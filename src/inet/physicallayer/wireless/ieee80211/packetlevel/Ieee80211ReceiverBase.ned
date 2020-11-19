@@ -33,9 +33,9 @@ module Ieee80211ReceiverBase extends NarrowbandReceiverBase
         string opMode @enum("a", "b", "g(erp)", "g(mixed)", "n(mixed-2.4Ghz)", "p", "ac");
         string bandName @enum("2.4 GHz", "5 GHz", "5 GHz (20 MHz)", "5 GHz (40 MHz)", "5 GHz (80 MHz)", "5 GHz (160 MHz)", "5.9 GHz");
         int channelNumber;
-        modulation = default("BPSK"); // TODO: this is simply wrong
+        modulation = default("BPSK"); // TODO this is simply wrong
         errorModel.typename = default("Ieee80211NistErrorModel");
-        // TODO: remove when opMode is removed from the error model
+        // TODO remove when opMode is removed from the error model
         *.opMode = opMode;
 }
 

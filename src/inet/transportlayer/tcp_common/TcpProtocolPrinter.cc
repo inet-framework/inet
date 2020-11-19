@@ -65,8 +65,8 @@ void TcpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *pr
             context.infoColumn << flagEnd;
 
         context.infoColumn << " Seq=" << header->getSequenceNo()
-               << " Win=" << header->getWindow();
-        //TODO show options
+                           << " Win=" << header->getWindow();
+        // TODO show options
     }
     else
         context.infoColumn << "(TCP) " << chunk;

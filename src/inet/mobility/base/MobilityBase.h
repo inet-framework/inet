@@ -53,7 +53,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
         IMobility *mobility = nullptr;
 
       public:
-        DirectiveResolver(IMobility *mobility) : mobility(mobility) { }
+        DirectiveResolver(IMobility *mobility) : mobility(mobility) {}
 
         virtual const char *resolveDirective(char directive) const override;
     };
@@ -64,10 +64,10 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
      * @see handleIfOutside()
      */
     enum BorderPolicy {
-        REFLECT,    ///< reflect off the wall
-        WRAP,    ///< reappear at the opposite edge (torus)
-        PLACERANDOMLY,    ///< placed at a randomly chosen position within the constraint area
-        RAISEERROR    ///< stop the simulation with error
+        REFLECT, ///< reflect off the wall
+        WRAP, ///< reappear at the opposite edge (torus)
+        PLACERANDOMLY, ///< placed at a randomly chosen position within the constraint area
+        RAISEERROR ///< stop the simulation with error
     };
 
   protected:

@@ -25,8 +25,7 @@ namespace inet {
 class INET_API Ieee8022LlcSocket : public SocketBase
 {
   public:
-    class INET_API ICallback
-    {
+    class INET_API ICallback {
       public:
         virtual ~ICallback() {}
         virtual void socketDataArrived(Ieee8022LlcSocket *socket, Packet *packet) = 0;

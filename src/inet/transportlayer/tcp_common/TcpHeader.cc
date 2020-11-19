@@ -116,11 +116,10 @@ std::string TcpHeader::str() const
            << " Win=" << getWindow()
            << ", length = " << getChunkLength();
 
-    //TODO show TCP Options
+    // TODO show TCP Options
 
     return stream.str();
 }
-
 
 } // namespace tcp
 

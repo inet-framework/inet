@@ -34,7 +34,7 @@ class INET_API TcpServerSocketIo : public cSimpleModule, public TcpSocket::ICall
     virtual TcpSocket *getSocket() { return socket; }
     virtual void acceptSocket(TcpAvailableInfo *availableInfo);
 
-    virtual void socketDataArrived(TcpSocket* socket, Packet *packet, bool urgent) override;
+    virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override;
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override {}
     virtual void socketEstablished(TcpSocket *socket) override {}
     virtual void socketPeerClosed(TcpSocket *socket) override {}

@@ -53,7 +53,7 @@ namespace physicallayer {
  * changes its receiver state to the appropriate value, and emits a receiver
  * state changed signal.
  */
-// TODO: support capturing a stronger transmission
+// TODO support capturing a stronger transmission
 class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 {
   protected:
@@ -212,7 +212,7 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual void updateTransceiverPart();
 
   public:
-    Radio() { }
+    Radio() {}
     virtual ~Radio();
 
     virtual int getId() const override { return id; }
@@ -238,8 +238,8 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     virtual IRadioSignal::SignalPart getTransmittedSignalPart() const override;
     virtual IRadioSignal::SignalPart getReceivedSignalPart() const override;
 
-    virtual void encapsulate(Packet *packet) const { }
-    virtual void decapsulate(Packet *packet) const { }
+    virtual void encapsulate(Packet *packet) const {}
+    virtual void decapsulate(Packet *packet) const {}
 };
 
 } // namespace physicallayer

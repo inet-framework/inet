@@ -90,8 +90,7 @@ class SctpHeader;
 class INET_API Sctp : public cSimpleModule
 {
   public:
-    struct AppAssocKey
-    {
+    struct AppAssocKey {
         int32_t appGateIndex;
         int32_t assocId;
 
@@ -104,8 +103,7 @@ class INET_API Sctp : public cSimpleModule
         }
     };
 
-    struct SockPair
-    {
+    struct SockPair {
         L3Address localAddr;
         L3Address remoteAddr;
         uint16_t localPort;
@@ -124,16 +122,14 @@ class INET_API Sctp : public cSimpleModule
         }
     };
 
-    struct VTagPair
-    {
+    struct VTagPair {
         uint32_t peerVTag;
         uint32_t localVTag;
         uint16_t localPort;
         uint16_t remotePort;
     };
 
-    struct AssocStat
-    {
+    struct AssocStat {
         int32_t assocId;
         simtime_t start;
         simtime_t stop;
@@ -149,8 +145,8 @@ class INET_API Sctp : public cSimpleModule
         double throughput;
         simtime_t lifeTime;
         uint32_t numOverfullSACKs;
-        uint64_t sumRGapRanges;    // Total sum of RGap ranges (Last RGapStop - CumAck)
-        uint64_t sumNRGapRanges;    // Total sum of NRGap ranges (Last NRGapStop - CumAck)
+        uint64_t sumRGapRanges; // Total sum of RGap ranges (Last RGapStop - CumAck)
+        uint64_t sumNRGapRanges; // Total sum of NRGap ranges (Last NRGapStop - CumAck)
         uint32_t numDropsBecauseNewTsnGreaterThanHighestTsn;
         uint32_t numDropsBecauseNoRoomInBuffer;
         uint32_t numChunksReneged;
@@ -186,7 +182,7 @@ class INET_API Sctp : public cSimpleModule
     int udpSockId;
     SctpCrcInsertion crcInsertion;
 
-    SocketOptions* socketOptions;
+    SocketOptions *socketOptions;
 
   protected:
     IRoutingTable *rt;
@@ -229,7 +225,6 @@ class INET_API Sctp : public cSimpleModule
     virtual void finish() override;
     virtual void send_to_ip(Packet *msg);
 
-
     AssocStat *getAssocStat(uint32_t assocId)
     {
         auto found = assocStatMap.find(assocId);
@@ -271,7 +266,7 @@ class INET_API Sctp : public cSimpleModule
     /** Getter and Setter for the socket options **/
     SocketOptions *collectSocketOptions();
 
-    void setSocketOptions(SocketOptions* options) { socketOptions = options; };
+    void setSocketOptions(SocketOptions *options) { socketOptions = options; }
     int getMaxInitRetrans() { return socketOptions->maxInitRetrans; };
     int getMaxInitRetransTimeout() { return socketOptions->maxInitRetransTimeout; };
     double getRtoInitial() { return socketOptions->rtoInitial; };
@@ -286,10 +281,10 @@ class INET_API Sctp : public cSimpleModule
     int getPathMaxRetrans() { return socketOptions->pathMaxRetrans; };
     int getAssocMaxRtx() { return socketOptions->assocMaxRtx; };
     double getHbInterval() { return socketOptions->hbInterval; };
-    void setRtoInitial(double rtoInitial) { socketOptions->rtoInitial = rtoInitial; };
-    void setRtoMin(double rtoMin) { socketOptions->rtoMin = rtoMin; };
-    void setRtoMax(double rtoMax) { socketOptions->rtoMax = rtoMax; };
-    void setInterfaceId(int id) { interfaceId = id; };
+    void setRtoInitial(double rtoInitial) { socketOptions->rtoInitial = rtoInitial; }
+    void setRtoMin(double rtoMin) { socketOptions->rtoMin = rtoMin; }
+    void setRtoMax(double rtoMax) { socketOptions->rtoMax = rtoMax; }
+    void setInterfaceId(int id) { interfaceId = id; }
     int getInterfaceId() { return interfaceId; };
 };
 

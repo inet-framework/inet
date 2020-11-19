@@ -17,7 +17,7 @@
 
 #include "inet/transportlayer/tcp/flavours/TcpTahoe.h"
 
-#include <algorithm>    // min,max
+#include <algorithm> // min,max
 
 #include "inet/transportlayer/tcp/Tcp.h"
 
@@ -35,8 +35,8 @@ void TcpTahoe::recalculateSlowStartThreshold()
 {
     // set ssthresh to flight size / 2, but at least 2 MSS
     // (the formula below practically amounts to ssthresh = cwnd / 2 most of the time)
-    uint32_t flight_size = std::min(state->snd_cwnd, state->snd_wnd);    // FIXME TODO - Does this formula computes the amount of outstanding data?
-    // uint32_t flight_size = state->snd_max - state->snd_una;
+    uint32_t flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME - Does this formula computes the amount of outstanding data?
+//    uint32_t flight_size = state->snd_max - state->snd_una;
     state->ssthresh = std::max(flight_size / 2, 2 * state->snd_mss);
 
     conn->emit(ssthreshSignal, state->ssthresh);
@@ -83,8 +83,8 @@ void TcpTahoe::receivedDataAck(uint32_t firstSeqAcked)
         // that arrive. This is called "Appropriate Byte Counting" (ABC) and is
         // described in RFC 3465 (experimental).
         //
-        // int bytesAcked = state->snd_una - firstSeqAcked;
-        // state->snd_cwnd += bytesAcked;
+//        int bytesAcked = state->snd_una - firstSeqAcked;
+//        state->snd_cwnd += bytesAcked;
 
         conn->emit(cwndSignal, state->snd_cwnd);
 

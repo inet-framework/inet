@@ -78,7 +78,7 @@ void PacketReceiverBase::handleCrashOperation(LifecycleOperation *operation)
 Packet *PacketReceiverBase::decodePacket(Signal *signal) const
 {
     auto packet = check_and_cast<Packet *>(signal->decapsulate());
-    // TODO: check signal physical properties such as datarate, modulation, etc.
+    // TODO check signal physical properties such as datarate, modulation, etc.
     packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_INBOUND);
     if (networkInterface != nullptr)
         packet->addTag<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
@@ -86,3 +86,4 @@ Packet *PacketReceiverBase::decodePacket(Signal *signal) const
 }
 
 } // namespace inet
+

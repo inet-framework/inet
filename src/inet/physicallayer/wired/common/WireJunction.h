@@ -48,12 +48,12 @@ class INET_API WireJunction : public cSimpleModule, protected cListener
 
   protected:
     std::vector<TxInfo> txList;
-    int numPorts;    // sizeof(port)
-    int inputGateBaseId;  // gate id of port$i[0]
+    int numPorts; // sizeof(port)
+    int inputGateBaseId; // gate id of port$i[0]
     int outputGateBaseId; // gate id of port$o[0]
 
     // statistics
-    long numMessages;    // number of messages handled
+    long numMessages; // number of messages handled
 
   protected:
     virtual void initialize() override;
@@ -63,11 +63,11 @@ class INET_API WireJunction : public cSimpleModule, protected cListener
     virtual void setChannelModes();
     virtual void setGateModes();
     virtual void addTxInfo(long incomingTxId, int port, long outgoingTxId, simtime_t finishTime);
-    virtual void updateTxInfo(TxInfo *txInfo, simtime_t finishTime) {txInfo->finishTime = finishTime;}
+    virtual void updateTxInfo(TxInfo *txInfo, simtime_t finishTime) { txInfo->finishTime = finishTime; }
     virtual TxInfo *findTxInfo(long incomingTxId, int port);
 };
 
-} //namespace physicallayer
+} // namespace physicallayer
 } // namespace inet
 
 #endif

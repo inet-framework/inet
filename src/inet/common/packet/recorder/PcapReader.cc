@@ -68,7 +68,7 @@ std::pair<simtime_t, Packet *> PcapReader::readPacket()
     if (file == nullptr)
         throw cRuntimeError("Cannot read packet: pcap input file is not open");
     if (feof(file))
-        return {-1, nullptr};
+        return { -1, nullptr };
     struct pcaprec_hdr packetHeader;
     auto err = fread(&packetHeader, sizeof(packetHeader), 1, file);
     if (err != 1)
@@ -112,7 +112,7 @@ std::pair<simtime_t, Packet *> PcapReader::readPacket()
     if (protocol != nullptr)
         packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
     packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
-    return {time, packet};
+    return { time, packet };
 }
 
 void PcapReader::closePcap()

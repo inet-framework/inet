@@ -25,13 +25,13 @@
 #include <vector>
 
 #ifdef _WIN32
-# include <io.h>
-# include <stdio.h>
+#include <io.h>
+#include <stdio.h>
 #else // ifdef _WIN32
-# include <unistd.h>
+#include <unistd.h>
 #endif // ifdef _WIN32
 
-#include "inet/applications/httptools/common/HttpMessages_m.h"    // for HttpContentType
+#include "inet/applications/httptools/common/HttpMessages_m.h" // for HttpContentType
 
 namespace inet {
 

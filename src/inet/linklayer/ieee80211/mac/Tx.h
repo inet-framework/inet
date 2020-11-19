@@ -31,27 +31,27 @@ class IRx;
  */
 class INET_API Tx : public cSimpleModule, public ITx
 {
-    protected:
-        ITx::ICallback *txCallback = nullptr;
-        Ieee80211Mac *mac = nullptr;
-        IRx *rx = nullptr;
-        Packet *frame = nullptr;
-        cMessage *endIfsTimer = nullptr;
-        bool transmitting = false;
+  protected:
+    ITx::ICallback *txCallback = nullptr;
+    Ieee80211Mac *mac = nullptr;
+    IRx *rx = nullptr;
+    Packet *frame = nullptr;
+    cMessage *endIfsTimer = nullptr;
+    bool transmitting = false;
 
-    protected:
-        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage) override;
-        virtual void handleMessage(cMessage *msg) override;
-        virtual void refreshDisplay() const override;
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
+    virtual void refreshDisplay() const override;
 
-    public:
-        Tx() {}
-        ~Tx();
+  public:
+    Tx() {}
+    ~Tx();
 
-        virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, ITx::ICallback *txCallback) override;
-        virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ITx::ICallback *txCallback) override;
-        virtual void radioTransmissionFinished() override;
+    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, ITx::ICallback *txCallback) override;
+    virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ITx::ICallback *txCallback) override;
+    virtual void radioTransmissionFinished() override;
 };
 
 } // namespace ieee80211

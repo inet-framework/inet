@@ -103,8 +103,8 @@ class INET_API SctpGapList
     }
 
     enum GapType {
-        GT_Any = 0,
-        GT_Revokable = 1,
+        GT_Any          = 0,
+        GT_Revokable    = 1,
         GT_NonRevokable = 2
     };
 

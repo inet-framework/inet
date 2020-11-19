@@ -114,7 +114,7 @@ void ExtIpv4TunDevice::openTun(std::string dev)
          * the kernel will try to allocate the "next" device of the
          * specified type */
         strncpy(ifr.ifr_name, dev.c_str(), IFNAMSIZ);
-    if (ioctl(fd, (TUNSETIFF), (void *) &ifr) < 0) {
+    if (ioctl(fd, (TUNSETIFF), (void *)&ifr) < 0) {
         close(fd);
         throw cRuntimeError("Cannot create TUN device: %s", strerror(errno));
     }
@@ -148,7 +148,7 @@ bool ExtIpv4TunDevice::notify(int fd)
     }
     else if (nread > 0) {
         Packet *packet = new Packet(nullptr, makeShared<BytesChunk>(buffer, nread));
-        // KLUDGE:
+        // KLUDGE
         packet->addTag<InterfaceReq>()->setInterfaceId(101);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
         packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());

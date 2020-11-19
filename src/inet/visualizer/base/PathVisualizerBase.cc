@@ -210,7 +210,7 @@ void PathVisualizerBase::removeAllPathVisualizations()
 
 const std::vector<int> *PathVisualizerBase::getIncompletePath(const std::string& label, int chunkId)
 {
-    auto it = incompletePaths.find({label, chunkId});
+    auto it = incompletePaths.find({ label, chunkId });
     if (it == incompletePaths.end())
         return nullptr;
     else
@@ -219,7 +219,7 @@ const std::vector<int> *PathVisualizerBase::getIncompletePath(const std::string&
 
 void PathVisualizerBase::addToIncompletePath(const std::string& label, int chunkId, cModule *module)
 {
-    auto& moduleIds = incompletePaths[{label, chunkId}];
+    auto& moduleIds = incompletePaths[{ label, chunkId }];
     auto moduleId = module->getId();
     if (moduleIds.size() == 0 || moduleIds[moduleIds.size() - 1] != moduleId)
         moduleIds.push_back(moduleId);
@@ -227,7 +227,7 @@ void PathVisualizerBase::addToIncompletePath(const std::string& label, int chunk
 
 void PathVisualizerBase::removeIncompletePath(const std::string& label, int chunkId)
 {
-    incompletePaths.erase(incompletePaths.find({label, chunkId}));
+    incompletePaths.erase(incompletePaths.find({ label, chunkId }));
 }
 
 void PathVisualizerBase::refreshPathVisualization(const PathVisualization *pathVisualization, cPacket *packet)

@@ -62,7 +62,7 @@ void EthernetSocketCommandProcessor::handleCommand(Request *request)
         int socketId = request->getTag<SocketReq>()->getSocketId();
         socketTable->removeSocket(socketId);
         delete request;
-// TODO: move to EthernetSocketPacketProcessor module into a listener on the EthernetSocketTable
+        // TODO move to EthernetSocketPacketProcessor module into a listener on the EthernetSocketTable
 //        auto indication = new Indication("closed", ETHERNET_I_SOCKET_CLOSED);
 //        auto ctrl = new EthernetSocketClosedIndication();
 //        indication->setControlInfo(ctrl);

@@ -52,15 +52,14 @@ class INET_API PimSm : public PimBase, protected cListener
   private:
     struct Route;
 
-    struct PimsmInterface : public Interface
-    {
+    struct PimsmInterface : public Interface {
         cMessage *expiryTimer;
 
         enum Flags {
-            RECEIVER_INCLUDE = 1 << 0,    // local_receiver_include(S,G,I) or local_receiver_include(*,G,I)
-            RECEIVER_EXCLUDE = 1 << 1,    // local_receiver_exclude(S,G,I)
-            COULD_ASSERT = 1 << 2,    // CouldAssert(S,G,I)
-            ASSERT_TRACKING_DESIRED = 1 << 3    // AssertTrackingDesired(S,G,I)
+            RECEIVER_INCLUDE        = 1 << 0, // local_receiver_include(S,G,I) or local_receiver_include(*,G,I)
+            RECEIVER_EXCLUDE        = 1 << 1, // local_receiver_exclude(S,G,I)
+            COULD_ASSERT            = 1 << 2, // CouldAssert(S,G,I)
+            ASSERT_TRACKING_DESIRED = 1 << 3, // AssertTrackingDesired(S,G,I)
         };
 
         PimsmInterface(Route *owner, NetworkInterface *ie);
@@ -81,20 +80,19 @@ class INET_API PimSm : public PimBase, protected cListener
         bool pimInclude() const
         {
             return localReceiverInclude() &&
-                   ((    /*I_am_DR AND*/ assertState != I_LOST_ASSERT) || assertState == I_WON_ASSERT);
+                   (( /*I_am_DR AND*/ assertState != I_LOST_ASSERT) || assertState == I_WON_ASSERT);
         }
 
         bool pimExclude() const
         {
             return localReceiverExclude() &&
-                   ((    /*I_am_DR AND*/ assertState != I_LOST_ASSERT) || assertState == I_WON_ASSERT);
+                   (( /*I_am_DR AND*/ assertState != I_LOST_ASSERT) || assertState == I_WON_ASSERT);
         }
     };
 
     // upstream interface is toward the RP or toward the source
-    struct UpstreamInterface : public PimsmInterface
-    {
-        Ipv4Address nextHop;    // RPF nexthop, <unspec> at the DR in (S,G) routes
+    struct UpstreamInterface : public PimsmInterface {
+        Ipv4Address nextHop; // RPF nexthop, <unspec> at the DR in (S,G) routes
 
         UpstreamInterface(Route *owner, NetworkInterface *ie, Ipv4Address nextHop)
             : PimsmInterface(owner, ie), nextHop(nextHop) {}
@@ -102,8 +100,7 @@ class INET_API PimSm : public PimBase, protected cListener
         Ipv4Address rpfNeighbor() { return assertState == I_LOST_ASSERT ? winnerMetric.address : nextHop; }
     };
 
-    struct DownstreamInterface : public PimsmInterface
-    {
+    struct DownstreamInterface : public PimsmInterface {
         /** States of each outgoing interface. */
         enum JoinPruneState { NO_INFO, JOIN, PRUNE_PENDING };
 
@@ -122,8 +119,7 @@ class INET_API PimSm : public PimBase, protected cListener
 
     typedef std::vector<DownstreamInterface *> DownstreamInterfaceVector;
 
-    class PimSmOutInterface : public IMulticastRoute::OutInterface
-    {
+    class PimSmOutInterface : public IMulticastRoute::OutInterface {
         DownstreamInterface *downstream;
 
       public:
@@ -133,20 +129,19 @@ class INET_API PimSm : public PimBase, protected cListener
     };
 
     enum RouteType {
-        RP,    // (*,*,RP)
-        G,    // (*,G)
-        SG,    // (S,G)
-        SGrpt    // (S,G,rpt)
+        RP, // (*,*,RP)
+        G, // (*,G)
+        SG, // (S,G)
+        SGrpt // (S,G,rpt)
     };
 
     // Holds (*,G), (S,G) or (S,G,rpt) state
-    struct Route : public RouteEntry
-    {
+    struct Route : public RouteEntry {
         enum Flags {
-            PRUNED = 0x01,    // UpstreamJPState
-            REGISTER = 0x02,    // Register flag
-            SPT_BIT = 0x04,    // used to distinguish whether to forward on (*,*,RP)/(*,G) or on (S,G) state
-            JOIN_DESIRED = 0x08,
+            PRUNED                    = 0x01, // UpstreamJPState
+            REGISTER                  = 0x02, // Register flag
+            SPT_BIT                   = 0x04, // used to distinguish whether to forward on (*,*,RP)/(*,G) or on (S,G) state
+            JOIN_DESIRED              = 0x08,
             SOURCE_DIRECTLY_CONNECTED = 0x10
         };
 
@@ -158,12 +153,12 @@ class INET_API PimSm : public PimBase, protected cListener
         Route *gRoute;
         Route *sgrptRoute;
 
-        //Originated from destination.Ensures loop freeness.
+        // Originated from destination.Ensures loop freeness.
         unsigned int sequencenumber;
-        //Time of routing table entry creation
-        simtime_t installtime;    // XXX not used
+        // Time of routing table entry creation
+        simtime_t installtime; // TODO not used
 
-        cMessage *keepAliveTimer;    // only for (S,G) routes
+        cMessage *keepAliveTimer; // only for (S,G) routes
         cMessage *joinTimer;
 
         // Register state (only for (S,G) at the DR)
@@ -172,8 +167,8 @@ class INET_API PimSm : public PimBase, protected cListener
         cMessage *registerStopTimer;
 
         // interface specific state
-        UpstreamInterface *upstreamInterface;    // may be nullptr at RP and at DR
-        DownstreamInterfaceVector downstreamInterfaces;    ///< Out interfaces (downstream)
+        UpstreamInterface *upstreamInterface; // may be nullptr at RP and at DR
+        DownstreamInterfaceVector downstreamInterfaces; ///< Out interfaces (downstream)
 
       public:
         Route(PimSm *owner, RouteType type, Ipv4Address origin, Ipv4Address group);
@@ -269,7 +264,7 @@ class INET_API PimSm : public PimBase, protected cListener
     void unroutableMulticastPacketArrived(Ipv4Address srcAddr, Ipv4Address destAddr);
     void multicastPacketArrivedOnRpfInterface(Route *route);
     void multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceId);
-    void multicastPacketForwarded(Packet *pk);          // pk should begin with Ipv4Header
+    void multicastPacketForwarded(Packet *pk); // pk should begin with Ipv4Header
     void multicastReceiverAdded(NetworkInterface *ie, Ipv4Address group);
     void multicastReceiverRemoved(NetworkInterface *ie, Ipv4Address group);
 
@@ -279,17 +274,17 @@ class INET_API PimSm : public PimBase, protected cListener
     void iAmDRHasChanged(NetworkInterface *ie, bool iAmDR);
 
     // send pim messages
-    void sendPIMRegister(Packet *pk, Ipv4Address dest, int outInterfaceId);     // pk should begin with Ipv4Header
+    void sendPIMRegister(Packet *pk, Ipv4Address dest, int outInterfaceId); // pk should begin with Ipv4Header
     void sendPIMRegisterStop(Ipv4Address source, Ipv4Address dest, Ipv4Address multGroup, Ipv4Address multSource);
     void sendPIMRegisterNull(Ipv4Address multSource, Ipv4Address multDest);
     void sendPIMJoin(Ipv4Address group, Ipv4Address source, Ipv4Address upstreamNeighbor, RouteType JPtype);
     void sendPIMPrune(Ipv4Address group, Ipv4Address source, Ipv4Address upstreamNeighbor, RouteType JPtype);
     void sendPIMAssert(Ipv4Address source, Ipv4Address group, AssertMetric metric, NetworkInterface *ie, bool rptBit);
     void sendToIP(Packet *packet, Ipv4Address source, Ipv4Address dest, int outInterfaceId, short ttl);
-    void forwardMulticastData(Packet *pk, int outInterfaceId);    // pk should begin with Ipv4Header
+    void forwardMulticastData(Packet *pk, int outInterfaceId); // pk should begin with Ipv4Header
 
     // computed intervals
-    double joinPruneHoldTime() { return 3.5 * joinPrunePeriod; }    // Holdtime in Join/Prune messages
+    double joinPruneHoldTime() { return 3.5 * joinPrunePeriod; } // Holdtime in Join/Prune messages
     double effectivePropagationDelay() { return defaultPropagationDelay; }
     double effectiveOverrideInterval() { return defaultOverrideInterval; }
     double joinPruneOverrideInterval() { return effectivePropagationDelay() + effectiveOverrideInterval(); }
@@ -320,7 +315,7 @@ class INET_API PimSm : public PimBase, protected cListener
     Ipv4MulticastRoute *findIpv4Route(Ipv4Address source, Ipv4Address group);
 };
 
-}    // namespace inet
+} // namespace inet
 
 #endif
 

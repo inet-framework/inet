@@ -65,8 +65,8 @@ class INET_API PacketReceiverBase : public OperationalMixin<PacketProcessorBase>
     virtual bool supportsPacketPushing(cGate *gate) const override { return gate == outputGate; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
-    virtual void handleCanPushPacketChanged(cGate *gate) override { }
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override { }
+    virtual void handleCanPushPacketChanged(cGate *gate) override {}
+    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override {}
 };
 
 } // namespace inet

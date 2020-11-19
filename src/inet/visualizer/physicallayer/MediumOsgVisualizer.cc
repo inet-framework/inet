@@ -85,6 +85,7 @@ void MediumOsgVisualizer::initialize(int stage)
         networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
 }
+
 void MediumOsgVisualizer::refreshDisplay() const
 {
     if (displaySignals) {
@@ -126,7 +127,7 @@ void MediumOsgVisualizer::setAnimationSpeed() const
         }
     }
     animationSpeed = animationSpeed == DBL_MAX ? 0 : animationSpeed;
-    // TODO: switch to osg canvas when API is extended
+    // TODO switch to osg canvas when API is extended
     visualizationTargetModule->getCanvas()->setAnimationSpeed(animationSpeed, this);
 }
 
@@ -206,9 +207,9 @@ osg::Node *MediumOsgVisualizer::createRingSignalNode(const ITransmission *transm
     auto stateSet = inet::osg::createStateSet(color, 0.99, false); // <1 opacity so it will be in the TRANSPARENT_BIN
     stateSet->setAttributeAndModes(depth, osg::StateAttribute::ON);
     auto transmissionStart = transmission->getStartPosition();
-    // FIXME: there's some random overlapping artifact due to clipping degenerate triangles
-    // FIXME: when the inner radius is very small and the outer radius is very large
-    // FIXME: split up shape into multiple annuluses having more and more vertices, and being wider outwards
+    // FIXME there's some random overlapping artifact due to clipping degenerate triangles
+    // FIXME when the inner radius is very small and the outer radius is very large
+    // FIXME split up shape into multiple annuluses having more and more vertices, and being wider outwards
     auto annulus = inet::osg::createAnnulusGeometry(Coord::ZERO, 0, 0, 100);
     annulus->setStateSet(stateSet);
     osg::AutoTransform::AutoRotateMode autoRotateMode;
@@ -278,7 +279,7 @@ osg::Node *MediumOsgVisualizer::createSphereSignalNode(const ITransmission *tran
     auto transmissionStart = transmission->getStartPosition();
     auto startSphere = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(transmissionStart.x, transmissionStart.y, transmissionStart.z), 0));
     auto endSphere = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(transmissionStart.x, transmissionStart.y, transmissionStart.z), 0));
-    cFigure::Color color = signalColorSet.getColor(transmission->getId());;
+    cFigure::Color color = signalColorSet.getColor(transmission->getId());
     auto depth = new osg::Depth();
     depth->setWriteMask(false);
     auto startStateSet = inet::osg::createStateSet(color, 0.99, false); // <1 opacity so it will be in the TRANSPARENT_BIN
@@ -302,7 +303,7 @@ osg::Node *MediumOsgVisualizer::createSphereSignalNode(const ITransmission *tran
 void MediumOsgVisualizer::refreshRingTransmissionNode(const ITransmission *transmission, osg::Node *node) const
 {
     auto propagation = radioMedium->getPropagation();
-    // TODO: auto transmissionStart = transmission->getStartPosition();
+    // TODO auto transmissionStart = transmission->getStartPosition();
     double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
     double endRadius = std::max(0.0, propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl());
     auto positionAttitudeTransform = static_cast<osg::PositionAttitudeTransform *>(node);
@@ -316,7 +317,7 @@ void MediumOsgVisualizer::refreshRingTransmissionNode(const ITransmission *trans
     labelAutoTransform->setPosition(osg::Vec3d(endRadius * sin(phi), endRadius * cos(phi), 0.0));
     auto stateSet = annulus->getOrCreateStateSet();
     stateSet->getUniform("waveOffset")->set((float)startRadius);
-    // TODO: add parameter to control
+    // TODO add parameter to control
     double waveFadingFactor = std::min(1.0, signalPropagationAnimationSpeed / getSimulation()->getEnvir()->getAnimationSpeed() / signalWaveFadingAnimationSpeedFactor);
     stateSet->getUniform("waveFadingFactor")->set((float)waveFadingFactor);
 }
@@ -324,7 +325,7 @@ void MediumOsgVisualizer::refreshRingTransmissionNode(const ITransmission *trans
 void MediumOsgVisualizer::refreshSphereTransmissionNode(const ITransmission *transmission, osg::Node *node) const
 {
     auto propagation = radioMedium->getPropagation();
-    // TODO: auto transmissionStart = transmission->getStartPosition();
+    // TODO auto transmissionStart = transmission->getStartPosition();
     double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
     double endRadius = std::max(0.0, propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl());
     auto group = static_cast<osg::Group *>(node);

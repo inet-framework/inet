@@ -28,19 +28,19 @@ namespace physicallayer {
 
 class INET_API Ieee80211OfdmCode : public ICode
 {
-    protected:
-        const ConvolutionalCode *convolutionalCode;
-        const Ieee80211OfdmInterleaving *interleaving;
-        const AdditiveScrambling *scrambling;
+  protected:
+    const ConvolutionalCode *convolutionalCode;
+    const Ieee80211OfdmInterleaving *interleaving;
+    const AdditiveScrambling *scrambling;
 
-    public:
-        Ieee80211OfdmCode(const ConvolutionalCode *convolutionalCode, const Ieee80211OfdmInterleaving *interleaving, const AdditiveScrambling *scrambling);
+  public:
+    Ieee80211OfdmCode(const ConvolutionalCode *convolutionalCode, const Ieee80211OfdmInterleaving *interleaving, const AdditiveScrambling *scrambling);
 
-        virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
-        const ConvolutionalCode *getConvolutionalCode() const { return convolutionalCode; }
-        const Ieee80211OfdmInterleaving *getInterleaving() const { return interleaving; }
-        const AdditiveScrambling *getScrambling() const { return scrambling; }
+    const ConvolutionalCode *getConvolutionalCode() const { return convolutionalCode; }
+    const Ieee80211OfdmInterleaving *getInterleaving() const { return interleaving; }
+    const AdditiveScrambling *getScrambling() const { return scrambling; }
 };
 
 class INET_API Ieee80211OfdmCompliantCodes

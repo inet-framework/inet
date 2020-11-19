@@ -51,7 +51,7 @@ void TracingObstacleLossOsgVisualizer::initialize(int stage)
 void TracingObstacleLossOsgVisualizer::refreshDisplay() const
 {
     TracingObstacleLossVisualizerBase::refreshDisplay();
-    // TODO: switch to osg canvas when API is extended
+    // TODO switch to osg canvas when API is extended
     visualizationTargetModule->getCanvas()->setAnimationSpeed(obstacleLossVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
@@ -62,7 +62,7 @@ const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObsta
     auto intersection2 = obstaclePenetratedEvent->intersection2;
     auto normal1 = obstaclePenetratedEvent->normal1;
     auto normal2 = obstaclePenetratedEvent->normal2;
-    // TODO: display auto loss = obstaclePenetratedEvent->loss;
+    // TODO display auto loss = obstaclePenetratedEvent->loss;
     const RotationMatrix rotation(object->getOrientation().toEulerAngles());
     const Coord& position = object->getPosition();
     const Coord rotatedIntersection1 = rotation.rotateVector(intersection1);
@@ -90,7 +90,7 @@ const TracingObstacleLossVisualizerBase::ObstacleLossVisualization *TracingObsta
     return new ObstacleLossOsgVisualization(group);
 }
 
-void TracingObstacleLossOsgVisualizer::addObstacleLossVisualization(const ObstacleLossVisualization* obstacleLossVisualization)
+void TracingObstacleLossOsgVisualizer::addObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization)
 {
     TracingObstacleLossVisualizerBase::addObstacleLossVisualization(obstacleLossVisualization);
     auto obstacleLossOsgVisualization = static_cast<const ObstacleLossOsgVisualization *>(obstacleLossVisualization);
@@ -98,7 +98,7 @@ void TracingObstacleLossOsgVisualizer::addObstacleLossVisualization(const Obstac
     scene->addChild(obstacleLossOsgVisualization->node);
 }
 
-void TracingObstacleLossOsgVisualizer::removeObstacleLossVisualization(const ObstacleLossVisualization* obstacleLossVisualization)
+void TracingObstacleLossOsgVisualizer::removeObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization)
 {
     TracingObstacleLossVisualizerBase::removeObstacleLossVisualization(obstacleLossVisualization);
     auto obstacleLossOsgVisualization = static_cast<const ObstacleLossOsgVisualization *>(obstacleLossVisualization);

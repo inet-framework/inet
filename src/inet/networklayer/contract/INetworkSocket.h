@@ -31,8 +31,7 @@ namespace inet {
 class INET_API INetworkSocket : public ISocket
 {
   public:
-    class INET_API ICallback
-    {
+    class INET_API ICallback {
       public:
         virtual ~ICallback() {}
         virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) = 0;

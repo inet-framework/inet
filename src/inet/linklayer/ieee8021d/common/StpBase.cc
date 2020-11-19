@@ -34,7 +34,7 @@ StpBase::StpBase()
 
 void StpBase::initialize(int stage)
 {
-    if (stage == INITSTAGE_LINK_LAYER) {    // "auto" MAC addresses assignment takes place in stage 0
+    if (stage == INITSTAGE_LINK_LAYER) { // "auto" MAC addresses assignment takes place in stage 0
         numPorts = ifTable->getNumInterfaces();
         switchModule->subscribe(interfaceStateChangedSignal, this);
     }
@@ -80,8 +80,8 @@ void StpBase::colorLink(NetworkInterface *ie, bool forwarding) const
         cGate *inGatePrev = inGate ? inGate->getPreviousGate() : nullptr;
         cGate *inGatePrev2 = inGatePrev ? inGatePrev->getPreviousGate() : nullptr;
 
-        //TODO The Gate::getDisplayString() has a side effect: create a channel when gate currently not connected.
-        //     Should check the channel existing with Gate::getChannel() before use the Gate::getDisplayString().
+        // TODO The Gate::getDisplayString() has a side effect: create a channel when gate currently not connected.
+        //      Should check the channel existing with Gate::getChannel() before use the Gate::getDisplayString().
         if (outGate && inGate && inGatePrev && outGateNext && outGatePrev && inGatePrev2) {
             if (forwarding) {
                 outGatePrev->getDisplayString().setTagArg("ls", 0, ENABLED_LINK_COLOR);
@@ -174,9 +174,9 @@ int StpBase::getRootInterfaceId() const
 
 NetworkInterface *StpBase::chooseInterface()
 {
-    // TODO: Currently, we assume that the first non-loopback interface is an Ethernet interface
-    //       since STP and RSTP work on EtherSwitches.
-    //       NOTE that, we doesn't check if the returning interface is an Ethernet interface!
+    // TODO Currently, we assume that the first non-loopback interface is an Ethernet interface
+    //      since STP and RSTP work on EtherSwitches.
+    // NOTE that, we doesn't check if the returning interface is an Ethernet interface!
     for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
         NetworkInterface *current = ifTable->getInterface(i);
         if (!current->isLoopback())

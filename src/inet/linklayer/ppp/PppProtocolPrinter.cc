@@ -28,7 +28,7 @@ Register_Protocol_Printer(&Protocol::ppp, PppProtocolPrinter);
 void PppProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *protocol, const cMessagePrinter::Options *options, Context& context) const
 {
     if (auto header = dynamicPtrCast<const PppHeader>(chunk)) {
-        context.infoColumn << "(PPP) " << chunk;        //TODO
+        context.infoColumn << "(PPP) " << chunk; // TODO
     }
     else
         context.infoColumn << "(PPP) " << chunk;

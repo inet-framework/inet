@@ -143,7 +143,6 @@ cGate *findConnectedGate(cGate *gate, int direction = 0)
         throw cRuntimeError("Unknown gate type");
 }
 
-
 /**
  * Returns a gate of a module with type T that is on the path starting at the given gate.
  * Throws an error if no such module is found along the path.

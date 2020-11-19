@@ -34,7 +34,7 @@ typedef TcpTahoeRenoFamilyStateVariables TcpRenoStateVariables;
 class INET_API TcpReno : public TcpTahoeRenoFamily
 {
   protected:
-    TcpRenoStateVariables *& state;    // alias to TCLAlgorithm's 'state'
+    TcpRenoStateVariables *& state; // alias to TCLAlgorithm's 'state'
 
     /** Create and return a TcpRenoStateVariables object. */
     virtual TcpStateVariables *createStateVariables() override

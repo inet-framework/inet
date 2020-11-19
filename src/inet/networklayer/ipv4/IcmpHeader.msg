@@ -119,7 +119,7 @@ inline bool isIcmpInfoType(int type)
 // because their contents is conceptually truncated. decapsulate() would result
 // in a "length became negative" error; use getEncapsulatedMsg() instead.
 //
-// TODO: add originator id and sequence number and create an ICMPControlInfo
+// TODO add originator id and sequence number and create an ICMPControlInfo
 class IcmpHeader extends FieldsChunk
 {
     chunkLength = B(8);

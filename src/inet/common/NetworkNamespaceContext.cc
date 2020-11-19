@@ -36,7 +36,7 @@ NetworkNamespaceContext::NetworkNamespaceContext(const char *networkNamespace)
         if (setns(newNs, 0) == -1)
             throw cRuntimeError("Cannot change network namespace");
 #else
-    throw cRuntimeError("Network namespaces are only supported on Linux");
+        throw cRuntimeError("Network namespaces are only supported on Linux");
 #endif
     }
 }

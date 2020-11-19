@@ -64,7 +64,7 @@ void Tun::handleUpperPacket(Packet *packet)
     auto sId = socketReq != nullptr ? socketReq->getSocketId() : -1;
     ASSERT(packet->getControlInfo() == nullptr);
     if (socketReq != nullptr && contains(socketIds, sId)) {
-        // TODO: should we determine the network protocol by looking at the packet?!
+        // TODO should we determine the network protocol by looking at the packet?!
         packet->clearTags();
         packet->addTag<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
         packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);

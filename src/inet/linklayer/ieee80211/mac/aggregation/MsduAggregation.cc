@@ -31,23 +31,19 @@ void MsduAggregation::setSubframeAddress(const Ptr<Ieee80211MsduSubframeHeader>&
     MacAddress da, sa;
     bool toDS = header->getToDS();
     bool fromDS = header->getFromDS();
-    if (toDS == 0 && fromDS == 0) // STA to STA
-    {
+    if (toDS == 0 && fromDS == 0) { // STA to STA
         da = header->getReceiverAddress();
         sa = header->getTransmitterAddress();
     }
-    else if (toDS == 0 && fromDS == 1) // AP to STA
-    {
+    else if (toDS == 0 && fromDS == 1) { // AP to STA
         da = header->getReceiverAddress();
         sa = header->getAddress3();
     }
-    else if (toDS == 1 && fromDS == 0) // STA to AP
-    {
+    else if (toDS == 1 && fromDS == 0) { // STA to AP
         da = header->getAddress3();
         sa = header->getTransmitterAddress();
     }
-    else if (toDS == 1 && fromDS == 1) // AP to AP
-    {
+    else if (toDS == 1 && fromDS == 1) { // AP to AP
         da = header->getAddress3();
         sa = header->getAddress4();
     }
@@ -68,8 +64,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
     auto ra = firstHeader->getReceiverAddress();
     auto aggregatedFrame = new Packet();
     std::string aggregatedName;
-    for (int i = 0; i < (int)frames->size(); i++)
-    {
+    for (int i = 0; i < (int)frames->size(); i++) {
         auto msduSubframeHeader = makeShared<Ieee80211MsduSubframeHeader>();
         auto frame = frames->at(i);
         const auto& header = frame->popAtFront<Ieee80211DataHeader>();
@@ -100,7 +95,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
     amsduHeader->setReceiverAddress(ra);
     amsduHeader->setTid(tid);
     amsduHeader->addChunkLength(QOSCONTROL_PART_LENGTH);
-    // TODO: set addr3 and addr4 according to fromDS and toDS.
+    // TODO set addr3 and addr4 according to fromDS and toDS.
     aggregatedFrame->insertAtFront(amsduHeader);
     aggregatedFrame->insertAtBack(makeShared<Ieee80211MacTrailer>());
     aggregatedFrame->setName(aggregatedName.c_str());

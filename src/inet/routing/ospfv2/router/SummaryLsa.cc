@@ -57,7 +57,7 @@ bool SummaryLsa::differsFrom(const Ospfv2SummaryLsa *summaryLSA) const
                 auto thisTosData = getTosData(i);
                 auto lsaTosData = summaryLSA->getTosData(i);
                 if ((thisTosData.tos != summaryLSA->getTosData(i).tos) ||
-                        (thisTosData.tosMetric != lsaTosData.tosMetric))
+                    (thisTosData.tosMetric != lsaTosData.tosMetric))
                 {
                     differentBody = true;
                     break;

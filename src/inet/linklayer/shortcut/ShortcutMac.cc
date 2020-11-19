@@ -41,7 +41,7 @@ ShortcutMac::~ShortcutMac()
     }
 }
 
-//TODO for LifeCycle, should update the shortcutMacs vector on shutdown/crash/startup cases
+// TODO for LifeCycle, should update the shortcutMacs vector on shutdown/crash/startup cases
 
 void ShortcutMac::initialize(int stage)
 {

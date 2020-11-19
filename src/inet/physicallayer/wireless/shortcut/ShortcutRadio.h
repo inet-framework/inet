@@ -26,7 +26,7 @@ namespace inet {
 
 namespace physicallayer {
 
-// TODO: emit signals required by IRadio interface
+// TODO emit signals required by IRadio interface
 class INET_API ShortcutRadio : public PhysicalLayerBase, public virtual IRadio
 {
   protected:
@@ -68,9 +68,9 @@ class INET_API ShortcutRadio : public PhysicalLayerBase, public virtual IRadio
     virtual IRadioSignal::SignalPart getReceivedSignalPart() const override { return IRadioSignal::SIGNAL_PART_WHOLE; }
 
     // OperationalBase:
-    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
+    virtual void handleStartOperation(LifecycleOperation *operation) override {} // TODO implementation
+    virtual void handleStopOperation(LifecycleOperation *operation) override {} // TODO implementation
+    virtual void handleCrashOperation(LifecycleOperation *operation) override {} // TODO implementation
 };
 
 } // namespace physicallayer

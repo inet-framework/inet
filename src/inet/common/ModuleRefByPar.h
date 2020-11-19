@@ -30,9 +30,9 @@ namespace inet {
  * The pointer is automatically set to nullptr when the referenced module is
  * deleted.
  *
- * TODO: follow parameter change
+ * TODO follow parameter change
  */
-template <typename T>
+template<typename T>
 class INET_API ModuleRefByPar
 {
   private:

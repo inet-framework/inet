@@ -33,7 +33,7 @@ class IInterfaceTable;
 class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable, public cListener
 {
   private:
-    IInterfaceTable *ift = nullptr;    // cached pointer
+    IInterfaceTable *ift = nullptr; // cached pointer
 
     L3Address routerId;
     L3Address::AddressType addressType = L3Address::NONE;
@@ -41,10 +41,10 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
     bool multicastForwarding = false;
 
     typedef std::vector<NextHopRoute *> RouteVector;
-    RouteVector routes;    // unicast route table, sorted by prefix match order
+    RouteVector routes; // unicast route table, sorted by prefix match order
 
     typedef std::vector<NextHopMulticastRoute *> MulticastRouteVector;
-    MulticastRouteVector multicastRoutes;    // multicast route table, sorted by prefix match order
+    MulticastRouteVector multicastRoutes; // multicast route table, sorted by prefix match order
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -83,7 +83,7 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
     /**
      * Forwarding on/off
      */
-    virtual bool isForwardingEnabled() const override;    //XXX IP modulba?
+    virtual bool isForwardingEnabled() const override; // TODO IP modulba?
 
     /**
      * Administrative distance on/off
@@ -93,7 +93,7 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
     /**
      * Multicast forwarding on/off
      */
-    virtual bool isMulticastForwardingEnabled() const override;    //XXX IP modulba?
+    virtual bool isMulticastForwardingEnabled() const override; // TODO IP modulba?
 
     /**
      * Returns routerId.
@@ -103,12 +103,12 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
     /**
      * Checks if the address is a local one, i.e. one of the host's.
      */
-    virtual bool isLocalAddress(const L3Address& dest) const override;    //XXX maybe into InterfaceTable?
+    virtual bool isLocalAddress(const L3Address& dest) const override; // TODO maybe into InterfaceTable?
 
     /**
      * Returns an interface given by its address. Returns nullptr if not found.
      */
-    virtual NetworkInterface *getInterfaceByAddress(const L3Address& address) const override;    //XXX should be find..., see next one
+    virtual NetworkInterface *getInterfaceByAddress(const L3Address& address) const override; // TODO should be find..., see next one
 
     /**
      * To be called from route objects whenever a field changes. Used for
@@ -125,7 +125,7 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
      * destination address, and returns the resulting route. Returns nullptr
      * if there is no matching route.
      */
-    virtual NextHopRoute *findBestMatchingRoute(const L3Address& dest) const override;    //TODO make coveriant return types everywhere
+    virtual NextHopRoute *findBestMatchingRoute(const L3Address& dest) const override; // TODO make coveriant return types everywhere
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -133,7 +133,7 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
      * Returns the output interface for the packets with dest as destination
      * address, or nullptr if the destination is not in routing table.
      */
-    virtual NetworkInterface *getOutputInterfaceForDestination(const L3Address& dest) const override;    //XXX redundant
+    virtual NetworkInterface *getOutputInterfaceForDestination(const L3Address& dest) const override; // TODO redundant
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -142,7 +142,7 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
      * address if the destination is not in routing table or the gateway field
      * is not filled in in the route.
      */
-    virtual L3Address getNextHopForDestination(const L3Address& dest) const override;    //XXX redundant AND unused
+    virtual L3Address getNextHopForDestination(const L3Address& dest) const override; // TODO redundant AND unused
     //@}
 
     /** @name Multicast routing functions */
@@ -176,7 +176,7 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
     /**
      * Finds and returns the default route, or nullptr if it doesn't exist
      */
-    virtual IRoute *getDefaultRoute() const override;    //XXX is this a universal concept?
+    virtual IRoute *getDefaultRoute() const override; // TODO is this a universal concept?
 
     /**
      * Adds a route to the routing table. Routes are allowed to be modified

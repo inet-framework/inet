@@ -43,7 +43,7 @@ enum McastSourceFilterMode { MCAST_INCLUDE_SOURCES, MCAST_EXCLUDE_SOURCES };
 class INET_API MacEstimateCostProcess
 {
   public:
-    virtual ~MacEstimateCostProcess() {};
+    virtual ~MacEstimateCostProcess() {}
     virtual double getCost(int, MacAddress&) = 0;
     virtual double getNumCost() = 0;
     virtual int getNumNeighbors() = 0;
@@ -56,10 +56,10 @@ class INET_API MacEstimateCostProcess
  */
 class INET_API InterfaceProtocolData : public TagBase
 {
-    friend class NetworkInterface;    //only this guy is allowed to set ownerp
+    friend class NetworkInterface; // only this guy is allowed to set ownerp
 
   protected:
-    NetworkInterface *ownerp = nullptr;    // the interface entry this object belongs to
+    NetworkInterface *ownerp = nullptr; // the interface entry this object belongs to
     int id;
 
   protected:
@@ -67,7 +67,7 @@ class INET_API InterfaceProtocolData : public TagBase
     virtual void changed(simsignal_t signalID, int fieldId);
 
   public:
-    InterfaceProtocolData(int id) : id(id) { }
+    InterfaceProtocolData(int id) : id(id) {}
 
     /**
      * Returns the NetworkInterface that contains this data object, or nullptr
@@ -94,7 +94,7 @@ class INET_API NetworkInterfaceChangeDetails : public cObject
  */
 class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassivePacketSink, public queueing::IPacketProcessor, public ILifecycle, public cListener
 {
-    friend class InterfaceProtocolData;    // to call protocolDataChanged()
+    friend class InterfaceProtocolData; // to call protocolDataChanged()
 
   public:
     enum State { UP, DOWN, GOING_UP, GOING_DOWN };
@@ -108,21 +108,21 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     queueing::IPassivePacketSink *consumer = nullptr;
 
     const Protocol *protocol = nullptr;
-    ModuleRefByPar<IInterfaceTable> interfaceTable;    ///< IInterfaceTable that contains this interface, or nullptr
-    int interfaceId = -1;    ///< identifies the interface in the IInterfaceTable
+    ModuleRefByPar<IInterfaceTable> interfaceTable; ///< IInterfaceTable that contains this interface, or nullptr
+    int interfaceId = -1; ///< identifies the interface in the IInterfaceTable
     std::string interfaceName;
-    int nodeOutputGateId = -1;    ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
-    int nodeInputGateId = -1;    ///< id of the input gate of this host/router (or -1 if this is a virtual interface)
-    int mtu = 0;    ///< Maximum Transmission Unit (e.g. 1500 on Ethernet); 0 means infinite (i.e. never fragment)
-    State state = DOWN;    ///< requested interface state, similar to Linux ifup/ifdown
-    bool carrier = false;    ///< presence of the physical or virtual carrier
-    bool broadcast = false;    ///< interface supports broadcast
-    bool multicast = false;    ///< interface supports multicast
-    bool pointToPoint = false;    ///< interface is point-to-point link
-    bool loopback = false;    ///< interface is loopback interface
-    double datarate = 0;    ///< data rate in bit/s
-    MacAddress macAddr;    ///< link-layer address (for now, only IEEE 802 MAC addresses are supported)
-    InterfaceToken token;    ///< for Ipv6 stateless autoconfig (RFC 1971), interface identifier (RFC 2462)
+    int nodeOutputGateId = -1; ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
+    int nodeInputGateId = -1; ///< id of the input gate of this host/router (or -1 if this is a virtual interface)
+    int mtu = 0; ///< Maximum Transmission Unit (e.g. 1500 on Ethernet); 0 means infinite (i.e. never fragment)
+    State state = DOWN; ///< requested interface state, similar to Linux ifup/ifdown
+    bool carrier = false; ///< presence of the physical or virtual carrier
+    bool broadcast = false; ///< interface supports broadcast
+    bool multicast = false; ///< interface supports multicast
+    bool pointToPoint = false; ///< interface is point-to-point link
+    bool loopback = false; ///< interface is loopback interface
+    double datarate = 0; ///< data rate in bit/s
+    MacAddress macAddr; ///< link-layer address (for now, only IEEE 802 MAC addresses are supported)
+    InterfaceToken token; ///< for Ipv6 stateless autoconfig (RFC 1971), interface identifier (RFC 2462)
 
     TagSet protocolDataSet;
     std::vector<MacEstimateCostProcess *> estimateCostProcessArray;
@@ -200,7 +200,7 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     /**
      * Returns the combined state of the carrier and the interface requested state.
      */
-    // TODO: remove hasCarrier from this function and update all call sites accordingly
+    // TODO remove hasCarrier from this function and update all call sites accordingly
     bool isUp() const { return getState() == UP && hasCarrier(); }
     bool isDown() const { return getState() != UP; }
 
@@ -253,7 +253,7 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     /**
      * Returns the protocol data at the given index.
      */
-    const InterfaceProtocolData* getProtocolData(int index) const {
+    const InterfaceProtocolData *getProtocolData(int index) const {
         return static_cast<const InterfaceProtocolData *>(protocolDataSet.getTag(index));
     }
 
@@ -335,6 +335,7 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
         }
         return t;
     }
+
     //@}
 
     /** @name Accessing protocol-specific interface data. Note methods are non-virtual, for performance reasons. */
@@ -363,7 +364,7 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     //@}
 };
 
-std::ostream& operator <<(std::ostream& o, NetworkInterface::State);
+std::ostream& operator<<(std::ostream& o, NetworkInterface::State);
 
 /**
  * Find the nic module (inside the networkNode) containing the given module.

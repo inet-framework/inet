@@ -30,7 +30,7 @@ namespace inet {
 class InterfaceToken;
 
 enum {
-    IPv6_ADDRESS_SIZE = 16  // bytes
+    IPv6_ADDRESS_SIZE = 16 // bytes
 };
 
 /**
@@ -51,7 +51,7 @@ class INET_API Ipv6Address
     /**
      * Ipv6 address scope (RFC 3513)
      */
-    // FIXME TBD add multicast address scopes!!! rfc 3513, section 2.7
+    // FIXME add multicast address scopes!!! rfc 3513, section 2.7
     enum Scope {
         UNSPECIFIED,
         LOOPBACK,
@@ -140,7 +140,7 @@ class INET_API Ipv6Address
 
     bool operator==(const Ipv6Address& addr) const
     {
-        return d[3] == addr.d[3] && d[2] == addr.d[2] && d[1] == addr.d[1] && d[0] == addr.d[0];    // d[3] differs most often, compare that first
+        return d[3] == addr.d[3] && d[2] == addr.d[2] && d[1] == addr.d[1] && d[0] == addr.d[0]; // d[3] differs most often, compare that first
     }
 
     bool operator!=(const Ipv6Address& addr) const { return !operator==(addr); }

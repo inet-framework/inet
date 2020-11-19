@@ -32,7 +32,7 @@ class INET_API PcapngWriter : public IPcapWriter
 {
   protected:
     std::string fileName;
-    FILE *dumpfile = nullptr;    // pcap file
+    FILE *dumpfile = nullptr; // pcap file
     bool flush = false;
     int nextPcapngInterfaceId = 0;
     std::map<int, int> interfaceModuleIdToPcapngInterfaceId;
@@ -78,7 +78,7 @@ class INET_API PcapngWriter : public IPcapWriter
     /**
      * Force flushing of pcap dump.
      */
-    void setFlush(bool flush) override { this->flush = flush; };
+    void setFlush(bool flush) override { this->flush = flush; }
 };
 
 } // namespace inet

@@ -41,7 +41,7 @@ class INET_API AckingMacToEthernetPcapRecorderHelper : public cObject, public Pc
 {
     virtual PcapLinkType protocolToLinkType(const Protocol *protocol) const;
     virtual bool matchesLinkType(PcapLinkType pcapLinkType, const Protocol *protocol) const;
-    virtual Packet *tryConvertToLinkType(const Packet* packet, PcapLinkType pcapLinkType, const Protocol *protocol) const;
+    virtual Packet *tryConvertToLinkType(const Packet *packet, PcapLinkType pcapLinkType, const Protocol *protocol) const;
 };
 
 } // namespace inet

@@ -59,7 +59,7 @@ const EthernetMacBase::EtherDescr EthernetMacBase::etherDescrs[NUM_OF_ETHERDESCR
         MIN_ETHERNET_FRAME_BYTES,
         MIN_ETHERNET_FRAME_BYTES,
         512 / ETHERNET_TXRATE,
-        2500    /*m*/ / SPEED_OF_LIGHT_IN_CABLE
+        2500 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
     },
     {
         FAST_ETHERNET_TXRATE,
@@ -69,7 +69,7 @@ const EthernetMacBase::EtherDescr EthernetMacBase::etherDescrs[NUM_OF_ETHERDESCR
         MIN_ETHERNET_FRAME_BYTES,
         MIN_ETHERNET_FRAME_BYTES,
         512 / FAST_ETHERNET_TXRATE,
-        250    /*m*/ / SPEED_OF_LIGHT_IN_CABLE
+        250 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
     },
     {
         GIGABIT_ETHERNET_TXRATE,
@@ -79,14 +79,14 @@ const EthernetMacBase::EtherDescr EthernetMacBase::etherDescrs[NUM_OF_ETHERDESCR
         GIGABIT_MIN_FRAME_BYTES_WITH_EXT,
         MIN_ETHERNET_FRAME_BYTES,
         4096 / GIGABIT_ETHERNET_TXRATE,
-        250    /*m*/ / SPEED_OF_LIGHT_IN_CABLE
+        250 /*m*/ / SPEED_OF_LIGHT_IN_CABLE
     },
     {
         FAST_GIGABIT_ETHERNET_TXRATE,
         0.5 / FAST_GIGABIT_ETHERNET_TXRATE,
         0,
         B(0),
-        B(-1),    // half-duplex is not supported
+        B(-1), // half-duplex is not supported
         B(0),
         0.0,
         0.0
@@ -96,7 +96,7 @@ const EthernetMacBase::EtherDescr EthernetMacBase::etherDescrs[NUM_OF_ETHERDESCR
         0.5 / TWENTYFIVE_GIGABIT_ETHERNET_TXRATE,
         0,
         B(0),
-        B(-1),    // half-duplex is not supported
+        B(-1), // half-duplex is not supported
         B(0),
         0.0,
         0.0
@@ -106,7 +106,7 @@ const EthernetMacBase::EtherDescr EthernetMacBase::etherDescrs[NUM_OF_ETHERDESCR
         0.5 / FOURTY_GIGABIT_ETHERNET_TXRATE,
         0,
         B(0),
-        B(-1),    // half-duplex is not supported
+        B(-1), // half-duplex is not supported
         B(0),
         0.0,
         0.0
@@ -116,7 +116,7 @@ const EthernetMacBase::EtherDescr EthernetMacBase::etherDescrs[NUM_OF_ETHERDESCR
         0.5 / HUNDRED_GIGABIT_ETHERNET_TXRATE,
         0,
         B(0),
-        B(-1),    // half-duplex is not supported
+        B(-1), // half-duplex is not supported
         B(0),
         0.0,
         0.0
@@ -126,7 +126,7 @@ const EthernetMacBase::EtherDescr EthernetMacBase::etherDescrs[NUM_OF_ETHERDESCR
         0.5 / TWOHUNDRED_GIGABIT_ETHERNET_TXRATE,
         0,
         B(0),
-        B(-1),    // half-duplex is not supported
+        B(-1), // half-duplex is not supported
         B(0),
         0.0,
         0.0
@@ -136,7 +136,7 @@ const EthernetMacBase::EtherDescr EthernetMacBase::etherDescrs[NUM_OF_ETHERDESCR
         0.5 / FOURHUNDRED_GIGABIT_ETHERNET_TXRATE,
         0,
         B(0),
-        B(-1),    // half-duplex is not supported
+        B(-1), // half-duplex is not supported
         B(0),
         0.0,
         0.0
@@ -163,7 +163,7 @@ simsignal_t EthernetMacBase::receptionStateChangedSignal = registerSignal("recep
 
 EthernetMacBase::EthernetMacBase()
 {
-    lastTxFinishTime = -1.0;    // never equals to current simtime
+    lastTxFinishTime = -1.0; // never equals to current simtime
     curEtherDescr = &nullEtherDescr;
 }
 
@@ -189,7 +189,7 @@ void EthernetMacBase::initialize(int stage)
 
         initializeStatistics();
 
-        lastTxFinishTime = -1.0;    // not equals with current simtime.
+        lastTxFinishTime = -1.0; // not equals with current simtime.
 
         // initialize self messages
         endTxTimer = new cMessage("EndTransmission", ENDTRANSMISSION);
@@ -300,7 +300,7 @@ void EthernetMacBase::handleCrashOperation(LifecycleOperation *operation)
     networkInterface->setState(NetworkInterface::State::DOWN);
 }
 
-// TODO: this method should be renamed and called where processing is finished on the current frame (i.e. curTxFrame becomes nullptr)
+// TODO this method should be renamed and called where processing is finished on the current frame (i.e. curTxFrame becomes nullptr)
 void EthernetMacBase::processAtHandleMessageFinished()
 {
     if (operationalState == State::STOPPING_OPERATION) {
@@ -327,7 +327,7 @@ void EthernetMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cO
             if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
                 refreshConnection();
         }
-        else if (transmissionChannel && dynamic_cast<cPostParameterChangeNotification *>(obj)) {    // note: we are subscribed to the channel object too
+        else if (transmissionChannel && dynamic_cast<cPostParameterChangeNotification *>(obj)) { // note: we are subscribed to the channel object too
             cPostParameterChangeNotification *gcobj = static_cast<cPostParameterChangeNotification *>(obj);
             if (transmissionChannel == gcobj->par->getOwner())
                 refreshConnection();
@@ -348,7 +348,7 @@ void EthernetMacBase::processConnectDisconnect()
             PacketDropDetails details;
             details.setReason(INTERFACE_DOWN);
             dropCurrentTxFrame(details);
-            lastTxFinishTime = -1.0;    // so that it never equals to the current simtime, used for Burst mode detection.
+            lastTxFinishTime = -1.0; // so that it never equals to the current simtime, used for Burst mode detection.
         }
 
         // Clear queue
@@ -362,10 +362,10 @@ void EthernetMacBase::processConnectDisconnect()
             delete msg;
         }
 
-        changeTransmissionState(TX_IDLE_STATE);         //FIXME replace status to OFF
+        changeTransmissionState(TX_IDLE_STATE); // FIXME replace status to OFF
         changeReceptionState(RX_IDLE_STATE);
     }
-    //FIXME when connect, set statuses to RECONNECT or IDLE
+    // FIXME when connect, set statuses to RECONNECT or IDLE
 }
 
 void EthernetMacBase::encapsulate(Packet *frame)
@@ -382,15 +382,15 @@ void EthernetMacBase::decapsulate(Packet *packet)
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
 }
 
-//FIXME should use it in EthernetCsmaMac, EthernetMac, etc. modules. But should not use it in EtherBus, EthernetHub.
+// FIXME should use it in EthernetCsmaMac, EthernetMac, etc. modules. But should not use it in EtherBus, EthernetHub.
 bool EthernetMacBase::verifyCrcAndLength(Packet *packet)
 {
     EV_STATICCONTEXT;
 
-    auto ethHeader = packet->peekAtFront<EthernetMacHeader>();          //FIXME can I use any flags?
-    const auto& ethTrailer = packet->peekAtBack<EthernetFcs>(ETHER_FCS_BYTES);          //FIXME can I use any flags?
+    auto ethHeader = packet->peekAtFront<EthernetMacHeader>(); // FIXME can I use any flags?
+    const auto& ethTrailer = packet->peekAtBack<EthernetFcs>(ETHER_FCS_BYTES); // FIXME can I use any flags?
 
-    switch(ethTrailer->getFcsMode()) {
+    switch (ethTrailer->getFcsMode()) {
         case FCS_DECLARED_CORRECT:
             break;
         case FCS_DECLARED_INCORRECT:
@@ -406,8 +406,8 @@ bool EthernetMacBase::verifyCrcAndLength(Packet *packet)
             ethBytes->copyToBuffer(buffer, bufferLength);
             // 2. compute the FCS
             auto computedFcs = ethernetCRC(buffer, bufferLength);
-            delete [] buffer;
-            isFcsBad = (computedFcs != ethTrailer->getFcs());      //FIXME how to check fcs?
+            delete[] buffer;
+            isFcsBad = (computedFcs != ethTrailer->getFcs()); // FIXME how to check fcs?
             if (isFcsBad)
                 return false;
             break;
@@ -418,7 +418,7 @@ bool EthernetMacBase::verifyCrcAndLength(Packet *packet)
     if (isIeee8023Header(*ethHeader)) {
         b payloadLength = B(ethHeader->getTypeOrLength());
 
-        return (payloadLength <= packet->getDataLength() - (ethHeader->getChunkLength() + ethTrailer->getChunkLength()));
+        return payloadLength <= packet->getDataLength() - (ethHeader->getChunkLength() + ethTrailer->getChunkLength());
     }
     return true;
 }
@@ -526,7 +526,7 @@ void EthernetMacBase::readChannelParameters(bool errorWhenAsymmetric)
 
     if (connected) {
         // Check valid speeds
-        for (auto & etherDescr : etherDescrs) {
+        for (auto& etherDescr : etherDescrs) {
             if (txRate == etherDescr.txrate) {
                 curEtherDescr = &(etherDescr);
                 if (networkInterface) {
@@ -660,26 +660,25 @@ void EthernetMacBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) co
         packet->insertAtBack(ethPadding);
     }
 
-    switch(ethFcs->getFcsMode()) {
+    switch (ethFcs->getFcsMode()) {
         case FCS_DECLARED_CORRECT:
             ethFcs->setFcs(0xC00DC00DL);
             break;
         case FCS_DECLARED_INCORRECT:
             ethFcs->setFcs(0xBAADBAADL);
             break;
-        case FCS_COMPUTED:
-            { // calculate FCS
-                auto ethBytes = packet->peekDataAsBytes();
-                auto bufferLength = B(ethBytes->getChunkLength()).get();
-                auto buffer = new uint8_t[bufferLength];
-                // 1. fill in the data
-                ethBytes->copyToBuffer(buffer, bufferLength);
-                // 2. compute the FCS
-                auto computedFcs = ethernetCRC(buffer, bufferLength);
-                delete [] buffer;
-                ethFcs->setFcs(computedFcs);
-            }
+        case FCS_COMPUTED: { // calculate FCS
+            auto ethBytes = packet->peekDataAsBytes();
+            auto bufferLength = B(ethBytes->getChunkLength()).get();
+            auto buffer = new uint8_t[bufferLength];
+            // 1. fill in the data
+            ethBytes->copyToBuffer(buffer, bufferLength);
+            // 2. compute the FCS
+            auto computedFcs = ethernetCRC(buffer, bufferLength);
+            delete[] buffer;
+            ethFcs->setFcs(computedFcs);
             break;
+        }
         default:
             throw cRuntimeError("Unknown FCS mode: %d", (int)(ethFcs->getFcsMode()));
     }
@@ -687,15 +686,15 @@ void EthernetMacBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) co
     packet->insertAtBack(ethFcs);
 }
 
-void EthernetMacBase::cutEthernetSignalEnd(EthernetSignalBase* signal, simtime_t duration)
+void EthernetMacBase::cutEthernetSignalEnd(EthernetSignalBase *signal, simtime_t duration)
 {
     ASSERT(duration <= signal->getDuration());
     if (duration == signal->getDuration())
         return;
     signal->setDuration(duration);
     int64_t newBitLength = duration.dbl() * signal->getBitrate();
-    if (auto packet = check_and_cast_nullable<Packet*>(signal->decapsulate())) {
-        //TODO: removed length calculation based on the PHY layer (parallel bits, bit order, etc.)
+    if (auto packet = check_and_cast_nullable<Packet *>(signal->decapsulate())) {
+        // TODO removed length calculation based on the PHY layer (parallel bits, bit order, etc.)
         if (newBitLength < packet->getBitLength()) {
             packet->trimFront();
             packet->setBackOffset(b(newBitLength));
@@ -707,7 +706,6 @@ void EthernetMacBase::cutEthernetSignalEnd(EthernetSignalBase* signal, simtime_t
     signal->setBitError(true);
     signal->setBitLength(newBitLength);
 }
-
 
 } // namespace inet
 

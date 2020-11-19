@@ -64,7 +64,7 @@ class INET_API LsaTrackingInfo
   public:
     enum InstallSource {
         ORIGINATED = 0,
-        FLOODED = 1
+        FLOODED    = 1
     };
 
   private:
@@ -92,7 +92,7 @@ class INET_API RouterLsa : public Ospfv2RouterLsa,
     RouterLsa(const RouterLsa& lsa) : Ospfv2RouterLsa(lsa), RoutingInfo(lsa), LsaTrackingInfo(lsa) {}
     virtual ~RouterLsa() {}
 
-    bool validateLSChecksum() const { return true; }    // not implemented
+    bool validateLSChecksum() const { return true; } // not implemented
 
     bool update(const Ospfv2RouterLsa *lsa);
     bool differsFrom(const Ospfv2RouterLsa *routerLSA) const;
@@ -108,7 +108,7 @@ class INET_API NetworkLsa : public Ospfv2NetworkLsa,
     NetworkLsa(const NetworkLsa& lsa) : Ospfv2NetworkLsa(lsa), RoutingInfo(lsa), LsaTrackingInfo(lsa) {}
     virtual ~NetworkLsa() {}
 
-    bool validateLSChecksum() const { return true; }    // not implemented
+    bool validateLSChecksum() const { return true; } // not implemented
 
     bool update(const Ospfv2NetworkLsa *lsa);
     bool differsFrom(const Ospfv2NetworkLsa *networkLSA) const;
@@ -130,7 +130,7 @@ class INET_API SummaryLsa : public Ospfv2SummaryLsa,
     bool getPurgeable() const { return purgeable; }
     void setPurgeable(bool purge = true) { purgeable = purge; }
 
-    bool validateLSChecksum() const { return true; }    // not implemented
+    bool validateLSChecksum() const { return true; } // not implemented
 
     bool update(const Ospfv2SummaryLsa *lsa);
     bool differsFrom(const Ospfv2SummaryLsa *summaryLSA) const;
@@ -152,7 +152,7 @@ class INET_API AsExternalLsa : public Ospfv2AsExternalLsa,
     bool getPurgeable() const { return purgeable; }
     void setPurgeable(bool purge = true) { purgeable = purge; }
 
-    bool validateLSChecksum() const { return true; }    // not implemented
+    bool validateLSChecksum() const { return true; } // not implemented
 
     bool update(const Ospfv2AsExternalLsa *lsa);
     bool differsFrom(const Ospfv2AsExternalLsa *asExternalLSA) const;

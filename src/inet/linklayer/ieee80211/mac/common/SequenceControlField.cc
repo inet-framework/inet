@@ -33,7 +33,7 @@ SequenceControlField::SequenceControlField(const Ptr<const Ieee80211DataOrMgmtHe
 {
 }
 
-bool SequenceControlField::operator <(const SequenceControlField& other) const
+bool SequenceControlField::operator<(const SequenceControlField& other) const
 {
     return sequenceNumber < other.sequenceNumber ||
            (sequenceNumber == other.sequenceNumber && fragmentNumber < other.fragmentNumber);

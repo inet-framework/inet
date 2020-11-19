@@ -38,14 +38,14 @@ namespace physicallayer {
 class INET_API ICommunicationCache : public IPrintableObject
 {
   public:
-    virtual ~ICommunicationCache() { }
+    virtual ~ICommunicationCache() {}
 
     /** @name Radio cache */
     //@{
     virtual void addRadio(const IRadio *radio) = 0;
     virtual void removeRadio(const IRadio *radio) = 0;
     virtual const IRadio *getRadio(int id) const = 0;
-    virtual void mapRadios(std::function<void (const IRadio *)> f) const = 0;
+    virtual void mapRadios(std::function<void(const IRadio *)> f) const = 0;
     //@}
 
     /** @name Transmission cache */
@@ -53,13 +53,13 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual void addTransmission(const ITransmission *transmission) = 0;
     virtual void removeTransmission(const ITransmission *transmission) = 0;
     virtual const ITransmission *getTransmission(int id) const = 0;
-    virtual void mapTransmissions(std::function<void (const ITransmission *)> f) const = 0;
+    virtual void mapTransmissions(std::function<void(const ITransmission *)> f) const = 0;
     //@}
 
     /** @name Interference cache */
     //@{
     virtual std::vector<const ITransmission *> *computeInterferingTransmissions(const IRadio *radio, const simtime_t startTime, const simtime_t endTime) = 0;
-    virtual void removeNonInterferingTransmissions(std::function<void (const ITransmission *transmission)> f) = 0;
+    virtual void removeNonInterferingTransmissions(std::function<void(const ITransmission *transmission)> f) = 0;
 
     virtual const simtime_t getCachedInterferenceEndTime(const ITransmission *transmission) = 0;
     virtual void setCachedInterferenceEndTime(const ITransmission *transmission, const simtime_t interferenceEndTime) = 0;

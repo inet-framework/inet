@@ -32,11 +32,10 @@ namespace eigrp {
 
 Define_Module(EigrpSplitter);
 
-EigrpSplitter::EigrpSplitter(){
-
+EigrpSplitter::EigrpSplitter() {
 }
-EigrpSplitter::~EigrpSplitter(){
 
+EigrpSplitter::~EigrpSplitter() {
 }
 
 void EigrpSplitter::initialize(int stage)
@@ -50,43 +49,40 @@ void EigrpSplitter::initialize(int stage)
     }
 }
 
-void EigrpSplitter::handleMessage(cMessage* msg)
+void EigrpSplitter::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         EV_DEBUG << "Self message received by EigrpSplitter" << endl;
         delete msg;
     }
     else {
-        if (strcmp(msg->getArrivalGate()->getBaseName(),"splitterIn")==0 || strcmp(msg->getArrivalGate()->getBaseName(),"splitter6In")==0 ) {
+        if (strcmp(msg->getArrivalGate()->getBaseName(), "splitterIn") == 0 || strcmp(msg->getArrivalGate()->getBaseName(), "splitter6In") == 0) {
             this->send(msg, "ipOut"); // A message from ipv6pdm or ipv4pdm to outside
         }
-        else if (strcmp(msg->getArrivalGate()->getBaseName(),"ipIn")==0)
-        {
+        else if (strcmp(msg->getArrivalGate()->getBaseName(), "ipIn") == 0) {
 
             Packet *packet = check_and_cast<Packet *>(msg); // A message to ipv6pdm or ipv4pdm
 
             auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-            if (protocol!=&Protocol::eigrp) { // non eigrp message
+            if (protocol != &Protocol::eigrp) { // non eigrp message
                 delete msg;
                 return;
             }
 
             auto ipversion = packet->getTag<L3AddressInd>()->getSrcAddress().getType();
-            if (ipversion==inet::L3Address::IPv4)
-            {
+            if (ipversion == inet::L3Address::IPv4) {
                 this->send(msg, "splitterOut");
             }
-            else if (ipversion==inet::L3Address::IPv6)
-            {
+            else if (ipversion == inet::L3Address::IPv6) {
                 this->send(msg, "splitter6Out");
             }
-            else
-            {
+            else {
                 delete msg;
             }
         }
     }
 }
 
-} //eigrp
-} //inet
+} // eigrp
+} // inet
+

@@ -27,55 +27,54 @@ class OriginatorBlockAckAgreementHandler;
 
 class OriginatorBlockAckAgreement : public cObject
 {
-    protected:
-        MacAddress receiverAddr = MacAddress::UNSPECIFIED_ADDRESS;
-        Tid tid = -1;
-        int numSentBaPolicyFrames = 0;
-        SequenceNumber startingSequenceNumber = -1;
-        int bufferSize = -1;
-        bool isAMsduSupported = false;
-        bool isDelayedBlockAckPolicySupported = false;
-        bool isAddbaResponseReceived = false;
-        bool isAddbaRequestSent = false;
-        simtime_t blockAckTimeoutValue = -1;
-        simtime_t expirationTime = -1;
+  protected:
+    MacAddress receiverAddr = MacAddress::UNSPECIFIED_ADDRESS;
+    Tid tid = -1;
+    int numSentBaPolicyFrames = 0;
+    SequenceNumber startingSequenceNumber = -1;
+    int bufferSize = -1;
+    bool isAMsduSupported = false;
+    bool isDelayedBlockAckPolicySupported = false;
+    bool isAddbaResponseReceived = false;
+    bool isAddbaRequestSent = false;
+    simtime_t blockAckTimeoutValue = -1;
+    simtime_t expirationTime = -1;
 
-    public:
-        OriginatorBlockAckAgreement(MacAddress receiverAddr, Tid tid, SequenceNumber startingSequenceNumber, int bufferSize, bool isAMsduSupported, bool isDelayedBlockAckPolicySupported) :
-            receiverAddr(receiverAddr),
-            tid(tid),
-            startingSequenceNumber(startingSequenceNumber),
-            bufferSize(bufferSize),
-            isAMsduSupported(isAMsduSupported),
-            isDelayedBlockAckPolicySupported(isDelayedBlockAckPolicySupported)
-        {
-        }
+  public:
+    OriginatorBlockAckAgreement(MacAddress receiverAddr, Tid tid, SequenceNumber startingSequenceNumber, int bufferSize, bool isAMsduSupported, bool isDelayedBlockAckPolicySupported) :
+        receiverAddr(receiverAddr),
+        tid(tid),
+        startingSequenceNumber(startingSequenceNumber),
+        bufferSize(bufferSize),
+        isAMsduSupported(isAMsduSupported),
+        isDelayedBlockAckPolicySupported(isDelayedBlockAckPolicySupported)
+    {
+    }
 
-        virtual ~OriginatorBlockAckAgreement() { }
+    virtual ~OriginatorBlockAckAgreement() {}
 
-        virtual int getBufferSize() const { return bufferSize; }
-        virtual SequenceNumber getStartingSequenceNumber() { return startingSequenceNumber; }
-        virtual void setStartingSequenceNumber(SequenceNumber sequenceNumber) { startingSequenceNumber = sequenceNumber; }
-        virtual bool getIsAddbaResponseReceived() const { return isAddbaResponseReceived; }
-        virtual bool getIsAddbaRequestSent() const { return isAddbaRequestSent; }
-        virtual bool getIsAMsduSupported() const { return isAMsduSupported; }
-        virtual bool getIsDelayedBlockAckPolicySupported() const { return isDelayedBlockAckPolicySupported; }
-        virtual MacAddress getReceiverAddr() const { return receiverAddr; }
-        virtual Tid getTid() const { return tid; }
-        virtual const simtime_t getBlockAckTimeoutValue() const  { return blockAckTimeoutValue; }
-        virtual int getNumSentBaPolicyFrames() const { return numSentBaPolicyFrames; }
+    virtual int getBufferSize() const { return bufferSize; }
+    virtual SequenceNumber getStartingSequenceNumber() { return startingSequenceNumber; }
+    virtual void setStartingSequenceNumber(SequenceNumber sequenceNumber) { startingSequenceNumber = sequenceNumber; }
+    virtual bool getIsAddbaResponseReceived() const { return isAddbaResponseReceived; }
+    virtual bool getIsAddbaRequestSent() const { return isAddbaRequestSent; }
+    virtual bool getIsAMsduSupported() const { return isAMsduSupported; }
+    virtual bool getIsDelayedBlockAckPolicySupported() const { return isDelayedBlockAckPolicySupported; }
+    virtual MacAddress getReceiverAddr() const { return receiverAddr; }
+    virtual Tid getTid() const { return tid; }
+    virtual const simtime_t getBlockAckTimeoutValue() const { return blockAckTimeoutValue; }
+    virtual int getNumSentBaPolicyFrames() const { return numSentBaPolicyFrames; }
 
-        virtual void setBufferSize(int bufferSize) { this->bufferSize = bufferSize; }
-        virtual void setIsAddbaResponseReceived(bool isAddbaResponseReceived) { this->isAddbaResponseReceived = isAddbaResponseReceived; }
-        virtual void setIsAddbaRequestSent(bool isAddbaRequestSent) { this->isAddbaRequestSent = isAddbaRequestSent; }
-        virtual void setIsAMsduSupported(bool isAMsduSupported) { this->isAMsduSupported = isAMsduSupported; }
-        virtual void setIsDelayedBlockAckPolicySupported(bool isDelayedBlockAckPolicySupported) { this->isDelayedBlockAckPolicySupported = isDelayedBlockAckPolicySupported; }
-        virtual void setBlockAckTimeoutValue(const simtime_t blockAckTimeoutValue) { this->blockAckTimeoutValue = blockAckTimeoutValue; }
+    virtual void setBufferSize(int bufferSize) { this->bufferSize = bufferSize; }
+    virtual void setIsAddbaResponseReceived(bool isAddbaResponseReceived) { this->isAddbaResponseReceived = isAddbaResponseReceived; }
+    virtual void setIsAddbaRequestSent(bool isAddbaRequestSent) { this->isAddbaRequestSent = isAddbaRequestSent; }
+    virtual void setIsAMsduSupported(bool isAMsduSupported) { this->isAMsduSupported = isAMsduSupported; }
+    virtual void setIsDelayedBlockAckPolicySupported(bool isDelayedBlockAckPolicySupported) { this->isDelayedBlockAckPolicySupported = isDelayedBlockAckPolicySupported; }
+    virtual void setBlockAckTimeoutValue(const simtime_t blockAckTimeoutValue) { this->blockAckTimeoutValue = blockAckTimeoutValue; }
 
-        virtual void baPolicyFrameSent() { numSentBaPolicyFrames++; }
-        virtual void calculateExpirationTime() { expirationTime = blockAckTimeoutValue == 0 ? SIMTIME_MAX : simTime() + blockAckTimeoutValue; }
-        virtual simtime_t getExpirationTime() { return expirationTime; }
-
+    virtual void baPolicyFrameSent() { numSentBaPolicyFrames++; }
+    virtual void calculateExpirationTime() { expirationTime = blockAckTimeoutValue == 0 ? SIMTIME_MAX : simTime() + blockAckTimeoutValue; }
+    virtual simtime_t getExpirationTime() { return expirationTime; }
 };
 
 } /* namespace ieee80211 */

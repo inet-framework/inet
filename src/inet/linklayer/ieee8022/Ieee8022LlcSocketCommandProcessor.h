@@ -34,7 +34,7 @@ class INET_API Ieee8022LlcSocketCommandProcessor : public queueing::PacketFlowBa
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
     virtual void handleCommand(Request *request);
-    virtual void processPacket(Packet *packet) override { }
+    virtual void processPacket(Packet *packet) override {}
 
   public:
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;

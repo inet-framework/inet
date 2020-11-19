@@ -57,3 +57,4 @@ bool EdcaCollisionController::isInternalCollision(Edcaf *edcaf)
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

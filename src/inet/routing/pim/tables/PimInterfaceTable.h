@@ -32,7 +32,7 @@ class INET_API PimInterface : public cObject
 {
   public:
     enum PimMode {
-        DenseMode = 1,
+        DenseMode  = 1,
         SparseMode = 2
     };
 
@@ -92,7 +92,7 @@ class INET_API PimInterfaceTable : public cSimpleModule, protected cListener
     virtual void removeInterface(NetworkInterface *ie);
 };
 
-}    // namespace inet
+} // namespace inet
 
 #endif
 

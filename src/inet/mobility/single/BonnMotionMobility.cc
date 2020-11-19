@@ -36,12 +36,11 @@ void BonnMotionMobility::computeMaxSpeed()
 {
     const BonnMotionFile::Line& vec = *lines;
     double lastTime = vec[0];
-    Coord lastPos(vec[1],vec[2],(is3D ? vec[3] : 0));
-    unsigned int step = (is3D ? 4: 3);
-    for (unsigned int i = step; i < vec.size(); i += step)
-    {
+    Coord lastPos(vec[1], vec[2], (is3D ? vec[3] : 0));
+    unsigned int step = (is3D ? 4 : 3);
+    for (unsigned int i = step; i < vec.size(); i += step) {
         double elapsedTime = vec[i] - lastTime;
-        Coord currPos(vec[i+1], vec[i+2], (is3D ? vec[i+3] : 0));
+        Coord currPos(vec[i + 1], vec[i + 2], (is3D ? vec[i + 3] : 0));
         double distance = currPos.distance(lastPos);
         double speed = distance / elapsedTime;
         if (speed > maxSpeed)

@@ -101,7 +101,7 @@ void MobilityCanvasVisualizer::removeMobilityVisualization(const IMobility *mobi
     mobilityVisualizations.erase(mobility);
 }
 
-MobilityCanvasVisualizer::MobilityCanvasVisualization* MobilityCanvasVisualizer::ensureMobilityVisualization(IMobility *mobility)
+MobilityCanvasVisualizer::MobilityCanvasVisualization *MobilityCanvasVisualizer::ensureMobilityVisualization(IMobility *mobility)
 {
     auto mobilityVisualization = getMobilityVisualization(mobility);
     if (mobilityVisualization == nullptr) {
@@ -167,10 +167,10 @@ void MobilityCanvasVisualizer::extendMovementTrail(const IMobility *mobility, Tr
     if (trailFigure->getNumFigures() == 0)
         startPosition = position;
     else
-        startPosition = static_cast<cLineFigure*>(trailFigure->getFigure(trailFigure->getNumFigures() - 1))->getEnd();
+        startPosition = static_cast<cLineFigure *>(trailFigure->getFigure(trailFigure->getNumFigures() - 1))->getEnd();
     double dx = startPosition.x - endPosition.x;
     double dy = startPosition.y - endPosition.y;
-    // TODO: 1?
+    // TODO 1?
     if (trailFigure->getNumFigures() == 0 || dx * dx + dy * dy > 1) {
         cLineFigure *movementLine = new cLineFigure("movementTrail");
         movementLine->setTags((std::string("movement_trail recent_history ") + tags).c_str());

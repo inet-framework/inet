@@ -38,23 +38,23 @@ namespace ieee80211 {
  */
 class INET_API IRx
 {
-    public:
-        virtual ~IRx() { }
+  public:
+    virtual ~IRx() {}
 
-        virtual bool isReceptionInProgress() const = 0;
+    virtual bool isReceptionInProgress() const = 0;
 
-        // from Contention
-        virtual bool isMediumFree() const = 0;
-        virtual void frameTransmitted(simtime_t durationField) = 0;
+    // from Contention
+    virtual bool isMediumFree() const = 0;
+    virtual void frameTransmitted(simtime_t durationField) = 0;
 
-        // from Coordination functions
-        virtual void registerContention(IContention *contention) = 0;
+    // from Coordination functions
+    virtual void registerContention(IContention *contention) = 0;
 
-        // events
-        virtual void receptionStateChanged(physicallayer::IRadio::ReceptionState state) = 0;
-        virtual void transmissionStateChanged(physicallayer::IRadio::TransmissionState state) = 0;
-        virtual void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart part) = 0;
-        virtual bool lowerFrameReceived(Packet *packet) = 0;
+    // events
+    virtual void receptionStateChanged(physicallayer::IRadio::ReceptionState state) = 0;
+    virtual void transmissionStateChanged(physicallayer::IRadio::TransmissionState state) = 0;
+    virtual void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart part) = 0;
+    virtual bool lowerFrameReceived(Packet *packet) = 0;
 };
 
 } // namespace ieee80211

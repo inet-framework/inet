@@ -36,60 +36,60 @@ void Ieee80211MacProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Pro
             context.sourceColumn << twoAddressHeader->getTransmitterAddress();
         switch (macHeader->getType()) {
             case ST_ASSOCIATIONREQUEST:
-                context.typeColumn << "AssocReq";    //TODO
+                context.typeColumn << "AssocReq"; // TODO
                 break;
 
             case ST_ASSOCIATIONRESPONSE:
-                context.typeColumn << "AssocResp";    //TODO
+                context.typeColumn << "AssocResp"; // TODO
                 break;
 
             case ST_REASSOCIATIONREQUEST:
-                context.typeColumn << "ReassocReq";    //TODO
+                context.typeColumn << "ReassocReq"; // TODO
                 break;
 
             case ST_REASSOCIATIONRESPONSE:
-                context.typeColumn << "ReassocResp";    //TODO
+                context.typeColumn << "ReassocResp"; // TODO
                 break;
 
             case ST_PROBEREQUEST:
-                context.typeColumn << "ProbeRequest";    //TODO
+                context.typeColumn << "ProbeRequest"; // TODO
                 break;
 
             case ST_PROBERESPONSE:
-                context.typeColumn << "ProbeResponse";    //TODO
+                context.typeColumn << "ProbeResponse"; // TODO
                 break;
 
             case ST_BEACON:
-                context.typeColumn << "Beacon";    //TODO
+                context.typeColumn << "Beacon"; // TODO
                 break;
 
             case ST_ATIM:
-                context.typeColumn << "Atim";    //TODO
+                context.typeColumn << "Atim"; // TODO
                 break;
 
             case ST_DISASSOCIATION:
-                context.typeColumn << "Disassoc";    //TODO
+                context.typeColumn << "Disassoc"; // TODO
                 break;
 
             case ST_AUTHENTICATION:
-                context.typeColumn << "Auth";    //TODO
+                context.typeColumn << "Auth"; // TODO
                 break;
 
             case ST_DEAUTHENTICATION:
-                context.typeColumn << "Deauth";    //TODO
+                context.typeColumn << "Deauth"; // TODO
                 break;
 
             case ST_ACTION:
-                context.typeColumn << "Action";    //TODO
+                context.typeColumn << "Action"; // TODO
                 break;
 
             case ST_NOACKACTION:
-                context.typeColumn << "Noackaction";    //TODO
+                context.typeColumn << "Noackaction"; // TODO
                 break;
 
             case ST_PSPOLL:
-                context.typeColumn << "Pspoll";    //TODO
-            break;
+                context.typeColumn << "Pspoll"; // TODO
+                break;
 
             case ST_RTS: {
                 context.typeColumn << "RTS";
@@ -106,24 +106,24 @@ void Ieee80211MacProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Pro
                 break;
 
             case ST_BLOCKACK_REQ:
-                context.typeColumn << "BlockAckReq";    //TODO
+                context.typeColumn << "BlockAckReq"; // TODO
                 break;
 
             case ST_BLOCKACK:
-                context.typeColumn << "BlockAck";    //TODO
+                context.typeColumn << "BlockAck"; // TODO
                 break;
 
             case ST_DATA:
             case ST_DATA_WITH_QOS:
-                context.typeColumn << "DATA";    //TODO
+                context.typeColumn << "DATA"; // TODO
                 break;
 
             case ST_LBMS_REQUEST:
-                context.typeColumn << "LbmsReq";    //TODO
+                context.typeColumn << "LbmsReq"; // TODO
                 break;
 
             case ST_LBMS_REPORT:
-                context.typeColumn << "LbmsReport";    //TODO
+                context.typeColumn << "LbmsReport"; // TODO
                 break;
 
             default:

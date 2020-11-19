@@ -50,7 +50,7 @@ void Flooding::initialize(int stage)
 {
     NetworkProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        //initialize seqence number to 0
+        // initialize seqence number to 0
         seqNum = 0;
         nbDataPacketsReceived = 0;
         nbDataPacketsSent = 0;
@@ -64,7 +64,7 @@ void Flooding::initialize(int stage)
            << " plainFlooding = " << plainFlooding << endl;
 
         if (plainFlooding) {
-            //these parameters are only needed for plain flooding
+            // these parameters are only needed for plain flooding
             bcMaxEntries = par("bcMaxEntries");
             bcDelTime = par("bcDelTime");
             EV << "bcMaxEntries = " << bcMaxEntries
@@ -117,14 +117,14 @@ void Flooding::handleUpperPacket(Packet *packet)
 
     if (plainFlooding) {
         if (bcMsgs.size() >= bcMaxEntries) {
-            //serach the broadcast list of outdated entries and delete them
-            for (auto it = bcMsgs.begin(); it != bcMsgs.end(); ) {
+            // serach the broadcast list of outdated entries and delete them
+            for (auto it = bcMsgs.begin(); it != bcMsgs.end();) {
                 if (it->delTime < simTime())
                     it = bcMsgs.erase(it);
                 else
                     ++it;
             }
-            //delete oldest entry if max size is reached
+            // delete oldest entry if max size is reached
             if (bcMsgs.size() >= bcMaxEntries) {
                 EV << "bcMsgs is full, delete oldest entry" << endl;
                 bcMsgs.pop_front();
@@ -132,7 +132,7 @@ void Flooding::handleUpperPacket(Packet *packet)
         }
         bcMsgs.push_back(Bcast(floodHeader->getSeqNum(), floodHeader->getSourceAddress(), simTime() + bcDelTime));
     }
-    //there is no routing so all messages are broadcast for the mac layer
+    // there is no routing so all messages are broadcast for the mac layer
     sendDown(packet);
     nbDataPacketsSent++;
 }
@@ -155,9 +155,9 @@ void Flooding::handleLowerPacket(Packet *packet)
 {
     auto floodHeader = packet->peekAtFront<FloodingHeader>();
 
-    //msg not broadcasted yet
+    // msg not broadcasted yet
     if (notBroadcasted(floodHeader.get())) {
-        //msg is for me
+        // msg is for me
         if (interfaceTable->isLocalAddress(floodHeader->getDestinationAddress())) {
             EV << " data msg for me! send to Upper" << endl;
             nbHops = nbHops + (defaultTtl + 1 - floodHeader->getTtl());
@@ -165,9 +165,9 @@ void Flooding::handleLowerPacket(Packet *packet)
             sendUp(packet);
             nbDataPacketsReceived++;
         }
-        //broadcast message
+        // broadcast message
         else if (floodHeader->getDestinationAddress().isBroadcast()) {
-            //check ttl and rebroadcast
+            // check ttl and rebroadcast
             if (floodHeader->getTtl() > 1) {
                 EV << " data msg BROADCAST! ttl = " << floodHeader->getTtl()
                    << " > 1 -> rebroadcast msg & send to upper\n";
@@ -188,9 +188,9 @@ void Flooding::handleLowerPacket(Packet *packet)
             sendUp(packet);
             nbDataPacketsReceived++;
         }
-        //not for me -> rebroadcast
+        // not for me -> rebroadcast
         else {
-            //check ttl and rebroadcast
+            // check ttl and rebroadcast
             if (floodHeader->getTtl() > 1) {
                 EV << " data msg not for me! ttl = " << floodHeader->getTtl()
                    << " > 1 -> forward\n";
@@ -210,7 +210,7 @@ void Flooding::handleLowerPacket(Packet *packet)
                 delete packet;
             }
             else {
-                //max hops reached -> delete
+                // max hops reached -> delete
                 EV << " max hops reached (ttl = " << floodHeader->getTtl() << ") -> delete msg\n";
                 delete packet;
             }
@@ -236,12 +236,12 @@ bool Flooding::notBroadcasted(const FloodingHeader *msg)
     if (!plainFlooding)
         return true;
 
-    //serach the broadcast list of outdated entries and delete them
-    for (auto it = bcMsgs.begin(); it != bcMsgs.end(); ) {
+    // serach the broadcast list of outdated entries and delete them
+    for (auto it = bcMsgs.begin(); it != bcMsgs.end();) {
         if (it->delTime < simTime()) {
             it = bcMsgs.erase(it);
         }
-        //message was already broadcasted
+        // message was already broadcasted
         else if ((it->srcAddr == msg->getSourceAddress()) && (it->seqNum == msg->getSeqNum())) {
             // update entry
             it->delTime = simTime() + bcDelTime;
@@ -251,7 +251,7 @@ bool Flooding::notBroadcasted(const FloodingHeader *msg)
             ++it;
     }
 
-    //delete oldest entry if max size is reached
+    // delete oldest entry if max size is reached
     if (bcMsgs.size() >= bcMaxEntries) {
         EV << "bcMsgs is full, delete oldest entry\n";
         bcMsgs.pop_front();
@@ -269,7 +269,7 @@ void Flooding::decapsulate(Packet *packet)
     auto floodHeader = packet->popAtFront<FloodingHeader>();
     auto payloadLength = floodHeader->getPayloadLengthField();
     if (packet->getDataLength() < payloadLength) {
-        throw cRuntimeError("Data error: illegal payload length");     //FIXME packet drop
+        throw cRuntimeError("Data error: illegal payload length"); // FIXME packet drop
     }
     if (packet->getDataLength() > payloadLength)
         packet->setBackOffset(packet->getFrontOffset() + payloadLength);
@@ -295,7 +295,7 @@ void Flooding::encapsulate(Packet *appPkt)
     EV << "in encaps...\n";
 
     auto cInfo = appPkt->removeControlInfo();
-    auto pkt = makeShared<FloodingHeader>(); // TODO: appPkt->getName(), appPkt->getKind());
+    auto pkt = makeShared<FloodingHeader>(); // TODO appPkt->getName(), appPkt->getKind());
     pkt->setChunkLength(b(headerLength));
 
     auto& hopLimitReq = appPkt->removeTagIfPresent<HopLimitReq>();
@@ -329,7 +329,7 @@ void Flooding::encapsulate(Packet *appPkt)
 
     pkt->setPayloadLengthField(appPkt->getDataLength());
 
-    //encapsulate the application packet
+    // encapsulate the application packet
     setDownControlInfo(appPkt, MacAddress::BROADCAST_ADDRESS);
 
     appPkt->insertAtFront(pkt);

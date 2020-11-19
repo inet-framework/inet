@@ -36,7 +36,7 @@ class INET_API LinkCanvasVisualizerBase : public LinkVisualizerBase
       public:
         LinkCanvasVisualization(LabeledLineFigure *figure, int sourceModuleId, int destinationModuleId);
         virtual ~LinkCanvasVisualization();
-     };
+    };
 
   protected:
     double zIndex = NaN;

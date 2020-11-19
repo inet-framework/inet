@@ -55,12 +55,12 @@ class Sctp;
 typedef std::vector<L3Address> AddressVector;
 
 enum SctpState {
-    SCTP_S_CLOSED = 0,
-    SCTP_S_COOKIE_WAIT = FSM_Steady(1),
-    SCTP_S_COOKIE_ECHOED = FSM_Steady(2),
-    SCTP_S_ESTABLISHED = FSM_Steady(3),
-    SCTP_S_SHUTDOWN_PENDING = FSM_Steady(4),
-    SCTP_S_SHUTDOWN_SENT = FSM_Steady(5),
+    SCTP_S_CLOSED            = 0,
+    SCTP_S_COOKIE_WAIT       = FSM_Steady(1),
+    SCTP_S_COOKIE_ECHOED     = FSM_Steady(2),
+    SCTP_S_ESTABLISHED       = FSM_Steady(3),
+    SCTP_S_SHUTDOWN_PENDING  = FSM_Steady(4),
+    SCTP_S_SHUTDOWN_SENT     = FSM_Steady(5),
     SCTP_S_SHUTDOWN_RECEIVED = FSM_Steady(6),
     SCTP_S_SHUTDOWN_ACK_SENT = FSM_Steady(7)
 };
@@ -110,88 +110,88 @@ enum SctpEventCode {
 };
 
 enum SCTPChunkTypes {
-    DATA = 0,
-    INIT = 1,
-    INIT_ACK = 2,
-    SACK = 3,
-    HEARTBEAT = 4,
-    HEARTBEAT_ACK = 5,
-    ABORT = 6,
-    SHUTDOWN = 7,
-    SHUTDOWN_ACK = 8,
-    ERRORTYPE = 9,
-    COOKIE_ECHO = 10,
-    COOKIE_ACK = 11,
+    DATA              = 0,
+    INIT              = 1,
+    INIT_ACK          = 2,
+    SACK              = 3,
+    HEARTBEAT         = 4,
+    HEARTBEAT_ACK     = 5,
+    ABORT             = 6,
+    SHUTDOWN          = 7,
+    SHUTDOWN_ACK      = 8,
+    ERRORTYPE         = 9,
+    COOKIE_ECHO       = 10,
+    COOKIE_ACK        = 11,
     SHUTDOWN_COMPLETE = 14,
-    AUTH = 15,
-    NR_SACK = 16,
-    ASCONF_ACK = 128,
-    PKTDROP = 129,
-    RE_CONFIG = 130,
-    FORWARD_TSN = 192,
-    ASCONF = 193,
-    IFORWARD_TSN = 194
+    AUTH              = 15,
+    NR_SACK           = 16,
+    ASCONF_ACK        = 128,
+    PKTDROP           = 129,
+    RE_CONFIG         = 130,
+    FORWARD_TSN       = 192,
+    ASCONF            = 193,
+    IFORWARD_TSN      = 194
 };
 
 enum SctpPrMethods {
-    PR_NONE = 0,
-    PR_TTL = 1,
-    PR_RTX = 2,
-    PR_PRIO = 3,
+    PR_NONE   = 0,
+    PR_TTL    = 1,
+    PR_RTX    = 2,
+    PR_PRIO   = 3,
     PR_STRRST = 4
 };
 
 enum SctpStreamResetConstants {
-    NOTHING_TO_DO = 0,
-    PERFORMED = 1,
-    DENIED = 2,
-    WRONG_SSN = 3,
-    REQUEST_IN_PROGRESS = 4,
-    NO_RESET = 5,
-    DEFERRED = 6,
-    RESET_OUTGOING = 7,
-    RESET_INCOMING = 8,
-    RESET_BOTH = 9,
-    SSN_TSN = 10,
-    ADD_INCOMING = 11,
-    ADD_OUTGOING = 12,
-    OUTGOING_RESET_REQUEST_PARAMETER = 13,
-    INCOMING_RESET_REQUEST_PARAMETER = 14,
-    SSN_TSN_RESET_REQUEST_PARAMETER = 15,
-    STREAM_RESET_RESPONSE_PARAMETER = 16,
+    NOTHING_TO_DO                          = 0,
+    PERFORMED                              = 1,
+    DENIED                                 = 2,
+    WRONG_SSN                              = 3,
+    REQUEST_IN_PROGRESS                    = 4,
+    NO_RESET                               = 5,
+    DEFERRED                               = 6,
+    RESET_OUTGOING                         = 7,
+    RESET_INCOMING                         = 8,
+    RESET_BOTH                             = 9,
+    SSN_TSN                                = 10,
+    ADD_INCOMING                           = 11,
+    ADD_OUTGOING                           = 12,
+    OUTGOING_RESET_REQUEST_PARAMETER       = 13,
+    INCOMING_RESET_REQUEST_PARAMETER       = 14,
+    SSN_TSN_RESET_REQUEST_PARAMETER        = 15,
+    STREAM_RESET_RESPONSE_PARAMETER        = 16,
     ADD_OUTGOING_STREAMS_REQUEST_PARAMETER = 17,
     ADD_INCOMING_STREAMS_REQUEST_PARAMETER = 18,
-    ADD_BOTH = 19,
-    PERFORMED_WITH_OPTION = 20,
-    PERFORMED_WITH_ADDOUT = 21
+    ADD_BOTH                               = 19,
+    PERFORMED_WITH_OPTION                  = 20,
+    PERFORMED_WITH_ADDOUT                  = 21
 };
 
 enum SctpAddIPCorrelatedTypes {
-    SET_PRIMARY_ADDRESS = 49156,
-    ADAPTATION_LAYER_INDICATION = 49158,
-    SUPPORTED_EXTENSIONS = 32776,
-    ADD_IP_ADDRESS = 49153,
-    DELETE_IP_ADDRESS = 49154,
-    ERROR_CAUSE_INDICATION = 49155,
-    SUCCESS_INDICATION = 49157,
+    SET_PRIMARY_ADDRESS          = 49156,
+    ADAPTATION_LAYER_INDICATION  = 49158,
+    SUPPORTED_EXTENSIONS         = 32776,
+    ADD_IP_ADDRESS               = 49153,
+    DELETE_IP_ADDRESS            = 49154,
+    ERROR_CAUSE_INDICATION       = 49155,
+    SUCCESS_INDICATION           = 49157,
     ERROR_DELETE_LAST_IP_ADDRESS = 160,
-    ERROR_DELETE_SOURCE_ADDRESS = 162
+    ERROR_DELETE_SOURCE_ADDRESS  = 162
 };
 
 enum SctpParameterTypes {
-    UNRECOGNIZED_PARAMETER = 8,
-    SUPPORTED_ADDRESS_TYPES = 12,
+    UNRECOGNIZED_PARAMETER          = 8,
+    SUPPORTED_ADDRESS_TYPES         = 12,
     FORWARD_TSN_SUPPORTED_PARAMETER = 49152,
-    RANDOM = 32770,
-    CHUNKS = 32771,
-    HMAC_ALGO = 32772
+    RANDOM                          = 32770,
+    CHUNKS                          = 32771,
+    HMAC_ALGO                       = 32772
 };
 
 enum SctpErrorCauses {
     INVALID_STREAM_IDENTIFIER = 1,
-    NO_USER_DATA = 9,
-    UNSUPPORTED_HMAC = 261,
-    MISSING_NAT_ENTRY = 177
+    NO_USER_DATA              = 9,
+    UNSUPPORTED_HMAC          = 261,
+    MISSING_NAT_ENTRY         = 177
 };
 
 enum SctpCcModules {
@@ -199,16 +199,16 @@ enum SctpCcModules {
 };
 
 enum SctpStreamSchedulers {
-    ROUND_ROBIN = 0,
-    ROUND_ROBIN_PACKET = 1,
-    RANDOM_SCHEDULE = 2,
+    ROUND_ROBIN            = 0,
+    ROUND_ROBIN_PACKET     = 1,
+    RANDOM_SCHEDULE        = 2,
     RANDOM_SCHEDULE_PACKET = 3,
-    FAIR_BANDWITH = 4,
-    FAIR_BANDWITH_PACKET = 5,
-    PRIORITY = 6,
-    FCFS = 7,
-    PATH_MANUAL = 8,
-    PATH_MAP_TO_PATH = 9
+    FAIR_BANDWITH          = 4,
+    FAIR_BANDWITH_PACKET   = 5,
+    PRIORITY               = 6,
+    FCFS                   = 7,
+    PATH_MANUAL            = 8,
+    PATH_MAP_TO_PATH       = 9
 };
 
 #define SCTP_COMMON_HEADER                              12      // without options
@@ -360,7 +360,7 @@ class INET_API SctpPathVariables : public cObject
     double cmtGroupTotalUtilizedCwndBandwidth;
     double cmtGroupAlpha;
     // ====== CMT Sender Buffer Control ===================================
-    simtime_t blockingTimeout;    // do not use path until given time
+    simtime_t blockingTimeout; // do not use path until given time
     // ====== CMT Slow Path RTT Calculation ===============================
     bool waitingForRTTCalculaton;
     simtime_t txTimeForRTTCalculation;
@@ -379,9 +379,9 @@ class INET_API SctpPathVariables : public cObject
     simtime_t rttvar;
 
     // ====== Path Statistics =============================================
-    unsigned int gapAckedChunksInLastSACK;    // Per-path GapAck'ed chunks in last SACK (R+NR)
-    unsigned int gapNRAckedChunksInLastSACK;    // Per-path GapAck'ed chunks in last SACK (only NR)
-    unsigned int gapUnackedChunksInLastSACK;    // Per-path Not-GapAck'ed chunks in last SACK (i.e. chunks between GapAcks)
+    unsigned int gapAckedChunksInLastSACK; // Per-path GapAck'ed chunks in last SACK (R+NR)
+    unsigned int gapNRAckedChunksInLastSACK; // Per-path GapAck'ed chunks in last SACK (only NR)
+    unsigned int gapUnackedChunksInLastSACK; // Per-path Not-GapAck'ed chunks in last SACK (i.e. chunks between GapAcks)
     unsigned int numberOfDuplicates;
     unsigned int numberOfFastRetransmissions;
     unsigned int numberOfTimerBasedRetransmissions;
@@ -485,20 +485,20 @@ class INET_API SctpDataVariables : public cObject
 
     // ====== Chunk Data Management =======================================
     cPacket *userData;
-    uint32_t len;    // Different from wire
+    uint32_t len; // Different from wire
     uint32_t booksize;
     uint32_t tsn;
     uint16_t sid;
     uint16_t ssn;
     uint32_t ppid;
-    uint32_t fragments;    // Number of fragments => TSNs={tsn, ..., tsn+fragments-1}
-    bool enqueuedInTransmissionQ;    // In transmissionQ? Otherwise, it is just in retransmissionQ.
-    bool countsAsOutstanding;    // Is chunk outstanding?
+    uint32_t fragments; // Number of fragments => TSNs={tsn, ..., tsn+fragments-1}
+    bool enqueuedInTransmissionQ; // In transmissionQ? Otherwise, it is just in retransmissionQ.
+    bool countsAsOutstanding; // Is chunk outstanding?
     bool hasBeenFastRetransmitted;
     bool hasBeenAbandoned;
-    bool hasBeenReneged;    // Has chunk been reneged?
-    bool hasBeenAcked;    // Has chunk been SACK'ed?
-    bool hasBeenCountedAsNewlyAcked;    // Chunk has been counted as newly SACK'ed
+    bool hasBeenReneged; // Has chunk been reneged?
+    bool hasBeenAcked; // Has chunk been SACK'ed?
+    bool hasBeenCountedAsNewlyAcked; // Chunk has been counted as newly SACK'ed
     bool bbit;
     bool ebit;
     bool ordered;
@@ -514,13 +514,13 @@ class INET_API SctpDataVariables : public cObject
     uint32_t allowedNoRetransmissions;
 
     // ====== Advanced Chunk Information ==================================
-    SctpPathVariables *queuedOnPath;    // The path to account this chunk in qCounters.queuedOnPath
-    SctpPathVariables *ackedOnPath;    // The path this chunk has been acked on
-    bool hasBeenTimerBasedRtxed;    // Has chunk been timer-based retransmitted?
-    bool hasBeenMoved;    // Chunk has been moved to solve buffer blocking
+    SctpPathVariables *queuedOnPath; // The path to account this chunk in qCounters.queuedOnPath
+    SctpPathVariables *ackedOnPath; // The path this chunk has been acked on
+    bool hasBeenTimerBasedRtxed; // Has chunk been timer-based retransmitted?
+    bool hasBeenMoved; // Chunk has been moved to solve buffer blocking
     simtime_t firstSendTime;
-    bool wasDropped;    // For receiving side of PKTDROP: chunk dropped
-    bool wasPktDropped;    // Stays true even if the TSN has been transmitted
+    bool wasDropped; // For receiving side of PKTDROP: chunk dropped
+    bool wasPktDropped; // Stays true even if the TSN has been transmitted
     bool strReset;
     uint32_t prMethod;
     uint32_t priority;
@@ -562,8 +562,7 @@ class INET_API SctpStateVariables : public cObject
         return primaryPath;
     }
 
-    struct RequestData
-    {
+    struct RequestData {
         uint32_t sn;
         uint16_t result;
         uint16_t type;
@@ -590,45 +589,45 @@ class INET_API SctpStateVariables : public cObject
     bool reactivatePrimaryPath;
     bool resetPending;
     bool resetRequested;
-    bool stopReceiving;    // incoming data will be discarded
-    bool stopOldData;    // data with TSN<peerTsnAfterReset will be discarded
+    bool stopReceiving; // incoming data will be discarded
+    bool stopOldData; // data with TSN<peerTsnAfterReset will be discarded
     bool queueUpdate;
     bool firstDataSent;
     bool peerWindowFull;
     bool zeroWindow;
-    bool stopSending;    // will be called when SCTP_E_SHUTDOWN arrived
-    bool stopReading;    // will be called when CLOSE was called and no data will be accepted
+    bool stopSending; // will be called when SCTP_E_SHUTDOWN arrived
+    bool stopReading; // will be called when CLOSE was called and no data will be accepted
     bool inOut;
     bool noMoreOutstanding;
     bool fragInProgress;
     bool incomingRequestSet;
     uint32_t numGapReports;
     L3Address initialPrimaryPath;
-    std::list<SctpPathVariables *> lastDataSourceList;    // DATA chunk sources for new SACK
+    std::list<SctpPathVariables *> lastDataSourceList; // DATA chunk sources for new SACK
     SctpPathVariables *lastDataSourcePath;
     AddressVector localAddresses;
-    std::list<uint32_t> dupList;    // Duplicates list for incoming DATA chunks
-    uint32_t errorCount;    // overall error counter
+    std::list<uint32_t> dupList; // Duplicates list for incoming DATA chunks
+    uint32_t errorCount; // overall error counter
     uint64_t peerRwnd;
     uint64_t initialPeerRwnd;
     uint64_t localRwnd;
-    uint32_t nextTsn;    // TSN to be sent
-    uint32_t lastTsnAck;    // stored at the sender side; cumTSNAck announced in a SACK
+    uint32_t nextTsn; // TSN to be sent
+    uint32_t lastTsnAck; // stored at the sender side; cumTSNAck announced in a SACK
     uint32_t highestTsnAcked;
-    uint32_t lastTsnReceived;    // SACK
-    uint32_t lastTsn;    // my very last TSN to be sent
-    uint32_t ackState;    // number of packets to be acknowledged
-    SctpGapList gapList;    // GapAck list for incoming DATA chunks
+    uint32_t lastTsnReceived; // SACK
+    uint32_t lastTsn; // my very last TSN to be sent
+    uint32_t ackState; // number of packets to be acknowledged
+    SctpGapList gapList; // GapAck list for incoming DATA chunks
     uint32_t packetsInTotalBurst;
     simtime_t lastTransmission;
-    uint64_t outstandingBytes;    // Number of bytes outstanding
-    uint64_t queuedSentBytes;    // Number of bytes in sender queue
-    uint64_t queuedDroppableBytes;    // Bytes in send queue droppable by PR-SCTP
-    uint64_t queuedReceivedBytes;    // Number of bytes in receiver queue
+    uint64_t outstandingBytes; // Number of bytes outstanding
+    uint64_t queuedSentBytes; // Number of bytes in sender queue
+    uint64_t queuedDroppableBytes; // Bytes in send queue droppable by PR-SCTP
+    uint64_t queuedReceivedBytes; // Number of bytes in receiver queue
     uint32_t lastStreamScheduled;
-    uint32_t assocPmtu;    // smallest overall path mtu
-    uint32_t fragPoint;    // maximum size of a fragment
-    uint32_t msgNum;    // indicates the sequence number of the message
+    uint32_t assocPmtu; // smallest overall path mtu
+    uint32_t fragPoint; // maximum size of a fragment
+    uint32_t msgNum; // indicates the sequence number of the message
     uint64_t bytesRcvd;
     uint32_t numRequests;
     uint32_t bytesToRetransmit;
@@ -637,7 +636,7 @@ class INET_API SctpStateVariables : public cObject
     uint32_t count;
     uint8_t localTieTag[32];
     uint8_t peerTieTag[32];
-    uint64_t queuedMessages;    // Messages buffered at the sender side
+    uint64_t queuedMessages; // Messages buffered at the sender side
     uint32_t messageAcceptLimit;
     uint32_t queueLimit;
     uint16_t header;
@@ -678,10 +677,10 @@ class INET_API SctpStateVariables : public cObject
     bool nrSack;
     uint32_t gapReportLimit;
     enum GLOVariant {
-        GLOV_None = 0,
+        GLOV_None       = 0,
         GLOV_Optimized1 = 1,
         GLOV_Optimized2 = 2,
-        GLOV_Shrunken = 3
+        GLOV_Shrunken   = 3
     };
     uint32_t gapListOptimizationVariant;
     bool smartOverfullSACKHandling;
@@ -692,13 +691,13 @@ class INET_API SctpStateVariables : public cObject
     // ====== Max Burst ===================================================
     uint32_t maxBurst;
     enum MBVariant {
-        MBV_UseItOrLoseIt = 0,
-        MBV_CongestionWindowLimiting = 1,
-        MBV_UseItOrLoseItTempCwnd = 2,
+        MBV_UseItOrLoseIt                    = 0,
+        MBV_CongestionWindowLimiting         = 1,
+        MBV_UseItOrLoseItTempCwnd            = 2,
         MBV_CongestionWindowLimitingTempCwnd = 3,
-        MBV_MaxBurst = 4,
-        MBV_AggressiveMaxBurst = 5,
-        MBV_TotalMaxBurst = 6
+        MBV_MaxBurst                         = 4,
+        MBV_AggressiveMaxBurst               = 5,
+        MBV_TotalMaxBurst                    = 6
     };
     MBVariant maxBurstVariant;
     uint32_t initialWindow;
@@ -708,75 +707,75 @@ class INET_API SctpStateVariables : public cObject
     const char *cmtRetransmissionVariant;
 
     enum CUCVariant {
-        CUCV_Normal = 0,
-        CUCV_PseudoCumAck = 1,
+        CUCV_Normal         = 0,
+        CUCV_PseudoCumAck   = 1,
         CUCV_PseudoCumAckV2 = 2
     };
-    CUCVariant cmtCUCVariant;    // Cwnd Update for CMT (CUC)
+    CUCVariant cmtCUCVariant; // Cwnd Update for CMT (CUC)
 
     enum BufferSplitVariant {
-        CBSV_None = 0,
-        CBSV_SenderOnly = 1,
+        CBSV_None         = 0,
+        CBSV_SenderOnly   = 1,
         CBSV_ReceiverOnly = 2,
-        CBSV_BothSides = 3
+        CBSV_BothSides    = 3
     };
-    BufferSplitVariant cmtBufferSplitVariant;    // Buffer Splitting for CMT
-    bool cmtBufferSplittingUsesOSB;    // Use outstanding instead of queued bytes for Buffer Splitting
+    BufferSplitVariant cmtBufferSplitVariant; // Buffer Splitting for CMT
+    bool cmtBufferSplittingUsesOSB; // Use outstanding instead of queued bytes for Buffer Splitting
 
     enum ChunkReschedulingVariant {
-        CCRV_None = 0,
-        CCRV_SenderOnly = 1,
+        CCRV_None         = 0,
+        CCRV_SenderOnly   = 1,
         CCRV_ReceiverOnly = 2,
-        CCRV_BothSides = 3,
-        CCRV_Test = 99    // Test only!
+        CCRV_BothSides    = 3,
+        CCRV_Test         = 99    // Test only!
     };
-    ChunkReschedulingVariant cmtChunkReschedulingVariant;    // Chunk Rescheduling
-    double cmtChunkReschedulingThreshold;    // Blocking Threshold for Chunk Rescheduling
+    ChunkReschedulingVariant cmtChunkReschedulingVariant; // Chunk Rescheduling
+    double cmtChunkReschedulingThreshold; // Blocking Threshold for Chunk Rescheduling
 
-    bool cmtSmartT3Reset;    // Smart T3 Reset for CMT
-    bool cmtSmartFastRTX;    // Smart Fast RTX for CMT
-    bool cmtSmartReneging;    // Smart Reneging for CMT
-    bool cmtSlowPathRTTUpdate;    // Slow Path RTT Update for CMT
-    bool cmtUseSFR;    // Split Fast Retransmission (SFR) for CMT
-    bool cmtUseDAC;    // Delayed Ack for CMT (DAC)
-    bool cmtUseFRC;    // Fast Recovery for CMT (FRC)
-    bool cmtMovedChunksReduceCwnd;    // Subtract moved chunk from cwnd of old path
+    bool cmtSmartT3Reset; // Smart T3 Reset for CMT
+    bool cmtSmartFastRTX; // Smart Fast RTX for CMT
+    bool cmtSmartReneging; // Smart Reneging for CMT
+    bool cmtSlowPathRTTUpdate; // Slow Path RTT Update for CMT
+    bool cmtUseSFR; // Split Fast Retransmission (SFR) for CMT
+    bool cmtUseDAC; // Delayed Ack for CMT (DAC)
+    bool cmtUseFRC; // Fast Recovery for CMT (FRC)
+    bool cmtMovedChunksReduceCwnd; // Subtract moved chunk from cwnd of old path
     double movedChunkFastRTXFactor;
     unsigned int blockingTsnsMoved;
-    bool strictCwndBooking;    // Strict overbooking handling
+    bool strictCwndBooking; // Strict overbooking handling
     enum CSackPath {
-        CSP_Standard = 0,
-        CSP_Primary = 1,
-        CSP_RoundRobin = 2,
+        CSP_Standard     = 0,
+        CSP_Primary      = 1,
+        CSP_RoundRobin   = 2,
         CSP_SmallestSRTT = 3
     };
-    CSackPath cmtSackPath;    // SACK path selection variant for CMT
+    CSackPath cmtSackPath; // SACK path selection variant for CMT
     // ====== High-Speed SCTP =============================================
-    bool highSpeedCC;    // HighSpeed CC (RFC 3649)
+    bool highSpeedCC; // HighSpeed CC (RFC 3649)
 
     // ====== CMT/RP-SCTP =================================================
     enum CCCVariant {
-        CCCV_Off = 0,    // Standard SCTP
-        CCCV_CMT = 1,    // CMT-SCTP
-        CCCV_CMTRPv1 = 2,    // CMT/RPv1-SCTP (old CMT/RP)
-        CCCV_CMTRPv2 = 3,    // CMT/RPv2-SCTP (new CMT/RP with bandwidth consideration)
-        CCCV_CMT_LIA = 4,    // LIA CC
-        CCCV_CMT_OLIA = 5,    // OLIA CC
+        CCCV_Off         = 0,    // Standard SCTP
+        CCCV_CMT         = 1,    // CMT-SCTP
+        CCCV_CMTRPv1     = 2,    // CMT/RPv1-SCTP (old CMT/RP)
+        CCCV_CMTRPv2     = 3,    // CMT/RPv2-SCTP (new CMT/RP with bandwidth consideration)
+        CCCV_CMT_LIA     = 4,    // LIA CC
+        CCCV_CMT_OLIA    = 5,    // OLIA CC
         CCCV_CMTRP_Test1 = 100,
         CCCV_CMTRP_Test2 = 101
     };
     CCCVariant cmtCCVariant;
-    bool rpPathBlocking;    // T.D. 10.08.2011: CMT/RP path blocking
-    bool rpScaleBlockingTimeout;    // T.D. 15.08.2011: Scale blocking timeout by number of paths
-    uint32_t rpMinCwnd;    // T.D. 15.08.2011: Minimum cwnd in MTUs
+    bool rpPathBlocking; // T.D. 10.08.2011: CMT/RP path blocking
+    bool rpScaleBlockingTimeout; // T.D. 15.08.2011: Scale blocking timeout by number of paths
+    uint32_t rpMinCwnd; // T.D. 15.08.2011: Minimum cwnd in MTUs
 
     // ====== SACK Sequence Number Checker ================================
-    bool checkSackSeqNumber;    // Ensure handling SACKs in original sequence
+    bool checkSackSeqNumber; // Ensure handling SACKs in original sequence
     uint32_t outgoingSackSeqNum;
     uint32_t incomingSackSeqNum;
 
     // ====== Partial Reliability SCTP ====================================
-    uint32_t asconfSn;    // own AddIP serial number
+    uint32_t asconfSn; // own AddIP serial number
     uint16_t numberAsconfReceived;
     uint32_t corrIdNum;
     bool asconfOutstanding;
@@ -796,7 +795,7 @@ class INET_API SctpStateVariables : public cObject
     uint32_t peerRequestSn;
     uint32_t inRequestSn;
     uint32_t peerTsnAfterReset;
-    uint32_t lastTsnBeforeReset;    // lastTsn announced in OutgoingStreamResetParameter
+    uint32_t lastTsnBeforeReset; // lastTsn announced in OutgoingStreamResetParameter
     SctpStreamResetChunk *resetChunk; // pointer to the resetChunk (for retransmission)
     SctpParameter *incomingRequest;
     std::list<uint16_t> resetOutStreams;
@@ -814,7 +813,7 @@ class INET_API SctpStateVariables : public cObject
     bool findPeerRequestNum(uint32_t num);
     bool findPeerStreamToReset(uint16_t sn);
     bool findMatch(uint16_t sn);
-    RequestData* findTypeInRequests(uint16_t type);
+    RequestData *findTypeInRequests(uint16_t type);
     uint16_t getNumRequestsNotPerformed();
 
     // ====== SCTP Authentication =========================================
@@ -836,16 +835,16 @@ class INET_API SctpStateVariables : public cObject
     bool peerPktDrop;
     uint32_t advancedPeerAckPoint;
     uint32_t prMethod;
-    bool peerAllowsChunks;    // Flowcontrol: indicates whether the peer adjusts the window according to a number of messages
+    bool peerAllowsChunks; // Flowcontrol: indicates whether the peer adjusts the window according to a number of messages
     uint32_t initialPeerMsgRwnd;
     uint32_t localMsgRwnd;
-    uint32_t peerMsgRwnd;    // Flowcontrol: corresponds to peerRwnd
-    uint32_t bufferedMessages;    // Messages buffered at the receiver side
-    uint32_t outstandingMessages;    // Outstanding messages on the sender side; used for flowControl; including retransmitted messages
+    uint32_t peerMsgRwnd; // Flowcontrol: corresponds to peerRwnd
+    uint32_t bufferedMessages; // Messages buffered at the receiver side
+    uint32_t outstandingMessages; // Outstanding messages on the sender side; used for flowControl; including retransmitted messages
     uint32_t bytesToAddPerRcvdChunk;
     uint32_t bytesToAddPerPeerChunk;
     bool tellArwnd;
-    bool swsMsgInvoked;    // Flowcontrol: corresponds to swsAvoidanceInvoked
+    bool swsMsgInvoked; // Flowcontrol: corresponds to swsAvoidanceInvoked
     simtime_t lastThroughputTime;
     std::map<uint16_t, uint32_t> streamThroughput;
     simtime_t lastAssocThroughputTime;
@@ -872,8 +871,7 @@ class INET_API SctpAssociation : public cObject
     // map for storing the queued bytes per path
     typedef std::map<L3Address, uint32_t> CounterMap;
 
-    struct QueueCounter
-    {
+    struct QueueCounter {
         uint64_t roomSumSendStreams;
         uint64_t bookedSumSendStreams;
         uint64_t roomSumRcvStreams;
@@ -882,15 +880,13 @@ class INET_API SctpAssociation : public cObject
         CounterMap roomRetransQ;
     };
 
-    struct BytesToBeSent
-    {
+    struct BytesToBeSent {
         bool chunk;
         bool packet;
         uint32_t bytesToSend;
     };
 
-    struct CCFunctions
-    {
+    struct CCFunctions {
         void (SctpAssociation::*ccInitParams)(SctpPathVariables *path);
         void (SctpAssociation::*ccUpdateBeforeSack)();
         void (SctpAssociation::*ccUpdateAfterSack)();
@@ -902,24 +898,24 @@ class INET_API SctpAssociation : public cObject
 
     typedef std::map<uint32_t, SctpSendStream *> SctpSendStreamMap;
     typedef std::map<uint32_t, SctpReceiveStream *> SctpReceiveStreamMap;
-    typedef std::map<uint32_t,SctpPathVariables*> SctpPathCollection;
+    typedef std::map<uint32_t, SctpPathVariables *> SctpPathCollection;
     SctpPathCollection assocBestPaths;
     SctpPathCollection assocMaxWndPaths;
     SctpPathCollection assocCollectedPaths;
 
   public:
     // connection identification by apps: appgateIndex+assocId
-    int32_t appGateIndex;    // Application gate index
-    int32_t assocId;    // Identifies connection within the app
+    int32_t appGateIndex; // Application gate index
+    int32_t assocId; // Identifies connection within the app
     int32_t listeningAssocId;
     int32_t fd;
     bool listening;
-    L3Address remoteAddr;    // Remote address from last message
-    L3Address localAddr;    // Local address from last message
-    uint16_t localPort;    // Remote port from last message
-    uint16_t remotePort;    // Local port from last message
-    uint32_t localVTag;    // Local verification tag
-    uint32_t peerVTag;    // Remote verification tag
+    L3Address remoteAddr; // Remote address from last message
+    L3Address localAddr; // Local address from last message
+    uint16_t localPort; // Remote port from last message
+    uint16_t remotePort; // Local port from last message
+    uint32_t localVTag; // Local verification tag
+    uint32_t peerVTag; // Remote verification tag
 
     // Timers
     cMessage *T1_InitTimer;
@@ -965,8 +961,8 @@ class INET_API SctpAssociation : public cObject
     // Variables associated with the state of this association
     SctpStateVariables *state;
     BytesToBeSent bytes;
-    Sctp *sctpMain;    // SCTP module
-    cFSM *fsm;    // SCTP state machine
+    Sctp *sctpMain; // SCTP module
+    cFSM *fsm; // SCTP state machine
     SctpPathMap sctpPathMap;
     QueueCounter qCounter;
     SctpQueue *transmissionQ;
@@ -983,19 +979,19 @@ class INET_API SctpAssociation : public cObject
     cOutVector *statisticsTotalCwnd;
     cOutVector *statisticsTotalBandwidth;
     // ------ Received SACK Statistics ------------------------------------
-    cOutVector *statisticsRevokableGapBlocksInLastSACK;    // Revokable GapAck blocks in last received SACK
-    cOutVector *statisticsNonRevokableGapBlocksInLastSACK;    // Non-Revokable GapAck blocks in last received SACK
+    cOutVector *statisticsRevokableGapBlocksInLastSACK; // Revokable GapAck blocks in last received SACK
+    cOutVector *statisticsNonRevokableGapBlocksInLastSACK; // Non-Revokable GapAck blocks in last received SACK
     cOutVector *statisticsArwndInLastSACK;
     cOutVector *statisticsPeerRwnd;
     // ------ Sent SACK Statistics ----------------------------------------
-    cOutVector *statisticsNumTotalGapBlocksStored;    // Number of GapAck blocks stored (NOTE: R + NR!)
-    cOutVector *statisticsNumRevokableGapBlocksStored;    // Number of Revokable GapAck blocks stored
-    cOutVector *statisticsNumNonRevokableGapBlocksStored;    // Number of Non-Revokable GapAck blocks stored
-    cOutVector *statisticsNumDuplicatesStored;    // Number of duplicate TSNs stored
-    cOutVector *statisticsNumRevokableGapBlocksSent;    // Number of Revokable GapAck blocks sent in last SACK
-    cOutVector *statisticsNumNonRevokableGapBlocksSent;    // Number of Non-Revokable GapAck blocks sent in last SACK
-    cOutVector *statisticsNumDuplicatesSent;    // Number of duplicate TSNs sent in last SACK
-    cOutVector *statisticsSACKLengthSent;    // Length of last sent SACK
+    cOutVector *statisticsNumTotalGapBlocksStored; // Number of GapAck blocks stored (NOTE: R + NR!)
+    cOutVector *statisticsNumRevokableGapBlocksStored; // Number of Revokable GapAck blocks stored
+    cOutVector *statisticsNumNonRevokableGapBlocksStored; // Number of Non-Revokable GapAck blocks stored
+    cOutVector *statisticsNumDuplicatesStored; // Number of duplicate TSNs stored
+    cOutVector *statisticsNumRevokableGapBlocksSent; // Number of Revokable GapAck blocks sent in last SACK
+    cOutVector *statisticsNumNonRevokableGapBlocksSent; // Number of Non-Revokable GapAck blocks sent in last SACK
+    cOutVector *statisticsNumDuplicatesSent; // Number of duplicate TSNs sent in last SACK
+    cOutVector *statisticsSACKLengthSent; // Length of last sent SACK
 
   public:
     /**
@@ -1046,8 +1042,8 @@ class INET_API SctpAssociation : public cObject
      * of false means that the connection structure must be deleted by the
      * caller (SCTP).
      */
-   // bool processSctpMessage(const Ptr<const SctpHeader>& sctpmsg, const L3Address& srcAddr, const L3Address& destAddr);
-   bool processSctpMessage(SctpHeader *sctpmsg, const L3Address& srcAddr, const L3Address& destAddr);
+//    bool processSctpMessage(const Ptr<const SctpHeader>& sctpmsg, const L3Address& srcAddr, const L3Address& destAddr);
+    bool processSctpMessage(SctpHeader *sctpmsg, const L3Address& srcAddr, const L3Address& destAddr);
     /**
      * Process commands from the application.
      * Normally returns true. A return value of false means that the
@@ -1074,21 +1070,27 @@ class INET_API SctpAssociation : public cObject
      * Compare TSNs
      */
     /* Defines see RFC1982 for details */
-    static bool SCTP_UINT16_GT(uint16_t a, uint16_t b) { return (((a < b) && ((uint16_t)(b - a) > (1U<<15))) || \
-                                  ((a > b) && ((uint16_t)(a - b) < (1U<<15)))); }
-    static bool SCTP_UINT16_GE(uint16_t a, uint16_t b) { return (a == b ) || SCTP_UINT16_GT(a, b); }
-    static bool SCTP_UINT32_GT(uint32_t a, uint32_t b) { return ((a < b) && ((uint32_t)(b - a) > (1UL<<31))) ||
-                                  ((a > b) && ((uint32_t)(a - b) < (1UL<<31))); }
+    static bool SCTP_UINT16_GT(uint16_t a, uint16_t b) {
+        return ((a < b) && ((uint16_t)(b - a) > (1U << 15))) || \
+               ((a > b) && ((uint16_t)(a - b) < (1U << 15)));
+    }
+
+    static bool SCTP_UINT16_GE(uint16_t a, uint16_t b) { return (a == b) || SCTP_UINT16_GT(a, b); }
+    static bool SCTP_UINT32_GT(uint32_t a, uint32_t b) {
+        return ((a < b) && ((uint32_t)(b - a) > (1UL << 31))) ||
+               ((a > b) && ((uint32_t)(a - b) < (1UL << 31)));
+    }
+
     static bool SCTP_UINT32_GE(uint32_t a, uint32_t b) { return SCTP_UINT32_GT(a, b) || (a == b); }
-    #define SCTP_TSN_GT(a, b) SCTP_UINT32_GT(a, b)
-    #define SCTP_TSN_GE(a, b) SCTP_UINT32_GE(a, b)
-    #define SCTP_SSN_GT(a, b) SCTP_UINT16_GT(a, b)
-    #define SCTP_SSN_GE(a, b) SCTP_UINT16_GE(a, b)
+    #define SCTP_TSN_GT(a, b)    SCTP_UINT32_GT(a, b)
+    #define SCTP_TSN_GE(a, b)    SCTP_UINT32_GE(a, b)
+    #define SCTP_SSN_GT(a, b)    SCTP_UINT16_GT(a, b)
+    #define SCTP_SSN_GE(a, b)    SCTP_UINT16_GE(a, b)
     static bool tsnGe(const uint32_t tsn1, const uint32_t tsn2) { return SCTP_TSN_GE(tsn1, tsn2); }
     static bool tsnGt(const uint32_t tsn1, const uint32_t tsn2) { return SCTP_TSN_GT(tsn1, tsn2); }
     static bool tsnLe(const uint32_t tsn1, const uint32_t tsn2) { return SCTP_TSN_GE(tsn2, tsn1); }
     static bool tsnLt(const uint32_t tsn1, const uint32_t tsn2) { return SCTP_TSN_GT(tsn2, tsn1); }
-    static bool tsnBetween(const uint32_t tsn1, const uint32_t midtsn, const uint32_t tsn2) { return (SCTP_TSN_GE(midtsn, tsn1) && SCTP_TSN_GE(tsn2, midtsn)); }
+    static bool tsnBetween(const uint32_t tsn1, const uint32_t midtsn, const uint32_t tsn2) { return SCTP_TSN_GE(midtsn, tsn1) && SCTP_TSN_GE(tsn2, midtsn); }
     static bool ssnGt(const uint16_t ssn1, const uint16_t ssn2) { return SCTP_SSN_GT(ssn1, ssn2); }
     static bool midGt(const uint32_t mid1, const uint32_t mid2) { return SCTP_TSN_GT(mid1, mid2); }
 
@@ -1116,8 +1118,8 @@ class INET_API SctpAssociation : public cObject
 
     /** @name Processing Sctp message arrivals. Invoked from processSctpHeader(). */
     //@{
-   // bool process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg, const L3Address& src, const L3Address& dest);
-   bool process_RCV_Message(SctpHeader *sctpmsg, const L3Address& src, const L3Address& dest);
+//    bool process_RCV_Message(const Ptr<const SctpHeader>& sctpmsg, const L3Address& src, const L3Address& dest);
+    bool process_RCV_Message(SctpHeader *sctpmsg, const L3Address& src, const L3Address& dest);
     /**
      * Process incoming SCTP packets. Invoked from process_RCV_Message
      */
@@ -1264,14 +1266,14 @@ class INET_API SctpAssociation : public cObject
 
     SctpForwardTsnChunk *createForwardTsnChunk(const L3Address& pid);
 
-    bool msgMustBeAbandoned(SctpDataMsg *msg, int32_t stream, bool ordered);    //PR-SCTP
+    bool msgMustBeAbandoned(SctpDataMsg *msg, int32_t stream, bool ordered); // PR-SCTP
     bool chunkMustBeAbandoned(SctpDataVariables *chunk,
             SctpPathVariables *sackPath);
     void advancePeerTsn();
 
     void cucProcessGapReports(const SctpDataVariables *chunk,
             SctpPathVariables *path,
-            const bool isAcked);    // CMT-SCTP
+            const bool isAcked); // CMT-SCTP
     /**
      * Manipulating chunks
      */
@@ -1297,8 +1299,7 @@ class INET_API SctpAssociation : public cObject
     int32_t pathStreamSchedulerManual(SctpPathVariables *path, bool peek);
     int32_t pathStreamSchedulerMapToPath(SctpPathVariables *path, bool peek);
 
-    struct SSFunctions
-    {
+    struct SSFunctions {
         void (SctpAssociation::*ssInitStreams)(uint32_t inStreams, uint32_t outStreams);
         void (SctpAssociation::*ssAddInStreams)(uint32_t inStreams);
         void (SctpAssociation::*ssAddOutStreams)(uint32_t outStreams);
@@ -1493,7 +1494,7 @@ class INET_API SctpAssociation : public cObject
      * ackedBytes: ackednowlged bytes
      * path: path variable (for further investigation, debug, etc)
      */
-    uint32_t updateOLIA(uint32_t w, uint32_t s, uint32_t totalW, double a, uint32_t mtu, uint32_t ackedBytes, SctpPathVariables* path);
+    uint32_t updateOLIA(uint32_t w, uint32_t s, uint32_t totalW, double a, uint32_t mtu, uint32_t ackedBytes, SctpPathVariables *path);
 
     bool addAuthChunkIfNecessary(Ptr<SctpHeader> sctpMsg, uint16_t chunkType, bool authAdded)
     {

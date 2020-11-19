@@ -113,11 +113,11 @@ void AckHandler::dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgm
 std::string AckHandler::getStatusString(Status status)
 {
     switch (status) {
-        case Status::FRAME_NOT_YET_TRANSMITTED : return "FRAME_NOT_YET_TRANSMITTED";
-        case Status::NO_ACK_REQUIRED : return "NO_ACK_REQUIRED";
-        case Status::WAITING_FOR_ACK : return "WAITING_FOR_NORMAL_ACK";
-        case Status::ACK_NOT_ARRIVED : return "NORMAL_ACK_NOT_ARRIVED";
-        case Status::ACK_ARRIVED  : return "NORMAL_ACK_ARRIVED";
+        case Status::FRAME_NOT_YET_TRANSMITTED: return "FRAME_NOT_YET_TRANSMITTED";
+        case Status::NO_ACK_REQUIRED: return "NO_ACK_REQUIRED";
+        case Status::WAITING_FOR_ACK: return "WAITING_FOR_NORMAL_ACK";
+        case Status::ACK_NOT_ARRIVED: return "NORMAL_ACK_NOT_ARRIVED";
+        case Status::ACK_ARRIVED: return "NORMAL_ACK_ARRIVED";
         default: throw cRuntimeError("Unknown status");
     }
 }
@@ -133,3 +133,4 @@ void AckHandler::printAckStatuses()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

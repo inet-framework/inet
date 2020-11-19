@@ -30,7 +30,7 @@ Define_Module(Ieee8021aeTagEpdHeaderChecker);
 
 void Ieee8021aeTagEpdHeaderChecker::processPacket(Packet *packet)
 {
-    // TODO: this code is incomplete
+    // TODO this code is incomplete
     const auto& header = packet->popAtFront<Ieee8021aeTagEpdHeader>();
     auto typeOrLength = header->getTypeOrLength();
     const Protocol *protocol;

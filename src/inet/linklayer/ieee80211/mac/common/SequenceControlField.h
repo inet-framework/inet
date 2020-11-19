@@ -30,17 +30,17 @@ namespace ieee80211 {
  */
 class INET_API SequenceControlField
 {
-    private:
-        SequenceNumber sequenceNumber;
-        FragmentNumber fragmentNumber;
+  private:
+    SequenceNumber sequenceNumber;
+    FragmentNumber fragmentNumber;
 
-    public:
-        SequenceControlField(SequenceNumber sequenceNumber, FragmentNumber fragmentNumber);
-        SequenceControlField(const Ptr<const Ieee80211DataOrMgmtHeader>& header);
+  public:
+    SequenceControlField(SequenceNumber sequenceNumber, FragmentNumber fragmentNumber);
+    SequenceControlField(const Ptr<const Ieee80211DataOrMgmtHeader>& header);
 
-        SequenceNumber getSequenceNumber() const { return sequenceNumber; }
-        FragmentNumber getFragmentNumber() const { return fragmentNumber; }
-        bool operator <(const SequenceControlField& other) const;
+    SequenceNumber getSequenceNumber() const { return sequenceNumber; }
+    FragmentNumber getFragmentNumber() const { return fragmentNumber; }
+    bool operator<(const SequenceControlField& other) const;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const SequenceControlField& field) { return os << field.getSequenceNumber() << ":" << (int)field.getFragmentNumber(); }

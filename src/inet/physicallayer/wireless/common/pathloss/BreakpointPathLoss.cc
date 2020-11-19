@@ -1,4 +1,3 @@
-
 #include "inet/physicallayer/wireless/common/pathloss/BreakpointPathLoss.h"
 
 namespace inet {
@@ -58,20 +57,21 @@ m BreakpointPathLoss::computeRange(mps propagationSpeed, Hz frequency, double lo
     // the result should be the same for the second case including l02 and alpha2
     double breakpointPathLoss = 1 / (l01 * pow(breakpointDistance.get(), alpha1));
 
-    if(loss < breakpointPathLoss) {
+    if (loss < breakpointPathLoss) {
         // the allowed loss factor is smaller than the one faced at the breakpoint distance
         // -> range is higher than breakpointDistance
         // loss = 1 / (l02 * (d / d0)^alpha2)
         // (d / d0)^alpha2 = 1 / (loss * l02)
         // (d / d0) = 1 / ((loss * l02)^(1/alpha2))
         // d = d0 / ((loss * l02)^(1/alpha2))
-        return breakpointDistance / (pow(loss * l02, 1/alpha2));
+        return breakpointDistance / (pow(loss * l02, 1 / alpha2));
     }
     else {
-        return m(1) / (pow(loss * l01, 1/alpha1));
+        return m(1) / (pow(loss * l01, 1 / alpha1));
     }
 }
 
 } // namespace physicallayer
 
 } // namespace inet
+

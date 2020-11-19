@@ -33,15 +33,15 @@ namespace eigrp {
 /**
  * Interface for DUAL automaton.
  */
-template <typename IPAddress>
+template<typename IPAddress>
 class IEigrpPdm
 {
   public:
-    static const int UNSPEC_RECEIVER = 0;  /**< Unspecified address of receiver - all neighbors */
-    static const int STUB_RECEIVER = -1;  /**< All stub neighbors */
+    static const int UNSPEC_RECEIVER = 0; /**< Unspecified address of receiver - all neighbors */
+    static const int STUB_RECEIVER = -1; /**< All stub neighbors */
 
     static const int CONNECTED_ROUTE = 0;
-    static const int UNSPEC_SENDER = 0;  /**< Unspecified address of sender - input event source */
+    static const int UNSPEC_SENDER = 0; /**< Unspecified address of sender - input event source */
     static const bool RT_UNREACHABLE = true;
 
     /**
@@ -87,7 +87,7 @@ class IEigrpPdm
      * Determine whether there are Feasibles Successors for specified route.
      * @param resultDmin return parameter with minimal distance to the destination.
      */
-    virtual bool hasFeasibleSuccessor(EigrpRoute<IPAddress> *route, uint64_t &resultDmin) = 0;
+    virtual bool hasFeasibleSuccessor(EigrpRoute<IPAddress> *route, uint64_t& resultDmin) = 0;
     /**
      * Sets Reply Status Table for specified network.
      * @param route route network
@@ -113,8 +113,9 @@ class IEigrpPdm
     /**
      * Sends update message to all stub neighbors.
      */
-    virtual void sendUpdateToStubs(EigrpRouteSource<IPAddress> *succ ,EigrpRouteSource<IPAddress> *oldSucc, EigrpRoute<IPAddress> *route) = 0;
+    virtual void sendUpdateToStubs(EigrpRouteSource<IPAddress> *succ, EigrpRouteSource<IPAddress> *oldSucc, EigrpRoute<IPAddress> *route) = 0;
 };
-} //eigrp
-} //inet
+} // eigrp
+} // inet
 #endif /* IEIGRPPDM_H_ */
+

@@ -60,7 +60,7 @@ class INET_API NoiseSource : public cSimpleModule, public virtual IRadio
     virtual ReceptionState getReceptionState() const override { return RECEPTION_STATE_UNDEFINED; }
     virtual TransmissionState getTransmissionState() const override { return TRANSMISSION_STATE_TRANSMITTING; }
 
-    virtual int getId() const override { return id; } // TODO:
+    virtual int getId() const override { return id; } // TODO
 
     virtual const IAntenna *getAntenna() const override { return antenna; }
     virtual const ITransmitter *getTransmitter() const override { return transmitter; }

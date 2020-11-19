@@ -25,7 +25,7 @@
 
 namespace inet {
 
-//Forward declarations:
+// Forward declarations:
 class TcpSocket;
 
 namespace bgp {
@@ -55,7 +55,7 @@ static const int BGP_TCP_KEEP_ALIVE_RCV = 75;
 
 static const int BGP_RETRY_TIME = 120;
 static const int BGP_HOLD_TIME = 180;
-static const int BGP_KEEP_ALIVE = 60;    // 1/3 of BGP_HOLD_TIME
+static const int BGP_KEEP_ALIVE = 60; // 1/3 of BGP_HOLD_TIME
 static const int NB_SEC_START_EGP_SESSION = 1;
 
 typedef Ipv4Address RouterId;

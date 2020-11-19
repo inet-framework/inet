@@ -164,7 +164,7 @@ void ExtLowerUdp::handleMessage(cMessage *message)
 
 bool ExtLowerUdp::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
-    // TODO:
+    // TODO
     return true;
 }
 
@@ -191,7 +191,7 @@ ExtLowerUdp::Socket *ExtLowerUdp::open(int socketId)
     // Setting this option makes it possible to kill the simulations
     // and restart them right away using the same port numbers.
     int enable = 1;
-    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (const char*)&enable, sizeof(int)) < 0)
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&enable, sizeof(int)) < 0)
         throw cRuntimeError("ExtLowerUdp: cannot set socket option");
 
     socket->fd = fd;
@@ -214,7 +214,7 @@ void ExtLowerUdp::bind(int socketId, const L3Address& localAddress, int localPor
     sockaddr.sin_port = htons(localPort);
     sockaddr.sin_addr.s_addr = htonl(localAddress.toIpv4().getInt());
 #if !defined(linux) && !defined(__linux) && !defined(_WIN32)
-        sockaddr.sin_len = sizeof(struct sockaddr_in);
+    sockaddr.sin_len = sizeof(struct sockaddr_in);
 #endif
     int n = ::bind(socket->fd, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
     if (n < 0)
@@ -303,7 +303,7 @@ void ExtLowerUdp::processPacketFromLower(int fd)
         struct sockaddr_in sockaddr;
         socklen_t socklen = sizeof(sockaddr);
         // type of buffer in recvfrom(): win: char *, linux: void *
-        int n = ::recvfrom(fd, (char *)buffer, sizeof(buffer), 0, (struct sockaddr*)&sockaddr, &socklen);
+        int n = ::recvfrom(fd, (char *)buffer, sizeof(buffer), 0, (struct sockaddr *)&sockaddr, &socklen);
         if (n < 0)
             throw cRuntimeError("Calling recv failed: %d", n);
         auto data = makeShared<BytesChunk>(static_cast<const uint8_t *>(buffer), n);

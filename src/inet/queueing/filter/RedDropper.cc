@@ -73,7 +73,7 @@ RedDropper::RedResult RedDropper::doRandomEarlyDetection(const Packet *packet)
         avg = pow(1 - wq, m) * avg;
     }
 
-    if (queueLength >= packetCapacity) {   // maxth is also the "hard" limit
+    if (queueLength >= packetCapacity) { // maxth is also the "hard" limit
         EV_DEBUG << "Queue length >= capacity" << EV_FIELD(queueLength) << EV_FIELD(packetCapacity) << EV_ENDL;
         count = 0;
         return QUEUE_FULL;

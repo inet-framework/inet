@@ -23,7 +23,7 @@
 
 namespace inet {
 
-template <typename T>
+template<typename T>
 void increaseTimeTag(const Ptr<Chunk>& chunk, simtime_t duration)
 {
     chunk->mapAllTagsForUpdate<T>(b(0), chunk->getChunkLength(), [&] (b offset, b length, T *timeTag) {
@@ -32,7 +32,7 @@ void increaseTimeTag(const Ptr<Chunk>& chunk, simtime_t duration)
     });
 }
 
-template <typename T>
+template<typename T>
 void increaseTimeTag(Packet *packet, simtime_t duration)
 {
     packet->mapAllRegionTagsForUpdate<T>(b(0), packet->getTotalLength(), [&] (b offset, b length, const Ptr<T>& timeTag) {

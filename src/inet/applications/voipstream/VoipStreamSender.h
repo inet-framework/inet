@@ -68,10 +68,9 @@ class INET_API VoipStreamSender : public cSimpleModule, public LifecycleUnsuppor
     virtual void readFrame();
 
   protected:
-    class Buffer
-    {
+    class Buffer {
       public:
-        enum { BUFSIZE = 48000*2*2 };   // 1 second of two channel 48kHz 16bit audio
+        enum { BUFSIZE = 48000 * 2 * 2 }; // 1 second of two channel 48kHz 16bit audio
 
       protected:
         char *samples;
@@ -100,32 +99,32 @@ class INET_API VoipStreamSender : public cSimpleModule, public LifecycleUnsuppor
     L3Address destAddress;
 
     int voipHeaderSize = 0;
-    int voipSilenceThreshold = 0;    // the maximum amplitude of a silence packet
-    int voipSilencePacketSize = 0;    // size of a silence packet
-    int sampleRate = 0;    // samples/sec [Hz]
+    int voipSilenceThreshold = 0; // the maximum amplitude of a silence packet
+    int voipSilencePacketSize = 0; // size of a silence packet
+    int sampleRate = 0; // samples/sec [Hz]
     const char *codec = nullptr;
     int compressedBitRate = 0;
     simtime_t packetTimeLength;
-    const char *soundFile = nullptr;    // input audio file name
+    const char *soundFile = nullptr; // input audio file name
     int repeatCount = 0;
 
-    const char *traceFileName = nullptr;    // name of the output trace file, nullptr or empty to turn off recording
+    const char *traceFileName = nullptr; // name of the output trace file, nullptr or empty to turn off recording
     AudioOutFile outFile;
 
     // AVCodec parameters
     AVFormatContext *pFormatCtx = nullptr;
     AVCodecContext *pCodecCtx = nullptr;
-    AVCodec *pCodec = nullptr;    // input decoder codec
+    AVCodec *pCodec = nullptr; // input decoder codec
     AVAudioResampleContext *pReSampleCtx = nullptr;
     AVCodecContext *pEncoderCtx = nullptr;
-    AVCodec *pCodecEncoder = nullptr;    // output encoder codec
+    AVCodec *pCodecEncoder = nullptr; // output encoder codec
 
     // state variables
     UdpSocket socket;
     int streamIndex = -1;
-    uint32_t pktID = 0;    // increasing packet sequence number
+    uint32_t pktID = 0; // increasing packet sequence number
     int samplesPerPacket = 0;
-    AVPacket packet {};  // {}: zero-initialize so that av_free_packet() doesn't crash if initialization doesn't go through
+    AVPacket packet {}; // {}: zero-initialize so that av_free_packet() doesn't crash if initialization doesn't go through
     Buffer sampleBuffer;
 
     cMessage *timer = nullptr;

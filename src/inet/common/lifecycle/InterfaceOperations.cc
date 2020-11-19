@@ -38,7 +38,7 @@ void InterfaceOperationBase::initialize(cModule *module, StringMap& params)
     if (!ift)
         throw cRuntimeError("Interface table of network node '%s' not found, required for operation %s", module->getFullPath().c_str(), getClassName());
     std::string interfaceName = params["interfacename"];
-    params.erase("interfacename");  //TODO implement "towards=..."
+    params.erase("interfacename"); // TODO implement "towards=..."
     if (interfaceName.empty())
         throw cRuntimeError("interfacename attribute missing, required for operation %s", getClassName());
     NetworkInterface *ie = ift->findInterfaceByName(interfaceName.c_str());
@@ -47,3 +47,4 @@ void InterfaceOperationBase::initialize(cModule *module, StringMap& params)
 }
 
 } // namespace inet
+

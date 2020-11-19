@@ -29,8 +29,8 @@ Register_Serializer(RtcpSenderReportPacket, RtcpPacketSerializer);
 
 namespace {
 
-void serializeReceptionReport(MemoryOutputStream& stream, const ReceptionReport* receptionReport) {
-    if(receptionReport != nullptr) {
+void serializeReceptionReport(MemoryOutputStream& stream, const ReceptionReport *receptionReport) {
+    if (receptionReport != nullptr) {
         stream.writeUint32Be(receptionReport->getSsrc());
         stream.writeByte(receptionReport->getFractionLost());
         stream.writeUint24Be(receptionReport->getPacketsLostCumulative());
@@ -53,16 +53,16 @@ void deserializeReceptionReport(MemoryInputStream& stream, ReceptionReport& rece
     receptionReport.setDelaySinceLastSR(stream.readUint32Be());
 }
 
-void serializeSdesChunk(MemoryOutputStream& stream, const SdesChunk* sdesChunk) {
+void serializeSdesChunk(MemoryOutputStream& stream, const SdesChunk *sdesChunk) {
     stream.writeUint32Be(sdesChunk->getSsrc());
     uint64_t numBytes = 4;
-    for(int e = 0; e < sdesChunk->size(); ++e) {
-        const SdesItem* sdesItem = static_cast<const SdesItem*>(sdesChunk->get(e));
+    for (int e = 0; e < sdesChunk->size(); ++e) {
+        const SdesItem *sdesItem = static_cast<const SdesItem *>(sdesChunk->get(e));
         if (sdesItem != nullptr) {
             stream.writeByte(sdesItem->getType());
             uint8_t length = sdesItem->getLengthField();
             stream.writeByte(length);
-            stream.writeBytes((uint8_t*)sdesItem->getContent(), B(length));
+            stream.writeBytes((uint8_t *)sdesItem->getContent(), B(length));
             numBytes += 2 + length;
         }
         else
@@ -82,9 +82,9 @@ void deserializeSdesChunk(MemoryInputStream& stream, const Ptr<RtcpPacket> rtcpP
     uint64_t numBytes = 1;
     while (type != 0) {
         uint8_t count = stream.readByte();
-        char* content = new char[count];
-        stream.readBytes((uint8_t*)content, B(count));
-        SdesItem* sdesItem = new SdesItem(static_cast<SdesItem::SdesItemType>(type), content);
+        char *content = new char[count];
+        stream.readBytes((uint8_t *)content, B(count));
+        SdesItem *sdesItem = new SdesItem(static_cast<SdesItem::SdesItemType>(type), content);
         sdesChunk.addSDESItem(sdesItem);
         type = stream.readByte();
         numBytes += 2 + count;
@@ -94,7 +94,7 @@ void deserializeSdesChunk(MemoryInputStream& stream, const Ptr<RtcpPacket> rtcpP
             rtcpPacket->markIncorrect();
 }
 
-}
+} // namespace
 
 void RtcpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
@@ -106,7 +106,7 @@ void RtcpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     stream.writeNBitsOfUint64Be(count, 5);
     stream.writeByte(rtcpPacket->getPacketType());
     stream.writeUint16Be(rtcpPacket->getRtcpLength());
-    switch(rtcpPacket->getPacketType()){
+    switch (rtcpPacket->getPacketType()) {
         case RTCP_PT_SR: {
             const auto& rtcpSenderReportPacket = staticPtrCast<const RtcpSenderReportPacket>(chunk);
             stream.writeUint32Be(rtcpSenderReportPacket->getSsrc());
@@ -116,8 +116,8 @@ void RtcpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             stream.writeUint32Be(senderReport.getPacketCount());
             stream.writeUint32Be(senderReport.getByteCount());
             ASSERT(count == rtcpSenderReportPacket->getReceptionReports().size());
-            for(short i = 0; i < count; ++i) {
-                serializeReceptionReport(stream, static_cast<const ReceptionReport*>(rtcpSenderReportPacket->getReceptionReports()[i]));
+            for (short i = 0; i < count; ++i) {
+                serializeReceptionReport(stream, static_cast<const ReceptionReport *>(rtcpSenderReportPacket->getReceptionReports()[i]));
             }
             ASSERT(rtcpSenderReportPacket->getChunkLength() == B(4) + B(24) + B(count * 24));
             break;
@@ -125,16 +125,16 @@ void RtcpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
         case RTCP_PT_RR: {
             const auto& rtcpReceiverReportPacket = staticPtrCast<const RtcpReceiverReportPacket>(chunk);
             stream.writeUint32Be(rtcpReceiverReportPacket->getSsrc());
-            for(short i = 0; i < count; ++i) {
-                serializeReceptionReport(stream, static_cast<const ReceptionReport*>(rtcpReceiverReportPacket->getReceptionReports()[i]));
+            for (short i = 0; i < count; ++i) {
+                serializeReceptionReport(stream, static_cast<const ReceptionReport *>(rtcpReceiverReportPacket->getReceptionReports()[i]));
             }
             ASSERT(rtcpReceiverReportPacket->getChunkLength() == B(4) + B(4) + B(count * 24));
             break;
         }
         case RTCP_PT_SDES: {
             const auto& rtcpSdesPacket = staticPtrCast<const RtcpSdesPacket>(chunk);
-            for(short i = 0; i < count; ++i) {
-                serializeSdesChunk(stream, static_cast<const SdesChunk*>(rtcpSdesPacket->getSdesChunks()[i]));
+            for (short i = 0; i < count; ++i) {
+                serializeSdesChunk(stream, static_cast<const SdesChunk *>(rtcpSdesPacket->getSdesChunks()[i]));
             }
             ASSERT(rtcpSdesPacket->getChunkLength() == (stream.getLength() - start_position));
             break;
@@ -162,7 +162,7 @@ const Ptr<Chunk> RtcpPacketSerializer::deserialize(MemoryInputStream& stream) co
     rtcpPacket->setCount(count);
     rtcpPacket->setPacketType((RtcpPacketType)stream.readByte());
     rtcpPacket->setRtcpLength(stream.readUint16Be());
-    switch(rtcpPacket->getPacketType()){
+    switch (rtcpPacket->getPacketType()) {
         case RTCP_PT_SR: {
             auto rtcpSenderReportPacket = makeShared<RtcpSenderReportPacket>();
             rtcpSenderReportPacket->setVersion(rtcpPacket->getVersion());
@@ -176,8 +176,8 @@ const Ptr<Chunk> RtcpPacketSerializer::deserialize(MemoryInputStream& stream) co
             senderReport.setRTPTimeStamp(stream.readUint32Be());
             senderReport.setPacketCount(stream.readUint32Be());
             senderReport.setByteCount(stream.readUint32Be());
-            for(short i = 0; i < count; ++i) {
-                ReceptionReport* receptionReport = new ReceptionReport();
+            for (short i = 0; i < count; ++i) {
+                ReceptionReport *receptionReport = new ReceptionReport();
                 deserializeReceptionReport(stream, *receptionReport);
                 rtcpSenderReportPacket->addReceptionReport(receptionReport);
             }
@@ -191,8 +191,8 @@ const Ptr<Chunk> RtcpPacketSerializer::deserialize(MemoryInputStream& stream) co
             rtcpReceiverReportPacket->setPacketType(rtcpPacket->getPacketType());
             rtcpReceiverReportPacket->setRtcpLength(rtcpPacket->getRtcpLength());
             rtcpReceiverReportPacket->setSsrc(stream.readUint32Be());
-            for(short i = 0; i < count; ++i) {
-                ReceptionReport* receptionReport = new ReceptionReport();
+            for (short i = 0; i < count; ++i) {
+                ReceptionReport *receptionReport = new ReceptionReport();
                 deserializeReceptionReport(stream, *receptionReport);
                 rtcpReceiverReportPacket->addReceptionReport(receptionReport);
             }
@@ -205,8 +205,8 @@ const Ptr<Chunk> RtcpPacketSerializer::deserialize(MemoryInputStream& stream) co
             rtcpSdesPacket->setCount(0);
             rtcpSdesPacket->setPacketType(rtcpPacket->getPacketType());
             rtcpSdesPacket->setRtcpLength(rtcpPacket->getRtcpLength());
-            for(short i = 0; i < count; ++i){
-                SdesChunk* sdesChunk = new SdesChunk();
+            for (short i = 0; i < count; ++i) {
+                SdesChunk *sdesChunk = new SdesChunk();
                 deserializeSdesChunk(stream, rtcpSdesPacket, *sdesChunk);
                 rtcpSdesPacket->addSDESChunk(sdesChunk);
             }

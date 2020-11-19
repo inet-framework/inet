@@ -25,7 +25,6 @@
 * @detail Functions prototypes for dual-stack (IPv4/IPv6) support
 */
 
-
 #ifndef EIGRPDUALSTACK_H_
 #define EIGRPDUALSTACK_H_
 
@@ -44,7 +43,7 @@ namespace inet {
  * @param   netmask IPv4 netmask
  * @return  Length of netmask
  */
-int getNetmaskLength(const Ipv4Address &netmask);
+int getNetmaskLength(const Ipv4Address& netmask);
 
 /**
  * Computes length of IPv6 netmask represented as address
@@ -52,7 +51,7 @@ int getNetmaskLength(const Ipv4Address &netmask);
  * @param   netmask IPv6 netmask
  * @return  Length of netmask
  */
-int getNetmaskLength(const Ipv6Address &netmask);
+int getNetmaskLength(const Ipv6Address& netmask);
 
 /**
  * Compare two IPv4 addresses masked by netmask
@@ -93,5 +92,6 @@ Ipv6Address getPrefix(const Ipv6Address& addr, const Ipv6Address& netmask);
  */
 Ipv6Address makeNetmask(int length);
 
-}
+} // namespace inet
 #endif /* EIGRPDUALSTACK_H_ */
+

@@ -24,7 +24,7 @@ namespace inet {
 
 namespace physicallayer {
 
-// TODO: Ieee80211ReceiverBase
+// TODO Ieee80211ReceiverBase
 class INET_API Ieee80211UnitDiskReceiver : public UnitDiskReceiver
 {
   protected:

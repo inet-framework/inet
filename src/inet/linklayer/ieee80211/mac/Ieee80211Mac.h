@@ -68,7 +68,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     cMessage *pendingRadioConfigMsg = nullptr;
 
   protected:
-    virtual int numInitStages() const override {return NUM_INIT_STAGES;}
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;
     virtual void initializeRadioMode();
 

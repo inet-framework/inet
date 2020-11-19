@@ -33,8 +33,7 @@ namespace inet {
 class INET_API SctpServer : public cSimpleModule, public LifecycleUnsupported
 {
   protected:
-    struct ServerAssocStat
-    {
+    struct ServerAssocStat {
         simtime_t start;
         simtime_t stop;
         simtime_t lifeTime;
@@ -79,7 +78,7 @@ class INET_API SctpServer : public cSimpleModule, public LifecycleUnsupported
     unsigned long int bytesSent;
     unsigned long int packetsSent;
     unsigned long int packetsRcvd;
-    unsigned long int numRequestsToSend;    // requests to send in this session
+    unsigned long int numRequestsToSend; // requests to send in this session
     BytesPerAssoc bytesPerAssoc;
     ServerAssocStatMap serverAssocStatMap;
 

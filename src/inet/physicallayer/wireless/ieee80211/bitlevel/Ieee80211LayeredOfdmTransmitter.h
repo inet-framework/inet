@@ -33,7 +33,7 @@ namespace physicallayer {
 
 class INET_API Ieee80211LayeredOfdmTransmitter : public TransmitterBase
 {
-    // TODO: copy
+    // TODO copy
 
   public:
     enum LevelOfDetail {
@@ -85,7 +85,7 @@ class INET_API Ieee80211LayeredOfdmTransmitter : public TransmitterBase
     virtual ~Ieee80211LayeredOfdmTransmitter();
 
     virtual b getPaddingLength(const Ieee80211OfdmMode *mode, b length) const;
-    virtual const Ieee80211OfdmMode *getMode(const Packet* packet) const;
+    virtual const Ieee80211OfdmMode *getMode(const Packet *packet) const;
     virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, const simtime_t startTime) const override;
     virtual const IEncoder *getEncoder() const { return dataEncoder; }
     virtual const IModulator *getModulator() const { return dataModulator; }

@@ -37,7 +37,7 @@ void Ipv4FlatNetworkConfigurator::initialize(int stage)
 
     if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         cTopology topo("topo");
-        NodeInfoVector nodeInfo;    // will be of size topo.nodes[]
+        NodeInfoVector nodeInfo; // will be of size topo.nodes[]
 
         // extract topology into the cTopology object, then fill in
         // isIPNode, rt and ift members of nodeInfo[]
@@ -83,7 +83,7 @@ void Ipv4FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVecto
     // assign Ipv4 addresses
     uint32_t networkAddress = Ipv4Address(par("networkAddress").stringValue()).getInt();
     uint32_t netmask = Ipv4Address(par("netmask").stringValue()).getInt();
-    int maxNodes = (~netmask) - 1;    // 0 and ffff have special meaning and cannot be used
+    int maxNodes = (~netmask) - 1; // 0 and ffff have special meaning and cannot be used
     if (topo.getNumNodes() > maxNodes)
         throw cRuntimeError("netmask too large, not enough addresses for all %d nodes", topo.getNumNodes());
 
@@ -103,7 +103,7 @@ void Ipv4FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVecto
             if (!ie->isLoopback()) {
                 auto ipv4Data = ie->getProtocolDataForUpdate<Ipv4InterfaceData>();
                 ipv4Data->setIPAddress(Ipv4Address(addr));
-                ipv4Data->setNetmask(Ipv4Address::ALLONES_ADDRESS);    // full address must match for local delivery
+                ipv4Data->setNetmask(Ipv4Address::ALLONES_ADDRESS); // full address must match for local delivery
             }
         }
     }
@@ -144,7 +144,7 @@ void Ipv4FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVect
         e->setNetmask(Ipv4Address());
         e->setInterface(ie);
         e->setSourceType(IRoute::MANUAL);
-        //e->getMetric() = 1;
+//        e->getMetric() = 1;
         rt->addRoute(e);
     }
 }
@@ -195,10 +195,10 @@ void Ipv4FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVec
             IIpv4RoutingTable *rt = nodeInfo[j].rt;
             Ipv4Route *e = new Ipv4Route();
             e->setDestination(destAddr);
-            e->setNetmask(Ipv4Address(255, 255, 255, 255));    // full match needed
+            e->setNetmask(Ipv4Address(255, 255, 255, 255)); // full match needed
             e->setInterface(ie);
             e->setSourceType(IRoute::MANUAL);
-            //e->getMetric() = 1;
+//            e->getMetric() = 1;
             rt->addRoute(e);
         }
     }
@@ -215,7 +215,6 @@ void Ipv4FlatNetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVect
     for (int i = 0; i < topo.getNumNodes(); i++)
         if (nodeInfo[i].isIPNode)
             numIPNodes++;
-
 
     // update display string
     char buf[80];

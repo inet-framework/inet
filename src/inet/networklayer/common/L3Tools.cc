@@ -73,7 +73,7 @@ const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(const Packet *packe
     if (protocol == Protocol::nextHopForwarding)
         return packet->peekAtFront<NextHopForwardingHeader>();
 #endif
-    // TODO: add other L3 protocols
+    // TODO add other L3 protocols
     throw cRuntimeError("Unknown protocol: %s", protocol.getName());
 }
 
@@ -99,7 +99,7 @@ const Ptr<NetworkHeaderBase> removeNetworkProtocolHeader(Packet *packet, const P
     if (protocol == Protocol::nextHopForwarding)
         return removeNetworkProtocolHeader<NextHopForwardingHeader>(packet);
 #endif
-    // TODO: add other L3 protocols
+    // TODO add other L3 protocols
     throw cRuntimeError("Unknown protocol: %s", protocol.getName());
 }
 

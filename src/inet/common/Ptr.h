@@ -20,10 +20,10 @@
 
 #include "inet/common/INETDefs.h"
 
-#define INET_STD_SHARED_PTR 1
-#define INET_INTRUSIVE_PTR 2
+#define INET_STD_SHARED_PTR        1
+#define INET_INTRUSIVE_PTR         2
 #ifndef INET_PTR_IMPLEMENTATION
-#define INET_PTR_IMPLEMENTATION INET_INTRUSIVE_PTR
+#define INET_PTR_IMPLEMENTATION    INET_INTRUSIVE_PTR
 #endif
 
 #if INET_PTR_IMPLEMENTATION == INET_STD_SHARED_PTR
@@ -118,8 +118,7 @@ Ptr<T> __checknull(const Ptr<T>& p, const char *expr, const char *file, int line
     return p;
 }
 
-
-template <typename T>
+template<typename T>
 class INET_API SharedVector : public std::vector<T>, public SharedBase<SharedVector<T>>
 {
 };

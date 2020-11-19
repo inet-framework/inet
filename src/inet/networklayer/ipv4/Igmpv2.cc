@@ -173,13 +173,13 @@ void Igmpv2::initialize(int stage)
         lastMemberQueryInterval = par("lastMemberQueryInterval");
         lastMemberQueryCount = par("lastMemberQueryCount");
         unsolicitedReportInterval = par("unsolicitedReportInterval");
-        //version1RouterPresentInterval = par("version1RouterPresentInterval");
+//        version1RouterPresentInterval = par("version1RouterPresentInterval");
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
 
         addWatches();
     }
-    // TODO: INITSTAGE
+    // TODO INITSTAGE
     else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         cModule *host = getContainingNode(this);
         registerProtocol(Protocol::igmp, gate("ipOut"), gate("ipIn"));
@@ -308,7 +308,7 @@ void Igmpv2::configureInterface(NetworkInterface *ie)
         RouterInterfaceData *routerData = getRouterInterfaceData(ie);
         routerData->igmpQueryTimer = timer;
         routerData->igmpRouterState = IGMP_RS_QUERIER;
-        sendQuery(ie, Ipv4Address(), queryResponseInterval);    // general query
+        sendQuery(ie, Ipv4Address(), queryResponseInterval); // general query
         startTimer(timer, startupQueryInterval);
     }
 }
@@ -397,7 +397,7 @@ void Igmpv2::processQueryTimer(cMessage *msg)
     RouterState state = interfaceData->igmpRouterState;
     if (state == IGMP_RS_QUERIER || state == IGMP_RS_NON_QUERIER) {
         interfaceData->igmpRouterState = IGMP_RS_QUERIER;
-        sendQuery(ie, Ipv4Address(), queryResponseInterval);    // general query
+        sendQuery(ie, Ipv4Address(), queryResponseInterval); // general query
         startTimer(msg, queryInterval);
     }
 }
@@ -477,9 +477,9 @@ void Igmpv2::processIgmpMessage(Packet *packet)
             break;
 
         //case IGMPV1_MEMBERSHIP_REPORT:
-        //    processV1Report(ie, msg);
-        //    delete msg;
-        //    break;
+//           processV1Report(ie, msg);
+//           delete msg;
+//           break;
         case IGMPV2_MEMBERSHIP_REPORT:
             processV2Report(ie, packet);
             break;
@@ -492,7 +492,7 @@ void Igmpv2::processIgmpMessage(Packet *packet)
             if (externalRouter)
                 send(packet, "routerOut");
             else {
-                //delete msg;
+//                delete msg;
                 throw cRuntimeError("Igmpv2: Unhandled message type (%d) in packet %s", igmp->getType(), packet->getName());
             }
             break;
@@ -505,19 +505,19 @@ void Igmpv2::processQuery(NetworkInterface *ie, Packet *packet)
 
     Ipv4Address sender = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4();
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
-    const auto& igmpQry = packet->peekAtFront<IgmpQuery>(b(packet->getBitLength()));   //peek entire igmp packet
+    const auto& igmpQry = packet->peekAtFront<IgmpQuery>(b(packet->getBitLength())); // peek entire igmp packet
 
     numQueriesRecv++;
 
     Ipv4Address groupAddr = igmpQry->getGroupAddress();
     const Ptr<const Igmpv2Query>& v2Query = dynamicPtrCast<const Igmpv2Query>(igmpQry);
-    simtime_t maxRespTime = SimTime(v2Query ? v2Query->getMaxRespTimeCode() : 100, (SimTimeUnit)-1);
+    simtime_t maxRespTime = SimTime(v2Query ? v2Query->getMaxRespTimeCode() : 100, (SimTimeUnit) - 1);
 
     if (groupAddr.isUnspecified()) {
         // general query
         EV_INFO << "Igmpv2: received General Membership Query on iface=" << ie->getInterfaceName() << "\n";
         numGeneralQueriesRecv++;
-        for (auto & elem : interfaceData->groups)
+        for (auto& elem : interfaceData->groups)
             processGroupQuery(ie, elem.second, maxRespTime);
     }
     else {
@@ -541,7 +541,7 @@ void Igmpv2::processQuery(NetworkInterface *ie, Packet *packet)
             routerInterfaceData->igmpRouterState = IGMP_RS_NON_QUERIER;
         }
 
-        if (!groupAddr.isUnspecified() && routerInterfaceData->igmpRouterState == IGMP_RS_NON_QUERIER) {    // group specific query
+        if (!groupAddr.isUnspecified() && routerInterfaceData->igmpRouterState == IGMP_RS_NON_QUERIER) { // group specific query
             RouterGroupData *groupData = getRouterGroupData(ie, groupAddr);
             if (groupData->state == IGMP_RGS_MEMBERS_PRESENT) {
                 startTimer(groupData->timer, maxRespTime.dbl() * lastMemberQueryCount);
@@ -557,7 +557,7 @@ void Igmpv2::processQuery(NetworkInterface *ie, Packet *packet)
 
 void Igmpv2::processGroupQuery(NetworkInterface *ie, HostGroupData *group, simtime_t maxRespTime)
 {
-    double maxRespTimeSecs = maxRespTime.dbl();         //FIXME use simtime_t !!!
+    double maxRespTimeSecs = maxRespTime.dbl(); // FIXME use simtime_t !!!
 
     if (group->state == IGMP_HGS_DELAYING_MEMBER) {
         cMessage *timer = group->timer;
@@ -683,7 +683,7 @@ void Igmpv2::sendQuery(NetworkInterface *ie, const Ipv4Address& groupAddr, doubl
         const auto& msg = makeShared<Igmpv2Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupAddr);
-        msg->setMaxRespTimeCode(SimTime(maxRespTime).inUnit((SimTimeUnit)-1));
+        msg->setMaxRespTimeCode(SimTime(maxRespTime).inUnit((SimTimeUnit) - 1));
         msg->setChunkLength(B(8));
         insertCrc(msg, packet);
         packet->insertAtFront(msg);
@@ -874,7 +874,7 @@ Igmpv2::RouterGroupData::RouterGroupData(Igmpv2 *owner, const Ipv4Address& group
     state = IGMP_RGS_NO_MEMBERS_PRESENT;
     timer = nullptr;
     rexmtTimer = nullptr;
-    // v1HostTimer = nullptr;
+//    v1HostTimer = nullptr;
 }
 
 Igmpv2::RouterGroupData::~RouterGroupData()
@@ -904,7 +904,7 @@ Igmpv2::HostInterfaceData::HostInterfaceData(Igmpv2 *owner)
 
 Igmpv2::HostInterfaceData::~HostInterfaceData()
 {
-    for (auto & elem : groups)
+    for (auto& elem : groups)
         delete elem.second;
 }
 
@@ -923,7 +923,7 @@ Igmpv2::RouterInterfaceData::~RouterInterfaceData()
 {
     owner->cancelAndDelete(igmpQueryTimer);
 
-    for (auto & elem : groups)
+    for (auto& elem : groups)
         delete elem.second;
 }
 
@@ -931,11 +931,11 @@ Igmpv2::RouterInterfaceData::~RouterInterfaceData()
 
 const std::string Igmpv2::getRouterStateString(Igmpv2::RouterState rs)
 {
-    if(rs == IGMP_RS_INITIAL)
+    if (rs == IGMP_RS_INITIAL)
         return "INITIAL";
-    else if(rs == IGMP_RS_QUERIER)
+    else if (rs == IGMP_RS_QUERIER)
         return "QUERIER";
-    else if(rs == IGMP_RS_NON_QUERIER)
+    else if (rs == IGMP_RS_NON_QUERIER)
         return "NON_QUERIER";
 
     return "UNKNOWN";
@@ -943,13 +943,13 @@ const std::string Igmpv2::getRouterStateString(Igmpv2::RouterState rs)
 
 const std::string Igmpv2::getRouterGroupStateString(Igmpv2::RouterGroupState rgs)
 {
-    if(rgs == IGMP_RGS_NO_MEMBERS_PRESENT)
+    if (rgs == IGMP_RGS_NO_MEMBERS_PRESENT)
         return "NO_MEMBERS_PRESENT";
-    else if(rgs == IGMP_RGS_MEMBERS_PRESENT)
+    else if (rgs == IGMP_RGS_MEMBERS_PRESENT)
         return "MEMBERS_PRESENT";
-    else if(rgs == IGMP_RGS_V1_MEMBERS_PRESENT)
+    else if (rgs == IGMP_RGS_V1_MEMBERS_PRESENT)
         return "V1_MEMBERS_PRESENT";
-    else if(rgs == IGMP_RGS_CHECKING_MEMBERSHIP)
+    else if (rgs == IGMP_RGS_CHECKING_MEMBERSHIP)
         return "CHECKING_MEMBERSHIP";
 
     return "UNKNOWN";
@@ -957,11 +957,11 @@ const std::string Igmpv2::getRouterGroupStateString(Igmpv2::RouterGroupState rgs
 
 const std::string Igmpv2::getHostGroupStateString(Igmpv2::HostGroupState hgs)
 {
-    if(hgs == IGMP_HGS_NON_MEMBER)
+    if (hgs == IGMP_HGS_NON_MEMBER)
         return "NON_MEMBER";
-    else if(hgs == IGMP_HGS_DELAYING_MEMBER)
+    else if (hgs == IGMP_HGS_DELAYING_MEMBER)
         return "DELAYING_MEMBER";
-    else if(hgs == IGMP_HGS_IDLE_MEMBER)
+    else if (hgs == IGMP_HGS_IDLE_MEMBER)
         return "IDLE_MEMBER";
 
     return "UNKNOWN";
@@ -1008,7 +1008,7 @@ bool Igmpv2::verifyCrc(const Packet *packet)
             // otherwise compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC)
             auto dataBytes = packet->peekDataAsBytes(Chunk::PF_ALLOW_INCORRECT);
             uint16_t crc = TcpIpChecksum::checksum(dataBytes->getBytes());
-            // TODO: delete these isCorrect calls, rely on CRC only
+            // TODO delete these isCorrect calls, rely on CRC only
             return crc == 0 && igmpMsg->isCorrect();
         }
         default:
@@ -1016,5 +1016,5 @@ bool Igmpv2::verifyCrc(const Packet *packet)
     }
 }
 
-}    // namespace inet
+} // namespace inet
 

@@ -29,15 +29,15 @@ const Protocol& getPacketProtocol(Packet *packet);
 
 void insertProtocolHeader(Packet *packet, const Protocol& protocol, const Ptr<Chunk>& header);
 
-template <typename T>
+template<typename T>
 const Ptr<T> removeProtocolHeader(Packet *packet)
 {
     packet->removeTagIfPresent<PacketProtocolTag>();
-    packet->trim(); // TODO: breaks fingerprints, but why not? packet->trimHeaders();
+    packet->trim(); // TODO breaks fingerprints, but why not? packet->trimHeaders();
     return packet->removeAtFront<T>();
 }
 
-};
+} // namespace inet
 
 #endif
 

@@ -1,4 +1,3 @@
-
 #include "inet/routing/ospfv3/interface/Ospfv3InterfaceStateDr.h"
 
 #include "inet/routing/ospfv3/Ospfv3Timers.h"
@@ -9,7 +8,7 @@
 namespace inet {
 namespace ospfv3 {
 
-void Ospfv3InterfaceStateDr::processEvent(Ospfv3Interface* interface, Ospfv3Interface::Ospfv3InterfaceEvent event)
+void Ospfv3InterfaceStateDr::processEvent(Ospfv3Interface *interface, Ospfv3Interface::Ospfv3InterfaceEvent event)
 {
     /*
      * HELLO_TIMER - watch for changes in DR, BDR or priority!!
@@ -35,15 +34,15 @@ void Ospfv3InterfaceStateDr::processEvent(Ospfv3Interface* interface, Ospfv3Inte
     if (event == Ospfv3Interface::HELLO_TIMER_EVENT) {
         if (interface->getType() == Ospfv3Interface::BROADCAST_TYPE) {
             EV_DEBUG << "Sending Hello to all in " << this->getInterfaceStateString() << "\n";
-            Packet* hello = interface->prepareHello();
+            Packet *hello = interface->prepareHello();
             interface->getArea()->getInstance()->getProcess()->sendPacket(hello, Ipv6Address::ALL_OSPF_ROUTERS_MCAST, interface->getIntName().c_str());
         }
-        else {    // Interface::NBMA
+        else { // Interface::NBMA
             EV_DEBUG << "Sending Hello to all NBMA neighbors in " << this->getInterfaceStateString() << "\n";
             unsigned long neighborCount = interface->getNeighborCount();
             int hopLimit = (interface->getType() == Ospfv3Interface::VIRTUAL_TYPE) ? VIRTUAL_LINK_TTL : 1;
             for (unsigned long i = 0; i < neighborCount; i++) {
-                Packet* hello = interface->prepareHello();
+                Packet *hello = interface->prepareHello();
                 Ipv6Address dest = interface->getNeighbor(i)->getNeighborIP();
                 interface->getArea()->getInstance()->getProcess()->sendPacket(hello, dest, interface->getIntName().c_str(), hopLimit);
             }
@@ -58,8 +57,8 @@ void Ospfv3InterfaceStateDr::processEvent(Ospfv3Interface* interface, Ospfv3Inte
         changeState(interface, new Ospfv3InterfaceStateWaiting, this);
         interface->getArea()->getInstance()->getProcess()->setTimer(interface->getWaitTimer(), interface->getDeadInterval());
     }
-}//processEvent
+} // processEvent
 
 } // namespace ospfv3
-}//namespace inet
+} // namespace inet
 

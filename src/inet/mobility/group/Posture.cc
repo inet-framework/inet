@@ -72,19 +72,19 @@ Posture::Posture(unsigned int ID, unsigned int num)
 
 Posture::~Posture()
 {
-    delete [] nodePs;
-    delete [] nodeRadius;
-    delete [] nodeSpeed;
+    delete[] nodePs;
+    delete[] nodeRadius;
+    delete[] nodeSpeed;
 
     for (unsigned int i = 0; i < numNodes; ++i)
-        delete [] alphaMean[i];
-    delete [] alphaMean;
+        delete[] alphaMean[i];
+    delete[] alphaMean;
 
     for (unsigned int i = 0; i < numNodes; ++i)
-        delete [] alphaSD[i];
-    delete [] alphaSD;
+        delete[] alphaSD[i];
+    delete[] alphaSD;
 
-    delete [] posture_name;
+    delete[] posture_name;
 }
 
 bool Posture::setPs(unsigned int i, Coord ps)
@@ -98,7 +98,7 @@ bool Posture::setPs(unsigned int i, Coord ps)
 
 bool Posture::setPostureName(char *str)
 {
-    delete [] posture_name;
+    delete[] posture_name;
     posture_name = opp_strdup(str);
     return true;
 }

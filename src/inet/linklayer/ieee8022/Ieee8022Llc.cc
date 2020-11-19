@@ -40,12 +40,11 @@ void Ieee8022Llc::initialize(int stage)
 {
     OperationalBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        // TODO: parameterization for llc or snap?
+        // TODO parameterization for llc or snap?
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
-    {
-        if (par("registerProtocol").boolValue()) {    //FIXME //KUDGE should redesign place of EthernetEncapsulation and LLC modules
-            //register service and protocol
+    else if (stage == INITSTAGE_LINK_LAYER) {
+        if (par("registerProtocol").boolValue()) { // FIXME //KUDGE should redesign place of EthernetEncapsulation and LLC modules
+            // register service and protocol
             registerService(Protocol::ieee8022llc, gate("upperLayerIn"), gate("upperLayerOut"));
         }
 
@@ -126,9 +125,10 @@ void Ieee8022Llc::processPacketFromMac(Packet *packet)
     if (auto sap = packet->findTag<Ieee802SapInd>()) {
         int localSap = sap->getDsap();
         int remoteSap = sap->getSsap();
-        for (const auto &elem: socketIdToSocketDescriptor) {
+        for (const auto& elem: socketIdToSocketDescriptor) {
             if ((elem.second->localSap == localSap || elem.second->localSap == -1)
-                    && (elem.second->remoteSap == remoteSap || elem.second->remoteSap == -1)) {
+                && (elem.second->remoteSap == remoteSap || elem.second->remoteSap == -1))
+            {
                 auto *packetCopy = packet->dup();
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
                 EV_INFO << "Passing up to socket " << elem.second->socketId << "\n";
@@ -173,7 +173,7 @@ void Ieee8022Llc::encapsulate(Packet *frame)
         }
         else {
             snapHeader->setOui(snapOui);
-            snapHeader->setProtocolId(-1);      //FIXME get value from a tag (e.g. protocolTag->getSubId() ???)
+            snapHeader->setProtocolId(-1); // FIXME get value from a tag (e.g. protocolTag->getSubId() ???)
         }
         frame->insertAtFront(snapHeader);
     }
@@ -189,7 +189,7 @@ void Ieee8022Llc::encapsulate(Packet *frame)
             auto sapReq = frame->getTag<Ieee802SapReq>();
             llcHeader->setSsap(sapReq->getSsap());
             llcHeader->setDsap(sapReq->getDsap());
-            llcHeader->setControl(3);       //TODO get from sapTag
+            llcHeader->setControl(3); // TODO get from sapTag
         }
         frame->insertAtFront(llcHeader);
     }
@@ -203,7 +203,7 @@ void Ieee8022Llc::decapsulate(Packet *frame)
     auto sapInd = frame->addTagIfAbsent<Ieee802SapInd>();
     sapInd->setSsap(llcHeader->getSsap());
     sapInd->setDsap(llcHeader->getDsap());
-    //TODO control?
+    // TODO control?
 
     if (llcHeader->getSsap() == 0xAA && llcHeader->getDsap() == 0xAA && llcHeader->getControl() == 0x03) {
         const auto& snapHeader = dynamicPtrCast<const Ieee8022LlcSnapHeader>(llcHeader);
@@ -235,7 +235,7 @@ const Protocol *Ieee8022Llc::getProtocol(const Ptr<const Ieee8022LlcHeader>& llc
     }
     else {
         int32_t sapData = ((llcHeader->getSsap() & 0xFF) << 8) | (llcHeader->getDsap() & 0xFF);
-        payloadProtocol = ProtocolGroup::ieee8022protocol.findProtocol(sapData);    // do not use getProtocol
+        payloadProtocol = ProtocolGroup::ieee8022protocol.findProtocol(sapData); // do not use getProtocol
     }
     return payloadProtocol;
 }
@@ -248,12 +248,12 @@ void Ieee8022Llc::handleRegisterService(const Protocol& protocol, cGate *gate, S
 void Ieee8022Llc::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-// KLUDGE: this should be here: if (!strcmp("upperLayerOut", gate->getBaseName()))
-//         but then the register protocol calls are lost, because they can't go through the traffic conditioner
-        upperProtocols.insert(&protocol);
+    // KLUDGE this should be here: if (!strcmp("upperLayerOut", gate->getBaseName()))
+    // but then the register protocol calls are lost, because they can't go through the traffic conditioner
+    upperProtocols.insert(&protocol);
 }
 
-std::ostream& operator << (std::ostream& o, const Ieee8022Llc::SocketDescriptor& t)
+std::ostream& operator<<(std::ostream& o, const Ieee8022Llc::SocketDescriptor& t)
 {
     o << "(id:" << t.socketId << ",lsap:" << t.localSap << ",rsap" << t.remoteSap << ")";
     return o;
@@ -261,7 +261,7 @@ std::ostream& operator << (std::ostream& o, const Ieee8022Llc::SocketDescriptor&
 
 void Ieee8022Llc::clearSockets()
 {
-    for (auto &elem: socketIdToSocketDescriptor) {
+    for (auto& elem: socketIdToSocketDescriptor) {
         delete elem.second;
         elem.second = nullptr;
     }

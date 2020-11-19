@@ -61,7 +61,7 @@ Packet *PassivePacketSource::canPullPacket(cGate *gate) const
         return nullptr;
     else {
         if (nextPacket == nullptr)
-            // TODO: KLUDGE:
+            // KLUDGE
             nextPacket = const_cast<PassivePacketSource *>(this)->createPacket();
         return nextPacket;
     }
@@ -70,7 +70,7 @@ Packet *PassivePacketSource::canPullPacket(cGate *gate) const
 Packet *PassivePacketSource::pullPacket(cGate *gate)
 {
     Enter_Method("pullPacket");
-    if (providingTimer->isScheduled()  && providingTimer->getArrivalTime() > simTime())
+    if (providingTimer->isScheduled() && providingTimer->getArrivalTime() > simTime())
         throw cRuntimeError("Another packet is already being provided");
     else {
         auto packet = providePacket(gate);

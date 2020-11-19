@@ -233,7 +233,7 @@ bool DatabaseDescriptionHandler::processDDPacket(const Ospfv2DatabaseDescription
     if (neighbor->getDatabaseExchangeRelationship() == Neighbor::MASTER) {
         neighbor->incrementDDSequenceNumber();
         if ((neighbor->getDatabaseSummaryListCount() == 0) && !ddPacket->getDdOptions().M_More) {
-            neighbor->processEvent(Neighbor::EXCHANGE_DONE);    // does nothing in ExchangeStart
+            neighbor->processEvent(Neighbor::EXCHANGE_DONE); // does nothing in ExchangeStart
         }
         else {
             if (!inExchangeStart) {
@@ -249,7 +249,7 @@ bool DatabaseDescriptionHandler::processDDPacket(const Ospfv2DatabaseDescription
         if (!ddPacket->getDdOptions().M_More &&
             (neighbor->getDatabaseSummaryListCount() == 0))
         {
-            neighbor->processEvent(Neighbor::EXCHANGE_DONE);    // does nothing in ExchangeStart
+            neighbor->processEvent(Neighbor::EXCHANGE_DONE); // does nothing in ExchangeStart
         }
     }
     return true;

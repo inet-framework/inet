@@ -82,7 +82,7 @@ const IRadio *MapCommunicationCache::getRadio(int id) const
         return it->second.radio;
 }
 
-void MapCommunicationCache::mapRadios(std::function<void (const IRadio *)> f) const
+void MapCommunicationCache::mapRadios(std::function<void(const IRadio *)> f) const
 {
     for (auto& it : radioCache)
         f(it.second.radio);
@@ -127,13 +127,13 @@ const ITransmission *MapCommunicationCache::getTransmission(int id) const
         return it->second.transmission;
 }
 
-void MapCommunicationCache::mapTransmissions(std::function<void (const ITransmission *)> f) const
+void MapCommunicationCache::mapTransmissions(std::function<void(const ITransmission *)> f) const
 {
     for (auto& it : transmissionCache)
         f(it.second.transmission);
 }
 
-void MapCommunicationCache::removeNonInterferingTransmissions(std::function<void (const ITransmission *transmission)> f)
+void MapCommunicationCache::removeNonInterferingTransmissions(std::function<void(const ITransmission *transmission)> f)
 {
     int transmissionCount = 0;
     const simtime_t now = simTime();

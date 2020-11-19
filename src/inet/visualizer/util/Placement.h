@@ -24,8 +24,7 @@ namespace inet {
 
 namespace visualizer {
 
-enum Placement
-{
+enum Placement {
     PLACEMENT_NONE          = 0x0000,
     PLACEMENT_TOP_LEFT      = 0x0001,
     PLACEMENT_TOP_CENTER    = 0x0002,

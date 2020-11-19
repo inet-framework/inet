@@ -24,8 +24,8 @@ namespace ieee80211 {
 
 class INET_API DcfReceiveLifetimeHandler
 {
-    protected:
-        simtime_t maxReceiveLifetime;
+  protected:
+    simtime_t maxReceiveLifetime;
 };
 
 } /* namespace ieee80211 */

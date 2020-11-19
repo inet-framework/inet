@@ -25,7 +25,7 @@ import inet.queueing.contract.IActivePacketSink;
 // a packet is pulled by one of the connected packet collectors, then the demultiplexer
 // simply pulls a packet from the connected packet provider.
 //
-simple PacketDemultiplexer extends PacketProcessorBase like IActivePacketSink // TODO: , IPassivePacketSource // out gate is vector
+simple PacketDemultiplexer extends PacketProcessorBase like IActivePacketSink // TODO , IPassivePacketSource // out gate is vector
 {
     parameters:
         displayStringTextFormat = default("passed %p pk (%l)");

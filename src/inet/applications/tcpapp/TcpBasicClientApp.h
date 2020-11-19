@@ -31,8 +31,8 @@ class INET_API TcpBasicClientApp : public TcpAppBase
 {
   protected:
     cMessage *timeoutMsg = nullptr;
-    bool earlySend = false;    // if true, don't wait with sendRequest() until established()
-    int numRequestsToSend = 0;    // requests to send in this session
+    bool earlySend = false; // if true, don't wait with sendRequest() until established()
+    int numRequestsToSend = 0; // requests to send in this session
     simtime_t startTime;
     simtime_t stopTime;
 

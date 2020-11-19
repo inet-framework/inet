@@ -28,7 +28,7 @@ namespace inet {
 
 class INET_API RipRoute : public cObject
 {
-public:
+  public:
     enum RouteType {
         RIP_ROUTE_RTE,          // route learned from a RipEntry
         RIP_ROUTE_STATIC,       // static route
@@ -37,23 +37,23 @@ public:
         RIP_ROUTE_INTERFACE     // route belongs to a local interface
     };
 
-protected:
-    IRoute *route = nullptr;    // the route in the host routing table that is associated with this route, may be nullptr if deleted
-    RouteType type = static_cast<RouteType>(-1);    // the type of the route
+  protected:
+    IRoute *route = nullptr; // the route in the host routing table that is associated with this route, may be nullptr if deleted
+    RouteType type = static_cast<RouteType>(-1); // the type of the route
 
-    L3Address dest;                 // destination of the route
-    L3Address nextHop;              // next hop of the route
-    int prefixLength = 0;           // prefix length of the destination
-    int metric = 0;                 // the metric of this route, or infinite (16) if invalid
-    NetworkInterface *ie = nullptr;   // outgoing interface of the route
+    L3Address dest; // destination of the route
+    L3Address nextHop; // next hop of the route
+    int prefixLength = 0; // prefix length of the destination
+    int metric = 0; // the metric of this route, or infinite (16) if invalid
+    NetworkInterface *ie = nullptr; // outgoing interface of the route
 
-    L3Address from;                 // from which router did we get the route (only for RTE routes)
-    simtime_t lastUpdateTime = 0;   // time of the last change (only for RTE routes)
-    bool changed = false;           // true if the route has changed since the update
-    uint16_t tag = 0;                 // route tag (only for REDISTRIBUTE routes)
-    simtime_t lastInvalid = 0;      // time of the last invalidation
+    L3Address from; // from which router did we get the route (only for RTE routes)
+    simtime_t lastUpdateTime = 0; // time of the last change (only for RTE routes)
+    bool changed = false; // true if the route has changed since the update
+    uint16_t tag = 0; // route tag (only for REDISTRIBUTE routes)
+    simtime_t lastInvalid = 0; // time of the last invalidation
 
-public:
+  public:
     RipRoute(IRoute *route, RouteType type, int metric, uint16_t routeTag)
     {
         this->route = route;

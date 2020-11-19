@@ -21,7 +21,6 @@
     email            : <Matthias.Oppitz@gmx.de> <ahmed.ayadi@sophia.inria.fr>
 ***************************************************************************/
 
-
 #ifndef __INET_RTPPAYLOADRECEIVER_H
 #define __INET_RTPPAYLOADRECEIVER_H
 
@@ -34,7 +33,7 @@ namespace inet {
 
 namespace rtp {
 
-//Forward declarations
+// Forward declarations
 
 /**
  * The class RtpPayloadReceiver acts as a base class for modules

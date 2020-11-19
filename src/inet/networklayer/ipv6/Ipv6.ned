@@ -45,7 +45,7 @@ package inet.networklayer.ipv6;
 // calling C++ methods of ~Ipv6RoutingTable. No message exchange with ~Ipv6RoutingTable
 // takes place.
 //
-//#FIXME TBD describe operation
+//#FIXME describe operation
 //
 // Routing protocol implementations can also query and manipulate the route table
 // by calling ~Ipv6RoutingTable's methods in C++.

@@ -25,12 +25,12 @@ namespace inet {
 
 Register_Abstract_Class(Ipv6Route);
 
-const char* inet::Ipv6Route::getSourceTypeAbbreviation() const {
+const char *inet::Ipv6Route::getSourceTypeAbbreviation() const {
     switch (_sourceType) {
         case IFACENETMASK:
             return "C";
         case MANUAL:
-            return (getDestPrefix().isUnspecified() ? "S*": "S");
+            return getDestPrefix().isUnspecified() ? "S*" : "S";
         case ROUTER_ADVERTISEMENT:
             return "ra";
         case RIP:
@@ -61,12 +61,10 @@ std::string Ipv6Route::str() const
     else
         out << " " << getDestPrefix();
     out << "/" << getPrefixLength();
-    if (getNextHop().isUnspecified())
-    {
+    if (getNextHop().isUnspecified()) {
         out << " is directly connected";
     }
-    else
-    {
+    else {
         out << " [" << getAdminDist() << "/" << getMetric() << "]";
         out << " via ";
         out << getNextHop();

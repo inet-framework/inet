@@ -25,10 +25,10 @@ namespace ieee80211 {
 
 class INET_API IBlockAckAgreementHandlerCallback
 {
-    public:
-        virtual ~IBlockAckAgreementHandlerCallback() { }
+  public:
+    virtual ~IBlockAckAgreementHandlerCallback() {}
 
-        virtual void scheduleInactivityTimer(simtime_t timeout) = 0;
+    virtual void scheduleInactivityTimer(simtime_t timeout) = 0;
 };
 
 } // namespace ieee80211

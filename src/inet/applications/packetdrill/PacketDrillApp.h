@@ -41,8 +41,8 @@ class PacketDrillScript;
  * Implements the packetdrill application simple module. See the NED file for more info.
  */
 class INET_API PacketDrillApp : public ApplicationBase,
-        public UdpSocket::ICallback, public TcpSocket::ICallback,
-        public SctpSocket::ICallback, TunSocket::ICallback
+    public UdpSocket::ICallback, public TcpSocket::ICallback,
+    public SctpSocket::ICallback, TunSocket::ICallback
 {
   public:
     PacketDrillApp();
@@ -91,7 +91,7 @@ class INET_API PacketDrillApp : public ApplicationBase,
     TcpSocket tcpSocket;
     SctpSocket sctpSocket;
     TunSocket tunSocket;
-    SocketMap socketMap;    // holds TCP connections with peers
+    SocketMap socketMap; // holds TCP connections with peers
     PacketDrill *pd = nullptr;
     bool msgArrived = false;
     bool recvFromSet = false;
@@ -174,15 +174,15 @@ class INET_API PacketDrillApp : public ApplicationBase,
 
     bool compareSctpPacket(const Ptr<const sctp::SctpHeader>& storedSctp, const Ptr<const sctp::SctpHeader>& liveSctp);
 
-    bool compareInitPacket(const sctp::SctpInitChunk* storedInitChunk, const sctp::SctpInitChunk* liveInitChunk);
+    bool compareInitPacket(const sctp::SctpInitChunk *storedInitChunk, const sctp::SctpInitChunk *liveInitChunk);
 
-    bool compareDataPacket(const sctp::SctpDataChunk* storedDataChunk, const sctp::SctpDataChunk* liveDataChunk);
+    bool compareDataPacket(const sctp::SctpDataChunk *storedDataChunk, const sctp::SctpDataChunk *liveDataChunk);
 
-    bool compareSackPacket(const sctp::SctpSackChunk* storedSackChunk, const sctp::SctpSackChunk* liveSackChunk);
+    bool compareSackPacket(const sctp::SctpSackChunk *storedSackChunk, const sctp::SctpSackChunk *liveSackChunk);
 
-    bool compareInitAckPacket(const sctp::SctpInitAckChunk* storedInitAckChunk, const sctp::SctpInitAckChunk* liveInitAckChunk);
+    bool compareInitAckPacket(const sctp::SctpInitAckChunk *storedInitAckChunk, const sctp::SctpInitAckChunk *liveInitAckChunk);
 
-    bool compareReconfigPacket(const sctp::SctpStreamResetChunk* storedReconfigChunk, const sctp::SctpStreamResetChunk* liveReconfigChunk);
+    bool compareReconfigPacket(const sctp::SctpStreamResetChunk *storedReconfigChunk, const sctp::SctpStreamResetChunk *liveReconfigChunk);
 
     int verifyTime(enum eventTime_t timeType,
             simtime_t script_usecs, simtime_t script_usecs_end,
@@ -205,8 +205,8 @@ class INET_API PacketDrillApp : public ApplicationBase,
     virtual void socketPeerClosed(TcpSocket *socket) override;
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override;
-    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { }
-    virtual void socketDeleted(TcpSocket *socket) override {}   //TODO
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override {}
+    virtual void socketDeleted(TcpSocket *socket) override {} // TODO
     //@}
 
     /** @name UdpSocket::ICallback methods */

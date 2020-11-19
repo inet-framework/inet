@@ -89,7 +89,7 @@ void Int128::set(const char *sz)
         }
     }
 
-    for ( ; i < strlen(sz); ++i) {
+    for (; i < strlen(sz); ++i) {
         uint32_t n = 0;
         if (sz[i] >= '0' && sz[i] <= '9' && sz[i] < '0' + (int)radix)
             n = sz[i] - '0';
@@ -241,7 +241,7 @@ Int128 Int128::div(const Int128& divisor, Int128& remainder) const
     if (!divisor)
         return 1u / (unsigned int)divisor.lo;
     // or RaiseException (EXCEPTION_INT_DIVIDE_BY_ZERO,
-    //                    EXCEPTION_NONCONTINUABLE, 0, nullptr);
+//                          EXCEPTION_NONCONTINUABLE, 0, nullptr);
 
     Int128 ds = (divisor < 0) ? -divisor : divisor;
     Int128 dd = (*this < 0) ? -*this : *this;
@@ -254,7 +254,7 @@ Int128 Int128::div(const Int128& divisor, Int128& remainder) const
 
     Int128 r = (Int128)0;
     Int128 q = (Int128)0;
-//    while (dd >= ds) { dd -= ds; q += 1; } // extreme slow version
+    // while (dd >= ds) { dd -= ds; q += 1; } // extreme slow version
 
     unsigned int b = 127;
     while (r < ds) {

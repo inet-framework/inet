@@ -43,7 +43,7 @@ void Ieee80211BerTableErrorModel::initialize(int stage)
         const char *fname = par("berTableFile");
         if (fname == nullptr)
             throw cRuntimeError("BER file parameter is mandatory");
-        // TODO: remove and cleanup opMode from here and also from BerParseFile, this should depend on the received signal
+        // TODO remove and cleanup opMode from here and also from BerParseFile, this should depend on the received signal
         char opMode;
         const char *opModeString = par("opMode");
         if (!strcmp("b", opModeString))

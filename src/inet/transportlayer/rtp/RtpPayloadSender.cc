@@ -21,7 +21,6 @@
 
 ***************************************************************************/
 
-
 #include "inet/transportlayer/rtp/RtpPayloadSender.h"
 
 #include "inet/transportlayer/rtp/RtpInnerPacket_m.h"

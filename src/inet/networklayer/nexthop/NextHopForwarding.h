@@ -48,8 +48,7 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
     /**
      * Represents an NextHopDatagram, queued by a Hook
      */
-    struct QueuedDatagramForHook
-    {
+    struct QueuedDatagramForHook {
       public:
         QueuedDatagramForHook(Packet *datagram, INetfilter::IHook::Type hookType)
             : datagram(datagram), hookType(hookType) {}
@@ -63,15 +62,14 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
         const INetfilter::IHook::Type hookType;
     };
 
-    struct SocketDescriptor
-    {
+    struct SocketDescriptor {
         int socketId = -1;
         int protocolId = -1;
         L3Address localAddress;
         L3Address remoteAddress;
 
         SocketDescriptor(int socketId, int protocolId, L3Address localAddress)
-                : socketId(socketId), protocolId(protocolId), localAddress(localAddress) { }
+            : socketId(socketId), protocolId(protocolId), localAddress(localAddress) {}
     };
 
     IInterfaceTable *interfaceTable;
@@ -82,7 +80,7 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
     int defaultHopLimit;
 
     // working vars
-    std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
+    std::set<const Protocol *> upperProtocols; // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
 
     // hooks

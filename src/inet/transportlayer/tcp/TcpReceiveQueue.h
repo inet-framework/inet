@@ -46,7 +46,7 @@ class TcpHeader;
 class INET_API TcpReceiveQueue : public cObject
 {
   protected:
-    TcpConnection *conn = nullptr;    // the connection that owns this queue
+    TcpConnection *conn = nullptr; // the connection that owns this queue
     uint32_t rcv_nxt = 0;
     ReorderBuffer reorderBuffer;
 

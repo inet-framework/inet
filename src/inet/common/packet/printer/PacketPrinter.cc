@@ -91,18 +91,18 @@ const ProtocolPrinter& PacketPrinter::getProtocolPrinter(const Protocol *protoco
 
 std::set<std::string> PacketPrinter::getSupportedTags() const
 {
-    return {"Print inside out", "Print left to right",
-            "Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Type' column", "Show 'Length' column", "Show 'Info' column",
-            "Show all PDU source fields", "Show all PDU destination fields", "Show all PDU protocols", "Show all PDU lengths",
-            "Show physical layer info", "Show link layer info", "Show network layer info", "Show transport layer info", "Show all info", "Show innermost info",
-            "Show auto source fields", "Show auto destination fields", "Show auto info"};
+    return { "Print inside out", "Print left to right",
+             "Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Type' column", "Show 'Length' column", "Show 'Info' column",
+             "Show all PDU source fields", "Show all PDU destination fields", "Show all PDU protocols", "Show all PDU lengths",
+             "Show physical layer info", "Show link layer info", "Show network layer info", "Show transport layer info", "Show all info", "Show innermost info",
+             "Show auto source fields", "Show auto destination fields", "Show auto info" };
 }
 
 std::set<std::string> PacketPrinter::getDefaultEnabledTags() const
 {
-    return {"Print inside out",
-            "Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Type' column", "Show 'Length' column", "Show 'Info' column",
-            "Show auto source fields", "Show auto destination fields", "Show auto info"};
+    return { "Print inside out",
+             "Show 'Source' column", "Show 'Destination' column", "Show 'Protocol' column", "Show 'Type' column", "Show 'Length' column", "Show 'Info' column",
+             "Show auto source fields", "Show auto destination fields", "Show auto info" };
 }
 
 std::vector<std::string> PacketPrinter::getColumnNames(const Options *options) const
@@ -129,17 +129,17 @@ void PacketPrinter::printContext(std::ostream& stream, const Options *options, C
         stream << "\x1b[103m";
     stream << "\x1b[30m";
     if (isEnabledOption(options, "Show 'Source' column"))
-       stream << context.sourceColumn.str() << "\t";
+        stream << context.sourceColumn.str() << "\t";
     if (isEnabledOption(options, "Show 'Destination' column"))
-       stream << context.destinationColumn.str() << "\t";
+        stream << context.destinationColumn.str() << "\t";
     if (isEnabledOption(options, "Show 'Protocol' column"))
-       stream << "\x1b[34m" << context.protocolColumn.str() << "\x1b[30m\t";
+        stream << "\x1b[34m" << context.protocolColumn.str() << "\x1b[30m\t";
     if (isEnabledOption(options, "Show 'Type' column"))
-       stream << "\x1b[34m" << context.typeColumn.str() << "\x1b[30m\t";
+        stream << "\x1b[34m" << context.typeColumn.str() << "\x1b[30m\t";
     if (isEnabledOption(options, "Show 'Length' column"))
-       stream << context.lengthColumn.str() << "\t";
+        stream << context.lengthColumn.str() << "\t";
     if (isEnabledOption(options, "Show 'Info' column"))
-       stream << context.infoColumn.str();
+        stream << context.infoColumn.str();
     stream << std::endl;
 }
 

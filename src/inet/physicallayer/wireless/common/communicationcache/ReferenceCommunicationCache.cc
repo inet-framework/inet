@@ -75,7 +75,7 @@ const IRadio *ReferenceCommunicationCache::getRadio(int id) const
     return nullptr;
 }
 
-void ReferenceCommunicationCache::mapRadios(std::function<void (const IRadio *)> f) const
+void ReferenceCommunicationCache::mapRadios(std::function<void(const IRadio *)> f) const
 {
     for (const auto& radioCacheEntry : radioCache)
         f(radioCacheEntry.radio);
@@ -104,13 +104,13 @@ const ITransmission *ReferenceCommunicationCache::getTransmission(int id) const
     return nullptr;
 }
 
-void ReferenceCommunicationCache::mapTransmissions(std::function<void (const ITransmission *)> f) const
+void ReferenceCommunicationCache::mapTransmissions(std::function<void(const ITransmission *)> f) const
 {
     for (const auto& transmissionCacheEntry : transmissionCache)
         f(transmissionCacheEntry.transmission);
 }
 
-void ReferenceCommunicationCache::removeNonInterferingTransmissions(std::function<void (const ITransmission *transmission)> f)
+void ReferenceCommunicationCache::removeNonInterferingTransmissions(std::function<void(const ITransmission *transmission)> f)
 {
     // NOTE: no erase from the transmission cache to test that it doesn't affect simulation results
 }

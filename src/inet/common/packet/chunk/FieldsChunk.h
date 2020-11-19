@@ -28,18 +28,18 @@ namespace inet {
  */
 class INET_API FieldsChunk : public Chunk
 {
-  friend class Chunk;
-  friend class FieldsChunkSerializer;
+    friend class Chunk;
+    friend class FieldsChunkSerializer;
 
   protected:
     b chunkLength;
     /**
-    * The serialized representation of this chunk or nullptr if not available.
-    * When a chunk is serialized, the result is stored here for fast subsequent
-    * serializations. Moreover, if a chunk is created by deserialization, then
-    * the original bytes are also stored here. The serialized representation
-    * is deleted if a chunk is modified.
-    */
+     * The serialized representation of this chunk or nullptr if not available.
+     * When a chunk is serialized, the result is stored here for fast subsequent
+     * serializations. Moreover, if a chunk is created by deserialization, then
+     * the original bytes are also stored here. The serialized representation
+     * is deleted if a chunk is modified.
+     */
     mutable const std::vector<uint8_t> *serializedBytes;
 
   protected:

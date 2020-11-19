@@ -21,7 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-
 #ifndef __INET_SDES_H
 #define __INET_SDES_H
 
@@ -46,13 +45,13 @@ class INET_API SdesItem : public cObject
     enum SdesItemType {
         SDES_UNDEF = 0,
         SDES_CNAME = 1,
-        SDES_NAME = 2,
+        SDES_NAME  = 2,
         SDES_EMAIL = 3,
         SDES_PHONE = 4,
-        SDES_LOC = 5,
-        SDES_TOOL = 6,
-        SDES_NOTE = 7,
-        SDES_PRIV = 8
+        SDES_LOC   = 5,
+        SDES_TOOL  = 6,
+        SDES_NOTE  = 7,
+        SDES_PRIV  = 8
     };
 
     /**
@@ -118,7 +117,7 @@ class INET_API SdesItem : public cObject
 
   private:
     void copy(const SdesItem& other);
-    void clean() {}    //FIXME The `_content' sometimes allocated, sometimes not allocated pointer.
+    void clean() {} // FIXME The `_content' sometimes allocated, sometimes not allocated pointer.
 
   protected:
     /**

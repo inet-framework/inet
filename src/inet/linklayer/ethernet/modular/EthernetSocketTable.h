@@ -26,8 +26,7 @@ namespace inet {
 class INET_API EthernetSocketTable : public cSimpleModule
 {
   public:
-    struct Socket
-    {
+    struct Socket {
         int socketId = -1;
         MacAddress localAddress;
         MacAddress remoteAddress;

@@ -29,18 +29,18 @@ void OriginatorBlockAckAgreementPolicy::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        ackPolicy = check_and_cast<IOriginatorQoSAckPolicy*>(getModuleByPath(par("originatorAckPolicyModule")));
+        ackPolicy = check_and_cast<IOriginatorQoSAckPolicy *>(getModuleByPath(par("originatorAckPolicyModule")));
         delayedAckPolicySupported = par("delayedAckPolicySupported");
         aMsduSupported = par("aMsduSupported");
         maximumAllowedBufferSize = par("maximumAllowedBufferSize");
         blockAckTimeoutValue = par("blockAckTimeoutValue");
-        // TODO: addbaFailureTimeout = par("addbaFailureTimeout");
+        // TODO addbaFailureTimeout = par("addbaFailureTimeout");
     }
 }
 
 simtime_t OriginatorBlockAckAgreementPolicy::computeAddbaFailureTimeout() const
 {
-    // TODO: ADDBAFailureTimeout -- 6.3.29.2.2 Semantics of the service primitive
+    // TODO ADDBAFailureTimeout -- 6.3.29.2.2 Semantics of the service primitive
     throw cRuntimeError("Unimplemented");
 }
 
@@ -49,7 +49,7 @@ bool OriginatorBlockAckAgreementPolicy::isAddbaReqNeeded(Packet *packet, const P
     return ackPolicy->isBlockAckPolicyEligibleFrame(packet, header);
 }
 
-bool OriginatorBlockAckAgreementPolicy::isAddbaReqAccepted(const Ptr<const Ieee80211AddbaResponse>& addbaResp, OriginatorBlockAckAgreement* agreement)
+bool OriginatorBlockAckAgreementPolicy::isAddbaReqAccepted(const Ptr<const Ieee80211AddbaResponse>& addbaResp, OriginatorBlockAckAgreement *agreement)
 {
     ASSERT(agreement);
     return true;
@@ -62,3 +62,4 @@ bool OriginatorBlockAckAgreementPolicy::isDelbaAccepted(const Ptr<const Ieee8021
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

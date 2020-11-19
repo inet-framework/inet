@@ -25,7 +25,7 @@ const char *Tags::get(const char *k) const
 {
     for (size_t i = 0; i < kvpairs.size(); i += 2)
         if (strcmp(kvpairs[i], k) == 0)
-            return kvpairs[i+1];
+            return kvpairs[i + 1];
     return nullptr;
 }
 
@@ -52,7 +52,7 @@ void OpenStreetMap::releaseAllocations()
         delete node;
     for (const Relation *relation : relations)
         delete relation;
-     delete strings;
+    delete strings;
 }
 
 void OpenStreetMap::operator=(OpenStreetMap&& other)
@@ -110,9 +110,9 @@ void OpenStreetMap::parseTags(cXMLElement *parent, Tags& tags)
 OpenStreetMap OpenStreetMap::from(cXMLElement *mapRoot)
 {
     OpenStreetMap map;
-    std::map<id_t,Node*> nodeById;
-    std::map<id_t,Way*> wayById;
-    std::map<id_t,Relation*> relationById;
+    std::map<id_t, Node *> nodeById;
+    std::map<id_t, Way *> wayById;
+    std::map<id_t, Relation *> relationById;
 
     cXMLElement *boundsElement = mapRoot->getFirstChildWithTag("bounds");
     Bounds& bounds = map.bounds;
@@ -158,7 +158,7 @@ OpenStreetMap OpenStreetMap::from(cXMLElement *mapRoot)
             Member member;
             const char *type = memberElem->getAttribute("type");
             id_t ref = parseId(memberElem->getAttribute("ref"));
-            if (strcmp(type, "node")==0) {
+            if (strcmp(type, "node") == 0) {
                 member.type = Member::NODE;
                 auto it = nodeById.find(ref);
                 member.resolved = (it != nodeById.end());
@@ -167,7 +167,7 @@ OpenStreetMap OpenStreetMap::from(cXMLElement *mapRoot)
                 else
                     member.unresolvedId = ref;
             }
-            else if (strcmp(type, "way")==0) {
+            else if (strcmp(type, "way") == 0) {
                 member.type = Member::WAY;
                 auto it = wayById.find(ref);
                 member.resolved = (it != wayById.end());
@@ -176,7 +176,7 @@ OpenStreetMap OpenStreetMap::from(cXMLElement *mapRoot)
                 else
                     member.unresolvedId = ref;
             }
-            else if (strcmp(type, "relation")==0) {
+            else if (strcmp(type, "relation") == 0) {
                 member.type = Member::RELATION;
                 auto it = relationById.find(ref);
                 member.resolved = (it != relationById.end());
@@ -198,7 +198,7 @@ OpenStreetMap OpenStreetMap::from(cXMLElement *mapRoot)
 
     // resolve references to relations defined out of order
     for (const Relation *relation : map.relations) {
-        for (Member& member : const_cast<Relation*>(relation)->members) {
+        for (Member& member : const_cast<Relation *>(relation)->members) {
             if (member.type == Member::RELATION && !member.resolved) {
                 auto it = relationById.find(member.unresolvedId);
                 if (it != relationById.end()) {

@@ -30,7 +30,7 @@
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
 #include "inet/transportlayer/tcp_nsc/TcpNscConnection.h"
-#include "sim_interface.h"    // NSC. We need this here to derive from classes
+#include "sim_interface.h" // NSC. We need this here to derive from classes
 
 namespace inet {
 
@@ -58,10 +58,10 @@ class INET_API TcpNsc : public cSimpleModule, ISendCallback, IInterruptCallback,
 
     // Implement NSC callbacks:
 
-    //   Implement ISendCallback:
+    // Implement ISendCallback:
     virtual void send_callback(const void *, int) override;
 
-    //   Implement IInterruptCallback:
+    // Implement IInterruptCallback:
     virtual void wakeup() override;
     virtual void gettime(unsigned int *, unsigned int *) override;
 
@@ -147,7 +147,7 @@ class INET_API TcpNsc : public cSimpleModule, ISendCallback, IInterruptCallback,
     virtual TcpNscReceiveQueue *createReceiveQueue();
 
   protected:
-    typedef std::map<int, TcpNscConnection> TcpAppConnMap;    // connId-to-TcpNscConnection
+    typedef std::map<int, TcpNscConnection> TcpAppConnMap; // connId-to-TcpNscConnection
     typedef std::map<u_int32_t, L3Address> Nsc2RemoteMap;
     typedef std::map<L3Address, u_int32_t> Remote2NscMap;
     typedef std::map<TcpNscConnection::SockPair, int> SockPair2ConnIdMap;
@@ -165,27 +165,27 @@ class INET_API TcpNsc : public cSimpleModule, ISendCallback, IInterruptCallback,
     cMessage *pNsiTimerM;
 
   protected:
-    bool isAliveM;    // true when I between initialize() and finish()
+    bool isAliveM; // true when I between initialize() and finish()
 
-    int curAddrCounterM;    // incr, when set curLocalAddr, decr when "felhasznaltam"
-    TcpNscConnection *curConnM;    // store current connection in connect/listen command
+    int curAddrCounterM; // incr, when set curLocalAddr, decr when "felhasznaltam"
+    TcpNscConnection *curConnM; // store current connection in connect/listen command
 
     TcpCrcInsertion crcInsertion;
     CrcMode crcMode = CRC_MODE_UNDEFINED;
 
-    static const L3Address localInnerIpS;    // local NSC IP addr
-    static const L3Address localInnerGwS;    // local NSC gateway IP addr
-    static const L3Address localInnerMaskS;    // local NSC Network Mask
-    static const L3Address remoteFirstInnerIpS;    // first remote NSC IP addr
+    static const L3Address localInnerIpS; // local NSC IP addr
+    static const L3Address localInnerGwS; // local NSC gateway IP addr
+    static const L3Address localInnerMaskS; // local NSC Network Mask
+    static const L3Address remoteFirstInnerIpS; // first remote NSC IP addr
 
-    static const char *stackNameParamNameS;    // name of stackname parameter
-    static const char *bufferSizeParamNameS;    // name of buffersize parameter
+    static const char *stackNameParamNameS; // name of stackname parameter
+    static const char *bufferSizeParamNameS; // name of buffersize parameter
 
     // statistics
-    cOutVector *sndNxtVector;    // sent seqNo
-    cOutVector *sndAckVector;    // sent ackNo
-    cOutVector *rcvSeqVector;    // received seqNo
-    cOutVector *rcvAckVector;    // received ackNo (= snd_una)
+    cOutVector *sndNxtVector; // sent seqNo
+    cOutVector *sndAckVector; // sent ackNo
+    cOutVector *rcvSeqVector; // received seqNo
+    cOutVector *rcvAckVector; // received ackNo (= snd_una)
 };
 
 } // namespace tcp

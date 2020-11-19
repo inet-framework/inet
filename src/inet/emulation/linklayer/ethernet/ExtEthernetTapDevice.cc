@@ -116,7 +116,7 @@ void ExtEthernetTapDevice::openTap(std::string dev)
          * the kernel will try to allocate the "next" device of the
          * specified type */
         strncpy(ifr.ifr_name, dev.c_str(), IFNAMSIZ);
-    if (ioctl(fd, (TUNSETIFF), (void *) &ifr) < 0) {
+    if (ioctl(fd, (TUNSETIFF), (void *)&ifr) < 0) {
         close(fd);
         throw cRuntimeError("Cannot create TAP device: %s", strerror(errno));
     }
@@ -149,11 +149,11 @@ bool ExtEthernetTapDevice::notify(int fd)
         throw cRuntimeError("Cannot read '%s' device: %s", device.c_str(), strerror(errno));
     }
     else if (nread > 0) {
-        ASSERT (nread > 4);
+        ASSERT(nread > 4);
         // buffer[0..1]: flags, buffer[2..3]: ethertype
         Packet *packet = new Packet(nullptr, makeShared<BytesChunk>(buffer + 4, nread - 4));
         auto ethernetFcs = makeShared<EthernetFcs>();
-        ethernetFcs->setFcsMode(FCS_COMPUTED); // TODO: get fcsMode from NED parameter
+        ethernetFcs->setFcsMode(FCS_COMPUTED); // TODO get fcsMode from NED parameter
         packet->insertAtBack(ethernetFcs);
         packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);

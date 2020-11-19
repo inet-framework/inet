@@ -50,15 +50,15 @@ class INET_API ThruputMeteringChannel : public cDatarateChannel
   protected:
     // configuration
     bool displayAsTooltip;
-    const char *fmt;    // display format
-    unsigned int batchSize;    // number of packets in a batch
-    simtime_t maxInterval;    // max length of measurement interval (measurement ends
-                              // if either batchSize or maxInterval is reached, whichever
-                              // is reached first)
+    const char *fmt; // display format
+    unsigned int batchSize; // number of packets in a batch
+    simtime_t maxInterval; // max length of measurement interval (measurement ends
+                           // if either batchSize or maxInterval is reached, whichever
+                           // is reached first)
 
     // global statistics
     long numPackets;
-    double numBits;    // double to avoid overflow
+    double numBits; // double to avoid overflow
 
     // current measurement interval
     simtime_t intvlStartTime;
@@ -99,7 +99,7 @@ class INET_API ThruputMeteringChannel : public cDatarateChannel
      * Creates and returns an exact copy of this object.
      * See cObject for more details.
      */
-//    virtual ThruputMeteringChannel *dup() const {return new ThruputMeteringChannel(*this);}
+//    virtual ThruputMeteringChannel *dup() const { return new ThruputMeteringChannel(*this); }
 
     /**
      * Add parameters and initialize the stat variables

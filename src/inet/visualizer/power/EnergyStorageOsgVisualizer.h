@@ -57,7 +57,7 @@ class INET_API EnergyStorageOsgVisualizer : public EnergyStorageVisualizerBase
     virtual void initialize(int stage) override {}
 
     virtual EnergyStorageVisualization *createEnergyStorageVisualization(const power::IEnergyStorage *energyStorage) const override { return nullptr; }
-    virtual void refreshEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization) const override { }
+    virtual void refreshEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization) const override {}
 
 #endif // ifdef WITH_OSG
 };

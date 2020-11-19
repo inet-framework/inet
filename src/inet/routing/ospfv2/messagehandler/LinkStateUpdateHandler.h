@@ -29,8 +29,7 @@ namespace ospfv2 {
 class INET_API LinkStateUpdateHandler : public IMessageHandler
 {
   private:
-    struct AcknowledgementFlags
-    {
+    struct AcknowledgementFlags {
         bool floodedBackOut;
         bool lsaIsNewer;
         bool lsaIsDuplicate;
@@ -41,7 +40,7 @@ class INET_API LinkStateUpdateHandler : public IMessageHandler
     };
 
   private:
-    bool validateLSChecksum(const Ospfv2Lsa *lsa) { return true; }    // not implemented
+    bool validateLSChecksum(const Ospfv2Lsa *lsa) { return true; } // not implemented
     void acknowledgeLSA(const Ospfv2LsaHeader& lsaHeader, Ospfv2Interface *intf, AcknowledgementFlags acknowledgementFlags, RouterId lsaSource);
 
   public:

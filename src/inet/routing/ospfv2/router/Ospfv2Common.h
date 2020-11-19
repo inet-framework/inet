@@ -68,9 +68,9 @@ const B OSPFv2_ASEXTERNALLSA_TOS_INFO_LENGTH   = B(12);
 typedef unsigned long Metric;
 
 enum AuthenticationType {
-    NULL_TYPE = 0,
+    NULL_TYPE            = 0,
     SIMPLE_PASSWORD_TYPE = 1,
-    CRYTOGRAPHIC_TYPE = 2
+    CRYTOGRAPHIC_TYPE    = 2
 };
 
 struct AuthenticationKeyType
@@ -288,7 +288,6 @@ inline char hexCharToByte(char hex)
         default:
             break;
     }
-    ;
     return 0;
 }
 

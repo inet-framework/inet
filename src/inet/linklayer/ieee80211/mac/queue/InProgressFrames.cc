@@ -70,7 +70,7 @@ bool InProgressFrames::hasEligibleFrameToTransmit()
 
 void InProgressFrames::ensureHasFrameToTransmit()
 {
-//    TODO: delete old frames from inProgressFrames
+//    TODO delete old frames from inProgressFrames
 //    if (auto dataFrame = dynamic_cast<Ieee80211DataHeader*>(frame)) {
 //        if (transmitLifetimeHandler->isLifetimeExpired(dataFrame))
 //            return frame;
@@ -122,7 +122,7 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
                 emit(packetEnqueuedSignal, frame);
             }
             delete frames;
-            // FIXME: If the next Txop sequence were a BlockAckReqBlockAckFs then this would return
+            // FIXME If the next Txop sequence were a BlockAckReqBlockAckFs then this would return
             // a wrong pending frame.
             return firstFrame;
         }
@@ -189,3 +189,4 @@ InProgressFrames::~InProgressFrames()
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

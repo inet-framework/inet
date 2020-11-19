@@ -78,7 +78,7 @@ module Ipv6NetworkLayer like INetworkLayer
             parameters:
                 @display("p=400,400");
         }
-        // TODO: rename to ip
+        // TODO rename to ip
         ipv6: Ipv6 {
             parameters:
                 @display("p=550,400");

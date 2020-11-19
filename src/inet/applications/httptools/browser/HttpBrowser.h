@@ -54,16 +54,15 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TcpSocket::ReceiveQu
      * it as a myPtr. See the TcpSocket::ICallback methods of HttpBrowser for more
      * details.
      */
-    struct SockData
-    {
-        HttpRequestQueue messageQueue;    // Queue of pending messages.
-        TcpSocket *socket = nullptr;    // A reference to the socket object.
-        int pending = 0;    // A counter for the number of outstanding replies.
+    struct SockData {
+        HttpRequestQueue messageQueue; // Queue of pending messages.
+        TcpSocket *socket = nullptr; // A reference to the socket object.
+        int pending = 0; // A counter for the number of outstanding replies.
     };
 
-    SocketMap sockCollection;    // List of active sockets
-    unsigned long numBroken = 0;    // Counter for the number of broken connections
-    unsigned long socketsOpened = 0;    // Counter for opened sockets
+    SocketMap sockCollection; // List of active sockets
+    unsigned long numBroken = 0; // Counter for the number of broken connections
+    unsigned long socketsOpened = 0; // Counter for opened sockets
 
   protected:
     virtual void initialize(int stage) override;

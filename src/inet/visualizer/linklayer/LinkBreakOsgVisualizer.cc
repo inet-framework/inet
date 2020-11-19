@@ -41,13 +41,13 @@ LinkBreakOsgVisualizer::LinkBreakOsgVisualization::LinkBreakOsgVisualization(osg
 
 LinkBreakOsgVisualizer::LinkBreakOsgVisualization::~LinkBreakOsgVisualization()
 {
-    // TODO: delete node;
+    // TODO delete node;
 }
 
 void LinkBreakOsgVisualizer::refreshDisplay() const
 {
     LinkBreakVisualizerBase::refreshDisplay();
-    // TODO: switch to osg canvas when API is extended
+    // TODO switch to osg canvas when API is extended
     visualizationTargetModule->getCanvas()->setAnimationSpeed(linkBreakVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 
@@ -71,7 +71,7 @@ const LinkBreakVisualizerBase::LinkBreakVisualization *LinkBreakOsgVisualizer::c
     material->setDiffuse(osg::Material::FRONT_AND_BACK, colorVec);
     material->setAlpha(osg::Material::FRONT_AND_BACK, 1.0);
     geode->getOrCreateStateSet()->setAttribute(material);
-    // TODO: apply tinting
+    // TODO apply tinting
     return new LinkBreakOsgVisualization(geode, transmitter->getId(), receiver->getId());
 }
 

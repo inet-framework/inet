@@ -44,3 +44,4 @@ const Ptr<Chunk> MplsPacketSerializer::deserialize(MemoryInputStream& stream) co
 }
 
 } // namespace inet
+

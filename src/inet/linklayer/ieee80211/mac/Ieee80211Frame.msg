@@ -212,7 +212,7 @@ class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
 //  The presence of the Address 4 field is determined by the setting of the To DS and From DS subfields of
 //  the Frame Control field (see below). The QoS Control field is present when the QoS subfield of the Subtype
 //  field is set to 1 (8.3.2.1 Data frame format)
-//  FIXME: chunkLength is not a constant value DATAFRAME_HEADER_MINLENGTH (24 bytes).
+//  FIXME chunkLength is not a constant value DATAFRAME_HEADER_MINLENGTH (24 bytes).
 //  For example, with Address 4 and without QoS the correct length is 30 bytes.
 //  Without Address 4 and QoS the correct value is indeed 24 bytes.
 //  With Address 4 and QoS the correct value is indeed 32 bytes.
@@ -231,7 +231,7 @@ class Ieee80211DataHeader extends Ieee80211DataOrMgmtHeader
 //    chunkLength = DATAFRAME_HEADER_MINLENGTH + QOSCONTROL_PART_LENGTH;
 //    AckPolicy ackPolicy = NORMAL_ACK; //FIXME in real life this is part of the optional qos field above...
 //    uint8_t tid;
-//    // TODO: other QoS control field parts
+//    // TODO other QoS control field parts
 //}
 
 //
@@ -247,8 +247,8 @@ class Ieee80211ActionFrame extends Ieee80211MgmtHeader
     type = ST_ACTION;
     short category;
     uint8_t blockAckAction;
-    // TODO: subclasses will add action subfield contents
-    //WirelessNetworkManagementAction action; // action TODO: remove it
+    // TODO subclasses will add action subfield contents
+    //WirelessNetworkManagementAction action; // action TODO remove it
 }
 
 class Ieee80211MsduSubframeHeader extends FieldsChunk
@@ -290,7 +290,7 @@ class Ieee80211AddbaRequest extends Ieee80211ActionFrame
     // Block Ack Starting Sequence Control (2 bytes)
     // The Starting Sequence Number subfield of the Block Ack Starting Sequence Control subfield contains the sequence number of the first MSDU for which this Basic
     // BlockAckReq frame is sent. The Fragment Number subfield is set to 0.
-    uint8_t _fragmentNumber = 0; // FIXME: DataOrMgmtFreme has a fragmentNumber (4 bits)
+    uint8_t _fragmentNumber = 0; // FIXME DataOrMgmtFreme has a fragmentNumber (4 bits)
     SequenceNumber startingSequenceNumber; // the sequence number of the first MSDU (12 bits)
 }
 
@@ -401,7 +401,7 @@ class Ieee80211MultiTidBlockAckReq extends Ieee80211BlockAckReq
     multiTid = 1;
     compressedBitmap = 1;
 
-    // TODO: unimplemented
+    // TODO unimplemented
 }
 
 //
@@ -480,6 +480,6 @@ class Ieee80211MultiTidBlockAck extends Ieee80211BlockAck
     multiTid = 1;
     compressedBitmap = 1;
 
-    // TODO: unimplemented
+    // TODO unimplemented
 }
 

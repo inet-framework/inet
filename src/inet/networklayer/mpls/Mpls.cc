@@ -82,7 +82,7 @@ void Mpls::processPacketFromL3(Packet *msg)
 
     const auto& ipHeader = msg->peekAtFront<Ipv4Header>();
 
-    // XXX temporary solution, until TcpSocket and Ipv4 are extended to support nam tracing
+    // TODO temporary solution, until TcpSocket and Ipv4 are extended to support nam tracing
     if (ipHeader->getProtocolId() == IP_PROT_TCP) {
         const auto& seg = msg->peekDataAt<TcpHeader>(ipHeader->getChunkLength());
         if (seg->getDestPort() == LDP_PORT || seg->getSrcPort() == LDP_PORT) {
@@ -91,11 +91,11 @@ void Mpls::processPacketFromL3(Packet *msg)
         }
     }
     else if (ipHeader->getProtocolId() == IP_PROT_ICMP) {
-        // ASSERT(!msg->hasPar("color")); XXX this did not hold sometimes...
+//        ASSERT(!msg->hasPar("color")); TODO this did not hold sometimes...
         if (!msg->hasPar("color"))
             msg->addPar("color") = ICMP_TRAFFIC;
     }
-    // XXX end of temporary area
+    // TODO end of temporary area
 
     labelAndForwardIpv4Datagram(msg);
 }
@@ -103,9 +103,9 @@ void Mpls::processPacketFromL3(Packet *msg)
 bool Mpls::tryLabelAndForwardIpv4Datagram(Packet *packet)
 {
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-    (void)ipv4Header;       // unused variable
+    (void)ipv4Header; // unused variable
     LabelOpVector outLabel;
-    std::string outInterface;   //FIXME set based on interfaceID
+    std::string outInterface; // FIXME set based on interfaceID
     int color;
 
     if (!pct->lookupLabel(packet, outLabel, outInterface, color)) {
@@ -164,7 +164,7 @@ void Mpls::popLabel(Packet *packet)
 {
     ASSERT(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId());
     auto oldMplsHeader = packet->popAtFront<MplsHeader>();
-    if(oldMplsHeader->getS()) {
+    if (oldMplsHeader->getS()) {
         packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     }
 }
@@ -216,7 +216,7 @@ void Mpls::processPacketFromL2(Packet *packet)
     }
     else {
         throw cRuntimeError("Unknown message received");
-        //FIXME remove throw below
+        // FIXME remove throw below
         sendToL3(packet);
     }
 }
@@ -230,7 +230,7 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
 
     EV_INFO << "Received " << packet << " from L2, label=" << mplsHeader->getLabel() << " inInterface=" << incomingInterfaceName << endl;
 
-    if (mplsHeader->getLabel() == (uint32_t)-1) {   //FIXME
+    if (mplsHeader->getLabel() == (uint32_t)-1) { // FIXME
         // This is a Ipv4 native packet (RSVP/TED traffic)
         // Decapsulate the message and pass up to L3
         EV_INFO << ": decapsulating and sending up\n";
@@ -267,7 +267,7 @@ void Mpls::processMplsPacketFromL2(Packet *packet)
             packet->addPar("color") = color;
         }
 
-        //ASSERT(labelIf[outgoingPort]);
+//        ASSERT(labelIf[outgoingPort]);
         packet->removeTagIfPresent<DispatchProtocolReq>();
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
         packet->trim();
@@ -305,7 +305,7 @@ void Mpls::sendToL3(Packet *msg)
     send(msg, "netwOut");
 }
 
-void Mpls::handleRegisterInterface(const NetworkInterface &interface, cGate *out, cGate *in)
+void Mpls::handleRegisterInterface(const NetworkInterface& interface, cGate *out, cGate *in)
 {
     if (!strcmp("ifIn", in->getBaseName()))
         registerInterface(interface, gate("netwIn"), gate("netwOut"));

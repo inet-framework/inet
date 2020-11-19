@@ -36,7 +36,7 @@ namespace inet {
  */
 namespace math {
 
-//file: INETMath.h , namespace math a class helyett
+// file: INETMath.h , namespace math a class helyett
 /* Windows math.h doesn't define the the following variables: */
 #ifndef M_E
 #define M_E           2.7182818284590452354
@@ -93,12 +93,12 @@ namespace math {
 /* Constant for comparing doubles. Two doubles at most epsilon apart
    are declared equal.*/
 #ifndef EPSILON
-#define EPSILON     0.001
+#define EPSILON    0.001
 #endif // ifndef EPSILON
 
-#define qNaN        std::numeric_limits<double>::quiet_NaN()
-#define sNaN        std::numeric_limits<double>::signaling_NaN()
-#define NaN         qNaN
+#define qNaN       std::numeric_limits<double>::quiet_NaN()
+#define sNaN       std::numeric_limits<double>::signaling_NaN()
+#define NaN        qNaN
 
 /**
  * Returns the rest of a whole-numbered division.
@@ -205,13 +205,13 @@ inline double n_choose_k(int n, int k) {
     if (n < k)
         return 0.0;
 
-    const int       iK     = (k<<1) > n ? n-k : k;
-    const double    dNSubK = (n-iK);
-    int    i      = 1;
-    double dRes   = i > iK ? 1.0 : (dNSubK+i);
+    const int iK = (k << 1) > n ? n - k : k;
+    const double dNSubK = (n - iK);
+    int i = 1;
+    double dRes = i > iK ? 1.0 : (dNSubK + i);
 
     for (++i; i <= iK; ++i) {
-        dRes *= dNSubK+i;
+        dRes *= dNSubK + i;
         dRes /= i;
     }
     return dRes;

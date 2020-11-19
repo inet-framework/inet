@@ -23,7 +23,7 @@
 #include "sys/stat.h"
 #include "sys/types.h"
 #include "winsock2.h"
-#define stat _stat
+#define stat    _stat
 #endif
 #include <assert.h>
 
@@ -87,7 +87,6 @@ struct int_symbol *platform_symbols(void)
     return platform_symbols_table;
 }
 
-
 PacketDrillConfig::PacketDrillConfig()
 {
     ip_version = IP_VERSION_4;
@@ -108,8 +107,8 @@ void PacketDrillConfig::parseScriptOptions(cQueue *options)
 
 PacketDrillPacket::PacketDrillPacket()
 {
-   inetPacket = nullptr;
-   direction = DIRECTION_INVALID;
+    inetPacket = nullptr;
+    direction = DIRECTION_INVALID;
 }
 
 PacketDrillPacket::~PacketDrillPacket()
@@ -182,7 +181,8 @@ int PacketDrillExpression::unescapeCstringExpression(const char *input_string, c
                     EV_DEBUG << "Unsupported escape code: " << *c_in << endl;
                     return STATUS_ERR;
             }
-        } else {
+        }
+        else {
             *c_out = *c_in;
         }
         ++c_in;
@@ -231,12 +231,11 @@ int PacketDrillExpression::getU16(uint16_t *val, char **error)
     return STATUS_OK;
 }
 
-
 /* Do a symbol->int lookup, and return true if we found the symbol. */
 bool PacketDrillExpression::lookupIntSymbol(const char *input_symbol, int64_t *output_integer, struct int_symbol *symbols)
 {
     int i;
-    for (i = 0; symbols[i].name != NULL ; ++i) {
+    for (i = 0; symbols[i].name != NULL; ++i) {
         if (strcmp(input_symbol, symbols[i].name) == 0) {
             *output_integer = symbols[i].value;
             return true;
@@ -426,7 +425,7 @@ PacketDrillSctpParameter::~PacketDrillSctpParameter()
 {
 }
 
-PacketDrillSctpParameter::PacketDrillSctpParameter(uint16_t type_, int16_t len, void* content_)
+PacketDrillSctpParameter::PacketDrillSctpParameter(uint16_t type_, int16_t len, void *content_)
 {
     parameterValue = 0;
     uint32_t flgs = 0;
@@ -440,7 +439,8 @@ PacketDrillSctpParameter::PacketDrillSctpParameter(uint16_t type_, int16_t len, 
     if (!content_) {
         flgs |= FLAG_CHUNK_VALUE_NOCHECK;
         parameterList = nullptr;
-    } else {
+    }
+    else {
         switch (type) {
             case SUPPORTED_EXTENSIONS: {
                 PacketDrillBytes *pdb = (PacketDrillBytes *)content_;
@@ -460,6 +460,5 @@ PacketDrillSctpParameter::PacketDrillSctpParameter(uint16_t type_, int16_t len, 
     flags = flgs;
 }
 
-}    // namespace inet
-
+} // namespace inet
 

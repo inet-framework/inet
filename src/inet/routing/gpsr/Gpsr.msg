@@ -61,6 +61,6 @@ class GpsrOption extends TlvOptionBase {
     Coord perimeterRoutingForwardPosition;   // Lf
     L3Address currentFaceFirstSenderAddress;   // e0
     L3Address currentFaceFirstReceiverAddress; // e0
-    L3Address senderAddress; // TODO: this field is not strictly needed by GPSR (should be eliminated)
+    L3Address senderAddress; // TODO this field is not strictly needed by GPSR (should be eliminated)
 }
 

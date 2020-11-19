@@ -23,11 +23,12 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API HtTxOpFs : public AlternativesFs {
-    public:
-        HtTxOpFs();
+class INET_API HtTxOpFs : public AlternativesFs
+{
+  public:
+    HtTxOpFs();
 
-        virtual int selectHtTxOpSequence(AlternativesFs *frameSequence, FrameSequenceContext *context);
+    virtual int selectHtTxOpSequence(AlternativesFs *frameSequence, FrameSequenceContext *context);
 };
 
 } // namespace ieee80211

@@ -33,7 +33,7 @@ class INET_API ModuleStartOperation : public LifecycleOperation
 {
   public:
     enum Stage {
-        STAGE_LOCAL,    // for changes that don't depend on other modules
+        STAGE_LOCAL, // for changes that don't depend on other modules
         STAGE_PHYSICAL_LAYER,
         STAGE_LINK_LAYER,
         STAGE_NETWORK_LAYER,
@@ -56,14 +56,14 @@ class INET_API ModuleStopOperation : public LifecycleOperation
 {
   public:
     enum Stage {
-        STAGE_LOCAL,    // for changes that don't depend on other modules
+        STAGE_LOCAL, // for changes that don't depend on other modules
         STAGE_APPLICATION_LAYER,
         STAGE_ROUTING_PROTOCOLS,
         STAGE_TRANSPORT_LAYER,
         STAGE_NETWORK_LAYER,
         STAGE_LINK_LAYER,
         STAGE_PHYSICAL_LAYER,
-        STAGE_LAST    // for changes that others shouldn't depend on
+        STAGE_LAST // for changes that others shouldn't depend on
     };
 
   public:
@@ -83,7 +83,7 @@ class INET_API ModuleCrashOperation : public LifecycleOperation
 {
   public:
     enum Stage {
-        STAGE_CRASH,    // the only stage, must execute within zero simulation time
+        STAGE_CRASH, // the only stage, must execute within zero simulation time
         STAGE_LAST
     };
 

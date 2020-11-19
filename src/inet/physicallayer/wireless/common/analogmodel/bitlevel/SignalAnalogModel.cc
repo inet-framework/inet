@@ -43,9 +43,9 @@ NarrowbandSignalAnalogModel::NarrowbandSignalAnalogModel(const simtime_t duratio
 std::ostream& NarrowbandSignalAnalogModel::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     if (level <= PRINT_LEVEL_DEBUG)
-       stream << EV_FIELD(centerFrequency);
+        stream << EV_FIELD(centerFrequency);
     if (level <= PRINT_LEVEL_TRACE)
-       stream << EV_FIELD(bandwidth);
+        stream << EV_FIELD(bandwidth);
     return stream;
 }
 

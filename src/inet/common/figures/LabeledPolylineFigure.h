@@ -20,7 +20,6 @@
 
 #include "inet/common/INETDefs.h"
 
-
 namespace inet {
 
 class INET_API LabeledPolylineFigure : public cGroupFigure

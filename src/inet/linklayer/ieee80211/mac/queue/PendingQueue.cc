@@ -25,7 +25,7 @@ namespace ieee80211 {
 
 static int compareMgmtOverData(Packet *a, Packet *b)
 {
-    int aPri = dynamicPtrCast<const Ieee80211MgmtHeader>(a->peekAtFront<Ieee80211MacHeader>()) ? 1 : 0;  //TODO there should really exist a high-performance isMgmtFrame() function!
+    int aPri = dynamicPtrCast<const Ieee80211MgmtHeader>(a->peekAtFront<Ieee80211MacHeader>()) ? 1 : 0; // TODO there should really exist a high-performance isMgmtFrame() function!
     int bPri = dynamicPtrCast<const Ieee80211MgmtHeader>(b->peekAtFront<Ieee80211MacHeader>()) ? 1 : 0;
     return bPri - aPri;
 }
@@ -69,3 +69,4 @@ Register_Packet_Classifier_Function(MgmtOverMulticastOverUnicastClassifier, clas
 
 } /* namespace inet */
 } /* namespace ieee80211 */
+

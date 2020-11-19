@@ -58,14 +58,14 @@ const IReceptionSymbolModel *LayeredErrorModelBase::computeSymbolModel(const Lay
 {
     if (symbolErrorRate == 0) {
         const TransmissionSymbolModel *transmissionSymbolModel = check_and_cast<const TransmissionSymbolModel *>(transmission->getSymbolModel());
-        return new ReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getPayloadSymbolLength(), transmissionSymbolModel->getPayloadSymbolRate(), new std::vector<const ISymbol*>(*transmissionSymbolModel->getSymbols()), symbolErrorRate);
+        return new ReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getPayloadSymbolLength(), transmissionSymbolModel->getPayloadSymbolRate(), new std::vector<const ISymbol *>(*transmissionSymbolModel->getSymbols()), symbolErrorRate);
     }
     else {
         const TransmissionSymbolModel *transmissionSymbolModel = check_and_cast<const TransmissionSymbolModel *>(transmission->getSymbolModel());
         const ApskModulationBase *modulation = check_and_cast<const ApskModulationBase *>(transmissionSymbolModel->getPayloadModulation());
-        const std::vector<const ISymbol*> *transmittedSymbols = transmissionSymbolModel->getSymbols();
-        std::vector<const ISymbol*> *receivedSymbols = new std::vector<const ISymbol *>();
-        for (auto & transmittedSymbols_i : *transmittedSymbols) {
+        const std::vector<const ISymbol *> *transmittedSymbols = transmissionSymbolModel->getSymbols();
+        std::vector<const ISymbol *> *receivedSymbols = new std::vector<const ISymbol *>();
+        for (auto& transmittedSymbols_i : *transmittedSymbols) {
             if (uniform(0, 1) < symbolErrorRate) {
                 const ApskSymbol *transmittedSymbol = check_and_cast<const ApskSymbol *>(transmittedSymbols_i);
                 ShortBitVector bits = modulation->demapToBitRepresentation(transmittedSymbol);

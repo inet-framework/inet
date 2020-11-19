@@ -55,7 +55,7 @@ void Ieee8022LlcSocketPacketProcessor::pushPacket(Packet *packet, cGate *gate)
         send(packetCopy, "upperLayerOut");
     }
 
-    //TODO mark packet when sent to any socket
+    // TODO mark packet when sent to any socket
     send(packet, "out");
 }
 

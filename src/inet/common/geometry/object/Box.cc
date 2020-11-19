@@ -31,13 +31,11 @@ Box inet::Box::computeBoundingBox(const std::vector<Coord>& points)
 {
     Coord min = Coord::NIL;
     Coord max = Coord::NIL;
-    if (points.begin() != points.end())
-    {
+    if (points.begin() != points.end()) {
         min = *points.begin();
         max = min;
     }
-    for (const auto & point : points)
-    {
+    for (const auto& point : points) {
         min = min.min(point);
         max = max.max(point);
     }
@@ -45,3 +43,4 @@ Box inet::Box::computeBoundingBox(const std::vector<Coord>& points)
 }
 
 } /* namespace inet */
+

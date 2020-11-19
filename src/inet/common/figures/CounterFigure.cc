@@ -165,7 +165,7 @@ int CounterFigure::getLabelOffset() const
 
 void CounterFigure::setLabelOffset(int offset)
 {
-    if(labelOffset != offset)   {
+    if (labelOffset != offset) {
         labelOffset = offset;
         labelFigure->setPosition(Point(backgroundFigure->getBounds().x + backgroundFigure->getBounds().width / 2, backgroundFigure->getBounds().y + backgroundFigure->getBounds().height + labelOffset));
     }
@@ -323,8 +323,7 @@ void CounterFigure::calculateBounds()
     double rectHeight = getDigitFont().pointSize * DIGIT_HEIGHT_PERCENT;
 
     Rectangle bounds = backgroundFigure->getBounds();
-    backgroundFigure->setBounds(Rectangle(0, 0, 2 * PADDING + (rectWidth + DIGIT_PADDING) * digits.size(),
-                    rectHeight + 2 * PADDING));
+    backgroundFigure->setBounds(Rectangle(0, 0, 2 * PADDING + (rectWidth + DIGIT_PADDING) * digits.size(), rectHeight + 2 * PADDING));
     Point pos = calculateRealPos(Point(bounds.x, bounds.y));
     bounds = backgroundFigure->getBounds();
     bounds.x = pos.x;
@@ -359,7 +358,7 @@ void CounterFigure::parse(cProperty *property)
     if ((s = property->getValue(PKEY_LABEL)) != nullptr)
         setLabel(s);
     if ((s = property->getValue(PKEY_LABEL_OFFSET)) != nullptr)
-            setLabelOffset(atoi(s));
+        setLabelOffset(atoi(s));
     if ((s = property->getValue(PKEY_LABEL_FONT)) != nullptr)
         setLabelFont(parseFont(s));
     if ((s = property->getValue(PKEY_LABEL_COLOR)) != nullptr)

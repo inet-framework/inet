@@ -68,9 +68,9 @@ bool Cuboid::computeIntersection(const LineSegment& lineSegment, Coord& intersec
     }
 }
 
-void Cuboid::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const RotationMatrix& rotation, const RotationMatrix& viewRotation) const
+void Cuboid::computeVisibleFaces(std::vector<std::vector<Coord>>& faces, const RotationMatrix& rotation, const RotationMatrix& viewRotation) const
 {
-    // TODO: specialize
+    // TODO specialize
     std::vector<Coord> polygonPoints;
     polygonPoints.push_back(Coord(-size.x / 2, -size.y / 2, -size.z / 2));
     polygonPoints.push_back(Coord(-size.x / 2, size.y / 2, -size.z / 2));

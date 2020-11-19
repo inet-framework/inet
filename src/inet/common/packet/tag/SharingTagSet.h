@@ -47,7 +47,7 @@ class INET_API SharingTagSet : public cObject
     const Ptr<TagBase> removeTag(int index);
 
     int getTagIndex(const std::type_info& typeInfo) const;
-    template <typename T> int getTagIndex() const;
+    template<typename T> int getTagIndex() const;
 
     void ensureTagsVectorAllocated();
     void prepareTagsVectorForUpdate();
@@ -55,8 +55,8 @@ class INET_API SharingTagSet : public cObject
   public:
     /** @name Constructors and operators */
     //@{
-    SharingTagSet() : tags(nullptr) { }
-    SharingTagSet(const SharingTagSet& other) : tags(other.tags) { }
+    SharingTagSet() : tags(nullptr) {}
+    SharingTagSet(const SharingTagSet& other) : tags(other.tags) {}
     SharingTagSet(SharingTagSet&& other) : tags(other.tags) { other.tags = nullptr; }
 
     SharingTagSet& operator=(const SharingTagSet& other);
@@ -99,42 +99,42 @@ class INET_API SharingTagSet : public cObject
     /**
      * Returns the shared tag of the provided type, or returns nullptr if no such tag is present.
      */
-    template <typename T> const Ptr<const T> findTag() const;
+    template<typename T> const Ptr<const T> findTag() const;
 
     /**
      * Returns the exclusively owned tag of the provided type for update, or returns nullptr if no such tag is present.
      */
-    template <typename T> const Ptr<T> findTagForUpdate();
+    template<typename T> const Ptr<T> findTagForUpdate();
 
     /**
      * Returns the shared tag of the provided type, or throws an exception if no such tag is present.
      */
-    template <typename T> const Ptr<const T> getTag() const;
+    template<typename T> const Ptr<const T> getTag() const;
 
     /**
      * Returns the exclusively owned tag of the provided type for update, or throws an exception if no such tag is present.
      */
-    template <typename T> const Ptr<T> getTagForUpdate();
+    template<typename T> const Ptr<T> getTagForUpdate();
 
     /**
      * Returns a newly added exclusively owned tag of the provided type for update, or throws an exception if such a tag is already present.
      */
-    template <typename T> const Ptr<T> addTag();
+    template<typename T> const Ptr<T> addTag();
 
     /**
      * Returns a newly added exclusively owned tag of the provided type if absent, or returns the exclusively owned tag that is already present for update.
      */
-    template <typename T> const Ptr<T> addTagIfAbsent();
+    template<typename T> const Ptr<T> addTagIfAbsent();
 
     /**
      * Removes the tag of the provided type and returns it for update, or throws an exception if no such tag is present.
      */
-    template <typename T> const Ptr<T> removeTag();
+    template<typename T> const Ptr<T> removeTag();
 
     /**
      * Removes the tag of the provided type if present and returns it for update, or returns nullptr if no such tag is present.
      */
-    template <typename T> const Ptr<T> removeTagIfPresent();
+    template<typename T> const Ptr<T> removeTagIfPresent();
     //@}
 };
 
@@ -188,27 +188,27 @@ inline void SharingTagSet::copyTags(const SharingTagSet& source)
     operator=(source);
 }
 
-template <typename T>
+template<typename T>
 inline int SharingTagSet::getTagIndex() const
 {
     return getTagIndex(typeid(T));
 }
 
-template <typename T>
+template<typename T>
 inline const Ptr<const T> SharingTagSet::findTag() const
 {
     int index = getTagIndex<T>();
     return index == -1 ? nullptr : staticPtrCast<const T>(getTag(index));
 }
 
-template <typename T>
+template<typename T>
 inline const Ptr<T> SharingTagSet::findTagForUpdate()
 {
     int index = getTagIndex<T>();
     return index == -1 ? nullptr : staticPtrCast<T>(getTagForUpdate(index));
 }
 
-template <typename T>
+template<typename T>
 inline const Ptr<const T> SharingTagSet::getTag() const
 {
     int index = getTagIndex<T>();
@@ -217,7 +217,7 @@ inline const Ptr<const T> SharingTagSet::getTag() const
     return staticPtrCast<const T>(getTag(index));
 }
 
-template <typename T>
+template<typename T>
 inline const Ptr<T> SharingTagSet::getTagForUpdate()
 {
     int index = getTagIndex<T>();
@@ -226,7 +226,7 @@ inline const Ptr<T> SharingTagSet::getTagForUpdate()
     return staticPtrCast<T>(getTagForUpdate(index));
 }
 
-template <typename T>
+template<typename T>
 inline const Ptr<T> SharingTagSet::addTag()
 {
     int index = getTagIndex<T>();
@@ -237,7 +237,7 @@ inline const Ptr<T> SharingTagSet::addTag()
     return tag;
 }
 
-template <typename T>
+template<typename T>
 inline const Ptr<T> SharingTagSet::addTagIfAbsent()
 {
     const Ptr<T>& tag = findTagForUpdate<T>();
@@ -250,7 +250,7 @@ inline const Ptr<T> SharingTagSet::addTagIfAbsent()
     }
 }
 
-template <typename T>
+template<typename T>
 inline const Ptr<T> SharingTagSet::removeTag()
 {
     int index = getTagIndex<T>();
@@ -259,7 +259,7 @@ inline const Ptr<T> SharingTagSet::removeTag()
     return staticPtrCast<T>(removeTag(index));
 }
 
-template <typename T>
+template<typename T>
 inline const Ptr<T> SharingTagSet::removeTagIfPresent()
 {
     int index = getTagIndex<T>();

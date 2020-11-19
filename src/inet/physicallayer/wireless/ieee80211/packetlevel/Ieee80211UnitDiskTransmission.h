@@ -25,7 +25,7 @@ namespace inet {
 
 namespace physicallayer {
 
-// TODO: IdealTransmissionBase
+// TODO IdealTransmissionBase
 class INET_API Ieee80211UnitDiskTransmission : public UnitDiskTransmission, public Ieee80211TransmissionBase
 {
   public:

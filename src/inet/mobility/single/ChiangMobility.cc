@@ -54,7 +54,7 @@ void ChiangMobility::initialize(int stage)
 
 int ChiangMobility::getNextStateIndex(int currentState)
 {
-    //we assume that the sum in each row is 1
+    // we assume that the sum in each row is 1
     double sum = 0;
     double randomValue = uniform(0.0, 1.0);
     for (int i = 0; i < 3; i++) {

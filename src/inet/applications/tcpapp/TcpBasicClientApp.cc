@@ -40,7 +40,7 @@ void TcpBasicClientApp::initialize(int stage)
     TcpAppBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         numRequestsToSend = 0;
-        earlySend = false;    // TBD make it parameter
+        earlySend = false; // TODO make it parameter
         WATCH(numRequestsToSend);
         WATCH(earlySend);
 
@@ -103,7 +103,7 @@ void TcpBasicClientApp::handleTimer(cMessage *msg)
 {
     switch (msg->getKind()) {
         case MSGKIND_CONNECT:
-            connect();    // active OPEN
+            connect(); // active OPEN
 
             // significance of earlySend: if true, data will be sent already
             // in the ACK of SYN, otherwise only in a separate packet (but still

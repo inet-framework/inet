@@ -43,3 +43,4 @@ const ChunkSerializer *ChunkSerializerRegistry::getSerializer(const std::type_in
 }
 
 } // namespace
+

@@ -98,7 +98,7 @@ class INET_API SpaceAndFrequencyDependentAttenuationFunction : public FunctionBa
 
   public:
     SpaceAndFrequencyDependentAttenuationFunction(const Ptr<const IFunction<double, Domain<Quaternion>>>& transmitterAntennaGainFunction, const Ptr<const IFunction<double, Domain<mps, m, Hz>>>& pathLossFunction, const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction, const Point<m, m, m> startPosition, const Quaternion& startOrientation, const mps propagationSpeed) :
-        transmitterAntennaGainFunction(transmitterAntennaGainFunction), pathLossFunction(pathLossFunction), obstacleLossFunction(obstacleLossFunction), startPosition(startPosition), startOrientation(startOrientation), propagationSpeed(propagationSpeed) { }
+        transmitterAntennaGainFunction(transmitterAntennaGainFunction), pathLossFunction(pathLossFunction), obstacleLossFunction(obstacleLossFunction), startPosition(startPosition), startOrientation(startOrientation), propagationSpeed(propagationSpeed) {}
 
     virtual double getValue(const Point<m, m, m, simsec, Hz>& p) const override {
         m x = std::get<0>(p);
@@ -126,7 +126,7 @@ class INET_API SpaceAndFrequencyDependentAttenuationFunction : public FunctionBa
         return gain;
     }
 
-    virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void (const Interval<m, m, m, simsec, Hz>&, const IFunction<double, Domain<m, m, m, simsec, Hz>> *)> f) const override {
+    virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void(const Interval<m, m, m, simsec, Hz>&, const IFunction<double, Domain<m, m, m, simsec, Hz>> *)> f) const override {
         const auto& lower = i.getLower();
         const auto& upper = i.getUpper();
         if ((i.getFixed() & 0b11101) == 0b11101) {
@@ -176,7 +176,7 @@ class INET_API SpaceDependentAttenuationFunction : public FunctionBase<double, D
 
   public:
     SpaceDependentAttenuationFunction(const Ptr<const IFunction<double, Domain<Quaternion>>>& transmitterAntennaGainFunction, const Ptr<const IFunction<double, Domain<mps, m, Hz>>>& pathLossFunction, const Ptr<const IFunction<double, Domain<m, m, m, m, m, m, Hz>>>& obstacleLossFunction, const Point<m, m, m> startPosition, const Quaternion& startOrientation, const mps propagationSpeed, Hz frequency) :
-        transmitterAntennaGainFunction(transmitterAntennaGainFunction), pathLossFunction(pathLossFunction), obstacleLossFunction(obstacleLossFunction), startPosition(startPosition), startOrientation(startOrientation), propagationSpeed(propagationSpeed), frequency(frequency) { }
+        transmitterAntennaGainFunction(transmitterAntennaGainFunction), pathLossFunction(pathLossFunction), obstacleLossFunction(obstacleLossFunction), startPosition(startPosition), startOrientation(startOrientation), propagationSpeed(propagationSpeed), frequency(frequency) {}
 
     virtual double getValue(const Point<m, m, m, simsec, Hz>& p) const override {
         m x = std::get<0>(p);
@@ -203,7 +203,7 @@ class INET_API SpaceDependentAttenuationFunction : public FunctionBase<double, D
         return gain;
     }
 
-    virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void (const Interval<m, m, m, simsec, Hz>&, const IFunction<double, Domain<m, m, m, simsec, Hz>> *)> f) const override {
+    virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void(const Interval<m, m, m, simsec, Hz>&, const IFunction<double, Domain<m, m, m, simsec, Hz>> *)> f) const override {
         const auto& lower = i.getLower();
         const auto& upper = i.getUpper();
         if ((i.getFixed() & 0b11100) == 0b11100) {
@@ -241,7 +241,7 @@ class INET_API BackgroundNoisePowerFunction : public FunctionBase<WpHz, Domain<m
     Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> powerFunction;
 
   public:
-    BackgroundNoisePowerFunction(const IBackgroundNoise* backgroundNoise) {
+    BackgroundNoisePowerFunction(const IBackgroundNoise *backgroundNoise) {
         Hz minFrequency = Hz(0);
         Hz maxFrequency = GHz(10);
         Coord minPosition;
@@ -258,7 +258,7 @@ class INET_API BackgroundNoisePowerFunction : public FunctionBase<WpHz, Domain<m
         return powerFunction->getValue(Point<simsec, Hz>(std::get<3>(p), std::get<4>(p)));
     }
 
-    virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void (const Interval<m, m, m, simsec, Hz>&, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *)> f) const override {
+    virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void(const Interval<m, m, m, simsec, Hz>&, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *)> f) const override {
         const auto& lower = i.getLower();
         const auto& upper = i.getUpper();
         if ((i.getFixed() & 0b11100) == 0b11100) {
@@ -307,7 +307,7 @@ class INET_API PropagatedTransmissionPowerFunction : public FunctionBase<WpHz, D
     const mps propagationSpeed;
 
   public:
-    PropagatedTransmissionPowerFunction(const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& transmissionPowerFunction, const Point<m, m, m>& startPosition, mps propagationSpeed) : transmissionPowerFunction(transmissionPowerFunction), startPosition(startPosition), propagationSpeed(propagationSpeed) { }
+    PropagatedTransmissionPowerFunction(const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>& transmissionPowerFunction, const Point<m, m, m>& startPosition, mps propagationSpeed) : transmissionPowerFunction(transmissionPowerFunction), startPosition(startPosition), propagationSpeed(propagationSpeed) {}
 
     virtual const Point<m, m, m>& getStartPosition() const { return startPosition; }
 
@@ -330,7 +330,7 @@ class INET_API PropagatedTransmissionPowerFunction : public FunctionBase<WpHz, D
         return transmissionPowerFunction->getValue(Point<simsec, Hz>(time - propagationTime, frequency));
     }
 
-    virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void (const Interval<m, m, m, simsec, Hz>&, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *)> f) const override {
+    virtual void partition(const Interval<m, m, m, simsec, Hz>& i, const std::function<void(const Interval<m, m, m, simsec, Hz>&, const IFunction<WpHz, Domain<m, m, m, simsec, Hz>> *)> f) const override {
         const auto& lower = i.getLower();
         const auto& upper = i.getUpper();
         if ((i.getFixed() & 0b11100) == 0b11100) {
@@ -387,7 +387,7 @@ class INET_API PathLossFunction : public FunctionBase<double, Domain<mps, m, Hz>
     const IPathLoss *pathLoss;
 
   public:
-    PathLossFunction(const IPathLoss *pathLoss) : pathLoss(pathLoss) { }
+    PathLossFunction(const IPathLoss *pathLoss) : pathLoss(pathLoss) {}
 
     virtual double getValue(const Point<mps, m, Hz>& p) const override {
         mps propagationSpeed = std::get<0>(p);
@@ -408,7 +408,7 @@ class INET_API ObstacleLossFunction : public FunctionBase<double, Domain<m, m, m
     const IObstacleLoss *obstacleLoss;
 
   public:
-    ObstacleLossFunction(const IObstacleLoss *obstacleLoss) : obstacleLoss(obstacleLoss) { }
+    ObstacleLossFunction(const IObstacleLoss *obstacleLoss) : obstacleLoss(obstacleLoss) {}
 
     virtual double getValue(const Point<m, m, m, m, m, m, Hz>& p) const override {
         Coord transmissionPosition(std::get<0>(p).get(), std::get<1>(p).get(), std::get<2>(p).get());
@@ -429,7 +429,7 @@ class INET_API AntennaGainFunction : public IFunction<double, Domain<Quaternion>
     const IAntennaGain *antennaGain;
 
   public:
-    AntennaGainFunction(const IAntennaGain *antennaGain) : antennaGain(antennaGain) { }
+    AntennaGainFunction(const IAntennaGain *antennaGain) : antennaGain(antennaGain) {}
 
     virtual Interval<double> getRange() const override { return getRange(getDomain()); }
     virtual Interval<double> getRange(const Interval<Quaternion>& i) const override { throw cRuntimeError("TODO"); }
@@ -439,7 +439,7 @@ class INET_API AntennaGainFunction : public IFunction<double, Domain<Quaternion>
         return antennaGain->computeGain(std::get<0>(p));
     }
 
-    virtual void partition(const Interval<Quaternion>& i, const std::function<void (const Interval<Quaternion>&, const IFunction<double, Domain<Quaternion>> *)> f) const override { throw cRuntimeError("TODO"); }
+    virtual void partition(const Interval<Quaternion>& i, const std::function<void(const Interval<Quaternion>&, const IFunction<double, Domain<Quaternion>> *)> f) const override { throw cRuntimeError("TODO"); }
 
     virtual bool isFinite() const override { throw cRuntimeError("TODO"); }
     virtual bool isFinite(const Interval<Quaternion>& i) const override { throw cRuntimeError("TODO"); }

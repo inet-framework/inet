@@ -42,7 +42,7 @@ inline std::ostream& operator<<(std::ostream& out, const UdpVideoStreamServer::V
 
 UdpVideoStreamServer::~UdpVideoStreamServer()
 {
-    for (auto & elem : streams)
+    for (auto& elem : streams)
         cancelAndDelete(elem.second.timer);
 }
 
@@ -155,7 +155,7 @@ void UdpVideoStreamServer::sendStreamData(cMessage *timer)
 
 void UdpVideoStreamServer::clearStreams()
 {
-    for (auto & elem : streams)
+    for (auto& elem : streams)
         cancelAndDelete(elem.second.timer);
     streams.clear();
 }
@@ -190,8 +190,8 @@ void UdpVideoStreamServer::handleStopOperation(LifecycleOperation *operation)
 void UdpVideoStreamServer::handleCrashOperation(LifecycleOperation *operation)
 {
     clearStreams();
-    if (operation->getRootModule() != getContainingNode(this))     // closes socket when the application crashed only
-        socket.destroy();    //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
+    if (operation->getRootModule() != getContainingNode(this)) // closes socket when the application crashed only
+        socket.destroy(); // TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
     socket.setCallback(nullptr);
 }
 

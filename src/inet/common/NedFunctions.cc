@@ -166,8 +166,7 @@ Define_NED_Function2(nedf_absPath,
 cNEDValue nedf_firstAvailableOrEmpty(cComponent *context, cNEDValue argv[], int argc)
 {
     cRegistrationList *types = componentTypes.getInstance();
-    for (int i=0; i<argc; i++)
-    {
+    for (int i = 0; i < argc; i++) {
         if (argv[i].getType() != cNEDValue::STRING)
             throw cRuntimeError("firstAvailable(): string arguments expected");
         const char *name = argv[i].stringValue();
@@ -207,7 +206,7 @@ static cNedValue nedf_intWithUnit(cComponent *contextComponent, cNedValue argv[]
 {
     switch (argv[0].getType()) {
         case cNedValue::BOOL:
-            return (intval_t)( argv[0].boolValue() ? 1 : 0 );
+            return (intval_t)(argv[0].boolValue() ? 1 : 0);
         case cNedValue::INT:
             return argv[0];
         case cNedValue::DOUBLE:

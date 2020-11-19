@@ -40,7 +40,7 @@ void ChunkBuffer::eraseEmptyRegions(std::vector<Region>::iterator begin, std::ve
     // NOTE: begin and end are inclusive
     CHUNK_CHECK_IMPLEMENTATION(begin != regions.end());
     CHUNK_CHECK_IMPLEMENTATION(end != regions.end());
-    regions.erase(std::remove_if(begin, end + 1, [](const Region& region) { return region.data == nullptr; }), end + 1);
+    regions.erase(std::remove_if(begin, end + 1, [] (const Region& region) { return region.data == nullptr; }), end + 1);
 }
 
 void ChunkBuffer::sliceRegions(Region& newRegion)
@@ -193,3 +193,4 @@ std::string ChunkBuffer::str() const
 }
 
 } // namespace
+

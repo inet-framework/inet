@@ -80,6 +80,7 @@ Ieee80211OfdmInterleaver::Ieee80211OfdmInterleaver(const Ieee80211OfdmInterleavi
     numberOfCodedBitsPerSymbol = interleaving->getNumberOfCodedBitsPerSymbol();
     s = std::max(numberOfCodedBitsPerSubcarrier / 2, 1);
 }
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

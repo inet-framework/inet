@@ -42,19 +42,18 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
         IntervalTree *receptionIntervals = nullptr;
 
       public:
-        RadioCacheEntry() { }
-        RadioCacheEntry(const RadioCacheEntry &other);
-        RadioCacheEntry(RadioCacheEntry &&other) noexcept;
-        RadioCacheEntry &operator=(const RadioCacheEntry &other);
-        RadioCacheEntry &operator=(RadioCacheEntry &&other) noexcept;
+        RadioCacheEntry() {}
+        RadioCacheEntry(const RadioCacheEntry& other);
+        RadioCacheEntry(RadioCacheEntry&& other) noexcept;
+        RadioCacheEntry& operator=(const RadioCacheEntry& other);
+        RadioCacheEntry& operator=(RadioCacheEntry&& other) noexcept;
         virtual ~RadioCacheEntry();
     };
 
     /**
      * Caches the intermediate computation results related to a reception.
      */
-    class ReceptionCacheEntry
-    {
+    class ReceptionCacheEntry {
       public:
         /**
          * The corresponding transmission.
@@ -80,18 +79,17 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
 
       public:
         ReceptionCacheEntry();
-        ReceptionCacheEntry(const ReceptionCacheEntry &other);
-        ReceptionCacheEntry(ReceptionCacheEntry &&other) noexcept;
-        ReceptionCacheEntry &operator=(const ReceptionCacheEntry &other);
-        ReceptionCacheEntry &operator=(ReceptionCacheEntry &&other) noexcept;
+        ReceptionCacheEntry(const ReceptionCacheEntry& other);
+        ReceptionCacheEntry(ReceptionCacheEntry&& other) noexcept;
+        ReceptionCacheEntry& operator=(const ReceptionCacheEntry& other);
+        ReceptionCacheEntry& operator=(ReceptionCacheEntry&& other) noexcept;
         virtual ~ReceptionCacheEntry();
     };
 
     /**
      * Caches the intermediate computation results related to a transmission.
      */
-    class TransmissionCacheEntry
-    {
+    class TransmissionCacheEntry {
       public:
         /**
          * The corresponding transmission.
@@ -108,11 +106,11 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
         const IWirelessSignal *signal = nullptr;
 
       public:
-        TransmissionCacheEntry() { }
-        TransmissionCacheEntry(const TransmissionCacheEntry &other);
-        TransmissionCacheEntry(TransmissionCacheEntry &&other) noexcept;
-        TransmissionCacheEntry &operator=(const TransmissionCacheEntry &other);
-        TransmissionCacheEntry &operator=(TransmissionCacheEntry &&other) noexcept;
+        TransmissionCacheEntry() {}
+        TransmissionCacheEntry(const TransmissionCacheEntry& other);
+        TransmissionCacheEntry(TransmissionCacheEntry&& other) noexcept;
+        TransmissionCacheEntry& operator=(const TransmissionCacheEntry& other);
+        TransmissionCacheEntry& operator=(TransmissionCacheEntry&& other) noexcept;
     };
 
   protected:

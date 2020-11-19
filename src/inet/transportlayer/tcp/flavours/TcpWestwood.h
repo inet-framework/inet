@@ -37,12 +37,12 @@ class INET_API TcpWestwoodStateVariables : public TcpBaseAlgStateVariables
     virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
 
-    uint32_t ssthresh;    ///< slow start threshold
+    uint32_t ssthresh; ///< slow start threshold
 
-    simtime_t w_RTTmin;    // min RTT
-    double w_a;    // threshold reduction factor for ssthresh calculation
+    simtime_t w_RTTmin; // min RTT
+    double w_a; // threshold reduction factor for ssthresh calculation
 
-    simtime_t w_lastAckTime;    // last received ack time
+    simtime_t w_lastAckTime; // last received ack time
 
     double w_bwe;
     double w_sample_bwe;
@@ -53,7 +53,7 @@ class INET_API TcpWestwoodStateVariables : public TcpBaseAlgStateVariables
 class INET_API TcpWestwood : public TcpBaseAlg
 {
   protected:
-    TcpWestwoodStateVariables *& state;    // alias to TCLAlgorithm's 'state'
+    TcpWestwoodStateVariables *& state; // alias to TCLAlgorithm's 'state'
 
     /** Create and return a TCPvegasStateVariables object. */
     virtual TcpStateVariables *createStateVariables() override

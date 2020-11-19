@@ -45,17 +45,16 @@ void TxopProcedure::initialize(int stage)
 
 s TxopProcedure::getTxopLimit(const IIeee80211Mode *mode, AccessCategory ac)
 {
-    switch (ac)
-    {
+    switch (ac) {
         case AC_BK: return s(0);
         case AC_BE: return s(0);
         case AC_VI:
-            if (dynamic_cast<const Ieee80211DsssMode*>(mode) || dynamic_cast<const Ieee80211HrDsssMode*>(mode)) return ms(6.016);
-            else if (dynamic_cast<const Ieee80211HtMode*>(mode) || dynamic_cast<const Ieee80211OfdmMode*>(mode)) return ms(3.008);
+            if (dynamic_cast<const Ieee80211DsssMode *>(mode) || dynamic_cast<const Ieee80211HrDsssMode *>(mode)) return ms(6.016);
+            else if (dynamic_cast<const Ieee80211HtMode *>(mode) || dynamic_cast<const Ieee80211OfdmMode *>(mode)) return ms(3.008);
             else return s(0);
         case AC_VO:
-            if (dynamic_cast<const Ieee80211DsssMode*>(mode) || dynamic_cast<const Ieee80211HrDsssMode*>(mode)) return ms(3.264);
-            else if (dynamic_cast<const Ieee80211HtMode*>(mode) || dynamic_cast<const Ieee80211OfdmMode*>(mode)) return ms(1.504);
+            if (dynamic_cast<const Ieee80211DsssMode *>(mode) || dynamic_cast<const Ieee80211HrDsssMode *>(mode)) return ms(3.264);
+            else if (dynamic_cast<const Ieee80211HtMode *>(mode) || dynamic_cast<const Ieee80211OfdmMode *>(mode)) return ms(1.504);
             else return s(0);
         default: throw cRuntimeError("Unknown access category = %d", ac);
     }
@@ -65,7 +64,6 @@ TxopProcedure::ProtectionMechanism TxopProcedure::selectProtectionMechanism(Acce
 {
     return ProtectionMechanism::SINGLE_PROTECTION;
 }
-
 
 simtime_t TxopProcedure::getStart() const
 {
@@ -94,7 +92,6 @@ void TxopProcedure::startTxop(AccessCategory ac)
     EV_INFO << "Txop started: limit = " << limit << ".\n";
 }
 
-
 void TxopProcedure::endTxop()
 {
     Enter_Method("endTxop");
@@ -119,19 +116,19 @@ simtime_t TxopProcedure::getDuration() const
     return simTime() - start;
 }
 
-// FIXME: implement!
+// FIXME implement!
 bool TxopProcedure::isFinalFragment(const Ptr<const Ieee80211MacHeader>& header) const
 {
     return false;
 }
 
-// FIXME: implement!
+// FIXME implement!
 bool TxopProcedure::isTxopInitiator(const Ptr<const Ieee80211MacHeader>& header) const
 {
     return false;
 }
 
-// FIXME: implement!
+// FIXME implement!
 bool TxopProcedure::isTxopTerminator(const Ptr<const Ieee80211MacHeader>& header) const
 {
     return false;
@@ -145,4 +142,5 @@ void TxopDurationFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cO
 }
 
 } // namespace ieee80211
-}// namespace inet
+} // namespace inet
+

@@ -86,7 +86,7 @@ double StochasticErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal
         return bitErrorRate;
     }
     else {
-        // TODO: compute bit error rate based on symbol error rate and modulation
+        // TODO compute bit error rate based on symbol error rate and modulation
 //        const IReception *reception = snir->getReception();
 //        const NarrowbandTransmissionBase *narrowbandTransmission = check_and_cast<const NarrowbandTransmissionBase *>(reception->getTransmission());
 //        const IModulation *modulation = narrowbandTransmission->getModulation();

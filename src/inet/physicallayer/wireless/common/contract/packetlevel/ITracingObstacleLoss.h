@@ -28,8 +28,7 @@ namespace physicallayer {
 class INET_API ITracingObstacleLoss : public IObstacleLoss
 {
   public:
-    class ObstaclePenetratedEvent : public cObject
-    {
+    class ObstaclePenetratedEvent : public cObject {
       public:
         const physicalenvironment::IPhysicalObject *object;
         const Coord intersection1;

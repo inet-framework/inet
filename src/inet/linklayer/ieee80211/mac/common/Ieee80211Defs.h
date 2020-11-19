@@ -36,7 +36,7 @@ struct SequenceNumber
     int16_t distance4096(int16_t other) const { ASSERT(0 <= other && other < 4096); return (value - other + 4096) % 4096; }
 
   public:
-    SequenceNumber() : value(-1) { }
+    SequenceNumber() : value(-1) {}
     SequenceNumber(int16_t value) : value(value) { ASSERT(0 <= value && value < 4096); }
     SequenceNumber(const SequenceNumber& other) : value(other.value) { ASSERT(other.value != -1); }
 
@@ -49,10 +49,12 @@ struct SequenceNumber
     SequenceNumber operator-(int other) const { ASSERT(value != -1); SequenceNumber result; result.value = modulo4096(value - other); return result; }
     SequenceNumber operator+(int other) const { ASSERT(value != -1); SequenceNumber result; result.value = modulo4096(value + other); return result; }
 
-    bool operator<(const SequenceNumber& other) const { ASSERT(value != -1 && other.value != -1);
+    bool operator<(const SequenceNumber& other) const {
+        ASSERT(value != -1 && other.value != -1);
         int16_t d = (other.value - value + 4096) % 4096;
         return 0 < d && d < 2048;
     }
+
     bool operator<=(const SequenceNumber& other) const { return *this == other || *this < other; }
     bool operator>(const SequenceNumber& other) const { return other < *this; }
     bool operator>=(const SequenceNumber& other) const { return *this == other || *this > other; }

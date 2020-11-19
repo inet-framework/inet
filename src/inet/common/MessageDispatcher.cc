@@ -26,8 +26,8 @@ namespace inet {
 
 Define_Module(MessageDispatcher);
 
-// TODO: optimize gate access throughout this class
-// TODO: factoring out some methods could also help
+// TODO optimize gate access throughout this class
+// TODO factoring out some methods could also help
 
 void MessageDispatcher::initialize(int stage)
 {
@@ -127,6 +127,7 @@ void MessageDispatcher::handleCanPushPacketChanged(cGate *outGate)
 void MessageDispatcher::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
 }
+
 #endif // #ifdef WITH_QUEUEING
 
 cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
@@ -140,11 +141,11 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
         else
             throw cRuntimeError("handlePacket(): Unknown socket, id = %d, sender = %s", socketId, inGate->getPathStartGate()->getOwnerModule()->getFullName());
     }
-    const auto& dispatchProtocolReq = packet->findTag<DispatchProtocolReq>();;
+    const auto& dispatchProtocolReq = packet->findTag<DispatchProtocolReq>();
     if (dispatchProtocolReq != nullptr) {
-        const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();;
+        const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();
         auto servicePrimitive = dispatchProtocolReq->getServicePrimitive();
-        // TODO: KLUDGE: eliminate this by adding ServicePrimitive to every DispatchProtocolReq
+        // KLUDGE eliminate this by adding ServicePrimitive to every DispatchProtocolReq
         if (servicePrimitive == static_cast<ServicePrimitive>(-1)) {
             if (packetProtocolTag != nullptr && dispatchProtocolReq->getProtocol() == packetProtocolTag->getProtocol())
                 servicePrimitive = SP_INDICATION;
@@ -211,10 +212,10 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
         else
             throw cRuntimeError("handleMessage(): Unknown socket, id = %d", socketId);
     }
-    const auto& dispatchProtocolReq = message->findTag<DispatchProtocolReq>();;
+    const auto& dispatchProtocolReq = message->findTag<DispatchProtocolReq>();
     if (dispatchProtocolReq != nullptr) {
         auto servicePrimitive = dispatchProtocolReq->getServicePrimitive();
-        // TODO: KLUDGE: eliminate this by adding ServicePrimitive to every DispatchProtocolReq
+        // KLUDGE eliminate this by adding ServicePrimitive to every DispatchProtocolReq
         if (servicePrimitive == static_cast<ServicePrimitive>(-1))
             servicePrimitive = SP_REQUEST;
         auto protocol = dispatchProtocolReq->getProtocol();
@@ -353,7 +354,7 @@ void MessageDispatcher::handleRegisterAnyProtocol(cGate *g, ServicePrimitive ser
     }
 }
 
-void MessageDispatcher::handleRegisterInterface(const NetworkInterface &interface, cGate *out, cGate *in)
+void MessageDispatcher::handleRegisterInterface(const NetworkInterface& interface, cGate *out, cGate *in)
 {
     Enter_Method("handleRegisterInterface");
     EV_INFO << "Registering interface" << EV_FIELD(interface) << EV_FIELD(out, out) << EV_FIELD(in) << EV_ENDL;

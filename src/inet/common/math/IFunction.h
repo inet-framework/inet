@@ -64,7 +64,7 @@ class INET_API IFunction : public cObject, public SharedBase<IFunction<R, D>>
      * Subdivides the provided domain and calls back f with the subdomains and
      * the corresponding potentially simpler domain limited functions.
      */
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> f) const = 0;
+    virtual void partition(const typename D::I& i, const std::function<void(const typename D::I&, const IFunction<R, D> *)> f) const = 0;
 
     /**
      * Returns true if the function value is finite in the whole domain.
@@ -172,8 +172,8 @@ class INET_API IFunction : public cObject, public SharedBase<IFunction<R, D>>
     virtual void printStructure(std::ostream& os, int level = 0) const = 0;
 };
 
-template<typename R, typename ... T>
-inline std::ostream& operator<<(std::ostream& os, const IFunction<R, Domain<T ...> >& f) {
+template<typename R, typename... T>
+inline std::ostream& operator<<(std::ostream& os, const IFunction<R, Domain<T ...>>& f) {
     f.print(os);
     return os;
 }

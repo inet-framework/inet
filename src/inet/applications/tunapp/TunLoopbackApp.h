@@ -26,19 +26,19 @@ namespace inet {
 
 class INET_API TunLoopbackApp : public cSimpleModule, public LifecycleUnsupported
 {
-    protected:
-        const char *tunInterface = nullptr;
+  protected:
+    const char *tunInterface = nullptr;
 
-        unsigned int packetsSent = 0;
-        unsigned int packetsReceived = 0;
+    unsigned int packetsSent = 0;
+    unsigned int packetsReceived = 0;
 
-        TunSocket tunSocket;
+    TunSocket tunSocket;
 
-    protected:
-        void initialize(int stage) override;
-        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-        void handleMessage(cMessage *msg) override;
-        void finish() override;
+  protected:
+    void initialize(int stage) override;
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    void handleMessage(cMessage *msg) override;
+    void finish() override;
 };
 
 } // namespace inet

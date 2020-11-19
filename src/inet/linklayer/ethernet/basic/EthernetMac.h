@@ -60,7 +60,7 @@ class INET_API EthernetMac : public EthernetMacBase
     virtual void beginSendFrames();
 
     // statistics
-    simtime_t totalSuccessfulRxTime;    // total duration of successful transmissions on channel
+    simtime_t totalSuccessfulRxTime; // total duration of successful transmissions on channel
 };
 
 } // namespace inet

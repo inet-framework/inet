@@ -71,7 +71,7 @@ bool MacAddress::tryParse(const char *hexstr)
     // Converts hex string into the address
     // if hext string is shorter, address is filled with zeros;
     // Non-hex characters are discarded before conversion.
-    address = 0;    // clear top 16 bits too that setAddressByte() calls skip
+    address = 0; // clear top 16 bits too that setAddressByte() calls skip
     int k = 0;
     const char *s = hexstr;
     for (int pos = 0; pos < MAC_ADDRESS_SIZE; pos++) {
@@ -119,7 +119,7 @@ void MacAddress::getAddressBytes(unsigned char *addrbytes) const
 
 void MacAddress::setAddressBytes(unsigned char *addrbytes)
 {
-    address = 0;    // clear top 16 bits too that setAddressByte() calls skip
+    address = 0; // clear top 16 bits too that setAddressByte() calls skip
     for (int i = 0; i < MAC_ADDRESS_SIZE; i++)
         setAddressByte(i, addrbytes[i]);
 }
@@ -136,7 +136,7 @@ std::string MacAddress::str() const
 
 int MacAddress::compareTo(const MacAddress& other) const
 {
-    return (address < other.address) ? -1 : (address == other.address) ? 0 : 1;    // note: "return address-other.address" is not OK because 64-bit result does not fit into the return type
+    return (address < other.address) ? -1 : (address == other.address) ? 0 : 1; // note: "return address-other.address" is not OK because 64-bit result does not fit into the return type
 }
 
 InterfaceToken MacAddress::formInterfaceIdentifier() const

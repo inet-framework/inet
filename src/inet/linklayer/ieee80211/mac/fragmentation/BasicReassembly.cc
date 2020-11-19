@@ -28,7 +28,7 @@ namespace ieee80211 {
 Register_Class(BasicReassembly);
 
 /*
- * FIXME: this function needs a serious review
+ * FIXME this function needs a serious review
  */
 Packet *BasicReassembly::addFragment(Packet *packet)
 {
@@ -36,7 +36,7 @@ Packet *BasicReassembly::addFragment(Packet *packet)
     // Frame is not fragmented
     if (!header->getMoreFragments() && header->getFragmentNumber() == 0)
         return packet;
-    // FIXME: temporary fix for mgmt frames
+    // FIXME temporary fix for mgmt frames
     if (dynamicPtrCast<const Ieee80211MgmtHeader>(header))
         return packet;
     // find entry for this frame
@@ -62,7 +62,7 @@ Packet *BasicReassembly::addFragment(Packet *packet)
     else
         delete packet;
 
-    //MacAddress txAddress = header->getTransmitterAddress();
+//    MacAddress txAddress = header->getTransmitterAddress();
 
     // if all fragments arrived, return assembled frame
     if (value.allFragments != 0 && value.allFragments == value.receivedFragments) {
@@ -70,8 +70,8 @@ Packet *BasicReassembly::addFragment(Packet *packet)
         value.fragments.erase(std::remove(value.fragments.begin(), value.fragments.end(), nullptr), value.fragments.end());
         auto defragmentedFrame = defragmentation.defragmentFrames(&value.fragments);
         // We need to restore some data from the carrying frame's header like TX address
-        // TODO: Maybe we need to restore the fromDs, toDs fields as well when traveling through multiple APs
-        // TODO: Are there any other fields that we need to restore?
+        // TODO Maybe we need to restore the fromDs, toDs fields as well when traveling through multiple APs
+        // TODO Are there any other fields that we need to restore?
         for (auto fragment : value.fragments)
             delete fragment;
         fragmentsMap.erase(key);
@@ -92,14 +92,14 @@ void BasicReassembly::purge(const MacAddress& address, int tid, int startSeqNumb
     auto itEnd = fragmentsMap.upper_bound(key);
 
     if (endSeqNumber < startSeqNumber) {
-        for (auto it = itStart; it != fragmentsMap.end(); ) {
+        for (auto it = itStart; it != fragmentsMap.end();) {
             for (auto fragment : it->second.fragments)
                 delete fragment;
             it = fragmentsMap.erase(it);
         }
         itStart = fragmentsMap.begin();
     }
-    for (auto it = itStart; it != itEnd; ) {
+    for (auto it = itStart; it != itEnd;) {
         for (auto fragment : it->second.fragments)
             delete fragment;
         it = fragmentsMap.erase(it);

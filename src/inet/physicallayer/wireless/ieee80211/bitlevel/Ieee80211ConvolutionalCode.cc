@@ -39,8 +39,7 @@ Ieee80211ConvolutionalCode::Ieee80211ConvolutionalCode(int codeRateK, int codeRa
         codeRatePuncturingN = 4;
         puncturingMatrix = "1 1 0; 1 0 1";
     }
-    else if (codeRateK == 5 && codeRateN == 6)
-    {
+    else if (codeRateK == 5 && codeRateN == 6) {
         codeRatePuncturingK = 5;
         codeRatePuncturingN = 6;
         puncturingMatrix = "1 1 0 1 0; 1 0 1 0 1";
@@ -48,6 +47,7 @@ Ieee80211ConvolutionalCode::Ieee80211ConvolutionalCode(int codeRateK, int codeRa
     else
         throw cRuntimeError("Unsupported code rate %d/%d", codeRateK, codeRateN);
 }
-}
-}
+
+} // namespace physicallayer
+} // namespace inet
 

@@ -64,12 +64,14 @@ Ptr<Ipv4Header> PacketDrill::makeIpv4Header(IpProtocolId protocol, enum directio
         ipv4Header->setDestAddress(localAddr.toIpv4());
         ipv4Header->setIdentification(pdapp->getIdInbound());
         pdapp->increaseIdInbound();
-    } else if (direction == DIRECTION_OUTBOUND) {
+    }
+    else if (direction == DIRECTION_OUTBOUND) {
         ipv4Header->setSrcAddress(localAddr.toIpv4());
         ipv4Header->setDestAddress(remoteAddr.toIpv4());
         ipv4Header->setIdentification(pdapp->getIdOutbound());
         pdapp->increaseIdOutbound();
-    } else
+    }
+    else
         throw cRuntimeError("Unknown direction type %d", direction);
     ipv4Header->setProtocolId(protocol);
     ipv4Header->setTimeToLive(32);
@@ -83,7 +85,7 @@ Ptr<Ipv4Header> PacketDrill::makeIpv4Header(IpProtocolId protocol, enum directio
     return ipv4Header;
 }
 
-void PacketDrill::setIpv4HeaderCrc(Ptr<Ipv4Header> &ipv4Header)
+void PacketDrill::setIpv4HeaderCrc(Ptr<Ipv4Header>& ipv4Header)
 {
     ipv4Header->setCrcMode(pdapp->getCrcMode());
     ipv4Header->setCrc(0);
@@ -95,9 +97,8 @@ void PacketDrill::setIpv4HeaderCrc(Ptr<Ipv4Header> &ipv4Header)
     }
 }
 
-
-Packet* PacketDrill::buildUDPPacket(int address_family, enum direction_t direction,
-                                     uint16_t udpPayloadBytes, char **error)
+Packet *PacketDrill::buildUDPPacket(int address_family, enum direction_t direction,
+                                    uint16_t udpPayloadBytes, char **error)
 {
     PacketDrillApp *app = PacketDrill::pdapp;
     Packet *packet = new Packet("UDPInject");
@@ -110,11 +111,13 @@ Packet* PacketDrill::buildUDPPacket(int address_family, enum direction_t directi
         udpHeader->setSourcePort(app->getRemotePort());
         udpHeader->setDestinationPort(app->getLocalPort());
         packet->setName("UDPInbound");
-    } else if (direction == DIRECTION_OUTBOUND) {
+    }
+    else if (direction == DIRECTION_OUTBOUND) {
         udpHeader->setSourcePort(app->getLocalPort());
         udpHeader->setDestinationPort(app->getRemotePort());
         packet->setName("UDPOutbound");
-    } else
+    }
+    else
         throw cRuntimeError("Unknown direction");
     udpHeader->setCrcMode(CRC_DISABLED);
     udpHeader->setTotalLengthField(UDP_HEADER_LENGTH + B(udpPayloadBytes));
@@ -126,8 +129,7 @@ Packet* PacketDrill::buildUDPPacket(int address_family, enum direction_t directi
     return packet;
 }
 
-
-TcpOption *setOptionValues(PacketDrillTcpOption* opt)
+TcpOption *setOptionValues(PacketDrillTcpOption *opt)
 {
     unsigned char length = opt->getLength();
     switch (opt->getKind()) {
@@ -193,13 +195,13 @@ TcpOption *setOptionValues(PacketDrillTcpOption* opt)
     if (length > 2)
         option->setBytesArraySize(length - 2);
     for (unsigned int i = 2; i < length; i++)
-        option->setBytes(i-2, length);
+        option->setBytes(i - 2, length);
     return option;
 }
 
-Packet* PacketDrill::buildTCPPacket(int address_family, enum direction_t direction, const char *flags,
-                                     uint32_t startSequence, uint16_t tcpPayloadBytes, uint32_t ackSequence,
-                                     int32_t window, cQueue *tcpOptions, char **error)
+Packet *PacketDrill::buildTCPPacket(int address_family, enum direction_t direction, const char *flags,
+                                    uint32_t startSequence, uint16_t tcpPayloadBytes, uint32_t ackSequence,
+                                    int32_t window, cQueue *tcpOptions, char **error)
 {
     Packet *packet = new Packet("TCPInject");
     PacketDrillApp *app = PacketDrill::pdapp;
@@ -214,7 +216,8 @@ Packet* PacketDrill::buildTCPPacket(int address_family, enum direction_t directi
         tcpHeader->setSrcPort(app->getRemotePort());
         tcpHeader->setDestPort(app->getLocalPort());
         packet->setName("TCPInbound");
-    } else if (direction == DIRECTION_OUTBOUND) {
+    }
+    else if (direction == DIRECTION_OUTBOUND) {
         tcpHeader->setSrcPort(app->getLocalPort());
         tcpHeader->setDestPort(app->getRemotePort());
         packet->setName("TCPOutbound");
@@ -250,7 +253,7 @@ Packet* PacketDrill::buildTCPPacket(int address_family, enum direction_t directi
         TcpOption *option;
 
         for (cQueue::Iterator iter(*tcpOptions); !iter.end(); iter++) {
-            PacketDrillTcpOption* opt = check_and_cast<PacketDrillTcpOption*>(*iter);
+            PacketDrillTcpOption *opt = check_and_cast<PacketDrillTcpOption *>(*iter);
             option = setOptionValues(opt);
             // write option to tcp header
             tcpHeader->insertHeaderOption(option);
@@ -269,7 +272,7 @@ Packet* PacketDrill::buildTCPPacket(int address_family, enum direction_t directi
     return packet;
 }
 
-Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direction, cQueue *chunks)
+Packet *PacketDrill::buildSCTPPacket(int address_family, enum direction_t direction, cQueue *chunks)
 {
     Packet *packet = new Packet("SCTPInject");
     PacketDrillApp *app = PacketDrill::pdapp;
@@ -335,7 +338,7 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
                         return nullptr;
                     }
                     break;
-               case INIT_ACK:
+                case INIT_ACK:
                     if (sctpchunk->getFlags() & FLAG_INIT_ACK_CHUNK_TAG_NOCHECK) {
                         printf("TAG must be specified for inbound packets\n");
                         return nullptr;
@@ -357,7 +360,7 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
                         return nullptr;
                     }
                     break;
-               case SCTP_SACK_CHUNK_TYPE:
+                case SCTP_SACK_CHUNK_TYPE:
                     if (sctpchunk->getFlags() & FLAG_SACK_CHUNK_CUM_TSN_NOCHECK) {
                         printf("CUM_TSN must be specified for inbound packets\n");
                         return nullptr;
@@ -375,19 +378,19 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
                         return nullptr;
                     }
                     break;
-               case SCTP_ABORT_CHUNK_TYPE:
+                case SCTP_ABORT_CHUNK_TYPE:
                     if (sctpchunk->getFlags() & FLAG_CHUNK_LENGTH_NOCHECK) {
                         printf("error causes must be specified for inbound packets\n");
                         return nullptr;
                     }
                     break;
-               case SCTP_SHUTDOWN_CHUNK_TYPE:
+                case SCTP_SHUTDOWN_CHUNK_TYPE:
                     if (sctpchunk->getFlags() & FLAG_SHUTDOWN_CHUNK_CUM_TSN_NOCHECK) {
                         printf("TSN must be specified for inbound packets\n");
                         return nullptr;
                     }
                     break;
-               default:
+                default:
                     if (sctpchunk->getFlags() & FLAG_CHUNK_TYPE_NOCHECK) {
                         printf("chunk type must be specified for inbound packets\n");
                         return nullptr;
@@ -403,7 +406,8 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
                     break;
             }
         }
-    } else if (direction == DIRECTION_OUTBOUND) {
+    }
+    else if (direction == DIRECTION_OUTBOUND) {
         sctpmsg->setSrcPort(app->getLocalPort());
         sctpmsg->setDestPort(app->getRemotePort());
         auto addressReq = packet->addTag<L3AddressReq>();
@@ -416,7 +420,7 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
             SctpChunk *sctpchunk = chunk->getChunk();
             switch (sctpchunk->getSctpChunkType()) {
                 case SCTP_RECONFIG_CHUNK_TYPE:
-                    SctpStreamResetChunk* reconfig = check_and_cast<SctpStreamResetChunk*>(sctpchunk);
+                    SctpStreamResetChunk *reconfig = check_and_cast<SctpStreamResetChunk *>(sctpchunk);
                     for (unsigned int i = 0; i < reconfig->getParametersArraySize(); i++) {
                         const SctpParameter *parameter = reconfig->getParameters(i);
                         switch (parameter->getParameterType()) {
@@ -486,7 +490,7 @@ Packet* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
     return packet;
 }
 
-PacketDrillSctpChunk* PacketDrill::buildDataChunk(int64_t flgs, int64_t len, int64_t tsn, int64_t sid, int64_t ssn, int64_t ppid)
+PacketDrillSctpChunk *PacketDrill::buildDataChunk(int64_t flgs, int64_t len, int64_t tsn, int64_t sid, int64_t ssn, int64_t ppid)
 {
     uint32_t flags = 0;
     SctpDataChunk *datachunk = new SctpDataChunk();
@@ -503,41 +507,46 @@ PacketDrillSctpChunk* PacketDrill::buildDataChunk(int64_t flgs, int64_t len, int
         if (flgs & SCTP_DATA_CHUNK_U_BIT) {
             datachunk->setUBit(1);
         }
-    } else {
+    }
+    else {
         flags |= FLAG_CHUNK_FLAGS_NOCHECK;
     }
 
     if (tsn == -1) {
         datachunk->setTsn(0);
         flags |= FLAG_DATA_CHUNK_TSN_NOCHECK;
-    } else {
-        datachunk->setTsn((uint32_t) tsn);
+    }
+    else {
+        datachunk->setTsn((uint32_t)tsn);
     }
 
     if (sid == -1) {
         datachunk->setSid(0);
         flags |= FLAG_DATA_CHUNK_SID_NOCHECK;
-    } else {
-        datachunk->setSid((uint16_t) sid);
+    }
+    else {
+        datachunk->setSid((uint16_t)sid);
     }
 
     if (ssn == -1) {
         datachunk->setSsn(0);
         flags |= FLAG_DATA_CHUNK_SSN_NOCHECK;
-    } else {
-        datachunk->setSsn((uint16_t) ssn);
+    }
+    else {
+        datachunk->setSsn((uint16_t)ssn);
     }
 
     if (ppid == -1) {
         datachunk->setPpid(0);
         flags |= FLAG_DATA_CHUNK_PPID_NOCHECK;
-    } else {
-        datachunk->setPpid((uint32_t) ppid);
     }
-// ToDo: Padding
+    else {
+        datachunk->setPpid((uint32_t)ppid);
+    }
+    // TODO Padding
     if (len != -1) {
         datachunk->setByteLength(SCTP_DATA_CHUNK_LENGTH);
-        SctpSimpleMessage* msg = new SctpSimpleMessage("payload");
+        SctpSimpleMessage *msg = new SctpSimpleMessage("payload");
         uint32_t sendBytes = len - SCTP_DATA_CHUNK_LENGTH;
         msg->setDataArraySize(sendBytes);
         for (uint32_t i = 0; i < sendBytes; i++)
@@ -546,7 +555,8 @@ PacketDrillSctpChunk* PacketDrill::buildDataChunk(int64_t flgs, int64_t len, int
         msg->setEncaps(false);
         msg->setByteLength(sendBytes);
         datachunk->encapsulate(msg);
-    } else {
+    }
+    else {
         flags |= FLAG_CHUNK_LENGTH_NOCHECK;
         flags |= FLAG_CHUNK_VALUE_NOCHECK;
         datachunk->setByteLength(SCTP_DATA_CHUNK_LENGTH);
@@ -556,7 +566,7 @@ PacketDrillSctpChunk* PacketDrill::buildDataChunk(int64_t flgs, int64_t len, int
     return sctpchunk;
 }
 
-PacketDrillSctpChunk* PacketDrill::buildInitChunk(int64_t flgs, int64_t tag, int64_t a_rwnd, int64_t os, int64_t is, int64_t tsn, cQueue *parameters)
+PacketDrillSctpChunk *PacketDrill::buildInitChunk(int64_t flgs, int64_t tag, int64_t a_rwnd, int64_t os, int64_t is, int64_t tsn, cQueue *parameters)
 {
     uint32_t flags = 0;
     uint16_t length = 0;
@@ -567,35 +577,40 @@ PacketDrillSctpChunk* PacketDrill::buildInitChunk(int64_t flgs, int64_t tag, int
     if (tag == -1) {
         initchunk->setInitTag(0);
         flags |= FLAG_INIT_CHUNK_TAG_NOCHECK;
-    } else {
-        initchunk->setInitTag((uint32_t) tag);
+    }
+    else {
+        initchunk->setInitTag((uint32_t)tag);
     }
 
     if (a_rwnd == -1) {
         initchunk->setA_rwnd(0);
         flags |= FLAG_INIT_CHUNK_A_RWND_NOCHECK;
-    } else {
-        initchunk->setA_rwnd((uint32_t) a_rwnd);
+    }
+    else {
+        initchunk->setA_rwnd((uint32_t)a_rwnd);
     }
 
     if (is == -1) {
         initchunk->setNoInStreams(0);
         flags |= FLAG_INIT_CHUNK_IS_NOCHECK;
-    } else {
-        initchunk->setNoInStreams((uint16_t) is);
+    }
+    else {
+        initchunk->setNoInStreams((uint16_t)is);
     }
 
     if (os == -1) {
         initchunk->setNoOutStreams(0);
         flags |= FLAG_INIT_CHUNK_OS_NOCHECK;
-    } else {
-        initchunk->setNoOutStreams((uint16_t) os);
+    }
+    else {
+        initchunk->setNoOutStreams((uint16_t)os);
     }
 
     if (tsn == -1) {
         initchunk->setInitTsn(0);
         flags |= FLAG_INIT_CHUNK_TSN_NOCHECK;
-    } else {
+    }
+    else {
         initchunk->setInitTsn(tsn);
     }
 
@@ -603,7 +618,7 @@ PacketDrillSctpChunk* PacketDrill::buildInitChunk(int64_t flgs, int64_t tag, int
         PacketDrillSctpParameter *parameter;
         uint16_t parLen = 0;
         for (cQueue::Iterator iter(*parameters); !iter.end(); iter++) {
-            parameter = check_and_cast<PacketDrillSctpParameter*>(*iter);
+            parameter = check_and_cast<PacketDrillSctpParameter *>(*iter);
             switch (parameter->getType()) {
                 case SUPPORTED_EXTENSIONS: {
                     auto ba = parameter->getByteList();
@@ -630,7 +645,8 @@ PacketDrillSctpChunk* PacketDrill::buildInitChunk(int64_t flgs, int64_t tag, int
                 default: printf("Parameter type not implemented\n");
             }
         }
-    } else {
+    }
+    else {
         flags |= FLAG_INIT_CHUNK_OPT_PARAM_NOCHECK;
     }
     initchunk->setAddressesArraySize(0);
@@ -642,7 +658,7 @@ PacketDrillSctpChunk* PacketDrill::buildInitChunk(int64_t flgs, int64_t tag, int
     return sctpchunk;
 }
 
-PacketDrillSctpChunk* PacketDrill::buildInitAckChunk(int64_t flgs, int64_t tag, int64_t a_rwnd, int64_t os, int64_t is, int64_t tsn, cQueue *parameters)
+PacketDrillSctpChunk *PacketDrill::buildInitAckChunk(int64_t flgs, int64_t tag, int64_t a_rwnd, int64_t os, int64_t is, int64_t tsn, cQueue *parameters)
 {
     uint32_t flags = 0;
     uint16_t length = 0;
@@ -653,42 +669,47 @@ PacketDrillSctpChunk* PacketDrill::buildInitAckChunk(int64_t flgs, int64_t tag, 
     if (tag == -1) {
         initackchunk->setInitTag(0);
         flags |= FLAG_INIT_ACK_CHUNK_TAG_NOCHECK;
-    } else {
-        initackchunk->setInitTag((uint32_t) tag);
+    }
+    else {
+        initackchunk->setInitTag((uint32_t)tag);
     }
 
     if (a_rwnd == -1) {
         initackchunk->setA_rwnd(0);
         flags |= FLAG_INIT_ACK_CHUNK_A_RWND_NOCHECK;
-    } else {
-        initackchunk->setA_rwnd((uint32_t) a_rwnd);
+    }
+    else {
+        initackchunk->setA_rwnd((uint32_t)a_rwnd);
     }
 
     if (is == -1) {
         initackchunk->setNoInStreams(0);
         flags |= FLAG_INIT_ACK_CHUNK_IS_NOCHECK;
-    } else {
-        initackchunk->setNoInStreams((uint16_t) is);
+    }
+    else {
+        initackchunk->setNoInStreams((uint16_t)is);
     }
 
     if (os == -1) {
         initackchunk->setNoOutStreams(0);
         flags |= FLAG_INIT_ACK_CHUNK_OS_NOCHECK;
-    } else {
-        initackchunk->setNoOutStreams((uint16_t) os);
+    }
+    else {
+        initackchunk->setNoOutStreams((uint16_t)os);
     }
 
     if (tsn == -1) {
         initackchunk->setInitTsn(0);
         flags |= FLAG_INIT_ACK_CHUNK_TSN_NOCHECK;
-    } else {
-        initackchunk->setInitTsn((uint32_t) tsn);
+    }
+    else {
+        initackchunk->setInitTsn((uint32_t)tsn);
     }
     if (parameters != nullptr) {
         PacketDrillSctpParameter *parameter;
         uint16_t parLen = 0;
         for (cQueue::Iterator iter(*parameters); !iter.end(); iter++) {
-            parameter = check_and_cast<PacketDrillSctpParameter*>(*iter);
+            parameter = check_and_cast<PacketDrillSctpParameter *>(*iter);
             switch (parameter->getType()) {
                 case SUPPORTED_EXTENSIONS: {
                     auto ba = parameter->getByteList();
@@ -715,7 +736,8 @@ PacketDrillSctpChunk* PacketDrill::buildInitAckChunk(int64_t flgs, int64_t tag, 
                 default: printf("Parameter type not implemented\n");
             }
         }
-    } else {
+    }
+    else {
         flags |= FLAG_INIT_ACK_CHUNK_OPT_PARAM_NOCHECK;
     }
 
@@ -734,9 +756,9 @@ PacketDrillSctpChunk* PacketDrill::buildInitAckChunk(int64_t flgs, int64_t tag, 
     return sctpchunk;
 }
 
-PacketDrillSctpChunk* PacketDrill::buildSackChunk(int64_t flgs, int64_t cum_tsn, int64_t a_rwnd, cQueue *gaps, cQueue *dups)
+PacketDrillSctpChunk *PacketDrill::buildSackChunk(int64_t flgs, int64_t cum_tsn, int64_t a_rwnd, cQueue *gaps, cQueue *dups)
 {
-    auto* sackchunk = new SctpSackChunk();
+    auto *sackchunk = new SctpSackChunk();
     sackchunk->setSctpChunkType(SACK);
     sackchunk->setName("SACK");
     uint32_t flags = 0;
@@ -744,36 +766,40 @@ PacketDrillSctpChunk* PacketDrill::buildSackChunk(int64_t flgs, int64_t cum_tsn,
     if (cum_tsn == -1) {
         sackchunk->setCumTsnAck(0);
         flags |= FLAG_SACK_CHUNK_CUM_TSN_NOCHECK;
-    } else {
-        sackchunk->setCumTsnAck((uint32_t) cum_tsn);
+    }
+    else {
+        sackchunk->setCumTsnAck((uint32_t)cum_tsn);
     }
 
     if (a_rwnd == -1) {
         sackchunk->setA_rwnd(0);
         flags |= FLAG_SACK_CHUNK_A_RWND_NOCHECK;
-    } else {
-        sackchunk->setA_rwnd((uint32_t) a_rwnd);
+    }
+    else {
+        sackchunk->setA_rwnd((uint32_t)a_rwnd);
     }
 
     if (gaps == NULL) {
         sackchunk->setNumGaps(0);
         flags |= FLAG_CHUNK_LENGTH_NOCHECK;
         flags |= FLAG_SACK_CHUNK_GAP_BLOCKS_NOCHECK;
-    } else if (gaps->getLength() != 0) {
+    }
+    else if (gaps->getLength() != 0) {
         gaps->setName("gapList");
         int num = 0;
-        PacketDrillStruct* gap;
+        PacketDrillStruct *gap;
         sackchunk->setNumGaps(gaps->getLength());
         sackchunk->setGapStartArraySize(gaps->getLength());
         sackchunk->setGapStopArraySize(gaps->getLength());
         for (cQueue::Iterator iter(*gaps); !iter.end(); iter++) {
-            gap = check_and_cast<PacketDrillStruct*>(*iter);
+            gap = check_and_cast<PacketDrillStruct *>(*iter);
             sackchunk->setGapStart(num, gap->getValue1());
             sackchunk->setGapStop(num, gap->getValue2());
             num++;
         }
         delete gaps;
-    } else {
+    }
+    else {
         sackchunk->setNumGaps(0);
         delete gaps;
     }
@@ -782,19 +808,21 @@ PacketDrillSctpChunk* PacketDrill::buildSackChunk(int64_t flgs, int64_t cum_tsn,
         sackchunk->setNumDupTsns(0);
         flags |= FLAG_CHUNK_LENGTH_NOCHECK;
         flags |= FLAG_SACK_CHUNK_DUP_TSNS_NOCHECK;
-    } else if (dups->getLength() != 0) {
+    }
+    else if (dups->getLength() != 0) {
         int num = 0;
-        PacketDrillStruct* tsn;
+        PacketDrillStruct *tsn;
         sackchunk->setNumDupTsns(dups->getLength());
         sackchunk->setDupTsnsArraySize(dups->getLength());
 
         for (cQueue::Iterator iter(*dups); !iter.end(); iter++) {
-            tsn = check_and_cast<PacketDrillStruct*>(*iter);
+            tsn = check_and_cast<PacketDrillStruct *>(*iter);
             sackchunk->setDupTsns(num, tsn->getValue1());
             num++;
         }
         delete dups;
-    } else {
+    }
+    else {
         sackchunk->setNumDupTsns(0);
         delete dups;
     }
@@ -805,7 +833,7 @@ PacketDrillSctpChunk* PacketDrill::buildSackChunk(int64_t flgs, int64_t cum_tsn,
 
 }
 
-PacketDrillSctpChunk* PacketDrill::buildCookieEchoChunk(int64_t flgs, int64_t len, PacketDrillBytes *cookie)
+PacketDrillSctpChunk *PacketDrill::buildCookieEchoChunk(int64_t flgs, int64_t len, PacketDrillBytes *cookie)
 {
     SctpCookieEchoChunk *cookieechochunk = new SctpCookieEchoChunk();
     cookieechochunk->setSctpChunkType(COOKIE_ECHO);
@@ -815,8 +843,7 @@ PacketDrillSctpChunk* PacketDrill::buildCookieEchoChunk(int64_t flgs, int64_t le
     if (cookie) {
         printf("cookie present\n");
     }
-    else
-    {
+    else {
         flags |= FLAG_CHUNK_VALUE_NOCHECK;
         cookieechochunk->setCookieArraySize(0);
     }
@@ -827,7 +854,7 @@ PacketDrillSctpChunk* PacketDrill::buildCookieEchoChunk(int64_t flgs, int64_t le
     return sctpchunk;
 }
 
-PacketDrillSctpChunk* PacketDrill::buildCookieAckChunk(int64_t flgs)
+PacketDrillSctpChunk *PacketDrill::buildCookieAckChunk(int64_t flgs)
 {
     SctpCookieAckChunk *cookieAckChunk = new SctpCookieAckChunk("Cookie_Ack");
     cookieAckChunk->setSctpChunkType(COOKIE_ACK);
@@ -836,7 +863,7 @@ PacketDrillSctpChunk* PacketDrill::buildCookieAckChunk(int64_t flgs)
     return sctpchunk;
 }
 
-PacketDrillSctpChunk* PacketDrill::buildShutdownChunk(int64_t flgs, int64_t cum_tsn)
+PacketDrillSctpChunk *PacketDrill::buildShutdownChunk(int64_t flgs, int64_t cum_tsn)
 {
     auto *shutdownchunk = new SctpShutdownChunk();
     shutdownchunk->setSctpChunkType(SHUTDOWN);
@@ -846,7 +873,8 @@ PacketDrillSctpChunk* PacketDrill::buildShutdownChunk(int64_t flgs, int64_t cum_
     if (cum_tsn == -1) {
         flags |= FLAG_SHUTDOWN_CHUNK_CUM_TSN_NOCHECK;
         shutdownchunk->setCumTsnAck(0);
-    } else {
+    }
+    else {
         shutdownchunk->setCumTsnAck(cum_tsn);
     }
     shutdownchunk->setFlags(flags);
@@ -855,7 +883,7 @@ PacketDrillSctpChunk* PacketDrill::buildShutdownChunk(int64_t flgs, int64_t cum_
     return sctpchunk;
 }
 
-PacketDrillSctpChunk* PacketDrill::buildShutdownAckChunk(int64_t flgs)
+PacketDrillSctpChunk *PacketDrill::buildShutdownAckChunk(int64_t flgs)
 {
     auto *shutdownAckChunk = new SctpShutdownAckChunk("Shutdown_Ack");
     shutdownAckChunk->setSctpChunkType(SHUTDOWN_ACK);
@@ -864,7 +892,7 @@ PacketDrillSctpChunk* PacketDrill::buildShutdownAckChunk(int64_t flgs)
     return sctpchunk;
 }
 
-PacketDrillSctpChunk* PacketDrill::buildShutdownCompleteChunk(int64_t flgs)
+PacketDrillSctpChunk *PacketDrill::buildShutdownCompleteChunk(int64_t flgs)
 {
     auto *shutdowncompletechunk = new SctpShutdownCompleteChunk();
     shutdowncompletechunk->setSctpChunkType(SHUTDOWN_COMPLETE);
@@ -872,7 +900,8 @@ PacketDrillSctpChunk* PacketDrill::buildShutdownCompleteChunk(int64_t flgs)
 
     if (flgs != -1) {
         shutdowncompletechunk->setTBit(flgs);
-    } else {
+    }
+    else {
         flgs |= FLAG_CHUNK_FLAGS_NOCHECK;
     }
     shutdowncompletechunk->setByteLength(SCTP_SHUTDOWN_ACK_LENGTH);
@@ -880,14 +909,15 @@ PacketDrillSctpChunk* PacketDrill::buildShutdownCompleteChunk(int64_t flgs)
     return sctpchunk;
 }
 
-PacketDrillSctpChunk* PacketDrill::buildAbortChunk(int64_t flgs)
+PacketDrillSctpChunk *PacketDrill::buildAbortChunk(int64_t flgs)
 {
     auto *abortChunk = new SctpAbortChunk("Abort");
     abortChunk->setSctpChunkType(ABORT);
 
     if (flgs != -1) {
         abortChunk->setT_Bit(flgs);
-    } else {
+    }
+    else {
         flgs |= FLAG_CHUNK_FLAGS_NOCHECK;
     }
     abortChunk->setByteLength(SCTP_ABORT_CHUNK_LENGTH);
@@ -895,14 +925,14 @@ PacketDrillSctpChunk* PacketDrill::buildAbortChunk(int64_t flgs)
     return sctpchunk;
 }
 
-PacketDrillSctpChunk* PacketDrill::buildErrorChunk(int64_t flgs, cQueue *causes)
+PacketDrillSctpChunk *PacketDrill::buildErrorChunk(int64_t flgs, cQueue *causes)
 {
     PacketDrillStruct *errorcause;
     auto *errorChunk = new SctpErrorChunk("Error");
     errorChunk->setSctpChunkType(ERRORTYPE);
     errorChunk->setByteLength(SCTP_ERROR_CHUNK_LENGTH);
     for (cQueue::Iterator iter(*causes); !iter.end(); iter++) {
-        errorcause = check_and_cast<PacketDrillStruct*>(*iter);
+        errorcause = check_and_cast<PacketDrillStruct *>(*iter);
         auto *cause = new SctpSimpleErrorCauseParameter("Cause");
         cause->setParameterType(INVALID_STREAM_IDENTIFIER);
         cause->setByteLength(8);
@@ -915,20 +945,19 @@ PacketDrillSctpChunk* PacketDrill::buildErrorChunk(int64_t flgs, cQueue *causes)
     return sctpchunk;
 }
 
-PacketDrillSctpChunk* PacketDrill::buildHeartbeatChunk(int64_t flgs, PacketDrillSctpParameter *info)
+PacketDrillSctpChunk *PacketDrill::buildHeartbeatChunk(int64_t flgs, PacketDrillSctpParameter *info)
 {
     auto *heartbeatChunk = new SctpHeartbeatChunk();
     heartbeatChunk->setSctpChunkType(HEARTBEAT);
-    assert(info == NULL ||
-       info->getLength() + SCTP_HEARTBEAT_CHUNK_LENGTH <= MAX_SCTP_CHUNK_BYTES);
-    if (info && info->getLength() > 0)
-    {
+    assert(info == NULL || info->getLength() + SCTP_HEARTBEAT_CHUNK_LENGTH <= MAX_SCTP_CHUNK_BYTES);
+    if (info && info->getLength() > 0) {
         uint32_t flgs = info->getFlags();
-        uint16_t length =  0;
+        uint16_t length = 0;
         if (flgs & FLAG_CHUNK_VALUE_NOCHECK) {
             if (flgs & FLAG_CHUNK_LENGTH_NOCHECK) {
                 length = 12;
-            } else {
+            }
+            else {
                 length = info->getLength();
             }
             if (length >= 12) {
@@ -940,10 +969,12 @@ PacketDrillSctpChunk* PacketDrill::buildHeartbeatChunk(int64_t flgs, PacketDrill
                 }
                 heartbeatChunk->setByteLength(SCTP_HEARTBEAT_CHUNK_LENGTH + length);
             }
-        } else {
+        }
+        else {
             printf("Take Info Parameter not yet implemented\n");
         }
-    } else {
+    }
+    else {
         heartbeatChunk->setRemoteAddr(pdapp->getRemoteAddress());
         heartbeatChunk->setTimeField(simTime());
         heartbeatChunk->setByteLength(SCTP_HEARTBEAT_CHUNK_LENGTH + 12);
@@ -952,16 +983,15 @@ PacketDrillSctpChunk* PacketDrill::buildHeartbeatChunk(int64_t flgs, PacketDrill
     return sctpchunk;
 }
 
-PacketDrillSctpChunk* PacketDrill::buildHeartbeatAckChunk(int64_t flgs, PacketDrillSctpParameter *info)
+PacketDrillSctpChunk *PacketDrill::buildHeartbeatAckChunk(int64_t flgs, PacketDrillSctpParameter *info)
 {
     auto *heartbeatAckChunk = new SctpHeartbeatAckChunk();
     heartbeatAckChunk->setSctpChunkType(HEARTBEAT_ACK);
-    assert(info == NULL ||
-       info->getLength() + SCTP_HEARTBEAT_CHUNK_LENGTH <= MAX_SCTP_CHUNK_BYTES);
-    if (info && info->getLength() > 0)
-    {
+    assert(info == NULL || info->getLength() + SCTP_HEARTBEAT_CHUNK_LENGTH <= MAX_SCTP_CHUNK_BYTES);
+    if (info && info->getLength() > 0) {
         printf("not implemented yet\n");
-    } else {
+    }
+    else {
         heartbeatAckChunk->setRemoteAddr(pdapp->getRemoteAddress());
         heartbeatAckChunk->setTimeField(pdapp->getPeerHeartbeatTime());
         heartbeatAckChunk->setByteLength(SCTP_HEARTBEAT_CHUNK_LENGTH + 12);
@@ -970,7 +1000,7 @@ PacketDrillSctpChunk* PacketDrill::buildHeartbeatAckChunk(int64_t flgs, PacketDr
     return sctpchunk;
 }
 
-PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64_t flgs, cQueue *parameters)
+PacketDrillSctpChunk *PacketDrill::buildReconfigChunk(int64_t flgs, cQueue *parameters)
 {
     uint32_t flags = 0;
     uint16_t len = 0;
@@ -980,7 +1010,7 @@ PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64_t flgs, cQueue *para
     if (parameters != nullptr) {
         PacketDrillSctpParameter *parameter;
         for (cQueue::Iterator iter(*parameters); !iter.end(); iter++) {
-            parameter = check_and_cast<PacketDrillSctpParameter*>(*iter);
+            parameter = check_and_cast<PacketDrillSctpParameter *>(*iter);
             switch (parameter->getType()) {
                 case OUTGOING_RESET_REQUEST_PARAMETER: {
                     auto *outResetParam = new SctpOutgoingSsnResetRequestParameter("Outgoing_Request_Param");
@@ -989,19 +1019,22 @@ PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64_t flgs, cQueue *para
                     if (content->getValue1() == -1) {
                         outResetParam->setSrReqSn(0);
                         flags |= FLAG_RECONFIG_REQ_SN_NOCHECK;
-                    } else {
+                    }
+                    else {
                         outResetParam->setSrReqSn(content->getValue1());
                     }
                     if (content->getValue2() == -1) {
                         outResetParam->setSrResSn(0);
                         flags |= FLAG_RECONFIG_RESP_SN_NOCHECK;
-                    } else {
+                    }
+                    else {
                         outResetParam->setSrResSn(content->getValue2());
                     }
                     if (content->getValue3() == -1) {
                         outResetParam->setLastTsn(0);
                         flags |= FLAG_RECONFIG_LAST_TSN_NOCHECK;
-                    } else {
+                    }
+                    else {
                         outResetParam->setLastTsn(content->getValue3());
                     }
                     if (content->getStreams() != nullptr) {
@@ -1061,7 +1094,8 @@ PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64_t flgs, cQueue *para
                     if (content->getValue2() == -1) {
                         responseParam->setResult(0);
                         flags |= FLAG_RECONFIG_RESULT_NOCHECK;
-                    } else {
+                    }
+                    else {
                         responseParam->setResult(content->getValue2());
                     }
                     uint32_t len = SCTP_STREAM_RESET_RESPONSE_PARAMETER_LENGTH;
@@ -1069,13 +1103,15 @@ PacketDrillSctpChunk* PacketDrill::buildReconfigChunk(int64_t flgs, cQueue *para
                         if (content->getValue3() == -1) {
                             responseParam->setSendersNextTsn(0);
                             flags |= FLAG_RECONFIG_SENDER_NEXT_TSN_NOCHECK;
-                        } else {
+                        }
+                        else {
                             responseParam->setSendersNextTsn(content->getValue3());
                         }
                         if (content->getValue4() == -1) {
                             responseParam->setReceiversNextTsn(0);
                             flags |= FLAG_RECONFIG_RECEIVER_NEXT_TSN_NOCHECK;
-                        } else {
+                        }
+                        else {
                             responseParam->setReceiversNextTsn(content->getValue4());
                         }
                         len += 8;
@@ -1129,584 +1165,585 @@ int PacketDrill::evaluate(PacketDrillExpression *in, PacketDrillExpression *out,
         return STATUS_ERR;
     }
     switch (in->getType()) {
-    case EXPR_ELLIPSIS:
-        break;
+        case EXPR_ELLIPSIS:
+            break;
 
-    case EXPR_INTEGER:
-        out->setNum(in->getNum());
-        break;
+        case EXPR_INTEGER:
+            out->setNum(in->getNum());
+            break;
 
-    case EXPR_WORD:
-        out->setType(EXPR_INTEGER);
-        if (in->symbolToInt(in->getString(), &number, error))
-            return STATUS_ERR;
-        out->setNum(number);
-        break;
+        case EXPR_WORD:
+            out->setType(EXPR_INTEGER);
+            if (in->symbolToInt(in->getString(), &number, error))
+                return STATUS_ERR;
+            out->setNum(number);
+            break;
 
-    case EXPR_SCTP_INITMSG: {
-        assert(in->getType() == EXPR_SCTP_INITMSG);
-        assert(out->getType() == EXPR_SCTP_INITMSG);
-        struct sctp_initmsg_expr *expr = (struct sctp_initmsg_expr *)malloc(sizeof(struct sctp_initmsg_expr));
-        expr->sinit_num_ostreams = new PacketDrillExpression(in->getInitmsg()->sinit_num_ostreams->getType());
-        if (evaluate(in->getInitmsg()->sinit_num_ostreams, expr->sinit_num_ostreams, error)) {
-            delete (expr->sinit_num_ostreams);
-            free (expr);
-            return STATUS_ERR;
-        }
-        expr->sinit_max_instreams = new PacketDrillExpression(in->getInitmsg()->sinit_max_instreams->getType());
-        if (evaluate(in->getInitmsg()->sinit_max_instreams, expr->sinit_max_instreams, error)) {
-            delete (expr->sinit_num_ostreams);
-            delete (expr->sinit_max_instreams);
-            free (expr);
-            return STATUS_ERR;
-        }
-        expr->sinit_max_attempts = new PacketDrillExpression(in->getInitmsg()->sinit_max_attempts->getType());
-        if (evaluate(in->getInitmsg()->sinit_max_attempts, expr->sinit_max_attempts, error)) {
-            delete (expr->sinit_num_ostreams);
-            delete (expr->sinit_max_instreams);
-            delete (expr->sinit_max_attempts);
-            free (expr);
-            return STATUS_ERR;
-        }
-        expr->sinit_max_init_timeo = new PacketDrillExpression(in->getInitmsg()->sinit_max_init_timeo->getType());
-        if (evaluate(in->getInitmsg()->sinit_max_init_timeo, expr->sinit_max_init_timeo, error)) {
-            delete (expr->sinit_num_ostreams);
-            delete (expr->sinit_max_instreams);
-            delete (expr->sinit_max_attempts);
-            delete (expr->sinit_max_init_timeo);
-            free (expr);
-            return STATUS_ERR;
-        }
-        out->setInitmsg(expr);
-        break;
-    }
-
-    case EXPR_SCTP_ASSOCPARAMS: {
-        assert(in->getType() == EXPR_SCTP_ASSOCPARAMS);
-        assert(out->getType() == EXPR_SCTP_ASSOCPARAMS);
-        struct sctp_assocparams_expr *ap = (struct sctp_assocparams_expr *)malloc(sizeof(struct sctp_assocparams_expr));
-        ap->sasoc_assoc_id = new PacketDrillExpression(in->getAssocParams()->sasoc_assoc_id->getType());
-        if (evaluate(in->getAssocParams()->sasoc_assoc_id, ap->sasoc_assoc_id, error)) {
-            delete (ap->sasoc_assoc_id);
-            free (ap);
-            return STATUS_ERR;
-        }
-        ap->sasoc_asocmaxrxt = new PacketDrillExpression(in->getAssocParams()->sasoc_asocmaxrxt->getType());
-        if (evaluate(in->getAssocParams()->sasoc_asocmaxrxt, ap->sasoc_asocmaxrxt, error)) {
-            delete (ap->sasoc_assoc_id);
-            delete (ap->sasoc_asocmaxrxt);
-            free (ap);
-            return STATUS_ERR;
-        }
-        ap->sasoc_number_peer_destinations = new PacketDrillExpression(in->getAssocParams()->sasoc_number_peer_destinations->getType());
-        if (evaluate(in->getAssocParams()->sasoc_number_peer_destinations, ap->sasoc_number_peer_destinations, error)) {
-            delete (ap->sasoc_assoc_id);
-            delete (ap->sasoc_asocmaxrxt);
-            delete (ap->sasoc_number_peer_destinations);
-            free (ap);
-            return STATUS_ERR;
-        }
-        ap->sasoc_peer_rwnd = new PacketDrillExpression(in->getAssocParams()->sasoc_peer_rwnd->getType());
-        if (evaluate(in->getAssocParams()->sasoc_peer_rwnd, ap->sasoc_peer_rwnd, error)) {
-            delete (ap->sasoc_assoc_id);
-            delete (ap->sasoc_asocmaxrxt);
-            delete (ap->sasoc_number_peer_destinations);
-            delete (ap->sasoc_peer_rwnd);
-            free (ap);
-            return STATUS_ERR;
-        }
-        ap->sasoc_local_rwnd = new PacketDrillExpression(in->getAssocParams()->sasoc_local_rwnd->getType());
-        if (evaluate(in->getAssocParams()->sasoc_local_rwnd, ap->sasoc_local_rwnd, error)) {
-            delete (ap->sasoc_assoc_id);
-            delete (ap->sasoc_asocmaxrxt);
-            delete (ap->sasoc_number_peer_destinations);
-            delete (ap->sasoc_peer_rwnd);
-            delete (ap->sasoc_local_rwnd);
-            free (ap);
-            return STATUS_ERR;
-        }
-        ap->sasoc_cookie_life = new PacketDrillExpression(in->getAssocParams()->sasoc_cookie_life->getType());
-        if (evaluate(in->getAssocParams()->sasoc_cookie_life, ap->sasoc_cookie_life, error)) {
-            delete (ap->sasoc_assoc_id);
-            delete (ap->sasoc_asocmaxrxt);
-            delete (ap->sasoc_number_peer_destinations);
-            delete (ap->sasoc_peer_rwnd);
-            delete (ap->sasoc_local_rwnd);
-            delete (ap->sasoc_cookie_life);
-            free (ap);
-            return STATUS_ERR;
-        }
-        out->setAssocParams(ap);
-        break;
-    }
-
-    case EXPR_SCTP_RTOINFO: {
-        assert(in->getType() == EXPR_SCTP_RTOINFO);
-        assert(out->getType() == EXPR_SCTP_RTOINFO);
-        struct sctp_rtoinfo_expr *info = (struct sctp_rtoinfo_expr *)malloc(sizeof(struct sctp_rtoinfo_expr));
-        info->srto_assoc_id = new PacketDrillExpression(in->getRtoinfo()->srto_assoc_id->getType());
-        if (evaluate(in->getRtoinfo()->srto_assoc_id, info->srto_assoc_id, error)) {
-            delete (info->srto_assoc_id);
-            free (info);
-            return STATUS_ERR;
-        }
-        info->srto_initial = new PacketDrillExpression(in->getRtoinfo()->srto_initial->getType());
-        if (evaluate(in->getRtoinfo()->srto_initial, info->srto_initial, error)) {
-            delete (info->srto_assoc_id);
-            delete (info->srto_initial);
-            free (info);
-            return STATUS_ERR;
-        }
-        info->srto_max = new PacketDrillExpression(in->getRtoinfo()->srto_max->getType());
-        if (evaluate(in->getRtoinfo()->srto_max, info->srto_max, error)) {
-            delete (info->srto_assoc_id);
-            delete (info->srto_initial);
-            delete (info->srto_max);
-            free (info);
-            return STATUS_ERR;
-        }
-        info->srto_min = new PacketDrillExpression(in->getRtoinfo()->srto_min->getType());
-        if (evaluate(in->getRtoinfo()->srto_min, info->srto_min, error)) {
-            delete (info->srto_assoc_id);
-            delete (info->srto_initial);
-            delete (info->srto_max);
-            delete (info->srto_min);
-            free (info);
-            return STATUS_ERR;
-        }
-        out->setRtoinfo(info);
-        break;
-    }
-
-    case EXPR_SCTP_SACKINFO: {
-        assert(in->getType() == EXPR_SCTP_SACKINFO);
-        assert(out->getType() == EXPR_SCTP_SACKINFO);
-        struct sctp_sack_info_expr *si = (struct sctp_sack_info_expr *)malloc(sizeof(struct sctp_sack_info_expr));
-        si->sack_assoc_id = new PacketDrillExpression(in->getSackinfo()->sack_assoc_id->getType());
-        if (evaluate(in->getSackinfo()->sack_assoc_id, si->sack_assoc_id, error)) {
-            delete (si->sack_assoc_id);
-            free (si);
-            return STATUS_ERR;
-        }
-        si->sack_delay = new PacketDrillExpression(in->getSackinfo()->sack_delay->getType());
-        if (evaluate(in->getSackinfo()->sack_delay, si->sack_delay, error)) {
-            delete (si->sack_assoc_id);
-            delete (si->sack_delay);
-            free (si);
-            return STATUS_ERR;
-        }
-        si->sack_freq = new PacketDrillExpression(in->getSackinfo()->sack_freq->getType());
-        if (evaluate(in->getSackinfo()->sack_freq, si->sack_freq, error)) {
-            delete (si->sack_assoc_id);
-            delete (si->sack_delay);
-            delete (si->sack_freq);
-            free (si);
-            return STATUS_ERR;
-        }
-        out->setSackinfo(si);
-        break;
-    }
-
-    case EXPR_SCTP_STATUS: {
-        assert(in->getType() == EXPR_SCTP_STATUS);
-        assert(out->getType() == EXPR_SCTP_STATUS);
-        struct sctp_status_expr *st = (struct sctp_status_expr *)malloc(sizeof(struct sctp_status_expr));
-        st->sstat_assoc_id = new PacketDrillExpression(in->getStatus()->sstat_assoc_id->getType());
-        if (evaluate(in->getStatus()->sstat_assoc_id, st->sstat_assoc_id, error)) {
-            delete (st->sstat_assoc_id);
-            free (st);
-            return STATUS_ERR;
-        }
-        st->sstat_state = new PacketDrillExpression(in->getStatus()->sstat_state->getType());
-        if (evaluate(in->getStatus()->sstat_state, st->sstat_state, error)) {
-            delete (st->sstat_assoc_id);
-            delete (st->sstat_state);
-            free (st);
-            return STATUS_ERR;
-        }
-        st->sstat_rwnd = new PacketDrillExpression(in->getStatus()->sstat_rwnd->getType());
-        if (evaluate(in->getStatus()->sstat_rwnd, st->sstat_rwnd, error)) {
-            delete (st->sstat_assoc_id);
-            delete (st->sstat_state);
-            delete (st->sstat_rwnd);
-            free (st);
-            return STATUS_ERR;
-        }
-        st->sstat_unackdata = new PacketDrillExpression(in->getStatus()->sstat_unackdata->getType());
-        if (evaluate(in->getStatus()->sstat_unackdata, st->sstat_unackdata, error)) {
-            delete (st->sstat_assoc_id);
-            delete (st->sstat_state);
-            delete (st->sstat_rwnd);
-            delete (st->sstat_unackdata);
-            free (st);
-            return STATUS_ERR;
-        }
-        st->sstat_penddata = new PacketDrillExpression(in->getStatus()->sstat_penddata->getType());
-        if (evaluate(in->getStatus()->sstat_penddata, st->sstat_penddata, error)) {
-            delete (st->sstat_assoc_id);
-            delete (st->sstat_state);
-            delete (st->sstat_rwnd);
-            delete (st->sstat_unackdata);
-            delete (st->sstat_penddata);
-            free (st);
-            return STATUS_ERR;
-        }
-        st->sstat_instrms = new PacketDrillExpression(in->getStatus()->sstat_instrms->getType());
-        if (evaluate(in->getStatus()->sstat_instrms, st->sstat_instrms, error)) {
-            delete (st->sstat_assoc_id);
-            delete (st->sstat_state);
-            delete (st->sstat_rwnd);
-            delete (st->sstat_unackdata);
-            delete (st->sstat_penddata);
-            delete (st->sstat_instrms);
-            free (st);
-            return STATUS_ERR;
-        }
-        st->sstat_outstrms = new PacketDrillExpression(in->getStatus()->sstat_outstrms->getType());
-        if (evaluate(in->getStatus()->sstat_outstrms, st->sstat_outstrms, error)) {
-            delete (st->sstat_assoc_id);
-            delete (st->sstat_state);
-            delete (st->sstat_rwnd);
-            delete (st->sstat_unackdata);
-            delete (st->sstat_penddata);
-            delete (st->sstat_instrms);
-            delete (st->sstat_outstrms);
-            free (st);
-            return STATUS_ERR;
-        }
-        st->sstat_fragmentation_point = new PacketDrillExpression(in->getStatus()->sstat_fragmentation_point->getType());
-        if (evaluate(in->getStatus()->sstat_fragmentation_point, st->sstat_fragmentation_point, error)) {
-            delete (st->sstat_assoc_id);
-            delete (st->sstat_state);
-            delete (st->sstat_rwnd);
-            delete (st->sstat_unackdata);
-            delete (st->sstat_penddata);
-            delete (st->sstat_instrms);
-            delete (st->sstat_outstrms);
-            delete (st->sstat_fragmentation_point);
-            free (st);
-            return STATUS_ERR;
-        }
-        st->sstat_primary = new PacketDrillExpression(in->getStatus()->sstat_primary->getType());
-        if (evaluate(in->getStatus()->sstat_primary, st->sstat_primary, error)) {
-            delete (st->sstat_assoc_id);
-            delete (st->sstat_state);
-            delete (st->sstat_rwnd);
-            delete (st->sstat_unackdata);
-            delete (st->sstat_penddata);
-            delete (st->sstat_instrms);
-            delete (st->sstat_outstrms);
-            delete (st->sstat_fragmentation_point);
-            delete (st->sstat_primary);
-            free (st);
-            return STATUS_ERR;
-        }
-        out->setStatus(st);
-        break;
-    }
-
-    case EXPR_SCTP_ASSOCVAL: {
-        assert(in->getType() == EXPR_SCTP_ASSOCVAL);
-        assert(out->getType() == EXPR_SCTP_ASSOCVAL);
-        struct sctp_assoc_value_expr *ass = (struct sctp_assoc_value_expr *)malloc(sizeof(struct sctp_assoc_value_expr));
-        ass->assoc_id = new PacketDrillExpression(in->getAssocval()->assoc_id->getType());
-        if (evaluate(in->getAssocval()->assoc_id, ass->assoc_id, error)) {
-            delete (ass->assoc_id);
-            free (ass);
-            return STATUS_ERR;
-        }
-        ass->assoc_value = new PacketDrillExpression(in->getAssocval()->assoc_value->getType());
-        if (evaluate(in->getAssocval()->assoc_value, ass->assoc_value, error)) {
-            delete (ass->assoc_id);
-            delete (ass->assoc_value);
-            free (ass);
-            return STATUS_ERR;
-        }
-        out->setAssocval(ass);
-        break;
-    }
-
-    case EXPR_SCTP_SNDRCVINFO: {
-        assert(in->getType() == EXPR_SCTP_SNDRCVINFO);
-        assert(out->getType() == EXPR_SCTP_SNDRCVINFO);
-        struct sctp_sndrcvinfo_expr *sri = (struct sctp_sndrcvinfo_expr *)malloc(sizeof(struct sctp_sndrcvinfo_expr));
-        sri->sinfo_stream = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_stream->getType());
-        if (evaluate(in->getSndRcvInfo()->sinfo_stream, sri->sinfo_stream, error)) {
-            delete (sri->sinfo_stream);
-            free (sri);
-            return STATUS_ERR;
-        }
-        sri->sinfo_ssn = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_ssn->getType());
-        if (evaluate(in->getSndRcvInfo()->sinfo_ssn, sri->sinfo_ssn, error)) {
-            delete (sri->sinfo_stream);
-            delete (sri->sinfo_ssn);
-            free (sri);
-            return STATUS_ERR;
-        }
-        sri->sinfo_flags = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_flags->getType());
-        if (evaluate(in->getSndRcvInfo()->sinfo_flags, sri->sinfo_flags, error)) {
-            delete (sri->sinfo_stream);
-            delete (sri->sinfo_ssn);
-            delete (sri->sinfo_flags);
-            free (sri);
-            return STATUS_ERR;
-        }
-        sri->sinfo_ppid = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_ppid->getType());
-        if (evaluate(in->getSndRcvInfo()->sinfo_ppid, sri->sinfo_ppid, error)) {
-            delete (sri->sinfo_stream);
-            delete (sri->sinfo_ssn);
-            delete (sri->sinfo_flags);
-            delete (sri->sinfo_ppid);
-            free (sri);
-            return STATUS_ERR;
-        }
-        sri->sinfo_context = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_context->getType());
-        if (evaluate(in->getSndRcvInfo()->sinfo_context, sri->sinfo_context, error)) {
-            delete (sri->sinfo_stream);
-            delete (sri->sinfo_ssn);
-            delete (sri->sinfo_flags);
-            delete (sri->sinfo_ppid);
-            delete (sri->sinfo_context);
-            free (sri);
-            return STATUS_ERR;
-        }
-        sri->sinfo_timetolive = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_timetolive->getType());
-        if (evaluate(in->getSndRcvInfo()->sinfo_timetolive, sri->sinfo_timetolive, error)) {
-            delete (sri->sinfo_stream);
-            delete (sri->sinfo_ssn);
-            delete (sri->sinfo_flags);
-            delete (sri->sinfo_ppid);
-            delete (sri->sinfo_context);
-            delete (sri->sinfo_timetolive);
-            free (sri);
-            return STATUS_ERR;
-        }
-        sri->sinfo_tsn = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_tsn->getType());
-        if (evaluate(in->getSndRcvInfo()->sinfo_tsn, sri->sinfo_tsn, error)) {
-            delete (sri->sinfo_stream);
-            delete (sri->sinfo_ssn);
-            delete (sri->sinfo_flags);
-            delete (sri->sinfo_ppid);
-            delete (sri->sinfo_context);
-            delete (sri->sinfo_timetolive);
-            delete (sri->sinfo_tsn);
-            free (sri);
-            return STATUS_ERR;
-        }
-        sri->sinfo_cumtsn = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_cumtsn->getType());
-        if (evaluate(in->getSndRcvInfo()->sinfo_cumtsn, sri->sinfo_cumtsn, error)) {
-            delete (sri->sinfo_stream);
-            delete (sri->sinfo_ssn);
-            delete (sri->sinfo_flags);
-            delete (sri->sinfo_ppid);
-            delete (sri->sinfo_context);
-            delete (sri->sinfo_timetolive);
-            delete (sri->sinfo_tsn);
-            delete (sri->sinfo_cumtsn);
-            free (sri);
-            return STATUS_ERR;
-        }
-        sri->sinfo_assoc_id = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_assoc_id->getType());
-        if (evaluate(in->getSndRcvInfo()->sinfo_assoc_id, sri->sinfo_assoc_id, error)) {
-            delete (sri->sinfo_stream);
-            delete (sri->sinfo_ssn);
-            delete (sri->sinfo_flags);
-            delete (sri->sinfo_ppid);
-            delete (sri->sinfo_context);
-            delete (sri->sinfo_timetolive);
-            delete (sri->sinfo_tsn);
-            delete (sri->sinfo_cumtsn);
-            delete (sri->sinfo_assoc_id);
-            free (sri);
-            return STATUS_ERR;
-        }
-        out->setSndRcvInfo(sri);
-        break;
-    }
-
-    case EXPR_SCTP_RESET_STREAMS: {
-        assert(in->getType() == EXPR_SCTP_RESET_STREAMS);
-        assert(out->getType() == EXPR_SCTP_RESET_STREAMS);
-        struct sctp_reset_streams_expr *rs = (struct sctp_reset_streams_expr *) malloc(sizeof(struct sctp_reset_streams_expr));
-        rs->srs_assoc_id = new PacketDrillExpression(in->getResetStreams()->srs_assoc_id->getType());
-        if (evaluate(in->getResetStreams()->srs_assoc_id, rs->srs_assoc_id, error)) {
-            delete (rs->srs_assoc_id);
-            free (rs);
-            return STATUS_ERR;
-        }
-        rs->srs_flags = new PacketDrillExpression(in->getResetStreams()->srs_flags->getType());
-        if (evaluate(in->getResetStreams()->srs_flags, rs->srs_flags, error)) {
-            delete (rs->srs_assoc_id);
-            delete (rs->srs_flags);
-            free (rs);
-            return STATUS_ERR;
-        }
-        rs->srs_number_streams = new PacketDrillExpression(in->getResetStreams()->srs_number_streams->getType());
-        if (evaluate(in->getResetStreams()->srs_number_streams, rs->srs_number_streams, error)) {
-            delete (rs->srs_assoc_id);
-            delete (rs->srs_flags);
-            delete (rs->srs_number_streams);
-            free (rs);
-            return STATUS_ERR;
-        }
-        if (rs->srs_number_streams->getNum() > 0) {
-            rs->srs_stream_list = new PacketDrillExpression(in->getResetStreams()->srs_stream_list->getType());
-            if (evaluate(in->getResetStreams()->srs_stream_list, rs->srs_stream_list, error)) {
-                EV_WARN << "Error in evaluate\n";
-                delete (rs->srs_assoc_id);
-                delete (rs->srs_flags);
-                delete (rs->srs_number_streams);
-                delete (rs->srs_stream_list);
-                free (rs);
+        case EXPR_SCTP_INITMSG: {
+            assert(in->getType() == EXPR_SCTP_INITMSG);
+            assert(out->getType() == EXPR_SCTP_INITMSG);
+            struct sctp_initmsg_expr *expr = (struct sctp_initmsg_expr *)malloc(sizeof(struct sctp_initmsg_expr));
+            expr->sinit_num_ostreams = new PacketDrillExpression(in->getInitmsg()->sinit_num_ostreams->getType());
+            if (evaluate(in->getInitmsg()->sinit_num_ostreams, expr->sinit_num_ostreams, error)) {
+                delete expr->sinit_num_ostreams;
+                free(expr);
                 return STATUS_ERR;
             }
-            delete in->getResetStreams()->srs_stream_list->getList();
-        } else {
-            rs->srs_stream_list = nullptr;
+            expr->sinit_max_instreams = new PacketDrillExpression(in->getInitmsg()->sinit_max_instreams->getType());
+            if (evaluate(in->getInitmsg()->sinit_max_instreams, expr->sinit_max_instreams, error)) {
+                delete expr->sinit_num_ostreams;
+                delete expr->sinit_max_instreams;
+                free(expr);
+                return STATUS_ERR;
+            }
+            expr->sinit_max_attempts = new PacketDrillExpression(in->getInitmsg()->sinit_max_attempts->getType());
+            if (evaluate(in->getInitmsg()->sinit_max_attempts, expr->sinit_max_attempts, error)) {
+                delete expr->sinit_num_ostreams;
+                delete expr->sinit_max_instreams;
+                delete expr->sinit_max_attempts;
+                free(expr);
+                return STATUS_ERR;
+            }
+            expr->sinit_max_init_timeo = new PacketDrillExpression(in->getInitmsg()->sinit_max_init_timeo->getType());
+            if (evaluate(in->getInitmsg()->sinit_max_init_timeo, expr->sinit_max_init_timeo, error)) {
+                delete expr->sinit_num_ostreams;
+                delete expr->sinit_max_instreams;
+                delete expr->sinit_max_attempts;
+                delete expr->sinit_max_init_timeo;
+                free(expr);
+                return STATUS_ERR;
+            }
+            out->setInitmsg(expr);
+            break;
         }
-        out->setResetStreams(rs);
-        break;
-    }
 
-    case EXPR_SCTP_ADD_STREAMS: {
-        assert(in->getType() == EXPR_SCTP_ADD_STREAMS);
-        assert(out->getType() == EXPR_SCTP_ADD_STREAMS);
-        printf("evaluate EXPR_SCTP_ADD_STREAMS\n");
-        struct sctp_add_streams_expr *as = (struct sctp_add_streams_expr *) malloc(sizeof(struct sctp_add_streams_expr));
-        as->sas_assoc_id = new PacketDrillExpression(in->getAddStreams()->sas_assoc_id->getType());
-        if (evaluate(in->getAddStreams()->sas_assoc_id, as->sas_assoc_id, error)) {
-        printf("add streams assoc id=%" PRId64 "\n", as->sas_assoc_id->getNum());
-            delete (as->sas_assoc_id);
-            free (as);
-            return STATUS_ERR;
+        case EXPR_SCTP_ASSOCPARAMS: {
+            assert(in->getType() == EXPR_SCTP_ASSOCPARAMS);
+            assert(out->getType() == EXPR_SCTP_ASSOCPARAMS);
+            struct sctp_assocparams_expr *ap = (struct sctp_assocparams_expr *)malloc(sizeof(struct sctp_assocparams_expr));
+            ap->sasoc_assoc_id = new PacketDrillExpression(in->getAssocParams()->sasoc_assoc_id->getType());
+            if (evaluate(in->getAssocParams()->sasoc_assoc_id, ap->sasoc_assoc_id, error)) {
+                delete ap->sasoc_assoc_id;
+                free(ap);
+                return STATUS_ERR;
+            }
+            ap->sasoc_asocmaxrxt = new PacketDrillExpression(in->getAssocParams()->sasoc_asocmaxrxt->getType());
+            if (evaluate(in->getAssocParams()->sasoc_asocmaxrxt, ap->sasoc_asocmaxrxt, error)) {
+                delete ap->sasoc_assoc_id;
+                delete ap->sasoc_asocmaxrxt;
+                free(ap);
+                return STATUS_ERR;
+            }
+            ap->sasoc_number_peer_destinations = new PacketDrillExpression(in->getAssocParams()->sasoc_number_peer_destinations->getType());
+            if (evaluate(in->getAssocParams()->sasoc_number_peer_destinations, ap->sasoc_number_peer_destinations, error)) {
+                delete ap->sasoc_assoc_id;
+                delete ap->sasoc_asocmaxrxt;
+                delete ap->sasoc_number_peer_destinations;
+                free(ap);
+                return STATUS_ERR;
+            }
+            ap->sasoc_peer_rwnd = new PacketDrillExpression(in->getAssocParams()->sasoc_peer_rwnd->getType());
+            if (evaluate(in->getAssocParams()->sasoc_peer_rwnd, ap->sasoc_peer_rwnd, error)) {
+                delete ap->sasoc_assoc_id;
+                delete ap->sasoc_asocmaxrxt;
+                delete ap->sasoc_number_peer_destinations;
+                delete ap->sasoc_peer_rwnd;
+                free(ap);
+                return STATUS_ERR;
+            }
+            ap->sasoc_local_rwnd = new PacketDrillExpression(in->getAssocParams()->sasoc_local_rwnd->getType());
+            if (evaluate(in->getAssocParams()->sasoc_local_rwnd, ap->sasoc_local_rwnd, error)) {
+                delete ap->sasoc_assoc_id;
+                delete ap->sasoc_asocmaxrxt;
+                delete ap->sasoc_number_peer_destinations;
+                delete ap->sasoc_peer_rwnd;
+                delete ap->sasoc_local_rwnd;
+                free(ap);
+                return STATUS_ERR;
+            }
+            ap->sasoc_cookie_life = new PacketDrillExpression(in->getAssocParams()->sasoc_cookie_life->getType());
+            if (evaluate(in->getAssocParams()->sasoc_cookie_life, ap->sasoc_cookie_life, error)) {
+                delete ap->sasoc_assoc_id;
+                delete ap->sasoc_asocmaxrxt;
+                delete ap->sasoc_number_peer_destinations;
+                delete ap->sasoc_peer_rwnd;
+                delete ap->sasoc_local_rwnd;
+                delete ap->sasoc_cookie_life;
+                free(ap);
+                return STATUS_ERR;
+            }
+            out->setAssocParams(ap);
+            break;
         }
-        as->sas_instrms = new PacketDrillExpression(in->getAddStreams()->sas_instrms->getType());
-        if (evaluate(in->getAddStreams()->sas_instrms, as->sas_instrms, error)) {
-            delete (as->sas_assoc_id);
-            delete (as->sas_instrms);
-            free (as);
-            return STATUS_ERR;
-        }
-        as->sas_outstrms = new PacketDrillExpression(in->getAddStreams()->sas_outstrms->getType());
-        if (evaluate(in->getAddStreams()->sas_outstrms, as->sas_outstrms, error)) {
-            delete (as->sas_assoc_id);
-            delete (as->sas_instrms);
-            delete (as->sas_outstrms);
-            free (as);
-            return STATUS_ERR;
-        }
-        out->setAddStreams(as);
-        break;
-    }
 
-    case EXPR_SCTP_PEER_ADDR_PARAMS: {
-        assert(in->getType() == EXPR_SCTP_PEER_ADDR_PARAMS);
-        assert(out->getType() == EXPR_SCTP_PEER_ADDR_PARAMS);
-        struct sctp_paddrparams_expr *spp = (struct sctp_paddrparams_expr *) malloc(sizeof(struct sctp_paddrparams_expr));
-        spp->spp_assoc_id = new PacketDrillExpression(in->getPaddrParams()->spp_assoc_id->getType());
-        if (evaluate(in->getPaddrParams()->spp_assoc_id, spp->spp_assoc_id, error)) {
-            delete (spp->spp_assoc_id);
-            free (spp);
-            return STATUS_ERR;
+        case EXPR_SCTP_RTOINFO: {
+            assert(in->getType() == EXPR_SCTP_RTOINFO);
+            assert(out->getType() == EXPR_SCTP_RTOINFO);
+            struct sctp_rtoinfo_expr *info = (struct sctp_rtoinfo_expr *)malloc(sizeof(struct sctp_rtoinfo_expr));
+            info->srto_assoc_id = new PacketDrillExpression(in->getRtoinfo()->srto_assoc_id->getType());
+            if (evaluate(in->getRtoinfo()->srto_assoc_id, info->srto_assoc_id, error)) {
+                delete info->srto_assoc_id;
+                free(info);
+                return STATUS_ERR;
+            }
+            info->srto_initial = new PacketDrillExpression(in->getRtoinfo()->srto_initial->getType());
+            if (evaluate(in->getRtoinfo()->srto_initial, info->srto_initial, error)) {
+                delete info->srto_assoc_id;
+                delete info->srto_initial;
+                free(info);
+                return STATUS_ERR;
+            }
+            info->srto_max = new PacketDrillExpression(in->getRtoinfo()->srto_max->getType());
+            if (evaluate(in->getRtoinfo()->srto_max, info->srto_max, error)) {
+                delete info->srto_assoc_id;
+                delete info->srto_initial;
+                delete info->srto_max;
+                free(info);
+                return STATUS_ERR;
+            }
+            info->srto_min = new PacketDrillExpression(in->getRtoinfo()->srto_min->getType());
+            if (evaluate(in->getRtoinfo()->srto_min, info->srto_min, error)) {
+                delete info->srto_assoc_id;
+                delete info->srto_initial;
+                delete info->srto_max;
+                delete info->srto_min;
+                free(info);
+                return STATUS_ERR;
+            }
+            out->setRtoinfo(info);
+            break;
         }
-        spp->spp_address = new PacketDrillExpression(in->getPaddrParams()->spp_address->getType());
-        if (evaluate(in->getPaddrParams()->spp_address, spp->spp_address, error)) {
-            delete (spp->spp_assoc_id);
-            delete (spp->spp_address);
-            free (spp);
-            return STATUS_ERR;
-        }
-        spp->spp_hbinterval = new PacketDrillExpression(in->getPaddrParams()->spp_hbinterval->getType());
-        if (evaluate(in->getPaddrParams()->spp_hbinterval, spp->spp_hbinterval, error)) {
-            delete (spp->spp_assoc_id);
-            delete (spp->spp_address);
-            delete (spp->spp_hbinterval);
-            free (spp);
-            return STATUS_ERR;
-        }
-        spp->spp_pathmaxrxt = new PacketDrillExpression(in->getPaddrParams()->spp_pathmaxrxt->getType());
-        if (evaluate(in->getPaddrParams()->spp_pathmaxrxt, spp->spp_pathmaxrxt, error)) {
-            delete (spp->spp_assoc_id);
-            delete (spp->spp_address);
-            delete (spp->spp_hbinterval);
-            delete (spp->spp_pathmaxrxt);
-            free (spp);
-            return STATUS_ERR;
-        }
-        spp->spp_pathmtu = new PacketDrillExpression(in->getPaddrParams()->spp_pathmtu->getType());
-        if (evaluate(in->getPaddrParams()->spp_pathmtu, spp->spp_pathmtu, error)) {
-            delete (spp->spp_assoc_id);
-            delete (spp->spp_address);
-            delete (spp->spp_hbinterval);
-            delete (spp->spp_pathmaxrxt);
-            delete (spp->spp_pathmtu);
-            free (spp);
-            return STATUS_ERR;
-        }
-        spp->spp_flags = new PacketDrillExpression(in->getPaddrParams()->spp_flags->getType());
-        if (evaluate(in->getPaddrParams()->spp_flags, spp->spp_flags, error)) {
-            delete (spp->spp_assoc_id);
-            delete (spp->spp_address);
-            delete (spp->spp_hbinterval);
-            delete (spp->spp_pathmaxrxt);
-            delete (spp->spp_pathmtu);
-            delete (spp->spp_flags);
-            free (spp);
-            return STATUS_ERR;
-        }
-        spp->spp_ipv6_flowlabel = new PacketDrillExpression(in->getPaddrParams()->spp_ipv6_flowlabel->getType());
-        if (evaluate(in->getPaddrParams()->spp_ipv6_flowlabel, spp->spp_ipv6_flowlabel, error)) {
-            delete (spp->spp_assoc_id);
-            delete (spp->spp_address);
-            delete (spp->spp_hbinterval);
-            delete (spp->spp_pathmaxrxt);
-            delete (spp->spp_pathmtu);
-            delete (spp->spp_flags);
-            delete (spp->spp_ipv6_flowlabel);
-            free (spp);
-            return STATUS_ERR;
-        }
-        spp->spp_dscp = new PacketDrillExpression(in->getPaddrParams()->spp_dscp->getType());
-        if (evaluate(in->getPaddrParams()->spp_dscp, spp->spp_dscp, error)) {
-            delete (spp->spp_assoc_id);
-            delete (spp->spp_address);
-            delete (spp->spp_hbinterval);
-            delete (spp->spp_pathmaxrxt);
-            delete (spp->spp_pathmtu);
-            delete (spp->spp_flags);
-            delete (spp->spp_ipv6_flowlabel);
-            delete (spp->spp_dscp);
-            free (spp);
-            return STATUS_ERR;
-        }
-        out->setPaddrParams(spp);
-        break;
-    }
 
-    case EXPR_STRING:
-        if (out->unescapeCstringExpression(in->getString(), error))
-            return STATUS_ERR;
-        break;
-
-    case EXPR_BINARY:
-        if (evaluate_binary_expression(in, out, error)) {
-            printf("Error in EXPR_BINARY\n");
+        case EXPR_SCTP_SACKINFO: {
+            assert(in->getType() == EXPR_SCTP_SACKINFO);
+            assert(out->getType() == EXPR_SCTP_SACKINFO);
+            struct sctp_sack_info_expr *si = (struct sctp_sack_info_expr *)malloc(sizeof(struct sctp_sack_info_expr));
+            si->sack_assoc_id = new PacketDrillExpression(in->getSackinfo()->sack_assoc_id->getType());
+            if (evaluate(in->getSackinfo()->sack_assoc_id, si->sack_assoc_id, error)) {
+                delete si->sack_assoc_id;
+                free(si);
+                return STATUS_ERR;
+            }
+            si->sack_delay = new PacketDrillExpression(in->getSackinfo()->sack_delay->getType());
+            if (evaluate(in->getSackinfo()->sack_delay, si->sack_delay, error)) {
+                delete si->sack_assoc_id;
+                delete si->sack_delay;
+                free(si);
+                return STATUS_ERR;
+            }
+            si->sack_freq = new PacketDrillExpression(in->getSackinfo()->sack_freq->getType());
+            if (evaluate(in->getSackinfo()->sack_freq, si->sack_freq, error)) {
+                delete si->sack_assoc_id;
+                delete si->sack_delay;
+                delete si->sack_freq;
+                free(si);
+                return STATUS_ERR;
+            }
+            out->setSackinfo(si);
+            break;
         }
-        break;
 
-    case EXPR_LIST:
-        if (evaluateListExpression(in, out, error)) {
-            printf("Error in EXPR_LIST\n");
+        case EXPR_SCTP_STATUS: {
+            assert(in->getType() == EXPR_SCTP_STATUS);
+            assert(out->getType() == EXPR_SCTP_STATUS);
+            struct sctp_status_expr *st = (struct sctp_status_expr *)malloc(sizeof(struct sctp_status_expr));
+            st->sstat_assoc_id = new PacketDrillExpression(in->getStatus()->sstat_assoc_id->getType());
+            if (evaluate(in->getStatus()->sstat_assoc_id, st->sstat_assoc_id, error)) {
+                delete st->sstat_assoc_id;
+                free(st);
+                return STATUS_ERR;
+            }
+            st->sstat_state = new PacketDrillExpression(in->getStatus()->sstat_state->getType());
+            if (evaluate(in->getStatus()->sstat_state, st->sstat_state, error)) {
+                delete st->sstat_assoc_id;
+                delete st->sstat_state;
+                free(st);
+                return STATUS_ERR;
+            }
+            st->sstat_rwnd = new PacketDrillExpression(in->getStatus()->sstat_rwnd->getType());
+            if (evaluate(in->getStatus()->sstat_rwnd, st->sstat_rwnd, error)) {
+                delete st->sstat_assoc_id;
+                delete st->sstat_state;
+                delete st->sstat_rwnd;
+                free(st);
+                return STATUS_ERR;
+            }
+            st->sstat_unackdata = new PacketDrillExpression(in->getStatus()->sstat_unackdata->getType());
+            if (evaluate(in->getStatus()->sstat_unackdata, st->sstat_unackdata, error)) {
+                delete st->sstat_assoc_id;
+                delete st->sstat_state;
+                delete st->sstat_rwnd;
+                delete st->sstat_unackdata;
+                free(st);
+                return STATUS_ERR;
+            }
+            st->sstat_penddata = new PacketDrillExpression(in->getStatus()->sstat_penddata->getType());
+            if (evaluate(in->getStatus()->sstat_penddata, st->sstat_penddata, error)) {
+                delete st->sstat_assoc_id;
+                delete st->sstat_state;
+                delete st->sstat_rwnd;
+                delete st->sstat_unackdata;
+                delete st->sstat_penddata;
+                free(st);
+                return STATUS_ERR;
+            }
+            st->sstat_instrms = new PacketDrillExpression(in->getStatus()->sstat_instrms->getType());
+            if (evaluate(in->getStatus()->sstat_instrms, st->sstat_instrms, error)) {
+                delete st->sstat_assoc_id;
+                delete st->sstat_state;
+                delete st->sstat_rwnd;
+                delete st->sstat_unackdata;
+                delete st->sstat_penddata;
+                delete st->sstat_instrms;
+                free(st);
+                return STATUS_ERR;
+            }
+            st->sstat_outstrms = new PacketDrillExpression(in->getStatus()->sstat_outstrms->getType());
+            if (evaluate(in->getStatus()->sstat_outstrms, st->sstat_outstrms, error)) {
+                delete st->sstat_assoc_id;
+                delete st->sstat_state;
+                delete st->sstat_rwnd;
+                delete st->sstat_unackdata;
+                delete st->sstat_penddata;
+                delete st->sstat_instrms;
+                delete st->sstat_outstrms;
+                free(st);
+                return STATUS_ERR;
+            }
+            st->sstat_fragmentation_point = new PacketDrillExpression(in->getStatus()->sstat_fragmentation_point->getType());
+            if (evaluate(in->getStatus()->sstat_fragmentation_point, st->sstat_fragmentation_point, error)) {
+                delete st->sstat_assoc_id;
+                delete st->sstat_state;
+                delete st->sstat_rwnd;
+                delete st->sstat_unackdata;
+                delete st->sstat_penddata;
+                delete st->sstat_instrms;
+                delete st->sstat_outstrms;
+                delete st->sstat_fragmentation_point;
+                free(st);
+                return STATUS_ERR;
+            }
+            st->sstat_primary = new PacketDrillExpression(in->getStatus()->sstat_primary->getType());
+            if (evaluate(in->getStatus()->sstat_primary, st->sstat_primary, error)) {
+                delete st->sstat_assoc_id;
+                delete st->sstat_state;
+                delete st->sstat_rwnd;
+                delete st->sstat_unackdata;
+                delete st->sstat_penddata;
+                delete st->sstat_instrms;
+                delete st->sstat_outstrms;
+                delete st->sstat_fragmentation_point;
+                delete st->sstat_primary;
+                free(st);
+                return STATUS_ERR;
+            }
+            out->setStatus(st);
+            break;
         }
-        break;
 
-    case EXPR_SOCKET_ADDRESS_IPV4:
-        break;
-    case EXPR_NONE:
-        break;
+        case EXPR_SCTP_ASSOCVAL: {
+            assert(in->getType() == EXPR_SCTP_ASSOCVAL);
+            assert(out->getType() == EXPR_SCTP_ASSOCVAL);
+            struct sctp_assoc_value_expr *ass = (struct sctp_assoc_value_expr *)malloc(sizeof(struct sctp_assoc_value_expr));
+            ass->assoc_id = new PacketDrillExpression(in->getAssocval()->assoc_id->getType());
+            if (evaluate(in->getAssocval()->assoc_id, ass->assoc_id, error)) {
+                delete ass->assoc_id;
+                free(ass);
+                return STATUS_ERR;
+            }
+            ass->assoc_value = new PacketDrillExpression(in->getAssocval()->assoc_value->getType());
+            if (evaluate(in->getAssocval()->assoc_value, ass->assoc_value, error)) {
+                delete ass->assoc_id;
+                delete ass->assoc_value;
+                free(ass);
+                return STATUS_ERR;
+            }
+            out->setAssocval(ass);
+            break;
+        }
 
-    default:
-        EV_INFO << "type " << in->getType() << " not implemented\n";
+        case EXPR_SCTP_SNDRCVINFO: {
+            assert(in->getType() == EXPR_SCTP_SNDRCVINFO);
+            assert(out->getType() == EXPR_SCTP_SNDRCVINFO);
+            struct sctp_sndrcvinfo_expr *sri = (struct sctp_sndrcvinfo_expr *)malloc(sizeof(struct sctp_sndrcvinfo_expr));
+            sri->sinfo_stream = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_stream->getType());
+            if (evaluate(in->getSndRcvInfo()->sinfo_stream, sri->sinfo_stream, error)) {
+                delete sri->sinfo_stream;
+                free(sri);
+                return STATUS_ERR;
+            }
+            sri->sinfo_ssn = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_ssn->getType());
+            if (evaluate(in->getSndRcvInfo()->sinfo_ssn, sri->sinfo_ssn, error)) {
+                delete sri->sinfo_stream;
+                delete sri->sinfo_ssn;
+                free(sri);
+                return STATUS_ERR;
+            }
+            sri->sinfo_flags = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_flags->getType());
+            if (evaluate(in->getSndRcvInfo()->sinfo_flags, sri->sinfo_flags, error)) {
+                delete sri->sinfo_stream;
+                delete sri->sinfo_ssn;
+                delete sri->sinfo_flags;
+                free(sri);
+                return STATUS_ERR;
+            }
+            sri->sinfo_ppid = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_ppid->getType());
+            if (evaluate(in->getSndRcvInfo()->sinfo_ppid, sri->sinfo_ppid, error)) {
+                delete sri->sinfo_stream;
+                delete sri->sinfo_ssn;
+                delete sri->sinfo_flags;
+                delete sri->sinfo_ppid;
+                free(sri);
+                return STATUS_ERR;
+            }
+            sri->sinfo_context = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_context->getType());
+            if (evaluate(in->getSndRcvInfo()->sinfo_context, sri->sinfo_context, error)) {
+                delete sri->sinfo_stream;
+                delete sri->sinfo_ssn;
+                delete sri->sinfo_flags;
+                delete sri->sinfo_ppid;
+                delete sri->sinfo_context;
+                free(sri);
+                return STATUS_ERR;
+            }
+            sri->sinfo_timetolive = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_timetolive->getType());
+            if (evaluate(in->getSndRcvInfo()->sinfo_timetolive, sri->sinfo_timetolive, error)) {
+                delete sri->sinfo_stream;
+                delete sri->sinfo_ssn;
+                delete sri->sinfo_flags;
+                delete sri->sinfo_ppid;
+                delete sri->sinfo_context;
+                delete sri->sinfo_timetolive;
+                free(sri);
+                return STATUS_ERR;
+            }
+            sri->sinfo_tsn = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_tsn->getType());
+            if (evaluate(in->getSndRcvInfo()->sinfo_tsn, sri->sinfo_tsn, error)) {
+                delete sri->sinfo_stream;
+                delete sri->sinfo_ssn;
+                delete sri->sinfo_flags;
+                delete sri->sinfo_ppid;
+                delete sri->sinfo_context;
+                delete sri->sinfo_timetolive;
+                delete sri->sinfo_tsn;
+                free(sri);
+                return STATUS_ERR;
+            }
+            sri->sinfo_cumtsn = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_cumtsn->getType());
+            if (evaluate(in->getSndRcvInfo()->sinfo_cumtsn, sri->sinfo_cumtsn, error)) {
+                delete sri->sinfo_stream;
+                delete sri->sinfo_ssn;
+                delete sri->sinfo_flags;
+                delete sri->sinfo_ppid;
+                delete sri->sinfo_context;
+                delete sri->sinfo_timetolive;
+                delete sri->sinfo_tsn;
+                delete sri->sinfo_cumtsn;
+                free(sri);
+                return STATUS_ERR;
+            }
+            sri->sinfo_assoc_id = new PacketDrillExpression(in->getSndRcvInfo()->sinfo_assoc_id->getType());
+            if (evaluate(in->getSndRcvInfo()->sinfo_assoc_id, sri->sinfo_assoc_id, error)) {
+                delete sri->sinfo_stream;
+                delete sri->sinfo_ssn;
+                delete sri->sinfo_flags;
+                delete sri->sinfo_ppid;
+                delete sri->sinfo_context;
+                delete sri->sinfo_timetolive;
+                delete sri->sinfo_tsn;
+                delete sri->sinfo_cumtsn;
+                delete sri->sinfo_assoc_id;
+                free(sri);
+                return STATUS_ERR;
+            }
+            out->setSndRcvInfo(sri);
+            break;
+        }
+
+        case EXPR_SCTP_RESET_STREAMS: {
+            assert(in->getType() == EXPR_SCTP_RESET_STREAMS);
+            assert(out->getType() == EXPR_SCTP_RESET_STREAMS);
+            struct sctp_reset_streams_expr *rs = (struct sctp_reset_streams_expr *)malloc(sizeof(struct sctp_reset_streams_expr));
+            rs->srs_assoc_id = new PacketDrillExpression(in->getResetStreams()->srs_assoc_id->getType());
+            if (evaluate(in->getResetStreams()->srs_assoc_id, rs->srs_assoc_id, error)) {
+                delete rs->srs_assoc_id;
+                free(rs);
+                return STATUS_ERR;
+            }
+            rs->srs_flags = new PacketDrillExpression(in->getResetStreams()->srs_flags->getType());
+            if (evaluate(in->getResetStreams()->srs_flags, rs->srs_flags, error)) {
+                delete rs->srs_assoc_id;
+                delete rs->srs_flags;
+                free(rs);
+                return STATUS_ERR;
+            }
+            rs->srs_number_streams = new PacketDrillExpression(in->getResetStreams()->srs_number_streams->getType());
+            if (evaluate(in->getResetStreams()->srs_number_streams, rs->srs_number_streams, error)) {
+                delete rs->srs_assoc_id;
+                delete rs->srs_flags;
+                delete rs->srs_number_streams;
+                free(rs);
+                return STATUS_ERR;
+            }
+            if (rs->srs_number_streams->getNum() > 0) {
+                rs->srs_stream_list = new PacketDrillExpression(in->getResetStreams()->srs_stream_list->getType());
+                if (evaluate(in->getResetStreams()->srs_stream_list, rs->srs_stream_list, error)) {
+                    EV_WARN << "Error in evaluate\n";
+                    delete rs->srs_assoc_id;
+                    delete rs->srs_flags;
+                    delete rs->srs_number_streams;
+                    delete rs->srs_stream_list;
+                    free(rs);
+                    return STATUS_ERR;
+                }
+                delete in->getResetStreams()->srs_stream_list->getList();
+            }
+            else {
+                rs->srs_stream_list = nullptr;
+            }
+            out->setResetStreams(rs);
+            break;
+        }
+
+        case EXPR_SCTP_ADD_STREAMS: {
+            assert(in->getType() == EXPR_SCTP_ADD_STREAMS);
+            assert(out->getType() == EXPR_SCTP_ADD_STREAMS);
+            printf("evaluate EXPR_SCTP_ADD_STREAMS\n");
+            struct sctp_add_streams_expr *as = (struct sctp_add_streams_expr *)malloc(sizeof(struct sctp_add_streams_expr));
+            as->sas_assoc_id = new PacketDrillExpression(in->getAddStreams()->sas_assoc_id->getType());
+            if (evaluate(in->getAddStreams()->sas_assoc_id, as->sas_assoc_id, error)) {
+                printf("add streams assoc id=%" PRId64 "\n", as->sas_assoc_id->getNum());
+                delete as->sas_assoc_id;
+                free(as);
+                return STATUS_ERR;
+            }
+            as->sas_instrms = new PacketDrillExpression(in->getAddStreams()->sas_instrms->getType());
+            if (evaluate(in->getAddStreams()->sas_instrms, as->sas_instrms, error)) {
+                delete as->sas_assoc_id;
+                delete as->sas_instrms;
+                free(as);
+                return STATUS_ERR;
+            }
+            as->sas_outstrms = new PacketDrillExpression(in->getAddStreams()->sas_outstrms->getType());
+            if (evaluate(in->getAddStreams()->sas_outstrms, as->sas_outstrms, error)) {
+                delete as->sas_assoc_id;
+                delete as->sas_instrms;
+                delete as->sas_outstrms;
+                free(as);
+                return STATUS_ERR;
+            }
+            out->setAddStreams(as);
+            break;
+        }
+
+        case EXPR_SCTP_PEER_ADDR_PARAMS: {
+            assert(in->getType() == EXPR_SCTP_PEER_ADDR_PARAMS);
+            assert(out->getType() == EXPR_SCTP_PEER_ADDR_PARAMS);
+            struct sctp_paddrparams_expr *spp = (struct sctp_paddrparams_expr *)malloc(sizeof(struct sctp_paddrparams_expr));
+            spp->spp_assoc_id = new PacketDrillExpression(in->getPaddrParams()->spp_assoc_id->getType());
+            if (evaluate(in->getPaddrParams()->spp_assoc_id, spp->spp_assoc_id, error)) {
+                delete spp->spp_assoc_id;
+                free(spp);
+                return STATUS_ERR;
+            }
+            spp->spp_address = new PacketDrillExpression(in->getPaddrParams()->spp_address->getType());
+            if (evaluate(in->getPaddrParams()->spp_address, spp->spp_address, error)) {
+                delete spp->spp_assoc_id;
+                delete spp->spp_address;
+                free(spp);
+                return STATUS_ERR;
+            }
+            spp->spp_hbinterval = new PacketDrillExpression(in->getPaddrParams()->spp_hbinterval->getType());
+            if (evaluate(in->getPaddrParams()->spp_hbinterval, spp->spp_hbinterval, error)) {
+                delete spp->spp_assoc_id;
+                delete spp->spp_address;
+                delete spp->spp_hbinterval;
+                free(spp);
+                return STATUS_ERR;
+            }
+            spp->spp_pathmaxrxt = new PacketDrillExpression(in->getPaddrParams()->spp_pathmaxrxt->getType());
+            if (evaluate(in->getPaddrParams()->spp_pathmaxrxt, spp->spp_pathmaxrxt, error)) {
+                delete spp->spp_assoc_id;
+                delete spp->spp_address;
+                delete spp->spp_hbinterval;
+                delete spp->spp_pathmaxrxt;
+                free(spp);
+                return STATUS_ERR;
+            }
+            spp->spp_pathmtu = new PacketDrillExpression(in->getPaddrParams()->spp_pathmtu->getType());
+            if (evaluate(in->getPaddrParams()->spp_pathmtu, spp->spp_pathmtu, error)) {
+                delete spp->spp_assoc_id;
+                delete spp->spp_address;
+                delete spp->spp_hbinterval;
+                delete spp->spp_pathmaxrxt;
+                delete spp->spp_pathmtu;
+                free(spp);
+                return STATUS_ERR;
+            }
+            spp->spp_flags = new PacketDrillExpression(in->getPaddrParams()->spp_flags->getType());
+            if (evaluate(in->getPaddrParams()->spp_flags, spp->spp_flags, error)) {
+                delete spp->spp_assoc_id;
+                delete spp->spp_address;
+                delete spp->spp_hbinterval;
+                delete spp->spp_pathmaxrxt;
+                delete spp->spp_pathmtu;
+                delete spp->spp_flags;
+                free(spp);
+                return STATUS_ERR;
+            }
+            spp->spp_ipv6_flowlabel = new PacketDrillExpression(in->getPaddrParams()->spp_ipv6_flowlabel->getType());
+            if (evaluate(in->getPaddrParams()->spp_ipv6_flowlabel, spp->spp_ipv6_flowlabel, error)) {
+                delete spp->spp_assoc_id;
+                delete spp->spp_address;
+                delete spp->spp_hbinterval;
+                delete spp->spp_pathmaxrxt;
+                delete spp->spp_pathmtu;
+                delete spp->spp_flags;
+                delete spp->spp_ipv6_flowlabel;
+                free(spp);
+                return STATUS_ERR;
+            }
+            spp->spp_dscp = new PacketDrillExpression(in->getPaddrParams()->spp_dscp->getType());
+            if (evaluate(in->getPaddrParams()->spp_dscp, spp->spp_dscp, error)) {
+                delete spp->spp_assoc_id;
+                delete spp->spp_address;
+                delete spp->spp_hbinterval;
+                delete spp->spp_pathmaxrxt;
+                delete spp->spp_pathmtu;
+                delete spp->spp_flags;
+                delete spp->spp_ipv6_flowlabel;
+                delete spp->spp_dscp;
+                free(spp);
+                return STATUS_ERR;
+            }
+            out->setPaddrParams(spp);
+            break;
+        }
+
+        case EXPR_STRING:
+            if (out->unescapeCstringExpression(in->getString(), error))
+                return STATUS_ERR;
+            break;
+
+        case EXPR_BINARY:
+            if (evaluate_binary_expression(in, out, error)) {
+                printf("Error in EXPR_BINARY\n");
+            }
+            break;
+
+        case EXPR_LIST:
+            if (evaluateListExpression(in, out, error)) {
+                printf("Error in EXPR_LIST\n");
+            }
+            break;
+
+        case EXPR_SOCKET_ADDRESS_IPV4:
+            break;
+        case EXPR_NONE:
+            break;
+
+        default:
+            EV_INFO << "type " << in->getType() << " not implemented\n";
     }
     return result;
 }
@@ -1721,7 +1758,7 @@ int PacketDrill::evaluateExpressionList(cQueue *in_list, cQueue *out_list, char 
     for (cQueue::Iterator it(*in_list); !it.end(); it++) {
         PacketDrillExpression *outExpr = new PacketDrillExpression(check_and_cast<PacketDrillExpression *>(*it)->getType());
         if (evaluate(check_and_cast<PacketDrillExpression *>(*it), outExpr, error)) {
-            delete(outExpr);
+            delete outExpr;
             return STATUS_ERR;
         }
         node_ptr->insert(outExpr);
@@ -1739,25 +1776,29 @@ int PacketDrill::evaluate_binary_expression(PacketDrillExpression *in, PacketDri
     PacketDrillExpression *lhs = new PacketDrillExpression(in->getBinary()->lhs->getType());
     PacketDrillExpression *rhs = new PacketDrillExpression(in->getBinary()->rhs->getType());
     if ((evaluate(in->getBinary()->lhs, lhs, error)) ||
-        (evaluate(in->getBinary()->rhs, rhs, error))) {
-        delete(rhs);
-        delete(lhs);
+        (evaluate(in->getBinary()->rhs, rhs, error)))
+    {
+        delete rhs;
+        delete lhs;
         return result;
     }
     if (strcmp("|", in->getBinary()->op) == 0) {
         if (lhs->getType() != EXPR_INTEGER) {
             EV_ERROR << "left hand side of | not an integer\n";
-        } else if (rhs->getType() != EXPR_INTEGER) {
+        }
+        else if (rhs->getType() != EXPR_INTEGER) {
             EV_ERROR << "right hand side of | not an integer\n";
-        } else {
+        }
+        else {
             out->setNum(lhs->getNum() | rhs->getNum());
             result = STATUS_OK;
         }
-    } else {
+    }
+    else {
         EV_ERROR << "bad binary operator '" << in->getBinary()->op << "'\n";
     }
-    delete(rhs);
-    delete(lhs);
+    delete rhs;
+    delete lhs;
     return result;
 }
 

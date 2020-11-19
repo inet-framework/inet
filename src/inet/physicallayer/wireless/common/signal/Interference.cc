@@ -37,7 +37,7 @@ std::ostream& Interference::printToStream(std::ostream& stream, int level, int e
     stream << "Interference";
     if (level <= PRINT_LEVEL_TRACE)
         stream << EV_FIELD(backgroundNoise, printFieldToString(backgroundNoise, level + 1, evFlags))
-               << EV_FIELD(interferingReceptions, interferingReceptions );
+               << EV_FIELD(interferingReceptions, interferingReceptions);
     return stream;
 }
 

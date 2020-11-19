@@ -30,24 +30,22 @@ namespace inet {
 /**
  * Uses IPv4Address.getNetmaskLength() method
  */
-int getNetmaskLength(const Ipv4Address &netmask)
+int getNetmaskLength(const Ipv4Address& netmask)
 {
     return netmask.getNetmaskLength();
 }
 
-
 /**
  * Uses four times IPv4Address.getNetmaskLength() method on four parts of IPv6 address
  */
-int getNetmaskLength(const Ipv6Address &netmask)
+int getNetmaskLength(const Ipv6Address& netmask)
 {
     int length = 0;
 
-    for(int i = 0; i <= 3; ++i)
-    {
-        //length += IPv4Address(netmask.words()[i]).getNetmaskLength();
+    for (int i = 0; i <= 3; ++i) {
+//        length += IPv4Address(netmask.words()[i]).getNetmaskLength();
 
-        length += (static_cast<Ipv4Address> (netmask.words()[i])).getNetmaskLength();      //TODO - verify!
+        length += (static_cast<Ipv4Address>(netmask.words()[i])).getNetmaskLength(); // TODO - verify!
     }
 
     return length;
@@ -55,7 +53,7 @@ int getNetmaskLength(const Ipv6Address &netmask)
 
 bool maskedAddrAreEqual(const Ipv4Address& addr1, const Ipv4Address& addr2, const Ipv4Address& netmask)
 {
-    //return !(bool)((addr1.addr ^ addr2.addr) & netmask.addr);
+//    return !(bool)((addr1.addr ^ addr2.addr) & netmask.addr);
     return Ipv4Address::maskedAddrAreEqual(addr1, addr2, netmask);
 }
 
@@ -69,8 +67,7 @@ bool maskedAddrAreEqual(const Ipv6Address& addr1, const Ipv6Address& addr2, cons
             ((a1[0] ^ a2[0]) & mask[0]) |
             ((a1[1] ^ a2[1]) & mask[1]) |
             ((a1[2] ^ a2[2]) & mask[2]) |
-            ((a1[3] ^ a2[3]) & mask[3]))
-            );//TODO - verify!
+            ((a1[3] ^ a2[3]) & mask[3]))); //TODO - verify!
 
 
 }
@@ -80,27 +77,26 @@ Ipv6Address getPrefix(const Ipv6Address& addr, const Ipv6Address& netmask)
     const uint32_t *addrp = addr.words();
     const uint32_t *netmaskp = netmask.words();
 
-    return Ipv6Address(addrp[0] & netmaskp[0], addrp[1] & netmaskp[1], addrp[2] & netmaskp[2], addrp[3] & netmaskp[3]); //TODO - verify
+    return Ipv6Address(addrp[0] & netmaskp[0], addrp[1] & netmaskp[1], addrp[2] & netmaskp[2], addrp[3] & netmaskp[3]); // TODO - verify
 }
 
-Ipv6Address makeNetmask(int length) //TODO - verify
+Ipv6Address makeNetmask(int length) // TODO - verify
 {
-    uint32_t netmask[4] = {0, 0, 0, 0};
+    uint32_t netmask[4] = { 0, 0, 0, 0 };
 
-    for(int i = 0; i < 4; ++i)
-    {//through 4 parts of address
-        int wlen = length - (i * 32);   //computes number of ones bits in part
+    for (int i = 0; i < 4; ++i) { // through 4 parts of address
+        int wlen = length - (i * 32); // computes number of ones bits in part
 
-        if(wlen > 0)
-        {//some bits to set
-            netmask[i] = (wlen >= 32) ? 0xffffffffu : ~(0xffffffffu >> wlen);   //(Implementation note: MSVC refuses to shift by 32 bits!)
+        if (wlen > 0) { // some bits to set
+            netmask[i] = (wlen >= 32) ? 0xffffffffu : ~(0xffffffffu >> wlen); // (Implementation note: MSVC refuses to shift by 32 bits!)
         }
-        else
-        {// nothing to set
+        else { // nothing to set
             break;
         }
     }
 
     return Ipv6Address(netmask[0], netmask[1], netmask[2], netmask[3]);
 }
-}
+
+} // namespace inet
+

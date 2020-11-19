@@ -135,14 +135,14 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
             sendSyn();
             startSynRexmitTimer();
             scheduleAfter(TCP_TIMEOUT_CONN_ESTAB, connEstabTimer);
-            sendQueue->enqueueAppData(packet);    // queue up for later
+            sendQueue->enqueueAppData(packet); // queue up for later
             EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
             break;
 
         case TCP_S_SYN_RCVD:
         case TCP_S_SYN_SENT:
             EV_DETAIL << "Queueing up data for sending later.\n";
-            sendQueue->enqueueAppData(packet);    // queue up for later
+            sendQueue->enqueueAppData(packet); // queue up for later
             EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
             break;
 
@@ -172,8 +172,7 @@ void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCom
         throw cRuntimeError("READ without ACCEPT");
     delete msg;
     Packet *dataMsg;
-    while ((dataMsg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr)
-    {
+    while ((dataMsg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) != nullptr) {
         dataMsg->setKind(TCP_I_DATA);
         dataMsg->addTag<SocketInd>()->setSocketId(socketId);
         sendToApp(dataMsg);
@@ -288,12 +287,12 @@ void TcpConnection::process_DESTROY(TcpEventCode& event, TcpCommand *tcpCommand,
 {
     delete tcpCommand;
     delete msg;
-    //TODO should we send a RST or not?
+    // TODO should we send a RST or not?
 }
 
 void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
 {
-    delete tcpCommand;    // but reuse msg for reply
+    delete tcpCommand; // but reuse msg for reply
 
     if (fsm.getState() == TCP_S_INIT)
         throw cRuntimeError("Error processing command STATUS: connection not open");
@@ -333,7 +332,7 @@ void TcpConnection::process_QUEUE_BYTES_LIMIT(TcpEventCode& event, TcpCommand *t
     if (state == nullptr)
         throw cRuntimeError("Called process_QUEUE_BYTES_LIMIT on uninitialized TcpConnection!");
 
-    state->sendQueueLimit = tcpCommand->getUserId();    // Set queue size limit
+    state->sendQueueLimit = tcpCommand->getUserId(); // Set queue size limit
     EV << "state->sendQueueLimit set to " << state->sendQueueLimit << "\n";
     delete msg;
     delete tcpCommand;

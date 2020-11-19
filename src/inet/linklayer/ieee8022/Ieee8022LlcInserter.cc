@@ -50,7 +50,7 @@ void Ieee8022LlcInserter::processPacket(Packet *packet)
         auto sapReq = packet->getTag<Ieee802SapReq>();
         llcHeader->setSsap(sapReq->getSsap());
         llcHeader->setDsap(sapReq->getDsap());
-        llcHeader->setControl(3);       //TODO get from sapTag
+        llcHeader->setControl(3); // TODO get from sapTag
     }
     packet->insertAtFront(llcHeader);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022llc);

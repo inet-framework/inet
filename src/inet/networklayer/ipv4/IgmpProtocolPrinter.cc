@@ -44,7 +44,7 @@ void IgmpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *p
                         context.infoColumn << ", general";
                     else
                         context.infoColumn << ", group " << header->getGroupAddress();
-                    context.infoColumn << ", maxRespTime=" << SimTime(header->getMaxRespTimeCode(), (SimTimeUnit)-1);
+                    context.infoColumn << ", maxRespTime=" << SimTime(header->getMaxRespTimeCode(), (SimTimeUnit) - 1);
                 }
                 else if (auto header = dynamicPtrCast<const Igmpv3Query>(chunk)) {
                     context.infoColumn << "IGMPv3 QRY";
@@ -52,14 +52,14 @@ void IgmpProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *p
                         context.infoColumn << ", general";
                     else
                         context.infoColumn << ", group " << header->getGroupAddress();
-                    context.infoColumn << ", maxRespTime=" << SimTime(Igmpv3::decodeTime(header->getMaxRespTimeCode()), (SimTimeUnit)-1);
+                    context.infoColumn << ", maxRespTime=" << SimTime(Igmpv3::decodeTime(header->getMaxRespTimeCode()), (SimTimeUnit) - 1);
                     if (header->getSuppressRouterProc())
                         context.infoColumn << " Suppress";
                     context.infoColumn << ", QRV=" << header->getRobustnessVariable();
                     context.infoColumn << ", QQIC=" << SimTime(Igmpv3::decodeTime(header->getQueryIntervalCode()), SIMTIME_S);
                     if (header->getSourceList().size() > 0) {
                         context.infoColumn << ", SRC={";
-                        for(auto it = header->getSourceList().begin(); it != header->getSourceList().end(); ++it) {
+                        for (auto it = header->getSourceList().begin(); it != header->getSourceList().end(); ++it) {
                             if (it != header->getSourceList().begin())
                                 context.infoColumn << ", ";
                             context.infoColumn << *it;

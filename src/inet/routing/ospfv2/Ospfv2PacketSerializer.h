@@ -67,7 +67,7 @@ class INET_API Ospfv2PacketSerializer : public FieldsChunkSerializer
     static void serializeLsaHeader(MemoryOutputStream& stream, const Ospfv2LsaHeader& lsaHeader);
     static void deserializeLsaHeader(MemoryInputStream& stream, Ospfv2LsaHeader& lsaHeader);
 
-    //TODO kludge, should register Ospfv2PacketSerializer to OspfPacketSerializer later.
+    // TODO kludge, should register Ospfv2PacketSerializer to OspfPacketSerializer later.
     friend class inet::ospf::OspfPacketSerializer;
 };
 

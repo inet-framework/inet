@@ -180,7 +180,7 @@ class Ipv4OptionUnknown extends Ipv4Option
 //
 // Only one of the option fields can exist at a time.
 //
-// TODO: cleanup order of fields
+// TODO cleanup order of fields
 class Ipv4Header extends NetworkHeaderBase
 {
     chunkLength = IPv4_MIN_HEADER_LENGTH;

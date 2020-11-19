@@ -27,8 +27,7 @@ namespace inet {
 class INET_API StringFormat
 {
   public:
-    class INET_API IDirectiveResolver
-    {
+    class INET_API IDirectiveResolver {
       public:
         virtual const char *resolveDirective(char directive) const = 0;
     };

@@ -40,3 +40,4 @@ void PacketReceiver::receiveSignal(Signal *signal)
 }
 
 } // namespace inet
+

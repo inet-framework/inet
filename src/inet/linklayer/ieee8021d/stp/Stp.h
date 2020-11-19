@@ -41,10 +41,10 @@ class INET_API Stp : public StpBase
     typedef Ieee8021dInterfaceData::PortInfo PortInfo;
 
   protected:
-    static const double tickInterval;    // interval between two ticks
+    static const double tickInterval; // interval between two ticks
     bool isRoot = false;
     unsigned int rootInterfaceId = 0;
-    std::vector<unsigned int> desPorts;    // set of designated ports
+    std::vector<unsigned int> desPorts; // set of designated ports
 
     // Discovered values
     unsigned int rootPathCost = 0;

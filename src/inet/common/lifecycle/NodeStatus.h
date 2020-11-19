@@ -36,7 +36,7 @@ class INET_API NodeStatus : public cSimpleModule, public ILifecycle
 {
   public:
     enum State { UP, DOWN, GOING_UP, GOING_DOWN };
-    static simsignal_t nodeStatusChangedSignal;    // the signal used to notify subscribers about status changes
+    static simsignal_t nodeStatusChangedSignal; // the signal used to notify subscribers about status changes
 
   private:
     State state;

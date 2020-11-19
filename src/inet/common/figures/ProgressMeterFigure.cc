@@ -137,12 +137,11 @@ int ProgressMeterFigure::getLabelOffset() const
 
 void ProgressMeterFigure::setLabelOffset(int offset)
 {
-    if(labelOffset != offset)   {
-    labelOffset = offset;
-    labelFigure->setPosition(Point(getBounds().x + getBounds().width / 2, getBounds().y + getBounds().height + labelOffset));
-    };
+    if (labelOffset != offset) {
+        labelOffset = offset;
+        labelFigure->setPosition(Point(getBounds().x + getBounds().width / 2, getBounds().y + getBounds().height + labelOffset));
+    }
 }
-
 
 const cFigure::Font& ProgressMeterFigure::getLabelFont() const
 {
@@ -201,7 +200,6 @@ void ProgressMeterFigure::setMaxValue(double value)
 void ProgressMeterFigure::parse(cProperty *property)
 {
     cGroupFigure::parse(property);
-
 
     setBounds(parseBounds(property, getBounds()));
 

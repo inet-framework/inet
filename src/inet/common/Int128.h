@@ -50,8 +50,8 @@ class INET_API Int128
     friend bool operator&&(const Int128&, const Int128&);
 
 #ifdef __GNUC__
-    //   friend Int128 operator <? (const Int128&, const Int128&);
-    //   friend Int128 operator >? (const Int128&, const Int128&);
+//    friend Int128 operator <? (const Int128&, const Int128&);
+//    friend Int128 operator >? (const Int128&, const Int128&);
 #endif // ifdef __GNUC__
 
   public:
@@ -79,7 +79,7 @@ class INET_API Int128
 
     Int128(const char *sz) { set(sz); }
 
-    // TODO: Consider creation of operator= to eliminate
+    // TODO Consider creation of operator= to eliminate
     //       the need of intermediate objects during assignments.
 
     Int128& operator=(const Int128& other) { lo = other.lo; hi = other.hi; return *this; }
@@ -269,7 +269,7 @@ inline bool operator!=(const Int128& a, const Int128& b)
 
 // MISC
 
-//typedef Int128 __int128;
+// typedef Int128 __int128;
 
 } // namespace inet
 

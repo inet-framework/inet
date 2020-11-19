@@ -71,7 +71,7 @@ bool FieldsChunk::containsSameData(const Chunk& other) const
     else if (!Chunk::containsSameData(other))
         return false;
     else {
-        // KLUDGE: TODO: should we generate this method from the MSG compiler?
+        // KLUDGE should we generate this method from the MSG compiler?
         // this implementation returns false if it cannot determine the result correctly
         auto thisDescriptor = getDescriptor();
         auto otherDescriptor = other.getDescriptor();
@@ -129,7 +129,7 @@ std::ostream& FieldsChunk::printFieldsToStream(std::ostream& stream, int level, 
 {
     auto className = getClassName();
     auto descriptor = getDescriptor();
-    // TODO: make this more sophisticated, e.g. add properties to fields to control what is printed
+    // TODO make this more sophisticated, e.g. add properties to fields to control what is printed
     if (level <= PRINT_LEVEL_DETAIL)
         for (int i = 0; i < descriptor->getFieldCount(); i++)
             if (!descriptor->getFieldIsArray(i) && !strcmp(className, descriptor->getFieldDeclaredOn(i)))
@@ -138,3 +138,4 @@ std::ostream& FieldsChunk::printFieldsToStream(std::ostream& stream, int level, 
 }
 
 } // namespace
+

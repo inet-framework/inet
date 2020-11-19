@@ -33,7 +33,7 @@ namespace sctp {
 INetfilter::IHook::Result SctpCrcInsertion::datagramPostRoutingHook(Packet *packet)
 {
     if (packet->findTag<InterfaceInd>())
-        return ACCEPT;  // FORWARD
+        return ACCEPT; // FORWARD
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
     if (networkHeader->getProtocol() == &Protocol::sctp) {
@@ -75,7 +75,7 @@ void SctpCrcInsertion::insertCrc(const Protocol *networkProtocol, const L3Addres
             std::copy(sctpPacketBytes.begin(), sctpPacketBytes.end(), (uint8_t *)buffer);
             auto crc = SctpChecksum::checksum(buffer, length);
             sctpHeader->setCrc(crc);
-            delete [] buffer;
+            delete[] buffer;
             break;
         }
         default:

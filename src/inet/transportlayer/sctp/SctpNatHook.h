@@ -13,7 +13,7 @@ namespace sctp {
 class INET_API SctpNatHook : public cSimpleModule, NetfilterBase::HookBase
 {
   protected:
-    IPv4 *ipLayer;    // IPv4 module
+    IPv4 *ipLayer; // IPv4 module
     SctpNatTable *natTable;
     IRoutingTable *rt;
     IInterfaceTable *ift;
@@ -22,8 +22,8 @@ class INET_API SctpNatHook : public cSimpleModule, NetfilterBase::HookBase
     void finish() override;
 
   protected:
-   // void sendBackError(const Ptr<const Ipv4Header>& dgram, SctpHeader* sctp);
-    void sendBackError(SctpHeader* sctp);
+//    void sendBackError(const Ptr<const Ipv4Header>& dgram, SctpHeader* sctp);
+    void sendBackError(SctpHeader *sctp);
 
   public:
     SctpNatHook();

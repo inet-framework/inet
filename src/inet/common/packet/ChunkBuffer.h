@@ -40,12 +40,12 @@ namespace inet {
  */
 class INET_API ChunkBuffer : public cNamedObject
 {
-  friend class ChunkBufferDescriptor;
-  friend class ChunkBuffer__RegionDescriptor;
+    friend class ChunkBufferDescriptor;
+    friend class ChunkBuffer__RegionDescriptor;
 
   protected:
     class INET_API Region {
-      friend class ChunkBuffer__RegionDescriptor;
+        friend class ChunkBuffer__RegionDescriptor;
 
       public:
         b offset;
@@ -59,8 +59,8 @@ class INET_API ChunkBuffer : public cNamedObject
         const Chunk *getData() const { return data.get(); } // only for class descriptor
 
       public:
-        Region(b offset, const Ptr<const Chunk>& data) : offset(offset), data(data) { }
-        Region(const Region& other) : offset(other.offset), data(other.data) { }
+        Region(b offset, const Ptr<const Chunk>& data) : offset(offset), data(data) {}
+        Region(const Region& other) : offset(other.offset), data(other.data) {}
 
         b getStartOffset() const { return offset; }
         b getEndOffset() const { return offset + data->getChunkLength(); }
@@ -129,7 +129,7 @@ class INET_API ChunkBuffer : public cNamedObject
      * chunk. Already existing data gets overwritten, and connecting data gets
      * merged with the provided chunk.
      */
-    // TODO: add flag to decide between keeping or overwriting old data when replacing with new data
+    // TODO add flag to decide between keeping or overwriting old data when replacing with new data
     void replace(b offset, const Ptr<const Chunk>& chunk);
 
     /**

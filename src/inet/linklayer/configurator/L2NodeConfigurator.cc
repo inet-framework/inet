@@ -69,14 +69,14 @@ void L2NodeConfigurator::prepareNode()
 
 void L2NodeConfigurator::prepareInterface(NetworkInterface *networkInterface)
 {
-    // ASSERT(!networkInterface->getProtocolData<Ieee8021dInterfaceData>());
+//    ASSERT(!networkInterface->getProtocolData<Ieee8021dInterfaceData>());
     networkInterface->addProtocolData<Ieee8021dInterfaceData>();
 }
 
 void L2NodeConfigurator::configureNode()
 {
     ASSERT(networkConfigurator);
-    // std::cout << "configureNode(): " << interfaceTable->getNumInterfaces() << endl;
+//    std::cout << "configureNode(): " << interfaceTable->getNumInterfaces() << endl;
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
         networkConfigurator->configureInterface(interfaceTable->getInterface(i));
 }

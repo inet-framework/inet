@@ -34,11 +34,11 @@ class INET_API DcTcpFamilyStateVariables : public TcpTahoeRenoFamilyStateVariabl
     virtual std::string str() const override;
     virtual std::string detailedInfo() const override;
 
-    //DCTCP
+    // DCTCP
     bool dctcp_ce;
     uint32_t dctcp_windEnd;
     uint32_t dctcp_bytesAcked;
-    uint32_t dctcp_bytesMarked; //amount of bytes marked
+    uint32_t dctcp_bytesMarked; // amount of bytes marked
     double dctcp_alpha;
     double dctcp_gamma;
 };
@@ -49,7 +49,7 @@ class INET_API DcTcpFamilyStateVariables : public TcpTahoeRenoFamilyStateVariabl
 class INET_API DcTcpFamily : public TcpTahoeRenoFamily
 {
   protected:
-    DcTcpFamilyStateVariables *& state;    // alias to TcpAlgorithm's 'state'
+    DcTcpFamilyStateVariables *& state; // alias to TcpAlgorithm's 'state'
 
   public:
     /** Ctor */

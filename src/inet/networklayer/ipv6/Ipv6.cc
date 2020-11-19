@@ -46,7 +46,6 @@
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h"
 #endif /* WITH_xMIPv6 */
 
-
 namespace inet {
 
 #define FRAGMENT_TIMEOUT    60   // 60 sec, from Ipv6 RFC
@@ -54,7 +53,7 @@ namespace inet {
 Define_Module(Ipv6);
 
 Ipv6::Ipv6() :
-        curFragmentId(0)
+    curFragmentId(0)
 {
 }
 
@@ -66,11 +65,11 @@ Ipv6::~Ipv6()
 
 #ifdef WITH_xMIPv6
 Ipv6::ScheduledDatagram::ScheduledDatagram(Packet *packet, const Ipv6Header *ipv6Header, const NetworkInterface *ie, MacAddress macAddr, bool fromHL) :
-        packet(packet),
-        ipv6Header(ipv6Header),
-        ie(ie),
-        macAddr(macAddr),
-        fromHL(fromHL)
+    packet(packet),
+    ipv6Header(ipv6Header),
+    ie(ie),
+    macAddr(macAddr),
+    fromHL(fromHL)
 {
 }
 
@@ -78,6 +77,7 @@ Ipv6::ScheduledDatagram::~ScheduledDatagram()
 {
     delete packet;
 }
+
 #endif /* WITH_xMIPv6 */
 
 void Ipv6::initialize(int stage)
@@ -148,7 +148,8 @@ void Ipv6::handleRequest(Request *request)
         delete request;
     }
     else if (dynamic_cast<Ipv6SocketCloseCommand *>(ctrl) != nullptr) {
-        int socketId = 0; request->getTag<SocketReq>()->getSocketId();
+        int socketId = 0;
+        request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
             delete it->second;
@@ -162,7 +163,8 @@ void Ipv6::handleRequest(Request *request)
         delete request;
     }
     else if (dynamic_cast<Ipv6SocketDestroyCommand *>(ctrl) != nullptr) {
-        int socketId = 0; request->getTag<SocketReq>()->getSocketId();
+        int socketId = 0;
+        request->getTag<SocketReq>()->getSocketId();
         auto it = socketIdToSocketDescriptor.find(socketId);
         if (it != socketIdToSocketDescriptor.end()) {
             delete it->second;
@@ -204,8 +206,8 @@ void Ipv6::handleMessage(cMessage *msg)
         // take care of datagram which was supposed to be sent over a tentative address
         if (sDgram->getIE()->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(sDgram->getSrcAddress())) {
             // address is still tentative - enqueue again
-            //queue.insert(sDgram);
-            scheduleAfter(1.0, sDgram);    //FIXME KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
+//            queue.insert(sDgram);
+            scheduleAfter(1.0, sDgram); // KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
         }
         else {
             // address is not tentative anymore - send out datagram
@@ -219,14 +221,13 @@ void Ipv6::handleMessage(cMessage *msg)
 
     if (auto request = dynamic_cast<Request *>(msg))
         handleRequest(request);
-    else
-    if (msg->getArrivalGate()->isName("transportIn")
-        || (msg->arrivedOn("ndIn") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
-        || (msg->arrivedOn("upperTunnelingIn"))    // for tunneling support-CB
+    else if (msg->getArrivalGate()->isName("transportIn")
+             || (msg->arrivedOn("ndIn") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6)
+             || (msg->arrivedOn("upperTunnelingIn")) // for tunneling support-CB
 #ifdef WITH_xMIPv6
-        || (msg->arrivedOn("xMIPv6In") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6)
+             || (msg->arrivedOn("xMIPv6In") && tags.getTag<PacketProtocolTag>()->getProtocol() == &Protocol::mobileipv6)
 #endif /* WITH_xMIPv6 */
-        )
+             )
     {
         // packet from upper layers, tunnel link-layer output or ND: encapsulate and send out
         handleMessageFromHL(check_and_cast<Packet *>(msg));
@@ -378,7 +379,7 @@ void Ipv6::datagramLocalOut(Packet *packet, const NetworkInterface *destIE, Ipv6
 void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const NetworkInterface *fromIE, Ipv6Address requestedNextHopAddress, bool fromHL)
 {
     auto ipv6Header = packet->peekAtFront<Ipv6Header>();
-    // TBD add option handling code here
+    // TODO add option handling code here
     Ipv6Address destAddress = ipv6Header->getDestAddress();
 
     EV_INFO << "Routing datagram `" << ipv6Header->getName() << "' with dest=" << destAddress << ", requested nexthop is " << requestedNextHopAddress << " on " << (destIE ? destIE->getFullName() : "unspec") << " interface: \n";
@@ -396,8 +397,8 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
 
     if (!fromHL) {
         // if datagram arrived from input gate and IP forwarding is off, delete datagram
-        //yes but datagrams from the ND module is getting dropped too!-WEI
-        //so we add a 2nd condition
+        // yes but datagrams from the ND module is getting dropped too!-WEI
+        // so we add a 2nd condition
         // FIXME rewrite code so that condition is cleaner --Andras
         //if (!rt->isRouter())
         if (!rt->isRouter() && !(packet->getArrivalGate()->isName("ndIn"))) {
@@ -417,7 +418,7 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
         // hop counter decrement: only if datagram arrived from network, and will be
         // sent out to the network (hoplimit check will be done just before sending
         // out datagram)
-        // TBD: in Ipv4, arrange TTL check like this
+        // TODO: in Ipv4, arrange TTL check like this
         packet->trim();
         ipv6Header = nullptr;
         const auto& newIpv6Header = removeNetworkProtocolHeader<Ipv6Header>(packet);
@@ -433,31 +434,29 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
 #ifdef WITH_xMIPv6
     // tunneling support - CB
     // check if destination is covered by tunnel lists
-    if ((ipv6Header->getProtocolId() != IP_PROT_IPv6) &&    // if datagram was already tunneled, don't tunnel again
-        (ipv6Header->getExtensionHeaderArraySize() == 0) &&    // we do not already have extension headers - FIXME: check for RH2 existence
-        ((rt->isMobileNode() && rt->isHomeAddress(ipv6Header->getSrcAddress())) ||    // for MNs: only if source address is a HoA // 27.08.07 - CB
-         rt->isHomeAgent() ||    // but always check for tunnel if node is a HA
-         !rt->isMobileNode()    // or if it is a correspondent or non-MIP node
-        )
-        )
+    if ((ipv6Header->getProtocolId() != IP_PROT_IPv6) && // if datagram was already tunneled, don't tunnel again
+        (ipv6Header->getExtensionHeaderArraySize() == 0) && // we do not already have extension headers - FIXME check for RH2 existence
+        ((rt->isMobileNode() && rt->isHomeAddress(ipv6Header->getSrcAddress())) || // for MNs: only if source address is a HoA // 27.08.07 - CB
+         rt->isHomeAgent() || // but always check for tunnel if node is a HA
+         !rt->isMobileNode())) // or if it is a correspondent or non-MIP node
     {
         if (ipv6Header->getProtocolId() == IP_PROT_IPv6EXT_MOB)
             // in case of mobility header we can only search for "real" tunnels
             // as T2RH or HoA Opt. are not allowed with these messages
             interfaceId = tunneling->getVIfIndexForDest(destAddress, Ipv6Tunneling::NORMAL); // 10.06.08 - CB
-        //getVIfIndexForDestForXSplitTunnel(destAddress);
+//        getVIfIndexForDestForXSplitTunnel(destAddress);
         else
             // otherwise we can search for everything
             interfaceId = tunneling->getVIfIndexForDest(destAddress);
     }
 #else // ifdef WITH_xMIPv6
-      // FIXME this is not the same as the code above (when WITH_xMIPv6 is defined),
-      // so tunneling examples could not work with xMIPv6
+    // FIXME this is not the same as the code above (when WITH_xMIPv6 is defined),
+    // so tunneling examples could not work with xMIPv6
     interfaceId = tunneling->getVIfIndexForDest(destAddress, Ipv6Tunneling::NORMAL);
 #endif /* WITH_xMIPv6 */
 
     if (interfaceId == -1 && destIE != nullptr)
-        interfaceId = destIE->getInterfaceId();         // set interfaceId to destIE when not tunneling
+        interfaceId = destIE->getInterfaceId(); // set interfaceId to destIE when not tunneling
 
     if (interfaceId > ift->getBiggestInterfaceId()) {
         // a virtual tunnel interface provides a path to the destination: do tunneling
@@ -469,7 +468,7 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
     if (interfaceId == -1)
         if (!determineOutputInterface(destAddress, nextHop, interfaceId, packet, fromHL))
             // no interface found; sent to ND or to ICMP for error processing
-            //throw cRuntimeError("No interface found!");//return;
+//            throw cRuntimeError("No interface found!");//return;
             return;
     // don't raise error if sent to ND or ICMP!
 
@@ -500,7 +499,7 @@ void Ipv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, Ipv6A
     }
 #endif /* WITH_xMIPv6 */
 
-    MacAddress macAddr = nd->resolveNeighbour(nextHop, interfaceId);    // might initiate NUD
+    MacAddress macAddr = nd->resolveNeighbour(nextHop, interfaceId); // might initiate NUD
     if (macAddr.isUnspecified()) {
         if (!ie->isPointToPoint()) {
             EV_INFO << "no link-layer address for next hop yet, passing datagram to Neighbour Discovery module\n";
@@ -689,10 +688,11 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
     auto localAddress(ipv6Header->getDestAddress());
     decapsulate(packet);
     bool hasSocket = false;
-    for (const auto &elem: socketIdToSocketDescriptor) {
+    for (const auto& elem: socketIdToSocketDescriptor) {
         if (elem.second->protocolId == protocol->getId()
-                && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
-                && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress)) {
+            && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
+            && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress))
+        {
             auto *packetCopy = packet->dup();
             packetCopy->setKind(IPv6_I_DATA);
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
@@ -705,7 +705,7 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
 
     if (protocol == &Protocol::icmpv6) {
         handleReceivedIcmp(packet);
-    }    //Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
+    } // Added by WEI to forward ICMPv6 msgs to ICMPv6 module.
 #ifdef WITH_xMIPv6
     else if (protocol == &Protocol::mobileipv6) {
         // added check for MIPv6 support to prevent nodes w/o the
@@ -736,8 +736,8 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
         // send ICMP Destination Unreacheable error: protocol unavailable
         EV_INFO << "Transport layer gate not connected - dropping packet!\n";
         sendIcmpError(origPacket, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
-        origPacket = nullptr;    // for not delete
-        delete packet;          // delete decapsulated packet
+        origPacket = nullptr; // for not delete
+        delete packet; // delete decapsulated packet
     }
     delete origPacket;
 }
@@ -761,7 +761,7 @@ void Ipv6::decapsulate(Packet *packet)
     auto ipv6Header = packet->popAtFront<Ipv6Header>();
 
     B payloadLength = ipv6Header->getPayloadLength();
-    if (payloadLength != B(0)) {      // payloadLength == 0 occured with Jumbo payload
+    if (payloadLength != B(0)) { // payloadLength == 0 occured with Jumbo payload
         ASSERT(payloadLength <= packet->getDataLength());
         // drop padding behind the payload:
         if (payloadLength < packet->getDataLength())
@@ -787,7 +787,7 @@ void Ipv6::decapsulate(Packet *packet)
 
 void Ipv6::encapsulate(Packet *transportPacket)
 {
-    auto ipv6Header = makeShared<Ipv6Header>(); // TODO: transportPacket->getName());
+    auto ipv6Header = makeShared<Ipv6Header>(); // TODO transportPacket->getName());
 
     auto& addresses = transportPacket->removeTag<L3AddressReq>();
     Ipv6Address src = addresses->getSrcAddress().toIpv6();
@@ -815,7 +815,7 @@ void Ipv6::encapsulate(Packet *transportPacket)
     if (auto& ecnReq = transportPacket->removeTagIfPresent<EcnReq>())
         ipv6Header->setEcn(ecnReq->getExplicitCongestionNotification());
 
-    ipv6Header->setHopLimit(ttl != -1 ? ttl : 32);    //FIXME use iface hop limit instead of 32?
+    ipv6Header->setHopLimit(ttl != -1 ? ttl : 32); // FIXME use iface hop limit instead of 32?
     ASSERT(ipv6Header->getHopLimit() > 0);
     ipv6Header->setProtocolId(static_cast<IpProtocolId>(ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getTag<PacketProtocolTag>()->getProtocol())));
 
@@ -824,7 +824,7 @@ void Ipv6::encapsulate(Packet *transportPacket)
     while (extHeadersTag && 0 < extHeadersTag->getExtensionHeaderArraySize()) {
         Ipv6ExtensionHeader *extHeader = extHeadersTag->removeFirstExtensionHeader();
         ipv6Header->addExtensionHeader(extHeader);
-        // EV << "Move extension header to datagram." << endl;
+//        EV << "Move extension header to datagram." << endl;
     }
 
     ipv6Header->setChunkLength(B(ipv6Header->calculateHeaderByteLength()));
@@ -843,9 +843,9 @@ void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const
     {
         // source address can be unspecified during DAD
         const Ipv6Address& srcAddr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
-        ASSERT(!srcAddr.isUnspecified());    // FIXME what if we don't have an address yet?
+        ASSERT(!srcAddr.isUnspecified()); // FIXME what if we don't have an address yet?
 
-        // TODO: factor out
+        // TODO factor out
         ipv6Header = nullptr;
         auto newIpv6Header = removeNetworkProtocolHeader<Ipv6Header>(packet);
         newIpv6Header->setSrcAddress(srcAddr);
@@ -866,7 +866,7 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
     if (ipv6Header->getHopLimit() <= 0) {
         // drop datagram, destruction responsibility in ICMP
         EV_INFO << "datagram hopLimit reached zero, sending ICMPv6_TIME_EXCEEDED\n";
-        sendIcmpError(packet, ICMPv6_TIME_EXCEEDED, 0);    // FIXME check icmp 'code'
+        sendIcmpError(packet, ICMPv6_TIME_EXCEEDED, 0); // FIXME check icmp 'code'
         return;
     }
 
@@ -876,12 +876,12 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
     {
         // source address can be unspecified during DAD
         const Ipv6Address& srcAddr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
-        ASSERT(!srcAddr.isUnspecified());    // FIXME what if we don't have an address yet?
+        ASSERT(!srcAddr.isUnspecified()); // FIXME what if we don't have an address yet?
 
-        // TODO: factor out
+        // TODO factor out
         packet->eraseAtFront(ipv6Header->getChunkLength());
         auto ipv6HeaderCopy = staticPtrCast<Ipv6Header>(ipv6Header->dupShared());
-        // TODO: dup or mark ipv4Header->markMutableIfExclusivelyOwned();
+        // TODO dup or mark ipv4Header->markMutableIfExclusivelyOwned();
         ipv6HeaderCopy->setSrcAddress(srcAddr);
         packet->insertAtFront(ipv6HeaderCopy);
         ipv6Header = ipv6HeaderCopy;
@@ -892,8 +892,8 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
         if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(srcAddr)) {
             EV_INFO << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
             ScheduledDatagram *sDgram = new ScheduledDatagram(packet, ipv6Header.get(), ie, nextHopAddr, fromHL);
-            // queue.insert(sDgram);
-            scheduleAfter(1.0, sDgram);    //FIXME KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
+//            queue.insert(sDgram);
+            scheduleAfter(1.0, sDgram); // KLUDGE wait 1s for tentative->permanent. MISSING: timeout for drop or send back icmpv6 error, processing signals from IE, need another msg queue for waiting (similar to Ipv4 ARP)
             return;
         }
     #endif /* WITH_xMIPv6 */
@@ -910,7 +910,7 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
     // routed datagrams are not fragmented
     if (!fromHL) {
         // FIXME check for multicast datagrams, how many ICMP error should be sent
-        sendIcmpError(packet, ICMPv6_PACKET_TOO_BIG, 0);    // TODO set MTU
+        sendIcmpError(packet, ICMPv6_PACKET_TOO_BIG, 0); // TODO set MTU
         return;
     }
 
@@ -926,7 +926,7 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
     std::string fragMsgName = packet->getName();
     fragMsgName += "-frag-";
 
-    //FIXME is need to remove unfragmentable header extensions? see calculateUnfragmentableHeaderByteLength()
+    // FIXME is need to remove unfragmentable header extensions? see calculateUnfragmentableHeaderByteLength()
 
     unsigned int identification = curFragmentId++;
     for (B offset = B(0); offset < payloadLength; offset += fragmentLength) {
@@ -943,7 +943,7 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
         fh->setFragmentOffset(offset.get());
         fh->setMoreFragments(!lastFragment);
         fragHdr->addExtensionHeader(fh);
-        fragHdr->setChunkLength(headerLength + fh->getByteLength());      //FIXME KLUDGE
+        fragHdr->setChunkLength(headerLength + fh->getByteLength()); // KLUDGE
         fragPk->insertAtFront(fragHdr);
         fragPk->insertAtBack(packet->peekDataAt(offset, thisFragmentLength));
 
@@ -980,9 +980,9 @@ bool Ipv6::determineOutputInterface(const Ipv6Address& destAddress, Ipv6Address&
             if (rt->isRouter()) {
                 EV_INFO << "unroutable, sending ICMPv6_DESTINATION_UNREACHABLE\n";
                 numUnroutable++;
-                sendIcmpError(packet, ICMPv6_DESTINATION_UNREACHABLE, 0);    // FIXME check ICMP 'code'
+                sendIcmpError(packet, ICMPv6_DESTINATION_UNREACHABLE, 0); // FIXME check ICMP 'code'
             }
-            else {    // host
+            else { // host
                 EV_INFO << "no match in routing table, passing datagram to Neighbour Discovery module for default router selection\n";
                 Ipv6NdControlInfo *ctrl = new Ipv6NdControlInfo();
                 ctrl->setFromHL(fromHL);
@@ -1032,8 +1032,8 @@ bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
             }
         }
         else if (dynamic_cast<const Ipv6DestinationOptionsHeader *>(eh)) {
-            //Ipv6DestinationOptionsHeader* doh = (Ipv6DestinationOptionsHeader*) (eh);
-            //EV << "object of type=" << typeid(eh).name() << endl;
+//            Ipv6DestinationOptionsHeader* doh = (Ipv6DestinationOptionsHeader*) (eh);
+//            EV << "object of type=" << typeid(eh).name() << endl;
 
             if (rt->hasMipv6Support() && dynamic_cast<const HomeAddressOption *>(eh)) {
                 packet->setContextPointer((void *)eh);
@@ -1100,12 +1100,12 @@ void Ipv6::reinjectQueuedDatagram(const Packet *packet)
                     break;
 
                 case INetfilter::IHook::POSTROUTING:
-                    //fragmentAndSend(datagram, iter->outIE, iter->nextHopAddr);
+//                    fragmentAndSend(datagram, iter->outIE, iter->nextHopAddr);
                     throw cRuntimeError("Re-injection of datagram queued for POSTROUTING hook not implemented");
                     break;
 
                 case INetfilter::IHook::LOCALIN:
-                    //reassembleAndDeliverFinish(datagram);
+//                    reassembleAndDeliverFinish(datagram);
                     throw cRuntimeError("Re-injection of datagram queued for LOCALIN hook not implemented");
                     break;
 
@@ -1125,11 +1125,11 @@ void Ipv6::reinjectQueuedDatagram(const Packet *packet)
 
 INetfilter::IHook::Result Ipv6::datagramPreRoutingHook(Packet *packet)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramPreRoutingHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
-                break;    // continue iteration
+                break; // continue iteration
 
             case INetfilter::IHook::DROP:
                 delete packet;
@@ -1151,11 +1151,11 @@ INetfilter::IHook::Result Ipv6::datagramPreRoutingHook(Packet *packet)
 
 INetfilter::IHook::Result Ipv6::datagramForwardHook(Packet *packet)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramForwardHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
-                break;    // continue iteration
+                break; // continue iteration
 
             case INetfilter::IHook::DROP:
                 delete packet;
@@ -1177,11 +1177,11 @@ INetfilter::IHook::Result Ipv6::datagramForwardHook(Packet *packet)
 
 INetfilter::IHook::Result Ipv6::datagramPostRoutingHook(Packet *packet, const NetworkInterface *inIE, const NetworkInterface *& outIE, L3Address& nextHopAddr)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramPostRoutingHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
-                break;    // continue iteration
+                break; // continue iteration
 
             case INetfilter::IHook::DROP:
                 delete packet;
@@ -1203,11 +1203,11 @@ INetfilter::IHook::Result Ipv6::datagramPostRoutingHook(Packet *packet, const Ne
 
 INetfilter::IHook::Result Ipv6::datagramLocalInHook(Packet *packet, const NetworkInterface *inIE)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramLocalInHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
-                break;    // continue iteration
+                break; // continue iteration
 
             case INetfilter::IHook::DROP:
                 delete packet;
@@ -1229,11 +1229,11 @@ INetfilter::IHook::Result Ipv6::datagramLocalInHook(Packet *packet, const Networ
 
 INetfilter::IHook::Result Ipv6::datagramLocalOutHook(Packet *packet)
 {
-    for (auto & elem : hooks) {
+    for (auto& elem : hooks) {
         IHook::Result r = elem.second->datagramLocalOutHook(packet);
         switch (r) {
             case INetfilter::IHook::ACCEPT:
-                break;    // continue iteration
+                break; // continue iteration
 
             case INetfilter::IHook::DROP:
                 delete packet;

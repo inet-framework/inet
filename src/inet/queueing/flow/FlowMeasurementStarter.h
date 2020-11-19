@@ -43,7 +43,7 @@ class INET_API FlowMeasurementStarter : public PacketFlowBase
   protected:
     virtual void initialize(int stage) override;
 
-    template <typename T>
+    template<typename T>
     void startMeasurement(Packet *packet, b offset, b length, simtime_t value) const {
         if (length == b(-1))
             length = packet->getTotalLength();

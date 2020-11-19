@@ -39,6 +39,5 @@ class INET_API IcmpHeaderSerializer : public FieldsChunkSerializer
 
 } // namespace inet
 
-
 #endif
 

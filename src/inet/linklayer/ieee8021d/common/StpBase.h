@@ -33,11 +33,11 @@ namespace inet {
 class INET_API StpBase : public OperationalBase, public cListener
 {
   protected:
-    bool visualize = false;    // if true it visualize the spanning tree
-    unsigned int numPorts = 0;    // number of ports
+    bool visualize = false; // if true it visualize the spanning tree
+    unsigned int numPorts = 0; // number of ports
 
-    unsigned int bridgePriority = 0;    // bridge's priority
-    MacAddress bridgeAddress;    // bridge's MAC address
+    unsigned int bridgePriority = 0; // bridge's priority
+    MacAddress bridgeAddress; // bridge's MAC address
 
     simtime_t maxAge;
     simtime_t helloTime;

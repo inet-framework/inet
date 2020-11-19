@@ -29,7 +29,7 @@ namespace tcp {
 class INET_API DumbTcpStateVariables : public TcpStateVariables
 {
   public:
-    //...
+    // ...
 };
 
 /**
@@ -42,9 +42,9 @@ class INET_API DumbTcpStateVariables : public TcpStateVariables
 class INET_API DumbTcp : public TcpAlgorithm
 {
   protected:
-    DumbTcpStateVariables *& state;    // alias to TCLAlgorithm's 'state'
+    DumbTcpStateVariables *& state; // alias to TCLAlgorithm's 'state'
 
-    cMessage *rexmitTimer;    // retransmission timer
+    cMessage *rexmitTimer; // retransmission timer
 
   protected:
     /** Creates and returns a DumbTcpStateVariables object. */

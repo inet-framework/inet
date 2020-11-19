@@ -23,10 +23,10 @@
 namespace inet {
 namespace physicallayer {
 
-Ieee80211OfdmCode::Ieee80211OfdmCode(const ConvolutionalCode* convolutionalCode, const Ieee80211OfdmInterleaving* interleaving, const AdditiveScrambling* scrambling) :
-        convolutionalCode(convolutionalCode),
-        interleaving(interleaving),
-        scrambling(scrambling)
+Ieee80211OfdmCode::Ieee80211OfdmCode(const ConvolutionalCode *convolutionalCode, const Ieee80211OfdmInterleaving *interleaving, const AdditiveScrambling *scrambling) :
+    convolutionalCode(convolutionalCode),
+    interleaving(interleaving),
+    scrambling(scrambling)
 {
 }
 
@@ -41,10 +41,10 @@ std::ostream& Ieee80211OfdmCode::printToStream(std::ostream& stream, int level, 
 }
 
 // Convolutional codes
-const Ieee80211ConvolutionalCode Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2(1,2);
-const Ieee80211ConvolutionalCode Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3(2,3);
-const Ieee80211ConvolutionalCode Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4(3,4);
-const Ieee80211ConvolutionalCode Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6(5,6);
+const Ieee80211ConvolutionalCode Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode1_2(1, 2);
+const Ieee80211ConvolutionalCode Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode2_3(2, 3);
+const Ieee80211ConvolutionalCode Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode3_4(3, 4);
+const Ieee80211ConvolutionalCode Ieee80211OfdmCompliantCodes::ofdmConvolutionalCode5_6(5, 6);
 
 // Interleavings
 const Ieee80211OfdmInterleaving Ieee80211OfdmCompliantCodes::ofdmBPSKInterleaving(NUMBER_OF_OFDM_DATA_SUBCARRIERS, 1);

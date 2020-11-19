@@ -21,7 +21,7 @@ namespace inet {
 
 namespace visualizer {
 
-void NetworkNodeFilter::setPattern(const char* pattern)
+void NetworkNodeFilter::setPattern(const char *pattern)
 {
     matchExpression.setPattern(pattern, false, true, true);
 }
@@ -29,7 +29,7 @@ void NetworkNodeFilter::setPattern(const char* pattern)
 bool NetworkNodeFilter::matches(const cModule *module) const
 {
     MatchableObject matchableObject(MatchableObject::ATTRIBUTE_FULLNAME, module);
-    // TODO: eliminate const_cast when cMatchExpression::matches becomes const
+    // TODO eliminate const_cast when cMatchExpression::matches becomes const
     return const_cast<NetworkNodeFilter *>(this)->matchExpression.matches(&matchableObject);
 }
 

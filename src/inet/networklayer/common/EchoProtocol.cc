@@ -75,7 +75,7 @@ void EchoProtocol::processEchoRequest(Packet *request)
     auto addressInd = request->getTag<L3AddressInd>();
 
     // swap src and dest
-    // TBD check what to do if dest was multicast etc?
+    // TODO check what to do if dest was multicast etc?
     auto addressReq = reply->addTag<L3AddressReq>();
     addressReq->setSrcAddress(addressInd->getDestAddress());
     addressReq->setDestAddress(addressInd->getSrcAddress());

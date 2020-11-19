@@ -29,7 +29,7 @@ void OriginatorProtectionMechanism::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        rateSelection = check_and_cast<IRateSelection*>(getModuleByPath(par("rateSelectionModule")));
+        rateSelection = check_and_cast<IRateSelection *>(getModuleByPath(par("rateSelectionModule")));
     }
 }
 
@@ -42,7 +42,7 @@ void OriginatorProtectionMechanism::initialize(int stage)
 simtime_t OriginatorProtectionMechanism::computeRtsDurationField(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
     auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingHeader);
-    RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // KLUDGE:
+    RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // KLUDGE
     simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getDataLength());
     simtime_t ctsFrameDuration = rateSelection->computeResponseCtsFrameMode(rtsPacket, rtsFrame)->getDuration(LENGTH_CTS);
     simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, pendingHeader)->getDuration(LENGTH_ACK);
@@ -114,3 +114,4 @@ simtime_t OriginatorProtectionMechanism::computeDurationField(Packet *packet, co
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

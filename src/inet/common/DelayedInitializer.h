@@ -25,15 +25,15 @@
 namespace inet {
 
 // this is a singleton
-template <typename T> class INET_API DelayedInitializer
+template<typename T> class INET_API DelayedInitializer
 {
   private:
     mutable T *t = nullptr;
     bool constructed;
-    const std::function <T *()> initializer;
+    const std::function<T *()> initializer;
 
   public:
-    DelayedInitializer(const std::function <T *()> initializer) : constructed(true), initializer(initializer) {}
+    DelayedInitializer(const std::function<T *()> initializer) : constructed(true), initializer(initializer) {}
     ~DelayedInitializer() { delete t; }
 
     const T *operator&() const {

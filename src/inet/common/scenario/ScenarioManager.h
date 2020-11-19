@@ -23,14 +23,14 @@
 
 namespace inet {
 
-// TODO: replace these with standard omnet notifications when they become available
+// TODO replace these with standard omnet notifications when they become available
 class INET_API cPreModuleInitNotification : public cModelChangeNotification
 {
   public:
     cModule *module;
 };
 
-// TODO: replace these with standard omnet notifications when they become available
+// TODO replace these with standard omnet notifications when they become available
 class INET_API cPostModuleInitNotification : public cModelChangeNotification
 {
   public:
@@ -59,7 +59,7 @@ class INET_API ScenarioManager : public cSimpleModule
 
   protected:
     // utilities
-    typedef std::pair<cGate*,cGate*> GatePair;
+    typedef std::pair<cGate *, cGate *> GatePair;
     cModule *getRequiredModule(const char *path);
     cModule *getRequiredModule(const cXMLElement *node, const char *attr);
     cGate *findMandatorySingleGateTowards(cModule *srcModule, cModule *destModule);

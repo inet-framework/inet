@@ -62,7 +62,7 @@ void PhysicalEnvironmentOsgVisualizer::refreshDisplay() const
             const Coord& position = object->getPosition();
             const Quaternion& orientation = object->getOrientation();
             const RotationMatrix rotation(orientation.toEulerAngles());
-            const double opacity = enableObjectOpacity? object->getOpacity() : 1.0;
+            const double opacity = enableObjectOpacity ? object->getOpacity() : 1.0;
             // cuboid
             const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
             if (cuboid != nullptr) {

@@ -24,18 +24,18 @@
 #include "inet/networklayer/common/IpProtocolId_m.h"
 
 #ifdef WITH_IPv4
-#  include "inet/networklayer/ipv4/IcmpHeader_m.h"
-#  include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4/IcmpHeader_m.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #endif
 #ifdef WITH_IPv6
-#  include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
-#  include "inet/networklayer/ipv6/Ipv6Header.h"
+#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif
 #ifdef WITH_TCP_COMMON
-#  include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 #endif
 #ifdef WITH_UDP
-#  include "inet/transportlayer/udp/UdpHeader_m.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 #endif
 
 namespace inet {

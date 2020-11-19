@@ -30,19 +30,19 @@ class INET_API RtpApplication : public cSimpleModule, public LifecycleUnsupporte
 {
   protected:
     // parameters
-    const char *fileName = nullptr;    // the name of the file to be transmitted
-    const char *commonName = nullptr;    // the CNAME of this participant.
-    const char *profileName = nullptr;    // the name of the used profile
-    double bandwidth = 0;    // the reserved bandwidth for rtp/rtcp in bytes/second
-    int port = -1;    // one of the udp port used
-    int payloadType = -1;    // the payload type of the data in the file
-    simtime_t sessionEnterDelay;    // the delay after the application enters the session
-    simtime_t transmissionStartDelay;    // the delay after the application starts the transmission
-    simtime_t transmissionStopDelay;    // the delay after the application stops the transmission
-    simtime_t sessionLeaveDelay;    // the delay after the application leaves the session
+    const char *fileName = nullptr; // the name of the file to be transmitted
+    const char *commonName = nullptr; // the CNAME of this participant.
+    const char *profileName = nullptr; // the name of the used profile
+    double bandwidth = 0; // the reserved bandwidth for rtp/rtcp in bytes/second
+    int port = -1; // one of the udp port used
+    int payloadType = -1; // the payload type of the data in the file
+    simtime_t sessionEnterDelay; // the delay after the application enters the session
+    simtime_t transmissionStartDelay; // the delay after the application starts the transmission
+    simtime_t transmissionStopDelay; // the delay after the application stops the transmission
+    simtime_t sessionLeaveDelay; // the delay after the application leaves the session
 
     // state
-    Ipv4Address destinationAddress;    // the address of the unicast peer or of the multicast group
+    Ipv4Address destinationAddress; // the address of the unicast peer or of the multicast group
     uint32_t ssrc = 0;
     bool isActiveSession = false;
 

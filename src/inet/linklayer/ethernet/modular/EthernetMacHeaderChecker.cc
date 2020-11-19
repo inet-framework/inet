@@ -79,7 +79,7 @@ bool EthernetMacHeaderChecker::matchesPacket(const Packet *packet) const
 
 void EthernetMacHeaderChecker::dropPacket(Packet *packet)
 {
-    // TODO: or PacketFilterBase::dropPacket(packet, NO_PROTOCOL_FOUND);
+    // TODO or PacketFilterBase::dropPacket(packet, NO_PROTOCOL_FOUND);
     PacketFilterBase::dropPacket(packet, NOT_ADDRESSED_TO_US);
 }
 

@@ -56,11 +56,11 @@ class INET_API SctpSendStream : public cObject
     uint32_t getNextStreamSeqNum();
     uint32_t getBytesInFlight() const { return bytesInFlight; };
     void setNextStreamSeqNum(const uint16_t num);
-    void setBytesInFlight(const uint32_t bytes) { bytesInFlight = bytes; };
+    void setBytesInFlight(const uint32_t bytes) { bytesInFlight = bytes; }
     bool getFragInProgress() const { return fragInProgress; };
-    void setFragInProgress(const bool frag) { fragInProgress = frag; };
+    void setFragInProgress(const bool frag) { fragInProgress = frag; }
     uint16_t getStreamId() const { return streamId; };
-    void setStreamId(const uint16_t id) { streamId = id; };
+    void setStreamId(const uint16_t id) { streamId = id; }
     void deleteQueue();
 };
 

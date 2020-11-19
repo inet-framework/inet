@@ -21,7 +21,6 @@
 
 ***************************************************************************/
 
-
 #include "inet/transportlayer/rtp/Rtp.h"
 
 #include "inet/common/ModuleAccess.h"
@@ -305,7 +304,7 @@ void Rtp::senderModuleStatus(RtpInnerPacket *rinp)
 void Rtp::dataOut(RtpInnerPacket *rinp)
 {
     Packet *packet = check_and_cast<Packet *>(rinp->getEncapsulatedPacket()->dup());
-    // RtpPacket *msg = check_and_cast<RtpPacket *>(rinp->getEncapsulatedPacket()->dup());      //FIXME kell itt az RtpPacket?
+//    RtpPacket *msg = check_and_cast<RtpPacket *>(rinp->getEncapsulatedPacket()->dup());      //FIXME kell itt az RtpPacket?
 
     _udpSocket.sendTo(packet, _destinationAddress, _port);
 
@@ -366,7 +365,7 @@ int Rtp::resolveMTU()
 {
     // it returns MTU bytelength (ethernet) minus ip
     // and udp headers
-    // TODO: How to do get the valid length of IP and ETHERNET header?
+    // TODO How to do get the valid length of IP and ETHERNET header?
     IIpv4RoutingTable *rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
     const NetworkInterface *rtie = rt->getInterfaceForDestAddr(_destinationAddress);
 
@@ -400,7 +399,7 @@ void Rtp::createSocket()
 {
     _udpSocket.bind(_port);
     MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this)->collectMulticastGroups();
-    _udpSocket.joinLocalMulticastGroups(mgl);    //TODO make it parameter-dependent
+    _udpSocket.joinLocalMulticastGroups(mgl); // TODO make it parameter-dependent
     connectRet();
 }
 

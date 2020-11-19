@@ -174,10 +174,10 @@ void UdpSink::handleStopOperation(LifecycleOperation *operation)
 void UdpSink::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelEvent(selfMsg);
-    if (operation->getRootModule() != getContainingNode(this)) {     // closes socket when the application crashed only
+    if (operation->getRootModule() != getContainingNode(this)) { // closes socket when the application crashed only
         if (!multicastGroup.isUnspecified())
             socket.leaveMulticastGroup(multicastGroup); // FIXME should be done by socket.close()
-        socket.destroy();    //TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
+        socket.destroy(); // TODO  in real operating systems, program crash detected by OS and OS closes sockets of crashed programs.
     }
 }
 

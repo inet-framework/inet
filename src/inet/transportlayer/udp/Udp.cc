@@ -101,7 +101,7 @@ void Udp::initialize(int stage)
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         if (crcMode == CRC_COMPUTED) {
-            //TODO:
+            // TODO
             // Unlike IPv4, when UDP packets are originated by an IPv6 node,
             // the UDP checksum is not optional.  That is, whenever
             // originating a UDP packet, an IPv6 node must compute a UDP
@@ -166,7 +166,7 @@ void Udp::handleUpperCommand(cMessage *msg)
             UdpSetOptionCommand *ctrl = check_and_cast<UdpSetOptionCommand *>(msg->getControlInfo());
             SockDesc *sd = getOrCreateSocket(socketId);
 
-            switch(ctrl->getOptionCode()) {
+            switch (ctrl->getOptionCode()) {
                 case UDP_C_SETOPTION_TTL: {
                     auto cmd = check_and_cast<UdpSetTimeToLiveCommand *>(ctrl);
                     setTimeToLive(sd, cmd->getTtl());
@@ -241,7 +241,7 @@ void Udp::handleUpperCommand(cMessage *msg)
                 }
                 case UDP_C_SETOPTION_LEAVE_MCAST_SRC: {
                     auto cmd = check_and_cast<UdpLeaveMulticastSourcesCommand *>(ctrl);
-                   NetworkInterface *ie = ift->getInterfaceById(cmd->getInterfaceId());
+                    NetworkInterface *ie = ift->getInterfaceById(cmd->getInterfaceId());
                     std::vector<L3Address> sourceList;
                     for (size_t i = 0; i < cmd->getSourceListArraySize(); i++)
                         sourceList.push_back(cmd->getSourceList(i));
@@ -294,7 +294,7 @@ void Udp::handleUpperCommand(cMessage *msg)
         }
     }
 
-    delete msg;    // also deletes control info in it
+    delete msg; // also deletes control info in it
 }
 
 void Udp::bind(int sockId, int gateIndex, const L3Address& localAddr, int localPort)
@@ -359,7 +359,7 @@ Udp::SockDesc *Udp::createSocket(int sockId, const L3Address& localAddr, int loc
     socketsByIdMap[sockId] = sd;
 
     // add to socketsByPortMap
-    SockDescList& list = socketsByPortMap[sd->localPort];    // create if doesn't exist
+    SockDescList& list = socketsByPortMap[sd->localPort]; // create if doesn't exist
     list.push_back(sd);
 
     EV_INFO << "Socket created: " << *sd << "\n";
@@ -512,7 +512,7 @@ void Udp::leaveMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multi
 {
     std::vector<L3Address> empty;
 
-    for (auto & multicastAddresse : multicastAddresses) {
+    for (auto& multicastAddresse : multicastAddresses) {
         auto it = sd->findFirstMulticastMembership(multicastAddresse);
         while (it != sd->multicastMembershipTable.end()) {
             MulticastMembership *membership = *it;
@@ -559,7 +559,7 @@ void Udp::blockMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address mu
     std::vector<L3Address> oldSources(membership->sourceList);
     std::vector<L3Address>& excludedSources = membership->sourceList;
     bool changed = false;
-    for (auto & elem : sourceList) {
+    for (auto& elem : sourceList) {
         const L3Address& sourceAddress = elem;
         auto it = std::find(excludedSources.begin(), excludedSources.end(), sourceAddress);
         if (it != excludedSources.end()) {
@@ -590,7 +590,7 @@ void Udp::unblockMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address 
     std::vector<L3Address> oldSources(membership->sourceList);
     std::vector<L3Address>& excludedSources = membership->sourceList;
     bool changed = false;
-    for (auto & elem : sourceList) {
+    for (auto& elem : sourceList) {
         const L3Address& sourceAddress = elem;
         auto it = std::find(excludedSources.begin(), excludedSources.end(), sourceAddress);
         if (it != excludedSources.end()) {
@@ -621,7 +621,7 @@ void Udp::leaveMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address mu
     std::vector<L3Address> oldSources(membership->sourceList);
     std::vector<L3Address>& includedSources = membership->sourceList;
     bool changed = false;
-    for (auto & elem : sourceList) {
+    for (auto& elem : sourceList) {
         const L3Address& sourceAddress = elem;
         auto it = std::find(includedSources.begin(), includedSources.end(), sourceAddress);
         if (it != includedSources.end()) {
@@ -659,7 +659,7 @@ void Udp::joinMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address mul
     std::vector<L3Address> oldSources(membership->sourceList);
     std::vector<L3Address>& includedSources = membership->sourceList;
     bool changed = false;
-    for (auto & elem : sourceList) {
+    for (auto& elem : sourceList) {
         const L3Address& sourceAddress = elem;
         auto it = std::find(includedSources.begin(), includedSources.end(), sourceAddress);
         if (it != includedSources.end()) {
@@ -775,7 +775,7 @@ void Udp::handleUpperPacket(Packet *packet)
     }
 
     const Protocol *l3Protocol = nullptr;
-    // TODO: apps use ModuleIdAddress if the network interface doesn't have an IP address configured, and UDP uses NextHopForwarding which results in a weird error in MessageDispatcher
+    // TODO apps use ModuleIdAddress if the network interface doesn't have an IP address configured, and UDP uses NextHopForwarding which results in a weird error in MessageDispatcher
     if (destAddr.getType() == L3Address::IPv4)
         l3Protocol = &Protocol::ipv4;
     else if (destAddr.getType() == L3Address::IPv6)
@@ -789,13 +789,13 @@ void Udp::handleUpperPacket(Packet *packet)
     udpHeader->setDestinationPort(destPort);
 
     B totalLength = udpHeader->getChunkLength() + packet->getTotalLength();
-    if(totalLength.get() > UDP_MAX_MESSAGE_SIZE)
+    if (totalLength.get() > UDP_MAX_MESSAGE_SIZE)
         throw cRuntimeError("send: total UDP message size exceeds %u", UDP_MAX_MESSAGE_SIZE);
 
     udpHeader->setTotalLengthField(totalLength);
     if (crcMode == CRC_COMPUTED) {
         udpHeader->setCrcMode(CRC_COMPUTED);
-        udpHeader->setCrc(0x0000);    // crcMode == CRC_COMPUTED is done in an INetfilter hook
+        udpHeader->setCrc(0x0000); // crcMode == CRC_COMPUTED is done in an INetfilter hook
     }
     else {
         udpHeader->setCrcMode(crcMode);
@@ -833,7 +833,7 @@ void Udp::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress
             // if the CRC mode is computed, then compute the CRC and set it
             // this computation is delayed after the routing decision, see INetfilter hook
             udpHeader->setCrc(0x0000); // make sure that the CRC is 0 in the Udp header before computing the CRC
-            udpHeader->setCrcMode(CRC_DISABLED);    // for serializer/deserializer checks only: deserializer sets the crcMode to disabled when crc is 0
+            udpHeader->setCrcMode(CRC_DISABLED); // for serializer/deserializer checks only: deserializer sets the crcMode to disabled when crc is 0
             auto udpData = packet->peekData(Chunk::PF_ALLOW_EMPTY);
             auto crc = computeCrc(networkProtocol, srcAddress, destAddress, udpHeader, udpData);
             udpHeader->setCrc(crc);
@@ -940,7 +940,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
     auto srcAddr = l3AddressInd->getSrcAddress();
     auto destAddr = l3AddressInd->getDestAddress();
     auto totalLength = B(udpHeader->getTotalLengthField());
-    auto hasIncorrectLength = totalLength < udpHeader->getChunkLength() || totalLength > udpHeader->getChunkLength() + udpPacket->getDataLength();
+    auto hasIncorrectLength = totalLength<udpHeader->getChunkLength() || totalLength> udpHeader->getChunkLength() + udpPacket->getDataLength();
     auto networkProtocol = udpPacket->getTag<NetworkProtocolInd>()->getProtocol();
 
     if (hasIncorrectLength || !verifyCrc(networkProtocol, udpHeader, udpPacket)) {
@@ -986,7 +986,7 @@ void Udp::processUDPPacket(Packet *udpPacket)
             unsigned int i;
             for (i = 0; i < sds.size() - 1; i++) // sds.size() >= 1
                 sendUp(udpHeader, udpPacket->dup(), sds[i], srcPort, destPort); // dup() to all but the last one
-            sendUp(udpHeader, udpPacket, sds[i], srcPort, destPort);    // send original to last socket
+            sendUp(udpHeader, udpPacket, sds[i], srcPort, destPort); // send original to last socket
         }
     }
 }
@@ -1018,7 +1018,7 @@ bool Udp::verifyCrc(const Protocol *networkProtocol, const Ptr<const UdpHeader>&
                 auto totalLength = udpHeader->getTotalLengthField();
                 auto udpData = packet->peekDataAt<BytesChunk>(B(0), totalLength - udpHeader->getChunkLength(), Chunk::PF_ALLOW_INCORRECT);
                 auto computedCrc = computeCrc(networkProtocol, srcAddress, destAddress, udpHeader, udpData);
-                // TODO: delete these isCorrect calls, rely on CRC only
+                // TODO delete these isCorrect calls, rely on CRC only
                 return computedCrc == 0xFFFF && udpHeader->isCorrect() && udpData->isCorrect();
             }
         }
@@ -1111,7 +1111,7 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
     if (protocol->getId() == Protocol::ipv4.getId()) {
 #ifdef WITH_IPv4
         if (!icmp)
-            // TODO: move to initialize?
+            // TODO move to initialize?
             icmp = getModuleFromPar<Icmp>(par("icmpModule"), this);
         icmp->sendErrorMessage(udpPacket, inIe, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
 #else // ifdef WITH_IPv4
@@ -1121,7 +1121,7 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
     else if (protocol->getId() == Protocol::ipv6.getId()) {
 #ifdef WITH_IPv6
         if (!icmpv6)
-            // TODO: move to initialize?
+            // TODO move to initialize?
             icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
         icmpv6->sendErrorMessage(udpPacket, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
 #else // ifdef WITH_IPv6
@@ -1162,7 +1162,7 @@ void Udp::processICMPv4Error(Packet *packet)
     // extract details from the error message, then try to notify socket that sent bogus packet
 
     if (!icmp)
-        // TODO: move to initialize?
+        // TODO move to initialize?
         icmp = getModuleFromPar<Icmp>(par("icmpModule"), this);
     if (!icmp->verifyCrc(packet)) {
         EV_WARN << "incoming ICMP packet has wrong CRC, dropped\n";
@@ -1217,7 +1217,7 @@ void Udp::processICMPv6Error(Packet *packet)
 {
 #ifdef WITH_IPv6
     if (!icmpv6)
-        // TODO: move to initialize?
+        // TODO move to initialize?
         icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
     if (!icmpv6->verifyCrc(packet)) {
         EV_WARN << "incoming ICMPv6 packet has wrong CRC, dropped\n";
@@ -1238,7 +1238,7 @@ void Udp::processICMPv6Error(Packet *packet)
     ASSERT(icmpHeader);
 
     type = icmpHeader->getType();
-    code = -1;    // FIXME this is dependent on getType()...
+    code = -1; // FIXME this is dependent on getType()...
     // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
     const auto& ipv6Header = packet->popAtFront<Ipv6Header>();
     const Ipv6FragmentHeader *fh = dynamic_cast<const Ipv6FragmentHeader *>(ipv6Header->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
@@ -1280,7 +1280,7 @@ void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
     auto indication = new Indication("ERROR", UDP_I_ERROR);
     UdpErrorIndication *udpCtrl = new UdpErrorIndication();
     indication->setControlInfo(udpCtrl);
-    //FIXME notifyMsg->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
+    // FIXME notifyMsg->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
     indication->addTag<SocketInd>()->setSocketId(sd->sockId);
     auto addresses = indication->addTag<L3AddressInd>();
     addresses->setSrcAddress(localAddr);
@@ -1320,7 +1320,7 @@ void Udp::clearAllSockets()
 {
     EV_INFO << "Clear all sockets\n";
 
-    for (auto & elem : socketsByIdMap)
+    for (auto& elem : socketsByIdMap)
         delete elem.second;
 
     socketsByIdMap.clear();
@@ -1374,8 +1374,8 @@ Udp::SockDesc::SockDesc(int sockId_)
 
 Udp::SockDesc::~SockDesc()
 {
-    for(auto & elem : multicastMembershipTable)
-        delete (elem);
+    for (auto& elem : multicastMembershipTable)
+        delete elem;
 }
 
 /*
@@ -1397,7 +1397,7 @@ Udp::MulticastMembershipTable::iterator Udp::SockDesc::findFirstMulticastMembers
 {
     MulticastMembership membership;
     membership.multicastAddress = multicastAddress;
-    membership.interfaceId = 0;    // less than any other interfaceId
+    membership.interfaceId = 0; // less than any other interfaceId
 
     auto it = lower_bound(multicastMembershipTable.begin(), multicastMembershipTable.end(), &membership, lessMembership);
     if (it != multicastMembershipTable.end() && (*it)->multicastAddress == multicastAddress)
@@ -1452,7 +1452,7 @@ std::ostream& operator<<(std::ostream& os, const Udp::SockDesc& sd)
 
 std::ostream& operator<<(std::ostream& os, const Udp::SockDescList& list)
 {
-    for (const auto & elem : list)
+    for (const auto& elem : list)
         os << "sockId=" << (elem)->sockId << " ";
     return os;
 }
@@ -1464,7 +1464,7 @@ std::ostream& operator<<(std::ostream& os, const Udp::SockDescList& list)
 INetfilter::IHook::Result Udp::CrcInsertion::datagramPostRoutingHook(Packet *packet)
 {
     if (packet->findTag<InterfaceInd>())
-        return ACCEPT;  // FORWARD
+        return ACCEPT; // FORWARD
 
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);

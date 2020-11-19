@@ -66,10 +66,11 @@ void NetworkProtocolBase::sendUp(cMessage *message)
         auto remoteAddress(addr->getSrcAddress());
         auto localAddress(addr->getDestAddress());
         bool hasSocket = false;
-        for (const auto &elem: socketIdToSocketDescriptor) {
-            if (elem.second->protocolId == protocol->getId()
-                    && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
-                    && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress)) {
+        for (const auto& elem: socketIdToSocketDescriptor) {
+            if (elem.second->protocolId == protocol->getId() &&
+                (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress) &&
+                (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress))
+            {
                 auto *packetCopy = packet->dup();
                 packetCopy->setKind(L3_I_DATA);
                 packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(elem.second->socketId);
@@ -87,8 +88,8 @@ void NetworkProtocolBase::sendUp(cMessage *message)
         else {
             if (!hasSocket) {
                 EV_ERROR << "Transport protocol '" << protocol->getName() << "' not connected, discarding packet\n";
-                //TODO send an ICMP error: protocol unreachable
-                // sendToIcmp(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+                // TODO send an ICMP error: protocol unreachable
+//                sendToIcmp(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
             }
             delete packet;
         }
@@ -111,7 +112,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
             NetworkInterface *networkInterface = interfaceTable->getInterface(i);
             if (networkInterface && !networkInterface->isLoopback()) {
-                cMessage* duplicate = utils::dupPacketAndControlInfo(message);
+                cMessage *duplicate = utils::dupPacketAndControlInfo(message);
                 auto& tags = check_and_cast<ITaggedObject *>(duplicate)->getTags();
                 tags.removeTagIfPresent<DispatchProtocolReq>();
                 tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());

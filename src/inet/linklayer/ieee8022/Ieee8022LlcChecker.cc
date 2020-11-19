@@ -55,7 +55,7 @@ void Ieee8022LlcChecker::processPacket(Packet *packet)
     auto sapInd = packet->addTagIfAbsent<Ieee802SapInd>();
     sapInd->setSsap(llcHeader->getSsap());
     sapInd->setDsap(llcHeader->getDsap());
-    //TODO control?
+    // TODO control?
     auto protocol = getProtocol(llcHeader);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);

@@ -30,20 +30,20 @@ namespace inet {
 
 Define_Module(PimDm);
 
-simsignal_t PimDm::sentGraftPkSignal        = registerSignal("sentGraftPk");
-simsignal_t PimDm::rcvdGraftPkSignal        = registerSignal("rcvdGraftPk");
-simsignal_t PimDm::sentGraftAckPkSignal     = registerSignal("sentGraftAckPk");
-simsignal_t PimDm::rcvdGraftAckPkSignal     = registerSignal("rcvdGraftAckPk");
-simsignal_t PimDm::sentJoinPrunePkSignal    = registerSignal("sentJoinPrunePk");
-simsignal_t PimDm::rcvdJoinPrunePkSignal    = registerSignal("rcvdJoinPrunePk");
-simsignal_t PimDm::sentAssertPkSignal       = registerSignal("sentAssertPk");
-simsignal_t PimDm::rcvdAssertPkSignal       = registerSignal("rcvdAssertPk");
+simsignal_t PimDm::sentGraftPkSignal = registerSignal("sentGraftPk");
+simsignal_t PimDm::rcvdGraftPkSignal = registerSignal("rcvdGraftPk");
+simsignal_t PimDm::sentGraftAckPkSignal = registerSignal("sentGraftAckPk");
+simsignal_t PimDm::rcvdGraftAckPkSignal = registerSignal("rcvdGraftAckPk");
+simsignal_t PimDm::sentJoinPrunePkSignal = registerSignal("sentJoinPrunePk");
+simsignal_t PimDm::rcvdJoinPrunePkSignal = registerSignal("rcvdJoinPrunePk");
+simsignal_t PimDm::sentAssertPkSignal = registerSignal("sentAssertPk");
+simsignal_t PimDm::rcvdAssertPkSignal = registerSignal("rcvdAssertPk");
 simsignal_t PimDm::sentStateRefreshPkSignal = registerSignal("sentStateRefreshPk");
 simsignal_t PimDm::rcvdStateRefreshPkSignal = registerSignal("rcvdStateRefreshPk");
 
 PimDm::~PimDm()
 {
-    for (auto & elem : routes)
+    for (auto& elem : routes)
         delete elem.second;
     routes.clear();
 }
@@ -253,7 +253,7 @@ void PimDm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         for (int i = 0; i < rt->getNumMulticastRoutes(); i++) {
             // find multicast routes whose source are on the destination of the new unicast route
             Ipv4MulticastRoute *route = rt->getMulticastRoute(i);
-            if (route->getSource() == this && Ipv4Address::maskedAddrAreEqual(route->getOrigin(), entry->getDestination()/*routeSource*/, entry->getNetmask()/*routeNetmask*/)) {
+            if (route->getSource() == this && Ipv4Address::maskedAddrAreEqual(route->getOrigin(), entry->getDestination() /*routeSource*/, entry->getNetmask() /*routeNetmask*/)) {
                 Ipv4Address source = route->getOrigin();
                 Ipv4Route *routeToSource = rt->findBestMatchingRoute(source);
                 NetworkInterface *newRpfInterface = routeToSource->getInterface();
@@ -290,7 +290,7 @@ void PimDm::processAssertTimer(cMessage *timer)
     // If CouldAssert == TRUE, the router MUST evaluate any possible
     // transitions to its Upstream(S,G) state machine.
     EV_DEBUG << "Going into NO_ASSERT_INFO state.\n";
-    interfaceData->deleteAssertInfo();    // deletes timer
+    interfaceData->deleteAssertInfo(); // deletes timer
 
     // upstream state machine transition
     if (interfaceData != upstream) {
@@ -360,7 +360,7 @@ void PimDm::processPrunePendingTimer(cMessage *timer)
     //
     // go to pruned state
     downstream->pruneState = DownstreamInterface::PRUNED;
-    double holdTime = pruneInterval - overrideInterval - propagationDelay;    // XXX should be received HoldTime - computed override interval;
+    double holdTime = pruneInterval - overrideInterval - propagationDelay; // TODO should be received HoldTime - computed override interval;
     downstream->startPruneTimer(holdTime);
 
     // TODO optionally send PruneEcho
@@ -663,7 +663,7 @@ void PimDm::processAssertPacket(Packet *pk)
     Ipv4Address group = pkt->getGroupAddress().groupAddress.toIpv4();
     AssertMetric receivedMetric = AssertMetric(pkt->getMetricPreference(), pkt->getMetric(), srcAddrFromTag);
     Route *route = findRoute(source, group);
-    ASSERT(route);    // XXX create S,G state?
+    ASSERT(route); // TODO create S,G state?
     Interface *incomingInterface = route->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
         static_cast<Interface *>(route->upstreamInterface) :
         static_cast<Interface *>(route->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
@@ -1102,8 +1102,8 @@ void PimDm::unroutableMulticastPacketArrived(Ipv4Address source, Ipv4Address gro
     for (int i = 0; i < pimIft->getNumInterfaces(); i++) {
         PimInterface *pimInterface = pimIft->getInterface(i);
 
-        //check if PIM-DM interface and it is not RPF interface
-        if (pimInterface == rpfInterface || pimInterface->getMode() != PimInterface::DenseMode) // XXX original code added downstream if data for PIM-SM interfaces too
+        // check if PIM-DM interface and it is not RPF interface
+        if (pimInterface == rpfInterface || pimInterface->getMode() != PimInterface::DenseMode) // TODO original code added downstream if data for PIM-SM interfaces too
             continue;
 
         bool hasPIMNeighbors = pimNbt->getNumNeighbors(pimInterface->getInterfaceId()) > 0;
@@ -1134,7 +1134,7 @@ void PimDm::unroutableMulticastPacketArrived(Ipv4Address source, Ipv4Address gro
     newRoute->setSourceType(IMulticastRoute::PIM_DM);
     newRoute->setSource(this);
     newRoute->setInInterface(new IMulticastRoute::InInterface(route->upstreamInterface->ie));
-    for (auto & elem : route->downstreamInterfaces) {
+    for (auto& elem : route->downstreamInterfaces) {
         DownstreamInterface *downstream = elem;
         newRoute->addOutInterface(new PimDmOutInterface(downstream->ie, downstream));
     }
@@ -1368,7 +1368,7 @@ void PimDm::multicastPacketArrivedOnRpfInterface(int interfaceId, Ipv4Address gr
  * interfaces. If route was not pruned, the router has to join to the multicast tree again
  * (by different path).
  */
-// XXX Assert state causes RPF'(S) to change
+// TODO Assert state causes RPF'(S) to change
 void PimDm::rpfInterfaceHasChanged(Ipv4MulticastRoute *ipv4Route, Ipv4Route *routeToSource)
 {
     NetworkInterface *newRpf = routeToSource->getInterface();
@@ -1390,14 +1390,14 @@ void PimDm::rpfInterfaceHasChanged(Ipv4MulticastRoute *ipv4Route, Ipv4Route *rou
 
     // set new upstream interface data
     bool isSourceDirectlyConnected = routeToSource->getSourceType() == Ipv4Route::IFACENETMASK;
-    Ipv4Address newRpfNeighbor = pimNbt->getNeighbor(rpfId, 0)->getAddress();    // XXX what happens if no neighbors?
+    Ipv4Address newRpfNeighbor = pimNbt->getNeighbor(rpfId, 0)->getAddress(); // TODO what happens if no neighbors?
     UpstreamInterface *upstream = route->upstreamInterface = new UpstreamInterface(route, newRpf, newRpfNeighbor, isSourceDirectlyConnected);
     ipv4Route->setInInterface(new IMulticastRoute::InInterface(newRpf));
 
     // delete rpf interface from the downstream interfaces
     DownstreamInterface *oldDownstreamInterface = route->removeDownstreamInterface(newRpf->getInterfaceId());
     if (oldDownstreamInterface) {
-        ipv4Route->removeOutInterface(newRpf);    // will delete downstream data, XXX method should be called deleteOutInterface()
+        ipv4Route->removeOutInterface(newRpf); // will delete downstream data, TODO method should be called deleteOutInterface()
         delete oldDownstreamInterface;
     }
 
@@ -1482,7 +1482,7 @@ void PimDm::sendJoinPacket(Ipv4Address nextHop, Ipv4Address src, Ipv4Address grp
     Packet *packet = new Packet("PIMJoin");
     const auto& msg = makeShared<PimJoinPrune>();
     msg->getUpstreamNeighborAddressForUpdate().unicastAddress = nextHop;
-    msg->setHoldTime(0);    // ignored by the receiver
+    msg->setHoldTime(0); // ignored by the receiver
 
     // set multicast groups
     msg->setJoinPruneGroupsArraySize(1);
@@ -1752,7 +1752,7 @@ void PimDm::clearRoutes()
     }
 
     // clear local table
-    for (auto & elem : routes)
+    for (auto& elem : routes)
         delete elem.second;
     routes.clear();
 }
@@ -1760,14 +1760,14 @@ void PimDm::clearRoutes()
 PimDm::Route::~Route()
 {
     delete upstreamInterface;
-    for (auto & elem : downstreamInterfaces)
+    for (auto& elem : downstreamInterfaces)
         delete elem;
     downstreamInterfaces.clear();
 }
 
 PimDm::DownstreamInterface *PimDm::Route::findDownstreamInterfaceByInterfaceId(int interfaceId) const
 {
-    for (auto & elem : downstreamInterfaces)
+    for (auto& elem : downstreamInterfaces)
         if (elem->ie->getInterfaceId() == interfaceId)
             return elem;
 
@@ -1795,7 +1795,7 @@ PimDm::DownstreamInterface *PimDm::Route::removeDownstreamInterface(int interfac
 
 bool PimDm::Route::isOilistNull()
 {
-    for (auto & elem : downstreamInterfaces) {
+    for (auto& elem : downstreamInterfaces) {
         if (elem->isInOlist())
             return false;
     }
@@ -1957,7 +1957,7 @@ std::ostream& operator<<(std::ostream& out, const PimDm::Route& route)
     }
 
     out << "Downstream interfaces ";
-    if(route.downstreamInterfaces.empty())
+    if (route.downstreamInterfaces.empty())
         out << "(empty) ";
     for (unsigned int i = 0; i < route.downstreamInterfaces.size(); ++i) {
         out << "(name: " << route.downstreamInterfaces[i]->ie->getInterfaceName() << " ";
@@ -1974,11 +1974,11 @@ std::ostream& operator<<(std::ostream& out, const PimDm::Route& route)
 
 const std::string PimDm::graftPruneStateString(UpstreamInterface::GraftPruneState ps)
 {
-    if(ps == UpstreamInterface::FORWARDING)
+    if (ps == UpstreamInterface::FORWARDING)
         return "FORWARDING";
-    else if(ps == UpstreamInterface::PRUNED)
+    else if (ps == UpstreamInterface::PRUNED)
         return "PRUNED";
-    else if(ps == UpstreamInterface::ACK_PENDING)
+    else if (ps == UpstreamInterface::ACK_PENDING)
         return "ACK_PENDING";
 
     return "UNKNOWN";
@@ -1986,9 +1986,9 @@ const std::string PimDm::graftPruneStateString(UpstreamInterface::GraftPruneStat
 
 const std::string PimDm::originatorStateString(UpstreamInterface::OriginatorState os)
 {
-    if(os == UpstreamInterface::NOT_ORIGINATOR)
+    if (os == UpstreamInterface::NOT_ORIGINATOR)
         return "NOT_ORIGINATOR";
-    else if(os == UpstreamInterface::ORIGINATOR)
+    else if (os == UpstreamInterface::ORIGINATOR)
         return "ORIGINATOR";
 
     return "UNKNOWN";
@@ -1996,15 +1996,15 @@ const std::string PimDm::originatorStateString(UpstreamInterface::OriginatorStat
 
 const std::string PimDm::pruneStateString(DownstreamInterface::PruneState ps)
 {
-    if(ps == DownstreamInterface::NO_INFO)
+    if (ps == DownstreamInterface::NO_INFO)
         return "NO_INFO";
-    else if(ps == DownstreamInterface::PRUNE_PENDING)
+    else if (ps == DownstreamInterface::PRUNE_PENDING)
         return "PRUNE_PENDING";
-    else if(ps == DownstreamInterface::PRUNED)
+    else if (ps == DownstreamInterface::PRUNED)
         return "PRUNED";
 
     return "UNKNOWN";
 }
 
-}    // namespace inet
+} // namespace inet
 

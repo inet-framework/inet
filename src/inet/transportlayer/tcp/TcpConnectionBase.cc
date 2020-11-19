@@ -34,32 +34,32 @@ namespace tcp {
 
 Define_Module(TcpConnection);
 
-simsignal_t TcpConnection::stateSignal = registerSignal("state");    // FSM state
-simsignal_t TcpConnection::sndWndSignal = registerSignal("sndWnd");    // snd_wnd
-simsignal_t TcpConnection::rcvWndSignal = registerSignal("rcvWnd");    // rcv_wnd
-simsignal_t TcpConnection::rcvAdvSignal = registerSignal("rcvAdv");    // current advertised window (=rcv_adv)
-simsignal_t TcpConnection::sndNxtSignal = registerSignal("sndNxt");    // sent seqNo
-simsignal_t TcpConnection::sndAckSignal = registerSignal("sndAck");    // sent ackNo
-simsignal_t TcpConnection::rcvSeqSignal = registerSignal("rcvSeq");    // received seqNo
-simsignal_t TcpConnection::rcvAckSignal = registerSignal("rcvAck");    // received ackNo (=snd_una)
-simsignal_t TcpConnection::unackedSignal = registerSignal("unacked");    // number of bytes unacknowledged
-simsignal_t TcpConnection::dupAcksSignal = registerSignal("dupAcks");    // current number of received dupAcks
-simsignal_t TcpConnection::pipeSignal = registerSignal("pipe");    // current sender's estimate of bytes outstanding in the network
-simsignal_t TcpConnection::sndSacksSignal = registerSignal("sndSacks");    // number of sent Sacks
-simsignal_t TcpConnection::rcvSacksSignal = registerSignal("rcvSacks");    // number of received Sacks
-simsignal_t TcpConnection::rcvOooSegSignal = registerSignal("rcvOooSeg");    // number of received out-of-order segments
-simsignal_t TcpConnection::rcvNASegSignal = registerSignal("rcvNASeg");    // number of received not acceptable segments
-simsignal_t TcpConnection::sackedBytesSignal = registerSignal("sackedBytes");    // current number of received sacked bytes
-simsignal_t TcpConnection::tcpRcvQueueBytesSignal = registerSignal("tcpRcvQueueBytes");    // current amount of used bytes in tcp receive queue
-simsignal_t TcpConnection::tcpRcvQueueDropsSignal = registerSignal("tcpRcvQueueDrops");    // number of drops in tcp receive queue
-simsignal_t TcpConnection::tcpRcvPayloadBytesSignal = registerSignal("tcpRcvPayloadBytes");  // amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
+simsignal_t TcpConnection::stateSignal = registerSignal("state"); // FSM state
+simsignal_t TcpConnection::sndWndSignal = registerSignal("sndWnd"); // snd_wnd
+simsignal_t TcpConnection::rcvWndSignal = registerSignal("rcvWnd"); // rcv_wnd
+simsignal_t TcpConnection::rcvAdvSignal = registerSignal("rcvAdv"); // current advertised window (=rcv_adv)
+simsignal_t TcpConnection::sndNxtSignal = registerSignal("sndNxt"); // sent seqNo
+simsignal_t TcpConnection::sndAckSignal = registerSignal("sndAck"); // sent ackNo
+simsignal_t TcpConnection::rcvSeqSignal = registerSignal("rcvSeq"); // received seqNo
+simsignal_t TcpConnection::rcvAckSignal = registerSignal("rcvAck"); // received ackNo (=snd_una)
+simsignal_t TcpConnection::unackedSignal = registerSignal("unacked"); // number of bytes unacknowledged
+simsignal_t TcpConnection::dupAcksSignal = registerSignal("dupAcks"); // current number of received dupAcks
+simsignal_t TcpConnection::pipeSignal = registerSignal("pipe"); // current sender's estimate of bytes outstanding in the network
+simsignal_t TcpConnection::sndSacksSignal = registerSignal("sndSacks"); // number of sent Sacks
+simsignal_t TcpConnection::rcvSacksSignal = registerSignal("rcvSacks"); // number of received Sacks
+simsignal_t TcpConnection::rcvOooSegSignal = registerSignal("rcvOooSeg"); // number of received out-of-order segments
+simsignal_t TcpConnection::rcvNASegSignal = registerSignal("rcvNASeg"); // number of received not acceptable segments
+simsignal_t TcpConnection::sackedBytesSignal = registerSignal("sackedBytes"); // current number of received sacked bytes
+simsignal_t TcpConnection::tcpRcvQueueBytesSignal = registerSignal("tcpRcvQueueBytes"); // current amount of used bytes in tcp receive queue
+simsignal_t TcpConnection::tcpRcvQueueDropsSignal = registerSignal("tcpRcvQueueDrops"); // number of drops in tcp receive queue
+simsignal_t TcpConnection::tcpRcvPayloadBytesSignal = registerSignal("tcpRcvPayloadBytes"); // amount of payload bytes received (including duplicates, out of order etc) for TCP throughput
 
 TcpStateVariables::TcpStateVariables()
 {
     // set everything to 0 -- real init values will be set manually
     active = false;
     fork = false;
-    snd_mss = 0;    // will initially be set from configureStateVariables() and probably reset during connection setup
+    snd_mss = 0; // will initially be set from configureStateVariables() and probably reset during connection setup
     snd_una = 0;
     snd_nxt = 0;
     snd_max = 0;
@@ -70,10 +70,10 @@ TcpStateVariables::TcpStateVariables()
     iss = 0;
 
     rcv_nxt = 0;
-    rcv_wnd = 0;    // will be set from configureStateVariables()
+    rcv_wnd = 0; // will be set from configureStateVariables()
     rcv_up = 0;
     irs = 0;
-    rcv_adv = 0;    // will be set from configureStateVariables()
+    rcv_adv = 0; // will be set from configureStateVariables()
 
     syn_rexmit_count = 0;
     syn_rexmit_timeout = 0;
@@ -84,10 +84,10 @@ TcpStateVariables::TcpStateVariables()
     fin_rcvd = false;
     rcv_fin_seq = 0;
 
-    nagle_enabled = false;    // will be set from configureStateVariables()
-    delayed_acks_enabled = false;    // will be set from configureStateVariables()
-    limited_transmit_enabled = false;    // will be set from configureStateVariables()
-    increased_IW_enabled = false;    // will be set from configureStateVariables()
+    nagle_enabled = false; // will be set from configureStateVariables()
+    delayed_acks_enabled = false; // will be set from configureStateVariables()
+    limited_transmit_enabled = false; // will be set from configureStateVariables()
+    increased_IW_enabled = false; // will be set from configureStateVariables()
     full_sized_segment_counter = 0;
     ack_now = false;
 
@@ -95,23 +95,23 @@ TcpStateVariables::TcpStateVariables()
 
     time_last_data_sent = 0;
 
-    ws_support = false;    // will be set from configureStateVariables()
+    ws_support = false; // will be set from configureStateVariables()
     ws_enabled = false;
     ws_manual_scale = -1;
 
     snd_ws = false;
     rcv_ws = false;
-    rcv_wnd_scale = 0;    // will be set from configureStateVariables()
+    rcv_wnd_scale = 0; // will be set from configureStateVariables()
     snd_wnd_scale = 0;
 
-    ts_support = false;    // will be set from configureStateVariables()
+    ts_support = false; // will be set from configureStateVariables()
     ts_enabled = false;
     snd_initial_ts = false;
     rcv_initial_ts = false;
     ts_recent = 0;
     last_ack_sent = 0;
 
-    sack_support = false;    // will be set from configureStateVariables()
+    sack_support = false; // will be set from configureStateVariables()
     sack_enabled = false;
     snd_sack_perm = false;
     rcv_sack_perm = false;
@@ -133,7 +133,7 @@ TcpStateVariables::TcpStateVariables()
     rcv_oooseg = 0;
     rcv_naseg = 0;
 
-    maxRcvBuffer = 0;    // will be set from configureStateVariables()
+    maxRcvBuffer = 0; // will be set from configureStateVariables()
     usedRcvBuffer = 0;
     freeRcvBuffer = 0;
     tcpRcvQueueDrops = 0;
@@ -423,15 +423,15 @@ TcpEventCode TcpConnection::preanalyseAppCommandEvent(int commandCode)
 
 bool TcpConnection::performStateTransition(const TcpEventCode& event)
 {
-    ASSERT(fsm.getState() != TCP_S_CLOSED);    // closed connections should be deleted immediately
+    ASSERT(fsm.getState() != TCP_S_CLOSED); // closed connections should be deleted immediately
 
-    if (event == TCP_E_IGNORE) {    // e.g. discarded segment
+    if (event == TCP_E_IGNORE) { // e.g. discarded segment
         EV_DETAIL << "Staying in state: " << stateName(fsm.getState()) << " (no FSM event)\n";
         return true;
     }
 
     // state machine
-    // TBD add handling of connection timeout event (KEEP-ALIVE), with transition to CLOSED
+    // TODO add handling of connection timeout event (KEEP-ALIVE), with transition to CLOSED
     // Note: empty "default:" lines are for gcc's benefit which would otherwise spit warnings
     int oldState = fsm.getState();
 

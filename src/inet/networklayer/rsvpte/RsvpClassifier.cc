@@ -40,7 +40,7 @@ void RsvpClassifier::initialize(int stage)
         maxLabel = 0;
         WATCH_VECTOR(bindings);
     }
-    // TODO: INITSTAGE
+    // TODO INITSTAGE
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         IIpv4RoutingTable *rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         routerId = rt->getRouterId();
@@ -76,7 +76,7 @@ bool RsvpClassifier::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::s
 
     // forwarding decision for non-labeled datagrams
 
-    for (auto & elem : bindings) {
+    for (auto& elem : bindings) {
         if (!elem.dest.isUnspecified() && !elem.dest.equals(ipv4Header->getDestAddress()))
             continue;
 
@@ -98,7 +98,7 @@ bool RsvpClassifier::lookupLabel(Packet *packet, LabelOpVector& outLabel, std::s
 
 void RsvpClassifier::bind(const SessionObj& session, const SenderTemplateObj& sender, int inLabel)
 {
-    for (auto & elem : bindings) {
+    for (auto& elem : bindings) {
         if (elem.session != session)
             continue;
 
@@ -128,7 +128,7 @@ void RsvpClassifier::readTableFromXML(const cXMLElement *fectable)
     ASSERT(!strcmp(fectable->getTagName(), "fectable"));
     checkTags(fectable, "fecentry");
     cXMLElementList list = fectable->getChildrenByTagName("fecentry");
-    for (auto & elem : list)
+    for (auto& elem : list)
         readItemFromXML(elem);
 }
 
@@ -178,7 +178,7 @@ void RsvpClassifier::readItemFromXML(const cXMLElement *fec)
 
         newFec.session.Tunnel_Id = getParameterIntValue(fec, "tunnel_id");
         newFec.session.Extended_Tunnel_Id = getParameterIPAddressValue(fec, "extened_tunnel_id", routerId).getInt();
-        newFec.session.DestAddress = getParameterIPAddressValue(fec, "endpoint", newFec.dest);    // ??? always use newFec.dest ???
+        newFec.session.DestAddress = getParameterIPAddressValue(fec, "endpoint", newFec.dest); // ??? always use newFec.dest ???
 
         newFec.sender.Lsp_Id = getParameterIntValue(fec, "lspid");
         newFec.sender.SrcAddress = routerId;
@@ -207,7 +207,7 @@ void RsvpClassifier::readItemFromXML(const cXMLElement *fec)
 std::vector<RsvpClassifier::FecEntry>::iterator RsvpClassifier::findFEC(int fecid)
 {
     auto it = bindings.begin();
-    for ( ; it != bindings.end(); it++) {
+    for (; it != bindings.end(); it++) {
         if (it->id == fecid)
             break;
     }

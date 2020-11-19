@@ -58,7 +58,7 @@ const Ptr<Chunk> CsmaCaMacHeaderSerializer::deserialize(MemoryInputStream& strea
     auto startPos = stream.getPosition();
     CsmaCaMacHeaderType type = static_cast<CsmaCaMacHeaderType>(stream.readUint8());
     uint8_t length = stream.readUint8();
-    switch(type) {
+    switch (type) {
         case CSMA_DATA: {
             auto macHeader = makeShared<CsmaCaMacDataHeader>();
             macHeader->setType(type);

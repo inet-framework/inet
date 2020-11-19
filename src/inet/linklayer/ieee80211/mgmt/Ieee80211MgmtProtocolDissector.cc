@@ -28,7 +28,7 @@ Register_Protocol_Dissector(&Protocol::ieee80211Mgmt, Ieee80211MgmtProtocolDisse
 void Ieee80211MgmtProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
     callback.startProtocolDataUnit(&Protocol::ieee80211Mgmt);
-    //TODO popHeader<Ieee80211MgmtHeader>
+    // TODO popHeader<Ieee80211MgmtHeader>
     callback.visitChunk(packet->peekData(), &Protocol::ieee80211Mgmt);
     packet->setFrontOffset(packet->getBackOffset());
     callback.endProtocolDataUnit(&Protocol::ieee80211Mgmt);

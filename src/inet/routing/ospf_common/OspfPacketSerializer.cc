@@ -38,7 +38,7 @@ const Ptr<Chunk> OspfPacketSerializer::deserialize(MemoryInputStream& stream) co
     auto startPos = stream.getPosition();
     int ospfVer = stream.readUint8();
 
-    //TODO should register Ospfv<version>Serializer classes to OspfSerializer and deserializer choose a serializer class based on version field
+    // TODO should register Ospfv<version>Serializer classes to OspfSerializer and deserializer choose a serializer class based on version field
     switch (ospfVer) {
 #ifdef WITH_OSPFv2
         case 2:
@@ -48,8 +48,8 @@ const Ptr<Chunk> OspfPacketSerializer::deserialize(MemoryInputStream& stream) co
 #endif // #ifdef WITH_OSPFv2
 #ifdef WITH_OSPFv3
         case 3:
-            //TODO stream.seek(startPos);
-            //TODO return ospfv3::Ospfv3PacketSerializer().deserialize(stream);
+            // TODO stream.seek(startPos);
+            // TODO return ospfv3::Ospfv3PacketSerializer().deserialize(stream);
 #endif // #ifdef WITH_OSPFv3
         default: {
             auto ospfPacket = makeShared<OspfPacketBase>();

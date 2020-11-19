@@ -118,8 +118,8 @@ void MessageChecker::checkFieldValue(void *object, cClassDescriptor *descriptor,
     }
 
     // check field value into the client object
-    if (value.find(attr["value"]) != 0) //allow to keep reference values even if
-                                        //simtime precision changed...
+    if (value.find(attr["value"]) != 0) // allow to keep reference values even if
+                                        // simtime precision changed...
         throw cRuntimeError("Mismatch: field \"%s\" in the message %d (\"%s\" != \"%s\")",
                 attr["name"].data(), forwardedMsg, value.data(), attr["value"].data());
 }

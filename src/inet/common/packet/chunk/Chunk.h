@@ -30,28 +30,28 @@
 
 // checking chunk implementation is disabled by default
 #ifndef CHUNK_CHECK_IMPLEMENTATION_ENABLED
-#define CHUNK_CHECK_IMPLEMENTATION_ENABLED 0
+#define CHUNK_CHECK_IMPLEMENTATION_ENABLED       0
 #endif
 
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED
-#define CHUNK_CHECK_IMPLEMENTATION(condition)   ASSERT(condition)
+#define CHUNK_CHECK_IMPLEMENTATION(condition)    ASSERT(condition)
 #else
-#define CHUNK_CHECK_IMPLEMENTATION(condition) ;
+#define CHUNK_CHECK_IMPLEMENTATION(condition)    ;
 #endif
 
 // checking chunk usage is enabled in debug mode and disabled in release mode by default
 #ifndef CHUNK_CHECK_USAGE_ENABLED
 #ifdef NDEBUG
-#define CHUNK_CHECK_USAGE_ENABLED 0
+#define CHUNK_CHECK_USAGE_ENABLED    0
 #else
-#define CHUNK_CHECK_USAGE_ENABLED 1
+#define CHUNK_CHECK_USAGE_ENABLED    1
 #endif
 #endif
 
 #if CHUNK_CHECK_USAGE_ENABLED
-#define CHUNK_CHECK_USAGE(condition, format, ...)   ((void) ((condition) ? 0 :  throw cRuntimeError("Error: " format, ##__VA_ARGS__)))
+#define CHUNK_CHECK_USAGE(condition, format, ...)    ((void)((condition) ? 0 : throw cRuntimeError("Error: " format, ## __VA_ARGS__)))
 #else
-#define CHUNK_CHECK_USAGE(condition, format, ...) ;
+#define CHUNK_CHECK_USAGE(condition, format, ...)    ;
 #endif
 
 namespace inet {
@@ -245,13 +245,13 @@ using namespace units::values;
  * d) Inserting a ByteCountChunk into a ByteCountChunk merges them
  * e) Inserting a connecting SliceChunk into a SliceChunk merges them
  */
-// TODO: performance related; avoid iteration in SequenceChunk::getChunkLength, avoid peek for simplifying, use vector instead of deque, reverse order for frequent prepends?
+// TODO performance related; avoid iteration in SequenceChunk::getChunkLength, avoid peek for simplifying, use vector instead of deque, reverse order for frequent prepends?
 class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintableObject, public IRegionTaggedObject
 {
-  friend class SliceChunk;
-  friend class EncryptedChunk;
-  friend class SequenceChunk;
-  friend class ChunkDescriptor;
+    friend class SliceChunk;
+    friend class EncryptedChunk;
+    friend class SequenceChunk;
+    friend class ChunkDescriptor;
 
   protected:
     /**
@@ -296,8 +296,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
 
     static const b unspecifiedLength;
 
-    class INET_API Iterator
-    {
+    class INET_API Iterator {
       protected:
         const bool isForward_;
         b position;
@@ -324,24 +323,22 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     /**
      * Position and index are measured from the beginning.
      */
-    class INET_API ForwardIterator : public Iterator
-    {
+    class INET_API ForwardIterator : public Iterator {
       public:
-        ForwardIterator(b position) : Iterator(true, position, -1) { }
-        ForwardIterator(B position) : Iterator(true, position, -1) { }
-        explicit ForwardIterator(b position, int index) : Iterator(true, position, index) { }
+        ForwardIterator(b position) : Iterator(true, position, -1) {}
+        ForwardIterator(B position) : Iterator(true, position, -1) {}
+        explicit ForwardIterator(b position, int index) : Iterator(true, position, index) {}
         ForwardIterator& operator=(const ForwardIterator& other) { position = other.position; index = other.index; CHUNK_CHECK_IMPLEMENTATION(isCorrect()); return *this; }
     };
 
     /**
      * Position and index are measured from the end.
      */
-    class INET_API BackwardIterator : public Iterator
-    {
+    class INET_API BackwardIterator : public Iterator {
       public:
-        BackwardIterator(b position) : Iterator(false, position, -1) { }
-        BackwardIterator(B position) : Iterator(false, position, -1) { }
-        explicit BackwardIterator(b position, int index) : Iterator(false, position, index) { }
+        BackwardIterator(b position) : Iterator(false, position, -1) {}
+        BackwardIterator(B position) : Iterator(false, position, -1) {}
+        explicit BackwardIterator(b position, int index) : Iterator(false, position, index) {}
         BackwardIterator& operator=(const BackwardIterator& other) { position = other.position; index = other.index; CHUNK_CHECK_IMPLEMENTATION(isCorrect()); return *this; }
     };
 
@@ -408,7 +405,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
 
     virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const = 0;
 
-    template <typename T>
+    template<typename T>
     const Ptr<T> peekConverted(const Iterator& iterator, b length, int flags) const {
         CHUNK_CHECK_USAGE(iterator.isForward() || length >= b(0), "chunk conversion using backward iterator with undefined length is invalid");
         auto offset = iterator.isForward() ? iterator.getPosition() : getChunkLength() - iterator.getPosition() - length;
@@ -417,7 +414,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
         return staticPtrCast<T>(chunk);
     }
 
-    template <typename T>
+    template<typename T>
     const Ptr<T> checkPeekResult(const Ptr<T>& chunk, int flags) const {
         if (chunk == nullptr) {
             if (!(flags & PF_ALLOW_NULLPTR))
@@ -447,8 +444,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     /**
      * Returns a mutable copy of this chunk in a shared pointer.
      */
-    virtual const Ptr<Chunk> dupShared() const { return Ptr<Chunk>(static_cast<Chunk *>(dup())); };
-
+    virtual const Ptr<Chunk> dupShared() const { return Ptr<Chunk>(static_cast<Chunk *>(dup())); }
     virtual void forEachChild(cVisitor *v) override;
 
     virtual void parsimPack(cCommBuffer *buffer) const override;
@@ -661,7 +657,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
      * Returns whether if the designated part of the data is available in the
      * requested representation.
      */
-    template <typename T>
+    template<typename T>
     bool has(const Iterator& iterator, b length = unspecifiedLength) const {
         if (length >= b(0) && getChunkLength() < iterator.getPosition() + length)
             return false;
@@ -679,7 +675,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
      * length. The result is mutable iff the designated part is directly represented
      * in this chunk by a mutable chunk, otherwise the result is immutable.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<T> peek(const Iterator& iterator, b length = unspecifiedLength, int flags = 0) const {
         if (std::is_same<T, Chunk>::value)
             // NOTE: this code used to be a simple peek template specialization for the Chunk type but
@@ -751,14 +747,14 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     /**
      * Maps all tags in the provided range to to the function.
      */
-    template<typename T> void mapAllTags(b offset, b length, std::function<void (b, b, const Ptr<const T>&)> f) const {
+    template<typename T> void mapAllTags(b offset, b length, std::function<void(b, b, const Ptr<const T>&)> f) const {
         return regionTags.mapAllTags<const T>(offset, length == b(-1) ? getChunkLength() - offset : length, f);
     }
 
     /**
      * Maps all tags in the provided range to to the function.
      */
-    template<typename T> void mapAllTagsForUpdate(b offset, b length, std::function<void (b, b, const Ptr<T>&)> f) {
+    template<typename T> void mapAllTagsForUpdate(b offset, b length, std::function<void(b, b, const Ptr<T>&)> f) {
         checkMutable();
         return regionTags.mapAllTags<T>(offset, length == b(-1) ? getChunkLength() - offset : length, f);
     }
@@ -805,7 +801,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     /**
      * Removes the chunk tag for the provided type and range, or throws an exception if no such chunk tag is found.
      */
-    template <typename T> const Ptr<T> removeTag(b offset, b length) {
+    template<typename T> const Ptr<T> removeTag(b offset, b length) {
         checkMutable();
         return regionTags.removeTag<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
@@ -813,7 +809,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     /**
      * Removes the chunk tag for the provided type and range if present, or returns nullptr if no such chunk tag is found.
      */
-    template <typename T> const Ptr<T> removeTagIfPresent(b offset, b length) {
+    template<typename T> const Ptr<T> removeTagIfPresent(b offset, b length) {
         checkMutable();
         return regionTags.removeTagIfPresent<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
@@ -821,7 +817,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     /**
      * Removes and returns all chunk tags for the provided type and range.
      */
-    template <typename T> std::vector<SharingRegionTagSet::RegionTag<T>> removeTagsWherePresent(b offset, b length) {
+    template<typename T> std::vector<SharingRegionTagSet::RegionTag<T>> removeTagsWherePresent(b offset, b length) {
         checkMutable();
         return regionTags.removeTagsWherePresent<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
@@ -870,7 +866,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     //@}
 };
 
-template <typename T>
+template<typename T>
 const Ptr<T> makeExclusivelyOwnedMutableChunk(const Ptr<const T>& chunk)
 {
     if (chunk.use_count() == 1) {

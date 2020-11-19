@@ -50,30 +50,26 @@ class INET_API Ieee802154UwbIrMode
     static const short shortSFD[8];
     /**@brief Maximum size of message that is accepted by the Phy layer (in bytes). */
     static const int MaxPSDULength = 128;
-    // TODO: change to non-static, because it depends on the mode
+    // TODO change to non-static, because it depends on the mode
     static const int maxS = 20000;
     static short s_array[maxS];
     static int last_s;
     static const Ieee802154UwbIrMode cfg_mandatory_4M;
     static const Ieee802154UwbIrMode cfg_mandatory_16M;
 
-    enum UwbPrf
-    {
+    enum UwbPrf {
         PRF_OFF, NOMINAL_4_M, NOMINAL_16_M, NOMINAL_64_M
     };
 
-    enum Ranging
-    {
+    enum Ranging {
         NON_RANGING, ALL_RANGING, PHY_HEADER_ONLY
     };
 
-    enum UwbPreambleSymbolRepetitions
-    {
+    enum UwbPreambleSymbolRepetitions {
         PSR_SHORT = 16, PSR_DEFAULT = 64, PSR_MEDIUM = 1024, PSR_LONG = 4096
     };
 
-    enum DataRate
-    {
+    enum DataRate {
         DATA_RATE_0, DATA_RATE_1, DATA_RATE_2, DATA_RATE_3, DATA_RATE_4
     };
 
@@ -86,12 +82,12 @@ class INET_API Ieee802154UwbIrMode
     int Ncpb;
     bps bitrate;
     int nbPulsesPerBurst;
-//        simtime_t sync_symbol_duration;
-//        simtime_t data_symbol_duration;
-//        simtime_t shift_duration;
-//        simtime_t pulse_duration;
-//        simtime_t burst_duration;
-//        simtime_t preambleLength;
+//    simtime_t sync_symbol_duration;
+//    simtime_t data_symbol_duration;
+//    simtime_t shift_duration;
+//    simtime_t pulse_duration;
+//    simtime_t burst_duration;
+//    simtime_t preambleLength;
     double sync_symbol_duration;
     double data_symbol_duration;
     double shift_duration;

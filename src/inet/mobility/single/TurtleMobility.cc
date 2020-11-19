@@ -113,7 +113,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
 
     if (!strcmp(tag, "repeat")) {
         const char *nAttr = stmt->getAttribute("n");
-        long n = -1;    // infinity -- that's the default
+        long n = -1; // infinity -- that's the default
 
         if (nAttr) {
             n = (long)getValue(nAttr);
@@ -230,7 +230,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         if (t < 0)
             throw cRuntimeError("<wait>: time (attribute t) is negative (%g) at %s", t, stmt->getSourceLocation());
 
-        nextChange += t;    // targetPosition is unchanged
+        nextChange += t; // targetPosition is unchanged
     }
     else if (!strcmp(tag, "moveto")) {
         const char *xAttr = stmt->getAttribute("x");
@@ -336,7 +336,7 @@ void TurtleMobility::gotoNextStatement()
     ASSERT(!nextStatement->getFirstChild() || (!strcmp(nextStatement->getTagName(), "repeat")
                                                && !loopVars.empty()));
 
-    if (nextStatement->getFirstChild() && (loopVars.top() != 0 || (loopVars.pop(), false))) {    // !=0: positive or -1
+    if (nextStatement->getFirstChild() && (loopVars.top() != 0 || (loopVars.pop(), false))) { // !=0: positive or -1
         // statement must be a <repeat> if it has children; repeat count>0 must be
         // on the stack; let's start doing the body.
         nextStatement = nextStatement->getFirstChild();
@@ -350,7 +350,7 @@ void TurtleMobility::gotoNextStatement()
             if (loopVars.top() != -1) // -1 means infinity
                 loopVars.top()--;
 
-            if (loopVars.top() != 0) {    // positive or -1
+            if (loopVars.top() != 0) { // positive or -1
                 // go to beginning of <repeat> block again
                 nextStatement = nextStatement->getParentNode()->getFirstChild();
             }
@@ -376,8 +376,7 @@ void TurtleMobility::computeMaxSpeed(cXMLElement *nodes)
     // Recursively traverse the whole config file, looking for
     // speed attributes
     cXMLElementList childs = nodes->getChildren();
-    for (auto & child : childs)
-    {
+    for (auto& child : childs) {
         const char *speedAttr = child->getAttribute("speed");
         if (speedAttr) {
             double speed = atof(speedAttr);

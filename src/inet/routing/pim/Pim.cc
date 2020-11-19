@@ -83,7 +83,7 @@ void Pim::handleCrashOperation(LifecycleOperation *operation)
 INetfilter::IHook::Result Pim::CrcInsertion::datagramPostRoutingHook(Packet *packet)
 {
     if (packet->findTag<InterfaceInd>())
-        return ACCEPT;  // FORWARD
+        return ACCEPT; // FORWARD
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     if (*networkProtocol == Protocol::ipv6) {
         const auto& networkHeader = getNetworkProtocolHeader(packet);
@@ -181,5 +181,5 @@ uint16_t Pim::computeCrc(const Protocol *networkProtocol, const L3Address& srcAd
     return crc;
 }
 
-}    // namespace inet
+} // namespace inet
 

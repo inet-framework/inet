@@ -29,7 +29,7 @@ Define_Module(PacketDropOsgVisualizer);
 
 #ifdef WITH_OSG
 
-PacketDropOsgVisualizer::PacketDropOsgVisualization::PacketDropOsgVisualization(osg::Node* node, const PacketDrop* packetDrop) :
+PacketDropOsgVisualizer::PacketDropOsgVisualization::PacketDropOsgVisualization(osg::Node *node, const PacketDrop *packetDrop) :
     PacketDropVisualization(packetDrop),
     node(node)
 {
@@ -37,13 +37,13 @@ PacketDropOsgVisualizer::PacketDropOsgVisualization::PacketDropOsgVisualization(
 
 PacketDropOsgVisualizer::PacketDropOsgVisualization::~PacketDropOsgVisualization()
 {
-    // TODO: delete node;
+    // TODO delete node;
 }
 
 void PacketDropOsgVisualizer::refreshDisplay() const
 {
     PacketDropVisualizerBase::refreshDisplay();
-    // TODO: switch to osg canvas when API is extended
+    // TODO switch to osg canvas when API is extended
     visualizationTargetModule->getCanvas()->setAnimationSpeed(packetDropVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
 

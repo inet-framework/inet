@@ -45,7 +45,7 @@ SctpSocket::SctpSocket(bool type)
     appOptions->outboundStreams = -1;
     appOptions->streamReset = 0;
     appLimited = false;
-   // if (oneToOne)
+//    if (oneToOne)
         assocId = getNewAssocId();
   /*  else
         assocId = 0;*/
@@ -95,7 +95,7 @@ SctpSocket::SctpSocket(cMessage *msg)
         fsmStatus = connectInfo->getStatus();
         appOptions->inboundStreams = connectInfo->getInboundStreams();
         appOptions->outboundStreams = connectInfo->getOutboundStreams();
-   }
+    }
 }
 
 SctpSocket::~SctpSocket()
@@ -143,7 +143,7 @@ void SctpSocket::sendToSctp(cMessage *msg)
 void SctpSocket::getSocketOptions()
 {
     EV_INFO << "getSocketOptions\n";
-    Request* cmsg = new Request("GetSocketOptions", SCTP_C_GETSOCKETOPTIONS);
+    Request *cmsg = new Request("GetSocketOptions", SCTP_C_GETSOCKETOPTIONS);
     auto sctpSendReq = cmsg->addTag<SctpSendReq>();
     sctpSendReq->setSocketId(assocId);
     sctpSendReq->setSid(0);
@@ -155,7 +155,7 @@ void SctpSocket::bind(int lPort)
     if (sockstate != NOT_BOUND)
         throw cRuntimeError("SctpSocket::bind(): socket already bound");
 
-    localAddresses.push_back(L3Address());    // Unspecified address
+    localAddresses.push_back(L3Address()); // Unspecified address
     localPrt = lPort;
     sockstate = CLOSED;
     getSocketOptions();
@@ -182,7 +182,7 @@ void SctpSocket::addAddress(L3Address addr)
 void SctpSocket::bindx(AddressVector lAddresses, int lPort)
 {
     L3Address lAddr;
-    for (auto & lAddresse : lAddresses) {
+    for (auto& lAddresse : lAddresses) {
         EV << "bindx: bind address " << (lAddresse) << "\n";
         localAddresses.push_back((lAddresse));
     }
@@ -242,9 +242,9 @@ void SctpSocket::listen(uint32_t requests, bool fork, uint32_t messagesToPush, b
     openCmd->setMessagesToPush(messagesToPush);
     openCmd->setStreamReset(appOptions->streamReset);
 
-    EV_INFO<< "Assoc " << openCmd->getSocketId() << ": PassiveOPEN to SCTP from SctpSocket:listen2()\n";
+    EV_INFO << "Assoc " << openCmd->getSocketId() << ": PassiveOPEN to SCTP from SctpSocket:listen2()\n";
     if (options)
-        cmsg->setContextPointer((void*) sOptions);
+        cmsg->setContextPointer((void *)sOptions);
     sendToSctp(cmsg);
     sockstate = LISTENING;
 }
@@ -254,8 +254,8 @@ void SctpSocket::connect(L3Address remoteAddress, int32_t remotePort, bool strea
     EV_INFO << "Socket connect. Assoc=" << assocId << ", sockstate=" << stateName(sockstate) << "\n";
 
     if (oneToOne && sockstate == NOT_BOUND) {
-   EV_INFO << "Connect: call bind first\n";
-       bind(0);
+        EV_INFO << "Connect: call bind first\n";
+        bind(0);
     }
 
     if (oneToOne && sockstate != CLOSED)
@@ -297,7 +297,7 @@ void SctpSocket::connect(int32_t fd, L3Address remoteAddress, int32_t remotePort
     EV_INFO << "Socket connect. Assoc=" << assocId << ", sockstate=" << stateName(sockstate) << "\n";
 
     if (oneToOne && sockstate == NOT_BOUND)
-       bind(0);
+        bind(0);
 
     if (oneToOne && sockstate != CLOSED)
         throw cRuntimeError("SctpSocket::connect(): connect() or listen() already called");
@@ -327,7 +327,7 @@ void SctpSocket::connect(int32_t fd, L3Address remoteAddress, int32_t remotePort
     openCmd->setAppLimited(appLimited);
 
     if (options) {
-        cmsg->setContextPointer((void*) sOptions);
+        cmsg->setContextPointer((void *)sOptions);
     }
     sendToSctp(cmsg);
 
@@ -363,7 +363,6 @@ void SctpSocket::connectx(AddressVector remoteAddressList, int32_t remotePort, b
     connect(remoteAddressList.front(), remotePort, streamReset, prMethod, numRequests);
 }
 
-
 void SctpSocket::send(Packet *packet)
 {
     auto sendReq = packet->findTagForUpdate<SctpSendReq>();
@@ -375,7 +374,8 @@ void SctpSocket::send(Packet *packet)
         if (sendReq->getSocketId() == -1) {
             sendReq->setSocketId(assocId);
         }
-    } else {
+    }
+    else {
         auto sctpReq = packet->addTagIfAbsent<SctpSendReq>();
         sctpReq->setSocketId(assocId);
         lastStream = (lastStream + 1) % appOptions->outboundStreams;
@@ -618,7 +618,7 @@ void SctpSocket::processMessage(cMessage *msg)
             if (cb) {
                 cb->addressAddedArrived(this, cmd->getLocalAddr(), remoteAddr);
             }
-           // delete cmd;
+//            delete cmd;
             break;
         }
 
@@ -657,19 +657,20 @@ void SctpSocket::setRtoInfo(double initial, double max, double min)
 bool SctpSocket::isOpen() const
 {
     switch (sockstate) {
-    case LISTENING:
-    case CONNECTING:
-    case CONNECTED:
-    case PEER_CLOSED:
-    case LOCALLY_CLOSED:
-    case SOCKERROR: //TODO check SOCKERROR is opened or is closed socket
-        return true;
-    case NOT_BOUND:
-    case CLOSED:
-        return false;
-    default:
-        throw cRuntimeError("invalid SctpSocket state: %d", sockstate);
+        case LISTENING:
+        case CONNECTING:
+        case CONNECTED:
+        case PEER_CLOSED:
+        case LOCALLY_CLOSED:
+        case SOCKERROR: // TODO check SOCKERROR is opened or is closed socket
+            return true;
+        case NOT_BOUND:
+        case CLOSED:
+            return false;
+        default:
+            throw cRuntimeError("invalid SctpSocket state: %d", sockstate);
     }
 }
 
 } // namespace inet
+

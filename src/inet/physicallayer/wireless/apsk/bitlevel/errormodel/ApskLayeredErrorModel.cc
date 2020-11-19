@@ -44,9 +44,9 @@ std::ostream& ApskLayeredErrorModel::printToStream(std::ostream& stream, int lev
 
 const IReceptionPacketModel *ApskLayeredErrorModel::computePacketModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
-    const ITransmissionBitModel* bitModel = transmission->getBitModel();
+    const ITransmissionBitModel *bitModel = transmission->getBitModel();
     const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
-    const IModulation* modulation = transmission->getSymbolModel()->getPayloadModulation();
+    const IModulation *modulation = transmission->getSymbolModel()->getPayloadModulation();
     double grossBitErrorRate = modulation->calculateBER(snir->getMin(), analogModel->getBandwidth(), bitModel->getDataBitRate());
     int bitLength = transmission->getPacketModel()->getPacket()->getBitLength();
     double packetErrorRate;
@@ -62,18 +62,18 @@ const IReceptionPacketModel *ApskLayeredErrorModel::computePacketModel(const Lay
 
 const IReceptionBitModel *ApskLayeredErrorModel::computeBitModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
-    const ITransmissionBitModel* bitModel = transmission->getBitModel();
+    const ITransmissionBitModel *bitModel = transmission->getBitModel();
     const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
-    const IModulation* modulation = transmission->getSymbolModel()->getPayloadModulation();
+    const IModulation *modulation = transmission->getSymbolModel()->getPayloadModulation();
     double bitErrorRate = modulation->calculateBER(snir->getMin(), analogModel->getBandwidth(), bitModel->getDataBitRate());
     return LayeredErrorModelBase::computeBitModel(transmission, bitErrorRate);
 }
 
 const IReceptionSymbolModel *ApskLayeredErrorModel::computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
-    const IModulation* modulation = transmission->getSymbolModel()->getPayloadModulation();
+    const IModulation *modulation = transmission->getSymbolModel()->getPayloadModulation();
     const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
-    const ITransmissionBitModel* bitModel = transmission->getBitModel();
+    const ITransmissionBitModel *bitModel = transmission->getBitModel();
     double symbolErrorRate = modulation->calculateSER(snir->getMin(), analogModel->getBandwidth(), bitModel->getDataBitRate());
     return LayeredErrorModelBase::computeSymbolModel(transmission, symbolErrorRate);
 }

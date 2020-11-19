@@ -14,15 +14,16 @@ class INET_API Ospfv3NeighborStateInit : public Ospfv3NeighborState
      * This means that the router has not seen itself in the Hello from neighbor. All neighbors
      * in this or higher states are listed in hello.
      */
+
   public:
     ~Ospfv3NeighborStateInit() {}
-    virtual void processEvent(Ospfv3Neighbor* neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) override;
+    virtual void processEvent(Ospfv3Neighbor *neighbor, Ospfv3Neighbor::Ospfv3NeighborEventType event) override;
     virtual Ospfv3Neighbor::Ospfv3NeighborStateType getState() const override { return Ospfv3Neighbor::INIT_STATE; }
     virtual std::string getNeighborStateString() override { return std::string("Ospfv3NeighborStateInit"); }
 };
 
 } // namespace ospfv3
-}//namespace inet
+} // namespace inet
 
 #endif
 

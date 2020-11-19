@@ -93,7 +93,7 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
             std::ostringstream line;
 
             line << std::left;
-            Ipv4Address prefix = compat ? dest.doAnd(netmask) : dest;    // typically dest in routes is already masked, so this is a no-op
+            Ipv4Address prefix = compat ? dest.doAnd(netmask) : dest; // typically dest in routes is already masked, so this is a no-op
             line.width(16);
             if (prefix.isUnspecified())
                 line << "0.0.0.0";
@@ -114,7 +114,7 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
 
             if (compat) {
                 int pad = 3;
-                line << "U";    // routes in INET are always up
+                line << "U"; // routes in INET are always up
                 if (!gateway.isUnspecified())
                     line << "G";
                 else

@@ -36,7 +36,7 @@ void StreamingReceiverBase::initialize(int stage)
 void StreamingReceiverBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method("receiveSignal");
-    // TODO: handle if the channel is cut at the receiver
+    // TODO handle if the channel is cut at the receiver
 }
 
 } // namespace inet

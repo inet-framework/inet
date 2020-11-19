@@ -46,8 +46,7 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     /**
      * Represents an Ipv4Header, queued by a Hook
      */
-    class QueuedDatagramForHook
-    {
+    class QueuedDatagramForHook {
       public:
         QueuedDatagramForHook(Packet *packet, IHook::Type hookType) :
             packet(packet), inIE(nullptr), outIE(nullptr),
@@ -62,15 +61,14 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     };
 
   protected:
-    struct SocketDescriptor
-    {
+    struct SocketDescriptor {
         int socketId = -1;
         int protocolId = -1;
         Ipv6Address localAddress;
         Ipv6Address remoteAddress;
 
         SocketDescriptor(int socketId, int protocolId, Ipv6Address localAddress)
-                : socketId(socketId), protocolId(protocolId), localAddress(localAddress) { }
+            : socketId(socketId), protocolId(protocolId), localAddress(localAddress) {}
     };
 
     IInterfaceTable *ift = nullptr;
@@ -81,10 +79,10 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     Ipv6Tunneling *tunneling = nullptr;
 
     // working vars
-    unsigned int curFragmentId = -1;    // counter, used to assign unique fragmentIds to datagrams
-    Ipv6FragBuf fragbuf;    // fragmentation reassembly buffer
-    simtime_t lastCheckTime;    // when fragbuf was last checked for state fragments
-    std::set<const Protocol *> upperProtocols;    // where to send packets after decapsulation
+    unsigned int curFragmentId = -1; // counter, used to assign unique fragmentIds to datagrams
+    Ipv6FragBuf fragbuf; // fragmentation reassembly buffer
+    simtime_t lastCheckTime; // when fragbuf was last checked for state fragments
+    std::set<const Protocol *> upperProtocols; // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
 
     // statistics
@@ -98,19 +96,19 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     // 28.9.07 - CB
     // datagrams that are supposed to be sent with a tentative Ipv6 address
     // are rescheduled for later resubmission.
-    class ScheduledDatagram : public cPacket
-    {
+    class ScheduledDatagram : public cPacket {
       protected:
         Packet *packet = nullptr;
         const Ipv6Header *ipv6Header = nullptr;
         const NetworkInterface *ie = nullptr;
         MacAddress macAddr;
         bool fromHL = false;
+
       public:
         ScheduledDatagram(Packet *packet, const Ipv6Header *datagram, const NetworkInterface *ie, MacAddress macAddr, bool fromHL);
         ~ScheduledDatagram();
         const NetworkInterface *getIE() { return ie; }
-        const Ipv6Address& getSrcAddress() {return ipv6Header->getSrcAddress(); }
+        const Ipv6Address& getSrcAddress() { return ipv6Header->getSrcAddress(); }
         const MacAddress& getMacAddress() { return macAddr; }
         bool getFromHL() { return fromHL; }
         Packet *removeDatagram() { Packet *ret = packet; packet = nullptr; return ret; }

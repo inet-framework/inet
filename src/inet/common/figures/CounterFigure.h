@@ -25,8 +25,7 @@ namespace inet {
 
 class INET_API CounterFigure : public cGroupFigure, public inet::IIndicatorFigure
 {
-    struct Digit
-    {
+    struct Digit {
         cRectangleFigure *bounds;
         cTextFigure *text;
 
@@ -52,7 +51,7 @@ class INET_API CounterFigure : public cGroupFigure, public inet::IIndicatorFigur
 
   public:
     CounterFigure(const char *name = nullptr);
-    virtual ~CounterFigure() {};
+    virtual ~CounterFigure() {}
 
     virtual void setValue(int series, simtime_t timestamp, double value) override;
 
@@ -100,7 +99,6 @@ class INET_API CounterFigure : public cGroupFigure, public inet::IIndicatorFigur
 
     Anchor getAnchor() const;
     void setAnchor(Anchor anchor);
-
 };
 
 } // namespace inet

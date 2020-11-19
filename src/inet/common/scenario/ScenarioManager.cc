@@ -61,7 +61,6 @@ static const char *OP_CRASH = "crash";
 static const char *OP_SUSPEND = "suspend";
 static const char *OP_RESUME = "resume";
 
-
 void ScenarioManager::initialize()
 {
     cXMLElement *script = par("script");
@@ -118,7 +117,7 @@ void ScenarioManager::processCommand(const cXMLElement *node)
         else if (tag == CMD_DISCONNECT)
             processDisconnectCommand(node);
         else if (tag == CMD_INITIATE || tag == OP_START || tag == OP_STARTUP || tag == OP_STOP
-                || tag == OP_SHUTDOWN || tag == OP_CRASH || tag == OP_SUSPEND || tag == OP_RESUME)
+                 || tag == OP_SHUTDOWN || tag == OP_CRASH || tag == OP_SUSPEND || tag == OP_RESUME)
             processLifecycleCommand(node);
         else
             processModuleSpecificCommand(node);
@@ -210,12 +209,12 @@ ScenarioManager::GatePair ScenarioManager::getConnection(const cXMLElement *node
         if (srcModule->getParentModule() != destModule->getParentModule())
             throw cRuntimeError("Source and destination modules must be under the same parent");
         cGate *srcGate = findMandatorySingleGateTowards(srcModule, destModule);
-        bool bidir = strlen(srcGate->getNameSuffix()) > 0; //TODO use =srcGate->isGateHalf();
+        bool bidir = strlen(srcGate->getNameSuffix()) > 0; // TODO use =srcGate->isGateHalf();
         if (!bidir) {
             return GatePair(srcGate, nullptr);
         }
         else {
-            cGate *otherHalf = srcModule->gateHalf(srcGate->getBaseName(), cGate::INPUT, srcGate->isVector() ? srcGate->getIndex() : -1); //TODO use =srcGate->getOtherHalf();
+            cGate *otherHalf = srcModule->gateHalf(srcGate->getBaseName(), cGate::INPUT, srcGate->isVector() ? srcGate->getIndex() : -1); // TODO use =srcGate->getOtherHalf();
             cGate *otherSrcGate = otherHalf->getPreviousGate();
             if (otherSrcGate == nullptr)
                 throw cRuntimeError("Broken bidirectional connection: the corresponding input gate is not connected");
@@ -310,7 +309,7 @@ void ScenarioManager::processCreateModuleCommand(const cXMLElement *node)
     if (parentModule == nullptr)
         throw cRuntimeError("Parent module '%s' is not found", parentModulePath);
 
-    //TODO solution for inconsistent out-of-date vectorSize values in OMNeT++
+    // TODO solution for inconsistent out-of-date vectorSize values in OMNeT++
     int submoduleVectorSize = 0;
     for (SubmoduleIterator it(parentModule); !it.end(); ++it) {
         cModule *submodule = *it;

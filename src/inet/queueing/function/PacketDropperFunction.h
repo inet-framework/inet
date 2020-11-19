@@ -31,13 +31,15 @@ class INET_API CPacketDropperFunction : public cObject, public virtual IPacketDr
     PacketDropperFunction packetDropperFunction;
 
   public:
-    CPacketDropperFunction(PacketDropperFunction packetDropperFunction) : packetDropperFunction(packetDropperFunction) { }
+    CPacketDropperFunction(PacketDropperFunction packetDropperFunction) : packetDropperFunction(packetDropperFunction) {}
 
-    virtual Packet *selectPacket(IPacketCollection* collection) const override;
+    virtual Packet *selectPacket(IPacketCollection *collection) const override;
 };
 
 #define Register_Packet_Dropper_Function(name, function) \
-    class INET_API name : public ::inet::queueing::CPacketDropperFunction { public: name() : CPacketDropperFunction(function) { } }; \
+    class INET_API name : public ::inet::queueing::CPacketDropperFunction { \
+      public: name() : CPacketDropperFunction(function) {} \
+    }; \
     Register_Class(name)
 
 } // namespace queueing

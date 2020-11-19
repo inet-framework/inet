@@ -29,23 +29,23 @@ namespace inet {
  */
 class INET_API RotationMatrix
 {
-    protected:
-        double matrix[3][3];
+  protected:
+    double matrix[3][3];
 
-    protected:
-        void computeRotationMatrix(const double& q0, const double& q1, const double& q2, const double& q3);
-        double computeDeterminant() const;
+  protected:
+    void computeRotationMatrix(const double& q0, const double& q1, const double& q2, const double& q3);
+    double computeDeterminant() const;
 
-    public:
-        RotationMatrix();
-        RotationMatrix(const double matrix[3][3]);
-        RotationMatrix(const EulerAngles& eulerAngles);
+  public:
+    RotationMatrix();
+    RotationMatrix(const double matrix[3][3]);
+    RotationMatrix(const EulerAngles& eulerAngles);
 
-        Coord rotateVector(const Coord& vector) const;
-        Coord rotateVectorInverse(const Coord& vector) const;
+    Coord rotateVector(const Coord& vector) const;
+    Coord rotateVectorInverse(const Coord& vector) const;
 
-        EulerAngles toEulerAngles() const;
-        Quaternion toQuaternion() const;
+    EulerAngles toEulerAngles() const;
+    Quaternion toQuaternion() const;
 };
 
 } // namespace inet

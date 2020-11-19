@@ -22,7 +22,7 @@
 
 namespace inet {
 
-#define Register_Serializer(TYPE, CLASSNAME) EXECUTE_ON_STARTUP(ChunkSerializerRegistry::globalRegistry.registerSerializer(typeid(TYPE), new CLASSNAME()));
+#define Register_Serializer(TYPE, CLASSNAME)    EXECUTE_ON_STARTUP(ChunkSerializerRegistry::globalRegistry.registerSerializer(typeid(TYPE), new CLASSNAME()));
 
 class INET_API ChunkSerializerRegistry
 {

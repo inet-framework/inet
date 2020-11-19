@@ -27,8 +27,8 @@ PcfFs::PcfFs() :
     // frame-sequence =
     //   ( PS-Poll ACK ) |
     //   ( [ Beacon + DTIM ] {cf-sequence} [ CF-End [+ CF-Ack ] ] )
-    AlternativesFs({new SequentialFs({}), // TODO: poll
-                    new SequentialFs({})}, // TODO: beacon
+    AlternativesFs({new SequentialFs({}), // TODO poll
+                    new SequentialFs({})}, // TODO beacon
                    ALTERNATIVESFS_SELECTOR(selectPcfSequence))
 {
 }

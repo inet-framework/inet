@@ -30,8 +30,7 @@ namespace inet {
 class INET_API BehaviorAggregateClassifier : public queueing::PacketClassifierBase
 {
   protected:
-    class INET_API PacketDissectorCallback : public PacketDissector::ICallback
-    {
+    class INET_API PacketDissectorCallback : public PacketDissector::ICallback {
       protected:
         bool matches_ = false;
         bool dissect = true;

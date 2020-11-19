@@ -32,8 +32,8 @@ void Ipv4ProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *p
         context.destinationColumn << header->getDestAddress();
         B payloadLength = B(header->getTotalLengthField()) - header->getChunkLength();
         context.infoColumn << "IPv4"
-                << " id:" << header->getIdentification()
-                << " ttl:" << header->getTimeToLive();
+                           << " id:" << header->getIdentification()
+                           << " ttl:" << header->getTimeToLive();
         if (header->getDontFragment())
             context.infoColumn << " DontFrag";
         if (header->getMoreFragments() || header->getFragmentOffset() > 0) {
@@ -47,7 +47,7 @@ void Ipv4ProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *p
             context.infoColumn << " payload:" << payloadProtocol->getName() << " " << payloadLength;
         else
             context.infoColumn << " payload: protocol(" << header->getProtocolId() << ") " << payloadLength;
-        //TODO options
+        // TODO options
     }
     else
         context.infoColumn << "(IPv4) " << chunk;

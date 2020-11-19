@@ -62,14 +62,14 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
 
     // state
     SocketMap socketMap;
-    INetworkSocket *currentSocket = nullptr;   // current socket stored in socketMap, too
-    int pid = 0;    // to determine which hosts are associated with the responses
-    cMessage *timer = nullptr;    // to schedule the next Ping request
-    NodeStatus *nodeStatus = nullptr;    // lifecycle
-    simtime_t lastStart;    // the last time when the app was started (lifecycle)
-    long sendSeqNo = 0;    // to match the response with the request that caused the response
+    INetworkSocket *currentSocket = nullptr; // current socket stored in socketMap, too
+    int pid = 0; // to determine which hosts are associated with the responses
+    cMessage *timer = nullptr; // to schedule the next Ping request
+    NodeStatus *nodeStatus = nullptr; // lifecycle
+    simtime_t lastStart; // the last time when the app was started (lifecycle)
+    long sendSeqNo = 0; // to match the response with the request that caused the response
     long expectedReplySeqNo = 0;
-    simtime_t sendTimeHistory[PING_HISTORY_SIZE];    // times of when the requests were sent
+    simtime_t sendTimeHistory[PING_HISTORY_SIZE]; // times of when the requests were sent
     bool pongReceived[PING_HISTORY_SIZE];
 
     static const std::map<const Protocol *, const Protocol *> l3Echo;
@@ -81,11 +81,11 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
     static simsignal_t numOutOfOrderArrivalsSignal;
     static simsignal_t pingTxSeqSignal;
     static simsignal_t pingRxSeqSignal;
-    long sentCount = 0;    // number of sent Ping requests
-    long lossCount = 0;    // number of lost requests
-    long outOfOrderArrivalCount = 0;    // number of responses which arrived too late
-    long numPongs = 0;    // number of received Ping requests
-    long numDuplicatedPongs = 0;    // number of duplicated Ping responses
+    long sentCount = 0; // number of sent Ping requests
+    long lossCount = 0; // number of lost requests
+    long outOfOrderArrivalCount = 0; // number of responses which arrived too late
+    long numPongs = 0; // number of received Ping requests
+    long numDuplicatedPongs = 0; // number of duplicated Ping responses
 
   protected:
     virtual void initialize(int stage) override;
@@ -110,9 +110,10 @@ class INET_API PingApp : public ApplicationBase, public INetworkSocket::ICallbac
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
-    //INetworkSocket::ICallback:
+    // INetworkSocket::ICallback:
     virtual void socketDataArrived(INetworkSocket *socket, Packet *packet) override;
     virtual void socketClosed(INetworkSocket *socket) override;
+
   public:
     PingApp();
     virtual ~PingApp();

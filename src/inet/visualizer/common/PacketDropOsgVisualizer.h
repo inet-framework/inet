@@ -29,13 +29,12 @@ class INET_API PacketDropOsgVisualizer : public PacketDropVisualizerBase
 #ifdef WITH_OSG
 
   protected:
-    class INET_API PacketDropOsgVisualization : public PacketDropVisualization
-    {
+    class INET_API PacketDropOsgVisualization : public PacketDropVisualization {
       public:
         osg::Node *node = nullptr;
 
       public:
-        PacketDropOsgVisualization(osg::Node* node, const PacketDrop* packetDrop);
+        PacketDropOsgVisualization(osg::Node *node, const PacketDrop *packetDrop);
         virtual ~PacketDropOsgVisualization();
     };
 
@@ -53,7 +52,7 @@ class INET_API PacketDropOsgVisualizer : public PacketDropVisualizerBase
     virtual void initialize(int stage) override {}
 
     virtual const PacketDropVisualization *createPacketDropVisualization(PacketDrop *packetDrop) const override { return nullptr; }
-    virtual void setAlpha(const PacketDropVisualization *packetDropVisualization, double alpha) const override { }
+    virtual void setAlpha(const PacketDropVisualization *packetDropVisualization, double alpha) const override {}
 
 #endif // ifdef WITH_OSG
 };

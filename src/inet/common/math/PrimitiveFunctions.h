@@ -32,7 +32,7 @@ class INET_API ConstantFunction : public FunctionBase<R, D>
     const R value;
 
   public:
-    ConstantFunction(R value) : value(value) { }
+    ConstantFunction(R value) : value(value) {}
 
     virtual R getConstantValue() const { return value; }
 
@@ -40,7 +40,7 @@ class INET_API ConstantFunction : public FunctionBase<R, D>
 
     virtual R getValue(const typename D::P& p) const override { return value; }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+    virtual void partition(const typename D::I& i, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback) const override {
         callback(i, this);
     }
 
@@ -49,7 +49,7 @@ class INET_API ConstantFunction : public FunctionBase<R, D>
     virtual R getMin(const typename D::I& i) const override { return value; }
     virtual R getMax(const typename D::I& i) const override { return value; }
     virtual R getMean(const typename D::I& i) const override { return value; }
-    virtual R getIntegral(const typename D::I& i) const override { return value == R(0) ? value : value * i.getVolume(); }
+    virtual R getIntegral(const typename D::I& i) const override { return value == R(0) ? value : value *i.getVolume(); }
 
     virtual void printPartition(std::ostream& os, const typename D::I& i, int level = 0) const override {
         os << "constant over " << i << "\n" << std::string(level + 2, ' ') << "→ " << value << std::endl;
@@ -75,7 +75,7 @@ class INET_API UnilinearFunction : public FunctionBase<R, D>
 
   public:
     UnilinearFunction(typename D::P lower, typename D::P upper, R rLower, R rUpper, int dimension) :
-        lower(lower), upper(upper), rLower(rLower), rUpper(rUpper), dimension(dimension) { }
+        lower(lower), upper(upper), rLower(rLower), rUpper(rUpper), dimension(dimension) {}
 
     virtual const typename D::P& getLower() const { return lower; }
     virtual const typename D::P& getUpper() const { return upper; }
@@ -93,7 +93,7 @@ class INET_API UnilinearFunction : public FunctionBase<R, D>
         return rLower * (1 - alpha) + rUpper * alpha;
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+    virtual void partition(const typename D::I& i, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback) const override {
         callback(i, this);
     }
 
@@ -163,7 +163,7 @@ class INET_API BilinearFunction : public FunctionBase<R, D>
                      const R rLowerLower, const R rLowerUpper, const R rUpperLower, const R rUpperUpper, const int dimension1, const int dimension2) :
         lowerLower(lowerLower), lowerUpper(lowerUpper), upperLower(upperLower), upperUpper(upperUpper),
         rLowerLower(rLowerLower), rLowerUpper(rLowerUpper), rUpperLower(rUpperLower), rUpperUpper(rUpperUpper),
-        dimension1(dimension1), dimension2(dimension2) { }
+        dimension1(dimension1), dimension2(dimension2) {}
 
     virtual const typename D::P& getLowerLower() const { return lowerLower; }
     virtual const typename D::P& getLowerUpper() const { return lowerUpper; }
@@ -176,9 +176,11 @@ class INET_API BilinearFunction : public FunctionBase<R, D>
     virtual int getDimension1() const { return dimension1; }
     virtual int getDimension2() const { return dimension2; }
 
-    virtual Interval<R> getRange() const override { return Interval<R>(math::minnan(math::minnan(rLowerLower, rLowerUpper), math::minnan(rUpperLower, rUpperUpper)),
-                                                                       math::maxnan(math::maxnan(rLowerLower, rLowerUpper), math::maxnan(rUpperLower, rUpperUpper)),
-                                                                       0b1, 0b1, 0b0); }
+    virtual Interval<R> getRange() const override {
+        return Interval<R>(math::minnan(math::minnan(rLowerLower, rLowerUpper), math::minnan(rUpperLower, rUpperUpper)),
+                math::maxnan(math::maxnan(rLowerLower, rLowerUpper), math::maxnan(rUpperLower, rUpperUpper)),
+                0b1, 0b1, 0b0);
+    }
 
     virtual R getValue(const typename D::P& p) const override {
         double lowerAlpha = (p - lowerLower).get(dimension1) / (upperLower - lowerLower).get(dimension1);
@@ -193,7 +195,7 @@ class INET_API BilinearFunction : public FunctionBase<R, D>
         return rLower * (1 - alpha) + rUpper * alpha;
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+    virtual void partition(const typename D::I& i, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback) const override {
         callback(i, this);
     }
 
@@ -247,7 +249,7 @@ class INET_API UnireciprocalFunction : public FunctionBase<R, D>
     }
 
   public:
-    UnireciprocalFunction(double a, double b, double c, double d, int dimension) : a(a), b(b), c(c), d(d), dimension(dimension) { }
+    UnireciprocalFunction(double a, double b, double c, double d, int dimension) : a(a), b(b), c(c), d(d), dimension(dimension) {}
 
     virtual int getDimension() const { return dimension; }
 
@@ -256,7 +258,7 @@ class INET_API UnireciprocalFunction : public FunctionBase<R, D>
         return R(a * x + b) / (c * x + d);
     }
 
-    virtual void partition(const typename D::I& i, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) const override {
+    virtual void partition(const typename D::I& i, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback) const override {
         callback(i, this);
     }
 
@@ -315,7 +317,7 @@ class INET_API UnireciprocalFunction : public FunctionBase<R, D>
 //
 //  public:
 //    BireciprocalFunction(double a0, double a1, double a2, double a3, double b0, double b1, double b2, double b3, int dimension1, int dimension2) :
-//        a0(a0), a1(a1), a2(a2), a3(a3), b0(b0), b1(b1), b2(b2), b3(b3), dimension1(dimension1), dimension2(dimension2) { }
+//        a0(a0), a1(a1), a2(a2), a3(a3), b0(b0), b1(b1), b2(b2), b3(b3), dimension1(dimension1), dimension2(dimension2) {}
 //
 //    virtual R getValue(const typename D::P& p) const override {
 //        double x = p.get(dimension1);
@@ -349,7 +351,7 @@ class INET_API UnireciprocalFunction : public FunctionBase<R, D>
 //    const double c;
 //
 //  public:
-//    QuadraticFunction(double a, double b, double c) : a(a), b(b), c(c) { }
+//    QuadraticFunction(double a, double b, double c) : a(a), b(b), c(c) {}
 //
 //    virtual R getValue(const typename D::P& p) const override {
 //        return R(0);
@@ -382,7 +384,7 @@ class INET_API Boxcar1DFunction : public FunctionBase<R, Domain<X>>
         return std::get<0>(p) < lower || std::get<0>(p) >= upper ? R(0) : value;
     }
 
-    virtual void partition(const Interval<X>& i, const std::function<void (const Interval<X>&, const IFunction<R, Domain<X>> *)> callback) const override {
+    virtual void partition(const Interval<X>& i, const std::function<void(const Interval<X>&, const IFunction<R, Domain<X>> *)> callback) const override {
         const auto& i1 = i.getIntersected(Interval<X>(getLowerBound<X>(), Point<X>(lower), 0b0, 0b0, 0b0));
         if (!i1.isEmpty()) {
             ConstantFunction<R, Domain<X>> g(R(0));
@@ -422,7 +424,7 @@ class INET_API Boxcar2DFunction : public FunctionBase<R, Domain<X, Y>>
     const R value;
 
   protected:
-    void call(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback, R r) const {
+    void call(const Interval<X, Y>& i, const std::function<void(const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback, R r) const {
         if (!i.isEmpty()) {
             ConstantFunction<R, Domain<X, Y>> g(r);
             callback(i, &g);
@@ -442,7 +444,7 @@ class INET_API Boxcar2DFunction : public FunctionBase<R, Domain<X, Y>>
         return std::get<0>(p) < lowerX || std::get<0>(p) >= upperX || std::get<1>(p) < lowerY || std::get<1>(p) >= upperY ? R(0) : value;
     }
 
-    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const override {
+    virtual void partition(const Interval<X, Y>& i, const std::function<void(const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const override {
         call(i.getIntersected(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), getLowerBound<Y>()), Point<X, Y>(X(lowerX), Y(lowerY)), 0b00, 0b00, 0b00)), callback, R(0));
         call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(lowerX), getLowerBound<Y>()), Point<X, Y>(X(upperX), Y(lowerY)), 0b10, 0b00, 0b00)), callback, R(0));
         call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(upperX), getLowerBound<Y>()), Point<X, Y>(getUpperBound<X>(), Y(lowerY)), 0b10, 0b00, 0b00)), callback, R(0));
@@ -479,7 +481,7 @@ class INET_API GaussFunction : public FunctionBase<R, Domain<X>>
     const X stddev;
 
   public:
-    GaussFunction(X mean, X stddev) : mean(mean), stddev(stddev) { }
+    GaussFunction(X mean, X stddev) : mean(mean), stddev(stddev) {}
 
     virtual R getValue(const Point<X>& p) const override {
         static const double c = 1 / sqrt(2 * M_PI);
@@ -504,7 +506,7 @@ class INET_API SawtoothFunction : public FunctionBase<R, Domain<X>>
   public:
     SawtoothFunction(X start, X end, X period, R value) :
         start(start), end(end), period(period), value(value)
-    { }
+    {}
 
     virtual R getValue(const Point<X>& p) const override {
         auto x = std::get<0>(p);
@@ -532,7 +534,7 @@ class INET_API PeriodicallyInterpolated1DFunction : public FunctionBase<R, Domai
 
   public:
     PeriodicallyInterpolated1DFunction(X start, X end, const IInterpolator<X, R>& interpolator, const std::vector<R>& rs) :
-        start(start), end(end), step((end - start) / (rs.size() - 1)), interpolator(interpolator), rs(rs) { }
+        start(start), end(end), step((end - start) / (rs.size() - 1)), interpolator(interpolator), rs(rs) {}
 
     virtual R getValue(const Point<X>& p) const override {
         X x = std::get<0>(p);
@@ -548,7 +550,7 @@ class INET_API PeriodicallyInterpolated1DFunction : public FunctionBase<R, Domai
         }
     }
 
-    virtual void partition(const Interval<X>& i, const std::function<void (const Interval<X>&, const IFunction<R, Domain<X>> *)> callback) const override {
+    virtual void partition(const Interval<X>& i, const std::function<void(const Interval<X>&, const IFunction<R, Domain<X>> *)> callback) const override {
         const auto& i1 = i.getIntersected(Interval<X>(getLowerBound<X>(), Point<X>(start), 0b0, 0b0, 0b0));
         if (!i1.isEmpty()) {
             ConstantFunction<R, Domain<X>> g(R(0));
@@ -606,7 +608,7 @@ class INET_API PeriodicallyInterpolated2DFunction : public FunctionBase<R, Domai
         return interpolatorX.getValue(x1, r1, x2, r2, x);
     }
 
-    void call(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const {
+    void call(const Interval<X, Y>& i, const std::function<void(const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const {
         if (!i.isEmpty()) {
             ConstantFunction<R, Domain<X, Y>> g(R(0));
             callback(i, &g);
@@ -638,7 +640,7 @@ class INET_API PeriodicallyInterpolated2DFunction : public FunctionBase<R, Domai
         }
     }
 
-    virtual void partition(const Interval<X, Y>& i, const std::function<void (const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const override {
+    virtual void partition(const Interval<X, Y>& i, const std::function<void(const Interval<X, Y>&, const IFunction<R, Domain<X, Y>> *)> callback) const override {
         call(i.getIntersected(Interval<X, Y>(Point<X, Y>(getLowerBound<X>(), getLowerBound<Y>()), Point<X, Y>(X(startX), Y(startY)), 0b00, 0b00, 0b00)), callback);
         call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(startX), getLowerBound<Y>()), Point<X, Y>(X(endX), Y(startY)), 0b10, 0b00, 0b00)), callback);
         call(i.getIntersected(Interval<X, Y>(Point<X, Y>(X(endX), getLowerBound<Y>()), Point<X, Y>(getUpperBound<X>(), Y(startY)), 0b10, 0b00, 0b00)), callback);
@@ -688,18 +690,18 @@ class INET_API Interpolated1DFunction : public FunctionBase<R, Domain<X>>
     Interpolated1DFunction(const std::map<X, R>& rs, const IInterpolator<X, R> *interpolator) : rs([&] () {
         std::map<X, std::pair<R, const IInterpolator<X, R> *>> result;
         for (auto it : rs)
-            result[it.first] = {it.second, interpolator};
+            result[it.first] = { it.second, interpolator };
         return result;
-    } ()) { }
+    } ()) {}
 
-    Interpolated1DFunction(const std::map<X, std::pair<R, const IInterpolator<X, R> *>>& rs) : rs(rs) { }
+    Interpolated1DFunction(const std::map<X, std::pair<R, const IInterpolator<X, R> *>>& rs) : rs(rs) {}
 
     virtual R getValue(const Point<X>& p) const override {
         X x = std::get<0>(p);
         auto it = rs.equal_range(x);
         auto& lt = it.first;
         auto& ut = it.second;
-        // TODO: this nested if looks horrible
+        // TODO this nested if looks horrible
         if (lt != rs.end() && lt->first == x) {
             if (ut == rs.end())
                 return lt->second.first;
@@ -716,7 +718,7 @@ class INET_API Interpolated1DFunction : public FunctionBase<R, Domain<X>>
         }
     }
 
-    virtual void partition(const Interval<X>& i, const std::function<void (const Interval<X>&, const IFunction<R, Domain<X>> *)> callback) const override {
+    virtual void partition(const Interval<X>& i, const std::function<void(const Interval<X>&, const IFunction<R, Domain<X>> *)> callback) const override {
         // loop from less or equal than lower to greater or equal than upper inclusive both ends
         auto lt = rs.lower_bound(std::get<0>(i.getLower()));
         auto ut = rs.upper_bound(std::get<0>(i.getUpper()));
@@ -781,12 +783,12 @@ class INET_API Interpolated1DFunction : public FunctionBase<R, Domain<X>>
 };
 
 template<typename R, typename D>
-void simplifyAndCall(const typename D::I& i, const IFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) {
+void simplifyAndCall(const typename D::I& i, const IFunction<R, D> *f, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback) {
     callback(i, f);
 }
 
 template<typename R, typename D>
-void simplifyAndCall(const typename D::I& i, const UnilinearFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) {
+void simplifyAndCall(const typename D::I& i, const UnilinearFunction<R, D> *f, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback) {
     if (f->getRLower() == f->getRUpper()) {
         ConstantFunction<R, D> g(f->getRLower());
         callback(i, &g);
@@ -796,12 +798,12 @@ void simplifyAndCall(const typename D::I& i, const UnilinearFunction<R, D> *f, c
 }
 
 template<typename R, typename D>
-void simplifyAndCall(const typename D::I& i, const BilinearFunction<R, D> *f, const std::function<void (const typename D::I&, const IFunction<R, D> *)> callback) {
+void simplifyAndCall(const typename D::I& i, const BilinearFunction<R, D> *f, const std::function<void(const typename D::I&, const IFunction<R, D> *)> callback) {
     if (f->getRLowerLower() == f->getRLowerUpper() && f->getRLowerLower() == f->getRUpperLower() && f->getRLowerLower() == f->getRUpperUpper()) {
         ConstantFunction<R, D> g(f->getRLowerLower());
         callback(i, &g);
     }
-    // TODO: simplify to one dimensional linear functions?
+    // TODO simplify to one dimensional linear functions?
     else
         callback(i, f);
 }

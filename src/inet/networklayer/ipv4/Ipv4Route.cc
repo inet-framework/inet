@@ -38,12 +38,12 @@ Ipv4Route::~Ipv4Route()
     delete protocolData;
 }
 
-const char* inet::Ipv4Route::getSourceTypeAbbreviation() const {
+const char *inet::Ipv4Route::getSourceTypeAbbreviation() const {
     switch (sourceType) {
         case IFACENETMASK:
             return "C";
         case MANUAL:
-            return (getDestination().isUnspecified() ? "S*": "S");
+            return getDestination().isUnspecified() ? "S*" : "S";
         case ROUTER_ADVERTISEMENT:
             return "ra";
         case RIP:
@@ -83,7 +83,7 @@ std::string Ipv4Route::str() const
         out << "*";
     else
         out << getGateway();
-    if(rt && rt->isAdminDistEnabled())
+    if (rt && rt->isAdminDistEnabled())
         out << " AD:" << adminDist;
     out << " metric:" << metric;
     out << " if:";
@@ -128,7 +128,7 @@ IRoutingTable *Ipv4Route::getRoutingTableAsGeneric() const
 Ipv4MulticastRoute::~Ipv4MulticastRoute()
 {
     delete inInterface;
-    for (auto & elem : outInterfaces)
+    for (auto& elem : outInterfaces)
         delete elem;
     outInterfaces.clear();
 }
@@ -160,7 +160,7 @@ std::string Ipv4MulticastRoute::str() const
         out << inInterface->getInterface()->getInterfaceName() << "  ";
     out << "out:";
     bool first = true;
-    for (auto & elem : outInterfaces) {
+    for (auto& elem : outInterfaces) {
         if (!first)
             out << ",";
         if (elem->isEnabled()) {
@@ -191,7 +191,7 @@ void Ipv4MulticastRoute::setInInterface(InInterface *_inInterface)
 void Ipv4MulticastRoute::clearOutInterfaces()
 {
     if (!outInterfaces.empty()) {
-        for (auto & elem : outInterfaces)
+        for (auto& elem : outInterfaces)
             delete elem;
         outInterfaces.clear();
         changed(F_OUT);
@@ -208,7 +208,7 @@ void Ipv4MulticastRoute::addOutInterface(OutInterface *outInterface)
     ASSERT(outInterface);
 
     auto it = outInterfaces.begin();
-    for ( ; it != outInterfaces.end(); ++it) {
+    for (; it != outInterfaces.end(); ++it) {
         if ((*it)->getInterface() == outInterface->getInterface()) {
             delete *it;
             *it = outInterface;

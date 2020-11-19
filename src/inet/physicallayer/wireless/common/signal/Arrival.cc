@@ -39,17 +39,17 @@ std::ostream& Arrival::printToStream(std::ostream& stream, int level, int evFlag
 {
     stream << "Arrival";
     if (level <= PRINT_LEVEL_TRACE)
-       stream << EV_FIELD(startPropagationTime)
-              << EV_FIELD(endPropagationTime)
-              << EV_FIELD(startTime)
-              << EV_FIELD(endTime)
-              << EV_FIELD(preambleDuration)
-              << EV_FIELD(headerDuration)
-              << EV_FIELD(dataDuration)
-              << EV_FIELD(startPosition)
-              << EV_FIELD(endPosition)
-              << EV_FIELD(startOrientation)
-              << EV_FIELD(endOrientation);
+        stream << EV_FIELD(startPropagationTime)
+               << EV_FIELD(endPropagationTime)
+               << EV_FIELD(startTime)
+               << EV_FIELD(endTime)
+               << EV_FIELD(preambleDuration)
+               << EV_FIELD(headerDuration)
+               << EV_FIELD(dataDuration)
+               << EV_FIELD(startPosition)
+               << EV_FIELD(endPosition)
+               << EV_FIELD(startOrientation)
+               << EV_FIELD(endOrientation);
     return stream;
 }
 

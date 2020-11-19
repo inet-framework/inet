@@ -21,7 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-
 #ifndef __INET_RTPAVPROFILEPAYLOAD32SENDER_H
 #define __INET_RTPAVPROFILEPAYLOAD32SENDER_H
 
@@ -50,7 +49,7 @@ class INET_API RtpAvProfilePayload32Sender : public RtpPayloadSender
     /**
      * The main method.
      */
-    //virtual void activity();
+//    virtual void activity();
 
   protected:
     /**

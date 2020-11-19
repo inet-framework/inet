@@ -37,10 +37,10 @@ namespace physicallayer {
 /**
  * The default implementation of the radio medium interface.
  */
-// TODO: add tests for various optimization configurations
+// TODO add tests for various optimization configurations
 class INET_API RadioMedium : public cSimpleModule, public cListener, public IRadioMedium
 {
-  friend Radio;
+    friend Radio;
 
   protected:
     enum RangeFilterKind {
@@ -309,7 +309,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     RadioMedium();
     virtual ~RadioMedium();
 
-    virtual std::ostream& printToStream(std::ostream &stream, int level, int evFlags = 0) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual const physicalenvironment::IMaterial *getMaterial() const override { return material; }
     virtual const IPropagation *getPropagation() const override { return propagation; }

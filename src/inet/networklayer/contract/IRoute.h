@@ -36,19 +36,19 @@ class INET_API IRoute
   public:
     /** Specifies where the route comes from */
     enum SourceType {
-        MANUAL,    ///< manually added static route
-        IFACENETMASK,    ///< comes from an interface's netmask
-        ROUTER_ADVERTISEMENT,    ///< on-link prefix, from Router Advertisement
-        OWN_ADV_PREFIX,    ///< on routers: on-link prefix that the router **itself** advertises on the link
-        ICMP_REDIRECT,    ///< ICMP redirect message
-        RIP,    ///< managed by the given routing protocol
-        OSPF,    ///< managed by the given routing protocol
-        BGP,    ///< managed by the given routing protocol
-        ZEBRA,    ///< managed by the Quagga/Zebra based model
-        MANET,    ///< managed by manet, search exact address
-        MANET2,    ///< managed by manet, search approximate address
-        DYMO,    ///< managed by DYMO routing
-        AODV,    ///< managed by AODV routing
+        MANUAL, ///< manually added static route
+        IFACENETMASK, ///< comes from an interface's netmask
+        ROUTER_ADVERTISEMENT, ///< on-link prefix, from Router Advertisement
+        OWN_ADV_PREFIX, ///< on routers: on-link prefix that the router **itself** advertises on the link
+        ICMP_REDIRECT, ///< ICMP redirect message
+        RIP, ///< managed by the given routing protocol
+        OSPF, ///< managed by the given routing protocol
+        BGP, ///< managed by the given routing protocol
+        ZEBRA, ///< managed by the Quagga/Zebra based model
+        MANET, ///< managed by manet, search exact address
+        MANET2, ///< managed by manet, search approximate address
+        DYMO, ///< managed by DYMO routing
+        AODV, ///< managed by AODV routing
         EIGRP, LISP, BABEL, ODR, UNKNOWN, ISIS
     };
 
@@ -69,25 +69,25 @@ class INET_API IRoute
     /** Cisco like administrative distances */
     enum RouteAdminDist {
         dDirectlyConnected = 0,
-        dStatic = 1,
-        dEIGRPSummary = 5,
-        dBGPExternal = 20,
-        dEIGRPInternal = 90,
-        dIGRP = 100,
-        dOSPF = 110,
-        dISIS = 115,
-        dRIP = 120,
-        dEGP = 140,
-        dODR = 160,
-        dEIGRPExternal = 170,
-        dBGPInternal = 200,
-        dDHCPlearned = 254,
-        dBABEL = 125,
-        dLISP = 210,
-        dUnknown = 255
+        dStatic            = 1,
+        dEIGRPSummary      = 5,
+        dBGPExternal       = 20,
+        dEIGRPInternal     = 90,
+        dIGRP              = 100,
+        dOSPF              = 110,
+        dISIS              = 115,
+        dRIP               = 120,
+        dEGP               = 140,
+        dODR               = 160,
+        dEIGRPExternal     = 170,
+        dBGPInternal       = 200,
+        dDHCPlearned       = 254,
+        dBABEL             = 125,
+        dLISP              = 210,
+        dUnknown           = 255
     };
 
-//TODO maybe:
+    // TODO maybe:
 //    virtual std::string info() const;
 //    virtual std::string detailedInfo() const;
 //
@@ -106,7 +106,7 @@ class INET_API IRoute
     virtual void setInterface(NetworkInterface *ie) = 0;
     virtual void setSource(cObject *source) = 0;
     virtual void setSourceType(SourceType type) = 0;
-    virtual void setMetric(int metric) = 0;    //XXX double?
+    virtual void setMetric(int metric) = 0; // TODO double?
     virtual void setAdminDist(unsigned int adminDist) = 0;
 
     /** Destination address prefix to match */
@@ -136,7 +136,7 @@ class INET_API IRoute
     static const char *sourceTypeName(SourceType sourceType);
 };
 
-// TODO: move into info()?
+// TODO move into info()?
 inline std::ostream& operator<<(std::ostream& out, const IRoute *route)
 {
     out << "destination = " << route->getDestinationAsGeneric();
@@ -173,14 +173,13 @@ class INET_API IMulticastRoute
   public:
     /** Specifies where the route comes from */
     enum SourceType {
-        MANUAL,    ///< manually added static route
-        DVMRP,    ///< managed by DVMRP router
-        PIM_DM,    ///< managed by PIM-DM router
-        PIM_SM,    ///< managed by PIM-SM router
+        MANUAL, ///< manually added static route
+        DVMRP, ///< managed by DVMRP router
+        PIM_DM, ///< managed by PIM-DM router
+        PIM_SM, ///< managed by PIM-SM router
     };
 
-    class InInterface
-    {
+    class InInterface {
       protected:
         NetworkInterface *ie;
 
@@ -191,11 +190,10 @@ class INET_API IMulticastRoute
         NetworkInterface *getInterface() const { return ie; }
     };
 
-    class OutInterface
-    {
+    class OutInterface {
       protected:
         const NetworkInterface *ie;
-        bool _isLeaf;    // for TRPB support
+        bool _isLeaf; // for TRPB support
 
       public:
         OutInterface(const NetworkInterface *ie, bool isLeaf = false) : ie(ie), _isLeaf(isLeaf) { ASSERT(ie); }
@@ -211,7 +209,7 @@ class INET_API IMulticastRoute
 
     typedef std::vector<OutInterface *> OutInterfaceVector;
 
-//TODO maybe:
+    // TODO maybe:
 //    virtual std::string info() const;
 //    virtual std::string detailedInfo() const;
 

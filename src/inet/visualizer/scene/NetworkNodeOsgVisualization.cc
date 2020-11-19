@@ -94,9 +94,9 @@ NetworkNodeOsgVisualization::NetworkNodeOsgVisualization(cModule *networkNode, b
             annotationNode = new osg::Group();
             annotationNode->addChild(geode);
             auto autoTransform = new osg::AutoTransform();
-            // TODO: allow pivot point parameterization
+            // TODO allow pivot point parameterization
             autoTransform->setPivotPoint(osg::Vec3d(0.0, 0.0, 0.0));
-            // autoTransform->setPivotPoint(osg::Vec3d(image->s() / 2, image->t() / 2, 0.0));
+//            autoTransform->setPivotPoint(osg::Vec3d(image->s() / 2, image->t() / 2, 0.0));
             autoTransform->setAutoScaleToScreen(true);
             autoTransform->setAutoRotateMode(osg::AutoTransform::ROTATE_TO_SCREEN);
             autoTransform->setPosition(osg::Vec3d(0.0, 0.0, boundingSphere.radius()));
@@ -131,7 +131,7 @@ NetworkNodeOsgVisualization::NetworkNodeOsgVisualization(cModule *networkNode, b
         annotationNode = new osg::Group();
         annotationNode->addChild(geode);
         auto autoTransform = new osg::AutoTransform();
-        // TODO: allow pivot point parameterization
+        // TODO allow pivot point parameterization
         autoTransform->setPivotPoint(osg::Vec3d(0.0, 0.0, 0.0));
 //        autoTransform->setPivotPoint(osg::Vec3d(image->s() / 2, image->t() / 2, 0.0));
         autoTransform->setAutoScaleToScreen(true);
@@ -158,8 +158,7 @@ std::string NetworkNodeOsgVisualization::getOsgModelPath(cModule *networkNode)
         auto secondDot = strchr(firstDot + 1, '.');
         if (secondDot == nullptr)
             return networkNode->resolveResourcePath(osgModel);
-        else
-        {
+        else {
             auto path = std::string(osgModel).substr(0, secondDot - osgModel);
             auto resolvedPath = networkNode->resolveResourcePath(path.c_str());
             auto pseudoLoader = std::string(osgModel).substr(secondDot - osgModel);
@@ -173,7 +172,7 @@ void NetworkNodeOsgVisualization::updateAnnotationPositions()
     double spacing = 4;
     double totalHeight = 0;
     for (auto annotation : annotations) {
-        // TODO: what should be the default pivot point? double dx = -annotation.size.x() / 2;
+        // TODO what should be the default pivot point? double dx = -annotation.size.x() / 2;
         double dx = 0;
         double dy = size.y() + spacing + totalHeight;
         auto positionAttitudeTransform = static_cast<osg::PositionAttitudeTransform *>(annotation.node->getParent(0));
@@ -185,8 +184,7 @@ void NetworkNodeOsgVisualization::updateAnnotationPositions()
 void NetworkNodeOsgVisualization::addAnnotation(osg::Node *node, osg::Vec3d size, double priority)
 {
     annotations.push_back(Annotation(node, size, priority));
-    std::stable_sort(annotations.begin(), annotations.end(), [](Annotation a1, Annotation a2)
-    {
+    std::stable_sort(annotations.begin(), annotations.end(), [] (Annotation a1, Annotation a2) {
         return a1.priority < a2.priority;
     });
     auto positionAttitudeTransform = new osg::PositionAttitudeTransform();

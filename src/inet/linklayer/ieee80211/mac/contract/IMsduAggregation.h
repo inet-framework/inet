@@ -26,10 +26,10 @@ namespace ieee80211 {
 
 class INET_API IMsduAggregation
 {
-    public:
-        virtual ~IMsduAggregation() { }
+  public:
+    virtual ~IMsduAggregation() {}
 
-        virtual Packet *aggregateFrames(std::vector<Packet *> *frames) = 0;
+    virtual Packet *aggregateFrames(std::vector<Packet *> *frames) = 0;
 };
 
 } // namespace ieee80211

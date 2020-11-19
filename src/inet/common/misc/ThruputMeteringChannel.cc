@@ -25,8 +25,8 @@ ThruputMeteringChannel::ThruputMeteringChannel(const char *name) : cDatarateChan
 {
     displayAsTooltip = false;
     fmt = nullptr;
-    batchSize = 10;    // packets
-    maxInterval = 0.1;    // seconds
+    batchSize = 10; // packets
+    maxInterval = 0.1; // seconds
 
     numPackets = 0;
     numBits = 0;
@@ -106,11 +106,11 @@ void ThruputMeteringChannel::refreshDisplay() const
     double bytes;
     for (const char *fp = fmt; *fp && buf + 200 - p > 20; fp++) {
         switch (*fp) {
-            case 'N':    // number of packets
+            case 'N': // number of packets
                 p += sprintf(p, "%ld", numPackets);
                 break;
 
-            case 'V':    // volume (in bytes)
+            case 'V': // volume (in bytes)
                 bytes = floor(numBits / 8);
                 if (bytes < 1024)
                     p += sprintf(p, "%gB", bytes);
@@ -120,36 +120,36 @@ void ThruputMeteringChannel::refreshDisplay() const
                     p += sprintf(p, "%.3gMiB", bytes / 1024 / 1024);
                 break;
 
-            case 'p':    // current packet/sec
+            case 'p': // current packet/sec
                 p += sprintf(p, "%.3gpps", currentPkPerSec);
                 break;
 
-            case 'b':    // current bandwidth
+            case 'b': // current bandwidth
                 if (currentBitPerSec < 1000000)
                     p += sprintf(p, "%.3gk", currentBitPerSec / 1000);
                 else
                     p += sprintf(p, "%.3gM", currentBitPerSec / 1000000);
                 break;
 
-            case 'u':    // current channel utilization (%)
+            case 'u': // current channel utilization (%)
                 if (getDatarate() == 0)
                     p += sprintf(p, "n/a");
                 else
                     p += sprintf(p, "%.3g%%", currentBitPerSec / getDatarate() * 100.0);
                 break;
 
-            case 'P':    // average packet/sec on [0,now)
+            case 'P': // average packet/sec on [0,now)
                 p += sprintf(p, "%.3gpps", tt == 0 ? 0 : numPackets / tt);
                 break;
 
-            case 'B':    // average bandwidth on [0,now)
+            case 'B': // average bandwidth on [0,now)
                 if (bps < 1000000)
                     p += sprintf(p, "%.3gk", bps / 1000);
                 else
                     p += sprintf(p, "%.3gM", bps / 1000000);
                 break;
 
-            case 'U':    // average channel utilization (%) on [0,now)
+            case 'U': // average channel utilization (%) on [0,now)
                 if (getDatarate() == 0)
                     p += sprintf(p, "n/a");
                 else

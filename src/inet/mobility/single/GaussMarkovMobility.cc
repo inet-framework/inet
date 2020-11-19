@@ -41,7 +41,7 @@ void GaussMarkovMobility::initialize(int stage)
         alpha = par("alpha");
         if (alpha < 0.0 || alpha > 1.0)
             throw cRuntimeError("The parameter 'alpha' is out of [0;1] interval");
-        //constrain alpha to [0.0;1.0]
+        // constrain alpha to [0.0;1.0]
         margin = par("margin");
         speed = speedMean;
         angle = angleMean;

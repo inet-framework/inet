@@ -128,7 +128,7 @@ A StateBasedCcEnergyConsumer::computeCurrentConsumption() const
         if (transmissionState == IRadio::TRANSMISSION_STATE_IDLE)
             currentConsumption += transmitterIdleCurrentConsumption;
         else if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING) {
-            // TODO: add transmission power?
+            // TODO add transmission power?
             auto part = radio->getTransmittedSignalPart();
             if (part == IRadioSignal::SIGNAL_PART_NONE)
                 ;

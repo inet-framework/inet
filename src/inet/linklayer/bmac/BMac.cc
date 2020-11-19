@@ -124,9 +124,9 @@ void BMac::finish()
     recordScalar("nbRecvdAcks", nbRecvdAcks);
     recordScalar("nbTxAcks", nbTxAcks);
     recordScalar("nbDroppedDataPackets", nbDroppedDataPackets);
-    //recordScalar("timeSleep", timeSleep);
-    //recordScalar("timeRX", timeRX);
-    //recordScalar("timeTX", timeTX);
+//    recordScalar("timeSleep", timeSleep);
+//    recordScalar("timeRX", timeRX);
+//    recordScalar("timeTX", timeTX);
 }
 
 void BMac::configureNetworkInterface()
@@ -173,7 +173,7 @@ void BMac::sendPreamble()
     preamble->setDestAddr(MacAddress::BROADCAST_ADDRESS);
     preamble->setChunkLength(ctrlFrameLength);
 
-    //attach signal and send down
+    // attach signal and send down
     auto packet = new Packet("Preamble");
     preamble->setType(BMAC_PREAMBLE);
     packet->insertAtFront(preamble);
@@ -193,7 +193,7 @@ void BMac::sendMacAck()
     ack->setDestAddr(lastDataPktSrcAddr);
     ack->setChunkLength(ctrlFrameLength);
 
-    //attach signal and send down
+    // attach signal and send down
     auto packet = new Packet("BMacAck");
     ack->setType(BMAC_ACK);
     packet->insertAtFront(ack);
@@ -201,7 +201,7 @@ void BMac::sendMacAck()
     attachSignal(packet);
     sendDown(packet);
     nbTxAcks++;
-    //endSimulation();
+//    endSimulation();
 }
 
 /**
@@ -286,8 +286,8 @@ void BMac::handleSelfMessage(cMessage *msg)
                 scheduleAfter(SIMTIME_ZERO, msg);
                 return;
             }
-            //in case we get an ACK, we simply dicard it, because it means the end
-            //of another communication
+            // in case we get an ACK, we simply dicard it, because it means the end
+            // of another communication
             if (msg->getKind() == BMAC_ACK) {
                 EV_DETAIL << "State CCA, message BMAC_ACK, new state CCA" << endl;
                 delete msg;
@@ -370,7 +370,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 else {
                     EV_DETAIL << "State WAIT_ACK, message BMAC_ACK_TIMEOUT, new state"
                                  " SLEEP" << endl;
-                    //drop the packet
+                    // drop the packet
                     emit(linkBrokenSignal, currentTxFrame);
                     PacketDropDetails details;
                     details.setReason(OTHER_PACKET_DROP);
@@ -387,7 +387,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 }
                 return;
             }
-            //ignore and other packets
+            // ignore and other packets
             if ((msg->getKind() == BMAC_DATA) || (msg->getKind() == BMAC_PREAMBLE)) {
                 EV_DETAIL << "State WAIT_ACK, message BMAC_DATA or BMAC_PREMABLE, new"
                              " state WAIT_ACK" << endl;
@@ -423,7 +423,7 @@ void BMac::handleSelfMessage(cMessage *msg)
 
         case WAIT_DATA:
             if (msg->getKind() == BMAC_PREAMBLE) {
-                //nothing happens
+                // nothing happens
                 EV_DETAIL << "State WAIT_DATA, message BMAC_PREAMBLE, new state"
                              " WAIT_DATA" << endl;
                 nbRxPreambles++;
@@ -431,7 +431,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 return;
             }
             if (msg->getKind() == BMAC_ACK) {
-                //nothing happens
+                // nothing happens
                 EV_DETAIL << "State WAIT_DATA, message BMAC_ACK, new state WAIT_DATA"
                           << endl;
                 delete msg;
@@ -592,9 +592,9 @@ void BMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t valu
 
 void BMac::attachSignal(Packet *macPkt)
 {
-    //calc signal duration
+    // calc signal duration
     simtime_t duration = macPkt->getBitLength() / bitrate;
-    //create and initialize control info with new signal
+    // create and initialize control info with new signal
     macPkt->setDuration(duration);
 }
 
@@ -700,13 +700,13 @@ void BMac::encapsulate(Packet *packet)
     pkt->setNetworkProtocol(ProtocolGroup::ethertype.getProtocolNumber(packet->getTag<PacketProtocolTag>()->getProtocol()));
     pkt->setDestAddr(dest);
 
-    //delete the control info
+    // delete the control info
     delete packet->removeControlInfo();
 
-    //set the src address to own mac address (nic module getId())
+    // set the src address to own mac address (nic module getId())
     pkt->setSrcAddr(networkInterface->getMacAddress());
 
-    //encapsulate the network packet
+    // encapsulate the network packet
     packet->insertAtFront(pkt);
     EV_DETAIL << "pkt encapsulated\n";
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);

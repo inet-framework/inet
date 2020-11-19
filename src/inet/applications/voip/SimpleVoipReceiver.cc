@@ -187,7 +187,7 @@ void SimpleVoipReceiver::evaluateTalkspurt(bool finish)
 
     if (finish) {
         unsigned int maxId = 0;
-        for (auto & elem : currentTalkspurt.packets)
+        for (auto& elem : currentTalkspurt.packets)
             maxId = std::max(maxId, (elem).packetID);
         channelLoss = maxId + 1 - currentTalkspurt.packets.size();
     }
@@ -205,15 +205,15 @@ void SimpleVoipReceiver::evaluateTalkspurt(bool finish)
     for (unsigned int y = 0; y < talkspurtNumPackets; y++)
         isArrived[y] = false;
 
-    simtime_t lastLateness = -playoutDelay;    // arrival time - playout time
+    simtime_t lastLateness = -playoutDelay; // arrival time - playout time
     simtime_t maxLateness = -playoutDelay;
 
     // compute channelLoss, playoutLoss and tailDropLoss, needed for MOS and statistics
     PacketsList playoutQueue;
-    for (auto & elem : currentTalkspurt.packets) {
+    for (auto& elem : currentTalkspurt.packets) {
         elem.playoutTime = (firstPlayoutTime + ((int)elem.packetID - (int)firstPacketId) * currentTalkspurt.voiceDuration);
 
-        lastLateness = elem.arrivalTime - elem.playoutTime;    // >0: packet is too late (missed its playout time)
+        lastLateness = elem.arrivalTime - elem.playoutTime; // >0: packet is too late (missed its playout time)
         if (maxLateness < lastLateness)
             maxLateness = lastLateness;
 
@@ -221,7 +221,7 @@ void SimpleVoipReceiver::evaluateTalkspurt(bool finish)
 
         // Management of duplicated packets
         if (isArrived[elem.packetID]) {
-            ++channelLoss;    // duplicate packets may shadow lost packets in the channel loss calculation above, we correct that here.
+            ++channelLoss; // duplicate packets may shadow lost packets in the channel loss calculation above, we correct that here.
             EV_DEBUG << "DUPLICATED PACKET: TALK " << currentTalkspurt.talkspurtID << " PACKET " << elem.packetID << "\n\n";
         }
         else if (lastLateness > 0.0) {
@@ -235,7 +235,7 @@ void SimpleVoipReceiver::evaluateTalkspurt(bool finish)
             auto qi = playoutQueue.begin();
             while (qi != playoutQueue.end()) {
                 if ((*qi)->playoutTime < elem.arrivalTime) {
-                    // EV_DEBUG << "REPRODUCED AND EXTRACT FROM BUFFER: TALK " << currentTalkspurt.talkspurtID << " PACKET " << (*qi)->packetID << "\n";
+//                    EV_DEBUG << "REPRODUCED AND EXTRACT FROM BUFFER: TALK " << currentTalkspurt.talkspurtID << " PACKET " << (*qi)->packetID << "\n";
                     qi = playoutQueue.erase(qi);
                 }
                 else
@@ -248,7 +248,7 @@ void SimpleVoipReceiver::evaluateTalkspurt(bool finish)
                          << "ARRIVAL TIME " << elem.arrivalTime << "s, "
                          << "PLAYOUT TIME " << elem.playoutTime << "s\n\n";
 
-                isArrived[elem.packetID] = true;    // isArrived[] is needed for detecting duplicate packets
+                isArrived[elem.packetID] = true; // isArrived[] is needed for detecting duplicate packets
 
                 playoutQueue.push_back(&(elem));
             }
@@ -299,7 +299,7 @@ void SimpleVoipReceiver::evaluateTalkspurt(bool finish)
 // "mouth to ear" characteristics of a speech path.
 double SimpleVoipReceiver::eModel(double delay, double lossRate)
 {
-    static const double alpha3 = 177.3;    //ms
+    static const double alpha3 = 177.3; // ms
     double delayms = 1000.0 * delay;
 
     // Compute the Id parameter

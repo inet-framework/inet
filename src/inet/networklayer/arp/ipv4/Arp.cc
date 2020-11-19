@@ -90,7 +90,7 @@ void Arp::finish()
 
 Arp::~Arp()
 {
-    for (auto & elem : arpCache)
+    for (auto& elem : arpCache)
         delete elem.second;
 }
 
@@ -417,7 +417,7 @@ MacAddress Arp::resolveL3Address(const L3Address& address, const NetworkInterfac
         ArpCacheEntry *entry = new ArpCacheEntry();
         entry->owner = this;
         auto where = arpCache.insert(arpCache.begin(), std::make_pair(addr, entry));
-        entry->myIter = where;    // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
+        entry->myIter = where; // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
         entry->ie = ie;
 
         EV << "Starting ARP resolution for " << addr << "\n";
@@ -435,7 +435,7 @@ MacAddress Arp::resolveL3Address(const L3Address& address, const NetworkInterfac
     else {
         EV << "ARP cache entry for " << addr << " expired, starting new ARP resolution\n";
         ArpCacheEntry *entry = it->second;
-        entry->ie = ie;    // routing table may have changed
+        entry->ie = ie; // routing table may have changed
         initiateArpResolution(entry);
     }
     return MacAddress::UNSPECIFIED_ADDRESS;
@@ -449,10 +449,9 @@ L3Address Arp::getL3AddressFor(const MacAddress& macAddr) const
         return Ipv4Address::UNSPECIFIED_ADDRESS;
 
     simtime_t now = simTime();
-    for (const auto & elem : arpCache)
+    for (const auto& elem : arpCache)
         if (elem.second->macAddress == macAddr && elem.second->lastUpdate + cacheTimeout >= now)
             return elem.first;
-
 
     return Ipv4Address::UNSPECIFIED_ADDRESS;
 }
@@ -495,7 +494,7 @@ void Arp::sendArpGratuitous(const NetworkInterface *ie, MacAddress srcAddr, Ipv4
     entry->timer = nullptr;
     entry->numRetries = 0;
 
-//    updateARPCache(entry, srcAddr); //FIXME
+    // updateARPCache(entry, srcAddr); //FIXME
 
     // send out
     send(packet, "ifOut");

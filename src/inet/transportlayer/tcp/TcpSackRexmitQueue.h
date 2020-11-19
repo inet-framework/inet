@@ -31,21 +31,20 @@ namespace tcp {
 class INET_API TcpSackRexmitQueue
 {
   public:
-    TcpConnection *conn;    // the connection that owns this queue
+    TcpConnection *conn; // the connection that owns this queue
 
-    struct Region
-    {
+    struct Region {
         uint32_t beginSeqNum;
         uint32_t endSeqNum;
-        bool sacked;    // indicates whether region has already been sacked by data receiver
-        bool rexmitted;    // indicates whether region has already been retransmitted by data sender
+        bool sacked; // indicates whether region has already been sacked by data receiver
+        bool rexmitted; // indicates whether region has already been retransmitted by data sender
     };
 
     typedef std::list<Region> RexmitQueue;
-    RexmitQueue rexmitQueue;    // rexmitQueue is ordered by seqnum, and doesn't have overlapped Regions
+    RexmitQueue rexmitQueue; // rexmitQueue is ordered by seqnum, and doesn't have overlapped Regions
 
-    uint32_t begin;    // 1st sequence number stored
-    uint32_t end;    // last sequence number stored + 1
+    uint32_t begin; // 1st sequence number stored
+    uint32_t end; // last sequence number stored + 1
 
   public:
     /**

@@ -42,3 +42,4 @@ const Ptr<Chunk> EchoPacketSerializer::deserialize(MemoryInputStream& stream) co
 }
 
 } // namespace inet
+

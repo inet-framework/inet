@@ -32,7 +32,8 @@ namespace eigrp {
 /**
  * Table with disabled EIGRP interfaces. Used to store the settings of interfaces.
  */
-class EigrpDisabledInterfaces {
+class EigrpDisabledInterfaces
+{
   protected:
     std::vector<EigrpInterface *> ifVector;
 
@@ -62,6 +63,7 @@ class EigrpDisabledInterfaces {
     EigrpInterface *getInterface(int k) const { return ifVector[k]; }
 };
 
-}// namespace eigrp
-}// namespace inet
+} // namespace eigrp
+} // namespace inet
 #endif /* EIGRPDISABLEDINTERFACES_H_ */
+

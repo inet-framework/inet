@@ -143,7 +143,7 @@ void StreamThroughTransmitter::abortTx()
     ASSERT(isTransmitting());
     // 2. create new truncated signal
     auto packet = check_and_cast<Packet *>(txSignal->decapsulate());
-    // TODO: we can't just simply cut the packet proportionally with time because it's not always the case (modulation, scrambling, etc.)
+    // TODO we can't just simply cut the packet proportionally with time because it's not always the case (modulation, scrambling, etc.)
     simtime_t timePosition = simTime() - txStartTime;
     b dataPosition = b(std::floor(txDatarate.get() * timePosition.dbl()));
     packet->eraseAtBack(packet->getTotalLength() - dataPosition);
@@ -180,8 +180,8 @@ void StreamThroughTransmitter::scheduleBufferUnderrunTimer()
     cancelEvent(bufferUnderrunTimer);
     if (lastInputDatarate < txDatarate) {
         // Underrun occurs when the following two values become equal:
-        //   inputProgressPosition = lastInputProgressPosition + inputDatarate * (simTime() - lastInputProgressTime)
-        //   txProgressPosition = lastTxProgressPosition + txDatarate * (simTime() - lastTxProgressTime)
+        // inputProgressPosition = lastInputProgressPosition + inputDatarate * (simTime() - lastInputProgressTime)
+        // txProgressPosition = lastTxProgressPosition + txDatarate * (simTime() - lastTxProgressTime)
         simtime_t bufferUnderrunTime = s((-lastInputProgressPosition + lastInputDatarate * s(lastInputProgressTime.dbl()) + lastTxProgressPosition - txDatarate * s(lastTxProgressTime.dbl())) / (lastInputDatarate - txDatarate)).get();
         EV_INFO << "Scheduling buffer underrun timer" << EV_FIELD(at, bufferUnderrunTime.ustr()) << EV_ENDL;
         scheduleAt(bufferUnderrunTime, bufferUnderrunTimer);

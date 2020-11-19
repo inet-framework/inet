@@ -20,7 +20,7 @@
 #ifndef __INET_ICMP_H
 #define __INET_ICMP_H
 
-//  Cleanup and rewrite: Andras Varga, 2004
+// Cleanup and rewrite: Andras Varga, 2004
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/packet/Packet.h"
@@ -38,8 +38,9 @@ class Ipv4Header;
 class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationListener
 {
   protected:
-    std::set<int> transportProtocols;    // where to send up packets
+    std::set<int> transportProtocols; // where to send up packets
     CrcMode crcMode = CRC_MODE_UNDEFINED;
+
   protected:
     virtual void processICMPMessage(Packet *);
     virtual void errorOut(Packet *);
@@ -55,7 +56,7 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
      * This method can be called from other modules to send an ICMP error packet
      * in response to a received bogus packet. It will not send ICMP error in response
      * to broadcast or multicast packets -- in that case it will simply delete the packet.
-     * KLUDGE: if inputInterfaceId cannot be determined, pass in -1.
+     * KLUDGE if inputInterfaceId cannot be determined, pass in -1.
      */
     virtual void sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type, IcmpCode code);
     static void insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet *payload);

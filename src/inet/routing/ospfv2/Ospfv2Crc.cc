@@ -71,10 +71,10 @@ void setLsaCrc(Ospfv2Lsa& lsa, CrcMode crcMode)
             lsaHeader.setLsCrc(0);
             MemoryOutputStream stream;
             auto lsAge = lsaHeader.getLsAge();
-            lsaHeader.setLsAge(0);    // disable lsAge from CRC
+            lsaHeader.setLsAge(0); // disable lsAge from CRC
             Ospfv2PacketSerializer::serializeLsa(stream, lsa);
             uint16_t crc = TcpIpChecksum::checksum(stream.getData());
-            lsaHeader.setLsAge(lsAge);    // restore lsAge
+            lsaHeader.setLsAge(lsAge); // restore lsAge
             lsaHeader.setLsCrc(crc);
             break;
         }
@@ -97,10 +97,10 @@ void setLsaHeaderCrc(Ospfv2LsaHeader& lsaHeader, CrcMode crcMode)
             lsaHeader.setLsCrc(0);
             MemoryOutputStream stream;
             auto lsAge = lsaHeader.getLsAge();
-            lsaHeader.setLsAge(0);    // disable lsAge from CRC
+            lsaHeader.setLsAge(0); // disable lsAge from CRC
             Ospfv2PacketSerializer::serializeLsaHeader(stream, lsaHeader);
             uint16_t crc = TcpIpChecksum::checksum(stream.getData());
-            lsaHeader.setLsAge(lsAge);    // restore lsAge
+            lsaHeader.setLsAge(lsAge); // restore lsAge
             lsaHeader.setLsCrc(crc);
             break;
         }

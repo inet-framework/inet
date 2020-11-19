@@ -77,7 +77,7 @@ void ThruputMeter::beginNewInterval(simtime_t now)
     pkpersecVector.recordWithTimestamp(intvlStartTime, pkpersec);
 
     // restart counters
-    intvlStartTime = now;    // FIXME this should be *beginning* of tx of this packet, not end!
+    intvlStartTime = now; // FIXME this should be *beginning* of tx of this packet, not end!
     intvlNumPackets = intvlNumBits = 0;
 }
 

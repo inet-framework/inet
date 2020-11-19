@@ -79,7 +79,6 @@ bool L3AddressResolver::tryParse(L3Address& result, const char *addr, int addrTy
     return true;
 }
 
-
 bool L3AddressResolver::tryResolve(const char *s, L3Address& result, int addrType)
 {
     // empty address
@@ -410,7 +409,7 @@ bool L3AddressResolver::getInterfaceIpv4Address(L3Address& ret, NetworkInterface
     }
     else {
         // find address in the configurator's notebook
-        // TODO: how do we know where is the configurator? get the path from a NED parameter?
+        // TODO how do we know where is the configurator? get the path from a NED parameter?
         L3AddressResolver *configurator = dynamic_cast<L3AddressResolver *>(getSimulation()->findModuleByPath("configurator"));
         if (configurator)
             return configurator->getInterfaceIpv4Address(ret, ie, netmask);
@@ -502,14 +501,14 @@ NextHopRoutingTable *L3AddressResolver::findNextHopRoutingTableOf(cModule *host)
 #endif // ifdef WITH_NEXTHOP
 }
 
-std::vector<cModule*> L3AddressResolver::collectNetworkNodes()
+std::vector<cModule *> L3AddressResolver::collectNetworkNodes()
 {
-    std::vector<cModule*> result;
+    std::vector<cModule *> result;
     doCollectNetworkNodes(getSimulation()->getSystemModule(), result);
     return result;
 }
 
-void L3AddressResolver::doCollectNetworkNodes(cModule *parent, std::vector<cModule*>& result)
+void L3AddressResolver::doCollectNetworkNodes(cModule *parent, std::vector<cModule *>& result)
 {
     for (cModule::SubmoduleIterator it(parent); !it.end(); ++it) {
         cModule *submodule = *it;
@@ -555,7 +554,7 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
                             return mod;
                         break;
                     default:
-                        (void)entry;    // eliminate warning: unused variable 'entry'
+                        (void)entry; // eliminate warning: unused variable 'entry'
                         throw cRuntimeError("findHostWithAddress() doesn't accept AddressType '%s', yet", L3Address::getTypeName(add.getType()));
                         break;
                 }

@@ -55,11 +55,11 @@ void TcpServerHostApp::handleCrashOperation(LifecycleOperation *operation)
     // remove and delete threads
     while (!threadSet.empty()) {
         auto thread = *threadSet.begin();
-        // TODO: destroy!!!
+        // TODO destroy!!!
         thread->getSocket()->close();
         removeThread(thread);
     }
-    // TODO: always?
+    // TODO always?
     if (operation->getRootModule() != getContainingNode(this))
         serverSocket.destroy();
 }
@@ -82,13 +82,13 @@ void TcpServerHostApp::handleMessageWhenUp(cMessage *msg)
         thread->timerExpired(msg);
     }
     else {
-        TcpSocket *socket = check_and_cast_nullable<TcpSocket*>(socketMap.findSocketFor(msg));
+        TcpSocket *socket = check_and_cast_nullable<TcpSocket *>(socketMap.findSocketFor(msg));
         if (socket)
             socket->processMessage(msg);
         else if (serverSocket.belongsToSocket(msg))
             serverSocket.processMessage(msg);
         else {
-            // throw cRuntimeError("Unknown incoming message: '%s'", msg->getName());
+//            throw cRuntimeError("Unknown incoming message: '%s'", msg->getName());
             EV_ERROR << "message " << msg->getFullName() << "(" << msg->getClassName() << ") arrived for unknown socket \n";
             delete msg;
         }

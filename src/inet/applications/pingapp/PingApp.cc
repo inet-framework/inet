@@ -53,7 +53,6 @@
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif // ifdef WITH_IPv6
 
-
 namespace inet {
 
 using std::cout;
@@ -326,8 +325,8 @@ void PingApp::handleStopOperation(LifecycleOperation *operation)
     destAddrIdx = -1;
     cancelNextPingRequest();
     currentSocket = nullptr;
-    // TODO: close sockets
-    // TODO: remove getMap()
+    // TODO close sockets
+    // TODO remove getMap()
     if (socketMap.size() > 0) {
         for (auto socket: socketMap.getMap())
             socket.second->close();
@@ -345,9 +344,9 @@ void PingApp::handleCrashOperation(LifecycleOperation *operation)
     destAddrIdx = -1;
     cancelNextPingRequest();
     currentSocket = nullptr;
-    // TODO: remove check?
+    // TODO remove check?
     if (operation->getRootModule() != getContainingNode(this)) {
-        // TODO: destroy sockets
+        // TODO destroy sockets
         for (auto socket: socketMap.getMap())
             socket.second->destroy();
         socketMap.deleteSockets();
@@ -426,7 +425,7 @@ void PingApp::sendPingRequest()
             request->setIdentifier(pid);
             request->setSeqNumber(sendSeqNo);
             outPacket->insertAtBack(payload);
-            // insertCrc(crcMode, request, outPacket);
+//            insertCrc(crcMode, request, outPacket);
             outPacket->insertAtFront(request);
             outPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::echo);
             break;
@@ -465,7 +464,7 @@ void PingApp::processPingResponse(int originatorId, int seqNo, Packet *packet)
 
     // get src, hopCount etc from packet, and print them
     L3Address src = packet->getTag<L3AddressInd>()->getSrcAddress();
-    //L3Address dest = msg->getTag<L3AddressInd>()->getDestination();
+//    L3Address dest = msg->getTag<L3AddressInd>()->getDestination();
     auto& msgHopCountTag = packet->findTag<HopLimitInd>();
     int msgHopCount = msgHopCountTag ? msgHopCountTag->getHopLimit() : -1;
 
@@ -526,8 +525,8 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt, bool isDup
         // expect sequence numbers to continue from here
         expectedReplySeqNo = seqNo + 1;
     }
-    else {    // seqNo < expectedReplySeqNo
-              // ping reply arrived too late: count as out-of-order arrival (not loss after all)
+    else { // seqNo < expectedReplySeqNo
+           // ping reply arrived too late: count as out-of-order arrival (not loss after all)
         EV_DETAIL << "Arrived out of order (too late)\n";
         outOfOrderArrivalCount++;
         if (!isDup && rtt > SIMTIME_ZERO)
@@ -543,8 +542,7 @@ std::vector<L3Address> PingApp::getAllAddresses()
 
     int lastId = getSimulation()->getLastComponentId();
 
-    for (int i = 0; i <= lastId; i++)
-    {
+    for (int i = 0; i <= lastId; i++) {
         IInterfaceTable *ift = dynamic_cast<IInterfaceTable *>(getSimulation()->getModule(i));
         if (ift) {
             for (int j = 0; j < ift->getNumInterfaces(); j++) {

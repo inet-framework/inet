@@ -27,11 +27,11 @@ namespace ieee80211 {
 
 class INET_API IRecipientAckProcedure
 {
-    public:
-        virtual ~IRecipientAckProcedure() { }
+  public:
+    virtual ~IRecipientAckProcedure() {}
 
-        virtual void processReceivedFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader, IRecipientAckPolicy *ackPolicy, IProcedureCallback *callback) = 0;
-        virtual void processTransmittedAck(const Ptr<const Ieee80211AckFrame>& ack) = 0;
+    virtual void processReceivedFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader, IRecipientAckPolicy *ackPolicy, IProcedureCallback *callback) = 0;
+    virtual void processTransmittedAck(const Ptr<const Ieee80211AckFrame>& ack) = 0;
 };
 
 } // namespace ieee80211

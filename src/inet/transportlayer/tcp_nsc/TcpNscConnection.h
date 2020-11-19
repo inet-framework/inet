@@ -43,8 +43,7 @@ class TcpNscSendQueue;
 class INET_API TcpNscConnection
 {
   public:
-    class SockAddr
-    {
+    class SockAddr {
       public:
         SockAddr() : ipAddrM(), portM(-1) {}
         L3Address ipAddrM;
@@ -63,8 +62,7 @@ class INET_API TcpNscConnection
         }
     };
 
-    class SockPair
-    {
+    class SockPair {
       public:
         SockAddr remoteM;
         SockAddr localM;
@@ -95,7 +93,7 @@ class INET_API TcpNscConnection
 
   public:
     int connIdM = -1;
-    int forkedConnId = -1;    // identifies forked connection within the app (listener socket ID)
+    int forkedConnId = -1; // identifies forked connection within the app (listener socket ID)
     SockPair inetSockPairM;
     SockPair nscSockPairM;
     INetStreamSocket *pNscSocketM = nullptr;

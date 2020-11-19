@@ -152,7 +152,7 @@ struct    ip6_ext
 } __PACKED__;
 
 /* Hop-by-Hop options header */
-/* XXX should we pad it to force alignment on an 8-byte boundary? */
+/* TODO should we pad it to force alignment on an 8-byte boundary? */
 struct ip6_hbh
 {
     u_int8_t ip6h_nxt;    /* next header */
@@ -161,7 +161,7 @@ struct ip6_hbh
 } __PACKED__;
 
 /* Destination options header */
-/* XXX should we pad it to force alignment on an 8-byte boundary? */
+/* TODO should we pad it to force alignment on an 8-byte boundary? */
 struct ip6_dest
 {
     u_int8_t ip6d_nxt;    /* next header */

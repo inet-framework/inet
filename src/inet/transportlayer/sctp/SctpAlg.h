@@ -31,7 +31,7 @@ namespace sctp {
 class INET_API SctpAlgStateVariables : public SctpStateVariables
 {
   public:
-    //...
+    // ...
 };
 
 class INET_API SctpAlg : public SctpAlgorithm

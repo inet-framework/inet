@@ -66,7 +66,7 @@ void Stp::initPortTable()
 void Stp::handleMessageWhenUp(cMessage *msg)
 {
     if (!msg->isSelfMessage()) {
-        Packet *packet = check_and_cast<Packet*>(msg);
+        Packet *packet = check_and_cast<Packet *>(msg);
         const auto& bpdu = packet->peekAtFront<BpduBase>();
 
         switch (bpdu->getBpduType()) {
@@ -116,7 +116,7 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const BpduCfg>& bpdu)
             macTable->setAgingTime(currentFwdDelay);
 
             // config BPDU with TC flag
-            for (auto & elem : desPorts)
+            for (auto& elem : desPorts)
                 generateBPDU(elem, MacAddress::STP_MULTICAST_ADDRESS, true, false);
         }
         else {
@@ -125,7 +125,7 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const BpduCfg>& bpdu)
             EV_INFO << "Sending BPDUs on all designated ports." << endl;
 
             // BPDUs are sent on all designated ports
-            for (auto & elem : desPorts)
+            for (auto& elem : desPorts)
                 generateBPDU(elem);
         }
     }
@@ -254,14 +254,14 @@ bool Stp::isSuperiorBPDU(int interfaceId, const Ptr<const BpduCfg>& bpdu)
 
     if (result < 0) {
         // BPDU is superior
-        port->setFdWhile(0);    // renew info
+        port->setFdWhile(0); // renew info
         port->setState(Ieee8021dInterfaceData::DISCARDING);
-        setSuperiorBPDU(interfaceId, bpdu);    // renew information
+        setSuperiorBPDU(interfaceId, bpdu); // renew information
         delete xBpdu;
         return true;
     }
 
-    setSuperiorBPDU(interfaceId, bpdu);    // renew information
+    setSuperiorBPDU(interfaceId, bpdu); // renew information
     delete xBpdu;
     return true;
 }
@@ -513,7 +513,7 @@ int Stp::comparePorts(const Ieee8021dInterfaceData *portA, const Ieee8021dInterf
     if (result != 0)
         return result;
 
-    return 0;    // same
+    return 0; // same
 }
 
 void Stp::selectRootPort()
@@ -605,7 +605,7 @@ void Stp::selectDesignatedPorts()
 void Stp::setAllDesignated()
 {
     // all ports of the root switch are designated ports
-    EV_DETAIL << "All ports become designated." << endl;    // todo
+    EV_DETAIL << "All ports become designated." << endl; // todo
 
     desPorts.clear();
     for (unsigned int i = 0; i < numPorts; i++) {

@@ -23,7 +23,7 @@
 
 namespace inet {
 
-//forward declarations:
+// forward declarations:
 
 class INET_API CloudDelayerBase : public cSimpleModule, public NetfilterBase::HookBase
 {

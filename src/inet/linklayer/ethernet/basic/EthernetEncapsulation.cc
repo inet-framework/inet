@@ -45,14 +45,14 @@ simsignal_t EthernetEncapsulation::encapPkSignal = registerSignal("encapPk");
 simsignal_t EthernetEncapsulation::decapPkSignal = registerSignal("decapPk");
 simsignal_t EthernetEncapsulation::pauseSentSignal = registerSignal("pauseSent");
 
-std::ostream& operator << (std::ostream& o, const EthernetEncapsulation::Socket& t)
+std::ostream& operator<<(std::ostream& o, const EthernetEncapsulation::Socket& t)
 {
     o << "(id:" << t.socketId
-            << ",local:" << t.localAddress
-            << ",remote:" << t.remoteAddress
-            << ",protocol" << (t.protocol ? t.protocol->getName() : "<null>")
-            << ",steal:" << (t.steal ? "on":"off")
-            << ")";
+      << ",local:" << t.localAddress
+      << ",remote:" << t.remoteAddress
+      << ",protocol" << (t.protocol ? t.protocol->getName() : "<null>")
+      << ",steal:" << (t.steal ? "on" : "off")
+      << ")";
     return o;
 }
 
@@ -82,17 +82,16 @@ void EthernetEncapsulation::initialize(int stage)
         WATCH(seqNum);
         totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
         useSNAP = par("useSNAP");
-        networkInterface = findContainingNicModule(this);     //TODO or getContainingNicModule() ? or use a macaddresstable?
+        networkInterface = findContainingNicModule(this); // TODO or getContainingNicModule() ? or use a macaddresstable?
 
         WATCH_PTRMAP(socketIdToSocketMap);
         WATCH(totalFromHigherLayer);
         WATCH(totalFromMAC);
         WATCH(totalPauseSent);
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
-    {
-        if (par("registerProtocol").boolValue()) {    //FIXME //KUDGE should redesign place of EthernetEncapsulation and LLC modules
-            //register service and protocol
+    else if (stage == INITSTAGE_LINK_LAYER) {
+        if (par("registerProtocol").boolValue()) { // FIXME //KUDGE should redesign place of EthernetEncapsulation and LLC modules
+            // register service and protocol
             registerService(Protocol::ethernetMac, gate("upperLayerIn"), gate("upperLayerOut"));
         }
     }

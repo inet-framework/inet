@@ -28,7 +28,7 @@
 #ifndef EIGRPNEIGHBOR_H_
 #define EIGRPNEIGHBOR_H_
 
-//IPv6 ready
+// IPv6 ready
 
 #include <omnetpp.h>
 
@@ -71,7 +71,7 @@ class EigrpNeighbor : public cObject
      * Sets timer for a neighbor
      */
     void setHoldTimer(EigrpTimer *holdt) { ASSERT(this->holdt == NULL); this->holdt = holdt; }
-    void setNeighborId(int neighborId) {  this->neighborId = neighborId; }
+    void setNeighborId(int neighborId) { this->neighborId = neighborId; }
     void setSeqNumber(int seqNumber) { this->seqNumber = seqNumber; }
     void setAck(uint32_t waitForAck) { this->waitForAck = waitForAck; }
     void setRoutesForDeletion(bool routesForDeletion) { this->routesForDeletion = routesForDeletion; }
@@ -92,6 +92,7 @@ class EigrpNeighbor : public cObject
 
     const char *getIfaceName() const { return ifaceName; }
 };
-} //eigrp
-} //inet
+} // eigrp
+} // inet
 #endif /* EIGRPNEIGHBORTABLE_H_ */
+

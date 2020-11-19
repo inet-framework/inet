@@ -151,7 +151,7 @@ void RadioMedium::finish()
     recordScalar("reception result cache hit", resultCacheHitPercentage, "%");
 }
 
-std::ostream& RadioMedium::printToStream(std::ostream &stream, int level, int evFlags) const
+std::ostream& RadioMedium::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << static_cast<const cSimpleModule *>(this);
     if (level <= PRINT_LEVEL_TRACE) {
@@ -307,7 +307,7 @@ const IReceptionResult *RadioMedium::computeReceptionResult(const IRadio *radio,
     const IInterference *interference = getInterference(radio, listening, transmission);
     const ISnir *snir = getSNIR(radio, transmission);
     const IReceptionDecision *receptionDecision = getReceptionDecision(radio, listening, transmission, IRadioSignal::SIGNAL_PART_WHOLE);
-    const std::vector<const IReceptionDecision *> *receptionDecisions = new std::vector<const IReceptionDecision *> {receptionDecision};
+    const std::vector<const IReceptionDecision *> *receptionDecisions = new std::vector<const IReceptionDecision *> { receptionDecision };
     return radio->getReceiver()->computeReceptionResult(listening, reception, interference, snir, receptionDecisions);
 }
 
@@ -622,7 +622,7 @@ bool RadioMedium::isPotentialReceiver(const IRadio *radio, const ITransmission *
         return false;
     else if (listeningFilter && radio->getReceiver() != nullptr && !radio->getReceiver()->computeIsReceptionPossible(getListening(radio, transmission), transmission))
         return false;
-    // TODO: where is the tag?
+    // TODO where is the tag?
     else if (macAddressFilter && !matchesMacAddressFilter(radio, transmission->getPacket()))
         return false;
     else if (rangeFilter == RANGE_FILTER_INTERFERENCE_RANGE) {
@@ -641,7 +641,7 @@ bool RadioMedium::isReceptionPossible(const IRadio *receiver, const ITransmissio
 {
     const IReception *reception = getReception(receiver, transmission);
     const IListening *listening = getListening(receiver, transmission);
-    // TODO: why compute?
+    // TODO why compute?
     const IInterference *interference = computeInterference(receiver, listening, transmission);
     bool isReceptionPossible = receiver->getReceiver()->computeIsReceptionAttempted(listening, reception, part, interference);
     delete interference;
@@ -652,7 +652,7 @@ bool RadioMedium::isReceptionAttempted(const IRadio *receiver, const ITransmissi
 {
     const IReception *reception = getReception(receiver, transmission);
     const IListening *listening = getListening(receiver, transmission);
-    // TODO: why compute?
+    // TODO why compute?
     const IInterference *interference = computeInterference(receiver, listening, transmission);
     bool isReceptionAttempted = receiver->getReceiver()->computeIsReceptionAttempted(listening, reception, part, interference);
     delete interference;
@@ -663,7 +663,7 @@ bool RadioMedium::isReceptionSuccessful(const IRadio *receiver, const ITransmiss
 {
     const IReception *reception = getReception(receiver, transmission);
     const IListening *listening = getListening(receiver, transmission);
-    // TODO: why compute?
+    // TODO why compute?
     const IInterference *interference = computeInterference(receiver, listening, transmission);
     const ISnir *snir = getSNIR(receiver, transmission);
     bool isReceptionSuccessful = receiver->getReceiver()->computeIsReceptionSuccessful(listening, reception, part, interference, snir);

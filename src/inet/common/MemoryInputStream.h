@@ -32,10 +32,11 @@ using namespace units::values;
  * provides a set of read functions that read data at the current position of
  * the stream. Most functions are implemented in the header to allow inlining.
  */
-// TODO: allow arbitrary mixed bit/byte reads
-// TODO: add parameter checks
-// TODO: review efficiency
-class INET_API MemoryInputStream {
+// TODO allow arbitrary mixed bit/byte reads
+// TODO add parameter checks
+// TODO review efficiency
+class INET_API MemoryInputStream
+{
   protected:
     /**
      * This vector contains the bits that are read from this stream. The first
@@ -425,7 +426,7 @@ class INET_API MemoryInputStream {
      */
     Ipv6Address readIpv6Address() {
         uint32_t d[4];
-        for (auto & element : d)
+        for (auto& element : d)
             element = readUint32Be();
         return Ipv6Address(d[0], d[1], d[2], d[3]);
     }

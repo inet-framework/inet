@@ -22,7 +22,7 @@ namespace inet {
 
 namespace dymo {
 
-// TODO: use generic MANET port
+// TODO use generic MANET port
 #define DYMO_UDP_PORT    269
 
 typedef uint32_t DymoSequenceNumber;

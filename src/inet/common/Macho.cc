@@ -46,7 +46,7 @@ void MACHO_TRC3(const char *state, const char *msg1, const char *msg2)
 #define MACHO_TRC2(STATE, MSG)
 #define MACHO_TRC3(STATE, MSG1, MSG2)
 
-#endif    //  MACHO_TRACE
+#endif //  MACHO_TRACE
 
 ////////////////////////////////////////////////////////////////////////////////
 // Box for states which don't declare own Box class.
@@ -383,15 +383,14 @@ void _MachineBase::rattleOn()
 
             assert("Init may only transition to proper substates" &&
                     (!myPendingState ||
-                     (myPendingState->isChild(*myCurrentState) && (myCurrentState != myPendingState)))
-                    );
+                     (myPendingState->isChild(*myCurrentState) && (myCurrentState != myPendingState))));
 
 #ifndef NDEBUG
             // Clear dummy event if need be
             if (myPendingEvent == (_IEventBase *)&myPendingEvent)
                 myPendingEvent = nullptr;
 #endif // ifndef NDEBUG
-        }    // while (myPendingState)
+        } // while (myPendingState)
 
         if (myPendingEvent) {
             _IEventBase *event = myPendingEvent;
@@ -399,8 +398,8 @@ void _MachineBase::rattleOn()
             event->dispatch(*myCurrentState);
             delete event;
         }
-    }    // while (myPendingState || myPendingEvent)
-}    // rattleOn
+    } // while (myPendingState || myPendingEvent)
+} // rattleOn
 
 ////////////////////////////////////////////////////////////////////////////////
 // Implementation for _AdaptingInitializer

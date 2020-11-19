@@ -57,7 +57,7 @@ class INET_API InfoOsgVisualizer : public InfoVisualizerBase
     virtual void initialize(int stage) override {}
 
     virtual InfoVisualization *createInfoVisualization(cModule *module) const override { return nullptr; }
-    virtual void refreshInfoVisualization(const InfoVisualization *infoVisualization, const char *info) const override { }
+    virtual void refreshInfoVisualization(const InfoVisualization *infoVisualization, const char *info) const override {}
 
 #endif // ifdef WITH_OSG
 };

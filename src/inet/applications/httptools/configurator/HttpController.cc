@@ -25,7 +25,6 @@ namespace httptools {
 
 Define_Module(HttpController);
 
-
 HttpController::HttpController() :
     rdServerSelection(nullptr)
 {
@@ -34,7 +33,7 @@ HttpController::HttpController() :
 HttpController::~HttpController()
 {
     // Clean up the server references
-    for (auto & elem : webSiteList)
+    for (auto& elem : webSiteList)
         delete elem.second;
 
     delete rdServerSelection;
@@ -66,7 +65,7 @@ void HttpController::initialize(int stage)
             throw cRuntimeError("Server popularity distribution random object could not be created");
         EV_INFO << "Using " << rdServerSelection->typeStr() << " for server popularity distribution." << endl;
 
-        pspecial = 0.0;    // No special events by default
+        pspecial = 0.0; // No special events by default
         totalLookups = 0;
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
@@ -157,7 +156,7 @@ void HttpController::registerServer(HttpServerBase *serverAppModule, const char 
             pickList.push_back(en);
         }
         else {
-            pos = (int)uniform(0, pickList.size() - 1);         //FIXME pos = intuniform(0, pickList.size() - 1);
+            pos = (int)uniform(0, pickList.size() - 1); // FIXME pos = intuniform(0, pickList.size() - 1);
             pickList.insert(begin + pos, en);
         }
     }
@@ -179,7 +178,7 @@ cModule *HttpController::getServerModule(const char *wwwName)
 
     std::string serverUrl = extractServerName(wwwName);
 
-    if (webSiteList.find(serverUrl) == webSiteList.end()) {    // The www name is not in the map
+    if (webSiteList.find(serverUrl) == webSiteList.end()) { // The www name is not in the map
         EV_ERROR << "Could not find module name for " << wwwName << endl;
         return nullptr;
     }
@@ -226,7 +225,7 @@ int HttpController::getServerInfo(const char *wwwName, char *module, int& port)
 
     std::string serverUrl = extractServerName(wwwName);
 
-    if (webSiteList.find(serverUrl) == webSiteList.end()) {    // The www name is not in the map
+    if (webSiteList.find(serverUrl) == webSiteList.end()) { // The www name is not in the map
         EV_ERROR << "Could not find module name for " << wwwName << endl;
         return -1;
     }
@@ -274,7 +273,7 @@ int HttpController::getAnyServerInfo(char *wwwName, char *module, int& port)
 
 void HttpController::setSpecialStatus(const char *www, ServerStatus status, double p, double amortize)
 {
-    if (webSiteList.find(www) == webSiteList.end()) {    // The www name is not in the map
+    if (webSiteList.find(www) == webSiteList.end()) { // The www name is not in the map
         EV_ERROR << "Could not find module name for " << www << ". Cannot set special status" << endl;
         return;
     }
@@ -331,7 +330,7 @@ HttpController::WebServerEntry *HttpController::selectFromSpecialList()
     if (specialList.size() > 1) {
         double p = uniform(0, 1);
         double pcumulative = 0.0;
-        for (auto & elem : specialList) {
+        for (auto& elem : specialList) {
             en = (elem);
             pcumulative += en->pvalue;
             if (pcumulative / pspecial > p)
@@ -373,7 +372,7 @@ std::string HttpController::listSpecials()
 {
     std::ostringstream str;
     WebServerEntry *en;
-    for (auto & elem : specialList) {
+    for (auto& elem : specialList) {
         en = (elem);
         str << en->name << ";" << en->host << ";" << en->port << ";" << en->serverStatus
             << ";" << en->pvalue << ";" << en->pamortize << endl;
@@ -385,7 +384,7 @@ std::string HttpController::listPickOrder()
 {
     std::ostringstream str;
     WebServerEntry *en;
-    for (auto & elem : pickList) {
+    for (auto& elem : pickList) {
         en = (elem);
         str << en->name << ";" << en->host << ";" << en->port << ";" << en->serverStatus
             << ";" << en->pvalue << ";" << en->pamortize << endl;

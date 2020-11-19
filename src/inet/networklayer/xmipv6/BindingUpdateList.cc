@@ -98,7 +98,7 @@ BindingUpdateList::~BindingUpdateList()
 
 void BindingUpdateList::initialize()
 {
-    WATCH_MAP(bindingUpdateList);    //added by Zarrar Yousaf
+    WATCH_MAP(bindingUpdateList); // added by Zarrar Yousaf
 }
 
 void BindingUpdateList::handleMessage(cMessage *msg)
@@ -106,7 +106,7 @@ void BindingUpdateList::handleMessage(cMessage *msg)
     throw cRuntimeError("This module doesn't process messages");
 }
 
-void BindingUpdateList::addOrUpdateBUL(const Ipv6Address& dest, const Ipv6Address& hoa, const Ipv6Address& coa, const uint lifetime, const uint seq, const simtime_t buSentTime)    //,const simtime_t& nextBUSentTime)
+void BindingUpdateList::addOrUpdateBUL(const Ipv6Address& dest, const Ipv6Address& hoa, const Ipv6Address& coa, const uint lifetime, const uint seq, const simtime_t buSentTime) // ,const simtime_t& nextBUSentTime)
 {
     // modified structure - CB
 
@@ -126,12 +126,12 @@ void BindingUpdateList::addOrUpdateBUL(const Ipv6Address& dest, const Ipv6Addres
     entry->homeAddress = hoa;
     entry->careOfAddress = coa;
     // update lifetime 11.06.08 - CB
-    entry->bindingLifetime = lifetime;    // for the moment a constant but then it is supposed to decrement with time.
-    entry->bindingExpiry = simTime() + lifetime;    // binding expires at this point in time
-    //TODO bindingUpdateList[dest].remainingLifetime = ;
-    entry->sentTime = buSentTime;    //the time at which the BU, whose ack is awaited is sent
-    //entry->nextBUTx = nextBUSentTime; //the nextScgheduledTime at which the BU will be sent in case of timeout.
-    entry->sequenceNumber = seq;    //seq number of the last BU sent.
+    entry->bindingLifetime = lifetime; // for the moment a constant but then it is supposed to decrement with time.
+    entry->bindingExpiry = simTime() + lifetime; // binding expires at this point in time
+    // TODO bindingUpdateList[dest].remainingLifetime = ;
+    entry->sentTime = buSentTime; // the time at which the BU, whose ack is awaited is sent
+//    entry->nextBUTx = nextBUSentTime; //the nextScgheduledTime at which the BU will be sent in case of timeout.
+    entry->sequenceNumber = seq; // seq number of the last BU sent.
     entry->BAck = false;
 }
 
@@ -140,7 +140,7 @@ BindingUpdateList::BindingUpdateListEntry *BindingUpdateList::createBULEntry(con
     bindingUpdateList[dest].destAddress = dest;
 
     BindingUpdateListEntry& entry = bindingUpdateList[dest];
-    //BindingUpdateList::BindingUpdateListEntry* entry = & bindingUpdateList[dest];
+//    BindingUpdateList::BindingUpdateListEntry* entry = & bindingUpdateList[dest];
     initializeBUValues(entry);
 
     return &entry;
@@ -151,9 +151,9 @@ void BindingUpdateList::initializeBUValues(BindingUpdateListEntry& entry)
     // normal BU values
     entry.bindingLifetime = 0;
     entry.bindingExpiry = 0;
-    //TODO bindingUpdateList[dest].remainingLifetime = ;
+    // TODO bindingUpdateList[dest].remainingLifetime = ;
     entry.sentTime = 0;
-    //entry.nextBUTx = 0;
+//    entry.nextBUTx = 0;
     entry.sequenceNumber = 0;
     entry.BAck = false;
 
@@ -162,7 +162,7 @@ void BindingUpdateList::initializeBUValues(BindingUpdateListEntry& entry)
     entry.sentCoTI = 0;
     entry.cookieHoTI = UNDEFINED_COOKIE;
     entry.cookieCoTI = UNDEFINED_COOKIE;
-    //entry.sendNext = 0;
+//    entry.sendNext = 0;
     entry.tokenH = UNDEFINED_TOKEN;
     entry.tokenC = UNDEFINED_TOKEN;
     // 21.07.08 - CB
@@ -183,12 +183,12 @@ void BindingUpdateList::addOrUpdateBUL(const Ipv6Address& dest, const Ipv6Addres
         initializeBUValues(*entry);
     }
 
-    if (HoTI) {    // those values are from the HoTI message
+    if (HoTI) { // those values are from the HoTI message
         entry->homeAddress = addr;
         entry->sentHoTI = sentTime;
         entry->cookieHoTI = cookie;
     }
-    else {    // and those from the CoTI
+    else { // and those from the CoTI
         entry->careOfAddress = addr;
         entry->sentCoTI = sentTime;
         entry->cookieCoTI = cookie;
@@ -265,7 +265,7 @@ void BindingUpdateList::resetHomeToken(const Ipv6Address& dest, const Ipv6Addres
     ASSERT(entry != nullptr);
 
     entry->tokenH = UNDEFINED_TOKEN;
-    //entry->sentHoTI = 0;
+//    entry->sentHoTI = 0;
 }
 
 void BindingUpdateList::resetCareOfToken(const Ipv6Address& dest, const Ipv6Address& hoa)
@@ -274,7 +274,7 @@ void BindingUpdateList::resetCareOfToken(const Ipv6Address& dest, const Ipv6Addr
     ASSERT(entry != nullptr);
 
     entry->tokenC = UNDEFINED_TOKEN;
-    //entry->sentCoTI = 0;
+//    entry->sentCoTI = 0;
 }
 
 bool BindingUpdateList::isHomeTokenAvailable(const Ipv6Address& dest, NetworkInterface *ie)
@@ -407,10 +407,10 @@ void BindingUpdateList::resetBindingCacheEntry(BindingUpdateListEntry& entry)
 {
     entry.bindingLifetime = 0;
     entry.bindingExpiry = 0;
-    //entry.remainingLifetime = 0;
-    //entry.sequenceNumber = 0;
+//    entry.remainingLifetime = 0;
+//    entry.sequenceNumber = 0;
     entry.sentTime = 0;
-    //entry.nextBUTx = 0;
+//    entry.nextBUTx = 0;
     entry.BAck = false;
     entry.state = NONE;
 

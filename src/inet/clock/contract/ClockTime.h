@@ -26,12 +26,12 @@
 namespace inet {
 
 #ifdef WITH_CLOCK_SUPPORT
-#define CLOCKTIME_AS_SIMTIME(x) (x).asSimTime()
-#define SIMTIME_AS_CLOCKTIME(x) ClockTime::from(x)
+#define CLOCKTIME_AS_SIMTIME(x)    (x).asSimTime()
+#define SIMTIME_AS_CLOCKTIME(x)    ClockTime::from(x)
 #else
-#define ClockTime SimTime
-#define CLOCKTIME_AS_SIMTIME(x)  (x)
-#define SIMTIME_AS_CLOCKTIME(x)  (x)
+#define ClockTime                  SimTime
+#define CLOCKTIME_AS_SIMTIME(x)    (x)
+#define SIMTIME_AS_CLOCKTIME(x)    (x)
 #endif // WITH_CLOCK_SUPPORT
 
 typedef ClockTime clocktime_t;
@@ -39,13 +39,13 @@ typedef ClockTime clocktime_t;
 /**
  * The maximum representable simulation time with the current resolution.
  */
-#define CLOCKTIME_MAX    ClockTime::getMaxTime()
+#define CLOCKTIME_MAX     ClockTime::getMaxTime()
 
 /**
  * Constant for zero simulation time. Using CLOCKTIME_ZERO can be more efficient
  * than using the 0 constant.
  */
-#define CLOCKTIME_ZERO   ClockTime::ZERO
+#define CLOCKTIME_ZERO    ClockTime::ZERO
 
 } // namespace inet
 

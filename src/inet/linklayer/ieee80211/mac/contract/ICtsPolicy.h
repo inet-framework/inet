@@ -26,11 +26,11 @@ namespace ieee80211 {
 
 class INET_API ICtsPolicy
 {
-    public:
-        virtual ~ICtsPolicy() { }
+  public:
+    virtual ~ICtsPolicy() {}
 
-        virtual bool isCtsNeeded(const Ptr<const Ieee80211RtsFrame>& rtsFrame) const = 0;
-        virtual simtime_t computeCtsDurationField(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const = 0;
+    virtual bool isCtsNeeded(const Ptr<const Ieee80211RtsFrame>& rtsFrame) const = 0;
+    virtual simtime_t computeCtsDurationField(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const = 0;
 };
 
 } // namespace ieee80211

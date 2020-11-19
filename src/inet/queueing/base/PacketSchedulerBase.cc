@@ -41,7 +41,7 @@ void PacketSchedulerBase::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        for (auto & inputGate : inputGates)
+        for (auto& inputGate : inputGates)
             checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
     }
@@ -49,7 +49,7 @@ void PacketSchedulerBase::initialize(int stage)
 
 int PacketSchedulerBase::callSchedulePacket() const
 {
-    // KLUDGE:
+    // KLUDGE
     int index = const_cast<PacketSchedulerBase *>(this)->schedulePacket();
     if (index < 0 || static_cast<unsigned int>(index) >= inputGates.size())
         throw cRuntimeError("Scheduled packet from invalid input gate: %d", index);

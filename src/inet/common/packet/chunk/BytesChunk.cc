@@ -94,7 +94,7 @@ const Ptr<Chunk> BytesChunk::convertChunk(const std::type_info& typeInfo, const 
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= resultLength && resultLength <= chunkLength);
     MemoryOutputStream outputStream(chunkLength);
     Chunk::serialize(outputStream, chunk, offset, resultLength);
-    // TODO: this can return data which is contains garbage because the data length is not divisible by 8
+    // TODO this can return data which is contains garbage because the data length is not divisible by 8
     return makeShared<BytesChunk>(outputStream.getData());
 }
 
@@ -188,10 +188,11 @@ std::ostream& BytesChunk::printFieldsToStream(std::ostream& stream, int level, i
             stream << ", ";
         else
             first = false;
-        stream << (int) (byte);
+        stream << (int)(byte);
     }
     stream << "}";
     return stream;
 }
 
 } // namespace
+

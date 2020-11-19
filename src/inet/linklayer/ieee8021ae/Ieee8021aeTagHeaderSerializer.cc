@@ -32,7 +32,7 @@ void Ieee8021aeTagTpidHeaderSerializer::serialize(MemoryOutputStream& stream, co
     stream.writeByte(header->getTciAn());
     stream.writeByte(header->getSl());
     stream.writeUint32Be(header->getPn());
-    // stream.writeUint64Be(header->getSci());
+//    stream.writeUint64Be(header->getSci());
 }
 
 const Ptr<Chunk> Ieee8021aeTagTpidHeaderSerializer::deserialize(MemoryInputStream& stream) const

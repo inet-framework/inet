@@ -33,7 +33,7 @@ void DimensionalAnalogModelBase::initialize(int stage)
 {
     AnalogModelBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        attenuateWithCenterFrequency = par("attenuateWithCenterFrequency"); // TODO: rename center
+        attenuateWithCenterFrequency = par("attenuateWithCenterFrequency"); // TODO rename center
 }
 
 const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
@@ -60,7 +60,7 @@ const Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> DimensionalAnalogModelBase:
     else {
         Hz lower = dimensionalTransmission->getCenterFrequency() - dimensionalTransmission->getBandwidth() / 2;
         Hz upper = dimensionalTransmission->getCenterFrequency() + dimensionalTransmission->getBandwidth() / 2;
-        Hz step = dimensionalTransmission->getBandwidth() / 10; // TODO: parameter for 10
+        Hz step = dimensionalTransmission->getBandwidth() / 10; // TODO parameter for 10
         const auto& approximatedAttenuationFunction = makeShared<ApproximatedFunction<double, Domain<simsec, Hz>, 1, Hz>>(lower, upper, step, &AverageInterpolator<Hz, double>::singleton, attenuationFunction);
         receptionPower = propagatedTransmissionPowerFunction->multiply(approximatedAttenuationFunction);
     }
@@ -82,7 +82,7 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IListening *listeni
         receptionPowers.push_back(backgroundNoisePower);
     }
     const std::vector<const IReception *> *interferingReceptions = interference->getInterferingReceptions();
-    for (const auto & interferingReception : *interferingReceptions) {
+    for (const auto& interferingReception : *interferingReceptions) {
         const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(interferingReception);
         auto receptionPower = dimensionalReception->getPower();
         receptionPowers.push_back(receptionPower);

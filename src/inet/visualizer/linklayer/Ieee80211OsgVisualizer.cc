@@ -69,7 +69,7 @@ Ieee80211VisualizerBase::Ieee80211Visualization *Ieee80211OsgVisualizer::createI
     geometry->setColorArray(colorArray, osg::Array::BIND_OVERALL);
     auto geode = new osg::Geode();
     geode->addDrawable(geometry);
-    // TODO: apply tinting
+    // TODO apply tinting
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     if (networkNodeVisualization == nullptr)
         throw cRuntimeError("Cannot create IEEE 802.11 visualization for '%s', because network node visualization is not found for '%s'", networkInterface->getInterfaceName(), networkNode->getFullPath().c_str());

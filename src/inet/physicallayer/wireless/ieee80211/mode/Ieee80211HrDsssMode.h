@@ -89,7 +89,7 @@ class INET_API Ieee80211HrDsssDataMode : public IIeee80211DataMode
     virtual b getPaddingLength(b dataLength) const override { return b(0); }
     virtual b getCompleteLength(b dataLength) const override { return dataLength; }
     virtual const simtime_t getDuration(b length) const override;
-    virtual IModulation *getModulation() const override { return nullptr; } // TODO:
+    virtual IModulation *getModulation() const override { return nullptr; } // TODO
     virtual int getNumberOfSpatialStreams() const override { return 1; }
 };
 
@@ -122,7 +122,7 @@ class INET_API Ieee80211HrDsssMode : public Ieee80211ModeBase
 
     virtual inline const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + headerMode->getDuration() + dataMode->getDuration(dataLength); }
 
-    // TODO: fill in
+    // TODO fill in
     virtual inline const simtime_t getSlotTime() const override { return 20E-6; }
     virtual inline const simtime_t getSifsTime() const override { return 10E-6; }
     virtual inline const simtime_t getCcaTime() const override { return 15E-6; }

@@ -54,7 +54,7 @@ class INET_API PimSplitter : public cSimpleModule
     virtual void processPIMPacket(Packet *pkt);
 };
 
-}    // namespace inet
+} // namespace inet
 
 #endif
 

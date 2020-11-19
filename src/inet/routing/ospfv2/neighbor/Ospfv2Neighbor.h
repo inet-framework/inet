@@ -39,51 +39,49 @@ class INET_API Neighbor
 
   public:
     enum NeighborEventType {
-        HELLO_RECEIVED = 0,
-        START = 1,
-        TWOWAY_RECEIVED = 2,
-        NEGOTIATION_DONE = 3,
-        EXCHANGE_DONE = 4,
-        BAD_LINK_STATE_REQUEST = 5,
-        LOADING_DONE = 6,
-        IS_ADJACENCY_OK = 7,
-        SEQUENCE_NUMBER_MISMATCH = 8,
-        ONEWAY_RECEIVED = 9,
-        KILL_NEIGHBOR = 10,
-        INACTIVITY_TIMER = 11,
-        POLL_TIMER = 12,
-        LINK_DOWN = 13,
-        DD_RETRANSMISSION_TIMER = 14,
-        UPDATE_RETRANSMISSION_TIMER = 15,
+        HELLO_RECEIVED               = 0,
+        START                        = 1,
+        TWOWAY_RECEIVED              = 2,
+        NEGOTIATION_DONE             = 3,
+        EXCHANGE_DONE                = 4,
+        BAD_LINK_STATE_REQUEST       = 5,
+        LOADING_DONE                 = 6,
+        IS_ADJACENCY_OK              = 7,
+        SEQUENCE_NUMBER_MISMATCH     = 8,
+        ONEWAY_RECEIVED              = 9,
+        KILL_NEIGHBOR                = 10,
+        INACTIVITY_TIMER             = 11,
+        POLL_TIMER                   = 12,
+        LINK_DOWN                    = 13,
+        DD_RETRANSMISSION_TIMER      = 14,
+        UPDATE_RETRANSMISSION_TIMER  = 15,
         REQUEST_RETRANSMISSION_TIMER = 16
     };
 
     enum NeighborStateType {
-        DOWN_STATE = 0,
-        ATTEMPT_STATE = 1,
-        INIT_STATE = 2,
-        TWOWAY_STATE = 4,
+        DOWN_STATE           = 0,
+        ATTEMPT_STATE        = 1,
+        INIT_STATE           = 2,
+        TWOWAY_STATE         = 4,
         EXCHANGE_START_STATE = 8,
-        EXCHANGE_STATE = 16,
-        LOADING_STATE = 32,
-        FULL_STATE = 64
+        EXCHANGE_STATE       = 16,
+        LOADING_STATE        = 32,
+        FULL_STATE           = 64
     };
 
     enum DatabaseExchangeRelationshipType {
         MASTER = 0,
-        SLAVE = 1
+        SLAVE  = 1
     };
 
-    struct DdPacketId
-    {
+    struct DdPacketId {
         Ospfv2DdOptions ddOptions;
         Ospfv2Options options;
         unsigned long sequenceNumber = 0;
     };
 
   private:
-    struct TransmittedLsa
-    {
+    struct TransmittedLsa {
         LsaKeyType lsaKey;
         unsigned short age;
     };
@@ -118,7 +116,7 @@ class INET_API Neighbor
 
     Ospfv2Interface *parentInterface = nullptr;
 
-    // TODO: Should come from a global unique number generator module.
+    // TODO Should come from a global unique number generator module.
     static unsigned long ddSequenceNumberInitSeed;
 
   private:

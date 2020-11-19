@@ -27,12 +27,12 @@ ProtocolPrinterRegistry::~ProtocolPrinterRegistry()
         delete it.second;
 }
 
-void ProtocolPrinterRegistry::registerProtocolPrinter(const Protocol* protocol, const ProtocolPrinter *printer)
+void ProtocolPrinterRegistry::registerProtocolPrinter(const Protocol *protocol, const ProtocolPrinter *printer)
 {
     protocolPrinters[protocol] = printer;
 }
 
-const ProtocolPrinter *ProtocolPrinterRegistry::findProtocolPrinter(const Protocol* protocol) const
+const ProtocolPrinter *ProtocolPrinterRegistry::findProtocolPrinter(const Protocol *protocol) const
 {
     auto it = protocolPrinters.find(protocol);
     if (it != protocolPrinters.end())
@@ -41,7 +41,7 @@ const ProtocolPrinter *ProtocolPrinterRegistry::findProtocolPrinter(const Protoc
         return nullptr;
 }
 
-const ProtocolPrinter *ProtocolPrinterRegistry::getProtocolPrinter(const Protocol* protocol) const
+const ProtocolPrinter *ProtocolPrinterRegistry::getProtocolPrinter(const Protocol *protocol) const
 {
     auto protocolPrinter = findProtocolPrinter(protocol);
     if (protocolPrinter != nullptr)
@@ -51,3 +51,4 @@ const ProtocolPrinter *ProtocolPrinterRegistry::getProtocolPrinter(const Protoco
 }
 
 } // namespace
+

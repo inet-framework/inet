@@ -49,65 +49,64 @@ typedef ObjectPrinterRecursionControl (*ObjectPrinterRecursionPredicate)(void *,
  */
 class INET_API ObjectPrinter
 {
-    protected:
-        int indentSize;
-        char buffer[1024];
-        std::vector<cMatchExpression*> objectMatchExpressions;
-        std::vector<std::vector<cMatchExpression*> > fieldNameMatchExpressionsList;
-        ObjectPrinterRecursionPredicate recursionPredicate;
+  protected:
+    int indentSize;
+    char buffer[1024];
+    std::vector<cMatchExpression *> objectMatchExpressions;
+    std::vector<std::vector<cMatchExpression *>> fieldNameMatchExpressionsList;
+    ObjectPrinterRecursionPredicate recursionPredicate;
 
-    public:
-        /**
-         * Accepts the parsed form of the pattern string. The two vectors
-         * must be of the same size. The contained MatchExpression objects
-         * will be deallocated by this ObjectPrinter.
-         */
-        ObjectPrinter(ObjectPrinterRecursionPredicate recursionPredicate,
-                      const std::vector<cMatchExpression*>& objectMatchExpressions,
-                      const std::vector<std::vector<cMatchExpression*> >& fieldNameMatchExpressionsList,
-                      int indentSize=4);
+  public:
+    /**
+     * Accepts the parsed form of the pattern string. The two vectors
+     * must be of the same size. The contained MatchExpression objects
+     * will be deallocated by this ObjectPrinter.
+     */
+    ObjectPrinter(ObjectPrinterRecursionPredicate recursionPredicate,
+                  const std::vector<cMatchExpression *>& objectMatchExpressions,
+                  const std::vector<std::vector<cMatchExpression *>>& fieldNameMatchExpressionsList,
+                  int indentSize = 4);
 
-        /**
-         * Pattern syntax is that of the "eventlog-message-detail-pattern"
-         * configuration entry -- see documentation there.
-         *
-         * Recommended pattern for packet printing:
-         * "*: not className and not fullName and not fullPath and not info and not rawBin and not rawHex"
-         *
-         * Just some examples here:
-         * "*":
-         *     captures all fields of all messages
-         * "*Msg | *Packet":
-         *     captures all fields of classes named AnythingMsg or AnythingPacket
-         * "*Frame:*Address,*Id":
-         *     captures all fields named anythingAddress and anythingId from
-         *     objects of any class named AnythingFrame
-         * "MyMessage:declaredOn(MyMessage)":
-         *     captures instances of MyMessage recording the fields
-         *     declared on the MyMessage class
-         * "*:(not declaredOn(cMessage) and not declaredOn(cNamedObject) and
-         * not declaredOn(cObject))":
-         *     records user-defined fields from all objects
-         */
-        ObjectPrinter(ObjectPrinterRecursionPredicate recursionPredicate=nullptr, const char *pattern="*", int indentSize=4);
+    /**
+     * Pattern syntax is that of the "eventlog-message-detail-pattern"
+     * configuration entry -- see documentation there.
+     *
+     * Recommended pattern for packet printing:
+     * "*: not className and not fullName and not fullPath and not info and not rawBin and not rawHex"
+     *
+     * Just some examples here:
+     * "*":
+     *     captures all fields of all messages
+     * "*Msg | *Packet":
+     *     captures all fields of classes named AnythingMsg or AnythingPacket
+     * "*Frame:*Address,*Id":
+     *     captures all fields named anythingAddress and anythingId from
+     *     objects of any class named AnythingFrame
+     * "MyMessage:declaredOn(MyMessage)":
+     *     captures instances of MyMessage recording the fields
+     *     declared on the MyMessage class
+     * "*:(not declaredOn(cMessage) and not declaredOn(cNamedObject) and
+     * not declaredOn(cObject))":
+     *     records user-defined fields from all objects
+     */
+    ObjectPrinter(ObjectPrinterRecursionPredicate recursionPredicate = nullptr, const char *pattern = "*", int indentSize = 4);
 
-        /**
-         * Destructor.
-         */
-        ~ObjectPrinter();
+    /**
+     * Destructor.
+     */
+    ~ObjectPrinter();
 
-        void printObjectToStream(std::ostream& ostream, cObject *object);
+    void printObjectToStream(std::ostream& ostream, cObject *object);
 
-        std::string printObjectToString(cObject *object);
+    std::string printObjectToString(cObject *object);
 
-    protected:
-        void printIndent(std::ostream& ostream, int level);
-        void printObjectToStream(std::ostream& ostream, void *object, cClassDescriptor *descriptor, void **objects, int level);
-        bool matchesObjectField(cObject *object, int fieldIndex);
+  protected:
+    void printIndent(std::ostream& ostream, int level);
+    void printObjectToStream(std::ostream& ostream, void *object, cClassDescriptor *descriptor, void **objects, int level);
+    bool matchesObjectField(cObject *object, int fieldIndex);
 };
 
-}  // namespace inet
-
+} // namespace inet
 
 #endif
 

@@ -30,7 +30,7 @@ DcTcpFamilyStateVariables::DcTcpFamilyStateVariables()
     dctcp_windEnd = snd_una;
     dctcp_bytesAcked = 0;
     dctcp_bytesMarked = 0;
-    dctcp_gamma = 0.0625;   // 1/16 (backup 0.16) TODO make it NED parameter;
+    dctcp_gamma = 0.0625; // 1/16 (backup 0.16) TODO make it NED parameter;
 }
 
 std::string DcTcpFamilyStateVariables::str() const
@@ -58,7 +58,7 @@ std::string DcTcpFamilyStateVariables::detailedInfo() const
     return out.str();
 }
 
-//---
+// ---
 
 DcTcpFamily::DcTcpFamily() : TcpTahoeRenoFamily(),
     state((DcTcpFamilyStateVariables *&)TcpTahoeRenoFamily::state)

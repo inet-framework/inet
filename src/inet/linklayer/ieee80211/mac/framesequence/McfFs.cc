@@ -27,7 +27,7 @@ McfFs::McfFs() :
     // mcf-sequence =
     //   ( [ CTS ] |{( Data + group + QoS ) | Management + broadcast } ) | ( [ CTS ] 1{txop-sequence} ) |
     //   group-mccaop-abandon;
-    AlternativesFs({/* TODO: */},
+    AlternativesFs({/* TODO */},
                    ALTERNATIVESFS_SELECTOR(selectMcfSequence))
 {
 }

@@ -103,7 +103,7 @@ void Gpsr::initialize(int stage)
         purgeNeighborsTimer = new cMessage("PurgeNeighborsTimer");
         // packet size
         positionByteLength = par("positionByteLength");
-        // KLUDGE: implement position registry protocol
+        // KLUDGE implement position registry protocol
         globalPositionTable.clear();
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
@@ -251,6 +251,7 @@ void Gpsr::processBeacon(Packet *packet)
     neighborPositionTable.setPosition(beacon->getAddress(), beacon->getPosition());
     delete packet;
 }
+
 //
 // handling packets
 //
@@ -297,18 +298,18 @@ void Gpsr::configureInterfaces()
 // position
 //
 
-// KLUDGE: implement position registry protocol
+// KLUDGE implement position registry protocol
 PositionTable Gpsr::globalPositionTable;
 
 Coord Gpsr::lookupPositionInGlobalRegistry(const L3Address& address) const
 {
-    // KLUDGE: implement position registry protocol
+    // KLUDGE implement position registry protocol
     return globalPositionTable.getPosition(address);
 }
 
 void Gpsr::storePositionInGlobalRegistry(const L3Address& address, const Coord& position) const
 {
-    // KLUDGE: implement position registry protocol
+    // KLUDGE implement position registry protocol
     globalPositionTable.setPosition(address, position);
 }
 
@@ -380,7 +381,7 @@ std::string Gpsr::getHostName() const
 
 L3Address Gpsr::getSelfAddress() const
 {
-    //TODO choose self address based on a new 'interfaces' parameter
+    // TODO choose self address based on a new 'interfaces' parameter
     L3Address ret = routingTable->getRouterIdAsGeneric();
 #ifdef WITH_IPv6
     if (ret.getType() == L3Address::IPv6) {
@@ -434,7 +435,7 @@ std::vector<L3Address> Gpsr::getPlanarNeighbors() const
             return neighborAddresses;
         else if (planarizationMode == GPSR_RNG_PLANARIZATION) {
             double neighborDistance = (neighborPosition - selfPosition).length();
-            for (auto & witnessAddress : neighborAddresses) {
+            for (auto& witnessAddress : neighborAddresses) {
                 Coord witnessPosition = neighborPositionTable.getPosition(witnessAddress);
                 double witnessDistance = (witnessPosition - selfPosition).length();
                 double neighborWitnessDistance = (witnessPosition - neighborPosition).length();
@@ -447,7 +448,7 @@ std::vector<L3Address> Gpsr::getPlanarNeighbors() const
         else if (planarizationMode == GPSR_GG_PLANARIZATION) {
             Coord middlePosition = (selfPosition + neighborPosition) / 2;
             double neighborDistance = (neighborPosition - middlePosition).length();
-            for (auto & witnessAddress : neighborAddresses) {
+            for (auto& witnessAddress : neighborAddresses) {
                 Coord witnessPosition = neighborPositionTable.getPosition(witnessAddress);
                 double witnessDistance = (witnessPosition - middlePosition).length();
                 if (neighborAddress == witnessAddress)
@@ -467,7 +468,7 @@ std::vector<L3Address> Gpsr::getPlanarNeighbors() const
 std::vector<L3Address> Gpsr::getPlanarNeighborsCounterClockwise(double startAngle) const
 {
     std::vector<L3Address> neighborAddresses = getPlanarNeighbors();
-    std::sort(neighborAddresses.begin(), neighborAddresses.end(), [&](const L3Address& address1, const L3Address& address2) {
+    std::sort(neighborAddresses.begin(), neighborAddresses.end(), [&] (const L3Address& address1, const L3Address& address2) {
         // NOTE: make sure the neighbor at startAngle goes to the end
         auto angle1 = getNeighborAngle(address1) - startAngle;
         auto angle2 = getNeighborAngle(address2) - startAngle;
@@ -760,7 +761,7 @@ INetfilter::IHook::Result Gpsr::datagramPreRoutingHook(Packet *datagram)
     if (destination.isMulticast() || destination.isBroadcast() || routingTable->isLocalAddress(destination))
         return ACCEPT;
     else {
-        // KLUDGE: this allows overwriting the GPSR option inside
+        // KLUDGE this allows overwriting the GPSR option inside
         auto gpsrOption = const_cast<GpsrOption *>(getGpsrOptionFromNetworkDatagram(networkHeader));
         return routeDatagram(datagram, gpsrOption);
     }
@@ -793,7 +794,7 @@ void Gpsr::handleStartOperation(LifecycleOperation *operation)
 
 void Gpsr::handleStopOperation(LifecycleOperation *operation)
 {
-    // TODO: send a beacon to remove ourself from peers neighbor position table
+    // TODO send a beacon to remove ourself from peers neighbor position table
     neighborPositionTable.clear();
     cancelEvent(beaconTimer);
     cancelEvent(purgeNeighborsTimer);
@@ -815,7 +816,7 @@ void Gpsr::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
     Enter_Method("receiveChangeNotification");
     if (signalID == linkBrokenSignal) {
         EV_WARN << "Received link break" << endl;
-        // TODO: remove the neighbor
+        // TODO remove the neighbor
     }
 }
 

@@ -96,7 +96,6 @@ struct pbuf {
    * the stack itself, or pbuf->next pointers from a chain.
    */
   u16_t ref;
-
 };
 
 /* Initializes the pbuf module. This call is empty for now, but may not be in future. */

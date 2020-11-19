@@ -91,7 +91,7 @@ bool DscpMarker::markPacket(Packet *packet, int dscp)
 
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
 
-    //TODO processing link-layer headers when exists
+    // TODO processing link-layer headers when exists
 
 #ifdef WITH_IPv4
     if (protocol == &Protocol::ipv4) {
@@ -117,3 +117,4 @@ bool DscpMarker::markPacket(Packet *packet, int dscp)
 }
 
 } // namespace inet
+

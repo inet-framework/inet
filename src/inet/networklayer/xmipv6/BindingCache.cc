@@ -47,7 +47,7 @@ BindingCache::~BindingCache()
 
 void BindingCache::initialize()
 {
-    WATCH_MAP(bindingCache);    //added by Zarrar Yousaf
+    WATCH_MAP(bindingCache); // added by Zarrar Yousaf
 }
 
 void BindingCache::handleMessage(cMessage *msg)
@@ -67,7 +67,7 @@ void BindingCache::addOrUpdateBC(const Ipv6Address& hoa, const Ipv6Address& coa,
 
 uint BindingCache::readBCSequenceNumber(const Ipv6Address& HoA) const
 {
-    //Reads the sequence number of the last received BU Message
+    // Reads the sequence number of the last received BU Message
     /*Ipv6Address HoA = bu->getHomeAddressMN();
        uint seqNumber = bindingCache[HoA].sequenceNumber;
        return seqNumber;*/
@@ -90,7 +90,7 @@ bool BindingCache::isInBindingCache(const Ipv6Address& HoA, const Ipv6Address& C
     if (pos == bindingCache.end())
         return false; // if HoA is not registered then there's obviously no valid entry in the BC
 
-    return pos->second.careOfAddress == CoA;    // if CoA corresponds to HoA, everything is fine
+    return pos->second.careOfAddress == CoA; // if CoA corresponds to HoA, everything is fine
 }
 
 bool BindingCache::isInBindingCache(const Ipv6Address& HoA) const

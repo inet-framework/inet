@@ -35,5 +35,5 @@ void Ospfv3NeighborStateAttempt::processEvent(Ospfv3Neighbor *neighbor, Ospfv3Ne
 }
 
 } // namespace ospfv3
-}//namespace inet
+} // namespace inet
 

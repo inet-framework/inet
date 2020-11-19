@@ -57,7 +57,7 @@ void Ospfv2::initialize(int stage)
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         startupTimer = new cMessage("OSPF-startup");
     }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {  // interfaces and static routes are already initialized
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) { // interfaces and static routes are already initialized
         registerProtocol(Protocol::ospf, gate("ipOut"), gate("ipIn"));
     }
 }
@@ -179,7 +179,7 @@ void Ospfv2::insertExternalRoute(int ifIndex, const Ipv4AddressRange& netAddr)
     tosInfo.E_ExternalMetricType = false;
     tosInfo.tos = 0;
     tosInfo.externalRouteTag = OSPFv2_EXTERNAL_ROUTES_LEARNED_BY_BGP;
-    //tosInfo.forwardingAddress = ;
+//    tosInfo.forwardingAddress = ;
     tosInfo.routeCost = OSPFv2_BGP_DEFAULT_COST;
 
     ospfRouter->updateExternalRoute(netAddr.address, newExternalContents, ifIndex);
@@ -191,8 +191,8 @@ int Ospfv2::checkExternalRoute(const Ipv4Address& route)
     for (uint32_t i = 0; i < ospfRouter->getASExternalLSACount(); i++) {
         AsExternalLsa *externalLSA = ospfRouter->getASExternalLSA(i);
         Ipv4Address externalAddr = externalLSA->getHeader().getLinkStateID();
-        if (externalAddr == route) { //FIXME was this meant???
-            if(externalLSA->getContents().getExternalTOSInfo(0).E_ExternalMetricType)
+        if (externalAddr == route) { // FIXME was this meant???
+            if (externalLSA->getContents().getExternalTOSInfo(0).E_ExternalMetricType)
                 return 2;
             else
                 return 1;
@@ -208,18 +208,18 @@ void Ospfv2::handleInterfaceDown(const NetworkInterface *ie)
     // Step 1: delete all direct-routes connected to this interface
 
     // ... from OSPF table
-    for(uint32_t i = 0; i < ospfRouter->getRoutingTableEntryCount(); i++) {
+    for (uint32_t i = 0; i < ospfRouter->getRoutingTableEntryCount(); i++) {
         Ospfv2RoutingTableEntry *ospfRoute = ospfRouter->getRoutingTableEntry(i);
-        if(ospfRoute && ospfRoute->getInterface() == ie && ospfRoute->getNextHopAsGeneric().isUnspecified()) {
+        if (ospfRoute && ospfRoute->getInterface() == ie && ospfRoute->getNextHopAsGeneric().isUnspecified()) {
             EV_DEBUG << "removing route from OSPF routing table: " << ospfRoute << "\n";
             ospfRouter->deleteRoute(ospfRoute);
             i--;
         }
     }
     // ... from Ipv4 table
-    for(int32_t i = 0; i < rt->getNumRoutes(); i++) {
+    for (int32_t i = 0; i < rt->getNumRoutes(); i++) {
         Ipv4Route *route = rt->getRoute(i);
-        if(route && route->getInterface() == ie && route->getNextHopAsGeneric().isUnspecified()) {
+        if (route && route->getInterface() == ie && route->getNextHopAsGeneric().isUnspecified()) {
             EV_DEBUG << "removing route from Ipv4 routing table: " << route << "\n";
             rt->deleteRoute(route);
             i--;
@@ -228,17 +228,17 @@ void Ospfv2::handleInterfaceDown(const NetworkInterface *ie)
 
     // Step 2: find the Ospfv2Interface associated with the ie and take it down
     Ospfv2Interface *foundIntf = nullptr;
-    for(auto &areaId : ospfRouter->getAreaIds()) {
+    for (auto& areaId : ospfRouter->getAreaIds()) {
         Ospfv2Area *area = ospfRouter->getAreaByID(areaId);
-        if(area) {
-            for(auto &ifIndex : area->getInterfaceIndices()) {
+        if (area) {
+            for (auto& ifIndex : area->getInterfaceIndices()) {
                 Ospfv2Interface *intf = area->getInterface(ifIndex);
-                if(intf && intf->getIfIndex() == ie->getInterfaceId()) {
+                if (intf && intf->getIfIndex() == ie->getInterfaceId()) {
                     foundIntf = intf;
                     break;
                 }
             }
-            if(foundIntf) {
+            if (foundIntf) {
                 foundIntf->processEvent(Ospfv2Interface::INTERFACE_DOWN);
                 break;
             }
@@ -248,3 +248,4 @@ void Ospfv2::handleInterfaceDown(const NetworkInterface *ie)
 
 } // namespace ospfv2
 } // namespace inet
+

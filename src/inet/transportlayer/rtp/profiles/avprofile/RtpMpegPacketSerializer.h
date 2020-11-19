@@ -16,7 +16,6 @@
 #ifndef __INET_RTPMPEGPACKETSERIALIZER_H
 #define __INET_RTPMPEGPACKETSERIALIZER_H
 
-
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 
 namespace inet {

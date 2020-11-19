@@ -25,14 +25,14 @@
 
 namespace inet {
 
-template <typename T>
+template<typename T>
 OperationalMixin<T>::~OperationalMixin()
 {
     T::cancelAndDelete(activeOperationExtraTimer);
     T::cancelAndDelete(activeOperationTimeout);
 }
 
-template <typename T>
+template<typename T>
 void OperationalMixin<T>::initialize(int stage)
 {
     T::initialize(stage);
@@ -47,11 +47,11 @@ void OperationalMixin<T>::initialize(int stage)
         ASSERT(state == NOT_OPERATING || state == OPERATING);
         setOperationalState(state);
         if (operationalState == OPERATING)
-            handleStartOperation(nullptr);     //TODO use an InitializeOperation with current stage value
+            handleStartOperation(nullptr); // TODO use an InitializeOperation with current stage value
     }
 }
 
-template <typename T>
+template<typename T>
 void OperationalMixin<T>::handleMessage(cMessage *message)
 {
     if (message == activeOperationExtraTimer)
@@ -77,7 +77,7 @@ void OperationalMixin<T>::handleMessage(cMessage *message)
     }
 }
 
-template <typename T>
+template<typename T>
 void OperationalMixin<T>::handleMessageWhenDown(cMessage *message)
 {
     if (message->isSelfMessage())
@@ -89,7 +89,7 @@ void OperationalMixin<T>::handleMessageWhenDown(cMessage *message)
     delete message;
 }
 
-template <typename T>
+template<typename T>
 bool OperationalMixin<T>::handleOperationStage(LifecycleOperation *operation, IDoneCallback *doneCallback)
 {
     Enter_Method("handleOperationStage");
@@ -128,38 +128,38 @@ bool OperationalMixin<T>::handleOperationStage(LifecycleOperation *operation, ID
     return true;
 }
 
-template <typename T>
+template<typename T>
 void OperationalMixin<T>::scheduleOperationTimeout(simtime_t timeout)
 {
     ASSERT(activeOperation.isDelayedFinish);
     ASSERT(!activeOperationTimeout->isScheduled());
     activeOperationTimeout->setContextPointer(activeOperation.operation);
     T::scheduleAt(simTime() + timeout, activeOperationTimeout);
-    // TODO: schedule timer and use module parameter
+    // TODO schedule timer and use module parameter
 }
 
-template <typename T>
+template<typename T>
 void OperationalMixin<T>::handleActiveOperationTimeout(cMessage *message)
 {
     handleCrashOperation(activeOperation.operation);
     finishActiveOperation();
 }
 
-template <typename T>
+template<typename T>
 void OperationalMixin<T>::setupActiveOperation(LifecycleOperation *operation, IDoneCallback *doneCallback, State endState)
 {
     ASSERT(activeOperation.operation == nullptr);
     activeOperation.set(operation, doneCallback, endState);
 }
 
-template <typename T>
+template<typename T>
 void OperationalMixin<T>::setOperationalState(State newState)
 {
     operationalState = newState;
     lastChange = simTime();
 }
 
-template <typename T>
+template<typename T>
 typename OperationalMixin<T>::State OperationalMixin<T>::getInitialOperationalState() const
 {
     cModule *node = findContainingNode(this);
@@ -167,7 +167,7 @@ typename OperationalMixin<T>::State OperationalMixin<T>::getInitialOperationalSt
     return (!nodeStatus || nodeStatus->getState() == NodeStatus::UP) ? OPERATING : NOT_OPERATING;
 }
 
-template <typename T>
+template<typename T>
 void OperationalMixin<T>::delayActiveOperationFinish(simtime_t timeout)
 {
     ASSERT(activeOperation.operation != nullptr);
@@ -175,7 +175,7 @@ void OperationalMixin<T>::delayActiveOperationFinish(simtime_t timeout)
     scheduleOperationTimeout(timeout);
 }
 
-template <typename T>
+template<typename T>
 void OperationalMixin<T>::startActiveOperationExtraTime(simtime_t extraTime)
 {
     ASSERT(extraTime >= SIMTIME_ZERO);
@@ -185,7 +185,7 @@ void OperationalMixin<T>::startActiveOperationExtraTime(simtime_t extraTime)
     T::scheduleAt(simTime() + extraTime, activeOperationExtraTimer);
 }
 
-template <typename T>
+template<typename T>
 void OperationalMixin<T>::startActiveOperationExtraTimeOrFinish(simtime_t extraTime)
 {
     if (extraTime >= SIMTIME_ZERO)
@@ -194,7 +194,7 @@ void OperationalMixin<T>::startActiveOperationExtraTimeOrFinish(simtime_t extraT
         finishActiveOperation();
 }
 
-template <typename T>
+template<typename T>
 void OperationalMixin<T>::finishActiveOperation()
 {
     setOperationalState(activeOperation.endState);
@@ -206,26 +206,26 @@ void OperationalMixin<T>::finishActiveOperation()
     activeOperation.clear();
 }
 
-template <typename T>
+template<typename T>
 void OperationalMixin<T>::refreshDisplay() const
 {
     auto& displayString = T::getDisplayString();
     switch (operationalState) {
-    case STARTING_OPERATION:
-        displayString.setTagArg("i2", 0, "status/up");
-        break;
-    case OPERATING:
-        displayString.removeTag("i2");
-        break;
-    case STOPPING_OPERATION:
-    case CRASHING_OPERATION:
-        displayString.setTagArg("i2", 0, "status/down");
-        break;
-    case NOT_OPERATING:
-        displayString.setTagArg("i2", 0, "status/cross");
-        break;
-    default:
-        break;
+        case STARTING_OPERATION:
+            displayString.setTagArg("i2", 0, "status/up");
+            break;
+        case OPERATING:
+            displayString.removeTag("i2");
+            break;
+        case STOPPING_OPERATION:
+        case CRASHING_OPERATION:
+            displayString.setTagArg("i2", 0, "status/down");
+            break;
+        case NOT_OPERATING:
+            displayString.setTagArg("i2", 0, "status/cross");
+            break;
+        default:
+            break;
     }
 }
 

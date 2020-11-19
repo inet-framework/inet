@@ -36,8 +36,7 @@ class INET_API INetfilter
     /**
      * This interface is used by the network protocol during processing datagrams.
      */
-    class INET_API IHook
-    {
+    class INET_API IHook {
       public:
         enum Type {
             PREROUTING,
@@ -54,7 +53,7 @@ class INET_API INetfilter
             STOLEN  ///< doesn't allow datagram to pass to next hook, but won't be deleted
         };
 
-        virtual ~IHook() {};
+        virtual ~IHook() {}
 
         /**
          * This is the first hook called by the network protocol before it routes
@@ -123,10 +122,11 @@ class INET_API INetfilter
 
 };
 
-class INET_API NetfilterBase : public INetfilter {
+class INET_API NetfilterBase : public INetfilter
+{
   public:
     class INET_API HookBase : public INetfilter::IHook {
-      friend class NetfilterBase;
+        friend class NetfilterBase;
 
       protected:
         std::vector<INetfilter *> netfilters;

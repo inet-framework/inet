@@ -29,7 +29,7 @@ void QosCtsPolicy::initialize(int stage)
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
-        rateSelection = check_and_cast<IQosRateSelection*>(getModuleByPath(par("rateSelectionModule")));
+        rateSelection = check_and_cast<IQosRateSelection *>(getModuleByPath(par("rateSelectionModule")));
     }
 }
 
@@ -57,8 +57,9 @@ simtime_t QosCtsPolicy::computeCtsDurationField(Packet *rtsPacket, const Ptr<con
 //
 bool QosCtsPolicy::isCtsNeeded(const Ptr<const Ieee80211RtsFrame>& rtsFrame) const
 {
-   return rx->isMediumFree();
+    return rx->isMediumFree();
 }
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

@@ -43,7 +43,7 @@ namespace inet {
  */
 class INET_API ChunkQueue : public cNamedObject
 {
-  friend class ChunkQueueDescriptor;
+    friend class ChunkQueueDescriptor;
 
   protected:
     b pushedLength = b(0);
@@ -115,7 +115,7 @@ class INET_API ChunkQueue : public cNamedObject
      * in the requested representation. If the length is unspecified, then the
      * length of the result is chosen according to the internal representation.
      */
-    template <typename T>
+    template<typename T>
     bool has(b length = b(-1)) const {
         return content->has<T>(iterator, length == b(-1) ? Chunk::unspecifiedLength : length);
     }
@@ -125,7 +125,7 @@ class INET_API ChunkQueue : public cNamedObject
      * chunk in the requested representation. If the length is unspecified, then
      * the length of the result is chosen according to the internal representation.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<const T> peek(b length = b(-1), int flags = 0) const {
         return content->peek<T>(iterator, length == b(-1) ? Chunk::unspecifiedLength : length, flags);
     }
@@ -135,7 +135,7 @@ class INET_API ChunkQueue : public cNamedObject
      * the requested representation. If the length is unspecified, then the
      * length of the result is chosen according to the internal representation.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<const T> peekAt(b offset, b length = b(-1), int flags = 0) const {
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getLength(), "offset is out of range");
         CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getLength(), "length is invalid");
@@ -182,7 +182,7 @@ class INET_API ChunkQueue : public cNamedObject
      * unspecified, then the length of the result is chosen according to the
      * internal representation.
      */
-    template <typename T>
+    template<typename T>
     const Ptr<const T> pop(b length = b(-1), int flags = 0) {
         const auto& chunk = peek<T>(length == b(-1) ? Chunk::unspecifiedLength : length, flags);
         if (chunk != nullptr)

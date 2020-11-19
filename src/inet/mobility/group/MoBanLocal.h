@@ -99,6 +99,7 @@ class INET_API MoBanLocal : public LineSegmentsMobilityBase
     virtual void setTargetPosition() override;
 
     virtual void computeMaxSpeed();
+
   public:
     MoBanLocal();
 

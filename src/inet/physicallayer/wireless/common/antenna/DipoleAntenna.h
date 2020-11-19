@@ -29,8 +29,7 @@ class INET_API DipoleAntenna : public AntennaBase
   protected:
     virtual void initialize(int stage) override;
 
-    class AntennaGain : public IAntennaGain
-    {
+    class AntennaGain : public IAntennaGain {
       protected:
         Coord wireAxisDirection;
         m length;

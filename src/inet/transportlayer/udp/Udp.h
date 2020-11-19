@@ -67,10 +67,9 @@ class INET_API Udp : public TransportProtocolBase
         EPHEMERAL_PORTRANGE_END   = 5000
     };
 
-    struct MulticastMembership
-    {
+    struct MulticastMembership {
         L3Address multicastAddress;
-        int interfaceId = -1;    // -1 = all
+        int interfaceId = -1; // -1 = all
         UdpSourceFilterMode filterMode = static_cast<UdpSourceFilterMode>(0);
         std::vector<L3Address> sourceList;
 
@@ -81,8 +80,7 @@ class INET_API Udp : public TransportProtocolBase
     // Records are ordered first by multicastAddress, then by interfaceId (-1 interfaceId is the last)
     typedef std::vector<MulticastMembership *> MulticastMembershipTable;
 
-    struct SockDesc
-    {
+    struct SockDesc {
         SockDesc(int sockId);
         ~SockDesc();
         int sockId = -1;
@@ -109,7 +107,7 @@ class INET_API Udp : public TransportProtocolBase
 
     friend std::ostream& operator<<(std::ostream& os, const Udp::SockDesc& sd);
 
-    typedef std::list<SockDesc *> SockDescList;    // might contain duplicated local addresses if their reuseAddr flag is set
+    typedef std::list<SockDesc *> SockDescList; // might contain duplicated local addresses if their reuseAddr flag is set
     typedef std::map<int, SockDesc *> SocketsByIdMap;
     typedef std::map<int, SockDescList> SocketsByPortMap;
 

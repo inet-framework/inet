@@ -29,8 +29,7 @@
 
 namespace inet {
 
-enum LabelOpCode
-{
+enum LabelOpCode {
     PUSH_OPER,
     SWAP_OPER,
     POP_OPER
@@ -50,8 +49,7 @@ typedef std::vector<LabelOp> LabelOpVector;
 class INET_API LibTable : public cSimpleModule
 {
   public:
-    struct LibEntry
-    {
+    struct LibEntry {
         int inLabel;
         std::string inInterface;
 

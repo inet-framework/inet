@@ -74,14 +74,14 @@ class IRoutingTable;
 class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable, protected cListener, public ILifecycle
 {
   protected:
-    IInterfaceTable *ift = nullptr;    // cached pointer
+    IInterfaceTable *ift = nullptr; // cached pointer
 
     Ipv4Address routerId;
     const char *netmaskRoutes = nullptr;
     bool forwarding = false;
     bool multicastForward = false;
     bool isNodeUp = false;
-    bool useAdminDist = false;     // Use Cisco like administrative distances
+    bool useAdminDist = false; // Use Cisco like administrative distances
 
     // for convenience
     typedef Ipv4MulticastRoute::OutInterface OutInterface;
@@ -102,10 +102,10 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     // to modify them, but they can not access them directly.
 
     typedef std::vector<Ipv4Route *> RouteVector;
-    RouteVector routes;    // Unicast route array, sorted by netmask desc, dest asc, metric asc
+    RouteVector routes; // Unicast route array, sorted by netmask desc, dest asc, metric asc
 
     typedef std::vector<Ipv4MulticastRoute *> MulticastRouteVector;
-    MulticastRouteVector multicastRoutes;    // Multicast route array, sorted by netmask desc, origin asc, metric asc
+    MulticastRouteVector multicastRoutes; // Multicast route array, sorted by netmask desc, origin asc, metric asc
 
   protected:
     // set router Id
@@ -127,12 +127,12 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     virtual void invalidateCache();
 
     // helper for sorting routing table, used by addRoute()
-    class RouteLessThan
-    {
-        const Ipv4RoutingTable &c;
+    class RouteLessThan {
+        const Ipv4RoutingTable& c;
+
       public:
         RouteLessThan(const Ipv4RoutingTable& c) : c(c) {}
-        bool operator () (const Ipv4Route *a, const Ipv4Route *b) { return c.routeLessThan(a, b); }
+        bool operator()(const Ipv4Route *a, const Ipv4Route *b) { return c.routeLessThan(a, b); }
     };
     bool routeLessThan(const Ipv4Route *a, const Ipv4Route *b) const;
 
@@ -378,10 +378,10 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     virtual bool isLocalAddress(const L3Address& dest) const override { return isLocalAddress(dest.toIpv4()); }
     virtual NetworkInterface *getInterfaceByAddress(const L3Address& address) const override { return getInterfaceByAddress(address.toIpv4()); }
     virtual IRoute *findBestMatchingRoute(const L3Address& dest) const override { return findBestMatchingRoute(dest.toIpv4()); }
-    virtual NetworkInterface *getOutputInterfaceForDestination(const L3Address& dest) const override { return getInterfaceForDestAddr(dest.toIpv4()); }    //XXX inconsistent names
-    virtual L3Address getNextHopForDestination(const L3Address& dest) const override { return getGatewayForDestAddr(dest.toIpv4()); }    //XXX inconsistent names
+    virtual NetworkInterface *getOutputInterfaceForDestination(const L3Address& dest) const override { return getInterfaceForDestAddr(dest.toIpv4()); } // TODO inconsistent names
+    virtual L3Address getNextHopForDestination(const L3Address& dest) const override { return getGatewayForDestAddr(dest.toIpv4()); } // TODO inconsistent names
     virtual bool isLocalMulticastAddress(const L3Address& dest) const override { return isLocalMulticastAddress(dest.toIpv4()); }
-    virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const override { return const_cast<Ipv4MulticastRoute *>(findBestMatchingMulticastRoute(origin.toIpv4(), group.toIpv4())); }    //XXX remove 'const' from Ipv4 method?
+    virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const override { return const_cast<Ipv4MulticastRoute *>(findBestMatchingMulticastRoute(origin.toIpv4(), group.toIpv4())); } // TODO remove 'const' from Ipv4 method?
     virtual IRoute *createRoute() override { return new Ipv4Route(); }
 
   private:

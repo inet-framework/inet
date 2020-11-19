@@ -21,7 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-
 #ifndef __INET_RTPAVPROFILE_H
 #define __INET_RTPAVPROFILE_H
 

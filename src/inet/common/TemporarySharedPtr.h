@@ -39,7 +39,7 @@ class TemporarySharedPtrClassDescriptor : public cClassDescriptor
     T *getObjectPointer(void *object) const { return const_cast<T *>(getSharedPtr(object).get()); }
 
   public:
-    TemporarySharedPtrClassDescriptor(cClassDescriptor *classDescriptor) : cClassDescriptor(classDescriptor->getClassName()), classDescriptor(classDescriptor) { }
+    TemporarySharedPtrClassDescriptor(cClassDescriptor *classDescriptor) : cClassDescriptor(classDescriptor->getClassName()), classDescriptor(classDescriptor) {}
 
     virtual bool doesSupport(cObject *object) const override { return classDescriptor->doesSupport(getObjectPointer(object)); }
     virtual cClassDescriptor *getBaseClassDescriptor() const override { return classDescriptor->getBaseClassDescriptor(); }
@@ -66,7 +66,7 @@ class TemporarySharedPtrClassDescriptor : public cClassDescriptor
 /**
  * This class provides support for Qtenv inspectors for objects referenced by shared pointers.
  */
-// TODO: subclass from cTemporary when available to fix leaking memory from the inspector
+// TODO subclass from cTemporary when available to fix leaking memory from the inspector
 template<typename T>
 class TemporarySharedPtr : public cObject
 {
@@ -75,7 +75,7 @@ class TemporarySharedPtr : public cObject
     TemporarySharedPtrClassDescriptor<T> *classDescriptor;
 
   public:
-    TemporarySharedPtr(const Ptr<const T> object) : object(object), classDescriptor(new TemporarySharedPtrClassDescriptor<T>(object.get()->getDescriptor())) { }
+    TemporarySharedPtr(const Ptr<const T> object) : object(object), classDescriptor(new TemporarySharedPtrClassDescriptor<T>(object.get()->getDescriptor())) {}
     virtual ~TemporarySharedPtr() { delete classDescriptor; }
 
     const Ptr<const T>& getObject() const { return object; }

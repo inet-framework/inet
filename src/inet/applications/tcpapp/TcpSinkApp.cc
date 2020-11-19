@@ -56,14 +56,12 @@ void TcpSinkApp::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-
 void TcpSinkApp::finish()
 {
     TcpServerHostApp::finish();
 
     recordScalar("bytesRcvd", bytesRcvd);
 }
-
 
 void TcpSinkAppThread::initialize(int stage)
 {

@@ -88,17 +88,17 @@ class INET_API IProtocolRegistrationListener
 class INET_API DefaultProtocolRegistrationListener : public virtual IProtocolRegistrationListener
 {
   public:
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override { }
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override { }
+    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override {}
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override {}
 
-    virtual void handleRegisterServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) override { }
-    virtual void handleRegisterProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) override { }
+    virtual void handleRegisterServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) override {}
+    virtual void handleRegisterProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) override {}
 
-    virtual void handleRegisterAnyService(cGate *gate, ServicePrimitive servicePrimitive) override { }
-    virtual void handleRegisterAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) override { }
+    virtual void handleRegisterAnyService(cGate *gate, ServicePrimitive servicePrimitive) override {}
+    virtual void handleRegisterAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) override {}
 };
 
-#define Enter_Method2 cMethodCallContextSwitcher __ctx(check_and_cast<cComponent *>(this)); __ctx.methodCall
+#define Enter_Method2    cMethodCallContextSwitcher __ctx(check_and_cast<cComponent *>(this)); __ctx.methodCall
 
 class INET_API TransparentProtocolRegistrationListener : public virtual IProtocolRegistrationListener
 {

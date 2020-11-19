@@ -32,14 +32,14 @@ namespace bgp {
 
 class INET_API BgpConfigReader
 {
-private:
+  private:
     cModule *bgpModule = nullptr;
     IInterfaceTable *ift = nullptr;
     BgpRouter *bgpRouter = nullptr;
 
   public:
     BgpConfigReader(cModule *bgpModule, IInterfaceTable *ift);
-    virtual ~BgpConfigReader() {};
+    virtual ~BgpConfigReader() {}
 
     void loadConfigFromXML(cXMLElement *bgpConfig, BgpRouter *bgpRouter);
 

@@ -44,7 +44,7 @@ void ShortcutRadio::initialize(int stage)
         packetLoss = &par("packetLoss");
         gate("radioIn")->setDeliverImmediately(true);
     }
-    // TODO: INITSTAGE
+    // TODO INITSTAGE
     else if (stage == INITSTAGE_LINK_LAYER) {
         auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         auto networkInterface = CHK(interfaceTable->findInterfaceByInterfaceModule(this));
@@ -79,7 +79,7 @@ void ShortcutRadio::handleUpperPacket(Packet *packet)
         else
             throw cRuntimeError("ShortcutRadio not found");
     }
-    transmissionState = IRadio::TRANSMISSION_STATE_IDLE;        //TODO zero time transmission simulated
+    transmissionState = IRadio::TRANSMISSION_STATE_IDLE; // TODO zero time transmission simulated
     emit(transmissionStateChangedSignal, transmissionState);
 }
 

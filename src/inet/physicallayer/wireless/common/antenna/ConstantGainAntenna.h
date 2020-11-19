@@ -29,8 +29,7 @@ class INET_API ConstantGainAntenna : public AntennaBase
   protected:
     virtual void initialize(int stage) override;
 
-    class AntennaGain : public IAntennaGain
-    {
+    class AntennaGain : public IAntennaGain {
       public:
         AntennaGain(double gain) : gain(gain) {}
         virtual double getMinGain() const override { return gain; }

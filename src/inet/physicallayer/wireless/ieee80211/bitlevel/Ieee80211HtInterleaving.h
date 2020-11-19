@@ -28,16 +28,16 @@ using namespace inet::units::values;
 
 class INET_API Ieee80211HtInterleaving : public IInterleaving
 {
-    protected:
-        // Let numberOfCodedBitsPerSpatialStreams.at(i) denote the number of coded bits for the ith spatial
-        // stream and numberOfCodedBitsPerSpatialStreams.size() must be equal to N_SS (the number of spatial
-        // streams).
-        const std::vector<unsigned int>& numberOfCodedBitsPerSpatialStreams;
-        const Hz bandwidth;
+  protected:
+    // Let numberOfCodedBitsPerSpatialStreams.at(i) denote the number of coded bits for the ith spatial
+    // stream and numberOfCodedBitsPerSpatialStreams.size() must be equal to N_SS (the number of spatial
+    // streams).
+    const std::vector<unsigned int>& numberOfCodedBitsPerSpatialStreams;
+    const Hz bandwidth;
 
-    public:
-        virtual void printToStream(std::ostream& stream) const { stream << "Ieee80211HtInterleaving"; }
-        Ieee80211HtInterleaving(const std::vector<unsigned int>& numberOfCodedBitsPerSpatialStreams, Hz bandwidth);
+  public:
+    virtual void printToStream(std::ostream& stream) const { stream << "Ieee80211HtInterleaving"; }
+    Ieee80211HtInterleaving(const std::vector<unsigned int>& numberOfCodedBitsPerSpatialStreams, Hz bandwidth);
 };
 
 } /* namespace physicallayer */

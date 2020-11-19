@@ -37,11 +37,11 @@ namespace ospfv2 {
 class Ospfv2 : public RoutingProtocolBase, protected cListener
 {
   private:
-    cModule *host = nullptr;    // the host module that owns this module
+    cModule *host = nullptr; // the host module that owns this module
     IIpv4RoutingTable *rt = nullptr;
     IInterfaceTable *ift = nullptr;
-    Router *ospfRouter = nullptr;    // root object of the OSPF data structure
-    cMessage *startupTimer = nullptr;    // timer for delayed startup
+    Router *ospfRouter = nullptr; // root object of the OSPF data structure
+    cMessage *startupTimer = nullptr; // timer for delayed startup
 
   public:
     Ospfv2();

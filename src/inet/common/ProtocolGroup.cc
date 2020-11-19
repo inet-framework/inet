@@ -69,7 +69,7 @@ void ProtocolGroup::addProtocol(int protocolId, const Protocol *protocol)
 }
 
 
-//FIXME use constants instead of numbers
+// FIXME use constants instead of numbers
 
 // excerpt from http://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml
 ProtocolGroup ProtocolGroup::ethertype("ethertype", {

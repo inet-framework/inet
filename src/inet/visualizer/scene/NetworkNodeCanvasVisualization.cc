@@ -43,7 +43,7 @@ NetworkNodeCanvasVisualization::NetworkNodeCanvasVisualization(cModule *networkN
     annotationFigure = new cPanelFigure("annotation");
     addFigure(annotationFigure);
     submoduleBounds = getEnvir()->getSubmoduleBounds(networkNode);
-    submoduleBounds.height += 32; // TODO: KLUDGE: extend bounds for submodule name label
+    submoduleBounds.height += 32; // KLUDGE extend bounds for submodule name label
     submoduleBounds.x = -submoduleBounds.width / 2;
     submoduleBounds.y = -submoduleBounds.height / 2;
     if (networkNode->hasPar("canvasImage") && strlen(networkNode->par("canvasImage")) != 0) {
@@ -222,8 +222,8 @@ bool NetworkNodeCanvasVisualization::Annotation::comparePlacementPriority(const 
 
 void NetworkNodeCanvasVisualization::layout()
 {
-    std::vector<cFigure::Rectangle> rcs;  // rectangles of annotations already positioned
-    std::vector<cFigure::Point> pts;  // candidate points where annotations may be positioned
+    std::vector<cFigure::Rectangle> rcs; // rectangles of annotations already positioned
+    std::vector<cFigure::Point> pts; // candidate points where annotations may be positioned
     cFigure::Rectangle extendendSubmoduleBounds = submoduleBounds;
     extendendSubmoduleBounds.x -= annotationSpacing / 2;
     extendendSubmoduleBounds.y -= annotationSpacing / 2;
@@ -335,14 +335,14 @@ void NetworkNodeCanvasVisualization::layout()
             }
         }
 
-    found:
+      found:
         // store position and rectangle
         annotation.bounds.x = bestRc.x + annotationSpacing / 2;
         annotation.bounds.y = bestRc.y + annotationSpacing / 2;
         annotation.figure->setTransform(cFigure::Transform().translate(annotation.bounds.x, annotation.bounds.y));
 
         // delete candidate points covered by best rc
-        for (auto j = pts.begin(); j != pts.end(); ) {
+        for (auto j = pts.begin(); j != pts.end();) {
             if (containsPoint(bestRc, *j))
                 j = pts.erase(j);
             else

@@ -47,11 +47,11 @@ void IcmpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             break;
         }
         case ICMP_DESTINATION_UNREACHABLE:
-            stream.writeUint16Be(0);   // unused
-            stream.writeUint16Be(0);   // next hop MTU
+            stream.writeUint16Be(0); // unused
+            stream.writeUint16Be(0); // next hop MTU
             break;
         case ICMP_TIME_EXCEEDED:
-            stream.writeUint32Be(0);   // unused
+            stream.writeUint32Be(0); // unused
             break;
         default:
             throw cRuntimeError("Can not serialize ICMP packet: type %d  not supported.", icmpHeader->getType());
@@ -90,11 +90,11 @@ const Ptr<Chunk> IcmpHeaderSerializer::deserialize(MemoryInputStream& stream) co
             break;
         }
         case ICMP_DESTINATION_UNREACHABLE:
-            stream.readUint16Be();   // unused
-            stream.readUint16Be();   // next hop MTU
+            stream.readUint16Be(); // unused
+            stream.readUint16Be(); // next hop MTU
             break;
         case ICMP_TIME_EXCEEDED:
-            stream.readUint32Be();   // unused
+            stream.readUint32Be(); // unused
             break;
         default:
             EV_ERROR << "Can not parse ICMP packet: type " << type << " not supported.";

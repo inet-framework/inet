@@ -41,7 +41,7 @@ LinkOsgVisualizerBase::LinkOsgVisualization::LinkOsgVisualization(inet::osg::Lin
 
 LinkOsgVisualizerBase::LinkOsgVisualization::~LinkOsgVisualization()
 {
-    // TODO: delete node;
+    // TODO delete node;
 }
 
 void LinkOsgVisualizerBase::initialize(int stage)
@@ -58,7 +58,7 @@ void LinkOsgVisualizerBase::refreshDisplay() const
 {
     LinkVisualizerBase::refreshDisplay();
     auto simulation = getSimulation();
-    // TODO: share common part with LinkCanvasVisualizerBase
+    // TODO share common part with LinkCanvasVisualizerBase
     for (auto it : linkVisualizations) {
         auto linkVisualization = it.second;
         auto sourceModule = simulation->getModule(linkVisualization->sourceModuleId);

@@ -29,7 +29,7 @@ namespace inet {
  */
 class INET_API BitsChunk : public Chunk
 {
-  friend class Chunk;
+    friend class Chunk;
 
   protected:
     /**

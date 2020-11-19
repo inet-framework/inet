@@ -37,8 +37,7 @@ void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOr
     CacheType type = getCacheType(header, false);
     SequenceNumber seqNum;
     MacAddress address = header->getReceiverAddress();
-    if (type == TIME_PRIORITY)
-    {
+    if (type == TIME_PRIORITY) {
         // Error in spec?
         // "QoS STA may use values from additional modulo-4096 counters per <Address 1, TID> for sequence numbers assigned to
         // time priority management frames." 9.3.2.10 Duplicate detection and recovery, But management frames don't have QoS Control field.
@@ -48,8 +47,7 @@ void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOr
         else
             it->second = seqNum = it->second + 1;
     }
-    if (type == SHARED)
-    {
+    if (type == SHARED) {
         auto it = lastSentSharedSeqNums.find(address);
         if (it == lastSentSharedSeqNums.end())
             lastSentSharedSeqNums[address] = seqNum = lastSentSharedCounterSeqNum;
@@ -59,8 +57,7 @@ void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOr
             it->second = seqNum = lastSentSharedCounterSeqNum;
         }
     }
-    else if (type == DATA)
-    {
+    else if (type == DATA) {
         const Ptr<const Ieee80211DataHeader>& qosDataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header);
         Key key(header->getReceiverAddress(), qosDataHeader->getTid());
         auto it = lastSentSeqNums.find(key);
@@ -77,3 +74,4 @@ void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOr
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

@@ -28,7 +28,7 @@ void RecipientAckPolicy::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        rateSelection = check_and_cast<IRateSelection*>(getModuleByPath(par("rateSelectionModule")));
+        rateSelection = check_and_cast<IRateSelection *>(getModuleByPath(par("rateSelectionModule")));
     }
 }
 
@@ -44,7 +44,7 @@ simtime_t RecipientAckPolicy::computeAckDuration(Packet *dataOrMgmtPacket, const
 //
 bool RecipientAckPolicy::isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
 {
-    // TODO: add mgmt NoAck check
+    // TODO add mgmt NoAck check
     return !header->getReceiverAddress().isMulticast();
 }
 
@@ -74,3 +74,4 @@ simtime_t RecipientAckPolicy::computeAckDurationField(Packet *packet, const Ptr<
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

@@ -28,16 +28,16 @@ namespace ieee80211 {
  */
 class INET_API RecipientAckProcedure : public IRecipientAckProcedure
 {
-    protected:
-        int numReceivedAckableFrame = 0;
-        int numSentAck = 0;
+  protected:
+    int numReceivedAckableFrame = 0;
+    int numSentAck = 0;
 
-    protected:
-        virtual const Ptr<Ieee80211AckFrame> buildAck(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const;
+  protected:
+    virtual const Ptr<Ieee80211AckFrame> buildAck(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const;
 
-    public:
-        virtual void processReceivedFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader, IRecipientAckPolicy *ackPolicy, IProcedureCallback *callback) override;
-        virtual void processTransmittedAck(const Ptr<const Ieee80211AckFrame>& ack) override;
+  public:
+    virtual void processReceivedFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader, IRecipientAckPolicy *ackPolicy, IProcedureCallback *callback) override;
+    virtual void processTransmittedAck(const Ptr<const Ieee80211AckFrame>& ack) override;
 };
 
 } /* namespace ieee80211 */

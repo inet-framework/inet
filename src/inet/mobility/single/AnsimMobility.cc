@@ -36,7 +36,6 @@ static cXMLElement *firstChildWithTag(cXMLElement *node, const char *tagname)
     return child;
 }
 
-
 void AnsimMobility::computeMaxSpeed()
 {
     cXMLElement *rootElem = par("ansimTrace");
@@ -56,8 +55,7 @@ void AnsimMobility::computeMaxSpeed()
     // first position is the initial position so we don't take it into account to compute maxSpeed
     if (curElem)
         curElem = curElem->getNextSibling();
-    while (curElem)
-    {
+    while (curElem) {
         cXMLElement *destElem = firstChildWithTag(curElem, "destination");
         const char *xStr = firstChildWithTag(destElem, "xpos")->getNodeValue();
         const char *yStr = firstChildWithTag(destElem, "ypos")->getNodeValue();

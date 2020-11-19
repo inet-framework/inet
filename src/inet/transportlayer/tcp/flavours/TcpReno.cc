@@ -19,7 +19,7 @@
 
 #include "inet/transportlayer/tcp/flavours/TcpReno.h"
 
-#include <algorithm>    // min,max
+#include <algorithm> // min,max
 
 #include "inet/transportlayer/tcp/Tcp.h"
 
@@ -47,8 +47,8 @@ void TcpReno::recalculateSlowStartThreshold()
 
     // set ssthresh to flight size / 2, but at least 2 SMSS
     // (the formula below practically amounts to ssthresh = cwnd / 2 most of the time)
-    uint32_t flight_size = std::min(state->snd_cwnd, state->snd_wnd);    // FIXME TODO - Does this formula computes the amount of outstanding data?
-    // uint32_t flight_size = state->snd_max - state->snd_una;
+    uint32_t flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME - Does this formula computes the amount of outstanding data?
+//    uint32_t flight_size = state->snd_max - state->snd_una;
     state->ssthresh = std::max(flight_size / 2, 2 * state->snd_mss);
 
     conn->emit(ssthreshSignal, state->ssthresh);
@@ -102,7 +102,7 @@ void TcpReno::receivedDataAck(uint32_t firstSeqAcked)
         conn->emit(cwndSignal, state->snd_cwnd);
     }
     else {
-        bool performSsCa = true; //Stands for: "perform slow start and congestion avoidance"
+        bool performSsCa = true; // Stands for: "perform slow start and congestion avoidance"
         if (state && state->ect && state->gotEce) {
             // halve cwnd and reduce ssthresh and do not increase cwnd (rfc-3168, page 18):
             //   If the sender receives an ECN-Echo (ECE) ACK
@@ -129,11 +129,10 @@ void TcpReno::receivedDataAck(uint32_t firstSeqAcked)
                 state->snd_cwnd = std::max(state->snd_cwnd / 2, uint32_t(1));
                 state->sndCwr = true;
                 performSsCa = false;
-                EV_INFO
-                               << "ssthresh = cwnd/2: received ECN-Echo ACK... new ssthresh = "
-                               << state->ssthresh << "\n";
+                EV_INFO << "ssthresh = cwnd/2: received ECN-Echo ACK... new ssthresh = "
+                        << state->ssthresh << "\n";
                 EV_INFO << "cwnd /= 2: received ECN-Echo ACK... new cwnd = "
-                               << state->snd_cwnd << "\n";
+                        << state->snd_cwnd << "\n";
 
                 // rfc-3168 page 18:
                 // The sending TCP MUST reset the retransmit timer on receiving
@@ -206,7 +205,7 @@ void TcpReno::receivedDataAck(uint32_t firstSeqAcked)
             state->lossRecovery = false;
         }
         // RFC 3517, page 7: "(B) Upon receipt of an ACK that does not cover RecoveryPoint the
-        //following actions MUST be taken:
+        // following actions MUST be taken:
         //
         // (B.1) Use Update () to record the new SACK information conveyed
         // by the incoming ACK.
@@ -266,8 +265,8 @@ void TcpReno::receivedDuplicateAck()
             // recovery phase (as described in section 5) MUST NOT be initiated
             // until HighACK is greater than or equal to the new value of
             // RecoveryPoint."
-            if (state->recoveryPoint == 0 || seqGE(state->snd_una, state->recoveryPoint)) {    // HighACK = snd_una
-                state->recoveryPoint = state->snd_max;    // HighData = snd_max
+            if (state->recoveryPoint == 0 || seqGE(state->snd_una, state->recoveryPoint)) { // HighACK = snd_una
+                state->recoveryPoint = state->snd_max; // HighData = snd_max
                 state->lossRecovery = true;
                 EV_DETAIL << " recoveryPoint=" << state->recoveryPoint;
             }
@@ -282,7 +281,7 @@ void TcpReno::receivedDuplicateAck()
         // enter Fast Recovery
         recalculateSlowStartThreshold();
         // "set cwnd to ssthresh plus 3 * SMSS." (RFC 2581)
-        state->snd_cwnd = state->ssthresh + 3 * state->snd_mss;    // 20051129 (1)
+        state->snd_cwnd = state->ssthresh + 3 * state->snd_mss; // 20051129 (1)
 
         conn->emit(cwndSignal, state->snd_cwnd);
 

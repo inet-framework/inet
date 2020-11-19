@@ -56,8 +56,9 @@ simtime_t CtsPolicy::computeCtsDurationField(Packet *rtsPacket, const Ptr<const 
 //
 bool CtsPolicy::isCtsNeeded(const Ptr<const Ieee80211RtsFrame>& rtsFrame) const
 {
-   return rx->isMediumFree();
+    return rx->isMediumFree();
 }
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

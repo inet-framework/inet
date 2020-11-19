@@ -35,16 +35,14 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, protected cListener
 {
   public:
     /** Describes a STA */
-    struct StaInfo
-    {
+    struct StaInfo {
         MacAddress address;
-        int authSeqExpected;    // when NOT_AUTHENTICATED: transaction sequence number of next expected auth frame
-        //int consecFailedTrans;  //XXX
-        //double expiry;          //XXX association should expire after a while if STA is silent?
+        int authSeqExpected; // when NOT_AUTHENTICATED: transaction sequence number of next expected auth frame
+//        int consecFailedTrans; // TODO
+//        double expiry; // TODO association should expire after a while if STA is silent?
     };
 
-    class NotificationInfoSta : public cObject
-    {
+    class NotificationInfoSta : public cObject {
         MacAddress apAddress;
         MacAddress staAddress;
 
@@ -55,8 +53,7 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, protected cListener
         const MacAddress& getStaAddress() const { return staAddress; }
     };
 
-    struct MacCompare
-    {
+    struct MacCompare {
         bool operator()(const MacAddress& u1, const MacAddress& u2) const { return u1.compareTo(u2) < 0; }
     };
     typedef std::map<MacAddress, StaInfo, MacCompare> StaList;
@@ -70,7 +67,7 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, protected cListener
     Ieee80211SupportedRatesElement supportedRates;
 
     // state
-    StaList staList;    ///< list of STAs
+    StaList staList; ///< list of STAs
     cMessage *beaconTimer = nullptr;
 
   public:

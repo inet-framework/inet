@@ -77,11 +77,11 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
         fcsBytes->copyToBuffer(buffer, bufferLength);
         auto fcs = ethernetCRC(buffer, bufferLength);
         updatedTrailer->setFcs(fcs);
-        delete [] buffer;
+        delete[] buffer;
     }
     packet->insertAtBack(updatedTrailer);
     this->frame = packet->dup();
-    ASSERT(!endIfsTimer->isScheduled() && !transmitting);    // we are idle
+    ASSERT(!endIfsTimer->isScheduled() && !transmitting); // we are idle
     if (ifs == 0) {
         // do directly what handleMessage() would do
         transmitting = true;

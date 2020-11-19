@@ -35,7 +35,7 @@ void TcpSendQueue::init(uint32_t startSeq)
 {
     begin = startSeq;
     end = startSeq;
-    dataBuffer.clear();          // clear dataBuffer
+    dataBuffer.clear(); // clear dataBuffer
 }
 
 std::string TcpSendQueue::str() const
@@ -77,7 +77,7 @@ Packet *TcpSendQueue::createSegmentWithBytes(uint32_t fromSeq, uint32_t numBytes
     sprintf(msgname, "tcpseg(l=%u)", (unsigned int)numBytes);
 
     Packet *tcpSegment = new Packet(msgname);
-    const auto& payload = dataBuffer.peekAt(B(fromSeq - begin), B(numBytes));   //get data from buffer
+    const auto& payload = dataBuffer.peekAt(B(fromSeq - begin), B(numBytes)); // get data from buffer
     tcpSegment->insertAtBack(payload);
     return tcpSegment;
 }

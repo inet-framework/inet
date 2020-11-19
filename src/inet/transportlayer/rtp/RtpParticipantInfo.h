@@ -21,7 +21,6 @@
     email                : Matthias.Oppitz@gmx.de
 ***************************************************************************/
 
-
 #ifndef __INET_RTPPARTICIPANTINFO_H
 #define __INET_RTPPARTICIPANTINFO_H
 
@@ -34,7 +33,7 @@
 namespace inet {
 namespace rtp {
 
-//Forward declarations:
+// Forward declarations:
 class ReceptionReport;
 class SenderReport;
 

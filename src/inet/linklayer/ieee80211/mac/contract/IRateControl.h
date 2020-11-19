@@ -32,12 +32,12 @@ namespace ieee80211 {
  */
 class INET_API IRateControl
 {
-    public:
-        virtual ~IRateControl() { }
+  public:
+    virtual ~IRateControl() {}
 
-        virtual const physicallayer::IIeee80211Mode *getRate() = 0;
-        virtual void frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp) = 0;
-        virtual void frameReceived(Packet *frame) = 0;
+    virtual const physicallayer::IIeee80211Mode *getRate() = 0;
+    virtual void frameTransmitted(Packet *frame, int retryCount, bool isSuccessful, bool isGivenUp) = 0;
+    virtual void frameReceived(Packet *frame) = 0;
 };
 
 } // namespace ieee80211

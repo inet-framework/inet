@@ -22,7 +22,7 @@
 
 namespace inet {
 
-template <typename T>
+template<typename T>
 class INET_API OperationalMixin : public T, public ILifecycle
 {
   protected:
@@ -33,8 +33,7 @@ class INET_API OperationalMixin : public T, public ILifecycle
     State operationalState = NOT_OPERATING;
     simtime_t lastChange;
 
-    class INET_API Operation
-    {
+    class INET_API Operation {
       public:
         LifecycleOperation *operation = nullptr;
         IDoneCallback *doneCallback = nullptr;
@@ -73,7 +72,7 @@ class INET_API OperationalMixin : public T, public ILifecycle
 
     virtual void handleActiveOperationTimeout(cMessage *message);
 
-    /// @{ utility functions
+    ///@{ utility functions
     virtual bool isUp() const { return operationalState != NOT_OPERATING /* && operationalState != OPERATION_SUSPENDED */; }
     virtual bool isDown() const { return operationalState == NOT_OPERATING /* || operationalState == OPERATION_SUSPENDED */; }
     virtual void setOperationalState(State newState);

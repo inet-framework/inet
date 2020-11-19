@@ -54,7 +54,7 @@ void NetworkConnectionVisualizerBase::handleParameterChange(const char *name)
     if (name != nullptr) {
         if (!strcmp(name, "nodeFilter"))
             nodeFilter.setPattern(par("nodeFilter"));
-        // TODO:
+        // TODO
     }
 }
 

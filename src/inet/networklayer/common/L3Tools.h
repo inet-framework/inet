@@ -33,7 +33,7 @@ INET_API const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(const Pack
 
 INET_API void insertNetworkProtocolHeader(Packet *packet, const Protocol& protocol, const Ptr<NetworkHeaderBase>& header);
 
-template <typename T>
+template<typename T>
 const Ptr<T> removeNetworkProtocolHeader(Packet *packet)
 {
     packet->removeTagIfPresent<NetworkProtocolInd>();
@@ -42,7 +42,7 @@ const Ptr<T> removeNetworkProtocolHeader(Packet *packet)
 
 INET_API const Ptr<NetworkHeaderBase> removeNetworkProtocolHeader(Packet *packet, const Protocol& protocol);
 
-};
+} // namespace inet
 
 #endif
 

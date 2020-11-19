@@ -34,10 +34,10 @@ void Ipv6ProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *p
         context.sourceColumn << header->getSrcAddress();
         context.destinationColumn << header->getDestAddress();
         context.infoColumn << "IPv6"
-                << " ttl:" << header->getHopLimit();
+                           << " ttl:" << header->getHopLimit();
         if (fh && (fh->getMoreFragments() || fh->getFragmentOffset() > 0)) {
             context.infoColumn << " id:" << fh->getIdentification()
-                    << " frag:[" << fh->getFragmentOffset() << ".." << fh->getFragmentOffset() + payloadLength.get();
+                               << " frag:[" << fh->getFragmentOffset() << ".." << fh->getFragmentOffset() + payloadLength.get();
             if (!fh->getMoreFragments())
                 context.infoColumn << " End";
             context.infoColumn << ")";
@@ -47,7 +47,7 @@ void Ipv6ProtocolPrinter::print(const Ptr<const Chunk>& chunk, const Protocol *p
             context.infoColumn << " payload:" << payloadProtocol->getName() << " " << payloadLength;
         else
             context.infoColumn << " payload: protocol(" << header->getProtocolId() << ") " << payloadLength;
-        //TODO options
+        // TODO options
     }
     else
         context.infoColumn << "(IPv6) " << chunk;

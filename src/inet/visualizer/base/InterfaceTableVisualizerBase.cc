@@ -53,7 +53,7 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
         case 'm':
             result = networkInterface->getMacAddress().str();
             break;
-        case 'l': // TODO: Ipv4 or Ipv6
+        case 'l': // TODO Ipv4 or Ipv6
 #ifdef WITH_IPv4
             if (auto ipv4Data = networkInterface->findProtocolData<Ipv4InterfaceData>())
                 result = std::to_string(ipv4Data->getNetmask().getNetmaskLength());
@@ -307,8 +307,8 @@ void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t
 #ifdef WITH_IPv4
                     || (signal == interfaceIpv4ConfigChangedSignal && (fieldId == Ipv4InterfaceData::F_IP_ADDRESS || fieldId == Ipv4InterfaceData::F_NETMASK))
 #endif // WITH_IPv4
-                    || (signal == interfaceStateChangedSignal && (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER))
-                    ) {
+                    || (signal == interfaceStateChangedSignal && (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER)))
+            {
                 if (interfaceFilter.matches(networkInterface)) {
                     auto interfaceVisualization = getInterfaceVisualization(networkNode, networkInterface);
                     if (interfaceVisualization == nullptr) {

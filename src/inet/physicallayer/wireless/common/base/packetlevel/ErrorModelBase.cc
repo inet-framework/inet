@@ -121,17 +121,21 @@ Packet *ErrorModelBase::computeCorruptedPacket(const Packet *packet, double ber)
 {
     bool isCorrupted = false;
     Packet *corruptedPacket = nullptr;
-    // TODO: this while loop looks bad, but we don't have any other chance now, because the decision whether the reception is successful or not has been already made
+    // TODO this while loop looks bad, but we don't have any other chance now, because the decision whether the reception is successful or not has been already made
     while (!isCorrupted) {
         switch (corruptionMode) {
             case CorruptionMode::CM_PACKET:
-                corruptedPacket = corruptPacket(packet, isCorrupted); break;
+                corruptedPacket = corruptPacket(packet, isCorrupted);
+                break;
             case CorruptionMode::CM_CHUNK:
-                corruptedPacket = corruptChunks(packet, ber, isCorrupted); break;
+                corruptedPacket = corruptChunks(packet, ber, isCorrupted);
+                break;
             case CorruptionMode::CM_BYTE:
-                corruptedPacket = corruptBytes(packet, ber, isCorrupted); break;
+                corruptedPacket = corruptBytes(packet, ber, isCorrupted);
+                break;
             case CorruptionMode::CM_BIT:
-                corruptedPacket = corruptBits(packet, ber, isCorrupted); break;
+                corruptedPacket = corruptBits(packet, ber, isCorrupted);
+                break;
             default:
                 throw cRuntimeError("Unknown corruption mode");
         }

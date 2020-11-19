@@ -31,7 +31,7 @@ struct INET_API Ipv4MulticastSourceList
 {
     typedef std::vector<Ipv4Address> Ipv4AddressVector;
     McastSourceFilterMode filterMode;
-    Ipv4AddressVector sources;    // sorted
+    Ipv4AddressVector sources; // sorted
 
     Ipv4MulticastSourceList()
         : filterMode(MCAST_INCLUDE_SOURCES) {}
@@ -80,7 +80,7 @@ struct INET_API Ipv4MulticastGroupSourceInfo : public Ipv4MulticastGroupInfo
  *
  * @see NetworkInterface
  */
-// XXX pass Ipv4Address parameters as values
+// TODO pass Ipv4Address parameters as values
 class INET_API Ipv4InterfaceData : public InterfaceProtocolData
 {
   public:
@@ -91,8 +91,7 @@ class INET_API Ipv4InterfaceData : public InterfaceProtocolData
 
   protected:
 
-    struct INET_API HostMulticastGroupData
-    {
+    struct INET_API HostMulticastGroupData {
         Ipv4Address multicastGroup;
         std::map<Ipv4Address, int> includeCounts;
         std::map<Ipv4Address, int> excludeCounts;
@@ -108,17 +107,15 @@ class INET_API Ipv4InterfaceData : public InterfaceProtocolData
 
     typedef std::vector<HostMulticastGroupData *> HostMulticastGroupVector;
 
-    struct INET_API HostMulticastData
-    {
-        HostMulticastGroupVector joinedMulticastGroups;    // multicast groups this interface joined
+    struct INET_API HostMulticastData {
+        HostMulticastGroupVector joinedMulticastGroups; // multicast groups this interface joined
 
         virtual ~HostMulticastData();
         std::string str();
         std::string detailedInfo();
     };
 
-    struct INET_API RouterMulticastGroupData
-    {
+    struct INET_API RouterMulticastGroupData {
         Ipv4Address multicastGroup;
         Ipv4MulticastSourceList sourceList;
 
@@ -128,10 +125,9 @@ class INET_API Ipv4InterfaceData : public InterfaceProtocolData
 
     typedef std::vector<RouterMulticastGroupData *> RouterMulticastGroupVector;
 
-    struct INET_API RouterMulticastData
-    {
-        RouterMulticastGroupVector reportedMulticastGroups;    ///< multicast groups that have listeners on the link connected to this interface
-        int multicastTtlThreshold;    ///< multicast ttl threshold, used by multicast routers to limit multicast scope
+    struct INET_API RouterMulticastData {
+        RouterMulticastGroupVector reportedMulticastGroups; ///< multicast groups that have listeners on the link connected to this interface
+        int multicastTtlThreshold; ///< multicast ttl threshold, used by multicast routers to limit multicast scope
 
         RouterMulticastData() : multicastTtlThreshold(0) {}
         virtual ~RouterMulticastData();
@@ -139,9 +135,9 @@ class INET_API Ipv4InterfaceData : public InterfaceProtocolData
         std::string detailedInfo();
     };
 
-    Ipv4Address inetAddr;    ///< Ipv4 address of interface
-    Ipv4Address netmask;    ///< netmask
-    int metric;    ///< link "cost"; see e.g. MS KB article Q299540
+    Ipv4Address inetAddr; ///< Ipv4 address of interface
+    Ipv4Address netmask; ///< netmask
+    int metric; ///< link "cost"; see e.g. MS KB article Q299540
     HostMulticastData *hostData;
     RouterMulticastData *routerData;
 

@@ -58,7 +58,7 @@ static int parseGroups(const char *& s, uint16_t *groups)
     while (1) {
         char *e;
         unsigned long grp = strtoul(s, &e, 16);
-        if (s == e) {    // no hex digit converted
+        if (s == e) { // no hex digit converted
             if (k != 0)
                 s--; // "unskip" preceding ':'
             break;
@@ -66,11 +66,11 @@ static int parseGroups(const char *& s, uint16_t *groups)
         // if negative or too big, return (s will point to beginning of large number)
         if (grp > 0xffff)
             break;
-        groups[k++] = grp;    // group[k] successfully stored
-        s = e;    // skip converted hex number
+        groups[k++] = grp; // group[k] successfully stored
+        s = e; // skip converted hex number
         if (*s != ':' || k == 8)
             break;
-        s++;    // skip ':'
+        s++; // skip ':'
     }
     return k;
 }
@@ -210,9 +210,9 @@ std::string Ipv6Address::str() const
 
 Ipv6Address::Scope Ipv6Address::getScope() const
 {
-    //Mask the given Ipv6 address with the different mask types
-    //to get only the Ipv6 address scope. Compare the masked
-    //address with the different prefixes.
+    // Mask the given Ipv6 address with the different mask types
+    // to get only the Ipv6 address scope. Compare the masked
+    // address with the different prefixes.
 
     if ((d[0] & LINK_LOCAL_MASK) == LINK_LOCAL_PREFIX) {
         return LINK;
@@ -231,7 +231,7 @@ Ipv6Address::Scope Ipv6Address::getScope() const
             return LOOPBACK;
         }
         else {
-            return GLOBAL;    // actually an "Ipv4-compatible Ipv6 address"
+            return GLOBAL; // actually an "Ipv4-compatible Ipv6 address"
         }
     }
     else {

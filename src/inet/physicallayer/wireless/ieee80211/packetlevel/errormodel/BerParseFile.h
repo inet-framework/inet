@@ -37,8 +37,7 @@ namespace physicallayer {
 class INET_API BerParseFile
 {
   protected:
-    struct SnrBer
-    {
+    struct SnrBer {
         double snr;
         double ber;
         inline SnrBer& operator=(const SnrBer& m)
@@ -54,14 +53,13 @@ class INET_API BerParseFile
         }
     };
     typedef std::vector<SnrBer> SnrBerList;
-    struct LongBer
-    {
+    struct LongBer {
         int longpkt;
         SnrBerList snrlist;
     };
 
     typedef std::vector<LongBer *> BerList;
-// A and G
+    // A and G
     typedef std::vector<BerList> BerTable;
     BerTable berTable;
     char phyOpMode;

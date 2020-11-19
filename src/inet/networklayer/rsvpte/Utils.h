@@ -44,7 +44,7 @@ bool find(std::vector<int>& vec, int value);
 /**
  * TODO documentation
  */
-bool find(const Ipv4AddressVector& vec, Ipv4Address addr);    // use TEMPLATE
+bool find(const Ipv4AddressVector& vec, Ipv4Address addr); // use TEMPLATE
 
 /**
  * TODO documentation
@@ -57,7 +57,7 @@ void append(std::vector<int>& dest, const std::vector<int>& src);
 int find(const EroVector& ERO, Ipv4Address node);
 
 /**
- * XXX function appears to be unused
+ * TODO function appears to be unused
  */
 cModule *getPayloadOwner(cPacket *msg);
 

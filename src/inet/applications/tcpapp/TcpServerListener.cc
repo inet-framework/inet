@@ -45,11 +45,11 @@ void TcpServerListener::handleCrashOperation(LifecycleOperation *operation)
 {
     while (!connectionSet.empty()) {
         auto connection = *connectionSet.begin();
-        // TODO: destroy!!!
+        // TODO destroy!!!
         connection->getSocket()->close();
         removeConnection(connection);
     }
-    // TODO: always?
+    // TODO always?
     if (operation->getRootModule() != getContainingNode(this))
         serverSocket.destroy();
 }
@@ -59,7 +59,7 @@ void TcpServerListener::handleMessageWhenUp(cMessage *msg)
     if (serverSocket.belongsToSocket(msg))
         serverSocket.processMessage(msg);
     else
-         throw cRuntimeError("Unknown incoming message: '%s'", msg->getName());
+        throw cRuntimeError("Unknown incoming message: '%s'", msg->getName());
 }
 
 void TcpServerListener::finish()

@@ -25,7 +25,7 @@ static int getPacketPriority(cObject *object)
 {
     auto packet = static_cast<Packet *>(object);
     int up = packet->getTag<UserPriorityReq>()->getUserPriority();
-    return (up == UP_BK) ? -2 : (up == UP_BK2) ? -1 : up;  // because UP_BE==0, but background traffic should have lower priority than best effort
+    return (up == UP_BK) ? -2 : (up == UP_BK2) ? -1 : up; // because UP_BE==0, but background traffic should have lower priority than best effort
 }
 
 static int comparePacketsByUserPriority(Packet *a, Packet *b)

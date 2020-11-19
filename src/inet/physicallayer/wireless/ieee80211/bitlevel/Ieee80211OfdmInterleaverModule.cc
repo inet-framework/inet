@@ -43,6 +43,7 @@ Ieee80211OfdmInterleaverModule::~Ieee80211OfdmInterleaverModule()
     delete interleaver->getInterleaving();
     delete interleaver;
 }
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

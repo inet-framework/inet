@@ -82,8 +82,7 @@ void QuadTreeNeighborCache::addRadio(const IRadio *radio)
     Coord newConstraintAreaMin = radioMedium->getMediumLimitCache()->getMinConstraintArea();
     Coord newConstraintAreaMax = radioMedium->getMediumLimitCache()->getMaxConstraintArea();
     // If the constraintArea changed we must rebuild the QuadTree
-    if (newConstraintAreaMin != constraintAreaMin || newConstraintAreaMax != constraintAreaMax)
-    {
+    if (newConstraintAreaMin != constraintAreaMin || newConstraintAreaMax != constraintAreaMax) {
         constraintAreaMin = newConstraintAreaMin;
         constraintAreaMax = newConstraintAreaMax;
         if (initialized())
@@ -100,8 +99,7 @@ void QuadTreeNeighborCache::removeRadio(const IRadio *radio)
         radios.erase(it);
         Coord newConstraintAreaMin = radioMedium->getMediumLimitCache()->getMinConstraintArea();
         Coord newConstraintAreaMax = radioMedium->getMediumLimitCache()->getMaxConstraintArea();
-        if (newConstraintAreaMin != constraintAreaMin || newConstraintAreaMax != constraintAreaMax)
-        {
+        if (newConstraintAreaMin != constraintAreaMin || newConstraintAreaMax != constraintAreaMax) {
             constraintAreaMin = newConstraintAreaMin;
             constraintAreaMax = newConstraintAreaMax;
             if (initialized())
@@ -127,7 +125,7 @@ void QuadTreeNeighborCache::sendToNeighbors(IRadio *transmitter, const IWireless
 
 void QuadTreeNeighborCache::fillQuadTreeWithRadios()
 {
-    for (auto & elem : radios) {
+    for (auto& elem : radios) {
         Coord radioPos = elem->getAntenna()->getMobility()->getCurrentPosition();
         if (!quadTree->insert(check_and_cast<const cObject *>(elem), radioPos))
             throw cRuntimeError("Unsuccessful QuadTree building");

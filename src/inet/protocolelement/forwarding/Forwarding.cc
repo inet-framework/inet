@@ -43,16 +43,16 @@ void Forwarding::initialize(int stage)
 
 std::pair<L3Address, int> Forwarding::findNextHop(const L3Address& destinationAddress)
 {
-    // TODO: KLUDGE: this is for testing only
+    // KLUDGE this is for testing only
     if (destinationAddress == Ipv4Address("10.0.0.10")) {
         if (address == Ipv4Address("10.0.0.1"))
-            return {Ipv4Address("10.0.0.2"), 0};
+            return { Ipv4Address("10.0.0.2"), 0 };
         else if (address == Ipv4Address("10.0.0.2"))
-            return {Ipv4Address("10.0.0.7"), 2};
+            return { Ipv4Address("10.0.0.7"), 2 };
         else if (address == Ipv4Address("10.0.0.7"))
-            return {Ipv4Address("10.0.0.10"), 2};
+            return { Ipv4Address("10.0.0.10"), 2 };
     }
-    return {Ipv4Address(), -1};
+    return { Ipv4Address(), -1 };
 }
 
 void Forwarding::pushPacket(Packet *packet, cGate *gate)
@@ -72,7 +72,7 @@ void Forwarding::pushPacket(Packet *packet, cGate *gate)
     else {
         auto interface = check_and_cast<NetworkInterface *>(getParentModule()->getParentModule()->getSubmodule("interface", interfaceIndex));
         packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interface->getInterfaceId());
-        // TODO: KLUDGE: this is for testing only
+        // KLUDGE this is for testing only
         MacAddress destinationMacAddress("00-AA-00-00-00-00");
         destinationMacAddress.setAddressByte(5, nextHopAddress.toIpv4().getDByte(3));
         packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(destinationMacAddress);

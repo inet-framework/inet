@@ -30,16 +30,16 @@ namespace ieee80211 {
  */
 class INET_API Pcf : public ICoordinationFunction, public cSimpleModule
 {
-    protected:
-        IChannelAccess *pcfChannelAccess = nullptr;
+  protected:
+    IChannelAccess *pcfChannelAccess = nullptr;
 
-    protected:
-        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
-    public:
-        virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override { throw cRuntimeError("Unimplemented!"); }
-        virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override { throw cRuntimeError("Unimplemented!"); };
-        virtual void corruptedFrameReceived() override { throw cRuntimeError("Unimplemented!"); }
+  public:
+    virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override { throw cRuntimeError("Unimplemented!"); }
+    virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override { throw cRuntimeError("Unimplemented!"); }
+    virtual void corruptedFrameReceived() override { throw cRuntimeError("Unimplemented!"); }
 };
 
 } /* namespace ieee80211 */

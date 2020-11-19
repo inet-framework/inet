@@ -88,6 +88,7 @@ class EigrpMetricHelper
      */
     bool isParamMaximal(const EigrpWideMetricPar& par) { return par.delay == DELAY_INF; }
 };
-} //eigrp
-} //inet
+} // eigrp
+} // inet
 #endif /* EIGRPMETRICHELPER_H_ */
+

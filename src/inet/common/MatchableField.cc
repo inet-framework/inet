@@ -62,5 +62,5 @@ const char *MatchableField::getAsString(const char *attribute) const
         return nullptr;
 }
 
-}  // namespace inet
+} // namespace inet
 

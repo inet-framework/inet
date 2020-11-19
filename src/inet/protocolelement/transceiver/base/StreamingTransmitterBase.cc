@@ -54,7 +54,7 @@ void StreamingTransmitterBase::receiveSignal(cComponent *source, simsignal_t sig
             if (notification->par->getOwner() == transmissionChannel &&
                 notification->par->getType() == cPar::BOOL && strcmp(notification->par->getName(), "disabled") == 0 &&
                 !transmissionChannel->isDisabled() &&
-                isTransmitting()) // TODO: the new value of parameter currently unavailable: notification->newValue == true
+                isTransmitting()) // TODO the new value of parameter currently unavailable: notification->newValue == true
             {
                 abortTx();
             }

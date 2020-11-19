@@ -39,12 +39,12 @@ cModule *getModuleByRelativePath(cModule *modp, const char *path)
             if (token[strlen(token) - 1] != ']')
                 return nullptr;
             int index = atoi(lbracket + 1);
-            *lbracket = '\0';    // cut off [index]
+            *lbracket = '\0'; // cut off [index]
             modp = modp->getSubmodule(token, index);
         }
         token = strtok(nullptr, ".");
     }
-    return modp;    // nullptr if not found
+    return modp; // nullptr if not found
 }
 
 } // namespace

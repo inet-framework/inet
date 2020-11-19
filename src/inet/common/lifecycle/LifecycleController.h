@@ -63,8 +63,7 @@ namespace inet {
 class INET_API LifecycleController
 {
   protected:
-    class INET_API Callback : public IDoneCallback
-    {
+    class INET_API Callback : public IDoneCallback {
       public:
         LifecycleController *controller = nullptr;
         LifecycleOperation *operation = nullptr;
@@ -79,7 +78,7 @@ class INET_API LifecycleController
   protected:
     virtual bool resumeOperation(LifecycleOperation *operation);
     virtual void doOneStage(LifecycleOperation *operation, cModule *submodule);
-    virtual void moduleOperationStageCompleted(Callback *callback);    // invoked from the callback
+    virtual void moduleOperationStageCompleted(Callback *callback); // invoked from the callback
 
   public:
     LifecycleController() : spareCallback(nullptr) {}

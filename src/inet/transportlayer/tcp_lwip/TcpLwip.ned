@@ -29,8 +29,8 @@ import inet.transportlayer.contract.ITcp;
 simple TcpLwip like ITcp
 {
     parameters:
-        string sendQueueClass = default("");    //# TODO: Obsolete!!!
-        string receiveQueueClass = default(""); //# TODO: Obsolete!!!
+        string sendQueueClass = default("");    //# TODO Obsolete!!!
+        string receiveQueueClass = default(""); //# TODO Obsolete!!!
         string crcMode @enum("declared", "computed") = default("declared");
         @display("i=block/wheelbarrow");
 

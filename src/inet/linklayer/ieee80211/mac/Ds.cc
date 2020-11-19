@@ -123,12 +123,11 @@ void Ds::distributeDataFrame(Packet *incomingFrame, const Ptr<const Ieee80211Dat
     auto outgoingFrame = new Packet(incomingFrame->getName(), incomingFrame->peekData());
     outgoingFrame->insertAtFront(outgoingHeader);
     const auto& trailer = makeShared<Ieee80211MacTrailer>();
-    // TODO: add module parameter, implement fcs computing
-    // TODO: trailer->setFcsMode(FCS_COMPUTED);
+    // TODO add module parameter, implement fcs computing
+    // TODO trailer->setFcsMode(FCS_COMPUTED);
     outgoingFrame->insertAtBack(trailer);
     mac->processUpperFrame(outgoingFrame, outgoingHeader);
 }
-
 
 } // namespace ieee80211
 } // namespace inet

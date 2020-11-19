@@ -36,70 +36,70 @@ namespace ieee80211 {
 
 class INET_API QoSContext
 {
-    public:
-        QoSContext(IOriginatorQoSAckPolicy *ackPolicy, IOriginatorBlockAckProcedure *blockAckProcedure, IOriginatorBlockAckAgreementHandler *blockAckAgreementHandler, TxopProcedure *txopProcedure) :
-            ackPolicy(ackPolicy),
-            blockAckProcedure(blockAckProcedure),
-            blockAckAgreementHandler(blockAckAgreementHandler),
-            txopProcedure(txopProcedure)
-        { }
+  public:
+    QoSContext(IOriginatorQoSAckPolicy *ackPolicy, IOriginatorBlockAckProcedure *blockAckProcedure, IOriginatorBlockAckAgreementHandler *blockAckAgreementHandler, TxopProcedure *txopProcedure) :
+        ackPolicy(ackPolicy),
+        blockAckProcedure(blockAckProcedure),
+        blockAckAgreementHandler(blockAckAgreementHandler),
+        txopProcedure(txopProcedure)
+    {}
 
-        IOriginatorQoSAckPolicy *ackPolicy = nullptr;
-        IOriginatorBlockAckProcedure *blockAckProcedure = nullptr;
-        IOriginatorBlockAckAgreementHandler *blockAckAgreementHandler = nullptr;
-        TxopProcedure *txopProcedure = nullptr;
+    IOriginatorQoSAckPolicy *ackPolicy = nullptr;
+    IOriginatorBlockAckProcedure *blockAckProcedure = nullptr;
+    IOriginatorBlockAckAgreementHandler *blockAckAgreementHandler = nullptr;
+    TxopProcedure *txopProcedure = nullptr;
 };
 
 class INET_API NonQoSContext
 {
-    public:
-        NonQoSContext(IOriginatorAckPolicy *ackPolicy) :
-            ackPolicy(ackPolicy)
-        { }
+  public:
+    NonQoSContext(IOriginatorAckPolicy *ackPolicy) :
+        ackPolicy(ackPolicy)
+    {}
 
-        IOriginatorAckPolicy *ackPolicy = nullptr;
+    IOriginatorAckPolicy *ackPolicy = nullptr;
 };
 
 class INET_API FrameSequenceContext : public cObject
 {
-    protected:
-        simtime_t startTime = simTime();
-        MacAddress address = MacAddress::UNSPECIFIED_ADDRESS;
-        physicallayer::Ieee80211ModeSet *modeSet = nullptr;
-        InProgressFrames *inProgressFrames = nullptr;
-        std::vector<IFrameSequenceStep *> steps;
+  protected:
+    simtime_t startTime = simTime();
+    MacAddress address = MacAddress::UNSPECIFIED_ADDRESS;
+    physicallayer::Ieee80211ModeSet *modeSet = nullptr;
+    InProgressFrames *inProgressFrames = nullptr;
+    std::vector<IFrameSequenceStep *> steps;
 
-        IRtsProcedure *rtsProcedure = nullptr;
-        IRtsPolicy *rtsPolicy = nullptr;
+    IRtsProcedure *rtsProcedure = nullptr;
+    IRtsPolicy *rtsPolicy = nullptr;
 
-        NonQoSContext *nonQoSContext = nullptr;
-        QoSContext *qosContext = nullptr;
+    NonQoSContext *nonQoSContext = nullptr;
+    QoSContext *qosContext = nullptr;
 
-    public:
-        FrameSequenceContext(MacAddress address, physicallayer::Ieee80211ModeSet *modeSet, InProgressFrames *inProgressFrames, IRtsProcedure *rtsProcedure, IRtsPolicy *rtsPolicy, NonQoSContext *nonQosContext, QoSContext *qosContext);
-        virtual ~FrameSequenceContext();
+  public:
+    FrameSequenceContext(MacAddress address, physicallayer::Ieee80211ModeSet *modeSet, InProgressFrames *inProgressFrames, IRtsProcedure *rtsProcedure, IRtsPolicy *rtsPolicy, NonQoSContext *nonQosContext, QoSContext *qosContext);
+    virtual ~FrameSequenceContext();
 
-        virtual simtime_t getDuration() const { return simTime() - startTime; }
+    virtual simtime_t getDuration() const { return simTime() - startTime; }
 
-        virtual void addStep(IFrameSequenceStep *step) { steps.push_back(step); }
-        virtual int getNumSteps() const { return steps.size(); }
-        virtual IFrameSequenceStep *getStep(int i) const { return steps[i]; }
-        virtual IFrameSequenceStep *getLastStep() const { return steps.size() > 0 ? steps.back() : nullptr; }
-        virtual IFrameSequenceStep *getStepBeforeLast() const { return steps.size() > 1 ? steps[steps.size() - 2] : nullptr; }
+    virtual void addStep(IFrameSequenceStep *step) { steps.push_back(step); }
+    virtual int getNumSteps() const { return steps.size(); }
+    virtual IFrameSequenceStep *getStep(int i) const { return steps[i]; }
+    virtual IFrameSequenceStep *getLastStep() const { return steps.size() > 0 ? steps.back() : nullptr; }
+    virtual IFrameSequenceStep *getStepBeforeLast() const { return steps.size() > 1 ? steps[steps.size() - 2] : nullptr; }
 
-        virtual InProgressFrames* getInProgressFrames() const { return inProgressFrames; }
-        virtual IRtsProcedure* getRtsProcedure() const { return rtsProcedure; }
-        virtual IRtsPolicy* getRtsPolicy() const { return rtsPolicy; }
+    virtual InProgressFrames *getInProgressFrames() const { return inProgressFrames; }
+    virtual IRtsProcedure *getRtsProcedure() const { return rtsProcedure; }
+    virtual IRtsPolicy *getRtsPolicy() const { return rtsPolicy; }
 
-        virtual NonQoSContext *getNonQoSContext() const { return nonQoSContext; }
-        virtual QoSContext *getQoSContext() const { return qosContext; }
+    virtual NonQoSContext *getNonQoSContext() const { return nonQoSContext; }
+    virtual QoSContext *getQoSContext() const { return qosContext; }
 
-        virtual simtime_t getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtframe) const;
-        virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const;
-        virtual simtime_t getIfs() const;
+    virtual simtime_t getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtframe) const;
+    virtual simtime_t getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const;
+    virtual simtime_t getIfs() const;
 
-        virtual bool isForUs(const Ptr<const Ieee80211MacHeader>& header) const;
-        virtual bool isSentByUs(const Ptr<const Ieee80211MacHeader>& header) const;
+    virtual bool isForUs(const Ptr<const Ieee80211MacHeader>& header) const;
+    virtual bool isSentByUs(const Ptr<const Ieee80211MacHeader>& header) const;
 };
 
 class INET_API FrameSequenceDurationFilter : public cObjectResultFilter

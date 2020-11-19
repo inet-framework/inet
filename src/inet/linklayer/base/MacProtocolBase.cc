@@ -122,7 +122,7 @@ void MacProtocolBase::flushQueue(PacketDropDetails& details)
     if (txQueue)
         while (!txQueue->isEmpty()) {
             auto packet = txQueue->dequeuePacket();
-            emit(packetDroppedSignal, packet, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
+            emit(packetDroppedSignal, packet, &details); // FIXME this signal lumps together packets from the network and packets from higher layers! separate them
             delete packet;
         }
 }

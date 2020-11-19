@@ -81,7 +81,7 @@ void Ieee802154Mac::initialize(int stage)
         ackLength = par("ackLength");
         ackMessage = nullptr;
 
-        //init parameters for backoff method
+        // init parameters for backoff method
         std::string backoffMethodStr = par("backoffMethod").stdstringValue();
         if (backoffMethodStr == "exponential") {
             backoffMethod = EXPONENTIAL;
@@ -116,9 +116,9 @@ void Ieee802154Mac::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *radioModule = check_and_cast<cModule *>(radio);
-        //check parameters for consistency
-        //aTurnaroundTime should match (be equal or bigger) the RX to TX
-        //switching time of the radio
+        // check parameters for consistency
+        // aTurnaroundTime should match (be equal or bigger) the RX to TX
+        // switching time of the radio
         if (radioModule->hasPar("timeRXToTX")) {
             simtime_t rxToTx = radioModule->par("timeRXToTX");
             if (rxToTx > aTurnaroundTime) {
@@ -187,7 +187,7 @@ void Ieee802154Mac::configureNetworkInterface()
  */
 void Ieee802154Mac::handleUpperPacket(Packet *packet)
 {
-    //MacPkt*macPkt = encapsMsg(msg);
+//    MacPkt*macPkt = encapsMsg(msg);
     auto macPkt = makeShared<Ieee802154MacHeader>();
     assert(headerLength % 8 == 0);
     macPkt->setChunkLength(b(headerLength));
@@ -200,7 +200,7 @@ void Ieee802154Mac::handleUpperPacket(Packet *packet)
 
     if (useMACAcks) {
         if (SeqNrParent.find(dest) == SeqNrParent.end()) {
-            //no record of current parent -> add next sequence number to map
+            // no record of current parent -> add next sequence number to map
             SeqNrParent[dest] = 1;
             macPkt->setSequenceId(0);
             EV_DETAIL << "Adding a new parent to the map of Sequence numbers:" << dest << endl;
@@ -212,8 +212,8 @@ void Ieee802154Mac::handleUpperPacket(Packet *packet)
         }
     }
 
-    //RadioAccNoise3PhyControlInfo *pco = new RadioAccNoise3PhyControlInfo(bitrate);
-    //macPkt->setControlInfo(pco);
+//    RadioAccNoise3PhyControlInfo *pco = new RadioAccNoise3PhyControlInfo(bitrate);
+//    macPkt->setControlInfo(pco);
     packet->insertAtFront(macPkt);
     packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee802154);
     EV_DETAIL << "pkt encapsulated, length: " << macPkt->getChunkLength() << "\n";
@@ -229,14 +229,14 @@ void Ieee802154Mac::updateStatusIdle(t_mac_event event, cMessage *msg)
                 EV_DETAIL << "(1) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff avail]: startTimerBackOff -> BACKOFF." << endl;
                 updateMacState(BACKOFF_2);
                 NB = 0;
-                //BE = macMinBE;
+//                BE = macMinBE;
                 startTimer(TIMER_BACKOFF);
             }
             break;
 
         case EV_DUPLICATE_RECEIVED:
             EV_DETAIL << "(15) FSM State IDLE_1, EV_DUPLICATE_RECEIVED: setting up radio tx -> WAITSIFS." << endl;
-            //sendUp(decapsMsg(static_cast<MacSeqPkt *>(msg)));
+//            sendUp(decapsMsg(static_cast<MacSeqPkt *>(msg)));
             delete msg;
 
             if (useMACAcks) {
@@ -299,7 +299,7 @@ void Ieee802154Mac::updateStatusBackoff(t_mac_event event, cMessage *msg)
             else {
                 EV_DETAIL << "Nothing to do.";
             }
-            //sendUp(decapsMsg(static_cast<MacSeqPkt *>(msg)));
+//            sendUp(decapsMsg(static_cast<MacSeqPkt *>(msg)));
             delete msg;
 
             break;
@@ -358,7 +358,7 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
                     popTxQueue();
                 Packet *mac = currentTxFrame->dup();
                 attachSignal(mac, simTime() + aTurnaroundTime);
-                //sendDown(msg);
+//                sendDown(msg);
                 // give time for the radio to be in Tx state before transmitting
                 sendDelayed(mac, aTurnaroundTime, lowerLayerOutGateId);
                 nbTxFrames++;
@@ -368,7 +368,7 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
                 EV_DETAIL << "(7) FSM State CCA_3, EV_TIMER_CCA, [Channel Busy]: "
                           << " increment counters." << endl;
                 NB = NB + 1;
-                //BE = std::min(BE+1, macMaxBE);
+//                BE = std::min(BE+1, macMaxBE);
 
                 // decide if we go for another backoff or if we drop the frame.
                 if (NB > macMaxCSMABackoffs) {
@@ -384,7 +384,7 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
                         dropCurrentTxFrame(details);
                     }
                     else {
-                        EV_ERROR << "too many Backoffs, but currentTxFrame is empty\n";    //TODO is it good, or model error?
+                        EV_ERROR << "too many Backoffs, but currentTxFrame is empty\n"; // TODO is it good, or model error?
                     }
                     manageQueue();
                 }
@@ -414,7 +414,7 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
             else {
                 EV_DETAIL << " Nothing to do." << endl;
             }
-            //sendUp(decapsMsg(static_cast<MacPkt*>(msg)));
+//            sendUp(decapsMsg(static_cast<MacPkt*>(msg)));
             delete msg;
             break;
 
@@ -454,19 +454,19 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
 void Ieee802154Mac::updateStatusTransmitFrame(t_mac_event event, cMessage *msg)
 {
     if (event == EV_FRAME_TRANSMITTED && currentTxFrame != nullptr) {
-        //    delete msg;
+//        delete msg;
         Packet *packet = currentTxFrame;
         const auto& csmaHeader = packet->peekAtFront<Ieee802154MacHeader>();
         radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
 
         bool expectAck = useMACAcks;
         if (!csmaHeader->getDestAddr().isBroadcast() && !csmaHeader->getDestAddr().isMulticast()) {
-            //unicast
+            // unicast
             EV_DETAIL << "(4) FSM State TRANSMITFRAME_4, "
                       << "EV_FRAME_TRANSMITTED [Unicast]: ";
         }
         else {
-            //broadcast
+            // broadcast
             EV_DETAIL << "(27) FSM State TRANSMITFRAME_4, EV_FRAME_TRANSMITTED "
                       << " [Broadcast]";
             expectAck = false;
@@ -528,7 +528,7 @@ void Ieee802154Mac::updateStatusWaitAck(t_mac_event event, cMessage *msg)
     }
 }
 
-void Ieee802154Mac::manageMissingAck(t_mac_event    /*event*/, cMessage *    /*msg*/)
+void Ieee802154Mac::manageMissingAck(t_mac_event /*event*/, cMessage * /*msg*/)
 {
     if (txAttempts < macMaxFrameRetries) {
         // increment counter
@@ -561,7 +561,7 @@ void Ieee802154Mac::updateStatusSIFS(t_mac_event event, cMessage *msg)
             attachSignal(ackMessage, simTime());
             sendDown(ackMessage);
             nbTxAcks++;
-            //        sendDelayed(ackMessage, aTurnaroundTime, lowerLayerOut);
+//            sendDelayed(ackMessage, aTurnaroundTime, lowerLayerOut);
             ackMessage = nullptr;
             break;
 
@@ -667,7 +667,7 @@ void Ieee802154Mac::manageQueue()
             // initialize counters if we start a new transmission
             // cycle from zero
             NB = 0;
-            //BE = macMinBE;
+//            BE = macMinBE;
         }
         if (!backoffTimer->isScheduled()) {
             startTimer(TIMER_BACKOFF);
@@ -837,9 +837,9 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
                 ackMessage = new Packet("CSMA-Ack");
                 ackMessage->insertAtFront(csmaHeader);
                 ackMessage->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee802154);
-                //Check for duplicates by checking expected seqNr of sender
+                // Check for duplicates by checking expected seqNr of sender
                 if (SeqNrChild.find(src) == SeqNrChild.end()) {
-                    //no record of current child -> add expected next number to map
+                    // no record of current child -> add expected next number to map
                     SeqNrChild[src] = SeqNr + 1;
                     EV_DETAIL << "Adding a new child to the map of Sequence numbers:" << src << endl;
                     executeMac(EV_FRAME_RECEIVED, packet);
@@ -849,7 +849,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
                     EV_DETAIL << "Expected Sequence number is " << ExpectedNr
                               << " and number of packet is " << SeqNr << endl;
                     if (SeqNr < ExpectedNr) {
-                        //Duplicate Packet, count and do not send to upper layer
+                        // Duplicate Packet, count and do not send to upper layer
                         nbDuplicates++;
                         executeMac(EV_DUPLICATE_RECEIVED, packet);
                     }
@@ -896,7 +896,7 @@ void Ieee802154Mac::receiveSignal(cComponent *source, simsignal_t signalID, intv
     if (signalID == IRadio::transmissionStateChangedSignal) {
         IRadio::TransmissionState newRadioTransmissionState = static_cast<IRadio::TransmissionState>(value);
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
-            // KLUDGE: we used to get a cMessage from the radio (the identity was not important)
+            // KLUDGE we used to get a cMessage from the radio (the identity was not important)
             executeMac(EV_FRAME_TRANSMITTED, new cMessage("Transmission over"));
         }
         transmissionState = newRadioTransmissionState;
@@ -916,7 +916,7 @@ void Ieee802154Mac::decapsulate(Packet *packet)
 void Ieee802154Mac::handleStartOperation(LifecycleOperation *operation)
 {
     updateMacState(IDLE_1);
-    //manageQueue() to see waiting packets or set to idle if none
+    // manageQueue() to see waiting packets or set to idle if none
     MacProtocolBase::handleStartOperation(operation);
 
     cModule *radioModule = check_and_cast<cModule *>(radio);
@@ -926,8 +926,8 @@ void Ieee802154Mac::handleStartOperation(LifecycleOperation *operation)
 
 void Ieee802154Mac::handleStopOperation(LifecycleOperation *operation)
 {
-    //TODO: More gracefully allow current Tx to end (delay operation)
-    //Cancel all self message timers
+    // TODO More gracefully allow current Tx to end (delay operation)
+    // Cancel all self message timers
     cancelEvent(backoffTimer);
     cancelEvent(ccaTimer);
     cancelEvent(sifsTimer);

@@ -62,7 +62,7 @@ void Ieee8022LlcSocketCommandProcessor::handleCommand(Request *request)
         int socketId = request->getTag<SocketReq>()->getSocketId();
         socketTable->removeSocket(socketId);
         delete request;
-        // TODO: move to Ieee8022SocketPacketProcessor module into a listener on the Ieee8022SocketTable
+        // TODO move to Ieee8022SocketPacketProcessor module into a listener on the Ieee8022SocketTable
 //        auto indication = new Indication("closed", IEEE8022_LLC_I_SOCKET_CLOSED);
 //        auto controlInfo = new Ieee8022LlcSocketClosedIndication();
 //        indication->setControlInfo(controlInfo);

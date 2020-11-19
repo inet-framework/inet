@@ -31,29 +31,29 @@ namespace ieee80211 {
  */
 class INET_API Edca : public cSimpleModule
 {
-    protected:
-        int numEdcafs = -1;
-        Edcaf **edcafs = nullptr;
-        EdcaTransmitLifetimeHandler *lifetimeHandler = nullptr;
-        NonQosRecoveryProcedure *mgmtAndNonQoSRecoveryProcedure = nullptr;
+  protected:
+    int numEdcafs = -1;
+    Edcaf **edcafs = nullptr;
+    EdcaTransmitLifetimeHandler *lifetimeHandler = nullptr;
+    NonQosRecoveryProcedure *mgmtAndNonQoSRecoveryProcedure = nullptr;
 
-    protected:
-        virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage) override;
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
 
-        virtual AccessCategory mapTidToAc(Tid tid);
+    virtual AccessCategory mapTidToAc(Tid tid);
 
-    public:
-        virtual ~Edca();
+  public:
+    virtual ~Edca();
 
-        virtual AccessCategory classifyFrame(const Ptr<const Ieee80211DataHeader>& header);
-        virtual Edcaf *getEdcaf(AccessCategory ac) const { return edcafs[ac]; }
-        virtual Edcaf *getChannelOwner();
-        virtual std::vector<Edcaf*> getInternallyCollidedEdcafs();
-        virtual NonQosRecoveryProcedure *getMgmtAndNonQoSRecoveryProcedure() const { return mgmtAndNonQoSRecoveryProcedure; }
+    virtual AccessCategory classifyFrame(const Ptr<const Ieee80211DataHeader>& header);
+    virtual Edcaf *getEdcaf(AccessCategory ac) const { return edcafs[ac]; }
+    virtual Edcaf *getChannelOwner();
+    virtual std::vector<Edcaf *> getInternallyCollidedEdcafs();
+    virtual NonQosRecoveryProcedure *getMgmtAndNonQoSRecoveryProcedure() const { return mgmtAndNonQoSRecoveryProcedure; }
 
-        virtual void requestChannelAccess(AccessCategory ac, IChannelAccess::ICallback *callback);
-        virtual void releaseChannelAccess(AccessCategory ac, IChannelAccess::ICallback *callback);
+    virtual void requestChannelAccess(AccessCategory ac, IChannelAccess::ICallback *callback);
+    virtual void releaseChannelAccess(AccessCategory ac, IChannelAccess::ICallback *callback);
 };
 
 } /* namespace ieee80211 */

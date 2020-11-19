@@ -118,7 +118,7 @@ const IRadio *VectorCommunicationCache::getRadio(int id) const
         return nullptr;
 }
 
-void VectorCommunicationCache::mapRadios(std::function<void (const IRadio *)> f) const
+void VectorCommunicationCache::mapRadios(std::function<void(const IRadio *)> f) const
 {
     for (auto& radioCacheEntry : radioCache)
         if (radioCacheEntry.radio != nullptr)
@@ -158,19 +158,19 @@ const ITransmission *VectorCommunicationCache::getTransmission(int id) const
         return nullptr;
 }
 
-void VectorCommunicationCache::mapTransmissions(std::function<void (const ITransmission *)> f) const
+void VectorCommunicationCache::mapTransmissions(std::function<void(const ITransmission *)> f) const
 {
     for (auto& transmissionCacheEntry : transmissionCache)
         if (transmissionCacheEntry.transmission != nullptr)
             f(transmissionCacheEntry.transmission);
 }
 
-void VectorCommunicationCache::removeNonInterferingTransmissions(std::function<void (const ITransmission *transmission)> f)
+void VectorCommunicationCache::removeNonInterferingTransmissions(std::function<void(const ITransmission *transmission)> f)
 {
     const simtime_t now = simTime();
     size_t transmissionIndex = 0;
     for (auto it = transmissionCache.begin(); it != transmissionCache.end(); ++it) {
-        VectorTransmissionCacheEntry &transmissionCacheEntry = *it;
+        VectorTransmissionCacheEntry& transmissionCacheEntry = *it;
         if (transmissionCacheEntry.interferenceEndTime <= now) {
             transmissionIndex++;
             if (transmissionCacheEntry.receptionCacheEntries != nullptr) {
@@ -178,8 +178,8 @@ void VectorCommunicationCache::removeNonInterferingTransmissions(std::function<v
                 auto radioIt = radioCache.cbegin();
                 auto receptionIt = receptionCacheEntries->cbegin();
                 while (radioIt != radioCache.cend() && receptionIt != receptionCacheEntries->cend()) {
-                    const RadioCacheEntry &radioCacheEntry = *radioIt;
-                    const ReceptionCacheEntry &receptionCacheEntry = *receptionIt;
+                    const RadioCacheEntry& radioCacheEntry = *radioIt;
+                    const ReceptionCacheEntry& receptionCacheEntry = *receptionIt;
                     const IntervalTree::Interval *interval = receptionCacheEntry.interval;
                     if (interval != nullptr)
                         radioCacheEntry.receptionIntervals->deleteNode(interval);

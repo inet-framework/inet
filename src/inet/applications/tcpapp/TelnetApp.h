@@ -30,8 +30,8 @@ class INET_API TelnetApp : public TcpAppBase
 {
   protected:
     cMessage *timeoutMsg = nullptr;
-    int numLinesToType = 0;    // lines (commands) the user will type in this session
-    int numCharsToType = 0;    // characters the user will type for current line (command)
+    int numLinesToType = 0; // lines (commands) the user will type in this session
+    int numCharsToType = 0; // characters the user will type for current line (command)
     simtime_t stopTime;
 
   protected:

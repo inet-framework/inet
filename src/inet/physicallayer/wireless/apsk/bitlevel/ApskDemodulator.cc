@@ -53,7 +53,7 @@ const IReceptionBitModel *ApskDemodulator::demodulate(const IReceptionSymbolMode
 {
     const std::vector<const ISymbol *> *symbols = symbolModel->getSymbols();
     BitVector *bits = new BitVector();
-    for (auto & symbols_i : *symbols) {
+    for (auto& symbols_i : *symbols) {
         const ApskSymbol *symbol = dynamic_cast<const ApskSymbol *>(symbols_i);
         ShortBitVector symbolBits = modulation->demapToBitRepresentation(symbol);
         for (unsigned int j = 0; j < symbolBits.getSize(); j++)

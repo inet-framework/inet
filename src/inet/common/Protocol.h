@@ -120,8 +120,8 @@ class INET_API Protocol
     static const Protocol tcp;
     static const Protocol telnet;
     static const Protocol trill;
-    static const Protocol tsn;  // ieee1722, AVB, TSN
-    static const Protocol tteth;  // SAE AS6802, TTEthernet
+    static const Protocol tsn; // ieee1722, AVB, TSN
+    static const Protocol tteth; // SAE AS6802, TTEthernet
     static const Protocol udp;
     static const Protocol xmac;
     static const Protocol xtp;
@@ -145,10 +145,10 @@ class INET_API Protocol
     static const Protocol lte;
 };
 
-inline std::ostream& operator << (std::ostream& o, const Protocol& t) { o << t.str(); return o; }
+inline std::ostream& operator<<(std::ostream& o, const Protocol& t) { o << t.str(); return o; }
 
-inline void doParsimPacking(cCommBuffer *buffer, const Protocol* protocol) { buffer->pack(protocol->getId()); }
-inline void doParsimUnpacking(cCommBuffer *buffer, const Protocol*& protocol) { int id; buffer->unpack(id); protocol = Protocol::getProtocol(id); }
+inline void doParsimPacking(cCommBuffer *buffer, const Protocol *protocol) { buffer->pack(protocol->getId()); }
+inline void doParsimUnpacking(cCommBuffer *buffer, const Protocol *& protocol) { int id; buffer->unpack(id); protocol = Protocol::getProtocol(id); }
 
 } // namespace inet
 

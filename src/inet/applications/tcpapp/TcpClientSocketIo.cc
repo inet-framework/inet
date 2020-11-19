@@ -54,7 +54,7 @@ void TcpClientSocketIo::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-void TcpClientSocketIo::socketDataArrived(TcpSocket* socket, Packet *packet, bool urgent)
+void TcpClientSocketIo::socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent)
 {
     packet->removeTag<SocketInd>();
     send(packet, "trafficOut");

@@ -20,7 +20,6 @@
     (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
 ***************************************************************************/
 
-
 #ifndef __INET_RTCP_H
 #define __INET_RTCP_H
 
@@ -32,7 +31,7 @@
 namespace inet {
 namespace rtp {
 
-//Forward declarations:
+// Forward declarations:
 class RtcpByePacket;
 class RtcpCompoundPacket;
 class RtcpReceiverReportPacket;
@@ -240,7 +239,7 @@ class INET_API Rtcp : public cSimpleModule, public LifecycleUnsupported
      * behaviour of rtcp. Every participant's rtcp module
      * writes its calculated rtcp interval (without variation
      */
-//  cOutVector *_rtcpIntervalOutVector;
+//    cOutVector *_rtcpIntervalOutVector;
 };
 
 } // namespace rtp

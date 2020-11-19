@@ -26,11 +26,11 @@ namespace ieee80211 {
 
 class INET_API IRecipientAckPolicy
 {
-    public:
-        virtual ~IRecipientAckPolicy() { }
+  public:
+    virtual ~IRecipientAckPolicy() {}
 
-        virtual bool isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const = 0;
-        virtual simtime_t computeAckDurationField(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) const = 0;
+    virtual bool isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const = 0;
+    virtual simtime_t computeAckDurationField(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) const = 0;
 };
 
 } // namespace ieee80211

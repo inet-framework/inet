@@ -21,7 +21,6 @@
 
 ***************************************************************************/
 
-
 #include "inet/transportlayer/rtp/Rtcp.h"
 
 #include "inet/common/ModuleAccess.h"
@@ -192,7 +191,7 @@ void Rtcp::handleDataOut(RtpInnerPacket *innerPacket)
 void Rtcp::handleDataIn(RtpInnerPacket *rinp)
 {
     Packet *packet = check_and_cast<Packet *>(rinp->decapsulate());
-    //rtpPacket->dump();
+//    rtpPacket->dump();
     processIncomingRTPPacket(packet, rinp->getAddress(), rinp->getPort());
 }
 
@@ -217,9 +216,9 @@ void Rtcp::readRet(Packet *sifpIn)
 
 void Rtcp::createSocket()
 {
-    _udpSocket.bind(_port);    //XXX this will fail if this function is invoked multiple times; not sure that may (or is expected to) happen
+    _udpSocket.bind(_port); // TODO this will fail if this function is invoked multiple times; not sure that may (or is expected to) happen
     MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this)->collectMulticastGroups();
-    _udpSocket.joinLocalMulticastGroups(mgl);    //TODO make it parameter-dependent
+    _udpSocket.joinLocalMulticastGroups(mgl); // TODO make it parameter-dependent
     connectRet();
 }
 
@@ -236,7 +235,7 @@ void Rtcp::scheduleInterval()
     // with a random number between 0.5 and 1.5
     intervalLength = intervalLength * (0.5 + dblrand());
 
-    intervalLength /= (double)(2.71828 - 1.5);    // [RFC 3550] , by Ahmed ayadi
+    intervalLength /= (double)(2.71828 - 1.5); // [RFC 3550] , by Ahmed ayadi
 
     cMessage *reminderMessage = new cMessage("Interval");
     scheduleAfter(intervalLength, reminderMessage);
@@ -478,7 +477,7 @@ void Rtcp::processIncomingRTCPSDESPacket(const Ptr<const RtcpSdesPacket>& rtcpSD
             // remove the sdes chunk from the cArray of sdes chunks
             const SdesChunk *sdesChunk = check_and_cast<const SdesChunk *>(sdesChunks.get(j));
             // this is needed to avoid seg faults
-            //sdesChunk->setOwner(this);
+//            sdesChunk->setOwner(this);
             uint32_t ssrc = sdesChunk->getSsrc();
             RtpParticipantInfo *participantInfo = findParticipantInfo(ssrc);
             if (participantInfo == nullptr) {

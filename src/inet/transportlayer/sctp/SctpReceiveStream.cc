@@ -99,7 +99,7 @@ uint32_t SctpReceiveStream::reassemble(SctpQueue *queue, uint32_t tsn)
 
 uint32_t SctpReceiveStream::enqueueNewDataChunk(SctpDataVariables *dchunk)
 {
-    uint32_t delivery = 0;    //0:orderedQ=false && deliveryQ=false; 1:orderedQ=true && deliveryQ=false; 2:oderedQ=true && deliveryQ=true; 3:fragment
+    uint32_t delivery = 0; // 0:orderedQ=false && deliveryQ=false; 1:orderedQ=true && deliveryQ=false; 2:oderedQ=true && deliveryQ=true; 3:fragment
 
     SctpDataVariables *chunk;
     /* Enqueueing NEW data chunk. Append it to the respective queue */
@@ -111,7 +111,8 @@ uint32_t SctpReceiveStream::enqueueNewDataChunk(SctpDataVariables *dchunk)
             if (deliveryQ->checkAndInsertChunk(dchunk->tsn, dchunk)) {
                 delivery = 2;
             }
-        } else {
+        }
+        else {
             if (unorderedQ->checkAndInsertChunk(dchunk->tsn, dchunk)) {
                 delivery = 3;
             }
@@ -119,7 +120,7 @@ uint32_t SctpReceiveStream::enqueueNewDataChunk(SctpDataVariables *dchunk)
             /* try to reassemble here */
             uint32_t reassembled = reassemble(unorderedQ, dchunk->tsn);
 
-            if ((unorderedQ->getChunk(reassembled))->bbit && (unorderedQ->getChunk(reassembled))->bbit) {  //FIXME There are identical sub-expressions '(unorderedQ->getChunk(reassembled))->bbit' to the left and to the right of the '&&' operator.
+            if ((unorderedQ->getChunk(reassembled))->bbit && (unorderedQ->getChunk(reassembled))->bbit) { // FIXME There are identical sub-expressions '(unorderedQ->getChunk(reassembled))->bbit' to the left and to the right of the '&&' operator.
                 /* put message into deliveryQ */
                 if (deliveryQ->checkAndInsertChunk(reassembled, unorderedQ->getAndExtractChunk(reassembled))) {
                     delivery = 2;
@@ -163,7 +164,6 @@ int32_t SctpReceiveStream::getExpectedStreamSeqNum() {
 void SctpReceiveStream::setExpectedStreamSeqNum(int32_t seqNum) {
     expectedStreamSeqNum = seqNum;
 }
-
 
 } // namespace sctp
 

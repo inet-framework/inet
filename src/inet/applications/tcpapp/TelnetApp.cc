@@ -32,7 +32,6 @@ namespace inet {
 
 Define_Module(TelnetApp);
 
-
 TelnetApp::~TelnetApp()
 {
     cancelAndDelete(timeoutMsg);

@@ -67,7 +67,7 @@ bool DcfFs::hasMoreFragments(RepeatingFs *frameSequence, FrameSequenceContext *c
 
 bool DcfFs::isSelfCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context)
 {
-    return false; // TODO: Implement
+    return false; // TODO Implement
 }
 
 bool DcfFs::isRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context)
@@ -93,7 +93,7 @@ bool DcfFs::isBroadcastManagementOrGroupDataSequenceNeeded(AlternativesFs *frame
         return false;
 }
 
-int DcfFs::selectMulticastDataOrMgmt(AlternativesFs* frameSequence, FrameSequenceContext* context)
+int DcfFs::selectMulticastDataOrMgmt(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
     auto frameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
     return dynamicPtrCast<const Ieee80211MgmtHeader>(frameToTransmit->peekAtFront<Ieee80211MacHeader>()) ? 0 : 1;
@@ -106,3 +106,4 @@ bool DcfFs::isFragFrameSequenceNeeded(AlternativesFs *frameSequence, FrameSequen
 
 } // namespace ieee80211
 } // namespace inet
+

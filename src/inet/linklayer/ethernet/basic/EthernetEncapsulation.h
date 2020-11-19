@@ -38,17 +38,16 @@ class INET_API EthernetEncapsulation : public Ieee8022Llc
     int seqNum;
 
     // statistics
-    long totalFromHigherLayer;    // total number of packets received from higher layer
-    long totalFromMAC;    // total number of frames received from MAC
-    long totalPauseSent;    // total number of PAUSE frames sent
+    long totalFromHigherLayer; // total number of packets received from higher layer
+    long totalFromMAC; // total number of frames received from MAC
+    long totalPauseSent; // total number of PAUSE frames sent
     static simsignal_t encapPkSignal;
     static simsignal_t decapPkSignal;
     static simsignal_t pauseSentSignal;
-    bool useSNAP;    // true: generate EtherFrameWithSNAP, false: generate EthernetIIFrame
+    bool useSNAP; // true: generate EtherFrameWithSNAP, false: generate EthernetIIFrame
     NetworkInterface *networkInterface = nullptr;
 
-    struct Socket
-    {
+    struct Socket {
         int socketId = -1;
         MacAddress localAddress;
         MacAddress remoteAddress;
@@ -59,7 +58,7 @@ class INET_API EthernetEncapsulation : public Ieee8022Llc
         bool matches(Packet *packet, const Ptr<const EthernetMacHeader>& ethernetMacHeader);
     };
 
-    friend std::ostream& operator << (std::ostream& o, const Socket& t);
+    friend std::ostream& operator<<(std::ostream& o, const Socket& t);
     std::map<int, Socket *> socketIdToSocketMap;
 
   protected:

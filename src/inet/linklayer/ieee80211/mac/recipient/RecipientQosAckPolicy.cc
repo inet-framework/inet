@@ -28,7 +28,7 @@ void RecipientQosAckPolicy::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        rateSelection = check_and_cast<IQosRateSelection*>(getModuleByPath(par("rateSelectionModule")));
+        rateSelection = check_and_cast<IQosRateSelection *>(getModuleByPath(par("rateSelectionModule")));
     }
 }
 
@@ -49,7 +49,7 @@ simtime_t RecipientQosAckPolicy::computeAckDuration(Packet *packet, const Ptr<co
 //
 bool RecipientQosAckPolicy::isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
 {
-    // TODO: add mgmt frame NoAck check
+    // TODO add mgmt frame NoAck check
     if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header))
         if (dataHeader->getAckPolicy() != NORMAL_ACK)
             return false;
@@ -59,7 +59,7 @@ bool RecipientQosAckPolicy::isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeade
 //
 // If the immediate Block Ack policy is used, the recipient shall respond to a
 // Basic BlockAckReq frame with a Basic BlockAck frame.
-// TODO:
+// TODO
 // If the delayed Block Ack policy is used, the recipient shall respond to a Basic BlockAckReq frame with an
 // ACK frame. The recipient shall then send its Basic BlockAck response in a subsequently obtained TXOP.
 // Once the contents of the Basic BlockAck frame have been prepared, the recipient shall send this frame in the
@@ -73,7 +73,7 @@ bool RecipientQosAckPolicy::isBlockAckNeeded(const Ptr<const Ieee80211BlockAckRe
 {
     if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
         return agreement != nullptr;
-        // TODO: The Basic BlockAckReq frame shall be discarded if all MSDUs referenced by this
+        // TODO The Basic BlockAckReq frame shall be discarded if all MSDUs referenced by this
         // frame have been discarded from the transmit buffer due to expiry of their lifetime limit.
     }
     else
@@ -106,3 +106,4 @@ simtime_t RecipientQosAckPolicy::computeBasicBlockAckDurationField(Packet *packe
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

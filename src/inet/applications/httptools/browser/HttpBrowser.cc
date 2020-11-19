@@ -74,7 +74,7 @@ void HttpBrowser::handleMessage(cMessage *msg)
         }
 
         // Locate the socket for the incoming message. One should definitely exist.
-        TcpSocket *socket = check_and_cast_nullable<TcpSocket*>(sockCollection.findSocketFor(msg));
+        TcpSocket *socket = check_and_cast_nullable<TcpSocket *>(sockCollection.findSocketFor(msg));
         if (socket == nullptr) {
             // Handle errors. @todo error instead of warning?
             EV_WARN << "No socket found for message " << msg->getName() << endl;
@@ -275,7 +275,7 @@ void HttpBrowser::socketDeleted(TcpSocket *socket)
         throw cRuntimeError("Model error: socketDelete failure. yourPtr is null pointer");
     }
 
-    // TODO: socket is already deleted, no?
+    // TODO socket is already deleted, no?
     ASSERT(socket == sockdata->socket);
     HttpRequestQueue& queue = sockdata->messageQueue;
     while (!queue.empty()) {

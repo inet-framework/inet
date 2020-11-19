@@ -79,15 +79,15 @@ void Radio::initialize(int stage)
 
 void Radio::initializeRadioMode() {
     const char *initialRadioMode = par("initialRadioMode");
-    if(!strcmp(initialRadioMode, "off"))
+    if (!strcmp(initialRadioMode, "off"))
         completeRadioModeSwitch(IRadio::RADIO_MODE_OFF);
-    else if(!strcmp(initialRadioMode, "sleep"))
+    else if (!strcmp(initialRadioMode, "sleep"))
         completeRadioModeSwitch(IRadio::RADIO_MODE_SLEEP);
-    else if(!strcmp(initialRadioMode, "receiver"))
+    else if (!strcmp(initialRadioMode, "receiver"))
         completeRadioModeSwitch(IRadio::RADIO_MODE_RECEIVER);
-    else if(!strcmp(initialRadioMode, "transmitter"))
+    else if (!strcmp(initialRadioMode, "transmitter"))
         completeRadioModeSwitch(IRadio::RADIO_MODE_TRANSMITTER);
-    else if(!strcmp(initialRadioMode, "transceiver"))
+    else if (!strcmp(initialRadioMode, "transceiver"))
         completeRadioModeSwitch(IRadio::RADIO_MODE_TRANSCEIVER);
     else
         throw cRuntimeError("Unknown initialRadioMode");
@@ -352,7 +352,7 @@ void Radio::startTransmission(Packet *macFrame, IRadioSignal::SignalPart part)
     updateTransceiverState();
     updateTransceiverPart();
     emit(transmissionStartedSignal, check_and_cast<const cObject *>(transmission));
-    // TODO: move to radio medium
+    // TODO move to radio medium
     check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::signalDepartureStartedSignal, check_and_cast<const cObject *>(transmission));
 }
 
@@ -380,7 +380,7 @@ void Radio::endTransmission()
     updateTransceiverState();
     updateTransceiverPart();
     emit(transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
-    // TODO: move to radio medium
+    // TODO move to radio medium
     check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::signalDepartureEndedSignal, check_and_cast<const cObject *>(transmission));
 }
 
@@ -401,7 +401,7 @@ WirelessSignal *Radio::createSignal(Packet *packet) const
 {
     encapsulate(packet);
     if (sendRawBytes) {
-        // TODO: this doesn't always work, because the packet length may not be divisible by 8
+        // TODO this doesn't always work, because the packet length may not be divisible by 8
         auto bytes = packet->peekDataAsBytes();
         packet->eraseAll();
         packet->insertAtFront(bytes);
@@ -416,7 +416,7 @@ void Radio::startReception(cMessage *timer, IRadioSignal::SignalPart part)
     auto signal = static_cast<WirelessSignal *>(timer->getControlInfo());
     auto arrival = signal->getArrival();
     auto reception = signal->getReception();
-// TODO: should be this, but it breaks fingerprints: if (receptionTimer == nullptr && isReceiverMode(radioMode) && arrival->getStartTime(part) == simTime()) {
+    // TODO should be this, but it breaks fingerprints: if (receptionTimer == nullptr && isReceiverMode(radioMode) && arrival->getStartTime(part) == simTime()) {
     if (isReceiverMode(radioMode) && arrival->getStartTime(part) == simTime()) {
         auto transmission = signal->getTransmission();
         auto isReceptionAttempted = medium->isReceptionAttempted(this, transmission, part);
@@ -432,7 +432,7 @@ void Radio::startReception(cMessage *timer, IRadioSignal::SignalPart part)
     scheduleAt(arrival->getEndTime(part), timer);
     updateTransceiverState();
     updateTransceiverPart();
-    // TODO: move to radio medium
+    // TODO move to radio medium
     check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::signalArrivalStartedSignal, check_and_cast<const cObject *>(reception));
 }
 
@@ -453,7 +453,7 @@ void Radio::continueReception(cMessage *timer)
         EV_INFO << "Reception started: " << (isReceptionAttempted ? "\x1b[1mattempting\x1b[0m" : "\x1b[1mnot attempting\x1b[0m") << " " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(nextPart) << " as " << reception << endl;
         if (!isReceptionAttempted)
             receptionTimer = nullptr;
-        // TODO: FIXME: see handling packets with incorrect PHY headers in the TODO file
+        // FIXME see handling packets with incorrect PHY headers in the TODO file
     }
     else {
         EV_INFO << "Reception ended: \x1b[1mignoring\x1b[0m " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(previousPart) << " as " << reception << endl;
@@ -473,12 +473,12 @@ void Radio::endReception(cMessage *timer)
     auto reception = signal->getReception();
     if (timer == receptionTimer && isReceiverMode(radioMode) && arrival->getEndTime() == simTime()) {
         auto transmission = signal->getTransmission();
-// TODO: this would draw twice from the random number generator in isReceptionSuccessful: auto isReceptionSuccessful = medium->isReceptionSuccessful(this, transmission, part);
+        // TODO this would draw twice from the random number generator in isReceptionSuccessful: auto isReceptionSuccessful = medium->isReceptionSuccessful(this, transmission, part);
         auto isReceptionSuccessful = medium->getReceptionDecision(this, signal->getListening(), transmission, part)->isReceptionSuccessful();
         EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "\x1b[1msuccessfully\x1b[0m" : "\x1b[1munsuccessfully\x1b[0m") << " for " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         auto macFrame = medium->receivePacket(this, signal);
         take(macFrame);
-        // TODO: FIXME: see handling packets with incorrect PHY headers in the TODO file
+        // FIXME see handling packets with incorrect PHY headers in the TODO file
         decapsulate(macFrame);
         sendUp(macFrame);
         receptionTimer = nullptr;
@@ -489,7 +489,7 @@ void Radio::endReception(cMessage *timer)
     updateTransceiverState();
     updateTransceiverPart();
     delete timer;
-    // TODO: move to radio medium
+    // TODO move to radio medium
     check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::signalArrivalEndedSignal, check_and_cast<const cObject *>(reception));
 }
 
@@ -507,7 +507,7 @@ void Radio::abortReception(cMessage *timer)
 
 void Radio::captureReception(cMessage *timer)
 {
-    // TODO: this would be called when the receiver switches to a stronger signal while receiving a weaker one
+    // TODO this would be called when the receiver switches to a stronger signal while receiving a weaker one
     throw cRuntimeError("Not yet implemented");
 }
 
@@ -544,7 +544,7 @@ bool Radio::isListeningPossible() const
 {
     const simtime_t now = simTime();
     const Coord& position = antenna->getMobility()->getCurrentPosition();
-    // TODO: use 2 * minInterferenceTime for lookahead? or maybe simply use 0 duration listening?
+    // TODO use 2 * minInterferenceTime for lookahead? or maybe simply use 0 duration listening?
     const IListening *listening = receiver->createListening(this, now, now + 1E-12, position, position);
     const IListeningDecision *listeningDecision = medium->listenOnMedium(this, listening);
     bool isListeningPossible = listeningDecision->isListeningPossible();

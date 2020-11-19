@@ -73,7 +73,7 @@ void Ospfv2InterfaceState::changeState(Ospfv2Interface *intf, Ospfv2InterfaceSta
                 intf->getArea()->floodLSA(routerLSA);
             }
         }
-        else {    // (lsa == nullptr) -> This must be the first time any interface is up...
+        else { // (lsa == nullptr) -> This must be the first time any interface is up...
             RouterLsa *newLSA = intf->getArea()->originateRouterLSA();
 
             shouldRebuildRoutingTable |= intf->getArea()->installRouterLSA(newLSA);
@@ -94,7 +94,7 @@ void Ospfv2InterfaceState::changeState(Ospfv2Interface *intf, Ospfv2InterfaceSta
             intf->getArea()->floodLSA(newLSA);
             delete newLSA;
         }
-        else {    // no neighbors on the network -> old NetworkLsa must be flushed
+        else { // no neighbors on the network -> old NetworkLsa must be flushed
             NetworkLsa *oldLSA = intf->getArea()->findNetworkLSA(intf->getAddressRange().address);
 
             if (oldLSA != nullptr) {
@@ -386,17 +386,17 @@ void Ospfv2InterfaceState::printElectionResult(const Ospfv2Interface *onInterfac
 {
     EV_DETAIL << "DR/BDR election is done for interface[" << static_cast<short>(onInterface->getIfIndex()) << "] ";
     switch (onInterface->getType()) {
-    case Ospfv2Interface::BROADCAST:
-        EV_DETAIL << "(Broadcast)";
-        break;
+        case Ospfv2Interface::BROADCAST:
+            EV_DETAIL << "(Broadcast)";
+            break;
 
-    case Ospfv2Interface::NBMA:
-        EV_DETAIL << "(NBMA)";
-        break;
+        case Ospfv2Interface::NBMA:
+            EV_DETAIL << "(NBMA)";
+            break;
 
-    default:
-        EV_DETAIL << "(Unknown)";
-        break;
+        default:
+            EV_DETAIL << "(Unknown)";
+            break;
     }
     EV_DETAIL << " (state: " << onInterface->getStateString(onInterface->getState()) << "):";
     EV_DETAIL << "\n";

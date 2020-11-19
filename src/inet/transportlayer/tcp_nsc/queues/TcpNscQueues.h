@@ -158,7 +158,7 @@ class INET_API TcpNscReceiveQueue : public cObject
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
      */
-   virtual uint32_t getAmountOfBufferedBytes() const;
+    virtual uint32_t getAmountOfBufferedBytes() const;
 
     /**
      * Returns the number of blocks currently buffered in queue.
@@ -178,7 +178,7 @@ class INET_API TcpNscReceiveQueue : public cObject
     virtual void notifyAboutSending(const Packet *packet);
 
   protected:
-    ChunkQueue dataBuffer;      // fifo dataBuffer
+    ChunkQueue dataBuffer; // fifo dataBuffer
     TcpNscConnection *connM = nullptr;
 };
 

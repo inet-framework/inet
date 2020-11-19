@@ -41,7 +41,7 @@ void LifecycleController::Callback::invoke()
     controller->moduleOperationStageCompleted(this);
 }
 
-//----
+// ----
 
 template<typename T>
 void vector_delete_element(std::vector<T *>& v, T *p)
@@ -77,7 +77,7 @@ bool LifecycleController::resumeOperation(LifecycleOperation *operation)
     if (operation->operationCompletionCallback && !operation->insideInitiateOperation)
         operation->operationCompletionCallback->invoke();
     delete operation;
-    return true;    // done
+    return true; // done
 }
 
 void LifecycleController::doOneStage(LifecycleOperation *operation, cModule *submodule)

@@ -54,7 +54,7 @@ const Protocol *Protocol::getProtocol(int id)
     if (protocol != nullptr)
         return protocol;
     else
-        throw cRuntimeError("Unknown protocol: id = %d" , id);
+        throw cRuntimeError("Unknown protocol: id = %d", id);
 }
 
 const Protocol *Protocol::findProtocol(const char *name)
@@ -69,7 +69,7 @@ const Protocol *Protocol::getProtocol(const char *name)
     if (protocol != nullptr)
         return protocol;
     else
-        throw cRuntimeError("Unknown protocol: name = %s" , name);
+        throw cRuntimeError("Unknown protocol: name = %s", name);
 }
 
 // Standard protocol identifiers

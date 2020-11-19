@@ -55,7 +55,7 @@ double DsssOqpsk16Modulation::calculateBER(double snir, Hz bandwidth, bps bitrat
      */
 
     // n_choose_k(16, k) == n_choose_k(16, 16-k)
-    for ( ; k < 8; k += 2) {
+    for (; k < 8; k += 2) {
         // k will be 2, 4, 6 (symmetric values: 14, 12, 10)
         dSumK += math::n_choose_k(16, k) * (exp(dSNRFct * (1.0 / k - 1.0)) + exp(dSNRFct * (1.0 / (16 - k) - 1.0)));
     }

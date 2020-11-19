@@ -29,7 +29,7 @@ Define_Module(PimInterfaceTable);
 
 PimInterfaceTable::~PimInterfaceTable()
 {
-    for (auto & elem : pimInterfaces)
+    for (auto& elem : pimInterfaces)
         delete elem;
 }
 
@@ -45,7 +45,7 @@ void PimInterfaceTable::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         WATCH_VECTOR(pimInterfaces);
     }
-    // TODO: INITSTAGE
+    // TODO INITSTAGE
     else if (stage == INITSTAGE_LINK_LAYER) {
         configureInterfaces(par("pimConfig"));
 
@@ -174,5 +174,5 @@ std::string PimInterface::str() const
     return out.str();
 }
 
-}    //namespace inet
+} // namespace inet
 

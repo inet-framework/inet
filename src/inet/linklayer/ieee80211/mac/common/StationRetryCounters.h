@@ -25,19 +25,19 @@ namespace ieee80211 {
 
 class INET_API StationRetryCounters
 {
-    protected:
-        int stationShortRetryCount = 0;
-        int stationLongRetryCount = 0;
+  protected:
+    int stationShortRetryCount = 0;
+    int stationLongRetryCount = 0;
 
-    public:
-        int getStationLongRetryCount() const { return stationLongRetryCount; }
-        int getStationShortRetryCount() const { return stationShortRetryCount; }
+  public:
+    int getStationLongRetryCount() const { return stationLongRetryCount; }
+    int getStationShortRetryCount() const { return stationShortRetryCount; }
 
-        void resetStationShortRetryCount() { stationShortRetryCount = 0; }
-        void resetStationLongRetryCount() { stationLongRetryCount = 0; }
+    void resetStationShortRetryCount() { stationShortRetryCount = 0; }
+    void resetStationLongRetryCount() { stationLongRetryCount = 0; }
 
-        void incrementStationShortRetryCount() { stationShortRetryCount++; }
-        void incrementStationLongRetryCount() { stationLongRetryCount++; }
+    void incrementStationShortRetryCount() { stationShortRetryCount++; }
+    void incrementStationLongRetryCount() { stationLongRetryCount++; }
 };
 
 } /* namespace ieee80211 */

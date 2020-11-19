@@ -25,7 +25,7 @@ import inet.physicallayer.wireless.common.base.packetlevel.AntennaBase;
 // The gain parameters contain a sequence of angle [degree] and gain [dB] pairs.
 // The first pair must be at 0 [degree].
 //
-//# TODO: refactor to use Delaunay triangulation on unit sphere, i.e. triangulate
+//# TODO refactor to use Delaunay triangulation on unit sphere, i.e. triangulate
 //# result from enclosing spherical triangle as seen from the center
 //
 module InterpolatingAntenna extends AntennaBase

@@ -26,7 +26,7 @@
 #endif
 
 #ifdef WITH_SCTP
-//TODO
+// TODO
 #endif
 
 namespace inet {
@@ -63,11 +63,9 @@ const Ptr<const TransportHeaderBase> getTransportProtocolHeader(Packet *packet)
 
 bool isTransportProtocol(const Protocol& protocol)
 {
-    return
-            (protocol == Protocol::tcp)
-            || (protocol == Protocol::udp)
-            // TODO: add other L4 protocols
-            ;
+    // TODO add other L4 protocols
+    return protocol == Protocol::tcp ||
+           protocol == Protocol::udp;
 }
 
 const Ptr<const TransportHeaderBase> peekTransportProtocolHeader(Packet *packet, const Protocol& protocol, int flags)
@@ -80,7 +78,7 @@ const Ptr<const TransportHeaderBase> peekTransportProtocolHeader(Packet *packet,
     if (protocol == Protocol::udp)
         return packet->peekAtFront<UdpHeader>(b(-1), flags);
 #endif
-    // TODO: add other L4 protocols
+    // TODO add other L4 protocols
     if (flags & Chunk::PF_ALLOW_NULLPTR)
         return nullptr;
     throw cRuntimeError("Unknown protocol: %s", protocol.getName());
@@ -104,7 +102,7 @@ const Ptr<TransportHeaderBase> removeTransportProtocolHeader(Packet *packet, con
     if (protocol == Protocol::udp)
         return removeTransportProtocolHeader<UdpHeader>(packet);
 #endif
-    // TODO: add other L4 protocols
+    // TODO add other L4 protocols
     throw cRuntimeError("Unknown protocol: %s", protocol.getName());
 }
 

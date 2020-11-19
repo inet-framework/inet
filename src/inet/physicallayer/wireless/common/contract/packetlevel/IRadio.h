@@ -36,8 +36,8 @@ class IRadioMedium;
  * radio medium at its position.
  *
  */
-// TODO: add burst support, sending of signals back to back (using a resource limited queue)
-// TODO: rename *Changed signals to *Change signals and emit them just before overwriting
+// TODO add burst support, sending of signals back to back (using a resource limited queue)
+// TODO rename *Changed signals to *Change signals and emit them just before overwriting
 //       the current state, and thus allowing listeners to use the current value too
 class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
 {
@@ -124,7 +124,7 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
          * The radio is switching from one mode to another, frame reception or
          * transmission is not possible, power consumption is minimal.
          */
-        RADIO_MODE_SWITCHING    // this radio mode must be the very last
+        RADIO_MODE_SWITCHING // this radio mode must be the very last
     };
 
     /**

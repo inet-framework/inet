@@ -36,7 +36,7 @@ class INET_API TracingObstacleLossCanvasVisualizer : public TracingObstacleLossV
         cLineFigure *faceNormalFigure2 = nullptr;
 
       public:
-        ObstacleLossCanvasVisualization(LabeledLineFigure* intersectionFigure, cLineFigure* faceNormalFigure1, cLineFigure* faceNormalFigure2);
+        ObstacleLossCanvasVisualization(LabeledLineFigure *intersectionFigure, cLineFigure *faceNormalFigure1, cLineFigure *faceNormalFigure2);
         virtual ~ObstacleLossCanvasVisualization();
     };
 
@@ -63,8 +63,8 @@ class INET_API TracingObstacleLossCanvasVisualizer : public TracingObstacleLossV
     virtual void refreshDisplay() const override;
 
     virtual const ObstacleLossVisualization *createObstacleLossVisualization(const physicallayer::ITracingObstacleLoss::ObstaclePenetratedEvent *obstaclePenetratedEvent) const override;
-    virtual void addObstacleLossVisualization(const ObstacleLossVisualization* obstacleLossVisualization) override;
-    virtual void removeObstacleLossVisualization(const ObstacleLossVisualization* obstacleLossVisualization) override;
+    virtual void addObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization) override;
+    virtual void removeObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization) override;
     virtual void setAlpha(const ObstacleLossVisualization *obstacleLossVisualization, double alpha) const override;
 };
 

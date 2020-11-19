@@ -42,12 +42,12 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     enum TimerType {
         START_DHCP
     };
-    DhcpLeased leased;    // lookup table for lease infos
+    DhcpLeased leased; // lookup table for lease infos
 
-    int numSent = 0;    // num of sent UDP packets
-    int numReceived = 0;    // num of received UDP packets
-    int serverPort = -1;    // server port
-    int clientPort = -1;    // client port
+    int numSent = 0; // num of sent UDP packets
+    int numReceived = 0; // num of received UDP packets
+    int serverPort = -1; // server port
+    int clientPort = -1; // client port
 
     /* Set by management, see DhcpServer NED file. */
     unsigned int maxNumOfClients = 0;
@@ -56,10 +56,10 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     Ipv4Address gateway;
     Ipv4Address ipAddressStart;
 
-    NetworkInterface *ie = nullptr;    // interface to serve DHCP requests on
+    NetworkInterface *ie = nullptr; // interface to serve DHCP requests on
     UdpSocket socket;
-    simtime_t startTime;    // application start time
-    cMessage *startTimer = nullptr;    // self message to start DHCP server
+    simtime_t startTime; // application start time
+    cMessage *startTimer = nullptr; // self message to start DHCP server
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -107,7 +107,7 @@ class INET_API DhcpServer : public ApplicationBase, public cListener, public Udp
     virtual NetworkInterface *chooseInterface();
     virtual void sendToUDP(Packet *msg, int srcPort, const L3Address& destAddr, int destPort);
 
-    //UdpSocket::ICallback methods
+    // UdpSocket::ICallback methods
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
     virtual void socketClosed(UdpSocket *socket) override;

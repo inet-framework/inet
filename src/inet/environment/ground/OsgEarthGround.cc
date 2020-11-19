@@ -18,12 +18,11 @@
 #include "inet/environment/ground/OsgEarthGround.h"
 
 #if defined(WITH_OSGEARTH) && defined(WITH_VISUALIZERS)
-//TODO the visualizers needed only for get the map from SceneOsgEarthVisualizer
+// TODO the visualizers needed only for get the map from SceneOsgEarthVisualizer
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/visualizer/scene/SceneOsgEarthVisualizer.h"
-
 
 namespace inet {
 
@@ -49,7 +48,7 @@ Coord OsgEarthGround::computeGroundProjection(const Coord& position) const
     if (success)
         geoCoord.altitude = m(elevation);
     else {
-        // TODO: throw cRuntimeError ?
+        // TODO throw cRuntimeError ?
     }
     return coordinateSystem->computeSceneCoordinate(geoCoord);
 }

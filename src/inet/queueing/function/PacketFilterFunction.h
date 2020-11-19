@@ -31,13 +31,15 @@ class INET_API CPacketFilterFunction : public cObject, public virtual IPacketFil
     PacketFilterFunction packetFilterFunction;
 
   public:
-    CPacketFilterFunction(PacketFilterFunction packetFilterFunction) : packetFilterFunction(packetFilterFunction) { }
+    CPacketFilterFunction(PacketFilterFunction packetFilterFunction) : packetFilterFunction(packetFilterFunction) {}
 
     virtual bool matchesPacket(const Packet *packet) const override { return packetFilterFunction(packet); }
 };
 
 #define Register_Packet_Filter_Function(name, function) \
-    class INET_API name : public ::inet::queueing::CPacketFilterFunction { public: name() : CPacketFilterFunction(function) { } }; \
+    class INET_API name : public ::inet::queueing::CPacketFilterFunction { \
+      public: name() : CPacketFilterFunction(function) {} \
+    }; \
     Register_Class(name)
 
 } // namespace queueing

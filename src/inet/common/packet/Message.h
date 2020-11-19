@@ -26,7 +26,7 @@ namespace inet {
 
 class INET_API Message : public cMessage, public IPrintableObject, public ITaggedObject
 {
-  friend class MessageDescriptor;
+    friend class MessageDescriptor;
 
   protected:
     SharingTagSet tags;
@@ -133,6 +133,7 @@ class INET_API Message : public cMessage, public IPrintableObject, public ITagge
     template<typename T> const Ptr<T> removeTagIfPresent() {
         return tags.removeTagIfPresent<T>();
     }
+
     //@}
 
     /** @name Utility functions */

@@ -25,7 +25,7 @@
 #ifndef __INET_EIGRPTOPOLOGYTABLE_H_
 #define __INET_EIGRPTOPOLOGYTABLE_H_
 
-//Ipv6 ready - mozny problem s originator (address vs. routerID)!!!
+// Ipv6 ready - mozny problem s originator (address vs. routerID)!!!
 
 #include <omnetpp.h>
 
@@ -45,13 +45,13 @@ class EigrpTopologyTable : public cSimpleModule
     typedef typename std::vector<EigrpRouteSource<IPAddress> *> RouteVector;
     typedef typename std::vector<EigrpRoute<IPAddress> *> RouteInfoVector;
 
-    RouteVector routeVec;       /**< Table with routes. */
-    RouteInfoVector routeInfoVec;/**< Table with info about routes. */
+    RouteVector routeVec; /**< Table with routes. */
+    RouteInfoVector routeInfoVec; /**< Table with info about routes. */
 
-    Ipv4Address routerID;       /**< Router ID of this router, number represented as IPv4 address. INDEPENDENT on routed protocol (Ipv4/IPv6)! */
+    Ipv4Address routerID; /**< Router ID of this router, number represented as IPv4 address. INDEPENDENT on routed protocol (Ipv4/IPv6)! */
 
-    int routeIdCounter;         /**< Counter for route ID */
-    int sourceIdCounter;         /**< Counter for source ID */
+    int routeIdCounter; /**< Counter for route ID */
+    int sourceIdCounter; /**< Counter for source ID */
 
     typename RouteVector::iterator removeRoute(typename RouteVector::iterator routeIt);
 
@@ -77,16 +77,15 @@ class EigrpTopologyTable : public cSimpleModule
      * Finds and returns source with given address or create one.
      * @param sourceNew return parameter, it is true if source was created. Else false.
      */
-    EigrpRouteSource<IPAddress> * findOrCreateRoute(const IPAddress& routeAddr, const IPAddress& routeMask,const Ipv4Address& routerId, eigrp::EigrpInterface *eigrpIface, int nextHopId, bool *sourceNew);
+    EigrpRouteSource<IPAddress> *findOrCreateRoute(const IPAddress& routeAddr, const IPAddress& routeMask, const Ipv4Address& routerId, eigrp::EigrpInterface *eigrpIface, int nextHopId, bool *sourceNew);
     /**
      * Deletes unreachable routes from the topology table.
      */
     void purgeTable();
     void delayedRemove(int neighId);
 
-
     uint64_t findRouteDMin(EigrpRoute<IPAddress> *route);
-    bool hasFeasibleSuccessor(EigrpRoute<IPAddress> *route, uint64_t &resultDmin);
+    bool hasFeasibleSuccessor(EigrpRoute<IPAddress> *route, uint64_t& resultDmin);
     /**
      * Returns best successor to the destination.
      */
@@ -110,17 +109,20 @@ class EigrpTopologyTable : public cSimpleModule
 
 class EigrpIpv4TopologyTable : public EigrpTopologyTable<Ipv4Address>
 {
-//container class for IPv4TT, must exist because of Define_Module()
-public:
-    virtual ~EigrpIpv4TopologyTable() {};
+// container class for IPv4TT, must exist because of Define_Module()
+
+  public:
+    virtual ~EigrpIpv4TopologyTable() {}
 };
 
 class EigrpIpv6TopologyTable : public EigrpTopologyTable<Ipv6Address>
 {
-//container class for IPv6TT, must exist because of Define_Module()
-public:
-    virtual ~EigrpIpv6TopologyTable() {};
+// container class for IPv6TT, must exist because of Define_Module()
+
+  public:
+    virtual ~EigrpIpv6TopologyTable() {}
 };
-} //eigrp
-} //inet
+} // eigrp
+} // inet
 #endif
+

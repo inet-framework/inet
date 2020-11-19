@@ -50,7 +50,7 @@ void OnoeRateControl::resetStatisticalVariables()
     numOfGivenUpTransmissions = 0;
 }
 
-void OnoeRateControl::handleMessage(cMessage* msg)
+void OnoeRateControl::handleMessage(cMessage *msg)
 {
     throw cRuntimeError("This module doesn't handle self messages");
 }
@@ -68,8 +68,7 @@ void OnoeRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
 
 void OnoeRateControl::computeModeIfTimerIsExpired()
 {
-    if (simTime() - timer >= interval)
-    {
+    if (simTime() - timer >= interval) {
         computeMode();
         timer = simTime();
     }
@@ -84,10 +83,8 @@ void OnoeRateControl::computeMode()
     int numOfFrameTransmitted = numOfSuccTransmissions + numOfGivenUpTransmissions + numOfRetries;
     avgRetriesPerFrame = double(numOfRetries) / (numOfSuccTransmissions + numOfGivenUpTransmissions);
 
-    if (numOfSuccTransmissions > 0)
-    {
-        if (numOfFrameTransmitted >= 10 && avgRetriesPerFrame > 1)
-        {
+    if (numOfSuccTransmissions > 0) {
+        if (numOfFrameTransmitted >= 10 && avgRetriesPerFrame > 1) {
             currentMode = decreaseRateIfPossible(currentMode);
             emitDatarateChangedSignal();
             updateDisplayString();
@@ -99,8 +96,7 @@ void OnoeRateControl::computeMode()
         else
             credit++;
 
-        if (credit >= 10)
-        {
+        if (credit >= 10) {
             currentMode = increaseRateIfPossible(currentMode);
             emitDatarateChangedSignal();
             updateDisplayString();
@@ -112,7 +108,7 @@ void OnoeRateControl::computeMode()
     }
 }
 
-const IIeee80211Mode* OnoeRateControl::getRate()
+const IIeee80211Mode *OnoeRateControl::getRate()
 {
     Enter_Method("getRate");
     computeModeIfTimerIsExpired();
@@ -120,6 +116,6 @@ const IIeee80211Mode* OnoeRateControl::getRate()
     return currentMode;
 }
 
-
 } /* namespace ieee80211 */
 } /* namespace inet */
+

@@ -169,7 +169,7 @@ void Ipv6FlatNetworkConfigurator::addOwnAdvPrefixRoutes(cTopology& topo)
     }
 }
 
-// XXX !isRouter nodes are not used as source/destination of routes
+// TODO !isRouter nodes are not used as source/destination of routes
 //     but can be internal nodes of the generated shortest paths.
 //     the same problem with non-ipv6 nodes
 void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)
@@ -188,7 +188,7 @@ void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)
                                  int interfaceId, simtime_t expiryTime);
  */
 
-        numIPNodes++;    // FIXME split into num hosts, num routers
+        numIPNodes++; // FIXME split into num hosts, num routers
         Ipv6RoutingTable *destRt = L3AddressResolver().findIpv6RoutingTableOf(destNode->getModule());
         IInterfaceTable *destIft = L3AddressResolver().interfaceTableOf(destNode->getModule());
 
@@ -265,7 +265,7 @@ void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)
 
             // traverse through address of each node
             // add to route table
-            for (auto & destPrefixe : destPrefixes) {
+            for (auto& destPrefixe : destPrefixes) {
                 rt->addStaticRoute(destPrefixe->prefix, destPrefixe->prefixLength,
                         localIf->getInterfaceId(), nextHopLinkLocalAddr);
             }

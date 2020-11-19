@@ -29,8 +29,7 @@ Packet *MpduAggregation::aggregateFrames(std::vector<Packet *> *frames)
     EV_DEBUG << "Aggregating " << frames->size() << " packets into A-MPDU.\n";
     auto aggregatedFrame = new Packet();
     std::string aggregatedName;
-    for (int i = 0; i < (int)frames->size(); i++)
-    {
+    for (int i = 0; i < (int)frames->size(); i++) {
         auto mpduSubframeHeader = makeShared<Ieee80211MpduSubframeHeader>();
         auto frame = frames->at(i);
         auto mpdu = frame->peekAll();

@@ -53,7 +53,7 @@ void Ieee8022SnapInserter::processPacket(Packet *packet)
     }
     else {
         snapHeader->setOui(snapOui);
-        snapHeader->setProtocolId(-1);      //FIXME get value from a tag (e.g. protocolTag->getSubId() ???)
+        snapHeader->setProtocolId(-1); // FIXME get value from a tag (e.g. protocolTag->getSubId() ???)
     }
     packet->insertAtFront(snapHeader);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022snap);

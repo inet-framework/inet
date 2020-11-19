@@ -45,6 +45,7 @@ Ieee80211OfdmDemodulatorModule::~Ieee80211OfdmDemodulatorModule()
     delete ofdmDemodulator->getModulation();
     delete ofdmDemodulator;
 }
+
 } /* namespace physicallayer */
 } /* namespace inet */
 

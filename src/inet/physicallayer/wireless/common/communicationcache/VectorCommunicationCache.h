@@ -26,8 +26,7 @@ namespace physicallayer {
 class INET_API VectorCommunicationCache : public CommunicationCacheBase
 {
   protected:
-    class VectorTransmissionCacheEntry : public TransmissionCacheEntry
-    {
+    class VectorTransmissionCacheEntry : public TransmissionCacheEntry {
       public:
         /**
          * The list of intermediate reception computation results.
@@ -72,14 +71,14 @@ class INET_API VectorCommunicationCache : public CommunicationCacheBase
   public:
     virtual ~VectorCommunicationCache();
 
-    virtual std::ostream& printToStream(std::ostream &stream, int level, int evFlags = 0) const override { return stream << "VectorCommunicationCache"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "VectorCommunicationCache"; }
 
     /** @name Radio cache */
     //@{
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
     virtual const IRadio *getRadio(int id) const override;
-    virtual void mapRadios(std::function<void (const IRadio *)> f) const override;
+    virtual void mapRadios(std::function<void(const IRadio *)> f) const override;
     //@}
 
     /** @name Transmission cache */
@@ -87,12 +86,12 @@ class INET_API VectorCommunicationCache : public CommunicationCacheBase
     virtual void addTransmission(const ITransmission *transmission) override;
     virtual void removeTransmission(const ITransmission *transmission) override;
     virtual const ITransmission *getTransmission(int id) const override;
-    virtual void mapTransmissions(std::function<void (const ITransmission *)> f) const override;
+    virtual void mapTransmissions(std::function<void(const ITransmission *)> f) const override;
     //@}
 
     /** @name Interference cache */
     //@{
-    virtual void removeNonInterferingTransmissions(std::function<void (const ITransmission *transmission)> f) override;
+    virtual void removeNonInterferingTransmissions(std::function<void(const ITransmission *transmission)> f) override;
     //@}
 };
 

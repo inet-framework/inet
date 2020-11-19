@@ -21,7 +21,7 @@ namespace inet {
 
 namespace visualizer {
 
-void PortFilter::setPattern(const char* pattern)
+void PortFilter::setPattern(const char *pattern)
 {
     matchExpression.setPattern(pattern, false, true, true);
 }
@@ -30,10 +30,11 @@ bool PortFilter::matches(int value) const
 {
     std::string text = std::to_string(value);
     cMatchableString matchableString(text.c_str());
-    // TODO: eliminate const_cast when cMatchExpression::matches becomes const
+    // TODO eliminate const_cast when cMatchExpression::matches becomes const
     return const_cast<PortFilter *>(this)->matchExpression.matches(&matchableString);
 }
 
 } // namespace visualizer
 
 } // namespace inet
+

@@ -26,8 +26,7 @@ namespace physicallayer {
 class INET_API ReferenceCommunicationCache : public CommunicationCacheBase
 {
   protected:
-    class ReferenceTransmissionCacheEntry : public TransmissionCacheEntry
-    {
+    class ReferenceTransmissionCacheEntry : public TransmissionCacheEntry {
       public:
         /**
          * The list of intermediate reception computation results.
@@ -50,14 +49,14 @@ class INET_API ReferenceCommunicationCache : public CommunicationCacheBase
   public:
     virtual ~ReferenceCommunicationCache();
 
-    virtual std::ostream& printToStream(std::ostream &stream, int level, int evFlags = 0) const override { return stream << "ReferenceCommunicationCache"; }
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "ReferenceCommunicationCache"; }
 
     /** @name Radio cache */
     //@{
     virtual void addRadio(const IRadio *radio) override;
     virtual void removeRadio(const IRadio *radio) override;
     virtual const IRadio *getRadio(int id) const override;
-    virtual void mapRadios(std::function<void (const IRadio *)> f) const override;
+    virtual void mapRadios(std::function<void(const IRadio *)> f) const override;
     //@}
 
     /** @name Transmission cache */
@@ -65,12 +64,12 @@ class INET_API ReferenceCommunicationCache : public CommunicationCacheBase
     virtual void addTransmission(const ITransmission *transmission) override;
     virtual void removeTransmission(const ITransmission *transmission) override;
     virtual const ITransmission *getTransmission(int id) const override;
-    virtual void mapTransmissions(std::function<void (const ITransmission *)> f) const override;
+    virtual void mapTransmissions(std::function<void(const ITransmission *)> f) const override;
     //@}
 
     /** @name Interference cache */
     //@{
-    virtual void removeNonInterferingTransmissions(std::function<void (const ITransmission *transmission)> f) override;
+    virtual void removeNonInterferingTransmissions(std::function<void(const ITransmission *transmission)> f) override;
     virtual std::vector<const ITransmission *> *computeInterferingTransmissions(const IRadio *radio, const simtime_t startTime, const simtime_t endTime) override;
     //@}
 
@@ -80,7 +79,7 @@ class INET_API ReferenceCommunicationCache : public CommunicationCacheBase
     virtual const IInterference *getCachedInterference(const IRadio *receiver, const ITransmission *transmission) override { return nullptr; }
     virtual const INoise *getCachedNoise(const IRadio *receiver, const ITransmission *transmission) override { return nullptr; }
     virtual const ISnir *getCachedSNIR(const IRadio *receiver, const ITransmission *transmission) override { return nullptr; }
-    // TODO: disabling this cache makes the fingerprint of the reference and other models different,
+    // TODO disabling this cache makes the fingerprint of the reference and other models different,
     //       because recomputing the reception decision involves drawing random numbers
     // virtual const IReceptionDecision *getCachedReceptionDecision(const IRadio *radio, const ITransmission *transmission, IRadioSignal::SignalPart part) override { return nullptr; }
     //@}

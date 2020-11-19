@@ -66,7 +66,7 @@ namespace inet {
 PostureTransition::PostureTransition(int numPosture)
 {
     numPos = numPosture;
-    defaultMatrixID = 0;    // if no default matrix found, the first one will be supposed as the default matrix.
+    defaultMatrixID = 0; // if no default matrix found, the first one will be supposed as the default matrix.
 }
 
 PostureTransition::~PostureTransition()
@@ -76,8 +76,8 @@ PostureTransition::~PostureTransition()
     }
     for (auto mat: matrixList) {
         for (int i = 0; i < numPos; ++i)
-            delete [] mat->matrix[i];
-        delete [] mat->matrix;
+            delete[] mat->matrix[i];
+        delete[] mat->matrix;
         delete mat;
     }
     for (auto areaType: areaTypeList) {
@@ -92,14 +92,13 @@ PostureTransition::~PostureTransition()
     }
 }
 
-
 /**
  * This function initiates a new instance of markov matrix with the given matrix. Note that it copies the matrix into the created matrix.
  * The function first verifies if the given matrix can be a Markov transition matrix.
  */
 int PostureTransition::addMatrix(std::string name, double **matrix, bool thisDefault)
 {
-    //check if the name is repetitive
+    // check if the name is repetitive
     TransMatrixList::const_iterator matrixIt;
     for (matrixIt = matrixList.begin(); matrixIt != matrixList.end(); matrixIt++) {
         if ((*matrixIt)->name == name) {
@@ -139,7 +138,7 @@ int PostureTransition::addMatrix(std::string name, double **matrix, bool thisDef
  */
 int PostureTransition::addSteadyState(std::string name, double *iVector)
 {
-    //check if the name is repetitive
+    // check if the name is repetitive
     TransMatrixList::const_iterator matrixIt;
     for (matrixIt = matrixList.begin(); matrixIt != matrixList.end(); matrixIt++) {
         if ((*matrixIt)->name == name) {
@@ -162,7 +161,7 @@ int PostureTransition::addSteadyState(std::string name, double *iVector)
     TransMatrix *mat = new TransMatrix;
     mat->name = name;
     mat->matrix = extractMatrixFromSteadyState(steady);
-    delete [] steady;
+    delete[] steady;
 
     matrixList.push_back(mat);
 
@@ -175,7 +174,7 @@ int PostureTransition::addSteadyState(std::string name, double *iVector)
  */
 int PostureTransition::addAreaType(std::string name)
 {
-    //Check if the name is repetitive
+    // Check if the name is repetitive
     AreaTypeList::const_iterator areaIt;
     for (areaIt = areaTypeList.begin(); areaIt != areaTypeList.end(); areaIt++) {
         if ((*areaIt)->name == name) {
@@ -210,7 +209,7 @@ bool PostureTransition::setAreaBoundry(int id, Coord lowBound, Coord highBound)
  */
 int PostureTransition::addTimeDomain(std::string name)
 {
-    //Check if the name is repetitive
+    // Check if the name is repetitive
     TimeDomainList::const_iterator timeIt;
     for (timeIt = timeDomainList.begin(); timeIt != timeDomainList.end(); timeIt++) {
         if ((*timeIt)->name == name) {
@@ -478,7 +477,7 @@ double **PostureTransition::extractMatrixFromSteadyState(double *vec)
     int i, j;
     double **dafaultMat;
 
-    //make output matrix and an identity matrix and a temp
+    // make output matrix and an identity matrix and a temp
     double **mat = new double *[numPos];
     double **temp1 = new double *[numPos];
     double **temp2 = new double *[numPos];
@@ -512,11 +511,10 @@ double **PostureTransition::extractMatrixFromSteadyState(double *vec)
         multMatrix(temp1, temp2, temp3);
         addMatrix(dafaultMat, temp3, mat);
 
-        //remember if it has not changed
+        // remember if it has not changed
         for (i = 0; i < numPos; i++)
             for (j = 0; j < numPos; j++)
                 change[i][j] = 1;
-
 
         for (j = 0; j < numPos; j++)
             for (i = 0; i < numPos; i++) {
@@ -564,19 +562,19 @@ double **PostureTransition::extractMatrixFromSteadyState(double *vec)
     }
 
     for (int i = 0; i < numPos; ++i) {
-        delete [] temp1[i];
-        delete [] temp2[i];
-        delete [] temp3[i];
-        delete [] identity[i];
-        delete [] change[i];
+        delete[] temp1[i];
+        delete[] temp2[i];
+        delete[] temp3[i];
+        delete[] identity[i];
+        delete[] change[i];
     }
-    delete [] temp1;
-    delete [] temp2;
-    delete [] temp3;
-    delete [] identity;
-    delete [] change;
-    delete [] sum;
-    delete [] changeSum;
+    delete[] temp1;
+    delete[] temp2;
+    delete[] temp3;
+    delete[] identity;
+    delete[] change;
+    delete[] sum;
+    delete[] changeSum;
 
     return mat;
 }

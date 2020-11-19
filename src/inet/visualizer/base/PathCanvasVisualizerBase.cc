@@ -56,8 +56,8 @@ bool isPointOnSegment(const LineSegment& segment, const Coord& point)
 {
     auto& p1 = segment.getPoint1();
     auto& p2 = segment.getPoint2();
-    return (std::min(p1.x, p2.x) <= point.x && point.x <= std::max(p1.x, p2.x) &&
-            std::min(p1.y, p2.y) <= point.y && point.y <= std::max(p1.y, p2.y));
+    return std::min(p1.x, p2.x) <= point.x && point.x <= std::max(p1.x, p2.x) &&
+           std::min(p1.y, p2.y) <= point.y && point.y <= std::max(p1.y, p2.y);
 }
 
 PathCanvasVisualizerBase::PathCanvasVisualization::PathCanvasVisualization(const char *label, const std::vector<int>& path, LabeledPolylineFigure *figure) :

@@ -29,11 +29,11 @@ namespace inet {
 class INET_API TokenBucketMeter : public PacketMeterBase
 {
   protected:
-    double CIR = NaN;    // Commited Information Rate (bits/sec)
-    long CBS = 0;    // Committed Burst Size (in bits)
+    double CIR = NaN; // Commited Information Rate (bits/sec)
+    long CBS = 0; // Committed Burst Size (in bits)
     bool colorAwareMode = false;
 
-    long Tc = 0;    // token bucket for committed burst
+    long Tc = 0; // token bucket for committed burst
     simtime_t lastUpdateTime;
 
     int numRcvd = 0;

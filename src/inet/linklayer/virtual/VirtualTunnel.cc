@@ -56,7 +56,7 @@ void VirtualTunnel::initialize(int stage)
         networkInterface->setPointToPoint(realNetworkInterface->isPointToPoint());
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        // KLUDGE: depends on other interface
+        // KLUDGE depends on other interface
         if (!strcmp(par("address"), "copy"))
             networkInterface->setMacAddress(realNetworkInterface->getMacAddress());
         if (protocol == &Protocol::ethernetMac) {

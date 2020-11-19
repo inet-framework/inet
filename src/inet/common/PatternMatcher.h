@@ -82,27 +82,26 @@ class INET_API PatternMatcher
     enum ElemType {
         LITERALSTRING = 0,
         ANYCHAR,
-        COMMONCHAR,    // any char except "."
+        COMMONCHAR, // any char except "."
         SET,
         NEGSET,
         NUMRANGE,
-        ANYSEQ,    // "**": sequence of any chars
-        COMMONSEQ,    // "*": seq of any chars except "."
+        ANYSEQ, // "**": sequence of any chars
+        COMMONSEQ, // "*": seq of any chars except "."
         END
     };
 
-    struct Elem
-    {
+    struct Elem {
         ElemType type = END;
-        std::string literalstring;    // if type==LITERALSTRING
-        std::string setchars;    // SET/NEGSET: character pairs (0,1),(2,3) etc denote char ranges
-        long fromnum = -1, tonum = -1;    // NUMRANGE; -1 means "unset"
+        std::string literalstring; // if type==LITERALSTRING
+        std::string setchars; // SET/NEGSET: character pairs (0,1),(2,3) etc denote char ranges
+        long fromnum = -1, tonum = -1; // NUMRANGE; -1 means "unset"
     };
 
     std::vector<Elem> pattern;
     bool iscasesensitive = false;
 
-    std::string rest;    // used to pass return value from doMatch() to patternPrefixMatches()
+    std::string rest; // used to pass return value from doMatch() to patternPrefixMatches()
 
   private:
     void parseSet(const char *& s, Elem& e);

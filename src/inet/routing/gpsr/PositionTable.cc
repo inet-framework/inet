@@ -22,7 +22,7 @@ namespace inet {
 std::vector<L3Address> PositionTable::getAddresses() const
 {
     std::vector<L3Address> addresses;
-    for (const auto & elem : addressToPositionMap)
+    for (const auto& elem : addressToPositionMap)
         addresses.push_back(elem.first);
     return addresses;
 }
@@ -72,7 +72,7 @@ void PositionTable::clear()
 simtime_t PositionTable::getOldestPosition() const
 {
     simtime_t oldestPosition = SimTime::getMaxTime();
-    for (const auto & elem : addressToPositionMap) {
+    for (const auto& elem : addressToPositionMap) {
         const simtime_t& time = elem.second.first;
         if (time < oldestPosition)
             oldestPosition = time;
@@ -80,10 +80,10 @@ simtime_t PositionTable::getOldestPosition() const
     return oldestPosition;
 }
 
-std::ostream& operator << (std::ostream& o, const PositionTable& t)
+std::ostream& operator<<(std::ostream& o, const PositionTable& t)
 {
     o << "{ ";
-    for(auto elem : t.addressToPositionMap) {
+    for (auto elem : t.addressToPositionMap) {
         o << elem.first << ":(" << elem.second.first << ";" << elem.second.second << ") ";
     }
     o << "}";

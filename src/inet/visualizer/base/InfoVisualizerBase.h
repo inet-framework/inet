@@ -30,8 +30,7 @@ namespace visualizer {
 class INET_API InfoVisualizerBase : public VisualizerBase
 {
   protected:
-    class INET_API InfoVisualization
-    {
+    class INET_API InfoVisualization {
       public:
         int moduleId = -1;
 
@@ -45,7 +44,7 @@ class INET_API InfoVisualizerBase : public VisualizerBase
         const cModule *module = nullptr;
 
       public:
-        DirectiveResolver(const cModule *module) : module(module) { }
+        DirectiveResolver(const cModule *module) : module(module) {}
 
         virtual const char *resolveDirective(char directive) const override;
     };

@@ -67,7 +67,7 @@ void HttpServer::handleMessage(cMessage *msg)
     }
     else {
         EV_DEBUG << "Handle inbound message " << msg->getName() << " of kind " << msg->getKind() << endl;
-        TcpSocket *socket = check_and_cast_nullable<TcpSocket*>(sockCollection.findSocketFor(msg));
+        TcpSocket *socket = check_and_cast_nullable<TcpSocket *>(sockCollection.findSocketFor(msg));
         if (socket) {
             EV_DEBUG << "Process the message " << msg->getName() << endl;
             socket->processMessage(msg);
@@ -113,7 +113,7 @@ void HttpServer::socketDataArrived(TcpSocket *socket)
         auto packet = new Packet("", queue->pop<HttpRequestMessage>());
         auto reply = handleReceivedMessage(packet);
         if (reply != nullptr)
-            socket->send(reply);    // Send to socket if the reply is non-zero.
+            socket->send(reply); // Send to socket if the reply is non-zero.
         delete packet;
     }
 }
@@ -130,7 +130,7 @@ void HttpServer::socketPeerClosed(TcpSocket *socket)
     // close the connection (if not already closed)
     if (socket->getState() == TcpSocket::PEER_CLOSED) {
         EV_INFO << "remote TCP closed, closing here as well. Connection id is " << socket->getSocketId() << endl;
-        socket->close();    // Call the close method to properly dispose of the socket.
+        socket->close(); // Call the close method to properly dispose of the socket.
     }
 }
 

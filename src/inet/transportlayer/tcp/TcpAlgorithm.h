@@ -35,8 +35,8 @@ namespace tcp {
 class INET_API TcpAlgorithm : public cObject
 {
   protected:
-    TcpConnection *conn;    // we belong to this connection
-    TcpStateVariables *state;    // our state variables
+    TcpConnection *conn; // we belong to this connection
+    TcpStateVariables *state; // our state variables
 
     /**
      * Create state block (TCB) used by this TCP variant. It is expected

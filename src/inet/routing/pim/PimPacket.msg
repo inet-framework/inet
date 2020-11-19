@@ -166,7 +166,7 @@ class JoinPruneGroup extends cObject
 class PimJoinPrune extends PimPacket
 {
     type = JoinPrune;
-    EncodedUnicastAddress  upstreamNeighborAddress;    //TODO: replace to L3Address
+    EncodedUnicastAddress  upstreamNeighborAddress;    //TODO replace to L3Address
     int                    reserved2 = 0;
     int                    holdTime;    // in seconds
     JoinPruneGroup         joinPruneGroups[];

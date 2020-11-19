@@ -76,14 +76,14 @@ simsignal_t ipv6MulticastGroupLeftSignal = cComponent::registerSignal("ipv6Multi
 simsignal_t ipv6MulticastGroupRegisteredSignal = cComponent::registerSignal("ipv6MulticastGroupRegistered");
 simsignal_t ipv6MulticastGroupUnregisteredSignal = cComponent::registerSignal("ipv6MulticastGroupUnregistered");
 
-//layer 3 - ISIS
+// layer 3 - ISIS
 simsignal_t isisAdjChangedSignal = cComponent::registerSignal("isisAdjChanged");
 
 // - layer 4 (transport)
-//...
+// ...
 
 // - layer 7 (application)
-//...
+// ...
 
 // general
 simsignal_t packetCreatedSignal = cComponent::registerSignal("packetCreated");

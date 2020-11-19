@@ -41,7 +41,7 @@ RoutingTableOsgVisualizer::RouteOsgVisualization::RouteOsgVisualization(osg::Nod
 
 RoutingTableOsgVisualizer::RouteOsgVisualization::~RouteOsgVisualization()
 {
-    // TODO: delete node;
+    // TODO delete node;
 }
 
 void RoutingTableOsgVisualizer::initialize(int stage)
@@ -86,9 +86,9 @@ void RoutingTableOsgVisualizer::removeRouteVisualization(const RouteVisualizatio
 
 void RoutingTableOsgVisualizer::refreshRouteVisualization(const RouteVisualization *routeVisualization) const
 {
-    // TODO:
-    // auto routeOsgVisualization = static_cast<const RouteOsgVisualization *>(routeVisualization);
-    // auto text = getRouteVisualizationText(routeVisualization->route);
+    // TODO
+//    auto routeOsgVisualization = static_cast<const RouteOsgVisualization *>(routeVisualization);
+//    auto text = getRouteVisualizationText(routeVisualization->route);
 }
 
 #endif // ifdef WITH_OSG

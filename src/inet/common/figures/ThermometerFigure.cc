@@ -95,11 +95,12 @@ int ThermometerFigure::getLabelOffset() const
 {
     return labelOffset;
 }
+
 void ThermometerFigure::setLabelOffset(int offset)
 {
-    if(labelOffset != offset)   {
-    labelOffset = offset;
-    labelFigure->setPosition(Point(getBounds().getCenter().x, getBounds().y + getBounds().height + labelOffset));
+    if (labelOffset != offset) {
+        labelOffset = offset;
+        labelFigure->setPosition(Point(getBounds().getCenter().x, getBounds().y + getBounds().height + labelOffset));
     }
 }
 
@@ -169,13 +170,10 @@ void ThermometerFigure::parse(cProperty *property)
 {
     cGroupFigure::parse(property);
 
-
     setBounds(parseBounds(property, getBounds()));
-
 
     // Set default
     redrawTicks();
-
 
     const char *s;
     if ((s = property->getValue(PKEY_MERCURY_COLOR)) != nullptr)
@@ -183,7 +181,7 @@ void ThermometerFigure::parse(cProperty *property)
     if ((s = property->getValue(PKEY_LABEL)) != nullptr)
         setLabel(s);
     if ((s = property->getValue(PKEY_LABEL_OFFSET)) != nullptr)
-            setLabelOffset(atoi(s));
+        setLabelOffset(atoi(s));
     if ((s = property->getValue(PKEY_LABEL_FONT)) != nullptr)
         setLabelFont(parseFont(s));
     if ((s = property->getValue(PKEY_LABEL_COLOR)) != nullptr)
@@ -295,8 +293,8 @@ void ThermometerFigure::setMercuryAndContainerGeometry()
 
     containerFigure->addMoveTo(x, y);
     containerFigure->addLineRel(0, height + 2 * offset);
-    //TODO this does not work with Qtenv:
-    //containerFigure->addCubicBezierCurveRel(0, width, width, width, width, 0);
+    // TODO this does not work with Qtenv:
+//    containerFigure->addCubicBezierCurveRel(0, width, width, width, width, 0);
     containerFigure->addArcRel(width / 2, width / 2, 0, true, false, width, 0);
     containerFigure->addLineRel(0, -height - 2 * offset);
     containerFigure->addArcRel(width / 2, width / 2, 0, true, false, -width, 0);
@@ -322,8 +320,8 @@ void ThermometerFigure::setMercuryAndContainerGeometry()
 
     mercuryFigure->addMoveTo(x, y + offset + height * (1 - mercuryLevel));
     mercuryFigure->addLineRel(0, height * mercuryLevel + overflow + offset);
-    //TODO this does not work with Qtenv:
-    //mercuryFigure->addCubicBezierCurveRel(0, width, width, width, width, 0);
+    // TODO this does not work with Qtenv:
+//    mercuryFigure->addCubicBezierCurveRel(0, width, width, width, width, 0);
     mercuryFigure->addArcRel(width / 2, width / 2, 0, true, false, width, 0);
     mercuryFigure->addLineRel(0, -height * mercuryLevel - overflow - offset);
     if (overflow > 0)

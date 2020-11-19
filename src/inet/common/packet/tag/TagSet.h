@@ -40,7 +40,7 @@ class INET_API TagSet : public cObject
     cObject *removeTag(int index);
 
     int getTagIndex(const std::type_info& typeInfo) const;
-    template <typename T> int getTagIndex() const;
+    template<typename T> int getTagIndex() const;
 
   public:
     TagSet();
@@ -74,42 +74,42 @@ class INET_API TagSet : public cObject
     /**
      * Returns the tag for the provided type, or returns nullptr if no such tag is present.
      */
-    template <typename T> const T *findTag() const;
+    template<typename T> const T *findTag() const;
 
     /**
      * Returns the tag of the provided type for update, or returns nullptr if no such tag is present.
      */
-    template <typename T> T *findTagForUpdate();
+    template<typename T> T *findTagForUpdate();
 
     /**
      * Returns the tag for the provided type, or throws an exception if no such tag is present.
      */
-    template <typename T> const T *getTag() const;
+    template<typename T> const T *getTag() const;
 
     /**
      * Returns the tag of the provided type for update, or throws an exception if no such tag is present.
      */
-    template <typename T> T *getTagForUpdate();
+    template<typename T> T *getTagForUpdate();
 
     /**
      * Returns a newly added tag for the provided type, or throws an exception if such a tag is already present.
      */
-    template <typename T> T *addTag();
+    template<typename T> T *addTag();
 
     /**
      * Returns a newly added tag for the provided type if absent, or returns the tag that is already present.
      */
-    template <typename T> T *addTagIfAbsent();
+    template<typename T> T *addTagIfAbsent();
 
     /**
      * Removes the tag for the provided type, or throws an exception if no such tag is present.
      */
-    template <typename T> T *removeTag();
+    template<typename T> T *removeTag();
 
     /**
      * Removes the tag for the provided type if present, or returns nullptr if no such tag is present.
      */
-    template <typename T> T *removeTagIfPresent();
+    template<typename T> T *removeTagIfPresent();
 };
 
 inline int TagSet::getNumTags() const
@@ -122,26 +122,26 @@ inline cObject *TagSet::getTag(int index) const
     return tags->at(index);
 }
 
-template <typename T>
+template<typename T>
 inline int TagSet::getTagIndex() const
 {
     return getTagIndex(typeid(T));
 }
 
-template <typename T>
+template<typename T>
 inline const T *TagSet::findTag() const
 {
     int index = getTagIndex<T>();
     return index == -1 ? nullptr : static_cast<T *>((*tags)[index]);
 }
 
-template <typename T>
+template<typename T>
 inline T *TagSet::findTagForUpdate()
 {
     return const_cast<T *>(findTag<T>());
 }
 
-template <typename T>
+template<typename T>
 inline const T *TagSet::getTag() const
 {
     int index = getTagIndex<T>();
@@ -150,13 +150,13 @@ inline const T *TagSet::getTag() const
     return static_cast<T *>((*tags)[index]);
 }
 
-template <typename T>
+template<typename T>
 inline T *TagSet::getTagForUpdate()
 {
     return const_cast<T *>(getTag<T>());
 }
 
-template <typename T>
+template<typename T>
 inline T *TagSet::addTag()
 {
     int index = getTagIndex<T>();
@@ -167,7 +167,7 @@ inline T *TagSet::addTag()
     return tag;
 }
 
-template <typename T>
+template<typename T>
 inline T *TagSet::addTagIfAbsent()
 {
     T *tag = findTagForUpdate<T>();
@@ -176,7 +176,7 @@ inline T *TagSet::addTagIfAbsent()
     return tag;
 }
 
-template <typename T>
+template<typename T>
 inline T *TagSet::removeTag()
 {
     int index = getTagIndex<T>();
@@ -185,7 +185,7 @@ inline T *TagSet::removeTag()
     return static_cast<T *>(removeTag(index));
 }
 
-template <typename T>
+template<typename T>
 inline T *TagSet::removeTagIfPresent()
 {
     int index = getTagIndex<T>();

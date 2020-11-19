@@ -47,7 +47,7 @@ W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, cons
     const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     const IScalarSignal *scalarSignalAnalogModel = check_and_cast<const IScalarSignal *>(transmission->getAnalogModel());
     const Coord& receptionStartPosition = arrival->getStartPosition();
-    // TODO: could be used for doppler shift? const Coord& receptionEndPosition = arrival->getEndPosition();
+    // TODO could be used for doppler shift? const Coord& receptionEndPosition = arrival->getEndPosition();
     double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmission->getStartPosition(), arrival->getStartPosition(), transmission->getStartOrientation());
     double receiverAntennaGain = computeAntennaGain(receiverRadio->getAntenna()->getGain().get(), arrival->getStartPosition(), transmission->getStartPosition(), arrival->getStartOrientation());
     double pathLoss = radioMedium->getPathLoss()->computePathLoss(transmission, arrival);
@@ -87,7 +87,7 @@ void ScalarAnalogModelBase::addReception(const ScalarReception *reception, simti
 void ScalarAnalogModelBase::addNoise(const ScalarNoise *noise, simtime_t& noiseStartTime, simtime_t& noiseEndTime, std::map<simtime_t, W> *powerChanges) const
 {
     const std::map<simtime_t, W> *noisePowerChanges = noise->getPowerChanges();
-    for (const auto & noisePowerChange : *noisePowerChanges) {
+    for (const auto& noisePowerChange : *noisePowerChanges) {
         std::map<simtime_t, W>::iterator jt = powerChanges->find(noisePowerChange.first);
         if (jt != powerChanges->end())
             jt->second += noisePowerChange.second;

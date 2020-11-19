@@ -49,4 +49,5 @@ const char **SimTimeTextFigure::getAllowedPropertyKeys() const
     return keys;
 }
 
-}
+} // namespace inet
+

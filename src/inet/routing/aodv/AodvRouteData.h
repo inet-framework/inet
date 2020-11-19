@@ -34,7 +34,7 @@ class INET_API AodvRouteData : public cObject
     bool beingRepaired;
     bool validDestNum;
     unsigned int destSeqNum;
-    simtime_t lifeTime;    // expiration or deletion time of the route
+    simtime_t lifeTime; // expiration or deletion time of the route
 
   public:
 

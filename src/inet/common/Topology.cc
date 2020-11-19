@@ -47,7 +47,7 @@ Topology::LinkOut *Topology::Node::getLinkOut(int i)
     return (Topology::LinkOut *)outLinks[i];
 }
 
-//----
+// ----
 
 Topology::Topology(const char *name) : cOwnedObject(name)
 {
@@ -88,15 +88,15 @@ Topology& Topology::operator=(const Topology&)
 
 void Topology::clear()
 {
-    for (auto & elem : nodes) {
-        for (auto & _j : elem->outLinks)
+    for (auto& elem : nodes) {
+        for (auto& _j : elem->outLinks)
             delete _j; // delete links from their source side
         delete elem;
     }
     nodes.clear();
 }
 
-//---
+// ---
 
 static bool selectByModulePath(cModule *mod, void *data)
 {
@@ -105,7 +105,7 @@ static bool selectByModulePath(cModule *mod, void *data)
     // actually, this is selectByModuleFullPathPattern()
     const std::vector<std::string>& v = *(const std::vector<std::string> *)data;
     std::string path = mod->getFullPath();
-    for (auto & elem : v)
+    for (auto& elem : v)
         if (PatternMatcher(elem.c_str(), true, true, true).matches(path.c_str()))
             return true;
 
@@ -120,8 +120,7 @@ static bool selectByNedTypeName(cModule *mod, void *data)
 
 static bool selectByProperty(cModule *mod, void *data)
 {
-    struct ParamData
-    {
+    struct ParamData {
         const char *name;
         const char *value;
     };
@@ -138,8 +137,7 @@ static bool selectByProperty(cModule *mod, void *data)
 
 static bool selectByParameter(cModule *mod, void *data)
 {
-    struct PropertyData
-    {
+    struct PropertyData {
         const char *name;
         const char *value;
     };
@@ -147,7 +145,7 @@ static bool selectByParameter(cModule *mod, void *data)
     return mod->hasPar(d->name) && (d->value == nullptr || mod->par(d->name).str() == std::string(d->value));
 }
 
-//---
+// ---
 
 void Topology::extractByModulePath(const std::vector<std::string>& fullPathPatterns)
 {
@@ -161,8 +159,7 @@ void Topology::extractByNedTypeName(const std::vector<std::string>& nedTypeNames
 
 void Topology::extractByProperty(const char *propertyName, const char *value)
 {
-    struct
-    {
+    struct {
         const char *name;
         const char *value;
     } data = {
@@ -173,8 +170,7 @@ void Topology::extractByProperty(const char *propertyName, const char *value)
 
 void Topology::extractByParameter(const char *paramName, const char *paramValue)
 {
-    struct
-    {
+    struct {
         const char *name;
         const char *value;
     } data = {
@@ -183,7 +179,7 @@ void Topology::extractByParameter(const char *paramName, const char *paramValue)
     extractFromNetwork(selectByParameter, (void *)&data);
 }
 
-//---
+// ---
 
 static bool selectByPredicate(cModule *mod, void *data)
 {
@@ -202,8 +198,7 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *, void *), void *da
 
     // Loop through all modules and find those that satisfy the criteria
     int networkId = 0;
-    for (int modId = 0; modId <= getSimulation()->getLastComponentId(); modId++)
-    {
+    for (int modId = 0; modId <= getSimulation()->getLastComponentId(); modId++) {
         cModule *module = getSimulation()->getModule(modId);
         if (module && predicate(module, data)) {
             Node *node = createNode(module);
@@ -213,7 +208,7 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *, void *), void *da
     }
 
     // Discover out neighbors too.
-    for (auto & elem : nodes) {
+    for (auto& elem : nodes) {
         // Loop through all its gates and find those which come
         // from or go to modules included in the topology.
 
@@ -244,14 +239,14 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *, void *), void *da
     }
 
     // fill inLinks vectors
-    for (auto & elem : nodes) {
-        for (auto & _l : elem->outLinks) {
+    for (auto& elem : nodes) {
+        for (auto& _l : elem->outLinks) {
             Topology::Link *link = _l;
             link->destNode->inLinks.push_back(link);
         }
     }
 
-    for (auto & elem : nodes)
+    for (auto& elem : nodes)
         findNetworks(elem);
 }
 
@@ -273,7 +268,7 @@ int Topology::addNode(Node *node)
 void Topology::deleteNode(Node *node)
 {
     // remove outgoing links
-    for (auto & elem : node->outLinks) {
+    for (auto& elem : node->outLinks) {
         Link *link = elem;
         unlinkFromDestNode(link);
         delete link;
@@ -281,7 +276,7 @@ void Topology::deleteNode(Node *node)
     node->outLinks.clear();
 
     // remove incoming links
-    for (auto & elem : node->inLinks) {
+    for (auto& elem : node->inLinks) {
         Link *link = elem;
         unlinkFromSourceNode(link);
         delete link;
@@ -373,7 +368,7 @@ Topology::Node *Topology::getNodeFor(cModule *mod)
     // binary search because nodes[] is ordered by module ID
     Node tmpNode(mod->getId());
     auto it = std::lower_bound(nodes.begin(), nodes.end(), &tmpNode, lessByModuleId);
-//TODO: this does not compile with VC9 (VC10 is OK): auto it = std::lower_bound(nodes.begin(), nodes.end(), mod->getId(), isModuleIdLess);
+    // TODO this does not compile with VC9 (VC10 is OK): auto it = std::lower_bound(nodes.begin(), nodes.end(), mod->getId(), isModuleIdLess);
     return it == nodes.end() || (*it)->moduleId != mod->getId() ? nullptr : *it;
 }
 
@@ -385,7 +380,7 @@ void Topology::calculateUnweightedSingleShortestPathsTo(Node *_target)
         throw cRuntimeError(this, "..ShortestPathTo(): target node is nullptr");
     target = _target;
 
-    for (auto & elem : nodes) {
+    for (auto& elem : nodes) {
         elem->dist = INFINITY;
         elem->outPath = nullptr;
     }
@@ -424,7 +419,7 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *_target)
     target = _target;
 
     // clean path infos
-    for (auto & elem : nodes) {
+    for (auto& elem : nodes) {
         elem->dist = INFINITY;
         elem->outPath = nullptr;
     }
@@ -458,7 +453,7 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *_target)
             double newdist = dest->dist + linkWeight;
             if (dest != target)
                 newdist += dest->getWeight(); // dest is not the target, uses weight of dest node as price of routing (infinity means dest node doesn't route between interfaces)
-            if (newdist != INFINITY && src->dist > newdist) {    // it's a valid shorter path from src to target node
+            if (newdist != INFINITY && src->dist > newdist) { // it's a valid shorter path from src to target node
                 if (src->dist != INFINITY)
                     q.remove(src); // src is in the queue
                 src->dist = newdist;
@@ -466,7 +461,7 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *_target)
 
                 // insert src node to ordered list
                 auto it = q.begin();
-                for ( ; it != q.end(); ++it)
+                for (; it != q.end(); ++it)
                     if ((*it)->dist > newdist)
                         break;
 

@@ -59,7 +59,7 @@ void Ieee80211LayeredOfdmTransmitter::initialize(int stage)
         centerFrequency = Hz(par("centerFrequency"));
         bandwidth = Hz(par("bandwidth"));
         if (isCompliant && (dataEncoder || signalEncoder || dataModulator || signalModulator
-                            || pulseShaper || digitalAnalogConverter || !std::isnan(channelSpacing.get()))) // TODO: check modulations
+                            || pulseShaper || digitalAnalogConverter || !std::isnan(channelSpacing.get()))) // TODO check modulations
         {
             throw cRuntimeError("In compliant mode it is forbidden to set the following parameters: dataEncoder, signalEncoder, modulator, signalModulator, pulseShaper, digitalAnalogConverter, bandwidth, channelSpacing");
         }
@@ -203,12 +203,12 @@ const ITransmissionSymbolModel *Ieee80211LayeredOfdmTransmitter::createSymbolMod
         const std::vector<const ISymbol *> *signalSymbols = signalFieldSymbolModel->getSymbols();
         std::vector<const ISymbol *> *mergedSymbols = new std::vector<const ISymbol *>();
         const Ieee80211OfdmSymbol *ofdmSymbol = nullptr;
-        for (auto & signalSymbol : *signalSymbols) {
+        for (auto& signalSymbol : *signalSymbols) {
             ofdmSymbol = check_and_cast<const Ieee80211OfdmSymbol *>(signalSymbol);
             mergedSymbols->push_back(new Ieee80211OfdmSymbol(*ofdmSymbol));
         }
         const std::vector<const ISymbol *> *dataSymbols = dataFieldSymbolModel->getSymbols();
-        for (auto & dataSymbol : *dataSymbols) {
+        for (auto& dataSymbol : *dataSymbols) {
             ofdmSymbol = dynamic_cast<const Ieee80211OfdmSymbol *>(dataSymbol);
             mergedSymbols->push_back(new Ieee80211OfdmSymbol(*ofdmSymbol));
         }
@@ -241,7 +241,7 @@ const ITransmissionBitModel *Ieee80211LayeredOfdmTransmitter::createBitModel(con
 b Ieee80211LayeredOfdmTransmitter::getPaddingLength(const Ieee80211OfdmMode *mode, b length) const
 {
     // 18.3.5.4 Pad bits (PAD), 1597p.
-    // TODO: in non-compliant mode: header padding.
+    // TODO in non-compliant mode: header padding.
     unsigned int codedBitsPerOFDMSymbol = mode->getDataMode()->getModulation()->getSubcarrierModulation()->getCodeWordSize() * NUMBER_OF_OFDM_DATA_SUBCARRIERS;
     const Ieee80211OfdmCode *code = mode->getDataMode()->getCode();
     unsigned int dataBitsPerOFDMSymbol = codedBitsPerOFDMSymbol; // N_DBPS
@@ -250,7 +250,7 @@ b Ieee80211LayeredOfdmTransmitter::getPaddingLength(const Ieee80211OfdmMode *mod
         dataBitsPerOFDMSymbol = convolutionalCode->getDecodedLength(codedBitsPerOFDMSymbol);
     }
     unsigned int dataBitsLength = 6 + b(length).get() + 16;
-    unsigned int numberOfOFDMSymbols = lrint(ceil(1.0*dataBitsLength / dataBitsPerOFDMSymbol));
+    unsigned int numberOfOFDMSymbols = lrint(ceil(1.0 * dataBitsLength / dataBitsPerOFDMSymbol));
     unsigned int numberOfBitsInTheDataField = dataBitsPerOFDMSymbol * numberOfOFDMSymbols; // N_DATA
     unsigned int numberOfPadBits = numberOfBitsInTheDataField - dataBitsLength; // N_PAD
     return b(numberOfPadBits);
@@ -284,7 +284,7 @@ const ITransmissionAnalogModel *Ieee80211LayeredOfdmTransmitter::createAnalogMod
         else
             throw cRuntimeError("Digital/analog converter needs sample representation");
     }
-    else // TODO: Analog model is obligatory, currently we use scalar analog model as default analog model
+    else // TODO Analog model is obligatory, currently we use scalar analog model as default analog model
         analogModel = createScalarAnalogModel(packetModel, bitModel);
     return analogModel;
 }
@@ -300,11 +300,11 @@ const Ieee80211OfdmMode *Ieee80211LayeredOfdmTransmitter::computeMode(Hz bandwid
     return new Ieee80211OfdmMode("", new Ieee80211OfdmPreambleMode(channelSpacing), signalMode, dataMode, channelSpacing, bandwidth);
 }
 
-const Ieee80211OfdmMode *Ieee80211LayeredOfdmTransmitter::getMode(const Packet* packet) const
+const Ieee80211OfdmMode *Ieee80211LayeredOfdmTransmitter::getMode(const Packet *packet) const
 {
-    const auto& modeReq = const_cast<Packet*>(packet)->findTag<Ieee80211ModeReq>();
+    const auto& modeReq = const_cast<Packet *>(packet)->findTag<Ieee80211ModeReq>();
     if (isCompliant)
-        return modeReq != nullptr ? check_and_cast<const Ieee80211OfdmMode*>(modeReq->getMode()) : &Ieee80211OfdmCompliantModes::getCompliantMode(11, MHz(20));
+        return modeReq != nullptr ? check_and_cast<const Ieee80211OfdmMode *>(modeReq->getMode()) : &Ieee80211OfdmCompliantModes::getCompliantMode(11, MHz(20));
     else
         return mode;
 }
@@ -334,7 +334,7 @@ const ITransmission *Ieee80211LayeredOfdmTransmitter::createTransmission(const I
     const Coord& endPosition = mobility->getCurrentPosition();
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
-    // TODO: compute channel
+    // TODO compute channel
     return new Ieee80211LayeredTransmission(packetModel, bitModel, symbolModel, sampleModel, analogModel, transmitter, packet, startTime, endTime, -1, -1, -1, startPosition, endPosition, startOrientation, endOrientation, mode, nullptr);
 }
 

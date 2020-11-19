@@ -64,7 +64,7 @@ class INET_API NextHopRoute : public cObject, public IRoute
     virtual void setSourceType(SourceType sourceType) override { if (this->sourceType != sourceType) { this->sourceType = sourceType; changed(F_TYPE); } }
     virtual void setSource(cObject *source) override { if (this->source != source) { this->source = source; changed(F_SOURCE); } }
     virtual void setMetric(int metric) override { if (this->metric != metric) { this->metric = metric; changed(F_METRIC); } }
-    virtual void setAdminDist(unsigned int adminDist) override {   }
+    virtual void setAdminDist(unsigned int adminDist) override {}
     virtual void setProtocolData(cObject *protocolData) override { this->protocolData = protocolData; }
 
     /** The routing table in which this route is inserted, or nullptr. */
@@ -98,7 +98,7 @@ class INET_API NextHopMulticastRoute : public cObject
 {
 };
 
-#if 0    /*FIXME TODO!!!! */
+#if 0 /*FIXME TODO!!!! */
 /**
  * TODO
  */
@@ -116,11 +116,11 @@ class INET_API NextHopMulticastRoute : public cObject, public INextHopMulticastR
     NetworkInterface *parent;
     std::vector<Child> children;
     cObject *source;
-    //XXX cObject *protocolData;
+    // TODO cObject *protocolData;
     int metric;
 
   public:
-    NextHopMulticastRoute() {}    //TODO
+    NextHopMulticastRoute() {} // TODO
     virtual ~NextHopMulticastRoute() {}
 
     virtual std::string str() const;
@@ -143,7 +143,7 @@ class INET_API NextHopMulticastRoute : public cObject, public INextHopMulticastR
     virtual bool isEnabled() const { return enabled; }
 
     /** Expired entries are ignored by routing, and may be periodically purged. */
-    virtual bool isExpired() const { return false; }    //XXX
+    virtual bool isExpired() const { return false; } // TODO
 
     /** Source address prefix to match */
     virtual L3Address getOrigin() const { return origin; }
@@ -161,10 +161,10 @@ class INET_API NextHopMulticastRoute : public cObject, public INextHopMulticastR
     virtual int getNumChildren() const { return children.size(); }
 
     /** Returns the ith child interface */
-    virtual NetworkInterface *getChild(int i) const { return X; }    //TODO
+    virtual NetworkInterface *getChild(int i) const { return X; } // TODO
 
     /** Returns true if the ith child interface is a leaf */
-    virtual bool getChildIsLeaf(int i) const { return X; }    //TODO
+    virtual bool getChildIsLeaf(int i) const { return X; } // TODO
 
     /** Source of route */
     virtual cObject *getSource() const { return source; }

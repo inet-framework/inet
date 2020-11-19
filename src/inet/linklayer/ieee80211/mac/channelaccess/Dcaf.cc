@@ -35,7 +35,7 @@ void Dcaf::initialize(int stage)
         getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        // TODO: calculateTimingParameters()
+        // TODO calculateTimingParameters()
         pendingQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("pendingQueue"));
         inProgressFrames = check_and_cast<InProgressFrames *>(getSubmodule("inProgressFrames"));
         contention = check_and_cast<IContention *>(getSubmodule("contention"));
@@ -117,7 +117,7 @@ void Dcaf::channelAccessGranted()
     callback->channelGranted(this);
 }
 
-void Dcaf::releaseChannel(IChannelAccess::ICallback* callback)
+void Dcaf::releaseChannel(IChannelAccess::ICallback *callback)
 {
     Enter_Method("releaseChannel");
     owning = false;
@@ -126,7 +126,7 @@ void Dcaf::releaseChannel(IChannelAccess::ICallback* callback)
     EV_INFO << "Channel released.\n";
 }
 
-void Dcaf::requestChannel(IChannelAccess::ICallback* callback)
+void Dcaf::requestChannel(IChannelAccess::ICallback *callback)
 {
     Enter_Method("requestChannel");
     this->callback = callback;
@@ -143,14 +143,15 @@ void Dcaf::expectedChannelAccess(simtime_t time)
     // don't care
 }
 
-void Dcaf::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
+void Dcaf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("receiveSignal");
     if (signalID == modesetChangedSignal) {
-        modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
+        modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
         calculateTimingParameters();
     }
 }
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

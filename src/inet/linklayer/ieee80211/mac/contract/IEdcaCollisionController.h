@@ -27,11 +27,11 @@ class Edcaf;
 
 class INET_API IEdcaCollisionController
 {
-    public:
-        virtual ~IEdcaCollisionController() { }
+  public:
+    virtual ~IEdcaCollisionController() {}
 
-        virtual void expectedChannelAccess(Edcaf *channelAccess, simtime_t time) = 0;
-        virtual bool isInternalCollision(Edcaf *channelAccess) = 0;
+    virtual void expectedChannelAccess(Edcaf *channelAccess, simtime_t time) = 0;
+    virtual bool isInternalCollision(Edcaf *channelAccess) = 0;
 };
 
 } // namespace ieee80211

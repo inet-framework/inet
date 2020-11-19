@@ -99,7 +99,7 @@ class INET_API SctpQueue : public cObject
     PayloadQueue payloadQueue;
 
   protected:
-    SctpAssociation *assoc;    // SCTP connection object
+    SctpAssociation *assoc; // SCTP connection object
 
   private:
     PayloadQueue::iterator GetChunkFastIterator;

@@ -29,7 +29,7 @@ namespace utils {
 /**
  *  Converts an integer to string.
  */
-INET_API std::string ltostr(long i);    //XXX make an ultostr as well, to be consistent with atoul
+INET_API std::string ltostr(long i); // TODO make an ultostr as well, to be consistent with atoul
 
 /**
  *  Converts a double to string
@@ -77,7 +77,7 @@ INET_API std::string vstringf(const char *fmt, va_list& args);
 /**
  * Rounding up to the nearest multiple of a number.
  */
-inline int roundUp(int numToRound, int multiple) { return ((numToRound + multiple -1) / multiple) * multiple; }
+inline int roundUp(int numToRound, int multiple) { return ((numToRound + multiple - 1) / multiple) * multiple; }
 
 /**
  * Like cObjectFactory::createOneIfClassIsKnown(), except it starts searching for the class in the given namespace
@@ -95,7 +95,7 @@ INET_API cObject *createOne(const char *className, const char *defaultNamespace 
  */
 template<typename T>
 T *dupPacketAndControlInfo(T *packet) {
-    T *copy  = packet->dup();
+    T *copy = packet->dup();
     if (cObject *ctrl = packet->getControlInfo())
         copy->setControlInfo(ctrl->dup());
     return copy;

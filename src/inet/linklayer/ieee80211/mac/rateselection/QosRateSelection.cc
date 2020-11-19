@@ -32,7 +32,7 @@ void QosRateSelection::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LINK_LAYER) {
-        dataOrMgmtRateControl = dynamic_cast<IRateControl*>(findModuleByPath(par("rateControlModule")));
+        dataOrMgmtRateControl = dynamic_cast<IRateControl *>(findModuleByPath(par("rateControlModule")));
         double multicastFrameBitrate = par("multicastFrameBitrate");
         multicastFrameMode = (multicastFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(multicastFrameBitrate));
         double dataFrameBitrate = par("dataFrameBitrate");
@@ -50,7 +50,7 @@ void QosRateSelection::initialize(int stage)
     }
 }
 
-const IIeee80211Mode* QosRateSelection::getMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
+const IIeee80211Mode *QosRateSelection::getMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     const auto& modeReqTag = packet->findTag<Ieee80211ModeReq>();
     if (modeReqTag)
@@ -79,9 +79,9 @@ bool QosRateSelection::isControlResponseFrame(const Ptr<const Ieee80211MacHeader
 // non-HT PPDU CTS or ACK control response frame at either the primary rate or the alternate rate, if
 // one exists.
 //
-const IIeee80211Mode* QosRateSelection::computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
+const IIeee80211Mode *QosRateSelection::computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
-    // TODO: BSSBasicRateSet, alternate rate
+    // TODO BSSBasicRateSet, alternate rate
     auto mode = getMode(packet, dataOrMgmtHeader);
     ASSERT(modeSet->containsMode(mode));
     if (!responseAckFrameMode) {
@@ -96,9 +96,9 @@ const IIeee80211Mode* QosRateSelection::computeResponseAckFrameMode(Packet *pack
         return responseAckFrameMode;
 }
 
-const IIeee80211Mode* QosRateSelection::computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame)
+const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame)
 {
-    // TODO: BSSBasicRateSet, alternate rate
+    // TODO BSSBasicRateSet, alternate rate
     auto mode = getMode(packet, rtsFrame);
     ASSERT(modeSet->containsMode(mode));
     if (!responseCtsFrameMode) {
@@ -119,7 +119,7 @@ const IIeee80211Mode* QosRateSelection::computeResponseCtsFrameMode(Packet *pack
 // rate is defined to be the same rate and modulation class as the BlockAckReq frame, and the STA
 // shall transmit the Basic BlockAck frame at the primary rate.
 //
-const IIeee80211Mode* QosRateSelection::computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
+const IIeee80211Mode *QosRateSelection::computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
     if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq))
         return responseBlockAckFrameMode ? responseBlockAckFrameMode : getMode(packet, blockAckReq);
@@ -127,7 +127,7 @@ const IIeee80211Mode* QosRateSelection::computeResponseBlockAckFrameMode(Packet 
         throw cRuntimeError("Unknown BlockAckReq frame type");
 }
 
-const IIeee80211Mode* QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
+const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
     if (dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader) && dataFrameMode)
         return dataFrameMode;
@@ -143,7 +143,7 @@ const IIeee80211Mode* QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<con
         // above) with a group address in the Address 1 field shall be transmitted in a non-HT PPDU using one of the
         // rates included in the BSSBasicRateSet parameter or the rate chosen by the AP, described in 10.23.7, if the data
         // frames are part of an FMS stream.
-        // TODO: BSSBasicRateSet
+        // TODO BSSBasicRateSet
         // If the BSSBasicRateSet parameter is empty and the BSSBasicMCSSet parameter is not empty, the frame shall
         // be transmitted in an HT PPDU using one of the MCSs included in the BSSBasicMCSSet parameter.
 
@@ -166,8 +166,8 @@ const IIeee80211Mode* QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<con
     //      OperationalRateSet or the HTOperationalMCSset, which are parameters of the MLME-
     //      JOIN.request primitive.
     else {
-        // TODO: Supported Rates element, Extended Supported Rates element
-        // TODO: OperationalRateSet or the HTOperationalMCSset
+        // TODO Supported Rates element, Extended Supported Rates element
+        // TODO OperationalRateSet or the HTOperationalMCSset
         if (dataOrMgmtRateControl)
             return dataOrMgmtRateControl->getRate();
         else
@@ -175,7 +175,7 @@ const IIeee80211Mode* QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<con
     }
 }
 
-const IIeee80211Mode* QosRateSelection::computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure)
+const IIeee80211Mode *QosRateSelection::computeControlFrameMode(const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure)
 {
     ASSERT(!isControlResponseFrame(header, txopProcedure));
     if (controlFrameMode)
@@ -187,7 +187,7 @@ const IIeee80211Mode* QosRateSelection::computeControlFrameMode(const Ptr<const 
         // transmitting STA shall transmit the frame using one of the rates in the BSSBasicRateSet parameter or a rate
         // from the mandatory rate set of the attached PHY if the BSSBasicRateSet is empty.
         if (!dynamicPtrCast<const Ieee80211BasicBlockAck>(header) && !dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header)) {
-            // TODO: BSSBasicRateSet
+            // TODO BSSBasicRateSet
             return fastestMandatoryMode;
         }
         // If a Basic BlockAckReq or Basic BlockAck frame is carried in a non-HT PPDU, the transmitting STA shall
@@ -197,7 +197,7 @@ const IIeee80211Mode* QosRateSelection::computeControlFrameMode(const Ptr<const 
         // BSSBasicRateSet parameter or using a rate from the mandatory rate set of the attached PHY if the
         // BSSBasicRateSet is empty.
         else {
-            // TODO: supported rate set of the receiving STA
+            // TODO supported rate set of the receiving STA
             return fastestMandatoryMode;
         }
     }
@@ -211,9 +211,9 @@ const IIeee80211Mode* QosRateSelection::computeControlFrameMode(const Ptr<const 
         // transmitted at a rate no higher than the highest mandatory rate of the attached PHY that is less than or equal to
         // the rate or non-HT reference rate (see 9.7.9) of the previously transmitted frame that was directed to the same
         // receiving STA.
-        // TODO: BSSBasicRateSet
+        // TODO BSSBasicRateSet
         if (!dynamicPtrCast<const Ieee80211BasicBlockAck>(header) && !dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header)) {
-            // TODO: frame sequence context
+            // TODO frame sequence context
             auto it = lastTransmittedFrameMode.find(header->getReceiverAddress());
             if (it != lastTransmittedFrameMode.end()) {
                 return it->second;
@@ -227,8 +227,8 @@ const IIeee80211Mode* QosRateSelection::computeControlFrameMode(const Ptr<const 
         // known, the transmitting STA shall transmit using a rate from the BSSBasicRateSet parameter or from the
         // mandatory rate set of the attached PHY if the BSSBasicRateSet is empty.
         else {
-            // TODO: BSSBasicRateSet
-            // TODO: Supported Rates element and/or Extended Supported Rates
+            // TODO BSSBasicRateSet
+            // TODO Supported Rates element and/or Extended Supported Rates
             return fastestMandatoryMode;
         }
     }
@@ -236,7 +236,7 @@ const IIeee80211Mode* QosRateSelection::computeControlFrameMode(const Ptr<const 
         throw cRuntimeError("Control frames cannot terminate TXOPs");
 }
 
-const IIeee80211Mode* QosRateSelection::computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure)
+const IIeee80211Mode *QosRateSelection::computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure)
 {
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         return computeDataOrMgmtFrameMode(dataOrMgmtHeader);
@@ -244,11 +244,11 @@ const IIeee80211Mode* QosRateSelection::computeMode(Packet *packet, const Ptr<co
         return computeControlFrameMode(header, txopProcedure);
 }
 
-void QosRateSelection::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details)
+void QosRateSelection::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("receiveSignal");
     if (signalID == modesetChangedSignal) {
-        modeSet = check_and_cast<Ieee80211ModeSet*>(obj);
+        modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
         fastestMandatoryMode = modeSet->getFastestMandatoryMode();
     }
 }
@@ -261,3 +261,4 @@ void QosRateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee8021
 
 } /* namespace ieee80211 */
 } /* namespace inet */
+

@@ -35,7 +35,7 @@ typedef TcpBaseAlgStateVariables TcpNoCongestionControlStateVariables;
 class INET_API TcpNoCongestionControl : public TcpBaseAlg
 {
   protected:
-    TcpNoCongestionControlStateVariables *& state;    // alias to TcpAlgorithm's 'state'
+    TcpNoCongestionControlStateVariables *& state; // alias to TcpAlgorithm's 'state'
 
     /** Create and return a TcpNoCongestionControlStateVariables object. */
     virtual TcpStateVariables *createStateVariables() override

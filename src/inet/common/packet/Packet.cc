@@ -72,19 +72,19 @@ const ChunkTemporarySharedPtr *Packet::getDissection() const
 const ChunkTemporarySharedPtr *Packet::getFront() const
 {
     const auto& chunk = peekAt(b(0), getFrontOffset(), Chunk::PF_ALLOW_ALL);
-    return chunk == nullptr? nullptr : new ChunkTemporarySharedPtr(chunk);
+    return chunk == nullptr ? nullptr : new ChunkTemporarySharedPtr(chunk);
 }
 
 const ChunkTemporarySharedPtr *Packet::getData() const
 {
     const auto& chunk = peekData(Chunk::PF_ALLOW_ALL);
-    return chunk == nullptr? nullptr : new ChunkTemporarySharedPtr(chunk);
+    return chunk == nullptr ? nullptr : new ChunkTemporarySharedPtr(chunk);
 }
 
 const ChunkTemporarySharedPtr *Packet::getBack() const
 {
     const auto& chunk = peekAt(getBackOffset(), backIterator.getPosition(), Chunk::PF_ALLOW_ALL);
-    return chunk == nullptr? nullptr : new ChunkTemporarySharedPtr(chunk);
+    return chunk == nullptr ? nullptr : new ChunkTemporarySharedPtr(chunk);
 }
 
 // Supported cPacket interface functions
@@ -209,7 +209,7 @@ void Packet::eraseAt(b offset, b length)
         newContent->markImmutable();
         content = newContent->simplify();
     }
-    else if (offset + length == totalLength && content->canRemoveAtBack(length))  {
+    else if (offset + length == totalLength && content->canRemoveAtBack(length)) {
         const auto& newContent = makeExclusivelyOwnedMutableChunk(content);
         newContent->removeAtBack(length);
         newContent->markImmutable();

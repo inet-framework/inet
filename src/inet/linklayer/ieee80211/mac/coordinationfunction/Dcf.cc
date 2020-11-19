@@ -41,9 +41,9 @@ void Dcf::initialize(int stage)
         rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
         channelAccess = check_and_cast<Dcaf *>(getSubmodule("channelAccess"));
         originatorDataService = check_and_cast<IOriginatorMacDataService *>(getSubmodule(("originatorMacDataService")));
-        recipientDataService = check_and_cast<IRecipientMacDataService*>(getSubmodule("recipientMacDataService"));
+        recipientDataService = check_and_cast<IRecipientMacDataService *>(getSubmodule("recipientMacDataService"));
         recoveryProcedure = check_and_cast<NonQosRecoveryProcedure *>(getSubmodule("recoveryProcedure"));
-        rateSelection = check_and_cast<IRateSelection*>(getSubmodule("rateSelection"));
+        rateSelection = check_and_cast<IRateSelection *>(getSubmodule("rateSelection"));
         rtsProcedure = new RtsProcedure();
         rtsPolicy = check_and_cast<IRtsPolicy *>(getSubmodule("rtsPolicy"));
         recipientAckProcedure = new RecipientAckProcedure();
@@ -54,7 +54,7 @@ void Dcf::initialize(int stage)
         ctsProcedure = new CtsProcedure();
         ctsPolicy = check_and_cast<ICtsPolicy *>(getSubmodule("ctsPolicy"));
         stationRetryCounters = new StationRetryCounters();
-        originatorProtectionMechanism = check_and_cast<OriginatorProtectionMechanism*>(getSubmodule("originatorProtectionMechanism"));
+        originatorProtectionMechanism = check_and_cast<OriginatorProtectionMechanism *>(getSubmodule("originatorProtectionMechanism"));
     }
 }
 
@@ -65,7 +65,7 @@ void Dcf::forEachChild(cVisitor *v)
         v->visit(const_cast<FrameSequenceContext *>(frameSequenceHandler->getContext()));
 }
 
-void Dcf::handleMessage(cMessage* msg)
+void Dcf::handleMessage(cMessage *msg)
 {
     if (msg == startRxTimer) {
         if (!isReceptionInProgress()) {
@@ -155,7 +155,7 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
     Enter_Method("processLowerFrame(%s)", packet->getName());
     EV_INFO << "Processing lower frame: " << packet->getName() << endl;
     if (frameSequenceHandler->isSequenceRunning()) {
-        // TODO: always call processResponses
+        // TODO always call processResponses
         if ((!isForUs(header) && !startRxTimer->isScheduled()) || isForUs(header)) {
             frameSequenceHandler->processResponse(packet);
             updateDisplayString();
@@ -198,7 +198,7 @@ void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
 }
 
 /*
- * TODO:  If a PHY-RXSTART.indication primitive does not occur during the ACKTimeout interval,
+ * TODO  If a PHY-RXSTART.indication primitive does not occur during the ACKTimeout interval,
  * the STA concludes that the transmission of the MPDU has failed, and this STA shall invoke its
  * backoff procedure **upon expiration of the ACKTimeout interval**.
  */
@@ -210,7 +210,7 @@ void Dcf::frameSequenceFinished()
     channelAccess->releaseChannel(this);
     if (hasFrameToTransmit())
         channelAccess->requestChannel(this);
-    mac->sendDownPendingRadioConfigMsg(); // TODO: review
+    mac->sendDownPendingRadioConfigMsg(); // TODO review
 }
 
 bool Dcf::isReceptionInProgress()
@@ -228,7 +228,7 @@ void Dcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
         sendUp(recipientDataService->dataFrameReceived(packet, dataHeader));
     else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(header))
         sendUp(recipientDataService->managementFrameReceived(packet, mgmtHeader));
-    else { // TODO: else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
+    else { // TODO else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
         sendUp(recipientDataService->controlFrameReceived(packet, header));
         recipientProcessReceivedControlFrame(packet, header);
         delete packet;
@@ -249,7 +249,7 @@ void Dcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const I
         throw cRuntimeError("Unknown control frame");
 }
 
-FrameSequenceContext* Dcf::buildContext()
+FrameSequenceContext *Dcf::buildContext()
 {
     auto nonQoSContext = new NonQoSContext(originatorAckPolicy);
     return new FrameSequenceContext(mac->getAddress(), modeSet, channelAccess->getInProgressFrames(), rtsProcedure, rtsPolicy, nonQoSContext, nullptr);
@@ -309,7 +309,7 @@ void Dcf::originatorProcessTransmittedFrame(Packet *packet)
         }
     }
     else if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(transmittedHeader)) {
-        auto protectedFrame = channelAccess->getInProgressFrames()->getFrameToTransmit(); // KLUDGE:
+        auto protectedFrame = channelAccess->getInProgressFrames()->getFrameToTransmit(); // KLUDGE
         auto protectedHeader = protectedFrame->peekAtFront<Ieee80211DataOrMgmtHeader>();
         EV_INFO << "For the current frame exchange, we have CW = " << channelAccess->getCw() << " SRC = " << recoveryProcedure->getShortRetryCount(protectedFrame, protectedHeader) << " LRC = " << recoveryProcedure->getLongRetryCount(protectedFrame, protectedHeader) << " SSRC = " << stationRetryCounters->getStationShortRetryCount() << " and SLRC = " << stationRetryCounters->getStationLongRetryCount() << std::endl;
         rtsProcedure->processTransmittedRts(rtsFrame);
@@ -363,7 +363,7 @@ void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
         EV_INFO << "Dropping frame " << failedPacket->getName() << ", because retry limit is reached.\n";
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
-        details.setLimit(-1); // TODO:
+        details.setLimit(-1); // TODO
         emit(packetDroppedSignal, failedPacket, &details);
         emit(linkBrokenSignal, failedPacket);
     }
@@ -382,7 +382,7 @@ bool Dcf::isForUs(const Ptr<const Ieee80211MacHeader>& header) const
 
 bool Dcf::isSentByUs(const Ptr<const Ieee80211MacHeader>& header) const
 {
-    // FIXME:
+    // FIXME
     // Check the roles of the Addr3 field when aggregation is applied
     // Table 8-19—Address field contents
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))

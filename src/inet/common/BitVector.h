@@ -22,7 +22,7 @@
 
 namespace inet {
 
-#define UINT8_LENGTH 8
+#define UINT8_LENGTH    8
 
 class INET_API BitVector
 {
@@ -41,7 +41,7 @@ class INET_API BitVector
     BitVector(unsigned int bits);
     BitVector(unsigned int bits, unsigned int fixedSize);
     BitVector(const BitVector& other) { copy(other); }
-    BitVector(const std::vector<uint8_t>& bytes) : bytes(bytes), size(bytes.size() * 8) { }
+    BitVector(const std::vector<uint8_t>& bytes) : bytes(bytes), size(bytes.size() * 8) {}
 
     unsigned int toDecimal() const;
     unsigned int reverseToDecimal() const;

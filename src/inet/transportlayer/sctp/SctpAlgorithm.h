@@ -34,7 +34,7 @@ namespace sctp {
 class INET_API SctpAlgorithm : public cObject
 {
   protected:
-    SctpAssociation *assoc;    // we belong to this association
+    SctpAssociation *assoc; // we belong to this association
     SctpQueue *transmissionQ;
     SctpQueue *retransmissionQ;
 

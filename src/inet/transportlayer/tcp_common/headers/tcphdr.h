@@ -55,7 +55,7 @@ struct tcphdr
     uint16_t th_urp;    /* urgent pointer */
 
     uint32_t th_options[0];    /* options (optional) */
-    //unsigned char data[0];        XXX MSVC only allows zero-size arrays at the end of a struct
+    //unsigned char data[0];        TODO MSVC only allows zero-size arrays at the end of a struct
 };    // TODO  __attribute__((packed));
 
 } // namespace tcp

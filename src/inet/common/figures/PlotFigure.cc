@@ -312,7 +312,7 @@ void PlotFigure::addChildren()
 
 void PlotFigure::setValue(int series, double x, double y)
 {
-    seriesValues[series].push_front({x, y});
+    seriesValues[series].push_front({ x, y });
     invalidPlot = true;
 }
 
@@ -340,7 +340,7 @@ void PlotFigure::layout()
     bounds = rectangleUnion(bounds, labelFigure->getBounds());
     bounds.x -= fontSize;
     bounds.y -= fontSize;
-    bounds.width +=  2 * fontSize;
+    bounds.width += 2 * fontSize;
     bounds.height += 2 * fontSize;
     invalidLayout = false;
 }
@@ -353,7 +353,7 @@ void PlotFigure::redrawYTicks()
     double valueTickYposAdjust[2] = { 0, 0 };
     int fontSize = labelFigure->getFont().pointSize;
     if (yTicks.size() == 1) {
-        valueTickYposAdjust[0] = - (fontSize / 2);
+        valueTickYposAdjust[0] = -(fontSize / 2);
         valueTickYposAdjust[1] = fontSize / 2;
     }
 

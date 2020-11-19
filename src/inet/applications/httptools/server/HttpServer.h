@@ -40,9 +40,8 @@ namespace httptools {
 class INET_API HttpServer : public HttpServerBase, public TcpSocket::ReceiveQueueBasedCallback
 {
   protected:
-    struct SockData
-    {
-        TcpSocket *socket = nullptr;    // A reference to the socket object.
+    struct SockData {
+        TcpSocket *socket = nullptr; // A reference to the socket object.
     };
 
     TcpSocket listensocket;
@@ -62,7 +61,7 @@ class INET_API HttpServer : public HttpServerBase, public TcpSocket::ReceiveQueu
     virtual void socketPeerClosed(TcpSocket *socket) override;
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override;
-    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { }
+    virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override {}
     virtual void socketDeleted(TcpSocket *socket) override;
 };
 

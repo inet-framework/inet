@@ -37,9 +37,9 @@ class INET_API AckingMac : public MacProtocolBase
 {
   protected:
     // parameters
-    int headerLength = 0;    // AckingMacFrame header length in bytes
-    double bitrate = 0;    // [bits per sec]
-    bool promiscuous = false;    // promiscuous mode
+    int headerLength = 0; // AckingMacFrame header length in bytes
+    double bitrate = 0; // [bits per sec]
+    bool promiscuous = false; // promiscuous mode
     bool fullDuplex = false;
     bool useAck = true;
 
@@ -59,9 +59,9 @@ class INET_API AckingMac : public MacProtocolBase
     virtual bool dropFrameNotForUs(Packet *frame);
     virtual void encapsulate(Packet *msg);
     virtual void decapsulate(Packet *frame);
-    virtual void acked(Packet *packet);    // called by other AckingMac module, when receiving a packet with my moduleID
+    virtual void acked(Packet *packet); // called by other AckingMac module, when receiving a packet with my moduleID
 
-    //cListener:
+    // cListener:
     virtual void receiveSignal(cComponent *src, simsignal_t id, intval_t value, cObject *details) override;
 
     /** implements MacProtocolBase functions */

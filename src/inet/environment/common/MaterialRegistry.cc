@@ -31,7 +31,7 @@ MaterialRegistry::MaterialRegistry()
 
 MaterialRegistry::~MaterialRegistry()
 {
-    for (auto & entry : materials)
+    for (auto& entry : materials)
         delete entry.second;
 }
 
@@ -42,9 +42,8 @@ void MaterialRegistry::addMaterial(const Material *material) const
 
 const Material *MaterialRegistry::getMaterial(const char *name) const
 {
-    if (materials.size() == 0)
-    {
-        // TODO: verify values
+    if (materials.size() == 0) {
+        // TODO verify values
         addMaterial(new Material("vacuum", Ohmm(NaN), 1, 1));
         addMaterial(new Material("air", Ohmm(NaN), 1.00058986, 1.00000037));
         addMaterial(new Material("copper", Ohmm(1.68), NaN, NaN));

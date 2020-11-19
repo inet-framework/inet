@@ -125,16 +125,16 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
      *                    over
      */
     enum States {
-        INIT,    //0
-        SLEEP,    //1
-        CCA,    //2
-        SEND_PREAMBLE,    //3
-        WAIT_DATA,    //4
-        SEND_DATA,    //5
-        WAIT_TX_DATA_OVER,    //6
-        WAIT_ACK,    //7
-        SEND_ACK,    //8
-        WAIT_ACK_TX    //9
+        INIT, // 0
+        SLEEP, // 1
+        CCA, // 2
+        SEND_PREAMBLE, // 3
+        WAIT_DATA, // 4
+        SEND_DATA, // 5
+        WAIT_TX_DATA_OVER, // 6
+        WAIT_ACK, // 7
+        SEND_ACK, // 8
+        WAIT_ACK_TX // 9
     };
     /** @brief The current state of the protocol */
     States macState = static_cast<States>(-1);

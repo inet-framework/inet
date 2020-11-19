@@ -58,10 +58,10 @@ const ApskModulationBase *ApskModulationBase::findModulation(const char *modulat
     else if (!strcmp("QAM-256", modulation))
         return &Qam256Modulation::singleton;
     else if (!strncmp("MQAM-", modulation, 5))
-        // TODO: avoid allocation
+        // TODO avoid allocation
         return new MqamModulation(atoi(modulation + 5));
     else if (!strncmp("MPSK-", modulation, 5))
-        // TODO: avoid allocation
+        // TODO avoid allocation
         return new MpskModulation(atoi(modulation + 5));
     else if (!strcmp(modulation, "DSSS-OQPSK-16"))
         return &DsssOqpsk16Modulation::singleton;
@@ -79,7 +79,7 @@ const ApskSymbol *ApskModulationBase::mapToConstellationDiagram(const ShortBitVe
 
 ShortBitVector ApskModulationBase::demapToBitRepresentation(const ApskSymbol *symbol) const
 {
-    // TODO: Complete implementation: http://eprints.soton.ac.uk/354719/1/tvt-hanzo-2272640-proof.pdf
+    // TODO Complete implementation: http://eprints.soton.ac.uk/354719/1/tvt-hanzo-2272640-proof.pdf
     double symbolQ = symbol->real();
     double symbolI = symbol->imag();
     double minDist = DBL_MAX;

@@ -38,7 +38,7 @@ void LabeledIconFigure::setTooltip(const char *tooltip)
     labelFigure->setTooltip(tooltip);
 }
 
-void LabeledIconFigure::setAssociatedObject(cObject * object)
+void LabeledIconFigure::setAssociatedObject(cObject *object)
 {
     iconFigure->setAssociatedObject(object);
     labelFigure->setAssociatedObject(object);

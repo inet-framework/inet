@@ -30,8 +30,7 @@ simsignal_t Contention::stateChangedSignal = registerSignal("stateChanged");
 Register_Enum(Contention::State,
         (Contention::IDLE,
          Contention::DEFER,
-         Contention::IFS_AND_BACKOFF)
-         );
+         Contention::IFS_AND_BACKOFF));
 
 Define_Module(Contention);
 
@@ -43,7 +42,7 @@ void Contention::initialize(int stage)
         mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"));
         startTxEvent = new cMessage("startTx");
         startTxEvent->setSchedulingPriority(1000); // low priority, i.e. processed later than most events for the same time
-        // KLUDGE:
+        // KLUDGE
         // The callback->channelAccessGranted() call should be the last
         // event at a simulation time in order to handle internal collisions
         // properly.
@@ -229,7 +228,7 @@ void Contention::scheduleTransmissionRequest()
             waitInterval -= backoffOptimizationDelta;
     }
     scheduledTransmissionTime = now + waitInterval;
-    EV_INFO << ", waitInterval = " <<  waitInterval << ".\n";
+    EV_INFO << ", waitInterval = " << waitInterval << ".\n";
     scheduleTransmissionRequestFor(scheduledTransmissionTime);
 }
 
@@ -249,7 +248,7 @@ void Contention::computeRemainingBackoffSlots()
         backoffSlots = remainingSlots;
 }
 
-// TODO: we should call it when internal collision occurs after backoff optimization
+// TODO we should call it when internal collision occurs after backoff optimization
 void Contention::revokeBackoffOptimization()
 {
     EV_DEBUG << "Revoking backoff optimization: backoffOptimizationDelta = " << backoffOptimizationDelta << std::endl;
@@ -280,3 +279,4 @@ void Contention::updateDisplayString(simtime_t expectedChannelAccess)
 
 } // namespace ieee80211
 } // namespace inet
+
