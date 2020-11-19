@@ -145,10 +145,14 @@ void Icmp::sendPtbMessage(Packet *packet, int mtu)
     Packet *errorPacket = new Packet(msgname);
     const auto& icmpPtb = makeShared<IcmpPtb>();
     icmpPtb->setMtu(mtu);
-    // ICMP message length: the internet header plus the first 8 bytes of
+    // ICMP message length: the internet header plus the first queteLength bytes of
     // the original datagram's data is returned to the sender.
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-    errorPacket->insertAtBack(packet->peekDataAt(B(0), ipv4Header->getHeaderLength() + B(8)));
+    B quoteLength = ipv4Header->getHeaderLength() + B(par("quoteLength"));
+    if (quoteLength > packet->getDataLength()) {
+        quoteLength = packet->getDataLength();
+    }
+    errorPacket->insertAtBack(packet->peekDataAt(B(0), quoteLength));
     insertCrc(icmpPtb, errorPacket);
     errorPacket->insertAtFront(icmpPtb);
 
@@ -179,10 +183,14 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
     icmpHeader->setChunkLength(B(8)); // FIXME second 4 byte in icmp header not represented yet
     icmpHeader->setType(type);
     icmpHeader->setCode(code);
-    // ICMP message length: the internet header plus the first 8 bytes of
+    // ICMP message length: the internet header plus the first queteLength bytes of
     // the original datagram's data is returned to the sender.
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-    errorPacket->insertAtBack(packet->peekDataAt(B(0), ipv4Header->getHeaderLength() + B(8)));
+    B quoteLength = ipv4Header->getHeaderLength() + B(par("quoteLength"));
+    if (quoteLength > packet->getDataLength()) {
+        quoteLength = packet->getDataLength();
+    }
+    errorPacket->insertAtBack(packet->peekDataAt(B(0), quoteLength));
     insertCrc(icmpHeader, errorPacket);
     errorPacket->insertAtFront(icmpHeader);
 
