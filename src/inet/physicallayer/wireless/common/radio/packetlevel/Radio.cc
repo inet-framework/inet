@@ -557,7 +557,7 @@ void Radio::updateTransceiverState()
 {
     // reception state
     ReceptionState newRadioReceptionState;
-    if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_TRANSMITTER)
+    if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SWITCHING || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_TRANSMITTER)
         newRadioReceptionState = RECEPTION_STATE_UNDEFINED;
     else if (receptionTimer && receptionTimer->isScheduled())
         newRadioReceptionState = RECEPTION_STATE_RECEIVING;
@@ -572,7 +572,7 @@ void Radio::updateTransceiverState()
     }
     // transmission state
     TransmissionState newRadioTransmissionState;
-    if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_RECEIVER)
+    if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SWITCHING || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_RECEIVER)
         newRadioTransmissionState = TRANSMISSION_STATE_UNDEFINED;
     else if (transmissionTimer->isScheduled())
         newRadioTransmissionState = TRANSMISSION_STATE_TRANSMITTING;
