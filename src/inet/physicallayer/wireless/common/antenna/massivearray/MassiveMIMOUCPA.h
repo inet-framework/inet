@@ -72,7 +72,7 @@ class INET_API MassiveMIMOUCPA : public MassiveArray
   protected:
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, double d, cObject *details) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long d, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t d, cObject *details) override;
     double computeIntegral();
 
   public:

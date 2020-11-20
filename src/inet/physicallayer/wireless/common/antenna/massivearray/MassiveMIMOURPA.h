@@ -69,7 +69,7 @@ class INET_API MassiveMIMOURPA : public MassiveArray
     virtual double computeIntegral();
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, double d, cObject *details) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long d, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t d, cObject *details) override;
 
   public:
     virtual void setDirection(const double &angle) override;

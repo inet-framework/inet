@@ -323,8 +323,7 @@ void MassiveMIMOUHPA::receiveSignal(cComponent *source, simsignal_t signalID,
     }
 }
 
-void MassiveMIMOUHPA::receiveSignal(cComponent *source, simsignal_t signalID,
-        long val, cObject *details) {
+void MassiveMIMOUHPA::receiveSignal(cComponent *source, simsignal_t signalID, intval_t val, cObject *details) {
     if (signalID != MassiveArrayConfigureChange) {
         // Radio signals
         if (pendingConfiguration) {
