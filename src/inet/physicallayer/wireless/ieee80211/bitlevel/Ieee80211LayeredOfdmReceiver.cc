@@ -81,6 +81,15 @@ void Ieee80211LayeredOfdmReceiver::initialize(int stage)
     }
 }
 
+const Ieee80211OfdmMode *Ieee80211LayeredOfdmReceiver::getMode(const Packet *packet) const
+{
+    const auto& modeInd = const_cast<Packet *>(packet)->findTag<Ieee80211ModeInd>();
+    if (isCompliant)
+        return modeInd != nullptr ? check_and_cast<const Ieee80211OfdmMode *>(modeInd->getMode()) : &Ieee80211OfdmCompliantModes::getCompliantMode(11, MHz(20));
+    else
+        return mode;
+}
+
 const IReceptionAnalogModel *Ieee80211LayeredOfdmReceiver::createAnalogModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
     return nullptr;
