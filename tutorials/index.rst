@@ -12,7 +12,7 @@ the simulations (NED, ini and other files) and the web pages are in the
 
 Recently released tutorials:
 
-- :doc:`fingerprint/doc/index`
+- :doc:`fingerprint/doc/index` :sub:`(released on: 2020-11-24)`
 
 The following tutorials are available:
 

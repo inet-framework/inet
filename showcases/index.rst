@@ -17,13 +17,13 @@ the simulations (NED, ini and other files) and the web pages are in the
 
 Recently released showcases:
 
-- :doc:`emulation/videostreaming/doc/index`
-- :doc:`wireless/analogmodel/doc/index`
-- :doc:`wireless/crosstalk/doc/index`
-- :doc:`wireless/coexistence/doc/index`
-- :doc:`visualizer/spectrum/doc/index`
-- :doc:`emulation/voip/doc/index`
-- :doc:`emulation/babel/doc/index`
+- :doc:`emulation/videostreaming/doc/index` :sub:`(released on: 2020-09-08)`
+- :doc:`wireless/analogmodel/doc/index` :sub:`(released on: 2020-05-20)`
+- :doc:`wireless/crosstalk/doc/index` :sub:`(released on: 2020-03-26)`
+- :doc:`wireless/coexistence/doc/index` :sub:`(released on: 2020-03-26)`
+- :doc:`visualizer/spectrum/doc/index` :sub:`(released on: 2019-12-20)`
+- :doc:`emulation/voip/doc/index` :sub:`(released on: 2019-11-06)`
+- :doc:`emulation/babel/doc/index` :sub:`(released on: 2019-11-06)`
 
 All showcases:
 
