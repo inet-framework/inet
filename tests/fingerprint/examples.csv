@@ -524,8 +524,8 @@
 /examples/wireless/lan80211ac/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,         c9a8-e487/tplx, PASS,
 # /examples/wireless/lan80211ac/,      -f omnetpp.ini -c Ping2 -r 0,                  ---100s,         0000-0000/tplx, PASS,   # [Config Ping2] # __interactive__
 
-/examples/wireless/layered80211/,    -f omnetpp.ini -c LayeredCompliant80211Ping -r 0, 100s,      35b0-558e/tplx, PASS, wireless
-/examples/wireless/layered80211/,    -f omnetpp.ini -c LayeredNonCompliant80211Ping -r 0, 100s,   42ed-145b/tplx, PASS, wireless
+/examples/wireless/layered80211/,    -f omnetpp.ini -c LayeredCompliant80211Ping -r 0, 100s,      88dd-4b30/tplx, PASS, wireless
+/examples/wireless/layered80211/,    -f omnetpp.ini -c LayeredNonCompliant80211Ping -r 0, 100s,   3e43-f68c/tplx, PASS, wireless
 
 /examples/wireless/layeredapsk/,     -f omnetpp.ini -c General -r 0,                100s,            d15b-93d0/tplx, PASS, wireless
 
