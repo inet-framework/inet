@@ -2716,7 +2716,7 @@ void Ospfv3Area::calculateInterAreaRoutes(std::vector<Ospfv3RoutingTableEntry *>
              LSA's LS age is equal to MaxAge, then examine the the next
              LSA.
 
-         (2) If the LSA was originated by the calculating router itself,
+           (2) If the LSA was originated by the calculating router itself,
              examine the next LSA.*/
         if ((routeCost == LS_INFINITY) || (lsAge == MAX_AGE) || (selfOriginated)) { // (1) and(2)
             continue;

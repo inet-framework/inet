@@ -369,7 +369,7 @@ void Ospfv3Interface::processHelloPacket(Packet *packet)
                    Neighbor ID ) and the receiving interface is in state
                    Waiting, the receiving interface's state machine is
                    scheduled with the event BACKUP_SEEN.
-                */
+                 */
                 if ((newBackupRouterID == sourceId) &&
                     (this->getState() == Ospfv3InterfaceFaState::INTERFACE_STATE_WAITING))
                 {

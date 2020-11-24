@@ -15,15 +15,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 /**
-* @file EigrpPrint.h
-* @author Jan Zavrel (honza.zavrel96@gmail.com)
-* @author Vit Rek (rek@kn.vutbr.cz)
-* @author Vladimir Vesely (ivesely@fit.vutbr.cz)
-* @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
-* @date 6. 11. 2014
-* @brief EIGRP Print functions header file
-* @detail File contains useful functions for printing EIGRP informations (CUT + PASTE from EigrpIpv4Pdm.cc)
-*/
+ * @file EigrpPrint.h
+ * @author Jan Zavrel (honza.zavrel96@gmail.com)
+ * @author Vit Rek (rek@kn.vutbr.cz)
+ * @author Vladimir Vesely (ivesely@fit.vutbr.cz)
+ * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
+ * @date 6. 11. 2014
+ * @brief EIGRP Print functions header file
+ * @detail File contains useful functions for printing EIGRP informations (CUT + PASTE from EigrpIpv4Pdm.cc)
+ */
 
 #ifndef EIGRPPRINT_H_
 #define EIGRPPRINT_H_
