@@ -12,7 +12,7 @@ FEATURETOOL := opp_featuretool
 #
 #CFLAGS += -Wold-style-cast
 
-ifeq ($(PLATFORM),linux)
+ifneq ($(PLATFORM),win32.x86_64)
    ifeq ($(WITH_ICANCLOUD),yes)
         LIBS += -lz
    endif
