@@ -44,17 +44,20 @@ void ErrorModelBase::initialize(int stage)
             snirMode = SnirMode::SM_MEAN;
         else
             throw cRuntimeError("Unknown SNIR mode: '%s'", snirModeString);
+        snirOffset = inet::math::dB2fraction(par("snirOffset"));
     }
 }
 
 double ErrorModelBase::getScalarSnir(const ISnir *snir) const
 {
+    double scalarSnir;
     if (snirMode == SnirMode::SM_MIN)
-        return snir->getMin();
+        scalarSnir = snir->getMin();
     else if (snirMode == SnirMode::SM_MEAN)
-        return snir->getMean();
+        scalarSnir = snir->getMean();
     else
         throw cRuntimeError("Unknown SNIR mode");
+    return scalarSnir * snirOffset;
 }
 
 bool ErrorModelBase::hasProbabilisticError(b length, double ber) const
