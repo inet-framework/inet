@@ -1053,7 +1053,7 @@ const std::vector<ApskSymbol> Qam1024Modulation::constellation = {
 
 const Qam1024Modulation Qam1024Modulation::singleton;
 
-Qam1024Modulation::Qam1024Modulation() : MqamModulationBase(&constellation)
+Qam1024Modulation::Qam1024Modulation() : MqamModulationBase(k, &constellation)
 {
 }
 

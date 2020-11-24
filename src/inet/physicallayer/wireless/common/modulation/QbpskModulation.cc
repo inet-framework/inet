@@ -27,7 +27,7 @@ const std::vector<ApskSymbol> QbpskModulation::constellation = {
 
 const QbpskModulation QbpskModulation::singleton;
 
-QbpskModulation::QbpskModulation() : MqamModulationBase(&constellation)
+QbpskModulation::QbpskModulation() : MqamModulationBase(1, &constellation)
 {
 }
 

@@ -285,7 +285,7 @@ const std::vector<ApskSymbol> Qam256Modulation::constellation = {
 
 const Qam256Modulation Qam256Modulation::singleton;
 
-Qam256Modulation::Qam256Modulation() : MqamModulationBase(&constellation)
+Qam256Modulation::Qam256Modulation() : MqamModulationBase(k, &constellation)
 {
 }
 
