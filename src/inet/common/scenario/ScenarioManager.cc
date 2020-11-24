@@ -226,7 +226,6 @@ ScenarioManager::GatePair ScenarioManager::getConnection(const cXMLElement *node
     else {
         throw cRuntimeError("Missing attribute: Either 'src-gate' or 'dest-module' must be present");
     }
-
 }
 
 void ScenarioManager::processAtCommand(const cXMLElement *node)

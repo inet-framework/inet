@@ -201,7 +201,6 @@ const Ptr<Chunk> Ipv6HeaderSerializer::deserialize(MemoryInputStream& stream) co
                 break;
             }
         }
-
     }
     return ipv6Header;
 }

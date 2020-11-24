@@ -508,7 +508,6 @@ bool SctpAssociation::process_RCV_Message(SctpHeader *sctpmsg,
         {
             sendOnAllPaths(state->getPrimaryPath());
         }
-
     } // end of for-loop
     if (state->sendResponse > 0) {
         if (state->sendResponse == PERFORMED_WITH_OPTION) {

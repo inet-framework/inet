@@ -150,7 +150,6 @@ void RtcpPacketSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             break;
         }
     }
-
 }
 
 const Ptr<Chunk> RtcpPacketSerializer::deserialize(MemoryInputStream& stream) const

@@ -169,7 +169,6 @@ bool Ospfv3Interface::ageDatabase()
 
                 floodLSA(lsa);
             }
-
         }
         if (!selfOriginated && (lsAge == MAX_AGE - 1)) {
             lsa->getHeaderForUpdate().setLsaAge(MAX_AGE);
@@ -1679,7 +1678,6 @@ void Ospfv3Interface::removeFromAllRetransmissionLists(LSAKeyType lsaKey)
     for (long i = 0; i < neighborCount; i++) {
         neighbors[i]->removeFromRetransmissionList(lsaKey);
     }
-
 }
 
 bool Ospfv3Interface::isOnAnyRetransmissionList(LSAKeyType lsaKey) const

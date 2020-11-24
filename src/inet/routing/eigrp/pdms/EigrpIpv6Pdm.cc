@@ -191,7 +191,6 @@ void EigrpIpv6Pdm::processIfaceStateChange(NetworkInterface *iface)
             if (route->getInterface()->getInterfaceId() == ifaceId && route->getNextHop() == Ipv6Address::UNSPECIFIED_ADDRESS && route->getDestPrefix() != Ipv6Address::LINKLOCAL_PREFIX) { // Found Directly-connected (no link-local) route on interface -> remove
                 rt->removeRoute(route);
             }
-
         }
 
         eigrpIface = this->eigrpIft->findInterfaceById(ifaceId);
@@ -363,7 +362,6 @@ void EigrpIpv6Pdm::processMsgFromNetwork(cMessage *msg)
                 EV_DEBUG << "EIGRP: Received message from " << srcAddr << " that is not neighbor, skipped" << endl;
             break;
     }
-
 }
 
 void EigrpIpv6Pdm::processMsgFromRtp(cMessage *msg)

@@ -442,7 +442,6 @@ void Ospfv3InterfaceState::calculateDesignatedRouter(Ospfv3Interface *intf) {
         if (isDesignatedRouter) { // for case that link between routers was disconnected and Router become DR again
             changeState(intf, new Ospfv3InterfaceStateDr, this);
         }
-
     }
     if (wasOther) {
         if (isDesignatedRouter) {

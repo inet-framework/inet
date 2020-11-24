@@ -1776,7 +1776,6 @@ bool PacketDrillApp::compareTcpHeader(const Ptr<const TcpHeader>& storedTcp, con
                 }
             }
         }
-
     }
     return true;
 }

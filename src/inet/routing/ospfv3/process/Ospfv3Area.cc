@@ -236,7 +236,6 @@ void Ospfv3Area::ageDatabase()
 
                 floodLSA(lsa);
             }
-
         }
         if (!selfOriginated && (lsAge == MAX_AGE - 1)) {
             lsa->getHeaderForUpdate().setLsaAge(MAX_AGE);
@@ -3187,7 +3186,6 @@ std::vector<NextHop> *Ospfv3Area::calculateNextHops(Ospfv3Lsa *destination, Ospf
                 }
             }
         }
-
     }
     else { // if parent is NETWORK_LSA
         NetworkLSA *networkLSA = dynamic_cast<NetworkLSA *>(parent);
