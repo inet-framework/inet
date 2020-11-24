@@ -18,6 +18,7 @@
 #ifndef __INET_IEEE80211OFDMERRORMODEL_H
 #define __INET_IEEE80211OFDMERRORMODEL_H
 
+#include "inet/physicallayer/wireless/common/base/packetlevel/MqamModulationBase.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ILayeredErrorModel.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmSymbol.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
@@ -37,8 +38,8 @@ class INET_API Ieee80211OfdmErrorModel : public Ieee80211NistErrorModel, public 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    Ieee80211OfdmSymbol *corruptOFDMSymbol(const Ieee80211OfdmSymbol *symbol, double ser, int constellationSize, const std::vector<ApskSymbol> *constellation) const;
-    void corruptBits(BitVector *bits, double ber, int begin, int end) const;
+    virtual Ieee80211OfdmSymbol *corruptOfdmSymbol(const Ieee80211OfdmSymbol *symbol, const MqamModulationBase *modulation, double snir) const;
+    virtual void corruptBits(BitVector *bits, double ber, int begin, int end) const;
 
   public:
     virtual const IReceptionPacketModel *computePacketModel(const LayeredTransmission *transmission, const ISnir *snir) const override;
