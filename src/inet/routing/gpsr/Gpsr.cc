@@ -503,7 +503,7 @@ L3Address Gpsr::findGreedyRoutingNextHop(const L3Address& destination, GpsrOptio
     double bestDistance = (destinationPosition - selfPosition).length();
     L3Address bestNeighbor;
     std::vector<L3Address> neighborAddresses = neighborPositionTable.getAddresses();
-    for (auto& neighborAddress: neighborAddresses) {
+    for (auto& neighborAddress : neighborAddresses) {
         Coord neighborPosition = neighborPositionTable.getPosition(neighborAddress);
         double neighborDistance = (destinationPosition - neighborPosition).length();
         if (neighborDistance < bestDistance) {

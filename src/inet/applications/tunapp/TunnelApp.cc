@@ -98,7 +98,7 @@ void TunnelApp::handleMessageWhenUp(cMessage *message)
     if (operationalState == State::STOPPING_OPERATION) {
         if (ipv4Socket.isOpen() || serverSocket.isOpen() || clientSocket.isOpen())
             return;
-        for (auto s: socketMap.getMap())
+        for (auto s : socketMap.getMap())
             if (s.second->isOpen())
                 return;
         socketMap.deleteSockets();
@@ -167,7 +167,7 @@ void TunnelApp::handleStopOperation(LifecycleOperation *operation)
     ipv4Socket.close();
     serverSocket.close();
     clientSocket.close();
-    for (auto s: socketMap.getMap())
+    for (auto s : socketMap.getMap())
         s.second->close();
     delayActiveOperationFinish(par("stopOperationTimeout"));
 }
@@ -177,7 +177,7 @@ void TunnelApp::handleCrashOperation(LifecycleOperation *operation)
     ipv4Socket.destroy();
     serverSocket.destroy();
     clientSocket.destroy();
-    for (auto s: socketMap.getMap())
+    for (auto s : socketMap.getMap())
         s.second->destroy();
     socketMap.deleteSockets();
 }

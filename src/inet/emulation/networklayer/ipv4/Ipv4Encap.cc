@@ -68,7 +68,7 @@ void Ipv4Encap::handleMessage(cMessage *msg)
         EV << "Receiving\n";
         decapsulate(packet);
         bool hasSocket = false;
-        for (const auto& elem: socketIdToSocketDescriptor) {
+        for (const auto& elem : socketIdToSocketDescriptor) {
             if (elem.second->protocolId == protocol->getId() &&
                 (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress) &&
                 (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress))

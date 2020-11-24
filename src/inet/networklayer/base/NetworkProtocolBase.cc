@@ -66,7 +66,7 @@ void NetworkProtocolBase::sendUp(cMessage *message)
         auto remoteAddress(addr->getSrcAddress());
         auto localAddress(addr->getDestAddress());
         bool hasSocket = false;
-        for (const auto& elem: socketIdToSocketDescriptor) {
+        for (const auto& elem : socketIdToSocketDescriptor) {
             if (elem.second->protocolId == protocol->getId() &&
                 (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress) &&
                 (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress))

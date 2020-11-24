@@ -50,7 +50,7 @@ simsignal_t EthernetCsmaMac::backoffSlotsGeneratedSignal = registerSignal("backo
 
 EthernetCsmaMac::~EthernetCsmaMac()
 {
-    for (auto& rx: rxSignals)
+    for (auto& rx : rxSignals)
         delete rx.signal;
     cancelAndDelete(endRxTimer);
     cancelAndDelete(endBackoffTimer);
@@ -105,7 +105,7 @@ void EthernetCsmaMac::initializeFlags()
 void EthernetCsmaMac::processConnectDisconnect()
 {
     if (!connected) {
-        for (auto& rx: rxSignals)
+        for (auto& rx : rxSignals)
             delete rx.signal;
         rxSignals.clear();
         cancelEvent(endRxTimer);
@@ -122,7 +122,7 @@ void EthernetCsmaMac::processConnectDisconnect()
             // start RX_RECONNECT_STATE
             changeReceptionState(RX_RECONNECT_STATE);
             simtime_t reconnectEndTime = simTime() + b(MAX_ETHERNET_FRAME_BYTES + JAM_SIGNAL_BYTES).get() / curEtherDescr->txrate;
-            for (auto& rx: rxSignals)
+            for (auto& rx : rxSignals)
                 delete rx.signal;
             rxSignals.clear();
             EthernetSignalBase *signal = new EthernetSignalBase("RECONNECT");
@@ -552,7 +552,7 @@ void EthernetCsmaMac::handleEndRxPeriod()
         case RX_COLLISION_STATE:
             EV_DETAIL << "Incoming signals finished after collision\n";
             totalCollisionTime += dt;
-            for (auto& rx: rxSignals) {
+            for (auto& rx : rxSignals) {
                 delete rx.signal;
             }
             rxSignals.clear();
@@ -560,7 +560,7 @@ void EthernetCsmaMac::handleEndRxPeriod()
 
         case RX_RECONNECT_STATE:
             EV_DETAIL << "Incoming signals finished or reconnect time elapsed after reconnect\n";
-            for (auto& rx: rxSignals) {
+            for (auto& rx : rxSignals) {
                 delete rx.signal;
             }
             rxSignals.clear();
@@ -889,7 +889,7 @@ void EthernetCsmaMac::updateRxSignals(EthernetSignalBase *signal, simtime_t endR
     bool isUpdate = signal->isUpdate();
     long signalTransmissionId = signal->getTransmissionId();
 
-    for (auto& rx: rxSignals) {
+    for (auto& rx : rxSignals) {
         if (isUpdate && rx.transmissionId == signalTransmissionId) {
             ASSERT(!found);
             found = true;

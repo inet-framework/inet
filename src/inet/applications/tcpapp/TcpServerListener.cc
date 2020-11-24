@@ -35,7 +35,7 @@ void TcpServerListener::handleStartOperation(LifecycleOperation *operation)
 
 void TcpServerListener::handleStopOperation(LifecycleOperation *operation)
 {
-    for (auto connection: connectionSet)
+    for (auto connection : connectionSet)
         connection->getSocket()->close();
     serverSocket.close();
     delayActiveOperationFinish(par("stopOperationTimeout"));

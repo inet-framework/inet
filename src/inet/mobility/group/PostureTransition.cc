@@ -71,22 +71,22 @@ PostureTransition::PostureTransition(int numPosture)
 
 PostureTransition::~PostureTransition()
 {
-    for (auto comb: combinationList) {
+    for (auto comb : combinationList) {
         delete comb;
     }
-    for (auto mat: matrixList) {
+    for (auto mat : matrixList) {
         for (int i = 0; i < numPos; ++i)
             delete[] mat->matrix[i];
         delete[] mat->matrix;
         delete mat;
     }
-    for (auto areaType: areaTypeList) {
-        for (auto bound: areaType->boundries)
+    for (auto areaType : areaTypeList) {
+        for (auto bound : areaType->boundries)
             delete bound;
         delete areaType;
     }
-    for (auto timeDomain: timeDomainList) {
-        for (auto bound: timeDomain->boundries)
+    for (auto timeDomain : timeDomainList) {
+        for (auto bound : timeDomain->boundries)
             delete bound;
         delete timeDomain;
     }

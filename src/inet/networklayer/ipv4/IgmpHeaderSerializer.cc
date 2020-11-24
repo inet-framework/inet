@@ -97,7 +97,7 @@ void IgmpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                 stream.writeByte(groupRecord.getAuxDataArraySize());
                 stream.writeUint16Be(groupRecord.getSourceList().size());
                 stream.writeIpv4Address(groupRecord.getGroupAddress());
-                for (auto src: groupRecord.getSourceList()) {
+                for (auto src : groupRecord.getSourceList()) {
                     stream.writeIpv4Address(src);
                 }
                 for (size_t i = 0; i < groupRecord.getAuxDataArraySize(); ++i) {

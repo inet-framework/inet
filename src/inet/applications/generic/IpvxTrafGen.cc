@@ -228,7 +228,7 @@ void IpvxTrafGen::handleCrashOperation(LifecycleOperation *operation)
 
 void ipvxTrafGenClearProtocols()
 {
-    for (auto *p: IpvxTrafGen::allocatedProtocols)
+    for (auto *p : IpvxTrafGen::allocatedProtocols)
         delete p;
     IpvxTrafGen::allocatedProtocols.clear();
 }

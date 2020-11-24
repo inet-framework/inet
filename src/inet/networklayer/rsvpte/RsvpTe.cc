@@ -55,16 +55,16 @@ RsvpTe::RsvpTe()
 RsvpTe::~RsvpTe()
 {
     // TODO cancelAndDelete timers in all data structures
-    for (auto& psb: PSBList) {
+    for (auto& psb : PSBList) {
         cancelAndDelete(psb.timerMsg);
         cancelAndDelete(psb.timeoutMsg);
     }
-    for (auto& rsb: RSBList) {
+    for (auto& rsb : RSBList) {
         cancelAndDelete(rsb.refreshTimerMsg);
         cancelAndDelete(rsb.commitTimerMsg);
         cancelAndDelete(rsb.timeoutMsg);
     }
-    for (auto& hello: HelloList) {
+    for (auto& hello : HelloList) {
         cancelAndDelete(hello.timer);
         cancelAndDelete(hello.timeout);
     }
