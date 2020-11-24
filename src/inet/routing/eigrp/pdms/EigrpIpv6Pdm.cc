@@ -23,7 +23,7 @@
  * @date 6. 11. 2014
  * @brief EIGRP IPv6 Protocol Dependent Module
  * @detail Main module, it mediates control exchange between DUAL, routing table and
-topology table.
+   topology table.
  */
 
 #include "inet/routing/eigrp/pdms/EigrpIpv6Pdm.h"
@@ -1979,7 +1979,7 @@ bool EigrpIpv6Pdm::addNetPrefix(const Ipv6Address& network, const short int pref
     return true;
 }
 
-}
-
 } // namespace eigrp
+
+} // namespace inet
 

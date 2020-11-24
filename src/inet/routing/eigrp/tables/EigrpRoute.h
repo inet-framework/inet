@@ -198,8 +198,12 @@ class EigrpRouteSource : public cObject
     /** Sets metric and RD to infinity */
     void setUnreachableMetric()
     {
-        metric = eigrp::EigrpMetricHelper::METRIC_INF; metricParams.bandwidth = eigrp::EigrpMetricHelper::BANDWIDTH_INF; metricParams.delay = eigrp::EigrpMetricHelper::DELAY_INF;
-        rd = eigrp::EigrpMetricHelper::METRIC_INF; rdParams.bandwidth = eigrp::EigrpMetricHelper::BANDWIDTH_INF; rdParams.delay = eigrp::EigrpMetricHelper::DELAY_INF;
+        metric = eigrp::EigrpMetricHelper::METRIC_INF;
+        metricParams.bandwidth = eigrp::EigrpMetricHelper::BANDWIDTH_INF;
+        metricParams.delay = eigrp::EigrpMetricHelper::DELAY_INF;
+        rd = eigrp::EigrpMetricHelper::METRIC_INF;
+        rdParams.bandwidth = eigrp::EigrpMetricHelper::BANDWIDTH_INF;
+        rdParams.delay = eigrp::EigrpMetricHelper::DELAY_INF;
     }
 
     int getDelayedRemove() const { return delayedRemoveNID; }
