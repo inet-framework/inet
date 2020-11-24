@@ -72,7 +72,7 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
 #endif // INET_WITH_IPv6
             break;
         case 'a':
-            if (false) {}
+            if (false) ;
 #ifdef INET_WITH_IPv4
             else if (auto ipv4Data = networkInterface->findProtocolData<Ipv4InterfaceData>())
                 result = ipv4Data->getIPAddress().str();

@@ -59,7 +59,7 @@ void VirtualTunnel::initialize(int stage)
         // KLUDGE depends on other interface
         if (!strcmp(par("address"), "copy"))
             networkInterface->setMacAddress(realNetworkInterface->getMacAddress());
-        if (false) {}
+        if (false) ;
 #ifdef INET_WITH_ETHERNET
         else if (protocol == &Protocol::ethernetMac) {
             auto ethernetSocket = new EthernetSocket();

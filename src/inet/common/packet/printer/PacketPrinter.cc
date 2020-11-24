@@ -154,7 +154,7 @@ void PacketPrinter::printMessage(std::ostream& stream, cMessage *message, const 
 {
     Context context;
     for (auto cpacket = dynamic_cast<cPacket *>(message); cpacket != nullptr; cpacket = cpacket->getEncapsulatedPacket()) {
-        if (false) {}
+        if (false) ;
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
         else if (auto signal = dynamic_cast<physicallayer::Signal *>(cpacket))
             printSignal(signal, options, context);
