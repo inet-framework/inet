@@ -38,11 +38,11 @@ void Ieee80211OfdmRadio::encapsulate(Packet *packet) const
 {
     auto ofdmTransmitter = check_and_cast<const Ieee80211LayeredOfdmTransmitter *>(transmitter);
     const auto& phyHeader = makeShared<Ieee80211OfdmPhyHeader>();
-    phyHeader->setRate(ofdmTransmitter->getMode(packet)->getSignalMode()->getRate());
+    auto mode = ofdmTransmitter->getMode(packet);
+    phyHeader->setRate(mode->getSignalMode()->getRate());
     phyHeader->setLengthField(B(packet->getTotalLength()));
     packet->insertAtFront(phyHeader);
-    auto paddingLength = ofdmTransmitter->getPaddingLength(ofdmTransmitter->getMode(packet), B(phyHeader->getLengthField()));
-    // insert padding and 6 tail bits
+    auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
     const auto& phyTrailer = makeShared<BitCountChunk>(paddingLength + b(6));
     packet->insertAtBack(phyTrailer);
     packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211OfdmPhy);
