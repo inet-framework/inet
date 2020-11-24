@@ -63,9 +63,9 @@ W ScalarAnalogModelBase::computeReceptionPower(const IRadio *receiverRadio, cons
     return transmissionPower * gain;
 }
 
-void ScalarAnalogModelBase::addReception(const ScalarReception *reception, simtime_t& noiseStartTime, simtime_t& noiseEndTime, std::map<simtime_t, W> *powerChanges) const
+void ScalarAnalogModelBase::addReception(const IReception *reception, simtime_t& noiseStartTime, simtime_t& noiseEndTime, std::map<simtime_t, W> *powerChanges) const
 {
-    W power = reception->getPower();
+    W power = check_and_cast<const IScalarSignal *>(reception->getAnalogModel())->getPower();
     simtime_t startTime = reception->getStartTime();
     simtime_t endTime = reception->getEndTime();
     std::map<simtime_t, W>::iterator itStartTime = powerChanges->find(startTime);
@@ -115,7 +115,7 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IListening *listening, c
         Hz signalCenterFrequency = narrowbandSignalAnalogModel->getCenterFrequency();
         Hz signalBandwidth = narrowbandSignalAnalogModel->getBandwidth();
         if (commonCenterFrequency == signalCenterFrequency && commonBandwidth >= signalBandwidth)
-            addReception(check_and_cast<const ScalarReception *>(reception), noiseStartTime, noiseEndTime, powerChanges);
+            addReception(reception, noiseStartTime, noiseEndTime, powerChanges);
         else if (!ignorePartialInterference && areOverlappingBands(commonCenterFrequency, commonBandwidth, narrowbandSignalAnalogModel->getCenterFrequency(), narrowbandSignalAnalogModel->getBandwidth()))
             throw cRuntimeError("Partially interfering signals are not supported by ScalarAnalogModel, enable ignorePartialInterference to avoid this error!");
     }
@@ -138,12 +138,11 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IListening *listening, c
 
 const INoise *ScalarAnalogModelBase::computeNoise(const IReception *reception, const INoise *noise) const
 {
-    auto scalarReception = check_and_cast<const ScalarReception *>(reception);
     auto scalarNoise = check_and_cast<const ScalarNoise *>(noise);
     simtime_t noiseStartTime = SimTime::getMaxTime();
     simtime_t noiseEndTime = 0;
     std::map<simtime_t, W> *powerChanges = new std::map<simtime_t, W>();
-    addReception(scalarReception, noiseStartTime, noiseEndTime, powerChanges);
+    addReception(reception, noiseStartTime, noiseEndTime, powerChanges);
     addNoise(scalarNoise, noiseStartTime, noiseEndTime, powerChanges);
     return new ScalarNoise(noiseStartTime, noiseEndTime, scalarNoise->getCenterFrequency(), scalarNoise->getBandwidth(), powerChanges);
 }
