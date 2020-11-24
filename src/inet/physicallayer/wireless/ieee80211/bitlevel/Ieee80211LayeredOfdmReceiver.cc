@@ -157,11 +157,15 @@ double Ieee80211LayeredOfdmReceiver::getCodeRateFromDecoderModule(const IDecoder
 const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createCompleteBitModel(const IReceptionBitModel *signalFieldBitModel, const IReceptionBitModel *dataFieldBitModel) const
 {
     if (levelOfDetail >= BIT_DOMAIN) {
-        BitVector *bits = new BitVector(*signalFieldBitModel->getBits());
-        const BitVector *dataBits = dataFieldBitModel->getBits();
-        for (unsigned int i = 0; i < dataBits->getSize(); i++)
-            bits->appendBit(dataBits->getBit(i));
-        return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderBitRate(), dataFieldBitModel->getDataLength(), dataFieldBitModel->getDataBitRate(), bits, NaN);
+        if (dataFieldBitModel == nullptr)
+            return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderBitRate(), b(-1), bps(NaN), new BitVector(*signalFieldBitModel->getBits()), NaN);
+        else {
+            BitVector *bits = new BitVector(*signalFieldBitModel->getBits());
+            const BitVector *dataBits = dataFieldBitModel->getBits();
+            for (unsigned int i = 0; i < dataBits->getSize(); i++)
+                bits->appendBit(dataBits->getBit(i));
+            return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderBitRate(), dataFieldBitModel->getDataLength(), dataFieldBitModel->getDataBitRate(), bits, NaN);
+        }
     }
     return nullptr;
 }
@@ -339,10 +343,15 @@ const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createCompleteSymbolM
 
 const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createCompletePacketModel(const char *name, const IReceptionPacketModel *signalFieldPacketModel, const IReceptionPacketModel *dataFieldPacketModel) const
 {
-    Packet *packet = new Packet(name);
-    packet->insertAtBack(signalFieldPacketModel->getPacket()->peekAll());
-    packet->insertAtBack(dataFieldPacketModel->getPacket()->peekAll());
-    return new ReceptionPacketModel(packet, bps(NaN), NaN);
+    if (dataFieldPacketModel == nullptr)
+        return new ReceptionPacketModel(signalFieldPacketModel->getPacket()->dup(), bps(NaN), NaN);
+    else {
+        Packet *packet = new Packet(name);
+        packet->insertAtBack(signalFieldPacketModel->getPacket()->peekAllAsBits());
+        packet->insertAtBack(dataFieldPacketModel->getPacket()->peekAllAsBits());
+        packet->setBitError(signalFieldPacketModel->getPacket()->hasBitError() | dataFieldPacketModel->getPacket()->hasBitError());
+        return new ReceptionPacketModel(packet, bps(NaN), NaN);
+    }
 }
 
 const Ieee80211OfdmMode *Ieee80211LayeredOfdmReceiver::computeMode(Hz bandwidth) const
@@ -359,27 +368,32 @@ const Ieee80211OfdmMode *Ieee80211LayeredOfdmReceiver::computeMode(Hz bandwidth)
 const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
     const Ieee80211LayeredTransmission *transmission = dynamic_cast<const Ieee80211LayeredTransmission *>(reception->getTransmission());
+    // corruted model
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
     const IReceptionSampleModel *sampleModel = createSampleModel(transmission, snir);
     const IReceptionSymbolModel *symbolModel = createSymbolModel(transmission, snir);
     const IReceptionBitModel *bitModel = createBitModel(transmission, snir);
     const IReceptionPacketModel *packetModel = createPacketModel(transmission, snir);
-
+    // signal field model
     const IReceptionSymbolModel *signalFieldSymbolModel = createSignalFieldSymbolModel(symbolModel);
     const IReceptionSymbolModel *dataFieldSymbolModel = createDataFieldSymbolModel(symbolModel);
     const IReceptionBitModel *signalFieldBitModel = createSignalFieldBitModel(bitModel, signalFieldSymbolModel);
     const IReceptionPacketModel *signalFieldPacketModel = createSignalFieldPacketModel(signalFieldBitModel);
+    // determine mode
     if (isCompliant) {
-        const auto& signalFieldBytesChunk = signalFieldPacketModel != nullptr ? signalFieldPacketModel->getPacket()->peekAllAsBytes() : packetModel->getPacket()->peekAllAsBytes();
+        auto packet = signalFieldPacketModel != nullptr ? signalFieldPacketModel->getPacket() : packetModel->getPacket();
+        const auto& signalFieldBytesChunk = packet->peekAllAsBytes();
         uint8_t rate = signalFieldBytesChunk->getByte(0) >> 4;
-        // TODO handle erroneous rate field
-        mode = &Ieee80211OfdmCompliantModes::getCompliantMode(rate, channelSpacing);
+        mode = Ieee80211OfdmCompliantModes::findCompliantMode(rate, channelSpacing);
+        if (mode == nullptr)
+            const_cast<Packet *>(packet)->setBitError(true);
     }
     else if (!mode)
         mode = computeMode(bandwidth);
-    const IReceptionBitModel *dataFieldBitModel = createDataFieldBitModel(bitModel, dataFieldSymbolModel, signalFieldPacketModel, signalFieldBitModel);
-    const IReceptionPacketModel *dataFieldPacketModel = createDataFieldPacketModel(signalFieldBitModel, dataFieldBitModel, signalFieldPacketModel);
-
+    // data field model
+    const IReceptionBitModel *dataFieldBitModel = mode != nullptr ? createDataFieldBitModel(bitModel, dataFieldSymbolModel, signalFieldPacketModel, signalFieldBitModel) : nullptr;
+    const IReceptionPacketModel *dataFieldPacketModel = mode != nullptr ? createDataFieldPacketModel(signalFieldBitModel, dataFieldBitModel, signalFieldPacketModel) : nullptr;
+    // complete model
 //    if (!sampleModel)
 //        sampleModel = createCompleteSampleModel(signalFieldSampleModel, dataFieldSampleModel);
     if (!symbolModel)
@@ -388,16 +402,20 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
         bitModel = createCompleteBitModel(signalFieldBitModel, dataFieldBitModel);
     if (!packetModel)
         packetModel = createCompletePacketModel(transmission->getPacket()->getName(), signalFieldPacketModel, dataFieldPacketModel);
-
+    // delete signal and data field models
     delete signalFieldSymbolModel;
     delete dataFieldSymbolModel;
     delete signalFieldBitModel;
     delete dataFieldBitModel;
-    delete signalFieldPacketModel->getPacket();
-    delete signalFieldPacketModel;
-    delete dataFieldPacketModel->getPacket();
-    delete dataFieldPacketModel;
-
+    if (signalFieldPacketModel != nullptr) {
+        delete signalFieldPacketModel->getPacket();
+        delete signalFieldPacketModel;
+    }
+    if (dataFieldPacketModel != nullptr) {
+        delete dataFieldPacketModel->getPacket();
+        delete dataFieldPacketModel;
+    }
+    // add indications
     auto packet = const_cast<Packet *>(packetModel->getPacket());
     auto snirInd = packet->addTagIfAbsent<SnirInd>();
     snirInd->setMinimumSnir(snir->getMin());
