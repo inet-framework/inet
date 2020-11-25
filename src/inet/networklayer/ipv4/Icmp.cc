@@ -196,7 +196,7 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
     icmpHeader->setChunkLength(B(8)); // FIXME second 4 byte in icmp header not represented yet
     icmpHeader->setType(type);
     icmpHeader->setCode(code);
-    // ICMP message length: the internet header plus the first queteLength bytes of
+    // ICMP message length: the internet header plus the first quoteLength bytes of
     // the original datagram's data is returned to the sender.
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     B curQuoteLength = std::min(B(packet->getDataLength()), ipv4Header->getHeaderLength() + quoteLength);
