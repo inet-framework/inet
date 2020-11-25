@@ -487,7 +487,7 @@ void Radio::endReception(cMessage *timer)
         EV_INFO << "Reception ended: \x1b[1mignoring\x1b[0m " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
     updateTransceiverState();
     updateTransceiverPart();
-    if(timer == receptionTimer)
+    if (timer == receptionTimer)
         receptionTimer = nullptr;
     delete timer;
     // TODO move to radio medium
