@@ -30,8 +30,10 @@ MobilityVisualizerBase::MobilityVisualization::MobilityVisualization(IMobility *
 
 void MobilityVisualizerBase::preDelete(cComponent *root)
 {
-    if (displayMobility)
+    if (displayMobility) {
         unsubscribe();
+        removeAllMobilityVisualizations();
+    }
 }
 
 void MobilityVisualizerBase::initialize(int stage)
@@ -97,6 +99,22 @@ void MobilityVisualizerBase::unsubscribe()
     if (visualizationSubjectModule != nullptr) {
         visualizationSubjectModule->unsubscribe(IMobility::mobilityStateChangedSignal, this);
         visualizationSubjectModule->unsubscribe(PRE_MODEL_CHANGE, this);
+    }
+}
+
+void MobilityVisualizerBase::removeMobilityVisualization(const MobilityVisualization *mobilityVisualization)
+{
+    mobilityVisualizations.erase(mobilityVisualization->mobility);
+}
+
+void MobilityVisualizerBase::removeAllMobilityVisualizations()
+{
+    std::vector<const MobilityVisualization *> removedMobilityVisualizations;
+    for (auto it : mobilityVisualizations)
+        removedMobilityVisualizations.push_back(it.second);
+    for (auto mobilityVisualization : removedMobilityVisualizations) {
+        removeMobilityVisualization(mobilityVisualization);
+        delete mobilityVisualization;
     }
 }
 

@@ -53,7 +53,7 @@ void MobilityOsgVisualizer::refreshDisplay() const
 {
     MobilityVisualizerBase::refreshDisplay();
     for (auto it : mobilityVisualizations) {
-        auto mobilityVisualization = it.second;
+        auto mobilityVisualization = static_cast<MobilityOsgVisualization *>(it.second);
         auto mobility = mobilityVisualization->mobility;
         auto position = mobility->getCurrentPosition();
         if (displayMovementTrails)
@@ -69,33 +69,23 @@ MobilityOsgVisualizer::MobilityOsgVisualization *MobilityOsgVisualizer::getMobil
     if (it == mobilityVisualizations.end())
         return nullptr;
     else
-        return it->second;
+        return static_cast<MobilityOsgVisualization *>(it->second);
 }
 
-void MobilityOsgVisualizer::setMobilityVisualization(const IMobility *mobility, MobilityOsgVisualization *entry)
+void MobilityOsgVisualizer::addMobilityVisualization(const IMobility *mobility, MobilityOsgVisualization *mobilityVisualization)
 {
-    mobilityVisualizations[mobility] = entry;
+    mobilityVisualizations[mobility] = mobilityVisualization;
 }
 
-void MobilityOsgVisualizer::removeMobilityVisualization(const IMobility *mobility)
+MobilityOsgVisualizer::MobilityOsgVisualization *MobilityOsgVisualizer::createMobilityVisualization(IMobility *mobility)
 {
-    mobilityVisualizations.erase(mobility);
-}
-
-MobilityOsgVisualizer::MobilityOsgVisualization *MobilityOsgVisualizer::ensureMobilityVisualization(IMobility *mobility)
-{
-    auto mobilityVisualization = getMobilityVisualization(mobility);
-    if (mobilityVisualization == nullptr) {
-        auto module = const_cast<cModule *>(check_and_cast<const cModule *>(mobility));
-        auto trail = new osg::Geode();
-        trail->setStateSet(inet::osg::createStateSet(movementTrailLineColorSet.getColor(module->getId()), 1.0));
-        trail->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
-        auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
-        scene->addChild(trail);
-        mobilityVisualization = new MobilityOsgVisualization(trail, mobility);
-        setMobilityVisualization(mobility, mobilityVisualization);
-    }
-    return mobilityVisualization;
+    auto module = const_cast<cModule *>(check_and_cast<const cModule *>(mobility));
+    auto trail = new osg::Geode();
+    trail->setStateSet(inet::osg::createStateSet(movementTrailLineColorSet.getColor(module->getId()), 1.0));
+    trail->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
+    scene->addChild(trail);
+    return new MobilityOsgVisualization(trail, mobility);
 }
 
 void MobilityOsgVisualizer::extendMovementTrail(osg::Geode *trail, const Coord& position) const
@@ -127,13 +117,22 @@ void MobilityOsgVisualizer::receiveSignal(cComponent *source, simsignal_t signal
 {
     Enter_Method("receiveSignal");
     if (signal == IMobility::mobilityStateChangedSignal) {
-        if (moduleFilter.matches(check_and_cast<cModule *>(source)))
-            ensureMobilityVisualization(dynamic_cast<IMobility *>(source));
+        if (moduleFilter.matches(check_and_cast<cModule *>(source))) {
+            auto mobility = dynamic_cast<IMobility *>(source);
+            auto mobilityVisualization = getMobilityVisualization(mobility);
+            if (mobilityVisualization == nullptr) {
+                mobilityVisualization = createMobilityVisualization(dynamic_cast<IMobility *>(source));
+                addMobilityVisualization(mobility, mobilityVisualization);
+            }
+        }
     }
     else if (signal == PRE_MODEL_CHANGE) {
         if (dynamic_cast<cPreModuleDeleteNotification *>(object)) {
-            if (auto mobility = dynamic_cast<IMobility *>(source))
-                removeMobilityVisualization(mobility);
+            if (auto mobility = dynamic_cast<IMobility *>(source)) {
+                auto mobilityVisualization = getMobilityVisualization(mobility);
+                removeMobilityVisualization(mobilityVisualization);
+                delete mobilityVisualization;
+            }
         }
     }
     else

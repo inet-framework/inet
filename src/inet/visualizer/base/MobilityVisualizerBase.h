@@ -36,6 +36,7 @@ class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
 
       public:
         MobilityVisualization(IMobility *mobility);
+        virtual ~MobilityVisualization() {}
     };
 
   protected:
@@ -74,6 +75,8 @@ class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
     int trailLength = -1;
     //@}
 
+    std::map<const IMobility *, MobilityVisualization *> mobilityVisualizations;
+
   protected:
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
@@ -81,6 +84,9 @@ class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
 
     virtual void subscribe();
     virtual void unsubscribe();
+
+    virtual void removeMobilityVisualization(const MobilityVisualization *visualization);
+    virtual void removeAllMobilityVisualizations();
 };
 
 } // namespace visualizer

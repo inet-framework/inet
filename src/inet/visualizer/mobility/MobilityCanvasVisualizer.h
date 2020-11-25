@@ -33,31 +33,29 @@ class INET_API MobilityCanvasVisualizer : public MobilityVisualizerBase
       public:
         cOvalFigure *positionFigure = nullptr;
         cPieSliceFigure *orientationFigure = nullptr;
-        cLineFigure *veloctiyFigure = nullptr;
+        cLineFigure *velocityFigure = nullptr;
         TrailFigure *trailFigure = nullptr;
 
       public:
-        MobilityCanvasVisualization(cOvalFigure *positionFigure, cPieSliceFigure *orientationFigure, cLineFigure *veloctiyFigure, TrailFigure *trailFigure, IMobility *mobility);
+        MobilityCanvasVisualization(cOvalFigure *positionFigure, cPieSliceFigure *orientationFigure, cLineFigure *velocityFigure, TrailFigure *trailFigure, IMobility *mobility);
+        virtual ~MobilityCanvasVisualization();
     };
 
   protected:
     double zIndex = NaN;
     const CanvasProjection *canvasProjection = nullptr;
-    std::map<const IMobility *, MobilityCanvasVisualization *> mobilityVisualizations;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
+    virtual MobilityCanvasVisualization *createMobilityVisualization(IMobility *mobility);
     virtual MobilityCanvasVisualization *getMobilityVisualization(const IMobility *mobility) const;
-    virtual void setMobilityVisualization(const IMobility *mobility, MobilityCanvasVisualization *entry);
-    virtual void removeMobilityVisualization(const IMobility *mobility);
-    virtual MobilityCanvasVisualization *ensureMobilityVisualization(IMobility *mobility);
+    virtual void addMobilityVisualization(const IMobility *mobility, MobilityCanvasVisualization *mobilityVisualization);
+    virtual void removeMobilityVisualization(const MobilityVisualization *mobilityVisualization) override;
     virtual void extendMovementTrail(const IMobility *mobility, TrailFigure *trailFigure, cFigure::Point position) const;
 
   public:
-    virtual ~MobilityCanvasVisualizer();
-
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 
