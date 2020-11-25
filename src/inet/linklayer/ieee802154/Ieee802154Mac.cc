@@ -920,7 +920,6 @@ void Ieee802154Mac::handleStartOperation(LifecycleOperation *operation)
     MacProtocolBase::handleStartOperation(operation);
 
     cModule *radioModule = check_and_cast<cModule *>(radio);
-    radioModule->subscribe(IRadio::radioModeChangedSignal, this);
     radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
 }
 
@@ -934,7 +933,6 @@ void Ieee802154Mac::handleStopOperation(LifecycleOperation *operation)
     cancelEvent(rxAckTimer);
 
     cModule *radioModule = check_and_cast<cModule *>(radio);
-    radioModule->unsubscribe(IRadio::radioModeChangedSignal, this);
     radioModule->unsubscribe(IRadio::transmissionStateChangedSignal, this);
 
     MacProtocolBase::handleStopOperation(operation);
@@ -948,7 +946,6 @@ void Ieee802154Mac::handleCrashOperation(LifecycleOperation *operation)
     cancelEvent(rxAckTimer);
 
     cModule *radioModule = check_and_cast<cModule *>(radio);
-    radioModule->unsubscribe(IRadio::radioModeChangedSignal, this);
     radioModule->unsubscribe(IRadio::transmissionStateChangedSignal, this);
 
     MacProtocolBase::handleCrashOperation(operation);
