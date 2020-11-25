@@ -241,7 +241,6 @@ class SctpErrorChunk extends SctpChunk
 class SctpParameter extends cPacket
 {
     uint16_t parameterType;
-    char name[];
 }
 
 class SctpPacketDropChunk extends SctpChunk
