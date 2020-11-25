@@ -46,7 +46,8 @@ RadioMedium::RadioMedium() :
     radioModeFilter(false),
     listeningFilter(false),
     macAddressFilter(false),
-    recordCommunicationLog(false),
+    recordTransmissionLog(false),
+    recordReceptionLog(false),
     removeNonInterferingTransmissionsTimer(nullptr),
     mediumLimitCache(nullptr),
     neighborCache(nullptr),
@@ -76,7 +77,7 @@ RadioMedium::RadioMedium() :
 RadioMedium::~RadioMedium()
 {
     cancelAndDelete(removeNonInterferingTransmissionsTimer);
-    if (recordCommunicationLog)
+    if (recordTransmissionLog || recordReceptionLog)
         communicationLog.close();
 }
 
@@ -109,8 +110,9 @@ void RadioMedium::initialize(int stage)
         // initialize timers
         removeNonInterferingTransmissionsTimer = new cMessage("removeNonInterferingTransmissions");
         // initialize logging
-        recordCommunicationLog = par("recordCommunicationLog");
-        if (recordCommunicationLog)
+        recordTransmissionLog = par("recordTransmissionLog");
+        recordReceptionLog = par("recordReceptionLog");
+        if (recordTransmissionLog || recordReceptionLog)
             communicationLog.open();
     }
     else if (stage == INITSTAGE_LAST)
@@ -581,7 +583,7 @@ IWirelessSignal *RadioMedium::transmitPacket(const IRadio *radio, Packet *packet
     auto signal = createTransmitterSignal(radio, packet);
     auto transmission = signal->getTransmission();
     addTransmission(radio, transmission);
-    if (recordCommunicationLog)
+    if (recordTransmissionLog)
         communicationLog.writeTransmission(radio, signal);
     sendToAffectedRadios(const_cast<IRadio *>(radio), signal);
     communicationCache->setCachedSignal(transmission, signal);
@@ -593,7 +595,7 @@ Packet *RadioMedium::receivePacket(const IRadio *radio, IWirelessSignal *signal)
     Enter_Method("receivePacket");
     const ITransmission *transmission = signal->getTransmission();
     const IListening *listening = communicationCache->getCachedListening(radio, transmission);
-    if (recordCommunicationLog)
+    if (recordReceptionLog)
         communicationLog.writeReception(radio, signal);
     const IReceptionResult *result = getReceptionResult(radio, listening, transmission);
     communicationCache->removeCachedReceptionResult(radio, transmission);
