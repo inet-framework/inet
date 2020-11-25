@@ -43,6 +43,9 @@ class INET_API SecurityPolicy
     typedef IPsecRule::Action Action;
     typedef IPsecRule::Direction Direction;
     typedef IPsecRule::Protection Protection;
+    typedef IPsecRule::EspMode EspMode;
+    typedef IPsecRule::EncryptionAlg EncryptionAlg;
+    typedef IPsecRule::AuthenticationAlg AuthenticationAlg;
 
   public:
     Action getAction() const { return rule.getAction(); }
@@ -51,8 +54,14 @@ class INET_API SecurityPolicy
     void setDirection(Direction direction) { rule.setDirection(direction); }
     Protection getProtection() const { return rule.getProtection(); }
     void setProtection(Protection protection) { rule.setProtection(protection); }
-    int getIcvNumBits() const { return rule.getIcvNumBits(); }
-    void setIcvNumBits(int len) { rule.setIcvNumBits(len); }
+    EspMode getEspMode() const { return rule.getEspMode(); }
+    void setEspMode(EspMode espMode) { rule.setEspMode(espMode); }
+    EncryptionAlg getEnryptionAlg() const { return rule.getEnryptionAlg(); }
+    void setEnryptionAlg(EncryptionAlg alg) { rule.setEnryptionAlg(alg); }
+    AuthenticationAlg getAuthenticationAlg() const {return rule.getAuthenticationAlg(); }
+    void setAuthenticationAlg(AuthenticationAlg alg) { rule.setAuthenticationAlg(alg); }
+    unsigned int getMaxTfcPadLength() const { return rule.getMaxTfcPadLength(); }
+    void setMaxTfcPadLength(unsigned int maxTfcPadLength) { rule.setMaxTfcPadLength(maxTfcPadLength); }
     const PacketSelector& getSelector() const { return rule.getSelector(); }
     void setSelector(const PacketSelector& selector) { rule.setSelector(selector); }
     const IPsecRule& getRule() const { return rule; }

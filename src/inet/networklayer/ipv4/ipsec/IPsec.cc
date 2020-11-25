@@ -57,8 +57,12 @@ IPsec::~IPsec()
 
 void IPsec::initSecurityDBs(cXMLElement *spdConfig)
 {
+    checkTags(spdConfig, "SecurityPolicy");
+
     for (cXMLElement *spdEntryElem : spdConfig->getChildrenByTagName("SecurityPolicy")) {
         SecurityPolicy *spdEntry = new SecurityPolicy();
+
+        checkTags(spdEntryElem, "Selector Direction Action Protection EspMode EncryptionAlg AuthenticationAlg MaxTfcPadLength SecurityAssociation");
 
         // Selector
         PacketSelector selector;
@@ -66,24 +70,51 @@ void IPsec::initSecurityDBs(cXMLElement *spdConfig)
         spdEntry->setSelector(selector);
 
         // Direction
-        IPsecRule::Direction direction = parseDirection(getUniqueChild(spdEntryElem, "Direction"));
+        Direction direction = parseEnum(directionEnum, getUniqueChild(spdEntryElem, "Direction"));
         spdEntry->setDirection(direction);
 
         // Action
-        IPsecRule::Action action = parseAction(getUniqueChild(spdEntryElem, "Action"));
+        Action action = parseEnum(actionEnum, getUniqueChild(spdEntryElem, "Action"));
         spdEntry->setAction(action);
 
-        if (action == IPsecRule::Action::PROTECT) {
+        if (action == Action::PROTECT) {
             // Protection
-            IPsecRule::Protection protection = parseProtection(getUniqueChild(spdEntryElem, "Protection"));
+            Protection protection = parseEnum(protectionEnum, getUniqueChild(spdEntryElem, "Protection"));
             spdEntry->setProtection(protection);
 
-            // ICV length in bits
-            int icvNumBits = xmlutils::getParameterIntValue(spdEntryElem, "IcvNumBits");
-            spdEntry->setIcvNumBits(icvNumBits);
+            if (protection == Protection::ESP) {
+                EspMode espMode = parseEnum(espModeEnum, getUniqueChild(spdEntryElem, "EspMode"));
+                spdEntry->setEspMode(espMode);
+
+                EncryptionAlg encryptionAlg = parseOptionalEnum(encryptionAlgEnum, getUniqueChildIfExists(spdEntryElem, "EncryptionAlg"), EncryptionAlg::NONE);
+                AuthenticationAlg authenticationAlg = parseOptionalEnum(authenticationAlgEnum, getUniqueChildIfExists(spdEntryElem, "AuthenticationAlg"), AuthenticationAlg::NONE);
+                spdEntry->setEnryptionAlg(encryptionAlg);
+                spdEntry->setAuthenticationAlg(authenticationAlg);
+
+                spdEntry->setMaxTfcPadLength(getParameterIntValue(spdEntryElem, "MaxTfcPadLength", 0));
+
+                if ((espMode == EspMode::CONFIDENTIALITY || espMode == EspMode::COMBINED) && encryptionAlg == EncryptionAlg::NONE)
+                    throw cRuntimeError("Cannot set encryptionAlg=NONE if confidentiality was requested in espMode, at %s", spdEntryElem->getSourceLocation());
+
+                if (espMode == EspMode::INTEGRITY && authenticationAlg == AuthenticationAlg::NONE)
+                    throw cRuntimeError("Cannot set authenticationAlg=NONE if espMode=INTEGRITY is selected, at %s", spdEntryElem->getSourceLocation());
+
+                if (espMode == EspMode::COMBINED && authenticationAlg == AuthenticationAlg::NONE && getIntegrityCheckValueBitLength(encryptionAlg) == 0)
+                    throw cRuntimeError("No authenticationAlg set and EncryptionAlg %s does not provide authentication, required by EspMode=COMBINED, at %s",
+                            encryptionAlgEnum.nameOf(encryptionAlg), getUniqueChild(spdEntryElem, "EncryptionAlg")->getSourceLocation());
+            }
+
+            if (protection == Protection::AH) {
+                AuthenticationAlg authenticationAlg = parseEnum(authenticationAlgEnum, getUniqueChild(spdEntryElem, "AuthenticationAlg"));
+                if (authenticationAlg == AuthenticationAlg::NONE)
+                    throw cRuntimeError("Cannot set authenticationAlg=NONE for AH protection, at %s", spdEntryElem->getSourceLocation());
+                spdEntry->setAuthenticationAlg(authenticationAlg);
+            }
 
             // load SA details
             for (cXMLElement *saEntryElem : spdEntryElem->getChildrenByTagName("SecurityAssociation")) {
+                checkTags(saEntryElem, "SPI Selector");
+
                 // SPI
                 const cXMLElement *spiElem = getUniqueChild(saEntryElem, "SPI");
                 unsigned int spi = atoi(spiElem->getNodeValue());
@@ -112,6 +143,8 @@ void IPsec::initSecurityDBs(cXMLElement *spdConfig)
 
 void IPsec::parseSelector(const cXMLElement *selectorElem, PacketSelector& selector)
 {
+    checkTags(selectorElem, "LocalAddress RemoteAddress Protocol LocalPort RemotePort ICMPType ICMPCode");
+
     auto addrConv = [](std::string s) {return L3AddressResolver().resolve(s.c_str(), L3AddressResolver::ADDR_IPv4).toIPv4();};
     auto intConv = [](std::string s) {return atoi(s.c_str());};
     auto protocolConv = [](std::string s) {return parseProtocol(s);};
@@ -150,39 +183,30 @@ unsigned int IPsec::parseProtocol(const std::string& value)
         return inet::utils::atoul(value.c_str());
 }
 
-IPsecRule::Action IPsec::parseAction(const cXMLElement *elem)
+inline const char *nulltoempty(const char *s) {return s ? s : nullptr;}
+
+template<typename E>
+E IPsec::parseEnum(const Enum<E>& enum_, const cXMLElement *elem)
 {
-    std::string value = elem->getNodeValue();
-    if (value == "DISCARD")
-        return IPsecRule::Action::DISCARD;
-    else if (value == "BYPASS")
-        return IPsecRule::Action::BYPASS;
-    else if (value == "PROTECT")
-        return IPsecRule::Action::PROTECT;
-    else
-        throw cRuntimeError(elem, "Rule has unknown action (DISCARD, BYPASS or PROTECT expected)");
+    try {
+        return enum_.valueFor(nulltoempty(elem->getNodeValue()));
+    }
+    catch (std::exception& e) {
+        throw cRuntimeError("%s at %s", e.what(), elem->getSourceLocation());
+    }
 }
 
-IPsecRule::Direction IPsec::parseDirection(const cXMLElement *elem)
+template<typename E>
+E IPsec::parseOptionalEnum(const Enum<E>& enum_, const cXMLElement *elem, E defaultValue)
 {
-    std::string value = elem->getNodeValue();
-    if (value == "IN")
-        return IPsecRule::Direction::IN;
-    else if (value == "OUT")
-        return IPsecRule::Direction::OUT;
-    else
-        throw cRuntimeError(elem, "Rule has unknown direction (IN or OUT expected)");
-}
-
-IPsecRule::Protection IPsec::parseProtection(const cXMLElement *elem)
-{
-    std::string value = elem->getNodeValue();
-    if (value == "AH")
-        return IPsecRule::Protection::AH;
-    else if (value == "ESP")
-        return IPsecRule::Protection::ESP;
-    else
-        throw cRuntimeError(elem, "Unknown protection (AH, ESP or AH_ESP expected)");
+    if (elem == nullptr)
+        return defaultValue;
+    try {
+        return enum_.valueFor(nulltoempty(elem->getNodeValue()));
+    }
+    catch (std::exception& e) {
+        throw cRuntimeError("%s at %s", e.what(), elem->getSourceLocation());
+    }
 }
 
 void IPsec::initialize(int stage)
@@ -266,20 +290,20 @@ INetfilter::IHook::Result IPsec::processEgressPacket(IPv4Datagram *ipv4datagram,
     PacketInfo egressPacketInfo = extractEgressPacketInfo(ipv4datagram, localAddress);
 
     //search Security Policy Database
-    SecurityPolicy *spdEntry = spdModule->findEntry(IPsecRule::Direction::OUT, &egressPacketInfo);
+    SecurityPolicy *spdEntry = spdModule->findEntry(Direction::OUT, &egressPacketInfo);
     if (spdEntry != nullptr) {
-        if (spdEntry->getAction() == IPsecRule::Action::PROTECT) {
+        if (spdEntry->getAction() == Action::PROTECT) {
             emit(outProtectSignal, 1L);
             outProtect++;
             return protectDatagram(ipv4datagram, egressPacketInfo, spdEntry);
         }
-        else if (spdEntry->getAction() == IPsecRule::Action::BYPASS) {
+        else if (spdEntry->getAction() == Action::BYPASS) {
             EV_INFO << "IPsec OUT BYPASS rule, packet: " << egressPacketInfo.str() << std::endl;
             emit(outBypassSignal, 1L);
             outBypass++;
             return INetfilter::IHook::ACCEPT;
         }
-        else if (spdEntry->getAction() == IPsecRule::Action::DISCARD) {
+        else if (spdEntry->getAction() == Action::DISCARD) {
             EV_INFO << "IPsec OUT DROP rule, packet: " << egressPacketInfo.str() << std::endl;
             emit(outDropSignal, 1L);
             outDrop++;
@@ -322,16 +346,57 @@ PacketInfo IPsec::extractIngressPacketInfo(IPv4Datagram *ipv4datagram)
 cPacket *IPsec::espProtect(cPacket *transport, SecurityAssociation *sadEntry, int transportType)
 {
     IPsecEncapsulatingSecurityPayload *espPacket = new IPsecEncapsulatingSecurityPayload();
-    unsigned int blockSize = 16;
-    unsigned int pad = (blockSize - (transport->getByteLength() + 2) % blockSize) % blockSize; //TODO revise
-    unsigned int icv = 4 * ((sadEntry->getIcvNumBits() + 31) / 32);
-    unsigned int len = pad + 2 + IP_ESP_HEADER_BYTES + icv;
-    espPacket->setByteLength(len);
 
+    bool haveEncryption = sadEntry->getEspMode()==EspMode::CONFIDENTIALITY || sadEntry->getEspMode()==EspMode::COMBINED;
+    ASSERT(haveEncryption == (sadEntry->getEnryptionAlg()!=EncryptionAlg::NONE));
+
+    // Handle encryption part. Compute padding according to RFC 4303 Sections 2.4 and 2.5
+    unsigned int tcfPadding = intuniform(0, sadEntry->getMaxTfcPadLength());
+    unsigned int paddableLength = transport->getByteLength() + tcfPadding + ESP_FIXED_PAYLOAD_TRAILER_BYTES;
+    unsigned int blockSize = getBlockSizeBytes(sadEntry->getEnryptionAlg());
+    unsigned int paddedLength = blockSize * ((paddableLength + blockSize - 1) / blockSize);
+    paddedLength = (paddedLength+3) & ~3;  // multiple of 32 bits
+    unsigned int padLength = paddedLength - paddableLength;
+    ASSERT(padLength <= 255);  // otherwise it won't fit into the 8-bit field in the ESP packet
+
+    // Compute Initialization Vector and Integrity Check Value lengths if necessary
+    unsigned int icvBytes;
+    unsigned int ivBytes;
+    switch (sadEntry->getEspMode()) {
+        case EspMode::NONE:
+            ASSERT(false); // forbidden by RFC 4301
+            break;
+        case EspMode::INTEGRITY:
+            ivBytes = getInitializationVectorBitLength(sadEntry->getAuthenticationAlg()) / 8;
+            icvBytes = getIntegrityCheckValueBitLength(sadEntry->getAuthenticationAlg()) / 8;
+            ASSERT2(icvBytes != 0, "ICV must not be empty if integrity is requested for the SA");
+            break;
+        case EspMode::CONFIDENTIALITY:
+            ivBytes = getInitializationVectorBitLength(sadEntry->getEnryptionAlg()) / 8;
+            icvBytes = 0; // no checksum
+            break;
+        case EspMode::COMBINED: {
+            ivBytes = getInitializationVectorBitLength(sadEntry->getEnryptionAlg()) / 8;
+            bool haveSeparateAuthenticationAlg = sadEntry->getAuthenticationAlg() != AuthenticationAlg::NONE;
+            if (haveSeparateAuthenticationAlg)
+                icvBytes = getIntegrityCheckValueBitLength(sadEntry->getAuthenticationAlg()) / 8;
+            else
+                icvBytes = getIntegrityCheckValueBitLength(sadEntry->getEnryptionAlg()) / 8; // assume encryption alg's supports combined mode (contains hash function)
+            ASSERT2(icvBytes != 0, "ICV must not be empty if integrity is requested for the SA");
+            break;
+        }
+    }
+
+    // compute total length
+    unsigned int len = ESP_FIXED_HEADER_BYTES + ivBytes + paddedLength + icvBytes;
+
+    // create ESP packet
+    espPacket->setPadLength(padLength);
     espPacket->setSequenceNumber(sadEntry->getAndIncSeqNum());
     espPacket->setSpi(sadEntry->getSpi());
-    espPacket->encapsulate(transport);
     espPacket->setNextHeader(transportType);
+    espPacket->encapsulate(transport);
+    espPacket->setByteLength(len);
 
     return espPacket;
 }
@@ -339,8 +404,11 @@ cPacket *IPsec::espProtect(cPacket *transport, SecurityAssociation *sadEntry, in
 cPacket *IPsec::ahProtect(cPacket *transport, SecurityAssociation *sadEntry, int transportType)
 {
     IPsecAuthenticationHeader *ahPacket = new IPsecAuthenticationHeader();
-    unsigned int icv = 4 * ((sadEntry->getIcvNumBits() + 31) / 32);
-    unsigned int len = IP_AH_HEADER_BYTES + icv;
+
+    unsigned int icvBytes = getIntegrityCheckValueBitLength(sadEntry->getAuthenticationAlg()) / 8;
+    unsigned int ivBytes  = getInitializationVectorBitLength(sadEntry->getAuthenticationAlg()) / 8;
+
+    unsigned int len = IP_AH_HEADER_BYTES + ivBytes + icvBytes;
     ahPacket->setByteLength(len);
 
     ahPacket->setSequenceNumber(sadEntry->getAndIncSeqNum());
@@ -351,15 +419,146 @@ cPacket *IPsec::ahProtect(cPacket *transport, SecurityAssociation *sadEntry, int
     return ahPacket;
 }
 
+int IPsec::getIntegrityCheckValueBitLength(EncryptionAlg alg)
+{
+    switch (alg) {
+        // Confidentiality only
+        case EncryptionAlg::NONE: return 0;
+        case EncryptionAlg::DES: return 0;
+        case EncryptionAlg::TRIPLE_DES: return 0;
+
+        case EncryptionAlg::AES_CBC_128:
+        case EncryptionAlg::AES_CBC_192:
+        case EncryptionAlg::AES_CBC_256: return 0;
+
+        // Combined mode
+        case EncryptionAlg::AES_CCM_8_128:
+        case EncryptionAlg::AES_CCM_8_192:
+        case EncryptionAlg::AES_CCM_8_256: return 64;
+
+        case EncryptionAlg::AES_CCM_16_128:
+        case EncryptionAlg::AES_CCM_16_192:
+        case EncryptionAlg::AES_CCM_16_256: return 128;
+
+        case EncryptionAlg::AES_GCM_16_128:
+        case EncryptionAlg::AES_GCM_16_192:
+        case EncryptionAlg::AES_GCM_16_256: return 128;
+
+        case EncryptionAlg::CHACHA20_POLY1305: return 128;
+    }
+    ASSERT(false);
+    return 0;
+}
+
+int IPsec::getInitializationVectorBitLength(EncryptionAlg alg)
+{
+    switch (alg) {
+        case EncryptionAlg::NONE: return 0;
+        // DES RFC 2405
+        case EncryptionAlg::DES: return 64;
+        // 3DES RFC 2451
+        case EncryptionAlg::TRIPLE_DES: return 64;
+        // AES_CBC RFC 3602
+        case EncryptionAlg::AES_CBC_128:
+        case EncryptionAlg::AES_CBC_192:
+        case EncryptionAlg::AES_CBC_256: return 128;
+        // AES_CCM RFC 4309
+        case EncryptionAlg::AES_CCM_8_128:
+        case EncryptionAlg::AES_CCM_8_192:
+        case EncryptionAlg::AES_CCM_8_256:
+        case EncryptionAlg::AES_CCM_16_128:
+        case EncryptionAlg::AES_CCM_16_192:
+        case EncryptionAlg::AES_CCM_16_256: return 64;
+        // AES_GCM RFC 4106
+        case EncryptionAlg::AES_GCM_16_128:
+        case EncryptionAlg::AES_GCM_16_192:
+        case EncryptionAlg::AES_GCM_16_256: return 64;
+        // CHACHA20_POLY1305 RFC 7634
+        case EncryptionAlg::CHACHA20_POLY1305: return 64;
+    }
+
+    ASSERT(false);
+    return 0;
+}
+
+int IPsec::getBlockSizeBytes(EncryptionAlg alg)
+{
+    switch (alg) {
+        case EncryptionAlg::NONE: return 1; // the "NULL" cipher is essentially a do-nothing cipher with blocksize=1
+        // DES RFC 2405
+        case EncryptionAlg::DES: return 64;
+        // 3DES RFC 2451
+        case EncryptionAlg::TRIPLE_DES: return 64;
+        // AES_CBC RFC 3602
+        case EncryptionAlg::AES_CBC_128:
+        case EncryptionAlg::AES_CBC_192:
+        case EncryptionAlg::AES_CBC_256: return 128;
+        // AES_CCM RFC 4309
+        case EncryptionAlg::AES_CCM_8_128:
+        case EncryptionAlg::AES_CCM_8_192:
+        case EncryptionAlg::AES_CCM_8_256:
+        case EncryptionAlg::AES_CCM_16_128:
+        case EncryptionAlg::AES_CCM_16_192:
+        case EncryptionAlg::AES_CCM_16_256: return 128;
+        // AES_GCM RFC 4106
+        case EncryptionAlg::AES_GCM_16_128:
+        case EncryptionAlg::AES_GCM_16_192:
+        case EncryptionAlg::AES_GCM_16_256: return 128;
+        // CHACHA20_POLY1305 RFC 7634
+        case EncryptionAlg::CHACHA20_POLY1305: return 32; //It is a stream cipher, but when used in ESP the ciphertext needs to be aligned so that padLength and nextHeader are right aligned to multiple of 4 octets.
+
+    }
+
+    ASSERT(false);
+    return 0;
+}
+
+int IPsec::getIntegrityCheckValueBitLength(AuthenticationAlg alg)
+{
+    switch (alg) {
+        case AuthenticationAlg::NONE: return 0;
+        case AuthenticationAlg::HMAC_MD5_96: return 96;
+        case AuthenticationAlg::HMAC_SHA1: return 160;
+        case AuthenticationAlg::AES_128_GMAC:
+        case AuthenticationAlg::AES_192_GMAC:
+        case AuthenticationAlg::AES_256_GMAC: return 128; //RFC 4543 Section 4.
+        case AuthenticationAlg::HMAC_SHA2_256_128: return 128;
+        case AuthenticationAlg::HMAC_SHA2_384_192: return 384;
+        case AuthenticationAlg::HMAC_SHA2_512_256: return 256;
+    }
+
+    ASSERT(false);
+    return 0;
+}
+
+int IPsec::getInitializationVectorBitLength(AuthenticationAlg alg)
+{
+    switch (alg) {
+        case AuthenticationAlg::NONE: return 0;
+        case AuthenticationAlg::HMAC_MD5_96: return 0;
+        case AuthenticationAlg::HMAC_SHA1: return 0;
+        case AuthenticationAlg::AES_128_GMAC:
+        case AuthenticationAlg::AES_192_GMAC:
+        case AuthenticationAlg::AES_256_GMAC: return 64; //RFC 4543 Section 4.
+        case AuthenticationAlg::HMAC_SHA2_256_128: return 0;
+        case AuthenticationAlg::HMAC_SHA2_384_192: return 0;
+        case AuthenticationAlg::HMAC_SHA2_512_256: return 0;
+    }
+
+    ASSERT(false);
+    return 0;
+}
+
 INetfilter::IHook::Result IPsec::protectDatagram(IPv4Datagram *ipv4datagram, const PacketInfo& packetInfo, SecurityPolicy *spdEntry)
 {
     Enter_Method_Silent();
     cPacket *transport = ipv4datagram->decapsulate();
     double delay = 0;
 
+    bool espProtected = false, ahProtected = false;
     for (auto saEntry : spdEntry->getEntries()) {
         if (saEntry->getRule().getSelector().matches(&packetInfo)) {
-            if (saEntry->getProtection() == IPsecRule::Protection::ESP) {
+            if (saEntry->getProtection() == Protection::ESP && !espProtected && !ahProtected) { // ESP protection must precede possible AH protection
                 EV_INFO << "IPsec OUT ESP PROTECT packet: " << packetInfo.str() << std::endl;
 
                 int transportType = ipv4datagram->getTransportProtocol();
@@ -367,8 +566,9 @@ INetfilter::IHook::Result IPsec::protectDatagram(IPv4Datagram *ipv4datagram, con
                 transport = espProtect(transport, (saEntry), transportType);
 
                 delay += espProtectOutDelay->doubleValue();
+                espProtected = true;
             }
-            else if (saEntry->getProtection() == IPsecRule::Protection::AH) {
+            else if (saEntry->getProtection() == Protection::AH && !ahProtected) {
                 EV_INFO << "IPsec OUT AH PROTECT packet: " << packetInfo.str() << std::endl;
 
                 int transportType = ipv4datagram->getTransportProtocol();
@@ -376,6 +576,10 @@ INetfilter::IHook::Result IPsec::protectDatagram(IPv4Datagram *ipv4datagram, con
                 transport = ahProtect(transport, saEntry, transportType);
 
                 delay += ahProtectOutDelay->doubleValue();
+                ahProtected = true;
+            }
+            else {
+                EV_WARN << "IPsec OUT PROTECT packet " << packetInfo.str() << ": matching but unused SA (repeated AH or ESP protection, or swapped AH/ESP SAs)" << std::endl;
             }
         }
     }
@@ -419,10 +623,10 @@ INetfilter::IHook::Result IPsec::processIngressPacket(IPv4Datagram *ipv4datagram
         IPsecAuthenticationHeader *ah = check_and_cast<IPsecAuthenticationHeader *>(ipv4datagram->decapsulate());
 
         // find SA Entry in SAD
-        SecurityAssociation *sadEntry = sadModule->findEntry(IPsecRule::Direction::IN, ah->getSpi());
+        SecurityAssociation *sadEntry = sadModule->findEntry(Direction::IN, ah->getSpi());
 
         if (sadEntry != nullptr) {
-            if (sadEntry->getProtection() != IPsecRule::Protection::AH) {
+            if (sadEntry->getProtection() != Protection::AH) {
                 EV_INFO << "IPsec IN DROP AH, SA does not prescribe AH, packet: " << ingressPacketInfo.str() << std::endl;
                 emit(inProtectedDropSignal, 1L);
                 inDrop++;
@@ -474,10 +678,10 @@ INetfilter::IHook::Result IPsec::processIngressPacket(IPv4Datagram *ipv4datagram
     if (transportProtocol == IP_PROT_ESP) {
         IPsecEncapsulatingSecurityPayload *esp = check_and_cast<IPsecEncapsulatingSecurityPayload *>(ipv4datagram->decapsulate());
 
-        SecurityAssociation *sadEntry = sadModule->findEntry(IPsecRule::Direction::IN, esp->getSpi());
+        SecurityAssociation *sadEntry = sadModule->findEntry(Direction::IN, esp->getSpi());
 
         if (sadEntry != nullptr) {
-            if (sadEntry->getProtection() != IPsecRule::Protection::ESP) {
+            if (sadEntry->getProtection() != Protection::ESP) {
                 EV_INFO << "IPsec IN DROP ESP, SA does not prescribe ESP, packet: " << ingressPacketInfo.str() << std::endl;
                 emit(inProtectedDropSignal, 1L);
                 inDrop++;
@@ -522,15 +726,15 @@ INetfilter::IHook::Result IPsec::processIngressPacket(IPv4Datagram *ipv4datagram
         }
     }
 
-    SecurityPolicy *spdEntry = spdModule->findEntry(IPsecRule::Direction::IN, &ingressPacketInfo);
+    SecurityPolicy *spdEntry = spdModule->findEntry(Direction::IN, &ingressPacketInfo);
     if (spdEntry != nullptr) {
-        if (spdEntry->getAction() == IPsecRule::Action::BYPASS) {
+        if (spdEntry->getAction() == Action::BYPASS) {
             EV_INFO << "IPsec BYPASS rule, packet: " << ingressPacketInfo.str() << std::endl;
             emit(inUnprotectedBypassSignal, 1L);
             inBypass++;
             return INetfilter::IHook::ACCEPT;
         }
-        else if (spdEntry->getAction() == IPsecRule::Action::DISCARD) {
+        else if (spdEntry->getAction() == Action::DISCARD) {
             EV_INFO << "IPsec DROP rule, packet: " << ingressPacketInfo.str() << std::endl;
             emit(inUnprotectedDropSignal, 1L);
             inDrop++;

@@ -17,7 +17,8 @@
 
 namespace inet::ipsec;
 cplusplus {{
-const int IP_ESP_HEADER_BYTES = 8;  // size of IPsec ESP fixed header fields (does not include padding, Next Header, ICV fields)  
+const int ESP_FIXED_HEADER_BYTES = 8;  // length of the SPI and Sequence Number fields
+const int ESP_FIXED_PAYLOAD_TRAILER_BYTES = 2; // length of the Pad Length and Next Header fields
 }}
 
 //
@@ -26,7 +27,8 @@ const int IP_ESP_HEADER_BYTES = 8;  // size of IPsec ESP fixed header fields (do
 packet IPsecEncapsulatingSecurityPayload
 {
     uint32_t spi; // security parameters index
-    uint32_t sequenceNumber;      
+    uint32_t sequenceNumber;
+    uint8_t padLength;
     uint8_t nextHeader; // IP Protocol number defined by IANA (4 = IPv4; 41 IPv6; 6 = TCP)
 }
 

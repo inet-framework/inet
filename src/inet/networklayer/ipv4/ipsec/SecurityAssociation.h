@@ -45,20 +45,29 @@ class INET_API SecurityAssociation
     typedef IPsecRule::Action Action;
     typedef IPsecRule::Direction Direction;
     typedef IPsecRule::Protection Protection;
+    typedef IPsecRule::EspMode EspMode;
+    typedef IPsecRule::EncryptionAlg EncryptionAlg;
+    typedef IPsecRule::AuthenticationAlg AuthenticationAlg;
 
   public:
     const IPsecRule& getRule() const { return rule; }
     void setRule(const IPsecRule& rule) { this->rule = rule; }
     unsigned int getSpi() const { return spi; }
     void setSpi(unsigned int spi) { this->spi = spi; }
-    Protection getProtection() const { return rule.getProtection(); }
-    void setProtection(Protection protection) { rule.setProtection(protection); }
-    Action getAction() const { return rule.getAction(); }
-    void setAction(Action action) { rule.setAction(action); }
-    int getIcvNumBits() const { return rule.getIcvNumBits(); }
-    void setIcvNumBits(int len) { rule.setIcvNumBits(len); }
     Direction getDirection() const { return rule.getDirection(); }
     void setDirection(Direction direction) { rule.setDirection(direction); }
+    Action getAction() const { return rule.getAction(); }
+    void setAction(Action action) { rule.setAction(action); }
+    Protection getProtection() const { return rule.getProtection(); }
+    void setProtection(Protection protection) { rule.setProtection(protection); }
+    EspMode getEspMode() const { return rule.getEspMode(); }
+    void setEspMode(EspMode espMode) { rule.setEspMode(espMode); }
+    EncryptionAlg getEnryptionAlg() const { return rule.getEnryptionAlg(); }
+    void setEnryptionAlg(EncryptionAlg alg) { rule.setEnryptionAlg(alg); }
+    AuthenticationAlg getAuthenticationAlg() const {return rule.getAuthenticationAlg(); }
+    void setAuthenticationAlg(AuthenticationAlg alg) { rule.setAuthenticationAlg(alg); }
+    unsigned int getMaxTfcPadLength() const { return rule.getMaxTfcPadLength(); }
+    void setMaxTfcPadLength(unsigned int maxTfcPadLength) { rule.setMaxTfcPadLength(maxTfcPadLength); }
     unsigned int getSeqNum() const { return seqNum; }
     unsigned int getAndIncSeqNum() { return seqNum++; }
     void setSeqNum(unsigned int seqNum = 0) { this->seqNum = seqNum; }

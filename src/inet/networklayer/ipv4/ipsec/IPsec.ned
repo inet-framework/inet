@@ -55,7 +55,8 @@ package inet.networklayer.ipv4.ipsec;
 // Structural elements (notation: ?=optional, *=zero or more):
 //
 // - root: SecurityPolicy*
-// - SecurityPolicy: Selector, Direction, Action, Protection?, IcvNumBits?, SecurityAssociation*
+// - SecurityPolicy: Selector, Direction, Action, Protection?, EspMode?, 
+//   EncryptionAlg?, AuthenticationAlg?, MaxTfcPadLength?, SecurityAssociation*
 // - Selector: LocalAddress?, RemoteAddress?, Protocol?, LocalPort?, RemotePort?, ICMPType?, ICMPCode?
 // - SecurityAssociation: SPI, Selector?
 //
@@ -65,7 +66,19 @@ package inet.networklayer.ipv4.ipsec;
 // - Direction: IN or OUT
 // - Action: BYPASS, DISCARD, or PROTECT
 // - Protection: AH or ESP. This element is only valid if Action is PROTECT.
-// - IcvNumBits: if Action is PROTECT: length of ICV in bits, e.g. 128 for MD5, 256 for SHA2-256 
+// - EspMode: INTEGRITY, CONFIDENTIALITY, COMBINED. Only valid if Protection is ESP.
+// - EncryptionAlg: Name of encryption algorithm, only valid for Protection=ESP.
+//   Possible values are: AES_CBC_128, AES_CBC_192, AES_CBC_256,
+//   AES_GCM_16_128, AES_GCM_16_192, AES_GCM_16_256,
+//   AES_CCM_8_128, AES_CCM_8_192, AES_CCM_8_256,
+//   AES_CCM_16_128, AES_CCM_16_192, AES_CCM_16_256,
+//   CHACHA20_POLY1305
+// - AuthenticationAlg: Name of authentication algorithm, only valid if Action is PROTECT,
+//   and authentication is in use (protection is AH, or ESP with mode INTEGRITY or COMBINED).
+//   Possible values are: NONE, HMAC_MD5_96, HMAC_SHA1, AES_128_GMAC, AES_192_GMAC,
+//   AES_256_GMAC, HMAC_SHA2_256_128, HMAC_SHA2_384_192, HMAC_SHA2_512_256.
+// - MaxTfcPadLength: Maximum length of random Traffic Confidentiality (TFC) padding. 
+//   Actual TFC pad length will be drawn with uniform distribution over [0,max].
 // - LocalAddress, RemoteAddress: comma-separated list of addresses / address ranges
 // - Protocol: comma-separated list of protocol names/numbers and/or their ranges.
 //   Recognized names are TCP, UDP, and ICMP.
