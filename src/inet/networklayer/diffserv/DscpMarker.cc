@@ -22,14 +22,14 @@
 #include "inet/networklayer/diffserv/DiffservUtil.h"
 #include "inet/networklayer/diffserv/Dscp_m.h"
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6Header.h"
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
 
 namespace inet {
 
@@ -93,7 +93,7 @@ bool DscpMarker::markPacket(Packet *packet, int dscp)
 
     // TODO processing link-layer headers when exists
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
     if (protocol == &Protocol::ipv4) {
         packet->trimFront();
         const auto& ipv4Header = packet->removeAtFront<Ipv4Header>();
@@ -102,8 +102,8 @@ bool DscpMarker::markPacket(Packet *packet, int dscp)
         packet->insertAtFront(ipv4Header);
         return true;
     }
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
     if (protocol == &Protocol::ipv6) {
         packet->trimFront();
         const auto& ipv6Header = packet->removeAtFront<Ipv6Header>();
@@ -111,7 +111,7 @@ bool DscpMarker::markPacket(Packet *packet, int dscp)
         packet->insertAtFront(ipv6Header);
         return true;
     }
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
 
     return false;
 }

@@ -22,6 +22,7 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IApskModulation.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/common/modulation/BpskModulation.h"
+#include "inet/physicallayer/wireless/common/modulation/Qam16Modulation.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSampleModel.h"
@@ -98,28 +99,19 @@ const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const Layered
 
 const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
-    const ITransmissionBitModel *transmissionBitModel = transmission->getBitModel();
-    const TransmissionSymbolModel *transmissionSymbolModel = check_and_cast<const Ieee80211OfdmTransmissionSymbolModel *>(transmission->getSymbolModel());
-    const IModulation *modulation = transmissionSymbolModel->getPayloadModulation();
-    const ApskModulationBase *dataModulation = check_and_cast<const ApskModulationBase *>(modulation);
-    unsigned int dataFieldConstellationSize = dataModulation->getConstellationSize();
-    unsigned int signalFieldConstellationSize = BpskModulation::singleton.getConstellationSize();
-    const std::vector<ApskSymbol> *constellationForDataField = dataModulation->getConstellation();
-    const std::vector<ApskSymbol> *constellationForSignalField = BpskModulation::singleton.getConstellation();
-    const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
-    double signalSER = std::isnan(signalSymbolErrorRate) ? BpskModulation::singleton.calculateSER(getScalarSnir(snir), analogModel->getBandwidth(), transmissionBitModel->getHeaderBitRate()) : signalSymbolErrorRate;
-    double dataSER = std::isnan(dataSymbolErrorRate) ? dataModulation->calculateSER(getScalarSnir(snir), analogModel->getBandwidth(), transmissionBitModel->getDataBitRate()) : dataSymbolErrorRate;
-    const std::vector<const ISymbol *> *symbols = transmissionSymbolModel->getSymbols();
-    std::vector<const ISymbol *> *corruptedSymbols = new std::vector<const ISymbol *>();
+    auto transmissionSymbolModel = check_and_cast<const Ieee80211OfdmTransmissionSymbolModel *>(transmission->getSymbolModel());
+    auto symbols = transmissionSymbolModel->getSymbols();
+    auto receivedSymbols = new std::vector<const ISymbol *>();
     // Only the first symbol is signal field symbol
-    corruptedSymbols->push_back(corruptOFDMSymbol(check_and_cast<const Ieee80211OfdmSymbol *>(symbols->at(0)), signalSER, signalFieldConstellationSize, constellationForSignalField));
+    double scalarSnir = getScalarSnir(snir);
+    receivedSymbols->push_back(corruptOfdmSymbol(check_and_cast<const Ieee80211OfdmSymbol *>(symbols->at(0)), &BpskModulation::singleton, scalarSnir));
     // The remaining are all data field symbols
+    auto dataModulation = check_and_cast<const MqamModulationBase *>(transmissionSymbolModel->getPayloadModulation());
     for (unsigned int i = 1; i < symbols->size(); i++) {
-        Ieee80211OfdmSymbol *corruptedOFDMSymbol = corruptOFDMSymbol(check_and_cast<const Ieee80211OfdmSymbol *>(symbols->at(i)), dataSER,
-                dataFieldConstellationSize, constellationForDataField);
-        corruptedSymbols->push_back(corruptedOFDMSymbol);
+        Ieee80211OfdmSymbol *corruptedOFDMSymbol = corruptOfdmSymbol(check_and_cast<const Ieee80211OfdmSymbol *>(symbols->at(i)), dataModulation, scalarSnir);
+        receivedSymbols->push_back(corruptedOFDMSymbol);
     }
-    return new Ieee80211OfdmReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getPayloadSymbolLength(), transmissionSymbolModel->getPayloadSymbolRate(), corruptedSymbols);
+    return new Ieee80211OfdmReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getPayloadSymbolLength(), transmissionSymbolModel->getPayloadSymbolRate(), receivedSymbols);
 }
 
 void Ieee80211OfdmErrorModel::corruptBits(BitVector *bits, double ber, int begin, int end) const
@@ -131,15 +123,28 @@ void Ieee80211OfdmErrorModel::corruptBits(BitVector *bits, double ber, int begin
     }
 }
 
-Ieee80211OfdmSymbol *Ieee80211OfdmErrorModel::corruptOFDMSymbol(const Ieee80211OfdmSymbol *symbol, double ser, int constellationSize, const std::vector<ApskSymbol> *constellation) const
+Ieee80211OfdmSymbol *Ieee80211OfdmErrorModel::corruptOfdmSymbol(const Ieee80211OfdmSymbol *ofdmSymbol, const MqamModulationBase *modulation, double snir) const
 {
-    std::vector<const ApskSymbol *> subcarrierSymbols = symbol->getSubCarrierSymbols();
-    for (int j = 0; j < symbol->symbolSize(); j++) {
-        double p = uniform(0, 1);
-        if (p <= ser) {
-            int corruptedSubcarrierSymbolIndex = intuniform(0, constellationSize - 1); // TODO it can be equal to the current symbol
-            const ApskSymbol *corruptedSubcarrierSymbol = &constellation->at(corruptedSubcarrierSymbolIndex);
-            subcarrierSymbols[j] = corruptedSubcarrierSymbol;
+    std::vector<const ApskSymbol *> subcarrierSymbols = ofdmSymbol->getSubCarrierSymbols();
+    for (auto& subcarrierSymbol : subcarrierSymbols) {
+        if (subcarrierSymbol != nullptr) {
+            double transmittedI = subcarrierSymbol->real();
+            double transmittedQ = subcarrierSymbol->imag();
+            double sigma = std::sqrt(0.5 / snir);
+            double receivedI = normal(transmittedI, sigma);
+            double receivedQ = normal(transmittedQ, sigma);
+            double bestDistanceSquare = DBL_MAX;
+            const ApskSymbol *receivedSubcarrierSymbol = subcarrierSymbol;
+            for (auto& symbol : *modulation->getConstellation()) {
+                double i = symbol.real();
+                double q = symbol.imag();
+                double distanceSquare = std::pow((i - receivedI), 2) + std::pow((q - receivedQ), 2);
+                if (distanceSquare < bestDistanceSquare) {
+                    bestDistanceSquare = distanceSquare;
+                    receivedSubcarrierSymbol = &symbol;
+                }
+            }
+            subcarrierSymbol = receivedSubcarrierSymbol;
         }
     }
     return new Ieee80211OfdmSymbol(subcarrierSymbols);

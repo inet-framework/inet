@@ -19,9 +19,9 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
-#ifdef WITH_TCP_INET
+#ifdef INET_WITH_TCP_INET
 #include "inet/transportlayer/tcp/Tcp.h"
-#endif // WITH_TCP_INET
+#endif // INET_WITH_TCP_INET
 #include "inet/visualizer/base/TransportConnectionVisualizerBase.h"
 
 namespace inet {
@@ -82,19 +82,19 @@ void TransportConnectionVisualizerBase::handleParameterChange(const char *name)
 
 void TransportConnectionVisualizerBase::subscribe()
 {
-#ifdef WITH_TCP_INET
+#ifdef INET_WITH_TCP_INET
     visualizationSubjectModule->subscribe(inet::tcp::Tcp::tcpConnectionAddedSignal, this);
-#endif // WITH_TCP_INET
+#endif // INET_WITH_TCP_INET
 }
 
 void TransportConnectionVisualizerBase::unsubscribe()
 {
-#ifdef WITH_TCP_INET
+#ifdef INET_WITH_TCP_INET
     // NOTE: lookup the module again because it may have been deleted first
     auto visualizationSubjectModule = findModuleFromPar<cModule>(par("visualizationSubjectModule"), this);
     if (visualizationSubjectModule != nullptr)
         visualizationSubjectModule->unsubscribe(inet::tcp::Tcp::tcpConnectionAddedSignal, this);
-#endif // WITH_TCP_INET
+#endif // INET_WITH_TCP_INET
 }
 
 void TransportConnectionVisualizerBase::addConnectionVisualization(const TransportConnectionVisualization *connection)
@@ -120,7 +120,7 @@ void TransportConnectionVisualizerBase::removeAllConnectionVisualizations()
 
 void TransportConnectionVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-#ifdef WITH_TCP_INET
+#ifdef INET_WITH_TCP_INET
     Enter_Method("receiveSignal");
     if (signal == inet::tcp::Tcp::tcpConnectionAddedSignal) {
         auto tcpConnection = check_and_cast<inet::tcp::TcpConnection *>(object);
@@ -137,7 +137,7 @@ void TransportConnectionVisualizerBase::receiveSignal(cComponent *source, simsig
     }
     else
         throw cRuntimeError("Unknown signal");
-#endif // WITH_TCP_INET
+#endif // INET_WITH_TCP_INET
 }
 
 } // namespace visualizer

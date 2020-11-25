@@ -21,11 +21,11 @@
 #include "inet/visualizer/base/MediumVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
 
-#ifdef WITH_RADIO
+#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionDecision.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IWirelessSignal.h"
-#endif // WITH_RADIO
+#endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
 namespace inet {
 
@@ -33,7 +33,7 @@ namespace visualizer {
 
 class INET_API MediumOsgVisualizer : public MediumVisualizerBase
 {
-#ifdef WITH_RADIO
+#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 #ifdef WITH_OSG
 
   protected:
@@ -115,7 +115,7 @@ class INET_API MediumOsgVisualizer : public MediumVisualizerBase
     virtual void handleSignalArrivalEnded(const physicallayer::IReception *reception) override {}
 
 #endif // ifdef WITH_OSG
-#endif // ifdef WITH_RADIO
+#endif // ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 };
 
 } // namespace visualizer

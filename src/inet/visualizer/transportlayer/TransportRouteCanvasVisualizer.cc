@@ -17,23 +17,23 @@
 
 #include "inet/common/INETDefs.h"
 
-#ifdef WITH_ETHERNET
+#ifdef INET_WITH_ETHERNET
 #include "inet/linklayer/ethernet/common/MacRelayUnit.h"
 #endif
 
-#ifdef WITH_IEEE8021D
+#ifdef INET_WITH_IEEE8021D
 #include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
 #endif
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4.h"
 #endif
 
-#ifdef WITH_TCP_INET
+#ifdef INET_WITH_TCP_INET
 #include "inet/transportlayer/tcp/Tcp.h"
 #endif
 
-#ifdef WITH_UDP
+#ifdef INET_WITH_UDP
 #include "inet/transportlayer/udp/Udp.h"
 #endif
 
@@ -47,12 +47,12 @@ Define_Module(TransportRouteCanvasVisualizer);
 
 bool TransportRouteCanvasVisualizer::isPathStart(cModule *module) const
 {
-#ifdef WITH_UDP
+#ifdef INET_WITH_UDP
     if (dynamic_cast<Udp *>(module) != nullptr)
         return true;
 #endif
 
-#ifdef WITH_TCP_INET
+#ifdef INET_WITH_TCP_INET
     if (dynamic_cast<tcp::Tcp *>(module) != nullptr)
         return true;
 #endif
@@ -62,12 +62,12 @@ bool TransportRouteCanvasVisualizer::isPathStart(cModule *module) const
 
 bool TransportRouteCanvasVisualizer::isPathEnd(cModule *module) const
 {
-#ifdef WITH_UDP
+#ifdef INET_WITH_UDP
     if (dynamic_cast<Udp *>(module) != nullptr)
         return true;
 #endif
 
-#ifdef WITH_TCP_INET
+#ifdef INET_WITH_TCP_INET
     if (dynamic_cast<tcp::Tcp *>(module) != nullptr)
         return true;
 #endif
@@ -77,17 +77,17 @@ bool TransportRouteCanvasVisualizer::isPathEnd(cModule *module) const
 
 bool TransportRouteCanvasVisualizer::isPathElement(cModule *module) const
 {
-#ifdef WITH_ETHERNET
+#ifdef INET_WITH_ETHERNET
     if (dynamic_cast<MacRelayUnit *>(module) != nullptr)
         return true;
 #endif
 
-#ifdef WITH_IEEE8021D
+#ifdef INET_WITH_IEEE8021D
     if (dynamic_cast<Ieee8021dRelay *>(module) != nullptr)
         return true;
 #endif
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
     if (dynamic_cast<Ipv4 *>(module) != nullptr)
         return true;
 #endif

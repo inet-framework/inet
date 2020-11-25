@@ -41,17 +41,17 @@
 #include "inet/networklayer/contract/ipv4/Ipv4Socket.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Socket.h"
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Icmp.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
 
 namespace inet {
 
@@ -236,7 +236,7 @@ void PingApp::handleMessageWhenUp(cMessage *msg)
 
 void PingApp::socketDataArrived(INetworkSocket *socket, Packet *packet)
 {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
     if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv4) {
         const auto& icmpHeader = packet->popAtFront<IcmpHeader>();
         if (icmpHeader->getType() == ICMP_ECHO_REPLY) {
@@ -250,7 +250,7 @@ void PingApp::socketDataArrived(INetworkSocket *socket, Packet *packet)
     }
     else
 #endif
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
     if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::icmpv6) {
         const auto& icmpHeader = packet->popAtFront<Icmpv6Header>();
         if (icmpHeader->getType() == ICMPv6_ECHO_REPLY) {
@@ -264,7 +264,7 @@ void PingApp::socketDataArrived(INetworkSocket *socket, Packet *packet)
     }
     else
 #endif
-#ifdef WITH_NEXTHOP
+#ifdef INET_WITH_NEXTHOP
     if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::echo) {
         const auto& icmpHeader = packet->popAtFront<EchoPacket>();
         if (icmpHeader->getType() == ECHO_PROTOCOL_REPLY) {
@@ -389,7 +389,7 @@ void PingApp::sendPingRequest()
 
     switch (destAddr.getType()) {
         case L3Address::IPv4: {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
             const auto& request = makeShared<IcmpEchoRequest>();
             request->setIdentifier(pid);
             request->setSeqNumber(sendSeqNo);
@@ -403,7 +403,7 @@ void PingApp::sendPingRequest()
 #endif
         }
         case L3Address::IPv6: {
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
             const auto& request = makeShared<Icmpv6EchoRequestMsg>();
             request->setIdentifier(pid);
             request->setSeqNumber(sendSeqNo);
@@ -418,7 +418,7 @@ void PingApp::sendPingRequest()
         }
         case L3Address::MODULEID:
         case L3Address::MODULEPATH: {
-#ifdef WITH_NEXTHOP
+#ifdef INET_WITH_NEXTHOP
             const auto& request = makeShared<EchoPacket>();
             request->setChunkLength(B(8));
             request->setType(ECHO_PROTOCOL_REQUEST);
@@ -548,15 +548,15 @@ std::vector<L3Address> PingApp::getAllAddresses()
             for (int j = 0; j < ift->getNumInterfaces(); j++) {
                 NetworkInterface *ie = ift->getInterface(j);
                 if (ie && !ie->isLoopback()) {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
                     auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
                     if (ipv4Data != nullptr) {
                         Ipv4Address address = ipv4Data->getIPAddress();
                         if (!address.isUnspecified())
                             result.push_back(L3Address(address));
                     }
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
                     auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
                     if (ipv6Data != nullptr) {
                         for (int k = 0; k < ipv6Data->getNumAddresses(); k++) {
@@ -565,7 +565,7 @@ std::vector<L3Address> PingApp::getAllAddresses()
                                 result.push_back(L3Address(address));
                         }
                     }
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
                 }
             }
         }

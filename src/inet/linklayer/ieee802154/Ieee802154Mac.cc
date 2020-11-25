@@ -920,7 +920,6 @@ void Ieee802154Mac::handleStartOperation(LifecycleOperation *operation)
     MacProtocolBase::handleStartOperation(operation);
 
     cModule *radioModule = check_and_cast<cModule *>(radio);
-    radioModule->subscribe(IRadio::radioModeChangedSignal, this);
     radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
 }
 
@@ -934,7 +933,6 @@ void Ieee802154Mac::handleStopOperation(LifecycleOperation *operation)
     cancelEvent(rxAckTimer);
 
     cModule *radioModule = check_and_cast<cModule *>(radio);
-    radioModule->unsubscribe(IRadio::radioModeChangedSignal, this);
     radioModule->unsubscribe(IRadio::transmissionStateChangedSignal, this);
 
     MacProtocolBase::handleStopOperation(operation);
@@ -948,10 +946,48 @@ void Ieee802154Mac::handleCrashOperation(LifecycleOperation *operation)
     cancelEvent(rxAckTimer);
 
     cModule *radioModule = check_and_cast<cModule *>(radio);
-    radioModule->unsubscribe(IRadio::radioModeChangedSignal, this);
     radioModule->unsubscribe(IRadio::transmissionStateChangedSignal, this);
 
     MacProtocolBase::handleCrashOperation(operation);
+}
+
+void Ieee802154Mac::refreshDisplay() const
+{
+    std::stringstream os;
+    os<<"";
+    switch (macState) {
+        case IDLE_1:
+            os<< "IDLE";
+            break;
+
+        case BACKOFF_2:
+            os<< "BACKOFF ("<<(backoffTimer->getArrivalTime()- simTime()).inUnit(SIMTIME_US) <<"us)";
+            break;
+
+        case CCA_3:
+            os<< "CCA ("<<(ccaTimer->getArrivalTime()- simTime()).inUnit(SIMTIME_US) <<"us)";
+            break;
+
+        case TRANSMITFRAME_4:
+            os<< "TRANSMITING FRAME";
+            break;
+
+        case WAITACK_5:
+            os<< "WAITING ACK (" <<(rxAckTimer->getArrivalTime()- simTime()).inUnit(SIMTIME_US) <<"us)";
+            break;
+
+        case WAITSIFS_6:
+            os<< "WAITING SIFS (" <<(sifsTimer->getArrivalTime()- simTime()).inUnit(SIMTIME_US) <<"us)";
+            break;
+
+        case TRANSMITACK_7:
+            os<< "TRANSMITING ACK";
+            break;
+        default:
+            os<< "defined state";
+            break;
+    }
+    getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
 } // namespace inet

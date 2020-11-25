@@ -34,7 +34,7 @@ const std::vector<ApskSymbol> Qam16Modulation::constellation = {
 
 const Qam16Modulation Qam16Modulation::singleton;
 
-Qam16Modulation::Qam16Modulation() : MqamModulationBase(&constellation)
+Qam16Modulation::Qam16Modulation() : MqamModulationBase(k, &constellation)
 {
 }
 

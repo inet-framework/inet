@@ -22,7 +22,7 @@ import inet.common.packet.chunk.Chunk;
 
 cplusplus {{
 #ifndef HAVE_FFMPEG
-#error Please install libavcodec, libavformat, libavutil or disable 'VoIPStream' feature.
+#error Please install libavcodec, libavformat, libavutil or disable 'VoipStream' feature.
 #endif
 }};
 

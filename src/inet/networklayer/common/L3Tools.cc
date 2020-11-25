@@ -17,13 +17,13 @@
 
 #include "inet/networklayer/common/L3Tools.h"
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #endif
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6Header.h"
 #endif
-#ifdef WITH_NEXTHOP
+#ifdef INET_WITH_NEXTHOP
 #include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"
 #endif
 
@@ -61,15 +61,15 @@ const Ptr<const NetworkHeaderBase> getNetworkProtocolHeader(Packet *packet)
 
 const Ptr<const NetworkHeaderBase> peekNetworkProtocolHeader(const Packet *packet, const Protocol& protocol)
 {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
     if (protocol == Protocol::ipv4)
         return packet->peekAtFront<Ipv4Header>();
 #endif
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
     if (protocol == Protocol::ipv6)
         return packet->peekAtFront<Ipv6Header>();
 #endif
-#ifdef WITH_NEXTHOP
+#ifdef INET_WITH_NEXTHOP
     if (protocol == Protocol::nextHopForwarding)
         return packet->peekAtFront<NextHopForwardingHeader>();
 #endif
@@ -87,15 +87,15 @@ void insertNetworkProtocolHeader(Packet *packet, const Protocol& protocol, const
 
 const Ptr<NetworkHeaderBase> removeNetworkProtocolHeader(Packet *packet, const Protocol& protocol)
 {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
     if (protocol == Protocol::ipv4)
         return removeNetworkProtocolHeader<Ipv4Header>(packet);
 #endif
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
     if (protocol == Protocol::ipv6)
         return removeNetworkProtocolHeader<Ipv6Header>(packet);
 #endif
-#ifdef WITH_NEXTHOP
+#ifdef INET_WITH_NEXTHOP
     if (protocol == Protocol::nextHopForwarding)
         return removeNetworkProtocolHeader<NextHopForwardingHeader>(packet);
 #endif

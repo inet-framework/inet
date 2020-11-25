@@ -20,17 +20,17 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
-#ifdef WITH_RADIO
+#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalReception.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
-#endif // WITH_RADIO
+#endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
 namespace inet {
 
 namespace visualizer {
 
-#ifdef WITH_RADIO
+#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
 using namespace inet::physicallayer;
 
@@ -373,7 +373,7 @@ void MediumVisualizerBase::handleSignalArrivalStarted(const physicallayer::IRece
     }
 }
 
-#endif // WITH_RADIO
+#endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
 } // namespace visualizer
 

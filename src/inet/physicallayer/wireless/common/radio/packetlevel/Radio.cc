@@ -481,13 +481,14 @@ void Radio::endReception(cMessage *timer)
         // FIXME see handling packets with incorrect PHY headers in the TODO file
         decapsulate(macFrame);
         sendUp(macFrame);
-        receptionTimer = nullptr;
         emit(receptionEndedSignal, check_and_cast<const cObject *>(reception));
     }
     else
         EV_INFO << "Reception ended: \x1b[1mignoring\x1b[0m " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
     updateTransceiverState();
     updateTransceiverPart();
+    if (timer == receptionTimer)
+        receptionTimer = nullptr;
     delete timer;
     // TODO move to radio medium
     check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::signalArrivalEndedSignal, check_and_cast<const cObject *>(reception));
@@ -557,7 +558,7 @@ void Radio::updateTransceiverState()
 {
     // reception state
     ReceptionState newRadioReceptionState;
-    if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_TRANSMITTER)
+    if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SWITCHING || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_TRANSMITTER)
         newRadioReceptionState = RECEPTION_STATE_UNDEFINED;
     else if (receptionTimer && receptionTimer->isScheduled())
         newRadioReceptionState = RECEPTION_STATE_RECEIVING;
@@ -572,7 +573,7 @@ void Radio::updateTransceiverState()
     }
     // transmission state
     TransmissionState newRadioTransmissionState;
-    if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_RECEIVER)
+    if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SWITCHING || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_RECEIVER)
         newRadioTransmissionState = TRANSMISSION_STATE_UNDEFINED;
     else if (transmissionTimer->isScheduled())
         newRadioTransmissionState = TRANSMISSION_STATE_TRANSMITTING;

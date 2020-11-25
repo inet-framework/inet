@@ -23,13 +23,13 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketTag_m.h"
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
 
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/sctp/Sctp.h"
@@ -601,18 +601,18 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32_t srcPo
             state->localAddresses.clear();
             if (localAddressList.front().isUnspecified()) {
                 for (int32_t i = 0; i < ift->getNumInterfaces(); ++i) {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
                     if (auto ipv4Data = ift->getInterface(i)->findProtocolData<Ipv4InterfaceData>()) {
                         adv.push_back(ipv4Data->getIPAddress());
                     }
                     else
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
                     if (auto ipv6Data = ift->getInterface(i)->findProtocolData<Ipv6InterfaceData>()) {
                         adv.push_back(ipv6Data->getAddress(0));
                     }
                     else
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
                         throw cRuntimeError("INET was compiled without IPv4/IPv6 support");
                 }
             }

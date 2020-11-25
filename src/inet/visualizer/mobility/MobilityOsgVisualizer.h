@@ -41,16 +41,12 @@ class INET_API MobilityOsgVisualizer : public MobilityVisualizerBase
     };
 
   protected:
-    std::map<const IMobility *, MobilityOsgVisualization *> mobilityVisualizations;
-
-  protected:
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
+    virtual MobilityOsgVisualization *createMobilityVisualization(IMobility *mobility);
     virtual MobilityOsgVisualization *getMobilityVisualization(const IMobility *mobility) const;
-    virtual void setMobilityVisualization(const IMobility *mobility, MobilityOsgVisualization *entry);
-    virtual void removeMobilityVisualization(const IMobility *mobility);
-    virtual MobilityOsgVisualization *ensureMobilityVisualization(IMobility *mobility);
+    virtual void addMobilityVisualization(const IMobility *mobility, MobilityOsgVisualization *mobilityVisualization);
 
     virtual void extendMovementTrail(osg::Geode *trail, const Coord& position) const;
 

@@ -17,10 +17,10 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
-#ifdef WITH_IEEE80211
+#ifdef INET_WITH_IEEE80211
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
-#endif // WITH_IEEE80211
+#endif // INET_WITH_IEEE80211
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/visualizer/base/Ieee80211VisualizerBase.h"
 
@@ -130,7 +130,7 @@ void Ieee80211VisualizerBase::removeAllIeee80211Visualizations()
 
 void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-#ifdef WITH_IEEE80211
+#ifdef INET_WITH_IEEE80211
     Enter_Method("receiveSignal");
     if (signal == l2AssociatedSignal) {
         auto networkNode = getContainingNode(check_and_cast<cModule *>(source));
@@ -180,7 +180,7 @@ void Ieee80211VisualizerBase::receiveSignal(cComponent *source, simsignal_t sign
     }
     else
         throw cRuntimeError("Unknown signal");
-#endif // WITH_IEEE80211
+#endif // INET_WITH_IEEE80211
 }
 
 std::string Ieee80211VisualizerBase::getIcon(W power) const

@@ -31,9 +31,9 @@ Define_Module(MessageDispatcher);
 
 void MessageDispatcher::initialize(int stage)
 {
-#ifdef WITH_QUEUEING
+#ifdef INET_WITH_QUEUEING
     PacketProcessorBase::initialize(stage);
-#endif // #ifdef WITH_QUEUEING
+#endif // #ifdef INET_WITH_QUEUEING
     if (stage == INITSTAGE_LOCAL) {
         WATCH_MAP(socketIdToGateIndex);
         WATCH_MAP(interfaceIdToGateIndex);
@@ -49,19 +49,19 @@ void MessageDispatcher::arrived(cMessage *message, cGate *inGate, const SendOpti
     if (message->isPacket()) {
         auto packet = check_and_cast<Packet *>(message);
         outGate = handlePacket(packet, inGate);
-#ifdef WITH_QUEUEING
+#ifdef INET_WITH_QUEUEING
         handlePacketProcessed(packet);
-#endif // #ifdef WITH_QUEUEING
+#endif // #ifdef INET_WITH_QUEUEING
     }
     else
         outGate = handleMessage(check_and_cast<Message *>(message), inGate);
     outGate->deliver(message, options, time);
-#ifdef WITH_QUEUEING
+#ifdef INET_WITH_QUEUEING
     updateDisplayString();
-#endif // #ifdef WITH_QUEUEING
+#endif // #ifdef INET_WITH_QUEUEING
 }
 
-#ifdef WITH_QUEUEING
+#ifdef INET_WITH_QUEUEING
 bool MessageDispatcher::canPushSomePacket(cGate *inGate) const
 {
     int size = gateSize("out");
@@ -128,7 +128,7 @@ void MessageDispatcher::handlePushPacketProcessed(Packet *packet, cGate *gate, b
 {
 }
 
-#endif // #ifdef WITH_QUEUEING
+#endif // #ifdef INET_WITH_QUEUEING
 
 cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
 {

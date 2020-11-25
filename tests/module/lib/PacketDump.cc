@@ -24,28 +24,28 @@
 #include "PacketDump.h"
 #include "inet/common/packet/Packet.h"
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6Header.h"
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
 
-#ifdef WITH_SCTP
+#ifdef INET_WITH_SCTP
 #include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/sctp/SctpHeader.h"
-#endif // ifdef WITH_SCTP
+#endif // ifdef INET_WITH_SCTP
 
-#ifdef WITH_TCP_COMMON
+#ifdef INET_WITH_TCP_COMMON
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
-#endif // ifdef WITH_TCP_COMMON
+#endif // ifdef INET_WITH_TCP_COMMON
 
-#ifdef WITH_UDP
+#ifdef INET_WITH_UDP
 #include "inet/transportlayer/udp/UdpHeader_m.h"
-#endif // ifdef WITH_UDP
+#endif // ifdef INET_WITH_UDP
 
 
 namespace inet {
@@ -60,7 +60,7 @@ PacketDump::~PacketDump()
 {
 }
 
-#ifdef WITH_SCTP
+#ifdef INET_WITH_SCTP
 void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::SctpHeader>& sctpmsg,
         const std::string& srcAddr, const std::string& destAddr, const char *comment)
 {
@@ -347,7 +347,7 @@ void PacketDump::sctpDump(const char *label, Packet * pk, const Ptr<const sctp::
 
     out << endl;
 }
-#endif // ifndef WITH_SCTP
+#endif // ifndef INET_WITH_SCTP
 
 void PacketDump::dump(const char *label, const char *msg)
 {
@@ -371,7 +371,7 @@ void PacketDump::dumpPacket(bool l2r, const cPacket *msg)
     std::string rightAddr = "B";
     auto packetCopy = packet->dup();
     while(const auto& chunk = packetCopy->popAtFront(b(-1), Chunk::PF_ALLOW_NULLPTR)) {
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
         if (const auto& ipv4Hdr = dynamicPtrCast<const Ipv4Header>(chunk)) {
             leftAddr = ipv4Hdr->getSourceAddress().str();
             rightAddr = ipv4Hdr->getDestinationAddress().str();
@@ -386,25 +386,25 @@ void PacketDump::dumpPacket(bool l2r, const cPacket *msg)
             out << "ICMPMessage " << packet->getName() << (packet->hasBitError() ? " (BitError)" : "") << endl;
         }
         else
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
         if (const auto& ipv6Hdr = dynamicPtrCast<const Ipv6Header>(chunk)) {
             dumpIpv6(l2r, "", ipv6Hdr);
         }
         else
-#endif // ifdef WITH_IPv6
-#ifdef WITH_SCTP
+#endif // ifdef INET_WITH_IPv6
+#ifdef INET_WITH_SCTP
         if (const auto& sctpMessage = dynamicPtrCast<const sctp::SctpHeader>(chunk)) {
             sctpDump("", packetCopy, sctpMessage, std::string(l2r ? leftAddr : rightAddr), std::string(l2r ?  rightAddr: leftAddr));
         }
         else
-#endif // ifdef WITH_SCTP
-#ifdef WITH_TCP_COMMON
+#endif // ifdef INET_WITH_SCTP
+#ifdef INET_WITH_TCP_COMMON
         if (const auto& tcpHdr = dynamicPtrCast<const tcp::TcpHeader>(chunk)) {
             tcpDump(l2r, "", tcpHdr, msg->getByteLength(), (l2r ? leftAddr : rightAddr), (l2r ? rightAddr : leftAddr));
         }
         else
-#endif // ifdef WITH_TCP_COMMON
+#endif // ifdef INET_WITH_TCP_COMMON
         {
             out << chunk->str();
         }
@@ -412,7 +412,7 @@ void PacketDump::dumpPacket(bool l2r, const cPacket *msg)
     delete packetCopy;
 }
 
-#ifdef WITH_UDP
+#ifdef INET_WITH_UDP
 void PacketDump::udpDump(bool l2r, const char *label, const Ptr<const UdpHeader>& udpHeader,
         const std::string& srcAddr, const std::string& destAddr, const char *comment)
 {
@@ -442,9 +442,9 @@ void PacketDump::udpDump(bool l2r, const char *label, const Ptr<const UdpHeader>
 
     out << endl;
 }
-#endif // ifdef WITH_UDP
+#endif // ifdef INET_WITH_UDP
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
 void PacketDump::dumpArp(bool l2r, const char *label, const Ptr<const ArpPacket>& arp, const char *comment)
 {
     std::ostream& out = *outp;
@@ -484,9 +484,9 @@ void PacketDump::dumpIpv4(bool l2r, const char *label, const Ptr<const Ipv4Heade
 
     out << endl;
 }
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
 void PacketDump::dumpIpv6(bool l2r, const char *label, const Ptr<const Ipv6Header>& ipv6Header, const char *comment)
 {
     using namespace tcp;
@@ -505,9 +505,9 @@ void PacketDump::dumpIpv6(bool l2r, const char *label, const Ptr<const Ipv6Heade
 
     out << endl;
 }
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
 
-#ifdef WITH_TCP_COMMON
+#ifdef INET_WITH_TCP_COMMON
 void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHeader>& tcpHeader, int tcpLength,
         const std::string& srcAddr, const std::string& destAddr, const char *comment)
 {
@@ -629,7 +629,7 @@ void PacketDump::tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHe
 
     out << endl;
 }
-#endif // ifdef WITH_TCP_COMMON
+#endif // ifdef INET_WITH_TCP_COMMON
 
 } // namespace inet
 

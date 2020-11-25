@@ -47,7 +47,8 @@ module RadioMedium like IRadioMedium
         bool macAddressFilter = default(false); // when enabled the radio medium doesn't send signals to a radio if it the destination mac address differs
 
         // logging parameters
-        bool recordCommunicationLog = default(false); // when enabled the medium writes a communication log file that contains one line per transmission and per reception
+        bool recordTransmissionLog = default(false); // when enabled the medium writes one line per transmission into the communication log file
+        bool recordReceptionLog = default(false);    // when enabled the medium writes one line per reception into the communication log file
 
         @class(RadioMedium);
         @display("i=misc/sun");

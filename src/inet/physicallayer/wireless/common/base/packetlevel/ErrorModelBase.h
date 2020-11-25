@@ -44,6 +44,7 @@ class INET_API ErrorModelBase : public cModule, public IErrorModel
   protected:
     CorruptionMode corruptionMode = CorruptionMode::CM_UNDEFINED;
     SnirMode snirMode = SnirMode::SM_UNDEFINED;
+    double snirOffset = NaN;
 
   protected:
     virtual void initialize(int stage) override;

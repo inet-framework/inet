@@ -41,7 +41,7 @@ if [ "$TARGET_PLATFORM" != "linux" ]; then
     # - ExternalInterface is only supported on Linux
     # - lwIP and NSC does not seem to compile on at least Windows, oh well...
     echo "::group::Disable some features"
-    opp_featuretool disable VoIPStream VoIPStream_examples ExternalInterface ExternalInterface_examples emulation_showcases TCP_lwIP TCP_NSC
+    opp_featuretool disable VoipStream VoipStreamExamples NetworkEmulationSupport NetworkEmulationExamples NetworkEmulationShowcases TcpLwip TcpNsc
     echo "::endgroup::"
 fi
 

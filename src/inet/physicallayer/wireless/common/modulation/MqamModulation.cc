@@ -42,7 +42,7 @@ static std::vector<ApskSymbol> *createConstellation(unsigned int codeWordSize)
     return symbols;
 }
 
-MqamModulation::MqamModulation(unsigned int codeWordSize) : MqamModulationBase(createConstellation(codeWordSize))
+MqamModulation::MqamModulation(unsigned int codeWordSize) : MqamModulationBase(1 / sqrt(2 * (pow(2, codeWordSize) - 1) / 3), createConstellation(codeWordSize))
 {
 }
 

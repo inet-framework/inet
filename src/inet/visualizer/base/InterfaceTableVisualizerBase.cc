@@ -20,15 +20,15 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#ifdef WITH_NEXTHOP
+#ifdef INET_WITH_NEXTHOP
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
-#endif // WITH_NEXTHOP
-#ifdef WITH_IPv4
+#endif // INET_WITH_NEXTHOP
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#endif // WITH_IPv4
-#ifdef WITH_IPv6
+#endif // INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#endif // WITH_IPv6
+#endif // INET_WITH_IPv6
 #include "inet/visualizer/base/InterfaceTableVisualizerBase.h"
 
 namespace inet {
@@ -54,43 +54,43 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
             result = networkInterface->getMacAddress().str();
             break;
         case 'l': // TODO Ipv4 or Ipv6
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
             if (auto ipv4Data = networkInterface->findProtocolData<Ipv4InterfaceData>())
                 result = std::to_string(ipv4Data->getNetmask().getNetmaskLength());
-#endif // WITH_IPv4
+#endif // INET_WITH_IPv4
             break;
         case '4':
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
             if (auto ipv4Data = networkInterface->findProtocolData<Ipv4InterfaceData>())
                 result = ipv4Data->getIPAddress().str();
-#endif // WITH_IPv4
+#endif // INET_WITH_IPv4
             break;
         case '6':
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
             if (auto ipv6Data = networkInterface->findProtocolData<Ipv6InterfaceData>())
                 result = ipv6Data->getLinkLocalAddress().str();
-#endif // WITH_IPv6
+#endif // INET_WITH_IPv6
             break;
         case 'a':
             if (false) {}
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
             else if (auto ipv4Data = networkInterface->findProtocolData<Ipv4InterfaceData>())
                 result = ipv4Data->getIPAddress().str();
-#endif // WITH_IPv4
-#ifdef WITH_IPv6
+#endif // INET_WITH_IPv4
+#ifdef INET_WITH_IPv6
             else if (auto ipv6Data = networkInterface->findProtocolData<Ipv6InterfaceData>())
                 result = ipv6Data->getLinkLocalAddress().str();
-#endif // WITH_IPv6
-#ifdef WITH_NEXTHOP
+#endif // INET_WITH_IPv6
+#ifdef INET_WITH_NEXTHOP
             else if (auto nextHopData = networkInterface->findProtocolData<NextHopInterfaceData>())
                 result = nextHopData->getAddress().str();
-#endif // WITH_NEXTHOP
+#endif // INET_WITH_NEXTHOP
             break;
         case 'g':
-#ifdef WITH_NEXTHOP
+#ifdef INET_WITH_NEXTHOP
             if (auto nextHopData = networkInterface->findProtocolData<NextHopInterfaceData>())
                 result = nextHopData->getAddress().str();
-#endif // WITH_NEXTHOP
+#endif // INET_WITH_NEXTHOP
             break;
         case 'n':
             result = networkInterface->getNetworkAddress().str();
@@ -304,9 +304,9 @@ void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t
             auto networkInterface = networkInterfaceDetails->getNetworkInterface();
             auto fieldId = networkInterfaceDetails->getFieldId();
             if ((signal == interfaceConfigChangedSignal && fieldId == NetworkInterface::F_IPV4_DATA)
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
                     || (signal == interfaceIpv4ConfigChangedSignal && (fieldId == Ipv4InterfaceData::F_IP_ADDRESS || fieldId == Ipv4InterfaceData::F_NETMASK))
-#endif // WITH_IPv4
+#endif // INET_WITH_IPv4
                     || (signal == interfaceStateChangedSignal && (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER)))
             {
                 if (interfaceFilter.matches(networkInterface)) {

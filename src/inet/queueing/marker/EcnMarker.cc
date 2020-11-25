@@ -22,14 +22,14 @@
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 
-#ifdef WITH_ETHERNET
+#ifdef INET_WITH_ETHERNET
 #include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
-#endif // #ifdef WITH_ETHERNET
+#endif // #ifdef INET_WITH_ETHERNET
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 
 namespace inet {
 namespace queueing {
@@ -49,13 +49,13 @@ void EcnMarker::setEcn(Packet *packet, IpEcnCode ecn)
 {
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     if (protocol == &Protocol::ethernetMac) {
-#if defined(WITH_ETHERNET)
+#if defined(INET_WITH_ETHERNET)
         packet->trim();
         auto ethHeader = packet->removeAtFront<EthernetMacHeader>();
         auto ethFcs = packet->removeAtBack<EthernetFcs>(ETHER_FCS_BYTES);
         if (isEth2Header(*ethHeader)) {
             const Protocol *payloadProtocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
-#if defined(WITH_IPv4)
+#if defined(INET_WITH_IPv4)
             if (payloadProtocol == &Protocol::ipv4) {
                 auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
                 ipv4Header->setEcn(ecn);
@@ -77,13 +77,13 @@ void EcnMarker::setEcn(Packet *packet, IpEcnCode ecn)
         }
 #else
         throw cRuntimeError("Ethernet feature is disabled");
-#endif // #if defined(WITH_ETHERNET) && defined(WITH_IPv4)
+#endif // #if defined(INET_WITH_ETHERNET) && defined(INET_WITH_IPv4)
     }
 }
 
 IpEcnCode EcnMarker::getEcn(const Packet *packet)
 {
-#if defined(WITH_ETHERNET) && defined(WITH_IPv4)
+#if defined(INET_WITH_ETHERNET) && defined(INET_WITH_IPv4)
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     if (protocol == &Protocol::ethernetMac) {
         auto ethHeader = packet->peekAtFront<EthernetMacHeader>();
@@ -95,7 +95,7 @@ IpEcnCode EcnMarker::getEcn(const Packet *packet)
             }
         }
     }
-#endif // #if defined(WITH_ETHERNET) && defined(WITH_IPv4)
+#endif // #if defined(INET_WITH_ETHERNET) && defined(INET_WITH_IPv4)
     return IP_ECN_NOT_ECT;
 }
 

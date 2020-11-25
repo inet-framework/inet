@@ -20,10 +20,10 @@
 #include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 
-#ifdef WITH_ETHERNET
+#ifdef INET_WITH_ETHERNET
 #include "inet/linklayer/ethernet/basic/EthernetEncapsulation.h"
 #include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
-#endif // ifdef WITH_ETHERNET
+#endif // ifdef INET_WITH_ETHERNET
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/portal/Ieee80211Portal.h"
@@ -39,9 +39,9 @@ void Ieee80211Portal::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         upperLayerOutConnected = gate("upperLayerOut")->getPathEndGate()->isConnected();
-#ifdef WITH_ETHERNET
+#ifdef INET_WITH_ETHERNET
         fcsMode = parseFcsMode(par("fcsMode"));
-#endif // ifdef WITH_ETHERNET
+#endif // ifdef INET_WITH_ETHERNET
     }
 }
 
@@ -66,7 +66,7 @@ void Ieee80211Portal::handleMessage(cMessage *message)
 
 void Ieee80211Portal::encapsulate(Packet *packet)
 {
-#ifdef WITH_ETHERNET
+#ifdef INET_WITH_ETHERNET
     auto ethernetHeader = EthernetEncapsulation::decapsulateMacHeader(packet); // do not use const auto& : trimChunks() delete it from packet
     packet->trim();
     packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(ethernetHeader->getDest());
@@ -83,14 +83,14 @@ void Ieee80211Portal::encapsulate(Packet *packet)
     }
     else
         throw cRuntimeError("Unknown packet: '%s'", packet->getFullName());
-#else // ifdef WITH_ETHERNET
+#else // ifdef INET_WITH_ETHERNET
     throw cRuntimeError("INET compiled without ETHERNET feature!");
-#endif // ifdef WITH_ETHERNET
+#endif // ifdef INET_WITH_ETHERNET
 }
 
 void Ieee80211Portal::decapsulate(Packet *packet)
 {
-#ifdef WITH_ETHERNET
+#ifdef INET_WITH_ETHERNET
     packet->trim();
     int typeOrLength = packet->getByteLength();
     const auto& llcHeader = packet->peekAtFront<Ieee8022LlcHeader>();
@@ -114,9 +114,9 @@ void Ieee80211Portal::decapsulate(Packet *packet)
     packet->insertAtBack(ethernetFcs);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
-#else // ifdef WITH_ETHERNET
+#else // ifdef INET_WITH_ETHERNET
     throw cRuntimeError("INET compiled without ETHERNET feature!");
-#endif // ifdef WITH_ETHERNET
+#endif // ifdef INET_WITH_ETHERNET
 }
 
 } // namespace ieee80211

@@ -50,10 +50,10 @@
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
 #include "inet/networklayer/xmipv6/MobilityHeader_m.h" // for HA Option header
 #include "inet/networklayer/xmipv6/xMIPv6.h"
-#endif // ifdef WITH_xMIPv6
+#endif // ifdef INET_WITH_xMIPv6
 
 namespace inet {
 
@@ -380,7 +380,7 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
     // TODO copy information from old ctrlInfo into new one (Traffic Class, Flow label, etc.)
     delete packet->removeControlInfo();
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     if ((tunnels[vIfIndex].tunnelType == T2RH) || (tunnels[vIfIndex].tunnelType == HA_OPT)) {
         // pseudo-tunnel for Type 2 Routing Header
         // or Home Address Option
@@ -455,7 +455,7 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
         send(packet, "upperLayerOut");
     }
     else {
-#endif // WITH_xMIPv6
+#endif // INET_WITH_xMIPv6
     // normal tunnel - just modify controlInfo and send
     // datagram back to Ipv6 module for encapsulation
 
@@ -465,10 +465,10 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
     addresses->setDestAddress(tunnels[vIfIndex].exit);
 
     send(packet, "upperLayerOut");
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
 }
 
-#endif // ifdef WITH_xMIPv6
+#endif // ifdef INET_WITH_xMIPv6
 }
 
 void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
@@ -477,7 +477,7 @@ void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
     // decapsulation is performed in Ipv6 module
     Ipv6Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     // we only decapsulate packets for which we have a tunnel
     // where the exit point is equal to the packets source
     // 11.9.07 - CB
@@ -496,7 +496,7 @@ void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
         delete packet;
         return;
     }
-#endif // ifdef WITH_xMIPv6
+#endif // ifdef INET_WITH_xMIPv6
 
     // FIX: we leave the interface Id to it's previous value to make sure
     // that later processing knowns from which interface the datagram came from
@@ -505,7 +505,7 @@ void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
 
     send(packet, "linkLayerOut");
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     // Alain Tigyo, 21.03.2008
     // The following code is used for triggering RO to a CN
     NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
@@ -517,7 +517,7 @@ void Ipv6Tunneling::decapsulateDatagram(Packet *packet)
         if (mipv6)
             mipv6->triggerRouteOptimization(ipv6Header->getSrcAddress(), ie->getProtocolData<Ipv6InterfaceData>()->getMNHomeAddress(), ie);
     }
-#endif // ifdef WITH_xMIPv6
+#endif // ifdef INET_WITH_xMIPv6
 }
 
 int Ipv6Tunneling::lookupTunnels(const Ipv6Address& dest)

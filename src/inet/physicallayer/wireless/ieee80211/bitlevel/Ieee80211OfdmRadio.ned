@@ -22,6 +22,9 @@ import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
 module Ieee80211OfdmRadio extends FlatRadioBase
 {
     parameters:
+        transmitter.typename = default("Ieee80211LayeredOfdmTransmitter");
+        receiver.typename = default("Ieee80211LayeredOfdmReceiver");
+        receiver.errorModel.typename = default("Ieee80211OfdmErrorModel");
         @class(Ieee80211OfdmRadio);
 }
 

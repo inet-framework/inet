@@ -19,13 +19,13 @@
 #define __INET_CLOCKEVENT_H
 
 #include "inet/common/INETDefs.h"
-#ifdef WITH_CLOCK_SUPPORT
+#ifdef INET_WITH_CLOCK
 #include "inet/clock/common/ClockEvent_m.h"
 #endif
 
 namespace inet {
 
-#ifndef WITH_CLOCK_SUPPORT
+#ifndef INET_WITH_CLOCK
 typedef cMessage ClockEvent;
 #endif
 

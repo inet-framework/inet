@@ -21,7 +21,7 @@
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/linklayer/acking/AckingMacHeader_m.h"
 
-#ifdef WITH_ETHERNET
+#ifdef INET_WITH_ETHERNET
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #endif
 
@@ -69,16 +69,16 @@ bool AckingMacToEthernetPcapRecorderHelper::matchesLinkType(PcapLinkType pcapLin
 
 PcapLinkType AckingMacToEthernetPcapRecorderHelper::protocolToLinkType(const Protocol *protocol) const
 {
-#if defined(WITH_ETHERNET)
+#if defined(INET_WITH_ETHERNET)
     if (*protocol == Protocol::ackingMac)
         return LINKTYPE_ETHERNET;
-#endif // defined(WITH_ETHERNET)
+#endif // defined(INET_WITH_ETHERNET)
     return LINKTYPE_INVALID;
 }
 
 Packet *AckingMacToEthernetPcapRecorderHelper::tryConvertToLinkType(const Packet *packet, PcapLinkType pcapLinkType, const Protocol *protocol) const
 {
-#if defined(WITH_ETHERNET)
+#if defined(INET_WITH_ETHERNET)
     if (*protocol == Protocol::ackingMac && pcapLinkType == LINKTYPE_ETHERNET) {
         auto newPacket = packet->dup();
         auto ackingHdr = newPacket->popAtFront<AckingMacHeader>();
@@ -91,7 +91,7 @@ Packet *AckingMacToEthernetPcapRecorderHelper::tryConvertToLinkType(const Packet
         newPacket->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
         return newPacket;
     }
-#endif // defined(WITH_ETHERNET)
+#endif // defined(INET_WITH_ETHERNET)
 
     return nullptr;
 }

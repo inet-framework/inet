@@ -288,6 +288,7 @@ from pygments.lexers.c_cpp import CLexer, CppLexer
 from pygments.lexer import RegexLexer, include, bygroups, using, this, inherit, default, words
 from pygments.token import Name, Keyword, Comment, Text, Operator, String, Number, Punctuation, Error
 from sphinx.highlighting import lexers
+from pygments.formatters import HtmlFormatter
 
 #####
 class NedLexer(RegexLexer):
@@ -422,6 +423,43 @@ class IniLexer(RegexLexer):
         return text[0] == '[' and text[npos-1] == ']'
 
 lexers['ini'] = IniLexer(startinline=True)
+
+#######################################################################
+
+from pygments.style import Style
+from pygments.token import Keyword, Name, Comment, String, Error, \
+     Number, Operator, Generic, Whitespace
+
+class FpStyle(Style):
+	default_style = "default"
+	style = {
+		Text:	'#ffffff'
+}
+
+class FingerprintLexer(RegexLexer):
+    name = 'fp'
+    filenames = ['*.fp']
+    mimetypes = ['text/x-fp']
+    pygments_style = "FpStyle"
+
+    tokens = {
+        'root': [
+            #(r'.*: ', Text),
+            #(r'PASS', Keyword),
+            #(r'FAILED', String),
+	    (r'(.* : )(PASS)?(FAILED)?(ERROR)?',
+             bygroups(Name.Entity, Name.Builtin, String, String)),
+	    (r'.*?\n', Name.Entity),
+        ],
+    }
+
+    def analyse_text(text):
+        npos = text.find('\n')
+        if npos < 3:
+            return False
+        return text[0] == '[' and text[npos-1] == ']'
+
+lexers['fp'] = FingerprintLexer(startinline=True)
 
 #######################################################################
 # -- setup the customizations

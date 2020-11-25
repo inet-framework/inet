@@ -87,7 +87,7 @@ class INET_API PacketDump
      */
     void dumpPacket(bool l2r, const cPacket *packet);
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
     /**
      * Dumps info about the given Ipv4 datagram. The l2r parameter denotes the
      * direction of the packet.
@@ -95,40 +95,40 @@ class INET_API PacketDump
     void dumpIpv4(bool l2r, const char *label, const Ptr<const Ipv4Header>& ipv4Header, const char *comment = nullptr);
 
     void dumpArp(bool l2r, const char *label, const Ptr<const ArpPacket>& arp, const char *comment = nullptr);
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
     /**
      * Dumps info about the given Ipv6 datagram. The l2r parameter denotes
      * the direction of the packet.
      */
     void dumpIpv6(bool l2r, const char *label, const Ptr<const Ipv6Header>& ipv6Header, const char *comment = nullptr);
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
 
-#ifdef WITH_SCTP
+#ifdef INET_WITH_SCTP
     /**
      * Dumps info about the given SCTP message.
      */
      void sctpDump(const char *label, Packet * pk, const Ptr<const sctp::SctpHeader>& sctpmsg,
         const std::string& srcAddr, const std::string& destAddr, const char *comment = nullptr);
 
-#endif // ifdef WITH_SCTP
+#endif // ifdef INET_WITH_SCTP
 
-#ifdef WITH_TCP_COMMON
+#ifdef INET_WITH_TCP_COMMON
     /**
      * Dumps info about the given TCP segment.
      */
     void tcpDump(bool l2r, const char *label, const Ptr<const tcp::TcpHeader>& tcpHeader, int tcpLength, const std::string& srcAddr,
             const std::string& destAddr, const char *comment = nullptr);
-#endif // ifdef WITH_TCP_COMMON
+#endif // ifdef INET_WITH_TCP_COMMON
 
-#ifdef WITH_UDP
+#ifdef INET_WITH_UDP
     /**
      * Dumps info about the given UDP packet.
      */
     void udpDump(bool l2r, const char *label, const Ptr<const UdpHeader>& udpHeader, const std::string& srcAddr,
             const std::string& destAddr, const char *comment);
-#endif // ifdef WITH_UDP
+#endif // ifdef INET_WITH_UDP
 };
 
 } // namespace inet

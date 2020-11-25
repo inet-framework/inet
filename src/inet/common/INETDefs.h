@@ -25,7 +25,7 @@
 #include "inet/common/precompiled_debug.h"
 #endif
 
-// important WITH_* macros defined by OMNET
+// important INET_WITH_* macros defined by OMNET
 #include "inet/opp_defines.h"
 
 // feature defines generated based on the actual feature enablement

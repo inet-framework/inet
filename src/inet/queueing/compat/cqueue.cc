@@ -77,7 +77,7 @@ void cQueue::forEachChild(cVisitor *v)
 
 void cQueue::parsimPack(cCommBuffer *buffer) const
 {
-#ifndef WITH_PARSIM
+#ifndef INET_WITH_PARSIM
     throw cRuntimeError(this, E_NOPARSIM);
 #else
     cOwnedObject::parsimPack(buffer);
@@ -98,7 +98,7 @@ void cQueue::parsimPack(cCommBuffer *buffer) const
 
 void cQueue::parsimUnpack(cCommBuffer *buffer)
 {
-#ifndef WITH_PARSIM
+#ifndef INET_WITH_PARSIM
     throw cRuntimeError(this, E_NOPARSIM);
 #else
     cOwnedObject::parsimUnpack(buffer);

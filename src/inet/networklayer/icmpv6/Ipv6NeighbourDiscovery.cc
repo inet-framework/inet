@@ -31,9 +31,9 @@
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
 #include "inet/networklayer/xmipv6/xMIPv6.h"
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
 namespace inet {
 
@@ -104,14 +104,14 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
         rt6 = getModuleFromPar<Ipv6RoutingTable>(par("routingTableModule"), this);
         icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
         if (rt6->isMobileNode())
             mipv6 = getModuleFromPar<xMIPv6>(par("xmipv6Module"), this);
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
         pendingQueue.setName("pendingQueue");
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
 //         MIPv6Enabled = par("MIPv6Support"); // (Zarrar 14.07.07)
         /*if(rt6->isRouter()) // 12.9.07 - CB
            {
@@ -121,7 +121,7 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
             WATCH(minRAInterval);    // (Zarrar 15.07.07)
             WATCH(maxRAInterval);    // (Zarrar 15.07.07)
            }*/
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
         for (int i = 0; i < ift->getNumInterfaces(); i++) {
             NetworkInterface *ie = ift->getInterface(i);
@@ -806,11 +806,11 @@ void Ipv6NeighbourDiscovery::assignLinkLocalAddress(cMessage *timerMsg)
 
 void Ipv6NeighbourDiscovery::initiateDad(const Ipv6Address& tentativeAddr, NetworkInterface *ie)
 {
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     Enter_Method("initiateDad");
     EV_INFO << "----------INITIATING DUPLICATE ADDRESS DISCOVERY----------" << endl;
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(true);
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     DadEntry *dadEntry = new DadEntry();
     dadEntry->interfaceId = ie->getInterfaceId();
@@ -834,13 +834,13 @@ void Ipv6NeighbourDiscovery::initiateDad(const Ipv6Address& tentativeAddr, Netwo
     cMessage *msg = new cMessage("dadTimeout", MK_DAD_TIMEOUT);
     msg->setContextPointer(dadEntry);
 
-#ifndef WITH_xMIPv6
+#ifndef INET_WITH_xMIPv6
     scheduleAfter(ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer(), msg);
-#else /* WITH_xMIPv6 */
+#else /* INET_WITH_xMIPv6 */
     // update: added uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY) to account for joining the solicited-node multicast
     // group which is delay up to one 1 second (RFC 4862, 5.4.2) - 16.01.08, CB
     scheduleAfter(ie->getProtocolData<Ipv6InterfaceData>()->getRetransTimer() + uniform(0, IPv6_MAX_RTR_SOLICITATION_DELAY), msg);
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     emit(startDadSignal, 1);
 }
@@ -878,7 +878,7 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
 {
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->permanentlyAssign(tentativeAddr);
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(false);
 
     // update 28.09.07 - CB
@@ -935,7 +935,7 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
         }
     }
     // ==================================End: Zarrar Yousaf 08.07.07===========================================
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     /*RFC 2461: Section 6.3.7 2nd Paragraph
        Before a host sends an initial solicitation, it SHOULD delay the
@@ -1207,13 +1207,13 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
         ra->setManagedAddrConfFlag(ie->getProtocolData<Ipv6InterfaceData>()->getAdvManagedFlag());
         ra->setOtherStatefulConfFlag(ie->getProtocolData<Ipv6InterfaceData>()->getAdvOtherConfigFlag());
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
         // Configuring the HomeAgentFlag (H-bit) (RFC 3775): Zarrar 25.02.07
         if (rt6->isHomeAgent())
             ra->setHomeAgentFlag(true); // Set H-bit if the router is a HA
         else
             ra->setHomeAgentFlag(ie->getProtocolData<Ipv6InterfaceData>()->getAdvHomeAgentFlag()); // else unset it, which is default
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
         // - In the Cur Hop Limit field: the interface's configured CurHopLimit.
         ra->setCurHopLimit(ie->getProtocolData<Ipv6InterfaceData>()->getAdvCurHopLimit());
@@ -1245,9 +1245,9 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
             Ipv6InterfaceData::AdvPrefix advPrefix = ie->getProtocolData<Ipv6InterfaceData>()->getAdvPrefix(i);
             auto prefixInfo = new Ipv6NdPrefixInformation();
 
-#ifndef WITH_xMIPv6
+#ifndef INET_WITH_xMIPv6
             prefixInfo->setPrefix(advPrefix.prefix);
-#else /* WITH_xMIPv6 */
+#else /* INET_WITH_xMIPv6 */
             EV_DETAIL << "\n+=+=+=+= Appendign Prefix Info Option to RA +=+=+=+=\n";
             EV_DETAIL << "Prefix Value: " << advPrefix.prefix << endl;
             EV_DETAIL << "Prefix Length: " << advPrefix.prefixLength << endl;
@@ -1260,7 +1260,7 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
                 prefixInfo->setPrefix(advPrefix.rtrAddress); // add the global-scope address of the HA's interface in the prefix option list of the RA message.
             else
                 prefixInfo->setPrefix(advPrefix.prefix); // adds the prefix only of the router's interface in the prefix option list of the RA message.
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
             prefixInfo->setPrefixLength(advPrefix.prefixLength);
 
@@ -1272,13 +1272,13 @@ void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, 
             // AdvAutonomousFlag.
             prefixInfo->setAutoAddressConfFlag(advPrefix.advAutonomousFlag);
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
             if (rt6->isHomeAgent())
                 prefixInfo->setRouterAddressFlag(true); // set the R-bit if the node is a HA
 
             // - In the Valid Lifetime field: the entry's AdvValidLifetime.
             prefixInfo->setValidLifetime(SIMTIME_DBL(advPrefix.advValidLifetime));
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
             // - In the Preferred Lifetime field: the entry's AdvPreferredLifetime.
             prefixInfo->setPreferredLifetime(SIMTIME_DBL(advPrefix.advPreferredLifetime));
@@ -1308,7 +1308,7 @@ void Ipv6NeighbourDiscovery::processRaPacket(Packet *packet, const Ipv6RouterAdv
             return;
         }
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
         if (ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->isDadInProgress()) {
             // in case we are currently performing DAD we ignore this RA
             // TODO improve this procedure in order to allow reinitiating DAD
@@ -1316,7 +1316,7 @@ void Ipv6NeighbourDiscovery::processRaPacket(Packet *packet, const Ipv6RouterAdv
             delete packet;
             return;
         }
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
         cancelRouterDiscovery(ie); // Cancel router discovery if it is in progress.
         EV_INFO << "Interface is a host, processing RA.\n";
@@ -1332,14 +1332,14 @@ void Ipv6NeighbourDiscovery::processRaPacket(Packet *packet, const Ipv6RouterAdv
                 continue;
             const Ipv6NdPrefixInformation& prefixInfo = *check_and_cast<const Ipv6NdPrefixInformation *>(option);
             if (prefixInfo.getAutoAddressConfFlag() == true) { // If auto addr conf is set
-#ifndef WITH_xMIPv6
+#ifndef INET_WITH_xMIPv6
                 processRaPrefixInfoForAddrAutoConf(prefixInfo, ie); // We process prefix Info and form an addr
-#else /* WITH_xMIPv6 */
+#else /* INET_WITH_xMIPv6 */
                 processRaPrefixInfoForAddrAutoConf(prefixInfo, ie, ra->getHomeAgentFlag()); // then calling the overloaded function for address configuration. The address conf for MN is different from other nodes as it needs to classify the newly formed address as HoA or CoA, depending on the status of the H-Flag. (Zarrar Yousaf 20.07.07)
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
             }
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
             // When in foreign network(s), the MN needs info about its HA address and its own Home Address (HoA), when sending BU to HA and CN(s). Therefore while in the home network I intialise struct HomeNetworkInfo{} with HoA and HA address, which will eventually be used by the MN while sending BUs from within visit networks. (Zarrar Yousaf 12.07.07)
             if (ra->getHomeAgentFlag() && (prefixInfo.getRouterAddressFlag() == true)) { // If R-Flag is set and RA is from HA
                 // homeNetworkInfo now carries HoA, global unicast HA address and the home network prefix
@@ -1350,7 +1350,7 @@ void Ipv6NeighbourDiscovery::processRaPacket(Packet *packet, const Ipv6RouterAdv
                           << " and the home prefix is " << prefixInfo.getPrefix() << endl;
                 ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->updateHomeNetworkInfo(HoA, HA, prefixInfo.getPrefix(), prefixInfo.getPrefixLength()); // populate the HoA of MN, the HA global scope address and the home network prefix
             }
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
         }
     }
     delete packet;
@@ -1378,9 +1378,9 @@ void Ipv6NeighbourDiscovery::processRaForRouterUpdates(Packet *packet, const Ipv
        Router Lifetime field.*/
     Neighbour *neighbour = neighbourCache.lookup(raSrcAddr, ifID);
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     // update 3.9.07 - CB // if (neighbour == nullptr && (ra->homeAgentFlag() == true)) //the RA is from a Router acting as a Home Agent as well
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     if (neighbour == nullptr) {
         EV_INFO << "Neighbour Cache Entry does not contain RA's source address\n";
@@ -1388,20 +1388,20 @@ void Ipv6NeighbourDiscovery::processRaForRouterUpdates(Packet *packet, const Ipv
             EV_INFO << "RA's router lifetime is non-zero, creating an entry in the "
                     << "Host's default router list with lifetime=" << ra->getRouterLifetime() << "\n";
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
             // initiate neighbour unreachability detection for existing routers and remove default route(r), 3.9.07 - CB
             // TODO improve this code
             routersUnreachabilityDetection(ie);
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
             // If a Neighbor Cache entry is created for the router its reachability
             // state MUST be set to STALE as specified in Section 7.3.3.
             neighbour = neighbourCache.addRouter(raSrcAddr, ifID,
                         sourceLinkLayerAddress, simTime() + ra->getRouterLifetime()
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
                         , ra->getHomeAgentFlag()
-#endif /* WITH_xMIPv6 */
-                    );
+#endif /* INET_WITH_xMIPv6 */
+                        );
             // According to Greg, we should add a default route for hosts as well!
             rt6->addDefaultRoute(raSrcAddr, ifID, simTime() + ra->getRouterLifetime());
         }
@@ -1567,7 +1567,7 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfo(const Ipv6RouterAdvertisement *
     }
 }
 
-#ifndef WITH_xMIPv6
+#ifndef INET_WITH_xMIPv6
 void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPrefixInformation& prefixInfo, NetworkInterface *ie)
 {
     EV_INFO << "Processing Prefix Info for address auto-configuration.\n";
@@ -1641,7 +1641,7 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPref
           address to two hours.*/
 }
 
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
 void Ipv6NeighbourDiscovery::createRaTimer(NetworkInterface *ie)
 {
@@ -1651,7 +1651,7 @@ void Ipv6NeighbourDiscovery::createRaTimer(NetworkInterface *ie)
     advIfEntry->interfaceId = ie->getInterfaceId();
     advIfEntry->numRASent = 0;
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     // 20.9.07 - CB
     /*if ( rt6->isRouter() )
        {
@@ -1673,7 +1673,7 @@ void Ipv6NeighbourDiscovery::createRaTimer(NetworkInterface *ie)
 //        EV<<"\nThe random calculated RA_ND interval is: "<< interval<<" seconds\n";
     }
     // end CB
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     simtime_t interval = uniform(ie->getProtocolData<Ipv6InterfaceData>()->getMinRtrAdvInterval(), ie->getProtocolData<Ipv6InterfaceData>()->getMaxRtrAdvInterval());
     advIfEntry->raTimeoutMsg = msg;
@@ -1722,15 +1722,15 @@ void Ipv6NeighbourDiscovery::sendPeriodicRa(cMessage *msg)
        configured MinRtrAdvInterval and MaxRtrAdvInterval; expiration of the timer
        causes the next advertisement to be sent and a new random value to be chosen.*/
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     EV_DEBUG << "\n+=+=+= MIPv6 Feature: " << rt6->hasMipv6Support() << " +=+=+=\n";
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     simtime_t interval = uniform(ie->getProtocolData<Ipv6InterfaceData>()->getMinRtrAdvInterval(), ie->getProtocolData<Ipv6InterfaceData>()->getMaxRtrAdvInterval());
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     EV_DETAIL << "\n +=+=+= The random calculated interval is: " << interval << " +=+=+=\n";
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     /*For the first few advertisements (up to MAX_INITIAL_RTR_ADVERTISEMENTS)
        sent from an interface when it becomes an advertising interface,*/
@@ -1796,7 +1796,7 @@ bool Ipv6NeighbourDiscovery::validateRaPacket(Packet *packet, const Ipv6RouterAd
         result = false;
     }
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     // - All included options have a length that is greater than zero.
     // CB
     bool prefixInfoFound = false;
@@ -1811,7 +1811,7 @@ bool Ipv6NeighbourDiscovery::validateRaPacket(Packet *packet, const Ipv6RouterAd
         EV_WARN << "No prefix information available! RA validation failed\n";
         result = false;
     }
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     return result;
 }
@@ -1819,9 +1819,9 @@ bool Ipv6NeighbourDiscovery::validateRaPacket(Packet *packet, const Ipv6RouterAd
 void Ipv6NeighbourDiscovery::createAndSendNsPacket(const Ipv6Address& nsTargetAddr, const Ipv6Address& dgDestAddr,
         const Ipv6Address& dgSrcAddr, NetworkInterface *ie)
 {
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     Enter_Method("createAndSendNsPacket");
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     MacAddress myMacAddr = ie->getMacAddress();
 
@@ -2102,11 +2102,11 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie)
 {
     // RFC 2461
     // Section 7.2.6: Sending Unsolicited Neighbor Advertisements
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     Enter_Method("sendUnsolicitedNa");
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
-#ifndef WITH_xMIPv6
+#ifndef INET_WITH_xMIPv6
     // In some cases a node may be able to determine that its link-layer
     // address has changed (e.g., hot-swap of an interface card) and may
     // wish to inform its neighbors of the new link-layer address quickly.
@@ -2114,33 +2114,33 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie)
     // unsolicited Neighbor Advertisement messages to the all-nodes
     // multicast address.  These advertisements MUST be separated by at
     // least RetransTimer seconds.
-#else /* WITH_xMIPv6 */
+#else /* INET_WITH_xMIPv6 */
     auto na = makeShared<Ipv6NeighbourAdvertisement>();
     Ipv6Address myIPv6Addr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     // The Target Address field in the unsolicited advertisement is set to
     // an IP address of the interface, and the Target Link-Layer Address
     // option is filled with the new link-layer address.
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     na->setTargetAddress(myIPv6Addr);
     auto sla = new Ipv6NdTargetLinkLayerAddress();
     sla->setLinkLayerAddress(ie->getMacAddress());
     na->getOptionsForUpdate().insertOption(sla);
     na->addChunkLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     // The Solicited flag MUST be set to zero, in order to avoid confusing
     // the Neighbor Unreachability Detection algorithm.
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     na->setSolicitedFlag(false);
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     // If the node is a router, it MUST set the Router flag to one;
     // otherwise it MUST set it to zero.
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     na->setRouterFlag(rt6->isRouter());
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     // The Override flag MAY be set to either zero or one.  In either case,
     // neighboring nodes will immediately change the state of their Neighbor
@@ -2149,9 +2149,9 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie)
     // one, neighboring nodes will install the new link-layer address in
     // their caches.  Otherwise, they will ignore the new link-layer
     // address, choosing instead to probe the cached address.
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     na->setOverrideFlag(true);
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
     // A node that has multiple IP addresses assigned to an interface MAY
     // multicast a separate Neighbor Advertisement for each address.  In
@@ -2178,12 +2178,12 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie)
     // Neighbor Unreachability Detection algorithm ensures that all nodes
     // obtain a reachable link-layer address, though the delay may be
     // slightly longer.
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
     auto packet = new Packet("NApacket");
     Icmpv6::insertCrc(crcMode, na, packet);
     packet->insertAtFront(na);
     sendPacketToIpv6Module(packet, Ipv6Address::ALL_NODES_2, myIPv6Addr, ie->getInterfaceId());
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 }
 
 void Ipv6NeighbourDiscovery::processNaPacket(Packet *packet, const Ipv6NeighbourAdvertisement *na)
@@ -2442,7 +2442,7 @@ void Ipv6NeighbourDiscovery::processRedirectPacket(const Ipv6Redirect *redirect)
 #endif
 }
 
-#ifdef WITH_xMIPv6
+#ifdef INET_WITH_xMIPv6
 // The overlaoded function has been added by zarrar yousaf on 20.07.07
 void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPrefixInformation& prefixInfo, NetworkInterface *ie, bool hFlag)
 {
@@ -2650,7 +2650,7 @@ bool Ipv6NeighbourDiscovery::isWirelessAccessPoint(cModule *module)
            (module->getSubmodule("wlan", 0) || module->getSubmodule("wlan"));
 }
 
-#endif /* WITH_xMIPv6 */
+#endif /* INET_WITH_xMIPv6 */
 
 } // namespace inet
 

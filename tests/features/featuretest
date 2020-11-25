@@ -10,7 +10,7 @@ FEATURETOOL=opp_featuretool
 # Set the SKIPPED_FEATURES environment variable to empty string to allow enabling
 # the features that require NSC or libav*.
 if [ -z ${SKIPPED_FEATURES+x} ]; then
-  skipped_features="TCP_NSC VoIPStream"
+  skipped_features="TcpNsc VoipStream"
 else
   skipped_features=${SKIPPED_FEATURES}
 fi

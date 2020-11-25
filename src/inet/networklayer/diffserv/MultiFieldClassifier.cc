@@ -26,23 +26,23 @@
 #include "inet/networklayer/diffserv/DiffservUtil.h"
 #include "inet/transportlayer/contract/TransportHeaderBase_m.h"
 
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
 
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6Header.h"
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
 
 #include "inet/transportlayer/common/L4Tools.h"
 
-#ifdef WITH_TCP_COMMON
+#ifdef INET_WITH_TCP_COMMON
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
-#endif // ifdef WITH_TCP_COMMON
+#endif // ifdef INET_WITH_TCP_COMMON
 
-#ifdef WITH_UDP
+#ifdef INET_WITH_UDP
 #include "inet/transportlayer/udp/UdpHeader_m.h"
-#endif // ifdef WITH_UDP
+#endif // ifdef INET_WITH_UDP
 
 namespace inet {
 
@@ -72,7 +72,7 @@ void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const C
         return;
     if (*protocol == Protocol::ipv4) {
         dissect = false;
-#ifdef WITH_IPv4
+#ifdef INET_WITH_IPv4
         const auto& ipv4Header = dynamicPtrCast<const Ipv4Header>(chunk);
         if (!ipv4Header)
             return;
@@ -92,10 +92,10 @@ void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const C
             matchesL4 = true;
         else
             dissect = true;
-#endif // ifdef WITH_IPv4
+#endif // ifdef INET_WITH_IPv4
     }
     else if (*protocol == Protocol::ipv6) {
-#ifdef WITH_IPv6
+#ifdef INET_WITH_IPv6
         dissect = false;
         const auto& ipv6Header = dynamicPtrCast<const Ipv6Header>(chunk);
         if (!ipv6Header)
@@ -117,7 +117,7 @@ void MultiFieldClassifier::PacketDissectorCallback::visitChunk(const Ptr<const C
             matchesL4 = true;
         else
             dissect = true;
-#endif // ifdef WITH_IPv6
+#endif // ifdef INET_WITH_IPv6
     }
     else if (isTransportProtocol(*protocol)) {
         const auto& transportHeader = dynamicPtrCast<const TransportHeaderBase>(chunk);

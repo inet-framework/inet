@@ -21,7 +21,7 @@
 #define __INET_VOIPSTREAMSENDER_H
 
 #ifndef HAVE_FFMPEG
-#error Please install libavcodec, libavformat, libavutil or disable 'VoIPStream' feature
+#error Please install libavcodec, libavformat, libavutil or disable 'VoipStream' feature
 #endif // ifndef HAVE_FFMPEG
 
 #include <fnmatch.h>
@@ -37,7 +37,7 @@ extern "C" {
 #include <libavformat/avformat.h>
 
 #ifndef HAVE_FFMPEG_AVRESAMPLE
-#error Please install libavresample or disable 'VoIPStream' feature
+#error Please install libavresample or disable 'VoipStream' feature
 #endif // ifndef HAVE_FFMPEG_AVRESAMPLE
 #include <libavresample/avresample.h>
 };

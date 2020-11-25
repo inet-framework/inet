@@ -23,12 +23,12 @@
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/common/L4Tools.h"
 
-#ifdef WITH_TCP_COMMON
+#ifdef INET_WITH_TCP_COMMON
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 #endif
 
-#ifdef WITH_UDP
+#ifdef INET_WITH_UDP
 #include "inet/transportlayer/udp/Udp.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #endif
@@ -123,7 +123,7 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
             if (!natEntry.getSrcAddress().isUnspecified())
                 ipv4Header->setSrcAddress(natEntry.getSrcAddress());
             auto transportProtocol = ipv4Header->getProtocol();
-#ifdef WITH_UDP
+#ifdef INET_WITH_UDP
             if (transportProtocol == &Protocol::udp) {
                 auto& udpHeader = removeTransportProtocolHeader<UdpHeader>(packet);
                 // TODO if (!Udp::verifyCrc(Protocol::ipv4, udpHeader, packet))
@@ -137,7 +137,7 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
             }
             else
 #endif
-#ifdef WITH_TCP_COMMON
+#ifdef INET_WITH_TCP_COMMON
             if (transportProtocol == &Protocol::tcp) {
                 auto& tcpHeader = removeTransportProtocolHeader<tcp::TcpHeader>(packet);
                 // TODO if (!Tcp::verifyCrc(Protocol::ipv4, tcpHeader, packet))

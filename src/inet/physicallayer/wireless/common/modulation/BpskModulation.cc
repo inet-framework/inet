@@ -27,7 +27,7 @@ const std::vector<ApskSymbol> BpskModulation::constellation = {
 
 const BpskModulation BpskModulation::singleton;
 
-BpskModulation::BpskModulation() : MqamModulationBase(&constellation)
+BpskModulation::BpskModulation() : MqamModulationBase(1, &constellation)
 {
 }
 

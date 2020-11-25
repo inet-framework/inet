@@ -29,8 +29,13 @@ namespace physicallayer {
  */
 class INET_API MqamModulationBase : public ApskModulationBase
 {
+  protected:
+    double normalizationFactor = NaN;
+
   public:
-    MqamModulationBase(const std::vector<ApskSymbol> *constellation);
+    MqamModulationBase(double normalizationFactor, const std::vector<ApskSymbol> *constellation);
+
+    virtual double getNormalizationFactor() const { return normalizationFactor; }
 
     virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const override;
     virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const override;

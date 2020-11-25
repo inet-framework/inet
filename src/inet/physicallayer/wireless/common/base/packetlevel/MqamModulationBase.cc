@@ -21,8 +21,9 @@ namespace inet {
 
 namespace physicallayer {
 
-MqamModulationBase::MqamModulationBase(const std::vector<ApskSymbol> *constellation) :
-    ApskModulationBase(constellation)
+MqamModulationBase::MqamModulationBase(double normalizationFactor, const std::vector<ApskSymbol> *constellation) :
+    ApskModulationBase(constellation),
+    normalizationFactor(normalizationFactor)
 {
 }
 

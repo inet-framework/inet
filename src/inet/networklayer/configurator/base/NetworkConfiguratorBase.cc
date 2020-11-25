@@ -27,11 +27,11 @@
 #include "inet/common/stlutils.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
-#ifdef WITH_IEEE80211
+#ifdef INET_WITH_IEEE80211
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #endif
 
-#ifdef WITH_RADIO
+#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmitterBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
@@ -42,13 +42,13 @@
 #include "inet/physicallayer/wireless/common/signal/Interference.h"
 #endif
 
-#ifdef WITH_ACKINGWIRELESS
+#ifdef INET_WITH_UNITDISKRADIO
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeader_m.h"
 #endif
 
 namespace inet {
 
-#ifdef WITH_RADIO
+#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 using namespace inet::physicallayer;
 #endif
 
@@ -388,7 +388,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
     else {
         if (!strcmp(metric, "hopCount"))
             return 1;
-#ifdef WITH_RADIO
+#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
         else if (!strcmp(metric, "delay")) {
             // compute the delay between the two interfaces using a dummy transmission
             const InterfaceInfo *transmitterInterfaceInfo = link->sourceInterfaceInfo;
@@ -497,9 +497,9 @@ std::string NetworkConfiguratorBase::getWirelessId(NetworkInterface *networkInte
             throw cRuntimeError("Error in XML <wireless> element at %s: %s", wirelessElement->getSourceLocation(), e.what());
         }
     }
-#if defined(WITH_IEEE80211) || defined(WITH_RADIO)
+#if defined(INET_WITH_IEEE80211) || defined(INET_WITH_PHYSICALLAYERWIRELESSCOMMON)
     cModule *interfaceModule = networkInterface;
-#ifdef WITH_IEEE80211
+#ifdef INET_WITH_IEEE80211
     if (auto mibModule = dynamic_cast<ieee80211::Ieee80211Mib *>(interfaceModule->getSubmodule("mib"))) {
         auto ssid = mibModule->bssData.ssid;
         if (ssid.length() != 0)
@@ -517,8 +517,8 @@ std::string NetworkConfiguratorBase::getWirelessId(NetworkInterface *networkInte
         if (*value)
             return value;
     }
-#endif // WITH_IEEE80211
-#ifdef WITH_RADIO
+#endif // INET_WITH_IEEE80211
+#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
     cModule *radioModule = interfaceModule->getSubmodule("radio");
     const IRadio *radio = dynamic_cast<const IRadio *>(radioModule);
     if (radio != nullptr) {
@@ -526,8 +526,8 @@ std::string NetworkConfiguratorBase::getWirelessId(NetworkInterface *networkInte
         if (mediumModule != nullptr)
             return mediumModule->getFullName();
     }
-#endif // WITH_RADIO
-#endif // defined(WITH_IEEE80211) || defined(WITH_RADIO)
+#endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
+#endif // defined(INET_WITH_IEEE80211) || defined(INET_WITH_PHYSICALLAYERWIRELESSCOMMON)
 
     // default: put all such wireless interfaces on the same LAN
     return "SSID";
