@@ -164,7 +164,7 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
 {
     Enter_Method("sendErrorMessage(datagram, type=%d, code=%d)", type, code);
 
-    if (!maySendErrorMessage(packet, -1)) {
+    if (!maySendErrorMessage(packet, inputInterfaceId)) {
         delete packet;
         return;
     }
