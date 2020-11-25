@@ -193,7 +193,6 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
     // create and send ICMP packet
     Packet *errorPacket = new Packet(msgname);
     const auto& icmpHeader = makeShared<IcmpHeader>();
-    icmpHeader->setChunkLength(B(8)); // FIXME second 4 byte in icmp header not represented yet
     icmpHeader->setType(type);
     icmpHeader->setCode(code);
     // ICMP message length: the internet header plus the first quoteLength bytes of
