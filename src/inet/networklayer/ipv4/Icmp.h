@@ -40,6 +40,9 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
   protected:
     std::set<int> transportProtocols; // where to send up packets
     CrcMode crcMode = CRC_MODE_UNDEFINED;
+    B quoteLength;
+    IIpv4RoutingTable *rt = nullptr;
+    IInterfaceTable *ift = nullptr;
 
   protected:
     virtual void processICMPMessage(Packet *);
@@ -68,6 +71,7 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
+    virtual void handleParameterChange(const char *name) override;
     virtual bool maySendErrorMessage(Packet *packet, int inputInterfaceId);
     virtual void sendOrProcessIcmpPacket(Packet *packet, Ipv4Address origSrcAddr);
 };

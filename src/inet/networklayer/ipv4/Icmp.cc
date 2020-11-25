@@ -40,14 +40,30 @@ namespace inet {
 
 Define_Module(Icmp);
 
-void Icmp::initialize(int stage)
+void Icmp::handleParameterChange(const char *name)
 {
-    cSimpleModule::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (name == nullptr || !strcmp(name, "crcMode")) {
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
+    if (name == nullptr || !strcmp(name, "quoteLength")) {
+        quoteLength = B(par("quoteLength"));
+        if (quoteLength < B(8))
+            throw cRuntimeError("The quoteLength must be 8 bytes or larger");
+    }
+    if (name == nullptr || !strcmp(name, "interfaceTableModule")) {
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+    }
+    if (name == nullptr || !strcmp(name, "routingTableModule")) {
+        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
+    }
+}
+
+void Icmp::initialize(int stage)
+{
+    cSimpleModule::initialize(stage);
+
+    if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         registerService(Protocol::icmpv4, gate("transportIn"), gate("transportOut"));
         registerProtocol(Protocol::icmpv4, gate("ipOut"), gate("ipIn"));
     }
@@ -145,14 +161,11 @@ void Icmp::sendPtbMessage(Packet *packet, int mtu)
     Packet *errorPacket = new Packet(msgname);
     const auto& icmpPtb = makeShared<IcmpPtb>();
     icmpPtb->setMtu(mtu);
-    // ICMP message length: the internet header plus the first queteLength bytes of
+    // ICMP message length: the internet header plus the first quoteLength bytes of
     // the original datagram's data is returned to the sender.
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-    B quoteLength = ipv4Header->getHeaderLength() + B(par("quoteLength"));
-    if (quoteLength > packet->getDataLength()) {
-        quoteLength = packet->getDataLength();
-    }
-    errorPacket->insertAtBack(packet->peekDataAt(B(0), quoteLength));
+    B curQuoteLength = std::min(B(packet->getDataLength()), ipv4Header->getHeaderLength() + quoteLength);
+    errorPacket->insertAtBack(packet->peekDataAt(b(0), curQuoteLength));
     insertCrc(icmpPtb, errorPacket);
     errorPacket->insertAtFront(icmpPtb);
 
@@ -186,11 +199,8 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
     // ICMP message length: the internet header plus the first queteLength bytes of
     // the original datagram's data is returned to the sender.
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-    B quoteLength = ipv4Header->getHeaderLength() + B(par("quoteLength"));
-    if (quoteLength > packet->getDataLength()) {
-        quoteLength = packet->getDataLength();
-    }
-    errorPacket->insertAtBack(packet->peekDataAt(B(0), quoteLength));
+    B curQuoteLength = std::min(B(packet->getDataLength()), ipv4Header->getHeaderLength() + quoteLength);
+    errorPacket->insertAtBack(packet->peekDataAt(B(0), curQuoteLength));
     insertCrc(icmpHeader, errorPacket);
     errorPacket->insertAtFront(icmpHeader);
 
@@ -203,12 +213,10 @@ bool Icmp::possiblyLocalBroadcast(const Ipv4Address& addr, int interfaceId)
     if ((addr.getInt() & 1) == 0)
         return false;
 
-    IIpv4RoutingTable *rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
     if (rt->isLocalBroadcastAddress(addr))
         return true;
 
     // if the input interface is unconfigured, we won't recognize network-directed broadcasts because we don't what network we are on
-    IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (interfaceId != -1) {
         NetworkInterface *ie = ift->getInterfaceById(interfaceId);
         auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>();
