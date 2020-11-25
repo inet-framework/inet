@@ -149,5 +149,6 @@ class IcmpPtb extends IcmpHeader
 {
     type = ICMP_DESTINATION_UNREACHABLE;
     code = ICMP_DU_FRAGMENTATION_NEEDED;
-    int mtu = 0;   // 1 byte
+    uint16_t unused = 0;
+    uint16_t mtu = 0;
 }
