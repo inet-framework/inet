@@ -274,20 +274,6 @@
         linkerFlags = ""
         />
     <feature
-        id = "EmulationShowcases"
-        name = "Emulation showcases"
-        description = "Showcases that demonstrate communication with external systems/components."
-        initiallyEnabled = "false"
-        requires = " Ethernet NetworkEmulationSupport Ieee80211 VoipStream"
-        labels = ""
-        nedPackages = "
-                       inet.showcases.emulation
-                      "
-        extraSourceFolders = ""
-        compileFlags = ""
-        linkerFlags = ""
-        />
-    <feature
         id = "Ethernet"
         name = "Ethernet"
         description = "IEEE 802.3 models (MAC, LLC, Encap) with support for classic
@@ -705,6 +691,20 @@
         labels = "nic"
         nedPackages = "
                        inet.examples.emulation
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id = "NetworkEmulationShowcases"
+        name = "Network emulation support showcases"
+        description = "Showcases that demonstrate communication with external systems/components."
+        initiallyEnabled = "false"
+        requires = " Ethernet NetworkEmulationSupport Ieee80211 VoipStream"
+        labels = ""
+        nedPackages = "
+                       inet.showcases.emulation
                       "
         extraSourceFolders = ""
         compileFlags = ""
