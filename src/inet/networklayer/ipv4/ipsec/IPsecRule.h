@@ -21,6 +21,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "PacketSelector.h"
+#include "Enum.h"
 
 // Some Windows header defines IN and OUT as macros, which clashes with our use of those words.
 #ifdef _WIN32
@@ -50,6 +51,7 @@ class INET_API IPsecRule
     };
 
     enum class Action {
+        NONE,
         DISCARD,
         BYPASS,
         PROTECT
@@ -61,12 +63,86 @@ class INET_API IPsecRule
         ESP
     };
 
+    enum class EspMode {
+        NONE,
+        INTEGRITY,
+        CONFIDENTIALITY,
+        COMBINED
+    };
+
+    enum class EncryptionAlg {
+        /*
+         * "NULL" algorithm, see RFC 4303 Section 3.2.1
+         */
+        NONE, // Note: the name NULL is still reserved due to the C heritage
+        /*
+         * DES RFC 2405
+         * BS = 8B
+         * IV = 8B
+         */
+        DES, //  MUST NOT RFC 8221 5.
+        /*
+         * 3DES RFC 2451
+         * Key size = 24B
+         * BS = 8B
+         * IV = 8B
+         *
+         */
+        TRIPLE_DES, // SHOULD NOT RFC 8221 5.
+        /*
+         * AES_CBC RFC 3602
+         * BS = 16B
+         * IV = same as Block Size
+         */
+        AES_CBC_128, AES_CBC_192, AES_CBC_256,
+        /*
+         * AES_GCM RFC 4106
+         * GCM is a block cipher mode of operation providing both confidentiality and data origin authentication.
+         * BS = 16B
+         * IV = 8B
+         * ICV = 16B (MUST) 8B, 12B - MAY
+         * The Key Length attribute MUST have a value of 128, 192, or 256.
+         */
+        AES_GCM_16_128, AES_GCM_16_192, AES_GCM_16_256, //Combined mode
+        /*
+         * AES_CCM RFC 4309
+         * BS = 16B
+         * IV = 8B
+         * ICV = 8B or 16B (MUST), 12B - MAY
+         */
+        AES_CCM_8_128, AES_CCM_8_192, AES_CCM_8_256,    //Combined mode
+        AES_CCM_16_128, AES_CCM_16_192, AES_CCM_16_256,  //Combined mode
+        /*
+         * CHACHA20_POLY1305 RFC 7634
+         * IV = 8B
+         * ICV = 16B - MUST, 8B, 12B - MAY
+         * !!!! It is a stream cipher, but when used in ESP the ciphertext needs to be aligned so that padLength and nextHeader are right aligned to multiple of 4 octets.
+         * BS = 4B
+         */
+        CHACHA20_POLY1305 // Combined mode
+    };
+
+    enum class AuthenticationAlg {
+        NONE,              // "NULL" algorithm, RFC 4301 Section 3.2.2
+        HMAC_MD5_96,       // MUST NOT RFC 8221 Section 6
+        HMAC_SHA1,         // MUST-    RFC 8221 Section 6
+        AES_128_GMAC,      // MAY      RFC 8221 Section 6
+        AES_192_GMAC,      // MAY      RFC 8221 Section 6
+        AES_256_GMAC,      // MAY      RFC 8221 Section 6
+        HMAC_SHA2_256_128, // MUST     RFC 8221 Section 6
+        HMAC_SHA2_384_192,
+        HMAC_SHA2_512_256, // SHOULD   RFC 8221 Section 6
+    };
+
   private:
     Direction direction = Direction::INVALID;
     PacketSelector selector;
     Action action = Action::DISCARD;
     Protection protection = Protection::NONE;  // if action=PROTECT
-    int icvNumBits = 0;
+    EspMode espMode = EspMode::NONE;
+    EncryptionAlg enryptionAlg = EncryptionAlg::NONE;
+    AuthenticationAlg authenticationAlg = AuthenticationAlg::NONE;
+    unsigned int maxTfcPadLength;
 
   public:
     Direction getDirection() const { return direction; }
@@ -77,8 +153,14 @@ class INET_API IPsecRule
     void setAction(Action action = Action::DISCARD) { this->action = action; }
     Protection getProtection() const { return protection; }
     void setProtection(Protection protection) { this->protection = protection; }
-    int getIcvNumBits() const { return icvNumBits; }
-    void setIcvNumBits(int len) { this->icvNumBits = len; }
+    EspMode getEspMode() const { return espMode; }
+    void setEspMode(EspMode espMode) { this->espMode = espMode; }
+    EncryptionAlg getEnryptionAlg() const { return enryptionAlg; }
+    void setEnryptionAlg(EncryptionAlg alg) { this->enryptionAlg = alg; }
+    AuthenticationAlg getAuthenticationAlg() const {return authenticationAlg; }
+    void setAuthenticationAlg(AuthenticationAlg alg) { this->authenticationAlg = alg; }
+    unsigned int getMaxTfcPadLength() const { return maxTfcPadLength; }
+    void setMaxTfcPadLength(unsigned int maxTfcPadLength) { this->maxTfcPadLength = maxTfcPadLength; }
     std::string str() const;
 };
 
@@ -86,6 +168,13 @@ inline std::ostream& operator<<(std::ostream& os, const IPsecRule& e)
 {
     return os << e.str();
 }
+
+extern Enum<IPsecRule::Direction> directionEnum;
+extern Enum<IPsecRule::Action> actionEnum;
+extern Enum<IPsecRule::Protection> protectionEnum;
+extern Enum<IPsecRule::EspMode> espModeEnum;
+extern Enum<IPsecRule::EncryptionAlg> encryptionAlgEnum;
+extern Enum<IPsecRule::AuthenticationAlg> authenticationAlgEnum;
 
 }  // namespace ipsec
 }  // namespace inet

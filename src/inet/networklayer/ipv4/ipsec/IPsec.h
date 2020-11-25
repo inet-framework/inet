@@ -36,6 +36,14 @@ namespace ipsec {
  */
 class INET_API IPsec : public cSimpleModule, INetfilter::IHook
 {
+  public:
+    typedef IPsecRule::Action Action;
+    typedef IPsecRule::Direction Direction;
+    typedef IPsecRule::Protection Protection;
+    typedef IPsecRule::EspMode EspMode;
+    typedef IPsecRule::EncryptionAlg EncryptionAlg;
+    typedef IPsecRule::AuthenticationAlg AuthenticationAlg;
+
   private:
     IPv4 *ipLayer;
     SecurityPolicyDatabase *spdModule;
@@ -75,9 +83,10 @@ class INET_API IPsec : public cSimpleModule, INetfilter::IHook
     virtual void initSecurityDBs(omnetpp::cXMLElement *spdConfig);
     virtual void parseSelector(const cXMLElement *selectorElem, PacketSelector& selector);
     static unsigned int parseProtocol(const std::string& value);
-    static IPsecRule::Action parseAction(const cXMLElement *elem);
-    static IPsecRule::Direction parseDirection(const cXMLElement *elem);
-    static IPsecRule::Protection parseProtection(const cXMLElement *elem);
+    template<typename E>
+    static E parseEnum(const Enum<E>& enum_, const cXMLElement *elem);
+    template<typename E>
+    static E parseOptionalEnum(const Enum<E>& enum_, const cXMLElement *elem, E defaultValue);
 
     virtual PacketInfo extractIngressPacketInfo(IPv4Datagram *ipv4datagram);
     virtual PacketInfo extractEgressPacketInfo(IPv4Datagram *ipv4datagram, const IPv4Address& localAddress);
@@ -86,6 +95,13 @@ class INET_API IPsec : public cSimpleModule, INetfilter::IHook
     virtual cPacket *ahProtect(cPacket *transport, SecurityAssociation *sadEntry, int transportType);
 
     virtual INetfilter::IHook::Result protectDatagram(IPv4Datagram *ipv4datagram, const PacketInfo& packetInfo, SecurityPolicy *spdEntry);
+
+    virtual int getIntegrityCheckValueBitLength(EncryptionAlg alg);
+    virtual int getInitializationVectorBitLength(EncryptionAlg alg);
+    virtual int getBlockSizeBytes(EncryptionAlg alg);
+
+    virtual int getIntegrityCheckValueBitLength(AuthenticationAlg alg);
+    virtual int getInitializationVectorBitLength(AuthenticationAlg alg);
 
   public:
     IPsec();

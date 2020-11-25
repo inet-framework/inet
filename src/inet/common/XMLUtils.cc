@@ -10,7 +10,7 @@ const cXMLElement *getUniqueChild(const cXMLElement *node, const char *name)
 {
     const cXMLElement *child = getUniqueChildIfExists(node, name);
     if (!child)
-        throw cRuntimeError(node, "XML error: exactly one %s element expected", name);
+        throw cRuntimeError("Missing <%s> element in <%s> at %s", name, node->getTagName(), node->getSourceLocation());
 
     return child;
 }
@@ -19,7 +19,7 @@ const cXMLElement *getUniqueChildIfExists(const cXMLElement *node, const char *n
 {
     cXMLElementList list = node->getChildrenByTagName(name);
     if (list.size() > 1)
-        throw cRuntimeError(node, "XML error: at most one %s element expected", name);
+        throw cRuntimeError("More than one <%s> element in <%s> at %s", name, node->getTagName(), node->getSourceLocation());
     else if (list.size() == 1)
         return *list.begin();
     else
@@ -54,22 +54,22 @@ bool parseBool(const char *text)
 
 void checkTags(const cXMLElement *node, const char *allowed)
 {
-    std::vector<const char *> tags;
+    std::vector<const char *> allowedTags;
 
     cStringTokenizer st(allowed, " ");
     const char *nt;
     while ((nt = st.nextToken()) != nullptr)
-        tags.push_back(nt);
+        allowedTags.push_back(nt);
 
     for (cXMLElement *child = node->getFirstChild(); child; child = child->getNextSibling()) {
         unsigned int i;
-        for (i = 0; i < tags.size(); i++)
-            if (!strcmp(child->getTagName(), tags[i]))
+        for (i = 0; i < allowedTags.size(); i++)
+            if (!strcmp(child->getTagName(), allowedTags[i]))
                 break;
 
-        if (i == tags.size())
-            throw cRuntimeError(node, "Subtag <%s> not expected in <%s>",
-                    child->getTagName(), node->getTagName());
+        if (i == allowedTags.size())
+            throw cRuntimeError(node, "Child element <%s> is unexpected in <%s> at %s",
+                    child->getTagName(), node->getTagName(), child->getSourceLocation());
     }
 }
 

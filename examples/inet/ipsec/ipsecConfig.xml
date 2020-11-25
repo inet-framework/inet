@@ -12,7 +12,8 @@
                 <Direction>IN</Direction>
                 <Action>PROTECT</Action>
                 <Protection>ESP</Protection>
-                <IcvNumBits>256</IcvNumBits>
+                <EspMode>CONFIDENTIALITY</EspMode>
+                <EncryptionAlg>AES_CBC_128</EncryptionAlg>
                 <SecurityAssociation>
                     <SPI>1</SPI> <!-- Must match SPI for OUT rule at the other host -->
                 </SecurityAssociation>
@@ -29,7 +30,9 @@
                 <Direction>OUT</Direction>
                 <Action>PROTECT</Action>
                 <Protection>ESP</Protection>
-                <IcvNumBits>256</IcvNumBits>
+                <EspMode>CONFIDENTIALITY</EspMode>
+                <EncryptionAlg>AES_CBC_128</EncryptionAlg>
+                <MaxTfcPadLength>255</MaxTfcPadLength>
                 <SecurityAssociation>
                     <SPI>50</SPI> <!-- Must match SPI for OUT rule at the other host -->
                 </SecurityAssociation>
@@ -72,7 +75,8 @@
                 <Direction>IN</Direction>
                 <Action>PROTECT</Action>
                 <Protection>ESP</Protection>
-                <IcvNumBits>256</IcvNumBits>
+                <EspMode>CONFIDENTIALITY</EspMode>
+                <EncryptionAlg>AES_CBC_128</EncryptionAlg>
                 <SecurityAssociation>
                     <SPI>50</SPI> <!-- Must match SPI for OUT rule at the other host -->
                 </SecurityAssociation>
@@ -89,7 +93,8 @@
                 <Direction>OUT</Direction>
                 <Action>PROTECT</Action>
                 <Protection>ESP</Protection>
-                <IcvNumBits>256</IcvNumBits>
+                <EspMode>CONFIDENTIALITY</EspMode>
+                <EncryptionAlg>AES_CBC_128</EncryptionAlg>
                 <SecurityAssociation>
                     <SPI>1</SPI> <!-- Must match SPI for OUT rule at the other host -->
                 </SecurityAssociation>

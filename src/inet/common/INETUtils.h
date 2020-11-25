@@ -70,6 +70,12 @@ INET_API std::string vstringf(const char *fmt, va_list& args);
 inline int roundUp(int numToRound, int multiple) { return ((numToRound + multiple - 1) / multiple) * multiple; }
 
 /**
+ * Concatenate the strings passed in the vector, using the given separator,
+ * and putting each item between quoteChars unless it is '\0'. Empty elements are skipped.
+ */
+INET_API std::string join(const std::vector<std::string>& strings, const char *separator, char quoteChar=0);
+
+/**
  * Like cObjectFactory::createOneIfClassIsKnown(), except it starts searching for the class in the given namespace
  */
 INET_API cObject *createOneIfClassIsKnown(const char *className, const char *defaultNamespace = nullptr);

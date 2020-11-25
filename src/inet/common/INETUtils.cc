@@ -128,6 +128,24 @@ std::string vstringf(const char *fmt, va_list& args)
 
 #undef BUFLEN
 
+std::string join(const std::vector<std::string>& strings, const char *separator, char quoteChar)
+{
+    bool first = true;
+    std::stringstream os;
+    for (auto item : strings) {
+        if (item.empty())
+            continue;
+        if (!first)
+            os << separator;
+        if (quoteChar)
+            os << quoteChar << item << quoteChar;
+        else
+            os << item;
+        first = false;
+    }
+    return os.str();
+}
+
 cObject *createOneIfClassIsKnown(const char *className, const char *defaultNamespace)
 {
     if (!defaultNamespace)
