@@ -26,6 +26,7 @@ namespace inet {
 Register_Serializer(IcmpHeader, IcmpHeaderSerializer);
 Register_Serializer(IcmpEchoRequest, IcmpHeaderSerializer);
 Register_Serializer(IcmpEchoReply, IcmpHeaderSerializer);
+Register_Serializer(IcmpPtb, IcmpHeaderSerializer);
 
 void IcmpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
@@ -47,8 +48,16 @@ void IcmpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
             break;
         }
         case ICMP_DESTINATION_UNREACHABLE:
-            stream.writeUint16Be(0); // unused
-            stream.writeUint16Be(0); // next hop MTU
+            if (icmpHeader->getCode() == ICMP_DU_FRAGMENTATION_NEEDED) {
+                if (const auto& icmpPtb = dynamicPtrCast<const IcmpPtb>(chunk)) {
+                    stream.writeUint16Be(icmpPtb->getUnused()); // unused
+                    stream.writeUint16Be(icmpPtb->getMtu()); // next hop MTU
+                }
+                else
+                    stream.writeUint32Be(0);
+            }
+            else
+                stream.writeUint32Be(0); // unused
             break;
         case ICMP_TIME_EXCEEDED:
             stream.writeUint32Be(0); // unused
@@ -90,8 +99,18 @@ const Ptr<Chunk> IcmpHeaderSerializer::deserialize(MemoryInputStream& stream) co
             break;
         }
         case ICMP_DESTINATION_UNREACHABLE:
-            stream.readUint16Be(); // unused
-            stream.readUint16Be(); // next hop MTU
+            if (icmpHeader->getCode() == ICMP_DU_FRAGMENTATION_NEEDED) {
+                auto icmpPtb = makeShared<IcmpPtb>();
+                icmpPtb->setType(type);
+                icmpPtb->setCode(icmpHeader->getCode());
+                icmpPtb->setChksum(icmpHeader->getChksum());
+                icmpPtb->setCrcMode(CRC_COMPUTED);
+                icmpPtb->setUnused(stream.readUint16Be());
+                icmpPtb->setMtu(stream.readUint16Be());
+                icmpHeader = icmpPtb;
+            }
+            else
+                stream.readUint32Be(); // unused
             break;
         case ICMP_TIME_EXCEEDED:
             stream.readUint32Be(); // unused
