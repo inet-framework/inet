@@ -7,3 +7,4 @@ The following showcases demonstrate INET's Ethernet support:
    :maxdepth: 1
 
    preemption/doc/index
+   cutthrough/doc/index
