@@ -17,7 +17,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/routing/extras/dsr/dsr-uu-omnetpp.h"
 
-#ifndef WITH_IPv4
+#ifndef INET_WITH_IPv4
 #error Ipv4 must be defined for DSR
 #endif
 

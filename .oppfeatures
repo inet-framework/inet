@@ -1483,7 +1483,7 @@
                        inet.routing.extras
                       "
         extraSourceFolders = ""
-        compileFlags = "-DWITH_EXTRAMANETROUTING"
+        compileFlags = "-DINET_WITH_EXTRAMANETROUTING"
         linkerFlags = ""
         />
     <feature
@@ -1498,7 +1498,7 @@
                       inet.examples.lora
                       "
         extraSourceFolders = ""
-        compileFlags = "-DWITH_FLORACODE"
+        compileFlags = "-DINET_WITH_FLORACODE"
         linkerFlags = ""
         />        
     <feature
@@ -1513,7 +1513,7 @@
                        inet.examples.cloudNetSim
                       "
         extraSourceFolders = ""
-        compileFlags = "-DWITH_CLOUDNETSIM"
+        compileFlags = "-DINET_WITH_CLOUDNETSIM"
         linkerFlags = ""
         />
 		<feature
@@ -1528,7 +1528,7 @@
                        inet.examples.icancloud
                       "
         extraSourceFolders = ""
-        compileFlags = "-DWITH_ICANCLOUD"
+        compileFlags = "-DINET_WITH_ICANCLOUD"
         linkerFlags = ""
         />
 
