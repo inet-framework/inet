@@ -24,8 +24,8 @@ module Ieee802154NarrowbandRadio extends FlatRadioBase
 {
     parameters:
         string signalAnalogRepresentation @enum("scalar", "dimensional") = default("scalar");
-        transmitter.typename = default(signalAnalogRepresentation == "scalar" ? "Ieee802154ScalarTransmitter" : signalAnalogRepresentation == "dimensional" ? "Ieee802154DimensionalTransmitter" : "");
-        receiver.typename = default(signalAnalogRepresentation == "scalar" ? "Ieee802154ScalarReceiver" : signalAnalogRepresentation == "dimensional" ? "Ieee802154DimensionalReceiver" : "");
+        transmitter.typename = default(signalAnalogRepresentation == "scalar" ? "Ieee802154NarrowbandScalarTransmitter" : signalAnalogRepresentation == "dimensional" ? "Ieee802154NarrowbandDimensionalTransmitter" : "");
+        receiver.typename = default(signalAnalogRepresentation == "scalar" ? "Ieee802154NarrowbandScalarReceiver" : signalAnalogRepresentation == "dimensional" ? "Ieee802154NarrowbandDimensionalReceiver" : "");
 
         centerFrequency = default(2450 MHz);
 
