@@ -68,7 +68,7 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual bool doSendErrorMessage(Packet *packet, int inputInterfaceId);
+    virtual bool maySendErrorMessage(Packet *packet, int inputInterfaceId);
     virtual void sendOrProcessIcmpPacket(Packet *packet, Ipv4Address origSrcAddr);
 };
 

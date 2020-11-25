@@ -67,7 +67,7 @@ void Icmp::handleMessage(cMessage *msg)
         throw cRuntimeError("Message %s(%s) arrived in unknown '%s' gate", msg->getName(), msg->getClassName(), msg->getArrivalGate()->getName());
 }
 
-bool Icmp::doSendErrorMessage(Packet *packet, int inputInterfaceId)
+bool Icmp::maySendErrorMessage(Packet *packet, int inputInterfaceId)
 {
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     Ipv4Address origSrcAddr = ipv4Header->getSrcAddress();
@@ -128,7 +128,7 @@ void Icmp::sendPtbMessage(Packet *packet, int mtu)
 {
     Enter_Method("sendPtbMessage(datagram, mtu=%d)", mtu);
 
-    if (!doSendErrorMessage(packet, -1)) {
+    if (!maySendErrorMessage(packet, -1)) {
         delete packet;
         return;
     }
@@ -164,7 +164,7 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
 {
     Enter_Method("sendErrorMessage(datagram, type=%d, code=%d)", type, code);
 
-    if (!doSendErrorMessage(packet, -1)) {
+    if (!maySendErrorMessage(packet, -1)) {
         delete packet;
         return;
     }
