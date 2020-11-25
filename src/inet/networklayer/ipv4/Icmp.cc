@@ -40,6 +40,8 @@ namespace inet {
 
 Define_Module(Icmp);
 
+long Icmp::ctr = 0;
+
 void Icmp::handleParameterChange(const char *name)
 {
     if (name == nullptr || !strcmp(name, "crcMode")) {
@@ -151,7 +153,6 @@ void Icmp::sendPtbMessage(Packet *packet, int mtu)
 
     // assemble a message name
     char msgname[80];
-    static long ctr;
     sprintf(msgname, "ICMP-PTB-#%ld-mtu%d", ++ctr, mtu);
 
     // debugging information
@@ -184,7 +185,6 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
 
     // assemble a message name
     char msgname[80];
-    static long ctr;
     sprintf(msgname, "ICMP-error-#%ld-type%d-code%d", ++ctr, type, code);
 
     // debugging information

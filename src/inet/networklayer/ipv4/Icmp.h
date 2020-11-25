@@ -43,6 +43,7 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
     B quoteLength;
     IIpv4RoutingTable *rt = nullptr;
     IInterfaceTable *ift = nullptr;
+    static long ctr;
 
   protected:
     virtual void processICMPMessage(Packet *);
