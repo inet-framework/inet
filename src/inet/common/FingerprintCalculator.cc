@@ -55,13 +55,13 @@ bool FingerprintCalculator::addEventIngredient(cEvent *event, cSingleFingerprint
 #if OMNETPP_BUILDNUM <= 1506
                         hasher->add(senderNode->getFullPath().c_str());
 #else
-                        hasher << senderNode->getFullPath();
+                        hasher_ << senderNode->getFullPath();
 #endif
                     if (auto arrivalNode = findContainingNode(cpacket->getArrivalModule()))
 #if OMNETPP_BUILDNUM <= 1506
                         hasher->add(arrivalNode->getFullPath().c_str());
 #else
-                        hasher << arrivalNode->getFullPath();
+                        hasher_ << arrivalNode->getFullPath();
 #endif
                 }
                 break;
@@ -71,13 +71,13 @@ bool FingerprintCalculator::addEventIngredient(cEvent *event, cSingleFingerprint
 #if OMNETPP_BUILDNUM <= 1506
                         hasher->add(senderInterface->getInterfaceFullPath().c_str());
 #else
-                        hasher << senderInterface->getInterfaceFullPath();
+                        hasher_ << senderInterface->getInterfaceFullPath();
 #endif
                     if (auto arrivalInterface = findContainingNicModule(cpacket->getArrivalModule()))
 #if OMNETPP_BUILDNUM <= 1506
                         hasher->add(arrivalInterface->getInterfaceFullPath().c_str());
 #else
-                        hasher << arrivalInterface->getInterfaceFullPath();
+                        hasher_ << arrivalInterface->getInterfaceFullPath();
 #endif
                 }
                 break;
@@ -93,7 +93,7 @@ bool FingerprintCalculator::addEventIngredient(cEvent *event, cSingleFingerprint
 #if OMNETPP_BUILDNUM <= 1506
                                 hasher->add(byte);
 #else
-                                hasher << byte;
+                                hasher_ << byte;
 #endif
                         }
                         else {
@@ -102,7 +102,7 @@ bool FingerprintCalculator::addEventIngredient(cEvent *event, cSingleFingerprint
 #if OMNETPP_BUILDNUM <= 1506
                                 hasher->add(bit);
 #else
-                                hasher << bit;
+                                hasher_ << bit;
 #endif
                         }
                     }
