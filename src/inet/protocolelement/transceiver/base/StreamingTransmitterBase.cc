@@ -42,9 +42,8 @@ void StreamingTransmitterBase::receiveSignal(cComponent *source, simsignal_t sig
 {
 #ifdef INET_WITH_CLOCK
     ClockUserModuleMixin::receiveSignal(source, signal, object, details);
-#else
-    Enter_Method("receiveSignal");
 #endif
+    Enter_Method("receiveSignal");
     if (signal == PRE_MODEL_CHANGE) {
         if (auto notification = dynamic_cast<cPrePathCutNotification *>(object)) {
             if (outputGate == notification->pathStartGate && isTransmitting())
