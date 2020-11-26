@@ -46,7 +46,7 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
     static long ctr;
 
   protected:
-    virtual void processICMPMessage(Packet *);
+    virtual void processIcmpMessage(Packet *);
     virtual void errorOut(Packet *);
     virtual void processEchoRequest(Packet *);
     virtual void sendToIP(Packet *, const Ipv4Address& dest);

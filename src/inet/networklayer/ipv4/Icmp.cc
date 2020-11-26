@@ -78,7 +78,7 @@ void Icmp::handleMessage(cMessage *msg)
     // process arriving ICMP message
     if (arrivalGate->isName("ipIn")) {
         EV_INFO << "Received " << msg << " from network protocol.\n";
-        processICMPMessage(check_and_cast<Packet *>(msg));
+        processIcmpMessage(check_and_cast<Packet *>(msg));
         return;
     }
     else
@@ -135,7 +135,7 @@ void Icmp::sendOrProcessIcmpPacket(Packet *packet, Ipv4Address origSrcAddr)
         packet->addTag<L3AddressInd>()->setDestAddress(Ipv4Address::LOOPBACK_ADDRESS);    // FIXME maybe use configured loopback address
 
         // then process it locally
-        processICMPMessage(packet);
+        processIcmpMessage(packet);
     }
     else {
         sendToIP(packet, origSrcAddr);
@@ -229,7 +229,7 @@ bool Icmp::possiblyLocalBroadcast(const Ipv4Address& addr, int interfaceId)
     }
 }
 
-void Icmp::processICMPMessage(Packet *packet)
+void Icmp::processIcmpMessage(Packet *packet)
 {
     if (!verifyCrc(packet)) {
         EV_WARN << "incoming ICMP packet has wrong CRC, dropped\n";
@@ -245,6 +245,7 @@ void Icmp::processICMPMessage(Packet *packet)
     switch (icmpmsg->getType()) {
         case ICMP_REDIRECT:
             // TODO implement redirect handling
+            EV_ERROR << "ICMP_REDIRECT not implemented yet, packet " << EV_FORMAT_OBJECT(packet) << " dropped.\n";
             delete packet;
             break;
 
