@@ -312,6 +312,20 @@ static inline char *print_pkt(char *p, int len)
 #define DELIVER(pkt) omnet_deliver(pkt)
 #define __init
 #define __exit
+
+#ifdef ntohl
+#undef ntohl
+#endif
+#ifdef htonl
+#undef htonl
+#endif
+#ifdef htons
+#undef htons
+#endif
+#ifdef ntohs
+#undef ntohs
+#endif
+
 #define ntohl(x) x
 #define htonl(x) x
 #define htons(x) x
