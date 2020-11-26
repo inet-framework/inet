@@ -18,6 +18,8 @@
 #ifndef __INET_LINKBREAKOSGVISUALIZER_H
 #define __INET_LINKBREAKOSGVISUALIZER_H
 
+#include <osg/ref_ptr>
+
 #include "inet/visualizer/base/LinkBreakVisualizerBase.h"
 
 namespace inet {
@@ -31,11 +33,10 @@ class INET_API LinkBreakOsgVisualizer : public LinkBreakVisualizerBase
   protected:
     class INET_API LinkBreakOsgVisualization : public LinkBreakVisualization {
       public:
-        osg::Node *node = nullptr;
+        osg::ref_ptr<osg::Node> node;
 
       public:
         LinkBreakOsgVisualization(osg::Node *node, int transmitterModuleId, int receiverModuleId);
-        virtual ~LinkBreakOsgVisualization();
     };
 
   protected:

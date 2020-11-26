@@ -39,11 +39,6 @@ LinkOsgVisualizerBase::LinkOsgVisualization::LinkOsgVisualization(inet::osg::Lin
 {
 }
 
-LinkOsgVisualizerBase::LinkOsgVisualization::~LinkOsgVisualization()
-{
-    // TODO delete node;
-}
-
 void LinkOsgVisualizerBase::initialize(int stage)
 {
     LinkVisualizerBase::initialize(stage);

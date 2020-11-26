@@ -35,11 +35,6 @@ PacketDropOsgVisualizer::PacketDropOsgVisualization::PacketDropOsgVisualization(
 {
 }
 
-PacketDropOsgVisualizer::PacketDropOsgVisualization::~PacketDropOsgVisualization()
-{
-    // TODO delete node;
-}
-
 void PacketDropOsgVisualizer::refreshDisplay() const
 {
     PacketDropVisualizerBase::refreshDisplay();
@@ -91,7 +86,7 @@ void PacketDropOsgVisualizer::removePacketDropVisualization(const PacketDropVisu
 void PacketDropOsgVisualizer::setAlpha(const PacketDropVisualization *packetDropVisualization, double alpha) const
 {
     auto packetDropOsgVisualization = static_cast<const PacketDropOsgVisualization *>(packetDropVisualization);
-    auto positionAttitudeTransform = static_cast<osg::PositionAttitudeTransform *>(packetDropOsgVisualization->node);
+    auto positionAttitudeTransform = static_cast<osg::PositionAttitudeTransform *>(packetDropOsgVisualization->node.get());
     auto autoTransform = static_cast<osg::AutoTransform *>(positionAttitudeTransform->getChild(0));
     auto geode = static_cast<osg::Geode *>(autoTransform->getChild(0));
     auto material = static_cast<osg::Material *>(geode->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));

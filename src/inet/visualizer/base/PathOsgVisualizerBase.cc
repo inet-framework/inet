@@ -39,11 +39,6 @@ PathOsgVisualizerBase::PathOsgVisualization::PathOsgVisualization(const char *la
 {
 }
 
-PathOsgVisualizerBase::PathOsgVisualization::~PathOsgVisualization()
-{
-    // TODO delete node;
-}
-
 void PathOsgVisualizerBase::initialize(int stage)
 {
     PathVisualizerBase::initialize(stage);
