@@ -1,21 +1,15 @@
 package inet.tutorials.fingerprint;
 
-import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth10G;
-import inet.node.ethernet.EtherSwitch;
+import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
-import inet.physicallayer.contract.packetlevel.IRadioMedium;
-import inet.physicallayer.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;
 import inet.visualizer.integrated.IntegratedMultiCanvasVisualizer;
-import inet.visualizer.integrated.IntegratedMultiVisualizer;
 import inet.visualizer.integrated.IntegratedVisualizer;
-import ned.DatarateChannel;
-
 
 network RegressionTestingTutorialWireless
 {
@@ -51,13 +45,13 @@ network RegressionTestingTutorialWired
         router2: Router {
             @display("p=530.1875,375.0625");
         }
-        switch2: EtherSwitch {
+        switch2: EthernetSwitch {
             @display("p=643.875,374");
         }
-        switch3: EtherSwitch {
+        switch3: EthernetSwitch {
             @display("p=427.125,167.875");
         }
-        switch1: EtherSwitch {
+        switch1: EthernetSwitch {
             @display("p=210.375,374");
         }
         host4: StandardHost {
