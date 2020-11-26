@@ -146,31 +146,28 @@ void Icmp::sendPtbMessage(Packet *packet, int mtu)
 {
     Enter_Method("sendPtbMessage(datagram, mtu=%d)", mtu);
 
-    if (!maySendErrorMessage(packet, -1)) {
-        delete packet;
-        return;
+    if (maySendErrorMessage(packet, -1)) {
+        // assemble a message name
+        char msgname[80];
+        sprintf(msgname, "ICMP-PTB-#%ld-mtu%d", ++ctr, mtu);
+
+        // debugging information
+        EV_DETAIL << "sending ICMP PTB " << msgname << endl;
+
+        // create and send ICMP packet
+        Packet *errorPacket = new Packet(msgname);
+        const auto& icmpPtb = makeShared<IcmpPtb>();
+        icmpPtb->setMtu(mtu);
+        // ICMP message length: the internet header plus the first quoteLength bytes of
+        // the original datagram's data is returned to the sender.
+        const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
+        B curQuoteLength = std::min(B(packet->getDataLength()), ipv4Header->getHeaderLength() + quoteLength);
+        errorPacket->insertAtBack(packet->peekDataAt(b(0), curQuoteLength));
+        insertCrc(icmpPtb, errorPacket);
+        errorPacket->insertAtFront(icmpPtb);
+
+        sendOrProcessIcmpPacket(errorPacket, ipv4Header->getSrcAddress());
     }
-
-    // assemble a message name
-    char msgname[80];
-    sprintf(msgname, "ICMP-PTB-#%ld-mtu%d", ++ctr, mtu);
-
-    // debugging information
-    EV_DETAIL << "sending ICMP PTB " << msgname << endl;
-
-    // create and send ICMP packet
-    Packet *errorPacket = new Packet(msgname);
-    const auto& icmpPtb = makeShared<IcmpPtb>();
-    icmpPtb->setMtu(mtu);
-    // ICMP message length: the internet header plus the first quoteLength bytes of
-    // the original datagram's data is returned to the sender.
-    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-    B curQuoteLength = std::min(B(packet->getDataLength()), ipv4Header->getHeaderLength() + quoteLength);
-    errorPacket->insertAtBack(packet->peekDataAt(b(0), curQuoteLength));
-    insertCrc(icmpPtb, errorPacket);
-    errorPacket->insertAtFront(icmpPtb);
-
-    sendOrProcessIcmpPacket(errorPacket, ipv4Header->getSrcAddress());
     delete packet;
 }
 
@@ -178,32 +175,29 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
 {
     Enter_Method("sendErrorMessage(datagram, type=%d, code=%d)", type, code);
 
-    if (!maySendErrorMessage(packet, inputInterfaceId)) {
-        delete packet;
-        return;
+    if (maySendErrorMessage(packet, inputInterfaceId)) {
+        // assemble a message name
+        char msgname[80];
+        sprintf(msgname, "ICMP-error-#%ld-type%d-code%d", ++ctr, type, code);
+
+        // debugging information
+        EV_DETAIL << "sending ICMP error " << msgname << endl;
+
+        // create and send ICMP packet
+        Packet *errorPacket = new Packet(msgname);
+        const auto& icmpHeader = makeShared<IcmpHeader>();
+        icmpHeader->setType(type);
+        icmpHeader->setCode(code);
+        // ICMP message length: the internet header plus the first quoteLength bytes of
+        // the original datagram's data is returned to the sender.
+        const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
+        B curQuoteLength = std::min(B(packet->getDataLength()), ipv4Header->getHeaderLength() + quoteLength);
+        errorPacket->insertAtBack(packet->peekDataAt(B(0), curQuoteLength));
+        insertCrc(icmpHeader, errorPacket);
+        errorPacket->insertAtFront(icmpHeader);
+
+        sendOrProcessIcmpPacket(errorPacket, ipv4Header->getSrcAddress());
     }
-
-    // assemble a message name
-    char msgname[80];
-    sprintf(msgname, "ICMP-error-#%ld-type%d-code%d", ++ctr, type, code);
-
-    // debugging information
-    EV_DETAIL << "sending ICMP error " << msgname << endl;
-
-    // create and send ICMP packet
-    Packet *errorPacket = new Packet(msgname);
-    const auto& icmpHeader = makeShared<IcmpHeader>();
-    icmpHeader->setType(type);
-    icmpHeader->setCode(code);
-    // ICMP message length: the internet header plus the first quoteLength bytes of
-    // the original datagram's data is returned to the sender.
-    const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
-    B curQuoteLength = std::min(B(packet->getDataLength()), ipv4Header->getHeaderLength() + quoteLength);
-    errorPacket->insertAtBack(packet->peekDataAt(B(0), curQuoteLength));
-    insertCrc(icmpHeader, errorPacket);
-    errorPacket->insertAtFront(icmpHeader);
-
-    sendOrProcessIcmpPacket(errorPacket, ipv4Header->getSrcAddress());
     delete packet;
 }
 
