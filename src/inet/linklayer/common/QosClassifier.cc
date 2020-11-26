@@ -24,7 +24,7 @@
 #include "inet/networklayer/common/IpProtocolId_m.h"
 
 #ifdef INET_WITH_ETHERNET
-#  include "inet/linklayer/ethernet/EtherFrame_m.h"
+#  include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #endif
 #ifdef INET_WITH_IPv4
 #  include "inet/networklayer/ipv4/IcmpHeader_m.h"
@@ -104,13 +104,14 @@ int QosClassifier::getUserPriority(cMessage *msg)
 
 #if defined(INET_WITH_ETHERNET) || defined(INET_WITH_IPv4) || defined(INET_WITH_IPv6) || defined(INET_WITH_UDP) || defined(INET_WITH_TCP_COMMON)
     auto packet = check_and_cast<Packet *>(msg);
+    auto packetProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     int ethernetMacProtocol = -1;
     b ethernetMacHeaderLength = b(0);
     b ipHeaderLength = b(-1);
 #endif
 
-#if defined(INET_WITH_ETHERNET)
-    if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ethernetMac) {
+#ifdef INET_WITH_ETHERNET
+    if (packetProtocol == &Protocol::ethernetMac) {
         const auto& ethernetMacHeader = packet->peekAtFront<EthernetMacHeader>();
         ethernetMacProtocol = ethernetMacHeader->getTypeOrLength();
         ethernetMacHeaderLength = ethernetMacHeader->getChunkLength();
@@ -118,7 +119,7 @@ int QosClassifier::getUserPriority(cMessage *msg)
 #endif
 
 #ifdef INET_WITH_IPv4
-    if (ethernetMacProtocol == ETHERTYPE_IPv4 || packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv4) {
+    if (ethernetMacProtocol == ETHERTYPE_IPv4 || packetProtocol == &Protocol::ipv4) {
         const auto& ipv4Header = packet->peekDataAt<Ipv4Header>(ethernetMacHeaderLength);
         ipProtocol = ipv4Header->getProtocolId();
         ipHeaderLength = ipv4Header->getChunkLength();
@@ -126,7 +127,7 @@ int QosClassifier::getUserPriority(cMessage *msg)
 #endif
 
 #ifdef INET_WITH_IPv6
-    if (ethernetMacProtocol == ETHERTYPE_IPv6 || packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ipv6) {
+    if (ethernetMacProtocol == ETHERTYPE_IPv6 || packetProtocol == &Protocol::ipv6) {
         const auto& ipv6Header = packet->peekDataAt<Ipv6Header>(ethernetMacHeaderLength);
         ipProtocol = ipv6Header->getProtocolId();
         ipHeaderLength = ipv6Header->getChunkLength();
