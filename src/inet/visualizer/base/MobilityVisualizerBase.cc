@@ -102,6 +102,20 @@ void MobilityVisualizerBase::unsubscribe()
     }
 }
 
+MobilityVisualizerBase::MobilityVisualization *MobilityVisualizerBase::getMobilityVisualization(const IMobility *mobility) const
+{
+    auto it = mobilityVisualizations.find(mobility);
+    if (it == mobilityVisualizations.end())
+        return nullptr;
+    else
+        return it->second;
+}
+
+void MobilityVisualizerBase::addMobilityVisualization(const IMobility *mobility, MobilityVisualization *mobilityVisualization)
+{
+    mobilityVisualizations[mobility] = mobilityVisualization;
+}
+
 void MobilityVisualizerBase::removeMobilityVisualization(const MobilityVisualization *mobilityVisualization)
 {
     mobilityVisualizations.erase(mobilityVisualization->mobility);
@@ -116,6 +130,32 @@ void MobilityVisualizerBase::removeAllMobilityVisualizations()
         removeMobilityVisualization(mobilityVisualization);
         delete mobilityVisualization;
     }
+}
+
+void MobilityVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
+{
+    Enter_Method("receiveSignal");
+    if (signal == IMobility::mobilityStateChangedSignal) {
+        if (moduleFilter.matches(check_and_cast<cModule *>(source))) {
+            auto mobility = dynamic_cast<IMobility *>(source);
+            auto mobilityVisualization = getMobilityVisualization(mobility);
+            if (mobilityVisualization == nullptr) {
+                mobilityVisualization = createMobilityVisualization(mobility);
+                addMobilityVisualization(mobility, mobilityVisualization);
+            }
+        }
+    }
+    else if (signal == PRE_MODEL_CHANGE) {
+        if (dynamic_cast<cPreModuleDeleteNotification *>(object)) {
+            if (auto mobility = dynamic_cast<IMobility *>(source)) {
+                auto mobilityVisualization = getMobilityVisualization(mobility);
+                removeMobilityVisualization(mobilityVisualization);
+                delete mobilityVisualization;
+            }
+        }
+    }
+    else
+        throw cRuntimeError("Unknown signal");
 }
 
 } // namespace visualizer

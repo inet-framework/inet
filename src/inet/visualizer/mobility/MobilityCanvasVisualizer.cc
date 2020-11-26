@@ -84,27 +84,19 @@ void MobilityCanvasVisualizer::refreshDisplay() const
     visualizationTargetModule->getCanvas()->setAnimationSpeed(mobilityVisualizations.empty() ? 0 : animationSpeed, this);
 }
 
-MobilityCanvasVisualizer::MobilityCanvasVisualization *MobilityCanvasVisualizer::getMobilityVisualization(const IMobility *mobility) const
+void MobilityCanvasVisualizer::addMobilityVisualization(const IMobility *mobility, MobilityVisualization *mobilityVisualization)
 {
-    auto it = mobilityVisualizations.find(mobility);
-    if (it == mobilityVisualizations.end())
-        return nullptr;
-    else
-        return static_cast<MobilityCanvasVisualization *>(it->second);
-}
-
-void MobilityCanvasVisualizer::addMobilityVisualization(const IMobility *mobility, MobilityCanvasVisualization *mobilityVisualization)
-{
-    mobilityVisualizations[mobility] = mobilityVisualization;
+    MobilityVisualizerBase::addMobilityVisualization(mobility, mobilityVisualization);
+    auto mobilityCanvasVisualization = static_cast<MobilityCanvasVisualization *>(mobilityVisualization);
     auto canvas = visualizationTargetModule->getCanvas();
     if (displayPositions)
-        canvas->addFigure(mobilityVisualization->positionFigure);
+        canvas->addFigure(mobilityCanvasVisualization->positionFigure);
     if (displayOrientations)
-        canvas->addFigure(mobilityVisualization->orientationFigure);
+        canvas->addFigure(mobilityCanvasVisualization->orientationFigure);
     if (displayVelocities)
-        canvas->addFigure(mobilityVisualization->velocityFigure);
+        canvas->addFigure(mobilityCanvasVisualization->velocityFigure);
     if (displayMovementTrails)
-        canvas->addFigure(mobilityVisualization->trailFigure);
+        canvas->addFigure(mobilityCanvasVisualization->trailFigure);
 }
 
 void MobilityCanvasVisualizer::removeMobilityVisualization(const MobilityVisualization *mobilityVisualization)
@@ -122,7 +114,7 @@ void MobilityCanvasVisualizer::removeMobilityVisualization(const MobilityVisuali
     MobilityVisualizerBase::removeMobilityVisualization(mobilityVisualization);
 }
 
-MobilityCanvasVisualizer::MobilityCanvasVisualization *MobilityCanvasVisualizer::createMobilityVisualization(IMobility *mobility)
+MobilityCanvasVisualizer::MobilityVisualization *MobilityCanvasVisualizer::createMobilityVisualization(IMobility *mobility)
 {
     auto module = const_cast<cModule *>(check_and_cast<const cModule *>(mobility));
     cOvalFigure *positionFigure = nullptr;
@@ -195,32 +187,6 @@ void MobilityCanvasVisualizer::extendMovementTrail(const IMobility *mobility, Tr
         movementLine->setZoomLineWidth(false);
         trailFigure->addFigure(movementLine);
     }
-}
-
-void MobilityCanvasVisualizer::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
-{
-    Enter_Method("receiveSignal");
-    if (signal == IMobility::mobilityStateChangedSignal) {
-        if (moduleFilter.matches(check_and_cast<cModule *>(source))) {
-            auto mobility = dynamic_cast<IMobility *>(source);
-            auto mobilityVisualization = getMobilityVisualization(mobility);
-            if (mobilityVisualization == nullptr) {
-                mobilityVisualization = createMobilityVisualization(mobility);
-                addMobilityVisualization(mobility, mobilityVisualization);
-            }
-        }
-    }
-    else if (signal == PRE_MODEL_CHANGE) {
-        if (dynamic_cast<cPreModuleDeleteNotification *>(object)) {
-            if (auto mobility = dynamic_cast<IMobility *>(source)) {
-                auto mobilityVisualization = getMobilityVisualization(mobility);
-                removeMobilityVisualization(mobilityVisualization);
-                delete mobilityVisualization;
-            }
-        }
-    }
-    else
-        throw cRuntimeError("Unknown signal");
 }
 
 } // namespace visualizer
