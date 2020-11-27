@@ -49,14 +49,18 @@ void PacketProcessorBase::checkPacketOperationSupport(cGate *gate) const
     auto startElement = startGate == nullptr ? nullptr : check_and_cast<IPacketProcessor *>(startGate->getOwnerModule());
     auto endElement = endGate == nullptr ? nullptr : check_and_cast<IPacketProcessor *>(endGate->getOwnerModule());
     if (startElement != nullptr && endElement != nullptr) {
+        bool startSending = startElement->supportsPacketSending(startGate);
         bool startPushing = startElement->supportsPacketPushing(startGate);
         bool startPulling = startElement->supportsPacketPulling(startGate);
         bool startPassing = startElement->supportsPacketPassing(startGate);
         bool startStreaming = startElement->supportsPacketStreaming(startGate);
+        bool startOnlySending = startSending && !startPushing && !startPulling;
+        bool endSending = endElement->supportsPacketSending(endGate);
         bool endPushing = endElement->supportsPacketPushing(endGate);
         bool endPulling = endElement->supportsPacketPulling(endGate);
         bool endPassing = endElement->supportsPacketPassing(endGate);
         bool endStreaming = endElement->supportsPacketStreaming(endGate);
+        bool endOnlySending = endSending && !endPushing && !endPulling;
         bool bothPushing = startPushing && endPushing;
         bool bothPulling = startPulling && endPulling;
         bool bothPassing = startPassing && endPassing;
@@ -65,7 +69,13 @@ void PacketProcessorBase::checkPacketOperationSupport(cGate *gate) const
         bool eitherPulling = startPulling || endPulling;
         bool eitherPassing = startPassing || endPassing;
         bool eitherStreaming = startStreaming || endStreaming;
-        if (!bothPushing && !bothPulling) {
+        if (startOnlySending || endOnlySending) {
+            if (!startSending)
+                throw cRuntimeError(startGate->getOwnerModule(), "doesn't support packet sending on gate %s", startGate->getFullPath().c_str());
+            if (!endSending)
+                throw cRuntimeError(endGate->getOwnerModule(), "doesn't support packet sending on gate %s", endGate->getFullPath().c_str());
+        }
+        else if (!bothPushing && !bothPulling) {
             if (eitherPushing) {
                 if (startPushing)
                     throw cRuntimeError(endGate->getOwnerModule(), "doesn't support packet pushing on gate %s", endGate->getFullPath().c_str());
