@@ -1,0 +1,83 @@
+%description:
+
+In this test, packets are pushed synchronously, then they are sent asynhronously,
+and finally they are pushed again synchronously.
+
+%file: test.ned
+
+import inet.queueing.common.PacketPushToSend;
+import inet.queueing.common.PacketDelayer;
+import inet.queueing.common.PacketSendToPush;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+
+network TestPushSendPush
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        pushToSend: PacketPushToSend {
+            @display("p=200,100");
+        }
+        delayer: PacketDelayer {
+            @display("p=300,100");
+        }
+        sendToPush: PacketSendToPush {
+            @display("p=400,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=500,100");
+        }
+    connections allowunconnected:
+        producer.out --> pushToSend.in;
+        pushToSend.out --> delayer.in;
+        delayer.out --> sendToPush.in;
+        sendToPush.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestPushSendPush
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer.packetLength = 100B
+*.producer.productionInterval = 1s
+*.delayer.delay = 1s
+
+%contains-regex: stdout
+Producing packet, .*?producer-0.*?
+
+Running simulation...
+Delaying packet, .*?producer-0.*?
+Producing packet, .*?producer-1.*?
+Delaying packet, .*?producer-1.*?
+Consuming packet, .*?producer-0.*?
+Producing packet, .*?producer-2.*?
+Delaying packet, .*?producer-2.*?
+Consuming packet, .*?producer-1.*?
+Producing packet, .*?producer-3.*?
+Delaying packet, .*?producer-3.*?
+Consuming packet, .*?producer-2.*?
+Producing packet, .*?producer-4.*?
+Delaying packet, .*?producer-4.*?
+Consuming packet, .*?producer-3.*?
+Producing packet, .*?producer-5.*?
+Delaying packet, .*?producer-5.*?
+Consuming packet, .*?producer-4.*?
+Producing packet, .*?producer-6.*?
+Delaying packet, .*?producer-6.*?
+Consuming packet, .*?producer-5.*?
+Producing packet, .*?producer-7.*?
+Delaying packet, .*?producer-7.*?
+Consuming packet, .*?producer-6.*?
+Producing packet, .*?producer-8.*?
+Delaying packet, .*?producer-8.*?
+Consuming packet, .*?producer-7.*?
+Producing packet, .*?producer-9.*?
+Delaying packet, .*?producer-9.*?
+Consuming packet, .*?producer-8.*?
+Producing packet, .*?producer-10.*?
+Delaying packet, .*?producer-10.*?
+Consuming packet, .*?producer-9.*?
