@@ -1,0 +1,5 @@
+#!/bin/bash
+
+opp_runall inet -u Cmdenv -c DefaultStudy --sim-time-limit=1s &
+opp_runall inet -u Cmdenv -c PriorityQueueStudy --sim-time-limit=1s &
+opp_runall inet -u Cmdenv -c PreemptionStudy --sim-time-limit=1s &
