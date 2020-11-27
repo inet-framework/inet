@@ -18,15 +18,18 @@
 #ifndef __INET_PACKETDELAYER_H
 #define __INET_PACKETDELAYER_H
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketDelayer : public PacketPusherBase
+class INET_API PacketDelayer : public PacketPusherBase, public TransparentProtocolRegistrationListener
 {
   protected:
     virtual void handleMessage(cMessage *message) override;
+
+    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
   public:
     virtual void pushPacket(Packet *packet, cGate *gate) override;

@@ -36,6 +36,16 @@ void PacketDelayer::handleMessage(cMessage *message)
         PacketPusherBase::handleMessage(message);
 }
 
+cGate *PacketDelayer::getRegistrationForwardingGate(cGate *gate)
+{
+    if (gate == outputGate)
+        return inputGate;
+    else if (gate == inputGate)
+        return outputGate;
+    else
+        throw cRuntimeError("Unknown gate");
+}
+
 void PacketDelayer::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
