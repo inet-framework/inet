@@ -18,7 +18,9 @@
 #ifndef __INET_ROUTINGTABLEOSGVISUALIZER_H
 #define __INET_ROUTINGTABLEOSGVISUALIZER_H
 
+#ifdef WITH_OSG
 #include <osg/ref_ptr>
+#endif
 
 #include "inet/visualizer/base/RoutingTableVisualizerBase.h"
 
