@@ -32,11 +32,10 @@ class INET_API LinkOsgVisualizerBase : public LinkVisualizerBase
   protected:
     class INET_API LinkOsgVisualization : public LinkVisualization {
       public:
-        inet::osg::LineNode *node = nullptr;
+        osg::ref_ptr<inet::osg::LineNode> node;
 
       public:
         LinkOsgVisualization(inet::osg::LineNode *node, int sourceModuleId, int destinationModuleId);
-        virtual ~LinkOsgVisualization();
     };
 
   protected:

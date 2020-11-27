@@ -18,6 +18,8 @@
 #ifndef __INET_ROUTINGTABLEOSGVISUALIZER_H
 #define __INET_ROUTINGTABLEOSGVISUALIZER_H
 
+#include <osg/ref_ptr>
+
 #include "inet/visualizer/base/RoutingTableVisualizerBase.h"
 
 namespace inet {
@@ -31,11 +33,10 @@ class INET_API RoutingTableOsgVisualizer : public RoutingTableVisualizerBase
   protected:
     class INET_API RouteOsgVisualization : public RouteVisualization {
       public:
-        osg::Node *node = nullptr;
+        osg::ref_ptr<osg::Node> node;
 
       public:
         RouteOsgVisualization(osg::Node *node, const Ipv4Route *route, int nodeModuleId, int nextHopModuleId);
-        virtual ~RouteOsgVisualization();
     };
 
   protected:

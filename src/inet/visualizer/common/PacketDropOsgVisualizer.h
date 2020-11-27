@@ -18,6 +18,8 @@
 #ifndef __INET_PACKETDROPOSGVISUALIZER_H
 #define __INET_PACKETDROPOSGVISUALIZER_H
 
+#include <osg/ref_ptr>
+
 #include "inet/visualizer/base/PacketDropVisualizerBase.h"
 
 namespace inet {
@@ -31,11 +33,10 @@ class INET_API PacketDropOsgVisualizer : public PacketDropVisualizerBase
   protected:
     class INET_API PacketDropOsgVisualization : public PacketDropVisualization {
       public:
-        osg::Node *node = nullptr;
+        osg::ref_ptr<osg::Node> node;
 
       public:
         PacketDropOsgVisualization(osg::Node *node, const PacketDrop *packetDrop);
-        virtual ~PacketDropOsgVisualization();
     };
 
   protected:

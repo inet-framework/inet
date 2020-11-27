@@ -18,6 +18,8 @@
 #ifndef __INET_PATHOSGVISUALIZERBASE_H
 #define __INET_PATHOSGVISUALIZERBASE_H
 
+#include <osg/ref_ptr>
+
 #include "inet/visualizer/base/PathVisualizerBase.h"
 
 namespace inet {
@@ -31,11 +33,10 @@ class INET_API PathOsgVisualizerBase : public PathVisualizerBase
   protected:
     class INET_API PathOsgVisualization : public PathVisualization {
       public:
-        osg::Node *node = nullptr;
+        osg::ref_ptr<osg::Node> node;
 
       public:
         PathOsgVisualization(const char *label, const std::vector<int>& path, osg::Node *node);
-        virtual ~PathOsgVisualization();
     };
 
   protected:

@@ -145,3 +145,10 @@ class IcmpEchoReply extends IcmpHeader
     int seqNumber; // sequence number           // 2 bytes
 }
 
+class IcmpPtb extends IcmpHeader
+{
+    type = ICMP_DESTINATION_UNREACHABLE;
+    code = ICMP_DU_FRAGMENTATION_NEEDED;
+    uint16_t unused = 0;
+    uint16_t mtu = 0;
+}

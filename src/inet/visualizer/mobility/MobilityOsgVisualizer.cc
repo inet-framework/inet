@@ -59,33 +59,35 @@ void MobilityOsgVisualizer::refreshDisplay() const
         if (displayMovementTrails)
             extendMovementTrail(mobilityVisualization->trail, position);
     }
-    // TODO switch to osg canvas when API is extended
+    // TODO switch to osg Osg when API is extended
     visualizationTargetModule->getCanvas()->setAnimationSpeed(mobilityVisualizations.empty() ? 0 : animationSpeed, this);
 }
 
-MobilityOsgVisualizer::MobilityOsgVisualization *MobilityOsgVisualizer::getMobilityVisualization(const IMobility *mobility) const
-{
-    auto it = mobilityVisualizations.find(mobility);
-    if (it == mobilityVisualizations.end())
-        return nullptr;
-    else
-        return static_cast<MobilityOsgVisualization *>(it->second);
-}
-
-void MobilityOsgVisualizer::addMobilityVisualization(const IMobility *mobility, MobilityOsgVisualization *mobilityVisualization)
-{
-    mobilityVisualizations[mobility] = mobilityVisualization;
-}
-
-MobilityOsgVisualizer::MobilityOsgVisualization *MobilityOsgVisualizer::createMobilityVisualization(IMobility *mobility)
+MobilityOsgVisualizer::MobilityVisualization *MobilityOsgVisualizer::createMobilityVisualization(IMobility *mobility)
 {
     auto module = const_cast<cModule *>(check_and_cast<const cModule *>(mobility));
     auto trail = new osg::Geode();
     trail->setStateSet(inet::osg::createStateSet(movementTrailLineColorSet.getColor(module->getId()), 1.0));
     trail->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
-    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
-    scene->addChild(trail);
     return new MobilityOsgVisualization(trail, mobility);
+}
+
+void MobilityOsgVisualizer::addMobilityVisualization(const IMobility *mobility, MobilityVisualization *mobilityVisualization)
+{
+    MobilityVisualizerBase::addMobilityVisualization(mobility, mobilityVisualization);
+    auto mobilityOsgVisualization = static_cast<MobilityOsgVisualization *>(mobilityVisualization);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
+    if (displayMovementTrails)
+        scene->addChild(mobilityOsgVisualization->trail);
+}
+
+void MobilityOsgVisualizer::removeMobilityVisualization(const MobilityVisualization *mobilityVisualization)
+{
+    auto mobilityOsgVisualization = static_cast<const MobilityOsgVisualization *>(mobilityVisualization);
+    auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
+    if (displayMovementTrails)
+        scene->removeChild(mobilityOsgVisualization->trail);
+    MobilityVisualizerBase::removeMobilityVisualization(mobilityVisualization);
 }
 
 void MobilityOsgVisualizer::extendMovementTrail(osg::Geode *trail, const Coord& position) const
@@ -111,32 +113,6 @@ void MobilityOsgVisualizer::extendMovementTrail(osg::Geode *trail, const Coord& 
             drawable->dirtyDisplayList();
         }
     }
-}
-
-void MobilityOsgVisualizer::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
-{
-    Enter_Method("receiveSignal");
-    if (signal == IMobility::mobilityStateChangedSignal) {
-        if (moduleFilter.matches(check_and_cast<cModule *>(source))) {
-            auto mobility = dynamic_cast<IMobility *>(source);
-            auto mobilityVisualization = getMobilityVisualization(mobility);
-            if (mobilityVisualization == nullptr) {
-                mobilityVisualization = createMobilityVisualization(dynamic_cast<IMobility *>(source));
-                addMobilityVisualization(mobility, mobilityVisualization);
-            }
-        }
-    }
-    else if (signal == PRE_MODEL_CHANGE) {
-        if (dynamic_cast<cPreModuleDeleteNotification *>(object)) {
-            if (auto mobility = dynamic_cast<IMobility *>(source)) {
-                auto mobilityVisualization = getMobilityVisualization(mobility);
-                removeMobilityVisualization(mobilityVisualization);
-                delete mobilityVisualization;
-            }
-        }
-    }
-    else
-        throw cRuntimeError("Unknown signal");
 }
 
 #endif // ifdef WITH_OSG

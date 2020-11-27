@@ -64,7 +64,7 @@ void NetworkNodeVisualizerBase::receiveSignal(cComponent *source, simsignal_t si
             if (isNetworkNode(module) && nodeFilter.matches(module)) {
                 auto visualization = getNetworkNodeVisualization(module);
                 removeNetworkNodeVisualization(visualization);
-                delete visualization;
+                destroyNetworkNodeVisualization(visualization);
             }
         }
     }

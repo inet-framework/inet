@@ -49,6 +49,7 @@ class INET_API NetworkNodeVisualizerBase : public VisualizerBase, public cListen
     virtual NetworkNodeVisualization *createNetworkNodeVisualization(cModule *networkNode) const = 0;
     virtual void addNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization) = 0;
     virtual void removeNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization) = 0;
+    virtual void destroyNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization) = 0;
 
   public:
     virtual NetworkNodeVisualization *getNetworkNodeVisualization(const cModule *networkNode) const = 0;

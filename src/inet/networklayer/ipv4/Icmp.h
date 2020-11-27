@@ -40,9 +40,13 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
   protected:
     std::set<int> transportProtocols; // where to send up packets
     CrcMode crcMode = CRC_MODE_UNDEFINED;
+    B quoteLength;
+    IIpv4RoutingTable *rt = nullptr;
+    IInterfaceTable *ift = nullptr;
+    static long ctr;
 
   protected:
-    virtual void processICMPMessage(Packet *);
+    virtual void processIcmpMessage(Packet *);
     virtual void errorOut(Packet *);
     virtual void processEchoRequest(Packet *);
     virtual void sendToIP(Packet *, const Ipv4Address& dest);
@@ -59,6 +63,7 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
      * KLUDGE if inputInterfaceId cannot be determined, pass in -1.
      */
     virtual void sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type, IcmpCode code);
+    virtual void sendPtbMessage(Packet *packet, int mtu);
     static void insertCrc(CrcMode crcMode, const Ptr<IcmpHeader>& icmpHeader, Packet *payload);
     void insertCrc(const Ptr<IcmpHeader>& icmpHeader, Packet *payload) { insertCrc(crcMode, icmpHeader, payload); }
     bool verifyCrc(const Packet *packet);
@@ -67,6 +72,9 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
+    virtual void handleParameterChange(const char *name) override;
+    virtual bool maySendErrorMessage(Packet *packet, int inputInterfaceId);
+    virtual void sendOrProcessIcmpPacket(Packet *packet, Ipv4Address origSrcAddr);
 };
 
 } // namespace inet

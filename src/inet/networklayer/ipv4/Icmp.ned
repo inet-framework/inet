@@ -29,6 +29,7 @@ simple Icmp
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string crcMode @enum("declared", "computed") = default("declared");
+        int quoteLength @unit("B") = default(8B); // Number of bytes from original packet to quote in ICMP reply
         @display("i=block/control");
     gates:
         input transportIn;

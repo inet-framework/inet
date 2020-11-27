@@ -85,8 +85,14 @@ class INET_API MobilityVisualizerBase : public VisualizerBase, public cListener
     virtual void subscribe();
     virtual void unsubscribe();
 
+    virtual MobilityVisualization *createMobilityVisualization(IMobility *mobility) = 0;
+    virtual MobilityVisualization *getMobilityVisualization(const IMobility *mobility) const;
+    virtual void addMobilityVisualization(const IMobility *mobility, MobilityVisualization *mobilityVisualization);
     virtual void removeMobilityVisualization(const MobilityVisualization *visualization);
     virtual void removeAllMobilityVisualizations();
+
+  public:
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 
 } // namespace visualizer

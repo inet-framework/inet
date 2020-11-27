@@ -49,14 +49,10 @@ class INET_API MobilityCanvasVisualizer : public MobilityVisualizerBase
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
-    virtual MobilityCanvasVisualization *createMobilityVisualization(IMobility *mobility);
-    virtual MobilityCanvasVisualization *getMobilityVisualization(const IMobility *mobility) const;
-    virtual void addMobilityVisualization(const IMobility *mobility, MobilityCanvasVisualization *mobilityVisualization);
+    virtual MobilityVisualization *createMobilityVisualization(IMobility *mobility) override;
+    virtual void addMobilityVisualization(const IMobility *mobility, MobilityVisualization *mobilityVisualization) override;
     virtual void removeMobilityVisualization(const MobilityVisualization *mobilityVisualization) override;
     virtual void extendMovementTrail(const IMobility *mobility, TrailFigure *trailFigure, cFigure::Point position) const;
-
-  public:
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 
 } // namespace visualizer

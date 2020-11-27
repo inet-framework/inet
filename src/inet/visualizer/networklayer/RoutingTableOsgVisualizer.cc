@@ -39,11 +39,6 @@ RoutingTableOsgVisualizer::RouteOsgVisualization::RouteOsgVisualization(osg::Nod
 {
 }
 
-RoutingTableOsgVisualizer::RouteOsgVisualization::~RouteOsgVisualization()
-{
-    // TODO delete node;
-}
-
 void RoutingTableOsgVisualizer::initialize(int stage)
 {
     RoutingTableVisualizerBase::initialize(stage);

@@ -31,7 +31,7 @@ class INET_API NetworkNodeOsgVisualizer : public NetworkNodeVisualizerBase
 
   protected:
     bool displayModuleName;
-    std::map<const cModule *, NetworkNodeOsgVisualization *> networkNodeVisualizations;
+    std::map<const cModule *, osg::ref_ptr<NetworkNodeOsgVisualization>> networkNodeVisualizations;
 
   protected:
     virtual void initialize(int stage) override;
@@ -40,6 +40,7 @@ class INET_API NetworkNodeOsgVisualizer : public NetworkNodeVisualizerBase
     virtual NetworkNodeOsgVisualization *createNetworkNodeVisualization(cModule *networkNode) const override;
     virtual void addNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization) override;
     virtual void removeNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization) override;
+    virtual void destroyNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization) override {}
 
   public:
     virtual ~NetworkNodeOsgVisualizer();
@@ -48,6 +49,7 @@ class INET_API NetworkNodeOsgVisualizer : public NetworkNodeVisualizerBase
     virtual NetworkNodeVisualization *createNetworkNodeVisualization(cModule *networkNode) const override { return nullptr; }
     virtual void addNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization) override {}
     virtual void removeNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization) override {}
+    virtual void destroyNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization) override {}
 
   public:
     virtual NetworkNodeVisualization *getNetworkNodeVisualization(const cModule *networkNode) const override { return nullptr; }

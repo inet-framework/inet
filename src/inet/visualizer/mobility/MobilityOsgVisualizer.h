@@ -44,22 +44,16 @@ class INET_API MobilityOsgVisualizer : public MobilityVisualizerBase
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
 
-    virtual MobilityOsgVisualization *createMobilityVisualization(IMobility *mobility);
-    virtual MobilityOsgVisualization *getMobilityVisualization(const IMobility *mobility) const;
-    virtual void addMobilityVisualization(const IMobility *mobility, MobilityOsgVisualization *mobilityVisualization);
-
+    virtual MobilityVisualization *createMobilityVisualization(IMobility *mobility) override;
+    virtual void addMobilityVisualization(const IMobility *mobility, MobilityVisualization *mobilityVisualization) override;
+    virtual void removeMobilityVisualization(const MobilityVisualization *mobilityVisualization) override;
     virtual void extendMovementTrail(osg::Geode *trail, const Coord& position) const;
-
-  public:
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 
 #else // ifdef WITH_OSG
 
   protected:
     virtual void initialize(int stage) override {}
-
-  public:
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override {}
+    virtual MobilityVisualization *createMobilityVisualization(IMobility *mobility) override { return nullptr; }
 
 #endif // ifdef WITH_OSG
 };
