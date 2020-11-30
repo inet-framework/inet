@@ -4,6 +4,10 @@
 
 	Replaced (u)int8..64 with the standard (u)int8..64_t types.
 
+2020-08-18  Daniel Stolpmann
+
+	Added support for handling Ethernet frames in QoS classifiers.
+
 2020-07-22  Levente Mészáros
 
 	Renamed InterfaceEntry -> NetworkInterface and interfaceEntry -> networkInterface.

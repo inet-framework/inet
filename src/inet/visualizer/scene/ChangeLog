@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2020-11-26  Levente Mészáros
+
+	Fixed double delete crashed caused by explicit deletes and deletes due to reference counting.
+
+2020-11-04  Levente Mészáros
+
+	Changed network node visualizers to remove the annotations before destruction.
+
 2020-01-08  ------ inet-4.2.0 released ------
 
 2019-12-18  Levente Mészáros

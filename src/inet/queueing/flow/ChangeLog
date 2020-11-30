@@ -1,3 +1,13 @@
+====== inet-4.x ======
+
+2020-11-10  Levente Mészáros
+
+	Renamed TimingMeasurement* to FlowMeasurement*.
+
+2020-11-09  Levente Mészáros
+
+	Renamed timing folder to flow.
+
 2020-08-14  Levente Mészáros
 
 	Added new timing package with modules: TimingMeasurementStarter and TimingMeasurementMaker.

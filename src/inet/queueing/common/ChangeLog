@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2020-11-27  Levente Mészáros
+
+	Added support to PacketDelayer for transparent protocol and servie registration.
+	Added actual delay value to log output in PacketDelayer.
+	Added PacketPushToSend and PacketSendToPush modules.
+
+2020-11-05  Levente Mészáros
+
+	Fixed issues found by clang-tidy code checker.
+
 2020-09-04  Levente Mészáros
 
 	Refactored a few more EV statements to use the new macros.

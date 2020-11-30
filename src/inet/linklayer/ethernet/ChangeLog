@@ -1,5 +1,27 @@
 ====== inet-4.x ======
 
+2020-11-10  Levente Mészáros
+
+	Moved EthernetMacBase to base folder.
+	Moved contents of switch folder into common.
+	Renamed EthernetSelectiveQueue to EthernetGatingQueue.
+
+2020-11-09  Levente Mészáros
+
+	Renamed layered folder to modular.
+	Moved the basic MAC implementations into their own folder.
+	Moved several generic components shared between basic and modular implementations
+	into a separate common folder.
+	Renamed several files and moved them to better folders.
+	Dropped obsolete EthernetHub C++ class replaced by WireJunction functionality.
+	Moved EthernetHub module to inet.node.ethernet package.
+
+2020-11-05  Zoltan Bojthe
+
+	Added socketIdToSocketMap WATCH to EtherEncap.
+	Fixed socket close and socket destroy in EtherEncap: delegate to Ieee8022Llc
+	when socket not found in socketIdToSocketMap.
+
 2020-10-30  Levente Mészáros
 
 	Reused SocketBase and default socket commands in socket and related processing.

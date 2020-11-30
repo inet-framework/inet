@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2020-11-10  Levente Mészáros
+
+	Moved InProgressQueue to queueing/queue folder.
+	Renamed SelectiveQueue to GatingPriorityQueue.
+	Renamed CompoundPacketQueue source files to CompoundPacketQueueBase.
+
 2020-08-25  Levente Mészáros
 
 	Adapted to new EV_FIELD macro.

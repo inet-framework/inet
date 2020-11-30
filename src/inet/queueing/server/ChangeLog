@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-11-10  Levente Mészáros
+
+	Moved PreemptingServer to queueing/server folder.
+
 2020-10-19  Levente Mészáros
 
 	Added new PreemptingServer.
