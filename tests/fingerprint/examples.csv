@@ -325,6 +325,7 @@
 /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          c9c9-a373/tplx, PASS,
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             aea7-a643/tplx, PASS,
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             15c2-c505/tplx, PASS,
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c Mixed -r 0,                  50s,             3669-9666/tplx, PASS,
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             dae3-d00e/tplx, PASS,
 # /examples/ipv6/nclients/,            -f omnetpp.ini -c TCP_APP -r 0   # TCP_APP extended
 # /examples/ipv6/nclients/,            -f omnetpp.ini -c SCTP_APP -r 0   # SCTP_APP extended
