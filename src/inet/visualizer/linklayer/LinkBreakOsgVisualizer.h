@@ -18,7 +18,9 @@
 #ifndef __INET_LINKBREAKOSGVISUALIZER_H
 #define __INET_LINKBREAKOSGVISUALIZER_H
 
+#ifdef WITH_OSG
 #include <osg/ref_ptr>
+#endif
 
 #include "inet/visualizer/base/LinkBreakVisualizerBase.h"
 

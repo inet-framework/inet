@@ -18,7 +18,9 @@
 #ifndef __INET_PATHOSGVISUALIZERBASE_H
 #define __INET_PATHOSGVISUALIZERBASE_H
 
+#ifdef WITH_OSG
 #include <osg/ref_ptr>
+#endif
 
 #include "inet/visualizer/base/PathVisualizerBase.h"
 

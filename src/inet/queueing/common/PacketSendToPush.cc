@@ -15,31 +15,34 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_PACKETDELAYER_H
-#define __INET_PACKETDELAYER_H
+#include "inet/queueing/common/PacketSendToPush.h"
 
-#include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/queueing/base/PacketPusherBase.h"
+#include "inet/common/ModuleAccess.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketDelayer : public PacketPusherBase, public TransparentProtocolRegistrationListener
+Define_Module(PacketSendToPush);
+
+void PacketSendToPush::initialize(int stage)
 {
-  protected:
-    virtual void handleMessage(cMessage *message) override;
+    PacketProcessorBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        outputGate = gate("out");
+        consumer = findConnectedModule<IPassivePacketSink>(outputGate);
+    }
+    else if (stage == INITSTAGE_QUEUEING)
+        checkPacketOperationSupport(outputGate);
+}
 
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
-
-  public:
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
-
-    virtual void handleCanPushPacketChanged(cGate *gate) override;
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
-};
+void PacketSendToPush::handleMessage(cMessage *message)
+{
+    auto packet = check_and_cast<Packet *>(message);
+    handlePacketProcessed(packet);
+    pushOrSendPacket(packet, outputGate, consumer);
+    updateDisplayString();
+}
 
 } // namespace queueing
 } // namespace inet
-
-#endif
 

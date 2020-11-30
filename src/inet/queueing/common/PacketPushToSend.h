@@ -15,27 +15,18 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_PACKETDELAYER_H
-#define __INET_PACKETDELAYER_H
+#ifndef __INET_PACKETPUSHTOSEND_H
+#define __INET_PACKETPUSHTOSEND_H
 
-#include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/queueing/base/PacketPusherBase.h"
+#include "inet/queueing/base/PassivePacketSinkBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketDelayer : public PacketPusherBase, public TransparentProtocolRegistrationListener
+class INET_API PacketPushToSend : public PassivePacketSinkBase
 {
-  protected:
-    virtual void handleMessage(cMessage *message) override;
-
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
-
   public:
     virtual void pushPacket(Packet *packet, cGate *gate) override;
-
-    virtual void handleCanPushPacketChanged(cGate *gate) override;
-    virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
 } // namespace queueing

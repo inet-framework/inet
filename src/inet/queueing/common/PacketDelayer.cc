@@ -36,12 +36,22 @@ void PacketDelayer::handleMessage(cMessage *message)
         PacketPusherBase::handleMessage(message);
 }
 
+cGate *PacketDelayer::getRegistrationForwardingGate(cGate *gate)
+{
+    if (gate == outputGate)
+        return inputGate;
+    else if (gate == inputGate)
+        return outputGate;
+    else
+        throw cRuntimeError("Unknown gate");
+}
+
 void PacketDelayer::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
-    EV_INFO << "Delaying packet" << EV_FIELD(packet) << EV_ENDL;
     simtime_t delay = par("delay");
+    EV_INFO << "Delaying packet" << EV_FIELD(delay) << EV_FIELD(packet) << EV_ENDL;
     scheduleAt(simTime() + delay, packet);
     insertPacketEvent(this, packet, PEK_DELAYED, delay / packet->getBitLength());
     increaseTimeTag<DelayingTimeTag>(packet, delay / packet->getBitLength());
