@@ -16,6 +16,13 @@
 	linklayer/virtual
 	networks
 	node/eigrp
+	physicallayer/wired/common
+	physicallayer/wired/ethernet
+	physicallayer/wireless/common
+	physicallayer/wireless/common/medium
+	physicallayer/wireless/common/radio
+	physicallayer/wireless/common/signal
+	physicallayer/wireless/noise
 	protocolelement/aggregation/base
 	protocolelement/aggregation/contract
 	protocolelement/aggregation/policy
@@ -40,7 +47,7 @@
 	routing/eigrp/pdms
 	routing/eigrp/tables
 	visualizer/flow
-	
+
 	Refactored folders
 	==================
 	linklayer/ethernet -> linklayer/ethernet/base
@@ -48,7 +55,10 @@
 	linklayer/ethernet -> linklayer/ethernet/common
 	linklayer/ethernet -> linklayer/ethernet/contract
 	linklayer/ethernet/switch -> linklayer/ethernet/common
-	
+	physicallayer -> physicallayer/common
+	physicallayer -> physicallayer/wired
+	physicallayer -> physicallayer/wireless
+
 	Added modules
 	=============
 	clock/base/ClockBase
@@ -276,7 +286,7 @@
 	visualizer/flow/PacketFlowCanvasVisualizer
 	visualizer/flow/PacketFlowOsgVisualizer
 	visualizer/flow/PacketFlowVisualizer
-	
+
 	Refactored modules
 	==================
 	linklayer/contract/ITrafficConditioner -> queueing/contract/ITrafficConditioner
@@ -286,19 +296,19 @@
 	linklayer/vlan/VlanTunnel -> linklayer/virtual/VirtualTunnel
 	networklayer/common/InterfaceEntry -> networklayer/common/NetworkInterface
 	queueing/common/PacketGate -> queueing/gate/PacketGate
-	
+
 	Removed modules
 	===============
 	common/misc/NetAnimTrace
 	linklayer/ethernet/EtherBus
 	linklayer/ieee8021q/Ieee8021qEncap
 	linklayer/ieee8021q/IIeee8021qEncap
-	
+
 	Added signals
 	=============
 	packetFlowStartedSignal
 	packetFlowEndedSignal
-	
+
 	Refactored signals
 	==================
 	packetPoppedSignal -> packetPulledSignal
@@ -306,7 +316,7 @@
 	receptionEndedSignal
 	transmissionStartedSignal
 	transmissionEndedSignal
-	
+
 	Added C++ classes
 	=================
 	clock/common/ClockTime
@@ -356,7 +366,7 @@
 	routing/eigrp/tables/EigrpNetworkTable
 	routing/eigrp/tables/EigrpRoute
 	routing/eigrp/tables/EigrpTopologyTable
-	
+
 	Refactored C++ classes
 	======================
 	common/int128 -> common/Int128
@@ -364,7 +374,7 @@
 	linklayer/ethernet/EthernetHeaderSerializer -> linklayer/ethernet/EthernetMacHeaderSerializer
 	linklayer/ethernet/EthernetProtocolDissector -> linklayer/ethernet/EthernetMacProtocolDissector
 	linklayer/ethernet/EthernetProtocolPrinter -> linklayer/ethernet/EthernetMacProtocolPrinter
-	
+
 	Removed C++ classes
 	===================
 	common/packet/recorder/PacketDump
@@ -372,7 +382,7 @@
 	linklayer/ieee80211/llc/Ieee80211EtherTypeHeaderSerializer
 	linklayer/ieee80211/llc/Ieee80211EtherTypeProtocolDissector
 	linklayer/ieee80211/llc/Ieee80211EtherTypeProtocolPrinter
-	
+
 	Added MSG classes
 	=================
 	common/DirectionTag.msg: DirectionTag
@@ -429,7 +439,7 @@
 	routing/eigrp/messages/EigrpMessage.msg: EigrpIpv6Reply
 	routing/eigrp/messages/EigrpMessage.msg: EigrpIpv6Update
 	routing/eigrp/messages/EigrpMessage.msg: EigrpMessage
-	
+
 	Refactored MSG classes
 	======================
 	linklayer/ethernet/EtherFrame.msg: EthernetControlFrame -> linklayer/ethernet/EthernetControlFrame.msg: EthernetControlFrameBase
@@ -441,7 +451,7 @@
 	linklayer/ieee8021q/Ieee8021qHeader.msg: Ieee8021qHeader -> linklayer/ieee8021q/Ieee8021qTagHeader.msg: Ieee8021qTagTpidHeader
 	linklayer/ieee8022/Ieee8022LlcHeader.msg: Ieee8022LlcSnapHeader -> linklayer/ieee8022/Ieee8022SnapHeader.msg: Ieee8022LlcSnapHeader
 	linklayer/ieee8022/Ieee8022LlcHeader.msg: Ieee8022LlcSnapHeader -> linklayer/ieee8022/Ieee8022SnapHeader.msg: Ieee8022SnapHeader
-	
+
 	Removed MSG classes
 	===================
 	linklayer/ethernet/EthernetCommand.msg: EthernetCloseCommand
