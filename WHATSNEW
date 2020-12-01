@@ -4,11 +4,21 @@ Recent changes in the INET Framework
 INET-4.3 (December 2020) - Stable
 ---------------------------------
 
-This is a new minor stable release of the INET 4.x branch. This version includes
-intra-node packet streaming and inter-node transmission update support, the features
-required for Time-Sensitive Networking (TSN), a new modular Ethernet MAC and PHY
-layer model, some backward incompatible changes, a number of small improvements,
-and several bug fixes. This version requires OMNeT++ 6. preview 10 or later.
+This is a new minor stable release of the INET 4.x branch. The highlights of this
+release are the infrastructure for Time-Sensitive Networking protocols, the EIGRP
+routing protocol and DCTCP congestion control.
+
+For TSN support, a new modular Ethernet MAC and PHY layer model has been added
+which provides Ethernet frame preemption, Ethernet cut-through switching, a gating
+mechanism for packet queueing, and a clock model which also models clock drifting.
+
+New API level features include intra-node packet streaming, inter-node transmission
+update support, bit level packet data identity tracking, and the ability to define
+and measure packet flows.
+
+There are also a number of small improvements, and several bug fixes. Some changes
+are backward incompatible, so existing models may need to be updated. This version
+requires OMNeT++ 6.0 preview 10 or later.
 
 Notable backward incompatible changes are the following:
 
@@ -33,8 +43,6 @@ Notable backward incompatible changes are the following:
    now returned as shared pointers. Moreover, a different method must be called,
    namely the ones with the 'ForUpdate' suffix, to modify existing tags. Due to
    this copy-on-write semantics, this change can also break existing user code.
-   For example, if the tag pointer is stored with a large extent and the tag is
-   updated later on without retrieving it from the packet again after.
 
 2. Ethernet
 
@@ -42,12 +50,12 @@ Notable backward incompatible changes are the following:
    to have the complete word, Ethernet, in their names instead. This change affects
    many names: EthernetSwitch, EthernetMac, EthernetLink, EthernetSignal, etc.
 
-   The Ethernet switch frame relay functionality provided by the MacRelayUnit and
+   The Ethernet switch relay functionality provided by the MacRelayUnit and
    Ieee8021dRelay modules have been refactored. The most prominent change is that
-   these modules no longer work on Ethernet frames only. They simply
-   expect the packets to contain the necessary metadata such as the incoming
-   interface indication (InterfaceInd) and the source and destination MAC address
-   indication (MacAddressInd) in order to operate.
+   these modules no longer work on Ethernet frames only. They simply expect the
+   packets to contain the necessary metadata such as the incoming interface
+   indication (InterfaceInd) and the source and destination MAC address indication
+   (MacAddressInd) in order to operate.
 
    A new WireJunction module has been added which replaces the functionality of
    the old EtherBus and EtherHub modules. This module represents a generic wiring
@@ -70,10 +78,11 @@ Notable backward incompatible changes are the following:
    extensible.
 
    The LinkLayerNodeBase base module has been extended with separate and optional
-   Ethernet and IEEE 802.1q protocol layers. This mode of operation is distinct
-   from the default operation where the Ethernet protocol is part of the network
-   interface. The advantage is that various additional IEEE 802 protocols such as
-   802 LLC, 802 SNAP, 802.1q and 802.1ae are better composable this way.
+   Ethernet and IEEE 802.1q protocol layers, where protocol modules have on instance
+   per network node. This results in a different structure from the default one
+   where the Ethernet protocol is part of the network interface. The advantage is
+   that various additional IEEE 802 protocols such as 802 LLC, 802 SNAP, 802.1q
+   and 802.1ae are better composable this way.
 
    Several small layered protocol models and infrastructure components have been
    added to support these IEEE 802 protocols. These include among others protocol
@@ -231,6 +240,14 @@ Notable backward compatible changes are the following:
    individual packets, and must be separately updated for different paths the
    same data takes in the network.
 
+   The chunk API has been extended with a bit-level identity tracking of data.
+   In other words, it is now possible to determine if the data that shows up at
+   two different locations in the network, independently of whether these locations
+   are in the same network node or not, and also independently of how the data
+   is represented (field-based or binary), is the same data or not. This feature,
+   for example, is useful for end-to-end delay measurements and more accurate
+   path visualization.
+
    A new chunk class, called EncryptedChunk, has been added to allow storing
    encrypted data in a packet without actually encrypting the data. Internally,
    the new chunk uses a shared reference to the encrypted chunk and the length
@@ -260,19 +277,19 @@ Notable backward compatible changes are the following:
 
 3. Ethernet
 
-   Following the changes in the OMNeT++ cDatarateChannel API, both MAC models
-   that used the old forceTransmissionFinishTime() API has been updated to use
-   the new transmission update mechanism instead.
-
    A completely new modular Ethernet model has been added to the linklayer and
-   physicallayer folders. The new model contains of several smaller modules that
-   allow the user to combine them in more ways than before and also to customize
-   their behavior. The main purpose of this change was to provide support for
-   Ethernet Time-Sensitive Networking (TSN) features.
+   physicallayer folders. The three most prominent new features that are directly
+   supported are the Ethernet frame preemption, Ethernet cut-through switching,
+   and the gating mechanism in the Ethernet queues.
 
-   The three most prominent features that are directly supported are the Ethernet
-   frame preemption, Ethernet cut-through switching, and the gating mechanism in
-   the Ethernet queues.
+   The new model contains of several smaller modules that allow the user to
+   combine them in more ways than before and also to customize their behavior.
+   The main purpose of this change was to provide support for Ethernet
+   Time-Sensitive Networking (TSN) features.
+
+   Following the changes in the OMNeT++ cDatarateChannel API, both existing
+   Ethernet MAC models that used the old forceTransmissionFinishTime() API have
+   been updated to use the new transmission update mechanism instead.
 
 4. PPP
 
@@ -282,7 +299,7 @@ Notable backward compatible changes are the following:
 
 5. TCP
 
-   A new congestion control algorithm, called DC-TCP, has been added by Marcel
+   A new congestion control algorithm, called DCTCP, has been added by Marcel
    Marek. Also, related to this change, the ECN support has been enhanced to be
    customizable by congestion control algorithms.
 
@@ -296,25 +313,22 @@ Notable backward compatible changes are the following:
    This model was contributed by Vladimir Vesely, Jan Bloudicek, Vit Rek, and Jan
    Zavrel from the Brno University of Technology.
 
-7. Advanced timing measurements and packet flows
+7. Packet flows and timing measurements
 
    The concept of packet flows has been added to provide support for advanced timing
    measurements. A packet flow is a logical classification of packets, identified
    by a name, over the whole network and over the duration of the whole simulation.
+   Packets may have a PacketFlow tag attached to a region of data which describes
+   flow membership.
 
    This feature allows making timing measurements between two or more arbitrary
    end points in the network. The measurement can separate queueing time, processing
    time, propagation time, transmission time, etc. on a per-bit basis efficiently.
    It is also possible to collect all packet events (e.g queueing, processing,
    transmission, propagation) and do arbitrary computations again on a per-bit
-   basis.
-
-   Moreover, the above feature required the introduction of bit-level identity
-   tracking of packet data. In other words, it is now possible to determine if the
-   data that shows up at two different locations in the network, independently
-   of whether these locations are in the same network node or not, and also
-   independently of how the data is represented (field-based or binary), is the
-   same data or not.
+   basis. This feature is provided by the FlowMeasurementStarter and FlowMeasurementRecorder
+   modules. The measurement data are collected on packets in various time tags
+   (e.g. QueueingTimeTag), which are updated by all related modules (e.g. PacketQueue).
 
 8. Queueing model
 
@@ -352,7 +366,7 @@ Notable backward compatible changes are the following:
    a table of open sockets (which can also be inspected in the runtime user interface),
    and some for processing and duplicating the incoming packets for all open sockets.
 
-11. Protocol support model
+11. Protocol elements library
 
    Many small generic and reusable protocol implementation support components
    have been added. These components include, among others, generic components for
@@ -362,11 +376,11 @@ Notable backward compatible changes are the following:
 
 12. Visualizer
 
-   A new packet flow visualier has been added, called PacketFlowCanvasVisualizer
-   and PacketFlowOsgVisualizer. They have also been included in the integrated
-   visualizer modules. The new visualizers can display the detected packet flow
-   paths as polylines along with some basic statistics that show how thay are
-   actually used in the simulation.
+   A new packet flow visualizer has been added, called PacketFlowCanvasVisualizer
+   and its OSG variant PacketFlowOsgVisualizer. They have also been included in
+   the integrated visualizer modules. The new visualizers display the packet flow
+   paths as polylines along with some basic statistics. This visualizer relies on
+   the newly introduced packet flow concept.
 
    The spectrum and spectrogram visualization of the MediumCanvasVisualizer has
    been further enhanced with better options and a more efficient implementation.
@@ -401,7 +415,7 @@ Notable backward compatible changes are the following:
     - Ethernet cut-through switching
     - gating mechanism in Ethernet queueing
     - modular Ethernet interface
-    - DC-TCP congestion algorithm
+    - DCTCP congestion algorithm
     - timing measurement along packet flows
     - video streaming using network emulation
     - signal power spectral density visualization
@@ -443,7 +457,7 @@ Notable backward compatible changes are the following:
 19. Code cleanup and formatting
 
    The whole source tree has been cleaned up with respect to C++ code formatting,
-   indentation, header guards, white space, and so on. Moreover, all copyright
+   indentation, header guards, whitespace, and so on. Moreover, all copyright
    headers in the C++ source files have been updated to use the official GPL-2
    and GPL-3 formats as suggested.
 
