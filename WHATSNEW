@@ -38,29 +38,29 @@ Notable backward incompatible changes are the following:
 
 2. Ethernet
 
-   Several modules which had an abbreviated Ether in their name has been renamed
-   to have the complete word, Ethernet, in their name instead. This change affects
+   Several modules which had an abbreviated Ether in their names have been renamed
+   to have the complete word, Ethernet, in their names instead. This change affects
    many names: EthernetSwitch, EthernetMac, EthernetLink, EthernetSignal, etc.
 
    The Ethernet switch frame relay functionality provided by the MacRelayUnit and
    Ieee8021dRelay modules have been refactored. The most prominent change is that
-   these modules no longer require to work only on Ethernet frames. They simply
-   expect the packets to contain the necessary meta data such as the incoming
+   these modules no longer work on Ethernet frames only. They simply
+   expect the packets to contain the necessary metadata such as the incoming
    interface indication (InterfaceInd) and the source and destination MAC address
    indication (MacAddressInd) in order to operate.
 
    A new WireJunction module has been added which replaces the functionality of
    the old EtherBus and EtherHub modules. This module represents a generic wiring
-   hub that simply broadcasts messages (packets, frames, signals) received on one
+   hub, and simply broadcasts messages (packets, frames, signals) received on one
    port to all other ports, mimicking the propagation of wired electrical signals.
 
    The physical signal class hierarchy has been refactored, the old Signal class
    has been split into a generic wireless signal, called WirelessSignal, and
-   a generic wired signal, called WiredSignal, both subclassing from Signal.
+   a generic wired signal, called WiredSignal, both subclassed from Signal.
 
    The renames may break existing simulations but they are easy to follow. The
    MAC relay changes are internal to network nodes and may only break Ethernet
-   extension models. All the other changes will most likely produce compilation
+   extension models. All the other changes are likely to produce compilation
    errors.
 
 3. IEEE 802.1q support
@@ -86,7 +86,7 @@ Notable backward incompatible changes are the following:
 
    The VLAN support has been completely refactored to use separate modules for
    filtering and mapping VLAN indications and requests on packets according to
-   a user configurable policy. The new VlanIndFilter and VlanReqMapper modules
+   a user-configurable policy. The new VlanIndFilter and VlanReqMapper modules
    are part of a VLAN policy module of Ethernet switches by default.
 
    This change may cause simulations to ignore certain parameters which are
@@ -153,8 +153,8 @@ Notable backward incompatible changes are the following:
 
 10. Renames
 
-   Several folders in the physicallayer folder have been renamed to folders below
-   the newly added wired and wireless folders. Besides, all support modules have
+   Several folders in the physicallayer folder have been moved below the newly
+   added wired and wireless folders, and renamed. Besides, all support modules have
    been moved one level deeper into the common folders. This change helps new
    users to find existing physical layer technologies more easily, because they
    have their own folders right inside the wired and wireless folders. This change
@@ -166,7 +166,7 @@ Notable backward incompatible changes are the following:
    class was really an integral part of the InterfaceTable module. This is no
    longer the case, thus the renaming makes perfect sense.
 
-   The Protocol::ieee8022 global protocol variable has been renamed and split
+   The Protocol::ieee8022 global protocol variable has been renamed, and split
    into Protocol::ieee8022llc and Protocol::ieee8022snap.
 
    The queueing API has been updated to reflect the new push/pull duality in
@@ -219,7 +219,7 @@ Notable backward compatible changes are the following:
    The replace methods allow replacing arbitrary parts of the packet content with
    a single method call. The update methods allow updating arbitrary parts of the
    packet content in place with a single method call. Similarly to the completeness
-   of these methods, the remove and insert methods have also been futher extended.
+   of these methods, the remove and insert methods have also been further extended.
 
    Moreover, the Packet API has been extended with a packet level region tag
    support. This allows attaching region tags to the data of packets similarly
@@ -231,7 +231,7 @@ Notable backward compatible changes are the following:
    individual packets, and must be separately updated for different paths the
    same data takes in the network.
 
-   A new chunk class, called EncryptedChunk, has been added that allows storing
+   A new chunk class, called EncryptedChunk, has been added to allow storing
    encrypted data in a packet without actually encrypting the data. Internally,
    the new chunk uses a shared reference to the encrypted chunk and the length
    of the encrypted binary representation.
@@ -242,7 +242,7 @@ Notable backward compatible changes are the following:
    The PacketProtocolTag has been extended with an extra front and back offset
    that further specifies where the actual protocol is to be found within the
    packet data. This feature is primarily useful to keep the associated protocol
-   of the packet up-to-date even while the packet is being constructed within a
+   of the packet up to date even while the packet is being constructed within a
    protocol module. Doing so allows the packet printer and packet dissector to
    understand a partially encapsulated, incomplete packet.
 
@@ -251,7 +251,7 @@ Notable backward compatible changes are the following:
    Several new modules have been added to support the modeling of hardware clocks
    and the related clock drift phenomena. The new modules can be found in a new
    top level folder called clock. The clock model is an optional feature that
-   can be used most easily via the ClockUserModuleBase and ClockUserModuleMixin
+   can be most conveniently used via the ClockUserModuleBase and ClockUserModuleMixin
    classes.
 
    Several modules have been extended with optional clock support: UdpBasicApp,
@@ -266,7 +266,7 @@ Notable backward compatible changes are the following:
 
    A completely new modular Ethernet model has been added to the linklayer and
    physicallayer folders. The new model contains of several smaller modules that
-   allow the user to combine them in more ways than before and also to custimze
+   allow the user to combine them in more ways than before and also to customize
    their behavior. The main purpose of this change was to provide support for
    Ethernet Time-Sensitive Networking (TSN) features.
 
@@ -284,7 +284,7 @@ Notable backward compatible changes are the following:
 
    A new congestion control algorithm, called DC-TCP, has been added by Marcel
    Marek. Also, related to this change, the ECN support has been enhanced to be
-   cusomizable by congestion control algorithms.
+   customizable by congestion control algorithms.
 
 6. Enhanced Interior Gateway Routing Protocol (EIGRP)
 
@@ -296,7 +296,7 @@ Notable backward compatible changes are the following:
    This model was contributed by Vladimir Vesely, Jan Bloudicek, Vit Rek, and Jan
    Zavrel from the Brno University of Technology.
 
-7. Advancend timing measurements and packet flows
+7. Advanced timing measurements and packet flows
 
    The concept of packet flows has been added to provide support for advanced timing
    measurements. A packet flow is a logical classification of packets, identified
@@ -304,16 +304,16 @@ Notable backward compatible changes are the following:
 
    This feature allows making timing measurements between two or more arbitrary
    end points in the network. The measurement can separate queueing time, processing
-   time, propagation time, transmission time, etc. on a per bit basis efficiently.
-   It's also possible to collect all packet events (e.g queueing, processing,
-   tranmsission, propagation) and do arbitrary computations again on a per bit
+   time, propagation time, transmission time, etc. on a per-bit basis efficiently.
+   It is also possible to collect all packet events (e.g queueing, processing,
+   transmission, propagation) and do arbitrary computations again on a per-bit
    basis.
 
-   Moreover, the above feature required the introduction of bit level identity
-   tracking of packet data. In other words, it's possible to determine if the
+   Moreover, the above feature required the introduction of bit-level identity
+   tracking of packet data. In other words, it is now possible to determine if the
    data that shows up at two different locations in the network, independently
    of whether these locations are in the same network node or not, and also
-   independently of how the data is represented (field based or binary), is the
+   independently of how the data is represented (field-based or binary), is the
    same data or not.
 
 8. Queueing model
@@ -321,7 +321,7 @@ Notable backward compatible changes are the following:
    The synchronous packet processing API has been extended with the support of
    packet streaming between modules. This feature allows two modules within the
    same network node to communicate synchronously (without sending asynchronous
-   messages) and process a packet bit-by-bit over a non-zero amount of time. The
+   messages) and process a packet bit by bit over a nonzero amount of time. The
    related methods are called pushPacketStart(), pushPacketEnd(), pushPacketProgress(),
    pullPacketStart(), pullPacketEnd(), and pullPacketProgress().
 
@@ -329,7 +329,7 @@ Notable backward compatible changes are the following:
    in order to better support the new feature. Also, many queueing model elements
    have been extended with direct packet streaming support.
 
-   A few new queueing model elements has also been added that provides support
+   A few new queueing model elements have also been added that provide support
    for the gating mechanism of Time-Sensitive Networking and for the preemption
    mechanism of Ethernet. Some notable examples are PacketGate, PeriodicGate,
    PreemptingServer, PreemptableStreamer, etc.
@@ -340,22 +340,23 @@ Notable backward compatible changes are the following:
    This is the new default output file format for the PcapRecorder module. The
    support for recording PCAP files has been extended to the network, network
    node, and network interface level. The new format allows recording the network
-   interface, packet direction (outbound/inbound) and multiple packet formats
-   in a single file potentially for the whole network.
+   interface and packet direction (outbound/inbound) for frames and also supports
+   mixing packet formats, making it possible to record the traffic of potentially
+   the whole network into a single file.
 
 10. Socket processing
 
    Several new modular socket command and packet processing components have been
    added for Ethernet and IEEE 802.2 LLC protocols. There are modules for handling
-   the opening, configuration, and closing commands for sockets, others for maintaing
-   a table of open sockets, which can also be inspected in the runtime user interface,
+   the opening, configuration, and closing commands for sockets, others for maintaining
+   a table of open sockets (which can also be inspected in the runtime user interface),
    and some for processing and duplicating the incoming packets for all open sockets.
 
 11. Protocol support model
 
    Many small generic and reusable protocol implementation support components
-   have been added. These include among others generic components for packet
-   fragmentation and defragmentation, aggregation and deaggregation, CRC and
+   have been added. These components include, among others, generic components for
+   packet fragmentation and defragmentation, aggregation and deaggregation, CRC and
    FCS insertion and checking, and physical layer wired transmitter and receiver
    models.
 
@@ -367,8 +368,8 @@ Notable backward compatible changes are the following:
    paths as polylines along with some basic statistics that show how thay are
    actually used in the simulation.
 
-   The spectrum and spectogram visualization of the MediumCanvasVisualizer has
-   been further enchanced with better options and a more efficient implementation.
+   The spectrum and spectrogram visualization of the MediumCanvasVisualizer has
+   been further enhanced with better options and a more efficient implementation.
 
 13. Printing formatted output
 
@@ -424,7 +425,7 @@ Notable backward compatible changes are the following:
 17. Documentation
 
    A new chapter about the newly added clock model has been added to the User's
-   Guide. The Collecting results chapter has been completed and also extended
+   Guide. The Collecting Results chapter has been completed and also extended
    with a new section that describes how to do timing measurements along packet
    flows. The queueing model and emulation chapters of the User's Guide has been
    updated to reflect the changes in the queueing model of this release.
@@ -442,7 +443,7 @@ Notable backward compatible changes are the following:
 19. Code cleanup and formatting
 
    The whole source tree has been cleaned up with respect to C++ code formatting,
-   indentation, header guards, whitespaces, and so on. Moreover, all copyright
+   indentation, header guards, white space, and so on. Moreover, all copyright
    headers in the C++ source files have been updated to use the official GPL-2
    and GPL-3 formats as suggested.
 
@@ -458,9 +459,9 @@ Notable backward compatible changes are the following:
    LeftCurryingFunction and RightCurryingFunction.
 
    In several places the std::min and std::max calls have been replaced with
-   inet::minnan, inet::maxnan to properly propagate NaN values as expected.
+   inet::minnan, inet::maxnan that properly propagate NaN values.
 
-   The IProtocolRegistrationListenger interfaces have been extended to allow
+   The IProtocolRegistrationListener interfaces have been extended to allow
    registering a protocol group or any protocol as a fallback for a service or
    protocol available at a module gate.
 
@@ -908,7 +909,7 @@ The backward compatible changes are the following:
     parameters of switches and hosts. Additionally, all network nodes can have
     any number of virtual network interfaces which can be configured to request
     VLAN tagging. This feature allows using multiple different virtual networks
-    on the same physical network on a per application basis.
+    on the same physical network on a per-application basis.
 
 12. Raphael Riebl contributed support for ether type discrimantion for IEEE 802.11p
     networks in the 5.9 GHz band. The new modules provide both IEEE 802.11 EPD and
