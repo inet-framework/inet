@@ -144,11 +144,22 @@ void AckingMac::handleUpperPacket(Packet *packet)
 
 void AckingMac::handleLowerPacket(Packet *packet)
 {
-    auto macHeader = packet->peekAtFront<AckingMacHeader>();
+    //auto macHeader = packet->peekAtFront<AckingMacHeader>();
     if (packet->hasBitError()) {
         EV << "Received frame '" << packet->getName() << "' contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+        return;
+    }
+
+    const auto & chunk = packet->peekAtFront<Chunk>();
+    const auto & macHeader = dynamicPtrCast<const AckingMacHeader> (chunk);
+    if (macHeader == nullptr) {
+        EV << "Received " << packet << " contains other header protocol, dropping it\n";
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
         emit(packetDroppedSignal, packet, &details);
         delete packet;
         return;

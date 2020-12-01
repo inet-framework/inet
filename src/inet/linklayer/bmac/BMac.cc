@@ -540,7 +540,18 @@ void BMac::handleLowerPacket(Packet *packet)
         return;
     }
     else {
-        const auto& hdr = packet->peekAtFront<BMacHeaderBase>();
+        const auto & chunk = packet->peekAtFront<Chunk>();
+        const auto & hdr = dynamicPtrCast<const BMacHeaderBase> (chunk);
+        if (hdr == nullptr) {
+            EV << "Received " << packet << " contains other header protocol, dropping it\n";
+            PacketDropDetails details;
+            details.setReason(OTHER_PACKET_DROP);
+            emit(packetDroppedSignal, packet, &details);
+            delete packet;
+            return;
+        }
+
+        //const auto& hdr = packet->peekAtFront<BMacHeaderBase>();
         packet->setKind(hdr->getType());
         // simply pass the message as self message, to be processed by the FSM.
         handleSelfMessage(packet);

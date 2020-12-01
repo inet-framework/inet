@@ -798,7 +798,18 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
         delete packet;
         return;
     }
-    const auto& csmaHeader = packet->peekAtFront<Ieee802154MacHeader>();
+    //const auto& csmaHeader = packet->peekAtFront<Ieee802154MacHeader>();
+    const auto & chunk = packet->peekAtFront<Chunk>();
+    const auto & csmaHeader = dynamicPtrCast<const Ieee802154MacHeader> (chunk);
+    if (csmaHeader == nullptr) {
+        EV << "Received " << packet << " contains other header protocol, dropping it\n";
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+        return;
+    }
+
     const MacAddress& src = csmaHeader->getSrcAddr();
     const MacAddress& dest = csmaHeader->getDestAddr();
     long ExpectedNr = 0;

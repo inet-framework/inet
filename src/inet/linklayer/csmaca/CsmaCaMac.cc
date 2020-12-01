@@ -621,7 +621,12 @@ bool CsmaCaMac::isFcsOk(Packet *frame)
     if (frame->hasBitError() || !frame->peekData()->isCorrect())
         return false;
     else {
-        const auto& trailer = frame->peekAtBack<CsmaCaMacTrailer>(B(4));
+        //const auto& trailer = frame->peekAtBack<CsmaCaMacTrailer>(B(4));
+        const auto & chunk = frame->peekAtBack<Chunk>(B(4));
+        const auto & trailer = dynamicPtrCast<const CsmaCaMacTrailer> (chunk);
+        if (trailer == nullptr) // other protocol type
+            return false;
+
         switch (trailer->getFcsMode()) {
             case FCS_DECLARED_INCORRECT:
                 return false;
