@@ -1,4 +1,26 @@
 {
+   libgnutls
+   Memcheck:Leak
+   ...
+   fun:allocate_dtv_entry
+   fun:allocate_and_init
+   fun:tls_get_addr_tail
+   ...
+}
+
+{
+   libgobject
+   Memcheck:Leak
+   ...
+   fun:malloc
+   fun:_dl_resize_dtv
+   fun:_dl_update_slotinfo
+   ...
+   fun:_dl_open
+   ...
+}
+
+{
    nedparser_overlap
    Memcheck:Overlap
    fun:memcpy@@GLIBC_2.14
