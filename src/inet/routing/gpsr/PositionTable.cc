@@ -56,7 +56,7 @@ void PositionTable::removePosition(const L3Address& address)
 
 void PositionTable::removeOldPositions(simtime_t timestamp)
 {
-    for (auto it = addressToPositionMap.begin(); it != addressToPositionMap.end(); )
+    for (auto it = addressToPositionMap.begin(); it != addressToPositionMap.end();)
         if (it->second.first <= timestamp)
             addressToPositionMap.erase(it++);
         else

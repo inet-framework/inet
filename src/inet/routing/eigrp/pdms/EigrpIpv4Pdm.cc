@@ -23,7 +23,7 @@
  * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
  * @brief EIGRP IPv4 Protocol Dependent Module
  * @detail Main module, it mediates control exchange between DUAL, routing table and
-topology table.
+   topology table.
  */
 
 #include "inet/routing/eigrp/pdms/EigrpIpv4Pdm.h"

@@ -194,7 +194,7 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
         else {
             auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
             int socketId = tags.getTag<SocketInd>()->getSocketId();
-            for (auto& s: udpSockets) {
+            for (auto& s : udpSockets) {
                 if (s.getSocketId() == socketId) {
                     s.processMessage(msg);
                     return;
@@ -208,10 +208,10 @@ void Ldp::handleMessageWhenUp(cMessage *msg)
         if (udpSocket.isOpen() || serverSocket.isOpen())
             return;
         // TODO check for empty sockets?
-        for (auto& s: udpSockets)
+        for (auto& s : udpSockets)
             if (s.isOpen())
                 return;
-        for (auto s: socketMap.getMap())
+        for (auto s : socketMap.getMap())
             if (s.second->isOpen())
                 return;
         udpSockets.clear();
@@ -249,10 +249,10 @@ void Ldp::handleStopOperation(LifecycleOperation *operation)
     myPeers.clear();
     cancelEvent(sendHelloMsg);
     udpSocket.close();
-    for (auto& s: udpSockets)
+    for (auto& s : udpSockets)
         s.close();
     serverSocket.close();
-    for (auto s: socketMap.getMap())
+    for (auto s : socketMap.getMap())
         s.second->close();
     delayActiveOperationFinish(par("stopOperationTimeout"));
 }
@@ -265,10 +265,10 @@ void Ldp::handleCrashOperation(LifecycleOperation *operation)
     cancelEvent(sendHelloMsg);
 
     udpSocket.destroy();
-    for (auto& s: udpSockets)
+    for (auto& s : udpSockets)
         s.destroy();
     serverSocket.destroy();
-    for (auto s: socketMap.getMap())
+    for (auto s : socketMap.getMap())
         s.second->destroy();
 }
 

@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2020-11-09  Levente Mészáros
+
+	Moved EthernetHub to inet.node.ethernet package.
+	Renamed EtherSwitch to EthernetSwitch and EtherHost to EthernetHost.
+
 2020-10-19  Levente Mészáros
 
 	Renamed MessageDispatcher submodules to reflect the layers they are in between.

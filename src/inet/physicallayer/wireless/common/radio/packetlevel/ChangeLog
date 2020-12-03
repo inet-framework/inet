@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2020-11-20  Edward Longman
+
+	Bugfix to prevent wrong StateChangedSignal when switching radio mode.
+
+2020-11-13  Edward Longman
+
+	Bugfix segfault when accessing receptionTimer after endReception.
+
 2020-10-21  Levente Mészáros
 
 	Moved deletion of transmission and signal to the communication cache module.

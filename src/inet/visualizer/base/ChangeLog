@@ -1,5 +1,19 @@
 ====== inet-4.x ======
 
+2020-11-26  Levente Mészáros
+
+	Fixed double delete crashed caused by explicit deletes and deletes due to reference counting.
+	Replaced plain pointers with reference counted pointers to osg nodes.
+	Extracted common parts into base class between canvas and OSG mobility visualizers.
+
+2020-11-25  Levente Mészáros
+
+	Fixed stale canvas visualization for deleted mobility module, see #555.
+
+2020-11-04  Levente Mészáros
+
+	Changed all visualizer base class destructors into preDelete methods.
+
 2020-10-21  Levente Mészáros
 
 	Moved visualization removal in destructors to visualizer base classes.

@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2020-11-24  Levente Mészáros
+
+	Changed the corruptOfdmSymbol method in Ieee80211OfdmErrorModel to compute
+	the corrupted symbol using normal distribution along the Q and I axis.
+	Fixed for the case when the data mode parameter of the PHY header is
+	incorrect and the packet cannot be received correctly.
+	Fixed several cases in Ieee80211OfdmRadio where the decapsulation of the
+	PHY header is not possible.
+	Changed Ieee80211OfdmRadio to call getPaddingLength on the data mode
+	instead of the transmitter.
+	Removed getPaddingLength method from Ieee80211LayeredOfdmTransmitter, because
+	it's already available from the Ieee80211OfdmDataMode class.
+	Added getMode method to Ieee80211LayeredOfdmReceiver to query the reception
+	mode of a received packet.
+	Added default transmitter/receiver submodule type parameters to Ieee80211OfdmRadio.
+
 2020-08-31  Levente Mészáros
 
 	Added evFlags parameter to all printToStream methods and recursive calls.

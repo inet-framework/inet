@@ -166,7 +166,7 @@ static cFigure::Rectangle createRectangle(const cFigure::Point& pt, const cFigur
 
 static void pushUnlessContains(std::vector<cFigure::Point>& pts, const std::vector<cFigure::Rectangle>& rcs, const cFigure::Point& pt)
 {
-    for (const auto& rc: rcs) {
+    for (const auto& rc : rcs) {
         if (containsPoint(rc, pt))
             return;
     }
@@ -260,7 +260,7 @@ void NetworkNodeCanvasVisualization::layout()
         cFigure::Rectangle bestRc;
 
         // for all candidate points
-        for (auto pt: pts) {
+        for (auto pt : pts) {
             // align annotation to candidate points with its various points
             for (int k = 0; k < 9; k++) {
                 cFigure::Rectangle candidateRc;
@@ -314,7 +314,7 @@ void NetworkNodeCanvasVisualization::layout()
 
                     // find an already positioned annotation which would intersect the candidate rectangle
                     bool intersects = false;
-                    for (const auto& rc: rcs) {
+                    for (const auto& rc : rcs) {
                         if (intersectsRectangle(candidateRc, rc)) {
                             intersects = true;
                             break;

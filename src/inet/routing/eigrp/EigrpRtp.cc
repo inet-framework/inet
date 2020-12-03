@@ -424,7 +424,6 @@ void EigrpRtpT<IPAddress>::scheduleNextMsg(int ifaceId)
             sendUnrelMsg(msgReq);
         }
     }
-
 }
 
 template<typename IPAddress>

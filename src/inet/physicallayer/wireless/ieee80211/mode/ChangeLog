@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-11-24  Levente Mészáros
+
+	Added findCompliantMode that can return a nullptr if the mode is not found.
+
 2020-08-31  Levente Mészáros
 
 	Added evFlags parameter to all printToStream methods and recursive calls.

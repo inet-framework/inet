@@ -561,7 +561,7 @@ void NextHopForwarding::sendDatagramToHL(Packet *packet)
     auto localAddress(header->getDestAddr());
     auto remoteAddress(header->getSrcAddr());
     bool hasSocket = false;
-    for (const auto& elem: socketIdToSocketDescriptor) {
+    for (const auto& elem : socketIdToSocketDescriptor) {
         if (elem.second->protocolId == protocol->getId()
             && (elem.second->localAddress.isUnspecified() || elem.second->localAddress == localAddress)
             && (elem.second->remoteAddress.isUnspecified() || elem.second->remoteAddress == remoteAddress))

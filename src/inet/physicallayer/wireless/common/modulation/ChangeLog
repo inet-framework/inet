@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2020-11-24  Levente Mészáros
+
+	Fixed the normalization factor in Qam1024Modulation according to literature.
+	Added a normalizationFactor field that stores the k value for M-QAM modulations.
+
 2020-08-31  Levente Mészáros
 
 	Added evFlags parameter to all printToStream methods and recursive calls.

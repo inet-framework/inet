@@ -23,7 +23,7 @@
  * @date 6. 11. 2014
  * @brief EIGRP IPv6 Protocol Dependent Module
  * @detail Main module, it mediates control exchange between DUAL, routing table and
-topology table.
+   topology table.
  */
 
 #include "inet/routing/eigrp/pdms/EigrpIpv6Pdm.h"
@@ -191,7 +191,6 @@ void EigrpIpv6Pdm::processIfaceStateChange(NetworkInterface *iface)
             if (route->getInterface()->getInterfaceId() == ifaceId && route->getNextHop() == Ipv6Address::UNSPECIFIED_ADDRESS && route->getDestPrefix() != Ipv6Address::LINKLOCAL_PREFIX) { // Found Directly-connected (no link-local) route on interface -> remove
                 rt->removeRoute(route);
             }
-
         }
 
         eigrpIface = this->eigrpIft->findInterfaceById(ifaceId);
@@ -363,7 +362,6 @@ void EigrpIpv6Pdm::processMsgFromNetwork(cMessage *msg)
                 EV_DEBUG << "EIGRP: Received message from " << srcAddr << " that is not neighbor, skipped" << endl;
             break;
     }
-
 }
 
 void EigrpIpv6Pdm::processMsgFromRtp(cMessage *msg)
@@ -1981,7 +1979,7 @@ bool EigrpIpv6Pdm::addNetPrefix(const Ipv6Address& network, const short int pref
     return true;
 }
 
-}
-
 } // namespace eigrp
+
+} // namespace inet
 

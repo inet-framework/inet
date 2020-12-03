@@ -2564,7 +2564,6 @@ void SctpAssociation::fragmentOutboundDataMsgs() {
             }
         }
     }
-
 }
 
 SctpDataMsg *SctpAssociation::dequeueOutboundDataMsg(SctpPathVariables *path,

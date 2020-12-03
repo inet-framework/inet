@@ -183,7 +183,7 @@ void PingApp::handleSelfMessage(cMessage *msg)
         }
         const Protocol *icmp = l3Echo.at(networkProtocol);
 
-        for (auto socket: socketMap.getMap()) {
+        for (auto socket : socketMap.getMap()) {
             socket.second->close();
         }
         currentSocket = nullptr;
@@ -328,7 +328,7 @@ void PingApp::handleStopOperation(LifecycleOperation *operation)
     // TODO close sockets
     // TODO remove getMap()
     if (socketMap.size() > 0) {
-        for (auto socket: socketMap.getMap())
+        for (auto socket : socketMap.getMap())
             socket.second->close();
     }
     delayActiveOperationFinish(par("stopOperationTimeout"));
@@ -347,7 +347,7 @@ void PingApp::handleCrashOperation(LifecycleOperation *operation)
     // TODO remove check?
     if (operation->getRootModule() != getContainingNode(this)) {
         // TODO destroy sockets
-        for (auto socket: socketMap.getMap())
+        for (auto socket : socketMap.getMap())
             socket.second->destroy();
         socketMap.deleteSockets();
     }

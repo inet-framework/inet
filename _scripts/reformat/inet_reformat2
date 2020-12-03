@@ -1,0 +1,18 @@
+#!/bin/bash
+
+find $(pwd) -name "*.cc" -o -name "*.h" \
+  | grep -v /src/inet/transportlayer/tcp_lwip/lwip \
+  | grep -v _m.cc | grep -v _m.h \
+  | grep -v /lexer.cc | grep -v /lexer.h \
+  | grep -v /parser.cc | grep -v /parser.h \
+  | grep -v src/inet/routing/extras/ \
+  >__reformat2_filelist.txt
+
+uncrustify -c $(dirname $0)/omnetpp.style --replace --no-backup -l CPP -F __reformat2_filelist.txt
+
+$(dirname $0)/postprocess __reformat2_filelist.txt
+
+rm __reformat2_filelist.txt
+
+echo ""
+echo "Please verify the changes!"

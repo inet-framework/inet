@@ -15,16 +15,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 /**
-* @file EigrpIpv6Pdm.h
-* @author Jan Zavrel (honza.zavrel96@gmail.com)
-* @author Vit Rek (rek@kn.vutbr.cz)
-* @author Vladimir Vesely (ivesely@fit.vutbr.cz)
-* @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
-* @date 6. 11. 2014
-* @brief EIGRP IPv6 Protocol Dependent Module header file
-* @detail Main module, it mediates control exchange between DUAL, routing table and
-topology table.
-*/
+ * @file EigrpIpv6Pdm.h
+ * @author Jan Zavrel (honza.zavrel96@gmail.com)
+ * @author Vit Rek (rek@kn.vutbr.cz)
+ * @author Vladimir Vesely (ivesely@fit.vutbr.cz)
+ * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
+ * @date 6. 11. 2014
+ * @brief EIGRP IPv6 Protocol Dependent Module header file
+ * @detail Main module, it mediates control exchange between DUAL, routing table and
+   topology table.
+ */
 
 #ifndef EIGRPIPV6PDM_H_
 #define EIGRPIPV6PDM_H_

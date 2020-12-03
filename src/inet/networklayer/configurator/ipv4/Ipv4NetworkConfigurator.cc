@@ -858,7 +858,7 @@ void Ipv4NetworkConfigurator::dumpConfig(Topology& topology)
     }
 
     // wireless links
-    for (auto& linkInfo: topology.linkInfos) {
+    for (auto& linkInfo : topology.linkInfos) {
         bool hasWireless = false;
         for (auto& element : linkInfo->interfaceInfos) {
             InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(element);
@@ -1764,7 +1764,7 @@ void Ipv4NetworkConfigurator::optimizeRoutes(std::vector<Ipv4Route *>& originalR
     checkOriginalRoutes(routingTableInfo, originalRoutingTableInfo);
 #endif // ifndef NDEBUG
 
-    for (auto rti: originalRoutingTableInfo.routeInfos)
+    for (auto rti : originalRoutingTableInfo.routeInfos)
         delete rti;
     originalRoutingTableInfo.routeInfos.clear();
 

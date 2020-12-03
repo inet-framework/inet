@@ -754,7 +754,6 @@ void MoBanCoordinator::computeMaxSpeed()
             if (maxSpeed < postureMaxSpeed)
                 maxSpeed = postureMaxSpeed;
         }
-
     }
 }
 

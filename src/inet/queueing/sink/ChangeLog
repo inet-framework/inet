@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-11-05  Levente Mészáros
+
+	Fixed issues found by clang-tidy code checker.
+
 2020-08-25  Levente Mészáros
 
 	Adapted to new EV_FIELD macro.

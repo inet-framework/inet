@@ -1,5 +1,19 @@
 ====== inet-4.x ======
 
+2020-11-27  Levente Mészáros
+
+	Extended check in PacketProcessorBase to allow for only sending packet
+	processor gates.
+
+2020-11-24  Levente Mészáros
+
+	Changed the interpretation of the packetData parameter in PacketSourceBase
+	to allow for per bit/byte random packet data.
+
+2020-11-05  Levente Mészáros
+
+	Fixed issues found by clang-tidy code checker.
+
 2020-10-21  Levente Mészáros
 
 	Replaced plain pointers with module references in PacketFilterBase/PacketFlowBase.

@@ -125,7 +125,7 @@ void Ieee8022Llc::processPacketFromMac(Packet *packet)
     if (auto sap = packet->findTag<Ieee802SapInd>()) {
         int localSap = sap->getDsap();
         int remoteSap = sap->getSsap();
-        for (const auto& elem: socketIdToSocketDescriptor) {
+        for (const auto& elem : socketIdToSocketDescriptor) {
             if ((elem.second->localSap == localSap || elem.second->localSap == -1)
                 && (elem.second->remoteSap == remoteSap || elem.second->remoteSap == -1))
             {
@@ -261,7 +261,7 @@ std::ostream& operator<<(std::ostream& o, const Ieee8022Llc::SocketDescriptor& t
 
 void Ieee8022Llc::clearSockets()
 {
-    for (auto& elem: socketIdToSocketDescriptor) {
+    for (auto& elem : socketIdToSocketDescriptor) {
         delete elem.second;
         elem.second = nullptr;
     }

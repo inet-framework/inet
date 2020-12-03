@@ -61,7 +61,6 @@ class VirtualTunnel : public cSimpleModule
     virtual void socketClosed(EthernetSocket *socket) override {}
 #endif
 
-
 #ifdef INET_WITH_IEEE8021Q
     virtual void socketDataArrived(Ieee8021qSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(Ieee8021qSocket *socket, Indication *indication) override { throw cRuntimeError("Invalid operation"); }

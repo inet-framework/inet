@@ -15,15 +15,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 /**
-* @file EigrpDualStack.cc
-* @author Jan Zavrel (honza.zavrel96@gmail.com)
-* @author Vit Rek (rek@kn.vutbr.cz)
-* @author Vladimir Vesely (ivesely@fit.vutbr.cz)
-* @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
-* @date 27. 10. 2014
-* @brief EIGRP Dual-stack (IPv4/IPv6) support
-* @detail Contains functions for dual-stack (IPv4/IPv6) support
-*/
+ * @file EigrpDualStack.cc
+ * @author Jan Zavrel (honza.zavrel96@gmail.com)
+ * @author Vit Rek (rek@kn.vutbr.cz)
+ * @author Vladimir Vesely (ivesely@fit.vutbr.cz)
+ * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
+ * @date 27. 10. 2014
+ * @brief EIGRP Dual-stack (IPv4/IPv6) support
+ * @detail Contains functions for dual-stack (IPv4/IPv6) support
+ */
 
 #include "inet/routing/eigrp/EigrpDualStack.h"
 namespace inet {

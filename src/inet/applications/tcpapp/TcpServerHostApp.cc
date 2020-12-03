@@ -44,7 +44,7 @@ void TcpServerHostApp::handleStartOperation(LifecycleOperation *operation)
 
 void TcpServerHostApp::handleStopOperation(LifecycleOperation *operation)
 {
-    for (auto thread: threadSet)
+    for (auto thread : threadSet)
         thread->getSocket()->close();
     serverSocket.close();
     delayActiveOperationFinish(par("stopOperationTimeout"));

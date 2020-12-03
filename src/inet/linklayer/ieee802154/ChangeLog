@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2020-11-25  ababila
+
+	Added visualizing FSM states to Ieee8021514Mac.
+	Removed unused signal subscription from Ieee802154Mac.
+
 2020-09-11  Levente Mészáros
 
 	Removed protocol field from network interfaces that doesn't have an external

@@ -465,7 +465,6 @@ bool EigrpDeviceConfigurator::loadEigrpInterfaceParams(cXMLElement *eigrpIface, 
             eigrpModule->setLoad(tempNumber, ifaceId);
             changed = true;
         }
-
     }
     return changed;
 }
@@ -496,7 +495,6 @@ void EigrpDeviceConfigurator::loadEigrpInterface(cXMLElement *eigrpIface, IEigrp
                 throw cRuntimeError("Bad value for EIGRP Split Horizon on interface %s", ifaceName);
             eigrpModule->setSplitHorizon(tempBool, ifaceId);
         }
-
     }
 }
 
@@ -727,7 +725,6 @@ bool EigrpDeviceConfigurator::loadEigrpInterfaceParams6(cXMLElement *eigrpIface,
             eigrpModule->setLoad(tempNumber, ifaceId);
             changed = true;
         }
-
     }
     return changed;
 }

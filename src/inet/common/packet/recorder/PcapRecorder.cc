@@ -266,7 +266,7 @@ bool PcapRecorder::matchesLinkType(PcapLinkType pcapLinkType, const Protocol *pr
     else if (*protocol == Protocol::ieee802154)
         return pcapLinkType == LINKTYPE_IEEE802_15_4 || pcapLinkType == LINKTYPE_IEEE802_15_4_NOFCS;
     else {
-        for (auto helper: helpers) {
+        for (auto helper : helpers) {
             if (helper->matchesLinkType(pcapLinkType, protocol))
                 return true;
         }
@@ -289,7 +289,7 @@ PcapLinkType PcapRecorder::protocolToLinkType(const Protocol *protocol) const
     else if (*protocol == Protocol::ieee802154)
         return LINKTYPE_IEEE802_15_4;
     else {
-        for (auto helper: helpers) {
+        for (auto helper : helpers) {
             auto lt = helper->protocolToLinkType(protocol);
             if (lt != LINKTYPE_INVALID)
                 return lt;
@@ -300,7 +300,7 @@ PcapLinkType PcapRecorder::protocolToLinkType(const Protocol *protocol) const
 
 Packet *PcapRecorder::tryConvertToLinkType(const Packet *packet, PcapLinkType pcapLinkType, const Protocol *protocol) const
 {
-    for (IHelper *helper: helpers) {
+    for (IHelper *helper : helpers) {
         if (auto newPacket = helper->tryConvertToLinkType(packet, pcapLinkType, protocol))
             return newPacket;
     }

@@ -236,7 +236,6 @@ void Ospfv3Area::ageDatabase()
 
                 floodLSA(lsa);
             }
-
         }
         if (!selfOriginated && (lsAge == MAX_AGE - 1)) {
             lsa->getHeaderForUpdate().setLsaAge(MAX_AGE);
@@ -2717,7 +2716,7 @@ void Ospfv3Area::calculateInterAreaRoutes(std::vector<Ospfv3RoutingTableEntry *>
              LSA's LS age is equal to MaxAge, then examine the the next
              LSA.
 
-         (2) If the LSA was originated by the calculating router itself,
+           (2) If the LSA was originated by the calculating router itself,
              examine the next LSA.*/
         if ((routeCost == LS_INFINITY) || (lsAge == MAX_AGE) || (selfOriginated)) { // (1) and(2)
             continue;
@@ -3187,7 +3186,6 @@ std::vector<NextHop> *Ospfv3Area::calculateNextHops(Ospfv3Lsa *destination, Ospf
                 }
             }
         }
-
     }
     else { // if parent is NETWORK_LSA
         NetworkLSA *networkLSA = dynamic_cast<NetworkLSA *>(parent);

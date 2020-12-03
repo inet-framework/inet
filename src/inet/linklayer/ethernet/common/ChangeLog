@@ -1,5 +1,16 @@
 ====== inet-4.x ======
 
+2020-11-10  Levente Mészáros
+
+	Moved contents of switch folder into common.
+
+2020-11-09  Levente Mészáros
+
+	Moved several generic components shared between basic and
+	composite implementations into a separate common folder.
+	Moved further common files into the common folder.
+	Renamed several files and moved them to better folders.
+
 2020-10-27  Levente Mészáros
 
 	Changed to duplicate the packet instead of creating a new one when forwarding.

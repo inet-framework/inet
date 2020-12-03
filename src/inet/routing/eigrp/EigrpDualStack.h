@@ -15,15 +15,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 /**
-* @file EigrpDualStack.h
-* @author Jan Zavrel (honza.zavrel96@gmail.com)
-* @author Vit Rek (rek@kn.vutbr.cz)
-* @author Vladimir Vesely (ivesely@fit.vutbr.cz)
-* @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
-* @date 27. 10. 2014
-* @brief EIGRP Dual-stack (IPv4/IPv6) support header file
-* @detail Functions prototypes for dual-stack (IPv4/IPv6) support
-*/
+ * @file EigrpDualStack.h
+ * @author Jan Zavrel (honza.zavrel96@gmail.com)
+ * @author Vit Rek (rek@kn.vutbr.cz)
+ * @author Vladimir Vesely (ivesely@fit.vutbr.cz)
+ * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
+ * @date 27. 10. 2014
+ * @brief EIGRP Dual-stack (IPv4/IPv6) support header file
+ * @detail Functions prototypes for dual-stack (IPv4/IPv6) support
+ */
 
 #ifndef EIGRPDUALSTACK_H_
 #define EIGRPDUALSTACK_H_

@@ -10,6 +10,9 @@ import os
 
 
 def processFile(filecontent):
+    filecontent = re.sub(r'(    }\n)\n( *}\n)', r'\1\2', filecontent, 0, re.MULTILINE)  # remove empty lines between '}' and '}'
+    filecontent = re.sub(r'(\n +class( INET_API)? \w+( : public \w+(::\w+)*)?)\n +\{', r'\1 {', filecontent, 0, re.MULTILINE)  # remove \n from inner class declarations
+    filecontent = re.sub(r'(\n +class( INET_API)? \w+( : public \w+(::\w+)*)?)( //[^\n])\n +\{', r'\1 {\5', filecontent, 0, re.MULTILINE)  # remove \n from inner class declarations
     return filecontent
 
 # configuration parameters

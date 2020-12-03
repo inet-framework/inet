@@ -40,7 +40,6 @@ class FunctionBasedComparator : public cQueue::Comparator
    virtual bool less(cObject *a, cObject *b) override {return f(a,b) < 0;}
 };
 
-
 cQueue::cQueue(const cQueue& queue) : cOwnedObject(queue)
 {
     copy(queue);

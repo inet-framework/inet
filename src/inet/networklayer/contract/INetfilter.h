@@ -144,7 +144,7 @@ class INET_API NetfilterBase : public INetfilter
 
   public:
     virtual ~NetfilterBase() {
-        for (auto hook: hooks)
+        for (auto hook : hooks)
             check_and_cast<HookBase *>(hook.second)->unregisteredFrom(this);
     }
 
