@@ -135,7 +135,7 @@
         name = "Configurator tutorial"
         description = "A step-by-step tutorial starting from the basics, and introducing new features and concepts related to automatic IP address and routing table configuartion."
         initiallyEnabled = "true"
-        requires = "Aodv Ethernet Ieee80211 Ipv4 Visualization"
+        requires = "Aodv Ethernet Ieee80211 Ipv4 Visualization2D"
         labels = "tutorial configuration"
         nedPackages = "
                        inet.tutorials.configurator
@@ -329,7 +329,7 @@
         initiallyEnabled = "true"
         requires = "Aodv ApskRadio BMac CsmaCaMac Dhcp DiffServ Dsdv Ethernet Gpsr
                     Ieee80211 Ieee802154 Ipv4 LMac PhysicalEnvironment Ppp Rip
-                    TcpInet Udp Visualization XMac"
+                    TcpInet Udp Visualization2D XMac"
         labels = ""
         nedPackages = "
                        inet.showcases.general
@@ -627,7 +627,7 @@
         name = "Mobility showcases"
         description = "Showcases that demonstrate node mobility."
         initiallyEnabled = "true"
-        requires = "Ieee80211 Ipv4 Mobility PhysicalEnvironment Visualization"
+        requires = "Ieee80211 Ipv4 Mobility PhysicalEnvironment Visualization2D"
         labels = ""
         nedPackages = "
                        inet.showcases.mobility
@@ -1053,7 +1053,7 @@
         name = "Routing showcases"
         description = "Showcases that demonstrate routing protocols."
         initiallyEnabled = "true"
-        requires = "Gpsr Ieee80211 Ipv4 PhysicalEnvironment Visualization"
+        requires = "Gpsr Ieee80211 Ipv4 PhysicalEnvironment Visualization2D"
         labels = ""
         nedPackages = "
                        inet.showcases.routing
@@ -1284,31 +1284,50 @@
         linkerFlags = ""
         />
     <feature
-        id = "Visualization"
-        name = "Visualization"
-        description = "Provides network-level visualization features for physical layer,
-                       data link layer and network layer communications, and more.
-                       Supports both canvas (2D) and OSG (3D) graphics."
+        id = "VisualizationCommon"
+        name = "Visualization common"
+        description = "Provides support for 2D and 3D visualization"
         initiallyEnabled = "true"
         requires = "Queueing"
         labels = "information"
         nedPackages = "
                        inet.visualizer.base
                        inet.visualizer.common
-                       inet.visualizer.environment
-                       inet.visualizer.flow
-                       inet.visualizer.integrated
-                       inet.visualizer.linklayer
-                       inet.visualizer.mobility
-                       inet.visualizer.networklayer
-                       inet.visualizer.physicallayer
-                       inet.visualizer.power
-                       inet.visualizer.scene
-                       inet.visualizer.transportlayer
+                       inet.visualizer.contract
                        inet.visualizer.util
                       "
         extraSourceFolders = ""
         compileFlags = "-DINET_WITH_VISUALIZERS"
+        linkerFlags = ""
+        />
+    <feature
+        id = "Visualization2D"
+        name = "Visualization (2D)"
+        description = "Provides network-level 2D visualization features for physical layer,
+                       data link layer and network layer communications, and more."
+        initiallyEnabled = "true"
+        requires = "VisualizationCommon"
+        labels = "information"
+        nedPackages = "
+                       inet.visualizer.canvas
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_CANVASVISUALIZERS"
+        linkerFlags = ""
+        />
+    <feature
+        id = "Visualization3D"
+        name = "Visualization (3D)"
+        description = "Provides network-level 3D visualization features for physical layer,
+                       data link layer and network layer communications, and more."
+        initiallyEnabled = "false"
+        requires = "VisualizationCommon"
+        labels = "information"
+        nedPackages = "
+                       inet.visualizer.osg
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_OSGVISUALIZERS"
         linkerFlags = ""
         />
     <feature
@@ -1317,7 +1336,7 @@
         description = "Showcases that demonstrate the visualization of state and behavior
                        of communication networks."
         initiallyEnabled = "true"
-        requires = "Aodv Ethernet Ieee80211 Ipv4 PhysicalEnvironment Visualization"
+        requires = "Aodv Ethernet Ieee80211 Ipv4 PhysicalEnvironment Visualization2D Visualization3D"
         labels = ""
         nedPackages = "
                        inet.showcases.visualizer
@@ -1391,7 +1410,7 @@
         name = "Wireless showcases"
         description = "Showcases that demonstrate the simulation of wireless networks."
         initiallyEnabled = "true"
-        requires = "Aodv Ieee80211 Ipv4 PhysicalEnvironment Visualization"
+        requires = "Aodv Ieee80211 Ipv4 PhysicalEnvironment Visualization2D"
         labels = ""
         nedPackages = "
                        inet.showcases.wireless
