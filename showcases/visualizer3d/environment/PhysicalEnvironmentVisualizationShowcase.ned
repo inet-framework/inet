@@ -1,4 +1,4 @@
-package inet.showcases.visualizer.environment;
+package inet.showcases.visualizer3d.environment;
 
 import inet.environment.common.PhysicalEnvironment;
 import inet.visualizer.common.IntegratedVisualizer;

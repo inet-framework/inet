@@ -35,4 +35,5 @@ All showcases:
    mobility/index
    routing/index
    visualizer/index
+   visualizer3d/index
    wireless/index

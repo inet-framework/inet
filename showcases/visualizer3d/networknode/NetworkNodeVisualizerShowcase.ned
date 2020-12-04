@@ -12,7 +12,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.// 
 
-package inet.showcases.visualizer.networknode;
+package inet.showcases.visualizer3d.networknode;
 import inet.node.inet.AdhocHost;
 import inet.visualizer.common.IntegratedVisualizer;
 

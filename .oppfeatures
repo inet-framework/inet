@@ -1336,10 +1336,25 @@
         description = "Showcases that demonstrate the visualization of state and behavior
                        of communication networks."
         initiallyEnabled = "true"
-        requires = "Aodv Ethernet Ieee80211 Ipv4 PhysicalEnvironment Visualization2D Visualization3D"
+        requires = "Aodv Ethernet Ieee80211 Ipv4 PhysicalEnvironment Visualization2D"
         labels = ""
         nedPackages = "
                        inet.showcases.visualizer
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id = "Visualization3DShowcases"
+        name = "Visualization 3D showcases"
+        description = "Showcases that demonstrate the 3D visualization of state and behavior
+                       of communication networks."
+        initiallyEnabled = "false"
+        requires = "Aodv Ethernet Ieee80211 Ipv4 PhysicalEnvironment Visualization2D Visualization3D"
+        labels = ""
+        nedPackages = "
+                       inet.showcases.visualizer3d
                       "
         extraSourceFolders = ""
         compileFlags = ""
