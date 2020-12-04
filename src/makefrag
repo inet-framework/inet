@@ -90,10 +90,10 @@ ifeq ($(WITH_VOIPSTREAM), enabled)
 endif
 
 #
-# visualization feature requires (optionally) some extra osg and osgEarth libraries
+# Visualization3D feature requires (optionally) some extra osg and osgEarth libraries
 #
-WITH_VISUALIZERS := $(shell (cd .. && $(FEATURETOOL) -q isenabled Visualization && echo enabled) )
-ifeq ($(WITH_VISUALIZERS), enabled)
+WITH_VISUALIZATION3D := $(shell (cd .. && $(FEATURETOOL) -q isenabled Visualization3D && echo enabled) )
+ifeq ($(WITH_VISUALIZATION3D), enabled)
   ifeq ($(WITH_OSG), yes)
     OMNETPP_LIBS += -losg -losgText -losgDB -losgGA -losgViewer -losgUtil -lOpenThreads # TODO: use $(OSG_LIBS) from Makefile.inc? Does that include -losgText? Why not?
     ifeq ($(WITH_OSGEARTH), yes)
