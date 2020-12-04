@@ -17,21 +17,17 @@
 
 #include "inet/visualizer/linklayer/Ieee80211OsgVisualizer.h"
 
+#include <osg/Geode>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgScene.h"
 #include "inet/common/OsgUtils.h"
-
-#ifdef WITH_OSG
-#include <osg/Geode>
-#endif // ifdef WITH_OSG
 
 namespace inet {
 
 namespace visualizer {
 
 Define_Module(Ieee80211OsgVisualizer);
-
-#ifdef WITH_OSG
 
 Ieee80211OsgVisualizer::Ieee80211OsgVisualization::Ieee80211OsgVisualization(NetworkNodeOsgVisualization *networkNodeVisualization, osg::Node *node, int networkNodeId, int interfaceId) :
     Ieee80211Visualization(networkNodeId, interfaceId),
@@ -90,8 +86,6 @@ void Ieee80211OsgVisualizer::removeIeee80211Visualization(const Ieee80211Visuali
     if (networkNodeVisualizer != nullptr)
         ieee80211OsgVisualization->networkNodeVisualization->removeAnnotation(ieee80211OsgVisualization->node);
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

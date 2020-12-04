@@ -29,8 +29,6 @@ namespace visualizer {
 
 class INET_API InfoOsgVisualizer : public InfoVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     class INET_API InfoOsgVisualization : public InfoVisualization {
       public:
@@ -50,16 +48,6 @@ class INET_API InfoOsgVisualizer : public InfoVisualizerBase
 
     virtual InfoVisualization *createInfoVisualization(cModule *module) const override;
     virtual void refreshInfoVisualization(const InfoVisualization *infoVisualization, const char *info) const override;
-
-#else // ifdef WITH_OSG
-
-  protected:
-    virtual void initialize(int stage) override {}
-
-    virtual InfoVisualization *createInfoVisualization(cModule *module) const override { return nullptr; }
-    virtual void refreshInfoVisualization(const InfoVisualization *infoVisualization, const char *info) const override {}
-
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer

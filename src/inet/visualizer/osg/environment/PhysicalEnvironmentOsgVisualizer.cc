@@ -17,6 +17,12 @@
 
 #include "inet/visualizer/environment/PhysicalEnvironmentOsgVisualizer.h"
 
+#include <osg/Material>
+#include <osg/PolygonMode>
+#include <osg/Program>
+#include <osg/Shader>
+#include <osg/Texture2D>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgScene.h"
 #include "inet/common/OsgUtils.h"
@@ -25,14 +31,6 @@
 #include "inet/common/geometry/shape/Sphere.h"
 #include "inet/common/geometry/shape/polyhedron/Polyhedron.h"
 
-#ifdef WITH_OSG
-#include <osg/Material>
-#include <osg/PolygonMode>
-#include <osg/Program>
-#include <osg/Shader>
-#include <osg/Texture2D>
-#endif // ifdef WITH_OSG
-
 namespace inet {
 
 namespace visualizer {
@@ -40,8 +38,6 @@ namespace visualizer {
 using namespace inet::physicalenvironment;
 
 Define_Module(PhysicalEnvironmentOsgVisualizer);
-
-#ifdef WITH_OSG
 
 void PhysicalEnvironmentOsgVisualizer::initialize(int stage)
 {
@@ -128,8 +124,6 @@ void PhysicalEnvironmentOsgVisualizer::refreshDisplay() const
         }
     }
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

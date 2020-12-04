@@ -17,15 +17,13 @@
 
 #include "inet/visualizer/physicallayer/TracingObstacleLossOsgVisualizer.h"
 
+#include <osg/Geode>
+#include <osg/LineWidth>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgScene.h"
 #include "inet/common/OsgUtils.h"
 #include "inet/common/geometry/common/RotationMatrix.h"
-
-#ifdef WITH_OSG
-#include <osg/Geode>
-#include <osg/LineWidth>
-#endif // ifdef WITH_OSG
 
 namespace inet {
 
@@ -34,8 +32,6 @@ namespace visualizer {
 using namespace inet::physicallayer;
 
 Define_Module(TracingObstacleLossOsgVisualizer);
-
-#ifdef WITH_OSG
 
 void TracingObstacleLossOsgVisualizer::initialize(int stage)
 {
@@ -115,8 +111,6 @@ void TracingObstacleLossOsgVisualizer::setAlpha(const ObstacleLossVisualization 
         material->setAlpha(osg::Material::FRONT_AND_BACK, alpha);
     }
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

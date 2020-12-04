@@ -34,7 +34,6 @@ namespace visualizer {
 class INET_API MediumOsgVisualizer : public MediumVisualizerBase
 {
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
-#ifdef WITH_OSG
 
   protected:
     /** @name Parameters */
@@ -98,23 +97,6 @@ class INET_API MediumOsgVisualizer : public MediumVisualizerBase
     virtual void handleSignalArrivalStarted(const physicallayer::IReception *reception) override;
     virtual void handleSignalArrivalEnded(const physicallayer::IReception *reception) override;
 
-#else // ifdef WITH_OSG
-
-  protected:
-    virtual void initialize(int stage) override {}
-
-    virtual void handleRadioAdded(const physicallayer::IRadio *radio) override {}
-    virtual void handleRadioRemoved(const physicallayer::IRadio *radio) override {}
-
-    virtual void handleSignalAdded(const physicallayer::ITransmission *transmission) override {}
-    virtual void handleSignalRemoved(const physicallayer::ITransmission *transmission) override {}
-
-    virtual void handleSignalDepartureStarted(const physicallayer::ITransmission *transmission) override {}
-    virtual void handleSignalDepartureEnded(const physicallayer::ITransmission *transmission) override {}
-    virtual void handleSignalArrivalStarted(const physicallayer::IReception *reception) override {}
-    virtual void handleSignalArrivalEnded(const physicallayer::IReception *reception) override {}
-
-#endif // ifdef WITH_OSG
 #endif // ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 };
 

@@ -17,22 +17,18 @@
 
 #include "inet/visualizer/scene/SceneOsgVisualizer.h"
 
+#include <osg/Group>
+#include <osgDB/ReadFile>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgScene.h"
 #include "inet/common/OsgUtils.h"
-
-#ifdef WITH_OSG
-#include <osg/Group>
-#include <osgDB/ReadFile>
-#endif // ifdef WITH_OSG
 
 namespace inet {
 
 namespace visualizer {
 
 Define_Module(SceneOsgVisualizer);
-
-#ifdef WITH_OSG
 
 void SceneOsgVisualizer::initialize(int stage)
 {
@@ -68,8 +64,6 @@ void SceneOsgVisualizer::initializeViewpoint()
     auto osgCanvas = visualizationTargetModule->getOsgCanvas();
     osgCanvas->setGenericViewpoint(cOsgCanvas::Viewpoint(eye, viewpointCenter, cOsgCanvas::Vec3d(0, 0, 1)));
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

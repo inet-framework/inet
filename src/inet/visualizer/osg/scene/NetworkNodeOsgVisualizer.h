@@ -27,8 +27,6 @@ namespace visualizer {
 
 class INET_API NetworkNodeOsgVisualizer : public NetworkNodeVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     bool displayModuleName;
     std::map<const cModule *, osg::ref_ptr<NetworkNodeOsgVisualization>> networkNodeVisualizations;
@@ -45,15 +43,6 @@ class INET_API NetworkNodeOsgVisualizer : public NetworkNodeVisualizerBase
   public:
     virtual ~NetworkNodeOsgVisualizer();
     virtual NetworkNodeOsgVisualization *getNetworkNodeVisualization(const cModule *networkNode) const override;
-#else // ifdef WITH_OSG
-    virtual NetworkNodeVisualization *createNetworkNodeVisualization(cModule *networkNode) const override { return nullptr; }
-    virtual void addNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization) override {}
-    virtual void removeNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization) override {}
-    virtual void destroyNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization) override {}
-
-  public:
-    virtual NetworkNodeVisualization *getNetworkNodeVisualization(const cModule *networkNode) const override { return nullptr; }
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer

@@ -18,9 +18,7 @@
 #ifndef __INET_LINKBREAKOSGVISUALIZER_H
 #define __INET_LINKBREAKOSGVISUALIZER_H
 
-#ifdef WITH_OSG
 #include <osg/ref_ptr>
-#endif
 
 #include "inet/visualizer/base/LinkBreakVisualizerBase.h"
 
@@ -30,8 +28,6 @@ namespace visualizer {
 
 class INET_API LinkBreakOsgVisualizer : public LinkBreakVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     class INET_API LinkBreakOsgVisualization : public LinkBreakVisualization {
       public:
@@ -48,16 +44,6 @@ class INET_API LinkBreakOsgVisualizer : public LinkBreakVisualizerBase
     virtual void addLinkBreakVisualization(const LinkBreakVisualization *linkBreakVisualization) override;
     virtual void removeLinkBreakVisualization(const LinkBreakVisualization *linkBreakVisualization) override;
     virtual void setAlpha(const LinkBreakVisualization *linkBreakVisualization, double alpha) const override;
-
-#else // ifdef WITH_OSG
-
-  protected:
-    virtual void initialize(int stage) override {}
-
-    virtual const LinkBreakVisualization *createLinkBreakVisualization(cModule *transmitter, cModule *receiver) const override { return nullptr; }
-    virtual void setAlpha(const LinkBreakVisualization *linkBreakVisualization, double alpha) const override {}
-
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer

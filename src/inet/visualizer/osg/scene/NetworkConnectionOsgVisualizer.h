@@ -26,21 +26,10 @@ namespace visualizer {
 
 class INET_API NetworkConnectionOsgVisualizer : public NetworkConnectionVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     virtual void initialize(int stage) override;
 
     virtual void createNetworkConnectionVisualization(cModule *startNetworkNode, cModule *endNetworkNode) override;
-
-#else // ifdef WITH_OSG
-
-  protected:
-    virtual void initialize(int stage) override {}
-
-    virtual void createNetworkConnectionVisualization(cModule *startNetworkNode, cModule *endNetworkNode) override {}
-
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer

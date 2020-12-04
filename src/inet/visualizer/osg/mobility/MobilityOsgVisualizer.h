@@ -29,8 +29,6 @@ namespace visualizer {
 
 class INET_API MobilityOsgVisualizer : public MobilityVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     class INET_API MobilityOsgVisualization : public MobilityVisualization {
       public:
@@ -48,14 +46,6 @@ class INET_API MobilityOsgVisualizer : public MobilityVisualizerBase
     virtual void addMobilityVisualization(const IMobility *mobility, MobilityVisualization *mobilityVisualization) override;
     virtual void removeMobilityVisualization(const MobilityVisualization *mobilityVisualization) override;
     virtual void extendMovementTrail(osg::Geode *trail, const Coord& position) const;
-
-#else // ifdef WITH_OSG
-
-  protected:
-    virtual void initialize(int stage) override {}
-    virtual MobilityVisualization *createMobilityVisualization(IMobility *mobility) override { return nullptr; }
-
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer

@@ -17,21 +17,17 @@
 
 #include "inet/visualizer/base/PathOsgVisualizerBase.h"
 
+#include <osg/LineWidth>
+
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgScene.h"
 #include "inet/common/OsgUtils.h"
 #include "inet/mobility/contract/IMobility.h"
 
-#ifdef WITH_OSG
-#include <osg/LineWidth>
-#endif // ifdef WITH_OSG
-
 namespace inet {
 
 namespace visualizer {
-
-#ifdef WITH_OSG
 
 PathOsgVisualizerBase::PathOsgVisualization::PathOsgVisualization(const char *label, const std::vector<int>& path, osg::Node *node) :
     PathVisualization(label, path),
@@ -94,8 +90,6 @@ void PathOsgVisualizerBase::setAlpha(const PathVisualization *pathVisualization,
     auto material = static_cast<osg::Material *>(stateSet->getAttribute(osg::StateAttribute::MATERIAL));
     material->setAlpha(osg::Material::FRONT_AND_BACK, alpha);
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

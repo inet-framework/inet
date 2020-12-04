@@ -17,21 +17,17 @@
 
 #include "inet/visualizer/base/LinkOsgVisualizerBase.h"
 
+#include <osg/Geode>
+#include <osg/LineWidth>
+
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgScene.h"
 #include "inet/mobility/contract/IMobility.h"
 
-#ifdef WITH_OSG
-#include <osg/Geode>
-#include <osg/LineWidth>
-#endif // ifdef WITH_OSG
-
 namespace inet {
 
 namespace visualizer {
-
-#ifdef WITH_OSG
 
 LinkOsgVisualizerBase::LinkOsgVisualization::LinkOsgVisualization(inet::osg::LineNode *node, int sourceModuleId, int destinationModuleId) :
     LinkVisualization(sourceModuleId, destinationModuleId),
@@ -104,8 +100,6 @@ void LinkOsgVisualizerBase::setAlpha(const LinkVisualization *link, double alpha
     auto material = static_cast<osg::Material *>(node->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
     material->setAlpha(osg::Material::FRONT_AND_BACK, alpha);
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

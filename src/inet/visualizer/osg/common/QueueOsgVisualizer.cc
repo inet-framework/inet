@@ -25,8 +25,6 @@ namespace visualizer {
 
 Define_Module(QueueOsgVisualizer);
 
-#ifdef WITH_OSG
-
 QueueOsgVisualizer::QueueOsgVisualization::QueueOsgVisualization(NetworkNodeOsgVisualization *networkNodeVisualization, osg::Geode *node, queueing::IPacketQueue *queue) :
     QueueVisualization(queue),
     networkNodeVisualization(networkNodeVisualization),
@@ -69,8 +67,6 @@ void QueueOsgVisualizer::refreshQueueVisualization(const QueueVisualization *que
 //    auto infoOsgVisualization = static_cast<const QueueOsgVisualization *>(queueVisualization);
 //    auto node = infoOsgVisualization->node;
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

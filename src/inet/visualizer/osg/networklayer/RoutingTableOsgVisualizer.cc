@@ -17,21 +17,17 @@
 
 #include "inet/visualizer/networklayer/RoutingTableOsgVisualizer.h"
 
-#include "inet/common/OsgScene.h"
-#include "inet/common/OsgUtils.h"
-
-#ifdef WITH_OSG
 #include <osg/Geode>
 #include <osg/LineWidth>
-#endif // ifdef WITH_OSG
+
+#include "inet/common/OsgScene.h"
+#include "inet/common/OsgUtils.h"
 
 namespace inet {
 
 namespace visualizer {
 
 Define_Module(RoutingTableOsgVisualizer);
-
-#ifdef WITH_OSG
 
 RoutingTableOsgVisualizer::RouteOsgVisualization::RouteOsgVisualization(osg::Node *node, const Ipv4Route *route, int nodeModuleId, int nextHopModuleId) :
     RouteVisualization(route, nodeModuleId, nextHopModuleId),
@@ -85,8 +81,6 @@ void RoutingTableOsgVisualizer::refreshRouteVisualization(const RouteVisualizati
 //    auto routeOsgVisualization = static_cast<const RouteOsgVisualization *>(routeVisualization);
 //    auto text = getRouteVisualizationText(routeVisualization->route);
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

@@ -18,9 +18,7 @@
 #ifndef __INET_ROUTINGTABLEOSGVISUALIZER_H
 #define __INET_ROUTINGTABLEOSGVISUALIZER_H
 
-#ifdef WITH_OSG
 #include <osg/ref_ptr>
-#endif
 
 #include "inet/visualizer/base/RoutingTableVisualizerBase.h"
 
@@ -30,8 +28,6 @@ namespace visualizer {
 
 class INET_API RoutingTableOsgVisualizer : public RoutingTableVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     class INET_API RouteOsgVisualization : public RouteVisualization {
       public:
@@ -48,16 +44,6 @@ class INET_API RoutingTableOsgVisualizer : public RoutingTableVisualizerBase
     virtual void addRouteVisualization(const RouteVisualization *routeVisualization) override;
     virtual void removeRouteVisualization(const RouteVisualization *routeVisualization) override;
     virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization) const override;
-
-#else // ifdef WITH_OSG
-
-  protected:
-    virtual void initialize(int stage) override {}
-
-    virtual const RouteVisualization *createRouteVisualization(Ipv4Route *route, cModule *node, cModule *nextHop) const override { return nullptr; }
-    virtual void refreshRouteVisualization(const RouteVisualization *routeVisualization) const override {}
-
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer

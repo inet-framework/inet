@@ -29,8 +29,6 @@ namespace visualizer {
 
 class INET_API EnergyStorageOsgVisualizer : public EnergyStorageVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     class INET_API EnergyStorageOsgVisualization : public EnergyStorageVisualization {
       public:
@@ -50,16 +48,6 @@ class INET_API EnergyStorageOsgVisualizer : public EnergyStorageVisualizerBase
 
     virtual EnergyStorageVisualization *createEnergyStorageVisualization(const power::IEnergyStorage *energyStorage) const override;
     virtual void refreshEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization) const override;
-
-#else // ifdef WITH_OSG
-
-  protected:
-    virtual void initialize(int stage) override {}
-
-    virtual EnergyStorageVisualization *createEnergyStorageVisualization(const power::IEnergyStorage *energyStorage) const override { return nullptr; }
-    virtual void refreshEnergyStorageVisualization(const EnergyStorageVisualization *energyStorageVisualization) const override {}
-
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer

@@ -17,21 +17,17 @@
 
 #include "inet/visualizer/linklayer/LinkBreakOsgVisualizer.h"
 
-#include "inet/common/OsgScene.h"
-#include "inet/common/OsgUtils.h"
-
-#ifdef WITH_OSG
 #include <osg/Geode>
 #include <osg/LineWidth>
-#endif // ifdef WITH_OSG
+
+#include "inet/common/OsgScene.h"
+#include "inet/common/OsgUtils.h"
 
 namespace inet {
 
 namespace visualizer {
 
 Define_Module(LinkBreakOsgVisualizer);
-
-#ifdef WITH_OSG
 
 LinkBreakOsgVisualizer::LinkBreakOsgVisualization::LinkBreakOsgVisualization(osg::Node *node, int transmitterModuleId, int receiverModuleId) :
     LinkBreakVisualization(transmitterModuleId, receiverModuleId),
@@ -93,8 +89,6 @@ void LinkBreakOsgVisualizer::setAlpha(const LinkBreakVisualization *linkBreakVis
     auto material = static_cast<osg::Material *>(node->getOrCreateStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
     material->setAlpha(osg::Material::FRONT_AND_BACK, alpha);
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

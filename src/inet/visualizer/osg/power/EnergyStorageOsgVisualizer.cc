@@ -27,8 +27,6 @@ namespace visualizer {
 
 Define_Module(EnergyStorageOsgVisualizer);
 
-#ifdef WITH_OSG
-
 EnergyStorageOsgVisualizer::EnergyStorageOsgVisualization::EnergyStorageOsgVisualization(NetworkNodeOsgVisualization *networkNodeVisualization, osg::Geode *node, const IEnergyStorage *energyStorage) :
     EnergyStorageVisualization(energyStorage),
     networkNodeVisualization(networkNodeVisualization),
@@ -70,8 +68,6 @@ void EnergyStorageOsgVisualizer::refreshEnergyStorageVisualization(const EnergyS
 //    auto infoOsgVisualization = static_cast<const EnergyStorageOsgVisualization *>(energyStorageVisualization);
 //    auto node = infoOsgVisualization->node;
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

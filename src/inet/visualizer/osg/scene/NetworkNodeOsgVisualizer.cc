@@ -29,8 +29,6 @@ namespace visualizer {
 
 Define_Module(NetworkNodeOsgVisualizer);
 
-#ifdef WITH_OSG
-
 NetworkNodeOsgVisualizer::~NetworkNodeOsgVisualizer()
 {
     for (auto& it : networkNodeVisualizations) {
@@ -94,8 +92,6 @@ void NetworkNodeOsgVisualizer::removeNetworkNodeVisualization(NetworkNodeVisuali
     auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
     scene->removeChild(networkNodeOsgVisualization);
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

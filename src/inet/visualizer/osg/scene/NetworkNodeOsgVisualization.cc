@@ -19,23 +19,19 @@
 
 #include <omnetpp/osgutil.h>
 
-#include <algorithm>
-
-#include "inet/common/OsgUtils.h"
-
-#ifdef WITH_OSG
 #include <osg/AutoTransform>
 #include <osg/Texture2D>
 #include <osgDB/ReadFile>
 #include <osgText/Font>
 #include <osgText/Text>
-#endif // ifdef WITH_OSG
+
+#include <algorithm>
+
+#include "inet/common/OsgUtils.h"
 
 namespace inet {
 
 namespace visualizer {
-
-#ifdef WITH_OSG
 
 NetworkNodeOsgVisualization::Annotation::Annotation(osg::Node *node, osg::Vec3d size, double priority) :
     node(node),
@@ -213,8 +209,6 @@ void NetworkNodeOsgVisualization::removeAnnotation(int index)
     annotationNode->removeChild(node->getParent(0));
     updateAnnotationPositions();
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

@@ -18,14 +18,12 @@
 #ifndef __INET_INTERFACETABLEOSGVISUALIZER_H
 #define __INET_INTERFACETABLEOSGVISUALIZER_H
 
+#include <osg/Node>
+
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/visualizer/base/InterfaceTableVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualization.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
-
-#ifdef WITH_OSG
-#include <osg/Node>
-#endif // ifdef WITH_OSG
 
 namespace inet {
 
@@ -33,8 +31,6 @@ namespace visualizer {
 
 class INET_API InterfaceTableOsgVisualizer : public InterfaceTableVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     class INET_API InterfaceOsgVisualization : public InterfaceVisualization {
       public:
@@ -55,16 +51,6 @@ class INET_API InterfaceTableOsgVisualizer : public InterfaceTableVisualizerBase
     virtual void addInterfaceVisualization(const InterfaceVisualization *interfaceVisualization) override;
     virtual void removeInterfaceVisualization(const InterfaceVisualization *interfaceVisualization) override;
     virtual void refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const NetworkInterface *networkInterface) override;
-
-#else // ifdef WITH_OSG
-
-  protected:
-    virtual void initialize(int stage) override {}
-
-    virtual InterfaceVisualization *createInterfaceVisualization(cModule *networkNode, NetworkInterface *networkInterface) override { return nullptr; }
-    virtual void refreshInterfaceVisualization(const InterfaceVisualization *interfaceVisualization, const NetworkInterface *networkInterface) override {}
-
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer

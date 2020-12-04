@@ -17,22 +17,18 @@
 
 #include "inet/visualizer/scene/NetworkConnectionOsgVisualizer.h"
 
+#include <osg/Geode>
+#include <osg/LineWidth>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgScene.h"
 #include "inet/common/OsgUtils.h"
-
-#ifdef WITH_OSG
-#include <osg/Geode>
-#include <osg/LineWidth>
-#endif // ifdef WITH_OSG
 
 namespace inet {
 
 namespace visualizer {
 
 Define_Module(NetworkConnectionOsgVisualizer);
-
-#ifdef WITH_OSG
 
 void NetworkConnectionOsgVisualizer::initialize(int stage)
 {
@@ -56,8 +52,6 @@ void NetworkConnectionOsgVisualizer::createNetworkConnectionVisualization(cModul
     auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
     scene->addChild(geode);
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

@@ -26,8 +26,6 @@ namespace visualizer {
 
 Define_Module(StatisticOsgVisualizer);
 
-#ifdef WITH_OSG
-
 StatisticOsgVisualizer::StatisticOsgVisualization::StatisticOsgVisualization(NetworkNodeOsgVisualization *networkNodeVisualization, osg::Node *node, int moduleId, simsignal_t signal, const char *unit) :
     StatisticVisualization(moduleId, signal, unit),
     networkNodeVisualization(networkNodeVisualization),
@@ -87,8 +85,6 @@ void StatisticOsgVisualizer::refreshStatisticVisualization(const StatisticVisual
     auto label = check_and_cast<osgText::Text *>(geode->getDrawable(0));
     label->setText(getText(statisticVisualization));
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

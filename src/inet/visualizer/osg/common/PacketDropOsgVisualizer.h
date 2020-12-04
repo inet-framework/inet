@@ -18,9 +18,7 @@
 #ifndef __INET_PACKETDROPOSGVISUALIZER_H
 #define __INET_PACKETDROPOSGVISUALIZER_H
 
-#ifdef WITH_OSG
 #include <osg/ref_ptr>
-#endif
 
 #include "inet/visualizer/base/PacketDropVisualizerBase.h"
 
@@ -30,8 +28,6 @@ namespace visualizer {
 
 class INET_API PacketDropOsgVisualizer : public PacketDropVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     class INET_API PacketDropOsgVisualization : public PacketDropVisualization {
       public:
@@ -48,16 +44,6 @@ class INET_API PacketDropOsgVisualizer : public PacketDropVisualizerBase
     virtual void addPacketDropVisualization(const PacketDropVisualization *packetDropVisualization) override;
     virtual void removePacketDropVisualization(const PacketDropVisualization *packetDropVisualization) override;
     virtual void setAlpha(const PacketDropVisualization *packetDropVisualization, double alpha) const override;
-
-#else // ifdef WITH_OSG
-
-  protected:
-    virtual void initialize(int stage) override {}
-
-    virtual const PacketDropVisualization *createPacketDropVisualization(PacketDrop *packetDrop) const override { return nullptr; }
-    virtual void setAlpha(const PacketDropVisualization *packetDropVisualization, double alpha) const override {}
-
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer

@@ -18,12 +18,10 @@
 #ifndef __INET_SCENEOSGVISUALIZERBASE_H
 #define __INET_SCENEOSGVISUALIZERBASE_H
 
-#include "inet/visualizer/base/SceneVisualizerBase.h"
-
-#ifdef WITH_OSG
 #include <osg/Geode>
 #include <osg/Group>
-#endif // ifdef WITH_OSG
+
+#include "inet/visualizer/base/SceneVisualizerBase.h"
 
 namespace inet {
 
@@ -31,16 +29,12 @@ namespace visualizer {
 
 class INET_API SceneOsgVisualizerBase : public SceneVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     virtual void initializeScene();
     virtual void initializeAxis(double axisLength);
     virtual void initializeSceneFloor();
     virtual osg::Geode *createSceneFloor(const Coord& min, const Coord& max, cFigure::Color& color, osg::Image *image, double imageSize, double opacity, bool shading) const;
     virtual osg::BoundingSphere getNetworkBoundingSphere();
-
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer

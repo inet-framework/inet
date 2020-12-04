@@ -17,15 +17,6 @@
 
 #include "inet/visualizer/physicallayer/MediumOsgVisualizer.h"
 
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/OsgScene.h"
-#include "inet/common/OsgUtils.h"
-
-#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
-#include "inet/physicallayer/wireless/common/pathloss/FreeSpacePathLoss.h"
-#endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
-
-#ifdef WITH_OSG
 #include <osg/Depth>
 #include <osg/Geode>
 #include <osg/Geometry>
@@ -35,7 +26,14 @@
 #include <osg/ShapeDrawable>
 #include <osg/Texture2D>
 #include <osgDB/ReadFile>
-#endif // ifdef WITH_OSG
+
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/OsgScene.h"
+#include "inet/common/OsgUtils.h"
+
+#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
+#include "inet/physicallayer/wireless/common/pathloss/FreeSpacePathLoss.h"
+#endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
 namespace inet {
 
@@ -44,7 +42,6 @@ namespace visualizer {
 Define_Module(MediumOsgVisualizer);
 
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
-#ifdef WITH_OSG
 
 using namespace physicallayer;
 
@@ -500,7 +497,6 @@ void MediumOsgVisualizer::handleSignalArrivalEnded(const IReception *reception)
     }
 }
 
-#endif // ifdef WITH_OSG
 #endif // ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 
 } // namespace visualizer

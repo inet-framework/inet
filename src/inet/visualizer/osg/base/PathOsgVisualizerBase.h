@@ -18,9 +18,7 @@
 #ifndef __INET_PATHOSGVISUALIZERBASE_H
 #define __INET_PATHOSGVISUALIZERBASE_H
 
-#ifdef WITH_OSG
 #include <osg/ref_ptr>
-#endif
 
 #include "inet/visualizer/base/PathVisualizerBase.h"
 
@@ -30,8 +28,6 @@ namespace visualizer {
 
 class INET_API PathOsgVisualizerBase : public PathVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     class INET_API PathOsgVisualization : public PathVisualization {
       public:
@@ -49,16 +45,6 @@ class INET_API PathOsgVisualizerBase : public PathVisualizerBase
     virtual void addPathVisualization(const PathVisualization *pathVisualization) override;
     virtual void removePathVisualization(const PathVisualization *pathVisualization) override;
     virtual void setAlpha(const PathVisualization *pathVisualization, double alpha) const override;
-
-#else // ifdef WITH_OSG
-
-  protected:
-    virtual void initialize(int stage) override {}
-
-    virtual const PathVisualization *createPathVisualization(const char *label, const std::vector<int>& path, cPacket *packet) const override { return nullptr; }
-    virtual void setAlpha(const PathVisualization *pathVisualization, double alpha) const override {}
-
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer

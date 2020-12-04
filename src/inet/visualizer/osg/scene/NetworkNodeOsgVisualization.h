@@ -18,19 +18,15 @@
 #ifndef __INET_NETWORKNODEOSGVISUALIZATION_H
 #define __INET_NETWORKNODEOSGVISUALIZATION_H
 
-#include "inet/visualizer/base/NetworkNodeVisualizerBase.h"
-
-#ifdef WITH_OSG
 #include <osg/AutoTransform>
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
-#endif // ifdef WITH_OSG
+
+#include "inet/visualizer/base/NetworkNodeVisualizerBase.h"
 
 namespace inet {
 
 namespace visualizer {
-
-#ifdef WITH_OSG
 
 class INET_API NetworkNodeOsgVisualization : public NetworkNodeVisualizerBase::NetworkNodeVisualization, public osg::PositionAttitudeTransform
 {
@@ -64,8 +60,6 @@ class INET_API NetworkNodeOsgVisualization : public NetworkNodeVisualizerBase::N
     virtual void removeAnnotation(osg::Node *node);
     virtual void removeAnnotation(int index);
 };
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

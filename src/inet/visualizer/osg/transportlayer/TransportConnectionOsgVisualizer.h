@@ -28,8 +28,6 @@ namespace visualizer {
 
 class INET_API TransportConnectionOsgVisualizer : public TransportConnectionVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     class INET_API TransportConnectionOsgVisualization : public TransportConnectionVisualization {
       public:
@@ -50,15 +48,6 @@ class INET_API TransportConnectionOsgVisualizer : public TransportConnectionVisu
     virtual const TransportConnectionVisualization *createConnectionVisualization(cModule *source, cModule *destination, tcp::TcpConnection *tcpConnection) const override;
     virtual void addConnectionVisualization(const TransportConnectionVisualization *connectionVisualization) override;
     virtual void removeConnectionVisualization(const TransportConnectionVisualization *connectionVisualization) override;
-
-#else // ifdef WITH_OSG
-
-  protected:
-    virtual void initialize(int stage) override {}
-
-    virtual const TransportConnectionVisualization *createConnectionVisualization(cModule *source, cModule *destination, tcp::TcpConnection *tcpConnection) const override { return nullptr; }
-
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer

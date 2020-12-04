@@ -27,8 +27,6 @@ namespace visualizer {
 
 class INET_API LinkOsgVisualizerBase : public LinkVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     class INET_API LinkOsgVisualization : public LinkVisualization {
       public:
@@ -46,16 +44,6 @@ class INET_API LinkOsgVisualizerBase : public LinkVisualizerBase
     virtual void addLinkVisualization(std::pair<int, int> sourceAndDestination, const LinkVisualization *linkVisualization) override;
     virtual void removeLinkVisualization(const LinkVisualization *linkVisualization) override;
     virtual void setAlpha(const LinkVisualization *linkVisualization, double alpha) const override;
-
-#else // ifdef WITH_OSG
-
-  protected:
-    virtual void initialize(int stage) override {}
-
-    virtual const LinkVisualization *createLinkVisualization(cModule *source, cModule *destination, cPacket *packet) const override { return nullptr; }
-    virtual void setAlpha(const LinkVisualization *linkVisualization, double alpha) const override {}
-
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer

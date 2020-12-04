@@ -18,14 +18,12 @@
 #ifndef __INET_STATISTICOSGVISUALIZER_H
 #define __INET_STATISTICOSGVISUALIZER_H
 
+#include <osg/Node>
+
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/visualizer/base/StatisticVisualizerBase.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualization.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
-
-#ifdef WITH_OSG
-#include <osg/Node>
-#endif // ifdef WITH_OSG
 
 namespace inet {
 
@@ -33,8 +31,6 @@ namespace visualizer {
 
 class INET_API StatisticOsgVisualizer : public StatisticVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     class StatisticOsgVisualization : public StatisticVisualization {
       public:
@@ -55,16 +51,6 @@ class INET_API StatisticOsgVisualizer : public StatisticVisualizerBase
     virtual void addStatisticVisualization(const StatisticVisualization *statisticVisualization) override;
     virtual void removeStatisticVisualization(const StatisticVisualization *statisticVisualization) override;
     virtual void refreshStatisticVisualization(const StatisticVisualization *statisticVisualization) override;
-
-#else // ifdef WITH_OSG
-
-  protected:
-    virtual void initialize(int stage) override {}
-
-    virtual StatisticVisualization *createStatisticVisualization(cComponent *source, simsignal_t signal) override { return nullptr; }
-    virtual void refreshStatisticVisualization(const StatisticVisualization *statisticVisualization) override {}
-
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer

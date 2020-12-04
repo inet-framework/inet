@@ -26,8 +26,6 @@ namespace visualizer {
 
 Define_Module(InterfaceTableOsgVisualizer);
 
-#ifdef WITH_OSG
-
 InterfaceTableOsgVisualizer::InterfaceOsgVisualization::InterfaceOsgVisualization(NetworkNodeOsgVisualization *networkNodeVisualization, osg::Node *node, int networkNodeId, int networkNodeGateId, int interfaceId) :
     InterfaceVisualization(networkNodeId, networkNodeGateId, interfaceId),
     networkNodeVisualization(networkNodeVisualization),
@@ -87,8 +85,6 @@ void InterfaceTableOsgVisualizer::refreshInterfaceVisualization(const InterfaceV
     auto label = check_and_cast<osgText::Text *>(geode->getDrawable(0));
     label->setText(getVisualizationText(networkInterface).c_str());
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

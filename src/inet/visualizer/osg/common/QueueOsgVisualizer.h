@@ -29,8 +29,6 @@ namespace visualizer {
 
 class INET_API QueueOsgVisualizer : public QueueVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     class INET_API QueueOsgVisualization : public QueueVisualization {
       public:
@@ -50,16 +48,6 @@ class INET_API QueueOsgVisualizer : public QueueVisualizerBase
 
     virtual QueueVisualization *createQueueVisualization(queueing::IPacketQueue *queue) const override;
     virtual void refreshQueueVisualization(const QueueVisualization *queueVisualization) const override;
-
-#else // ifdef WITH_OSG
-
-  protected:
-    virtual void initialize(int stage) override {}
-
-    virtual QueueVisualization *createQueueVisualization(queueing::IPacketQueue *queue) const override { return nullptr; }
-    virtual void refreshQueueVisualization(const QueueVisualization *queueVisualization) const override {}
-
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer

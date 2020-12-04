@@ -27,16 +27,12 @@ namespace visualizer {
 
 class INET_API PhysicalEnvironmentOsgVisualizer : public PhysicalEnvironmentVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     bool enableObjectOpacity = false;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void refreshDisplay() const override;
-
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer

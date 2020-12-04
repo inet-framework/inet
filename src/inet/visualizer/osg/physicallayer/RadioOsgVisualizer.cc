@@ -27,8 +27,6 @@ using namespace inet::physicallayer;
 
 Define_Module(RadioOsgVisualizer);
 
-#ifdef WITH_OSG
-
 RadioOsgVisualizer::RadioOsgVisualization::RadioOsgVisualization(NetworkNodeOsgVisualization *networkNodeVisualization, osg::Geode *node, const int radioModuleId) :
     RadioVisualization(radioModuleId),
     networkNodeVisualization(networkNodeVisualization),
@@ -70,8 +68,6 @@ void RadioOsgVisualizer::refreshRadioVisualization(const RadioVisualization *rad
 //    auto infoOsgVisualization = static_cast<const RadioOsgVisualization *>(radioVisualization);
 //    auto node = infoOsgVisualization->node;
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

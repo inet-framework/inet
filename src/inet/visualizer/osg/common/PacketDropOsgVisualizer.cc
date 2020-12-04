@@ -27,8 +27,6 @@ namespace visualizer {
 
 Define_Module(PacketDropOsgVisualizer);
 
-#ifdef WITH_OSG
-
 PacketDropOsgVisualizer::PacketDropOsgVisualization::PacketDropOsgVisualization(osg::Node *node, const PacketDrop *packetDrop) :
     PacketDropVisualization(packetDrop),
     node(node)
@@ -97,8 +95,6 @@ void PacketDropOsgVisualizer::setAlpha(const PacketDropVisualization *packetDrop
     auto& position = packetDropVisualization->packetDrop->getPosition();
     positionAttitudeTransform->setPosition(osg::Vec3d(position.x + dx, position.y + dy, position.z + dz));
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

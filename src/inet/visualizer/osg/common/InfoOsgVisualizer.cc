@@ -25,8 +25,6 @@ namespace visualizer {
 
 Define_Module(InfoOsgVisualizer);
 
-#ifdef WITH_OSG
-
 InfoOsgVisualizer::InfoOsgVisualization::InfoOsgVisualization(NetworkNodeOsgVisualization *networkNodeVisualization, osg::Geode *node, int moduleId) :
     InfoVisualization(moduleId),
     networkNodeVisualization(networkNodeVisualization),
@@ -77,8 +75,6 @@ void InfoOsgVisualizer::refreshInfoVisualization(const InfoVisualization *infoVi
     auto text = static_cast<osgText::Text *>(node->getDrawable(0));
     text->setText(info);
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

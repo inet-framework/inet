@@ -17,23 +17,19 @@
 
 #include "inet/visualizer/base/SceneOsgVisualizerBase.h"
 
+#include <osg/PolygonOffset>
+#include <osg/Shape>
+#include <osg/ShapeDrawable>
+#include <osgDB/ReadFile>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgScene.h"
 #include "inet/common/OsgUtils.h"
 #include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
 
-#ifdef WITH_OSG
-#include <osg/PolygonOffset>
-#include <osg/Shape>
-#include <osg/ShapeDrawable>
-#include <osgDB/ReadFile>
-#endif // ifdef WITH_OSG
-
 namespace inet {
 
 namespace visualizer {
-
-#ifdef WITH_OSG
 
 void SceneOsgVisualizerBase::initializeScene()
 {
@@ -205,8 +201,6 @@ osg::BoundingSphere SceneOsgVisualizerBase::getNetworkBoundingSphere()
     else
         return nodes->getBound();
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

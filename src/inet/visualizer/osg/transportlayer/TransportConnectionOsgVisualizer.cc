@@ -26,8 +26,6 @@ namespace visualizer {
 
 Define_Module(TransportConnectionOsgVisualizer);
 
-#ifdef WITH_OSG
-
 TransportConnectionOsgVisualizer::TransportConnectionOsgVisualization::TransportConnectionOsgVisualization(osg::Node *sourceNode, osg::Node *destinationNode, int sourceModuleId, int destinationModuleId, int count) :
     TransportConnectionVisualization(sourceModuleId, destinationModuleId, count),
     sourceNode(sourceNode),
@@ -103,8 +101,6 @@ void TransportConnectionOsgVisualizer::removeConnectionVisualization(const Trans
     auto destinationVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(destinationModule));
     destinationVisualization->removeAnnotation(connectionOsgVisualization->destinationNode);
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

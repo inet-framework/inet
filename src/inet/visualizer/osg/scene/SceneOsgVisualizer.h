@@ -18,11 +18,9 @@
 #ifndef __INET_SCENEOSGVISUALIZER_H
 #define __INET_SCENEOSGVISUALIZER_H
 
-#include "inet/visualizer/base/SceneOsgVisualizerBase.h"
-
-#ifdef WITH_OSG
 #include <osg/Geode>
-#endif // ifdef WITH_OSG
+
+#include "inet/visualizer/base/SceneOsgVisualizerBase.h"
 
 namespace inet {
 
@@ -30,14 +28,10 @@ namespace visualizer {
 
 class INET_API SceneOsgVisualizer : public SceneOsgVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     virtual void initialize(int stage) override;
     virtual void initializeScene() override;
     virtual void initializeViewpoint();
-
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer

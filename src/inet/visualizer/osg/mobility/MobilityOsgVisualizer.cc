@@ -17,25 +17,21 @@
 
 #include "inet/visualizer/mobility/MobilityOsgVisualizer.h"
 
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/OsgScene.h"
-#include "inet/common/OsgUtils.h"
-
-#ifdef WITH_OSG
 #include <osg/AutoTransform>
 #include <osg/Material>
 #include <osg/Texture2D>
 #include <osgDB/ReadFile>
 #include <osgText/Text>
-#endif // ifdef WITH_OSG
+
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/OsgScene.h"
+#include "inet/common/OsgUtils.h"
 
 namespace inet {
 
 namespace visualizer {
 
 Define_Module(MobilityOsgVisualizer);
-
-#ifdef WITH_OSG
 
 MobilityOsgVisualizer::MobilityOsgVisualization::MobilityOsgVisualization(osg::Geode *trail, IMobility *mobility) :
     MobilityVisualization(mobility),
@@ -114,8 +110,6 @@ void MobilityOsgVisualizer::extendMovementTrail(osg::Geode *trail, const Coord& 
         }
     }
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace visualizer
 

@@ -18,11 +18,9 @@
 #ifndef __INET_TRACINGOBSTACLELOSSOSGVISUALIZER_H
 #define __INET_TRACINGOBSTACLELOSSOSGVISUALIZER_H
 
-#include "inet/visualizer/base/TracingObstacleLossVisualizerBase.h"
-
-#ifdef WITH_OSG
 #include <osg/Group>
-#endif // ifdef WITH_OSG
+
+#include "inet/visualizer/base/TracingObstacleLossVisualizerBase.h"
 
 namespace inet {
 
@@ -30,8 +28,6 @@ namespace visualizer {
 
 class INET_API TracingObstacleLossOsgVisualizer : public TracingObstacleLossVisualizerBase
 {
-#ifdef WITH_OSG
-
   protected:
     class INET_API ObstacleLossOsgVisualization : public ObstacleLossVisualization {
       public:
@@ -52,16 +48,6 @@ class INET_API TracingObstacleLossOsgVisualizer : public TracingObstacleLossVisu
     virtual void addObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization) override;
     virtual void removeObstacleLossVisualization(const ObstacleLossVisualization *obstacleLossVisualization) override;
     virtual void setAlpha(const ObstacleLossVisualization *obstacleLossVisualization, double alpha) const override;
-
-#else // ifdef WITH_OSG
-
-  protected:
-    virtual void initialize(int stage) override {}
-
-    virtual const ObstacleLossVisualization *createObstacleLossVisualization(const physicallayer::ITracingObstacleLoss::ObstaclePenetratedEvent *obstaclePenetratedEvent) const override { return nullptr; }
-    virtual void setAlpha(const ObstacleLossVisualization *obstacleLossVisualization, double alpha) const override {}
-
-#endif // ifdef WITH_OSG
 };
 
 } // namespace visualizer
