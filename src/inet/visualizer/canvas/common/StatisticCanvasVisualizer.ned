@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.visualizer.common;
+package inet.visualizer.canvas.common;
 
 import inet.visualizer.base.StatisticVisualizerBase;
 import inet.visualizer.contract.IStatisticVisualizer;

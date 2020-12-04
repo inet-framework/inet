@@ -13,6 +13,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.// 
 
 package inet.showcases.visualizer.networkpathactivity;
+
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.aodv.AodvRouter;
@@ -23,9 +24,8 @@ import inet.node.inet.StandardHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.integrated.IntegratedVisualizer;
-import inet.visualizer.networklayer.NetworkRouteVisualizer;
-
+import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.common.NetworkRouteVisualizer;
 
 network NetworkPathSimpleShowcase
 {

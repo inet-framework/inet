@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.visualizer.power;
+package inet.visualizer.osg.power;
 
 import inet.visualizer.base.EnergyStorageVisualizerBase;
 import inet.visualizer.contract.IEnergyStorageVisualizer;

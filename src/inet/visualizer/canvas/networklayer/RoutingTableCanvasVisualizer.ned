@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.visualizer.networklayer;
+package inet.visualizer.canvas.networklayer;
 
 import inet.visualizer.base.RoutingTableVisualizerBase;
 import inet.visualizer.contract.IRoutingTableVisualizer;

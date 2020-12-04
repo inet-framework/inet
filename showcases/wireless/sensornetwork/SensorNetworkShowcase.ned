@@ -5,7 +5,7 @@ import inet.node.ethernet.Eth100M;
 import inet.node.inet.StandardHost;
 import inet.node.inet.SensorNode;
 import inet.physicallayer.wireless.apsk.packetlevel.ApskScalarRadioMedium;
-import inet.visualizer.integrated.IntegratedVisualizer;
+import inet.visualizer.common.IntegratedVisualizer;
 
 
 network SensorNetworkShowcaseA

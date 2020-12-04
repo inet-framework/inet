@@ -21,10 +21,9 @@ import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.AdhocHost;
 import inet.node.inet.StandardHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.integrated.IntegratedMultiVisualizer;
-import inet.visualizer.integrated.IntegratedVisualizer;
-import inet.visualizer.linklayer.DataLinkVisualizer;
-
+import inet.visualizer.common.DataLinkVisualizer;
+import inet.visualizer.common.IntegratedMultiVisualizer;
+import inet.visualizer.common.IntegratedVisualizer;
 
 network DataLinkVisualizerEnablingWiredShowcase
 {

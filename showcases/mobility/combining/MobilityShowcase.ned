@@ -1,11 +1,11 @@
 package inet.showcases.mobility.combining;
 
 import inet.node.inet.StandardHost;
-import inet.visualizer.integrated.IntegratedVisualizer;
+import inet.visualizer.common.IntegratedVisualizer;
 
 
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.integrated.IntegratedMultiVisualizer;
+import inet.visualizer.common.IntegratedMultiVisualizer;
 
 
 network MobilityShowcase

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.visualizer.linklayer;
+package inet.visualizer.osg.linklayer;
 
 import inet.visualizer.base.LinkBreakVisualizerBase;
 import inet.visualizer.contract.ILinkBreakVisualizer;

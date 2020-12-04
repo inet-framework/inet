@@ -37,7 +37,7 @@ import ned.DatarateChannel;
 
 
 
-//import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+//import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
 channel NormalP extends DatarateChannel

@@ -15,10 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.visualizer.scene;
+package inet.visualizer.osg.scene;
 
-import inet.visualizer.base.SceneOsgVisualizerBase;
 import inet.visualizer.contract.ISceneVisualizer;
+import inet.visualizer.osg.base.SceneOsgVisualizerBase;
 
 //
 // This module visualizes the scene using osgEarth. It displays a 3D osg map of

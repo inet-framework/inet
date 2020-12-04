@@ -8,8 +8,8 @@ import inet.node.inet.AdhocHost;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;
-import inet.visualizer.integrated.IntegratedMultiCanvasVisualizer;
-import inet.visualizer.integrated.IntegratedVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedMultiCanvasVisualizer;
+import inet.visualizer.common.IntegratedVisualizer;
 
 network RegressionTestingTutorialWireless
 {

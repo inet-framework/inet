@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.visualizer.common;
+package inet.visualizer.osg.common;
 
 import inet.visualizer.base.PacketDropVisualizerBase;
 import inet.visualizer.contract.IPacketDropVisualizer;

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.visualizer.physicallayer;
+package inet.visualizer.osg.physicallayer;
 
 import inet.visualizer.base.TracingObstacleLossVisualizerBase;
 import inet.visualizer.contract.ITracingObstacleLossVisualizer;

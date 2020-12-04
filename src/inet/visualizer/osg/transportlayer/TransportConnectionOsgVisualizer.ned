@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.visualizer.transportlayer;
+package inet.visualizer.osg.transportlayer;
 
 import inet.visualizer.base.TransportConnectionVisualizerBase;
 import inet.visualizer.contract.ITransportConnectionVisualizer;

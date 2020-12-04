@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.visualizer.integrated;
+package inet.visualizer.canvas.integrated;
 
 import inet.visualizer.contract.IDataLinkVisualizer;
 import inet.visualizer.contract.IEnergyStorageVisualizer;

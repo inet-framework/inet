@@ -21,7 +21,7 @@ import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth10M;
 import inet.node.inet.StandardHost;
-import inet.visualizer.integrated.IntegratedVisualizer;
+import inet.visualizer.common.IntegratedVisualizer;
 
 
 network DHCPShutdownReboot

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.visualizer.mobility;
+package inet.visualizer.osg.mobility;
 
 import inet.visualizer.base.MobilityVisualizerBase;
 import inet.visualizer.contract.IMobilityVisualizer;

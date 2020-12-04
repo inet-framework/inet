@@ -15,7 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.visualizer.base;
+package inet.visualizer.osg.base;
+
+import inet.visualizer.base.SceneVisualizerBase;
 
 //
 // This is a base module for scene visualizer simple modules on a 3D osg scene.

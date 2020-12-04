@@ -20,7 +20,7 @@ package inet.examples.wireless.ieee80211levelofdetail;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 network Ieee80211LevelofDetailShowcase
 {

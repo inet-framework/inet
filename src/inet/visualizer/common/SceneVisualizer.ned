@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.visualizer.scene;
+package inet.visualizer.common;
 
 import inet.visualizer.contract.ISceneVisualizer;
 

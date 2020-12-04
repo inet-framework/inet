@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.visualizer.physicallayer;
+package inet.visualizer.canvas.physicallayer;
 
 import inet.visualizer.base.PhysicalLinkVisualizerBase;
 import inet.visualizer.contract.IPhysicalLinkVisualizer;

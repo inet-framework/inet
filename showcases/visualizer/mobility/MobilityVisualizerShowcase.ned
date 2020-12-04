@@ -15,7 +15,7 @@
 package inet.showcases.visualizer.mobility;
 
 import inet.node.inet.AdhocHost;
-import inet.visualizer.integrated.IntegratedVisualizer;
+import inet.visualizer.common.IntegratedVisualizer;
 
 network MobilityVisualizerShowcase
 {

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.visualizer.scene;
+package inet.visualizer.canvas.scene;
 
 import inet.visualizer.base.NetworkNodeVisualizerBase;
 import inet.visualizer.contract.INetworkNodeVisualizer;

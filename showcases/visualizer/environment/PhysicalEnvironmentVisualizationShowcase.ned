@@ -1,7 +1,7 @@
 package inet.showcases.visualizer.environment;
 
 import inet.environment.common.PhysicalEnvironment;
-import inet.visualizer.integrated.IntegratedVisualizer;
+import inet.visualizer.common.IntegratedVisualizer;
 
 network PhysicalEnvironmentVisualizationShowcase
 {

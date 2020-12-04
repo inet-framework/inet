@@ -4,7 +4,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.ManetRouter;
 import inet.node.gpsr.GpsrRouter;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.integrated.IntegratedMultiVisualizer;
+import inet.visualizer.common.IntegratedMultiVisualizer;
 
 
 network ManetprotocolsShowcaseA

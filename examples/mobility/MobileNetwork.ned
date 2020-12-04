@@ -17,7 +17,7 @@
 
 package inet.examples.mobility;
 
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 network MobileNetwork
 {

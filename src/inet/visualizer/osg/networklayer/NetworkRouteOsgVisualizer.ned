@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.visualizer.networklayer;
+package inet.visualizer.osg.networklayer;
 
 import inet.visualizer.base.PathVisualizerBase;
 import inet.visualizer.contract.INetworkRouteVisualizer;

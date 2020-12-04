@@ -19,9 +19,8 @@ import inet.node.inet.AdhocHost;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.integrated.IntegratedVisualizer;
-import inet.visualizer.physicallayer.PhysicalLinkVisualizer;
-
+import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.common.PhysicalLinkVisualizer;
 
 network PhysicalLinkVisualizerEnablingShowcase
 {
