@@ -17,7 +17,7 @@
 
 #include "inet/common/OsgUtils.h"
 
-#if defined(WITH_OSG) && defined(INET_WITH_VISUALIZERS)
+#if defined(WITH_OSG) && defined(INET_WITH_OSGVISUALIZERS)
 #include <osg/CullFace>
 #include <osg/Depth>
 #include <osg/Light>
@@ -31,7 +31,7 @@ namespace inet {
 
 namespace osg {
 
-#if defined(WITH_OSG) && defined(INET_WITH_VISUALIZERS)
+#if defined(WITH_OSG) && defined(INET_WITH_OSGVISUALIZERS)
 
 Vec3Array *createCircleVertices(const Coord& center, double radius, int polygonSize)
 {

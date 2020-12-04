@@ -17,7 +17,7 @@
 
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 
-#if defined(WITH_OSGEARTH) && defined(INET_WITH_VISUALIZERS)
+#if defined(WITH_OSGEARTH) && defined(INET_WITH_OSGVISUALIZERS)
 #include <osg/PositionAttitudeTransform>
 #include <osgEarth/GeoTransform>
 #endif
@@ -51,7 +51,7 @@ GeoCoord SimpleGeographicCoordinateSystem::computeGeographicCoordinate(const Coo
     return GeoCoord(geograpicLatitude, geograpicLongitude, m(sceneCoordinate.z) - sceneAltitude);
 }
 
-#if defined(WITH_OSGEARTH) && defined(INET_WITH_VISUALIZERS)
+#if defined(WITH_OSGEARTH) && defined(INET_WITH_OSGVISUALIZERS)
 
 Define_Module(OsgGeographicCoordinateSystem);
 

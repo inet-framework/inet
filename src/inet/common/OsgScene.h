@@ -20,7 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 
-#if defined(WITH_OSG) && defined(INET_WITH_VISUALIZERS)
+#if defined(WITH_OSG) && defined(INET_WITH_OSGVISUALIZERS)
 #include <osg/Group>
 #include <osg/NodeVisitor>
 #endif // ifdef WITH_OSG
@@ -29,7 +29,7 @@ namespace inet {
 
 namespace osg {
 
-#if defined(WITH_OSG) && defined(INET_WITH_VISUALIZERS)
+#if defined(WITH_OSG) && defined(INET_WITH_OSGVISUALIZERS)
 
 using namespace ::osg;
 

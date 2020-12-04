@@ -19,8 +19,9 @@
 #include "inet/common/INETMath.h"
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/common/geometry/common/Quaternion.h"
-#ifdef INET_WITH_VISUALIZERS
-#include "inet/visualizer/mobility/MobilityCanvasVisualizer.h"
+
+#ifdef INET_WITH_CANVASVISUALIZERS
+#include "inet/visualizer/canvas/mobility/MobilityCanvasVisualizer.h"
 #endif
 
 namespace inet {

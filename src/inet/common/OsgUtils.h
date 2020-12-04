@@ -21,7 +21,7 @@
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/Quaternion.h"
 
-#if defined(WITH_OSG) && defined(INET_WITH_VISUALIZERS)
+#if defined(WITH_OSG) && defined(INET_WITH_OSGVISUALIZERS)
 #include <omnetpp/osgutil.h>
 
 #include <osg/AutoTransform>
@@ -39,7 +39,7 @@ namespace inet {
 
 namespace osg {
 
-#if defined(WITH_OSG) && defined(INET_WITH_VISUALIZERS)
+#if defined(WITH_OSG) && defined(INET_WITH_OSGVISUALIZERS)
 
 using namespace ::osg;
 

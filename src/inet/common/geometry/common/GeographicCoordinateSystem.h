@@ -21,7 +21,7 @@
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/Quaternion.h"
 
-#if defined(WITH_OSGEARTH) && defined(INET_WITH_VISUALIZERS)
+#if defined(WITH_OSGEARTH) && defined(INET_WITH_OSGVISUALIZERS)
 #include <osgEarth/MapNode>
 #endif
 
@@ -73,7 +73,7 @@ class INET_API SimpleGeographicCoordinateSystem : public cSimpleModule, public I
     virtual GeoCoord computeGeographicCoordinate(const Coord& sceneCoordinate) const override;
 };
 
-#if defined(WITH_OSGEARTH) && defined(INET_WITH_VISUALIZERS)
+#if defined(WITH_OSGEARTH) && defined(INET_WITH_OSGVISUALIZERS)
 
 class INET_API OsgGeographicCoordinateSystem : public cSimpleModule, public IGeographicCoordinateSystem
 {
