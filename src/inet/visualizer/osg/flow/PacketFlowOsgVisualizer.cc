@@ -25,7 +25,7 @@
 #include "inet/linklayer/ieee8021d/relay/Ieee8021dRelay.h"
 #endif
 
-#include "inet/visualizer/flow/PacketFlowOsgVisualizer.h"
+#include "inet/visualizer/osg/flow/PacketFlowOsgVisualizer.h"
 
 namespace inet {
 

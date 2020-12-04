@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/environment/PhysicalEnvironmentOsgVisualizer.h"
+#include "inet/visualizer/osg/environment/PhysicalEnvironmentOsgVisualizer.h"
 
 #include <osg/Material>
 #include <osg/PolygonMode>

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/linklayer/InterfaceTableCanvasVisualizer.h"
+#include "inet/visualizer/canvas/linklayer/InterfaceTableCanvasVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/L3AddressResolver.h"

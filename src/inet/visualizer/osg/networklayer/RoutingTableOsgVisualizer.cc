@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/networklayer/RoutingTableOsgVisualizer.h"
+#include "inet/visualizer/osg/networklayer/RoutingTableOsgVisualizer.h"
 
 #include <osg/Geode>
 #include <osg/LineWidth>

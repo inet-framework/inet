@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/canvas/flow/PacketFlowCanvasVisualizer.h"
+
 #include "inet/common/FlowTag.h"
 
 #ifdef INET_WITH_ETHERNET
@@ -28,8 +30,6 @@
 #ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4.h"
 #endif
-
-#include "inet/visualizer/flow/PacketFlowCanvasVisualizer.h"
 
 namespace inet {
 

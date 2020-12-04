@@ -18,7 +18,7 @@
 #ifndef __INET_NETWORKROUTECANVASVISUALIZER_H
 #define __INET_NETWORKROUTECANVASVISUALIZER_H
 
-#include "inet/visualizer/base/PathCanvasVisualizerBase.h"
+#include "inet/visualizer/canvas/base/PathCanvasVisualizerBase.h"
 
 namespace inet {
 

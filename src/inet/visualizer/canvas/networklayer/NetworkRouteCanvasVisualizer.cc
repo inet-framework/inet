@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/INETDefs.h"
+#include "inet/visualizer/canvas/networklayer/NetworkRouteCanvasVisualizer.h"
 
 #ifdef INET_WITH_ETHERNET
 #include "inet/linklayer/ethernet/common/MacRelayUnit.h"
@@ -28,8 +28,6 @@
 #ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4.h"
 #endif
-
-#include "inet/visualizer/networklayer/NetworkRouteCanvasVisualizer.h"
 
 namespace inet {
 

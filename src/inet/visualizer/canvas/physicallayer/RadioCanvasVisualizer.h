@@ -22,7 +22,7 @@
 #include "inet/common/figures/IndexedImageFigure.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntenna.h"
 #include "inet/visualizer/base/RadioVisualizerBase.h"
-#include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
+#include "inet/visualizer/canvas/scene/NetworkNodeCanvasVisualizer.h"
 
 namespace inet {
 

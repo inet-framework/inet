@@ -20,8 +20,8 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/visualizer/base/StatisticVisualizerBase.h"
-#include "inet/visualizer/scene/NetworkNodeCanvasVisualization.h"
-#include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
+#include "inet/visualizer/canvas/scene/NetworkNodeCanvasVisualization.h"
+#include "inet/visualizer/canvas/scene/NetworkNodeCanvasVisualizer.h"
 
 namespace inet {
 

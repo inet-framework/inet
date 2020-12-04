@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/physicallayer/PhysicalLinkOsgVisualizer.h"
+#include "inet/visualizer/osg/physicallayer/PhysicalLinkOsgVisualizer.h"
 
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 

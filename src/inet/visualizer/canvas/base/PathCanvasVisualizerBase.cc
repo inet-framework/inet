@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/base/PathCanvasVisualizerBase.h"
+#include "inet/visualizer/canvas/base/PathCanvasVisualizerBase.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/geometry/object/LineSegment.h"

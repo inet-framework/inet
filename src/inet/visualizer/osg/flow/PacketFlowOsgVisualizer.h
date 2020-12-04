@@ -18,7 +18,7 @@
 #ifndef __INET_PACKETFLOWOSGVISUALIZER_H
 #define __INET_PACKETFLOWOSGVISUALIZER_H
 
-#include "inet/visualizer/base/PathOsgVisualizerBase.h"
+#include "inet/visualizer/osg/base/PathOsgVisualizerBase.h"
 
 namespace inet {
 

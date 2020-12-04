@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/scene/NetworkNodeCanvasVisualization.h"
+#include "inet/visualizer/canvas/scene/NetworkNodeCanvasVisualization.h"
 
 #include <algorithm>
 

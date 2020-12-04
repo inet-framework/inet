@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/common/PacketDropOsgVisualizer.h"
+#include "inet/visualizer/osg/common/PacketDropOsgVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgScene.h"

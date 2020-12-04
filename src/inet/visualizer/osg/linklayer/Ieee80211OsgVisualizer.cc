@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/linklayer/Ieee80211OsgVisualizer.h"
+#include "inet/visualizer/osg/linklayer/Ieee80211OsgVisualizer.h"
 
 #include <osg/Geode>
 

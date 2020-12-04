@@ -21,7 +21,7 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/figures/LabeledIconFigure.h"
 #include "inet/visualizer/base/Ieee80211VisualizerBase.h"
-#include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
+#include "inet/visualizer/canvas/scene/NetworkNodeCanvasVisualizer.h"
 
 namespace inet {
 

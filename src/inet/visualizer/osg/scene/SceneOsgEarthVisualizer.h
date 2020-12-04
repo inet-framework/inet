@@ -19,7 +19,7 @@
 #define __INET_SCENEOSGEARTHVISUALIZER_H
 
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
-#include "inet/visualizer/base/SceneOsgVisualizerBase.h"
+#include "inet/visualizer/osg/base/SceneOsgVisualizerBase.h"
 
 #ifdef WITH_OSGEARTH
 #include <osgEarth/GeoTransform>

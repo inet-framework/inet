@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/INETDefs.h"
+#include "inet/visualizer/canvas/transportlayer/TransportRouteCanvasVisualizer.h"
 
 #ifdef INET_WITH_ETHERNET
 #include "inet/linklayer/ethernet/common/MacRelayUnit.h"
@@ -36,8 +36,6 @@
 #ifdef INET_WITH_UDP
 #include "inet/transportlayer/udp/Udp.h"
 #endif
-
-#include "inet/visualizer/transportlayer/TransportRouteCanvasVisualizer.h"
 
 namespace inet {
 

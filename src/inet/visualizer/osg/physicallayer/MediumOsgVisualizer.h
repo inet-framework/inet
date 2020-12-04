@@ -19,7 +19,7 @@
 #define __INET_MEDIUMOSGVISUALIZER_H
 
 #include "inet/visualizer/base/MediumVisualizerBase.h"
-#include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
+#include "inet/visualizer/osg/scene/NetworkNodeOsgVisualizer.h"
 
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionDecision.h"

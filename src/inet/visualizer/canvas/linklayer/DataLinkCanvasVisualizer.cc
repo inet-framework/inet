@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/linklayer/DataLinkCanvasVisualizer.h"
+#include "inet/visualizer/canvas/linklayer/DataLinkCanvasVisualizer.h"
 
 #include "inet/linklayer/base/MacProtocolBase.h"
 

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/physicallayer/TracingObstacleLossCanvasVisualizer.h"
+#include "inet/visualizer/canvas/physicallayer/TracingObstacleLossCanvasVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
 

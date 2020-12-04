@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/canvas/physicallayer/MediumCanvasVisualizer.h"
+
 #include <algorithm>
 
 #include "inet/common/ModuleAccess.h"
@@ -27,8 +29,6 @@
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReception.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
 #endif // INET_WITH_PHYSICALLAYERWIRELESSCOMMON
-
-#include "inet/visualizer/physicallayer/MediumCanvasVisualizer.h"
 
 namespace inet {
 namespace visualizer {

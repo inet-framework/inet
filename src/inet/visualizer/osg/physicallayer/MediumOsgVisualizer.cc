@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/physicallayer/MediumOsgVisualizer.h"
+#include "inet/visualizer/osg/physicallayer/MediumOsgVisualizer.h"
 
 #include <osg/Depth>
 #include <osg/Geode>

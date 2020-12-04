@@ -25,7 +25,7 @@
 #include "inet/common/figures/TrailFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/visualizer/base/MediumVisualizerBase.h"
-#include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
+#include "inet/visualizer/canvas/scene/NetworkNodeCanvasVisualizer.h"
 #include "inet/visualizer/util/AnimationSpeedInterpolator.h"
 
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON

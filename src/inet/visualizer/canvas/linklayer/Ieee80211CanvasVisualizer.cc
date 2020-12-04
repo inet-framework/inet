@@ -15,14 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include "inet/visualizer/canvas/linklayer/Ieee80211CanvasVisualizer.h"
+
 #include "inet/common/ModuleAccess.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 
 #ifdef INET_WITH_IEEE80211
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
 #endif
-
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/visualizer/linklayer/Ieee80211CanvasVisualizer.h"
 
 namespace inet {
 

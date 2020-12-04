@@ -21,8 +21,8 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/figures/BoxedLabelFigure.h"
 #include "inet/visualizer/base/InterfaceTableVisualizerBase.h"
-#include "inet/visualizer/scene/NetworkNodeCanvasVisualization.h"
-#include "inet/visualizer/scene/NetworkNodeCanvasVisualizer.h"
+#include "inet/visualizer/canvas/scene/NetworkNodeCanvasVisualization.h"
+#include "inet/visualizer/canvas/scene/NetworkNodeCanvasVisualizer.h"
 
 namespace inet {
 

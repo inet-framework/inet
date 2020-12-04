@@ -20,7 +20,7 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/visualizer/base/TransportConnectionVisualizerBase.h"
-#include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
+#include "inet/visualizer/osg/scene/NetworkNodeOsgVisualizer.h"
 
 namespace inet {
 

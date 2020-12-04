@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/common/PacketDropCanvasVisualizer.h"
+#include "inet/visualizer/canvas/common/PacketDropCanvasVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
 

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/common/StatisticCanvasVisualizer.h"
+#include "inet/visualizer/canvas/common/StatisticCanvasVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/figures/BoxedLabelFigure.h"

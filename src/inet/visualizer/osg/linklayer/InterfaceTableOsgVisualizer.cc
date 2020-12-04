@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/linklayer/InterfaceTableOsgVisualizer.h"
+#include "inet/visualizer/osg/linklayer/InterfaceTableOsgVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgUtils.h"

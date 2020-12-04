@@ -21,7 +21,7 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/OsgUtils.h"
 #include "inet/visualizer/base/EnergyStorageVisualizerBase.h"
-#include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
+#include "inet/visualizer/osg/scene/NetworkNodeOsgVisualizer.h"
 
 namespace inet {
 

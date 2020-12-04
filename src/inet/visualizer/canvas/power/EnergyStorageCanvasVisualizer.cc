@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/power/EnergyStorageCanvasVisualizer.h"
+#include "inet/visualizer/canvas/power/EnergyStorageCanvasVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
 

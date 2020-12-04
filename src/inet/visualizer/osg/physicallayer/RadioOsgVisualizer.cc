@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/physicallayer/RadioOsgVisualizer.h"
+#include "inet/visualizer/osg/physicallayer/RadioOsgVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
 

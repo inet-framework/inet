@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/scene/NetworkConnectionOsgVisualizer.h"
+#include "inet/visualizer/osg/scene/NetworkConnectionOsgVisualizer.h"
 
 #include <osg/Geode>
 #include <osg/LineWidth>

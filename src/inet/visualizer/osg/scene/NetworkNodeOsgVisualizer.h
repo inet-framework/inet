@@ -19,7 +19,7 @@
 #define __INET_NETWORKNODEOSGVISUALIZER_H
 
 #include "inet/visualizer/base/NetworkNodeVisualizerBase.h"
-#include "inet/visualizer/scene/NetworkNodeOsgVisualization.h"
+#include "inet/visualizer/osg/scene/NetworkNodeOsgVisualization.h"
 
 namespace inet {
 

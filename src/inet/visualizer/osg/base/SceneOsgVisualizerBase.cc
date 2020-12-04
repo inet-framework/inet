@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/base/SceneOsgVisualizerBase.h"
+#include "inet/visualizer/osg/base/SceneOsgVisualizerBase.h"
 
 #include <osg/PolygonOffset>
 #include <osg/Shape>
@@ -25,7 +25,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/OsgScene.h"
 #include "inet/common/OsgUtils.h"
-#include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
+#include "inet/visualizer/osg/scene/NetworkNodeOsgVisualizer.h"
 
 namespace inet {
 

@@ -18,7 +18,7 @@
 #ifndef __INET_PHYSICALLINKCANVASVISUALIZER_H
 #define __INET_PHYSICALLINKCANVASVISUALIZER_H
 
-#include "inet/visualizer/base/LinkCanvasVisualizerBase.h"
+#include "inet/visualizer/canvas/base/LinkCanvasVisualizerBase.h"
 
 namespace inet {
 

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/environment/PhysicalEnvironmentCanvasVisualizer.h"
+#include "inet/visualizer/canvas/environment/PhysicalEnvironmentCanvasVisualizer.h"
 
 #include <algorithm>
 

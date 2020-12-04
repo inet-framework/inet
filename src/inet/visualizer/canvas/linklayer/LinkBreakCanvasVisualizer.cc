@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/linklayer/LinkBreakCanvasVisualizer.h"
+#include "inet/visualizer/canvas/linklayer/LinkBreakCanvasVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
 

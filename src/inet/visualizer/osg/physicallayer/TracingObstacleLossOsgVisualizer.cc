@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/physicallayer/TracingObstacleLossOsgVisualizer.h"
+#include "inet/visualizer/osg/physicallayer/TracingObstacleLossOsgVisualizer.h"
 
 #include <osg/Geode>
 #include <osg/LineWidth>

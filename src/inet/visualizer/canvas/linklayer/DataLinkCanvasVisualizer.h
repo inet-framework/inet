@@ -18,7 +18,7 @@
 #ifndef __INET_DATALINKCANVASVISUALIZER_H
 #define __INET_DATALINKCANVASVISUALIZER_H
 
-#include "inet/visualizer/base/LinkCanvasVisualizerBase.h"
+#include "inet/visualizer/canvas/base/LinkCanvasVisualizerBase.h"
 
 namespace inet {
 

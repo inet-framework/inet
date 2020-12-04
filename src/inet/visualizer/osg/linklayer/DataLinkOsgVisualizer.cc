@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/linklayer/DataLinkOsgVisualizer.h"
+#include "inet/visualizer/osg/linklayer/DataLinkOsgVisualizer.h"
 
 #include "inet/linklayer/base/MacProtocolBase.h"
 

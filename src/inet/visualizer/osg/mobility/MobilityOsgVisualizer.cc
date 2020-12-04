@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/mobility/MobilityOsgVisualizer.h"
+#include "inet/visualizer/osg/mobility/MobilityOsgVisualizer.h"
 
 #include <osg/AutoTransform>
 #include <osg/Material>

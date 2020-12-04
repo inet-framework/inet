@@ -22,8 +22,8 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/visualizer/base/InterfaceTableVisualizerBase.h"
-#include "inet/visualizer/scene/NetworkNodeOsgVisualization.h"
-#include "inet/visualizer/scene/NetworkNodeOsgVisualizer.h"
+#include "inet/visualizer/osg/scene/NetworkNodeOsgVisualization.h"
+#include "inet/visualizer/osg/scene/NetworkNodeOsgVisualizer.h"
 
 namespace inet {
 

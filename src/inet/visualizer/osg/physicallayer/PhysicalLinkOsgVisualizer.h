@@ -18,7 +18,7 @@
 #ifndef __INET_PHYSICALLINKOSGVISUALIZER_H
 #define __INET_PHYSICALLINKOSGVISUALIZER_H
 
-#include "inet/visualizer/base/LinkOsgVisualizerBase.h"
+#include "inet/visualizer/osg/base/LinkOsgVisualizerBase.h"
 
 namespace inet {
 

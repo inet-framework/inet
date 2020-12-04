@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/scene/SceneOsgVisualizer.h"
+#include "inet/visualizer/osg/scene/SceneOsgVisualizer.h"
 
 #include <osg/Group>
 #include <osgDB/ReadFile>

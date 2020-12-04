@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/physicallayer/RadioCanvasVisualizer.h"
+#include "inet/visualizer/canvas/physicallayer/RadioCanvasVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/geometry/common/Quaternion.h"

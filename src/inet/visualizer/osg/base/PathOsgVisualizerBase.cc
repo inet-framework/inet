@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/base/PathOsgVisualizerBase.h"
+#include "inet/visualizer/osg/base/PathOsgVisualizerBase.h"
 
 #include <osg/LineWidth>
 

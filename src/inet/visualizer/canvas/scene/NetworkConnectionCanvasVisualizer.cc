@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/scene/NetworkConnectionCanvasVisualizer.h"
+#include "inet/visualizer/canvas/scene/NetworkConnectionCanvasVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
 

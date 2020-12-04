@@ -20,7 +20,7 @@
 
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/visualizer/base/NetworkNodeVisualizerBase.h"
-#include "inet/visualizer/scene/NetworkNodeCanvasVisualization.h"
+#include "inet/visualizer/canvas/scene/NetworkNodeCanvasVisualization.h"
 
 namespace inet {
 

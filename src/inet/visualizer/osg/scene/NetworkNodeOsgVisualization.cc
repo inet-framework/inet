@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/visualizer/scene/NetworkNodeOsgVisualization.h"
+#include "inet/visualizer/osg/scene/NetworkNodeOsgVisualization.h"
 
 #include <omnetpp/osgutil.h>
 

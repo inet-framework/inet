@@ -20,7 +20,7 @@
 
 #include <osg/Geode>
 
-#include "inet/visualizer/base/SceneOsgVisualizerBase.h"
+#include "inet/visualizer/osg/base/SceneOsgVisualizerBase.h"
 
 namespace inet {
 
