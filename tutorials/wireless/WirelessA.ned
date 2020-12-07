@@ -30,7 +30,7 @@ network WirelessA
         @statistic[packetReceived](source=hostB.app[0].packetReceived; record=figure(count); targetFigure=rcvdPkText);
 
     submodules:
-        visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
+        visualizer: <default(firstAvailableOrEmpty("IntegratedCanvasVisualizer"))> like IIntegratedVisualizer if typename != "" {
             @display("p=580,125");
         }
         configurator: Ipv4NetworkConfigurator {

@@ -30,7 +30,7 @@ network WirelessNetWith2DHCP
 {
     int numHosts;
     submodules:
-        visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
+        visualizer: <default(firstAvailableOrEmpty("IntegratedCanvasVisualizer"))> like IIntegratedVisualizer if typename != "" {
             @display("p=100,300;is=s");
         }
         radioMedium: Ieee80211ScalarRadioMedium {

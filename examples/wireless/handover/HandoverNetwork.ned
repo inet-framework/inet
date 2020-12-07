@@ -27,7 +27,7 @@ network HandoverNetwork
 {
     @display("bgb=900,400");
     submodules:
-        visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
+        visualizer: <default(firstAvailableOrEmpty("IntegratedCanvasVisualizer"))> like IIntegratedVisualizer if typename != "" {
             parameters:
                 @display("p=100,300;is=s");
         }
