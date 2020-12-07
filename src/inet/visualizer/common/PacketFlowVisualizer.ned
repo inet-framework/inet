@@ -26,11 +26,11 @@ module PacketFlowVisualizer like IPacketFlowVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("PacketFlowCanvasVisualizer")> like IPacketFlowVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("PacketFlowCanvasVisualizer"))> like IPacketFlowVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("PacketFlowOsgVisualizer")> like IPacketFlowVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("PacketFlowOsgVisualizer"))> like IPacketFlowVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

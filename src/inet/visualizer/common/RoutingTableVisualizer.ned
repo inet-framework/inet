@@ -31,11 +31,11 @@ module RoutingTableVisualizer like IRoutingTableVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("RoutingTableCanvasVisualizer")> like IRoutingTableVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("RoutingTableCanvasVisualizer"))> like IRoutingTableVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("RoutingTableOsgVisualizer")> like IRoutingTableVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("RoutingTableOsgVisualizer"))> like IRoutingTableVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

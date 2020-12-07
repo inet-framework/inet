@@ -31,11 +31,11 @@ module LinkBreakVisualizer like ILinkBreakVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("LinkBreakCanvasVisualizer")> like ILinkBreakVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("LinkBreakCanvasVisualizer"))> like ILinkBreakVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("LinkBreakOsgVisualizer")> like ILinkBreakVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("LinkBreakOsgVisualizer"))> like ILinkBreakVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

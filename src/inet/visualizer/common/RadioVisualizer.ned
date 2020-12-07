@@ -31,11 +31,11 @@ module RadioVisualizer like IRadioVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("RadioCanvasVisualizer")> like IRadioVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("RadioCanvasVisualizer"))> like IRadioVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("RadioOsgVisualizer")> like IRadioVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("RadioOsgVisualizer"))> like IRadioVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

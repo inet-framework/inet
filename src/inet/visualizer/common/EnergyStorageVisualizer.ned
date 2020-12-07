@@ -31,11 +31,11 @@ module EnergyStorageVisualizer like IEnergyStorageVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("EnergyStorageCanvasVisualizer")> like IEnergyStorageVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("EnergyStorageCanvasVisualizer"))> like IEnergyStorageVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("EnergyStorageOsgVisualizer")> like IEnergyStorageVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("EnergyStorageOsgVisualizer"))> like IEnergyStorageVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

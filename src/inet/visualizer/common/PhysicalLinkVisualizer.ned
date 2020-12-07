@@ -31,11 +31,11 @@ module PhysicalLinkVisualizer like IPhysicalLinkVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("PhysicalLinkCanvasVisualizer")> like IPhysicalLinkVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("PhysicalLinkCanvasVisualizer"))> like IPhysicalLinkVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("PhysicalLinkOsgVisualizer")> like IPhysicalLinkVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("PhysicalLinkOsgVisualizer"))> like IPhysicalLinkVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

@@ -31,11 +31,11 @@ module Ieee80211Visualizer like IIeee80211Visualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("Ieee80211CanvasVisualizer")> like IIeee80211Visualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("Ieee80211CanvasVisualizer"))> like IIeee80211Visualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("Ieee80211OsgVisualizer")> like IIeee80211Visualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("Ieee80211OsgVisualizer"))> like IIeee80211Visualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

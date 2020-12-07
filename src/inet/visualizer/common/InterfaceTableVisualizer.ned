@@ -26,11 +26,11 @@ module InterfaceTableVisualizer like IInterfaceTableVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("InterfaceTableCanvasVisualizer")> like IInterfaceTableVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("InterfaceTableCanvasVisualizer"))> like IInterfaceTableVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("InterfaceTableOsgVisualizer")> like IInterfaceTableVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("InterfaceTableOsgVisualizer"))> like IInterfaceTableVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

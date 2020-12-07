@@ -31,11 +31,11 @@ module MobilityVisualizer like IMobilityVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("MobilityCanvasVisualizer")> like IMobilityVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("MobilityCanvasVisualizer"))> like IMobilityVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("MobilityOsgVisualizer")> like IMobilityVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("MobilityOsgVisualizer"))> like IMobilityVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

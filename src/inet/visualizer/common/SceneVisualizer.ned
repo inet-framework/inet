@@ -31,11 +31,11 @@ module SceneVisualizer like ISceneVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("SceneCanvasVisualizer")> like ISceneVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("SceneCanvasVisualizer"))> like ISceneVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("SceneOsgVisualizer")> like ISceneVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("SceneOsgVisualizer"))> like ISceneVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

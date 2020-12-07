@@ -31,11 +31,11 @@ module TracingObstacleLossVisualizer like ITracingObstacleLossVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("TracingObstacleLossCanvasVisualizer")> like ITracingObstacleLossVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("TracingObstacleLossCanvasVisualizer"))> like ITracingObstacleLossVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("TracingObstacleLossOsgVisualizer")> like ITracingObstacleLossVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("TracingObstacleLossOsgVisualizer"))> like ITracingObstacleLossVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

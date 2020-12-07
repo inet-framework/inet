@@ -31,11 +31,11 @@ module TransportConnectionVisualizer like ITransportConnectionVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("TransportConnectionCanvasVisualizer")> like ITransportConnectionVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("TransportConnectionCanvasVisualizer"))> like ITransportConnectionVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("TransportConnectionOsgVisualizer")> like ITransportConnectionVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("TransportConnectionOsgVisualizer"))> like ITransportConnectionVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

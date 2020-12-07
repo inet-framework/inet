@@ -31,11 +31,11 @@ module StatisticVisualizer like IStatisticVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("StatisticCanvasVisualizer")> like IStatisticVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("StatisticCanvasVisualizer"))> like IStatisticVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("StatisticOsgVisualizer")> like IStatisticVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("StatisticOsgVisualizer"))> like IStatisticVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

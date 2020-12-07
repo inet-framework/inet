@@ -31,11 +31,11 @@ module MediumVisualizer like IMediumVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("MediumCanvasVisualizer")> like IMediumVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("MediumCanvasVisualizer"))> like IMediumVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("MediumOsgVisualizer")> like IMediumVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("MediumOsgVisualizer"))> like IMediumVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

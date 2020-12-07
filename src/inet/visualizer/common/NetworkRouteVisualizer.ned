@@ -31,11 +31,11 @@ module NetworkRouteVisualizer like INetworkRouteVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("NetworkRouteCanvasVisualizer")> like INetworkRouteVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("NetworkRouteCanvasVisualizer"))> like INetworkRouteVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("NetworkRouteOsgVisualizer")> like INetworkRouteVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("NetworkRouteOsgVisualizer"))> like INetworkRouteVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

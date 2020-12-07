@@ -31,11 +31,11 @@ module PhysicalEnvironmentVisualizer like IPhysicalEnvironmentVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("PhysicalEnvironmentCanvasVisualizer")> like IPhysicalEnvironmentVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("PhysicalEnvironmentCanvasVisualizer"))> like IPhysicalEnvironmentVisualizer if typename != "" {
             parameters:
                 @display("p=100,50");
         }
-        osgVisualizer: <default("PhysicalEnvironmentOsgVisualizer")> like IPhysicalEnvironmentVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("PhysicalEnvironmentOsgVisualizer"))> like IPhysicalEnvironmentVisualizer if typename != "" {
             parameters:
                 @display("p=100,150");
         }

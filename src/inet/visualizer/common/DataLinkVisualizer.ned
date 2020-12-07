@@ -31,11 +31,11 @@ module DataLinkVisualizer like IDataLinkVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("DataLinkCanvasVisualizer")> like IDataLinkVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("DataLinkCanvasVisualizer"))> like IDataLinkVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("DataLinkOsgVisualizer")> like IDataLinkVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("DataLinkOsgVisualizer"))> like IDataLinkVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

@@ -31,11 +31,11 @@ module InfoVisualizer like IInfoVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("InfoCanvasVisualizer")> like IInfoVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("InfoCanvasVisualizer"))> like IInfoVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("InfoOsgVisualizer")> like IInfoVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("InfoOsgVisualizer"))> like IInfoVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

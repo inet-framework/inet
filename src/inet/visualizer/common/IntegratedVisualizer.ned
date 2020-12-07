@@ -29,11 +29,11 @@ module IntegratedVisualizer like IIntegratedVisualizer
         *.*.visualizationTargetModule = default("^.^.^");
         *.*.visualizationSubjectModule = default("^.^.^");
     submodules:
-        canvasVisualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("IntegratedCanvasVisualizer"))> like IIntegratedVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("")> like IIntegratedVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("IntegratedOsgVisualizer"))> like IIntegratedVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }
