@@ -1,4 +1,4 @@
-package inet.showcases.visualizer.statistic;
+package inet.showcases.visualizer.canvas.statistic;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;

@@ -12,7 +12,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.// 
 
-package inet.showcases.visualizer.mobility;
+package inet.showcases.visualizer.canvas.mobility;
 
 import inet.node.inet.AdhocHost;
 import inet.visualizer.common.IntegratedVisualizer;

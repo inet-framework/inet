@@ -12,7 +12,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.// 
 
-package inet.showcases.visualizer.physicallinkactivity;
+package inet.showcases.visualizer.canvas.physicallinkactivity;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;

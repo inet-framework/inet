@@ -1,4 +1,4 @@
-package inet.showcases.visualizer.interfacetable;
+package inet.showcases.visualizer.canvas.interfacetable;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;

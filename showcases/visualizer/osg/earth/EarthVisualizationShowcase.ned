@@ -1,4 +1,4 @@
-package inet.showcases.visualizer3d.earth;
+package inet.showcases.visualizer.osg.earth;
 
 import inet.common.geometry.common.OsgGeographicCoordinateSystem;
 import inet.environment.common.PhysicalEnvironment;

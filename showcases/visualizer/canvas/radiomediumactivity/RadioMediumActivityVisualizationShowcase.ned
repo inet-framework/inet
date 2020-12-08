@@ -2,7 +2,7 @@
 
 
 
-package inet.showcases.visualizer.radiomediumactivity;
+package inet.showcases.visualizer.canvas.radiomediumactivity;
 
 import inet.environment.common.PhysicalEnvironment;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;

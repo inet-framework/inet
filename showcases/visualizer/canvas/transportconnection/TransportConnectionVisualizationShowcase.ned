@@ -1,6 +1,6 @@
 
 
-package inet.showcases.visualizer.transportconnection;
+package inet.showcases.visualizer.canvas.transportconnection;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;

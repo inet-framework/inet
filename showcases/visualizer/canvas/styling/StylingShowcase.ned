@@ -12,7 +12,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.// 
 
-package inet.showcases.visualizer.styling;
+package inet.showcases.visualizer.canvas.styling;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.WirelessHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;

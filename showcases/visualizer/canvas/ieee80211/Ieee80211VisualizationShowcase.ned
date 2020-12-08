@@ -1,4 +1,4 @@
-package inet.showcases.visualizer.ieee80211;
+package inet.showcases.visualizer.canvas.ieee80211;
 
 import inet.environment.common.PhysicalEnvironment;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;

@@ -1,4 +1,4 @@
-package inet.showcases.visualizer.packetdrop;
+package inet.showcases.visualizer.canvas.packetdrop;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100G;
