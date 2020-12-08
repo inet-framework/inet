@@ -40,7 +40,7 @@ EigrpDisabledInterfaces::~EigrpDisabledInterfaces()
 
     for (int i = 0; i < cnt; i++) {
         iface = ifVector[i];
-        ifVector[i] = NULL;
+        ifVector[i] = nullptr;
         delete iface;
     }
     ifVector.clear();
@@ -61,7 +61,7 @@ EigrpInterface *EigrpDisabledInterfaces::removeInterface(EigrpInterface *iface)
         return iface;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 EigrpInterface *EigrpDisabledInterfaces::findInterface(int ifaceId)
@@ -76,7 +76,7 @@ EigrpInterface *EigrpDisabledInterfaces::findInterface(int ifaceId)
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 } // namespace eigrp

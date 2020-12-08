@@ -297,7 +297,7 @@ struct syscall_spec
     const char *name; /* name of system call */
     cQueue *arguments; /* arguments to system call */
     PacketDrillExpression *result; /* expected result from call */
-    struct errno_spec *error; /* errno symbol or NULL */
+    struct errno_spec *error; /* errno symbol or nullptr */
     char *note; /* extra note from strace */
     int64_t end_usecs; /* finish time, if it blocks */
 };

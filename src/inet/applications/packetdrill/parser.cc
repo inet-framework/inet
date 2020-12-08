@@ -168,7 +168,7 @@ extern int yylex(void);
 extern int yyparse(void);
 
 /* The input to the parser: the path name of the script file to parse. */
-static const char* current_script_path = NULL;
+static const char* current_script_path = nullptr;
 
 /* The starting line number of the input script statement that we're
  * currently parsing. This may be different than yylineno if bison had
@@ -181,13 +181,13 @@ static int current_script_line = -1;
  * We use this object to look up configuration info needed during
  * parsing.
  */
-static PacketDrillConfig *in_config = NULL;
+static PacketDrillConfig *in_config = nullptr;
 
 /* The output of the parser: an output script containing
  * 1) a linked list of options
  * 2) a linked list of events
  */
-static PacketDrillScript *out_script = NULL;
+static PacketDrillScript *out_script = nullptr;
 
 
 /* The test invocation to pass back to parse_and_finalize_config(). */
@@ -232,7 +232,7 @@ int parse_script(PacketDrillConfig *config, PacketDrillScript *script, Invocatio
      */
     yylineno = 1;
     int result = yyparse(); /* invoke bison-generated parser */
-    current_script_path = NULL;
+    current_script_path = nullptr;
     if (fclose(yyin))
         printf("fclose: error closing script buffer");
 
@@ -274,7 +274,7 @@ static PacketDrillExpression *new_integer_expression(int64_t num, const char *fo
 /* Create and initialize a new option. */
 /*static struct option_list *new_option(char *name, char *value)
 {
-    return NULL;
+    return nullptr;
 }*/
 
 
@@ -2467,14 +2467,14 @@ yyreduce:
         case 2:
 #line 365 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.string) = NULL;    /* The parser output is in out_script */
+    (yyval.string) = nullptr;    /* The parser output is in out_script */
 }
 #line 2473 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 3:
 #line 371 "parser.y" /* yacc.c:1646  */
-    { (yyval.option) = NULL;
+    { (yyval.option) = nullptr;
     parse_and_finalize_config(invocation);}
 #line 2480 "parser.cc" /* yacc.c:1646  */
     break;
@@ -2672,7 +2672,7 @@ yyreduce:
     if ((yyvsp[0].packet)) {
         (yyval.event) = new PacketDrillEvent(PACKET_EVENT);  (yyval.event)->setPacket((yyvsp[0].packet));
     } else {
-        (yyval.event) = NULL;
+        (yyval.event) = nullptr;
     }
 }
 #line 2679 "parser.cc" /* yacc.c:1646  */
@@ -2732,11 +2732,11 @@ yyreduce:
   case 29:
 #line 534 "parser.y" /* yacc.c:1646  */
     {
-    char *error = NULL;
-    PacketDrillPacket *outer = (yyvsp[-5].packet), *inner = NULL;
+    char *error = nullptr;
+    PacketDrillPacket *outer = (yyvsp[-5].packet), *inner = nullptr;
     enum direction_t direction = outer->getDirection();
 
-    if (((yyvsp[0].tcp_options) == NULL) && (direction != DIRECTION_OUTBOUND)) {
+    if (((yyvsp[0].tcp_options) == nullptr) && (direction != DIRECTION_OUTBOUND)) {
         yylineno = (yylsp[0]).first_line;
         printf("<...> for TCP options can only be used with outbound packets");
     }
@@ -2760,8 +2760,8 @@ yyreduce:
   case 30:
 #line 560 "parser.y" /* yacc.c:1646  */
     {
-    char *error = NULL;
-    PacketDrillPacket *outer = (yyvsp[-4].packet), *inner = NULL;
+    char *error = nullptr;
+    PacketDrillPacket *outer = (yyvsp[-4].packet), *inner = nullptr;
 
     enum direction_t direction = outer->getDirection();
     Packet* pkt = PacketDrill::buildUDPPacket(in_config->getWireProtocol(), direction, (yyvsp[-1].integer), &error);
@@ -2781,7 +2781,7 @@ yyreduce:
   case 31:
 #line 579 "parser.y" /* yacc.c:1646  */
     {
-    PacketDrillPacket *inner = NULL;
+    PacketDrillPacket *inner = nullptr;
     enum direction_t direction = (yyvsp[-3].packet)->getDirection();
     Packet* pkt = PacketDrill::buildSCTPPacket(in_config->getWireProtocol(), direction, (yyvsp[0].sctp_chunk_list));
     if (pkt) {
@@ -2945,13 +2945,13 @@ yyreduce:
 
   case 53:
 #line 651 "parser.y" /* yacc.c:1646  */
-    { (yyval.byte_list) = NULL; }
+    { (yyval.byte_list) = nullptr; }
 #line 2950 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 54:
 #line 652 "parser.y" /* yacc.c:1646  */
-    { (yyval.byte_list) = NULL; }
+    { (yyval.byte_list) = nullptr; }
 #line 2956 "parser.cc" /* yacc.c:1646  */
     break;
 
@@ -3503,13 +3503,13 @@ yyreduce:
 
   case 111:
 #line 971 "parser.y" /* yacc.c:1646  */
-    { (yyval.sack_block_list) = NULL; }
+    { (yyval.sack_block_list) = nullptr; }
 #line 3508 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 112:
 #line 972 "parser.y" /* yacc.c:1646  */
-    { (yyval.sack_block_list) = NULL; }
+    { (yyval.sack_block_list) = nullptr; }
 #line 3514 "parser.cc" /* yacc.c:1646  */
     break;
 
@@ -3521,13 +3521,13 @@ yyreduce:
 
   case 114:
 #line 978 "parser.y" /* yacc.c:1646  */
-    { (yyval.sack_block_list) = NULL; }
+    { (yyval.sack_block_list) = nullptr; }
 #line 3526 "parser.cc" /* yacc.c:1646  */
     break;
 
   case 115:
 #line 979 "parser.y" /* yacc.c:1646  */
-    { (yyval.sack_block_list) = NULL; }
+    { (yyval.sack_block_list) = nullptr; }
 #line 3532 "parser.cc" /* yacc.c:1646  */
     break;
 
@@ -3620,11 +3620,11 @@ yyreduce:
         (!is_valid_u16((yyvsp[-3].integer)) || ((yyvsp[-3].integer) < SCTP_COOKIE_ACK_LENGTH))) {
         semantic_error("length value out of range");
     }
-    if (((yyvsp[-3].integer) != -1) && ((yyvsp[-1].byte_list) != NULL) &&
+    if (((yyvsp[-3].integer) != -1) && ((yyvsp[-1].byte_list) != nullptr) &&
         ((yyvsp[-3].integer) != SCTP_COOKIE_ACK_LENGTH + (yyvsp[-1].byte_list)->getListLength())) {
         semantic_error("length value incompatible with val");
     }
-    if (((yyvsp[-3].integer) == -1) && ((yyvsp[-1].byte_list) != NULL)) {
+    if (((yyvsp[-3].integer) == -1) && ((yyvsp[-1].byte_list) != nullptr)) {
         semantic_error("length needs to be specified");
     }
     (yyval.sctp_chunk) = PacketDrill::buildCookieEchoChunk((yyvsp[-5].integer), (yyvsp[-3].integer), (yyvsp[-1].byte_list));
@@ -3642,7 +3642,7 @@ yyreduce:
 
   case 128:
 #line 1057 "parser.y" /* yacc.c:1646  */
-    { (yyval.cause_list) = NULL; }
+    { (yyval.cause_list) = nullptr; }
 #line 3647 "parser.cc" /* yacc.c:1646  */
     break;
 
@@ -3893,7 +3893,7 @@ yyreduce:
   case 158:
 #line 1201 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.sctp_parameter) = new PacketDrillSctpParameter(OUTGOING_RESET_REQUEST_PARAMETER, 16, new PacketDrillStruct((yyvsp[-5].integer), (yyvsp[-3].integer), (yyvsp[-1].integer), -2, NULL));
+    (yyval.sctp_parameter) = new PacketDrillSctpParameter(OUTGOING_RESET_REQUEST_PARAMETER, 16, new PacketDrillStruct((yyvsp[-5].integer), (yyvsp[-3].integer), (yyvsp[-1].integer), -2, nullptr));
 }
 #line 3899 "parser.cc" /* yacc.c:1646  */
     break;
@@ -3909,7 +3909,7 @@ yyreduce:
   case 160:
 #line 1210 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.sctp_parameter) = new PacketDrillSctpParameter(INCOMING_RESET_REQUEST_PARAMETER, 8, new PacketDrillStruct((yyvsp[-1].integer), -2, -2, -2, NULL));
+    (yyval.sctp_parameter) = new PacketDrillSctpParameter(INCOMING_RESET_REQUEST_PARAMETER, 8, new PacketDrillStruct((yyvsp[-1].integer), -2, -2, -2, nullptr));
 }
 #line 3915 "parser.cc" /* yacc.c:1646  */
     break;
@@ -3925,7 +3925,7 @@ yyreduce:
   case 162:
 #line 1219 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.sctp_parameter) = new PacketDrillSctpParameter(SSN_TSN_RESET_REQUEST_PARAMETER, 8, new PacketDrillStruct((yyvsp[-1].integer), -2, -2, -2, NULL));
+    (yyval.sctp_parameter) = new PacketDrillSctpParameter(SSN_TSN_RESET_REQUEST_PARAMETER, 8, new PacketDrillStruct((yyvsp[-1].integer), -2, -2, -2, nullptr));
 }
 #line 3931 "parser.cc" /* yacc.c:1646  */
     break;
@@ -3933,7 +3933,7 @@ yyreduce:
   case 163:
 #line 1225 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.sctp_parameter) = new PacketDrillSctpParameter(STREAM_RESET_RESPONSE_PARAMETER, 8, new PacketDrillStruct((yyvsp[-3].integer), (yyvsp[-1].integer), -2, -2, NULL));
+    (yyval.sctp_parameter) = new PacketDrillSctpParameter(STREAM_RESET_RESPONSE_PARAMETER, 8, new PacketDrillStruct((yyvsp[-3].integer), (yyvsp[-1].integer), -2, -2, nullptr));
 }
 #line 3939 "parser.cc" /* yacc.c:1646  */
     break;
@@ -3941,7 +3941,7 @@ yyreduce:
   case 164:
 #line 1228 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.sctp_parameter) = new PacketDrillSctpParameter(STREAM_RESET_RESPONSE_PARAMETER, 12, new PacketDrillStruct((yyvsp[-7].integer), (yyvsp[-5].integer), (yyvsp[-3].integer), (yyvsp[-1].integer), NULL));
+    (yyval.sctp_parameter) = new PacketDrillSctpParameter(STREAM_RESET_RESPONSE_PARAMETER, 12, new PacketDrillStruct((yyvsp[-7].integer), (yyvsp[-5].integer), (yyvsp[-3].integer), (yyvsp[-1].integer), nullptr));
 }
 #line 3947 "parser.cc" /* yacc.c:1646  */
     break;
@@ -3949,7 +3949,7 @@ yyreduce:
   case 165:
 #line 1234 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.sctp_parameter) = new PacketDrillSctpParameter(ADD_OUTGOING_STREAMS_REQUEST_PARAMETER, 12, new PacketDrillStruct((yyvsp[-3].integer), (yyvsp[-1].integer), -2, -2, NULL));
+    (yyval.sctp_parameter) = new PacketDrillSctpParameter(ADD_OUTGOING_STREAMS_REQUEST_PARAMETER, 12, new PacketDrillStruct((yyvsp[-3].integer), (yyvsp[-1].integer), -2, -2, nullptr));
 }
 #line 3955 "parser.cc" /* yacc.c:1646  */
     break;
@@ -3957,7 +3957,7 @@ yyreduce:
   case 166:
 #line 1240 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.sctp_parameter) = new PacketDrillSctpParameter(ADD_INCOMING_STREAMS_REQUEST_PARAMETER, 12, new PacketDrillStruct((yyvsp[-3].integer), (yyvsp[-1].integer), -2, -2, NULL));
+    (yyval.sctp_parameter) = new PacketDrillSctpParameter(ADD_INCOMING_STREAMS_REQUEST_PARAMETER, 12, new PacketDrillStruct((yyvsp[-3].integer), (yyvsp[-1].integer), -2, -2, nullptr));
 }
 #line 3963 "parser.cc" /* yacc.c:1646  */
     break;
@@ -3972,7 +3972,7 @@ yyreduce:
 
   case 168:
 #line 1258 "parser.y" /* yacc.c:1646  */
-    { (yyval.expression_list) = NULL; }
+    { (yyval.expression_list) = nullptr; }
 #line 3977 "parser.cc" /* yacc.c:1646  */
     break;
 
@@ -4069,7 +4069,7 @@ yyreduce:
   case 183:
 #line 1290 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.sctp_parameter) = new PacketDrillSctpParameter(HEARTBEAT_INFORMATION, -1, NULL);
+    (yyval.sctp_parameter) = new PacketDrillSctpParameter(HEARTBEAT_INFORMATION, -1, nullptr);
 }
 #line 4075 "parser.cc" /* yacc.c:1646  */
     break;
@@ -4081,11 +4081,11 @@ yyreduce:
         (!is_valid_u16((yyvsp[-3].integer)) || ((yyvsp[-3].integer) < 4))) {
         semantic_error("length value out of range");
     }
-    if (((yyvsp[-3].integer) != -1) && ((yyvsp[-1].byte_list) != NULL) &&
+    if (((yyvsp[-3].integer) != -1) && ((yyvsp[-1].byte_list) != nullptr) &&
         ((yyvsp[-3].integer) != 4 + (yyvsp[-1].byte_list)->getListLength())) {
         semantic_error("length value incompatible with val");
     }
-    if (((yyvsp[-3].integer) == -1) && ((yyvsp[-1].byte_list) != NULL)) {
+    if (((yyvsp[-3].integer) == -1) && ((yyvsp[-1].byte_list) != nullptr)) {
         semantic_error("length needs to be specified");
     }
     (yyval.sctp_parameter) = new PacketDrillSctpParameter(HEARTBEAT_INFORMATION, (yyvsp[-3].integer), (yyvsp[-1].byte_list));
@@ -4096,7 +4096,7 @@ yyreduce:
   case 185:
 #line 1309 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.sctp_parameter) = new PacketDrillSctpParameter(SUPPORTED_EXTENSIONS, -1, NULL);
+    (yyval.sctp_parameter) = new PacketDrillSctpParameter(SUPPORTED_EXTENSIONS, -1, nullptr);
 }
 #line 4102 "parser.cc" /* yacc.c:1646  */
     break;
@@ -4156,7 +4156,7 @@ yyreduce:
   case 193:
 #line 1337 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.sctp_parameter) = new PacketDrillSctpParameter(SUPPORTED_ADDRESS_TYPES, -1, NULL);
+    (yyval.sctp_parameter) = new PacketDrillSctpParameter(SUPPORTED_ADDRESS_TYPES, -1, nullptr);
 }
 #line 4162 "parser.cc" /* yacc.c:1646  */
     break;
@@ -4173,7 +4173,7 @@ yyreduce:
   case 195:
 #line 1346 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.sctp_parameter) = new PacketDrillSctpParameter(STATE_COOKIE, -1, NULL);
+    (yyval.sctp_parameter) = new PacketDrillSctpParameter(STATE_COOKIE, -1, nullptr);
 }
 #line 4179 "parser.cc" /* yacc.c:1646  */
     break;
@@ -4181,7 +4181,7 @@ yyreduce:
   case 196:
 #line 1349 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.sctp_parameter) = new PacketDrillSctpParameter(STATE_COOKIE, -1, NULL);
+    (yyval.sctp_parameter) = new PacketDrillSctpParameter(STATE_COOKIE, -1, nullptr);
 }
 #line 4187 "parser.cc" /* yacc.c:1646  */
     break;
@@ -4192,7 +4192,7 @@ yyreduce:
     if (((yyvsp[-5].integer) < 4) || !is_valid_u32((yyvsp[-5].integer))) {
         semantic_error("len value out of range");
     }
-    (yyval.sctp_parameter) = new PacketDrillSctpParameter(STATE_COOKIE, (yyvsp[-5].integer), NULL);
+    (yyval.sctp_parameter) = new PacketDrillSctpParameter(STATE_COOKIE, (yyvsp[-5].integer), nullptr);
 }
 #line 4198 "parser.cc" /* yacc.c:1646  */
     break;
@@ -4336,7 +4336,7 @@ yyreduce:
   case 212:
 #line 1447 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.tcp_options) = NULL; /* FLAG_OPTIONS_NOCHECK */
+    (yyval.tcp_options) = nullptr; /* FLAG_OPTIONS_NOCHECK */
 }
 #line 4342 "parser.cc" /* yacc.c:1646  */
     break;
@@ -4583,7 +4583,7 @@ yyreduce:
   case 237:
 #line 1607 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.expression_list) = NULL;
+    (yyval.expression_list) = nullptr;
 }
 #line 4589 "parser.cc" /* yacc.c:1646  */
     break;
@@ -4836,7 +4836,7 @@ yyreduce:
 #line 1734 "parser.y" /* yacc.c:1646  */
     {
     (yyval.expression) = new PacketDrillExpression(EXPR_LIST);
-    (yyval.expression)->setList(NULL);
+    (yyval.expression)->setList(nullptr);
 }
 #line 4842 "parser.cc" /* yacc.c:1646  */
     break;
@@ -5806,7 +5806,7 @@ printf("SRS_FLAGS = MYWORD\n");
   case 364:
 #line 2380 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.errno_info) = NULL;
+    (yyval.errno_info) = nullptr;
 }
 #line 5812 "parser.cc" /* yacc.c:1646  */
     break;
@@ -5824,7 +5824,7 @@ printf("SRS_FLAGS = MYWORD\n");
   case 366:
 #line 2391 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.string) = NULL;
+    (yyval.string) = nullptr;
 }
 #line 5830 "parser.cc" /* yacc.c:1646  */
     break;

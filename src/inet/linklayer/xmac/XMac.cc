@@ -465,8 +465,8 @@ void XMac::handleSelfMessage(cMessage *msg)
                 }
                 else {
                     delete msg;
-                    msg = NULL;
-                    mac = NULL;
+                    msg = nullptr;
+                    mac = nullptr;
                 }
 
                 EV << "node " << address << " : State WAIT_DATA, message XMAC_DATA, new state  SLEEP" << endl;

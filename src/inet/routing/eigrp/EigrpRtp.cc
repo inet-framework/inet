@@ -124,7 +124,7 @@ EigrpMsgReq *EigrpRequestQueue::findReqByIf(int ifaceId, bool sent)
                 return *it;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 EigrpMsgReq *EigrpRequestQueue::findReqByNeighbor(int neighId, bool sent)
@@ -138,7 +138,7 @@ EigrpMsgReq *EigrpRequestQueue::findReqByNeighbor(int neighId, bool sent)
                 return *it;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 /**
@@ -152,7 +152,7 @@ EigrpMsgReq *EigrpRequestQueue::findUnrelReqByIf(int ifaceId)
             return *it;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 EigrpMsgReq *EigrpRequestQueue::findReqBySeq(uint32_t seqNumber)
@@ -162,7 +162,7 @@ EigrpMsgReq *EigrpRequestQueue::findReqBySeq(uint32_t seqNumber)
         if ((*it)->getSeqNumber() == seqNumber)
             return *it;
     }
-    return NULL;
+    return nullptr;
 }
 
 void EigrpRequestQueue::pushReq(EigrpMsgReq *req)
@@ -185,7 +185,7 @@ EigrpMsgReq *EigrpRequestQueue::removeReq(EigrpMsgReq *msgReq)
             return msgReq;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 /**
@@ -277,7 +277,7 @@ void EigrpRtpT<IPAddress>::handleMessage(cMessage *msg)
     if (msg->isSelfMessage()) { // Timer
     }
     else {
-        if (dynamic_cast<EigrpMsgReq *>(msg) != NULL) { // EIGRP message request
+        if (dynamic_cast<EigrpMsgReq *>(msg) != nullptr) { // EIGRP message request
             processRequest(msg);
 
             // Do not delete msg
@@ -305,12 +305,12 @@ void EigrpRtpT<IPAddress>::processHeader(cMessage *msg)
     const auto& header = pk->peekAtFront<EigrpMessage>();
     uint32_t seqNumNeigh; // Sequence number of neighbor
     uint32_t ackNum; // Acknowledge number
-    EigrpMsgReq *msgReq = NULL;
+    EigrpMsgReq *msgReq = nullptr;
     int numOfAck;
-    EigrpNeighbor<IPAddress> *neigh = NULL;
-    EigrpInterface *eigrpIface = NULL;
+    EigrpNeighbor<IPAddress> *neigh = nullptr;
+    EigrpInterface *eigrpIface = nullptr;
 
-    if ((neigh = getNeighborId(msg)) == NULL)
+    if ((neigh = getNeighborId(msg)) == nullptr)
         return;
 
 //    EV_DEBUG << "EIGRP RTP: received " << eigrpRtp::UserMsgs[header->getOpcode()] << " message for processing" << endl;
@@ -319,7 +319,7 @@ void EigrpRtpT<IPAddress>::processHeader(cMessage *msg)
     ackNum = header->getAckNum();
 
     if (ackNum != 0) { // Acknowledge of message
-        if ((msgReq = requestQ->findReqBySeq(ackNum)) != NULL && neigh->getAck() == ackNum) { // Record ack
+        if ((msgReq = requestQ->findReqBySeq(ackNum)) != nullptr && neigh->getAck() == ackNum) { // Record ack
             neigh->setAck(0);
             numOfAck = msgReq->getNumOfAck();
             msgReq->setNumOfAck(--numOfAck);
@@ -331,7 +331,7 @@ void EigrpRtpT<IPAddress>::processHeader(cMessage *msg)
                 // Delete request
                 requestQ->removeReq(msgReq);
                 delete msgReq;
-                msgReq = NULL;
+                msgReq = nullptr;
 
                 scheduleNextMsg(neigh->getIfaceId());
             }
@@ -350,9 +350,9 @@ void EigrpRtpT<IPAddress>::processHeader(cMessage *msg)
 template<typename IPAddress>
 void EigrpRtpT<IPAddress>::acknowledgeMsg(int neighId, int ifaceId, uint32_t ackNum)
 {
-    EigrpMsgReq *msgReq = NULL;
+    EigrpMsgReq *msgReq = nullptr;
 
-    /*if ((msgReq = requestQ->findReqByIf(ifaceId, false)) != NULL && msgReq->getDestNeighbor() == neighId)
+    /*if ((msgReq = requestQ->findReqByIf(ifaceId, false)) != nullptr && msgReq->getDestNeighbor() == neighId)
     { // Use scheduled message as acknowledge
         EV_DEBUG << "EIGRP RTP: do not create Ack message, use existing message to neighbor " << neighId << endl;
         msgReq->setAckNumber(ackNum);
@@ -405,22 +405,22 @@ void EigrpRtpT<IPAddress>::scheduleNewMsg(EigrpMsgReq *msgReq)
 template<typename IPAddress>
 void EigrpRtpT<IPAddress>::scheduleNextMsg(int ifaceId)
 {
-    EigrpMsgReq *msgReq = NULL;
+    EigrpMsgReq *msgReq = nullptr;
     EigrpInterface *eigrpIface = eigrpIft->findInterfaceById(ifaceId);
 
-    if (eigrpIface == NULL) {
+    if (eigrpIface == nullptr) {
         requestQ->removeAllMsgsToIf(ifaceId);
         return;
     }
 
     if (eigrpIface->getPendingMsgs() == 0) { // Try to send first rel/unrel message
-        if ((msgReq = requestQ->findReqByIf(ifaceId)) != NULL) {
+        if ((msgReq = requestQ->findReqByIf(ifaceId)) != nullptr) {
             ASSERT(msgReq->getNumOfAck() == 0);
             sendMsg(msgReq);
         }
     }
     else { // Try to send first unrel message
-        if ((msgReq = requestQ->findUnrelReqByIf(ifaceId)) != NULL) {
+        if ((msgReq = requestQ->findUnrelReqByIf(ifaceId)) != nullptr) {
             sendUnrelMsg(msgReq);
         }
     }
@@ -462,9 +462,9 @@ template<typename IPAddress>
 void EigrpRtpT<IPAddress>::sendRelMsg(EigrpMsgReq *msgReq)
 {
     NeighborInfo info;
-    EigrpMsgReq *msgToSend = NULL;
-    EigrpNeighbor<IPAddress> *neigh = NULL;
-    EigrpInterface *eigrpIface = NULL;
+    EigrpMsgReq *msgToSend = nullptr;
+    EigrpNeighbor<IPAddress> *neigh = nullptr;
+    EigrpInterface *eigrpIface = nullptr;
 
     info.neighborId = msgReq->getDestNeighbor();
     info.neighborIfaceId = msgReq->getDestInterface();
@@ -475,7 +475,7 @@ void EigrpRtpT<IPAddress>::sendRelMsg(EigrpMsgReq *msgReq)
     }
 
     if (info.neighborId != 0) { // Unicast
-        if ((neigh = eigrpNt->findNeighborById(info.neighborId)) == NULL) {
+        if ((neigh = eigrpNt->findNeighborById(info.neighborId)) == nullptr) {
             requestQ->removeAllMsgsToNeigh(info.neighborId);
             discardMsg(msgReq);
             return;

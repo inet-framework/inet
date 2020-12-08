@@ -50,7 +50,7 @@ class IEigrpPdm
      * @param dmin minimal distance to the destination
      * @param rtableChanged return parameter, true if occurs change in the routing table
      * @param removeUnreach invalidate unreachable sources of the route.
-     * @return pointer to successor or NULL.
+     * @return pointer to successor or nullptr.
      */
     virtual EigrpRouteSource<IPAddress> *updateRoute(EigrpRoute<IPAddress> *route, uint64_t dmin, bool *rtableChanged, bool removeUnreach = false) = 0;
     /**

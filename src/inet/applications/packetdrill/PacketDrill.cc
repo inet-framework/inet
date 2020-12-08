@@ -779,7 +779,7 @@ PacketDrillSctpChunk *PacketDrill::buildSackChunk(int64_t flgs, int64_t cum_tsn,
         sackchunk->setA_rwnd((uint32_t)a_rwnd);
     }
 
-    if (gaps == NULL) {
+    if (gaps == nullptr) {
         sackchunk->setNumGaps(0);
         flags |= FLAG_CHUNK_LENGTH_NOCHECK;
         flags |= FLAG_SACK_CHUNK_GAP_BLOCKS_NOCHECK;
@@ -804,7 +804,7 @@ PacketDrillSctpChunk *PacketDrill::buildSackChunk(int64_t flgs, int64_t cum_tsn,
         delete gaps;
     }
 
-    if (dups == NULL) {
+    if (dups == nullptr) {
         sackchunk->setNumDupTsns(0);
         flags |= FLAG_CHUNK_LENGTH_NOCHECK;
         flags |= FLAG_SACK_CHUNK_DUP_TSNS_NOCHECK;
@@ -949,7 +949,7 @@ PacketDrillSctpChunk *PacketDrill::buildHeartbeatChunk(int64_t flgs, PacketDrill
 {
     auto *heartbeatChunk = new SctpHeartbeatChunk();
     heartbeatChunk->setSctpChunkType(HEARTBEAT);
-    assert(info == NULL || info->getLength() + SCTP_HEARTBEAT_CHUNK_LENGTH <= MAX_SCTP_CHUNK_BYTES);
+    assert(info == nullptr || info->getLength() + SCTP_HEARTBEAT_CHUNK_LENGTH <= MAX_SCTP_CHUNK_BYTES);
     if (info && info->getLength() > 0) {
         uint32_t flgs = info->getFlags();
         uint16_t length = 0;
@@ -987,7 +987,7 @@ PacketDrillSctpChunk *PacketDrill::buildHeartbeatAckChunk(int64_t flgs, PacketDr
 {
     auto *heartbeatAckChunk = new SctpHeartbeatAckChunk();
     heartbeatAckChunk->setSctpChunkType(HEARTBEAT_ACK);
-    assert(info == NULL || info->getLength() + SCTP_HEARTBEAT_CHUNK_LENGTH <= MAX_SCTP_CHUNK_BYTES);
+    assert(info == nullptr || info->getLength() + SCTP_HEARTBEAT_CHUNK_LENGTH <= MAX_SCTP_CHUNK_BYTES);
     if (info && info->getLength() > 0) {
         printf("not implemented yet\n");
     }
@@ -1749,7 +1749,7 @@ int PacketDrill::evaluate(PacketDrillExpression *in, PacketDrillExpression *out,
 }
 
 /* Return a copy of the given expression list with each expression
- * evaluated (e.g. symbols resolved to ints). On failure, return NULL
+ * evaluated (e.g. symbols resolved to ints). On failure, return nullptr
  * and fill in *error.
  */
 int PacketDrill::evaluateExpressionList(cQueue *in_list, cQueue *out_list, char **error)

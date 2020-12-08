@@ -38,13 +38,13 @@ namespace eigrp {
 class INET_API EigrpDeviceConfigurator
 {
   private:
-//    const char *deviceType = NULL;
-//    const char *deviceId = NULL;
-    cXMLElement *configFile = NULL;
-    cXMLElement *device = NULL;
+//    const char *deviceType = nullptr;
+//    const char *deviceId = nullptr;
+    cXMLElement *configFile = nullptr;
+    cXMLElement *device = nullptr;
 
   protected:
-    IInterfaceTable *ift = NULL;
+    IInterfaceTable *ift = nullptr;
 
     /////////////////////////////
     // configuration for EIGRP //
