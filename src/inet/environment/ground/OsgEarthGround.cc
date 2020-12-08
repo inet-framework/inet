@@ -17,7 +17,7 @@
 
 #include "inet/environment/ground/OsgEarthGround.h"
 
-#if defined(WITH_OSGEARTH) && defined(INET_WITH_OSGVISUALIZERS)
+#if defined(WITH_OSGEARTH) && defined(INET_WITH_VISUALIZATIONOSG)
 // TODO the visualizers needed only for get the map from SceneOsgEarthVisualizer
 
 #include "inet/common/ModuleAccess.h"
@@ -78,5 +78,5 @@ Coord OsgEarthGround::computeGroundNormal(const Coord& position) const
 
 } // namespace inet
 
-#endif // defined(WITH_OSGEARTH) && defined(INET_WITH_OSGVISUALIZERS)
+#endif // defined(WITH_OSGEARTH) && defined(INET_WITH_VISUALIZATIONOSG)
 

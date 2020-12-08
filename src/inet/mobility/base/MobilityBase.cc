@@ -20,7 +20,7 @@
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/common/geometry/common/Quaternion.h"
 
-#ifdef INET_WITH_CANVASVISUALIZERS
+#ifdef INET_WITH_VISUALIZATIONCANVAS
 #include "inet/visualizer/canvas/mobility/MobilityCanvasVisualizer.h"
 #endif
 
