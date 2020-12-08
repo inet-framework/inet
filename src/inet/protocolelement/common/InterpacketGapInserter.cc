@@ -37,13 +37,13 @@ void InterpacketGapInserter::initialize(int stage)
     ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         durationPar = &par("duration");
-        packetEndTime = par("initialChannelBusy") ? getClockTime() : getClockTime().setRaw(INT64_MIN / 2); // INT64_MIN / 2 to prevent overflow
         timer = new ClockEvent("IfgTimer");
         progress = new ClockEvent("ProgressTimer");
         WATCH(packetStartTime);
         WATCH(packetEndTime);
     }
     else if (stage == INITSTAGE_LAST) {
+        packetEndTime = par("initialChannelBusy") ? getClockTime() : getClockTime().setRaw(INT64_MIN / 2); // INT64_MIN / 2 to prevent overflow
         if (packetEndTime + durationPar->doubleValue() > getClockTime())
             scheduleClockEventAt(packetEndTime + durationPar->doubleValue(), timer);
     }
