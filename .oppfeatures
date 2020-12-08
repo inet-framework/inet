@@ -679,7 +679,7 @@
                        inet.emulation
                       "
         extraSourceFolders = ""
-        compileFlags = "-DINET_WITH_NETWORKEMULATION"
+        compileFlags = "-DINET_WITH_NETWORKEMULATIONSUPPORT"
         linkerFlags = ""
         />
     <feature
@@ -957,7 +957,7 @@
                        inet.protocolelement
                       "
         extraSourceFolders = ""
-        compileFlags = "-DINET_WITH_PROTOCOL"
+        compileFlags = "-DINET_WITH_PROTOCOLSUPPORT"
         linkerFlags = ""
         />
     <feature
