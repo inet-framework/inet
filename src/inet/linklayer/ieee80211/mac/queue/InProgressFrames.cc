@@ -80,6 +80,7 @@ void InProgressFrames::ensureHasFrameToTransmit()
         if (frames) {
             for (auto frame : *frames) {
                 EV_DEBUG << "Inserting frame " << frame->getName() << " extracted from MAC data service.\n";
+                take(frame);
                 ackHandler->frameGotInProgress(frame->peekAtFront<Ieee80211DataOrMgmtHeader>());
                 inProgressFrames.push_back(frame);
                 frame->setArrivalTime(simTime());
@@ -115,6 +116,7 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
         if (frames) {
             auto firstFrame = (*frames)[0];
             for (auto frame : *frames) {
+                take(frame);
                 ackHandler->frameGotInProgress(frame->peekAtFront<Ieee80211DataOrMgmtHeader>());
                 inProgressFrames.push_back(frame);
                 frame->setArrivalTime(simTime());
@@ -174,6 +176,7 @@ std::vector<Packet *> InProgressFrames::getOutstandingFrames()
 
 void InProgressFrames::clearDroppedFrames()
 {
+    Enter_Method("clearDroppedFrames");
     for (auto frame : droppedFrames)
         delete frame;
     droppedFrames.clear();

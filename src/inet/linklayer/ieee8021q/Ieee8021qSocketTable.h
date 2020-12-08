@@ -43,6 +43,8 @@ class INET_API Ieee8021qSocketTable : public cSimpleModule
     virtual void initialize(int stage) override;
 
   public:
+    virtual ~Ieee8021qSocketTable();
+
     virtual void addSocket(int socketId, const Protocol *protocol, int vlanId, bool steal);
     virtual void removeSocket(int socketId);
     virtual std::vector<Socket *> findSockets(const Protocol *protocol, int vlanId) const;

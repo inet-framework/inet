@@ -45,6 +45,8 @@ class INET_API EthernetSocketTable : public cSimpleModule
     virtual void initialize(int stage) override;
 
   public:
+    virtual ~EthernetSocketTable();
+
     virtual void addSocket(int socketId, MacAddress localAddress, MacAddress remoteAddress, const Protocol *protocol, bool steal);
     virtual void removeSocket(int socketId);
     virtual std::vector<Socket *> findSockets(MacAddress localAddress, MacAddress remoteAddress, const Protocol *protocol) const;

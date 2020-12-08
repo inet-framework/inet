@@ -433,6 +433,7 @@ typename std::vector<EigrpRouteSource<IPAddress> *>::iterator EigrpTopologyTable
     if (route->getRefCnt() == 1 && !route->isActive() && route->getNumSentMsgs() == 0) {
         EV_DEBUG << "EIGRP: remove route info " << route->getRouteAddress() << ", it does not have any source" << endl;
         removeRouteInfo(route);
+        delete route;
     }
     else {
         route->decrementRefCnt();

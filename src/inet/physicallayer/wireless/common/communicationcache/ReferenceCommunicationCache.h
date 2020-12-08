@@ -37,6 +37,10 @@ class INET_API ReferenceCommunicationCache : public CommunicationCacheBase
   protected:
     std::vector<RadioCacheEntry> radioCache;
     std::vector<ReferenceTransmissionCacheEntry> transmissionCache;
+    std::vector<const IReception *> receptions;
+    std::vector<const IInterference *> interferences;
+    std::vector<const INoise *> noises;
+    std::vector<const ISnir *> snirs;
 
   protected:
     /** @name Cache data structures */
@@ -76,12 +80,21 @@ class INET_API ReferenceCommunicationCache : public CommunicationCacheBase
     /** @name Reception cache */
     //@{
     virtual const IReception *getCachedReception(const IRadio *radio, const ITransmission *transmission) override { return nullptr; }
+    virtual void setCachedReception(const IRadio *receiver, const ITransmission *transmission, const IReception *reception) override { receptions.push_back(reception); }
+
     virtual const IInterference *getCachedInterference(const IRadio *receiver, const ITransmission *transmission) override { return nullptr; }
+    virtual void setCachedInterference(const IRadio *receiver, const ITransmission *transmission, const IInterference *interference) override { interferences.push_back(interference); }
+
     virtual const INoise *getCachedNoise(const IRadio *receiver, const ITransmission *transmission) override { return nullptr; }
+    virtual void setCachedNoise(const IRadio *receiver, const ITransmission *transmission, const INoise *noise) override { noises.push_back(noise); }
+
     virtual const ISnir *getCachedSNIR(const IRadio *receiver, const ITransmission *transmission) override { return nullptr; }
+    virtual void setCachedSNIR(const IRadio *receiver, const ITransmission *transmission, const ISnir *snir) override { snirs.push_back(snir); }
+
     // TODO disabling this cache makes the fingerprint of the reference and other models different,
     //       because recomputing the reception decision involves drawing random numbers
     // virtual const IReceptionDecision *getCachedReceptionDecision(const IRadio *radio, const ITransmission *transmission, IRadioSignal::SignalPart part) override { return nullptr; }
+    // virtual void setCachedReceptionDecision(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part, const IReceptionDecision *receptionDecision) override {}
     //@}
 };
 

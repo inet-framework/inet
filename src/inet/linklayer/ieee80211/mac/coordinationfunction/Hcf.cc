@@ -377,7 +377,6 @@ void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
         throw cRuntimeError("Hcca is unimplemented!");
     else
         recipientProcessTransmittedControlResponseFrame(packet, header);
-    delete packet;
 }
 
 void Hcf::originatorProcessRtsProtectionFailed(Packet *packet)

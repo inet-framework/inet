@@ -409,7 +409,7 @@ IFrameSequenceStep *BlockAckReqBlockAckFs::prepareStep(FrameSequenceContext *con
             auto blockAckReq = context->getQoSContext()->blockAckProcedure->buildBasicBlockAckReqFrame(receiverAddr, tid, startingSequenceNumber);
             auto blockAckPacket = new Packet("BasicBlockAckReq", blockAckReq);
             blockAckPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
-            return new TransmitStep(blockAckPacket, context->getIfs());
+            return new TransmitStep(blockAckPacket, context->getIfs(), true);
         }
         case 1: {
             auto txStep = check_and_cast<ITransmitStep *>(context->getLastStep());

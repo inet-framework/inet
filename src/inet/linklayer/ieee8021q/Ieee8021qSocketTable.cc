@@ -33,6 +33,12 @@ void Ieee8021qSocketTable::initialize(int stage)
         WATCH_PTRMAP(socketIdToSocketMap);
 }
 
+Ieee8021qSocketTable::~Ieee8021qSocketTable()
+{
+    for (auto it : socketIdToSocketMap)
+        delete it.second;
+}
+
 void Ieee8021qSocketTable::addSocket(int socketId, const Protocol *protocol, int vlanId, bool steal)
 {
     auto it = socketIdToSocketMap.find(socketId);

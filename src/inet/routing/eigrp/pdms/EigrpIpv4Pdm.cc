@@ -67,7 +67,6 @@ EigrpIpv4Pdm::EigrpIpv4Pdm() : EIGRP_IPV4_MULT(Ipv4Address(224, 0, 0, 10))
 
 EigrpIpv4Pdm::~EigrpIpv4Pdm()
 {
-    cancelHelloTimers();
     delete this->routingForNetworks;
     delete this->eigrpIftDisabled;
     delete this->eigrpDual;
@@ -101,8 +100,8 @@ void EigrpIpv4Pdm::initialize(int stage) {
         // Load configuration of EIGRP
 //        EigrpDeviceConfigurator *conf = ModuleAccess<EigrpDeviceConfigurator>("eigrpDeviceConfigurator").get();
 
-        EigrpDeviceConfigurator *conf = new EigrpDeviceConfigurator(par("configData"), ift);
-        conf->loadEigrpIPv4Config(this);
+        EigrpDeviceConfigurator conf(par("configData"), ift);
+        conf.loadEigrpIPv4Config(this);
 
         // moved to splitter
 //        registerService(Protocol::eigrp, nullptr, gate("splitterIn"));
@@ -129,6 +128,11 @@ void EigrpIpv4Pdm::initialize(int stage) {
         host->subscribe(interfaceConfigChangedSignal, this);
         host->subscribe(routeDeletedSignal, this);
     }
+}
+
+void EigrpIpv4Pdm::preDelete(cComponent *root)
+{
+    cancelHelloTimers();
 }
 
 void EigrpIpv4Pdm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -902,7 +906,7 @@ void EigrpIpv4Pdm::unlockRoutes(const EigrpMsgReq *msgReq)
         route->decrementRefCnt();
 
         if (route->getRefCnt() < 1) { // Route would have been removed be removed if wasn't locked
-            eigrpTt->removeRouteInfo(route);
+            delete eigrpTt->removeRouteInfo(route);
         }
     }
 }
@@ -1112,6 +1116,7 @@ void EigrpIpv4Pdm::cancelHelloTimers()
                 cancelEvent(timer);
             }
 
+            iface->setHelloTimerPtr(nullptr);
             delete timer;
         }
     }
@@ -1126,6 +1131,7 @@ void EigrpIpv4Pdm::cancelHelloTimers()
                 cancelEvent(timer);
             }
 
+            iface->setHelloTimerPtr(nullptr);
             delete timer;
         }
     }
@@ -1676,7 +1682,7 @@ bool EigrpIpv4Pdm::removeRouteFromRT(EigrpRouteSource<Ipv4Address> *source, IRou
         //if (*removedRtSrc == ANSAIPv4Route::pEIGRP)
         if (ansaRtEntry->getSourceType() == IRoute::EIGRP) {
             EV_DEBUG << "EIGRP: delete route " << route->getRouteAddress() << " via " << source->getNextHop() << " from RT" << endl;
-            rt->removeRoute(rtEntry);
+            delete rt->removeRoute(rtEntry);
         }
     }
     else {

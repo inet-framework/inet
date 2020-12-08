@@ -35,6 +35,8 @@ Define_Module(CsmaCaMac);
 
 CsmaCaMac::~CsmaCaMac()
 {
+    if (endSifs != nullptr)
+        delete static_cast<Packet *>(endSifs->getContextPointer());
     cancelAndDelete(endSifs);
     cancelAndDelete(endDifs);
     cancelAndDelete(endBackoff);

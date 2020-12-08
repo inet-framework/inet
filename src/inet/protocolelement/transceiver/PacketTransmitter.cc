@@ -67,7 +67,7 @@ void PacketTransmitter::endTx()
     // 1. check current state
     ASSERT(isTransmitting());
     // 2. notify subscribers
-    auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
+    auto packet = check_and_cast<Packet *>(txSignal->decapsulate());
     handlePacketProcessed(packet);
     emit(transmissionEndedSignal, txSignal);
     // 3. clear internal state
@@ -78,6 +78,7 @@ void PacketTransmitter::endTx()
         producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), true);
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     }
+    delete packet;
 }
 
 void PacketTransmitter::scheduleTxEndTimer(Signal *signal)

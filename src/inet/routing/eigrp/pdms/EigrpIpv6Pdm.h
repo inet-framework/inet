@@ -100,6 +100,7 @@ class INET_API EigrpIpv6Pdm : public cSimpleModule, public IEigrpModule<Ipv6Addr
     PrefixVector netPrefixes;
 
     virtual void initialize(int stage) override;
+    virtual void preDelete(cComponent *root) override;
     virtual void handleMessage(cMessage *msg) override;
     /**< Multi-stage initialization. */
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

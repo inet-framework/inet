@@ -264,7 +264,6 @@ void Dcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
     }
     else
         recipientProcessTransmittedControlResponseFrame(packet, header);
-    delete packet;
 }
 
 bool Dcf::hasFrameToTransmit()

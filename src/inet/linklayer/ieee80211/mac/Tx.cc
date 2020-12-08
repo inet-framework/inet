@@ -57,7 +57,6 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
     Enter_Method("transmitFrame(\"%s\")", packet->getName());
     ASSERT(this->txCallback == nullptr);
     this->txCallback = txCallback;
-    take(packet);
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     const auto& updatedHeader = packet->removeAtFront<Ieee80211MacHeader>();
     if (auto oneAddressHeader = dynamicPtrCast<Ieee80211OneAddressHeader>(updatedHeader)) {
@@ -105,6 +104,7 @@ void Tx::radioTransmissionFinished()
         frame = nullptr;
         txCallback = nullptr;
         tmpTxCallback->transmissionComplete(tmpFrame, tmpFrame->peekAtFront<Ieee80211MacHeader>());
+        delete tmpFrame;
         rx->frameTransmitted(duration);
     }
 }
