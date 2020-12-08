@@ -225,7 +225,8 @@ osg::Node *MediumOsgVisualizer::createRingSignalNode(const ITransmission *transm
     label->setCharacterSize(18);
     label->setColor(osg::Vec4(color.red / 255.0 / 2, color.green / 255.0 / 2, color.blue / 255.0 / 2, 1.0));
     label->setAlignment(osgText::Text::CENTER_BOTTOM);
-    label->setText(transmission->getPacket()->getName());
+    if (transmission->getPacket() != nullptr)
+        label->setText(transmission->getPacket()->getName());
     auto labelAutoTransform = inet::osg::createAutoTransform(label, osg::AutoTransform::ROTATE_TO_SCREEN, true);
     labelAutoTransform->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
     auto positionAttitudeTransform = inet::osg::createPositionAttitudeTransform(transmissionStart, Quaternion::IDENTITY);

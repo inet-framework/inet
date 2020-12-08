@@ -247,8 +247,8 @@ bool MediumVisualizerBase::matchesTransmission(const ITransmission *transmission
     auto networkNode = getContainingNode(radio);
     if (!networkNodeFilter.matches(networkNode))
         return false;
-    auto networkInterface = getContainingNicModule(radio);
-    if (!interfaceFilter.matches(networkInterface))
+    auto networkInterface = findContainingNicModule(radio);
+    if (networkInterface != nullptr && !interfaceFilter.matches(networkInterface))
         return false;
     auto packet = transmission->getPacket();
     return packet == nullptr || packetFilter.matches(packet);
