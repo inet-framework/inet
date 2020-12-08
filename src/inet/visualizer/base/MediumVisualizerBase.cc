@@ -65,6 +65,15 @@ void MediumVisualizerBase::initialize(int stage)
         signalPropagationAdditionalTime = par("signalPropagationAdditionalTime");
         signalTransmissionAnimationSpeed = par("signalTransmissionAnimationSpeed");
         signalTransmissionAnimationTime = par("signalTransmissionAnimationTime");
+        const char *s = par("signalAnimationSpeedChangeTimeMode");
+        if (!strcmp(s, "simulationTime"))
+            signalAnimationSpeedChangeTimeMode = AnimationPosition::SIMULATION_TIME;
+        else if (!strcmp(s, "animationTime"))
+            signalAnimationSpeedChangeTimeMode = AnimationPosition::ANIMATION_TIME;
+        else if (!strcmp(s, "realTime"))
+            signalAnimationSpeedChangeTimeMode = AnimationPosition::REAL_TIME;
+        else
+            throw cRuntimeError("Unknown signalAnimationSpeedChangeTimeMode: %s", s);
         signalAnimationSpeedChangeTime = par("signalAnimationSpeedChangeTime");
         displaySignalDepartures = par("displaySignalDepartures");
         displaySignalArrivals = par("displaySignalArrivals");
