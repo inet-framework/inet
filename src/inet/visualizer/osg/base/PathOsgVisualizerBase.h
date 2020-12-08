@@ -19,6 +19,7 @@
 #define __INET_PATHOSGVISUALIZERBASE_H
 
 #include <osg/ref_ptr>
+#include <osg/Node>
 
 #include "inet/visualizer/base/PathVisualizerBase.h"
 
