@@ -726,6 +726,19 @@
         linkerFlags = ""
         />
     <feature
+        id = "OpenMP"
+        name = "Open MP support"
+        description = "Open MP support for parallel computation (for speeding up visualization of transmission power spectral density, etc.)."
+        initiallyEnabled = "false"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Ospfv2"
         name = "OSPFv2 routing"
         description = "OSPFv2 routing."
