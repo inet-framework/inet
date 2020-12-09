@@ -18,6 +18,8 @@
 #ifndef __INET_NETWORKNODEOSGVISUALIZER_H
 #define __INET_NETWORKNODEOSGVISUALIZER_H
 
+#include <osg/ref_ptr>
+
 #include "inet/visualizer/base/NetworkNodeVisualizerBase.h"
 #include "inet/visualizer/osg/scene/NetworkNodeOsgVisualization.h"
 

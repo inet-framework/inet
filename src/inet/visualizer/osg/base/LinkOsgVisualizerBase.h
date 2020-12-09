@@ -18,6 +18,8 @@
 #ifndef __INET_LINKOSGVISUALIZERBASE_H
 #define __INET_LINKOSGVISUALIZERBASE_H
 
+#include <osg/ref_ptr>
+
 #include "inet/common/OsgUtils.h"
 #include "inet/visualizer/base/LinkVisualizerBase.h"
 
