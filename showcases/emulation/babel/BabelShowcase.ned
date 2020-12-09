@@ -10,7 +10,7 @@ network BabelShowcase
         int numHosts;
         @display("bgb=600,400");
     submodules:
-        visualizer: <default("IntegratedMultiCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
+        visualizer: <default(firstAvailableOrEmpty("IntegratedMultiCanvasVisualizer"))> like IIntegratedVisualizer if typename != "" {
             parameters:
                 @display("p=176,350;is=s");
         }

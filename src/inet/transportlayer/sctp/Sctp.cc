@@ -624,7 +624,7 @@ SctpAssociation *Sctp::findAssocForApp(int32_t appGateIndex, int32_t assocId)
 
 int32_t Sctp::findAssocForFd(int32_t fd)
 {
-    SctpAssociation *assoc = NULL;
+    SctpAssociation *assoc = nullptr;
     for (auto& elem : sctpAppAssocMap) {
         assoc = elem.second;
         if (assoc->fd == fd)

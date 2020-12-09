@@ -198,7 +198,7 @@ class INET_API NetPerfMeter : public cSimpleModule
     unsigned long transmitFrame(const unsigned int frameSize, const unsigned int streamID);
     static opp_string format(const char *formatString, ...);
     static void parseExpressionVector(std::vector<cDynamicExpression>& expressionVector,
-            const char *string, const char *delimiters = NULL);
+            const char *string, const char *delimiters = nullptr);
     void createAndBindSocket();
     void handleTimer(cMessage *msg);
 };

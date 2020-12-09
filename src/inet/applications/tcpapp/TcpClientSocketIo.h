@@ -32,6 +32,8 @@ class INET_API TcpClientSocketIo : public cSimpleModule, public TcpSocket::ICall
     virtual void open();
 
   public:
+    virtual ~TcpClientSocketIo() { delete socket; }
+
     virtual void socketDataArrived(TcpSocket *socket, Packet *packet, bool urgent) override;
     virtual void socketAvailable(TcpSocket *socket, TcpAvailableInfo *availableInfo) override {}
     virtual void socketEstablished(TcpSocket *socket) override {}

@@ -66,7 +66,7 @@ void MacRelayUnit::handleLowerPacket(Packet *incomingPacket)
         }
         else if (outgoingInterfaceId != -1) {
             auto outgoingInterface = interfaceTable->getInterfaceById(outgoingInterfaceId);
-            sendPacket(outgoingPacket->dup(), destinationAddress, outgoingInterface);
+            sendPacket(outgoingPacket, destinationAddress, outgoingInterface);
         }
         else
             broadcastPacket(outgoingPacket, destinationAddress, incomingInterface);

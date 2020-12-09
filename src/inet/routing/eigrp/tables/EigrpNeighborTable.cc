@@ -108,7 +108,7 @@ EigrpNeighbor<IPAddress> *EigrpNeighborTable<IPAddress>::findNeighbor(const IPAd
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 template<typename IPAddress>
@@ -122,7 +122,7 @@ EigrpNeighbor<IPAddress> *EigrpNeighborTable<IPAddress>::findNeighborById(int id
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 template<typename IPAddress>
@@ -148,7 +148,7 @@ EigrpNeighbor<IPAddress> *EigrpNeighborTable<IPAddress>::removeNeighbor(EigrpNei
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 template<typename IPAddress>
@@ -161,7 +161,7 @@ EigrpNeighbor<IPAddress> *EigrpNeighborTable<IPAddress>::getFirstNeighborOnIf(in
             return *it;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 template<typename IPAddress>

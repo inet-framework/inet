@@ -29,12 +29,16 @@ class INET_API TransmitStep : public ITransmitStep
     Completion completion = Completion::UNDEFINED;
     Packet *frameToTransmit = nullptr;
     simtime_t ifs = -1;
+    bool owner = false;
 
   public:
-    TransmitStep(Packet *frame, simtime_t ifs) :
+    TransmitStep(Packet *frame, simtime_t ifs, bool owner = false) :
         frameToTransmit(frame),
-        ifs(ifs)
+        ifs(ifs),
+        owner(owner)
     {}
+
+    virtual ~TransmitStep() { if (owner) delete frameToTransmit; }
 
     virtual Completion getCompletion() override { return completion; }
     virtual void setCompletion(Completion completion) override { this->completion = completion; }
@@ -49,7 +53,7 @@ class INET_API RtsTransmitStep : public TransmitStep
 
   public:
     RtsTransmitStep(Packet *protectedFrame, Packet *frame, simtime_t ifs) :
-        TransmitStep(frame, ifs),
+        TransmitStep(frame, ifs, true),
         protectedFrame(protectedFrame)
     {}
 

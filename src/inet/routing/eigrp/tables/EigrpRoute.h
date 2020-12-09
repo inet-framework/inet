@@ -250,7 +250,7 @@ EigrpRoute<IPAddress>::EigrpRoute(const IPAddress& address, const IPAddress& mas
     fd = Dij = eigrp::EigrpMetricHelper::METRIC_INF;
     rd.delay = eigrp::EigrpMetricHelper::METRIC_INF;
 
-    successor = NULL;
+    successor = nullptr;
     queryOrigin = 1;
 
     numSuccessors = 0;

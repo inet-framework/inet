@@ -72,7 +72,7 @@ class INET_API EigrpIpv6Pdm : public cSimpleModule, public IEigrpModule<Ipv6Addr
     const Ipv6Address EIGRP_IPV6_MULT; /**< Multicast address for EIGRP messages */
     EigrpKValues KVALUES_MAX;           /**< K-values (from K1 to K5) are set to max */
     const Ipv6Address EIGRP_SELF_ADDR;  /**< Next hop address 0.0.0.0 (self address) */
-    EigrpRouteSource<Ipv6Address> *oldsource = NULL; /**< Latest route change */
+    EigrpRouteSource<Ipv6Address> *oldsource = nullptr; /**< Latest route change */
 
     int asNum;                  /**< Autonomous system number */
     EigrpKValues kValues;       /**< K-values for calculation of metric */
@@ -100,6 +100,7 @@ class INET_API EigrpIpv6Pdm : public cSimpleModule, public IEigrpModule<Ipv6Addr
     PrefixVector netPrefixes;
 
     virtual void initialize(int stage) override;
+    virtual void preDelete(cComponent *root) override;
     virtual void handleMessage(cMessage *msg) override;
     /**< Multi-stage initialization. */
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -213,7 +214,7 @@ class INET_API EigrpIpv6Pdm : public cSimpleModule, public IEigrpModule<Ipv6Addr
 //    void enableInterface(EigrpInterface *eigrpIface, Ipv6Address& ifAddress, Ipv6Address& ifMask, int networkId);
     void enableInterface(EigrpInterface *eigrpIface);
     /**
-     * Returns EIGRP interface (enabled or disabled) or NULL.
+     * Returns EIGRP interface (enabled or disabled) or nullptr.
      */
     EigrpInterface *getInterfaceById(int ifaceId);
     /**

@@ -805,6 +805,7 @@ bool Router::deleteRoute(Ospfv2RoutingTableEntry *entry)
 {
     auto i = std::find(ospfRoutingTable.begin(), ospfRoutingTable.end(), entry);
     if (i != ospfRoutingTable.end()) {
+        delete *i;
         ospfRoutingTable.erase(i);
         return true;
     }
@@ -882,6 +883,7 @@ void Router::pruneASBoundaryRouterEntries(std::vector<Ospfv2RoutingTableEntry *>
             if (((*it)->getPathType() != Ospfv2RoutingTableEntry::INTRAAREA) ||
                 ((*it)->getArea() == BACKBONE_AREAID))
             {
+                delete *it;
                 it = asbrEntries.erase(it);
             }
             else {

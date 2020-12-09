@@ -79,7 +79,7 @@ struct int_symbol platform_symbols_table[] = {
     { F_SETFL,                          "F_SETFL"                         },
     { O_RDWR,                           "PD_O_RDWR"                       },
     /* Sentinel marking the end of the table. */
-    { 0, NULL },
+    { 0, nullptr },
 };
 
 struct int_symbol *platform_symbols(void)
@@ -235,7 +235,7 @@ int PacketDrillExpression::getU16(uint16_t *val, char **error)
 bool PacketDrillExpression::lookupIntSymbol(const char *input_symbol, int64_t *output_integer, struct int_symbol *symbols)
 {
     int i;
-    for (i = 0; symbols[i].name != NULL; ++i) {
+    for (i = 0; symbols[i].name != nullptr; ++i) {
         if (strcmp(input_symbol, symbols[i].name) == 0) {
             *output_integer = symbols[i].value;
             return true;
@@ -289,7 +289,7 @@ void PacketDrillScript::readScript()
 {
     int size = 0;
 
-    while (buffer == NULL) {
+    while (buffer == nullptr) {
         struct stat script_info;
         int fd = -1;
 
@@ -303,7 +303,7 @@ void PacketDrillScript::readScript()
         size = fmax((int)script_info.st_size, size) + 1;
 
         buffer = (char *)malloc((int)size);
-        assert(buffer != NULL);
+        assert(buffer != nullptr);
 
         /* Read the file into our buffer. */
         fd = open(scriptPath, O_RDONLY);
@@ -320,7 +320,7 @@ void PacketDrillScript::readScript()
          */
         if (length == size) {
             free(buffer);
-            buffer = NULL;
+            buffer = nullptr;
             length = 0;
         }
 

@@ -59,10 +59,9 @@ void CompoundPacketQueueBase::pushPacket(Packet *packet, cGate *gate)
         EV_INFO << "Dropping packet because the queue is full" << EV_FIELD(packet) << EV_ENDL;
         dropPacket(packet, QUEUE_OVERFLOW, packetCapacity);
     }
-    else {
+    else
         consumer->pushPacket(packet, inputGate->getPathEndGate());
-        updateDisplayString();
-    }
+    updateDisplayString();
 }
 
 Packet *CompoundPacketQueueBase::pullPacket(cGate *gate)

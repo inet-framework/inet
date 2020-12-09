@@ -31,11 +31,11 @@ module QueueVisualizer like IQueueVisualizer
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default("QueueCanvasVisualizer")> like IQueueVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("QueueCanvasVisualizer"))> like IQueueVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default("QueueOsgVisualizer")> like IQueueVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("QueueOsgVisualizer"))> like IQueueVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

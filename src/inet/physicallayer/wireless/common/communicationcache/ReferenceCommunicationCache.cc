@@ -31,6 +31,14 @@ ReferenceCommunicationCache::~ReferenceCommunicationCache()
         delete transmissionCacheEntry.transmission;
         delete transmissionCacheEntry.receptionCacheEntries;
     }
+    for (auto reception : receptions)
+        delete reception;
+    for (auto interference : interferences)
+        delete interference;
+    for (auto noise : noises)
+        delete noise;
+    for (auto snir : snirs)
+        delete snir;
 }
 
 ReferenceCommunicationCache::RadioCacheEntry *ReferenceCommunicationCache::getRadioCacheEntry(const IRadio *radio)
@@ -40,7 +48,9 @@ ReferenceCommunicationCache::RadioCacheEntry *ReferenceCommunicationCache::getRa
 
 ReferenceCommunicationCache::ReferenceTransmissionCacheEntry *ReferenceCommunicationCache::getTransmissionCacheEntry(const ITransmission *transmission)
 {
-    return &transmissionCache[transmission->getId()];
+    int transmissionIndex = transmission->getId();
+    ASSERT(0 <= transmissionIndex && transmissionIndex < (int)transmissionCache.size());
+    return &transmissionCache[transmissionIndex];
 }
 
 ReferenceCommunicationCache::ReceptionCacheEntry *ReferenceCommunicationCache::getReceptionCacheEntry(const IRadio *radio, const ITransmission *transmission)
@@ -88,7 +98,7 @@ void ReferenceCommunicationCache::addTransmission(const ITransmission *transmiss
         transmissionCache.resize(transmissionId + 1);
     auto transmissionCacheEntry = getTransmissionCacheEntry(transmission);
     transmissionCacheEntry->transmission = transmission;
-    transmissionCacheEntry->receptionCacheEntries = new std::vector<ReceptionCacheEntry>(radioCache.size() + 1);
+    transmissionCacheEntry->receptionCacheEntries = new std::vector<ReceptionCacheEntry>(radioCache.size());
 }
 
 void ReferenceCommunicationCache::removeTransmission(const ITransmission *transmission)

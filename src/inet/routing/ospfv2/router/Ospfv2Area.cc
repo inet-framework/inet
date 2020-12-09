@@ -2416,6 +2416,7 @@ void Ospfv2Area::calculateInterAreaRoutes(std::vector<Ospfv2RoutingTableEntry *>
                 if (checkedEntry->getCost() > currentCost) {
                     for (auto entryIt = newRoutingTable.begin(); entryIt != newRoutingTable.end(); entryIt++) {
                         if (checkedEntry == (*entryIt)) {
+                            delete *entryIt;
                             newRoutingTable.erase(entryIt);
                             break;
                         }

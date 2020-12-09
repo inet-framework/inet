@@ -20,7 +20,7 @@ import inet.node.inet.Router;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
-import inet.visualizer.integrated.IntegratedMultiCanvasVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedMultiCanvasVisualizer;
 
 
 network MultiRadioShowcase

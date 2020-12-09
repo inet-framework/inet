@@ -48,6 +48,8 @@ class INET_API ClockUserModuleMixin : public T, public cListener
     virtual void scheduleClockEventAfter(clocktime_t delay, ClockEvent *msg);
     virtual cMessage *cancelClockEvent(ClockEvent *msg);
     virtual void cancelAndDeleteClockEvent(ClockEvent *msg);
+    virtual void rescheduleClockEventAt(clocktime_t time, ClockEvent* msg);
+    virtual void rescheduleClockEventAfter(clocktime_t time, ClockEvent* msg);
 
     virtual clocktime_t getClockTime() const;
     virtual clocktime_t getArrivalClockTime(ClockEvent *msg) const;
@@ -68,6 +70,8 @@ class INET_API ClockUserModuleMixin : public T, public cListener
     virtual void scheduleClockEventAfter(clocktime_t delay, ClockEvent *msg) { T::scheduleAfter(delay, msg); }
     virtual cMessage *cancelClockEvent(ClockEvent *msg) { return T::cancelEvent(msg); }
     virtual void cancelAndDeleteClockEvent(ClockEvent *msg) { T::cancelAndDelete(msg); }
+    virtual void rescheduleClockEventAt(clocktime_t time, ClockEvent* msg) { T::rescheduleAt(time, msg); }
+    virtual void rescheduleClockEventAfter(clocktime_t time, ClockEvent* msg) { T::rescheduleAfter(time, msg); }
     virtual clocktime_t getClockTime() const { return simTime(); }
     virtual clocktime_t getArrivalClockTime(ClockEvent *msg) const { return msg->getArrivalTime(); }
 #endif // #ifdef INET_WITH_CLOCK

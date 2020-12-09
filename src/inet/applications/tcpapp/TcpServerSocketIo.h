@@ -31,6 +31,8 @@ class INET_API TcpServerSocketIo : public cSimpleModule, public TcpSocket::ICall
     virtual void handleMessage(cMessage *message) override;
 
   public:
+    virtual ~TcpServerSocketIo() { delete socket; }
+
     virtual TcpSocket *getSocket() { return socket; }
     virtual void acceptSocket(TcpAvailableInfo *availableInfo);
 

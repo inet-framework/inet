@@ -139,7 +139,7 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
         if (it != socketIdToGateIndex.end())
             return gate("out", it->second);
         else
-            throw cRuntimeError("handlePacket(): Unknown socket, id = %d, sender = %s", socketId, inGate->getPathStartGate()->getOwnerModule()->getFullName());
+            throw cRuntimeError("handlePacket(): Unknown socket: socketId = %d, pathStartGate = %s, pathEndGate = %s", socketId, inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
     }
     const auto& dispatchProtocolReq = packet->findTag<DispatchProtocolReq>();
     if (dispatchProtocolReq != nullptr) {
@@ -162,7 +162,7 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
                 if (it != serviceToGateIndex.end())
                     return gate("out", it->second);
                 else
-                    throw cRuntimeError("handlePacket(): Unknown protocol: id = %d, name = %s, sender = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getOwnerModule()->getFullName());
+                    throw cRuntimeError("handlePacket(): Unknown protocol: protocolId = %d, protocolName = %s, servicePrimitive = REQUEST, pathStartGate = %s, pathEndGate = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
             }
         }
         else if (servicePrimitive == SP_INDICATION) {
@@ -174,11 +174,11 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
                 if (it != protocolToGateIndex.end())
                     return gate("out", it->second);
                 else
-                    throw cRuntimeError("handlePacket(): Unknown protocol: id = %d, name = %s, sender = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getOwnerModule()->getFullName());
+                    throw cRuntimeError("handlePacket(): Unknown protocol: protocolId = %d, protocolName = %s, servicePrimitive = INDICATION, pathStartGate = %s, pathEndGate = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
             }
         }
         else
-            throw cRuntimeError("handlePacket(): Unknown service primitive");
+            throw cRuntimeError("handlePacket(): Unknown service primitive: %d, pathStartGate = %s, pathEndGate = %s", static_cast<int>(servicePrimitive), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
     }
     const auto& interfaceReq = packet->findTag<InterfaceReq>();
     if (interfaceReq != nullptr) {
@@ -187,9 +187,9 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
         if (it != interfaceIdToGateIndex.end())
             return gate("out", it->second);
         else
-            throw cRuntimeError("handlePacket(): Unknown interface: id = %d, sender = %s", interfaceId, inGate->getPathStartGate()->getOwnerModule()->getFullName());
+            throw cRuntimeError("handlePacket(): Unknown interface: interfaceId = %d, pathStartGate = %s, pathEndGate = %s", interfaceId, inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
     }
-    throw cRuntimeError("handlePacket(): Unknown packet: %s(%s), sender = %s", packet->getName(), packet->getClassName(), inGate->getPathStartGate()->getOwnerModule()->getFullName());
+    throw cRuntimeError("handlePacket(): Unknown packet: %s(%s), pathStartGate = %s, pathEndGate = %s", packet->getName(), packet->getClassName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
 }
 
 cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
@@ -201,7 +201,7 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
         if (it == socketIdToGateIndex.end())
             socketIdToGateIndex[socketReqId] = inGate->getIndex();
         else if (it->first != socketReqId)
-            throw cRuntimeError("handleMessage(): Socket is already registered: id = %d, gate = %d, new gate = %d (from %s)", socketReqId, it->second, inGate->getIndex(), inGate->getPathStartGate()->getOwnerModule()->getFullName());
+            throw cRuntimeError("handleMessage(): Socket is already registered: socketId = %d, current gateIndex = %d, new gateIndex = %d, pathStartGate = %s, pathEndGate = %s", socketReqId, it->second, inGate->getIndex(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
     }
     const auto& socketInd = message->findTag<SocketInd>();
     if (socketInd != nullptr) {
@@ -210,7 +210,7 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
         if (it != socketIdToGateIndex.end())
             return gate("out", it->second);
         else
-            throw cRuntimeError("handleMessage(): Unknown socket, id = %d", socketId);
+            throw cRuntimeError("handleMessage(): Unknown socket: socketId = %d, pathStartGate = %s, pathEndGate = %s", socketId, inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
     }
     const auto& dispatchProtocolReq = message->findTag<DispatchProtocolReq>();
     if (dispatchProtocolReq != nullptr) {
@@ -228,7 +228,7 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
                 if (it != serviceToGateIndex.end())
                     return gate("out", it->second);
                 else
-                    throw cRuntimeError("handleMessage(): Unknown protocol: id = %d, name = %s", protocol->getId(), protocol->getName());
+                    throw cRuntimeError("handleMessage(): Unknown protocol: protocolId = %d, protocolName = %s, servicePrimitive = REQUEST, pathStartGate = %s, pathEndGate = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
             }
         }
         else if (servicePrimitive == SP_INDICATION) {
@@ -240,11 +240,11 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
                 if (it != protocolToGateIndex.end())
                     return gate("out", it->second);
                 else
-                    throw cRuntimeError("handlePacket(): Unknown protocol: id = %d, name = %s, sender = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getOwnerModule()->getFullName());
+                    throw cRuntimeError("handleMessage(): Unknown protocol: protocolId = %d, protocolName = %s, servicePrimitive = INDICATION, pathStartGate = %s, pathEndGate = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
             }
         }
         else
-            throw cRuntimeError("handlePacket(): Unknown service primitive");
+            throw cRuntimeError("handleMessage(): Unknown service primitive: servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", static_cast<int>(servicePrimitive), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
     }
     const auto& interfaceReq = message->findTag<InterfaceReq>();
     if (interfaceReq != nullptr) {
@@ -253,9 +253,9 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
         if (it != interfaceIdToGateIndex.end())
             return gate("out", it->second);
         else
-            throw cRuntimeError("handleMessage(): Unknown interface: id = %d", interfaceId);
+            throw cRuntimeError("handleMessage(): Unknown interface: interfaceId = %d, pathStartGate = %s, pathEndGate = %s", interfaceId, inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
     }
-    throw cRuntimeError("handleMessage(): Unknown message: %s(%s)", message->getName(), message->getClassName());
+    throw cRuntimeError("handleMessage(): Unknown message: %s(%s), pathStartGate = %s, pathEndGate = %s", message->getName(), message->getClassName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
 }
 
 void MessageDispatcher::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
@@ -266,7 +266,7 @@ void MessageDispatcher::handleRegisterService(const Protocol& protocol, cGate *g
     auto it = serviceToGateIndex.find(key);
     if (it != serviceToGateIndex.end()) {
         if (it->second != g->getIndex())
-            throw cRuntimeError("handleRegisterService(): service is already registered: %s", protocol.str().c_str());
+            throw cRuntimeError("handleRegisterService(): service is already registered: protocolId = %d, protocolName = %s, servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", protocol.getId(), protocol.str().c_str(), static_cast<int>(servicePrimitive), g->getPathStartGate()->getFullPath().c_str(), g->getPathEndGate()->getFullPath().c_str());
     }
     else {
         serviceToGateIndex[key] = g->getIndex();
@@ -290,7 +290,7 @@ void MessageDispatcher::handleRegisterAnyService(cGate *g, ServicePrimitive serv
     auto it = serviceToGateIndex.find(key);
     if (it != serviceToGateIndex.end()) {
         if (it->second != g->getIndex())
-            throw cRuntimeError("handleRegisterAnyService(): any service is already registered");
+            throw cRuntimeError("handleRegisterAnyService(): any service is already registered: servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", static_cast<int>(servicePrimitive), g->getPathStartGate()->getFullPath().c_str(), g->getPathEndGate()->getFullPath().c_str());
     }
     else {
         serviceToGateIndex[key] = g->getIndex();
@@ -314,7 +314,7 @@ void MessageDispatcher::handleRegisterProtocol(const Protocol& protocol, cGate *
     auto it = protocolToGateIndex.find(key);
     if (it != protocolToGateIndex.end()) {
         if (it->second != g->getIndex())
-            throw cRuntimeError("handleRegisterProtocol(): protocol is already registered: %s", protocol.str().c_str());
+            throw cRuntimeError("handleRegisterProtocol(): protocol is already registered: protocolId = %d, protocolName = %s, servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", protocol.getId(), protocol.str().c_str(), static_cast<int>(servicePrimitive), g->getPathStartGate()->getFullPath().c_str(), g->getPathEndGate()->getFullPath().c_str());
     }
     else {
         protocolToGateIndex[key] = g->getIndex();
@@ -338,7 +338,7 @@ void MessageDispatcher::handleRegisterAnyProtocol(cGate *g, ServicePrimitive ser
     auto it = protocolToGateIndex.find(key);
     if (it != protocolToGateIndex.end()) {
         if (it->second != g->getIndex())
-            throw cRuntimeError("handleRegisterAnyProtocol(): any protocol is already registered");
+            throw cRuntimeError("handleRegisterAnyProtocol(): any protocol is already registered: servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", static_cast<int>(servicePrimitive), g->getPathStartGate()->getFullPath().c_str(), g->getPathEndGate()->getFullPath().c_str());
     }
     else {
         protocolToGateIndex[key] = g->getIndex();
@@ -361,7 +361,7 @@ void MessageDispatcher::handleRegisterInterface(const NetworkInterface& interfac
     auto it = interfaceIdToGateIndex.find(interface.getInterfaceId());
     if (it != interfaceIdToGateIndex.end()) {
         if (it->second != out->getIndex())
-            throw cRuntimeError("handleRegisterInterface(): Interface is already registered: %s", interface.str().c_str());
+            throw cRuntimeError("handleRegisterInterface(): interface is already registered: interfaceId = %d, interfaceName = %s, pathStartGate = %s, pathEndGate = %s", interface.getInterfaceId(), interface.str().c_str(), out->getPathStartGate()->getFullPath().c_str(), out->getPathEndGate()->getFullPath().c_str());
     }
     else {
         interfaceIdToGateIndex[interface.getInterfaceId()] = out->getIndex();

@@ -22,21 +22,6 @@ namespace inet {
 
 namespace utils {
 
-cNEDValue nedf_hasVisualizer(cComponent *context, cNEDValue argv[], int argc)
-{
-#ifdef INET_WITH_VISUALIZERS
-    return true;
-#else
-    return false;
-#endif
-}
-
-Define_NED_Function2(nedf_hasVisualizer,
-        "bool hasVisualizer()",
-        "",
-        "Returns true if the visualizer feature is available"
-        );
-
 cNEDValue nedf_hasModule(cComponent *context, cNEDValue argv[], int argc)
 {
     cRegistrationList *types = componentTypes.getInstance();

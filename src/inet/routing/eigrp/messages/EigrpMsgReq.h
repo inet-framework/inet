@@ -29,7 +29,7 @@ namespace inet {
 class EigrpMsgReq : public EigrpMsgReq_Base
 {
   public:
-    EigrpMsgReq(const char *name = NULL) : EigrpMsgReq_Base(name) {}
+    EigrpMsgReq(const char *name = nullptr) : EigrpMsgReq_Base(name) {}
     EigrpMsgReq(const EigrpMsgReq& other) : EigrpMsgReq_Base(other) {}
     EigrpMsgReq& operator=(const EigrpMsgReq& other)
     { EigrpMsgReq_Base::operator=(other); return *this; }

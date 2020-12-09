@@ -1,7 +1,7 @@
 package inet.showcases.mobility.basic;
 
 import inet.node.inet.StandardHost;
-import inet.visualizer.integrated.IntegratedVisualizer;
+import inet.visualizer.common.IntegratedVisualizer;
 
 network MobilityShowcase
 {

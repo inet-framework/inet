@@ -28,6 +28,12 @@ std::ostream& operator<<(std::ostream& os, const EthernetSocketTable::Socket& so
     return os;
 }
 
+EthernetSocketTable::~EthernetSocketTable()
+{
+    for (auto it : socketIdToSocketMap)
+        delete it.second;
+}
+
 void EthernetSocketTable::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)

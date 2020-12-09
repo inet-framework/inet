@@ -18,7 +18,7 @@
 #ifndef __INET_IRADIO_H
 #define __INET_IRADIO_H
 
-#include "IWirelessSignal.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IWirelessSignal.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntenna.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IPhysicalLayer.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReceiver.h"

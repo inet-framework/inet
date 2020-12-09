@@ -18,7 +18,7 @@
 #ifndef __INET_ICOMMUNICATIONCACHE_H
 #define __INET_ICOMMUNICATIONCACHE_H
 
-#include "IWirelessSignal.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IWirelessSignal.h"
 #include "inet/common/IntervalTree.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IArrival.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IBackgroundNoise.h"

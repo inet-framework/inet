@@ -186,8 +186,8 @@ bool PacketFilterBase::canPullSomePacket(cGate *gate) const
             nonConstThisPtr->take(packet);
             EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
             // KLUDGE
-            nonConstThisPtr->dropPacket(packet);
             nonConstThisPtr->handlePacketProcessed(packet);
+            nonConstThisPtr->dropPacket(packet);
             updateDisplayString();
         }
     }
@@ -256,9 +256,9 @@ void PacketFilterBase::dropPacket(Packet *packet)
 
 void PacketFilterBase::dropPacket(Packet *packet, PacketDropReason reason, int limit)
 {
-    PacketProcessorBase::dropPacket(packet, reason, limit);
     numDroppedPackets++;
     droppedTotalLength += packet->getTotalLength();
+    PacketProcessorBase::dropPacket(packet, reason, limit);
 }
 
 const char *PacketFilterBase::resolveDirective(char directive) const

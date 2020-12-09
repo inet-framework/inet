@@ -62,7 +62,7 @@ class EigrpNeighbor : public cObject
 
     virtual ~EigrpNeighbor() { delete holdt; }
     EigrpNeighbor(int ifaceId, const char *ifaceNname, IPAddress ipAddress) :
-        ifaceId(ifaceId), ifaceName(ifaceNname), neighborId(UNSPEC_ID), ipAddress(ipAddress), isUp(false), holdt(NULL)
+        ifaceId(ifaceId), ifaceName(ifaceNname), neighborId(UNSPEC_ID), ipAddress(ipAddress), isUp(false), holdt(nullptr)
     { seqNumber = 0; holdInt = 0; routesForDeletion = false; waitForAck = 0; stubEnabled = false; }
 
     void setStateUp(bool stateUp) { this->isUp = stateUp; }
@@ -70,7 +70,7 @@ class EigrpNeighbor : public cObject
     /**
      * Sets timer for a neighbor
      */
-    void setHoldTimer(EigrpTimer *holdt) { ASSERT(this->holdt == NULL); this->holdt = holdt; }
+    void setHoldTimer(EigrpTimer *holdt) { ASSERT(this->holdt == nullptr); this->holdt = holdt; }
     void setNeighborId(int neighborId) { this->neighborId = neighborId; }
     void setSeqNumber(int seqNumber) { this->seqNumber = seqNumber; }
     void setAck(uint32_t waitForAck) { this->waitForAck = waitForAck; }

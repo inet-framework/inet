@@ -111,6 +111,30 @@ void ClockUserModuleMixin<T>::cancelAndDeleteClockEvent(ClockEvent *msg) {
 }
 
 template<typename T>
+void ClockUserModuleMixin<T>::rescheduleClockEventAt(clocktime_t t, ClockEvent* msg)
+{
+#ifndef NDEBUG
+    usedClockApi = true;
+#endif
+    if (clock != nullptr)
+        clock->scheduleClockEventAt(t, clock->cancelClockEvent(msg));
+    else
+        T::rescheduleAt(t.asSimTime(), msg);
+}
+
+template<typename T>
+void ClockUserModuleMixin<T>::rescheduleClockEventAfter(clocktime_t t, ClockEvent* msg)
+{
+#ifndef NDEBUG
+    usedClockApi = true;
+#endif
+    if (clock != nullptr)
+        clock->scheduleClockEventAfter(t, clock->cancelClockEvent(msg));
+    else
+        T::rescheduleAfter(t.asSimTime(), msg);
+}
+
+template<typename T>
 clocktime_t ClockUserModuleMixin<T>::getClockTime() const {
 #ifndef NDEBUG
     usedClockApi = true;

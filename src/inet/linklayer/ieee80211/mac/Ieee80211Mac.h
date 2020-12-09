@@ -64,7 +64,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     Hcf *hcf = nullptr;
     Mcf *mcf = nullptr;
 
-    // The last change channel message received and not yet sent to the physical layer, or NULL.
+    // The last change channel message received and not yet sent to the physical layer, or nullptr.
     cMessage *pendingRadioConfigMsg = nullptr;
 
   protected:

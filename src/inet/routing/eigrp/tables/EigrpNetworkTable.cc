@@ -63,7 +63,7 @@ EigrpNetwork<IPAddress> *EigrpNetworkTable<IPAddress>::findNetworkById(int netId
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 template<>

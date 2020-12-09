@@ -60,7 +60,7 @@ EigrpInterface::~EigrpInterface()
 EigrpInterface::EigrpInterface(NetworkInterface *iface, int networkId, bool enabled) :
                interfaceId(iface->getInterfaceId()), networkId(networkId), enabled(enabled)
 {
-    hellot = NULL;
+    hellot = nullptr;
     neighborCount = 0;
     stubCount = 0;
     splitHorizon = true;
@@ -124,7 +124,7 @@ EigrpInterfaceTable::~EigrpInterfaceTable()
     for (int i = 0; i < cnt; i++) {
 
         iface = eigrpInterfaces[i];
-        eigrpInterfaces[i] = NULL;
+        eigrpInterfaces[i] = nullptr;
         delete iface;
     }
     eigrpInterfaces.clear();
@@ -159,7 +159,7 @@ EigrpInterface *EigrpInterfaceTable::removeInterface(EigrpInterface *iface)
         return iface;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 EigrpInterface *EigrpInterfaceTable::findInterfaceById(int ifaceId)
@@ -174,7 +174,7 @@ EigrpInterface *EigrpInterfaceTable::findInterfaceById(int ifaceId)
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 } // namespace eigrp

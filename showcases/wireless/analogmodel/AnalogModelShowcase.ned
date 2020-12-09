@@ -8,8 +8,8 @@ import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRad
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.physicallayer.wireless.noise.NoiseSource;
 import inet.physicallayer.wireless.unitdisk.UnitDiskRadioMedium;
-import inet.visualizer.integrated.IntegratedMultiVisualizer;
-import inet.visualizer.integrated.IntegratedVisualizer;
+import inet.visualizer.common.IntegratedMultiVisualizer;
+import inet.visualizer.common.IntegratedVisualizer;
 
 network AnalogModelShowcaseRoutingNetwork
 {

@@ -16,7 +16,7 @@
 package inet.showcases.mobility.spatial;
 
 import inet.node.inet.StandardHost;
-import inet.visualizer.integrated.IntegratedVisualizer;
+import inet.visualizer.common.IntegratedVisualizer;
 
 
 network MobilityShowcase

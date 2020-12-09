@@ -78,23 +78,23 @@ ClnsAddress::ClnsAddress(std::string net)
             case 2:
                 dots++;
 //                area[0] = (unsigned char) (atoi(net.substr(0, 2).c_str()));
-                areaID += (uint64_t)(strtoul(net.substr(0, 2).c_str(), NULL, 16)) << 16;
+                areaID += (uint64_t)(strtoul(net.substr(0, 2).c_str(), nullptr, 16)) << 16;
                 break;
             case 7:
-                areaID += (uint64_t)(strtoul(net.substr(3, 4).c_str(), NULL, 16));
+                areaID += (uint64_t)(strtoul(net.substr(3, 4).c_str(), nullptr, 16));
                 dots++;
                 break;
             case 12:
                 dots++;
-                systemID += (uint64_t)(strtoul(net.substr(8, 4).c_str(), NULL, 16)) << 32;
+                systemID += (uint64_t)(strtoul(net.substr(8, 4).c_str(), nullptr, 16)) << 32;
                 break;
             case 17:
                 dots++;
-                systemID += (uint64_t)(strtoul(net.substr(13, 4).c_str(), NULL, 16)) << 16;
+                systemID += (uint64_t)(strtoul(net.substr(13, 4).c_str(), nullptr, 16)) << 16;
                 break;
             case 22:
                 dots++;
-                systemID += (uint64_t)(strtoul(net.substr(18, 4).c_str(), NULL, 16));
+                systemID += (uint64_t)(strtoul(net.substr(18, 4).c_str(), nullptr, 16));
                 break;
             default:
                 return;
@@ -108,7 +108,7 @@ ClnsAddress::ClnsAddress(std::string net)
         return;
     }
 
-    nsel = strtoul(net.substr(23, 2).c_str(), NULL, 16);
+    nsel = strtoul(net.substr(23, 2).c_str(), nullptr, 16);
 
     // 49.0001.1921.6801.2003.00
 //    this->nickname = this->sysId[ISIS_SYSTEM_ID - 1] + this->sysId[ISIS_SYSTEM_ID - 2] * 0xFF;

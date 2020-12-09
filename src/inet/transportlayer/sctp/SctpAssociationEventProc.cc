@@ -50,7 +50,7 @@ void SctpAssociation::process_ASSOCIATE(SctpEventCode& event, SctpCommandReq *sc
 
     switch (fsm->getState()) {
         case SCTP_S_CLOSED:
-            if (msg->getContextPointer() != NULL) {
+            if (msg->getContextPointer() != nullptr) {
                 sctpMain->setSocketOptions((SocketOptions *)(msg->getContextPointer()));
             }
             initAssociation(openCmd);
@@ -102,7 +102,7 @@ void SctpAssociation::process_OPEN_PASSIVE(SctpEventCode& event, SctpCommandReq 
 
     switch (fsm->getState()) {
         case SCTP_S_CLOSED:
-            if (msg->getContextPointer() != NULL)
+            if (msg->getContextPointer() != nullptr)
                 sctpMain->setSocketOptions((SocketOptions *)(msg->getContextPointer()));
             initAssociation(openCmd);
             state->fork = openCmd->getFork();

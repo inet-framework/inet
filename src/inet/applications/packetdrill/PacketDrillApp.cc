@@ -585,7 +585,7 @@ void PacketDrillApp::handleTimer(cMessage *msg)
         case MSGKIND_START: {
             simStartTime = getSimulation()->getSimTime();
             simRelTime = simStartTime;
-            if (script->parseScriptAndSetConfig(config, NULL)) {
+            if (script->parseScriptAndSetConfig(config, nullptr)) {
                 delete msg;
                 throw cRuntimeError("Error parsing the script");
             }
@@ -665,7 +665,7 @@ bool PacketDrillApp::findSeqNumMap(uint32_t num)
 
 void PacketDrillApp::runSystemCallEvent(PacketDrillEvent *event, struct syscall_spec *syscall)
 {
-    char *error = NULL;
+    char *error = nullptr;
     const char *name = syscall->name;
     cQueue *args = new cQueue("systemCallEventQueue");
     int result = STATUS_OK;

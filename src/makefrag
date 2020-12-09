@@ -95,16 +95,25 @@ ifeq ($(WITH_VOIPSTREAM), enabled)
 endif
 
 #
-# visualization feature requires (optionally) some extra osg and osgEarth libraries
+# VisualizationOsg feature requires (optionally) some extra osg and osgEarth libraries
 #
-WITH_VISUALIZERS := $(shell (cd .. && $(FEATURETOOL) -q isenabled Visualization && echo enabled) )
-ifeq ($(WITH_VISUALIZERS), enabled)
+WITH_VISUALIZATIONOSG := $(shell (cd .. && $(FEATURETOOL) -q isenabled VisualizationOsg && echo enabled) )
+ifeq ($(WITH_VISUALIZATIONOSG), enabled)
   ifeq ($(WITH_OSG), yes)
     OMNETPP_LIBS += -losg -losgText -losgDB -losgGA -losgViewer -losgUtil -lOpenThreads # TODO: use $(OSG_LIBS) from Makefile.inc? Does that include -losgText? Why not?
     ifeq ($(WITH_OSGEARTH), yes)
       OMNETPP_LIBS += -losgEarth -losgEarthUtil # TODO: use $(OSGEARTH_LIBS) from Makefile.inc? -lgeos_c might also be needed. Is that included? Should it be?
     endif
   endif
+endif
+
+#
+# OpenMP feature allows faster execution of certain visualizations (like transmission power spectral density maps )
+#
+WITH_OPENMP := $(shell (cd .. && $(FEATURETOOL) -q isenabled OpenMP && echo enabled) )
+ifeq ($(WITH_OPENMP), enabled)
+  CFLAGS += -fopenmp
+  LDFLAGS += -fopenmp
 endif
 
 # uncomment this if you want to run the NS3 vs INET 802.11 cross validation tests in the 'tests/misc/ns3' folder.

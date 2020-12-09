@@ -34,7 +34,7 @@ network NetworkBase
                 moduleNamePatterns = ".^";
                 @display("p=100,100;is=s");
         }
-        visualizer: <default("IntegratedCanvasVisualizer")> like IIntegratedVisualizer if hasVisualizer() {
+        visualizer: <default(firstAvailableOrEmpty("IntegratedCanvasVisualizer"))> like IIntegratedVisualizer if typename != "" {
             parameters:
                 @display("p=100,200;is=s");
         }

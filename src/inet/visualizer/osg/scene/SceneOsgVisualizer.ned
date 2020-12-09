@@ -1,0 +1,38 @@
+//
+// Copyright (C) 2020 OpenSim Ltd.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+
+package inet.visualizer.osg.scene;
+
+import inet.visualizer.contract.ISceneVisualizer;
+import inet.visualizer.osg.base.SceneOsgVisualizerBase;
+
+//
+// This module visualizes the scene using osg. It displays the scene and
+// the coordinate system axes. It sets the initial viewpoint of the 3D scene
+// based on the bounding sphere of all network nodes. The viewpoint is located
+// opposite of the coordinate system origin with respect to the sphere, and it
+// faces towards the center of the sphere.
+//
+// @see ~SceneCanvasVisualizer, ~SceneVisualizer, ~SceneVisualizerBase, ~ISceneVisualizer
+//
+simple SceneOsgVisualizer extends SceneOsgVisualizerBase like ISceneVisualizer
+{
+    parameters:
+        @class(SceneOsgVisualizer);
+        clearColor = default("#FFFFFF"); // scene background color, white by default
+}
+

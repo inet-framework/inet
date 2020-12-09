@@ -5,7 +5,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.bgp.BgpRouter;
 import inet.node.inet.StandardHost;
 import inet.node.ospfv2.OspfRouter;
-import inet.visualizer.integrated.IntegratedCanvasVisualizer;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 network BgpNetwork
 {
