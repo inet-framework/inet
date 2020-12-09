@@ -21,7 +21,6 @@
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/geometry/common/Quaternion.h"
 
-#if defined(WITH_OSG) && defined(INET_WITH_VISUALIZATIONOSG)
 #include <omnetpp/osgutil.h>
 
 #include <osg/AutoTransform>
@@ -33,13 +32,10 @@
 #include <osg/ShapeDrawable>
 #include <osg/Texture2D>
 #include <osgText/Text>
-#endif // ifdef WITH_OSG
 
 namespace inet {
 
 namespace osg {
-
-#if defined(WITH_OSG) && defined(INET_WITH_VISUALIZATIONOSG)
 
 using namespace ::osg;
 
@@ -100,8 +96,6 @@ class INET_API LineNode : public Group
     void setStart(const Coord& start);
     void setEnd(const Coord& end);
 };
-
-#endif // ifdef WITH_OSG
 
 } // namespace osg
 

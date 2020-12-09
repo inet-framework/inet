@@ -21,8 +21,6 @@ namespace inet {
 
 namespace osg {
 
-#if defined(WITH_OSG) && defined(INET_WITH_VISUALIZATIONOSG)
-
 template<typename T>
 void FindNodesVisitor<T>::apply(Node& node) {
     T *result = dynamic_cast<T *>(&node);
@@ -62,8 +60,6 @@ SimulationScene *TopLevelScene::getSimulationScene(cModule *module)
         return simulationScene;
     }
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace osg
 
