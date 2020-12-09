@@ -22,8 +22,8 @@
 
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/visualizer/osg/util/OsgScene.h"
 #include "inet/mobility/contract/IMobility.h"
+#include "inet/visualizer/osg/util/OsgScene.h"
 
 namespace inet {
 

@@ -23,9 +23,9 @@
 #include <osgDB/ReadFile>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/visualizer/osg/scene/NetworkNodeOsgVisualizer.h"
 #include "inet/visualizer/osg/util/OsgScene.h"
 #include "inet/visualizer/osg/util/OsgUtils.h"
-#include "inet/visualizer/osg/scene/NetworkNodeOsgVisualizer.h"
 
 namespace inet {
 
