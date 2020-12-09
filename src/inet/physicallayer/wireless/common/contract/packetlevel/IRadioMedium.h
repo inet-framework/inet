@@ -18,7 +18,7 @@
 #ifndef __INET_IRADIOMEDIUM_H
 #define __INET_IRADIOMEDIUM_H
 
-#include "IWirelessSignal.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IWirelessSignal.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/environment/contract/IMaterial.h"
 #include "inet/environment/contract/IPhysicalEnvironment.h"
