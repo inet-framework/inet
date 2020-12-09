@@ -107,8 +107,8 @@ endif
 #
 WITH_OPENMP := $(shell (cd .. && $(FEATURETOOL) -q isenabled OpenMP && echo enabled) )
 ifeq ($(WITH_OPENMP), enabled)
-  CFLAGS += -fopenmp
-  LDFLAGS += -fopenmp
+  CFLAGS += $(OPENMP_FLAGS)
+  LDFLAGS += $(OPENMP_FLAGS)
 endif
 
 # uncomment this if you want to run the NS3 vs INET 802.11 cross validation tests in the 'tests/misc/ns3' folder.
