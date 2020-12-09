@@ -20,7 +20,7 @@
 
 #include <osg/ref_ptr>
 
-#include "inet/common/OsgUtils.h"
+#include "inet/visualizer/osg/util/OsgUtils.h"
 #include "inet/visualizer/base/LinkVisualizerBase.h"
 
 namespace inet {

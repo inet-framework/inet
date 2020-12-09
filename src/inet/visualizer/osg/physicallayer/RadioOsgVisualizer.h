@@ -19,7 +19,7 @@
 #define __INET_RADIOOSGVISUALIZER_H
 
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/common/OsgUtils.h"
+#include "inet/visualizer/osg/util/OsgUtils.h"
 #include "inet/visualizer/base/RadioVisualizerBase.h"
 #include "inet/visualizer/osg/scene/NetworkNodeOsgVisualizer.h"
 

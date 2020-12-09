@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/OsgUtils.h"
+#include "inet/visualizer/osg/util/OsgUtils.h"
 
 #if defined(WITH_OSG) && defined(INET_WITH_VISUALIZATIONOSG)
 #include <osg/CullFace>

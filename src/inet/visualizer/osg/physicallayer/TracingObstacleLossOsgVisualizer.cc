@@ -21,8 +21,8 @@
 #include <osg/LineWidth>
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/OsgScene.h"
-#include "inet/common/OsgUtils.h"
+#include "inet/visualizer/osg/util/OsgScene.h"
+#include "inet/visualizer/osg/util/OsgUtils.h"
 #include "inet/common/geometry/common/RotationMatrix.h"
 
 namespace inet {
