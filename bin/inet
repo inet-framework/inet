@@ -49,6 +49,16 @@ fi
 OPP_RUN_DBG=`which opp_run_dbg 2> /dev/null || echo opp_run_dbg`
 OPP_RUN_RELEASE=`which opp_run_release 2> /dev/null || echo opp_run_release`
 
+INET_NEDFOLDERS=$(cat $INET_ROOT/.nedfolders | sed "s|^|$INET_ROOT/|" | tr '\n' ':')
+if [ ! "$INET_NEDFOLDERS" = "" ]; then
+  INET_OMNETPP_OPTIONS="-n $INET_NEDFOLDERS $INET_OMNETPP_OPTIONS"
+fi
+
+INET_NEDEXCLUSIONS=$(cat $INET_ROOT/.nedexclusions | tr '\n' ':' | tr '.' '/')
+if [ ! "$INET_NEDEXCLUSIONS" = "" ]; then
+  INET_OMNETPP_OPTIONS="-x $INET_NEDEXCLUSIONS $INET_OMNETPP_OPTIONS"
+fi
+
 if [ "$MODE" = "" ]; then
   if [ -f $OUT/INET ]; then
     $TOOL $OUT/INET $INET_OMNETPP_OPTIONS

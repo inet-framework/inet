@@ -25,21 +25,6 @@ ifeq ($(PLATFORM),win32.x86_64)
   #
   LIBS += -lws2_32
   DEFINES += -DINET_EXPORT
-  ENABLE_AUTO_IMPORT=-Wl,--enable-auto-import
-  LDFLAGS := $(filter-out $(ENABLE_AUTO_IMPORT), $(LDFLAGS))
-
-  # FIX for clang not exporting typinfo and other thunks on Windows
-  ifeq ($(CC),clang)
-    DEFFILE = $O/typeinfo.def
-    LDFLAGS += $(DEFFILE)
-
-$(DEFFILE): $(OBJS)  $(wildcard $(EXTRA_OBJS)) Makefile $(CONFIGFILE)
-	@echo Creating .DEF file for $(TARGET) - needed to fix an issue where clang is not exporting typinfo for classes on Windows
-	$(Q)echo >.tmp$$$$ $(OBJS) $(EXTRA_OBJS) && $(DLLTOOL) --export-all-symbols --kill-at -z all$$$$.def @.tmp$$$$ && grep -E '( *_ZTI)|( *_ZThn)|EXPORTS' all$$$$.def | sed 's/ @.*//' >$(DEFFILE) && rm .tmp$$$$ all$$$$.def
-
-$O/$(TARGET): $(DEFFILE)
-
-  endif
 endif
 
 #
@@ -112,8 +97,8 @@ endif
 #
 WITH_OPENMP := $(shell (cd .. && $(FEATURETOOL) -q isenabled OpenMP && echo enabled) )
 ifeq ($(WITH_OPENMP), enabled)
-  CFLAGS += -fopenmp
-  LDFLAGS += -fopenmp
+  CFLAGS += $(OPENMP_FLAGS)
+  LDFLAGS += $(OPENMP_FLAGS)
 endif
 
 # uncomment this if you want to run the NS3 vs INET 802.11 cross validation tests in the 'tests/misc/ns3' folder.
