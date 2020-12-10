@@ -26,7 +26,7 @@ opp_featuretool enable all 2>&1 # redirecting stderr so it doesn't get out of sy
 echo "::endgroup::"
 
 echo "::group::Disable OSG features"
-opp_featuretool disable VisualizationOsg 2>&1
+opp_featuretool disable VisualizationOsg VisualizationOsgShowcases 2>&1
 echo "::endgroup::"
 
 echo "::group::Run fingerprint tests"
