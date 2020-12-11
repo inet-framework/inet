@@ -57,8 +57,6 @@ RadioVisualizerBase::RadioVisualization *RadioOsgVisualizer::createRadioVisualiz
     geode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
     auto networkNode = getContainingNode(module);
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
-    if (networkNodeVisualization == nullptr)
-        throw cRuntimeError("Cannot create radio visualization for '%s', because network node visualization is not found for '%s'", module->getFullPath().c_str(), networkNode->getFullPath().c_str());
     return new RadioOsgVisualization(networkNodeVisualization, geode, module->getId());
 }
 

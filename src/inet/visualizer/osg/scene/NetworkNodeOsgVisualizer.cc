@@ -71,10 +71,15 @@ NetworkNodeOsgVisualization *NetworkNodeOsgVisualizer::createNetworkNodeVisualiz
     return new NetworkNodeOsgVisualization(networkNode, displayModuleName);
 }
 
-NetworkNodeOsgVisualization *NetworkNodeOsgVisualizer::getNetworkNodeVisualization(const cModule *networkNode) const
+NetworkNodeOsgVisualization *NetworkNodeOsgVisualizer::findNetworkNodeVisualization(const cModule *networkNode) const
 {
     auto it = networkNodeVisualizations.find(networkNode->getId());
     return it == networkNodeVisualizations.end() ? nullptr : it->second;
+}
+
+NetworkNodeOsgVisualization *NetworkNodeOsgVisualizer::getNetworkNodeVisualization(const cModule *networkNode) const
+{
+    return static_cast<NetworkNodeOsgVisualization *>(NetworkNodeVisualizerBase::getNetworkNodeVisualization(networkNode));
 }
 
 void NetworkNodeOsgVisualizer::addNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization)

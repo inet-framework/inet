@@ -52,7 +52,8 @@ class INET_API NetworkNodeVisualizerBase : public VisualizerBase, public cListen
     virtual void destroyNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization) = 0;
 
   public:
-    virtual NetworkNodeVisualization *getNetworkNodeVisualization(const cModule *networkNode) const = 0;
+    virtual NetworkNodeVisualization *findNetworkNodeVisualization(const cModule *networkNode) const = 0;
+    virtual NetworkNodeVisualization *getNetworkNodeVisualization(const cModule *networkNode) const;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };

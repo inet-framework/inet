@@ -142,7 +142,6 @@ void MediumCanvasVisualizer::initialize(int stage)
                     powerDensityMapFigures[networkNode->getId()] = powerDensityMapFigure;
                 }
                 if (displaySpectrums) {
-                    auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
                     auto spectrumFigure = new PlotFigure();
                     spectrumFigure->setTags("signal_spectrum");
                     spectrumFigure->setTooltip("This plot represents the signal spectral power density");
@@ -943,8 +942,6 @@ void MediumCanvasVisualizer::handleRadioAdded(const IRadio *radio)
     if (networkNodeFilter.matches(networkNode)) {
         invalidDisplay = true;
         auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
-        if (networkNodeVisualization == nullptr)
-            throw cRuntimeError("Cannot create medium visualization for '%s', because network node visualization is not found for '%s'", module->getFullPath().c_str(), networkNode->getFullPath().c_str());
         if (displayInterferenceRanges || (module->hasPar("displayInterferenceRange") && module->par("displayInterferenceRange"))) {
             auto interferenceRangeFigure = new cOvalFigure("interferenceRange");
             m maxInterferenceRange = check_and_cast<const IRadioMedium *>(radio->getMedium())->getMediumLimitCache()->getMaxInterferenceRange(radio);

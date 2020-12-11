@@ -70,10 +70,15 @@ NetworkNodeCanvasVisualization *NetworkNodeCanvasVisualizer::createNetworkNodeVi
     return visualization;
 }
 
-NetworkNodeCanvasVisualization *NetworkNodeCanvasVisualizer::getNetworkNodeVisualization(const cModule *networkNode) const
+NetworkNodeCanvasVisualization *NetworkNodeCanvasVisualizer::findNetworkNodeVisualization(const cModule *networkNode) const
 {
     auto it = networkNodeVisualizations.find(networkNode->getId());
     return it == networkNodeVisualizations.end() ? nullptr : it->second;
+}
+
+NetworkNodeCanvasVisualization *NetworkNodeCanvasVisualizer::getNetworkNodeVisualization(const cModule *networkNode) const
+{
+    return static_cast<NetworkNodeCanvasVisualization *>(NetworkNodeVisualizerBase::getNetworkNodeVisualization(networkNode));
 }
 
 void NetworkNodeCanvasVisualizer::addNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization)

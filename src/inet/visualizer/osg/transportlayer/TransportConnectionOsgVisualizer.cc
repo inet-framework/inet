@@ -67,14 +67,6 @@ const TransportConnectionVisualizerBase::TransportConnectionVisualization *Trans
 {
     auto sourceNode = createConnectionEndNode(tcpConnection);
     auto destinationNode = createConnectionEndNode(tcpConnection);
-    auto sourceNetworkNode = getContainingNode(source);
-    auto sourceVisualization = networkNodeVisualizer->getNetworkNodeVisualization(sourceNetworkNode);
-    if (sourceVisualization == nullptr)
-        throw cRuntimeError("Cannot create transport connection visualization for '%s', because network node visualization is not found for '%s'", source->getFullPath().c_str(), sourceNetworkNode->getFullPath().c_str());
-    auto destinationNetworkNode = getContainingNode(destination);
-    auto destinationVisualization = networkNodeVisualizer->getNetworkNodeVisualization(destinationNetworkNode);
-    if (destinationVisualization == nullptr)
-        throw cRuntimeError("Cannot create transport connection visualization for '%s', because network node visualization is not found for '%s'", source->getFullPath().c_str(), destinationNetworkNode->getFullPath().c_str());
     return new TransportConnectionOsgVisualization(sourceNode, destinationNode, source->getId(), destination->getId(), 1);
 }
 
@@ -83,10 +75,12 @@ void TransportConnectionOsgVisualizer::addConnectionVisualization(const Transpor
     TransportConnectionVisualizerBase::addConnectionVisualization(connectionVisualization);
     auto connectionOsgVisualization = static_cast<const TransportConnectionOsgVisualization *>(connectionVisualization);
     auto sourceModule = getSimulation()->getModule(connectionVisualization->sourceModuleId);
-    auto sourceVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(sourceModule));
+    auto sourceNetworkNode = getContainingNode(sourceModule);
+    auto sourceVisualization = networkNodeVisualizer->getNetworkNodeVisualization(sourceNetworkNode);
     sourceVisualization->addAnnotation(connectionOsgVisualization->sourceNode, osg::Vec3d(0, 0, 32), 0); // TODO size
     auto destinationModule = getSimulation()->getModule(connectionVisualization->destinationModuleId);
-    auto destinationVisualization = networkNodeVisualizer->getNetworkNodeVisualization(getContainingNode(destinationModule));
+    auto destinationNetworkNode = getContainingNode(destinationModule);
+    auto destinationVisualization = networkNodeVisualizer->getNetworkNodeVisualization(destinationNetworkNode);
     destinationVisualization->addAnnotation(connectionOsgVisualization->destinationNode, osg::Vec3d(0, 0, 32), 0); // TODO size
 }
 

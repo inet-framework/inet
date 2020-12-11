@@ -47,6 +47,15 @@ void NetworkNodeVisualizerBase::handleParameterChange(const char *name)
     }
 }
 
+NetworkNodeVisualizerBase::NetworkNodeVisualization *NetworkNodeVisualizerBase::getNetworkNodeVisualization(const cModule *networkNode) const
+{
+    auto visualization = findNetworkNodeVisualization(networkNode);
+    if (visualization == nullptr)
+        throw cRuntimeError("Network node visualization is not found for '%s'", networkNode->getFullPath().c_str());
+    else
+        return visualization;
+}
+
 void NetworkNodeVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signal));

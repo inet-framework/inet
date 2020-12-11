@@ -58,8 +58,6 @@ InterfaceTableVisualizerBase::InterfaceVisualization *InterfaceTableOsgVisualize
     geode->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
     geode->addDrawable(label);
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
-    if (networkNodeVisualization == nullptr)
-        throw cRuntimeError("Cannot create interface visualization for '%s', because network node visualization is not found for '%s'", networkInterface->getInterfaceName(), networkNode->getFullPath().c_str());
     return new InterfaceOsgVisualization(networkNodeVisualization, geode, networkNode->getId(), gate == nullptr ? -1 : gate->getId(), networkInterface->getInterfaceId());
 }
 

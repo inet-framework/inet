@@ -57,8 +57,6 @@ EnergyStorageVisualizerBase::EnergyStorageVisualization *EnergyStorageOsgVisuali
     geode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
     auto networkNode = getContainingNode(module);
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
-    if (networkNodeVisualization == nullptr)
-        throw cRuntimeError("Cannot create energy storage visualization for '%s', because network node visualization is not found for '%s'", module->getFullPath().c_str(), networkNode->getFullPath().c_str());
     return new EnergyStorageOsgVisualization(networkNodeVisualization, geode, energyStorage);
 }
 

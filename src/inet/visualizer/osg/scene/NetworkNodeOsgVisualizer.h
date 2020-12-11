@@ -44,6 +44,7 @@ class INET_API NetworkNodeOsgVisualizer : public NetworkNodeVisualizerBase
 
   public:
     virtual ~NetworkNodeOsgVisualizer();
+    virtual NetworkNodeOsgVisualization *findNetworkNodeVisualization(const cModule *networkNode) const override;
     virtual NetworkNodeOsgVisualization *getNetworkNodeVisualization(const cModule *networkNode) const override;
 };
 
