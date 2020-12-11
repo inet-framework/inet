@@ -377,7 +377,7 @@ void MediumOsgVisualizer::handleRadioAdded(const IRadio *radio)
         if (displaySignalArrivals) {
             auto texture = new osg::Texture2D();
             texture->setImage(receptionImage);
-            auto geometry = osg::createTexturedQuadGeometry(osg::Vec3(-transmissionImage->s() / 2, 0.0, 0.0), osg::Vec3(receptionImage->s(), 0.0, 0.0), osg::Vec3(0.0, receptionImage->t(), 0.0), 0.0, 0.0, 1.0, 1.0);
+            auto geometry = osg::createTexturedQuadGeometry(osg::Vec3(-receptionImage->s() / 2, 0.0, 0.0), osg::Vec3(receptionImage->s(), 0.0, 0.0), osg::Vec3(0.0, receptionImage->t(), 0.0), 0.0, 0.0, 1.0, 1.0);
             auto stateSet = geometry->getOrCreateStateSet();
             stateSet->setTextureAttributeAndModes(0, texture);
             stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
