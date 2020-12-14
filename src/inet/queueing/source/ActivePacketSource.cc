@@ -30,7 +30,7 @@ void ActivePacketSource::initialize(int stage)
     ActivePacketSourceBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         productionIntervalParameter = &par("productionInterval");
-        productionTimer = new cMessage("ProductionTimer");
+        productionTimer = new ClockEvent("ProductionTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (!productionTimer->isScheduled() && (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()))) {
@@ -54,7 +54,7 @@ void ActivePacketSource::handleMessage(cMessage *message)
 
 void ActivePacketSource::scheduleProductionTimer()
 {
-    scheduleAfter(productionIntervalParameter->doubleValue(), productionTimer);
+    scheduleClockEventAfter(productionIntervalParameter->doubleValue(), productionTimer);
 }
 
 void ActivePacketSource::producePacket()

@@ -18,16 +18,17 @@
 #ifndef __INET_PASSIVEPACKETSOURCE_H
 #define __INET_PASSIVEPACKETSOURCE_H
 
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PassivePacketSourceBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PassivePacketSource : public PassivePacketSourceBase
+class INET_API PassivePacketSource : public ClockUserModuleMixin<PassivePacketSourceBase>
 {
   protected:
     cPar *providingIntervalParameter = nullptr;
-    cMessage *providingTimer = nullptr;
+    ClockEvent *providingTimer = nullptr;
 
     mutable Packet *nextPacket = nullptr;
 
@@ -39,7 +40,7 @@ class INET_API PassivePacketSource : public PassivePacketSourceBase
     virtual Packet *providePacket(cGate *gate);
 
   public:
-    virtual ~PassivePacketSource() { delete nextPacket; cancelAndDelete(providingTimer); }
+    virtual ~PassivePacketSource() { delete nextPacket; cancelAndDeleteClockEvent(providingTimer); }
 
     virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return outputGate == gate; }

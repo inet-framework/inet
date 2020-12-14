@@ -29,7 +29,7 @@ void PassivePacketSource::initialize(int stage)
     PassivePacketSourceBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         providingIntervalParameter = &par("providingInterval");
-        providingTimer = new cMessage("ProvidingTimer");
+        providingTimer = new ClockEvent("ProvidingTimer");
         WATCH_PTR(nextPacket);
     }
     else if (stage == INITSTAGE_QUEUEING) {
@@ -50,9 +50,9 @@ void PassivePacketSource::handleMessage(cMessage *message)
 
 void PassivePacketSource::scheduleProvidingTimer()
 {
-    simtime_t interval = providingIntervalParameter->doubleValue();
+    clocktime_t interval = providingIntervalParameter->doubleValue();
     if (interval != 0 || providingTimer->getArrivalModule() == nullptr)
-        scheduleAfter(interval, providingTimer);
+        scheduleClockEventAfter(interval, providingTimer);
 }
 
 Packet *PassivePacketSource::canPullPacket(cGate *gate) const
@@ -70,7 +70,7 @@ Packet *PassivePacketSource::canPullPacket(cGate *gate) const
 Packet *PassivePacketSource::pullPacket(cGate *gate)
 {
     Enter_Method("pullPacket");
-    if (providingTimer->isScheduled() && providingTimer->getArrivalTime() > simTime())
+    if (providingTimer->isScheduled() && providingTimer->getArrivalClockTime() > getClockTime())
         throw cRuntimeError("Another packet is already being provided");
     else {
         auto packet = providePacket(gate);

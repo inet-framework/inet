@@ -20,9 +20,11 @@
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/lifecycle/OperationalMixin.h"
 #ifdef INET_WITH_QUEUEING
+#include "inet/queueing/base/ActivePacketSourceBase.h"
 #include "inet/queueing/base/PacketGateBase.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/base/PacketPusherBase.h"
+#include "inet/queueing/base/PassivePacketSourceBase.h"
 #endif // #ifdef INET_WITH_QUEUEING
 
 namespace inet {
@@ -32,9 +34,11 @@ template class ClockUserModuleMixin<cSimpleModule>;
 template class ClockUserModuleMixin<ApplicationBase>;
 
 #ifdef INET_WITH_QUEUEING
+template class ClockUserModuleMixin<queueing::ActivePacketSourceBase>;
+template class ClockUserModuleMixin<queueing::PacketGateBase>;
 template class ClockUserModuleMixin<queueing::PacketProcessorBase>;
 template class ClockUserModuleMixin<queueing::PacketPusherBase>;
-template class ClockUserModuleMixin<queueing::PacketGateBase>;
+template class ClockUserModuleMixin<queueing::PassivePacketSourceBase>;
 template class ClockUserModuleMixin<OperationalMixin<queueing::PacketProcessorBase>>;
 #endif // #ifdef INET_WITH_QUEUEING
 
