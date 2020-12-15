@@ -18,6 +18,7 @@
 #include "inet/physicallayer/wireless/apsk/packetlevel/ApskRadio.h"
 
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskEncoder.h"
@@ -33,6 +34,35 @@ Define_Module(ApskRadio);
 ApskRadio::ApskRadio() :
     FlatRadioBase()
 {
+}
+
+void ApskRadio::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL) {
+        const char *protocolName = par("protocol");
+        if (*protocolName != '\0')
+            protocol = Protocol::getProtocol(protocolName);
+    }
+}
+
+void ApskRadio::handleUpperPacket(Packet *packet)
+{
+    if (protocol != nullptr && protocol != packet->getTag<PacketProtocolTag>()->getProtocol())
+        throw cRuntimeError("Packet received with incorrect protocol");
+    else
+        FlatRadioBase::handleUpperPacket(packet);
+}
+
+void ApskRadio::sendUp(Packet *packet)
+{
+    if (protocol != nullptr && protocol != packet->getTag<PacketProtocolTag>()->getProtocol()) {
+        PacketDropDetails details;
+        details.setReason(PacketDropReason::OTHER_PACKET_DROP);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+    }
+    else
+        FlatRadioBase::sendUp(packet);
 }
 
 b ApskRadio::computePaddingLength(b length, const ConvolutionalCode *forwardErrorCorrection, const ApskModulationBase *modulation) const

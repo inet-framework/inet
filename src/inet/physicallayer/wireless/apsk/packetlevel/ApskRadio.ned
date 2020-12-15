@@ -29,9 +29,12 @@ import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
 module ApskRadio extends FlatRadioBase
 {
     parameters:
+        string protocol = default("");
         string signalAnalogRepresentation @enum("scalar", "dimensional") = default("scalar");
         transmitter.typename = default(signalAnalogRepresentation == "scalar" ? "ApskScalarTransmitter" : signalAnalogRepresentation == "dimensional" ? "ApskDimensionalTransmitter" : "");
         receiver.typename = default(signalAnalogRepresentation == "scalar" ? "ApskScalarReceiver" : signalAnalogRepresentation == "dimensional" ? "ApskDimensionalReceiver" : "");
         @class(ApskRadio);
+        @signal[packetDropped](type=inet::Packet);
+        @statistic[packetDropped](title="packets dropped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }
 
