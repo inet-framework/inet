@@ -27,6 +27,7 @@ simple ExtIpv4TunDevice
 {
     parameters:
         string device;
+        string namespace = default("");
         string packetNameFormat = default("Ext");
         @signal[packetSentToLower](type=Packet);
         @signal[packetReceivedFromLower](type=Packet);
