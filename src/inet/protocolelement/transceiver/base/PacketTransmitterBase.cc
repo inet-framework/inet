@@ -62,12 +62,13 @@ void PacketTransmitterBase::handleStartOperation(LifecycleOperation *operation)
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
-Signal *PacketTransmitterBase::encodePacket(Packet *packet) const
+Signal *PacketTransmitterBase::encodePacket(Packet *packet)
 {
-    auto duration = calculateDuration(packet);
-    auto bitTransmissionTime = CLOCKTIME_AS_SIMTIME(duration / packet->getBitLength());
+    txDurationClockTime = calculateDuration(packet);
+    // TODO: this is just a weak approximation which ignores the past and future drift and drift rate changes of the clock
+    simtime_t bitTransmissionTime = CLOCKTIME_AS_SIMTIME(txDurationClockTime / packet->getBitLength());
     auto packetEvent = new PacketTransmittedEvent();
-    packetEvent->setDatarate(packet->getTotalLength() / s(duration.dbl()));
+    packetEvent->setDatarate(packet->getTotalLength() / s(txDurationClockTime.dbl()));
     insertPacketEvent(this, packet, PEK_TRANSMITTED, bitTransmissionTime, packetEvent);
     increaseTimeTag<TransmissionTimeTag>(packet, bitTransmissionTime);
     if (auto channel = dynamic_cast<cDatarateChannel *>(outputGate->findTransmissionChannel())) {
@@ -82,7 +83,7 @@ Signal *PacketTransmitterBase::encodePacket(Packet *packet) const
     }
     auto signal = new Signal(packet->getName());
     signal->encapsulate(packet);
-    signal->setDuration(CLOCKTIME_AS_SIMTIME(duration));
+    signal->setDuration(CLOCKTIME_AS_SIMTIME(txDurationClockTime));
     return signal;
 }
 

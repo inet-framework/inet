@@ -45,6 +45,8 @@ class INET_API PacketTransmitterBase : public ClockUserModuleMixin<OperationalMi
     Signal *txSignal = nullptr;
     ClockEvent *txEndTimer = nullptr;
 
+    clocktime_t txDurationClockTime = -1;
+
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *message) override;
@@ -54,7 +56,7 @@ class INET_API PacketTransmitterBase : public ClockUserModuleMixin<OperationalMi
     virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
     virtual void handleStartOperation(LifecycleOperation *operation) override;
 
-    virtual Signal *encodePacket(Packet *packet) const;
+    virtual Signal *encodePacket(Packet *packet);
 
     virtual void sendSignalStart(Signal *signal, int transmissionId);
     virtual void sendSignalProgress(Signal *signal, int transmissionId, b bitPosition, clocktime_t timePosition);
