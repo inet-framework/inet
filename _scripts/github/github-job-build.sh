@@ -49,7 +49,7 @@ if [ "$TARGET_PLATFORM" != "linux" ]; then
     echo "::endgroup::"
 fi
 
-if [ "$TARGET_PLATFORM" = "mac" ]; then
+if [ "$TARGET_PLATFORM" = "macosx" ]; then
     echo "::group::Disable iCanCloud"
     opp_featuretool disable iCanCloud
     echo "::endgroup::"
