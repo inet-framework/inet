@@ -25,10 +25,15 @@ echo "::group::Enable all features"
 opp_featuretool enable all 2>&1 # redirecting stderr so it doesn't get out of sync with stdout
 echo "::endgroup::"
 
+echo "::group::Disable OSG features"
+opp_featuretool disable VisualizationOsg VisualizationOsgShowcases 2>&1
+echo "::endgroup::"
+
 echo "::group::Run fingerprint tests"
 cd tests/fingerprint
 # this indirectly calls the script named simply "inet", which handles the MODE envvar internally
-./fingerprinttest | tee fingerprinttest.out
+./fingerprinttest -f 'tplx' | tee fingerprinttest.out
+./fingerprinttest -f '~tND' -a '--**.crcMode=\"computed\" --**.fcsMode=\"computed\"' | tee fingerprinttest.out
 #                ^---- Everything from here on is only needed to make the pretty GitHub annotations. ----v
 EXITCODE="${PIPESTATUS[0]}"
 echo "::endgroup::"
