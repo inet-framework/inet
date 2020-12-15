@@ -44,6 +44,26 @@ class INET_API IClock
     virtual clocktime_t getClockTime() const = 0;
 
     /**
+     * Returns the clock time for the specified future simulation time according
+     * to the current state of the clock. This method implements a monotonic
+     * function with respect to the simulation time argument. It's allowed to
+     * return a different value for the same argument value if the clock is set
+     * between calls. The time argument must be greater than or equal to the current
+     * simulation time, otherwise an error is raised.
+     */
+    virtual clocktime_t computeClockTimeFromSimTime(simtime_t time) const = 0;
+
+    /**
+     * Returns the simulation time (first moment) for the specified future clock
+     * time according to the current state of the clock. This method implements
+     * a monotonic function with respect to the clock time argument. It's allowed
+     * to return a different value for the same argument value if the clock is
+     * set between calls. The time argument must be greater or than equal to the
+     * current clock time, otherwise an error is raised.
+     */
+    virtual simtime_t computeSimTimeFromClockTime(clocktime_t time) const = 0;
+
+    /**
      * Schedules an event to be delivered to the caller module (i.e. the context
      * module) at the specified clock time. The event is anchored to a specific
      * clock time value, so the actual simulation time when this event is executed
