@@ -18,6 +18,7 @@
 #ifndef __INET_PREEMPTABLESTREAMER_H
 #define __INET_PREEMPTABLESTREAMER_H
 
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IPacketFlow.h"
 
@@ -25,7 +26,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API PreemptableStreamer : public PacketProcessorBase, public virtual IPacketFlow
+class INET_API PreemptableStreamer : public ClockUserModuleMixin<PacketProcessorBase>, public virtual IPacketFlow
 {
   protected:
     bps datarate = bps(NaN);
@@ -45,7 +46,7 @@ class INET_API PreemptableStreamer : public PacketProcessorBase, public virtual 
     Packet *streamedPacket = nullptr;
     Packet *remainingPacket = nullptr;
 
-    cMessage *endStreamingTimer = nullptr;
+    ClockEvent *endStreamingTimer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
