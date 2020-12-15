@@ -38,6 +38,14 @@ bool StreamingTransmitterBase::canPushSomePacket(cGate *gate) const
     return transmissionChannel != nullptr && !transmissionChannel->isDisabled() && PacketTransmitterBase::canPushSomePacket(gate);
 }
 
+void StreamingTransmitterBase::scheduleTxEndTimer(Signal *signal)
+{
+    ASSERT(txStartClockTime != -1);
+    clocktime_t txEndClockTime = txStartClockTime + txDurationClockTime;
+    EV_INFO << "Scheduling transmission end timer" << EV_FIELD(at, txEndClockTime.ustr()) << EV_ENDL;
+    rescheduleClockEventAt(txEndClockTime, txEndTimer);
+}
+
 void StreamingTransmitterBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
 #ifdef INET_WITH_CLOCK

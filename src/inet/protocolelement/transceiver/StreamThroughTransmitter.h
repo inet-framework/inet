@@ -48,7 +48,6 @@ class INET_API StreamThroughTransmitter : public StreamingTransmitterBase
     virtual void abortTx() override;
 
     virtual void scheduleBufferUnderrunTimer();
-    virtual void scheduleTxEndTimer(Signal *signal);
 
   public:
     virtual ~StreamThroughTransmitter() { cancelAndDelete(bufferUnderrunTimer); }

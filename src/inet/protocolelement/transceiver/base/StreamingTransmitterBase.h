@@ -35,6 +35,8 @@ class INET_API StreamingTransmitterBase : public PacketTransmitterBase
 
     virtual void abortTx() = 0;
 
+    virtual void scheduleTxEndTimer(Signal *signal);
+
   public:
     virtual bool canPushSomePacket(cGate *gate) const override;
 
