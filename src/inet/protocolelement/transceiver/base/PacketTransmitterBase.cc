@@ -83,7 +83,7 @@ Signal *PacketTransmitterBase::encodePacket(Packet *packet)
     }
     auto signal = new Signal(packet->getName());
     signal->encapsulate(packet);
-    signal->setDuration(CLOCKTIME_AS_SIMTIME(txDurationClockTime));
+    signal->setDuration(calculateDuration(txDurationClockTime));
     return signal;
 }
 
@@ -111,6 +111,11 @@ clocktime_t PacketTransmitterBase::calculateClockTimeDuration(const Packet *pack
     s duration = packet->getTotalLength() / txDatarate;
     EV_TRACE << "Calculating signal duration" << EV_FIELD(packet) << EV_FIELD(duration, simsec(duration)) << EV_ENDL;
     return duration.get();
+}
+
+simtime_t PacketTransmitterBase::calculateDuration(clocktime_t clockTimeDuration) const
+{
+    return computeSimTimeFromClockTime(txStartClockTime + clockTimeDuration) - txStartTime;
 }
 
 } // namespace inet
