@@ -64,7 +64,7 @@ void PacketTransmitterBase::handleStartOperation(LifecycleOperation *operation)
 
 Signal *PacketTransmitterBase::encodePacket(Packet *packet)
 {
-    txDurationClockTime = calculateDuration(packet);
+    txDurationClockTime = calculateClockTimeDuration(packet);
     // TODO: this is just a weak approximation which ignores the past and future drift and drift rate changes of the clock
     simtime_t bitTransmissionTime = CLOCKTIME_AS_SIMTIME(txDurationClockTime / packet->getBitLength());
     auto packetEvent = new PacketTransmittedEvent();
@@ -106,7 +106,7 @@ void PacketTransmitterBase::sendSignalEnd(Signal *signal, int transmissionId)
     send(signal, SendOptions().duration(signal->getDuration()).finishTx(transmissionId), outputGate);
 }
 
-clocktime_t PacketTransmitterBase::calculateDuration(const Packet *packet) const
+clocktime_t PacketTransmitterBase::calculateClockTimeDuration(const Packet *packet) const
 {
     s duration = packet->getTotalLength() / txDatarate;
     EV_TRACE << "Calculating signal duration" << EV_FIELD(packet) << EV_FIELD(duration, simsec(duration)) << EV_ENDL;

@@ -64,7 +64,7 @@ class INET_API PacketTransmitterBase : public ClockUserModuleMixin<OperationalMi
     virtual void sendSignalProgress(Signal *signal, int transmissionId, b bitPosition, clocktime_t timePosition);
     virtual void sendSignalEnd(Signal *signal, int transmissionId);
 
-    virtual clocktime_t calculateDuration(const Packet *packet) const;
+    virtual clocktime_t calculateClockTimeDuration(const Packet *packet) const;
     virtual bool isTransmitting() const { return txSignal != nullptr; }
 
   public:
