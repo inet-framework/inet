@@ -18,17 +18,18 @@
 #ifndef __INET_PASSIVEPACKETSINK_H
 #define __INET_PASSIVEPACKETSINK_H
 
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PassivePacketSinkBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PassivePacketSink : public PassivePacketSinkBase
+class INET_API PassivePacketSink : public ClockUserModuleMixin<PassivePacketSinkBase>
 {
   protected:
     cPar *consumptionIntervalParameter = nullptr;
-    cMessage *consumptionTimer = nullptr;
+    ClockEvent *consumptionTimer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
@@ -38,7 +39,7 @@ class INET_API PassivePacketSink : public PassivePacketSinkBase
     virtual void consumePacket(Packet *packet);
 
   public:
-    virtual ~PassivePacketSink() { cancelAndDelete(consumptionTimer); }
+    virtual ~PassivePacketSink() { cancelAndDeleteClockEvent(consumptionTimer); }
 
     virtual bool supportsPacketPushing(cGate *gate) const override { return gate == inputGate; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return false; }

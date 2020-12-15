@@ -27,7 +27,7 @@ void ActivePacketSink::initialize(int stage)
     ActivePacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         collectionIntervalParameter = &par("collectionInterval");
-        collectionTimer = new cMessage("CollectionTimer");
+        collectionTimer = new ClockEvent("CollectionTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (!collectionTimer->isScheduled() && provider->canPullSomePacket(inputGate->getPathStartGate())) {
@@ -51,7 +51,7 @@ void ActivePacketSink::handleMessage(cMessage *message)
 
 void ActivePacketSink::scheduleCollectionTimer()
 {
-    scheduleAfter(collectionIntervalParameter->doubleValue(), collectionTimer);
+    scheduleClockEventAfter(collectionIntervalParameter->doubleValue(), collectionTimer);
 }
 
 void ActivePacketSink::collectPacket()

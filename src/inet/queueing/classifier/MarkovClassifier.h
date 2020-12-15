@@ -18,6 +18,7 @@
 #ifndef __INET_MARKOVCLASSIFIER_H
 #define __INET_MARKOVCLASSIFIER_H
 
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketClassifierBase.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IPassivePacketSource.h"
@@ -25,7 +26,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API MarkovClassifier : public PacketClassifierBase, public virtual IActivePacketSink, public virtual IPassivePacketSource
+class INET_API MarkovClassifier : public ClockUserModuleMixin<PacketClassifierBase>, public virtual IActivePacketSink, public virtual IPassivePacketSource
 {
   protected:
     IPassivePacketSource *provider = nullptr;
@@ -36,8 +37,7 @@ class INET_API MarkovClassifier : public PacketClassifierBase, public virtual IA
 
     int state;
 
-    cMessage *transitionTimer = nullptr;
-    cMessage *waitTimer = nullptr;
+    ClockEvent *waitTimer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;

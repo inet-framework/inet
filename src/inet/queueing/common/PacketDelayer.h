@@ -19,12 +19,13 @@
 #define __INET_PACKETDELAYER_H
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketDelayer : public PacketPusherBase, public TransparentProtocolRegistrationListener
+class INET_API PacketDelayer : public ClockUserModuleMixin<PacketPusherBase>, public TransparentProtocolRegistrationListener
 {
   protected:
     virtual void handleMessage(cMessage *message) override;

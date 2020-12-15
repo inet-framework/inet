@@ -18,18 +18,19 @@
 #ifndef __INET_TIMEBASEDTOKENGENERATOR_H
 #define __INET_TIMEBASEDTOKENGENERATOR_H
 
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/TokenGeneratorBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API TimeBasedTokenGenerator : public TokenGeneratorBase
+class INET_API TimeBasedTokenGenerator : public ClockUserModuleMixin<TokenGeneratorBase>
 {
   protected:
     cPar *generationIntervalParameter = nullptr;
     cPar *numTokensParameter = nullptr;
 
-    cMessage *generationTimer = nullptr;
+    ClockEvent *generationTimer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
@@ -38,7 +39,7 @@ class INET_API TimeBasedTokenGenerator : public TokenGeneratorBase
     virtual void scheduleGenerationTimer();
 
   public:
-    virtual ~TimeBasedTokenGenerator() { cancelAndDelete(generationTimer); }
+    virtual ~TimeBasedTokenGenerator() { cancelAndDeleteClockEvent(generationTimer); }
 
     virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return false; }

@@ -28,7 +28,7 @@ void TimeBasedTokenGenerator::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         generationIntervalParameter = &par("generationInterval");
         numTokensParameter = &par("numTokens");
-        generationTimer = new cMessage("GenerationTimer");
+        generationTimer = new ClockEvent("GenerationTimer");
     }
     else if (stage == INITSTAGE_QUEUEING)
         scheduleGenerationTimer();
@@ -36,7 +36,7 @@ void TimeBasedTokenGenerator::initialize(int stage)
 
 void TimeBasedTokenGenerator::scheduleGenerationTimer()
 {
-    scheduleAfter(generationIntervalParameter->doubleValue(), generationTimer);
+    scheduleClockEventAfter(generationIntervalParameter->doubleValue(), generationTimer);
 }
 
 void TimeBasedTokenGenerator::handleMessage(cMessage *message)

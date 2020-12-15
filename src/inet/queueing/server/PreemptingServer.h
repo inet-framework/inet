@@ -18,6 +18,7 @@
 #ifndef __INET_PREEMPTINGSERVER_H
 #define __INET_PREEMPTINGSERVER_H
 
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketServerBase.h"
 
 namespace inet {
@@ -25,14 +26,14 @@ namespace queueing {
 
 using namespace inet::queueing;
 
-class INET_API PreemptingServer : public PacketServerBase
+class INET_API PreemptingServer : public ClockUserModuleMixin<PacketServerBase>
 {
   protected:
     bps datarate = bps(NaN);
 
     Packet *streamedPacket = nullptr;
 
-    cMessage *timer = nullptr;
+    ClockEvent *timer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
@@ -45,7 +46,7 @@ class INET_API PreemptingServer : public PacketServerBase
     virtual void endStreaming();
 
   public:
-    virtual ~PreemptingServer() { delete streamedPacket; cancelAndDelete(timer); }
+    virtual ~PreemptingServer() { delete streamedPacket; cancelAndDeleteClockEvent(timer); }
 
     virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handleCanPullPacketChanged(cGate *gate) override;

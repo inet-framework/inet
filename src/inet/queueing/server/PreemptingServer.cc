@@ -27,7 +27,7 @@ void PreemptingServer::initialize(int stage)
     PacketServerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         datarate = bps(par("datarate"));
-        timer = new cMessage("Timer");
+        timer = new ClockEvent("Timer");
     }
 }
 
@@ -51,7 +51,7 @@ void PreemptingServer::startStreaming()
     EV_INFO << "Starting streaming packet" << EV_FIELD(packet) << EV_ENDL;
     streamedPacket = packet;
     pushOrSendPacketStart(streamedPacket->dup(), outputGate, consumer, datarate, packet->getTransmissionId());
-    scheduleAt(simTime() + s(streamedPacket->getTotalLength() / datarate).get(), timer);
+    scheduleClockEventAfter(s(streamedPacket->getTotalLength() / datarate).get(), timer);
     handlePacketProcessed(streamedPacket);
     updateDisplayString();
 }
@@ -80,7 +80,7 @@ void PreemptingServer::handleCanPullPacketChanged(cGate *gate)
     Enter_Method("handleCanPullPacketChanged");
     if (isStreaming()) {
         endStreaming();
-        cancelEvent(timer);
+        cancelClockEvent(timer);
     }
     else if (canStartStreaming())
         startStreaming();
