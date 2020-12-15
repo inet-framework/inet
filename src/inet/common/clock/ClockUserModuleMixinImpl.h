@@ -135,6 +135,30 @@ void ClockUserModuleMixin<T>::rescheduleClockEventAfter(clocktime_t t, ClockEven
 }
 
 template<typename T>
+clocktime_t ClockUserModuleMixin<T>::computeClockTimeFromSimTime(simtime_t t) const
+{
+#ifndef NDEBUG
+    usedClockApi = true;
+#endif
+    if (clock != nullptr)
+        return clock->computeClockTimeFromSimTime(t);
+    else
+        return ClockTime::from(t);
+}
+
+template<typename T>
+simtime_t ClockUserModuleMixin<T>::computeSimTimeFromClockTime(clocktime_t t) const
+{
+#ifndef NDEBUG
+    usedClockApi = true;
+#endif
+    if (clock != nullptr)
+        return clock->computeSimTimeFromClockTime(t);
+    else
+        return t.asSimTime();
+}
+
+template<typename T>
 clocktime_t ClockUserModuleMixin<T>::getClockTime() const {
 #ifndef NDEBUG
     usedClockApi = true;
