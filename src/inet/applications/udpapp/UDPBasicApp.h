@@ -43,6 +43,16 @@ class INET_API UDPBasicApp : public ApplicationBase
     simtime_t stopTime;
     const char *packetName = nullptr;
 
+    bool useSendScript;  // whether sendInterval or sendScript is in use
+    cPar *sendIntervalPar = nullptr;
+    struct SendScriptItem {
+        simtime_t tSend;
+        long numBytes = 0;
+        SendScriptItem(simtime_t t, long n) { tSend = t; numBytes = n; }
+    };
+    std::vector<SendScriptItem> sendScript;
+    int sendScriptIndex = 0;
+
     // state
     UDPSocket socket;
     cMessage *selfMsg = nullptr;
@@ -60,10 +70,12 @@ class INET_API UDPBasicApp : public ApplicationBase
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void finish() override;
     virtual void refreshDisplay() const override;
+    virtual void parseScript(const char *script);
 
     // chooses random destination address
     virtual L3Address chooseDestAddr();
-    virtual void sendPacket();
+    virtual void sendPacket(long bytes);
+    virtual void scheduleNextSending();
     virtual void processPacket(cPacket *msg);
     virtual void setSocketOptions();
 

@@ -55,6 +55,14 @@ void UDPBasicApp::initialize(int stage)
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
         selfMsg = new cMessage("sendTimer");
+
+        sendIntervalPar = &par("sendInterval");
+        bool sendIntervalGiven = sendIntervalPar->isExpression() || sendIntervalPar->doubleValue() > 0; // not a constant zero or negative number
+        const char *script = par("sendScript");
+        parseScript(script);
+        if (sendIntervalGiven && !sendScript.empty())
+            throw cRuntimeError("Cannot use both sendScript and sendInterval");
+        useSendScript = !sendIntervalGiven; // note: instead of !sendScript.empty(), because sendInterval=0 should result in sending turned off
     }
 }
 
@@ -95,6 +103,59 @@ void UDPBasicApp::setSocketOptions()
     }
 }
 
+void UDPBasicApp::parseScript(const char *script)
+{
+    const char *s = script;
+
+    EV_DEBUG << "parse script \"" << script << "\"\n";
+    while (*s) {
+        // parse time
+        while (isspace(*s))
+            s++;
+
+        if (!*s || *s == ';')
+            break;
+
+        const char *s0 = s;
+        simtime_t tSend = strtod(s, &const_cast<char *&>(s));
+
+        if (s == s0)
+            throw cRuntimeError("Syntax error in script: simulation time expected");
+
+        // parse number of bytes
+        while (isspace(*s))
+            s++;
+
+        if (!isdigit(*s))
+            throw cRuntimeError("Syntax error in script: number of bytes expected");
+
+        long numBytes = strtol(s, nullptr, 10);
+
+        while (isdigit(*s))
+            s++;
+
+        // add command
+        EV_DEBUG << " add command (" << tSend << "s, " << "B)\n";
+        sendScript.push_back(SendScriptItem(tSend, numBytes));
+
+        // skip delimiter
+        while (isspace(*s))
+            s++;
+
+        if (!*s)
+            break;
+
+        if (*s != ';')
+            throw cRuntimeError("Syntax error in script: separator ';' missing");
+
+        s++;
+
+        while (isspace(*s))
+            s++;
+    }
+    EV_DEBUG << "parser finished\n";
+}
+
 L3Address UDPBasicApp::chooseDestAddr()
 {
     int k = intrand(destAddresses.size());
@@ -110,12 +171,12 @@ L3Address UDPBasicApp::chooseDestAddr()
     return destAddresses[k];
 }
 
-void UDPBasicApp::sendPacket()
+void UDPBasicApp::sendPacket(long bytes)
 {
     std::ostringstream str;
     str << packetName << "-" << numSent;
     ApplicationPacket *payload = new ApplicationPacket(str.str().c_str());
-    payload->setByteLength(par("messageLength").intValue());
+    payload->setByteLength(bytes);
     payload->setSequenceNumber(numSent);
 
     L3Address destAddr = chooseDestAddr();
@@ -146,8 +207,14 @@ void UDPBasicApp::processStart()
     }
 
     if (!destAddresses.empty()) {
-        selfMsg->setKind(SEND);
-        processSend();
+        if (!useSendScript)
+            processSend();
+        else {
+            // find first script entry whose time is >= simTime()
+            for (sendScriptIndex = 0; sendScriptIndex < sendScript.size() && sendScript[sendScriptIndex].tSend < simTime(); sendScriptIndex++)
+                /*no-op*/;
+            scheduleNextSending();
+        }
     }
     else {
         if (stopTime >= SIMTIME_ZERO) {
@@ -159,15 +226,40 @@ void UDPBasicApp::processStart()
 
 void UDPBasicApp::processSend()
 {
-    sendPacket();
-    simtime_t d = simTime() + par("sendInterval").doubleValue();
-    if (stopTime < SIMTIME_ZERO || d < stopTime) {
-        selfMsg->setKind(SEND);
-        scheduleAt(d, selfMsg);
+    long bytes = useSendScript ? sendScript[sendScriptIndex++].numBytes : (long)par("messageLength").intValue();
+    sendPacket(bytes);
+
+    scheduleNextSending();
+}
+
+void UDPBasicApp::scheduleNextSending()
+{
+    simtime_t nextSendTime;
+    if (!useSendScript)
+        nextSendTime = simTime() + sendIntervalPar->doubleValue();
+    else
+        nextSendTime = sendScriptIndex < sendScript.size() ? sendScript[sendScriptIndex].tSend : -1;
+
+    if (nextSendTime < SIMTIME_ZERO && stopTime < SIMTIME_ZERO) {  // neither is valid
+        // nothing to do
     }
-    else {
+    else if (stopTime < SIMTIME_ZERO) { // only nextSendTime is valid
+        selfMsg->setKind(SEND);
+        scheduleAt(nextSendTime, selfMsg);
+    }
+    else if (nextSendTime < SIMTIME_ZERO) {  // only stopTime is valid
         selfMsg->setKind(STOP);
         scheduleAt(stopTime, selfMsg);
+    }
+    else { // both are valid
+        if (nextSendTime < stopTime) {
+            selfMsg->setKind(SEND);
+            scheduleAt(nextSendTime, selfMsg);
+        }
+        else {
+            selfMsg->setKind(STOP);
+            scheduleAt(stopTime, selfMsg);
+        }
     }
 }
 

@@ -26,7 +26,11 @@ import inet.applications.contract.IUDPApp;
 // Sends UDP packets to the given IP address at the given interval.
 // Compatible with both ~IPv4 and ~IPv6.
 //
-// The sending interval can be a constant or a random value (e.g. exponential(1)).
+// The sending interval (sendInterval parameter) can be a constant or a random
+// value (e.g. exponential(1)). An alternative way of specifying traffic is 
+// the sendScript parameter. If a script is given, it takes pririty over sendInterval.
+// The script format is "<time> <numBytes>;<time> <numBytes>;..."
+//
 // If the destAddresses parameter contains more than one address, one
 // of them is randomly chosen for each packet. An address may be given in the
 // dotted decimal notation, or with the module name. (The L3AddressResolver
@@ -51,7 +55,8 @@ simple UDPBasicApp like IUDPApp
         volatile int messageLength @unit(B); // length of messages to generate, in bytes
         double startTime @unit(s) = default(this.sendInterval); // application start time (start of the first packet)
         double stopTime @unit(s) = default(-1s);  // time of finishing sending, -1s means forever
-        volatile double sendInterval @unit(s); // should usually be a random value, e.g. exponential(1)
+        volatile double sendInterval @unit(s) = default(0s); // e.g. exponential(1); 0s or negative means off
+        string sendScript = default(""); // if not empty, overrides sendInterval
         int timeToLive = default(-1); // if not -1, set the TTL (IPv4) or Hop Limit (IPv6) field of sent packets to this value
         int typeOfService = default(-1); // if not -1, set the ToS (IPv4) or Traffic Class (IPv6) field of sent packets to this value
         string multicastInterface = default("");  // if not empty, set the multicast output interface option on the socket (interface name expected)
