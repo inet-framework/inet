@@ -27,9 +27,6 @@ class INET_API StreamingTransmitterBase : public PacketTransmitterBase
   protected:
     cChannel *transmissionChannel = nullptr;
 
-    simtime_t txStartTime = -1;
-    clocktime_t txStartClockTime = -1;
-
   protected:
     virtual void initialize(int stage) override;
 

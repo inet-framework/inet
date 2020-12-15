@@ -45,6 +45,8 @@ class INET_API PacketTransmitterBase : public ClockUserModuleMixin<OperationalMi
     Signal *txSignal = nullptr;
     ClockEvent *txEndTimer = nullptr;
 
+    simtime_t txStartTime = -1;
+    clocktime_t txStartClockTime = -1;
     clocktime_t txDurationClockTime = -1;
 
   protected:
