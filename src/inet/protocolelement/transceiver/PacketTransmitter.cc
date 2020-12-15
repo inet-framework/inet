@@ -52,13 +52,17 @@ void PacketTransmitter::startTx(Packet *packet)
 {
     // 1. check current state
     ASSERT(!isTransmitting());
-    // 2. create signal
+    // 2. store transmission progress
+    txDatarate = bps(*dataratePar);
+    txStartTime = simTime();
+    txStartClockTime = getClockTime();
+    // 3. create signal
     auto signal = encodePacket(packet);
     txSignal = signal->dup();
-    // 3. send signal start and notify subscribers
+    // 4. send signal start and notify subscribers
     emit(transmissionStartedSignal, signal);
     send(signal, SendOptions().duration(signal->getDuration()), outputGate);
-    // 4. schedule transmission end timer
+    // 5. schedule transmission end timer
     scheduleTxEndTimer(txSignal);
 }
 
@@ -73,6 +77,8 @@ void PacketTransmitter::endTx()
     // 3. clear internal state
     delete txSignal;
     txSignal = nullptr;
+    txStartTime = -1;
+    txStartClockTime = -1;
     // 4. notify producer
     if (producer != nullptr) {
         producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), true);
