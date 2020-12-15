@@ -29,6 +29,7 @@ class INET_API StreamingTransmitterBase : public PacketTransmitterBase
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void scheduleAt(simtime_t t, cMessage *message) override;
 
     virtual void abortTx() = 0;
 

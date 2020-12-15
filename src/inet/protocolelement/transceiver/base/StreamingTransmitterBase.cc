@@ -33,6 +33,19 @@ void StreamingTransmitterBase::initialize(int stage)
     }
 }
 
+void StreamingTransmitterBase::scheduleAt(simtime_t t, cMessage *message)
+{
+    if (message == txEndTimer) {
+        if (txStartTime + txSignal->getDuration() != t) {
+            clocktime_t timePosition = getClockTime() - txStartClockTime;
+            b bitPosition = b(std::floor(txDatarate.get() * timePosition.dbl()));
+            txSignal->setDuration(t - txStartTime);
+            sendSignalProgress(txSignal->dup(), txSignal->getId(), bitPosition, timePosition);
+        }
+    }
+    ClockUserModuleMixin::scheduleAt(t, message);
+}
+
 bool StreamingTransmitterBase::canPushSomePacket(cGate *gate) const
 {
     return transmissionChannel != nullptr && !transmissionChannel->isDisabled() && PacketTransmitterBase::canPushSomePacket(gate);
