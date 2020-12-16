@@ -130,7 +130,7 @@ void MediumOsgVisualizer::setAnimationSpeed() const
 
 osg::Node *MediumOsgVisualizer::getRadioOsgNode(const IRadio *radio) const
 {
-    auto it = radioOsgNodes.find(radio);
+    auto it = radioOsgNodes.find(radio->getId());
     if (it == radioOsgNodes.end())
         return nullptr;
     else
@@ -139,12 +139,12 @@ osg::Node *MediumOsgVisualizer::getRadioOsgNode(const IRadio *radio) const
 
 void MediumOsgVisualizer::setRadioOsgNode(const IRadio *radio, osg::Node *node)
 {
-    radioOsgNodes[radio] = node;
+    radioOsgNodes[radio->getId()] = node;
 }
 
 osg::Node *MediumOsgVisualizer::removeRadioOsgNode(const IRadio *radio)
 {
-    auto it = radioOsgNodes.find(radio);
+    auto it = radioOsgNodes.find(radio->getId());
     if (it == radioOsgNodes.end())
         return nullptr;
     else {
@@ -155,7 +155,7 @@ osg::Node *MediumOsgVisualizer::removeRadioOsgNode(const IRadio *radio)
 
 osg::Node *MediumOsgVisualizer::getSignalOsgNode(const ITransmission *transmission) const
 {
-    auto it = signalOsgNodes.find(transmission);
+    auto it = signalOsgNodes.find(transmission->getId());
     if (it == signalOsgNodes.end())
         return nullptr;
     else
@@ -164,12 +164,12 @@ osg::Node *MediumOsgVisualizer::getSignalOsgNode(const ITransmission *transmissi
 
 void MediumOsgVisualizer::setSignalOsgNode(const ITransmission *transmission, osg::Node *node)
 {
-    signalOsgNodes[transmission] = node;
+    signalOsgNodes[transmission->getId()] = node;
 }
 
 osg::Node *MediumOsgVisualizer::removeSignalOsgNode(const ITransmission *transmission)
 {
-    auto it = signalOsgNodes.find(transmission);
+    auto it = signalOsgNodes.find(transmission->getId());
     if (it == signalOsgNodes.end())
         return nullptr;
     else {

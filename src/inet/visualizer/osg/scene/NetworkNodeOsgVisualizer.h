@@ -31,7 +31,7 @@ class INET_API NetworkNodeOsgVisualizer : public NetworkNodeVisualizerBase
 {
   protected:
     bool displayModuleName;
-    std::map<const cModule *, osg::ref_ptr<NetworkNodeOsgVisualization>> networkNodeVisualizations;
+    std::map<int, osg::ref_ptr<NetworkNodeOsgVisualization>> networkNodeVisualizations;
 
   protected:
     virtual void initialize(int stage) override;

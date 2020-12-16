@@ -57,7 +57,7 @@ void NetworkNodeOsgVisualizer::initialize(int stage)
 void NetworkNodeOsgVisualizer::refreshDisplay() const
 {
     for (auto it : networkNodeVisualizations) {
-        auto networkNode = it.first;
+        auto networkNode = getSimulation()->getModule(it.first);
         auto visualization = it.second;
         auto position = getPosition(networkNode);
         auto orientation = getOrientation(networkNode);
@@ -73,14 +73,14 @@ NetworkNodeOsgVisualization *NetworkNodeOsgVisualizer::createNetworkNodeVisualiz
 
 NetworkNodeOsgVisualization *NetworkNodeOsgVisualizer::getNetworkNodeVisualization(const cModule *networkNode) const
 {
-    auto it = networkNodeVisualizations.find(networkNode);
+    auto it = networkNodeVisualizations.find(networkNode->getId());
     return it == networkNodeVisualizations.end() ? nullptr : it->second;
 }
 
 void NetworkNodeOsgVisualizer::addNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization)
 {
     auto networkNodeOsgVisualization = check_and_cast<NetworkNodeOsgVisualization *>(networkNodeVisualization);
-    networkNodeVisualizations[networkNodeOsgVisualization->networkNode] = networkNodeOsgVisualization;
+    networkNodeVisualizations[networkNodeOsgVisualization->networkNode->getId()] = networkNodeOsgVisualization;
     auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
     scene->addChild(networkNodeOsgVisualization);
 }
@@ -88,7 +88,7 @@ void NetworkNodeOsgVisualizer::addNetworkNodeVisualization(NetworkNodeVisualizat
 void NetworkNodeOsgVisualizer::removeNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization)
 {
     auto networkNodeOsgVisualization = check_and_cast<NetworkNodeOsgVisualization *>(networkNodeVisualization);
-    networkNodeVisualizations.erase(networkNodeVisualizations.find(networkNodeOsgVisualization->networkNode));
+    networkNodeVisualizations.erase(networkNodeVisualizations.find(networkNodeOsgVisualization->networkNode->getId()));
     auto scene = inet::osg::TopLevelScene::getSimulationScene(visualizationTargetModule);
     scene->removeChild(networkNodeOsgVisualization);
 }

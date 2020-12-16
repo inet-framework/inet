@@ -55,7 +55,7 @@ void NetworkNodeCanvasVisualizer::initialize(int stage)
 void NetworkNodeCanvasVisualizer::refreshDisplay() const
 {
     for (auto it : networkNodeVisualizations) {
-        auto networkNode = it.first;
+        auto networkNode = getSimulation()->getModule(it.first);
         auto visualization = it.second;
         auto position = canvasProjection->computeCanvasPoint(getPosition(networkNode));
         visualization->setTransform(cFigure::Transform().translate(position.x, position.y));
@@ -72,21 +72,21 @@ NetworkNodeCanvasVisualization *NetworkNodeCanvasVisualizer::createNetworkNodeVi
 
 NetworkNodeCanvasVisualization *NetworkNodeCanvasVisualizer::getNetworkNodeVisualization(const cModule *networkNode) const
 {
-    auto it = networkNodeVisualizations.find(networkNode);
+    auto it = networkNodeVisualizations.find(networkNode->getId());
     return it == networkNodeVisualizations.end() ? nullptr : it->second;
 }
 
 void NetworkNodeCanvasVisualizer::addNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization)
 {
     auto networkNodeCanvasVisualization = check_and_cast<NetworkNodeCanvasVisualization *>(networkNodeVisualization);
-    networkNodeVisualizations[networkNodeCanvasVisualization->networkNode] = networkNodeCanvasVisualization;
+    networkNodeVisualizations[networkNodeCanvasVisualization->networkNode->getId()] = networkNodeCanvasVisualization;
     visualizationTargetModule->getCanvas()->addFigure(networkNodeCanvasVisualization);
 }
 
 void NetworkNodeCanvasVisualizer::removeNetworkNodeVisualization(NetworkNodeVisualization *networkNodeVisualization)
 {
     auto networkNodeCanvasVisualization = check_and_cast<NetworkNodeCanvasVisualization *>(networkNodeVisualization);
-    networkNodeVisualizations.erase(networkNodeVisualizations.find(networkNodeCanvasVisualization->networkNode));
+    networkNodeVisualizations.erase(networkNodeVisualizations.find(networkNodeCanvasVisualization->networkNode->getId()));
     visualizationTargetModule->getCanvas()->removeFigure(networkNodeCanvasVisualization);
 }
 

@@ -76,7 +76,8 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
 
     LineManager *lineManager = nullptr;
 
-    std::map<std::tuple<const Ipv4Route *, int, int>, const RouteVisualization *> routeVisualizations;
+    // key is router ID, source module ID, destination module ID
+    std::map<std::tuple<Ipv4Address, int, int>, const RouteVisualization *> routeVisualizations;
 
   protected:
     virtual void initialize(int stage) override;

@@ -292,14 +292,14 @@ void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission 
             signalPowerDensityFunction = propagatedTransmissionPowerFunction->multiply(approximatedAtteunuationFunction);
         }
         mediumPowerDensityFunction->addElement(signalPowerDensityFunction);
-        signalPowerDensityFunctions[transmission] = signalPowerDensityFunction;
+        signalPowerDensityFunctions[transmission->getId()] = signalPowerDensityFunction;
         for (auto it : noisePowerDensityFunctions)
             it.second->addElement(signalPowerDensityFunction);
         auto noisePowerFunction = makeShared<SummedFunction<WpHz, Domain<m, m, m, simsec, Hz>>>();
         for (auto elementFunction : mediumPowerDensityFunction->getElements())
             if (elementFunction != signalPowerDensityFunction)
                 noisePowerFunction->addElement(elementFunction);
-        noisePowerDensityFunctions[transmission] = noisePowerFunction;
+        noisePowerDensityFunctions[transmission->getId()] = noisePowerFunction;
         if (autoPowerAxis) {
             auto l = concat(startPosition, transmissionPowerFunction->getDomain().getLower());
             auto u = concat(startPosition, transmissionPowerFunction->getDomain().getUpper());
@@ -343,7 +343,7 @@ void MediumVisualizerBase::handleSignalAdded(const physicallayer::ITransmission 
 void MediumVisualizerBase::handleSignalRemoved(const physicallayer::ITransmission *transmission)
 {
     if (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectrograms) {
-        auto it = signalPowerDensityFunctions.find(transmission);
+        auto it = signalPowerDensityFunctions.find(transmission->getId());
         if (it != signalPowerDensityFunctions.end()) {
             mediumPowerDensityFunction->removeElement(it->second);
             noisePowerDensityFunctions.erase(it->first);

@@ -70,6 +70,7 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
         SIP_PROPAGATION,
         SIP_TRANSMISSION,
     };
+
     SignalInProgress lastSignalInProgress = SIP_NONE;
     AnimationSpeedInterpolator animationSpeedInterpolator;
     ModuleRefByPar<NetworkNodeCanvasVisualizer> networkNodeVisualizer;
@@ -78,17 +79,17 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
      */
     std::vector<const physicallayer::ITransmission *> transmissions;
     /**
-     * The list of transmission figures.
+     * The map of signal departure figures for all radios.
      */
-    std::map<const physicallayer::IRadio *, cFigure *> signalDepartureFigures;
+    std::map<int, cFigure *> signalDepartureFigures;
     /**
-     * The list of reception figures.
+     * The map of signal arrival figures for all radios.
      */
-    std::map<const physicallayer::IRadio *, cFigure *> signalArrivalFigures;
+    std::map<int, cFigure *> signalArrivalFigures;
     /**
-     * The propagating signal figures.
+     * The propagating signal figures for all ongoing transmissions.
      */
-    std::map<const physicallayer::ITransmission *, cFigure *> signalFigures;
+    std::map<int, cFigure *> signalFigures;
     /**
      * The main power density figure.
      */
@@ -96,15 +97,15 @@ class INET_API MediumCanvasVisualizer : public MediumVisualizerBase
     /**
      * The list of power density figures.
      */
-    std::map<const cModule *, HeatMapPlotFigure *> powerDensityMapFigures;
+    std::map<int, HeatMapPlotFigure *> powerDensityMapFigures;
     /**
      * The list of spectrum figures.
      */
-    std::map<const cModule *, PlotFigure *> spectrumFigures;
+    std::map<int, PlotFigure *> spectrumFigures;
     /**
      * The list of spectrum flow figures.
      */
-    std::map<const cModule *, HeatMapPlotFigure *> spectrogramFigures;
+    std::map<int, HeatMapPlotFigure *> spectrogramFigures;
     /**
      * The layer figure that contains the figures representing the ongoing communications.
      */

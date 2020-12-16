@@ -104,7 +104,7 @@ void MobilityVisualizerBase::unsubscribe()
 
 MobilityVisualizerBase::MobilityVisualization *MobilityVisualizerBase::getMobilityVisualization(const IMobility *mobility) const
 {
-    auto it = mobilityVisualizations.find(mobility);
+    auto it = mobilityVisualizations.find(mobility->getId());
     if (it == mobilityVisualizations.end())
         return nullptr;
     else
@@ -113,12 +113,12 @@ MobilityVisualizerBase::MobilityVisualization *MobilityVisualizerBase::getMobili
 
 void MobilityVisualizerBase::addMobilityVisualization(const IMobility *mobility, MobilityVisualization *mobilityVisualization)
 {
-    mobilityVisualizations[mobility] = mobilityVisualization;
+    mobilityVisualizations[mobility->getId()] = mobilityVisualization;
 }
 
 void MobilityVisualizerBase::removeMobilityVisualization(const MobilityVisualization *mobilityVisualization)
 {
-    mobilityVisualizations.erase(mobilityVisualization->mobility);
+    mobilityVisualizations.erase(mobilityVisualization->mobility->getId());
 }
 
 void MobilityVisualizerBase::removeAllMobilityVisualizations()
