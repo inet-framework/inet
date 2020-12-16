@@ -452,7 +452,7 @@ void TcpConnection::configureStateVariables()
     state->ws_support = tcpMain->par("windowScalingSupport"); // if set, this means that current host supports WS (RFC 1323)
     state->ws_manual_scale = tcpMain->par("windowScalingFactor"); // scaling factor (set manually) to help for Tcp validation
     state->ecnWillingness = tcpMain->par("ecnWillingness"); // if set, current host is willing to use ECN
-    if (!state->ws_support && (advertisedWindowPar > TCP_MAX_WIN || advertisedWindowPar <= 0))
+    if ((!state->ws_support && advertisedWindowPar > TCP_MAX_WIN) || advertisedWindowPar <= 0 || advertisedWindowPar > TCP_MAX_WIN_SCALED)
         throw cRuntimeError("Invalid advertisedWindow parameter: %ld", advertisedWindowPar);
 
     state->rcv_wnd = advertisedWindowPar;
