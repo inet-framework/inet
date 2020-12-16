@@ -70,7 +70,7 @@ Packet *PassivePacketSource::canPullPacket(cGate *gate) const
 Packet *PassivePacketSource::pullPacket(cGate *gate)
 {
     Enter_Method("pullPacket");
-    if (providingTimer->isScheduled() && providingTimer->getArrivalClockTime() > getClockTime())
+    if (providingTimer->isScheduled() && providingTimer->getArrivalTime() > simTime())
         throw cRuntimeError("Another packet is already being provided");
     else {
         auto packet = providePacket(gate);
