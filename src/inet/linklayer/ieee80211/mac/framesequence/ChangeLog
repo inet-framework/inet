@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-12-08  Levente Mészáros
+
+	Fixed leaks detected by Valgrind.
+
 2020-10-19  Levente Mészáros
 
 	Removed weird deletion of management frames from FrameSequenceStep (e.g RTS/CTS).

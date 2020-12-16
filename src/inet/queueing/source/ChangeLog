@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-12-14  Levente Mészáros
+
+	*PacketSource: Added optional clock module support.
+
 2020-09-04  Levente Mészáros
 
 	Refactored a few more EV statements to use the new macros.

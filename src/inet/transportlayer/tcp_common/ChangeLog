@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-12-15  Zoltan Bojthe
+
+	Fixed ECE and CWR bit serialization in TcpHeaderSerializer.
+
 2020-09-25  Levente Mészáros
 
 	Removed class name from str() method, it's not expected to be there according

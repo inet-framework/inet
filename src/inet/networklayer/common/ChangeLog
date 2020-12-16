@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-12-14  Zoltan Bojthe
+
+	Fixed issue #572: L3AddressResolver endless loop.
+
 2020-09-16  Levente Mészáros
 
 	Replaced (u)int8..64 with the standard (u)int8..64_t types.

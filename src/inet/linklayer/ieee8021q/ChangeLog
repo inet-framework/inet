@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-12-08  Levente Mészáros
+
+	Fixed leaks detected by Valgrind.
+
 2020-10-30  Levente Mészáros
 
 	Reused SocketBase and default socket commands in socket and related processing.

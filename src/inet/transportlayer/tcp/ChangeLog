@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2020-12-16  Zoltan Bojthe
+
+	Fixed advertisedWindow parameter in TcpConnection (#631).
+
+2020-12-15  Levente Mészáros
+
+	Added missing packetDropped signal to Tcp.
+
+2020-12-10  Levente Mészáros
+
+	Fixed ownership problems in TcpConnectionBase detected by latest omnet.
+
 2020-09-16  Levente Mészáros
 
 	Replaced (u)int8..64 with the standard (u)int8..64_t types.

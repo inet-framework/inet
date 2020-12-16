@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-12-08  Zoltan Bojthe
+
+	Added getId() method.
+
 2020-06-08  Levente Mészáros
 
 	Changed interface to return const references for performance reasons.

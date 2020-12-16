@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-12-15  Levente Mészáros
+
+	Added optional clock support to all timers.
+
 2020-11-10  Levente Mészáros
 
 	Moved PreemptingServer to queueing/server folder.

@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2020-12-16  Levente Mészáros
+
+	Fixed inconsistent MediumOsgVisualizer field names according to usage.
+
+2020-12-11  Zoltan Bojthe
+
+	Renamed receptionImage to signalArrivalImage and transmissionImage to signalDepartureImage in MediumOsgVisualizer.
+
+2020-12-08  Levente Mészáros
+
+	Added extra conditions to support the visualization of noise source transmissions.
+
 2020-10-21  Levente Mészáros
 
 	Moved visualization removal in destructors to visualizer base classes.
