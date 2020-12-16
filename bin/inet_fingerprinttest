@@ -71,7 +71,7 @@ fpExtraArgs = {
               "--cmdenv-fake-gui-on-simtime-probability=0.1",
               "--cmdenv-fake-gui-on-simtime-numsteps=3",
               "'--**.fadeOutMode=\"animationTime\"'",
-              "'--**.signalAnimationTimeMode=\"animationTime\"'"
+              "'--**.signalAnimationSpeedChangeTimeMode=\"animationTime\"'"
             }
 }
 
