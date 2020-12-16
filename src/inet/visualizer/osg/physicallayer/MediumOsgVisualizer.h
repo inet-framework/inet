@@ -45,8 +45,8 @@ class INET_API MediumOsgVisualizer : public MediumVisualizerBase
     double signalWaveLength = NaN;
     double signalWaveAmplitude = NaN;
     double signalWaveFadingAnimationSpeedFactor = NaN;
-    osg::Image *transmissionImage = nullptr;
-    osg::Image *receptionImage = nullptr;
+    osg::Image *signalDepartureImage = nullptr;
+    osg::Image *signalArrivalImage = nullptr;
     //@}
 
     /** @name Internal state */
