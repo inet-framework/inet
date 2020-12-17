@@ -1123,9 +1123,8 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
             // TODO move to initialize?
             icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
         icmpv6->sendErrorMessage(udpPacket, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
-#else // ifdef INET_WITH_IPv6
-        delete udpPacket;
 #endif // ifdef INET_WITH_IPv6
+        delete udpPacket;
     }
     else if (protocol->getId() == Protocol::nextHopForwarding.getId()) {
         delete udpPacket;
@@ -1133,6 +1132,7 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
     else {
         throw cRuntimeError("(%s)%s arrived from lower layer with unrecognized NetworkProtocolInd %s",
                 udpPacket->getClassName(), udpPacket->getName(), protocol->getName());
+        delete udpPacket;
     }
 }
 

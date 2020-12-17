@@ -79,6 +79,7 @@ Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const
     // the fragment packet.
     if (moreFragments && (fragmentLength % 8) != 0) {
         icmpModule->sendErrorMessage(pk, ICMPv6_PARAMETER_PROBLEM, ERROREOUS_HDR_FIELD); // TODO set pointer
+        delete pk;
         return nullptr;
     }
 
@@ -91,6 +92,7 @@ Packet *Ipv6FragBuf::addFragment(Packet *pk, const Ipv6Header *ipv6Header, const
     // fragment packet.
     if (offset + fragmentLength > 65535) {
         icmpModule->sendErrorMessage(pk, ICMPv6_PARAMETER_PROBLEM, ERROREOUS_HDR_FIELD); // TODO set pointer
+        delete pk;
         return nullptr;
     }
 
@@ -163,6 +165,7 @@ void Ipv6FragBuf::purgeStaleFragments(simtime_t lastupdate)
                 // send ICMP error
                 EV_INFO << "datagram fragment timed out in reassembly buffer, sending ICMP_TIME_EXCEEDED\n";
                 icmpModule->sendErrorMessage(buf.packet, ICMPv6_TIME_EXCEEDED, 0);
+                delete buf.packet;
             }
 
             // delete
