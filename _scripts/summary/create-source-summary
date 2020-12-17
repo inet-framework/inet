@@ -1,3 +1,6 @@
+# features
+grep -E "name *=" .oppfeatures | sed -E 's/.*"(.*?)"/\1/' | sort > features.out
+
 # folders
 find src -type d -print | sort > folders.out
 
