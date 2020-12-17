@@ -1114,9 +1114,8 @@ void Udp::processUndeliverablePacket(Packet *udpPacket)
             // TODO move to initialize?
             icmp = getModuleFromPar<Icmp>(par("icmpModule"), this);
         icmp->sendErrorMessage(udpPacket, inIe, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
-#else // ifdef INET_WITH_IPv4
-        delete udpPacket;
 #endif // ifdef INET_WITH_IPv4
+        delete udpPacket;
     }
     else if (protocol->getId() == Protocol::ipv6.getId()) {
 #ifdef INET_WITH_IPv6

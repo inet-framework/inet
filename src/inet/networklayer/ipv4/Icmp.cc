@@ -168,7 +168,6 @@ void Icmp::sendPtbMessage(Packet *packet, int mtu)
 
         sendOrProcessIcmpPacket(errorPacket, ipv4Header->getSrcAddress());
     }
-    delete packet;
 }
 
 void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type, IcmpCode code)
@@ -198,7 +197,6 @@ void Icmp::sendErrorMessage(Packet *packet, int inputInterfaceId, IcmpType type,
 
         sendOrProcessIcmpPacket(errorPacket, ipv4Header->getSrcAddress());
     }
-    delete packet;
 }
 
 bool Icmp::possiblyLocalBroadcast(const Ipv4Address& addr, int interfaceId)
