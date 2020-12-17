@@ -47,7 +47,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     tcp.th_x2 = 0; // unused
 
     // set flags
-    unsigned char flags = 0;
+    uint8_t flags = 0;
     if (tcpHeader->getFinBit())
         flags |= TH_FIN;
     if (tcpHeader->getSynBit())
@@ -65,7 +65,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     if (tcpHeader->getCwrBit())
         flags |= TH_CWR;
 
-    tcp.th_flags = (TH_FLAGS & flags);
+    tcp.th_flags = flags;
     tcp.th_win = htons(tcpHeader->getWindow());
     tcp.th_urp = htons(tcpHeader->getUrgentPointer());
     if (B(tcpHeader->getHeaderLength()).get() % 4 != 0)

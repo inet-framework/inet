@@ -19,9 +19,9 @@
 #define __INET_ENERGYSTORAGEOSGVISUALIZER_H
 
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/common/OsgUtils.h"
 #include "inet/visualizer/base/EnergyStorageVisualizerBase.h"
 #include "inet/visualizer/osg/scene/NetworkNodeOsgVisualizer.h"
+#include "inet/visualizer/osg/util/OsgUtils.h"
 
 namespace inet {
 

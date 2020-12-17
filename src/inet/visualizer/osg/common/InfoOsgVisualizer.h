@@ -19,9 +19,9 @@
 #define __INET_INFOOSGVISUALIZER_H
 
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/common/OsgUtils.h"
 #include "inet/visualizer/base/InfoVisualizerBase.h"
 #include "inet/visualizer/osg/scene/NetworkNodeOsgVisualizer.h"
+#include "inet/visualizer/osg/util/OsgUtils.h"
 
 namespace inet {
 

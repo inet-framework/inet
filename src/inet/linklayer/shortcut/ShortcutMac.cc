@@ -62,6 +62,7 @@ void ShortcutMac::configureNetworkInterface()
     networkInterface->setDatarate(bitrate);
     networkInterface->setMacAddress(address);
     networkInterface->setInterfaceToken(address.formInterfaceIdentifier());
+    networkInterface->setMtu(par("mtu"));
     networkInterface->setMulticast(false);
     networkInterface->setBroadcast(true);
 }

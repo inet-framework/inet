@@ -30,7 +30,7 @@ void PacketServer::initialize(int stage)
 {
     PacketServerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        processingTimer = new cMessage("ProcessingTimer");
+        processingTimer = new ClockEvent("ProcessingTimer");
 }
 
 void PacketServer::handleMessage(cMessage *message)
@@ -49,10 +49,10 @@ void PacketServer::handleMessage(cMessage *message)
 
 void PacketServer::scheduleProcessingTimer()
 {
-    simtime_t processingTime = par("processingTime");
+    clocktime_t processingTime = par("processingTime");
     auto processingBitrate = bps(par("processingBitrate"));
     processingTime += s(packet->getTotalLength() / processingBitrate).get();
-    scheduleAfter(processingTime, processingTimer);
+    scheduleClockEventAfter(processingTime, processingTimer);
 }
 
 bool PacketServer::canStartProcessingPacket()

@@ -54,7 +54,7 @@ if [ ! "$INET_NEDFOLDERS" = "" ]; then
   INET_OMNETPP_OPTIONS="-n $INET_NEDFOLDERS $INET_OMNETPP_OPTIONS"
 fi
 
-INET_NEDEXCLUSIONS=$(cat $INET_ROOT/.nedexclusions | tr '\n' ':' | tr '.' '/')
+INET_NEDEXCLUSIONS=$(cat $INET_ROOT/.nedexclusions | tr '\n' ':')
 if [ ! "$INET_NEDEXCLUSIONS" = "" ]; then
   INET_OMNETPP_OPTIONS="-x $INET_NEDEXCLUSIONS $INET_OMNETPP_OPTIONS"
 fi

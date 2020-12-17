@@ -36,6 +36,7 @@ simple ShortcutMac extends MacProtocolBase like ILinkLayer, IMacProtocol
                                             // "auto". "auto" values will be replaced by
                                             // a generated MAC address in init stage 0.
         double bitrate @unit(bps);
+        int mtu @unit(B) = default(1500B);
         volatile int lengthOverhead @unit(b) = default(0b); // extra length added to packets
         volatile double durationOverhead @unit(s) = default(0s); // extra transmission duration added to packets
         volatile double propagationDelay @unit(s) = default(0s); // propagation time to all destinations

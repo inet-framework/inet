@@ -15,9 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/OsgUtils.h"
+#include "inet/visualizer/osg/util/OsgUtils.h"
 
-#if defined(WITH_OSG) && defined(INET_WITH_VISUALIZATIONOSG)
 #include <osg/CullFace>
 #include <osg/Depth>
 #include <osg/Light>
@@ -25,13 +24,10 @@
 #include <osg/LineStipple>
 #include <osg/LineWidth>
 #include <osgDB/ReadFile>
-#endif // ifdef WITH_OSG
 
 namespace inet {
 
 namespace osg {
-
-#if defined(WITH_OSG) && defined(INET_WITH_VISUALIZATIONOSG)
 
 Vec3Array *createCircleVertices(const Coord& center, double radius, int polygonSize)
 {
@@ -385,8 +381,6 @@ void LineNode::setEnd(const Coord& end)
         addChild(createArrowhead(start, end, 10 + 2 * lineWidth, 20 + 2 * lineWidth));
     }
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace osg
 

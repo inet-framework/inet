@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2020-12-15  Levente Mészáros
+
+	Added support for dropping correctly received packets which doesn't contain
+	the expected protocol in the header.
+
 2020-11-11  Levente Mészáros
 
 	Renamed apskradio folder to apsk.

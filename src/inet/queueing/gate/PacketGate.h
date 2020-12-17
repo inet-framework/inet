@@ -18,18 +18,19 @@
 #ifndef __INET_PACKETGATE_H
 #define __INET_PACKETGATE_H
 
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketGateBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketGate : public PacketGateBase
+class INET_API PacketGate : public ClockUserModuleMixin<PacketGateBase>
 {
   protected:
-    simtime_t openTime;
-    simtime_t closeTime;
+    clocktime_t openTime;
+    clocktime_t closeTime;
 
-    cMessage *changeTimer = nullptr;
+    ClockEvent *changeTimer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
@@ -39,7 +40,7 @@ class INET_API PacketGate : public PacketGateBase
     virtual void processChangeTimer();
 
   public:
-    virtual ~PacketGate() { cancelAndDelete(changeTimer); }
+    virtual ~PacketGate() { cancelAndDeleteClockEvent(changeTimer); }
 };
 
 } // namespace queueing

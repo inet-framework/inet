@@ -26,8 +26,7 @@ Define_Module(MarkovScheduler);
 
 MarkovScheduler::~MarkovScheduler()
 {
-    cancelAndDelete(transitionTimer);
-    cancelAndDelete(waitTimer);
+    cancelAndDeleteClockEvent(waitTimer);
 }
 
 void MarkovScheduler::initialize(int stage)
@@ -54,7 +53,7 @@ void MarkovScheduler::initialize(int stage)
             expression.parse(waitIntervalsTokenizer.nextToken());
             waitIntervals.push_back(expression);
         }
-        waitTimer = new cMessage("WaitTimer");
+        waitTimer = new ClockEvent("WaitTimer");
         WATCH(state);
     }
     else if (stage == INITSTAGE_QUEUEING) {
@@ -95,7 +94,7 @@ int MarkovScheduler::schedulePacket()
 
 void MarkovScheduler::scheduleWaitTimer()
 {
-    scheduleAfter(waitIntervals[state].doubleValue(this), waitTimer);
+    scheduleClockEventAfter(waitIntervals[state].doubleValue(this), waitTimer);
 }
 
 bool MarkovScheduler::canPushSomePacket(cGate *gate) const

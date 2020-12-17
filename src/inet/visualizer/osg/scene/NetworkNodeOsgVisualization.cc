@@ -27,7 +27,7 @@
 
 #include <algorithm>
 
-#include "inet/common/OsgUtils.h"
+#include "inet/visualizer/osg/util/OsgUtils.h"
 
 namespace inet {
 

@@ -125,14 +125,5 @@ void StreamingTransmitter::abortTx()
     }
 }
 
-void StreamingTransmitter::scheduleTxEndTimer(Signal *signal)
-{
-    ASSERT(txStartClockTime != -1);
-    clocktime_t txEndTime = txStartClockTime + SIMTIME_AS_CLOCKTIME(signal->getDuration());
-    EV_INFO << "Scheduling transmission end timer" << EV_FIELD(at, txEndTime.ustr()) << EV_ENDL;
-    cancelClockEvent(txEndTimer);
-    scheduleClockEventAt(txEndTime, txEndTimer);
-}
-
 } // namespace inet
 

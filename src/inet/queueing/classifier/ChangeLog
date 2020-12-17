@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-12-15  Levente Mészáros
+
+	Added optional clock support to all timers.
+
 2020-11-05  Levente Mészáros
 
 	Fixed issues found by clang-tidy code checker.

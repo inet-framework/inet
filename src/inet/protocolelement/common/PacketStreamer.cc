@@ -26,7 +26,7 @@ Define_Module(PacketStreamer);
 PacketStreamer::~PacketStreamer()
 {
     delete streamedPacket;
-    cancelAndDelete(endStreamingTimer);
+    cancelAndDeleteClockEvent(endStreamingTimer);
 }
 
 void PacketStreamer::initialize(int stage)
@@ -40,7 +40,7 @@ void PacketStreamer::initialize(int stage)
         provider = findConnectedModule<IPassivePacketSource>(inputGate);
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
         collector = findConnectedModule<IActivePacketSink>(outputGate);
-        endStreamingTimer = new cMessage("EndStreamingTimer");
+        endStreamingTimer = new ClockEvent("EndStreamingTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
@@ -92,7 +92,7 @@ void PacketStreamer::pushPacket(Packet *packet, cGate *gate)
     if (std::isnan(streamDatarate.get()))
         endStreaming();
     else
-        scheduleAfter(s(streamedPacket->getTotalLength() / streamDatarate).get(), endStreamingTimer);
+        scheduleClockEventAfter(s(streamedPacket->getTotalLength() / streamDatarate).get(), endStreamingTimer);
 }
 
 void PacketStreamer::handleCanPushPacketChanged(cGate *gate)

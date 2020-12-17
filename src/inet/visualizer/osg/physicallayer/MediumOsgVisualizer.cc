@@ -28,8 +28,8 @@
 #include <osgDB/ReadFile>
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/OsgScene.h"
-#include "inet/common/OsgUtils.h"
+#include "inet/visualizer/osg/util/OsgScene.h"
+#include "inet/visualizer/osg/util/OsgUtils.h"
 
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 #include "inet/physicallayer/wireless/common/pathloss/FreeSpacePathLoss.h"
@@ -66,16 +66,16 @@ void MediumOsgVisualizer::initialize(int stage)
         signalWaveAmplitude = par("signalWaveAmplitude");
         signalWaveFadingAnimationSpeedFactor = par("signalWaveFadingAnimationSpeedFactor");
         if (displaySignalDepartures) {
-            const char *transmissionImageName = par("transmissionImage");
-            transmissionImage = inet::osg::createImageFromResource(transmissionImageName);
-            auto imageStream = dynamic_cast<osg::ImageStream *>(transmissionImage);
+            const char *signalDepartureImageName = par("signalDepartureImage");
+            signalDepartureImage = inet::osg::createImageFromResource(signalDepartureImageName);
+            auto imageStream = dynamic_cast<osg::ImageStream *>(signalDepartureImage);
             if (imageStream != nullptr)
                 imageStream->play();
         }
         if (displaySignalArrivals) {
-            const char *receptionImageName = par("receptionImage");
-            receptionImage = inet::osg::createImageFromResource(receptionImageName);
-            auto imageStream = dynamic_cast<osg::ImageStream *>(receptionImage);
+            const char *signalArrivalImageName = par("signalArrivalImage");
+            signalArrivalImage = inet::osg::createImageFromResource(signalArrivalImageName);
+            auto imageStream = dynamic_cast<osg::ImageStream *>(signalArrivalImage);
             if (imageStream != nullptr)
                 imageStream->play();
         }
@@ -362,8 +362,8 @@ void MediumOsgVisualizer::handleRadioAdded(const IRadio *radio)
         networkNodeVisualization->addAnnotation(group, osg::Vec3d(0.0, 0.0, 0.0), 100.0);
         if (displaySignalDepartures) {
             auto texture = new osg::Texture2D();
-            texture->setImage(transmissionImage);
-            auto geometry = osg::createTexturedQuadGeometry(osg::Vec3(-transmissionImage->s() / 2, 0.0, 0.0), osg::Vec3(transmissionImage->s(), 0.0, 0.0), osg::Vec3(0.0, transmissionImage->t(), 0.0), 0.0, 0.0, 1.0, 1.0);
+            texture->setImage(signalDepartureImage);
+            auto geometry = osg::createTexturedQuadGeometry(osg::Vec3(-signalDepartureImage->s() / 2, 0.0, 0.0), osg::Vec3(signalDepartureImage->s(), 0.0, 0.0), osg::Vec3(0.0, signalDepartureImage->t(), 0.0), 0.0, 0.0, 1.0, 1.0);
             auto stateSet = geometry->getOrCreateStateSet();
             stateSet->setTextureAttributeAndModes(0, texture);
             stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
@@ -376,8 +376,8 @@ void MediumOsgVisualizer::handleRadioAdded(const IRadio *radio)
         }
         if (displaySignalArrivals) {
             auto texture = new osg::Texture2D();
-            texture->setImage(receptionImage);
-            auto geometry = osg::createTexturedQuadGeometry(osg::Vec3(-transmissionImage->s() / 2, 0.0, 0.0), osg::Vec3(receptionImage->s(), 0.0, 0.0), osg::Vec3(0.0, receptionImage->t(), 0.0), 0.0, 0.0, 1.0, 1.0);
+            texture->setImage(signalArrivalImage);
+            auto geometry = osg::createTexturedQuadGeometry(osg::Vec3(-signalArrivalImage->s() / 2, 0.0, 0.0), osg::Vec3(signalArrivalImage->s(), 0.0, 0.0), osg::Vec3(0.0, signalArrivalImage->t(), 0.0), 0.0, 0.0, 1.0, 1.0);
             auto stateSet = geometry->getOrCreateStateSet();
             stateSet->setTextureAttributeAndModes(0, texture);
             stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);

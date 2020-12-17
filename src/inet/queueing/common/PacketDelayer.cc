@@ -29,7 +29,12 @@ Define_Module(PacketDelayer);
 void PacketDelayer::handleMessage(cMessage *message)
 {
     if (message->isSelfMessage()) {
-        auto packet = check_and_cast<Packet *>(message);
+        auto packet = message->isPacket() ? check_and_cast<Packet *>(message) : static_cast<Packet *>(message->getContextPointer());
+        if (!message->isPacket())
+            delete message;
+        simtime_t delay = simTime() - message->getSendingTime();
+        insertPacketEvent(this, packet, PEK_DELAYED, delay / packet->getBitLength());
+        increaseTimeTag<DelayingTimeTag>(packet, delay / packet->getBitLength());
         pushOrSendPacket(packet, outputGate, consumer);
     }
     else
@@ -50,11 +55,22 @@ void PacketDelayer::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
-    simtime_t delay = par("delay");
-    EV_INFO << "Delaying packet" << EV_FIELD(delay) << EV_FIELD(packet) << EV_ENDL;
-    scheduleAt(simTime() + delay, packet);
-    insertPacketEvent(this, packet, PEK_DELAYED, delay / packet->getBitLength());
-    increaseTimeTag<DelayingTimeTag>(packet, delay / packet->getBitLength());
+#ifdef INET_WITH_CLOCK
+    if (clock != nullptr) {
+        clocktime_t delay = par("delay");
+        EV_INFO << "Delaying packet" << EV_FIELD(delay) << EV_FIELD(packet) << EV_ENDL;
+        auto clockEvent = new ClockEvent("DelayTimer");
+        clockEvent->setContextPointer(packet);
+        scheduleClockEventAfter(delay, clockEvent);
+    }
+    else {
+#else
+    {
+#endif
+        simtime_t delay = par("delay");
+        EV_INFO << "Delaying packet" << EV_FIELD(delay) << EV_FIELD(packet) << EV_ENDL;
+        scheduleAfter(delay, packet);
+    }
     handlePacketProcessed(packet);
     updateDisplayString();
 }

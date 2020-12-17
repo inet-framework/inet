@@ -33,8 +33,6 @@ class INET_API StreamingTransmitter : public StreamingTransmitterBase
     virtual void endTx();
     virtual void abortTx() override;
 
-    virtual void scheduleTxEndTimer(Signal *signal);
-
   public:
     virtual bool supportsPacketStreaming(cGate *gate) const override { return gate == outputGate; }
 

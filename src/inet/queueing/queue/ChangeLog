@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-12-08  Levente Mészáros
+
+	Fixed leaks detected by Valgrind.
+
 2020-11-10  Levente Mészáros
 
 	Moved InProgressQueue to queueing/queue folder.

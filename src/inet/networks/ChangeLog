@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-12-07  Levente Mészáros
+
+	Replaced hasVisualizer with firstAvailableOrEmpty to support optional visualization features.
+
 2020-04-28  Levente Mészáros
 
 	Added new networks package with modules: NetworkBase, WiredNetworkBase,

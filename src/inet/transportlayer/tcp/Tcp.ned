@@ -220,6 +220,7 @@ simple Tcp like ITcp
         @signal[tcpConnectionRemoved];
         @signal[packetReceivedFromUpper](type=cPacket);
         @signal[packetReceivedFromLower](type=cPacket);
+        @signal[packetDropped](type=inet::Packet);
     gates:
         input appIn @labels(TcpCommand/down) @messageKinds(inet::TcpCommandCode);
         input ipIn @labels(TcpHeader,Ipv4ControlInfo/up,Ipv6ControlInfo/up);

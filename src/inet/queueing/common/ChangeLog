@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2020-12-15  Levente Mészáros
+
+	Added optional clock support to all timers.
+
 2020-11-27  Levente Mészáros
 
 	Added support to PacketDelayer for transparent protocol and servie registration.

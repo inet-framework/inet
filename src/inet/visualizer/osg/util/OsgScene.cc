@@ -15,13 +15,11 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/common/OsgScene.h"
+#include "inet/visualizer/osg/util/OsgScene.h"
 
 namespace inet {
 
 namespace osg {
-
-#if defined(WITH_OSG) && defined(INET_WITH_VISUALIZATIONOSG)
 
 template<typename T>
 void FindNodesVisitor<T>::apply(Node& node) {
@@ -62,8 +60,6 @@ SimulationScene *TopLevelScene::getSimulationScene(cModule *module)
         return simulationScene;
     }
 }
-
-#endif // ifdef WITH_OSG
 
 } // namespace osg
 

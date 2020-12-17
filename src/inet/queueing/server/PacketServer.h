@@ -18,15 +18,16 @@
 #ifndef __INET_PACKETSERVER_H
 #define __INET_PACKETSERVER_H
 
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketServerBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketServer : public PacketServerBase
+class INET_API PacketServer : public ClockUserModuleMixin<PacketServerBase>
 {
   protected:
-    cMessage *processingTimer = nullptr;
+    ClockEvent *processingTimer = nullptr;
     Packet *packet = nullptr;
 
   protected:
@@ -38,7 +39,7 @@ class INET_API PacketServer : public PacketServerBase
     virtual void endProcessingPacket();
 
   public:
-    virtual ~PacketServer() { cancelAndDelete(processingTimer); delete packet; }
+    virtual ~PacketServer() { cancelAndDeleteClockEvent(processingTimer); delete packet; }
 
     virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handleCanPullPacketChanged(cGate *gate) override;

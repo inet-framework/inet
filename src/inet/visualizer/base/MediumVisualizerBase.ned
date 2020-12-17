@@ -46,6 +46,7 @@ simple MediumVisualizerBase extends VisualizerBase
         double signalPropagationAdditionalTime @unit(s) = default(0s); // additional simulation time to animate signal propagation after leaving last receiver
         double signalTransmissionAnimationSpeed = default(nan); // animation speed while a signal is being transmitted on the medium, value must be in the range (0, +inf) or NaN, the latter means automatic setting
         double signalTransmissionAnimationTime @unit(s) = default(1s); // signal transmission animation duration when signalTransmissionAnimationSpeed is unspecified
+        string signalAnimationSpeedChangeTimeMode @enum("realTime", "animationTime", "simulationTime") = default("realTime"); // specifies the time mode for animation speed changes between propagation and transmission animation
         double signalAnimationSpeedChangeTime @unit(s) = default(1s); // animation speed changes smoothly from propagationAnimationSpeed to transmissionAnimationSpeed in the specified real time
 
         bool displaySignalDepartures = default(false); // display an image where a signal departure is currently in progress, disabled by default

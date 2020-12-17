@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2020-12-08  Zoltan Bojthe
+
+	Changed MediumCanvasVisualizer to use signalAnimationSpeedChangeTimeMode
+	parameter instead of hardcoded REAL_TIME mode.
+
 2020-10-21  Levente Mészáros
 
 	Moved visualization removal in destructors to visualizer base classes.

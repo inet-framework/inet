@@ -58,6 +58,7 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
         }
         phyLayer: <default("EthernetPhyLayer")> like IEthernetPhyLayer {
             parameters:
+                transmitter.clockModule = default("");
                 @display("p=400,400");
         }
     connections:

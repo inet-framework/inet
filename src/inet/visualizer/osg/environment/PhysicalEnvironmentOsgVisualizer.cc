@@ -24,12 +24,12 @@
 #include <osg/Texture2D>
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/OsgScene.h"
-#include "inet/common/OsgUtils.h"
 #include "inet/common/geometry/shape/Cuboid.h"
 #include "inet/common/geometry/shape/Prism.h"
 #include "inet/common/geometry/shape/Sphere.h"
 #include "inet/common/geometry/shape/polyhedron/Polyhedron.h"
+#include "inet/visualizer/osg/util/OsgScene.h"
+#include "inet/visualizer/osg/util/OsgUtils.h"
 
 namespace inet {
 

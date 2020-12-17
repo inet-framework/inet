@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2020-12-15  Levente Mészáros
+
+	Disabled transmitter clock module by default in LayeredEthernetInterface.
+
+2020-11-06  Zoltan Bojthe
+
+	Cut packet content at byte-aligned position when transmission aborted.
+
 2020-11-10  Levente Mészáros
 
 	Moved EthernetMacBase to base folder.

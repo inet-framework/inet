@@ -27,13 +27,13 @@ class INET_API StreamingTransmitterBase : public PacketTransmitterBase
   protected:
     cChannel *transmissionChannel = nullptr;
 
-    simtime_t txStartTime = -1;
-    clocktime_t txStartClockTime = -1;
-
   protected:
     virtual void initialize(int stage) override;
+    virtual void scheduleAt(simtime_t t, cMessage *message) override;
 
     virtual void abortTx() = 0;
+
+    virtual void scheduleTxEndTimer(Signal *signal);
 
   public:
     virtual bool canPushSomePacket(cGate *gate) const override;

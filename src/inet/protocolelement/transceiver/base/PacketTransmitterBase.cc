@@ -62,12 +62,13 @@ void PacketTransmitterBase::handleStartOperation(LifecycleOperation *operation)
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
 }
 
-Signal *PacketTransmitterBase::encodePacket(Packet *packet) const
+Signal *PacketTransmitterBase::encodePacket(Packet *packet)
 {
-    auto duration = calculateDuration(packet);
-    auto bitTransmissionTime = CLOCKTIME_AS_SIMTIME(duration / packet->getBitLength());
+    txDurationClockTime = calculateClockTimeDuration(packet);
+    // TODO: this is just a weak approximation which ignores the past and future drift and drift rate changes of the clock
+    simtime_t bitTransmissionTime = CLOCKTIME_AS_SIMTIME(txDurationClockTime / packet->getBitLength());
     auto packetEvent = new PacketTransmittedEvent();
-    packetEvent->setDatarate(packet->getTotalLength() / s(duration.dbl()));
+    packetEvent->setDatarate(packet->getTotalLength() / s(txDurationClockTime.dbl()));
     insertPacketEvent(this, packet, PEK_TRANSMITTED, bitTransmissionTime, packetEvent);
     increaseTimeTag<TransmissionTimeTag>(packet, bitTransmissionTime);
     if (auto channel = dynamic_cast<cDatarateChannel *>(outputGate->findTransmissionChannel())) {
@@ -82,7 +83,7 @@ Signal *PacketTransmitterBase::encodePacket(Packet *packet) const
     }
     auto signal = new Signal(packet->getName());
     signal->encapsulate(packet);
-    signal->setDuration(CLOCKTIME_AS_SIMTIME(duration));
+    signal->setDuration(calculateDuration(txDurationClockTime));
     return signal;
 }
 
@@ -105,11 +106,16 @@ void PacketTransmitterBase::sendSignalEnd(Signal *signal, int transmissionId)
     send(signal, SendOptions().duration(signal->getDuration()).finishTx(transmissionId), outputGate);
 }
 
-clocktime_t PacketTransmitterBase::calculateDuration(const Packet *packet) const
+clocktime_t PacketTransmitterBase::calculateClockTimeDuration(const Packet *packet) const
 {
     s duration = packet->getTotalLength() / txDatarate;
     EV_TRACE << "Calculating signal duration" << EV_FIELD(packet) << EV_FIELD(duration, simsec(duration)) << EV_ENDL;
     return duration.get();
+}
+
+simtime_t PacketTransmitterBase::calculateDuration(clocktime_t clockTimeDuration) const
+{
+    return computeSimTimeFromClockTime(txStartClockTime + clockTimeDuration) - txStartTime;
 }
 
 } // namespace inet

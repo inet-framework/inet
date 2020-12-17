@@ -28,7 +28,7 @@ Define_Module(PreemptableStreamer);
 PreemptableStreamer::~PreemptableStreamer()
 {
     delete streamedPacket;
-    cancelAndDelete(endStreamingTimer);
+    cancelAndDeleteClockEvent(endStreamingTimer);
 }
 
 void PreemptableStreamer::initialize(int stage)
@@ -44,7 +44,7 @@ void PreemptableStreamer::initialize(int stage)
         provider = findConnectedModule<IPassivePacketSource>(inputGate);
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
         collector = findConnectedModule<IActivePacketSink>(outputGate);
-        endStreamingTimer = new cMessage("EndStreamingTimer");
+        endStreamingTimer = new ClockEvent("EndStreamingTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
@@ -96,7 +96,7 @@ void PreemptableStreamer::pushPacket(Packet *packet, cGate *gate)
     if (std::isnan(streamDatarate.get()))
         endStreaming();
     else
-        scheduleAfter(s(streamedPacket->getTotalLength() / streamDatarate).get(), endStreamingTimer);
+        scheduleClockEventAfter(s(streamedPacket->getTotalLength() / streamDatarate).get(), endStreamingTimer);
 }
 
 void PreemptableStreamer::handleCanPushPacketChanged(cGate *gate)

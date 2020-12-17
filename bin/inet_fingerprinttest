@@ -37,6 +37,7 @@ cpuTimeLimit = "600s"
 logFile = "test.out"
 extraOppRunArgs = ""
 debug=False
+release=False
 exitCode = 0
 writeOutfile = True
 useColors = sys.stdout.isatty()
@@ -58,6 +59,21 @@ if useColors:
     txtERROR = "\033[1;31m" + "ERROR" + "\033[0;0m"      # RED
     txtERROR_expected = "\033[2;32m" + "ERROR (expected)" + "\033[0;0m"    # DARK GREEN
 
+fpExtraArgs = {
+    "~tND": { "'--**.crcMode=\"computed\"'",
+              "'--**.fcsMode=\"computed\"'"
+            },
+    "tyf" : { "--cmdenv-fake-gui=true",
+              "--cmdenv-fake-gui-before-event-probability=0.1",
+              "--cmdenv-fake-gui-after-event-probability=0.1",
+              "--cmdenv-fake-gui-on-hold-probability=0.1",
+              "--cmdenv-fake-gui-on-hold-numsteps=3",
+              "--cmdenv-fake-gui-on-simtime-probability=0.1",
+              "--cmdenv-fake-gui-on-simtime-numsteps=3",
+              "'--**.fadeOutMode=\"animationTime\"'",
+              "'--**.signalAnimationSpeedChangeTimeMode=\"animationTime\"'"
+            }
+}
 
 def fpGroup2Str(fpGroup, separ1=';', separ2=' '):
     return separ1.join(separ2.join(sorted(x)) for x in fpGroup)
@@ -125,15 +141,24 @@ class FingerprintTestCaseGenerator():
 
         testcases = []
         for simulation in simulations:
-            title = simulation['wd'] + " " + simulation['args']
+            title = simulation['wd'] + " " + simulation['args'] + " " + simulation['tags']
             if not filterRegexList or ['x' for regex in filterRegexList if re.search(regex, title)]: # if any regex matches title
                 if not excludeFilterRegexList or not ['x' for regex in excludeFilterRegexList if re.search(regex, title)]: # if NO exclude-regex matches title
                     fingerprints = str2FpGroup(simulation['fingerprint'])
-                    if len(fpFilterList) > 0 or len(excludeFpFilterList):
+                    if len(fpFilterList) > 0 or len(excludeFpFilterList) > 0:
                         fingerprints = filteringFpGroup(fingerprints, fpFilterList, excludeFpFilterList)
                     if len(fingerprints):
+                        fpArg = set()
+                        fpSet = set()
+                        for fps in fingerprints:
+                            for fp in fps:
+                                fpKey = re.sub(r'[a-fA-F0-9]{4}-[a-fA-F0-9]{4}/', '', fp)
+                                fpSet.add(fpKey)
+                        for fps in fpSet:
+                            if (fps in fpExtraArgs):
+                                fpArg = fpArg.union(fpExtraArgs[fps])
                         simulation['expectedFingerprint'] = fingerprints
-                        testcases.append(FingerprintTestCase(title, simulation['file'], simulation['wd'], simulation['args'],
+                        testcases.append(FingerprintTestCase(title, simulation['file'], simulation['wd'], simulation['args'], " ".join(fpArg),
                                 simulation['simtimelimit'], fingerprints, simulation['expectedResult'], StoreFingerprintCallback(simulation), StoreExitcodeCallback(simulation), repeat))
         return testcases
 
@@ -370,12 +395,13 @@ class SimulationTestCase(unittest.TestCase):
 
 
 class FingerprintTestCase(SimulationTestCase):
-    def __init__(self, title, csvFile, wd, cmdLine, simtimelimit, fingerprint, expectedResult, storeFingerprintCallback, storeExitcodeCallback, repeat):
+    def __init__(self, title, csvFile, wd, cmdLine, extraFpArg, simtimelimit, fingerprint, expectedResult, storeFingerprintCallback, storeExitcodeCallback, repeat):
         SimulationTestCase.__init__(self)
         self.title = title
         self.csvFile = csvFile
         self.wd = wd
         self.cmdLine = cmdLine
+        self.extraFpArg = extraFpArg
         self.simtimelimit = simtimelimit
         self.fingerprint = fingerprint
         self.expectedResult = expectedResult
@@ -385,7 +411,7 @@ class FingerprintTestCase(SimulationTestCase):
 
     def runTest(self):
         # CPU time limit is a safety guard: fingerprint checks shouldn't take forever
-        global rootDir, executable, debug, cpuTimeLimit, extraOppRunArgs
+        global rootDir, executable, debug, release, cpuTimeLimit, extraOppRunArgs
 
 
         # run the simulation
@@ -401,7 +427,7 @@ class FingerprintTestCase(SimulationTestCase):
         # Otherwise, assume the first word as the name of the executable.
         (exeName, progArgs) = (executable, self.cmdLine) if (self.cmdLine.startswith("-")) else self.cmdLine.split(None, 1)
 
-        command =  (exeName+"_dbg" if debug else exeName) + " -u Cmdenv " + progArgs + \
+        command = (exeName + "_dbg" if debug else exeName + "_release" if release else exeName) + " -u Cmdenv " + progArgs + ' ' + self.extraFpArg + \
             _iif(self.simtimelimit != "", " --sim-time-limit=" + self.simtimelimit, "") + \
             " \"--fingerprint=" + fpGroup2Str(self.fingerprint, ', ') + "\" --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=true" + \

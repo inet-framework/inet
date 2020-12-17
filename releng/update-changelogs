@@ -9,7 +9,7 @@ import string
 import subprocess
 
 # configuration
-since = '2020-11-03'  # empty means "since last entry in the ChangeLog file"
+since = '2020-11-30'  # empty means "since last entry in the ChangeLog file"
 fromtag = '' # alternative for 'since': from the given tag or branch
 
 entriesToIgnore = [
@@ -55,7 +55,7 @@ def updateChangeLogIn(dir):
     if since!="": gitLogCommand +=  ['--since='+since]
     if fromtag!="": gitLogCommand += [fromtag+"..HEAD"]
     gitLogCommand += [dir]
-    newLog = subprocess.check_output(gitLogCommand, shell=(isWindows and not isMSYS), encoding="utf-8")
+    newLog = subprocess.check_output(gitLogCommand, shell=(isWindows and not isMSYS))
     newLog = formatChangeLog(newLog)
 
     newLog = re.sub('(?m)^    (    )?', "\t", newLog) # spaces-to-tab

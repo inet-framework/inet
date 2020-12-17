@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2020-12-08  Zoltan Bojthe
+
+	Added signalAnimationTimeMode parameter to MediumVisualizerBase.
+
+2020-12-08  Levente Mészáros
+
+	Added extra conditions to support the visualization of noise source transmissions.
+
+2020-12-04  Levente Mészáros
+
+	Moved canvas and OSG visualizers into separate folders.
+
 2020-11-26  Levente Mészáros
 
 	Fixed double delete crashed caused by explicit deletes and deletes due to reference counting.

@@ -75,7 +75,7 @@ void MediumCanvasVisualizer::initialize(int stage)
             canvas->addFigure(communicationHeat, 0);
         }
         animationSpeedInterpolator.setCurrentAnimationSpeed(0);
-        animationSpeedInterpolator.setTargetAnimationSpeed(AnimationPosition::REAL_TIME, 0, 0);
+        animationSpeedInterpolator.setTargetAnimationSpeed(signalAnimationSpeedChangeTimeMode, 0, 0);
         networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
     else if (stage == INITSTAGE_LAST) {
@@ -751,13 +751,13 @@ void MediumCanvasVisualizer::setAnimationSpeed()
     else if (lastSignalInProgress == SIP_PROPAGATION) {
         if (newSignalInProgress == SIP_NONE) {
             animationSpeedInterpolator.setCurrentAnimationSpeed(currentSignalPropagationAnimationSpeed);
-            animationSpeedInterpolator.setTargetAnimationSpeed(AnimationPosition::REAL_TIME, currentPosition.getRealTime() + signalAnimationSpeedChangeTime, currentSignalTransmissionAnimationSpeed);
+            animationSpeedInterpolator.setTargetAnimationSpeed(signalAnimationSpeedChangeTimeMode, currentPosition.getTime(signalAnimationSpeedChangeTimeMode) + signalAnimationSpeedChangeTime, currentSignalTransmissionAnimationSpeed);
         }
         else if (newSignalInProgress == SIP_PROPAGATION)
             ; // void
         else if (newSignalInProgress == SIP_TRANSMISSION) {
             animationSpeedInterpolator.setCurrentAnimationSpeed(currentSignalPropagationAnimationSpeed);
-            animationSpeedInterpolator.setTargetAnimationSpeed(AnimationPosition::REAL_TIME, currentPosition.getRealTime() + signalAnimationSpeedChangeTime, currentSignalTransmissionAnimationSpeed);
+            animationSpeedInterpolator.setTargetAnimationSpeed(signalAnimationSpeedChangeTimeMode, currentPosition.getTime(signalAnimationSpeedChangeTimeMode) + signalAnimationSpeedChangeTime, currentSignalTransmissionAnimationSpeed);
         }
     }
     else if (lastSignalInProgress == SIP_TRANSMISSION) {

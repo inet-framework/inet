@@ -27,6 +27,7 @@ import inet.queueing.contract.IActivePacketSource;
 simple ActivePacketSource extends PacketSourceBase like IActivePacketSource
 {
     parameters:
+        string clockModule = default(""); // relative path of a module that implements IClock; optional
         volatile double productionInterval @unit(s); // elapsed time between subsequent packets pushed to the connected packet consumer
         @class(ActivePacketSource);
         @display("i=block/source");

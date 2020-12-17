@@ -18,16 +18,17 @@
 #ifndef __INET_ACTIVEPACKETSOURCE_H
 #define __INET_ACTIVEPACKETSOURCE_H
 
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/ActivePacketSourceBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API ActivePacketSource : public ActivePacketSourceBase
+class INET_API ActivePacketSource : public ClockUserModuleMixin<ActivePacketSourceBase>
 {
   protected:
     cPar *productionIntervalParameter = nullptr;
-    cMessage *productionTimer = nullptr;
+    ClockEvent *productionTimer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
@@ -37,7 +38,7 @@ class INET_API ActivePacketSource : public ActivePacketSourceBase
     virtual void producePacket();
 
   public:
-    virtual ~ActivePacketSource() { cancelAndDelete(productionTimer); }
+    virtual ~ActivePacketSource() { cancelAndDeleteClockEvent(productionTimer); }
 
     virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;

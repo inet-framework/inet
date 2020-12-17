@@ -52,6 +52,8 @@ class INET_API IMobility
   public:
     virtual ~IMobility() {}
 
+    virtual int getId() const = 0;
+
     /**
      * Returns the maximum possible speed at any future time.
      */

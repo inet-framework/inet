@@ -91,6 +91,8 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
   protected:
     MobilityBase();
 
+    virtual int getId() const override { return cSimpleModule::getId(); }
+
     /** @brief Returns the required number of initialize stages. */
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 

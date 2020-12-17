@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2020-12-09  Zoltan Bojthe
+
+	Moved OsgScene and OsgUtils to visualizer/osg/util/
+
+2020-12-07  Levente Mészáros
+
+	Replaced hasVisualizer with firstAvailableOrEmpty to support optional visualization features.
+
 2020-11-14  Zoltan Bojthe
 
 	Marked queueing feature dependent code in MessageDispatcher.
@@ -8,6 +16,10 @@
 
 	Removed checkReference calls from operator* in ModuleRefBy*, because it's
 	used for nullptr checking.
+
+2020-11-05  Zoltan Bojthe
+
+	Don't serialize empty packets in FingerprintCalculator.
 
 2020-11-02  Levente Mészáros
 
@@ -93,6 +105,10 @@
 	name trio unconditionally.
 	Added EV_FIELD to INETDefs.h macro to support outputting "field = value"
 	fragments with nice formatting.
+
+2020-08-13  Levente Mészáros
+
+	Enhanced MessageDispatcher error messages.
 
 2020-07-31  Levente Mészáros
 

@@ -30,7 +30,7 @@ void PassivePacketSink::initialize(int stage)
     PassivePacketSinkBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         consumptionIntervalParameter = &par("consumptionInterval");
-        consumptionTimer = new cMessage("ConsumptionTimer");
+        consumptionTimer = new ClockEvent("ConsumptionTimer");
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
@@ -51,9 +51,9 @@ void PassivePacketSink::handleMessage(cMessage *message)
 
 void PassivePacketSink::scheduleConsumptionTimer()
 {
-    simtime_t interval = consumptionIntervalParameter->doubleValue();
+    clocktime_t interval = consumptionIntervalParameter->doubleValue();
     if (interval != 0 || consumptionTimer->getArrivalModule() == nullptr)
-        scheduleAfter(interval, consumptionTimer);
+        scheduleClockEventAfter(interval, consumptionTimer);
 }
 
 void PassivePacketSink::pushPacket(Packet *packet, cGate *gate)

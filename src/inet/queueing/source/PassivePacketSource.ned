@@ -27,6 +27,7 @@ import inet.queueing.contract.IPassivePacketSource;
 simple PassivePacketSource extends PacketSourceBase like IPassivePacketSource
 {
     parameters:
+        string clockModule = default(""); // relative path of a module that implements IClock; optional
         volatile double providingInterval @unit(s) = default(0s); // elapsed time between subsequent packets allowed to be pulled by the connected packet collector, 0 means any number of packets can be pulled at the same simulation time
         @class(PassivePacketSource);
         @signal[packetPulled](type=inet::Packet);

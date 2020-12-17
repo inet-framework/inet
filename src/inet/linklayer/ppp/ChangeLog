@@ -20,6 +20,7 @@
 
 2020-07-24  Levente Mészáros
 
+	Added guard conditions to allow calling refreshDisplay before initialize.
 	Added protocol parameter to PppInterface.
 
 2020-07-31  Zoltan Bojthe

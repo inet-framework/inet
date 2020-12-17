@@ -18,13 +18,14 @@
 #ifndef __INET_MARKOVSCHEDULER_H
 #define __INET_MARKOVSCHEDULER_H
 
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketSchedulerBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API MarkovScheduler : public PacketSchedulerBase, public virtual IPassivePacketSink, public virtual IActivePacketSource
+class INET_API MarkovScheduler : public ClockUserModuleMixin<PacketSchedulerBase>, public virtual IPassivePacketSink, public virtual IActivePacketSource
 {
   protected:
     std::vector<IActivePacketSource *> producers;
@@ -35,8 +36,7 @@ class INET_API MarkovScheduler : public PacketSchedulerBase, public virtual IPas
 
     int state;
 
-    cMessage *transitionTimer = nullptr;
-    cMessage *waitTimer = nullptr;
+    ClockEvent *waitTimer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;

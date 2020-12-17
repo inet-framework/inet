@@ -20,6 +20,7 @@
 
 #include "inet/common/packet/PacketFilter.h"
 #include "inet/visualizer/base/VisualizerBase.h"
+#include "inet/visualizer/util/AnimationSpeedInterpolator.h"
 #include "inet/visualizer/util/ColorSet.h"
 #include "inet/visualizer/util/InterfaceFilter.h"
 #include "inet/visualizer/util/NetworkNodeFilter.h"
@@ -58,6 +59,7 @@ class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
     double signalPropagationAdditionalTime = NaN;
     double signalTransmissionAnimationSpeed = NaN;
     double signalTransmissionAnimationTime = NaN;
+    AnimationPosition::TimeType signalAnimationSpeedChangeTimeMode = AnimationPosition::REAL_TIME;
     double signalAnimationSpeedChangeTime = NaN;
     bool displaySignalDepartures = false;
     bool displaySignalArrivals = false;

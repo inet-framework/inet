@@ -18,16 +18,17 @@
 #ifndef __INET_ACTIVEPACKETSINK_H
 #define __INET_ACTIVEPACKETSINK_H
 
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/ActivePacketSinkBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API ActivePacketSink : public ActivePacketSinkBase
+class INET_API ActivePacketSink : public ClockUserModuleMixin<ActivePacketSinkBase>
 {
   protected:
     cPar *collectionIntervalParameter = nullptr;
-    cMessage *collectionTimer = nullptr;
+    ClockEvent *collectionTimer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
@@ -37,7 +38,7 @@ class INET_API ActivePacketSink : public ActivePacketSinkBase
     virtual void collectPacket();
 
   public:
-    virtual ~ActivePacketSink() { cancelAndDelete(collectionTimer); }
+    virtual ~ActivePacketSink() { cancelAndDeleteClockEvent(collectionTimer); }
 
     virtual void handleCanPullPacketChanged(cGate *gate) override;
     virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;

@@ -18,11 +18,11 @@
 #include "inet/visualizer/osg/scene/SceneOsgEarthVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/OsgScene.h"
-#include "inet/common/OsgUtils.h"
 #include "inet/environment/contract/IPhysicalEnvironment.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/visualizer/osg/scene/NetworkNodeOsgVisualizer.h"
+#include "inet/visualizer/osg/util/OsgScene.h"
+#include "inet/visualizer/osg/util/OsgUtils.h"
 
 #ifdef WITH_OSGEARTH
 #include <osg/Group>

@@ -33,7 +33,7 @@ void PacketGate::initialize(int stage)
         isOpen_ = par("initiallyOpen");
         openTime = par("openTime");
         closeTime = par("closeTime");
-        changeTimer = new cMessage("ChangeTimer");
+        changeTimer = new ClockEvent("ChangeTimer");
     }
     else if (stage == INITSTAGE_QUEUEING)
         scheduleChangeTimer();
@@ -51,13 +51,13 @@ void PacketGate::handleMessage(cMessage *message)
 
 void PacketGate::scheduleChangeTimer()
 {
-    simtime_t changeTime;
+    clocktime_t changeTime;
     if (isOpen_)
         changeTime = closeTime;
     else
         changeTime = openTime;
-    if (changeTime > simTime())
-        scheduleAt(changeTime, changeTimer);
+    if (changeTime > getClockTime())
+        scheduleClockEventAt(changeTime, changeTimer);
 }
 
 void PacketGate::processChangeTimer()
