@@ -25,10 +25,6 @@ echo "::group::Enable all features"
 opp_featuretool enable all 2>&1 # redirecting stderr so it doesn't get out of sync with stdout
 echo "::endgroup::"
 
-echo "::group::Disable OSG features"
-opp_featuretool disable VisualizationOsg VisualizationOsgShowcases 2>&1
-echo "::endgroup::"
-
 echo "::group::Run fingerprint tests"
 cd tests/fingerprint
 # this indirectly calls the script named simply "inet", which handles the MODE envvar internally

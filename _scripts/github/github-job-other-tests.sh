@@ -27,10 +27,6 @@ echo "::group::Enable all features"
 opp_featuretool enable all  2>&1 # redirecting stderr so it doesn't get out of sync with stdout
 echo "::endgroup::"
 
-echo "::group::Disable OSG features"
-opp_featuretool disable VisualizationOsg VisualizationOsgShowcases 2>&1
-echo "::endgroup::"
-
 echo "::group::Make Makefiles"
 make makefiles
 echo "::endgroup::"

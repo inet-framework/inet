@@ -34,10 +34,6 @@ echo "::group::Enable all features"
 opp_featuretool enable all 2>&1 # redirecting stderr so it doesn't get out of sync with stdout
 echo "::endgroup::"
 
-echo "::group::Disable OSG features"
-opp_featuretool disable VisualizationOsg VisualizationOsgShowcases 2>&1
-echo "::endgroup::"
-
 if [ "$TARGET_PLATFORM" != "linux" ]; then
     # Disabling some features when cross-compiling, because:
     # - we don't [want to?] have cross-compiled ffmpeg
@@ -45,7 +41,11 @@ if [ "$TARGET_PLATFORM" != "linux" ]; then
     # - ExternalInterface is only supported on Linux
     # - lwIP and NSC does not seem to compile on at least Windows, oh well...
     echo "::group::Disable some features"
-    opp_featuretool disable VoipStream VoipStreamExamples NetworkEmulationSupport NetworkEmulationExamples NetworkEmulationShowcases TcpLwip TcpNsc
+    opp_featuretool disable \
+        VoipStream VoipStreamExamples \
+        NetworkEmulationSupport NetworkEmulationExamples NetworkEmulationShowcases \
+        TcpLwip TcpNsc \
+        VisualizationOsg VisualizationOsgShowcases 2>&1
     echo "::endgroup::"
 fi
 
