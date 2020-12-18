@@ -2,7 +2,7 @@ version: 2
 jobs:
   build: # the name is misleading, but has to be "build", so it is used outside of workflows
     docker:
-      - image: omnetpp/travis-inet:6.0pre9-201029
+      - image: omnetpp/travis-inet:6.0pre10-201218
     parallelism: 4 # make use of all our free containers
     steps:
       - checkout
@@ -11,7 +11,7 @@ jobs:
           command: git submodule update --init
       - run: # note: this does not set ALL variables that ". setenv" (in OMNeT++ and in INET) do, but this should to be enough for testing
           name: Setting up environment variables
-          command: echo 'export PATH=/root/omnetpp-6.0pre9-linux/bin:$PATH SKIPPED_FEATURES="" SPLIT_INDEX=$CIRCLE_NODE_INDEX SPLIT_TOTAL=$CIRCLE_NODE_TOTAL' >> $BASH_ENV
+          command: echo 'export PATH=/root/omnetpp-6.0pre10-linux/bin:$PATH SKIPPED_FEATURES="" SPLIT_INDEX=$CIRCLE_NODE_INDEX SPLIT_TOTAL=$CIRCLE_NODE_TOTAL' >> $BASH_ENV
       - run:
           name: Copying NSC into INET
           command: cp -r /root/nsc-0.5.3 3rdparty
