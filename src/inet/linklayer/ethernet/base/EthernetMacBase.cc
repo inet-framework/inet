@@ -183,7 +183,6 @@ void EthernetMacBase::initialize(int stage)
         lowerLayerInGateId = physInGate->getId();
         lowerLayerOutGateId = physOutGate->getId();
         transmissionChannel = nullptr;
-        currentTxFrame = nullptr;
 
         initializeFlags();
 
