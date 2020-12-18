@@ -95,6 +95,7 @@ void Hcf::handleMessage(cMessage* msg)
 void Hcf::processUpperFrame(Ieee80211DataOrMgmtFrame* frame)
 {
     Enter_Method("processUpperFrame(%s)", frame->getName());
+    take(frame);
     EV_INFO << "Processing upper frame: " << frame->getName() << endl;
     // TODO:
     // A QoS STA should send individually addressed Management frames that are addressed to a non-QoS STA
@@ -142,7 +143,9 @@ void Hcf::scheduleInactivityTimer(simtime_t timeout)
 
 void Hcf::processLowerFrame(Ieee80211Frame* frame)
 {
-    Enter_Method_Silent();
+    Enter_Method("processLowerFrame(%s)", frame->getName());
+    take(frame);
+    EV_INFO << "Processing lower frame: " << frame->getName() << endl;
     auto edcaf = edca->getChannelOwner();
     if (edcaf && frameSequenceHandler->isSequenceRunning()) {
         // TODO: always call processResponse?

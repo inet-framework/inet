@@ -77,6 +77,7 @@ void Dcf::channelGranted(IChannelAccess *channelAccess)
 void Dcf::processUpperFrame(Ieee80211DataOrMgmtFrame* frame)
 {
     Enter_Method("processUpperFrame(%s)", frame->getName());
+    take(frame);
     EV_INFO << "Processing upper frame: " << frame->getName() << endl;
     if (pendingQueue->insert(frame)) {
         EV_INFO << "Frame " << frame->getName() << " has been inserted into the PendingQueue." << endl;
@@ -127,7 +128,9 @@ void Dcf::scheduleStartRxTimer(simtime_t timeout)
 
 void Dcf::processLowerFrame(Ieee80211Frame* frame)
 {
-    Enter_Method_Silent();
+    Enter_Method("processLowerFrame(%s)", frame->getName());
+    take(frame);
+    EV_INFO << "Processing lower frame: " << frame->getName() << endl;
     if (frameSequenceHandler->isSequenceRunning()) {
         // TODO: always call processResponses
         if ((!isForUs(frame) && !startRxTimer->isScheduled()) || isForUs(frame)) {
