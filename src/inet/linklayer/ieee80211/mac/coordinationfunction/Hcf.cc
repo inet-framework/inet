@@ -119,6 +119,7 @@ void Hcf::updateDisplayString()
 void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     Enter_Method("processUpperFrame(%s)", packet->getName());
+    take(packet);
     EV_INFO << "Processing upper frame: " << packet->getName() << endl;
     // TODO
     // A QoS STA should send individually addressed Management frames that are addressed to a non-QoS STA
@@ -161,6 +162,7 @@ void Hcf::scheduleInactivityTimer(simtime_t timeout)
 void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     Enter_Method("processLowerFrame(%s)", packet->getName());
+    take(packet);
     EV_INFO << "Processing lower frame: " << packet->getName() << endl;
     auto edcaf = edca->getChannelOwner();
     if (edcaf && frameSequenceHandler->isSequenceRunning()) {
