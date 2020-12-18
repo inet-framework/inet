@@ -53,8 +53,8 @@
     routing/eigrp/pdms
     routing/eigrp/tables
 
-    Refactored folders
-    ==================
+    Changed folders
+    ===============
     linklayer/ethernet -> linklayer/ethernet/base
     linklayer/ethernet -> linklayer/ethernet/basic
     linklayer/ethernet -> linklayer/ethernet/common
@@ -294,8 +294,8 @@
     visualizer/flow/PacketFlowOsgVisualizer
     visualizer/flow/PacketFlowVisualizer
 
-    Refactored modules
-    ==================
+    Changed modules
+    ===============
     linklayer/contract/ITrafficConditioner -> queueing/contract/ITrafficConditioner
     linklayer/contract/IVlanInterface -> linklayer/contract/IVirtualInterface
     linklayer/ethernet/EtherEncap -> linklayer/ethernet/basic/EthernetEncapsulation
@@ -372,8 +372,8 @@
     VirtualTunnel:steal
     WirelessInterface:protocol
 
-    Refactored module parameters
-    ============================
+    Changed module parameters
+    =========================
     LinkLayerNodeBase:numVlanInterfaces -> LinkLayerNodeBase:numVirtInterfaces
     MediumVisualizerBase:powerDensityMapSampling -> MediumVisualizerBase:powerDensityMapPixelMode
     RadioMedium:recordCommunicationLog -> RadioMedium:recordReceptionLog
@@ -404,8 +404,8 @@
     timeChanged
     transmissionTime
 
-    Refactored statistics
-    ================
+    Changed statistics
+    ==================
     packetPopped -> packetPulled
 
     Added packet chunks
@@ -433,8 +433,8 @@
     SequenceNumberHeader
     SubpacketLengthHeader
 
-    Refactored packet chunks
-    ========================
+    Changed packet chunks
+    =====================
     EthernetControlFrame -> EthernetControlFrameBase
     Ieee80211EtherTypeHeader -> Ieee802EpdHeader
     Ieee8021qHeader -> Ieee8021qTagEpdHeader
@@ -481,8 +481,8 @@
     routing/eigrp/messages/EigrpMessage.msg: EigrpIpv6Update
     routing/eigrp/messages/EigrpMessage.msg: EigrpMessage
 
-    Refactored MSG classes
-    ======================
+    Changed MSG classes
+    ===================
     linklayer/ethernet/EtherFrame.msg: EthernetControlFrame -> linklayer/ethernet/EthernetControlFrame.msg: EthernetControlFrameBase
     linklayer/ethernet/EtherFrame.msg: EthernetPauseFrame -> linklayer/ethernet/EthernetControlFrame.msg: EthernetPauseFrame
     linklayer/ethernet/EthernetMacHeader.msg: EthernetMacAddressFields
@@ -570,8 +570,8 @@
     routing/eigrp/tables/EigrpRoute
     routing/eigrp/tables/EigrpTopologyTable
 
-    Refactored C++ classes
-    ======================
+    Changed C++ classes
+    ===================
     common/int128 -> common/Int128
     common/NetworkCommunicationFingerprintCalculator -> common/FingerprintCalculator
     linklayer/ethernet/EthernetHeaderSerializer -> linklayer/ethernet/EthernetMacHeaderSerializer
@@ -611,8 +611,8 @@
     ===============
     messageSent
 
-    Refactored signals
-    ==================
+    Changed signals
+    ===============
     packetPopped -> packetPulled
     receptionStarted
     receptionEnded
