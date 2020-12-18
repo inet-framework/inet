@@ -20,6 +20,9 @@ There are also a number of small improvements, and several bug fixes. Some chang
 are backward incompatible, so existing models may need to be updated. This version
 requires OMNeT++ 6.0 preview 10 or later.
 
+For a complete list of all added, removed, and change folders, NED modules, packet
+chunks, packet tags, statistics, C++ classes, and signals please refer to src/ChangeLog.
+
 Notable backward incompatible changes are the following:
 
 1. Packet API
@@ -197,9 +200,6 @@ Notable backward incompatible changes are the following:
 
    All integral C++ type alias have been replaced with the standard variants.
    For example, the int64 type alias has been replaced with int64_t.
-
-   For a complete list of all added, removed, and renamed folders, NED modules,
-   C++ classes, signals, etc. please refer to src/ChangeLog.
 
    These changes mostly result in NED errors and C++ compilation errors in the
    simulation models which are affected, and they are easy to follow.
