@@ -141,8 +141,12 @@ void VectorCommunicationCache::addTransmission(const ITransmission *transmission
 
 void VectorCommunicationCache::removeTransmission(const ITransmission *transmission)
 {
-    delete getCachedSignal(transmission);
-    delete transmission;
+    ASSERT(baseTransmissionId != -1);
+    int transmissionIndex = transmission->getId() - baseTransmissionId;
+    if (0 <= transmissionIndex && transmissionIndex < (int)transmissionCache.size())
+        transmissionCache[transmissionIndex] = VectorTransmissionCacheEntry();
+    else
+        throw cRuntimeError("Cannot find transmission");
 }
 
 const ITransmission *VectorCommunicationCache::getTransmission(int id) const
