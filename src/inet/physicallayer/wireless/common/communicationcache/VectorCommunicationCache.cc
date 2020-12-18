@@ -26,11 +26,8 @@ Define_Module(VectorCommunicationCache);
 
 VectorCommunicationCache::~VectorCommunicationCache()
 {
-    for (auto& transmissionCacheEntry : transmissionCache) {
-        delete transmissionCacheEntry.signal;
-        delete transmissionCacheEntry.transmission;
+    for (auto& transmissionCacheEntry : transmissionCache)
         delete transmissionCacheEntry.receptionCacheEntries;
-    }
 }
 
 VectorCommunicationCache::RadioCacheEntry *VectorCommunicationCache::getRadioCacheEntry(const IRadio *radio)
@@ -189,11 +186,8 @@ void VectorCommunicationCache::removeNonInterferingTransmissions(std::function<v
                 delete receptionCacheEntries;
                 transmissionCacheEntry.receptionCacheEntries = nullptr;
             }
-            if (transmissionCacheEntry.transmission != nullptr) {
+            if (transmissionCacheEntry.transmission != nullptr)
                 f(transmissionCacheEntry.transmission);
-                delete transmissionCacheEntry.signal;
-                delete transmissionCacheEntry.transmission;
-            }
         }
         else
             break;
