@@ -1,0 +1,8 @@
+#!/bin/bash
+
+inet -u Cmdenv -c NoVlan --sim-time-limit=1s &
+inet -u Cmdenv -c BetweenSwitches --sim-time-limit=1s &
+inet -u Cmdenv -c BetweenHosts --sim-time-limit=1s &
+inet -u Cmdenv -c Asymmetric --sim-time-limit=1s &
+inet -u Cmdenv -c DoubleTagged --sim-time-limit=1s &
+inet -u Cmdenv -c VirtualInterface --sim-time-limit=1s &
