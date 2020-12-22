@@ -57,6 +57,7 @@ void PassivePacketSource::scheduleProvidingTimer()
 
 Packet *PassivePacketSource::canPullPacket(cGate *gate) const
 {
+    Enter_Method("canPullPacket");
     if (providingTimer->isScheduled())
         return nullptr;
     else {

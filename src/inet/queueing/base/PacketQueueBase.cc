@@ -47,6 +47,18 @@ void PacketQueueBase::handleMessage(cMessage *message)
     pushPacket(packet, packet->getArrivalGate());
 }
 
+void PacketQueueBase::enqueuePacket(Packet *packet)
+{
+    pushPacket(packet, inputGate);
+}
+
+Packet *PacketQueueBase::dequeuePacket()
+{
+    auto packet = pullPacket(outputGate);
+    drop(packet);
+    return packet;
+}
+
 void PacketQueueBase::emit(simsignal_t signal, cObject *object, cObject *details)
 {
     if (signal == packetPushedSignal)

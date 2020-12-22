@@ -49,8 +49,8 @@ class INET_API PacketQueueBase : public PacketProcessorBase, public virtual IPac
     virtual bool canPullSomePacket(cGate *gate) const override { return getNumPackets() > 0; }
     virtual bool canPushSomePacket(cGate *gate) const override { return true; }
 
-    virtual void enqueuePacket(Packet *packet) override { pushPacket(packet, inputGate); }
-    virtual Packet *dequeuePacket() override { return pullPacket(outputGate); }
+    virtual void enqueuePacket(Packet *packet) override;
+    virtual Packet *dequeuePacket() override;
 
     virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
     virtual void pushPacketEnd(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }

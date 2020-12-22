@@ -20,6 +20,9 @@ There are also a number of small improvements, and several bug fixes. Some chang
 are backward incompatible, so existing models may need to be updated. This version
 requires OMNeT++ 6.0 preview 10 or later.
 
+For a complete list of all added, removed, and change folders, NED modules, packet
+chunks, packet tags, statistics, C++ classes, and signals please refer to src/ChangeLog.
+
 Notable backward incompatible changes are the following:
 
 1. Packet API
@@ -170,6 +173,11 @@ Notable backward incompatible changes are the following:
    separates the largely independent wired and wireless physical layer support
    modules and implementations.
 
+   Similary to the above, several folders in the visualizer folder have been
+   moved below the newly added canvas and osg folders. This change is required
+   in order to be able to add separate features for canvas (2D) and OSG (3D)
+   visualizations.
+
    The InterfaceEntry module that represents network interfaces has been renamed
    to NetworkInterface. The old name was a left-over from the time when this
    class was really an integral part of the InterfaceTable module. This is no
@@ -192,9 +200,6 @@ Notable backward incompatible changes are the following:
 
    All integral C++ type alias have been replaced with the standard variants.
    For example, the int64 type alias has been replaced with int64_t.
-
-   For a complete list of all added, removed, and renamed folders, NED modules,
-   C++ classes, signals, etc. please refer to src/ChangeLog.
 
    These changes mostly result in NED errors and C++ compilation errors in the
    simulation models which are affected, and they are easy to follow.
@@ -398,14 +403,34 @@ Notable backward compatible changes are the following:
 
 14. Features (.oppfeatures):
 
-   Several new OMNeT++ features have been added to INET:
-    - clock
+   Several new OMNeT++ features have been added and some old features have been
+   split. These changes can be found in the IDE on the INET project properties:
+
+    - Clock
+    - Clock examples
+    - EIGRP routing
+    - EIGRP routing examples
+    - Emulation showcase
+    - IEEE 802.1ae
+    - IEEE 802.1q
     - IEEE 802.2
-    - queueing
-    - queueing tutorial
-    - protocol support
-    - protocol tutorial
-    - emulation showcase
+    - Internet protocol examples
+    - Open MP support
+    - Physical layer common
+    - Physical layer wired common
+    - Physical layer wireless common
+    - Protocol support
+    - Protocol tutorial
+    - Queueing library
+    - Queueing tutorial
+    - Unit disk radio
+    - Virtual interface
+    - Visualization OSG (3D)
+    - Visualization OSG (3D) showcases
+    - Visualization canvas (2D)
+    - Visualization canvas (2D) showcases
+    - Visualization common
+    - Wireless noise source
 
 15. Examples
 
@@ -428,10 +453,13 @@ Notable backward compatible changes are the following:
 
    The fingerprint testing script has been extended with support for computing
    multiple different fingerprints and a separate fingerprint calculator option.
-   The updated fingerprint tests contain three separate fingerprint values for
-   each example simulation: one for the detailed model behavior, another for the
-   complete network byte order packet data and timing at the network level, and
-   finally one that is computed from all the graphics in the runtime user interface.
+   The updated fingerprint tests contain four separate fingerprint values for
+   each example simulation:
+
+    - detailed model behavior
+    - complete network byte order packet data and timing at the network level
+    - complete network packet length and timing at the network level
+    - graphics in the runtime user interface.
 
    Several new fingerprint, module, and unit tests have been added for the new
    clock model, the protocol support modules, and the new formatted output.

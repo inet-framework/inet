@@ -131,9 +131,9 @@ void SctpAssociation::checkPseudoCumAck(const SctpPathVariables *path)
     if (tsnGt(path->pseudoCumAck, earliestOutstandingTsn) ||
         tsnGt(path->rtxPseudoCumAck, rtxEarliestOutstandingTsn))
     {
-        std::cerr << "WRONG PSEUDO CUM-ACK!" << endl
-                  << "pseudoCumAck=" << path->pseudoCumAck << ", earliestOutstandingTsn=" << earliestOutstandingTsn << endl
-                  << "rtxPseudoCumAck=" << path->rtxPseudoCumAck << ", rtxEarliestOutstandingTsn=" << rtxEarliestOutstandingTsn << endl;
+        EV_WARN << "WRONG PSEUDO CUM-ACK!" << endl
+                << "pseudoCumAck=" << path->pseudoCumAck << ", earliestOutstandingTsn=" << earliestOutstandingTsn << endl
+                << "rtxPseudoCumAck=" << path->rtxPseudoCumAck << ", rtxEarliestOutstandingTsn=" << rtxEarliestOutstandingTsn << endl;
     }
 }
 

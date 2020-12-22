@@ -47,9 +47,9 @@ template<typename T>
 ClockUserModuleMixin<T>::~ClockUserModuleMixin() {
 #ifndef NDEBUG
     if (clock != nullptr && !usedClockApi)
-        std::cerr << "*** Warning: Class '" << className << "' has a clock module set but does not use the clock API (at least in this simulation)\n";
+        EV_WARN << "Class '" << className << "' has a clock module set but does not use the clock API (at least in this simulation)\n";
     if (!T::hasPar("clockModule") && usedClockApi)
-        std::cerr << "*** Warning: Class '" << className << "' uses the clock API but does not have a clock module parameter\n";
+        EV_WARN << "Class '" << className << "' uses the clock API but does not have a clock module parameter\n";
 #endif
 }
 

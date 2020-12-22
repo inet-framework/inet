@@ -195,9 +195,6 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
 {
     Enter_Method("sendErrorMessage(datagram, type=%d, code=%d)", type, code);
 
-    // get ownership
-    take(origDatagram);
-
     if (!validateDatagramPromptingError(origDatagram))
         return;
 
@@ -247,7 +244,6 @@ void Icmpv6::sendErrorMessage(Packet *origDatagram, Icmpv6Type type, int code)
     else {
         sendToIP(errorMsg, ipv6Header->getSrcAddress());
     }
-    delete origDatagram;
 }
 
 void Icmpv6::sendToIP(Packet *msg, const Ipv6Address& dest)
@@ -311,7 +307,6 @@ bool Icmpv6::validateDatagramPromptingError(Packet *packet)
     // don't send ICMP error messages for multicast messages
     if (ipv6Header->getDestAddress().isMulticast()) {
         EV_INFO << "won't send ICMP error messages for multicast message " << ipv6Header << endl;
-        delete packet;
         return false;
     }
 
@@ -320,7 +315,6 @@ bool Icmpv6::validateDatagramPromptingError(Packet *packet)
         auto recICMPMsg = packet->peekDataAt<Icmpv6Header>(ipv6Header->getChunkLength());
         if (recICMPMsg->getType() < 128) {
             EV_INFO << "ICMP error received -- do not reply to it" << endl;
-            delete packet;
             return false;
         }
     }

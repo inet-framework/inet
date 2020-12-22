@@ -1256,6 +1256,7 @@ INetfilter::IHook::Result Ipv6::datagramLocalOutHook(Packet *packet)
 void Ipv6::sendIcmpError(Packet *packet, Icmpv6Type type, int code)
 {
     icmp->sendErrorMessage(packet, type, code);
+    delete packet;
 }
 
 } // namespace inet

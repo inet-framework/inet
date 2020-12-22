@@ -54,7 +54,7 @@ class INET_API cQueue : public cOwnedObject
      * @brief Base class for object comparators, used by cQueue for
      * priority queuing.
      */
-    class SIM_API Comparator
+    class INET_API Comparator
     {
       public:
         virtual ~Comparator() {}
@@ -78,7 +78,7 @@ class INET_API cQueue : public cOwnedObject
     /**
      * @brief Walks along a cQueue.
      */
-    class SIM_API Iterator
+    class INET_API Iterator
     {
       private:
         QElem *p;

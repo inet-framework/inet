@@ -926,6 +926,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
         EV_WARN << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
         icmp->sendPtbMessage(packet, mtu);
         numDropped++;
+        delete packet;
         return;
     }
 
@@ -1432,6 +1433,7 @@ void Ipv4::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj,
 void Ipv4::sendIcmpError(Packet *origPacket, int inputInterfaceId, IcmpType type, IcmpCode code)
 {
     icmp->sendErrorMessage(origPacket, inputInterfaceId, type, code);
+    delete origPacket;
 }
 
 

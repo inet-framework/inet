@@ -246,6 +246,7 @@ void Ipv6NeighbourDiscovery::processIpv6Datagram(Packet *packet)
         // draft-ietf-v6ops-onlinkassumption-03 explains why.
         delete packet->removeControlInfo();
         icmpv6->sendErrorMessage(packet, ICMPv6_DESTINATION_UNREACHABLE, NO_ROUTE_TO_DEST);
+        delete packet;
         return;
     }
 
@@ -735,6 +736,7 @@ void Ipv6NeighbourDiscovery::dropQueuedPacketsAwaitingAr(Neighbour *nce)
         pendingPackets.erase(i);
         pendingQueue.remove(msg);
         icmpv6->sendErrorMessage(msg, ICMPv6_DESTINATION_UNREACHABLE, ADDRESS_UNREACHABLE);
+        delete msg;
     }
 
     // RFC 2461: Section 7.3.3

@@ -122,8 +122,10 @@ void Ipv4FragBuf::purgeStaleFragments(Icmp *icmpModule, simtime_t lastupdate)
             // because its length (being a fragment) is smaller than the encapsulated
             // packet, resulting in "length became negative" error. Use getEncapsulatedPacket().
             EV_WARN << "datagram fragment timed out in reassembly buffer, sending ICMP_TIME_EXCEEDED\n";
-            if (buf.packet != nullptr)
+            if (buf.packet != nullptr) {
                 icmpModule->sendErrorMessage(buf.packet, -1 /*TODO*/, ICMP_TIME_EXCEEDED, 0);
+                delete buf.packet;
+            }
 
             // delete
             auto oldi = i++;

@@ -38,6 +38,7 @@ ApskRadio::ApskRadio() :
 
 void ApskRadio::initialize(int stage)
 {
+    Radio::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         const char *protocolName = par("protocol");
         if (*protocolName != '\0')
