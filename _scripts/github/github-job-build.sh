@@ -61,8 +61,8 @@ if [ "$TARGET_PLATFORM" = "windows" ]; then
     # This workaround will not be necessary once the tester Docker image includes:
     # - A newer opp_makemake that generates a group target for the .dll and .dll.a files
     # - GNU make 4.3 that supports group targets (this is in ubuntu:20.10)
-    sed -i 's|  TARGET_FILES+= $(TARGET_DIR)/$(TARGET_IMPLIB)||g' src/Makefile
-    sed -i 's|$O/$(TARGET) $O/$(TARGET_IMPLIB): $(OBJS)|$O/$(TARGET): $(OBJS)|g' src/Makefile
+    sed -i 's|  TARGET_FILES+= $(TARGET_DIR)/$(TARGET_IMPDEF) $(TARGET_DIR)/$(TARGET_IMPLIB)||g' src/Makefile
+    sed -i 's|$O/$(TARGET) $O/$(TARGET_IMPDEF) $O/$(TARGET_IMPLIB) &: $(OBJS)|$O/$(TARGET) : $(OBJS)|g' src/Makefile
 fi
 
 echo "::group::Build"
