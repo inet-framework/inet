@@ -311,8 +311,6 @@ void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
     else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(header)) {
         sendUp(recipientDataService->managementFrameReceived(packet, mgmtHeader));
         recipientProcessReceivedManagementFrame(mgmtHeader);
-        if (dynamicPtrCast<const Ieee80211ActionFrame>(mgmtHeader))
-            delete packet;
     }
     else { // TODO else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
         sendUp(recipientDataService->controlFrameReceived(packet, header, recipientBlockAckAgreementHandler));
@@ -650,12 +648,8 @@ bool Hcf::hasFrameToTransmit()
 
 void Hcf::sendUp(const std::vector<Packet *>& completeFrames)
 {
-    for (auto frame : completeFrames) {
-        // FIXME mgmt module does not handle addba req ..
-        const auto& header = frame->peekAtFront<Ieee80211DataOrMgmtHeader>();
-        if (!dynamicPtrCast<const Ieee80211ActionFrame>(header))
-            mac->sendUpFrame(frame);
-    }
+    for (auto frame : completeFrames)
+        mac->sendUpFrame(frame);
 }
 
 void Hcf::transmitFrame(Packet *packet, simtime_t ifs)
