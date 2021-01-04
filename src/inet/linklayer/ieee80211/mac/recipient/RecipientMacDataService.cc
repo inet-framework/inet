@@ -52,16 +52,21 @@ std::vector<Ieee80211Frame*> RecipientMacDataService::dataOrMgmtFrameReceived(Ie
 
 std::vector<Ieee80211Frame*> RecipientMacDataService::dataFrameReceived(Ieee80211DataFrame* dataFrame)
 {
+    Enter_Method("dataFrameReceived");
+    take(dataFrame);
     return dataOrMgmtFrameReceived(dataFrame);
 }
 
 std::vector<Ieee80211Frame*> RecipientMacDataService::managementFrameReceived(Ieee80211ManagementFrame* mgmtFrame)
 {
+    Enter_Method("managementFrameReceived");
+    take(mgmtFrame);
     return dataOrMgmtFrameReceived(mgmtFrame);
 }
 
 std::vector<Ieee80211Frame*> RecipientMacDataService::controlFrameReceived(Ieee80211Frame* controlFrame)
 {
+    Enter_Method("controlFrameReceived");
     return std::vector<Ieee80211Frame*>(); // has nothing to do
 }
 

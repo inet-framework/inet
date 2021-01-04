@@ -49,6 +49,7 @@ OriginatorMacDataService::Fragments *OriginatorMacDataService::fragmentIfNeeded(
 
 OriginatorMacDataService::Fragments* OriginatorMacDataService::extractFramesToTransmit(PendingQueue *pendingQueue)
 {
+    Enter_Method("extractFramesToTransmit");
     if (pendingQueue->isEmpty())
         return nullptr;
     else {
