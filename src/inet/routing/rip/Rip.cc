@@ -169,6 +169,12 @@ void Rip::handleMessageWhenUp(cMessage *msg)
         EV_DETAIL << "Ignoring UDP error report\n";
         delete msg;
     }
+    else if (msg->getKind() == UDP_I_SOCKET_CLOSED) {
+        EV_DETAIL << "Ignoring UDP socket closed indication\n";
+        delete msg;
+    }
+    else
+        throw cRuntimeError("RIP: unknown msg kind (%d)", (int)msg->getKind());
 }
 
 void Rip::startRIPRouting()
