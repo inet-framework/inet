@@ -60,9 +60,9 @@ LinearGaugeFigure::LinearGaugeFigure(const char *name) : cGroupFigure(name)
 LinearGaugeFigure::~LinearGaugeFigure()
 {
     // delete figures which is not in canvas
-    for (int i = numTicks; i < tickFigures.size(); ++i) {
-        delete tickFigures[i];
-        delete numberFigures[i];
+    for (uint32_t i = numTicks; i < tickFigures.size(); ++i) {
+        dropAndDelete(tickFigures[i]);
+        dropAndDelete(numberFigures[i]);
     }
 }
 
@@ -337,6 +337,8 @@ void LinearGaugeFigure::redrawTicks()
         while (numTicks > tickFigures.size()) {
             cLineFigure *tick = new cLineFigure();
             cTextFigure *number = new cTextFigure();
+            take(tick);
+            take(number);
 
             number->setAnchor(cFigure::ANCHOR_N);
 
@@ -348,8 +350,12 @@ void LinearGaugeFigure::redrawTicks()
     for (int i = numTicks; i < prevNumTicks; ++i) {
         removeFigure(tickFigures[i]);
         removeFigure(numberFigures[i]);
+        take(tickFigures[i]);
+        take(numberFigures[i]);
     }
     for (int i = prevNumTicks; i < numTicks; ++i) {
+        drop(tickFigures[i]);
+        drop(numberFigures[i]);
         tickFigures[i]->insertBelow(needle);
         numberFigures[i]->insertBelow(needle);
     }
