@@ -28,6 +28,7 @@ Define_Module(PreemptableStreamer);
 PreemptableStreamer::~PreemptableStreamer()
 {
     delete streamedPacket;
+    delete remainingPacket;
     cancelAndDeleteClockEvent(endStreamingTimer);
 }
 
