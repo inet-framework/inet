@@ -63,11 +63,11 @@ GaugeFigure::~GaugeFigure()
 {
     // delete figures which is not in canvas
     for (size_t i = curvesOnCanvas; i < curveFigures.size(); ++i)
-        delete curveFigures[i];
+        dropAndDelete(curveFigures[i]);
 
     for (size_t i = numTicks; i < tickFigures.size(); ++i) {
-        delete tickFigures[i];
-        delete numberFigures[i];
+        dropAndDelete(tickFigures[i]);
+        dropAndDelete(numberFigures[i]);
     }
 }
 
@@ -401,6 +401,8 @@ void GaugeFigure::redrawTicks()
         while ((size_t)numTicks > tickFigures.size()) {
             cLineFigure *tick = new cLineFigure();
             cTextFigure *number = new cTextFigure();
+            take(tick);
+            take(number);
 
             number->setAnchor(cFigure::ANCHOR_CENTER);
 
@@ -412,8 +414,12 @@ void GaugeFigure::redrawTicks()
     for (int i = numTicks; i < prevNumTicks; ++i) {
         removeFigure(tickFigures[i]);
         removeFigure(numberFigures[i]);
+        take(tickFigures[i]);
+        take(numberFigures[i]);
     }
     for (int i = prevNumTicks; i < numTicks; ++i) {
+        drop(tickFigures[i]);
+        drop(numberFigures[i]);
         addFigure(tickFigures[i]);
         numberFigures[i]->insertBelow(needle);
     }
@@ -449,6 +455,7 @@ void GaugeFigure::redrawCurves()
         if (newStop > lastStop) {
             if (index == curveFigures.size()) {
                 cArcFigure *arc = new cArcFigure("colorStrip");
+                take(arc);
                 arc->setZoomLineWidth(true);
                 curveFigures.push_back(arc);
             }
@@ -464,6 +471,7 @@ void GaugeFigure::redrawCurves()
     if (lastStop < 1.0) {
         if (index == curveFigures.size()) {
             cArcFigure *arc = new cArcFigure("colorStrip");
+            take(arc);
             arc->setZoomLineWidth(true);
             curveFigures.push_back(arc);
         }
@@ -476,10 +484,13 @@ void GaugeFigure::redrawCurves()
 
     // Add or remove figures from canvas according to previous number of curves
     for (int i = prevCurvesOnCanvas; i < curvesOnCanvas; ++i) {
+        drop(curveFigures[i]);
         curveFigures[i]->insertBelow(needle);
     }
-    for (int i = curvesOnCanvas; i < prevCurvesOnCanvas; ++i)
+    for (int i = curvesOnCanvas; i < prevCurvesOnCanvas; ++i) {
         removeFigure(curveFigures[index]);
+        take(curveFigures[index]);
+    }
 }
 
 void GaugeFigure::layout()

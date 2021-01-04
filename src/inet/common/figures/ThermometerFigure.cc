@@ -55,8 +55,8 @@ ThermometerFigure::~ThermometerFigure()
 {
     // delete figures which is not in canvas
     for (size_t i = numTicks; i < tickFigures.size(); ++i) {
-        delete tickFigures[i];
-        delete numberFigures[i];
+        dropAndDelete(tickFigures[i]);
+        dropAndDelete(numberFigures[i]);
     }
 }
 
@@ -347,6 +347,8 @@ void ThermometerFigure::redrawTicks()
         while ((size_t)numTicks > tickFigures.size()) {
             cLineFigure *tick = new cLineFigure();
             cTextFigure *number = new cTextFigure();
+            take(tick);
+            take(number);
 
             number->setAnchor(cFigure::ANCHOR_W);
 
@@ -359,8 +361,12 @@ void ThermometerFigure::redrawTicks()
     for (int i = numTicks; i < prevNumTicks; ++i) {
         removeFigure(tickFigures[i]);
         removeFigure(numberFigures[i]);
+        take(tickFigures[i]);
+        take(numberFigures[i]);
     }
     for (int i = prevNumTicks; i < numTicks; ++i) {
+        drop(tickFigures[i]);
+        drop(numberFigures[i]);
         addFigure(tickFigures[i]);
         addFigure(numberFigures[i]);
     }
