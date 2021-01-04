@@ -1,13 +1,45 @@
 Recent changes in the INET Framework
 ====================================
 
+INET 3.6.9 (January 2021) - stable
+----------------------------------
+
+This release adds an IPsec model, and improves on UDPBasicApp. It requires
+OMNeT++ 5.3 or later, or OMNeT++ 6.0 Preview 9 or 10.
+
+IPsec:
+
+  The IPsec model implements basic RFC 4301 functionality: Authentication
+  Header (AH) and Encapsulating Security Payload (ESP). Key exchange protocols
+  are not model modeled, but instead, security associations (SAs) are statically
+  configured and remain in effect for the entire duration of the simulation.
+
+  The model does not perform actual cryptography. This was an explicit non-goal,
+  as the purpose of the model is to study the effects of the network overhead of
+  IPsec. As a consequence, encryption keys, certificates, and other cryptography-
+  related data do not appear in the model's data structures. However, protocol
+  overhead and a simple performance model to account for the runtime overhead
+  of cryptography are included.
+
+  Further limitations:
+  - Transport mode only. Tunnel mode is not supported.
+  - Multicast traffic is not supported.
+  - The anti-replay mechanism is not implemented.
+  - DSCP-based SA selection is not implemented.
+
+UDPBasicApp:
+
+  Added sendScript parameter; sendInterval made optional. The change is
+  backward compatible (existing fingerprints unchanged).
+
+
 INET 3.6.8 (October 2020) - stable
 ----------------------------------
 
 This release contains a compatibility fix to be able to build INET with
 OMNeT++ 6.0 Preview 9. It requires OMNeT++ 5.3 or later.
 
-NOTE: OMNeT++ 6.0 Preview 5-8 will NOT work with this releasre. Use INET 3.6.7
+NOTE: OMNeT++ 6.0 Preview 5-8 will NOT work with this release. Use INET 3.6.7
 with those versions or rather upgrade your OMNeT++ installation.
 
 

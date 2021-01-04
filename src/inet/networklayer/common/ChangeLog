@@ -1,3 +1,9 @@
+2020-11-05  Andras Varga
+
+	IPProtocolId.msg: added IP_PROT_AH and IP_PROT_ESP
+
+	L3AddressResolver: improved error messages
+
 ====== inet-3.x ======
 
 2020-10-20  ------ inet-3.6.8 released ------
