@@ -127,8 +127,14 @@ Packet *PreemptableStreamer::pullPacketStart(cGate *gate, bps datarate)
 {
     Enter_Method("pullPacketStart");
     streamDatarate = datarate;
-    streamedPacket = remainingPacket == nullptr ? provider->pullPacket(inputGate->getPathStartGate()) : remainingPacket;
-    remainingPacket = nullptr;
+    if (remainingPacket == nullptr) {
+        streamedPacket = provider->pullPacket(inputGate->getPathStartGate());
+        take(streamedPacket);
+    }
+    else {
+        streamedPacket = remainingPacket;
+        remainingPacket = nullptr;
+    }
     auto fragmentTag = streamedPacket->findTagForUpdate<FragmentTag>();
     if (fragmentTag == nullptr) {
         fragmentTag = streamedPacket->addTag<FragmentTag>();
