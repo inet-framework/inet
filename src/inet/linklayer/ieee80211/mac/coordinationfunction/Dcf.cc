@@ -101,6 +101,7 @@ void Dcf::channelGranted(IChannelAccess *channelAccess)
 void Dcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     Enter_Method("processUpperFrame(%s)", packet->getName());
+    take(packet);
     EV_INFO << "Processing upper frame: " << packet->getName() << endl;
     auto pendingQueue = channelAccess->getPendingQueue();
     pendingQueue->enqueuePacket(packet);
@@ -153,6 +154,7 @@ void Dcf::scheduleStartRxTimer(simtime_t timeout)
 void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     Enter_Method("processLowerFrame(%s)", packet->getName());
+    take(packet);
     EV_INFO << "Processing lower frame: " << packet->getName() << endl;
     if (frameSequenceHandler->isSequenceRunning()) {
         // TODO always call processResponses

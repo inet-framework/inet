@@ -111,6 +111,10 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
         TransmissionCacheEntry(TransmissionCacheEntry&& other) noexcept;
         TransmissionCacheEntry& operator=(const TransmissionCacheEntry& other);
         TransmissionCacheEntry& operator=(TransmissionCacheEntry&& other) noexcept;
+        virtual ~TransmissionCacheEntry();
+
+      protected:
+        virtual void deleteSignal();
     };
 
   protected:

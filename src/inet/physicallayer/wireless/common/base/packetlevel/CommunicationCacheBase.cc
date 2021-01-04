@@ -228,9 +228,18 @@ CommunicationCacheBase::TransmissionCacheEntry::TransmissionCacheEntry(Transmiss
     other.signal = nullptr;
 }
 
+CommunicationCacheBase::TransmissionCacheEntry::~TransmissionCacheEntry()
+{
+    deleteSignal();
+    delete transmission;
+    transmission = nullptr;
+}
+
 CommunicationCacheBase::TransmissionCacheEntry& CommunicationCacheBase::TransmissionCacheEntry::operator=(const TransmissionCacheEntry& other)
 {
     if (this != &other) {
+        deleteSignal();
+        delete transmission;
         transmission = other.transmission;
         interferenceEndTime = other.interferenceEndTime;
         signal = other.signal;
@@ -241,6 +250,8 @@ CommunicationCacheBase::TransmissionCacheEntry& CommunicationCacheBase::Transmis
 CommunicationCacheBase::TransmissionCacheEntry& CommunicationCacheBase::TransmissionCacheEntry::operator=(TransmissionCacheEntry&& other) noexcept
 {
     if (this != &other) {
+        deleteSignal();
+        delete transmission;
         transmission = other.transmission;
         interferenceEndTime = other.interferenceEndTime;
         signal = other.signal;
@@ -249,6 +260,17 @@ CommunicationCacheBase::TransmissionCacheEntry& CommunicationCacheBase::Transmis
         other.signal = nullptr;
     }
     return *this;
+}
+
+void CommunicationCacheBase::TransmissionCacheEntry::deleteSignal()
+{
+    if (signal != nullptr) {
+        // NOTE: we pretend that the owning context is the packet owner in order to be able to delete it
+        auto packet = check_and_cast<const cPacket *>(signal);
+        cContextSwitcher contextSwitcher(check_and_cast<cComponent *>(packet->getOwner()));
+        delete signal;
+        signal = nullptr;
+    }
 }
 
 std::vector<const ITransmission *> *CommunicationCacheBase::computeInterferingTransmissions(const IRadio *radio, const simtime_t startTime, const simtime_t endTime)

@@ -11,12 +11,12 @@
 
 set -e # make the script exit with error if any executed command exits with error
 
-export PATH="/root/omnetpp-6.0pre9-$TARGET_PLATFORM/bin:$PATH"
+export PATH="/root/omnetpp-6.0pre10-$TARGET_PLATFORM/bin:$PATH"
 
 # HACK: When cross-building to macOS, the linker complains about this
 # being a missing search directory, so let's make sure it exists...
 # (Just to silence that warning...)
-mkdir -p /root/omnetpp-6.0pre9-macosx/tools/macosx/lib
+mkdir -p /root/omnetpp-6.0pre10-macosx/tools/macosx/lib
 # MEGA HACK: When cross-building to Windows, make complains about this
 # being a missing executable. Let's make sure it exists, but it doesn't
 # matter exactly what it does, as it's only used to translate
@@ -34,10 +34,6 @@ echo "::group::Enable all features"
 opp_featuretool enable all 2>&1 # redirecting stderr so it doesn't get out of sync with stdout
 echo "::endgroup::"
 
-echo "::group::Disable OSG features"
-opp_featuretool disable VisualizationOsg VisualizationOsgShowcases 2>&1
-echo "::endgroup::"
-
 if [ "$TARGET_PLATFORM" != "linux" ]; then
     # Disabling some features when cross-compiling, because:
     # - we don't [want to?] have cross-compiled ffmpeg
@@ -45,7 +41,11 @@ if [ "$TARGET_PLATFORM" != "linux" ]; then
     # - ExternalInterface is only supported on Linux
     # - lwIP and NSC does not seem to compile on at least Windows, oh well...
     echo "::group::Disable some features"
-    opp_featuretool disable VoipStream VoipStreamExamples NetworkEmulationSupport NetworkEmulationExamples NetworkEmulationShowcases TcpLwip TcpNsc
+    opp_featuretool disable \
+        VoipStream VoipStreamExamples \
+        NetworkEmulationSupport NetworkEmulationExamples NetworkEmulationShowcases \
+        TcpLwip TcpNsc \
+        VisualizationOsg VisualizationOsgShowcases 2>&1
     echo "::endgroup::"
 fi
 
@@ -67,8 +67,8 @@ if [ "$TARGET_PLATFORM" = "windows" ]; then
     # This workaround will not be necessary once the tester Docker image includes:
     # - A newer opp_makemake that generates a group target for the .dll and .dll.a files
     # - GNU make 4.3 that supports group targets (this is in ubuntu:20.10)
-    sed -i 's|  TARGET_FILES+= $(TARGET_DIR)/$(TARGET_IMPLIB)||g' src/Makefile
-    sed -i 's|$O/$(TARGET) $O/$(TARGET_IMPLIB): $(OBJS)|$O/$(TARGET): $(OBJS)|g' src/Makefile
+    sed -i 's|  TARGET_FILES+= $(TARGET_DIR)/$(TARGET_IMPDEF) $(TARGET_DIR)/$(TARGET_IMPLIB)||g' src/Makefile
+    sed -i 's|$O/$(TARGET) $O/$(TARGET_IMPDEF) $O/$(TARGET_IMPLIB) &: $(OBJS)|$O/$(TARGET) : $(OBJS)|g' src/Makefile
 fi
 
 echo "::group::Build"

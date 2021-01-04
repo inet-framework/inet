@@ -12,7 +12,7 @@
 set -e # make the script exit with error if any executed command exits with error
 
 
-export PATH="/root/omnetpp-6.0pre9-linux/bin:$PATH"
+export PATH="/root/omnetpp-6.0pre10-linux/bin:$PATH"
 
 # this is where the cloned INET repo is mounted into the container
 cd $GITHUB_WORKSPACE
@@ -23,10 +23,6 @@ cp -r /root/nsc-0.5.3 3rdparty
 
 echo "::group::Enable all features"
 opp_featuretool enable all 2>&1 # redirecting stderr so it doesn't get out of sync with stdout
-echo "::endgroup::"
-
-echo "::group::Disable OSG features"
-opp_featuretool disable VisualizationOsg VisualizationOsgShowcases 2>&1
 echo "::endgroup::"
 
 echo "::group::Run fingerprint tests"

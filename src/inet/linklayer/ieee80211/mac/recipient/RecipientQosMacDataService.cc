@@ -65,6 +65,8 @@ Packet *RecipientQosMacDataService::defragment(Packet *mgmtFragment)
 
 std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
 {
+    Enter_Method("dataFrameReceived");
+    take(dataPacket);
     // TODO A-MPDU Deaggregation, MPDU Header+CRC Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
     if (duplicateRemoval && duplicateRemoval->isDuplicate(dataHeader)) {
         EV_WARN << "Dropping duplicate packet " << *dataPacket << ".\n";
@@ -122,6 +124,8 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
 
 std::vector<Packet *> RecipientQosMacDataService::managementFrameReceived(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader)
 {
+    Enter_Method("managementFrameReceived");
+    take(mgmtPacket);
     // TODO MPDU Header+CRC Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
     if (duplicateRemoval && duplicateRemoval->isDuplicate(mgmtHeader))
         return std::vector<Packet *>();
@@ -131,11 +135,17 @@ std::vector<Packet *> RecipientQosMacDataService::managementFrameReceived(Packet
     if (auto delba = dynamicPtrCast<const Ieee80211Delba>(mgmtHeader))
         blockAckReordering->processReceivedDelba(delba);
     // TODO Defrag, MSDU Integrity, Replay Detection, RX MSDU Rate Limiting
-    return std::vector<Packet *>({ mgmtPacket });
+    if (dynamicPtrCast<const Ieee80211ActionFrame>(mgmtHeader)) {
+        delete mgmtPacket;
+        return std::vector<Packet *>();
+    }
+    else
+        return std::vector<Packet *>({ mgmtPacket });
 }
 
 std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
 {
+    Enter_Method("controlFrameReceived");
     if (auto blockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(controlHeader)) {
         BlockAckReordering::ReorderBuffer frames;
         if (blockAckReordering) {

@@ -354,6 +354,7 @@ void Ieee80211Mac::sendUp(cMessage *msg)
 void Ieee80211Mac::sendUpFrame(Packet *frame)
 {
     Enter_Method("sendUpFrame(\"%s\")", frame->getName());
+    take(frame);
     const auto& header = frame->peekAtFront<Ieee80211DataOrMgmtHeader>();
     decapsulate(frame);
     if (!(header->getType() & 0x30))

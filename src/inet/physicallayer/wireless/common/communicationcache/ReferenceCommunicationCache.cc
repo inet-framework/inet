@@ -26,11 +26,8 @@ Define_Module(ReferenceCommunicationCache);
 
 ReferenceCommunicationCache::~ReferenceCommunicationCache()
 {
-    for (auto& transmissionCacheEntry : transmissionCache) {
-        delete transmissionCacheEntry.signal;
-        delete transmissionCacheEntry.transmission;
+    for (auto& transmissionCacheEntry : transmissionCache)
         delete transmissionCacheEntry.receptionCacheEntries;
-    }
     for (auto reception : receptions)
         delete reception;
     for (auto interference : interferences)

@@ -26,12 +26,8 @@ Define_Module(MapCommunicationCache);
 
 MapCommunicationCache::~MapCommunicationCache()
 {
-    for (auto& it : transmissionCache) {
-        auto& transmissionCacheEntry = it.second;
-        delete transmissionCacheEntry.signal;
-        delete transmissionCacheEntry.transmission;
-        delete transmissionCacheEntry.receptionCacheEntries;
-    }
+    for (auto& it : transmissionCache)
+        delete it.second.receptionCacheEntries;
 }
 
 MapCommunicationCache::RadioCacheEntry *MapCommunicationCache::getRadioCacheEntry(const IRadio *radio)
@@ -112,10 +108,10 @@ void MapCommunicationCache::removeTransmission(const ITransmission *transmission
         }
         delete transmissionCacheEntry.receptionCacheEntries;
         transmissionCacheEntry.receptionCacheEntries = nullptr;
-        delete transmissionCacheEntry.signal;
         transmissionCache.erase(it);
     }
-    delete transmission;
+    else
+        throw cRuntimeError("Cannot find transmission");
 }
 
 const ITransmission *MapCommunicationCache::getTransmission(int id) const
@@ -156,8 +152,6 @@ void MapCommunicationCache::removeNonInterferingTransmissions(std::function<void
                 transmissionCacheEntry.receptionCacheEntries = nullptr;
             }
             f(transmissionCacheEntry.transmission);
-            delete transmissionCacheEntry.signal;
-            delete transmissionCacheEntry.transmission;
             transmissionCache.erase(it++);
             transmissionCount++;
         }
