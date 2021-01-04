@@ -50,6 +50,7 @@ std::vector<Packet *> *OriginatorMacDataService::fragmentIfNeeded(Packet *frame)
 
 std::vector<Packet *> *OriginatorMacDataService::extractFramesToTransmit(queueing::IPacketQueue *pendingQueue)
 {
+    Enter_Method("extractFramesToTransmit");
     if (pendingQueue->isEmpty())
         return nullptr;
     else {

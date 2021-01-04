@@ -46,8 +46,10 @@ Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(queueing::IPacketQue
 {
     auto subframes = aMsduAggregationPolicy->computeAggregateFrames(pendingQueue);
     if (subframes) {
-        for (auto f : *subframes)
-            pendingQueue->removePacket(f);
+        for (auto subframe : *subframes) {
+            pendingQueue->removePacket(subframe);
+            take(subframe);
+        }
         auto aggregatedFrame = aMsduAggregation->aggregateFrames(subframes);
         emit(packetAggregatedSignal, aggregatedFrame);
         delete subframes;
@@ -88,6 +90,7 @@ std::vector<Packet *> *OriginatorQosMacDataService::fragmentIfNeeded(Packet *fra
 
 std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queueing::IPacketQueue *pendingQueue)
 {
+    Enter_Method("extractFramesToTransmit");
     if (pendingQueue->isEmpty())
         return nullptr;
     else {
