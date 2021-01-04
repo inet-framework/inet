@@ -50,4 +50,17 @@ The VlanPolicyLayer submodule
 Creating VLAN policies
 ----------------------
 
-The :ned:`VlanPolicyLayer` module can filter packets based on VLAN tags, and modify VLAN tags on packets. It is an optional submodule of :ned:`EthernetSwitch`. Here it is 
+The :ned:`VlanPolicyLayer` module can filter packets based on VLAN tags, and modify VLAN tags on packets. It is an optional submodule of :ned:`EthernetSwitch`. Here is the VLAN policy layer submodule inside an :ned:`EthernetSwitch`:
+
+.. figure:: media/switch2.png
+   :align: center
+   :width: 100%
+
+so
+
+- The VlanPolicyLayer module can filter incoming and outgoing packets based on VLAN ID
+- It can also re-map VLAN tags/IDs
+- The VlanPolicyLayer has four optional submodules: a mapper and a filter module for each direction
+
+.. figure:: media/vlanpolicylayer2.png
+   :align: center
