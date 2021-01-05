@@ -84,11 +84,11 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
 
     // getters and setters
     const Point getPlotSize() const { return backgroundFigure->getBounds().getSize(); }
-    void setPlotSize(const Point& p);
+    void setPlotSize(const Point& size);
 
     virtual const Point getSize() const override { return getBounds().getSize(); }
     const Rectangle& getBounds() const;
-    void setBounds(const Rectangle& rect);
+    void setBounds(const Rectangle& bounds);
 
     const Color& getBackgrouncColor() const;
     void setBackgroundColor(const Color& color);
@@ -123,13 +123,13 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     void setYValueFormat(const char *format) { yValueFormat = format; }
 
     const char *getXAxisLabel() const { return xAxisLabelFigure->getText(); }
-    void setXAxisLabel(const char *text) { xAxisLabelFigure->setText(text); }
+    void setXAxisLabel(const char *text);
 
     const char *getYAxisLabel() const { return yAxisLabelFigure->getText(); }
-    void setYAxisLabel(const char *text) { yAxisLabelFigure->setText(text); }
+    void setYAxisLabel(const char *text);
 
     const char *getLabel() const { return labelFigure->getText(); }
-    void setLabel(const char *text) { labelFigure->setText(text); }
+    void setLabel(const char *text);
 
     int getLabelOffset() const;
     void setLabelOffset(int offset);

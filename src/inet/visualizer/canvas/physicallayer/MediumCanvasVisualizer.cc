@@ -138,7 +138,7 @@ void MediumCanvasVisualizer::initialize(int stage)
                     powerDensityMapFigure->setPlotSize(cFigure::Point(powerDensityMapFigureWidth, powerDensityMapFigureHeight), cFigure::Point(powerDensityMapPixmapWidth, powerDensityMapPixmapHeight));
                     // TODO center on node to align in space coordinates
                     powerDensityMapFigure->refreshDisplay();
-                    networkNodeVisualization->addAnnotation(powerDensityMapFigure, powerDensityMapFigure->getPlotSize(), PLACEMENT_CENTER_CENTER, -1);
+                    networkNodeVisualization->addAnnotation(powerDensityMapFigure, powerDensityMapFigure->getSize(), PLACEMENT_CENTER_CENTER, -1);
                     powerDensityMapFigures[networkNode] = powerDensityMapFigure;
                 }
                 if (displaySpectrums) {
@@ -157,7 +157,7 @@ void MediumCanvasVisualizer::initialize(int stage)
                     spectrumFigure->setYValueFormat("%.3g");
                     spectrumFigure->setPlotSize(cFigure::Point(spectrumFigureWidth, spectrumFigureHeight));
                     spectrumFigure->refreshDisplay();
-                    networkNodeVisualization->addAnnotation(spectrumFigure, spectrumFigure->getPlotSize(), spectrumPlacementHint, spectrumPlacementPriority);
+                    networkNodeVisualization->addAnnotation(spectrumFigure, spectrumFigure->getSize(), spectrumPlacementHint, spectrumPlacementPriority);
                     spectrumFigures[networkNode] = spectrumFigure;
                 }
                 if (displaySpectrograms) {
@@ -172,7 +172,7 @@ void MediumCanvasVisualizer::initialize(int stage)
                     spectrogramFigure->invertYAxis();
                     spectrogramFigure->setPlotSize(cFigure::Point(spectrogramFigureWidth, spectrogramFigureHeight), cFigure::Point(spectrogramPixmapWidth, spectrogramPixmapHeight));
                     spectrogramFigure->refreshDisplay();
-                    networkNodeVisualization->addAnnotation(spectrogramFigure, spectrogramFigure->getPlotSize(), spectrogramPlacementHint, spectrogramPlacementPriority);
+                    networkNodeVisualization->addAnnotation(spectrogramFigure, spectrogramFigure->getSize(), spectrogramPlacementHint, spectrogramPlacementPriority);
                     spectrogramFigures[networkNode] = spectrogramFigure;
                 }
                 if (displayPowerDensityMaps || displaySpectrums || displaySpectrograms)

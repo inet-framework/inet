@@ -25,8 +25,8 @@ Register_Figure("plot", PlotFigure);
 
 static const char *INIT_PLOT_COLOR = "blue";
 static const char *INIT_BACKGROUND_COLOR = "white";
+static const double SPACING = 5;
 static const double TICK_LENGTH = 5;
-static const double LABEL_Y_DISTANCE_FACTOR = 1.5;
 
 static const char *PKEY_BACKGROUND_COLOR = "backgroundColor";
 static const char *PKEY_LABEL = "label";
@@ -43,6 +43,7 @@ static const char *PKEY_MIN_Y = "minY";
 static const char *PKEY_MAX_Y = "maxY";
 static const char *PKEY_POS = "pos";
 static const char *PKEY_SIZE = "size";
+static const char *PKEY_PLOTSIZE = "plotSize";
 static const char *PKEY_ANCHOR = "anchor";
 static const char *PKEY_BOUNDS = "bounds";
 
@@ -69,10 +70,11 @@ void PlotFigure::setNumSeries(int numSeries)
     }
 }
 
-void PlotFigure::setPlotSize(const Point& p)
+void PlotFigure::setPlotSize(const Point& size)
 {
-    const auto& backgroundBounds = backgroundFigure->getBounds();
-    backgroundFigure->setBounds(Rectangle(backgroundBounds.x, backgroundBounds.y, p.x, p.y));
+    Rectangle plotBounds = backgroundFigure->getBounds();
+    backgroundFigure->setBounds(Rectangle(plotBounds.x, plotBounds.y, size.x, size.y));
+    std::cout << "setPlotSize " << size.str() << " bounds " << bounds.str() << std::endl;
     invalidLayout = true;
 }
 
@@ -83,10 +85,31 @@ const cFigure::Rectangle& PlotFigure::getBounds() const
     return bounds;
 }
 
-void PlotFigure::setBounds(const Rectangle& rect)
+void PlotFigure::setBounds(const Rectangle& bounds)
 {
-    const auto& backgroundBounds = backgroundFigure->getBounds();
-    backgroundFigure->setBounds(Rectangle(backgroundBounds.x + rect.x - bounds.x, backgroundBounds.y + rect.y - bounds.y, rect.width - (bounds.width - backgroundBounds.width), rect.height - (bounds.height - backgroundBounds.height)));
+    std::cout << "setBounds " << bounds.str() << std::endl;
+    this->bounds = bounds;
+    invalidLayout = true;
+}
+
+void PlotFigure::setXAxisLabel(const char *text)
+{
+    xAxisLabelFigure->setText(text);
+    std::cout << "setXAxisLabel " << xAxisLabelFigure->getBounds().str() << " bounds " << bounds.str() << std::endl;
+    invalidLayout = true;
+}
+
+void PlotFigure::setYAxisLabel(const char *text)
+{
+    yAxisLabelFigure->setText(text);
+    std::cout << "setYAxisLabel " << yAxisLabelFigure->getBounds().str() << " bounds " << bounds.str() << std::endl;
+    invalidLayout = true;
+}
+
+void PlotFigure::setLabel(const char *text)
+{
+    labelFigure->setText(text);
+    std::cout << "setLabel " << labelFigure->getBounds().str() << " bounds " << bounds.str() << std::endl;
     invalidLayout = true;
 }
 
@@ -242,7 +265,11 @@ void PlotFigure::parse(cProperty *property)
 
     const char *s;
 
+    if ((s = property->getValue(PKEY_PLOTSIZE)) != nullptr)
+        setPlotSize(parsePoint(property, PKEY_PLOTSIZE, 0));
     setBounds(parseBounds(property, getBounds()));
+    if ((s = property->getValue(PKEY_PLOTSIZE)) != nullptr)
+        setPlotSize(parsePoint(property, PKEY_PLOTSIZE, 0));
 
     if ((s = property->getValue(PKEY_BACKGROUND_COLOR)) != nullptr)
         setBackgroundColor(parseColor(s));
@@ -283,7 +310,7 @@ const char **PlotFigure::getAllowedPropertyKeys() const
             PKEY_Y_TICK_SIZE, PKEY_TIME_WINDOW, PKEY_X_TICK_SIZE,
             PKEY_LINE_COLOR, PKEY_MIN_X, PKEY_MAX_X, PKEY_MIN_Y, PKEY_MAX_Y, PKEY_BACKGROUND_COLOR,
             PKEY_LABEL, PKEY_LABEL_OFFSET, PKEY_LABEL_COLOR, PKEY_LABEL_FONT, PKEY_POS,
-            PKEY_SIZE, PKEY_ANCHOR, PKEY_BOUNDS, nullptr
+            PKEY_SIZE, PKEY_PLOTSIZE, PKEY_ANCHOR, PKEY_BOUNDS, nullptr
         };
         concatArrays(keys, cGroupFigure::getAllowedPropertyKeys(), localKeys);
     }
@@ -316,32 +343,31 @@ void PlotFigure::setValue(int series, double x, double y)
     invalidPlot = true;
 }
 
-static cFigure::Rectangle rectangleUnion(const cFigure::Rectangle& r1, const cFigure::Rectangle& r2)
-{
-    auto x1 = std::min(r1.x, r2.x);
-    auto y1 = std::min(r1.y, r2.y);
-    auto x2 = std::max(r1.x + r1.width, r2.x + r2.width);
-    auto y2 = std::max(r1.y + r1.height, r2.y + r2.height);
-    return cFigure::Rectangle(x1, y1, x2 - x1, y2 - y1);
-}
-
 void PlotFigure::layout()
 {
     redrawXTicks();
     redrawYTicks();
 
-    Rectangle b = backgroundFigure->getBounds();
-    double fontSize = xTicks.size() > 0 && xTicks[0].number ? xTicks[0].number->getFont().pointSize : 12;
-    labelFigure->setPosition(Point(b.getCenter().x, b.y + b.height + fontSize * LABEL_Y_DISTANCE_FACTOR + labelOffset));
-    xAxisLabelFigure->setPosition(Point(b.x + b.width / 2, b.y - 5));
-    yAxisLabelFigure->setPosition(Point(-5, b.height / 2));
-
-    bounds = backgroundFigure->getBounds();
-    bounds = rectangleUnion(bounds, labelFigure->getBounds());
-    bounds.x -= fontSize;
-    bounds.y -= fontSize;
-    bounds.width += 2 * fontSize;
-    bounds.height += 2 * fontSize;
+    Rectangle backgroundFigureBounds = backgroundFigure->getBounds();
+    bounds.width = backgroundFigureBounds.width;
+    bounds.height = backgroundFigureBounds.height;
+    if (*labelFigure->getText() != '\0')
+        bounds.height += labelFigure->getBounds().height + SPACING;
+    backgroundFigureBounds.x = bounds.x;
+    if (*yAxisLabelFigure->getText() != '\0') {
+        bounds.width += yAxisLabelFigure->getBounds().height + SPACING;
+        backgroundFigureBounds.x += yAxisLabelFigure->getBounds().height + SPACING;
+    }
+    backgroundFigureBounds.y = bounds.y;
+    if (*xAxisLabelFigure->getText() != '\0') {
+        bounds.height += xAxisLabelFigure->getBounds().height + SPACING;
+        backgroundFigureBounds.y += xAxisLabelFigure->getBounds().height + SPACING;
+    }
+    backgroundFigure->setBounds(backgroundFigureBounds);
+    labelFigure->setPosition(Point(backgroundFigureBounds.getCenter().x, backgroundFigureBounds.y + backgroundFigureBounds.height + SPACING + labelOffset));
+    xAxisLabelFigure->setPosition(Point(backgroundFigureBounds.x + backgroundFigureBounds.width / 2, backgroundFigureBounds.y - SPACING));
+    yAxisLabelFigure->setPosition(Point(yAxisLabelFigure->getBounds().height, backgroundFigureBounds.y + backgroundFigureBounds.height / 2));
+    std::cout << "layout " << backgroundFigureBounds.str() << " bounds " << bounds.str() << std::endl;
     invalidLayout = false;
 }
 
