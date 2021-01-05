@@ -1,5 +1,22 @@
 ====== inet-3.x ======
 
+2021-01-05  Zoltan Bojthe
+
+	802.11: Dcf: added some missing Enter_Method() calls
+
+2021-01-04  Levente Mészáros
+
+	802.11: Tx ownership fix.
+
+2021-01-04  Levente Mészáros
+
+	802.11: Change MAC data services to take care of packet ownership.
+
+2020-12-18  Levente Mészáros
+
+	802.11: Changed coordination function to take ownership of received upper
+	and lower packets.
+
 2020-10-20  ------ inet-3.6.8 released ------
 
 2020-10-20  Zoltan Bojthe

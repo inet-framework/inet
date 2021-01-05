@@ -1,9 +1,9 @@
+====== inet-3.x ======
+
 2020-12-15  Andras Varga
 
 	UDPBasicApp: added sendScript; sendInterval made optional. The change is
 	backward compatible (existing fingerprints unchanged)
-
-====== inet-3.x ======
 
 2020-10-20  ------ inet-3.6.8 released ------
 

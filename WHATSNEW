@@ -1,11 +1,11 @@
 Recent changes in the INET Framework
 ====================================
 
-INET 3.6.9 (January 2021) - stable
-----------------------------------
+INET 3.7 (January 2021) - stable
+--------------------------------
 
-This release adds an IPsec model, and improves on UDPBasicApp. It requires
-OMNeT++ 5.3 or later, or OMNeT++ 6.0 Preview 9 or 10.
+This release adds an IPsec model, improves on UDPBasicApp, and contains small
+bug fixes. It requires OMNeT++ 5.3 or later, or OMNeT++ 6.0 Preview 9 or 10.
 
 IPsec:
 
@@ -31,6 +31,14 @@ UDPBasicApp:
 
   Added sendScript parameter; sendInterval made optional. The change is
   backward compatible (existing fingerprints unchanged).
+
+VoIPStream:
+
+  Updated for avcodec-7:4.2.4
+
+Other:
+
+  Fixed a number of (previously hidden) subtle ownership problems.
 
 
 INET 3.6.8 (October 2020) - stable

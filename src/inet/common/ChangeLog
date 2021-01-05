@@ -1,10 +1,10 @@
+====== inet-3.x ======
+
 2020-11-25  Andras Varga
 
 	INETUtils.h: added join()
 
 	XMLUtils.cc: improved error messages
-
-====== inet-3.x ======
 
 2020-10-20  ------ inet-3.6.8 released ------
 

@@ -1,5 +1,13 @@
 ====== inet-3.x ======
 
+2021-01-04  Levente Mészáros
+
+	Figures: Fixed ownership problems in figures that keep other figures
+	around while they are detached.
+
+	The detached figures are owned by their creator figure until they are
+	added to the figure tree again.
+
 2020-10-20  ------ inet-3.6.8 released ------
 
 2019-11-04  ------ inet-3.6.7 released ------
