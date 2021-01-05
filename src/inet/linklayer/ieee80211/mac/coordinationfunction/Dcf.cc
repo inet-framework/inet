@@ -69,6 +69,7 @@ void Dcf::handleMessage(cMessage* msg)
 
 void Dcf::channelGranted(IChannelAccess *channelAccess)
 {
+    Enter_Method("channelGranted");
     ASSERT(dcfChannelAccess == channelAccess);
     if (!frameSequenceHandler->isSequenceRunning())
         frameSequenceHandler->startFrameSequence(new DcfFs(), buildContext(), this);
@@ -93,6 +94,7 @@ void Dcf::processUpperFrame(Ieee80211DataOrMgmtFrame* frame)
 
 void Dcf::transmitControlResponseFrame(Ieee80211Frame* responseFrame, Ieee80211Frame* receivedFrame)
 {
+    Enter_Method("transmitControlResponseFrame");
     const IIeee80211Mode *responseMode = nullptr;
     if (auto rtsFrame = dynamic_cast<Ieee80211RTSFrame*>(receivedFrame))
         responseMode = rateSelection->computeResponseCtsFrameMode(rtsFrame);
