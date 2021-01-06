@@ -118,6 +118,10 @@
 /showcases/wireless/aggregation/,     -f omnetpp.ini -c Aggregation -r 0,                                        1s,            671b-274c/tplx;6d84-9720/~tNl;7159-a7f9/~tND;198d-e6a6/tyf, PASS,    wireless
 /showcases/wireless/aggregation/,     -f omnetpp.ini -c VoicePriorityAggregation -r 0,                           1s,            1dbe-6672/tplx;a253-dbe3/~tNl;c82e-eeca/~tND;297d-cb44/tyf, PASS,    wireless
 
+/showcases/wireless/analogmodel/,     -f omnetpp.ini -c Routing -r 0,                5s,         06cd-3543/tplx;38f8-e1c8/~tNl;adea-faae/~tND;590b-3f92/tyf, PASS,    wireless
+/showcases/wireless/analogmodel/,     -f omnetpp.ini -c Distance -r 0,                2.5s,         1e75-270e/tplx;6d7a-d84c/~tNl;9ccb-a57b/~tND;da4b-98d0/tyf, PASS,    wireless
+/showcases/wireless/analogmodel/,     -f omnetpp.ini -c Noise -r 0,                0.1s,         971f-d936/tplx;3caf-a8f4/~tNl;f5e3-baf9/~tND;b8d9-b7be/tyf, PASS,    wireless
+
 /showcases/wireless/blockack/,     -f omnetpp.ini -c NoFragmentation -r 0,                                        1s,            4821-e745/tplx;9018-08c8/~tNl;0665-70ed/~tND, PASS,    wireless
 /showcases/wireless/blockack/,     -f omnetpp.ini -c Fragmentation -r 0,                                          1s,            2d29-28dd/tplx;27bf-b5e5/~tNl;f566-61a0/~tND, PASS,    wireless
 /showcases/wireless/blockack/,     -f omnetpp.ini -c MixedTraffic -r 0,                                           1s,            e136-81db/tplx;c6d0-cd6a/~tNl;59d0-28b6/~tND, PASS,    wireless
