@@ -50,7 +50,7 @@ class INET_API EulerAngles
     rad getGamma() const { return gamma; }
     void setGamma(rad gamma) { this->gamma = gamma; }
 
-    std::string str() const;
+    inline std::string str() const;
 
     bool isNil() const
     {

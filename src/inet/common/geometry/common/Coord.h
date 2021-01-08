@@ -84,7 +84,7 @@ class INET_API Coord
     void setZ(double z) { this->z = z; }
 
     /** @brief Returns a string with the value of the coordinate. */
-    std::string str() const;
+    inline std::string str() const;
 
     /** @brief Returns the negated vector. */
     Coord operator-() const { return Coord(-x, -y, -z); }

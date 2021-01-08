@@ -52,12 +52,12 @@ class INET_API TagSet : public cObject
     /**
      * Returns the number of tags.
      */
-    int getNumTags() const;
+    inline int getNumTags() const;
 
     /**
      * Returns the tag at the given index. The index must be in the range [0, getNumTags()).
      */
-    cObject *getTag(int index) const;
+    inline cObject *getTag(int index) const;
 
     /**
      * Clears the set of tags.

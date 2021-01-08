@@ -133,7 +133,7 @@ class INET_API Quaternion
     */
     void getSwingAndTwist(const Coord& direction, Quaternion& swing, Quaternion& twist) const;
 
-    std::string str() const;
+    inline std::string str() const;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Quaternion& q)

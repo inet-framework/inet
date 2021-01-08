@@ -106,17 +106,17 @@ class INET_API RegionTagSet : public cObject
     /**
      * Returns the number of tags.
      */
-    int getNumTags() const;
+    inline int getNumTags() const;
 
     /**
      * Returns the tag at the given index.
      */
-    cObject *getTag(int index) const;
+    inline cObject *getTag(int index) const;
 
     /**
      * Returns the region tag at the given index.
      */
-    const RegionTag<cObject>& getRegionTag(int index) const;
+    inline const RegionTag<cObject>& getRegionTag(int index) const;
 
     /**
      * Clears the set of tags in the given region.
