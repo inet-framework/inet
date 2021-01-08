@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Creates shadow directories in /media folder, and creates symlink in the showcase's or tutorial's /doc folder
+
+# only works for showcases
+
+parentdir1="$(dirname $(pwd))"
+currentdir="$(basename $(pwd))"
+parentdir1base="$(basename $parentdir1)"
+parentdir2="$(dirname $parentdir1)"
+parentdir2base="$(basename $parentdir2)"
+parentdir3="$(dirname $parentdir2)"
+parentdir3base="$(basename $parentdir3)"
+
+if [ $currentdir == 'doc' ]
+then
+	#echo "in doc directory, OK!"
+	mkdir -v ../../../../media/$parentdir3base/$parentdir2base/$parentdir1base
+	mkdir -v ../../../../media/$parentdir3base/$parentdir2base/$parentdir1base/doc
+	ln -vs ../../../../media/$parentdir3base/$parentdir2base/$parentdir1base/doc media
+else
+	echo "Run script from /doc directory!"
+fi
