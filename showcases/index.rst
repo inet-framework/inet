@@ -21,7 +21,7 @@ Recently released showcases:
 - :doc:`wireless/analogmodel/doc/index` :sub:`(released on: 2020-05-20)`
 - :doc:`wireless/crosstalk/doc/index` :sub:`(released on: 2020-03-26)`
 - :doc:`wireless/coexistence/doc/index` :sub:`(released on: 2020-03-26)`
-- :doc:`visualizer/spectrum/doc/index` :sub:`(released on: 2019-12-20)`
+- :doc:`visualizer/canvas/spectrum/doc/index` :sub:`(released on: 2019-12-20)`
 - :doc:`emulation/voip/doc/index` :sub:`(released on: 2019-11-06)`
 - :doc:`emulation/babel/doc/index` :sub:`(released on: 2019-11-06)`
 
@@ -34,6 +34,6 @@ All showcases:
    general/index
    mobility/index
    routing/index
-   visualizer/index
-   visualizer3d/index
+   visualizer/canvas/index
+   visualizer/osg/index
    wireless/index

@@ -226,7 +226,7 @@ The dimensional analog model represents signal power as a 2-dimensional function
 
 It is the most accurate analog signal representation, but it is computationally more expensive than the scalar model.
 In contrast to the unit disk and scalar models, the signal spectra of the dimensional analog model can also be
-visualized with spectrum figures, spectrograms and power density maps (see :doc:`/showcases/visualizer/spectrum/doc/index`).
+visualized with spectrum figures, spectrograms and power density maps (see :doc:`/showcases/visualizer/canvas/spectrum/doc/index`).
 
 .. figure:: media/dimensional3d.png
    :align: center
