@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd $(dirname $0)/.. || { echo --- error changing to the inet root directory ---; exit 1;}
+echo $(pwd)

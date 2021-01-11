@@ -12,7 +12,7 @@
 cd `dirname $0`/.. || { echo --- error changing to the inet root directory ---; exit 1;}
 INET_ROOT=`pwd`
 
-VERSION=`$INET_ROOT/_scripts/get_version` || exit 1
+VERSION=$($INET_ROOT/bin/inet_version) || exit 1
 
 echo "INET Version: $VERSION"
 
