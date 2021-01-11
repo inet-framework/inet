@@ -31,6 +31,13 @@ INET 4.3 release TODO items:
 
 ===============================================================================
 
+ - visualizer/canvas/spectrum -> GHz overlapping with node label
+ - visualizer/instrumentfigures -> plot figure size parameter not working
+ - visualizer/styling -> switching config lead to crash
+ - visualizer/canvas/transportconnection -> switching config lead to crash
+ - wireless/ratecontrol -> missing visualization when run in fast mode
+
+ - compound figures should be updated to have a bounds property that contains all elements and they must not be over-determined (e.g. size vs plotSize) see topic/figures
  - refactor ICMP/ICMPv6 error message sending and error indication
    - separate sending an ICMP error message on the network from sending an ICMP error indiciation up to a transport protocol or an application
    - ICMP error indication must not contain an ICMP header but ICMP specific Ind tags instead

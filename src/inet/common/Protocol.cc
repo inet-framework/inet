@@ -20,8 +20,17 @@
 namespace inet {
 
 int Protocol::nextId = 0;
-std::map<int, const Protocol *> Protocol::idToProtocol;
-std::map<std::string, const Protocol *> Protocol::nameToProtocol;
+std::map<int, const Protocol *>& Protocol::getIdToProtocol()
+{
+    static std::map<int, const Protocol *> idToProtocol;
+    return idToProtocol;
+}
+
+std::map<std::string, const Protocol *>& Protocol::getNameToProtocol()
+{
+    static std::map<std::string, const Protocol *> nameToProtocol;
+    return nameToProtocol;
+}
 
 Protocol::Protocol(const char *name, const char *descriptiveName, Layer layer) :
     id(nextId++),
@@ -29,8 +38,8 @@ Protocol::Protocol(const char *name, const char *descriptiveName, Layer layer) :
     descriptiveName(descriptiveName),
     layer(layer)
 {
-    idToProtocol[id] = this;
-    nameToProtocol[name] = this;
+    getIdToProtocol()[id] = this;
+    getNameToProtocol()[name] = this;
     if (strchr(name, ' ') != nullptr)
         throw cRuntimeError("Space is not allowed in protocol name");
 }
@@ -44,8 +53,8 @@ std::string Protocol::str() const
 
 const Protocol *Protocol::findProtocol(int id)
 {
-    auto it = idToProtocol.find(id);
-    return it != idToProtocol.end() ? it->second : nullptr;
+    auto it = getIdToProtocol().find(id);
+    return it != getIdToProtocol().end() ? it->second : nullptr;
 }
 
 const Protocol *Protocol::getProtocol(int id)
@@ -59,8 +68,8 @@ const Protocol *Protocol::getProtocol(int id)
 
 const Protocol *Protocol::findProtocol(const char *name)
 {
-    auto it = nameToProtocol.find(name);
-    return it != nameToProtocol.end() ? it->second : nullptr;
+    auto it = getNameToProtocol().find(name);
+    return it != getNameToProtocol().end() ? it->second : nullptr;
 }
 
 const Protocol *Protocol::getProtocol(const char *name)

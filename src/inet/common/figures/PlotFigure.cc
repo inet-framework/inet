@@ -298,7 +298,7 @@ void PlotFigure::addChildren()
     xAxisLabelFigure->setAnchor(ANCHOR_S);
     yAxisLabelFigure = new cLabelFigure("Y axis label");
     yAxisLabelFigure->setAnchor(ANCHOR_S);
-    yAxisLabelFigure->setAngle(-90);
+    yAxisLabelFigure->setAngle(M_PI / 2);
     backgroundFigure = new cRectangleFigure("bounds");
 
     backgroundFigure->setFilled(true);

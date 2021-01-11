@@ -26,8 +26,8 @@ class INET_API Protocol
 {
   protected:
     static int nextId;
-    static std::map<int, const Protocol *> idToProtocol;
-    static std::map<std::string, const Protocol *> nameToProtocol;
+    static std::map<int, const Protocol *>& getIdToProtocol();
+    static std::map<std::string, const Protocol *>& getNameToProtocol();
 
   public:
     enum Layer { PhysicalLayer, LinkLayer, NetworkLayer, TransportLayer, UnspecifiedLayer };

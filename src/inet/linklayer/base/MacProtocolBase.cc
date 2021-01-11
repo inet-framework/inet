@@ -50,6 +50,7 @@ void MacProtocolBase::initialize(int stage)
 {
     LayeredProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        currentTxFrame = nullptr;
         upperLayerInGateId = findGate("upperLayerIn");
         upperLayerOutGateId = findGate("upperLayerOut");
         lowerLayerInGateId = findGate("lowerLayerIn");

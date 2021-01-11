@@ -99,6 +99,10 @@
 /showcases/visualizer/canvas/routingtable/, -f omnetpp.ini -c Filtered -r 0,                                 500s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
 /showcases/visualizer/canvas/routingtable/, -f omnetpp.ini -c Dynamic -r 0,                                  500s,            308c-2c32/tplx;bbbf-3bb1/~tNl;10bd-77e0/~tND;0039-1722/tyf, PASS,    wireless
 
+/showcases/visualizer/canvas/spectrum/, -f omnetpp.ini -c SpectrumFigure -r 0,                       1s,            23cb-bc0c/tplx;5ba5-b602/~tNl;519e-eaf9/~tND;61b6-7659/tyf, PASS,	wireless
+/showcases/visualizer/canvas/spectrum/, -f omnetpp.ini -c Spectrogram -r 0,                       1s,            23cb-bc0c/tplx;5ba5-b602/~tNl;519e-eaf9/~tND;25b6-babb/tyf, PASS,	wireless
+/showcases/visualizer/canvas/spectrum/, -f omnetpp.ini -c PowerDensityMap -r 0,                       1s,            ccd5-887d/tplx;1112-a155/~tNl;2d24-6059/~tND;1e86-871a/tyf, PASS,	wireless
+
 /showcases/visualizer/canvas/statistic/,    -f omnetpp.ini -c PingRtt -r 0,                                            500s,            1479-6398/tplx;6faa-aeb3/~tNl;1c72-48f9/~tND;6724-ef6e/tyf, PASS,    wireless
 /showcases/visualizer/canvas/statistic/,    -f omnetpp.ini -c PacketErrorRate -r 0,                                    25s,            eb0f-ff32/tplx;ef09-141f/~tNl;aa58-0098/~tND;127a-5357/tyf, PASS,    wireless
 
@@ -117,6 +121,10 @@
 /showcases/wireless/aggregation/,     -f omnetpp.ini -c NoAggregation -r 0,                                      1s,            97f6-a969/tplx;ecf2-6e33/~tNl;17ce-8b5a/~tND;ac4f-be51/tyf, PASS,    wireless
 /showcases/wireless/aggregation/,     -f omnetpp.ini -c Aggregation -r 0,                                        1s,            671b-274c/tplx;6d84-9720/~tNl;7159-a7f9/~tND;198d-e6a6/tyf, PASS,    wireless
 /showcases/wireless/aggregation/,     -f omnetpp.ini -c VoicePriorityAggregation -r 0,                           1s,            1dbe-6672/tplx;a253-dbe3/~tNl;c82e-eeca/~tND;297d-cb44/tyf, PASS,    wireless
+
+/showcases/wireless/analogmodel/,     -f omnetpp.ini -c Routing -r 0,                5s,         06cd-3543/tplx;38f8-e1c8/~tNl;adea-faae/~tND;590b-3f92/tyf, PASS,    wireless
+/showcases/wireless/analogmodel/,     -f omnetpp.ini -c Distance -r 0,                2.5s,         1e75-270e/tplx;6d7a-d84c/~tNl;9ccb-a57b/~tND;da4b-98d0/tyf, PASS,    wireless
+/showcases/wireless/analogmodel/,     -f omnetpp.ini -c Noise -r 0,                0.1s,         971f-d936/tplx;3caf-a8f4/~tNl;f5e3-baf9/~tND;b8d9-b7be/tyf, PASS,    wireless
 
 /showcases/wireless/blockack/,     -f omnetpp.ini -c NoFragmentation -r 0,                                        1s,            4821-e745/tplx;9018-08c8/~tNl;0665-70ed/~tND, PASS,    wireless
 /showcases/wireless/blockack/,     -f omnetpp.ini -c Fragmentation -r 0,                                          1s,            2d29-28dd/tplx;27bf-b5e5/~tNl;f566-61a0/~tND, PASS,    wireless
@@ -151,6 +159,12 @@
 /showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 5,                                           5s,            cc8e-28df/tplx;6879-dea3/~tNl;f035-bd00/tyf, PASS,    wireless
 /showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 6,                                        5s,            6187-239f/tplx;4f98-6ace/~tNl;2463-4c31/tyf, PASS,    wireless
 /showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 7,                                          5s,            83fc-9bf8/tplx;fd16-e751/~tNl;5858-2820/tyf, PASS,    wireless
+
+/showcases/wireless/directionalantennas/,     -f omnetpp.ini -c IsotropicAntenna -r 0,                360s,         cb2c-76b8/tplx;34d3-be84/~tNl;9ff1-60e9/~tND;f7cc-17ff/tyf, PASS,    wireless
+/showcases/wireless/directionalantennas/,     -f omnetpp.ini -c ParabolicAntenna -r 0,                360s,         814f-c3c5/tplx;ff14-8923/~tNl;5561-21a0/~tND;ece6-7d98/tyf, PASS,    wireless
+/showcases/wireless/directionalantennas/,     -f omnetpp.ini -c DipoleAntenna -r 0,                360s,         41ce-90fc/tplx;c00c-d575/~tNl;e126-2c16/~tND;b20a-63a0/tyf, PASS,    wireless
+/showcases/wireless/directionalantennas/,     -f omnetpp.ini -c CosineAntenna -r 0,                360s,         01f3-50b8/tplx;53be-e739/~tNl;9f05-55b0/~tND;6fab-72e6/tyf, PASS,    wireless
+/showcases/wireless/directionalantennas/,     -f omnetpp.ini -c AxiallySymmetricAntenna -r 0,                360s,         b026-a022/tplx;6206-2bf6/~tNl;c69e-e5d5/~tND;cabd-ed99/tyf, PASS,    wireless
 
 /showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==6 && $distance==50',               500s,            95ac-0d44/tplx;6df1-afa5/~tNl;5c08-b66b/~tND;41cb-bc2b/tyf, PASS,    wireless
 /showcases/wireless/errorrate/,      -f omnetpp.ini -c General -r '$bitrate==9 && $distance==50',               500s,            c77b-67bf/tplx;c34f-5b24/~tNl;113f-b3e4/~tND;247a-a79a/tyf, PASS,    wireless

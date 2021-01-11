@@ -154,8 +154,8 @@
 /examples/inet/configurator/,        -f omnetpp.ini -c DisableSourceHost -r 0,              10s,     8d38-e18e/tplx;00b9-be78/~tNl;3e29-21db/~tND;af29-b473/tyf, PASS,
 /examples/inet/configurator/,        -f omnetpp.ini -c DisableDestinationInterfaces -r 0,   10s,     767c-2ea2/tplx;00e5-d3e4/~tNl;3fc9-02dd/~tND;6df4-aa19/tyf, PASS,
 
-/examples/inet/dctcp/,               -f omnetpp.ini -c DcTcpIncast -r 0,            100s,         a38e-8c36/tplx;6327-1a92/~tNl;5229-cf6a/~tND;7fd9-fc5a/tyf, PASS,   # DcTcpIncast extended
-/examples/inet/dctcp/,               -f omnetpp.ini -c TcpRenoIncast -r 0,          100s,         94d0-f9d9/tplx;1137-4610/~tNl;5229-cf6a/~tND;8d38-6031/tyf, PASS,
+/examples/inet/dctcp/,               -f omnetpp.ini -c DcTcpIncast -r 0,            100s,         a38e-8c36/tplx;6327-1a92/~tNl;bb58-9b35/~tND;7fd9-fc5a/tyf, PASS,   # DcTcpIncast extended
+/examples/inet/dctcp/,               -f omnetpp.ini -c TcpRenoIncast -r 0,          100s,         94d0-f9d9/tplx;1137-4610/~tNl;bb58-9b35/~tND;8d38-6031/tyf, PASS,
 
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            1bd7-ecd3/tplx;145c-4d9e/~tNl;087d-a911/~tND;cf5a-ffa8/tyf, PASS,
 
@@ -202,7 +202,7 @@
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           ebb0-8926/tplx;d71f-958c/~tNl;5cde-116b/~tND;d807-c257/tyf, PASS,
 
-/examples/inet/redmarker/,           -f omnetpp.ini -c TcpSender1 -r 0,             100s,         b854-0436/tplx;38ca-6687/~tNl;51e5-59dc/~tND;48c7-0700/tyf, PASS,
+/examples/inet/redmarker/,           -f omnetpp.ini -c TcpSender1 -r 0,             100s,         b854-0436/tplx;38ca-6687/~tNl;07c9-a783/~tND;48c7-0700/tyf, PASS,
 
 /examples/inet/routerperf/,          -f omnetpp.ini -c General -r 0,                100s,            565c-1aee/tplx;50cc-5c8d/~tNl;11bd-09a5/~tND;005e-5d82/tyf, PASS,
 

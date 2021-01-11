@@ -61,6 +61,10 @@ Ipv6::~Ipv6()
 {
     for (auto it : socketIdToSocketDescriptor)
         delete it.second;
+
+    for (auto& elem : queuedDatagramsForHooks) {
+        delete elem.packet;
+    }
 }
 
 #ifdef INET_WITH_xMIPv6

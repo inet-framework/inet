@@ -491,6 +491,8 @@ void Ldp::sendHelloTo(Ipv4Address dest)
             Packet *msg = (i == udpSockets.size() - 1) ? pk : pk->dup();
             udpSockets[i].sendTo(msg, dest, LDP_PORT);
         }
+        if (udpSockets.size() == 0)
+            delete pk;
     }
     else
         udpSocket.sendTo(pk, dest, LDP_PORT);
