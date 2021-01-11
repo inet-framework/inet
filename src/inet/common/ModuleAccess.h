@@ -62,9 +62,6 @@ INET_API cModule *findModuleUnderContainingNode(const cModule *from);
  * or type mismatch.
  */
 template<typename T>
-INET_API T *findModuleFromPar(cPar& par, const cModule *from);
-
-template<typename T>
 T *findModuleFromPar(cPar& par, const cModule *from)
 {
     const char *path = par;
@@ -87,9 +84,6 @@ T *findModuleFromPar(cPar& par, const cModule *from)
  * Returns the pointer to a module of type T or throws an error if module not found
  * or type mismatch.
  */
-template<typename T>
-INET_API T *getModuleFromPar(cPar& par, const cModule *from);
-
 template<typename T>
 T *getModuleFromPar(cPar& par, const cModule *from)
 {
