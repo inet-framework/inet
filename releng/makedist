@@ -47,7 +47,9 @@ perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g doc/neddoc/overview.html
 perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g src/inet-index.ned
 
 # cleanup
-rm -rf _scripts doc/src .gitattributes .gitignore .gitmodules .circleci .travis.yml .oppfeaturestate
+rm -rf _scripts doc/src releng .github .gitattributes .gitignore .gitmodules .circleci .travis.yml .clang-format .oppfeaturestate .nedexclusions
+mv .oppfeaturestate.default .oppfeaturestate
+mv .nedexclusions.default .nedexclusions
 
 todofiles=$(find . -name '__*')
 if [ "$todofiles" != "" ]; then
