@@ -144,13 +144,13 @@ void Arp::refreshDisplay() const
     getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
-void Arp::initiateArpResolution(ArpCacheEntry *entry)
+void Arp::initiateArpResolution(Ipv4Address nextHopAddr, ArpCacheEntry *entry)
 {
-    Ipv4Address nextHopAddr = entry->myIter->first;
     entry->pending = true;
     entry->numRetries = 0;
     entry->lastUpdate = SIMTIME_ZERO;
     entry->macAddress = MacAddress::UNSPECIFIED_ADDRESS;
+    entry->ipv4Address = nextHopAddr;
     sendArpRequest(entry->ie, nextHopAddr);
 
     // start timer
@@ -203,7 +203,7 @@ void Arp::requestTimedOut(cMessage *selfmsg)
     entry->numRetries++;
     if (entry->numRetries < retryCount) {
         // retry
-        Ipv4Address nextHopAddr = entry->myIter->first;
+        Ipv4Address nextHopAddr = entry->ipv4Address;
         EV_INFO << "ARP request for " << nextHopAddr << " timed out, resending\n";
         sendArpRequest(entry->ie, nextHopAddr);
         scheduleAfter(retryTimeout, selfmsg);
@@ -214,10 +214,10 @@ void Arp::requestTimedOut(cMessage *selfmsg)
 
     // max retry count reached: ARP failure.
     // throw out entry from cache
-    EV << "ARP timeout, max retry count " << retryCount << " for " << entry->myIter->first << " reached.\n";
-    Notification signal(entry->myIter->first, MacAddress::UNSPECIFIED_ADDRESS, entry->ie);
+    EV << "ARP timeout, max retry count " << retryCount << " for " << entry->ipv4Address << " reached.\n";
+    Notification signal(entry->ipv4Address, MacAddress::UNSPECIFIED_ADDRESS, entry->ie);
     emit(arpResolutionFailedSignal, &signal);
-    arpCache.erase(entry->myIter);
+    arpCache.erase(entry->ipv4Address);
     delete entry;
     numFailedResolutions++;
 }
@@ -313,8 +313,8 @@ void Arp::processArpPacket(Packet *packet)
             }
             else {
                 entry = new ArpCacheEntry();
-                auto where = arpCache.insert(arpCache.begin(), std::make_pair(srcIpAddress, entry));
-                entry->myIter = where;
+                arpCache.insert(arpCache.begin(), std::make_pair(srcIpAddress, entry));
+                entry->ipv4Address = srcIpAddress;
                 entry->ie = ie;
 
                 entry->pending = false;
@@ -391,7 +391,7 @@ MacAddress Arp::resolveMacAddressForArpReply(const NetworkInterface *ie, const A
 
 void Arp::updateArpCache(ArpCacheEntry *entry, const MacAddress& macAddress)
 {
-    EV_DETAIL << "Updating ARP cache entry: " << entry->myIter->first << " <--> " << macAddress << "\n";
+    EV_DETAIL << "Updating ARP cache entry: " << entry->ipv4Address << " <--> " << macAddress << "\n";
 
     // update entry
     if (entry->pending) {
@@ -402,7 +402,7 @@ void Arp::updateArpCache(ArpCacheEntry *entry, const MacAddress& macAddress)
     }
     entry->macAddress = macAddress;
     entry->lastUpdate = simTime();
-    Notification signal(entry->myIter->first, macAddress, entry->ie);
+    Notification signal(entry->ipv4Address, macAddress, entry->ie);
     emit(arpResolutionCompletedSignal, &signal);
 }
 
@@ -416,12 +416,12 @@ MacAddress Arp::resolveL3Address(const L3Address& address, const NetworkInterfac
         // no cache entry: launch ARP request
         ArpCacheEntry *entry = new ArpCacheEntry();
         entry->owner = this;
-        auto where = arpCache.insert(arpCache.begin(), std::make_pair(addr, entry));
-        entry->myIter = where; // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
+        arpCache.insert(arpCache.begin(), std::make_pair(addr, entry));
+        entry->ipv4Address = addr;
         entry->ie = ie;
 
         EV << "Starting ARP resolution for " << addr << "\n";
-        initiateArpResolution(entry);
+        initiateArpResolution(addr, entry);
         return MacAddress::UNSPECIFIED_ADDRESS;
     }
     else if (it->second->pending) {
@@ -436,7 +436,7 @@ MacAddress Arp::resolveL3Address(const L3Address& address, const NetworkInterfac
         EV << "ARP cache entry for " << addr << " expired, starting new ARP resolution\n";
         ArpCacheEntry *entry = it->second;
         entry->ie = ie; // routing table may have changed
-        initiateArpResolution(entry);
+        initiateArpResolution(addr, entry);
     }
     return MacAddress::UNSPECIFIED_ADDRESS;
 }
@@ -486,8 +486,8 @@ void Arp::sendArpGratuitous(const NetworkInterface *ie, MacAddress srcAddr, Ipv4
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
 
     ArpCacheEntry *entry = new ArpCacheEntry();
-    auto where = arpCache.insert(arpCache.begin(), std::make_pair(ipAddr, entry));
-    entry->myIter = where;
+    arpCache.insert(arpCache.begin(), std::make_pair(ipAddr, entry));
+    entry->ipv4Address = ipAddr;
     entry->ie = ie;
 
     entry->pending = false;

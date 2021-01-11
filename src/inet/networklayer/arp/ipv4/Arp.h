@@ -61,7 +61,7 @@ class INET_API Arp : public OperationalBase, public IArp
         simtime_t lastUpdate; // entries should time out after cacheTimeout
         int numRetries = 0; // if pending==true: 0 after first ARP request, 1 after second, etc.
         cMessage *timer = nullptr; // if pending==true: request timeout msg
-        ArpCache::iterator myIter; // iterator pointing to this entry
+        Ipv4Address ipv4Address;
     };
 
   protected:
@@ -115,7 +115,7 @@ class INET_API Arp : public OperationalBase, public IArp
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
     virtual void flush();
 
-    virtual void initiateArpResolution(ArpCacheEntry *entry);
+    virtual void initiateArpResolution(Ipv4Address ipv4Address, ArpCacheEntry *entry);
     virtual void sendArpRequest(const NetworkInterface *ie, Ipv4Address ipAddress);
     virtual void requestTimedOut(cMessage *selfmsg);
     virtual bool addressRecognized(Ipv4Address destAddr, NetworkInterface *ie);
