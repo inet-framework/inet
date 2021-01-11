@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2021-01-11  ------ inet-4.3.0 released ------
+
 2020-06-08  Levente Mészáros
 
 	Changed interface to return const references for performance reasons.

@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2021-01-11  ------ inet-4.3.0 released ------
+
 2020-11-26  Levente Mészáros
 
 	Extracted common parts into base class between canvas and OSG mobility visualizers.

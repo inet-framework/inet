@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2021-01-11  ------ inet-4.3.0 released ------
+
 2020-08-03  Levente Mészáros
 
 	Added new dispatching package with modules: ReceiveWithProtocol and SendWithProtocol.

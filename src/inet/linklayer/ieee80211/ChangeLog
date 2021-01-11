@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2021-01-11  ------ inet-4.3.0 released ------
+
 2020-09-25  Levente Mészáros
 
 	Moved Ieee80211EtherType* to ieee802 folder.

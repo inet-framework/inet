@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2021-01-11  ------ inet-4.3.0 released ------
+
 2020-12-14  Levente Mészáros
 
 	*PacketSource: Added optional clock module support.

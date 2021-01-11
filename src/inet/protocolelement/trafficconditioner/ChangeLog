@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2021-01-11  ------ inet-4.3.0 released ------
+
 2020-08-05  Levente Mészáros
 
 	Added new trafficconditioner package with modules: ITrafficConditionerLayer,
