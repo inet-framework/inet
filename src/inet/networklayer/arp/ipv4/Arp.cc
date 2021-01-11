@@ -494,6 +494,7 @@ void Arp::sendArpGratuitous(const NetworkInterface *ie, MacAddress srcAddr, Ipv4
     entry->timer = nullptr;
     entry->numRetries = 0;
 
+    entry->lastUpdate = simTime();
     // updateARPCache(entry, srcAddr); //FIXME
 
     // send out
