@@ -15,7 +15,7 @@ grep "E #" $2 | awk '{print $13}' | uniq > $2.tmp
 diff -y -t --suppress-common-lines $1.tmp $2.tmp > diffingerprints.diff
 rm $1.tmp
 rm $2.tmp
-f1=`head -n 1 diffingerprints.diff | awk '{print $1}'`
-f2=`head -n 1 diffingerprints.diff | awk '{print $3}'`
+f1=$(head -n 1 diffingerprints.diff | awk '{print $1}')
+f2=$(head -n 1 diffingerprints.diff | awk '{print $3}')
 grep -e "$f1" $1 | head -n 1
 grep -e "$f2" $2 | head -n 1

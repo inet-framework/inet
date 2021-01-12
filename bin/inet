@@ -15,7 +15,7 @@
 # its compiled, as executable or shared lib.
 #
 
-DIR=`dirname $0`
+DIR=$(dirname $0)
 OUT=$DIR/../src
 
 #
@@ -46,8 +46,8 @@ if [ "$1" = "--printcmd" ] || [ "$1" = "-p" ]; then
    shift;
 fi
 
-OPP_RUN_DBG=`which opp_run_dbg 2> /dev/null || echo opp_run_dbg`
-OPP_RUN_RELEASE=`which opp_run_release 2> /dev/null || echo opp_run_release`
+OPP_RUN_DBG=$(which opp_run_dbg 2> /dev/null || echo opp_run_dbg)
+OPP_RUN_RELEASE=$(which opp_run_release 2> /dev/null || echo opp_run_release)
 
 INET_NEDFOLDERS=$(cat $INET_ROOT/.nedfolders | sed "s|^|$INET_ROOT/|" | tr '\n' ':')
 if [ ! "$INET_NEDFOLDERS" = "" ]; then
