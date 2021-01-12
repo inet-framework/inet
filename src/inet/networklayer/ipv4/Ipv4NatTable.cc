@@ -141,7 +141,6 @@ INetfilter::IHook::Result Ipv4NatTable::processPacket(Packet *packet, INetfilter
             if (transportProtocol == &Protocol::tcp) {
                 auto& tcpHeader = removeTransportProtocolHeader<tcp::TcpHeader>(packet);
                 // TODO if (!Tcp::verifyCrc(Protocol::ipv4, tcpHeader, packet))
-                auto tcpData = packet->peekData();
                 if (natEntry.getDestPort() != -1)
                     tcpHeader->setDestPort(natEntry.getDestPort());
                 if (natEntry.getSrcPort() != -1)
