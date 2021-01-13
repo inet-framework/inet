@@ -170,8 +170,6 @@ void EthernetMac::handleUpperPacket(Packet *packet)
         frame = newFrame;
     }
 
-    addPaddingAndSetFcs(packet, MIN_ETHERNET_FRAME_BYTES); // calculate valid FCS
-
     // store frame and possibly begin transmitting
     EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
     txQueue->enqueuePacket(packet);
@@ -180,6 +178,7 @@ void EthernetMac::handleUpperPacket(Packet *packet)
         ASSERT(currentTxFrame == nullptr);
         if (!txQueue->isEmpty()) {
             popTxQueue();
+            addPaddingAndSetFcs(currentTxFrame, MIN_ETHERNET_FRAME_BYTES);
             startFrameTransmission();
         }
     }
@@ -190,7 +189,7 @@ void EthernetMac::processMsgFromNetwork(EthernetSignalBase *signal)
     EV_INFO << signal << " received." << endl;
 
     if (!connected) {
-        EV_WARN << "Interface is not connected -- dropping msg " << signal << endl;
+        EV_WARN << "Interface is not connected -- dropping signal " << signal << endl;
         if (dynamic_cast<EthernetSignal *>(signal)) { // do not count JAM and IFG packets
             auto packet = check_and_cast<Packet *>(signal->decapsulate());
             delete signal;
@@ -225,6 +224,7 @@ void EthernetMac::processMsgFromNetwork(EthernetSignalBase *signal)
     emit(packetReceivedFromLowerSignal, packet);
 
     if (hasBitError || !verifyCrcAndLength(packet)) {
+        EV_WARN << "Bit error/CRC error in incoming packet -- dropping packet " << EV_FIELD(packet) << EV_ENDL;
         numDroppedBitError++;
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
@@ -242,18 +242,19 @@ void EthernetMac::processMsgFromNetwork(EthernetSignalBase *signal)
         if (controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE) {
             auto pauseFrame = check_and_cast<const EthernetPauseFrame *>(controlFrame.get());
             int pauseUnits = pauseFrame->getPauseTime();
+            EV_INFO << "Reception of PAUSE frame " << packet << " successfully completed." << endl;
             delete packet;
             numPauseFramesRcvd++;
             emit(rxPausePkUnitsSignal, pauseUnits);
             processPauseCommand(pauseUnits);
         }
         else {
-            EV_INFO << "Received unknown ethernet flow control frame" << packet << " dropped." << endl;
+            EV_INFO << "Received unknown ethernet flow control frame " << EV_FIELD(packet) << ", dropped." << endl;
             delete packet;
         }
     }
     else {
-        EV_INFO << "Reception of " << packet << " successfully completed." << endl;
+        EV_INFO << "Reception of " << EV_FIELD(packet) << " successfully completed." << endl;
         processReceivedDataFrame(packet, frame);
     }
 }
@@ -267,8 +268,10 @@ void EthernetMac::handleEndIFGPeriod()
     // End of IFG period, okay to transmit
     EV_DETAIL << "IFG elapsed" << endl;
 
-    if (!txQueue->isEmpty())
+    if (!txQueue->isEmpty()) {
         popTxQueue();
+        addPaddingAndSetFcs(currentTxFrame, MIN_ETHERNET_FRAME_BYTES);
+    }
     beginSendFrames();
 }
 
@@ -329,8 +332,10 @@ void EthernetMac::handleEndPausePeriod()
         throw cRuntimeError("End of PAUSE event occurred when not in PAUSE_STATE!");
 
     EV_DETAIL << "Pause finished, resuming transmissions\n";
-    if (!currentTxFrame && !txQueue->isEmpty())
+    if (!currentTxFrame && !txQueue->isEmpty()) {
         popTxQueue();
+        addPaddingAndSetFcs(currentTxFrame, MIN_ETHERNET_FRAME_BYTES);
+    }
     beginSendFrames();
 }
 
