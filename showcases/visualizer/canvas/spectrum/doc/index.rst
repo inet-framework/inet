@@ -22,7 +22,7 @@ About the Visualizer
 :ned:`MediumCanvasVisualizer` can visualize the power density of radio signals using
 three kinds of figures (in addition to visualizing propagating signals, signal
 departures/arrivals, and communication/interference ranges, described in the
-:doc:`/showcases/visualizer/radiomediumactivity/doc/index` showcase).
+:doc:`/showcases/visualizer/canvas/radiomediumactivity/doc/index` showcase).
 
 The module can visualize signals in the following ways:
 

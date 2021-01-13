@@ -1,0 +1,16 @@
+#!/bin/sh
+# script to output the inet version extracted from the INETDefs.h
+
+cd $(dirname $0)/.. || { echo --- error changing to the inet root directory ---; exit 1;}
+INET_ROOT=$(pwd)
+
+INETDEFS_H='src/inet/common/INETDefs.h'
+VERSION_LINE=$(grep -E '^#define +INET_VERSION' $INETDEFS_H)
+PATCH_LEVEL_LINE=$(grep -E '^#define +INET_PATCH_LEVEL' $INETDEFS_H)
+VERSION=$(echo $VERSION_LINE | perl -pe 's/#define +INET_VERSION +0x(..)(..)/hex($1) . "." . hex($2)/e').$(echo $PATCH_LEVEL_LINE | perl -pe 's/#define +INET_PATCH_LEVEL +0x(..)/hex($1)/e')
+if ! echo $VERSION | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+   echo "Error: #define INET_VERSION or INET_PATCH_LEVEL cannot be found in $INETDEFS_H or not in the expected format 0xHHHH: \"$VERSION_LINE\"" 1>&2
+   exit 1
+fi
+
+echo "$VERSION"

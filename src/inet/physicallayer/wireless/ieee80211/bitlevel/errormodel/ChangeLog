@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2021-01-11  ------ inet-4.3.0 released ------
+
 2020-11-24  Levente Mészáros
 
 	Changed the corruptOfdmSymbol method in Ieee80211OfdmErrorModel to compute

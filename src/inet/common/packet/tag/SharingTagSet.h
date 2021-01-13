@@ -71,27 +71,27 @@ class INET_API SharingTagSet : public cObject
     /**
      * Returns the number of tags.
      */
-    int getNumTags() const;
+    inline int getNumTags() const;
 
     /**
      * Returns the shared tag at the given index. The index must be in the range [0, getNumTags()).
      */
-    const Ptr<const TagBase>& getTag(int index) const;
+    inline const Ptr<const TagBase>& getTag(int index) const;
 
     /**
      * Returns the exclusively owned tag at the given index for update. The index must be in the range [0, getNumTags()).
      */
-    const Ptr<TagBase> getTagForUpdate(int index);
+    inline const Ptr<TagBase> getTagForUpdate(int index);
 
     /**
      * Clears the set of tags.
      */
-    void clearTags();
+    inline void clearTags();
 
     /**
      * Copies the set of tags from the other set.
      */
-    void copyTags(const SharingTagSet& other);
+    inline void copyTags(const SharingTagSet& other);
     //@}
 
     /** @name Type dependent functions */

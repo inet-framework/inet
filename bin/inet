@@ -15,7 +15,7 @@
 # its compiled, as executable or shared lib.
 #
 
-DIR=`dirname $0`
+DIR=$(dirname $0)
 OUT=$DIR/../src
 
 #
@@ -46,8 +46,8 @@ if [ "$1" = "--printcmd" ] || [ "$1" = "-p" ]; then
    shift;
 fi
 
-OPP_RUN_DBG=`which opp_run_dbg 2> /dev/null || echo opp_run_dbg`
-OPP_RUN_RELEASE=`which opp_run_release 2> /dev/null || echo opp_run_release`
+OPP_RUN_DBG=$(which opp_run_dbg 2> /dev/null || echo opp_run_dbg)
+OPP_RUN_RELEASE=$(which opp_run_release 2> /dev/null || echo opp_run_release)
 
 INET_NEDFOLDERS=$(cat $INET_ROOT/.nedfolders | sed "s|^|$INET_ROOT/|" | tr '\n' ':')
 if [ ! "$INET_NEDFOLDERS" = "" ]; then
@@ -68,7 +68,7 @@ if [ "$MODE" = "" ]; then
     $TOOL $OUT/INET.exe $INET_OMNETPP_OPTIONS
   elif [ -f $OUT/INET_dbg.exe ]; then
     $TOOL $OUT/INET_dbg.exe $INET_OMNETPP_OPTIONS
-  elif [ -f $OUT/libINET.so ] || [ -f $OUT/INET.dll ] || [ -f $OUT/libINET.dll ]; then
+  elif [ -f $OUT/libINET.so ] || [ -f $OUT/INET.dll ] || [ -f $OUT/libINET.dll ] || [ -f $OUT/libINET.dylib ]; then
     $TOOL $OPP_RUN_RELEASE -l $OUT/../src/INET $INET_OMNETPP_OPTIONS "$@"
   elif [ -f $OUT/libINET_dbg.so ] || [ -f $OUT/INET_dbg.dll ] || [ -f $OUT/libINET_dbg.dll ] || [ -f $OUT/libINET_dbg.dylib ]; then
     $TOOL $OPP_RUN_DBG -l $OUT/../src/INET $INET_OMNETPP_OPTIONS "$@"

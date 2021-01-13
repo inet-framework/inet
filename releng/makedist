@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# before running this script: 
+# before running this script:
 # 1. build the INET documentation from the IDE:
 #    * be sure to switch off auto linking (i.e. enable tilde linking)
 #    * enable ALL features in the project properties dialog
@@ -9,22 +9,22 @@
 #      folder to be sure that there are no broken tilde links
 # 2. build the inet manual and copy the generated PDF file to the doc directory.
 
-cd `dirname $0`/.. || { echo --- error changing to the inet root directory ---; exit 1;}
-INET_ROOT=`pwd`
+INET_ROOT=$(inet_root)
 
-VERSION=`$INET_ROOT/_scripts/get_version` || exit 1
+VERSION=$(inet_version) || exit 1
+MINOR_VERSION=$(echo $VERSION | rev | cut -f 2- -d '.' | rev) || exit 1
 
 echo "INET Version: $VERSION"
 
 if [ "$BUILDID" = "" ]; then
   # generate our own build identifier
-  export BUILDDATE=`date +%Y%m%d`
-  export BUILDHASH=`git describe --tags --long | awk -F '-g' '{print $2;}'`
+  export BUILDDATE=$(date +%Y%m%d)
+  export BUILDHASH=$(git describe --tags --long | awk -F '-g' '{print $2;}')
   export BUILDID="$VERSION-$BUILDHASH"
 fi
 
 FILENAME=$INET_ROOT/inet-$BUILDID-src.tgz
-DIRNAME=inet4
+DIRNAME=inet$MINOR_VERSION
 
 rm -rf $INET_ROOT/out/$DIRNAME
 mkdir -p $INET_ROOT/out/$DIRNAME
@@ -47,9 +47,11 @@ perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g doc/neddoc/overview.html
 perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g src/inet-index.ned
 
 # cleanup
-rm -rf _scripts doc/src .gitattributes .gitignore .gitmodules .circleci .travis.yml .oppfeaturestate
+rm -rf _scripts doc/src releng .github .gitattributes .gitignore .gitmodules .circleci .travis.yml .clang-format .oppfeaturestate .nedexclusions
+mv .oppfeaturestate.default .oppfeaturestate
+mv .nedexclusions.default .nedexclusions
 
-todofiles=`find . -name '__*'`
+todofiles=$(find . -name '__*')
 if [ "$todofiles" != "" ]; then
     echo "Removing underscore files: $todofiles"
     rm -rf $todofiles
