@@ -548,6 +548,7 @@ INetfilter::IHook::Result DSRUU::processPacket(Packet *pkt, unsigned int) {
 
         auto srt = RouteFind(my_addr(), nxt_hop);
         if (srt && (srt->addrs.empty())) {
+            pkt->addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
             pkt->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(srt->dst.s_addr);
             return ACCEPT;
         }
