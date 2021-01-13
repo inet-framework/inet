@@ -28,6 +28,7 @@
 #endif // #ifdef INET_WITH_ETHERNET
 
 #ifdef INET_WITH_IPv4
+#include "inet/networklayer/ipv4/Ipv4.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #endif // ifdef INET_WITH_IPv4
 
@@ -59,7 +60,7 @@ void EcnMarker::setEcn(Packet *packet, IpEcnCode ecn)
             if (payloadProtocol == &Protocol::ipv4) {
                 auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
                 ipv4Header->setEcn(ecn);
-                // TODO recalculate IP header checksum
+                Ipv4::insertCrc(ipv4Header); // recalculate IP header checksum
                 insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
                 packet->insertAtFront(ethHeader);
                 // TODO recalculate ethernet CRC
