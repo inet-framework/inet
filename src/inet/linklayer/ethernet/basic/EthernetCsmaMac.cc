@@ -289,8 +289,6 @@ void EthernetCsmaMac::handleUpperPacket(Packet *packet)
         frame = newFrame;
     }
 
-    addPaddingAndSetFcs(packet, MIN_ETHERNET_FRAME_BYTES); // calculate valid FCS
-
     // store frame and possibly begin transmitting
     EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
     txQueue->enqueuePacket(packet);
@@ -298,8 +296,10 @@ void EthernetCsmaMac::handleUpperPacket(Packet *packet)
     if ((duplexMode || receiveState == RX_IDLE_STATE) && transmitState == TX_IDLE_STATE) {
         EV_DETAIL << "No incoming carrier signals detected, frame clear to send\n";
 
-        if (!currentTxFrame && !txQueue->isEmpty())
+        if (!currentTxFrame && !txQueue->isEmpty()) {
             popTxQueue();
+            addPaddingAndSetFcs(currentTxFrame, MIN_ETHERNET_FRAME_BYTES);
+        }
 
         startFrameTransmission();
     }
@@ -392,8 +392,10 @@ void EthernetCsmaMac::handleEndIFGPeriod()
 
     // End of IFG period, okay to transmit, if Rx idle OR duplexMode ( checked in startFrameTransmission(); )
 
-    if (currentTxFrame == nullptr && !txQueue->isEmpty())
+    if (currentTxFrame == nullptr && !txQueue->isEmpty()) {
         popTxQueue();
+        addPaddingAndSetFcs(currentTxFrame, MIN_ETHERNET_FRAME_BYTES);
+    }
 
     // send frame to network
     beginSendFrames();
@@ -514,8 +516,10 @@ void EthernetCsmaMac::handleEndTxPeriod()
     deleteCurrentTxFrame();
     lastTxFinishTime = simTime();
     // note: cannot be moved into handleEndIFGPeriod(), because in burst mode we need to know whether to send filled IFG or not
-    if (!duplexMode && frameBursting && framesSentInBurst > 0 && !txQueue->isEmpty())
+    if (!duplexMode && frameBursting && framesSentInBurst > 0 && !txQueue->isEmpty()) {
         popTxQueue();
+        addPaddingAndSetFcs(currentTxFrame, MIN_ETHERNET_FRAME_BYTES);
+    }
 
     // only count transmissions in totalSuccessfulRxTxTime if channel is half-duplex
     if (!duplexMode) {
@@ -652,8 +656,10 @@ void EthernetCsmaMac::handleRetransmission()
         dropCurrentTxFrame(details);
         changeTransmissionState(TX_IDLE_STATE);
         backoffs = 0;
-        if (!txQueue->isEmpty())
+        if (!txQueue->isEmpty()) {
             popTxQueue();
+            addPaddingAndSetFcs(currentTxFrame, MIN_ETHERNET_FRAME_BYTES);
+        }
         beginSendFrames();
         return;
     }
