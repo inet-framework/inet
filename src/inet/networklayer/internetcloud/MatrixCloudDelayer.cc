@@ -26,35 +26,10 @@ namespace inet {
 
 Define_Module(MatrixCloudDelayer);
 
-namespace {
-inline bool isEmpty(const char *s)
-{
-    return !s || !s[0];
-}
-
-// TODO suggestion: add to XMLUtils
-bool getBoolAttribute(const cXMLElement& element, const char *name, const bool *defaultValue = nullptr)
-{
-    const char *s = element.getAttribute(name);
-    if (isEmpty(s)) {
-        if (defaultValue)
-            return *defaultValue;
-        throw cRuntimeError("Required attribute %s of <%s> missing at %s", name, element.getTagName(),
-                element.getSourceLocation());
-    }
-    if (strcasecmp(s, "true") == 0 || strcmp(s, "1") == 0)
-        return true;
-    if (strcasecmp(s, "false") == 0 || strcmp(s, "0") == 0)
-        return false;
-    throw cRuntimeError("Invalid boolean attribute %s = '%s' at %s", name, s, element.getSourceLocation());
-}
-
-} // namespace {
-
 // FIXME modified copy of 'Matcher' class from Ipv4NetworkConfigurator
 MatrixCloudDelayer::Matcher::Matcher(const char *pattern)
 {
-    matchesany = isEmpty(pattern);
+    matchesany = !pattern || !pattern[0];
     if (matchesany)
         return;
     cStringTokenizer tokenizer(pattern);
@@ -93,7 +68,7 @@ MatrixCloudDelayer::MatrixEntry::MatrixEntry(cXMLElement *trafficEntity, bool de
     const char *delayAttr = trafficEntity->getAttribute("delay");
     const char *datarateAttr = trafficEntity->getAttribute("datarate");
     const char *dropAttr = trafficEntity->getAttribute("drop");
-    symmetric = getBoolAttribute(*trafficEntity, "symmetric", &defaultSymmetric);
+    symmetric = xmlutils::getAttributeBoolValue(trafficEntity, "symmetric", defaultSymmetric);
     try {
         delayPar.parse(delayAttr);
     }
@@ -144,7 +119,7 @@ void MatrixCloudDelayer::initialize(int stage)
         if (strcmp(configEntity->getTagName(), "internetCloud"))
             throw cRuntimeError("Cannot read internetCloud configuration, unaccepted '%s' entity at %s", configEntity->getTagName(),
                     configEntity->getSourceLocation());
-        bool defaultSymmetric = getBoolAttribute(*configEntity, "symmetric");
+        bool defaultSymmetric = getAttributeBoolValue(configEntity, "symmetric");
         const cXMLElement *parameterEntity = getUniqueChild(configEntity, "parameters");
         cXMLElementList trafficEntities = parameterEntity->getChildrenByTagName("traffic");
         for (auto& trafficEntitie : trafficEntities) {
