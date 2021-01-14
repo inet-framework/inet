@@ -26,12 +26,7 @@ namespace inet {
 class INET_API AdaptiveProbabilisticBroadcast : public ProbabilisticBroadcast
 {
   public:
-    AdaptiveProbabilisticBroadcast()
-        : ProbabilisticBroadcast()
-        , timeInNeighboursTable()
-        , bvec()
-        , neighMap()
-    {}
+    AdaptiveProbabilisticBroadcast() {}
 
     /** @brief Initialization of the module and some variables*/
     virtual void initialize(int) override;
