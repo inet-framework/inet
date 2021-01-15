@@ -35,7 +35,7 @@ class INET_API PacketBufferBase : public PacketProcessorBase, public virtual IPa
   protected:
     virtual void initialize(int stage) override;
     virtual void emit(simsignal_t signal, cObject *object, cObject *details = nullptr) override;
-    virtual void updateDisplayString();
+    virtual const char *resolveDirective(char directive) const override;
 };
 
 } // namespace queueing

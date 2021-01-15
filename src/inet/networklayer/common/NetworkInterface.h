@@ -21,6 +21,7 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/StringFormat.h"
 #include "inet/common/TagBase.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/packet/tag/TagSet.h"
@@ -92,7 +93,7 @@ class INET_API NetworkInterfaceChangeDetails : public cObject
  *
  * @see IInterfaceTable
  */
-class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassivePacketSink, public queueing::IPacketProcessor, public ILifecycle, public cListener
+class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassivePacketSink, public queueing::IPacketProcessor, public ILifecycle, public cListener, public StringFormat::IDirectiveResolver
 {
     friend class InterfaceProtocolData; // to call protocolDataChanged()
 
@@ -151,9 +152,10 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
+    virtual void handleParameterChange(const char *name) override;
     virtual void refreshDisplay() const override;
     virtual void updateDisplayString() const;
-    virtual void handleParameterChange(const char *name) override;
+    virtual const char *resolveDirective(char directive) const override;
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
 
     virtual double computeDatarate() const;

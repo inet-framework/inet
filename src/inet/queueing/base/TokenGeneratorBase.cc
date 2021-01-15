@@ -34,14 +34,6 @@ void TokenGeneratorBase::initialize(int stage)
     }
 }
 
-void TokenGeneratorBase::updateDisplayString()
-{
-    if (getEnvir()->isGUI()) {
-        auto text = StringFormat::formatString(displayStringTextFormat, this);
-        getDisplayString().setTagArg("t", 0, text);
-    }
-}
-
 const char *TokenGeneratorBase::resolveDirective(char directive) const
 {
     static std::string result;
@@ -57,7 +49,7 @@ const char *TokenGeneratorBase::resolveDirective(char directive) const
             break;
         }
         default:
-            throw cRuntimeError("Unknown directive: %c", directive);
+            result = PacketProcessorBase::resolveDirective(directive);
     }
     return result.c_str();
 }

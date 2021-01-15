@@ -19,14 +19,16 @@
 #define __INET_IPV4NETWORKLAYER_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/StringFormat.h"
 
 namespace inet {
 
-class INET_API Ipv4NetworkLayer : public cModule
+class INET_API Ipv4NetworkLayer : public cModule, public StringFormat::IDirectiveResolver
 {
   protected:
     virtual void refreshDisplay() const override;
     virtual void updateDisplayString() const;
+    virtual const char *resolveDirective(char directive) const override;
 };
 
 } // namespace inet

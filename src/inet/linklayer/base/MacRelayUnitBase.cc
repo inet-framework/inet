@@ -44,23 +44,28 @@ void MacRelayUnitBase::initialize(int stage)
     }
 }
 
+const char *MacRelayUnitBase::resolveDirective(char directive) const
+{
+    static std::string result;
+    switch (directive) {
+    case 'p':
+        result = std::to_string(numProcessedFrames);
+        break;
+    case 'd':
+        result = std::to_string(numDroppedFrames);
+        break;
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+    return result.c_str();
+}
+
 void MacRelayUnitBase::updateDisplayString() const
 {
-    auto text = StringFormat::formatString(par("displayStringTextFormat"), [&] (char directive) {
-        static std::string result;
-        switch (directive) {
-            case 'p':
-                result = std::to_string(numProcessedFrames);
-                break;
-            case 'd':
-                result = std::to_string(numDroppedFrames);
-                break;
-            default:
-                throw cRuntimeError("Unknown directive: %c", directive);
-        }
-        return result.c_str();
-    });
-    getDisplayString().setTagArg("t", 0, text);
+    if (getEnvir()->isGUI()) {
+        auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
+        getDisplayString().setTagArg("t", 0, text);
+    }
 }
 
 void MacRelayUnitBase::broadcastPacket(Packet *outgoingPacket, const MacAddress& destinationAddress, NetworkInterface *incomingInterface)

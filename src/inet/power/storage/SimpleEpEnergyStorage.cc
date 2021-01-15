@@ -69,21 +69,26 @@ void SimpleEpEnergyStorage::refreshDisplay() const
 
 void SimpleEpEnergyStorage::updateDisplayString() const
 {
-    auto text = StringFormat::formatString(par("displayStringTextFormat"), [&] (char directive) {
-        static std::string result;
-        switch (directive) {
-            case 'c':
-                result = getResidualEnergyCapacity().str();
-                break;
-            case 'p':
-                result = std::to_string((int)std::round(100 * unit(getResidualEnergyCapacity() / getNominalEnergyCapacity()).get())) + "%";
-                break;
-            default:
-                throw cRuntimeError("Unknown directive: %c", directive);
-        }
-        return result.c_str();
-    });
-    getDisplayString().setTagArg("t", 0, text);
+    if (getEnvir()->isGUI()) {
+        auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
+        getDisplayString().setTagArg("t", 0, text);
+    }
+}
+
+const char *SimpleEpEnergyStorage::resolveDirective(char directive) const
+{
+    static std::string result;
+    switch (directive) {
+        case 'c':
+            result = getResidualEnergyCapacity().str();
+            break;
+        case 'p':
+            result = std::to_string((int)std::round(100 * unit(getResidualEnergyCapacity() / getNominalEnergyCapacity()).get())) + "%";
+            break;
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+    return result.c_str();
 }
 
 void SimpleEpEnergyStorage::updateTotalPowerConsumption()

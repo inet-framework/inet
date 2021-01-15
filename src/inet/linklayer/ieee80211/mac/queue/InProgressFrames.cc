@@ -37,7 +37,7 @@ void InProgressFrames::initialize(int stage)
     }
 }
 
-void InProgressFrames::updateDisplayString()
+void InProgressFrames::updateDisplayString() const
 {
     std::string text = std::to_string(inProgressFrames.size()) + " packets";
     getDisplayString().setTagArg("t", 0, text.c_str());

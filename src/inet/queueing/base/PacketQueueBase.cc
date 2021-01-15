@@ -72,43 +72,39 @@ void PacketQueueBase::emit(simsignal_t signal, cObject *object, cObject *details
     cSimpleModule::emit(signal, object, details);
 }
 
-void PacketQueueBase::updateDisplayString()
+const char *PacketQueueBase::resolveDirective(char directive) const
 {
-    if (getEnvir()->isGUI()) {
-        auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) {
-            static std::string result;
-            switch (directive) {
-                case 'p':
-                    result = std::to_string(getNumPackets());
-                    break;
-                case 'l':
-                    result = getTotalLength().str();
-                    break;
-                case 'u':
-                    result = std::to_string(numPushedPackets);
-                    break;
-                case 'o':
-                    result = std::to_string(numPulledPackets);
-                    break;
-                case 'r':
-                    result = std::to_string(numRemovedPackets);
-                    break;
-                case 'd':
-                    result = std::to_string(numDroppedPackets);
-                    break;
-                case 'c':
-                    result = std::to_string(numCreatedPackets);
-                    break;
-                case 'n':
-                    result = !isEmpty() ? getPacket(0)->getFullName() : "";
-                    break;
-                default:
-                    throw cRuntimeError("Unknown directive: %c", directive);
-            }
-            return result.c_str();
-        });
-        getDisplayString().setTagArg("t", 0, text);
+    static std::string result;
+    switch (directive) {
+        case 'p':
+            result = std::to_string(getNumPackets());
+            break;
+        case 'l':
+            result = getTotalLength().str();
+            break;
+        case 'u':
+            result = std::to_string(numPushedPackets);
+            break;
+        case 'o':
+            result = std::to_string(numPulledPackets);
+            break;
+        case 'r':
+            result = std::to_string(numRemovedPackets);
+            break;
+        case 'd':
+            result = std::to_string(numDroppedPackets);
+            break;
+        case 'c':
+            result = std::to_string(numCreatedPackets);
+            break;
+        case 'n':
+            result = !isEmpty() ? getPacket(0)->getFullName() : "";
+            break;
+        default:
+            result = PacketProcessorBase::resolveDirective(directive);
+            break;
     }
+    return result.c_str();
 }
 
 } // namespace queueing

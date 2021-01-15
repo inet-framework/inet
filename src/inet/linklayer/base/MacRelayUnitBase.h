@@ -20,6 +20,7 @@
 
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/StringFormat.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/linklayer/ethernet/contract/IMacAddressTable.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -27,7 +28,7 @@
 
 namespace inet {
 
-class INET_API MacRelayUnitBase : public LayeredProtocolBase
+class INET_API MacRelayUnitBase : public LayeredProtocolBase, public StringFormat::IDirectiveResolver
 {
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
@@ -40,6 +41,7 @@ class INET_API MacRelayUnitBase : public LayeredProtocolBase
     virtual void initialize(int stage) override;
     virtual void finish() override;
     virtual void updateDisplayString() const;
+    virtual const char *resolveDirective(char directive) const override;
 
     virtual bool isForwardingInterface(NetworkInterface *networkInterface) const { return !networkInterface->isLoopback() && networkInterface->isBroadcast(); }
     virtual void broadcastPacket(Packet *packet, const MacAddress& destinationAddress, NetworkInterface *incomingInterface);

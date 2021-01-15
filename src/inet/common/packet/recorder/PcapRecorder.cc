@@ -150,20 +150,25 @@ void PcapRecorder::refreshDisplay() const
     updateDisplayString();
 }
 
+const char *PcapRecorder::resolveDirective(char directive) const
+{
+    static std::string result;
+    switch (directive) {
+        case 'n':
+            result = std::to_string(numRecorded);
+            break;
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+    return result.c_str();
+}
+
 void PcapRecorder::updateDisplayString() const
 {
-    auto text = StringFormat::formatString(par("displayStringTextFormat"), [&] (char directive) {
-        static std::string result;
-        switch (directive) {
-            case 'n':
-                result = std::to_string(numRecorded);
-                break;
-            default:
-                throw cRuntimeError("Unknown directive: %c", directive);
-        }
-        return result.c_str();
-    });
-    getDisplayString().setTagArg("t", 0, text);
+    if (getEnvir()->isGUI()) {
+        auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
+        getDisplayString().setTagArg("t", 0, text);
+    }
 }
 
 void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)

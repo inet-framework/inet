@@ -272,7 +272,7 @@ const char *Contention::getEventName(EventType event)
 #undef CASE
 }
 
-void Contention::updateDisplayString(simtime_t expectedChannelAccess)
+void Contention::updateDisplayString(simtime_t expectedChannelAccess) const
 {
     getDisplayString().setTagArg("t", 0, fsm.getStateName());
 }

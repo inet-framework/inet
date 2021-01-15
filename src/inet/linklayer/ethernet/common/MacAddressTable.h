@@ -18,6 +18,7 @@
 #ifndef __INET_MACADDRESSTABLE_H
 #define __INET_MACADDRESSTABLE_H
 
+#include "inet/common/StringFormat.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/linklayer/common/MacAddress.h"
@@ -31,7 +32,7 @@ namespace inet {
  * NOTE that interfaceIds (interfaceId parameters) are actually the corresponding ID of the port interface.
  * i.e. this is an interfaceId and NOT an index of the some kind in a gate vector.
  */
-class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
+class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable, public StringFormat::IDirectiveResolver
 {
   protected:
     struct AddressEntry {
@@ -67,6 +68,7 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void refreshDisplay() const override;
     virtual void updateDisplayString() const;
+    virtual const char *resolveDirective(char directive) const override;
 
     virtual void parseAddressTableParameter();
 

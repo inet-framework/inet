@@ -43,7 +43,7 @@ class INET_API PacketQueueBase : public PacketProcessorBase, public virtual IPac
 
     virtual void emit(simsignal_t signal, cObject *object, cObject *details = nullptr) override;
 
-    virtual void updateDisplayString();
+    virtual const char *resolveDirective(char directive) const override;
 
   public:
     virtual bool canPullSomePacket(cGate *gate) const override { return getNumPackets() > 0; }

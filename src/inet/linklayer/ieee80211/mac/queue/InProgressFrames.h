@@ -42,7 +42,7 @@ class INET_API InProgressFrames : public cSimpleModule
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void updateDisplayString();
+    virtual void updateDisplayString() const;
 
     void ensureHasFrameToTransmit();
     bool hasEligibleFrameToTransmit();

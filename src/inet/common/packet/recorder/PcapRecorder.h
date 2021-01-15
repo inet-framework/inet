@@ -31,7 +31,7 @@ namespace inet {
 /**
  * Dumps every packet using the IPacketWriter and PacketDump classes
  */
-class INET_API PcapRecorder : public cSimpleModule, protected cListener
+class INET_API PcapRecorder : public cSimpleModule, protected cListener, public StringFormat::IDirectiveResolver
 {
   public:
     class INET_API IHelper {
@@ -67,6 +67,7 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
   public:
     PcapRecorder();
     virtual ~PcapRecorder();
+    virtual const char *resolveDirective(char directive) const override;
 
   protected:
     virtual void initialize() override;

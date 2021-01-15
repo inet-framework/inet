@@ -30,18 +30,23 @@ void Ipv4NetworkLayer::refreshDisplay() const
 
 void Ipv4NetworkLayer::updateDisplayString() const
 {
-    auto text = StringFormat::formatString(par("displayStringTextFormat"), [&] (char directive) {
-        static std::string result;
-        switch (directive) {
-            case 'i':
-                result = getSubmodule("ip")->getDisplayString().getTagArg("t", 0);
-                break;
-            default:
-                throw cRuntimeError("Unknown directive: %c", directive);
-        }
-        return result.c_str();
-    });
-    getDisplayString().setTagArg("t", 0, text);
+    if (getEnvir()->isGUI()) {
+        auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
+        getDisplayString().setTagArg("t", 0, text);
+    }
+}
+
+const char *Ipv4NetworkLayer::resolveDirective(char directive) const
+{
+    static std::string result;
+    switch (directive) {
+        case 'i':
+            result = getSubmodule("ip")->getDisplayString().getTagArg("t", 0);
+            break;
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+    return result.c_str();
 }
 
 } // namespace inet

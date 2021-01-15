@@ -185,27 +185,32 @@ void NetworkInterface::refreshDisplay() const
 
 void NetworkInterface::updateDisplayString() const
 {
-    auto text = StringFormat::formatString(par("displayStringTextFormat"), [&] (char directive) {
-        static std::string result;
-        switch (directive) {
-            case 'i':
-                result = std::to_string(interfaceId);
-                break;
-            case 'm':
-                result = macAddr.str();
-                break;
-            case 'n':
-                result = interfaceName;
-                break;
-            case 'a':
-                result = getNetworkAddress().str();
-                break;
-            default:
-                throw cRuntimeError("Unknown directive: %c", directive);
-        }
-        return result.c_str();
-    });
-    getDisplayString().setTagArg("t", 0, text);
+    if (getEnvir()->isGUI()) {
+        auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
+        getDisplayString().setTagArg("t", 0, text);
+    }
+}
+
+const char *NetworkInterface::resolveDirective(char directive) const
+{
+    static std::string result;
+    switch (directive) {
+        case 'i':
+            result = std::to_string(interfaceId);
+            break;
+        case 'm':
+            result = macAddr.str();
+            break;
+        case 'n':
+            result = interfaceName;
+            break;
+        case 'a':
+            result = getNetworkAddress().str();
+            break;
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+    return result.c_str();
 }
 
 void NetworkInterface::handleParameterChange(const char *name)

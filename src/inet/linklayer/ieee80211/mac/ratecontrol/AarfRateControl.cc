@@ -51,7 +51,7 @@ void AarfRateControl::handleMessage(cMessage *msg)
     throw cRuntimeError("This module doesn't handle self messages");
 }
 
-void AarfRateControl::updateDisplayString()
+void AarfRateControl::updateDisplayString() const
 {
     getDisplayString().setTagArg("t", 0, currentMode->getName());
 }

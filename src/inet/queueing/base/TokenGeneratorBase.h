@@ -39,12 +39,9 @@ class INET_API TokenGeneratorBase : public PacketProcessorBase
   protected:
     virtual void initialize(int stage) override;
 
-    virtual void updateDisplayString();
-
   public:
     virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
-
     virtual const char *resolveDirective(char directive) const override;
 };
 

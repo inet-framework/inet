@@ -18,6 +18,7 @@
 #ifndef __INET_SIMPLEEPENERGYSTORAGE_H
 #define __INET_SIMPLEEPENERGYSTORAGE_H
 
+#include "inet/common/StringFormat.h"
 #include "inet/common/lifecycle/LifecycleController.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/power/base/EpEnergyStorageBase.h"
@@ -38,7 +39,7 @@ namespace power {
  * See the corresponding NED file for more details.
  *
  */
-class INET_API SimpleEpEnergyStorage : public EpEnergyStorageBase
+class INET_API SimpleEpEnergyStorage : public EpEnergyStorageBase, public StringFormat::IDirectiveResolver
 {
   protected:
     /**
@@ -92,6 +93,7 @@ class INET_API SimpleEpEnergyStorage : public EpEnergyStorageBase
     virtual void handleMessage(cMessage *message) override;
     virtual void refreshDisplay() const override;
     virtual void updateDisplayString() const;
+    virtual const char *resolveDirective(char directive) const override;
 
     virtual void updateTotalPowerConsumption() override;
     virtual void updateTotalPowerGeneration() override;
