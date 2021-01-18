@@ -277,7 +277,9 @@ class INET_API Ieee80211VhtMode : public Ieee80211ModeBase
     virtual inline const simtime_t getSifsTime() const override;
     virtual inline const simtime_t getRifsTime() const override { return 2E-6; }
     virtual inline const simtime_t getCcaTime() const override { return 4E-6; } // < 4
-    virtual inline const simtime_t getPhyRxStartDelay() const override { return 33E-6; }
+    virtual inline const simtime_t getPhyRxStartDelay() const override { return 36E-6
+            + (getPreambleMode()->getSecondAndSubsequentHTLongTrainingFielDuration() * getPreambleMode()->getNumberOfHtLongTrainings())
+            + 4E-6 ; } // Table 21-28 P80211Vmd_D50_Sept2020
     virtual inline const simtime_t getRxTxTurnaroundTime() const override { return 2E-6; } // < 2
     virtual inline const simtime_t getPreambleLength() const override { return 16E-6; }
     virtual inline const simtime_t getPlcpHeaderLength() const override { return 4E-6; }
