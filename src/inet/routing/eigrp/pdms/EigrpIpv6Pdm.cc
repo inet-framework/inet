@@ -133,7 +133,7 @@ void EigrpIpv6Pdm::preDelete(cComponent *root)
 //void EigrpIpv6Pdm::receiveChangeNotification(int category, const cObject *details)
 void EigrpIpv6Pdm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method_Silent("EigrpIPv6Pdm::receiveChangeNotification");
+    Enter_Method("receiveSignal");
 
     if (signalID == interfaceStateChangedSignal) {
         NetworkInterfaceChangeDetails *ifcecd = check_and_cast<NetworkInterfaceChangeDetails *>(obj);
