@@ -53,7 +53,7 @@ class INET_API TcpServerHostApp : public ApplicationBase, public TcpSocket::ICal
     virtual void socketClosed(TcpSocket *socket) override;
     virtual void socketFailure(TcpSocket *socket, int code) override {}
     virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override {}
-    virtual void socketDeleted(TcpSocket *socket) override {}
+    virtual void socketDeleted(TcpSocket *socket) override { socketMap.removeSocket(socket); }
 
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
@@ -87,7 +87,7 @@ class INET_API TcpServerThreadBase : public cSimpleModule, public TcpSocket::ICa
     virtual void socketClosed(TcpSocket *socket) override { hostmod->threadClosed(this); }
     virtual void socketFailure(TcpSocket *socket, int code) override { failure(code); }
     virtual void socketStatusArrived(TcpSocket *socket, TcpStatusInfo *status) override { statusArrived(status); }
-    virtual void socketDeleted(TcpSocket *socket) override { if (socket == sock) sock = nullptr; }
+    virtual void socketDeleted(TcpSocket *socket) override;
 
     virtual void refreshDisplay() const override;
 

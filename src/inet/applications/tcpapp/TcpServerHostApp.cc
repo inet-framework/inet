@@ -153,6 +153,14 @@ void TcpServerHostApp::threadClosed(TcpServerThreadBase *thread)
     thread->deleteModule();
 }
 
+void TcpServerThreadBase::socketDeleted(TcpSocket *socket)
+{
+    if (socket == sock) {
+        sock = nullptr;
+        hostmod->socketDeleted(socket);
+    }
+}
+
 void TcpServerThreadBase::refreshDisplay() const
 {
     getDisplayString().setTagArg("t", 0, TcpSocket::stateName(sock->getState()));
