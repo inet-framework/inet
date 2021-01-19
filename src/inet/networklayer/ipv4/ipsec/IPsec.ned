@@ -34,7 +34,7 @@ package inet.networklayer.ipv4.ipsec;
 //   are statically configured and remain in effect for the entire duration of the
 //   simulation.
 // - Transport mode only. Tunnel mode is not supported.
-// - Multicast traffic is not supported.
+// - Multicast traffic is not supported. (Any multicast packet is let through unchanged.)
 // - Anti-replay mechanism is not implemented.
 // - DSCP-based SA selection is not implemented. 
 //

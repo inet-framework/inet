@@ -289,6 +289,13 @@ INetfilter::IHook::Result IPsec::processEgressPacket(IPv4Datagram *ipv4datagram,
 
     PacketInfo egressPacketInfo = extractEgressPacketInfo(ipv4datagram, localAddress);
 
+    if (ipv4datagram->getDestAddress().isMulticast()) {
+        EV_INFO << "IPsec OUT BYPASS due to multicast, packet: " << egressPacketInfo.str() << std::endl;
+        emit(outBypassSignal, 1L);
+        outBypass++;
+        return INetfilter::IHook::ACCEPT;
+    }
+
     //search Security Policy Database
     SecurityPolicy *spdEntry = spdModule->findEntry(Direction::OUT, &egressPacketInfo);
     if (spdEntry != nullptr) {
@@ -617,6 +624,13 @@ INetfilter::IHook::Result IPsec::processIngressPacket(IPv4Datagram *ipv4datagram
     int transportProtocol = ipv4datagram->getTransportProtocol();
 
     PacketInfo ingressPacketInfo = extractIngressPacketInfo(ipv4datagram);
+
+    if (ipv4datagram->getDestAddress().isMulticast()) {
+        EV_INFO << "IPsec IN BYPASS due to multicast, packet: " << ingressPacketInfo.str() << std::endl;
+        emit(inUnprotectedBypassSignal, 1L);
+        inBypass++;
+        return INetfilter::IHook::ACCEPT;
+    }
 
     double delay = 0.0;
     if (transportProtocol == IP_PROT_AH) {
