@@ -16,8 +16,8 @@ Goals
 
 This showcase demonstrates the VLAN support of INET's modular Ethernet model.
 
-The Model
----------
+.. The Model
+   ---------
 
     so
 
@@ -29,11 +29,11 @@ The Model
 
     - actually, VLAN tags can be added in hosts
 
-VLANs are created by adding VLAN tags to Ethernet packets in a 802.1q header. The VLAN-aware parts of the network filter traffic based on the VLAN tags. Packets without VLAN tags are considered to be part of the native VLAN.
+.. VLANs are created by adding VLAN tags to Ethernet packets in a 802.1q header. The VLAN-aware parts of the network filter traffic based on the VLAN tags. Packets without VLAN tags are considered to be part of the native VLAN.
 
-In INET, various modules (such as hosts and policy submodules) can add a VLAN tag request to packets. The actual VLAn tags are then added by the 802.1q submodule. 
+   In INET, various modules (such as hosts and policy submodules) can add a VLAN tag request to packets. The actual VLAn tags are then added by the 802.1q submodule. 
 
-As such, the presence of the 802.1q submodule makes the network node VLAN-aware.
+   As such, the presence of the 802.1q submodule makes the network node VLAN-aware.
 
     so
 
@@ -80,16 +80,32 @@ The :ned:`VlanPolicyLayer` module can filter packets based on VLAN tags, and mod
 .. figure:: media/switch2.png
    :align: center
 
-so
+.. **V1** The module has four optional submodules: a `mapper` and a `filter` module, for each traffic direction (incoming/outgoing). **TODO** how do they become optional? -> omitted type
+
+   By default, the module has the following modules:
+
+   .. figure:: media/policy.png
+      :align: center
+
+The module has four optional submodules: a `mapper` and a `filter` module, for each traffic direction (inbound/outbound). By default, the module has the following submodules:
+
+.. figure:: media/policy.png
+   :align: center
+
+In the filter submodules, the set of allowed VLAN IDs can be specified with the :par:`acceptedVlanIds` parameter. In the mapper submodules, VLAN ID mappings can be specified with the :par:`mappedVlanIds` parameter.
+
+**TODO** adds vlan id request/indication tags
+
+.. so
 
     - The VlanPolicyLayer module can filter incoming and outgoing packets based on VLAN ID
     - It can also re-map VLAN tags/IDs
     - The VlanPolicyLayer has four optional submodules: a mapper and a filter module for each direction
 
-.. figure:: media/vlanpolicylayer2.png
-   :align: center
+   .. figure:: media/vlanpolicylayer2.png
+      :align: center
 
-so
+.. so
 
     VLAN:
 
@@ -112,7 +128,7 @@ so
 
    - what is VLAN and how is it implemented (data link layer filtering, act like different physical networks, vlan tags, 802.1q, extra header, interface filtering)
 
-the structure:
+.. the structure:
 
     - what is VLAN?
 
