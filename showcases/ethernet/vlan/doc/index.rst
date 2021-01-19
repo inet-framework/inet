@@ -148,13 +148,36 @@ In the filter submodules, the set of allowed VLAN IDs can be specified with the 
 
     - the vlan policy module
 
-The Model/Configuration
------------------------
+The Model/Configuration/The example simulations
+-----------------------------------------------
+
+The example simulations use the following network:
+
+.. figure:: media/network.png
+   :align: center
+
+It contains a network of two switches (:ned:`EthernetSwitch`). A host (:ned:`StandardHost`) is connected to each switch.
 
 - the configs
 
-Results
--------
+**V1** There are two configurations in this showcase:
+
+- Config ``BetweenSwitches``: All packets between the switches are assigned to VLAN 42.
+- Config ``VirtualInterface``: All packets between the hosts are assigned to VLAN 42 and use virtual interfaces in the hosts.
+
+**V2** There are two configurations in this showcase:
+
+- **VLAN between the switches**: All packets between the switches are assigned to VLAN 42.
+- **VLAN between the hosts using virtual interfaces**: All packets between the hosts are assigned to VLAN 42 and use virtual interfaces in the hosts.
+
+.. Example: VLAN between the Switches
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+VLAN between the Switches
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. Results
+   -------
 
 Here is a TCP packet displayed in Qtenv's packet inspector:
 
