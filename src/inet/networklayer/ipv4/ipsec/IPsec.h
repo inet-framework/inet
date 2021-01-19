@@ -84,9 +84,7 @@ class INET_API IPsec : public cSimpleModule, INetfilter::IHook
     virtual void parseSelector(const cXMLElement *selectorElem, PacketSelector& selector);
     static unsigned int parseProtocol(const std::string& value);
     template<typename E>
-    static E parseEnum(const Enum<E>& enum_, const cXMLElement *elem);
-    template<typename E>
-    static E parseOptionalEnum(const Enum<E>& enum_, const cXMLElement *elem, E defaultValue);
+    static E parseEnumElem(const Enum<E>& enum_, const cXMLElement *parentElem, const char *childElemName, E defaultValue=(E)-1, E defaultValue2=(E)-1);
 
     virtual PacketInfo extractIngressPacketInfo(IPv4Datagram *ipv4datagram);
     virtual PacketInfo extractEgressPacketInfo(IPv4Datagram *ipv4datagram, const IPv4Address& localAddress);

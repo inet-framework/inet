@@ -184,6 +184,12 @@ simple IPsec
 		string spdModule = default("^.spd");
 		string sadModule = default("^.sad");
 		xml spdConfig;
+
+		string defaultProtection = default("");  // if not "": value to use where <Protection> element is absent from the configuration          
+		string defaultEspMode = default(""); // if not "": value to use where <EspMode> element is absent from the configuration         
+		string defaultEncryptionAlg = default(""); // if not "": value to use where <EncryptionAlg> element is absent from the configuration          
+		string defaultAuthenticationAlg = default(""); // if not "": value to use where <defaultAuthenticationAlg> element is absent from the configuration          
+		int defaultMaxTfcPadLength = default(0); // value to use where <MaxTfcPadLength> element is absent from the configuration           
           
         volatile double ahProtectOutDelay @unit(s) = default(0.0s);
         volatile double ahProtectInDelay @unit(s) = default(0.0s);
