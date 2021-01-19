@@ -57,6 +57,13 @@ IPsec::~IPsec()
 
 void IPsec::initSecurityDBs(cXMLElement *spdConfig)
 {
+    const char *s;
+    Protection defaultProtection = strlen(s=par("defaultProtection"))==0 ? (Protection)-1 : protectionEnum.valueFor(s);
+    EspMode defaultEspMode = strlen(s=par("defaultEspMode"))==0 ? (EspMode)-1 : espModeEnum.valueFor(s);
+    EncryptionAlg defaultEncryptionAlg = strlen(s=par("defaultEncryptionAlg"))==0 ? (EncryptionAlg)-1 : encryptionAlgEnum.valueFor(s);
+    AuthenticationAlg defaultAuthenticationAlg = strlen(s=par("defaultAuthenticationAlg"))==0 ? (AuthenticationAlg)-1 : authenticationAlgEnum.valueFor(s);
+    int defaultMaxTfcPadLength = par("defaultMaxTfcPadLength").intValue();
+
     checkTags(spdConfig, "SecurityPolicy");
 
     for (cXMLElement *spdEntryElem : spdConfig->getChildrenByTagName("SecurityPolicy")) {
@@ -70,28 +77,28 @@ void IPsec::initSecurityDBs(cXMLElement *spdConfig)
         spdEntry->setSelector(selector);
 
         // Direction
-        Direction direction = parseEnum(directionEnum, getUniqueChild(spdEntryElem, "Direction"));
+        Direction direction = parseEnumElem(directionEnum, spdEntryElem, "Direction");
         spdEntry->setDirection(direction);
 
         // Action
-        Action action = parseEnum(actionEnum, getUniqueChild(spdEntryElem, "Action"));
+        Action action = parseEnumElem(actionEnum, spdEntryElem, "Action");
         spdEntry->setAction(action);
 
         if (action == Action::PROTECT) {
             // Protection
-            Protection protection = parseEnum(protectionEnum, getUniqueChild(spdEntryElem, "Protection"));
+            Protection protection = parseEnumElem(protectionEnum, spdEntryElem, "Protection", defaultProtection);
             spdEntry->setProtection(protection);
 
             if (protection == Protection::ESP) {
-                EspMode espMode = parseEnum(espModeEnum, getUniqueChild(spdEntryElem, "EspMode"));
+                EspMode espMode = parseEnumElem(espModeEnum, spdEntryElem, "EspMode", defaultEspMode);
                 spdEntry->setEspMode(espMode);
 
-                EncryptionAlg encryptionAlg = parseOptionalEnum(encryptionAlgEnum, getUniqueChildIfExists(spdEntryElem, "EncryptionAlg"), EncryptionAlg::NONE);
-                AuthenticationAlg authenticationAlg = parseOptionalEnum(authenticationAlgEnum, getUniqueChildIfExists(spdEntryElem, "AuthenticationAlg"), AuthenticationAlg::NONE);
+                EncryptionAlg encryptionAlg = parseEnumElem(encryptionAlgEnum, spdEntryElem, "EncryptionAlg", defaultEncryptionAlg, EncryptionAlg::NONE);
+                AuthenticationAlg authenticationAlg = parseEnumElem(authenticationAlgEnum, spdEntryElem, "AuthenticationAlg", defaultAuthenticationAlg, AuthenticationAlg::NONE);
                 spdEntry->setEnryptionAlg(encryptionAlg);
                 spdEntry->setAuthenticationAlg(authenticationAlg);
 
-                spdEntry->setMaxTfcPadLength(getParameterIntValue(spdEntryElem, "MaxTfcPadLength", 0));
+                spdEntry->setMaxTfcPadLength(getParameterIntValue(spdEntryElem, "MaxTfcPadLength", defaultMaxTfcPadLength));
 
                 if ((espMode == EspMode::CONFIDENTIALITY || espMode == EspMode::COMBINED) && encryptionAlg == EncryptionAlg::NONE)
                     throw cRuntimeError("Cannot set encryptionAlg=NONE if confidentiality was requested in espMode, at %s", spdEntryElem->getSourceLocation());
@@ -105,7 +112,7 @@ void IPsec::initSecurityDBs(cXMLElement *spdConfig)
             }
 
             if (protection == Protection::AH) {
-                AuthenticationAlg authenticationAlg = parseEnum(authenticationAlgEnum, getUniqueChild(spdEntryElem, "AuthenticationAlg"));
+                AuthenticationAlg authenticationAlg = parseEnumElem(authenticationAlgEnum, spdEntryElem, "AuthenticationAlg");
                 if (authenticationAlg == AuthenticationAlg::NONE)
                     throw cRuntimeError("Cannot set authenticationAlg=NONE for AH protection, at %s", spdEntryElem->getSourceLocation());
                 spdEntry->setAuthenticationAlg(authenticationAlg);
@@ -186,21 +193,18 @@ unsigned int IPsec::parseProtocol(const std::string& value)
 inline const char *nulltoempty(const char *s) {return s ? s : nullptr;}
 
 template<typename E>
-E IPsec::parseEnum(const Enum<E>& enum_, const cXMLElement *elem)
+E IPsec::parseEnumElem(const Enum<E>& enum_, const cXMLElement *parentElem, const char *childElemName, E defaultValue, E defaultValue2)
 {
-    try {
-        return enum_.valueFor(nulltoempty(elem->getNodeValue()));
+    const cXMLElement *elem = getUniqueChildIfExists(parentElem, childElemName);
+    if (elem == nullptr) {
+        if (defaultValue != (E)-1)
+            return defaultValue;
+        else if (defaultValue2 != (E)-1)
+            return defaultValue2;
+        else
+            throw cRuntimeError("Missing <%s> child in <%s> element at %s, and no default value given as module parameter",
+                    childElemName, parentElem->getTagName(), parentElem->getSourceLocation());
     }
-    catch (std::exception& e) {
-        throw cRuntimeError("%s at %s", e.what(), elem->getSourceLocation());
-    }
-}
-
-template<typename E>
-E IPsec::parseOptionalEnum(const Enum<E>& enum_, const cXMLElement *elem, E defaultValue)
-{
-    if (elem == nullptr)
-        return defaultValue;
     try {
         return enum_.valueFor(nulltoempty(elem->getNodeValue()));
     }
