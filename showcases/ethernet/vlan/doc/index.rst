@@ -50,8 +50,11 @@ This showcase demonstrates the VLAN support of INET's modular Ethernet model.
     - Also, the policy submodule can do that. It also filters packets based on VLAN tags, and can modify VLAN tags
     - The whole thing supports double tagging (where 802.1q headers are nested) and virtual interfaces as well
 
-The Model
----------
+INET's VLAN support
+-------------------
+
+Overview
+~~~~~~~~
 
 **V1** Ethernet VLANs are created by adding an extra header to Ethernet frames. The header contains VLAN tags. The VLAN-aware parts of the network filter traffic based on these VLAN tags. The VLAN-aware parts of the network filter traffic at interfaces, based on VLAN tags and VLAN ID. Each interface has a set of allowed VLAN IDs. Packets without VLAN tags are considered to be part of the native VLAN and are not filtered.
 
@@ -73,7 +76,7 @@ Several configurations are possible...**TODO**
    -----------------------------
 
 Creating VLAN policies
-----------------------
+~~~~~~~~~~~~~~~~~~~~~~
 
 The :ned:`VlanPolicyLayer` module can filter packets based on VLAN tags, and modify VLAN tags on packets. It is an optional submodule of :ned:`EthernetSwitch`. Here is the VLAN policy layer submodule inside an :ned:`EthernetSwitch`:
 
@@ -144,3 +147,16 @@ In the filter submodules, the set of allowed VLAN IDs can be specified with the 
       double tagging, virtual interfaces, etc 
 
     - the vlan policy module
+
+The Model/Configuration
+-----------------------
+
+- the configs
+
+Results
+-------
+
+Here is a TCP packet displayed in Qtenv's packet inspector:
+
+.. figure:: media/inspector2.png
+   :align: center
