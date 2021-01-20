@@ -176,8 +176,23 @@ It contains a network of two switches (:ned:`EthernetSwitch`). A host (:ned:`Sta
 VLAN between the Switches
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. Results
-   -------
+Before we get to the example simulation, here is part of the ``General`` configuration with Ethernet settings:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: encap
+   :end-at: bitrate
+   :language: ini
+
+The first three lines configure all network nodes to use the composable Ethernet model. Then, all network nodes are configured to have a :ned:`Ieee8021qLayer` submodule. Finally, the connection speed is set.
+
+The example simulation is defined in the ``BetweenSwitches`` config in omnetpp.ini:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: Config BetweenSwitches
+   :end-at: outboundMapper
+   :language: ini
+
+
 
 Here is a TCP packet displayed in Qtenv's packet inspector:
 
