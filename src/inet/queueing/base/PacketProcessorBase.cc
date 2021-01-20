@@ -218,6 +218,41 @@ void PacketProcessorBase::animatePull(Packet *packet, cGate *gate, const SendOpt
     packet->setArrival(endGate->getOwnerModule()->getId(), endGate->getId(), simTime());
     packet->setSentFrom(gate->getOwnerModule(), gate->getId(), simTime());
 
+#ifdef INET_WITH_SELFDOC
+    if (SelfDoc::generateSelfdoc) {
+        auto from = gate->getOwnerModule();
+        auto to = endGate->getOwnerModule();
+        auto ctrl = packet->getControlInfo();
+        {
+            std::ostringstream os;
+            os << "=SelfDoc={ " << SelfDoc::keyVal("module", from->getComponentType()->getFullName())
+                    << ", " << SelfDoc::keyVal("action", "PULLED_OUT")
+                    << ", " << SelfDoc::val("details") << " : {"
+                    << SelfDoc::keyVal("gate", SelfDoc::gateInfo(gate))
+                    << ", "<< SelfDoc::keyVal("msg", opp_typename(typeid(*packet)))
+                    << ", " << SelfDoc::keyVal("kind", SelfDoc::kindToStr(packet->getKind(), gate->getProperties(), "messageKinds", endGate->getProperties(), "messageKinds"))
+                    << ", " << SelfDoc::keyVal("ctrl", ctrl ? opp_typename(typeid(*ctrl)) : "")
+                    << ", " << SelfDoc::tagsToJson("tags", packet)
+                    << " } }"
+                    ;
+            globalSelfDoc.insert(os.str());
+        }
+        {
+            std::ostringstream os;
+            os << "=SelfDoc={ " << SelfDoc::keyVal("module", to->getComponentType()->getFullName())
+                    << ", " << SelfDoc::keyVal("action", "PULL_IN")
+                    << ", " << SelfDoc::val("details") << " : {"
+                    << SelfDoc::keyVal("gate", SelfDoc::gateInfo(endGate))
+                    << ", " << SelfDoc::keyVal("msg", opp_typename(typeid(*packet)))
+                    << ", " << SelfDoc::keyVal("kind", SelfDoc::kindToStr(packet->getKind(), endGate->getProperties(), "messageKinds", gate->getProperties(), "messageKinds"))
+                    << ", " << SelfDoc::keyVal("ctrl", ctrl ? opp_typename(typeid(*ctrl)) : "")
+                    << ", " << SelfDoc::tagsToJson("tags", packet)
+                    << " } }"
+                    ;
+            globalSelfDoc.insert(os.str());
+        }
+    }
+#endif // INET_WITH_SELFDOC
     auto envir = getEnvir();
     if (envir->isGUI() && gate->getNextGate() != nullptr) {
         envir->beginSend(packet, sendOptions);
@@ -239,6 +274,41 @@ void PacketProcessorBase::animatePush(Packet *packet, cGate *gate, const SendOpt
     packet->setArrival(endGate->getOwnerModule()->getId(), endGate->getId(), simTime());
     packet->setSentFrom(gate->getOwnerModule(), gate->getId(), simTime());
 
+#ifdef INET_WITH_SELFDOC
+    if (SelfDoc::generateSelfdoc) {
+        auto from = gate->getOwnerModule();
+        auto to = endGate->getOwnerModule();
+        auto ctrl = packet->getControlInfo();
+        {
+            std::ostringstream os;
+            os << "=SelfDoc={ " << SelfDoc::keyVal("module", from->getComponentType()->getFullName())
+                    << ", " << SelfDoc::keyVal("action", "PUSH_OUT")
+                    << ", " << SelfDoc::val("details") << " : {"
+                    << SelfDoc::keyVal("gate", SelfDoc::gateInfo(gate))
+                    << ", "<< SelfDoc::keyVal("msg", opp_typename(typeid(*packet)))
+                    << ", " << SelfDoc::keyVal("kind", SelfDoc::kindToStr(packet->getKind(), gate->getProperties(), "messageKinds", endGate->getProperties(), "messageKinds"))
+                    << ", " << SelfDoc::keyVal("ctrl", ctrl ? opp_typename(typeid(*ctrl)) : "")
+                    << ", " << SelfDoc::tagsToJson("tags", packet)
+                    << " } }"
+                    ;
+            globalSelfDoc.insert(os.str());
+        }
+        {
+            std::ostringstream os;
+            os << "=SelfDoc={ " << SelfDoc::keyVal("module", to->getComponentType()->getFullName())
+                    << ", " << SelfDoc::keyVal("action", "PUSHED_IN")
+                    << ", " << SelfDoc::val("details") << " : {"
+                    << SelfDoc::keyVal("gate", SelfDoc::gateInfo(endGate))
+                    << ", " << SelfDoc::keyVal("msg", opp_typename(typeid(*packet)))
+                    << ", " << SelfDoc::keyVal("kind", SelfDoc::kindToStr(packet->getKind(), endGate->getProperties(), "messageKinds", gate->getProperties(), "messageKinds"))
+                    << ", " << SelfDoc::keyVal("ctrl", ctrl ? opp_typename(typeid(*ctrl)) : "")
+                    << ", " << SelfDoc::tagsToJson("tags", packet)
+                    << " } }"
+                    ;
+            globalSelfDoc.insert(os.str());
+        }
+    }
+#endif // INET_WITH_SELFDOC
 
     auto envir = getEnvir();
     if (envir->isGUI() && gate->getNextGate() != nullptr) {

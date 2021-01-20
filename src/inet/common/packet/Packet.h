@@ -31,6 +31,22 @@
 
 namespace inet {
 
+#ifdef INET_WITH_SELFDOC
+#define SELFDOC_FUNCTION  \
+        selfDoc(__FUNCTION__, ""); \
+        SelfDocTempOff
+#define SELFDOC_FUNCTION_CHUNK(chunk)  \
+        { auto p = chunk.get(); selfDoc(__FUNCTION__, opp_typename(typeid(*p))); } \
+        SelfDocTempOff
+#define SELFDOC_FUNCTION_T  \
+        selfDoc(__FUNCTION__, opp_typename(typeid(T))); \
+        SelfDocTempOff
+#else
+#define SELFDOC_FUNCTION
+#define SELFDOC_FUNCTION_CHUNK(chunk)
+#define SELFDOC_FUNCTION_T
+#endif
+
 /**
  * This class represents network packets, datagrams, frames and other kinds of
  * data used by communication protocols. The underlying data structure supports
@@ -148,6 +164,10 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
     }
     //@}
 
+#ifdef INET_WITH_SELFDOC
+    static void selfDoc(const char * packetAction, const char *typeName);
+#endif
+
   public:
     /** @name Constructors */
     //@{
@@ -254,6 +274,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const Chunk> peekData(int flags = 0) const {
+        SELFDOC_FUNCTION;
         return peekDataAt(b(0), getDataLength(), flags);
     }
 
@@ -264,6 +285,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const BitsChunk> peekDataAsBits(int flags = 0) const {
+        SELFDOC_FUNCTION;
         return peekDataAt<BitsChunk>(b(0), getDataLength(), flags);
     }
 
@@ -274,6 +296,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const BytesChunk> peekDataAsBytes(int flags = 0) const {
+        SELFDOC_FUNCTION;
         return peekDataAt<BytesChunk>(b(0), getDataLength(), flags);
     }
 
@@ -284,6 +307,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const Chunk> peekAll(int flags = 0) const {
+        SELFDOC_FUNCTION;
         return peekAt(b(0), getTotalLength(), flags);
     }
 
@@ -294,6 +318,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const BitsChunk> peekAllAsBits(int flags = 0) const {
+        SELFDOC_FUNCTION;
         return peekAt<BitsChunk>(b(0), getTotalLength(), flags);
     }
 
@@ -304,6 +329,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const BytesChunk> peekAllAsBytes(int flags = 0) const {
+        SELFDOC_FUNCTION;
         return peekAt<BytesChunk>(b(0), getTotalLength(), flags);
     }
 
@@ -314,6 +340,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const Chunk> peekDataAt(b offset, b length = b(-1), int flags = 0) const {
+        SELFDOC_FUNCTION;
         return peekDataAt<Chunk>(offset, length, flags);
     }
 
@@ -324,6 +351,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * parameter is a combination of Chunk::PeekFlag enumeration members.
      */
     const Ptr<const Chunk> peekAt(b offset, b length = b(-1), int flags = 0) const {
+        SELFDOC_FUNCTION;
         return peekAt<Chunk>(offset, length, flags);
     }
 
@@ -336,6 +364,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<const T> peekAtFront(b length = b(-1), int flags = 0) const {
+        SELFDOC_FUNCTION_T;
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
         const auto& chunk = content->peek<T>(frontIterator, length == b(-1) ? -dataLength : length, flags);
@@ -350,6 +379,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<const T> peekAtBack(b length, int flags = 0) const {
+        SELFDOC_FUNCTION_T;
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(b(0) <= length && length <= dataLength, "length is invalid");
         const auto& chunk = content->peek<T>(backIterator, length, flags);
@@ -365,6 +395,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<const T> peekData(int flags = 0) const {
+        SELFDOC_FUNCTION_T;
         return peekDataAt<T>(b(0), getDataLength(), flags);
     }
 
@@ -376,6 +407,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<const T> peekAll(int flags = 0) const {
+        SELFDOC_FUNCTION_T;
         return peekAt<T>(b(0), getTotalLength(), flags);
     }
 
@@ -387,6 +419,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<const T> peekDataAt(b offset, b length = b(-1), int flags = 0) const {
+        SELFDOC_FUNCTION_T;
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= dataLength, "offset is out of range");
         CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= dataLength, "length is invalid");
@@ -401,6 +434,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<const T> peekAt(b offset, b length = b(-1), int flags = 0) const {
+        SELFDOC_FUNCTION_T;
         auto totalLength = getTotalLength();
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
         CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= totalLength, "length is invalid");
@@ -444,6 +478,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<const T> popAtFront(b length = b(-1), int flags = 0) {
+        SELFDOC_FUNCTION_T;
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
         const auto& chunk = peekAtFront<T>(length, flags);
         if (chunk != nullptr) {
@@ -461,6 +496,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<const T> popAtBack(b length, int flags = 0) {
+        SELFDOC_FUNCTION_T;
         CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
         const auto& chunk = peekAtBack<T>(length, flags);
         if (chunk != nullptr) {
@@ -481,6 +517,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     bool hasAtFront(b length = b(-1)) const {
+        SELFDOC_FUNCTION_T;
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= dataLength, "length is invalid");
         return content->has<T>(frontIterator, length == b(-1) ? -dataLength : length);
@@ -492,6 +529,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     bool hasAtBack(b length) const {
+        SELFDOC_FUNCTION_T;
         CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
         return content->has<T>(backIterator, length);
     }
@@ -502,6 +540,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     bool hasData() const {
+        SELFDOC_FUNCTION_T;
         return content->has<T>(frontIterator, getDataLength());
     }
 
@@ -511,6 +550,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     bool hasAll() const {
+        SELFDOC_FUNCTION_T;
         return content->has<T>(Chunk::ForwardIterator(b(0)), getTotalLength());
     }
 
@@ -521,6 +561,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     bool hasDataAt(b offset, b length = b(-1)) const {
+        SELFDOC_FUNCTION_T;
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= dataLength, "offset is out of range");
         CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= dataLength, "length is invalid");
@@ -534,6 +575,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     bool hasAt(b offset, b length = b(-1)) const {
+        SELFDOC_FUNCTION_T;
         auto totalLength = getTotalLength();
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
         CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= totalLength, "length is invalid");
@@ -549,6 +591,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * offsets are not affected.
      */
     void insertAtFront(const Ptr<const Chunk>& chunk) {
+        SELFDOC_FUNCTION_CHUNK(chunk);
         insertAt(chunk, getFrontOffset());
     }
 
@@ -558,6 +601,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * are not affected.
      */
     void insertAtBack(const Ptr<const Chunk>& chunk) {
+        SELFDOC_FUNCTION_CHUNK(chunk);
         insertAt(chunk, getBackOffset());
     }
 
@@ -568,6 +612,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * this function.
      */
     void insertData(const Ptr<const Chunk>& chunk) {
+        SELFDOC_FUNCTION_CHUNK(chunk);
         CHUNK_CHECK_USAGE(getDataLength() == b(0), "data part is not empty");
         insertAt(chunk, getFrontOffset());
     }
@@ -579,6 +624,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * function.
      */
     void insertAll(const Ptr<const Chunk>& chunk) {
+        SELFDOC_FUNCTION_CHUNK(chunk);
         CHUNK_CHECK_USAGE(getTotalLength() == b(0), "content is not empty");
         insertAt(chunk, b(0));
     }
@@ -590,6 +636,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * [0, getDataLength()].
      */
     void insertDataAt(const Ptr<const Chunk>& chunk, b offset) {
+        SELFDOC_FUNCTION_CHUNK(chunk);
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
         insertAt(chunk, getFrontOffset() + offset);
     }
@@ -677,6 +724,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<T> removeAtFront(b length = b(-1), int flags = 0) {
+        SELFDOC_FUNCTION_T;
         const auto& chunk = peekAtFront<T>(length, flags);
         eraseAtFront(chunk->getChunkLength());
         return makeExclusivelyOwnedMutableChunk(chunk);
@@ -690,6 +738,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<T> removeAtBack(b length, int flags = 0) {
+        SELFDOC_FUNCTION_T;
         const auto& chunk = peekAtBack<T>(length, flags);
         eraseAtBack(chunk->getChunkLength());
         return makeExclusivelyOwnedMutableChunk(chunk);
@@ -702,6 +751,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<T> removeData(int flags = 0) {
+        SELFDOC_FUNCTION_T;
         const auto& chunk = peekData<T>(flags);
         eraseData();
         return makeExclusivelyOwnedMutableChunk(chunk);
@@ -714,6 +764,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<T> removeAll(int flags = 0) {
+        SELFDOC_FUNCTION_T;
         const auto& chunk = peekAll<T>(flags);
         eraseAll();
         return makeExclusivelyOwnedMutableChunk(chunk);
@@ -727,6 +778,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<T> removeDataAt(b offset, b length = b(-1), int flags = 0) {
+        SELFDOC_FUNCTION_T;
         const auto& chunk = peekDataAt<T>(offset, length, flags);
         eraseDataAt(offset, chunk->getChunkLength());
         return makeExclusivelyOwnedMutableChunk(chunk);
@@ -740,6 +792,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<T> removeAt(b offset, b length = b(-1), int flags = 0) {
+        SELFDOC_FUNCTION_T;
         const auto& chunk = peekAt<T>(offset, length, flags);
         eraseAt(offset, chunk->getChunkLength());
         return makeExclusivelyOwnedMutableChunk(chunk);
@@ -826,6 +879,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<T> replaceAtFront(const Ptr<const Chunk>& chunk, b length = b(-1), int flags = 0) {
+        SELFDOC_FUNCTION_T;
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
         return replaceAt<T>(chunk, getFrontOffset(), length, flags);
     }
@@ -839,6 +893,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<T> replaceAtBack(const Ptr<const Chunk>& chunk, b length, int flags = 0) {
+        SELFDOC_FUNCTION_T;
         CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
         return replaceAt<T>(chunk, getBackOffset() - length, length, flags);
     }
@@ -852,6 +907,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<T> replaceData(const Ptr<const Chunk>& chunk, int flags = 0) {
+        SELFDOC_FUNCTION_T;
         return replaceAt<T>(chunk, getFrontOffset(), getDataLength(), flags);
     }
 
@@ -864,6 +920,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<T> replaceAll(const Ptr<const Chunk>& chunk, int flags = 0) {
+        SELFDOC_FUNCTION_T;
         return replaceAt(chunk, b(0), getTotalLength(), flags);
     }
 
@@ -875,6 +932,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<T> replaceDataAt(const Ptr<const Chunk>& chunk, b offset, b length = b(-1), int flags = 0) {
+        SELFDOC_FUNCTION_T;
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
         CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getDataLength(), "length is invalid");
         return replaceAt<T>(chunk, getFrontOffset() + offset, length, flags);
@@ -891,6 +949,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     const Ptr<T> replaceAt(const Ptr<const Chunk>& chunk, b offset, b length = b(-1), int flags = 0) {
+        SELFDOC_FUNCTION_T;
         auto totalLength = getTotalLength();
         CHUNK_CHECK_USAGE(chunk != nullptr, "chunk is nullptr");
         CHUNK_CHECK_USAGE(chunk->getChunkLength() > b(0), "chunk is empty");
@@ -934,6 +993,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * combination of Chunk::PeekFlag enumeration members.
      */
     void updateAtFront(std::function<void(const Ptr<Chunk>&)> f, b length = b(-1), int flags = 0) {
+        SELFDOC_FUNCTION;
         updateAtFront<Chunk>(f, length, flags);
     }
 
@@ -946,6 +1006,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * combination of Chunk::PeekFlag enumeration members.
      */
     void updateAtBack(std::function<void(const Ptr<Chunk>&)> f, b length = b(-1), int flags = 0) {
+        SELFDOC_FUNCTION;
         updateAtBack<Chunk>(f, length, flags);
     }
 
@@ -956,6 +1017,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * is a combination of Chunk::PeekFlag enumeration members.
      */
     void updateData(std::function<void(const Ptr<Chunk>&)> f, int flags = 0) {
+        SELFDOC_FUNCTION;
         updateData<Chunk>(f, flags);
     }
 
@@ -966,6 +1028,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * combination of Chunk::PeekFlag enumeration members.
      */
     void updateAll(std::function<void(const Ptr<Chunk>&)> f, int flags = 0) {
+        SELFDOC_FUNCTION;
         updateAll<Chunk>(f, flags);
     }
 
@@ -978,6 +1041,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * enumeration members.
      */
     void updateDataAt(std::function<void(const Ptr<Chunk>&)> f, b offset, b length = b(-1), int flags = 0) {
+        SELFDOC_FUNCTION;
         updateDataAt<Chunk>(f, offset, length, flags);
     }
 
@@ -990,6 +1054,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * is a combination of Chunk::PeekFlag enumeration members.
      */
     void updateAt(std::function<void(const Ptr<Chunk>&)> f, b offset, b length = b(-1), int flags = 0) {
+        SELFDOC_FUNCTION;
         updateAt<Chunk>(f, offset, length, flags);
     }
 
@@ -1004,6 +1069,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     void updateAtFront(std::function<void(const Ptr<T>&)> f, b length = b(-1), int flags = 0) {
+        SELFDOC_FUNCTION_T;
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
         updateAt<T>(f, getFrontOffset(), length, flags);
     }
@@ -1017,6 +1083,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     void updateAtBack(std::function<void(const Ptr<T>&)> f, b length, int flags = 0) {
+        SELFDOC_FUNCTION_T;
         CHUNK_CHECK_USAGE(b(0) <= length && length <= getDataLength(), "length is invalid");
         updateAt<T>(f, getBackOffset() - length, length, flags);
     }
@@ -1029,6 +1096,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     void updateData(std::function<void(const Ptr<T>&)> f, int flags = 0) {
+        SELFDOC_FUNCTION_T;
         updateAt<T>(f, getFrontOffset(), getDataLength(), flags);
     }
 
@@ -1040,6 +1108,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     void updateAll(std::function<void(const Ptr<T>&)> f, int flags = 0) {
+        SELFDOC_FUNCTION_T;
         updateAt<T>(f, b(0), totalLength, flags);
     }
 
@@ -1053,6 +1122,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     void updateDataAt(std::function<void(const Ptr<T>&)> f, b offset, b length = b(-1), int flags = 0) {
+        SELFDOC_FUNCTION_T;
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= getDataLength(), "offset is out of range");
         CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= getDataLength(), "length is invalid");
         updateAt<T>(f, getFrontOffset() + offset, length, flags);
@@ -1070,6 +1140,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      */
     template<typename T>
     void updateAt(std::function<void(const Ptr<T>&)> f, b offset, b length = b(-1), int flags = 0) {
+        SELFDOC_FUNCTION_T;
         auto totalLength = getTotalLength();
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
         CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= totalLength, "length is invalid");
@@ -1106,6 +1177,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * parameter must be in the range [0, getDataLength()].
      */
     void eraseAtFront(b length) {
+        SELFDOC_FUNCTION;
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
         eraseAt(getFrontOffset(), length);
     }
@@ -1116,6 +1188,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * must be in the range [0, getDataLength()].
      */
     void eraseAtBack(b length) {
+        SELFDOC_FUNCTION;
         CHUNK_CHECK_USAGE(b(-1) <= length && length <= getDataLength(), "length is invalid");
         eraseAt(getBackOffset() - length, length);
     }
@@ -1125,6 +1198,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * not affected.
      */
     void eraseData() {
+        SELFDOC_FUNCTION;
         eraseAt(getFrontOffset(), getDataLength());
     }
 
@@ -1133,6 +1207,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * to zero.
      */
     void eraseAll() {
+        SELFDOC_FUNCTION;
         eraseAt(b(0), getTotalLength());
     }
 
@@ -1142,6 +1217,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
      * [0, getDataLength()].
      */
     void eraseDataAt(b offset, b length) {
+        SELFDOC_FUNCTION;
         auto dataLength = getDataLength();
         CHUNK_CHECK_USAGE(b(0) <= offset && offset <= dataLength, "offset is out of range");
         CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= dataLength, "length is invalid");
@@ -1409,6 +1485,10 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
     virtual std::string str() const override;
     //@}
 };
+
+#undef SELFDOC_FUNCTION
+#undef SELFDOC_FUNCTION_CHUNK
+#undef SELFDOC_FUNCTION_T
 
 } // namespace
 

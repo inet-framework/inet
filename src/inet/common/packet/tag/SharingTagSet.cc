@@ -19,6 +19,22 @@
 
 namespace inet {
 
+#ifdef INET_WITH_SELFDOC
+void SharingTagSet::selfDoc(const char * tagAction, const char *typeName)
+{
+    if (SelfDoc::generateSelfdoc) {
+        std::ostringstream os;
+        os << "=SelfDoc={ " << SelfDoc::keyVal("module", getSimulation()->getContextModule()->getComponentType()->getFullName())
+           << ", " << SelfDoc::keyVal("action", "STAG")
+           << ", \"details\" : { "
+           << SelfDoc::keyVal("tagAction", tagAction)
+           << ", " << SelfDoc::keyVal("tagType", typeName)
+           << " } }";
+        globalSelfDoc.insert(os.str());
+    }
+}
+#endif // INET_WITH_SELFDOC
+
 void SharingTagSet::addTag(const Ptr<const TagBase>& tag)
 {
     ensureTagsVectorAllocated();

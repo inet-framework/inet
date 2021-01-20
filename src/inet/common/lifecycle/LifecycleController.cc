@@ -105,6 +105,10 @@ void LifecycleController::doOneStage(LifecycleOperation *operation, cModule *sub
 void LifecycleController::moduleOperationStageCompleted(Callback *callback)
 {
     omnetpp::cMethodCallContextSwitcher __ctx(check_and_cast<cComponent *>(this)); __ctx.methodCall(__FUNCTION__);
+#ifdef INET_WITH_SELFDOC
+    __Enter_Method_SelfDoc(__FUNCTION__);
+#endif
+
     LifecycleOperation *operation = callback->operation;
     std::string moduleFullPath = callback->module->getFullPath();
     vector_delete_element(operation->pendingList, (IDoneCallback *)callback);

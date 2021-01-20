@@ -19,6 +19,22 @@
 
 namespace inet {
 
+#ifdef INET_WITH_SELFDOC
+void TagSet::selfDoc(const char * tagAction, const char *typeName)
+{
+    if (SelfDoc::generateSelfdoc) {
+        std::ostringstream os;
+        os << "=SelfDoc={ " << SelfDoc::keyVal("module", getSimulation()->getContextModule()->getComponentType()->getFullName())
+           << ", " << SelfDoc::keyVal("action", "TAG")
+           << ", \"details\" : { "
+           << SelfDoc::keyVal("tagAction", tagAction)
+           << ", " << SelfDoc::keyVal("tagType", typeName)
+           << " } }";
+        globalSelfDoc.insert(os.str());
+    }
+}
+#endif // INET_WITH_SELFDOC
+
 TagSet::TagSet() :
     tags(nullptr)
 {
@@ -97,6 +113,10 @@ cObject *TagSet::removeTag(int index)
 
 void TagSet::clearTags()
 {
+#ifdef INET_WITH_SELFDOC
+    selfDoc(__FUNCTION__, "");
+    SelfDocTempOff;
+#endif // INET_WITH_SELFDOC
     if (tags != nullptr) {
         int numTags = tags->size();
         for (int index = 0; index < numTags; index++) {

@@ -26,6 +26,14 @@
 
 namespace inet {
 
+#ifdef INET_WITH_SELFDOC
+#define SELFDOC_FUNCTION_T  \
+        selfDoc(__FUNCTION__, opp_typename(typeid(T))); \
+        SelfDocTempOff;
+#else
+#define SELFDOC_FUNCTION_T
+#endif
+
 /**
  * This class maintains a set of tags. Tags are usually small data strcutures
  * that hold some relevant information. Tags are identified by their type,
@@ -136,6 +144,10 @@ class INET_API SharingTagSet : public cObject
      */
     template<typename T> const Ptr<T> removeTagIfPresent();
     //@}
+
+#ifdef INET_WITH_SELFDOC
+    static void selfDoc(const char * tagAction, const char *typeName);
+#endif
 };
 
 inline SharingTagSet& SharingTagSet::operator=(const SharingTagSet& other)
@@ -180,6 +192,9 @@ inline const Ptr<TagBase> SharingTagSet::getTagForUpdate(int index)
 
 inline void SharingTagSet::clearTags()
 {
+#ifdef INET_WITH_SELFDOC
+    selfDoc(__FUNCTION__, "");
+#endif // INET_WITH_SELFDOC
     tags = nullptr;
 }
 
@@ -197,6 +212,7 @@ inline int SharingTagSet::getTagIndex() const
 template<typename T>
 inline const Ptr<const T> SharingTagSet::findTag() const
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>();
     return index == -1 ? nullptr : staticPtrCast<const T>(getTag(index));
 }
@@ -204,6 +220,7 @@ inline const Ptr<const T> SharingTagSet::findTag() const
 template<typename T>
 inline const Ptr<T> SharingTagSet::findTagForUpdate()
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>();
     return index == -1 ? nullptr : staticPtrCast<T>(getTagForUpdate(index));
 }
@@ -211,6 +228,7 @@ inline const Ptr<T> SharingTagSet::findTagForUpdate()
 template<typename T>
 inline const Ptr<const T> SharingTagSet::getTag() const
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>();
     if (index == -1)
         throw cRuntimeError("Tag '%s' is absent", opp_typename(typeid(T)));
@@ -220,6 +238,7 @@ inline const Ptr<const T> SharingTagSet::getTag() const
 template<typename T>
 inline const Ptr<T> SharingTagSet::getTagForUpdate()
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>();
     if (index == -1)
         throw cRuntimeError("Tag '%s' is absent", opp_typename(typeid(T)));
@@ -229,6 +248,7 @@ inline const Ptr<T> SharingTagSet::getTagForUpdate()
 template<typename T>
 inline const Ptr<T> SharingTagSet::addTag()
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>();
     if (index != -1)
         throw cRuntimeError("Tag '%s' is present", opp_typename(typeid(T)));
@@ -240,6 +260,7 @@ inline const Ptr<T> SharingTagSet::addTag()
 template<typename T>
 inline const Ptr<T> SharingTagSet::addTagIfAbsent()
 {
+    SELFDOC_FUNCTION_T;
     const Ptr<T>& tag = findTagForUpdate<T>();
     if (tag != nullptr)
         return tag;
@@ -253,6 +274,7 @@ inline const Ptr<T> SharingTagSet::addTagIfAbsent()
 template<typename T>
 inline const Ptr<T> SharingTagSet::removeTag()
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>();
     if (index == -1)
         throw cRuntimeError("Tag '%s' is absent", opp_typename(typeid(T)));
@@ -262,9 +284,12 @@ inline const Ptr<T> SharingTagSet::removeTag()
 template<typename T>
 inline const Ptr<T> SharingTagSet::removeTagIfPresent()
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>();
     return index == -1 ? nullptr : staticPtrCast<T>(removeTag(index));
 }
+
+#undef SELFDOC_FUNCTION_T
 
 } // namespace
 

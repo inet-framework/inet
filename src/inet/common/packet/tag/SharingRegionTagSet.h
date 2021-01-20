@@ -28,6 +28,14 @@
 
 namespace inet {
 
+#ifdef INET_WITH_SELFDOC
+#define SELFDOC_FUNCTION_T  \
+        selfDoc(__FUNCTION__, opp_typename(typeid(T))); \
+        SelfDocTempOff;
+#else
+#define SELFDOC_FUNCTION_T
+#endif
+
 using namespace units::values;
 
 /**
@@ -277,6 +285,10 @@ class INET_API SharingRegionTagSet : public cObject
      */
     template<typename T> std::vector<RegionTag<T>> removeTagsWherePresent(b offset, b length);
     //@}
+
+#ifdef INET_WITH_SELFDOC
+    static void selfDoc(const char * tagAction, const char *typeName);
+#endif
 };
 
 inline SharingRegionTagSet& SharingRegionTagSet::operator=(const SharingRegionTagSet& other)
@@ -337,18 +349,21 @@ inline void SharingRegionTagSet::sortTagsVector()
 template<typename T>
 inline int SharingRegionTagSet::getTagIndex(b offset, b length) const
 {
+    SELFDOC_FUNCTION_T;
     return getTagIndex(typeid(T), offset, length);
 }
 
 template<typename T>
 inline void SharingRegionTagSet::splitTags(b offset)
 {
+    SELFDOC_FUNCTION_T;
     splitTags(offset, [&] (const TagBase *tag) { return typeid(T) == typeid(*tag); });
 }
 
 template<typename T>
 inline const Ptr<const T> SharingRegionTagSet::findTag(b offset, b length) const
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>(offset, length);
     return index == -1 ? nullptr : staticPtrCast<const T>(getTag(index));
 }
@@ -356,6 +371,7 @@ inline const Ptr<const T> SharingRegionTagSet::findTag(b offset, b length) const
 template<typename T>
 inline const Ptr<T> SharingRegionTagSet::findTagForUpdate(b offset, b length)
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>(offset, length);
     return index == -1 ? nullptr : staticPtrCast<T>(getTagForUpdate(index));
 }
@@ -363,6 +379,7 @@ inline const Ptr<T> SharingRegionTagSet::findTagForUpdate(b offset, b length)
 template<typename T>
 inline const Ptr<const T> SharingRegionTagSet::getTag(b offset, b length) const
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>(offset, length);
     if (index == -1)
         throw cRuntimeError("Tag '%s' is absent", opp_typename(typeid(T)));
@@ -372,6 +389,7 @@ inline const Ptr<const T> SharingRegionTagSet::getTag(b offset, b length) const
 template<typename T>
 inline const Ptr<T> SharingRegionTagSet::getTagForUpdate(b offset, b length)
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>(offset, length);
     if (index == -1)
         throw cRuntimeError("Tag '%s' is absent", opp_typename(typeid(T)));
@@ -381,6 +399,7 @@ inline const Ptr<T> SharingRegionTagSet::getTagForUpdate(b offset, b length)
 template<typename T>
 inline const Ptr<T> SharingRegionTagSet::addTag(b offset, b length)
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>(offset, length);
     if (index != -1)
         throw cRuntimeError("Tag '%s' is present", opp_typename(typeid(T)));
@@ -392,6 +411,7 @@ inline const Ptr<T> SharingRegionTagSet::addTag(b offset, b length)
 template<typename T>
 inline const Ptr<T> SharingRegionTagSet::addTagIfAbsent(b offset, b length)
 {
+    SELFDOC_FUNCTION_T;
     const Ptr<T>& tag = findTagForUpdate<T>(offset, length);
     if (tag != nullptr)
         return tag;
@@ -405,6 +425,7 @@ inline const Ptr<T> SharingRegionTagSet::addTagIfAbsent(b offset, b length)
 template<typename T>
 inline std::vector<SharingRegionTagSet::RegionTag<T>> SharingRegionTagSet::addTagsWhereAbsent(b offset, b length)
 {
+    SELFDOC_FUNCTION_T;
     splitTags<T>(offset);
     splitTags<T>(offset + length);
     std::vector<SharingRegionTagSet::RegionTag<T>> result;
@@ -416,6 +437,7 @@ inline std::vector<SharingRegionTagSet::RegionTag<T>> SharingRegionTagSet::addTa
 template<typename T>
 inline const Ptr<T> SharingRegionTagSet::removeTag(b offset, b length)
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>(offset, length);
     if (index == -1)
         throw cRuntimeError("Tag '%s' is absent", opp_typename(typeid(T)));
@@ -425,6 +447,7 @@ inline const Ptr<T> SharingRegionTagSet::removeTag(b offset, b length)
 template<typename T>
 inline const Ptr<T> SharingRegionTagSet::removeTagIfPresent(b offset, b length)
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>(offset, length);
     return index == -1 ? nullptr : staticPtrCast<T>(removeTag(index));
 }
@@ -432,6 +455,7 @@ inline const Ptr<T> SharingRegionTagSet::removeTagIfPresent(b offset, b length)
 template<typename T>
 inline void SharingRegionTagSet::mapAllTags(b offset, b length, std::function<void(b, b, const Ptr<const T>&)> f) const
 {
+    SELFDOC_FUNCTION_T;
     mapAllTags(offset, length, [&] (b o, b l, const Ptr<const TagBase>& tag) {
         auto tagObject = tag.get();
         if (typeid(*tagObject) == typeid(T))
@@ -442,6 +466,7 @@ inline void SharingRegionTagSet::mapAllTags(b offset, b length, std::function<vo
 template<typename T>
 inline void SharingRegionTagSet::mapAllTagsForUpdate(b offset, b length, std::function<void(b, b, const Ptr<T>&)> f)
 {
+    SELFDOC_FUNCTION_T;
     splitTags<T>(offset);
     splitTags<T>(offset + length);
     mapAllTagsForUpdate(offset, length, [&] (b o, b l, const Ptr<TagBase>& tag) {
@@ -454,6 +479,7 @@ inline void SharingRegionTagSet::mapAllTagsForUpdate(b offset, b length, std::fu
 template<typename T>
 inline std::vector<SharingRegionTagSet::RegionTag<T>> SharingRegionTagSet::getAllTags(b offset, b length) const
 {
+    SELFDOC_FUNCTION_T;
     std::vector<SharingRegionTagSet::RegionTag<T>> result;
     mapAllTags<T>(offset, length, [&] (b o, b l, const Ptr<const T>& tag) {
         result.push_back(RegionTag<T>(o, l, staticPtrCast<const T>(tag)));
@@ -464,6 +490,7 @@ inline std::vector<SharingRegionTagSet::RegionTag<T>> SharingRegionTagSet::getAl
 template<typename T>
 inline std::vector<SharingRegionTagSet::RegionTag<T>> SharingRegionTagSet::getAllTagsForUpdate(b offset, b length)
 {
+    SELFDOC_FUNCTION_T;
     std::vector<SharingRegionTagSet::RegionTag<T>> result;
     mapAllTagsForUpdate<T>(offset, length, [&] (b o, b l, const Ptr<T>& tag) {
         result.push_back(RegionTag<T>(o, l, staticPtrCast<T>(tag)));
@@ -474,10 +501,13 @@ inline std::vector<SharingRegionTagSet::RegionTag<T>> SharingRegionTagSet::getAl
 template<typename T>
 inline std::vector<SharingRegionTagSet::RegionTag<T>> SharingRegionTagSet::removeTagsWherePresent(b offset, b length)
 {
+    SELFDOC_FUNCTION_T;
     auto result = getAllTags<T>(offset, length);
     clearTags(offset, length);
     return result;
 }
+
+#undef SELFDOC_FUNCTION_T
 
 } // namespace
 

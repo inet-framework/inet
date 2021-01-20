@@ -22,6 +22,14 @@
 
 namespace inet {
 
+#ifdef INET_WITH_SELFDOC
+#define SELFDOC_FUNCTION_T  \
+        selfDoc(__FUNCTION__, opp_typename(typeid(T))); \
+        SelfDocTempOff;
+#else
+#define SELFDOC_FUNCTION_T
+#endif
+
 /**
  * This class maintains a set of tags. Tags are usually small data strcutures
  * that hold some relevant information. Tags are identified by their type,
@@ -110,6 +118,10 @@ class INET_API TagSet : public cObject
      * Removes the tag for the provided type if present, or returns nullptr if no such tag is present.
      */
     template<typename T> T *removeTagIfPresent();
+
+#ifdef INET_WITH_SELFDOC
+    static void selfDoc(const char * tagAction, const char *typeName);
+#endif
 };
 
 inline int TagSet::getNumTags() const
@@ -131,6 +143,7 @@ inline int TagSet::getTagIndex() const
 template<typename T>
 inline const T *TagSet::findTag() const
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>();
     return index == -1 ? nullptr : static_cast<T *>((*tags)[index]);
 }
@@ -138,12 +151,14 @@ inline const T *TagSet::findTag() const
 template<typename T>
 inline T *TagSet::findTagForUpdate()
 {
+    SELFDOC_FUNCTION_T;
     return const_cast<T *>(findTag<T>());
 }
 
 template<typename T>
 inline const T *TagSet::getTag() const
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>();
     if (index == -1)
         throw cRuntimeError("Tag '%s' is absent", opp_typename(typeid(T)));
@@ -153,12 +168,14 @@ inline const T *TagSet::getTag() const
 template<typename T>
 inline T *TagSet::getTagForUpdate()
 {
+    SELFDOC_FUNCTION_T;
     return const_cast<T *>(getTag<T>());
 }
 
 template<typename T>
 inline T *TagSet::addTag()
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>();
     if (index != -1)
         throw cRuntimeError("Tag '%s' is present", opp_typename(typeid(T)));
@@ -170,6 +187,7 @@ inline T *TagSet::addTag()
 template<typename T>
 inline T *TagSet::addTagIfAbsent()
 {
+    SELFDOC_FUNCTION_T;
     T *tag = findTagForUpdate<T>();
     if (tag == nullptr)
         addTag(tag = new T());
@@ -179,6 +197,7 @@ inline T *TagSet::addTagIfAbsent()
 template<typename T>
 inline T *TagSet::removeTag()
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>();
     if (index == -1)
         throw cRuntimeError("Tag '%s' is absent", opp_typename(typeid(T)));
@@ -188,9 +207,12 @@ inline T *TagSet::removeTag()
 template<typename T>
 inline T *TagSet::removeTagIfPresent()
 {
+    SELFDOC_FUNCTION_T;
     int index = getTagIndex<T>();
     return index == -1 ? nullptr : static_cast<T *>(removeTag(index));
 }
+
+#undef SELFDOC_FUNCTION_T
 
 } // namespace
 
