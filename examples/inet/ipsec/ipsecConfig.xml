@@ -1,13 +1,14 @@
 <ipsecConfig>
     <Devices>
         <Device id="client1">
+            <!-- 1000<-2000 TCP/UDP: ESP, SPI=1 -->
             <SecurityPolicy>
                 <Selector>
                     <LocalAddress>client1</LocalAddress>
                     <RemoteAddress>server</RemoteAddress>
-                    <Protocol>TCP</Protocol>
-                    <LocalPort>1025</LocalPort>
-                    <RemotePort>1000</RemotePort>
+                    <Protocol>TCP,UDP</Protocol>
+                    <LocalPort>1000</LocalPort>
+                    <RemotePort>2000</RemotePort>
                 </Selector>
                 <Direction>IN</Direction>
                 <Action>PROTECT</Action>
@@ -19,13 +20,14 @@
                 </SecurityAssociation>
             </SecurityPolicy>
 
+            <!-- 1000->2000 TCP/UDP: ESP, SPI=101 -->
             <SecurityPolicy>
                 <Selector>
                     <LocalAddress>client1</LocalAddress>
                     <RemoteAddress>server</RemoteAddress>
-                    <Protocol>TCP</Protocol>
-                    <LocalPort>1025</LocalPort>
-                    <RemotePort>1000</RemotePort>
+                    <Protocol>TCP,UDP</Protocol>
+                    <LocalPort>1000</LocalPort>
+                    <RemotePort>2000</RemotePort>
                 </Selector>
                 <Direction>OUT</Direction>
                 <Action>PROTECT</Action>
@@ -34,29 +36,31 @@
                 <EncryptionAlg>AES_CBC_128</EncryptionAlg>
                 <MaxTfcPadLength>255</MaxTfcPadLength>
                 <SecurityAssociation>
-                    <SPI>50</SPI> <!-- Must match SPI for OUT rule at the other host -->
+                    <SPI>101</SPI> <!-- Must match SPI for OUT rule at the other host -->
                 </SecurityAssociation>
             </SecurityPolicy>
 
+            <!-- 1001<-2001 TCP/UDP: BYPASS -->
             <SecurityPolicy>
                 <Selector>
                     <LocalAddress>client1</LocalAddress>
                     <RemoteAddress>server</RemoteAddress>
-                    <Protocol>TCP</Protocol>
-                    <LocalPort>1026</LocalPort>
-                    <RemotePort>1001</RemotePort>
+                    <Protocol>TCP,UDP</Protocol>
+                    <LocalPort>1001</LocalPort>
+                    <RemotePort>2001</RemotePort>
                 </Selector>
                 <Direction>IN</Direction>
                 <Action>BYPASS</Action>
             </SecurityPolicy>
 
+            <!-- 1001->2001 TCP/UDP: BYPASS -->
             <SecurityPolicy>
                 <Selector>
                     <LocalAddress>client1</LocalAddress>
                     <RemoteAddress>server</RemoteAddress>
-                    <Protocol>TCP</Protocol>
-                    <LocalPort>1026</LocalPort>
-                    <RemotePort>1001</RemotePort>
+                    <Protocol>TCP,UDP</Protocol>
+                    <LocalPort>1001</LocalPort>
+                    <RemotePort>2001</RemotePort>
                 </Selector>
                 <Direction>OUT</Direction>
                 <Action>BYPASS</Action>
@@ -64,13 +68,14 @@
         </Device>
 
         <Device id="server">
+            <!-- 1000->2000 TCP/UDP: ESP, SPI=101 -->
             <SecurityPolicy>
                 <Selector>
                     <LocalAddress>server</LocalAddress>
                     <RemoteAddress>client1</RemoteAddress>
-                    <Protocol>TCP</Protocol>
-                    <LocalPort>1000</LocalPort>
-                    <RemotePort>1025</RemotePort>
+                    <Protocol>TCP,UDP</Protocol>
+                    <LocalPort>2000</LocalPort>
+                    <RemotePort>1000</RemotePort>
                 </Selector>
                 <Direction>IN</Direction>
                 <Action>PROTECT</Action>
@@ -78,17 +83,18 @@
                 <EspMode>CONFIDENTIALITY</EspMode>
                 <EncryptionAlg>AES_CBC_128</EncryptionAlg>
                 <SecurityAssociation>
-                    <SPI>50</SPI> <!-- Must match SPI for OUT rule at the other host -->
+                    <SPI>101</SPI> <!-- Must match SPI for OUT rule at the other host -->
                 </SecurityAssociation>
             </SecurityPolicy>
 
+            <!-- 1000<-2000 TCP/UDP: ESP, SPI=1 -->
             <SecurityPolicy>
                 <Selector>
                     <LocalAddress>server</LocalAddress>
                     <RemoteAddress>client1</RemoteAddress>
-                    <Protocol>TCP</Protocol>
-                    <LocalPort>1000</LocalPort>
-                    <RemotePort>1025</RemotePort>
+                    <Protocol>TCP,UDP</Protocol>
+                    <LocalPort>2000</LocalPort>
+                    <RemotePort>1000</RemotePort>
                 </Selector>
                 <Direction>OUT</Direction>
                 <Action>PROTECT</Action>
@@ -100,25 +106,27 @@
                 </SecurityAssociation>
             </SecurityPolicy>
 
+            <!-- 1001->2001 TCP/UDP: BYPASS -->
             <SecurityPolicy>
                 <Selector>
                     <LocalAddress>server</LocalAddress>
                     <RemoteAddress>client1</RemoteAddress>
-                    <Protocol>TCP</Protocol>
-                    <LocalPort>1001</LocalPort>
-                    <RemotePort>1026</RemotePort>
+                    <Protocol>TCP,UDP</Protocol>
+                    <LocalPort>2001</LocalPort>
+                    <RemotePort>1001</RemotePort>
                 </Selector>
                 <Direction>IN</Direction>
                 <Action>BYPASS</Action>
             </SecurityPolicy>
 
+            <!-- 1001<-2001 TCP/UDP: BYPASS -->
             <SecurityPolicy>
                 <Selector>
                     <LocalAddress>server</LocalAddress>
                     <RemoteAddress>client1</RemoteAddress>
-                    <Protocol>TCP</Protocol>
-                    <LocalPort>1001</LocalPort>
-                    <RemotePort>1026</RemotePort>
+                    <Protocol>TCP,UDP</Protocol>
+                    <LocalPort>2001</LocalPort>
+                    <RemotePort>1001</RemotePort>
                 </Selector>
                 <Direction>OUT</Direction>
                 <Action>BYPASS</Action>
