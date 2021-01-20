@@ -64,6 +64,10 @@ void TCPAppBase::connect()
     // we need a new connId if this is not the first connection
     socket.renewSocket();
 
+    const char *localAddress = par("localAddress");
+    int localPort = par("localPort");
+    socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
+
     // connect
     const char *connectAddress = par("connectAddress");
     int connectPort = par("connectPort");
