@@ -27,7 +27,7 @@
 namespace inet {
 namespace sctp {
 
-class SctpCrcInsertion : public NetfilterBase::HookBase
+class SctpCrcInsertion : public cSimpleModule, public NetfilterBase::HookBase
 {
     CrcMode crcMode = CRC_MODE_UNDEFINED;
 

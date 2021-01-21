@@ -124,8 +124,6 @@ class INET_API Tcp : public TransportProtocolBase
   protected:
     typedef std::map<int /*socketId*/, TcpConnection *> TcpAppConnMap;
     typedef std::map<SockPair, TcpConnection *> TcpConnMap;
-    TcpCrcInsertion crcInsertion;
-
     TcpAppConnMap tcpAppConnMap;
     TcpConnMap tcpConnMap;
 
