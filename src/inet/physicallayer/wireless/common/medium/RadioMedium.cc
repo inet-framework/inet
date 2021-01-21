@@ -507,7 +507,7 @@ IWirelessSignal *RadioMedium::createTransmitterSignal(const IRadio *radio, Packe
     auto signal = new WirelessSignal(transmission);
     auto duration = transmission->getDuration();
     if (duration > mediumLimitCache->getMaxTransmissionDuration())
-        throw cRuntimeError("Maximum transmission duration is exceeded");
+        throw cRuntimeError("Maximum transmission duration is exceeded Dur =%f Max Dur %f",duration.dbl(), mediumLimitCache->getMaxTransmissionDuration().dbl());
     signal->setDuration(duration);
     if (packet != nullptr) {
         signal->setName(packet->getName());
