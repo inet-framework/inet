@@ -153,7 +153,10 @@ The Model/Configuration/The example simulations
 
 The example simulations use the following network:
 
-.. figure:: media/network.png
+.. .. figure:: media/network.png
+      :align: center
+
+.. figure:: media/network4.png
    :align: center
 
 It contains a network of two switches (:ned:`EthernetSwitch`). A host (:ned:`StandardHost`) is connected to each switch.
@@ -191,6 +194,19 @@ The example simulation is defined in the ``BetweenSwitches`` config in omnetpp.i
    :start-at: Config BetweenSwitches
    :end-at: outboundMapper
    :language: ini
+
+The configuration adds a :ned:`VlanPolicyLayer` module to the switches. **TODO** qtag
+
+so
+
+- the accepted vlan ids are defined
+- eth0 interfaces in both switches face the connected hosts
+- eth1 interfaces face the other switch
+- on eth1, add vlan tag 42
+- on eth0, remove tag (or dont add)(we dont want tags)
+
+- so the syntax replaces an accepted vlan id to another one on an interface
+(replace -1 with 42, that is if there is no tag add tag 42 -> if there is tag 1, does it get replaced?)
 
 
 
