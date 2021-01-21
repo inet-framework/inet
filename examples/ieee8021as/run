@@ -1,0 +1,4 @@
+#!/bin/sh
+cd `dirname $0`
+../src/ieee8021as -n .:../src $*
+# for shared lib, use: opp_run -l ../src/ieee8021as -n .:../src $*
