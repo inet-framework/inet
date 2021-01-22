@@ -31,7 +31,7 @@ PacketStreamer::~PacketStreamer()
 
 void PacketStreamer::initialize(int stage)
 {
-    PacketProcessorBase::initialize(stage);
+    ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         datarate = bps(par("datarate"));
         inputGate = gate("in");

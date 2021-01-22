@@ -32,7 +32,7 @@ MarkovScheduler::~MarkovScheduler()
 void MarkovScheduler::initialize(int stage)
 {
     if (stage != INITSTAGE_QUEUEING)
-        PacketSchedulerBase::initialize(stage);
+        ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         for (int i = 0; i < gateSize("in"); i++) {
             auto input = findConnectedModule<IActivePacketSource>(inputGates[i]);

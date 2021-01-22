@@ -27,7 +27,7 @@ Define_Module(ActivePacketSource);
 
 void ActivePacketSource::initialize(int stage)
 {
-    ActivePacketSourceBase::initialize(stage);
+    ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         productionIntervalParameter = &par("productionInterval");
         productionTimer = new ClockEvent("ProductionTimer");

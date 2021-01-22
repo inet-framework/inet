@@ -27,7 +27,7 @@ Define_Module(PassivePacketSink);
 
 void PassivePacketSink::initialize(int stage)
 {
-    PassivePacketSinkBase::initialize(stage);
+    ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         consumptionIntervalParameter = &par("consumptionInterval");
         consumptionTimer = new ClockEvent("ConsumptionTimer");
