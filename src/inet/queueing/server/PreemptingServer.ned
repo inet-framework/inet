@@ -23,6 +23,7 @@ import inet.queueing.contract.IPacketServer;
 simple PreemptingServer extends PacketServerBase like IPacketServer
 {
     parameters:
+        string clockModule = default(""); // relative path of a module that implements IClock; optional
         double datarate @unit(bps);
         @class(PreemptingServer);
 }

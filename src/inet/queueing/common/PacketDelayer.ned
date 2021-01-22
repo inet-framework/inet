@@ -31,6 +31,7 @@ import inet.queueing.contract.IPassivePacketSink;
 simple PacketDelayer extends PacketProcessorBase like IPassivePacketSink, IActivePacketSource
 {
     parameters:
+        string clockModule = default(""); // relative path of a module that implements IClock; optional
         volatile double delay @unit(s);
         @class(PacketDelayer);
         @display("i=block/delay");

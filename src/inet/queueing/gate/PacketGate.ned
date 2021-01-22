@@ -27,6 +27,7 @@ import inet.queueing.contract.IPacketGate;
 simple PacketGate extends PacketGateBase like IPacketGate
 {
     parameters:
+        string clockModule = default(""); // relative path of a module that implements IClock; optional
         bool initiallyOpen = default(false);
         double openTime @unit(s);
         double closeTime @unit(s);
