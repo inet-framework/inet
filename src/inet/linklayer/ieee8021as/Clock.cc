@@ -7,6 +7,8 @@
 
 #include "Clock.h"
 
+namespace inet {
+
 Define_Module(Clock);
 
 void Clock::initialize()
@@ -38,4 +40,6 @@ void Clock::adjustTime(SimTime value)
 {
     lastAdjustedClock = value;
     lastSimTime = simTime();
+}
+
 }

@@ -5,10 +5,10 @@
 //           University of Rostock, Germany
 // 
 
-package ieee8021as;
+package inet.linklayer.ieee8021as;
 
 simple Clock
 {
-    string clockType=default("ConstantDrift");
-    int clockDrift=default(0);
+    string clockType = default("ConstantDrift");
+    int clockDrift = default(0);
 }

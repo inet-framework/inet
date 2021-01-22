@@ -5,7 +5,7 @@
 //           University of Rostock, Germany
 // 
 
-package ieee8021as;
+package inet.linklayer.ieee8021as;
 
 //
 // this will be used to store a value of correctionField and rateRatio
@@ -17,7 +17,4 @@ simple TableGPTP
         double correctionField = default(0);
         double rateRatio = default(1);
         double syncReceivedTime = default(0);
-    gates:
-        input gptpLayerIn[];
-        output gptpLayerOut[];
 }

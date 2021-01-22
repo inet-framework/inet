@@ -7,28 +7,31 @@
 
 #include "tableGPTP.h"
 
+#include "EtherGPTP.h"
+
+namespace inet {
+
 Define_Module(TableGPTP);
 
-void TableGPTP::initialize(int stage)
+void TableGPTP::initialize()
 {
     correctionField = par("correctionField");
     rateRatio = par("rateRatio");
     peerDelay = 0;
     receivedTimeSync = 0;
     receivedTimeFollowUp = 0;
-    numberOfGates = gateSize("gptpLayerIn");
 }
 
-void TableGPTP::handleMessage(cMessage *msg)
+void TableGPTP::handleGptpCall(cMessage *msg)
 {
-    if(msg->arrivedOn("gptpLayerIn"))
-    {
-        for (int i = 0; i < numberOfGates; i++)
-        {
-            send(msg->dup(), "gptpLayerOut", i);
-        }
-        delete msg;
+    Enter_Method("handleGptpCall");
+
+    take (msg);
+    //TODO tags?
+    for (auto gptp : gptps) {
+        gptp.second->handleTableGptpCall(msg->dup());
     }
+    delete msg;
 }
 
 void TableGPTP::setCorrectionField(SimTime cf)
@@ -99,4 +102,16 @@ void TableGPTP::setOriginTimestamp(SimTime cf)
 SimTime TableGPTP::getOriginTimestamp()
 {
     return originTimestamp;
+}
+
+void TableGPTP::addGptp(EtherGPTP *gptp)
+{
+    gptps.insert(std::pair<int, EtherGPTP*>(gptp->getId(), gptp));
+}
+
+void TableGPTP::removeGptp(EtherGPTP *gptp)
+{
+    gptps.erase(gptp->getId());
+}
+
 }

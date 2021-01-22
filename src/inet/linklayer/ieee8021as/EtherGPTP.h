@@ -14,14 +14,13 @@
 #include "Clock.h"
 #include <omnetpp.h>
 #include <string>
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
 
-#include "inet/linklayer/ethernet/EtherMACBase.h"
-#include "inet/linklayer/ethernet/EtherFrame_m.h"
-#include "inet/linklayer/common/MACAddress.h"
-#include "inet/linklayer/base/MACBase.h"
+//#include "inet/linklayer/ethernet/common/EthernetMacBase.h"
+#include "inet/linklayer/common/MacAddress.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
+//#include "inet/linklayer/base/MacBase.h"
 
-using namespace omnetpp;
+namespace inet {
 
 enum gPtpNodeType {
     MASTER_NODE = 11,
@@ -35,18 +34,10 @@ enum gPtpPortType {
     PASSIVE_PORT = 0
 };
 
-enum gPtpMessageType {
-    SYNC    = 1010,
-    FOLLOW_UP = 1011,
-    PDELAY_REQ = 1014,
-    PDELAY_RESP = 1012,
-    PDELAY_RESP_FOLLOW_UP = 1013
-};
-
 class EtherGPTP : public cSimpleModule
 {
-    TableGPTP* tableGptp;
-    Clock* clockGptp;
+    opp_component_ptr<TableGPTP> tableGptp;
+    opp_component_ptr<Clock> clockGptp;
     int portType;
     int nodeType;
     int stepCounter;
@@ -54,7 +45,7 @@ class EtherGPTP : public cSimpleModule
 
     // errorTime is time difference between MAC transmition
     // or receiving time and etherGPTP time
-    cMessage* requestMsg;
+    cMessage* requestMsg = nullptr;
 
     SimTime receivedTimeAtHandleMessage;
     SimTime residenceTime;
@@ -66,10 +57,10 @@ class EtherGPTP : public cSimpleModule
     SimTime syncInterval;
     SimTime pdelayInterval;
 
-    cMessage* selfMsgSync;
-    cMessage* selfMsgFollowUp;
-    cMessage* selfMsgDelayReq;
-    cMessage* selfMsgDelayResp;
+    cMessage* selfMsgSync = nullptr;
+    cMessage* selfMsgFollowUp = nullptr;
+    cMessage* selfMsgDelayReq = nullptr;
+    cMessage* selfMsgDelayResp = nullptr;
 
     /* Slave port - Variables is used for Peer Delay Measurement */
     SimTime peerDelay;
@@ -108,25 +99,32 @@ class EtherGPTP : public cSimpleModule
     cOutVector vPeerDelay;
 
 protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
 
   public:
     EtherGPTP();
+    virtual ~EtherGPTP();
 
     void masterPort(cMessage *msg);
+    void slavePort(cMessage *msg);
+
     void sendSync(SimTime value);
     void sendFollowUp();
-    void processPdelayReq(gPtp_PdelayReq* gptp);
+    void sendPdelayReq();
     void sendPdelayResp();
     void sendPdelayRespFollowUp();
 
-    void slavePort(cMessage *msg);
-    void sendPdelayReq();
-    void processSync(gPtp_Sync* gptp);
-    void processFollowUp(gPtp_FollowUp* gptp);
-    void processPdelayResp(gPtp_PdelayResp* gptp);
-    void processPdelayRespFollowUp(gPtp_PdelayRespFollowUp* gptp);
+    void processSync(const GPtpSync* gptp);
+    void processFollowUp(const GPtpFollowUp* gptp);
+    void processPdelayReq(const GPtpPdelayReq* gptp);
+    void processPdelayResp(const GPtpPdelayResp* gptp);
+    void processPdelayRespFollowUp(const GPtpPdelayRespFollowUp* gptp);
+
+    void handleTableGptpCall(cMessage *msg);
 };
+
+}
 
 #endif

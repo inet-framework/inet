@@ -8,10 +8,9 @@
 #ifndef __IEEE8021AS_CLOCK_H_
 #define __IEEE8021AS_CLOCK_H_
 
-#include <omnetpp.h>
+#include "inet/common/INETDefs.h"
 
-using namespace omnetpp;
-
+namespace inet {
 
 class Clock : public cSimpleModule
 {
@@ -27,5 +26,7 @@ class Clock : public cSimpleModule
     SimTime getCalculatedDrift(SimTime value);
     void adjustTime(SimTime value);
 };
+
+}
 
 #endif

@@ -8,9 +8,11 @@
 #ifndef __IEEE8021AS_TABLEGPTP_H_
 #define __IEEE8021AS_TABLEGPTP_H_
 
-#include <omnetpp.h>
+#include "inet/common/INETDefs.h"
 
-using namespace omnetpp;
+namespace inet {
+
+class EtherGPTP;
 
 class TableGPTP : public cSimpleModule
 {
@@ -18,7 +20,6 @@ class TableGPTP : public cSimpleModule
     SimTime rateRatio;
     SimTime originTimestamp;
     SimTime peerDelay;
-    int numberOfGates;
 
     // Below timestamps are not drifted and they are in simtime
     SimTime receivedTimeSync;
@@ -35,9 +36,11 @@ class TableGPTP : public cSimpleModule
     // For constant drift, setTime = sentTime + delay
     SimTime setTime;
 
+    // array of EtherGPTP modules in this node:
+    std::map<int, EtherGPTP *> gptps;
+
   protected:
-    virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual void initialize() override;
 
   public:
     void setCorrectionField(SimTime cf);
@@ -47,6 +50,9 @@ class TableGPTP : public cSimpleModule
     void setReceivedTimeFollowUp(SimTime cf);
     void setReceivedTimeAtHandleMessage(SimTime cf);
     void setOriginTimestamp(SimTime cf);
+    void addGptp(EtherGPTP *gptp);
+    void removeGptp(EtherGPTP *gptp);
+    void handleGptpCall(cMessage *msg);
 
     SimTime getCorrectionField();
     SimTime getRateRatio();
@@ -56,5 +62,7 @@ class TableGPTP : public cSimpleModule
     SimTime getReceivedTimeAtHandleMessage();
     SimTime getOriginTimestamp();
 };
+
+}
 
 #endif

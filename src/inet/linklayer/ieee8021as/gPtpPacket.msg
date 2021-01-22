@@ -1,52 +1,97 @@
 //
+// Copyright (C) 2020 OpenSim Ltd.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+//
 // @authors: Enkhtuvshin Janchivnyambuu
 //           Henning Puttnies
 //           Peter Danielis
 //           University of Rostock, Germany
 // 
 
-cplusplus {{
-#include "omnetpp/simtime.h"
-#include "gPtp.h"
-#include "omnetpp.h"
-}};
+import inet.common.packet.chunk.Chunk;
 
+namespace inet;
 
-class noncobject omnetpp::SimTime;
-
-packet gPtp_Sync
+enum gPtpMessageType
 {
-	omnetpp::SimTime sentTime;
-	omnetpp::SimTime localDrift;
-	omnetpp::SimTime originTimestamp;	
+    GPTPTYPE_SYNC    = 1010;
+    GPTPTYPE_FOLLOW_UP = 1011;
+    GPTPTYPE_PDELAY_REQ = 1014;
+    GPTPTYPE_PDELAY_RESP = 1012;
+    GPTPTYPE_PDELAY_RESP_FOLLOW_UP = 1013;
 }
 
-packet gPtp_FollowUp
+enum gPtpPacketSize
 {
-	omnetpp::SimTime sentTime;
-	omnetpp::SimTime preciseOriginTimestamp;
-	omnetpp::SimTime correctionField;
-	omnetpp::SimTime rateRatio;
-	int numberOfHops;
+    GPTP_SYNC_PACKET_SIZE = 44;
+    GPTP_FOLLOW_UP_PACKET_SIZE = 76;
+    GPTP_PDELAY_REQ_PACKET_SIZE = 54;
+    GPTP_PDELAY_RESP_PACKET_SIZE = 54;
+    GPTP_PDELAY_RESP_FOLLOW_UP_PACKET_SIZE = 54;
 }
 
-packet gPtp_PdelayReq
+class GPtpBase extends FieldsChunk
 {
-    omnetpp::SimTime sentTime;
-    omnetpp::SimTime originTimestamp;
-	int requestingPortIdentity;
+    int typeCode;
 }
 
-packet gPtp_PdelayResp
+class GPtpSync extends GPtpBase
 {
-    omnetpp::SimTime sentTime;
-    omnetpp::SimTime requestReceiptTimestamp;
-	int requestingPortIdentity;
+    typeCode = GPTPTYPE_SYNC;
+    chunkLength = B(GPTP_SYNC_PACKET_SIZE);
+    simtime_t sentTime;
+    simtime_t localDrift;
+    simtime_t originTimestamp;  
 }
 
-packet gPtp_PdelayRespFollowUp
+class GPtpFollowUp extends GPtpBase
 {
-    omnetpp::SimTime sentTime;
-    omnetpp::SimTime responseOriginTimestamp;
-	int requestingPortIdentity;
+    typeCode = GPTPTYPE_FOLLOW_UP;
+    chunkLength = B(GPTP_FOLLOW_UP_PACKET_SIZE);
+    simtime_t sentTime;
+    simtime_t preciseOriginTimestamp;
+    simtime_t correctionField;
+    simtime_t rateRatio;
+    int numberOfHops;
 }
+
+class GPtpPdelayReq extends GPtpBase
+{
+    typeCode = GPTPTYPE_PDELAY_REQ;
+    chunkLength = B(GPTP_PDELAY_REQ_PACKET_SIZE);
+    simtime_t sentTime;
+    simtime_t originTimestamp;
+    int requestingPortIdentity;
+}
+
+class GPtpPdelayResp extends GPtpBase
+{
+    typeCode = GPTPTYPE_PDELAY_RESP;
+    chunkLength = B(GPTP_PDELAY_RESP_PACKET_SIZE);
+    simtime_t sentTime;
+    simtime_t requestReceiptTimestamp;
+    int requestingPortIdentity;
+}
+
+class GPtpPdelayRespFollowUp extends GPtpBase
+{
+    typeCode = GPTPTYPE_PDELAY_RESP_FOLLOW_UP;
+    chunkLength = B(GPTP_PDELAY_RESP_FOLLOW_UP_PACKET_SIZE);
+    simtime_t sentTime;
+    simtime_t responseOriginTimestamp;
+    int requestingPortIdentity;
+}
+
