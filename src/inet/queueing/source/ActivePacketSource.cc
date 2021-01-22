@@ -35,8 +35,13 @@ void ActivePacketSource::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (!productionTimer->isScheduled() && (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()))) {
-            scheduleProductionTimer();
-            producePacket();
+            double offset = par("initialProductionOffset");
+            if (offset != 0)
+                scheduleProductionTimer(offset);
+            else {
+                scheduleProductionTimer(productionIntervalParameter->doubleValue());
+                producePacket();
+            }
         }
     }
 }
@@ -45,7 +50,7 @@ void ActivePacketSource::handleMessage(cMessage *message)
 {
     if (message == productionTimer) {
         if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
-            scheduleProductionTimer();
+            scheduleProductionTimer(productionIntervalParameter->doubleValue());
             producePacket();
         }
     }
@@ -53,12 +58,12 @@ void ActivePacketSource::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-void ActivePacketSource::scheduleProductionTimer()
+void ActivePacketSource::scheduleProductionTimer(double delay)
 {
     if (scheduleProductionForAbsoluteTime)
-        scheduleClockEventAt(getClockTime() + productionIntervalParameter->doubleValue(), productionTimer);
+        scheduleClockEventAt(getClockTime() + delay, productionTimer);
     else
-        scheduleClockEventAfter(productionIntervalParameter->doubleValue(), productionTimer);
+        scheduleClockEventAfter(delay, productionTimer);
 }
 
 void ActivePacketSource::producePacket()
@@ -73,8 +78,13 @@ void ActivePacketSource::handleCanPushPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (!productionTimer->isScheduled() && (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()))) {
-        scheduleProductionTimer();
-        producePacket();
+        double offset = par("initialProductionOffset");
+        if (offset != 0)
+            scheduleProductionTimer(offset);
+        else {
+            scheduleProductionTimer(productionIntervalParameter->doubleValue());
+            producePacket();
+        }
     }
 }
 

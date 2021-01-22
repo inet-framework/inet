@@ -35,7 +35,7 @@ class INET_API ActivePacketSource : public ClockUserModuleMixin<ActivePacketSour
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual void scheduleProductionTimer();
+    virtual void scheduleProductionTimer(double delay);
     virtual void producePacket();
 
   public:
