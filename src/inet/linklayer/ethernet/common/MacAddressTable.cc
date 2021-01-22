@@ -128,7 +128,7 @@ MacAddressTable::AddressTable *MacAddressTable::getTableForVid(unsigned int vid)
 
 int MacAddressTable::getInterfaceIdForAddress(const MacAddress& address, unsigned int vid)
 {
-    Enter_Method("MacAddressTable::getPortForAddress()");
+    Enter_Method("getInterfaceIdForAddress");
 
     AddressTable *table = getTableForVid(vid);
     // VLAN ID vid does not exist
@@ -157,7 +157,7 @@ int MacAddressTable::getInterfaceIdForAddress(const MacAddress& address, unsigne
 
 bool MacAddressTable::updateTableWithAddress(int interfaceId, const MacAddress& address, unsigned int vid)
 {
-    Enter_Method("MacAddressTable::updateTableWithAddress()");
+    Enter_Method("updateTableWithAddress");
     if (address.isMulticast()) // broadcast or multicast
         return false;
 
@@ -205,7 +205,7 @@ bool MacAddressTable::updateTableWithAddress(int interfaceId, const MacAddress& 
 
 void MacAddressTable::flush(int interfaceId)
 {
-    Enter_Method("MacAddressTable::flush():  Clearing interfaceId %d cache", interfaceId);
+    Enter_Method("flush");
     for (auto& elem : vlanAddressTable) {
         AddressTable *table = elem.second;
         for (auto j = table->begin(); j != table->end();) {

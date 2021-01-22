@@ -137,7 +137,7 @@ void EigrpIpv4Pdm::preDelete(cComponent *root)
 
 void EigrpIpv4Pdm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method("EigrpIpv4Pdm::receiveSignal"); // Switch Context to this module!
+    Enter_Method("receiveSignal"); // Switch Context to this module!
 
     if (signalID == interfaceStateChangedSignal) {
         NetworkInterfaceChangeDetails *ifcecd = check_and_cast<NetworkInterfaceChangeDetails *>(obj);
