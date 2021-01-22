@@ -24,7 +24,9 @@ simple RandomDriftOscillator extends ConstantDriftOscillator
 {
     parameters:
         volatile double changeInterval @unit(s);
-        volatile double driftRateChange @unit(ppm);
+        volatile double driftRateChange @unit(ppm) = default(0ppm); // integrated over time (driftRate random walk), no change by default
+        double driftRateChangeLowerLimit @unit(ppm) = default(-inf ppm); // lower limit for random walk, no limit by default
+        double driftRateChangeUpperLimit @unit(ppm) = default(inf ppm); // upper limit for random walk, no limit by default
         @class(RandomDriftOscillator);
 }
 

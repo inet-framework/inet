@@ -26,6 +26,9 @@ class INET_API RandomDriftOscillator : public ConstantDriftOscillator
 {
   protected:
     cMessage *timer = nullptr;
+    double driftRateChangeTotal = 0;
+    double driftRateChangeLowerLimit = NaN;
+    double driftRateChangeUpperLimit = NaN;
 
   protected:
     virtual ~RandomDriftOscillator() { cancelAndDelete(timer); }
