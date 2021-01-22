@@ -35,7 +35,7 @@ class INET_API ActivePacketSink : public ClockUserModuleMixin<ActivePacketSinkBa
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual void scheduleCollectionTimer();
+    virtual void scheduleCollectionTimer(double delay);
     virtual void collectPacket();
 
   public:
