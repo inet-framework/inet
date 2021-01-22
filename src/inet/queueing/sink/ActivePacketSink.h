@@ -29,6 +29,7 @@ class INET_API ActivePacketSink : public ClockUserModuleMixin<ActivePacketSinkBa
   protected:
     cPar *collectionIntervalParameter = nullptr;
     ClockEvent *collectionTimer = nullptr;
+    bool scheduleCollectionForAbsoluteTime = false;
 
   protected:
     virtual void initialize(int stage) override;

@@ -28,6 +28,7 @@ void ActivePacketSink::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         collectionIntervalParameter = &par("collectionInterval");
         collectionTimer = new ClockEvent("CollectionTimer");
+        scheduleCollectionForAbsoluteTime = par("scheduleCollectionForAbsoluteTime");
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (!collectionTimer->isScheduled() && provider->canPullSomePacket(inputGate->getPathStartGate())) {
@@ -51,7 +52,10 @@ void ActivePacketSink::handleMessage(cMessage *message)
 
 void ActivePacketSink::scheduleCollectionTimer()
 {
-    scheduleClockEventAfter(collectionIntervalParameter->doubleValue(), collectionTimer);
+    if (scheduleCollectionForAbsoluteTime)
+        scheduleClockEventAt(getClockTime() + collectionIntervalParameter->doubleValue(), collectionTimer);
+    else
+        scheduleClockEventAfter(collectionIntervalParameter->doubleValue(), collectionTimer);
 }
 
 void ActivePacketSink::collectPacket()

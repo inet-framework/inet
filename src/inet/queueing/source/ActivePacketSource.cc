@@ -31,6 +31,7 @@ void ActivePacketSource::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         productionIntervalParameter = &par("productionInterval");
         productionTimer = new ClockEvent("ProductionTimer");
+        scheduleProductionForAbsoluteTime = par("scheduleProductionForAbsoluteTime");
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (!productionTimer->isScheduled() && (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()))) {
@@ -54,7 +55,10 @@ void ActivePacketSource::handleMessage(cMessage *message)
 
 void ActivePacketSource::scheduleProductionTimer()
 {
-    scheduleClockEventAfter(productionIntervalParameter->doubleValue(), productionTimer);
+    if (scheduleProductionForAbsoluteTime)
+        scheduleClockEventAt(getClockTime() + productionIntervalParameter->doubleValue(), productionTimer);
+    else
+        scheduleClockEventAfter(productionIntervalParameter->doubleValue(), productionTimer);
 }
 
 void ActivePacketSource::producePacket()

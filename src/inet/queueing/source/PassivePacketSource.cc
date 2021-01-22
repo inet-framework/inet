@@ -30,6 +30,7 @@ void PassivePacketSource::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         providingIntervalParameter = &par("providingInterval");
         providingTimer = new ClockEvent("ProvidingTimer");
+        scheduleProductionForAbsoluteTime = par("scheduleProductionForAbsoluteTime");
         WATCH_PTR(nextPacket);
     }
     else if (stage == INITSTAGE_QUEUEING) {
@@ -51,8 +52,12 @@ void PassivePacketSource::handleMessage(cMessage *message)
 void PassivePacketSource::scheduleProvidingTimer()
 {
     clocktime_t interval = providingIntervalParameter->doubleValue();
-    if (interval != 0 || providingTimer->getArrivalModule() == nullptr)
-        scheduleClockEventAfter(interval, providingTimer);
+    if (interval != 0 || providingTimer->getArrivalModule() == nullptr) {
+        if (scheduleProductionForAbsoluteTime)
+            scheduleClockEventAt(getClockTime() + interval, providingTimer);
+        else
+            scheduleClockEventAfter(interval, providingTimer);
+    }
 }
 
 Packet *PassivePacketSource::canPullPacket(cGate *gate) const

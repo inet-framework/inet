@@ -30,6 +30,7 @@ class INET_API PassivePacketSink : public ClockUserModuleMixin<PassivePacketSink
   protected:
     cPar *consumptionIntervalParameter = nullptr;
     ClockEvent *consumptionTimer = nullptr;
+    bool scheduleCollectionForAbsoluteTime = false;
 
   protected:
     virtual void initialize(int stage) override;

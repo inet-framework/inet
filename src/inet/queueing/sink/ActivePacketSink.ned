@@ -28,6 +28,7 @@ simple ActivePacketSink extends PacketSinkBase like IActivePacketSink
 {
     parameters:
         volatile double collectionInterval @unit(s); // elapsed time between subsequent packets pulled from the connected packet provider
+        bool scheduleCollectionForAbsoluteTime = default(true); // when a clock is used relative means that setting the clock will not affect the simulation time of the event
         @class(ActivePacketSink);
     gates:
         input in @labels(pull);
