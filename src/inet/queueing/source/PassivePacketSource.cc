@@ -26,7 +26,7 @@ Define_Module(PassivePacketSource);
 
 void PassivePacketSource::initialize(int stage)
 {
-    PassivePacketSourceBase::initialize(stage);
+    ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         providingIntervalParameter = &par("providingInterval");
         providingTimer = new ClockEvent("ProvidingTimer");

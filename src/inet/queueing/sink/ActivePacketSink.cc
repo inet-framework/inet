@@ -24,7 +24,7 @@ Define_Module(ActivePacketSink);
 
 void ActivePacketSink::initialize(int stage)
 {
-    ActivePacketSinkBase::initialize(stage);
+    ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         collectionIntervalParameter = &par("collectionInterval");
         collectionTimer = new ClockEvent("CollectionTimer");
