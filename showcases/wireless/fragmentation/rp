@@ -1,0 +1,18 @@
+#!/bin/bash
+
+inet -u Cmdenv -f parameterstudy.ini -c PacketSizeDCFnofrag &
+inet -u Cmdenv -f parameterstudy.ini -c PacketSizeDCFfrag &
+inet -u Cmdenv -f parameterstudy.ini -c PacketSizeHCFfrag &
+inet -u Cmdenv -f parameterstudy.ini -c PacketSizeHCFfragblockack &
+inet -u Cmdenv -f parameterstudy.ini -c TxPowerDCFnofrag &
+inet -u Cmdenv -f parameterstudy.ini -c TxPowerDCFfrag &
+inet -u Cmdenv -f parameterstudy.ini -c TxPowerHCFfrag &
+inet -u Cmdenv -f parameterstudy.ini -c TxPowerHCFfragblockack &
+inet -u Cmdenv -f parameterstudy.ini -c ThresholdDCFnofrag &
+inet -u Cmdenv -f parameterstudy.ini -c ThresholdDCFfrag &
+inet -u Cmdenv -f parameterstudy.ini -c ThresholdHCFfrag &
+inet -u Cmdenv -f parameterstudy.ini -c ThresholdHCFfragblockack &
+inet -u Cmdenv -f parameterstudy.ini -c OnlyPacketSizeDCFnofrag &
+inet -u Cmdenv -f parameterstudy.ini -c OnlyPacketSizeDCFfrag &
+inet -u Cmdenv -f parameterstudy.ini -c OnlyPacketSizeHCFfrag &
+inet -u Cmdenv -f parameterstudy.ini -c OnlyPacketSizeHCFfragblockack
