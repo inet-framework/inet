@@ -255,7 +255,14 @@ unsigned int Ieee80211VhtPreambleMode::computeNumberOfHTLongTrainings(unsigned i
     // the number of training symbols, N_LTF, is equal to the number of space-time
     // streams, N STS, except that for three space-time streams, four training symbols
     // are required.
-    return numberOfSpaceTimeStreams == 3 ? 4 : numberOfSpaceTimeStreams;
+    if (numberOfSpaceTimeStreams == 3)
+        return 4;
+    else if (numberOfSpaceTimeStreams == 5)
+        return 6;
+    else if (numberOfSpaceTimeStreams == 7)
+        return 8;
+    else
+        numberOfSpaceTimeStreams;
 }
 
 const simtime_t Ieee80211VhtPreambleMode::getDuration() const
