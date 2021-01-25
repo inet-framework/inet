@@ -1,0 +1,6 @@
+#!/bin/bash
+
+rm -r results/Ieee80211Radio
+
+opp_runall inet -u Cmdenv -f compare-ieee80211radio-error-models.ini -c OneNoiseSourceDimensionalPacketLevel
+opp_runall inet -u Cmdenv -f compare-ieee80211radio-error-models.ini -c OneNoiseSourceDimensionalSymbollevel
