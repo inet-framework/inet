@@ -29,6 +29,7 @@ class INET_API PassivePacketSource : public ClockUserModuleMixin<PassivePacketSo
   protected:
     cPar *providingIntervalParameter = nullptr;
     ClockEvent *providingTimer = nullptr;
+    bool scheduleProductionForAbsoluteTime = false;
 
     mutable Packet *nextPacket = nullptr;
 

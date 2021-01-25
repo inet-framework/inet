@@ -19,6 +19,7 @@
 
 package inet.node.ethernet;
 
+import inet.clock.contract.IClock;
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.common.packet.recorder.PcapRecorder;
@@ -69,6 +70,10 @@ module EthernetSwitch
     submodules:
         status: NodeStatus if hasStatus {
             @display("p=100,400;is=s");
+        }
+        clock: <default("")> like IClock if typename != "" {
+            parameters:
+                @display("p=100,600;is=s");
         }
         l2NodeConfigurator: L2NodeConfigurator if hasStp {
             @display("p=100,300;is=s");

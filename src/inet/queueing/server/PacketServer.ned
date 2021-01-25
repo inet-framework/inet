@@ -29,6 +29,7 @@ simple PacketServer extends PacketServerBase like IPacketServer
 {
     parameters:
         displayStringTextFormat = default("served %p pk (%l)\n%s");
+        string clockModule = default(""); // relative path of a module that implements IClock; optional
         volatile double processingTime @unit(s); // determines additional processing time per packet
         volatile double processingBitrate @unit(bps) = default(inf bps); // determines additional processing time per bit
         @class(PacketServer);

@@ -32,7 +32,7 @@ MarkovClassifier::~MarkovClassifier()
 void MarkovClassifier::initialize(int stage)
 {
     if (stage != INITSTAGE_QUEUEING)
-        PacketClassifierBase::initialize(stage);
+        ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         for (int i = 0; i < gateSize("out"); i++) {
             auto output = findConnectedModule<IActivePacketSink>(outputGates[i]);

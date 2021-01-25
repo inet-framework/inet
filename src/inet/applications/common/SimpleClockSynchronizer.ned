@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2020 OpenSim Ltd.
+// Copyright (C) 2004 OpenSim Ltd.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
@@ -15,15 +15,25 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.queueing.server;
+package inet.applications.common;
 
-import inet.queueing.base.PacketServerBase;
-import inet.queueing.contract.IPacketServer;
+import inet.applications.contract.IApp;
 
-simple PreemptingServer extends PacketServerBase like IPacketServer
+//
+// This module periodically synchronizes the slave clock to the master clock with
+// the specified accuracy.
+//
+simple SimpleClockSynchronizer like IApp
 {
     parameters:
-        string clockModule = default(""); // relative path of a module that implements IClock; optional
-        double datarate @unit(bps);
-        @class(PreemptingServer);
+        string masterClockModule;
+        string slaveClockModule;
+        volatile double synchronizationInterval @unit(s); // clock synchronization period
+        volatile double synchronizationAccuracy @unit(s) = default(0s); // 0 means exact synchronization
+        @display("i=block/app");
+        @lifecycleSupport;
+    gates:
+        input socketIn @loose;
+        output socketOut @loose;
 }
+

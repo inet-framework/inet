@@ -28,7 +28,7 @@ Define_Module(PacketServer);
 
 void PacketServer::initialize(int stage)
 {
-    PacketServerBase::initialize(stage);
+    ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         processingTimer = new ClockEvent("ProcessingTimer");
 }

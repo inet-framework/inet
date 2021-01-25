@@ -24,7 +24,7 @@ Define_Module(TimeBasedTokenGenerator);
 
 void TimeBasedTokenGenerator::initialize(int stage)
 {
-    TokenGeneratorBase::initialize(stage);
+    ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         generationIntervalParameter = &par("generationInterval");
         numTokensParameter = &par("numTokens");

@@ -23,19 +23,29 @@ Define_Module(RandomDriftOscillator);
 
 void RandomDriftOscillator::initialize(int stage)
 {
-    ConstantDriftOscillator::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        timer = new cMessage("ChangeTimer");
-        scheduleAfter(par("changeInterval"), timer);
+        driftRateParameter = &par("driftRate");
+        driftRateChangeParameter = &par("driftRateChange");
+        driftRate = driftRateParameter->doubleValue() / 1E+6;
+    }
+    DriftingOscillatorBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL) {
+        changeTimer = new cMessage("ChangeTimer");
+        driftRateChangeLowerLimit = par("driftRateChangeLowerLimit").doubleValue() / 1E+6;
+        driftRateChangeUpperLimit = par("driftRateChangeUpperLimit").doubleValue() / 1E+6;
+        scheduleAfter(par("changeInterval"), changeTimer);
     }
 }
 
 void RandomDriftOscillator::handleMessage(cMessage *message)
 {
-    if (message == timer) {
-        double driftRateChange = par("driftRateChange").doubleValue() / 1E+6;
-        setDriftRate(driftRate + driftRateChange);
-        scheduleAfter(par("changeInterval"), timer);
+    if (message == changeTimer) {
+        driftRateChangeTotal += driftRateChangeParameter->doubleValue() / 1E+6;
+        driftRateChangeTotal = std::max(driftRateChangeTotal, driftRateChangeLowerLimit);
+        driftRateChangeTotal = std::min(driftRateChangeTotal, driftRateChangeUpperLimit);
+        driftRate = driftRateParameter->doubleValue();
+        setDriftRate(driftRate + driftRateChangeTotal);
+        scheduleAfter(par("changeInterval"), changeTimer);
     }
     else
         throw cRuntimeError("Unknown message");

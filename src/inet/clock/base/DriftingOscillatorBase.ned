@@ -15,31 +15,20 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_RANDOMDRIFTOSCILLATOR_H
-#define __INET_RANDOMDRIFTOSCILLATOR_H
+package inet.clock.base;
 
-#include "inet/clock/base/DriftingOscillatorBase.h"
-
-namespace inet {
-
-class INET_API RandomDriftOscillator : public DriftingOscillatorBase
+//
+// This is a base module for oscillators that drift relative to the nominal tick
+// length over time.
+//
+simple DriftingOscillatorBase extends OscillatorBase
 {
-  protected:
-    cMessage *changeTimer = nullptr;
-    cPar *driftRateParameter;
-    cPar *driftRateChangeParameter;
-    double driftRateChangeTotal = 0;
-    double driftRateChangeLowerLimit = NaN;
-    double driftRateChangeUpperLimit = NaN;
-
-  protected:
-    virtual ~RandomDriftOscillator() { cancelAndDelete(changeTimer); }
-
-    virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
-};
-
-} // namespace inet
-
-#endif
+    parameters:
+        displayStringTextFormat = default("%c (%n + %d)"); // determines the text that is written on top of the submodule
+        double nominalTickLength @unit(s) = default(0s); // 0 means simulation time precision
+        double tickOffset @unit(s) = default(0s); // shifts ticks to the past, must be in the range of [0, current tick length)
+        @signal[preOscillatorStateChanged];
+        @signal[postOscillatorStateChanged];
+        @class(DriftingOscillatorBase);
+}
 
