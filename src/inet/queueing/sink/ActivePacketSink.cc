@@ -24,15 +24,21 @@ Define_Module(ActivePacketSink);
 
 void ActivePacketSink::initialize(int stage)
 {
-    ActivePacketSinkBase::initialize(stage);
+    ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         collectionIntervalParameter = &par("collectionInterval");
         collectionTimer = new ClockEvent("CollectionTimer");
+        scheduleCollectionForAbsoluteTime = par("scheduleCollectionForAbsoluteTime");
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (!collectionTimer->isScheduled() && provider->canPullSomePacket(inputGate->getPathStartGate())) {
-            scheduleCollectionTimer();
-            collectPacket();
+            double offset = par("initialCollectionOffset");
+            if (offset != 0)
+                scheduleCollectionTimer(offset);
+            else {
+                scheduleCollectionTimer(collectionIntervalParameter->doubleValue());
+                collectPacket();
+            }
         }
     }
 }
@@ -41,7 +47,7 @@ void ActivePacketSink::handleMessage(cMessage *message)
 {
     if (message == collectionTimer) {
         if (provider->canPullSomePacket(inputGate->getPathStartGate())) {
-            scheduleCollectionTimer();
+            scheduleCollectionTimer(collectionIntervalParameter->doubleValue());
             collectPacket();
         }
     }
@@ -49,9 +55,12 @@ void ActivePacketSink::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-void ActivePacketSink::scheduleCollectionTimer()
+void ActivePacketSink::scheduleCollectionTimer(double delay)
 {
-    scheduleClockEventAfter(collectionIntervalParameter->doubleValue(), collectionTimer);
+    if (scheduleCollectionForAbsoluteTime)
+        scheduleClockEventAt(getClockTime() + delay, collectionTimer);
+    else
+        scheduleClockEventAfter(delay, collectionTimer);
 }
 
 void ActivePacketSink::collectPacket()
@@ -69,8 +78,13 @@ void ActivePacketSink::handleCanPullPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (!collectionTimer->isScheduled() && provider->canPullSomePacket(inputGate->getPathStartGate())) {
-        scheduleCollectionTimer();
-        collectPacket();
+        double offset = par("initialCollectionOffset");
+        if (offset != 0)
+            scheduleCollectionTimer(offset);
+        else {
+            scheduleCollectionTimer(collectionIntervalParameter->doubleValue());
+            collectPacket();
+        }
     }
 }
 

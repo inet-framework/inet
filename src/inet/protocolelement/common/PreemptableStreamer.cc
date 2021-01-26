@@ -34,7 +34,7 @@ PreemptableStreamer::~PreemptableStreamer()
 
 void PreemptableStreamer::initialize(int stage)
 {
-    PacketProcessorBase::initialize(stage);
+    ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         datarate = bps(par("datarate"));
         minPacketLength = b(par("minPacketLength"));

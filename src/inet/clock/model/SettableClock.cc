@@ -83,7 +83,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, bool resetOscillator)
         clocktime_t clockDelta = newClockTime - oldClockTime;
         for (auto event : events) {
             if (event->getRelative())
-                // NOTE: the simulation time of event execution is affected
+                // NOTE: the simulation time of event execution is not affected
                 event->setArrivalClockTime(event->getArrivalClockTime() + clockDelta);
             else {
                 clocktime_t arrivalClockTime = event->getArrivalClockTime();

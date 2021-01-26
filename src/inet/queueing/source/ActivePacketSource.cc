@@ -27,15 +27,21 @@ Define_Module(ActivePacketSource);
 
 void ActivePacketSource::initialize(int stage)
 {
-    ActivePacketSourceBase::initialize(stage);
+    ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         productionIntervalParameter = &par("productionInterval");
         productionTimer = new ClockEvent("ProductionTimer");
+        scheduleProductionForAbsoluteTime = par("scheduleProductionForAbsoluteTime");
     }
     else if (stage == INITSTAGE_QUEUEING) {
         if (!productionTimer->isScheduled() && (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()))) {
-            scheduleProductionTimer();
-            producePacket();
+            double offset = par("initialProductionOffset");
+            if (offset != 0)
+                scheduleProductionTimer(offset);
+            else {
+                scheduleProductionTimer(productionIntervalParameter->doubleValue());
+                producePacket();
+            }
         }
     }
 }
@@ -44,7 +50,7 @@ void ActivePacketSource::handleMessage(cMessage *message)
 {
     if (message == productionTimer) {
         if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
-            scheduleProductionTimer();
+            scheduleProductionTimer(productionIntervalParameter->doubleValue());
             producePacket();
         }
     }
@@ -52,9 +58,12 @@ void ActivePacketSource::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-void ActivePacketSource::scheduleProductionTimer()
+void ActivePacketSource::scheduleProductionTimer(double delay)
 {
-    scheduleClockEventAfter(productionIntervalParameter->doubleValue(), productionTimer);
+    if (scheduleProductionForAbsoluteTime)
+        scheduleClockEventAt(getClockTime() + delay, productionTimer);
+    else
+        scheduleClockEventAfter(delay, productionTimer);
 }
 
 void ActivePacketSource::producePacket()
@@ -69,8 +78,13 @@ void ActivePacketSource::handleCanPushPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (!productionTimer->isScheduled() && (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()))) {
-        scheduleProductionTimer();
-        producePacket();
+        double offset = par("initialProductionOffset");
+        if (offset != 0)
+            scheduleProductionTimer(offset);
+        else {
+            scheduleProductionTimer(productionIntervalParameter->doubleValue());
+            producePacket();
+        }
     }
 }
 

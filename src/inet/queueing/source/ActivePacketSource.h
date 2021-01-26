@@ -29,12 +29,13 @@ class INET_API ActivePacketSource : public ClockUserModuleMixin<ActivePacketSour
   protected:
     cPar *productionIntervalParameter = nullptr;
     ClockEvent *productionTimer = nullptr;
+    bool scheduleProductionForAbsoluteTime = false;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual void scheduleProductionTimer();
+    virtual void scheduleProductionTimer(double delay);
     virtual void producePacket();
 
   public:
