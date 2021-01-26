@@ -262,7 +262,7 @@ unsigned int Ieee80211VhtPreambleMode::computeNumberOfHTLongTrainings(unsigned i
     else if (numberOfSpaceTimeStreams == 7)
         return 8;
     else
-        numberOfSpaceTimeStreams;
+        return numberOfSpaceTimeStreams;
 }
 
 const simtime_t Ieee80211VhtPreambleMode::getDuration() const
