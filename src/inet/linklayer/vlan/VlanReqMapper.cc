@@ -36,6 +36,16 @@ void VlanReqMapper::initialize(int stage)
     }
 }
 
+cGate *VlanReqMapper::getRegistrationForwardingGate(cGate *gate)
+{
+    if (gate == outputGate)
+        return inputGate;
+    else if (gate == inputGate)
+        return outputGate;
+    else
+        throw cRuntimeError("Unknown gate");
+}
+
 void VlanReqMapper::processPacket(Packet *packet)
 {
     auto interfaceReq = packet->findTag<InterfaceReq>();
@@ -58,18 +68,6 @@ void VlanReqMapper::processPacket(Packet *packet)
     auto dispatchProtocolInd = packet->findTag<DispatchProtocolInd>();
     if (dispatchProtocolInd != nullptr)
         packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(dispatchProtocolInd->getProtocol());
-}
-
-void VlanReqMapper::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterService");
-    if (gate == outputGate)
-        registerService(protocol, inputGate, servicePrimitive);
-}
-
-void VlanReqMapper::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
 }
 
 } // namespace inet

@@ -26,7 +26,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API VlanReqMapper : public PacketFlowBase, public DefaultProtocolRegistrationListener
+class INET_API VlanReqMapper : public PacketFlowBase, public TransparentProtocolRegistrationListener
 {
   protected:
     IInterfaceTable *interfaceTable = nullptr;
@@ -36,9 +36,7 @@ class INET_API VlanReqMapper : public PacketFlowBase, public DefaultProtocolRegi
     virtual void initialize(int stage) override;
     virtual void processPacket(Packet *packet) override;
 
-  public:
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 
 } // namespace inet
