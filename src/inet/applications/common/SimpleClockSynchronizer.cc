@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+#ifdef INET_WITH_CLOCK
 #include "inet/applications/common/SimpleClockSynchronizer.h"
 
 #include "inet/common/ModuleAccess.h"
@@ -60,3 +61,4 @@ void SimpleClockSynchronizer::scheduleSynchronizationTimer()
 
 } // namespace
 
+#endif

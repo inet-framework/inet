@@ -18,6 +18,7 @@
 #ifndef __INET_SIMPLECLOCKSYNCHRONIZER_H
 #define __INET_SIMPLECLOCKSYNCHRONIZER_H
 
+#ifdef INET_WITH_CLOCK
 #include <functional>
 
 #include "inet/applications/base/ApplicationBase.h"
@@ -47,6 +48,7 @@ class INET_API SimpleClockSynchronizer : public ApplicationBase
 };
 
 } // namespace
+#endif
 
 #endif
 
