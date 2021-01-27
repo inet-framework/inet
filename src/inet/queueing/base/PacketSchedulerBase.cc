@@ -98,7 +98,9 @@ void PacketSchedulerBase::handleCanPushPacketChanged(cGate *gate)
 {
     int index = schedulePacket();
     if (index != -1) {
-    producers[index]->handleCanPushPacketChanged(inputGates[index]->getPathStartGate());
+        auto producer = producers[index];
+        if (producer != nullptr)
+            producer->handleCanPushPacketChanged(inputGates[index]->getPathStartGate());
     }
 }
 
