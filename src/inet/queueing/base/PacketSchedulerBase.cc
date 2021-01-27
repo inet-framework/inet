@@ -49,7 +49,7 @@ void PacketSchedulerBase::initialize(int stage)
 
 int PacketSchedulerBase::callSchedulePacket() const
 {
-    // KLUDGE
+    // KLUDGE const_cast
     int index = const_cast<PacketSchedulerBase *>(this)->schedulePacket();
     if (index < 0 || static_cast<unsigned int>(index) >= inputGates.size())
         throw cRuntimeError("Scheduled packet from invalid input gate: %d", index);
@@ -96,8 +96,12 @@ void PacketSchedulerBase::pushPacket(Packet *packet, cGate *gate)
 
 void PacketSchedulerBase::handleCanPushPacketChanged(cGate *gate)
 {
-    int index = callSchedulePacket();
-    producers[index]->handleCanPushPacketChanged(inputGates[index]->getPathStartGate());
+    int index = schedulePacket();
+    if (index != -1) {
+        auto producer = producers[index];
+        if (producer != nullptr)
+            producer->handleCanPushPacketChanged(inputGates[index]->getPathStartGate());
+    }
 }
 
 bool PacketSchedulerBase::canPullSomePacket(cGate *gate) const

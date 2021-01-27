@@ -191,7 +191,9 @@ void PacketClassifierBase::handleCanPullPacketChanged(cGate *gate)
     auto packet = provider->canPullPacket(inputGate->getPathStartGate());
     if (packet != nullptr) {
         int index = callClassifyPacket(packet);
-        collectors[index]->handleCanPullPacketChanged(outputGates[index]->getPathEndGate());
+        auto collector = collectors[index];
+        if (collector != nullptr)
+            collector->handleCanPullPacketChanged(outputGates[index]->getPathEndGate());
     }
 }
 

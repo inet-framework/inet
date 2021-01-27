@@ -1,0 +1,4 @@
+# VLAN ID   MAC Address     Interface
+  0         switch2         eth0
+  0         sink1           eth0
+  0         sink2           eth0
