@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.applications.common;
+package inet.applications.clock;
 
 import inet.applications.contract.IApp;
 

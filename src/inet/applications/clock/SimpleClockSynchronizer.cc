@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/common/SimpleClockSynchronizer.h"
+#include "inet/applications/clock/SimpleClockSynchronizer.h"
 
 #include "inet/common/ModuleAccess.h"
 
