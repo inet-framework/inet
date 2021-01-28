@@ -16,7 +16,7 @@
 //
 
 cplusplus {{
-#include "inet/clock/contract/ClockTime.h"
+#include "inet/clock/common/ClockTime.h"
 }}
 
 import inet.common.INETDefs;
