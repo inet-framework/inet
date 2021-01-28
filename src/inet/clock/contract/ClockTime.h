@@ -15,17 +15,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_CLOCKTIME_H
-#define __INET_CLOCKTIME_H
+#ifndef __INET_CONTRACT_CLOCKTIME_H
+#define __INET_CONTRACT_CLOCKTIME_H
 
 #include "inet/common/INETDefs.h"
-#ifdef INET_WITH_CLOCK
-#include "inet/clock/common/ClockTime.h"
-#endif // INET_WITH_CLOCK
 
 namespace inet {
 
 #ifdef INET_WITH_CLOCK
+class ClockTime;
 #define CLOCKTIME_AS_SIMTIME(x)    (x).asSimTime()
 #define SIMTIME_AS_CLOCKTIME(x)    ClockTime::from(x)
 #else

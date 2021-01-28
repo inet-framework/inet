@@ -15,10 +15,6 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-cplusplus{{
-namespace inet { class IClock; }
-}}
-
 import inet.common.INETDefs;
 import inet.clock.common.ClockTime;
 import inet.clock.contract.IClock;
@@ -34,22 +30,9 @@ enum OverdueClockEventHandlingMode {
 
 message ClockEvent
 {
+    @customize;
     IClock *clock = nullptr;
     bool relative = false;
     clocktime_t arrivalClockTime = -1;
     OverdueClockEventHandlingMode overdueClockEventHandlingMode = UNSPECIFIED;
 }
-
-cplusplus(ClockEvent) {{
-    virtual void execute() override;
-}}
-
-cplusplus(cc) {{
-    void ClockEvent::execute()
-    {
-        if (clock != nullptr)
-            clock->handleClockEventOccurred(this);
-        cMessage::execute();
-    }
-}}
-
