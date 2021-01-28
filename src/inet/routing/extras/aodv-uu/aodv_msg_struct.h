@@ -18,7 +18,7 @@ namespace inetmanet {
 
 // this structures are a redifinition of def.h struct for omnet
 
-typedef struct
+struct AODV_ext
 {
     uint8_t type;
     uint8_t length;
@@ -26,7 +26,7 @@ typedef struct
     uint8_t getType() {return type;}
     uint8_t getLength() {return length;}
     /* Type specific data follows here */
-} AODV_ext;
+};
 
 /* A generic AODV packet header struct... */ /* Omnet++ definition */
 class AODV_msg : public FieldsChunk
