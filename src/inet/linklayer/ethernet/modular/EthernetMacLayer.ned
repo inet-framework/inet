@@ -26,6 +26,8 @@ import inet.queueing.contract.IPacketServer;
 module EthernetMacLayer like IEthernetMacLayer
 {
     parameters:
+        double bitrate @unit(bps);
+        *.bitrate = default(bitrate);
         outboundEmitter.signalName = "packetSentToLower";
         outboundEmitter.direction = "outbound";
         inboundEmitter.signalName = "packetReceivedFromLower";
