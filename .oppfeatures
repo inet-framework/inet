@@ -107,6 +107,7 @@
         requires = ""
         labels = "oscillator time"
         nedPackages = "
+                       inet.applications.clock
                        inet.clock.base
                        inet.clock.common
                        inet.clock.model

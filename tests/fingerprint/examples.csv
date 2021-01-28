@@ -499,7 +499,7 @@
 
 /examples/wireless/crosstalk/,       -f omnetpp.ini -c General -r 0,                2s,           0a4f-e755/tplx;7ef5-c624/~tNl;105a-8a94/~tND;8bd7-b622/tyf, PASS, wireless
 
-/examples/wireless/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         4b91-925c/tplx;2b55-3ab9/~tNl;4cd4-e6d5/~tND;56c2-93a8/tyf, PASS, wireless
+/examples/wireless/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         4b91-925c/tplx;2b55-3ab9/~tNl;d5bf-a4c2/~tND;56c2-93a8/tyf, PASS, wireless
 
 /examples/wireless/errorrate/,       -f omnetpp.ini -c General -r 0,                100s,         0bb3-adca/tplx;726d-5e7e/~tNl;1549-93b8/~tND;cf24-943a/tyf, PASS, wireless
 
