@@ -26,6 +26,12 @@
 
 namespace inet {
 
+/**
+ * This class implements the event scheduler interface of OMNeT++ to provide a
+ * real time scheduling mechanism. The events are scheduled so that the events
+ * are executed according to the time of the underlying operating system. All
+ * time values are measured in nanoseconds.
+ */
 class INET_API RealTimeScheduler : public cScheduler
 {
   public:
@@ -60,7 +66,7 @@ class INET_API RealTimeScheduler : public cScheduler
 
   protected:
     virtual void advanceSimTime();
-    virtual bool receiveWithTimeout(long usec);
+    virtual bool receiveWithTimeout(int64_t timeout);
     virtual int receiveUntil(int64_t targetTime); // in nanoseconds, as returned by opp_get_monotonic_clock_nsecs()
 
   public:
