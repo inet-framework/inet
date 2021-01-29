@@ -191,6 +191,23 @@ Packet *UdpBasicFlooding::createPacket()
     return pk;
 }
 
+void UdpBasicFlooding::processStop()
+{
+    socket.close();
+    socket.setCallback(nullptr);
+    cancelEvent(timerNext);
+}
+
+void UdpBasicFlooding::processSend()
+{
+    if (stopTime < SIMTIME_ZERO || simTime() < stopTime) {
+        // send and reschedule next sending
+        if (isSource) // if the node is a sink, don't generate messages
+            generateBurst();
+    }
+}
+
+
 void UdpBasicFlooding::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
