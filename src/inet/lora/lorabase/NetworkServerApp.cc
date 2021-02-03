@@ -101,7 +101,7 @@ NetworkServerApp::~NetworkServerApp() {
         knownNodes.pop_back();
     }
     while(!receivedPackets.empty()) {
-        delete receivedPackets.back().rcvdPacket;
+        //delete receivedPackets.back().rcvdPacket;
         if (receivedPackets.back().endOfWaiting) {
             if (receivedPackets.back().endOfWaiting->isScheduled())
                 cancelAndDelete(receivedPackets.back().endOfWaiting);
@@ -133,7 +133,7 @@ void NetworkServerApp::finish()
     receivedRSSI.recordAs("receivedRSSI");
     recordScalar("totalReceivedPackets", totalReceivedPackets);
     while(!receivedPackets.empty())  {
-        delete receivedPackets.back().rcvdPacket;
+        //delete receivedPackets.back().rcvdPacket;
         if (receivedPackets.back().endOfWaiting && receivedPackets.back().endOfWaiting->isScheduled())
             cancelAndDelete(receivedPackets.back().endOfWaiting);
         else
@@ -275,8 +275,9 @@ void NetworkServerApp::processScheduledPacket(cMessage* selfMsg)
     int nodeNumber;
     for(uint i=0;i<receivedPackets.size();i++)
     {
-        const auto &frameAux = receivedPackets[i].rcvdPacket->peekAtFront<LoRaMacFrame>();
-        if(frameAux->getTransmitterAddress() == frame->getTransmitterAddress() && frameAux->getSequenceNumber() == frame->getSequenceNumber())
+        //const auto &frameAux = receivedPackets[i].rcvdPacket->peekAtFront<LoRaMacFrame>();
+        //if(frameAux->getTransmitterAddress() == frame->getTransmitterAddress() && frameAux->getSequenceNumber() == frame->getSequenceNumber())
+        if(receivedPackets[i].rcvdPacket == pkt)
         {
             packetNumber = i;
             nodeNumber = frame->getTransmitterAddress().getInt();
