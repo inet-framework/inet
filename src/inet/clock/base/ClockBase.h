@@ -36,6 +36,7 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
+    virtual void finish() override;
     virtual void refreshDisplay() const override;
     virtual void updateDisplayString() const;
 

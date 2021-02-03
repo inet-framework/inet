@@ -71,6 +71,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, bool resetOscillator)
     Enter_Method("setClockTime");
     clocktime_t oldClockTime = getClockTime();
     if (newClockTime != oldClockTime) {
+        emit(timeChangedSignal, oldClockTime.asSimTime());
         if (resetOscillator) {
             auto constantDriftOscillator = check_and_cast<ConstantDriftOscillator *>(oscillator);
             constantDriftOscillator->setTickOffset(0);
@@ -98,6 +99,7 @@ void SettableClock::setClockTime(clocktime_t newClockTime, bool resetOscillator)
                 }
             }
         }
+        emit(timeChangedSignal, newClockTime.asSimTime());
     }
 }
 
