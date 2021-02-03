@@ -25,8 +25,11 @@ simsignal_t PacketGateBase::gateStateChangedSignal = registerSignal("gateStateCh
 void PacketGateBase::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
+        bitrate = bps(par("bitrate"));
+        guardBand = par("guardBand");
         WATCH(isOpen_);
+    }
     else if (stage == INITSTAGE_QUEUEING)
         emit(gateStateChangedSignal, isOpen_);
 }
@@ -62,22 +65,24 @@ void PacketGateBase::processPacket(Packet *packet)
 
 bool PacketGateBase::canPushSomePacket(cGate *gate) const
 {
-    return isOpen_ && consumer->canPushSomePacket(outputGate->getPathStartGate());
+    return isOpen_ && canPacketFlowThrough(nullptr) && PacketFlowBase::canPushSomePacket(gate);
 }
 
 bool PacketGateBase::canPushPacket(Packet *packet, cGate *gate) const
 {
-    return isOpen_ && consumer->canPushPacket(packet, outputGate->getPathStartGate());
+    return isOpen_ && canPacketFlowThrough(packet) && PacketFlowBase::canPushPacket(packet, gate);
 }
 
 bool PacketGateBase::canPullSomePacket(cGate *gate) const
 {
-    return isOpen_ && provider->canPullSomePacket(inputGate->getPathStartGate());
+    auto packet = PacketFlowBase::canPullPacket(gate);
+    return isOpen_ && canPacketFlowThrough(packet) && PacketFlowBase::canPullSomePacket(gate);
 }
 
 Packet *PacketGateBase::canPullPacket(cGate *gate) const
 {
-    return isOpen_ ? provider->canPullPacket(inputGate->getPathStartGate()) : nullptr;
+    auto packet = PacketFlowBase::canPullPacket(gate);
+    return isOpen_ && canPacketFlowThrough(packet) ? packet : nullptr;
 }
 
 void PacketGateBase::handleCanPushPacketChanged(cGate *gate)
@@ -92,6 +97,11 @@ void PacketGateBase::handleCanPullPacketChanged(cGate *gate)
     Enter_Method("handleCanPullPacketChanged");
     if (isOpen_)
         PacketFlowBase::handleCanPullPacketChanged(gate);
+}
+
+bool PacketGateBase::canPacketFlowThrough(Packet *packet) const
+{
+    return true;
 }
 
 } // namespace queueing

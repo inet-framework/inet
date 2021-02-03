@@ -28,6 +28,9 @@ module ClockSynchronizationExampleQueue extends CompoundPacketQueueBase
 {
     parameters:
         int numQueues;
+        double bitrate @unit(bps);
+        *.bitrate = default(bitrate);
+        *.guardBand = replaceUnit(96.0 / dropUnit(bitrate), "s");
     submodules:
         classifier: <default("ContentBasedClassifier")> like IPacketClassifier {
             parameters:

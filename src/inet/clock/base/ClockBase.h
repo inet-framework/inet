@@ -19,6 +19,7 @@
 #define __INET_CLOCKBASE_H
 
 #include "inet/clock/common/ClockTime.h"
+#include "inet/clock/common/ClockEvent.h"
 #include "inet/clock/contract/IClock.h"
 #include "inet/common/StringFormat.h"
 

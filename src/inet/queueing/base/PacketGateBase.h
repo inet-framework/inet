@@ -18,11 +18,14 @@
 #ifndef __INET_PACKETGATEBASE_H
 #define __INET_PACKETGATEBASE_H
 
+#include "inet/common/Units.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 #include "inet/queueing/contract/IPacketGate.h"
 
 namespace inet {
 namespace queueing {
+
+using namespace units::values;
 
 class INET_API PacketGateBase : public PacketFlowBase, public virtual IPacketGate
 {
@@ -30,11 +33,15 @@ class INET_API PacketGateBase : public PacketFlowBase, public virtual IPacketGat
     static simsignal_t gateStateChangedSignal;
 
   protected:
+    bps bitrate = bps(NaN);
+    simtime_t guardBand;
+
     bool isOpen_ = false;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void processPacket(Packet *packet) override;
+    virtual bool canPacketFlowThrough(Packet *packet) const;
 
   public:
     virtual bool isOpen() const override { return isOpen_; }

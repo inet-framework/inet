@@ -10,7 +10,7 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.// 
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.//
 
 package inet.examples.ethernet.gatepreemption;
 
@@ -81,8 +81,7 @@ module CustomMacLayer extends EthernetMacLayer
         phyHeaderInserter.typename = default("EthernetFragmentPhyHeaderInserter");
         fcsChecker.typename = default("EthernetFragmentFcsChecker");
         phyHeaderChecker.typename = default("EthernetFragmentPhyHeaderChecker");
-        volatile double bitrate @unit(bps);
-        server.datarate = bitrate;
+        server.datarate = default(bitrate);
     submodules:
         defragmenter: FragmentTagBasedDefragmenter {
             @display("p=500,300");

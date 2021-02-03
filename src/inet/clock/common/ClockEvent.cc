@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2020 OpenSim Ltd.
+// Copyright (C) 2021 OpenSim Ltd.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
@@ -15,20 +15,28 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_CONTRACT_CLOCKEVENT_H
-#define __INET_CONTRACT_CLOCKEVENT_H
+#include "inet/clock/common/ClockEvent.h"
 
-#include "inet/common/INETDefs.h"
+#include "inet/clock/contract/IClock.h"
 
 namespace inet {
 
-#ifdef INET_WITH_CLOCK
-class ClockEvent;
-#else
-typedef cMessage ClockEvent;
-#endif
+Register_Class(ClockEvent)
+
+clocktime_t ClockEvent::getArrivalClockTime() const
+{
+    if (clock == nullptr)
+        return SIMTIME_AS_CLOCKTIME(getArrivalTime());
+    else
+        return ClockEvent_Base::getArrivalClockTime();
+}
+
+void ClockEvent::execute()
+{
+    if (clock != nullptr)
+        clock->handleClockEventOccurred(this);
+    cMessage::execute();
+}
 
 } // namespace inet
-
-#endif
 

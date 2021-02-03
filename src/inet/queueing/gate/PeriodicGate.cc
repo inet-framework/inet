@@ -54,8 +54,8 @@ void PeriodicGate::initialize(int stage)
 void PeriodicGate::handleMessage(cMessage *message)
 {
     if (message == changeTimer) {
-        processChangeTimer();
         scheduleChangeTimer();
+        processChangeTimer();
     }
     else
         throw cRuntimeError("Unknown message");
@@ -75,6 +75,18 @@ void PeriodicGate::processChangeTimer()
         close();
     else
         open();
+}
+
+bool PeriodicGate::canPacketFlowThrough(Packet *packet) const
+{
+    if (std::isnan(bitrate.get()))
+        return PacketGateBase::canPacketFlowThrough(packet);
+    else if (packet == nullptr)
+        return false;
+    else {
+        clocktime_t flowEndTime = getClockTime() + s(packet->getTotalLength() / bitrate).get();
+        return flowEndTime <= getArrivalClockTime(changeTimer) - SIMTIME_AS_CLOCKTIME(guardBand);
+    }
 }
 
 } // namespace queueing

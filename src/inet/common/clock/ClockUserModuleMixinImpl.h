@@ -18,8 +18,6 @@
 #ifndef __INET_CLOCKUSERMODULEMIXINIMPL_H
 #define __INET_CLOCKUSERMODULEMIXINIMPL_H
 
-#include "inet/clock/contract/ClockTime.h"
-#include "inet/clock/contract/IClock.h"
 #include "inet/common/clock/ClockUserModuleMixin.h"
 
 namespace inet {
