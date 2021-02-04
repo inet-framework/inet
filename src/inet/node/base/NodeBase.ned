@@ -46,6 +46,7 @@ module NodeBase like INetworkNode
         *.mobilityModule = default(exists(mobility) ? absPath(".mobility") : "");
         *.energySourceModule = default(exists(energyStorage) ? absPath(".energyStorage") : "");
         *.energyGeneratorModule = default(exists(energyGenerator) ? absPath(".energyGenerator") : "");
+        *.clockModule = default(exists(clock) ? absPath(".clock") : "");
         @class(NodeBase);
         @display("bgb=1256,822");
     submodules:

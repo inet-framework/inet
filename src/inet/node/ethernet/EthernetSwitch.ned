@@ -59,6 +59,7 @@ module EthernetSwitch
         *.fcsMode = fcsMode;
         **.interfaceTableModule = default(absPath(".interfaceTable"));
         **.macTableModule = default(absPath(".macTable"));
+        *.clockModule = default(exists(clock) ? absPath(".clock") : "");
 
         llc.registerProtocol = true;
         eth[*].mac.promiscuous = default(true);
