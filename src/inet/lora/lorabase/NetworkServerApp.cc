@@ -271,8 +271,41 @@ void NetworkServerApp::processScheduledPacket(cMessage* selfMsg)
     L3Address pickedGateway;
     double SNIRinGW = -99999999999;
     double RSSIinGW = -99999999999;
-    int packetNumber;
-    int nodeNumber;
+    int nodeNumber = -1;
+#if 1
+    auto it = std::find(receivedPackets.begin(), receivedPackets.end(), pkt);
+    if (it != receivedPackets.end()) {
+        nodeNumber = frame->getTransmitterAddress().getInt();
+        if (numReceivedPerNode.count(nodeNumber-1)>0)
+            ++numReceivedPerNode[nodeNumber-1];
+        else
+            numReceivedPerNode[nodeNumber-1] = 1;
+
+        for(auto & elem : it->possibleGateways)
+        {
+            if(SNIRinGW < std::get<1>(elem))
+            {
+                RSSIinGW = std::get<2>(elem);
+                SNIRinGW = std::get<1>(elem);
+                pickedGateway = std::get<0>(elem);
+            }
+        }
+    }
+    emit(LoRa_ServerPacketReceived, true);
+    if (simTime() >= getSimulation()->getWarmupPeriod())
+    {
+        counterUniqueReceivedPackets++;
+    }
+    receivedRSSI.collect(frame->getRSSI());
+    if(evaluateADRinServer)
+    {
+        evaluateADR(pkt, pickedGateway, SNIRinGW, RSSIinGW);
+    }
+    receivedPackets.erase(it);
+    delete pkt;
+    delete selfMsg;
+#else
+    int packetNumber = -1;
     for(uint i=0;i<receivedPackets.size();i++)
     {
         //const auto &frameAux = receivedPackets[i].rcvdPacket->peekAtFront<LoRaMacFrame>();
@@ -312,6 +345,7 @@ void NetworkServerApp::processScheduledPacket(cMessage* selfMsg)
     delete receivedPackets[packetNumber].rcvdPacket;
     delete selfMsg;
     receivedPackets.erase(receivedPackets.begin()+packetNumber);
+#endif
 }
 
 void NetworkServerApp::evaluateADR(Packet* pkt, L3Address pickedGateway, double SNIRinGW, double RSSIinGW)
