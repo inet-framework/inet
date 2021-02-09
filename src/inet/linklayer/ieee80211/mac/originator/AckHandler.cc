@@ -31,23 +31,32 @@ void AckHandler::initialize(int stage)
     }
 }
 
+void AckHandler::updateAckStatus(SequenceControlField id, Status status) 
+{
+    auto identifier = id.toString();
+    auto it = ackStatuses.find(identifier);
+    if (it == ackStatuses.end()) {
+        ackStatuses.insert(std::make_pair(identifier, status));
+    } else {
+        it->second = status;
+    }
+}
+
 AckHandler::Status AckHandler::getAckStatus(SequenceControlField id)
 {
-    auto it = ackStatuses.find(id);
-    if (it == ackStatuses.end())
+    auto identifier = id.toString();
+    auto it = ackStatuses.find(identifier);
+    if (it == ackStatuses.end()){
         return Status::FRAME_NOT_YET_TRANSMITTED;
-    else
+    } else {
         return it->second;
+    }
 }
 
 AckHandler::Status AckHandler::getAckStatus(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     auto id = SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber());
-    auto it = ackStatuses.find(id);
-    if (it == ackStatuses.end())
-        return Status::FRAME_NOT_YET_TRANSMITTED;
-    else
-        return it->second;
+    return getAckStatus(id);
 }
 
 void AckHandler::processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader)
@@ -56,7 +65,7 @@ void AckHandler::processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, con
     auto status = getAckStatus(id);
     if (status == Status::FRAME_NOT_YET_TRANSMITTED)
         throw cRuntimeError("ackedFrame = %s is not yet transmitted", ackedHeader->getName());
-    ackStatuses[id] = Status::ACK_ARRIVED;
+    updateAckStatus(id, Status::ACK_ARRIVED);
 }
 
 void AckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
@@ -64,12 +73,12 @@ void AckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211Data
     auto id = SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber());
     if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
         if (dataHeader->getAckPolicy() == NORMAL_ACK)
-            ackStatuses[id] = Status::WAITING_FOR_ACK;
+            updateAckStatus(id, Status::WAITING_FOR_ACK);
         else
-            ackStatuses[id] = Status::NO_ACK_REQUIRED;
+            updateAckStatus(id, Status::NO_ACK_REQUIRED);
     }
     else
-        ackStatuses[id] = Status::NO_ACK_REQUIRED;
+        updateAckStatus(id, Status::NO_ACK_REQUIRED);
 }
 
 void AckHandler::frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
@@ -77,7 +86,7 @@ void AckHandler::frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>& 
     auto id = SequenceControlField(dataOrMgmtHeader->getSequenceNumber(), dataOrMgmtHeader->getFragmentNumber());
     auto status = getAckStatus(id);
     ASSERT(status != Status::WAITING_FOR_ACK);
-    ackStatuses[id] = Status::FRAME_NOT_YET_TRANSMITTED;
+    updateAckStatus(id, Status::FRAME_NOT_YET_TRANSMITTED);
 }
 
 bool AckHandler::isEligibleToTransmit(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
@@ -99,7 +108,7 @@ void AckHandler::processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& 
         if (dataHeader->getAckPolicy() == NORMAL_ACK) {
             ASSERT(getAckStatus(dataOrMgmtHeader) == Status::WAITING_FOR_ACK);
             auto id = SequenceControlField(dataOrMgmtHeader->getSequenceNumber(), dataOrMgmtHeader->getFragmentNumber());
-            ackStatuses[id] = Status::ACK_NOT_ARRIVED;
+            updateAckStatus(id, Status::ACK_NOT_ARRIVED);
         }
     }
 }
@@ -107,7 +116,7 @@ void AckHandler::processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& 
 void AckHandler::dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
     auto id = SequenceControlField(dataOrMgmtHeader->getSequenceNumber(), dataOrMgmtHeader->getFragmentNumber());
-    ackStatuses.erase(id);
+    ackStatuses.erase(id.toString());
 }
 
 std::string AckHandler::getStatusString(Status status)
@@ -125,7 +134,7 @@ std::string AckHandler::getStatusString(Status status)
 void AckHandler::printAckStatuses()
 {
     for (auto ackStatus : ackStatuses) {
-        std::cout << "Seq Num = " << ackStatus.first.getSequenceNumber() << " " << "Frag Num = " << (int)ackStatus.first.getFragmentNumber() << std::endl;
+        std::cout << "Seq Num = " << ackStatus.first << std::endl;
         std::cout << "Status = " << getStatusString(ackStatus.second) << std::endl;
     }
     std::cout << "=========================================" << std::endl;

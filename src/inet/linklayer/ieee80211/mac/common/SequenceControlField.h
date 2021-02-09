@@ -18,6 +18,8 @@
 #ifndef __INET_SEQUENCECONTROLFIELD_H
 #define __INET_SEQUENCECONTROLFIELD_H
 
+#include <string>
+#include <sstream>
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/common/Ieee80211Defs.h"
 
@@ -41,6 +43,8 @@ class INET_API SequenceControlField
     SequenceNumber getSequenceNumber() const { return sequenceNumber; }
     FragmentNumber getFragmentNumber() const { return fragmentNumber; }
     bool operator<(const SequenceControlField& other) const;
+
+    std::string toString();
 };
 
 inline std::ostream& operator<<(std::ostream& os, const SequenceControlField& field) { return os << field.getSequenceNumber() << ":" << (int)field.getFragmentNumber(); }

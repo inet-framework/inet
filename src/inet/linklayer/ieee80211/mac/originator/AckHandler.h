@@ -19,6 +19,7 @@
 #define __INET_ACKHANDLER_H
 
 #include <map>
+#include <string>
 
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
 #include "inet/linklayer/ieee80211/mac/contract/IAckHandler.h"
@@ -38,12 +39,13 @@ class INET_API AckHandler : public cSimpleModule, public IAckHandler
     };
 
   protected:
-    std::map<SequenceControlField, Status> ackStatuses;
+    std::map<std::string, Status> ackStatuses;
 
   protected:
     virtual void initialize(int stage) override;
     virtual Status getAckStatus(SequenceControlField id);
     void printAckStatuses();
+    void updateAckStatus(SequenceControlField id, Status status);
 
   public:
     virtual ~AckHandler() {}

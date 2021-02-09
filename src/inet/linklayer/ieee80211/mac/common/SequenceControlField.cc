@@ -39,6 +39,12 @@ bool SequenceControlField::operator<(const SequenceControlField& other) const
            (sequenceNumber == other.sequenceNumber && fragmentNumber < other.fragmentNumber);
 }
 
+std::string SequenceControlField::toString() {
+    std::stringstream ss;
+    ss << *this;
+    return ss.str();
+}
+
 } /* namespace ieee80211 */
 } /* namespace inet */
 
