@@ -29,7 +29,7 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
   protected:
     int index = 0;
     clocktime_t offset;
-    std::vector<clocktime_t> durations;
+    cValueArray *durations = nullptr;
 
     ClockEvent *changeTimer = nullptr;
 
