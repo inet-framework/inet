@@ -1284,6 +1284,10 @@ typedef value<double, units::mAh> mAh;
 typedef value<double, units::kHz> kHz;
 typedef value<double, units::MHz> MHz;
 typedef value<double, units::GHz> GHz;
+typedef value<double, units::ps> ps;
+typedef value<double, units::ns> ns;
+typedef value<double, units::us> us;
+typedef value<double, units::ms> ms;
 typedef value<simtime_t, units::ps> psimsec;
 typedef value<simtime_t, units::ns> nsimsec;
 typedef value<simtime_t, units::us> usimsec;
@@ -1422,6 +1426,29 @@ std::ostream& operator<<(std::ostream& os, const value<Value, units::bps>& value
     else {
         os << value.get() << ' ';
         output_unit<units::bps>::fn(os);
+    }
+    return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const value<double, units::s>& value)
+{
+    if (value == values::s(0))
+        os << "0 s";
+    else if (value.get() == INFINITY)
+        os << "inf s";
+    else if (value.get() == -INFINITY)
+        os << "-inf s";
+    else if (value > values::ps(-1000.0) && value < values::ps(1000.0))
+        os << values::ps(value);
+    else if (value > values::ns(-1000.0) && value < values::ns(1000.0))
+        os << values::ns(value);
+    else if (value > values::us(-1000.0) && value < values::us(1000.0))
+        os << values::us(value);
+    else if (value > values::ms(-1000.0) && value < values::ms(1000.0))
+        os << values::ms(value);
+    else {
+        os << value.get() << ' ';
+        output_unit<units::s>::fn(os);
     }
     return os;
 }
