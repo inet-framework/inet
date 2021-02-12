@@ -116,9 +116,9 @@ EV_FORMAT_OBJECT\(\&v\) -> 0x[0-9a-f]+
 
 cNamedObject n1\("name"\)
 n1 -> \(omnetpp::cNamedObject\)name
-EV_FORMAT_OBJECT\(n1\) -> 
+EV_FORMAT_OBJECT\(n1\) -> \(omnetpp::cNamedObject\)name
 &n1 -> \(omnetpp::cNamedObject\)name
-EV_FORMAT_OBJECT\(&n1\) -> 
+EV_FORMAT_OBJECT\(&n1\) -> \(omnetpp::cNamedObject\)name
 
 cNamedObject \*n2 = nullptr
 n2 -> <nullptr>
@@ -147,7 +147,7 @@ p2 -> <nullptr>
 EV_FORMAT_OBJECT\(p2\) -> <nullptr>
 
 cObject \*p3 = new Packet\("name"\)
-\*p3 -> \(inet::Packet\)name \(0 B\) \(inet::EmptyChunk\) 
+\*p3 -> \(inet::Packet\)name \(0 B\) \(inet::EmptyChunk\)
 EV_FORMAT_OBJECT\(\*p3\) -> \[2m\(Packet\)\[0m\[3mname\[0m \(0 B\) \[2mEmptyChunk\[0m
 p3 -> \(inet::Packet\)name \(0 B\) \(inet::EmptyChunk\)
 EV_FORMAT_OBJECT\(p3\) -> \[2m\(Packet\)\[0m\[3mname\[0m \(0 B\) \[2mEmptyChunk\[0m
