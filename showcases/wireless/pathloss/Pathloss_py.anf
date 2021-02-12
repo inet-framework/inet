@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="results/Coexistence-*.sca"/>
-        <input pattern="results/*Only-*.sca"/>
+        <input pattern="results/General-*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/barchart.png" id="1602" name="Wifi performance" template="barchart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/scatterchart.png" id="1" name="FreeSpacePathLoss, TwoRayGroundReflection and TwoRayInterference" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script>
                 <![CDATA[import math
 import numpy as np
 import pandas as pd
-from omnetpp.scave import results, chart, plot, utils
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import xticks
+from omnetpp.scave import results, chart, utils, plot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -20,10 +18,12 @@ utils.preconfigure_plot(props)
 
 # collect parameters for query
 filter_expression = props["filter"]
+xaxis_itervar = props["xaxis_itervar"]
+iso_itervars = utils.split(props["iso_itervar"])
 
-# query scalar data into dataframe
+# query data into a data frame
 try:
-    df = results.get_scalars(filter_expression, include_attrs=True, include_itervars=True, include_runattrs=True)
+    df = results.get_scalars(filter_expression, include_runattrs=True, include_attrs=True, include_itervars=True)
 except ValueError as e:
     plot.set_warning("Error while querying results: " + str(e))
     exit(1)
@@ -32,59 +32,115 @@ if df.empty:
     plot.set_warning("The result filter returned no data.")
     exit(1)
 
-groups = props["groups"].split(",")
-series = props["series"].split(",")
+if not xaxis_itervar and not iso_itervars:
+    print("The 'Itervar for X Axis' and 'Itervar for iso line' options were not set in the dialog, inferring them from the data..")
+    xaxis_itervar, iso_itervar = utils.pick_two_columns(df)
+    iso_itervars = [iso_itervar] if iso_itervar else []
+    print("X axis: " + xaxis_itervar + " iso lines: " + ",".join(iso_itervars))
 
-if not groups[0] and not series[0]:
-    print("The Groups and Series options were not set in the dialog, inferring them from the data.")
-    g, s = ("module", "name") if len(df) == 1 else utils.pick_two_columns(df)
-    groups, series = [g], [s]
-
-if not groups[0] or not series[0]:
-    plot.set_warning("Please set both the Groups and Series properties in the dialog - or neither, for automatic setup.")
+if xaxis_itervar:
+    utils.assert_columns_exist(df, [xaxis_itervar], "The iteration variable for the X axis could not be found")
+    df[xaxis_itervar] = pd.to_numeric(df[xaxis_itervar], errors="ignore")
+else:
+    plot.set_warning("Please select the iteration variable for the X axis!")
     exit(1)
 
-utils.assert_columns_exist(df, groups + series, "No such iteration variable or run attribute")
+if iso_itervars:
+    utils.assert_columns_exist(df, iso_itervars, "An iteration variable for the iso lines could not be found")
+    for iv in iso_itervars:
+        if iv:
+            df[iv] = pd.to_numeric(df[iv], errors="ignore")
 
-for c in groups + series:
-    df[c] = pd.to_numeric(df[c], errors="ignore")
+if df.empty:
+    plot.set_warning("Select scalars for the Y axis in the Properties dialog")
+    exit(1)
 
-df.sort_values(by=groups+series, axis='index', inplace=True)
+uninteresting = ["runID", "value", "datetime", "iterationvars",
+                "iterationvarsf", "measurement", "processid",
+                "replication", "runnumber", "seedset", "title",
+                "source", "interpolationmode"]
 
-names = utils.get_names_for_title(df, props)
+for c in df:
+    ul = len(df[c].unique())
+    if ul > 1 and c != xaxis_itervar and c not in iso_itervars and c not in uninteresting:
+        print("Points are averaged from an overall", ul, "unique", c, "values.")
+
+scalar_names = ', '.join(df["name"].unique())
 
 confidence_level_str = props["confidence_level"] if "confidence_level" in props else "none"
 
-plt.title("Wifi performance")
+if confidence_level_str == "none":
+    df = pd.pivot_table(df, values="value", columns=iso_itervars, index=xaxis_itervar)
+    errors_df = None
+else:
+    confidence_level = float(confidence_level_str[:-1])/100
+    conf_int = lambda values: utils.confidence_interval(confidence_level, values) if len(values) > 1 else math.nan
 
-df = pd.pivot_table(df, index='experiment', values='value')
+    pivoted = pd.pivot_table(df, values="value", columns=iso_itervars, index=xaxis_itervar if xaxis_itervar else "name", aggfunc=[np.mean, conf_int], dropna=False)
+    df = pivoted["mean"]
+    errors_df = pivoted["<lambda>"]
 
-df.sort_values(by="experiment", axis='index', inplace=True, ascending=False)
-print(df)
+legend_cols, _ = utils.extract_label_columns(df)
 
-df.columns=['Number of packets received']
-df.index=['Wifi only','Wifi+WPAN coexistence']
+p = plot if chart.is_native_chart() else plt
 
-df.plot(kind='bar', ax=plt.gca(), zorder=2, align='center', width=0.8, figsize=(8,6))
+try:
+    xs = pd.to_numeric(df.index.values)
+    p.xlabel(xaxis_itervar)
+except:
+    xs = np.zeros_like(df.index.values)
 
-plt.legend()
-plt.grid(axis='y', linestyle='--')
-xticks(rotation=0)
+p.ylabel(scalar_names)
 
-plt.xlabel('')
+for c in df.columns:
+    style = utils._make_line_args(props, c, df)
+    if len(xs) < 2 and style["marker"] == ' ':
+        style["marker"] = '.'
+
+    ys = df[c].values
+    if iso_itervars:
+        names = df[c].name
+        if type(names) != tuple:
+            names = [names]
+        label = ', '.join([str(a) + "=" + str(b) for a, b in zip(iso_itervars, names)])
+    else:
+        label = scalar_names
+    p.plot(xs, ys, label=label, **style)
+
+    if errors_df is not None and not chart.is_native_chart():
+        style["linewidth"] = float(style["linewidth"])
+        style["linestyle"] = "none"
+        yerr = errors_df[c].values
+
+        if props["error_style"] == "Error bars":
+            plt.errorbar(xs, ys, yerr=yerr, capsize=float(props["cap_size"]), **style)
+        elif props["error_style"] == "Error band":
+            plt.fill_between(xs, ys-yerr, ys+yerr, alpha=float(props["band_alpha"]))
+
+
+utils.set_plot_title((scalar_names + " vs. " + xaxis_itervar) if xaxis_itervar else scalar_names)
+
+utils.postconfigure_plot(props)
 
 ax = plt.gca()
-for p in ax.patches:
-    ax.annotate(str(round(p.get_height(),2)), (p.get_x() + p.get_width() / 2, p.get_height() - 200),
-                horizontalalignment='center', verticalalignment='top', color='white', size=12)
-    
-bottom, top = plt.ylim()
-plt.ylim(bottom, top*1.05)
+handles, labels = ax.get_legend_handles_labels()
+newlabels = []
+for i in labels:
+    newlabels.append(i.replace('pathlosstype=',''))
+ax.legend(handles, newlabels, loc=1, markerscale=2)
 
-#plt.tight_layout()
+plt.title("FreeSpacePathLoss, TwoRayGroundReflection and TwoRayInterference")
 
-#plt.savefig('rcvdpackets.png', dpi=120, bbox_inches='tight')
-plt.savefig('wifiperformance.png', dpi=120, bbox_inches='tight', transparent=True)
+zoomed = False
+
+if zoomed:
+    plt.xlim(0,620)
+    plt.ylim(0.000000000001,0.00001)
+    plt.savefig("tworay2.svg", dpi=150, transparent=True)
+else:
+    plt.xlim(0,1000)
+    plt.ylim(0.00000000000001,1)
+    plt.savefig("tworay.svg", dpi=150, transparent=True)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -100,98 +156,40 @@ utils.export_data_if_needed(df, props)
     <package name="org.eclipse.swt.layout" />
     <package name="org.eclipse.swt.custom" />
   </import>
-  <layout x:class="GridLayout" numColumns="2" />
+  <layout x:class="GridLayout" numColumns="1" />
   <x:children>
-    <label text="Filter expression:" >
-        <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </label>
-
+    <label text="Filter expression for scalars as Y value:" />
     <styledText x:id="filter" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="filter" x:id.resultType="scalar">
-      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
     </styledText>
-
     <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
-      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="END" />
+      <layoutData x:class="GridData" horizontalAlignment="END" />
     </button>
-
-    <label text="Multiple attributes can be selected in both fields below, separated by commas.">
-        <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </label>
-
-    <label text="Groups:"/>
-    <combo x:id="groups" x:style="BORDER" x:id.content="module,name,experiment,module+name,$itervarnames,$runattrnames">
-        <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </combo>
-
-    <label text="Series:"/>
-    <combo x:id="series" x:style="BORDER" x:id.content="module,name,experiment,module+name,$itervarnames,$runattrnames">
-        <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </combo>
-
-    <label text="Scalar values will be averaged across all attributes not selected above.">
-        <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </label>
-
-  </x:children>
-</xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Bars" label="Bars">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
-
-  <import xmlns="http://sweet_swt.sf.net/xswt">
-    <package name="java.lang"/>
-    <package name="org.eclipse.swt.widgets" />
-    <package name="org.eclipse.swt.graphics" />
-    <package name="org.eclipse.swt.layout" />
-    <package name="org.eclipse.swt.custom" />
-    <package name="org.omnetpp.common.wizard.support" />
-    <package name="org.omnetpp.ned.editor.wizards.support" />
-    <package name="org.omnetpp.cdt.wizard.support" />
-  </import>
-  <layout x:class="GridLayout"/>
-
-  <x:children>
-
-    <group text="Bars">
-      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
-      <layout x:class="GridLayout" numColumns="2"/>
+    <composite>
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
+      <layout x:class="GridLayout" numColumns="2" />
       <x:children>
 
-        <!-- Baseline -->
-        <label text="Baseline:"/>
-        <text x:id="baseline" x:id.default="0" x:style="BORDER">
-          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-        </text>
-
-        <!-- Bar placement:Aligned/Overlap/InFront/Stacked -->
-        <label text="Bar placement:"/>
-        <combo x:id="bar_placement" x:id.default="Aligned" x:style="BORDER|READ_ONLY">
-          <add x:p0="Aligned"/>
-          <add x:p0="Overlap"/>
-          <add x:p0="InFront"/>
-          <add x:p0="Stacked"/>
+        <label text="Itervar for X axis:"/>
+        <combo x:id="xaxis_itervar" x:id.content="$itervarnames" x:style="BORDER">
+            <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
         </combo>
 
-        <!-- Rotate X labels by:0/30/45/60/90 -->
-        <label text="Rotate x labels by:"/>
-        <combo x:id="xlabel_rotation" x:id.default="0" x:style="BORDER|READ_ONLY">
-          <add x:p0="0"/>
-          <add x:p0="30"/>
-          <add x:p0="45"/>
-          <add x:p0="60"/>
-          <add x:p0="90"/>
+        <label text="Itervar(s) for iso lines:*"/>
+        <combo x:id="iso_itervar" x:id.content="$itervarnames,replication,module,name" x:style="BORDER">
+            <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
         </combo>
+        <label text="* This is a comma-separated list of iteration variable, run attribute, or result attribute names.">
+            <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" horizontalSpan="2" />
+        </label>
 
       </x:children>
-    </group>
-
+    </composite>
   </x:children>
 </xswt>
 ]]>
             </dialogPage>
-            <dialogPage id="Confidence Interval" label="Confidence Interval">
+            <dialogPage id="Lines" label="Lines">
                 <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
@@ -209,24 +207,76 @@ utils.export_data_if_needed(df, props)
 
   <x:children>
 
-    <group text="Error Markers">
-      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+    <group text="Lines">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
       <layout x:class="GridLayout" numColumns="2"/>
       <x:children>
 
-    <label text="Confidence level:"/>
-    <combo x:id="confidence_level" x:id.default="95%" x:style="BORDER|READ_ONLY">
+    <label text="Draw style:"/>
+    <combo x:id="drawstyle" x:id.default="auto" x:style="BORDER|READ_ONLY">
+      <add x:p0="auto"/>
       <add x:p0="none"/>
-      <add x:p0="80%"/>
-      <add x:p0="85%"/>
-      <add x:p0="90%"/>
-      <add x:p0="95%"/>
-      <add x:p0="99.5%"/>
-      <add x:p0="99.9%"/>
+      <add x:p0="linear"/>
+      <add x:p0="steps-pre"/>
+      <add x:p0="steps-mid"/>
+      <add x:p0="steps-post"/>
     </combo>
 
-    <label text="Cap size:"/>
-    <spinner x:id="cap_size" x:id.default="4" selection="4" minimum="0" maximum="10" x:style="BORDER"/>
+    <label text="Line color:"/>
+    <ColorChooser x:id="linecolor" x:id.default="" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="BEGINNING" grabExcessHorizontalSpace="false"/>
+    </ColorChooser>
+
+    <label text="Line style:"/>
+    <combo x:id="linestyle" x:id.default="solid" x:style="BORDER|READ_ONLY">
+      <add x:p0="none"/>
+      <add x:p0="solid"/>
+      <add x:p0="dotted"/>
+      <add x:p0="dashed"/>
+      <add x:p0="dashdot"/>
+    </combo>
+
+    <label text="Line width:"/>
+    <spinner x:id="linewidth" x:id.default="1.5" minimum="0" digits="1" selection="15" maximum="1000" x:style="BORDER"/>
+
+      </x:children>
+    </group>
+
+    <group text="Markers">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <label text="Marker:"/>
+    <combo x:id="marker" x:id.default="none" x:style="BORDER">
+      <add x:p0="auto"/>
+      <add x:p0="none"/>
+      <add x:p0=". (dot)"/>
+      <add x:p0=", (point)"/>
+      <add x:p0="v (triangle down)"/>
+      <add x:p0="^ (triangle up)"/>
+      <add x:p0="&lt; (triangle left)"/>
+      <add x:p0="&gt; (triangle right)"/>
+      <add x:p0="1 (tri down)"/>
+      <add x:p0="2 (tri up)"/>
+      <add x:p0="3 (tri left)"/>
+      <add x:p0="4 (tri right)"/>
+      <add x:p0="| (vline)"/>
+      <add x:p0="_ (hline)"/>
+      <add x:p0="8 (octagon)"/>
+      <add x:p0="o (circle)"/>
+      <add x:p0="s (square)"/>
+      <add x:p0="p (pentagon)"/>
+      <add x:p0="* (star)"/>
+      <add x:p0="+ (plus)"/>
+      <add x:p0="x (cross)"/>
+      <add x:p0="D (diamond)"/>
+      <add x:p0="d (thin diamond)"/>
+      <!-- TODO the rest...  -->
+    </combo>
+
+    <label text="Marker size:"/>
+    <spinner x:id="markersize" x:id.default="5" selection="6" minimum="0" maximum="100" x:style="BORDER"/>
 
       </x:children>
     </group>
@@ -270,7 +320,7 @@ utils.export_data_if_needed(df, props)
 
     <!-- X Axis { -->
     <group text="X axis">
-      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
       <layout x:class="GridLayout" numColumns="2"/>
       <x:children>
 
@@ -278,6 +328,20 @@ utils.export_data_if_needed(df, props)
     <text x:id="xaxis_title" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
+
+    <label text="Min:"/>
+    <text x:id="xaxis_min" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Max:"/>
+    <text x:id="xaxis_max" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <button x:id="xaxis_log" x:id.default="false" text="Logarithmic" x:style="CHECK">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
 
     <!-- } -->
       </x:children>
@@ -383,6 +447,77 @@ utils.export_data_if_needed(df, props)
     <!-- } -->
       </x:children>
     </group>
+
+  </x:children>
+</xswt>
+]]>
+            </dialogPage>
+            <dialogPage id="Confidence Interval" label="Confidence Interval">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <group text="Error Markers">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <label text="Confidence level:"/>
+    <combo x:id="confidence_level" x:id.default="95%" x:style="BORDER|READ_ONLY">
+      <add x:p0="none"/>
+      <add x:p0="80%"/>
+      <add x:p0="85%"/>
+      <add x:p0="90%"/>
+      <add x:p0="95%"/>
+      <add x:p0="99.5%"/>
+      <add x:p0="99.9%"/>
+    </combo>
+
+    <label text="Display style:"/>
+    <combo x:id="error_style" x:id.default="Error bars" x:style="BORDER|READ_ONLY">
+      <add x:p0="Error bars"/>
+      <add x:p0="Error band"/>
+    </combo>
+
+      </x:children>
+    </group>
+
+    <group text="Error Bar Visual Properties">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+        <label text="Cap size:"/>
+        <spinner x:id="cap_size" x:id.default="4" selection="4" minimum="0" maximum="10" x:style="BORDER"/>
+
+      </x:children>
+    </group>
+
+
+    <group text="Error Band Visual Properties">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+        <label text="Alpha:"/>
+        <spinner x:id="band_alpha" x:id.default="0.2" minimum="0" digits="2" selection="20" maximum="100" x:style="BORDER"/>
+        
+      </x:children>
+    </group>
+
 
   </x:children>
 </xswt>
@@ -578,48 +713,54 @@ utils.export_data_if_needed(df, props)
 </xswt>
 ]]>
             </dialogPage>
+            <property name="error_style" value="Error bars"/>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
-            <property name="grid_show" value="false"/>
+            <property name="grid_show" value="true"/>
+            <property name="linecolor" value=""/>
             <property name="confidence_level" value="none"/>
             <property name="matplotlibrc.figure.facecolor" value=""/>
             <property name="legend_labels" value="result titles"/>
-            <property name="yaxis_title" value=""/>
-            <property name="title" value=""/>
+            <property name="yaxis_title" value="Reception power [J]"/>
+            <property name="title" value="FreeSpacePathLoss, TwoRayGroundReflection and TwoRayInterference"/>
             <property name="cycle_seed" value="0"/>
-            <property name="bar_placement" value="Aligned"/>
-            <property name="yaxis_log" value="false"/>
+            <property name="yaxis_log" value="true"/>
             <property name="image_export_height" value="4"/>
+            <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value=""/>
-            <property name="xlabel_rotation" value="0"/>
+            <property name="xaxis_title" value="Distance [m]"/>
             <property name="grid_density" value="Major"/>
-            <property name="groups" value="configname"/>
-            <property name="yaxis_min" value=""/>
-            <property name="baseline" value="0"/>
+            <property name="xaxis_itervar" value="distance"/>
+            <property name="yaxis_min" value="0.00000000000001"/>
             <property name="image_export_filename" value=""/>
+            <property name="xaxis_min" value="0"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
+            <property name="linewidth" value="1.0"/>
             <property name="cap_size" value="4"/>
-            <property name="filter" value="type =~ scalar AND isfield =~ false AND module =~ &quot;CoexistenceShowcase.wifiHost2.app[0]&quot; AND name =~ packetReceived:count&#10;AND NOT (type =~ scalar AND runattr:experiment =~ WpanOnly AND module =~ &quot;CoexistenceShowcase.wifiHost2.app[0]&quot; AND name =~ packetReceived:count AND (&#10;    (runattr:replication =~ &quot;#0&quot;) OR&#10;    (runattr:replication =~ &quot;#1&quot;) OR&#10;    (runattr:replication =~ &quot;#2&quot;) OR&#10;    (runattr:replication =~ &quot;#3&quot;) OR&#10;    (runattr:replication =~ &quot;#4&quot;) OR&#10;    (runattr:replication =~ &quot;#5&quot;) OR&#10;    (runattr:replication =~ &quot;#6&quot;) OR&#10;    (runattr:replication =~ &quot;#7&quot;)&#10;))"/>
-            <property name="series" value="inifile"/>
+            <property name="filter" value="type =~ scalar AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ PathLossShowcase AND name =~ receptionPower:last AND (&#10;itervar:pathlosstype =~ &quot;FreeSpacePathLoss&quot; OR itervar:pathlosstype =~ &quot;TwoRayGroundReflection&quot; OR itervar:pathlosstype =~ &quot;TwoRayInterference&quot; &#10;)"/>
+            <property name="linestyle" value="solid"/>
+            <property name="markersize" value="5"/>
+            <property name="drawstyle" value="auto"/>
+            <property name="band_alpha" value="0.2"/>
+            <property name="marker" value="none"/>
             <property name="plt.style" value="default"/>
-            <property name="legend_show" value="false"/>
+            <property name="legend_show" value="true"/>
+            <property name="iso_itervar" value="pathlosstype"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
-            <property name="yaxis_max" value=""/>
+            <property name="yaxis_max" value="1"/>
+            <property name="xaxis_max" value="1000"/>
             <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value=""/>
+            <property name="matplotlibrc" value="figure.figsize : 10,6"/>
         </chart>
-        <chart icon="icons/full/obj/barchart.png" id="1600" name="Wpan performance" template="barchart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/scatterchart.png" id="2" name="FreeSpacePathLoss, LogNormalShadowing and RicianFading" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script>
                 <![CDATA[import math
 import numpy as np
 import pandas as pd
-from omnetpp.scave import results, chart, plot, utils
 import matplotlib.pyplot as plt
-import pandas as pd
-from matplotlib.pyplot import xticks
+from omnetpp.scave import results, chart, utils, plot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -627,10 +768,12 @@ utils.preconfigure_plot(props)
 
 # collect parameters for query
 filter_expression = props["filter"]
+xaxis_itervar = props["xaxis_itervar"]
+iso_itervars = utils.split(props["iso_itervar"])
 
-# query scalar data into dataframe
+# query data into a data frame
 try:
-    df = results.get_scalars(filter_expression, include_attrs=True, include_itervars=True, include_runattrs=True)
+    df = results.get_scalars(filter_expression, include_runattrs=True, include_attrs=True, include_itervars=True)
 except ValueError as e:
     plot.set_warning("Error while querying results: " + str(e))
     exit(1)
@@ -639,61 +782,115 @@ if df.empty:
     plot.set_warning("The result filter returned no data.")
     exit(1)
 
-groups = props["groups"].split(",")
-series = props["series"].split(",")
+if not xaxis_itervar and not iso_itervars:
+    print("The 'Itervar for X Axis' and 'Itervar for iso line' options were not set in the dialog, inferring them from the data..")
+    xaxis_itervar, iso_itervar = utils.pick_two_columns(df)
+    iso_itervars = [iso_itervar] if iso_itervar else []
+    print("X axis: " + xaxis_itervar + " iso lines: " + ",".join(iso_itervars))
 
-if not groups[0] and not series[0]:
-    print("The Groups and Series options were not set in the dialog, inferring them from the data.")
-    g, s = ("module", "name") if len(df) == 1 else utils.pick_two_columns(df)
-    groups, series = [g], [s]
-
-if not groups[0] or not series[0]:
-    plot.set_warning("Please set both the Groups and Series properties in the dialog - or neither, for automatic setup.")
+if xaxis_itervar:
+    utils.assert_columns_exist(df, [xaxis_itervar], "The iteration variable for the X axis could not be found")
+    df[xaxis_itervar] = pd.to_numeric(df[xaxis_itervar], errors="ignore")
+else:
+    plot.set_warning("Please select the iteration variable for the X axis!")
     exit(1)
 
-utils.assert_columns_exist(df, groups + series, "No such iteration variable or run attribute")
+if iso_itervars:
+    utils.assert_columns_exist(df, iso_itervars, "An iteration variable for the iso lines could not be found")
+    for iv in iso_itervars:
+        if iv:
+            df[iv] = pd.to_numeric(df[iv], errors="ignore")
 
-for c in groups + series:
-    df[c] = pd.to_numeric(df[c], errors="ignore")
+if df.empty:
+    plot.set_warning("Select scalars for the Y axis in the Properties dialog")
+    exit(1)
 
-df.sort_values(by=groups+series, axis='index', inplace=True)
+uninteresting = ["runID", "value", "datetime", "iterationvars",
+                "iterationvarsf", "measurement", "processid",
+                "replication", "runnumber", "seedset", "title",
+                "source", "interpolationmode"]
 
-names = utils.get_names_for_title(df, props)
+for c in df:
+    ul = len(df[c].unique())
+    if ul > 1 and c != xaxis_itervar and c not in iso_itervars and c not in uninteresting:
+        print("Points are averaged from an overall", ul, "unique", c, "values.")
+
+scalar_names = ', '.join(df["name"].unique())
 
 confidence_level_str = props["confidence_level"] if "confidence_level" in props else "none"
 
-plt.title("WPAN performance")
+if confidence_level_str == "none":
+    df = pd.pivot_table(df, values="value", columns=iso_itervars, index=xaxis_itervar)
+    errors_df = None
+else:
+    confidence_level = float(confidence_level_str[:-1])/100
+    conf_int = lambda values: utils.confidence_interval(confidence_level, values) if len(values) > 1 else math.nan
 
-df = pd.pivot_table(df, index='experiment', values='value')
+    pivoted = pd.pivot_table(df, values="value", columns=iso_itervars, index=xaxis_itervar if xaxis_itervar else "name", aggfunc=[np.mean, conf_int], dropna=False)
+    df = pivoted["mean"]
+    errors_df = pivoted["<lambda>"]
 
-df.sort_values(by="experiment", axis='index', inplace=True, ascending=False)
-print(df)
+legend_cols, _ = utils.extract_label_columns(df)
 
-df.columns=['Number of packets received']
-df.index=['WPAN only','Wifi+WPAN coexistence']
+p = plot if chart.is_native_chart() else plt
 
-df.plot(kind='bar', ax=plt.gca(), zorder=2, align='center', width=0.8, figsize=(8,6))
+try:
+    xs = pd.to_numeric(df.index.values)
+    p.xlabel(xaxis_itervar)
+except:
+    xs = np.zeros_like(df.index.values)
 
-#utils.postconfigure_plot(props)
+p.ylabel(scalar_names)
 
-plt.legend()
-plt.grid(axis='y', linestyle='--')
-xticks(rotation=0)
+for c in df.columns:
+    style = utils._make_line_args(props, c, df)
+    if len(xs) < 2 and style["marker"] == ' ':
+        style["marker"] = '.'
 
-plt.xlabel('')
+    ys = df[c].values
+    if iso_itervars:
+        names = df[c].name
+        if type(names) != tuple:
+            names = [names]
+        label = ', '.join([str(a) + "=" + str(b) for a, b in zip(iso_itervars, names)])
+    else:
+        label = scalar_names
+    p.plot(xs, ys, label=label, **style)
+
+    if errors_df is not None and not chart.is_native_chart():
+        style["linewidth"] = float(style["linewidth"])
+        style["linestyle"] = "none"
+        yerr = errors_df[c].values
+
+        if props["error_style"] == "Error bars":
+            plt.errorbar(xs, ys, yerr=yerr, capsize=float(props["cap_size"]), **style)
+        elif props["error_style"] == "Error band":
+            plt.fill_between(xs, ys-yerr, ys+yerr, alpha=float(props["band_alpha"]))
+
+
+utils.set_plot_title((scalar_names + " vs. " + xaxis_itervar) if xaxis_itervar else scalar_names)
+
+utils.postconfigure_plot(props)
 
 ax = plt.gca()
-for p in ax.patches:
-    ax.annotate(str(p.get_height()), (p.get_x() + p.get_width() / 2, p.get_height() - 2),
-                horizontalalignment='center', verticalalignment='top', color='white', size=12)
-    
-bottom, top = plt.ylim()
-plt.ylim(bottom, top*1.1)
+handles, labels = ax.get_legend_handles_labels()
+newlabels = []
+for i in labels:
+    newlabels.append(i.replace('pathlosstype=',''))
+ax.legend(handles, newlabels, loc=1, markerscale=2)
 
-#plt.tight_layout()
+plt.title("FreeSpacePathLoss, LogNormalShadowing and RicianFading")
 
-#plt.savefig('rcvdpackets.png', dpi=120, bbox_inches='tight')
-plt.savefig('wpanperformance.png', dpi=120, bbox_inches='tight', transparent=True)
+zoomed = False
+
+if zoomed:
+    plt.xlim(0,73)
+    plt.ylim(0.0000000001,0.000001)
+    plt.savefig("ricianlognormal2.svg", dpi=150, transparent=True)
+else:
+    plt.xlim(0,620)
+    plt.ylim(ymax=0.00001)
+    plt.savefig("ricianlognormal.svg", dpi=150, transparent=True)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -709,98 +906,40 @@ utils.export_data_if_needed(df, props)
     <package name="org.eclipse.swt.layout" />
     <package name="org.eclipse.swt.custom" />
   </import>
-  <layout x:class="GridLayout" numColumns="2" />
+  <layout x:class="GridLayout" numColumns="1" />
   <x:children>
-    <label text="Filter expression:" >
-        <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </label>
-
+    <label text="Filter expression for scalars as Y value:" />
     <styledText x:id="filter" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="filter" x:id.resultType="scalar">
-      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
     </styledText>
-
     <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
-      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="END" />
+      <layoutData x:class="GridData" horizontalAlignment="END" />
     </button>
-
-    <label text="Multiple attributes can be selected in both fields below, separated by commas.">
-        <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </label>
-
-    <label text="Groups:"/>
-    <combo x:id="groups" x:style="BORDER" x:id.content="module,name,experiment,module+name,$itervarnames,$runattrnames">
-        <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </combo>
-
-    <label text="Series:"/>
-    <combo x:id="series" x:style="BORDER" x:id.content="module,name,experiment,module+name,$itervarnames,$runattrnames">
-        <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </combo>
-
-    <label text="Scalar values will be averaged across all attributes not selected above.">
-        <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </label>
-
-  </x:children>
-</xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Bars" label="Bars">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
-
-  <import xmlns="http://sweet_swt.sf.net/xswt">
-    <package name="java.lang"/>
-    <package name="org.eclipse.swt.widgets" />
-    <package name="org.eclipse.swt.graphics" />
-    <package name="org.eclipse.swt.layout" />
-    <package name="org.eclipse.swt.custom" />
-    <package name="org.omnetpp.common.wizard.support" />
-    <package name="org.omnetpp.ned.editor.wizards.support" />
-    <package name="org.omnetpp.cdt.wizard.support" />
-  </import>
-  <layout x:class="GridLayout"/>
-
-  <x:children>
-
-    <group text="Bars">
-      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
-      <layout x:class="GridLayout" numColumns="2"/>
+    <composite>
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
+      <layout x:class="GridLayout" numColumns="2" />
       <x:children>
 
-        <!-- Baseline -->
-        <label text="Baseline:"/>
-        <text x:id="baseline" x:id.default="0" x:style="BORDER">
-          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-        </text>
-
-        <!-- Bar placement:Aligned/Overlap/InFront/Stacked -->
-        <label text="Bar placement:"/>
-        <combo x:id="bar_placement" x:id.default="Aligned" x:style="BORDER|READ_ONLY">
-          <add x:p0="Aligned"/>
-          <add x:p0="Overlap"/>
-          <add x:p0="InFront"/>
-          <add x:p0="Stacked"/>
+        <label text="Itervar for X axis:"/>
+        <combo x:id="xaxis_itervar" x:id.content="$itervarnames" x:style="BORDER">
+            <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
         </combo>
 
-        <!-- Rotate X labels by:0/30/45/60/90 -->
-        <label text="Rotate x labels by:"/>
-        <combo x:id="xlabel_rotation" x:id.default="0" x:style="BORDER|READ_ONLY">
-          <add x:p0="0"/>
-          <add x:p0="30"/>
-          <add x:p0="45"/>
-          <add x:p0="60"/>
-          <add x:p0="90"/>
+        <label text="Itervar(s) for iso lines:*"/>
+        <combo x:id="iso_itervar" x:id.content="$itervarnames,replication,module,name" x:style="BORDER">
+            <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
         </combo>
+        <label text="* This is a comma-separated list of iteration variable, run attribute, or result attribute names.">
+            <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" horizontalSpan="2" />
+        </label>
 
       </x:children>
-    </group>
-
+    </composite>
   </x:children>
 </xswt>
 ]]>
             </dialogPage>
-            <dialogPage id="Confidence Interval" label="Confidence Interval">
+            <dialogPage id="Lines" label="Lines">
                 <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
@@ -818,24 +957,76 @@ utils.export_data_if_needed(df, props)
 
   <x:children>
 
-    <group text="Error Markers">
-      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+    <group text="Lines">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
       <layout x:class="GridLayout" numColumns="2"/>
       <x:children>
 
-    <label text="Confidence level:"/>
-    <combo x:id="confidence_level" x:id.default="95%" x:style="BORDER|READ_ONLY">
+    <label text="Draw style:"/>
+    <combo x:id="drawstyle" x:id.default="auto" x:style="BORDER|READ_ONLY">
+      <add x:p0="auto"/>
       <add x:p0="none"/>
-      <add x:p0="80%"/>
-      <add x:p0="85%"/>
-      <add x:p0="90%"/>
-      <add x:p0="95%"/>
-      <add x:p0="99.5%"/>
-      <add x:p0="99.9%"/>
+      <add x:p0="linear"/>
+      <add x:p0="steps-pre"/>
+      <add x:p0="steps-mid"/>
+      <add x:p0="steps-post"/>
     </combo>
 
-    <label text="Cap size:"/>
-    <spinner x:id="cap_size" x:id.default="4" selection="4" minimum="0" maximum="10" x:style="BORDER"/>
+    <label text="Line color:"/>
+    <ColorChooser x:id="linecolor" x:id.default="" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="BEGINNING" grabExcessHorizontalSpace="false"/>
+    </ColorChooser>
+
+    <label text="Line style:"/>
+    <combo x:id="linestyle" x:id.default="solid" x:style="BORDER|READ_ONLY">
+      <add x:p0="none"/>
+      <add x:p0="solid"/>
+      <add x:p0="dotted"/>
+      <add x:p0="dashed"/>
+      <add x:p0="dashdot"/>
+    </combo>
+
+    <label text="Line width:"/>
+    <spinner x:id="linewidth" x:id.default="1.5" minimum="0" digits="1" selection="15" maximum="1000" x:style="BORDER"/>
+
+      </x:children>
+    </group>
+
+    <group text="Markers">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <label text="Marker:"/>
+    <combo x:id="marker" x:id.default="none" x:style="BORDER">
+      <add x:p0="auto"/>
+      <add x:p0="none"/>
+      <add x:p0=". (dot)"/>
+      <add x:p0=", (point)"/>
+      <add x:p0="v (triangle down)"/>
+      <add x:p0="^ (triangle up)"/>
+      <add x:p0="&lt; (triangle left)"/>
+      <add x:p0="&gt; (triangle right)"/>
+      <add x:p0="1 (tri down)"/>
+      <add x:p0="2 (tri up)"/>
+      <add x:p0="3 (tri left)"/>
+      <add x:p0="4 (tri right)"/>
+      <add x:p0="| (vline)"/>
+      <add x:p0="_ (hline)"/>
+      <add x:p0="8 (octagon)"/>
+      <add x:p0="o (circle)"/>
+      <add x:p0="s (square)"/>
+      <add x:p0="p (pentagon)"/>
+      <add x:p0="* (star)"/>
+      <add x:p0="+ (plus)"/>
+      <add x:p0="x (cross)"/>
+      <add x:p0="D (diamond)"/>
+      <add x:p0="d (thin diamond)"/>
+      <!-- TODO the rest...  -->
+    </combo>
+
+    <label text="Marker size:"/>
+    <spinner x:id="markersize" x:id.default="5" selection="6" minimum="0" maximum="100" x:style="BORDER"/>
 
       </x:children>
     </group>
@@ -879,7 +1070,7 @@ utils.export_data_if_needed(df, props)
 
     <!-- X Axis { -->
     <group text="X axis">
-      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
       <layout x:class="GridLayout" numColumns="2"/>
       <x:children>
 
@@ -887,6 +1078,20 @@ utils.export_data_if_needed(df, props)
     <text x:id="xaxis_title" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </text>
+
+    <label text="Min:"/>
+    <text x:id="xaxis_min" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Max:"/>
+    <text x:id="xaxis_max" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <button x:id="xaxis_log" x:id.default="false" text="Logarithmic" x:style="CHECK">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
 
     <!-- } -->
       </x:children>
@@ -992,6 +1197,77 @@ utils.export_data_if_needed(df, props)
     <!-- } -->
       </x:children>
     </group>
+
+  </x:children>
+</xswt>
+]]>
+            </dialogPage>
+            <dialogPage id="Confidence Interval" label="Confidence Interval">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <group text="Error Markers">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <label text="Confidence level:"/>
+    <combo x:id="confidence_level" x:id.default="95%" x:style="BORDER|READ_ONLY">
+      <add x:p0="none"/>
+      <add x:p0="80%"/>
+      <add x:p0="85%"/>
+      <add x:p0="90%"/>
+      <add x:p0="95%"/>
+      <add x:p0="99.5%"/>
+      <add x:p0="99.9%"/>
+    </combo>
+
+    <label text="Display style:"/>
+    <combo x:id="error_style" x:id.default="Error bars" x:style="BORDER|READ_ONLY">
+      <add x:p0="Error bars"/>
+      <add x:p0="Error band"/>
+    </combo>
+
+      </x:children>
+    </group>
+
+    <group text="Error Bar Visual Properties">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+        <label text="Cap size:"/>
+        <spinner x:id="cap_size" x:id.default="4" selection="4" minimum="0" maximum="10" x:style="BORDER"/>
+
+      </x:children>
+    </group>
+
+
+    <group text="Error Band Visual Properties">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+        <label text="Alpha:"/>
+        <spinner x:id="band_alpha" x:id.default="0.2" minimum="0" digits="2" selection="20" maximum="100" x:style="BORDER"/>
+        
+      </x:children>
+    </group>
+
 
   </x:children>
 </xswt>
@@ -1187,38 +1463,46 @@ utils.export_data_if_needed(df, props)
 </xswt>
 ]]>
             </dialogPage>
+            <property name="error_style" value="Error bars"/>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
-            <property name="grid_show" value="false"/>
-            <property name="confidence_level" value="95%"/>
+            <property name="grid_show" value="true"/>
+            <property name="linecolor" value=""/>
+            <property name="confidence_level" value="none"/>
             <property name="matplotlibrc.figure.facecolor" value=""/>
             <property name="legend_labels" value="result titles"/>
-            <property name="yaxis_title" value=""/>
+            <property name="yaxis_title" value="Reception power [J]"/>
             <property name="title" value=""/>
             <property name="cycle_seed" value="0"/>
-            <property name="bar_placement" value="Aligned"/>
-            <property name="yaxis_log" value="false"/>
+            <property name="yaxis_log" value="true"/>
             <property name="image_export_height" value="4"/>
+            <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value=""/>
-            <property name="xlabel_rotation" value="0"/>
+            <property name="xaxis_title" value="Distance [m]"/>
             <property name="grid_density" value="Major"/>
-            <property name="groups" value=""/>
+            <property name="xaxis_itervar" value="distance"/>
             <property name="yaxis_min" value=""/>
-            <property name="baseline" value="0"/>
             <property name="image_export_filename" value=""/>
+            <property name="xaxis_min" value="0"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
+            <property name="linewidth" value="1.0"/>
             <property name="cap_size" value="4"/>
-            <property name="filter" value="type =~ scalar AND isfield =~ false AND module =~ &quot;CoexistenceShowcase.wpanHost2.app[0]&quot; AND name =~ packetReceived:count&#10;AND NOT (type =~ scalar AND runattr:experiment =~ WifiOnly AND module =~ &quot;CoexistenceShowcase.wpanHost2.app[0]&quot; AND name =~ packetReceived:count AND (&#10;    (runattr:replication =~ &quot;#0&quot;) OR&#10;    (runattr:replication =~ &quot;#1&quot;) OR&#10;    (runattr:replication =~ &quot;#2&quot;) OR&#10;    (runattr:replication =~ &quot;#3&quot;) OR&#10;    (runattr:replication =~ &quot;#4&quot;) OR&#10;    (runattr:replication =~ &quot;#5&quot;) OR&#10;    (runattr:replication =~ &quot;#6&quot;) OR&#10;    (runattr:replication =~ &quot;#7&quot;)&#10;))"/>
-            <property name="series" value=""/>
+            <property name="filter" value="type =~ scalar AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ PathLossShowcase AND name =~ receptionPower:last AND (&#10;itervar:pathlosstype =~ &quot;FreeSpacePathLoss&quot; OR itervar:pathlosstype =~ &quot;LogNormalShadowing&quot;  OR itervar:pathlosstype =~ &quot;RicianFading&quot; &#10;)"/>
+            <property name="linestyle" value="solid"/>
+            <property name="markersize" value="5"/>
+            <property name="drawstyle" value="auto"/>
+            <property name="band_alpha" value="0.2"/>
+            <property name="marker" value="none"/>
             <property name="plt.style" value="default"/>
-            <property name="legend_show" value="false"/>
+            <property name="legend_show" value="true"/>
+            <property name="iso_itervar" value="pathlosstype"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
+            <property name="xaxis_max" value="570"/>
             <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value=""/>
+            <property name="matplotlibrc" value="figure.figsize : 10,6"/>
         </chart>
     </charts>
 </analysis>
