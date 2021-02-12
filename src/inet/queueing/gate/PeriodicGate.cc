@@ -31,6 +31,9 @@ void PeriodicGate::initialize(int stage)
         isOpen_ = par("initiallyOpen");
         offset = par("offset");
         durations = check_and_cast<cValueArray *>(par("durations").objectValue());
+        changeTimer = new ClockEvent("ChangeTimer");
+    }
+    else if (stage == INITSTAGE_QUEUEING) {
         if (durations->size() % 2 != 0)
             throw cRuntimeError("The duration parameter must contain an even number of values");
         while (offset > 0) {
@@ -43,11 +46,21 @@ void PeriodicGate::initialize(int stage)
             else
                 break;
         }
-        changeTimer = new ClockEvent("ChangeTimer");
-    }
-    else if (stage == INITSTAGE_QUEUEING) {
         if (index < (int)durations->size())
             scheduleChangeTimer();
+    }
+}
+
+void PeriodicGate::handleParameterChange(const char *name)
+{
+    if (name != nullptr) {
+        ASSERT(!changeTimer->isScheduled());
+        if (!strcmp(name, "offset"))
+            offset = par("offset");
+        else if (!strcmp(name, "initiallyOpen"))
+            isOpen_ = par("initiallyOpen");
+        else if (!strcmp(name, "durations"))
+            durations = check_and_cast<cValueArray *>(par("durations").objectValue());
     }
 }
 
