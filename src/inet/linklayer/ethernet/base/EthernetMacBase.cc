@@ -169,6 +169,7 @@ EthernetMacBase::EthernetMacBase()
 
 EthernetMacBase::~EthernetMacBase()
 {
+    delete curTxSignal;
     cancelAndDelete(endTxTimer);
     cancelAndDelete(endIfgTimer);
     cancelAndDelete(endPauseTimer);
@@ -702,6 +703,14 @@ void EthernetMacBase::cutEthernetSignalEnd(EthernetSignalBase *signal, simtime_t
     signal->setBitLength(newBitLength);
     signal->setDuration(duration);
 }
+
+void EthernetMacBase::txFinished()
+{
+    ASSERT(curTxSignal != nullptr);
+    delete curTxSignal;
+    curTxSignal = nullptr;
+}
+
 
 } // namespace inet
 

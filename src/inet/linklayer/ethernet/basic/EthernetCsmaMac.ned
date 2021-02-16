@@ -136,6 +136,10 @@ module EthernetCsmaMac like IEtherMac
         @signal[backoffSlotsGenerated](type=long);    // slotNumber value emitted
         @signal[transmissionStateChanged](type=long); // enum=MacTransmitState
         @signal[receptionStateChanged](type=long); // enum=MacReceiveState
+        @signal[transmissionStarted](type=inet::physicallayer::EthernetSignalBase);
+        @signal[transmissionEnded](type=inet::physicallayer::EthernetSignalBase);
+        @signal[receptionStarted](type=inet::physicallayer::EthernetSignalBase);
+        @signal[receptionEnded](type=inet::physicallayer::EthernetSignalBase);
 
         @statistic[txPk](title="packets transmitted"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

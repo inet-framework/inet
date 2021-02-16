@@ -117,6 +117,9 @@ class INET_API EthernetMacBase : public MacProtocolBase
     cMessage *endIfgTimer = nullptr;
     cMessage *endPauseTimer = nullptr;
 
+    // RX / TX signals:
+    EthernetSignalBase *curTxSignal = nullptr;
+
     // statistics
     unsigned long numFramesSent = 0;
     unsigned long numFramesReceivedOK = 0;
@@ -205,6 +208,7 @@ class INET_API EthernetMacBase : public MacProtocolBase
     void changeReceptionState(MacReceiveState newState);
 
     virtual void cutEthernetSignalEnd(EthernetSignalBase *signal, simtime_t duration);
+    virtual void txFinished();
 };
 
 } // namespace inet

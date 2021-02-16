@@ -331,6 +331,7 @@ void EthernetCsmaMac::processMsgFromNetwork(EthernetSignalBase *signal)
         ASSERT(!signal->isUpdate());
         channelBusySince = simTime();
         EV_INFO << "Reception of " << signal << " started.\n";
+        emit(receptionStartedSignal, signal);
         updateRxSignals(signal, endRxTime);
         changeReceptionState(RECEIVING_STATE);
     }
@@ -380,8 +381,10 @@ void EthernetCsmaMac::handleEndIFGPeriod()
     if (transmitState != WAIT_IFG_STATE && transmitState != SEND_IFG_STATE)
         throw cRuntimeError("Not in WAIT_IFG_STATE at the end of IFG period");
 
-    if (transmitState == SEND_IFG_STATE)
+    if (transmitState == SEND_IFG_STATE) {
+        emit(transmissionEndedSignal, curTxSignal);
         txFinished();
+    }
 
     EV_DETAIL << "IFG elapsed\n";
 
@@ -493,14 +496,15 @@ void EthernetCsmaMac::handleEndTxPeriod()
     if (transmitState != TRANSMITTING_STATE || (!duplexMode && receiveState != RX_IDLE_STATE))
         throw cRuntimeError("End of transmission, and incorrect state detected");
 
-    txFinished();
-
     if (currentTxFrame == nullptr)
         throw cRuntimeError("Frame under transmission cannot be found");
 
     numFramesSent++;
     numBytesSent += currentTxFrame->getByteLength();
     emit(packetSentToLowerSignal, currentTxFrame); // consider: emit with start time of frame
+
+    emit(transmissionEndedSignal, curTxSignal);
+    txFinished();
 
     const auto& header = currentTxFrame->peekAtFront<EthernetMacHeader>();
     if (header->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
@@ -605,6 +609,7 @@ void EthernetCsmaMac::sendSignal(EthernetSignalBase *signal, simtime_t_cref dura
     ASSERT(curTxSignal == nullptr);
     signal->setDuration(duration);
     curTxSignal = signal->dup();
+    emit(transmissionStartedSignal, curTxSignal);
     send(signal, SendOptions().transmissionId(curTxSignal->getId()).duration(duration), physOutGate);
 }
 
@@ -614,6 +619,7 @@ void EthernetCsmaMac::sendJamSignal()
     ASSERT(curTxSignal != nullptr);
     simtime_t duration = simTime() - curTxSignal->getCreationTime(); // TODO save and use start tx time
     cutEthernetSignalEnd(curTxSignal, duration); // TODO save and use start tx time
+    emit(transmissionEndedSignal, curTxSignal);
     send(curTxSignal, SendOptions().finishTx(curTxSignal->getId()).duration(duration), physOutGate);
     curTxSignal = nullptr;
 
@@ -629,18 +635,12 @@ void EthernetCsmaMac::sendJamSignal()
     changeTransmissionState(JAMMING_STATE);
 }
 
-void EthernetCsmaMac::txFinished()
-{
-    ASSERT(curTxSignal != nullptr);
-    delete curTxSignal;
-    curTxSignal = nullptr;
-}
-
 void EthernetCsmaMac::handleEndJammingPeriod()
 {
     if (transmitState != JAMMING_STATE)
         throw cRuntimeError("At end of JAMMING but not in JAMMING_STATE");
 
+    emit(transmissionEndedSignal, curTxSignal);
     txFinished();
     EV_DETAIL << "Jamming finished, executing backoff\n";
     handleRetransmission();
@@ -741,6 +741,8 @@ void EthernetCsmaMac::frameReceptionComplete()
     }
     if (signal->getSrcMacFullDuplex() != duplexMode)
         throw cRuntimeError("Ethernet misconfiguration: MACs on the same link must be all in full duplex mode, or all in half-duplex mode");
+
+    emit(receptionEndedSignal, signal);
 
     bool hasBitError = signal->hasBitError();
     auto packet = check_and_cast<Packet *>(signal->decapsulate());
