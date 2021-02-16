@@ -44,6 +44,9 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
 
   public:
     virtual ~PeriodicGate() { cancelAndDelete(changeTimer); }
+
+    virtual bool getInitiallyOpen() const { return par("initiallyOpen"); }
+    virtual const cValueArray *getDurations() const { return durations; }
 };
 
 } // namespace queueing
