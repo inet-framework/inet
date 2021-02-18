@@ -61,6 +61,7 @@ void PacketTransmitter::startTx(Packet *packet)
     txSignal = signal->dup();
     // 4. send signal start and notify subscribers
     emit(transmissionStartedSignal, signal);
+    prepareSignal(signal);
     send(signal, SendOptions().duration(signal->getDuration()), outputGate);
     // 5. schedule transmission end timer
     scheduleTxEndTimer(txSignal);
@@ -71,9 +72,9 @@ void PacketTransmitter::endTx()
     // 1. check current state
     ASSERT(isTransmitting());
     // 2. notify subscribers
+    emit(transmissionEndedSignal, txSignal);
     auto packet = check_and_cast<Packet *>(txSignal->decapsulate());
     handlePacketProcessed(packet);
-    emit(transmissionEndedSignal, txSignal);
     // 3. clear internal state
     delete txSignal;
     txSignal = nullptr;
