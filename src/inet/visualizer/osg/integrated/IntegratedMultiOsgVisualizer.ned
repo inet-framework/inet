@@ -19,6 +19,7 @@ package inet.visualizer.osg.integrated;
 
 import inet.visualizer.contract.IDataLinkVisualizer;
 import inet.visualizer.contract.IEnergyStorageVisualizer;
+import inet.visualizer.contract.IGateVisualizer;
 import inet.visualizer.contract.IIeee80211Visualizer;
 import inet.visualizer.contract.IInfoVisualizer;
 import inet.visualizer.contract.IIntegratedVisualizer;
@@ -63,6 +64,7 @@ module IntegratedMultiOsgVisualizer like IIntegratedVisualizer
         int numObstacleLossVisualizers = default(1);
         int numPacketDropVisualizers = default(1);
         int numQueueVisualizers = default(1);
+        int numGateVisualizers = default(1);
         int numRadioVisualizers = default(1);
         int numPhysicalLinkVisualizers = default(1);
         int numInterfaceTableVisualizers = default(1);
@@ -125,45 +127,49 @@ module IntegratedMultiOsgVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=450,100,row,100");
         }
-        radioVisualizer[numRadioVisualizers]: <default("RadioOsgVisualizer")> like IRadioVisualizer {
+        gateVisualizer[numGateVisualizers]: <default("GateOsgVisualizer")> like IGateVisualizer {
             parameters:
                 @display("p=450,200,row,100");
         }
-        physicalLinkVisualizer[numPhysicalLinkVisualizers]: <default("PhysicalLinkOsgVisualizer")> like IPhysicalLinkVisualizer {
+        radioVisualizer[numRadioVisualizers]: <default("RadioOsgVisualizer")> like IRadioVisualizer {
             parameters:
                 @display("p=450,300,row,100");
         }
-        interfaceTableVisualizer[numInterfaceTableVisualizers]: <default("InterfaceTableOsgVisualizer")> like IInterfaceTableVisualizer {
+        physicalLinkVisualizer[numPhysicalLinkVisualizers]: <default("PhysicalLinkOsgVisualizer")> like IPhysicalLinkVisualizer {
             parameters:
                 @display("p=450,400,row,100");
         }
-        dataLinkVisualizer[numDataLinkVisualizers]: <default("DataLinkOsgVisualizer")> like IDataLinkVisualizer {
+        interfaceTableVisualizer[numInterfaceTableVisualizers]: <default("InterfaceTableOsgVisualizer")> like IInterfaceTableVisualizer {
             parameters:
                 @display("p=450,500,row,100");
         }
-        linkBreakVisualizer[numLinkBreakVisualizers]: <default("LinkBreakOsgVisualizer")> like ILinkBreakVisualizer {
+        dataLinkVisualizer[numDataLinkVisualizers]: <default("DataLinkOsgVisualizer")> like IDataLinkVisualizer {
             parameters:
                 @display("p=450,600,row,100");
         }
-        ieee80211Visualizer[numIeee80211Visualizers]: <default("Ieee80211OsgVisualizer")> like IIeee80211Visualizer {
+        linkBreakVisualizer[numLinkBreakVisualizers]: <default("LinkBreakOsgVisualizer")> like ILinkBreakVisualizer {
             parameters:
                 @display("p=450,700,row,100");
         }
-        networkRouteVisualizer[numNetworkRouteVisualizers]: <default("NetworkRouteOsgVisualizer")> like INetworkRouteVisualizer {
+        ieee80211Visualizer[numIeee80211Visualizers]: <default("Ieee80211OsgVisualizer")> like IIeee80211Visualizer {
             parameters:
                 @display("p=450,800,row,100");
         }
-        routingTableVisualizer[numRoutingTableVisualizers]: <default("RoutingTableOsgVisualizer")> like IRoutingTableVisualizer {
+        networkRouteVisualizer[numNetworkRouteVisualizers]: <default("NetworkRouteOsgVisualizer")> like INetworkRouteVisualizer {
             parameters:
                 @display("p=450,900,row,100");
         }
-        transportRouteVisualizer[numTransportRouteVisualizers]: <default("TransportRouteOsgVisualizer")> like ITransportRouteVisualizer {
+        routingTableVisualizer[numRoutingTableVisualizers]: <default("RoutingTableOsgVisualizer")> like IRoutingTableVisualizer {
             parameters:
                 @display("p=450,1000,row,100");
         }
-        transportConnectionVisualizer[numTransportConnectionVisualizers]: <default("TransportConnectionOsgVisualizer")> like ITransportConnectionVisualizer {
+        transportRouteVisualizer[numTransportRouteVisualizers]: <default("TransportRouteOsgVisualizer")> like ITransportRouteVisualizer {
             parameters:
                 @display("p=450,1100,row,100");
+        }
+        transportConnectionVisualizer[numTransportConnectionVisualizers]: <default("TransportConnectionOsgVisualizer")> like ITransportConnectionVisualizer {
+            parameters:
+                @display("p=450,1200,row,100");
         }
 }
 

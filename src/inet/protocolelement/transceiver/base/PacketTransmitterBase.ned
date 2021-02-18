@@ -28,6 +28,7 @@ simple PacketTransmitterBase extends PacketProcessorBase
         @display("i=block/wtx");
         @signal[transmissionStarted](type=inet::physicallayer::Signal);
         @signal[transmissionEnded](type=inet::physicallayer::Signal);
+        @statistic[transmitting](title="transmitting"; type=int; source=count(transmissionStarted) - count(transmissionEnded); record=vector; interpolationmode=sample-hold);
     gates:
         input in;
         output out;

@@ -28,6 +28,7 @@ void PacketGateBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         bitrate = bps(par("bitrate"));
         guardBand = par("guardBand");
+        getDisplayString().setTagArg("i", 2, 20);
         WATCH(isOpen_);
     }
     else if (stage == INITSTAGE_QUEUEING)
@@ -44,6 +45,7 @@ void PacketGateBase::open()
     if (collector != nullptr)
         collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
     emit(gateStateChangedSignal, isOpen_);
+    updateDisplayString();
 }
 
 void PacketGateBase::close()
@@ -56,6 +58,7 @@ void PacketGateBase::close()
     if (collector != nullptr)
         collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
     emit(gateStateChangedSignal, isOpen_);
+    updateDisplayString();
 }
 
 void PacketGateBase::processPacket(Packet *packet)
@@ -102,6 +105,12 @@ void PacketGateBase::handleCanPullPacketChanged(cGate *gate)
 bool PacketGateBase::canPacketFlowThrough(Packet *packet) const
 {
     return true;
+}
+
+void PacketGateBase::updateDisplayString() const
+{
+    PacketFlowBase::updateDisplayString();
+    getDisplayString().setTagArg("i", 1, isOpen_ ? "green" : "red");
 }
 
 } // namespace queueing

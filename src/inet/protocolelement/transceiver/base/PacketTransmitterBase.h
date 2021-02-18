@@ -59,6 +59,7 @@ class INET_API PacketTransmitterBase : public ClockUserModuleMixin<OperationalMi
     virtual void handleStartOperation(LifecycleOperation *operation) override;
 
     virtual Signal *encodePacket(Packet *packet);
+    virtual void prepareSignal(Signal *signal);
 
     virtual void sendSignalStart(Signal *signal, int transmissionId);
     virtual void sendSignalProgress(Signal *signal, int transmissionId, b bitPosition, clocktime_t timePosition);

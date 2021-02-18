@@ -166,7 +166,6 @@ class INET_API EthernetMacBase : public MacProtocolBase
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initializeFlags();
-    virtual void initializeQueue();
     virtual void initializeStatistics();
 
     // finish

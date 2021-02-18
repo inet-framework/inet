@@ -75,21 +75,27 @@ Signal *PacketTransmitterBase::encodePacket(Packet *packet)
         insertPacketEvent(this, packet, PEK_PROPAGATED, channel->getDelay());
         increaseTimeTag<PropagationTimeTag>(packet, channel->getDelay());
     }
-    auto oldPacketProtocolTag = packet->removeTagIfPresent<PacketProtocolTag>();
-    packet->clearTags();
-    if (oldPacketProtocolTag != nullptr) {
-        auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
-        *newPacketProtocolTag = *oldPacketProtocolTag;
-    }
     auto signal = new Signal(packet->getName());
     signal->encapsulate(packet);
     signal->setDuration(calculateDuration(txDurationClockTime));
     return signal;
 }
 
+void PacketTransmitterBase::prepareSignal(Signal *signal)
+{
+    auto packet = check_and_cast<Packet *>(signal->getEncapsulatedPacket());
+    auto oldPacketProtocolTag = packet->removeTagIfPresent<PacketProtocolTag>();
+    packet->clearTags();
+    if (oldPacketProtocolTag != nullptr) {
+        auto newPacketProtocolTag = packet->addTag<PacketProtocolTag>();
+        *newPacketProtocolTag = *oldPacketProtocolTag;
+    }
+}
+
 void PacketTransmitterBase::sendSignalStart(Signal *signal, int transmissionId)
 {
     EV_INFO << "Sending signal start to channel" << EV_FIELD(signal) << EV_ENDL;
+    prepareSignal(signal);
     send(signal, SendOptions().duration(signal->getDuration()).transmissionId(transmissionId), outputGate);
 }
 
@@ -97,12 +103,14 @@ void PacketTransmitterBase::sendSignalProgress(Signal *signal, int transmissionI
 {
     simtime_t remainingDuration = signal->getDuration() - CLOCKTIME_AS_SIMTIME(timePosition);
     EV_INFO << "Sending signal progress to channel" << EV_FIELD(signal) << EV_FIELD(transmissionId) << EV_FIELD(remainingDuration, simsec(remainingDuration)) << EV_ENDL;
+    prepareSignal(signal);
     send(signal, SendOptions().duration(signal->getDuration()).updateTx(transmissionId, remainingDuration), outputGate);
 }
 
 void PacketTransmitterBase::sendSignalEnd(Signal *signal, int transmissionId)
 {
     EV_INFO << "Sending signal end to channel" << EV_FIELD(signal) << EV_FIELD(transmissionId) << EV_ENDL;
+    prepareSignal(signal);
     send(signal, SendOptions().duration(signal->getDuration()).finishTx(transmissionId), outputGate);
 }
 

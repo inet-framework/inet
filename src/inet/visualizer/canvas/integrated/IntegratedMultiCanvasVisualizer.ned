@@ -19,6 +19,7 @@ package inet.visualizer.canvas.integrated;
 
 import inet.visualizer.contract.IDataLinkVisualizer;
 import inet.visualizer.contract.IEnergyStorageVisualizer;
+import inet.visualizer.contract.IGateVisualizer;
 import inet.visualizer.contract.IIeee80211Visualizer;
 import inet.visualizer.contract.IInfoVisualizer;
 import inet.visualizer.contract.IIntegratedVisualizer;
@@ -64,6 +65,7 @@ module IntegratedMultiCanvasVisualizer like IIntegratedVisualizer
         int numObstacleLossVisualizers = default(1);
         int numPacketDropVisualizers = default(1);
         int numQueueVisualizers = default(1);
+        int numGateVisualizers = default(1);
         int numRadioVisualizers = default(1);
         int numPhysicalLinkVisualizers = default(1);
         int numInterfaceTableVisualizers = default(1);
@@ -126,45 +128,49 @@ module IntegratedMultiCanvasVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=450,100,row,100");
         }
-        radioVisualizer[numRadioVisualizers]: <default("RadioCanvasVisualizer")> like IRadioVisualizer {
+        gateVisualizer[numGateVisualizers]: <default("GateCanvasVisualizer")> like IGateVisualizer {
             parameters:
                 @display("p=450,200,row,100");
         }
-        physicalLinkVisualizer[numPhysicalLinkVisualizers]: <default("PhysicalLinkCanvasVisualizer")> like IPhysicalLinkVisualizer {
+        radioVisualizer[numRadioVisualizers]: <default("RadioCanvasVisualizer")> like IRadioVisualizer {
             parameters:
                 @display("p=450,300,row,100");
         }
-        interfaceTableVisualizer[numInterfaceTableVisualizers]: <default("InterfaceTableCanvasVisualizer")> like IInterfaceTableVisualizer {
+        physicalLinkVisualizer[numPhysicalLinkVisualizers]: <default("PhysicalLinkCanvasVisualizer")> like IPhysicalLinkVisualizer {
             parameters:
                 @display("p=450,400,row,100");
         }
-        dataLinkVisualizer[numDataLinkVisualizers]: <default("DataLinkCanvasVisualizer")> like IDataLinkVisualizer {
+        interfaceTableVisualizer[numInterfaceTableVisualizers]: <default("InterfaceTableCanvasVisualizer")> like IInterfaceTableVisualizer {
             parameters:
                 @display("p=450,500,row,100");
         }
-        linkBreakVisualizer[numLinkBreakVisualizers]: <default("LinkBreakCanvasVisualizer")> like ILinkBreakVisualizer {
+        dataLinkVisualizer[numDataLinkVisualizers]: <default("DataLinkCanvasVisualizer")> like IDataLinkVisualizer {
             parameters:
                 @display("p=450,600,row,100");
         }
+        linkBreakVisualizer[numLinkBreakVisualizers]: <default("LinkBreakCanvasVisualizer")> like ILinkBreakVisualizer {
+            parameters:
+                @display("p=450,700,row,100");
+        }
         ieee80211Visualizer[numIeee80211Visualizers]: <default("Ieee80211CanvasVisualizer")> like IIeee80211Visualizer {
             parameters:
-                @display("p=450,700,row,25,row,100");
+                @display("p=450,800,row,25,row,100");
         }
         networkRouteVisualizer[numNetworkRouteVisualizers]: <default("NetworkRouteCanvasVisualizer")> like INetworkRouteVisualizer {
             parameters:
-                @display("p=450,800,row,100");
+                @display("p=450,900,row,100");
         }
         routingTableVisualizer[numRoutingTableVisualizers]: <default("RoutingTableCanvasVisualizer")> like IRoutingTableVisualizer {
             parameters:
-                @display("p=450,900,row,100");
+                @display("p=450,1000,row,100");
         }
         transportRouteVisualizer[numTransportRouteVisualizers]: <default("TransportRouteCanvasVisualizer")> like ITransportRouteVisualizer {
             parameters:
-                @display("p=450,1000,row,100");
+                @display("p=450,1100,row,100");
         }
         transportConnectionVisualizer[numTransportConnectionVisualizers]: <default("TransportConnectionCanvasVisualizer")> like ITransportConnectionVisualizer {
             parameters:
-                @display("p=450,1100,row,100");
+                @display("p=450,1200,row,100");
         }
 }
 
