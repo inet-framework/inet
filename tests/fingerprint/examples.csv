@@ -80,6 +80,8 @@
 /examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0,                500s,            2b63-2dea/tplx;47b1-8963/~tNl;7156-c692/~tND;6371-8e5f/tyf, PASS,
 /examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            bbce-8358/tplx;3c33-1c77/~tNl;0660-bef9/~tND;cf66-e14b/tyf, PASS,
 
+/examples/ethernet/creditbasedshaper/, -f omnetpp.ini -c General -r 0,              100ms,           0bc1-642e/tplx;5ab0-6235/~tNl;702f-784c/~tND;2254-06ad/tyf, PASS,
+
 # /examples/ethernet/lans/,            -f .qtenv.ini -c General -r 0
 /examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            d9fd-427b/tplx;659f-7aa5/~tNl;f462-64a1/tyf, PASS,
 # /examples/ethernet/lans/,            -f defaults.ini -c General -r 0,               -1s,             0, ERROR,   # not a complete simulations, defaults.ini included by other ini files
