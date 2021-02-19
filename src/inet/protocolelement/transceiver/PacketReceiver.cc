@@ -32,9 +32,9 @@ void PacketReceiver::handleMessageWhenUp(cMessage *message)
 
 void PacketReceiver::receiveSignal(Signal *signal)
 {
+    emit(receptionEndedSignal, signal);
     auto packet = decodePacket(signal);
     handlePacketProcessed(packet);
-    emit(receptionEndedSignal, signal);
     pushOrSendPacket(packet, outputGate, consumer);
     delete signal;
 }
