@@ -104,6 +104,7 @@ void EthernetEncapsulation::registerMyProtocol()
 
 void EthernetEncapsulation::processCommandFromHigherLayer(Request *msg)
 {
+    msg->removeTagIfPresent<DispatchProtocolReq>();
     auto ctrl = msg->getControlInfo();
     if (dynamic_cast<Ieee802PauseCommand *>(ctrl) != nullptr)
         handleSendPause(msg);
@@ -158,7 +159,6 @@ void EthernetEncapsulation::refreshDisplay() const
 
 void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)
 {
-    packet->removeTagIfPresent<DispatchProtocolReq>();
     if (packet->getDataLength() > MAX_ETHERNET_DATA_BYTES)
         throw cRuntimeError("packet length from higher layer (%s) exceeds maximum Ethernet payload length (%s)", packet->getDataLength().str().c_str(), MAX_ETHERNET_DATA_BYTES.str().c_str());
 
@@ -200,6 +200,7 @@ void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)
     ethernetFcs->setFcsMode(fcsMode);
     packet->insertAtBack(ethernetFcs);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+    packet->removeTagIfPresent<DispatchProtocolReq>();
     EV_INFO << "Sending " << packet << " to lower layer.\n";
     send(packet, "lowerLayerOut");
 }
