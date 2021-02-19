@@ -20,46 +20,23 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
-#include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
-#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
-#include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 
 namespace inet {
 
 Define_Module(Ieee8021dRelay);
 
-static bool isBpdu(Packet *packet)
-{
-    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-    if (protocol == &Protocol::ieee8022llc) {
-        auto sapInd = packet->findTag<Ieee802SapInd>();
-        return sapInd != nullptr && sapInd->getSsap() == 0x42 && sapInd->getDsap() == 0x42; // TODO && sapInd->getControl() == 3;
-    }
-    else if (protocol == &Protocol::ethernetMac) {
-        const auto& ethernetHeader = packet->peekAtFront<EthernetMacHeader>();
-        if (isIeee8023Header(*ethernetHeader)) {
-            const auto& llcHeader = packet->peekDataAt<Ieee8022LlcHeader>(ethernetHeader->getChunkLength());
-            return llcHeader->getSsap() == 0x42 && llcHeader->getDsap() == 0x42 && llcHeader->getControl() == 3;
-        }
-        else
-            return false;
-    }
-    else
-        return false;
-}
-
 void Ieee8021dRelay::initialize(int stage)
 {
     MacRelayUnitBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        isStpAware = par("hasStp");
         numDispatchedBDPUFrames = numDispatchedNonBPDUFrames = numDeliveredBDPUsToSTP = 0;
         numReceivedBPDUsFromSTP = numReceivedNetworkFrames = 0;
+
         WATCH(bridgeAddress);
         WATCH(numReceivedNetworkFrames);
         WATCH(numReceivedBPDUsFromSTP);
@@ -68,9 +45,6 @@ void Ieee8021dRelay::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(Protocol::ethernetMac, gate("upperLayerIn"), gate("upperLayerOut"));
-        // TODO FIX Move it at least to STP module (like in ANSA's CDP/LLDP)
-        if (isStpAware)
-            registerAddress(MacAddress::STP_MULTICAST_ADDRESS);
     }
 }
 
@@ -98,18 +72,17 @@ void Ieee8021dRelay::handleLowerPacket(Packet *incomingPacket)
     updatePeerAddress(incomingInterface, sourceAddress);
 
     const auto& incomingInterfaceData = incomingInterface->findProtocolData<Ieee8021dInterfaceData>();
-    if (isStpAware && incomingInterfaceData == nullptr)
-        throw cRuntimeError("Ieee8021dInterfaceData not found for interface %s", incomingInterface->getFullName());
     // BPDU Handling
-    if (isStpAware
-        && (destinationAddress == MacAddress::STP_MULTICAST_ADDRESS || destinationAddress == bridgeAddress)
-        && incomingInterfaceData->getRole() != Ieee8021dInterfaceData::DISABLED
-        && isBpdu(incomingPacket))
+    if ((!incomingInterfaceData || incomingInterfaceData->getRole() != Ieee8021dInterfaceData::DISABLED)
+            && (destinationAddress == bridgeAddress
+                || in_range(registeredMacAddresses, destinationAddress)
+                || incomingInterface->matchesMacAddress(destinationAddress))
+            && !destinationAddress.isBroadcast())
     {
-        EV_DETAIL << "Deliver BPDU to the STP/RSTP module" << endl;
+        EV_DETAIL << "Deliver to upper layer" << endl;
         sendUp(incomingPacket); // deliver to the STP/RSTP module
     }
-    else if (isStpAware && !incomingInterfaceData->isForwarding()) {
+    else if (incomingInterfaceData && !incomingInterfaceData->isForwarding()) {
         EV_INFO << "Dropping packet because the incoming interface is currently not forwarding" << EV_FIELD(incomingInterface) << EV_FIELD(incomingPacket) << endl;
         numDroppedFrames++;
         PacketDropDetails details;
@@ -117,8 +90,6 @@ void Ieee8021dRelay::handleLowerPacket(Packet *incomingPacket)
         emit(packetDroppedSignal, incomingPacket, &details);
         delete incomingPacket;
     }
-    else if (in_range(registeredMacAddresses, destinationAddress))
-        sendUp(incomingPacket);
     else {
         auto outgoingPacket = incomingPacket->dup();
         outgoingPacket->trim();
@@ -195,13 +166,16 @@ void Ieee8021dRelay::handleUpperPacket(Packet *packet)
 
 bool Ieee8021dRelay::isForwardingInterface(NetworkInterface *networkInterface) const
 {
-    return MacRelayUnitBase::isForwardingInterface(networkInterface) &&
-           (!isStpAware || networkInterface->getProtocolData<Ieee8021dInterfaceData>()->isForwarding());
+    if (!MacRelayUnitBase::isForwardingInterface(networkInterface))
+        return false;
+    const auto& interfaceData = networkInterface->findProtocolData<Ieee8021dInterfaceData>();
+    return (interfaceData == nullptr || interfaceData->isForwarding());
 }
 
 void Ieee8021dRelay::updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress)
 {
-    if (!isStpAware || incomingInterface->getProtocolData<Ieee8021dInterfaceData>()->isLearning())
+    const auto& interfaceData = incomingInterface->findProtocolData<Ieee8021dInterfaceData>();
+    if (interfaceData == nullptr || interfaceData->isLearning())
         MacRelayUnitBase::updatePeerAddress(incomingInterface, sourceAddress);
 }
 
@@ -234,12 +208,9 @@ void Ieee8021dRelay::handleCrashOperation(LifecycleOperation *operation)
 
 NetworkInterface *Ieee8021dRelay::chooseBridgeInterface()
 {
-    // TODO Currently, we assume that the first non-loopback interface is an Ethernet interface
-    //       since relays work on EtherSwitches.
-    //       NOTE that, we don't check if the returning interface is an Ethernet interface!
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
         NetworkInterface *current = interfaceTable->getInterface(i);
-        if (!current->isLoopback())
+        if (!current->isLoopback() && current->isWired() /* && current->getProtocol() == &Protocol::ethernetMac */)   // TODO check protocol
             return current;
     }
 
