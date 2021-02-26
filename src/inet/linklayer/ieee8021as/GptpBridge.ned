@@ -3,12 +3,14 @@
 //           Henning Puttnies
 //           Peter Danielis
 //           University of Rostock, Germany
-// 
+//
 
 package inet.linklayer.ieee8021as;
 
-simple Clock
+import inet.node.ethernet.EthernetSwitch;
+
+module GptpBridge extends EthernetSwitch
 {
-    string clockType = default("ConstantDrift");
-    int clockDrift = default(0);
+    parameters:
+        hasGptp = true;
 }
