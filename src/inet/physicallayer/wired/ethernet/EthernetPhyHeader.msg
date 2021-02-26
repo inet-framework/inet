@@ -17,6 +17,7 @@
 
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
+import inet.physicallayer.wired.ethernet.EthernetPhyConstants;
 
 namespace inet::physicallayer;
 
@@ -26,7 +27,7 @@ namespace inet::physicallayer;
 //
 class EthernetPhyHeaderBase extends FieldsChunk
 {
-    chunkLength = B(8);
+    chunkLength = ETHERNET_PHY_HEADER_LEN;
 }
 
 //
