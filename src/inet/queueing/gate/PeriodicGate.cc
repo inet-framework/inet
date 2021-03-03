@@ -30,24 +30,37 @@ void PeriodicGate::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         isOpen_ = par("initiallyOpen");
         offset = par("offset");
-        const char *durationsAsString = par("durations");
-        cStringTokenizer tokenizer(durationsAsString);
-        while (tokenizer.hasMoreTokens())
-            durations.push_back(cNEDValue::parseQuantity(tokenizer.nextToken(), "s"));
+        durations = check_and_cast<cValueArray *>(par("durations").objectValue());
+        changeTimer = new ClockEvent("ChangeTimer");
+    }
+    else if (stage == INITSTAGE_QUEUEING) {
+        if (durations->size() % 2 != 0)
+            throw cRuntimeError("The duration parameter must contain an even number of values");
         while (offset > 0) {
-            if (offset > durations[index]) {
+            clocktime_t duration = durations->get(index).doubleValueInUnit("s");
+            if (offset > duration) {
                 isOpen_ = !isOpen_;
-                offset -= durations[index];
-                index = (index + 1) % durations.size();
+                offset -= duration;
+                index = (index + 1) % durations->size();
             }
             else
                 break;
         }
-        changeTimer = new ClockEvent("ChangeTimer");
-    }
-    else if (stage == INITSTAGE_QUEUEING) {
-        if (index < (int)durations.size())
+        if (index < (int)durations->size())
             scheduleChangeTimer();
+    }
+}
+
+void PeriodicGate::handleParameterChange(const char *name)
+{
+    if (name != nullptr) {
+        ASSERT(!changeTimer->isScheduled());
+        if (!strcmp(name, "offset"))
+            offset = par("offset");
+        else if (!strcmp(name, "initiallyOpen"))
+            isOpen_ = par("initiallyOpen");
+        else if (!strcmp(name, "durations"))
+            durations = check_and_cast<cValueArray *>(par("durations").objectValue());
     }
 }
 
@@ -63,9 +76,10 @@ void PeriodicGate::handleMessage(cMessage *message)
 
 void PeriodicGate::scheduleChangeTimer()
 {
-    ASSERT(0 <= index && index < (int)durations.size());
-    scheduleClockEventAfter(durations[index] - offset, changeTimer);
-    index = (index + 1) % durations.size();
+    ASSERT(0 <= index && index < (int)durations->size());
+    clocktime_t duration = durations->get(index).doubleValueInUnit("s");
+    scheduleClockEventAfter(duration - offset, changeTimer);
+    index = (index + 1) % durations->size();
     offset = 0;
 }
 

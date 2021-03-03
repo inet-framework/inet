@@ -169,6 +169,11 @@ std::enable_if_t<std::is_polymorphic<T>::value && has_str<T>::value && !has_prin
         return "<nullptr>";
     else if (auto printableObject = dynamic_cast<IPrintableObject *>(object))
         return printableObject->printToString(cLog::logLevel, evFlags);
+    else if (auto cobject = dynamic_cast<cObject *>(object)) {
+        std::stringstream s;
+        s << cobject;
+        return s.str();
+    }
     else
         return object->str();
 }
@@ -178,6 +183,11 @@ std::enable_if_t<std::is_polymorphic<T>::value && has_str<T>::value && !has_prin
 {
     if (auto printableObject = dynamic_cast<const IPrintableObject *>(&object))
         return printableObject->printToString(cLog::logLevel, evFlags);
+    else if (auto cobject = dynamic_cast<const cObject *>(&object)) {
+        std::stringstream s;
+        s << cobject;
+        return s.str();
+    }
     else
         return object.str();
 }
@@ -189,6 +199,11 @@ std::enable_if_t<std::is_polymorphic<T>::value && has_str<T>::value && !has_prin
         return "<nullptr>";
     else if (auto printableObject = dynamic_cast<const IPrintableObject *>(object))
         return printableObject->printToString(cLog::logLevel, evFlags);
+    else if (auto cobject = dynamic_cast<const cObject *>(object)) {
+        std::stringstream s;
+        s << cobject;
+        return s.str();
+    }
     else
         return object->str();
 }

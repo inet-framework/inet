@@ -29,13 +29,14 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
   protected:
     int index = 0;
     clocktime_t offset;
-    std::vector<clocktime_t> durations;
+    cValueArray *durations = nullptr;
 
     ClockEvent *changeTimer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
+    virtual void handleParameterChange(const char *name) override;
     virtual bool canPacketFlowThrough(Packet *packet) const override;
 
     virtual void scheduleChangeTimer();
@@ -43,6 +44,9 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
 
   public:
     virtual ~PeriodicGate() { cancelAndDelete(changeTimer); }
+
+    virtual bool getInitiallyOpen() const { return par("initiallyOpen"); }
+    virtual const cValueArray *getDurations() const { return durations; }
 };
 
 } // namespace queueing

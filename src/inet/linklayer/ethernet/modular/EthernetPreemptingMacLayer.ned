@@ -28,6 +28,7 @@ module EthernetPreemptingMacLayer like IEthernetMacLayer
 {
     parameters:
         volatile double bitrate @unit(bps);
+        *.bitrate = default(bitrate);
         @display("i=block/layer");
     gates:
         input upperLayerIn;

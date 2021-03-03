@@ -1284,6 +1284,10 @@ typedef value<double, units::mAh> mAh;
 typedef value<double, units::kHz> kHz;
 typedef value<double, units::MHz> MHz;
 typedef value<double, units::GHz> GHz;
+typedef value<double, units::ps> ps;
+typedef value<double, units::ns> ns;
+typedef value<double, units::us> us;
+typedef value<double, units::ms> ms;
 typedef value<simtime_t, units::ps> psimsec;
 typedef value<simtime_t, units::ns> nsimsec;
 typedef value<simtime_t, units::us> usimsec;
@@ -1377,13 +1381,13 @@ std::ostream& operator<<(std::ostream& os, const value<Value, units::W>& value)
 {
     if (value == values::W(0))
         os << "0 W";
-    else if (values::pW(value) < values::pW(1000.0))
+    else if (value > values::pW(-1000.0) && value < values::pW(1000.0))
         os << values::pW(value);
-    else if (values::nW(value) < values::nW(1000.0))
+    else if (value > values::nW(-1000.0) && value < values::nW(1000.0))
         os << values::nW(value);
-    else if (values::uW(value) < values::uW(1000.0))
+    else if (value > values::uW(-1000.0) && value < values::uW(1000.0))
         os << values::uW(value);
-    else if (values::mW(value) < values::mW(1000.0))
+    else if (value > values::mW(-1000.0) && value < values::mW(1000.0))
         os << values::mW(value);
     else {
         os << value.get() << ' ';
@@ -1396,11 +1400,11 @@ std::ostream& operator<<(std::ostream& os, const value<Value, units::W>& value)
 template<typename Value>
 std::ostream& operator<<(std::ostream& os, const value<Value, units::Hz>& value)
 {
-    if (values::GHz(value) >= values::GHz(1.0))
+    if (value >= values::GHz(1.0))
         os << values::GHz(value);
-    else if (values::MHz(value) >= values::MHz(1.0))
+    else if (value >= values::MHz(1.0))
         os << values::MHz(value);
-    else if (values::kHz(value) >= values::kHz(1.0))
+    else if (value >= values::kHz(1.0))
         os << values::kHz(value);
     else {
         os << value.get() << ' ';
@@ -1413,15 +1417,38 @@ std::ostream& operator<<(std::ostream& os, const value<Value, units::Hz>& value)
 template<typename Value>
 std::ostream& operator<<(std::ostream& os, const value<Value, units::bps>& value)
 {
-    if (values::Gbps(value) >= values::Gbps(1.0))
+    if (value >= values::Gbps(1.0))
         os << values::Gbps(value);
-    else if (values::Mbps(value) >= values::Mbps(1.0))
+    else if (value >= values::Mbps(1.0))
         os << values::Mbps(value);
-    else if (values::kbps(value) >= values::kbps(1.0))
+    else if (value >= values::kbps(1.0))
         os << values::kbps(value);
     else {
         os << value.get() << ' ';
         output_unit<units::bps>::fn(os);
+    }
+    return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const value<double, units::s>& value)
+{
+    if (value == values::s(0))
+        os << "0 s";
+    else if (value.get() == INFINITY)
+        os << "inf s";
+    else if (value.get() == -INFINITY)
+        os << "-inf s";
+    else if (value > values::ps(-1000.0) && value < values::ps(1000.0))
+        os << values::ps(value);
+    else if (value > values::ns(-1000.0) && value < values::ns(1000.0))
+        os << values::ns(value);
+    else if (value > values::us(-1000.0) && value < values::us(1000.0))
+        os << values::us(value);
+    else if (value > values::ms(-1000.0) && value < values::ms(1000.0))
+        os << values::ms(value);
+    else {
+        os << value.get() << ' ';
+        output_unit<units::s>::fn(os);
     }
     return os;
 }
@@ -1437,13 +1464,13 @@ inline std::ostream& operator<<(std::ostream& os, const value<simtime_t, units::
         os << "inf s";
     else if (value.get() == negativeInfinity)
         os << "-inf s";
-    else if (values::simsec(value) < values::psimsec(1000.0))
+    else if (value > values::psimsec(-1000) && value < values::psimsec(1000))
         os << values::psimsec(value);
-    else if (values::simsec(value) < values::nsimsec(1000.0))
+    else if (value > values::nsimsec(-1000) && value < values::nsimsec(1000))
         os << values::nsimsec(value);
-    else if (values::simsec(value) < values::usimsec(1000.0))
+    else if (value > values::usimsec(-1000) && value < values::usimsec(1000))
         os << values::usimsec(value);
-    else if (values::simsec(value) < values::msimsec(1000.0))
+    else if (value > values::msimsec(-1000) && value < values::msimsec(1000))
         os << values::msimsec(value);
     else {
         os << value.get() << ' ';

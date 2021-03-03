@@ -183,6 +183,7 @@ void EthernetMacBase::initialize(int stage)
         lowerLayerInGateId = physInGate->getId();
         lowerLayerOutGateId = physOutGate->getId();
         transmissionChannel = nullptr;
+        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
 
         initializeFlags();
 
@@ -211,11 +212,6 @@ void EthernetMacBase::initialize(int stage)
         WATCH(promiscuous);
         WATCH(pauseUnitsRequested);
     }
-}
-
-void EthernetMacBase::initializeQueue()
-{
-    txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
 }
 
 void EthernetMacBase::initializeFlags()
@@ -273,7 +269,6 @@ void EthernetMacBase::handleStartOperation(LifecycleOperation *operation)
 {
     networkInterface->setState(NetworkInterface::State::UP);
     initializeFlags();
-    initializeQueue();
     readChannelParameters(true);
 }
 

@@ -42,6 +42,7 @@ class INET_API PacketGateBase : public PacketFlowBase, public virtual IPacketGat
     virtual void initialize(int stage) override;
     virtual void processPacket(Packet *packet) override;
     virtual bool canPacketFlowThrough(Packet *packet) const;
+    virtual void updateDisplayString() const override;
 
   public:
     virtual bool isOpen() const override { return isOpen_; }

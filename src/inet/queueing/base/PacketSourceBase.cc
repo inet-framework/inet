@@ -20,12 +20,13 @@
 #include "inet/applications/base/ApplicationPacket_m.h"
 #include "inet/common/DirectionTag_m.h"
 #include "inet/common/IdentityTag_m.h"
-#include "inet/common/Simsignals.h"
-#include "inet/common/TimeTag_m.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/TimeTag_m.h"
 
 namespace inet {
 namespace queueing {
@@ -52,8 +53,14 @@ const char *PacketSourceBase::createPacketName(const Ptr<const Chunk>& data) con
             case 'n':
                 result = getFullName();
                 break;
+            case 'N':
+                result = getContainingNode(this)->getFullName();
+                break;
             case 'p':
                 result = getFullPath();
+                break;
+            case 'P':
+                result = getContainingNode(this)->getFullName();
                 break;
             case 'c':
                 result = std::to_string(numProcessedPackets);
