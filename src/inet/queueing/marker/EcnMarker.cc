@@ -63,7 +63,6 @@ void EcnMarker::setEcn(Packet *packet, IpEcnCode ecn)
                 Ipv4::insertCrc(ipv4Header); // recalculate IP header checksum
                 insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
                 packet->insertAtFront(ethHeader);
-                // TODO recalculate ethernet CRC
                 ethFcs->setFcs(0);
                 packet->insertAtBack(ethFcs);
                 packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
