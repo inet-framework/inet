@@ -115,9 +115,7 @@ while($sor = <FILE>)
 [0.024] tcpdump finished, A:17 B:16 segments
 
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

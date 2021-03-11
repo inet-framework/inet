@@ -55,9 +55,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 Transport protocol 'udp' not connected, discarding packet
 sending ICMP error ICMP-error-#1-type3-code2
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

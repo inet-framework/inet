@@ -41,9 +41,7 @@ TcpTestNet1.cli_app: received 0 bytes in 0 packets
 TcpTestNet1.srv_app: received 3074 bytes in 5 packets
 [1.616] tcpdump finished, A:7 B:5 segments
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

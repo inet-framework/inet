@@ -120,8 +120,7 @@ For the current frame exchange, we have CW = 15 SRC = 0 LRC = 0 SSRC = 0 and SLR
 For the current frame exchange, we have CW = 15 SRC = 0 LRC = 0 SSRC = 0 and SLRC = 4
 .*
 %#--------------------------------------------------------------------------------------------------------------
-%#%not-contains: stdout
-%#undisposed object:
-%#%not-contains: stdout
-%#-- check module destructor
-%#%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

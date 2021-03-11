@@ -71,3 +71,8 @@ processing <disconnect> command...
 Disconnecting Test.msrc.outv[0] --> Test.msink.inv[0]
 processing <disconnect> command...
 Disconnecting Test.mpeer1.gatev$o[0] --> Test.mpeer2.gatev$i[0] and its reverse connection
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

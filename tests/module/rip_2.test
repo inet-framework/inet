@@ -155,3 +155,8 @@ R1 430
 192.168.1.0/30 <unspec> eth0 IFACENETMASK .*
 192.168.2.0/30 10.0.0.2 eth1 RIP 3
 END
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
