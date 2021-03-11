@@ -57,8 +57,11 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains-regex: stdout
+%postrun-command: grep "Association" test.out > test_assoc.out || true
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains-regex: test_assoc.out
 "Association 1: number of Fast RTX=0"
-%not-contains-regex: stdout
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains-regex: test_assoc.out
 "Association 1\w* ForwardTsns=0"
 %#--------------------------------------------------------------------------------------------------------------
