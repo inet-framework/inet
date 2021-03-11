@@ -59,8 +59,7 @@ IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=IS_IN \(10.0.0.1\)>.
 IGMPTester: Received: inet::Igmpv3Report<225.0.0.1=IS_EX \(10.0.0.2\)>.
 
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

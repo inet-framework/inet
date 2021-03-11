@@ -645,8 +645,7 @@ Decoding the following bits: 1 1 0 1 0 0 0 1 1 0 0 1 0 1 1 0 1 1 0 0 0 1 0 0 0 0
 Recovered message: 1 0 1 1 0 1 0 1 0 0 0 1 1 1 1 1 0 0 1 0 0 0 0 0 1 0 0 1 1 1 1 0 1 0 1 0 1 1 1 1 0 1 0 1 1 1 1 1 0 0 1 0 1 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 0 0 1 0 0 1 0 1 1 1 0 1 1 0 1 0 0 1 1 0 1 1 1 1 0 0 0 1 1 1 1 0
 Number of errors: 0 Cumulative error (Hamming distance): 0 End state: 30
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

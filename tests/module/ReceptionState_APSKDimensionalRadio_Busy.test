@@ -82,8 +82,7 @@ Changing radio reception state from IDLE to BUSY.
 %# remove colorizing
 %subst: /\x1B\[[0-9;]*m//
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

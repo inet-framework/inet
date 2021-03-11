@@ -98,8 +98,7 @@ DHCPDISCOVER arrived. Handling it.
 The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available. Assigning it to client.
 .*
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

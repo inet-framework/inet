@@ -106,8 +106,7 @@ t=200\..* router/eth0/225.0.0.2: QUERIER NO_MEMBERS_PRESENT NON_MEMBER --> repor
 t=20.\..* router/eth0/225.0.0.2: QUERIER MEMBERS_PRESENT NON_MEMBER --> report received <> --> QUERIER MEMBERS_PRESENT NON_MEMBER
 t=30.\..* router/eth0/225.0.0.2: MEMBERS_PRESENT --> timer expired <> --> NO_MEMBERS_PRESENT
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

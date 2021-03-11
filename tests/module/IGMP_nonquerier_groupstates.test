@@ -93,8 +93,7 @@ t=20.\..* nqrouter/eth0/225.0.0.2: NON_QUERIER MEMBERS_PRESENT NON_MEMBER --> re
 t=40.\..* nqrouter/eth0/225.0.0.2: MEMBERS_PRESENT --> timer expired <> --> NO_MEMBERS_PRESENT
 
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

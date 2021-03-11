@@ -75,8 +75,7 @@ C:\(Udp\)SimpleTestNetwork\.client\.udp: Socket connected: sockId=2 localPort=10
 .*
 C:\(Udp\)SimpleTestNetwork\.client\.udp: Socket connected: sockId=2 localPort=100 remotePort=2000 remoteAddr=10\.0\.0\.2 multicastLoop=0
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

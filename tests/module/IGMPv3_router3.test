@@ -107,8 +107,7 @@ Received TO_IN(10.0.0.1,10.0.0.2) report.
 New Router State is EXCLUDE(10.0.0.1,10.0.0.2,10.0.0.3;).
 
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------
