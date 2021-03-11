@@ -80,12 +80,11 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.sctp_server.pcapRecorder[0].pcapNetwork = 204
 **.sctp_client.pcapRecorder[0].pcapNetwork = 204
-
-
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
 scalar SctpFeatureTest.sctp_client.sctp "Number of StreamReset requests sent" 2
 scalar SctpFeatureTest.sctp_client.sctp "Number of StreamReset requests performed" 1
+%#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
 scalar SctpFeatureTest.sctp_server.sctp "Number of StreamReset requests sent" 1
 scalar SctpFeatureTest.sctp_server.sctp "Number of StreamReset requests performed" 1

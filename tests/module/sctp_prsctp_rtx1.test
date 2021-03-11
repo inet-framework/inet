@@ -54,8 +54,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 # sctp settings
 **.hasSctp = true
 **.sctp.sctpAlgorithmClass = "SctpAlg"
-
-
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "Association" test.out > test_assoc.out || true
 %#--------------------------------------------------------------------------------------------------------------

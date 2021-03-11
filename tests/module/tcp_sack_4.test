@@ -114,11 +114,9 @@ srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
 [2.648 A010] A.1000 > B.2000: A 3501:4001(500) ack 501 win 5000
 [2.651 B010] A.1000 < B.2000: A ack 4001 win 5000
 [2.651] tcpdump finished, A:10 B:10 segments
-
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 [2.651] tcpdump finished, A:10 B:10 segments
-
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

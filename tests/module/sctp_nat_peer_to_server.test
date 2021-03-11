@@ -87,7 +87,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.Nat_1_2.routingTable.routingFile="../../lib/nat1_2.mrt"
 **.Router_1.routingTable.routingFile="../../lib/nat_mrouter_1.mrt"
 **.Router_2.routingTable.routingFile="../../lib/nat_mrouter_2.mrt"
-
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 multinat.Nat_1_2.natHook:[ \t]*Natted packets:[ \t]*[1-9][0-9][0-9]

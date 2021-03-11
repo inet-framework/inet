@@ -102,10 +102,13 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: results/General-0.sca
 scalar multiRendezvous.Peer_1.sctp "Acked Bytes" 14520
+%#--------------------------------------------------------------------------------------------------------------
 %contains-regex: results/General-0.sca
 scalar multiRendezvous.Peer_1.sctp "Transmitted Bytes" 14520
+%#--------------------------------------------------------------------------------------------------------------
 %contains-regex: results/General-0.sca
 scalar multiRendezvous.Server.sctp "Acked Bytes" 24
+%#--------------------------------------------------------------------------------------------------------------
 %contains-regex: results/General-0.sca
 scalar multiRendezvous.Server.sctp "Transmitted Bytes" 24
 %#--------------------------------------------------------------------------------------------------------------

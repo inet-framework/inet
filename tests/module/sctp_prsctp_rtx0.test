@@ -59,8 +59,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 #**.ppp[*].ppp.queue.typename = "DropTailQueue" # in routers
 #**.ppp[*].ppp.queue.packetCapacity = 100  # in routers
 #**.ppp[*].ppp.mtu = 1500 B
-
-
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "Association" test.out > test_assoc.out || true
 %#--------------------------------------------------------------------------------------------------------------

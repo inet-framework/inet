@@ -74,8 +74,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.sctp_server.pcapRecorder[0].pcapNetwork = 204
 **.sctp_client.pcapRecorder[0].pcapNetwork = 204
-
-
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: results/General-0.sca
 scalar multihomed.sctp_server.sctp "Number of Heartbeat ACKs Sent [0-9]*:10.2.1.1" [1-9]

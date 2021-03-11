@@ -9,6 +9,7 @@ Sequence of operations:
  - at 2 client executes shutdown operation
  - simulation stops at 3
 
+%#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 
 [General]
@@ -42,7 +43,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 **.server.app[0].typename = "UdpSink"
 **.server.app[0].localPort = 1000
-
+%#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
 import inet.test.moduletest.lib.*;
@@ -61,7 +62,7 @@ network Test
     connections:
         client.pppg++ <--> Eth10M <--> server.pppg++;
 }
-
+%#--------------------------------------------------------------------------------------------------------------
 %file: scenario.xml
 
 <scenario>
@@ -72,9 +73,8 @@ network Test
         <shutdown module="client"/>
     </at>
 </scenario>
-
+%#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-
 .*
 Test.server shutting down
 .*
@@ -86,7 +86,6 @@ Test.client shut down
 .*
 Test.server.app\[0\]: received 10 packets
 .*
-
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

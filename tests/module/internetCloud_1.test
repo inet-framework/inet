@@ -86,7 +86,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 </internetCloud>
 
 %#--------------------------------------------------------------------------------------------------------------
-%#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 [^C].*
 CloudAndHosts\.sender\[9\]\.app\[0\]: reply of 56 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
@@ -100,7 +99,6 @@ CloudAndHosts\.sender\[2\]\.app\[0\]: reply of 56 bytes from 10\.0\.0.\d+ icmp_s
 CloudAndHosts\.sender\[1\]\.app\[0\]: reply of 56 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
 CloudAndHosts\.sender\[0\]\.app\[0\]: reply of 56 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=\d+ time=.*
 [^C].*
-%#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

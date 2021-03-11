@@ -63,7 +63,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.internet.ipv4Delayer.config = xmldoc("internetCloud.xml")
 
 **.numSenders = 10
-
 %#--------------------------------------------------------------------------------------------------------------
 %file: internetCloud.xml
 
@@ -94,8 +93,6 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 -->
   </parameters>
 </internetCloud>
-
-%#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 [^C].*
