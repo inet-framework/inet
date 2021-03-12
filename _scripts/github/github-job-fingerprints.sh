@@ -32,7 +32,7 @@ SPLIT_I="${SPLIT_I:-0}"
 echo "::group::Run fingerprint tests"
 cd tests/fingerprint
 # this indirectly calls the script named simply "inet", which handles the MODE envvar internally
-./fingerprinttest -n $SPLIT_N -i $SPLIT_I -f 'tplx' | tee fingerprinttest.out
+./fingerprinttest -n $SPLIT_N -i $SPLIT_I -f 'tplx' -f '~tNl' | tee fingerprinttest.out
 ./fingerprinttest -n $SPLIT_N -i $SPLIT_I -f 'tplx' -f '~tND' | tee fingerprinttest.out
 #                ^---- Everything from here on is only needed to make the pretty GitHub annotations. ----v
 EXITCODE="${PIPESTATUS[0]}"
