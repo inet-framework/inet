@@ -129,8 +129,7 @@ cmdenv-express-mode=false
 #43:20000071904000: 'FilledIFG:start' (inet::physicallayer::EthernetFilledIfgSignal) sent:20000071904000 (12 byte) discard:0, delay:0, duration:96000
 #44:20000072000000: 'PK at 20: 980 Bytes:start' (inet::physicallayer::EthernetSignal) sent:20000072000000 (988 byte) discard:0, delay:0, duration:7904000
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

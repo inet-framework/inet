@@ -50,8 +50,7 @@ This fragment completes the datagram.
 %contains: stdout
 Received packet: (inet::Packet)UdpBasicAppData-0 (5000 B)
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

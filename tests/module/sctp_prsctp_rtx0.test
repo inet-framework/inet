@@ -59,11 +59,12 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 #**.ppp[*].ppp.queue.typename = "DropTailQueue" # in routers
 #**.ppp[*].ppp.queue.packetCapacity = 100  # in routers
 #**.ppp[*].ppp.mtu = 1500 B
-
-
 %#--------------------------------------------------------------------------------------------------------------
-%contains: stdout
+%postrun-command: grep "Association" test.out > test_assoc.out || true
+%#--------------------------------------------------------------------------------------------------------------
+%contains: test_assoc.out
 Association 1: number of Fast RTX=0, number of Timer-Based RTX=0, path failures=0
-%not-contains-regex: stdout
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains-regex: test_assoc.out
 "Association 1\w* ForwardTsns=0"
 %#--------------------------------------------------------------------------------------------------------------

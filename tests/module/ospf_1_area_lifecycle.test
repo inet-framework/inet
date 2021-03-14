@@ -104,8 +104,10 @@ description = "Simple test"
 network = Test1
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
-
 sim-time-limit = 200s
+
+**.vector-recording = false
+**.cmdenv-log-level = "info"
 
 #omnetpp 5.0 - 5.1 compatibility:
 eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"
@@ -276,8 +278,7 @@ scalar Test1.H2.app[0] packetReceived:count 107
 %contains: results/General-6.sca
 scalar Test1.H2.app[1] echoedPk:count 107
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

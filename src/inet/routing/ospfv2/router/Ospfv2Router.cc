@@ -1494,23 +1494,23 @@ void Router::printAsExternalLsa()
 
         const Ospfv2LsaHeader& head = entry->getHeader();
         std::string routerId = head.getAdvertisingRouter().str(false);
-        EV_INFO << "AS External LSA in OSPF router with ID " << routerId << std::endl;
+        EV_DETAIL << "AS External LSA in OSPF router with ID " << routerId << std::endl;
 
         // print header info
-        EV_INFO << "    LS age: " << head.getLsAge() << std::endl;
-        EV_INFO << "    LS type: " << head.getLsType() << std::endl;
-        EV_INFO << "    Link state ID (IP network): " << head.getLinkStateID() << std::endl;
-        EV_INFO << "    Advertising router: " << head.getAdvertisingRouter() << std::endl;
-        EV_INFO << "    Seq number: " << head.getLsSequenceNumber() << std::endl;
-        EV_INFO << "    Length: " << head.getLsaLength() << std::endl;
+        EV_DETAIL << "    LS age: " << head.getLsAge() << std::endl;
+        EV_DETAIL << "    LS type: " << head.getLsType() << std::endl;
+        EV_DETAIL << "    Link state ID (IP network): " << head.getLinkStateID() << std::endl;
+        EV_DETAIL << "    Advertising router: " << head.getAdvertisingRouter() << std::endl;
+        EV_DETAIL << "    Seq number: " << head.getLsSequenceNumber() << std::endl;
+        EV_DETAIL << "    Length: " << head.getLsaLength() << std::endl;
 
-        EV_INFO << "    Network Mask: " << entry->getContents().getNetworkMask().str(false) << std::endl;
-        EV_INFO << "    Metric: " << entry->getContents().getExternalTOSInfo(0).routeCost << std::endl;
-        EV_INFO << "    E flag: " << ((entry->getContents().getExternalTOSInfo(0).E_ExternalMetricType == true) ? "set" : "unset") << std::endl;
-        EV_INFO << "    Forwarding Address: " << entry->getContents().getExternalTOSInfo(0).forwardingAddress.str(false) << std::endl;
-        EV_INFO << "    External Route Tag: " << entry->getContents().getExternalTOSInfo(0).externalRouteTag << std::endl;
+        EV_DETAIL << "    Network Mask: " << entry->getContents().getNetworkMask().str(false) << std::endl;
+        EV_DETAIL << "    Metric: " << entry->getContents().getExternalTOSInfo(0).routeCost << std::endl;
+        EV_DETAIL << "    E flag: " << ((entry->getContents().getExternalTOSInfo(0).E_ExternalMetricType == true) ? "set" : "unset") << std::endl;
+        EV_DETAIL << "    Forwarding Address: " << entry->getContents().getExternalTOSInfo(0).forwardingAddress.str(false) << std::endl;
+        EV_DETAIL << "    External Route Tag: " << entry->getContents().getExternalTOSInfo(0).externalRouteTag << std::endl;
         // todo: add ExternalTosInfo externalTOSInfo[];
-        EV_INFO << std::endl;
+        EV_DETAIL << std::endl;
     }
 }
 

@@ -1,0 +1,32 @@
+name: Feature tests
+
+on:
+  schedule:
+      # https://crontab.guru/#0_16_*_*_6
+    - cron: "0 16 * * 6" # “At 16:00 on Saturday.”
+  workflow_dispatch:
+    # nothing
+
+jobs:
+  featuretests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # we could go all the way up to 20 even
+        node-index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        node-total: [16] # keep these in sync!
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+      - name: Pull Docker image
+        run: docker pull omnetpp/travis-inet:6.0pre10-201218
+      - name: Feature tests (split)
+        run: |
+          docker run -i --env SKIPPED_FEATURES="" --env SPLIT_INDEX=${{ matrix.node-index }} --env SPLIT_TOTAL=${{ matrix.node-total }} \
+            --env GITHUB_WORKSPACE -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE \
+            omnetpp/travis-inet:6.0pre10-201218 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-featuretests.sh
+      - uses: actions/upload-artifact@v2
+        if: always() # even if the test failed, of course
+        with:
+          name: log-${{ matrix.node-index }}
+          path: ${{ github.workspace }}/tests/features/_log

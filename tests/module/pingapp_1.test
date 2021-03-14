@@ -47,8 +47,7 @@ round-trip min/avg/max \(ms\): 0\.1761/0\.18763/0\.2914
 stddev \(ms\): 0\.0364611   variance:1\.32941e-00?9
 --------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

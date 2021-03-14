@@ -54,9 +54,9 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 # sctp settings
 **.hasSctp = true
 **.sctp.sctpAlgorithmClass = "SctpAlg"
-
-
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains-regex: stdout
+%postrun-command: grep "Association" test.out > test_assoc.out || true
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains-regex: test_assoc.out
 "Association 1: number of Fast RTX=0"
 %#--------------------------------------------------------------------------------------------------------------

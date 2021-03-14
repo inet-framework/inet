@@ -96,8 +96,7 @@ t=320\..* host/eth0/225.0.0.3: DELAYING_MEMBER --> report received <> --> IDLE_M
 t=350\..* host/eth0/225.0.0.3: IDLE_MEMBER --> query received <> --> DELAYING_MEMBER
 t=350\..* host/eth0/225.0.0.3: DELAYING_MEMBER --> query received <> --> DELAYING_MEMBER
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

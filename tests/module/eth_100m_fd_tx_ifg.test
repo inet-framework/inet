@@ -60,8 +60,7 @@ cmdenv-express-mode=false
 #3:20000000000000: 'PK at 20: 92 Bytes:start' (inet::physicallayer::EthernetSignal) sent:20000000000000 (100 byte) discard:0, delay:0, duration:8000000
 #4:20000008960000: 'PK at 20: 92 Bytes:start' (inet::physicallayer::EthernetSignal) sent:20000008960000 (100 byte) discard:0, delay:0, duration:8000000
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

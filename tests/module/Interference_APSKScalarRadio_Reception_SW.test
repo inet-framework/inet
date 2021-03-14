@@ -97,8 +97,7 @@ Passing up contained packet 'ping0' to higher layer
 %contains: results/General-0.elog
 Sending datagram 'ping0-reply' with destination = 10.0.0.1
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

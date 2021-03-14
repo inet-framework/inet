@@ -52,9 +52,7 @@ while($sor = <FILE>)
 cli_tcp: ESTABLISHED --> CLOSED  (on ABORT)
 [1822.000] tcpdump finished, A:15 B:1 segments
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

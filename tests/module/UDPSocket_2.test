@@ -65,8 +65,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %contains-regex: test_err.out
 (<!> Error in module \(inet::Udp\) SimpleTestNetwork\.client\.udp \(id=\d+\) at event \#\d+, t=0: bind: socket is already bound \(sockId=\d+\).)|(<!> Error: bind: socket is already bound \(sockId=\d+\) -- in module \(inet::Udp\) SimpleTestNetwork\.client\.udp \(id=\d+\), at t=0s, event \#\d+)
 %#--------------------------------------------------------------------------------------------------------------
-%# %not-contains: stdout
-%# undisposed object:
-%# %not-contains: stdout
-%# -- check module destructor
+%# %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%# %not-contains: test_undisposed.out
+%# undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

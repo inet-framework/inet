@@ -76,8 +76,7 @@ Link 1
     client\[2\] / eth0 ID:\d+ MTU:1500 UP BROADCAST CARRIER MULTICAST macAddr:0A-AA-00-00-00-[0-9A-F]{2} Ipv4:\{inet_addr:10.0.0.23/28.*\}
 
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

@@ -138,8 +138,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 \-R #\d+  28\.2952\d+s  AODVTest\.sender  145\.236\.0\.1  145\.236\.0\.2/32  145\.236\.0\.2  wlan0
 \-R #\d+  30\.1960\d+s  AODVTest\.receiver  145\.236\.0\.4  145\.236\.0\.2/32  145\.236\.0\.2  wlan0
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

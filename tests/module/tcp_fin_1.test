@@ -49,8 +49,7 @@ cli_tcp: TIME_WAIT --> CLOSED  (on TIMEOUT_2MSL)
 [243.002] tcpdump finished, A:4 B:3 segments
 
 %#--------------------------------------------------------------------------------------------------------------
-%not-contains: stdout
-undisposed object:
-%not-contains: stdout
--- check module destructor
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
 %#--------------------------------------------------------------------------------------------------------------

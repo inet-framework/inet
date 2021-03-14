@@ -1,11 +1,14 @@
 name: Build and tests
 
 on:
-  schedule:
-      # https://crontab.guru/#0_21_*_*_1-5
-    - cron: "0 21 * * 1-5" # "At 21:00 on every day-of-week from Monday through Friday."
+  # schedule:
+  #   - cron: "0 21 * * 1-5" # https://crontab.guru/#0_21_*_*_1-5 : "At 21:00 on every day-of-week from Monday through Friday."
+  push:
+    branches:
+      - master
   pull_request:
-    branches: [ "master" ]
+    branches:
+      - master
   workflow_dispatch:
     # nothing
 
@@ -53,6 +56,7 @@ jobs:
     strategy:
       matrix:
         mode: ["debug", "release"]
+        split: [0, 1, 2, 3]
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
@@ -64,7 +68,7 @@ jobs:
         run: docker pull omnetpp/travis-inet:6.0pre10-201218
       - name: Fingerprint tests
         run: |
-          docker run -i --env MODE=${{ matrix.mode }} --env GITHUB_WORKSPACE \
+          docker run -i --env MODE=${{ matrix.mode }} --env GITHUB_WORKSPACE --env SPLIT_N=4 --env SPLIT_I=${{ matrix.split }} \
             -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE \
             omnetpp/travis-inet:6.0pre10-201218 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-fingerprints.sh
 
