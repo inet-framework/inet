@@ -95,10 +95,11 @@ void Ieee8021dRelay::handleLowerPacket(Packet *incomingPacket)
     int incomingInterfaceId = interfaceInd->getInterfaceId();
     auto incomingInterface = interfaceTable->getInterfaceById(incomingInterfaceId);
     EV_INFO << "Processing packet from network" << EV_FIELD(incomingInterface) << EV_FIELD(incomingPacket) << EV_ENDL;
+    updatePeerAddress(incomingInterface, sourceAddress);
+
     const auto& incomingInterfaceData = incomingInterface->findProtocolData<Ieee8021dInterfaceData>();
     if (isStpAware && incomingInterfaceData == nullptr)
         throw cRuntimeError("Ieee8021dInterfaceData not found for interface %s", incomingInterface->getFullName());
-    updatePeerAddress(incomingInterface, sourceAddress);
     // BPDU Handling
     if (isStpAware
         && (destinationAddress == MacAddress::STP_MULTICAST_ADDRESS || destinationAddress == bridgeAddress)
