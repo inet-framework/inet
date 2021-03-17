@@ -22,12 +22,12 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
+#include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
-class INET_API Ieee80211Portal : public cSimpleModule, public IIeee80211Llc
+class INET_API Ieee80211Portal : public Ieee8022Llc, public IIeee80211Llc
 {
   protected:
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
@@ -36,17 +36,13 @@ class INET_API Ieee80211Portal : public cSimpleModule, public IIeee80211Llc
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
-    virtual void handleMessage(cMessage *message) override;
-
-    virtual void encapsulate(Packet *packet);
-    virtual void decapsulate(Packet *packet);
+    virtual void processPacketFromMac(Packet *packet) override;
 
   public:
     const Protocol *getProtocol() const override { return &Protocol::ieee8022llc; }
 };
 
 } // namespace ieee80211
-
 } // namespace inet
 
 #endif
