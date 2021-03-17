@@ -71,7 +71,7 @@ void NonQosRecoveryProcedure::incrementStationLrc(StationRetryCounters *stationC
 
 void NonQosRecoveryProcedure::incrementCounter(const Ptr<const Ieee80211DataOrMgmtHeader>& header, std::map<SequenceControlField, int>& retryCounter)
 {
-    auto id = SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber());
+    auto id = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
     if (retryCounter.find(id) != retryCounter.end())
         retryCounter[id]++;
     else
@@ -113,7 +113,7 @@ void NonQosRecoveryProcedure::ctsFrameReceived(StationRetryCounters *stationCoun
 //
 void NonQosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader, StationRetryCounters *stationCounters)
 {
-    auto id = SequenceControlField(ackedHeader->getSequenceNumber(), ackedHeader->getFragmentNumber());
+    auto id = SequenceControlField(ackedHeader->getSequenceNumber().get(), ackedHeader->getFragmentNumber());
     if (packet->getByteLength() >= rtsThreshold) {
         stationCounters->resetStationLongRetryCount();
         auto it = longRetryCounter.find(id);
@@ -141,7 +141,7 @@ void NonQosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const I
 void NonQosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     EV_WARN << "Retry limit reached for " << *packet << ".\n";
-    auto id = SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber());
+    auto id = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
     if (packet->getByteLength() >= rtsThreshold) {
         auto it = longRetryCounter.find(id);
         if (it != longRetryCounter.end())
@@ -242,7 +242,7 @@ bool NonQosRecoveryProcedure::isRtsFrameRetryLimitReached(Packet *packet, const 
 
 int NonQosRecoveryProcedure::getRc(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header, std::map<SequenceControlField, int>& retryCounter)
 {
-    auto count = retryCounter.find(SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber()));
+    auto count = retryCounter.find(SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()));
     if (count != retryCounter.end())
         return count->second;
     else

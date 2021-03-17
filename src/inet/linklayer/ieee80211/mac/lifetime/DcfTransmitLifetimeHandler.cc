@@ -33,7 +33,7 @@ void DcfTransmitLifetimeHandler::frameGotInProgess(const Ptr<const Ieee80211Data
 void DcfTransmitLifetimeHandler::frameTransmitted(const Ptr<const Ieee80211DataHeader>& header)
 {
     if (header->getFragmentNumber() == 0)
-        lifetimes[header->getSequenceNumber()] = simTime();
+        lifetimes[header->getSequenceNumber().get()] = simTime();
 }
 
 //
@@ -42,7 +42,7 @@ void DcfTransmitLifetimeHandler::frameTransmitted(const Ptr<const Ieee80211DataH
 //
 bool DcfTransmitLifetimeHandler::isLifetimeExpired(const Ptr<const Ieee80211DataHeader>& header)
 {
-    auto it = lifetimes.find(header->getSequenceNumber());
+    auto it = lifetimes.find(header->getSequenceNumber().get());
     if (it == lifetimes.end())
         throw cRuntimeError("There is no lifetime entry for frame = %s", header->getName());
     return (simTime() - it->second) >= maxTransmitLifetime;

@@ -28,17 +28,17 @@ BlockAckRecord::BlockAckRecord(MacAddress originatorAddress, Tid tid) :
 
 void BlockAckRecord::blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header)
 {
-    SequenceNumber sequenceNumber = header->getSequenceNumber();
+    SequenceNumberCyclic sequenceNumber = header->getSequenceNumber();
     FragmentNumber fragmentNumber = header->getFragmentNumber();
-    acknowledgmentState[std::make_pair(sequenceNumber, fragmentNumber)] = true;
+    acknowledgmentState[SequenceControlField(sequenceNumber.get(), fragmentNumber)] = true;
 }
 
-bool BlockAckRecord::getAckState(SequenceNumber sequenceNumber, FragmentNumber fragmentNumber)
+bool BlockAckRecord::getAckState(SequenceNumberCyclic sequenceNumber, FragmentNumber fragmentNumber)
 {
     // The status of MPDUs that are considered “old” and prior to the sequence number
     // range for which the receiver maintains status shall be reported as successfully
     // received (i.e., the corresponding bit in the bitmap shall be set to 1).
-    auto it = acknowledgmentState.find(std::make_pair(sequenceNumber, fragmentNumber));
+    auto it = acknowledgmentState.find(SequenceControlField(sequenceNumber.get(), fragmentNumber));
     if (it != acknowledgmentState.end()) {
         return true;
     }
@@ -47,15 +47,15 @@ bool BlockAckRecord::getAckState(SequenceNumber sequenceNumber, FragmentNumber f
     }
     else {
         auto earliest = acknowledgmentState.begin();
-        return earliest->first.first > sequenceNumber; // old = true
+        return SequenceNumberCyclic(earliest->first.getSequenceNumber()) > sequenceNumber; // old = true
     }
 }
 
-void BlockAckRecord::removeAckStates(SequenceNumber sequenceNumber)
+void BlockAckRecord::removeAckStates(SequenceNumberCyclic sequenceNumber)
 {
     auto it = acknowledgmentState.begin();
     while (it != acknowledgmentState.end()) {
-        if (it->first.first < sequenceNumber)
+        if (SequenceNumberCyclic(it->first.getSequenceNumber()) < sequenceNumber)
             it = acknowledgmentState.erase(it);
         else
             it++;

@@ -36,7 +36,7 @@ class BitVector
     @toString(.toString());
 }
 
-class SequenceNumber
+class SequenceNumberCyclic
 {
     @existingClass;
     @opaque;
@@ -201,7 +201,7 @@ class Ieee80211DataOrMgmtHeader extends Ieee80211TwoAddressHeader
     chunkLength = LENGTH_MGMT - B(4);
     MacAddress address3;
     short fragmentNumber;
-    SequenceNumber sequenceNumber;
+    SequenceNumberCyclic sequenceNumber;
 }
 
 //
@@ -291,7 +291,7 @@ class Ieee80211AddbaRequest extends Ieee80211ActionFrame
     // The Starting Sequence Number subfield of the Block Ack Starting Sequence Control subfield contains the sequence number of the first MSDU for which this Basic
     // BlockAckReq frame is sent. The Fragment Number subfield is set to 0.
     uint8_t _fragmentNumber = 0; // FIXME DataOrMgmtFreme has a fragmentNumber (4 bits)
-    SequenceNumber startingSequenceNumber; // the sequence number of the first MSDU (12 bits)
+    SequenceNumberCyclic startingSequenceNumber; // the sequence number of the first MSDU (12 bits)
 }
 
 //
@@ -365,7 +365,7 @@ class Ieee80211BasicBlockAckReq extends Ieee80211BlockAckReq
     // Starting Sequence Control subfield contains the sequence number of the first MSDU for which this Basic
     // BlockAckReq frame is sent. The Fragment Number subfield is set to 0.
     int fragmentNumber = 0;
-    SequenceNumber startingSequenceNumber;
+    SequenceNumberCyclic startingSequenceNumber;
 
     multiTid = 0;
     compressedBitmap = 0;
@@ -383,7 +383,7 @@ class Ieee80211CompressedBlockAckReq extends Ieee80211BlockAckReq
     // Control subfield is set to 0.
 
     int fragmentNumber = 0;
-    SequenceNumber startingSequenceNumber;
+    SequenceNumberCyclic startingSequenceNumber;
 
     multiTid = 0;
     compressedBitmap = 1;
@@ -435,7 +435,7 @@ class Ieee80211BasicBlockAck extends Ieee80211BlockAck
     // subfield and the Block Ack Bitmap subfield, as shown in Figure 8-26.
 
     int fragmentNumber = 0; // ??
-    SequenceNumber startingSequenceNumber;
+    SequenceNumberCyclic startingSequenceNumber;
     // The Block Ack Bitmap subfield is 128 octets in length and is used to indicate the received status of up to
     // 64 MSDUs. Bit position n of the Block Ack bitmap, if equal to 1, acknowledges receipt of an MPDU with an
     // MPDU sequence control value equal to (Block Ack Starting Sequence Control + n). Bit position n of the
@@ -463,7 +463,7 @@ class Ieee80211CompressedBlockAck extends Ieee80211BlockAck
     // Control subfield and the Block Ack Bitmap subfield, as shown in Figure 8-27.
 
     int fragmentNumber = 0;
-    SequenceNumber startingSequenceNumber;
+    SequenceNumberCyclic startingSequenceNumber;
     BitVector blockAckBitmap; // 64 bits
 
     // The TID_INFO subfield of the BA Control field of the Compressed BlockAck frame contains the TID for
