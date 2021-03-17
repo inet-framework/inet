@@ -156,7 +156,7 @@ void Stp::handleTCN(Packet *packet, const Ptr<const BpduTcn>& tcn)
         macAddressReq->setSrcAddress(bridgeAddress);
         macAddressReq->setDestAddress(destAddress);
         outPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
-        outPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+        outPacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
         send(outPacket, "relayOut");
     }
     delete packet;
@@ -171,7 +171,7 @@ void Stp::generateBPDU(int interfaceId, const MacAddress& address, bool tcFlag, 
     macAddressReq->setDestAddress(address);
     packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
-    packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+    packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
 
     bpdu->setProtocolIdentifier(SPANNING_TREE_PROTOCOL);
     bpdu->setProtocolVersionIdentifier(SPANNING_TREE);
@@ -220,7 +220,7 @@ void Stp::generateTCN()
             macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
             packet->addTag<InterfaceReq>()->setInterfaceId(rootInterfaceId);
             packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
-            packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+            packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
 
             packet->insertAtBack(tcn);
             EV_INFO << "The topology has changed. Sending Topology Change Notification BPDU " << tcn << " to the Root Switch." << endl;
