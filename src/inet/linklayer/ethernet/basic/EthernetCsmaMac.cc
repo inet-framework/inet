@@ -249,7 +249,6 @@ void EthernetCsmaMac::handleSignalFromNetwork(EthernetSignalBase *signal)
 
 void EthernetCsmaMac::handleUpperPacket(Packet *packet)
 {
-
     EV_INFO << "Received " << packet << " from upper layer." << endl;
 
     numFramesFromHL++;
