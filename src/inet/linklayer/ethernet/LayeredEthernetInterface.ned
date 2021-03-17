@@ -42,7 +42,7 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
         output upperLayerOut;
         input cutthroughIn @loose;
         output cutthroughOut @loose;
-        inout phys;
+        inout phys @labels(EthernetSignal);
     submodules:
         trafficConditionerLayer: <default("OmittedTrafficConditionerLayer")> like ITrafficConditionerLayer {
             parameters:

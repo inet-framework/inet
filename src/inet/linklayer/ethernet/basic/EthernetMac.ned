@@ -157,7 +157,7 @@ module EthernetMac like IEtherMac
     gates:
         input upperLayerIn @labels(EtherFrame);    // to ~EthernetEncapsulation or ~IMacRelayUnit
         output upperLayerOut @labels(EtherFrame);  // to ~EthernetEncapsulation or ~IMacRelayUnit
-        inout phys @labels(EtherFrame);            // to physical layer or the network
+        inout phys @labels(EthernetSignal);        // to the network
     submodules:
         queue: <default("EthernetQueue")> like IPacketQueue {
             parameters:
