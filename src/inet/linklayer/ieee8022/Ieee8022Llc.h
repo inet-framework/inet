@@ -55,6 +55,8 @@ class INET_API Ieee8022Llc : public OperationalBase, public DefaultProtocolRegis
     virtual void encapsulate(Packet *frame);
     virtual void decapsulate(Packet *frame);
     virtual void processPacketFromHigherLayer(Packet *msg);
+    virtual bool deliverCopyToSockets(Packet *packet);  // return true when delivered to any socket
+    virtual bool isDeliverableToUpperLayer(Packet *packet);
     virtual void processPacketFromMac(Packet *packet);
     virtual void processCommandFromHigherLayer(Request *request);
     virtual void registerMyProtocol();

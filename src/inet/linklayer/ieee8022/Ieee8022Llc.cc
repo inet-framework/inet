@@ -122,12 +122,9 @@ void Ieee8022Llc::processCommandFromHigherLayer(Request *request)
         throw cRuntimeError("Unknown command: '%s' with %s", request->getName(), ctrl->getClassName());
 }
 
-void Ieee8022Llc::processPacketFromMac(Packet *packet)
+bool Ieee8022Llc::deliverCopyToSockets(Packet *packet)
 {
-    decapsulate(packet);
     bool isSent = false;
-
-    // deliver to sockets
     if (auto sap = packet->findTag<Ieee802SapInd>()) {
         int localSap = sap->getDsap();
         int remoteSap = sap->getSsap();
@@ -144,9 +141,21 @@ void Ieee8022Llc::processPacketFromMac(Packet *packet)
             }
         }
     }
+    return isSent;
+}
 
+bool Ieee8022Llc::isDeliverableToUpperLayer(Packet *packet)
+{
     const auto& protocolTag = packet->findTag<PacketProtocolTag>();
-    if (protocolTag != nullptr && upperProtocols.find(protocolTag->getProtocol()) != upperProtocols.end()) {
+    return (protocolTag != nullptr && upperProtocols.find(protocolTag->getProtocol()) != upperProtocols.end());
+}
+
+void Ieee8022Llc::processPacketFromMac(Packet *packet)
+{
+    decapsulate(packet);
+    bool isSent = deliverCopyToSockets(packet);
+
+    if (isDeliverableToUpperLayer(packet)) {
         send(packet, "upperLayerOut");
     }
     else {
