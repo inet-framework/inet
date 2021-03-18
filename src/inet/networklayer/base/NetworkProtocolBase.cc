@@ -104,8 +104,13 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
         emit(packetSentToLowerSignal, message);
     if (interfaceId != -1) {
         auto& tags = check_and_cast<ITaggedObject *>(message)->getTags();
-        tags.removeTagIfPresent<DispatchProtocolReq>();
         tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+        auto networkInterface = interfaceTable->getInterfaceById(interfaceId);
+        auto protocol = networkInterface->getProtocol();
+        if (protocol != nullptr)
+            tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+        else
+            tags.removeTagIfPresent<DispatchProtocolReq>();
         send(message, "queueOut");
     }
     else {
@@ -114,8 +119,12 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
             if (networkInterface && !networkInterface->isLoopback()) {
                 cMessage *duplicate = utils::dupPacketAndControlInfo(message);
                 auto& tags = check_and_cast<ITaggedObject *>(duplicate)->getTags();
-                tags.removeTagIfPresent<DispatchProtocolReq>();
                 tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
+                auto protocol = networkInterface->getProtocol();
+                if (protocol != nullptr)
+                    tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+                else
+                    tags.removeTagIfPresent<DispatchProtocolReq>();
                 send(duplicate, "queueOut");
             }
         }

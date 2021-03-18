@@ -962,10 +962,14 @@ void Ipv6::fragmentAndSend(Packet *packet, const NetworkInterface *ie, const Mac
 void Ipv6::sendDatagramToOutput(Packet *packet, const NetworkInterface *destIE, const MacAddress& macAddr)
 {
     packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(macAddr);
-    packet->removeTagIfPresent<DispatchProtocolReq>();
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
     packet->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
+    auto protocol = destIE->getProtocol();
+    if (protocol != nullptr)
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+    else
+        packet->removeTagIfPresent<DispatchProtocolReq>();
     send(packet, "queueOut");
 }
 

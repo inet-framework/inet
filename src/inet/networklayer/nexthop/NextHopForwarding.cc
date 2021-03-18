@@ -609,10 +609,14 @@ void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const NetworkInte
     if (!ie->isBroadcast()) {
         EV_DETAIL << "output interface " << ie->getInterfaceName() << " is not broadcast, skipping ARP\n";
         // Peer to peer interface, no broadcast, no MACAddress. // packet->addTagIfAbsent<MACAddressReq>()->setDestinationAddress(macAddress);
-        datagram->removeTagIfPresent<DispatchProtocolReq>();
         datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
         datagram->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::nextHopForwarding);
         datagram->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::nextHopForwarding);
+        auto protocol = ie->getProtocol();
+        if (protocol != nullptr)
+            datagram->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+        else
+            datagram->removeTagIfPresent<DispatchProtocolReq>();
         send(datagram, "queueOut");
         return;
     }
@@ -631,10 +635,14 @@ void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const NetworkInte
     else {
         // add control info with MAC address
         datagram->addTagIfAbsent<MacAddressReq>()->setDestAddress(nextHopMAC);
-        datagram->removeTagIfPresent<DispatchProtocolReq>();
         datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
         datagram->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::nextHopForwarding);
         datagram->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::nextHopForwarding);
+        auto protocol = ie->getProtocol();
+        if (protocol != nullptr)
+            datagram->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+        else
+            datagram->removeTagIfPresent<DispatchProtocolReq>();
 
         // send out
         send(datagram, "queueOut");
