@@ -44,6 +44,7 @@ module EthernetHost2
     submodules:
         app: EtherTrafGen {
             @display("p=200,100");
+            interface = "eth";
         }
         interfaceTable: InterfaceTable {
             parameters:
