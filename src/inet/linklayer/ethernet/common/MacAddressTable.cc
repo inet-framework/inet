@@ -185,13 +185,13 @@ bool MacAddressTable::updateTableWithAddress(int interfaceId, const MacAddress& 
         removeAgedEntriesIfNeeded();
 
         // Add entry to table
-        EV << "Adding entry to Address Table: " << address << " --> interfaceId " << interfaceId << "\n";
+        EV << "Adding entry" << EV_FIELD(address) << EV_FIELD(interfaceId) << EV_FIELD(vid) << EV_ENDL;
         (*table)[address] = AddressEntry(vid, interfaceId, simTime());
         return false;
     }
     else {
         // Update existing entry
-        EV << "Updating entry in Address Table: " << address << " --> interfaceId " << interfaceId << "\n";
+        EV << "Updating entry" << EV_FIELD(address) << EV_FIELD(interfaceId) << EV_FIELD(vid) << EV_ENDL;
         AddressEntry& entry = iter->second;
         entry.insertionTime = simTime();
         entry.interfaceId = interfaceId;
