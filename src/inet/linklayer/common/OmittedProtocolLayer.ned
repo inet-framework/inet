@@ -17,9 +17,9 @@
 
 package inet.linklayer.common;
 
-import inet.linklayer.contract.IPolicyLayer;
+import inet.linklayer.ethernet.redundancy.IProtocolLayer;
 
-module OmittedPolicyLayer like IPolicyLayer
+module OmittedProtocolLayer like IProtocolLayer
 {
     parameters:
         @class(::inet::OmittedModule);

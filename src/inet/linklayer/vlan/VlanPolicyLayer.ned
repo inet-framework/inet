@@ -17,11 +17,11 @@
 
 package inet.linklayer.vlan;
 
-import inet.linklayer.contract.IPolicyLayer;
+import inet.linklayer.ethernet.redundancy.IProtocolLayer;
 import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 
-module VlanPolicyLayer like IPolicyLayer
+module VlanPolicyLayer like IProtocolLayer
 {
     parameters:
         @display("i=block/layer");
