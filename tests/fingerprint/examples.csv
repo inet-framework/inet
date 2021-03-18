@@ -119,6 +119,10 @@
 /examples/ethernet/invehicle/,       -f omnetpp.ini -c BrokenCameraNoTAS -r 0,              100ms,   2f85-3e91/tplx;5ca1-ffab/~tNl;16b3-7874/~tND;057d-7e3f/tyf, PASS, ethernet layered tsn
 /examples/ethernet/invehicle/,       -f omnetpp.ini -c BrokenCameraTAS -r 0,                100ms,   e31f-1c90/tplx;b767-4c48/~tNl;cff6-4c29/~tND;3752-3998/tyf, PASS, ethernet layered tsn
 
+/examples/ethernet/redundancy/,       -f omnetpp.ini -c General -r 0,                100ms,           7bcc-5348/tplx;a9eb-bb41/~tNl;35e9-07e0/~tND;69b4-5aa4/tyf, PASS, ethernet layered tsn
+/examples/ethernet/redundancy/,       -f omnetpp2.ini -c General -r 0,               100ms,           45f8-33b3/tplx;d938-c1cd/~tNl;ddf0-1e60/~tND;aa90-c9aa/tyf, PASS, ethernet layered tsn
+/examples/ethernet/redundancy/,       -f omnetpp3.ini -c General -r 0,               100ms,           59c1-d8d6/tplx;30f4-52b6/~tNl;ae84-7adc/~tND;7492-b88e/tyf, PASS, ethernet layered tsn
+
 /examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,            75d0-cba9/tplx;ce1d-d136/~tNl;51b3-9d40/~tND;2fef-6362/tyf, PASS, wireless
 
 /examples/httptools/direct/flashdirect/, -f omnetpp.ini -c General -r 0,               500000s,      f607-5921/tplx;428e-2e61/~tNl;8154-c757/tyf, PASS,
