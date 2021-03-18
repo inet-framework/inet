@@ -197,6 +197,9 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
      */
     State getState() const { return state; }
 
+    cChannel *getRxTransmissionChannel() { return rxTransmissionChannel; }
+    cChannel *getTxTransmissionChannel() { return txTransmissionChannel; }
+
     /**
      * Returns the combined state of the carrier and the interface requested state.
      */
