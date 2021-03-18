@@ -30,9 +30,6 @@ namespace inet {
 
 class INET_API GateSchedulingConfigurator : public cSimpleModule
 {
-  public:
-    GateSchedulingConfigurator() {}
-
   protected:
     class InterfaceInfo;
 
@@ -91,16 +88,20 @@ class INET_API GateSchedulingConfigurator : public cSimpleModule
         simtime_t maxLatency = -1;
         bps datarate = bps(NaN);
         simtime_t startOffset = -1;
+        std::vector<std::vector<std::string>> pathFragments;
     };
 
-    Topology topology;
+  protected:
     cValueArray *configuration;
-    std::vector<StreamReservation> streamReservations;
     simtime_t gateCycleDuration;
 
+    Topology topology;
+    std::vector<StreamReservation> streamReservations;
+
   protected:
-    virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleParameterChange(const char *name) override;
     virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
 
     /**
@@ -110,6 +111,7 @@ class INET_API GateSchedulingConfigurator : public cSimpleModule
      */
     virtual void extractTopology(Topology& topology);
 
+    virtual void clearConfiguration();
     /**
      * Computes the network configuration for all nodes in the network.
      * The result of the computation is only stored in the configurator.
@@ -117,12 +119,20 @@ class INET_API GateSchedulingConfigurator : public cSimpleModule
     virtual void computeConfiguration();
     virtual void computeStreamReservations();
     virtual void computeGateScheduling();
+
     virtual void computeStreamStartOffset(StreamReservation& streamReservation);
+    virtual simtime_t computeStartOffsetForPathFragments(StreamReservation& streamReservation, std::string startNetworkNodeName, simtime_t startTime);
+
     virtual void addGateScheduling(StreamReservation& streamReservation, int startIndex, int endIndex);
+    virtual void addGateSchedulingForPathFragments(StreamReservation& streamReservation, std::string startNetworkNodeName, simtime_t startTime);
 
     virtual void configureGateScheduling();
     virtual void configureGateScheduling(cModule *networkNode, cModule *gate, InterfaceInfo *interfaceInfo);
+    virtual void configureApplicationOffsets();
 
+    virtual std::vector<std::string> computePath(Node *source, Node *destination);
+
+    virtual Link *findLinkOut(Node *node, const char *neighbor);
     virtual Topology::LinkOut *findLinkOut(Node *node, int gateId);
     virtual InterfaceInfo *findInterfaceInfo(Node *node, NetworkInterface *networkInterface);
 };

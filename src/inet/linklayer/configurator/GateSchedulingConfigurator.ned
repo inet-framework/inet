@@ -25,9 +25,9 @@ package inet.linklayer.configurator;
 simple GateSchedulingConfigurator
 {
     parameters:
-        @display("i=block/cogwheel");
         double gateCycleDuration @unit(s); // the globally used gating schedule period in each PeriodicGate modules
-        object configuration; // a vector of objects (e.g. [{...}, {...}]) where each object has the following fields: type, priority, source, destination, packetLength, packetInterval, maxLatency
-                              // here is an example: [{type: "unicast", priority: 0, source: "wheel*", destination: "hud", packetLength: 100B, packetInterval: 5ms, maxLatency: 100us}]
+        object configuration = default([]); // a vector of objects (e.g. [{...}, {...}]) where each object has the following fields: type, priority, source, destination, packetLength, packetInterval, maxLatency
+                                            // here is an example: [{type: "unicast", priority: 0, source: "wheel*", destination: "hud", packetLength: 100B, packetInterval: 5ms, maxLatency: 100us}]
+        @display("i=block/cogwheel");
 }
 

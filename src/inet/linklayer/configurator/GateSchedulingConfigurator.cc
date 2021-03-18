@@ -40,14 +40,19 @@ void GateSchedulingConfigurator::initialize(int stage)
     if (stage == INITSTAGE_QUEUEING) {
         computeConfiguration();
         configureGateScheduling();
-        for (auto& streamReservation : streamReservations) {
-            if (streamReservation.startOffset != -1) {
-                auto networkNode = streamReservation.source->module;
-                auto sourceModule = networkNode->getModuleByPath(".app[0].source");
-                simtime_t startOffset = streamReservation.startOffset;
-                EV_DEBUG << "Setting initial packet production offset for application source" << EV_FIELD(sourceModule) << EV_FIELD(startOffset, startOffset.ustr()) << EV_ENDL;
-                sourceModule->par("initialProductionOffset") = startOffset.dbl();
-            }
+        configureApplicationOffsets();
+    }
+}
+
+void GateSchedulingConfigurator::handleParameterChange(const char *name)
+{
+    if (name != nullptr) {
+        if (!strcmp(name, "configuration")) {
+            configuration = check_and_cast<cValueArray *>(par("configuration").objectValue());
+            clearConfiguration();
+            computeConfiguration();
+            configureGateScheduling();
+            configureApplicationOffsets();
         }
     }
 }
@@ -111,6 +116,12 @@ void GateSchedulingConfigurator::extractTopology(Topology& topology)
     }
 }
 
+void GateSchedulingConfigurator::clearConfiguration()
+{
+    topology.clear();
+    streamReservations.clear();
+}
+
 void GateSchedulingConfigurator::computeConfiguration()
 {
     long initializeStartTime = clock();
@@ -150,6 +161,18 @@ void GateSchedulingConfigurator::computeStreamReservations()
                     streamReservation.packetInterval = packetInterval;
                     streamReservation.maxLatency = maxLatency;
                     streamReservation.datarate = datarate;
+                    if (entry->containsKey("pathFragments")) {
+                        auto pathFragments = check_and_cast<cValueArray *>(entry->get("pathFragments").objectValue());
+                        for (int l = 0; l < pathFragments->size(); l++) {
+                            std::vector<std::string> path;
+                            auto pathFragment = check_and_cast<cValueArray *>(pathFragments->get(l).objectValue());
+                            for (int m = 0; m < pathFragment->size(); m++)
+                                path.push_back(pathFragment->get(m).stringValue());
+                            streamReservation.pathFragments.push_back(path);
+                        }
+                    }
+                    else
+                        streamReservation.pathFragments.push_back(computePath(sourceNode, destinationNode));
                     streamReservations.push_back(streamReservation);
                 }
             }
@@ -182,50 +205,78 @@ void GateSchedulingConfigurator::computeStreamStartOffset(StreamReservation& str
     b packetLength = streamReservation.packetLength;
     EV_DEBUG << "Computing start offset for stream reservation" << EV_FIELD(source) << EV_FIELD(destination) << EV_FIELD(priority) << EV_FIELD(packetLength) << EV_FIELD(datarate) << EV_FIELD(gateCycleDuration, gateCycleDuration.ustr()) << EV_ENDL;
     simtime_t startOffset = 0;
-    topology.calculateUnweightedSingleShortestPathsTo(streamReservation.destination);
     while (true) {
-        simtime_t nextGateOpenTime = startOffset;
-        auto node = streamReservation.source;
-        while (node != streamReservation.destination) {
-            auto link = (Link *)node->getPath(0);
-            auto interfaceInfo = link->sourceInterfaceInfo;
-            auto networkInterface = interfaceInfo->networkInterface;
-            bps interfaceDatarate = bps(networkInterface->getDatarate());
-            simtime_t transmissionDuration = s(packetLength / interfaceDatarate).get();
-            simtime_t interFrameGap = s(b(96) / interfaceDatarate).get();
-            // KLUDGE: get this from the channel
-            simtime_t propagationDelay = s(m(10) / mps(2E+8)).get();
-            auto gate = networkInterface->findModuleByPath(".macLayer.queue.gate[0]");
-            if (gate != nullptr) {
-                simtime_t gateOpenDuration = transmissionDuration;
-                simtime_t gateOpenTime = nextGateOpenTime;
-                simtime_t gateCloseTime = gateOpenTime + gateOpenDuration;
-                for (int i = 0; i < interfaceInfo->gateOpenIndices.size(); i++) {
-                    if (interfaceInfo->gateCloseTimes[i] + interFrameGap <= gateOpenTime || gateCloseTime + interFrameGap <= interfaceInfo->gateOpenTimes[i])
-                        continue;
-                    else {
-                        gateOpenTime = interfaceInfo->gateCloseTimes[i] + interFrameGap;
-                        gateCloseTime = gateOpenTime + gateOpenDuration;
-                        i = 0;
-                    }
-                }
-                simtime_t gateOpenDelay = gateOpenTime - nextGateOpenTime;
-                if (gateOpenDelay != 0) {
-                    startOffset += gateOpenDelay;
-                    break;
-                }
-                nextGateOpenTime = gateCloseTime + propagationDelay;
-            }
-            else
-                nextGateOpenTime += transmissionDuration + propagationDelay;
-            node = (Node *)node->getPath(0)->getRemoteNode();
-        }
-        if (node == streamReservation.destination)
+        auto startOffsetShift = computeStartOffsetForPathFragments(streamReservation, source->getFullName(), startOffset);
+        if (startOffsetShift == 0)
             break;
+        else
+            startOffset += startOffsetShift;
     }
     EV_DEBUG << "Setting start offset for stream reservation" << EV_FIELD(source) << EV_FIELD(destination) << EV_FIELD(priority) << EV_FIELD(packetLength) << EV_FIELD(datarate) << EV_FIELD(gateCycleDuration, gateCycleDuration.ustr()) << EV_FIELD(startOffset, startOffset.ustr()) << EV_ENDL;
     streamReservation.startOffset = startOffset;
 }
+
+simtime_t GateSchedulingConfigurator::computeStartOffsetForPathFragments(StreamReservation& streamReservation, std::string startNetworkNodeName, simtime_t startTime)
+{
+    auto destination = streamReservation.destination->module;
+    b packetLength = streamReservation.packetLength;
+    simtime_t result = 0;
+    std::deque<std::tuple<std::string, simtime_t, std::vector<std::string>>> todos;
+    todos.push_back({startNetworkNodeName, startTime, {}});
+    while (!todos.empty()) {
+        auto todo = todos.front();
+        todos.pop_front();
+        simtime_t startOffsetShift = 0;
+        for (auto& pathFragment : streamReservation.pathFragments) {
+            if (pathFragment.front() == std::get<0>(todo)) {
+                simtime_t nextGateOpenTime = std::get<1>(todo);
+                std::vector<std::string> extendedPath = std::get<2>(todo);
+                for (int i = 0; i < pathFragment.size() - 1; i++) {
+                    auto networkNodeName = pathFragment[i];
+                    extendedPath.push_back(networkNodeName);
+                    auto networkNode = getParentModule()->getSubmodule(networkNodeName.c_str());
+                    auto node = (Node *)topology.getNodeFor(networkNode);
+                    auto link = findLinkOut(node, pathFragment[i + 1].c_str());
+                    auto interfaceInfo = link->sourceInterfaceInfo;
+                    auto networkInterface = interfaceInfo->networkInterface;
+                    bps interfaceDatarate = bps(networkInterface->getDatarate());
+                    simtime_t transmissionDuration = s(packetLength / interfaceDatarate).get();
+                    simtime_t interFrameGap = s(b(96) / interfaceDatarate).get();
+                    auto channel = dynamic_cast<cDatarateChannel *>(networkInterface->getTxTransmissionChannel());
+                    simtime_t propagationDelay = channel != nullptr ? channel->getDelay() : 0;
+                    auto gate = networkInterface->findModuleByPath(".macLayer.queue.gate[0]"); // KLUDGE: to check for gate scheduling
+                    if (gate != nullptr) {
+                        simtime_t gateOpenDuration = transmissionDuration;
+                        simtime_t gateOpenTime = nextGateOpenTime;
+                        simtime_t gateCloseTime = gateOpenTime + gateOpenDuration;
+                        for (int i = 0; i < interfaceInfo->gateOpenIndices.size(); i++) {
+                            if (interfaceInfo->gateCloseTimes[i] + interFrameGap <= gateOpenTime || gateCloseTime + interFrameGap <= interfaceInfo->gateOpenTimes[i])
+                                continue;
+                            else {
+                                gateOpenTime = interfaceInfo->gateCloseTimes[i] + interFrameGap;
+                                gateCloseTime = gateOpenTime + gateOpenDuration;
+                                i = 0;
+                            }
+                        }
+                        simtime_t gateOpenDelay = gateOpenTime - nextGateOpenTime;
+                        if (gateOpenDelay != 0) {
+                            startOffsetShift += gateOpenDelay;
+                            break;
+                        }
+                        nextGateOpenTime = gateCloseTime + propagationDelay;
+                    }
+                    else
+                        nextGateOpenTime += transmissionDuration + propagationDelay;
+                }
+                auto endNetworkNodeName = pathFragment.back();
+                if (endNetworkNodeName != destination->getFullName() && std::find(extendedPath.begin(), extendedPath.end(), endNetworkNodeName) == extendedPath.end())
+                    todos.push_back({endNetworkNodeName, nextGateOpenTime, extendedPath});
+            }
+        }
+        result += startOffsetShift;
+    }
+    return result;
+};
 
 void GateSchedulingConfigurator::addGateScheduling(StreamReservation& streamReservation, int startIndex, int endIndex)
 {
@@ -236,47 +287,69 @@ void GateSchedulingConfigurator::addGateScheduling(StreamReservation& streamRese
     b packetLength = streamReservation.packetLength;
     simtime_t startOffset = streamReservation.startOffset;
     EV_DEBUG << "Allocating gate scheduling for stream reservation" << EV_FIELD(source) << EV_FIELD(destination) << EV_FIELD(priority) << EV_FIELD(packetLength) << EV_FIELD(datarate) << EV_FIELD(gateCycleDuration, gateCycleDuration.ustr()) << EV_FIELD(startOffset, startOffset.ustr()) << EV_FIELD(startIndex) << EV_FIELD(endIndex) << EV_ENDL;
-    topology.calculateUnweightedSingleShortestPathsTo(streamReservation.destination);
     for (int index = startIndex; index < endIndex; index++) {
         simtime_t startTime = startOffset + index * streamReservation.packetInterval;
-        simtime_t nextGateOpenTime = startTime;
-        auto node = streamReservation.source;
-        while (node != streamReservation.destination) {
-            auto networkNode = node->module;
-            auto link = (Link *)node->getPath(0);
-            auto interfaceInfo = link->sourceInterfaceInfo;
-            auto networkInterface = interfaceInfo->networkInterface;
-            bps interfaceDatarate = bps(networkInterface->getDatarate());
-            simtime_t transmissionDuration = s(packetLength / interfaceDatarate).get();
-            simtime_t interFrameGap = s(b(96) / interfaceDatarate).get();
-            // KLUDGE: get this from the channel
-            simtime_t propagationDelay = s(m(10) / mps(2E+8)).get();
-            auto gate = networkInterface->findModuleByPath(".macLayer.queue.gate[0]");
-            if (gate != nullptr) {
-                simtime_t gateOpenDuration = transmissionDuration;
-                simtime_t gateOpenTime = nextGateOpenTime;
-                simtime_t gateCloseTime = gateOpenTime + gateOpenDuration;
-                for (int i = 0; i < interfaceInfo->gateOpenIndices.size(); i++) {
-                    if (interfaceInfo->gateCloseTimes[i] + interFrameGap <= gateOpenTime || gateCloseTime + interFrameGap <= interfaceInfo->gateOpenTimes[i])
-                        continue;
-                    else {
-                        gateOpenTime = interfaceInfo->gateCloseTimes[i] + interFrameGap;
-                        gateCloseTime = gateOpenTime + gateOpenDuration;
-                        i = 0;
+        addGateSchedulingForPathFragments(streamReservation, source->getFullName(), startTime);
+    }
+}
+
+void GateSchedulingConfigurator::addGateSchedulingForPathFragments(StreamReservation& streamReservation, std::string startNetworkNodeName, simtime_t startTime)
+{
+    auto destination = streamReservation.destination->module;
+    auto priority = streamReservation.priority;
+    b packetLength = streamReservation.packetLength;
+    std::deque<std::tuple<std::string, simtime_t, std::vector<std::string>>> todos;
+    todos.push_back({startNetworkNodeName, startTime, {}});
+    while (!todos.empty()) {
+        auto todo = todos.front();
+        todos.pop_front();
+        for (auto& pathFragment : streamReservation.pathFragments) {
+            if (pathFragment.front() == std::get<0>(todo)) {
+                simtime_t nextGateOpenTime = std::get<1>(todo);
+                std::vector<std::string> extendedPath = std::get<2>(todo);
+                for (int i = 0; i < pathFragment.size() - 1; i++) {
+                    auto networkNodeName = pathFragment[i];
+                    extendedPath.push_back(networkNodeName);
+                    auto networkNode = getParentModule()->getSubmodule(networkNodeName.c_str());
+                    auto node = (Node *)topology.getNodeFor(networkNode);
+                    auto link = findLinkOut(node, pathFragment[i + 1].c_str());
+                    auto interfaceInfo = link->sourceInterfaceInfo;
+                    auto networkInterface = interfaceInfo->networkInterface;
+                    bps interfaceDatarate = bps(networkInterface->getDatarate());
+                    simtime_t transmissionDuration = s(packetLength / interfaceDatarate).get();
+                    simtime_t interFrameGap = s(b(96) / interfaceDatarate).get();
+                    auto channel = dynamic_cast<cDatarateChannel *>(networkInterface->getTxTransmissionChannel());
+                    simtime_t propagationDelay = channel != nullptr ? channel->getDelay() : 0;
+                    auto gate = networkInterface->findModuleByPath(".macLayer.queue.gate[0]"); // KLUDGE: to check for gate scheduling
+                    if (gate != nullptr) {
+                        simtime_t gateOpenDuration = transmissionDuration;
+                        simtime_t gateOpenTime = nextGateOpenTime;
+                        simtime_t gateCloseTime = gateOpenTime + gateOpenDuration;
+                        for (int i = 0; i < interfaceInfo->gateOpenIndices.size(); i++) {
+                            if (interfaceInfo->gateCloseTimes[i] + interFrameGap <= gateOpenTime || gateCloseTime + interFrameGap <= interfaceInfo->gateOpenTimes[i])
+                                continue;
+                            else {
+                                gateOpenTime = interfaceInfo->gateCloseTimes[i] + interFrameGap;
+                                gateCloseTime = gateOpenTime + gateOpenDuration;
+                                i = 0;
+                            }
+                        }
+                        simtime_t extraDelay = gateOpenTime - nextGateOpenTime;
+                        EV_DEBUG << "Extending gate scheduling for stream reservation" << EV_FIELD(networkNode) << EV_FIELD(networkInterface) << EV_FIELD(priority) << EV_FIELD(interfaceDatarate) << EV_FIELD(packetLength) << EV_FIELD(index) << EV_FIELD(startTime, startTime.ustr()) << EV_FIELD(gateOpenTime, gateOpenTime.ustr()) << EV_FIELD(gateCloseTime, gateCloseTime.ustr()) << EV_FIELD(gateOpenDuration, gateOpenDuration.ustr()) << EV_FIELD(extraDelay, extraDelay.ustr()) << EV_ENDL;
+                        if (gateCloseTime > gateCycleDuration)
+                            throw cRuntimeError("Gate scheduling doesn't fit into cycle duration");
+                        interfaceInfo->gateOpenIndices.push_back(streamReservation.priority);
+                        interfaceInfo->gateOpenTimes.push_back(gateOpenTime);
+                        interfaceInfo->gateCloseTimes.push_back(gateCloseTime);
+                        nextGateOpenTime = gateCloseTime + propagationDelay;
                     }
+                    else
+                        nextGateOpenTime += transmissionDuration + propagationDelay;
                 }
-                simtime_t extraDelay = gateOpenTime - nextGateOpenTime;
-                EV_DEBUG << "Extending gate scheduling for stream reservation" << EV_FIELD(networkNode) << EV_FIELD(networkInterface) << EV_FIELD(priority) << EV_FIELD(interfaceDatarate) << EV_FIELD(packetLength) << EV_FIELD(index) << EV_FIELD(startTime, startTime.ustr()) << EV_FIELD(gateOpenTime, gateOpenTime.ustr()) << EV_FIELD(gateCloseTime, gateCloseTime.ustr()) << EV_FIELD(gateOpenDuration, gateOpenDuration.ustr()) << EV_FIELD(extraDelay, extraDelay.ustr()) << EV_ENDL;
-                if (gateCloseTime > gateCycleDuration)
-                    throw cRuntimeError("Gate scheduling doesn't fit into cycle duration");
-                interfaceInfo->gateOpenIndices.push_back(streamReservation.priority);
-                interfaceInfo->gateOpenTimes.push_back(gateOpenTime);
-                interfaceInfo->gateCloseTimes.push_back(gateCloseTime);
-                nextGateOpenTime = gateCloseTime + propagationDelay;
+                auto endNetworkNodeName = pathFragment.back();
+                if (endNetworkNodeName != destination->getFullName() && std::find(extendedPath.begin(), extendedPath.end(), endNetworkNodeName) == extendedPath.end())
+                    todos.push_back({endNetworkNodeName, nextGateOpenTime, extendedPath});
             }
-            else
-                nextGateOpenTime += transmissionDuration + propagationDelay;
-            node = (Node *)node->getPath(0)->getRemoteNode();
         }
     }
 }
@@ -333,7 +406,8 @@ void GateSchedulingConfigurator::configureGateScheduling(cModule *networkNode, c
         durations->add(cValue(0, "s"));
         stream << "0s ";
     }
-    stream.seekp(-1, stream.cur);
+    if (durations->size() != 0)
+        stream.seekp(-1, stream.cur);
     stream << "]";
     simtime_t offset = 0;
     auto networkInterface = interfaceInfo->networkInterface;
@@ -345,6 +419,42 @@ void GateSchedulingConfigurator::configureGateScheduling(cModule *networkNode, c
     cPar& durationsPar = gate->par("durations");
     durationsPar.copyIfShared();
     durationsPar.setObjectValue(durations);
+}
+
+void GateSchedulingConfigurator::configureApplicationOffsets()
+{
+    for (auto& streamReservation : streamReservations) {
+        if (streamReservation.startOffset != -1) {
+            auto networkNode = streamReservation.source->module;
+            // KLUDGE:
+            auto sourceModule = networkNode->getModuleByPath(".app[0].source");
+            simtime_t startOffset = streamReservation.startOffset;
+            EV_DEBUG << "Setting initial packet production offset for application source" << EV_FIELD(sourceModule) << EV_FIELD(startOffset, startOffset.ustr()) << EV_ENDL;
+            sourceModule->par("initialProductionOffset") = startOffset.dbl();
+        }
+    }
+}
+
+std::vector<std::string> GateSchedulingConfigurator::computePath(Node *source, Node *destination)
+{
+    std::vector<std::string> path;
+    topology.calculateUnweightedSingleShortestPathsTo(destination);
+    auto node = source;
+    while (node != destination) {
+        auto networkNode = node->module;
+        path.push_back(networkNode->getFullName());
+        node = (Node *)node->getPath(0)->getRemoteNode();
+    }
+    path.push_back(destination->module->getFullName());
+    return path;
+}
+
+GateSchedulingConfigurator::Link *GateSchedulingConfigurator::findLinkOut(Node *node, const char *neighbor)
+{
+    for (int i = 0; i < node->getNumOutLinks(); i++)
+        if (!strcmp(node->getLinkOut(i)->getRemoteNode()->getModule()->getFullName(), neighbor))
+            return check_and_cast<Link *>(static_cast<Topology::Link *>(node->getLinkOut(i)));
+    return nullptr;
 }
 
 Topology::LinkOut *GateSchedulingConfigurator::findLinkOut(Node *node, int gateId)
