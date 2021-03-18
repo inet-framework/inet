@@ -17,10 +17,10 @@
 
 package inet.linklayer.ieee8021q;
 
+import inet.linklayer.ethernet.redundancy.IProtocolLayer;
 import inet.queueing.contract.IPacketFlow;
 
-
-module Ieee8021qLayer like IIeee8021qLayer
+module Ieee8021qLayer like IProtocolLayer
 {
     parameters:
         string vlanTagType = default("c");

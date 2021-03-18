@@ -17,7 +17,9 @@
 
 package inet.linklayer.ieee8021r;
 
-module Ieee8021rProtocol like IIeee8021rLayer
+import inet.linklayer.ethernet.redundancy.IProtocolLayer;
+
+module Ieee8021rProtocol like IProtocolLayer
 {
     parameters:
         @display("i=block/layer");

@@ -19,7 +19,7 @@ package inet.linklayer.ieee8021r;
 
 import inet.protocolelement.contract.IProtocolLayer;
 
-module Ieee8021rLayer like IIeee8021rLayer
+module Ieee8021rLayer like IProtocolLayer
 {
     parameters:
         @display("i=block/layer");
