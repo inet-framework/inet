@@ -205,7 +205,7 @@ void PacketProcessorBase::dropPacket(Packet *packet, PacketDropReason reason, in
 
 void PacketProcessorBase::updateDisplayString() const
 {
-    if (getEnvir()->isGUI()) {
+    if (getEnvir()->isGUI() && displayStringTextFormat != nullptr) {
         auto text = StringFormat::formatString(displayStringTextFormat, this);
         getDisplayString().setTagArg("t", 0, text);
     }
