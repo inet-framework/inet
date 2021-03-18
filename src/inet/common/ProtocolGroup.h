@@ -43,6 +43,8 @@ class INET_API ProtocolGroup
     int getProtocolNumber(const Protocol *protocol) const;
     void addProtocol(int protocolId, const Protocol *protocol);
 
+    std::string str() const { return name; }
+
   public:
     // in alphanumeric order
     static ProtocolGroup ethertype;
@@ -53,6 +55,8 @@ class INET_API ProtocolGroup
     static ProtocolGroup tcpprotocol;
     static ProtocolGroup udpprotocol;
 };
+
+inline std::ostream& operator<<(std::ostream& o, const ProtocolGroup& t) { o << t.str(); return o; }
 
 } // namespace inet
 
