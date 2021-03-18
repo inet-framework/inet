@@ -82,6 +82,7 @@ Packet *PacketReceiverBase::decodePacket(Signal *signal) const
     packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_INBOUND);
     if (networkInterface != nullptr)
         packet->addTag<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
+    packet->setBitError(signal->hasBitError());
     return packet;
 }
 
