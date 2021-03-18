@@ -136,8 +136,7 @@ Packet *PacketStreamer::pullPacketEnd(cGate *gate)
     Enter_Method("pullPacketEnd");
     EV_INFO << "Ending streaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     auto packet = streamedPacket;
-    numProcessedPackets++;
-    processedTotalLength += packet->getTotalLength();
+    handlePacketProcessed(packet);
     animateSendPacketEnd(packet, outputGate, SendOptions().transmissionId(streamedPacket->getId()));
     streamDatarate = bps(NaN);
     streamedPacket = nullptr;
