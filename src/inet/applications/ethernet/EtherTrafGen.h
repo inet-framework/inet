@@ -20,10 +20,12 @@
 #define __INET_ETHERTRAFGEN_H
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
@@ -35,6 +37,8 @@ class INET_API EtherTrafGen : public ApplicationBase
   protected:
     enum Kinds { START = 100, NEXT };
 
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
+
     long seqNum = 0;
 
     // send parameters
@@ -44,6 +48,7 @@ class INET_API EtherTrafGen : public ApplicationBase
     int ssap = -1;
     int dsap = -1;
     MacAddress destMacAddress;
+    int outInterface = -1;
 
     Ieee8022LlcSocket llcSocket;
     // self messages

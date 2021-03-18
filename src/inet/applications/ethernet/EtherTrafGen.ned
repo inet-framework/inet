@@ -26,6 +26,8 @@ simple EtherTrafGen
 {
     parameters:
         string destAddress = default("");  // destination MAC address, or module path name of destination station; empty means off
+        string interface;   // outgoing interface
+        string interfaceTableModule;
         int ssap = default(-1);  // llc ssap to set on outgoing packets
         int dsap = default(-1);  // llc dsap to set on outgoing packets
         double startTime @unit(s) = default(this.sendInterval);  // time of sending the first packet

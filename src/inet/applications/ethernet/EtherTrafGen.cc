@@ -30,6 +30,7 @@
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
@@ -52,12 +53,15 @@ EtherTrafGen::~EtherTrafGen()
 
 void EtherTrafGen::initialize(int stage)
 {
-    if (stage == INITSTAGE_APPLICATION_LAYER && isGenerator())
+    if (stage == INITSTAGE_APPLICATION_LAYER && isGenerator()) {
         timerMsg = new cMessage("generateNextPacket");
+        outInterface = CHK(interfaceTable->findInterfaceByName(par("interface")))->getInterfaceId();
+    }
 
     ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        interfaceTable.reference(this, "interfaceTableModule", true);
         sendInterval = &par("sendInterval");
         numPacketsPerBurst = &par("numPacketsPerBurst");
         packetLength = &par("packetLength");
@@ -169,6 +173,7 @@ void EtherTrafGen::sendBurstPackets()
         datapacket->insertAtBack(payload);
         datapacket->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
         datapacket->addTag<MacAddressReq>()->setDestAddress(destMacAddress);
+        datapacket->addTag<InterfaceReq>()->setInterfaceId(outInterface);
         auto sapTag = datapacket->addTag<Ieee802SapReq>();
         sapTag->setSsap(ssap);
         sapTag->setDsap(dsap);
