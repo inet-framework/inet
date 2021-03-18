@@ -46,6 +46,14 @@ void Ieee8021qTagEpdHeaderChecker::initialize(int stage)
         registerProtocol(*qtagProtocol, nullptr, inputGate);
 }
 
+void Ieee8021qTagEpdHeaderChecker::handleParameterChange(const char *name)
+{
+    if (name != nullptr) {
+        if (!strcmp(name, "vlanIdFilter"))
+            vlanIdFilter = check_and_cast<cValueArray *>(par("vlanIdFilter").objectValue());
+   }
+}
+
 void Ieee8021qTagEpdHeaderChecker::processPacket(Packet *packet)
 {
     const auto& header = packet->popAtFront<Ieee8021qTagEpdHeader>();
