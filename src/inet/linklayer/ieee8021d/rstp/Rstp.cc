@@ -605,7 +605,7 @@ void Rstp::sendTCNtoRoot()
                 packet->addTag<InterfaceReq>()->setInterfaceId(r);
 
                 packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
-                packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+                packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
                 send(packet, "relayOut");
             }
         }
@@ -674,7 +674,7 @@ void Rstp::sendBPDU(int interfaceId)
         macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
         packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
-        packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+        packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
         send(packet, "relayOut");
     }
 }
