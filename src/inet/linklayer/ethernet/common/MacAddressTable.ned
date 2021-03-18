@@ -39,6 +39,7 @@ simple MacAddressTable like IMacAddressTable
     parameters:
         @display("i=block/table2");
         double agingTime @unit(s) = default(120s);
+        object addressTable = default([]);
         string addressTableFile = default("");
         string interfaceTableModule;
         string displayStringTextFormat = default("addr: %a\nvlan: %v");
