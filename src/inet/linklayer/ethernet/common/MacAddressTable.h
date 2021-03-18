@@ -62,6 +62,7 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
 
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
+    virtual void handleParameterChange(const char *name) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void refreshDisplay() const override;

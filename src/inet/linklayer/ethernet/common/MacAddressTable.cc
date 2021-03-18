@@ -50,6 +50,16 @@ void MacAddressTable::initialize(int stage)
     }
 }
 
+void MacAddressTable::handleParameterChange(const char *name)
+{
+    if (name != nullptr) {
+        if (!strcmp(name, "addressTable")) {
+            clearTable();
+            parseAddressTableParameter();
+        }
+    }
+}
+
 /**
  * Function reads from a file stream pointed to by 'fp' and stores characters
  * until the '\n' or EOF character is found, the resultant string is returned.
