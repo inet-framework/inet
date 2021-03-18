@@ -15,11 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ieee8021r;
+package inet.protocolelement.contract;
 
-import inet.protocolelement.contract.IProtocolLayer;
-
-module Ieee8021rProtocol like IProtocolLayer
+moduleinterface IProtocolLayer
 {
     parameters:
         @display("i=block/layer");
@@ -28,17 +26,4 @@ module Ieee8021rProtocol like IProtocolLayer
         output upperLayerOut;
         input lowerLayerIn;
         output lowerLayerOut;
-    submodules:
-        rTagHeaderInserter: <default("Ieee8021rTagEpdHeaderInserter")> like IIeee8021rTagEpdHeaderInserter {
-            @display("p=300,200");
-        }
-        rTagHeaderChecker: <default("Ieee8021rTagEpdHeaderChecker")> like IIeee8021rTagEpdHeaderChecker {
-            @display("p=600,200");
-        }
-    connections:
-        upperLayerIn --> { @display("m=n"); } --> rTagHeaderInserter.in;
-        rTagHeaderInserter.out --> { @display("m=s"); } --> lowerLayerOut;
-
-        lowerLayerIn --> { @display("m=s"); } --> rTagHeaderChecker.in;
-        rTagHeaderChecker.out --> { @display("m=n"); } --> upperLayerOut;
 }

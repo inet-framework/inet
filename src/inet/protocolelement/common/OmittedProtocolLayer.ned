@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.common;
+package inet.protocolelement.common;
 
-import inet.linklayer.ethernet.redundancy.IProtocolLayer;
+import inet.protocolelement.contract.IProtocolLayer;
 
 module OmittedProtocolLayer like IProtocolLayer
 {

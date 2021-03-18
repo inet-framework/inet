@@ -17,7 +17,7 @@
 
 package inet.linklayer.ieee8021q;
 
-import inet.linklayer.ethernet.redundancy.IProtocolLayer;
+import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.contract.IPacketFlow;
 
 module Ieee8021qLayer like IProtocolLayer

@@ -26,7 +26,7 @@ import inet.linklayer.contract.ITunnelInterface;
 import inet.linklayer.contract.IVirtualInterface;
 import inet.linklayer.contract.IWirelessInterface;
 import inet.linklayer.ethernet.contract.IEthernetLayer;
-import inet.linklayer.ethernet.redundancy.IProtocolLayer;
+import inet.protocolelement.contract.IProtocolLayer;
 import inet.networklayer.common.InterfaceTable;
 
 module LinkLayerNodeBase extends NodeBase
