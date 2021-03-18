@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/configurator/StreamReservationConfigurator.h"
+#include "inet/linklayer/configurator/GateSchedulingConfigurator.h"
 
 #include <queue>
 #include <set>
@@ -29,9 +29,9 @@
 
 namespace inet {
 
-Define_Module(StreamReservationConfigurator);
+Define_Module(GateSchedulingConfigurator);
 
-void StreamReservationConfigurator::initialize(int stage)
+void GateSchedulingConfigurator::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         gateCycleDuration = par("gateCycleDuration");
@@ -52,7 +52,7 @@ void StreamReservationConfigurator::initialize(int stage)
     }
 }
 
-void StreamReservationConfigurator::extractTopology(Topology& topology)
+void GateSchedulingConfigurator::extractTopology(Topology& topology)
 {
     topology.extractByProperty("networkNode");
     EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
@@ -111,7 +111,7 @@ void StreamReservationConfigurator::extractTopology(Topology& topology)
     }
 }
 
-void StreamReservationConfigurator::computeConfiguration()
+void GateSchedulingConfigurator::computeConfiguration()
 {
     long initializeStartTime = clock();
     TIME(extractTopology(topology));
@@ -120,7 +120,7 @@ void StreamReservationConfigurator::computeConfiguration()
     printElapsedTime("initialize", initializeStartTime);
 }
 
-void StreamReservationConfigurator::computeStreamReservations()
+void GateSchedulingConfigurator::computeStreamReservations()
 {
     EV_DEBUG << "Computing stream reservations according to configuration" << EV_FIELD(configuration) << EV_ENDL;
     for (int i = 0; i < topology.getNumNodes(); i++) {
@@ -157,9 +157,9 @@ void StreamReservationConfigurator::computeStreamReservations()
     }
 }
 
-void StreamReservationConfigurator::computeGateScheduling()
+void GateSchedulingConfigurator::computeGateScheduling()
 {
-    std::sort(streamReservations.begin(), streamReservations.end(), [] (const StreamReservationConfigurator::StreamReservation& r1, const StreamReservationConfigurator::StreamReservation& r2) {
+    std::sort(streamReservations.begin(), streamReservations.end(), [] (const GateSchedulingConfigurator::StreamReservation& r1, const GateSchedulingConfigurator::StreamReservation& r2) {
         return r1.priority < r2.priority;
     });
     for (auto& streamReservation : streamReservations) {
@@ -173,7 +173,7 @@ void StreamReservationConfigurator::computeGateScheduling()
     }
 }
 
-void StreamReservationConfigurator::computeStreamStartOffset(StreamReservation& streamReservation)
+void GateSchedulingConfigurator::computeStreamStartOffset(StreamReservation& streamReservation)
 {
     auto source = streamReservation.source->module;
     auto destination = streamReservation.destination->module;
@@ -227,7 +227,7 @@ void StreamReservationConfigurator::computeStreamStartOffset(StreamReservation& 
     streamReservation.startOffset = startOffset;
 }
 
-void StreamReservationConfigurator::addGateScheduling(StreamReservation& streamReservation, int startIndex, int endIndex)
+void GateSchedulingConfigurator::addGateScheduling(StreamReservation& streamReservation, int startIndex, int endIndex)
 {
     auto source = streamReservation.source->module;
     auto destination = streamReservation.destination->module;
@@ -281,7 +281,7 @@ void StreamReservationConfigurator::addGateScheduling(StreamReservation& streamR
     }
 }
 
-void StreamReservationConfigurator::configureGateScheduling()
+void GateSchedulingConfigurator::configureGateScheduling()
 {
     for (int i = 0; i < topology.getNumNodes(); i++) {
         auto node = (Node *)topology.getNode(i);
@@ -300,7 +300,7 @@ void StreamReservationConfigurator::configureGateScheduling()
     }
 }
 
-void StreamReservationConfigurator::configureGateScheduling(cModule *networkNode, cModule *gate, InterfaceInfo *interfaceInfo)
+void GateSchedulingConfigurator::configureGateScheduling(cModule *networkNode, cModule *gate, InterfaceInfo *interfaceInfo)
 {
     int index = gate->getIndex();
     cValueArray *durations = new cValueArray();
@@ -347,7 +347,7 @@ void StreamReservationConfigurator::configureGateScheduling(cModule *networkNode
     durationsPar.setObjectValue(durations);
 }
 
-Topology::LinkOut *StreamReservationConfigurator::findLinkOut(Node *node, int gateId)
+Topology::LinkOut *GateSchedulingConfigurator::findLinkOut(Node *node, int gateId)
 {
     for (int i = 0; i < node->getNumOutLinks(); i++)
         if (node->getLinkOut(i)->getLocalGateId() == gateId)
@@ -355,7 +355,7 @@ Topology::LinkOut *StreamReservationConfigurator::findLinkOut(Node *node, int ga
     return nullptr;
 }
 
-StreamReservationConfigurator::InterfaceInfo *StreamReservationConfigurator::findInterfaceInfo(Node *node, NetworkInterface *networkInterface)
+GateSchedulingConfigurator::InterfaceInfo *GateSchedulingConfigurator::findInterfaceInfo(Node *node, NetworkInterface *networkInterface)
 {
     if (networkInterface == nullptr)
         return nullptr;

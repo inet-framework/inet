@@ -22,7 +22,7 @@ package inet.linklayer.configurator;
 // network according to the to be reserved streams described by the configuration
 // parameter. The streams are reserved in the order of priority (0 being the highest).
 //
-simple StreamReservationConfigurator
+simple GateSchedulingConfigurator
 {
     parameters:
         @display("i=block/cogwheel");
