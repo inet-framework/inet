@@ -39,7 +39,7 @@
 
 /examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           9a35-64c9/tplx;023a-3c37/~tNl;6223-c03b/~tND;6438-8a23/tyf, PASS,
 /examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            1463-d615/tplx;3c78-9f43/~tNl;a8df-0872/~tND;edf3-d307/tyf, PASS, wireless
-/examples/dhcp/,                     -f omnetpp.ini -c Wireless2DHCP -r 0,          500s,            69aa-7621/tplx;7554-a8b0/~tNl;087f-c47f/~tND;f4ac-11b7/tyf, PASS, wireless
+/examples/dhcp/,                     -f omnetpp.ini -c Wireless2DHCP -r 0,          500s,            bb99-2ee9/tplx;c687-ec73/~tNl;02ab-f8e8/~tND;f4ac-11b7/tyf, PASS, wireless
 /examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            0deb-8472/tplx;0610-405e/~tNl;e3eb-18eb/~tND;089e-e1db/tyf, PASS,
 
 # /examples/diffserv/onedomain/,       -f omnetpp.ini -c Apps -r 0,                  10s,             0, PASS,   # Apps extended
