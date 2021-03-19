@@ -32,32 +32,31 @@ void SomeUDPApp::initialize(int stage)
 {
     // because of AddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage != INITSTAGE_APPLICATION_LAYER)
-        return;
+    if (stage == INITSTAGE_APPLICATION_LAYER) {
+        counter = 0;
+        numSent = 0;
+        numReceived = 0;
+        WATCH(numSent);
+        WATCH(numReceived);
 
-    counter = 0;
-    numSent = 0;
-    numReceived = 0;
-    WATCH(numSent);
-    WATCH(numReceived);
+        localPort = par("localPort");
+        destPort = par("destPort");
+        msgLength = par("messageLength");
 
-    localPort = par("localPort");
-    destPort = par("destPort");
-    msgLength = par("messageLength");
+        const char *destAddrs = par("destAddresses");
+        cStringTokenizer tokenizer(destAddrs);
+        const char *token;
+        while ((token = tokenizer.nextToken())!=NULL)
+            destAddresses.push_back(AddressResolver().resolve(token));
 
-    const char *destAddrs = par("destAddresses");
-    cStringTokenizer tokenizer(destAddrs);
-    const char *token;
-    while ((token = tokenizer.nextToken())!=NULL)
-        destAddresses.push_back(AddressResolver().resolve(token));
+        if (destAddresses.empty())
+            return;
 
-    if (destAddresses.empty())
-        return;
+        bindToPort(localPort);
 
-    bindToPort(localPort);
-
-    cMessage *timer = new cMessage("sendTimer");
-    scheduleAfter((double)par("sendInterval"), timer);
+        cMessage *timer = new cMessage("sendTimer");
+        scheduleAfter((double)par("sendInterval"), timer);
+    }
 }
 
 Address SomeUDPApp::chooseDestAddr()
