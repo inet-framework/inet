@@ -74,7 +74,7 @@ void QosRecoveryProcedure::incrementStationLrc()
 
 void QosRecoveryProcedure::incrementCounter(const Ptr<const Ieee80211DataHeader>& header, std::map<std::pair<Tid, SequenceControlField>, int>& retryCounter)
 {
-    auto id = std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber()));
+    auto id = std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()));
     if (retryCounter.find(id) != retryCounter.end())
         retryCounter[id]++;
     else
@@ -121,7 +121,7 @@ void QosRecoveryProcedure::blockAckFrameReceived()
 //
 void QosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee80211DataHeader>& ackedHeader)
 {
-    auto id = std::make_pair(ackedHeader->getTid(), SequenceControlField(ackedHeader->getSequenceNumber(), ackedHeader->getFragmentNumber()));
+    auto id = std::make_pair(ackedHeader->getTid(), SequenceControlField(ackedHeader->getSequenceNumber().get(), ackedHeader->getFragmentNumber()));
     if (packet->getByteLength() >= rtsThreshold) {
         resetStationLrc();
         auto it = longRetryCounter.find(id);
@@ -148,7 +148,7 @@ void QosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee
 void QosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& header)
 {
     EV_WARN << "Retry limit reached for " << *packet << ".\n";
-    auto id = std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber()));
+    auto id = std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()));
     if (packet->getByteLength() >= rtsThreshold) {
         auto it = longRetryCounter.find(id);
         if (it != longRetryCounter.end())
@@ -239,7 +239,7 @@ bool QosRecoveryProcedure::isRtsFrameRetryLimitReached(Packet *packet, const Ptr
 
 int QosRecoveryProcedure::getRc(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, std::map<std::pair<Tid, SequenceControlField>, int>& retryCounter)
 {
-    auto id = std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber()));
+    auto id = std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()));
     auto it = retryCounter.find(id);
     if (it != retryCounter.end())
         return it->second;

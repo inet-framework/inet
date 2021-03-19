@@ -41,14 +41,14 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(Re
             // sequence number shall be passed up to the next MAC process.
             if (receiveBuffer->isFull()) {
                 passedUp(agreement, receiveBuffer, earliestSequenceNumber);
-                return ReorderBuffer({std::make_pair(earliestSequenceNumber, Fragments(earliestCompleteMsduOrAMsdu))});
+                return ReorderBuffer({std::make_pair(earliestSequenceNumber.get(), Fragments(earliestCompleteMsduOrAMsdu))});
             }
             // If, after an MPDU is received, the receive buffer is not full, but the sequence number of the complete MSDU or
             // A-MSDU in the buffer with the lowest sequence number is equal to the NextExpectedSequenceNumber for
             // that Block Ack agreement, then the MPDU shall be passed up to the next MAC process.
             else if (earliestSequenceNumber == receiveBuffer->getNextExpectedSequenceNumber()) {
                 passedUp(agreement, receiveBuffer, earliestSequenceNumber);
-                return ReorderBuffer({std::make_pair(earliestSequenceNumber, Fragments(earliestCompleteMsduOrAMsdu))});
+                return ReorderBuffer({std::make_pair(earliestSequenceNumber.get(), Fragments(earliestCompleteMsduOrAMsdu))});
             }
         }
     }
@@ -64,7 +64,7 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq
 {
     // The originator shall use the Block Ack starting sequence control to signal the first MPDU in the block for
     // which an acknowledgment is expected.
-    SequenceNumber startingSequenceNumber;
+    SequenceNumberCyclic startingSequenceNumber;
     Tid tid = -1;
     if (auto basicReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
         tid = basicReq->getTidInfo();
@@ -113,14 +113,14 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq
 // the starting sequence number contained in the BlockAckReq frame shall be passed up to the next MAC process
 // as shown in Figure 5-1.
 //
-BlockAckReordering::ReorderBuffer BlockAckReordering::collectCompletePrecedingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumber startingSequenceNumber)
+BlockAckReordering::ReorderBuffer BlockAckReordering::collectCompletePrecedingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber)
 {
     ReorderBuffer completePrecedingMpdus;
     const auto& buffer = receiveBuffer->getBuffer();
     for (auto it : buffer) { // collects complete preceding MPDUs
         auto sequenceNumber = it.first;
         auto fragments = it.second;
-        if (sequenceNumber < startingSequenceNumber)
+        if (SequenceNumberCyclic(sequenceNumber) < startingSequenceNumber)
             if (isComplete(fragments))
                 completePrecedingMpdus[sequenceNumber] = fragments;
     }
@@ -132,7 +132,7 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::collectCompletePrecedingMp
 // the starting sequence number sequentially until there is an incomplete or missing MSDU
 // or A-MSDU in the buffer.
 //
-BlockAckReordering::ReorderBuffer BlockAckReordering::collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumber startingSequenceNumber)
+BlockAckReordering::ReorderBuffer BlockAckReordering::collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber)
 {
     ReorderBuffer framesToPassUp;
     for (int i = 0; i < receiveBuffer->getBufferSize(); i++) {
@@ -142,14 +142,14 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::collectConsecutiveComplete
     return framesToPassUp;
 }
 
-bool BlockAckReordering::addMsduIfComplete(ReceiveBuffer *receiveBuffer, ReorderBuffer& reorderBuffer, SequenceNumber seqNum)
+bool BlockAckReordering::addMsduIfComplete(ReceiveBuffer *receiveBuffer, ReorderBuffer& reorderBuffer, SequenceNumberCyclic seqNum)
 {
     const auto& buffer = receiveBuffer->getBuffer();
-    auto it = buffer.find(seqNum);
+    auto it = buffer.find(seqNum.get());
     if (it != buffer.end()) {
         auto fragments = it->second;
         if (isComplete(fragments)) {
-            reorderBuffer[seqNum] = fragments;
+            reorderBuffer[seqNum.get()] = fragments;
             return true;
         }
     }
@@ -160,7 +160,7 @@ void BlockAckReordering::releaseReceiveBuffer(RecipientBlockAckAgreement *agreem
 {
     for (auto it : reorderBuffer) {
         auto sequenceNumber = it.first;
-        passedUp(agreement, receiveBuffer, sequenceNumber);
+        passedUp(agreement, receiveBuffer, SequenceNumberCyclic(sequenceNumber));
     }
 }
 
@@ -179,7 +179,7 @@ bool BlockAckReordering::isComplete(const std::vector<Packet *>& fragments)
 
 ReceiveBuffer* BlockAckReordering::createReceiveBufferIfNecessary(RecipientBlockAckAgreement *agreement)
 {
-    SequenceNumber startingSequenceNumber = agreement->getStartingSequenceNumber();
+    SequenceNumberCyclic startingSequenceNumber = agreement->getStartingSequenceNumber();
     int bufferSize = agreement->getBufferSize();
     Tid tid = agreement->getBlockAckRecord()->getTid();
     MacAddress originatorAddr = agreement->getBlockAckRecord()->getOriginatorAddress();
@@ -208,7 +208,7 @@ void BlockAckReordering::processReceivedDelba(const Ptr<const Ieee80211Delba>& d
         EV_DETAIL << "Receive buffer is not found" << endl;
 }
 
-void BlockAckReordering::passedUp(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, SequenceNumber sequenceNumber)
+void BlockAckReordering::passedUp(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, SequenceNumberCyclic sequenceNumber)
 {
     // Each time that the recipient passes an MSDU or A-MSDU for a Block Ack agreement up to the next MAC
     // process, the NextExpectedSequenceNumber for that Block Ack agreement is set to the sequence number of the
@@ -222,7 +222,7 @@ void BlockAckReordering::passedUp(RecipientBlockAckAgreement *agreement, Receive
 std::vector<Packet *> BlockAckReordering::getEarliestCompleteMsduOrAMsduIfExists(ReceiveBuffer *receiveBuffer)
 {
     Fragments earliestFragments = Fragments();
-    SequenceNumber earliestSeqNum = 0;
+    SequenceNumberCyclic earliestSeqNum = SequenceNumberCyclic(0);
     const auto& buffer = receiveBuffer->getBuffer();
     for (auto it : buffer) {
         if (isComplete(it.second)) {
@@ -233,7 +233,7 @@ std::vector<Packet *> BlockAckReordering::getEarliestCompleteMsduOrAMsduIfExists
     }
     if (earliestFragments.size() > 0) {
         for (auto it : buffer) {
-            SequenceNumber currentSeqNum = it.second.at(0)->peekAtFront<Ieee80211DataOrMgmtHeader>()->getSequenceNumber();
+            SequenceNumberCyclic currentSeqNum = it.second.at(0)->peekAtFront<Ieee80211DataOrMgmtHeader>()->getSequenceNumber();
             if (currentSeqNum < earliestSeqNum) {
                 if (isComplete(it.second)) {
                     earliestFragments = it.second;

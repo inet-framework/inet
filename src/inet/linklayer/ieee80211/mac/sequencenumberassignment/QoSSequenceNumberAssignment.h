@@ -38,10 +38,10 @@ class INET_API QoSSequenceNumberAssignment : public ISequenceNumberAssignment
         };
         typedef std::pair<MacAddress, Tid> Key;
 
-        std::map<Key, SequenceNumber> lastSentSeqNums; // last sent sequence numbers per RA
-        std::map<MacAddress, SequenceNumber> lastSentTimePrioritySeqNums; // last sent sequence numbers per RA
-        std::map<MacAddress, SequenceNumber> lastSentSharedSeqNums; // last sent sequence numbers per RA
-        SequenceNumber lastSentSharedCounterSeqNum = 0;
+        std::map<Key, SequenceNumberCyclic> lastSentSeqNums; // last sent sequence numbers per RA
+        std::map<MacAddress, SequenceNumberCyclic> lastSentTimePrioritySeqNums; // last sent sequence numbers per RA
+        std::map<MacAddress, SequenceNumberCyclic> lastSentSharedSeqNums; // last sent sequence numbers per RA
+        SequenceNumberCyclic lastSentSharedCounterSeqNum = SequenceNumberCyclic(0);
 
     protected:
         virtual CacheType getCacheType(const Ptr<const Ieee80211DataOrMgmtHeader>& header, bool incoming);

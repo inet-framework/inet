@@ -18,7 +18,7 @@
 #ifndef __INET_BLOCKACKRECORD_H
 #define __INET_BLOCKACKRECORD_H
 
-#include "inet/linklayer/ieee80211/mac/common/Ieee80211Defs.h"
+#include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
@@ -34,15 +34,15 @@ class INET_API BlockAckRecord
     protected:
         MacAddress originatorAddress = MacAddress::UNSPECIFIED_ADDRESS;
         Tid tid = -1;
-        std::map<std::pair<SequenceNumber, FragmentNumber>, bool> acknowledgmentState;
+        std::map<SequenceControlField, bool> acknowledgmentState;
 
     public:
         BlockAckRecord(MacAddress originatorAddress, Tid tid);
         virtual ~BlockAckRecord() { }
 
         void blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header);
-        bool getAckState(SequenceNumber sequenceNumber, FragmentNumber fragmentNumber);
-        void removeAckStates(SequenceNumber sequenceNumber);
+        bool getAckState(SequenceNumberCyclic sequenceNumber, FragmentNumber fragmentNumber);
+        void removeAckStates(SequenceNumberCyclic sequenceNumber);
 
         MacAddress getOriginatorAddress() { return originatorAddress; }
         Tid getTid() { return tid; }

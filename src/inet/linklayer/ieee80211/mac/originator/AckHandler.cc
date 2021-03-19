@@ -42,7 +42,7 @@ AckHandler::Status AckHandler::getAckStatus(SequenceControlField id)
 
 AckHandler::Status AckHandler::getAckStatus(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
-    auto id = SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber());
+    auto id = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
     auto it = ackStatuses.find(id);
     if (it == ackStatuses.end())
         return Status::FRAME_NOT_YET_TRANSMITTED;
@@ -52,7 +52,7 @@ AckHandler::Status AckHandler::getAckStatus(const Ptr<const Ieee80211DataOrMgmtH
 
 void AckHandler::processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader)
 {
-    auto id = SequenceControlField(ackedHeader->getSequenceNumber(), ackedHeader->getFragmentNumber());
+    auto id = SequenceControlField(ackedHeader->getSequenceNumber().get(), ackedHeader->getFragmentNumber());
     auto status = getAckStatus(id);
     if (status == Status::FRAME_NOT_YET_TRANSMITTED)
         throw cRuntimeError("ackedFrame = %s is not yet transmitted", ackedHeader->getName());
@@ -61,7 +61,7 @@ void AckHandler::processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, con
 
 void AckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
-    auto id = SequenceControlField(header->getSequenceNumber(), header->getFragmentNumber());
+    auto id = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
     if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
         if (dataHeader->getAckPolicy() == NORMAL_ACK)
             ackStatuses[id] = Status::WAITING_FOR_ACK;
@@ -74,7 +74,7 @@ void AckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211Data
 
 void AckHandler::frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
-    auto id = SequenceControlField(dataOrMgmtHeader->getSequenceNumber(), dataOrMgmtHeader->getFragmentNumber());
+    auto id = SequenceControlField(dataOrMgmtHeader->getSequenceNumber().get(), dataOrMgmtHeader->getFragmentNumber());
     auto status = getAckStatus(id);
     ASSERT(status != Status::WAITING_FOR_ACK);
     ackStatuses[id] = Status::FRAME_NOT_YET_TRANSMITTED;
@@ -98,7 +98,7 @@ void AckHandler::processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& 
     if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(dataOrMgmtHeader)) {
         if (dataHeader->getAckPolicy() == NORMAL_ACK) {
             ASSERT(getAckStatus(dataOrMgmtHeader) == Status::WAITING_FOR_ACK);
-            auto id = SequenceControlField(dataOrMgmtHeader->getSequenceNumber(), dataOrMgmtHeader->getFragmentNumber());
+            auto id = SequenceControlField(dataOrMgmtHeader->getSequenceNumber().get(), dataOrMgmtHeader->getFragmentNumber());
             ackStatuses[id] = Status::ACK_NOT_ARRIVED;
         }
     }
@@ -106,7 +106,7 @@ void AckHandler::processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& 
 
 void AckHandler::dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
-    auto id = SequenceControlField(dataOrMgmtHeader->getSequenceNumber(), dataOrMgmtHeader->getFragmentNumber());
+    auto id = SequenceControlField(dataOrMgmtHeader->getSequenceNumber().get(), dataOrMgmtHeader->getFragmentNumber());
     ackStatuses.erase(id);
 }
 

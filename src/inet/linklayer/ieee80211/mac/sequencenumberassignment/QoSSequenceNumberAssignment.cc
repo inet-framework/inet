@@ -35,7 +35,7 @@ QoSSequenceNumberAssignment::CacheType QoSSequenceNumberAssignment::getCacheType
 void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
     CacheType type = getCacheType(header, false);
-    SequenceNumber seqNum;
+    SequenceNumberCyclic seqNum;
     MacAddress address = header->getReceiverAddress();
     if (type == TIME_PRIORITY)
     {
@@ -44,7 +44,7 @@ void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOr
         // time priority management frames." 9.3.2.10 Duplicate detection and recovery, But management frames don't have QoS Control field.
         auto it = lastSentTimePrioritySeqNums.find(address);
         if (it == lastSentTimePrioritySeqNums.end())
-            lastSentTimePrioritySeqNums[address] = seqNum = 0;
+            lastSentTimePrioritySeqNums[address] = seqNum = SequenceNumberCyclic(0);
         else
             it->second = seqNum = it->second + 1;
     }
@@ -65,7 +65,7 @@ void QoSSequenceNumberAssignment::assignSequenceNumber(const Ptr<Ieee80211DataOr
         Key key(header->getReceiverAddress(), qosDataHeader->getTid());
         auto it = lastSentSeqNums.find(key);
         if (it == lastSentSeqNums.end())
-            lastSentSeqNums[key] = seqNum = 0;
+            lastSentSeqNums[key] = seqNum = SequenceNumberCyclic(0);
         else
             it->second = seqNum = it->second + 1;
     }

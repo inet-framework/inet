@@ -51,7 +51,7 @@ std::map<MacAddress, std::vector<Packet *>> OriginatorQosAckPolicy::getOutstandi
 }
 
 
-SequenceNumber OriginatorQosAckPolicy::computeStartingSequenceNumber(const std::vector<Packet *>& outstandingFrames) const
+SequenceNumberCyclic OriginatorQosAckPolicy::computeStartingSequenceNumber(const std::vector<Packet *>& outstandingFrames) const
 {
     ASSERT(outstandingFrames.size() > 0);
     auto startingSequenceNumber = outstandingFrames[0]->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
@@ -86,7 +86,7 @@ bool OriginatorQosAckPolicy::isBlockAckReqNeeded(InProgressFrames* inProgressFra
 }
 
 // FIXME
-std::tuple<MacAddress, SequenceNumber, Tid> OriginatorQosAckPolicy::computeBlockAckReqParameters(InProgressFrames *inProgressFrames, TxopProcedure* txopProcedure) const
+std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::computeBlockAckReqParameters(InProgressFrames *inProgressFrames, TxopProcedure* txopProcedure) const
 {
     auto outstandingFramesPerReceiver = getOutstandingFramesPerReceiver(inProgressFrames);
     for (auto outstandingFrames : outstandingFramesPerReceiver) {
@@ -97,12 +97,12 @@ std::tuple<MacAddress, SequenceNumber, Tid> OriginatorQosAckPolicy::computeBlock
                     largestOutstandingFrames = it;
             }
             MacAddress receiverAddress = largestOutstandingFrames->first;
-            SequenceNumber startingSequenceNumber = computeStartingSequenceNumber(largestOutstandingFrames->second);
+            SequenceNumberCyclic startingSequenceNumber = computeStartingSequenceNumber(largestOutstandingFrames->second);
             Tid tid = largestOutstandingFrames->second.at(0)->peekAtFront<Ieee80211DataHeader>()->getTid();
             return std::make_tuple(receiverAddress, startingSequenceNumber, tid);
         }
     }
-    return std::make_tuple(MacAddress::UNSPECIFIED_ADDRESS, -1, -1);
+    return std::make_tuple(MacAddress::UNSPECIFIED_ADDRESS, SequenceNumberCyclic(), -1);
 }
 
 AckPolicy OriginatorQosAckPolicy::computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const

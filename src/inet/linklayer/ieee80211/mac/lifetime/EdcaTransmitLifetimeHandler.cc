@@ -31,7 +31,7 @@ EdcaTransmitLifetimeHandler::EdcaTransmitLifetimeHandler(simtime_t bkLifetime, s
 void EdcaTransmitLifetimeHandler::frameGotInProgess(const Ptr<const Ieee80211DataHeader>& header)
 {
     if (header->getFragmentNumber() == 0)
-        lifetimes[header->getSequenceNumber()] = simTime();
+        lifetimes[header->getSequenceNumber().get()] = simTime();
 }
 
 void EdcaTransmitLifetimeHandler::frameTransmitted(const Ptr<const Ieee80211DataHeader>& header)
@@ -43,7 +43,7 @@ bool EdcaTransmitLifetimeHandler::isLifetimeExpired(const Ptr<const Ieee80211Dat
 {
     ASSERT(header->getType() == ST_DATA_WITH_QOS);
     AccessCategory ac = mapTidToAc(header->getTid());
-    auto it = lifetimes.find(header->getSequenceNumber());
+    auto it = lifetimes.find(header->getSequenceNumber().get());
     if (it == lifetimes.end())
         throw cRuntimeError("There is no lifetime entry for frame = %s", header->getName());
     return (simTime() - it->second) >= msduLifetime[ac];

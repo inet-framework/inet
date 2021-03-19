@@ -23,7 +23,7 @@ namespace ieee80211 {
 
 bool QoSDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
-    SequenceControlField seqVal(header);
+    SequenceControlField seqVal(header->getSequenceNumber().get(), header->getFragmentNumber());
     bool isManagementFrame = dynamicPtrCast<const Ieee80211MgmtHeader>(header) != nullptr;
     bool isTimePriorityManagementFrame = isManagementFrame && false; // TODO: hack
     if (isTimePriorityManagementFrame || isManagementFrame)

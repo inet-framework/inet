@@ -74,7 +74,7 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
         return std::vector<Packet *>();
     }
     BlockAckReordering::ReorderBuffer frames;
-    frames[dataHeader->getSequenceNumber()].push_back(dataPacket);
+    frames[dataHeader->getSequenceNumber().get()].push_back(dataPacket);
     if (blockAckReordering && blockAckAgreementHandler) {
         Tid tid = dataHeader->getTid();
         MacAddress originatorAddr = dataHeader->getTransmitterAddress();

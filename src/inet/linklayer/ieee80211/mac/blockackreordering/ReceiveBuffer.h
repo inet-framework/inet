@@ -38,21 +38,21 @@ class INET_API ReceiveBuffer
         // Control field of the ADDBA Request frame of the accepted Block Ack agreement. (IEEE 802.11­-11/0381r0)
         int bufferSize = -1;
         int length = 0;
-        SequenceNumber nextExpectedSequenceNumber = -1;
+        SequenceNumberCyclic nextExpectedSequenceNumber;
 
     public:
-        ReceiveBuffer(int bufferSize, SequenceNumber nextExpectedSequenceNumber);
+        ReceiveBuffer(int bufferSize, SequenceNumberCyclic nextExpectedSequenceNumber);
         virtual ~ReceiveBuffer();
 
         bool insertFrame(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
-        void dropFramesUntil(SequenceNumber sequenceNumber);
-        void removeFrame(SequenceNumber sequenceNumber);
+        void dropFramesUntil(SequenceNumberCyclic sequenceNumber);
+        void removeFrame(SequenceNumberCyclic sequenceNumber);
 
         const ReorderBuffer& getBuffer() { return buffer; }
         int getLength() { return length; }
         int getBufferSize() { return bufferSize; }
-        SequenceNumber getNextExpectedSequenceNumber() { return nextExpectedSequenceNumber; }
-        void setNextExpectedSequenceNumber(SequenceNumber nextExpectedSequenceNumber) { this->nextExpectedSequenceNumber = nextExpectedSequenceNumber; }
+        SequenceNumberCyclic getNextExpectedSequenceNumber() { return nextExpectedSequenceNumber; }
+        void setNextExpectedSequenceNumber(SequenceNumberCyclic nextExpectedSequenceNumber) { this->nextExpectedSequenceNumber = nextExpectedSequenceNumber; }
         bool isFull() { ASSERT(length <= bufferSize); return length == bufferSize; }
 };
 

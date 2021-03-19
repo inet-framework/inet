@@ -45,7 +45,7 @@ Packet *BasicReassembly::addFragment(Packet *packet)
     if (header->getType() == ST_DATA_WITH_QOS)
         if (const Ptr<const Ieee80211DataHeader>& qosDataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header))
             key.tid = qosDataHeader->getTid();
-    key.seqNum = header->getSequenceNumber();
+    key.seqNum = header->getSequenceNumber().get();
     short fragNum = header->getFragmentNumber();
     ASSERT(fragNum >= 0 && fragNum < MAX_NUM_FRAGMENTS);
     auto& value = fragmentsMap[key];

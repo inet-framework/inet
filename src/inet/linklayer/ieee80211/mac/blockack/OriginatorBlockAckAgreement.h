@@ -31,7 +31,7 @@ class OriginatorBlockAckAgreement : public cObject
         MacAddress receiverAddr = MacAddress::UNSPECIFIED_ADDRESS;
         Tid tid = -1;
         int numSentBaPolicyFrames = 0;
-        SequenceNumber startingSequenceNumber = -1;
+        SequenceNumberCyclic startingSequenceNumber;
         int bufferSize = -1;
         bool isAMsduSupported = false;
         bool isDelayedBlockAckPolicySupported = false;
@@ -41,7 +41,7 @@ class OriginatorBlockAckAgreement : public cObject
         simtime_t expirationTime = -1;
 
     public:
-        OriginatorBlockAckAgreement(MacAddress receiverAddr, Tid tid, SequenceNumber startingSequenceNumber, int bufferSize, bool isAMsduSupported, bool isDelayedBlockAckPolicySupported) :
+        OriginatorBlockAckAgreement(MacAddress receiverAddr, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, bool isAMsduSupported, bool isDelayedBlockAckPolicySupported) :
             receiverAddr(receiverAddr),
             tid(tid),
             startingSequenceNumber(startingSequenceNumber),
@@ -54,8 +54,8 @@ class OriginatorBlockAckAgreement : public cObject
         virtual ~OriginatorBlockAckAgreement() { }
 
         virtual int getBufferSize() const { return bufferSize; }
-        virtual SequenceNumber getStartingSequenceNumber() { return startingSequenceNumber; }
-        virtual void setStartingSequenceNumber(SequenceNumber sequenceNumber) { startingSequenceNumber = sequenceNumber; }
+        virtual SequenceNumberCyclic getStartingSequenceNumber() { return startingSequenceNumber; }
+        virtual void setStartingSequenceNumber(SequenceNumberCyclic sequenceNumber) { startingSequenceNumber = sequenceNumber; }
         virtual bool getIsAddbaResponseReceived() const { return isAddbaResponseReceived; }
         virtual bool getIsAddbaRequestSent() const { return isAddbaRequestSent; }
         virtual bool getIsAMsduSupported() const { return isAMsduSupported; }

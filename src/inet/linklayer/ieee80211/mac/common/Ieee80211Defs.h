@@ -25,42 +25,45 @@ namespace ieee80211 {
 
 typedef int8_t FragmentNumber;
 typedef int8_t Tid;
+typedef int16_t SequenceNumber;
 
-struct SequenceNumber
+struct SequenceNumberCyclic
 {
   private:
-    int16_t value;
+    SequenceNumber value;
 
   private:
-    int16_t modulo4096(int16_t value) const { ASSERT(value != -1); return (value % 4096 + 4096) % 4096; } // always returns positive result
-    int16_t distance4096(int16_t other) const { ASSERT(0 <= other && other < 4096); return (value - other + 4096) % 4096; }
+    SequenceNumber modulo4096(SequenceNumber value) const { ASSERT(value != -1); return (value % 4096 + 4096) % 4096; } // always returns positive result
+    SequenceNumber distance4096(SequenceNumber other) const { ASSERT(0 <= other && other < 4096); return (value - other + 4096) % 4096; }
 
   public:
-    SequenceNumber() : value(-1) { }
-    SequenceNumber(int16_t value) : value(value) { ASSERT(0 <= value && value < 4096); }
-    SequenceNumber(const SequenceNumber& other) : value(other.value) { ASSERT(other.value != -1); }
+    SequenceNumberCyclic() : value(-1) {}
+    explicit SequenceNumberCyclic(SequenceNumber value) : value(value) { ASSERT(0 <= value && value < 4096); }
+    SequenceNumberCyclic(const SequenceNumberCyclic& other) : value(other.value) { ASSERT(other.value != -1); }
 
-    int16_t getRaw() const { ASSERT(value != -1); return value; }
+    SequenceNumber get() const { ASSERT(value != -1); return value; }
 
-    SequenceNumber& operator=(const SequenceNumber& other) { ASSERT(other.value != -1 || value == other.value); value = other.value; return *this; }
-    bool operator==(const SequenceNumber& other) const { ASSERT(value != -1 && other.value != -1); return value == other.value; }
-    bool operator!=(const SequenceNumber& other) const { ASSERT(value != -1 && other.value != -1); return value != other.value; }
+    SequenceNumberCyclic& operator=(const SequenceNumberCyclic& other) { ASSERT(other.value != -1 || value == other.value); value = other.value; return *this; }
+    bool operator==(const SequenceNumberCyclic& other) const { ASSERT(value != -1 && other.value != -1); return value == other.value; }
+    bool operator!=(const SequenceNumberCyclic& other) const { ASSERT(value != -1 && other.value != -1); return value != other.value; }
 
-    SequenceNumber operator-(int other) const { ASSERT(value != -1); SequenceNumber result; result.value = modulo4096(value - other); return result; }
-    SequenceNumber operator+(int other) const { ASSERT(value != -1); SequenceNumber result; result.value = modulo4096(value + other); return result; }
+    SequenceNumberCyclic operator-(int other) const { ASSERT(value != -1); SequenceNumberCyclic result; result.value = modulo4096(value - other); return result; }
+    SequenceNumberCyclic operator+(int other) const { ASSERT(value != -1); SequenceNumberCyclic result; result.value = modulo4096(value + other); return result; }
 
-    bool operator<(const SequenceNumber& other) const { ASSERT(value != -1 && other.value != -1);
-        int16_t d = (other.value - value + 4096) % 4096;
+    bool operator<(const SequenceNumberCyclic& other) const {
+        ASSERT(value != -1 && other.value != -1);
+        SequenceNumber d = (other.value - value + 4096) % 4096;
         return 0 < d && d < 2048;
     }
-    bool operator<=(const SequenceNumber& other) const { return *this == other || *this < other; }
-    bool operator>(const SequenceNumber& other) const { return other < *this; }
-    bool operator>=(const SequenceNumber& other) const { return *this == other || *this > other; }
+
+    bool operator<=(const SequenceNumberCyclic& other) const { return *this == other || *this < other; }
+    bool operator>(const SequenceNumberCyclic& other) const { return other < *this; }
+    bool operator>=(const SequenceNumberCyclic& other) const { return *this == other || *this > other; }
 };
 
-inline std::ostream& operator<<(std::ostream& os, const SequenceNumber& sequenceNumber)
+inline std::ostream& operator<<(std::ostream& os, const SequenceNumberCyclic& sequenceNumber)
 {
-    os << sequenceNumber.getRaw();
+    os << sequenceNumber.get();
     return os;
 }
 

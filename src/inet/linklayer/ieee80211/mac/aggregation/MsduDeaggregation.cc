@@ -79,7 +79,7 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         header->setToDS(amsduHeader->getToDS());
         header->setFromDS(amsduHeader->getFromDS());
         header->setTid(tid);
-        header->setSequenceNumber(0);
+        header->setSequenceNumber(SequenceNumberCyclic(0));
         setExplodedFrameAddress(header, msduSubframeHeader, amsduHeader);
         frame->insertAtFront(header);
         frame->insertAtBack(makeShared<Ieee80211MacTrailer>());

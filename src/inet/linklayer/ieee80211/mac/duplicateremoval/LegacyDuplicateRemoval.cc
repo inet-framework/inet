@@ -25,7 +25,7 @@ bool LegacyDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHead
 {
     ASSERT(header->getType() != ST_DATA_WITH_QOS);
     const MacAddress& address = header->getTransmitterAddress();
-    SequenceControlField seqVal(header);
+    SequenceControlField seqVal(header->getSequenceNumber().get(), header->getFragmentNumber());
     auto it = lastSeenSeqNumCache.find(address);
     if (it == lastSeenSeqNumCache.end())
         lastSeenSeqNumCache.insert(std::pair<MacAddress, SequenceControlField>(address, seqVal));

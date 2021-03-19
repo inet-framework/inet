@@ -28,14 +28,14 @@ class INET_API RecipientBlockAckAgreement : public cObject
     protected:
         BlockAckRecord *blockAckRecord = nullptr;
 
-        SequenceNumber startingSequenceNumber = -1;
+        SequenceNumberCyclic startingSequenceNumber;
         int bufferSize = -1;
         simtime_t blockAckTimeoutValue = 0;
         bool isAddbaResponseSent = false;
         simtime_t expirationTime = -1;
 
     public:
-        RecipientBlockAckAgreement(MacAddress originatorAddress, Tid tid, SequenceNumber startingSequenceNumber, int bufferSize, simtime_t blockAckTimeoutValue);
+        RecipientBlockAckAgreement(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, simtime_t blockAckTimeoutValue);
         virtual ~RecipientBlockAckAgreement() { delete blockAckRecord; }
 
         virtual void blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header);
@@ -43,7 +43,7 @@ class INET_API RecipientBlockAckAgreement : public cObject
         virtual BlockAckRecord *getBlockAckRecord() const { return blockAckRecord; }
         virtual simtime_t getBlockAckTimeoutValue() const { return blockAckTimeoutValue; }
         virtual int getBufferSize() const { return bufferSize; }
-        virtual SequenceNumber getStartingSequenceNumber() const { return startingSequenceNumber; }
+        virtual SequenceNumberCyclic getStartingSequenceNumber() const { return startingSequenceNumber; }
 
         virtual void addbaResposneSent() { isAddbaResponseSent = true; }
         virtual void calculateExpirationTime() { expirationTime = blockAckTimeoutValue == 0 ? SIMTIME_MAX : simTime() + blockAckTimeoutValue; }

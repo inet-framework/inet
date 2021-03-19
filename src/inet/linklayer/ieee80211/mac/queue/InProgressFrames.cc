@@ -147,7 +147,7 @@ void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, 
         auto header = frame->peekAtFront<Ieee80211MacHeader>();
         if (header->getType() == ST_DATA_WITH_QOS) {
             auto dataheader = CHK(dynamicPtrCast<const Ieee80211DataHeader>(header));
-            if (seqAndFragNums.count(std::make_pair(dataheader->getReceiverAddress(), std::make_pair(dataheader->getTid(), SequenceControlField(dataheader->getSequenceNumber(), dataheader->getFragmentNumber())))) != 0) {
+            if (seqAndFragNums.count(std::make_pair(dataheader->getReceiverAddress(), std::make_pair(dataheader->getTid(), SequenceControlField(dataheader->getSequenceNumber().get(), dataheader->getFragmentNumber())))) != 0) {
                 EV_DEBUG << "Dropping frame " << frame->getName() << ".\n";
                 it = inProgressFrames.erase(it);
                 droppedFrames.push_back(frame);
