@@ -34,7 +34,7 @@ void Dcaf::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         getContainingNicModule(this)->subscribe(modesetChangedSignal, this);
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    if (stage == INITSTAGE_LINK_LAYER) {
         // TODO calculateTimingParameters()
         pendingQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("pendingQueue"));
         inProgressFrames = check_and_cast<InProgressFrames *>(getSubmodule("inProgressFrames"));

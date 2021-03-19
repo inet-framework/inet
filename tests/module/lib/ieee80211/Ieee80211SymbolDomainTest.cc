@@ -37,7 +37,7 @@ void Ieee80211SymbolDomainTest::initialize(int stage)
         ieee80211OFDMDataDecoder = getModuleFromPar<Ieee80211OfdmDecoderModule>(par("ieee80211OFDMDataDecoderModule"), this);
         parseInput(par("testFile"));
     }
-    else if (stage == INITSTAGE_LAST)
+    if (stage == INITSTAGE_LAST)
     {
         test();
     }

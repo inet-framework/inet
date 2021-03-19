@@ -113,7 +113,7 @@ void Ipv4::initialize(int stage)
         WATCH_MAP(pendingPackets);
         WATCH_MAP(socketIdToSocketDescriptor);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
+    if (stage == INITSTAGE_NETWORK_LAYER) {
         cModule *arpModule = check_and_cast<cModule *>(arp);
         arpModule->subscribe(IArp::arpResolutionCompletedSignal, this);
         arpModule->subscribe(IArp::arpResolutionFailedSignal, this);

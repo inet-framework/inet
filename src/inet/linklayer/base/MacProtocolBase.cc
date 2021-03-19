@@ -59,7 +59,7 @@ void MacProtocolBase::initialize(int stage)
         if (hostModule)
             hostModule->subscribe(interfaceDeletedSignal, this);
     }
-    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
+    if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
         registerInterface();
 }
 

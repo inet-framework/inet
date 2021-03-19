@@ -136,7 +136,7 @@ void Dymo::initialize(int stage)
             clientAddressAndPrefixLengthPairs.push_back(std::pair<L3Address, int>(address, prefixLength));
         }
     }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerProtocol(Protocol::manet, gate("ipOut"), gate("ipIn"));
         host->subscribe(linkBrokenSignal, this);
         networkProtocol->registerHook(0, this);

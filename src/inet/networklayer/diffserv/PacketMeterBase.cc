@@ -27,7 +27,7 @@ void PacketMeterBase::initialize(int stage)
         inputGate = gate("in");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
     }
-    else if (stage == INITSTAGE_LAST) {
+    if (stage == INITSTAGE_LAST) {
         checkPacketOperationSupport(inputGate);
     }
 }

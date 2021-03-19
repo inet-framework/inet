@@ -38,7 +38,7 @@ void EthernetMacHeaderChecker::initialize(int stage)
         promiscuous = par("promiscuous");
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
+    if (stage == INITSTAGE_LINK_LAYER)
         registerProtocol(Protocol::ethernetMac, nullptr, inputGate);
 }
 

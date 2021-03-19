@@ -73,7 +73,7 @@ void Tcp::initialize(int stage)
         WATCH_PTRMAP(tcpConnMap);
         WATCH_PTRMAP(tcpAppConnMap);
     }
-    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
+    if (stage == INITSTAGE_TRANSPORT_LAYER) {
         registerService(Protocol::tcp, gate("appIn"), gate("appOut"));
         registerProtocol(Protocol::tcp, gate("ipOut"), gate("ipIn"));
         if (crcMode == CRC_COMPUTED) {

@@ -37,7 +37,7 @@ void PacketBuffer::initialize(int stage)
         dataCapacity = b(par("dataCapacity"));
         packetDropperFunction = createDropperFunction(par("dropperClass"));
     }
-    else if (stage == INITSTAGE_LAST)
+    if (stage == INITSTAGE_LAST)
         updateDisplayString();
 }
 

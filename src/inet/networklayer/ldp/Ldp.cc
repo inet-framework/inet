@@ -126,7 +126,7 @@ void Ldp::initialize(int stage)
         maxFecid = 0;
         sendHelloMsg = new cMessage("LDPSendHello");
     }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         // bind UDP socket
         udpSocket.setOutputGate(gate("socketOut"));
         udpSocket.bind(LDP_PORT);

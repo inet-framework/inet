@@ -153,7 +153,7 @@ void MultiFieldClassifier::initialize(int stage)
         numRcvd = 0;
         WATCH(numRcvd);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
+    if (stage == INITSTAGE_NETWORK_LAYER) {
         cXMLElement *config = par("filters");
         configureFilters(config);
     }

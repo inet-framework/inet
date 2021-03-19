@@ -114,7 +114,7 @@ void Sctp::initialize(int stage)
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
     }
-    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
+    if (stage == INITSTAGE_TRANSPORT_LAYER) {
         registerService(Protocol::sctp, gate("appIn"), gate("appOut"));
         registerProtocol(Protocol::sctp, gate("ipOut"), gate("ipIn"));
         if (crcMode == CRC_COMPUTED) {

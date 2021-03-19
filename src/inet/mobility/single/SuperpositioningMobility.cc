@@ -61,7 +61,7 @@ void SuperpositioningMobility::initialize(int stage)
         WATCH(lastVelocity);
         WATCH(lastAcceleration);
     }
-    else if (stage == INITSTAGE_LAST)
+    if (stage == INITSTAGE_LAST)
         initializePosition();
 }
 

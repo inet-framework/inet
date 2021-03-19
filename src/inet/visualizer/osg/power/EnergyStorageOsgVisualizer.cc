@@ -41,7 +41,7 @@ void EnergyStorageOsgVisualizer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
-    else if (stage == INITSTAGE_LAST) {
+    if (stage == INITSTAGE_LAST) {
         for (auto energyStorageVisualization : energyStorageVisualizations) {
             auto energyStorageOsgVisualization = static_cast<const EnergyStorageOsgVisualization *>(energyStorageVisualization);
             auto node = energyStorageOsgVisualization->node;

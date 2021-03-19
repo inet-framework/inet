@@ -40,7 +40,7 @@ void TokenBasedServer::initialize(int stage)
         maxNumTokens = par("maxNumTokens");
         WATCH(numTokens);
     }
-    else if (stage == INITSTAGE_LAST)
+    if (stage == INITSTAGE_LAST)
         updateDisplayString();
 }
 

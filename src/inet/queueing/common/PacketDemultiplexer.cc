@@ -38,7 +38,7 @@ void PacketDemultiplexer::initialize(int stage)
         }
         provider = findConnectedModule<IPassivePacketSource>(inputGate);
     }
-    else if (stage == INITSTAGE_QUEUEING) {
+    if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
         for (auto outputGate : outputGates)
             checkPacketOperationSupport(outputGate);

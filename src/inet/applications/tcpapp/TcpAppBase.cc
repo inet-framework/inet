@@ -38,7 +38,7 @@ void TcpAppBase::initialize(int stage)
         WATCH(bytesSent);
         WATCH(bytesRcvd);
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
+    if (stage == INITSTAGE_APPLICATION_LAYER) {
         // parameters
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");

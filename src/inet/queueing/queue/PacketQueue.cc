@@ -44,13 +44,13 @@ void PacketQueue::initialize(int stage)
             queue.setup(packetComparatorFunction);
         packetDropperFunction = createDropperFunction(par("dropperClass"));
     }
-    else if (stage == INITSTAGE_QUEUEING) {
+    if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
         if (producer != nullptr)
             producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     }
-    else if (stage == INITSTAGE_LAST)
+    if (stage == INITSTAGE_LAST)
         updateDisplayString();
 }
 

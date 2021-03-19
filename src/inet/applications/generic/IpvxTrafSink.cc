@@ -39,7 +39,7 @@ void IpvxTrafSink::initialize(int stage)
         numReceived = 0;
         WATCH(numReceived);
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
+    if (stage == INITSTAGE_APPLICATION_LAYER) {
         int protocolId = par("protocol");
         if (protocolId < 143 || protocolId > 254)
             throw cRuntimeError("invalid protocol id %d, accepts only between 143 and 254", protocolId);

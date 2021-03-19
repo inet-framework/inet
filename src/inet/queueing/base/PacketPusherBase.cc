@@ -32,7 +32,7 @@ void PacketPusherBase::initialize(int stage)
         producer = findConnectedModule<IActivePacketSource>(inputGate);
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
     }
-    else if (stage == INITSTAGE_QUEUEING) {
+    if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
     }

@@ -52,7 +52,7 @@ void Rx::initialize(int stage)
         WATCH(mediumFree);
     }
     // TODO INITSTAGE
-    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+    if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         address = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"))->getAddress();
         recomputeMediumFree();
     }

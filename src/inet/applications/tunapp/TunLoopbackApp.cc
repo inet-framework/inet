@@ -39,7 +39,7 @@ void TunLoopbackApp::initialize(int stage)
         packetsSent = 0;
         packetsReceived = 0;
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
+    if (stage == INITSTAGE_APPLICATION_LAYER) {
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         NetworkInterface *networkInterface = interfaceTable->findInterfaceByName(tunInterface);
         if (networkInterface == nullptr)

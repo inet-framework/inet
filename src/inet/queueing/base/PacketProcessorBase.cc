@@ -32,7 +32,7 @@ void PacketProcessorBase::initialize(int stage)
         WATCH(numProcessedPackets);
         WATCH(processedTotalLength);
     }
-    else if (stage == INITSTAGE_LAST)
+    if (stage == INITSTAGE_LAST)
         updateDisplayString();
 }
 

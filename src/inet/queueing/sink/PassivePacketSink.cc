@@ -33,7 +33,7 @@ void PassivePacketSink::initialize(int stage)
         consumptionTimer = new ClockEvent("ConsumptionTimer");
         scheduleCollectionForAbsoluteTime = par("scheduleCollectionForAbsoluteTime");
     }
-    else if (stage == INITSTAGE_QUEUEING) {
+    if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
         if (producer != nullptr)
             producer->handleCanPushPacketChanged(inputGate->getPathStartGate());

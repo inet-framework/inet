@@ -40,7 +40,7 @@ void PacketSchedulerBase::initialize(int stage)
             producers.push_back(producer);
         }
     }
-    else if (stage == INITSTAGE_QUEUEING) {
+    if (stage == INITSTAGE_QUEUEING) {
         for (auto& inputGate : inputGates)
             checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);

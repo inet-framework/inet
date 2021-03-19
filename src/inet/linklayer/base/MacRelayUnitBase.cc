@@ -38,7 +38,7 @@ void MacRelayUnitBase::initialize(int stage)
         WATCH(numProcessedFrames);
         WATCH(numDroppedFrames);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
+    if (stage == INITSTAGE_NETWORK_LAYER) {
         registerAnyService(gate("upperLayerIn"), gate("upperLayerOut"));
         registerAnyProtocol(gate("ifOut"), gate("ifIn"));
     }

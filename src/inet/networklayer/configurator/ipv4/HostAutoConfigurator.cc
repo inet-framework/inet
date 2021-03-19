@@ -38,7 +38,7 @@ void HostAutoConfigurator::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     }
-    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+    if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
             interfaceTable->getInterface(i)->addProtocolData<Ipv4InterfaceData>();
     }

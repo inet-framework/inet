@@ -30,7 +30,7 @@ void ActivePacketSink::initialize(int stage)
         collectionTimer = new ClockEvent("CollectionTimer");
         scheduleCollectionForAbsoluteTime = par("scheduleCollectionForAbsoluteTime");
     }
-    else if (stage == INITSTAGE_QUEUEING) {
+    if (stage == INITSTAGE_QUEUEING) {
         if (!collectionTimer->isScheduled() && provider->canPullSomePacket(inputGate->getPathStartGate())) {
             double offset = par("initialCollectionOffset");
             if (offset != 0)

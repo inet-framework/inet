@@ -67,12 +67,12 @@ void Radio::initialize(int stage)
         WATCH(receivedSignalPart);
         WATCH(transmittedSignalPart);
     }
-    else if (stage == INITSTAGE_PHYSICAL_LAYER) {
+    if (stage == INITSTAGE_PHYSICAL_LAYER) {
         medium->addRadio(this);
         initializeRadioMode();
         parseRadioModeSwitchingTimes();
     }
-    else if (stage == INITSTAGE_LAST) {
+    if (stage == INITSTAGE_LAST) {
         EV_INFO << "Initialized " << getCompleteStringRepresentation() << endl;
     }
 }

@@ -50,7 +50,7 @@ void Ipv4NatTable::initialize(int stage)
         config = par("config");
         networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
+    if (stage == INITSTAGE_NETWORK_LAYER) {
         parseConfig();
         if (natEntries.size() != 0)
             networkProtocol->registerHook(0, this);

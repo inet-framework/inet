@@ -47,7 +47,7 @@ void Mpls::initialize(int stage)
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         pct = getModuleFromPar<IIngressClassifier>(par("classifierModule"), this);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
+    if (stage == INITSTAGE_NETWORK_LAYER) {
         registerService(Protocol::mpls, gate("netwIn"), gate("netwOut"));
         registerProtocol(Protocol::mpls, gate("ifOut"), gate("ifIn"));
     }

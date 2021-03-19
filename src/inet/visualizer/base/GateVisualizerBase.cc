@@ -57,7 +57,7 @@ void GateVisualizerBase::initialize(int stage)
         displayDuration = par("displayDuration");
         currentTimePosition = par("currentTimePosition");
     }
-    else if (stage == INITSTAGE_LAST) {
+    if (stage == INITSTAGE_LAST) {
         if (displayGates)
             addGateVisualizations();
     }

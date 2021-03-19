@@ -77,7 +77,7 @@ void MoBanLocal::initialize(int stage)
         WATCH(radius);
         WATCH(speed);
     }
-    else if (stage == INITSTAGE_SINGLE_MOBILITY)
+    if (stage == INITSTAGE_SINGLE_MOBILITY)
         computeMaxSpeed();
 }
 

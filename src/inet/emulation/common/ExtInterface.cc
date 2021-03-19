@@ -51,7 +51,7 @@ void ExtInterface::initialize(int stage)
         else if (!strcmp("copyToExt", copyConfiguration))
             copyNetworkInterfaceConfigurationToExt();
     }
-    else if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
+    if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
         const char *copyConfiguration = par("copyConfiguration");
         if (!strcmp("copyFromExt", copyConfiguration))
             copyNetworkAddressFromExt();

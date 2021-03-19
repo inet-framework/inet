@@ -75,7 +75,7 @@ void Ieee80211LayeredOfdmTransmitter::initialize(int stage)
         else
             throw cRuntimeError("Unknown level of detail='%s'", levelOfDetailStr);
     }
-    else if (stage == INITSTAGE_LAST) {
+    if (stage == INITSTAGE_LAST) {
         if (!isCompliant)
             mode = computeMode(bandwidth);
     }

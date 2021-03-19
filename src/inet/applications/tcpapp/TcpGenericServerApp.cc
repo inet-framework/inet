@@ -48,7 +48,7 @@ void TcpGenericServerApp::initialize(int stage)
         WATCH(bytesRcvd);
         WATCH(bytesSent);
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
+    if (stage == INITSTAGE_APPLICATION_LAYER) {
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
         socket.setOutputGate(gate("socketOut"));

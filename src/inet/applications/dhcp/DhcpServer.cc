@@ -61,7 +61,7 @@ void DhcpServer::initialize(int stage)
         clientPort = 68; // client
         serverPort = 67; // server
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
+    if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *host = getContainingNode(this);
         host->subscribe(interfaceDeletedSignal, this);
         socket.setOutputGate(gate("socketOut"));

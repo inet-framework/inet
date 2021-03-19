@@ -36,7 +36,7 @@ void SceneOsgVisualizer::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL)
         initializeScene();
-    else if (stage == INITSTAGE_LAST) {
+    if (stage == INITSTAGE_LAST) {
         if (par("displayScene"))
             initializeSceneFloor();
         double axisLength = par("axisLength");

@@ -74,9 +74,9 @@ void Ipv4NetworkConfigurator::initialize(int stage)
         addDirectRoutesParameter = par("addDirectRoutes");
         optimizeRoutesParameter = par("optimizeRoutes");
     }
-    else if (stage == INITSTAGE_NETWORK_CONFIGURATION)
+    if (stage == INITSTAGE_NETWORK_CONFIGURATION)
         ensureConfigurationComputed(topology);
-    else if (stage == INITSTAGE_LAST)
+    if (stage == INITSTAGE_LAST)
         dumpConfiguration();
 }
 

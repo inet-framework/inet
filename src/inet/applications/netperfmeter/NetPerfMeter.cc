@@ -204,7 +204,7 @@ void NetPerfMeter::initialize(int stage)
             }
         }
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
+    if (stage == INITSTAGE_APPLICATION_LAYER) {
         // ====== Initialize and bind socket =====================================
         SocketSCTP = IncomingSocketSCTP = nullptr;
         SocketTCP = IncomingSocketTCP = nullptr;

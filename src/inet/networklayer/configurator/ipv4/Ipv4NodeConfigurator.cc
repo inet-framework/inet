@@ -53,15 +53,15 @@ void Ipv4NodeConfigurator::initialize(int stage)
             networkConfigurator = check_and_cast<Ipv4NetworkConfigurator *>(module);
         }
     }
-    else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
+    if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP)
             prepareAllInterfaces();
     }
-    else if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
+    if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
         if ((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) && networkConfigurator)
             configureAllInterfaces();
     }
-    else if (stage == INITSTAGE_STATIC_ROUTING) {
+    if (stage == INITSTAGE_STATIC_ROUTING) {
         if ((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) && networkConfigurator) {
             configureRoutingTable();
             cModule *node = getContainingNode(this);

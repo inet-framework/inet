@@ -35,7 +35,7 @@ void PacketGate::initialize(int stage)
         closeTime = par("closeTime");
         changeTimer = new ClockEvent("ChangeTimer");
     }
-    else if (stage == INITSTAGE_QUEUEING)
+    if (stage == INITSTAGE_QUEUEING)
         scheduleChangeTimer();
 }
 

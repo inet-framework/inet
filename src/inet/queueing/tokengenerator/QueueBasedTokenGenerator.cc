@@ -34,7 +34,7 @@ void QueueBasedTokenGenerator::initialize(int stage)
         check_and_cast<cSimpleModule *>(queue)->subscribe(packetPulledSignal, this);
         numTokensParameter = &par("numTokens");
     }
-    else if (stage == INITSTAGE_QUEUEING)
+    if (stage == INITSTAGE_QUEUEING)
         if (queue->getNumPackets() < minNumPackets || queue->getTotalLength() < minTotalLength)
             generateTokens();
 }

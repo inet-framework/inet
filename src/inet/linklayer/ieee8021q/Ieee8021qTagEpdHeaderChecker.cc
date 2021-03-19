@@ -45,7 +45,7 @@ void Ieee8021qTagEpdHeaderChecker::initialize(int stage)
             vlanIdFilter.push_back(atoi(filterTokenizer.nextToken()));
         WATCH_VECTOR(vlanIdFilter);
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
+    if (stage == INITSTAGE_LINK_LAYER)
         registerProtocol(*qtagProtocol, nullptr, inputGate);
 }
 
