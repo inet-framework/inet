@@ -42,7 +42,7 @@ void Ieee8021qTagEpdHeaderChecker::initialize(int stage)
             throw cRuntimeError("Unknown tag type");
         vlanIdFilter = check_and_cast<cValueArray *>(par("vlanIdFilter").objectValue());
     }
-    if (stage == INITSTAGE_LINK_LAYER)
+    else if (stage == INITSTAGE_LINK_LAYER)
         registerProtocol(*qtagProtocol, nullptr, inputGate);
 }
 

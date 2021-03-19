@@ -41,7 +41,7 @@ void AlternatingEpEnergyConsumer::initialize(int stage)
         WATCH(isSleeping);
         WATCH(powerConsumption);
     }
-    if (stage == INITSTAGE_POWER)
+    else if (stage == INITSTAGE_POWER)
         energySource->addEnergyConsumer(this);
 }
 

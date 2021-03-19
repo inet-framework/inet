@@ -45,7 +45,7 @@ void Ieee8021qTagEpdHeaderInserter::initialize(int stage)
         defaultVlanId = par("defaultVlanId");
         defaultUserPriority = par("defaultUserPriority");
     }
-    if (stage == INITSTAGE_LINK_LAYER)
+    else if (stage == INITSTAGE_LINK_LAYER)
         registerService(*qtagProtocol, inputGate, nullptr);
 }
 

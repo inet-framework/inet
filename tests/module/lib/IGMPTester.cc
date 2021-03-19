@@ -120,7 +120,7 @@ void IGMPTester::initialize(int stage)
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
     }
-    if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
+    else if (stage == INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT) {
         networkInterface->getProtocolDataForUpdate<Ipv4InterfaceData>()->setIPAddress(Ipv4Address("192.168.1.1"));
         networkInterface->getProtocolDataForUpdate<Ipv4InterfaceData>()->setNetmask(Ipv4Address("255.255.0.0"));
     }

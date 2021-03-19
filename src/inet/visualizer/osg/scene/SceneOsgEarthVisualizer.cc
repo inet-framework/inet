@@ -52,7 +52,7 @@ void SceneOsgEarthVisualizer::initialize(int stage)
         cameraDistanceFactor = par("cameraDistanceFactor");
         initializeScene();
     }
-    if (stage == INITSTAGE_LAST) {
+    else if (stage == INITSTAGE_LAST) {
         initializeLocator();
         if (par("displayScene"))
             initializeSceneFloor();

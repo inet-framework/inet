@@ -30,7 +30,7 @@ void TimeBasedTokenGenerator::initialize(int stage)
         numTokensParameter = &par("numTokens");
         generationTimer = new ClockEvent("GenerationTimer");
     }
-    if (stage == INITSTAGE_QUEUEING)
+    else if (stage == INITSTAGE_QUEUEING)
         scheduleGenerationTimer();
 }
 

@@ -43,7 +43,7 @@ void TwoRateThreeColorMeter::initialize(int stage)
         Tp = PBS;
         Tc = CBS;
     }
-    if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         PIR = parseInformationRate(par("pir"), "pir", ift, *this, 0);
         CIR = parseInformationRate(par("cir"), "cir", ift, *this, 0);

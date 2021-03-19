@@ -38,7 +38,7 @@ void VirtualTunnel::initialize(int stage)
         if (*protocolAsString != '\0')
             protocol = Protocol::findProtocol(protocolAsString);
     }
-    if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         realNetworkInterface = CHK(interfaceTable->findInterfaceByName(par("realInterface")));
         const char *addressString = par("address");
@@ -55,7 +55,7 @@ void VirtualTunnel::initialize(int stage)
         networkInterface->setMulticast(realNetworkInterface->isMulticast());
         networkInterface->setPointToPoint(realNetworkInterface->isPointToPoint());
     }
-    if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         // KLUDGE depends on other interface
         if (!strcmp(par("address"), "copy"))
             networkInterface->setMacAddress(realNetworkInterface->getMacAddress());

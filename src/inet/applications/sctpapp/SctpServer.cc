@@ -72,7 +72,7 @@ void SctpServer::initialize(int stage)
         else
             readInt = true;
     }
-    if (stage == INITSTAGE_APPLICATION_LAYER) {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         const char *addressesString = par("localAddress");
         AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
         int port = par("localPort");

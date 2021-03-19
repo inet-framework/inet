@@ -47,7 +47,7 @@ void NoiseSource::initialize(int stage)
         radioIn = gate("radioIn");
         radioIn->setDeliverImmediately(true);
     }
-    if (stage == INITSTAGE_PHYSICAL_LAYER) {
+    else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         medium->addRadio(this);
         scheduleSleepTimer();
     }

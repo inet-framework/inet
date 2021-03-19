@@ -53,7 +53,7 @@ void Rstp::initialize(int stage)
         helloTimer = new cMessage("itshellotime", SELF_HELLOTIME);
         upgradeTimer = new cMessage("upgrade", SELF_UPGRADE);
     }
-    if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         registerProtocol(Protocol::stp, gate("relayOut"), gate("relayIn"));
     }
 }

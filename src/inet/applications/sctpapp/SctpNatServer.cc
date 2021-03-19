@@ -55,7 +55,7 @@ void SctpNatServer::initialize(int stage)
         inboundStreams = par("inboundStreams");
         outboundStreams = par("outboundStreams");
     }
-    if (stage == INITSTAGE_APPLICATION_LAYER) {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // parameters
         const char *addressesString = par("localAddress");
         AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());

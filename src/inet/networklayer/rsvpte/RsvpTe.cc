@@ -87,7 +87,7 @@ void RsvpTe::initialize(int stage)
 
         retryInterval = 1.0;
     }
-    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         // process traffic configuration
         readTrafficFromXML(par("traffic"));
         registerProtocol(Protocol::rsvpTe, gate("ipOut"), gate("ipIn"));

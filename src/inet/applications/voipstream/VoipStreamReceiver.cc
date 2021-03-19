@@ -65,7 +65,7 @@ void VoipStreamReceiver::initialize(int stage)
         // initialize avcodec library
         av_register_all();
     }
-    if (stage == INITSTAGE_APPLICATION_LAYER) {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *node = findContainingNode(this);
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;

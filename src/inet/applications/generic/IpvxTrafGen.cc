@@ -77,7 +77,7 @@ void IpvxTrafGen::initialize(int stage)
         WATCH(numSent);
         WATCH(numReceived);
     }
-    if (stage == INITSTAGE_APPLICATION_LAYER) {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         registerProtocol(*protocol, gate("ipOut"), gate("ipIn"));
     }
 }

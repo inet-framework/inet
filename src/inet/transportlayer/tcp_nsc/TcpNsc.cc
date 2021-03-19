@@ -228,7 +228,7 @@ void TcpNsc::initialize(int stage)
         pStackM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1500);
         pStackM->add_default_gateway(localInnerGwS.str().c_str());
     }
-    if (stage == INITSTAGE_TRANSPORT_LAYER) {
+    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         cModule *node = findContainingNode(this);
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
@@ -255,7 +255,7 @@ void TcpNsc::initialize(int stage)
 #endif
         }
     }
-    if (stage == INITSTAGE_LAST) {
+    else if (stage == INITSTAGE_LAST) {
         isAliveM = true;
     }
 }

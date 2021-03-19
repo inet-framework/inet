@@ -42,7 +42,7 @@ void PacketStreamer::initialize(int stage)
         collector = findConnectedModule<IActivePacketSink>(outputGate);
         endStreamingTimer = new ClockEvent("EndStreamingTimer");
     }
-    if (stage == INITSTAGE_QUEUEING) {
+    else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
     }

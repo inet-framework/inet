@@ -35,7 +35,7 @@ void LibTable::initialize(int stage)
         maxLabel = 0;
         WATCH_VECTOR(lib);
     }
-    if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         // read configuration
         readTableFromXML(par("config"));
     }

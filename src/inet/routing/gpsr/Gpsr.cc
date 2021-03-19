@@ -106,7 +106,7 @@ void Gpsr::initialize(int stage)
         // KLUDGE implement position registry protocol
         globalPositionTable.clear();
     }
-    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerProtocol(Protocol::manet, gate("ipOut"), gate("ipIn"));
         host->subscribe(linkBrokenSignal, this);
         networkProtocol->registerHook(0, this);

@@ -42,7 +42,7 @@ void CloudDelayerBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
     }
-    if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         networkProtocol->registerHook(0, this);
     }
 }

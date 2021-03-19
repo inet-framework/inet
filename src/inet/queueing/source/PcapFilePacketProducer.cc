@@ -30,7 +30,7 @@ void PcapFilePacketProducer::initialize(int stage)
     ActivePacketSourceBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         pcapReader.openPcap(par("filename"), par("packetNameFormat"));
-    if (stage == INITSTAGE_QUEUEING)
+    else if (stage == INITSTAGE_QUEUEING)
         schedulePacket();
 }
 

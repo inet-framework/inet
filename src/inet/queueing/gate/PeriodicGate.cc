@@ -33,7 +33,7 @@ void PeriodicGate::initialize(int stage)
         durations = check_and_cast<cValueArray *>(par("durations").objectValue());
         changeTimer = new ClockEvent("ChangeTimer");
     }
-    if (stage == INITSTAGE_QUEUEING)
+    else if (stage == INITSTAGE_QUEUEING)
         initializeGating();
 }
 

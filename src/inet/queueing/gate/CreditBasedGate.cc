@@ -50,12 +50,12 @@ void CreditBasedGate::initialize(int stage)
         WATCH(currentCredit);
         WATCH(currentCreditGainRate);
     }
-    if (stage == INITSTAGE_QUEUEING) {
+    else if (stage == INITSTAGE_QUEUEING) {
         updateCurrentCredit();
         emitCurrentCredit();
         scheduleChangeTimer();
     }
-    if (stage == INITSTAGE_LAST)
+    else if (stage == INITSTAGE_LAST)
         updateDisplayString();
 }
 

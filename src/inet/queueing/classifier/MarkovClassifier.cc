@@ -56,7 +56,7 @@ void MarkovClassifier::initialize(int stage)
         waitTimer = new ClockEvent("WaitTimer");
         WATCH(state);
     }
-    if (stage == INITSTAGE_QUEUEING) {
+    else if (stage == INITSTAGE_QUEUEING) {
         for (auto& outputGate : outputGates)
             checkPacketOperationSupport(outputGate);
         checkPacketOperationSupport(inputGate);

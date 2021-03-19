@@ -100,7 +100,7 @@ void Udp::initialize(int stage)
         WATCH_PTRMAP(socketsByIdMap);
         WATCH_MAP(socketsByPortMap);
     }
-    if (stage == INITSTAGE_TRANSPORT_LAYER) {
+    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         if (crcMode == CRC_COMPUTED) {
             cModuleType *moduleType = cModuleType::get("inet.transportlayer.udp.UdpCrcInsertionHook");
             auto crcInsertion = check_and_cast<UdpCrcInsertionHook *>(moduleType->create("crcInsertion", this));

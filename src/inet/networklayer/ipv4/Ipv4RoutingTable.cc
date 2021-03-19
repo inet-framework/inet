@@ -88,7 +88,7 @@ void Ipv4RoutingTable::initialize(int stage)
         WATCH(multicastForward);
         WATCH(routerId);
     }
-    if (stage == INITSTAGE_ROUTER_ID_ASSIGNMENT) {
+    else if (stage == INITSTAGE_ROUTER_ID_ASSIGNMENT) {
         cModule *node = findContainingNode(this);
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
@@ -107,7 +107,7 @@ void Ipv4RoutingTable::initialize(int stage)
             configureRouterId();
         }
     }
-    if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         // we don't use notifications during initialize(), so we do it manually.
         updateNetmaskRoutes();
     }

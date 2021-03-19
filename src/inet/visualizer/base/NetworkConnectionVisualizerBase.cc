@@ -33,7 +33,7 @@ void NetworkConnectionVisualizerBase::initialize(int stage)
         lineStyle = cFigure::parseLineStyle(par("lineStyle"));
         lineWidth = par("lineWidth");
     }
-    if (stage == INITSTAGE_LAST) {
+    else if (stage == INITSTAGE_LAST) {
         for (cModule::SubmoduleIterator it(visualizationSubjectModule); !it.end(); it++) {
             auto networkNode = *it;
             if (isNetworkNode(networkNode) && nodeFilter.matches(networkNode)) {

@@ -42,7 +42,7 @@ void Pim::initialize(int stage)
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
     }
-    if (stage == INITSTAGE_TRANSPORT_LAYER) {
+    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         if (crcMode == CRC_COMPUTED) {
             cModuleType *moduleType = cModuleType::get("inet.routing.pim.PimCrcInsertionHook");
             auto crcInsertion = check_and_cast<PimCrcInsertionHook *>(moduleType->create("crcInsertion", this));
@@ -64,7 +64,7 @@ void Pim::initialize(int stage)
 #endif
         }
     }
-    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerProtocol(Protocol::pim, gate("networkLayerOut"), gate("networkLayerIn"));
     }
 }

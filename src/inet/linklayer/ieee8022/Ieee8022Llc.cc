@@ -42,7 +42,7 @@ void Ieee8022Llc::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         // TODO parameterization for llc or snap?
     }
-    if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         if (par("registerProtocol").boolValue()) { // FIXME //KUDGE should redesign place of EthernetEncapsulation and LLC modules
             // register service and protocol
             registerService(Protocol::ieee8022llc, gate("upperLayerIn"), gate("upperLayerOut"));

@@ -40,7 +40,7 @@ void PacketReceiverBase::initialize(int stage)
         networkInterface = findContainingNicModule(this);
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
     }
-    if (stage == INITSTAGE_QUEUEING)
+    else if (stage == INITSTAGE_QUEUEING)
         checkPacketOperationSupport(outputGate);
 }
 

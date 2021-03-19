@@ -43,7 +43,7 @@ void PacketTransmitterBase::initialize(int stage)
         producer.reference(inputGate, false);
         txEndTimer = new ClockEvent("TxEndTimer");
     }
-    if (stage == INITSTAGE_QUEUEING) {
+    else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
         if (producer != nullptr)
             producer->handleCanPushPacketChanged(inputGate->getPathStartGate());

@@ -114,7 +114,7 @@ void CsmaCaMac::initialize(int stage)
         WATCH(numSentBroadcast);
         WATCH(numReceivedBroadcast);
     }
-    if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         // subscribe for the information of the carrier sense
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);

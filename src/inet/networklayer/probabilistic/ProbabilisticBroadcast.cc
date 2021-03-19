@@ -44,7 +44,7 @@ void ProbabilisticBroadcast::initialize(int stage)
         nbDataPacketsForwarded = 0;
         nbHops = 0;
     }
-    if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         auto ie = interfaceTable->findFirstNonLoopbackInterface();
         if (ie != nullptr)
             myNetwAddr = ie->getNetworkAddress();

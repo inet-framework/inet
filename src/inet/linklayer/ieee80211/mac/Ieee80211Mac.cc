@@ -63,7 +63,7 @@ void Ieee80211Mac::initialize(int stage)
         mib = getModuleFromPar<Ieee80211Mib>(par("mibModule"), this);
         mib->qos = par("qosStation");
     }
-    if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *llcModule = gate("upperLayerOut")->getNextGate()->getOwnerModule();
         llc = check_and_cast<IIeee80211Llc *>(llcModule);
         cModule *radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule();

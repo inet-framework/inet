@@ -34,7 +34,7 @@ void Ieee80211OfdmDecoderModule::initialize(int stage)
         convolutionalDecoder = dynamic_cast<const IFecCoder *>(getSubmodule("fecDecoder"));
         deinterleaver = dynamic_cast<const IInterleaver *>(getSubmodule("deinterleaver"));
     }
-    if (stage == INITSTAGE_PHYSICAL_LAYER) {
+    else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         const ConvolutionalCode *convolutionalCode = convolutionalDecoder ? dynamic_cast<const ConvolutionalCode *>(convolutionalDecoder->getForwardErrorCorrection()) : nullptr;
         const Ieee80211OfdmInterleaving *interleaving = deinterleaver ? dynamic_cast<const Ieee80211OfdmInterleaving *>(deinterleaver->getInterleaving()) : nullptr;
         const AdditiveScrambling *scrambling = descrambler ? dynamic_cast<const AdditiveScrambling *>(descrambler->getScrambling()) : nullptr;

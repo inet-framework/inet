@@ -33,7 +33,7 @@ void ActivePacketSource::initialize(int stage)
         productionTimer = new ClockEvent("ProductionTimer");
         scheduleProductionForAbsoluteTime = par("scheduleProductionForAbsoluteTime");
     }
-    if (stage == INITSTAGE_QUEUEING) {
+    else if (stage == INITSTAGE_QUEUEING) {
         if (!productionTimer->isScheduled() && (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()))) {
             double offset = par("initialProductionOffset");
             if (offset != 0)

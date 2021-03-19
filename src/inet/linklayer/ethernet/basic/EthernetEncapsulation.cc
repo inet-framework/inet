@@ -89,7 +89,7 @@ void EthernetEncapsulation::initialize(int stage)
         WATCH(totalFromMAC);
         WATCH(totalPauseSent);
     }
-    if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         if (par("registerProtocol").boolValue()) { // FIXME //KUDGE should redesign place of EthernetEncapsulation and LLC modules
             // register service and protocol
             registerService(Protocol::ethernetMac, gate("upperLayerIn"), gate("upperLayerOut"));

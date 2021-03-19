@@ -52,7 +52,7 @@ void EnergyStorageVisualizerBase::initialize(int stage)
         placementHint = parsePlacement(par("placementHint"));
         placementPriority = par("placementPriority");
     }
-    if (stage == INITSTAGE_LAST) {
+    else if (stage == INITSTAGE_LAST) {
         if (displayEnergyStorages)
             addEnergyStorageVisualizations();
     }
