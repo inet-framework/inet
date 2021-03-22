@@ -39,6 +39,7 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
     virtual void handleParameterChange(const char *name) override;
     virtual bool canPacketFlowThrough(Packet *packet) const override;
 
+    virtual void initializeGating();
     virtual void scheduleChangeTimer();
     virtual void processChangeTimer();
 
