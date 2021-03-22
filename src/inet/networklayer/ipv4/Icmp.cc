@@ -44,27 +44,31 @@ long Icmp::ctr = 0;
 
 void Icmp::handleParameterChange(const char *name)
 {
-    if (name == nullptr || !strcmp(name, "crcMode")) {
-        const char *crcModeString = par("crcMode");
-        crcMode = parseCrcMode(crcModeString, false);
-    }
-    if (name == nullptr || !strcmp(name, "quoteLength")) {
-        quoteLength = B(par("quoteLength"));
-        if (quoteLength < B(8))
-            throw cRuntimeError("The quoteLength must be 8 bytes or larger");
-    }
-    if (name == nullptr || !strcmp(name, "interfaceTableModule")) {
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-    }
-    if (name == nullptr || !strcmp(name, "routingTableModule")) {
-        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
-    }
+    if (name == nullptr)
+        ;
+    else if (!strcmp(name, "crcMode"))
+        crcMode = parseCrcMode(par("crcMode"), false);
+    else if (!strcmp(name, "quoteLength"))
+        parseQuoteLengthParameter();
+}
+
+void Icmp::parseQuoteLengthParameter()
+{
+    quoteLength = B(par("quoteLength"));
+    if (quoteLength < B(8))
+        throw cRuntimeError("The quoteLength must be 8 bytes or larger");
 }
 
 void Icmp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
+    if (stage == INITSTAGE_LOCAL) {
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
+        crcMode = parseCrcMode(par("crcMode"), false);
+        parseQuoteLengthParameter();
+    }
     if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         registerService(Protocol::icmpv4, gate("transportIn"), gate("transportOut"));
         registerProtocol(Protocol::icmpv4, gate("ipOut"), gate("ipIn"));
