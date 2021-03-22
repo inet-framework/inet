@@ -2646,9 +2646,9 @@ bool Ipv6NeighbourDiscovery::isWirelessInterface(const NetworkInterface *ie)
 
 bool Ipv6NeighbourDiscovery::isWirelessAccessPoint(cModule *module)
 {
-    // AccessPoint is defined as a node containing "relayUnit" and
+    // AccessPoint is defined as a node containing "bridging" and
     // "wlan" submodules
-    return isNetworkNode(module) && module->getSubmodule("relayUnit") &&
+    return isNetworkNode(module) && module->getSubmodule("bridging") &&
            (module->getSubmodule("wlan", 0) || module->getSubmodule("wlan"));
 }
 

@@ -55,7 +55,7 @@ module AccessPoint
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
         eth[*].encap.typename = "OmittedEthernetEncapsulation";
         *.interfaceTableModule = default(absPath(".interfaceTable"));
-        relayUnit.hasStp = false;
+        bridging.hasStp = false;
     gates:
         input radioIn[numWlanInterfaces] @directIn;
         inout ethg[] @labels(EtherFrame-conn);
@@ -77,11 +77,11 @@ module AccessPoint
             parameters:
                 @display("p=100,300;is=s");
         }
-        relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit if sizeof(ethg)+numWlanInterfaces > 1 && typename != "" {
+        bridging: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit if sizeof(ethg)+numWlanInterfaces > 1 && typename != "" {
             parameters:
                 @display("p=400,100");
         }
-        nl: MessageDispatcher if sizeof(ethg)+numWlanInterfaces > 1 && exists(relayUnit) {
+        nl: MessageDispatcher if sizeof(ethg)+numWlanInterfaces > 1 && exists(bridging) {
             parameters:
                 @display("p=800,200;b=1200,5,,,,1");
         }
@@ -95,15 +95,15 @@ module AccessPoint
                 @display("p=850,300,row;q=txQueue");
         }
     connections allowunconnected:
-        nl.out++--> relayUnit.lowerLayerIn if sizeof(ethg)+numWlanInterfaces > 1 && exists(relayUnit);
-        nl.in++ <-- relayUnit.lowerLayerOut if sizeof(ethg)+numWlanInterfaces > 1 && exists(relayUnit);
+        nl.out++ --> bridging.lowerLayerIn if sizeof(ethg)+numWlanInterfaces > 1 && exists(bridging);
+        nl.in++ <-- bridging.lowerLayerOut if sizeof(ethg)+numWlanInterfaces > 1 && exists(bridging);
         // connections to network outside
         // wireless interfaces MUST be connected first (i.e. ports 0..numWlanInterfaces-1)
-        // because broadcasts must be handled differently for wireless IFs by the relayUnit
+        // because broadcasts must be handled differently for wireless IFs by the bridging
         for i=0..numWlanInterfaces-1 {
             radioIn[i] --> { @display("m=s"); } --> wlan[i].radioIn;
-            wlan[i].upperLayerOut --> nl.in++ if sizeof(ethg)+numWlanInterfaces > 1 && exists(relayUnit);
-            wlan[i].upperLayerIn <-- nl.out++ if sizeof(ethg)+numWlanInterfaces > 1 && exists(relayUnit);
+            wlan[i].upperLayerOut --> nl.in++ if sizeof(ethg)+numWlanInterfaces > 1 && exists(bridging);
+            wlan[i].upperLayerIn <-- nl.out++ if sizeof(ethg)+numWlanInterfaces > 1 && exists(bridging);
         }
         // ethernet must be connected only AFTER wireless ports
         for i=0..sizeof(ethg)-1 {
