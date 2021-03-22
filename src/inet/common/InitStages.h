@@ -38,118 +38,118 @@ namespace inet {
  *  - looking up other modules without actually using them
  *  - subscribing to module signals
  */
-extern int INITSTAGE_LOCAL;
+extern INET_API int INITSTAGE_LOCAL;
 
 /**
  * Initialization of clocks.
  */
-extern int INITSTAGE_CLOCK;
+extern INET_API int INITSTAGE_CLOCK;
 
 /**
  * Initialization of the physical environment.
  */
-extern int INITSTAGE_PHYSICAL_ENVIRONMENT;
+extern INET_API int INITSTAGE_PHYSICAL_ENVIRONMENT;
 
 /**
  * Initialization of the cache of physical objects present in the physical environment.
  */
-extern int INITSTAGE_PHYSICAL_OBJECT_CACHE;
+extern INET_API int INITSTAGE_PHYSICAL_OBJECT_CACHE;
 
 /**
  * Initialization of group mobility modules: calculating the initial position and orientation.
  */
-extern int INITSTAGE_GROUP_MOBILITY;
+extern INET_API int INITSTAGE_GROUP_MOBILITY;
 
 /**
  * Initialization of single mobility modules: calculating the initial position and orientation.
  */
-extern int INITSTAGE_SINGLE_MOBILITY;
+extern INET_API int INITSTAGE_SINGLE_MOBILITY;
 
 /**
  * Initialization of the power model: energy storage, energy consumer, energy generator, and energy management modules.
  */
-extern int INITSTAGE_POWER;
+extern INET_API int INITSTAGE_POWER;
 
 /**
  * Initialization of physical layer protocols includes:
  *  - registering radios in the RadioMedium
  *  - initializing radio mode, transmission and reception states
  */
-extern int INITSTAGE_PHYSICAL_LAYER;
+extern INET_API int INITSTAGE_PHYSICAL_LAYER;
 
 /**
  * Initialization of physical layer neighbor cache.
  */
-extern int INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE;
+extern INET_API int INITSTAGE_PHYSICAL_LAYER_NEIGHBOR_CACHE;
 
 /**
  * Initialization of network interfaces includes:
  *  - assigning MAC addresses
  *  - registering network interfaces in the InterfaceTable
  */
-extern int INITSTAGE_NETWORK_INTERFACE_CONFIGURATION;
+extern INET_API int INITSTAGE_NETWORK_INTERFACE_CONFIGURATION;
 
 /**
  * Initialization of queueing modules.
  */
-extern int INITSTAGE_QUEUEING;
+extern INET_API int INITSTAGE_QUEUEING;
 
 /**
  * Initialization of link-layer protocols.
  */
-extern int INITSTAGE_LINK_LAYER;
+extern INET_API int INITSTAGE_LINK_LAYER;
 
 /**
  * Initialization of network configuration (e.g. Ipv4NetworkConfigurator) includes:
  *  - determining IP addresses and static routes
  *  - adding protocol-specific data (e.g. Ipv4InterfaceData) to NetworkInterface
  */
-extern int INITSTAGE_NETWORK_CONFIGURATION;
+extern INET_API int INITSTAGE_NETWORK_CONFIGURATION;
 
 /**
  * Initialization of network addresses.
  */
-extern int INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT;
+extern INET_API int INITSTAGE_NETWORK_ADDRESS_ASSIGNMENT;
 
 /**
  * Initialization of network addresses.
  */
-extern int INITSTAGE_ROUTER_ID_ASSIGNMENT;
+extern INET_API int INITSTAGE_ROUTER_ID_ASSIGNMENT;
 
 /**
  * Initialization of static routing.
  */
-extern int INITSTAGE_STATIC_ROUTING;
+extern INET_API int INITSTAGE_STATIC_ROUTING;
 
 /**
  * Initialization of network layer protocols. (IPv4, IPv6, ...)
  */
-extern int INITSTAGE_NETWORK_LAYER;
+extern INET_API int INITSTAGE_NETWORK_LAYER;
 
 /**
  * Initialization of network layer protocols over IP. (ICMP, IGMP, ...)
  */
-extern int INITSTAGE_NETWORK_LAYER_PROTOCOLS;
+extern INET_API int INITSTAGE_NETWORK_LAYER_PROTOCOLS;
 
 /**
  * Initialization of transport-layer protocols.
  */
-extern int INITSTAGE_TRANSPORT_LAYER;
+extern INET_API int INITSTAGE_TRANSPORT_LAYER;
 
 /**
  * Initialization of routing protocols.
  */
-extern int INITSTAGE_ROUTING_PROTOCOLS;
+extern INET_API int INITSTAGE_ROUTING_PROTOCOLS;
 
 /**
  * Initialization of applications.
  */
-extern int INITSTAGE_APPLICATION_LAYER;
+extern INET_API int INITSTAGE_APPLICATION_LAYER;
 
 /**
  * Operations that no other initializations can depend on, e.g. display string updates.
  */
-extern int INITSTAGE_LAST;
+extern INET_API int INITSTAGE_LAST;
 
 } // namespace inet
 

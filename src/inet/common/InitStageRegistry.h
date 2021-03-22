@@ -54,7 +54,7 @@ class INET_API InitStageRegistry
     int getNumInitStages();
 };
 
-extern InitStageRegistry globalInitStageRegistry;
+extern INET_API InitStageRegistry globalInitStageRegistry;
 
 #define Define_InitStage(name) int INITSTAGE_ ## name = -1; EXECUTE_ON_STARTUP(globalInitStageRegistry.addInitStage(InitStage(&INITSTAGE_ ## name, #name)))
 
