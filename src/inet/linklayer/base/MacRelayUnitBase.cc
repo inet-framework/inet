@@ -40,7 +40,7 @@ void MacRelayUnitBase::initialize(int stage)
     }
     if (stage == INITSTAGE_NETWORK_LAYER) {
         registerAnyService(gate("upperLayerIn"), gate("upperLayerOut"));
-        registerAnyProtocol(gate("ifOut"), gate("ifIn"));
+        registerAnyProtocol(gate("lowerLayerOut"), gate("lowerLayerIn"));
     }
 }
 
@@ -88,7 +88,7 @@ void MacRelayUnitBase::sendPacket(Packet *packet, const MacAddress& destinationA
     else
         packet->removeTagIfPresent<DispatchProtocolReq>();
     emit(packetSentToLowerSignal, packet);
-    send(packet, "ifOut");
+    send(packet, "lowerLayerOut");
 }
 
 void MacRelayUnitBase::updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress)

@@ -47,8 +47,8 @@ moduleinterface IMacRelayUnit
     parameters:
         @display("i=block/switch");
     gates:
-        input ifIn @labels(EtherFrame);
-        output ifOut @labels(EtherFrame);
+        input lowerLayerIn @labels(EtherFrame);
+        output lowerLayerOut @labels(EtherFrame);
         input upperLayerIn;
         output upperLayerOut;
 }
