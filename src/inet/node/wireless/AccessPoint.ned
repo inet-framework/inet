@@ -95,8 +95,8 @@ module AccessPoint
                 @display("p=850,300,row;q=txQueue");
         }
     connections allowunconnected:
-        nl.out++--> relayUnit.ifIn if sizeof(ethg)+numWlanInterfaces > 1 && exists(relayUnit);
-        nl.in++ <-- relayUnit.ifOut if sizeof(ethg)+numWlanInterfaces > 1 && exists(relayUnit);
+        nl.out++--> relayUnit.lowerLayerIn if sizeof(ethg)+numWlanInterfaces > 1 && exists(relayUnit);
+        nl.in++ <-- relayUnit.lowerLayerOut if sizeof(ethg)+numWlanInterfaces > 1 && exists(relayUnit);
         // connections to network outside
         // wireless interfaces MUST be connected first (i.e. ports 0..numWlanInterfaces-1)
         // because broadcasts must be handled differently for wireless IFs by the relayUnit

@@ -136,8 +136,8 @@ module EthernetSwitch
             eth[i].cutthroughIn <-- cutthrough.out++ if enableCutthrough;
         }
 
-        relayUnit.ifOut --> policy.upperLayerIn if exists(policy);
-        policy.upperLayerOut --> relayUnit.ifIn if exists(policy);
+        relayUnit.lowerLayerOut --> policy.upperLayerIn if exists(policy);
+        policy.upperLayerOut --> relayUnit.lowerLayerIn if exists(policy);
 
         policy.lowerLayerOut --> rl.in++;
         rl.out++ --> policy.lowerLayerIn;
@@ -151,8 +151,8 @@ module EthernetSwitch
         rl.out++ --> ethernet.upperLayerIn if exists(ethernet);
         ethernet.upperLayerOut --> rl.in++ if exists(ethernet);
 
-        relayUnit.ifOut --> li.in++ if !exists(policy);
-        li.out++ --> relayUnit.ifIn if !exists(policy);
+        relayUnit.lowerLayerOut --> li.in++ if !exists(policy);
+        li.out++ --> relayUnit.lowerLayerIn if !exists(policy);
 
         for i=0..sizeof(ethg)-1 {
             li.out++ --> eth[i].upperLayerIn;
