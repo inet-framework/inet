@@ -32,8 +32,8 @@ simple MacRelayUnitBase
         @signal[packetDropped](type=inet::Packet);
         @statistic[packetDropped](title="packets dropped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
-        input ifIn;
-        output ifOut;
+        input lowerLayerIn;
+        output lowerLayerOut;
         input upperLayerIn;
         output upperLayerOut;
 }

@@ -46,7 +46,7 @@ void PimInterfaceTable::initialize(int stage)
         WATCH_VECTOR(pimInterfaces);
     }
     // TODO INITSTAGE
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    if (stage == INITSTAGE_LINK_LAYER) {
         configureInterfaces(par("pimConfig"));
 
         cModule *host = findContainingNode(this);

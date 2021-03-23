@@ -39,7 +39,7 @@ void InfoOsgVisualizer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
-    else if (stage == INITSTAGE_LAST) {
+    if (stage == INITSTAGE_LAST) {
         for (auto infoVisualization : infoVisualizations) {
             auto infoOsgVisualization = static_cast<const InfoOsgVisualization *>(infoVisualization);
             auto node = infoOsgVisualization->node;

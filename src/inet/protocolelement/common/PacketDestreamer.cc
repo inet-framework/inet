@@ -41,7 +41,7 @@ void PacketDestreamer::initialize(int stage)
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
         collector = findConnectedModule<IActivePacketSink>(outputGate);
     }
-    else if (stage == INITSTAGE_QUEUEING) {
+    if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
     }

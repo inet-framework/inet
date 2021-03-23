@@ -65,7 +65,7 @@ void Ieee80211AgentSta::initialize(int stage)
 
         myIface = nullptr;
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    if (stage == INITSTAGE_LINK_LAYER) {
         IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         if (ift) {
             myIface = getContainingNicModule(this);

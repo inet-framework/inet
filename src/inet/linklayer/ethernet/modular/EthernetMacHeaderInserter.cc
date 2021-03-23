@@ -35,7 +35,7 @@ void EthernetMacHeaderInserter::initialize(int stage)
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-    else if (stage == INITSTAGE_LINK_LAYER)
+    if (stage == INITSTAGE_LINK_LAYER)
         registerService(Protocol::ethernetMac, inputGate, nullptr);
 }
 

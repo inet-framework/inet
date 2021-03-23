@@ -39,7 +39,7 @@ void GateOsgVisualizer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
-    else if (stage == INITSTAGE_LAST) {
+    if (stage == INITSTAGE_LAST) {
         for (auto gateVisualization : gateVisualizations) {
             auto gateOsgVisualization = static_cast<const GateOsgVisualization *>(gateVisualization);
             auto node = gateOsgVisualization->node;

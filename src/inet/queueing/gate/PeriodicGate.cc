@@ -33,7 +33,7 @@ void PeriodicGate::initialize(int stage)
         durations = check_and_cast<cValueArray *>(par("durations").objectValue());
         changeTimer = new ClockEvent("ChangeTimer");
     }
-    else if (stage == INITSTAGE_QUEUEING) {
+    if (stage == INITSTAGE_QUEUEING) {
         if (durations->size() % 2 != 0)
             throw cRuntimeError("The duration parameter must contain an even number of values");
         while (offset > 0) {

@@ -102,7 +102,7 @@ void SctpPeer::initialize(int stage)
         WATCH(bytesSent);
         WATCH(numRequestsToSend);
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
+    if (stage == INITSTAGE_APPLICATION_LAYER) {
         // parameters
         const char *addressesString = par("localAddress");
         AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());

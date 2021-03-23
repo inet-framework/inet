@@ -63,7 +63,7 @@ void AckingMac::initialize(int stage)
 
         txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    if (stage == INITSTAGE_LINK_LAYER) {
         radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
         if (useAck)
             ackTimeoutMsg = new cMessage("link-break");

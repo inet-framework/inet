@@ -40,7 +40,7 @@ void NetworkProtocolBase::initialize(int stage)
     LayeredProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
+    if (stage == INITSTAGE_NETWORK_LAYER) {
         registerService(getProtocol(), gate("transportIn"), gate("transportOut"));
         registerProtocol(getProtocol(), gate("queueOut"), gate("queueIn"));
     }

@@ -45,7 +45,7 @@ void ShortcutRadio::initialize(int stage)
         gate("radioIn")->setDeliverImmediately(true);
     }
     // TODO INITSTAGE
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    if (stage == INITSTAGE_LINK_LAYER) {
         auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         auto networkInterface = CHK(interfaceTable->findInterfaceByInterfaceModule(this));
         auto address = networkInterface->getMacAddress();

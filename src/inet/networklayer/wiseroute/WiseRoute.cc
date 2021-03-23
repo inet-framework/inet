@@ -88,7 +88,7 @@ void WiseRoute::initialize(int stage)
 
         routeFloodTimer = new cMessage("route-flood-timer", SEND_ROUTE_FLOOD_TIMER);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER) {
+    if (stage == INITSTAGE_NETWORK_LAYER) {
         L3AddressResolver addressResolver;
         sinkAddress = addressResolver.resolve(par("sinkAddress"));
 

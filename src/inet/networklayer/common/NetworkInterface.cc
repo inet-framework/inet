@@ -129,7 +129,7 @@ void NetworkInterface::initialize(int stage)
             carrier = true;
         }
     }
-    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+    if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         if (hasPar("protocol")) {
             const char *protocolName = par("protocol");
             if (*protocolName != '\0')
@@ -157,7 +157,7 @@ void NetworkInterface::initialize(int stage)
             interfaceTable->addInterface(this);
         inet::registerInterface(*this, gate("upperLayerIn"), gate("upperLayerOut"));
     }
-    else if (stage == INITSTAGE_LAST)
+    if (stage == INITSTAGE_LAST)
         layoutSubmodulesWithoutGates(this);
 }
 

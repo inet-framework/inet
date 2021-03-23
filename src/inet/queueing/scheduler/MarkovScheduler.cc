@@ -56,7 +56,7 @@ void MarkovScheduler::initialize(int stage)
         waitTimer = new ClockEvent("WaitTimer");
         WATCH(state);
     }
-    else if (stage == INITSTAGE_QUEUEING) {
+    if (stage == INITSTAGE_QUEUEING) {
         for (auto& inputGate : inputGates)
             checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);

@@ -37,7 +37,7 @@ void PacketMultiplexer::initialize(int stage)
         outputGate = gate("out");
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
     }
-    else if (stage == INITSTAGE_QUEUEING) {
+    if (stage == INITSTAGE_QUEUEING) {
         for (auto& inputGate : inputGates)
             checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);

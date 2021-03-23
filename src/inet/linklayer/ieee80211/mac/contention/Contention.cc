@@ -65,7 +65,7 @@ void Contention::initialize(int stage)
         WATCH(startTime);
         updateDisplayString(-1);
     }
-    else if (stage == INITSTAGE_LAST) {
+    if (stage == INITSTAGE_LAST) {
         if (!par("initialChannelBusy") && simTime() == 0)
             lastChannelBusyTime = simTime() - SimTime().getMaxTime() / 2;
     }

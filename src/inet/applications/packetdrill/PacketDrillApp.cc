@@ -72,7 +72,7 @@ void PacketDrillApp::initialize(int stage)
         simStartTime = simTime();
         simRelTime = simTime();
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
+    if (stage == INITSTAGE_APPLICATION_LAYER) {
         if (operationalState != OPERATING)
             throw cRuntimeError("This module doesn't support starting in NOT_OPERATING state");
         pd = new PacketDrill(this);

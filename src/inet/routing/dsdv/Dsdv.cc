@@ -61,7 +61,7 @@ void Dsdv::initialize(int stage)
         forwardList = new std::list<ForwardEntry *>();
         event = new cMessage("event");
     }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         registerProtocol(Protocol::manet, gate("ipOut"), gate("ipIn"));
     }
 }

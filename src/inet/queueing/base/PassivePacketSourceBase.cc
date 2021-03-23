@@ -29,7 +29,7 @@ void PassivePacketSourceBase::initialize(int stage)
         outputGate = gate("out");
         collector = findConnectedModule<IActivePacketSink>(outputGate);
     }
-    else if (stage == INITSTAGE_QUEUEING)
+    if (stage == INITSTAGE_QUEUEING)
         checkPacketOperationSupport(outputGate);
 }
 

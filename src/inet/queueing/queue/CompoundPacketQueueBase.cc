@@ -40,11 +40,11 @@ void CompoundPacketQueueBase::initialize(int stage)
         subscribe(packetCreatedSignal, this);
         WATCH(numCreatedPackets);
     }
-    else if (stage == INITSTAGE_QUEUEING) {
+    if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
     }
-    else if (stage == INITSTAGE_LAST)
+    if (stage == INITSTAGE_LAST)
         updateDisplayString();
 }
 

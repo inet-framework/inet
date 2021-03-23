@@ -115,7 +115,7 @@ void RadioMedium::initialize(int stage)
         if (recordTransmissionLog || recordReceptionLog)
             communicationLog.open();
     }
-    else if (stage == INITSTAGE_LAST)
+    if (stage == INITSTAGE_LAST)
         EV_INFO << "Initialized " << getCompleteStringRepresentation() << endl;
 }
 

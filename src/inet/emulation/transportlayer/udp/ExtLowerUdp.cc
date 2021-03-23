@@ -50,7 +50,7 @@ void ExtLowerUdp::initialize(int stage)
             rtScheduler = scheduler;
         }
     }
-    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
+    if (stage == INITSTAGE_TRANSPORT_LAYER) {
         registerService(Protocol::udp, gate("appIn"), gate("appOut"));
     }
 }

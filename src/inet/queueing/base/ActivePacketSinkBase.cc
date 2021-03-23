@@ -29,7 +29,7 @@ void ActivePacketSinkBase::initialize(int stage)
         inputGate = gate("in");
         provider = findConnectedModule<IPassivePacketSource>(inputGate);
     }
-    else if (stage == INITSTAGE_QUEUEING)
+    if (stage == INITSTAGE_QUEUEING)
         checkPacketOperationSupport(inputGate);
 }
 

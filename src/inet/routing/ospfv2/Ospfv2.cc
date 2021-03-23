@@ -57,7 +57,7 @@ void Ospfv2::initialize(int stage)
         rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         startupTimer = new cMessage("OSPF-startup");
     }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) { // interfaces and static routes are already initialized
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS) { // interfaces and static routes are already initialized
         registerProtocol(Protocol::ospf, gate("ipOut"), gate("ipIn"));
     }
 }

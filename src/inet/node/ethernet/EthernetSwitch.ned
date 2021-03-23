@@ -60,7 +60,7 @@ module EthernetSwitch
         **.interfaceTableModule = default(absPath(".interfaceTable"));
         **.macTableModule = default(absPath(".macTable"));
 
-        relayUnit.hasStp = hasStp;
+        bridging.hasStp = hasStp;
         encap.registerProtocol = true;
         eth[*].mac.promiscuous = default(true);
         ethernet.*.promiscuous = default(true);
@@ -87,7 +87,7 @@ module EthernetSwitch
         macTable: <default("MacAddressTable")> like IMacAddressTable {
             @display("p=100,100;is=s");
         }
-        relayUnit: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit {
+        bridging: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit {
             @display("p=800,300;is=m");
         }
         stp: <spanningTreeProtocol> like ISpanningTree if hasStp {
@@ -136,8 +136,8 @@ module EthernetSwitch
             eth[i].cutthroughIn <-- cutthrough.out++ if enableCutthrough;
         }
 
-        relayUnit.ifOut --> policy.upperLayerIn if exists(policy);
-        policy.upperLayerOut --> relayUnit.ifIn if exists(policy);
+        bridging.lowerLayerOut --> policy.upperLayerIn if exists(policy);
+        policy.upperLayerOut --> bridging.lowerLayerIn if exists(policy);
 
         policy.lowerLayerOut --> rl.in++;
         rl.out++ --> policy.lowerLayerIn;
@@ -151,8 +151,8 @@ module EthernetSwitch
         rl.out++ --> ethernet.upperLayerIn if exists(ethernet);
         ethernet.upperLayerOut --> rl.in++ if exists(ethernet);
 
-        relayUnit.ifOut --> li.in++ if !exists(policy);
-        li.out++ --> relayUnit.ifIn if !exists(policy);
+        bridging.lowerLayerOut --> li.in++ if !exists(policy);
+        li.out++ --> bridging.lowerLayerIn if !exists(policy);
 
         for i=0..sizeof(ethg)-1 {
             li.out++ --> eth[i].upperLayerIn;
@@ -161,13 +161,13 @@ module EthernetSwitch
         }
 
         if hasStp {
-            stp.relayIn <-- nr.out++; // relayUnit.stpOut;
-            stp.relayOut --> nr.in++; // relayUnit.stpIn;
+            stp.relayIn <-- nr.out++; // bridging.stpOut;
+            stp.relayOut --> nr.in++; // bridging.stpIn;
         }
-        relayUnit.upperLayerOut --> nr.in++ if !exists(encap);
-        nr.out++ --> relayUnit.upperLayerIn if !exists(encap);
-        relayUnit.upperLayerOut --> encap.lowerLayerIn if exists(encap);
-        encap.lowerLayerOut --> relayUnit.upperLayerIn if exists(encap);
+        bridging.upperLayerOut --> nr.in++ if !exists(encap);
+        nr.out++ --> bridging.upperLayerIn if !exists(encap);
+        bridging.upperLayerOut --> encap.lowerLayerIn if exists(encap);
+        encap.lowerLayerOut --> bridging.upperLayerIn if exists(encap);
         encap.upperLayerOut --> nr.in++ if exists(encap);
         nr.out++ --> encap.upperLayerIn if exists(encap);
 }

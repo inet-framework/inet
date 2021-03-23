@@ -73,7 +73,7 @@ void OscillatorBasedClock::initialize(int stage)
         WATCH(originClockTick);
         WATCH_PTRVECTOR(events);
     }
-    else if (stage == INITSTAGE_CLOCK) {
+    if (stage == INITSTAGE_CLOCK) {
         simtime_t initialClockTime = par("initialClockTime");
         if (initialClockTime.raw() % oscillator->getNominalTickLength().raw() != 0)
             throw cRuntimeError("Initial clock time must be a multiple of the oscillator nominal tick length");

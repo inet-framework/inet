@@ -105,7 +105,7 @@ void VoipStreamSender::initialize(int stage)
         EV_DEBUG << "libavutil: " << LIBAVUTIL_VERSION_MAJOR << "." << LIBAVUTIL_VERSION_MINOR << "." << LIBAVUTIL_VERSION_MICRO << endl;
         EV_DEBUG << "libavresample: " << LIBAVRESAMPLE_VERSION_MAJOR << "." << LIBAVRESAMPLE_VERSION_MINOR << "." << LIBAVRESAMPLE_VERSION_MICRO << endl;
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
+    if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *node = findContainingNode(this);
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;

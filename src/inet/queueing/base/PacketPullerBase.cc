@@ -32,7 +32,7 @@ void PacketPullerBase::initialize(int stage)
         collector = findConnectedModule<IActivePacketSink>(outputGate);
         provider = findConnectedModule<IPassivePacketSource>(inputGate);
     }
-    else if (stage == INITSTAGE_QUEUEING) {
+    if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
     }

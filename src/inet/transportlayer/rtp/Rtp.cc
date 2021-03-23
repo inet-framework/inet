@@ -59,7 +59,7 @@ void Rtp::initialize(int stage)
         udpInGate = findGate("udpIn");
         _udpSocket.setOutputGate(gate("udpOut"));
     }
-    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
+    if (stage == INITSTAGE_TRANSPORT_LAYER) {
         cModule *node = findContainingNode(this);
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;

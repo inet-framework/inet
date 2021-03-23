@@ -33,7 +33,7 @@ void PassivePacketSource::initialize(int stage)
         scheduleProductionForAbsoluteTime = par("scheduleProductionForAbsoluteTime");
         WATCH_PTR(nextPacket);
     }
-    else if (stage == INITSTAGE_QUEUEING) {
+    if (stage == INITSTAGE_QUEUEING) {
         if (collector != nullptr)
             collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
     }

@@ -101,7 +101,7 @@ void TcpLwip::initialize(int stage)
         pLwipFastTimerM = new cMessage("lwip_fast_timer");
         EV_INFO << "TcpLwip " << this << " has stack " << pLwipTcpLayerM << "\n";
     }
-    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
+    if (stage == INITSTAGE_TRANSPORT_LAYER) {
         cModule *node = findContainingNode(this);
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
@@ -128,7 +128,7 @@ void TcpLwip::initialize(int stage)
 #endif
         }
     }
-    else if (stage == INITSTAGE_LAST) {
+    if (stage == INITSTAGE_LAST) {
         isAliveM = true;
     }
 }

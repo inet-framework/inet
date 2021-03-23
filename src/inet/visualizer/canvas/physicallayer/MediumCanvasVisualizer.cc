@@ -78,7 +78,7 @@ void MediumCanvasVisualizer::initialize(int stage)
         animationSpeedInterpolator.setTargetAnimationSpeed(signalAnimationSpeedChangeTimeMode, 0, 0);
         networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
-    else if (stage == INITSTAGE_LAST) {
+    if (stage == INITSTAGE_LAST) {
         canvasProjection = CanvasProjection::getCanvasProjection(visualizationTargetModule->getCanvas());
         if (communicationHeat != nullptr) {
             const IMediumLimitCache *mediumLimitCache = radioMedium->getMediumLimitCache();
