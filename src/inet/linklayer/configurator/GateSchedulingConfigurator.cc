@@ -398,13 +398,15 @@ void GateSchedulingConfigurator::configureGateScheduling(cModule *networkNode, c
         gateCloseTime = entry.first + entry.second;
     }
     simtime_t remainingDuration = gateCycleDuration - gateCloseTime;
-    if (remainingDuration != 0) {
-        durations->add(cValue(remainingDuration.dbl(), "s"));
-        stream << remainingDuration.ustr() << " ";
-    }
-    if (durations->size() % 2 != 0) {
-        durations->add(cValue(0, "s"));
-        stream << "0s ";
+    if (gateCloseTime != 0) {
+        if (remainingDuration != 0) {
+            durations->add(cValue(remainingDuration.dbl(), "s"));
+            stream << remainingDuration.ustr() << " ";
+        }
+        if (durations->size() % 2 != 0) {
+            durations->add(cValue(0, "s"));
+            stream << "0s ";
+        }
     }
     if (durations->size() != 0)
         stream.seekp(-1, stream.cur);
