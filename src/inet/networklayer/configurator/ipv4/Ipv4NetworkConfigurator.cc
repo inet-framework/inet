@@ -1411,6 +1411,8 @@ void Ipv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                     continue;
                 if (isBridgeNode(destinationNode))
                     continue;
+                if (std::isinf(destinationNode->getDistanceToTarget()))
+                    continue;
 
                 // determine next hop interface
                 // find next hop interface (the last IP interface on the path that is not in the source node)
