@@ -32,40 +32,6 @@ module Ecu extends StandardHost
         @display("i=device/card");
 }
 
-module InVehicleNetworkExampleQueue extends CompoundPacketQueueBase
-{
-    parameters:
-        int numQueues;
-        double bitrate @unit(bps);
-        *.bitrate = default(bitrate);
-        *.guardBand = default(replaceUnit(96.0 / dropUnit(bitrate), "s"));
-    submodules:
-        classifier: <default("ContentBasedClassifier")> like IPacketClassifier {
-            parameters:
-                @display("p=100,100");
-        }
-        queue[numQueues]: <default("PacketQueue")> like IPacketQueue {
-            parameters:
-                @display("p=300,100,column,125");
-        }
-        gate[numQueues]: <default("PeriodicGate")> like IPacketGate {
-            parameters:
-                @display("p=500,100,column,125");
-        }
-        scheduler: <default("PriorityScheduler")> like IPacketScheduler {
-            parameters:
-                @display("p=700,100");
-        }
-    connections:
-        in --> { @display("m=w"); } --> classifier.in;
-        for i=0..sizeof(queue)-1 {
-            classifier.out++ --> queue[i].in;
-            queue[i].out --> gate[i].in;
-            gate[i].out --> scheduler.in++;
-        }
-        scheduler.out --> { @display("m=e"); } --> out;
-}
-
 network InVehicleNetworkExample extends WiredNetworkBase
 {
     parameters:
