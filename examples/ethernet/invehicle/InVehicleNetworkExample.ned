@@ -15,7 +15,7 @@
 
 package inet.examples.ethernet.invehicle;
 
-import inet.linklayer.configurator.StreamReservationConfigurator;
+import inet.linklayer.configurator.GateSchedulingConfigurator;
 import inet.networks.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EthernetSwitch;
@@ -35,7 +35,7 @@ module Ecu extends StandardHost
 network InVehicleNetworkExample extends WiredNetworkBase
 {
     parameters:
-        bool hasStreamReservationConfigurator = default(false);
+        bool hasGateSchedulingConfigurator = default(false);
         @display("bgi=background/car;bgb=1280,720");
     types:
         channel Eth1G extends inet.node.ethernet.Eth1G
@@ -43,7 +43,7 @@ network InVehicleNetworkExample extends WiredNetworkBase
             @display("ls=,3");
         }
     submodules:
-        streamReservationConfigurator: StreamReservationConfigurator if hasStreamReservationConfigurator {
+        gateSchedulingConfigurator: GateSchedulingConfigurator if hasGateSchedulingConfigurator {
             @display("p=100,400;is=s");
         }
         frontSwitch: EthernetSwitch {
