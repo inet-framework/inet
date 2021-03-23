@@ -121,7 +121,7 @@
 
 /examples/ethernet/redundancy/,       -f omnetpp.ini -c General -r 0,                100ms,           7bcc-5348/tplx;a9eb-bb41/~tNl;35e9-07e0/~tND;69b4-5aa4/tyf, PASS, ethernet layered tsn
 /examples/ethernet/redundancy/,       -f omnetpp2.ini -c General -r 0,               100ms,           45f8-33b3/tplx;d938-c1cd/~tNl;ddf0-1e60/~tND;aa90-c9aa/tyf, PASS, ethernet layered tsn
-/examples/ethernet/redundancy/,       -f omnetpp3.ini -c General -r 0,               100ms,           59c1-d8d6/tplx;30f4-52b6/~tNl;ae84-7adc/~tND;7492-b88e/tyf, PASS, ethernet layered tsn
+/examples/ethernet/redundancy/,       -f omnetpp3.ini -c General -r 0,               100ms,           52e7-126e/tplx;30f4-52b6/~tNl;ae84-7adc/~tND;43a8-ac3b/tyf, PASS, ethernet layered tsn
 
 /examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,            75d0-cba9/tplx;ce1d-d136/~tNl;51b3-9d40/~tND;2fef-6362/tyf, PASS, wireless
 
