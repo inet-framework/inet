@@ -36,8 +36,7 @@ void PacketDuplicator::pushPacket(Packet *packet, cGate *gate)
     }
     EV_INFO << "Forwarding original packet" << EV_FIELD(packet) << EV_ENDL;
     pushOrSendPacket(packet, outputGate, consumer);
-    numProcessedPackets++;
-    processedTotalLength += packet->getTotalLength();
+    handlePacketProcessed(packet);
     updateDisplayString();
 }
 

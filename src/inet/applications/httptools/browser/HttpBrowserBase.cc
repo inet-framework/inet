@@ -138,7 +138,7 @@ void HttpBrowserBase::initialize(int stage)
 
         eventTimer = new cMessage("eventTimer");
     }
-    if (stage == INITSTAGE_APPLICATION_LAYER) {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         EV_DEBUG << "Initializing base HTTP browser component -- phase 1\n";
 
         cModule *node = findContainingNode(this);

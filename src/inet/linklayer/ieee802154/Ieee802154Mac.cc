@@ -114,7 +114,7 @@ void Ieee802154Mac::initialize(int stage)
         txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
         radio = getModuleFromPar<IRadio>(par("radioModule"), this);
     }
-    if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *radioModule = check_and_cast<cModule *>(radio);
         // check parameters for consistency
         // aTurnaroundTime should match (be equal or bigger) the RX to TX

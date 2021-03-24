@@ -59,7 +59,7 @@ void Edcaf::initialize(int stage)
         WATCH(cwMin);
         WATCH(cwMax);
     }
-    if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         auto rx = check_and_cast<IRx *>(getModuleByPath(par("rxModule")));
         rx->registerContention(contention);
         calculateTimingParameters();

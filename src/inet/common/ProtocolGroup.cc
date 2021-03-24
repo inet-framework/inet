@@ -91,6 +91,7 @@ ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { 0x88CC, &Protocol::lldp },
     { 0x88E5, &Protocol::ieee8021ae },
     { 0x891d, &Protocol::tteth },
+    { 0xF1C1, &Protocol::ieee8021rTag },
 });
 
 // excerpt from http://www.iana.org/assignments/ppp-numbers/ppp-numbers.xhtml

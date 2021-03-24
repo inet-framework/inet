@@ -46,7 +46,7 @@ void ApskDecoder::initialize(int stage)
         fecDecoder = dynamic_cast<const IFecCoder *>(getSubmodule("fecDecoder"));
         deinterleaver = dynamic_cast<const IInterleaver *>(getSubmodule("deinterleaver"));
     }
-    if (stage == INITSTAGE_PHYSICAL_LAYER) {
+    else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         const IScrambling *scrambling = descrambler != nullptr ? descrambler->getScrambling() : nullptr;
         const ConvolutionalCode *forwardErrorCorrection = fecDecoder != nullptr ? check_and_cast<const ConvolutionalCode *>(fecDecoder->getForwardErrorCorrection()) : nullptr;
         const IInterleaving *interleaving = deinterleaver != nullptr ? deinterleaver->getInterleaving() : nullptr;

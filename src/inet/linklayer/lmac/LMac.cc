@@ -57,7 +57,7 @@ void LMac::initialize(int stage)
 
         txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
     }
-    if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         cModule *radioModule = getModuleFromPar<cModule>(par("radioModule"), this);
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);

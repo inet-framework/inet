@@ -60,12 +60,15 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
 
   protected:
 
-    virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleParameterChange(const char *name) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void refreshDisplay() const override;
     virtual void updateDisplayString() const;
+
+    virtual void parseAddressTableParameter();
 
     /**
      * @brief Returns a MAC Address Table for a specified VLAN ID

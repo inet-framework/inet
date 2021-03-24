@@ -58,7 +58,9 @@ GateVisualizerBase::GateVisualization *GateCanvasVisualizer::createGateVisualiza
     figure->setSpacing(spacing);
     figure->setBounds(cFigure::Rectangle(0, 0, width, height));
     figure->setPosition(currentTimePosition);
-    figure->setLabel(module->getFullName());
+    auto networkInterface = getContainingNicModule(module);
+    auto label = std::string(networkInterface->getInterfaceName()) + "." + module->getFullName();
+    figure->setLabel(label.c_str());
     auto networkNode = getContainingNode(module);
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     if (networkNodeVisualization == nullptr)
@@ -93,26 +95,30 @@ void GateCanvasVisualizer::refreshGateVisualization(const GateVisualization *gat
     clocktime_t scheduleDuration = 0;
     for (int i = 0; i < durations->size(); i++)
         scheduleDuration += durations->get(i).doubleValueInUnit("s");
-    auto displayDuration = this->displayDuration != 0 ? this->displayDuration : scheduleDuration;
-    auto currentTime = gate->getClockTime();
-    clocktime_t schedulePosition = std::fmod(currentTime.dbl(), scheduleDuration.dbl());
-    auto scheduleDisplayStart = schedulePosition - (currentTimePosition / width) * displayDuration;
-    auto scheduleDisplayEnd = scheduleDisplayStart + displayDuration;
-    auto indexStart = (int)std::floor(scheduleDisplayStart.dbl() / scheduleDuration.dbl()) * durations->size();
-    auto indexEnd = (int)std::ceil(scheduleDisplayEnd.dbl() / scheduleDuration.dbl()) * durations->size();
-    clocktime_t displayTime = currentTime - schedulePosition + indexStart / durations->size() * scheduleDuration;
-    figure->clearSchedule();
-    for (int i = indexStart; i <= indexEnd; i++) {
-        auto duration = durations->get((i + durations->size()) % durations->size()).doubleValueInUnit("s");
-        clocktime_t startTime = displayTime - currentTime;
-        clocktime_t endTime = displayTime + duration - currentTime;
-        double factor = width / displayDuration.dbl();
-        double start = std::max(0.0, std::min(width, currentTimePosition + startTime.dbl() * factor));
-        double end = std::max(0.0, std::min(width, currentTimePosition + endTime.dbl() * factor));
-        if (start != end)
-            figure->addSchedule(start, end, open);
-        displayTime += duration;
-        open = !open;
+    if (scheduleDuration == 0)
+        figure->addSchedule(0, width, open);
+    else {
+        auto displayDuration = this->displayDuration != 0 ? this->displayDuration : scheduleDuration;
+        auto currentTime = gate->getClockTime();
+        clocktime_t schedulePosition = std::fmod(currentTime.dbl(), scheduleDuration.dbl());
+        auto scheduleDisplayStart = schedulePosition - (currentTimePosition / width) * displayDuration;
+        auto scheduleDisplayEnd = scheduleDisplayStart + displayDuration;
+        auto indexStart = (int)std::floor(scheduleDisplayStart.dbl() / scheduleDuration.dbl()) * durations->size();
+        auto indexEnd = (int)std::ceil(scheduleDisplayEnd.dbl() / scheduleDuration.dbl()) * durations->size();
+        clocktime_t displayTime = currentTime - schedulePosition + indexStart / durations->size() * scheduleDuration;
+        figure->clearSchedule();
+        for (int i = indexStart; i <= indexEnd; i++) {
+            auto duration = durations->get((i + durations->size()) % durations->size()).doubleValueInUnit("s");
+            clocktime_t startTime = displayTime - currentTime;
+            clocktime_t endTime = displayTime + duration - currentTime;
+            double factor = width / displayDuration.dbl();
+            double start = std::max(0.0, std::min(width, currentTimePosition + startTime.dbl() * factor));
+            double end = std::max(0.0, std::min(width, currentTimePosition + endTime.dbl() * factor));
+            if (start != end)
+                figure->addSchedule(start, end, open);
+            displayTime += duration;
+            open = !open;
+        }
     }
 }
 

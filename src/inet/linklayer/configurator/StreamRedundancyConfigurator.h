@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_STREAMRESERVATIONCONFIGURATOR_H
-#define __INET_STREAMRESERVATIONCONFIGURATOR_H
+#ifndef __INET_STREAMREDUNDANCYCONFIGURATOR_H
+#define __INET_STREAMREDUNDANCYCONFIGURATOR_H
 
 #include <algorithm>
 #include <vector>
@@ -28,13 +28,48 @@
 
 namespace inet {
 
-class INET_API StreamReservationConfigurator : public cSimpleModule
+class INET_API StreamRedundancyConfigurator : public cSimpleModule
 {
-  public:
-    StreamReservationConfigurator() {}
-
   protected:
     class InterfaceInfo;
+
+    class StreamIdentification
+    {
+      public:
+        std::string stream;
+        std::string packetFilter;
+    };
+
+    class StreamDecoding
+    {
+      public:
+        NetworkInterface *networkInterface = nullptr;
+        int vlanId = -1;
+        std::string name;
+    };
+
+    class StreamMerging
+    {
+      public:
+        std::vector<std::string> inputStreams;
+        std::string outputStream;
+    };
+
+    class StreamSplitting
+    {
+      public:
+        std::string inputStream;
+        std::vector<std::string> outputStreams;
+    };
+
+    class StreamEncoding
+    {
+      public:
+        std::string name;
+        NetworkInterface *networkInterface = nullptr;
+        std::string destination;
+        int vlanId = -1;
+    };
 
     /**
      * Represents a node in the network.
@@ -44,6 +79,11 @@ class INET_API StreamReservationConfigurator : public cSimpleModule
         cModule *module;
         IInterfaceTable *interfaceTable;
         std::vector<InterfaceInfo *> interfaceInfos;
+        std::vector<StreamIdentification> streamIdentifications;
+        std::vector<StreamEncoding> streamEncodings;
+        std::vector<StreamDecoding> streamDecodings;
+        std::vector<StreamMerging> streamMergings;
+        std::vector<StreamSplitting> streamSplittings;
 
       public:
         Node(cModule *module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = nullptr; }
@@ -56,9 +96,6 @@ class INET_API StreamReservationConfigurator : public cSimpleModule
     class InterfaceInfo : public cObject {
       public:
         NetworkInterface *networkInterface;
-        std::vector<int> gateOpenIndices;
-        std::vector<simtime_t> gateOpenTimes;
-        std::vector<simtime_t> gateCloseTimes;
 
       public:
         InterfaceInfo(NetworkInterface *networkInterface) : networkInterface(networkInterface) {}
@@ -76,31 +113,25 @@ class INET_API StreamReservationConfigurator : public cSimpleModule
 
     class Topology : public inet::Topology {
       protected:
-        virtual Node *createNode(cModule *module) override { return new StreamReservationConfigurator::Node(module); }
-        virtual Link *createLink() override { return new StreamReservationConfigurator::Link(); }
+        virtual Node *createNode(cModule *module) override { return new StreamRedundancyConfigurator::Node(module); }
+        virtual Link *createLink() override { return new StreamRedundancyConfigurator::Link(); }
     };
-
-    class StreamReservation
-    {
-      public:
-        Node *source = nullptr;
-        Node *destination = nullptr;
-        int priority = -1;
-        b packetLength = b(-1);
-        simtime_t packetInterval = -1;
-        simtime_t maxLatency = -1;
-        bps datarate = bps(NaN);
-        simtime_t startOffset = -1;
-    };
-
-    Topology topology;
-    cValueArray *configuration;
-    std::vector<StreamReservation> streamReservations;
-    simtime_t gateCycleDuration;
 
   protected:
-    virtual void initialize(int stage) override;
+    int minVlanId = -1;
+    int maxVlanId = -1;
+    cValueArray *configuration;
+
+    Topology topology;
+    std::map<std::pair<std::string, std::string>, std::vector<std::string>> streamSenders; // maps network node name and stream name to list of previous sender network node names
+    std::map<std::pair<std::string, std::string>, std::vector<std::string>> receivers; // maps network node name and stream name to list of next receiver network node names
+    std::map<std::pair<std::string, std::string>, int> nextVlanIds; // maps network node name and destination node name to next available VLAN ID
+    std::map<std::tuple<std::string, std::string, std::string, std::string>, int> assignedVlanIds; // maps network node name, receiver network node name, destination network node name and stream name to VLAN ID
+
+  protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleParameterChange(const char *name) override;
     virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
 
     /**
@@ -115,16 +146,23 @@ class INET_API StreamReservationConfigurator : public cSimpleModule
      * The result of the computation is only stored in the configurator.
      */
     virtual void computeConfiguration();
-    virtual void computeStreamReservations();
-    virtual void computeGateScheduling();
-    virtual void computeStreamStartOffset(StreamReservation& streamReservation);
-    virtual void addGateScheduling(StreamReservation& streamReservation, int startIndex, int endIndex);
+    virtual void clearConfiguration();
 
-    virtual void configureGateScheduling();
-    virtual void configureGateScheduling(cModule *networkNode, cModule *gate, InterfaceInfo *interfaceInfo);
+    virtual void computeStreams();
+    virtual void computeStreamSendersAndReceivers(cValueMap *streamConfiguration);
+    virtual void computeStreamEncodings(cValueMap *streamConfiguration);
+    virtual void computeStreamPolicyConfigurations(cValueMap *streamConfiguration);
 
+    virtual void configureStreams();
+    virtual void configureStreams(Node *node);
+
+    virtual Link *findLinkIn(Node *node, const char *neighbor);
+    virtual Link *findLinkOut(Node *node, const char *neighbor);
     virtual Topology::LinkOut *findLinkOut(Node *node, int gateId);
     virtual InterfaceInfo *findInterfaceInfo(Node *node, NetworkInterface *networkInterface);
+
+  public:
+    virtual std::vector<std::vector<std::string>> getPathFragments(const char *stream);
 };
 
 } // namespace inet

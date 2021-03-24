@@ -56,7 +56,7 @@ void StateBasedEpEnergyConsumer::initialize(int stage)
         energySource = getModuleFromPar<IEpEnergySource>(par("energySourceModule"), this);
         WATCH(powerConsumption);
     }
-    if (stage == INITSTAGE_POWER)
+    else if (stage == INITSTAGE_POWER)
         energySource->addEnergyConsumer(this);
 }
 

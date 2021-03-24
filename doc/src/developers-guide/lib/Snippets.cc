@@ -1100,7 +1100,7 @@ void Mac::initialize(int stage) // standard OMNeT++ API
 {
   if (stage == INITSTAGE_LOCAL) // operations independent from other modules
   selfAddress = MacAddress(par("address")); // store configured address
-  if (stage == INITSTAGE_NETWORK_LAYER) // after physical before network
+  else if (stage == INITSTAGE_NETWORK_LAYER) // after physical before network
   registerInterface(selfAddress); // register interface in InterfaceTable
 }
 //!End

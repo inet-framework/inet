@@ -117,7 +117,7 @@ void MobilityBase::initialize(int stage)
         WATCH(lastPosition);
         WATCH(lastOrientation);
     }
-    if (stage == INITSTAGE_SINGLE_MOBILITY) {
+    else if (stage == INITSTAGE_SINGLE_MOBILITY) {
         initializeOrientation();
         initializePosition();
     }

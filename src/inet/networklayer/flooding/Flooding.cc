@@ -71,7 +71,7 @@ void Flooding::initialize(int stage)
                << " bcDelTime = " << bcDelTime << endl;
         }
     }
-    if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         auto ie = interfaceTable->findFirstNonLoopbackInterface();
         if (ie != nullptr)
             myNetwAddr = ie->getNetworkAddress();

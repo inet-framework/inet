@@ -163,7 +163,7 @@ void MediumVisualizerBase::initialize(int stage)
             radioMediumModule->subscribe(IRadioMedium::signalArrivalEndedSignal, this);
         }
     }
-    if (stage == INITSTAGE_PHYSICAL_LAYER) {
+    else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         if (radioMedium != nullptr && (displayMainPowerDensityMap || displayPowerDensityMaps || displaySpectrums || displaySpectrograms)) {
             if (auto backgroundNoise = radioMedium->getBackgroundNoise())
                 mediumPowerDensityFunction->addElement(makeShared<BackgroundNoisePowerFunction>(backgroundNoise));
@@ -176,7 +176,7 @@ void MediumVisualizerBase::initialize(int stage)
             }
         }
     }
-    if (stage == INITSTAGE_LAST) {
+    else if (stage == INITSTAGE_LAST) {
         if (std::isnan(signalPropagationAnimationSpeed) && radioMedium != nullptr) {
             double maxPropagationDuration = radioMedium->getMediumLimitCache()->getMaxConstraintArea().distance(radioMedium->getMediumLimitCache()->getMinConstraintArea()) / mps(radioMedium->getPropagation()->getPropagationSpeed()).get();
             defaultSignalPropagationAnimationSpeed = maxPropagationDuration / signalPropagationAnimationTime;

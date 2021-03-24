@@ -33,7 +33,7 @@ void PacketFlowBase::initialize(int stage)
         provider.reference(inputGate, false);
         collector.reference(outputGate, false);
     }
-    if (stage == INITSTAGE_QUEUEING) {
+    else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
     }

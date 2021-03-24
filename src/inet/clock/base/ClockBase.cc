@@ -25,7 +25,7 @@ void ClockBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
         displayStringTextFormat = par("displayStringTextFormat");
-    if (stage == INITSTAGE_LAST)
+    else if (stage == INITSTAGE_LAST)
         updateDisplayString();
 }
 

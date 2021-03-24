@@ -26,6 +26,7 @@ void RandomDriftOscillator::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         driftRateParameter = &par("driftRate");
         driftRateChangeParameter = &par("driftRateChange");
+        changeIntervalParameter = &par("changeInterval");
         driftRate = driftRateParameter->doubleValue() / 1E+6;
     }
     DriftingOscillatorBase::initialize(stage);
@@ -33,7 +34,7 @@ void RandomDriftOscillator::initialize(int stage)
         changeTimer = new cMessage("ChangeTimer");
         driftRateChangeLowerLimit = par("driftRateChangeLowerLimit").doubleValue() / 1E+6;
         driftRateChangeUpperLimit = par("driftRateChangeUpperLimit").doubleValue() / 1E+6;
-        scheduleAfter(par("changeInterval"), changeTimer);
+        scheduleAfter(changeIntervalParameter->doubleValue(), changeTimer);
     }
 }
 
@@ -43,9 +44,9 @@ void RandomDriftOscillator::handleMessage(cMessage *message)
         driftRateChangeTotal += driftRateChangeParameter->doubleValue() / 1E+6;
         driftRateChangeTotal = std::max(driftRateChangeTotal, driftRateChangeLowerLimit);
         driftRateChangeTotal = std::min(driftRateChangeTotal, driftRateChangeUpperLimit);
-        driftRate = driftRateParameter->doubleValue();
+        auto driftRate = driftRateParameter->doubleValue() / 1E+6;
         setDriftRate(driftRate + driftRateChangeTotal);
-        scheduleAfter(par("changeInterval"), changeTimer);
+        scheduleAfter(changeIntervalParameter->doubleValue(), changeTimer);
     }
     else
         throw cRuntimeError("Unknown message");

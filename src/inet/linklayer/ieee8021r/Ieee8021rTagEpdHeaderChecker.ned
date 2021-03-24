@@ -15,21 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.common;
+package inet.linklayer.ieee8021r;
 
-import inet.linklayer.contract.IPolicyLayer;
+import inet.queueing.base.PacketFilterBase;
 
-module OmittedPolicyLayer like IPolicyLayer
+simple Ieee8021rTagEpdHeaderChecker extends PacketFilterBase like IIeee8021rTagEpdHeaderChecker
 {
     parameters:
-        @class(::inet::OmittedModule);
-        @display("i=block/layer,black,50");
-    gates:
-        input upperLayerIn;
-        output upperLayerOut;
-        input lowerLayerIn;
-        output lowerLayerOut;
-    connections:
-        upperLayerIn --> lowerLayerOut;
-        lowerLayerIn --> upperLayerOut;
+        @class(Ieee8021rTagEpdHeaderChecker);
+        @display("i=block/checker");
 }
+

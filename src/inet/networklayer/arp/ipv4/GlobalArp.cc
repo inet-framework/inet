@@ -86,7 +86,7 @@ void GlobalArp::initialize(int stage)
             throw cRuntimeError("Unknown address type");
         WATCH_PTRMAP(globalArpCache);
     }
-    if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         // register our addresses in the global cache
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {

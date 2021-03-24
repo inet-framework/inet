@@ -123,7 +123,7 @@ void xMIPv6::initialize(int stage)
         rt6->setMipv6Support(true);
         rt6->setIsHomeAgent(par("isHomeAgent"));
     }
-    if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         ipv6nd = getModuleFromPar<Ipv6NeighbourDiscovery>(par("ipv6NeighbourDiscoveryModule"), this);
 

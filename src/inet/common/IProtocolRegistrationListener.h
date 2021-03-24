@@ -105,34 +105,60 @@ class INET_API TransparentProtocolRegistrationListener : public virtual IProtoco
   public:
     virtual cGate *getRegistrationForwardingGate(cGate *gate) = 0;
 
+    virtual bool isForwardingProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) const { return true; }
+    virtual bool isForwardingProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) const { return true; }
+    virtual bool isForwardingAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) const { return true; }
+
+    virtual bool isForwardingService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) const { return true; }
+    virtual bool isForwardingServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) const { return true; }
+    virtual bool isForwardingAnyService(cGate *gate, ServicePrimitive servicePrimitive) const { return true; }
+
     virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override {
         Enter_Method2("handleRegisterService");
-        registerService(protocol, getRegistrationForwardingGate(gate), servicePrimitive);
+        if (isForwardingService(protocol, gate, servicePrimitive)) {
+            EV_INFO << "Forwarding service" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+            registerService(protocol, getRegistrationForwardingGate(gate), servicePrimitive);
+        }
     }
 
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override {
         Enter_Method2("handleRegisterProtocol");
-        registerProtocol(protocol, getRegistrationForwardingGate(gate), servicePrimitive);
+        if (isForwardingProtocol(protocol, gate, servicePrimitive)) {
+            EV_INFO << "Forwarding protocol" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+            registerProtocol(protocol, getRegistrationForwardingGate(gate), servicePrimitive);
+        }
     }
 
     virtual void handleRegisterServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) override {
         Enter_Method2("handleRegisterServiceGroup");
-        registerServiceGroup(protocolGroup, getRegistrationForwardingGate(gate), servicePrimitive);
+        if (isForwardingServiceGroup(protocolGroup, gate, servicePrimitive)) {
+            EV_INFO << "Forwarding service group" << EV_FIELD(protocolGroup) << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+            registerServiceGroup(protocolGroup, getRegistrationForwardingGate(gate), servicePrimitive);
+        }
     }
 
     virtual void handleRegisterProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) override {
         Enter_Method2("handleRegisterProtocolGroup");
-        registerProtocolGroup(protocolGroup, getRegistrationForwardingGate(gate), servicePrimitive);
+        if (isForwardingProtocolGroup(protocolGroup, gate, servicePrimitive)) {
+            EV_INFO << "Forwarding protocol group" << EV_FIELD(protocolGroup) << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+            registerProtocolGroup(protocolGroup, getRegistrationForwardingGate(gate), servicePrimitive);
+        }
     }
 
     virtual void handleRegisterAnyService(cGate *gate, ServicePrimitive servicePrimitive) override {
         Enter_Method2("handleRegisterAnyService");
-        registerAnyService(getRegistrationForwardingGate(gate), servicePrimitive);
+        if (isForwardingAnyService(gate, servicePrimitive)) {
+            EV_INFO << "Forwarding any service" << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+            registerAnyService(getRegistrationForwardingGate(gate), servicePrimitive);
+        }
     }
 
     virtual void handleRegisterAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) override {
         Enter_Method2("handleRegisterAnyProtocol");
-        registerAnyProtocol(getRegistrationForwardingGate(gate), servicePrimitive);
+        if (isForwardingAnyProtocol(gate, servicePrimitive)) {
+            EV_INFO << "Forwarding any protocol" << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+            registerAnyProtocol(getRegistrationForwardingGate(gate), servicePrimitive);
+        }
     }
 };
 

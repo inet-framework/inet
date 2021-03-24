@@ -163,9 +163,11 @@ const Protocol Protocol::shortcutPhy("shortcutphy", "Shortcut PHY", Protocol::Ph
 const Protocol Protocol::unitDisk("unitdisk", "UnitDisk");
 const Protocol Protocol::wiseRoute("wiseroute", "WiseRoute"); // WiseRoute Network Protocol
 
+
 // Additional wireless protocols
 const Protocol Protocol::lora("lora", "Lora"); //Lora Protocol
 const Protocol Protocol::lte("lte", "LTE", Protocol::LinkLayer); //LTE Protocol
 
+const Protocol Protocol::ieee8021rTag("ieee8021rtag", "IEEE 802.1R TAG"); // TODO: move to its place in the alphanumeric ordering, causes fingerprints to change because some hypothetical protocols serialize the protocol ID into the packet
 } // namespace inet
 

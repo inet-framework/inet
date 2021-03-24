@@ -31,7 +31,7 @@ void PacketGateBase::initialize(int stage)
         getDisplayString().setTagArg("i", 2, 20);
         WATCH(isOpen_);
     }
-    if (stage == INITSTAGE_QUEUEING)
+    else if (stage == INITSTAGE_LAST)
         emit(gateStateChangedSignal, isOpen_);
 }
 

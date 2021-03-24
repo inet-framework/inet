@@ -40,13 +40,18 @@ void Ieee8021qTagEpdHeaderChecker::initialize(int stage)
             qtagProtocol = &Protocol::ieee8021qCTag;
         else
             throw cRuntimeError("Unknown tag type");
-        cStringTokenizer filterTokenizer(par("vlanIdFilter"));
-        while (filterTokenizer.hasMoreTokens())
-            vlanIdFilter.push_back(atoi(filterTokenizer.nextToken()));
-        WATCH_VECTOR(vlanIdFilter);
+        vlanIdFilter = check_and_cast<cValueArray *>(par("vlanIdFilter").objectValue());
     }
-    if (stage == INITSTAGE_LINK_LAYER)
+    else if (stage == INITSTAGE_LINK_LAYER)
         registerProtocol(*qtagProtocol, nullptr, inputGate);
+}
+
+void Ieee8021qTagEpdHeaderChecker::handleParameterChange(const char *name)
+{
+    if (name != nullptr) {
+        if (!strcmp(name, "vlanIdFilter"))
+            vlanIdFilter = check_and_cast<cValueArray *>(par("vlanIdFilter").objectValue());
+   }
 }
 
 void Ieee8021qTagEpdHeaderChecker::processPacket(Packet *packet)
@@ -82,7 +87,14 @@ bool Ieee8021qTagEpdHeaderChecker::matchesPacket(const Packet *packet) const
         return false;
     else {
         auto vlanId = header->getVid();
-        return vlanIdFilter.empty() || std::find(vlanIdFilter.begin(), vlanIdFilter.end(), vlanId) != vlanIdFilter.end();
+        if (vlanIdFilter->size() == 0)
+            return true;
+        else {
+            for (int i = 0; i < vlanIdFilter->size(); i++)
+                if (vlanIdFilter->get(i).intValue() == vlanId)
+                    return true;
+            return false;
+        }
     }
 }
 

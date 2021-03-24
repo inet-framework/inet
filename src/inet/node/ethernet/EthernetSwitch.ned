@@ -26,13 +26,11 @@ import inet.common.packet.recorder.PcapRecorder;
 import inet.linklayer.configurator.L2NodeConfigurator;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IMacAddressTable;
-import inet.linklayer.contract.IMacRelayUnit;
-import inet.linklayer.contract.IPolicyLayer;
 import inet.linklayer.contract.ISpanningTree;
-import inet.linklayer.ethernet.contract.IEthernetEncapsulation;
 import inet.linklayer.ethernet.contract.IEthernetLayer;
-import inet.linklayer.ieee8021q.Ieee8021qLayer;
 import inet.networklayer.common.InterfaceTable;
+import inet.protocolelement.contract.IProtocolLayer;
+
 
 //
 // Model of an Ethernet switch.
@@ -61,7 +59,6 @@ module EthernetSwitch
         **.macTableModule = default(absPath(".macTable"));
 
         bridging.hasStp = hasStp;
-        encap.registerProtocol = true;
         eth[*].mac.promiscuous = default(true);
         ethernet.*.promiscuous = default(true);
 
@@ -87,8 +84,8 @@ module EthernetSwitch
         macTable: <default("MacAddressTable")> like IMacAddressTable {
             @display("p=100,100;is=s");
         }
-        bridging: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit {
-            @display("p=800,300;is=m");
+        bridging: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IProtocolLayer {
+            @display("p=800,275;is=m");
         }
         stp: <spanningTreeProtocol> like ISpanningTree if hasStp {
             @display("p=500,100");
@@ -105,21 +102,18 @@ module EthernetSwitch
             parameters:
                 @display("p=250,700,row,150;q=txQueue");
         }
-        encap: <default("EthernetEncapsulation")> like IEthernetEncapsulation if typename != "" {
-            @display("p=800,250");
-        }
-        policy: <default("OmittedPolicyLayer")> like IPolicyLayer {
-            @display("p=800,350");
-        }
         rl: MessageDispatcher {
             parameters:
-                @display("p=800,400;b=1200,5");
+                @display("p=800,350;b=1200,5");
         }
         ethernet: <default("")> like IEthernetLayer if typename != "" {
-            @display("p=500,450");
+            @display("p=500,425");
         }
-        ieee8021q: Ieee8021qLayer {
-            @display("p=700,450");
+        ieee8021q: <default("Ieee8021qProtocol")> like IProtocolLayer if typename != "" {
+            @display("p=700,425");
+        }
+        ieee8021r: <default("Ieee8021rProtocol")> like IProtocolLayer if typename != "" {
+            @display("p=900,425");
         }
         cutthrough: MessageDispatcher if enableCutthrough {
             @display("p=800,600;b=1200,5");
@@ -131,16 +125,13 @@ module EthernetSwitch
         ieee8021q.lowerLayerOut --> li.in++ if exists(ieee8021q);
         li.out++ --> ieee8021q.lowerLayerIn if exists(ieee8021q);
 
+        ieee8021r.lowerLayerOut --> li.in++ if exists(ieee8021r);
+        li.out++ --> ieee8021r.lowerLayerIn if exists(ieee8021r);
+
         for i=0..sizeof(ethg)-1 {
             eth[i].cutthroughOut --> cutthrough.in++ if enableCutthrough;
             eth[i].cutthroughIn <-- cutthrough.out++ if enableCutthrough;
         }
-
-        bridging.lowerLayerOut --> policy.upperLayerIn if exists(policy);
-        policy.upperLayerOut --> bridging.lowerLayerIn if exists(policy);
-
-        policy.lowerLayerOut --> rl.in++;
-        rl.out++ --> policy.lowerLayerIn;
 
         rl.out++ --> li.in++;
         li.out++ --> rl.in++;
@@ -148,11 +139,14 @@ module EthernetSwitch
         ieee8021q.upperLayerOut --> rl.in++ if exists(ieee8021q);
         rl.out++ --> ieee8021q.upperLayerIn if exists(ieee8021q);
 
+        ieee8021r.upperLayerOut --> rl.in++ if exists(ieee8021r);
+        rl.out++ --> ieee8021r.upperLayerIn if exists(ieee8021r);
+
         rl.out++ --> ethernet.upperLayerIn if exists(ethernet);
         ethernet.upperLayerOut --> rl.in++ if exists(ethernet);
 
-        bridging.lowerLayerOut --> li.in++ if !exists(policy);
-        li.out++ --> bridging.lowerLayerIn if !exists(policy);
+        bridging.lowerLayerOut --> rl.in++;
+        rl.out++ --> bridging.lowerLayerIn;
 
         for i=0..sizeof(ethg)-1 {
             li.out++ --> eth[i].upperLayerIn;
@@ -161,14 +155,10 @@ module EthernetSwitch
         }
 
         if hasStp {
-            stp.relayIn <-- nr.out++; // bridging.stpOut;
-            stp.relayOut --> nr.in++; // bridging.stpIn;
+            stp.relayIn <-- nr.out++; // relayLayer.stpOut;
+            stp.relayOut --> nr.in++; // relayLayer.stpIn;
         }
-        bridging.upperLayerOut --> nr.in++ if !exists(encap);
-        nr.out++ --> bridging.upperLayerIn if !exists(encap);
-        bridging.upperLayerOut --> encap.lowerLayerIn if exists(encap);
-        encap.lowerLayerOut --> bridging.upperLayerIn if exists(encap);
-        encap.upperLayerOut --> nr.in++ if exists(encap);
-        nr.out++ --> encap.upperLayerIn if exists(encap);
+        bridging.upperLayerOut --> nr.in++;
+        nr.out++ --> bridging.upperLayerIn;
 }
 

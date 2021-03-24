@@ -89,7 +89,7 @@ void Aodv::initialize(int stage)
         if (useHelloMessages)
             helloMsgTimer = new cMessage("HelloMsgTimer");
     }
-    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         networkProtocol->registerHook(0, this);
         host->subscribe(linkBrokenSignal, this);
         usingIpv6 = (routingTable->getRouterIdAsGeneric().getType() == L3Address::IPv6);

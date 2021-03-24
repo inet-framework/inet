@@ -94,7 +94,7 @@ void Igmpv3::initialize(int stage)
         addWatches();
     }
     // TODO INITSTAGE
-    if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
+    else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         cModule *host = getContainingNode(this);
         registerProtocol(Protocol::igmp, gate("ipOut"), gate("ipIn"));
         for (int i = 0; i < ift->getNumInterfaces(); ++i) {

@@ -42,10 +42,10 @@ void InterpacketGapInserter::initialize(int stage)
         WATCH(packetStartTime);
         WATCH(packetEndTime);
     }
-    if (stage == INITSTAGE_CLOCK + 1) {
+    else if (stage == INITSTAGE_CLOCK + 1) {
         packetEndTime = par("initialChannelBusy") ? getClockTime() : getClockTime().setRaw(INT64_MIN / 2); // INT64_MIN / 2 to prevent overflow
     }
-    if (stage == INITSTAGE_LAST) {
+    else if (stage == INITSTAGE_LAST) {
         if (packetEndTime + durationPar->doubleValue() > getClockTime())
             scheduleClockEventAt(packetEndTime + durationPar->doubleValue(), timer);
     }

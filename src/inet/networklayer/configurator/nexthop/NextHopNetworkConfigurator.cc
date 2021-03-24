@@ -76,6 +76,8 @@ void NextHopNetworkConfigurator::addStaticRoutes(Topology& topology)
                 continue;
             if (isBridgeNode(destinationNode))
                 continue;
+            if (std::isinf(destinationNode->getDistanceToTarget()))
+                continue;
 
 //            int destinationGateId = destinationNode->getPath(0)->getLocalGateId();
             IInterfaceTable *destinationInterfaceTable = destinationNode->interfaceTable;

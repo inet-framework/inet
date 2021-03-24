@@ -39,7 +39,7 @@ void QueueOsgVisualizer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
-    if (stage == INITSTAGE_LAST) {
+    else if (stage == INITSTAGE_LAST) {
         for (auto queueVisualization : queueVisualizations) {
             auto queueOsgVisualization = static_cast<const QueueOsgVisualization *>(queueVisualization);
             auto node = queueOsgVisualization->node;

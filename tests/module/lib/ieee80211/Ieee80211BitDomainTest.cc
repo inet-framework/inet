@@ -47,7 +47,7 @@ void Ieee80211BitDomainTest::initialize(int stage)
         else
             throw cRuntimeError("Unknown (= %s) test type", testType);
     }
-    if (stage == INITSTAGE_LAST)
+    else if (stage == INITSTAGE_LAST)
     {
         const char *testFile = par("testFile");
         fileStream = new std::ifstream(testFile);

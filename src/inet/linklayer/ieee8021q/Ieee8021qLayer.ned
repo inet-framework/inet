@@ -17,16 +17,13 @@
 
 package inet.linklayer.ieee8021q;
 
-import inet.queueing.contract.IPacketFlow;
+import inet.linklayer.ieee8021r.Ieee8021rProtocol;
+import inet.linklayer.vlan.VlanPolicyLayer;
+import inet.protocolelement.contract.IProtocolLayer;
 
-
-module Ieee8021qLayer like IIeee8021qLayer
+module Ieee8021qLayer like IProtocolLayer
 {
     parameters:
-        string vlanTagType = default("c");
-        bool hasSocketSupport = default(false);
-        *.vlanTagType = default(vlanTagType);
-        *.socketTableModule = default(absPath(".socketTable"));
         @display("i=block/layer");
     gates:
         input upperLayerIn;
@@ -34,27 +31,18 @@ module Ieee8021qLayer like IIeee8021qLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        socketTable: Ieee8021qSocketTable if hasSocketSupport {
-            @display("p=100,100");
+        policy: <default("VlanPolicyLayer")> like IProtocolLayer {
+            @display("p=300,150");
         }
-        socketCommandProcessor: <default(hasSocketSupport ? "Ieee8021qSocketCommandProcessor" : "OmittedPacketFlow")> like IPacketFlow {
-            @display("p=300,100");
-        }
-        qTagHeaderInserter: <default("Ieee8021qTagEpdHeaderInserter")> like IIeee8021qTagEpdHeaderInserter {
-            @display("p=300,200");
-        }
-        socketPacketProcessor: <default(hasSocketSupport ? "Ieee8021qSocketPacketProcessor" : "OmittedPacketFlow")> like IPacketFlow {
-            @display("p=600,100");
-        }
-        qTagHeaderChecker: <default("Ieee8021qTagEpdHeaderChecker")> like IIeee8021qTagEpdHeaderChecker {
-            @display("p=600,200");
+        protocol: <default("Ieee8021rProtocol")> like IProtocolLayer {
+            @display("p=300,300");
         }
     connections:
-        upperLayerIn --> { @display("m=n"); } --> socketCommandProcessor.in;
-        socketCommandProcessor.out --> qTagHeaderInserter.in;
-        qTagHeaderInserter.out --> { @display("m=s"); } --> lowerLayerOut;
+        upperLayerIn --> { @display("m=n"); } --> policy.upperLayerIn;
+        policy.lowerLayerOut --> protocol.upperLayerIn;
+        protocol.lowerLayerOut --> { @display("m=s"); } --> lowerLayerOut;
 
-        lowerLayerIn --> { @display("m=s"); } --> qTagHeaderChecker.in;
-        qTagHeaderChecker.out --> socketPacketProcessor.in;
-        socketPacketProcessor.out --> { @display("m=n"); } --> upperLayerOut;
+        lowerLayerIn --> { @display("m=s"); } --> protocol.lowerLayerIn;
+        protocol.upperLayerOut --> policy.lowerLayerIn;
+        policy.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }

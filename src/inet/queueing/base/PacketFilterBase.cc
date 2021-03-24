@@ -36,7 +36,7 @@ void PacketFilterBase::initialize(int stage)
         numDroppedPackets = 0;
         droppedTotalLength = b(0);
     }
-    if (stage == INITSTAGE_QUEUEING) {
+    else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
         checkPacketOperationSupport(outputGate);
     }

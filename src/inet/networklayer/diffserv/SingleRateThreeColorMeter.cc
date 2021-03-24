@@ -43,7 +43,7 @@ void SingleRateThreeColorMeter::initialize(int stage)
         Tc = CBS;
         Te = EBS;
     }
-    if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         const char *cirStr = par("cir");
         IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         CIR = parseInformationRate(cirStr, "cir", ift, *this, 0);

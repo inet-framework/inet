@@ -41,7 +41,7 @@ void AlternatingEpEnergyGenerator::initialize(int stage)
         WATCH(isSleeping);
         WATCH(powerGeneration);
     }
-    if (stage == INITSTAGE_POWER)
+    else if (stage == INITSTAGE_POWER)
         energySink->addEnergyGenerator(this);
 }
 

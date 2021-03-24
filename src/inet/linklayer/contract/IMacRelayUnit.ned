@@ -18,6 +18,8 @@
 
 package inet.linklayer.contract;
 
+import inet.protocolelement.contract.IProtocolLayer;
+
 //
 // Module interface for modules providing Ethernet switch functionality.
 // These modules handle the mapping between ports and MAC addresses,
@@ -42,14 +44,9 @@ package inet.linklayer.contract;
 //
 // Known implementations are ~MacRelayUnit and ~Ieee8021dRelay.
 //
-moduleinterface IMacRelayUnit
+moduleinterface IMacRelayUnit extends IProtocolLayer
 {
     parameters:
         @display("i=block/switch");
-    gates:
-        input lowerLayerIn @labels(EtherFrame);
-        output lowerLayerOut @labels(EtherFrame);
-        input upperLayerIn;
-        output upperLayerOut;
 }
 

@@ -28,7 +28,7 @@ class INET_API Ieee8021qTagTpidHeaderChecker : public PacketFilterBase
 {
   protected:
     int tpid = -1;
-    std::vector<int> vlanIdFilter;
+    cValueArray *vlanIdFilter = nullptr;
 
   protected:
     virtual void initialize(int stage) override;

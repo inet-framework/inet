@@ -74,9 +74,9 @@ void Ipv4NetworkConfigurator::initialize(int stage)
         addDirectRoutesParameter = par("addDirectRoutes");
         optimizeRoutesParameter = par("optimizeRoutes");
     }
-    if (stage == INITSTAGE_NETWORK_CONFIGURATION)
+    else if (stage == INITSTAGE_NETWORK_CONFIGURATION)
         ensureConfigurationComputed(topology);
-    if (stage == INITSTAGE_LAST)
+    else if (stage == INITSTAGE_LAST)
         dumpConfiguration();
 }
 
@@ -1410,6 +1410,8 @@ void Ipv4NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                 if (destinationNode->getNumPaths() == 0)
                     continue;
                 if (isBridgeNode(destinationNode))
+                    continue;
+                if (std::isinf(destinationNode->getDistanceToTarget()))
                     continue;
 
                 // determine next hop interface

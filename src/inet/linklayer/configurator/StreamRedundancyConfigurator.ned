@@ -17,17 +17,12 @@
 
 package inet.linklayer.configurator;
 
-//
-// This module configures the scheduling of all ~PeriodicGate modules in the
-// network according to the to be reserved streams described by the configuration
-// parameter. The streams are reserved in the order of priority (0 being the highest).
-//
-simple StreamReservationConfigurator
+simple StreamRedundancyConfigurator
 {
     parameters:
+        int minVlanId = default(0);
+        int maxVlanId = default(4095);
+        object configuration = default([]);
         @display("i=block/cogwheel");
-        double gateCycleDuration @unit(s); // the globally used gating schedule period in each PeriodicGate modules
-        object configuration; // a vector of objects (e.g. [{...}, {...}]) where each object has the following fields: type, priority, source, destination, packetLength, packetInterval, maxLatency
-                              // here is an example: [{type: "unicast", priority: 0, source: "wheel*", destination: "hud", packetLength: 100B, packetInterval: 5ms, maxLatency: 100us}]
 }
 

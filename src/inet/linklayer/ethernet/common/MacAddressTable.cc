@@ -50,6 +50,16 @@ void MacAddressTable::initialize(int stage)
     }
 }
 
+void MacAddressTable::handleParameterChange(const char *name)
+{
+    if (name != nullptr) {
+        if (!strcmp(name, "addressTable")) {
+            clearTable();
+            parseAddressTableParameter();
+        }
+    }
+}
+
 /**
  * Function reads from a file stream pointed to by 'fp' and stores characters
  * until the '\n' or EOF character is found, the resultant string is returned.
@@ -185,13 +195,13 @@ bool MacAddressTable::updateTableWithAddress(int interfaceId, const MacAddress& 
         removeAgedEntriesIfNeeded();
 
         // Add entry to table
-        EV << "Adding entry to Address Table: " << address << " --> interfaceId " << interfaceId << "\n";
+        EV << "Adding entry" << EV_FIELD(address) << EV_FIELD(interfaceId) << EV_FIELD(vid) << EV_ENDL;
         (*table)[address] = AddressEntry(vid, interfaceId, simTime());
         return false;
     }
     else {
         // Update existing entry
-        EV << "Updating entry in Address Table: " << address << " --> interfaceId " << interfaceId << "\n";
+        EV << "Updating entry" << EV_FIELD(address) << EV_FIELD(interfaceId) << EV_FIELD(vid) << EV_ENDL;
         AddressEntry& entry = iter->second;
         entry.insertionTime = simTime();
         entry.interfaceId = interfaceId;
@@ -366,9 +376,30 @@ void MacAddressTable::readAddressTable(const char *fileName)
     fclose(fp);
 }
 
+void MacAddressTable::parseAddressTableParameter()
+{
+    auto addressTable = check_and_cast<cValueArray *>(par("addressTable").objectValue());
+    for (int i = 0; i < addressTable->size(); i++) {
+        cValueMap *entry = check_and_cast<cValueMap *>(addressTable->get(i).objectValue());
+        auto vlan = entry->containsKey("vlan") ? entry->get("vlan").intValue() : 0;
+        auto macAddressString = entry->get("address").stringValue();
+        L3Address l3Address;
+        if (!L3AddressResolver().tryResolve(macAddressString, l3Address, L3AddressResolver::ADDR_MAC))
+            throw cRuntimeError("Cannot resolve MAC address of '%s'", macAddressString);
+        MacAddress macAddress = l3Address.toMac();
+        auto interfaceName = entry->get("interface").stringValue();
+        auto networkInterface = ifTable->findInterfaceByName(interfaceName);
+        if (networkInterface == nullptr)
+            throw cRuntimeError("Cannot find network interface '%s'", interfaceName);
+        updateTableWithAddress(networkInterface->getInterfaceId(), macAddress, vlan);
+    }
+}
+
 void MacAddressTable::initializeTable()
 {
     clearTable();
+    parseAddressTableParameter();
+
     // Option to pre-read in Address Table. To turn it off, set addressTableFile to empty string
     const char *addressTableFile = par("addressTableFile");
     if (addressTableFile && *addressTableFile)

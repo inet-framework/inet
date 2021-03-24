@@ -63,7 +63,7 @@ void PhysicalEnvironment::initialize(int stage)
         spaceMax.y = par("spaceMaxY");
         spaceMax.z = par("spaceMaxZ");
     }
-    if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT) {
+    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT) {
         cXMLElement *environment = par("config");
         parseShapes(environment);
         parseMaterials(environment);

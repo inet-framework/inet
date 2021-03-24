@@ -98,7 +98,7 @@ void Udp::initialize(int stage)
         WATCH_PTRMAP(socketsByIdMap);
         WATCH_MAP(socketsByPortMap);
     }
-    if (stage == INITSTAGE_TRANSPORT_LAYER) {
+    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         if (crcMode == CRC_COMPUTED) {
             //TODO:
             // Unlike IPv4, when UDP packets are originated by an IPv6 node,

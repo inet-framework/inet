@@ -38,7 +38,7 @@ void PacketBasedTokenGenerator::initialize(int stage)
         numTokensGenerated = 0;
         WATCH(numTokensGenerated);
     }
-    if (stage == INITSTAGE_QUEUEING) {
+    else if (stage == INITSTAGE_QUEUEING) {
         if (producer != nullptr)
             producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     }

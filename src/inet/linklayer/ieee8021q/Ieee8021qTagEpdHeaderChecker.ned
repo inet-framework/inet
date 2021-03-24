@@ -23,7 +23,7 @@ simple Ieee8021qTagEpdHeaderChecker extends PacketFilterBase like IIeee8021qTagE
 {
     parameters:
         string vlanTagType @enum("c","s") = default("c");
-        string vlanIdFilter = default("");
+        object vlanIdFilter = default([]);
         @class(Ieee8021qTagEpdHeaderChecker);
         @display("i=block/checker");
 }

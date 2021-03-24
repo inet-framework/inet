@@ -82,7 +82,7 @@ class INET_API Topology : public cOwnedObject
 
         // variables used by the shortest-path algorithms
         double dist;
-        Link *outPath;
+        std::vector<Link *> outPaths;
 
       public:
         /**
@@ -95,7 +95,6 @@ class INET_API Topology : public cOwnedObject
             visited = false;
             networkId = 0;
             dist = INFINITY;
-            outPath = nullptr;
         }
 
         virtual ~Node() {}
@@ -202,14 +201,14 @@ class INET_API Topology : public cOwnedObject
          * Returns the number of shortest paths towards the target node.
          * (There may be several paths with the same length.)
          */
-        int getNumPaths() const { return outPath ? 1 : 0; }
+        int getNumPaths() const { return outPaths.size(); }
 
         /**
          * Returns the next link in the ith shortest paths towards the
          * target node. (There may be several paths with the same
          * length.)
          */
-        LinkOut *getPath(int) const { return (LinkOut *)outPath; } // FIXME check_and_cast?
+        LinkOut *getPath(int i) const { return (LinkOut *)outPaths.at(i); }
         //@}
     };
 

@@ -93,6 +93,7 @@ class INET_API Protocol
     static const Protocol ieee8021ae;
     static const Protocol ieee8021qCTag;
     static const Protocol ieee8021qSTag;
+    static const Protocol ieee8021rTag;
     static const Protocol ieee8022llc;
     static const Protocol ieee8022snap;
     static const Protocol ieee802epd;

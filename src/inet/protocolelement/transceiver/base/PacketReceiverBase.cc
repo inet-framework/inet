@@ -40,7 +40,7 @@ void PacketReceiverBase::initialize(int stage)
         networkInterface = findContainingNicModule(this);
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
     }
-    if (stage == INITSTAGE_QUEUEING)
+    else if (stage == INITSTAGE_QUEUEING)
         checkPacketOperationSupport(outputGate);
 }
 
@@ -82,6 +82,7 @@ Packet *PacketReceiverBase::decodePacket(Signal *signal) const
     packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_INBOUND);
     if (networkInterface != nullptr)
         packet->addTag<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
+    packet->setBitError(signal->hasBitError());
     return packet;
 }
 

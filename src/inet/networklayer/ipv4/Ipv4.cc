@@ -115,7 +115,7 @@ void Ipv4::initialize(int stage)
         WATCH_MAP(pendingPackets);
         WATCH_MAP(socketIdToSocketDescriptor);
     }
-    if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         routeTraceActive = par("routeTag");
         auto node = getContainingNode(this);
         auto mob = node->getSubmodule("mobility");

@@ -17,7 +17,7 @@
 
 package inet.queueing.common;
 
-import inet.queueing.base.PacketProcessorBase;
+import inet.queueing.base.PacketDuplicatorBase;
 import inet.queueing.contract.IActivePacketSource;
 import inet.queueing.contract.IPassivePacketSink;
 
@@ -26,7 +26,7 @@ import inet.queueing.contract.IPassivePacketSink;
 // pushed with packets from the connected packet producer. When this happens,
 // one or more copy of the packet is pushed to the output gate.
 //
-simple PacketDuplicator extends PacketProcessorBase like IPassivePacketSink, IActivePacketSource
+simple PacketDuplicator extends PacketDuplicatorBase like IPassivePacketSink, IActivePacketSource
 {
     parameters:
         volatile int numDuplicates = default(1); // number of duplicates, 0 means only the original packet is forwarded

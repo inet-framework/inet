@@ -54,8 +54,7 @@ void PacketCloner::pushPacket(Packet *packet, cGate *gate)
         EV_INFO << "Cloning packet" << EV_FIELD(packet) << EV_ENDL;
         pushOrSendPacket(i == numGates - 1 ? packet : packet->dup(), outputGates[i], consumers[i]);
     }
-    numProcessedPackets++;
-    processedTotalLength += packet->getTotalLength();
+    handlePacketProcessed(packet);
     updateDisplayString();
 }
 

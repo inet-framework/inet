@@ -42,7 +42,7 @@ void Ipv4Encap::initialize(int stage)
         defaultMCTimeToLive = 16; // par("multicastTimeToLive");
         crcMode = CRC_COMPUTED;
     }
-    if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         registerService(Protocol::ipv4, gate("upperLayerIn"), gate("upperLayerOut"));
     }
 }

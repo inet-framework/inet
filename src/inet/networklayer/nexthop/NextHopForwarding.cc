@@ -76,7 +76,7 @@ void NextHopForwarding::initialize(int stage)
         WATCH(numUnroutable);
         WATCH(numForwarded);
     }
-    if (stage == INITSTAGE_NETWORK_LAYER) {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         registerService(Protocol::nextHopForwarding, gate("transportIn"), gate("transportOut"));
         registerProtocol(Protocol::nextHopForwarding, gate("queueOut"), gate("queueIn"));
     }

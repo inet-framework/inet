@@ -94,7 +94,7 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
     }
-    if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
+    else if (stage == INITSTAGE_NETWORK_LAYER_PROTOCOLS) {
         cModule *node = findContainingNode(this);
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;

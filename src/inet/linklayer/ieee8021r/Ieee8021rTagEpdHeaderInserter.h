@@ -15,15 +15,27 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ieee8021q;
+#ifndef __INET_IEEE8021RTAGEPDHEADERINSERTER_H
+#define __INET_IEEE8021RTAGEPDHEADERINSERTER_H
 
-moduleinterface IIeee8021qLayer
+#include "inet/common/Protocol.h"
+#include "inet/queueing/base/PacketFlowBase.h"
+
+namespace inet {
+
+using namespace inet::queueing;
+
+class INET_API Ieee8021rTagEpdHeaderInserter : public PacketFlowBase
 {
-    parameters:
-        @display("i=block/layer");
-    gates:
-        input upperLayerIn;
-        output upperLayerOut;
-        input lowerLayerIn;
-        output lowerLayerOut;
-}
+  protected:
+    const Protocol *nextProtocol = nullptr;
+
+  protected:
+    virtual void initialize(int stage) override;
+    virtual void processPacket(Packet *packet) override;
+};
+
+} // namespace inet
+
+#endif
+

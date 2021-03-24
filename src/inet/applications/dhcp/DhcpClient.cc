@@ -70,7 +70,7 @@ void DhcpClient::initialize(int stage)
         clientState = IDLE;
         // get the interface to configure
     }
-    if (stage == INITSTAGE_APPLICATION_LAYER) {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // get the hostname
         host = getContainingNode(this);
         // for a wireless interface subscribe the association event to start the DHCP protocol

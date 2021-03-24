@@ -41,7 +41,7 @@ void RadioOsgVisualizer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
     }
-    if (stage == INITSTAGE_LAST) {
+    else if (stage == INITSTAGE_LAST) {
         for (auto it : radioVisualizations) {
             auto radioOsgVisualization = static_cast<const RadioOsgVisualization *>(it.second);
             auto node = radioOsgVisualization->node;

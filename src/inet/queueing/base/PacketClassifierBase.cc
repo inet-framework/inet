@@ -39,7 +39,7 @@ void PacketClassifierBase::initialize(int stage)
             collectors.push_back(collector);
         }
     }
-    if (stage == INITSTAGE_QUEUEING) {
+    else if (stage == INITSTAGE_QUEUEING) {
         for (int i = 0; i < gateSize("out"); i++)
             checkPacketOperationSupport(outputGates[i]);
         checkPacketOperationSupport(inputGate);

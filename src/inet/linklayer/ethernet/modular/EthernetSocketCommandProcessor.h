@@ -36,7 +36,6 @@ class INET_API EthernetSocketCommandProcessor : public queueing::PacketFlowBase,
     virtual void handleCommand(Request *request);
     virtual void processPacket(Packet *packet) override {}
 
-  public:
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 

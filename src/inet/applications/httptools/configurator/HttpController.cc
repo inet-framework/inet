@@ -68,7 +68,7 @@ void HttpController::initialize(int stage)
         pspecial = 0.0; // No special events by default
         totalLookups = 0;
     }
-    if (stage == INITSTAGE_APPLICATION_LAYER) {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // Two stages are required to finalize the initialization of the random object for the site selection
         // once the final number of web sites is known.
 

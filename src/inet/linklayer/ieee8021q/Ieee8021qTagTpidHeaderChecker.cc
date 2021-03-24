@@ -37,10 +37,7 @@ void Ieee8021qTagTpidHeaderChecker::initialize(int stage)
             tpid = 0x8100;
         else
             throw cRuntimeError("Unknown tag type");
-        cStringTokenizer filterTokenizer(par("vlanIdFilter"));
-        while (filterTokenizer.hasMoreTokens())
-            vlanIdFilter.push_back(atoi(filterTokenizer.nextToken()));
-        WATCH_VECTOR(vlanIdFilter);
+        vlanIdFilter = check_and_cast<cValueArray *>(par("vlanIdFilter").objectValue());
     }
 }
 
@@ -66,7 +63,14 @@ bool Ieee8021qTagTpidHeaderChecker::matchesPacket(const Packet *packet) const
         return false;
     else {
         auto vlanId = header->getVid();
-        return vlanIdFilter.empty() || std::find(vlanIdFilter.begin(), vlanIdFilter.end(), vlanId) != vlanIdFilter.end();
+        if (vlanIdFilter->size() == 0)
+            return true;
+        else {
+            for (int i = 0; i < vlanIdFilter->size(); i++)
+                if (vlanIdFilter->get(i).intValue() == vlanId)
+                    return true;
+            return false;
+        }
     }
 }
 
