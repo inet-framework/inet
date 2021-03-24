@@ -30,6 +30,7 @@ import inet.linklayer.contract.ISpanningTree;
 import inet.linklayer.ethernet.contract.IEthernetLayer;
 import inet.linklayer.ieee8021q.IIeee8021qLayer;
 import inet.linklayer.ieee8021r.IIeee8021rLayer;
+import inet.linklayer.ieee8022.Ieee8022Llc;
 import inet.networklayer.common.InterfaceTable;
 import inet.protocolelement.contract.IProtocolLayer;
 
@@ -60,6 +61,7 @@ module EthernetSwitch
         **.macTableModule = default(absPath(".macTable"));
 
         bridging.hasStp = hasStp;
+        llc.registerProtocol = true;
         eth[*].mac.promiscuous = default(true);
         ethernet.*.promiscuous = default(true);
 
@@ -93,7 +95,7 @@ module EthernetSwitch
         }
         nr: MessageDispatcher {
             parameters:
-                @display("p=800,200;b=1200,5");
+                @display("p=800,150;b=1200,5");
         }
         li: MessageDispatcher {
             parameters:
@@ -102,6 +104,9 @@ module EthernetSwitch
         eth[sizeof(ethg)]: <default(enableCutthrough ? "EthernetCutthroughInterface" : "EthernetInterface")> like IEthernetInterface {
             parameters:
                 @display("p=250,700,row,150;q=txQueue");
+        }
+        llc: Ieee8022Llc {
+            @display("p=800,200");
         }
         rl: MessageDispatcher {
             parameters:
@@ -137,6 +142,12 @@ module EthernetSwitch
         rl.out++ --> li.in++;
         li.out++ --> rl.in++;
 
+        llc.upperLayerOut --> nr.in++;
+        nr.out++ --> llc.upperLayerIn;
+
+        bridging.upperLayerOut --> llc.lowerLayerIn;
+        llc.lowerLayerOut --> bridging.upperLayerIn;
+
         ieee8021q.upperLayerOut --> rl.in++ if exists(ieee8021q);
         rl.out++ --> ieee8021q.upperLayerIn if exists(ieee8021q);
 
@@ -156,10 +167,8 @@ module EthernetSwitch
         }
 
         if hasStp {
-            stp.relayIn <-- nr.out++; // relayLayer.stpOut;
-            stp.relayOut --> nr.in++; // relayLayer.stpIn;
+            stp.relayIn <-- nr.out++;
+            stp.relayOut --> nr.in++;
         }
-        bridging.upperLayerOut --> nr.in++;
-        nr.out++ --> bridging.upperLayerIn;
 }
 
