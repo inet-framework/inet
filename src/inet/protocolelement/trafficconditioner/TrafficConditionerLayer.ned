@@ -23,16 +23,18 @@ module TrafficConditionerLayer like ITrafficConditionerLayer
 {
     parameters:
         @display("i=block/layer");
+        string interfaceTableModule;
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
     gates:
         input upperLayerIn;
         output upperLayerOut;
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        ingressConditioner: <default("OmittedTrafficConditioner")> like ITrafficConditioner {
+        egressConditioner: <default("OmittedTrafficConditioner")> like ITrafficConditioner {
             @display("p=100,100");
         }
-        egressConditioner: <default("OmittedTrafficConditioner")> like ITrafficConditioner {
+        ingressConditioner: <default("OmittedTrafficConditioner")> like ITrafficConditioner {
             @display("p=300,100");
         }
     connections:
