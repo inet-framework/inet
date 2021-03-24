@@ -25,15 +25,15 @@ InitStageRegistry globalInitStageRegistry;
 
 inet::InitStage* InitStageRegistry::getInitStage(const char *name)
 {
-    for (auto &stage : stages)
-        if (!strcmp(stage.name, name))
-            return &stage;
+    for (auto stage : stages)
+        if (!strcmp(stage->name, name))
+            return stage;
     throw cRuntimeError("Cannot find initialization stage: %s", name);
 }
 
-void InitStageRegistry::addInitStage(const InitStage &initStage)
+void InitStageRegistry::addInitStage(InitStage &initStage)
 {
-    stages.push_back(initStage);
+    stages.push_back(&initStage);
     numInitStages = -1;
 }
 
@@ -45,16 +45,16 @@ void InitStageRegistry::addInitStageDependency(const char *source, const char *t
 
 int InitStageRegistry::getNumInitStages()
 {
-    if (numInitStages == -1)
-        assignInitStageNumbers();
+    ensureInitStageNumbersAssigned();
     return numInitStages;
 }
 
 void InitStageRegistry::assignInitStageNumbers()
 {
-    for (auto &stage : stages) {
-        stage.followingStages.clear();
-        stage.precedingStages.clear();
+    for (auto stage : stages) {
+        stage->number = -1;
+        stage->followingStages.clear();
+        stage->precedingStages.clear();
     }
     for (auto &dependency : dependencies) {
         auto following = getInitStage(dependency.first);
@@ -62,27 +62,28 @@ void InitStageRegistry::assignInitStageNumbers()
         preceding->followingStages.push_back(following);
         following->precedingStages.push_back(preceding);
     }
-    std::vector<InitStage*> toBeAssignedStages;
-    for (auto &stage : stages)
-        if (stage.precedingStages.empty())
-            toBeAssignedStages.push_back(&stage);
     numInitStages = 0;
-    while (!toBeAssignedStages.empty()) {
-        std::vector<InitStage*> dependentStages;
-        for (auto stage : toBeAssignedStages) {
-            *stage->number = numInitStages;
-            for (auto followingStage : stage->followingStages)
-                dependentStages.push_back(followingStage);
+    while (numInitStages < stages.size()) {
+        bool assigned = false;
+        for (auto stage : stages) {
+            if (stage->number == -1) {
+                for (auto precedingStage : stage->precedingStages)
+                    if (precedingStage->number == -1)
+                        goto next;
+                stage->number = numInitStages++;
+                assigned = true;
+            }
+            next:;
         }
-        toBeAssignedStages = dependentStages;
-        numInitStages++;
+        if (!assigned)
+            throw cRuntimeError("Circle detected in initialization stage dependency graph");
     }
-    std::sort(stages.begin(), stages.end(), [] (const InitStage& s1, const InitStage& s2) -> bool {
-        return s1.number < s2.number;
+    std::sort(stages.begin(), stages.end(), [] (const InitStage *s1, const InitStage *s2) -> bool {
+        return s1->number < s2->number;
     });
     EV_STATICCONTEXT;
-    for (auto &stage : stages)
-        EV_DEBUG << "Initialization stage: " << stage.name << " = " << *stage.number << std::endl;
+    for (auto stage : stages)
+        EV_DEBUG << "Initialization stage: " << stage->name << " = " << stage->number << std::endl;
     EV_DEBUG << "Total initialization stages: " << numInitStages << std::endl;
 }
 
