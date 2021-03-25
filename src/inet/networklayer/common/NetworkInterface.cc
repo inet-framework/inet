@@ -25,6 +25,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 
@@ -316,8 +317,29 @@ void NetworkInterface::resetInterface()
 
 bool NetworkInterface::matchesMacAddress(const MacAddress& address) const
 {
-    // TODO add real support for multicast MAC addresses
-    return address.isBroadcast() || address.isMulticast() || macAddr == address;
+    return address.isBroadcast()
+            || (address.isMulticast() && matchesMulticastMacAddress(address))
+            || macAddr == address;
+}
+
+bool NetworkInterface::matchesMulticastMacAddress(const MacAddress& address) const
+{
+    return address.isMulticast() && contains(multicastAddresses, address);
+}
+
+void NetworkInterface::addMulticastMacAddress(const MacAddress& address)
+{
+    if (contains(multicastAddresses, address))
+        throw cRuntimeError("Multicast MacAddress already added: '%s'", address.str().c_str());
+    multicastAddresses.push_back(address);
+}
+
+void NetworkInterface::removeMulticastMacAddress(const MacAddress& address)
+{
+    auto it = find(multicastAddresses, address);
+    if (it == multicastAddresses.end())
+        throw cRuntimeError("Multicast MacAddress not found: '%s'", address.str().c_str());
+    multicastAddresses.erase(it);
 }
 
 const L3Address NetworkInterface::getNetworkAddress() const
