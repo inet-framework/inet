@@ -42,6 +42,7 @@ void InterpacketGapInserter::initialize(int stage)
         WATCH(packetStartTime);
         WATCH(packetEndTime);
     }
+    // KLUDGE: this runs after the clock stage, the clocks must be initialized
     else if (stage == INITSTAGE_CLOCK + 1) {
         packetEndTime = par("initialChannelBusy") ? getClockTime() : getClockTime().setRaw(INT64_MIN / 2); // INT64_MIN / 2 to prevent overflow
     }
