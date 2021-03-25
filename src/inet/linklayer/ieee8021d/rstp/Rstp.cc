@@ -58,7 +58,7 @@ void Rstp::initialize(int stage)
 
         for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
             auto ie = ifTable->getInterface(i);
-            if (!ie->isLoopback() && ie->getProtocol() == &Protocol::ethernetMac) {
+            if (!ie->isLoopback() && ie->isWired() /* && ie->getProtocol() == &Protocol::ethernetMac */) {   // TODO check protocol
                 ie->addMulticastMacAddress(MacAddress::STP_MULTICAST_ADDRESS);
             }
         }
