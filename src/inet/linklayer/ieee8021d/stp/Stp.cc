@@ -47,6 +47,13 @@ void Stp::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         registerProtocol(Protocol::stp, gate("relayOut"), gate("relayIn"));
+
+        for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
+            auto ie = ifTable->getInterface(i);
+            if (!ie->isLoopback() && ie->getProtocol() == &Protocol::ethernetMac) {
+                ie->addMulticastMacAddress(MacAddress::STP_MULTICAST_ADDRESS);
+            }
+        }
     }
 }
 
@@ -59,7 +66,9 @@ void Stp::initPortTable()
 {
     EV_DEBUG << "IEE8021D Interface Data initialization. Setting port infos to the protocol defaults." << endl;
     for (unsigned int i = 0; i < numPorts; i++) {
-        initInterfacedata(ifTable->getInterface(i)->getInterfaceId());
+        auto ie = ifTable->getInterface(i);
+        if (!ie->isLoopback() && ie->getProtocol() == &Protocol::ethernetMac)
+            initInterfacedata(ie->getInterfaceId());
     }
 }
 
