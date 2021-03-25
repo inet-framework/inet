@@ -46,7 +46,7 @@ using namespace omnetpp;
 #endif // if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1506
 
 #define INET_VERSION        0x0403
-#define INET_PATCH_LEVEL    0x00
+#define INET_PATCH_LEVEL    0x01
 
 #if defined(INET_EXPORT)
 #define INET_API          OPP_DLLEXPORT
