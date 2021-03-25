@@ -124,7 +124,7 @@ class INET_API GateSchedulingConfigurator : public cSimpleModule
     virtual simtime_t computeStartOffsetForPathFragments(StreamReservation& streamReservation, std::string startNetworkNodeName, simtime_t startTime);
 
     virtual void addGateScheduling(StreamReservation& streamReservation, int startIndex, int endIndex);
-    virtual void addGateSchedulingForPathFragments(StreamReservation& streamReservation, std::string startNetworkNodeName, simtime_t startTime);
+    virtual void addGateSchedulingForPathFragments(StreamReservation& streamReservation, std::string startNetworkNodeName, simtime_t startTime, int index);
 
     virtual void configureGateScheduling();
     virtual void configureGateScheduling(cModule *networkNode, cModule *gate, InterfaceInfo *interfaceInfo);

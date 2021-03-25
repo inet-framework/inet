@@ -289,11 +289,11 @@ void GateSchedulingConfigurator::addGateScheduling(StreamReservation& streamRese
     EV_DEBUG << "Allocating gate scheduling for stream reservation" << EV_FIELD(source) << EV_FIELD(destination) << EV_FIELD(priority) << EV_FIELD(packetLength) << EV_FIELD(datarate) << EV_FIELD(gateCycleDuration, gateCycleDuration.ustr()) << EV_FIELD(startOffset, startOffset.ustr()) << EV_FIELD(startIndex) << EV_FIELD(endIndex) << EV_ENDL;
     for (int index = startIndex; index < endIndex; index++) {
         simtime_t startTime = startOffset + index * streamReservation.packetInterval;
-        addGateSchedulingForPathFragments(streamReservation, source->getFullName(), startTime);
+        addGateSchedulingForPathFragments(streamReservation, source->getFullName(), startTime, index);
     }
 }
 
-void GateSchedulingConfigurator::addGateSchedulingForPathFragments(StreamReservation& streamReservation, std::string startNetworkNodeName, simtime_t startTime)
+void GateSchedulingConfigurator::addGateSchedulingForPathFragments(StreamReservation& streamReservation, std::string startNetworkNodeName, simtime_t startTime, int index)
 {
     auto destination = streamReservation.destination->module;
     auto priority = streamReservation.priority;
