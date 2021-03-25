@@ -66,6 +66,8 @@ void DscpMarker::handleMessage(cMessage *message)
 
 void DscpMarker::pushPacket(Packet *packet, cGate *inputGate)
 {
+    Enter_Method("pushPacket");
+    take(packet);
     numRcvd++;
     int dscp = dscps.at(inputGate->getIndex());
     if (markPacket(packet, dscp)) {

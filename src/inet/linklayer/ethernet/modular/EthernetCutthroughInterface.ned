@@ -43,7 +43,7 @@ module EthernetCutthroughInterface extends NetworkInterface like IEthernetInterf
         output upperLayerOut;
         input cutthroughIn;
         output cutthroughOut;
-        inout phys;
+        inout phys @labels(EthernetSignal);
     submodules:
         macLayer: <default("EthernetMacLayer")> like IEthernetMacLayer {
             parameters:

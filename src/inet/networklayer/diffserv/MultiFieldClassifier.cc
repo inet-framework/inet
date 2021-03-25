@@ -48,16 +48,12 @@ namespace inet {
 
 using namespace DiffservUtil;
 
-bool MultiFieldClassifier::PacketDissectorCallback::matches(const Packet *packet)
+bool MultiFieldClassifier::PacketDissectorCallback::matches(Packet *packet)
 {
     matchesL3 = matchesL4 = false;
     dissect = true;
-    const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();
-    auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
     PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, *this);
-    auto copy = packet->dup();
-    packetDissector.dissectPacket(copy, protocol);
-    delete copy;
+    packetDissector.dissectPacket(packet);
     return matchesL3 && matchesL4;
 }
 

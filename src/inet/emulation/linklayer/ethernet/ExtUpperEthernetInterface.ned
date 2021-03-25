@@ -34,7 +34,7 @@ module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
     gates:
         input cutthroughIn @loose;
         output cutthroughOut @loose;
-        inout phys @labels(EtherFrame);
+        inout phys @labels(EthernetSignal);
     submodules:
         tap: ExtEthernetTapDevice {
             parameters:

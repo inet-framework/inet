@@ -28,9 +28,10 @@ import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IMacAddressTable;
 import inet.linklayer.contract.ISpanningTree;
 import inet.linklayer.ethernet.contract.IEthernetLayer;
+import inet.linklayer.ieee8021q.IIeee8021qLayer;
+import inet.linklayer.ieee8021r.IIeee8021rLayer;
 import inet.networklayer.common.InterfaceTable;
 import inet.protocolelement.contract.IProtocolLayer;
-
 
 //
 // Model of an Ethernet switch.
@@ -109,10 +110,10 @@ module EthernetSwitch
         ethernet: <default("")> like IEthernetLayer if typename != "" {
             @display("p=500,425");
         }
-        ieee8021q: <default("Ieee8021qProtocol")> like IProtocolLayer if typename != "" {
+        ieee8021q: <default("Ieee8021qProtocol")> like IIeee8021qLayer if typename != "" {
             @display("p=700,425");
         }
-        ieee8021r: <default("Ieee8021rProtocol")> like IProtocolLayer if typename != "" {
+        ieee8021r: <default("Ieee8021rProtocol")> like IIeee8021rLayer if typename != "" {
             @display("p=900,425");
         }
         cutthrough: MessageDispatcher if enableCutthrough {
