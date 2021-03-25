@@ -57,7 +57,7 @@ class INET_API MultiFieldClassifier : public queueing::PacketClassifierBase
         PacketDissectorCallback() {}
         virtual ~PacketDissectorCallback() {}
 
-        bool matches(const Packet *packet);
+        bool matches(Packet *packet);
 
         virtual bool shouldDissectProtocolDataUnit(const Protocol *protocol) override;
         virtual void startProtocolDataUnit(const Protocol *protocol) override {}

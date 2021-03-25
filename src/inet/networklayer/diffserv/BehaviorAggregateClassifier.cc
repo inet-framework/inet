@@ -47,14 +47,12 @@ Define_Module(BehaviorAggregateClassifier);
 
 simsignal_t BehaviorAggregateClassifier::pkClassSignal = registerSignal("pkClass");
 
-bool BehaviorAggregateClassifier::PacketDissectorCallback::matches(const Packet *packet)
+bool BehaviorAggregateClassifier::PacketDissectorCallback::matches(Packet *packet)
 {
     dissect = true;
     matches_ = false;
     PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, *this);
-    auto copy = packet->dup();
-    packetDissector.dissectPacket(copy);
-    delete copy;
+    packetDissector.dissectPacket(packet);
     return matches_;
 }
 
