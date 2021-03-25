@@ -322,7 +322,6 @@ void GateSchedulingConfigurator::addGateSchedulingForPathFragments(StreamReserva
                     simtime_t propagationDelay = channel != nullptr ? channel->getDelay() : 0;
                     auto gate = networkInterface->findModuleByPath(".macLayer.queue.gate[0]"); // KLUDGE: to check for gate scheduling
                     if (gate != nullptr) {
-                        int index = gate->getIndex();
                         simtime_t gateOpenDuration = transmissionDuration;
                         simtime_t gateOpenTime = nextGateOpenTime;
                         simtime_t gateCloseTime = gateOpenTime + gateOpenDuration;
