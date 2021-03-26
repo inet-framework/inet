@@ -43,7 +43,7 @@ module EthernetPhyLayer like IEthernetPhyLayer
             @display("p=200,100");
         }
         interFrameGapInserter: InterpacketGapInserter {
-            duration = default(96s / dropUnit(bitrate));
+            duration = default(96s / dropUnit(bitrate));  // 96 bit / <bitrate> bps
             @display("p=200,200");
         }
         outboundEmitter: <default("PacketEmitter")> like IPacketFlow {
