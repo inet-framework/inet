@@ -1,7 +1,4 @@
-| CI Status                |                                      |
-|--------------------------|-------------------------------------:|
-| Build and tests          | [![GitHub badge][github-badge]][1]   |
-| Feature enablement tests | [![CircleCI badge][circle-badge]][2] |
+[![badge 1][badge-1]][1] [![badge 2][badge-2]][2]
 
 INET Framework for OMNEST/OMNeT++
 =================================
@@ -55,8 +52,8 @@ either in the IDE or using the inet_featuretool then regenerate the INET makefil
 using 'make makefiles'.
 
 
-[github-badge]: https://github.com/inet-framework/inet/workflows/Build%20and%20tests/badge.svg?branch=master
-[circle-badge]: https://circleci.com/gh/inet-framework/inet/tree/master.svg?style=svg
+[badge-1]: https://github.com/inet-framework/inet/workflows/Build%20and%20tests/badge.svg?branch=master
+[badge-2]: https://github.com/inet-framework/inet/workflows/Feature%20tests/badge.svg?branch=master
 
 [1]: https://github.com/inet-framework/inet/actions?query=workflow%3A%22Build+and+tests%22
-[2]: https://circleci.com/gh/inet-framework/workflows/inet/tree/master
+[2]: https://github.com/inet-framework/inet/actions?query=workflow%3A%22Feature+tests%22
