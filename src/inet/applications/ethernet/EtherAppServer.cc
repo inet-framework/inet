@@ -26,6 +26,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 
 namespace inet {
@@ -92,6 +93,7 @@ void EtherAppServer::socketDataArrived(Ieee8022LlcSocket *, Packet *msg)
     emit(packetReceivedSignal, msg);
 
     MacAddress srcAddr = msg->getTag<MacAddressInd>()->getSrcAddress();
+    int srcInterfaceId = msg->getTag<InterfaceInd>()->getInterfaceId();
     int srcSap = msg->getTag<Ieee802SapInd>()->getSsap();
     long requestId = req->getRequestId();
     long replyBytes = req->getResponseBytes();
@@ -113,16 +115,17 @@ void EtherAppServer::socketDataArrived(Ieee8022LlcSocket *, Packet *msg)
 
         EV_INFO << "Send response `" << outPacket->getName() << "' to " << srcAddr << " ssap=" << localSap << " dsap=" << srcSap << " length=" << l << "B requestId=" << requestId << "\n";
 
-        sendPacket(outPacket, srcAddr, srcSap);
+        sendPacket(outPacket, srcInterfaceId, srcAddr, srcSap);
     }
 
     delete msg;
 }
 
-void EtherAppServer::sendPacket(Packet *datapacket, const MacAddress& destAddr, int destSap)
+void EtherAppServer::sendPacket(Packet *datapacket, int interfaceId, const MacAddress& destAddr, int destSap)
 {
-    datapacket->addTagIfAbsent<MacAddressReq>()->setDestAddress(destAddr);
-    auto ieee802SapReq = datapacket->addTagIfAbsent<Ieee802SapReq>();
+    datapacket->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
+    datapacket->addTag<MacAddressReq>()->setDestAddress(destAddr);
+    auto ieee802SapReq = datapacket->addTag<Ieee802SapReq>();
     ieee802SapReq->setSsap(localSap);
     ieee802SapReq->setDsap(destSap);
 
