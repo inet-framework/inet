@@ -28,6 +28,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
@@ -51,6 +52,7 @@ void EtherAppClient::initialize(int stage)
         reqLength = &par("reqLength");
         respLength = &par("respLength");
         sendInterval = &par("sendInterval");
+        interfaceTable.reference(this, "interfaceTableModule", true);
 
         localSap = par("localSAP");
         remoteSap = par("remoteSAP");
@@ -77,7 +79,8 @@ void EtherAppClient::handleMessageWhenUp(cMessage *msg)
     if (msg->isSelfMessage()) {
         if (msg->getKind() == START) {
             EV_DEBUG << getFullPath() << " registering DSAP " << localSap << "\n";
-            llcSocket.open(-1, localSap);
+            int interfaceId = CHK(interfaceTable->findInterfaceByName(par("interface")))->getInterfaceId();
+            llcSocket.open(interfaceId, localSap);
 
             destMacAddress = resolveDestMacAddress();
             // if no dest address given, nothing to do

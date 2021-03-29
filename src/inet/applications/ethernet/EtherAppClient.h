@@ -20,10 +20,12 @@
 #define __INET_ETHERAPPCLIENT_H
 
 #include "inet/applications/base/ApplicationBase.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocket.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
@@ -44,6 +46,7 @@ class INET_API EtherAppClient : public ApplicationBase, public Ieee8022LlcSocket
     int localSap = -1;
     int remoteSap = -1;
     MacAddress destMacAddress;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
 
     // self messages
     cMessage *timerMsg = nullptr;
