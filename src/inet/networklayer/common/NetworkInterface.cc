@@ -96,14 +96,15 @@ void NetworkInterface::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         upperLayerOut = gate("upperLayerOut");
+        subscribe(POST_MODEL_CHANGE, this);
         if (hasGate("phys$i")) {
-            rxIn = gate("phys$i");
+            rxIn = gate("phys$i")->getPathEndGate();
             rxTransmissionChannel = rxIn->findIncomingTransmissionChannel();
             if (rxTransmissionChannel != nullptr)
                 rxTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
         }
         if (hasGate("phys$o")) {
-            txOut = gate("phys$o");
+            txOut = gate("phys$o")->getPathStartGate();
             txTransmissionChannel = txOut->findTransmissionChannel();
             if (txTransmissionChannel != nullptr)
                 txTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
