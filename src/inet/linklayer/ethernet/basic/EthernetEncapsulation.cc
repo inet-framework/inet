@@ -97,6 +97,11 @@ void EthernetEncapsulation::initialize(int stage)
     }
 }
 
+void EthernetEncapsulation::registerMyProtocol()
+{
+    registerProtocol(Protocol::ethernetMac, gate("lowerLayerOut"), gate("lowerLayerIn"));
+}
+
 void EthernetEncapsulation::processCommandFromHigherLayer(Request *msg)
 {
     auto ctrl = msg->getControlInfo();
