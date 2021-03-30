@@ -263,6 +263,12 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     /** @name Tag related functions */
     //@{
     /**
+     * Returns the number of protocol data structures.
+     */
+    int getNumProtocolData() const {
+        return protocolDataSet.getNumTags();
+    }
+    /**
      * Returns the protocol data at the given index.
      */
     const InterfaceProtocolData *getProtocolData(int index) const {
