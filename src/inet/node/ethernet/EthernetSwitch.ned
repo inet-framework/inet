@@ -93,9 +93,13 @@ module EthernetSwitch
         stp: <spanningTreeProtocol> like ISpanningTree if hasStp {
             @display("p=500,100");
         }
-        nr: MessageDispatcher {
+        nc: MessageDispatcher {
             parameters:
                 @display("p=800,150;b=1200,5");
+        }
+        cr: MessageDispatcher {
+            parameters:
+                @display("p=800,240;b=1200,5");
         }
         li: MessageDispatcher {
             parameters:
@@ -142,11 +146,17 @@ module EthernetSwitch
         rl.out++ --> li.in++;
         li.out++ --> rl.in++;
 
-        llc.upperLayerOut --> nr.in++;
-        nr.out++ --> llc.upperLayerIn;
+        llc.upperLayerOut --> nc.in++;
+        nc.out++ --> llc.upperLayerIn;
 
-        bridging.upperLayerOut --> llc.lowerLayerIn;
-        llc.lowerLayerOut --> bridging.upperLayerIn;
+        nc.out++ --> cr.in++;
+        cr.out++ --> nc.in++;
+
+        cr.out++ --> llc.lowerLayerIn;
+        llc.lowerLayerOut --> cr.in++;
+
+        cr.out++ --> bridging.upperLayerIn;
+        bridging.upperLayerOut --> cr.in++;
 
         ieee8021q.upperLayerOut --> rl.in++ if exists(ieee8021q);
         rl.out++ --> ieee8021q.upperLayerIn if exists(ieee8021q);
@@ -167,8 +177,8 @@ module EthernetSwitch
         }
 
         if hasStp {
-            stp.relayIn <-- nr.out++;
-            stp.relayOut --> nr.in++;
+            stp.relayIn <-- nc.out++;
+            stp.relayOut --> nc.in++;
         }
 }
 
