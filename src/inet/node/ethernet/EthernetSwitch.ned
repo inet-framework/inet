@@ -60,7 +60,6 @@ module EthernetSwitch
         **.interfaceTableModule = default(absPath(".interfaceTable"));
         **.macTableModule = default(absPath(".macTable"));
 
-        bridging.hasStp = hasStp;
         llc.registerProtocol = true;
         eth[*].mac.promiscuous = default(true);
         ethernet.*.promiscuous = default(true);
