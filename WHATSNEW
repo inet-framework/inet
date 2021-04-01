@@ -1,6 +1,15 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-4.3.1 (April 2021) - Stable
+--------------------------------
+
+Minor bugfixes.
+
+  - fixed bug #646
+  - fixed calling base ClockUserModuleMixin class from initialize
+
+
 INET-4.3 (January 2021) - Stable
 ---------------------------------
 
