@@ -18,6 +18,7 @@
 package inet.linklayer.ethernet.modular;
 
 import inet.linklayer.ethernet.contract.IEthernetMacLayer;
+import inet.protocolelement.contract.IPacketLifeTimer;
 import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 import inet.queueing.contract.IPacketQueue;
@@ -28,6 +29,7 @@ module EthernetMacLayer like IEthernetMacLayer
     parameters:
         double bitrate @unit(bps);
         *.bitrate = default(bitrate);
+        lifetimer.collectionModule = default("^.queue");
         outboundEmitter.signalName = "packetSentToLower";
         outboundEmitter.direction = "outbound";
         inboundEmitter.signalName = "packetReceivedFromLower";
@@ -39,6 +41,9 @@ module EthernetMacLayer like IEthernetMacLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
+        lifetimer: <default("")> like IPacketLifeTimer if typename != "" {
+            @display("p=100,100;is=s");
+        }
         queue: <default("PacketQueue")> like IPacketQueue if typename != "" {
             @display("p=200,100");
         }

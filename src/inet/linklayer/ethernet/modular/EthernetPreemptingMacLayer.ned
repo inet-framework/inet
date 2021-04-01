@@ -18,17 +18,19 @@
 package inet.linklayer.ethernet.modular;
 
 import inet.linklayer.ethernet.contract.IEthernetMacLayer;
-import inet.queueing.server.PreemptingServer;
+import inet.protocolelement.contract.IPacketLifeTimer;
 import inet.queueing.classifier.PacketClassifier;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.scheduler.PriorityScheduler;
+import inet.queueing.server.PreemptingServer;
 
 module EthernetPreemptingMacLayer like IEthernetMacLayer
 {
     parameters:
         volatile double bitrate @unit(bps);
         *.bitrate = default(bitrate);
+        lifetimer.collectionModule = default("^.queue");
         @display("i=block/layer");
     gates:
         input upperLayerIn;
@@ -36,6 +38,9 @@ module EthernetPreemptingMacLayer like IEthernetMacLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
+        lifetimer: <default("")> like IPacketLifeTimer if typename != "" {
+            @display("p=100,100;is=s");
+        }
         queue: <default("OmittedPacketQueue")> like IPacketQueue if typename != "" {
             @display("p=200,100");
         }
