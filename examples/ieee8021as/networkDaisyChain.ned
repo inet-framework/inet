@@ -3,14 +3,14 @@
 //           Henning Puttnies
 //           Peter Danielis
 //           University of Rostock, Germany
-//  
+//
 
-package ieee8021as.simulations;
+package inet.examples.ieee8021as;
 
-import ieee8021as.GPtpBridge;
-import ieee8021as.GPtpMaster;
-import ieee8021as.GPtpSlave;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.linklayer.ieee8021as.GptpBridge;
+import inet.linklayer.ieee8021as.GptpMaster;
+import inet.linklayer.ieee8021as.GptpSlave;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 
 network NetworkDaisyChain
 {
@@ -22,56 +22,56 @@ network NetworkDaisyChain
             delay = 25ns;		// Length of connection is 5 meters
         }
     submodules:
-        gPtpBridge0: GPtpBridge {
+        gptpBridge0: GptpBridge {
             @display("p=264,162");
         }
-        gPtpBridge1: GPtpBridge {
+        gptpBridge1: GptpBridge {
             @display("p=264,258");
         }
-        gPtpBridge2: GPtpBridge {
+        gptpBridge2: GptpBridge {
             @display("p=264,349");
         }
-        gPtpMaster: GPtpMaster {
+        gptpMaster: GptpMaster {
             @display("p=264,55");
         }
-        gPtpSlave0: GPtpSlave {
+        gptpSlave0: GptpSlave {
             @display("p=408,94");
         }
-        gPtpSlave1: GPtpSlave {
+        gptpSlave1: GptpSlave {
             @display("p=408,182");
         }
-        gPtpSlave2: GPtpSlave {
+        gptpSlave2: GptpSlave {
             @display("p=408,259");
         }
-        gPtpSlave3: GPtpSlave {
+        gptpSlave3: GptpSlave {
             @display("p=408,375");
         }
-        gPtpSlave4: GPtpSlave {
+        gptpSlave4: GptpSlave {
             @display("p=124,375");
         }
-        gPtpSlave5: GPtpSlave {
+        gptpSlave5: GptpSlave {
             @display("p=124,298");
         }
-        gPtpSlave6: GPtpSlave {
+        gptpSlave6: GptpSlave {
             @display("p=124,205");
         }
-        gPtpSlave7: GPtpSlave {
+        gptpSlave7: GptpSlave {
             @display("p=124,94");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=51,33");
         }
     connections:
-       
-        gPtpMaster.ethg++ <--> Ethernet100 <--> gPtpBridge0.ethg++;
-        gPtpBridge0.ethg++ <--> Ethernet100 <--> gPtpSlave0.ethg++;
-        gPtpBridge0.ethg++ <--> Ethernet100 <--> gPtpSlave1.ethg++;
-        gPtpBridge0.ethg++ <--> Ethernet100 <--> gPtpSlave7.ethg++;
-        gPtpBridge0.ethg++ <--> Ethernet100 <--> gPtpBridge1.ethg++;
-        gPtpBridge1.ethg++ <--> Ethernet100 <--> gPtpSlave2.ethg++;
-        gPtpBridge1.ethg++ <--> Ethernet100 <--> gPtpSlave6.ethg++;
-        gPtpBridge1.ethg++ <--> Ethernet100 <--> gPtpSlave5.ethg++;
-        gPtpBridge1.ethg++ <--> Ethernet100 <--> gPtpBridge2.ethg++;
-        gPtpBridge2.ethg++ <--> Ethernet100 <--> gPtpSlave3.ethg++;
-        gPtpBridge2.ethg++ <--> Ethernet100 <--> gPtpSlave4.ethg++;
+
+        gptpMaster.ethg++ <--> Ethernet100 <--> gptpBridge0.ethg++;
+        gptpBridge0.ethg++ <--> Ethernet100 <--> gptpSlave0.ethg++;
+        gptpBridge0.ethg++ <--> Ethernet100 <--> gptpSlave1.ethg++;
+        gptpBridge0.ethg++ <--> Ethernet100 <--> gptpSlave7.ethg++;
+        gptpBridge0.ethg++ <--> Ethernet100 <--> gptpBridge1.ethg++;
+        gptpBridge1.ethg++ <--> Ethernet100 <--> gptpSlave2.ethg++;
+        gptpBridge1.ethg++ <--> Ethernet100 <--> gptpSlave6.ethg++;
+        gptpBridge1.ethg++ <--> Ethernet100 <--> gptpSlave5.ethg++;
+        gptpBridge1.ethg++ <--> Ethernet100 <--> gptpBridge2.ethg++;
+        gptpBridge2.ethg++ <--> Ethernet100 <--> gptpSlave3.ethg++;
+        gptpBridge2.ethg++ <--> Ethernet100 <--> gptpSlave4.ethg++;
 }

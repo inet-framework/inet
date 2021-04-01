@@ -3,44 +3,42 @@
 //           Henning Puttnies
 //           Peter Danielis
 //           University of Rostock, Germany
-// 
+//
 
-package ieee8021as.simulations;
+package inet.examples.ieee8021as;
 
-import ieee8021as.GPtpBridge;
-import ieee8021as.GPtpMaster;
-import ieee8021as.GPtpSlave;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.node.dymo.DYMORouter;
+import inet.linklayer.ieee8021as.GptpBridge;
+import inet.linklayer.ieee8021as.GptpMaster;
+import inet.linklayer.ieee8021as.GptpSlave;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
-
 
 network NetworkWithCrossTraffic
 {
     @display("bgb=1134,360");
     submodules:
-        gPtpBridge0: GPtpBridge {
+        gptpBridge0: GptpBridge {
             @display("p=230,179");
         }
-        gPtpMaster: GPtpMaster {
+        gptpMaster: GptpMaster {
             @display("p=91,180");
         }
-        gPtpBridge1: GPtpBridge {
+        gptpBridge1: GptpBridge {
             @display("p=370,179");
         }
-        gPtpBridge2: GPtpBridge {
+        gptpBridge2: GptpBridge {
             @display("p=510,179");
         }
-        gPtpBridge3: GPtpBridge {
+        gptpBridge3: GptpBridge {
             @display("p=651,179");
         }
-        gPtpBridge4: GPtpBridge {
+        gptpBridge4: GptpBridge {
             @display("p=794,179");
         }
-        gPtpBridge5: GPtpBridge {
+        gptpBridge5: GptpBridge {
             @display("p=927,179");
         }
-        gPtpSlave: GPtpSlave {
+        gptpSlave: GptpSlave {
             @display("p=1087,180");
         }
         standardHost0: StandardHost {
@@ -79,27 +77,27 @@ network NetworkWithCrossTraffic
         standardHost11: StandardHost {
             @display("p=927,305");
         }
-        configurator: IPv4NetworkConfigurator {
+        configurator: Ipv4NetworkConfigurator {
             @display("p=83,38");
         }
     connections:
-        gPtpMaster.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge0.ethg++;
-        standardHost0.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge0.ethg++;
-        standardHost1.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge0.ethg++;
-        gPtpBridge0.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge1.ethg++;
-        standardHost2.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge1.ethg++;
-        standardHost3.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge1.ethg++;
-        gPtpBridge1.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge2.ethg++;
-        standardHost4.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge2.ethg++;
-        standardHost5.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge2.ethg++;
-        gPtpBridge2.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge3.ethg++;
-        standardHost6.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge3.ethg++;
-        standardHost7.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge3.ethg++;
-        gPtpBridge3.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge4.ethg++;
-        standardHost8.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge4.ethg++;
-        standardHost9.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge4.ethg++;
-        gPtpBridge4.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge5.ethg++;
-        standardHost10.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge5.ethg++;
-        standardHost11.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpBridge5.ethg++;
-        gPtpBridge5.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gPtpSlave.ethg++;
+        gptpMaster.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge0.ethg++;
+        standardHost0.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge0.ethg++;
+        standardHost1.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge0.ethg++;
+        gptpBridge0.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge1.ethg++;
+        standardHost2.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge1.ethg++;
+        standardHost3.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge1.ethg++;
+        gptpBridge1.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge2.ethg++;
+        standardHost4.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge2.ethg++;
+        standardHost5.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge2.ethg++;
+        gptpBridge2.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge3.ethg++;
+        standardHost6.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge3.ethg++;
+        standardHost7.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge3.ethg++;
+        gptpBridge3.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge4.ethg++;
+        standardHost8.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge4.ethg++;
+        standardHost9.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge4.ethg++;
+        gptpBridge4.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge5.ethg++;
+        standardHost10.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge5.ethg++;
+        standardHost11.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpBridge5.ethg++;
+        gptpBridge5.ethg++ <--> {  datarate = 100Mbps; delay = 10ms; } <--> gptpSlave.ethg++;
 }
