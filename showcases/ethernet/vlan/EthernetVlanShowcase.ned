@@ -31,22 +31,14 @@ network EthernetVlanShowcase
         host1: StandardHost {
             @display("p=250,150");
         }
-        switch1: EthernetSwitch {
-            @display("p=450,150");
-        }
-        switch2: EthernetSwitch {
-            @display("p=650,150");
-        }
         host2: StandardHost {
-            @display("p=850,150");
+            @display("p=450,150");
         }
         visualizer: IntegratedCanvasVisualizer {
             @display("p=100,200;is=s");
         }
     connections:
-        host1.ethg++ <--> Eth100M <--> switch1.ethg++;
-        host2.ethg++ <--> Eth100M <--> switch2.ethg++;
-        switch1.ethg++ <--> Eth100M <--> switch2.ethg++;
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
 }
 
 network EthernetVlanShowcase2

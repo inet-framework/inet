@@ -286,3 +286,41 @@ Here is a TCP packet displayed in Qtenv's packet inspector:
 
 .. video:: media/vlan1.mp4
    :width: 100%
+
+VLAN Between Virtual Interfaces
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This configuration demonstrates how to use VLANs with virtual interfaces. It uses the following network:
+
+.. figure:: media/network7.png
+   :align: center
+
+The network contains two :ned:`StandardHost`'s connected with 100Mbps Ethernet. Both hosts have a regular Ethernet interface (``eth0``) and a virtual interface (``virt0``), which tunnels packets through the Ethernet interface.
+
+.. figure:: media/virt.png
+   :align: center
+
+The simulation is defined in the ``VirtualInterfaces`` configuration in omnetpp.ini:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: Config VirtualInterfaces
+   :end-at: UdpBasicAppData-virt
+   :language: ini
+
+Two UDP apps in host1 generate traffic, one of them for host2's eth0 and the other for host2's virt0 interface.
+The virtual interface is configured to assign packets to VLAN 1.
+
+so
+
+- two hosts connected with 100Mbps Ethernet
+- both have a regular Ethernet interface and a virtual interface which uses the Ethernet interface
+- host1 has two udp apps
+- one of them sends packets to host2's Ethernet interface
+- the other to host2's virt interface
+- the virtual interface puts vlan tags on outgoing (?) packets
+- so the packets sent to the ethernet interface doesn't have VLAN tags
+- the ones sent to the virt interface do
+- the configurator can assign addresses to virtual interfaces automatically, but can't set up routes for them, because it doesn't know the topology (which real interface they use) so routes for the virtual interfaces need to be added manually
+- it doesnt know the topology...i.e. how the virtual interfaces are connected
+- this is about how to use vlans with virtual interfaces
+- the application doesnt know anything about the vlan the packets are assigned to (they could)
