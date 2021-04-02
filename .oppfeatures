@@ -474,6 +474,20 @@
         linkerFlags = ""
         />
     <feature
+        id = "Ieee8021r"
+        name = "IEEE 802.1r"
+        description = "Provides IEEE 802.1r."
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.ieee8021r
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_IEEE8021R"
+        linkerFlags = ""
+        />
+    <feature
         id = "Ieee8022"
         name = "IEEE 802.2"
         description = ""
