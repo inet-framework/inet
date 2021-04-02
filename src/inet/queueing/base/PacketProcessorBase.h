@@ -52,8 +52,11 @@ class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacke
 
     virtual void animateSend(Packet *packet, cGate *gate, const SendOptions& sendOptions) const;
     virtual void animateSendPacket(Packet *packet, cGate *gate) const;
+    virtual void animateSendPacketStart(Packet *packet, cGate *gate, bps datarate, long transmissionId) const;
     virtual void animateSendPacketStart(Packet *packet, cGate *gate, bps datarate, const SendOptions& sendOptions) const;
+    virtual void animateSendPacketEnd(Packet *packet, cGate *gate, long transmissionId) const;
     virtual void animateSendPacketEnd(Packet *packet, cGate *gate, const SendOptions& sendOptions) const;
+    virtual void animateSendPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength, long transmissionId) const;
     virtual void animateSendPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength, const SendOptions& sendOptions) const;
 
   public:

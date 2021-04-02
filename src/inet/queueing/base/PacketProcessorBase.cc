@@ -233,7 +233,20 @@ void PacketProcessorBase::animateSend(Packet *packet, cGate *gate, const SendOpt
 
 void PacketProcessorBase::animateSendPacket(Packet *packet, cGate *gate) const
 {
-    animateSend(packet, gate, SendOptions());
+    SendOptions sendOptions;
+    sendOptions.duration_ = 0;
+    sendOptions.remainingDuration = 0;
+    animateSend(packet, gate, sendOptions);
+}
+
+void PacketProcessorBase::animateSendPacketStart(Packet *packet, cGate *gate, bps datarate, long transmissionId) const
+{
+    simtime_t duration = s(packet->getDataLength() / datarate).get();
+    SendOptions sendOptions;
+    sendOptions.duration_ = duration;
+    sendOptions.remainingDuration = duration;
+    sendOptions.transmissionId(transmissionId);
+    animateSendPacketStart(packet, gate, datarate, sendOptions);
 }
 
 void PacketProcessorBase::animateSendPacketStart(Packet *packet, cGate *gate, bps datarate, const SendOptions& sendOptions) const
@@ -241,9 +254,23 @@ void PacketProcessorBase::animateSendPacketStart(Packet *packet, cGate *gate, bp
     animateSend(packet, gate, sendOptions);
 }
 
+void PacketProcessorBase::animateSendPacketEnd(Packet *packet, cGate *gate, long transmissionId) const
+{
+    SendOptions sendOptions;
+    sendOptions.updateTx(transmissionId, 0);
+    animateSendPacketEnd(packet, gate, sendOptions);
+}
+
 void PacketProcessorBase::animateSendPacketEnd(Packet *packet, cGate *gate, const SendOptions& sendOptions) const
 {
     animateSend(packet, gate, sendOptions);
+}
+
+void PacketProcessorBase::animateSendPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength, long transmissionId) const
+{
+    SendOptions sendOptions;
+    sendOptions.transmissionId(transmissionId);
+    animateSendPacketProgress(packet, gate, datarate, position, extraProcessableLength, sendOptions);
 }
 
 void PacketProcessorBase::animateSendPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength, const SendOptions& sendOptions) const

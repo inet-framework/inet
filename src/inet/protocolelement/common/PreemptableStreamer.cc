@@ -147,7 +147,7 @@ Packet *PreemptableStreamer::pullPacketStart(cGate *gate, bps datarate)
     streamStart = simTime();
     auto packet = streamedPacket->dup();
     EV_INFO << "Starting streaming packet" << EV_FIELD(packet) << EV_ENDL;
-    animateSendPacketStart(packet, outputGate, streamDatarate, SendOptions().transmissionId(streamedPacket->getId()));
+    animateSendPacketStart(packet, outputGate, streamDatarate, streamedPacket->getId());
     updateDisplayString();
     return packet;
 }
@@ -183,7 +183,7 @@ Packet *PreemptableStreamer::pullPacketEnd(cGate *gate)
         remainingPacketFragmentTag->setFragmentNumber(fragmentNumber + 1);
     }
     handlePacketProcessed(packet);
-    animateSendPacketEnd(packet, outputGate, SendOptions().transmissionId(streamedPacket->getId()));
+    animateSendPacketEnd(packet, outputGate, streamedPacket->getId());
     streamedPacket = nullptr;
     updateDisplayString();
     return packet;
@@ -195,7 +195,7 @@ Packet *PreemptableStreamer::pullPacketProgress(cGate *gate, bps datarate, b pos
     streamDatarate = datarate;
     EV_INFO << "Progressing streaming" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     auto packet = streamedPacket->dup();
-    animateSendPacketProgress(packet, outputGate, streamDatarate, position, extraProcessableLength, SendOptions().transmissionId(streamedPacket->getId()));
+    animateSendPacketProgress(packet, outputGate, streamDatarate, position, extraProcessableLength, streamedPacket->getId());
     updateDisplayString();
     return packet;
 }
