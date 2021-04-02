@@ -431,6 +431,20 @@
         linkerFlags = ""
         />
     <feature
+        id = "Ieee8021as"
+        name = "IEEE 802.1as"
+        description = "Provides IEEE 802.1as."
+        initiallyEnabled = "true"
+        requires = "Clock Ethernet"
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.ieee8021as
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_IEEE8021AS"
+        linkerFlags = ""
+        />
+    <feature
         id = "Ieee8021d"
         name = "IEEE 802.1d"
         description = "STP and RSTP (Spanning Tree Protocol, Rapid Spanning Tree Protocol)."
