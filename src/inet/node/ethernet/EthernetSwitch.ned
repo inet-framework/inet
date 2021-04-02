@@ -19,6 +19,7 @@
 
 package inet.node.ethernet;
 
+import inet.applications.contract.IApp;
 import inet.clock.contract.IClock;
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
@@ -51,6 +52,7 @@ module EthernetSwitch
         int numPcapRecorders = default(0);
         bool hasStatus = default(false);
         bool hasStp = default(false);
+        bool hasGptp = default(false);
         bool enableCutthrough = default(false);
         string fcsMode @enum("declared","computed") = default("declared");
         string spanningTreeProtocol = default("Stp");
@@ -80,7 +82,7 @@ module EthernetSwitch
         status: NodeStatus if hasStatus {
             @display("p=100,400;is=s");
         }
-        clock: <default("")> like IClock if typename != "" {
+        clock: <default(hasGptp ? "SettableClock" : "")> like IClock if typename != "" {
             @display("p=100,500;is=s");
         }
         pcapRecorder[numPcapRecorders]: PcapRecorder {
@@ -88,6 +90,10 @@ module EthernetSwitch
         }
         stp: <spanningTreeProtocol> like ISpanningTree if hasStp {
             @display("p=500,75");
+        }
+        gptp: <default("Gptp")> like IApp if hasGptp {
+            @display("p=700,75");
+	        gptpNodeType = default("BRIDGE_NODE"); // @enum("gptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE
         }
         sc: MessageDispatcher {
             @display("p=800,150;b=1200,5");
@@ -173,6 +179,11 @@ module EthernetSwitch
         if hasStp {
             stp.relayIn <-- sc.out++;
             stp.relayOut --> sc.in++;
+        }
+
+        if hasGptp {
+            gptp.socketOut --> sc.in++;
+            sc.out++ --> gptp.socketIn;
         }
 }
 
