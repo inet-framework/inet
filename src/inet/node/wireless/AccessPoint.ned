@@ -61,55 +61,46 @@ module AccessPoint
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
         status: NodeStatus if hasStatus {
-            parameters:
-                @display("p=100,100;is=s");
+            @display("p=100,100;is=s");
         }
-
         interfaceTable: InterfaceTable {
-            parameters:
-                @display("p=100,200;is=s");
-        }
-        mobility: <default("StationaryMobility")> like IMobility {
-            parameters:
-                @display("p=100,400;is=s");
+            @display("p=100,200;is=s");
         }
         macTable: <default("MacAddressTable")> like IMacAddressTable {
-            parameters:
-                @display("p=100,300;is=s");
+            @display("p=100,300;is=s");
+        }
+        mobility: <default("StationaryMobility")> like IMobility {
+            @display("p=100,400;is=s");
         }
         bridging: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IMacRelayUnit if sizeof(ethg)+numWlanInterfaces > 1 && typename != "" {
-            parameters:
-                @display("p=400,100");
+            @display("p=800,100");
         }
-        nl: MessageDispatcher if sizeof(ethg)+numWlanInterfaces > 1 && exists(bridging) {
-            parameters:
-                @display("p=800,200;b=1200,5,,,,1");
+        bi: MessageDispatcher if sizeof(ethg)+numWlanInterfaces > 1 && exists(bridging) {
+            @display("p=800,200;b=1200,5,,,,1");
         }
         wlan[numWlanInterfaces]: <default("Ieee80211Interface")> like IWirelessInterface {
-            parameters:
-                @display("p=250,300,row,150;q=queue");
+            @display("p=250,300,row,150;q=queue");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
-            parameters:
-                mac.promiscuous = true;
-                @display("p=850,300,row;q=txQueue");
+            mac.promiscuous = true;
+            @display("p=850,300,row;q=txQueue");
         }
     connections allowunconnected:
-        nl.out++ --> bridging.lowerLayerIn if sizeof(ethg)+numWlanInterfaces > 1 && exists(bridging);
-        nl.in++ <-- bridging.lowerLayerOut if sizeof(ethg)+numWlanInterfaces > 1 && exists(bridging);
+        bi.out++ --> bridging.lowerLayerIn if sizeof(ethg)+numWlanInterfaces > 1 && exists(bridging);
+        bi.in++ <-- bridging.lowerLayerOut if sizeof(ethg)+numWlanInterfaces > 1 && exists(bridging);
         // connections to network outside
         // wireless interfaces MUST be connected first (i.e. ports 0..numWlanInterfaces-1)
         // because broadcasts must be handled differently for wireless IFs by the bridging
         for i=0..numWlanInterfaces-1 {
             radioIn[i] --> { @display("m=s"); } --> wlan[i].radioIn;
-            wlan[i].upperLayerOut --> nl.in++ if sizeof(ethg)+numWlanInterfaces > 1 && exists(bridging);
-            wlan[i].upperLayerIn <-- nl.out++ if sizeof(ethg)+numWlanInterfaces > 1 && exists(bridging);
+            wlan[i].upperLayerOut --> bi.in++ if sizeof(ethg)+numWlanInterfaces > 1 && exists(bridging);
+            wlan[i].upperLayerIn <-- bi.out++ if sizeof(ethg)+numWlanInterfaces > 1 && exists(bridging);
         }
         // ethernet must be connected only AFTER wireless ports
         for i=0..sizeof(ethg)-1 {
             eth[i].phys <--> { @display("m=s"); } <--> ethg[i];
-            eth[i].upperLayerIn <-- nl.out++ if sizeof(ethg)+numWlanInterfaces>1;
-            eth[i].upperLayerOut --> nl.in++ if sizeof(ethg)+numWlanInterfaces>1;
+            eth[i].upperLayerIn <-- bi.out++ if sizeof(ethg)+numWlanInterfaces>1;
+            eth[i].upperLayerOut --> bi.in++ if sizeof(ethg)+numWlanInterfaces>1;
         }
 }
 

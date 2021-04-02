@@ -68,65 +68,59 @@ module EthernetSwitch
     gates:
         inout ethg[numEthInterfaces] @labels(EtherFrame-conn);
     submodules:
-        status: NodeStatus if hasStatus {
-            @display("p=100,400;is=s");
-        }
-        clock: <default("")> like IClock if typename != "" {
-            parameters:
-                @display("p=100,600;is=s");
-        }
-        l2NodeConfigurator: L2NodeConfigurator if hasStp {
-            @display("p=100,300;is=s");
+        macTable: <default("MacAddressTable")> like IMacAddressTable {
+            @display("p=100,100;is=s");
         }
         interfaceTable: InterfaceTable {
             @display("p=100,200;is=s");
         }
-        pcapRecorder[numPcapRecorders]: PcapRecorder {
+        l2NodeConfigurator: L2NodeConfigurator if hasStp {
+            @display("p=100,300;is=s");
+        }
+        status: NodeStatus if hasStatus {
+            @display("p=100,400;is=s");
+        }
+        clock: <default("")> like IClock if typename != "" {
             @display("p=100,500;is=s");
         }
-        macTable: <default("MacAddressTable")> like IMacAddressTable {
-            @display("p=100,100;is=s");
-        }
-        bridging: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IProtocolLayer {
-            @display("p=800,275;is=m");
+        pcapRecorder[numPcapRecorders]: PcapRecorder {
+            @display("p=100,600;is=s");
         }
         stp: <spanningTreeProtocol> like ISpanningTree if hasStp {
-            @display("p=500,100");
+            @display("p=500,75");
         }
-        nc: MessageDispatcher {
-            parameters:
-                @display("p=800,150;b=1200,5");
-        }
-        cr: MessageDispatcher {
-            parameters:
-                @display("p=800,240;b=1200,5");
-        }
-        li: MessageDispatcher {
-            parameters:
-                @display("p=800,500;b=1200,5");
-        }
-        eth[sizeof(ethg)]: <default(enableCutthrough ? "EthernetCutthroughInterface" : "EthernetInterface")> like IEthernetInterface {
-            parameters:
-                @display("p=250,700,row,150;q=txQueue");
+        sc: MessageDispatcher {
+            @display("p=800,150;b=1200,5");
         }
         llc: Ieee8022Llc {
-            @display("p=800,200");
+            @display("p=700,225");
         }
-        rl: MessageDispatcher {
-            parameters:
-                @display("p=800,350;b=1200,5");
+        cb: MessageDispatcher {
+            @display("p=800,300;b=1200,5");
+        }
+        bridging: <default(firstAvailable("Ieee8021dRelay","MacRelayUnit"))> like IProtocolLayer {
+            @display("p=800,375;is=m");
+        }
+        bl: MessageDispatcher {
+            @display("p=800,450;b=1200,5");
         }
         ethernet: <default("")> like IEthernetLayer if typename != "" {
-            @display("p=500,425");
+            @display("p=500,525");
         }
         ieee8021q: <default("Ieee8021qProtocol")> like IIeee8021qLayer if typename != "" {
-            @display("p=700,425");
+            @display("p=700,525");
         }
         ieee8021r: <default("Ieee8021rProtocol")> like IIeee8021rLayer if typename != "" {
-            @display("p=900,425");
+            @display("p=900,525");
+        }
+        li: MessageDispatcher {
+            @display("p=800,600;b=1200,5");
         }
         cutthrough: MessageDispatcher if enableCutthrough {
-            @display("p=800,600;b=1200,5");
+            @display("p=800,675;b=1200,5");
+        }
+        eth[sizeof(ethg)]: <default(enableCutthrough ? "EthernetCutthroughInterface" : "EthernetInterface")> like IEthernetInterface {
+            @display("p=250,750,row,150;q=txQueue");
         }
     connections:
         ethernet.lowerLayerOut --> li.in++ if exists(ethernet);
@@ -143,32 +137,32 @@ module EthernetSwitch
             eth[i].cutthroughIn <-- cutthrough.out++ if enableCutthrough;
         }
 
-        rl.out++ --> li.in++;
-        li.out++ --> rl.in++;
+        bl.out++ --> li.in++;
+        li.out++ --> bl.in++;
 
-        llc.upperLayerOut --> nc.in++;
-        nc.out++ --> llc.upperLayerIn;
+        llc.upperLayerOut --> sc.in++;
+        sc.out++ --> llc.upperLayerIn;
 
-        nc.out++ --> cr.in++;
-        cr.out++ --> nc.in++;
+        sc.out++ --> cb.in++;
+        cb.out++ --> sc.in++;
 
-        cr.out++ --> llc.lowerLayerIn;
-        llc.lowerLayerOut --> cr.in++;
+        cb.out++ --> llc.lowerLayerIn;
+        llc.lowerLayerOut --> cb.in++;
 
-        cr.out++ --> bridging.upperLayerIn;
-        bridging.upperLayerOut --> cr.in++;
+        cb.out++ --> bridging.upperLayerIn;
+        bridging.upperLayerOut --> cb.in++;
 
-        ieee8021q.upperLayerOut --> rl.in++ if exists(ieee8021q);
-        rl.out++ --> ieee8021q.upperLayerIn if exists(ieee8021q);
+        ieee8021q.upperLayerOut --> bl.in++ if exists(ieee8021q);
+        bl.out++ --> ieee8021q.upperLayerIn if exists(ieee8021q);
 
-        ieee8021r.upperLayerOut --> rl.in++ if exists(ieee8021r);
-        rl.out++ --> ieee8021r.upperLayerIn if exists(ieee8021r);
+        ieee8021r.upperLayerOut --> bl.in++ if exists(ieee8021r);
+        bl.out++ --> ieee8021r.upperLayerIn if exists(ieee8021r);
 
-        rl.out++ --> ethernet.upperLayerIn if exists(ethernet);
-        ethernet.upperLayerOut --> rl.in++ if exists(ethernet);
+        bl.out++ --> ethernet.upperLayerIn if exists(ethernet);
+        ethernet.upperLayerOut --> bl.in++ if exists(ethernet);
 
-        bridging.lowerLayerOut --> rl.in++;
-        rl.out++ --> bridging.lowerLayerIn;
+        bridging.lowerLayerOut --> bl.in++;
+        bl.out++ --> bridging.lowerLayerIn;
 
         for i=0..sizeof(ethg)-1 {
             li.out++ --> eth[i].upperLayerIn;
@@ -177,8 +171,8 @@ module EthernetSwitch
         }
 
         if hasStp {
-            stp.relayIn <-- nc.out++;
-            stp.relayOut --> nc.in++;
+            stp.relayIn <-- sc.out++;
+            stp.relayOut --> sc.in++;
         }
 }
 
