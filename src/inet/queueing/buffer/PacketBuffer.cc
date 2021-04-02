@@ -81,6 +81,8 @@ void PacketBuffer::addPacket(Packet *packet)
                     if (callback != nullptr)
                         callback->handlePacketRemoved(packet);
                 }
+                // TODO maybe the buffer should take ownership and queues should be aware of it
+                take(packet);
                 dropPacket(packet, QUEUE_OVERFLOW);
             }
         }
