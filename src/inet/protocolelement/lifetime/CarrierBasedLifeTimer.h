@@ -15,29 +15,31 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocolelement/transceiver/PacketReceiver.h"
+#ifndef __INET_CARRIERBASEDLIFETIMER_H
+#define __INET_CARRIERBASEDLIFETIMER_H
+
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/queueing/contract/IPacketCollection.h"
 
 namespace inet {
 
-Define_Module(PacketReceiver);
+using namespace inet::queueing;
 
-void PacketReceiver::handleMessageWhenUp(cMessage *message)
+class INET_API CarrierBasedLifeTimer : public cSimpleModule, cListener
 {
-    if (message->isPacket())
-        receiveSignal(check_and_cast<Signal *>(message));
-    else
-        PacketReceiverBase::handleMessageWhenUp(message);
-    updateDisplayString();
-}
+  protected:
+    NetworkInterface *networkInterface = nullptr;
+    IPacketCollection *packetCollection = nullptr;
 
-void PacketReceiver::receiveSignal(Signal *signal)
-{
-    emit(receptionEndedSignal, signal);
-    auto packet = decodePacket(signal);
-    handlePacketProcessed(packet);
-    pushOrSendPacket(packet, outputGate, consumer);
-    delete signal;
-}
+  protected:
+    virtual void initialize(int stage) override;
+    virtual void clearCollection();
+
+  public:
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
+};
 
 } // namespace inet
+
+#endif
 

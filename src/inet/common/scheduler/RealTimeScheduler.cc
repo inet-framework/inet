@@ -32,9 +32,9 @@
 #endif // if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 
 #ifdef __linux__
-#define UI_REFRESH_TIME    100000 /* refresh time of the UI in us */
+#define UI_REFRESH_TIME    100000000
 #else
-#define UI_REFRESH_TIME    500
+#define UI_REFRESH_TIME    500000
 #endif
 
 namespace inet {
@@ -93,13 +93,13 @@ void RealTimeScheduler::advanceSimTime()
     sim->setSimTime(t);
 }
 
-bool RealTimeScheduler::receiveWithTimeout(long usec)
+bool RealTimeScheduler::receiveWithTimeout(int64_t timeout)
 {
 #ifdef __linux__
     bool found = false;
-    timeval timeout;
-    timeout.tv_sec = 0;
-    timeout.tv_usec = usec;
+    timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = timeout / 1000;
 
     int32_t fdVec[FD_SETSIZE], maxfd;
     fd_set rdfds;
@@ -111,7 +111,7 @@ bool RealTimeScheduler::receiveWithTimeout(long usec)
             maxfd = fdVec[i];
         FD_SET(fdVec[i], &rdfds);
     }
-    if (select(maxfd + 1, &rdfds, nullptr, nullptr, &timeout) < 0)
+    if (select(maxfd + 1, &rdfds, nullptr, nullptr, &tv) < 0)
         return found;
     advanceSimTime();
     for (uint16_t i = 0; i < callbackEntries.size(); i++) {
@@ -123,16 +123,16 @@ bool RealTimeScheduler::receiveWithTimeout(long usec)
     return found;
 #else
     bool found = false;
-    timeval timeout;
-    timeout.tv_sec = 0;
-    timeout.tv_usec = usec;
+    timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = timeout / 1000;
     advanceSimTime();
     for (uint16_t i = 0; i < callbackEntries.size(); i++) {
         if (callbackEntries.at(i).callback->notify(callbackEntries.at(i).fd))
             found = true;
     }
     if (!found)
-        select(0, nullptr, nullptr, nullptr, &timeout);
+        select(0, nullptr, nullptr, nullptr, &tv);
     return found;
 #endif
 }
@@ -143,7 +143,7 @@ int RealTimeScheduler::receiveUntil(int64_t targetTime)
     // in order to keep UI responsiveness by invoking getEnvir()->idle()
     int64_t curTime = opp_get_monotonic_clock_nsecs();
 
-    while ((targetTime - curTime) >= 2000000 || (targetTime - curTime) >= 2 * UI_REFRESH_TIME) {
+    while ((targetTime - curTime) >= 2 * UI_REFRESH_TIME) {
         if (receiveWithTimeout(UI_REFRESH_TIME))
             return 1;
         if (getEnvir()->idle())
@@ -194,7 +194,7 @@ cEvent *RealTimeScheduler::takeNextEvent()
         // we're behind -- customized versions of this class may
         // alert if we're too much behind, whatever that means
         int64_t diffTime = curTime - targetTime;
-        EV << "We are behind: " << diffTime * 1e-9 << " seconds\n";
+        EV_TRACE << "We are behind: " << diffTime * 1e-9 << " seconds\n";
     }
     cEvent *tmp = sim->getFES()->removeFirst();
     ASSERT(tmp == event);

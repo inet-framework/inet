@@ -57,6 +57,7 @@ class INET_API Ieee8022Llc : public OperationalBase, public DefaultProtocolRegis
     virtual void processPacketFromHigherLayer(Packet *msg);
     virtual void processPacketFromMac(Packet *packet);
     virtual void processCommandFromHigherLayer(Request *request);
+    virtual void registerMyProtocol();
 
     virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;

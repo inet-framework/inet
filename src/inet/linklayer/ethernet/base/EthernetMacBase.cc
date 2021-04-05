@@ -169,6 +169,7 @@ EthernetMacBase::EthernetMacBase()
 
 EthernetMacBase::~EthernetMacBase()
 {
+    delete curTxSignal;
     cancelAndDelete(endTxTimer);
     cancelAndDelete(endIfgTimer);
     cancelAndDelete(endPauseTimer);
@@ -178,6 +179,7 @@ void EthernetMacBase::initialize(int stage)
 {
     MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        fcsMode = parseFcsMode(par("fcsMode"));
         physInGate = gate("phys$i");
         physOutGate = gate("phys$o");
         lowerLayerInGateId = physInGate->getId();
@@ -646,6 +648,7 @@ void EthernetMacBase::changeReceptionState(MacReceiveState newState)
 void EthernetMacBase::addPaddingAndSetFcs(Packet *packet, B requiredMinBytes) const
 {
     auto ethFcs = packet->removeAtBack<EthernetFcs>(ETHER_FCS_BYTES);
+    ethFcs->setFcsMode(fcsMode);
 
     B paddingLength = requiredMinBytes - ETHER_FCS_BYTES - B(packet->getByteLength());
     if (paddingLength > B(0)) {
@@ -700,6 +703,14 @@ void EthernetMacBase::cutEthernetSignalEnd(EthernetSignalBase *signal, simtime_t
     signal->setBitLength(newBitLength);
     signal->setDuration(duration);
 }
+
+void EthernetMacBase::txFinished()
+{
+    ASSERT(curTxSignal != nullptr);
+    delete curTxSignal;
+    curTxSignal = nullptr;
+}
+
 
 } // namespace inet
 

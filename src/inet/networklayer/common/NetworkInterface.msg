@@ -38,5 +38,6 @@ class NetworkInterface extends cModule
     MacAddress macAddress;
     Ipv4Address ipv4Address @byValue;
     Ipv4Address ipv4Netmask @byValue;
+    cObject *protocolData[] @getter(getProtocolData) @sizeGetter(getNumProtocolData);
 }
 

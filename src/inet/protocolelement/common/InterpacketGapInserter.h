@@ -36,6 +36,8 @@ class INET_API InterpacketGapInserter : public ClockUserModuleMixin<PacketPusher
     clocktime_t packetStartTime;
     clocktime_t packetEndTime;
 
+    bps streamDatarate = bps(NaN);
+
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;

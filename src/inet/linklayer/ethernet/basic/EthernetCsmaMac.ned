@@ -117,6 +117,7 @@ module EthernetCsmaMac like IEtherMac
         bool duplexMode;                    // selects full-duplex (true) or half-duplex (false) operation
         bool frameBursting = default(true); // enable/disable frame bursting mode in Gigabit Ethernet
         int mtu @unit(B) = default(1500B);
+        string fcsMode @enum("declared","computed");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
@@ -135,6 +136,10 @@ module EthernetCsmaMac like IEtherMac
         @signal[backoffSlotsGenerated](type=long);    // slotNumber value emitted
         @signal[transmissionStateChanged](type=long); // enum=MacTransmitState
         @signal[receptionStateChanged](type=long); // enum=MacReceiveState
+        @signal[transmissionStarted](type=inet::physicallayer::EthernetSignalBase);
+        @signal[transmissionEnded](type=inet::physicallayer::EthernetSignalBase);
+        @signal[receptionStarted](type=inet::physicallayer::EthernetSignalBase);
+        @signal[receptionEnded](type=inet::physicallayer::EthernetSignalBase);
 
         @statistic[txPk](title="packets transmitted"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rxPkOk](title="packets received OK"; source=rxPkOk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

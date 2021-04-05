@@ -55,6 +55,13 @@ void Rstp::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         registerProtocol(Protocol::stp, gate("relayOut"), gate("relayIn"));
+
+        for (int i = 0; i < ifTable->getNumInterfaces(); i++) {
+            auto ie = ifTable->getInterface(i);
+            if (!ie->isLoopback() && ie->isWired() /* && ie->getProtocol() == &Protocol::ethernetMac */) {   // TODO check protocol
+                ie->addMulticastMacAddress(MacAddress::STP_MULTICAST_ADDRESS);
+            }
+        }
     }
 }
 
@@ -605,7 +612,7 @@ void Rstp::sendTCNtoRoot()
                 packet->addTag<InterfaceReq>()->setInterfaceId(r);
 
                 packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
-                packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+                packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
                 send(packet, "relayOut");
             }
         }
@@ -674,7 +681,7 @@ void Rstp::sendBPDU(int interfaceId)
         macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
         packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
-        packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+        packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
         send(packet, "relayOut");
     }
 }

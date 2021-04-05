@@ -40,6 +40,7 @@ void MacRelayUnit::handleLowerPacket(Packet *incomingPacket)
     auto incomingInterface = interfaceTable->getInterfaceById(incomingInterfaceId);
     EV_INFO << "Processing packet from network" << EV_FIELD(incomingInterface) << EV_FIELD(incomingPacket) << EV_ENDL;
     updatePeerAddress(incomingInterface, sourceAddress);
+
     auto outgoingPacket = incomingPacket->dup();
     outgoingPacket->trim();
     outgoingPacket->clearTags();

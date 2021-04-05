@@ -15,29 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocolelement/transceiver/PacketReceiver.h"
+package inet.protocolelement.contract;
 
-namespace inet {
-
-Define_Module(PacketReceiver);
-
-void PacketReceiver::handleMessageWhenUp(cMessage *message)
+moduleinterface IPacketLifeTimer
 {
-    if (message->isPacket())
-        receiveSignal(check_and_cast<Signal *>(message));
-    else
-        PacketReceiverBase::handleMessageWhenUp(message);
-    updateDisplayString();
+    parameters:
+        @display("i=block/timer");
 }
-
-void PacketReceiver::receiveSignal(Signal *signal)
-{
-    emit(receptionEndedSignal, signal);
-    auto packet = decodePacket(signal);
-    handlePacketProcessed(packet);
-    pushOrSendPacket(packet, outputGate, consumer);
-    delete signal;
-}
-
-} // namespace inet
-

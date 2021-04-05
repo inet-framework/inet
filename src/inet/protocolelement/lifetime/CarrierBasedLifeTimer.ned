@@ -15,29 +15,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocolelement/transceiver/PacketReceiver.h"
+package inet.protocolelement.lifetime;
 
-namespace inet {
+import inet.protocolelement.contract.IPacketLifeTimer;
 
-Define_Module(PacketReceiver);
-
-void PacketReceiver::handleMessageWhenUp(cMessage *message)
+simple CarrierBasedLifeTimer like IPacketLifeTimer
 {
-    if (message->isPacket())
-        receiveSignal(check_and_cast<Signal *>(message));
-    else
-        PacketReceiverBase::handleMessageWhenUp(message);
-    updateDisplayString();
+    parameters:
+        string collectionModule;
+        @display("i=block/timer");
+        @class(CarrierBasedLifeTimer);
+        @signal[packetDropped](type=inet::Packet);
+        @statistic[packetDropInterfaceDown](title="packet drop: interface down"; source=packetDropReasonIsInterfaceDown(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }
-
-void PacketReceiver::receiveSignal(Signal *signal)
-{
-    emit(receptionEndedSignal, signal);
-    auto packet = decodePacket(signal);
-    handlePacketProcessed(packet);
-    pushOrSendPacket(packet, outputGate, consumer);
-    delete signal;
-}
-
-} // namespace inet
-

@@ -123,6 +123,7 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     double datarate = 0; ///< data rate in bit/s
     MacAddress macAddr; ///< link-layer address (for now, only IEEE 802 MAC addresses are supported)
     InterfaceToken token; ///< for Ipv6 stateless autoconfig (RFC 1971), interface identifier (RFC 2462)
+    std::vector<MacAddress> multicastAddresses;
 
     TagSet protocolDataSet;
     std::vector<MacEstimateCostProcess *> estimateCostProcessArray;
@@ -229,7 +230,6 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     bool isWireless() const { return !isWired(); }
     double getDatarate() const { return datarate; }
     const MacAddress& getMacAddress() const { return macAddr; }
-    bool matchesMacAddress(const MacAddress& address) const;
     const InterfaceToken& getInterfaceToken() const { return token; }
     //@}
 
@@ -251,8 +251,23 @@ class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassiv
     virtual void setInterfaceToken(const InterfaceToken& t) { token = t; configChanged(F_TOKEN); }
     //@}
 
+    bool matchesMacAddress(const MacAddress& address) const;
+
+    /** @name Multicast MacAddress related functions */
+    //@{
+    void addMulticastMacAddress(const MacAddress& address);
+    void removeMulticastMacAddress(const MacAddress& address);
+    bool matchesMulticastMacAddress(const MacAddress& address) const;
+    //@}
+
     /** @name Tag related functions */
     //@{
+    /**
+     * Returns the number of protocol data structures.
+     */
+    int getNumProtocolData() const {
+        return protocolDataSet.getNumTags();
+    }
     /**
      * Returns the protocol data at the given index.
      */

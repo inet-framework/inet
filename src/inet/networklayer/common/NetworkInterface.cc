@@ -25,8 +25,8 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 
 #ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -96,14 +96,15 @@ void NetworkInterface::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         upperLayerOut = gate("upperLayerOut");
+        subscribe(POST_MODEL_CHANGE, this);
         if (hasGate("phys$i")) {
-            rxIn = gate("phys$i");
+            rxIn = gate("phys$i")->getPathEndGate();
             rxTransmissionChannel = rxIn->findIncomingTransmissionChannel();
             if (rxTransmissionChannel != nullptr)
                 rxTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
         }
         if (hasGate("phys$o")) {
-            txOut = gate("phys$o");
+            txOut = gate("phys$o")->getPathStartGate();
             txTransmissionChannel = txOut->findTransmissionChannel();
             if (txTransmissionChannel != nullptr)
                 txTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
@@ -316,8 +317,29 @@ void NetworkInterface::resetInterface()
 
 bool NetworkInterface::matchesMacAddress(const MacAddress& address) const
 {
-    // TODO add real support for multicast MAC addresses
-    return address.isBroadcast() || address.isMulticast() || macAddr == address;
+    return address.isBroadcast()
+            || (address.isMulticast() && matchesMulticastMacAddress(address))
+            || macAddr == address;
+}
+
+bool NetworkInterface::matchesMulticastMacAddress(const MacAddress& address) const
+{
+    return address.isMulticast() && contains(multicastAddresses, address);
+}
+
+void NetworkInterface::addMulticastMacAddress(const MacAddress& address)
+{
+    if (contains(multicastAddresses, address))
+        throw cRuntimeError("Multicast MacAddress already added: '%s'", address.str().c_str());
+    multicastAddresses.push_back(address);
+}
+
+void NetworkInterface::removeMulticastMacAddress(const MacAddress& address)
+{
+    auto it = find(multicastAddresses, address);
+    if (it == multicastAddresses.end())
+        throw cRuntimeError("Multicast MacAddress not found: '%s'", address.str().c_str());
+    multicastAddresses.erase(it);
 }
 
 const L3Address NetworkInterface::getNetworkAddress() const

@@ -1,2 +1,0 @@
-# VLAN ID   MAC Address     Interface
-  0         hud             eth0

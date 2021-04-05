@@ -15,29 +15,23 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocolelement/transceiver/PacketReceiver.h"
+cplusplus {{
+#include "inet/clock/contract/ClockTime.h"
+}}
 
-namespace inet {
+import inet.common.INETDefs;
 
-Define_Module(PacketReceiver);
+namespace inet;
 
-void PacketReceiver::handleMessageWhenUp(cMessage *message)
+class clocktime_t
 {
-    if (message->isPacket())
-        receiveSignal(check_and_cast<Signal *>(message));
-    else
-        PacketReceiverBase::handleMessageWhenUp(message);
-    updateDisplayString();
+    @existingClass;
+    @overwritePreviousDefinition;
+    @descriptor(false);
+    @opaque;
+    @byValue;
+    @cppType(inet::clocktime_t);
+    @fromString(SIMTIME_AS_CLOCKTIME(string2simtime($))); @toString(simtime2string(CLOCKTIME_AS_SIMTIME($)));
+    @defaultValue(CLOCKTIME_ZERO);
 }
-
-void PacketReceiver::receiveSignal(Signal *signal)
-{
-    emit(receptionEndedSignal, signal);
-    auto packet = decodePacket(signal);
-    handlePacketProcessed(packet);
-    pushOrSendPacket(packet, outputGate, consumer);
-    delete signal;
-}
-
-} // namespace inet
 

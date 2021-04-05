@@ -164,6 +164,7 @@ void InterpacketGapInserter::pushPacketStart(Packet *packet, cGate *gate, bps da
 {
     Enter_Method("pushPacketStart");
     take(packet);
+    streamDatarate = datarate;
     pushOrSendOrSchedulePacketProgress(packet, gate, datarate, b(0), b(0));
     updateDisplayString();
 }
@@ -172,7 +173,8 @@ void InterpacketGapInserter::pushPacketEnd(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacketEnd");
     take(packet);
-    pushOrSendOrSchedulePacketProgress(packet, gate, bps(NaN), packet->getDataLength(), b(0));
+    pushOrSendOrSchedulePacketProgress(packet, gate, streamDatarate, packet->getDataLength(), b(0));
+    streamDatarate = bps(NaN);
     updateDisplayString();
 }
 
@@ -180,6 +182,7 @@ void InterpacketGapInserter::pushPacketProgress(Packet *packet, cGate *gate, bps
 {
     Enter_Method("pushPacketProgress");
     take(packet);
+    streamDatarate = datarate;
     pushOrSendOrSchedulePacketProgress(packet, gate, datarate, position, extraProcessableLength);
     updateDisplayString();
 }

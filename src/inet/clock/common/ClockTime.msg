@@ -19,28 +19,5 @@ cplusplus {{
 #include "inet/clock/common/ClockTime.h"
 }}
 
-namespace inet;
-
-class ClockTime
-{
-    @existingClass;
-    @overwritePreviousDefinition;
-    @descriptor(false);
-    @opaque;
-    @byValue;
-    @cppType(inet::ClockTime);
-    @fromString(inet::ClockTime::parse($)); @toString($.str());
-    @defaultValue(CLOCKTIME_ZERO);
-}
-
-class clocktime_t
-{
-    @existingClass;
-    @overwritePreviousDefinition;
-    @descriptor(false);
-    @opaque;
-    @byValue;
-    @cppType(inet::clocktime_t);
-    @fromString(inet::ClockTime::parse($)); @toString($.str());
-    @defaultValue(CLOCKTIME_ZERO);
-}
+import inet.common.INETDefs;
+import inet.clock.contract.ClockTime;

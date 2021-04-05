@@ -15,29 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocolelement/transceiver/PacketReceiver.h"
+import inet.common.INETDefs;
 
-namespace inet {
-
-Define_Module(PacketReceiver);
-
-void PacketReceiver::handleMessageWhenUp(cMessage *message)
-{
-    if (message->isPacket())
-        receiveSignal(check_and_cast<Signal *>(message));
-    else
-        PacketReceiverBase::handleMessageWhenUp(message);
-    updateDisplayString();
-}
-
-void PacketReceiver::receiveSignal(Signal *signal)
-{
-    emit(receptionEndedSignal, signal);
-    auto packet = decodePacket(signal);
-    handlePacketProcessed(packet);
-    pushOrSendPacket(packet, outputGate, consumer);
-    delete signal;
-}
-
-} // namespace inet
+cplusplus {{
+#include "inet/physicallayer/wired/ethernet/EthernetPhyConstants.h"
+}}
 

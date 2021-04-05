@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2020 OpenSim Ltd.
+// Copyright (C) 2021 OpenSimLtd.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
@@ -15,29 +15,20 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/protocolelement/transceiver/PacketReceiver.h"
+#ifndef __INET_ETHERNETPHYCONSTANTS_H
+#define __INET_ETHERNETPHYCONSTANTS_H
+
+#include "inet/common/INETDefs.h"
+#include "inet/common/Units.h"
 
 namespace inet {
+namespace physicallayer {
 
-Define_Module(PacketReceiver);
+using namespace inet::units::values;
+const B ETHERNET_PHY_HEADER_LEN = B(8);
 
-void PacketReceiver::handleMessageWhenUp(cMessage *message)
-{
-    if (message->isPacket())
-        receiveSignal(check_and_cast<Signal *>(message));
-    else
-        PacketReceiverBase::handleMessageWhenUp(message);
-    updateDisplayString();
-}
-
-void PacketReceiver::receiveSignal(Signal *signal)
-{
-    emit(receptionEndedSignal, signal);
-    auto packet = decodePacket(signal);
-    handlePacketProcessed(packet);
-    pushOrSendPacket(packet, outputGate, consumer);
-    delete signal;
-}
-
+} // namespace physicallayer
 } // namespace inet
+
+#endif
 

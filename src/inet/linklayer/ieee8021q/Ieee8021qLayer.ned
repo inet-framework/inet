@@ -32,7 +32,7 @@ module Ieee8021qLayer like IIeee8021qLayer
         policy: <default("VlanPolicyLayer")> like IProtocolLayer {
             @display("p=300,150");
         }
-        protocol: <default("Ieee8021rProtocol")> like IIeee8021qLayer {
+        protocol: <default("Ieee8021qProtocol")> like IIeee8021qLayer {
             @display("p=300,300");
         }
     connections:

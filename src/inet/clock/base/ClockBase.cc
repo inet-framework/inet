@@ -25,8 +25,15 @@ void ClockBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
         displayStringTextFormat = par("displayStringTextFormat");
-    else if (stage == INITSTAGE_LAST)
+    else if (stage == INITSTAGE_LAST) {
         updateDisplayString();
+        emit(timeChangedSignal, getClockTime().asSimTime());
+    }
+}
+
+void ClockBase::finish()
+{
+    emit(timeChangedSignal, getClockTime().asSimTime());
 }
 
 void ClockBase::refreshDisplay() const

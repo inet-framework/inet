@@ -23,6 +23,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -92,6 +93,7 @@ class INET_API EthernetMacBase : public MacProtocolBase
     // configuration
     const char *displayStringTextFormat = nullptr;
     bool sendRawBytes = false;
+    FcsMode fcsMode = FCS_MODE_UNDEFINED;
     const EtherDescr *curEtherDescr = nullptr; // constants for the current Ethernet mode, e.g. txrate
     bool connected = false; // true if connected to a network, set automatically by exploring the network configuration
     bool promiscuous = false; // if true, passes up all received frames
@@ -114,6 +116,9 @@ class INET_API EthernetMacBase : public MacProtocolBase
     cMessage *endTxTimer = nullptr;
     cMessage *endIfgTimer = nullptr;
     cMessage *endPauseTimer = nullptr;
+
+    // RX / TX signals:
+    EthernetSignalBase *curTxSignal = nullptr;
 
     // statistics
     unsigned long numFramesSent = 0;
@@ -203,6 +208,7 @@ class INET_API EthernetMacBase : public MacProtocolBase
     void changeReceptionState(MacReceiveState newState);
 
     virtual void cutEthernetSignalEnd(EthernetSignalBase *signal, simtime_t duration);
+    virtual void txFinished();
 };
 
 } // namespace inet

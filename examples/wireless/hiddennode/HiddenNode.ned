@@ -41,6 +41,7 @@ module Node
         }
         cli: EtherAppClient {
             parameters:
+                interface = "wlan";
                 @display("p=300,100");
         }
         wlan: Ieee80211Interface {

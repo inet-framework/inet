@@ -62,7 +62,6 @@ class INET_API EthernetCsmaMac : public EthernetMacBase
     cMessage *endRxTimer = nullptr;
     cMessage *endBackoffTimer = nullptr;
     cMessage *endJammingTimer = nullptr;
-    EthernetSignalBase *curTxSignal = nullptr;
 
     // list of receptions during reconnect state; an additional special entry (with packetTreeId=-1)
     // stores the end time of the reconnect state
@@ -112,7 +111,6 @@ class INET_API EthernetCsmaMac : public EthernetMacBase
     virtual void processDetectedCollision();
     virtual void sendSignal(EthernetSignalBase *signal, simtime_t_cref duration);
     virtual void handleSignalFromNetwork(EthernetSignalBase *signal);
-    virtual void txFinished();
     virtual void updateRxSignals(EthernetSignalBase *signal, simtime_t endRxTime);
     virtual void dropCurrentTxFrame(PacketDropDetails& details) override;
 

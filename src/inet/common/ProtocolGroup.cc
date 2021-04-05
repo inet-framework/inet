@@ -18,6 +18,7 @@
 #include "inet/common/ProtocolGroup.h"
 
 #include "inet/networklayer/common/IpProtocolId_m.h"
+#include "inet/linklayer/common/EtherType_m.h"
 
 namespace inet {
 
@@ -72,26 +73,27 @@ void ProtocolGroup::addProtocol(int protocolId, const Protocol *protocol)
 
 // excerpt from http://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml
 ProtocolGroup ProtocolGroup::ethertype("ethertype", {
-    { 0x0800, &Protocol::ipv4 },
-    { 0x0806, &Protocol::arp },
-    { 0x2000, &Protocol::cdp },               // TODO remove it, it's a CISCO code for LLC, ANSAINET project use it currently
-    { 0x22EA, &Protocol::srp },
-    { 0x22F0, &Protocol::tsn },
-    { 0x22F3, &Protocol::trill },
-    { 0x22F4, &Protocol::l2isis },
-    { 0x36FC, &Protocol::flooding },          // INET specific non-standard protocol
-    { 0x8100, &Protocol::ieee8021qCTag },
-    { 0x86DD, &Protocol::ipv6 },
-    { 0x86FD, &Protocol::probabilistic },     // INET specific non-standard protocol
-    { 0x86FE, &Protocol::wiseRoute },         // INET specific non-standard protocol
-    { 0x86FF, &Protocol::nextHopForwarding }, // INET specific non-standard protocol
-    { 0x8808, &Protocol::ethernetFlowCtrl },
-    { 0x8847, &Protocol::mpls },
-    { 0x88A8, &Protocol::ieee8021qSTag },
-    { 0x88CC, &Protocol::lldp },
-    { 0x88E5, &Protocol::ieee8021ae },
-    { 0x891d, &Protocol::tteth },
-    { 0xF1C1, &Protocol::ieee8021rTag },
+    { ETHERTYPE_IPv4, &Protocol::ipv4 },
+    { ETHERTYPE_ARP, &Protocol::arp },
+    { ETHERTYPE_INET_CDP, &Protocol::cdp },               // TODO remove it, it's a CISCO code for LLC, ANSAINET project use it currently
+    { ETHERTYPE_SRP, &Protocol::srp },
+    { ETHERTYPE_TSN, &Protocol::tsn },
+    { ETHERTYPE_TRILL, &Protocol::trill },
+    { ETHERTYPE_L2_ISIS, &Protocol::l2isis },
+    { ETHERTYPE_INET_FLOODING, &Protocol::flooding },          // INET specific non-standard protocol
+    { ETHERTYPE_8021Q_TAG, &Protocol::ieee8021qCTag },
+    { ETHERTYPE_IPv6, &Protocol::ipv6 },
+    { ETHERTYPE_INET_PROBABILISTIC, &Protocol::probabilistic },     // INET specific non-standard protocol
+    { ETHERTYPE_INET_WISEROUTE, &Protocol::wiseRoute },         // INET specific non-standard protocol
+    { ETHERTYPE_NEXT_HOP_FORWARDING, &Protocol::nextHopForwarding }, // INET specific non-standard protocol
+    { ETHERTYPE_FLOW_CONTROL, &Protocol::ethernetFlowCtrl },
+    { ETHERTYPE_MPLS_UNICAST, &Protocol::mpls },
+    { ETHERTYPE_8021ad_S_TAG, &Protocol::ieee8021qSTag },
+    { ETHERTYPE_LLDP, &Protocol::lldp },
+    { ETHERTYPE_GPTP, &Protocol::gptp },
+    { ETHERTYPE_IEEE8021AE, &Protocol::ieee8021ae },
+    { ETHERTYPE_TTETH, &Protocol::tteth },
+    { ETHERTYPE_IEEE8021_R_TAG, &Protocol::ieee8021rTag },
 });
 
 // excerpt from http://www.iana.org/assignments/ppp-numbers/ppp-numbers.xhtml

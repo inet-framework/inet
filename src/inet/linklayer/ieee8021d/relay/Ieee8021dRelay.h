@@ -31,7 +31,6 @@ class INET_API Ieee8021dRelay : public MacRelayUnitBase
   protected:
     MacAddress bridgeAddress;
     NetworkInterface *bridgeNetworkInterface = nullptr;
-    bool isStpAware = false;
 
     typedef std::pair<MacAddress, MacAddress> MacAddressPair;
 

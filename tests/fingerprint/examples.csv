@@ -83,18 +83,18 @@
 /examples/ethernet/creditbasedshaper/, -f omnetpp.ini -c General -r 0,              100ms,           0bc1-642e/tplx;5ab0-6235/~tNl;702f-784c/~tND;2254-06ad/tyf, PASS, tsn
 
 # /examples/ethernet/lans/,            -f .qtenv.ini -c General -r 0
-/examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            d9fd-427b/tplx;46eb-2c9e/~tNl;b582-da58/tyf, PASS,
+/examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            571e-8c3e/tplx;46eb-2c9e/~tNl;b582-da58/tyf, PASS,
 # /examples/ethernet/lans/,            -f defaults.ini -c General -r 0,               -1s,             0, ERROR,   # not a complete simulations, defaults.ini included by other ini files
-/examples/ethernet/lans/,            -f duplexswitch.ini -c SwitchedDuplexLAN -r 0, 50s,             9893-49dd/tplx;5a1c-a9ae/~tNl;3082-691d/tyf, PASS,
-/examples/ethernet/lans/,            -f hub.ini -c Hub1 -r 0,                       100s,            2c41-3791/tplx;5164-36e7/~tNl;0b6c-7ab6/tyf, PASS,
-/examples/ethernet/lans/,            -f hub.ini -c Hub2 -r 0,                       10s,             e8f2-f013/tplx;e336-1a4c/~tNl;eca7-4b7e/tyf, PASS,
-/examples/ethernet/lans/,            -f hub.ini -c Hub3 -r 0,                       100s,            2c41-3791/tplx;5164-36e7/~tNl;0677-396b/tyf, PASS,
-/examples/ethernet/lans/,            -f largeNet.ini -c LargeNet -r 0,              5s,              3b99-e696/tplx;4d35-34ee/~tNl, PASS,
-/examples/ethernet/lans/,            -f mixed.ini -c MixedLAN -r 0,                 100s,            a106-c515/tplx;990a-3876/~tNl;2429-a410/tyf, PASS,
-/examples/ethernet/lans/,            -f omnetpp.ini -c MixedLAN1 -r 0,              500s,            5843-0aa4/tplx;695a-3394/~tNl;ebad-2734/tyf, PASS,
-/examples/ethernet/lans/,            -f switch.ini -c SwitchedLAN1 -r 0,            1000s,           4923-8d6d/tplx;6ff2-5a07/~tNl;ccfd-c2ae/tyf, PASS,
-/examples/ethernet/lans/,            -f switch.ini -c SwitchedLanPreconf -r 0,      1000s,           dde3-8deb/tplx;2c9a-5fb7/~tNl;c9fe-69d0/tyf, PASS,
-/examples/ethernet/lans/,            -f twoHosts.ini -c TwoHosts1 -r 0,             200s,            5d3a-c1ed/tplx;1ffa-9820/~tNl;9f99-6e09/tyf, PASS,
+/examples/ethernet/lans/,            -f duplexswitch.ini -c SwitchedDuplexLAN -r 0, 50s,             c89d-aa31/tplx;5a1c-a9ae/~tNl;3082-691d/tyf, PASS,
+/examples/ethernet/lans/,            -f hub.ini -c Hub1 -r 0,                       100s,            3f31-3ff2/tplx;5164-36e7/~tNl;0b6c-7ab6/tyf, PASS,
+/examples/ethernet/lans/,            -f hub.ini -c Hub2 -r 0,                       10s,             f794-127b/tplx;e336-1a4c/~tNl;eca7-4b7e/tyf, PASS,
+/examples/ethernet/lans/,            -f hub.ini -c Hub3 -r 0,                       100s,            3f31-3ff2/tplx;5164-36e7/~tNl;0677-396b/tyf, PASS,
+/examples/ethernet/lans/,            -f largeNet.ini -c LargeNet -r 0,              5s,              d829-de3d/tplx;4d35-34ee/~tNl, PASS,
+/examples/ethernet/lans/,            -f mixed.ini -c MixedLAN -r 0,                 100s,            c487-7051/tplx;990a-3876/~tNl;2429-a410/tyf, PASS,
+/examples/ethernet/lans/,            -f omnetpp.ini -c MixedLAN1 -r 0,              500s,            aea6-d111/tplx;695a-3394/~tNl;ebad-2734/tyf, PASS,
+/examples/ethernet/lans/,            -f switch.ini -c SwitchedLAN1 -r 0,            1000s,           68c8-9ef1/tplx;6ff2-5a07/~tNl;ccfd-c2ae/tyf, PASS,
+/examples/ethernet/lans/,            -f switch.ini -c SwitchedLanPreconf -r 0,      1000s,           23c2-23df/tplx;2c9a-5fb7/~tNl;c9fe-69d0/tyf, PASS,
+/examples/ethernet/lans/,            -f twoHosts.ini -c TwoHosts1 -r 0,             200s,            bcc5-f59e/tplx;1ffa-9820/~tNl;9f99-6e09/tyf, PASS,
 
 /examples/ethernet/vlan/,            -f omnetpp.ini -c NoVlan -r 0,                 10ms,            1869-0f8b/tplx;8cc3-6df5/~tNl;788d-f5d0/~tND;50ca-f4ad/tyf, PASS,
 /examples/ethernet/vlan/,            -f omnetpp.ini -c BetweenSwitches -r 0,        10ms,            2ee2-63f0/tplx;a820-12c6/~tNl;f35c-2800/~tND;0c45-c37d/tyf, PASS,
@@ -145,16 +145,16 @@
 # /examples/ieee8021d/,                -f omnetpp.ini -c Switch7to4BySrcPriority -r 0, 100s,           0, ERROR,   # Switch7to4BySrcPriority extended
 # /examples/ieee8021d/,                -f omnetpp.ini -c TopologyChange -r 0,         100s,            0, ERROR,   # TopologyChange extended
 # /examples/ieee8021d/,                -f omnetpp.ini -c LinkReconnect -r 0,          100s,            0, ERROR,   # LinkReconnect extended
-/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch1RootByMAC -r 0,   180s,           15c2-4966/tplx;b66a-c246/~tNl;1375-e9eb/tyf, PASS,
-/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch1RootByMAC -r 0,    180s,           5888-0ca7/tplx;57a0-e648/~tNl;b0ee-8388/tyf, PASS,
-/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch3RootByPriority -r 0, 180s,        4c4d-5eea/tplx;3511-33eb/~tNl;0279-a2cd/tyf, PASS,
-/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch3RootByPriority -r 0, 180s,         94f6-2eea/tplx;389a-613a/~tNl;3a05-184b/tyf, PASS,
-/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch7to4BySrcPriority -r 0, 180s,      a737-55bc/tplx;a8f9-0e8f/~tNl;98a5-b874/tyf, PASS,
-/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch7to4BySrcPriority -r 0, 180s,       1341-7109/tplx;816e-356b/~tNl;e80e-9ae5/tyf, PASS,
-/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LargeNet -r 0,           180s,           8dbc-f47f/tplx;205b-ecd9/~tNl;a34f-db44/tyf, PASS,
-/examples/ieee8021d/,                -f omnetpp.ini -c STP-LargeNet -r 0,            180s,           3468-af84/tplx;fb5a-fa9b/~tNl;72e2-664c/tyf, PASS,
-/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LinkReconnect -r 0,      180s,           c796-7198/tplx;0a89-2c14/~tNl;c70e-a86d/tyf, PASS,
-/examples/ieee8021d/,                -f omnetpp.ini -c STP-LinkReconnect -r 0,       180s,           f15f-7bce/tplx;d483-5b69/~tNl;72f7-c780/tyf, PASS,
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch1RootByMAC -r 0,   180s,           64d9-f461/tplx;b66a-c246/~tNl;1375-e9eb/tyf, PASS,
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch1RootByMAC -r 0,    180s,           9e11-ef30/tplx;57a0-e648/~tNl;b0ee-8388/tyf, PASS,
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch3RootByPriority -r 0, 180s,        37e5-e456/tplx;3511-33eb/~tNl;0279-a2cd/tyf, PASS,
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch3RootByPriority -r 0, 180s,         8c5e-74d9/tplx;389a-613a/~tNl;3a05-184b/tyf, PASS,
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch7to4BySrcPriority -r 0, 180s,      b0b2-803b/tplx;a8f9-0e8f/~tNl;98a5-b874/tyf, PASS,
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch7to4BySrcPriority -r 0, 180s,       0862-2a16/tplx;816e-356b/~tNl;e80e-9ae5/tyf, PASS,
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LargeNet -r 0,           180s,           0e46-8244/tplx;205b-ecd9/~tNl;a34f-db44/tyf, PASS,
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-LargeNet -r 0,            180s,           9b0a-0f1a/tplx;fb5a-fa9b/~tNl;72e2-664c/tyf, PASS,
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LinkReconnect -r 0,      180s,           a6aa-9ff0/tplx;0a89-2c14/~tNl;c70e-a86d/tyf, PASS,
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-LinkReconnect -r 0,       180s,           adfe-1ba6/tplx;d483-5b69/~tNl;72f7-c780/tyf, PASS,
 
 /examples/inet/ber/,                 -f omnetpp.ini -c ber-sack-experiment -r 0,    20s,             5942-6a28/tplx;2606-4da3/~tNl;e220-bff2/~tND;ee9f-6d67/tyf, PASS,
 /examples/inet/ber/,                 -f omnetpp.ini -c ber-flavour-experiment -r 0, 20s,             7192-426f/tplx;9ea5-385c/~tNl;f62e-2695/~tND;0c88-7cd9/tyf, PASS,
