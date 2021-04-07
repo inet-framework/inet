@@ -30,6 +30,7 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
     int index = 0;
     clocktime_t offset;
     cValueArray *durations = nullptr;
+    bool scheduleForAbsoluteTime = false;
 
     ClockEvent *changeTimer = nullptr;
 

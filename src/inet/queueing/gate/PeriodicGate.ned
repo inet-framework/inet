@@ -32,5 +32,6 @@ simple PeriodicGate extends PacketGateBase like IPacketGate
         bool initiallyOpen = default(false);
         double offset @unit(s) = default(0s);
         object durations @unit(s) = default([]); // space separated list of durations to stay open/closed
+        bool scheduleForAbsoluteTime = default(true); // when a clock is used relative means that setting the clock will not affect the simulation time of the event
         @class(PeriodicGate);
 }

@@ -31,6 +31,7 @@ void PeriodicGate::initialize(int stage)
         isOpen_ = par("initiallyOpen");
         offset = par("offset");
         durations = check_and_cast<cValueArray *>(par("durations").objectValue());
+        scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
         changeTimer = new ClockEvent("ChangeTimer");
     }
     else if (stage == INITSTAGE_QUEUEING)
@@ -87,7 +88,10 @@ void PeriodicGate::scheduleChangeTimer()
 {
     ASSERT(0 <= index && index < (int)durations->size());
     clocktime_t duration = durations->get(index).doubleValueInUnit("s");
-    scheduleClockEventAfter(duration - offset, changeTimer);
+    if (scheduleForAbsoluteTime)
+        scheduleClockEventAt(getClockTime() + duration - offset, changeTimer);
+    else
+        scheduleClockEventAfter(duration - offset, changeTimer);
     index = (index + 1) % durations->size();
     offset = 0;
 }
