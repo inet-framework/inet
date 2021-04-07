@@ -47,5 +47,5 @@
 /examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 8,   60s,     c282-c48d/tplx;f543-0b38/~tNl;348a-f8c3/~tND;2e81-1a25/tyf, PASS, udp
 /examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c pcm_s16le -r 9,   60s,     7d16-e24b/tplx;18a2-09ee/~tNl;45a0-9a5a/~tND;1cac-4458/tyf, PASS, udp
 
-/examples/voipstream/VoIPStreamLargeNet/,    -f omnetpp.ini -c General -r 0,      5s,     d185-4fa9/tplx;8ab4-19ce/~tNl;e8bd-08a6/tyf, PASS, udp
-/examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,      2s,     764e-5005/tplx;17b7-8385/~tNl;2749-b527/~tND;2e97-0acd/tyf, PASS, udp
+/examples/voipstream/VoIPStreamLargeNet/,    -f omnetpp.ini -c General -r 0,      5s,     d185-4fa9/tplx;a39a-0890/~tNl;e8bd-08a6/tyf, PASS, udp
+/examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,      2s,     764e-5005/tplx;5bd3-8774/~tNl;88ed-5fa9/~tND;2e97-0acd/tyf, PASS, udp
