@@ -109,31 +109,31 @@ ProtocolGroup ProtocolGroup::pppprotocol("pppprotocol", {
 
 // excerpt from http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
-    { 1, &Protocol::icmpv4 },
-    { 2, &Protocol::igmp },
-    { 4, &Protocol::ipv4 },
-    { 6, &Protocol::tcp },
-    { 8, &Protocol::egp },
-    { 9, &Protocol::igp },
-    { 17, &Protocol::udp },
-    { 36, &Protocol::xtp },
-    { 41, &Protocol::ipv6 },
-    { 46, &Protocol::rsvpTe },
-    { 48, &Protocol::dsr },
-    { 58, &Protocol::icmpv6 },
-    { 88, &Protocol::eigrp },
-    { 89, &Protocol::ospf },
-    { 103, &Protocol::pim },
-    { 132, &Protocol::sctp },
-    { 135, &Protocol::mobileipv6 },
-    { 138, &Protocol::manet },
+    { IP_PROT_ICMP, &Protocol::icmpv4 },
+    { IP_PROT_IGMP, &Protocol::igmp },
+    { IP_PROT_IP, &Protocol::ipv4 },
+    { IP_PROT_TCP, &Protocol::tcp },
+    { IP_PROT_EGP, &Protocol::egp },
+    { IP_PROT_IGP, &Protocol::igp },
+    { IP_PROT_UDP, &Protocol::udp },
+    { IP_PROT_XTP, &Protocol::xtp },
+    { IP_PROT_IPv6, &Protocol::ipv6 },
+    { IP_PROT_RSVP, &Protocol::rsvpTe },
+    { IP_PROT_DSR, &Protocol::dsr },
+    { IP_PROT_IPv6_ICMP, &Protocol::icmpv6 },
+    { IP_PROT_EIGRP, &Protocol::eigrp },
+    { IP_PROT_OSPF, &Protocol::ospf },
+    { IP_PROT_PIM, &Protocol::pim },
+    { IP_PROT_SCTP, &Protocol::sctp },
+    { IP_PROT_IPv6EXT_MOB, &Protocol::mobileipv6 },
+    { IP_PROT_MANET, &Protocol::manet },
 
-    { 249, &Protocol::linkStateRouting },
-    { 250, &Protocol::flooding },          // INET specific non-standard protocol
-    { 251, &Protocol::probabilistic },     // INET specific non-standard protocol
-    { 252, &Protocol::wiseRoute },         // INET specific non-standard protocol
-    { 253, &Protocol::nextHopForwarding }, // INET specific non-standard protocol
-    { 254, &Protocol::echo },              // INET specific non-standard protocol
+    { IP_PROT_LINK_STATE_ROUTING, &Protocol::linkStateRouting },
+    { IP_PROT_FLOODING, &Protocol::flooding },          // INET specific non-standard protocol
+    { IP_PROT_PROBABILISTIC, &Protocol::probabilistic },     // INET specific non-standard protocol
+    { IP_PROT_WISE, &Protocol::wiseRoute },         // INET specific non-standard protocol
+    { IP_PROT_NEXT_HOP_FORWARDING, &Protocol::nextHopForwarding }, // INET specific non-standard protocol
+    { IP_PROT_ECHO, &Protocol::echo },              // INET specific non-standard protocol
 });
 
 ProtocolGroup ProtocolGroup::snapOui("snapOui", {
