@@ -40,7 +40,7 @@ void IdealOscillator::finish()
 
 int64_t IdealOscillator::computeTicksForInterval(simtime_t timeInterval) const
 {
-    return (int64_t)floor(timeInterval / tickLength);
+    return timeInterval.raw() / tickLength.raw();
 }
 
 simtime_t IdealOscillator::computeIntervalForTicks(int64_t numTicks) const

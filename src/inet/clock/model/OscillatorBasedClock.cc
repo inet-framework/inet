@@ -90,7 +90,7 @@ clocktime_t OscillatorBasedClock::computeClockTimeFromSimTime(simtime_t t) const
 simtime_t OscillatorBasedClock::computeSimTimeFromClockTime(clocktime_t t) const
 {
     ASSERT(t >= getClockTime());
-    int64_t numTicks = floor(t.dbl() / oscillator->getNominalTickLength().dbl());
+    int64_t numTicks = t.raw() / oscillator->getNominalTickLength().raw();
     return oscillator->getComputationOrigin() + oscillator->computeIntervalForTicks(numTicks - originClockTick);
 }
 
