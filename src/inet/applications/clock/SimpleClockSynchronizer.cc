@@ -30,6 +30,8 @@ void SimpleClockSynchronizer::initialize(int stage)
         synhronizationTimer = new cMessage("SynchronizationTimer");
         masterClock = getModuleFromPar<IClock>(par("masterClockModule"), this);
         slaveClock = getModuleFromPar<SettableClock>(par("slaveClockModule"), this);
+        synchronizationIntervalParameter = &par("synchronizationInterval");
+        synchronizationAccuracyParameter = &par("synchronizationAccuracy");
     }
 }
 
@@ -50,12 +52,12 @@ void SimpleClockSynchronizer::handleStartOperation(LifecycleOperation *operation
 
 void SimpleClockSynchronizer::synchronizeSlaveClock()
 {
-    slaveClock->setClockTime(masterClock->getClockTime() + par("synchronizationAccuracy"), true);
+    slaveClock->setClockTime(masterClock->getClockTime() + synchronizationAccuracyParameter->doubleValue(), true);
 }
 
 void SimpleClockSynchronizer::scheduleSynchronizationTimer()
 {
-    scheduleAfter(par("synchronizationInterval"), synhronizationTimer);
+    scheduleAfter(synchronizationIntervalParameter->doubleValue(), synhronizationTimer);
 }
 
 } // namespace

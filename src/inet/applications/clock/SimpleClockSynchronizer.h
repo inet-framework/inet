@@ -31,6 +31,8 @@ class INET_API SimpleClockSynchronizer : public ApplicationBase
     cMessage *synhronizationTimer = nullptr;
     IClock *masterClock = nullptr;
     SettableClock *slaveClock = nullptr;
+    cPar *synchronizationIntervalParameter = nullptr;
+    cPar *synchronizationAccuracyParameter = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
