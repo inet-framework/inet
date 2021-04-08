@@ -18,6 +18,7 @@
 #ifndef __INET_QUEUEVISUALIZERBASE_H
 #define __INET_QUEUEVISUALIZERBASE_H
 
+#include "inet/common/Compat.h"
 #include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/Placement.h"
@@ -36,7 +37,7 @@ class INET_API QueueVisualizerBase : public VisualizerBase
             std::vector<queueing::IPacketQueue *> queues;
 
         public:
-            virtual void visit(cObject *object) override;
+            virtual VISIT_RETURNTYPE visit(cObject *object) override;
 
     };
 
