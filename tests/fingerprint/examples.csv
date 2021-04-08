@@ -107,10 +107,10 @@
 /examples/ethernet/preemption/,      -f omnetpp.ini -c General -r 0,                1s,              13c0-0255/tplx;9f0e-e3db/~tNl;6a9a-c7a1/~tND;3408-111e/tyf, PASS, ethernet layered tsn
 /examples/ethernet/gatepreemption/,  -f omnetpp.ini -c General -r 0,                1s,              efab-2d27/tplx;d21b-a25d/~tNl;24be-38d8/~tND;5887-afd8/tyf, PASS, ethernet layered tsn
 
-/examples/ethernet/clocksynchronization/, -f omnetpp.ini -c SynchronizedBySimulationTime -r 0, 10ms, 2587-8302/tplx;1c22-5f6b/~tNl;f703-9d04/~tND;1c2f-d302/tyf, PASS, ethernet layered tsn
-/examples/ethernet/clocksynchronization/, -f omnetpp.ini -c UnsynchronizedClocks -r 0,         10ms, a5c8-b81d/tplx;7c67-5cba/~tNl;3ed3-20ff/~tND;d05f-2c65/tyf, PASS, ethernet layered tsn
-/examples/ethernet/clocksynchronization/, -f omnetpp.ini -c SynchronizedClocks -r 0,           10ms, 3d81-7dc6/tplx;4eac-5d51/~tNl;940f-fec1/~tND;b2f4-4370/tyf, PASS, ethernet layered tsn
-/examples/ethernet/clocksynchronization/, -f omnetpp.ini -c SynchronizedClocksByGPTP -r 0,     10ms, 2587-8302/tplx;1c22-5f6b/~tNl;f703-9d04/~tND;1c2f-d302/tyf, PASS, ethernet layered tsn
+/examples/ethernet/clocksynchronization/, -f omnetpp.ini -c SynchronizedBySimulationTime -r 0, 10ms, b1aa-0eb7/tplx;772a-528b/~tNl;478a-1ee5/~tND;1c2f-d302/tyf, PASS, ethernet layered tsn
+/examples/ethernet/clocksynchronization/, -f omnetpp.ini -c UnsynchronizedClocks -r 0,         10ms, 649e-c5a1/tplx;277f-0e05/~tNl;1d4b-ad82/~tND;d05f-2c65/tyf, PASS, ethernet layered tsn
+/examples/ethernet/clocksynchronization/, -f omnetpp.ini -c SynchronizedClocksBySimpleClockSynchronizer -r 0, 10ms, 07e3-daf1/tplx;b9c8-5318/~tNl;d4da-15eb/~tND;b2f4-4370/tyf, PASS, ethernet layered tsn
+/examples/ethernet/clocksynchronization/, -f omnetpp.ini -c SynchronizedClocksByGPTP -r 0,     10ms, b269-6bd2/tplx;1002-0118/~tNl;1c2f-d302/tyf, PASS, ethernet layered tsn
 
 /examples/ethernet/invehicle/,       -f omnetpp.ini -c NoPriorityQueueing -r 0,             100ms,   7871-c190/tplx;0d7a-3ed2/~tNl;835c-9cb2/~tND;922f-de65/tyf, PASS, ethernet layered tsn
 /examples/ethernet/invehicle/,       -f omnetpp.ini -c NoTAS -r 0,                          100ms,   7871-c190/tplx;0d7a-3ed2/~tNl;835c-9cb2/~tND;23ac-a6b0/tyf, PASS, ethernet layered tsn
