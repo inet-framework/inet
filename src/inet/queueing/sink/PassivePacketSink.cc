@@ -31,7 +31,7 @@ void PassivePacketSink::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         consumptionIntervalParameter = &par("consumptionInterval");
         consumptionTimer = new ClockEvent("ConsumptionTimer");
-        scheduleCollectionForAbsoluteTime = par("scheduleCollectionForAbsoluteTime");
+        scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(inputGate);
@@ -54,7 +54,7 @@ void PassivePacketSink::scheduleConsumptionTimer()
 {
     clocktime_t interval = consumptionIntervalParameter->doubleValue();
     if (interval != 0 || consumptionTimer->getArrivalModule() == nullptr) {
-        if (scheduleCollectionForAbsoluteTime)
+        if (scheduleForAbsoluteTime)
             scheduleClockEventAt(getClockTime() + interval, consumptionTimer);
         else
             scheduleClockEventAfter(interval, consumptionTimer);
