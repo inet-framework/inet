@@ -21,27 +21,7 @@ import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
-
 network EthernetVlanShowcase
-{
-    submodules:
-        configurator: Ipv4NetworkConfigurator {
-            @display("p=100,100;is=s");
-        }
-        host1: StandardHost {
-            @display("p=250,150");
-        }
-        host2: StandardHost {
-            @display("p=450,150");
-        }
-        visualizer: IntegratedCanvasVisualizer {
-            @display("p=100,200;is=s");
-        }
-    connections:
-        host1.ethg++ <--> Eth100M <--> host2.ethg++;
-}
-
-network EthernetVlanShowcase2
 {
     submodules:
         configurator: Ipv4NetworkConfigurator {
@@ -85,3 +65,21 @@ network EthernetVlanShowcase2
         switch2.ethg++ <--> Eth100M <--> host6.ethg++;
 }
 
+network EthernetVlanShowcase2
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=100,100;is=s");
+        }
+        host1: StandardHost {
+            @display("p=250,150");
+        }
+        host2: StandardHost {
+            @display("p=450,150");
+        }
+        visualizer: IntegratedCanvasVisualizer {
+            @display("p=100,200;is=s");
+        }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
