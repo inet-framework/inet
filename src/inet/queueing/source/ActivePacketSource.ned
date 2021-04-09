@@ -30,7 +30,7 @@ simple ActivePacketSource extends PacketSourceBase like IActivePacketSource
         string clockModule = default(""); // relative path of a module that implements IClock; optional
         double initialProductionOffset @unit(s) = default(0s);
         volatile double productionInterval @unit(s); // elapsed time between subsequent packets pushed to the connected packet consumer
-        bool scheduleProductionForAbsoluteTime = default(true); // when a clock is used relative means that setting the clock will not affect the simulation time of the event
+        bool scheduleForAbsoluteTime = default(true); // when a clock is used relative means that setting the clock will not affect the simulation time of the event
         @class(ActivePacketSource);
         @display("i=block/source");
         @signal[packetCreated](type=inet::Packet);

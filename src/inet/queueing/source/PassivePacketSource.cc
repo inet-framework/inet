@@ -30,7 +30,7 @@ void PassivePacketSource::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         providingIntervalParameter = &par("providingInterval");
         providingTimer = new ClockEvent("ProvidingTimer");
-        scheduleProductionForAbsoluteTime = par("scheduleProductionForAbsoluteTime");
+        scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
         WATCH_PTR(nextPacket);
     }
     else if (stage == INITSTAGE_QUEUEING) {
@@ -53,7 +53,7 @@ void PassivePacketSource::scheduleProvidingTimer()
 {
     clocktime_t interval = providingIntervalParameter->doubleValue();
     if (interval != 0 || providingTimer->getArrivalModule() == nullptr) {
-        if (scheduleProductionForAbsoluteTime)
+        if (scheduleForAbsoluteTime)
             scheduleClockEventAt(getClockTime() + interval, providingTimer);
         else
             scheduleClockEventAfter(interval, providingTimer);
