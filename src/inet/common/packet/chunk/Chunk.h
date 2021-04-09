@@ -756,7 +756,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
      */
     template<typename T> void mapAllTagsForUpdate(b offset, b length, std::function<void(b, b, const Ptr<T>&)> f) {
         checkMutable();
-        return regionTags.mapAllTags<T>(offset, length == b(-1) ? getChunkLength() - offset : length, f);
+        return regionTags.mapAllTagsForUpdate<T>(offset, length == b(-1) ? getChunkLength() - offset : length, f);
     }
 
     /**
@@ -771,7 +771,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
      */
     template<typename T> std::vector<SharingRegionTagSet::RegionTag<T>> getAllTagsForUpdate(b offset = b(0), b length = b(-1)) {
         checkMutable();
-        return regionTags.getAllTags<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
+        return regionTags.getAllTagsForUpdate<T>(offset, length == b(-1) ? getChunkLength() - offset : length);
     }
 
     /**
