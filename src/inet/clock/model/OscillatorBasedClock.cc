@@ -114,10 +114,10 @@ ClockEvent *OscillatorBasedClock::cancelClockEvent(ClockEvent *event)
     return ClockBase::cancelClockEvent(event);
 }
 
-void OscillatorBasedClock::handleClockEventOccurred(ClockEvent *event)
+void OscillatorBasedClock::handleClockEvent(ClockEvent *event)
 {
-    ClockBase::handleClockEventOccurred(event);
     events.erase(std::remove(events.begin(), events.end(), event), events.end());
+    ClockBase::handleClockEvent(event);
 }
 
 const char *OscillatorBasedClock::resolveDirective(char directive) const

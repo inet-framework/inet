@@ -30,6 +30,15 @@ namespace inet {
  * ClockUserModuleBase or ClockUserModuleMixin. Then you can use the inherited
  * clock related methods or the methods of this interface on the inherited clock
  * field.
+ *
+ * The clock interface requires the following properties.
+ *
+ * 1. When a clock event is executed the clock time is guaranteed to be equal to
+ *    the arrival clock time of the event.
+ *
+ * 2. The scheduling and the execution of a new independent clock event doesn't
+ *    change the arrival simulation times (and of course arrival clock times) of
+ *    all other events.
  */
 class INET_API IClock
 {
@@ -88,11 +97,11 @@ class INET_API IClock
     virtual ClockEvent *cancelClockEvent(ClockEvent *event) = 0;
 
     /**
-     * Internally used method to notify the clock before a clock event is executed.
+     * Called by the clock event to be executed in the context of this clock.
      * This method is primarily useful for clock implementations to update their
      * internal data structures related to individual clock events.
      */
-    virtual void handleClockEventOccurred(ClockEvent *event) = 0;
+    virtual void handleClockEvent(ClockEvent *event) = 0;
 };
 
 } // namespace inet

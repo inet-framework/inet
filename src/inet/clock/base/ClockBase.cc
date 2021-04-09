@@ -51,12 +51,11 @@ void ClockBase::updateDisplayString() const
 
 clocktime_t ClockBase::getClockTime() const
 {
-    return computeClockTimeFromSimTime(simTime());
+    return clockEventTime != -1 ? clockEventTime : computeClockTimeFromSimTime(simTime());
 }
 
 void ClockBase::scheduleClockEventAt(clocktime_t t, ClockEvent *msg)
 {
-    ASSERT(msg->getClock() == nullptr);
     if (t < getClockTime())
         throw cRuntimeError("Cannot schedule clock event in the past");
     cSimpleModule *targetModule = getTargetModule();
@@ -68,7 +67,6 @@ void ClockBase::scheduleClockEventAt(clocktime_t t, ClockEvent *msg)
 
 void ClockBase::scheduleClockEventAfter(clocktime_t clockTimeDelay, ClockEvent *msg)
 {
-    ASSERT(msg->getClock() == nullptr);
     if (clockTimeDelay < 0)
         throw cRuntimeError("Cannot schedule clock event with negative delay");
     cSimpleModule *targetModule = getTargetModule();
@@ -87,9 +85,12 @@ ClockEvent *ClockBase::cancelClockEvent(ClockEvent *msg)
     return static_cast<ClockEvent *>(getTargetModule()->cancelEvent(msg));
 }
 
-void ClockBase::handleClockEventOccurred(ClockEvent *msg)
+void ClockBase::handleClockEvent(ClockEvent *msg)
 {
+    clockEventTime = msg->getArrivalClockTime();
     msg->setClock(nullptr);
+    msg->callBaseExecute();
+    clockEventTime = -1;
 }
 
 const char *ClockBase::resolveDirective(char directive) const

@@ -22,8 +22,17 @@
 
 namespace inet {
 
+class ClockBase;
+
 class INET_API ClockEvent : public ClockEvent_Base
 {
+  friend ClockBase;
+
+  protected:
+    virtual void execute() override;
+
+    void callBaseExecute() { ClockEvent_Base::execute(); }
+
   public:
     ClockEvent(const char *name = nullptr, short kind = 0) : ClockEvent_Base(name, kind) {}
     ClockEvent(const ClockEvent& other) : ClockEvent_Base(other) {}
@@ -34,10 +43,6 @@ class INET_API ClockEvent : public ClockEvent_Base
         return *this;
     }
     virtual ClockEvent *dup() const override { return new ClockEvent(*this); }
-
-    virtual clocktime_t getArrivalClockTime() const override;
-
-    virtual void execute() override;
 };
 
 } // namespace inet

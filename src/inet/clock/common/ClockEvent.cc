@@ -23,19 +23,15 @@ namespace inet {
 
 Register_Class(ClockEvent)
 
-clocktime_t ClockEvent::getArrivalClockTime() const
-{
-    if (clock == nullptr)
-        return SIMTIME_AS_CLOCKTIME(getArrivalTime());
-    else
-        return ClockEvent_Base::getArrivalClockTime();
-}
-
 void ClockEvent::execute()
 {
     if (clock != nullptr)
-        clock->handleClockEventOccurred(this);
-    cMessage::execute();
+        clock->handleClockEvent(this);
+    else {
+        // TODO: this should be part of setArrival if clock is nullptr
+        arrivalClockTime = SIMTIME_AS_CLOCKTIME(getArrivalTime());
+        cMessage::execute();
+    }
 }
 
 } // namespace inet

@@ -31,6 +31,7 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
     static simsignal_t timeChangedSignal;
 
   protected:
+    clocktime_t clockEventTime = -1;
     const char *displayStringTextFormat = nullptr;
 
   protected:
@@ -53,7 +54,7 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
     virtual void scheduleClockEventAt(clocktime_t time, ClockEvent *event) override;
     virtual void scheduleClockEventAfter(clocktime_t time, ClockEvent *event) override;
     virtual ClockEvent *cancelClockEvent(ClockEvent *event) override;
-    virtual void handleClockEventOccurred(ClockEvent *event) override;
+    virtual void handleClockEvent(ClockEvent *event) override;
 
     virtual const char *resolveDirective(char directive) const override;
 };

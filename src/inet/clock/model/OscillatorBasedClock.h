@@ -44,7 +44,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     virtual void scheduleClockEventAt(clocktime_t t, ClockEvent *event) override;
     virtual void scheduleClockEventAfter(clocktime_t delay, ClockEvent *event) override;
     virtual ClockEvent *cancelClockEvent(ClockEvent *event) override;
-    virtual void handleClockEventOccurred(ClockEvent *event) override;
+    virtual void handleClockEvent(ClockEvent *event) override;
 
     virtual const char *resolveDirective(char directive) const override;
 
