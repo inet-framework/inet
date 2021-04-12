@@ -21,7 +21,7 @@
 
 namespace inet {
 
-namespace lora {
+namespace flora {
 using namespace physicallayer;
 
 class INET_API LoRaBandListening : public BandListening
@@ -41,7 +41,7 @@ class INET_API LoRaBandListening : public BandListening
     virtual Hz getLoRaBW() const { return bandwidth; }
 };
 
-} // namespace physicallayer
+} 
 
 } // namespace inet
 

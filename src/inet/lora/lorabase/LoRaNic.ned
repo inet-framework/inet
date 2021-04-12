@@ -15,7 +15,6 @@
 
 package inet.lora.lorabase;
 import inet.linklayer.common.WirelessInterface;
-import inet.lora.loraphy.LoRaMedium;
 
 module LoRaNic extends WirelessInterface 
 {
@@ -23,5 +22,9 @@ module LoRaNic extends WirelessInterface
         @display("i=block/ifcard");
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         radio.typename = default("LoRaRadio");
+        radio.antenna.mobilityModule = "^.^.^.mobility";
+        radio.transmitter.typename = "LoRaTransmitter";
+        radio.transmitter.headerLength = 0B;
+        radio.receiver.typename = "LoRaReceiver";
         mac.typename = "LoRaMac";
 }

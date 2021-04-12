@@ -14,15 +14,16 @@
 // 
 
 #include "inet/lora/lorabase/LoRaGWMac.h"
-#include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/common/MacAddressTag_m.h"
-
 #include "inet/common/ModuleAccess.h"
+#include "inet/lora/loraphy/LoRaPhyPreamble_m.h"
+#include "inet/common/ProtocolTag_m.h"
+
+
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 
 namespace inet {
-namespace lora {
+namespace flora {
 
 Define_Module(LoRaGWMac);
 
@@ -106,6 +107,8 @@ void LoRaGWMac::handleUpperMessage(cMessage *msg)
 {
     if(waitingForDC == false)
     {
+//        LoRaMacFrame *frame = check_and_cast<LoRaMacFrame *>(msg);
+//        frame->removeControlInfo();
         auto pkt = check_and_cast<Packet *>(msg);
         const auto &frame = pkt->peekAtFront<LoRaMacFrame>();
         if (pkt->getControlInfo())
@@ -113,13 +116,12 @@ void LoRaGWMac::handleUpperMessage(cMessage *msg)
 
         auto tag = pkt->addTagIfAbsent<MacAddressReq>();
         tag->setDestAddress(frame->getReceiverAddress());
+//        LoRaMacControlInfo *ctrl = new LoRaMacControlInfo();
+//        ctrl->setSrc(address);
+//        ctrl->setDest(frame->getReceiverAddress());
+//        frame->setControlInfo(ctrl);
+//        sendDown(frame);
 
-
-
-       /* LoRaMacControlInfo *ctrl = new LoRaMacControlInfo();
-        ctrl->setSrc(address);
-        ctrl->setDest(frame->getReceiverAddress());
-        pkt->setControlInfo(ctrl);*/
 
         waitingForDC = true;
         double delta;
@@ -131,6 +133,7 @@ void LoRaGWMac::handleUpperMessage(cMessage *msg)
         if(frame->getLoRaSF() == 12) delta = 14.49984;
         scheduleAt(simTime() + delta, dutyCycleTimer);
         GW_forwardedDown++;
+        pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::apskPhy);
         sendDown(pkt);
     }
     else
@@ -143,6 +146,7 @@ void LoRaGWMac::handleUpperMessage(cMessage *msg)
 void LoRaGWMac::handleLowerMessage(cMessage *msg)
 {
     auto pkt = check_and_cast<Packet *>(msg);
+    auto header = pkt->popAtFront<flora::LoRaPhyPreamble>();
     const auto &frame = pkt->peekAtFront<LoRaMacFrame>();
     if(frame->getReceiverAddress() == MacAddress::BROADCAST_ADDRESS)
         sendUp(pkt);

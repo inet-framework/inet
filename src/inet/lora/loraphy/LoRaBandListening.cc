@@ -17,7 +17,7 @@
 
 namespace inet {
 
-namespace lora {
+namespace flora {
 
 
 LoRaBandListening::LoRaBandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition,  Hz centerFrequency, Hz bandwidth, int LoRaSF) :

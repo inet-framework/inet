@@ -12,7 +12,7 @@
 
 namespace inet {
 
-namespace lora {
+namespace flora {
 
 using namespace physicallayer;
 

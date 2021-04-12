@@ -12,7 +12,7 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
 
 namespace inet {
-namespace lora {
+namespace flora {
 
 using namespace physicallayer;
 

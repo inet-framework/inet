@@ -16,7 +16,7 @@
 #ifndef LORAPHY_LORATRANSMITTER_H_
 #define LORAPHY_LORATRANSMITTER_H_
 
-#include "inet/lora/loraphy/LoRaRadio.h"
+#include "inet/lora/lorabase/LoRaRadio.h"
 #include "inet/lora/loraphy/LoRaModulation.h"
 #include "inet/lora/loraphy/LoRaTransmission.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatTransmitterBase.h"
@@ -24,7 +24,7 @@
 
 namespace inet {
 
-namespace lora {
+namespace flora {
 
 using namespace physicallayer;
 

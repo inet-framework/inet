@@ -19,7 +19,7 @@
 #include "inet/lora/loraapp/SimpleLoRaApp.h"
 #include "inet/lora/lorabase/LoRaGWMac.h"
 #include "inet/lora/lorabase/LoRaMac.h"
-#include "inet/lora/loraphy/LoRaRadio.h"
+#include "inet/lora/lorabase/LoRaRadio.h"
 #include "inet/lora/loraphy/LoRaBandListening.h"
 #include "inet/lora/loraphy/LoRaModulation.h"
 #include "inet/lora/loraphy/LoRaReception.h"
@@ -38,7 +38,7 @@
 
 namespace inet {
 
-namespace lora {
+namespace flora {
 
 using namespace physicallayer;
 
@@ -59,6 +59,15 @@ private:
 
     W energyDetection;
     simsignal_t LoRaReceptionCollision;
+
+    int nonOrthDelta[6][6] = {
+       {1, -8, -9, -9, -9, -9},
+       {-11, 1, -11, -12, -13, -13},
+       {-15, -13, 1, -13, -14, -15},
+       {-19, -18, -17, 1, -17, -18},
+       {-22, -22, -21, -20, 1, -20},
+       {-25, -25, -25, -24, -23, 1}
+    };
 
     //statistics
     long numCollisions;
@@ -81,10 +90,6 @@ public:
 
   virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const override;
   virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
-
-  //virtual ReceptionIndication *createReceptionIndication() const;
-
-  //virtual const LoRaReceptionIndication *computeReceptionIndication(const ISnir *snir) const override;
 
   virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const override;
 

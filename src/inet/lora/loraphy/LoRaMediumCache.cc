@@ -24,7 +24,7 @@
 
 namespace inet {
 
-namespace lora {
+namespace flora {
 
 Define_Module(LoRaMediumCache);
 
@@ -196,9 +196,9 @@ double LoRaMediumCache::computeMaxAntennaGain() const
 m LoRaMediumCache::computeMaxRange(W maxTransmissionPower, W minReceptionPower) const
 {
     // TODO: this is NaN by default
-    Hz centerFrequency = Hz(par("centerFrequency"));
+    Hz carrierFrequency = Hz(par("carrierFrequency"));
     double loss = unit(minReceptionPower / maxTransmissionPower).get() / maxAntennaGain / maxAntennaGain;
-    return radioMedium->getPathLoss()->computeRange(radioMedium->getPropagation()->getPropagationSpeed(), centerFrequency, loss);
+    return radioMedium->getPathLoss()->computeRange(radioMedium->getPropagation()->getPropagationSpeed(), carrierFrequency, loss);
 }
 
 m LoRaMediumCache::computeMaxInterferenceRange() const
@@ -254,7 +254,6 @@ m LoRaMediumCache::getMaxCommunicationRange(const IRadio* radio) const
         LoRaLogNormalShadowing *loraLogNormalShadowing;
         loraLogNormalShadowing = check_and_cast<LoRaLogNormalShadowing *>(radioMedium->getSubmodule("pathLoss"));
         return(loraLogNormalShadowing->computeRange(maxTransmissionPower));
-
     }
     throw cRuntimeError("Lora propagation model is not of the type LoRaLogNormalShadowing, correct or modify the code in getMaxCommunicationRange");
     return m(NaN);

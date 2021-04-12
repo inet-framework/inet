@@ -30,7 +30,7 @@
 #include "inet/lora/loraapp/LoRaAppPacket_m.h"
 
 namespace inet {
-namespace lora {
+namespace flora {
 
 class knownNode
 {

@@ -21,7 +21,7 @@
 
 
 namespace inet {
-namespace lora {
+namespace flora {
 
 Define_Module(SimpleLoRaApp);
 
@@ -141,24 +141,26 @@ void SimpleLoRaApp::handleMessage(cMessage *msg)
 
 void SimpleLoRaApp::handleMessageFromLowerLayer(cMessage *msg)
 {
-    auto packet = check_and_cast<Packet *>(msg);
-
-    const auto &frame  = packet->peekAtFront<LoRaAppPacket>();
+//    LoRaAppPacket *packet = check_and_cast<LoRaAppPacket *>(msg);
+    auto pkt = check_and_cast<Packet *>(msg);
+    const auto & packet = pkt->peekAtFront<LoRaAppPacket>();
     if (simTime() >= getSimulation()->getWarmupPeriod())
         receivedADRCommands++;
     if(evaluateADRinNode)
     {
         ADR_ACK_CNT = 0;
-        if(frame->getMsgType() == TXCONFIG)
+        if(packet->getMsgType() == TXCONFIG)
         {
-            if(frame->getOptions().getLoRaTP() != -1)
+            if(packet->getOptions().getLoRaTP() != -1)
             {
-                loRaTP = frame->getOptions().getLoRaTP();
+                loRaTP = packet->getOptions().getLoRaTP();
             }
-            if(frame->getOptions().getLoRaSF() != -1)
+            if(packet->getOptions().getLoRaSF() != -1)
             {
-                loRaSF = frame->getOptions().getLoRaSF();
+                loRaSF = packet->getOptions().getLoRaSF();
             }
+            EV << "New TP " << loRaTP << endl;
+            EV << "New SF " << loRaSF << endl;
         }
     }
 }
@@ -173,20 +175,20 @@ bool SimpleLoRaApp::handleOperationStage(LifecycleOperation *operation, IDoneCal
 
 void SimpleLoRaApp::sendJoinRequest()
 {
-    auto request = makeShared<LoRaAppPacket>();
-    request->setChunkLength(B(par("dataSize").intValue()));
-
     auto pktRequest = new Packet("DataFrame");
     pktRequest->setKind(DATA);
 
+    auto payload = makeShared<LoRaAppPacket>();
+    payload->setChunkLength(B(par("dataSize").intValue()));
+
     lastSentMeasurement = rand();
-    request->setSampleMeasurement(lastSentMeasurement);
+    payload->setSampleMeasurement(lastSentMeasurement);
 
     if(evaluateADRinNode && sendNextPacketWithADRACKReq)
     {
-        auto opt = request->getOptions();
+        auto opt = payload->getOptions();
         opt.setADRACKReq(true);
-        request->setOptions(opt);
+        payload->setOptions(opt);
         //request->getOptions().setADRACKReq(true);
         sendNextPacketWithADRACKReq = false;
     }
@@ -197,7 +199,8 @@ void SimpleLoRaApp::sendJoinRequest()
     loraTag->setCenterFrequency(loRaCF);
     loraTag->setSpreadFactor(loRaSF);
     loraTag->setCodeRendundance(loRaCR);
-    loraTag->setPower(W(loRaTP));
+    loraTag->setPower(mW(math::dBmW2mW(loRaTP)));
+
     //add LoRa control info
   /*  LoRaMacControlInfo *cInfo = new LoRaMacControlInfo();
     cInfo->setLoRaTP(loRaTP);
@@ -209,7 +212,7 @@ void SimpleLoRaApp::sendJoinRequest()
 
     sfVector.record(loRaSF);
     tpVector.record(loRaTP);
-    pktRequest->insertAtFront(request);
+    pktRequest->insertAtBack(payload);
     send(pktRequest, "appOut");
     if(evaluateADRinNode)
     {

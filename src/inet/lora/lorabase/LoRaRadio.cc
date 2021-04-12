@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "inet/lora/loraphy/LoRaRadio.h"
+#include "inet/lora/lorabase/LoRaRadio.h"
 
 #include "inet/lora/loraphy/LoRaMedium.h"
 #include "inet/lora/loraphy/LoRaReceiver.h"
@@ -31,7 +31,7 @@
 
 namespace inet {
 
-namespace lora {
+namespace flora {
 
 Define_Module(LoRaRadio);
 
@@ -182,7 +182,7 @@ void LoRaRadio::handleUpperPacket(Packet *packet)
 {
     emit(packetReceivedFromUpperSignal, packet);
     if (isTransmitterMode(radioMode)) {
-        auto tag = packet->removeTag<lora::LoRaTag>();
+        auto tag = packet->removeTag<flora::LoRaTag>();
         auto preamble = makeShared<LoRaPhyPreamble>();
 
         preamble->setBandwidth(tag->getBandwidth());
@@ -193,7 +193,6 @@ void LoRaRadio::handleUpperPacket(Packet *packet)
         preamble->setUseHeader(tag->getUseHeader());
         const auto & loraHeader =  packet->peekAtFront<LoRaMacFrame>();
         preamble->setReceiverAddress(loraHeader->getReceiverAddress());
-
 
         auto signalPowerReq = packet->addTagIfAbsent<SignalPowerReq>();
         signalPowerReq->setPower(tag->getPower());
@@ -230,7 +229,6 @@ bool LoRaRadio::handleNodeStart(IDoneCallback *doneCallback)
     completeRadioModeSwitch(RADIO_MODE_OFF);
     return PhysicalLayerBase::handleNodeStart(doneCallback);
 }
-
 bool LoRaRadio::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     // NOTE: we ignore radio mode switching and ongoing transmission during shutdown
@@ -240,7 +238,6 @@ bool LoRaRadio::handleNodeShutdown(IDoneCallback *doneCallback)
     completeRadioModeSwitch(RADIO_MODE_OFF);
     return PhysicalLayerBase::handleNodeShutdown(doneCallback);
 }
-
 void LoRaRadio::handleNodeCrash()
 {
     cancelEvent(switchTimer);
@@ -258,7 +255,6 @@ void LoRaRadio::startTransmission(Packet *macFrame, IRadioSignal::SignalPart par
     auto transmission = radioFrame->getTransmission();
     transmissionTimer->setKind(part);
     transmissionTimer->setContextPointer(const_cast<Signal *>(radioFrame));
-
     scheduleAt(transmission->getEndTime(part), transmissionTimer);
     EV_INFO << "Transmission started: " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
     updateTransceiverState();
@@ -283,7 +279,6 @@ void LoRaRadio::continueTransmission()
     transmissionTimer->setKind(nextPart);
     scheduleAt(transmission->getEndTime(nextPart), transmissionTimer);
     EV_INFO << "Transmission started: " << (ISignal *)radioFrame << " " << IRadioSignal::getSignalPartName(nextPart) << " as " << transmission << endl;
-
     updateTransceiverState();
     updateTransceiverPart();
     */
@@ -394,7 +389,7 @@ void LoRaRadio::continueReception(cMessage *timer)
 
 void LoRaRadio::decapsulate(Packet *packet) const
 {
-    auto tag = packet->addTag<lora::LoRaTag>();
+    auto tag = packet->addTag<flora::LoRaTag>();
     auto preamble = packet->popAtFront<LoRaPhyPreamble>();
 
     tag->setBandwidth(preamble->getBandwidth());
@@ -448,17 +443,14 @@ void LoRaRadio::endReception(cMessage *timer)
         auto isReceptionSuccessful = medium->getReceptionDecision(this, signal->getListening(), transmission, part)->isReceptionSuccessful();
         EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "successfully" : "unsuccessfully") << " for " << (ISignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         auto macFrame = medium->receivePacket(this, signal);
-
-        auto tag = macFrame->addTag<lora::LoRaTag>();
+        auto tag = macFrame->addTag<flora::LoRaTag>();
         auto preamble = macFrame->popAtFront<LoRaPhyPreamble>();
-
         tag->setBandwidth(preamble->getBandwidth());
         tag->setCenterFrequency(preamble->getCenterFrequency());
         tag->setCodeRendundance(preamble->getCodeRendundance());
         tag->setPower(preamble->getPower());
         tag->setSpreadFactor(preamble->getSpreadFactor());
         tag->setUseHeader(preamble->getUseHeader());
-
         if(isReceptionSuccessful) {
             emit(packetSentToUpperSignal, macFrame);
             sendUp(macFrame);
@@ -469,7 +461,6 @@ void LoRaRadio::endReception(cMessage *timer)
         }
         emit(receptionEndedSignal, check_and_cast<const cObject *>(reception));
         receptionTimer = nullptr;
-
     }
     else
         EV_INFO << "Reception ended: ignoring " << (ISignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;

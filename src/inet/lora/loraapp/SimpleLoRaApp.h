@@ -27,7 +27,7 @@
 using namespace omnetpp;
 
 namespace inet {
-namespace lora{
+namespace flora{
 
 /**
  * TODO - Generated class

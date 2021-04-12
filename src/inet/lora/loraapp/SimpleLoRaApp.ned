@@ -32,9 +32,9 @@ simple SimpleLoRaApp
         double initialLoRaBW @unit(Hz) = default(125kHz);
         int initialLoRaCR = default(4);
         bool initialUseHeader = default(true);
+        bool evaluateADRinNode = default(false);
+        int dataSize @unit(B) = default(10B);
     	@class(SimpleLoRaApp);
-    	bool evaluateADRinNode = default(false);
-    	int dataSize @unit(B) = default(10B);
     gates:
         output appOut @labels(LoRaAppPacket/down);
         input appIn @labels(LoRaAppPacket/up);

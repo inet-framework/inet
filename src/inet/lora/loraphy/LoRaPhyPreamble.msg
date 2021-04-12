@@ -23,7 +23,7 @@ import inet.common.Units;
 import inet.linklayer.common.MacAddress;
 
 
-namespace inet::physicallayer;
+namespace inet::flora;
 
 class LoRaPhyPreamble extends FieldsChunk {
     Hz centerFrequency;

@@ -20,6 +20,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
 #include "inet/linklayer/common/UserPriority.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/csmaca/CsmaCaMac.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -27,7 +28,7 @@
 #include "inet/lora/lorabase/LoRaTagInfo_m.h"
 
 namespace inet {
-namespace lora {
+namespace flora {
 
 Define_Module(LoRaMac);
 
@@ -384,9 +385,9 @@ Packet *LoRaMac::decapsulate(Packet *frame)
     frame->addTagIfAbsent<MacAddressInd>()->setSrcAddress(loraHeader->getTransmitterAddress());
     frame->addTagIfAbsent<MacAddressInd>()->setDestAddress(loraHeader->getReceiverAddress());
     frame->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
-    auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(loraHeader->getNetworkProtocol());
-    frame->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
-    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
+//    auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(loraHeader->getNetworkProtocol());
+//    frame->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+//    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
 
     return frame;
 }
@@ -428,7 +429,7 @@ void LoRaMac::sendAckFrame()
     macHeader->setChunkLength(B(ackLength));
     auto frame = new Packet("CsmaAck");
     frame->insertAtFront(macHeader);
-    frame->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lora);
+//    frame->addTag<PacketProtocolTag>()->setProtocol(&Protocol::lora);
     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
 
     auto macAddressInd = frame->addTagIfAbsent<MacAddressInd>();

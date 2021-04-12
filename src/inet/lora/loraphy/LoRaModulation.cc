@@ -18,7 +18,7 @@
 
 namespace inet {
 
-namespace lora {
+namespace flora {
 
 const std::vector<ApskSymbol> LoRaModulation::constellation = {};
 
@@ -33,11 +33,6 @@ LoRaModulation::LoRaModulation(int spreadFactor,Hz bandwith,bps bitRate, int not
 {
 }
 
-simtime_t LoRaModulation::getSymbolTyme() {
-    double time = pow(2,spreadFactor)/bandwith.get();
-    return SimTime(time);
-}
-
 double LoRaModulation::calculateBER(double snir, Hz bandwidth, bps bitrate) const
 {
     // Taken from MiXiM 802.15.4 decider by Karl Wessel
@@ -47,7 +42,7 @@ double LoRaModulation::calculateBER(double snir, Hz bandwidth, bps bitrate) cons
     // calculations, formula 7). Here you can see that the factor of 20.0 is correct ;).
     const double dSNRFct = 20.0 *snir *bandwidth.get() / bitrate.get(); // TODO is this correct?
     double dSumK = 0;
-    int k = 2;
+    register int k = 2;
 
     /* following loop was optimized by using n_choose_k symmetries
        for (k=2; k <= 16; ++k) {

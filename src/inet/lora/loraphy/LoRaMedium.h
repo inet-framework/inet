@@ -27,9 +27,9 @@
 #include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
 #include <algorithm>
 
-#include "inet/lora/loraphy/LoRaRadio.h"
+#include "inet/lora/lorabase/LoRaRadio.h"
 namespace inet {
-namespace lora {
+namespace flora {
 
 using namespace physicallayer;
 

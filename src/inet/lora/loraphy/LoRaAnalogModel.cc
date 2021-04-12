@@ -21,11 +21,11 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarReception.h"
-#include "inet/lora/loraphy/LoRaRadio.h"
+#include "inet/lora/lorabase/LoRaRadio.h"
 
 namespace inet {
 
-namespace lora {
+namespace flora {
 
 Define_Module(LoRaAnalogModel);
 
@@ -88,19 +88,23 @@ const W LoRaAnalogModel::getBackgroundNoisePower(const LoRaBandListening *listen
 W LoRaAnalogModel::computeReceptionPower(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
-   // const IRadio *transmitterRadio = transmission->getTransmitter();
+//    const IRadio *transmitterRadio = transmission->getTransmitter();
+//    const IAntenna *receiverAntenna = receiverRadio->getAntenna();
+//    const IAntenna *transmitterAntenna = transmitterRadio->getAntenna();
     const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     const IScalarSignal *scalarSignalAnalogModel = check_and_cast<const IScalarSignal *>(transmission->getAnalogModel());
-    //const Coord receptionEndPosition = arrival->getEndPosition();
     const Coord receptionStartPosition = arrival->getStartPosition();
-    // TODO: could be used for doppler shift? const Coord receptionEndPosition = arrival->getEndPosition();
+    const Coord receptionEndPosition = arrival->getEndPosition();
+//    const Quaternion transmissionDirection = computeTransmissionDirection(transmission, arrival);
+//    const Quaternion transmissionAntennaDirection = transmission->getStartOrientation() - transmissionDirection;
+//    const Quaternion receptionAntennaDirection = transmissionDirection - arrival->getStartOrientation();
     double transmitterAntennaGain = computeAntennaGain(transmission->getTransmitterAntennaGain(), transmission->getStartPosition(), arrival->getStartPosition(), transmission->getStartOrientation());
     double receiverAntennaGain = computeAntennaGain(receiverRadio->getAntenna()->getGain().get(), arrival->getStartPosition(), transmission->getStartPosition(), arrival->getStartOrientation());
     double pathLoss = radioMedium->getPathLoss()->computePathLoss(transmission, arrival);
     double obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(narrowbandSignalAnalogModel->getCenterFrequency(), transmission->getStartPosition(), receptionStartPosition) : 1;
     W transmissionPower = scalarSignalAnalogModel->getPower();
     return transmissionPower * std::min(1.0, transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss);
- }
+}
 
 const IReception *LoRaAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
@@ -122,7 +126,7 @@ const IReception *LoRaAnalogModel::computeReception(const IRadio *receiverRadio,
 const INoise *LoRaAnalogModel::computeNoise(const IListening *listening, const IInterference *interference) const
 {
     const LoRaBandListening *bandListening = check_and_cast<const LoRaBandListening *>(listening);
-    Hz commonCenterFrequency = bandListening->getLoRaCF();
+    Hz commonCarrierFrequency = bandListening->getLoRaCF();
     Hz commonBandwidth = bandListening->getLoRaBW();
     simtime_t noiseStartTime = SimTime::getMaxTime();
     simtime_t noiseEndTime = 0;
@@ -132,9 +136,9 @@ const INoise *LoRaAnalogModel::computeNoise(const IListening *listening, const I
         const ISignalAnalogModel *signalAnalogModel = reception->getAnalogModel();
         const INarrowbandSignal *narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignal *>(signalAnalogModel);
         const LoRaReception *loRaReception = check_and_cast<const LoRaReception *>(signalAnalogModel);
-        Hz signalCenterFrequency = loRaReception->getLoRaCF();
+        Hz signalCarrierFrequency = loRaReception->getLoRaCF();
         Hz signalBandwidth = loRaReception->getLoRaBW();
-        if((commonCenterFrequency == signalCenterFrequency && commonBandwidth == signalBandwidth))
+        if((commonCarrierFrequency == signalCarrierFrequency && commonBandwidth == signalBandwidth))
         {
             const IScalarSignal *scalarSignalAnalogModel = check_and_cast<const IScalarSignal *>(signalAnalogModel);
             W power = scalarSignalAnalogModel->getPower();
@@ -155,7 +159,7 @@ const INoise *LoRaAnalogModel::computeNoise(const IListening *listening, const I
             else
                 powerChanges->insert(std::pair<simtime_t, W>(endTime, -power));
         }
-        else if (areOverlappingBands(commonCenterFrequency, commonBandwidth, narrowbandSignalAnalogModel->getCenterFrequency(), narrowbandSignalAnalogModel->getBandwidth()))
+        else if (areOverlappingBands(commonCarrierFrequency, commonBandwidth, narrowbandSignalAnalogModel->getCenterFrequency(), narrowbandSignalAnalogModel->getBandwidth()))
             throw cRuntimeError("Overlapping bands are not supported");
     }
 
@@ -181,15 +185,14 @@ const INoise *LoRaAnalogModel::computeNoise(const IListening *listening, const I
         EV_TRACE << "Noise at " << it->first << " = " << noise << endl;
     }
     EV_TRACE << "Noise power end" << endl;
-    return new ScalarNoise(noiseStartTime, noiseEndTime, commonCenterFrequency, commonBandwidth, powerChanges);
+    return new ScalarNoise(noiseStartTime, noiseEndTime, commonCarrierFrequency, commonBandwidth, powerChanges);
 }
 
 const ISnir *LoRaAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const
 {
     return new ScalarSnir(reception, noise);
 }
-
-} // namespace physicallayer
+} 
 
 } // namespace inet
 

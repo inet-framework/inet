@@ -20,7 +20,7 @@
 
 namespace inet {
 
-namespace lora {
+namespace flora {
 using namespace physicallayer;
 
 class INET_API LoRaModulation : public ApskModulationBase
@@ -37,7 +37,6 @@ protected:
     virtual Hz getBandwith() const {return  bandwith;}
     virtual bps getbitRate() const {return  bitRate;}
     virtual int getSpreadFactor() const {return  spreadFactor;}
-    virtual simtime_t getSymbolTyme();
     virtual void setHeaderEnable(const bool &p){notHeader = 1; if (p) notHeader = 0;}
     virtual bool getHeaderEnable() {return notHeader == 0;}
 

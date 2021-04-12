@@ -24,14 +24,13 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 
 namespace inet {
-namespace lora {
+namespace flora {
 
 Define_Module(PacketForwarder);
 
 
 void PacketForwarder::initialize(int stage)
 {
-
     if (stage == 0) {
         LoRa_GWPacketReceived = registerSignal("LoRa_GWPacketReceived");
         localPort = par("localPort");
@@ -40,15 +39,16 @@ void PacketForwarder::initialize(int stage)
         startUDP();
         getSimulation()->getSystemModule()->subscribe("LoRa_AppPacketSent", this);
     }
-
 }
 
 
 void PacketForwarder::startUDP()
 {
+    EV << "Wywalamy sie tutaj" << endl;
     socket.setOutputGate(gate("socketOut"));
     const char *localAddress = par("localAddress");
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
+    EV << "Dojechalismy za pierwszy resolv" << endl;
     // TODO: is this required?
     //setSocketOptions();
 
@@ -58,14 +58,18 @@ void PacketForwarder::startUDP()
 
     // Create UDP sockets to multiple destination addresses (network servers)
     while ((token = tokenizer.nextToken()) != nullptr) {
+        EV << "Wchodze w petle" << endl;
+        EV << token << endl;
         L3Address result;
         L3AddressResolver().tryResolve(token, result);
+        EV << "Wychodze z petli" << endl;
         if (result.isUnspecified())
             EV_ERROR << "cannot resolve destination address: " << token << endl;
         else
             EV << "Got destination address: " << token << endl;
         destAddresses.push_back(result);
     }
+    EV << "Dojechalismy do konca" << endl;
 }
 
 
@@ -130,29 +134,24 @@ void PacketForwarder::processLoraMACPacket(Packet *pk)
        delete pk->removeControlInfo();
 
     socket.sendTo(pk, destAddr, destPort);
-
 }
 
 void PacketForwarder::sendPacket()
 {
-
-    /*LoRaAppPacket *mgmtCommand = new LoRaAppPacket("mgmtCommand");
-    mgmtCommand->setMsgType(TXCONFIG);
-    LoRaOptions newOptions;
-    newOptions.setLoRaTP(uniform(0.1, 1));
-    mgmtCommand->setOptions(newOptions);
-
-
-
-
-    LoRaMacFrame *response = new LoRaMacFrame("mgmtCommand");
-    response->encapsulate(mgmtCommand);
-    response->setLoRaTP(pk->getLoRaTP());
-    response->setLoRaCF(pk->getLoRaCF());
-    response->setLoRaSF(pk->getLoRaSF());
-    response->setLoRaBW(pk->getLoRaBW());
-    response->setReceiverAddress(pk->getTransmitterAddress());
-    send(response, "lowerLayerOut");*/
+//    LoRaAppPacket *mgmtCommand = new LoRaAppPacket("mgmtCommand");
+//    mgmtCommand->setMsgType(TXCONFIG);
+//    LoRaOptions newOptions;
+//    newOptions.setLoRaTP(uniform(0.1, 1));
+//    mgmtCommand->setOptions(newOptions);
+//
+//    LoRaMacFrame *response = new LoRaMacFrame("mgmtCommand");
+//    response->encapsulate(mgmtCommand);
+//    response->setLoRaTP(pk->getLoRaTP());
+//    response->setLoRaCF(pk->getLoRaCF());
+//    response->setLoRaSF(pk->getLoRaSF());
+//    response->setLoRaBW(pk->getLoRaBW());
+//    response->setReceiverAddress(pk->getTransmitterAddress());
+//    send(response, "lowerLayerOut");
 
 }
 

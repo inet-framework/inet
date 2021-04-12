@@ -24,7 +24,7 @@
 
 namespace inet {
 
-namespace lora {
+namespace flora {
 using namespace physicallayer;
 
 class INET_API LoRaMediumCache : public cModule, public IMediumLimitCache

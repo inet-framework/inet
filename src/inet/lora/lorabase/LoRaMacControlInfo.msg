@@ -18,24 +18,23 @@
 //
 
 import inet.common.INETDefs;
-import inet.common.packet.chunk.Chunk;
 import inet.common.Units;
 import inet.linklayer.common.MacAddress;
 
-
 namespace inet::flora;
 
-class LoRaMacFrame extends FieldsChunk {
-    MacAddress transmitterAddress;
-    MacAddress receiverAddress;
+cplusplus {{
+using namespace inet;
+}}
 
-    int sequenceNumber;
+class LoRaMacControlInfo {
+    inet::MacAddress src;  // src DevAddr address (can be left empty when sending)
+    inet::MacAddress dest; // dest DevAddr address
+
     double LoRaTP;
-    Hz LoRaCF;
+    inet::Hz LoRaCF;
     int LoRaSF;
-    Hz LoRaBW;
+    inet::Hz LoRaBW;
     int LoRaCR;
     bool LoRaUseHeader;
-    double RSSI;
-    double SNIR;
 }

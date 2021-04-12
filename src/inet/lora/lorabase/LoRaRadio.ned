@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package inet.lora.loraphy;
+package inet.lora.lorabase;
 
 import inet.lora.loraphy.LoRaTransmitter;
 import inet.lora.loraphy.LoRaReceiver;

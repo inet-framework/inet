@@ -28,7 +28,7 @@
 
 namespace inet {
 
-namespace lora {
+namespace flora {
 using namespace physicallayer;
 class LoRaGWRadio : public FlatRadioBase {
 private:

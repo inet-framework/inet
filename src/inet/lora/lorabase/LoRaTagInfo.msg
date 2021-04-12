@@ -18,7 +18,7 @@ import inet.common.TagBase;
 import inet.common.Units;
 import inet.linklayer.common.MacAddress;
 
-namespace inet::lora;
+namespace inet::flora;
 
 class LoRaTag extends TagBase
 {

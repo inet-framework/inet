@@ -1,17 +1,17 @@
 #ifndef __LORAMAC_H
 #define __LORAMAC_H
 
-#include "inet/lora/loraphy/LoRaRadio.h"
+#include "inet/lora/lorabase/LoRaRadio.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/common/FSMA.h"
 #include "inet/queueing/contract/IPacketQueue.h"
 #include "inet/lora/lorabase/LoRaMacFrame_m.h"
-
+#include "inet/common/Protocol.h"
 
 namespace inet {
-namespace lora {
+namespace flora {
 
 
 using namespace physicallayer;
@@ -60,7 +60,6 @@ class LoRaMac : public MacProtocolBase
     /** End of the ack timeout */
     cMessage *endAckTimeout = nullptr;
 
-
     /**
      * @name CsmaCaMac state variables
      * Various state information checked and modified according to the state machine.
@@ -89,6 +88,11 @@ class LoRaMac : public MacProtocolBase
     /** Number of frame retransmission attempts. */
     int retryCounter = -1;
 
+    /** Messages received from upper layer and to be transmitted later */
+    cPacketQueue transmissionQueue;
+
+    /** Passive queue module to request messages from */
+    cPacketQueue *queueModule = nullptr;
     //@}
 
     /** @name Timer messages */

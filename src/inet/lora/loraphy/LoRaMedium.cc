@@ -29,7 +29,7 @@
 
 namespace inet {
 
-namespace lora {
+namespace flora {
 
 Define_Module(LoRaMedium);
 LoRaMedium::LoRaMedium() : RadioMedium()
@@ -43,7 +43,7 @@ LoRaMedium::~LoRaMedium()
 bool LoRaMedium::matchesMacAddressFilter(const IRadio *radio, const Packet *packet) const
 {
     const auto &chunk = packet->peekAtFront<Chunk>();
-    const auto & loraHeader = dynamicPtrCast<const lora::LoRaMacFrame>(chunk);
+    const auto & loraHeader = dynamicPtrCast<const LoRaMacFrame>(chunk);
     if (loraHeader == nullptr)
         return false;
     MacAddress address = MacAddress(loraHeader->getReceiverAddress().getInt());

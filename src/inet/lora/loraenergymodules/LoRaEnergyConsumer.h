@@ -23,7 +23,7 @@
 
 namespace inet {
 
-namespace lora {
+namespace flora {
 
 using namespace physicallayer;
 
@@ -33,7 +33,7 @@ public:
     void finish() override;
     virtual W getPowerConsumption() const override;
     bool readConfigurationFile();
-    void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details) override;
 
 protected:
     int energyConsumerId;

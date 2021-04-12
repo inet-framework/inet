@@ -16,14 +16,17 @@
 #ifndef LORA_LORAGWMAC_H_
 #define LORA_LORAGWMAC_H_
 
+#include "inet/common/INETDefs.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/lora/lorabase/LoRaMacFrame_m.h"
 
 namespace inet {
-namespace lora {
+namespace flora {
 
 using namespace physicallayer;
 
@@ -41,12 +44,6 @@ public:
     virtual void handleUpperMessage(cMessage *msg) override;
     virtual void handleLowerMessage(cMessage *msg) override;
     virtual void handleSelfMessage(cMessage *message) override;
-
-    // OperationalBase:
-    virtual void handleStartOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleStopOperation(LifecycleOperation *operation) override {}    //TODO implementation
-    virtual void handleCrashOperation(LifecycleOperation *operation) override {}    //TODO implementation
-
 
     void sendPacketBack(Packet *receivedFrame);
     void createFakeLoRaMacFrame();

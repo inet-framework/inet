@@ -19,7 +19,7 @@
 
 namespace inet {
 
-namespace lora {
+namespace flora {
 
 Define_Module(LoRaLogNormalShadowing);
 

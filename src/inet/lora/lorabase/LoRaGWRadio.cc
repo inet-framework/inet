@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "inet/lora/loraphy/LoRaGWRadio.h"
+#include "inet/lora/lorabase/LoRaGWRadio.h"
 #include "inet/lora/loraphy/LoRaMedium.h"
 #include "inet/lora/loraphy/LoRaPhyPreamble_m.h"
 #include "inet/lora/lorabase/LoRaTagInfo_m.h"
@@ -21,7 +21,7 @@
 
 namespace inet {
 
-namespace lora {
+namespace flora {
 
 Define_Module(LoRaGWRadio);
 
@@ -81,24 +81,27 @@ void LoRaGWRadio::handleUpperPacket(Packet *packet)
 {
     emit(packetReceivedFromUpperSignal, packet);
 
-    auto tag = packet->removeTagIfPresent<lora::LoRaTag>();
+    EV << packet->getDetailStringRepresentation(evFlags) << endl;
+    const auto &frame = packet->peekAtFront<LoRaMacFrame>();
 
     auto preamble = makeShared<LoRaPhyPreamble>();
-    if (tag != nullptr) {
-        preamble->setBandwidth(tag->getBandwidth());
-        preamble->setCenterFrequency(tag->getCenterFrequency());
-        preamble->setCodeRendundance(tag->getCodeRendundance());
-        preamble->setPower(tag->getPower());
-        preamble->setSpreadFactor(tag->getSpreadFactor());
-        preamble->setUseHeader(tag->getUseHeader());
-        auto signalPowerReq = packet->addTagIfAbsent<SignalPowerReq>();
-        signalPowerReq->setPower(tag->getPower());
-    }
-    const auto & loraHeader =  packet->peekAtFront<LoRaMacFrame>();
-    preamble->setReceiverAddress(loraHeader->getReceiverAddress());
 
+    preamble->setBandwidth(frame->getLoRaBW());
+    preamble->setCenterFrequency(frame->getLoRaCF());
+    preamble->setCodeRendundance(frame->getLoRaCR());
+    preamble->setPower(mW(frame->getLoRaTP()));
+    preamble->setSpreadFactor(frame->getLoRaSF());
+    preamble->setUseHeader(frame->getLoRaUseHeader());
+    preamble->setReceiverAddress(frame->getReceiverAddress());
+//    const auto & loraHeader =  packet->peekAtFront<LoRaMacFrame>();
+//    preamble->setReceiverAddress(loraHeader->getReceiverAddress());
+//
+    auto signalPowerReq = packet->addTagIfAbsent<SignalPowerReq>();
+    signalPowerReq->setPower(mW(frame->getLoRaTP()));
+//
     preamble->setChunkLength(b(16));
     packet->insertAtFront(preamble);
+    EV << "Wysylam " << preamble->getPower() << " " << preamble->getSpreadFactor() << endl;
 
 
     if (separateTransmissionParts)
@@ -111,12 +114,6 @@ void LoRaGWRadio::startTransmission(Packet *macFrame, IRadioSignal::SignalPart p
 {
     if(iAmTransmiting == false)
     {
-
-        //auto radioFrame = createSignal(macFrame);
-        //auto transmission = radioFrame->getTransmission();
-        //transmissionTimer->setKind(part);
-        //transmissionTimer->setContextPointer(const_cast<Signal *>(radioFrame));
-
         iAmTransmiting = true;
         auto radioFrame = createSignal(macFrame);
         auto transmission = radioFrame->getTransmission();
@@ -125,11 +122,8 @@ void LoRaGWRadio::startTransmission(Packet *macFrame, IRadioSignal::SignalPart p
         txTimer->setKind(part);
         txTimer->setContextPointer(radioFrame);
         scheduleAt(transmission->getEndTime(part), txTimer);
-        //updateTransceiverState();
-        //updateTransceiverPart();
         emit(transmissionStartedSignal, check_and_cast<const cObject *>(transmission));
         EV_INFO << "Transmission started: " << (IWirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
-        //check_and_cast<LoRaMedium *>(medium)->emit(transmissionStartedSignal, check_and_cast<const cObject *>(transmission));
         check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::signalDepartureStartedSignal, check_and_cast<const cObject *>(transmission));
     }
     else delete macFrame;
@@ -151,17 +145,13 @@ void LoRaGWRadio::endTransmission(cMessage *timer)
 {
     iAmTransmiting = false;
     auto part = (IRadioSignal::SignalPart)timer->getKind();
-    auto radioFrame = static_cast<IWirelessSignal *>(timer->getContextPointer());
-    auto transmission = radioFrame->getTransmission();
+    auto signal = static_cast<WirelessSignal *>(timer->getContextPointer());
+    auto transmission = signal->getTransmission();
     timer->setContextPointer(nullptr);
-    concurrentTransmissions.remove(timer);
-    EV_INFO << "Transmission ended: " << (IWirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
-
-
+//    concurrentTransmissions.remove(timer);
+    EV_INFO << "Transmission ended: " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << transmission << endl;
     emit(transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
-    // TODO: move to radio medium
     check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::signalDepartureEndedSignal, check_and_cast<const cObject *>(transmission));
-    //check_and_cast<LoRaMedium *>(medium)->emit(transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
     delete(timer);
 }
 
@@ -190,23 +180,21 @@ void LoRaGWRadio::startReception(cMessage *timer, IRadioSignal::SignalPart part)
     if (isReceiverMode(radioMode) && arrival->getStartTime(part) == simTime() && iAmTransmiting == false) {
         auto transmission = radioFrame->getTransmission();
         auto isReceptionAttempted = medium->isReceptionAttempted(this, transmission, part);
-        EV_INFO << "LoRaGWRadio Reception started: " << (isReceptionAttempted ? "attempting" : "not attempting") << " " << (IWirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
+        EV_INFO << "LoRaGWRadio Reception started: " << (isReceptionAttempted ? "attempting" : "not attempting") << " " << (WirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         if (isReceptionAttempted) {
             if(iAmGateway) {
                 concurrentReceptions.push_back(timer);
             }
             receptionTimer = timer;
-            emit(receptionStartedSignal, check_and_cast<const cObject *>(reception));
         }
     }
     else
-        EV_INFO << "LoRaGWRadio Reception started: ignoring " << (IWirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
+        EV_INFO << "LoRaGWRadio Reception started: ignoring " << (WirelessSignal *)radioFrame << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
     timer->setKind(part);
     scheduleAt(arrival->getEndTime(part), timer);
     //updateTransceiverState();
     //updateTransceiverPart();
     radioMode = RADIO_MODE_TRANSCEIVER;
-    //check_and_cast<LoRaMedium *>(medium)->emit(receptionStartedSignal, check_and_cast<const cObject *>(reception));
     check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::signalArrivalStartedSignal, check_and_cast<const cObject *>(reception));
     if(iAmGateway) EV << "[MSDebug] start reception, size : " << concurrentReceptions.size() << endl;
 }
@@ -274,13 +262,10 @@ void LoRaGWRadio::endReception(cMessage *timer)
             emit(LoRaGWRadioReceptionFinishedCorrect, true);
             if (simTime() >= getSimulation()->getWarmupPeriod())
                 LoRaGWRadioReceptionFinishedCorrect_counter++;
-            auto preamble = macFrame->popAtFront<LoRaPhyPreamble>();
-            if (preamble == nullptr)
-                throw cRuntimeError("Lora preamble not present");
+            EV << macFrame->getCompleteStringRepresentation(evFlags) << endl;
             sendUp(macFrame);
         }
         receptionTimer = nullptr;
-        emit(receptionEndedSignal, check_and_cast<const cObject *>(reception));
         if(iAmGateway) concurrentReceptions.remove(timer);
     }
     else
@@ -288,7 +273,6 @@ void LoRaGWRadio::endReception(cMessage *timer)
     //updateTransceiverState();
     //updateTransceiverPart();
     radioMode = RADIO_MODE_TRANSCEIVER;
-    //check_and_cast<LoRaMedium *>(medium)->emit(receptionEndedSignal, check_and_cast<const cObject *>(reception));
     check_and_cast<LoRaMedium *>(medium)->emit(IRadioMedium::signalArrivalEndedSignal, check_and_cast<const cObject *>(reception));
     delete timer;
 }

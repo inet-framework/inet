@@ -24,7 +24,7 @@
 
 namespace inet {
 
-namespace lora {
+namespace flora {
 using namespace physicallayer;
 
 class INET_API LoRaAnalogModel : public ScalarAnalogModelBase
@@ -38,7 +38,7 @@ class INET_API LoRaAnalogModel : public ScalarAnalogModelBase
     virtual const ISnir *computeSNIR(const IReception *reception, const INoise *noise) const override;
 };
 
-} // namespace physicallayer
+} 
 
 } // namespace inet
 

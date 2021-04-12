@@ -20,7 +20,7 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 
-namespace inet::lora;
+namespace inet::flora;
 
 enum AppPacketType
 {
