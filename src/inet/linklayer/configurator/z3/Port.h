@@ -1581,7 +1581,7 @@ class INET_API Port {
      * [Usage]: Returns true if the port uses an automated application period
      * methodology.
      *
-     * @return boolean value. True if automated application period methodology is used, false elsewhise
+     * @return bool value. True if automated application period methodology is used, false elsewhise
      */
     bool checkIfAutomatedApplicationPeriod() {
         if(this->useHyperCycle || this->useMicroCycles)
