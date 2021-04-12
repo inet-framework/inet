@@ -224,12 +224,12 @@ class INET_API Flow {
 
 
             if(this->useCustomValues) {
-                this->flowSendingPeriodicityZ3 = ctx.mkReal(float.toString(this->flowSendingPeriodicity));
+                this->flowSendingPeriodicityZ3 = ctx.real_val(std::to_string(this->flowSendingPeriodicity));
 
                 if(this->flowFirstSendingTime >= 0){
-                    this->flowFirstSendingTimeZ3 = ctx.mkReal(float.toString(this->flowFirstSendingTime));
+                    this->flowFirstSendingTimeZ3 = ctx.real_val(std::to_string(this->flowFirstSendingTime));
                 } else {
-                    this->flowFirstSendingTimeZ3 = ctx.mkRealConst("flow" + this->instance + "FirstSendingTime");
+                    this->flowFirstSendingTimeZ3 = ctx.real_const("flow" + this->instance + "FirstSendingTime");
                 }
             } else {
                 this->flowFirstSendingTimeZ3 = this->startDevice.getFirstT1TimeZ3();
@@ -295,7 +295,7 @@ class INET_API Flow {
                         flowFrag.addDepartureTimeZ3(
                                 (z3::expr) ctx.mkAdd(
                                         this->flowFirstSendingTimeZ3,
-                                        ctx.mkReal(float.toString(this->flowSendingPeriodicity * i))
+                                        ctx.real_val(std::to_string(this->flowSendingPeriodicity * i))
                                 )
                         );
 
@@ -400,7 +400,7 @@ class INET_API Flow {
                 flowFrag.addDepartureTimeZ3( // Packet departure constraint
                         (z3::expr) ctx.mkAdd(
                                 this->flowFirstSendingTimeZ3,
-                                ctx.mkReal(float.toString(this->flowSendingPeriodicity * i))
+                                ctx.real_val(std::to_string(this->flowSendingPeriodicity * i))
                         )
                 );
             }
@@ -1034,7 +1034,7 @@ class INET_API Flow {
      */
     z3::expr getLatencyZ3(Solver solver, Context ctx, int index) {
         //index += 1;
-        z3::expr latency = ctx.mkRealConst(this->name + "latencyOfPacket" + index);
+        z3::expr latency = ctx.real_const(this->name + "latencyOfPacket" + index);
 
         TSNSwitch lastSwitchInPath = ((TSNSwitch) this->path.get(path.size() - 1));
         FlowFragment lastFragmentInList = this->flowFragments.get(flowFragments.size() - 1);
@@ -1072,7 +1072,7 @@ class INET_API Flow {
      */
     z3::expr getLatencyZ3(Solver solver, Device dev, Context ctx, int index) {
         //index += 1;
-        z3::expr latency = ctx.mkRealConst(this->name + "latencyOfPacket" + index + "For" + dev.getName());
+        z3::expr latency = ctx.real_const(this->name + "latencyOfPacket" + index + "For" + dev.getName());
 
         std::vector<PathNode> nodes = this->getNodesFromRootToNode(dev);
         std::vector<FlowFragment> flowFrags = this->getFlowFromRootToNode(dev);
@@ -1146,7 +1146,7 @@ class INET_API Flow {
      * @return          Z3 variable containing the sum of all latencies of the flow
      */
     z3::expr getSumOfAllDevLatencyZ3(Solver solver, Context ctx, int index) {
-        z3::expr sumValue = ctx.mkReal(0);
+        z3::expr sumValue = ctx.real_val(0);
         Device currentDev = null;
 
         for(PathNode node : this->pathTree.getLeaves()) {
@@ -1170,12 +1170,12 @@ class INET_API Flow {
         if(this->type == UNICAST) {
             return (z3::expr) ctx.mkDiv(
                     getSumOfLatencyZ3(solver, ctx, this->numOfPacketsSentInFragment - 1),
-                    ctx.mkReal(this->numOfPacketsSentInFragment)
+                    ctx.real_val(this->numOfPacketsSentInFragment)
             );
         } else if (this->type == PUBLISH_SUBSCRIBE) {
             return (z3::expr) ctx.mkDiv(
                     getSumOfAllDevLatencyZ3(solver, ctx, this->numOfPacketsSentInFragment - 1),
-                    ctx.mkReal((this->numOfPacketsSentInFragment) * this->pathTree.getLeaves().size())
+                    ctx.real_val((this->numOfPacketsSentInFragment) * this->pathTree.getLeaves().size())
             );
         } else {
             // TODO: THROW ERROR
@@ -1199,7 +1199,7 @@ class INET_API Flow {
 
         return (z3::expr) ctx.mkDiv(
                 this->getSumOfLatencyZ3(dev, solver, ctx, this->numOfPacketsSentInFragment - 1),
-                ctx.mkReal(this->numOfPacketsSentInFragment)
+                ctx.real_val(this->numOfPacketsSentInFragment)
         );
 
     }
@@ -1227,7 +1227,7 @@ class INET_API Flow {
                 ctx.mkSub(latency , avgLatency),
                 ctx.mkMul(
                         ctx.mkSub(latency , avgLatency),
-                        ctx.mkReal(-1)
+                        ctx.real_val(-1)
                 )
         );
 
@@ -1246,7 +1246,7 @@ class INET_API Flow {
      */
     z3::expr getJitterZ3(Device dev, Solver solver, Context ctx, int index) {
         //index += 1;
-        z3::expr jitter = ctx.mkRealConst(this->name + "JitterOfPacket" + index + "For" + dev.getName());
+        z3::expr jitter = ctx.real_const(this->name + "JitterOfPacket" + index + "For" + dev.getName());
 
         std::vector<PathNode> nodes = this->getNodesFromRootToNode(dev);
 
@@ -1328,7 +1328,7 @@ class INET_API Flow {
      * @return          Z3 variable containing the sum of all jitter of the flow
      */
     z3::expr getSumOfAllDevJitterZ3(Solver solver, Context ctx, int index) {
-        z3::expr sumValue = ctx.mkReal(0);
+        z3::expr sumValue = ctx.real_val(0);
         Device currentDev = null;
 
         for(PathNode node : this->pathTree.getLeaves()) {

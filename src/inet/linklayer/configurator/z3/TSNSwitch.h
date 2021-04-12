@@ -155,12 +155,12 @@ class INET_API TSNSwitch extends Switch {
      * @param ctx      Context variable containing the z3 environment used
      */
     void toZ3(Context ctx, Solver solver) {
-        this->cycleDurationLowerBoundZ3 = ctx.mkReal(float.toString(cycleDurationLowerBound));
-        this->cycleDurationUpperBoundZ3 = ctx.mkReal(float.toString(cycleDurationUpperBound));
+        this->cycleDurationLowerBoundZ3 = ctx.real_val(std::to_string(cycleDurationLowerBound));
+        this->cycleDurationUpperBoundZ3 = ctx.real_val(std::to_string(cycleDurationUpperBound));
 
         // Creating the cycle duration and start for this switch
-        this->cycleDuration = ctx.mkRealConst("cycleOf" + this->name + "Duration");
-        this->cycleStart = ctx.mkRealConst("cycleOf" + this->name + "Start");
+        this->cycleDuration = ctx.real_const("cycleOf" + this->name + "Duration");
+        this->cycleStart = ctx.real_const("cycleOf" + this->name + "Start");
 
 
         // Creating the cycle setting up the bounds for the duration (Cycle duration constraint)
@@ -493,14 +493,14 @@ class INET_API TSNSwitch extends Switch {
     	solver.add(
 			ctx.mkEq(
 				this->cycleDurationUpperBoundZ3,
-				ctx.mkReal(float.toString(this->cycleDurationUpperBound))
+				ctx.real_val(std::to_string(this->cycleDurationUpperBound))
 			)
 		);
 
     	solver.add(
 			ctx.mkEq(
 				this->cycleDurationLowerBoundZ3,
-				ctx.mkReal(float.toString(this->cycleDurationLowerBound))
+				ctx.real_val(std::to_string(this->cycleDurationLowerBound))
 			)
 		);
     	*/

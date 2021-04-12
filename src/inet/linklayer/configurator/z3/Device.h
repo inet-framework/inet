@@ -151,12 +151,12 @@ class INET_API Device {
 	 * @param ctx      Context variable containing the z3 environment used
 	 */
      void toZ3(Context ctx) {
-	    this->packetPeriodicityZ3 = ctx.mkReal(float.toString(this->packetPeriodicity));
-	    //this->firstT1TimeZ3 = ctx.mkReal(float.toString(this->firstT1Time)); // In case of fixed firstT1Time
-	    this->firstT1TimeZ3 = ctx.mkRealConst(this->name + "FirstT1Time");
-	    this->hardConstraintTimeZ3 = ctx.mkReal(float.toString(this->hardConstraintTime));
-	    this->softConstraintTimeZ3 = ctx.mkReal(float.toString(this->softConstraintTime));
-	    this->packetSizeZ3 = ctx.mkReal(float.toString(this->packetSize));
+	    this->packetPeriodicityZ3 = ctx.real_val(std::to_string(this->packetPeriodicity));
+	    //this->firstT1TimeZ3 = ctx.real_val(std::to_string(this->firstT1Time)); // In case of fixed firstT1Time
+	    this->firstT1TimeZ3 = ctx.real_const(this->name + "FirstT1Time");
+	    this->hardConstraintTimeZ3 = ctx.real_val(std::to_string(this->hardConstraintTime));
+	    this->softConstraintTimeZ3 = ctx.real_val(std::to_string(this->softConstraintTime));
+	    this->packetSizeZ3 = ctx.real_val(std::to_string(this->packetSize));
 	}
 
     /*
