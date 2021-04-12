@@ -1,6 +1,10 @@
 #ifndef __INET_Z3_PORT_H
 #define __INET_Z3_PORT_H
 
+#include <z3++.h>
+
+#include "inet/common/INETDefs.h"
+
 /**
  * [Class]: Port
  * [Usage]: This class is used to implement the logical role of a

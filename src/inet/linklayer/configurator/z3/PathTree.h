@@ -1,6 +1,10 @@
 #ifndef __INET_Z3_PATHTREE_H
 #define __INET_Z3_PATHTREE_H
 
+#include <z3++.h>
+
+#include "inet/common/INETDefs.h"
+
 /**
  * [Class]: PathTree
  * [Usage]: Used to specify the path on publish subscribe

@@ -1,6 +1,10 @@
 #ifndef __INET_Z3_SWITCH_H
 #define __INET_Z3_SWITCH_H
 
+#include <z3++.h>
+
+#include "inet/common/INETDefs.h"
+
 /**
  * [Class]: Switch
  * [Usage]: Contains most of the properties of a normal

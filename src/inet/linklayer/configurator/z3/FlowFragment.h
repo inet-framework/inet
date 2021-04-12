@@ -1,6 +1,10 @@
 #ifndef __INET_Z3_FLOWFRAGMENT_H
 #define __INET_Z3_FLOWFRAGMENT_H
 
+#include <z3++.h>
+
+#include "inet/common/INETDefs.h"
+
 /**
  * [Class]: FlowFragment
  * [Usage]: This class is used to represent a fragment of a flow.

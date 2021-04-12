@@ -1,6 +1,10 @@
 #ifndef __INET_Z3_NETWORK_H
 #define __INET_Z3_NETWORK_H
 
+#include <z3++.h>
+
+#include "inet/common/INETDefs.h"
+
 /**
  * [Class]: Network
  * [Usage]: Using this class, the user can specify the network

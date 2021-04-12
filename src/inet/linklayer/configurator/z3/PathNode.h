@@ -1,6 +1,10 @@
 #ifndef __INET_Z3_PATHNODE_H
 #define __INET_Z3_PATHNODE_H
 
+#include <z3++.h>
+
+#include "inet/common/INETDefs.h"
+
 /**
  * [Class]: PathNode
  * [Usage]: Contains the data needed in each node of

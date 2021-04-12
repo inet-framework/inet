@@ -1,6 +1,10 @@
 #ifndef __INET_Z3_SCHEDULEGENERATOR_H
 #define __INET_Z3_SCHEDULEGENERATOR_H
 
+#include <z3++.h>
+
+#include "inet/common/INETDefs.h"
+
 /**
  * [Class]: ScheduleGenerator
  * [Usage]: Used to generate a schedule based on the properties of
