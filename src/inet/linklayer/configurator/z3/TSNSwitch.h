@@ -1,3 +1,6 @@
+#ifndef __INET_Z3_TSNSWITCH_H
+#define __INET_Z3_TSNSWITCH_H
+
 package schedule_generator;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -7,9 +10,9 @@ import com.microsoft.z3.*;
 
 /**
  * [Class]: TSNSwitch
- * [Usage]: This class contains the information needed to 
+ * [Usage]: This class contains the information needed to
  * specify a switch capable of complying with the TSN patterns
- * to the schedule. Aside from part of the z3 data used to 
+ * to the schedule. Aside from part of the z3 data used to
  * generate the schedule, objects created from this class
  * are able to organize a sequence of ports that connect the
  * switch to other nodes in the network.
@@ -585,3 +588,6 @@ public class TSNSwitch extends Switch implements Serializable {
     }
 
 }
+
+#endif
+

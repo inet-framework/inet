@@ -1,3 +1,6 @@
+#ifndef __INET_Z3_SWITCH_H
+#define __INET_Z3_SWITCH_H
+
 package schedule_generator;
 
 import java.io.Serializable;
@@ -5,14 +8,14 @@ import java.io.Serializable;
 /**
  * [Class]: Switch
  * [Usage]: Contains most of the properties of a normal
- * switch that are used to build the schedule. Since this 
+ * switch that are used to build the schedule. Since this
  * scheduler doesn't take in consideration scenarios where
  * normal switches and TSN switches interact, no z3 properties
  * had to be specified in this class.
- * 
- * Can be used to further extend the usability of this 
+ *
+ * Can be used to further extend the usability of this
  * project in the future.
- * 
+ *
  */
 public class Switch implements Serializable {
 
@@ -22,28 +25,28 @@ public class Switch implements Serializable {
     protected float timeToTravel;
     protected float transmissionTime;
     protected float portSpeed;
-    
+
     //protected RealExpr maxPacketSizeZ3;
     //protected RealExpr timeToTravelZ3;
     //protected RealExpr transmissionTimeZ3;
     //protected RealExpr portSpeedZ3;
-    
-    
+
+
     /**
      * [Method]: Switch
      * [Usage]: Default constructor of class Switch. Is used by
      * TSNSwitch to instantiate new children classes.
      */
     public Switch() {
-    
+
     }
-    
+
     /**
      * [Method]: Switch
      * [Usage]: Overloaded constructor of class Switch. Can
-     * instantiate new switches using properties given as 
+     * instantiate new switches using properties given as
      * parameters.
-     * 
+     *
      * @param name                  Name of the switch
      * @param maxPacketSize         Maximum size of a packet supported by this switch
      * @param timeToTravel          Time that a packet takes to leave its port and reach the destination
@@ -61,13 +64,13 @@ public class Switch implements Serializable {
         this.transmissionTime = transmissionTime;
         this.portSpeed = portSpeed;
     }
-    
-    
+
+
     /*
      *  GETTERS AND SETTERS
      */
-    
-    
+
+
     public float getMaxPacketSize() {
         return maxPacketSize;
     }
@@ -103,9 +106,12 @@ public class Switch implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public String getName() {
         return this.name;
     }
-    
+
 }
+
+#endif
+

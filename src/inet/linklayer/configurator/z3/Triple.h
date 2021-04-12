@@ -1,3 +1,6 @@
+#ifndef __INET_Z3_TRIPLE_H
+#define __INET_Z3_TRIPLE_H
+
 package schedule_generator;
 
 /** Utility class to store queue ID, slotStart and slot Duration. */
@@ -57,3 +60,6 @@ public class Triple implements Comparable<Triple> {
     return this.getSlotStart().compareTo(triple.getSlotStart());
   }
 }
+
+#endif
+

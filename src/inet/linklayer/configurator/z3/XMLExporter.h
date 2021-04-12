@@ -1,3 +1,6 @@
+#ifndef __INET_Z3_XMLEXPORTER_H
+#define __INET_Z3_XMLEXPORTER_H
+
 package schedule_generator;
 
 import java.io.FileNotFoundException;
@@ -247,7 +250,7 @@ public class XMLExporter {
       transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 
       System.out.println("BAGUI: " + CURRENT_DIR + SLASH + "XMLExporterFiles" + SLASH + CURRENT_TIME + "-" + switchName + XML);
-      
+
       DOMSource source = new DOMSource(this.doc);
 
       if (printToConsole) {
@@ -267,3 +270,6 @@ public class XMLExporter {
     }
   }
 }
+
+#endif
+
