@@ -1,3 +1,6 @@
+#ifndef __INET_Z3_FLOW_H
+#define __INET_Z3_FLOW_H
+
 package schedule_generator;
 
 import java.io.Serializable;
@@ -292,14 +295,14 @@ public class Flow implements Serializable {
                     flowFrag.setNodeName(((Switch)auxN.getNode()).getName());
 
                     for (int i = 0; i < numberOfPackets; i++) {
-                        
+
                         flowFrag.addDepartureTimeZ3(
                                 (RealExpr) ctx.mkAdd(
                                         this.flowFirstSendingTimeZ3,
                                         ctx.mkReal(Float.toString(this.flowSendingPeriodicity * i))
                                 )
                         );
-                        
+
                     }
 
 
@@ -1565,3 +1568,6 @@ public class Flow implements Serializable {
     }
 
 }
+
+#endif
+

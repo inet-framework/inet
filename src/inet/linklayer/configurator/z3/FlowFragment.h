@@ -1,3 +1,6 @@
+#ifndef __INET_Z3_FLOWFRAGMENT_H
+#define __INET_Z3_FLOWFRAGMENT_H
+
 package schedule_generator;
 
 import java.util.*;
@@ -268,3 +271,6 @@ public class FlowFragment extends Flow {
     }
 
 }
+
+#endif
+

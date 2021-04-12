@@ -1,3 +1,6 @@
+#ifndef __INET_Z3_PATHNODE_H
+#define __INET_Z3_PATHNODE_H
+
 package schedule_generator;
 
 import java.io.Serializable;
@@ -6,11 +9,11 @@ import java.util.ArrayList;
 
 /**
  * [Class]: PathNode
- * [Usage]: Contains the data needed in each node of 
- * a pathTree. Can reference a father, possesses an 
- * device or switch, a list of children and a flow 
+ * [Usage]: Contains the data needed in each node of
+ * a pathTree. Can reference a father, possesses an
+ * device or switch, a list of children and a flow
  * fragment for each children in case of being a switch.
- * 
+ *
  */
 public class PathNode implements Serializable {
 
@@ -19,14 +22,14 @@ public class PathNode implements Serializable {
     private Object node;
     private ArrayList<PathNode> children; // The children of the current FlowNode
     private ArrayList<FlowFragment> flowFragments;
-   
-    
+
+
     /**
      * [Method]: PathNode
      * [Usage]: Overloaded constructor method of the this class.
      * Receives an object that must be either a device or a switch.
      * In case of switch, creates a list of children and flowFragments.
-     * 
+     *
      * @param node      Device or a Switch that represents the node
      */
     public PathNode (Object node)
@@ -41,14 +44,14 @@ public class PathNode implements Serializable {
         } else {
             //[TODO]: Throw error
         }
-        
+
         children  = new ArrayList<PathNode>();
     }
 
     /**
      * [Method]: addChild
      * [Usage]: Adds a child to this node.
-     * 
+     *
      * @param node      Object representing the child device or switch
      * @return          A reference to the newly created node
      */
@@ -57,14 +60,14 @@ public class PathNode implements Serializable {
         PathNode pathNode = new PathNode(node);
         pathNode.setParent(this);
         children.add(pathNode);
-                
+
         return pathNode;
     }
-    
+
     /*
      * GETTERS AND SETTERS:
      */
-    
+
     public PathNode getParent() {
         return parent;
     }
@@ -92,7 +95,7 @@ public class PathNode implements Serializable {
     public void addFlowFragment(FlowFragment flowFragment) {
         this.flowFragments.add(flowFragment);
     }
-    
+
     public ArrayList<FlowFragment> getFlowFragments() {
         return flowFragments;
     }
@@ -100,5 +103,8 @@ public class PathNode implements Serializable {
     public void setFlowFragment(ArrayList<FlowFragment>  flowFragments) {
         this.flowFragments = flowFragments;
     }
-    
+
 }
+
+#endif
+
