@@ -53,8 +53,8 @@ class INET_API Cycle {
     float cycleDuration;
     float cycleStart;
 
-    std::vector<std::vector<z3::expr *>> slotStartZ3;
-    std::vector<std::vector<z3::expr *>> slotDurationZ3;
+    std::vector<std::vector<z3::expr *>> slotStartZ3_;
+    std::vector<std::vector<z3::expr *>> slotDurationZ3_;
 
     std::vector<int> slotsUsed;
     std::vector<std::vector<float>> slotStart;
@@ -157,21 +157,21 @@ class INET_API Cycle {
     void toZ3(context ctx) {
         instanceCounter++;
 
-        this->cycleDurationZ3 = ctx.real_const((std::string("cycle") + std::to_string(instanceCounter) + std::string("Duration")).c_str());
-        this->firstCycleStartZ3 = ctx.real_const((std::string("cycle") + std::to_string(instanceCounter) + std::string("Start")).c_str());
-        // this->firstCycleStartZ3 = ctx.real_val((std::to_string(0)).c_str());
-        // this->firstCycleStartZ3 = ctx.real_val((std::to_string(firstCycleStart)).c_str());
-        this->maximumSlotDurationZ3 = ctx.real_val((std::to_string(maximumSlotDuration)).c_str());
+        this->cycleDurationZ3 = new expr(ctx.real_const((std::string("cycle") + std::to_string(instanceCounter) + std::string("Duration")).c_str()));
+        this->firstCycleStartZ3 = new expr(ctx.real_const((std::string("cycle") + std::to_string(instanceCounter) + std::string("Start")).c_str()));
+        // this->firstCycleStartZ3 = new expr(ctx.real_val((std::to_string(0)).c_str()));
+        // this->firstCycleStartZ3 = new expr(ctx.real_val((std::to_string(firstCycleStart)).c_str()));
+        this->maximumSlotDurationZ3 = new expr(ctx.real_val((std::to_string(maximumSlotDuration)).c_str()));
 
-        this->slotStartZ3.clear();
-        this->slotDurationZ3.clear();
+        this->slotStartZ3_.clear();
+        this->slotDurationZ3_.clear();
 
         for(int i = 0; i < this->numOfPrts; i++) {
-            this->slotStartZ3.push_back(std::vector<z3::expr *>());
-            this->slotDurationZ3.push_back(std::vector<z3::expr *>());
+            this->slotStartZ3_.push_back(std::vector<z3::expr *>());
+            this->slotDurationZ3_.push_back(std::vector<z3::expr *>());
             for(int j = 0; j < this->numOfSlots; j++) {
                 expr v = ctx.real_const((std::string("cycleOfPort") + this->portName + std::string("prt") + std::to_string(i+1) + std::string("slot") + std::to_string(j+1)).c_str());
-                this->slotStartZ3.at(i).push_back(v);
+                this->slotStartZ3_.at(i).push_back(new expr(v));
             }
         }
 
@@ -277,7 +277,7 @@ class INET_API Cycle {
             for(int slotIndex = 0; slotIndex < this->numOfSlots; slotIndex++) {
                 solver.add(
                     ctx.mkEq(
-                        this->slotStartZ3.get(prt).get(slotIndex),
+                        this->slotStartZ3_.get(prt).get(slotIndex),
                         ctx.real_val(std::to_string(this->slotStart.get(this->slotsUsed.indexOf(prt)).get(slotIndex)))
                     )
                 );
@@ -287,7 +287,7 @@ class INET_API Cycle {
             for(int slotIndex = 0; slotIndex < this->numOfSlots; slotIndex++) {
                 solver.add(
                     ctx.mkEq(
-                        this->slotDurationZ3.get(prt).get(slotIndex),
+                        this->slotDurationZ3_.get(prt).get(slotIndex),
                         ctx.real_val(std::to_string(this->slotDuration.get(prt).get(slotIndex)))
                     )
                 );
