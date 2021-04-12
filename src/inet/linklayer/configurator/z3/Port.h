@@ -46,17 +46,17 @@ class INET_API Port {
 
     float gbSize;
 
-    protected float maxPacketSize;
-    protected float timeToTravel;
-    protected float transmissionTime;
-    protected float portSpeed;
-    protected int portNum;
+    float maxPacketSize;
+    float timeToTravel;
+    float transmissionTime;
+    float portSpeed;
+    int portNum;
 
     z3::expr gbSizeZ3; // Size of the guardBand
-    protected z3::expr maxPacketSizeZ3;
-    protected z3::expr timeToTravelZ3;
-    protected z3::expr transmissionTimeZ3;
-    protected z3::expr portSpeedZ3;
+    z3::expr maxPacketSizeZ3;
+    z3::expr timeToTravelZ3;
+    z3::expr transmissionTimeZ3;
+    z3::expr portSpeedZ3;
 
 
     /**

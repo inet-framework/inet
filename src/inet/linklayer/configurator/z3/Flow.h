@@ -30,7 +30,7 @@ class INET_API Flow {
 
 
 
-    protected std::string name;
+    std::string name;
     int type = 0;
     int totalNumOfPackets = 0;
 
@@ -47,11 +47,11 @@ class INET_API Flow {
     std::vector<FlowFragment> flowFragments;
     PathTree pathTree;
 
-    protected int pathTreeCount = 0;
+    int pathTreeCount = 0;
 
-    protected z3::expr flowPriority; // In the future, priority might be fixed
-    protected Device startDevice;
-    protected Device endDevice;
+    z3::expr flowPriority; // In the future, priority might be fixed
+    Device startDevice;
+    Device endDevice;
 
     float flowFirstSendingTime;
     float flowSendingPeriodicity;
