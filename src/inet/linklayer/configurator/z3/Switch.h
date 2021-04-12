@@ -19,7 +19,7 @@ namespace inet {
  * project in the future.
  *
  */
-public class Switch implements Serializable {
+class INET_API Switch {
 
 	private static final long serialVersionUID = 1L;
 	protected String name;

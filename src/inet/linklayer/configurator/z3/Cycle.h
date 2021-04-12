@@ -40,7 +40,7 @@ namespace inet {
  * and such.
  *
  */
-public class Cycle implements Serializable {
+class INET_API Cycle {
 	private static final long serialVersionUID = 1L;
 	private String portName = "";
 	static int instanceCounter = 0;

@@ -22,7 +22,7 @@ namespace inet {
  * might conflict in this specific port. The type of flow, its path or
  * anything else does not matter at this point.
  */
-public class Port implements Serializable {
+class INET_API Port {
 
 	private static final long serialVersionUID = 1L;
 	private Boolean useMicroCycles = false;
