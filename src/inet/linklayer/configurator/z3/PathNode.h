@@ -41,7 +41,7 @@ class INET_API PathNode {
             flowFragments.clear();
         } else if (node instanceof Device) {
             this->node = node;
-            children = null;
+            children = nullptr;
         } else {
             //[TODO]: Throw error
         }
