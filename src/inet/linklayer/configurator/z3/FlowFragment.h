@@ -23,11 +23,11 @@ using namespace z3;
 class INET_API FlowFragment extends Flow {
     bool isModifiedOrCreated = false;
     Flow parent;
-    expr *packetSize;
-    expr *packetPeriodicityZ3;
-    std::vector<z3::expr *> departureTimeZ3;
-    std::vector<z3::expr *> scheduledTimeZ3;
-    expr *fragmentPriorityZ3;
+    std::shared_ptr<expr> packetSize;
+    std::shared_ptr<expr> packetPeriodicityZ3;
+    std::vector<z3::std::shared_ptr<expr> > departureTimeZ3;
+    std::vector<z3::std::shared_ptr<expr> > scheduledTimeZ3;
+    std::shared_ptr<expr> fragmentPriorityZ3;
 
     Port port;
 
@@ -91,7 +91,7 @@ class INET_API FlowFragment extends Flow {
         return this->name;
     }
 
-    expr *getDepartureTimeZ3(int index) {
+    std::shared_ptr<expr> getDepartureTimeZ3(int index) {
         return departureTimeZ3.get(index);
     }
 
@@ -107,7 +107,7 @@ class INET_API FlowFragment extends Flow {
         this->departureTimeZ3.clear();
     }
 
-    expr *getPacketPeriodicityZ3() {
+    std::shared_ptr<expr> getPacketPeriodicityZ3() {
         return packetPeriodicityZ3;
     }
 
@@ -116,7 +116,7 @@ class INET_API FlowFragment extends Flow {
     }
 
 
-    expr *getPacketSizeZ3() {
+    std::shared_ptr<expr> getPacketSizeZ3() {
         return this->packetSize;
     }
 
@@ -124,7 +124,7 @@ class INET_API FlowFragment extends Flow {
         this->packetSize = packetSize;
     }
 
-    expr *getFragmentPriorityZ3() {
+    std::shared_ptr<expr> getFragmentPriorityZ3() {
         return fragmentPriorityZ3;
     }
 
@@ -251,7 +251,7 @@ class INET_API FlowFragment extends Flow {
         return this->port;
     }
 
-    expr *getScheduledTimeZ3(int index) {
+    std::shared_ptr<expr> getScheduledTimeZ3(int index) {
         return scheduledTimeZ3.get(index);
     }
 

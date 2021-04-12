@@ -37,7 +37,7 @@ class INET_API Port {
     std::string connectsTo;
 
     float bestEffortPercent = 0.5f;
-    expr *bestEffortPercentZ3;
+    std::shared_ptr<expr> bestEffortPercentZ3;
 
     Cycle cycle;
     std::vector<FlowFragment> flowFragments;
@@ -52,11 +52,11 @@ class INET_API Port {
     float portSpeed;
     int portNum;
 
-    expr *gbSizeZ3; // Size of the guardBand
-    expr *maxPacketSizeZ3;
-    expr *timeToTravelZ3;
-    expr *transmissionTimeZ3;
-    expr *portSpeedZ3;
+    std::shared_ptr<expr> gbSizeZ3; // Size of the guardBand
+    std::shared_ptr<expr> maxPacketSizeZ3;
+    std::shared_ptr<expr> timeToTravelZ3;
+    std::shared_ptr<expr> transmissionTimeZ3;
+    std::shared_ptr<expr> portSpeedZ3;
 
 
     /**
@@ -130,8 +130,8 @@ class INET_API Port {
 
         for(FlowFragment frag : this->flowFragments) {
             for(int index = 0; index < this->cycle.getNumOfSlots(); index++) {
-                expr *flowPriority = frag.getFragmentPriorityZ3();
-                expr *indexZ3 = ctx.int_val(index);
+                std::shared_ptr<expr> flowPriority = frag.getFragmentPriorityZ3();
+                std::shared_ptr<expr> indexZ3 = ctx.int_val(index);
 
                 // A slot will be somewhere between 0 and the end of the cycle minus its duration (Slot in cycle constraint)
                 solver.add(ctx.mkGe(cycle.slotStartZ3(ctx, flowPriority, indexZ3), ctx.int_val(0)));
@@ -191,7 +191,7 @@ class INET_API Port {
                         continue;
                     }
 
-                    expr *auxFlowPriority = auxFrag.getFragmentPriorityZ3();
+                    std::shared_ptr<expr> auxFlowPriority = auxFrag.getFragmentPriorityZ3();
 
                     solver.add(
                         ctx.mkImplies(
@@ -240,13 +240,13 @@ class INET_API Port {
                  *
                 for (FlowFragment auxFrag : this->flowFragments) {
                     for(int auxIndex = 0; auxIndex < this->cycle.getNumOfSlots(); auxIndex++) {
-                        expr *auxIndexZ3 = ctx.int_val(auxIndex);
+                        std::shared_ptr<expr> auxIndexZ3 = ctx.int_val(auxIndex);
 
                         if(auxFrag.equals(frag)) {
                             continue;
                         }
 
-                        expr *auxFlowPriority = auxFrag.getFlowPriority();
+                        std::shared_ptr<expr> auxFlowPriority = auxFrag.getFlowPriority();
 
                         solver.add(
                             ctx.mkImplies(
@@ -301,7 +301,7 @@ class INET_API Port {
      * @param flowFrag      A fragment of a flow that goes through this port
      */
     void setupTimeSlots(solver solver, context ctx, FlowFragment flowFrag) {
-        expr *indexZ3;
+        std::shared_ptr<expr> indexZ3;
 
         // If there is a flow assigned to the slot, slotDuration must be greater than transmission time
         for(int index = 0; index < this->cycle.getNumOfSlots(); index++) {
@@ -368,7 +368,7 @@ class INET_API Port {
 
         }
 
-        expr *indexZ3 = null;
+        std::shared_ptr<expr> indexZ3 = null;
         Expr auxExp = null;
         Expr auxExp2 = ctx.mkTrue();
         Expr exp = null;
@@ -889,12 +889,12 @@ class INET_API Port {
      * @param ctx        context object for the solver
      */
     void setupBestEffort(solver solver, context ctx) {
-        expr *[]slotStart = new z3::expr[8];
-        expr *[]slotDuration = new z3::expr[8];
+        std::shared_ptr<expr> []slotStart = new z3::expr[8];
+        std::shared_ptr<expr> []slotDuration = new z3::expr[8];
         // z3::expr guardBandTime = null;
 
         BoolExpr firstPartOfImplication = null;
-        expr *sumOfPrtTime = null;
+        std::shared_ptr<expr> sumOfPrtTime = null;
 
         for(int i = 0; i < 8; i++) {
             slotStart[i] = ctx.real_const((this->name + std::string("SlotStart") + i).c_str());
@@ -903,7 +903,7 @@ class INET_API Port {
 
         for(FlowFragment f : this->flowFragments) {
             // z3::expr sumOfSlotsStart = ctx.real_val(0);
-            expr *sumOfSlotsDuration = ctx.real_val(0);
+            std::shared_ptr<expr> sumOfSlotsDuration = ctx.real_val(0);
 
             for(int i = 0; i < this->cycle.getNumOfSlots(); i++) {
                 sumOfSlotsDuration = (z3::expr) ctx.mkAdd(cycle.slotDurationZ3(ctx, f.getFragmentPriorityZ3(), ctx.int_val(i)));
@@ -1253,7 +1253,7 @@ class INET_API Port {
     void zeroOutNonUsedSlots(solver solver, context ctx) {
         BoolExpr exp1;
         BoolExpr exp2;
-        expr *indexZ3;
+        std::shared_ptr<expr> indexZ3;
 
         for(int prtIndex = 0; prtIndex < this->cycle.getNumOfPrts(); prtIndex++) {
             for(FlowFragment frag : this->flowFragments) {
@@ -1408,7 +1408,7 @@ class INET_API Port {
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
 
-    expr *departureTime(context ctx, z3::expr index, FlowFragment flowFrag){
+    std::shared_ptr<expr> departureTime(context ctx, z3::expr index, FlowFragment flowFrag){
 
         // If the index is 0, then its the first departure time, else add index * periodicity
         return this->departureTime(ctx, (int.parseInt(index.toString())), flowFrag);
@@ -1435,9 +1435,9 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    expr *departureTime(context ctx, int auxIndex, FlowFragment flowFrag){
-        expr *index = null;
-        expr *departureTime;
+    std::shared_ptr<expr> departureTime(context ctx, int auxIndex, FlowFragment flowFrag){
+        std::shared_ptr<expr> index = null;
+        std::shared_ptr<expr> departureTime;
         int cycleNum = 0;
 
 
@@ -1474,7 +1474,7 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      *
-    expr *arrivalTime(context ctx, z3::expr index, FlowFragment flowFrag){
+    std::shared_ptr<expr> arrivalTime(context ctx, z3::expr index, FlowFragment flowFrag){
 
 
        // The arrival time of this index from the given flow fragment is
@@ -1498,8 +1498,8 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    expr *arrivalTime(context ctx, int auxIndex, FlowFragment flowFrag){
-        expr *index = ctx.int_val(auxIndex);
+    std::shared_ptr<expr> arrivalTime(context ctx, int auxIndex, FlowFragment flowFrag){
+        std::shared_ptr<expr> index = ctx.int_val(auxIndex);
 
         return (z3::expr) ctx.mkAdd( // Arrival time value constraint
                         departureTime(ctx, index, flowFrag),
@@ -1523,8 +1523,8 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      *
-    expr *scheduledTime(context ctx, z3::expr index, FlowFragment flowFrag){
-        expr *devT3 = ctx.real_const((flowFrag.getName() + std::string("ScheduledTime") + index.toString()).c_str());
+    std::shared_ptr<expr> scheduledTime(context ctx, z3::expr index, FlowFragment flowFrag){
+        std::shared_ptr<expr> devT3 = ctx.real_const((flowFrag.getName() + std::string("ScheduledTime") + index.toString()).c_str());
 
         return (z3::expr) devT3;
     }
@@ -1546,9 +1546,9 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      */
-    expr *scheduledTime(context ctx, int auxIndex, FlowFragment flowFrag){
-        expr *index = null;
-        expr *scheduledTime;
+    std::shared_ptr<expr> scheduledTime(context ctx, int auxIndex, FlowFragment flowFrag){
+        std::shared_ptr<expr> index = null;
+        std::shared_ptr<expr> scheduledTime;
         int cycleNum = 0;
 
         if(auxIndex + 1 > flowFrag.getNumOfPacketsSent()) {
@@ -1711,7 +1711,7 @@ class INET_API Port {
         this->gbSize = gbSize;
     }
 
-    expr *getGbSizeZ3() {
+    std::shared_ptr<expr> getGbSizeZ3() {
         return gbSizeZ3;
     }
 
@@ -1788,10 +1788,10 @@ class INET_API Port {
      *
      ***************************************************/
 
-    expr *getCycleOfScheduledTime(context ctx, FlowFragment f, int index) {
-        expr *cycleIndex = null;
+    std::shared_ptr<expr> getCycleOfScheduledTime(context ctx, FlowFragment f, int index) {
+        std::shared_ptr<expr> cycleIndex = null;
 
-        expr *relativeST = (z3::expr) ctx.mkSub(
+        std::shared_ptr<expr> relativeST = (z3::expr) ctx.mkSub(
                 this->scheduledTime(ctx, index, f),
                 this->cycle.getFirstCycleStartZ3()
         );
@@ -1804,10 +1804,10 @@ class INET_API Port {
     }
 
 
-    expr *getCycleOfTime(context ctx, z3::expr time) {
-        expr *cycleIndex = null;
+    std::shared_ptr<expr> getCycleOfTime(context ctx, z3::expr time) {
+        std::shared_ptr<expr> cycleIndex = null;
 
-        expr *relativeST = (z3::expr) ctx.mkSub(
+        std::shared_ptr<expr> relativeST = (z3::expr) ctx.mkSub(
                 time,
                 this->cycle.getFirstCycleStartZ3()
         );
@@ -1819,8 +1819,8 @@ class INET_API Port {
         return cycleIndex;
     }
 
-    expr *getScheduledTimeOfPreviousPacket(context ctx, FlowFragment f, int index) {
-        expr *prevPacketST = ctx.real_val(0);
+    std::shared_ptr<expr> getScheduledTimeOfPreviousPacket(context ctx, FlowFragment f, int index) {
+        std::shared_ptr<expr> prevPacketST = ctx.real_val(0);
 
         for(FlowFragment auxFrag : this->flowFragments) {
 

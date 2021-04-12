@@ -23,21 +23,21 @@ class INET_API Network {
     std::string file_id;
 
     //TODO: Remove debugging variables:
-    expr *avgOfAllLatency;
-    std::vector<z3::expr *> avgLatencyPerDev;
+    std::shared_ptr<expr> avgOfAllLatency;
+    std::vector<z3::std::shared_ptr<expr> > avgLatencyPerDev;
 
 
     std::vector<Switch> switches;
     std::vector<Flow> flows;
     float timeToTravel;
-    std::vector<z3::expr *> allSumOfJitter;
+    std::vector<z3::std::shared_ptr<expr> > allSumOfJitter;
     std::vector<int> numberOfNodes;
 
 #define PACKETUPPERBOUNDRANGE 5 // Limits the applications of rules to the packets
 #define CYCLEUPPERBOUNDRANGE 25 // Limits the applications of rules to the cycles
 
     float jitterUpperBoundRange = -1;
-    expr *jitterUpperBoundRangeZ3;
+    std::shared_ptr<expr> jitterUpperBoundRangeZ3;
 
     /**
      * [Method]: Network
@@ -95,9 +95,9 @@ class INET_API Network {
             this->setJitterUpperBoundRangeZ3(ctx, this->jitterUpperBoundRange);
         }
 
-        Stack<z3::expr *> jitterList = new Stack<z3::expr *>();
+        Stack<z3::std::shared_ptr<expr> > jitterList = new Stack<z3::std::shared_ptr<expr> >();
         int totalNumOfLeaves = 0;
-        expr *sumOfAllJitter;
+        std::shared_ptr<expr> sumOfAllJitter;
         // On every switch, set up the constraints of the schedule
         //switch1.setupSchedulingRules(solver, ctx);
 
@@ -293,7 +293,7 @@ class INET_API Network {
      * GETTERS AND SETTERS
      */
 
-    expr *getJitterUpperBoundRangeZ3() {
+    std::shared_ptr<expr> getJitterUpperBoundRangeZ3() {
         return jitterUpperBoundRangeZ3;
     }
 

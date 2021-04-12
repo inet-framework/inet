@@ -54,16 +54,16 @@ class INET_API Cycle {
     float cycleDuration;
     float cycleStart;
 
-    std::vector<std::vector<z3::expr *>> slotStartZ3_;
-    std::vector<std::vector<z3::expr *>> slotDurationZ3_;
+    std::vector<std::vector<std::shared_ptr<expr> >> slotStartZ3_;
+    std::vector<std::vector<std::shared_ptr<expr> >> slotDurationZ3_;
 
     std::vector<int> slotsUsed;
     std::vector<std::vector<float>> slotStart;
     std::vector<std::vector<float>> slotDuration;
 
-    expr *cycleDurationZ3;
-    expr *firstCycleStartZ3;
-    expr *maximumSlotDurationZ3;
+    std::shared_ptr<expr> cycleDurationZ3;
+    std::shared_ptr<expr> firstCycleStartZ3;
+    std::shared_ptr<expr> maximumSlotDurationZ3;
     int numOfPrts = 8;
 
     int numOfSlots = 1;
@@ -84,8 +84,8 @@ class INET_API Cycle {
      * @param maximumSlotDuration   Every priority slot should have up this time units
      */
     Cycle(float upperBoundCycleTime,
-                 float lowerBoundCycleTime,
-                 float maximumSlotDuration) {
+          float lowerBoundCycleTime,
+          float maximumSlotDuration) {
         this->upperBoundCycleTime = upperBoundCycleTime;
         this->lowerBoundCycleTime = lowerBoundCycleTime;
         this->maximumSlotDuration = maximumSlotDuration;
@@ -113,9 +113,9 @@ class INET_API Cycle {
      * @param maximumSlotDuration   Every priority slot should have up this time units
      */
     Cycle(float upperBoundCycleTime,
-                 float lowerBoundCycleTime,
-                 float firstCycleStart,
-                 float maximumSlotDuration) {
+          float lowerBoundCycleTime,
+          float firstCycleStart,
+          float maximumSlotDuration) {
         this->upperBoundCycleTime = upperBoundCycleTime;
         this->lowerBoundCycleTime = lowerBoundCycleTime;
         this->firstCycleStart = firstCycleStart;
@@ -137,9 +137,9 @@ class INET_API Cycle {
      * @param maximumSlotDurationZ3   Every priority slot should have up this time units
      */
     Cycle(z3::expr upperBoundCycleTimeZ3,
-                 expr *lowerBoundCycleTimeZ3,
-                 expr *firstCycleStartZ3,
-                 expr *maximumSlotDurationZ3) {
+          std::shared_ptr<expr> lowerBoundCycleTimeZ3,
+          std::shared_ptr<expr> firstCycleStartZ3,
+          std::shared_ptr<expr> maximumSlotDurationZ3) {
         // this->upperBoundCycleTimeZ3 = upperBoundCycleTimeZ3;
         // this->lowerBoundCycleTimeZ3 = lowerBoundCycleTimeZ3;
         this->firstCycleStartZ3 = firstCycleStartZ3;
@@ -158,21 +158,21 @@ class INET_API Cycle {
     void toZ3(context ctx) {
         instanceCounter++;
 
-        this->cycleDurationZ3 = new expr(ctx.real_const((std::string("cycle") + std::to_string(instanceCounter) + std::string("Duration")).c_str()));
-        this->firstCycleStartZ3 = new expr(ctx.real_const((std::string("cycle") + std::to_string(instanceCounter) + std::string("Start")).c_str()));
-        // this->firstCycleStartZ3 = new expr(ctx.real_val((std::to_string(0)).c_str()));
-        // this->firstCycleStartZ3 = new expr(ctx.real_val((std::to_string(firstCycleStart)).c_str()));
-        this->maximumSlotDurationZ3 = new expr(ctx.real_val((std::to_string(maximumSlotDuration)).c_str()));
+        this->cycleDurationZ3 = std::make_shared<expr>(ctx.real_const((std::string("cycle") + std::to_string(instanceCounter) + std::string("Duration")).c_str()));
+        this->firstCycleStartZ3 = std::make_shared<expr>(ctx.real_const((std::string("cycle") + std::to_string(instanceCounter) + std::string("Start")).c_str()));
+        // this->firstCycleStartZ3 = std::make_shared<expr>(ctx.real_val((std::to_string(0)).c_str()));
+        // this->firstCycleStartZ3 = std::make_shared<expr>(ctx.real_val((std::to_string(firstCycleStart)).c_str()));
+        this->maximumSlotDurationZ3 = std::make_shared<expr>(ctx.real_val((std::to_string(maximumSlotDuration)).c_str()));
 
         this->slotStartZ3_.clear();
         this->slotDurationZ3_.clear();
 
         for(int i = 0; i < this->numOfPrts; i++) {
-            this->slotStartZ3_.push_back(std::vector<z3::expr *>());
-            this->slotDurationZ3_.push_back(std::vector<z3::expr *>());
+            this->slotStartZ3_.push_back(std::vector<std::shared_ptr<expr> >());
+            this->slotDurationZ3_.push_back(std::vector<std::shared_ptr<expr> >());
             for(int j = 0; j < this->numOfSlots; j++) {
                 expr v = ctx.real_const((std::string("cycleOfPort") + this->portName + std::string("prt") + std::to_string(i+1) + std::string("slot") + std::to_string(j+1)).c_str());
-                this->slotStartZ3_.at(i).push_back(new expr(v));
+                this->slotStartZ3_.at(i).push_back(std::make_shared<expr>(v));
             }
         }
 
@@ -189,8 +189,8 @@ class INET_API Cycle {
      * @param index     Index of the desired cycle
      * @return          Z3 variable containing the cycle start time
      */
-    expr *cycleStartZ3(context ctx, z3::expr index){
-        return new expr(ite(index >= ctx.int_val(1),
+    std::shared_ptr<expr> cycleStartZ3(context ctx, z3::expr index){
+        return std::make_shared<expr>(ite(index >= ctx.int_val(1),
                             *firstCycleStartZ3 + *cycleDurationZ3 * index,
                             *firstCycleStartZ3));
      }
@@ -204,9 +204,9 @@ class INET_API Cycle {
      * @param index     Index of the desired cycle
      * @return          Z3 variable containing the cycle start time
      */
-    expr *cycleStartZ3(context ctx, int auxIndex){
+    std::shared_ptr<expr> cycleStartZ3(context ctx, int auxIndex){
         expr index = ctx.int_val(auxIndex);
-        return new expr(ite(index >= ctx.int_val(1),
+        return std::make_shared<expr>(ite(index >= ctx.int_val(1),
                             *firstCycleStartZ3 + *cycleDurationZ3 * index,
                             *firstCycleStartZ3));
 
@@ -339,41 +339,41 @@ class INET_API Cycle {
     }
 
 
-    expr *slotStartZ3(context ctx, z3::expr prt, z3::expr index) {
-        return new expr(ctx.real_const((std::string("priority") + prt.to_string() + std::string("slot") + index.to_string() + "Start").c_str()));
+    std::shared_ptr<expr> slotStartZ3(context ctx, z3::expr prt, z3::expr index) {
+        return std::make_shared<expr>(ctx.real_const((std::string("priority") + prt.to_string() + std::string("slot") + index.to_string() + "Start").c_str()));
     }
 
-    expr *slotStartZ3(context ctx, int auxPrt, int auxIndex) {
+    std::shared_ptr<expr> slotStartZ3(context ctx, int auxPrt, int auxIndex) {
         expr index = ctx.int_val(auxIndex);
         expr prt = ctx.int_val(auxPrt);
-        return new expr(ctx.real_const((std::string("priority") + prt.to_string() + std::string("slot") + index.to_string() + "Start").c_str()));
+        return std::make_shared<expr>(ctx.real_const((std::string("priority") + prt.to_string() + std::string("slot") + index.to_string() + "Start").c_str()));
     }
 
 
-    expr *slotDurationZ3(context ctx, z3::expr prt, z3::expr index) {
-        return new expr(ctx.real_const((std::string("priority") + prt.to_string() + std::string("slot") + index.to_string() + "Duration").c_str()));
+    std::shared_ptr<expr> slotDurationZ3(context ctx, z3::expr prt, z3::expr index) {
+        return std::make_shared<expr>(ctx.real_const((std::string("priority") + prt.to_string() + std::string("slot") + index.to_string() + "Duration").c_str()));
     }
 
-    expr *slotDurationZ3(context ctx, int auxPrt, int auxIndex) {
+    std::shared_ptr<expr> slotDurationZ3(context ctx, int auxPrt, int auxIndex) {
         expr index = ctx.int_val(auxIndex);
         expr prt = ctx.int_val(auxPrt);
-        return new expr(ctx.real_const((std::string("priority") + prt.to_string() + std::string("slot") + index.to_string() + "Duration").c_str()));
+        return std::make_shared<expr>(ctx.real_const((std::string("priority") + prt.to_string() + std::string("slot") + index.to_string() + "Duration").c_str()));
     }
 
-    expr *getCycleDurationZ3() {
+    std::shared_ptr<expr> getCycleDurationZ3() {
         return cycleDurationZ3;
     }
 
     void setCycleDurationZ3(z3::expr cycleDuration) {
-        this->cycleDurationZ3 = new expr(cycleDuration);
+        this->cycleDurationZ3 = std::make_shared<expr>(cycleDuration);
     }
 
-    expr *getFirstCycleStartZ3() {
+    std::shared_ptr<expr> getFirstCycleStartZ3() {
         return firstCycleStartZ3;
     }
 
     void setFirstCycleStartZ3(z3::expr firstCycleStart) {
-        this->firstCycleStartZ3 = new expr(firstCycleStart);
+        this->firstCycleStartZ3 = std::make_shared<expr>(firstCycleStart);
     }
 
     int getNumOfPrts() {
@@ -392,12 +392,12 @@ class INET_API Cycle {
         this->numOfSlots = numOfSlots;
     }
 
-    expr *getMaximumSlotDurationZ3() {
+    std::shared_ptr<expr> getMaximumSlotDurationZ3() {
         return maximumSlotDurationZ3;
     }
 
     void setMaximumSlotDurationZ3(z3::expr maximumSlotDuration) {
-        this->maximumSlotDurationZ3 = new expr(maximumSlotDuration);
+        this->maximumSlotDurationZ3 = std::make_shared<expr>(maximumSlotDuration);
     }
 
     std::vector<int> getSlotsUsed (){
@@ -425,12 +425,12 @@ class INET_API Cycle {
         this->portName = portName;
     }
 
-     expr *getSlotStartZ3(int prt, int slotNum) {
+     std::shared_ptr<expr> getSlotStartZ3(int prt, int slotNum) {
         return this->slotStartZ3_.at(prt).at(slotNum);
     }
 
     /*
-     expr *getSlotDurationZ3(int prt, int slotNum) {
+     std::shared_ptr<expr> getSlotDurationZ3(int prt, int slotNum) {
         return this->slotDurationZ3.get(prt).get(slotNum);
     }
     */

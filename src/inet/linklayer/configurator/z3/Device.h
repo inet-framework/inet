@@ -27,12 +27,12 @@ class INET_API Device {
     float packetSize;
 
     static int indexCounter;
-    expr *packetPeriodicityZ3;
-    expr *firstT1TimeZ3;
-    expr *hardConstraintTimeZ3;
-    expr *softConstraintTimeZ3;
-    expr *packetSizeZ3;
-    expr *flowPriority;
+    std::shared_ptr<expr> packetPeriodicityZ3;
+    std::shared_ptr<expr> firstT1TimeZ3;
+    std::shared_ptr<expr> hardConstraintTimeZ3;
+    std::shared_ptr<expr> softConstraintTimeZ3;
+    std::shared_ptr<expr> packetSizeZ3;
+    std::shared_ptr<expr> flowPriority;
 
     /**
      * [Method]: Device
@@ -129,12 +129,12 @@ class INET_API Device {
      * @param packetSizeZ3              Size of the packets sent by this device
      * @param flowPriority              Defines the priority queue in which this device packets belongs to (Not used yet)
      */
-     Device(expr *packetPeriodicityZ3,
-            expr *firstT1TimeZ3,
-            expr *hardConstraintTimeZ3,
-            expr *softConstraintTimeZ3,
-            expr *packetSizeZ3,
-            expr *flowPriority) {
+     Device(std::shared_ptr<expr> packetPeriodicityZ3,
+            std::shared_ptr<expr> firstT1TimeZ3,
+            std::shared_ptr<expr> hardConstraintTimeZ3,
+            std::shared_ptr<expr> softConstraintTimeZ3,
+            std::shared_ptr<expr> packetSizeZ3,
+            std::shared_ptr<expr> flowPriority) {
         this->packetPeriodicityZ3 = packetPeriodicityZ3;
         this->firstT1TimeZ3 = firstT1TimeZ3;
         this->hardConstraintTimeZ3 = hardConstraintTimeZ3;
@@ -153,12 +153,12 @@ class INET_API Device {
      * @param ctx      context variable containing the z3 environment used
      */
      void toZ3(context ctx) {
-        this->packetPeriodicityZ3 = new expr(ctx.real_val(std::to_string(this->packetPeriodicity).c_str()));
-        //this->firstT1TimeZ3 = new expr(ctx.real_val(std::to_string(this->firstT1Time))); // In case of fixed firstT1Time
-        this->firstT1TimeZ3 = new expr(ctx.real_const((this->name + std::string("FirstT1Time")).c_str()));
-        this->hardConstraintTimeZ3 = new expr(ctx.real_val(std::to_string(this->hardConstraintTime).c_str()));
-        this->softConstraintTimeZ3 = new expr(ctx.real_val(std::to_string(this->softConstraintTime).c_str()));
-        this->packetSizeZ3 = new expr(ctx.real_val(std::to_string(this->packetSize).c_str()));
+        this->packetPeriodicityZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->packetPeriodicity).c_str()));
+        //this->firstT1TimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->firstT1Time))); // In case of fixed firstT1Time
+        this->firstT1TimeZ3 = std::make_shared<expr>(ctx.real_const((this->name + std::string("FirstT1Time")).c_str()));
+        this->hardConstraintTimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->hardConstraintTime).c_str()));
+        this->softConstraintTimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->softConstraintTime).c_str()));
+        this->packetSizeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->packetSize).c_str()));
     }
 
     /*
@@ -217,51 +217,51 @@ class INET_API Device {
      *  Z3 GETTERS AND SETTERS
      */
 
-     expr *getPacketPeriodicityZ3() {
+     std::shared_ptr<expr> getPacketPeriodicityZ3() {
         return packetPeriodicityZ3;
     }
 
-     void setPacketPeriodicityZ3(z3::expr *packetPeriodicity) {
+     void setPacketPeriodicityZ3(std::shared_ptr<expr> packetPeriodicity) {
         this->packetPeriodicityZ3 = packetPeriodicity;
     }
 
-     expr *getFirstT1TimeZ3() {
+     std::shared_ptr<expr> getFirstT1TimeZ3() {
         return firstT1TimeZ3;
     }
 
-     void setFirstT1TimeZ3(z3::expr *firstT1Time) {
+     void setFirstT1TimeZ3(std::shared_ptr<expr> firstT1Time) {
         this->firstT1TimeZ3 = firstT1Time;
     }
 
-     expr *getHardConstraintTimeZ3() {
+     std::shared_ptr<expr> getHardConstraintTimeZ3() {
         return hardConstraintTimeZ3;
     }
 
-     void setHardConstraintTimeZ3(z3::expr *hardConstraintTime) {
+     void setHardConstraintTimeZ3(std::shared_ptr<expr> hardConstraintTime) {
         this->hardConstraintTimeZ3 = hardConstraintTime;
     }
 
-     expr *getSoftConstraintTimeZ3() {
+     std::shared_ptr<expr> getSoftConstraintTimeZ3() {
         return softConstraintTimeZ3;
     }
 
-     void setSoftConstraintTimeZ3(z3::expr *softConstraintTime) {
+     void setSoftConstraintTimeZ3(std::shared_ptr<expr> softConstraintTime) {
         this->softConstraintTimeZ3 = softConstraintTime;
     }
 
-    expr *getPacketSizeZ3() {
+    std::shared_ptr<expr> getPacketSizeZ3() {
         return packetSizeZ3;
     }
 
-    void setPacketSizeZ3(z3::expr *packetSize) {
+    void setPacketSizeZ3(std::shared_ptr<expr> packetSize) {
         this->packetSizeZ3 = packetSize;
     }
 
-    expr *getFlowPriority() {
+    std::shared_ptr<expr> getFlowPriority() {
         return flowPriority;
     }
 
-    void setFlowPriority(z3::expr *flowPriority) {
+    void setFlowPriority(std::shared_ptr<expr> flowPriority) {
         this->flowPriority = flowPriority;
     }
 };
