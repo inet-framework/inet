@@ -7,6 +7,8 @@
 
 namespace inet {
 
+using namespace z3;
+
 /**
  * [Class]: FlowFragment
  * [Usage]: This class is used to represent a fragment of a flow.

@@ -7,6 +7,8 @@
 
 namespace inet {
 
+using namespace z3;
+
 /**
  * [Class]: Network
  * [Usage]: Using this class, the user can specify the network

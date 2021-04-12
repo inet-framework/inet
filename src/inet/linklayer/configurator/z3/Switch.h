@@ -7,6 +7,8 @@
 
 namespace inet {
 
+using namespace z3;
+
 /**
  * [Class]: Switch
  * [Usage]: Contains most of the properties of a normal

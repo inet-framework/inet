@@ -7,6 +7,8 @@
 
 namespace inet {
 
+using namespace z3;
+
 /**
  * [Class]: ScheduleGenerator
  * [Usage]: Used to generate a schedule based on the properties of

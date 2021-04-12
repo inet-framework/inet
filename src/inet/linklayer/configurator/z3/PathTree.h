@@ -7,6 +7,8 @@
 
 namespace inet {
 
+using namespace z3;
+
 /**
  * [Class]: PathTree
  * [Usage]: Used to specify the path on publish subscribe

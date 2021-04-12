@@ -7,6 +7,8 @@
 
 namespace inet {
 
+using namespace z3;
+
 /**
  * [Class]: TSNSwitch
  * [Usage]: This class contains the information needed to

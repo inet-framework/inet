@@ -7,6 +7,8 @@
 
 namespace inet {
 
+using namespace z3;
+
 /**
  * [Class]: PathNode
  * [Usage]: Contains the data needed in each node of
