@@ -56,7 +56,7 @@ class INET_API Device {
      * @param hardConstraintTime    Maximum latency tolerated by this device
      */
     Device(float packetPeriodicity,
-                  float hardConstraintTime) {
+           float hardConstraintTime) {
         this->packetPeriodicity = packetPeriodicity;
         this->firstT1Time = 0;
         this->hardConstraintTime = hardConstraintTime;
@@ -79,10 +79,10 @@ class INET_API Device {
      * @param packetSize            Size of the packets sent by this device
      */
     Device(float packetPeriodicity,
-                  float firstT1Time,
-                  float hardConstraintTime,
-                  float softConstraintTime,
-                  float packetSize) {
+           float firstT1Time,
+           float hardConstraintTime,
+           float softConstraintTime,
+           float packetSize) {
         this->packetPeriodicity = packetPeriodicity;
         this->firstT1Time = firstT1Time;
         this->hardConstraintTime = hardConstraintTime;
@@ -104,15 +104,15 @@ class INET_API Device {
      * @param packetSize            Size of the packets sent by this device
      */
     Device(float packetPeriodicity,
-                  float firstT1Time,
-                  float hardConstraintTime,
-                  float packetSize) {
+           float firstT1Time,
+           float hardConstraintTime,
+           float packetSize) {
         this->packetPeriodicity = packetPeriodicity;
         this->firstT1Time = firstT1Time;
         this->hardConstraintTime = hardConstraintTime;
         this->softConstraintTime = 0;
         this->packetSize = packetSize;
-        this->name = std::string("dev") + ++indexCounter;
+        this->name = std::string("dev") + std::to_string(++indexCounter);
     }
 
 
@@ -129,12 +129,12 @@ class INET_API Device {
      * @param packetSizeZ3              Size of the packets sent by this device
      * @param flowPriority              Defines the priority queue in which this device packets belongs to (Not used yet)
      */
-     Device(z3::expr packetPeriodicityZ3,
-                  expr *firstT1TimeZ3,
-                  expr *hardConstraintTimeZ3,
-                  expr *softConstraintTimeZ3,
-                  expr *packetSizeZ3,
-                  expr *flowPriority) {
+     Device(expr *packetPeriodicityZ3,
+            expr *firstT1TimeZ3,
+            expr *hardConstraintTimeZ3,
+            expr *softConstraintTimeZ3,
+            expr *packetSizeZ3,
+            expr *flowPriority) {
         this->packetPeriodicityZ3 = packetPeriodicityZ3;
         this->firstT1TimeZ3 = firstT1TimeZ3;
         this->hardConstraintTimeZ3 = hardConstraintTimeZ3;
@@ -153,12 +153,12 @@ class INET_API Device {
      * @param ctx      context variable containing the z3 environment used
      */
      void toZ3(context ctx) {
-        this->packetPeriodicityZ3 = ctx.real_val(std::to_string(this->packetPeriodicity));
-        //this->firstT1TimeZ3 = ctx.real_val(std::to_string(this->firstT1Time)); // In case of fixed firstT1Time
-        this->firstT1TimeZ3 = ctx.real_const((this->name + std::string("FirstT1Time")).c_str());
-        this->hardConstraintTimeZ3 = ctx.real_val(std::to_string(this->hardConstraintTime));
-        this->softConstraintTimeZ3 = ctx.real_val(std::to_string(this->softConstraintTime));
-        this->packetSizeZ3 = ctx.real_val(std::to_string(this->packetSize));
+        this->packetPeriodicityZ3 = new expr(ctx.real_val(std::to_string(this->packetPeriodicity).c_str()));
+        //this->firstT1TimeZ3 = new expr(ctx.real_val(std::to_string(this->firstT1Time))); // In case of fixed firstT1Time
+        this->firstT1TimeZ3 = new expr(ctx.real_const((this->name + std::string("FirstT1Time")).c_str()));
+        this->hardConstraintTimeZ3 = new expr(ctx.real_val(std::to_string(this->hardConstraintTime).c_str()));
+        this->softConstraintTimeZ3 = new expr(ctx.real_val(std::to_string(this->softConstraintTime).c_str()));
+        this->packetSizeZ3 = new expr(ctx.real_val(std::to_string(this->packetSize).c_str()));
     }
 
     /*
@@ -221,7 +221,7 @@ class INET_API Device {
         return packetPeriodicityZ3;
     }
 
-     void setPacketPeriodicityZ3(z3::expr packetPeriodicity) {
+     void setPacketPeriodicityZ3(z3::expr *packetPeriodicity) {
         this->packetPeriodicityZ3 = packetPeriodicity;
     }
 
@@ -229,7 +229,7 @@ class INET_API Device {
         return firstT1TimeZ3;
     }
 
-     void setFirstT1TimeZ3(z3::expr firstT1Time) {
+     void setFirstT1TimeZ3(z3::expr *firstT1Time) {
         this->firstT1TimeZ3 = firstT1Time;
     }
 
@@ -237,7 +237,7 @@ class INET_API Device {
         return hardConstraintTimeZ3;
     }
 
-     void setHardConstraintTimeZ3(z3::expr hardConstraintTime) {
+     void setHardConstraintTimeZ3(z3::expr *hardConstraintTime) {
         this->hardConstraintTimeZ3 = hardConstraintTime;
     }
 
@@ -245,7 +245,7 @@ class INET_API Device {
         return softConstraintTimeZ3;
     }
 
-     void setSoftConstraintTimeZ3(z3::expr softConstraintTime) {
+     void setSoftConstraintTimeZ3(z3::expr *softConstraintTime) {
         this->softConstraintTimeZ3 = softConstraintTime;
     }
 
@@ -253,7 +253,7 @@ class INET_API Device {
         return packetSizeZ3;
     }
 
-    void setPacketSizeZ3(z3::expr packetSize) {
+    void setPacketSizeZ3(z3::expr *packetSize) {
         this->packetSizeZ3 = packetSize;
     }
 
@@ -261,7 +261,7 @@ class INET_API Device {
         return flowPriority;
     }
 
-    void setFlowPriority(z3::expr flowPriority) {
+    void setFlowPriority(z3::expr *flowPriority) {
         this->flowPriority = flowPriority;
     }
 };
