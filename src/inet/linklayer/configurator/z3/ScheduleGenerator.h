@@ -102,7 +102,7 @@ class INET_API ScheduleGenerator {
                 ex.printStackTrace(System.out);
             }
 
-            return null;
+            return nullptr;
        }
 
 
@@ -151,9 +151,9 @@ class INET_API ScheduleGenerator {
         */
        public void writePathTree(PathNode pathNode, Model model, context ctx, PrintWriter out) {
            Switch swt;
-           std::shared_ptr<expr> indexZ3 = null;
+           std::shared_ptr<expr> indexZ3 = nullptr;
 
-           if((pathNode.getNode() instanceof Device) && (pathNode.getParent() != null)) {
+           if((pathNode.getNode() instanceof Device) && (pathNode.getParent() != nullptr)) {
                out.println("    [END OF BRANCH]");
 
            }
@@ -334,7 +334,7 @@ class INET_API ScheduleGenerator {
 
 
            // A switch is picked in order to evaluate the unknown values
-           TSNSwitch switch1 = null;
+           TSNSwitch switch1 = nullptr;
            switch1 = (TSNSwitch) net.getSwitches().get(0);
            // The duration of the cycle is given as a question to z3, so all the
            // constraints will have to be evaluated in order to z3 to know this cycle
@@ -343,7 +343,7 @@ class INET_API ScheduleGenerator {
 
 
            /* find model for the constraints above */
-           Model model = null;
+           Model model = nullptr;
            LocalTime time = LocalTime.now();
 
 
@@ -356,7 +356,7 @@ class INET_API ScheduleGenerator {
                model = solver.getModel();
                System.out.println(model);
                Expr v = model.evaluate(switch1CycDuration, false);
-               if (v != null)
+               if (v != nullptr)
                {
                    System.out.println("Model generated.");
 
@@ -547,7 +547,7 @@ class INET_API ScheduleGenerator {
         * @return            The network object with all its primitive values
         */
        public Network deserializeNetwork(std::string path) {
-           Network net = null;
+           Network net = nullptr;
 
            try {
                FileInputStream fileIn = new FileInputStream(path);
@@ -557,7 +557,7 @@ class INET_API ScheduleGenerator {
                fileIn.close();
            } catch (Exception i) {
                 i.printStackTrace();
-               return null;
+               return nullptr;
            }
            return net;
        }

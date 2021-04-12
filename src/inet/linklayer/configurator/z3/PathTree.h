@@ -33,7 +33,7 @@ class INET_API PathTree {
     PathNode addRoot(Object node)
     {
         root=new PathNode(node);
-        root.setParent(null);
+        root.setParent(nullptr);
         root.setChildren(std::vector<PathNode>());
         return root;
     }
@@ -50,7 +50,7 @@ class INET_API PathTree {
     void changeRoot(PathNode newRoot)
     {
         PathNode oldRoot=this->root;
-        newRoot.setParent(null);
+        newRoot.setParent(nullptr);
         newRoot.addChild(oldRoot);
         oldRoot.setParent(newRoot);
         this->root=newRoot;
