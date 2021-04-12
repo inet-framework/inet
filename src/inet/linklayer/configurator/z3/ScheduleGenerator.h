@@ -209,9 +209,9 @@ class INET_API ScheduleGenerator {
                     	   // System.out.println(((TSNSwitch)child.getNode()).scheduledTime(ctx, i, ffrag));
 
                     	   if(i < ffrag.getParent().getNumOfPacketsSent()) {
-		                	   out.println(std::string("          (" + int.toString(i) + std::string(") Fragment departure time: ")) + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).departureTime(ctx, i, ffrag) , false).toString()));
-		                	   out.println(std::string("          (" + int.toString(i) + std::string(") Fragment arrival time: ")) + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).arrivalTime(ctx, i, ffrag) , false).toString()));
-		                       out.println(std::string("          (" + int.toString(i) + std::string(") Fragment scheduled time: ")) + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).scheduledTime(ctx, i, ffrag) , false).toString()));
+		                	   out.println(std::string("          (" + std::to_string(i) + std::string(") Fragment departure time: ")) + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).departureTime(ctx, i, ffrag) , false).toString()));
+		                	   out.println(std::string("          (" + std::to_string(i) + std::string(") Fragment arrival time: ")) + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).arrivalTime(ctx, i, ffrag) , false).toString()));
+		                       out.println(std::string("          (" + std::to_string(i) + std::string(") Fragment scheduled time: ")) + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).scheduledTime(ctx, i, ffrag) , false).toString()));
 		                       out.println("          ----------------------------");
                     	   }
 

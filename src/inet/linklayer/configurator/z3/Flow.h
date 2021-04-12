@@ -84,7 +84,7 @@ class INET_API Flow {
         instanceCounter++;
 
         this->instance = instanceCounter;
-        this->name = std::string("flow") + int.toString(instanceCounter);
+        this->name = std::string("flow") + std::to_string(instanceCounter);
 
         if(type == UNICAST) {
             //Its not a unicast flow
@@ -114,7 +114,7 @@ class INET_API Flow {
     Flow(int type, float flowFirstSendingTime, float flowSendingPeriodicity) {
         instanceCounter++;
         this->instance = instanceCounter;
-        this->name = std::string("flow") + int.toString(instanceCounter);
+        this->name = std::string("flow") + std::to_string(instanceCounter);
 
         if(type == UNICAST) {
             //Its not a unicast flow
