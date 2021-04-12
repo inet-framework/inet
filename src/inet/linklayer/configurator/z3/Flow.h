@@ -21,20 +21,20 @@ class INET_API Flow {
 
     // TODO: CHECK FUNCTIONS FOR UNICAST FLOWS
 
-    private Boolean isModifiedOrCreated = false;
+    Boolean isModifiedOrCreated = false;
 
-    private static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 1L;
     static int instanceCounter = 0;
-    private int instance = 0;
+    int instance = 0;
 
 
 
     protected String name;
-    private int type = 0;
-    private int totalNumOfPackets = 0;
+    int type = 0;
+    int totalNumOfPackets = 0;
 
-    private boolean fixedPriority = false;
-    private int priorityValue = -1;
+    boolean fixedPriority = false;
+    int priorityValue = -1;
 
     //Specifying the type of the flow:
     public static int UNICAST = 0;
@@ -42,25 +42,25 @@ class INET_API Flow {
 
 
 
-    private ArrayList<Switch> path;
-    private ArrayList<FlowFragment> flowFragments;
-    private PathTree pathTree;
+    ArrayList<Switch> path;
+    ArrayList<FlowFragment> flowFragments;
+    PathTree pathTree;
 
     protected int pathTreeCount = 0;
 
-    protected transient IntExpr flowPriority; // In the future, priority might be fixed
+    protected IntExpr flowPriority; // In the future, priority might be fixed
     protected Device startDevice;
     protected Device endDevice;
 
-    private float flowFirstSendingTime;
-    private float flowSendingPeriodicity;
+    float flowFirstSendingTime;
+    float flowSendingPeriodicity;
 
-    private transient RealExpr flowFirstSendingTimeZ3;
-    private transient RealExpr flowSendingPeriodicityZ3;
+    RealExpr flowFirstSendingTimeZ3;
+    RealExpr flowSendingPeriodicityZ3;
 
-    private int numOfPacketsSentInFragment = 0;
+    int numOfPacketsSentInFragment = 0;
 
-    private boolean useCustomValues = false;
+    boolean useCustomValues = false;
 
     /**
      * [Method]: Flow

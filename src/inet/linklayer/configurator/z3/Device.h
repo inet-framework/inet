@@ -17,21 +17,20 @@ namespace inet {
  */
 class INET_API Device {
 
-	private static final long serialVersionUID = 1L;
-	private String name;
-    private float packetPeriodicity;
-    private float firstT1Time;
-    private float hardConstraintTime;
-    private float softConstraintTime;
-    private float packetSize;
+    String name;
+    float packetPeriodicity;
+    float firstT1Time;
+    float hardConstraintTime;
+    float softConstraintTime;
+    float packetSize;
 
-    private static int indexCounter = -1;
-    private transient RealExpr packetPeriodicityZ3;
-	private transient RealExpr firstT1TimeZ3;
-	private transient RealExpr hardConstraintTimeZ3;
-	private transient RealExpr softConstraintTimeZ3;
-    private transient RealExpr packetSizeZ3;
-    private transient IntExpr flowPriority;
+    static int indexCounter = -1;
+    RealExpr packetPeriodicityZ3;
+    RealExpr firstT1TimeZ3;
+    RealExpr hardConstraintTimeZ3;
+    RealExpr softConstraintTimeZ3;
+    RealExpr packetSizeZ3;
+    IntExpr flowPriority;
 
     /**
      * [Method]: Device

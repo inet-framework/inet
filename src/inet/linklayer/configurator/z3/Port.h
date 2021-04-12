@@ -24,26 +24,25 @@ namespace inet {
  */
 class INET_API Port {
 
-	private static final long serialVersionUID = 1L;
-	private Boolean useMicroCycles = false;
-    private Boolean useHyperCycle = true;
+    Boolean useMicroCycles = false;
+    Boolean useHyperCycle = true;
 
-    private ArrayList<Float> listOfPeriods = new ArrayList<Float>();
-    private float definedHyperCycleSize = -1;
-    private float microCycleSize = -1;
+    ArrayList<Float> listOfPeriods = new ArrayList<Float>();
+    float definedHyperCycleSize = -1;
+    float microCycleSize = -1;
 
-	private String name;
-    private String connectsTo;
+    String name;
+    String connectsTo;
 
-    private float bestEffortPercent = 0.5f;
-    transient RealExpr bestEffortPercentZ3;
+    float bestEffortPercent = 0.5f;
+    RealExpr bestEffortPercentZ3;
 
-    private Cycle cycle;
-    private ArrayList<FlowFragment> flowFragments;
-    private int packetUpperBoundRange = Network.PACKETUPPERBOUNDRANGE; // Limits the applications of rules to the packets
-    private int cycleUpperBoundRange = Network.CYCLEUPPERBOUNDRANGE; // Limits the applications of rules to the cycles
+    Cycle cycle;
+    ArrayList<FlowFragment> flowFragments;
+    int packetUpperBoundRange = Network.PACKETUPPERBOUNDRANGE; // Limits the applications of rules to the packets
+    int cycleUpperBoundRange = Network.CYCLEUPPERBOUNDRANGE; // Limits the applications of rules to the cycles
 
-	private float gbSize;
+    float gbSize;
 
     protected float maxPacketSize;
     protected float timeToTravel;
@@ -51,11 +50,11 @@ class INET_API Port {
     protected float portSpeed;
     protected int portNum;
 
-	private transient RealExpr gbSizeZ3; // Size of the guardBand
-    protected transient RealExpr maxPacketSizeZ3;
-    protected transient RealExpr timeToTravelZ3;
-    protected transient RealExpr transmissionTimeZ3;
-    protected transient RealExpr portSpeedZ3;
+    RealExpr gbSizeZ3; // Size of the guardBand
+    protected RealExpr maxPacketSizeZ3;
+    protected RealExpr timeToTravelZ3;
+    protected RealExpr transmissionTimeZ3;
+    protected RealExpr portSpeedZ3;
 
 
     /**
@@ -125,7 +124,7 @@ class INET_API Port {
      * @param solver        z3 solver object used to discover the variables' values
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
-    private void setUpCycleRules(Solver solver, Context ctx) {
+    void setUpCycleRules(Solver solver, Context ctx) {
 
         for(FlowFragment frag : this.flowFragments) {
         	for(int index = 0; index < this.cycle.getNumOfSlots(); index++) {
@@ -299,7 +298,7 @@ class INET_API Port {
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      * @param flowFrag      A fragment of a flow that goes through this port
      */
-    private void setupTimeSlots(Solver solver, Context ctx, FlowFragment flowFrag) {
+    void setupTimeSlots(Solver solver, Context ctx, FlowFragment flowFrag) {
     	IntExpr indexZ3;
 
     	// If there is a flow assigned to the slot, slotDuration must be greater than transmission time
@@ -350,7 +349,7 @@ class INET_API Port {
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      * @param flowFrag      A fragment of a flow that goes through this port
      */
-    private void setupDevPacketTimes(Solver solver, Context ctx, FlowFragment flowFrag) {
+    void setupDevPacketTimes(Solver solver, Context ctx, FlowFragment flowFrag) {
 
         // For the specified range of packets defined by [0, upperBoundRange],
         // apply the scheduling rules.

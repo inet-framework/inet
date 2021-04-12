@@ -19,31 +19,31 @@ namespace inet {
  *
  */
 class INET_API FlowFragment extends Flow {
-    private Boolean isModifiedOrCreated = false;
-    private static final long serialVersionUID = 1L;
-    private Flow parent;
-    private transient RealExpr packetSize;
-    private transient RealExpr packetPeriodicityZ3;
-    private transient ArrayList<RealExpr> departureTimeZ3 = new ArrayList<RealExpr>();
-    private transient ArrayList<RealExpr> scheduledTimeZ3 = new ArrayList<RealExpr>();
-    private transient IntExpr fragmentPriorityZ3;
+    Boolean isModifiedOrCreated = false;
+    static final long serialVersionUID = 1L;
+    Flow parent;
+    RealExpr packetSize;
+    RealExpr packetPeriodicityZ3;
+    ArrayList<RealExpr> departureTimeZ3 = new ArrayList<RealExpr>();
+    ArrayList<RealExpr> scheduledTimeZ3 = new ArrayList<RealExpr>();
+    IntExpr fragmentPriorityZ3;
 
-    private Port port;
+    Port port;
 
-    private PathNode referenceToNode;
+    PathNode referenceToNode;
 
-    private int fragmentPriority;
-    private String nodeName;
-    private String nextHopName;
-    private int numOfPacketsSent = Network.PACKETUPPERBOUNDRANGE;
+    int fragmentPriority;
+    String nodeName;
+    String nextHopName;
+    int numOfPacketsSent = Network.PACKETUPPERBOUNDRANGE;
 
     //TODO: CREATE REFERENCES TO PREVIOUS AND NEXT FRAGMENTS
-    private FlowFragment previousFragment;
-    private List<FlowFragment> nextFragments;
+    FlowFragment previousFragment;
+    List<FlowFragment> nextFragments;
 
-    private ArrayList<Float> departureTime = new ArrayList<Float>();
-    private ArrayList<Float> arrivalTime = new ArrayList<Float>();
-    private ArrayList<Float> scheduledTime = new ArrayList<Float>();
+    ArrayList<Float> departureTime = new ArrayList<Float>();
+    ArrayList<Float> arrivalTime = new ArrayList<Float>();
+    ArrayList<Float> scheduledTime = new ArrayList<Float>();
 
     /**
      * [Method]: FlowFragment

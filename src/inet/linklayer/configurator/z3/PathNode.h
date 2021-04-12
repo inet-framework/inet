@@ -17,11 +17,10 @@ namespace inet {
  */
 class INET_API PathNode {
 
-	private static final long serialVersionUID = 1L;
-	private PathNode parent; // The parent of the current FlowNode
-    private Object node;
-    private ArrayList<PathNode> children; // The children of the current FlowNode
-    private ArrayList<FlowFragment> flowFragments;
+    PathNode parent; // The parent of the current FlowNode
+    Object node;
+    ArrayList<PathNode> children; // The children of the current FlowNode
+    ArrayList<FlowFragment> flowFragments;
 
 
     /**

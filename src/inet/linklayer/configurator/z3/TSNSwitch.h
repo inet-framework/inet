@@ -18,24 +18,24 @@ namespace inet {
  */
 class INET_API TSNSwitch extends Switch {
 
-    private Boolean isModifiedOrCreated = true;
+    Boolean isModifiedOrCreated = true;
 
-    private static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 1L;
     // private Cycle cycle;
-    private ArrayList<String> connectsTo;
-    private ArrayList<Port> ports;
-    private float cycleDurationUpperBound;
-    private float cycleDurationLowerBound;
+    ArrayList<String> connectsTo;
+    ArrayList<Port> ports;
+    float cycleDurationUpperBound;
+    float cycleDurationLowerBound;
 
-    private float gbSize;
-    private transient RealExpr gbSizeZ3; // Size of the guardBand
-    private transient RealExpr cycleDuration;
-    private transient RealExpr cycleStart;
-    private transient RealExpr cycleDurationUpperBoundZ3;
-    private transient RealExpr cycleDurationLowerBoundZ3;
-    private int portNum = 0;
+    float gbSize;
+    RealExpr gbSizeZ3; // Size of the guardBand
+    RealExpr cycleDuration;
+    RealExpr cycleStart;
+    RealExpr cycleDurationUpperBoundZ3;
+    RealExpr cycleDurationLowerBoundZ3;
+    int portNum = 0;
 
-    private static int indexCounter = 0;
+    static int indexCounter = 0;
 
 
     /**

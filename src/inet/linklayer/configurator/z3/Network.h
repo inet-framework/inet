@@ -17,26 +17,25 @@ namespace inet {
  */
 class INET_API Network {
 
-	private static final long serialVersionUID = 1L;
 	String db_name;
 	String file_id;
 
 	//TODO: Remove debugging variables:
-    public transient RealExpr avgOfAllLatency;
-    public transient ArrayList<RealExpr> avgLatencyPerDev = new ArrayList<RealExpr>();
+    public RealExpr avgOfAllLatency;
+    public ArrayList<RealExpr> avgLatencyPerDev = new ArrayList<RealExpr>();
 
 
-    private ArrayList<Switch> switches;
-    private ArrayList<Flow> flows;
-    private float timeToTravel;
-    public transient ArrayList<RealExpr> allSumOfJitter = new ArrayList<RealExpr>();
+    ArrayList<Switch> switches;
+    ArrayList<Flow> flows;
+    float timeToTravel;
+    public ArrayList<RealExpr> allSumOfJitter = new ArrayList<RealExpr>();
     public ArrayList<Integer> numberOfNodes = new ArrayList<Integer>();
 
     public static int PACKETUPPERBOUNDRANGE = 5; // Limits the applications of rules to the packets
     public static int CYCLEUPPERBOUNDRANGE = 25; // Limits the applications of rules to the cycles
 
-    private float jitterUpperBoundRange = -1;
-    transient RealExpr jitterUpperBoundRangeZ3;
+    float jitterUpperBoundRange = -1;
+    RealExpr jitterUpperBoundRangeZ3;
 
     /**
      * [Method]: Network
