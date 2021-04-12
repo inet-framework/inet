@@ -99,9 +99,9 @@ class INET_API Port {
      * generates the z3 equivalent of these values and creates any extra
      * variable needed.
      *
-     * @param ctx      Context variable containing the z3 environment used
+     * @param ctx      context variable containing the z3 environment used
      */
-    void toZ3(Context ctx) {
+    void toZ3(context ctx) {
         this->gbSizeZ3 = ctx.real_val(std::to_string(gbSize));
         this->maxPacketSizeZ3 = ctx.real_val(std::to_string(this->maxPacketSize));
         this->timeToTravelZ3 = ctx.real_val(std::to_string(this->timeToTravel));
@@ -124,7 +124,7 @@ class INET_API Port {
      * @param solver        z3 solver object used to discover the variables' values
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
-    void setUpCycleRules(Solver solver, Context ctx) {
+    void setUpCycleRules(solver solver, context ctx) {
 
         for(FlowFragment frag : this->flowFragments) {
         	for(int index = 0; index < this->cycle.getNumOfSlots(); index++) {
@@ -298,7 +298,7 @@ class INET_API Port {
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      * @param flowFrag      A fragment of a flow that goes through this port
      */
-    void setupTimeSlots(Solver solver, Context ctx, FlowFragment flowFrag) {
+    void setupTimeSlots(solver solver, context ctx, FlowFragment flowFrag) {
     	z3::expr indexZ3;
 
     	// If there is a flow assigned to the slot, slotDuration must be greater than transmission time
@@ -349,7 +349,7 @@ class INET_API Port {
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      * @param flowFrag      A fragment of a flow that goes through this port
      */
-    void setupDevPacketTimes(Solver solver, Context ctx, FlowFragment flowFrag) {
+    void setupDevPacketTimes(solver solver, context ctx, FlowFragment flowFrag) {
 
         // For the specified range of packets defined by [0, upperBoundRange],
         // apply the scheduling rules.
@@ -883,10 +883,10 @@ class INET_API Port {
      * [Usage]: Use in order to enable the best effort traffic reservation
      * constraint.
      *
-     * @param solver	Solver object
-     * @param ctx		Context object for the solver
+     * @param solver	solver object
+     * @param ctx		context object for the solver
      */
-    void setupBestEffort(Solver solver, Context ctx) {
+    void setupBestEffort(solver solver, context ctx) {
         z3::expr []slotStart = new z3::expr[8];
         z3::expr []slotDuration = new z3::expr[8];
         // z3::expr guardBandTime = null;
@@ -1087,10 +1087,10 @@ class INET_API Port {
      * [Usage]: Set up the cycle duration and number of packets and slots
      * to be scheduled according to the hyper cycle approach.
      *
-     * @param solver	Solver object
-     * @param ctx		Context object for the solver
+     * @param solver	solver object
+     * @param ctx		context object for the solver
      */
-    void setUpHyperCycle(Solver solver, Context ctx) {
+    void setUpHyperCycle(solver solver, context ctx) {
         int numOfPacketsScheduled = 0;
 
         /*
@@ -1137,10 +1137,10 @@ class INET_API Port {
      * [Usage]: Set up the cycle duration and number of packets, cycles and slots
      * to be scheduled according to the micro cycle approach.
      *
-     * @param solver	Solver object
-     * @param ctx		Context object for the solver
+     * @param solver	solver object
+     * @param ctx		context object for the solver
      */
-    void setUpMicroCycles(Solver solver, Context ctx) {
+    void setUpMicroCycles(solver solver, context ctx) {
 
         /*
         for(FlowFragment flowFrag : this->flowFragments) {
@@ -1175,10 +1175,10 @@ class INET_API Port {
      * [Usage]: IN DEVELOPMENT - Bind timeslots to a fixed name instead
      * of a variable.
      *
-     * @param solver	Solver object
-     * @param ctx		Context object for the solver
+     * @param solver	solver object
+     * @param ctx		context object for the solver
      */
-    void bindTimeSlots(Solver solver, Context ctx) {
+    void bindTimeSlots(solver solver, context ctx) {
 
     	// Ideia = se a prioridade de um flow e' igual a um numero,
     	// ctx.mkeq nele com o slot the cycle (getSlotS/D(prt, slotnum))
@@ -1212,7 +1212,7 @@ class INET_API Port {
      * @param solver        z3 solver object used to discover the variables' values
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
-    void setUpCycle(Solver solver, Context ctx) {
+    void setUpCycle(solver solver, context ctx) {
 
     	this->cycle.toZ3(ctx);
 
@@ -1248,7 +1248,7 @@ class INET_API Port {
      * @param solver
      * @param ctx
      */
-    void zeroOutNonUsedSlots(Solver solver, Context ctx) {
+    void zeroOutNonUsedSlots(solver solver, context ctx) {
     	BoolExpr exp1;
     	BoolExpr exp2;
     	z3::expr indexZ3;
@@ -1337,7 +1337,7 @@ class INET_API Port {
      * @param solver        z3 solver object used to discover the variables' values
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
-    void setupSchedulingRules(Solver solver, Context ctx) {
+    void setupSchedulingRules(solver solver, context ctx) {
 
     	if (this->flowFragments.size() == 0) {
     		solver.add(ctx.mkEq(
@@ -1406,7 +1406,7 @@ class INET_API Port {
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
 
-    z3::expr departureTime(Context ctx, z3::expr index, FlowFragment flowFrag){
+    z3::expr departureTime(context ctx, z3::expr index, FlowFragment flowFrag){
 
         // If the index is 0, then its the first departure time, else add index * periodicity
         return this->departureTime(ctx, (int.parseInt(index.toString())), flowFrag);
@@ -1433,7 +1433,7 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    z3::expr departureTime(Context ctx, int auxIndex, FlowFragment flowFrag){
+    z3::expr departureTime(context ctx, int auxIndex, FlowFragment flowFrag){
     	z3::expr index = null;
     	z3::expr departureTime;
     	int cycleNum = 0;
@@ -1472,7 +1472,7 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      *
-    z3::expr arrivalTime(Context ctx, z3::expr index, FlowFragment flowFrag){
+    z3::expr arrivalTime(context ctx, z3::expr index, FlowFragment flowFrag){
 
 
        // The arrival time of this index from the given flow fragment is
@@ -1496,7 +1496,7 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    z3::expr arrivalTime(Context ctx, int auxIndex, FlowFragment flowFrag){
+    z3::expr arrivalTime(context ctx, int auxIndex, FlowFragment flowFrag){
         z3::expr index = ctx.mkInt(auxIndex);
 
         return (z3::expr) ctx.mkAdd( // Arrival time value constraint
@@ -1521,7 +1521,7 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      *
-    z3::expr scheduledTime(Context ctx, z3::expr index, FlowFragment flowFrag){
+    z3::expr scheduledTime(context ctx, z3::expr index, FlowFragment flowFrag){
         z3::expr devT3 = ctx.real_const(flowFrag.getName() + "ScheduledTime" + index.toString());
 
         return (z3::expr) devT3;
@@ -1544,7 +1544,7 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      */
-    z3::expr scheduledTime(Context ctx, int auxIndex, FlowFragment flowFrag){
+    z3::expr scheduledTime(context ctx, int auxIndex, FlowFragment flowFrag){
     	z3::expr index = null;
     	z3::expr scheduledTime;
     	int cycleNum = 0;
@@ -1594,10 +1594,10 @@ class INET_API Port {
      * deserialization process, instantiate the z3 objects that represent
      * the same properties.
      *
-     * @param ctx		Context object for the solver
-     * @param solver	Solver object
+     * @param ctx		context object for the solver
+     * @param solver	solver object
      */
-    void loadZ3(Context ctx, Solver solver) {
+    void loadZ3(context ctx, solver solver) {
 
     	this->cycle.loadZ3(ctx, solver);
 
@@ -1786,7 +1786,7 @@ class INET_API Port {
      *
      ***************************************************/
 
-    z3::expr getCycleOfScheduledTime(Context ctx, FlowFragment f, int index) {
+    z3::expr getCycleOfScheduledTime(context ctx, FlowFragment f, int index) {
         z3::expr cycleIndex = null;
 
         z3::expr relativeST = (z3::expr) ctx.mkSub(
@@ -1802,7 +1802,7 @@ class INET_API Port {
     }
 
 
-    z3::expr getCycleOfTime(Context ctx, z3::expr time) {
+    z3::expr getCycleOfTime(context ctx, z3::expr time) {
         z3::expr cycleIndex = null;
 
         z3::expr relativeST = (z3::expr) ctx.mkSub(
@@ -1817,7 +1817,7 @@ class INET_API Port {
         return cycleIndex;
     }
 
-    z3::expr getScheduledTimeOfPreviousPacket(Context ctx, FlowFragment f, int index) {
+    z3::expr getScheduledTimeOfPreviousPacket(context ctx, FlowFragment f, int index) {
         z3::expr prevPacketST = ctx.real_val(0);
 
         for(FlowFragment auxFrag : this->flowFragments) {

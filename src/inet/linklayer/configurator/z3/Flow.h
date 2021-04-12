@@ -185,9 +185,9 @@ class INET_API Flow {
      * generates the z3 equivalent of these values and creates any extra
      * variable needed.
      *
-     * @param ctx      Context variable containing the z3 environment used
+     * @param ctx      context variable containing the z3 environment used
      */
-    void toZ3(Context ctx) {
+    void toZ3(context ctx) {
 
         if(this->type == UNICAST) { // If flow is unicast
             // Convert start device to z3
@@ -249,10 +249,10 @@ class INET_API Flow {
      * departure time from the current node, the arrival time in the child and
      * the scheduled time (departure time for grand-child).
      *
-     * @param ctx       Context variable containing the z3 environment used
+     * @param ctx       context variable containing the z3 environment used
      * @param node      A node of the pathTree
      */
-    FlowFragment nodeToZ3(Context ctx, PathNode node, FlowFragment frag) {
+    FlowFragment nodeToZ3(context ctx, PathNode node, FlowFragment frag) {
         FlowFragment flowFrag = null;
         int numberOfPackets = Network.PACKETUPPERBOUNDRANGE;
 
@@ -380,11 +380,11 @@ class INET_API Flow {
      * Each switch in the path will be given as a parameter for this function
      * so a flow fragment for each hop on the path can be created.
      *
-     * @param ctx                   Context variable containing the z3 environment used
+     * @param ctx                   context variable containing the z3 environment used
      * @param swt                   Switch of the current flow fragment
      * @param currentSwitchIndex    Index of the current switch in the path on the iteration
      */
-    void pathToZ3(Context ctx, Switch swt, int currentSwitchIndex) {
+    void pathToZ3(context ctx, Switch swt, int currentSwitchIndex) {
         // Flow fragment is created
         FlowFragment flowFrag = new FlowFragment(this);
 
@@ -443,7 +443,7 @@ class INET_API Flow {
     }
 
 
-    void bindToNextFragment(Solver solver, Context ctx, FlowFragment frag){
+    void bindToNextFragment(solver solver, context ctx, FlowFragment frag){
         if(frag.getNextFragments().size() > 0){
 
             for(FlowFragment childFrag : frag.getNextFragments()){
@@ -467,7 +467,7 @@ class INET_API Flow {
     }
 
 
-    void bindAllFragments(Solver solver, Context ctx){
+    void bindAllFragments(solver solver, context ctx){
         for(PathNode node : this->pathTree.getRoot().getChildren()){
             for(FlowFragment frag : node.getFlowFragments()){
                 this->bindToNextFragment(solver, ctx, frag);
@@ -1027,12 +1027,12 @@ class INET_API Flow {
      * [Usage]: Gets the Z3 variable containing the latency
      * of the flow for a certain packet specified by the index.
      *
-     * @param solver    Solver in which the rules of the problem will be added
+     * @param solver    solver in which the rules of the problem will be added
      * @param ctx       Z3 variable and function environment
      * @param index     Index of the desired packet
      * @return          Z3 variable containing the latency of the packet
      */
-    z3::expr getLatencyZ3(Solver solver, Context ctx, int index) {
+    z3::expr getLatencyZ3(solver solver, context ctx, int index) {
         //index += 1;
         z3::expr latency = ctx.real_const(this->name + "latencyOfPacket" + index);
 
@@ -1064,13 +1064,13 @@ class INET_API Flow {
      * of the flow for a certain packet specified by the index
      * for a certain device.
      *
-     * @param solver    Solver in which the rules of the problem will be added
+     * @param solver    solver in which the rules of the problem will be added
      * @param dev       End device of the packet
      * @param ctx       Z3 variable and function environment
      * @param index     Index of the desired packet
      * @return          Z3 variable containing the latency of the packet
      */
-    z3::expr getLatencyZ3(Solver solver, Device dev, Context ctx, int index) {
+    z3::expr getLatencyZ3(solver solver, Device dev, context ctx, int index) {
         //index += 1;
         z3::expr latency = ctx.real_const(this->name + "latencyOfPacket" + index + "For" + dev.getName());
 
@@ -1101,12 +1101,12 @@ class INET_API Flow {
      * [Usage]: Recursively creates values to sum the z3 latencies
      * of the flow from 0 up to a certain packet.
      *
-     * @param solver    Solver in which the rules of the problem will be added
+     * @param solver    solver in which the rules of the problem will be added
      * @param ctx       Z3 variable and function environment
      * @param index     Index of the current packet in the sum
      * @return          Z3 variable containing sum of latency up to index packet
      */
-    z3::expr getSumOfLatencyZ3(Solver solver, Context ctx, int index) {
+    z3::expr getSumOfLatencyZ3(solver solver, context ctx, int index) {
 
         if(index == 0) {
             return getLatencyZ3(solver, ctx, 0);
@@ -1122,12 +1122,12 @@ class INET_API Flow {
      * of the flow from 0 up to a certain packet for a certain device.
      *
      * @param dev       Destination of the packet
-     * @param solver    Solver in which the rules of the problem will be added
+     * @param solver    solver in which the rules of the problem will be added
      * @param ctx       Z3 variable and function environment
      * @param index     Index of the current packet in the sum
      * @return          Z3 variable containing sum of latency up to index packet
      */
-    z3::expr getSumOfLatencyZ3(Device dev, Solver solver, Context ctx, int index) {
+    z3::expr getSumOfLatencyZ3(Device dev, solver solver, context ctx, int index) {
         if(index == 0) {
             return getLatencyZ3(solver, dev, ctx, 0);
         }
@@ -1140,12 +1140,12 @@ class INET_API Flow {
      * [Usage]: Returns the sum of all latency for all destinations
      * of the flow for the [index] number of packets sent.
      *
-     * @param solver    Solver in which the rules of the problem will be added
+     * @param solver    solver in which the rules of the problem will be added
      * @param ctx       Z3 variable and function environment
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable containing the sum of all latencies of the flow
      */
-    z3::expr getSumOfAllDevLatencyZ3(Solver solver, Context ctx, int index) {
+    z3::expr getSumOfAllDevLatencyZ3(solver solver, context ctx, int index) {
         z3::expr sumValue = ctx.real_val(0);
         Device currentDev = null;
 
@@ -1162,11 +1162,11 @@ class INET_API Flow {
      * [Usage]: Returns the sum of all latency for all destinations
      * of the flow for the [index] number of packets sent.
      *
-     * @param solver    Solver in which the rules of the problem will be added
+     * @param solver    solver in which the rules of the problem will be added
      * @param ctx       Z3 variable and function environment
      * @return          Z3 variable containing the average latency of the flow
      */
-    z3::expr getAvgLatency(Solver solver, Context ctx) {
+    z3::expr getAvgLatency(solver solver, context ctx) {
         if(this->type == UNICAST) {
             return (z3::expr) ctx.mkDiv(
                     getSumOfLatencyZ3(solver, ctx, this->numOfPacketsSentInFragment - 1),
@@ -1191,11 +1191,11 @@ class INET_API Flow {
      * of the flow.
      *
      * @param dev 		Subscriber to which the average latency will be calculated
-     * @param solver	Solver object
-     * @param ctx		Context object for the solver
+     * @param solver	solver object
+     * @param ctx		context object for the solver
      * @return			z3 variable with the average latency for the device
      */
-    z3::expr getAvgLatency(Device dev, Solver solver, Context ctx) {
+    z3::expr getAvgLatency(Device dev, solver solver, context ctx) {
 
         return (z3::expr) ctx.mkDiv(
                 this->getSumOfLatencyZ3(dev, solver, ctx, this->numOfPacketsSentInFragment - 1),
@@ -1210,12 +1210,12 @@ class INET_API Flow {
      * packet.
      *
      *
-     * @param solver    Solver in which the rules of the problem will be added
+     * @param solver    solver in which the rules of the problem will be added
      * @param ctx       Z3 variable and function environment
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable for the jitter of packet [index]
      */
-    z3::expr getJitterZ3(Solver solver, Context ctx, int index) {
+    z3::expr getJitterZ3(solver solver, context ctx, int index) {
         z3::expr avgLatency = this->getAvgLatency(solver, ctx);
         z3::expr latency = this->getLatencyZ3(solver, ctx, index);
 
@@ -1239,12 +1239,12 @@ class INET_API Flow {
      * packet.
      *
      *
-     * @param solver    Solver in which the rules of the problem will be added
+     * @param solver    solver in which the rules of the problem will be added
      * @param ctx       Z3 variable and function environment
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable for the jitter of packet [index]
      */
-    z3::expr getJitterZ3(Device dev, Solver solver, Context ctx, int index) {
+    z3::expr getJitterZ3(Device dev, solver solver, context ctx, int index) {
         //index += 1;
         z3::expr jitter = ctx.real_const(this->name + "JitterOfPacket" + index + "For" + dev.getName());
 
@@ -1284,12 +1284,12 @@ class INET_API Flow {
      * [Usage]: Returns the sum of all jitter from packet 0
      * to packet of the given index as a Z3 variable.
      *
-     * @param solver    Solver in which the rules of the problem will be added
+     * @param solver    solver in which the rules of the problem will be added
      * @param ctx       Z3 variable and function environment
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable containing the sum of all jitter
      */
-    z3::expr getSumOfJitterZ3(Solver solver, Context ctx, int index) {
+    z3::expr getSumOfJitterZ3(solver solver, context ctx, int index) {
         if(index == 0) {
             return getJitterZ3(solver, ctx, 0);
         }
@@ -1304,12 +1304,12 @@ class INET_API Flow {
      * on a pub sub flow as a Z3 variable.
      *
      * @param dev       Destination of the packet
-     * @param solver    Solver in which the rules of the problem will be added
+     * @param solver    solver in which the rules of the problem will be added
      * @param ctx       Z3 variable and function environment
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable containing the sum of all jitter
      */
-    z3::expr getSumOfJitterZ3(Device dev, Solver solver, Context ctx, int index) {
+    z3::expr getSumOfJitterZ3(Device dev, solver solver, context ctx, int index) {
         if(index == 0) {
             return (z3::expr) getJitterZ3(dev, solver, ctx, 0);
         }
@@ -1322,12 +1322,12 @@ class INET_API Flow {
      * [Usage]: Returns the sum of all jitter for all destinations
      * of the flow from 0 to the [index] packet.
      *
-     * @param solver    Solver in which the rules of the problem will be added
+     * @param solver    solver in which the rules of the problem will be added
      * @param ctx       Z3 variable and function environment
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable containing the sum of all jitter of the flow
      */
-    z3::expr getSumOfAllDevJitterZ3(Solver solver, Context ctx, int index) {
+    z3::expr getSumOfAllDevJitterZ3(solver solver, context ctx, int index) {
         z3::expr sumValue = ctx.real_val(0);
         Device currentDev = null;
 
