@@ -160,8 +160,8 @@ class INET_API TSNSwitch extends Switch {
         this->cycleDurationUpperBoundZ3 = ctx.real_val(std::to_string(cycleDurationUpperBound));
 
         // Creating the cycle duration and start for this switch
-        this->cycleDuration = ctx.real_const("cycleOf" + this->name + "Duration");
-        this->cycleStart = ctx.real_const("cycleOf" + this->name + "Start");
+        this->cycleDuration = ctx.real_const(("cycleOf" + this->name + "Duration").c_str());
+        this->cycleStart = ctx.real_const(("cycleOf" + this->name + "Start").c_str());
 
 
         // Creating the cycle setting up the bounds for the duration (Cycle duration constraint)

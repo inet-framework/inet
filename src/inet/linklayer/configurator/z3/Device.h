@@ -155,7 +155,7 @@ class INET_API Device {
      void toZ3(context ctx) {
 	    this->packetPeriodicityZ3 = ctx.real_val(std::to_string(this->packetPeriodicity));
 	    //this->firstT1TimeZ3 = ctx.real_val(std::to_string(this->firstT1Time)); // In case of fixed firstT1Time
-	    this->firstT1TimeZ3 = ctx.real_const(this->name + "FirstT1Time");
+	    this->firstT1TimeZ3 = ctx.real_const((this->name + "FirstT1Time").c_str());
 	    this->hardConstraintTimeZ3 = ctx.real_val(std::to_string(this->hardConstraintTime));
 	    this->softConstraintTimeZ3 = ctx.real_val(std::to_string(this->softConstraintTime));
 	    this->packetSizeZ3 = ctx.real_val(std::to_string(this->packetSize));
