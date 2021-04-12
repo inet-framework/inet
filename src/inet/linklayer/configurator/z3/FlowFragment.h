@@ -270,7 +270,7 @@ class INET_API FlowFragment extends Flow {
         this.port = port;
     }
 
-}
+};
 
 }
 

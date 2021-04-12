@@ -108,7 +108,7 @@ class INET_API PathTree {
         this.root = root;
     }
 
-}
+};
 
 }
 

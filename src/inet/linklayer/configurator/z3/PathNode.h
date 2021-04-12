@@ -103,7 +103,7 @@ class INET_API PathNode {
         this.flowFragments = flowFragments;
     }
 
-}
+};
 
 }
 

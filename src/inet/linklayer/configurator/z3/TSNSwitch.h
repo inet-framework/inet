@@ -585,8 +585,7 @@ class INET_API TSNSwitch extends Switch {
     public ArrayList<String> getConnectsTo(){
         return this.connectsTo;
     }
-
-}
+};
 
 }
 

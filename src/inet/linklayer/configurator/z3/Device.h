@@ -262,10 +262,7 @@ class INET_API Device {
     public void setFlowPriority(IntExpr flowPriority) {
         this.flowPriority = flowPriority;
     }
-
-
-
-}
+};
 
 }
 

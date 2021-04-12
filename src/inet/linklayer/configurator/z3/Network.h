@@ -327,7 +327,7 @@ class INET_API Network {
         this.switches.add(swt);
     }
 
-}
+};
 
 }
 
