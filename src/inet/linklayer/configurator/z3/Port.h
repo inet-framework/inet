@@ -29,7 +29,7 @@ class INET_API Port {
     Boolean useMicroCycles = false;
     Boolean useHyperCycle = true;
 
-    std::vector<float> listOfPeriods = new std::vector<float>();
+    std::vector<float> listOfPeriods;
     float definedHyperCycleSize = -1;
     float microCycleSize = -1;
 
@@ -90,7 +90,7 @@ class INET_API Port {
         this->portSpeed = portSpeed;
         this->gbSize = gbSize;
         this->cycle = cycle;
-        this->flowFragments = new std::vector<FlowFragment>();
+        this->flowFragments.clear();
         this->cycle.setPortName(this->name);
     }
 

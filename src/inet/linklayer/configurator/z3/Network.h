@@ -24,14 +24,14 @@ class INET_API Network {
 
 	//TODO: Remove debugging variables:
     z3::expr avgOfAllLatency;
-    std::vector<z3::expr> avgLatencyPerDev = new std::vector<z3::expr>();
+    std::vector<z3::expr> avgLatencyPerDev;
 
 
     std::vector<Switch> switches;
     std::vector<Flow> flows;
     float timeToTravel;
-    std::vector<z3::expr> allSumOfJitter = new std::vector<z3::expr>();
-    std::vector<int> numberOfNodes = new std::vector<int>();
+    std::vector<z3::expr> allSumOfJitter;
+    std::vector<int> numberOfNodes;
 
     static int PACKETUPPERBOUNDRANGE = 5; // Limits the applications of rules to the packets
     static int CYCLEUPPERBOUNDRANGE = 25; // Limits the applications of rules to the cycles
@@ -47,8 +47,8 @@ class INET_API Network {
      */
     Network (float jitterUpperBoundRange) {
         this->jitterUpperBoundRange = jitterUpperBoundRange;
-        this->switches = new std::vector<Switch>();
-        this->flows = new std::vector<Flow>();
+        this->switches.clear();
+        this->flows.clear();
         this->timeToTravel = 2;
     }
 
@@ -60,8 +60,8 @@ class INET_API Network {
      * time to travel for 2 (Needs revision).
      */
     Network () {
-        this->switches = new std::vector<Switch>();
-        this->flows = new std::vector<Flow>();
+        this->switches.clear();
+        this->flows.clear();
         this->timeToTravel = 2;
     }
 
@@ -157,7 +157,7 @@ class INET_API Network {
             } else if (flw.getType() == Flow.PUBLISH_SUBSCRIBE) {
                 PathNode root = flw.getPathTree().getRoot();
                 std::vector<PathNode> leaves = flw.getPathTree().getLeaves();
-                std::vector<PathNode> parents = new std::vector<PathNode>();
+                std::vector<PathNode> parents;
 
                 // Make list of parents of all leaves
                 for(PathNode leaf : leaves) {

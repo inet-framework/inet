@@ -90,8 +90,8 @@ class INET_API Flow {
         if(type == UNICAST) {
             //Its not a unicast flow
             this->type = 0;
-            path = new std::vector<Switch>();
-            flowFragments = new std::vector<FlowFragment>();
+            path.clear();
+            flowFragments.clear();
         } else if (type == PUBLISH_SUBSCRIBE) {
             //Its a publish subscribe flow
             this->type = 1;
@@ -120,8 +120,8 @@ class INET_API Flow {
         if(type == UNICAST) {
             //Its not a unicast flow
             this->type = 0;
-            path = new std::vector<Switch>();
-            flowFragments = new std::vector<FlowFragment>();
+            path.clear();
+            flowFragments.clear();
         } else if (type == PUBLISH_SUBSCRIBE) {
             //Its a publish subscribe flow
             this->type = 1;
@@ -489,8 +489,8 @@ class INET_API Flow {
      * @return              std::vector of flow fragments containing every flow fragment from source to destination
      */
     std::vector<FlowFragment> getFlowFromRootToNode(Device endDevice){
-        std::vector<FlowFragment> flowFragments = new std::vector<FlowFragment>();
-        std::vector<Device> flowEndDevices = new std::vector<Device>();
+        std::vector<FlowFragment> flowFragments;
+        std::vector<Device> flowEndDevices;
         PathNode auxNode = null;
 
 
@@ -541,8 +541,8 @@ class INET_API Flow {
      * @return              std::vector of nodes containing every node from source to destination
      */
     std::vector<PathNode> getNodesFromRootToNode(Device endDevice){
-        std::vector<PathNode> pathNodes = new std::vector<PathNode>();
-        std::vector<Device> flowEndDevices = new std::vector<Device>();
+        std::vector<PathNode> pathNodes;
+        std::vector<Device> flowEndDevices;
         PathNode auxNode = null;
 
         // Iterate over leaves, get reference to the leaf of end device

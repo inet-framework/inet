@@ -37,8 +37,8 @@ class INET_API PathNode {
     {
         if((node instanceof TSNSwitch) || (node instanceof Switch)) {
             this->node = node;
-            children = new std::vector<PathNode>();
-            flowFragments = new std::vector<FlowFragment>();
+            children.clear();
+            flowFragments.clear();
         } else if (node instanceof Device) {
             this->node = node;
             children = null;
@@ -46,7 +46,7 @@ class INET_API PathNode {
             //[TODO]: Throw error
         }
 
-        children  = new std::vector<PathNode>();
+        children.clear();
     }
 
     /**
