@@ -22,28 +22,28 @@ class INET_API FlowFragment extends Flow {
     Boolean isModifiedOrCreated = false;
     static final long serialVersionUID = 1L;
     Flow parent;
-    RealExpr packetSize;
-    RealExpr packetPeriodicityZ3;
-    ArrayList<RealExpr> departureTimeZ3 = new ArrayList<RealExpr>();
-    ArrayList<RealExpr> scheduledTimeZ3 = new ArrayList<RealExpr>();
-    IntExpr fragmentPriorityZ3;
+    z3::expr packetSize;
+    z3::expr packetPeriodicityZ3;
+    std::vector<z3::expr> departureTimeZ3 = new std::vector<z3::expr>();
+    std::vector<z3::expr> scheduledTimeZ3 = new std::vector<z3::expr>();
+    z3::expr fragmentPriorityZ3;
 
     Port port;
 
     PathNode referenceToNode;
 
     int fragmentPriority;
-    String nodeName;
-    String nextHopName;
+    std::string nodeName;
+    std::string nextHopName;
     int numOfPacketsSent = Network.PACKETUPPERBOUNDRANGE;
 
     //TODO: CREATE REFERENCES TO PREVIOUS AND NEXT FRAGMENTS
     FlowFragment previousFragment;
     List<FlowFragment> nextFragments;
 
-    ArrayList<Float> departureTime = new ArrayList<Float>();
-    ArrayList<Float> arrivalTime = new ArrayList<Float>();
-    ArrayList<Float> scheduledTime = new ArrayList<Float>();
+    std::vector<float> departureTime = new std::vector<float>();
+    std::vector<float> arrivalTime = new std::vector<float>();
+    std::vector<float> scheduledTime = new std::vector<float>();
 
     /**
      * [Method]: FlowFragment
@@ -63,7 +63,7 @@ class INET_API FlowFragment extends Flow {
          */
         // Flow.instanceCounter--;
 
-        this.nextFragments = new ArrayList<FlowFragment>();
+        this.nextFragments = new std::vector<FlowFragment>();
 
         /*
          * Since the pathing methods for unicast and publish subscribe flows
@@ -86,48 +86,48 @@ class INET_API FlowFragment extends Flow {
      * GETTERS AND SETTERS
      */
 
-    String getName() {
+    std::string getName() {
         return this.name;
     }
 
-    RealExpr getDepartureTimeZ3(int index) {
+    z3::expr getDepartureTimeZ3(int index) {
         return departureTimeZ3.get(index);
     }
 
-    void setDepartureTimeZ3(RealExpr dTimeZ3, int index) {
+    void setDepartureTimeZ3(z3::expr dTimeZ3, int index) {
         this.departureTimeZ3.set(index, dTimeZ3);
     }
 
-    void addDepartureTimeZ3(RealExpr dTimeZ3) {
+    void addDepartureTimeZ3(z3::expr dTimeZ3) {
         this.departureTimeZ3.add(dTimeZ3);
     }
 
     void createNewDepartureTimeZ3List() {
-        this.departureTimeZ3 = new ArrayList<RealExpr>();
+        this.departureTimeZ3 = new std::vector<z3::expr>();
     }
 
-    RealExpr getPacketPeriodicityZ3() {
+    z3::expr getPacketPeriodicityZ3() {
         return packetPeriodicityZ3;
     }
 
-    void setPacketPeriodicityZ3(RealExpr packetPeriodicity) {
+    void setPacketPeriodicityZ3(z3::expr packetPeriodicity) {
         this.packetPeriodicityZ3 = packetPeriodicity;
     }
 
 
-    RealExpr getPacketSizeZ3() {
+    z3::expr getPacketSizeZ3() {
         return this.packetSize;
     }
 
-    void setPacketSizeZ3(RealExpr packetSize) {
+    void setPacketSizeZ3(z3::expr packetSize) {
         this.packetSize = packetSize;
     }
 
-    IntExpr getFragmentPriorityZ3() {
+    z3::expr getFragmentPriorityZ3() {
         return fragmentPriorityZ3;
     }
 
-    void setFragmentPriorityZ3(IntExpr flowPriority) {
+    void setFragmentPriorityZ3(z3::expr flowPriority) {
         this.fragmentPriorityZ3 = flowPriority;
     }
 
@@ -140,7 +140,7 @@ class INET_API FlowFragment extends Flow {
         return departureTime.get(index);
     }
 
-    ArrayList<Float> getDepartureTimeList() {
+    std::vector<float> getDepartureTimeList() {
         return departureTime;
     }
 
@@ -152,7 +152,7 @@ class INET_API FlowFragment extends Flow {
         return arrivalTime.get(index);
     }
 
-    ArrayList<Float> getArrivalTimeList() {
+    std::vector<float> getArrivalTimeList() {
         return arrivalTime;
     }
 
@@ -164,23 +164,23 @@ class INET_API FlowFragment extends Flow {
         return scheduledTime.get(index);
     }
 
-    ArrayList<Float> getScheduledTimeList() {
+    std::vector<float> getScheduledTimeList() {
         return scheduledTime;
     }
 
-    String getNextHop() {
+    std::string getNextHop() {
         return nextHopName;
     }
 
-    void setNextHop(String nextHop) {
+    void setNextHop(std::string nextHop) {
         this.nextHopName = nextHop;
     }
 
-    String getNodeName() {
+    std::string getNodeName() {
         return nodeName;
     }
 
-    void setNodeName(String nodeName) {
+    void setNodeName(std::string nodeName) {
         this.nodeName = nodeName;
     }
 
@@ -250,20 +250,20 @@ class INET_API FlowFragment extends Flow {
         return this.port;
     }
 
-    RealExpr getScheduledTimeZ3(int index) {
+    z3::expr getScheduledTimeZ3(int index) {
         return scheduledTimeZ3.get(index);
     }
 
-    void setScheduledTimeZ3(RealExpr sTimeZ3, int index) {
+    void setScheduledTimeZ3(z3::expr sTimeZ3, int index) {
         this.scheduledTimeZ3.set(index, sTimeZ3);
     }
 
-    void addScheduledTimeZ3(RealExpr sTimeZ3) {
+    void addScheduledTimeZ3(z3::expr sTimeZ3) {
         this.scheduledTimeZ3.add(sTimeZ3);
     }
 
     void createNewScheduledTimeZ3List() {
-        this.scheduledTimeZ3 = new ArrayList<RealExpr>();
+        this.scheduledTimeZ3 = new std::vector<z3::expr>();
     }
 
     void setPort(Port port) {

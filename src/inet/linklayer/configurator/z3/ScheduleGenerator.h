@@ -34,10 +34,10 @@ class INET_API ScheduleGenerator {
 	    * also on fraction form, which is also handled by
 	    * this function.
 	    *
-	    * @param str   String containing value to convert to float
-	    * @return      Float value of the given string str
+	    * @param str   std::string containing value to convert to float
+	    * @return      float value of the given string str
 	    */
-	   public float stringToFloat(String str) {
+	   public float stringToFloat(std::string str) {
 	       BigDecimal val1;
 	       BigDecimal val2;
 	       float result = 0;
@@ -49,7 +49,7 @@ class INET_API ScheduleGenerator {
 
 	       } else {
 	    	   try{
- 	    		    result = Float.parseFloat(str);
+ 	    		    result = float.parseFloat(str);
 	    	    }catch(NumberFormatException e){
 	    	        result = -1;
 	    	    }
@@ -76,13 +76,13 @@ class INET_API ScheduleGenerator {
                 System.out.println(Version.getMajor());
                 System.out.print("Z3 Full Version: ");
                 System.out.println(Version.getString());
-                System.out.print("Z3 Full Version String: ");
+                System.out.print("Z3 Full Version std::string: ");
                 System.out.println(Version.getFullVersion());
                 System.out.println("");
 
 
                 { // These examples need model generation turned on.
-                    HashMap<String, String> cfg = new HashMap<String, String>();
+                    HashMap<std::string, std::string> cfg = new HashMap<std::string, std::string>();
                     cfg.put("model", "true");
                     Context ctx = new Context(cfg);
 
@@ -149,7 +149,7 @@ class INET_API ScheduleGenerator {
 	    */
 	   public void writePathTree(PathNode pathNode, Model model, Context ctx, PrintWriter out) {
 	       Switch swt;
-	       IntExpr indexZ3 = null;
+	       z3::expr indexZ3 = null;
 
 	       if((pathNode.getNode() instanceof Device) && (pathNode.getParent() != null)) {
 	           out.println("    [END OF BRANCH]");
@@ -207,14 +207,14 @@ class INET_API ScheduleGenerator {
                     	   // System.out.println(((TSNSwitch)child.getNode()).scheduledTime(ctx, i, ffrag));
 
                     	   if(i < ffrag.getParent().getNumOfPacketsSent()) {
-		                	   out.println("          (" + Integer.toString(i) + ") Fragment departure time: " + this.stringToFloat(model.eval(((TSNSwitch) child.getNode()).departureTime(ctx, i, ffrag) , false).toString()));
-		                	   out.println("          (" + Integer.toString(i) + ") Fragment arrival time: " + this.stringToFloat(model.eval(((TSNSwitch) child.getNode()).arrivalTime(ctx, i, ffrag) , false).toString()));
-		                       out.println("          (" + Integer.toString(i) + ") Fragment scheduled time: " + this.stringToFloat(model.eval(((TSNSwitch) child.getNode()).scheduledTime(ctx, i, ffrag) , false).toString()));
+		                	   out.println("          (" + int.toString(i) + ") Fragment departure time: " + this.stringToFloat(model.eval(((TSNSwitch) child.getNode()).departureTime(ctx, i, ffrag) , false).toString()));
+		                	   out.println("          (" + int.toString(i) + ") Fragment arrival time: " + this.stringToFloat(model.eval(((TSNSwitch) child.getNode()).arrivalTime(ctx, i, ffrag) , false).toString()));
+		                       out.println("          (" + int.toString(i) + ") Fragment scheduled time: " + this.stringToFloat(model.eval(((TSNSwitch) child.getNode()).scheduledTime(ctx, i, ffrag) , false).toString()));
 		                       out.println("          ----------------------------");
                     	   }
 
                     	   ffrag.setFragmentPriority(
-                			   Integer.parseInt(
+                			   int.parseInt(
                     			   model.eval(ffrag.getFragmentPriorityZ3(), false).toString()
         					   )
             			   );
@@ -245,8 +245,8 @@ class INET_API ScheduleGenerator {
                                continue;
                            }
 
-                           ArrayList<Float> listOfStart = new ArrayList<Float>();
-                    	   ArrayList<Float> listOfDuration = new ArrayList<Float>();
+                           std::vector<float> listOfStart = new std::vector<float>();
+                    	   std::vector<float> listOfDuration = new std::vector<float>();
 
 
                            for(int index = 0; index < ((TSNSwitch) child.getNode()).getPortOf(ffrag.getNextHop()).getCycle().getNumOfSlots(); index++) {
@@ -337,7 +337,7 @@ class INET_API ScheduleGenerator {
            // The duration of the cycle is given as a question to z3, so all the
            // constraints will have to be evaluated in order to z3 to know this cycle
            // duration
-           RealExpr switch1CycDuration = switch1.getCycle(0).getCycleDurationZ3();
+           z3::expr switch1CycDuration = switch1.getCycle(0).getCycleDurationZ3();
 
 
 	       /* find model for the constraints above */
@@ -451,8 +451,8 @@ class INET_API ScheduleGenerator {
 	                           pathNode = pathTree.getRoot();
 
 	                           out.println("    Flow type: Multicast");
-	                           ArrayList<PathNode> auxNodes;
-	                           ArrayList<FlowFragment> auxFlowFragments;
+	                           std::vector<PathNode> auxNodes;
+	                           std::vector<FlowFragment> auxFlowFragments;
 	                           int auxCount = 0;
 
 	                           out.print("    List of leaves: ");
@@ -522,7 +522,7 @@ class INET_API ScheduleGenerator {
 	    * @param net		Network object to be serialized
 	    * @param path		Path of for the serialized object file
 	    */
-	   public void serializeNetwork(Network net, String path) {
+	   public void serializeNetwork(Network net, std::string path) {
 
 	    	try {
 	            FileOutputStream fileOut = new FileOutputStream(path);
@@ -544,7 +544,7 @@ class INET_API ScheduleGenerator {
 	    * @param path		Path of the serialized object file
 	    * @return			The network object with all its primitive values
 	    */
-	   public Network deserializeNetwork(String path) {
+	   public Network deserializeNetwork(std::string path) {
 		   Network net = null;
 
 		   try {

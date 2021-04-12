@@ -17,7 +17,7 @@ namespace inet {
  */
 class INET_API Device {
 
-    String name;
+    std::string name;
     float packetPeriodicity;
     float firstT1Time;
     float hardConstraintTime;
@@ -25,12 +25,12 @@ class INET_API Device {
     float packetSize;
 
     static int indexCounter = -1;
-    RealExpr packetPeriodicityZ3;
-    RealExpr firstT1TimeZ3;
-    RealExpr hardConstraintTimeZ3;
-    RealExpr softConstraintTimeZ3;
-    RealExpr packetSizeZ3;
-    IntExpr flowPriority;
+    z3::expr packetPeriodicityZ3;
+    z3::expr firstT1TimeZ3;
+    z3::expr hardConstraintTimeZ3;
+    z3::expr softConstraintTimeZ3;
+    z3::expr packetSizeZ3;
+    z3::expr flowPriority;
 
     /**
      * [Method]: Device
@@ -127,12 +127,12 @@ class INET_API Device {
      * @param packetSizeZ3              Size of the packets sent by this device
      * @param flowPriority              Defines the priority queue in which this device packets belongs to (Not used yet)
      */
-     Device(RealExpr packetPeriodicityZ3,
-				  RealExpr firstT1TimeZ3,
-				  RealExpr hardConstraintTimeZ3,
-				  RealExpr softConstraintTimeZ3,
-				  RealExpr packetSizeZ3,
-				  IntExpr flowPriority) {
+     Device(z3::expr packetPeriodicityZ3,
+				  z3::expr firstT1TimeZ3,
+				  z3::expr hardConstraintTimeZ3,
+				  z3::expr softConstraintTimeZ3,
+				  z3::expr packetSizeZ3,
+				  z3::expr flowPriority) {
 		this.packetPeriodicityZ3 = packetPeriodicityZ3;
 		this.firstT1TimeZ3 = firstT1TimeZ3;
 		this.hardConstraintTimeZ3 = hardConstraintTimeZ3;
@@ -151,23 +151,23 @@ class INET_API Device {
 	 * @param ctx      Context variable containing the z3 environment used
 	 */
      void toZ3(Context ctx) {
-	    this.packetPeriodicityZ3 = ctx.mkReal(Float.toString(this.packetPeriodicity));
-	    //this.firstT1TimeZ3 = ctx.mkReal(Float.toString(this.firstT1Time)); // In case of fixed firstT1Time
+	    this.packetPeriodicityZ3 = ctx.mkReal(float.toString(this.packetPeriodicity));
+	    //this.firstT1TimeZ3 = ctx.mkReal(float.toString(this.firstT1Time)); // In case of fixed firstT1Time
 	    this.firstT1TimeZ3 = ctx.mkRealConst(this.name + "FirstT1Time");
-	    this.hardConstraintTimeZ3 = ctx.mkReal(Float.toString(this.hardConstraintTime));
-	    this.softConstraintTimeZ3 = ctx.mkReal(Float.toString(this.softConstraintTime));
-	    this.packetSizeZ3 = ctx.mkReal(Float.toString(this.packetSize));
+	    this.hardConstraintTimeZ3 = ctx.mkReal(float.toString(this.hardConstraintTime));
+	    this.softConstraintTimeZ3 = ctx.mkReal(float.toString(this.softConstraintTime));
+	    this.packetSizeZ3 = ctx.mkReal(float.toString(this.packetSize));
 	}
 
     /*
      *  GETTERS AND SETTERS
      */
 
-    String getName() {
+    std::string getName() {
         return name;
     }
 
-    void setName(String name) {
+    void setName(std::string name) {
         this.name = name;
     }
 
@@ -215,51 +215,51 @@ class INET_API Device {
      *  Z3 GETTERS AND SETTERS
      */
 
-     RealExpr getPacketPeriodicityZ3() {
+     z3::expr getPacketPeriodicityZ3() {
 		return packetPeriodicityZ3;
 	}
 
-     void setPacketPeriodicityZ3(RealExpr packetPeriodicity) {
+     void setPacketPeriodicityZ3(z3::expr packetPeriodicity) {
 		this.packetPeriodicityZ3 = packetPeriodicity;
 	}
 
-     RealExpr getFirstT1TimeZ3() {
+     z3::expr getFirstT1TimeZ3() {
 		return firstT1TimeZ3;
 	}
 
-     void setFirstT1TimeZ3(RealExpr firstT1Time) {
+     void setFirstT1TimeZ3(z3::expr firstT1Time) {
 		this.firstT1TimeZ3 = firstT1Time;
 	}
 
-     RealExpr getHardConstraintTimeZ3() {
+     z3::expr getHardConstraintTimeZ3() {
 		return hardConstraintTimeZ3;
 	}
 
-     void setHardConstraintTimeZ3(RealExpr hardConstraintTime) {
+     void setHardConstraintTimeZ3(z3::expr hardConstraintTime) {
 		this.hardConstraintTimeZ3 = hardConstraintTime;
 	}
 
-     RealExpr getSoftConstraintTimeZ3() {
+     z3::expr getSoftConstraintTimeZ3() {
 		return softConstraintTimeZ3;
 	}
 
-     void setSoftConstraintTimeZ3(RealExpr softConstraintTime) {
+     void setSoftConstraintTimeZ3(z3::expr softConstraintTime) {
 		this.softConstraintTimeZ3 = softConstraintTime;
 	}
 
-    RealExpr getPacketSizeZ3() {
+    z3::expr getPacketSizeZ3() {
         return packetSizeZ3;
     }
 
-    void setPacketSizeZ3(RealExpr packetSize) {
+    void setPacketSizeZ3(z3::expr packetSize) {
         this.packetSizeZ3 = packetSize;
     }
 
-    IntExpr getFlowPriority() {
+    z3::expr getFlowPriority() {
         return flowPriority;
     }
 
-    void setFlowPriority(IntExpr flowPriority) {
+    void setFlowPriority(z3::expr flowPriority) {
         this.flowPriority = flowPriority;
     }
 };

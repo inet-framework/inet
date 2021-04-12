@@ -41,7 +41,7 @@ namespace inet {
  *
  */
 class INET_API Cycle {
-    String portName = "";
+    std::string portName = "";
 	static int instanceCounter = 0;
     float upperBoundCycleTime;
     float lowerBoundCycleTime;
@@ -51,16 +51,16 @@ class INET_API Cycle {
     float cycleDuration;
     float cycleStart;
 
-    ArrayList<ArrayList<RealExpr>> slotStartZ3 = new ArrayList<ArrayList<RealExpr>>();
-    ArrayList<ArrayList<RealExpr>> slotDurationZ3 = new ArrayList<ArrayList<RealExpr>>();
+    std::vector<std::vector<z3::expr>> slotStartZ3 = new std::vector<std::vector<z3::expr>>();
+    std::vector<std::vector<z3::expr>> slotDurationZ3 = new std::vector<std::vector<z3::expr>>();
 
-    ArrayList<Integer> slotsUsed = new ArrayList<Integer>();
-    ArrayList<ArrayList<Float>> slotStart = new ArrayList<ArrayList<Float>>();
-    ArrayList<ArrayList<Float>> slotDuration = new ArrayList<ArrayList<Float>>();
+    std::vector<int> slotsUsed = new std::vector<int>();
+    std::vector<std::vector<float>> slotStart = new std::vector<std::vector<float>>();
+    std::vector<std::vector<float>> slotDuration = new std::vector<std::vector<float>>();
 
-    RealExpr cycleDurationZ3;
-    RealExpr firstCycleStartZ3;
-    RealExpr maximumSlotDurationZ3;
+    z3::expr cycleDurationZ3;
+    z3::expr firstCycleStartZ3;
+    z3::expr maximumSlotDurationZ3;
     int numOfPrts = 8;
 
     int numOfSlots = 1;
@@ -133,10 +133,10 @@ class INET_API Cycle {
      * @param firstCycleStartZ3       Where the first cycle should start
      * @param maximumSlotDurationZ3   Every priority slot should have up this time units
      */
-    Cycle(RealExpr upperBoundCycleTimeZ3,
-                 RealExpr lowerBoundCycleTimeZ3,
-                 RealExpr firstCycleStartZ3,
-                 RealExpr maximumSlotDurationZ3) {
+    Cycle(z3::expr upperBoundCycleTimeZ3,
+                 z3::expr lowerBoundCycleTimeZ3,
+                 z3::expr firstCycleStartZ3,
+                 z3::expr maximumSlotDurationZ3) {
         // this.upperBoundCycleTimeZ3 = upperBoundCycleTimeZ3;
         // this.lowerBoundCycleTimeZ3 = lowerBoundCycleTimeZ3;
         this.firstCycleStartZ3 = firstCycleStartZ3;
@@ -155,18 +155,18 @@ class INET_API Cycle {
     void toZ3(Context ctx) {
         instanceCounter++;
 
-        this.cycleDurationZ3 = ctx.mkRealConst("cycle" + Integer.toString(instanceCounter) + "Duration");
-        this.firstCycleStartZ3 = ctx.mkRealConst("cycle" + Integer.toString(instanceCounter) + "Start");
-        // this.firstCycleStartZ3 = ctx.mkReal(Float.toString(0));
-        // this.firstCycleStartZ3 = ctx.mkReal(Float.toString(firstCycleStart));
-        this.maximumSlotDurationZ3 = ctx.mkReal(Float.toString(maximumSlotDuration));
+        this.cycleDurationZ3 = ctx.mkRealConst("cycle" + int.toString(instanceCounter) + "Duration");
+        this.firstCycleStartZ3 = ctx.mkRealConst("cycle" + int.toString(instanceCounter) + "Start");
+        // this.firstCycleStartZ3 = ctx.mkReal(float.toString(0));
+        // this.firstCycleStartZ3 = ctx.mkReal(float.toString(firstCycleStart));
+        this.maximumSlotDurationZ3 = ctx.mkReal(float.toString(maximumSlotDuration));
 
-        this.slotStartZ3 = new ArrayList<ArrayList<RealExpr>>();
-        this.slotDurationZ3 = new ArrayList<ArrayList<RealExpr>>();
+        this.slotStartZ3 = new std::vector<std::vector<z3::expr>>();
+        this.slotDurationZ3 = new std::vector<std::vector<z3::expr>>();
 
         for(int i = 0; i < this.numOfPrts; i++) {
-        	this.slotStartZ3.add(new ArrayList<RealExpr>());
-        	this.slotDurationZ3.add(new ArrayList<RealExpr>());
+        	this.slotStartZ3.add(new std::vector<z3::expr>());
+        	this.slotDurationZ3.add(new std::vector<z3::expr>());
         	for(int j = 0; j < this.numOfSlots; j++) {
         		this.slotStartZ3.get(i).add(ctx.mkRealConst("cycleOfPort" + this.portName + "prt" + (i+1) + "slot" + (j+1)));
         	}
@@ -185,8 +185,8 @@ class INET_API Cycle {
      * @param index     Index of the desired cycle
      * @return          Z3 variable containing the cycle start time
      */
-    RealExpr cycleStartZ3(Context ctx, IntExpr index){
-        return (RealExpr) ctx.mkITE(
+    z3::expr cycleStartZ3(Context ctx, z3::expr index){
+        return (z3::expr) ctx.mkITE(
                 ctx.mkGe(index, ctx.mkInt(1)),
                 ctx.mkAdd(
                         firstCycleStartZ3,
@@ -205,10 +205,10 @@ class INET_API Cycle {
      * @param index     Index of the desired cycle
      * @return          Z3 variable containing the cycle start time
      */
-    RealExpr cycleStartZ3(Context ctx, int auxIndex){
-        IntExpr index = ctx.mkInt(auxIndex);
+    z3::expr cycleStartZ3(Context ctx, int auxIndex){
+        z3::expr index = ctx.mkInt(auxIndex);
 
-        return (RealExpr) ctx.mkITE(
+        return (z3::expr) ctx.mkITE(
                 ctx.mkGe(index, ctx.mkInt(1)),
                 ctx.mkAdd(
                         firstCycleStartZ3,
@@ -229,7 +229,7 @@ class INET_API Cycle {
      * @param sStart        Slot start of the slot to be added
      * @param sDuration     Slot duration of the slot to be added
      */
-    void addSlotUsed(int prt, ArrayList<Float> sStart, ArrayList<Float> sDuration) {
+    void addSlotUsed(int prt, std::vector<float> sStart, std::vector<float> sDuration) {
 
         if(!this.slotsUsed.contains(prt)) {
             this.slotsUsed.add(prt);
@@ -255,14 +255,14 @@ class INET_API Cycle {
     	solver.add(
 			ctx.mkEq(
 				this.cycleDurationZ3,
-				ctx.mkReal(Float.toString(this.cycleDuration))
+				ctx.mkReal(float.toString(this.cycleDuration))
 			)
 		);
 
     	solver.add(
 			ctx.mkEq(
 				this.firstCycleStartZ3,
-				ctx.mkReal(Float.toString(this.firstCycleStart))
+				ctx.mkReal(float.toString(this.firstCycleStart))
 			)
 		);
 
@@ -275,7 +275,7 @@ class INET_API Cycle {
     			solver.add(
 					ctx.mkEq(
 						this.slotStartZ3.get(prt).get(slotIndex),
-						ctx.mkReal(Float.toString(this.slotStart.get(this.slotsUsed.indexOf(prt)).get(slotIndex)))
+						ctx.mkReal(float.toString(this.slotStart.get(this.slotsUsed.indexOf(prt)).get(slotIndex)))
 					)
 				);
     		}
@@ -285,7 +285,7 @@ class INET_API Cycle {
     			solver.add(
 					ctx.mkEq(
 						this.slotDurationZ3.get(prt).get(slotIndex),
-						ctx.mkReal(Float.toString(this.slotDuration.get(prt).get(slotIndex)))
+						ctx.mkReal(float.toString(this.slotDuration.get(prt).get(slotIndex)))
 					)
 				);
     		}
@@ -351,40 +351,40 @@ class INET_API Cycle {
     }
 
 
-    RealExpr slotStartZ3(Context ctx, IntExpr prt, IntExpr index) {
+    z3::expr slotStartZ3(Context ctx, z3::expr prt, z3::expr index) {
         return ctx.mkRealConst("priority" + prt.toString() + "slot" + index.toString() + "Start");
     }
 
-    RealExpr slotStartZ3(Context ctx, int auxPrt, int auxIndex) {
-        IntExpr index = ctx.mkInt(auxIndex);
-        IntExpr prt = ctx.mkInt(auxPrt);
+    z3::expr slotStartZ3(Context ctx, int auxPrt, int auxIndex) {
+        z3::expr index = ctx.mkInt(auxIndex);
+        z3::expr prt = ctx.mkInt(auxPrt);
         return ctx.mkRealConst("priority" + prt.toString() + "slot" + index.toString() + "Start");
     }
 
 
-    RealExpr slotDurationZ3(Context ctx, IntExpr prt, IntExpr index) {
+    z3::expr slotDurationZ3(Context ctx, z3::expr prt, z3::expr index) {
         return ctx.mkRealConst("priority" + prt.toString() + "slot" + index.toString() + "Duration");
     }
 
-    RealExpr slotDurationZ3(Context ctx, int auxPrt, int auxIndex) {
-        IntExpr index = ctx.mkInt(auxIndex);
-        IntExpr prt = ctx.mkInt(auxPrt);
+    z3::expr slotDurationZ3(Context ctx, int auxPrt, int auxIndex) {
+        z3::expr index = ctx.mkInt(auxIndex);
+        z3::expr prt = ctx.mkInt(auxPrt);
         return ctx.mkRealConst("priority" + prt.toString() + "slot" + index.toString() + "Duration");
     }
 
-    RealExpr getCycleDurationZ3() {
+    z3::expr getCycleDurationZ3() {
         return cycleDurationZ3;
     }
 
-    void setCycleDurationZ3(RealExpr cycleDuration) {
+    void setCycleDurationZ3(z3::expr cycleDuration) {
         this.cycleDurationZ3 = cycleDuration;
     }
 
-    RealExpr getFirstCycleStartZ3() {
+    z3::expr getFirstCycleStartZ3() {
         return firstCycleStartZ3;
     }
 
-    void setFirstCycleStartZ3(RealExpr firstCycleStart) {
+    void setFirstCycleStartZ3(z3::expr firstCycleStart) {
         this.firstCycleStartZ3 = firstCycleStart;
     }
 
@@ -404,19 +404,19 @@ class INET_API Cycle {
 		this.numOfSlots = numOfSlots;
 	}
 
-    RealExpr getMaximumSlotDurationZ3() {
+    z3::expr getMaximumSlotDurationZ3() {
         return maximumSlotDurationZ3;
     }
 
-    void setMaximumSlotDurationZ3(RealExpr maximumSlotDuration) {
+    void setMaximumSlotDurationZ3(z3::expr maximumSlotDuration) {
         this.maximumSlotDurationZ3 = maximumSlotDuration;
     }
 
-    ArrayList<Integer> getSlotsUsed (){
+    std::vector<int> getSlotsUsed (){
         return this.slotsUsed;
     }
 
-    ArrayList<ArrayList<Float>> getSlotDuration() {
+    std::vector<std::vector<float>> getSlotDuration() {
         return slotDuration;
     }
 
@@ -428,21 +428,21 @@ class INET_API Cycle {
         return this.slotDuration.get(this.slotsUsed.indexOf(prt)).get(index);
     }
 
-    String getPortName() {
+    std::string getPortName() {
 		return portName;
 	}
 
 
-     void setPortName(String portName) {
+     void setPortName(std::string portName) {
 		this.portName = portName;
 	}
 
-     RealExpr getSlotStartZ3(int prt, int slotNum) {
+     z3::expr getSlotStartZ3(int prt, int slotNum) {
 		return this.slotStartZ3.get(prt).get(slotNum);
 	}
 
 	/*
-     RealExpr getSlotDurationZ3(int prt, int slotNum) {
+     z3::expr getSlotDurationZ3(int prt, int slotNum) {
 		return this.slotDurationZ3.get(prt).get(slotNum);
 	}
 	*/
