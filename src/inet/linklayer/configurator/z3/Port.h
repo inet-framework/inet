@@ -356,7 +356,7 @@ class INET_API Port {
         // For the specified range of packets defined by [0, upperBoundRange],
         // apply the scheduling rules.
 
-        //System.out.println("Setting up rules for " + flowFrag.getName() + " - Num of packets: " + flowFrag.getParent().getNumOfPacketsSent());
+        //System.out.println(std::string("Setting up rules for " + flowFrag.getName() + std::string(" - Num of packets: ")) + flowFrag.getParent().getNumOfPacketsSent());
         for(int i = 0; i < flowFrag.getParent().getNumOfPacketsSent(); i++) {
             // Make t3 > t2 + transmissionTime
             solver.add( // Time to Transmit constraint.
@@ -376,7 +376,7 @@ class INET_API Port {
         for(FlowFragment auxFragment : this->flowFragments) {
 
         	/*
-        	System.out.println("Num de pacotes escalonados:" + auxFragment.getNumOfPacketsSent());
+        	System.out.println(std::string("Num de pacotes escalonados:") + auxFragment.getNumOfPacketsSent());
 
         	for(int i = 0; i < auxFragment.getNumOfPacketsSent(); i++) {
             	solver.add(
@@ -897,8 +897,8 @@ class INET_API Port {
         z3::expr sumOfPrtTime = null;
 
         for(int i = 0; i < 8; i++) {
-            slotStart[i] = ctx.real_const((this->name + "SlotStart" + i).c_str());
-            slotDuration[i] = ctx.real_const((this->name + "SlotDuration" + i).c_str());
+            slotStart[i] = ctx.real_const((this->name + std::string("SlotStart") + i).c_str());
+            slotDuration[i] = ctx.real_const((this->name + std::string("SlotDuration") + i).c_str());
         }
 
         for(FlowFragment f : this->flowFragments) {
@@ -1101,7 +1101,7 @@ class INET_API Port {
             listOfPeriods.add(flowFrag.getStartDevice().getPacketPeriodicity());
         }
         for(float periodicity : this->listOfPeriods) {
-        	System.out.println("Periodicidade: " + periodicity);
+        	System.out.println(std::string("Periodicidade: ") + periodicity);
         }
         */
 
@@ -1115,7 +1115,7 @@ class INET_API Port {
         /*
         for(FlowFragment flowFrag : this->flowFragments) {
             flowFrag.setNumOfPacketsSent((int) (hyperCycleSize/flowFrag.getStartDevice().getPacketPeriodicity()));
-            System.out.println("Frag num packets: " + flowFrag.getNumOfPacketsSent());
+            System.out.println(std::string("Frag num packets: ") + flowFrag.getNumOfPacketsSent());
             numOfPacketsScheduled += (int) (hyperCycleSize/flowFrag.getStartDevice().getPacketPeriodicity());
         }
         */
@@ -1124,7 +1124,7 @@ class INET_API Port {
         	numOfPacketsScheduled += (int) (hyperCycleSize/periodicity);
         }
 
-        // System.out.println("Num of Cycles: " + this->cycleUpperBoundRange);
+        // System.out.println(std::string("Num of Cycles: ") + this->cycleUpperBoundRange);
 
         this->cycle.setNumOfSlots(numOfPacketsScheduled);
 
@@ -1161,9 +1161,9 @@ class INET_API Port {
         /*
         for(FlowFragment flowFrag : this->flowFragments) {
             flowFrag.setNumOfPacketsSent((int) (hyperCycleSize/flowFrag.getStartDevice().getPacketPeriodicity()));
-            System.out.println("Frag num packets: " + flowFrag.getNumOfPacketsSent());
+            System.out.println(std::string("Frag num packets: ") + flowFrag.getNumOfPacketsSent());
         }
-        System.out.println("Num of Cycles: " + this->cycleUpperBoundRange);
+        System.out.println(std::string("Num of Cycles: ") + this->cycleUpperBoundRange);
       	*/
 
         // In order to use the value cycle time obtained, we must override the minimum and maximum cycle times
@@ -1218,7 +1218,7 @@ class INET_API Port {
 
     	this->cycle.toZ3(ctx);
 
-    	// System.out.println("On port: " + this->name + " with: " + this->listOfPeriods.size() + " fragments");
+    	// System.out.println(std::string("On port: " + this->name + std::string(" with: ") + this->listOfPeriods.size() + " fragments"));
 
     	if(this->listOfPeriods.size() < 1) {
     		return;
@@ -1524,7 +1524,7 @@ class INET_API Port {
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      *
     z3::expr scheduledTime(context ctx, z3::expr index, FlowFragment flowFrag){
-        z3::expr devT3 = ctx.real_const((flowFrag.getName() + "ScheduledTime" + index.toString()).c_str());
+        z3::expr devT3 = ctx.real_const((flowFrag.getName() + std::string("ScheduledTime") + index.toString()).c_str());
 
         return (z3::expr) devT3;
     }
@@ -1559,7 +1559,7 @@ class INET_API Port {
 
         	scheduledTime = (z3::expr)
         			ctx.mkAdd(
-    					ctx.real_const(flowFrag.getName() + "ScheduledTime" + index.toString()),
+    					ctx.real_const(flowFrag.getName() + std::string("ScheduledTime") + index.toString()),
     					ctx.mkMul(ctx.real_val(cycleNum), this->cycle.getCycleDurationZ3())
 					);
 
@@ -1570,7 +1570,7 @@ class INET_API Port {
         index = ctx.mkInt(auxIndex);
 
 
-        scheduledTime = ctx.real_const((flowFrag.getName() + "ScheduledTime" + index.toString()).c_str());
+        scheduledTime = ctx.real_const((flowFrag.getName() + std::string("ScheduledTime") + index.toString()).c_str());
 
         return (z3::expr) scheduledTime;
     }

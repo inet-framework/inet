@@ -69,7 +69,7 @@ class INET_API TSNSwitch extends Switch {
      */
     TSNSwitch(float timeToTravel,
                      float transmissionTime) {
-        this->name = "dev" + indexCounter++;
+        this->name = std::string("dev") + indexCounter++;
         this->timeToTravel = timeToTravel;
         this->transmissionTime = transmissionTime;
         this->ports.clear();
@@ -160,8 +160,8 @@ class INET_API TSNSwitch extends Switch {
         this->cycleDurationUpperBoundZ3 = ctx.real_val(std::to_string(cycleDurationUpperBound));
 
         // Creating the cycle duration and start for this switch
-        this->cycleDuration = ctx.real_const(("cycleOf" + this->name + "Duration").c_str());
-        this->cycleStart = ctx.real_const(("cycleOf" + this->name + "Start").c_str());
+        this->cycleDuration = ctx.real_const((std::string("cycleOf") + this->name + std::string("Duration")).c_str());
+        this->cycleStart = ctx.real_const((std::string("cycleOf") + this->name + std::string("Start")).c_str());
 
 
         // Creating the cycle setting up the bounds for the duration (Cycle duration constraint)
@@ -250,7 +250,7 @@ class INET_API TSNSwitch extends Switch {
         if(destination instanceof Device) {
             this->connectsTo.add(((Device)destination).getName());
             this->ports.add(
-                    new Port(this->name + "Port" + this->portNum,
+                    new Port(this->name + std::string("Port") + this->portNum,
                             this->portNum,
                             ((Device)destination).getName(),
                             this->maxPacketSize,
@@ -264,7 +264,7 @@ class INET_API TSNSwitch extends Switch {
         } else if (destination instanceof Switch) {
             this->connectsTo.add(((Switch)destination).getName());
 
-            Port newPort = new Port(this->name + "Port" + this->portNum,
+            Port newPort = new Port(this->name + std::string("Port") + this->portNum,
                     this->portNum,
                     ((Switch)destination).getName(),
                     this->maxPacketSize,
@@ -303,7 +303,7 @@ class INET_API TSNSwitch extends Switch {
         this->connectsTo.add(destination);
 
         this->ports.add(
-                new Port(this->name + "Port" + this->portNum,
+                new Port(this->name + std::string("Port") + this->portNum,
                         this->portNum,
                         destination,
                         this->maxPacketSize,
@@ -331,12 +331,12 @@ class INET_API TSNSwitch extends Switch {
         int index = this->connectsTo.indexOf(flowFrag.getNextHop());
 
         /*
-        System.out.println("Current node: " + flowFrag.getNodeName());
-        System.out.println("Next hop: " + flowFrag.getNextHop());
-        System.out.println("Index of port: " + index);
+        System.out.println(std::string("Current node: ") + flowFrag.getNodeName());
+        System.out.println(std::string("Next hop: ") + flowFrag.getNextHop());
+        System.out.println(std::string("Index of port: ") + index);
         System.out.print("Connects to: ");
         for(std::string connect : this->connectsTo) {
-            System.out.print(connect + ", ");
+            System.out.print(connect + std::string(", "));
         }
 
         System.out.println("");
@@ -359,7 +359,7 @@ class INET_API TSNSwitch extends Switch {
     Port getPortOf(std::string name) {
         int index = this->connectsTo.indexOf(name);
 
-        // System.out.println("On switch " + this->getName() + " looking for port to " + name);
+        // System.out.println(std::string("On switch " + this->getName() + std::string(" looking for port to ")) + name);
 
         Port port = this->ports.get(index);
 

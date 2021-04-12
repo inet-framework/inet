@@ -92,12 +92,12 @@ class INET_API ScheduleGenerator {
                 }
             } catch (Z3Exception ex)
             {
-                System.out.println("Z3 Managed Exception: " + ex.getMessage());
+                System.out.println(std::string("Z3 Managed Exception: ") + ex.getMessage());
                 System.out.println("Stack trace: ");
                 ex.printStackTrace(System.out);
             } catch (Exception ex)
             {
-                System.out.println("Unknown Exception: " + ex.getMessage());
+                System.out.println(std::string("Unknown Exception: ") + ex.getMessage());
                 System.out.println("Stack trace: ");
                 ex.printStackTrace(System.out);
             }
@@ -126,12 +126,12 @@ class INET_API ScheduleGenerator {
                     System.out.println("Log is still open!");
             } catch (Z3Exception ex)
             {
-                System.out.println("Z3 Managed Exception: " + ex.getMessage());
+                System.out.println(std::string("Z3 Managed Exception: ") + ex.getMessage());
                 System.out.println("Stack trace: ");
                 ex.printStackTrace(System.out);
             } catch (Exception ex)
             {
-                System.out.println("Unknown Exception: " + ex.getMessage());
+                System.out.println(std::string("Unknown Exception: ") + ex.getMessage());
                 System.out.println("Stack trace: ");
                 ex.printStackTrace(System.out);
             }
@@ -172,13 +172,13 @@ class INET_API ScheduleGenerator {
                if(child.getNode() instanceof Switch) {
 
                    for(FlowFragment ffrag : child.getFlowFragments()) {
-                       out.println("    Fragment name: " + ffrag.getName());
-                       out.println("        Fragment node: " + ffrag.getNodeName());
-                       out.println("        Fragment next hop: " + ffrag.getNextHop());
-                       out.println("        Fragment priority: " + model.eval(ffrag.getFragmentPriorityZ3(), false));
+                       out.println(std::string("    Fragment name: ") + ffrag.getName());
+                       out.println(std::string("        Fragment node: ") + ffrag.getNodeName());
+                       out.println(std::string("        Fragment next hop: ") + ffrag.getNextHop());
+                       out.println(std::string("        Fragment priority: ") + model.eval(ffrag.getFragmentPriorityZ3(), false));
                        for(int index = 0; index < ((TSNSwitch) child.getNode()).getPortOf(ffrag.getNextHop()).getCycle().getNumOfSlots(); index++) {
                     	   indexZ3 = ctx.mkInt(index);
-                    	   out.println("        Fragment slot start " + index + ": "
+                    	   out.println(std::string("        Fragment slot start ") + index + std::string(": ")
                                    + this->stringToFloat(
                                            model.eval(((TSNSwitch) child.getNode())
                                                   .getPortOf(ffrag.getNextHop())
@@ -186,7 +186,7 @@ class INET_API ScheduleGenerator {
                                                   .slotStartZ3(ctx, ffrag.getFragmentPriorityZ3(), indexZ3)
                                                   , false).toString()
                                        ));
-                    	   out.println("        Fragment slot duration " + index + " : "
+                    	   out.println(std::string("        Fragment slot duration ") + index + std::string(" : ")
                                     + this->stringToFloat(
                                         model.eval(((TSNSwitch) child.getNode())
                                                    .getPortOf(ffrag.getNextHop())
@@ -200,8 +200,8 @@ class INET_API ScheduleGenerator {
                        ffrag.getParent().addToTotalNumOfPackets(ffrag.getNumOfPacketsSent());
 
                        for(int i = 0; i < ffrag.getParent().getNumOfPacketsSent(); i++) {
-                       		System.out.println("On " + ffrag.getName() + " - " +
-								((TSNSwitch)child.getNode()).departureTime(ctx, i, ffrag) + " - " +
+                       		System.out.println(std::string("On " + ffrag.getName() + std::string(" - ")) +
+								((TSNSwitch)child.getNode()).departureTime(ctx, i, ffrag) + std::string(" - ") +
 						  		((TSNSwitch)child.getNode()).scheduledTime(ctx, i, ffrag)
 							);
                     	   // System.out.println(((TSNSwitch)child.getNode()).departureTime(ctx, i, ffrag));
@@ -209,9 +209,9 @@ class INET_API ScheduleGenerator {
                     	   // System.out.println(((TSNSwitch)child.getNode()).scheduledTime(ctx, i, ffrag));
 
                     	   if(i < ffrag.getParent().getNumOfPacketsSent()) {
-		                	   out.println("          (" + int.toString(i) + ") Fragment departure time: " + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).departureTime(ctx, i, ffrag) , false).toString()));
-		                	   out.println("          (" + int.toString(i) + ") Fragment arrival time: " + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).arrivalTime(ctx, i, ffrag) , false).toString()));
-		                       out.println("          (" + int.toString(i) + ") Fragment scheduled time: " + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).scheduledTime(ctx, i, ffrag) , false).toString()));
+		                	   out.println(std::string("          (" + int.toString(i) + std::string(") Fragment departure time: ")) + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).departureTime(ctx, i, ffrag) , false).toString()));
+		                	   out.println(std::string("          (" + int.toString(i) + std::string(") Fragment arrival time: ")) + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).arrivalTime(ctx, i, ffrag) , false).toString()));
+		                       out.println(std::string("          (" + int.toString(i) + std::string(") Fragment scheduled time: ")) + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).scheduledTime(ctx, i, ffrag) , false).toString()));
 		                       out.println("          ----------------------------");
                     	   }
 
@@ -348,7 +348,7 @@ class INET_API ScheduleGenerator {
 
 
 	       System.out.println("Rules set. Checking solver.");
-	       System.out.println("Current time of the day: " + time);
+	       System.out.println(std::string("Current time of the day: ") + time);
 
 
 	       if (Status.SATISFIABLE == solver.check())
@@ -369,20 +369,20 @@ class INET_API ScheduleGenerator {
 
 	                   // For every switch in the network, store its information in the log
 	                   for(Switch auxSwt : net.getSwitches()) {
-	                       out.println("  Switch name: " + auxSwt.getName());
-	                       out.println("    Max packet size: " + auxSwt.getMaxPacketSize());
-                           out.println("    Port speed: " + auxSwt.getPortSpeed());
-                           out.println("    Time to Travel: " + auxSwt.getTimeToTravel());
-	                       out.println("    Transmission time: " + auxSwt.getTransmissionTime());
+	                       out.println(std::string("  Switch name: ") + auxSwt.getName());
+	                       out.println(std::string("    Max packet size: ") + auxSwt.getMaxPacketSize());
+                           out.println(std::string("    Port speed: ") + auxSwt.getPortSpeed());
+                           out.println(std::string("    Time to Travel: ") + auxSwt.getTimeToTravel());
+	                       out.println(std::string("    Transmission time: ") + auxSwt.getTransmissionTime());
 //	                       out.println("    Cycle information -");
-//	                       out.println("        First cycle start: " + model.eval(((TSNSwitch)auxSwt).getCycleStart(), false));
-//	                       out.println("        Cycle duration: " + model.eval(((TSNSwitch)auxSwt).getCycleDuration(), false));
+//	                       out.println(std::string("        First cycle start: ") + model.eval(((TSNSwitch)auxSwt).getCycleStart(), false));
+//	                       out.println(std::string("        Cycle duration: ") + model.eval(((TSNSwitch)auxSwt).getCycleDuration(), false));
                            out.println("");
 	                       /*
 	                       for (Port port : ((TSNSwitch)auxSwt).getPorts()) {
-                               out.println("        Port name (Virtual Index): " + port.getName());
-                               out.println("        First cycle start: " + model.eval(port.getCycle().getFirstCycleStartZ3(), false));
-                               out.println("        Cycle duration: " + model.eval(port.getCycle().getCycleDurationZ3(), false));
+                               out.println(std::string("        Port name (Virtual Index): ") + port.getName());
+                               out.println(std::string("        First cycle start: ") + model.eval(port.getCycle().getFirstCycleStartZ3(), false));
+                               out.println(std::string("        Cycle duration: ") + model.eval(port.getCycle().getCycleDurationZ3(), false));
                                out.println("");
                            }
                            */
@@ -395,7 +395,7 @@ class INET_API ScheduleGenerator {
 	                           port
                                    .getCycle()
                                    .setCycleStart(
-                                       this->stringToFloat("" + model.eval(port.getCycle().getFirstCycleStartZ3(), false))
+                                       this->stringToFloat(std::string("") + model.eval(port.getCycle().getFirstCycleStartZ3(), false))
                                    );
 	                       }
 
@@ -404,7 +404,7 @@ class INET_API ScheduleGenerator {
                                port
                                    .getCycle()
                                    .setCycleDuration(
-                                       this->stringToFloat("" + model.eval(port.getCycle().getCycleDurationZ3(), false))
+                                       this->stringToFloat(std::string("") + model.eval(port.getCycle().getCycleDurationZ3(), false))
                                    );
 	                       }
 
@@ -415,11 +415,11 @@ class INET_API ScheduleGenerator {
 	                   out.println("FLOW LIST:");
 	                   //For every flow in the network, store its information in the log
 	                   for(Flow f : net.getFlows()) {
-	                       out.println("  Flow name: " + f.getName());
-	                       //out.println("    Flow priority:" + model.eval(f.getFlowPriority(), false));
-	                       out.println("    Start dev. first t1: " + model.eval(f.getStartDevice().getFirstT1TimeZ3(), false));
-	                       out.println("    Start dev. HC: " + model.eval(f.getStartDevice().getHardConstraintTimeZ3(), false));
-	                       out.println("    Start dev. packet periodicity: " + model.eval(f.getStartDevice().getPacketPeriodicityZ3(), false));
+	                       out.println(std::string("  Flow name: ") + f.getName());
+	                       //out.println(std::string("    Flow priority:") + model.eval(f.getFlowPriority(), false));
+	                       out.println(std::string("    Start dev. first t1: ") + model.eval(f.getStartDevice().getFirstT1TimeZ3(), false));
+	                       out.println(std::string("    Start dev. HC: ") + model.eval(f.getStartDevice().getHardConstraintTimeZ3(), false));
+	                       out.println(std::string("    Start dev. packet periodicity: ") + model.eval(f.getStartDevice().getPacketPeriodicityZ3(), false));
 
 
 	                       // IF FLOW IS UNICAST
@@ -459,22 +459,22 @@ class INET_API ScheduleGenerator {
 
 	                           out.print("    List of leaves: ");
 	                           for(PathNode node : f.getPathTree().getLeaves()) {
-	                               out.print(((Device) node.getNode()).getName() + ", ");
+	                               out.print(((Device) node.getNode()).getName() + std::string(", "));
 	                           }
 	                           out.println("");
                                for(PathNode node : f.getPathTree().getLeaves()) {
                                    auxNodes = f.getNodesFromRootToNode((Device) node.getNode());
                                    auxFlowFragments = f.getFlowFromRootToNode((Device) node.getNode());
 
-                                   out.print("    Path to " + ((Device) node.getNode()).getName() + ": ");
+                                   out.print(std::string("    Path to ") + ((Device) node.getNode()).getName() + std::string(": "));
                                    auxCount = 0;
                                    for(PathNode auxNode : auxNodes) {
                                        if(auxNode.getNode() instanceof Device) {
-                                           out.print(((Device) auxNode.getNode()).getName() + ", ");
+                                           out.print(((Device) auxNode.getNode()).getName() + std::string(", "));
                                        } else if (auxNode.getNode() instanceof TSNSwitch) {
                                            out.print(
                                                ((TSNSwitch) auxNode.getNode()).getName() +
-                                               "(" +
+                                               std::string("(") +
                                                auxFlowFragments.get(auxCount).getName() +
                                                "), ");
                                            auxCount++;
