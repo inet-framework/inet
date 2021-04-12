@@ -34,7 +34,7 @@ class INET_API Flow {
     int type = 0;
     int totalNumOfPackets = 0;
 
-    boolean fixedPriority = false;
+    bool fixedPriority = false;
     int priorityValue = -1;
 
     //Specifying the type of the flow:
@@ -61,7 +61,7 @@ class INET_API Flow {
 
     int numOfPacketsSentInFragment = 0;
 
-    boolean useCustomValues = false;
+    bool useCustomValues = false;
 
     /**
      * [Method]: Flow
@@ -1532,11 +1532,11 @@ class INET_API Flow {
     }
 
 
-    boolean isFixedPriority() {
+    bool isFixedPriority() {
         return fixedPriority;
     }
 
-    void setFixedPriority(boolean fixedPriority) {
+    void setFixedPriority(bool fixedPriority) {
         this->fixedPriority = fixedPriority;
     }
 
