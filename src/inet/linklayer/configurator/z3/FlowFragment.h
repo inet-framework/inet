@@ -18,7 +18,7 @@ namespace inet {
  * packets from this flow on the switch it belongs to.
  *
  */
-public class FlowFragment extends Flow {
+class INET_API FlowFragment extends Flow {
     private Boolean isModifiedOrCreated = false;
     private static final long serialVersionUID = 1L;
     private Flow parent;

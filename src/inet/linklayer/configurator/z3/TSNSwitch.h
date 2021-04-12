@@ -16,7 +16,7 @@ namespace inet {
  * are able to organize a sequence of ports that connect the
  * switch to other nodes in the network.
  */
-public class TSNSwitch extends Switch implements Serializable {
+class INET_API TSNSwitch extends Switch {
 
     private Boolean isModifiedOrCreated = true;
 

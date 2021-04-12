@@ -17,7 +17,7 @@ namespace inet {
  *
  */
 
-public class Flow implements Serializable {
+class INET_API Flow {
 
     // TODO: CHECK FUNCTIONS FOR UNICAST FLOWS
 

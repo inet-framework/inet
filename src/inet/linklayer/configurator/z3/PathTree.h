@@ -14,7 +14,7 @@ namespace inet {
  * simple and classic tree methods.
  *
  */
-public class PathTree implements Serializable {
+class INET_API PathTree {
 
 	private static final long serialVersionUID = 1L;
 	private PathNode root;

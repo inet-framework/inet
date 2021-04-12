@@ -15,7 +15,7 @@ namespace inet {
  * They can be used as sending devices and receiving devices.
  * Their properties specify part of the core of a flow.
  */
-public class Device implements Serializable {
+class INET_API Device {
 
 	private static final long serialVersionUID = 1L;
 	private String name;

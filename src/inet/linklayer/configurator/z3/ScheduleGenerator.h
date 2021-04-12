@@ -13,7 +13,7 @@ namespace inet {
  * a given network through the method generateSchedule. Will create
  * a log file and store the timing properties on the cycles and flows.
  */
-public class ScheduleGenerator {
+class INET_API ScheduleGenerator {
 
 	   @SuppressWarnings("serial")
 	   class TestFailedException extends Exception

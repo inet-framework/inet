@@ -15,7 +15,7 @@ namespace inet {
  * fragment for each children in case of being a switch.
  *
  */
-public class PathNode implements Serializable {
+class INET_API PathNode {
 
 	private static final long serialVersionUID = 1L;
 	private PathNode parent; // The parent of the current FlowNode

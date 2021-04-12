@@ -15,7 +15,7 @@ namespace inet {
  * flows and switches setting up the scheduling rules.
  *
  */
-public class Network implements Serializable {
+class INET_API Network {
 
 	private static final long serialVersionUID = 1L;
 	String db_name;
