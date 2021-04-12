@@ -25,8 +25,7 @@ class INET_API Flow {
 
     Boolean isModifiedOrCreated = false;
 
-    static final long serialVersionUID = 1L;
-    static int instanceCounter = 0;
+    static int instanceCounter;
     int instance = 0;
 
 
@@ -39,8 +38,8 @@ class INET_API Flow {
     int priorityValue = -1;
 
     //Specifying the type of the flow:
-    static int UNICAST = 0;
-    static int PUBLISH_SUBSCRIBE = 1;
+#define UNICAST 0
+#define PUBLISH_SUBSCRIBE 1
 
 
 

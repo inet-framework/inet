@@ -22,7 +22,6 @@ class INET_API TSNSwitch extends Switch {
 
     Boolean isModifiedOrCreated = true;
 
-    static final long serialVersionUID = 1L;
     // private Cycle cycle;
     std::vector<std::string> connectsTo;
     std::vector<Port> ports;
@@ -37,7 +36,7 @@ class INET_API TSNSwitch extends Switch {
     z3::expr cycleDurationLowerBoundZ3;
     int portNum = 0;
 
-    static int indexCounter = 0;
+    static int indexCounter;
 
 
     /**
