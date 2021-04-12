@@ -18,8 +18,8 @@ using namespace z3;
  */
 class INET_API PathTree {
   public:
-    PathNode root;
-    std::vector<PathNode> leaves;
+    PathNode *root;
+    std::vector<PathNode *> *leaves;
 
     /**
      * [Method]: addRoot
@@ -34,7 +34,7 @@ class INET_API PathTree {
     {
         root=new PathNode(node);
         root.setParent(nullptr);
-        root.setChildren(std::vector<PathNode>());
+        root.setChildren(std::vector<PathNode *>());
         return root;
     }
 
@@ -47,7 +47,7 @@ class INET_API PathTree {
      *
      * @param newRoot       New root of pathTree
      */
-    void changeRoot(PathNode newRoot)
+    void changeRoot(PathNode *newRoot)
     {
         PathNode oldRoot=this->root;
         newRoot.setParent(nullptr);
@@ -67,7 +67,7 @@ class INET_API PathTree {
      *
      * @param node      Starter node of the search
      */
-    void searchLeaves(PathNode node) {
+    void searchLeaves(PathNode *node) {
 
         if(node.getChildren().size() == 0) {
             leaves.add(node);
@@ -88,7 +88,7 @@ class INET_API PathTree {
      *
      * @return      std::vector with all leaves as PathNodes
      */
-    std::vector<PathNode> getLeaves(){
+    std::vector<PathNode *> getLeaves(){
         leaves.clear();
 
         searchLeaves(root);

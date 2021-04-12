@@ -3,7 +3,8 @@
 
 #include <z3++.h>
 
-#include "inet/common/INETDefs.h"
+#include "inet/linklayer/configurator/z3/Flow.h"
+#include "inet/linklayer/configurator/z3/Switch.h"
 
 namespace inet {
 
@@ -24,17 +25,14 @@ class INET_API Network {
 
     //TODO: Remove debugging variables:
     std::shared_ptr<expr> avgOfAllLatency;
-    std::vector<z3::std::shared_ptr<expr> > avgLatencyPerDev;
+    std::vector<std::shared_ptr<expr> > avgLatencyPerDev;
 
 
     std::vector<Switch> switches;
     std::vector<Flow> flows;
     float timeToTravel;
-    std::vector<z3::std::shared_ptr<expr> > allSumOfJitter;
+    std::vector<std::shared_ptr<expr> > allSumOfJitter;
     std::vector<int> numberOfNodes;
-
-#define PACKETUPPERBOUNDRANGE 5 // Limits the applications of rules to the packets
-#define CYCLEUPPERBOUNDRANGE 25 // Limits the applications of rules to the cycles
 
     float jitterUpperBoundRange = -1;
     std::shared_ptr<expr> jitterUpperBoundRangeZ3;
@@ -95,7 +93,7 @@ class INET_API Network {
             this->setJitterUpperBoundRangeZ3(ctx, this->jitterUpperBoundRange);
         }
 
-        Stack<z3::std::shared_ptr<expr> > jitterList = new Stack<z3::std::shared_ptr<expr> >();
+        Stack<std::shared_ptr<expr> > jitterList = new Stack<std::shared_ptr<expr> >();
         int totalNumOfLeaves = 0;
         std::shared_ptr<expr> sumOfAllJitter;
         // On every switch, set up the constraints of the schedule

@@ -3,7 +3,9 @@
 
 #include <z3++.h>
 
-#include "inet/common/INETDefs.h"
+#include "inet/linklayer/configurator/z3/Flow.h"
+#include "inet/linklayer/configurator/z3/PathNode.h"
+#include "inet/linklayer/configurator/z3/Port.h"
 
 namespace inet {
 
@@ -23,25 +25,25 @@ using namespace z3;
 class INET_API FlowFragment : public Flow {
   public:
     bool isModifiedOrCreated = false;
-    Flow parent;
+    Flow *parent;
     std::shared_ptr<expr> packetSize;
     std::shared_ptr<expr> packetPeriodicityZ3;
-    std::vector<z3::std::shared_ptr<expr> > departureTimeZ3;
-    std::vector<z3::std::shared_ptr<expr> > scheduledTimeZ3;
+    std::vector<std::shared_ptr<expr>> departureTimeZ3;
+    std::vector<std::shared_ptr<expr>> scheduledTimeZ3;
     std::shared_ptr<expr> fragmentPriorityZ3;
 
-    Port port;
+    Port *port;
 
-    PathNode referenceToNode;
+    PathNode *referenceToNode;
 
     int fragmentPriority;
     std::string nodeName;
     std::string nextHopName;
-    int numOfPacketsSent = Network.PACKETUPPERBOUNDRANGE;
+    int numOfPacketsSent = PACKETUPPERBOUNDRANGE;
 
     //TODO: CREATE REFERENCES TO PREVIOUS AND NEXT FRAGMENTS
-    FlowFragment previousFragment;
-    List<FlowFragment> nextFragments;
+    FlowFragment *previousFragment;
+    std::vector<FlowFragment *> nextFragments;
 
     std::vector<float> departureTime;
     std::vector<float> arrivalTime;
@@ -73,9 +75,9 @@ class INET_API FlowFragment : public Flow {
          * there must be a type check before assigning the names
          */
 
-        if(parent.getType() == Flow.UNICAST) {
+        if(parent.getType() == UNICAST) {
             this->name = parent.getName() + std::string("Fragment") + (parent.getFlowFragments().size() + 1);
-        } else if (parent.getType() == Flow.PUBLISH_SUBSCRIBE) {
+        } else if (parent.getType() == PUBLISH_SUBSCRIBE) {
             this->name = parent.getName() + std::string("Fragment") + (parent.pathTreeCount + 1);
             parent.pathTreeCount++;
         } else {
@@ -93,15 +95,15 @@ class INET_API FlowFragment : public Flow {
     }
 
     std::shared_ptr<expr> getDepartureTimeZ3(int index) {
-        return departureTimeZ3.get(index);
+        return departureTimeZ3.at(index);
     }
 
     void setDepartureTimeZ3(z3::expr dTimeZ3, int index) {
-        this->departureTimeZ3.set(index, dTimeZ3);
+        this->departureTimeZ3[index] = dTimeZ3;
     }
 
     void addDepartureTimeZ3(z3::expr dTimeZ3) {
-        this->departureTimeZ3.add(dTimeZ3);
+        this->departureTimeZ3.push_back(dTimeZ3);
     }
 
     void createNewDepartureTimeZ3List() {
@@ -122,7 +124,7 @@ class INET_API FlowFragment : public Flow {
     }
 
     void setPacketSizeZ3(z3::expr packetSize) {
-        this->packetSize = packetSize;
+        this->packetSize = std::make_shared<expr>(packetSize);
     }
 
     std::shared_ptr<expr> getFragmentPriorityZ3() {
@@ -130,12 +132,12 @@ class INET_API FlowFragment : public Flow {
     }
 
     void setFragmentPriorityZ3(z3::expr flowPriority) {
-        this->fragmentPriorityZ3 = flowPriority;
+        this->fragmentPriorityZ3 = std::make_shared<expr>(flowPriority);
     }
 
 
     void addDepartureTime(float val) {
-        departureTime.add(val);
+        departureTime.push_back(val);
     }
 
     float getDepartureTime(int index) {
@@ -186,21 +188,19 @@ class INET_API FlowFragment : public Flow {
         this->nodeName = nodeName;
     }
 
-    @Override
     int getNumOfPacketsSent() {
         return numOfPacketsSent;
     }
 
-    @Override
     void setNumOfPacketsSent(int numOfPacketsSent) {
         this->numOfPacketsSent = numOfPacketsSent;
     }
 
-    Flow getParent() {
+    Flow *getParent() {
         return parent;
     }
 
-    void setParent(Flow parent) {
+    void setParent(Flow *parent) {
         this->parent = parent;
     }
 
@@ -220,11 +220,11 @@ class INET_API FlowFragment : public Flow {
         this->previousFragment = previousFragment;
     }
 
-    List<FlowFragment> getNextFragments() {
+    std::vector<FlowFragment *> getNextFragments() {
         return nextFragments;
     }
 
-    void setNextFragments(List<FlowFragment> nextFragments) {
+    void setNextFragments(std::vector<FlowFragment *> nextFragments) {
         this->nextFragments = nextFragments;
     }
 
@@ -232,11 +232,11 @@ class INET_API FlowFragment : public Flow {
         this->nextFragments.add(frag);
     }
 
-    PathNode getReferenceToNode() {
+    PathNode *getReferenceToNode() {
         return referenceToNode;
     }
 
-    void setReferenceToNode(PathNode referenceToNode) {
+    void setReferenceToNode(PathNode *referenceToNode) {
         this->referenceToNode = referenceToNode;
     }
 
@@ -248,7 +248,7 @@ class INET_API FlowFragment : public Flow {
         this->isModifiedOrCreated = isModifiedOrCreated;
     }
 
-    Port getPort() {
+    Port *getPort() {
         return this->port;
     }
 
@@ -268,7 +268,7 @@ class INET_API FlowFragment : public Flow {
         this->scheduledTimeZ3.clear();
     }
 
-    void setPort(Port port) {
+    void setPort(Port *port) {
         this->port = port;
     }
 
