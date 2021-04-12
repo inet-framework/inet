@@ -1563,7 +1563,7 @@ class INET_API Flow {
         this.isModifiedOrCreated = isModifiedOrCreated;
     }
 
-}
+};
 
 }
 

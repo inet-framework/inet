@@ -1853,7 +1853,7 @@ class INET_API Port {
                 );
     }
 
-}
+};
 
 }
 

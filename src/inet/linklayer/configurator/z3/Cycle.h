@@ -446,7 +446,7 @@ class INET_API Cycle {
 		return this.slotDurationZ3.get(prt).get(slotNum);
 	}
 	*/
-}
+};
 
 }
 

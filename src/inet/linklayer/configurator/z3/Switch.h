@@ -111,8 +111,7 @@ class INET_API Switch {
     public String getName() {
         return this.name;
     }
-
-}
+};
 
 }
 

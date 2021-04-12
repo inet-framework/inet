@@ -559,10 +559,7 @@ class INET_API ScheduleGenerator {
 	       }
 		   return net;
 	   }
-
-
-
-}
+};
 
 }
 
