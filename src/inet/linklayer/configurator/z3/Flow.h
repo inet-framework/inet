@@ -23,7 +23,7 @@ class INET_API Flow {
 
     // TODO: CHECK FUNCTIONS FOR UNICAST FLOWS
 
-    Boolean isModifiedOrCreated = false;
+    bool isModifiedOrCreated = false;
 
     static int instanceCounter;
     int instance = 0;
@@ -1556,11 +1556,11 @@ class INET_API Flow {
         Flow.instanceCounter = instanceCounter;
     }
 
-    Boolean getIsModifiedOrCreated() {
+    bool getIsModifiedOrCreated() {
         return isModifiedOrCreated;
     }
 
-    void setIsModifiedOrCreated(Boolean isModifiedOrCreated) {
+    void setIsModifiedOrCreated(bool isModifiedOrCreated) {
         this->isModifiedOrCreated = isModifiedOrCreated;
     }
 

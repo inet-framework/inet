@@ -26,8 +26,8 @@ using namespace z3;
  */
 class INET_API Port {
 
-    Boolean useMicroCycles = false;
-    Boolean useHyperCycle = true;
+    bool useMicroCycles = false;
+    bool useHyperCycle = true;
 
     std::vector<float> listOfPeriods;
     float definedHyperCycleSize = -1;
@@ -1583,7 +1583,7 @@ class INET_API Port {
      *
      * @return boolean value. True if automated application period methodology is used, false elsewhise
      */
-    Boolean checkIfAutomatedApplicationPeriod() {
+    bool checkIfAutomatedApplicationPeriod() {
         if(this->useHyperCycle || this->useMicroCycles)
             return true;
         return false;

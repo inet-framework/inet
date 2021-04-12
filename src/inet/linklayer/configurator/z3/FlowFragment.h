@@ -21,7 +21,7 @@ using namespace z3;
  *
  */
 class INET_API FlowFragment extends Flow {
-    Boolean isModifiedOrCreated = false;
+    bool isModifiedOrCreated = false;
     Flow parent;
     z3::expr packetSize;
     z3::expr packetPeriodicityZ3;
@@ -239,11 +239,11 @@ class INET_API FlowFragment extends Flow {
         this->referenceToNode = referenceToNode;
     }
 
-    Boolean getIsModifiedOrCreated() {
+    bool getIsModifiedOrCreated() {
         return isModifiedOrCreated;
     }
 
-    void setIsModifiedOrCreated(Boolean isModifiedOrCreated) {
+    void setIsModifiedOrCreated(bool isModifiedOrCreated) {
         this->isModifiedOrCreated = isModifiedOrCreated;
     }
 
