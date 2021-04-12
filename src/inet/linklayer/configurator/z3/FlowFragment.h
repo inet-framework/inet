@@ -5,6 +5,8 @@
 
 #include "inet/common/INETDefs.h"
 
+namespace inet {
+
 /**
  * [Class]: FlowFragment
  * [Usage]: This class is used to represent a fragment of a flow.
@@ -267,6 +269,8 @@ public class FlowFragment extends Flow {
     public void setPort(Port port) {
         this.port = port;
     }
+
+}
 
 }
 

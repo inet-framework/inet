@@ -5,6 +5,8 @@
 
 #include "inet/common/INETDefs.h"
 
+namespace inet {
+
 /**
  * [Class]: PathNode
  * [Usage]: Contains the data needed in each node of
@@ -101,6 +103,8 @@ public class PathNode implements Serializable {
     public void setFlowFragment(ArrayList<FlowFragment>  flowFragments) {
         this.flowFragments = flowFragments;
     }
+
+}
 
 }
 

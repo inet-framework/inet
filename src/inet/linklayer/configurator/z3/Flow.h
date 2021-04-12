@@ -5,6 +5,8 @@
 
 #include "inet/common/INETDefs.h"
 
+namespace inet {
+
 /**
  * [Class]: Flow
  * [Usage]: This class specifies a flow (or a stream, in other
@@ -1560,6 +1562,8 @@ public class Flow implements Serializable {
     public void setIsModifiedOrCreated(Boolean isModifiedOrCreated) {
         this.isModifiedOrCreated = isModifiedOrCreated;
     }
+
+}
 
 }
 

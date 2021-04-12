@@ -5,6 +5,8 @@
 
 #include "inet/common/INETDefs.h"
 
+namespace inet {
+
 /**
  * [Class]: PathTree
  * [Usage]: Used to specify the path on publish subscribe
@@ -106,6 +108,8 @@ public class PathTree implements Serializable {
     public void setRoot(PathNode root) {
         this.root = root;
     }
+
+}
 
 }
 

@@ -5,6 +5,8 @@
 
 #include "inet/common/INETDefs.h"
 
+namespace inet {
+
 /**
  * [Class]: ScheduleGenerator
  * [Usage]: Used to generate a schedule based on the properties of
@@ -559,6 +561,8 @@ public class ScheduleGenerator {
 	   }
 
 
+
+}
 
 }
 

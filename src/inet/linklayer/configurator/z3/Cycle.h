@@ -5,6 +5,8 @@
 
 #include "inet/common/INETDefs.h"
 
+namespace inet {
+
 /**
  * [Class]: Cycle
  * [Usage]: Contains all properties of a TSN cycle.
@@ -445,6 +447,8 @@ public class Cycle implements Serializable {
 		return this.slotDurationZ3.get(prt).get(slotNum);
 	}
 	*/
+}
+
 }
 
 #endif

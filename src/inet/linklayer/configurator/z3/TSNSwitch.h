@@ -5,6 +5,8 @@
 
 #include "inet/common/INETDefs.h"
 
+namespace inet {
+
 /**
  * [Class]: TSNSwitch
  * [Usage]: This class contains the information needed to
@@ -583,6 +585,8 @@ public class TSNSwitch extends Switch implements Serializable {
     public ArrayList<String> getConnectsTo(){
         return this.connectsTo;
     }
+
+}
 
 }
 

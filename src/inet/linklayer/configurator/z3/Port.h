@@ -5,6 +5,8 @@
 
 #include "inet/common/INETDefs.h"
 
+namespace inet {
+
 /**
  * [Class]: Port
  * [Usage]: This class is used to implement the logical role of a
@@ -1851,6 +1853,8 @@ public class Port implements Serializable {
                     prevPacketST
                 );
     }
+
+}
 
 }
 
