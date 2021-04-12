@@ -3,11 +3,16 @@
 
 #include <z3++.h>
 
-#include "inet/common/INETDefs.h"
+#include "inet/linklayer/configurator/z3/PathNode.h"
+#include "inet/linklayer/configurator/z3/Switch.h"
 
 namespace inet {
 
 using namespace z3;
+
+class TSNSwitch {
+
+};
 
 /**
  * [Class]: Flow
@@ -145,7 +150,7 @@ class INET_API Flow {
      * @param swt   Switch to be added to the list
      */
     void addToPath(TSNSwitch *swt) {
-        path.add(swt);
+        path->push_back(swt);
     }
 
     /**
@@ -160,16 +165,15 @@ class INET_API Flow {
         // AVOID USING THE ARRAY LIST
         // TODO: REMOVE OPTION TO DISTINGUISH BETWEEN UNICAST AND MULTICAST LATER
         if(this->type == UNICAST) {
-            LinkedList<PathNode> nodeList;
+            std::vector<PathNode> nodeList;
 
             PathTree *pathTree = new PathTree();
             PathNode pathNode;
             pathNode = pathTree.addRoot(this->startDevice);
             pathNode = pathNode.addChild(path.get(0));
-            nodeList = new LinkedList<PathNode>();
-            nodeList.add(pathNode);
+            nodeList.push_back(pathNode);
             for(int i = 1;  i < path.size(); i++) {
-                nodeList.add(nodeList.removeFirst().addChild(path.get(i)));
+                nodeList.push_back(nodeList.removeFirst().addChild(path.get(i)));
             }
             nodeList.getFirst().addChild(this->endDevice);
             nodeList.removeFirst();
@@ -218,19 +222,19 @@ class INET_API Flow {
 
 
             if(this->priorityValue < 0 || this->priorityValue > 7) {
-                this->flowPriority = ctx.int_valConst(this->name + std::string("Priority"));
+                this->flowPriority = std::make_shared<expr>(ctx.int_const((this->name + std::string("Priority")).c_str()));
             } else {
-                this->flowPriority = ctx.int_val(this->priorityValue);
+                this->flowPriority = std::make_shared<expr>(ctx.int_val(this->priorityValue));
             }
 
 
             if(this->useCustomValues) {
-                this->flowSendingPeriodicityZ3 = ctx.real_val(std::to_string(this->flowSendingPeriodicity));
+                this->flowSendingPeriodicityZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->flowSendingPeriodicity).c_str()));
 
                 if(this->flowFirstSendingTime >= 0){
-                    this->flowFirstSendingTimeZ3 = ctx.real_val(std::to_string(this->flowFirstSendingTime));
+                    this->flowFirstSendingTimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->flowFirstSendingTime).c_str()));
                 } else {
-                    this->flowFirstSendingTimeZ3 = ctx.real_const((std::string("flow") + this->instance + std::string("FirstSendingTime")).c_str());
+                    this->flowFirstSendingTimeZ3 = std::make_shared<expr>(ctx.real_const((std::string("flow") + std::to_string(this->instance) + std::string("FirstSendingTime")).c_str()));
                 }
             } else {
                 this->flowFirstSendingTimeZ3 = this->startDevice.getFirstT1TimeZ3();
@@ -253,8 +257,8 @@ class INET_API Flow {
      * @param ctx       context variable containing the z3 environment used
      * @param node      A node of the pathTree
      */
-    FlowFragment nodeToZ3(context& ctx, PathNode node, FlowFragment frag) {
-        FlowFragment flowFrag = nullptr;
+    FlowFragment nodeToZ3(context& ctx, PathNode *node, FlowFragment frag) {
+        FlowFragment *flowFrag = nullptr;
         int numberOfPackets = Network.PACKETUPPERBOUNDRANGE;
 
         // If, by chance, the given node has no child, then its a leaf
@@ -385,7 +389,7 @@ class INET_API Flow {
      * @param swt                   Switch of the current flow fragment
      * @param currentSwitchIndex    Index of the current switch in the path on the iteration
      */
-    void pathToZ3(context& ctx, Switch swt, int currentSwitchIndex) {
+    void pathToZ3(context& ctx, Switch *swt, int currentSwitchIndex) {
         // Flow fragment is created
         FlowFragment flowFrag = new FlowFragment(this);
 

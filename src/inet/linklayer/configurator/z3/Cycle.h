@@ -2,6 +2,7 @@
 #define __INET_Z3_CYCLE_H
 
 #include <algorithm>
+#include <memory>
 #include <z3++.h>
 
 #include "inet/common/INETDefs.h"
@@ -9,6 +10,9 @@
 namespace inet {
 
 using namespace z3;
+
+#define PACKETUPPERBOUNDRANGE 5 // Limits the applications of rules to the packets
+#define CYCLEUPPERBOUNDRANGE 25 // Limits the applications of rules to the cycles
 
 /**
  * [Class]: Cycle
@@ -55,8 +59,8 @@ class INET_API Cycle {
     float cycleDuration;
     float cycleStart;
 
-    std::vector<std::vector<std::shared_ptr<expr> >> slotStartZ3_;
-    std::vector<std::vector<std::shared_ptr<expr> >> slotDurationZ3_;
+    std::vector<std::vector<std::shared_ptr<expr>>> slotStartZ3_;
+    std::vector<std::vector<std::shared_ptr<expr>>> slotDurationZ3_;
 
     std::vector<int> slotsUsed;
     std::vector<std::vector<float>> slotStart;

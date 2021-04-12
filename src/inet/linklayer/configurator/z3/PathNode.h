@@ -3,11 +3,14 @@
 
 #include <z3++.h>
 
-#include "inet/common/INETDefs.h"
+#include "inet/linklayer/configurator/z3/Switch.h"
+#include "inet/linklayer/configurator/z3/TSNSwitch.h"
 
 namespace inet {
 
 using namespace z3;
+
+class FlowFragment;
 
 /**
  * [Class]: PathNode
@@ -19,10 +22,10 @@ using namespace z3;
  */
 class INET_API PathNode {
   public:
-    PathNode parent; // The parent of the current FlowNode
-    Object node;
-    std::vector<PathNode> children; // The children of the current FlowNode
-    std::vector<FlowFragment> flowFragments;
+    PathNode *parent; // The parent of the current FlowNode
+    cObject *node;
+    std::vector<PathNode *> children; // The children of the current FlowNode
+    std::vector<FlowFragment *> flowFragments;
 
 
     /**
@@ -33,15 +36,15 @@ class INET_API PathNode {
      *
      * @param node      Device or a Switch that represents the node
      */
-    PathNode (Object node)
+    PathNode (cObject *node)
     {
-        if((node instanceof TSNSwitch) || (node instanceof Switch)) {
+        if((dynamic_cast<TSNSwitch *>(node)) || (dynamic_cast<Switch *>(node))) {
             this->node = node;
             children.clear();
             flowFragments.clear();
-        } else if (node instanceof Device) {
+        } else if (dynamic_cast<Device *>(node)) {
             this->node = node;
-            children = nullptr;
+            children.clear(); // NOTE: before port: children = nullptr;
         } else {
             //[TODO]: Throw error
         }
@@ -56,11 +59,11 @@ class INET_API PathNode {
      * @param node      Object representing the child device or switch
      * @return          A reference to the newly created node
      */
-    PathNode addChild(Object node)
+    PathNode *addChild(cObject *node)
     {
-        PathNode pathNode = new PathNode(node);
-        pathNode.setParent(this);
-        children.add(pathNode);
+        PathNode *pathNode = new PathNode(node);
+        pathNode->setParent(this);
+        children.push_back(pathNode);
 
         return pathNode;
     }
@@ -69,39 +72,39 @@ class INET_API PathNode {
      * GETTERS AND SETTERS:
      */
 
-    PathNode getParent() {
+    PathNode *getParent() {
         return parent;
     }
 
-    void setParent(PathNode parent) {
+    void setParent(PathNode *parent) {
         this->parent = parent;
     }
 
-    Object getNode() {
+    cObject *getNode() {
         return node;
     }
 
-    void setNode(Object node) {
+    void setNode(cObject *node) {
         this->node = node;
     }
 
-    std::vector<PathNode> getChildren() {
+    std::vector<PathNode *> getChildren() {
         return children;
     }
 
-    void setChildren(std::vector<PathNode> children) {
+    void setChildren(std::vector<PathNode *> children) {
         this->children = children;
     }
 
-    void addFlowFragment(FlowFragment flowFragment) {
-        this->flowFragments.add(flowFragment);
+    void addFlowFragment(FlowFragment *flowFragment) {
+        this->flowFragments.push_back(flowFragment);
     }
 
-    std::vector<FlowFragment> getFlowFragments() {
+    std::vector<FlowFragment *> getFlowFragments() {
         return flowFragments;
     }
 
-    void setFlowFragment(std::vector<FlowFragment>  flowFragments) {
+    void setFlowFragment(std::vector<FlowFragment *>  flowFragments) {
         this->flowFragments = flowFragments;
     }
 

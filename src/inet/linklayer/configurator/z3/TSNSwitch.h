@@ -3,11 +3,19 @@
 
 #include <z3++.h>
 
-#include "inet/common/INETDefs.h"
+#include "inet/linklayer/configurator/z3/Port.h"
+#include "inet/linklayer/configurator/z3/Switch.h"
 
 namespace inet {
 
 using namespace z3;
+
+class FlowFragment {
+
+};
+
+class Port {
+};
 
 /**
  * [Class]: TSNSwitch
@@ -24,7 +32,7 @@ class INET_API TSNSwitch : public Switch {
 
     // private Cycle cycle;
     std::vector<std::string> connectsTo;
-    std::vector<Port> ports;
+    std::vector<Port *> ports;
     float cycleDurationUpperBound;
     float cycleDurationLowerBound;
 
@@ -69,7 +77,7 @@ class INET_API TSNSwitch : public Switch {
      */
     TSNSwitch(float timeToTravel,
                      float transmissionTime) {
-        this->name = std::string("dev") + indexCounter++;
+        this->name = std::string("dev") + std::to_string(indexCounter++);
         this->timeToTravel = timeToTravel;
         this->transmissionTime = transmissionTime;
         this->ports.clear();
@@ -156,43 +164,29 @@ class INET_API TSNSwitch : public Switch {
      * @param ctx      context variable containing the z3 environment used
      */
     void toZ3(context& ctx, solver solver) {
-        this->cycleDurationLowerBoundZ3 = ctx.real_val(std::to_string(cycleDurationLowerBound));
-        this->cycleDurationUpperBoundZ3 = ctx.real_val(std::to_string(cycleDurationUpperBound));
+        this->cycleDurationLowerBoundZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(cycleDurationLowerBound).c_str()));
+        this->cycleDurationUpperBoundZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(cycleDurationUpperBound).c_str()));
 
         // Creating the cycle duration and start for this switch
-        this->cycleDuration = ctx.real_const((std::string("cycleOf") + this->name + std::string("Duration")).c_str());
-        this->cycleStart = ctx.real_const((std::string("cycleOf") + this->name + std::string("Start")).c_str());
+        this->cycleDuration = std::make_shared<expr>(ctx.real_const((std::string("cycleOf") + this->name + std::string("Duration")).c_str()));
+        this->cycleStart = std::make_shared<expr>(ctx.real_const((std::string("cycleOf") + this->name + std::string("Start")).c_str()));
 
 
         // Creating the cycle setting up the bounds for the duration (Cycle duration constraint)
-        solver.add(
-                ctx.mkGe(this->cycleDuration, this->cycleDurationLowerBoundZ3)
-        );
-        solver.add(
-                ctx.mkLe(this->cycleDuration, this->cycleDurationUpperBoundZ3)
-        );
+        solver.add(*this->cycleDuration >= *this->cycleDurationLowerBoundZ3);
+        solver.add(*this->cycleDuration <= *this->cycleDurationUpperBoundZ3);
 
         // A cycle must start on a point in time, so it must be greater than 0
-        solver.add( // No negative cycle values constraint
-                ctx.mkGe(this->cycleStart, ctx.int_val(0))
-        );
+        solver.add(*this->cycleStart >= ctx.int_val(0)); // No negative cycle values constraint
 
+        for (Port *port : this->ports) {
+            port->toZ3(ctx);
 
-        for (Port port : this->ports) {
-            port.toZ3(ctx);
-
-            for(FlowFragment frag : port.getFlowFragments()) {
-                solver.add( // Maximum cycle start constraint
-                        ctx.mkLe(
-                                port.getCycle().getFirstCycleStartZ3(),
-                                this->arrivalTime(ctx, 0, frag)
-                        )
-                );
+            for(FlowFragment *frag : port->getFlowFragments()) {
+                solver.add(*port->getCycle().getFirstCycleStartZ3() <= *this->arrivalTime(ctx, 0, frag)); // Maximum cycle start constraint
             }
 
-            solver.add( // No negative cycle values constraint
-                    ctx.mkGe(port.getCycle().getFirstCycleStartZ3(), ctx.int_val(0))
-            );
+            solver.add(*port->getCycle().getFirstCycleStartZ3() >= ctx.int_val(0)); // No negative cycle values constraint
 
             /* The cycle of every port must have the same duration
             solver.add(ctx.mkEq( // Equal cycle constraints
@@ -203,18 +197,12 @@ class INET_API TSNSwitch : public Switch {
 
             // The cycle of every port must have the same starting point
             /**/
-            solver.add(ctx.mkEq( // Equal cycle constraints
-                    this->cycleStart,
-                    port.getCycle().getFirstCycleStartZ3()
-            ));
+            solver.add(*this->cycleStart == port->getCycle().getFirstCycleStartZ3()); // Equal cycle constraints
             /**/
 
         }
 
-        solver.add(ctx.mkEq(
-                this->cycleStart,
-                ctx.int_val(0)
-        ));
+        solver.add(*this->cycleStart == ctx.int_val(0));
 
     }
 
@@ -229,8 +217,8 @@ class INET_API TSNSwitch : public Switch {
      */
     void setupSchedulingRules(solver solver, context& ctx) {
 
-        for(Port port : this->ports) {
-                port.setupSchedulingRules(solver, ctx);
+        for(Port *port : this->ports) {
+                port->setupSchedulingRules(solver, ctx);
         }
 
     }
@@ -245,14 +233,14 @@ class INET_API TSNSwitch : public Switch {
      * @param destination       Destination of the port as TSNSwitch or Device
      * @param cycle             Cycle used by the port
      */
-    void createPort(Object destination, Cycle cycle) {
+    void createPort(cObject *destination, Cycle *cycle) {
 
-        if(destination instanceof Device) {
-            this->connectsTo.add(((Device)destination).getName());
-            this->ports.add(
-                    new Port(this->name + std::string("Port") + this->portNum,
+        if(dynamic_cast<Device *>(destination)) {
+            this->connectsTo.push_back(((Device *)destination)->getName());
+            this->ports.push_back(
+                    new Port(this->name + std::string("Port") + std::to_string(this->portNum),
                             this->portNum,
-                            ((Device)destination).getName(),
+                            ((Device *)destination)->getName(),
                             this->maxPacketSize,
                             this->timeToTravel,
                             this->transmissionTime,
@@ -261,12 +249,12 @@ class INET_API TSNSwitch : public Switch {
                             cycle
                     )
             );
-        } else if (destination instanceof Switch) {
-            this->connectsTo.add(((Switch)destination).getName());
+        } else if (dynamic_cast<Switch *>(destination)) {
+            this->connectsTo.push_back(((Switch *)destination)->getName());
 
-            Port newPort = new Port(this->name + std::string("Port") + this->portNum,
+            Port *newPort = new Port(this->name + std::string("Port") + std::to_string(this->portNum),
                     this->portNum,
-                    ((Switch)destination).getName(),
+                    ((Switch *)destination)->getName(),
                     this->maxPacketSize,
                     this->timeToTravel,
                     this->transmissionTime,
@@ -275,9 +263,9 @@ class INET_API TSNSwitch : public Switch {
                     cycle
             );
 
-            newPort.setPortNum(this->portNum);
+            newPort->setPortNum(this->portNum);
 
-            this->ports.add(newPort);
+            this->ports.push_back(newPort);
         }
         else
             ; // [TODO]: THROW ERROR
@@ -300,10 +288,10 @@ class INET_API TSNSwitch : public Switch {
      * @param cycle             Cycle used by the port
      */
     void createPort(std::string destination, Cycle cycle) {
-        this->connectsTo.add(destination);
+        this->connectsTo.push_back(destination);
 
-        this->ports.add(
-                new Port(this->name + std::string("Port") + this->portNum,
+        this->ports.push_back(
+                new Port(this->name + std::string("Port") + std::to_string(this->portNum),
                         this->portNum,
                         destination,
                         this->maxPacketSize,
@@ -327,8 +315,8 @@ class INET_API TSNSwitch : public Switch {
      *
      * @param flowFrag      Fragment of a flow to be added to a port
      */
-    void addToFragmentList(FlowFragment flowFrag) {
-        int index = this->connectsTo.indexOf(flowFrag.getNextHop());
+    void addToFragmentList(FlowFragment *flowFrag) {
+        int index = this->connectsTo.indexOf(flowFrag->getNextHop());
 
         /*
         System.out.println(std::string("Current node: ") + flowFrag.getNodeName());
@@ -344,7 +332,7 @@ class INET_API TSNSwitch : public Switch {
 
         /**/
 
-        this->ports.get(index).addToFragmentList(flowFrag);
+        this->ports.at(index).addToFragmentList(flowFrag);
     }
 
 
@@ -356,12 +344,12 @@ class INET_API TSNSwitch : public Switch {
      * @param name      Name of the node that the switch is connects to
      * @return          Port of the switch that connects to a given node
      */
-    Port getPortOf(std::string name) {
+    Port *getPortOf(std::string name) {
         int index = this->connectsTo.indexOf(name);
 
         // System.out.println(std::string("On switch " + this->getName() + std::string(" looking for port to ")) + name);
 
-        Port port = this->ports.get(index);
+        Port *port = this->ports.at(index);
 
         return port;
     }
@@ -375,8 +363,8 @@ class INET_API TSNSwitch : public Switch {
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
     void setUpCycleSize(solver solver, context& ctx) {
-        for(Port port : this->ports) {
-            port.setUpCycle(solver, ctx);
+        for(Port *port : this->ports) {
+            port->setUpCycle(solver, ctx);
         }
     }
 
@@ -392,11 +380,11 @@ class INET_API TSNSwitch : public Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    std::shared_ptr<expr> arrivalTime(context& ctx, int auxIndex, FlowFragment flowFrag){
-        std::shared_ptr<expr> index = ctx.int_val(auxIndex);
-        int portIndex = this->connectsTo.indexOf(flowFrag.getNextHop());
+    std::shared_ptr<expr> arrivalTime(context& ctx, int auxIndex, FlowFragment *flowFrag){
+        std::shared_ptr<expr> index = std::make_shared<expr>(ctx.int_val(auxIndex));
+        int portIndex = this->connectsTo.indexOf(flowFrag->getNextHop());
 
-        return (z3::expr) this->ports.get(portIndex).arrivalTime(ctx, auxIndex, flowFrag);
+        return (z3::expr) this->ports.at(portIndex).arrivalTime(ctx, auxIndex, flowFrag);
     }
 
 
@@ -428,7 +416,7 @@ class INET_API TSNSwitch : public Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    std::shared_ptr<expr> departureTime(context& ctx, z3::expr index, FlowFragment flowFrag){
+    std::shared_ptr<expr> departureTime(context& ctx, z3::expr index, FlowFragment *flowFrag){
         int portIndex = this->connectsTo.indexOf(flowFrag.getNextHop());
         return (z3::expr) this->ports.get(portIndex).departureTime(ctx, index, flowFrag);
     }
@@ -445,7 +433,7 @@ class INET_API TSNSwitch : public Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    std::shared_ptr<expr> departureTime(context& ctx, int auxIndex, FlowFragment flowFrag){
+    std::shared_ptr<expr> departureTime(context& ctx, int auxIndex, FlowFragment *flowFrag){
         std::shared_ptr<expr> index = ctx.int_val(auxIndex);
 
         int portIndex = this->connectsTo.indexOf(flowFrag.getNextHop());
@@ -480,7 +468,7 @@ class INET_API TSNSwitch : public Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      */
-    std::shared_ptr<expr> scheduledTime(context& ctx, int auxIndex, FlowFragment flowFrag){
+    std::shared_ptr<expr> scheduledTime(context& ctx, int auxIndex, FlowFragment *flowFrag){
         // z3::expr index = ctx.int_val(auxIndex);
 
         int portIndex = this->connectsTo.indexOf(flowFrag.getNextHop());
@@ -546,15 +534,15 @@ class INET_API TSNSwitch : public Switch {
         this->gbSizeZ3 = gbSizeZ3;
     }
 
-    std::vector<Port> getPorts() {
+    std::vector<Port *> getPorts() {
         return ports;
     }
 
-    void setPorts(std::vector<Port> ports) {
+    void setPorts(std::vector<Port *> ports) {
         this->ports = ports;
     }
 
-    void addPort(Port port, std::string name) {
+    void addPort(Port *port, std::string name) {
         this->ports.add(port);
         this->connectsTo.add(name);
     }
