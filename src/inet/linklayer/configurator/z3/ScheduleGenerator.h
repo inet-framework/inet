@@ -86,7 +86,7 @@ class INET_API ScheduleGenerator {
                 { // These examples need model generation turned on.
                     HashMap<std::string, std::string> cfg = new HashMap<std::string, std::string>();
                     cfg.put("model", "true");
-                    context ctx = new context(cfg);
+                    context& ctx = new context(cfg);
 
                     return ctx;
                 }
@@ -113,7 +113,7 @@ class INET_API ScheduleGenerator {
         *
         * @param ctx   context to be cleared
         */
-       public void closeContext(context ctx) {
+       public void closeContext(context& ctx) {
            try
            {
 
@@ -149,7 +149,7 @@ class INET_API ScheduleGenerator {
         * @param ctx       z3 context used to generate the model
         * @param out       PrintWriter stream to output log file
         */
-       public void writePathTree(PathNode pathNode, Model model, context ctx, PrintWriter out) {
+       public void writePathTree(PathNode pathNode, Model model, context& ctx, PrintWriter out) {
            Switch swt;
            std::shared_ptr<expr> indexZ3 = nullptr;
 
@@ -284,7 +284,7 @@ class INET_API ScheduleGenerator {
        }
 
 
-       public void configureNetwork(Network net, context ctx, solver solver) {
+       public void configureNetwork(Network net, context& ctx, solver solver) {
            for(Flow flw : net.getFlows()) {
                   flw.modifyIfUsingCustomVal();
                flw.convertUnicastFlow();
@@ -325,7 +325,7 @@ class INET_API ScheduleGenerator {
         */
        public void generateSchedule(Network net)
        {
-           context ctx = this->createContext(); //Creating the z3 context
+           context& ctx = this->createContext(); //Creating the z3 context
            solver solver = ctx.mkSolver();     //Creating the solver to generate unknown values based on the given context
 
 

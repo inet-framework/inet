@@ -103,7 +103,7 @@ class INET_API Port {
      *
      * @param ctx      context variable containing the z3 environment used
      */
-    void toZ3(context ctx) {
+    void toZ3(context& ctx) {
         this->gbSizeZ3 = ctx.real_val(std::to_string(gbSize));
         this->maxPacketSizeZ3 = ctx.real_val(std::to_string(this->maxPacketSize));
         this->timeToTravelZ3 = ctx.real_val(std::to_string(this->timeToTravel));
@@ -126,7 +126,7 @@ class INET_API Port {
      * @param solver        z3 solver object used to discover the variables' values
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
-    void setUpCycleRules(solver solver, context ctx) {
+    void setUpCycleRules(solver solver, context& ctx) {
 
         for(FlowFragment frag : this->flowFragments) {
             for(int index = 0; index < this->cycle.getNumOfSlots(); index++) {
@@ -300,7 +300,7 @@ class INET_API Port {
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      * @param flowFrag      A fragment of a flow that goes through this port
      */
-    void setupTimeSlots(solver solver, context ctx, FlowFragment flowFrag) {
+    void setupTimeSlots(solver solver, context& ctx, FlowFragment flowFrag) {
         std::shared_ptr<expr> indexZ3;
 
         // If there is a flow assigned to the slot, slotDuration must be greater than transmission time
@@ -351,7 +351,7 @@ class INET_API Port {
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      * @param flowFrag      A fragment of a flow that goes through this port
      */
-    void setupDevPacketTimes(solver solver, context ctx, FlowFragment flowFrag) {
+    void setupDevPacketTimes(solver solver, context& ctx, FlowFragment flowFrag) {
 
         // For the specified range of packets defined by [0, upperBoundRange],
         // apply the scheduling rules.
@@ -888,7 +888,7 @@ class INET_API Port {
      * @param solver    solver object
      * @param ctx        context object for the solver
      */
-    void setupBestEffort(solver solver, context ctx) {
+    void setupBestEffort(solver solver, context& ctx) {
         std::shared_ptr<expr> []slotStart = new z3::expr[8];
         std::shared_ptr<expr> []slotDuration = new z3::expr[8];
         // z3::expr guardBandTime = nullptr;
@@ -1092,7 +1092,7 @@ class INET_API Port {
      * @param solver    solver object
      * @param ctx        context object for the solver
      */
-    void setUpHyperCycle(solver solver, context ctx) {
+    void setUpHyperCycle(solver solver, context& ctx) {
         int numOfPacketsScheduled = 0;
 
         /*
@@ -1142,7 +1142,7 @@ class INET_API Port {
      * @param solver    solver object
      * @param ctx        context object for the solver
      */
-    void setUpMicroCycles(solver solver, context ctx) {
+    void setUpMicroCycles(solver solver, context& ctx) {
 
         /*
         for(FlowFragment flowFrag : this->flowFragments) {
@@ -1180,7 +1180,7 @@ class INET_API Port {
      * @param solver    solver object
      * @param ctx        context object for the solver
      */
-    void bindTimeSlots(solver solver, context ctx) {
+    void bindTimeSlots(solver solver, context& ctx) {
 
         // Ideia = se a prioridade de um flow e' igual a um numero,
         // ctx.mkeq nele com o slot the cycle (getSlotS/D(prt, slotnum))
@@ -1214,7 +1214,7 @@ class INET_API Port {
      * @param solver        z3 solver object used to discover the variables' values
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
-    void setUpCycle(solver solver, context ctx) {
+    void setUpCycle(solver solver, context& ctx) {
 
         this->cycle.toZ3(ctx);
 
@@ -1250,7 +1250,7 @@ class INET_API Port {
      * @param solver
      * @param ctx
      */
-    void zeroOutNonUsedSlots(solver solver, context ctx) {
+    void zeroOutNonUsedSlots(solver solver, context& ctx) {
         BoolExpr exp1;
         BoolExpr exp2;
         std::shared_ptr<expr> indexZ3;
@@ -1339,7 +1339,7 @@ class INET_API Port {
      * @param solver        z3 solver object used to discover the variables' values
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
-    void setupSchedulingRules(solver solver, context ctx) {
+    void setupSchedulingRules(solver solver, context& ctx) {
 
         if (this->flowFragments.size() == 0) {
             solver.add(ctx.mkEq(
@@ -1408,7 +1408,7 @@ class INET_API Port {
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
 
-    std::shared_ptr<expr> departureTime(context ctx, z3::expr index, FlowFragment flowFrag){
+    std::shared_ptr<expr> departureTime(context& ctx, z3::expr index, FlowFragment flowFrag){
 
         // If the index is 0, then its the first departure time, else add index * periodicity
         return this->departureTime(ctx, (int.parseInt(index.toString())), flowFrag);
@@ -1435,7 +1435,7 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    std::shared_ptr<expr> departureTime(context ctx, int auxIndex, FlowFragment flowFrag){
+    std::shared_ptr<expr> departureTime(context& ctx, int auxIndex, FlowFragment flowFrag){
         std::shared_ptr<expr> index = nullptr;
         std::shared_ptr<expr> departureTime;
         int cycleNum = 0;
@@ -1474,7 +1474,7 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      *
-    std::shared_ptr<expr> arrivalTime(context ctx, z3::expr index, FlowFragment flowFrag){
+    std::shared_ptr<expr> arrivalTime(context& ctx, z3::expr index, FlowFragment flowFrag){
 
 
        // The arrival time of this index from the given flow fragment is
@@ -1498,7 +1498,7 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    std::shared_ptr<expr> arrivalTime(context ctx, int auxIndex, FlowFragment flowFrag){
+    std::shared_ptr<expr> arrivalTime(context& ctx, int auxIndex, FlowFragment flowFrag){
         std::shared_ptr<expr> index = ctx.int_val(auxIndex);
 
         return (z3::expr) ctx.mkAdd( // Arrival time value constraint
@@ -1523,7 +1523,7 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      *
-    std::shared_ptr<expr> scheduledTime(context ctx, z3::expr index, FlowFragment flowFrag){
+    std::shared_ptr<expr> scheduledTime(context& ctx, z3::expr index, FlowFragment flowFrag){
         std::shared_ptr<expr> devT3 = ctx.real_const((flowFrag.getName() + std::string("ScheduledTime") + index.toString()).c_str());
 
         return (z3::expr) devT3;
@@ -1546,7 +1546,7 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      */
-    std::shared_ptr<expr> scheduledTime(context ctx, int auxIndex, FlowFragment flowFrag){
+    std::shared_ptr<expr> scheduledTime(context& ctx, int auxIndex, FlowFragment flowFrag){
         std::shared_ptr<expr> index = nullptr;
         std::shared_ptr<expr> scheduledTime;
         int cycleNum = 0;
@@ -1599,7 +1599,7 @@ class INET_API Port {
      * @param ctx        context object for the solver
      * @param solver    solver object
      */
-    void loadZ3(context ctx, solver solver) {
+    void loadZ3(context& ctx, solver solver) {
 
         this->cycle.loadZ3(ctx, solver);
 
@@ -1788,7 +1788,7 @@ class INET_API Port {
      *
      ***************************************************/
 
-    std::shared_ptr<expr> getCycleOfScheduledTime(context ctx, FlowFragment f, int index) {
+    std::shared_ptr<expr> getCycleOfScheduledTime(context& ctx, FlowFragment f, int index) {
         std::shared_ptr<expr> cycleIndex = nullptr;
 
         std::shared_ptr<expr> relativeST = (z3::expr) ctx.mkSub(
@@ -1804,7 +1804,7 @@ class INET_API Port {
     }
 
 
-    std::shared_ptr<expr> getCycleOfTime(context ctx, z3::expr time) {
+    std::shared_ptr<expr> getCycleOfTime(context& ctx, z3::expr time) {
         std::shared_ptr<expr> cycleIndex = nullptr;
 
         std::shared_ptr<expr> relativeST = (z3::expr) ctx.mkSub(
@@ -1819,7 +1819,7 @@ class INET_API Port {
         return cycleIndex;
     }
 
-    std::shared_ptr<expr> getScheduledTimeOfPreviousPacket(context ctx, FlowFragment f, int index) {
+    std::shared_ptr<expr> getScheduledTimeOfPreviousPacket(context& ctx, FlowFragment f, int index) {
         std::shared_ptr<expr> prevPacketST = ctx.real_val(0);
 
         for(FlowFragment auxFrag : this->flowFragments) {
