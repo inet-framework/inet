@@ -66,7 +66,7 @@ class INET_API ScheduleGenerator {
 	    *
 	    * @return  A z3 context
 	    */
-	   public Context createContext() {
+	   public context createContext() {
 	       System.out.println("findSchedulerModel\n");
 
            try
@@ -84,7 +84,7 @@ class INET_API ScheduleGenerator {
                 { // These examples need model generation turned on.
                     HashMap<std::string, std::string> cfg = new HashMap<std::string, std::string>();
                     cfg.put("model", "true");
-                    Context ctx = new Context(cfg);
+                    context ctx = new context(cfg);
 
                     return ctx;
                 }
@@ -109,9 +109,9 @@ class INET_API ScheduleGenerator {
 	    * [Usage]: Clears and close the context used to
 	    * generate the schedule.
 	    *
-	    * @param ctx   Context to be cleared
+	    * @param ctx   context to be cleared
 	    */
-	   public void closeContext(Context ctx) {
+	   public void closeContext(context ctx) {
 	       try
            {
 
@@ -147,7 +147,7 @@ class INET_API ScheduleGenerator {
 	    * @param ctx       z3 context used to generate the model
 	    * @param out       PrintWriter stream to output log file
 	    */
-	   public void writePathTree(PathNode pathNode, Model model, Context ctx, PrintWriter out) {
+	   public void writePathTree(PathNode pathNode, Model model, context ctx, PrintWriter out) {
 	       Switch swt;
 	       z3::expr indexZ3 = null;
 
@@ -282,7 +282,7 @@ class INET_API ScheduleGenerator {
 	   }
 
 
-	   public void configureNetwork(Network net, Context ctx, Solver solver) {
+	   public void configureNetwork(Network net, context ctx, solver solver) {
 		   for(Flow flw : net.getFlows()) {
 		   	   flw.modifyIfUsingCustomVal();
 	    	   flw.convertUnicastFlow();
@@ -323,8 +323,8 @@ class INET_API ScheduleGenerator {
 	    */
 	   public void generateSchedule(Network net)
 	   {
-		   Context ctx = this->createContext(); //Creating the z3 context
-	       Solver solver = ctx.mkSolver();     //Creating the solver to generate unknown values based on the given context
+		   context ctx = this->createContext(); //Creating the z3 context
+	       solver solver = ctx.mkSolver();     //Creating the solver to generate unknown values based on the given context
 
 
 	        this->configureNetwork(net, ctx, solver);

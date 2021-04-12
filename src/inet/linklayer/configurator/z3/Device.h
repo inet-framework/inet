@@ -148,9 +148,9 @@ class INET_API Device {
 	 * generates the z3 equivalent of these values and creates any extra
 	 * variable needed.
 	 *
-	 * @param ctx      Context variable containing the z3 environment used
+	 * @param ctx      context variable containing the z3 environment used
 	 */
-     void toZ3(Context ctx) {
+     void toZ3(context ctx) {
 	    this->packetPeriodicityZ3 = ctx.real_val(std::to_string(this->packetPeriodicity));
 	    //this->firstT1TimeZ3 = ctx.real_val(std::to_string(this->firstT1Time)); // In case of fixed firstT1Time
 	    this->firstT1TimeZ3 = ctx.real_const(this->name + "FirstT1Time");

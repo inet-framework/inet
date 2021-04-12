@@ -150,9 +150,9 @@ class INET_API Cycle {
      * generates the z3 equivalent of these values and creates any extra
      * variable needed.
      *
-     * @param ctx      Context variable containing the z3 environment used
+     * @param ctx      context variable containing the z3 environment used
      */
-    void toZ3(Context ctx) {
+    void toZ3(context ctx) {
         instanceCounter++;
 
         this->cycleDurationZ3 = ctx.real_const("cycle" + int.toString(instanceCounter) + "Duration");
@@ -181,11 +181,11 @@ class INET_API Cycle {
      * specified by its index. The index is given as a z3
      * variable
      *
-     * @param ctx       Context containing the z3 environment
+     * @param ctx       context containing the z3 environment
      * @param index     Index of the desired cycle
      * @return          Z3 variable containing the cycle start time
      */
-    z3::expr cycleStartZ3(Context ctx, z3::expr index){
+    z3::expr cycleStartZ3(context ctx, z3::expr index){
         return (z3::expr) ctx.mkITE(
                 ctx.mkGe(index, ctx.mkInt(1)),
                 ctx.mkAdd(
@@ -201,11 +201,11 @@ class INET_API Cycle {
      * [Usage]: Returns the time of the start of a cycle
      * specified by its index. The index is given as integer
      *
-     * @param ctx       Context containing the z3 environment
+     * @param ctx       context containing the z3 environment
      * @param index     Index of the desired cycle
      * @return          Z3 variable containing the cycle start time
      */
-    z3::expr cycleStartZ3(Context ctx, int auxIndex){
+    z3::expr cycleStartZ3(context ctx, int auxIndex){
         z3::expr index = ctx.mkInt(auxIndex);
 
         return (z3::expr) ctx.mkITE(
@@ -246,10 +246,10 @@ class INET_API Cycle {
      * obtained in the deserialization process, initialize the
      * z3 variables.
      *
-     * @param ctx		Context object of z3
-     * @param solver	Solver object to add constraints
+     * @param ctx		context object of z3
+     * @param solver	solver object to add constraints
      */
-    void loadZ3(Context ctx, Solver solver) {
+    void loadZ3(context ctx, solver solver) {
     	// maximumSlotDurationZ3 already started on toZ3;
 
     	solver.add(
@@ -351,22 +351,22 @@ class INET_API Cycle {
     }
 
 
-    z3::expr slotStartZ3(Context ctx, z3::expr prt, z3::expr index) {
+    z3::expr slotStartZ3(context ctx, z3::expr prt, z3::expr index) {
         return ctx.real_const("priority" + prt.toString() + "slot" + index.toString() + "Start");
     }
 
-    z3::expr slotStartZ3(Context ctx, int auxPrt, int auxIndex) {
+    z3::expr slotStartZ3(context ctx, int auxPrt, int auxIndex) {
         z3::expr index = ctx.mkInt(auxIndex);
         z3::expr prt = ctx.mkInt(auxPrt);
         return ctx.real_const("priority" + prt.toString() + "slot" + index.toString() + "Start");
     }
 
 
-    z3::expr slotDurationZ3(Context ctx, z3::expr prt, z3::expr index) {
+    z3::expr slotDurationZ3(context ctx, z3::expr prt, z3::expr index) {
         return ctx.real_const("priority" + prt.toString() + "slot" + index.toString() + "Duration");
     }
 
-    z3::expr slotDurationZ3(Context ctx, int auxPrt, int auxIndex) {
+    z3::expr slotDurationZ3(context ctx, int auxPrt, int auxIndex) {
         z3::expr index = ctx.mkInt(auxIndex);
         z3::expr prt = ctx.mkInt(auxPrt);
         return ctx.real_const("priority" + prt.toString() + "slot" + index.toString() + "Duration");
