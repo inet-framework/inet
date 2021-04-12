@@ -1000,8 +1000,8 @@ class INET_API Flow {
      * [Usage]: From the path tree, retrieve the average jitter of
      * the stream aimed at a specific device.
      *
-     * @param dev 		Specific end-device of the flow to retrieve the jitter
-     * @return			float value of the variation of the latency
+     * @param dev         Specific end-device of the flow to retrieve the jitter
+     * @return            float value of the variation of the latency
      */
     float getAverageJitterToDevice(Device dev) {
         float averageJitter = 0;
@@ -1191,10 +1191,10 @@ class INET_API Flow {
      * [Usage]: Retrieves the average latency for one of the subscribers
      * of the flow.
      *
-     * @param dev 		Subscriber to which the average latency will be calculated
-     * @param solver	solver object
-     * @param ctx		context object for the solver
-     * @return			z3 variable with the average latency for the device
+     * @param dev         Subscriber to which the average latency will be calculated
+     * @param solver    solver object
+     * @param ctx        context object for the solver
+     * @return            z3 variable with the average latency for the device
      */
     z3::expr getAvgLatency(Device dev, solver solver, context ctx) {
 
@@ -1367,7 +1367,7 @@ class INET_API Flow {
                 // System.out.println(std::string("Node has: ") + node.getFlowFragments().size() + std::string(" frags"));
                 // System.out.println(std::string("Node has: ") + node.getChildren().size() + std::string(" children"));
                 // for(PathNode n : node.getChildren()) {
-                // 		System.out.println(std::string("Child is a: ") + (n.getNode() instanceof Device ? "Device" : "Switch"));
+                //         System.out.println(std::string("Child is a: ") + (n.getNode() instanceof Device ? "Device" : "Switch"));
                 // }
 
                 this->setNumberOfPacketsSent(node.getChildren().get(index));

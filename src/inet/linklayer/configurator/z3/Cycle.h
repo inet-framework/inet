@@ -44,7 +44,7 @@ using namespace z3;
  */
 class INET_API Cycle {
     std::string portName = "";
-	static int instanceCounter;
+    static int instanceCounter;
     float upperBoundCycleTime;
     float lowerBoundCycleTime;
     float firstCycleStart;
@@ -69,7 +69,7 @@ class INET_API Cycle {
 
 
 
-	/**
+    /**
      * [Method]: Cycle
      * [Usage]: Overloaded method of this class. Will create
      * an object setting up the minimum and maximum cycle time,
@@ -169,10 +169,10 @@ class INET_API Cycle {
         for(int i = 0; i < this->numOfPrts; i++) {
             this->slotStartZ3.push_back(std::vector<z3::expr>());
             this->slotDurationZ3.push_back(std::vector<z3::expr>());
-        	for(int j = 0; j < this->numOfSlots; j++) {
+            for(int j = 0; j < this->numOfSlots; j++) {
                 expr v = ctx.real_const((std::string("cycleOfPort") + this->portName + std::string("prt") + std::to_string(i+1) + std::string("slot") + std::to_string(j+1)).c_str());
                 this->slotStartZ3.at(i).push_back(v);
-        	}
+            }
         }
 
     }
@@ -249,51 +249,51 @@ class INET_API Cycle {
      * obtained in the deserialization process, initialize the
      * z3 variables.
      *
-     * @param ctx		context object of z3
-     * @param solver	solver object to add constraints
+     * @param ctx        context object of z3
+     * @param solver    solver object to add constraints
      */
     void loadZ3(context ctx, solver solver) {
-    	// maximumSlotDurationZ3 already started on toZ3;
+        // maximumSlotDurationZ3 already started on toZ3;
 
-    	solver.add(
-			ctx.mkEq(
-				this->cycleDurationZ3,
-				ctx.real_val(std::to_string(this->cycleDuration))
-			)
-		);
+        solver.add(
+            ctx.mkEq(
+                this->cycleDurationZ3,
+                ctx.real_val(std::to_string(this->cycleDuration))
+            )
+        );
 
-    	solver.add(
-			ctx.mkEq(
-				this->firstCycleStartZ3,
-				ctx.real_val(std::to_string(this->firstCycleStart))
-			)
-		);
+        solver.add(
+            ctx.mkEq(
+                this->firstCycleStartZ3,
+                ctx.real_val(std::to_string(this->firstCycleStart))
+            )
+        );
 
 
-    	for(int prt : this->getSlotsUsed()) {
+        for(int prt : this->getSlotsUsed()) {
 
-    		// Where are the slot duration per priority instantiated? Must do it before loading
+            // Where are the slot duration per priority instantiated? Must do it before loading
 
-    		for(int slotIndex = 0; slotIndex < this->numOfSlots; slotIndex++) {
-    			solver.add(
-					ctx.mkEq(
-						this->slotStartZ3.get(prt).get(slotIndex),
-						ctx.real_val(std::to_string(this->slotStart.get(this->slotsUsed.indexOf(prt)).get(slotIndex)))
-					)
-				);
-    		}
+            for(int slotIndex = 0; slotIndex < this->numOfSlots; slotIndex++) {
+                solver.add(
+                    ctx.mkEq(
+                        this->slotStartZ3.get(prt).get(slotIndex),
+                        ctx.real_val(std::to_string(this->slotStart.get(this->slotsUsed.indexOf(prt)).get(slotIndex)))
+                    )
+                );
+            }
 
-    		/*
-    		for(int slotIndex = 0; slotIndex < this->numOfSlots; slotIndex++) {
-    			solver.add(
-					ctx.mkEq(
-						this->slotDurationZ3.get(prt).get(slotIndex),
-						ctx.real_val(std::to_string(this->slotDuration.get(prt).get(slotIndex)))
-					)
-				);
-    		}
-    		*/
-    	}
+            /*
+            for(int slotIndex = 0; slotIndex < this->numOfSlots; slotIndex++) {
+                solver.add(
+                    ctx.mkEq(
+                        this->slotDurationZ3.get(prt).get(slotIndex),
+                        ctx.real_val(std::to_string(this->slotDuration.get(prt).get(slotIndex)))
+                    )
+                );
+            }
+            */
+        }
 
 
 
@@ -400,12 +400,12 @@ class INET_API Cycle {
     }
 
     int getNumOfSlots() {
-		return numOfSlots;
-	}
+        return numOfSlots;
+    }
 
      void setNumOfSlots(int numOfSlots) {
-		this->numOfSlots = numOfSlots;
-	}
+        this->numOfSlots = numOfSlots;
+    }
 
     z3::expr getMaximumSlotDurationZ3() {
         return maximumSlotDurationZ3;
@@ -432,23 +432,23 @@ class INET_API Cycle {
     }
 
     std::string getPortName() {
-		return portName;
-	}
+        return portName;
+    }
 
 
      void setPortName(std::string portName) {
-		this->portName = portName;
-	}
+        this->portName = portName;
+    }
 
      z3::expr getSlotStartZ3(int prt, int slotNum) {
-		return this->slotStartZ3.get(prt).get(slotNum);
-	}
+        return this->slotStartZ3.get(prt).get(slotNum);
+    }
 
-	/*
+    /*
      z3::expr getSlotDurationZ3(int prt, int slotNum) {
-		return this->slotDurationZ3.get(prt).get(slotNum);
-	}
-	*/
+        return this->slotDurationZ3.get(prt).get(slotNum);
+    }
+    */
 };
 
 }
