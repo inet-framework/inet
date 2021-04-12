@@ -5,6 +5,8 @@
 
 #include "inet/common/INETDefs.h"
 
+namespace inet {
+
 /**
  * [Class]: Switch
  * [Usage]: Contains most of the properties of a normal
@@ -110,6 +112,8 @@ public class Switch implements Serializable {
     public String getName() {
         return this.name;
     }
+
+}
 
 }
 

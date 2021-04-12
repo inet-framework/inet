@@ -5,8 +5,9 @@
 
 #include "inet/common/INETDefs.h"
 
-// CLASS WHERE DEVICE PROPERTIES AND CONDITIONS ARE SPECIFIED
+namespace inet {
 
+// CLASS WHERE DEVICE PROPERTIES AND CONDITIONS ARE SPECIFIED
 
 /**
  * [Class]: Device
@@ -264,6 +265,8 @@ public class Device implements Serializable {
     }
 
 
+
+}
 
 }
 

@@ -5,6 +5,8 @@
 
 #include "inet/common/INETDefs.h"
 
+namespace inet {
+
 /**
  * [Class]: Network
  * [Usage]: Using this class, the user can specify the network
@@ -325,6 +327,8 @@ public class Network implements Serializable {
     public void addSwitch (Switch swt) {
         this.switches.add(swt);
     }
+
+}
 
 }
 
