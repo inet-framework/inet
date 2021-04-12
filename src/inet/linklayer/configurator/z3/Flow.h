@@ -43,9 +43,9 @@ class INET_API Flow {
 
 
 
-    std::vector<Switch> path;
-    std::vector<FlowFragment> flowFragments;
-    PathTree pathTree;
+    std::vector<Switch *> path;
+    std::vector<FlowFragment *> flowFragments;
+    PathTree *pathTree;
 
     int pathTreeCount = 0;
 
@@ -144,7 +144,7 @@ class INET_API Flow {
      *
      * @param swt   Switch to be added to the list
      */
-    void addToPath(TSNSwitch swt) {
+    void addToPath(TSNSwitch *swt) {
         path.add(swt);
     }
 
@@ -162,7 +162,7 @@ class INET_API Flow {
         if(this->type == UNICAST) {
             LinkedList<PathNode> nodeList;
 
-            PathTree pathTree = new PathTree();
+            PathTree *pathTree = new PathTree();
             PathNode pathNode;
             pathNode = pathTree.addRoot(this->startDevice);
             pathNode = pathNode.addChild(path.get(0));
@@ -200,7 +200,7 @@ class INET_API Flow {
              */
 
             int currentSwitchIndex = 0;
-            for (Switch swt : this->path) {
+            for (Switch *swt : this->path) {
                 this->pathToZ3(ctx, swt, currentSwitchIndex);
                 currentSwitchIndex++;
             }
@@ -487,8 +487,8 @@ class INET_API Flow {
      * @param endDevice     End device (leaf) of the desired path
      * @return              std::vector of flow fragments containing every flow fragment from source to destination
      */
-    std::vector<FlowFragment> getFlowFromRootToNode(Device endDevice){
-        std::vector<FlowFragment> flowFragments;
+    std::vector<FlowFragment *> getFlowFromRootToNode(Device endDevice){
+        std::vector<FlowFragment *> flowFragments;
         std::vector<Device> flowEndDevices;
         PathNode auxNode = nullptr;
 
@@ -651,7 +651,7 @@ class INET_API Flow {
     float getDepartureTime(std::string deviceName, int hop, int packetNum) {
         float time;
         Device targetDevice = nullptr;
-        std::vector<FlowFragment> auxFlowFragments;
+        std::vector<FlowFragment *> auxFlowFragments;
 
         for(Object node : this->pathTree.getLeaves()) {
             if(node instanceof Device) {
@@ -687,7 +687,7 @@ class INET_API Flow {
      */
     float getDepartureTime(Device targetDevice, int hop, int packetNum) {
         float time;
-        std::vector<FlowFragment> auxFlowFragments;
+        std::vector<FlowFragment *> auxFlowFragments;
 
         if(!this->pathTree.getLeaves().contains(targetDevice)) {
             //TODO: Throw error
@@ -735,7 +735,7 @@ class INET_API Flow {
     float getArrivalTime(std::string deviceName, int hop, int packetNum) {
         float time;
         Device targetDevice = nullptr;
-        std::vector<FlowFragment> auxFlowFragments;
+        std::vector<FlowFragment *> auxFlowFragments;
 
         for(Object node : this->pathTree.getLeaves()) {
             if(node instanceof Device) {
@@ -772,7 +772,7 @@ class INET_API Flow {
      */
     float getArrivalTime(Device targetDevice, int hop, int packetNum) {
         float time;
-        std::vector<FlowFragment> auxFlowFragments;
+        std::vector<FlowFragment *> auxFlowFragments;
 
         if(!this->pathTree.getLeaves().contains(targetDevice)) {
             //TODO: Throw error
@@ -819,7 +819,7 @@ class INET_API Flow {
     float getScheduledTime(std::string deviceName, int hop, int packetNum) {
         float time;
         Device targetDevice = nullptr;
-        std::vector<FlowFragment> auxFlowFragments;
+        std::vector<FlowFragment *> auxFlowFragments;
 
         for(Object node : this->pathTree.getLeaves()) {
             if(node instanceof Device) {
@@ -855,7 +855,7 @@ class INET_API Flow {
      */
     float getScheduledTime(Device targetDevice, int hop, int packetNum) {
         float time;
-        std::vector<FlowFragment> auxFlowFragments;
+        std::vector<FlowFragment *> auxFlowFragments;
 
         if(!this->pathTree.getLeaves().contains(targetDevice)) {
             //TODO: Throw error
@@ -931,7 +931,7 @@ class INET_API Flow {
         float auxAverageLatency = 0;
         Device endDevice = nullptr;
 
-        std::vector<FlowFragment> fragments = this->getFlowFromRootToNode(dev);
+        std::vector<FlowFragment *> fragments = this->getFlowFromRootToNode(dev);
 
         for(int i = 0; i < fragments.get(0).getParent().getNumOfPacketsSent(); i++) {
             averageLatency +=
@@ -1007,7 +1007,7 @@ class INET_API Flow {
         float averageJitter = 0;
         float averageLatency = this->getAverageLatencyToDevice(dev);
 
-        std::vector<FlowFragment> fragments = this->getFlowFromRootToNode(dev);
+        std::vector<FlowFragment *> fragments = this->getFlowFromRootToNode(dev);
 
         for(int i = 0; i < fragments.get(0).getNumOfPacketsSent(); i++) {
             averageJitter +=
@@ -1076,7 +1076,7 @@ class INET_API Flow {
         std::shared_ptr<expr> latency = ctx.real_const((this->name + std::string("latencyOfPacket" + index + std::string("For")) + dev.getName()).c_str());
 
         std::vector<PathNode> nodes = this->getNodesFromRootToNode(dev);
-        std::vector<FlowFragment> flowFrags = this->getFlowFromRootToNode(dev);
+        std::vector<FlowFragment *> flowFrags = this->getFlowFromRootToNode(dev);
 
         TSNSwitch lastSwitchInPath = ((TSNSwitch) nodes.get(nodes.size() - 2).getNode()); // - 1 for indexing, - 1 for last node being the end device
         FlowFragment lastFragmentInList = flowFrags.get(flowFrags.size() - 1);
@@ -1410,11 +1410,11 @@ class INET_API Flow {
         this->endDevice = endDevice;
     }
 
-    std::vector<Switch> getPath() {
+    std::vector<Switch *> getPath() {
         return path;
     }
 
-    void setPath(std::vector<Switch> path) {
+    void setPath(std::vector<Switch *> path) {
         this->path = path;
     }
 
@@ -1434,11 +1434,11 @@ class INET_API Flow {
         this->name = name;
     }
 
-    std::vector<FlowFragment> getFlowFragments() {
+    std::vector<FlowFragment *> getFlowFragments() {
         return flowFragments;
     }
 
-    void setFlowFragments(std::vector<FlowFragment> flowFragments) {
+    void setFlowFragments(std::vector<FlowFragment *> flowFragments) {
         this->flowFragments = flowFragments;
     }
 
