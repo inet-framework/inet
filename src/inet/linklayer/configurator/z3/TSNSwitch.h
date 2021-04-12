@@ -20,7 +20,7 @@ using namespace z3;
  */
 class INET_API TSNSwitch extends Switch {
 
-    Boolean isModifiedOrCreated = true;
+    bool isModifiedOrCreated = true;
 
     // private Cycle cycle;
     std::vector<std::string> connectsTo;
@@ -575,11 +575,11 @@ class INET_API TSNSwitch extends Switch {
         this->cycleStart = cycleStart;
     }
 
-    Boolean getIsModifiedOrCreated() {
+    bool getIsModifiedOrCreated() {
         return isModifiedOrCreated;
     }
 
-    void setIsModifiedOrCreated(Boolean isModifiedOrCreated) {
+    void setIsModifiedOrCreated(bool isModifiedOrCreated) {
         this->isModifiedOrCreated = isModifiedOrCreated;
     }
 
