@@ -53,8 +53,8 @@ class INET_API Cycle {
     float cycleDuration;
     float cycleStart;
 
-    std::vector<std::vector<z3::expr>> slotStartZ3;
-    std::vector<std::vector<z3::expr>> slotDurationZ3;
+    std::vector<std::vector<z3::expr *>> slotStartZ3;
+    std::vector<std::vector<z3::expr *>> slotDurationZ3;
 
     std::vector<int> slotsUsed;
     std::vector<std::vector<float>> slotStart;
@@ -167,8 +167,8 @@ class INET_API Cycle {
         this->slotDurationZ3.clear();
 
         for(int i = 0; i < this->numOfPrts; i++) {
-            this->slotStartZ3.push_back(std::vector<z3::expr>());
-            this->slotDurationZ3.push_back(std::vector<z3::expr>());
+            this->slotStartZ3.push_back(std::vector<z3::expr *>());
+            this->slotDurationZ3.push_back(std::vector<z3::expr *>());
             for(int j = 0; j < this->numOfSlots; j++) {
                 expr v = ctx.real_const((std::string("cycleOfPort") + this->portName + std::string("prt") + std::to_string(i+1) + std::string("slot") + std::to_string(j+1)).c_str());
                 this->slotStartZ3.at(i).push_back(v);
