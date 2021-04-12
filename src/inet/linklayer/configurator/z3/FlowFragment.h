@@ -22,7 +22,6 @@ using namespace z3;
  */
 class INET_API FlowFragment extends Flow {
     Boolean isModifiedOrCreated = false;
-    static final long serialVersionUID = 1L;
     Flow parent;
     z3::expr packetSize;
     z3::expr packetPeriodicityZ3;

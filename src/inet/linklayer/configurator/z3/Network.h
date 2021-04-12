@@ -33,8 +33,8 @@ class INET_API Network {
     std::vector<z3::expr> allSumOfJitter;
     std::vector<int> numberOfNodes;
 
-    static int PACKETUPPERBOUNDRANGE = 5; // Limits the applications of rules to the packets
-    static int CYCLEUPPERBOUNDRANGE = 25; // Limits the applications of rules to the cycles
+#define PACKETUPPERBOUNDRANGE 5 // Limits the applications of rules to the packets
+#define CYCLEUPPERBOUNDRANGE 25 // Limits the applications of rules to the cycles
 
     float jitterUpperBoundRange = -1;
     z3::expr jitterUpperBoundRangeZ3;

@@ -26,7 +26,7 @@ class INET_API Device {
     float softConstraintTime;
     float packetSize;
 
-    static int indexCounter = -1;
+    static int indexCounter;
     z3::expr packetPeriodicityZ3;
     z3::expr firstT1TimeZ3;
     z3::expr hardConstraintTimeZ3;
