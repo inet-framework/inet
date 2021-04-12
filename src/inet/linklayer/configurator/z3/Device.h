@@ -152,7 +152,7 @@ class INET_API Device {
      *
      * @param ctx      context variable containing the z3 environment used
      */
-     void toZ3(context ctx) {
+     void toZ3(context& ctx) {
         this->packetPeriodicityZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->packetPeriodicity).c_str()));
         //this->firstT1TimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->firstT1Time))); // In case of fixed firstT1Time
         this->firstT1TimeZ3 = std::make_shared<expr>(ctx.real_const((this->name + std::string("FirstT1Time")).c_str()));

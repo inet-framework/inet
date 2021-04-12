@@ -156,7 +156,7 @@ class INET_API Cycle {
      *
      * @param ctx      context variable containing the z3 environment used
      */
-    void toZ3(context ctx) {
+    void toZ3(context& ctx) {
         instanceCounter++;
 
         this->cycleDurationZ3 = std::make_shared<expr>(ctx.real_const((std::string("cycle") + std::to_string(instanceCounter) + std::string("Duration")).c_str()));
@@ -190,7 +190,7 @@ class INET_API Cycle {
      * @param index     Index of the desired cycle
      * @return          Z3 variable containing the cycle start time
      */
-    std::shared_ptr<expr> cycleStartZ3(context ctx, z3::expr index){
+    std::shared_ptr<expr> cycleStartZ3(context& ctx, z3::expr index){
         return std::make_shared<expr>(ite(index >= ctx.int_val(1),
                             *firstCycleStartZ3 + *cycleDurationZ3 * index,
                             *firstCycleStartZ3));
@@ -205,7 +205,7 @@ class INET_API Cycle {
      * @param index     Index of the desired cycle
      * @return          Z3 variable containing the cycle start time
      */
-    std::shared_ptr<expr> cycleStartZ3(context ctx, int auxIndex){
+    std::shared_ptr<expr> cycleStartZ3(context& ctx, int auxIndex){
         expr index = ctx.int_val(auxIndex);
         return std::make_shared<expr>(ite(index >= ctx.int_val(1),
                             *firstCycleStartZ3 + *cycleDurationZ3 * index,
@@ -244,7 +244,7 @@ class INET_API Cycle {
      * @param ctx        context object of z3
      * @param solver    solver object to add constraints
      */
-    void loadZ3(context ctx, solver solver) {
+    void loadZ3(context& ctx, solver solver) {
         // maximumSlotDurationZ3 already started on toZ3;
 
         solver.add(
@@ -340,22 +340,22 @@ class INET_API Cycle {
     }
 
 
-    std::shared_ptr<expr> slotStartZ3(context ctx, z3::expr prt, z3::expr index) {
+    std::shared_ptr<expr> slotStartZ3(context& ctx, z3::expr prt, z3::expr index) {
         return std::make_shared<expr>(ctx.real_const((std::string("priority") + prt.to_string() + std::string("slot") + index.to_string() + "Start").c_str()));
     }
 
-    std::shared_ptr<expr> slotStartZ3(context ctx, int auxPrt, int auxIndex) {
+    std::shared_ptr<expr> slotStartZ3(context& ctx, int auxPrt, int auxIndex) {
         expr index = ctx.int_val(auxIndex);
         expr prt = ctx.int_val(auxPrt);
         return std::make_shared<expr>(ctx.real_const((std::string("priority") + prt.to_string() + std::string("slot") + index.to_string() + "Start").c_str()));
     }
 
 
-    std::shared_ptr<expr> slotDurationZ3(context ctx, z3::expr prt, z3::expr index) {
+    std::shared_ptr<expr> slotDurationZ3(context& ctx, z3::expr prt, z3::expr index) {
         return std::make_shared<expr>(ctx.real_const((std::string("priority") + prt.to_string() + std::string("slot") + index.to_string() + "Duration").c_str()));
     }
 
-    std::shared_ptr<expr> slotDurationZ3(context ctx, int auxPrt, int auxIndex) {
+    std::shared_ptr<expr> slotDurationZ3(context& ctx, int auxPrt, int auxIndex) {
         expr index = ctx.int_val(auxIndex);
         expr prt = ctx.int_val(auxPrt);
         return std::make_shared<expr>(ctx.real_const((std::string("priority") + prt.to_string() + std::string("slot") + index.to_string() + "Duration").c_str()));

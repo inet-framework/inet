@@ -89,7 +89,7 @@ class INET_API Network {
      * @param solver    z3 solver object used to discover the variables' values
      * @param ctx       z3 context which specify the environment of constants, functions and variables
      */
-    void secureHC(solver solver, context ctx) {
+    void secureHC(solver solver, context& ctx) {
 
         if(jitterUpperBoundRange != -1) { // If there is a value on the upperBoundRange, it was set through the network
             this->setJitterUpperBoundRangeZ3(ctx, this->jitterUpperBoundRange);
@@ -253,7 +253,7 @@ class INET_API Network {
      * @param ctx        context object for the solver
      * @param solver    solver object
      */
-    void loadNetwork(context ctx, solver solver) {
+    void loadNetwork(context& ctx, solver solver) {
 
         // TODO: Don't forget to load the values of this class
 
@@ -301,7 +301,7 @@ class INET_API Network {
         this->jitterUpperBoundRangeZ3 = jitterUpperBoundRange;
     }
 
-    void setJitterUpperBoundRangeZ3(context ctx, float auxJitterUpperBoundRange) {
+    void setJitterUpperBoundRangeZ3(context& ctx, float auxJitterUpperBoundRange) {
         this->jitterUpperBoundRangeZ3 = ctx.real_val(std::string.valueOf(auxJitterUpperBoundRange));
     }
 
