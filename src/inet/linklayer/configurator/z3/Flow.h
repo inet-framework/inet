@@ -237,7 +237,7 @@ class INET_API Flow {
                 this->flowSendingPeriodicityZ3 = this->startDevice.getPacketPeriodicityZ3();
             }
 
-            this->nodeToZ3(ctx, this->pathTree.getRoot(), null);
+            this->nodeToZ3(ctx, this->pathTree.getRoot(), nullptr);
 
         }
 
@@ -254,7 +254,7 @@ class INET_API Flow {
      * @param node      A node of the pathTree
      */
     FlowFragment nodeToZ3(context& ctx, PathNode node, FlowFragment frag) {
-        FlowFragment flowFrag = null;
+        FlowFragment flowFrag = nullptr;
         int numberOfPackets = Network.PACKETUPPERBOUNDRANGE;
 
         // If, by chance, the given node has no child, then its a leaf
@@ -288,7 +288,7 @@ class INET_API Flow {
                     flowFrag.setNumOfPacketsSent(numberOfPackets);
                 }
 
-                if(auxN.getParent().getParent() == null) { //First flow fragment, fragment first departure = device's first departure
+                if(auxN.getParent().getParent() == nullptr) { //First flow fragment, fragment first departure = device's first departure
                     flowFrag.setNodeName(((Switch)auxN.getNode()).getName());
 
                     for (int i = 0; i < numberOfPackets; i++) {
@@ -354,11 +354,11 @@ class INET_API Flow {
 
             }
 
-            if(flowFrag == null){
+            if(flowFrag == nullptr){
                 continue;
             }
 
-            if(frag != null && flowFrag.getPreviousFragment() == null) {
+            if(frag != nullptr && flowFrag.getPreviousFragment() == nullptr) {
                 flowFrag.setPreviousFragment(frag);
             }
 
@@ -366,7 +366,7 @@ class INET_API Flow {
             FlowFragment nextFragment = this->nodeToZ3(ctx, auxN, flowFrag);
 
 
-            if(nextFragment != null) {
+            if(nextFragment != nullptr) {
                 flowFrag.addToNextFragments(nextFragment);
             }
         }
@@ -395,7 +395,7 @@ class INET_API Flow {
          * this fragment departure time = last fragment scheduled time.
          */
         if(flowFragments.size() == 0) {
-            // If no flowFragment has been added to the path, flowPriority is null, so initiate it
+            // If no flowFragment has been added to the path, flowPriority is nullptr, so initiate it
             //flowFrag.setNodeName(this->startDevice.getName());
             for (int i = 0; i < Network.PACKETUPPERBOUNDRANGE; i++) {
                 flowFrag.addDepartureTimeZ3( // Packet departure constraint
@@ -490,7 +490,7 @@ class INET_API Flow {
     std::vector<FlowFragment> getFlowFromRootToNode(Device endDevice){
         std::vector<FlowFragment> flowFragments;
         std::vector<Device> flowEndDevices;
-        PathNode auxNode = null;
+        PathNode auxNode = nullptr;
 
 
         // Iterate over leaves, get reference to the leaf of end device
@@ -503,14 +503,14 @@ class INET_API Flow {
             }
         }
 
-        // If no leaf contains the desired end device, throw error returns null
+        // If no leaf contains the desired end device, throw error returns nullptr
         if(!flowEndDevices.contains(endDevice)) {
             // TODO [Priority: Low]: Throw error
-            return null;
+            return nullptr;
         }
 
         // Goes from parent to parent adding flowFragments to the list
-        while(auxNode.getParent().getParent() != null) {
+        while(auxNode.getParent().getParent() != nullptr) {
             flowFragments.add(
                     auxNode.getParent().getFlowFragments().get(
                             auxNode.getParent().getChildren().indexOf(auxNode)
@@ -542,7 +542,7 @@ class INET_API Flow {
     std::vector<PathNode> getNodesFromRootToNode(Device endDevice){
         std::vector<PathNode> pathNodes;
         std::vector<Device> flowEndDevices;
-        PathNode auxNode = null;
+        PathNode auxNode = nullptr;
 
         // Iterate over leaves, get reference to the leaf of end device
         for(PathNode node : this->pathTree.getLeaves()) {
@@ -553,14 +553,14 @@ class INET_API Flow {
             }
         }
 
-        // If no leaf contains the desired end device, throw error returns null
+        // If no leaf contains the desired end device, throw error returns nullptr
         if(!flowEndDevices.contains(endDevice)) {
             // TODO [Priority: Low]: Throw error
-            return null;
+            return nullptr;
         }
 
         // Goes from parent to parent adding nodes to the list
-        while(auxNode != null) {
+        while(auxNode != nullptr) {
             pathNodes.add(auxNode);
 
             auxNode = auxNode.getParent();
@@ -613,7 +613,7 @@ class INET_API Flow {
             }
         } else {
             TSNSwitch swt = (TSNSwitch) node.getNode(); //no good. Need the port
-            Port port = null;
+            Port port = nullptr;
 
             for(PathNode child : node.getChildren()) {
                 if(child.getNode() instanceof Device) {
@@ -650,7 +650,7 @@ class INET_API Flow {
      */
     float getDepartureTime(std::string deviceName, int hop, int packetNum) {
         float time;
-        Device targetDevice = null;
+        Device targetDevice = nullptr;
         std::vector<FlowFragment> auxFlowFragments;
 
         for(Object node : this->pathTree.getLeaves()) {
@@ -662,7 +662,7 @@ class INET_API Flow {
 
         }
 
-        if(targetDevice == null) {
+        if(targetDevice == nullptr) {
             //TODO: Throw error
         }
 
@@ -734,7 +734,7 @@ class INET_API Flow {
      */
     float getArrivalTime(std::string deviceName, int hop, int packetNum) {
         float time;
-        Device targetDevice = null;
+        Device targetDevice = nullptr;
         std::vector<FlowFragment> auxFlowFragments;
 
         for(Object node : this->pathTree.getLeaves()) {
@@ -746,7 +746,7 @@ class INET_API Flow {
 
         }
 
-        if(targetDevice == null) {
+        if(targetDevice == nullptr) {
             //TODO: Throw error
         }
 
@@ -818,7 +818,7 @@ class INET_API Flow {
      */
     float getScheduledTime(std::string deviceName, int hop, int packetNum) {
         float time;
-        Device targetDevice = null;
+        Device targetDevice = nullptr;
         std::vector<FlowFragment> auxFlowFragments;
 
         for(Object node : this->pathTree.getLeaves()) {
@@ -830,7 +830,7 @@ class INET_API Flow {
 
         }
 
-        if(targetDevice == null) {
+        if(targetDevice == nullptr) {
             //TODO: Throw error
         }
 
@@ -885,7 +885,7 @@ class INET_API Flow {
         float averageLatency = 0;
         float auxAverageLatency = 0;
         int timeListSize = 0;
-        Device endDevice = null;
+        Device endDevice = nullptr;
 
         if (type == UNICAST) {
             timeListSize = this->getTimeListSize();
@@ -929,7 +929,7 @@ class INET_API Flow {
     float getAverageLatencyToDevice(Device dev) {
         float averageLatency = 0;
         float auxAverageLatency = 0;
-        Device endDevice = null;
+        Device endDevice = nullptr;
 
         std::vector<FlowFragment> fragments = this->getFlowFromRootToNode(dev);
 
@@ -1148,7 +1148,7 @@ class INET_API Flow {
      */
     std::shared_ptr<expr> getSumOfAllDevLatencyZ3(solver solver, context& ctx, int index) {
         std::shared_ptr<expr> sumValue = ctx.real_val(0);
-        Device currentDev = null;
+        Device currentDev = nullptr;
 
         for(PathNode node : this->pathTree.getLeaves()) {
             currentDev = (Device) node.getNode();
@@ -1182,7 +1182,7 @@ class INET_API Flow {
             // TODO: THROW ERROR
         }
 
-        return null;
+        return nullptr;
     }
 
 
@@ -1330,7 +1330,7 @@ class INET_API Flow {
      */
     std::shared_ptr<expr> getSumOfAllDevJitterZ3(solver solver, context& ctx, int index) {
         std::shared_ptr<expr> sumValue = ctx.real_val(0);
-        Device currentDev = null;
+        Device currentDev = nullptr;
 
         for(PathNode node : this->pathTree.getLeaves()) {
             currentDev = (Device) node.getNode();
