@@ -37,7 +37,7 @@ class INET_API GateVisualizerBase : public VisualizerBase
         std::vector<queueing::IPacketGate *> gates;
 
       public:
-        virtual void visit(cObject *object) override;
+        virtual VISIT_RETURNTYPE visit(cObject *object) override;
     };
 
     class INET_API GateVisualization {

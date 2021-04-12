@@ -23,12 +23,13 @@ namespace inet {
 
 namespace visualizer {
 
-void GateVisualizerBase::GateVisitor::visit(cObject *object)
+VISIT_RETURNTYPE GateVisualizerBase::GateVisitor::visit(cObject *object)
 {
     if (auto gate = dynamic_cast<queueing::IPacketGate *>(object))
         gates.push_back(gate);
     else
         object->forEachChild(this);
+    VISIT_RETURN(true);
 }
 
 GateVisualizerBase::GateVisualization::GateVisualization(queueing::IPacketGate *gate) :
