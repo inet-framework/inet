@@ -23,16 +23,16 @@ using namespace z3;
  */
 class INET_API Switch {
 
-    protected std::string name;
-    protected float maxPacketSize;
-    protected float timeToTravel;
-    protected float transmissionTime;
-    protected float portSpeed;
+    std::string name;
+    float maxPacketSize;
+    float timeToTravel;
+    float transmissionTime;
+    float portSpeed;
 
-    //protected z3::expr maxPacketSizeZ3;
-    //protected z3::expr timeToTravelZ3;
-    //protected z3::expr transmissionTimeZ3;
-    //protected z3::expr portSpeedZ3;
+    //z3::expr maxPacketSizeZ3;
+    //z3::expr timeToTravelZ3;
+    //z3::expr transmissionTimeZ3;
+    //z3::expr portSpeedZ3;
 
 
     /**

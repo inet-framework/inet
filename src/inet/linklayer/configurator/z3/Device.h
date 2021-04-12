@@ -40,14 +40,14 @@ class INET_API Device {
      * Sets the newly created device name.
      */
     Device() {
-        this->name = std::string("dev") + indexCounter++;
+        this->name = std::string("dev") + std::to_string(indexCounter++);
     }
 
     /**
      * [Method]: Device
      * [Usage]: Overloaded constructor method of a device.
      * Can create a device specifying its properties through
-     * float values. These values will later be converted to
+     * float values. These values will later be converted tostd::to_string(
      * z3 values. Used for simplified configurations. Other
      * constructors either are deprecated or set parameters
      * that will be used in future works.
@@ -62,7 +62,7 @@ class INET_API Device {
         this->hardConstraintTime = hardConstraintTime;
         this->softConstraintTime = 0;
         this->packetSize = 0;
-        this->name = std::string("dev") + ++indexCounter;
+        this->name = std::string("dev") + std::to_string(++indexCounter);
     }
 
     /**
@@ -88,7 +88,7 @@ class INET_API Device {
         this->hardConstraintTime = hardConstraintTime;
         this->softConstraintTime = softConstraintTime;
         this->packetSize = packetSize;
-        this->name = std::string("dev") + ++indexCounter;
+        this->name = std::string("dev") + std::to_string(++indexCounter);
     }
 
     /**
@@ -141,7 +141,7 @@ class INET_API Device {
         this->softConstraintTimeZ3 = softConstraintTimeZ3;
         this->packetSizeZ3 = packetSizeZ3;
         this->flowPriority = flowPriority;
-        this->name = std::string("dev") + indexCounter++;
+        this->name = std::string("dev") + std::to_string(indexCounter++);
     }
 
     /**
