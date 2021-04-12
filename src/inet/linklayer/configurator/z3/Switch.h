@@ -57,10 +57,10 @@ class INET_API Switch {
      * @param portSpeed             Transmission speed of the port
      */
     Switch(std::string name,
-                  float maxPacketSize,
-                  float timeToTravel,
-                  float transmissionTime,
-                  float portSpeed) {
+           float maxPacketSize,
+           float timeToTravel,
+           float transmissionTime,
+           float portSpeed) {
         this->name = name;
         this->maxPacketSize = maxPacketSize;
         this->timeToTravel = timeToTravel;
