@@ -16,9 +16,8 @@ namespace inet {
  */
 class INET_API PathTree {
 
-	private static final long serialVersionUID = 1L;
-	private PathNode root;
-    private ArrayList<PathNode> leaves;
+    PathNode root;
+    ArrayList<PathNode> leaves;
 
     /**
      * [Method]: addRoot

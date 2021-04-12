@@ -41,30 +41,29 @@ namespace inet {
  *
  */
 class INET_API Cycle {
-	private static final long serialVersionUID = 1L;
-	private String portName = "";
+    String portName = "";
 	static int instanceCounter = 0;
-    private float upperBoundCycleTime;
-    private float lowerBoundCycleTime;
-    private float firstCycleStart;
-    private float maximumSlotDuration;
+    float upperBoundCycleTime;
+    float lowerBoundCycleTime;
+    float firstCycleStart;
+    float maximumSlotDuration;
 
-    private float cycleDuration;
-    private float cycleStart;
+    float cycleDuration;
+    float cycleStart;
 
-    private transient ArrayList<ArrayList<RealExpr>> slotStartZ3 = new ArrayList<ArrayList<RealExpr>>();
-	private transient ArrayList<ArrayList<RealExpr>> slotDurationZ3 = new ArrayList<ArrayList<RealExpr>>();
+    ArrayList<ArrayList<RealExpr>> slotStartZ3 = new ArrayList<ArrayList<RealExpr>>();
+    ArrayList<ArrayList<RealExpr>> slotDurationZ3 = new ArrayList<ArrayList<RealExpr>>();
 
-    private ArrayList<Integer> slotsUsed = new ArrayList<Integer>();
-    private ArrayList<ArrayList<Float>> slotStart = new ArrayList<ArrayList<Float>>();
-    private ArrayList<ArrayList<Float>> slotDuration = new ArrayList<ArrayList<Float>>();
+    ArrayList<Integer> slotsUsed = new ArrayList<Integer>();
+    ArrayList<ArrayList<Float>> slotStart = new ArrayList<ArrayList<Float>>();
+    ArrayList<ArrayList<Float>> slotDuration = new ArrayList<ArrayList<Float>>();
 
-    private transient RealExpr cycleDurationZ3;
-    private transient RealExpr firstCycleStartZ3;
-    private transient RealExpr maximumSlotDurationZ3;
-    private int numOfPrts = 8;
+    RealExpr cycleDurationZ3;
+    RealExpr firstCycleStartZ3;
+    RealExpr maximumSlotDurationZ3;
+    int numOfPrts = 8;
 
-    private int numOfSlots = 1;
+    int numOfSlots = 1;
 
 
 

@@ -21,7 +21,6 @@ namespace inet {
  */
 class INET_API Switch {
 
-	private static final long serialVersionUID = 1L;
 	protected String name;
     protected float maxPacketSize;
     protected float timeToTravel;
