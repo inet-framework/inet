@@ -22,17 +22,17 @@ class INET_API TSNSwitch extends Switch {
 
     static final long serialVersionUID = 1L;
     // private Cycle cycle;
-    ArrayList<String> connectsTo;
-    ArrayList<Port> ports;
+    std::vector<std::string> connectsTo;
+    std::vector<Port> ports;
     float cycleDurationUpperBound;
     float cycleDurationLowerBound;
 
     float gbSize;
-    RealExpr gbSizeZ3; // Size of the guardBand
-    RealExpr cycleDuration;
-    RealExpr cycleStart;
-    RealExpr cycleDurationUpperBoundZ3;
-    RealExpr cycleDurationLowerBoundZ3;
+    z3::expr gbSizeZ3; // Size of the guardBand
+    z3::expr cycleDuration;
+    z3::expr cycleStart;
+    z3::expr cycleDurationUpperBoundZ3;
+    z3::expr cycleDurationLowerBoundZ3;
     int portNum = 0;
 
     static int indexCounter = 0;
@@ -49,10 +49,10 @@ class INET_API TSNSwitch extends Switch {
      *
      * @param name      Name of the switch
      */
-    TSNSwitch(String name) {
+    TSNSwitch(std::string name) {
         this.name = name;
-        ports = new ArrayList<Port>();
-        this.connectsTo = new ArrayList<String>();
+        ports = new std::vector<Port>();
+        this.connectsTo = new std::vector<std::string>();
     }
 
     /**
@@ -71,8 +71,8 @@ class INET_API TSNSwitch extends Switch {
         this.name = "dev" + indexCounter++;
         this.timeToTravel = timeToTravel;
         this.transmissionTime = transmissionTime;
-        this.ports = new ArrayList<Port>();
-        this.connectsTo = new ArrayList<String>();
+        this.ports = new std::vector<Port>();
+        this.connectsTo = new std::vector<std::string>();
         this.maxPacketSize = 0;
         this.portSpeed = 0;
         this.gbSize = 0;
@@ -92,7 +92,7 @@ class INET_API TSNSwitch extends Switch {
      * @param portSpeed             Transmission speed of the port
      * @param gbSize                Size of the guard bands used to separate non consecutive time slots
      */
-    TSNSwitch(String name,
+    TSNSwitch(std::string name,
                      float maxPacketSize,
                      float timeToTravel,
                      float transmissionTime,
@@ -106,8 +106,8 @@ class INET_API TSNSwitch extends Switch {
         this.transmissionTime = transmissionTime;
         this.portSpeed = portSpeed;
         this.gbSize = gbSize;
-        this.ports = new ArrayList<Port>();
-        this.connectsTo = new ArrayList<String>();
+        this.ports = new std::vector<Port>();
+        this.connectsTo = new std::vector<std::string>();
         this.cycleDurationLowerBound = cycleDurationLowerBound;
         this.cycleDurationUpperBound = cycleDurationUpperBound;
     }
@@ -126,7 +126,7 @@ class INET_API TSNSwitch extends Switch {
      * @param portSpeed             Transmission speed of the port
      * @param gbSize                Size of the guard bands used to separate non consecutive time slots
      */
-    TSNSwitch(String name,
+    TSNSwitch(std::string name,
                      float maxPacketSize,
                      float timeToTravel,
                      float portSpeed,
@@ -139,8 +139,8 @@ class INET_API TSNSwitch extends Switch {
         this.transmissionTime = 0;
         this.portSpeed = portSpeed;
         this.gbSize = gbSize;
-        this.ports = new ArrayList<Port>();
-        this.connectsTo = new ArrayList<String>();
+        this.ports = new std::vector<Port>();
+        this.connectsTo = new std::vector<std::string>();
         this.cycleDurationLowerBound = cycleDurationLowerBound;
         this.cycleDurationUpperBound = cycleDurationUpperBound;
     }
@@ -155,8 +155,8 @@ class INET_API TSNSwitch extends Switch {
      * @param ctx      Context variable containing the z3 environment used
      */
     void toZ3(Context ctx, Solver solver) {
-        this.cycleDurationLowerBoundZ3 = ctx.mkReal(Float.toString(cycleDurationLowerBound));
-        this.cycleDurationUpperBoundZ3 = ctx.mkReal(Float.toString(cycleDurationUpperBound));
+        this.cycleDurationLowerBoundZ3 = ctx.mkReal(float.toString(cycleDurationLowerBound));
+        this.cycleDurationUpperBoundZ3 = ctx.mkReal(float.toString(cycleDurationUpperBound));
 
         // Creating the cycle duration and start for this switch
         this.cycleDuration = ctx.mkRealConst("cycleOf" + this.name + "Duration");
@@ -298,7 +298,7 @@ class INET_API TSNSwitch extends Switch {
      * @param destination       Name of the destination of the port
      * @param cycle             Cycle used by the port
      */
-    void createPort(String destination, Cycle cycle) {
+    void createPort(std::string destination, Cycle cycle) {
         this.connectsTo.add(destination);
 
         this.ports.add(
@@ -334,7 +334,7 @@ class INET_API TSNSwitch extends Switch {
         System.out.println("Next hop: " + flowFrag.getNextHop());
         System.out.println("Index of port: " + index);
         System.out.print("Connects to: ");
-        for(String connect : this.connectsTo) {
+        for(std::string connect : this.connectsTo) {
             System.out.print(connect + ", ");
         }
 
@@ -355,7 +355,7 @@ class INET_API TSNSwitch extends Switch {
      * @param name      Name of the node that the switch is connects to
      * @return          Port of the switch that connects to a given node
      */
-    Port getPortOf(String name) {
+    Port getPortOf(std::string name) {
         int index = this.connectsTo.indexOf(name);
 
         // System.out.println("On switch " + this.getName() + " looking for port to " + name);
@@ -391,11 +391,11 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    RealExpr arrivalTime(Context ctx, int auxIndex, FlowFragment flowFrag){
-        IntExpr index = ctx.mkInt(auxIndex);
+    z3::expr arrivalTime(Context ctx, int auxIndex, FlowFragment flowFrag){
+        z3::expr index = ctx.mkInt(auxIndex);
         int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
 
-        return (RealExpr) this.ports.get(portIndex).arrivalTime(ctx, auxIndex, flowFrag);
+        return (z3::expr) this.ports.get(portIndex).arrivalTime(ctx, auxIndex, flowFrag);
     }
 
 
@@ -410,9 +410,9 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      *
-    RealExpr arrivalTime(Context ctx, IntExpr index, FlowFragment flowFrag){
+    z3::expr arrivalTime(Context ctx, z3::expr index, FlowFragment flowFrag){
     int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
-    return (RealExpr) this.ports.get(portIndex).arrivalTime(ctx, index, flowFrag);
+    return (z3::expr) this.ports.get(portIndex).arrivalTime(ctx, index, flowFrag);
     }
     /**/
 
@@ -427,9 +427,9 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    RealExpr departureTime(Context ctx, IntExpr index, FlowFragment flowFrag){
+    z3::expr departureTime(Context ctx, z3::expr index, FlowFragment flowFrag){
         int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
-        return (RealExpr) this.ports.get(portIndex).departureTime(ctx, index, flowFrag);
+        return (z3::expr) this.ports.get(portIndex).departureTime(ctx, index, flowFrag);
     }
     /**/
 
@@ -444,11 +444,11 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    RealExpr departureTime(Context ctx, int auxIndex, FlowFragment flowFrag){
-        IntExpr index = ctx.mkInt(auxIndex);
+    z3::expr departureTime(Context ctx, int auxIndex, FlowFragment flowFrag){
+        z3::expr index = ctx.mkInt(auxIndex);
 
         int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
-        return (RealExpr) this.ports.get(portIndex).departureTime(ctx, index, flowFrag);
+        return (z3::expr) this.ports.get(portIndex).departureTime(ctx, index, flowFrag);
     }
 
     /**
@@ -462,9 +462,9 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      *
-    RealExpr scheduledTime(Context ctx, IntExpr index, FlowFragment flowFrag){
+    z3::expr scheduledTime(Context ctx, z3::expr index, FlowFragment flowFrag){
     int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
-    return (RealExpr) this.ports.get(portIndex).scheduledTime(ctx, index, flowFrag);
+    return (z3::expr) this.ports.get(portIndex).scheduledTime(ctx, index, flowFrag);
     }
     /**/
 
@@ -479,12 +479,12 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      */
-    RealExpr scheduledTime(Context ctx, int auxIndex, FlowFragment flowFrag){
-        // IntExpr index = ctx.mkInt(auxIndex);
+    z3::expr scheduledTime(Context ctx, int auxIndex, FlowFragment flowFrag){
+        // z3::expr index = ctx.mkInt(auxIndex);
 
         int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
 
-        return (RealExpr) this.ports.get(portIndex).scheduledTime(ctx, auxIndex, flowFrag);
+        return (z3::expr) this.ports.get(portIndex).scheduledTime(ctx, auxIndex, flowFrag);
     }
 
 
@@ -493,14 +493,14 @@ class INET_API TSNSwitch extends Switch {
     	solver.add(
 			ctx.mkEq(
 				this.cycleDurationUpperBoundZ3,
-				ctx.mkReal(Float.toString(this.cycleDurationUpperBound))
+				ctx.mkReal(float.toString(this.cycleDurationUpperBound))
 			)
 		);
 
     	solver.add(
 			ctx.mkEq(
 				this.cycleDurationLowerBoundZ3,
-				ctx.mkReal(Float.toString(this.cycleDurationLowerBound))
+				ctx.mkReal(float.toString(this.cycleDurationLowerBound))
 			)
 		);
     	*/
@@ -537,40 +537,40 @@ class INET_API TSNSwitch extends Switch {
         this.gbSize = gbSize;
     }
 
-    RealExpr getGbSizeZ3() {
+    z3::expr getGbSizeZ3() {
         return gbSizeZ3;
     }
 
-    void setGbSizeZ3(RealExpr gbSizeZ3) {
+    void setGbSizeZ3(z3::expr gbSizeZ3) {
         this.gbSizeZ3 = gbSizeZ3;
     }
 
-    ArrayList<Port> getPorts() {
+    std::vector<Port> getPorts() {
         return ports;
     }
 
-    void setPorts(ArrayList<Port> ports) {
+    void setPorts(std::vector<Port> ports) {
         this.ports = ports;
     }
 
-    void addPort(Port port, String name) {
+    void addPort(Port port, std::string name) {
         this.ports.add(port);
         this.connectsTo.add(name);
     }
 
-    RealExpr getCycleDuration() {
+    z3::expr getCycleDuration() {
         return cycleDuration;
     }
 
-    void setCycleDuration(RealExpr cycleDuration) {
+    void setCycleDuration(z3::expr cycleDuration) {
         this.cycleDuration = cycleDuration;
     }
 
-    RealExpr getCycleStart() {
+    z3::expr getCycleStart() {
         return cycleStart;
     }
 
-    void setCycleStart(RealExpr cycleStart) {
+    void setCycleStart(z3::expr cycleStart) {
         this.cycleStart = cycleStart;
     }
 
@@ -582,7 +582,7 @@ class INET_API TSNSwitch extends Switch {
         this.isModifiedOrCreated = isModifiedOrCreated;
     }
 
-    ArrayList<String> getConnectsTo(){
+    std::vector<std::string> getConnectsTo(){
         return this.connectsTo;
     }
 };

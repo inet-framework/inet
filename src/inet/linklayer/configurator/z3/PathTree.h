@@ -17,7 +17,7 @@ namespace inet {
 class INET_API PathTree {
 
     PathNode root;
-    ArrayList<PathNode> leaves;
+    std::vector<PathNode> leaves;
 
     /**
      * [Method]: addRoot
@@ -32,7 +32,7 @@ class INET_API PathTree {
     {
         root=new PathNode(node);
         root.setParent(null);
-        root.setChildren(new ArrayList<PathNode>());
+        root.setChildren(new std::vector<PathNode>());
         return root;
     }
 
@@ -57,7 +57,7 @@ class INET_API PathTree {
 
     /**
      * [Method]: searchLeaves
-     * [Usage]: Adds all leaves to the leaves ArrayList starting
+     * [Usage]: Adds all leaves to the leaves std::vector starting
      * from the node given as a parameter. In the way it is
      * implemented, must be used only once.
      *
@@ -81,13 +81,13 @@ class INET_API PathTree {
 
     /**
      * [Method]: getLeaves
-     * [Usage]: Returns an ArrayList with all the nodes of the
+     * [Usage]: Returns an std::vector with all the nodes of the
      * pathTree.
      *
-     * @return      ArrayList with all leaves as PathNodes
+     * @return      std::vector with all leaves as PathNodes
      */
-    ArrayList<PathNode> getLeaves(){
-        leaves = new ArrayList<PathNode>();
+    std::vector<PathNode> getLeaves(){
+        leaves = new std::vector<PathNode>();
 
         searchLeaves(root);
 

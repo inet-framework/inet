@@ -21,16 +21,16 @@ namespace inet {
  */
 class INET_API Switch {
 
-	protected String name;
+	protected std::string name;
     protected float maxPacketSize;
     protected float timeToTravel;
     protected float transmissionTime;
     protected float portSpeed;
 
-    //protected RealExpr maxPacketSizeZ3;
-    //protected RealExpr timeToTravelZ3;
-    //protected RealExpr transmissionTimeZ3;
-    //protected RealExpr portSpeedZ3;
+    //protected z3::expr maxPacketSizeZ3;
+    //protected z3::expr timeToTravelZ3;
+    //protected z3::expr transmissionTimeZ3;
+    //protected z3::expr portSpeedZ3;
 
 
     /**
@@ -54,7 +54,7 @@ class INET_API Switch {
      * @param transmissionTime      Time taken to process the packet inside the switch
      * @param portSpeed             Transmission speed of the port
      */
-    Switch(String name,
+    Switch(std::string name,
                   float maxPacketSize,
                   float timeToTravel,
                   float transmissionTime,
@@ -104,11 +104,11 @@ class INET_API Switch {
         this.portSpeed = portSpeed;
     }
 
-    void setName(String name) {
+    void setName(std::string name) {
         this.name = name;
     }
 
-    String getName() {
+    std::string getName() {
         return this.name;
     }
 };

@@ -17,36 +17,36 @@ namespace inet {
  */
 class INET_API Network {
 
-	String db_name;
-	String file_id;
+	std::string db_name;
+	std::string file_id;
 
 	//TODO: Remove debugging variables:
-    RealExpr avgOfAllLatency;
-    ArrayList<RealExpr> avgLatencyPerDev = new ArrayList<RealExpr>();
+    z3::expr avgOfAllLatency;
+    std::vector<z3::expr> avgLatencyPerDev = new std::vector<z3::expr>();
 
 
-    ArrayList<Switch> switches;
-    ArrayList<Flow> flows;
+    std::vector<Switch> switches;
+    std::vector<Flow> flows;
     float timeToTravel;
-    ArrayList<RealExpr> allSumOfJitter = new ArrayList<RealExpr>();
-    ArrayList<Integer> numberOfNodes = new ArrayList<Integer>();
+    std::vector<z3::expr> allSumOfJitter = new std::vector<z3::expr>();
+    std::vector<int> numberOfNodes = new std::vector<int>();
 
     static int PACKETUPPERBOUNDRANGE = 5; // Limits the applications of rules to the packets
     static int CYCLEUPPERBOUNDRANGE = 25; // Limits the applications of rules to the cycles
 
     float jitterUpperBoundRange = -1;
-    RealExpr jitterUpperBoundRangeZ3;
+    z3::expr jitterUpperBoundRangeZ3;
 
     /**
      * [Method]: Network
      * [Usage]: Default constructor method of class Network. Creates
-     * the ArrayLists for the switches and flows. Sets up the default
+     * the std::vectors for the switches and flows. Sets up the default
      * time to travel for 2 (Needs revision).
      */
     Network (float jitterUpperBoundRange) {
         this.jitterUpperBoundRange = jitterUpperBoundRange;
-        this.switches = new ArrayList<Switch>();
-        this.flows = new ArrayList<Flow>();
+        this.switches = new std::vector<Switch>();
+        this.flows = new std::vector<Flow>();
         this.timeToTravel = 2;
     }
 
@@ -54,26 +54,26 @@ class INET_API Network {
     /**
      * [Method]: Network
      * [Usage]: Default constructor method of class Network. Creates
-     * the ArrayLists for the switches and flows. Sets up the default
+     * the std::vectors for the switches and flows. Sets up the default
      * time to travel for 2 (Needs revision).
      */
     Network () {
-        this.switches = new ArrayList<Switch>();
-        this.flows = new ArrayList<Flow>();
+        this.switches = new std::vector<Switch>();
+        this.flows = new std::vector<Flow>();
         this.timeToTravel = 2;
     }
 
     /**
      * [Method]: Network
      * [Usage]: Overloaded constructor method of class Network. Will
-     * create a network with the given ArrayLists for switches, flows
+     * create a network with the given std::vectors for switches, flows
      * and time to travel.
      *
-     * @param switches      ArrayList with the instances of switches of the network
-     * @param flows         ArrayList with the instances of flows of the network
+     * @param switches      std::vector with the instances of switches of the network
+     * @param flows         std::vector with the instances of flows of the network
      * @param timeToTravel  Value used as travel time from a node to another in the network
      */
-    Network (ArrayList<Switch> switches, ArrayList<Flow> flows, float timeToTravel) {
+    Network (std::vector<Switch> switches, std::vector<Flow> flows, float timeToTravel) {
         this.switches = switches;
         this.flows = flows;
         this.timeToTravel = timeToTravel;
@@ -93,9 +93,9 @@ class INET_API Network {
             this.setJitterUpperBoundRangeZ3(ctx, this.jitterUpperBoundRange);
         }
 
-        Stack<RealExpr> jitterList = new Stack<RealExpr>();
+        Stack<z3::expr> jitterList = new Stack<z3::expr>();
         int totalNumOfLeaves = 0;
-        RealExpr sumOfAllJitter;
+        z3::expr sumOfAllJitter;
         // On every switch, set up the constraints of the schedule
         //switch1.setupSchedulingRules(solver, ctx);
 
@@ -135,8 +135,8 @@ class INET_API Network {
 
             if(flw.getType() == Flow.UNICAST) {
 
-                ArrayList<FlowFragment> currentFrags = flw.getFlowFragments();
-                ArrayList<Switch> path = flw.getPath();
+                std::vector<FlowFragment> currentFrags = flw.getFlowFragments();
+                std::vector<Switch> path = flw.getPath();
 
 
                 //Make sure that HC is respected
@@ -154,8 +154,8 @@ class INET_API Network {
 
             } else if (flw.getType() == Flow.PUBLISH_SUBSCRIBE) {
                 PathNode root = flw.getPathTree().getRoot();
-                ArrayList<PathNode> leaves = flw.getPathTree().getLeaves();
-                ArrayList<PathNode> parents = new ArrayList<PathNode>();
+                std::vector<PathNode> leaves = flw.getPathTree().getLeaves();
+                std::vector<PathNode> parents = new std::vector<PathNode>();
 
                 // Make list of parents of all leaves
                 for(PathNode leaf : leaves) {
@@ -224,7 +224,7 @@ class INET_API Network {
                     Device endDev = (Device) node.getNode();
 
                     this.avgLatencyPerDev.add(
-                        (RealExpr) ctx.mkDiv(
+                        (z3::expr) ctx.mkDiv(
                             flw.getSumOfJitterZ3(endDev, solver, ctx, flw.getNumOfPacketsSent() - 1),
                             ctx.mkInt(flw.getNumOfPacketsSent())
                         )
@@ -268,7 +268,7 @@ class INET_API Network {
         		for(Port port : ((TSNSwitch) swt).getPorts()) {
         			for(FlowFragment frag : port.getFlowFragments()) {
         				frag.createNewDepartureTimeZ3List();
-        				frag.addDepartureTimeZ3(ctx.mkReal(Float.toString(frag.getDepartureTime(0))));
+        				frag.addDepartureTimeZ3(ctx.mkReal(float.toString(frag.getDepartureTime(0))));
         			}
         		}
         		((TSNSwitch) swt).toZ3(ctx, solver);
@@ -291,31 +291,31 @@ class INET_API Network {
      * GETTERS AND SETTERS
      */
 
-    RealExpr getJitterUpperBoundRangeZ3() {
+    z3::expr getJitterUpperBoundRangeZ3() {
         return jitterUpperBoundRangeZ3;
     }
 
-    void setJitterUpperBoundRangeZ3(RealExpr jitterUpperBoundRange) {
+    void setJitterUpperBoundRangeZ3(z3::expr jitterUpperBoundRange) {
         this.jitterUpperBoundRangeZ3 = jitterUpperBoundRange;
     }
 
     void setJitterUpperBoundRangeZ3(Context ctx, float auxJitterUpperBoundRange) {
-        this.jitterUpperBoundRangeZ3 = ctx.mkReal(String.valueOf(auxJitterUpperBoundRange));
+        this.jitterUpperBoundRangeZ3 = ctx.mkReal(std::string.valueOf(auxJitterUpperBoundRange));
     }
 
-    ArrayList<Switch> getSwitches() {
+    std::vector<Switch> getSwitches() {
         return switches;
     }
 
-    void setSwitches(ArrayList<Switch> switches) {
+    void setSwitches(std::vector<Switch> switches) {
         this.switches = switches;
     }
 
-    ArrayList<Flow> getFlows() {
+    std::vector<Flow> getFlows() {
         return flows;
     }
 
-    void setFlows(ArrayList<Flow> flows) {
+    void setFlows(std::vector<Flow> flows) {
         this.flows = flows;
     }
 

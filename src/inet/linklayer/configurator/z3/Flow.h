@@ -29,7 +29,7 @@ class INET_API Flow {
 
 
 
-    protected String name;
+    protected std::string name;
     int type = 0;
     int totalNumOfPackets = 0;
 
@@ -42,21 +42,21 @@ class INET_API Flow {
 
 
 
-    ArrayList<Switch> path;
-    ArrayList<FlowFragment> flowFragments;
+    std::vector<Switch> path;
+    std::vector<FlowFragment> flowFragments;
     PathTree pathTree;
 
     protected int pathTreeCount = 0;
 
-    protected IntExpr flowPriority; // In the future, priority might be fixed
+    protected z3::expr flowPriority; // In the future, priority might be fixed
     protected Device startDevice;
     protected Device endDevice;
 
     float flowFirstSendingTime;
     float flowSendingPeriodicity;
 
-    RealExpr flowFirstSendingTimeZ3;
-    RealExpr flowSendingPeriodicityZ3;
+    z3::expr flowFirstSendingTimeZ3;
+    z3::expr flowSendingPeriodicityZ3;
 
     int numOfPacketsSentInFragment = 0;
 
@@ -83,13 +83,13 @@ class INET_API Flow {
         instanceCounter++;
 
         this.instance = instanceCounter;
-        this.name = "flow" + Integer.toString(instanceCounter);
+        this.name = "flow" + int.toString(instanceCounter);
 
         if(type == UNICAST) {
             //Its not a unicast flow
             this.type = 0;
-            path = new ArrayList<Switch>();
-            flowFragments = new ArrayList<FlowFragment>();
+            path = new std::vector<Switch>();
+            flowFragments = new std::vector<FlowFragment>();
         } else if (type == PUBLISH_SUBSCRIBE) {
             //Its a publish subscribe flow
             this.type = 1;
@@ -113,13 +113,13 @@ class INET_API Flow {
     Flow(int type, float flowFirstSendingTime, float flowSendingPeriodicity) {
         instanceCounter++;
         this.instance = instanceCounter;
-        this.name = "flow" + Integer.toString(instanceCounter);
+        this.name = "flow" + int.toString(instanceCounter);
 
         if(type == UNICAST) {
             //Its not a unicast flow
             this.type = 0;
-            path = new ArrayList<Switch>();
-            flowFragments = new ArrayList<FlowFragment>();
+            path = new std::vector<Switch>();
+            flowFragments = new std::vector<FlowFragment>();
         } else if (type == PUBLISH_SUBSCRIBE) {
             //Its a publish subscribe flow
             this.type = 1;
@@ -224,10 +224,10 @@ class INET_API Flow {
 
 
             if(this.useCustomValues) {
-                this.flowSendingPeriodicityZ3 = ctx.mkReal(Float.toString(this.flowSendingPeriodicity));
+                this.flowSendingPeriodicityZ3 = ctx.mkReal(float.toString(this.flowSendingPeriodicity));
 
                 if(this.flowFirstSendingTime >= 0){
-                    this.flowFirstSendingTimeZ3 = ctx.mkReal(Float.toString(this.flowFirstSendingTime));
+                    this.flowFirstSendingTimeZ3 = ctx.mkReal(float.toString(this.flowFirstSendingTime));
                 } else {
                     this.flowFirstSendingTimeZ3 = ctx.mkRealConst("flow" + this.instance + "FirstSendingTime");
                 }
@@ -293,9 +293,9 @@ class INET_API Flow {
                     for (int i = 0; i < numberOfPackets; i++) {
 
                         flowFrag.addDepartureTimeZ3(
-                                (RealExpr) ctx.mkAdd(
+                                (z3::expr) ctx.mkAdd(
                                         this.flowFirstSendingTimeZ3,
-                                        ctx.mkReal(Float.toString(this.flowSendingPeriodicity * i))
+                                        ctx.mkReal(float.toString(this.flowSendingPeriodicity * i))
                                 )
                         );
 
@@ -376,7 +376,7 @@ class INET_API Flow {
 
     /**
      * [Method]: pathToZ3
-     * [Usage]: On a unicast flow, the path is a simple ArrayList.
+     * [Usage]: On a unicast flow, the path is a simple std::vector.
      * Each switch in the path will be given as a parameter for this function
      * so a flow fragment for each hop on the path can be created.
      *
@@ -398,9 +398,9 @@ class INET_API Flow {
             //flowFrag.setNodeName(this.startDevice.getName());
             for (int i = 0; i < Network.PACKETUPPERBOUNDRANGE; i++) {
                 flowFrag.addDepartureTimeZ3( // Packet departure constraint
-                        (RealExpr) ctx.mkAdd(
+                        (z3::expr) ctx.mkAdd(
                                 this.flowFirstSendingTimeZ3,
-                                ctx.mkReal(Float.toString(this.flowSendingPeriodicity * i))
+                                ctx.mkReal(float.toString(this.flowSendingPeriodicity * i))
                         )
                 );
             }
@@ -484,11 +484,11 @@ class INET_API Flow {
      * the root to the leaf.
      *
      * @param endDevice     End device (leaf) of the desired path
-     * @return              ArrayList of flow fragments containing every flow fragment from source to destination
+     * @return              std::vector of flow fragments containing every flow fragment from source to destination
      */
-    ArrayList<FlowFragment> getFlowFromRootToNode(Device endDevice){
-        ArrayList<FlowFragment> flowFragments = new ArrayList<FlowFragment>();
-        ArrayList<Device> flowEndDevices = new ArrayList<Device>();
+    std::vector<FlowFragment> getFlowFromRootToNode(Device endDevice){
+        std::vector<FlowFragment> flowFragments = new std::vector<FlowFragment>();
+        std::vector<Device> flowEndDevices = new std::vector<Device>();
         PathNode auxNode = null;
 
 
@@ -536,11 +536,11 @@ class INET_API Flow {
      * the root to the leaf.
      *
      * @param endDevice     End device (leaf) of the desired path
-     * @return              ArrayList of nodes containing every node from source to destination
+     * @return              std::vector of nodes containing every node from source to destination
      */
-    ArrayList<PathNode> getNodesFromRootToNode(Device endDevice){
-        ArrayList<PathNode> pathNodes = new ArrayList<PathNode>();
-        ArrayList<Device> flowEndDevices = new ArrayList<Device>();
+    std::vector<PathNode> getNodesFromRootToNode(Device endDevice){
+        std::vector<PathNode> pathNodes = new std::vector<PathNode>();
+        std::vector<Device> flowEndDevices = new std::vector<Device>();
         PathNode auxNode = null;
 
         // Iterate over leaves, get reference to the leaf of end device
@@ -647,10 +647,10 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Departure time of the specific packet
      */
-    float getDepartureTime(String deviceName, int hop, int packetNum) {
+    float getDepartureTime(std::string deviceName, int hop, int packetNum) {
         float time;
         Device targetDevice = null;
-        ArrayList<FlowFragment> auxFlowFragments;
+        std::vector<FlowFragment> auxFlowFragments;
 
         for(Object node : this.pathTree.getLeaves()) {
             if(node instanceof Device) {
@@ -686,7 +686,7 @@ class INET_API Flow {
      */
     float getDepartureTime(Device targetDevice, int hop, int packetNum) {
         float time;
-        ArrayList<FlowFragment> auxFlowFragments;
+        std::vector<FlowFragment> auxFlowFragments;
 
         if(!this.pathTree.getLeaves().contains(targetDevice)) {
             //TODO: Throw error
@@ -731,10 +731,10 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Arrival time of the specific packet
      */
-    float getArrivalTime(String deviceName, int hop, int packetNum) {
+    float getArrivalTime(std::string deviceName, int hop, int packetNum) {
         float time;
         Device targetDevice = null;
-        ArrayList<FlowFragment> auxFlowFragments;
+        std::vector<FlowFragment> auxFlowFragments;
 
         for(Object node : this.pathTree.getLeaves()) {
             if(node instanceof Device) {
@@ -771,7 +771,7 @@ class INET_API Flow {
      */
     float getArrivalTime(Device targetDevice, int hop, int packetNum) {
         float time;
-        ArrayList<FlowFragment> auxFlowFragments;
+        std::vector<FlowFragment> auxFlowFragments;
 
         if(!this.pathTree.getLeaves().contains(targetDevice)) {
             //TODO: Throw error
@@ -815,10 +815,10 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Scheduled time of the specific packet
      */
-    float getScheduledTime(String deviceName, int hop, int packetNum) {
+    float getScheduledTime(std::string deviceName, int hop, int packetNum) {
         float time;
         Device targetDevice = null;
-        ArrayList<FlowFragment> auxFlowFragments;
+        std::vector<FlowFragment> auxFlowFragments;
 
         for(Object node : this.pathTree.getLeaves()) {
             if(node instanceof Device) {
@@ -854,7 +854,7 @@ class INET_API Flow {
      */
     float getScheduledTime(Device targetDevice, int hop, int packetNum) {
         float time;
-        ArrayList<FlowFragment> auxFlowFragments;
+        std::vector<FlowFragment> auxFlowFragments;
 
         if(!this.pathTree.getLeaves().contains(targetDevice)) {
             //TODO: Throw error
@@ -930,7 +930,7 @@ class INET_API Flow {
         float auxAverageLatency = 0;
         Device endDevice = null;
 
-        ArrayList<FlowFragment> fragments = this.getFlowFromRootToNode(dev);
+        std::vector<FlowFragment> fragments = this.getFlowFromRootToNode(dev);
 
         for(int i = 0; i < fragments.get(0).getParent().getNumOfPacketsSent(); i++) {
             averageLatency +=
@@ -1000,13 +1000,13 @@ class INET_API Flow {
      * the stream aimed at a specific device.
      *
      * @param dev 		Specific end-device of the flow to retrieve the jitter
-     * @return			Float value of the variation of the latency
+     * @return			float value of the variation of the latency
      */
     float getAverageJitterToDevice(Device dev) {
         float averageJitter = 0;
         float averageLatency = this.getAverageLatencyToDevice(dev);
 
-        ArrayList<FlowFragment> fragments = this.getFlowFromRootToNode(dev);
+        std::vector<FlowFragment> fragments = this.getFlowFromRootToNode(dev);
 
         for(int i = 0; i < fragments.get(0).getNumOfPacketsSent(); i++) {
             averageJitter +=
@@ -1032,9 +1032,9 @@ class INET_API Flow {
      * @param index     Index of the desired packet
      * @return          Z3 variable containing the latency of the packet
      */
-    RealExpr getLatencyZ3(Solver solver, Context ctx, int index) {
+    z3::expr getLatencyZ3(Solver solver, Context ctx, int index) {
         //index += 1;
-        RealExpr latency = ctx.mkRealConst(this.name + "latencyOfPacket" + index);
+        z3::expr latency = ctx.mkRealConst(this.name + "latencyOfPacket" + index);
 
         TSNSwitch lastSwitchInPath = ((TSNSwitch) this.path.get(path.size() - 1));
         FlowFragment lastFragmentInList = this.flowFragments.get(flowFragments.size() - 1);
@@ -1070,12 +1070,12 @@ class INET_API Flow {
      * @param index     Index of the desired packet
      * @return          Z3 variable containing the latency of the packet
      */
-    RealExpr getLatencyZ3(Solver solver, Device dev, Context ctx, int index) {
+    z3::expr getLatencyZ3(Solver solver, Device dev, Context ctx, int index) {
         //index += 1;
-        RealExpr latency = ctx.mkRealConst(this.name + "latencyOfPacket" + index + "For" + dev.getName());
+        z3::expr latency = ctx.mkRealConst(this.name + "latencyOfPacket" + index + "For" + dev.getName());
 
-        ArrayList<PathNode> nodes = this.getNodesFromRootToNode(dev);
-        ArrayList<FlowFragment> flowFrags = this.getFlowFromRootToNode(dev);
+        std::vector<PathNode> nodes = this.getNodesFromRootToNode(dev);
+        std::vector<FlowFragment> flowFrags = this.getFlowFromRootToNode(dev);
 
         TSNSwitch lastSwitchInPath = ((TSNSwitch) nodes.get(nodes.size() - 2).getNode()); // - 1 for indexing, - 1 for last node being the end device
         FlowFragment lastFragmentInList = flowFrags.get(flowFrags.size() - 1);
@@ -1106,13 +1106,13 @@ class INET_API Flow {
      * @param index     Index of the current packet in the sum
      * @return          Z3 variable containing sum of latency up to index packet
      */
-    RealExpr getSumOfLatencyZ3(Solver solver, Context ctx, int index) {
+    z3::expr getSumOfLatencyZ3(Solver solver, Context ctx, int index) {
 
         if(index == 0) {
             return getLatencyZ3(solver, ctx, 0);
         }
 
-        return (RealExpr) ctx.mkAdd(getLatencyZ3(solver, ctx, index), getSumOfLatencyZ3(solver, ctx, index - 1));
+        return (z3::expr) ctx.mkAdd(getLatencyZ3(solver, ctx, index), getSumOfLatencyZ3(solver, ctx, index - 1));
 
     }
 
@@ -1127,12 +1127,12 @@ class INET_API Flow {
      * @param index     Index of the current packet in the sum
      * @return          Z3 variable containing sum of latency up to index packet
      */
-    RealExpr getSumOfLatencyZ3(Device dev, Solver solver, Context ctx, int index) {
+    z3::expr getSumOfLatencyZ3(Device dev, Solver solver, Context ctx, int index) {
         if(index == 0) {
             return getLatencyZ3(solver, dev, ctx, 0);
         }
 
-        return (RealExpr) ctx.mkAdd(getLatencyZ3(solver, dev, ctx, index), getSumOfLatencyZ3(dev, solver, ctx, index - 1));
+        return (z3::expr) ctx.mkAdd(getLatencyZ3(solver, dev, ctx, index), getSumOfLatencyZ3(dev, solver, ctx, index - 1));
     }
 
     /**
@@ -1145,13 +1145,13 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable containing the sum of all latencies of the flow
      */
-    RealExpr getSumOfAllDevLatencyZ3(Solver solver, Context ctx, int index) {
-        RealExpr sumValue = ctx.mkReal(0);
+    z3::expr getSumOfAllDevLatencyZ3(Solver solver, Context ctx, int index) {
+        z3::expr sumValue = ctx.mkReal(0);
         Device currentDev = null;
 
         for(PathNode node : this.pathTree.getLeaves()) {
             currentDev = (Device) node.getNode();
-            sumValue = (RealExpr) ctx.mkAdd(this.getSumOfLatencyZ3(currentDev, solver, ctx, index), sumValue);
+            sumValue = (z3::expr) ctx.mkAdd(this.getSumOfLatencyZ3(currentDev, solver, ctx, index), sumValue);
         }
 
         return sumValue;
@@ -1166,14 +1166,14 @@ class INET_API Flow {
      * @param ctx       Z3 variable and function environment
      * @return          Z3 variable containing the average latency of the flow
      */
-    RealExpr getAvgLatency(Solver solver, Context ctx) {
+    z3::expr getAvgLatency(Solver solver, Context ctx) {
         if(this.type == UNICAST) {
-            return (RealExpr) ctx.mkDiv(
+            return (z3::expr) ctx.mkDiv(
                     getSumOfLatencyZ3(solver, ctx, this.numOfPacketsSentInFragment - 1),
                     ctx.mkReal(this.numOfPacketsSentInFragment)
             );
         } else if (this.type == PUBLISH_SUBSCRIBE) {
-            return (RealExpr) ctx.mkDiv(
+            return (z3::expr) ctx.mkDiv(
                     getSumOfAllDevLatencyZ3(solver, ctx, this.numOfPacketsSentInFragment - 1),
                     ctx.mkReal((this.numOfPacketsSentInFragment) * this.pathTree.getLeaves().size())
             );
@@ -1195,9 +1195,9 @@ class INET_API Flow {
      * @param ctx		Context object for the solver
      * @return			z3 variable with the average latency for the device
      */
-    RealExpr getAvgLatency(Device dev, Solver solver, Context ctx) {
+    z3::expr getAvgLatency(Device dev, Solver solver, Context ctx) {
 
-        return (RealExpr) ctx.mkDiv(
+        return (z3::expr) ctx.mkDiv(
                 this.getSumOfLatencyZ3(dev, solver, ctx, this.numOfPacketsSentInFragment - 1),
                 ctx.mkReal(this.numOfPacketsSentInFragment)
         );
@@ -1215,11 +1215,11 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable for the jitter of packet [index]
      */
-    RealExpr getJitterZ3(Solver solver, Context ctx, int index) {
-        RealExpr avgLatency = this.getAvgLatency(solver, ctx);
-        RealExpr latency = this.getLatencyZ3(solver, ctx, index);
+    z3::expr getJitterZ3(Solver solver, Context ctx, int index) {
+        z3::expr avgLatency = this.getAvgLatency(solver, ctx);
+        z3::expr latency = this.getLatencyZ3(solver, ctx, index);
 
-        return (RealExpr) ctx.mkITE(
+        return (z3::expr) ctx.mkITE(
                 ctx.mkGe(
                         latency,
                         avgLatency
@@ -1244,11 +1244,11 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable for the jitter of packet [index]
      */
-    RealExpr getJitterZ3(Device dev, Solver solver, Context ctx, int index) {
+    z3::expr getJitterZ3(Device dev, Solver solver, Context ctx, int index) {
         //index += 1;
-        RealExpr jitter = ctx.mkRealConst(this.name + "JitterOfPacket" + index + "For" + dev.getName());
+        z3::expr jitter = ctx.mkRealConst(this.name + "JitterOfPacket" + index + "For" + dev.getName());
 
-        ArrayList<PathNode> nodes = this.getNodesFromRootToNode(dev);
+        std::vector<PathNode> nodes = this.getNodesFromRootToNode(dev);
 
         TSNSwitch lastSwitchInPath = ((TSNSwitch) nodes.get(nodes.size() - 2).getNode()); // - 1 for indexing, - 1 for last node being the end device
         FlowFragment lastFragmentInList = nodes.get(nodes.size() - 2).getFlowFragments()
@@ -1257,9 +1257,9 @@ class INET_API Flow {
         TSNSwitch firstSwitchInPath = ((TSNSwitch) nodes.get(1).getNode()); // 1 since the first node is the publisher
         FlowFragment firstFragmentInList = nodes.get(1).getFlowFragments().get(0);
 
-        // RealExpr avgLatency = (RealExpr) ctx.mkDiv(getSumOfLatencyZ3(solver, dev, ctx, index), ctx.mkInt(Network.PACKETUPPERBOUNDRANGE - 1));
-        RealExpr avgLatency = this.getAvgLatency(dev, solver, ctx);
-        RealExpr latency = (RealExpr) ctx.mkSub(
+        // z3::expr avgLatency = (z3::expr) ctx.mkDiv(getSumOfLatencyZ3(solver, dev, ctx, index), ctx.mkInt(Network.PACKETUPPERBOUNDRANGE - 1));
+        z3::expr avgLatency = this.getAvgLatency(dev, solver, ctx);
+        z3::expr latency = (z3::expr) ctx.mkSub(
                 lastSwitchInPath
                         .getPortOf(lastFragmentInList.getNextHop())
                         .scheduledTime(ctx, index, lastFragmentInList),
@@ -1289,12 +1289,12 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable containing the sum of all jitter
      */
-    RealExpr getSumOfJitterZ3(Solver solver, Context ctx, int index) {
+    z3::expr getSumOfJitterZ3(Solver solver, Context ctx, int index) {
         if(index == 0) {
             return getJitterZ3(solver, ctx, 0);
         }
 
-        return (RealExpr) ctx.mkAdd(getJitterZ3(solver, ctx, index), getSumOfJitterZ3(solver, ctx, index - 1));
+        return (z3::expr) ctx.mkAdd(getJitterZ3(solver, ctx, index), getSumOfJitterZ3(solver, ctx, index - 1));
     }
 
     /**
@@ -1309,12 +1309,12 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable containing the sum of all jitter
      */
-    RealExpr getSumOfJitterZ3(Device dev, Solver solver, Context ctx, int index) {
+    z3::expr getSumOfJitterZ3(Device dev, Solver solver, Context ctx, int index) {
         if(index == 0) {
-            return (RealExpr) getJitterZ3(dev, solver, ctx, 0);
+            return (z3::expr) getJitterZ3(dev, solver, ctx, 0);
         }
 
-        return (RealExpr) ctx.mkAdd(getJitterZ3(dev, solver, ctx, index), getSumOfJitterZ3(dev, solver, ctx, index - 1));
+        return (z3::expr) ctx.mkAdd(getJitterZ3(dev, solver, ctx, index), getSumOfJitterZ3(dev, solver, ctx, index - 1));
     }
 
     /**
@@ -1327,13 +1327,13 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable containing the sum of all jitter of the flow
      */
-    RealExpr getSumOfAllDevJitterZ3(Solver solver, Context ctx, int index) {
-        RealExpr sumValue = ctx.mkReal(0);
+    z3::expr getSumOfAllDevJitterZ3(Solver solver, Context ctx, int index) {
+        z3::expr sumValue = ctx.mkReal(0);
         Device currentDev = null;
 
         for(PathNode node : this.pathTree.getLeaves()) {
             currentDev = (Device) node.getNode();
-            sumValue = (RealExpr) ctx.mkAdd(this.getSumOfJitterZ3(currentDev, solver, ctx, index), sumValue);
+            sumValue = (z3::expr) ctx.mkAdd(this.getSumOfJitterZ3(currentDev, solver, ctx, index), sumValue);
         }
 
         return sumValue;
@@ -1409,35 +1409,35 @@ class INET_API Flow {
         this.endDevice = endDevice;
     }
 
-    ArrayList<Switch> getPath() {
+    std::vector<Switch> getPath() {
         return path;
     }
 
-    void setPath(ArrayList<Switch> path) {
+    void setPath(std::vector<Switch> path) {
         this.path = path;
     }
 
-    IntExpr getFragmentPriorityZ3() {
+    z3::expr getFragmentPriorityZ3() {
         return flowPriority;
     }
 
-    void getFlowPriority(IntExpr priority) {
+    void getFlowPriority(z3::expr priority) {
         this.flowPriority = priority;
     }
 
-    String getName() {
+    std::string getName() {
         return name;
     }
 
-    void setName(String name) {
+    void setName(std::string name) {
         this.name = name;
     }
 
-    ArrayList<FlowFragment> getFlowFragments() {
+    std::vector<FlowFragment> getFlowFragments() {
         return flowFragments;
     }
 
-    void setFlowFragments(ArrayList<FlowFragment> flowFragments) {
+    void setFlowFragments(std::vector<FlowFragment> flowFragments) {
         this.flowFragments = flowFragments;
     }
 
@@ -1494,7 +1494,7 @@ class INET_API Flow {
         return this.startDevice.getPacketSize();
     }
 
-    RealExpr getPacketSizeZ3() {
+    z3::expr getPacketSizeZ3() {
         return this.startDevice.getPacketSizeZ3();
     }
 
@@ -1514,19 +1514,19 @@ class INET_API Flow {
         this.flowSendingPeriodicity = flowSendingPeriodicity;
     }
 
-    RealExpr getFlowFirstSendingTimeZ3() {
+    z3::expr getFlowFirstSendingTimeZ3() {
         return flowFirstSendingTimeZ3;
     }
 
-    void setFlowFirstSendingTimeZ3(RealExpr flowFirstSendingTimeZ3) {
+    void setFlowFirstSendingTimeZ3(z3::expr flowFirstSendingTimeZ3) {
         this.flowFirstSendingTimeZ3 = flowFirstSendingTimeZ3;
     }
 
-    RealExpr getFlowSendingPeriodicityZ3() {
+    z3::expr getFlowSendingPeriodicityZ3() {
         return flowSendingPeriodicityZ3;
     }
 
-    void setFlowSendingPeriodicityZ3(RealExpr flowSendingPeriodicityZ3) {
+    void setFlowSendingPeriodicityZ3(z3::expr flowSendingPeriodicityZ3) {
         this.flowSendingPeriodicityZ3 = flowSendingPeriodicityZ3;
     }
 

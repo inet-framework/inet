@@ -19,8 +19,8 @@ class INET_API PathNode {
 
     PathNode parent; // The parent of the current FlowNode
     Object node;
-    ArrayList<PathNode> children; // The children of the current FlowNode
-    ArrayList<FlowFragment> flowFragments;
+    std::vector<PathNode> children; // The children of the current FlowNode
+    std::vector<FlowFragment> flowFragments;
 
 
     /**
@@ -35,8 +35,8 @@ class INET_API PathNode {
     {
         if((node instanceof TSNSwitch) || (node instanceof Switch)) {
             this.node = node;
-            children = new ArrayList<PathNode>();
-            flowFragments = new ArrayList<FlowFragment>();
+            children = new std::vector<PathNode>();
+            flowFragments = new std::vector<FlowFragment>();
         } else if (node instanceof Device) {
             this.node = node;
             children = null;
@@ -44,7 +44,7 @@ class INET_API PathNode {
             //[TODO]: Throw error
         }
 
-        children  = new ArrayList<PathNode>();
+        children  = new std::vector<PathNode>();
     }
 
     /**
@@ -83,11 +83,11 @@ class INET_API PathNode {
         this.node = node;
     }
 
-    ArrayList<PathNode> getChildren() {
+    std::vector<PathNode> getChildren() {
         return children;
     }
 
-    void setChildren(ArrayList<PathNode> children) {
+    void setChildren(std::vector<PathNode> children) {
         this.children = children;
     }
 
@@ -95,11 +95,11 @@ class INET_API PathNode {
         this.flowFragments.add(flowFragment);
     }
 
-    ArrayList<FlowFragment> getFlowFragments() {
+    std::vector<FlowFragment> getFlowFragments() {
         return flowFragments;
     }
 
-    void setFlowFragment(ArrayList<FlowFragment>  flowFragments) {
+    void setFlowFragment(std::vector<FlowFragment>  flowFragments) {
         this.flowFragments = flowFragments;
     }
 
