@@ -20,7 +20,7 @@ using namespace z3;
  */
 
 class INET_API Flow {
-
+  public:
     // TODO: CHECK FUNCTIONS FOR UNICAST FLOWS
 
     bool isModifiedOrCreated = false;

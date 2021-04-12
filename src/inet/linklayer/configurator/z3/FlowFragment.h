@@ -21,6 +21,7 @@ using namespace z3;
  *
  */
 class INET_API FlowFragment : public Flow {
+  public:
     bool isModifiedOrCreated = false;
     Flow parent;
     std::shared_ptr<expr> packetSize;

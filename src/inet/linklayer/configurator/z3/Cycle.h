@@ -44,6 +44,7 @@ using namespace z3;
  *
  */
 class INET_API Cycle {
+  public:
     std::string portName = "";
     static int instanceCounter;
     float upperBoundCycleTime;

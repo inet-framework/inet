@@ -18,7 +18,7 @@ using namespace z3;
  *
  */
 class INET_API Network {
-
+  public:
     std::string db_name;
     std::string file_id;
 

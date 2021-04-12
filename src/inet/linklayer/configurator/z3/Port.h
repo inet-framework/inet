@@ -25,7 +25,7 @@ using namespace z3;
  * anything else does not matter at this point.
  */
 class INET_API Port {
-
+  public:
     bool useMicroCycles = false;
     bool useHyperCycle = true;
 

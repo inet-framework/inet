@@ -18,7 +18,7 @@ using namespace z3;
  * Their properties specify part of the core of a flow.
  */
 class INET_API Device {
-
+  public:
     std::string name;
     float packetPeriodicity;
     float firstT1Time;
