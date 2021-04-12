@@ -490,21 +490,21 @@ class INET_API TSNSwitch extends Switch {
 
 
     void loadZ3(context ctx, solver solver) {
-    	/*
-    	solver.add(
-			ctx.mkEq(
-				this->cycleDurationUpperBoundZ3,
-				ctx.real_val(std::to_string(this->cycleDurationUpperBound))
-			)
-		);
+        /*
+        solver.add(
+            ctx.mkEq(
+                this->cycleDurationUpperBoundZ3,
+                ctx.real_val(std::to_string(this->cycleDurationUpperBound))
+            )
+        );
 
-    	solver.add(
-			ctx.mkEq(
-				this->cycleDurationLowerBoundZ3,
-				ctx.real_val(std::to_string(this->cycleDurationLowerBound))
-			)
-		);
-    	*/
+        solver.add(
+            ctx.mkEq(
+                this->cycleDurationLowerBoundZ3,
+                ctx.real_val(std::to_string(this->cycleDurationLowerBound))
+            )
+        );
+        */
 
         if(!ports.isEmpty()) {
             for(Port port : this->ports) {

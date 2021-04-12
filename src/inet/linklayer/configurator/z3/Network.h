@@ -19,10 +19,10 @@ using namespace z3;
  */
 class INET_API Network {
 
-	std::string db_name;
-	std::string file_id;
+    std::string db_name;
+    std::string file_id;
 
-	//TODO: Remove debugging variables:
+    //TODO: Remove debugging variables:
     z3::expr avgOfAllLatency;
     std::vector<z3::expr> avgLatencyPerDev;
 
@@ -116,7 +116,7 @@ class INET_API Network {
          */
 
         for(Flow flw : this->getFlows()) {
-        	flw.setNumberOfPacketsSent(flw.getPathTree().getRoot());
+            flw.setNumberOfPacketsSent(flw.getPathTree().getRoot());
 
             flw.bindAllFragments(solver, ctx);
 
@@ -169,7 +169,7 @@ class INET_API Network {
 
                     // Set the maximum allowed jitter
                     for(int index = 0; index < flw.getNumOfPacketsSent(); index++) {
-                    	solver.add( // Maximum allowed jitter constraint
+                        solver.add( // Maximum allowed jitter constraint
                             ctx.mkLe(
                                 flw.getJitterZ3((Device) leaf.getNode(), solver, ctx, index),
                                 this->jitterUpperBoundRangeZ3
@@ -182,7 +182,7 @@ class INET_API Network {
                 // Iterate over the flows of each leaf parent, assert HC
                 for(PathNode parent : parents) {
                     for(FlowFragment ffrag : parent.getFlowFragments()) {
-                    	for(int i = 0; i < flw.getNumOfPacketsSent(); i++) {
+                        for(int i = 0; i < flw.getNumOfPacketsSent(); i++) {
                             solver.add( // Maximum Allowed Latency constraint
                                 ctx.mkLe(
                                     ctx.mkSub(
@@ -250,41 +250,41 @@ class INET_API Network {
      * deserialization process, instantiate the z3 objects that represent
      * the same properties.
      *
-     * @param ctx		context object for the solver
-     * @param solver	solver object
+     * @param ctx        context object for the solver
+     * @param solver    solver object
      */
     void loadNetwork(context ctx, solver solver) {
 
-    	// TODO: Don't forget to load the values of this class
+        // TODO: Don't forget to load the values of this class
 
-    	// On all network flows: Data given by the user will be converted to z3 values
+        // On all network flows: Data given by the user will be converted to z3 values
        for(Flow flw : this->flows) {
            // flw.toZ3(ctx);
-    	   flw.flowPriority = ctx.mkIntConst(flw.name + std::string("Priority"));
-    	   ((Device) flw.getPathTree().getRoot().getNode()).toZ3(ctx);
+           flw.flowPriority = ctx.mkIntConst(flw.name + std::string("Priority"));
+           ((Device) flw.getPathTree().getRoot().getNode()).toZ3(ctx);
        }
 
        // On all network switches: Data given by the user will be converted to z3 values
         for(Switch swt : this->switches) {
-        	if(swt instanceof TSNSwitch) {
-        		for(Port port : ((TSNSwitch) swt).getPorts()) {
-        			for(FlowFragment frag : port.getFlowFragments()) {
-        				frag.createNewDepartureTimeZ3List();
-        				frag.addDepartureTimeZ3(ctx.real_val(std::to_string(frag.getDepartureTime(0))));
-        			}
-        		}
-        		((TSNSwitch) swt).toZ3(ctx, solver);
-        		((TSNSwitch) swt).loadZ3(ctx, solver);
-        	}
+            if(swt instanceof TSNSwitch) {
+                for(Port port : ((TSNSwitch) swt).getPorts()) {
+                    for(FlowFragment frag : port.getFlowFragments()) {
+                        frag.createNewDepartureTimeZ3List();
+                        frag.addDepartureTimeZ3(ctx.real_val(std::to_string(frag.getDepartureTime(0))));
+                    }
+                }
+                ((TSNSwitch) swt).toZ3(ctx, solver);
+                ((TSNSwitch) swt).loadZ3(ctx, solver);
+            }
         }
 
-    	/*
-    	for(Switch swt : this->getSwitches()) {
-    		if(swt instanceof TSNSwitch) {
-    			((TSNSwitch) swt).loadZ3(ctx, solver);
-    		}
-    	}
-    	*/
+        /*
+        for(Switch swt : this->getSwitches()) {
+            if(swt instanceof TSNSwitch) {
+                ((TSNSwitch) swt).loadZ3(ctx, solver);
+            }
+        }
+        */
 
     }
 

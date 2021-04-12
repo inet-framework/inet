@@ -23,7 +23,7 @@ using namespace z3;
  */
 class INET_API Switch {
 
-	protected std::string name;
+    protected std::string name;
     protected float maxPacketSize;
     protected float timeToTravel;
     protected float transmissionTime;
