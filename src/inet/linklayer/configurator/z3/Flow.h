@@ -1,6 +1,10 @@
 #ifndef __INET_Z3_FLOW_H
 #define __INET_Z3_FLOW_H
 
+#include <z3++.h>
+
+#include "inet/common/INETDefs.h"
+
 /**
  * [Class]: Flow
  * [Usage]: This class specifies a flow (or a stream, in other

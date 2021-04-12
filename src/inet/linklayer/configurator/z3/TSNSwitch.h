@@ -1,6 +1,9 @@
 #ifndef __INET_Z3_TSNSWITCH_H
 #define __INET_Z3_TSNSWITCH_H
 
+#include <z3++.h>
+
+#include "inet/common/INETDefs.h"
 
 /**
  * [Class]: TSNSwitch

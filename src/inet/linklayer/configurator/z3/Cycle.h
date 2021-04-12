@@ -1,6 +1,10 @@
 #ifndef __INET_Z3_CYCLE_H
 #define __INET_Z3_CYCLE_H
 
+#include <z3++.h>
+
+#include "inet/common/INETDefs.h"
+
 /**
  * [Class]: Cycle
  * [Usage]: Contains all properties of a TSN cycle.
