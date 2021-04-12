@@ -18,7 +18,7 @@ using namespace z3;
  * are able to organize a sequence of ports that connect the
  * switch to other nodes in the network.
  */
-class INET_API TSNSwitch extends Switch {
+class INET_API TSNSwitch : public Switch {
 
     bool isModifiedOrCreated = true;
 

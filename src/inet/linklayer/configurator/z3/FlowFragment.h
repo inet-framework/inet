@@ -20,7 +20,7 @@ using namespace z3;
  * packets from this flow on the switch it belongs to.
  *
  */
-class INET_API FlowFragment extends Flow {
+class INET_API FlowFragment : public Flow {
     bool isModifiedOrCreated = false;
     Flow parent;
     std::shared_ptr<expr> packetSize;
