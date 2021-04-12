@@ -16,7 +16,7 @@ using namespace z3;
  * a log file and store the timing properties on the cycles and flows.
  */
 class INET_API ScheduleGenerator {
-
+  public:
        @SuppressWarnings("serial")
        class TestFailedException extends Exception
        {

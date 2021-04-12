@@ -17,7 +17,7 @@ using namespace z3;
  *
  */
 class INET_API PathTree {
-
+  public:
     PathNode root;
     std::vector<PathNode> leaves;
 

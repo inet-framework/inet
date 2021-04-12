@@ -19,7 +19,7 @@ using namespace z3;
  * switch to other nodes in the network.
  */
 class INET_API TSNSwitch : public Switch {
-
+  public:
     bool isModifiedOrCreated = true;
 
     // private Cycle cycle;

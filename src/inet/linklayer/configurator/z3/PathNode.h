@@ -18,7 +18,7 @@ using namespace z3;
  *
  */
 class INET_API PathNode {
-
+  public:
     PathNode parent; // The parent of the current FlowNode
     Object node;
     std::vector<PathNode> children; // The children of the current FlowNode

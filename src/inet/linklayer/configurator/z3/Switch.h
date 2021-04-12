@@ -22,7 +22,7 @@ using namespace z3;
  *
  */
 class INET_API Switch {
-
+  public:
     std::string name;
     float maxPacketSize;
     float timeToTravel;
