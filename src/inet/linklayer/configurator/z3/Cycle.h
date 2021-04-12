@@ -60,9 +60,9 @@ class INET_API Cycle {
     std::vector<std::vector<float>> slotStart;
     std::vector<std::vector<float>> slotDuration;
 
-    z3::expr cycleDurationZ3;
-    z3::expr firstCycleStartZ3;
-    z3::expr maximumSlotDurationZ3;
+    expr *cycleDurationZ3;
+    expr *firstCycleStartZ3;
+    expr *maximumSlotDurationZ3;
     int numOfPrts = 8;
 
     int numOfSlots = 1;
@@ -136,9 +136,9 @@ class INET_API Cycle {
      * @param maximumSlotDurationZ3   Every priority slot should have up this time units
      */
     Cycle(z3::expr upperBoundCycleTimeZ3,
-                 z3::expr lowerBoundCycleTimeZ3,
-                 z3::expr firstCycleStartZ3,
-                 z3::expr maximumSlotDurationZ3) {
+                 expr *lowerBoundCycleTimeZ3,
+                 expr *firstCycleStartZ3,
+                 expr *maximumSlotDurationZ3) {
         // this->upperBoundCycleTimeZ3 = upperBoundCycleTimeZ3;
         // this->lowerBoundCycleTimeZ3 = lowerBoundCycleTimeZ3;
         this->firstCycleStartZ3 = firstCycleStartZ3;
@@ -188,7 +188,7 @@ class INET_API Cycle {
      * @param index     Index of the desired cycle
      * @return          Z3 variable containing the cycle start time
      */
-    z3::expr cycleStartZ3(context ctx, z3::expr index){
+    expr *cycleStartZ3(context ctx, z3::expr index){
         return (z3::expr) ctx.mkITE(
                 ctx.mkGe(index, ctx.mkInt(1)),
                 ctx.mkAdd(
@@ -208,8 +208,8 @@ class INET_API Cycle {
      * @param index     Index of the desired cycle
      * @return          Z3 variable containing the cycle start time
      */
-    z3::expr cycleStartZ3(context ctx, int auxIndex){
-        z3::expr index = ctx.mkInt(auxIndex);
+    expr *cycleStartZ3(context ctx, int auxIndex){
+        expr *index = ctx.mkInt(auxIndex);
 
         return (z3::expr) ctx.mkITE(
                 ctx.mkGe(index, ctx.mkInt(1)),
@@ -354,28 +354,28 @@ class INET_API Cycle {
     }
 
 
-    z3::expr slotStartZ3(context ctx, z3::expr prt, z3::expr index) {
+    expr *slotStartZ3(context ctx, z3::expr prt, z3::expr index) {
         return ctx.real_const(std::string("priority" + prt.toString() + std::string("slot") + index.toString() + "Start"));
     }
 
-    z3::expr slotStartZ3(context ctx, int auxPrt, int auxIndex) {
-        z3::expr index = ctx.mkInt(auxIndex);
-        z3::expr prt = ctx.mkInt(auxPrt);
+    expr *slotStartZ3(context ctx, int auxPrt, int auxIndex) {
+        expr *index = ctx.mkInt(auxIndex);
+        expr *prt = ctx.mkInt(auxPrt);
         return ctx.real_const(std::string("priority" + prt.toString() + std::string("slot") + index.toString() + "Start"));
     }
 
 
-    z3::expr slotDurationZ3(context ctx, z3::expr prt, z3::expr index) {
+    expr *slotDurationZ3(context ctx, z3::expr prt, z3::expr index) {
         return ctx.real_const(std::string("priority" + prt.toString() + std::string("slot") + index.toString() + "Duration"));
     }
 
-    z3::expr slotDurationZ3(context ctx, int auxPrt, int auxIndex) {
-        z3::expr index = ctx.mkInt(auxIndex);
-        z3::expr prt = ctx.mkInt(auxPrt);
+    expr *slotDurationZ3(context ctx, int auxPrt, int auxIndex) {
+        expr *index = ctx.mkInt(auxIndex);
+        expr *prt = ctx.mkInt(auxPrt);
         return ctx.real_const(std::string("priority" + prt.toString() + std::string("slot") + index.toString() + "Duration"));
     }
 
-    z3::expr getCycleDurationZ3() {
+    expr *getCycleDurationZ3() {
         return cycleDurationZ3;
     }
 
@@ -383,7 +383,7 @@ class INET_API Cycle {
         this->cycleDurationZ3 = cycleDuration;
     }
 
-    z3::expr getFirstCycleStartZ3() {
+    expr *getFirstCycleStartZ3() {
         return firstCycleStartZ3;
     }
 
@@ -407,7 +407,7 @@ class INET_API Cycle {
         this->numOfSlots = numOfSlots;
     }
 
-    z3::expr getMaximumSlotDurationZ3() {
+    expr *getMaximumSlotDurationZ3() {
         return maximumSlotDurationZ3;
     }
 
@@ -440,12 +440,12 @@ class INET_API Cycle {
         this->portName = portName;
     }
 
-     z3::expr getSlotStartZ3(int prt, int slotNum) {
+     expr *getSlotStartZ3(int prt, int slotNum) {
         return this->slotStartZ3.get(prt).get(slotNum);
     }
 
     /*
-     z3::expr getSlotDurationZ3(int prt, int slotNum) {
+     expr *getSlotDurationZ3(int prt, int slotNum) {
         return this->slotDurationZ3.get(prt).get(slotNum);
     }
     */

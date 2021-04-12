@@ -23,7 +23,7 @@ class INET_API Network {
     std::string file_id;
 
     //TODO: Remove debugging variables:
-    z3::expr avgOfAllLatency;
+    expr *avgOfAllLatency;
     std::vector<z3::expr> avgLatencyPerDev;
 
 
@@ -37,7 +37,7 @@ class INET_API Network {
 #define CYCLEUPPERBOUNDRANGE 25 // Limits the applications of rules to the cycles
 
     float jitterUpperBoundRange = -1;
-    z3::expr jitterUpperBoundRangeZ3;
+    expr *jitterUpperBoundRangeZ3;
 
     /**
      * [Method]: Network
@@ -97,7 +97,7 @@ class INET_API Network {
 
         Stack<z3::expr> jitterList = new Stack<z3::expr>();
         int totalNumOfLeaves = 0;
-        z3::expr sumOfAllJitter;
+        expr *sumOfAllJitter;
         // On every switch, set up the constraints of the schedule
         //switch1.setupSchedulingRules(solver, ctx);
 
@@ -293,7 +293,7 @@ class INET_API Network {
      * GETTERS AND SETTERS
      */
 
-    z3::expr getJitterUpperBoundRangeZ3() {
+    expr *getJitterUpperBoundRangeZ3() {
         return jitterUpperBoundRangeZ3;
     }
 

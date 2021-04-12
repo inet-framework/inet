@@ -37,7 +37,7 @@ class INET_API Port {
     std::string connectsTo;
 
     float bestEffortPercent = 0.5f;
-    z3::expr bestEffortPercentZ3;
+    expr *bestEffortPercentZ3;
 
     Cycle cycle;
     std::vector<FlowFragment> flowFragments;
@@ -52,11 +52,11 @@ class INET_API Port {
     float portSpeed;
     int portNum;
 
-    z3::expr gbSizeZ3; // Size of the guardBand
-    z3::expr maxPacketSizeZ3;
-    z3::expr timeToTravelZ3;
-    z3::expr transmissionTimeZ3;
-    z3::expr portSpeedZ3;
+    expr *gbSizeZ3; // Size of the guardBand
+    expr *maxPacketSizeZ3;
+    expr *timeToTravelZ3;
+    expr *transmissionTimeZ3;
+    expr *portSpeedZ3;
 
 
     /**
@@ -130,8 +130,8 @@ class INET_API Port {
 
         for(FlowFragment frag : this->flowFragments) {
             for(int index = 0; index < this->cycle.getNumOfSlots(); index++) {
-                z3::expr flowPriority = frag.getFragmentPriorityZ3();
-                z3::expr indexZ3 = ctx.mkInt(index);
+                expr *flowPriority = frag.getFragmentPriorityZ3();
+                expr *indexZ3 = ctx.mkInt(index);
 
                 // A slot will be somewhere between 0 and the end of the cycle minus its duration (Slot in cycle constraint)
                 solver.add(ctx.mkGe(cycle.slotStartZ3(ctx, flowPriority, indexZ3), ctx.mkInt(0)));
@@ -191,7 +191,7 @@ class INET_API Port {
                         continue;
                     }
 
-                    z3::expr auxFlowPriority = auxFrag.getFragmentPriorityZ3();
+                    expr *auxFlowPriority = auxFrag.getFragmentPriorityZ3();
 
                     solver.add(
                         ctx.mkImplies(
@@ -240,13 +240,13 @@ class INET_API Port {
                  *
                 for (FlowFragment auxFrag : this->flowFragments) {
                     for(int auxIndex = 0; auxIndex < this->cycle.getNumOfSlots(); auxIndex++) {
-                        z3::expr auxIndexZ3 = ctx.mkInt(auxIndex);
+                        expr *auxIndexZ3 = ctx.mkInt(auxIndex);
 
                         if(auxFrag.equals(frag)) {
                             continue;
                         }
 
-                        z3::expr auxFlowPriority = auxFrag.getFlowPriority();
+                        expr *auxFlowPriority = auxFrag.getFlowPriority();
 
                         solver.add(
                             ctx.mkImplies(
@@ -301,7 +301,7 @@ class INET_API Port {
      * @param flowFrag      A fragment of a flow that goes through this port
      */
     void setupTimeSlots(solver solver, context ctx, FlowFragment flowFrag) {
-        z3::expr indexZ3;
+        expr *indexZ3;
 
         // If there is a flow assigned to the slot, slotDuration must be greater than transmission time
         for(int index = 0; index < this->cycle.getNumOfSlots(); index++) {
@@ -368,7 +368,7 @@ class INET_API Port {
 
         }
 
-        z3::expr indexZ3 = null;
+        expr *indexZ3 = null;
         Expr auxExp = null;
         Expr auxExp2 = ctx.mkTrue();
         Expr exp = null;
@@ -889,12 +889,12 @@ class INET_API Port {
      * @param ctx        context object for the solver
      */
     void setupBestEffort(solver solver, context ctx) {
-        z3::expr []slotStart = new z3::expr[8];
-        z3::expr []slotDuration = new z3::expr[8];
+        expr *[]slotStart = new z3::expr[8];
+        expr *[]slotDuration = new z3::expr[8];
         // z3::expr guardBandTime = null;
 
         BoolExpr firstPartOfImplication = null;
-        z3::expr sumOfPrtTime = null;
+        expr *sumOfPrtTime = null;
 
         for(int i = 0; i < 8; i++) {
             slotStart[i] = ctx.real_const((this->name + std::string("SlotStart") + i).c_str());
@@ -903,7 +903,7 @@ class INET_API Port {
 
         for(FlowFragment f : this->flowFragments) {
             // z3::expr sumOfSlotsStart = ctx.real_val(0);
-            z3::expr sumOfSlotsDuration = ctx.real_val(0);
+            expr *sumOfSlotsDuration = ctx.real_val(0);
 
             for(int i = 0; i < this->cycle.getNumOfSlots(); i++) {
                 sumOfSlotsDuration = (z3::expr) ctx.mkAdd(cycle.slotDurationZ3(ctx, f.getFragmentPriorityZ3(), ctx.mkInt(i)));
@@ -1253,7 +1253,7 @@ class INET_API Port {
     void zeroOutNonUsedSlots(solver solver, context ctx) {
         BoolExpr exp1;
         BoolExpr exp2;
-        z3::expr indexZ3;
+        expr *indexZ3;
 
         for(int prtIndex = 0; prtIndex < this->cycle.getNumOfPrts(); prtIndex++) {
             for(FlowFragment frag : this->flowFragments) {
@@ -1408,7 +1408,7 @@ class INET_API Port {
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
 
-    z3::expr departureTime(context ctx, z3::expr index, FlowFragment flowFrag){
+    expr *departureTime(context ctx, z3::expr index, FlowFragment flowFrag){
 
         // If the index is 0, then its the first departure time, else add index * periodicity
         return this->departureTime(ctx, (int.parseInt(index.toString())), flowFrag);
@@ -1435,9 +1435,9 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    z3::expr departureTime(context ctx, int auxIndex, FlowFragment flowFrag){
-        z3::expr index = null;
-        z3::expr departureTime;
+    expr *departureTime(context ctx, int auxIndex, FlowFragment flowFrag){
+        expr *index = null;
+        expr *departureTime;
         int cycleNum = 0;
 
 
@@ -1474,7 +1474,7 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      *
-    z3::expr arrivalTime(context ctx, z3::expr index, FlowFragment flowFrag){
+    expr *arrivalTime(context ctx, z3::expr index, FlowFragment flowFrag){
 
 
        // The arrival time of this index from the given flow fragment is
@@ -1498,8 +1498,8 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    z3::expr arrivalTime(context ctx, int auxIndex, FlowFragment flowFrag){
-        z3::expr index = ctx.mkInt(auxIndex);
+    expr *arrivalTime(context ctx, int auxIndex, FlowFragment flowFrag){
+        expr *index = ctx.mkInt(auxIndex);
 
         return (z3::expr) ctx.mkAdd( // Arrival time value constraint
                         departureTime(ctx, index, flowFrag),
@@ -1523,8 +1523,8 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      *
-    z3::expr scheduledTime(context ctx, z3::expr index, FlowFragment flowFrag){
-        z3::expr devT3 = ctx.real_const((flowFrag.getName() + std::string("ScheduledTime") + index.toString()).c_str());
+    expr *scheduledTime(context ctx, z3::expr index, FlowFragment flowFrag){
+        expr *devT3 = ctx.real_const((flowFrag.getName() + std::string("ScheduledTime") + index.toString()).c_str());
 
         return (z3::expr) devT3;
     }
@@ -1546,9 +1546,9 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      */
-    z3::expr scheduledTime(context ctx, int auxIndex, FlowFragment flowFrag){
-        z3::expr index = null;
-        z3::expr scheduledTime;
+    expr *scheduledTime(context ctx, int auxIndex, FlowFragment flowFrag){
+        expr *index = null;
+        expr *scheduledTime;
         int cycleNum = 0;
 
         if(auxIndex + 1 > flowFrag.getNumOfPacketsSent()) {
@@ -1711,7 +1711,7 @@ class INET_API Port {
         this->gbSize = gbSize;
     }
 
-    z3::expr getGbSizeZ3() {
+    expr *getGbSizeZ3() {
         return gbSizeZ3;
     }
 
@@ -1788,10 +1788,10 @@ class INET_API Port {
      *
      ***************************************************/
 
-    z3::expr getCycleOfScheduledTime(context ctx, FlowFragment f, int index) {
-        z3::expr cycleIndex = null;
+    expr *getCycleOfScheduledTime(context ctx, FlowFragment f, int index) {
+        expr *cycleIndex = null;
 
-        z3::expr relativeST = (z3::expr) ctx.mkSub(
+        expr *relativeST = (z3::expr) ctx.mkSub(
                 this->scheduledTime(ctx, index, f),
                 this->cycle.getFirstCycleStartZ3()
         );
@@ -1804,10 +1804,10 @@ class INET_API Port {
     }
 
 
-    z3::expr getCycleOfTime(context ctx, z3::expr time) {
-        z3::expr cycleIndex = null;
+    expr *getCycleOfTime(context ctx, z3::expr time) {
+        expr *cycleIndex = null;
 
-        z3::expr relativeST = (z3::expr) ctx.mkSub(
+        expr *relativeST = (z3::expr) ctx.mkSub(
                 time,
                 this->cycle.getFirstCycleStartZ3()
         );
@@ -1819,8 +1819,8 @@ class INET_API Port {
         return cycleIndex;
     }
 
-    z3::expr getScheduledTimeOfPreviousPacket(context ctx, FlowFragment f, int index) {
-        z3::expr prevPacketST = ctx.real_val(0);
+    expr *getScheduledTimeOfPreviousPacket(context ctx, FlowFragment f, int index) {
+        expr *prevPacketST = ctx.real_val(0);
 
         for(FlowFragment auxFrag : this->flowFragments) {
 

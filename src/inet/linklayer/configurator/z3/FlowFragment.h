@@ -23,11 +23,11 @@ using namespace z3;
 class INET_API FlowFragment extends Flow {
     bool isModifiedOrCreated = false;
     Flow parent;
-    z3::expr packetSize;
-    z3::expr packetPeriodicityZ3;
+    expr *packetSize;
+    expr *packetPeriodicityZ3;
     std::vector<z3::expr> departureTimeZ3;
     std::vector<z3::expr> scheduledTimeZ3;
-    z3::expr fragmentPriorityZ3;
+    expr *fragmentPriorityZ3;
 
     Port port;
 
@@ -91,7 +91,7 @@ class INET_API FlowFragment extends Flow {
         return this->name;
     }
 
-    z3::expr getDepartureTimeZ3(int index) {
+    expr *getDepartureTimeZ3(int index) {
         return departureTimeZ3.get(index);
     }
 
@@ -107,7 +107,7 @@ class INET_API FlowFragment extends Flow {
         this->departureTimeZ3.clear();
     }
 
-    z3::expr getPacketPeriodicityZ3() {
+    expr *getPacketPeriodicityZ3() {
         return packetPeriodicityZ3;
     }
 
@@ -116,7 +116,7 @@ class INET_API FlowFragment extends Flow {
     }
 
 
-    z3::expr getPacketSizeZ3() {
+    expr *getPacketSizeZ3() {
         return this->packetSize;
     }
 
@@ -124,7 +124,7 @@ class INET_API FlowFragment extends Flow {
         this->packetSize = packetSize;
     }
 
-    z3::expr getFragmentPriorityZ3() {
+    expr *getFragmentPriorityZ3() {
         return fragmentPriorityZ3;
     }
 
@@ -251,7 +251,7 @@ class INET_API FlowFragment extends Flow {
         return this->port;
     }
 
-    z3::expr getScheduledTimeZ3(int index) {
+    expr *getScheduledTimeZ3(int index) {
         return scheduledTimeZ3.get(index);
     }
 

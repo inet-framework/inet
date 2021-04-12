@@ -151,7 +151,7 @@ class INET_API ScheduleGenerator {
         */
        public void writePathTree(PathNode pathNode, Model model, context ctx, PrintWriter out) {
            Switch swt;
-           z3::expr indexZ3 = null;
+           expr *indexZ3 = null;
 
            if((pathNode.getNode() instanceof Device) && (pathNode.getParent() != null)) {
                out.println("    [END OF BRANCH]");
@@ -339,7 +339,7 @@ class INET_API ScheduleGenerator {
            // The duration of the cycle is given as a question to z3, so all the
            // constraints will have to be evaluated in order to z3 to know this cycle
            // duration
-           z3::expr switch1CycDuration = switch1.getCycle(0).getCycleDurationZ3();
+           expr *switch1CycDuration = switch1.getCycle(0).getCycleDurationZ3();
 
 
            /* find model for the constraints above */
