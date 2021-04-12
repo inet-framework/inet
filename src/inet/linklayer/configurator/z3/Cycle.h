@@ -155,11 +155,11 @@ class INET_API Cycle {
     void toZ3(Context ctx) {
         instanceCounter++;
 
-        this->cycleDurationZ3 = ctx.mkRealConst("cycle" + int.toString(instanceCounter) + "Duration");
-        this->firstCycleStartZ3 = ctx.mkRealConst("cycle" + int.toString(instanceCounter) + "Start");
-        // this->firstCycleStartZ3 = ctx.mkReal(float.toString(0));
-        // this->firstCycleStartZ3 = ctx.mkReal(float.toString(firstCycleStart));
-        this->maximumSlotDurationZ3 = ctx.mkReal(float.toString(maximumSlotDuration));
+        this->cycleDurationZ3 = ctx.real_const("cycle" + int.toString(instanceCounter) + "Duration");
+        this->firstCycleStartZ3 = ctx.real_const("cycle" + int.toString(instanceCounter) + "Start");
+        // this->firstCycleStartZ3 = ctx.real_val(std::to_string(0));
+        // this->firstCycleStartZ3 = ctx.real_val(std::to_string(firstCycleStart));
+        this->maximumSlotDurationZ3 = ctx.real_val(std::to_string(maximumSlotDuration));
 
         this->slotStartZ3 = new std::vector<std::vector<z3::expr>>();
         this->slotDurationZ3 = new std::vector<std::vector<z3::expr>>();
@@ -168,7 +168,7 @@ class INET_API Cycle {
         	this->slotStartZ3.add(new std::vector<z3::expr>());
         	this->slotDurationZ3.add(new std::vector<z3::expr>());
         	for(int j = 0; j < this->numOfSlots; j++) {
-        		this->slotStartZ3.get(i).add(ctx.mkRealConst("cycleOfPort" + this->portName + "prt" + (i+1) + "slot" + (j+1)));
+        		this->slotStartZ3.get(i).add(ctx.real_const("cycleOfPort" + this->portName + "prt" + (i+1) + "slot" + (j+1)));
         	}
         }
 
@@ -255,14 +255,14 @@ class INET_API Cycle {
     	solver.add(
 			ctx.mkEq(
 				this->cycleDurationZ3,
-				ctx.mkReal(float.toString(this->cycleDuration))
+				ctx.real_val(std::to_string(this->cycleDuration))
 			)
 		);
 
     	solver.add(
 			ctx.mkEq(
 				this->firstCycleStartZ3,
-				ctx.mkReal(float.toString(this->firstCycleStart))
+				ctx.real_val(std::to_string(this->firstCycleStart))
 			)
 		);
 
@@ -275,7 +275,7 @@ class INET_API Cycle {
     			solver.add(
 					ctx.mkEq(
 						this->slotStartZ3.get(prt).get(slotIndex),
-						ctx.mkReal(float.toString(this->slotStart.get(this->slotsUsed.indexOf(prt)).get(slotIndex)))
+						ctx.real_val(std::to_string(this->slotStart.get(this->slotsUsed.indexOf(prt)).get(slotIndex)))
 					)
 				);
     		}
@@ -285,7 +285,7 @@ class INET_API Cycle {
     			solver.add(
 					ctx.mkEq(
 						this->slotDurationZ3.get(prt).get(slotIndex),
-						ctx.mkReal(float.toString(this->slotDuration.get(prt).get(slotIndex)))
+						ctx.real_val(std::to_string(this->slotDuration.get(prt).get(slotIndex)))
 					)
 				);
     		}
@@ -352,24 +352,24 @@ class INET_API Cycle {
 
 
     z3::expr slotStartZ3(Context ctx, z3::expr prt, z3::expr index) {
-        return ctx.mkRealConst("priority" + prt.toString() + "slot" + index.toString() + "Start");
+        return ctx.real_const("priority" + prt.toString() + "slot" + index.toString() + "Start");
     }
 
     z3::expr slotStartZ3(Context ctx, int auxPrt, int auxIndex) {
         z3::expr index = ctx.mkInt(auxIndex);
         z3::expr prt = ctx.mkInt(auxPrt);
-        return ctx.mkRealConst("priority" + prt.toString() + "slot" + index.toString() + "Start");
+        return ctx.real_const("priority" + prt.toString() + "slot" + index.toString() + "Start");
     }
 
 
     z3::expr slotDurationZ3(Context ctx, z3::expr prt, z3::expr index) {
-        return ctx.mkRealConst("priority" + prt.toString() + "slot" + index.toString() + "Duration");
+        return ctx.real_const("priority" + prt.toString() + "slot" + index.toString() + "Duration");
     }
 
     z3::expr slotDurationZ3(Context ctx, int auxPrt, int auxIndex) {
         z3::expr index = ctx.mkInt(auxIndex);
         z3::expr prt = ctx.mkInt(auxPrt);
-        return ctx.mkRealConst("priority" + prt.toString() + "slot" + index.toString() + "Duration");
+        return ctx.real_const("priority" + prt.toString() + "slot" + index.toString() + "Duration");
     }
 
     z3::expr getCycleDurationZ3() {

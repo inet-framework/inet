@@ -102,12 +102,12 @@ class INET_API Port {
      * @param ctx      Context variable containing the z3 environment used
      */
     void toZ3(Context ctx) {
-        this->gbSizeZ3 = ctx.mkReal(float.toString(gbSize));
-        this->maxPacketSizeZ3 = ctx.mkReal(float.toString(this->maxPacketSize));
-        this->timeToTravelZ3 = ctx.mkReal(float.toString(this->timeToTravel));
-        this->transmissionTimeZ3 = ctx.mkReal(float.toString(this->transmissionTime));
-        this->portSpeedZ3 = ctx.mkReal(float.toString(portSpeed));
-        this->bestEffortPercentZ3 = ctx.mkReal(float.toString(bestEffortPercent));
+        this->gbSizeZ3 = ctx.real_val(std::to_string(gbSize));
+        this->maxPacketSizeZ3 = ctx.real_val(std::to_string(this->maxPacketSize));
+        this->timeToTravelZ3 = ctx.real_val(std::to_string(this->timeToTravel));
+        this->transmissionTimeZ3 = ctx.real_val(std::to_string(this->transmissionTime));
+        this->portSpeedZ3 = ctx.real_val(std::to_string(portSpeed));
+        this->bestEffortPercentZ3 = ctx.real_val(std::to_string(bestEffortPercent));
 
         if(this->cycle.getFirstCycleStartZ3() == null) {
         	this->cycle.toZ3(ctx);
@@ -895,13 +895,13 @@ class INET_API Port {
         z3::expr sumOfPrtTime = null;
 
         for(int i = 0; i < 8; i++) {
-            slotStart[i] = ctx.mkRealConst(this->name + "SlotStart" + i);
-            slotDuration[i] = ctx.mkRealConst(this->name + "SlotDuration" + i);
+            slotStart[i] = ctx.real_const(this->name + "SlotStart" + i);
+            slotDuration[i] = ctx.real_const(this->name + "SlotDuration" + i);
         }
 
         for(FlowFragment f : this->flowFragments) {
-            // z3::expr sumOfSlotsStart = ctx.mkReal(0);
-            z3::expr sumOfSlotsDuration = ctx.mkReal(0);
+            // z3::expr sumOfSlotsStart = ctx.real_val(0);
+            z3::expr sumOfSlotsDuration = ctx.real_val(0);
 
         	for(int i = 0; i < this->cycle.getNumOfSlots(); i++) {
         		sumOfSlotsDuration = (z3::expr) ctx.mkAdd(cycle.slotDurationZ3(ctx, f.getFragmentPriorityZ3(), ctx.mkInt(i)));
@@ -949,8 +949,8 @@ class INET_API Port {
                 ctx.mkImplies(
                     firstPartOfImplication,
                     ctx.mkAnd(
-                        ctx.mkEq(slotStart[i-1], ctx.mkReal(0)),
-                        ctx.mkEq(slotDuration[i-1], ctx.mkReal(0))
+                        ctx.mkEq(slotStart[i-1], ctx.real_val(0)),
+                        ctx.mkEq(slotDuration[i-1], ctx.real_val(0))
                     )
 
                 )
@@ -972,7 +972,7 @@ class INET_API Port {
                 sumOfPrtTime,
                 ctx.mkMul(
                     ctx.mkSub(
-                        ctx.mkReal(1),
+                        ctx.real_val(1),
                         bestEffortPercentZ3
                     ),
                     this->cycle.getCycleDurationZ3()
@@ -1227,13 +1227,13 @@ class INET_API Port {
             setUpMicroCycles(solver, ctx);
 
             solver.add(
-	            ctx.mkEq(this->cycle.getCycleDurationZ3(), ctx.mkReal(float.toString(this->microCycleSize)))
+	            ctx.mkEq(this->cycle.getCycleDurationZ3(), ctx.real_val(std::to_string(this->microCycleSize)))
 	        );
         } else if (useHyperCycle && this->listOfPeriods.size() > 0) {
         	setUpHyperCycle(solver, ctx);
 
         	solver.add(
-	            ctx.mkEq(this->cycle.getCycleDurationZ3(), ctx.mkReal(float.toString(this->definedHyperCycleSize)))
+	            ctx.mkEq(this->cycle.getCycleDurationZ3(), ctx.real_val(std::to_string(this->definedHyperCycleSize)))
 	        );
         }
 
@@ -1341,11 +1341,11 @@ class INET_API Port {
 
     	if (this->flowFragments.size() == 0) {
     		solver.add(ctx.mkEq(
-                ctx.mkReal(float.toString(0)),
+                ctx.real_val(std::to_string(0)),
                 this->cycle.getCycleDurationZ3()
             ));
     	    //	solver.add(ctx.mkEq(
-            //    ctx.mkReal(float.toString(0)),
+            //    ctx.real_val(std::to_string(0)),
             //    this->cycle.getFirstCycleStartZ3()
             // ));
 
@@ -1355,12 +1355,12 @@ class INET_API Port {
         /*
     	if(useMicroCycles && this->flowFragments.size() > 0) {
     		solver.add(ctx.mkEq(
-                ctx.mkReal(float.toString(this->microCycleSize)),
+                ctx.real_val(std::to_string(this->microCycleSize)),
                 this->cycle.getCycleDurationZ3()
             ));
         } else if (useHyperCycle && this->flowFragments.size() > 0) {
         	solver.add(ctx.mkEq(
-                ctx.mkReal(float.toString(this->definedHyperCycleSize)),
+                ctx.real_val(std::to_string(this->definedHyperCycleSize)),
                 this->cycle.getCycleDurationZ3()
             ));
         } else {
@@ -1447,7 +1447,7 @@ class INET_API Port {
         	departureTime = (z3::expr)
         			ctx.mkAdd(
     					flowFrag.getDepartureTimeZ3(auxIndex),
-    					ctx.mkMul(ctx.mkReal(cycleNum), this->cycle.getCycleDurationZ3())
+    					ctx.mkMul(ctx.real_val(cycleNum), this->cycle.getCycleDurationZ3())
 					);
 
 
@@ -1522,7 +1522,7 @@ class INET_API Port {
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      *
     z3::expr scheduledTime(Context ctx, z3::expr index, FlowFragment flowFrag){
-        z3::expr devT3 = ctx.mkRealConst(flowFrag.getName() + "ScheduledTime" + index.toString());
+        z3::expr devT3 = ctx.real_const(flowFrag.getName() + "ScheduledTime" + index.toString());
 
         return (z3::expr) devT3;
     }
@@ -1557,8 +1557,8 @@ class INET_API Port {
 
         	scheduledTime = (z3::expr)
         			ctx.mkAdd(
-    					ctx.mkRealConst(flowFrag.getName() + "ScheduledTime" + index.toString()),
-    					ctx.mkMul(ctx.mkReal(cycleNum), this->cycle.getCycleDurationZ3())
+    					ctx.real_const(flowFrag.getName() + "ScheduledTime" + index.toString()),
+    					ctx.mkMul(ctx.real_val(cycleNum), this->cycle.getCycleDurationZ3())
 					);
 
 
@@ -1568,7 +1568,7 @@ class INET_API Port {
         index = ctx.mkInt(auxIndex);
 
 
-        scheduledTime = ctx.mkRealConst(flowFrag.getName() + "ScheduledTime" + index.toString());
+        scheduledTime = ctx.real_const(flowFrag.getName() + "ScheduledTime" + index.toString());
 
         return (z3::expr) scheduledTime;
     }
@@ -1622,8 +1622,8 @@ class INET_API Port {
     			solver.add(
 					ctx.mkEq(
 						this->cycle.slotDurationZ3(ctx, frag.getFragmentPriorityZ3(), ctx.mkInt(index)),
-						ctx.mkReal(
-							float.toString(
+						ctx.real_val(
+							std::to_string(
 								this->cycle.getSlotDuration(frag.getFragmentPriority(), index)
 							)
 						)
@@ -1633,8 +1633,8 @@ class INET_API Port {
     			solver.add(
 					ctx.mkEq(
 						this->cycle.slotStartZ3(ctx, frag.getFragmentPriorityZ3(), ctx.mkInt(index)),
-						ctx.mkReal(
-							float.toString(
+						ctx.real_val(
+							std::to_string(
 								this->cycle.getSlotStart(frag.getFragmentPriority(), index)
 							)
 						)
@@ -1648,24 +1648,24 @@ class INET_API Port {
     			solver.add(
 					ctx.mkEq(
 						this->departureTime(ctx, i, frag),
-						ctx.mkReal(float.toString(frag.getDepartureTime(i)))
+						ctx.real_val(std::to_string(frag.getDepartureTime(i)))
 					)
 				);
     			*/
     			if (i > 0)
-    				frag.addDepartureTimeZ3(ctx.mkReal(float.toString(frag.getDepartureTime(i))));
+    				frag.addDepartureTimeZ3(ctx.real_val(std::to_string(frag.getDepartureTime(i))));
 
     			solver.add(
 					ctx.mkEq(
 						this->arrivalTime(ctx, i, frag),
-						ctx.mkReal(float.toString(frag.getArrivalTime(i)))
+						ctx.real_val(std::to_string(frag.getArrivalTime(i)))
 					)
 				);
 
     			solver.add(
 					ctx.mkEq(
 						this->scheduledTime(ctx, i, frag),
-						ctx.mkReal(float.toString(frag.getScheduledTime(i)))
+						ctx.real_val(std::to_string(frag.getScheduledTime(i)))
 					)
 				);
 
@@ -1818,7 +1818,7 @@ class INET_API Port {
     }
 
     z3::expr getScheduledTimeOfPreviousPacket(Context ctx, FlowFragment f, int index) {
-        z3::expr prevPacketST = ctx.mkReal(0);
+        z3::expr prevPacketST = ctx.real_val(0);
 
         for(FlowFragment auxFrag : this->flowFragments) {
 
@@ -1847,7 +1847,7 @@ class INET_API Port {
 
         return (z3::expr)
                 ctx.mkITE(
-                    ctx.mkEq(prevPacketST, ctx.mkReal(0)),
+                    ctx.mkEq(prevPacketST, ctx.real_val(0)),
                     this->scheduledTime(ctx, index, f),
                     prevPacketST
                 );

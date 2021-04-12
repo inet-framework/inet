@@ -121,7 +121,7 @@ class INET_API Network {
             solver.add( // No negative cycle values constraint
                 ctx.mkGe(
                     flw.getStartDevice().getFirstT1TimeZ3(),
-                    ctx.mkReal(0)
+                    ctx.real_val(0)
                 )
             );
             solver.add( // Maximum transmission offset constraint
@@ -211,7 +211,7 @@ class INET_API Network {
                     ctx.mkLe(
                         ctx.mkDiv(
                             sumOfAllJitter,
-                            ctx.mkReal(flw.getPathTree().getLeaves().size() * (PACKETUPPERBOUNDRANGE))
+                            ctx.real_val(flw.getPathTree().getLeaves().size() * (PACKETUPPERBOUNDRANGE))
                         ),
                         jitterUpperBoundRangeZ3
                     )
@@ -268,7 +268,7 @@ class INET_API Network {
         		for(Port port : ((TSNSwitch) swt).getPorts()) {
         			for(FlowFragment frag : port.getFlowFragments()) {
         				frag.createNewDepartureTimeZ3List();
-        				frag.addDepartureTimeZ3(ctx.mkReal(float.toString(frag.getDepartureTime(0))));
+        				frag.addDepartureTimeZ3(ctx.real_val(std::to_string(frag.getDepartureTime(0))));
         			}
         		}
         		((TSNSwitch) swt).toZ3(ctx, solver);
@@ -300,7 +300,7 @@ class INET_API Network {
     }
 
     void setJitterUpperBoundRangeZ3(Context ctx, float auxJitterUpperBoundRange) {
-        this->jitterUpperBoundRangeZ3 = ctx.mkReal(std::string.valueOf(auxJitterUpperBoundRange));
+        this->jitterUpperBoundRangeZ3 = ctx.real_val(std::string.valueOf(auxJitterUpperBoundRange));
     }
 
     std::vector<Switch> getSwitches() {
