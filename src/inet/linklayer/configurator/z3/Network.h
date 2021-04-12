@@ -44,10 +44,10 @@ class INET_API Network {
      * time to travel for 2 (Needs revision).
      */
     Network (float jitterUpperBoundRange) {
-        this.jitterUpperBoundRange = jitterUpperBoundRange;
-        this.switches = new std::vector<Switch>();
-        this.flows = new std::vector<Flow>();
-        this.timeToTravel = 2;
+        this->jitterUpperBoundRange = jitterUpperBoundRange;
+        this->switches = new std::vector<Switch>();
+        this->flows = new std::vector<Flow>();
+        this->timeToTravel = 2;
     }
 
 
@@ -58,9 +58,9 @@ class INET_API Network {
      * time to travel for 2 (Needs revision).
      */
     Network () {
-        this.switches = new std::vector<Switch>();
-        this.flows = new std::vector<Flow>();
-        this.timeToTravel = 2;
+        this->switches = new std::vector<Switch>();
+        this->flows = new std::vector<Flow>();
+        this->timeToTravel = 2;
     }
 
     /**
@@ -74,9 +74,9 @@ class INET_API Network {
      * @param timeToTravel  Value used as travel time from a node to another in the network
      */
     Network (std::vector<Switch> switches, std::vector<Flow> flows, float timeToTravel) {
-        this.switches = switches;
-        this.flows = flows;
-        this.timeToTravel = timeToTravel;
+        this->switches = switches;
+        this->flows = flows;
+        this->timeToTravel = timeToTravel;
     }
 
     /**
@@ -90,7 +90,7 @@ class INET_API Network {
     void secureHC(Solver solver, Context ctx) {
 
         if(jitterUpperBoundRange != -1) { // If there is a value on the upperBoundRange, it was set through the network
-            this.setJitterUpperBoundRangeZ3(ctx, this.jitterUpperBoundRange);
+            this->setJitterUpperBoundRangeZ3(ctx, this->jitterUpperBoundRange);
         }
 
         Stack<z3::expr> jitterList = new Stack<z3::expr>();
@@ -100,7 +100,7 @@ class INET_API Network {
         //switch1.setupSchedulingRules(solver, ctx);
 
 
-        for (Switch swt : this.getSwitches()) {
+        for (Switch swt : this->getSwitches()) {
             ((TSNSwitch) swt).setupSchedulingRules(solver, ctx);;
         }
 
@@ -113,7 +113,7 @@ class INET_API Network {
          *  constraint
          */
 
-        for(Flow flw : this.getFlows()) {
+        for(Flow flw : this->getFlows()) {
         	flw.setNumberOfPacketsSent(flw.getPathTree().getRoot());
 
             flw.bindAllFragments(solver, ctx);
@@ -170,7 +170,7 @@ class INET_API Network {
                     	solver.add( // Maximum allowed jitter constraint
                             ctx.mkLe(
                                 flw.getJitterZ3((Device) leaf.getNode(), solver, ctx, index),
-                                this.jitterUpperBoundRangeZ3
+                                this->jitterUpperBoundRangeZ3
                             )
                         );
                     }
@@ -223,7 +223,7 @@ class INET_API Network {
                 for(PathNode node : flw.getPathTree().getLeaves()) {
                     Device endDev = (Device) node.getNode();
 
-                    this.avgLatencyPerDev.add(
+                    this->avgLatencyPerDev.add(
                         (z3::expr) ctx.mkDiv(
                             flw.getSumOfJitterZ3(endDev, solver, ctx, flw.getNumOfPacketsSent() - 1),
                             ctx.mkInt(flw.getNumOfPacketsSent())
@@ -256,14 +256,14 @@ class INET_API Network {
     	// TODO: Don't forget to load the values of this class
 
     	// On all network flows: Data given by the user will be converted to z3 values
-       for(Flow flw : this.flows) {
+       for(Flow flw : this->flows) {
            // flw.toZ3(ctx);
     	   flw.flowPriority = ctx.mkIntConst(flw.name + "Priority");
     	   ((Device) flw.getPathTree().getRoot().getNode()).toZ3(ctx);
        }
 
        // On all network switches: Data given by the user will be converted to z3 values
-        for(Switch swt : this.switches) {
+        for(Switch swt : this->switches) {
         	if(swt instanceof TSNSwitch) {
         		for(Port port : ((TSNSwitch) swt).getPorts()) {
         			for(FlowFragment frag : port.getFlowFragments()) {
@@ -277,7 +277,7 @@ class INET_API Network {
         }
 
     	/*
-    	for(Switch swt : this.getSwitches()) {
+    	for(Switch swt : this->getSwitches()) {
     		if(swt instanceof TSNSwitch) {
     			((TSNSwitch) swt).loadZ3(ctx, solver);
     		}
@@ -296,11 +296,11 @@ class INET_API Network {
     }
 
     void setJitterUpperBoundRangeZ3(z3::expr jitterUpperBoundRange) {
-        this.jitterUpperBoundRangeZ3 = jitterUpperBoundRange;
+        this->jitterUpperBoundRangeZ3 = jitterUpperBoundRange;
     }
 
     void setJitterUpperBoundRangeZ3(Context ctx, float auxJitterUpperBoundRange) {
-        this.jitterUpperBoundRangeZ3 = ctx.mkReal(std::string.valueOf(auxJitterUpperBoundRange));
+        this->jitterUpperBoundRangeZ3 = ctx.mkReal(std::string.valueOf(auxJitterUpperBoundRange));
     }
 
     std::vector<Switch> getSwitches() {
@@ -308,7 +308,7 @@ class INET_API Network {
     }
 
     void setSwitches(std::vector<Switch> switches) {
-        this.switches = switches;
+        this->switches = switches;
     }
 
     std::vector<Flow> getFlows() {
@@ -316,15 +316,15 @@ class INET_API Network {
     }
 
     void setFlows(std::vector<Flow> flows) {
-        this.flows = flows;
+        this->flows = flows;
     }
 
     void addFlow (Flow flw) {
-        this.flows.add(flw);
+        this->flows.add(flw);
     }
 
     void addSwitch (Switch swt) {
-        this.switches.add(swt);
+        this->switches.add(swt);
     }
 
 };

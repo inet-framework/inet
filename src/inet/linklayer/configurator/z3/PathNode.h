@@ -34,11 +34,11 @@ class INET_API PathNode {
     PathNode (Object node)
     {
         if((node instanceof TSNSwitch) || (node instanceof Switch)) {
-            this.node = node;
+            this->node = node;
             children = new std::vector<PathNode>();
             flowFragments = new std::vector<FlowFragment>();
         } else if (node instanceof Device) {
-            this.node = node;
+            this->node = node;
             children = null;
         } else {
             //[TODO]: Throw error
@@ -72,7 +72,7 @@ class INET_API PathNode {
     }
 
     void setParent(PathNode parent) {
-        this.parent = parent;
+        this->parent = parent;
     }
 
     Object getNode() {
@@ -80,7 +80,7 @@ class INET_API PathNode {
     }
 
     void setNode(Object node) {
-        this.node = node;
+        this->node = node;
     }
 
     std::vector<PathNode> getChildren() {
@@ -88,11 +88,11 @@ class INET_API PathNode {
     }
 
     void setChildren(std::vector<PathNode> children) {
-        this.children = children;
+        this->children = children;
     }
 
     void addFlowFragment(FlowFragment flowFragment) {
-        this.flowFragments.add(flowFragment);
+        this->flowFragments.add(flowFragment);
     }
 
     std::vector<FlowFragment> getFlowFragments() {
@@ -100,7 +100,7 @@ class INET_API PathNode {
     }
 
     void setFlowFragment(std::vector<FlowFragment>  flowFragments) {
-        this.flowFragments = flowFragments;
+        this->flowFragments = flowFragments;
     }
 
 };

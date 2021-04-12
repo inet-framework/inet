@@ -50,9 +50,9 @@ class INET_API TSNSwitch extends Switch {
      * @param name      Name of the switch
      */
     TSNSwitch(std::string name) {
-        this.name = name;
+        this->name = name;
         ports = new std::vector<Port>();
-        this.connectsTo = new std::vector<std::string>();
+        this->connectsTo = new std::vector<std::string>();
     }
 
     /**
@@ -68,14 +68,14 @@ class INET_API TSNSwitch extends Switch {
      */
     TSNSwitch(float timeToTravel,
                      float transmissionTime) {
-        this.name = "dev" + indexCounter++;
-        this.timeToTravel = timeToTravel;
-        this.transmissionTime = transmissionTime;
-        this.ports = new std::vector<Port>();
-        this.connectsTo = new std::vector<std::string>();
-        this.maxPacketSize = 0;
-        this.portSpeed = 0;
-        this.gbSize = 0;
+        this->name = "dev" + indexCounter++;
+        this->timeToTravel = timeToTravel;
+        this->transmissionTime = transmissionTime;
+        this->ports = new std::vector<Port>();
+        this->connectsTo = new std::vector<std::string>();
+        this->maxPacketSize = 0;
+        this->portSpeed = 0;
+        this->gbSize = 0;
     }
 
 
@@ -100,16 +100,16 @@ class INET_API TSNSwitch extends Switch {
                      float gbSize,
                      float cycleDurationLowerBound,
                      float cycleDurationUpperBound) {
-        this.name = name;
-        this.maxPacketSize = maxPacketSize;
-        this.timeToTravel = timeToTravel;
-        this.transmissionTime = transmissionTime;
-        this.portSpeed = portSpeed;
-        this.gbSize = gbSize;
-        this.ports = new std::vector<Port>();
-        this.connectsTo = new std::vector<std::string>();
-        this.cycleDurationLowerBound = cycleDurationLowerBound;
-        this.cycleDurationUpperBound = cycleDurationUpperBound;
+        this->name = name;
+        this->maxPacketSize = maxPacketSize;
+        this->timeToTravel = timeToTravel;
+        this->transmissionTime = transmissionTime;
+        this->portSpeed = portSpeed;
+        this->gbSize = gbSize;
+        this->ports = new std::vector<Port>();
+        this->connectsTo = new std::vector<std::string>();
+        this->cycleDurationLowerBound = cycleDurationLowerBound;
+        this->cycleDurationUpperBound = cycleDurationUpperBound;
     }
 
     /**
@@ -133,16 +133,16 @@ class INET_API TSNSwitch extends Switch {
                      float gbSize,
                      float cycleDurationLowerBound,
                      float cycleDurationUpperBound) {
-        this.name = name;
-        this.maxPacketSize = maxPacketSize;
-        this.timeToTravel = timeToTravel;
-        this.transmissionTime = 0;
-        this.portSpeed = portSpeed;
-        this.gbSize = gbSize;
-        this.ports = new std::vector<Port>();
-        this.connectsTo = new std::vector<std::string>();
-        this.cycleDurationLowerBound = cycleDurationLowerBound;
-        this.cycleDurationUpperBound = cycleDurationUpperBound;
+        this->name = name;
+        this->maxPacketSize = maxPacketSize;
+        this->timeToTravel = timeToTravel;
+        this->transmissionTime = 0;
+        this->portSpeed = portSpeed;
+        this->gbSize = gbSize;
+        this->ports = new std::vector<Port>();
+        this->connectsTo = new std::vector<std::string>();
+        this->cycleDurationLowerBound = cycleDurationLowerBound;
+        this->cycleDurationUpperBound = cycleDurationUpperBound;
     }
 
 
@@ -155,36 +155,36 @@ class INET_API TSNSwitch extends Switch {
      * @param ctx      Context variable containing the z3 environment used
      */
     void toZ3(Context ctx, Solver solver) {
-        this.cycleDurationLowerBoundZ3 = ctx.mkReal(float.toString(cycleDurationLowerBound));
-        this.cycleDurationUpperBoundZ3 = ctx.mkReal(float.toString(cycleDurationUpperBound));
+        this->cycleDurationLowerBoundZ3 = ctx.mkReal(float.toString(cycleDurationLowerBound));
+        this->cycleDurationUpperBoundZ3 = ctx.mkReal(float.toString(cycleDurationUpperBound));
 
         // Creating the cycle duration and start for this switch
-        this.cycleDuration = ctx.mkRealConst("cycleOf" + this.name + "Duration");
-        this.cycleStart = ctx.mkRealConst("cycleOf" + this.name + "Start");
+        this->cycleDuration = ctx.mkRealConst("cycleOf" + this->name + "Duration");
+        this->cycleStart = ctx.mkRealConst("cycleOf" + this->name + "Start");
 
 
         // Creating the cycle setting up the bounds for the duration (Cycle duration constraint)
         solver.add(
-                ctx.mkGe(this.cycleDuration, this.cycleDurationLowerBoundZ3)
+                ctx.mkGe(this->cycleDuration, this->cycleDurationLowerBoundZ3)
         );
         solver.add(
-                ctx.mkLe(this.cycleDuration, this.cycleDurationUpperBoundZ3)
+                ctx.mkLe(this->cycleDuration, this->cycleDurationUpperBoundZ3)
         );
 
         // A cycle must start on a point in time, so it must be greater than 0
         solver.add( // No negative cycle values constraint
-                ctx.mkGe(this.cycleStart, ctx.mkInt(0))
+                ctx.mkGe(this->cycleStart, ctx.mkInt(0))
         );
 
 
-        for (Port port : this.ports) {
+        for (Port port : this->ports) {
             port.toZ3(ctx);
 
             for(FlowFragment frag : port.getFlowFragments()) {
                 solver.add( // Maximum cycle start constraint
                         ctx.mkLe(
                                 port.getCycle().getFirstCycleStartZ3(),
-                                this.arrivalTime(ctx, 0, frag)
+                                this->arrivalTime(ctx, 0, frag)
                         )
                 );
             }
@@ -195,7 +195,7 @@ class INET_API TSNSwitch extends Switch {
 
             /* The cycle of every port must have the same duration
             solver.add(ctx.mkEq( // Equal cycle constraints
-                this.cycleDuration,
+                this->cycleDuration,
                 port.getCycle().getCycleDurationZ3()
             ));
             /**/
@@ -203,7 +203,7 @@ class INET_API TSNSwitch extends Switch {
             // The cycle of every port must have the same starting point
             /**/
             solver.add(ctx.mkEq( // Equal cycle constraints
-                    this.cycleStart,
+                    this->cycleStart,
                     port.getCycle().getFirstCycleStartZ3()
             ));
             /**/
@@ -211,7 +211,7 @@ class INET_API TSNSwitch extends Switch {
         }
 
         solver.add(ctx.mkEq(
-                this.cycleStart,
+                this->cycleStart,
                 ctx.mkInt(0)
         ));
 
@@ -228,7 +228,7 @@ class INET_API TSNSwitch extends Switch {
      */
     void setupSchedulingRules(Solver solver, Context ctx) {
 
-        for(Port port : this.ports) {
+        for(Port port : this->ports) {
                 port.setupSchedulingRules(solver, ctx);
         }
 
@@ -247,36 +247,36 @@ class INET_API TSNSwitch extends Switch {
     void createPort(Object destination, Cycle cycle) {
 
         if(destination instanceof Device) {
-            this.connectsTo.add(((Device)destination).getName());
-            this.ports.add(
-                    new Port(this.name + "Port" + this.portNum,
-                            this.portNum,
+            this->connectsTo.add(((Device)destination).getName());
+            this->ports.add(
+                    new Port(this->name + "Port" + this->portNum,
+                            this->portNum,
                             ((Device)destination).getName(),
-                            this.maxPacketSize,
-                            this.timeToTravel,
-                            this.transmissionTime,
-                            this.portSpeed,
-                            this.gbSize,
+                            this->maxPacketSize,
+                            this->timeToTravel,
+                            this->transmissionTime,
+                            this->portSpeed,
+                            this->gbSize,
                             cycle
                     )
             );
         } else if (destination instanceof Switch) {
-            this.connectsTo.add(((Switch)destination).getName());
+            this->connectsTo.add(((Switch)destination).getName());
 
-            Port newPort = new Port(this.name + "Port" + this.portNum,
-                    this.portNum,
+            Port newPort = new Port(this->name + "Port" + this->portNum,
+                    this->portNum,
                     ((Switch)destination).getName(),
-                    this.maxPacketSize,
-                    this.timeToTravel,
-                    this.transmissionTime,
-                    this.portSpeed,
-                    this.gbSize,
+                    this->maxPacketSize,
+                    this->timeToTravel,
+                    this->transmissionTime,
+                    this->portSpeed,
+                    this->gbSize,
                     cycle
             );
 
-            newPort.setPortNum(this.portNum);
+            newPort.setPortNum(this->portNum);
 
-            this.ports.add(newPort);
+            this->ports.add(newPort);
         }
         else
             ; // [TODO]: THROW ERROR
@@ -285,7 +285,7 @@ class INET_API TSNSwitch extends Switch {
 
 
 
-        this.portNum++;
+        this->portNum++;
     }
 
     /**
@@ -299,22 +299,22 @@ class INET_API TSNSwitch extends Switch {
      * @param cycle             Cycle used by the port
      */
     void createPort(std::string destination, Cycle cycle) {
-        this.connectsTo.add(destination);
+        this->connectsTo.add(destination);
 
-        this.ports.add(
-                new Port(this.name + "Port" + this.portNum,
-                        this.portNum,
+        this->ports.add(
+                new Port(this->name + "Port" + this->portNum,
+                        this->portNum,
                         destination,
-                        this.maxPacketSize,
-                        this.timeToTravel,
-                        this.transmissionTime,
-                        this.portSpeed,
-                        this.gbSize,
+                        this->maxPacketSize,
+                        this->timeToTravel,
+                        this->transmissionTime,
+                        this->portSpeed,
+                        this->gbSize,
                         cycle
                 )
         );
 
-        this.portNum++;
+        this->portNum++;
     }
 
 
@@ -327,14 +327,14 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Fragment of a flow to be added to a port
      */
     void addToFragmentList(FlowFragment flowFrag) {
-        int index = this.connectsTo.indexOf(flowFrag.getNextHop());
+        int index = this->connectsTo.indexOf(flowFrag.getNextHop());
 
         /*
         System.out.println("Current node: " + flowFrag.getNodeName());
         System.out.println("Next hop: " + flowFrag.getNextHop());
         System.out.println("Index of port: " + index);
         System.out.print("Connects to: ");
-        for(std::string connect : this.connectsTo) {
+        for(std::string connect : this->connectsTo) {
             System.out.print(connect + ", ");
         }
 
@@ -343,7 +343,7 @@ class INET_API TSNSwitch extends Switch {
 
         /**/
 
-        this.ports.get(index).addToFragmentList(flowFrag);
+        this->ports.get(index).addToFragmentList(flowFrag);
     }
 
 
@@ -356,11 +356,11 @@ class INET_API TSNSwitch extends Switch {
      * @return          Port of the switch that connects to a given node
      */
     Port getPortOf(std::string name) {
-        int index = this.connectsTo.indexOf(name);
+        int index = this->connectsTo.indexOf(name);
 
-        // System.out.println("On switch " + this.getName() + " looking for port to " + name);
+        // System.out.println("On switch " + this->getName() + " looking for port to " + name);
 
-        Port port = this.ports.get(index);
+        Port port = this->ports.get(index);
 
         return port;
     }
@@ -374,7 +374,7 @@ class INET_API TSNSwitch extends Switch {
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
     void setUpCycleSize(Solver solver, Context ctx) {
-        for(Port port : this.ports) {
+        for(Port port : this->ports) {
             port.setUpCycle(solver, ctx);
         }
     }
@@ -393,9 +393,9 @@ class INET_API TSNSwitch extends Switch {
      */
     z3::expr arrivalTime(Context ctx, int auxIndex, FlowFragment flowFrag){
         z3::expr index = ctx.mkInt(auxIndex);
-        int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
+        int portIndex = this->connectsTo.indexOf(flowFrag.getNextHop());
 
-        return (z3::expr) this.ports.get(portIndex).arrivalTime(ctx, auxIndex, flowFrag);
+        return (z3::expr) this->ports.get(portIndex).arrivalTime(ctx, auxIndex, flowFrag);
     }
 
 
@@ -411,8 +411,8 @@ class INET_API TSNSwitch extends Switch {
      * @return              Returns the z3 variable for the arrival time of the desired packet
      *
     z3::expr arrivalTime(Context ctx, z3::expr index, FlowFragment flowFrag){
-    int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
-    return (z3::expr) this.ports.get(portIndex).arrivalTime(ctx, index, flowFrag);
+    int portIndex = this->connectsTo.indexOf(flowFrag.getNextHop());
+    return (z3::expr) this->ports.get(portIndex).arrivalTime(ctx, index, flowFrag);
     }
     /**/
 
@@ -428,8 +428,8 @@ class INET_API TSNSwitch extends Switch {
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
     z3::expr departureTime(Context ctx, z3::expr index, FlowFragment flowFrag){
-        int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
-        return (z3::expr) this.ports.get(portIndex).departureTime(ctx, index, flowFrag);
+        int portIndex = this->connectsTo.indexOf(flowFrag.getNextHop());
+        return (z3::expr) this->ports.get(portIndex).departureTime(ctx, index, flowFrag);
     }
     /**/
 
@@ -447,8 +447,8 @@ class INET_API TSNSwitch extends Switch {
     z3::expr departureTime(Context ctx, int auxIndex, FlowFragment flowFrag){
         z3::expr index = ctx.mkInt(auxIndex);
 
-        int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
-        return (z3::expr) this.ports.get(portIndex).departureTime(ctx, index, flowFrag);
+        int portIndex = this->connectsTo.indexOf(flowFrag.getNextHop());
+        return (z3::expr) this->ports.get(portIndex).departureTime(ctx, index, flowFrag);
     }
 
     /**
@@ -463,8 +463,8 @@ class INET_API TSNSwitch extends Switch {
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      *
     z3::expr scheduledTime(Context ctx, z3::expr index, FlowFragment flowFrag){
-    int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
-    return (z3::expr) this.ports.get(portIndex).scheduledTime(ctx, index, flowFrag);
+    int portIndex = this->connectsTo.indexOf(flowFrag.getNextHop());
+    return (z3::expr) this->ports.get(portIndex).scheduledTime(ctx, index, flowFrag);
     }
     /**/
 
@@ -482,9 +482,9 @@ class INET_API TSNSwitch extends Switch {
     z3::expr scheduledTime(Context ctx, int auxIndex, FlowFragment flowFrag){
         // z3::expr index = ctx.mkInt(auxIndex);
 
-        int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
+        int portIndex = this->connectsTo.indexOf(flowFrag.getNextHop());
 
-        return (z3::expr) this.ports.get(portIndex).scheduledTime(ctx, auxIndex, flowFrag);
+        return (z3::expr) this->ports.get(portIndex).scheduledTime(ctx, auxIndex, flowFrag);
     }
 
 
@@ -492,21 +492,21 @@ class INET_API TSNSwitch extends Switch {
     	/*
     	solver.add(
 			ctx.mkEq(
-				this.cycleDurationUpperBoundZ3,
-				ctx.mkReal(float.toString(this.cycleDurationUpperBound))
+				this->cycleDurationUpperBoundZ3,
+				ctx.mkReal(float.toString(this->cycleDurationUpperBound))
 			)
 		);
 
     	solver.add(
 			ctx.mkEq(
-				this.cycleDurationLowerBoundZ3,
-				ctx.mkReal(float.toString(this.cycleDurationLowerBound))
+				this->cycleDurationLowerBoundZ3,
+				ctx.mkReal(float.toString(this->cycleDurationLowerBound))
 			)
 		);
     	*/
 
         if(!ports.isEmpty()) {
-            for(Port port : this.ports) {
+            for(Port port : this->ports) {
                 //System.out.println(port.getIsModifiedOrCreated());
                 port.loadZ3(ctx, solver);
 
@@ -522,11 +522,11 @@ class INET_API TSNSwitch extends Switch {
 
     Cycle getCycle(int index) {
 
-        return this.ports.get(index).getCycle();
+        return this->ports.get(index).getCycle();
     }
 
     void setCycle(Cycle cycle, int index) {
-        this.ports.get(index).setCycle(cycle);
+        this->ports.get(index).setCycle(cycle);
     }
 
     float getGbSize() {
@@ -534,7 +534,7 @@ class INET_API TSNSwitch extends Switch {
     }
 
     void setGbSize(float gbSize) {
-        this.gbSize = gbSize;
+        this->gbSize = gbSize;
     }
 
     z3::expr getGbSizeZ3() {
@@ -542,7 +542,7 @@ class INET_API TSNSwitch extends Switch {
     }
 
     void setGbSizeZ3(z3::expr gbSizeZ3) {
-        this.gbSizeZ3 = gbSizeZ3;
+        this->gbSizeZ3 = gbSizeZ3;
     }
 
     std::vector<Port> getPorts() {
@@ -550,12 +550,12 @@ class INET_API TSNSwitch extends Switch {
     }
 
     void setPorts(std::vector<Port> ports) {
-        this.ports = ports;
+        this->ports = ports;
     }
 
     void addPort(Port port, std::string name) {
-        this.ports.add(port);
-        this.connectsTo.add(name);
+        this->ports.add(port);
+        this->connectsTo.add(name);
     }
 
     z3::expr getCycleDuration() {
@@ -563,7 +563,7 @@ class INET_API TSNSwitch extends Switch {
     }
 
     void setCycleDuration(z3::expr cycleDuration) {
-        this.cycleDuration = cycleDuration;
+        this->cycleDuration = cycleDuration;
     }
 
     z3::expr getCycleStart() {
@@ -571,7 +571,7 @@ class INET_API TSNSwitch extends Switch {
     }
 
     void setCycleStart(z3::expr cycleStart) {
-        this.cycleStart = cycleStart;
+        this->cycleStart = cycleStart;
     }
 
     Boolean getIsModifiedOrCreated() {
@@ -579,11 +579,11 @@ class INET_API TSNSwitch extends Switch {
     }
 
     void setIsModifiedOrCreated(Boolean isModifiedOrCreated) {
-        this.isModifiedOrCreated = isModifiedOrCreated;
+        this->isModifiedOrCreated = isModifiedOrCreated;
     }
 
     std::vector<std::string> getConnectsTo(){
-        return this.connectsTo;
+        return this->connectsTo;
     }
 };
 

@@ -54,7 +54,7 @@ class INET_API FlowFragment extends Flow {
      * @param parent    Flow object to whom this fragment belongs to
      */
     FlowFragment(Flow parent) {
-        this.setParent(parent);
+        this->setParent(parent);
 
         /*
          * Every time this constructor is called, the parent is also called
@@ -63,7 +63,7 @@ class INET_API FlowFragment extends Flow {
          */
         // Flow.instanceCounter--;
 
-        this.nextFragments = new std::vector<FlowFragment>();
+        this->nextFragments = new std::vector<FlowFragment>();
 
         /*
          * Since the pathing methods for unicast and publish subscribe flows
@@ -72,9 +72,9 @@ class INET_API FlowFragment extends Flow {
          */
 
         if(parent.getType() == Flow.UNICAST) {
-            this.name = parent.getName() + "Fragment" + (parent.getFlowFragments().size() + 1);
+            this->name = parent.getName() + "Fragment" + (parent.getFlowFragments().size() + 1);
         } else if (parent.getType() == Flow.PUBLISH_SUBSCRIBE) {
-            this.name = parent.getName() + "Fragment" + (parent.pathTreeCount + 1);
+            this->name = parent.getName() + "Fragment" + (parent.pathTreeCount + 1);
             parent.pathTreeCount++;
         } else {
             // Throw error
@@ -87,7 +87,7 @@ class INET_API FlowFragment extends Flow {
      */
 
     std::string getName() {
-        return this.name;
+        return this->name;
     }
 
     z3::expr getDepartureTimeZ3(int index) {
@@ -95,15 +95,15 @@ class INET_API FlowFragment extends Flow {
     }
 
     void setDepartureTimeZ3(z3::expr dTimeZ3, int index) {
-        this.departureTimeZ3.set(index, dTimeZ3);
+        this->departureTimeZ3.set(index, dTimeZ3);
     }
 
     void addDepartureTimeZ3(z3::expr dTimeZ3) {
-        this.departureTimeZ3.add(dTimeZ3);
+        this->departureTimeZ3.add(dTimeZ3);
     }
 
     void createNewDepartureTimeZ3List() {
-        this.departureTimeZ3 = new std::vector<z3::expr>();
+        this->departureTimeZ3 = new std::vector<z3::expr>();
     }
 
     z3::expr getPacketPeriodicityZ3() {
@@ -111,16 +111,16 @@ class INET_API FlowFragment extends Flow {
     }
 
     void setPacketPeriodicityZ3(z3::expr packetPeriodicity) {
-        this.packetPeriodicityZ3 = packetPeriodicity;
+        this->packetPeriodicityZ3 = packetPeriodicity;
     }
 
 
     z3::expr getPacketSizeZ3() {
-        return this.packetSize;
+        return this->packetSize;
     }
 
     void setPacketSizeZ3(z3::expr packetSize) {
-        this.packetSize = packetSize;
+        this->packetSize = packetSize;
     }
 
     z3::expr getFragmentPriorityZ3() {
@@ -128,7 +128,7 @@ class INET_API FlowFragment extends Flow {
     }
 
     void setFragmentPriorityZ3(z3::expr flowPriority) {
-        this.fragmentPriorityZ3 = flowPriority;
+        this->fragmentPriorityZ3 = flowPriority;
     }
 
 
@@ -173,7 +173,7 @@ class INET_API FlowFragment extends Flow {
     }
 
     void setNextHop(std::string nextHop) {
-        this.nextHopName = nextHop;
+        this->nextHopName = nextHop;
     }
 
     std::string getNodeName() {
@@ -181,7 +181,7 @@ class INET_API FlowFragment extends Flow {
     }
 
     void setNodeName(std::string nodeName) {
-        this.nodeName = nodeName;
+        this->nodeName = nodeName;
     }
 
     @Override
@@ -191,7 +191,7 @@ class INET_API FlowFragment extends Flow {
 
     @Override
     void setNumOfPacketsSent(int numOfPacketsSent) {
-        this.numOfPacketsSent = numOfPacketsSent;
+        this->numOfPacketsSent = numOfPacketsSent;
     }
 
     Flow getParent() {
@@ -199,7 +199,7 @@ class INET_API FlowFragment extends Flow {
     }
 
     void setParent(Flow parent) {
-        this.parent = parent;
+        this->parent = parent;
     }
 
     int getFragmentPriority() {
@@ -207,7 +207,7 @@ class INET_API FlowFragment extends Flow {
     }
 
     void setFragmentPriority(int fragmentPriority) {
-        this.fragmentPriority = fragmentPriority;
+        this->fragmentPriority = fragmentPriority;
     }
 
     FlowFragment getPreviousFragment() {
@@ -215,7 +215,7 @@ class INET_API FlowFragment extends Flow {
     }
 
     void setPreviousFragment(FlowFragment previousFragment) {
-        this.previousFragment = previousFragment;
+        this->previousFragment = previousFragment;
     }
 
     List<FlowFragment> getNextFragments() {
@@ -223,11 +223,11 @@ class INET_API FlowFragment extends Flow {
     }
 
     void setNextFragments(List<FlowFragment> nextFragments) {
-        this.nextFragments = nextFragments;
+        this->nextFragments = nextFragments;
     }
 
     void addToNextFragments(FlowFragment frag) {
-        this.nextFragments.add(frag);
+        this->nextFragments.add(frag);
     }
 
     PathNode getReferenceToNode() {
@@ -235,7 +235,7 @@ class INET_API FlowFragment extends Flow {
     }
 
     void setReferenceToNode(PathNode referenceToNode) {
-        this.referenceToNode = referenceToNode;
+        this->referenceToNode = referenceToNode;
     }
 
     Boolean getIsModifiedOrCreated() {
@@ -243,11 +243,11 @@ class INET_API FlowFragment extends Flow {
     }
 
     void setIsModifiedOrCreated(Boolean isModifiedOrCreated) {
-        this.isModifiedOrCreated = isModifiedOrCreated;
+        this->isModifiedOrCreated = isModifiedOrCreated;
     }
 
     Port getPort() {
-        return this.port;
+        return this->port;
     }
 
     z3::expr getScheduledTimeZ3(int index) {
@@ -255,19 +255,19 @@ class INET_API FlowFragment extends Flow {
     }
 
     void setScheduledTimeZ3(z3::expr sTimeZ3, int index) {
-        this.scheduledTimeZ3.set(index, sTimeZ3);
+        this->scheduledTimeZ3.set(index, sTimeZ3);
     }
 
     void addScheduledTimeZ3(z3::expr sTimeZ3) {
-        this.scheduledTimeZ3.add(sTimeZ3);
+        this->scheduledTimeZ3.add(sTimeZ3);
     }
 
     void createNewScheduledTimeZ3List() {
-        this.scheduledTimeZ3 = new std::vector<z3::expr>();
+        this->scheduledTimeZ3 = new std::vector<z3::expr>();
     }
 
     void setPort(Port port) {
-        this.port = port;
+        this->port = port;
     }
 
 };
