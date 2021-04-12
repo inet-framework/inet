@@ -31,7 +31,7 @@ class INET_API PathNode {
      *
      * @param node      Device or a Switch that represents the node
      */
-    public PathNode (Object node)
+    PathNode (Object node)
     {
         if((node instanceof TSNSwitch) || (node instanceof Switch)) {
             this.node = node;
@@ -54,7 +54,7 @@ class INET_API PathNode {
      * @param node      Object representing the child device or switch
      * @return          A reference to the newly created node
      */
-    public PathNode addChild(Object node)
+    PathNode addChild(Object node)
     {
         PathNode pathNode = new PathNode(node);
         pathNode.setParent(this);
@@ -67,39 +67,39 @@ class INET_API PathNode {
      * GETTERS AND SETTERS:
      */
 
-    public PathNode getParent() {
+    PathNode getParent() {
         return parent;
     }
 
-    public void setParent(PathNode parent) {
+    void setParent(PathNode parent) {
         this.parent = parent;
     }
 
-    public Object getNode() {
+    Object getNode() {
         return node;
     }
 
-    public void setNode(Object node) {
+    void setNode(Object node) {
         this.node = node;
     }
 
-    public ArrayList<PathNode> getChildren() {
+    ArrayList<PathNode> getChildren() {
         return children;
     }
 
-    public void setChildren(ArrayList<PathNode> children) {
+    void setChildren(ArrayList<PathNode> children) {
         this.children = children;
     }
 
-    public void addFlowFragment(FlowFragment flowFragment) {
+    void addFlowFragment(FlowFragment flowFragment) {
         this.flowFragments.add(flowFragment);
     }
 
-    public ArrayList<FlowFragment> getFlowFragments() {
+    ArrayList<FlowFragment> getFlowFragments() {
         return flowFragments;
     }
 
-    public void setFlowFragment(ArrayList<FlowFragment>  flowFragments) {
+    void setFlowFragment(ArrayList<FlowFragment>  flowFragments) {
         this.flowFragments = flowFragments;
     }
 

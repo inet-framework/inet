@@ -70,7 +70,7 @@ class INET_API Port {
      * @param gbSize                Size of the guard band
      * @param cycle                 Cycle used by the port
      */
-    public Port (String name,
+    Port (String name,
     		int portNum,
             String connectsTo,
             float maxPacketSize,
@@ -101,7 +101,7 @@ class INET_API Port {
      *
      * @param ctx      Context variable containing the z3 environment used
      */
-    public void toZ3(Context ctx) {
+    void toZ3(Context ctx) {
         this.gbSizeZ3 = ctx.mkReal(Float.toString(gbSize));
         this.maxPacketSizeZ3 = ctx.mkReal(Float.toString(this.maxPacketSize));
         this.timeToTravelZ3 = ctx.mkReal(Float.toString(this.timeToTravel));
@@ -886,7 +886,7 @@ class INET_API Port {
      * @param solver	Solver object
      * @param ctx		Context object for the solver
      */
-    public void setupBestEffort(Solver solver, Context ctx) {
+    void setupBestEffort(Solver solver, Context ctx) {
         RealExpr []slotStart = new RealExpr[8];
         RealExpr []slotDuration = new RealExpr[8];
         // RealExpr guardBandTime = null;
@@ -1090,7 +1090,7 @@ class INET_API Port {
      * @param solver	Solver object
      * @param ctx		Context object for the solver
      */
-    public void setUpHyperCycle(Solver solver, Context ctx) {
+    void setUpHyperCycle(Solver solver, Context ctx) {
         int numOfPacketsScheduled = 0;
 
         /*
@@ -1140,7 +1140,7 @@ class INET_API Port {
      * @param solver	Solver object
      * @param ctx		Context object for the solver
      */
-    public void setUpMicroCycles(Solver solver, Context ctx) {
+    void setUpMicroCycles(Solver solver, Context ctx) {
 
         /*
         for(FlowFragment flowFrag : this.flowFragments) {
@@ -1178,7 +1178,7 @@ class INET_API Port {
      * @param solver	Solver object
      * @param ctx		Context object for the solver
      */
-    public void bindTimeSlots(Solver solver, Context ctx) {
+    void bindTimeSlots(Solver solver, Context ctx) {
 
     	// Ideia = se a prioridade de um flow e' igual a um numero,
     	// ctx.mkeq nele com o slot the cycle (getSlotS/D(prt, slotnum))
@@ -1212,7 +1212,7 @@ class INET_API Port {
      * @param solver        z3 solver object used to discover the variables' values
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
-    public void setUpCycle(Solver solver, Context ctx) {
+    void setUpCycle(Solver solver, Context ctx) {
 
     	this.cycle.toZ3(ctx);
 
@@ -1248,7 +1248,7 @@ class INET_API Port {
      * @param solver
      * @param ctx
      */
-    public void zeroOutNonUsedSlots(Solver solver, Context ctx) {
+    void zeroOutNonUsedSlots(Solver solver, Context ctx) {
     	BoolExpr exp1;
     	BoolExpr exp2;
     	IntExpr indexZ3;
@@ -1337,7 +1337,7 @@ class INET_API Port {
      * @param solver        z3 solver object used to discover the variables' values
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
-    public void setupSchedulingRules(Solver solver, Context ctx) {
+    void setupSchedulingRules(Solver solver, Context ctx) {
 
     	if (this.flowFragments.size() == 0) {
     		solver.add(ctx.mkEq(
@@ -1406,7 +1406,7 @@ class INET_API Port {
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
 
-    public RealExpr departureTime(Context ctx, IntExpr index, FlowFragment flowFrag){
+    RealExpr departureTime(Context ctx, IntExpr index, FlowFragment flowFrag){
 
         // If the index is 0, then its the first departure time, else add index * periodicity
         return this.departureTime(ctx, (Integer.parseInt(index.toString())), flowFrag);
@@ -1433,7 +1433,7 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    public RealExpr departureTime(Context ctx, int auxIndex, FlowFragment flowFrag){
+    RealExpr departureTime(Context ctx, int auxIndex, FlowFragment flowFrag){
     	IntExpr index = null;
     	RealExpr departureTime;
     	int cycleNum = 0;
@@ -1472,7 +1472,7 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      *
-    public RealExpr arrivalTime(Context ctx, IntExpr index, FlowFragment flowFrag){
+    RealExpr arrivalTime(Context ctx, IntExpr index, FlowFragment flowFrag){
 
 
        // The arrival time of this index from the given flow fragment is
@@ -1496,7 +1496,7 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    public RealExpr arrivalTime(Context ctx, int auxIndex, FlowFragment flowFrag){
+    RealExpr arrivalTime(Context ctx, int auxIndex, FlowFragment flowFrag){
         IntExpr index = ctx.mkInt(auxIndex);
 
         return (RealExpr) ctx.mkAdd( // Arrival time value constraint
@@ -1521,7 +1521,7 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      *
-    public RealExpr scheduledTime(Context ctx, IntExpr index, FlowFragment flowFrag){
+    RealExpr scheduledTime(Context ctx, IntExpr index, FlowFragment flowFrag){
         RealExpr devT3 = ctx.mkRealConst(flowFrag.getName() + "ScheduledTime" + index.toString());
 
         return (RealExpr) devT3;
@@ -1544,7 +1544,7 @@ class INET_API Port {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      */
-    public RealExpr scheduledTime(Context ctx, int auxIndex, FlowFragment flowFrag){
+    RealExpr scheduledTime(Context ctx, int auxIndex, FlowFragment flowFrag){
     	IntExpr index = null;
     	RealExpr scheduledTime;
     	int cycleNum = 0;
@@ -1581,7 +1581,7 @@ class INET_API Port {
      *
      * @return boolean value. True if automated application period methodology is used, false elsewhise
      */
-    public Boolean checkIfAutomatedApplicationPeriod() {
+    Boolean checkIfAutomatedApplicationPeriod() {
     	if(this.useHyperCycle || this.useMicroCycles)
     		return true;
     	return false;
@@ -1597,7 +1597,7 @@ class INET_API Port {
      * @param ctx		Context object for the solver
      * @param solver	Solver object
      */
-    public void loadZ3(Context ctx, Solver solver) {
+    void loadZ3(Context ctx, Solver solver) {
 
     	this.cycle.loadZ3(ctx, solver);
 
@@ -1681,99 +1681,99 @@ class INET_API Port {
      * GETTERS AND SETTERS:
      */
 
-    public Cycle getCycle() {
+    Cycle getCycle() {
         return cycle;
     }
 
-    public void setCycle(Cycle cycle) {
+    void setCycle(Cycle cycle) {
         this.cycle = cycle;
     }
 
-    public ArrayList<FlowFragment> getDeviceList() {
+    ArrayList<FlowFragment> getDeviceList() {
         return flowFragments;
     }
 
-    public void setDeviceList(ArrayList<FlowFragment> flowFragments) {
+    void setDeviceList(ArrayList<FlowFragment> flowFragments) {
         this.flowFragments = flowFragments;
     }
 
-    public void addToFragmentList(FlowFragment flowFrag) {
+    void addToFragmentList(FlowFragment flowFrag) {
         this.flowFragments.add(flowFrag);
     }
 
-    public float getGbSize() {
+    float getGbSize() {
         return gbSize;
     }
 
-    public void setGbSize(float gbSize) {
+    void setGbSize(float gbSize) {
         this.gbSize = gbSize;
     }
 
-    public RealExpr getGbSizeZ3() {
+    RealExpr getGbSizeZ3() {
         return gbSizeZ3;
     }
 
-    public void setGbSizeZ3(RealExpr gbSizeZ3) {
+    void setGbSizeZ3(RealExpr gbSizeZ3) {
         this.gbSizeZ3 = gbSizeZ3;
     }
 
-    public String getName() {
+    String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    void setName(String name) {
         this.name = name;
     }
 
-    public String getConnectsTo() {
+    String getConnectsTo() {
         return connectsTo;
     }
 
-    public void setConnectsTo(String connectsTo) {
+    void setConnectsTo(String connectsTo) {
         this.connectsTo = connectsTo;
     }
 
-    public void addToListOfPeriods(Float period) {
+    void addToListOfPeriods(Float period) {
     	this.listOfPeriods.add(period);
     }
 
-    public ArrayList<Float> getListOfPeriods() {
+    ArrayList<Float> getListOfPeriods() {
 		return listOfPeriods;
 	}
 
-	public void setListOfPeriods(ArrayList<Float> listOfPeriods) {
+     void setListOfPeriods(ArrayList<Float> listOfPeriods) {
 		this.listOfPeriods = listOfPeriods;
 	}
 
-    public int getCycleUpperBoundRange() {
+    int getCycleUpperBoundRange() {
 		return cycleUpperBoundRange;
 	}
 
-	public void setCycleUpperBoundRange(int cycleUpperBoundRange) {
+     void setCycleUpperBoundRange(int cycleUpperBoundRange) {
 		this.cycleUpperBoundRange = cycleUpperBoundRange;
 	}
 
-	public float getDefinedHyperCycleSize() {
+     float getDefinedHyperCycleSize() {
 		return definedHyperCycleSize;
 	}
 
-	public void setDefinedHyperCycleSize(float definedHyperCycleSize) {
+     void setDefinedHyperCycleSize(float definedHyperCycleSize) {
 		this.definedHyperCycleSize = definedHyperCycleSize;
 	}
 
-	public int getPortNum() {
+     int getPortNum() {
 		return portNum;
 	}
 
-	public void setPortNum(int portNum) {
+     void setPortNum(int portNum) {
 		this.portNum = portNum;
 	}
 
-    public ArrayList<FlowFragment> getFlowFragments() {
+    ArrayList<FlowFragment> getFlowFragments() {
         return flowFragments;
     }
 
-    public void setFlowFragments(ArrayList<FlowFragment> flowFragments) {
+    void setFlowFragments(ArrayList<FlowFragment> flowFragments) {
         this.flowFragments = flowFragments;
     }
 
@@ -1786,7 +1786,7 @@ class INET_API Port {
      *
      ***************************************************/
 
-    public IntExpr getCycleOfScheduledTime(Context ctx, FlowFragment f, int index) {
+    IntExpr getCycleOfScheduledTime(Context ctx, FlowFragment f, int index) {
         IntExpr cycleIndex = null;
 
         RealExpr relativeST = (RealExpr) ctx.mkSub(
@@ -1802,7 +1802,7 @@ class INET_API Port {
     }
 
 
-    public IntExpr getCycleOfTime(Context ctx, RealExpr time) {
+    IntExpr getCycleOfTime(Context ctx, RealExpr time) {
         IntExpr cycleIndex = null;
 
         RealExpr relativeST = (RealExpr) ctx.mkSub(
@@ -1817,7 +1817,7 @@ class INET_API Port {
         return cycleIndex;
     }
 
-    public RealExpr getScheduledTimeOfPreviousPacket(Context ctx, FlowFragment f, int index) {
+    RealExpr getScheduledTimeOfPreviousPacket(Context ctx, FlowFragment f, int index) {
         RealExpr prevPacketST = ctx.mkReal(0);
 
         for(FlowFragment auxFrag : this.flowFragments) {

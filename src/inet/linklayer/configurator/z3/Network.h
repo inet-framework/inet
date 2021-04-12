@@ -21,18 +21,18 @@ class INET_API Network {
 	String file_id;
 
 	//TODO: Remove debugging variables:
-    public RealExpr avgOfAllLatency;
-    public ArrayList<RealExpr> avgLatencyPerDev = new ArrayList<RealExpr>();
+    RealExpr avgOfAllLatency;
+    ArrayList<RealExpr> avgLatencyPerDev = new ArrayList<RealExpr>();
 
 
     ArrayList<Switch> switches;
     ArrayList<Flow> flows;
     float timeToTravel;
-    public ArrayList<RealExpr> allSumOfJitter = new ArrayList<RealExpr>();
-    public ArrayList<Integer> numberOfNodes = new ArrayList<Integer>();
+    ArrayList<RealExpr> allSumOfJitter = new ArrayList<RealExpr>();
+    ArrayList<Integer> numberOfNodes = new ArrayList<Integer>();
 
-    public static int PACKETUPPERBOUNDRANGE = 5; // Limits the applications of rules to the packets
-    public static int CYCLEUPPERBOUNDRANGE = 25; // Limits the applications of rules to the cycles
+    static int PACKETUPPERBOUNDRANGE = 5; // Limits the applications of rules to the packets
+    static int CYCLEUPPERBOUNDRANGE = 25; // Limits the applications of rules to the cycles
 
     float jitterUpperBoundRange = -1;
     RealExpr jitterUpperBoundRangeZ3;
@@ -43,7 +43,7 @@ class INET_API Network {
      * the ArrayLists for the switches and flows. Sets up the default
      * time to travel for 2 (Needs revision).
      */
-    public Network (float jitterUpperBoundRange) {
+    Network (float jitterUpperBoundRange) {
         this.jitterUpperBoundRange = jitterUpperBoundRange;
         this.switches = new ArrayList<Switch>();
         this.flows = new ArrayList<Flow>();
@@ -57,7 +57,7 @@ class INET_API Network {
      * the ArrayLists for the switches and flows. Sets up the default
      * time to travel for 2 (Needs revision).
      */
-    public Network () {
+    Network () {
         this.switches = new ArrayList<Switch>();
         this.flows = new ArrayList<Flow>();
         this.timeToTravel = 2;
@@ -73,7 +73,7 @@ class INET_API Network {
      * @param flows         ArrayList with the instances of flows of the network
      * @param timeToTravel  Value used as travel time from a node to another in the network
      */
-    public Network (ArrayList<Switch> switches, ArrayList<Flow> flows, float timeToTravel) {
+    Network (ArrayList<Switch> switches, ArrayList<Flow> flows, float timeToTravel) {
         this.switches = switches;
         this.flows = flows;
         this.timeToTravel = timeToTravel;
@@ -87,7 +87,7 @@ class INET_API Network {
      * @param solver    z3 solver object used to discover the variables' values
      * @param ctx       z3 context which specify the environment of constants, functions and variables
      */
-    public void secureHC(Solver solver, Context ctx) {
+    void secureHC(Solver solver, Context ctx) {
 
         if(jitterUpperBoundRange != -1) { // If there is a value on the upperBoundRange, it was set through the network
             this.setJitterUpperBoundRangeZ3(ctx, this.jitterUpperBoundRange);
@@ -251,7 +251,7 @@ class INET_API Network {
      * @param ctx		Context object for the solver
      * @param solver	Solver object
      */
-    public void loadNetwork(Context ctx, Solver solver) {
+    void loadNetwork(Context ctx, Solver solver) {
 
     	// TODO: Don't forget to load the values of this class
 
@@ -291,39 +291,39 @@ class INET_API Network {
      * GETTERS AND SETTERS
      */
 
-    public RealExpr getJitterUpperBoundRangeZ3() {
+    RealExpr getJitterUpperBoundRangeZ3() {
         return jitterUpperBoundRangeZ3;
     }
 
-    public void setJitterUpperBoundRangeZ3(RealExpr jitterUpperBoundRange) {
+    void setJitterUpperBoundRangeZ3(RealExpr jitterUpperBoundRange) {
         this.jitterUpperBoundRangeZ3 = jitterUpperBoundRange;
     }
 
-    public void setJitterUpperBoundRangeZ3(Context ctx, float auxJitterUpperBoundRange) {
+    void setJitterUpperBoundRangeZ3(Context ctx, float auxJitterUpperBoundRange) {
         this.jitterUpperBoundRangeZ3 = ctx.mkReal(String.valueOf(auxJitterUpperBoundRange));
     }
 
-    public ArrayList<Switch> getSwitches() {
+    ArrayList<Switch> getSwitches() {
         return switches;
     }
 
-    public void setSwitches(ArrayList<Switch> switches) {
+    void setSwitches(ArrayList<Switch> switches) {
         this.switches = switches;
     }
 
-    public ArrayList<Flow> getFlows() {
+    ArrayList<Flow> getFlows() {
         return flows;
     }
 
-    public void setFlows(ArrayList<Flow> flows) {
+    void setFlows(ArrayList<Flow> flows) {
         this.flows = flows;
     }
 
-    public void addFlow (Flow flw) {
+    void addFlow (Flow flw) {
         this.flows.add(flw);
     }
 
-    public void addSwitch (Switch swt) {
+    void addSwitch (Switch swt) {
         this.switches.add(swt);
     }
 

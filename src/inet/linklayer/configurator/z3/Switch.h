@@ -38,7 +38,7 @@ class INET_API Switch {
      * [Usage]: Default constructor of class Switch. Is used by
      * TSNSwitch to instantiate new children classes.
      */
-    public Switch() {
+    Switch() {
 
     }
 
@@ -54,7 +54,7 @@ class INET_API Switch {
      * @param transmissionTime      Time taken to process the packet inside the switch
      * @param portSpeed             Transmission speed of the port
      */
-    public Switch(String name,
+    Switch(String name,
                   float maxPacketSize,
                   float timeToTravel,
                   float transmissionTime,
@@ -72,43 +72,43 @@ class INET_API Switch {
      */
 
 
-    public float getMaxPacketSize() {
+    float getMaxPacketSize() {
         return maxPacketSize;
     }
 
-    public void setMaxPacketSize(float maxPacketSize) {
+    void setMaxPacketSize(float maxPacketSize) {
         this.maxPacketSize = maxPacketSize;
     }
 
-    public float getTimeToTravel() {
+    float getTimeToTravel() {
         return timeToTravel;
     }
 
-    public void setTimeToTravel(float timeToTravel) {
+    void setTimeToTravel(float timeToTravel) {
         this.timeToTravel = timeToTravel;
     }
 
-    public float getTransmissionTime() {
+    float getTransmissionTime() {
         return transmissionTime;
     }
 
-    public void setTransmissionTime(float transmissionTime) {
+    void setTransmissionTime(float transmissionTime) {
         this.transmissionTime = transmissionTime;
     }
 
-    public float getPortSpeed() {
+    float getPortSpeed() {
         return portSpeed;
     }
 
-    public void setPortSpeed(float portSpeed) {
+    void setPortSpeed(float portSpeed) {
         this.portSpeed = portSpeed;
     }
 
-    public void setName(String name) {
+    void setName(String name) {
         this.name = name;
     }
 
-    public String getName() {
+    String getName() {
         return this.name;
     }
 };

@@ -18,7 +18,7 @@ class INET_API ScheduleGenerator {
 	   @SuppressWarnings("serial")
 	   class TestFailedException extends Exception
 	   {
-	       public TestFailedException()
+	       TestFailedException()
 	       {
 	           super("Check FAILED");
 	       }
