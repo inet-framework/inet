@@ -84,7 +84,7 @@ class INET_API Flow {
         instanceCounter++;
 
         this->instance = instanceCounter;
-        this->name = "flow" + int.toString(instanceCounter);
+        this->name = std::string("flow") + int.toString(instanceCounter);
 
         if(type == UNICAST) {
             //Its not a unicast flow
@@ -114,7 +114,7 @@ class INET_API Flow {
     Flow(int type, float flowFirstSendingTime, float flowSendingPeriodicity) {
         instanceCounter++;
         this->instance = instanceCounter;
-        this->name = "flow" + int.toString(instanceCounter);
+        this->name = std::string("flow") + int.toString(instanceCounter);
 
         if(type == UNICAST) {
             //Its not a unicast flow
@@ -218,7 +218,7 @@ class INET_API Flow {
 
 
             if(this->priorityValue < 0 || this->priorityValue > 7) {
-                this->flowPriority = ctx.mkIntConst(this->name + "Priority");
+                this->flowPriority = ctx.mkIntConst(this->name + std::string("Priority"));
             } else {
                 this->flowPriority = ctx.mkInt(this->priorityValue);
             }
@@ -230,7 +230,7 @@ class INET_API Flow {
                 if(this->flowFirstSendingTime >= 0){
                     this->flowFirstSendingTimeZ3 = ctx.real_val(std::to_string(this->flowFirstSendingTime));
                 } else {
-                    this->flowFirstSendingTimeZ3 = ctx.real_const(("flow" + this->instance + "FirstSendingTime").c_str());
+                    this->flowFirstSendingTimeZ3 = ctx.real_const((std::string("flow") + this->instance + std::string("FirstSendingTime")).c_str());
                 }
             } else {
                 this->flowFirstSendingTimeZ3 = this->startDevice.getFirstT1TimeZ3();
@@ -259,7 +259,7 @@ class INET_API Flow {
 
         // If, by chance, the given node has no child, then its a leaf
         if(node.getChildren().size() == 0) {
-            //System.out.println("On flow " + this->name + " leaving on node " + ((Device) node.getNode()).getName());
+            //System.out.println(std::string("On flow " + this->name + std::string(" leaving on node ")) + ((Device) node.getNode()).getName());
             return flowFrag;
         }
 
@@ -327,7 +327,7 @@ class INET_API Flow {
                 if(this->fixedPriority) {
                     flowFrag.setFragmentPriorityZ3(this->flowPriority); // FIXED PRIORITY (Fixed priority per flow constraint)
                 } else {
-                    flowFrag.setFragmentPriorityZ3(ctx.mkIntConst(flowFrag.getName() + "Priority"));
+                    flowFrag.setFragmentPriorityZ3(ctx.mkIntConst(flowFrag.getName() + std::string("Priority")));
                 }
 
                 int portIndex = ((TSNSwitch) auxN.getNode()).getConnectsTo().indexOf(flowFrag.getNextHop());
@@ -350,7 +350,7 @@ class INET_API Flow {
                 //Adding fragment to the fragment list and to the switch's fragment list
                 auxN.addFlowFragment(flowFrag);
                 ((TSNSwitch)auxN.getNode()).addToFragmentList(flowFrag);
-                // System.out.println("Adding fragment to switch " + ((TSNSwitch)auxN.getNode()).getName() + " has " + auxN.getChildren().size() + " children");
+                // System.out.println(std::string("Adding fragment to switch " + ((TSNSwitch)auxN.getNode()).getName() + std::string(" has ") + auxN.getChildren().size() + " children"));
 
             }
 
@@ -415,7 +415,7 @@ class INET_API Flow {
         flowFrag.setNodeName(((TSNSwitch) path.get(currentSwitchIndex)).getName());
 
         // Setting extra flow properties
-        flowFrag.setFragmentPriorityZ3(ctx.mkIntConst(flowFrag.getName() + "Priority"));
+        flowFrag.setFragmentPriorityZ3(ctx.mkIntConst(flowFrag.getName() + std::string("Priority")));
         flowFrag.setPacketPeriodicityZ3(this->flowSendingPeriodicityZ3);
         flowFrag.setPacketSizeZ3(startDevice.getPacketSizeZ3());
 
@@ -450,8 +450,8 @@ class INET_API Flow {
             for(FlowFragment childFrag : frag.getNextFragments()){
 
                 for (int i = 0; i < this->numOfPacketsSentInFragment; i++){
-//                    System.out.println("On fragment " + frag.getName() + " making " + frag.getPort().scheduledTime(ctx, i, frag) + " = " + childFrag.getPort().departureTime(ctx, i, childFrag) + " that leads to " + childFrag.getPort().scheduledTime(ctx, i, childFrag)
-//                            + " on cycle of port " + frag.getPort().getCycle().getFirstCycleStartZ3());
+//                    System.out.println(std::string("On fragment " + frag.getName() + std::string(" making " + frag.getPort().scheduledTime(ctx, i, frag) + " = " + childFrag.getPort().departureTime(ctx, i, childFrag) + " that leads to ")) + childFrag.getPort().scheduledTime(ctx, i, childFrag)
+//                            + std::string(" on cycle of port ") + frag.getPort().getCycle().getFirstCycleStartZ3());
                     solver.add(
                         ctx.mkEq(
                             frag.getPort().scheduledTime(ctx, i, frag),
@@ -1035,7 +1035,7 @@ class INET_API Flow {
      */
     z3::expr getLatencyZ3(solver solver, context ctx, int index) {
         //index += 1;
-        z3::expr latency = ctx.real_const((this->name + "latencyOfPacket" + index).c_str());
+        z3::expr latency = ctx.real_const((this->name + std::string("latencyOfPacket") + index).c_str());
 
         TSNSwitch lastSwitchInPath = ((TSNSwitch) this->path.get(path.size() - 1));
         FlowFragment lastFragmentInList = this->flowFragments.get(flowFragments.size() - 1);
@@ -1073,7 +1073,7 @@ class INET_API Flow {
      */
     z3::expr getLatencyZ3(solver solver, Device dev, context ctx, int index) {
         //index += 1;
-        z3::expr latency = ctx.real_const((this->name + "latencyOfPacket" + index + "For" + dev.getName()).c_str());
+        z3::expr latency = ctx.real_const((this->name + std::string("latencyOfPacket" + index + std::string("For")) + dev.getName()).c_str());
 
         std::vector<PathNode> nodes = this->getNodesFromRootToNode(dev);
         std::vector<FlowFragment> flowFrags = this->getFlowFromRootToNode(dev);
@@ -1247,7 +1247,7 @@ class INET_API Flow {
      */
     z3::expr getJitterZ3(Device dev, solver solver, context ctx, int index) {
         //index += 1;
-        z3::expr jitter = ctx.real_const((this->name + "JitterOfPacket" + index + "For" + dev.getName()).c_str());
+        z3::expr jitter = ctx.real_const((this->name + std::string("JitterOfPacket" + index + std::string("For")) + dev.getName()).c_str());
 
         std::vector<PathNode> nodes = this->getNodesFromRootToNode(dev);
 
@@ -1363,11 +1363,11 @@ class INET_API Flow {
                     this->numOfPacketsSentInFragment = frag.getNumOfPacketsSent();
                 }
 
-                // System.out.println("On node " + ((TSNSwitch)node.getNode()).getName() + " trying to reach children");
-                // System.out.println("Node has: " + node.getFlowFragments().size() + " frags");
-                // System.out.println("Node has: " + node.getChildren().size() + " children");
+                // System.out.println(std::string("On node ") + ((TSNSwitch)node.getNode()).getName() + std::string(" trying to reach children"));
+                // System.out.println(std::string("Node has: ") + node.getFlowFragments().size() + std::string(" frags"));
+                // System.out.println(std::string("Node has: ") + node.getChildren().size() + std::string(" children"));
                 // for(PathNode n : node.getChildren()) {
-                // 		System.out.println("Child is a: " + (n.getNode() instanceof Device ? "Device" : "Switch"));
+                // 		System.out.println(std::string("Child is a: ") + (n.getNode() instanceof Device ? "Device" : "Switch"));
                 // }
 
                 this->setNumberOfPacketsSent(node.getChildren().get(index));

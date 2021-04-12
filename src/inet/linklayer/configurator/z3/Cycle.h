@@ -157,8 +157,8 @@ class INET_API Cycle {
     void toZ3(context ctx) {
         instanceCounter++;
 
-        this->cycleDurationZ3 = ctx.real_const(("cycle" + int.toString(instanceCounter) + "Duration").c_str());
-        this->firstCycleStartZ3 = ctx.real_const(("cycle" + int.toString(instanceCounter) + "Start").c_str());
+        this->cycleDurationZ3 = ctx.real_const((std::string("cycle") + int.toString(instanceCounter) + std::string("Duration")).c_str());
+        this->firstCycleStartZ3 = ctx.real_const((std::string("cycle") + int.toString(instanceCounter) + std::string("Start")).c_str());
         // this->firstCycleStartZ3 = ctx.real_val((std::to_string(0)).c_str());
         // this->firstCycleStartZ3 = ctx.real_val((std::to_string(firstCycleStart)).c_str());
         this->maximumSlotDurationZ3 = ctx.real_val((std::to_string(maximumSlotDuration)).c_str());
@@ -170,7 +170,7 @@ class INET_API Cycle {
         	this->slotStartZ3.add(std::vector<z3::expr>());
         	this->slotDurationZ3.add(std::vector<z3::expr>());
         	for(int j = 0; j < this->numOfSlots; j++) {
-        		this->slotStartZ3.get(i).add(ctx.real_const("cycleOfPort" + this->portName + "prt" + (i+1) + "slot" + (j+1)));
+        		this->slotStartZ3.get(i).add(ctx.real_const(std::string("cycleOfPort" + this->portName + std::string("prt" + (i+1) + "slot")) + (j+1)));
         	}
         }
 
@@ -354,24 +354,24 @@ class INET_API Cycle {
 
 
     z3::expr slotStartZ3(context ctx, z3::expr prt, z3::expr index) {
-        return ctx.real_const("priority" + prt.toString() + "slot" + index.toString() + "Start");
+        return ctx.real_const(std::string("priority" + prt.toString() + std::string("slot") + index.toString() + "Start"));
     }
 
     z3::expr slotStartZ3(context ctx, int auxPrt, int auxIndex) {
         z3::expr index = ctx.mkInt(auxIndex);
         z3::expr prt = ctx.mkInt(auxPrt);
-        return ctx.real_const("priority" + prt.toString() + "slot" + index.toString() + "Start");
+        return ctx.real_const(std::string("priority" + prt.toString() + std::string("slot") + index.toString() + "Start"));
     }
 
 
     z3::expr slotDurationZ3(context ctx, z3::expr prt, z3::expr index) {
-        return ctx.real_const("priority" + prt.toString() + "slot" + index.toString() + "Duration");
+        return ctx.real_const(std::string("priority" + prt.toString() + std::string("slot") + index.toString() + "Duration"));
     }
 
     z3::expr slotDurationZ3(context ctx, int auxPrt, int auxIndex) {
         z3::expr index = ctx.mkInt(auxIndex);
         z3::expr prt = ctx.mkInt(auxPrt);
-        return ctx.real_const("priority" + prt.toString() + "slot" + index.toString() + "Duration");
+        return ctx.real_const(std::string("priority" + prt.toString() + std::string("slot") + index.toString() + "Duration"));
     }
 
     z3::expr getCycleDurationZ3() {

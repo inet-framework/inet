@@ -40,7 +40,7 @@ class INET_API Device {
      * Sets the newly created device name.
      */
     Device() {
-		this->name = "dev" + indexCounter++;
+		this->name = std::string("dev") + indexCounter++;
 	}
 
     /**
@@ -62,7 +62,7 @@ class INET_API Device {
         this->hardConstraintTime = hardConstraintTime;
         this->softConstraintTime = 0;
         this->packetSize = 0;
-        this->name = "dev" + ++indexCounter;
+        this->name = std::string("dev") + ++indexCounter;
     }
 
     /**
@@ -88,7 +88,7 @@ class INET_API Device {
         this->hardConstraintTime = hardConstraintTime;
         this->softConstraintTime = softConstraintTime;
         this->packetSize = packetSize;
-        this->name = "dev" + ++indexCounter;
+        this->name = std::string("dev") + ++indexCounter;
     }
 
     /**
@@ -112,7 +112,7 @@ class INET_API Device {
         this->hardConstraintTime = hardConstraintTime;
         this->softConstraintTime = 0;
         this->packetSize = packetSize;
-        this->name = "dev" + ++indexCounter;
+        this->name = std::string("dev") + ++indexCounter;
     }
 
 
@@ -141,7 +141,7 @@ class INET_API Device {
 		this->softConstraintTimeZ3 = softConstraintTimeZ3;
 		this->packetSizeZ3 = packetSizeZ3;
 		this->flowPriority = flowPriority;
-        this->name = "dev" + indexCounter++;
+        this->name = std::string("dev") + indexCounter++;
 	}
 
 	/**
@@ -155,7 +155,7 @@ class INET_API Device {
      void toZ3(context ctx) {
 	    this->packetPeriodicityZ3 = ctx.real_val(std::to_string(this->packetPeriodicity));
 	    //this->firstT1TimeZ3 = ctx.real_val(std::to_string(this->firstT1Time)); // In case of fixed firstT1Time
-	    this->firstT1TimeZ3 = ctx.real_const((this->name + "FirstT1Time").c_str());
+	    this->firstT1TimeZ3 = ctx.real_const((this->name + std::string("FirstT1Time")).c_str());
 	    this->hardConstraintTimeZ3 = ctx.real_val(std::to_string(this->hardConstraintTime));
 	    this->softConstraintTimeZ3 = ctx.real_val(std::to_string(this->softConstraintTime));
 	    this->packetSizeZ3 = ctx.real_val(std::to_string(this->packetSize));

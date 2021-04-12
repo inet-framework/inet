@@ -73,9 +73,9 @@ class INET_API FlowFragment extends Flow {
          */
 
         if(parent.getType() == Flow.UNICAST) {
-            this->name = parent.getName() + "Fragment" + (parent.getFlowFragments().size() + 1);
+            this->name = parent.getName() + std::string("Fragment") + (parent.getFlowFragments().size() + 1);
         } else if (parent.getType() == Flow.PUBLISH_SUBSCRIBE) {
-            this->name = parent.getName() + "Fragment" + (parent.pathTreeCount + 1);
+            this->name = parent.getName() + std::string("Fragment") + (parent.pathTreeCount + 1);
             parent.pathTreeCount++;
         } else {
             // Throw error

@@ -260,7 +260,7 @@ class INET_API Network {
     	// On all network flows: Data given by the user will be converted to z3 values
        for(Flow flw : this->flows) {
            // flw.toZ3(ctx);
-    	   flw.flowPriority = ctx.mkIntConst(flw.name + "Priority");
+    	   flw.flowPriority = ctx.mkIntConst(flw.name + std::string("Priority"));
     	   ((Device) flw.getPathTree().getRoot().getNode()).toZ3(ctx);
        }
 
