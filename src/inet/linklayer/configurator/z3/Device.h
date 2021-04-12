@@ -7,6 +7,8 @@
 
 namespace inet {
 
+using namespace z3;
+
 // CLASS WHERE DEVICE PROPERTIES AND CONDITIONS ARE SPECIFIED
 
 /**

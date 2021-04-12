@@ -7,6 +7,8 @@
 
 namespace inet {
 
+using namespace z3;
+
 /**
  * [Class]: Cycle
  * [Usage]: Contains all properties of a TSN cycle.

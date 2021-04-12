@@ -7,6 +7,8 @@
 
 namespace inet {
 
+using namespace z3;
+
 /**
  * [Class]: Flow
  * [Usage]: This class specifies a flow (or a stream, in other
