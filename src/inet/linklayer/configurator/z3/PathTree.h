@@ -47,11 +47,11 @@ class INET_API PathTree {
      */
     void changeRoot(PathNode newRoot)
     {
-        PathNode oldRoot=this.root;
+        PathNode oldRoot=this->root;
         newRoot.setParent(null);
         newRoot.addChild(oldRoot);
         oldRoot.setParent(newRoot);
-        this.root=newRoot;
+        this->root=newRoot;
     }
 
 
@@ -105,7 +105,7 @@ class INET_API PathTree {
     }
 
     void setRoot(PathNode root) {
-        this.root = root;
+        this->root = root;
     }
 
 };

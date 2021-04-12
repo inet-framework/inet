@@ -177,7 +177,7 @@ class INET_API ScheduleGenerator {
                        for(int index = 0; index < ((TSNSwitch) child.getNode()).getPortOf(ffrag.getNextHop()).getCycle().getNumOfSlots(); index++) {
                     	   indexZ3 = ctx.mkInt(index);
                     	   out.println("        Fragment slot start " + index + ": "
-                                   + this.stringToFloat(
+                                   + this->stringToFloat(
                                            model.eval(((TSNSwitch) child.getNode())
                                                   .getPortOf(ffrag.getNextHop())
                                                   .getCycle()
@@ -185,7 +185,7 @@ class INET_API ScheduleGenerator {
                                                   , false).toString()
                                        ));
                     	   out.println("        Fragment slot duration " + index + " : "
-                                    + this.stringToFloat(
+                                    + this->stringToFloat(
                                         model.eval(((TSNSwitch) child.getNode())
                                                    .getPortOf(ffrag.getNextHop())
                                                    .getCycle()
@@ -207,9 +207,9 @@ class INET_API ScheduleGenerator {
                     	   // System.out.println(((TSNSwitch)child.getNode()).scheduledTime(ctx, i, ffrag));
 
                     	   if(i < ffrag.getParent().getNumOfPacketsSent()) {
-		                	   out.println("          (" + int.toString(i) + ") Fragment departure time: " + this.stringToFloat(model.eval(((TSNSwitch) child.getNode()).departureTime(ctx, i, ffrag) , false).toString()));
-		                	   out.println("          (" + int.toString(i) + ") Fragment arrival time: " + this.stringToFloat(model.eval(((TSNSwitch) child.getNode()).arrivalTime(ctx, i, ffrag) , false).toString()));
-		                       out.println("          (" + int.toString(i) + ") Fragment scheduled time: " + this.stringToFloat(model.eval(((TSNSwitch) child.getNode()).scheduledTime(ctx, i, ffrag) , false).toString()));
+		                	   out.println("          (" + int.toString(i) + ") Fragment departure time: " + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).departureTime(ctx, i, ffrag) , false).toString()));
+		                	   out.println("          (" + int.toString(i) + ") Fragment arrival time: " + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).arrivalTime(ctx, i, ffrag) , false).toString()));
+		                       out.println("          (" + int.toString(i) + ") Fragment scheduled time: " + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).scheduledTime(ctx, i, ffrag) , false).toString()));
 		                       out.println("          ----------------------------");
                     	   }
 
@@ -220,17 +220,17 @@ class INET_API ScheduleGenerator {
             			   );
 
                            ffrag.addDepartureTime(
-                               this.stringToFloat(
+                               this->stringToFloat(
                                    model.eval(((TSNSwitch) child.getNode()).departureTime(ctx, i, ffrag) , false).toString()
                                )
                            );
                            ffrag.addArrivalTime(
-                               this.stringToFloat(
+                               this->stringToFloat(
                                    model.eval(((TSNSwitch) child.getNode()).arrivalTime(ctx, i, ffrag) , false).toString()
                                )
                            );
                            ffrag.addScheduledTime(
-                               this.stringToFloat(
+                               this->stringToFloat(
                                    model.eval(((TSNSwitch) child.getNode()).scheduledTime(ctx, i, ffrag) , false).toString()
                                )
                            );
@@ -253,13 +253,13 @@ class INET_API ScheduleGenerator {
                         	   indexZ3 = ctx.mkInt(index);
 
                     		   listOfStart.add(
-                				   this.stringToFloat(model.eval(
+                				   this->stringToFloat(model.eval(
                                        ((TSNSwitch) child.getNode())
                                        .getPortOf(ffrag.getNextHop())
                                        .getCycle().slotStartZ3(ctx, ffrag.getFragmentPriorityZ3(), indexZ3) , false).toString())
             				   );
                     		   listOfDuration.add(
-                				   this.stringToFloat(model.eval(
+                				   this->stringToFloat(model.eval(
                                        ((TSNSwitch) child.getNode())
                                        .getPortOf(ffrag.getNextHop())
                                        .getCycle().slotDurationZ3(ctx, ffrag.getFragmentPriorityZ3(), indexZ3) , false).toString())
@@ -267,7 +267,7 @@ class INET_API ScheduleGenerator {
                            }
 
                     	   port.getCycle().addSlotUsed(
-                               (int) this.stringToFloat(model.eval(ffrag.getFragmentPriorityZ3(), false).toString()),
+                               (int) this->stringToFloat(model.eval(ffrag.getFragmentPriorityZ3(), false).toString()),
                                listOfStart,
                                listOfDuration
                            );
@@ -275,7 +275,7 @@ class INET_API ScheduleGenerator {
 
                    }
 
-                   this.writePathTree(child, model, ctx, out);
+                   this->writePathTree(child, model, ctx, out);
                }
            }
 
@@ -323,11 +323,11 @@ class INET_API ScheduleGenerator {
 	    */
 	   public void generateSchedule(Network net)
 	   {
-		   Context ctx = this.createContext(); //Creating the z3 context
+		   Context ctx = this->createContext(); //Creating the z3 context
 	       Solver solver = ctx.mkSolver();     //Creating the solver to generate unknown values based on the given context
 
 
-	        this.configureNetwork(net, ctx, solver);
+	        this->configureNetwork(net, ctx, solver);
 	       // net.loadNetwork(ctx, solver);
 
 
@@ -393,7 +393,7 @@ class INET_API ScheduleGenerator {
 	                           port
                                    .getCycle()
                                    .setCycleStart(
-                                       this.stringToFloat("" + model.eval(port.getCycle().getFirstCycleStartZ3(), false))
+                                       this->stringToFloat("" + model.eval(port.getCycle().getFirstCycleStartZ3(), false))
                                    );
 	                       }
 
@@ -402,7 +402,7 @@ class INET_API ScheduleGenerator {
                                port
                                    .getCycle()
                                    .setCycleDuration(
-                                       this.stringToFloat("" + model.eval(port.getCycle().getCycleDurationZ3(), false))
+                                       this->stringToFloat("" + model.eval(port.getCycle().getCycleDurationZ3(), false))
                                    );
 	                       }
 
@@ -484,7 +484,7 @@ class INET_API ScheduleGenerator {
                                out.println("");
 
 	                           //Start the data storing and log printing process from the root
-	                           this.writePathTree(pathNode, model, ctx, out);
+	                           this->writePathTree(pathNode, model, ctx, out);
 	                       }
 
 	                       out.println("");
@@ -506,9 +506,9 @@ class INET_API ScheduleGenerator {
 	           System.out.println("The specified constraints might not be satisfiable.");
 	       }
 
-	       this.closeContext(ctx);
+	       this->closeContext(ctx);
 	       new XMLExporter(net);
-	       // this.serializeNetwork(net, "network.ser");
+	       // this->serializeNetwork(net, "network.ser");
 	   }
 
 

@@ -38,7 +38,7 @@ class INET_API Device {
      * Sets the newly created device name.
      */
     Device() {
-		this.name = "dev" + indexCounter++;
+		this->name = "dev" + indexCounter++;
 	}
 
     /**
@@ -55,12 +55,12 @@ class INET_API Device {
      */
     Device(float packetPeriodicity,
                   float hardConstraintTime) {
-        this.packetPeriodicity = packetPeriodicity;
-        this.firstT1Time = 0;
-        this.hardConstraintTime = hardConstraintTime;
-        this.softConstraintTime = 0;
-        this.packetSize = 0;
-        this.name = "dev" + ++indexCounter;
+        this->packetPeriodicity = packetPeriodicity;
+        this->firstT1Time = 0;
+        this->hardConstraintTime = hardConstraintTime;
+        this->softConstraintTime = 0;
+        this->packetSize = 0;
+        this->name = "dev" + ++indexCounter;
     }
 
     /**
@@ -81,12 +81,12 @@ class INET_API Device {
                   float hardConstraintTime,
                   float softConstraintTime,
                   float packetSize) {
-        this.packetPeriodicity = packetPeriodicity;
-        this.firstT1Time = firstT1Time;
-        this.hardConstraintTime = hardConstraintTime;
-        this.softConstraintTime = softConstraintTime;
-        this.packetSize = packetSize;
-        this.name = "dev" + ++indexCounter;
+        this->packetPeriodicity = packetPeriodicity;
+        this->firstT1Time = firstT1Time;
+        this->hardConstraintTime = hardConstraintTime;
+        this->softConstraintTime = softConstraintTime;
+        this->packetSize = packetSize;
+        this->name = "dev" + ++indexCounter;
     }
 
     /**
@@ -105,12 +105,12 @@ class INET_API Device {
                   float firstT1Time,
                   float hardConstraintTime,
                   float packetSize) {
-        this.packetPeriodicity = packetPeriodicity;
-        this.firstT1Time = firstT1Time;
-        this.hardConstraintTime = hardConstraintTime;
-        this.softConstraintTime = 0;
-        this.packetSize = packetSize;
-        this.name = "dev" + ++indexCounter;
+        this->packetPeriodicity = packetPeriodicity;
+        this->firstT1Time = firstT1Time;
+        this->hardConstraintTime = hardConstraintTime;
+        this->softConstraintTime = 0;
+        this->packetSize = packetSize;
+        this->name = "dev" + ++indexCounter;
     }
 
 
@@ -133,13 +133,13 @@ class INET_API Device {
 				  z3::expr softConstraintTimeZ3,
 				  z3::expr packetSizeZ3,
 				  z3::expr flowPriority) {
-		this.packetPeriodicityZ3 = packetPeriodicityZ3;
-		this.firstT1TimeZ3 = firstT1TimeZ3;
-		this.hardConstraintTimeZ3 = hardConstraintTimeZ3;
-		this.softConstraintTimeZ3 = softConstraintTimeZ3;
-		this.packetSizeZ3 = packetSizeZ3;
-		this.flowPriority = flowPriority;
-        this.name = "dev" + indexCounter++;
+		this->packetPeriodicityZ3 = packetPeriodicityZ3;
+		this->firstT1TimeZ3 = firstT1TimeZ3;
+		this->hardConstraintTimeZ3 = hardConstraintTimeZ3;
+		this->softConstraintTimeZ3 = softConstraintTimeZ3;
+		this->packetSizeZ3 = packetSizeZ3;
+		this->flowPriority = flowPriority;
+        this->name = "dev" + indexCounter++;
 	}
 
 	/**
@@ -151,12 +151,12 @@ class INET_API Device {
 	 * @param ctx      Context variable containing the z3 environment used
 	 */
      void toZ3(Context ctx) {
-	    this.packetPeriodicityZ3 = ctx.mkReal(float.toString(this.packetPeriodicity));
-	    //this.firstT1TimeZ3 = ctx.mkReal(float.toString(this.firstT1Time)); // In case of fixed firstT1Time
-	    this.firstT1TimeZ3 = ctx.mkRealConst(this.name + "FirstT1Time");
-	    this.hardConstraintTimeZ3 = ctx.mkReal(float.toString(this.hardConstraintTime));
-	    this.softConstraintTimeZ3 = ctx.mkReal(float.toString(this.softConstraintTime));
-	    this.packetSizeZ3 = ctx.mkReal(float.toString(this.packetSize));
+	    this->packetPeriodicityZ3 = ctx.mkReal(float.toString(this->packetPeriodicity));
+	    //this->firstT1TimeZ3 = ctx.mkReal(float.toString(this->firstT1Time)); // In case of fixed firstT1Time
+	    this->firstT1TimeZ3 = ctx.mkRealConst(this->name + "FirstT1Time");
+	    this->hardConstraintTimeZ3 = ctx.mkReal(float.toString(this->hardConstraintTime));
+	    this->softConstraintTimeZ3 = ctx.mkReal(float.toString(this->softConstraintTime));
+	    this->packetSizeZ3 = ctx.mkReal(float.toString(this->packetSize));
 	}
 
     /*
@@ -168,7 +168,7 @@ class INET_API Device {
     }
 
     void setName(std::string name) {
-        this.name = name;
+        this->name = name;
     }
 
      float getPacketPeriodicity() {
@@ -176,7 +176,7 @@ class INET_API Device {
     }
 
     void setPacketPeriodicity(float packetPeriodicity) {
-        this.packetPeriodicity = packetPeriodicity;
+        this->packetPeriodicity = packetPeriodicity;
     }
 
     float getFirstT1Time() {
@@ -184,7 +184,7 @@ class INET_API Device {
     }
 
     void setFirstT1Time(float firstT1Time) {
-        this.firstT1Time = firstT1Time;
+        this->firstT1Time = firstT1Time;
     }
 
     float getHardConstraintTime() {
@@ -192,7 +192,7 @@ class INET_API Device {
     }
 
     void setHardConstraintTime(float hardConstraintTime) {
-        this.hardConstraintTime = hardConstraintTime;
+        this->hardConstraintTime = hardConstraintTime;
     }
 
     float getSoftConstraintTime() {
@@ -200,7 +200,7 @@ class INET_API Device {
     }
 
     void setSoftConstraintTime(float softConstraintTime) {
-        this.softConstraintTime = softConstraintTime;
+        this->softConstraintTime = softConstraintTime;
     }
 
     float getPacketSize() {
@@ -208,7 +208,7 @@ class INET_API Device {
     }
 
     void setPacketSize(float packetSize) {
-        this.packetSize = packetSize;
+        this->packetSize = packetSize;
     }
 
     /*
@@ -220,7 +220,7 @@ class INET_API Device {
 	}
 
      void setPacketPeriodicityZ3(z3::expr packetPeriodicity) {
-		this.packetPeriodicityZ3 = packetPeriodicity;
+		this->packetPeriodicityZ3 = packetPeriodicity;
 	}
 
      z3::expr getFirstT1TimeZ3() {
@@ -228,7 +228,7 @@ class INET_API Device {
 	}
 
      void setFirstT1TimeZ3(z3::expr firstT1Time) {
-		this.firstT1TimeZ3 = firstT1Time;
+		this->firstT1TimeZ3 = firstT1Time;
 	}
 
      z3::expr getHardConstraintTimeZ3() {
@@ -236,7 +236,7 @@ class INET_API Device {
 	}
 
      void setHardConstraintTimeZ3(z3::expr hardConstraintTime) {
-		this.hardConstraintTimeZ3 = hardConstraintTime;
+		this->hardConstraintTimeZ3 = hardConstraintTime;
 	}
 
      z3::expr getSoftConstraintTimeZ3() {
@@ -244,7 +244,7 @@ class INET_API Device {
 	}
 
      void setSoftConstraintTimeZ3(z3::expr softConstraintTime) {
-		this.softConstraintTimeZ3 = softConstraintTime;
+		this->softConstraintTimeZ3 = softConstraintTime;
 	}
 
     z3::expr getPacketSizeZ3() {
@@ -252,7 +252,7 @@ class INET_API Device {
     }
 
     void setPacketSizeZ3(z3::expr packetSize) {
-        this.packetSizeZ3 = packetSize;
+        this->packetSizeZ3 = packetSize;
     }
 
     z3::expr getFlowPriority() {
@@ -260,7 +260,7 @@ class INET_API Device {
     }
 
     void setFlowPriority(z3::expr flowPriority) {
-        this.flowPriority = flowPriority;
+        this->flowPriority = flowPriority;
     }
 };
 

@@ -59,11 +59,11 @@ class INET_API Switch {
                   float timeToTravel,
                   float transmissionTime,
                   float portSpeed) {
-        this.name = name;
-        this.maxPacketSize = maxPacketSize;
-        this.timeToTravel = timeToTravel;
-        this.transmissionTime = transmissionTime;
-        this.portSpeed = portSpeed;
+        this->name = name;
+        this->maxPacketSize = maxPacketSize;
+        this->timeToTravel = timeToTravel;
+        this->transmissionTime = transmissionTime;
+        this->portSpeed = portSpeed;
     }
 
 
@@ -77,7 +77,7 @@ class INET_API Switch {
     }
 
     void setMaxPacketSize(float maxPacketSize) {
-        this.maxPacketSize = maxPacketSize;
+        this->maxPacketSize = maxPacketSize;
     }
 
     float getTimeToTravel() {
@@ -85,7 +85,7 @@ class INET_API Switch {
     }
 
     void setTimeToTravel(float timeToTravel) {
-        this.timeToTravel = timeToTravel;
+        this->timeToTravel = timeToTravel;
     }
 
     float getTransmissionTime() {
@@ -93,7 +93,7 @@ class INET_API Switch {
     }
 
     void setTransmissionTime(float transmissionTime) {
-        this.transmissionTime = transmissionTime;
+        this->transmissionTime = transmissionTime;
     }
 
     float getPortSpeed() {
@@ -101,15 +101,15 @@ class INET_API Switch {
     }
 
     void setPortSpeed(float portSpeed) {
-        this.portSpeed = portSpeed;
+        this->portSpeed = portSpeed;
     }
 
     void setName(std::string name) {
-        this.name = name;
+        this->name = name;
     }
 
     std::string getName() {
-        return this.name;
+        return this->name;
     }
 };
 

@@ -83,16 +83,16 @@ class INET_API Cycle {
     Cycle(float upperBoundCycleTime,
                  float lowerBoundCycleTime,
                  float maximumSlotDuration) {
-        this.upperBoundCycleTime = upperBoundCycleTime;
-        this.lowerBoundCycleTime = lowerBoundCycleTime;
-        this.maximumSlotDuration = maximumSlotDuration;
-        this.firstCycleStart = 0;
+        this->upperBoundCycleTime = upperBoundCycleTime;
+        this->lowerBoundCycleTime = lowerBoundCycleTime;
+        this->maximumSlotDuration = maximumSlotDuration;
+        this->firstCycleStart = 0;
     }
 
 
     Cycle(float maximumSlotDuration) {
-       this.maximumSlotDuration = maximumSlotDuration;
-       this.firstCycleStart = 0;
+       this->maximumSlotDuration = maximumSlotDuration;
+       this->firstCycleStart = 0;
     }
 
 
@@ -113,10 +113,10 @@ class INET_API Cycle {
                  float lowerBoundCycleTime,
                  float firstCycleStart,
                  float maximumSlotDuration) {
-        this.upperBoundCycleTime = upperBoundCycleTime;
-        this.lowerBoundCycleTime = lowerBoundCycleTime;
-        this.firstCycleStart = firstCycleStart;
-        this.maximumSlotDuration = maximumSlotDuration;
+        this->upperBoundCycleTime = upperBoundCycleTime;
+        this->lowerBoundCycleTime = lowerBoundCycleTime;
+        this->firstCycleStart = firstCycleStart;
+        this->maximumSlotDuration = maximumSlotDuration;
     }
 
     /**
@@ -137,11 +137,11 @@ class INET_API Cycle {
                  z3::expr lowerBoundCycleTimeZ3,
                  z3::expr firstCycleStartZ3,
                  z3::expr maximumSlotDurationZ3) {
-        // this.upperBoundCycleTimeZ3 = upperBoundCycleTimeZ3;
-        // this.lowerBoundCycleTimeZ3 = lowerBoundCycleTimeZ3;
-        this.firstCycleStartZ3 = firstCycleStartZ3;
-        //this.guardBandSizeZ3 = guardBandSize;
-        this.maximumSlotDurationZ3 = maximumSlotDurationZ3;
+        // this->upperBoundCycleTimeZ3 = upperBoundCycleTimeZ3;
+        // this->lowerBoundCycleTimeZ3 = lowerBoundCycleTimeZ3;
+        this->firstCycleStartZ3 = firstCycleStartZ3;
+        //this->guardBandSizeZ3 = guardBandSize;
+        this->maximumSlotDurationZ3 = maximumSlotDurationZ3;
     }
 
     /**
@@ -155,20 +155,20 @@ class INET_API Cycle {
     void toZ3(Context ctx) {
         instanceCounter++;
 
-        this.cycleDurationZ3 = ctx.mkRealConst("cycle" + int.toString(instanceCounter) + "Duration");
-        this.firstCycleStartZ3 = ctx.mkRealConst("cycle" + int.toString(instanceCounter) + "Start");
-        // this.firstCycleStartZ3 = ctx.mkReal(float.toString(0));
-        // this.firstCycleStartZ3 = ctx.mkReal(float.toString(firstCycleStart));
-        this.maximumSlotDurationZ3 = ctx.mkReal(float.toString(maximumSlotDuration));
+        this->cycleDurationZ3 = ctx.mkRealConst("cycle" + int.toString(instanceCounter) + "Duration");
+        this->firstCycleStartZ3 = ctx.mkRealConst("cycle" + int.toString(instanceCounter) + "Start");
+        // this->firstCycleStartZ3 = ctx.mkReal(float.toString(0));
+        // this->firstCycleStartZ3 = ctx.mkReal(float.toString(firstCycleStart));
+        this->maximumSlotDurationZ3 = ctx.mkReal(float.toString(maximumSlotDuration));
 
-        this.slotStartZ3 = new std::vector<std::vector<z3::expr>>();
-        this.slotDurationZ3 = new std::vector<std::vector<z3::expr>>();
+        this->slotStartZ3 = new std::vector<std::vector<z3::expr>>();
+        this->slotDurationZ3 = new std::vector<std::vector<z3::expr>>();
 
-        for(int i = 0; i < this.numOfPrts; i++) {
-        	this.slotStartZ3.add(new std::vector<z3::expr>());
-        	this.slotDurationZ3.add(new std::vector<z3::expr>());
-        	for(int j = 0; j < this.numOfSlots; j++) {
-        		this.slotStartZ3.get(i).add(ctx.mkRealConst("cycleOfPort" + this.portName + "prt" + (i+1) + "slot" + (j+1)));
+        for(int i = 0; i < this->numOfPrts; i++) {
+        	this->slotStartZ3.add(new std::vector<z3::expr>());
+        	this->slotDurationZ3.add(new std::vector<z3::expr>());
+        	for(int j = 0; j < this->numOfSlots; j++) {
+        		this->slotStartZ3.get(i).add(ctx.mkRealConst("cycleOfPort" + this->portName + "prt" + (i+1) + "slot" + (j+1)));
         	}
         }
 
@@ -231,10 +231,10 @@ class INET_API Cycle {
      */
     void addSlotUsed(int prt, std::vector<float> sStart, std::vector<float> sDuration) {
 
-        if(!this.slotsUsed.contains(prt)) {
-            this.slotsUsed.add(prt);
-            this.slotStart.add(sStart);
-            this.slotDuration.add(sDuration);
+        if(!this->slotsUsed.contains(prt)) {
+            this->slotsUsed.add(prt);
+            this->slotStart.add(sStart);
+            this->slotDuration.add(sDuration);
         }
 
     }
@@ -254,38 +254,38 @@ class INET_API Cycle {
 
     	solver.add(
 			ctx.mkEq(
-				this.cycleDurationZ3,
-				ctx.mkReal(float.toString(this.cycleDuration))
+				this->cycleDurationZ3,
+				ctx.mkReal(float.toString(this->cycleDuration))
 			)
 		);
 
     	solver.add(
 			ctx.mkEq(
-				this.firstCycleStartZ3,
-				ctx.mkReal(float.toString(this.firstCycleStart))
+				this->firstCycleStartZ3,
+				ctx.mkReal(float.toString(this->firstCycleStart))
 			)
 		);
 
 
-    	for(int prt : this.getSlotsUsed()) {
+    	for(int prt : this->getSlotsUsed()) {
 
     		// Where are the slot duration per priority instantiated? Must do it before loading
 
-    		for(int slotIndex = 0; slotIndex < this.numOfSlots; slotIndex++) {
+    		for(int slotIndex = 0; slotIndex < this->numOfSlots; slotIndex++) {
     			solver.add(
 					ctx.mkEq(
-						this.slotStartZ3.get(prt).get(slotIndex),
-						ctx.mkReal(float.toString(this.slotStart.get(this.slotsUsed.indexOf(prt)).get(slotIndex)))
+						this->slotStartZ3.get(prt).get(slotIndex),
+						ctx.mkReal(float.toString(this->slotStart.get(this->slotsUsed.indexOf(prt)).get(slotIndex)))
 					)
 				);
     		}
 
     		/*
-    		for(int slotIndex = 0; slotIndex < this.numOfSlots; slotIndex++) {
+    		for(int slotIndex = 0; slotIndex < this->numOfSlots; slotIndex++) {
     			solver.add(
 					ctx.mkEq(
-						this.slotDurationZ3.get(prt).get(slotIndex),
-						ctx.mkReal(float.toString(this.slotDuration.get(prt).get(slotIndex)))
+						this->slotDurationZ3.get(prt).get(slotIndex),
+						ctx.mkReal(float.toString(this->slotDuration.get(prt).get(slotIndex)))
 					)
 				);
     		}
@@ -306,7 +306,7 @@ class INET_API Cycle {
     }
 
     void setUpperBoundCycleTime(float upperBoundCycleTime) {
-        this.upperBoundCycleTime = upperBoundCycleTime;
+        this->upperBoundCycleTime = upperBoundCycleTime;
     }
 
     float getLowerBoundCycleTime() {
@@ -314,7 +314,7 @@ class INET_API Cycle {
     }
 
     void setLowerBoundCycleTime(float lowerBoundCycleTime) {
-        this.lowerBoundCycleTime = lowerBoundCycleTime;
+        this->lowerBoundCycleTime = lowerBoundCycleTime;
     }
 
     float getCycleDuration() {
@@ -327,11 +327,11 @@ class INET_API Cycle {
 
 
     void setCycleStart(float cycleStart) {
-        this.cycleStart = cycleStart;
+        this->cycleStart = cycleStart;
     }
 
     void setCycleDuration(float cycleDuration) {
-        this.cycleDuration = cycleDuration;
+        this->cycleDuration = cycleDuration;
     }
 
     float getFirstCycleStart() {
@@ -339,7 +339,7 @@ class INET_API Cycle {
     }
 
     void setFirstCycleStart(float firstCycleStart) {
-        this.firstCycleStart = firstCycleStart;
+        this->firstCycleStart = firstCycleStart;
     }
 
     float getMaximumSlotDuration() {
@@ -347,7 +347,7 @@ class INET_API Cycle {
     }
 
     void setMaximumSlotDuration(float maximumSlotDuration) {
-        this.maximumSlotDuration = maximumSlotDuration;
+        this->maximumSlotDuration = maximumSlotDuration;
     }
 
 
@@ -377,7 +377,7 @@ class INET_API Cycle {
     }
 
     void setCycleDurationZ3(z3::expr cycleDuration) {
-        this.cycleDurationZ3 = cycleDuration;
+        this->cycleDurationZ3 = cycleDuration;
     }
 
     z3::expr getFirstCycleStartZ3() {
@@ -385,15 +385,15 @@ class INET_API Cycle {
     }
 
     void setFirstCycleStartZ3(z3::expr firstCycleStart) {
-        this.firstCycleStartZ3 = firstCycleStart;
+        this->firstCycleStartZ3 = firstCycleStart;
     }
 
     int getNumOfPrts() {
-        return this.numOfPrts;
+        return this->numOfPrts;
     }
 
     void setNumOfPrts(int numOfPrts) {
-        this.numOfPrts = numOfPrts;
+        this->numOfPrts = numOfPrts;
     }
 
     int getNumOfSlots() {
@@ -401,7 +401,7 @@ class INET_API Cycle {
 	}
 
      void setNumOfSlots(int numOfSlots) {
-		this.numOfSlots = numOfSlots;
+		this->numOfSlots = numOfSlots;
 	}
 
     z3::expr getMaximumSlotDurationZ3() {
@@ -409,11 +409,11 @@ class INET_API Cycle {
     }
 
     void setMaximumSlotDurationZ3(z3::expr maximumSlotDuration) {
-        this.maximumSlotDurationZ3 = maximumSlotDuration;
+        this->maximumSlotDurationZ3 = maximumSlotDuration;
     }
 
     std::vector<int> getSlotsUsed (){
-        return this.slotsUsed;
+        return this->slotsUsed;
     }
 
     std::vector<std::vector<float>> getSlotDuration() {
@@ -421,11 +421,11 @@ class INET_API Cycle {
     }
 
     float getSlotStart(int prt, int index) {
-        return this.slotStart.get(this.slotsUsed.indexOf(prt)).get(index);
+        return this->slotStart.get(this->slotsUsed.indexOf(prt)).get(index);
     }
 
     float getSlotDuration(int prt, int index) {
-        return this.slotDuration.get(this.slotsUsed.indexOf(prt)).get(index);
+        return this->slotDuration.get(this->slotsUsed.indexOf(prt)).get(index);
     }
 
     std::string getPortName() {
@@ -434,16 +434,16 @@ class INET_API Cycle {
 
 
      void setPortName(std::string portName) {
-		this.portName = portName;
+		this->portName = portName;
 	}
 
      z3::expr getSlotStartZ3(int prt, int slotNum) {
-		return this.slotStartZ3.get(prt).get(slotNum);
+		return this->slotStartZ3.get(prt).get(slotNum);
 	}
 
 	/*
      z3::expr getSlotDurationZ3(int prt, int slotNum) {
-		return this.slotDurationZ3.get(prt).get(slotNum);
+		return this->slotDurationZ3.get(prt).get(slotNum);
 	}
 	*/
 };
