@@ -27,12 +27,12 @@ class INET_API Device {
     float packetSize;
 
     static int indexCounter;
-    z3::expr packetPeriodicityZ3;
-    z3::expr firstT1TimeZ3;
-    z3::expr hardConstraintTimeZ3;
-    z3::expr softConstraintTimeZ3;
-    z3::expr packetSizeZ3;
-    z3::expr flowPriority;
+    expr *packetPeriodicityZ3;
+    expr *firstT1TimeZ3;
+    expr *hardConstraintTimeZ3;
+    expr *softConstraintTimeZ3;
+    expr *packetSizeZ3;
+    expr *flowPriority;
 
     /**
      * [Method]: Device
@@ -130,11 +130,11 @@ class INET_API Device {
      * @param flowPriority              Defines the priority queue in which this device packets belongs to (Not used yet)
      */
      Device(z3::expr packetPeriodicityZ3,
-                  z3::expr firstT1TimeZ3,
-                  z3::expr hardConstraintTimeZ3,
-                  z3::expr softConstraintTimeZ3,
-                  z3::expr packetSizeZ3,
-                  z3::expr flowPriority) {
+                  expr *firstT1TimeZ3,
+                  expr *hardConstraintTimeZ3,
+                  expr *softConstraintTimeZ3,
+                  expr *packetSizeZ3,
+                  expr *flowPriority) {
         this->packetPeriodicityZ3 = packetPeriodicityZ3;
         this->firstT1TimeZ3 = firstT1TimeZ3;
         this->hardConstraintTimeZ3 = hardConstraintTimeZ3;
@@ -217,7 +217,7 @@ class INET_API Device {
      *  Z3 GETTERS AND SETTERS
      */
 
-     z3::expr getPacketPeriodicityZ3() {
+     expr *getPacketPeriodicityZ3() {
         return packetPeriodicityZ3;
     }
 
@@ -225,7 +225,7 @@ class INET_API Device {
         this->packetPeriodicityZ3 = packetPeriodicity;
     }
 
-     z3::expr getFirstT1TimeZ3() {
+     expr *getFirstT1TimeZ3() {
         return firstT1TimeZ3;
     }
 
@@ -233,7 +233,7 @@ class INET_API Device {
         this->firstT1TimeZ3 = firstT1Time;
     }
 
-     z3::expr getHardConstraintTimeZ3() {
+     expr *getHardConstraintTimeZ3() {
         return hardConstraintTimeZ3;
     }
 
@@ -241,7 +241,7 @@ class INET_API Device {
         this->hardConstraintTimeZ3 = hardConstraintTime;
     }
 
-     z3::expr getSoftConstraintTimeZ3() {
+     expr *getSoftConstraintTimeZ3() {
         return softConstraintTimeZ3;
     }
 
@@ -249,7 +249,7 @@ class INET_API Device {
         this->softConstraintTimeZ3 = softConstraintTime;
     }
 
-    z3::expr getPacketSizeZ3() {
+    expr *getPacketSizeZ3() {
         return packetSizeZ3;
     }
 
@@ -257,7 +257,7 @@ class INET_API Device {
         this->packetSizeZ3 = packetSize;
     }
 
-    z3::expr getFlowPriority() {
+    expr *getFlowPriority() {
         return flowPriority;
     }
 

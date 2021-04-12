@@ -29,11 +29,11 @@ class INET_API TSNSwitch extends Switch {
     float cycleDurationLowerBound;
 
     float gbSize;
-    z3::expr gbSizeZ3; // Size of the guardBand
-    z3::expr cycleDuration;
-    z3::expr cycleStart;
-    z3::expr cycleDurationUpperBoundZ3;
-    z3::expr cycleDurationLowerBoundZ3;
+    expr *gbSizeZ3; // Size of the guardBand
+    expr *cycleDuration;
+    expr *cycleStart;
+    expr *cycleDurationUpperBoundZ3;
+    expr *cycleDurationLowerBoundZ3;
     int portNum = 0;
 
     static int indexCounter;
@@ -392,8 +392,8 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    z3::expr arrivalTime(context ctx, int auxIndex, FlowFragment flowFrag){
-        z3::expr index = ctx.mkInt(auxIndex);
+    expr *arrivalTime(context ctx, int auxIndex, FlowFragment flowFrag){
+        expr *index = ctx.mkInt(auxIndex);
         int portIndex = this->connectsTo.indexOf(flowFrag.getNextHop());
 
         return (z3::expr) this->ports.get(portIndex).arrivalTime(ctx, auxIndex, flowFrag);
@@ -411,7 +411,7 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      *
-    z3::expr arrivalTime(context ctx, z3::expr index, FlowFragment flowFrag){
+    expr *arrivalTime(context ctx, z3::expr index, FlowFragment flowFrag){
     int portIndex = this->connectsTo.indexOf(flowFrag.getNextHop());
     return (z3::expr) this->ports.get(portIndex).arrivalTime(ctx, index, flowFrag);
     }
@@ -428,7 +428,7 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    z3::expr departureTime(context ctx, z3::expr index, FlowFragment flowFrag){
+    expr *departureTime(context ctx, z3::expr index, FlowFragment flowFrag){
         int portIndex = this->connectsTo.indexOf(flowFrag.getNextHop());
         return (z3::expr) this->ports.get(portIndex).departureTime(ctx, index, flowFrag);
     }
@@ -445,8 +445,8 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    z3::expr departureTime(context ctx, int auxIndex, FlowFragment flowFrag){
-        z3::expr index = ctx.mkInt(auxIndex);
+    expr *departureTime(context ctx, int auxIndex, FlowFragment flowFrag){
+        expr *index = ctx.mkInt(auxIndex);
 
         int portIndex = this->connectsTo.indexOf(flowFrag.getNextHop());
         return (z3::expr) this->ports.get(portIndex).departureTime(ctx, index, flowFrag);
@@ -463,7 +463,7 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      *
-    z3::expr scheduledTime(context ctx, z3::expr index, FlowFragment flowFrag){
+    expr *scheduledTime(context ctx, z3::expr index, FlowFragment flowFrag){
     int portIndex = this->connectsTo.indexOf(flowFrag.getNextHop());
     return (z3::expr) this->ports.get(portIndex).scheduledTime(ctx, index, flowFrag);
     }
@@ -480,7 +480,7 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      */
-    z3::expr scheduledTime(context ctx, int auxIndex, FlowFragment flowFrag){
+    expr *scheduledTime(context ctx, int auxIndex, FlowFragment flowFrag){
         // z3::expr index = ctx.mkInt(auxIndex);
 
         int portIndex = this->connectsTo.indexOf(flowFrag.getNextHop());
@@ -538,7 +538,7 @@ class INET_API TSNSwitch extends Switch {
         this->gbSize = gbSize;
     }
 
-    z3::expr getGbSizeZ3() {
+    expr *getGbSizeZ3() {
         return gbSizeZ3;
     }
 
@@ -559,7 +559,7 @@ class INET_API TSNSwitch extends Switch {
         this->connectsTo.add(name);
     }
 
-    z3::expr getCycleDuration() {
+    expr *getCycleDuration() {
         return cycleDuration;
     }
 
@@ -567,7 +567,7 @@ class INET_API TSNSwitch extends Switch {
         this->cycleDuration = cycleDuration;
     }
 
-    z3::expr getCycleStart() {
+    expr *getCycleStart() {
         return cycleStart;
     }
 
