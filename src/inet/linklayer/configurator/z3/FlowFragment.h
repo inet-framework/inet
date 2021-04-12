@@ -25,8 +25,8 @@ class INET_API FlowFragment extends Flow {
     Flow parent;
     expr *packetSize;
     expr *packetPeriodicityZ3;
-    std::vector<z3::expr> departureTimeZ3;
-    std::vector<z3::expr> scheduledTimeZ3;
+    std::vector<z3::expr *> departureTimeZ3;
+    std::vector<z3::expr *> scheduledTimeZ3;
     expr *fragmentPriorityZ3;
 
     Port port;
