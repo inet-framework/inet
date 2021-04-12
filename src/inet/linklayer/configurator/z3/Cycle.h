@@ -157,11 +157,11 @@ class INET_API Cycle {
     void toZ3(context ctx) {
         instanceCounter++;
 
-        this->cycleDurationZ3 = ctx.real_const("cycle" + int.toString(instanceCounter) + "Duration");
-        this->firstCycleStartZ3 = ctx.real_const("cycle" + int.toString(instanceCounter) + "Start");
-        // this->firstCycleStartZ3 = ctx.real_val(std::to_string(0));
-        // this->firstCycleStartZ3 = ctx.real_val(std::to_string(firstCycleStart));
-        this->maximumSlotDurationZ3 = ctx.real_val(std::to_string(maximumSlotDuration));
+        this->cycleDurationZ3 = ctx.real_const(("cycle" + int.toString(instanceCounter) + "Duration").c_str());
+        this->firstCycleStartZ3 = ctx.real_const(("cycle" + int.toString(instanceCounter) + "Start").c_str());
+        // this->firstCycleStartZ3 = ctx.real_val((std::to_string(0)).c_str());
+        // this->firstCycleStartZ3 = ctx.real_val((std::to_string(firstCycleStart)).c_str());
+        this->maximumSlotDurationZ3 = ctx.real_val((std::to_string(maximumSlotDuration)).c_str());
 
         this->slotStartZ3.clear();
         this->slotDurationZ3.clear();

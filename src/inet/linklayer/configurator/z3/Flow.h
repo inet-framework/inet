@@ -230,7 +230,7 @@ class INET_API Flow {
                 if(this->flowFirstSendingTime >= 0){
                     this->flowFirstSendingTimeZ3 = ctx.real_val(std::to_string(this->flowFirstSendingTime));
                 } else {
-                    this->flowFirstSendingTimeZ3 = ctx.real_const("flow" + this->instance + "FirstSendingTime");
+                    this->flowFirstSendingTimeZ3 = ctx.real_const(("flow" + this->instance + "FirstSendingTime").c_str());
                 }
             } else {
                 this->flowFirstSendingTimeZ3 = this->startDevice.getFirstT1TimeZ3();
@@ -1035,7 +1035,7 @@ class INET_API Flow {
      */
     z3::expr getLatencyZ3(solver solver, context ctx, int index) {
         //index += 1;
-        z3::expr latency = ctx.real_const(this->name + "latencyOfPacket" + index);
+        z3::expr latency = ctx.real_const((this->name + "latencyOfPacket" + index).c_str());
 
         TSNSwitch lastSwitchInPath = ((TSNSwitch) this->path.get(path.size() - 1));
         FlowFragment lastFragmentInList = this->flowFragments.get(flowFragments.size() - 1);
@@ -1073,7 +1073,7 @@ class INET_API Flow {
      */
     z3::expr getLatencyZ3(solver solver, Device dev, context ctx, int index) {
         //index += 1;
-        z3::expr latency = ctx.real_const(this->name + "latencyOfPacket" + index + "For" + dev.getName());
+        z3::expr latency = ctx.real_const((this->name + "latencyOfPacket" + index + "For" + dev.getName()).c_str());
 
         std::vector<PathNode> nodes = this->getNodesFromRootToNode(dev);
         std::vector<FlowFragment> flowFrags = this->getFlowFromRootToNode(dev);
@@ -1247,7 +1247,7 @@ class INET_API Flow {
      */
     z3::expr getJitterZ3(Device dev, solver solver, context ctx, int index) {
         //index += 1;
-        z3::expr jitter = ctx.real_const(this->name + "JitterOfPacket" + index + "For" + dev.getName());
+        z3::expr jitter = ctx.real_const((this->name + "JitterOfPacket" + index + "For" + dev.getName()).c_str());
 
         std::vector<PathNode> nodes = this->getNodesFromRootToNode(dev);
 

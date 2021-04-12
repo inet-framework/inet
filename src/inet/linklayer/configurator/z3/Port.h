@@ -897,8 +897,8 @@ class INET_API Port {
         z3::expr sumOfPrtTime = null;
 
         for(int i = 0; i < 8; i++) {
-            slotStart[i] = ctx.real_const(this->name + "SlotStart" + i);
-            slotDuration[i] = ctx.real_const(this->name + "SlotDuration" + i);
+            slotStart[i] = ctx.real_const((this->name + "SlotStart" + i).c_str());
+            slotDuration[i] = ctx.real_const((this->name + "SlotDuration" + i).c_str());
         }
 
         for(FlowFragment f : this->flowFragments) {
@@ -1524,7 +1524,7 @@ class INET_API Port {
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      *
     z3::expr scheduledTime(context ctx, z3::expr index, FlowFragment flowFrag){
-        z3::expr devT3 = ctx.real_const(flowFrag.getName() + "ScheduledTime" + index.toString());
+        z3::expr devT3 = ctx.real_const((flowFrag.getName() + "ScheduledTime" + index.toString()).c_str());
 
         return (z3::expr) devT3;
     }
@@ -1570,7 +1570,7 @@ class INET_API Port {
         index = ctx.mkInt(auxIndex);
 
 
-        scheduledTime = ctx.real_const(flowFrag.getName() + "ScheduledTime" + index.toString());
+        scheduledTime = ctx.real_const((flowFrag.getName() + "ScheduledTime" + index.toString()).c_str());
 
         return (z3::expr) scheduledTime;
     }
