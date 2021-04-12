@@ -49,7 +49,7 @@ class INET_API TSNSwitch extends Switch {
      *
      * @param name      Name of the switch
      */
-    public TSNSwitch(String name) {
+    TSNSwitch(String name) {
         this.name = name;
         ports = new ArrayList<Port>();
         this.connectsTo = new ArrayList<String>();
@@ -66,7 +66,7 @@ class INET_API TSNSwitch extends Switch {
      * @param timeToTravel          Time that a packet takes to leave its port and reach the destination
      * @param transmissionTime      Time taken to process the packet inside the switch
      */
-    public TSNSwitch(float timeToTravel,
+    TSNSwitch(float timeToTravel,
                      float transmissionTime) {
         this.name = "dev" + indexCounter++;
         this.timeToTravel = timeToTravel;
@@ -92,7 +92,7 @@ class INET_API TSNSwitch extends Switch {
      * @param portSpeed             Transmission speed of the port
      * @param gbSize                Size of the guard bands used to separate non consecutive time slots
      */
-    public TSNSwitch(String name,
+    TSNSwitch(String name,
                      float maxPacketSize,
                      float timeToTravel,
                      float transmissionTime,
@@ -126,7 +126,7 @@ class INET_API TSNSwitch extends Switch {
      * @param portSpeed             Transmission speed of the port
      * @param gbSize                Size of the guard bands used to separate non consecutive time slots
      */
-    public TSNSwitch(String name,
+    TSNSwitch(String name,
                      float maxPacketSize,
                      float timeToTravel,
                      float portSpeed,
@@ -154,7 +154,7 @@ class INET_API TSNSwitch extends Switch {
      *
      * @param ctx      Context variable containing the z3 environment used
      */
-    public void toZ3(Context ctx, Solver solver) {
+    void toZ3(Context ctx, Solver solver) {
         this.cycleDurationLowerBoundZ3 = ctx.mkReal(Float.toString(cycleDurationLowerBound));
         this.cycleDurationUpperBoundZ3 = ctx.mkReal(Float.toString(cycleDurationUpperBound));
 
@@ -226,7 +226,7 @@ class INET_API TSNSwitch extends Switch {
      * @param solver        z3 solver object used to discover the variables' values
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
-    public void setupSchedulingRules(Solver solver, Context ctx) {
+    void setupSchedulingRules(Solver solver, Context ctx) {
 
         for(Port port : this.ports) {
                 port.setupSchedulingRules(solver, ctx);
@@ -244,7 +244,7 @@ class INET_API TSNSwitch extends Switch {
      * @param destination       Destination of the port as TSNSwitch or Device
      * @param cycle             Cycle used by the port
      */
-    public void createPort(Object destination, Cycle cycle) {
+    void createPort(Object destination, Cycle cycle) {
 
         if(destination instanceof Device) {
             this.connectsTo.add(((Device)destination).getName());
@@ -298,7 +298,7 @@ class INET_API TSNSwitch extends Switch {
      * @param destination       Name of the destination of the port
      * @param cycle             Cycle used by the port
      */
-    public void createPort(String destination, Cycle cycle) {
+    void createPort(String destination, Cycle cycle) {
         this.connectsTo.add(destination);
 
         this.ports.add(
@@ -326,7 +326,7 @@ class INET_API TSNSwitch extends Switch {
      *
      * @param flowFrag      Fragment of a flow to be added to a port
      */
-    public void addToFragmentList(FlowFragment flowFrag) {
+    void addToFragmentList(FlowFragment flowFrag) {
         int index = this.connectsTo.indexOf(flowFrag.getNextHop());
 
         /*
@@ -355,7 +355,7 @@ class INET_API TSNSwitch extends Switch {
      * @param name      Name of the node that the switch is connects to
      * @return          Port of the switch that connects to a given node
      */
-    public Port getPortOf(String name) {
+    Port getPortOf(String name) {
         int index = this.connectsTo.indexOf(name);
 
         // System.out.println("On switch " + this.getName() + " looking for port to " + name);
@@ -373,7 +373,7 @@ class INET_API TSNSwitch extends Switch {
      * @param solver        z3 solver object used to discover the variables' values
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
-    public void setUpCycleSize(Solver solver, Context ctx) {
+    void setUpCycleSize(Solver solver, Context ctx) {
         for(Port port : this.ports) {
             port.setUpCycle(solver, ctx);
         }
@@ -391,7 +391,7 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    public RealExpr arrivalTime(Context ctx, int auxIndex, FlowFragment flowFrag){
+    RealExpr arrivalTime(Context ctx, int auxIndex, FlowFragment flowFrag){
         IntExpr index = ctx.mkInt(auxIndex);
         int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
 
@@ -410,7 +410,7 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      *
-    public RealExpr arrivalTime(Context ctx, IntExpr index, FlowFragment flowFrag){
+    RealExpr arrivalTime(Context ctx, IntExpr index, FlowFragment flowFrag){
     int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
     return (RealExpr) this.ports.get(portIndex).arrivalTime(ctx, index, flowFrag);
     }
@@ -427,7 +427,7 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    public RealExpr departureTime(Context ctx, IntExpr index, FlowFragment flowFrag){
+    RealExpr departureTime(Context ctx, IntExpr index, FlowFragment flowFrag){
         int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
         return (RealExpr) this.ports.get(portIndex).departureTime(ctx, index, flowFrag);
     }
@@ -444,7 +444,7 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
-    public RealExpr departureTime(Context ctx, int auxIndex, FlowFragment flowFrag){
+    RealExpr departureTime(Context ctx, int auxIndex, FlowFragment flowFrag){
         IntExpr index = ctx.mkInt(auxIndex);
 
         int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
@@ -462,7 +462,7 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      *
-    public RealExpr scheduledTime(Context ctx, IntExpr index, FlowFragment flowFrag){
+    RealExpr scheduledTime(Context ctx, IntExpr index, FlowFragment flowFrag){
     int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
     return (RealExpr) this.ports.get(portIndex).scheduledTime(ctx, index, flowFrag);
     }
@@ -479,7 +479,7 @@ class INET_API TSNSwitch extends Switch {
      * @param flowFrag      Flow fragment that the packets belong to
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      */
-    public RealExpr scheduledTime(Context ctx, int auxIndex, FlowFragment flowFrag){
+    RealExpr scheduledTime(Context ctx, int auxIndex, FlowFragment flowFrag){
         // IntExpr index = ctx.mkInt(auxIndex);
 
         int portIndex = this.connectsTo.indexOf(flowFrag.getNextHop());
@@ -488,7 +488,7 @@ class INET_API TSNSwitch extends Switch {
     }
 
 
-    public void loadZ3(Context ctx, Solver solver) {
+    void loadZ3(Context ctx, Solver solver) {
     	/*
     	solver.add(
 			ctx.mkEq(
@@ -520,69 +520,69 @@ class INET_API TSNSwitch extends Switch {
      *  GETTERS AND SETTERS
      */
 
-    public Cycle getCycle(int index) {
+    Cycle getCycle(int index) {
 
         return this.ports.get(index).getCycle();
     }
 
-    public void setCycle(Cycle cycle, int index) {
+    void setCycle(Cycle cycle, int index) {
         this.ports.get(index).setCycle(cycle);
     }
 
-    public float getGbSize() {
+    float getGbSize() {
         return gbSize;
     }
 
-    public void setGbSize(float gbSize) {
+    void setGbSize(float gbSize) {
         this.gbSize = gbSize;
     }
 
-    public RealExpr getGbSizeZ3() {
+    RealExpr getGbSizeZ3() {
         return gbSizeZ3;
     }
 
-    public void setGbSizeZ3(RealExpr gbSizeZ3) {
+    void setGbSizeZ3(RealExpr gbSizeZ3) {
         this.gbSizeZ3 = gbSizeZ3;
     }
 
-    public ArrayList<Port> getPorts() {
+    ArrayList<Port> getPorts() {
         return ports;
     }
 
-    public void setPorts(ArrayList<Port> ports) {
+    void setPorts(ArrayList<Port> ports) {
         this.ports = ports;
     }
 
-    public void addPort(Port port, String name) {
+    void addPort(Port port, String name) {
         this.ports.add(port);
         this.connectsTo.add(name);
     }
 
-    public RealExpr getCycleDuration() {
+    RealExpr getCycleDuration() {
         return cycleDuration;
     }
 
-    public void setCycleDuration(RealExpr cycleDuration) {
+    void setCycleDuration(RealExpr cycleDuration) {
         this.cycleDuration = cycleDuration;
     }
 
-    public RealExpr getCycleStart() {
+    RealExpr getCycleStart() {
         return cycleStart;
     }
 
-    public void setCycleStart(RealExpr cycleStart) {
+    void setCycleStart(RealExpr cycleStart) {
         this.cycleStart = cycleStart;
     }
 
-    public Boolean getIsModifiedOrCreated() {
+    Boolean getIsModifiedOrCreated() {
         return isModifiedOrCreated;
     }
 
-    public void setIsModifiedOrCreated(Boolean isModifiedOrCreated) {
+    void setIsModifiedOrCreated(Boolean isModifiedOrCreated) {
         this.isModifiedOrCreated = isModifiedOrCreated;
     }
 
-    public ArrayList<String> getConnectsTo(){
+    ArrayList<String> getConnectsTo(){
         return this.connectsTo;
     }
 };

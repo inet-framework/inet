@@ -37,7 +37,7 @@ class INET_API Device {
      * [Usage]: Default constructor method of a device.
      * Sets the newly created device name.
      */
-    public Device() {
+    Device() {
 		this.name = "dev" + indexCounter++;
 	}
 
@@ -53,7 +53,7 @@ class INET_API Device {
      * @param packetPeriodicity     Periodicity of packet sending
      * @param hardConstraintTime    Maximum latency tolerated by this device
      */
-    public Device(float packetPeriodicity,
+    Device(float packetPeriodicity,
                   float hardConstraintTime) {
         this.packetPeriodicity = packetPeriodicity;
         this.firstT1Time = 0;
@@ -76,7 +76,7 @@ class INET_API Device {
      * @param softConstraintTime    Recommended latency for using this device
      * @param packetSize            Size of the packets sent by this device
      */
-    public Device(float packetPeriodicity,
+    Device(float packetPeriodicity,
                   float firstT1Time,
                   float hardConstraintTime,
                   float softConstraintTime,
@@ -101,7 +101,7 @@ class INET_API Device {
      * @param hardConstraintTime    Maximum latency tolerated by this device
      * @param packetSize            Size of the packets sent by this device
      */
-    public Device(float packetPeriodicity,
+    Device(float packetPeriodicity,
                   float firstT1Time,
                   float hardConstraintTime,
                   float packetSize) {
@@ -127,7 +127,7 @@ class INET_API Device {
      * @param packetSizeZ3              Size of the packets sent by this device
      * @param flowPriority              Defines the priority queue in which this device packets belongs to (Not used yet)
      */
-	public Device(RealExpr packetPeriodicityZ3,
+     Device(RealExpr packetPeriodicityZ3,
 				  RealExpr firstT1TimeZ3,
 				  RealExpr hardConstraintTimeZ3,
 				  RealExpr softConstraintTimeZ3,
@@ -150,7 +150,7 @@ class INET_API Device {
 	 *
 	 * @param ctx      Context variable containing the z3 environment used
 	 */
-	public void toZ3(Context ctx) {
+     void toZ3(Context ctx) {
 	    this.packetPeriodicityZ3 = ctx.mkReal(Float.toString(this.packetPeriodicity));
 	    //this.firstT1TimeZ3 = ctx.mkReal(Float.toString(this.firstT1Time)); // In case of fixed firstT1Time
 	    this.firstT1TimeZ3 = ctx.mkRealConst(this.name + "FirstT1Time");
@@ -163,51 +163,51 @@ class INET_API Device {
      *  GETTERS AND SETTERS
      */
 
-    public String getName() {
+    String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    void setName(String name) {
         this.name = name;
     }
 
-	public float getPacketPeriodicity() {
+     float getPacketPeriodicity() {
         return packetPeriodicity;
     }
 
-    public void setPacketPeriodicity(float packetPeriodicity) {
+    void setPacketPeriodicity(float packetPeriodicity) {
         this.packetPeriodicity = packetPeriodicity;
     }
 
-    public float getFirstT1Time() {
+    float getFirstT1Time() {
         return firstT1Time;
     }
 
-    public void setFirstT1Time(float firstT1Time) {
+    void setFirstT1Time(float firstT1Time) {
         this.firstT1Time = firstT1Time;
     }
 
-    public float getHardConstraintTime() {
+    float getHardConstraintTime() {
         return hardConstraintTime;
     }
 
-    public void setHardConstraintTime(float hardConstraintTime) {
+    void setHardConstraintTime(float hardConstraintTime) {
         this.hardConstraintTime = hardConstraintTime;
     }
 
-    public float getSoftConstraintTime() {
+    float getSoftConstraintTime() {
         return softConstraintTime;
     }
 
-    public void setSoftConstraintTime(float softConstraintTime) {
+    void setSoftConstraintTime(float softConstraintTime) {
         this.softConstraintTime = softConstraintTime;
     }
 
-    public float getPacketSize() {
+    float getPacketSize() {
         return packetSize;
     }
 
-    public void setPacketSize(float packetSize) {
+    void setPacketSize(float packetSize) {
         this.packetSize = packetSize;
     }
 
@@ -215,51 +215,51 @@ class INET_API Device {
      *  Z3 GETTERS AND SETTERS
      */
 
-	public RealExpr getPacketPeriodicityZ3() {
+     RealExpr getPacketPeriodicityZ3() {
 		return packetPeriodicityZ3;
 	}
 
-	public void setPacketPeriodicityZ3(RealExpr packetPeriodicity) {
+     void setPacketPeriodicityZ3(RealExpr packetPeriodicity) {
 		this.packetPeriodicityZ3 = packetPeriodicity;
 	}
 
-	public RealExpr getFirstT1TimeZ3() {
+     RealExpr getFirstT1TimeZ3() {
 		return firstT1TimeZ3;
 	}
 
-	public void setFirstT1TimeZ3(RealExpr firstT1Time) {
+     void setFirstT1TimeZ3(RealExpr firstT1Time) {
 		this.firstT1TimeZ3 = firstT1Time;
 	}
 
-	public RealExpr getHardConstraintTimeZ3() {
+     RealExpr getHardConstraintTimeZ3() {
 		return hardConstraintTimeZ3;
 	}
 
-	public void setHardConstraintTimeZ3(RealExpr hardConstraintTime) {
+     void setHardConstraintTimeZ3(RealExpr hardConstraintTime) {
 		this.hardConstraintTimeZ3 = hardConstraintTime;
 	}
 
-	public RealExpr getSoftConstraintTimeZ3() {
+     RealExpr getSoftConstraintTimeZ3() {
 		return softConstraintTimeZ3;
 	}
 
-	public void setSoftConstraintTimeZ3(RealExpr softConstraintTime) {
+     void setSoftConstraintTimeZ3(RealExpr softConstraintTime) {
 		this.softConstraintTimeZ3 = softConstraintTime;
 	}
 
-    public RealExpr getPacketSizeZ3() {
+    RealExpr getPacketSizeZ3() {
         return packetSizeZ3;
     }
 
-    public void setPacketSizeZ3(RealExpr packetSize) {
+    void setPacketSizeZ3(RealExpr packetSize) {
         this.packetSizeZ3 = packetSize;
     }
 
-    public IntExpr getFlowPriority() {
+    IntExpr getFlowPriority() {
         return flowPriority;
     }
 
-    public void setFlowPriority(IntExpr flowPriority) {
+    void setFlowPriority(IntExpr flowPriority) {
         this.flowPriority = flowPriority;
     }
 };

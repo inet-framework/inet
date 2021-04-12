@@ -53,7 +53,7 @@ class INET_API FlowFragment extends Flow {
      *
      * @param parent    Flow object to whom this fragment belongs to
      */
-    public FlowFragment(Flow parent) {
+    FlowFragment(Flow parent) {
         this.setParent(parent);
 
         /*
@@ -86,187 +86,187 @@ class INET_API FlowFragment extends Flow {
      * GETTERS AND SETTERS
      */
 
-    public String getName() {
+    String getName() {
         return this.name;
     }
 
-    public RealExpr getDepartureTimeZ3(int index) {
+    RealExpr getDepartureTimeZ3(int index) {
         return departureTimeZ3.get(index);
     }
 
-    public void setDepartureTimeZ3(RealExpr dTimeZ3, int index) {
+    void setDepartureTimeZ3(RealExpr dTimeZ3, int index) {
         this.departureTimeZ3.set(index, dTimeZ3);
     }
 
-    public void addDepartureTimeZ3(RealExpr dTimeZ3) {
+    void addDepartureTimeZ3(RealExpr dTimeZ3) {
         this.departureTimeZ3.add(dTimeZ3);
     }
 
-    public void createNewDepartureTimeZ3List() {
+    void createNewDepartureTimeZ3List() {
         this.departureTimeZ3 = new ArrayList<RealExpr>();
     }
 
-    public RealExpr getPacketPeriodicityZ3() {
+    RealExpr getPacketPeriodicityZ3() {
         return packetPeriodicityZ3;
     }
 
-    public void setPacketPeriodicityZ3(RealExpr packetPeriodicity) {
+    void setPacketPeriodicityZ3(RealExpr packetPeriodicity) {
         this.packetPeriodicityZ3 = packetPeriodicity;
     }
 
 
-    public RealExpr getPacketSizeZ3() {
+    RealExpr getPacketSizeZ3() {
         return this.packetSize;
     }
 
-    public void setPacketSizeZ3(RealExpr packetSize) {
+    void setPacketSizeZ3(RealExpr packetSize) {
         this.packetSize = packetSize;
     }
 
-    public IntExpr getFragmentPriorityZ3() {
+    IntExpr getFragmentPriorityZ3() {
         return fragmentPriorityZ3;
     }
 
-    public void setFragmentPriorityZ3(IntExpr flowPriority) {
+    void setFragmentPriorityZ3(IntExpr flowPriority) {
         this.fragmentPriorityZ3 = flowPriority;
     }
 
 
-    public void addDepartureTime(float val) {
+    void addDepartureTime(float val) {
         departureTime.add(val);
     }
 
-    public float getDepartureTime(int index) {
+    float getDepartureTime(int index) {
         return departureTime.get(index);
     }
 
-    public ArrayList<Float> getDepartureTimeList() {
+    ArrayList<Float> getDepartureTimeList() {
         return departureTime;
     }
 
-    public void addArrivalTime(float val) {
+    void addArrivalTime(float val) {
         arrivalTime.add(val);
     }
 
-    public float getArrivalTime(int index) {
+    float getArrivalTime(int index) {
         return arrivalTime.get(index);
     }
 
-    public ArrayList<Float> getArrivalTimeList() {
+    ArrayList<Float> getArrivalTimeList() {
         return arrivalTime;
     }
 
-    public void addScheduledTime(float val) {
+    void addScheduledTime(float val) {
         scheduledTime.add(val);
     }
 
-    public float getScheduledTime(int index) {
+    float getScheduledTime(int index) {
         return scheduledTime.get(index);
     }
 
-    public ArrayList<Float> getScheduledTimeList() {
+    ArrayList<Float> getScheduledTimeList() {
         return scheduledTime;
     }
 
-    public String getNextHop() {
+    String getNextHop() {
         return nextHopName;
     }
 
-    public void setNextHop(String nextHop) {
+    void setNextHop(String nextHop) {
         this.nextHopName = nextHop;
     }
 
-    public String getNodeName() {
+    String getNodeName() {
         return nodeName;
     }
 
-    public void setNodeName(String nodeName) {
+    void setNodeName(String nodeName) {
         this.nodeName = nodeName;
     }
 
     @Override
-    public int getNumOfPacketsSent() {
+    int getNumOfPacketsSent() {
         return numOfPacketsSent;
     }
 
     @Override
-    public void setNumOfPacketsSent(int numOfPacketsSent) {
+    void setNumOfPacketsSent(int numOfPacketsSent) {
         this.numOfPacketsSent = numOfPacketsSent;
     }
 
-    public Flow getParent() {
+    Flow getParent() {
         return parent;
     }
 
-    public void setParent(Flow parent) {
+    void setParent(Flow parent) {
         this.parent = parent;
     }
 
-    public int getFragmentPriority() {
+    int getFragmentPriority() {
         return fragmentPriority;
     }
 
-    public void setFragmentPriority(int fragmentPriority) {
+    void setFragmentPriority(int fragmentPriority) {
         this.fragmentPriority = fragmentPriority;
     }
 
-    public FlowFragment getPreviousFragment() {
+    FlowFragment getPreviousFragment() {
         return previousFragment;
     }
 
-    public void setPreviousFragment(FlowFragment previousFragment) {
+    void setPreviousFragment(FlowFragment previousFragment) {
         this.previousFragment = previousFragment;
     }
 
-    public List<FlowFragment> getNextFragments() {
+    List<FlowFragment> getNextFragments() {
         return nextFragments;
     }
 
-    public void setNextFragments(List<FlowFragment> nextFragments) {
+    void setNextFragments(List<FlowFragment> nextFragments) {
         this.nextFragments = nextFragments;
     }
 
-    public void addToNextFragments(FlowFragment frag) {
+    void addToNextFragments(FlowFragment frag) {
         this.nextFragments.add(frag);
     }
 
-    public PathNode getReferenceToNode() {
+    PathNode getReferenceToNode() {
         return referenceToNode;
     }
 
-    public void setReferenceToNode(PathNode referenceToNode) {
+    void setReferenceToNode(PathNode referenceToNode) {
         this.referenceToNode = referenceToNode;
     }
 
-    public Boolean getIsModifiedOrCreated() {
+    Boolean getIsModifiedOrCreated() {
         return isModifiedOrCreated;
     }
 
-    public void setIsModifiedOrCreated(Boolean isModifiedOrCreated) {
+    void setIsModifiedOrCreated(Boolean isModifiedOrCreated) {
         this.isModifiedOrCreated = isModifiedOrCreated;
     }
 
-    public Port getPort() {
+    Port getPort() {
         return this.port;
     }
 
-    public RealExpr getScheduledTimeZ3(int index) {
+    RealExpr getScheduledTimeZ3(int index) {
         return scheduledTimeZ3.get(index);
     }
 
-    public void setScheduledTimeZ3(RealExpr sTimeZ3, int index) {
+    void setScheduledTimeZ3(RealExpr sTimeZ3, int index) {
         this.scheduledTimeZ3.set(index, sTimeZ3);
     }
 
-    public void addScheduledTimeZ3(RealExpr sTimeZ3) {
+    void addScheduledTimeZ3(RealExpr sTimeZ3) {
         this.scheduledTimeZ3.add(sTimeZ3);
     }
 
-    public void createNewScheduledTimeZ3List() {
+    void createNewScheduledTimeZ3List() {
         this.scheduledTimeZ3 = new ArrayList<RealExpr>();
     }
 
-    public void setPort(Port port) {
+    void setPort(Port port) {
         this.port = port;
     }
 

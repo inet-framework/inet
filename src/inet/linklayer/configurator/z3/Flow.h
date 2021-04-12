@@ -37,8 +37,8 @@ class INET_API Flow {
     int priorityValue = -1;
 
     //Specifying the type of the flow:
-    public static int UNICAST = 0;
-    public static int PUBLISH_SUBSCRIBE = 1;
+    static int UNICAST = 0;
+    static int PUBLISH_SUBSCRIBE = 1;
 
 
 
@@ -67,7 +67,7 @@ class INET_API Flow {
      * [Usage]: Default constructor method for flow objects.
      * Must be explicit due to call on child class.
      */
-    public Flow() {
+    Flow() {
 
     }
 
@@ -79,7 +79,7 @@ class INET_API Flow {
      *
      * @param type      Value specifying the type of the flow (0 - Unicast; 1 - Publish subscribe)
      */
-    public Flow(int type) {
+    Flow(int type) {
         instanceCounter++;
 
         this.instance = instanceCounter;
@@ -110,7 +110,7 @@ class INET_API Flow {
      *
      * @param type      Value specifying the type of the flow (0 - Unicast; 1 - Publish subscribe)
      */
-    public Flow(int type, float flowFirstSendingTime, float flowSendingPeriodicity) {
+    Flow(int type, float flowFirstSendingTime, float flowSendingPeriodicity) {
         instanceCounter++;
         this.instance = instanceCounter;
         this.name = "flow" + Integer.toString(instanceCounter);
@@ -143,7 +143,7 @@ class INET_API Flow {
      *
      * @param swt   Switch to be added to the list
      */
-    public void addToPath(TSNSwitch swt) {
+    void addToPath(TSNSwitch swt) {
         path.add(swt);
     }
 
@@ -155,7 +155,7 @@ class INET_API Flow {
      *
      */
 
-    public void convertUnicastFlow() {
+    void convertUnicastFlow() {
         // AVOID USING THE ARRAY LIST
         // TODO: REMOVE OPTION TO DISTINGUISH BETWEEN UNICAST AND MULTICAST LATER
         if(this.type == UNICAST) {
@@ -187,7 +187,7 @@ class INET_API Flow {
      *
      * @param ctx      Context variable containing the z3 environment used
      */
-    public void toZ3(Context ctx) {
+    void toZ3(Context ctx) {
 
         if(this.type == UNICAST) { // If flow is unicast
             // Convert start device to z3
@@ -252,7 +252,7 @@ class INET_API Flow {
      * @param ctx       Context variable containing the z3 environment used
      * @param node      A node of the pathTree
      */
-    public FlowFragment nodeToZ3(Context ctx, PathNode node, FlowFragment frag) {
+    FlowFragment nodeToZ3(Context ctx, PathNode node, FlowFragment frag) {
         FlowFragment flowFrag = null;
         int numberOfPackets = Network.PACKETUPPERBOUNDRANGE;
 
@@ -384,7 +384,7 @@ class INET_API Flow {
      * @param swt                   Switch of the current flow fragment
      * @param currentSwitchIndex    Index of the current switch in the path on the iteration
      */
-    public void pathToZ3(Context ctx, Switch swt, int currentSwitchIndex) {
+    void pathToZ3(Context ctx, Switch swt, int currentSwitchIndex) {
         // Flow fragment is created
         FlowFragment flowFrag = new FlowFragment(this);
 
@@ -443,7 +443,7 @@ class INET_API Flow {
     }
 
 
-    public void bindToNextFragment(Solver solver, Context ctx, FlowFragment frag){
+    void bindToNextFragment(Solver solver, Context ctx, FlowFragment frag){
         if(frag.getNextFragments().size() > 0){
 
             for(FlowFragment childFrag : frag.getNextFragments()){
@@ -467,7 +467,7 @@ class INET_API Flow {
     }
 
 
-    public void bindAllFragments(Solver solver, Context ctx){
+    void bindAllFragments(Solver solver, Context ctx){
         for(PathNode node : this.pathTree.getRoot().getChildren()){
             for(FlowFragment frag : node.getFlowFragments()){
                 this.bindToNextFragment(solver, ctx, frag);
@@ -486,7 +486,7 @@ class INET_API Flow {
      * @param endDevice     End device (leaf) of the desired path
      * @return              ArrayList of flow fragments containing every flow fragment from source to destination
      */
-    public ArrayList<FlowFragment> getFlowFromRootToNode(Device endDevice){
+    ArrayList<FlowFragment> getFlowFromRootToNode(Device endDevice){
         ArrayList<FlowFragment> flowFragments = new ArrayList<FlowFragment>();
         ArrayList<Device> flowEndDevices = new ArrayList<Device>();
         PathNode auxNode = null;
@@ -538,7 +538,7 @@ class INET_API Flow {
      * @param endDevice     End device (leaf) of the desired path
      * @return              ArrayList of nodes containing every node from source to destination
      */
-    public ArrayList<PathNode> getNodesFromRootToNode(Device endDevice){
+    ArrayList<PathNode> getNodesFromRootToNode(Device endDevice){
         ArrayList<PathNode> pathNodes = new ArrayList<PathNode>();
         ArrayList<Device> flowEndDevices = new ArrayList<Device>();
         PathNode auxNode = null;
@@ -586,7 +586,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Departure time of the specific packet
      */
-    public float getDepartureTime(int hop, int packetNum) {
+    float getDepartureTime(int hop, int packetNum) {
         float time;
 
 
@@ -603,7 +603,7 @@ class INET_API Flow {
      * This will be used for the automated application cycles.
      */
 
-    public void setUpPeriods(PathNode node) {
+    void setUpPeriods(PathNode node) {
         if(node.getChildren().isEmpty()) {
             return;
         } else if (node.getNode() instanceof Device) {
@@ -647,7 +647,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Departure time of the specific packet
      */
-    public float getDepartureTime(String deviceName, int hop, int packetNum) {
+    float getDepartureTime(String deviceName, int hop, int packetNum) {
         float time;
         Device targetDevice = null;
         ArrayList<FlowFragment> auxFlowFragments;
@@ -684,7 +684,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Departure time of the specific packet
      */
-    public float getDepartureTime(Device targetDevice, int hop, int packetNum) {
+    float getDepartureTime(Device targetDevice, int hop, int packetNum) {
         float time;
         ArrayList<FlowFragment> auxFlowFragments;
 
@@ -710,7 +710,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Arrival time of the specific packet
      */
-    public float getArrivalTime(int hop, int packetNum) {
+    float getArrivalTime(int hop, int packetNum) {
         float time;
 
         time = this.getFlowFragments().get(hop).getArrivalTime(packetNum);
@@ -731,7 +731,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Arrival time of the specific packet
      */
-    public float getArrivalTime(String deviceName, int hop, int packetNum) {
+    float getArrivalTime(String deviceName, int hop, int packetNum) {
         float time;
         Device targetDevice = null;
         ArrayList<FlowFragment> auxFlowFragments;
@@ -769,7 +769,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Arrival time of the specific packet
      */
-    public float getArrivalTime(Device targetDevice, int hop, int packetNum) {
+    float getArrivalTime(Device targetDevice, int hop, int packetNum) {
         float time;
         ArrayList<FlowFragment> auxFlowFragments;
 
@@ -794,7 +794,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Scheduled time of the specific packet
      */
-    public float getScheduledTime(int hop, int packetNum) {
+    float getScheduledTime(int hop, int packetNum) {
         float time;
 
         time = this.getFlowFragments().get(hop).getScheduledTime(packetNum);
@@ -815,7 +815,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Scheduled time of the specific packet
      */
-    public float getScheduledTime(String deviceName, int hop, int packetNum) {
+    float getScheduledTime(String deviceName, int hop, int packetNum) {
         float time;
         Device targetDevice = null;
         ArrayList<FlowFragment> auxFlowFragments;
@@ -852,7 +852,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Scheduled time of the specific packet
      */
-    public float getScheduledTime(Device targetDevice, int hop, int packetNum) {
+    float getScheduledTime(Device targetDevice, int hop, int packetNum) {
         float time;
         ArrayList<FlowFragment> auxFlowFragments;
 
@@ -880,7 +880,7 @@ class INET_API Flow {
      *
      * @return          Average latency of the flow
      */
-    public float getAverageLatency() {
+    float getAverageLatency() {
         float averageLatency = 0;
         float auxAverageLatency = 0;
         int timeListSize = 0;
@@ -925,7 +925,7 @@ class INET_API Flow {
         return averageLatency;
     }
 
-    public float getAverageLatencyToDevice(Device dev) {
+    float getAverageLatencyToDevice(Device dev) {
         float averageLatency = 0;
         float auxAverageLatency = 0;
         Device endDevice = null;
@@ -957,7 +957,7 @@ class INET_API Flow {
      *
      * @return      Average jitter of the flow
      */
-    public float getAverageJitter() {
+    float getAverageJitter() {
         float averageJitter = 0;
         float auxAverageJitter = 0;
         float averageLatency = this.getAverageLatency();
@@ -1002,7 +1002,7 @@ class INET_API Flow {
      * @param dev 		Specific end-device of the flow to retrieve the jitter
      * @return			Float value of the variation of the latency
      */
-    public float getAverageJitterToDevice(Device dev) {
+    float getAverageJitterToDevice(Device dev) {
         float averageJitter = 0;
         float averageLatency = this.getAverageLatencyToDevice(dev);
 
@@ -1032,7 +1032,7 @@ class INET_API Flow {
      * @param index     Index of the desired packet
      * @return          Z3 variable containing the latency of the packet
      */
-    public RealExpr getLatencyZ3(Solver solver, Context ctx, int index) {
+    RealExpr getLatencyZ3(Solver solver, Context ctx, int index) {
         //index += 1;
         RealExpr latency = ctx.mkRealConst(this.name + "latencyOfPacket" + index);
 
@@ -1070,7 +1070,7 @@ class INET_API Flow {
      * @param index     Index of the desired packet
      * @return          Z3 variable containing the latency of the packet
      */
-    public RealExpr getLatencyZ3(Solver solver, Device dev, Context ctx, int index) {
+    RealExpr getLatencyZ3(Solver solver, Device dev, Context ctx, int index) {
         //index += 1;
         RealExpr latency = ctx.mkRealConst(this.name + "latencyOfPacket" + index + "For" + dev.getName());
 
@@ -1106,7 +1106,7 @@ class INET_API Flow {
      * @param index     Index of the current packet in the sum
      * @return          Z3 variable containing sum of latency up to index packet
      */
-    public RealExpr getSumOfLatencyZ3(Solver solver, Context ctx, int index) {
+    RealExpr getSumOfLatencyZ3(Solver solver, Context ctx, int index) {
 
         if(index == 0) {
             return getLatencyZ3(solver, ctx, 0);
@@ -1127,7 +1127,7 @@ class INET_API Flow {
      * @param index     Index of the current packet in the sum
      * @return          Z3 variable containing sum of latency up to index packet
      */
-    public RealExpr getSumOfLatencyZ3(Device dev, Solver solver, Context ctx, int index) {
+    RealExpr getSumOfLatencyZ3(Device dev, Solver solver, Context ctx, int index) {
         if(index == 0) {
             return getLatencyZ3(solver, dev, ctx, 0);
         }
@@ -1145,7 +1145,7 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable containing the sum of all latencies of the flow
      */
-    public RealExpr getSumOfAllDevLatencyZ3(Solver solver, Context ctx, int index) {
+    RealExpr getSumOfAllDevLatencyZ3(Solver solver, Context ctx, int index) {
         RealExpr sumValue = ctx.mkReal(0);
         Device currentDev = null;
 
@@ -1166,7 +1166,7 @@ class INET_API Flow {
      * @param ctx       Z3 variable and function environment
      * @return          Z3 variable containing the average latency of the flow
      */
-    public RealExpr getAvgLatency(Solver solver, Context ctx) {
+    RealExpr getAvgLatency(Solver solver, Context ctx) {
         if(this.type == UNICAST) {
             return (RealExpr) ctx.mkDiv(
                     getSumOfLatencyZ3(solver, ctx, this.numOfPacketsSentInFragment - 1),
@@ -1195,7 +1195,7 @@ class INET_API Flow {
      * @param ctx		Context object for the solver
      * @return			z3 variable with the average latency for the device
      */
-    public RealExpr getAvgLatency(Device dev, Solver solver, Context ctx) {
+    RealExpr getAvgLatency(Device dev, Solver solver, Context ctx) {
 
         return (RealExpr) ctx.mkDiv(
                 this.getSumOfLatencyZ3(dev, solver, ctx, this.numOfPacketsSentInFragment - 1),
@@ -1215,7 +1215,7 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable for the jitter of packet [index]
      */
-    public RealExpr getJitterZ3(Solver solver, Context ctx, int index) {
+    RealExpr getJitterZ3(Solver solver, Context ctx, int index) {
         RealExpr avgLatency = this.getAvgLatency(solver, ctx);
         RealExpr latency = this.getLatencyZ3(solver, ctx, index);
 
@@ -1244,7 +1244,7 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable for the jitter of packet [index]
      */
-    public RealExpr getJitterZ3(Device dev, Solver solver, Context ctx, int index) {
+    RealExpr getJitterZ3(Device dev, Solver solver, Context ctx, int index) {
         //index += 1;
         RealExpr jitter = ctx.mkRealConst(this.name + "JitterOfPacket" + index + "For" + dev.getName());
 
@@ -1289,7 +1289,7 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable containing the sum of all jitter
      */
-    public RealExpr getSumOfJitterZ3(Solver solver, Context ctx, int index) {
+    RealExpr getSumOfJitterZ3(Solver solver, Context ctx, int index) {
         if(index == 0) {
             return getJitterZ3(solver, ctx, 0);
         }
@@ -1309,7 +1309,7 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable containing the sum of all jitter
      */
-    public RealExpr getSumOfJitterZ3(Device dev, Solver solver, Context ctx, int index) {
+    RealExpr getSumOfJitterZ3(Device dev, Solver solver, Context ctx, int index) {
         if(index == 0) {
             return (RealExpr) getJitterZ3(dev, solver, ctx, 0);
         }
@@ -1327,7 +1327,7 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable containing the sum of all jitter of the flow
      */
-    public RealExpr getSumOfAllDevJitterZ3(Solver solver, Context ctx, int index) {
+    RealExpr getSumOfAllDevJitterZ3(Solver solver, Context ctx, int index) {
         RealExpr sumValue = ctx.mkReal(0);
         Device currentDev = null;
 
@@ -1347,7 +1347,7 @@ class INET_API Flow {
      * constraint for all packets scheduled within the flow.
      */
 
-    public void setNumberOfPacketsSent(PathNode node) {
+    void setNumberOfPacketsSent(PathNode node) {
 
         if(node.getNode() instanceof Device && (node.getChildren().size() == 0)) {
             return;
@@ -1377,7 +1377,7 @@ class INET_API Flow {
 
     }
 
-    public void modifyIfUsingCustomVal(){
+    void modifyIfUsingCustomVal(){
         if(!this.useCustomValues) {
             this.flowSendingPeriodicity = startDevice.getPacketPeriodicity();
             this.flowFirstSendingTime = startDevice.getFirstT1Time();
@@ -1388,11 +1388,11 @@ class INET_API Flow {
      * GETTERS AND SETTERS:
      */
 
-    public Device getStartDevice() {
+    Device getStartDevice() {
         return startDevice;
     }
 
-    public void setStartDevice(Device startDevice) {
+    void setStartDevice(Device startDevice) {
         this.startDevice = startDevice;
 
         if(!this.useCustomValues) {
@@ -1401,165 +1401,165 @@ class INET_API Flow {
         }
     }
 
-    public Device getEndDevice() {
+    Device getEndDevice() {
         return endDevice;
     }
 
-    public void setEndDevice(Device endDevice) {
+    void setEndDevice(Device endDevice) {
         this.endDevice = endDevice;
     }
 
-    public ArrayList<Switch> getPath() {
+    ArrayList<Switch> getPath() {
         return path;
     }
 
-    public void setPath(ArrayList<Switch> path) {
+    void setPath(ArrayList<Switch> path) {
         this.path = path;
     }
 
-    public IntExpr getFragmentPriorityZ3() {
+    IntExpr getFragmentPriorityZ3() {
         return flowPriority;
     }
 
-    public void getFlowPriority(IntExpr priority) {
+    void getFlowPriority(IntExpr priority) {
         this.flowPriority = priority;
     }
 
-    public String getName() {
+    String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    void setName(String name) {
         this.name = name;
     }
 
-    public ArrayList<FlowFragment> getFlowFragments() {
+    ArrayList<FlowFragment> getFlowFragments() {
         return flowFragments;
     }
 
-    public void setFlowFragments(ArrayList<FlowFragment> flowFragments) {
+    void setFlowFragments(ArrayList<FlowFragment> flowFragments) {
         this.flowFragments = flowFragments;
     }
 
-    public int getTimeListSize() {
+    int getTimeListSize() {
         return this.getFlowFragments().get(0).getArrivalTimeList().size();
     }
 
-    public PathTree getPathTree() {
+    PathTree getPathTree() {
         return pathTree;
     }
 
-    public void setPathTree(PathTree pathTree) {
+    void setPathTree(PathTree pathTree) {
         this.startDevice = (Device) pathTree.getRoot().getNode();
         this.pathTree = pathTree;
     }
 
-    public int getType() {
+    int getType() {
         return type;
     }
 
-    public void setType(int type) {
+    void setType(int type) {
         this.type = type;
     }
 
-    public int getNumOfPacketsSent() {
+    int getNumOfPacketsSent() {
         return numOfPacketsSentInFragment;
     }
 
-    public void setNumOfPacketsSent(int numOfPacketsSent) {
+    void setNumOfPacketsSent(int numOfPacketsSent) {
         this.numOfPacketsSentInFragment = numOfPacketsSent;
     }
 
-    public int getTotalNumOfPackets() {
+    int getTotalNumOfPackets() {
         return totalNumOfPackets;
     }
 
-    public void setTotalNumOfPackets(int totalNumOfPackets) {
+    void setTotalNumOfPackets(int totalNumOfPackets) {
         this.totalNumOfPackets = totalNumOfPackets;
     }
 
-    public void addToTotalNumOfPackets(int num) {
+    void addToTotalNumOfPackets(int num) {
         this.totalNumOfPackets = this.totalNumOfPackets + num;
     }
 
-    public int getInstance() {
+    int getInstance() {
         return instance;
     }
 
-    public void setInstance(int instance) {
+    void setInstance(int instance) {
         this.instance = instance;
     }
 
-    public float getPacketSize() {
+    float getPacketSize() {
         return this.startDevice.getPacketSize();
     }
 
-    public RealExpr getPacketSizeZ3() {
+    RealExpr getPacketSizeZ3() {
         return this.startDevice.getPacketSizeZ3();
     }
 
-    public float getFlowFirstSendingTime() {
+    float getFlowFirstSendingTime() {
         return flowFirstSendingTime;
     }
 
-    public void setFlowFirstSendingTime(float flowFirstSendingTime) {
+    void setFlowFirstSendingTime(float flowFirstSendingTime) {
         this.flowFirstSendingTime = flowFirstSendingTime;
     }
 
-    public float getFlowSendingPeriodicity() {
+    float getFlowSendingPeriodicity() {
         return flowSendingPeriodicity;
     }
 
-    public void setFlowSendingPeriodicity(float flowSendingPeriodicity) {
+    void setFlowSendingPeriodicity(float flowSendingPeriodicity) {
         this.flowSendingPeriodicity = flowSendingPeriodicity;
     }
 
-    public RealExpr getFlowFirstSendingTimeZ3() {
+    RealExpr getFlowFirstSendingTimeZ3() {
         return flowFirstSendingTimeZ3;
     }
 
-    public void setFlowFirstSendingTimeZ3(RealExpr flowFirstSendingTimeZ3) {
+    void setFlowFirstSendingTimeZ3(RealExpr flowFirstSendingTimeZ3) {
         this.flowFirstSendingTimeZ3 = flowFirstSendingTimeZ3;
     }
 
-    public RealExpr getFlowSendingPeriodicityZ3() {
+    RealExpr getFlowSendingPeriodicityZ3() {
         return flowSendingPeriodicityZ3;
     }
 
-    public void setFlowSendingPeriodicityZ3(RealExpr flowSendingPeriodicityZ3) {
+    void setFlowSendingPeriodicityZ3(RealExpr flowSendingPeriodicityZ3) {
         this.flowSendingPeriodicityZ3 = flowSendingPeriodicityZ3;
     }
 
 
-    public boolean isFixedPriority() {
+    boolean isFixedPriority() {
         return fixedPriority;
     }
 
-    public void setFixedPriority(boolean fixedPriority) {
+    void setFixedPriority(boolean fixedPriority) {
         this.fixedPriority = fixedPriority;
     }
 
-    public int getPriorityValue() {
+    int getPriorityValue() {
         return priorityValue;
     }
 
-    public void setPriorityValue(int priorityValue) {
+    void setPriorityValue(int priorityValue) {
         this.priorityValue = priorityValue;
     }
 
-    public static int getInstanceCounter() {
+    static int getInstanceCounter() {
         return instanceCounter;
     }
 
-    public static void setInstanceCounter(int instanceCounter) {
+    static void setInstanceCounter(int instanceCounter) {
         Flow.instanceCounter = instanceCounter;
     }
 
-    public Boolean getIsModifiedOrCreated() {
+    Boolean getIsModifiedOrCreated() {
         return isModifiedOrCreated;
     }
 
-    public void setIsModifiedOrCreated(Boolean isModifiedOrCreated) {
+    void setIsModifiedOrCreated(Boolean isModifiedOrCreated) {
         this.isModifiedOrCreated = isModifiedOrCreated;
     }
 

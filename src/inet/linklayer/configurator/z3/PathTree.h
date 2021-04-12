@@ -28,7 +28,7 @@ class INET_API PathTree {
      * @param node      Device of the root node of the pathTree
      * @return          A reference to the root
      */
-    public PathNode addRoot(Object node)
+    PathNode addRoot(Object node)
     {
         root=new PathNode(node);
         root.setParent(null);
@@ -45,7 +45,7 @@ class INET_API PathTree {
      *
      * @param newRoot       New root of pathTree
      */
-    public void changeRoot(PathNode newRoot)
+    void changeRoot(PathNode newRoot)
     {
         PathNode oldRoot=this.root;
         newRoot.setParent(null);
@@ -65,7 +65,7 @@ class INET_API PathTree {
      *
      * @param node      Starter node of the search
      */
-    public void searchLeaves(PathNode node) {
+    void searchLeaves(PathNode node) {
 
         if(node.getChildren().size() == 0) {
             leaves.add(node);
@@ -86,7 +86,7 @@ class INET_API PathTree {
      *
      * @return      ArrayList with all leaves as PathNodes
      */
-    public ArrayList<PathNode> getLeaves(){
+    ArrayList<PathNode> getLeaves(){
         leaves = new ArrayList<PathNode>();
 
         searchLeaves(root);
@@ -100,11 +100,11 @@ class INET_API PathTree {
      */
 
 
-    public PathNode getRoot() {
+    PathNode getRoot() {
         return root;
     }
 
-    public void setRoot(PathNode root) {
+    void setRoot(PathNode root) {
         this.root = root;
     }
 
