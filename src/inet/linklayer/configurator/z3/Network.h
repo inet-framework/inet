@@ -228,7 +228,7 @@ class INET_API Network {
                     this->avgLatencyPerDev.add(
                         (z3::expr) ctx.mkDiv(
                             flw.getSumOfJitterZ3(endDev, solver, ctx, flw.getNumOfPacketsSent() - 1),
-                            ctx.mkInt(flw.getNumOfPacketsSent())
+                            ctx.int_val(flw.getNumOfPacketsSent())
                         )
                     );
 
@@ -260,7 +260,7 @@ class INET_API Network {
         // On all network flows: Data given by the user will be converted to z3 values
        for(Flow flw : this->flows) {
            // flw.toZ3(ctx);
-           flw.flowPriority = ctx.mkIntConst(flw.name + std::string("Priority"));
+           flw.flowPriority = ctx.int_valConst(flw.name + std::string("Priority"));
            ((Device) flw.getPathTree().getRoot().getNode()).toZ3(ctx);
        }
 

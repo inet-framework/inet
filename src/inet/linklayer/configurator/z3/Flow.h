@@ -218,9 +218,9 @@ class INET_API Flow {
 
 
             if(this->priorityValue < 0 || this->priorityValue > 7) {
-                this->flowPriority = ctx.mkIntConst(this->name + std::string("Priority"));
+                this->flowPriority = ctx.int_valConst(this->name + std::string("Priority"));
             } else {
-                this->flowPriority = ctx.mkInt(this->priorityValue);
+                this->flowPriority = ctx.int_val(this->priorityValue);
             }
 
 
@@ -327,7 +327,7 @@ class INET_API Flow {
                 if(this->fixedPriority) {
                     flowFrag.setFragmentPriorityZ3(this->flowPriority); // FIXED PRIORITY (Fixed priority per flow constraint)
                 } else {
-                    flowFrag.setFragmentPriorityZ3(ctx.mkIntConst(flowFrag.getName() + std::string("Priority")));
+                    flowFrag.setFragmentPriorityZ3(ctx.int_valConst(flowFrag.getName() + std::string("Priority")));
                 }
 
                 int portIndex = ((TSNSwitch) auxN.getNode()).getConnectsTo().indexOf(flowFrag.getNextHop());
@@ -415,7 +415,7 @@ class INET_API Flow {
         flowFrag.setNodeName(((TSNSwitch) path.get(currentSwitchIndex)).getName());
 
         // Setting extra flow properties
-        flowFrag.setFragmentPriorityZ3(ctx.mkIntConst(flowFrag.getName() + std::string("Priority")));
+        flowFrag.setFragmentPriorityZ3(ctx.int_valConst(flowFrag.getName() + std::string("Priority")));
         flowFrag.setPacketPeriodicityZ3(this->flowSendingPeriodicityZ3);
         flowFrag.setPacketSizeZ3(startDevice.getPacketSizeZ3());
 
@@ -1258,7 +1258,7 @@ class INET_API Flow {
         TSNSwitch firstSwitchInPath = ((TSNSwitch) nodes.get(1).getNode()); // 1 since the first node is the publisher
         FlowFragment firstFragmentInList = nodes.get(1).getFlowFragments().get(0);
 
-        // z3::expr avgLatency = (z3::expr) ctx.mkDiv(getSumOfLatencyZ3(solver, dev, ctx, index), ctx.mkInt(Network.PACKETUPPERBOUNDRANGE - 1));
+        // z3::expr avgLatency = (z3::expr) ctx.mkDiv(getSumOfLatencyZ3(solver, dev, ctx, index), ctx.int_val(Network.PACKETUPPERBOUNDRANGE - 1));
         expr *avgLatency = this->getAvgLatency(dev, solver, ctx);
         expr *latency = (z3::expr) ctx.mkSub(
                 lastSwitchInPath

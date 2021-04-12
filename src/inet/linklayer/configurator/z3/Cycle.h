@@ -190,7 +190,7 @@ class INET_API Cycle {
      */
     expr *cycleStartZ3(context ctx, z3::expr index){
         return (z3::expr) ctx.mkITE(
-                ctx.mkGe(index, ctx.mkInt(1)),
+                ctx.mkGe(index, ctx.int_val(1)),
                 ctx.mkAdd(
                         firstCycleStartZ3,
                         ctx.mkMul(cycleDurationZ3, index)
@@ -209,10 +209,10 @@ class INET_API Cycle {
      * @return          Z3 variable containing the cycle start time
      */
     expr *cycleStartZ3(context ctx, int auxIndex){
-        expr *index = ctx.mkInt(auxIndex);
+        expr *index = ctx.int_val(auxIndex);
 
         return (z3::expr) ctx.mkITE(
-                ctx.mkGe(index, ctx.mkInt(1)),
+                ctx.mkGe(index, ctx.int_val(1)),
                 ctx.mkAdd(
                         firstCycleStartZ3,
                         ctx.mkMul(cycleDurationZ3, index)
@@ -359,8 +359,8 @@ class INET_API Cycle {
     }
 
     expr *slotStartZ3(context ctx, int auxPrt, int auxIndex) {
-        expr *index = ctx.mkInt(auxIndex);
-        expr *prt = ctx.mkInt(auxPrt);
+        expr *index = ctx.int_val(auxIndex);
+        expr *prt = ctx.int_val(auxPrt);
         return ctx.real_const(std::string("priority" + prt.toString() + std::string("slot") + index.toString() + "Start"));
     }
 
@@ -370,8 +370,8 @@ class INET_API Cycle {
     }
 
     expr *slotDurationZ3(context ctx, int auxPrt, int auxIndex) {
-        expr *index = ctx.mkInt(auxIndex);
-        expr *prt = ctx.mkInt(auxPrt);
+        expr *index = ctx.int_val(auxIndex);
+        expr *prt = ctx.int_val(auxPrt);
         return ctx.real_const(std::string("priority" + prt.toString() + std::string("slot") + index.toString() + "Duration"));
     }
 

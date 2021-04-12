@@ -177,7 +177,7 @@ class INET_API ScheduleGenerator {
                        out.println(std::string("        Fragment next hop: ") + ffrag.getNextHop());
                        out.println(std::string("        Fragment priority: ") + model.eval(ffrag.getFragmentPriorityZ3(), false));
                        for(int index = 0; index < ((TSNSwitch) child.getNode()).getPortOf(ffrag.getNextHop()).getCycle().getNumOfSlots(); index++) {
-                           indexZ3 = ctx.mkInt(index);
+                           indexZ3 = ctx.int_val(index);
                            out.println(std::string("        Fragment slot start ") + index + std::string(": ")
                                    + this->stringToFloat(
                                            model.eval(((TSNSwitch) child.getNode())
@@ -252,7 +252,7 @@ class INET_API ScheduleGenerator {
 
 
                            for(int index = 0; index < ((TSNSwitch) child.getNode()).getPortOf(ffrag.getNextHop()).getCycle().getNumOfSlots(); index++) {
-                               indexZ3 = ctx.mkInt(index);
+                               indexZ3 = ctx.int_val(index);
 
                                listOfStart.add(
                                    this->stringToFloat(model.eval(
