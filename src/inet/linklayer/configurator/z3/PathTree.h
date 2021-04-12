@@ -1,11 +1,6 @@
 #ifndef __INET_Z3_PATHTREE_H
 #define __INET_Z3_PATHTREE_H
 
-package schedule_generator;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-
 /**
  * [Class]: PathTree
  * [Usage]: Used to specify the path on publish subscribe

@@ -1,16 +1,6 @@
 #ifndef __INET_Z3_FLOW_H
 #define __INET_Z3_FLOW_H
 
-package schedule_generator;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-
-import com.microsoft.z3.*;
-
-
 /**
  * [Class]: Flow
  * [Usage]: This class specifies a flow (or a stream, in other

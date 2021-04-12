@@ -1,23 +1,6 @@
 #ifndef __INET_Z3_PORT_H
 #define __INET_Z3_PORT_H
 
-package schedule_generator;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.Vector;
-
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Context;
-import com.microsoft.z3.Expr;
-import com.microsoft.z3.IntExpr;
-import com.microsoft.z3.RealExpr;
-import com.microsoft.z3.Solver;
-
 /**
  * [Class]: Port
  * [Usage]: This class is used to implement the logical role of a

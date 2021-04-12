@@ -1,11 +1,6 @@
 #ifndef __INET_Z3_DEVICE_H
 #define __INET_Z3_DEVICE_H
 
-package schedule_generator;
-import java.io.Serializable;
-
-import com.microsoft.z3.*;
-
 // CLASS WHERE DEVICE PROPERTIES AND CONDITIONS ARE SPECIFIED
 
 

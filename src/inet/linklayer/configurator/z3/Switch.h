@@ -1,10 +1,6 @@
 #ifndef __INET_Z3_SWITCH_H
 #define __INET_Z3_SWITCH_H
 
-package schedule_generator;
-
-import java.io.Serializable;
-
 /**
  * [Class]: Switch
  * [Usage]: Contains most of the properties of a normal

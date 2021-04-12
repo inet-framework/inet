@@ -1,14 +1,6 @@
 #ifndef __INET_Z3_NETWORK_H
 #define __INET_Z3_NETWORK_H
 
-package schedule_generator;
-
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Stack;
-
-import com.microsoft.z3.*;
-
 /**
  * [Class]: Network
  * [Usage]: Using this class, the user can specify the network
