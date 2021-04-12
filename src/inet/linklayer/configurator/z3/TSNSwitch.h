@@ -53,8 +53,8 @@ class INET_API TSNSwitch extends Switch {
      */
     TSNSwitch(std::string name) {
         this->name = name;
-        ports = new std::vector<Port>();
-        this->connectsTo = new std::vector<std::string>();
+        ports.clear();
+        this->connectsTo.clear();
     }
 
     /**
@@ -73,8 +73,8 @@ class INET_API TSNSwitch extends Switch {
         this->name = "dev" + indexCounter++;
         this->timeToTravel = timeToTravel;
         this->transmissionTime = transmissionTime;
-        this->ports = new std::vector<Port>();
-        this->connectsTo = new std::vector<std::string>();
+        this->ports.clear();
+        this->connectsTo.clear();
         this->maxPacketSize = 0;
         this->portSpeed = 0;
         this->gbSize = 0;
@@ -108,8 +108,8 @@ class INET_API TSNSwitch extends Switch {
         this->transmissionTime = transmissionTime;
         this->portSpeed = portSpeed;
         this->gbSize = gbSize;
-        this->ports = new std::vector<Port>();
-        this->connectsTo = new std::vector<std::string>();
+        this->ports.clear();
+        this->connectsTo.clear();
         this->cycleDurationLowerBound = cycleDurationLowerBound;
         this->cycleDurationUpperBound = cycleDurationUpperBound;
     }
@@ -141,8 +141,8 @@ class INET_API TSNSwitch extends Switch {
         this->transmissionTime = 0;
         this->portSpeed = portSpeed;
         this->gbSize = gbSize;
-        this->ports = new std::vector<Port>();
-        this->connectsTo = new std::vector<std::string>();
+        this->ports.clear();
+        this->connectsTo.clear();
         this->cycleDurationLowerBound = cycleDurationLowerBound;
         this->cycleDurationUpperBound = cycleDurationUpperBound;
     }

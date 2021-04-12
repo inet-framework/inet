@@ -247,8 +247,8 @@ class INET_API ScheduleGenerator {
                                continue;
                            }
 
-                           std::vector<float> listOfStart = new std::vector<float>();
-                    	   std::vector<float> listOfDuration = new std::vector<float>();
+                           std::vector<float> listOfStart.clear();
+                    	   std::vector<float> listOfDuration.clear();
 
 
                            for(int index = 0; index < ((TSNSwitch) child.getNode()).getPortOf(ffrag.getNextHop()).getCycle().getNumOfSlots(); index++) {

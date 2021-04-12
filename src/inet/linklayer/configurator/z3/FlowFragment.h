@@ -26,8 +26,8 @@ class INET_API FlowFragment extends Flow {
     Flow parent;
     z3::expr packetSize;
     z3::expr packetPeriodicityZ3;
-    std::vector<z3::expr> departureTimeZ3 = new std::vector<z3::expr>();
-    std::vector<z3::expr> scheduledTimeZ3 = new std::vector<z3::expr>();
+    std::vector<z3::expr> departureTimeZ3;
+    std::vector<z3::expr> scheduledTimeZ3;
     z3::expr fragmentPriorityZ3;
 
     Port port;
@@ -43,9 +43,9 @@ class INET_API FlowFragment extends Flow {
     FlowFragment previousFragment;
     List<FlowFragment> nextFragments;
 
-    std::vector<float> departureTime = new std::vector<float>();
-    std::vector<float> arrivalTime = new std::vector<float>();
-    std::vector<float> scheduledTime = new std::vector<float>();
+    std::vector<float> departureTime;
+    std::vector<float> arrivalTime;
+    std::vector<float> scheduledTime;
 
     /**
      * [Method]: FlowFragment
@@ -65,7 +65,7 @@ class INET_API FlowFragment extends Flow {
          */
         // Flow.instanceCounter--;
 
-        this->nextFragments = new std::vector<FlowFragment>();
+        this->nextFragments.clear();
 
         /*
          * Since the pathing methods for unicast and publish subscribe flows
@@ -105,7 +105,7 @@ class INET_API FlowFragment extends Flow {
     }
 
     void createNewDepartureTimeZ3List() {
-        this->departureTimeZ3 = new std::vector<z3::expr>();
+        this->departureTimeZ3.clear();
     }
 
     z3::expr getPacketPeriodicityZ3() {
@@ -265,7 +265,7 @@ class INET_API FlowFragment extends Flow {
     }
 
     void createNewScheduledTimeZ3List() {
-        this->scheduledTimeZ3 = new std::vector<z3::expr>();
+        this->scheduledTimeZ3.clear();
     }
 
     void setPort(Port port) {

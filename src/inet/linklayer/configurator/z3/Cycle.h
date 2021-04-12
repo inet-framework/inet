@@ -53,12 +53,12 @@ class INET_API Cycle {
     float cycleDuration;
     float cycleStart;
 
-    std::vector<std::vector<z3::expr>> slotStartZ3 = new std::vector<std::vector<z3::expr>>();
-    std::vector<std::vector<z3::expr>> slotDurationZ3 = new std::vector<std::vector<z3::expr>>();
+    std::vector<std::vector<z3::expr>> slotStartZ3;
+    std::vector<std::vector<z3::expr>> slotDurationZ3;
 
-    std::vector<int> slotsUsed = new std::vector<int>();
-    std::vector<std::vector<float>> slotStart = new std::vector<std::vector<float>>();
-    std::vector<std::vector<float>> slotDuration = new std::vector<std::vector<float>>();
+    std::vector<int> slotsUsed;
+    std::vector<std::vector<float>> slotStart;
+    std::vector<std::vector<float>> slotDuration;
 
     z3::expr cycleDurationZ3;
     z3::expr firstCycleStartZ3;
@@ -163,12 +163,12 @@ class INET_API Cycle {
         // this->firstCycleStartZ3 = ctx.real_val(std::to_string(firstCycleStart));
         this->maximumSlotDurationZ3 = ctx.real_val(std::to_string(maximumSlotDuration));
 
-        this->slotStartZ3 = new std::vector<std::vector<z3::expr>>();
-        this->slotDurationZ3 = new std::vector<std::vector<z3::expr>>();
+        this->slotStartZ3.clear();
+        this->slotDurationZ3.clear();
 
         for(int i = 0; i < this->numOfPrts; i++) {
-        	this->slotStartZ3.add(new std::vector<z3::expr>());
-        	this->slotDurationZ3.add(new std::vector<z3::expr>());
+        	this->slotStartZ3.add(std::vector<z3::expr>());
+        	this->slotDurationZ3.add(std::vector<z3::expr>());
         	for(int j = 0; j < this->numOfSlots; j++) {
         		this->slotStartZ3.get(i).add(ctx.real_const("cycleOfPort" + this->portName + "prt" + (i+1) + "slot" + (j+1)));
         	}

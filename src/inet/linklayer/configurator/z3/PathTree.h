@@ -34,7 +34,7 @@ class INET_API PathTree {
     {
         root=new PathNode(node);
         root.setParent(null);
-        root.setChildren(new std::vector<PathNode>());
+        root.setChildren(std::vector<PathNode>());
         return root;
     }
 
@@ -89,7 +89,7 @@ class INET_API PathTree {
      * @return      std::vector with all leaves as PathNodes
      */
     std::vector<PathNode> getLeaves(){
-        leaves = new std::vector<PathNode>();
+        leaves.clear();
 
         searchLeaves(root);
 
