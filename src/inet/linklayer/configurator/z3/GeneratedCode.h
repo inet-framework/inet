@@ -1,11 +1,6 @@
 #ifndef __INET_Z3_GENERATEDCODE_H
 #define __INET_Z3_GENERATEDCODE_H
 
-package schedule_generator;
-import java.util.*;
-import java.io.*;
-
-
 public class GeneratedCode {
 	public void runTestCase(){
 

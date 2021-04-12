@@ -1,12 +1,6 @@
 #ifndef __INET_Z3_FLOWFRAGMENT_H
 #define __INET_Z3_FLOWFRAGMENT_H
 
-package schedule_generator;
-
-import java.util.*;
-
-import com.microsoft.z3.*;
-
 /**
  * [Class]: FlowFragment
  * [Usage]: This class is used to represent a fragment of a flow.

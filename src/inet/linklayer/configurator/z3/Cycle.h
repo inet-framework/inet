@@ -1,13 +1,6 @@
 #ifndef __INET_Z3_CYCLE_H
 #define __INET_Z3_CYCLE_H
 
-package schedule_generator;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-
-import com.microsoft.z3.*;
-
 /**
  * [Class]: Cycle
  * [Usage]: Contains all properties of a TSN cycle.

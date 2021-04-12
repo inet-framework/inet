@@ -1,17 +1,6 @@
 #ifndef __INET_Z3_SCHEDULEGENERATOR_H
 #define __INET_Z3_SCHEDULEGENERATOR_H
 
-package schedule_generator;
-
-import java.io.*;
-
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.time.LocalTime;
-import java.util.*;
-
-import com.microsoft.z3.*;
-
 /**
  * [Class]: ScheduleGenerator
  * [Usage]: Used to generate a schedule based on the properties of

@@ -1,12 +1,6 @@
 #ifndef __INET_Z3_TSNSWITCH_H
 #define __INET_Z3_TSNSWITCH_H
 
-package schedule_generator;
-import java.io.Serializable;
-import java.util.ArrayList;
-
-import com.microsoft.z3.*;
-
 
 /**
  * [Class]: TSNSwitch

@@ -1,12 +1,6 @@
 #ifndef __INET_Z3_PATHNODE_H
 #define __INET_Z3_PATHNODE_H
 
-package schedule_generator;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-
-
 /**
  * [Class]: PathNode
  * [Usage]: Contains the data needed in each node of
