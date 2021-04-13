@@ -189,7 +189,7 @@ class INET_API TSNSwitch : public Switch {
             solver.add(*port->getCycle().getFirstCycleStartZ3() >= ctx.int_val(0)); // No negative cycle values constraint
 
             /* The cycle of every port must have the same duration
-            solver.add(ctx.mkEq( // Equal cycle constraints
+            solver.add(mkEq( // Equal cycle constraints
                 this->cycleDuration,
                 port.getCycle().getCycleDurationZ3()
             ));
@@ -480,14 +480,14 @@ class INET_API TSNSwitch : public Switch {
     void loadZ3(context& ctx, solver solver) {
         /*
         solver.add(
-            ctx.mkEq(
+            mkEq(
                 this->cycleDurationUpperBoundZ3,
                 ctx.real_val(std::to_string(this->cycleDurationUpperBound))
             )
         );
 
         solver.add(
-            ctx.mkEq(
+            mkEq(
                 this->cycleDurationLowerBoundZ3,
                 ctx.real_val(std::to_string(this->cycleDurationLowerBound))
             )

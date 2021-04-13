@@ -276,7 +276,7 @@ class INET_API Cycle {
             /*
             for(int slotIndex = 0; slotIndex < this->numOfSlots; slotIndex++) {
                 solver.add(
-                    ctx.mkEq(
+                    mkEq(
                         this->slotDurationZ3_.get(prt).get(slotIndex),
                         ctx.real_val(std::to_string(this->slotDuration.get(prt).get(slotIndex)))
                     )

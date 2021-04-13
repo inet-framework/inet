@@ -119,13 +119,13 @@ class INET_API Network {
             flw.bindAllFragments(solver, ctx);
 
             solver.add( // No negative cycle values constraint
-                ctx.mkGe(
+                mkGe(
                     flw.getStartDevice().getFirstT1TimeZ3(),
                     ctx.real_val(0)
                 )
             );
             solver.add( // Maximum transmission offset constraint
-                ctx.mkLe(
+                mkLe(
                     flw.getStartDevice().getFirstT1TimeZ3(),
                     flw.getStartDevice().getPacketPeriodicityZ3()
                 )
@@ -142,8 +142,8 @@ class INET_API Network {
                 //Make sure that HC is respected
                 for(int i = 0; i < flw.getNumOfPacketsSent(); i++) {
                     solver.add(
-                            ctx.mkLe(
-                                ctx.mkSub(
+                            mkLe(
+                                mkSub(
                                     ((TSNSwitch) path.get(path.size() - 1)).scheduledTime(ctx, i, currentFrags.get(currentFrags.size() - 1)),
                                     ((TSNSwitch) path.get(0)).departureTime(ctx, i, currentFrags.get(0))
                                 ),
@@ -168,7 +168,7 @@ class INET_API Network {
                     // Set the maximum allowed jitter
                     for(int index = 0; index < flw.getNumOfPacketsSent(); index++) {
                         solver.add( // Maximum allowed jitter constraint
-                            ctx.mkLe(
+                            mkLe(
                                 flw.getJitterZ3((Device) leaf.getNode(), solver, ctx, index),
                                 this->jitterUpperBoundRangeZ3
                             )
@@ -182,8 +182,8 @@ class INET_API Network {
                     for(FlowFragment ffrag : parent.getFlowFragments()) {
                         for(int i = 0; i < flw.getNumOfPacketsSent(); i++) {
                             solver.add( // Maximum Allowed Latency constraint
-                                ctx.mkLe(
-                                    ctx.mkSub(
+                                mkLe(
+                                    mkSub(
                                         ((TSNSwitch) parent.getNode()).scheduledTime(ctx, i, ffrag),
                                         ((TSNSwitch) root.getChildren().get(0).getNode()).departureTime(ctx, i,
                                             root.getChildren().get(0).getFlowFragments().get(0)
@@ -208,8 +208,8 @@ class INET_API Network {
 
                 // SET THE MAXIMUM JITTER FOR THE FLOW
                 solver.add(
-                    ctx.mkLe(
-                        ctx.mkDiv(
+                    mkLe(
+                        mkDiv(
                             sumOfAllJitter,
                             ctx.real_val(flw.getPathTree().getLeaves().size() * (PACKETUPPERBOUNDRANGE))
                         ),
@@ -224,7 +224,7 @@ class INET_API Network {
                     Device endDev = (Device) node.getNode();
 
                     this->avgLatencyPerDev.add(
-                        (z3::expr) ctx.mkDiv(
+                        (z3::expr) mkDiv(
                             flw.getSumOfJitterZ3(endDev, solver, ctx, flw.getNumOfPacketsSent() - 1),
                             ctx.int_val(flw.getNumOfPacketsSent())
                         )
