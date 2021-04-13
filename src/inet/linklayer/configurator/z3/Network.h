@@ -95,7 +95,7 @@ class INET_API Network {
         }
 
         std::stack<std::shared_ptr<expr>> jitterList;
-        int totalNumOfLeaves = 0;
+        // int totalNumOfLeaves = 0;
         std::shared_ptr<expr> sumOfAllJitter;
         // On every switch, set up the constraints of the schedule
         //switch1.setupSchedulingRules(solver, ctx);
