@@ -298,7 +298,7 @@ class INET_API Flow {
                     for (int i = 0; i < numberOfPackets; i++) {
 
                         flowFrag.addDepartureTimeZ3(
-                                (z3::expr) ctx.mkAdd(
+                                (z3::expr) mkAdd(
                                         this->flowFirstSendingTimeZ3,
                                         ctx.real_val(std::to_string(this->flowSendingPeriodicity * i))
                                 )
@@ -403,7 +403,7 @@ class INET_API Flow {
             //flowFrag.setNodeName(this->startDevice.getName());
             for (int i = 0; i < Network.PACKETUPPERBOUNDRANGE; i++) {
                 flowFrag.addDepartureTimeZ3( // Packet departure constraint
-                        (z3::expr) ctx.mkAdd(
+                        (z3::expr) mkAdd(
                                 this->flowFirstSendingTimeZ3,
                                 ctx.real_val(std::to_string(this->flowSendingPeriodicity * i))
                         )
@@ -457,7 +457,7 @@ class INET_API Flow {
 //                    System.out.println(std::string("On fragment " + frag.getName() + std::string(" making " + frag.getPort().scheduledTime(ctx, i, frag) + " = " + childFrag.getPort().departureTime(ctx, i, childFrag) + " that leads to ")) + childFrag.getPort().scheduledTime(ctx, i, childFrag)
 //                            + std::string(" on cycle of port ") + frag.getPort().getCycle().getFirstCycleStartZ3());
                     solver.add(
-                        ctx.mkEq(
+                        mkEq(
                             frag.getPort().scheduledTime(ctx, i, frag),
                             childFrag.getPort().departureTime(ctx, i, childFrag)
                         )
@@ -1048,8 +1048,8 @@ class INET_API Flow {
         FlowFragment firstFragmentInList = this->flowFragments.get(0);
 
         solver.add(
-                ctx.mkEq(latency,
-                        ctx.mkSub(
+                mkEq(latency,
+                        mkSub(
                                 lastSwitchInPath
                                         .getPortOf(lastFragmentInList.getNextHop())
                                         .scheduledTime(ctx, index, lastFragmentInList),
@@ -1088,8 +1088,8 @@ class INET_API Flow {
         TSNSwitch firstSwitchInPath = ((TSNSwitch) nodes.get(1).getNode()); // 1 since the first node is the publisher
         FlowFragment firstFragmentInList = flowFrags.get(0);
 
-        solver.add(ctx.mkEq(latency,
-                ctx.mkSub(
+        solver.add(mkEq(latency,
+                mkSub(
                         lastSwitchInPath
                                 .getPortOf(lastFragmentInList.getNextHop())
                                 .scheduledTime(ctx, index, lastFragmentInList),
@@ -1117,7 +1117,7 @@ class INET_API Flow {
             return getLatencyZ3(solver, ctx, 0);
         }
 
-        return (z3::expr) ctx.mkAdd(getLatencyZ3(solver, ctx, index), getSumOfLatencyZ3(solver, ctx, index - 1));
+        return (z3::expr) mkAdd(getLatencyZ3(solver, ctx, index), getSumOfLatencyZ3(solver, ctx, index - 1));
 
     }
 
@@ -1137,7 +1137,7 @@ class INET_API Flow {
             return getLatencyZ3(solver, dev, ctx, 0);
         }
 
-        return (z3::expr) ctx.mkAdd(getLatencyZ3(solver, dev, ctx, index), getSumOfLatencyZ3(dev, solver, ctx, index - 1));
+        return (z3::expr) mkAdd(getLatencyZ3(solver, dev, ctx, index), getSumOfLatencyZ3(dev, solver, ctx, index - 1));
     }
 
     /**
@@ -1156,7 +1156,7 @@ class INET_API Flow {
 
         for(PathNode node : this->pathTree.getLeaves()) {
             currentDev = (Device) node.getNode();
-            sumValue = (z3::expr) ctx.mkAdd(this->getSumOfLatencyZ3(currentDev, solver, ctx, index), sumValue);
+            sumValue = (z3::expr) mkAdd(this->getSumOfLatencyZ3(currentDev, solver, ctx, index), sumValue);
         }
 
         return sumValue;
@@ -1173,12 +1173,12 @@ class INET_API Flow {
      */
     std::shared_ptr<expr> getAvgLatency(solver solver, context& ctx) {
         if(this->type == UNICAST) {
-            return (z3::expr) ctx.mkDiv(
+            return (z3::expr) mkDiv(
                     getSumOfLatencyZ3(solver, ctx, this->numOfPacketsSentInFragment - 1),
                     ctx.real_val(this->numOfPacketsSentInFragment)
             );
         } else if (this->type == PUBLISH_SUBSCRIBE) {
-            return (z3::expr) ctx.mkDiv(
+            return (z3::expr) mkDiv(
                     getSumOfAllDevLatencyZ3(solver, ctx, this->numOfPacketsSentInFragment - 1),
                     ctx.real_val((this->numOfPacketsSentInFragment) * this->pathTree.getLeaves().size())
             );
@@ -1202,7 +1202,7 @@ class INET_API Flow {
      */
     std::shared_ptr<expr> getAvgLatency(Device dev, solver solver, context& ctx) {
 
-        return (z3::expr) ctx.mkDiv(
+        return (z3::expr) mkDiv(
                 this->getSumOfLatencyZ3(dev, solver, ctx, this->numOfPacketsSentInFragment - 1),
                 ctx.real_val(this->numOfPacketsSentInFragment)
         );
@@ -1224,14 +1224,14 @@ class INET_API Flow {
         std::shared_ptr<expr> avgLatency = this->getAvgLatency(solver, ctx);
         std::shared_ptr<expr> latency = this->getLatencyZ3(solver, ctx, index);
 
-        return (z3::expr) ctx.mkITE(
-                ctx.mkGe(
+        return (z3::expr) mkITE(
+                mkGe(
                         latency,
                         avgLatency
                 ),
-                ctx.mkSub(latency , avgLatency),
-                ctx.mkMul(
-                        ctx.mkSub(latency , avgLatency),
+                mkSub(latency , avgLatency),
+                mkMul(
+                        mkSub(latency , avgLatency),
                         ctx.real_val(-1)
                 )
         );
@@ -1262,9 +1262,9 @@ class INET_API Flow {
         TSNSwitch firstSwitchInPath = ((TSNSwitch) nodes.get(1).getNode()); // 1 since the first node is the publisher
         FlowFragment firstFragmentInList = nodes.get(1).getFlowFragments().get(0);
 
-        // z3::expr avgLatency = (z3::expr) ctx.mkDiv(getSumOfLatencyZ3(solver, dev, ctx, index), ctx.int_val(Network.PACKETUPPERBOUNDRANGE - 1));
+        // z3::expr avgLatency = (z3::expr) mkDiv(getSumOfLatencyZ3(solver, dev, ctx, index), ctx.int_val(Network.PACKETUPPERBOUNDRANGE - 1));
         std::shared_ptr<expr> avgLatency = this->getAvgLatency(dev, solver, ctx);
-        std::shared_ptr<expr> latency = (z3::expr) ctx.mkSub(
+        std::shared_ptr<expr> latency = (z3::expr) mkSub(
                 lastSwitchInPath
                         .getPortOf(lastFragmentInList.getNextHop())
                         .scheduledTime(ctx, index, lastFragmentInList),
@@ -1272,11 +1272,11 @@ class INET_API Flow {
                         .departureTime(ctx, index, firstFragmentInList)
         );
 
-        solver.add(ctx.mkEq(jitter,
-                ctx.mkITE(
-                        ctx.mkGe(latency, avgLatency),
-                        ctx.mkSub(latency, avgLatency),
-                        ctx.mkSub(avgLatency, latency)
+        solver.add(mkEq(jitter,
+                mkITE(
+                        mkGe(latency, avgLatency),
+                        mkSub(latency, avgLatency),
+                        mkSub(avgLatency, latency)
                 )
 
         ));
@@ -1299,7 +1299,7 @@ class INET_API Flow {
             return getJitterZ3(solver, ctx, 0);
         }
 
-        return (z3::expr) ctx.mkAdd(getJitterZ3(solver, ctx, index), getSumOfJitterZ3(solver, ctx, index - 1));
+        return (z3::expr) mkAdd(getJitterZ3(solver, ctx, index), getSumOfJitterZ3(solver, ctx, index - 1));
     }
 
     /**
@@ -1319,7 +1319,7 @@ class INET_API Flow {
             return (z3::expr) getJitterZ3(dev, solver, ctx, 0);
         }
 
-        return (z3::expr) ctx.mkAdd(getJitterZ3(dev, solver, ctx, index), getSumOfJitterZ3(dev, solver, ctx, index - 1));
+        return (z3::expr) mkAdd(getJitterZ3(dev, solver, ctx, index), getSumOfJitterZ3(dev, solver, ctx, index - 1));
     }
 
     /**
@@ -1338,7 +1338,7 @@ class INET_API Flow {
 
         for(PathNode node : this->pathTree.getLeaves()) {
             currentDev = (Device) node.getNode();
-            sumValue = (z3::expr) ctx.mkAdd(this->getSumOfJitterZ3(currentDev, solver, ctx, index), sumValue);
+            sumValue = (z3::expr) mkAdd(this->getSumOfJitterZ3(currentDev, solver, ctx, index), sumValue);
         }
 
         return sumValue;
