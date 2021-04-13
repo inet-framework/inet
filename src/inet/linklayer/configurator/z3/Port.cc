@@ -3,7 +3,7 @@
 
 namespace inet {
 
-void Port::setUpCycleRules(solver solver, context& ctx) {
+void Port::setUpCycleRules(solver& solver, context& ctx) {
 
     for(FlowFragment *frag : this->flowFragments) {
         for(int index = 0; index < this->cycle->getNumOfSlots(); index++) {
@@ -166,7 +166,7 @@ void Port::setUpCycleRules(solver solver, context& ctx) {
     }
 }
 
-void Port::setupTimeSlots(solver solver, context& ctx, FlowFragment *flowFrag) {
+void Port::setupTimeSlots(solver& solver, context& ctx, FlowFragment *flowFrag) {
     // If there is a flow assigned to the slot, slotDuration must be greater than transmission time
     for(int index = 0; index < this->cycle->getNumOfSlots(); index++) {
         solver.add(
@@ -203,7 +203,7 @@ void Port::setupTimeSlots(solver solver, context& ctx, FlowFragment *flowFrag) {
     }
 }
 
-void Port::setupDevPacketTimes(solver solver, context& ctx, FlowFragment *flowFrag) {
+void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowFrag) {
 
     // For the specified range of packets defined by [0, upperBoundRange],
     // apply the scheduling rules.
@@ -741,7 +741,7 @@ void Port::setupDevPacketTimes(solver solver, context& ctx, FlowFragment *flowFr
 
 }
 
-void Port::setupBestEffort(solver solver, context& ctx) {
+void Port::setupBestEffort(solver& solver, context& ctx) {
     std::shared_ptr<expr> slotStart[8];
     std::shared_ptr<expr> slotDuration[8];
     // expr guardBandTime = nullptr;
@@ -853,7 +853,7 @@ void Port::setupBestEffort(solver solver, context& ctx) {
 
 }
 
-void Port::zeroOutNonUsedSlots(solver solver, context& ctx)
+void Port::zeroOutNonUsedSlots(solver& solver, context& ctx)
 {
     std::shared_ptr<expr> exp1;
     std::shared_ptr<expr> exp2;
@@ -990,7 +990,7 @@ std::shared_ptr<expr> Port::scheduledTime(context& ctx, int auxIndex, FlowFragme
     return scheduledTime;
 }
 
-void Port::loadZ3(context& ctx, solver solver)
+void Port::loadZ3(context& ctx, solver& solver)
 {
 
     this->cycle->loadZ3(ctx, solver);

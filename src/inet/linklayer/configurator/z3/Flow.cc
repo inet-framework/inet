@@ -185,7 +185,7 @@ void Flow::pathToZ3(context& ctx, Switch *swt, int currentSwitchIndex)
     flowFragments.push_back(flowFrag);
 }
 
-void Flow::bindToNextFragment(solver solver, context& ctx, FlowFragment *frag)
+void Flow::bindToNextFragment(solver& solver, context& ctx, FlowFragment *frag)
 {
     if(frag->getNextFragments().size() > 0){
 
@@ -408,7 +408,7 @@ float Flow::getAverageJitterToDevice(Device *dev)
     return averageJitter;
 }
 
-std::shared_ptr<expr> Flow::getLatencyZ3(solver solver, context &ctx, int index)
+std::shared_ptr<expr> Flow::getLatencyZ3(solver& solver, context &ctx, int index)
 {
     //index += 1;
     std::shared_ptr<expr> latency = std::make_shared<expr>(
@@ -433,7 +433,7 @@ std::shared_ptr<expr> Flow::getLatencyZ3(solver solver, context &ctx, int index)
     return latency;
 }
 
-std::shared_ptr<expr> Flow::getLatencyZ3(solver solver, Device *dev, context &ctx, int index)
+std::shared_ptr<expr> Flow::getLatencyZ3(solver& solver, Device *dev, context &ctx, int index)
 {
     //index += 1;
     std::shared_ptr<expr> latency = std::make_shared<expr>(
@@ -462,7 +462,7 @@ std::shared_ptr<expr> Flow::getLatencyZ3(solver solver, Device *dev, context &ct
     return latency;
 }
 
-std::shared_ptr<expr> Flow::getJitterZ3(Device *dev, solver solver, context &ctx, int index)
+std::shared_ptr<expr> Flow::getJitterZ3(Device *dev, solver& solver, context &ctx, int index)
 {
     //index += 1;
     std::shared_ptr<expr> jitter = std::make_shared<expr>(ctx.real_const(

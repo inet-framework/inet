@@ -248,7 +248,7 @@ class INET_API Cycle {
      * @param ctx        context object of z3
      * @param solver    solver object to add constraints
      */
-    void loadZ3(context& ctx, solver solver) {
+    void loadZ3(context& ctx, solver& solver) {
         // maximumSlotDurationZ3 already started on toZ3;
 
         solver.add(

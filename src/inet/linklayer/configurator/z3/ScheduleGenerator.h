@@ -284,7 +284,7 @@ class INET_API ScheduleGenerator {
        }
 
 
-       public void configureNetwork(Network net, context& ctx, solver solver) {
+       public void configureNetwork(Network net, context& ctx, solver& solver) {
            for(Flow flw : net.getFlows()) {
                   flw.modifyIfUsingCustomVal();
                flw.convertUnicastFlow();
@@ -326,7 +326,7 @@ class INET_API ScheduleGenerator {
        public void generateSchedule(Network net)
        {
            context& ctx = this->createContext(); //Creating the z3 context
-           solver solver;     //Creating the solver to generate unknown values based on the given context
+           solver& solver;     //Creating the solver to generate unknown values based on the given context
 
 
             this->configureNetwork(net, ctx, solver);

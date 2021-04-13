@@ -157,7 +157,7 @@ class INET_API TSNSwitch : public Switch {
      *
      * @param ctx      context variable containing the z3 environment used
      */
-    void toZ3(context& ctx, solver solver) {
+    void toZ3(context& ctx, solver& solver) {
         this->cycleDurationLowerBoundZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(cycleDurationLowerBound).c_str()));
         this->cycleDurationUpperBoundZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(cycleDurationUpperBound).c_str()));
 
@@ -209,7 +209,7 @@ class INET_API TSNSwitch : public Switch {
      * @param solver        z3 solver object used to discover the variables' values
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
-    void setupSchedulingRules(solver solver, context& ctx) {
+    void setupSchedulingRules(solver& solver, context& ctx) {
 
         for(Port *port : this->ports) {
                 port->setupSchedulingRules(solver, ctx);
@@ -337,7 +337,7 @@ class INET_API TSNSwitch : public Switch {
      * @param solver        z3 solver object used to discover the variables' values
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
-    void setUpCycleSize(solver solver, context& ctx) {
+    void setUpCycleSize(solver& solver, context& ctx) {
         for(Port *port : this->ports) {
             port->setUpCycle(solver, ctx);
         }
@@ -430,7 +430,7 @@ class INET_API TSNSwitch : public Switch {
      */
     std::shared_ptr<expr> scheduledTime(context& ctx, int auxIndex, FlowFragment *flowFrag);
 
-    void loadZ3(context& ctx, solver solver) {
+    void loadZ3(context& ctx, solver& solver) {
         /*
         solver.add(
             mkEq(

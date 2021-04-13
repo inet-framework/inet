@@ -128,7 +128,7 @@ class INET_API Port {
      * @param solver        z3 solver object used to discover the variables' values
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
-    void setUpCycleRules(solver solver, context& ctx);
+    void setUpCycleRules(solver& solver, context& ctx);
 
     /**
      * [Method]: setupTimeSlots
@@ -140,7 +140,7 @@ class INET_API Port {
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      * @param flowFrag      A fragment of a flow that goes through this port
      */
-    void setupTimeSlots(solver solver, context& ctx, FlowFragment *flowFrag);
+    void setupTimeSlots(solver& solver, context& ctx, FlowFragment *flowFrag);
 
     /**
      * [Method]: setupDevPacketTimes
@@ -154,7 +154,7 @@ class INET_API Port {
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      * @param flowFrag      A fragment of a flow that goes through this port
      */
-    void setupDevPacketTimes(solver solver, context& ctx, FlowFragment *flowFrag);
+    void setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowFrag);
 
     /**
      * [Method]: setupBestEffort
@@ -164,7 +164,7 @@ class INET_API Port {
      * @param solver    solver object
      * @param ctx        context object for the solver
      */
-    void setupBestEffort(solver solver, context& ctx);
+    void setupBestEffort(solver& solver, context& ctx);
 
     /**
      * [Method]: gcd
@@ -258,7 +258,7 @@ class INET_API Port {
      * @param solver    solver object
      * @param ctx        context object for the solver
      */
-    void setUpHyperCycle(solver solver, context& ctx) {
+    void setUpHyperCycle(solver& solver, context& ctx) {
         int numOfPacketsScheduled = 0;
 
         /*
@@ -308,7 +308,7 @@ class INET_API Port {
      * @param solver    solver object
      * @param ctx        context object for the solver
      */
-    void setUpMicroCycles(solver solver, context& ctx) {
+    void setUpMicroCycles(solver& solver, context& ctx) {
 
         /*
         for(FlowFragment *flowFrag : this->flowFragments) {
@@ -346,7 +346,7 @@ class INET_API Port {
      * @param solver    solver object
      * @param ctx        context object for the solver
      */
-    void bindTimeSlots(solver solver, context& ctx) {
+    void bindTimeSlots(solver& solver, context& ctx) {
 
         // Ideia = se a prioridade de um flow e' igual a um numero,
         // mkEq nele com o slot the cycle (getSlotS/D(prt, slotnum))
@@ -380,7 +380,7 @@ class INET_API Port {
      * @param solver        z3 solver object used to discover the variables' values
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
-    void setUpCycle(solver solver, context& ctx) {
+    void setUpCycle(solver& solver, context& ctx) {
 
         this->cycle->toZ3(ctx);
 
@@ -416,7 +416,7 @@ class INET_API Port {
      * @param solver
      * @param ctx
      */
-    void zeroOutNonUsedSlots(solver solver, context& ctx);
+    void zeroOutNonUsedSlots(solver& solver, context& ctx);
 
     /**
      * [Method]: setupSchedulingRules
@@ -426,7 +426,7 @@ class INET_API Port {
      * @param solver        z3 solver object used to discover the variables' values
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
-    void setupSchedulingRules(solver solver, context& ctx) {
+    void setupSchedulingRules(solver& solver, context& ctx) {
 
         if (this->flowFragments.size() == 0) {
             solver.add(mkEq(
@@ -632,7 +632,7 @@ class INET_API Port {
      * @param ctx        context object for the solver
      * @param solver    solver object
      */
-    void loadZ3(context& ctx, solver solver);
+    void loadZ3(context& ctx, solver& solver);
 
     /*
      * GETTERS AND SETTERS:

@@ -270,9 +270,9 @@ class INET_API Flow {
      */
     void pathToZ3(context& ctx, Switch *swt, int currentSwitchIndex);
 
-    void bindToNextFragment(solver solver, context& ctx, FlowFragment *frag);
+    void bindToNextFragment(solver& solver, context& ctx, FlowFragment *frag);
 
-    void bindAllFragments(solver solver, context& ctx){
+    void bindAllFragments(solver& solver, context& ctx){
         for(PathNode node : this->pathTree->getRoot()->getChildren()){
             for(FlowFragment *frag : node.getFlowFragments()){
                 this->bindToNextFragment(solver, ctx, frag);
@@ -633,7 +633,7 @@ class INET_API Flow {
      * @param index     Index of the desired packet
      * @return          Z3 variable containing the latency of the packet
      */
-    std::shared_ptr<expr> getLatencyZ3(solver solver, context &ctx, int index);
+    std::shared_ptr<expr> getLatencyZ3(solver& solver, context &ctx, int index);
 
     /**
      * [Method]: getLatencyZ3
@@ -647,7 +647,7 @@ class INET_API Flow {
      * @param index     Index of the desired packet
      * @return          Z3 variable containing the latency of the packet
      */
-    std::shared_ptr<expr> getLatencyZ3(solver solver, Device *dev, context &ctx, int index);
+    std::shared_ptr<expr> getLatencyZ3(solver& solver, Device *dev, context &ctx, int index);
 
     /**
      * [Method]: getSumOfLatencyZ3
@@ -659,7 +659,7 @@ class INET_API Flow {
      * @param index     Index of the current packet in the sum
      * @return          Z3 variable containing sum of latency up to index packet
      */
-    std::shared_ptr<expr> getSumOfLatencyZ3(solver solver, context& ctx, int index) {
+    std::shared_ptr<expr> getSumOfLatencyZ3(solver& solver, context& ctx, int index) {
 
         if(index == 0) {
             return getLatencyZ3(solver, ctx, 0);
@@ -680,7 +680,7 @@ class INET_API Flow {
      * @param index     Index of the current packet in the sum
      * @return          Z3 variable containing sum of latency up to index packet
      */
-    std::shared_ptr<expr> getSumOfLatencyZ3(Device *dev, solver solver, context& ctx, int index) {
+    std::shared_ptr<expr> getSumOfLatencyZ3(Device *dev, solver& solver, context& ctx, int index) {
         if(index == 0) {
             return getLatencyZ3(solver, dev, ctx, 0);
         }
@@ -698,7 +698,7 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable containing the sum of all latencies of the flow
      */
-    std::shared_ptr<expr> getSumOfAllDevLatencyZ3(solver solver, context& ctx, int index) {
+    std::shared_ptr<expr> getSumOfAllDevLatencyZ3(solver& solver, context& ctx, int index) {
         expr sumValue = ctx.real_val(0);
         Device *currentDev = nullptr;
 
@@ -719,7 +719,7 @@ class INET_API Flow {
      * @param ctx       Z3 variable and function environment
      * @return          Z3 variable containing the average latency of the flow
      */
-    std::shared_ptr<expr> getAvgLatency(solver solver, context& ctx) {
+    std::shared_ptr<expr> getAvgLatency(solver& solver, context& ctx) {
         if(this->type == UNICAST) {
             return std::make_shared<expr>(mkDiv(
                     getSumOfLatencyZ3(solver, ctx, this->numOfPacketsSentInFragment - 1),
@@ -748,7 +748,7 @@ class INET_API Flow {
      * @param ctx        context object for the solver
      * @return            z3 variable with the average latency for the device
      */
-    std::shared_ptr<expr> getAvgLatency(Device *dev, solver solver, context& ctx) {
+    std::shared_ptr<expr> getAvgLatency(Device *dev, solver& solver, context& ctx) {
 
         return std::make_shared<expr>(mkDiv(
                 this->getSumOfLatencyZ3(dev, solver, ctx, this->numOfPacketsSentInFragment - 1),
@@ -768,7 +768,7 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable for the jitter of packet [index]
      */
-    std::shared_ptr<expr> getJitterZ3(solver solver, context& ctx, int index) {
+    std::shared_ptr<expr> getJitterZ3(solver& solver, context& ctx, int index) {
         std::shared_ptr<expr> avgLatency = this->getAvgLatency(solver, ctx);
         std::shared_ptr<expr> latency = this->getLatencyZ3(solver, ctx, index);
 
@@ -797,7 +797,7 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable for the jitter of packet [index]
      */
-    std::shared_ptr<expr> getJitterZ3(Device *dev, solver solver, context &ctx, int index);
+    std::shared_ptr<expr> getJitterZ3(Device *dev, solver& solver, context &ctx, int index);
 
     /**
      * [Method]: getSumOfJitterZ3
@@ -809,7 +809,7 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable containing the sum of all jitter
      */
-    std::shared_ptr<expr> getSumOfJitterZ3(solver solver, context& ctx, int index) {
+    std::shared_ptr<expr> getSumOfJitterZ3(solver& solver, context& ctx, int index) {
         if(index == 0) {
             return getJitterZ3(solver, ctx, 0);
         }
@@ -829,7 +829,7 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable containing the sum of all jitter
      */
-    std::shared_ptr<expr> getSumOfJitterZ3(Device *dev, solver solver, context& ctx, int index) {
+    std::shared_ptr<expr> getSumOfJitterZ3(Device *dev, solver& solver, context& ctx, int index) {
         if(index == 0) {
             return getJitterZ3(dev, solver, ctx, 0);
         }
@@ -847,7 +847,7 @@ class INET_API Flow {
      * @param index     Number of packet sent (as index)
      * @return          Z3 variable containing the sum of all jitter of the flow
      */
-    std::shared_ptr<expr> getSumOfAllDevJitterZ3(solver solver, context& ctx, int index) {
+    std::shared_ptr<expr> getSumOfAllDevJitterZ3(solver& solver, context& ctx, int index) {
         expr sumValue = ctx.real_val(0);
         Device *currentDev = nullptr;
 
