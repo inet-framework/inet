@@ -3,6 +3,12 @@
 
 namespace inet {
 
+int Cycle::instanceCounter = 0;
+int Device::indexCounter = 0;
+int Flow::instanceCounter = 0;
+int TSNSwitch::indexCounter = 0;
+int assertionCount = 0;
+
 void TSNSwitch::addToFragmentList(FlowFragment *flowFrag)
 {
     int index = std::find(connectsTo.begin(), connectsTo.end(), flowFrag->getNextHop()) - connectsTo.begin();

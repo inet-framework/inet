@@ -18,8 +18,8 @@ using namespace z3;
  */
 class INET_API PathTree {
   public:
-    PathNode *root;
-    std::vector<PathNode *> *leaves;
+    PathNode *root = nullptr;
+    std::vector<PathNode *> *leaves = new std::vector<PathNode *>();
 
     /**
      * [Method]: addRoot

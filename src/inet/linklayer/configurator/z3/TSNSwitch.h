@@ -70,7 +70,7 @@ class INET_API TSNSwitch : public Switch {
      * @param transmissionTime      Time taken to process the packet inside the switch
      */
     TSNSwitch(float timeToTravel,
-                     float transmissionTime) {
+              float transmissionTime) {
         this->name = std::string("dev") + std::to_string(indexCounter++);
         this->timeToTravel = timeToTravel;
         this->transmissionTime = transmissionTime;
@@ -96,13 +96,13 @@ class INET_API TSNSwitch : public Switch {
      * @param gbSize                Size of the guard bands used to separate non consecutive time slots
      */
     TSNSwitch(std::string name,
-                     float maxPacketSize,
-                     float timeToTravel,
-                     float transmissionTime,
-                     float portSpeed,
-                     float gbSize,
-                     float cycleDurationLowerBound,
-                     float cycleDurationUpperBound) {
+              float maxPacketSize,
+              float timeToTravel,
+              float transmissionTime,
+              float portSpeed,
+              float gbSize,
+              float cycleDurationLowerBound,
+              float cycleDurationUpperBound) {
         this->name = name;
         this->maxPacketSize = maxPacketSize;
         this->timeToTravel = timeToTravel;
@@ -130,12 +130,12 @@ class INET_API TSNSwitch : public Switch {
      * @param gbSize                Size of the guard bands used to separate non consecutive time slots
      */
     TSNSwitch(std::string name,
-                     float maxPacketSize,
-                     float timeToTravel,
-                     float portSpeed,
-                     float gbSize,
-                     float cycleDurationLowerBound,
-                     float cycleDurationUpperBound) {
+              float maxPacketSize,
+              float timeToTravel,
+              float portSpeed,
+              float gbSize,
+              float cycleDurationLowerBound,
+              float cycleDurationUpperBound) {
         this->name = name;
         this->maxPacketSize = maxPacketSize;
         this->timeToTravel = timeToTravel;
