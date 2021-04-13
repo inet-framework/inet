@@ -19,7 +19,7 @@ void TSNSwitch::addToFragmentList(FlowFragment *flowFrag)
     System.out.println("");
     System.out.println("------------------");
 
-    /**/
+    */
 
     this->ports.at(index)->addToFragmentList(flowFrag);
 }

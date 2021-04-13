@@ -350,11 +350,11 @@ class INET_API Port {
 
         // Ideia = se a prioridade de um flow e' igual a um numero,
         // mkEq nele com o slot the cycle (getSlotS/D(prt, slotnum))
+        /*
         for(FlowFragment *frag : this->flowFragments) {
 
             for(int i = 0; i < this->cycle->getNumOfPrts(); i++) {
                 for(int j = 0; j < this->cycle->getNumOfSlots(); j++) {
-                    /*
                     solver.add(
                         mkITE(
                             mkAnd(
@@ -364,11 +364,10 @@ class INET_API Port {
                                 ,
                                 )
                     );
-                    */
                 }
             }
         }
-
+        */
     }
 
     /**
@@ -457,7 +456,7 @@ class INET_API Port {
                 flowFrag->setNumOfPacketsSent(this->packetUpperBoundRange);
             }
         }
-        /**/
+        */
 
 
         setUpCycleRules(solver, ctx);
@@ -479,7 +478,7 @@ class INET_API Port {
         if(flowFragments.size() > 0) {
             setupBestEffort(solver, ctx);
         }
-        /**/
+        */
 
     }
 
@@ -508,7 +507,7 @@ class INET_API Port {
                        mkMul(flowFrag->getPacketPeriodicity(), index)
                        ),
                flowFrag->getDepartureTimeZ3(int.parseInt(index.toString())));
-        /**/
+        */
     }
 
     /**
@@ -546,7 +545,7 @@ class INET_API Port {
                       timeToTravelZ3
                       );
     }
-    /**/
+    */
 
     /**
      * [Method]: arrivalTime
@@ -589,7 +588,7 @@ class INET_API Port {
 
         return (z3::expr) devT3;
     }
-    /**/
+    */
 
     /**
      * [Method]: scheduledTime
