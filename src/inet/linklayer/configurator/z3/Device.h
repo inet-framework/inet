@@ -17,7 +17,7 @@ using namespace z3;
  * They can be used as sending devices and receiving devices.
  * Their properties specify part of the core of a flow.
  */
-class INET_API Device {
+class INET_API Device : public cObject {
   public:
     std::string name;
     float packetPeriodicity;

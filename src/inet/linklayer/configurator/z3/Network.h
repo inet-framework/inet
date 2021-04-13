@@ -1,6 +1,7 @@
 #ifndef __INET_Z3_NETWORK_H
 #define __INET_Z3_NETWORK_H
 
+#include <stack>
 #include <z3++.h>
 
 #include "inet/linklayer/configurator/z3/Flow.h"
@@ -25,11 +26,11 @@ class INET_API Network {
 
     //TODO: Remove debugging variables:
     std::shared_ptr<expr> avgOfAllLatency;
-    std::vector<std::shared_ptr<expr> > avgLatencyPerDev;
+    std::vector<std::shared_ptr<expr>> avgLatencyPerDev;
 
 
-    std::vector<Switch> switches;
-    std::vector<Flow> flows;
+    std::vector<Switch *> switches;
+    std::vector<Flow *> flows;
     float timeToTravel;
     std::vector<std::shared_ptr<expr> > allSumOfJitter;
     std::vector<int> numberOfNodes;
@@ -73,7 +74,7 @@ class INET_API Network {
      * @param flows         std::vector with the instances of flows of the network
      * @param timeToTravel  Value used as travel time from a node to another in the network
      */
-    Network (std::vector<Switch> switches, std::vector<Flow> flows, float timeToTravel) {
+    Network (std::vector<Switch *> switches, std::vector<Flow *> flows, float timeToTravel) {
         this->switches = switches;
         this->flows = flows;
         this->timeToTravel = timeToTravel;
@@ -93,15 +94,15 @@ class INET_API Network {
             this->setJitterUpperBoundRangeZ3(ctx, this->jitterUpperBoundRange);
         }
 
-        Stack<std::shared_ptr<expr> > jitterList = new Stack<std::shared_ptr<expr> >();
+        std::stack<std::shared_ptr<expr>> jitterList;
         int totalNumOfLeaves = 0;
         std::shared_ptr<expr> sumOfAllJitter;
         // On every switch, set up the constraints of the schedule
         //switch1.setupSchedulingRules(solver, ctx);
 
 
-        for (Switch swt : this->getSwitches()) {
-            ((TSNSwitch) swt).setupSchedulingRules(solver, ctx);;
+        for (Switch *swt : this->getSwitches()) {
+            ((TSNSwitch *) swt)->setupSchedulingRules(solver, ctx);
         }
 
         /*
@@ -113,63 +114,63 @@ class INET_API Network {
          *  constraint
          */
 
-        for(Flow flw : this->getFlows()) {
-            flw.setNumberOfPacketsSent(flw.getPathTree().getRoot());
+        for(Flow *flw : this->getFlows()) {
+            flw->setNumberOfPacketsSent(flw->getPathTree()->getRoot());
 
-            flw.bindAllFragments(solver, ctx);
+            flw->bindAllFragments(solver, ctx);
 
             solver.add( // No negative cycle values constraint
                 mkGe(
-                    flw.getStartDevice().getFirstT1TimeZ3(),
+                    flw->getStartDevice()->getFirstT1TimeZ3(),
                     ctx.real_val(0)
                 )
             );
             solver.add( // Maximum transmission offset constraint
                 mkLe(
-                    flw.getStartDevice().getFirstT1TimeZ3(),
-                    flw.getStartDevice().getPacketPeriodicityZ3()
+                    flw->getStartDevice()->getFirstT1TimeZ3(),
+                    flw->getStartDevice()->getPacketPeriodicityZ3()
                 )
             );
 
 
 
-            if(flw.getType() == Flow.UNICAST) {
+            if(flw->getType() == UNICAST) {
 
-                std::vector<FlowFragment> currentFrags = flw.getFlowFragments();
-                std::vector<Switch> path = flw.getPath();
+                std::vector<FlowFragment *> currentFrags = flw->getFlowFragments();
+                std::vector<Switch *> path = flw->getPath();
 
 
                 //Make sure that HC is respected
-                for(int i = 0; i < flw.getNumOfPacketsSent(); i++) {
+                for(int i = 0; i < flw->getNumOfPacketsSent(); i++) {
                     solver.add(
                             mkLe(
                                 mkSub(
-                                    ((TSNSwitch) path.get(path.size() - 1)).scheduledTime(ctx, i, currentFrags.get(currentFrags.size() - 1)),
-                                    ((TSNSwitch) path.get(0)).departureTime(ctx, i, currentFrags.get(0))
+                                    ((TSNSwitch *) path.at(path.size() - 1))->scheduledTime(ctx, i, currentFrags.at(currentFrags.size() - 1)),
+                                    ((TSNSwitch *) path.at(0))->departureTime(ctx, i, currentFrags.at(0))
                                 ),
-                                flw.getStartDevice().getHardConstraintTimeZ3()
+                                flw->getStartDevice()->getHardConstraintTimeZ3()
                             )
                       );
                 }
 
-            } else if (flw.getType() == Flow.PUBLISH_SUBSCRIBE) {
-                PathNode root = flw.getPathTree().getRoot();
-                std::vector<PathNode> leaves = flw.getPathTree().getLeaves();
-                std::vector<PathNode> parents;
+            } else if (flw->getType() == PUBLISH_SUBSCRIBE) {
+                PathNode *root = flw->getPathTree()->getRoot();
+                std::vector<PathNode *> *leaves = flw->getPathTree()->getLeaves();
+                std::vector<PathNode *> parents;
 
                 // Make list of parents of all leaves
-                for(PathNode leaf : leaves) {
+                for(PathNode *leaf : *leaves) {
 
-                    if(!parents.contains(leaf.getParent())){
-                        parents.add(leaf.getParent());
+                    if(std::find(parents.begin(), parents.end(), leaf->getParent()) == parents.end()){
+                        parents.push_back(leaf->getParent());
                     }
 
 
                     // Set the maximum allowed jitter
-                    for(int index = 0; index < flw.getNumOfPacketsSent(); index++) {
+                    for(int index = 0; index < flw->getNumOfPacketsSent(); index++) {
                         solver.add( // Maximum allowed jitter constraint
                             mkLe(
-                                flw.getJitterZ3((Device) leaf.getNode(), solver, ctx, index),
+                                flw->getJitterZ3((Device *) leaf->getNode(), solver, ctx, index),
                                 this->jitterUpperBoundRangeZ3
                             )
                         );
@@ -178,18 +179,18 @@ class INET_API Network {
                 }
 
                 // Iterate over the flows of each leaf parent, assert HC
-                for(PathNode parent : parents) {
-                    for(FlowFragment ffrag : parent.getFlowFragments()) {
-                        for(int i = 0; i < flw.getNumOfPacketsSent(); i++) {
+                for(PathNode *parent : parents) {
+                    for(FlowFragment *ffrag : parent->getFlowFragments()) {
+                        for(int i = 0; i < flw->getNumOfPacketsSent(); i++) {
                             solver.add( // Maximum Allowed Latency constraint
                                 mkLe(
                                     mkSub(
-                                        ((TSNSwitch) parent.getNode()).scheduledTime(ctx, i, ffrag),
-                                        ((TSNSwitch) root.getChildren().get(0).getNode()).departureTime(ctx, i,
-                                            root.getChildren().get(0).getFlowFragments().get(0)
+                                        ((TSNSwitch *) parent->getNode())->scheduledTime(ctx, i, ffrag),
+                                        ((TSNSwitch *) root->getChildren().at(0)->getNode())->departureTime(ctx, i,
+                                            root->getChildren().at(0)->getFlowFragments().at(0)
                                         )
                                     ),
-                                    flw.getStartDevice().getHardConstraintTimeZ3()
+                                    flw->getStartDevice()->getHardConstraintTimeZ3()
                                 )
                             );
                         }
@@ -201,17 +202,17 @@ class INET_API Network {
 
                 // TODO: CHECK FAIRNESS CONSTRAINT (?)
 
-                sumOfAllJitter = flw.getSumOfAllDevJitterZ3(solver, ctx, Network.PACKETUPPERBOUNDRANGE - 1);
+                sumOfAllJitter = flw->getSumOfAllDevJitterZ3(solver, ctx, Network.PACKETUPPERBOUNDRANGE - 1);
 
                 jitterList.push(sumOfAllJitter);
-                totalNumOfLeaves += flw.getPathTree().getLeaves().size();
+                totalNumOfLeaves += flw->getPathTree().getLeaves().size();
 
                 // SET THE MAXIMUM JITTER FOR THE FLOW
                 solver.add(
                     mkLe(
                         mkDiv(
                             sumOfAllJitter,
-                            ctx.real_val(flw.getPathTree().getLeaves().size() * (PACKETUPPERBOUNDRANGE))
+                            ctx.real_val(flw->getPathTree().getLeaves().size() * (PACKETUPPERBOUNDRANGE))
                         ),
                         jitterUpperBoundRangeZ3
                     )
@@ -219,16 +220,16 @@ class INET_API Network {
                 */
 
                 // TODO: Remove code for debugging
-                avgOfAllLatency = flw.getAvgLatency(solver, ctx);
-                for(PathNode node : flw.getPathTree().getLeaves()) {
-                    Device endDev = (Device) node.getNode();
+                avgOfAllLatency = flw->getAvgLatency(solver, ctx);
+                for(PathNode *node : *flw->getPathTree()->getLeaves()) {
+                    Device *endDev = (Device *) node->getNode();
 
-                    this->avgLatencyPerDev.add(
-                        (z3::expr) mkDiv(
-                            flw.getSumOfJitterZ3(endDev, solver, ctx, flw.getNumOfPacketsSent() - 1),
-                            ctx.int_val(flw.getNumOfPacketsSent())
+                    this->avgLatencyPerDev.push_back(std::make_shared<expr>(
+                        mkDiv(
+                            flw->getSumOfJitterZ3(endDev, solver, ctx, flw->getNumOfPacketsSent() - 1),
+                            ctx.int_val(flw->getNumOfPacketsSent())
                         )
-                    );
+                    ));
 
 
 
@@ -256,30 +257,30 @@ class INET_API Network {
         // TODO: Don't forget to load the values of this class
 
         // On all network flows: Data given by the user will be converted to z3 values
-       for(Flow flw : this->flows) {
-           // flw.toZ3(ctx);
-           flw.flowPriority = ctx.int_valConst(flw.name + std::string("Priority"));
-           ((Device) flw.getPathTree().getRoot().getNode()).toZ3(ctx);
+       for(Flow *flw : this->flows) {
+           // flw->toZ3(ctx);
+           flw->flowPriority = std::make_shared<expr>(ctx.int_val((flw->name + std::string("Priority")).c_str()));
+           ((Device *) flw->getPathTree()->getRoot()->getNode())->toZ3(ctx);
        }
 
        // On all network switches: Data given by the user will be converted to z3 values
-        for(Switch swt : this->switches) {
-            if(swt instanceof TSNSwitch) {
-                for(Port port : ((TSNSwitch) swt).getPorts()) {
-                    for(FlowFragment frag : port.getFlowFragments()) {
-                        frag.createNewDepartureTimeZ3List();
-                        frag.addDepartureTimeZ3(ctx.real_val(std::to_string(frag.getDepartureTime(0))));
+        for(Switch *swt : this->switches) {
+            if(dynamic_cast<TSNSwitch *>(swt)) {
+                for(Port *port : ((TSNSwitch *) swt)->getPorts()) {
+                    for(FlowFragment *frag : port->getFlowFragments()) {
+                        frag->createNewDepartureTimeZ3List();
+                        frag->addDepartureTimeZ3(ctx.real_val(std::to_string(frag->getDepartureTime(0)).c_str()));
                     }
                 }
-                ((TSNSwitch) swt).toZ3(ctx, solver);
-                ((TSNSwitch) swt).loadZ3(ctx, solver);
+                ((TSNSwitch *) swt)->toZ3(ctx, solver);
+                ((TSNSwitch *) swt)->loadZ3(ctx, solver);
             }
         }
 
         /*
         for(Switch swt : this->getSwitches()) {
-            if(swt instanceof TSNSwitch) {
-                ((TSNSwitch) swt).loadZ3(ctx, solver);
+            if(dynamic_cast<TSNSwitch *>(swt)) {
+                ((TSNSwitch *) swt).loadZ3(ctx, solver);
             }
         }
         */
@@ -296,35 +297,35 @@ class INET_API Network {
     }
 
     void setJitterUpperBoundRangeZ3(z3::expr jitterUpperBoundRange) {
-        this->jitterUpperBoundRangeZ3 = jitterUpperBoundRange;
+        this->jitterUpperBoundRangeZ3 = std::make_shared<expr>(jitterUpperBoundRange);
     }
 
     void setJitterUpperBoundRangeZ3(context& ctx, float auxJitterUpperBoundRange) {
-        this->jitterUpperBoundRangeZ3 = ctx.real_val(std::string.valueOf(auxJitterUpperBoundRange));
+        this->jitterUpperBoundRangeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(auxJitterUpperBoundRange).c_str()));
     }
 
-    std::vector<Switch> getSwitches() {
+    std::vector<Switch *> getSwitches() {
         return switches;
     }
 
-    void setSwitches(std::vector<Switch> switches) {
+    void setSwitches(std::vector<Switch *> switches) {
         this->switches = switches;
     }
 
-    std::vector<Flow> getFlows() {
+    std::vector<Flow *> getFlows() {
         return flows;
     }
 
-    void setFlows(std::vector<Flow> flows) {
+    void setFlows(std::vector<Flow *> flows) {
         this->flows = flows;
     }
 
-    void addFlow (Flow flw) {
-        this->flows.add(flw);
+    void addFlow (Flow *flw) {
+        this->flows.push_back(flw);
     }
 
-    void addSwitch (Switch swt) {
-        this->switches.add(swt);
+    void addSwitch (Switch *swt) {
+        this->switches.push_back(swt);
     }
 
 };

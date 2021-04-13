@@ -30,11 +30,11 @@ class INET_API PathTree {
      * @param node      Device of the root node of the pathTree
      * @return          A reference to the root
      */
-    PathNode addRoot(Object node)
+    PathNode *addRoot(cObject *node)
     {
         root=new PathNode(node);
-        root.setParent(nullptr);
-        root.setChildren(std::vector<PathNode *>());
+        root->setParent(nullptr);
+        root->setChildren(std::vector<PathNode *>());
         return root;
     }
 
@@ -49,10 +49,10 @@ class INET_API PathTree {
      */
     void changeRoot(PathNode *newRoot)
     {
-        PathNode oldRoot=this->root;
-        newRoot.setParent(nullptr);
-        newRoot.addChild(oldRoot);
-        oldRoot.setParent(newRoot);
+        PathNode *oldRoot=this->root;
+        newRoot->setParent(nullptr);
+        newRoot->addChild(oldRoot);
+        oldRoot->setParent(newRoot);
         this->root=newRoot;
     }
 
@@ -69,12 +69,12 @@ class INET_API PathTree {
      */
     void searchLeaves(PathNode *node) {
 
-        if(node.getChildren().size() == 0) {
-            leaves.add(node);
+        if(node->getChildren().size() == 0) {
+            leaves->push_back(node);
             return;
         }
 
-        for(PathNode auxNode : node.getChildren()) {
+        for(PathNode *auxNode : node->getChildren()) {
             searchLeaves(auxNode);
         }
 
@@ -88,8 +88,8 @@ class INET_API PathTree {
      *
      * @return      std::vector with all leaves as PathNodes
      */
-    std::vector<PathNode *> getLeaves(){
-        leaves.clear();
+    std::vector<PathNode *> *getLeaves(){
+        leaves->clear();
 
         searchLeaves(root);
 
@@ -102,11 +102,11 @@ class INET_API PathTree {
      */
 
 
-    PathNode getRoot() {
+    PathNode *getRoot() {
         return root;
     }
 
-    void setRoot(PathNode root) {
+    void setRoot(PathNode *root) {
         this->root = root;
     }
 

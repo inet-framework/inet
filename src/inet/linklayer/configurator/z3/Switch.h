@@ -21,7 +21,7 @@ using namespace z3;
  * project in the future.
  *
  */
-class INET_API Switch {
+class INET_API Switch : public cObject {
   public:
     std::string name;
     float maxPacketSize;
