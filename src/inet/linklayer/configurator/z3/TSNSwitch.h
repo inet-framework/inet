@@ -187,13 +187,10 @@ class INET_API TSNSwitch : public Switch {
                 this->cycleDuration,
                 port.getCycle()->getCycleDurationZ3()
             ));
-            /**/
+            */
 
             // The cycle of every port must have the same starting point
-            /**/
             solver.add(*this->cycleStart == *port->getCycle()->getFirstCycleStartZ3()); // Equal cycle constraints
-            /**/
-
         }
 
         solver.add(*this->cycleStart == ctx.int_val(0));
@@ -372,7 +369,7 @@ class INET_API TSNSwitch : public Switch {
     int portIndex = this->connectsTo.indexOf(flowFrag->getNextHop());
     return (z3::expr) this->ports.get(portIndex).arrivalTime(ctx, index, flowFrag);
     }
-    /**/
+    */
 
     /**
      * [Method]: departureTime
@@ -386,7 +383,6 @@ class INET_API TSNSwitch : public Switch {
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
     std::shared_ptr<expr> departureTime(context& ctx, z3::expr index, FlowFragment *flowFrag);
-    /**/
 
     /**
      * [Method]: departureTime
@@ -415,7 +411,7 @@ class INET_API TSNSwitch : public Switch {
     int portIndex = this->connectsTo.indexOf(flowFrag->getNextHop());
     return (z3::expr) this->ports.get(portIndex).scheduledTime(ctx, index, flowFrag);
     }
-    /**/
+    */
 
     /**
      * [Method]: scheduledTime

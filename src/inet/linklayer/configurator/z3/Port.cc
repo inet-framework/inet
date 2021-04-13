@@ -160,7 +160,7 @@ void Port::setUpCycleRules(solver& solver, context& ctx) {
                     );
                 }
             }
-            /**/
+            */
         }
 
     }
@@ -251,7 +251,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                 )
             );
         }
-        /**/
+        */
 
 
         for(int i = 0; i < flowFrag->getNumOfPacketsSent(); i++) {
@@ -306,7 +306,6 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                 for(int index = 0; index < this->cycle->getNumOfSlots(); index++) {
                     indexZ3 = std::make_shared<expr>(ctx.int_val(index));
 
-                    /**/
                     auxExp2 = std::make_shared<expr>(mkAnd(auxExp2, // Arrived during a time slot predicate
                             mkImplies(
                                 mkAnd(
@@ -340,7 +339,6 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                                 )
                             )
                     ));
-                    /**/
 
 
                     /*
@@ -420,9 +418,6 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                                 )
                             ));
                     }
-                    /**/
-
-
 
                     /*
                     ; T2 IS AFTER THE SLOT OR INSIDE WITHOUT ENOUGH TIME. The packet won't be trans-
@@ -536,7 +531,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                                 )
                         );
                     }
-                    /**/
+                    */
                 }
             }
 
@@ -594,8 +589,6 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
         exp = std::make_shared<expr>(ctx.bool_val(false));
     }
 
-
-    /**/
     for(int i = 0; i < flowFrag->getNumOfPacketsSent() - 1; i++) {
         solver.add(
             mkGe(
@@ -607,9 +600,6 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
             )
         );
     }
-    /**/
-
-
 
     for(int i = 0; i < flowFrag->getNumOfPacketsSent(); i++) {
         for(FlowFragment *auxFlowFrag : this->flowFragments) {
@@ -653,6 +643,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                        )
                    )
                );
+               */
 
                /*
                 * Frame isolation constraint as specified by:
@@ -682,7 +673,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                        )
                    )
                );
-               /**/
+               */
 
             }
         }
@@ -733,7 +724,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                         )
                     );
                 }
-                /**/
+                */
 
             }
         }
@@ -762,7 +753,6 @@ void Port::setupBestEffort(solver& solver, context& ctx) {
             sumOfSlotsDuration = std::make_shared<expr>(mkAdd(sumOfSlotsDuration, cycle->slotDurationZ3(ctx, *f.getFragmentPriorityZ3(), ctx.int_val(i))));
         }
 
-        /**/
         for(int i = 1; i <= 8; i++) {
             solver.add(
                 mkImplies(
@@ -778,8 +768,6 @@ void Port::setupBestEffort(solver& solver, context& ctx) {
                 )
             );
         }
-        /**/
-
     }
 
     for(int i = 1; i<=8; i++) {

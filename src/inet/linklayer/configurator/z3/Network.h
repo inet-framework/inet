@@ -234,8 +234,6 @@ class INET_API Network {
 
 
                 }
-
-                /**/
             }
 
         }
