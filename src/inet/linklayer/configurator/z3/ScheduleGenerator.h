@@ -17,14 +17,14 @@ using namespace z3;
  */
 class INET_API ScheduleGenerator {
   public:
-       @SuppressWarnings("serial")
-       class TestFailedException extends Exception
-       {
-           TestFailedException()
-           {
-               super("Check FAILED");
-           }
-       };
+//       @SuppressWarnings("serial")
+//       class TestFailedException extends Exception
+//       {
+//           TestFailedException()
+//           {
+//               super("Check FAILED");
+//           }
+//       };
 
        /**
         * [Method]: stringToFloat
@@ -39,24 +39,30 @@ class INET_API ScheduleGenerator {
         * @param str   std::string containing value to convert to float
         * @return      float value of the given string str
         */
-       public float stringToFloat(std::string str) {
-           BigDecimal val1;
-           BigDecimal val2;
+       float stringToFloat(std::string str) {
+//           BigDecimal val1;
+//           BigDecimal val2;
            float result = 0;
 
-           if(str.contains("/")) {
-               val1 = new BigDecimal(str.split("/")[0]);
-               val2 = new BigDecimal(str.split("/")[1]);
-               result = val1.divide(val2, MathContext.DECIMAL128).floatValue();
-
+           int index = str.find('/');
+           if(index != std::string::npos) {
+               str = str.substr(3, str.length() - 1); // (/ a b)
+               index = str.find(' ');
+               double val1 = atof(str.substr(0, index).c_str());
+               double val2 = atof(str.substr(index + 1).c_str());
+               result = val1 / val2;
+//               val1 = new BigDecimal(str.split("/")[0]);
+//               val2 = new BigDecimal(str.split("/")[1]);
+//               result = val1.divide(val2, MathContext.DECIMAL128).floatValue();
+//
            } else {
-               try{
-                     result = float.parseFloat(str);
-                }catch(NumberFormatException e){
-                    result = -1;
-                }
+//               try{
+                     result = atof(str.c_str());
+//                }catch(NumberFormatException e){
+//                    result = -1;
+//                }
            }
-
+//
            return result;
        }
 
@@ -68,40 +74,40 @@ class INET_API ScheduleGenerator {
         *
         * @return  A z3 context
         */
-       public context createContext() {
-           System.out.println("findSchedulerModel\n");
+       context *createContext() {
+           std::cout << "findSchedulerModel\n";
 
-           try
-           {
-                com.microsoft.z3.Global.ToggleWarningMessages(true);
-                System.out.print("Z3 Major Version: ");
-                System.out.println(Version.getMajor());
-                System.out.print("Z3 Full Version: ");
-                System.out.println(Version.getString());
-                System.out.print("Z3 Full Version std::string: ");
-                System.out.println(Version.getFullVersion());
-                System.out.println("");
+//           try
+//           {
+//                com.microsoft.z3.Global.ToggleWarningMessages(true);
+                std::cout << "Z3 Major Version: " << std::endl;
+//                std::cout << version.getMajor() << std::endl;
+                std::cout << "Z3 Full Version: " << std::endl;
+//                std::cout << version.getString() << std::endl;
+                std::cout << "Z3 Full Version std::string: " << std::endl;
+//                std::cout << version.getFullVersion() << std::endl;
+                std::cout << "" << std::endl;
 
 
                 { // These examples need model generation turned on.
-                    HashMap<std::string, std::string> cfg = new HashMap<std::string, std::string>();
-                    cfg.put("model", "true");
-                    context& ctx = new context(cfg);
+                    config cfg;
+                    cfg.set("model", "true");
+                    context *ctx = new context(cfg);
 
                     return ctx;
                 }
-            } catch (Z3Exception ex)
-            {
-                System.out.println(std::string("Z3 Managed Exception: ") + ex.getMessage());
-                System.out.println("Stack trace: ");
-                ex.printStackTrace(System.out);
-            } catch (Exception ex)
-            {
-                System.out.println(std::string("Unknown Exception: ") + ex.getMessage());
-                System.out.println("Stack trace: ");
-                ex.printStackTrace(System.out);
-            }
-
+//            } catch (Z3Exception ex)
+//            {
+//                std::cout << std::string("Z3 Managed Exception: ") + ex.getMessage());
+//                std::cout << "Stack trace: ");
+//                ex.printStackTrace(System.out);
+//            } catch (Exception ex)
+//            {
+//                std::cout << std::string("Unknown Exception: ") + ex.getMessage());
+//                std::cout << "Stack trace: ");
+//                ex.printStackTrace(System.out);
+//            }
+//
             return nullptr;
        }
 
@@ -113,28 +119,28 @@ class INET_API ScheduleGenerator {
         *
         * @param ctx   context to be cleared
         */
-       public void closeContext(context& ctx) {
-           try
-           {
-
-                {
-                    ctx.close();
-                }
-
-                //Log.close();
-                if (Log.isOpen())
-                    System.out.println("Log is still open!");
-            } catch (Z3Exception ex)
-            {
-                System.out.println(std::string("Z3 Managed Exception: ") + ex.getMessage());
-                System.out.println("Stack trace: ");
-                ex.printStackTrace(System.out);
-            } catch (Exception ex)
-            {
-                System.out.println(std::string("Unknown Exception: ") + ex.getMessage());
-                System.out.println("Stack trace: ");
-                ex.printStackTrace(System.out);
-            }
+       void closeContext(context& ctx) {
+//           try
+//           {
+//
+//                {
+//                    ctx.close();
+//                }
+//
+//                //Log.close();
+//                if (Log.isOpen())
+//                    std::cout << "Log is still open!");
+//            } catch (Z3Exception ex)
+//            {
+//                std::cout << std::string("Z3 Managed Exception: ") + ex.getMessage());
+//                std::cout << "Stack trace: ");
+//                ex.printStackTrace(System.out);
+//            } catch (Exception ex)
+//            {
+//                std::cout << std::string("Unknown Exception: ") + ex.getMessage());
+//                std::cout << "Stack trace: ");
+//                ex.printStackTrace(System.out);
+//            }
        }
 
        /**
@@ -149,12 +155,12 @@ class INET_API ScheduleGenerator {
         * @param ctx       z3 context used to generate the model
         * @param out       PrintWriter stream to output log file
         */
-       public void writePathTree(PathNode pathNode, Model model, context& ctx, PrintWriter out) {
-           Switch swt;
+       void writePathTree(PathNode *pathNode, model& model, context& ctx) {
+           Switch *swt;
            std::shared_ptr<expr> indexZ3 = nullptr;
 
-           if((pathNode.getNode() instanceof Device) && (pathNode.getParent() != nullptr)) {
-               out.println("    [END OF BRANCH]");
+           if(dynamic_cast<Device *>(pathNode->getNode()) && (pathNode->getParent() != nullptr)) {
+               std::cout << "    [END OF BRANCH]" << std::endl;
 
            }
 
@@ -168,108 +174,107 @@ class INET_API ScheduleGenerator {
             * flows is similar but easier than the unicast flows. The pathNode object
             * stores references to both flow fragment and switch, so no search is needed.
             */
-           for(PathNode child : pathNode.getChildren()) {
-               if(child.getNode() instanceof Switch) {
+           for(PathNode *child : pathNode->getChildren()) {
+               if(dynamic_cast<Switch *>(child->getNode())) {
 
-                   for(FlowFragment ffrag : child.getFlowFragments()) {
-                       out.println(std::string("    Fragment name: ") + ffrag.getName());
-                       out.println(std::string("        Fragment node: ") + ffrag.getNodeName());
-                       out.println(std::string("        Fragment next hop: ") + ffrag.getNextHop());
-                       out.println(std::string("        Fragment priority: ") + model.eval(ffrag.getFragmentPriorityZ3(), false));
-                       for(int index = 0; index < ((TSNSwitch) child.getNode()).getPortOf(ffrag.getNextHop()).getCycle().getNumOfSlots(); index++) {
-                           indexZ3 = ctx.int_val(index);
-                           out.println(std::string("        Fragment slot start ") + index + std::string(": ")
-                                   + this->stringToFloat(
-                                           model.eval(((TSNSwitch) child.getNode())
-                                                  .getPortOf(ffrag.getNextHop())
-                                                  .getCycle()
-                                                  .slotStartZ3(ctx, ffrag.getFragmentPriorityZ3(), indexZ3)
-                                                  , false).toString()
-                                       ));
-                           out.println(std::string("        Fragment slot duration ") + index + std::string(" : ")
-                                    + this->stringToFloat(
-                                        model.eval(((TSNSwitch) child.getNode())
-                                                   .getPortOf(ffrag.getNextHop())
-                                                   .getCycle()
-                                                   .slotDurationZ3(ctx, ffrag.getFragmentPriorityZ3(), indexZ3)
-                                                   , false).toString()));
+                   for(FlowFragment *ffrag : child->getFlowFragments()) {
+                       std::cout << std::string("    Fragment name: ") << ffrag->getName() << std::endl;
+                       std::cout << std::string("        Fragment node: ") << ffrag->getNodeName() << std::endl;
+                       std::cout << std::string("        Fragment next hop: ") << ffrag->getNextHop() << std::endl;
+                       std::cout << std::string("        Fragment priority: ") << model.eval(*ffrag->getFragmentPriorityZ3(), false) << std::endl;
+                       for(int index = 0; index < ((TSNSwitch *) child->getNode())->getPortOf(ffrag->getNextHop())->getCycle()->getNumOfSlots(); index++) {
+                           indexZ3 = std::make_shared<expr>(ctx.int_val(index));
+                           std::cout << std::string("        Fragment slot start ") << index << std::string(": ")
+                                   << this->stringToFloat(
+                                           model.eval(*((TSNSwitch *) child->getNode())
+                                                  ->getPortOf(ffrag->getNextHop())
+                                                  ->getCycle()
+                                                  ->slotStartZ3(ctx, *ffrag->getFragmentPriorityZ3(), *indexZ3)
+                                                  , false).to_string()) << std::endl;
+                           std::cout << std::string("        Fragment slot duration ") << index << std::string(" : ")
+                                    << this->stringToFloat(
+                                        model.eval(*((TSNSwitch *) child->getNode())
+                                                   ->getPortOf(ffrag->getNextHop())
+                                                   ->getCycle()
+                                                   ->slotDurationZ3(ctx, *ffrag->getFragmentPriorityZ3(), *indexZ3)
+                                                   , false).to_string()) << std::endl;
 
                        }
 
-                       out.println("        Fragment times-");
-                       ffrag.getParent().addToTotalNumOfPackets(ffrag.getNumOfPacketsSent());
+                       std::cout << "        Fragment times-" << std::endl;
+                       ffrag->getParent()->addToTotalNumOfPackets(ffrag->getNumOfPacketsSent());
 
-                       for(int i = 0; i < ffrag.getParent().getNumOfPacketsSent(); i++) {
-                               System.out.println(std::string("On " + ffrag.getName() + std::string(" - ")) +
-                                ((TSNSwitch)child.getNode()).departureTime(ctx, i, ffrag) + std::string(" - ") +
-                                  ((TSNSwitch)child.getNode()).scheduledTime(ctx, i, ffrag)
-                            );
-                           // System.out.println(((TSNSwitch)child.getNode()).departureTime(ctx, i, ffrag));
-                           // System.out.println(((TSNSwitch)child.getNode()).arrivalTime(ctx, i, ffrag));
-                           // System.out.println(((TSNSwitch)child.getNode()).scheduledTime(ctx, i, ffrag));
+                       for(int i = 0; i < ffrag->getParent()->getNumOfPacketsSent(); i++) {
+                               std::cout << std::string("On " + ffrag->getName() + std::string(" - ")) <<
+                                ((TSNSwitch *)child->getNode())->departureTime(ctx, i, ffrag)->to_string() << std::string(" - ") <<
+                                  ((TSNSwitch *)child->getNode())->scheduledTime(ctx, i, ffrag)->to_string() << std::endl;
+                           // std::cout << ((TSNSwitch *)child->getNode())->departureTime(ctx, i, ffrag).to_string() << std::endl;
+                           // std::cout << ((TSNSwitch *)child->getNode())->arrivalTime(ctx, i, ffrag).to_string() << std::endl;
+                           // std::cout << ((TSNSwitch *)child->getNode())->scheduledTime(ctx, i, ffrag).to_string() << std::endl;
 
-                           if(i < ffrag.getParent().getNumOfPacketsSent()) {
-                               out.println(std::string("          (" + std::to_string(i) + std::string(") Fragment departure time: ")) + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).departureTime(ctx, i, ffrag) , false).toString()));
-                               out.println(std::string("          (" + std::to_string(i) + std::string(") Fragment arrival time: ")) + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).arrivalTime(ctx, i, ffrag) , false).toString()));
-                               out.println(std::string("          (" + std::to_string(i) + std::string(") Fragment scheduled time: ")) + this->stringToFloat(model.eval(((TSNSwitch) child.getNode()).scheduledTime(ctx, i, ffrag) , false).toString()));
-                               out.println("          ----------------------------");
+                           if(i < ffrag->getParent()->getNumOfPacketsSent()) {
+                               std::cout << std::string("          (") << std::to_string(i) << std::string(") Fragment departure time: ") << this->stringToFloat(model.eval(*((TSNSwitch *) child->getNode())->departureTime(ctx, i, ffrag), false).to_string()) << std::endl;
+                               std::cout << std::string("          (") << std::to_string(i) << std::string(") Fragment arrival time: ") << this->stringToFloat(model.eval(*((TSNSwitch *) child->getNode())->arrivalTime(ctx, i, ffrag), false).to_string()) << std::endl;
+                               std::cout << std::string("          (") << std::to_string(i) << std::string(") Fragment scheduled time: ") << this->stringToFloat(model.eval(*((TSNSwitch *) child->getNode())->scheduledTime(ctx, i, ffrag), false).to_string()) << std::endl;
+                               std::cout << "          ----------------------------" << std::endl;
                            }
 
-                           ffrag.setFragmentPriority(
-                               int.parseInt(
-                                   model.eval(ffrag.getFragmentPriorityZ3(), false).toString()
+                           ffrag->setFragmentPriority(
+                               atoi(
+                                   model.eval(*ffrag->getFragmentPriorityZ3(), false).to_string().c_str()
                                )
                            );
 
-                           ffrag.addDepartureTime(
+                           ffrag->addDepartureTime(
                                this->stringToFloat(
-                                   model.eval(((TSNSwitch) child.getNode()).departureTime(ctx, i, ffrag) , false).toString()
+                                   model.eval(*((TSNSwitch *) child->getNode())->departureTime(ctx, i, ffrag) , false).to_string()
                                )
                            );
-                           ffrag.addArrivalTime(
+                           ffrag->addArrivalTime(
                                this->stringToFloat(
-                                   model.eval(((TSNSwitch) child.getNode()).arrivalTime(ctx, i, ffrag) , false).toString()
+                                   model.eval(*((TSNSwitch *) child->getNode())->arrivalTime(ctx, i, ffrag) , false).to_string()
                                )
                            );
-                           ffrag.addScheduledTime(
+                           ffrag->addScheduledTime(
                                this->stringToFloat(
-                                   model.eval(((TSNSwitch) child.getNode()).scheduledTime(ctx, i, ffrag) , false).toString()
+                                   model.eval(*((TSNSwitch *) child->getNode())->scheduledTime(ctx, i, ffrag) , false).to_string()
                                )
                            );
 
                        }
 
-                       swt = (TSNSwitch) child.getNode();
+                       swt = (TSNSwitch *) child->getNode();
 
-                       for (Port port : ((TSNSwitch) swt).getPorts()) {
+                       for (Port *port : ((TSNSwitch *) swt)->getPorts()) {
 
-                           if(!port.getFlowFragments().contains(ffrag)) {
+                           auto flowFragments = port->getFlowFragments();
+                           if(std::find(flowFragments.begin(), flowFragments.end(), ffrag) == flowFragments.end()) {
                                continue;
                            }
 
-                           std::vector<float> listOfStart.clear();
-                           std::vector<float> listOfDuration.clear();
+                           std::vector<float> listOfStart;
+                           std::vector<float> listOfDuration;
 
 
-                           for(int index = 0; index < ((TSNSwitch) child.getNode()).getPortOf(ffrag.getNextHop()).getCycle().getNumOfSlots(); index++) {
-                               indexZ3 = ctx.int_val(index);
+                           for(int index = 0; index < ((TSNSwitch *) child->getNode())->getPortOf(ffrag->getNextHop())->getCycle()->getNumOfSlots(); index++) {
+                               indexZ3 = std::make_shared<expr>(ctx.int_val(index));
 
-                               listOfStart.add(
+                               listOfStart.push_back(
                                    this->stringToFloat(model.eval(
-                                       ((TSNSwitch) child.getNode())
-                                       .getPortOf(ffrag.getNextHop())
-                                       .getCycle().slotStartZ3(ctx, ffrag.getFragmentPriorityZ3(), indexZ3) , false).toString())
+                                       *((TSNSwitch *) child->getNode())
+                                       ->getPortOf(ffrag->getNextHop())
+                                       ->getCycle()->slotStartZ3(ctx, *ffrag->getFragmentPriorityZ3(), *indexZ3) , false).to_string())
                                );
-                               listOfDuration.add(
+                               listOfDuration.push_back(
                                    this->stringToFloat(model.eval(
-                                       ((TSNSwitch) child.getNode())
-                                       .getPortOf(ffrag.getNextHop())
-                                       .getCycle().slotDurationZ3(ctx, ffrag.getFragmentPriorityZ3(), indexZ3) , false).toString())
+                                       *((TSNSwitch *) child->getNode())
+                                       ->getPortOf(ffrag->getNextHop())
+                                       ->getCycle()->slotDurationZ3(ctx, *ffrag->getFragmentPriorityZ3(), *indexZ3) , false).to_string())
                                );
                            }
 
-                           port.getCycle().addSlotUsed(
-                               (int) this->stringToFloat(model.eval(ffrag.getFragmentPriorityZ3(), false).toString()),
+                           port->getCycle()->addSlotUsed(
+                               (int) this->stringToFloat(model.eval(*ffrag->getFragmentPriorityZ3(), false).to_string()),
                                listOfStart,
                                listOfDuration
                            );
@@ -277,40 +282,40 @@ class INET_API ScheduleGenerator {
 
                    }
 
-                   this->writePathTree(child, model, ctx, out);
+                   this->writePathTree(child, model, ctx);
                }
            }
 
        }
 
 
-       public void configureNetwork(Network net, context& ctx, solver& solver) {
-           for(Flow flw : net.getFlows()) {
-                  flw.modifyIfUsingCustomVal();
-               flw.convertUnicastFlow();
-               flw.setUpPeriods(flw.getPathTree().getRoot());
+       void configureNetwork(Network *net, context& ctx, solver& solver) {
+           for(Flow *flw : net->getFlows()) {
+                  flw->modifyIfUsingCustomVal();
+               flw->convertUnicastFlow();
+               flw->setUpPeriods(flw->getPathTree()->getRoot());
            }
 
-           for(Switch swt : net.getSwitches()) {
-               TSNSwitch auxSwt = (TSNSwitch) swt;
-               auxSwt.setUpCycleSize(solver, ctx);
+           for(Switch *swt : net->getSwitches()) {
+               TSNSwitch *auxSwt = (TSNSwitch *) swt;
+               auxSwt->setUpCycleSize(solver, ctx);
            }
 
 
            // On all network flows: Data given by the user will be converted to z3 values
-           for(Flow flw : net.getFlows()) {
-               flw.toZ3(ctx);
-               flw.setNumberOfPacketsSent(flw.getPathTree().getRoot());
+           for(Flow *flw : net->getFlows()) {
+               flw->toZ3(ctx);
+               flw->setNumberOfPacketsSent(flw->getPathTree()->getRoot());
            }
 
            // On all network switches: Data given by the user will be converted to z3 values
-           for(Switch swt : net.getSwitches()) {
-               ((TSNSwitch) swt).toZ3(ctx, solver);
+           for(Switch *swt : net->getSwitches()) {
+               ((TSNSwitch *) swt)->toZ3(ctx, solver);
            }
 
            // Sets up the hard constraint for each individual flow in the network
-           net.setJitterUpperBoundRangeZ3(ctx, 25);
-           net.secureHC(solver, ctx);
+           net->setJitterUpperBoundRangeZ3(ctx, 25);
+           net->secureHC(solver, ctx);
        }
 
 
@@ -323,67 +328,66 @@ class INET_API ScheduleGenerator {
         *
         * @param net   Network used as base to generate the schedule
         */
-       public void generateSchedule(Network net)
+       void generateSchedule(Network *net)
        {
-           context& ctx = this->createContext(); //Creating the z3 context
-           solver& solver;     //Creating the solver to generate unknown values based on the given context
+           context *ctx = this->createContext(); //Creating the z3 context
+           solver solver(*ctx);     //Creating the solver to generate unknown values based on the given context
 
 
-            this->configureNetwork(net, ctx, solver);
+            this->configureNetwork(net, *ctx, solver);
            // net.loadNetwork(ctx, solver);
 
 
            // A switch is picked in order to evaluate the unknown values
-           TSNSwitch switch1 = nullptr;
-           switch1 = (TSNSwitch) net.getSwitches().get(0);
+           TSNSwitch *switch1 = nullptr;
+           switch1 = (TSNSwitch *) net->getSwitches().at(0);
            // The duration of the cycle is given as a question to z3, so all the
            // constraints will have to be evaluated in order to z3 to know this cycle
            // duration
-           std::shared_ptr<expr> switch1CycDuration = switch1.getCycle(0).getCycleDurationZ3();
+           std::shared_ptr<expr> switch1CycDuration = switch1->getCycle(0)->getCycleDurationZ3();
 
 
            /* find model for the constraints above */
-           Model model = nullptr;
-           LocalTime time = LocalTime.now();
+//           model model = nullptr;
+//           LocalTime time = LocalTime.now();
 
+           std::cout << "Rules set. Checking solver." << std::endl;
+           std::cout << solver << std::endl;
+//           std::cout << std::string("Current time of the day: ") << time << std::endl;
 
-           System.out.println("Rules set. Checking solver.");
-           System.out.println(std::string("Current time of the day: ") + time);
-
-
-           if (Status.SATISFIABLE == solver.check())
+           if (sat == solver.check())
            {
-               model = solver.getModel();
-               System.out.println(model);
-               Expr v = model.evaluate(switch1CycDuration, false);
-               if (v != nullptr)
-               {
-                   System.out.println("Model generated.");
+               model model = solver.get_model();
+               std::cout << model << std::endl;
+               expr v = model.eval(*switch1CycDuration, false);
+//               if (v != nullptr)
+//               {
+                   std::cout << "Model generated." << std::endl;
 
-                   try {
-                       PrintWriter out = new PrintWriter("log.txt");
+//                   try {
+//                       PrintWriter out = new PrintWriter("log.txt");
 
-                       out.println("SCHEDULER LOG:\n\n");
+                       std::cout << "SCHEDULER LOG:\n\n" << std::endl;
 
-                       out.println("SWITCH LIST:");
+                       std::cout << "SWITCH LIST:" << std::endl;
 
                        // For every switch in the network, store its information in the log
-                       for(Switch auxSwt : net.getSwitches()) {
-                           out.println(std::string("  Switch name: ") + auxSwt.getName());
-                           out.println(std::string("    Max packet size: ") + auxSwt.getMaxPacketSize());
-                           out.println(std::string("    Port speed: ") + auxSwt.getPortSpeed());
-                           out.println(std::string("    Time to Travel: ") + auxSwt.getTimeToTravel());
-                           out.println(std::string("    Transmission time: ") + auxSwt.getTransmissionTime());
-//                           out.println("    Cycle information -");
-//                           out.println(std::string("        First cycle start: ") + model.eval(((TSNSwitch)auxSwt).getCycleStart(), false));
-//                           out.println(std::string("        Cycle duration: ") + model.eval(((TSNSwitch)auxSwt).getCycleDuration(), false));
-                           out.println("");
+                       for(Switch *auxSwt : net->getSwitches()) {
+                           std::cout << std::string("  Switch name: ") << auxSwt->getName();
+                           std::cout << std::string("    Max packet size: ") << auxSwt->getMaxPacketSize();
+                           std::cout << std::string("    Port speed: ") << auxSwt->getPortSpeed();
+                           std::cout << std::string("    Time to Travel: ") << auxSwt->getTimeToTravel();
+                           std::cout << std::string("    Transmission time: ") << auxSwt->getTransmissionTime();
+//                           std::cout << "    Cycle information -" << std::endl;
+//                           std::cout << std::string("        First cycle start: ") + model.eval(((TSNSwitch *)auxSwt).getCycleStart(), false));
+//                           std::cout << std::string("        Cycle duration: ") + model.eval(((TSNSwitch *)auxSwt).getCycleDuration(), false));
+                           std::cout << "" << std::endl;
                            /*
-                           for (Port port : ((TSNSwitch)auxSwt).getPorts()) {
-                               out.println(std::string("        Port name (Virtual Index): ") + port.getName());
-                               out.println(std::string("        First cycle start: ") + model.eval(port.getCycle().getFirstCycleStartZ3(), false));
-                               out.println(std::string("        Cycle duration: ") + model.eval(port.getCycle().getCycleDurationZ3(), false));
-                               out.println("");
+                           for (Port port : ((TSNSwitch *)auxSwt).getPorts()) {
+                               std::cout << std::string("        Port name (Virtual Index): ") + port->getName());
+                               std::cout << std::string("        First cycle start: ") + model.eval(port->getCycle()->getFirstCycleStartZ3(), false));
+                               std::cout << std::string("        Cycle duration: ") + model.eval(port->getCycle()->getCycleDurationZ3(), false));
+                               std::cout << "" << std::endl;
                            }
                            */
 
@@ -391,36 +395,37 @@ class INET_API ScheduleGenerator {
                            // [EXTRACTING OUTPUT]: Obtaining the z3 output of the switch properties,
                            // converting it from string to float and storing in the objects
 
-                           for (Port port : ((TSNSwitch)auxSwt).getPorts()) {
+                           for (Port *port : ((TSNSwitch *)auxSwt)->getPorts()) {
                                port
-                                   .getCycle()
-                                   .setCycleStart(
-                                       this->stringToFloat(std::string("") + model.eval(port.getCycle().getFirstCycleStartZ3(), false))
+                                   ->getCycle()
+                                   ->setCycleStart(
+                                       this->stringToFloat(model.eval(*port->getCycle()->getFirstCycleStartZ3(), false).to_string())
                                    );
                            }
 
                            // cycleDuration
-                           for (Port port : ((TSNSwitch)auxSwt).getPorts()) {
+                           for (Port *port : ((TSNSwitch *)auxSwt)->getPorts()) {
                                port
-                                   .getCycle()
-                                   .setCycleDuration(
-                                       this->stringToFloat(std::string("") + model.eval(port.getCycle().getCycleDurationZ3(), false))
+                                   ->getCycle()
+                                   ->setCycleDuration(
+                                       this->stringToFloat(model.eval(*port->getCycle()->getCycleDurationZ3(), false).to_string())
                                    );
                            }
 
                        }
 
-                       out.println("");
+                       std::cout << "" << std::endl;
 
-                       out.println("FLOW LIST:");
+                       std::cout << "FLOW LIST:" << std::endl;
                        //For every flow in the network, store its information in the log
-                       for(Flow f : net.getFlows()) {
-                           out.println(std::string("  Flow name: ") + f.getName());
-                           //out.println(std::string("    Flow priority:") + model.eval(f.getFlowPriority(), false));
-                           out.println(std::string("    Start dev. first t1: ") + model.eval(f.getStartDevice().getFirstT1TimeZ3(), false));
-                           out.println(std::string("    Start dev. HC: ") + model.eval(f.getStartDevice().getHardConstraintTimeZ3(), false));
-                           out.println(std::string("    Start dev. packet periodicity: ") + model.eval(f.getStartDevice().getPacketPeriodicityZ3(), false));
+                       for(Flow *f : net->getFlows()) {
+                           std::cout << std::string("  Flow name: ") + f->getName() << std::endl;
+                           // std::cout << std::string("    Flow priority: ") + model.eval(f->getFlowPriority(), false) << std::endl;
+                           std::cout << std::string("    Start dev. first t1: ") << model.eval(*f->getStartDevice()->getFirstT1TimeZ3(), false).to_string() << std::endl;
+                           std::cout << std::string("    Start dev. HC: ") << model.eval(*f->getStartDevice()->getHardConstraintTimeZ3(), false).to_string() << std::endl;
+                           std::cout << std::string("    Start dev. packet periodicity: ") << model.eval(*f->getStartDevice()->getPacketPeriodicityZ3(), false).to_string() << std::endl;
 
+                           f->setFlowFirstSendingTime(stringToFloat(model.eval(*f->getStartDevice()->getFirstT1TimeZ3(), false).to_string()));
 
                            // IF FLOW IS UNICAST
                            /*
@@ -435,10 +440,10 @@ class INET_API ScheduleGenerator {
                            structured here are different. So this process is done differently
                            in each case.
                            */
-                           if(f.getType() == Flow.UNICAST) {
+                           if(f->getType() == UNICAST) {
                                // TODO: Throw error. UNICAST data structure are not allowed at this point
                                // Everything should had been converted into the multicast model.
-                           } else if(f.getType() == Flow.PUBLISH_SUBSCRIBE) { //IF FLOW IS PUB-SUB
+                           } else if(f->getType() == PUBLISH_SUBSCRIBE) { //IF FLOW IS PUB-SUB
 
                                /*
                                 * In case of a publish subscribe flow, it is easier to
@@ -446,70 +451,69 @@ class INET_API ScheduleGenerator {
                                 * nodes as it could be done with the unicast flow.
                                 */
 
-                               PathTree pathTree;
-                               PathNode pathNode;
+                               PathTree *pathTree;
+                               PathNode *pathNode;
 
-                               pathTree = f.getPathTree();
-                               pathNode = pathTree.getRoot();
+                               pathTree = f->getPathTree();
+                               pathNode = pathTree->getRoot();
 
-                               out.println("    Flow type: Multicast");
-                               std::vector<PathNode> auxNodes;
-                               std::vector<FlowFragment> auxFlowFragments;
+                               std::cout << "    Flow type: Multicast" << std::endl;
+                               std::vector<PathNode *> *auxNodes;
+                               std::vector<FlowFragment *> *auxFlowFragments;
                                int auxCount = 0;
 
-                               out.print("    List of leaves: ");
-                               for(PathNode node : f.getPathTree().getLeaves()) {
-                                   out.print(((Device) node.getNode()).getName() + std::string(", "));
+                               std::cout << "    List of leaves: ";
+                               for(PathNode *node : *f->getPathTree()->getLeaves()) {
+                                   std::cout << ((Device *) node->getNode())->getName() + std::string(", ");
                                }
-                               out.println("");
-                               for(PathNode node : f.getPathTree().getLeaves()) {
-                                   auxNodes = f.getNodesFromRootToNode((Device) node.getNode());
-                                   auxFlowFragments = f.getFlowFromRootToNode((Device) node.getNode());
+                               std::cout << "" << std::endl;
+                               for(PathNode *node : *f->getPathTree()->getLeaves()) {
+                                   auxNodes = f->getNodesFromRootToNode((Device *) node->getNode());
+                                   auxFlowFragments = f->getFlowFromRootToNode((Device *) node->getNode());
 
-                                   out.print(std::string("    Path to ") + ((Device) node.getNode()).getName() + std::string(": "));
+                                   std::cout << std::string("    Path to ") + ((Device *) node->getNode())->getName() + std::string(": ");
                                    auxCount = 0;
-                                   for(PathNode auxNode : auxNodes) {
-                                       if(auxNode.getNode() instanceof Device) {
-                                           out.print(((Device) auxNode.getNode()).getName() + std::string(", "));
-                                       } else if (auxNode.getNode() instanceof TSNSwitch) {
-                                           out.print(
-                                               ((TSNSwitch) auxNode.getNode()).getName() +
+                                   for(PathNode *auxNode : *auxNodes) {
+                                       if(dynamic_cast<Device *>(auxNode->getNode())) {
+                                           std::cout << ((Device *) auxNode->getNode())->getName() + std::string(", ");
+                                       } else if (dynamic_cast<TSNSwitch *>(auxNode->getNode())) {
+                                           std::cout <<
+                                               ((TSNSwitch *) auxNode->getNode())->getName() +
                                                std::string("(") +
-                                               auxFlowFragments.get(auxCount).getName() +
-                                               "), ");
+                                               auxFlowFragments->at(auxCount)->getName() +
+                                               "), ";
                                            auxCount++;
                                        }
 
                                    }
-                                   out.println("");
+                                   std::cout << "" << std::endl;
                                }
-                               out.println("");
+                               std::cout << "" << std::endl;
 
                                //Start the data storing and log printing process from the root
-                               this->writePathTree(pathNode, model, ctx, out);
+                               this->writePathTree(pathNode, model, *ctx);
                            }
 
-                           out.println("");
+                           std::cout << "" << std::endl;
 
                        }
+//
+//                   } catch (FileNotFoundException e) {
+//                       e.printStackTrace();
+//                   }
 
-                       out.close();
-
-                   } catch (FileNotFoundException e) {
-                       e.printStackTrace();
-                   }
-
-               } else
-               {
-                   System.out.println("Failed to evaluate");
-               }
+//               } else
+//               {
+//                   std::cout << "Failed to evaluate" << std::endl;
+//               }
            } else
            {
-               System.out.println("The specified constraints might not be satisfiable.");
+               std::cout << solver.unsat_core() << std::endl;
+               throw cRuntimeError("The specified constraints might not be satisfiable.");
            }
 
-           this->closeContext(ctx);
-           new XMLExporter(net);
+//           this->closeContext(ctx);
+//           new XMLExporter(net);
            // this->serializeNetwork(net, "network.ser");
        }
 
@@ -524,19 +528,19 @@ class INET_API ScheduleGenerator {
         * @param net        Network object to be serialized
         * @param path        Path of for the serialized object file
         */
-       public void serializeNetwork(Network net, std::string path) {
-
-            try {
-                FileOutputStream fileOut = new FileOutputStream(path);
-                ObjectOutputStream out = new ObjectOutputStream(fileOut);
-                out.writeObject(net);
-                out.close();
-                fileOut.close();
-                System.out.printf("Serialized data is saved in network.ser");
-             } catch (Exception i) {
-                i.printStackTrace();
-             }
-        }
+//       public void serializeNetwork(Network net, std::string path) {
+//
+//            try {
+//                FileOutputStream fileOut = new FileOutputStream(path);
+//                ObjectOutputStream out = new ObjectOutputStream(fileOut);
+//                out.writeObject(net);
+//                out.close();
+//                fileOut.close();
+//                System.out.printf("Serialized data is saved in network.ser");
+//             } catch (Exception i) {
+//                i.printStackTrace();
+//             }
+//        }
 
        /**
         * [Method]: deserializeNetwork
@@ -546,21 +550,21 @@ class INET_API ScheduleGenerator {
         * @param path        Path of the serialized object file
         * @return            The network object with all its primitive values
         */
-       public Network deserializeNetwork(std::string path) {
-           Network net = nullptr;
-
-           try {
-               FileInputStream fileIn = new FileInputStream(path);
-               ObjectInputStream in = new ObjectInputStream(fileIn);
-               net = (Network) in.readObject();
-               in.close();
-               fileIn.close();
-           } catch (Exception i) {
-                i.printStackTrace();
-               return nullptr;
-           }
-           return net;
-       }
+//       public Network deserializeNetwork(std::string path) {
+//           Network net = nullptr;
+//
+//           try {
+//               FileInputStream fileIn = new FileInputStream(path);
+//               ObjectInputStream in = new ObjectInputStream(fileIn);
+//               net = (Network) in.readObject();
+//               in.close();
+//               fileIn.close();
+//           } catch (Exception i) {
+//                i.printStackTrace();
+//               return nullptr;
+//           }
+//           return net;
+//       }
 };
 
 }

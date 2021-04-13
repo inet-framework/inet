@@ -163,7 +163,7 @@ class INET_API Flow {
         // AVOID USING THE ARRAY LIST
         // TODO: REMOVE OPTION TO DISTINGUISH BETWEEN UNICAST AND MULTICAST LATER
         if(this->type == UNICAST) {
-            std::deque<PathNode> nodeList;
+            std::deque<PathNode *> nodeList;
 
             PathTree *pathTree = new PathTree();
             PathNode *pathNode;
@@ -171,10 +171,10 @@ class INET_API Flow {
             pathNode = pathNode->addChild(path.at(0));
             nodeList.push_back(pathNode);
             for(int i = 1;  i < path.size(); i++) {
-                nodeList.push_back(nodeList.front().addChild(path.at(i)));
+                nodeList.push_back(nodeList.front()->addChild(path.at(i)));
                 nodeList.pop_front();
             }
-            nodeList.front().addChild(this->endDevice);
+            nodeList.front()->addChild(this->endDevice);
             nodeList.pop_front();
             this->setPathTree(pathTree);
 
@@ -913,7 +913,7 @@ class INET_API Flow {
         return flowPriority;
     }
 
-    void getFlowPriority(z3::expr priority) {
+    void setFlowPriority(z3::expr priority) {
         this->flowPriority = std::make_shared<expr>(priority);
     }
 

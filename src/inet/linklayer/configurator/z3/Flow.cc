@@ -78,7 +78,7 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
             if(this->fixedPriority) {
                 flowFrag->setFragmentPriorityZ3(*this->flowPriority); // FIXED PRIORITY (Fixed priority per flow constraint)
             } else {
-                flowFrag->setFragmentPriorityZ3(ctx.int_val((flowFrag->getName() + std::string("Priority")).c_str()));
+                flowFrag->setFragmentPriorityZ3(ctx.int_const((flowFrag->getName() + std::string("Priority")).c_str()));
             }
 
             auto connectsTo = ((TSNSwitch *) auxN->getNode())->getConnectsTo();
