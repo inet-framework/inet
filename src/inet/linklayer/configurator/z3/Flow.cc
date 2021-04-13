@@ -240,7 +240,7 @@ float Flow::getDepartureTime(Device *targetDevice, int hop,
         int packetNum) {
     float time;
     std::vector<FlowFragment*> *auxFlowFragments;
-    auto leaves = pathTree->getLeaves();
+//    auto leaves = pathTree->getLeaves();
 //    if (std::find(leaves->begin(), leaves->end(), targetDevice) == leaves->end()) {
 //        //TODO: Throw error
 //    }
@@ -253,7 +253,7 @@ float Flow::getArrivalTime(Device *targetDevice, int hop,
         int packetNum) {
     float time;
     std::vector<FlowFragment*> *auxFlowFragments;
-    auto leaves = pathTree->getLeaves();
+//    auto leaves = pathTree->getLeaves();
 //    if (std::find(leaves->begin(), leaves->end(), targetDevice) == leaves->end()) {
 //        //TODO: Throw error
 //    }
@@ -293,7 +293,7 @@ float Flow::getScheduledTime(Device *targetDevice, int hop, int packetNum)
 {
     float time;
     std::vector<FlowFragment*> *auxFlowFragments;
-    auto leaves = pathTree->getLeaves();
+//    auto leaves = pathTree->getLeaves();
 //    if (std::find(leaves->begin(), leaves->end(), targetDevice) == leaves->end()) {
 //        //TODO: Throw error
 //    }
@@ -380,8 +380,8 @@ float Flow::getAverageLatency()
 float Flow::getAverageLatencyToDevice(Device *dev)
 {
     float averageLatency = 0;
-    float auxAverageLatency = 0;
-    Device *endDevice = nullptr;
+//    float auxAverageLatency = 0;
+//    Device *endDevice = nullptr;
     std::vector<FlowFragment*> *fragments = this->getFlowFromRootToNode(dev);
     for (int i = 0; i < fragments->at(0)->getParent()->getNumOfPacketsSent();
             i++) {
