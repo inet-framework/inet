@@ -1,4 +1,12 @@
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
+
+/showcases/ethernet/preemption/,        -f omnetpp.ini -c Default,        1s,         ccd8-a45c/tplx;1f58-18c7/~tNl;5f4c-e464/~tND;0000-0000/tyf, PASS,
+/showcases/ethernet/preemption/,        -f omnetpp.ini -c PriorityQueue,        1s,         3d23-2242/tplx;6838-1b29/~tNl;c901-a2f1/~tND;0000-0000/tyf, PASS,
+/showcases/ethernet/preemption/,        -f omnetpp.ini -c Preemption,        1s,         8ccf-1c5b/tplx;2879-4a1a/~tNl;24c2-8f3c/~tND;0000-0000/tyf, PASS,
+/showcases/ethernet/preemption/,        -f omnetpp.ini -c RealisticDefault,        1s,         5252-c0e9/tplx;2b9e-90a1/~tNl;cbd8-e510/~tND;0000-0000/tyf, PASS,
+/showcases/ethernet/preemption/,        -f omnetpp.ini -c RealisticPriorityQueue,        1s,         0427-a65c/tplx;68c6-2d7a/~tNl;a670-0010/~tND;0000-0000/tyf, PASS,
+/showcases/ethernet/preemption/,        -f omnetpp.ini -c RealisticPreemption,        1s,         fd75-2966/tplx;bd9f-c698/~tNl;c3e4-7746/~tND;0000-0000/tyf, PASS,
+
 /showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithoutQoS -r 0,        50s,         bf1e-1722/tplx;57e7-b592/~tNl;e1f0-d661/~tND;5b99-8490/tyf, PASS,
 /showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithPolicing -r 0,      50s,         ebfe-7da0/tplx;0fb2-54f4/~tNl;73a3-41a4/~tND;c556-1c9a/tyf, PASS,
 /showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithPolicingAndQueueing -r 0, 50s,   f69f-e7c9/tplx;1f19-c3f3/~tNl;b536-9747/~tND;fbe4-2ba1/tyf, PASS,
