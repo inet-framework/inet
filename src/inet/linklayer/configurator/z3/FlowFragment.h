@@ -57,7 +57,7 @@ class INET_API FlowFragment : public Flow {
      *
      * @param parent    Flow object to whom this fragment belongs to
      */
-    FlowFragment(Flow parent) {
+    FlowFragment(Flow *parent) {
         this->setParent(parent);
 
         /*
@@ -75,11 +75,11 @@ class INET_API FlowFragment : public Flow {
          * there must be a type check before assigning the names
          */
 
-        if(parent.getType() == UNICAST) {
-            this->name = parent.getName() + std::string("Fragment") + (parent.getFlowFragments().size() + 1);
-        } else if (parent.getType() == PUBLISH_SUBSCRIBE) {
-            this->name = parent.getName() + std::string("Fragment") + (parent.pathTreeCount + 1);
-            parent.pathTreeCount++;
+        if(parent->getType() == UNICAST) {
+            this->name = parent->getName() + std::string("Fragment") + std::to_string(parent->getFlowFragments().size() + 1);
+        } else if (parent->getType() == PUBLISH_SUBSCRIBE) {
+            this->name = parent->getName() + std::string("Fragment") + std::to_string(parent->pathTreeCount + 1);
+            parent->pathTreeCount++;
         } else {
             // Throw error
         }
@@ -99,11 +99,11 @@ class INET_API FlowFragment : public Flow {
     }
 
     void setDepartureTimeZ3(z3::expr dTimeZ3, int index) {
-        this->departureTimeZ3[index] = dTimeZ3;
+        this->departureTimeZ3[index] = std::make_shared<expr>(dTimeZ3);
     }
 
     void addDepartureTimeZ3(z3::expr dTimeZ3) {
-        this->departureTimeZ3.push_back(dTimeZ3);
+        this->departureTimeZ3.push_back(std::make_shared<expr>(dTimeZ3));
     }
 
     void createNewDepartureTimeZ3List() {
@@ -115,7 +115,7 @@ class INET_API FlowFragment : public Flow {
     }
 
     void setPacketPeriodicityZ3(z3::expr packetPeriodicity) {
-        this->packetPeriodicityZ3 = packetPeriodicity;
+        this->packetPeriodicityZ3 = std::make_shared<expr>(packetPeriodicity);
     }
 
 
@@ -141,7 +141,7 @@ class INET_API FlowFragment : public Flow {
     }
 
     float getDepartureTime(int index) {
-        return departureTime.get(index);
+        return departureTime.at(index);
     }
 
     std::vector<float> getDepartureTimeList() {
@@ -149,11 +149,11 @@ class INET_API FlowFragment : public Flow {
     }
 
     void addArrivalTime(float val) {
-        arrivalTime.add(val);
+        arrivalTime.push_back(val);
     }
 
     float getArrivalTime(int index) {
-        return arrivalTime.get(index);
+        return arrivalTime.at(index);
     }
 
     std::vector<float> getArrivalTimeList() {
@@ -161,11 +161,11 @@ class INET_API FlowFragment : public Flow {
     }
 
     void addScheduledTime(float val) {
-        scheduledTime.add(val);
+        scheduledTime.push_back(val);
     }
 
     float getScheduledTime(int index) {
-        return scheduledTime.get(index);
+        return scheduledTime.at(index);
     }
 
     std::vector<float> getScheduledTimeList() {
@@ -212,11 +212,11 @@ class INET_API FlowFragment : public Flow {
         this->fragmentPriority = fragmentPriority;
     }
 
-    FlowFragment getPreviousFragment() {
+    FlowFragment *getPreviousFragment() {
         return previousFragment;
     }
 
-    void setPreviousFragment(FlowFragment previousFragment) {
+    void setPreviousFragment(FlowFragment *previousFragment) {
         this->previousFragment = previousFragment;
     }
 
@@ -228,8 +228,8 @@ class INET_API FlowFragment : public Flow {
         this->nextFragments = nextFragments;
     }
 
-    void addToNextFragments(FlowFragment frag) {
-        this->nextFragments.add(frag);
+    void addToNextFragments(FlowFragment *frag) {
+        this->nextFragments.push_back(frag);
     }
 
     PathNode *getReferenceToNode() {
@@ -253,15 +253,15 @@ class INET_API FlowFragment : public Flow {
     }
 
     std::shared_ptr<expr> getScheduledTimeZ3(int index) {
-        return scheduledTimeZ3.get(index);
+        return scheduledTimeZ3.at(index);
     }
 
     void setScheduledTimeZ3(z3::expr sTimeZ3, int index) {
-        this->scheduledTimeZ3.set(index, sTimeZ3);
+        this->scheduledTimeZ3[index] = std::make_shared<expr>(sTimeZ3);
     }
 
     void addScheduledTimeZ3(z3::expr sTimeZ3) {
-        this->scheduledTimeZ3.add(sTimeZ3);
+        this->scheduledTimeZ3.push_back(std::make_shared<expr>(sTimeZ3));
     }
 
     void createNewScheduledTimeZ3List() {

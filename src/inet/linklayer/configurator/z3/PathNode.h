@@ -20,7 +20,7 @@ class FlowFragment;
  * fragment for each children in case of being a switch.
  *
  */
-class INET_API PathNode {
+class INET_API PathNode : public cObject {
   public:
     PathNode *parent; // The parent of the current FlowNode
     cObject *node;
@@ -94,6 +94,10 @@ class INET_API PathNode {
 
     void setChildren(std::vector<PathNode *> children) {
         this->children = children;
+    }
+
+    int getChildIndex(PathNode *pathNode) {
+        return std::find(children.begin(), children.end(), pathNode) - children.begin();
     }
 
     void addFlowFragment(FlowFragment *flowFragment) {
