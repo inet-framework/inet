@@ -119,13 +119,13 @@ class INET_API Network {
 
             flw->bindAllFragments(solver, ctx);
 
-            solver.add( // No negative cycle values constraint
+            addAssert(solver,  // No negative cycle values constraint
                 mkGe(
                     flw->getStartDevice()->getFirstT1TimeZ3(),
                     ctx.real_val(0)
                 )
             );
-            solver.add( // Maximum transmission offset constraint
+            addAssert(solver,  // Maximum transmission offset constraint
                 mkLe(
                     flw->getStartDevice()->getFirstT1TimeZ3(),
                     flw->getStartDevice()->getPacketPeriodicityZ3()
@@ -142,7 +142,7 @@ class INET_API Network {
 
                 //Make sure that HC is respected
                 for(int i = 0; i < flw->getNumOfPacketsSent(); i++) {
-                    solver.add(
+                    addAssert(solver,
                             mkLe(
                                 mkSub(
                                     ((TSNSwitch *) path.at(path.size() - 1))->scheduledTime(ctx, i, currentFrags.at(currentFrags.size() - 1)),
@@ -168,7 +168,7 @@ class INET_API Network {
 
                     // Set the maximum allowed jitter
                     for(int index = 0; index < flw->getNumOfPacketsSent(); index++) {
-                        solver.add( // Maximum allowed jitter constraint
+                        addAssert(solver,  // Maximum allowed jitter constraint
                             mkLe(
                                 flw->getJitterZ3((Device *) leaf->getNode(), solver, ctx, index),
                                 this->jitterUpperBoundRangeZ3
@@ -182,7 +182,7 @@ class INET_API Network {
                 for(PathNode *parent : parents) {
                     for(FlowFragment *ffrag : parent->getFlowFragments()) {
                         for(int i = 0; i < flw->getNumOfPacketsSent(); i++) {
-                            solver.add( // Maximum Allowed Latency constraint
+                            addAssert(solver,  // Maximum Allowed Latency constraint
                                 mkLe(
                                     mkSub(
                                         ((TSNSwitch *) parent->getNode())->scheduledTime(ctx, i, ffrag),
@@ -208,7 +208,7 @@ class INET_API Network {
                 totalNumOfLeaves += flw->getPathTree().getLeaves().size();
 
                 // SET THE MAXIMUM JITTER FOR THE FLOW
-                solver.add(
+                addAssert(solver,
                     mkLe(
                         mkDiv(
                             sumOfAllJitter,

@@ -194,7 +194,7 @@ void Flow::bindToNextFragment(solver& solver, context& ctx, FlowFragment *frag)
             for (int i = 0; i < this->numOfPacketsSentInFragment; i++){
 //                    System.out.println(std::string("On fragment " + frag->getName() + std::string(" making " + frag->getPort()->scheduledTime(ctx, i, frag) + " = " + childFrag->getPort()->departureTime(ctx, i, childFrag) + " that leads to ")) + childFrag->getPort()->scheduledTime(ctx, i, childFrag)
 //                            + std::string(" on cycle of port ") + frag->getPort()->getCycle().getFirstCycleStartZ3());
-                solver.add(
+                addAssert(solver,
                     mkEq(
                         frag->getPort()->scheduledTime(ctx, i, frag),
                         childFrag->getPort()->departureTime(ctx, i, childFrag)
@@ -421,7 +421,7 @@ std::shared_ptr<expr> Flow::getLatencyZ3(solver& solver, context &ctx, int index
             flowFragments.size() - 1);
     TSNSwitch *firstSwitchInPath = ((TSNSwitch*) (this->path.at(0)));
     FlowFragment *firstFragmentInList = this->flowFragments.at(0);
-    solver.add(
+    addAssert(solver,
             mkEq(latency,
                     mkSub(
                             lastSwitchInPath->getPortOf(
@@ -450,7 +450,7 @@ std::shared_ptr<expr> Flow::getLatencyZ3(solver& solver, Device *dev, context &c
     FlowFragment *lastFragmentInList = flowFrags->at(flowFrags->size() - 1);
     TSNSwitch *firstSwitchInPath = ((TSNSwitch*) (nodes->at(1)->getNode())); // 1 since the first node is the publisher
     FlowFragment *firstFragmentInList = flowFrags->at(0);
-    solver.add(
+    addAssert(solver,
             mkEq(latency,
                     mkSub(
                             lastSwitchInPath->getPortOf(
@@ -488,7 +488,7 @@ std::shared_ptr<expr> Flow::getJitterZ3(Device *dev, solver& solver, context &ct
                     firstSwitchInPath->getPortOf(
                             firstFragmentInList->getNextHop())->departureTime(
                             ctx, index, firstFragmentInList));
-    solver.add(
+    addAssert(solver,
             mkEq(jitter,
                     mkITE(mkGe(latency, avgLatency), mkSub(latency, avgLatency),
                             mkSub(avgLatency, latency))));

@@ -355,7 +355,7 @@ class INET_API Port {
 
             for(int i = 0; i < this->cycle->getNumOfPrts(); i++) {
                 for(int j = 0; j < this->cycle->getNumOfSlots(); j++) {
-                    solver.add(
+                    addAssert(solver,
                         mkITE(
                             mkAnd(
                                 mkEq(frag->getFlowPriority(), ctx.int_val(i)),
@@ -393,13 +393,13 @@ class INET_API Port {
         if(useMicroCycles && this->listOfPeriods.size() > 0) {
             setUpMicroCycles(solver, ctx);
 
-            solver.add(
+            addAssert(solver,
                 mkEq(*this->cycle->getCycleDurationZ3(), ctx.real_val(std::to_string(this->microCycleSize).c_str()))
             );
         } else if (useHyperCycle && this->listOfPeriods.size() > 0) {
             setUpHyperCycle(solver, ctx);
 
-            solver.add(
+            addAssert(solver,
                 mkEq(*this->cycle->getCycleDurationZ3(), ctx.real_val(std::to_string(this->definedHyperCycleSize).c_str()))
             );
         }
@@ -428,11 +428,11 @@ class INET_API Port {
     void setupSchedulingRules(solver& solver, context& ctx) {
 
         if (this->flowFragments.size() == 0) {
-            solver.add(mkEq(
+            addAssert(solver, mkEq(
                 ctx.real_val(std::to_string(0).c_str()),
                 this->cycle->getCycleDurationZ3()
             ));
-            //    solver.add(mkEq(
+            //    addAssert(solver, mkEq(
             //    ctx.real_val(std::to_string(0)),
             //    this->cycle->getFirstCycleStartZ3()
             // ));
@@ -442,12 +442,12 @@ class INET_API Port {
 
         /*
         if(useMicroCycles && this->flowFragments.size() > 0) {
-            solver.add(mkEq(
+            addAssert(solver, mkEq(
                 ctx.real_val(std::to_string(this->microCycleSize)),
                 this->cycle->getCycleDurationZ3()
             ));
         } else if (useHyperCycle && this->flowFragments.size() > 0) {
-            solver.add(mkEq(
+            addAssert(solver, mkEq(
                 ctx.real_val(std::to_string(this->definedHyperCycleSize)),
                 this->cycle->getCycleDurationZ3()
             ));

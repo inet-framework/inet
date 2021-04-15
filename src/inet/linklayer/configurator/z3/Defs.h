@@ -10,6 +10,12 @@ namespace inet {
 
 using namespace z3;
 
+extern int assertionCount;
+
+inline void addAssert(solver& solver, const expr& expr) {
+    solver.add(expr, (std::string("a") + std::to_string(assertionCount++)).c_str());
+}
+
 inline expr mkReal2Int(expr const & a) { Z3_ast i = Z3_mk_real2int(a.ctx(), a); a.check_error(); return expr(a.ctx(), i); }
 
 inline expr mkITE(const expr& i, const expr& t, const expr& e) {
