@@ -167,33 +167,33 @@ class INET_API TSNSwitch : public Switch {
 
 
         // Creating the cycle setting up the bounds for the duration (Cycle duration constraint)
-        solver.add(*this->cycleDuration >= *this->cycleDurationLowerBoundZ3);
-        solver.add(*this->cycleDuration <= *this->cycleDurationUpperBoundZ3);
+        addAssert(solver, *this->cycleDuration >= *this->cycleDurationLowerBoundZ3);
+        addAssert(solver, *this->cycleDuration <= *this->cycleDurationUpperBoundZ3);
 
         // A cycle must start on a point in time, so it must be greater than 0
-        solver.add(*this->cycleStart >= ctx.int_val(0)); // No negative cycle values constraint
+        addAssert(solver, *this->cycleStart >= ctx.int_val(0)); // No negative cycle values constraint
 
         for (Port *port : this->ports) {
             port->toZ3(ctx);
 
             for(FlowFragment *frag : port->getFlowFragments()) {
-                solver.add(*port->getCycle()->getFirstCycleStartZ3() <= *this->arrivalTime(ctx, 0, frag)); // Maximum cycle start constraint
+                addAssert(solver, *port->getCycle()->getFirstCycleStartZ3() <= *this->arrivalTime(ctx, 0, frag)); // Maximum cycle start constraint
             }
 
-            solver.add(*port->getCycle()->getFirstCycleStartZ3() >= ctx.int_val(0)); // No negative cycle values constraint
+            addAssert(solver, *port->getCycle()->getFirstCycleStartZ3() >= ctx.int_val(0)); // No negative cycle values constraint
 
             /* The cycle of every port must have the same duration
-            solver.add(mkEq( // Equal cycle constraints
+            addAssert(solver, mkEq( // Equal cycle constraints
                 this->cycleDuration,
                 port.getCycle()->getCycleDurationZ3()
             ));
             */
 
             // The cycle of every port must have the same starting point
-            solver.add(*this->cycleStart == *port->getCycle()->getFirstCycleStartZ3()); // Equal cycle constraints
+            addAssert(solver, *this->cycleStart == *port->getCycle()->getFirstCycleStartZ3()); // Equal cycle constraints
         }
 
-        solver.add(*this->cycleStart == ctx.int_val(0));
+        addAssert(solver, *this->cycleStart == ctx.int_val(0));
 
     }
 
@@ -428,14 +428,14 @@ class INET_API TSNSwitch : public Switch {
 
     void loadZ3(context& ctx, solver& solver) {
         /*
-        solver.add(
+        addAssert(solver,
             mkEq(
                 this->cycleDurationUpperBoundZ3,
                 ctx.real_val(std::to_string(this->cycleDurationUpperBound))
             )
         );
 
-        solver.add(
+        addAssert(solver,
             mkEq(
                 this->cycleDurationLowerBoundZ3,
                 ctx.real_val(std::to_string(this->cycleDurationLowerBound))
