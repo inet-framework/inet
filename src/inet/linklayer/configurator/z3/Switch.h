@@ -22,15 +22,6 @@ using namespace z3;
 class INET_API Switch : public cObject {
   public:
     std::string name;
-    double maxPacketSize;
-    double timeToTravel;
-    double transmissionTime;
-    double portSpeed;
-
-    //z3::expr maxPacketSizeZ3;
-    //z3::expr timeToTravelZ3;
-    //z3::expr transmissionTimeZ3;
-    //z3::expr portSpeedZ3;
 
     bool isModifiedOrCreated = true;
 
@@ -40,8 +31,6 @@ class INET_API Switch : public cObject {
     double cycleDurationUpperBound;
     double cycleDurationLowerBound;
 
-    double gbSize;
-    std::shared_ptr<expr> gbSizeZ3; // Size of the guardBand
     std::shared_ptr<expr> cycleDuration;
     std::shared_ptr<expr> cycleStart;
     std::shared_ptr<expr> cycleDurationUpperBoundZ3;
@@ -75,20 +64,11 @@ class INET_API Switch : public cObject {
      * that are given as parameters. Used for simplified configurations.
      * Other constructors either are deprecated or set parameters
      * that will be used in future works.
-     *
-     * @param timeToTravel          Time that a packet takes to leave its port and reach the destination
-     * @param transmissionTime      Time taken to process the packet inside the switch
      */
-    Switch(double timeToTravel,
-              double transmissionTime) {
+    Switch() {
         this->name = std::string("dev") + std::to_string(indexCounter++);
-        this->timeToTravel = timeToTravel;
-        this->transmissionTime = transmissionTime;
         this->ports.clear();
         this->connectsTo.clear();
-        this->maxPacketSize = 0;
-        this->portSpeed = 0;
-        this->gbSize = 0;
     }
 
 
@@ -99,65 +79,16 @@ class INET_API Switch : public cObject {
      * that are given as parameters.
      *
      * @param name                  Name of the switch
-     * @param maxPacketSize         Maximum packet size supported by the switch
-     * @param timeToTravel          Time that a packet takes to leave its port and reach the destination
-     * @param transmissionTime      Time taken to process the packet inside the switch
-     * @param portSpeed             Transmission speed of the port
-     * @param gbSize                Size of the guard bands used to separate non consecutive time slots
      */
     Switch(std::string name,
-              double maxPacketSize,
-              double timeToTravel,
-              double transmissionTime,
-              double portSpeed,
-              double gbSize,
               double cycleDurationLowerBound,
               double cycleDurationUpperBound) {
         this->name = name;
-        this->maxPacketSize = maxPacketSize;
-        this->timeToTravel = timeToTravel;
-        this->transmissionTime = transmissionTime;
-        this->portSpeed = portSpeed;
-        this->gbSize = gbSize;
         this->ports.clear();
         this->connectsTo.clear();
         this->cycleDurationLowerBound = cycleDurationLowerBound;
         this->cycleDurationUpperBound = cycleDurationUpperBound;
     }
-
-    /**
-     * [Method]: TSNSwitch
-     * [Usage]: Overloaded constructor method of this class.
-     * Instantiates a new TSNSwitch object setting up its properties
-     * that are given as parameters. There is no transmission time here,
-     * as this method is used when considering that it will be calculated
-     * by the packet size divided by the port speed
-     *
-     * @param name                  Name of the switch
-     * @param maxPacketSize         Maximum packet size supported by the switch
-     * @param timeToTravel          Time that a packet takes to leave its port and reach the destination
-     * @param portSpeed             Transmission speed of the port
-     * @param gbSize                Size of the guard bands used to separate non consecutive time slots
-     */
-    Switch(std::string name,
-              double maxPacketSize,
-              double timeToTravel,
-              double portSpeed,
-              double gbSize,
-              double cycleDurationLowerBound,
-              double cycleDurationUpperBound) {
-        this->name = name;
-        this->maxPacketSize = maxPacketSize;
-        this->timeToTravel = timeToTravel;
-        this->transmissionTime = 0;
-        this->portSpeed = portSpeed;
-        this->gbSize = gbSize;
-        this->ports.clear();
-        this->connectsTo.clear();
-        this->cycleDurationLowerBound = cycleDurationLowerBound;
-        this->cycleDurationUpperBound = cycleDurationUpperBound;
-    }
-
 
     /**
      * [Method]: toZ3
@@ -234,7 +165,7 @@ class INET_API Switch : public cObject {
      * @param destination       Destination of the port as TSNSwitch or Device
      * @param cycle             Cycle used by the port
      */
-    void createPort(cObject *destination, Cycle *cycle) {
+    void createPort(cObject *destination, Cycle *cycle, double maxPacketSize, double timeToTravel, double portSpeed, double gbSize) {
 
         if(dynamic_cast<Device *>(destination)) {
             this->connectsTo.push_back(((Device *)destination)->getName());
@@ -242,11 +173,10 @@ class INET_API Switch : public cObject {
                     new Port(this->name + std::string("Port") + std::to_string(this->portNum),
                             this->portNum,
                             ((Device *)destination)->getName(),
-                            this->maxPacketSize,
-                            this->timeToTravel,
-                            this->transmissionTime,
-                            this->portSpeed,
-                            this->gbSize,
+                            maxPacketSize,
+                            timeToTravel,
+                            portSpeed,
+                            gbSize,
                             cycle
                     )
             );
@@ -256,11 +186,10 @@ class INET_API Switch : public cObject {
             Port *newPort = new Port(this->name + std::string("Port") + std::to_string(this->portNum),
                     this->portNum,
                     ((Switch *)destination)->getName(),
-                    this->maxPacketSize,
-                    this->timeToTravel,
-                    this->transmissionTime,
-                    this->portSpeed,
-                    this->gbSize,
+                    maxPacketSize,
+                    timeToTravel,
+                    portSpeed,
+                    gbSize,
                     cycle
             );
 
@@ -288,18 +217,17 @@ class INET_API Switch : public cObject {
      * @param destination       Name of the destination of the port
      * @param cycle             Cycle used by the port
      */
-    void createPort(std::string destination, Cycle *cycle) {
+    void createPort(std::string destination, Cycle *cycle, double maxPacketSize, double timeToTravel, double portSpeed, double gbSize) {
         this->connectsTo.push_back(destination);
 
         this->ports.push_back(
                 new Port(this->name + std::string("Port") + std::to_string(this->portNum),
                         this->portNum,
                         destination,
-                        this->maxPacketSize,
-                        this->timeToTravel,
-                        this->transmissionTime,
-                        this->portSpeed,
-                        this->gbSize,
+                        maxPacketSize,
+                        timeToTravel,
+                        portSpeed,
+                        gbSize,
                         cycle
                 )
         );
@@ -468,38 +396,6 @@ class INET_API Switch : public cObject {
      *  GETTERS AND SETTERS
      */
 
-    double getMaxPacketSize() {
-        return maxPacketSize;
-    }
-
-    void setMaxPacketSize(double maxPacketSize) {
-        this->maxPacketSize = maxPacketSize;
-    }
-
-    double getTimeToTravel() {
-        return timeToTravel;
-    }
-
-    void setTimeToTravel(double timeToTravel) {
-        this->timeToTravel = timeToTravel;
-    }
-
-    double getTransmissionTime() {
-        return transmissionTime;
-    }
-
-    void setTransmissionTime(double transmissionTime) {
-        this->transmissionTime = transmissionTime;
-    }
-
-    double getPortSpeed() {
-        return portSpeed;
-    }
-
-    void setPortSpeed(double portSpeed) {
-        this->portSpeed = portSpeed;
-    }
-
     void setName(std::string name) {
         this->name = name;
     }
@@ -515,22 +411,6 @@ class INET_API Switch : public cObject {
 
     void setCycle(Cycle *cycle, int index) {
         this->ports.at(index)->setCycle(cycle);
-    }
-
-    double getGbSize() {
-        return gbSize;
-    }
-
-    void setGbSize(double gbSize) {
-        this->gbSize = gbSize;
-    }
-
-    std::shared_ptr<expr> getGbSizeZ3() {
-        return gbSizeZ3;
-    }
-
-    void setGbSizeZ3(z3::expr gbSizeZ3) {
-        this->gbSizeZ3 = std::make_shared<expr>(gbSizeZ3);
     }
 
     std::vector<Port *> getPorts() {
