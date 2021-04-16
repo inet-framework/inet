@@ -44,7 +44,7 @@ class INET_API Port {
     Cycle *cycle;
     std::vector<FlowFragment *> flowFragments;
     int packetUpperBoundRange = PACKETUPPERBOUNDRANGE; // Limits the applications of rules to the packets
-    int cycleUpperBoundRange = CYCLEUPPERBOUNDRANGE; // Limits the applications of rules to the cycles
+    int cycleUpperBoundRange = 25; // Limits the applications of rules to the cycles
 
     double gbSize;
 
