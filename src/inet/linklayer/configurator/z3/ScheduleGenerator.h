@@ -36,13 +36,13 @@ class INET_API ScheduleGenerator {
         * also on fraction form, which is also handled by
         * this function.
         *
-        * @param str   std::string containing value to convert to float
-        * @return      float value of the given string str
+        * @param str   std::string containing value to convert to double
+        * @return      double value of the given string str
         */
-       float stringToFloat(std::string str) {
+       double stringToFloat(std::string str) {
 //           BigDecimal val1;
 //           BigDecimal val2;
-           float result = 0;
+           double result = 0;
 
            int index = str.find('/');
            if(index != std::string::npos) {
@@ -53,7 +53,7 @@ class INET_API ScheduleGenerator {
                result = val1 / val2;
 //               val1 = new BigDecimal(str.split("/")[0]);
 //               val2 = new BigDecimal(str.split("/")[1]);
-//               result = val1.divide(val2, MathContext.DECIMAL128).floatValue();
+//               result = val1.divide(val2, MathContext.DECIMAL128).doubleValue();
 //
            } else {
 //               try{
@@ -252,8 +252,8 @@ class INET_API ScheduleGenerator {
                                continue;
                            }
 
-                           std::vector<float> listOfStart;
-                           std::vector<float> listOfDuration;
+                           std::vector<double> listOfStart;
+                           std::vector<double> listOfDuration;
 
 
                            for(int index = 0; index < ((TSNSwitch *) child->getNode())->getPortOf(ffrag->getNextHop())->getCycle()->getNumOfSlots(); index++) {
@@ -393,7 +393,7 @@ class INET_API ScheduleGenerator {
 
 
                            // [EXTRACTING OUTPUT]: Obtaining the z3 output of the switch properties,
-                           // converting it from string to float and storing in the objects
+                           // converting it from string to double and storing in the objects
 
                            for (Port *port : ((TSNSwitch *)auxSwt)->getPorts()) {
                                port
