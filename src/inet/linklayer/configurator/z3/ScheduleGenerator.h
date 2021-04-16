@@ -440,10 +440,10 @@ class INET_API ScheduleGenerator {
                            structured here are different. So this process is done differently
                            in each case.
                            */
-                           if(f->getType() == UNICAST) {
+                           if(f->getType() == Flow::UNICAST) {
                                // TODO: Throw error. UNICAST data structure are not allowed at this point
                                // Everything should had been converted into the multicast model.
-                           } else if(f->getType() == PUBLISH_SUBSCRIBE) { //IF FLOW IS PUB-SUB
+                           } else if(f->getType() == Flow::PUBLISH_SUBSCRIBE) { //IF FLOW IS PUB-SUB
 
                                /*
                                 * In case of a publish subscribe flow, it is easier to

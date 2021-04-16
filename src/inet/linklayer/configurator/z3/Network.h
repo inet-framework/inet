@@ -134,7 +134,7 @@ class INET_API Network {
 
 
 
-            if(flw->getType() == UNICAST) {
+            if(flw->getType() == Flow::UNICAST) {
 
                 std::vector<FlowFragment *> currentFrags = flw->getFlowFragments();
                 std::vector<Switch *> path = flw->getPath();
@@ -153,7 +153,7 @@ class INET_API Network {
                       );
                 }
 
-            } else if (flw->getType() == PUBLISH_SUBSCRIBE) {
+            } else if (flw->getType() == Flow::PUBLISH_SUBSCRIBE) {
                 PathNode *root = flw->getPathTree()->getRoot();
                 std::vector<PathNode *> *leaves = flw->getPathTree()->getLeaves();
                 std::vector<PathNode *> parents;

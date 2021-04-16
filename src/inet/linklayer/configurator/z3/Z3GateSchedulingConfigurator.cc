@@ -218,7 +218,7 @@ void Z3GateSchedulingConfigurator::computeGateScheduling()
         }
     }
     for (auto& streamReservation : streamReservations) {
-        Flow *flow = new Flow(UNICAST);
+        Flow *flow = new Flow(Flow::UNICAST);
         flow->setFixedPriority(true);
         flow->setPriorityValue(streamReservation.priority);
         topology.calculateUnweightedSingleShortestPathsTo(streamReservation.destination);
