@@ -1,12 +1,7 @@
 reformat, cleanup whitespace
-replace float with double
-merge Switch into TSNSwitch
-remove constants in #define statements
 rename classes, fields according to naming convention
 remove unnecessary getters/setters?
 remove too much constructor parameters and use separate setting instead?
-rename default parameters and fields as such, e.g. Switch timeToTravel, or remove altogether?
-merge ScheduleGenerator into Z3GateSchedulingConfigurator
 merge PathNode and PathTree into network building API as subclasses?
 
 separate input, internal state and output as structures?
