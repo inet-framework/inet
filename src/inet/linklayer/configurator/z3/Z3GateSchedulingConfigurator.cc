@@ -31,7 +31,6 @@
 #include "inet/linklayer/configurator/z3/PathNode.h"
 #include "inet/linklayer/configurator/z3/PathTree.h"
 #include "inet/linklayer/configurator/z3/Port.h"
-#include "inet/linklayer/configurator/z3/Switch.h"
 #include "inet/linklayer/configurator/z3/Test.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/NetworkInterface.h"

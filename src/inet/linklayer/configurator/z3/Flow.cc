@@ -40,7 +40,7 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
             }
 
             if(auxN->getParent()->getParent() == nullptr) { //First flow fragment, fragment first departure = device's first departure
-                flowFrag->setNodeName(((Switch *)auxN->getNode())->getName());
+                flowFrag->setNodeName(((TSNSwitch *)auxN->getNode())->getName());
 
                 for (int i = 0; i < numberOfPackets; i++) {
 
@@ -126,7 +126,7 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
     return flowFrag;
 }
 
-void Flow::pathToZ3(context& ctx, Switch *swt, int currentSwitchIndex)
+void Flow::pathToZ3(context& ctx, TSNSwitch *swt, int currentSwitchIndex)
 {
     // Flow fragment is created
     FlowFragment *flowFrag = new FlowFragment(this);

@@ -6,7 +6,6 @@
 
 #include "inet/linklayer/configurator/z3/PathNode.h"
 #include "inet/linklayer/configurator/z3/PathTree.h"
-#include "inet/linklayer/configurator/z3/Switch.h"
 
 namespace inet {
 
@@ -46,7 +45,7 @@ class INET_API Flow {
 
 
 
-    std::vector<Switch *> path;
+    std::vector<TSNSwitch *> path;
     std::vector<FlowFragment *> flowFragments;
     PathTree *pathTree;
 
@@ -203,7 +202,7 @@ class INET_API Flow {
              */
 
             int currentSwitchIndex = 0;
-            for (Switch *swt : this->path) {
+            for (TSNSwitch *swt : this->path) {
                 this->pathToZ3(ctx, swt, currentSwitchIndex);
                 currentSwitchIndex++;
             }
@@ -268,7 +267,7 @@ class INET_API Flow {
      * @param swt                   Switch of the current flow fragment
      * @param currentSwitchIndex    Index of the current switch in the path on the iteration
      */
-    void pathToZ3(context& ctx, Switch *swt, int currentSwitchIndex);
+    void pathToZ3(context& ctx, TSNSwitch *swt, int currentSwitchIndex);
 
     void bindToNextFragment(solver& solver, context& ctx, FlowFragment *frag);
 
@@ -901,11 +900,11 @@ class INET_API Flow {
         this->endDevice = endDevice;
     }
 
-    std::vector<Switch *> getPath() {
+    std::vector<TSNSwitch *> getPath() {
         return path;
     }
 
-    void setPath(std::vector<Switch *> path) {
+    void setPath(std::vector<TSNSwitch *> path) {
         this->path = path;
     }
 

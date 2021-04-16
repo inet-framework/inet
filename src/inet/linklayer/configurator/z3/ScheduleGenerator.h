@@ -4,6 +4,7 @@
 #include <z3++.h>
 
 #include "inet/linklayer/configurator/z3/Defs.h"
+#include "inet/linklayer/configurator/z3/TSNSwitch.h"
 
 namespace inet {
 
@@ -156,7 +157,7 @@ class INET_API ScheduleGenerator {
         * @param out       PrintWriter stream to output log file
         */
        void writePathTree(PathNode *pathNode, model& model, context& ctx) {
-           Switch *swt;
+           TSNSwitch *swt;
            std::shared_ptr<expr> indexZ3 = nullptr;
 
            if(dynamic_cast<Device *>(pathNode->getNode()) && (pathNode->getParent() != nullptr)) {
@@ -175,7 +176,7 @@ class INET_API ScheduleGenerator {
             * stores references to both flow fragment and switch, so no search is needed.
             */
            for(PathNode *child : pathNode->getChildren()) {
-               if(dynamic_cast<Switch *>(child->getNode())) {
+               if(dynamic_cast<TSNSwitch *>(child->getNode())) {
 
                    for(FlowFragment *ffrag : child->getFlowFragments()) {
                        std::cout << std::string("    Fragment name: ") << ffrag->getName() << std::endl;
@@ -296,9 +297,8 @@ class INET_API ScheduleGenerator {
                flw->setUpPeriods(flw->getPathTree()->getRoot());
            }
 
-           for(Switch *swt : net->getSwitches()) {
-               TSNSwitch *auxSwt = (TSNSwitch *) swt;
-               auxSwt->setUpCycleSize(solver, ctx);
+           for(TSNSwitch *swt : net->getSwitches()) {
+               swt->setUpCycleSize(solver, ctx);
            }
 
 
@@ -309,8 +309,8 @@ class INET_API ScheduleGenerator {
            }
 
            // On all network switches: Data given by the user will be converted to z3 values
-           for(Switch *swt : net->getSwitches()) {
-               ((TSNSwitch *) swt)->toZ3(ctx, solver);
+           for(TSNSwitch *swt : net->getSwitches()) {
+               swt->toZ3(ctx, solver);
            }
 
            // Sets up the hard constraint for each individual flow in the network
@@ -372,7 +372,7 @@ class INET_API ScheduleGenerator {
                        std::cout << "SWITCH LIST:" << std::endl;
 
                        // For every switch in the network, store its information in the log
-                       for(Switch *auxSwt : net->getSwitches()) {
+                       for(TSNSwitch *auxSwt : net->getSwitches()) {
                            std::cout << std::string("  Switch name: ") << auxSwt->getName();
                            std::cout << std::string("    Max packet size: ") << auxSwt->getMaxPacketSize();
                            std::cout << std::string("    Port speed: ") << auxSwt->getPortSpeed();
