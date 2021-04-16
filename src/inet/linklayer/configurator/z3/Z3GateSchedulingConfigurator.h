@@ -26,7 +26,7 @@
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/linklayer/configurator/z3/Cycle.h"
 #include "inet/linklayer/configurator/z3/Flow.h"
-#include "inet/linklayer/configurator/z3/TSNSwitch.h"
+#include "inet/linklayer/configurator/z3/Switch.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 

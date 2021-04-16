@@ -5,7 +5,7 @@
 #include <z3++.h>
 
 #include "inet/linklayer/configurator/z3/Flow.h"
-#include "inet/linklayer/configurator/z3/TSNSwitch.h"
+#include "inet/linklayer/configurator/z3/Switch.h"
 
 namespace inet {
 
@@ -29,7 +29,7 @@ class INET_API Network {
     std::vector<std::shared_ptr<expr>> avgLatencyPerDev;
 
 
-    std::vector<TSNSwitch *> switches;
+    std::vector<Switch *> switches;
     std::vector<Flow *> flows;
     double timeToTravel;
     std::vector<std::shared_ptr<expr> > allSumOfJitter;
@@ -74,7 +74,7 @@ class INET_API Network {
      * @param flows         std::vector with the instances of flows of the network
      * @param timeToTravel  Value used as travel time from a node to another in the network
      */
-    Network (std::vector<TSNSwitch *> switches, std::vector<Flow *> flows, double timeToTravel) {
+    Network (std::vector<Switch *> switches, std::vector<Flow *> flows, double timeToTravel) {
         this->switches = switches;
         this->flows = flows;
         this->timeToTravel = timeToTravel;
@@ -101,7 +101,7 @@ class INET_API Network {
         //switch1.setupSchedulingRules(solver, ctx);
 
 
-        for (TSNSwitch *swt : this->getSwitches()) {
+        for (Switch *swt : this->getSwitches()) {
             swt->setupSchedulingRules(solver, ctx);
         }
 
@@ -137,7 +137,7 @@ class INET_API Network {
             if(flw->getType() == UNICAST) {
 
                 std::vector<FlowFragment *> currentFrags = flw->getFlowFragments();
-                std::vector<TSNSwitch *> path = flw->getPath();
+                std::vector<Switch *> path = flw->getPath();
 
 
                 //Make sure that HC is respected
@@ -145,8 +145,8 @@ class INET_API Network {
                     addAssert(solver,
                             mkLe(
                                 mkSub(
-                                    ((TSNSwitch *) path.at(path.size() - 1))->scheduledTime(ctx, i, currentFrags.at(currentFrags.size() - 1)),
-                                    ((TSNSwitch *) path.at(0))->departureTime(ctx, i, currentFrags.at(0))
+                                    ((Switch *) path.at(path.size() - 1))->scheduledTime(ctx, i, currentFrags.at(currentFrags.size() - 1)),
+                                    ((Switch *) path.at(0))->departureTime(ctx, i, currentFrags.at(0))
                                 ),
                                 flw->getStartDevice()->getHardConstraintTimeZ3()
                             )
@@ -185,8 +185,8 @@ class INET_API Network {
                             addAssert(solver,  // Maximum Allowed Latency constraint
                                 mkLe(
                                     mkSub(
-                                        ((TSNSwitch *) parent->getNode())->scheduledTime(ctx, i, ffrag),
-                                        ((TSNSwitch *) root->getChildren().at(0)->getNode())->departureTime(ctx, i,
+                                        ((Switch *) parent->getNode())->scheduledTime(ctx, i, ffrag),
+                                        ((Switch *) root->getChildren().at(0)->getNode())->departureTime(ctx, i,
                                             root->getChildren().at(0)->getFlowFragments().at(0)
                                         )
                                     ),
@@ -262,7 +262,7 @@ class INET_API Network {
        }
 
        // On all network switches: Data given by the user will be converted to z3 values
-        for(TSNSwitch *swt : this->switches) {
+        for(Switch *swt : this->switches) {
             for(Port *port : swt->getPorts()) {
                 for(FlowFragment *frag : port->getFlowFragments()) {
                     frag->createNewDepartureTimeZ3List();
@@ -300,11 +300,11 @@ class INET_API Network {
         this->jitterUpperBoundRangeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(auxJitterUpperBoundRange).c_str()));
     }
 
-    std::vector<TSNSwitch *> getSwitches() {
+    std::vector<Switch *> getSwitches() {
         return switches;
     }
 
-    void setSwitches(std::vector<TSNSwitch *> switches) {
+    void setSwitches(std::vector<Switch *> switches) {
         this->switches = switches;
     }
 
@@ -320,7 +320,7 @@ class INET_API Network {
         this->flows.push_back(flw);
     }
 
-    void addSwitch (TSNSwitch *swt) {
+    void addSwitch (Switch *swt) {
         this->switches.push_back(swt);
     }
 

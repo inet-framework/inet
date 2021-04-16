@@ -194,7 +194,7 @@ void Z3GateSchedulingConfigurator::computeGateScheduling()
                     guardBand = v;
             }
             double cycleDurationUpperBound = (gateCycleDuration * 1000000).dbl();
-            TSNSwitch *tsnSwitch = new TSNSwitch(networkNode->getFullName(), 0, propagationTime, datarate, guardBand, 0, cycleDurationUpperBound);
+            Switch *tsnSwitch = new Switch(networkNode->getFullName(), 0, propagationTime, datarate, guardBand, 0, cycleDurationUpperBound);
             node->device = tsnSwitch;
             network->addSwitch(tsnSwitch);
         }
@@ -213,7 +213,7 @@ void Z3GateSchedulingConfigurator::computeGateScheduling()
                 Node *remoteNode = (Node *)link->getRemoteNode();
                 Cycle *cycle = new Cycle((gateCycleDuration * 1000000).dbl(), 0, (gateCycleDuration * 1000000).dbl());
                 ((Link *)link)->sourceInterfaceInfo->cycle = cycle;
-                check_and_cast<TSNSwitch *>(localNode->device)->createPort(remoteNode->device, cycle);
+                check_and_cast<Switch *>(localNode->device)->createPort(remoteNode->device, cycle);
             }
         }
     }
@@ -230,7 +230,7 @@ void Z3GateSchedulingConfigurator::computeGateScheduling()
         auto node = streamReservation.source;
         node = (Node *)node->getPath(0)->getRemoteNode();
         while (node != streamReservation.destination) {
-            flow->addToPath(check_and_cast<TSNSwitch *>(node->device));
+            flow->addToPath(check_and_cast<Switch *>(node->device));
             node = (Node *)node->getPath(0)->getRemoteNode();
         }
         flow->setEndDevice(check_and_cast<Device *>(streamReservation.destination->device));
