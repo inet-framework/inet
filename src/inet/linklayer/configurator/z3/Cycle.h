@@ -11,7 +11,7 @@ namespace inet {
 
 using namespace z3;
 
-#define PACKETUPPERBOUNDRANGE 5 // Limits the applications of rules to the packets
+#define PACKETUPPERBOUNDRANGE 25 // Limits the applications of rules to the packets
 #define CYCLEUPPERBOUNDRANGE 25 // Limits the applications of rules to the cycles
 
 /**
