@@ -71,15 +71,16 @@ bool EthernetMacHeaderChecker::matchesPacket(const Packet *packet) const
     else {
         auto typeOrLength = header->getTypeOrLength();
         if (isIeee8023Length(typeOrLength))
-            return true;
+            return header->getChunkLength()+B(typeOrLength) <= packet->getDataLength();  // check: invalid length
         else
-            return ProtocolGroup::ethertype.findProtocol(typeOrLength) != nullptr;
+            return ProtocolGroup::ethertype.findProtocol(typeOrLength) != nullptr;  // check: NO_PROTOCOL_FOUND
     }
 }
 
 void EthernetMacHeaderChecker::dropPacket(Packet *packet)
 {
     // TODO or PacketFilterBase::dropPacket(packet, NO_PROTOCOL_FOUND);
+    // TODO or PacketFilterBase::dropPacket(packet, ???);   // invalid length, maybe INCORRECTLY_RECEIVED, or add a new constant
     PacketFilterBase::dropPacket(packet, NOT_ADDRESSED_TO_US);
 }
 
