@@ -5,7 +5,6 @@
 
 #include "inet/linklayer/configurator/z3/Device.h"
 #include "inet/linklayer/configurator/z3/Port.h"
-#include "inet/linklayer/configurator/z3/Switch.h"
 
 namespace inet {
 
@@ -20,8 +19,19 @@ using namespace z3;
  * are able to organize a sequence of ports that connect the
  * switch to other nodes in the network.
  */
-class INET_API TSNSwitch : public Switch {
+class INET_API TSNSwitch : public cObject {
   public:
+    std::string name;
+    double maxPacketSize;
+    double timeToTravel;
+    double transmissionTime;
+    double portSpeed;
+
+    //z3::expr maxPacketSizeZ3;
+    //z3::expr timeToTravelZ3;
+    //z3::expr transmissionTimeZ3;
+    //z3::expr portSpeedZ3;
+
     bool isModifiedOrCreated = true;
 
     // private Cycle cycle;
@@ -240,12 +250,12 @@ class INET_API TSNSwitch : public Switch {
                             cycle
                     )
             );
-        } else if (dynamic_cast<Switch *>(destination)) {
-            this->connectsTo.push_back(((Switch *)destination)->getName());
+        } else if (dynamic_cast<TSNSwitch *>(destination)) {
+            this->connectsTo.push_back(((TSNSwitch *)destination)->getName());
 
             Port *newPort = new Port(this->name + std::string("Port") + std::to_string(this->portNum),
                     this->portNum,
-                    ((Switch *)destination)->getName(),
+                    ((TSNSwitch *)destination)->getName(),
                     this->maxPacketSize,
                     this->timeToTravel,
                     this->transmissionTime,
@@ -457,6 +467,46 @@ class INET_API TSNSwitch : public Switch {
     /*
      *  GETTERS AND SETTERS
      */
+
+    double getMaxPacketSize() {
+        return maxPacketSize;
+    }
+
+    void setMaxPacketSize(double maxPacketSize) {
+        this->maxPacketSize = maxPacketSize;
+    }
+
+    double getTimeToTravel() {
+        return timeToTravel;
+    }
+
+    void setTimeToTravel(double timeToTravel) {
+        this->timeToTravel = timeToTravel;
+    }
+
+    double getTransmissionTime() {
+        return transmissionTime;
+    }
+
+    void setTransmissionTime(double transmissionTime) {
+        this->transmissionTime = transmissionTime;
+    }
+
+    double getPortSpeed() {
+        return portSpeed;
+    }
+
+    void setPortSpeed(double portSpeed) {
+        this->portSpeed = portSpeed;
+    }
+
+    void setName(std::string name) {
+        this->name = name;
+    }
+
+    std::string getName() {
+        return this->name;
+    }
 
     Cycle *getCycle(int index) {
 
