@@ -24,10 +24,10 @@ using namespace z3;
 class INET_API Switch : public cObject {
   public:
     std::string name;
-    float maxPacketSize;
-    float timeToTravel;
-    float transmissionTime;
-    float portSpeed;
+    double maxPacketSize;
+    double timeToTravel;
+    double transmissionTime;
+    double portSpeed;
 
     //z3::expr maxPacketSizeZ3;
     //z3::expr timeToTravelZ3;
@@ -57,10 +57,10 @@ class INET_API Switch : public cObject {
      * @param portSpeed             Transmission speed of the port
      */
     Switch(std::string name,
-           float maxPacketSize,
-           float timeToTravel,
-           float transmissionTime,
-           float portSpeed) {
+           double maxPacketSize,
+           double timeToTravel,
+           double transmissionTime,
+           double portSpeed) {
         this->name = name;
         this->maxPacketSize = maxPacketSize;
         this->timeToTravel = timeToTravel;
@@ -74,35 +74,35 @@ class INET_API Switch : public cObject {
      */
 
 
-    float getMaxPacketSize() {
+    double getMaxPacketSize() {
         return maxPacketSize;
     }
 
-    void setMaxPacketSize(float maxPacketSize) {
+    void setMaxPacketSize(double maxPacketSize) {
         this->maxPacketSize = maxPacketSize;
     }
 
-    float getTimeToTravel() {
+    double getTimeToTravel() {
         return timeToTravel;
     }
 
-    void setTimeToTravel(float timeToTravel) {
+    void setTimeToTravel(double timeToTravel) {
         this->timeToTravel = timeToTravel;
     }
 
-    float getTransmissionTime() {
+    double getTransmissionTime() {
         return transmissionTime;
     }
 
-    void setTransmissionTime(float transmissionTime) {
+    void setTransmissionTime(double transmissionTime) {
         this->transmissionTime = transmissionTime;
     }
 
-    float getPortSpeed() {
+    double getPortSpeed() {
         return portSpeed;
     }
 
-    void setPortSpeed(float portSpeed) {
+    void setPortSpeed(double portSpeed) {
         this->portSpeed = portSpeed;
     }
 

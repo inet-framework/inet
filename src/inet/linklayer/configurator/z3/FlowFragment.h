@@ -45,9 +45,9 @@ class INET_API FlowFragment : public Flow {
     FlowFragment *previousFragment;
     std::vector<FlowFragment *> nextFragments;
 
-    std::vector<float> departureTime;
-    std::vector<float> arrivalTime;
-    std::vector<float> scheduledTime;
+    std::vector<double> departureTime;
+    std::vector<double> arrivalTime;
+    std::vector<double> scheduledTime;
 
     /**
      * [Method]: FlowFragment
@@ -136,39 +136,39 @@ class INET_API FlowFragment : public Flow {
     }
 
 
-    void addDepartureTime(float val) {
+    void addDepartureTime(double val) {
         departureTime.push_back(val);
     }
 
-    float getDepartureTime(int index) {
+    double getDepartureTime(int index) {
         return departureTime.at(index);
     }
 
-    std::vector<float> getDepartureTimeList() {
+    std::vector<double> getDepartureTimeList() {
         return departureTime;
     }
 
-    void addArrivalTime(float val) {
+    void addArrivalTime(double val) {
         arrivalTime.push_back(val);
     }
 
-    float getArrivalTime(int index) {
+    double getArrivalTime(int index) {
         return arrivalTime.at(index);
     }
 
-    std::vector<float> getArrivalTimeList() {
+    std::vector<double> getArrivalTimeList() {
         return arrivalTime;
     }
 
-    void addScheduledTime(float val) {
+    void addScheduledTime(double val) {
         scheduledTime.push_back(val);
     }
 
-    float getScheduledTime(int index) {
+    double getScheduledTime(int index) {
         return scheduledTime.at(index);
     }
 
-    std::vector<float> getScheduledTimeList() {
+    std::vector<double> getScheduledTimeList() {
         return scheduledTime;
     }
 

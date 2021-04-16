@@ -27,10 +27,10 @@ class INET_API TSNSwitch : public Switch {
     // private Cycle cycle;
     std::vector<std::string> connectsTo;
     std::vector<Port *> ports;
-    float cycleDurationUpperBound;
-    float cycleDurationLowerBound;
+    double cycleDurationUpperBound;
+    double cycleDurationLowerBound;
 
-    float gbSize;
+    double gbSize;
     std::shared_ptr<expr> gbSizeZ3; // Size of the guardBand
     std::shared_ptr<expr> cycleDuration;
     std::shared_ptr<expr> cycleStart;
@@ -69,8 +69,8 @@ class INET_API TSNSwitch : public Switch {
      * @param timeToTravel          Time that a packet takes to leave its port and reach the destination
      * @param transmissionTime      Time taken to process the packet inside the switch
      */
-    TSNSwitch(float timeToTravel,
-              float transmissionTime) {
+    TSNSwitch(double timeToTravel,
+              double transmissionTime) {
         this->name = std::string("dev") + std::to_string(indexCounter++);
         this->timeToTravel = timeToTravel;
         this->transmissionTime = transmissionTime;
@@ -96,13 +96,13 @@ class INET_API TSNSwitch : public Switch {
      * @param gbSize                Size of the guard bands used to separate non consecutive time slots
      */
     TSNSwitch(std::string name,
-              float maxPacketSize,
-              float timeToTravel,
-              float transmissionTime,
-              float portSpeed,
-              float gbSize,
-              float cycleDurationLowerBound,
-              float cycleDurationUpperBound) {
+              double maxPacketSize,
+              double timeToTravel,
+              double transmissionTime,
+              double portSpeed,
+              double gbSize,
+              double cycleDurationLowerBound,
+              double cycleDurationUpperBound) {
         this->name = name;
         this->maxPacketSize = maxPacketSize;
         this->timeToTravel = timeToTravel;
@@ -130,12 +130,12 @@ class INET_API TSNSwitch : public Switch {
      * @param gbSize                Size of the guard bands used to separate non consecutive time slots
      */
     TSNSwitch(std::string name,
-              float maxPacketSize,
-              float timeToTravel,
-              float portSpeed,
-              float gbSize,
-              float cycleDurationLowerBound,
-              float cycleDurationUpperBound) {
+              double maxPacketSize,
+              double timeToTravel,
+              double portSpeed,
+              double gbSize,
+              double cycleDurationLowerBound,
+              double cycleDurationUpperBound) {
         this->name = name;
         this->maxPacketSize = maxPacketSize;
         this->timeToTravel = timeToTravel;
@@ -467,11 +467,11 @@ class INET_API TSNSwitch : public Switch {
         this->ports.at(index)->setCycle(cycle);
     }
 
-    float getGbSize() {
+    double getGbSize() {
         return gbSize;
     }
 
-    void setGbSize(float gbSize) {
+    void setGbSize(double gbSize) {
         this->gbSize = gbSize;
     }
 

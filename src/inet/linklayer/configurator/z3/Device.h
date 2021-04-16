@@ -20,11 +20,11 @@ using namespace z3;
 class INET_API Device : public cObject {
   public:
     std::string name;
-    float packetPeriodicity;
-    float firstT1Time;
-    float hardConstraintTime;
-    float softConstraintTime;
-    float packetSize;
+    double packetPeriodicity;
+    double firstT1Time;
+    double hardConstraintTime;
+    double softConstraintTime;
+    double packetSize;
 
     static int indexCounter;
     std::shared_ptr<expr> packetPeriodicityZ3;
@@ -47,7 +47,7 @@ class INET_API Device : public cObject {
      * [Method]: Device
      * [Usage]: Overloaded constructor method of a device.
      * Can create a device specifying its properties through
-     * float values. These values will later be converted tostd::to_string(
+     * double values. These values will later be converted tostd::to_string(
      * z3 values. Used for simplified configurations. Other
      * constructors either are deprecated or set parameters
      * that will be used in future works.
@@ -55,8 +55,8 @@ class INET_API Device : public cObject {
      * @param packetPeriodicity     Periodicity of packet sending
      * @param hardConstraintTime    Maximum latency tolerated by this device
      */
-    Device(float packetPeriodicity,
-           float hardConstraintTime) {
+    Device(double packetPeriodicity,
+           double hardConstraintTime) {
         this->packetPeriodicity = packetPeriodicity;
         this->firstT1Time = 0;
         this->hardConstraintTime = hardConstraintTime;
@@ -69,7 +69,7 @@ class INET_API Device : public cObject {
      * [Method]: Device
      * [Usage]: Overloaded constructor method of a device.
      * Can create a device specifying its properties through
-     * float values. These values will later be converted to
+     * double values. These values will later be converted to
      * z3 values.
      *
      * @param packetPeriodicity     Periodicity of packet sending
@@ -78,11 +78,11 @@ class INET_API Device : public cObject {
      * @param softConstraintTime    Recommended latency for using this device
      * @param packetSize            Size of the packets sent by this device
      */
-    Device(float packetPeriodicity,
-           float firstT1Time,
-           float hardConstraintTime,
-           float softConstraintTime,
-           float packetSize) {
+    Device(double packetPeriodicity,
+           double firstT1Time,
+           double hardConstraintTime,
+           double softConstraintTime,
+           double packetSize) {
         this->packetPeriodicity = packetPeriodicity;
         this->firstT1Time = firstT1Time;
         this->hardConstraintTime = hardConstraintTime;
@@ -95,7 +95,7 @@ class INET_API Device : public cObject {
      * [Method]: Device
      * [Usage]: Overloaded constructor method of a device.
      * Can create a device specifying its properties through
-     * float values. These values will later be converted to
+     * double values. These values will later be converted to
      * z3 values.
      *
      * @param packetPeriodicity     Periodicity of packet sending
@@ -103,10 +103,10 @@ class INET_API Device : public cObject {
      * @param hardConstraintTime    Maximum latency tolerated by this device
      * @param packetSize            Size of the packets sent by this device
      */
-    Device(float packetPeriodicity,
-           float firstT1Time,
-           float hardConstraintTime,
-           float packetSize) {
+    Device(double packetPeriodicity,
+           double firstT1Time,
+           double hardConstraintTime,
+           double packetSize) {
         this->packetPeriodicity = packetPeriodicity;
         this->firstT1Time = firstT1Time;
         this->hardConstraintTime = hardConstraintTime;
@@ -173,43 +173,43 @@ class INET_API Device : public cObject {
         this->name = name;
     }
 
-     float getPacketPeriodicity() {
+     double getPacketPeriodicity() {
         return packetPeriodicity;
     }
 
-    void setPacketPeriodicity(float packetPeriodicity) {
+    void setPacketPeriodicity(double packetPeriodicity) {
         this->packetPeriodicity = packetPeriodicity;
     }
 
-    float getFirstT1Time() {
+    double getFirstT1Time() {
         return firstT1Time;
     }
 
-    void setFirstT1Time(float firstT1Time) {
+    void setFirstT1Time(double firstT1Time) {
         this->firstT1Time = firstT1Time;
     }
 
-    float getHardConstraintTime() {
+    double getHardConstraintTime() {
         return hardConstraintTime;
     }
 
-    void setHardConstraintTime(float hardConstraintTime) {
+    void setHardConstraintTime(double hardConstraintTime) {
         this->hardConstraintTime = hardConstraintTime;
     }
 
-    float getSoftConstraintTime() {
+    double getSoftConstraintTime() {
         return softConstraintTime;
     }
 
-    void setSoftConstraintTime(float softConstraintTime) {
+    void setSoftConstraintTime(double softConstraintTime) {
         this->softConstraintTime = softConstraintTime;
     }
 
-    float getPacketSize() {
+    double getPacketSize() {
         return packetSize;
     }
 
-    void setPacketSize(float packetSize) {
+    void setPacketSize(double packetSize) {
         this->packetSize = packetSize;
     }
 

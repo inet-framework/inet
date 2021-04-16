@@ -31,11 +31,11 @@ class INET_API Network {
 
     std::vector<Switch *> switches;
     std::vector<Flow *> flows;
-    float timeToTravel;
+    double timeToTravel;
     std::vector<std::shared_ptr<expr> > allSumOfJitter;
     std::vector<int> numberOfNodes;
 
-    float jitterUpperBoundRange = -1;
+    double jitterUpperBoundRange = -1;
     std::shared_ptr<expr> jitterUpperBoundRangeZ3;
 
     /**
@@ -44,7 +44,7 @@ class INET_API Network {
      * the std::vectors for the switches and flows. Sets up the default
      * time to travel for 2 (Needs revision).
      */
-    Network (float jitterUpperBoundRange) {
+    Network (double jitterUpperBoundRange) {
         this->jitterUpperBoundRange = jitterUpperBoundRange;
         this->switches.clear();
         this->flows.clear();
@@ -74,7 +74,7 @@ class INET_API Network {
      * @param flows         std::vector with the instances of flows of the network
      * @param timeToTravel  Value used as travel time from a node to another in the network
      */
-    Network (std::vector<Switch *> switches, std::vector<Flow *> flows, float timeToTravel) {
+    Network (std::vector<Switch *> switches, std::vector<Flow *> flows, double timeToTravel) {
         this->switches = switches;
         this->flows = flows;
         this->timeToTravel = timeToTravel;
@@ -298,7 +298,7 @@ class INET_API Network {
         this->jitterUpperBoundRangeZ3 = std::make_shared<expr>(jitterUpperBoundRange);
     }
 
-    void setJitterUpperBoundRangeZ3(context& ctx, float auxJitterUpperBoundRange) {
+    void setJitterUpperBoundRangeZ3(context& ctx, double auxJitterUpperBoundRange) {
         this->jitterUpperBoundRangeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(auxJitterUpperBoundRange).c_str()));
     }
 

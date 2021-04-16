@@ -31,14 +31,14 @@ class INET_API Port {
     bool useMicroCycles = false;
     bool useHyperCycle = true;
 
-    std::vector<float> listOfPeriods;
-    float definedHyperCycleSize = -1;
-    float microCycleSize = -1;
+    std::vector<double> listOfPeriods;
+    double definedHyperCycleSize = -1;
+    double microCycleSize = -1;
 
     std::string name;
     std::string connectsTo;
 
-    float bestEffortPercent = 0.5f;
+    double bestEffortPercent = 0.5f;
     std::shared_ptr<expr> bestEffortPercentZ3;
 
     Cycle *cycle;
@@ -46,12 +46,12 @@ class INET_API Port {
     int packetUpperBoundRange = PACKETUPPERBOUNDRANGE; // Limits the applications of rules to the packets
     int cycleUpperBoundRange = CYCLEUPPERBOUNDRANGE; // Limits the applications of rules to the cycles
 
-    float gbSize;
+    double gbSize;
 
-    float maxPacketSize;
-    float timeToTravel;
-    float transmissionTime;
-    float portSpeed;
+    double maxPacketSize;
+    double timeToTravel;
+    double transmissionTime;
+    double portSpeed;
     int portNum;
 
     std::shared_ptr<expr> gbSizeZ3; // Size of the guardBand
@@ -77,11 +77,11 @@ class INET_API Port {
     Port (std::string name,
             int portNum,
             std::string connectsTo,
-            float maxPacketSize,
-            float timeToTravel,
-            float transmissionTime,
-            float portSpeed,
-            float gbSize,
+            double maxPacketSize,
+            double timeToTravel,
+            double transmissionTime,
+            double portSpeed,
+            double gbSize,
             Cycle *cycle) {
         this->name = name;
         this->portNum = portNum;
@@ -175,7 +175,7 @@ class INET_API Port {
      * @param b        Second value
      * @return        Greatest common divisor or the two previous parameters
      */
-    static float gcd(float a, float b) {
+    static double gcd(double a, double b) {
         if (a == 0) {
             return b;
         }
@@ -189,11 +189,11 @@ class INET_API Port {
      * [Usage]: Retrieves the value of the greatest common divisor
      * of all the values in an array.
      *
-     * @param arr    Array of float values
+     * @param arr    Array of double values
      * @return        Greatest common divisor of all values of arr
      */
-    static float findGCD(std::vector<float> arr) {
-        float gdc = arr.at(0);
+    static double findGCD(std::vector<double> arr) {
+        double gdc = arr.at(0);
         for (int i = 1; i < arr.size(); i++) {
             gdc = gcd(arr.at(i), gdc);
         }
@@ -207,23 +207,23 @@ class INET_API Port {
      * [Usage]: Retrieves the least common multiple of all values in
      * an array.
      *
-     * @param arr         Array of float values
+     * @param arr         Array of double values
      * @return            Least common multiple of all values of arr
      */
-    static float findLCM(std::vector<float> arr) {
+    static double findLCM(std::vector<double> arr) {
 
-        float n = arr.size();
+        double n = arr.size();
 
-        float max_num = 0;
+        double max_num = 0;
         for (int i = 0; i < n; i++) {
             if (max_num < arr.at(i)) {
                 max_num = arr.at(i);
             }
         }
 
-        float res = 1;
+        double res = 1;
 
-        float x = 2;
+        double x = 2;
         while (x <= max_num) {
             std::vector<int> indexes;
             for (int j = 0; j < n; j++) {
@@ -266,12 +266,12 @@ class INET_API Port {
             System.out.println(flowFrag->getStartDevice());
             listOfPeriods.add(flowFrag->getStartDevice().getPacketPeriodicity());
         }
-        for(float periodicity : this->listOfPeriods) {
+        for(double periodicity : this->listOfPeriods) {
             System.out.println(std::string("Periodicidade: ") + periodicity);
         }
         */
 
-        float hyperCycleSize = findLCM(listOfPeriods);
+        double hyperCycleSize = findLCM(listOfPeriods);
 
         this->definedHyperCycleSize = hyperCycleSize;
         this->cycle->setCycleDuration(hyperCycleSize);
@@ -286,7 +286,7 @@ class INET_API Port {
         }
         */
 
-        for(float periodicity : this->listOfPeriods) {
+        for(double periodicity : this->listOfPeriods) {
             numOfPacketsScheduled += (int) (hyperCycleSize/periodicity);
         }
 
@@ -318,7 +318,7 @@ class INET_API Port {
         */
 
         this->microCycleSize = findGCD(listOfPeriods);
-        float hyperCycleSize = findLCM(listOfPeriods);
+        double hyperCycleSize = findLCM(listOfPeriods);
 
         this->definedHyperCycleSize = hyperCycleSize;
 
@@ -657,11 +657,11 @@ class INET_API Port {
         this->flowFragments.push_back(flowFrag);
     }
 
-    float getGbSize() {
+    double getGbSize() {
         return gbSize;
     }
 
-    void setGbSize(float gbSize) {
+    void setGbSize(double gbSize) {
         this->gbSize = gbSize;
     }
 
@@ -689,15 +689,15 @@ class INET_API Port {
         this->connectsTo = connectsTo;
     }
 
-    void addToListOfPeriods(float period) {
+    void addToListOfPeriods(double period) {
         this->listOfPeriods.push_back(period);
     }
 
-    std::vector<float> getListOfPeriods() {
+    std::vector<double> getListOfPeriods() {
         return listOfPeriods;
     }
 
-     void setListOfPeriods(std::vector<float> listOfPeriods) {
+     void setListOfPeriods(std::vector<double> listOfPeriods) {
         this->listOfPeriods = listOfPeriods;
     }
 
@@ -709,11 +709,11 @@ class INET_API Port {
         this->cycleUpperBoundRange = cycleUpperBoundRange;
     }
 
-     float getDefinedHyperCycleSize() {
+     double getDefinedHyperCycleSize() {
         return definedHyperCycleSize;
     }
 
-     void setDefinedHyperCycleSize(float definedHyperCycleSize) {
+     void setDefinedHyperCycleSize(double definedHyperCycleSize) {
         this->definedHyperCycleSize = definedHyperCycleSize;
     }
 

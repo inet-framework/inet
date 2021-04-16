@@ -51,20 +51,20 @@ class INET_API Cycle {
   public:
     std::string portName = "";
     static int instanceCounter;
-    float upperBoundCycleTime;
-    float lowerBoundCycleTime;
-    float firstCycleStart;
-    float maximumSlotDuration;
+    double upperBoundCycleTime;
+    double lowerBoundCycleTime;
+    double firstCycleStart;
+    double maximumSlotDuration;
 
-    float cycleDuration;
-    float cycleStart;
+    double cycleDuration;
+    double cycleStart;
 
     std::vector<std::vector<std::shared_ptr<expr>>> slotStartZ3_;
     std::vector<std::vector<std::shared_ptr<expr>>> slotDurationZ3_;
 
     std::vector<int> slotsUsed;
-    std::vector<std::vector<float>> slotStart;
-    std::vector<std::vector<float>> slotDuration;
+    std::vector<std::vector<double>> slotStart;
+    std::vector<std::vector<double>> slotDuration;
 
     std::shared_ptr<expr> cycleDurationZ3;
     std::shared_ptr<expr> firstCycleStartZ3;
@@ -88,9 +88,9 @@ class INET_API Cycle {
      * @param lowerBoundCycleTime   Minimum size of the cycle
      * @param maximumSlotDuration   Every priority slot should have up this time units
      */
-    Cycle(float upperBoundCycleTime,
-          float lowerBoundCycleTime,
-          float maximumSlotDuration) {
+    Cycle(double upperBoundCycleTime,
+          double lowerBoundCycleTime,
+          double maximumSlotDuration) {
         this->upperBoundCycleTime = upperBoundCycleTime;
         this->lowerBoundCycleTime = lowerBoundCycleTime;
         this->maximumSlotDuration = maximumSlotDuration;
@@ -98,7 +98,7 @@ class INET_API Cycle {
     }
 
 
-    Cycle(float maximumSlotDuration) {
+    Cycle(double maximumSlotDuration) {
        this->maximumSlotDuration = maximumSlotDuration;
        this->firstCycleStart = 0;
     }
@@ -117,10 +117,10 @@ class INET_API Cycle {
      * @param firstCycleStart       Where the first cycle should start
      * @param maximumSlotDuration   Every priority slot should have up this time units
      */
-    Cycle(float upperBoundCycleTime,
-          float lowerBoundCycleTime,
-          float firstCycleStart,
-          float maximumSlotDuration) {
+    Cycle(double upperBoundCycleTime,
+          double lowerBoundCycleTime,
+          double firstCycleStart,
+          double maximumSlotDuration) {
         this->upperBoundCycleTime = upperBoundCycleTime;
         this->lowerBoundCycleTime = lowerBoundCycleTime;
         this->firstCycleStart = firstCycleStart;
@@ -221,14 +221,14 @@ class INET_API Cycle {
     /**
      * [Method]: addSlotUsed
      * [Usage]: After generating the schedule, the z3 values are
-     * converted to floats and integers. The used slots are now
+     * converted to doubles and integers. The used slots are now
      * placed on a arrayList, and so are the slot start and duration.
      *
      * @param prt           Priority of the slot to be added
      * @param sStart        Slot start of the slot to be added
      * @param sDuration     Slot duration of the slot to be added
      */
-    void addSlotUsed(int prt, std::vector<float> sStart, std::vector<float> sDuration) {
+    void addSlotUsed(int prt, std::vector<double> sStart, std::vector<double> sDuration) {
 
         if(std::find(slotsUsed.begin(), slotsUsed.end(), prt) == slotsUsed.end()) {
             this->slotsUsed.push_back(prt);
@@ -294,52 +294,52 @@ class INET_API Cycle {
      */
 
 
-    float getUpperBoundCycleTime() {
+    double getUpperBoundCycleTime() {
         return upperBoundCycleTime;
     }
 
-    void setUpperBoundCycleTime(float upperBoundCycleTime) {
+    void setUpperBoundCycleTime(double upperBoundCycleTime) {
         this->upperBoundCycleTime = upperBoundCycleTime;
     }
 
-    float getLowerBoundCycleTime() {
+    double getLowerBoundCycleTime() {
         return lowerBoundCycleTime;
     }
 
-    void setLowerBoundCycleTime(float lowerBoundCycleTime) {
+    void setLowerBoundCycleTime(double lowerBoundCycleTime) {
         this->lowerBoundCycleTime = lowerBoundCycleTime;
     }
 
-    float getCycleDuration() {
+    double getCycleDuration() {
         return cycleDuration;
     }
 
-    float getCycleStart() {
+    double getCycleStart() {
         return cycleStart;
     }
 
 
-    void setCycleStart(float cycleStart) {
+    void setCycleStart(double cycleStart) {
         this->cycleStart = cycleStart;
     }
 
-    void setCycleDuration(float cycleDuration) {
+    void setCycleDuration(double cycleDuration) {
         this->cycleDuration = cycleDuration;
     }
 
-    float getFirstCycleStart() {
+    double getFirstCycleStart() {
         return firstCycleStart;
     }
 
-    void setFirstCycleStart(float firstCycleStart) {
+    void setFirstCycleStart(double firstCycleStart) {
         this->firstCycleStart = firstCycleStart;
     }
 
-    float getMaximumSlotDuration() {
+    double getMaximumSlotDuration() {
         return maximumSlotDuration;
     }
 
-    void setMaximumSlotDuration(float maximumSlotDuration) {
+    void setMaximumSlotDuration(double maximumSlotDuration) {
         this->maximumSlotDuration = maximumSlotDuration;
     }
 
@@ -409,15 +409,15 @@ class INET_API Cycle {
         return this->slotsUsed;
     }
 
-    std::vector<std::vector<float>> getSlotDuration() {
+    std::vector<std::vector<double>> getSlotDuration() {
         return slotDuration;
     }
 
-    float getSlotStart(int prt, int index) {
+    double getSlotStart(int prt, int index) {
         return this->slotStart.at(std::find(slotsUsed.begin(), slotsUsed.end(), prt) - slotsUsed.begin()).at(index);
     }
 
-    float getSlotDuration(int prt, int index) {
+    double getSlotDuration(int prt, int index) {
         return this->slotDuration.at(std::find(slotsUsed.begin(), slotsUsed.end(), prt) - slotsUsed.begin()).at(index);
     }
 

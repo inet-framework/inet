@@ -56,8 +56,8 @@ class INET_API Flow {
     Device *startDevice;
     Device *endDevice;
 
-    float flowFirstSendingTime;
-    float flowSendingPeriodicity;
+    double flowFirstSendingTime;
+    double flowSendingPeriodicity;
 
     std::shared_ptr<expr> flowFirstSendingTimeZ3;
     std::shared_ptr<expr> flowSendingPeriodicityZ3;
@@ -114,7 +114,7 @@ class INET_API Flow {
      *
      * @param type      Value specifying the type of the flow (0 - Unicast; 1 - Publish subscribe)
      */
-    Flow(int type, float flowFirstSendingTime, float flowSendingPeriodicity) {
+    Flow(int type, double flowFirstSendingTime, double flowSendingPeriodicity) {
         instanceCounter++;
         this->instance = instanceCounter;
         this->name = std::string("flow") + std::to_string(instanceCounter);
@@ -392,7 +392,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Departure time of the specific packet
      */
-    float getDepartureTime(int hop, int packetNum);
+    double getDepartureTime(int hop, int packetNum);
 
 
     /**
@@ -447,7 +447,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Departure time of the specific packet
      */
-    float getDepartureTime(std::string deviceName, int hop, int packetNum);
+    double getDepartureTime(std::string deviceName, int hop, int packetNum);
 
     /**
      * [Method]: getDepartureTime
@@ -461,7 +461,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Departure time of the specific packet
      */
-    float getDepartureTime(Device *targetDevice, int hop, int packetNum);
+    double getDepartureTime(Device *targetDevice, int hop, int packetNum);
 
 
     /**
@@ -474,7 +474,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Arrival time of the specific packet
      */
-    float getArrivalTime(int hop, int packetNum);
+    double getArrivalTime(int hop, int packetNum);
 
 
     /**
@@ -489,7 +489,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Arrival time of the specific packet
      */
-    float getArrivalTime(std::string deviceName, int hop, int packetNum);
+    double getArrivalTime(std::string deviceName, int hop, int packetNum);
 
     /**
      * [Method]: getArrivalTime
@@ -503,7 +503,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Arrival time of the specific packet
      */
-    float getArrivalTime(Device *targetDevice, int hop, int packetNum);
+    double getArrivalTime(Device *targetDevice, int hop, int packetNum);
 
     /**
      * [Method]: getScheduledTime
@@ -515,7 +515,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Scheduled time of the specific packet
      */
-    float getScheduledTime(int hop, int packetNum);
+    double getScheduledTime(int hop, int packetNum);
 
 
     /**
@@ -530,7 +530,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Scheduled time of the specific packet
      */
-    float getScheduledTime(std::string deviceName, int hop, int packetNum);
+    double getScheduledTime(std::string deviceName, int hop, int packetNum);
 
     /**
      * [Method]: getScheduledTime
@@ -544,7 +544,7 @@ class INET_API Flow {
      * @param packetNum     Number of the packet sent by the flow
      * @return              Scheduled time of the specific packet
      */
-    float getScheduledTime(Device *targetDevice, int hop, int packetNum);
+    double getScheduledTime(Device *targetDevice, int hop, int packetNum);
 
     /**
      * [Method]: getAverageLatency
@@ -559,9 +559,9 @@ class INET_API Flow {
      *
      * @return          Average latency of the flow
      */
-    float getAverageLatency();
+    double getAverageLatency();
 
-    float getAverageLatencyToDevice(Device *dev);
+    double getAverageLatencyToDevice(Device *dev);
 
 
     /**
@@ -576,10 +576,10 @@ class INET_API Flow {
      *
      * @return      Average jitter of the flow
      */
-    float getAverageJitter() {
-        float averageJitter = 0;
-        float auxAverageJitter = 0;
-        float averageLatency = this->getAverageLatency();
+    double getAverageJitter() {
+        double averageJitter = 0;
+        double auxAverageJitter = 0;
+        double averageLatency = this->getAverageLatency();
         int timeListSize = 0;
 
         if (type == UNICAST) {
@@ -619,9 +619,9 @@ class INET_API Flow {
      * the stream aimed at a specific device.
      *
      * @param dev         Specific end-device of the flow to retrieve the jitter
-     * @return            float value of the variation of the latency
+     * @return            double value of the variation of the latency
      */
-    float getAverageJitterToDevice(Device *dev);
+    double getAverageJitterToDevice(Device *dev);
 
     /**
      * [Method]: getLatency
@@ -980,7 +980,7 @@ class INET_API Flow {
         this->instance = instance;
     }
 
-    float getPacketSize() {
+    double getPacketSize() {
         return this->startDevice->getPacketSize();
     }
 
@@ -988,19 +988,19 @@ class INET_API Flow {
         return this->startDevice->getPacketSizeZ3();
     }
 
-    float getFlowFirstSendingTime() {
+    double getFlowFirstSendingTime() {
         return flowFirstSendingTime;
     }
 
-    void setFlowFirstSendingTime(float flowFirstSendingTime) {
+    void setFlowFirstSendingTime(double flowFirstSendingTime) {
         this->flowFirstSendingTime = flowFirstSendingTime;
     }
 
-    float getFlowSendingPeriodicity() {
+    double getFlowSendingPeriodicity() {
         return flowSendingPeriodicity;
     }
 
-    void setFlowSendingPeriodicity(float flowSendingPeriodicity) {
+    void setFlowSendingPeriodicity(double flowSendingPeriodicity) {
         this->flowSendingPeriodicity = flowSendingPeriodicity;
     }
 

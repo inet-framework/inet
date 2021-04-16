@@ -473,8 +473,8 @@ class Test {
 		/*
 		* OUTPUT DATA
 		*/
-//		float overallAverageJitter = 0;
-//		float overallAverageLatency = 0;
+//		double overallAverageJitter = 0;
+//		double overallAverageLatency = 0;
 //		System.out.println("");
 //		System.out.println("");
 //		int auxCount = 0;
@@ -528,8 +528,8 @@ class Test {
 //
 //		System.out.println("");
 //
-//		float sumOfAvgLatencies = 0;
-//		float sumOfLatencies;
+//		double sumOfAvgLatencies = 0;
+//		double sumOfLatencies;
 //		int flowCounter = 0;
 //		for(Flow flw : net.getFlows()){
 //
@@ -584,7 +584,7 @@ class Test {
 //
 //
 //
-//		System.out.println("Execution time: " + ((float) totalTime)/1000000000 + " seconds\n ");
+//		System.out.println("Execution time: " + ((double) totalTime)/1000000000 + " seconds\n ");
 //		System.out.println("Flow 0 average latency: " + flow0.getAverageLatency());
 //		System.out.println("Flow 0 average jitter: " + flow0.getAverageJitter());
 //		overallAverageLatency += flow0.getAverageLatency();
