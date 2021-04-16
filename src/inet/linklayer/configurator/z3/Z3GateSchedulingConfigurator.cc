@@ -176,17 +176,8 @@ void Z3GateSchedulingConfigurator::computeGateScheduling()
         auto node = (Node *)topology.getNode(i);
         auto networkNode = node->module;
         if (isBridgeNode(node)) {
-            // TODO datarate, propagation time
-            double propagationTime = 50E-9 * 1000000;
-            double datarate = 1E+9 / 1000000;
-            double guardBand = 0;
-            for (auto& streamReservation : streamReservations) {
-                double v = b(streamReservation.packetLength).get() / datarate;
-                if (guardBand < v)
-                    guardBand = v;
-            }
             double cycleDurationUpperBound = (gateCycleDuration * 1000000).dbl();
-            Switch *tsnSwitch = new Switch(networkNode->getFullName(), 0, propagationTime, datarate, guardBand, 0, cycleDurationUpperBound);
+            Switch *tsnSwitch = new Switch(networkNode->getFullName(), 0, cycleDurationUpperBound);
             node->device = tsnSwitch;
             network->addSwitch(tsnSwitch);
         }
@@ -205,7 +196,16 @@ void Z3GateSchedulingConfigurator::computeGateScheduling()
                 Node *remoteNode = (Node *)link->getRemoteNode();
                 Cycle *cycle = new Cycle((gateCycleDuration * 1000000).dbl(), 0, (gateCycleDuration * 1000000).dbl());
                 ((Link *)link)->sourceInterfaceInfo->cycle = cycle;
-                check_and_cast<Switch *>(localNode->device)->createPort(remoteNode->device, cycle);
+                // TODO datarate, propagation time
+                double datarate = 1E+9 / 1000000;
+                double propagationTime = 50E-9 * 1000000;
+                double guardBand = 0;
+                for (auto& streamReservation : streamReservations) {
+                    double v = b(streamReservation.packetLength).get() / datarate;
+                    if (guardBand < v)
+                        guardBand = v;
+                }
+                check_and_cast<Switch *>(localNode->device)->createPort(remoteNode->device, cycle, 1500 * 8, propagationTime, datarate, guardBand);
             }
         }
     }

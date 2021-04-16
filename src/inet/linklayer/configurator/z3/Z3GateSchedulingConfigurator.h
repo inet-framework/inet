@@ -501,10 +501,10 @@ class INET_API Z3GateSchedulingConfigurator : public cSimpleModule
                     // For every switch in the network, store its information in the log
                     for(Switch *auxSwt : net->getSwitches()) {
                         std::cout << std::string("  Switch name: ") << auxSwt->getName();
-                        std::cout << std::string("    Max packet size: ") << auxSwt->getMaxPacketSize();
-                        std::cout << std::string("    Port speed: ") << auxSwt->getPortSpeed();
-                        std::cout << std::string("    Time to Travel: ") << auxSwt->getTimeToTravel();
-                        std::cout << std::string("    Transmission time: ") << auxSwt->getTransmissionTime();
+//                        std::cout << std::string("    Max packet size: ") << auxSwt->getMaxPacketSize();
+//                        std::cout << std::string("    Port speed: ") << auxSwt->getPortSpeed();
+//                        std::cout << std::string("    Time to Travel: ") << auxSwt->getTimeToTravel();
+//                        std::cout << std::string("    Transmission time: ") << auxSwt->getTransmissionTime();
 //                           std::cout << "    Cycle information -" << std::endl;
 //                           std::cout << std::string("        First cycle start: ") + model.eval(((TSNSwitch *)auxSwt).getCycleStart(), false));
 //                           std::cout << std::string("        Cycle duration: ") + model.eval(((TSNSwitch *)auxSwt).getCycleDuration(), false));
