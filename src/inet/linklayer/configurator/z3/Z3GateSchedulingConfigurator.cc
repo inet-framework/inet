@@ -24,14 +24,6 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/stlutils.h"
-#include "inet/linklayer/configurator/z3/Cycle.h"
-#include "inet/linklayer/configurator/z3/Device.h"
-#include "inet/linklayer/configurator/z3/FlowFragment.h"
-#include "inet/linklayer/configurator/z3/Network.h"
-#include "inet/linklayer/configurator/z3/PathNode.h"
-#include "inet/linklayer/configurator/z3/PathTree.h"
-#include "inet/linklayer/configurator/z3/Port.h"
-#include "inet/linklayer/configurator/z3/Test.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -237,8 +229,7 @@ void Z3GateSchedulingConfigurator::computeGateScheduling()
         network->addFlow(flow);
         streamReservation.flow = flow;
     }
-    ScheduleGenerator scheduleGenerator;
-    scheduleGenerator.generateSchedule(network);
+    generateSchedule(network);
 }
 
 void Z3GateSchedulingConfigurator::configureGateScheduling()
