@@ -45,7 +45,7 @@ class INET_API Flow {
 
 
 
-    std::vector<TSNSwitch *> path;
+    std::vector<Switch *> path;
     std::vector<FlowFragment *> flowFragments;
     PathTree *pathTree;
 
@@ -146,7 +146,7 @@ class INET_API Flow {
      *
      * @param swt   Switch to be added to the list
      */
-    void addToPath(TSNSwitch *swt) {
+    void addToPath(Switch *swt) {
         path.push_back(swt);
     }
 
@@ -202,7 +202,7 @@ class INET_API Flow {
              */
 
             int currentSwitchIndex = 0;
-            for (TSNSwitch *swt : this->path) {
+            for (Switch *swt : this->path) {
                 this->pathToZ3(ctx, swt, currentSwitchIndex);
                 currentSwitchIndex++;
             }
@@ -267,7 +267,7 @@ class INET_API Flow {
      * @param swt                   Switch of the current flow fragment
      * @param currentSwitchIndex    Index of the current switch in the path on the iteration
      */
-    void pathToZ3(context& ctx, TSNSwitch *swt, int currentSwitchIndex);
+    void pathToZ3(context& ctx, Switch *swt, int currentSwitchIndex);
 
     void bindToNextFragment(solver& solver, context& ctx, FlowFragment *frag);
 
@@ -409,15 +409,15 @@ class INET_API Flow {
                 this->setUpPeriods(child);
             }
         } else {
-            TSNSwitch *swt = (TSNSwitch *) node->getNode(); //no good. Need the port
+            Switch *swt = (Switch *) node->getNode(); //no good. Need the port
             Port *port = nullptr;
 
             for(PathNode *child : node->getChildren()) {
                 if(dynamic_cast<Device *>(child->getNode())) {
                     port = swt->getPortOf(((Device *) child->getNode())->getName());
                     this->setUpPeriods(child);
-                } else if (dynamic_cast<TSNSwitch *>(child->getNode())) {
-                    port = swt->getPortOf(((TSNSwitch *) child->getNode())->getName());
+                } else if (dynamic_cast<Switch *>(child->getNode())) {
+                    port = swt->getPortOf(((Switch *) child->getNode())->getName());
                     this->setUpPeriods(child);
                 } else {
                     std::cout << "Unrecognized node\n";
@@ -900,11 +900,11 @@ class INET_API Flow {
         this->endDevice = endDevice;
     }
 
-    std::vector<TSNSwitch *> getPath() {
+    std::vector<Switch *> getPath() {
         return path;
     }
 
-    void setPath(std::vector<TSNSwitch *> path) {
+    void setPath(std::vector<Switch *> path) {
         this->path = path;
     }
 

@@ -3,7 +3,7 @@
 
 #include <z3++.h>
 
-#include "inet/linklayer/configurator/z3/TSNSwitch.h"
+#include "inet/linklayer/configurator/z3/Switch.h"
 
 namespace inet {
 
@@ -37,7 +37,7 @@ class INET_API PathNode : public cObject {
      */
     PathNode (cObject *node)
     {
-        if(dynamic_cast<TSNSwitch *>(node)) {
+        if(dynamic_cast<Switch *>(node)) {
             this->node = node;
             children.clear();
             flowFragments.clear();

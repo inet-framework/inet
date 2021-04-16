@@ -10,7 +10,7 @@
 #include "inet/linklayer/configurator/z3/PathNode.h"
 #include "inet/linklayer/configurator/z3/PathTree.h"
 #include "inet/linklayer/configurator/z3/ScheduleGenerator.h"
-#include "inet/linklayer/configurator/z3/TSNSwitch.h"
+#include "inet/linklayer/configurator/z3/Switch.h"
 
 namespace inet {
 
@@ -79,16 +79,16 @@ class Test {
 		* GENERATING SWITCHES
 		*/
 		// 1Gbit/s = 125Bytes/microsec. Packet size on packets should be in bytes
-		TSNSwitch *switch0 = new TSNSwitch("switch0",100, 1, 125, 1, 400, 3000);
-		TSNSwitch *switch1 = new TSNSwitch("switch1",100, 1, 125, 1, 400, 3000);
-		TSNSwitch *switch2 = new TSNSwitch("switch2",100, 1, 125, 1, 400, 3000);
-		TSNSwitch *switch3 = new TSNSwitch("switch3",100, 1, 125, 1, 400, 3000);
-		TSNSwitch *switch4 = new TSNSwitch("switch4",100, 1, 125, 1, 400, 3000);
-		TSNSwitch *switch5 = new TSNSwitch("switch5",100, 1, 125, 1, 400, 3000);
-		TSNSwitch *switch6 = new TSNSwitch("switch6",100, 1, 125, 1, 400, 3000);
-		TSNSwitch *switch7 = new TSNSwitch("switch7",100, 1, 125, 1, 400, 3000);
-		TSNSwitch *switch8 = new TSNSwitch("switch8",100, 1, 125, 1, 400, 3000);
-		TSNSwitch *switch9 = new TSNSwitch("switch9",100, 1, 125, 1, 400, 3000);
+		Switch *switch0 = new Switch("switch0",100, 1, 125, 1, 400, 3000);
+		Switch *switch1 = new Switch("switch1",100, 1, 125, 1, 400, 3000);
+		Switch *switch2 = new Switch("switch2",100, 1, 125, 1, 400, 3000);
+		Switch *switch3 = new Switch("switch3",100, 1, 125, 1, 400, 3000);
+		Switch *switch4 = new Switch("switch4",100, 1, 125, 1, 400, 3000);
+		Switch *switch5 = new Switch("switch5",100, 1, 125, 1, 400, 3000);
+		Switch *switch6 = new Switch("switch6",100, 1, 125, 1, 400, 3000);
+		Switch *switch7 = new Switch("switch7",100, 1, 125, 1, 400, 3000);
+		Switch *switch8 = new Switch("switch8",100, 1, 125, 1, 400, 3000);
+		Switch *switch9 = new Switch("switch9",100, 1, 125, 1, 400, 3000);
 
 
 		/*

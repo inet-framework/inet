@@ -4,7 +4,7 @@
 #include <z3++.h>
 
 #include "inet/linklayer/configurator/z3/Defs.h"
-#include "inet/linklayer/configurator/z3/TSNSwitch.h"
+#include "inet/linklayer/configurator/z3/Switch.h"
 
 namespace inet {
 
@@ -157,7 +157,7 @@ class INET_API ScheduleGenerator {
         * @param out       PrintWriter stream to output log file
         */
        void writePathTree(PathNode *pathNode, model& model, context& ctx) {
-           TSNSwitch *swt;
+           Switch *swt;
            std::shared_ptr<expr> indexZ3 = nullptr;
 
            if(dynamic_cast<Device *>(pathNode->getNode()) && (pathNode->getParent() != nullptr)) {
@@ -176,25 +176,25 @@ class INET_API ScheduleGenerator {
             * stores references to both flow fragment and switch, so no search is needed.
             */
            for(PathNode *child : pathNode->getChildren()) {
-               if(dynamic_cast<TSNSwitch *>(child->getNode())) {
+               if(dynamic_cast<Switch *>(child->getNode())) {
 
                    for(FlowFragment *ffrag : child->getFlowFragments()) {
                        std::cout << std::string("    Fragment name: ") << ffrag->getName() << std::endl;
                        std::cout << std::string("        Fragment node: ") << ffrag->getNodeName() << std::endl;
                        std::cout << std::string("        Fragment next hop: ") << ffrag->getNextHop() << std::endl;
                        std::cout << std::string("        Fragment priority: ") << model.eval(*ffrag->getFragmentPriorityZ3(), false) << std::endl;
-                       for(int index = 0; index < ((TSNSwitch *) child->getNode())->getPortOf(ffrag->getNextHop())->getCycle()->getNumOfSlots(); index++) {
+                       for(int index = 0; index < ((Switch *) child->getNode())->getPortOf(ffrag->getNextHop())->getCycle()->getNumOfSlots(); index++) {
                            indexZ3 = std::make_shared<expr>(ctx.int_val(index));
                            std::cout << std::string("        Fragment slot start ") << index << std::string(": ")
                                    << this->stringToFloat(
-                                           model.eval(*((TSNSwitch *) child->getNode())
+                                           model.eval(*((Switch *) child->getNode())
                                                   ->getPortOf(ffrag->getNextHop())
                                                   ->getCycle()
                                                   ->slotStartZ3(ctx, *ffrag->getFragmentPriorityZ3(), *indexZ3)
                                                   , false).to_string()) << std::endl;
                            std::cout << std::string("        Fragment slot duration ") << index << std::string(" : ")
                                     << this->stringToFloat(
-                                        model.eval(*((TSNSwitch *) child->getNode())
+                                        model.eval(*((Switch *) child->getNode())
                                                    ->getPortOf(ffrag->getNextHop())
                                                    ->getCycle()
                                                    ->slotDurationZ3(ctx, *ffrag->getFragmentPriorityZ3(), *indexZ3)
@@ -207,16 +207,16 @@ class INET_API ScheduleGenerator {
 
                        for(int i = 0; i < ffrag->getParent()->getNumOfPacketsSent(); i++) {
                                std::cout << std::string("On " + ffrag->getName() + std::string(" - ")) <<
-                                ((TSNSwitch *)child->getNode())->departureTime(ctx, i, ffrag)->to_string() << std::string(" - ") <<
-                                  ((TSNSwitch *)child->getNode())->scheduledTime(ctx, i, ffrag)->to_string() << std::endl;
+                                ((Switch *)child->getNode())->departureTime(ctx, i, ffrag)->to_string() << std::string(" - ") <<
+                                  ((Switch *)child->getNode())->scheduledTime(ctx, i, ffrag)->to_string() << std::endl;
                            // std::cout << ((TSNSwitch *)child->getNode())->departureTime(ctx, i, ffrag).to_string() << std::endl;
                            // std::cout << ((TSNSwitch *)child->getNode())->arrivalTime(ctx, i, ffrag).to_string() << std::endl;
                            // std::cout << ((TSNSwitch *)child->getNode())->scheduledTime(ctx, i, ffrag).to_string() << std::endl;
 
                            if(i < ffrag->getParent()->getNumOfPacketsSent()) {
-                               std::cout << std::string("          (") << std::to_string(i) << std::string(") Fragment departure time: ") << this->stringToFloat(model.eval(*((TSNSwitch *) child->getNode())->departureTime(ctx, i, ffrag), false).to_string()) << std::endl;
-                               std::cout << std::string("          (") << std::to_string(i) << std::string(") Fragment arrival time: ") << this->stringToFloat(model.eval(*((TSNSwitch *) child->getNode())->arrivalTime(ctx, i, ffrag), false).to_string()) << std::endl;
-                               std::cout << std::string("          (") << std::to_string(i) << std::string(") Fragment scheduled time: ") << this->stringToFloat(model.eval(*((TSNSwitch *) child->getNode())->scheduledTime(ctx, i, ffrag), false).to_string()) << std::endl;
+                               std::cout << std::string("          (") << std::to_string(i) << std::string(") Fragment departure time: ") << this->stringToFloat(model.eval(*((Switch *) child->getNode())->departureTime(ctx, i, ffrag), false).to_string()) << std::endl;
+                               std::cout << std::string("          (") << std::to_string(i) << std::string(") Fragment arrival time: ") << this->stringToFloat(model.eval(*((Switch *) child->getNode())->arrivalTime(ctx, i, ffrag), false).to_string()) << std::endl;
+                               std::cout << std::string("          (") << std::to_string(i) << std::string(") Fragment scheduled time: ") << this->stringToFloat(model.eval(*((Switch *) child->getNode())->scheduledTime(ctx, i, ffrag), false).to_string()) << std::endl;
                                std::cout << "          ----------------------------" << std::endl;
                            }
 
@@ -228,25 +228,25 @@ class INET_API ScheduleGenerator {
 
                            ffrag->addDepartureTime(
                                this->stringToFloat(
-                                   model.eval(*((TSNSwitch *) child->getNode())->departureTime(ctx, i, ffrag) , false).to_string()
+                                   model.eval(*((Switch *) child->getNode())->departureTime(ctx, i, ffrag) , false).to_string()
                                )
                            );
                            ffrag->addArrivalTime(
                                this->stringToFloat(
-                                   model.eval(*((TSNSwitch *) child->getNode())->arrivalTime(ctx, i, ffrag) , false).to_string()
+                                   model.eval(*((Switch *) child->getNode())->arrivalTime(ctx, i, ffrag) , false).to_string()
                                )
                            );
                            ffrag->addScheduledTime(
                                this->stringToFloat(
-                                   model.eval(*((TSNSwitch *) child->getNode())->scheduledTime(ctx, i, ffrag) , false).to_string()
+                                   model.eval(*((Switch *) child->getNode())->scheduledTime(ctx, i, ffrag) , false).to_string()
                                )
                            );
 
                        }
 
-                       swt = (TSNSwitch *) child->getNode();
+                       swt = (Switch *) child->getNode();
 
-                       for (Port *port : ((TSNSwitch *) swt)->getPorts()) {
+                       for (Port *port : ((Switch *) swt)->getPorts()) {
 
                            auto flowFragments = port->getFlowFragments();
                            if(std::find(flowFragments.begin(), flowFragments.end(), ffrag) == flowFragments.end()) {
@@ -257,18 +257,18 @@ class INET_API ScheduleGenerator {
                            std::vector<double> listOfDuration;
 
 
-                           for(int index = 0; index < ((TSNSwitch *) child->getNode())->getPortOf(ffrag->getNextHop())->getCycle()->getNumOfSlots(); index++) {
+                           for(int index = 0; index < ((Switch *) child->getNode())->getPortOf(ffrag->getNextHop())->getCycle()->getNumOfSlots(); index++) {
                                indexZ3 = std::make_shared<expr>(ctx.int_val(index));
 
                                listOfStart.push_back(
                                    this->stringToFloat(model.eval(
-                                       *((TSNSwitch *) child->getNode())
+                                       *((Switch *) child->getNode())
                                        ->getPortOf(ffrag->getNextHop())
                                        ->getCycle()->slotStartZ3(ctx, *ffrag->getFragmentPriorityZ3(), *indexZ3) , false).to_string())
                                );
                                listOfDuration.push_back(
                                    this->stringToFloat(model.eval(
-                                       *((TSNSwitch *) child->getNode())
+                                       *((Switch *) child->getNode())
                                        ->getPortOf(ffrag->getNextHop())
                                        ->getCycle()->slotDurationZ3(ctx, *ffrag->getFragmentPriorityZ3(), *indexZ3) , false).to_string())
                                );
@@ -297,7 +297,7 @@ class INET_API ScheduleGenerator {
                flw->setUpPeriods(flw->getPathTree()->getRoot());
            }
 
-           for(TSNSwitch *swt : net->getSwitches()) {
+           for(Switch *swt : net->getSwitches()) {
                swt->setUpCycleSize(solver, ctx);
            }
 
@@ -309,7 +309,7 @@ class INET_API ScheduleGenerator {
            }
 
            // On all network switches: Data given by the user will be converted to z3 values
-           for(TSNSwitch *swt : net->getSwitches()) {
+           for(Switch *swt : net->getSwitches()) {
                swt->toZ3(ctx, solver);
            }
 
@@ -339,8 +339,8 @@ class INET_API ScheduleGenerator {
 
 
            // A switch is picked in order to evaluate the unknown values
-           TSNSwitch *switch1 = nullptr;
-           switch1 = (TSNSwitch *) net->getSwitches().at(0);
+           Switch *switch1 = nullptr;
+           switch1 = (Switch *) net->getSwitches().at(0);
            // The duration of the cycle is given as a question to z3, so all the
            // constraints will have to be evaluated in order to z3 to know this cycle
            // duration
@@ -372,7 +372,7 @@ class INET_API ScheduleGenerator {
                        std::cout << "SWITCH LIST:" << std::endl;
 
                        // For every switch in the network, store its information in the log
-                       for(TSNSwitch *auxSwt : net->getSwitches()) {
+                       for(Switch *auxSwt : net->getSwitches()) {
                            std::cout << std::string("  Switch name: ") << auxSwt->getName();
                            std::cout << std::string("    Max packet size: ") << auxSwt->getMaxPacketSize();
                            std::cout << std::string("    Port speed: ") << auxSwt->getPortSpeed();
@@ -395,7 +395,7 @@ class INET_API ScheduleGenerator {
                            // [EXTRACTING OUTPUT]: Obtaining the z3 output of the switch properties,
                            // converting it from string to double and storing in the objects
 
-                           for (Port *port : ((TSNSwitch *)auxSwt)->getPorts()) {
+                           for (Port *port : ((Switch *)auxSwt)->getPorts()) {
                                port
                                    ->getCycle()
                                    ->setCycleStart(
@@ -404,7 +404,7 @@ class INET_API ScheduleGenerator {
                            }
 
                            // cycleDuration
-                           for (Port *port : ((TSNSwitch *)auxSwt)->getPorts()) {
+                           for (Port *port : ((Switch *)auxSwt)->getPorts()) {
                                port
                                    ->getCycle()
                                    ->setCycleDuration(
@@ -476,9 +476,9 @@ class INET_API ScheduleGenerator {
                                    for(PathNode *auxNode : *auxNodes) {
                                        if(dynamic_cast<Device *>(auxNode->getNode())) {
                                            std::cout << ((Device *) auxNode->getNode())->getName() + std::string(", ");
-                                       } else if (dynamic_cast<TSNSwitch *>(auxNode->getNode())) {
+                                       } else if (dynamic_cast<Switch *>(auxNode->getNode())) {
                                            std::cout <<
-                                               ((TSNSwitch *) auxNode->getNode())->getName() +
+                                               ((Switch *) auxNode->getNode())->getName() +
                                                std::string("(") +
                                                auxFlowFragments->at(auxCount)->getName() +
                                                "), ";

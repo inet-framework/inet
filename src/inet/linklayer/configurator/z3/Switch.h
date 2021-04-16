@@ -19,7 +19,7 @@ using namespace z3;
  * are able to organize a sequence of ports that connect the
  * switch to other nodes in the network.
  */
-class INET_API TSNSwitch : public cObject {
+class INET_API Switch : public cObject {
   public:
     std::string name;
     double maxPacketSize;
@@ -62,7 +62,7 @@ class INET_API TSNSwitch : public cObject {
      *
      * @param name      Name of the switch
      */
-    TSNSwitch(std::string name) {
+    Switch(std::string name) {
         this->name = name;
         ports.clear();
         this->connectsTo.clear();
@@ -79,7 +79,7 @@ class INET_API TSNSwitch : public cObject {
      * @param timeToTravel          Time that a packet takes to leave its port and reach the destination
      * @param transmissionTime      Time taken to process the packet inside the switch
      */
-    TSNSwitch(double timeToTravel,
+    Switch(double timeToTravel,
               double transmissionTime) {
         this->name = std::string("dev") + std::to_string(indexCounter++);
         this->timeToTravel = timeToTravel;
@@ -105,7 +105,7 @@ class INET_API TSNSwitch : public cObject {
      * @param portSpeed             Transmission speed of the port
      * @param gbSize                Size of the guard bands used to separate non consecutive time slots
      */
-    TSNSwitch(std::string name,
+    Switch(std::string name,
               double maxPacketSize,
               double timeToTravel,
               double transmissionTime,
@@ -139,7 +139,7 @@ class INET_API TSNSwitch : public cObject {
      * @param portSpeed             Transmission speed of the port
      * @param gbSize                Size of the guard bands used to separate non consecutive time slots
      */
-    TSNSwitch(std::string name,
+    Switch(std::string name,
               double maxPacketSize,
               double timeToTravel,
               double portSpeed,
@@ -250,12 +250,12 @@ class INET_API TSNSwitch : public cObject {
                             cycle
                     )
             );
-        } else if (dynamic_cast<TSNSwitch *>(destination)) {
-            this->connectsTo.push_back(((TSNSwitch *)destination)->getName());
+        } else if (dynamic_cast<Switch *>(destination)) {
+            this->connectsTo.push_back(((Switch *)destination)->getName());
 
             Port *newPort = new Port(this->name + std::string("Port") + std::to_string(this->portNum),
                     this->portNum,
-                    ((TSNSwitch *)destination)->getName(),
+                    ((Switch *)destination)->getName(),
                     this->maxPacketSize,
                     this->timeToTravel,
                     this->transmissionTime,

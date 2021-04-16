@@ -24,9 +24,9 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
             flowFrag = new FlowFragment(this);
 
             // Setting next hop
-            if(dynamic_cast<TSNSwitch *>(n->getNode())) {
+            if(dynamic_cast<Switch *>(n->getNode())) {
                 flowFrag->setNextHop(
-                        ((TSNSwitch *) n->getNode())->getName()
+                        ((Switch *) n->getNode())->getName()
                 );
             } else {
                 flowFrag->setNextHop(
@@ -34,13 +34,13 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
                 );
             }
 
-            if(((TSNSwitch *)auxN->getNode())->getPortOf(flowFrag->getNextHop())->checkIfAutomatedApplicationPeriod()) {
-                numberOfPackets = (int) (((TSNSwitch *)auxN->getNode())->getPortOf(flowFrag->getNextHop())->getDefinedHyperCycleSize()/this->flowSendingPeriodicity);
+            if(((Switch *)auxN->getNode())->getPortOf(flowFrag->getNextHop())->checkIfAutomatedApplicationPeriod()) {
+                numberOfPackets = (int) (((Switch *)auxN->getNode())->getPortOf(flowFrag->getNextHop())->getDefinedHyperCycleSize()/this->flowSendingPeriodicity);
                 flowFrag->setNumOfPacketsSent(numberOfPackets);
             }
 
             if(auxN->getParent()->getParent() == nullptr) { //First flow fragment, fragment first departure = device's first departure
-                flowFrag->setNodeName(((TSNSwitch *)auxN->getNode())->getName());
+                flowFrag->setNodeName(((Switch *)auxN->getNode())->getName());
 
                 for (int i = 0; i < numberOfPackets; i++) {
 
@@ -59,7 +59,7 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
                 for (int i = 0; i < numberOfPackets; i++) {
 
                     flowFrag->addDepartureTimeZ3( // Flow fragment link constraint
-                            *((TSNSwitch *) auxN->getParent()->getNode())
+                            *((Switch *) auxN->getParent()->getNode())
                                     ->scheduledTime(
                                             ctx,
                                             i,
@@ -69,7 +69,7 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
 
                 }
 
-                flowFrag->setNodeName(((TSNSwitch *) auxN->getNode())->getName());
+                flowFrag->setNodeName(((Switch *) auxN->getNode())->getName());
 
             }
 
@@ -81,10 +81,10 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
                 flowFrag->setFragmentPriorityZ3(ctx.int_const((flowFrag->getName() + std::string("Priority")).c_str()));
             }
 
-            auto connectsTo = ((TSNSwitch *) auxN->getNode())->getConnectsTo();
+            auto connectsTo = ((Switch *) auxN->getNode())->getConnectsTo();
             int portIndex = std::find(connectsTo.begin(), connectsTo.end(), flowFrag->getNextHop()) - connectsTo.begin();
             flowFrag->setPort(
-                    ((TSNSwitch *) auxN->getNode())
+                    ((Switch *) auxN->getNode())
                             ->getPorts().at(portIndex)
             );
 
@@ -101,7 +101,7 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
 
             //Adding fragment to the fragment list and to the switch's fragment list
             auxN->addFlowFragment(flowFrag);
-            ((TSNSwitch *)auxN->getNode())->addToFragmentList(flowFrag);
+            ((Switch *)auxN->getNode())->addToFragmentList(flowFrag);
             // System.out.println(std::string("Adding fragment to switch " + ((TSNSwitch *)auxN->getNode())->getName() + std::string(" has ") + auxN->getChildren().size() + " children"));
 
         }
@@ -126,7 +126,7 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
     return flowFrag;
 }
 
-void Flow::pathToZ3(context& ctx, TSNSwitch *swt, int currentSwitchIndex)
+void Flow::pathToZ3(context& ctx, Switch *swt, int currentSwitchIndex)
 {
     // Flow fragment is created
     FlowFragment *flowFrag = new FlowFragment(this);
@@ -150,11 +150,11 @@ void Flow::pathToZ3(context& ctx, TSNSwitch *swt, int currentSwitchIndex)
     } else {
         for (int i = 0; i < PACKETUPPERBOUNDRANGE; i++) {
             flowFrag->addDepartureTimeZ3(
-                    *((TSNSwitch *) path.at(currentSwitchIndex - 1))->scheduledTime(ctx, i, flowFragments.at(flowFragments.size() - 1))
+                    *((Switch *) path.at(currentSwitchIndex - 1))->scheduledTime(ctx, i, flowFragments.at(flowFragments.size() - 1))
             );
         }
     }
-    flowFrag->setNodeName(((TSNSwitch *) path.at(currentSwitchIndex))->getName());
+    flowFrag->setNodeName(((Switch *) path.at(currentSwitchIndex))->getName());
 
     // Setting extra flow properties
     flowFrag->setFragmentPriorityZ3(ctx.int_val((flowFrag->getName() + std::string("Priority")).c_str()));
@@ -181,7 +181,7 @@ void Flow::pathToZ3(context& ctx, TSNSwitch *swt, int currentSwitchIndex)
      * the flow fragment list of this flow.
      */
 
-    ((TSNSwitch *)swt)->addToFragmentList(flowFrag);
+    ((Switch *)swt)->addToFragmentList(flowFrag);
     flowFragments.push_back(flowFrag);
 }
 
@@ -415,11 +415,11 @@ std::shared_ptr<expr> Flow::getLatencyZ3(solver& solver, context &ctx, int index
             ctx.real_const(
                     (this->name + std::string("latencyOfPacket")
                             + std::to_string(index)).c_str()));
-    TSNSwitch *lastSwitchInPath =
-            ((TSNSwitch*) (this->path.at(path.size() - 1)));
+    Switch *lastSwitchInPath =
+            ((Switch*) (this->path.at(path.size() - 1)));
     FlowFragment *lastFragmentInList = this->flowFragments.at(
             flowFragments.size() - 1);
-    TSNSwitch *firstSwitchInPath = ((TSNSwitch*) (this->path.at(0)));
+    Switch *firstSwitchInPath = ((Switch*) (this->path.at(0)));
     FlowFragment *firstFragmentInList = this->flowFragments.at(0);
     addAssert(solver,
             mkEq(latency,
@@ -445,10 +445,10 @@ std::shared_ptr<expr> Flow::getLatencyZ3(solver& solver, Device *dev, context &c
                             + dev->getName()).c_str()));
     std::vector<PathNode*> *nodes = this->getNodesFromRootToNode(dev);
     std::vector<FlowFragment*> *flowFrags = this->getFlowFromRootToNode(dev);
-    TSNSwitch *lastSwitchInPath =
-            ((TSNSwitch*) (nodes->at(nodes->size() - 2)->getNode())); // - 1 for indexing, - 1 for last node being the end device
+    Switch *lastSwitchInPath =
+            ((Switch*) (nodes->at(nodes->size() - 2)->getNode())); // - 1 for indexing, - 1 for last node being the end device
     FlowFragment *lastFragmentInList = flowFrags->at(flowFrags->size() - 1);
-    TSNSwitch *firstSwitchInPath = ((TSNSwitch*) (nodes->at(1)->getNode())); // 1 since the first node is the publisher
+    Switch *firstSwitchInPath = ((Switch*) (nodes->at(1)->getNode())); // 1 since the first node is the publisher
     FlowFragment *firstFragmentInList = flowFrags->at(0);
     addAssert(solver,
             mkEq(latency,
@@ -470,13 +470,13 @@ std::shared_ptr<expr> Flow::getJitterZ3(Device *dev, solver& solver, context &ct
                     + std::string("JitterOfPacket" + std::to_string(index) + std::string("For"))
                     + dev->getName()).c_str()));
     std::vector<PathNode*> *nodes = this->getNodesFromRootToNode(dev);
-    TSNSwitch *lastSwitchInPath =
-            ((TSNSwitch*) (nodes->at(nodes->size() - 2)->getNode())); // - 1 for indexing, - 1 for last node being the end device
+    Switch *lastSwitchInPath =
+            ((Switch*) (nodes->at(nodes->size() - 2)->getNode())); // - 1 for indexing, - 1 for last node being the end device
     FlowFragment *lastFragmentInList =
             nodes->at(nodes->size() - 2)->getFlowFragments().at(
                     nodes->at(nodes->size() - 2)->getChildIndex(
                             nodes->at(nodes->size() - 1)));
-    TSNSwitch *firstSwitchInPath = ((TSNSwitch*) (nodes->at(1)->getNode())); // 1 since the first node is the publisher
+    Switch *firstSwitchInPath = ((Switch*) (nodes->at(1)->getNode())); // 1 since the first node is the publisher
     FlowFragment *firstFragmentInList = nodes->at(1)->getFlowFragments().at(0);
     // z3::expr avgLatency = (z3::expr) mkDiv(getSumOfLatencyZ3(solver, dev, ctx, index), ctx.int_val(PACKETUPPERBOUNDRANGE - 1));
     std::shared_ptr<expr> avgLatency = this->getAvgLatency(dev, solver, ctx);
