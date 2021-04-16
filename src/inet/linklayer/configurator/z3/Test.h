@@ -385,7 +385,7 @@ class Test {
 		*/
 		std::deque<PathNode *> *nodeList;
 
-		Flow *flow0 = new Flow(PUBLISH_SUBSCRIBE);
+		Flow *flow0 = new Flow(Flow::PUBLISH_SUBSCRIBE);
 		PathTree *pathTree0 = new PathTree();
 		PathNode *pathNode0;
 		pathNode0 = pathTree0->addRoot(dev4);
@@ -404,7 +404,7 @@ class Test {
 		nodeList->pop_front();
 		flow0->setPathTree(pathTree0);
 
-		Flow *flow1 = new Flow(PUBLISH_SUBSCRIBE);
+		Flow *flow1 = new Flow(Flow::PUBLISH_SUBSCRIBE);
 		PathTree *pathTree1 = new PathTree();
 		PathNode *pathNode1;
 		pathNode1 = pathTree1->addRoot(dev21);
@@ -423,7 +423,7 @@ class Test {
 		nodeList->pop_front();
 		flow1->setPathTree(pathTree1);
 
-		Flow *flow2 = new Flow(PUBLISH_SUBSCRIBE);
+		Flow *flow2 = new Flow(Flow::PUBLISH_SUBSCRIBE);
 		PathTree *pathTree2 = new PathTree();
 		PathNode *pathNode2;
 		pathNode2 = pathTree2->addRoot(dev39);

@@ -24,6 +24,10 @@ using namespace z3;
 class INET_API Flow {
   public:
     // TODO: CHECK FUNCTIONS FOR UNICAST FLOWS
+    enum Type {
+        UNICAST,
+        PUBLISH_SUBSCRIBE
+    };
 
     bool isModifiedOrCreated = false;
 
@@ -38,12 +42,6 @@ class INET_API Flow {
 
     bool fixedPriority = false;
     int priorityValue = -1;
-
-    //Specifying the type of the flow:
-#define UNICAST 0
-#define PUBLISH_SUBSCRIBE 1
-
-
 
     std::vector<Switch *> path;
     std::vector<FlowFragment *> flowFragments;
