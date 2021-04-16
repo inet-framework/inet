@@ -47,6 +47,7 @@ class INET_API Flow {
     std::vector<FlowFragment *> flowFragments;
     PathTree *pathTree;
 
+    int numberOfPackets = -1;
     int pathTreeCount = 0;
 
     std::shared_ptr<expr> flowPriority; // In the future, priority might be fixed

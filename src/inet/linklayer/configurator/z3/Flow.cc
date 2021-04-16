@@ -6,7 +6,6 @@ namespace inet {
 FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
 {
     FlowFragment *flowFrag = nullptr;
-    int numberOfPackets = PACKETUPPERBOUNDRANGE;
 
     // If, by chance, the given node has no child, then its a leaf
     if(node->getChildren().size() == 0) {
@@ -36,8 +35,8 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
 
             if(((Switch *)auxN->getNode())->getPortOf(flowFrag->getNextHop())->checkIfAutomatedApplicationPeriod()) {
                 numberOfPackets = (int) (((Switch *)auxN->getNode())->getPortOf(flowFrag->getNextHop())->getDefinedHyperCycleSize()/this->flowSendingPeriodicity);
-                flowFrag->setNumOfPacketsSent(numberOfPackets);
             }
+            flowFrag->setNumOfPacketsSent(numberOfPackets);
 
             if(auxN->getParent()->getParent() == nullptr) { //First flow fragment, fragment first departure = device's first departure
                 flowFrag->setNodeName(((Switch *)auxN->getNode())->getName());
@@ -139,7 +138,7 @@ void Flow::pathToZ3(context& ctx, Switch *swt, int currentSwitchIndex)
     if(flowFragments.size() == 0) {
         // If no flowFragment has been added to the path, flowPriority is nullptr, so initiate it
         //flowFrag->setNodeName(this->startDevice->getName());
-        for (int i = 0; i < PACKETUPPERBOUNDRANGE; i++) {
+        for (int i = 0; i < numberOfPackets; i++) {
             flowFrag->addDepartureTimeZ3( // Packet departure constraint
                     (z3::expr) mkAdd(
                             this->flowFirstSendingTimeZ3,
@@ -148,7 +147,7 @@ void Flow::pathToZ3(context& ctx, Switch *swt, int currentSwitchIndex)
             );
         }
     } else {
-        for (int i = 0; i < PACKETUPPERBOUNDRANGE; i++) {
+        for (int i = 0; i < numberOfPackets; i++) {
             flowFrag->addDepartureTimeZ3(
                     *((Switch *) path.at(currentSwitchIndex - 1))->scheduledTime(ctx, i, flowFragments.at(flowFragments.size() - 1))
             );
