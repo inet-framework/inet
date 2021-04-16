@@ -39,7 +39,7 @@ class INET_API FlowFragment : public Flow {
     int fragmentPriority;
     std::string nodeName;
     std::string nextHopName;
-    int numOfPacketsSent = PACKETUPPERBOUNDRANGE;
+    int numOfPacketsSent = -1;
 
     //TODO: CREATE REFERENCES TO PREVIOUS AND NEXT FRAGMENTS
     FlowFragment *previousFragment;

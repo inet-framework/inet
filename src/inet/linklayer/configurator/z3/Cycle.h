@@ -11,8 +11,6 @@ namespace inet {
 
 using namespace z3;
 
-#define PACKETUPPERBOUNDRANGE 25 // Limits the applications of rules to the packets
-
 /**
  * [Class]: Cycle
  * [Usage]: Contains all properties of a TSN cycle.
