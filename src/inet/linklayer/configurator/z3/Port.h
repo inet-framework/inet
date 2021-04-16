@@ -49,14 +49,12 @@ class INET_API Port {
 
     double maxPacketSize;
     double timeToTravel;
-    double transmissionTime;
     double portSpeed;
     int portNum;
 
     std::shared_ptr<expr> gbSizeZ3; // Size of the guardBand
     std::shared_ptr<expr> maxPacketSizeZ3;
     std::shared_ptr<expr> timeToTravelZ3;
-    std::shared_ptr<expr> transmissionTimeZ3;
     std::shared_ptr<expr> portSpeedZ3;
 
 
@@ -68,7 +66,6 @@ class INET_API Port {
      * @param name                  Logical index of the port for z3
      * @param maxPacketSize         Maximum size of a packet that can be transmitted by this port
      * @param timeToTravel          Time to travel on the middle used by this port
-     * @param transmissionTime      Time taken to process a packet in this port
      * @param portSpeed             Transmission speed of this port
      * @param gbSize                Size of the guard band
      * @param cycle                 Cycle used by the port
@@ -78,7 +75,6 @@ class INET_API Port {
             std::string connectsTo,
             double maxPacketSize,
             double timeToTravel,
-            double transmissionTime,
             double portSpeed,
             double gbSize,
             Cycle *cycle) {
@@ -87,7 +83,6 @@ class INET_API Port {
         this->connectsTo = connectsTo;
         this->maxPacketSize = maxPacketSize;
         this->timeToTravel = timeToTravel;
-        this->transmissionTime = transmissionTime;
         this->portSpeed = portSpeed;
         this->gbSize = gbSize;
         this->cycle = cycle;
@@ -108,7 +103,6 @@ class INET_API Port {
         this->gbSizeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(gbSize).c_str()));
         this->maxPacketSizeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->maxPacketSize).c_str()));
         this->timeToTravelZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->timeToTravel).c_str()));
-        this->transmissionTimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->transmissionTime).c_str()));
         this->portSpeedZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(portSpeed).c_str()));
         this->bestEffortPercentZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(bestEffortPercent).c_str()));
 
