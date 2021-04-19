@@ -193,10 +193,23 @@ Some explanation on the syntax for the mapper:
 
     - the vlan policy module
 
-The Model/Configuration/The example simulations
------------------------------------------------
+.. The Model/Configuration/The example simulations
+   -----------------------------------------------
 
-The example simulations use the following network:
+The Model
+---------
+
+.. Ethernet VLANs are demonstrated with two configurations:
+
+We'll demonstrate Ethernet VLANs with the following configurations:
+
+- **VLAN between switches**: Packets are assigned to VLANs by Ethernet switches
+- **VLAN between hosts using virtual interfaces**: Packets are assigned to a VLAN by a host's virtual interface
+
+Config: VLAN Between Switches
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This simulation uses the following network:
 
 .. .. figure:: media/network.png
       :align: center
@@ -204,12 +217,20 @@ The example simulations use the following network:
 .. .. figure:: media/network5.png
    :align: center
 
-.. figure:: media/network6.png
+.. .. figure:: media/network6.png
+   :align: center
+
+.. .. figure:: media/network7.png
+   :align: center
+
+.. figure:: media/network9.png
    :align: center
 
 .. It contains a network of two switches (:ned:`EthernetSwitch`). A host (:ned:`StandardHost`) is connected to each switch.
 
-It contains six hosts (:ned:`StandardHost`) and two switches (:ned:`EthernetSwitch`). We separate the network into two virtual networks with three hosts each, indicated on the image with red and blue colors. We assign VLAN ID 1 to the upper VLAN, and VLAN ID 2 to the lower VLAN.
+The network contains six hosts (:ned:`StandardHost`) and two switches (:ned:`EthernetSwitch`). 
+
+All hosts are in the same subnet (addresses are sequential from 10.0.0.1 to 10.0.0.6). We separate the network into two virtual networks with three hosts each, indicated on the image with red and blue colors. We assign VLAN ID 1 to the upper VLAN, and VLAN ID 2 to the lower VLAN.
 
 The two switches are configured to be VLAN aware, but the hosts are not. (Thus the switches are responsible for creating the VLANs and adding VLAN tags to packets.
 
@@ -217,27 +238,26 @@ The two switches are configured to be VLAN aware, but the hosts are not. (Thus t
 
 **TODO** traffic
 
-For traffic, host1 in the upper VLAN broadcasts UDP packets to host4 in the same VLAN. Similarly, host4 in the lower VLAN send packets to hostX.
+.. For traffic, host1 in the upper VLAN broadcasts UDP packets to host4 in the same VLAN. Similarly, host4 in the lower VLAN send packets to hostX.
 
-**TODO** each is a different subnet -> how about they weren't ? can they have the same address ?
+A UDP application in host1 and host4 generate packets, which are broadcast to the entire LAN (to address 10.0.0.7). However, the switches only deliver packets in the same VLAN they originate from (host1 to host2 and host3, host4 to host5 and host6).
 
-For traffic, one of the hosts in each VLAN send UDP packets to another host in the same VLAN. The switches separate the packets.
+.. **TODO** each is a different subnet -> how about they weren't ? can they have the same address ?
 
-**V1** There are two configurations in this showcase:
+.. For traffic, one of the hosts in each VLAN send UDP packets to another host in the same VLAN. The switches separate the packets.
 
-- Config ``BetweenSwitches``: All packets between the5switches are assigned to VLAN 42.
-- Config ``VirtualInterface``: All packets between the hosts are assigned to VLAN 42 and use virtual interfaces in the hosts.
+.. **V1** There are two configurations in this showcase:
 
-**V2** There are two configurations in this showcase:
-
-- **VLAN between the switches**: All packets between the switches are assigned to VLAN 42.
-- **VLAN between the hosts using virtual interfaces**: All packets between the hosts are assigned to VLAN 42 and use virtual interfaces in the hosts.
+   - Config ``BetweenSwitches``: All packets between the5switches are assigned to VLAN 42.
+   - Config ``VirtualInterface``: All packets between the hosts are assigned to VLAN 42 and use virtual interfaces in the hosts.
 
 .. Example: VLAN between the Switches
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-VLAN between the Switches
-~~~~~~~~~~~~~~~~~~~~~~~~~
+**TODO** config
+
+Config: VLAN Between Hosts Using Virtual Interfaces
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Before we get to the example simulation, here is part of the ``General`` configuration with Ethernet settings:
 
