@@ -87,11 +87,11 @@ Ipv6::ScheduledDatagram::~ScheduledDatagram()
 void Ipv6::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        rt = getModuleFromPar<Ipv6RoutingTable>(par("routingTableModule"), this);
-        nd = getModuleFromPar<Ipv6NeighbourDiscovery>(par("ipv6NeighbourDiscoveryModule"), this);
-        icmp = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
-        tunneling = getModuleFromPar<Ipv6Tunneling>(par("ipv6TunnelingModule"), this);
+        ift.reference(this, "interfaceTableModule", true);
+        rt.reference(this, "routingTableModule", true);
+        nd.reference(this, "ipv6NeighbourDiscoveryModule", true);
+        icmp.reference(this, "icmpv6Module", true);
+        tunneling.reference(this, "ipv6TunnelingModule", true);
 
         curFragmentId = 0;
         lastCheckTime = SIMTIME_ZERO;

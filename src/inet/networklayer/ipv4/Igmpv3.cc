@@ -73,8 +73,8 @@ Igmpv3::~Igmpv3()
 void Igmpv3::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
+        ift.reference(this, "interfaceTableModule", true);
+        rt.reference(this, "routingTableModule", true);
 
         enabled = par("enabled");
         robustness = par("robustnessVariable");

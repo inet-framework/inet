@@ -68,8 +68,8 @@ void Ipv6Tunneling::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        rt = getModuleFromPar<Ipv6RoutingTable>(par("routingTableModule"), this);
+        ift.reference(this, "interfaceTableModule", true);
+        rt.reference(this, "routingTableModule", true);
 
         vIfIndexTop = INT_MAX; // virtual interface number set to maximum int value
         noOfNonSplitTunnels = 0; // current number of non-split tunnels on this host

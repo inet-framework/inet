@@ -18,6 +18,7 @@
 #ifndef __INET_TOKENGENERATORBASE_H
 #define __INET_TOKENGENERATORBASE_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/StringFormat.h"
 #include "inet/queueing/contract/IPacketProcessor.h"
 #include "inet/queueing/server/TokenBasedServer.h"
@@ -32,7 +33,7 @@ class INET_API TokenGeneratorBase : public PacketProcessorBase
 
   protected:
     const char *displayStringTextFormat = nullptr;
-    TokenBasedServer *server = nullptr;
+    ModuleRefByPar<TokenBasedServer> server;
     int numTokensGenerated = -1;
 
   protected:

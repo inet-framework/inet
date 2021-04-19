@@ -32,7 +32,6 @@ Define_Module(DielectricObstacleLoss);
 
 DielectricObstacleLoss::DielectricObstacleLoss() :
     medium(nullptr),
-    physicalEnvironment(nullptr),
     intersectionComputationCount(0),
     intersectionCount(0)
 {
@@ -44,7 +43,7 @@ void DielectricObstacleLoss::initialize(int stage)
         enableDielectricLoss = par("enableDielectricLoss");
         enableReflectionLoss = par("enableReflectionLoss");
         medium = check_and_cast<IRadioMedium *>(getParentModule());
-        physicalEnvironment = getModuleFromPar<IPhysicalEnvironment>(par("physicalEnvironmentModule"), this);
+        physicalEnvironment.reference(this, "physicalEnvironmentModule", true);
     }
 }
 

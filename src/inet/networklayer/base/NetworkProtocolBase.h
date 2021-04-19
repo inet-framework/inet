@@ -23,6 +23,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/LayeredProtocolBase.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
@@ -41,7 +42,7 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase, public DefaultP
             : socketId(socketId), protocolId(protocolId), localAddress(localAddress) {}
     };
 
-    IInterfaceTable *interfaceTable;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
     // working vars
     std::set<const Protocol *> upperProtocols;
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;

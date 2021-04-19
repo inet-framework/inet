@@ -19,6 +19,7 @@
 #define __INET_VLANREQMAPPER_H
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
@@ -29,7 +30,7 @@ using namespace inet::queueing;
 class INET_API VlanReqMapper : public PacketFlowBase, public TransparentProtocolRegistrationListener
 {
   protected:
-    IInterfaceTable *interfaceTable = nullptr;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
     cValueMap *mappedVlanIds = nullptr;
 
   protected:

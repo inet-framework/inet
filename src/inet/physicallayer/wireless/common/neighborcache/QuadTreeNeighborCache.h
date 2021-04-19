@@ -18,6 +18,7 @@
 #ifndef __INET_QUADTREENEIGHBORCACHE_H
 #define __INET_QUADTREENEIGHBORCACHE_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/geometry/container/QuadTree.h"
 #include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
 
@@ -45,7 +46,7 @@ class INET_API QuadTreeNeighborCache : public cSimpleModule, public INeighborCac
   protected:
     QuadTree *quadTree;
     Radios radios;
-    RadioMedium *radioMedium;
+    ModuleRefByPar<RadioMedium> radioMedium;
     cMessage *rebuildQuadTreeTimer;
     Coord constraintAreaMax, constraintAreaMin;
     unsigned int maxNumOfPointsPerQuadrant;

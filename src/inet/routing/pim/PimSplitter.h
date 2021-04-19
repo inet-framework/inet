@@ -20,6 +20,7 @@
 #ifndef __INET_PIMSPLITTER_H
 #define __INET_PIMSPLITTER_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/routing/pim/PimPacket_m.h"
@@ -37,8 +38,8 @@ namespace inet {
 class INET_API PimSplitter : public cSimpleModule
 {
   private:
-    IInterfaceTable *ift = nullptr;
-    PimInterfaceTable *pimIft = nullptr;
+    ModuleRefByPar<IInterfaceTable> ift;
+    ModuleRefByPar<PimInterfaceTable> pimIft;
 
     cGate *ipIn = nullptr;
     cGate *ipOut = nullptr;

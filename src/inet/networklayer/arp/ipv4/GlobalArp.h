@@ -21,6 +21,7 @@
 
 #include <map>
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Packet.h"
@@ -48,7 +49,7 @@ class INET_API GlobalArp : public OperationalBase, public IArp, public cListener
     };
 
   protected:
-    IInterfaceTable *interfaceTable = nullptr;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
     L3Address::AddressType addressType = static_cast<L3Address::AddressType>(-1);
 
     static ArpCache globalArpCache;

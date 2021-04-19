@@ -60,7 +60,7 @@ void Ieee80211Mac::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         modeSet = Ieee80211ModeSet::getModeSet(par("modeSet"));
         fcsMode = parseFcsMode(par("fcsMode"));
-        mib = getModuleFromPar<Ieee80211Mib>(par("mibModule"), this);
+        mib.reference(this, "mibModule", true);
         mib->qos = par("qosStation");
     }
     else if (stage == INITSTAGE_LINK_LAYER) {

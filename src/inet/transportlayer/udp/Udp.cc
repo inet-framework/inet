@@ -83,7 +83,7 @@ void Udp::initialize(int stage)
         crcMode = parseCrcMode(crcModeString, true);
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        ift.reference(this, "interfaceTableModule", true);
         icmp = nullptr;
         icmpv6 = nullptr;
 

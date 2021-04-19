@@ -18,6 +18,7 @@
 #ifndef __INET_NOISESOURCE_H
 #define __INET_NOISESOURCE_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntenna.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
@@ -31,7 +32,7 @@ class INET_API NoiseSource : public cSimpleModule, public virtual IRadio
     const int id = nextId++;
     cGate *radioIn = nullptr;
     int mediumModuleId = -1;
-    IRadioMedium *medium = nullptr;
+    ModuleRefByPar<IRadioMedium> medium;
     const IAntenna *antenna = nullptr;
     const ITransmitter *transmitter = nullptr;
 

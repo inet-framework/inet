@@ -43,7 +43,7 @@ void OpenStreetMapSceneCanvasVisualizer::initialize(int stage)
     if (!hasGUI()) return;
     if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT) {
         auto canvas = visualizationTargetModule->getCanvas();
-        coordinateSystem = getModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this);
+        coordinateSystem.reference(this, "coordinateSystemModule", true);
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
 
         cXMLElement *mapXml = par("mapFile").xmlValue();

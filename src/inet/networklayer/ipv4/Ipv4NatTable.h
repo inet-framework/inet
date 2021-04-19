@@ -18,6 +18,7 @@
 #ifndef __INET_IPV4NATTABLE_H
 #define __INET_IPV4NATTABLE_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/PacketFilter.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/ipv4/Ipv4NatEntry_m.h"
@@ -28,7 +29,7 @@ class INET_API Ipv4NatTable : public cSimpleModule, public NetfilterBase::HookBa
 {
   protected:
     cXMLElement *config = nullptr;
-    INetfilter *networkProtocol = nullptr;
+    ModuleRefByPar<INetfilter> networkProtocol;
 
     std::multimap<INetfilter::IHook::Type, std::pair<PacketFilter *, Ipv4NatEntry>> natEntries;
 

@@ -27,9 +27,6 @@ Define_Module(L2NodeConfigurator);
 
 L2NodeConfigurator::L2NodeConfigurator()
 {
-    nodeStatus = nullptr;
-    interfaceTable = nullptr;
-    networkConfigurator = nullptr;
 }
 
 void L2NodeConfigurator::initialize(int stage)
@@ -37,8 +34,8 @@ void L2NodeConfigurator::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         cModule *host = getContainingNode(this);
         nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
-        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        networkConfigurator = findModuleFromPar<L2NetworkConfigurator>(par("l2ConfiguratorModule"), this);
+        interfaceTable.reference(this, "interfaceTableModule", true);
+        networkConfigurator.reference(this, "l2ConfiguratorModule", false);
         host->subscribe(interfaceCreatedSignal, this);
     }
 }
@@ -75,7 +72,6 @@ void L2NodeConfigurator::prepareInterface(NetworkInterface *networkInterface)
 
 void L2NodeConfigurator::configureNode()
 {
-    ASSERT(networkConfigurator);
 //    std::cout << "configureNode(): " << interfaceTable->getNumInterfaces() << endl;
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
         networkConfigurator->configureInterface(interfaceTable->getInterface(i));

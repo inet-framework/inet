@@ -62,8 +62,8 @@ class INET_API Dsdv : public RoutingProtocolBase
 
   protected:
     simtime_t helloInterval;
-    IInterfaceTable *ift = nullptr;
-    IIpv4RoutingTable *rt = nullptr;
+    ModuleRefByPar<IInterfaceTable> ift;
+    ModuleRefByPar<IIpv4RoutingTable> rt;
 
   public:
     Dsdv();

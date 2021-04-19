@@ -19,6 +19,7 @@
 #define __INET_STREAMDECODER_H
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
@@ -30,7 +31,7 @@ class INET_API StreamDecoder : public PacketFlowBase, public TransparentProtocol
 {
   protected:
     cValueArray *streamMappings = nullptr;
-    IInterfaceTable *interfaceTable = nullptr;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
 
   protected:
     virtual void initialize(int stage) override;

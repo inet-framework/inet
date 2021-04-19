@@ -18,6 +18,7 @@
 #ifndef __INET_STATEBASEDEPENERGYCONSUMER_H
 #define __INET_STATEBASEDEPENERGYCONSUMER_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/power/contract/IEpEnergyConsumer.h"
 #include "inet/power/contract/IEpEnergySource.h"
@@ -52,8 +53,8 @@ class INET_API StateBasedEpEnergyConsumer : public cSimpleModule, public power::
     W transmitterTransmittingDataPowerConsumption = W(NaN);
 
     // environment
-    IRadio *radio = nullptr;
-    power::IEpEnergySource *energySource = nullptr;
+    opp_component_ptr<IRadio> radio;
+    ModuleRefByPar<power::IEpEnergySource> energySource;
 
     // state
     W powerConsumption = W(NaN);

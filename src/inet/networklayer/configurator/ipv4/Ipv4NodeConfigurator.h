@@ -18,6 +18,7 @@
 #ifndef __INET_IPV4NODECONFIGURATOR_H
 #define __INET_IPV4NODECONFIGURATOR_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/configurator/ipv4/Ipv4NetworkConfigurator.h"
@@ -35,10 +36,10 @@ namespace inet {
 class INET_API Ipv4NodeConfigurator : public cSimpleModule, public ILifecycle, protected cListener
 {
   protected:
-    NodeStatus *nodeStatus;
-    IInterfaceTable *interfaceTable;
-    IIpv4RoutingTable *routingTable;
-    Ipv4NetworkConfigurator *networkConfigurator;
+    opp_component_ptr<NodeStatus> nodeStatus;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
+    ModuleRefByPar<IIpv4RoutingTable> routingTable;
+    ModuleRefByPar<Ipv4NetworkConfigurator> networkConfigurator;
 
   public:
     Ipv4NodeConfigurator();

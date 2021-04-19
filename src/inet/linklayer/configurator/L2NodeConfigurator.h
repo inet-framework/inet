@@ -31,9 +31,9 @@ namespace inet {
 class INET_API L2NodeConfigurator : public cSimpleModule, public ILifecycle, public cListener
 {
   protected:
-    NodeStatus *nodeStatus;
-    IInterfaceTable *interfaceTable;
-    L2NetworkConfigurator *networkConfigurator;
+    opp_component_ptr<NodeStatus> nodeStatus;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
+    ModuleRefByPar<L2NetworkConfigurator> networkConfigurator;
 
   public:
     L2NodeConfigurator();

@@ -19,6 +19,7 @@
 #ifndef __INET_TED_H
 #define __INET_TED_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/rsvpte/IntServ_m.h"
 #include "inet/networklayer/ted/Ted_m.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
@@ -98,8 +99,8 @@ class INET_API Ted : public RoutingProtocolBase
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
   protected:
-    IIpv4RoutingTable *rt = nullptr;
-    IInterfaceTable *ift = nullptr;
+    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<IInterfaceTable> ift;
     Ipv4Address routerId;
 
     Ipv4AddressVector interfaceAddrs; // list of local interface addresses

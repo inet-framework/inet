@@ -20,6 +20,7 @@
 
 #include <vector>
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/nexthop/NextHopRoute.h"
 
@@ -33,7 +34,7 @@ class IInterfaceTable;
 class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable, public cListener
 {
   private:
-    IInterfaceTable *ift = nullptr; // cached pointer
+    ModuleRefByPar<IInterfaceTable> ift;
 
     L3Address routerId;
     L3Address::AddressType addressType = L3Address::NONE;

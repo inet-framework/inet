@@ -18,6 +18,7 @@
 #ifndef __INET_OPENSTREETMAPSCENECANVASVISUALIZER_H
 #define __INET_OPENSTREETMAPSCENECANVASVISUALIZER_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/common/streetmap/OpenStreetMap.h"
@@ -30,7 +31,7 @@ namespace visualizer {
 class INET_API OpenStreetMapSceneCanvasVisualizer : public SceneVisualizerBase
 {
   protected:
-    IGeographicCoordinateSystem *coordinateSystem = nullptr;
+    ModuleRefByPar<IGeographicCoordinateSystem> coordinateSystem;
     CanvasProjection *canvasProjection = nullptr;
 
   protected:

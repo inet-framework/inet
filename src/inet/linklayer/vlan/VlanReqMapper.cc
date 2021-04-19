@@ -29,7 +29,7 @@ void VlanReqMapper::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        interfaceTable.reference(this, "interfaceTableModule", true);
         cObject *object = par("mappedVlanIds");
         mappedVlanIds = check_and_cast<cValueMap *>(object);
         WATCH(mappedVlanIds);

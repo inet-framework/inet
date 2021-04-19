@@ -33,6 +33,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/InterfaceMatcher.h"
@@ -85,8 +86,8 @@ class INET_API EigrpIpv4Pdm : public cSimpleModule, public IEigrpModule<Ipv4Addr
     bool eigrpStubEnabled;      /**< True when EIGRP stub is on */
     EigrpStub eigrpStub;        /**< EIGRP stub configuration */
 
-    IIpv4RoutingTable *rt = nullptr; // Routing table
-    IInterfaceTable *ift = nullptr; // Interface table (all interfaces)
+    ModuleRefByPar<IInterfaceTable> ift;
+    ModuleRefByPar<IIpv4RoutingTable> rt;
 
     EigrpDual<Ipv4Address> *eigrpDual;
     EigrpMetricHelper *eigrpMetric;

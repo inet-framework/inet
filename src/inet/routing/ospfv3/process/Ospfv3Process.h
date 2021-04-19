@@ -68,10 +68,10 @@ class INET_API Ospfv3Process : protected cListener, public cSimpleModule
     bool hasAddressRange(const Ipv4AddressRange& addressRange) const;
 
   public:
-    IInterfaceTable *ift = nullptr;
-    Ipv6RoutingTable *rt6 = nullptr;
-    IIpv4RoutingTable *rt4 = nullptr;
-    cModule *containingModule = nullptr;
+    ModuleRefByPar<IInterfaceTable> ift;
+    ModuleRefByPar<Ipv6RoutingTable> rt6;
+    ModuleRefByPar<IIpv4RoutingTable> rt4;
+    opp_component_ptr<cModule> containingModule;
 
   private:
     void handleTimer(cMessage *msg);

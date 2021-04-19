@@ -24,6 +24,7 @@
 #include <set>
 #include <vector>
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
@@ -97,13 +98,13 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
     // Packets awaiting Address Resolution or Next-Hop Determination.
     cQueue pendingQueue;
 
-    IInterfaceTable *ift = nullptr;
-    Ipv6RoutingTable *rt6 = nullptr;
-    Icmpv6 *icmpv6 = nullptr;
+    ModuleRefByPar<IInterfaceTable> ift;
+    ModuleRefByPar<Ipv6RoutingTable> rt6;
+    ModuleRefByPar<Icmpv6> icmpv6;
     CrcMode crcMode = CRC_MODE_UNDEFINED;
 
 #ifdef INET_WITH_xMIPv6
-    xMIPv6 *mipv6 = nullptr; // in case the node has MIP support
+    ModuleRefByPar<xMIPv6> mipv6; // in case the node has MIP support
 #endif /* INET_WITH_xMIPv6 */
 
     Ipv6NeighbourCache neighbourCache;

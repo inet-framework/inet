@@ -93,11 +93,11 @@ void Gpsr::initialize(int stage)
         displayBubbles = par("displayBubbles");
         // context
         host = getContainingNode(this);
-        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        interfaceTable.reference(this, "interfaceTableModule", true);
         outputInterface = par("outputInterface");
         mobility = check_and_cast<IMobility *>(host->getSubmodule("mobility"));
-        routingTable = getModuleFromPar<IRoutingTable>(par("routingTableModule"), this);
-        networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
+        routingTable.reference(this, "routingTableModule", true);
+        networkProtocol.reference(this, "networkProtocolModule", true);
         // internal
         beaconTimer = new cMessage("BeaconTimer");
         purgeNeighborsTimer = new cMessage("PurgeNeighborsTimer");

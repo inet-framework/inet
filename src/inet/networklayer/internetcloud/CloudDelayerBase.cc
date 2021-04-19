@@ -28,7 +28,6 @@ Define_Module(CloudDelayerBase);
 
 CloudDelayerBase::CloudDelayerBase()
 {
-    networkProtocol = nullptr;
 }
 
 CloudDelayerBase::~CloudDelayerBase()
@@ -40,7 +39,7 @@ void CloudDelayerBase::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
+        networkProtocol.reference(this, "networkProtocolModule", true);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         networkProtocol->registerHook(0, this);
@@ -49,7 +48,7 @@ void CloudDelayerBase::initialize(int stage)
 
 void CloudDelayerBase::finish()
 {
-    if (isRegisteredHook(networkProtocol))
+    if (isRegisteredHook(networkProtocol.get()))
         networkProtocol->unregisterHook(this);
 }
 

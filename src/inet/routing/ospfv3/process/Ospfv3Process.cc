@@ -35,9 +35,9 @@ void Ospfv3Process::initialize(int stage)
 {
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         this->containingModule = findContainingNode(this);
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        rt6 = getModuleFromPar<Ipv6RoutingTable>(par("routingTableModule6"), this);
-        rt4 = findModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
+        ift.reference(this, "interfaceTableModule", true);
+        rt6.reference(this, "routingTableModule6", true);
+        rt4.reference(this, "routingTableModule", false);
 
         this->routerID = Ipv4Address(par("routerID").stringValue());
         this->processID = (int)par("processID");

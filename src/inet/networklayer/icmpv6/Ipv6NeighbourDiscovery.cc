@@ -100,13 +100,13 @@ void Ipv6NeighbourDiscovery::initialize(int stage)
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        rt6 = getModuleFromPar<Ipv6RoutingTable>(par("routingTableModule"), this);
-        icmpv6 = getModuleFromPar<Icmpv6>(par("icmpv6Module"), this);
+        ift.reference(this, "interfaceTableModule", true);
+        rt6.reference(this, "routingTableModule", true);
+        icmpv6.reference(this, "icmpv6Module", true);
 
 #ifdef INET_WITH_xMIPv6
         if (rt6->isMobileNode())
-            mipv6 = getModuleFromPar<xMIPv6>(par("xmipv6Module"), this);
+            mipv6.reference(this, "xmipv6Module", true);
 #endif /* INET_WITH_xMIPv6 */
 
         pendingQueue.setName("pendingQueue");

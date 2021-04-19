@@ -31,6 +31,7 @@
 
 #include <vector>
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
@@ -74,7 +75,7 @@ class IRoutingTable;
 class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable, protected cListener, public ILifecycle
 {
   protected:
-    IInterfaceTable *ift = nullptr; // cached pointer
+    ModuleRefByPar<IInterfaceTable> ift;
 
     Ipv4Address routerId;
     const char *netmaskRoutes = nullptr;

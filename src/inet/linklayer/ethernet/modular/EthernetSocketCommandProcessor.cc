@@ -29,7 +29,7 @@ void EthernetSocketCommandProcessor::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        socketTable = getModuleFromPar<EthernetSocketTable>(par("socketTableModule"), this);
+        socketTable.reference(this, "socketTableModule", true);
 }
 
 cGate *EthernetSocketCommandProcessor::getRegistrationForwardingGate(cGate *gate)

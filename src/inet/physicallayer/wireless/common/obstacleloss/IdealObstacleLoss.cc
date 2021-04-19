@@ -38,7 +38,7 @@ void IdealObstacleLoss::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         medium = check_and_cast<IRadioMedium *>(getParentModule());
-        physicalEnvironment = getModuleFromPar<IPhysicalEnvironment>(par("physicalEnvironmentModule"), this);
+        physicalEnvironment.reference(this, "physicalEnvironmentModule", true);
     }
 }
 

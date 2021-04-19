@@ -22,7 +22,7 @@
 
 namespace inet {
 
-class INET_API StreamingTransmitterBase : public PacketTransmitterBase
+class INET_API StreamingTransmitterBase : public PacketTransmitterBase, public cListener
 {
   protected:
     cChannel *transmissionChannel = nullptr;

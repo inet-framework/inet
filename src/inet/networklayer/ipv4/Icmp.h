@@ -23,6 +23,7 @@
 // Cleanup and rewrite: Andras Varga, 2004
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/IcmpHeader.h"
@@ -41,8 +42,8 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
     std::set<int> transportProtocols; // where to send up packets
     CrcMode crcMode = CRC_MODE_UNDEFINED;
     B quoteLength;
-    IIpv4RoutingTable *rt = nullptr;
-    IInterfaceTable *ift = nullptr;
+    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<IInterfaceTable> ift;
     static long ctr;
 
   protected:

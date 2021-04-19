@@ -71,7 +71,7 @@ void Ipv6RoutingTable::initialize(int stage)
         useAdminDist = par("useAdminDist");
         WATCH(isrouter);
 
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        ift.reference(this, "interfaceTableModule", true);
 
 #ifdef INET_WITH_xMIPv6
         // the following MIPv6 related flags will be overridden by the MIPv6 module (if existing)

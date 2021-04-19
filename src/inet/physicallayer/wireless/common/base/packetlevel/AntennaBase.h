@@ -27,7 +27,7 @@ namespace physicallayer {
 class INET_API AntennaBase : public IAntenna, public cModule
 {
   protected:
-    IMobility *mobility;
+    opp_component_ptr<IMobility> mobility;
     int numAntennas;
 
   protected:

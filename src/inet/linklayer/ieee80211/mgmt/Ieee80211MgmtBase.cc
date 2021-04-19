@@ -38,8 +38,8 @@ void Ieee80211MgmtBase::initialize(int stage)
     OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        mib = getModuleFromPar<Ieee80211Mib>(par("mibModule"), this);
-        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        mib.reference(this, "mibModule", true);
+        interfaceTable.reference(this, "interfaceTableModule", true);
         myIface = getContainingNicModule(this);
         numMgmtFramesReceived = 0;
         numMgmtFramesDropped = 0;

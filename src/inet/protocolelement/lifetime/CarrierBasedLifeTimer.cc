@@ -31,8 +31,8 @@ void CarrierBasedLifeTimer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         networkInterface = getContainingNicModule(this);
         networkInterface->subscribe(interfaceStateChangedSignal, this);
-        packetCollection = getModuleFromPar<IPacketCollection>(par("collectionModule"), this);
-        auto packetCollectionModule = check_and_cast<cModule *>(packetCollection);
+        packetCollection.reference(this, "collectionModule", true);
+        auto packetCollectionModule = check_and_cast<cModule *>(packetCollection.get());
         packetCollectionModule->subscribe(packetPushedSignal, this);
     }
 }

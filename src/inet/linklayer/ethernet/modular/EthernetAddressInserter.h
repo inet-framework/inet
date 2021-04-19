@@ -18,6 +18,7 @@
 #ifndef __INET_ETHERNETADDRESSINSERTER_H
 #define __INET_ETHERNETADDRESSINSERTER_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
@@ -28,7 +29,7 @@ using namespace inet::queueing;
 class INET_API EthernetAddressInserter : public PacketFlowBase
 {
   protected:
-    IInterfaceTable *interfaceTable = nullptr;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
 
   protected:
     virtual void initialize(int stage) override;

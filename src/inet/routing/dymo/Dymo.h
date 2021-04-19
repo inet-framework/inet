@@ -21,6 +21,7 @@
 #include <map>
 #include <vector>
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
@@ -77,9 +78,9 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
     // context
     cModule *host;
     IL3AddressType *addressType;
-    IInterfaceTable *interfaceTable;
-    IRoutingTable *routingTable;
-    INetfilter *networkProtocol;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
+    ModuleRefByPar<IRoutingTable> routingTable;
+    ModuleRefByPar<INetfilter> networkProtocol;
 
     // internal
     cMessage *expungeTimer;

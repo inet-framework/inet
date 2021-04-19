@@ -71,12 +71,11 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
             : socketId(socketId), protocolId(protocolId), localAddress(localAddress) {}
     };
 
-    IInterfaceTable *ift = nullptr;
-    Ipv6RoutingTable *rt = nullptr;
-    Ipv6NeighbourDiscovery *nd = nullptr;
-    Icmpv6 *icmp = nullptr;
-
-    Ipv6Tunneling *tunneling = nullptr;
+    ModuleRefByPar<IInterfaceTable> ift;
+    ModuleRefByPar<Ipv6RoutingTable> rt;
+    ModuleRefByPar<Ipv6NeighbourDiscovery> nd;
+    ModuleRefByPar<Icmpv6> icmp;
+    ModuleRefByPar<Ipv6Tunneling> tunneling;
 
     // working vars
     unsigned int curFragmentId = -1; // counter, used to assign unique fragmentIds to datagrams

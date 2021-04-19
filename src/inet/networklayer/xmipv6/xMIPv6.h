@@ -69,12 +69,12 @@ class INET_API xMIPv6 : public cSimpleModule
     virtual ~xMIPv6();
 
   protected:
-    IInterfaceTable *ift;
-    Ipv6RoutingTable *rt6;
-    BindingUpdateList *bul;
-    BindingCache *bc;
-    Ipv6Tunneling *tunneling;
-    Ipv6NeighbourDiscovery *ipv6nd;
+    ModuleRefByPar<IInterfaceTable> ift;
+    opp_component_ptr<Ipv6RoutingTable> rt6;
+    ModuleRefByPar<BindingUpdateList> bul;
+    ModuleRefByPar<BindingCache> bc;
+    ModuleRefByPar<Ipv6Tunneling> tunneling;
+    ModuleRefByPar<Ipv6NeighbourDiscovery> ipv6nd;
 
     // statistic collection
     cOutVector statVectorBUtoHA, statVectorBUtoCN, statVectorBUtoMN;

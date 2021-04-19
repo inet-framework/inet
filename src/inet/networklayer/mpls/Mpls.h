@@ -24,6 +24,7 @@
 
 #include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
@@ -45,9 +46,9 @@ class INET_API Mpls : public cSimpleModule, public DefaultProtocolRegistrationLi
     // no longer used, see comment in intialize
 //    std::vector<bool> labelIf;
 
-    LibTable *lt;
-    IInterfaceTable *ift;
-    IIngressClassifier *pct;
+    ModuleRefByPar<LibTable> lt;
+    ModuleRefByPar<IInterfaceTable> ift;
+    ModuleRefByPar<IIngressClassifier> pct;
 
   protected:
     virtual void initialize(int stage) override;

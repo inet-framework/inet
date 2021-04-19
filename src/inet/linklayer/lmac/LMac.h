@@ -84,7 +84,6 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
         , numSlots(0)
         , currSlot()
         , reservedMobileSlots(0)
-        , radio(nullptr)
         , transmissionState(physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED)
         , wakeup(nullptr)
         , timeout(nullptr)
@@ -175,7 +174,7 @@ class INET_API LMac : public MacProtocolBase, public IMacProtocol
     int reservedMobileSlots;
 
     /** @brief The radio. */
-    physicallayer::IRadio *radio;
+    ModuleRefByPar<physicallayer::IRadio> radio;
     physicallayer::IRadio::TransmissionState transmissionState;
 
     cMessage *wakeup;

@@ -20,6 +20,7 @@
 
 #include <vector>
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
@@ -49,7 +50,7 @@ class Ipv6RoutingTable;
 class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, protected cListener, public ILifecycle
 {
   protected:
-    IInterfaceTable *ift = nullptr; // cached pointer
+    ModuleRefByPar<IInterfaceTable> ift; // cached pointer
 
     bool isrouter = false;
     bool multicastForward = false; // If node is forwarding multicast info

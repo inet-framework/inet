@@ -19,6 +19,7 @@
 #define __INET_ETHERNETSOCKETCOMMANDPROCESSOR_H
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Message.h"
 #include "inet/linklayer/ieee8021q/Ieee8021qSocketTable.h"
 #include "inet/queueing/base/PacketFlowBase.h"
@@ -28,7 +29,7 @@ namespace inet {
 class INET_API Ieee8021qSocketCommandProcessor : public queueing::PacketFlowBase, public TransparentProtocolRegistrationListener
 {
   protected:
-    Ieee8021qSocketTable *socketTable = nullptr;
+    ModuleRefByPar<Ieee8021qSocketTable> socketTable;
 
   protected:
     virtual void initialize(int stage) override;

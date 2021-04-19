@@ -61,10 +61,7 @@ void StreamingTransmitterBase::scheduleTxEndTimer(Signal *signal)
 
 void StreamingTransmitterBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-#ifdef INET_WITH_CLOCK
-    ClockUserModuleMixin::receiveSignal(source, signal, object, details);
-#endif
-    Enter_Method("receiveSignal");
+    Enter_Method(cComponent::getSignalName(signal));
     if (signal == PRE_MODEL_CHANGE) {
         if (auto notification = dynamic_cast<cPrePathCutNotification *>(object)) {
             if (outputGate == notification->pathStartGate && isTransmitting())

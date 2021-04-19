@@ -75,11 +75,11 @@ void RsvpTe::initialize(int stage)
     RoutingProtocolBase::initialize(stage);
     // TODO INITSTAGE
     if (stage == INITSTAGE_LOCAL) {
-        tedmod = getModuleFromPar<Ted>(par("tedModule"), this);
-        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        lt = getModuleFromPar<LibTable>(par("libTableModule"), this);
-        rpct = getModuleFromPar<IRsvpClassifier>(par("classifierModule"), this);
+        tedmod.reference(this, "tedModule", true);
+        rt.reference(this, "routingTableModule", true);
+        ift.reference(this, "interfaceTableModule", true);
+        lt.reference(this, "libTableModule", true);
+        rpct.reference(this, "classifierModule", true);
 
         maxPsbId = 0;
         maxRsbId = 0;

@@ -26,7 +26,6 @@ Define_Module(GridNeighborCache);
 
 GridNeighborCache::GridNeighborCache() :
     grid(nullptr),
-    radioMedium(nullptr),
     constraintAreaMin(Coord::NIL),
     constraintAreaMax(Coord::NIL),
     refillCellsTimer(nullptr),
@@ -39,7 +38,7 @@ GridNeighborCache::GridNeighborCache() :
 void GridNeighborCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        radioMedium = getModuleFromPar<RadioMedium>(par("radioMediumModule"), this);
+        radioMedium.reference(this, "radioMediumModule", true);
         cellSize.x = par("cellSizeX");
         cellSize.y = par("cellSizeY");
         cellSize.z = par("cellSizeZ");

@@ -48,7 +48,7 @@ void LinkStateRouting::initialize(int stage)
     cSimpleModule::initialize(stage);
     // TODO INITSTAGE
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        tedmod = getModuleFromPar<Ted>(par("tedModule"), this);
+        tedmod.reference(this, "tedModule", true);
 
         IIpv4RoutingTable *rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         routerId = rt->getRouterId();

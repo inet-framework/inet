@@ -19,6 +19,7 @@
 #define __INET_BVHOBJECTCACHE_H
 
 #include "inet/common/IVisitor.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/geometry/container/BvhTree.h"
 #include "inet/environment/common/PhysicalEnvironment.h"
 #include "inet/environment/contract/IObjectCache.h"
@@ -33,7 +34,7 @@ class INET_API BvhObjectCache : public IObjectCache, public cModule
   protected:
     /** @name Parameters */
     //@{
-    PhysicalEnvironment *physicalEnvironment;
+    ModuleRefByPar<PhysicalEnvironment> physicalEnvironment;
     unsigned int leafCapacity;
     const char *axisOrder;
     //@}

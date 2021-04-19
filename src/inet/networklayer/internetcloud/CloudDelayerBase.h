@@ -50,7 +50,7 @@ class INET_API CloudDelayerBase : public cSimpleModule, public NetfilterBase::Ho
     virtual INetfilter::IHook::Result datagramLocalOutHook(Packet *datagram) override;
 
   protected:
-    INetfilter *networkProtocol;
+    ModuleRefByPar<INetfilter> networkProtocol;
 };
 
 } // namespace inet

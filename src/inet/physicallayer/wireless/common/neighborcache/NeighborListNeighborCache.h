@@ -21,6 +21,7 @@
 #include <set>
 #include <vector>
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
 
 namespace inet {
@@ -43,7 +44,7 @@ class INET_API NeighborListNeighborCache : public cSimpleModule, public INeighbo
     typedef std::map<const IRadio *, RadioEntry *> RadioEntryCache;
 
   protected:
-    RadioMedium *radioMedium;
+    ModuleRefByPar<RadioMedium> radioMedium;
     RadioEntries radios;
     cMessage *updateNeighborListsTimer;
     RadioEntryCache radioToEntry;

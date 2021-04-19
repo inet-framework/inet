@@ -4,6 +4,7 @@
 #include <string>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
@@ -25,7 +26,7 @@ class INET_API Ospfv3Splitter : protected cListener, public cSimpleModule
   public:
     Ospfv3Splitter();
     virtual ~Ospfv3Splitter();
-    IInterfaceTable *ift = nullptr;
+    ModuleRefByPar<IInterfaceTable> ift;
 
   private:
     void parseConfig(cXMLElement *, cXMLElement *);

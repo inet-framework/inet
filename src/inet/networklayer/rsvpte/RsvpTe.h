@@ -21,6 +21,7 @@
 
 #include <vector>
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/networklayer/rsvpte/IRsvpClassifier.h"
 #include "inet/networklayer/rsvpte/IntServ_m.h"
@@ -169,12 +170,11 @@ class INET_API RsvpTe : public RoutingProtocolBase, public IScriptable
     simtime_t retryInterval;
 
   protected:
-    Ted *tedmod = nullptr;
-    IIpv4RoutingTable *rt = nullptr;
-    IInterfaceTable *ift = nullptr;
-    LibTable *lt = nullptr;
-
-    IRsvpClassifier *rpct = nullptr;
+    ModuleRefByPar<Ted> tedmod;
+    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<IInterfaceTable> ift;
+    ModuleRefByPar<LibTable> lt;
+    ModuleRefByPar<IRsvpClassifier> rpct;
 
     int maxPsbId = 0;
     int maxRsbId = 0;

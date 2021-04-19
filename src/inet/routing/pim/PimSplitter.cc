@@ -35,8 +35,8 @@ void PimSplitter::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        pimIft = getModuleFromPar<PimInterfaceTable>(par("pimInterfaceTableModule"), this);
+        ift.reference(this, "interfaceTableModule", true);
+        pimIft.reference(this, "pimInterfaceTableModule", true);
 
         ipIn = gate("ipIn");
         ipOut = gate("ipOut");

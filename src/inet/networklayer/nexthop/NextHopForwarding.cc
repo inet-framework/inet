@@ -38,9 +38,6 @@ namespace inet {
 Define_Module(NextHopForwarding);
 
 NextHopForwarding::NextHopForwarding() :
-    interfaceTable(nullptr),
-    routingTable(nullptr),
-    arp(nullptr),
     defaultHopLimit(-1),
     numLocalDeliver(0),
     numDropped(0),
@@ -64,9 +61,9 @@ void NextHopForwarding::initialize(int stage)
     OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        routingTable = getModuleFromPar<NextHopRoutingTable>(par("routingTableModule"), this);
-        arp = getModuleFromPar<IArp>(par("arpModule"), this);
+        interfaceTable.reference(this, "interfaceTableModule", true);
+        routingTable.reference(this, "routingTableModule", true);
+        arp.reference(this, "arpModule", true);
 
         defaultHopLimit = par("hopLimit");
         numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;

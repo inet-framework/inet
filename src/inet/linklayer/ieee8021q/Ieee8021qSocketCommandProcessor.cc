@@ -29,7 +29,7 @@ void Ieee8021qSocketCommandProcessor::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        socketTable = getModuleFromPar<Ieee8021qSocketTable>(par("socketTableModule"), this);
+        socketTable.reference(this, "socketTableModule", true);
 }
 
 cGate *Ieee8021qSocketCommandProcessor::getRegistrationForwardingGate(cGate *gate)

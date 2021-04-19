@@ -26,7 +26,6 @@ namespace physicalenvironment {
 Define_Module(GridObjectCache);
 
 GridObjectCache::GridObjectCache() :
-    physicalEnvironment(nullptr),
     grid(nullptr)
 {
 }
@@ -39,7 +38,7 @@ GridObjectCache::~GridObjectCache()
 void GridObjectCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
-        physicalEnvironment = getModuleFromPar<PhysicalEnvironment>(par("physicalEnvironmentModule"), this);
+        physicalEnvironment.reference(this, "physicalEnvironmentModule", true);
     else if (stage == INITSTAGE_PHYSICAL_OBJECT_CACHE) {
         double cellSizeX = par("cellSizeX");
         double cellSizeY = par("cellSizeY");

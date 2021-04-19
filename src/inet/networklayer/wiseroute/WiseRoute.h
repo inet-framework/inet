@@ -108,7 +108,7 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
     tRouteTable routeTable;
     tFloodTable floodTable;
 
-    IArp *arp = nullptr;
+    ModuleRefByPar<IArp> arp;
 
     /**
      * @brief Length of the NetwPkt header

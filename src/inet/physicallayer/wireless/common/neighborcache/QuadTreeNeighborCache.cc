@@ -26,7 +26,6 @@ Define_Module(QuadTreeNeighborCache);
 
 QuadTreeNeighborCache::QuadTreeNeighborCache() :
     quadTree(nullptr),
-    radioMedium(nullptr),
     rebuildQuadTreeTimer(nullptr),
     constraintAreaMax(Coord::NIL),
     constraintAreaMin(Coord::NIL),
@@ -39,7 +38,7 @@ QuadTreeNeighborCache::QuadTreeNeighborCache() :
 void QuadTreeNeighborCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        radioMedium = getModuleFromPar<RadioMedium>(par("radioMediumModule"), this);
+        radioMedium.reference(this, "radioMediumModule", true);
         rebuildQuadTreeTimer = new cMessage("rebuildQuadTreeTimer");
         refillPeriod = par("refillPeriod");
         maxNumOfPointsPerQuadrant = par("maxNumOfPointsPerQuadrant");

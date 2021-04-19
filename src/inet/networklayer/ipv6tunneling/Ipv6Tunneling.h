@@ -30,6 +30,7 @@
 #ifndef __INET_IPV6TUNNELING_H
 #define __INET_IPV6TUNNELING_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
@@ -58,8 +59,8 @@ class INET_API Ipv6Tunneling : public cSimpleModule, public LifecycleUnsupported
     };
 
   protected:
-    IInterfaceTable *ift = nullptr;
-    Ipv6RoutingTable *rt = nullptr;
+    ModuleRefByPar<IInterfaceTable> ift;
+    ModuleRefByPar<Ipv6RoutingTable> rt;
 
     struct Tunnel {
         Tunnel(const Ipv6Address& entry = Ipv6Address::UNSPECIFIED_ADDRESS,

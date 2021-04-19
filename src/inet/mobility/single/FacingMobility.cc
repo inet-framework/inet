@@ -27,8 +27,8 @@ void FacingMobility::initialize(int stage)
     EV_TRACE << "initializing FacingMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
         format.parseFormat(par("displayStringTextFormat"));
-        sourceMobility = getModuleFromPar<IMobility>(par("sourceMobility"), this);
-        targetMobility = getModuleFromPar<IMobility>(par("targetMobility"), this);
+        sourceMobility.reference(this, "sourceMobility", true);
+        targetMobility.reference(this, "targetMobility", true);
     }
 }
 
@@ -51,7 +51,7 @@ void FacingMobility::handleParameterChange(const char *name)
     else if (!strcmp(name, "displayStringTextFormat"))
         format.parseFormat(par("displayStringTextFormat"));
     else if (!strcmp(name, "targetMobility")) {
-        targetMobility = getModuleFromPar<IMobility>(par("targetMobility"), this);
+        targetMobility.reference(this, "targetMobility", true);
         emitMobilityStateChangedSignal();
     }
 }

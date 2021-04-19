@@ -18,6 +18,7 @@
 #ifndef __INET_FACINGMOBILITY_H
 #define __INET_FACINGMOBILITY_H
 
+#include "inet/common/ModuleRef.h"
 #include "inet/mobility/base/MobilityBase.h"
 
 namespace inet {
@@ -25,8 +26,8 @@ namespace inet {
 class INET_API FacingMobility : public MobilityBase
 {
   protected:
-    IMobility *sourceMobility = nullptr;
-    IMobility *targetMobility = nullptr;
+    ModuleRef<IMobility> sourceMobility;
+    ModuleRef<IMobility> targetMobility;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

@@ -28,7 +28,7 @@ void TokenGeneratorBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         displayStringTextFormat = par("displayStringTextFormat");
-        server = getModuleFromPar<TokenBasedServer>(par("serverModule"), this);
+        server.reference(this, "serverModule", true);
         numTokensGenerated = 0;
         WATCH(numTokensGenerated);
     }

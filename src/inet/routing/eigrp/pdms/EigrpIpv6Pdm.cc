@@ -81,8 +81,8 @@ void EigrpIpv6Pdm::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         host = getContainingNode(this);
 
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        rt = getModuleFromPar<Ipv6RoutingTable>(par("routingTableModule"), this);
+        ift.reference(this, "interfaceTableModule", true);
+        rt.reference(this, "routingTableModule", true);
     }
 
     if (stage == INITSTAGE_ROUTING_PROTOCOLS) {

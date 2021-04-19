@@ -26,6 +26,7 @@
 
 #include <set>
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
@@ -197,8 +198,8 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
     };
 
   protected:
-    IRoutingTable *rt;
-    IInterfaceTable *ift;
+    ModuleRefByPar<IRoutingTable> rt;
+    ModuleRefByPar<IInterfaceTable> ift;
 
     bool enabled;
     int robustness;

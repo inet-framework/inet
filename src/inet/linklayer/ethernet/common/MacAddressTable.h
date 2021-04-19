@@ -55,7 +55,7 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
     simtime_t agingTime; // Max idle time for address table entries
     simtime_t lastPurge; // Time of the last call of removeAgedEntriesFromAllVlans()
     AddressTable *addressTable = nullptr; // VLAN-unaware address lookup (vid = 0)
-    IInterfaceTable *ifTable = nullptr;
+    ModuleRefByPar<IInterfaceTable> ifTable;
     VlanAddressTable vlanAddressTable; // VLAN-aware address lookup
 
   protected:

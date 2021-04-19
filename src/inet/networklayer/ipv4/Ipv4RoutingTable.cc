@@ -74,7 +74,7 @@ void Ipv4RoutingTable::initialize(int stage)
         host->subscribe(interfaceConfigChangedSignal, this);
         host->subscribe(interfaceIpv4ConfigChangedSignal, this);
 
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        ift.reference(this, "interfaceTableModule", true);
 
         netmaskRoutes = par("netmaskRoutes");
         forwarding = par("forwarding");

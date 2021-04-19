@@ -29,7 +29,7 @@ void Ospfv3Splitter::initialize(int stage)
         containingModule = findContainingNode(this);
         routingModule = this->getParentModule();
 
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        ift.reference(this, "interfaceTableModule", true);
         registerProtocol(Protocol::ospf, gate("ipOut"), gate("ipIn"));
 
         this->parseConfig(par("ospfv3RoutingConfig"), par("ospfv3IntConfig"));

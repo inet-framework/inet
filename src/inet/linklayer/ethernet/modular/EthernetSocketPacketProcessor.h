@@ -19,6 +19,7 @@
 #define __INET_ETHERNETSOCKETPACKETPROCESSOR_H
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/ethernet/modular/EthernetSocketTable.h"
 #include "inet/queueing/base/PacketPusherBase.h"
 
@@ -27,7 +28,7 @@ namespace inet {
 class INET_API EthernetSocketPacketProcessor : public queueing::PacketPusherBase, public TransparentProtocolRegistrationListener
 {
   protected:
-    EthernetSocketTable *socketTable = nullptr;
+    ModuleRefByPar<EthernetSocketTable> socketTable;
 
   protected:
     virtual void initialize(int stage) override;

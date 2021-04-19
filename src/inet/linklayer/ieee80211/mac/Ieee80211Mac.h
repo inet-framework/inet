@@ -18,6 +18,7 @@
 #ifndef __INET_IEEE80211MAC_H
 #define __INET_IEEE80211MAC_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDs.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
@@ -49,20 +50,20 @@ class INET_API Ieee80211Mac : public MacProtocolBase
   protected:
     FcsMode fcsMode;
 
-    Ieee80211Mib *mib = nullptr;
-    IIeee80211Llc *llc = nullptr;
-    IDs *ds = nullptr;
+    ModuleRefByPar<Ieee80211Mib> mib;
+    opp_component_ptr<IIeee80211Llc> llc;
+    opp_component_ptr<IDs> ds;
 
-    IRx *rx = nullptr;
-    ITx *tx = nullptr;
-    physicallayer::IRadio *radio = nullptr;
+    opp_component_ptr<IRx> rx;
+    opp_component_ptr<ITx> tx;
+    opp_component_ptr<physicallayer::IRadio> radio;
     const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
     physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TransmissionState::TRANSMISSION_STATE_UNDEFINED;
 
-    Dcf *dcf = nullptr;
-    Pcf *pcf = nullptr;
-    Hcf *hcf = nullptr;
-    Mcf *mcf = nullptr;
+    opp_component_ptr<Dcf> dcf;
+    opp_component_ptr<Pcf> pcf;
+    opp_component_ptr<Hcf> hcf;
+    opp_component_ptr<Mcf> mcf;
 
     // The last change channel message received and not yet sent to the physical layer, or nullptr.
     cMessage *pendingRadioConfigMsg = nullptr;

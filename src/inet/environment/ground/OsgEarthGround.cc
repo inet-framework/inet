@@ -37,7 +37,7 @@ void OsgEarthGround::initialize()
     auto sceneVisualizer = getModuleFromPar<SceneOsgEarthVisualizer>(par("osgEarthSceneVisualizerModule"), this);
     map = sceneVisualizer->getMapNode()->getMap();
     elevationQuery = new osgEarth::ElevationQuery(map);
-    coordinateSystem = getModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this);
+    coordinateSystem.reference(this, "coordinateSystemModule", true);
 }
 
 Coord OsgEarthGround::computeGroundProjection(const Coord& position) const

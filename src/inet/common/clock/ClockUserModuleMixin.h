@@ -24,15 +24,17 @@
 #include "inet/clock/common/ClockEvent.h"
 #endif
 
+#include "inet/common/ModuleRefByPar.h"
+
 namespace inet {
 
 template<typename T>
-class INET_API ClockUserModuleMixin : public T, public cListener
+class INET_API ClockUserModuleMixin : public T
 {
 #ifdef INET_WITH_CLOCK
 
   protected:
-    IClock *clock = nullptr;
+    ModuleRefByPar<IClock> clock;
 
 #ifndef NDEBUG
     mutable bool usedClockApi = false;
@@ -40,7 +42,7 @@ class INET_API ClockUserModuleMixin : public T, public cListener
 #endif
 
   protected:
-    virtual IClock *findClockModule() const;
+    virtual void findClockModule();
 
   public:
     virtual ~ClockUserModuleMixin();
@@ -67,8 +69,6 @@ class INET_API ClockUserModuleMixin : public T, public cListener
     virtual ClockTime exponential(ClockTime mean, int rng = 0) const { return exponential(mean.dbl(), rng); }
     virtual ClockTime normal(ClockTime mean, ClockTime stddev, int rng = 0) const { return normal(mean.dbl(), stddev.dbl(), rng); }
     virtual ClockTime truncnormal(ClockTime mean, ClockTime stddev, int rng = 0) const { return truncnormal(mean.dbl(), stddev.dbl(), rng); }
-
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
 #else // #ifdef INET_WITH_CLOCK
   public:
     virtual void scheduleClockEventAt(clocktime_t time, ClockEvent *msg) { T::scheduleAt(time, msg); }

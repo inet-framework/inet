@@ -19,6 +19,7 @@
 #ifndef __INET_HOSTAUTOCONFIGURATOR_H
 #define __INET_HOSTAUTOCONFIGURATOR_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
@@ -36,7 +37,7 @@ namespace inet {
 class INET_API HostAutoConfigurator : public OperationalBase
 {
   protected:
-    IInterfaceTable *interfaceTable = nullptr;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
 
   public:
     virtual void initialize(int stage) override;

@@ -43,10 +43,10 @@ class INET_API StpBase : public OperationalBase, public cListener
     simtime_t helloTime;
     simtime_t forwardDelay;
 
-    cModule *switchModule = nullptr;
-    IMacAddressTable *macTable = nullptr;
-    IInterfaceTable *ifTable = nullptr;
-    NetworkInterface *ie = nullptr;
+    opp_component_ptr<cModule> switchModule;
+    ModuleRefByPar<IMacAddressTable> macTable;
+    ModuleRefByPar<IInterfaceTable> ifTable;
+    opp_component_ptr<NetworkInterface> ie;
 
   public:
     StpBase();

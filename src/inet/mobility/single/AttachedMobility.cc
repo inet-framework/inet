@@ -28,7 +28,7 @@ void AttachedMobility::initialize(int stage)
     MobilityBase::initialize(stage);
     EV_TRACE << "initializing AttachedMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
-        mobility = getModuleFromPar<IMobility>(par("mobilityModule"), this);
+        mobility.reference(this, "mobilityModule", true);
         positionOffset.x = par("offsetX");
         positionOffset.y = par("offsetY");
         positionOffset.z = par("offsetZ");
@@ -39,7 +39,7 @@ void AttachedMobility::initialize(int stage)
         auto gamma = deg(par("offsetBank"));
         orientationOffset = Quaternion(EulerAngles(alpha, beta, gamma));
         isZeroOffset = positionOffset == Coord::ZERO;
-        check_and_cast<cModule *>(mobility)->subscribe(IMobility::mobilityStateChangedSignal, this);
+        check_and_cast<cModule *>(mobility.get())->subscribe(IMobility::mobilityStateChangedSignal, this);
         WATCH(lastVelocity);
         WATCH(lastAngularPosition);
     }

@@ -153,11 +153,11 @@ class INET_API PimBase : public RoutingProtocolBase
     static const Ipv4Address ALL_PIM_ROUTERS_MCAST;
 
   protected:
-    IIpv4RoutingTable *rt = nullptr;
-    IInterfaceTable *ift = nullptr;
-    PimInterfaceTable *pimIft = nullptr;
-    PimNeighborTable *pimNbt = nullptr;
-    Pim *pimModule = nullptr;
+    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<IInterfaceTable> ift;
+    ModuleRefByPar<PimInterfaceTable> pimIft;
+    ModuleRefByPar<PimNeighborTable> pimNbt;
+    opp_component_ptr<Pim> pimModule;
 
     bool isUp = false;
     bool isEnabled = false;

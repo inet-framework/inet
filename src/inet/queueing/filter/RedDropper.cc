@@ -53,9 +53,9 @@ void RedDropper::initialize(int stage)
         if (maxth > packetCapacity)
             throw cRuntimeError("Warning: packetCapacity < maxth. Setting capacity to maxth");
         auto outputGate = gate("out");
-        collection = findConnectedModule<IPacketCollection>(outputGate);
-        if (collection == nullptr)
-            collection = getModuleFromPar<IPacketCollection>(par("collectionModule"), this);
+        collection.reference(outputGate, false);
+        if (!collection)
+            collection.reference(this, "collectionModule", true);
     }
 }
 

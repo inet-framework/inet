@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Packet.h"
@@ -80,8 +81,8 @@ class INET_API Arp : public OperationalBase, public IArp
 
     ArpCache arpCache;
 
-    IInterfaceTable *ift = nullptr;
-    IIpv4RoutingTable *rt = nullptr; // for answering ProxyARP requests
+    ModuleRefByPar<IInterfaceTable> ift;
+    ModuleRefByPar<IIpv4RoutingTable> rt; // for answering ProxyARP requests
 
   protected:
     // Maps an IP multicast address to an Ethernet multicast address.

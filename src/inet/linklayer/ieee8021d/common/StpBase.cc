@@ -49,8 +49,8 @@ void StpBase::initialize(int stage)
         helloTime = par("helloTime");
         forwardDelay = par("forwardDelay");
 
-        macTable = getModuleFromPar<IMacAddressTable>(par("macTableModule"), this);
-        ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        macTable.reference(this, "macTableModule", true);
+        ifTable.reference(this, "interfaceTableModule", true);
         switchModule = getContainingNode(this);
     }
 }

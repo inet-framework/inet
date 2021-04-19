@@ -43,9 +43,9 @@ void Mpls::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         // interfaceTable must be initialized
 
-        lt = getModuleFromPar<LibTable>(par("libTableModule"), this);
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        pct = getModuleFromPar<IIngressClassifier>(par("classifierModule"), this);
+        lt.reference(this, "libTableModule", true);
+        ift.reference(this, "interfaceTableModule", true);
+        pct.reference(this, "classifierModule", true);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         registerService(Protocol::mpls, gate("netwIn"), gate("netwOut"));

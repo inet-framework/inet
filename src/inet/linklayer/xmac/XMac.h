@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
@@ -179,7 +180,7 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     b ctrlFrameLength = b(0); // XMacControlFrame frame length
 
     /** @brief The radio. */
-    physicallayer::IRadio *radio;
+    ModuleRefByPar<physicallayer::IRadio> radio;
     physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
 
     int txAttempts;

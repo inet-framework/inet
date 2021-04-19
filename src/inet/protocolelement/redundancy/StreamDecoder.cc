@@ -31,7 +31,7 @@ void StreamDecoder::initialize(int stage)
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         streamMappings = check_and_cast<cValueArray *>(par("streamMappings").objectValue());
-        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        interfaceTable.reference(this, "interfaceTableModule", true);
     }
 }
 

@@ -25,7 +25,6 @@ namespace physicallayer {
 Define_Module(NeighborListNeighborCache);
 
 NeighborListNeighborCache::NeighborListNeighborCache() :
-    radioMedium(nullptr),
     updateNeighborListsTimer(nullptr),
     refillPeriod(NaN),
     range(NaN),
@@ -36,7 +35,7 @@ NeighborListNeighborCache::NeighborListNeighborCache() :
 void NeighborListNeighborCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        radioMedium = getModuleFromPar<RadioMedium>(par("radioMediumModule"), this);
+        radioMedium.reference(this, "radioMediumModule", true);
         refillPeriod = par("refillPeriod");
         range = par("range");
         updateNeighborListsTimer = new cMessage("updateNeighborListsTimer");

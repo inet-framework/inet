@@ -65,7 +65,7 @@ class INET_API CsmaCaMac : public MacProtocolBase
         WAITSIFS,
     };
 
-    physicallayer::IRadio *radio = nullptr;
+    ModuleRefByPar<physicallayer::IRadio> radio;
     physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
 
     cFSM fsm;

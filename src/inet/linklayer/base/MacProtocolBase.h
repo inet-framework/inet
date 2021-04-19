@@ -43,7 +43,7 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
     Packet *currentTxFrame = nullptr;
 
     /** Messages received from upper layer and to be transmitted later */
-    queueing::IPacketQueue *txQueue = nullptr;
+    opp_component_ptr<queueing::IPacketQueue> txQueue;
 
     cModule *hostModule = nullptr;
 

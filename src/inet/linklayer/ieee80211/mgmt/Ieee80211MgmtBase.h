@@ -18,6 +18,7 @@
 #ifndef __INET_IEEE80211MGMTBASE_H
 #define __INET_IEEE80211MGMTBASE_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Packet.h"
@@ -39,8 +40,8 @@ class INET_API Ieee80211MgmtBase : public OperationalBase
 {
   protected:
     // configuration
-    Ieee80211Mib *mib = nullptr;
-    IInterfaceTable *interfaceTable = nullptr;
+    ModuleRefByPar<Ieee80211Mib> mib;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
     NetworkInterface *myIface = nullptr;
 
     // statistics

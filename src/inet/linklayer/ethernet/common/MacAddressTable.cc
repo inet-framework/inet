@@ -46,7 +46,7 @@ void MacAddressTable::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         agingTime = par("agingTime");
         lastPurge = SIMTIME_ZERO;
-        ifTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        ifTable.reference(this, "interfaceTableModule", true);
     }
 }
 

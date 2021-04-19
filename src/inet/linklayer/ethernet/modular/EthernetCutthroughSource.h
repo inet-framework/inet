@@ -18,6 +18,8 @@
 #ifndef __INET_ETHERNETCUTTHROUGHSOURCE_H
 #define __INET_ETHERNETCUTTHROUGHSOURCE_H
 
+#include "inet/common/ModuleRef.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/ethernet/contract/IMacAddressTable.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/protocolelement/common/PacketDestreamer.h"
@@ -30,10 +32,10 @@ class INET_API EthernetCutthroughSource : public PacketDestreamer
 {
   protected:
     cGate *cutthroughOutputGate = nullptr;
-    IPassivePacketSink *cutthroughConsumer = nullptr;
+    ModuleRef<IPassivePacketSink> cutthroughConsumer;
 
     NetworkInterface *networkInterface = nullptr;
-    IMacAddressTable *macTable = nullptr;
+    ModuleRefByPar<IMacAddressTable> macTable;
 
     bool cutthroughInProgress = false;
     cMessage *cutthroughTimer = nullptr;

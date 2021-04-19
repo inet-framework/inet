@@ -42,8 +42,8 @@ void NoiseSource::initialize(int stage)
         transmissionTimer = new cMessage("transmissionTimer");
         antenna = check_and_cast<IAntenna *>(getSubmodule("antenna"));
         transmitter = check_and_cast<ITransmitter *>(getSubmodule("transmitter"));
-        medium = getModuleFromPar<IRadioMedium>(par("radioMediumModule"), this);
-        mediumModuleId = check_and_cast<cModule *>(medium)->getId();
+        medium.reference(this, "radioMediumModule", true);
+        mediumModuleId = check_and_cast<cModule *>(medium.get())->getId();
         radioIn = gate("radioIn");
         radioIn->setDeliverImmediately(true);
     }

@@ -33,6 +33,7 @@
 #include <omnetpp.h>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
@@ -84,9 +85,9 @@ class INET_API EigrpIpv6Pdm : public cSimpleModule, public IEigrpModule<Ipv6Addr
     bool eigrpStubEnabled;      /**< True when EIGRP stub is on */
     EigrpStub eigrpStub;        /**< EIGRP stub configuration */
 
-    IInterfaceTable *ift;
+    ModuleRefByPar<IInterfaceTable> ift;
 //    ANSARoutingTable6 *rt;
-    Ipv6RoutingTable *rt;
+    ModuleRefByPar<Ipv6RoutingTable> rt;
 //    NotificationBoard *nb;
 
     EigrpDual<Ipv6Address> *eigrpDual;

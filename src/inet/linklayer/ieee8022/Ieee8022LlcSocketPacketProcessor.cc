@@ -30,7 +30,7 @@ void Ieee8022LlcSocketPacketProcessor::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        socketTable = getModuleFromPar<Ieee8022LlcSocketTable>(par("socketTableModule"), this);
+        socketTable.reference(this, "socketTableModule", true);
 }
 
 cGate *Ieee8022LlcSocketPacketProcessor::getRegistrationForwardingGate(cGate *gate)

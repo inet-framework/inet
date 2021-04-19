@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
@@ -57,8 +58,8 @@ class INET_API RsvpClassifier : public cSimpleModule, public IScriptable, public
     int maxLabel = 0;
 
     std::vector<FecEntry> bindings;
-    LibTable *lt = nullptr;
-    RsvpTe *rsvp = nullptr;
+    ModuleRefByPar<LibTable> lt;
+    ModuleRefByPar<RsvpTe> rsvp;
 
   public:
     RsvpClassifier() {}

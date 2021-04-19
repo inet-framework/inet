@@ -77,8 +77,8 @@ void Arp::initialize(int stage)
         WATCH_PTRMAP(arpCache);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
+        ift.reference(this, "interfaceTableModule", true);
+        rt.reference(this, "routingTableModule", true);
         registerService(Protocol::arp, gate("netwIn"), gate("netwOut"));
         registerProtocol(Protocol::arp, gate("ifOut"), gate("ifIn"));
     }

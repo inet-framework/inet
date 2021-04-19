@@ -28,8 +28,8 @@ using namespace inet::queueing;
 class INET_API CarrierBasedLifeTimer : public cSimpleModule, cListener
 {
   protected:
-    NetworkInterface *networkInterface = nullptr;
-    IPacketCollection *packetCollection = nullptr;
+    opp_component_ptr<NetworkInterface> networkInterface;
+    ModuleRefByPar<IPacketCollection> packetCollection;
 
   protected:
     virtual void initialize(int stage) override;

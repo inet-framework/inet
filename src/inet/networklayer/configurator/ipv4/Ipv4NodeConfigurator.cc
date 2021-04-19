@@ -27,10 +27,6 @@ Define_Module(Ipv4NodeConfigurator);
 
 Ipv4NodeConfigurator::Ipv4NodeConfigurator()
 {
-    nodeStatus = nullptr;
-    interfaceTable = nullptr;
-    routingTable = nullptr;
-    networkConfigurator = nullptr;
 }
 
 void Ipv4NodeConfigurator::initialize(int stage)
@@ -41,17 +37,10 @@ void Ipv4NodeConfigurator::initialize(int stage)
         cModule *node = getContainingNode(this);
         const char *networkConfiguratorPath = par("networkConfiguratorModule");
         nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
-        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        routingTable = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
-
-        if (!networkConfiguratorPath[0])
-            networkConfigurator = nullptr;
-        else {
-            cModule *module = findModuleByPath(networkConfiguratorPath);
-            if (!module)
-                throw cRuntimeError("Configurator module '%s' not found (check the 'networkConfiguratorModule' parameter)", networkConfiguratorPath);
-            networkConfigurator = check_and_cast<Ipv4NetworkConfigurator *>(module);
-        }
+        interfaceTable.reference(this, "interfaceTableModule", true);
+        routingTable.reference(this, "routingTableModule", true);
+        if (networkConfiguratorPath[0])
+            networkConfigurator.reference(this, "networkConfiguratorModule", false);
     }
     else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP)

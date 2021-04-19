@@ -19,6 +19,7 @@
 #define __INET_VLANREQFILTER_H
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 
@@ -29,7 +30,7 @@ using namespace inet::queueing;
 class INET_API VlanReqFilter : public PacketFilterBase, public TransparentProtocolRegistrationListener
 {
   protected:
-    IInterfaceTable *interfaceTable = nullptr;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
     cValueMap *acceptedVlanIds = nullptr;
 
   protected:

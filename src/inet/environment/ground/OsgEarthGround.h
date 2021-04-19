@@ -26,6 +26,7 @@
 #include <osgEarth/ElevationQuery>
 #include <osgEarth/MapNode>
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 
 namespace inet {
@@ -37,7 +38,7 @@ class INET_API OsgEarthGround : public IGround, public cModule
   protected:
     osgEarth::Map *map = nullptr;
     osgEarth::ElevationQuery *elevationQuery = nullptr;
-    IGeographicCoordinateSystem *coordinateSystem = nullptr;
+    ModuleRefByPar<IGeographicCoordinateSystem> coordinateSystem;
 
     virtual void initialize() override;
 

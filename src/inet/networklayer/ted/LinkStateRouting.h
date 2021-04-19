@@ -19,6 +19,7 @@
 #ifndef __INET_LINKSTATEROUTING_H
 #define __INET_LINKSTATEROUTING_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/rsvpte/IntServ_m.h"
 #include "inet/networklayer/ted/LinkStatePacket_m.h"
@@ -58,7 +59,7 @@ class NetworkInterface;
 class INET_API LinkStateRouting : public cSimpleModule, public cListener
 {
   protected:
-    Ted *tedmod = nullptr;
+    ModuleRefByPar<Ted> tedmod;
     cMessage *announceMsg = nullptr;
     Ipv4Address routerId;
 

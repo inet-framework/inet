@@ -32,7 +32,7 @@ void EthernetAddressInserter::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        interfaceTable.reference(this, "interfaceTableModule", true);
 }
 
 void EthernetAddressInserter::processPacket(Packet *packet)

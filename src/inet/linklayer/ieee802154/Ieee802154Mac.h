@@ -71,7 +71,6 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
         , backoffTimer(nullptr), ccaTimer(nullptr), sifsTimer(nullptr), rxAckTimer(nullptr)
         , macState(IDLE_1)
         , status(STATUS_OK)
-        , radio(nullptr)
         , transmissionState(physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED)
         , sifs()
         , macAckWaitDuration()
@@ -214,7 +213,7 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
     t_mac_status status;
 
     /** @brief The radio. */
-    physicallayer::IRadio *radio;
+    ModuleRefByPar<physicallayer::IRadio> radio;
     physicallayer::IRadio::TransmissionState transmissionState;
 
     /** @brief Maximum time between a packet and its ACK

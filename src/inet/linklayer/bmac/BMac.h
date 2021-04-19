@@ -89,7 +89,7 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
 
   protected:
     /** @brief The radio. */
-    physicallayer::IRadio *radio = nullptr;
+    ModuleRefByPar<physicallayer::IRadio> radio;
     physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
 
     /** @name Different tracked statistics.*/

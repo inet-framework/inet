@@ -33,8 +33,8 @@ namespace bgp {
 class INET_API Bgp : public cSimpleModule, protected cListener, public LifecycleUnsupported
 {
   private:
-    IIpv4RoutingTable *rt = nullptr;
-    IInterfaceTable *ift = nullptr;
+    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<IInterfaceTable> ift;
     bool isUp = false;
     BgpRouter *bgpRouter = nullptr; // data structure to fill in
     cMessage *startupTimer = nullptr; // timer for delayed startup

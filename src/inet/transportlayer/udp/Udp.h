@@ -122,9 +122,9 @@ class INET_API Udp : public TransportProtocolBase
 
     // other state vars
     ushort lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
-    IInterfaceTable *ift = nullptr;
-    Icmp *icmp = nullptr;
-    Icmpv6 *icmpv6 = nullptr;
+    ModuleRefByPar<IInterfaceTable> ift;
+    opp_component_ptr<Icmp> icmp;
+    opp_component_ptr<Icmpv6> icmpv6;
 
     // statistics
     int numSent = 0;

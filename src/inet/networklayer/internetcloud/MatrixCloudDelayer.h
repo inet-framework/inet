@@ -18,6 +18,7 @@
 #ifndef __INET_MATRIXCLOUDDELAYER_H
 #define __INET_MATRIXCLOUDDELAYER_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/internetcloud/CloudDelayerBase.h"
 
 namespace inet {
@@ -78,7 +79,7 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
     MatrixEntryPtrVector matrixEntries;
     IdPairToDescriptorMap idPairToDescriptorMap;
 
-    IInterfaceTable *ift = nullptr;
+    ModuleRefByPar<IInterfaceTable> ift;
     cModule *host = nullptr;
 
   protected:

@@ -18,6 +18,7 @@
 #ifndef __INET_GRIDNEIGHBORCACHE_H
 #define __INET_GRIDNEIGHBORCACHE_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/geometry/container/SpatialGrid.h"
 #include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
 
@@ -45,7 +46,7 @@ class INET_API GridNeighborCache : public cSimpleModule, public INeighborCache
   protected:
     SpatialGrid *grid;
     Radios radios;
-    RadioMedium *radioMedium;
+    ModuleRefByPar<RadioMedium> radioMedium;
     Coord constraintAreaMin, constraintAreaMax;
     cMessage *refillCellsTimer;
     double refillPeriod;

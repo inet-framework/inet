@@ -16,6 +16,7 @@
 //
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -27,7 +28,7 @@ namespace inet {
 class INET_API NetfilterInfoHook : public cSimpleModule, public NetfilterBase::HookBase
 {
   protected:
-    INetfilter *netfilter;
+    ModuleRefByPar<INetfilter> netfilter;
 
   protected:
     virtual void initialize(int stage) override;
@@ -69,7 +70,7 @@ void NetfilterInfoHook::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_NETWORK_LAYER) {
-        netfilter = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
+        netfilter.reference(this, "networkProtocolModule", true);
         netfilter->registerHook(0, this);
     }
 }

@@ -14,9 +14,9 @@ class INET_API SctpNatHook : public cSimpleModule, NetfilterBase::HookBase
 {
   protected:
     IPv4 *ipLayer; // IPv4 module
-    SctpNatTable *natTable;
-    IRoutingTable *rt;
-    IInterfaceTable *ift;
+    ModuleRefByPar<SctpNatTable> natTable;
+    ModuleRefByPar<IRoutingTable> rt;
+    ModuleRefByPar<IInterfaceTable> ift;
     uint64_t nattedPackets;
     void initialize() override;
     void finish() override;

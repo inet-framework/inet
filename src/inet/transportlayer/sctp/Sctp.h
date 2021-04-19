@@ -26,6 +26,7 @@
 
 #include <map>
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
@@ -184,8 +185,8 @@ class INET_API Sctp : public cSimpleModule
     SocketOptions *socketOptions;
 
   protected:
-    IRoutingTable *rt;
-    IInterfaceTable *ift;
+    ModuleRefByPar<IRoutingTable> rt;
+    ModuleRefByPar<IInterfaceTable> ift;
 
     int32_t sizeAssocMap;
 

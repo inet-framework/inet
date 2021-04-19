@@ -20,6 +20,7 @@
 
 #include <map>
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/contract/INetfilter.h"
@@ -74,9 +75,9 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
 
     // environment
     cModule *host = nullptr;
-    IRoutingTable *routingTable = nullptr;
-    IInterfaceTable *interfaceTable = nullptr;
-    INetfilter *networkProtocol = nullptr;
+    ModuleRefByPar<IRoutingTable> routingTable;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
+    ModuleRefByPar<INetfilter> networkProtocol;
     UdpSocket socket;
     bool usingIpv6 = false;
 

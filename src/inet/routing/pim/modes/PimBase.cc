@@ -49,10 +49,10 @@ void PimBase::initialize(int stage)
     RoutingProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
-        pimIft = getModuleFromPar<PimInterfaceTable>(par("pimInterfaceTableModule"), this);
-        pimNbt = getModuleFromPar<PimNeighborTable>(par("pimNeighborTableModule"), this);
+        ift.reference(this, "interfaceTableModule", true);
+        rt.reference(this, "routingTableModule", true);
+        pimIft.reference(this, "pimInterfaceTableModule", true);
+        pimNbt.reference(this, "pimNeighborTableModule", true);
 
         cModule *host = findContainingNode(this);
         if (!host)

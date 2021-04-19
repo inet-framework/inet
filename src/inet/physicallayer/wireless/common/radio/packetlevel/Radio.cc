@@ -52,8 +52,8 @@ void Radio::initialize(int stage)
         antenna = check_and_cast<IAntenna *>(getSubmodule("antenna"));
         transmitter = check_and_cast<ITransmitter *>(getSubmodule("transmitter"));
         receiver = check_and_cast<IReceiver *>(getSubmodule("receiver"));
-        medium = getModuleFromPar<IRadioMedium>(par("radioMediumModule"), this);
-        mediumModuleId = check_and_cast<cModule *>(medium)->getId();
+        medium.reference(this, "radioMediumModule", true);
+        mediumModuleId = check_and_cast<cModule *>(medium.get())->getId();
         upperLayerIn = gate("upperLayerIn");
         upperLayerOut = gate("upperLayerOut");
         radioIn = gate("radioIn");
@@ -353,7 +353,7 @@ void Radio::startTransmission(Packet *macFrame, IRadioSignal::SignalPart part)
     updateTransceiverPart();
     emit(transmissionStartedSignal, check_and_cast<const cObject *>(transmission));
     // TODO move to radio medium
-    check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::signalDepartureStartedSignal, check_and_cast<const cObject *>(transmission));
+    check_and_cast<RadioMedium *>(medium.get())->emit(IRadioMedium::signalDepartureStartedSignal, check_and_cast<const cObject *>(transmission));
 }
 
 void Radio::continueTransmission()
@@ -381,7 +381,7 @@ void Radio::endTransmission()
     updateTransceiverPart();
     emit(transmissionEndedSignal, check_and_cast<const cObject *>(transmission));
     // TODO move to radio medium
-    check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::signalDepartureEndedSignal, check_and_cast<const cObject *>(transmission));
+    check_and_cast<RadioMedium *>(medium.get())->emit(IRadioMedium::signalDepartureEndedSignal, check_and_cast<const cObject *>(transmission));
 }
 
 void Radio::abortTransmission()
@@ -433,7 +433,7 @@ void Radio::startReception(cMessage *timer, IRadioSignal::SignalPart part)
     updateTransceiverState();
     updateTransceiverPart();
     // TODO move to radio medium
-    check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::signalArrivalStartedSignal, check_and_cast<const cObject *>(reception));
+    check_and_cast<RadioMedium *>(medium.get())->emit(IRadioMedium::signalArrivalStartedSignal, check_and_cast<const cObject *>(reception));
 }
 
 void Radio::continueReception(cMessage *timer)
@@ -491,7 +491,7 @@ void Radio::endReception(cMessage *timer)
         receptionTimer = nullptr;
     delete timer;
     // TODO move to radio medium
-    check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::signalArrivalEndedSignal, check_and_cast<const cObject *>(reception));
+    check_and_cast<RadioMedium *>(medium.get())->emit(IRadioMedium::signalArrivalEndedSignal, check_and_cast<const cObject *>(reception));
 }
 
 void Radio::abortReception(cMessage *timer)

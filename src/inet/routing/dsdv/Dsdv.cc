@@ -53,8 +53,8 @@ void Dsdv::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         sequencenumber = 0;
         host = getContainingNode(this);
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
+        ift.reference(this, "interfaceTableModule", true);
+        rt.reference(this, "routingTableModule", true);
 
         routeLifetime = par("routeLifetime").doubleValue();
         helloInterval = par("helloInterval");

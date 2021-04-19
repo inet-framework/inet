@@ -12,6 +12,7 @@
 #include "inet/clock/common/ClockTime.h"
 #include "inet/clock/model/SettableClock.h"
 #include "inet/common/INETDefs.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/clock/ClockUserModuleBase.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -19,10 +20,10 @@
 
 namespace inet {
 
-class Gptp : public ClockUserModuleBase
+class Gptp : public ClockUserModuleBase, public cListener
 {
     //parameters:
-    IInterfaceTable *interfaceTable = nullptr;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
 
     GptpNodeType gptpNodeType;
     int slavePortId = -1; // interface ID of slave port

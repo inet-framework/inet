@@ -45,9 +45,8 @@ void RsvpClassifier::initialize(int stage)
         IIpv4RoutingTable *rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
         routerId = rt->getRouterId();
 
-        lt = getModuleFromPar<LibTable>(par("libTableModule"), this);
-
-        rsvp = getModuleFromPar<RsvpTe>(par("rsvpModule"), this);
+        lt.reference(this, "libTableModule", true);
+        rsvp.reference(this, "rsvpModule", true);
 
         readTableFromXML(par("config"));
     }

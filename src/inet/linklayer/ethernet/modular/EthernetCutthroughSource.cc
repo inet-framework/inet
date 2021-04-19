@@ -33,9 +33,9 @@ void EthernetCutthroughSource::initialize(int stage)
     PacketDestreamer::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         cutthroughOutputGate = gate("cutthroughOut");
-        cutthroughConsumer = findConnectedModule<IPassivePacketSink>(cutthroughOutputGate);
+        cutthroughConsumer.reference(cutthroughOutputGate, false);
         networkInterface = getContainingNicModule(this);
-        macTable = getModuleFromPar<IMacAddressTable>(par("macTableModule"), this);
+        macTable.reference(this, "macTableModule", true);
         cutthroughTimer = new cMessage("CutthroughTimer");
     }
 }

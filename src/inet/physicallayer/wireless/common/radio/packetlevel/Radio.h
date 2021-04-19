@@ -18,6 +18,7 @@
 #ifndef __INET_RADIO_H
 #define __INET_RADIO_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/PhysicalLayerBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IAntenna.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
@@ -80,7 +81,7 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
     /**
      * The radio medium model is never nullptr.
      */
-    IRadioMedium *medium = nullptr;
+    ModuleRefByPar<IRadioMedium> medium;
     /**
      * The module id of the medim model.
      */

@@ -18,6 +18,7 @@
 #ifndef __INET_REDDROPPER_H
 #define __INET_REDDROPPER_H
 
+#include "inet/common/ModuleRef.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 #include "inet/queueing/contract/IPacketCollection.h"
@@ -49,7 +50,7 @@ class INET_API RedDropper : public PacketFilterBase
     bool markNext = false;
     mutable RedResult lastResult;
 
-    IPacketCollection *collection = nullptr;
+    ModuleRef<IPacketCollection> collection;
 
   protected:
     virtual void initialize(int stage) override;

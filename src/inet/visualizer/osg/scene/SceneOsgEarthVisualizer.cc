@@ -48,7 +48,7 @@ void SceneOsgEarthVisualizer::initialize(int stage)
     SceneOsgVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        coordinateSystem = getModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this);
+        coordinateSystem.reference(this, "coordinateSystemModule", true);
         cameraDistanceFactor = par("cameraDistanceFactor");
         initializeScene();
     }

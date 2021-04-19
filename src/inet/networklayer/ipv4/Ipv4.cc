@@ -76,10 +76,10 @@ void Ipv4::initialize(int stage)
     OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
-        arp = getModuleFromPar<IArp>(par("arpModule"), this);
-        icmp = getModuleFromPar<Icmp>(par("icmpModule"), this);
+        ift.reference(this, "interfaceTableModule", true);
+        rt.reference(this, "routingTableModule", true);
+        arp.reference(this, "arpModule", true);
+        icmp.reference(this, "icmpModule", true);
 
         transportInGateBaseId = gateBaseId("transportIn");
 
@@ -114,7 +114,7 @@ void Ipv4::initialize(int stage)
         WATCH_MAP(socketIdToSocketDescriptor);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        cModule *arpModule = check_and_cast<cModule *>(arp);
+        cModule *arpModule = check_and_cast<cModule *>(arp.get());
         arpModule->subscribe(IArp::arpResolutionCompletedSignal, this);
         arpModule->subscribe(IArp::arpResolutionFailedSignal, this);
 

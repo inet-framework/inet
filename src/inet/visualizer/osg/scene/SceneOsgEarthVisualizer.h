@@ -39,7 +39,7 @@ class INET_API SceneOsgEarthVisualizer : public SceneOsgVisualizerBase
     osgEarth::MapNode *getMapNode() { return mapNode; }
 
   protected:
-    IGeographicCoordinateSystem *coordinateSystem = nullptr;
+    ModuleRefByPar<IGeographicCoordinateSystem> coordinateSystem;
     double cameraDistanceFactor = NaN;
 
     osgEarth::MapNode *mapNode = nullptr;

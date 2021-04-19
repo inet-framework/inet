@@ -36,7 +36,7 @@ void EthernetMacHeaderChecker::initialize(int stage)
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         promiscuous = par("promiscuous");
-        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        interfaceTable.reference(this, "interfaceTableModule", true);
     }
     else if (stage == INITSTAGE_LINK_LAYER)
         registerProtocol(Protocol::ethernetMac, nullptr, inputGate);

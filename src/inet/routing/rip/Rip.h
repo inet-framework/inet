@@ -18,6 +18,7 @@
 #ifndef __INET_RIP_H
 #define __INET_RIP_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IRoute.h"
@@ -93,8 +94,8 @@ class INET_API Rip : public RoutingProtocolBase, protected cListener
     typedef std::vector<RipRoute *> RouteVector;
     // environment
     cModule *host = nullptr; // the host module that owns this module
-    IInterfaceTable *ift = nullptr; // interface table of the host
-    IRoutingTable *rt = nullptr; // routing table from which routes are imported and to which learned routes are added
+    ModuleRefByPar<IInterfaceTable> ift;
+    ModuleRefByPar<IRoutingTable> rt;
     IL3AddressType *addressType = nullptr; // address type of the routing table
     // state
     InterfaceVector ripInterfaces; // interfaces on which RIP is used

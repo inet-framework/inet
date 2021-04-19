@@ -18,6 +18,7 @@
 #ifndef __INET_QUEUEBASEDTOKENGENERATOR_H
 #define __INET_QUEUEBASEDTOKENGENERATOR_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/queueing/base/TokenGeneratorBase.h"
 #include "inet/queueing/contract/IPacketQueue.h"
 
@@ -29,7 +30,7 @@ class INET_API QueueBasedTokenGenerator : public TokenGeneratorBase, public cLis
   protected:
     int minNumPackets = -1;
     b minTotalLength = b(-1);
-    IPacketQueue *queue = nullptr;
+    ModuleRefByPar<IPacketQueue> queue;
     cPar *numTokensParameter = nullptr;
 
   protected:

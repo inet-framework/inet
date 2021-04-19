@@ -28,8 +28,8 @@ void SimpleClockSynchronizer::initialize(int stage)
     ApplicationBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         synhronizationTimer = new cMessage("SynchronizationTimer");
-        masterClock = getModuleFromPar<IClock>(par("masterClockModule"), this);
-        slaveClock = getModuleFromPar<SettableClock>(par("slaveClockModule"), this);
+        masterClock.reference(this, "masterClockModule", true);
+        slaveClock.reference(this, "slaveClockModule", true);
         synchronizationIntervalParameter = &par("synchronizationInterval");
         synchronizationAccuracyParameter = &par("synchronizationAccuracy");
     }

@@ -19,6 +19,7 @@
 #define __INET_HTTPBROWSERBASE_H
 
 #include "inet/applications/httptools/common/HttpNodeBase.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 
 namespace inet {
@@ -83,7 +84,7 @@ class INET_API HttpBrowserBase : public HttpNodeBase
     typedef std::deque<Packet *> HttpRequestQueue;
 
     cMessage *eventTimer = nullptr; // The timer object used to trigger browsing events
-    HttpController *controller = nullptr; // Reference to the central controller object
+    ModuleRefByPar<HttpController> controller; // Reference to the central controller object
 
     bool scriptedMode = false; // Set to true if a script file is defined
     BrowseEventsList browseEvents; // Queue of browse events used in scripted mode

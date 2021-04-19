@@ -31,7 +31,7 @@ void Ieee8021qSocketPacketProcessor::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        socketTable = getModuleFromPar<Ieee8021qSocketTable>(par("socketTableModule"), this);
+        socketTable.reference(this, "socketTableModule", true);
 }
 
 cGate *Ieee8021qSocketPacketProcessor::getRegistrationForwardingGate(cGate *gate)

@@ -23,6 +23,7 @@
 #include <set>
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Message.h"
@@ -72,9 +73,9 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
             : socketId(socketId), protocolId(protocolId), localAddress(localAddress) {}
     };
 
-    IInterfaceTable *interfaceTable;
-    NextHopRoutingTable *routingTable;
-    IArp *arp;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
+    ModuleRefByPar<NextHopRoutingTable> routingTable;
+    ModuleRefByPar<IArp> arp;
 
     // config
     int defaultHopLimit;

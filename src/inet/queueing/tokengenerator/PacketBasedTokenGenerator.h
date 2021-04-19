@@ -18,6 +18,7 @@
 #ifndef __INET_PACKETBASEDTOKENGENERATOR_H
 #define __INET_PACKETBASEDTOKENGENERATOR_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/queueing/base/PassivePacketSinkBase.h"
 #include "inet/queueing/server/TokenBasedServer.h"
 
@@ -31,8 +32,8 @@ class INET_API PacketBasedTokenGenerator : public PassivePacketSinkBase, public 
     cPar *numTokensPerBitParameter = nullptr;
 
     cGate *inputGate = nullptr;
-    IActivePacketSource *producer = nullptr;
-    TokenBasedServer *server = nullptr;
+    opp_component_ptr<IActivePacketSource> producer;
+    ModuleRefByPar<TokenBasedServer> server;
 
     int numTokensGenerated = -1;
 

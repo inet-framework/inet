@@ -18,6 +18,7 @@
 #ifndef __INET_ATTACHEDMOBILITY_H
 #define __INET_ATTACHEDMOBILITY_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/mobility/base/MobilityBase.h"
 
 namespace inet {
@@ -25,7 +26,7 @@ namespace inet {
 class INET_API AttachedMobility : public MobilityBase, public cListener
 {
   protected:
-    IMobility *mobility = nullptr;
+    ModuleRefByPar<IMobility> mobility;
     Coord positionOffset = Coord::NIL;
     Quaternion orientationOffset = Quaternion::NIL;
     bool isZeroOffset = false;

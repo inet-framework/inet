@@ -52,8 +52,8 @@ void Ted::initialize(int stage)
 
         WATCH_VECTOR(ted);
 
-        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        rt.reference(this, "routingTableModule", true);
+        ift.reference(this, "interfaceTableModule", true);
     }
 }
 

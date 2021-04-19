@@ -23,6 +23,7 @@
 #include <set>
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
@@ -146,8 +147,8 @@ class INET_API Igmpv2 : public cSimpleModule, public DefaultProtocolRegistration
     };
 
   protected:
-    IIpv4RoutingTable *rt; // cached pointer
-    IInterfaceTable *ift; // cached pointer
+    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<IInterfaceTable> ift;
 
     bool enabled;
     bool externalRouter;

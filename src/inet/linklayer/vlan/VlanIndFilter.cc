@@ -29,7 +29,7 @@ void VlanIndFilter::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        interfaceTable.reference(this, "interfaceTableModule", true);
         cObject *object = par("acceptedVlanIds");
         acceptedVlanIds = check_and_cast<cValueMap *>(object);
         WATCH(acceptedVlanIds);

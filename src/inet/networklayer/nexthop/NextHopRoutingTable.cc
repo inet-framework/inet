@@ -60,7 +60,7 @@ void NextHopRoutingTable::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         // get a pointer to the IInterfaceTable
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        ift.reference(this, "interfaceTableModule", true);
 
         const char *addressTypeString = par("addressType");
         if (!strcmp(addressTypeString, "mac"))

@@ -18,6 +18,7 @@
 #ifndef __INET_GPSR_H
 #define __INET_GPSR_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/mobility/contract/IMobility.h"
@@ -55,12 +56,12 @@ class INET_API Gpsr : public RoutingProtocolBase, public cListener, public Netfi
 
     // context
     cModule *host = nullptr;
-    IMobility *mobility = nullptr;
+    opp_component_ptr<IMobility> mobility;
     IL3AddressType *addressType = nullptr;
-    IInterfaceTable *interfaceTable = nullptr;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
     const char *outputInterface = nullptr;
-    IRoutingTable *routingTable = nullptr; // TODO delete when necessary functions are moved to interface table
-    INetfilter *networkProtocol = nullptr;
+    ModuleRefByPar<IRoutingTable> routingTable; // TODO delete when necessary functions are moved to interface table
+    ModuleRefByPar<INetfilter> networkProtocol;
     static PositionTable globalPositionTable; // KLUDGE implement position registry protocol
 
     // packet size

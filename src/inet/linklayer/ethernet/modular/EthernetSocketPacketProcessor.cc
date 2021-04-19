@@ -31,7 +31,7 @@ void EthernetSocketPacketProcessor::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        socketTable = getModuleFromPar<EthernetSocketTable>(par("socketTableModule"), this);
+        socketTable.reference(this, "socketTableModule", true);
 }
 
 cGate *EthernetSocketPacketProcessor::getRegistrationForwardingGate(cGate *gate)

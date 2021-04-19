@@ -58,7 +58,7 @@ void Gptp::initialize(int stage)
         peerDelay = 0;
         receivedTimeSync = CLOCKTIME_ZERO;
 
-        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        interfaceTable.reference(this, "interfaceTableModule", true);
 
         const char *str = par("slavePort");
         if (*str) {
@@ -367,7 +367,7 @@ void Gptp::synchronize()
      *****************************************************************************/
     clocktime_t newTime = peerSentTimeSync + peerDelay + correctionField + residenceTime;
 
-    check_and_cast<SettableClock *>(clock)->setClockTime(newTime);
+    check_and_cast<SettableClock *>(clock.get())->setClockTime(newTime);
 
     // TODO computeGmRateRatio:
     gmRateRatio = (origNow - newLocalTimeAtTimeSync) / (syncIngressTimestamp - receivedTimeSync);
@@ -464,8 +464,6 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
 void Gptp::receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details)
 {
     Enter_Method("receiveSignal");
-
-    ClockUserModuleBase::receiveSignal(source, signal, obj, details);
 
     if (signal == receptionEndedSignal) {
         auto signal = check_and_cast<cPacket *>(obj);

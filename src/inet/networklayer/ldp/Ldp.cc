@@ -112,10 +112,10 @@ void Ldp::initialize(int stage)
         holdTime = par("holdTime");
         helloInterval = par("helloInterval");
 
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        rt = getModuleFromPar<IIpv4RoutingTable>(par("routingTableModule"), this);
-        lt = getModuleFromPar<LibTable>(par("libTableModule"), this);
-        tedmod = getModuleFromPar<Ted>(par("tedModule"), this);
+        ift.reference(this, "interfaceTableModule", true);
+        rt.reference(this, "routingTableModule", true);
+        lt.reference(this, "libTableModule", true);
+        tedmod.reference(this, "tedModule", true);
 
         WATCH_VECTOR(myPeers);
         WATCH_VECTOR(fecUp);

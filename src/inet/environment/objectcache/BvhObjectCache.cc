@@ -26,7 +26,6 @@ namespace physicalenvironment {
 Define_Module(BvhObjectCache);
 
 BvhObjectCache::BvhObjectCache() :
-    physicalEnvironment(nullptr),
     leafCapacity(0),
     axisOrder(nullptr),
     bvhTree(nullptr)
@@ -41,7 +40,7 @@ BvhObjectCache::~BvhObjectCache()
 void BvhObjectCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        physicalEnvironment = getModuleFromPar<PhysicalEnvironment>(par("physicalEnvironmentModule"), this);
+        physicalEnvironment.reference(this, "physicalEnvironmentModule", true);
         leafCapacity = par("leafCapacity");
         axisOrder = par("axisOrder");
     }

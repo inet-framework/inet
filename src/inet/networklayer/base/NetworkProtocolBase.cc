@@ -30,8 +30,7 @@
 
 namespace inet {
 
-NetworkProtocolBase::NetworkProtocolBase() :
-    interfaceTable(nullptr)
+NetworkProtocolBase::NetworkProtocolBase()
 {
 }
 
@@ -39,7 +38,7 @@ void NetworkProtocolBase::initialize(int stage)
 {
     LayeredProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        interfaceTable.reference(this, "interfaceTableModule", true);
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         registerService(getProtocol(), gate("transportIn"), gate("transportOut"));
         registerProtocol(getProtocol(), gate("queueOut"), gate("queueIn"));

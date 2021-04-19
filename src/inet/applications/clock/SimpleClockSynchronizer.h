@@ -22,6 +22,7 @@
 
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/clock/model/SettableClock.h"
+#include "inet/common/ModuleRefByPar.h"
 
 namespace inet {
 
@@ -29,8 +30,8 @@ class INET_API SimpleClockSynchronizer : public ApplicationBase
 {
   protected:
     cMessage *synhronizationTimer = nullptr;
-    IClock *masterClock = nullptr;
-    SettableClock *slaveClock = nullptr;
+    ModuleRefByPar<IClock> masterClock;
+    ModuleRefByPar<SettableClock> slaveClock;
     cPar *synchronizationIntervalParameter = nullptr;
     cPar *synchronizationAccuracyParameter = nullptr;
 

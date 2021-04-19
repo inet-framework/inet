@@ -112,7 +112,7 @@ void xMIPv6::initialize(int stage)
            statVectorHoTfromCN.setName("HoT from CN");
            statVectorCoTfromCN.setName("CoT from CN");*/
 
-        tunneling = getModuleFromPar<Ipv6Tunneling>(par("ipv6TunnelingModule"), this); // access to tunneling module
+        tunneling.reference(this, "ipv6TunnelingModule", true); // access to tunneling module
 
         // moved rt6 initialization to here, as we should
         // set the MIPv6 flag as soon as possible for use
@@ -124,16 +124,14 @@ void xMIPv6::initialize(int stage)
         rt6->setIsHomeAgent(par("isHomeAgent"));
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        ipv6nd = getModuleFromPar<Ipv6NeighbourDiscovery>(par("ipv6NeighbourDiscoveryModule"), this);
+        ift.reference(this, "interfaceTableModule", true);
+        ipv6nd.reference(this, "ipv6NeighbourDiscoveryModule", true);
 
         if (rt6->isMobileNode()) {
-            bul = getModuleFromPar<BindingUpdateList>(par("bindingUpdateListModule"), this);
-            bc = nullptr;
+            bul.reference(this, "bindingUpdateListModule", true);
         }
         else {
-            bc = getModuleFromPar<BindingCache>(par("bindingCacheModule"), this);
-            bul = nullptr;
+            bc.reference(this, "bindingCacheModule", true);
         }
 
         WATCH_VECTOR(cnList);

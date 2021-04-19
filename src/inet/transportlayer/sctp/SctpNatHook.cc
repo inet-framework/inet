@@ -18,9 +18,6 @@ Define_Module(SctpNatHook);
 SctpNatHook::SctpNatHook()
 {
     ipLayer = nullptr;
-    natTable = nullptr;
-    rt = nullptr;
-    ift = nullptr;
     nattedPackets = 0;
 }
 
@@ -30,10 +27,9 @@ SctpNatHook::~SctpNatHook()
 
 void SctpNatHook::initialize()
 {
-    rt = getModuleFromPar<IRoutingTable>(par("routingTableModule"), this);
-    ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-//    ipLayer = getModuleFromPar<IPv4>(par("networkProtocolModule"), this);
-    natTable = getModuleFromPar<SctpNatTable>(par("natTableModule"), this);
+    rt.reference(this, "routingTableModule", true);
+    ift.reference(this, "interfaceTableModule", true);
+    natTable.reference(this, "natTableModule", true);
     auto ipv4 = dynamic_cast<INetfilter *>(getModuleByPath("^.ipv4.ip"));
     ipv4->registerHook(0, this);
 }

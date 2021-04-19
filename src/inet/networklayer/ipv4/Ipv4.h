@@ -72,10 +72,10 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     };
 
   protected:
-    IIpv4RoutingTable *rt = nullptr;
-    IInterfaceTable *ift = nullptr;
-    IArp *arp = nullptr;
-    Icmp *icmp = nullptr;
+    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<IInterfaceTable> ift;
+    ModuleRefByPar<IArp> arp;
+    ModuleRefByPar<Icmp> icmp;
     int transportInGateBaseId = -1;
 
     // config

@@ -18,6 +18,7 @@
 #ifndef __INET_ETHERNETMACHEADERCHECKER_H
 #define __INET_ETHERNETMACHEADERCHECKER_H
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 
@@ -29,7 +30,7 @@ class INET_API EthernetMacHeaderChecker : public PacketFilterBase
 {
   protected:
     bool promiscuous = false;
-    IInterfaceTable *interfaceTable = nullptr;
+    ModuleRefByPar<IInterfaceTable> interfaceTable;
 
   protected:
     virtual void initialize(int stage) override;

@@ -25,20 +25,10 @@ namespace inet {
 #ifdef INET_WITH_CLOCK
 
 template<typename T>
-IClock *ClockUserModuleMixin<T>::findClockModule() const {
+void ClockUserModuleMixin<T>::findClockModule() {
     if (T::hasPar("clockModule")) {
-        const char *clockModulePath = T::par("clockModule");
-        if (*clockModulePath) {
-            cModule *clockModule = T::getModuleByPath(clockModulePath);
-            if (clockModule == nullptr)
-                throw cRuntimeError("Clock module '%s' not found", clockModulePath);
-            return check_and_cast<IClock *>(clockModule);
-        }
-        else
-            return nullptr;
+        clock.reference(this, "clockModule", false);
     }
-    else
-        return nullptr;
 }
 
 template<typename T>
@@ -55,12 +45,10 @@ template<typename T>
 void ClockUserModuleMixin<T>::initialize(int stage) {
     T::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        clock = findClockModule();
+        findClockModule();
 #ifndef NDEBUG
         className = T::getClassName();
 #endif
-        if (clock != nullptr)
-            dynamic_cast<cModule *>(clock)->subscribe(PRE_MODEL_CHANGE, this);
     }
 }
 
@@ -176,18 +164,6 @@ clocktime_t ClockUserModuleMixin<T>::getArrivalClockTime(ClockEvent *msg) const 
         return msg->getArrivalClockTime();
     else
         return ClockTime::from(msg->getArrivalTime());
-}
-
-template<typename T>
-void ClockUserModuleMixin<T>::receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details)
-{
-    Enter_Method("receiveSignal");
-    if (signal == PRE_MODEL_CHANGE) {
-        if (auto moduleDeleteNotification = dynamic_cast<cPreModuleDeleteNotification *>(obj)) {
-            if (moduleDeleteNotification->module == dynamic_cast<cModule *>(clock))
-                clock = nullptr;
-        }
-    }
 }
 
 #endif // #ifdef INET_WITH_CLOCK

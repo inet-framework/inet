@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/common/socket/SocketMap.h"
 #include "inet/networklayer/ldp/LdpPacket_m.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
@@ -116,10 +117,10 @@ class INET_API Ldp : public RoutingProtocolBase, public TcpSocket::ReceiveQueueB
     //
     // other variables:
     //
-    IInterfaceTable *ift = nullptr;
-    IIpv4RoutingTable *rt = nullptr;
-    LibTable *lt = nullptr;
-    Ted *tedmod = nullptr;
+    ModuleRefByPar<IInterfaceTable> ift;
+    ModuleRefByPar<IIpv4RoutingTable> rt;
+    ModuleRefByPar<LibTable> lt;
+    ModuleRefByPar<Ted> tedmod;
 
     UdpSocket udpSocket; // for receiving Hello
     std::vector<UdpSocket> udpSockets; // for sending Hello, one socket for each multicast interface
