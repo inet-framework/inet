@@ -62,8 +62,8 @@ class INET_API ModuleRef
     T *getNullable() { return referencedModule.getNullable(); }
     const T *getNullable() const { return referencedModule.getNullable(); }
 
-    T *get() { checkReference(); return get(); }
-    const T *get() const { checkReference(); return get(); }
+    T *get() { checkReference(); return referencedModule.get(); }
+    const T *get() const { checkReference(); return referencedModule.get(); }
 
     void reference(cModule *referencingModule, const char *parameterName, bool mandatory) {
         if (referencingModule == nullptr)
