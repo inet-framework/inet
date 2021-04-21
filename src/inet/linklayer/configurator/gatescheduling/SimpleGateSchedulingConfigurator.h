@@ -28,6 +28,7 @@
 
 namespace inet {
 
+// TODO: derive from GateSchedulingConfiguratorBase
 class INET_API SimpleGateSchedulingConfigurator : public cSimpleModule
 {
   protected:
