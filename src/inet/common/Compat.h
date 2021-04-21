@@ -65,4 +65,13 @@ inline double fmax(double a, double b)
 
 } // namespace inet
 
+// Around OMNeT++ 6.0 pre12, cVisitor::visit() return type changed from void to bool
+#if OMNETPP_BUILDNUM >= 1513
+#define VISIT_RETURNTYPE bool
+#define VISIT_RETURN(x) return x
+#else
+#define VISIT_RETURNTYPE void
+#define VISIT_RETURN(x)
+#endif
+
 #endif // ifndef __INET_COMPAT_H

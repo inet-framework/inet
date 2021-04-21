@@ -22,11 +22,12 @@ namespace inet {
 
 namespace visualizer {
 
-void QueueVisualizerBase::QueueVisitor::visit(cObject *object)
+VISIT_RETURNTYPE QueueVisualizerBase::QueueVisitor::visit(cObject *object)
 {
     if (auto queue = dynamic_cast<PacketQueue *>(object))
         queues.push_back(queue);
     object->forEachChild(this);
+    VISIT_RETURN(true);
 }
 
 QueueVisualizerBase::QueueVisualization::QueueVisualization(PacketQueue *queue) :
