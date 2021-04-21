@@ -1569,7 +1569,7 @@
         requires = "Ethernet"
         labels = ""
         nedPackages = "
-                       inet.linklayer.configurator.z3
+                       inet.linklayer.configurator.gatescheduling.z3
                       "
         extraSourceFolders = ""
         compileFlags = ""
