@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_GATESCHEDULINGCONFIGURATOR_H
-#define __INET_GATESCHEDULINGCONFIGURATOR_H
+#ifndef __INET_SIMPLEGATESCHEDULINGCONFIGURATOR_H
+#define __INET_SIMPLEGATESCHEDULINGCONFIGURATOR_H
 
 #include <algorithm>
 #include <vector>
@@ -28,7 +28,7 @@
 
 namespace inet {
 
-class INET_API GateSchedulingConfigurator : public cSimpleModule
+class INET_API SimpleGateSchedulingConfigurator : public cSimpleModule
 {
   protected:
     class InterfaceInfo;
@@ -73,8 +73,8 @@ class INET_API GateSchedulingConfigurator : public cSimpleModule
 
     class Topology : public inet::Topology {
       protected:
-        virtual Node *createNode(cModule *module) override { return new GateSchedulingConfigurator::Node(module); }
-        virtual Link *createLink() override { return new GateSchedulingConfigurator::Link(); }
+        virtual Node *createNode(cModule *module) override { return new SimpleGateSchedulingConfigurator::Node(module); }
+        virtual Link *createLink() override { return new SimpleGateSchedulingConfigurator::Link(); }
     };
 
     class StreamReservation

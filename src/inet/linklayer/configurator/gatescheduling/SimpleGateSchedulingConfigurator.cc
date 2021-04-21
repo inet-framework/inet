@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/configurator/GateSchedulingConfigurator.h"
+#include "inet/linklayer/configurator/gatescheduling/SimpleGateSchedulingConfigurator.h"
 
 #include <queue>
 #include <set>
@@ -29,9 +29,9 @@
 
 namespace inet {
 
-Define_Module(GateSchedulingConfigurator);
+Define_Module(SimpleGateSchedulingConfigurator);
 
-void GateSchedulingConfigurator::initialize(int stage)
+void SimpleGateSchedulingConfigurator::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         gateCycleDuration = par("gateCycleDuration");
@@ -44,7 +44,7 @@ void GateSchedulingConfigurator::initialize(int stage)
     }
 }
 
-void GateSchedulingConfigurator::handleParameterChange(const char *name)
+void SimpleGateSchedulingConfigurator::handleParameterChange(const char *name)
 {
     if (name != nullptr) {
         if (!strcmp(name, "configuration")) {
@@ -57,7 +57,7 @@ void GateSchedulingConfigurator::handleParameterChange(const char *name)
     }
 }
 
-void GateSchedulingConfigurator::extractTopology(Topology& topology)
+void SimpleGateSchedulingConfigurator::extractTopology(Topology& topology)
 {
     topology.extractByProperty("networkNode");
     EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
@@ -116,13 +116,13 @@ void GateSchedulingConfigurator::extractTopology(Topology& topology)
     }
 }
 
-void GateSchedulingConfigurator::clearConfiguration()
+void SimpleGateSchedulingConfigurator::clearConfiguration()
 {
     topology.clear();
     streamReservations.clear();
 }
 
-void GateSchedulingConfigurator::computeConfiguration()
+void SimpleGateSchedulingConfigurator::computeConfiguration()
 {
     long initializeStartTime = clock();
     TIME(extractTopology(topology));
@@ -131,7 +131,7 @@ void GateSchedulingConfigurator::computeConfiguration()
     printElapsedTime("initialize", initializeStartTime);
 }
 
-void GateSchedulingConfigurator::computeStreamReservations()
+void SimpleGateSchedulingConfigurator::computeStreamReservations()
 {
     EV_DEBUG << "Computing stream reservations according to configuration" << EV_FIELD(configuration) << EV_ENDL;
     for (int i = 0; i < topology.getNumNodes(); i++) {
@@ -180,9 +180,9 @@ void GateSchedulingConfigurator::computeStreamReservations()
     }
 }
 
-void GateSchedulingConfigurator::computeGateScheduling()
+void SimpleGateSchedulingConfigurator::computeGateScheduling()
 {
-    std::sort(streamReservations.begin(), streamReservations.end(), [] (const GateSchedulingConfigurator::StreamReservation& r1, const GateSchedulingConfigurator::StreamReservation& r2) {
+    std::sort(streamReservations.begin(), streamReservations.end(), [] (const SimpleGateSchedulingConfigurator::StreamReservation& r1, const SimpleGateSchedulingConfigurator::StreamReservation& r2) {
         return r1.priority < r2.priority;
     });
     for (auto& streamReservation : streamReservations) {
@@ -196,7 +196,7 @@ void GateSchedulingConfigurator::computeGateScheduling()
     }
 }
 
-void GateSchedulingConfigurator::computeStreamStartOffset(StreamReservation& streamReservation)
+void SimpleGateSchedulingConfigurator::computeStreamStartOffset(StreamReservation& streamReservation)
 {
     auto source = streamReservation.source->module;
     auto destination = streamReservation.destination->module;
@@ -216,7 +216,7 @@ void GateSchedulingConfigurator::computeStreamStartOffset(StreamReservation& str
     streamReservation.startOffset = startOffset;
 }
 
-simtime_t GateSchedulingConfigurator::computeStartOffsetForPathFragments(StreamReservation& streamReservation, std::string startNetworkNodeName, simtime_t startTime)
+simtime_t SimpleGateSchedulingConfigurator::computeStartOffsetForPathFragments(StreamReservation& streamReservation, std::string startNetworkNodeName, simtime_t startTime)
 {
     auto destination = streamReservation.destination->module;
     b packetLength = streamReservation.packetLength;
@@ -278,7 +278,7 @@ simtime_t GateSchedulingConfigurator::computeStartOffsetForPathFragments(StreamR
     return result;
 };
 
-void GateSchedulingConfigurator::addGateScheduling(StreamReservation& streamReservation, int startIndex, int endIndex)
+void SimpleGateSchedulingConfigurator::addGateScheduling(StreamReservation& streamReservation, int startIndex, int endIndex)
 {
     auto source = streamReservation.source->module;
     auto destination = streamReservation.destination->module;
@@ -293,7 +293,7 @@ void GateSchedulingConfigurator::addGateScheduling(StreamReservation& streamRese
     }
 }
 
-void GateSchedulingConfigurator::addGateSchedulingForPathFragments(StreamReservation& streamReservation, std::string startNetworkNodeName, simtime_t startTime, int index)
+void SimpleGateSchedulingConfigurator::addGateSchedulingForPathFragments(StreamReservation& streamReservation, std::string startNetworkNodeName, simtime_t startTime, int index)
 {
     auto destination = streamReservation.destination->module;
     auto priority = streamReservation.priority;
@@ -354,7 +354,7 @@ void GateSchedulingConfigurator::addGateSchedulingForPathFragments(StreamReserva
     }
 }
 
-void GateSchedulingConfigurator::configureGateScheduling()
+void SimpleGateSchedulingConfigurator::configureGateScheduling()
 {
     for (int i = 0; i < topology.getNumNodes(); i++) {
         auto node = (Node *)topology.getNode(i);
@@ -373,7 +373,7 @@ void GateSchedulingConfigurator::configureGateScheduling()
     }
 }
 
-void GateSchedulingConfigurator::configureGateScheduling(cModule *networkNode, cModule *gate, InterfaceInfo *interfaceInfo)
+void SimpleGateSchedulingConfigurator::configureGateScheduling(cModule *networkNode, cModule *gate, InterfaceInfo *interfaceInfo)
 {
     int index = gate->getIndex();
     cValueArray *durations = new cValueArray();
@@ -423,7 +423,7 @@ void GateSchedulingConfigurator::configureGateScheduling(cModule *networkNode, c
     durationsPar.setObjectValue(durations);
 }
 
-void GateSchedulingConfigurator::configureApplicationOffsets()
+void SimpleGateSchedulingConfigurator::configureApplicationOffsets()
 {
     for (auto& streamReservation : streamReservations) {
         if (streamReservation.startOffset != -1) {
@@ -437,7 +437,7 @@ void GateSchedulingConfigurator::configureApplicationOffsets()
     }
 }
 
-std::vector<std::string> GateSchedulingConfigurator::computePath(Node *source, Node *destination)
+std::vector<std::string> SimpleGateSchedulingConfigurator::computePath(Node *source, Node *destination)
 {
     std::vector<std::string> path;
     topology.calculateUnweightedSingleShortestPathsTo(destination);
@@ -451,7 +451,7 @@ std::vector<std::string> GateSchedulingConfigurator::computePath(Node *source, N
     return path;
 }
 
-GateSchedulingConfigurator::Link *GateSchedulingConfigurator::findLinkOut(Node *node, const char *neighbor)
+SimpleGateSchedulingConfigurator::Link *SimpleGateSchedulingConfigurator::findLinkOut(Node *node, const char *neighbor)
 {
     for (int i = 0; i < node->getNumOutLinks(); i++)
         if (!strcmp(node->getLinkOut(i)->getRemoteNode()->getModule()->getFullName(), neighbor))
@@ -459,7 +459,7 @@ GateSchedulingConfigurator::Link *GateSchedulingConfigurator::findLinkOut(Node *
     return nullptr;
 }
 
-Topology::LinkOut *GateSchedulingConfigurator::findLinkOut(Node *node, int gateId)
+Topology::LinkOut *SimpleGateSchedulingConfigurator::findLinkOut(Node *node, int gateId)
 {
     for (int i = 0; i < node->getNumOutLinks(); i++)
         if (node->getLinkOut(i)->getLocalGateId() == gateId)
@@ -467,7 +467,7 @@ Topology::LinkOut *GateSchedulingConfigurator::findLinkOut(Node *node, int gateI
     return nullptr;
 }
 
-GateSchedulingConfigurator::InterfaceInfo *GateSchedulingConfigurator::findInterfaceInfo(Node *node, NetworkInterface *networkInterface)
+SimpleGateSchedulingConfigurator::InterfaceInfo *SimpleGateSchedulingConfigurator::findInterfaceInfo(Node *node, NetworkInterface *networkInterface)
 {
     if (networkInterface == nullptr)
         return nullptr;
