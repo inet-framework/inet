@@ -4,8 +4,8 @@
 #include <deque>
 #include <z3++.h>
 
-#include "inet/linklayer/configurator/z3/PathNode.h"
-#include "inet/linklayer/configurator/z3/PathTree.h"
+#include "inet/linklayer/configurator/gatescheduling/z3/PathNode.h"
+#include "inet/linklayer/configurator/gatescheduling/z3/PathTree.h"
 
 namespace inet {
 

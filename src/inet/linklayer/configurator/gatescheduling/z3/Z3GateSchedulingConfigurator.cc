@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/configurator/z3/Z3GateSchedulingConfigurator.h"
+#include "inet/linklayer/configurator/gatescheduling/z3/Z3GateSchedulingConfigurator.h"
 
 #include <queue>
 #include <set>
