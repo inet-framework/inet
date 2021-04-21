@@ -123,7 +123,7 @@ void IGMPTester::initialize(int stage)
         MACAddress address("AA:00:00:00:00:01");
         interfaceEntry->setMACAddress(address);
         interfaceEntry->setInterfaceToken(address.formInterfaceIdentifier());
-        interfaceEntry->setMtu(par("mtu").longValue());
+        interfaceEntry->setMtu(par("mtu"));
         interfaceEntry->setMulticast(true);
         interfaceEntry->setBroadcast(true);
 
@@ -370,7 +370,7 @@ void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
         {
             IPv4Address group = ie->ipv4Data()->getJoinedMulticastGroup(i);
             const IPv4MulticastSourceList &sourceList = ie->ipv4Data()->getJoinedMulticastSources(i);
-            EV << (i==0?"":", ") << group << " " << sourceList.info();
+            EV << (i==0?"":", ") << group << " " << sourceList.str();
         }
     }
     else if (what == "listeners")
@@ -379,7 +379,7 @@ void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
         {
             IPv4Address group = ie->ipv4Data()->getReportedMulticastGroup(i);
             const IPv4MulticastSourceList &sourceList = ie->ipv4Data()->getReportedMulticastSources(i);
-            EV << (i==0?"":", ") << group << " " << sourceList.info();
+            EV << (i==0?"":", ") << group << " " << sourceList.str();
         }
     }
 

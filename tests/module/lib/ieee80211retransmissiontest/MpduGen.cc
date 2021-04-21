@@ -53,19 +53,19 @@ void MpduGen::sendPackets() {
     const char *localAddress = par("localAddress");
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
     const char *destAddrStr = par("destAddress");
-    const char *packets = par("packets").stringValue();
+    const char *packets = par("packets");
     L3Address destAddr = L3AddressResolver().resolve(destAddrStr);
     int len = strlen(packets);
-    const char *packetName = par("packetName").stringValue();
+    const char *packetName = par("packetName");
     for (int i = 0; i < len; i++) {
         std::ostringstream str;
         str << packetName << "-" << i;
         cPacket *payload = new cPacket(str.str().c_str());
         if (packets[i] == 'L') {
-            payload->setByteLength(par("longPacketSize").longValue());
+            payload->setByteLength(par("longPacketSize"));
         }
         else if (packets[i] == 'S') {
-            payload->setByteLength(par("shortPacketSize").longValue());
+            payload->setByteLength(par("shortPacketSize"));
         }
         else
             throw cRuntimeError("Unknown packet type = %c", packets[i]);
