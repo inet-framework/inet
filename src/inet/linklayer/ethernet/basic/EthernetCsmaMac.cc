@@ -228,7 +228,7 @@ void EthernetCsmaMac::handleSignalFromNetwork(EthernetSignalBase *signal)
         simtime_t propagationTime = simTime() - signal->getSendingTime();
         if (propagationTime >= curEtherDescr->maxPropagationDelay) {
             throw cRuntimeError("Very long frame propagation time detected, maybe cable exceeds "
-                                "maximum allowed length? (%lgs corresponds to an approx. %lgm cable)",
+                                "maximum allowed length? (%s s corresponds to an approx. %s m cable)",
                     SIMTIME_STR(propagationTime),
                     SIMTIME_STR(propagationTime * SPEED_OF_LIGHT_IN_CABLE));
         }

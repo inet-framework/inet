@@ -98,7 +98,7 @@ const IIeee80211Band *Ieee80211CompliantBands::getBand(const char *name)
 {
     const IIeee80211Band *band = findBand(name);
     if (band == nullptr)
-        throw cRuntimeError("Unknown 802.11 band: '%c'", name);
+        throw cRuntimeError("Unknown 802.11 band: '%s'", name);
     else
         return band;
 }
