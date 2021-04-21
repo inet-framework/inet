@@ -15,14 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.configurator;
+package inet.linklayer.configurator.gatescheduling;
 
 //
 // This module configures the scheduling of all ~PeriodicGate modules in the
 // network according to the to be reserved streams described by the configuration
 // parameter. The streams are reserved in the order of priority (0 being the highest).
 //
-simple GateSchedulingConfigurator
+simple SimpleGateSchedulingConfigurator
 {
     parameters:
         double gateCycleDuration @unit(s); // the globally used gating schedule period in each PeriodicGate modules
