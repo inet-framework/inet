@@ -59,7 +59,7 @@ bool SnirReceiverBase::computeIsReceptionSuccessful(const IListening *listening,
         return meanSnir > snirThreshold;
     }
     else
-        throw cRuntimeError("Unknown SNIR threshold mode: '%s'", snirThresholdMode);
+        throw cRuntimeError("Unknown SNIR threshold mode: '%d'", snirThresholdMode);
 }
 
 } // namespace physicallayer
