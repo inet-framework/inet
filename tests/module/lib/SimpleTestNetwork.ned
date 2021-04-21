@@ -1,3 +1,5 @@
+package inet.test.moduletest.lib;
+
 import ned.DatarateChannel;
 import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;

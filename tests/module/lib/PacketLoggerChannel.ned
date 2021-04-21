@@ -1,3 +1,4 @@
+package inet.test.moduletest.lib;
 
 channel PacketLoggerChannel extends ned.DatarateChannel
 {

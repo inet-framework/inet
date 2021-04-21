@@ -1,5 +1,7 @@
 
 
+package inet.test.moduletest.lib;
+
 import inet.linklayer.contract.IEtherMAC;
 import inet.linklayer.ethernet.EtherQoSQueue;
 

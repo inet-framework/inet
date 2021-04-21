@@ -1,8 +1,8 @@
+package inet.test.moduletest.lib;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.idealradio.IdealRadioMedium;
-
 
 network NetIdealRadios
 {

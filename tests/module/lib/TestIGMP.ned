@@ -1,3 +1,5 @@
+package inet.test.moduletest.lib;
+
 import inet.networklayer.ipv4.IIGMP;
 
 simple TestIGMP like IIGMP

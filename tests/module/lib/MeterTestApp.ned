@@ -27,6 +27,9 @@
 //
 // A report is written for each packet into resultFile.
 //
+
+package inet.test.moduletest.lib;
+
 simple MeterTestApp
 {
   parameters:
