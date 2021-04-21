@@ -3,9 +3,9 @@
 
 #include <z3++.h>
 
-#include "inet/linklayer/configurator/z3/Flow.h"
-#include "inet/linklayer/configurator/z3/PathNode.h"
-#include "inet/linklayer/configurator/z3/Port.h"
+#include "inet/linklayer/configurator/gatescheduling/z3/Flow.h"
+#include "inet/linklayer/configurator/gatescheduling/z3/PathNode.h"
+#include "inet/linklayer/configurator/gatescheduling/z3/Port.h"
 
 namespace inet {
 

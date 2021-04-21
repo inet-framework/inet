@@ -24,12 +24,12 @@
 #include "inet/common/PatternMatcher.h"
 #include "inet/common/Topology.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
-#include "inet/linklayer/configurator/z3/Cycle.h"
-#include "inet/linklayer/configurator/z3/Device.h"
-#include "inet/linklayer/configurator/z3/Flow.h"
-#include "inet/linklayer/configurator/z3/FlowFragment.h"
-#include "inet/linklayer/configurator/z3/Network.h"
-#include "inet/linklayer/configurator/z3/Switch.h"
+#include "inet/linklayer/configurator/gatescheduling/z3/Cycle.h"
+#include "inet/linklayer/configurator/gatescheduling/z3/Device.h"
+#include "inet/linklayer/configurator/gatescheduling/z3/Flow.h"
+#include "inet/linklayer/configurator/gatescheduling/z3/FlowFragment.h"
+#include "inet/linklayer/configurator/gatescheduling/z3/Network.h"
+#include "inet/linklayer/configurator/gatescheduling/z3/Switch.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 
@@ -37,6 +37,7 @@ namespace inet {
 
 using namespace z3;
 
+// TODO: derive from GateSchedulingConfiguratorBase
 class INET_API Z3GateSchedulingConfigurator : public cSimpleModule
 {
   protected:

@@ -3,7 +3,7 @@
 
 #include <z3++.h>
 
-#include "inet/linklayer/configurator/z3/Defs.h"
+#include "inet/linklayer/configurator/gatescheduling/z3/Defs.h"
 
 namespace inet {
 

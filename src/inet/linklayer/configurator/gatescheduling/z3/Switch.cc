@@ -1,5 +1,5 @@
-#include "inet/linklayer/configurator/z3/FlowFragment.h"
-#include "inet/linklayer/configurator/z3/Switch.h"
+#include "inet/linklayer/configurator/gatescheduling/z3/FlowFragment.h"
+#include "inet/linklayer/configurator/gatescheduling/z3/Switch.h"
 
 namespace inet {
 
