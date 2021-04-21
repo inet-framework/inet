@@ -14,7 +14,7 @@ TCPMsgBasedSendQueue sendQueue;
 TCPMsgBasedSendQueue *sq = &sendQueue;
 
 sq->init(0);
-EV << sq->info() <<"\n";
+EV << sq->str() <<"\n";
 
 enqueue(sq, "msg1", 500000000); //          0.. 500000000
 enqueue(sq, "msg2", 500000000); //  500000000..1000000000

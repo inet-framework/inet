@@ -14,14 +14,14 @@ TCPMsgBasedSendQueue sendQueue;
 TCPMsgBasedSendQueue *sq = &sendQueue;
 
 sq->init(0);
-EV << sq->info() <<"\n";
+EV << sq->str() <<"\n";
 
 TCPMsgBasedRcvQueue rcvQueue;
 TCPMsgBasedRcvQueue *rq = &rcvQueue;
 
 uint32 seq = 0;
 rq->init(seq);
-EV << rq->info() <<"\n";
+EV << rq->str() <<"\n";
 
 enqueue(sq, "msg1", 500000000); //          0.. 500000000
 enqueue(sq, "msg2", 500000000); //  500000000..1000000000

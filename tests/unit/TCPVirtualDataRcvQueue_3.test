@@ -15,7 +15,7 @@ TCPVirtualDataRcvQueue *q = &rcvQueue;
 
 q->init(1000);
 
-EV << q->info() <<"\n";
+EV << q->str() <<"\n";
 
 insertSegment(q,       1000, 1000001000);
 insertSegment(q, 1000001000, 2000001000);

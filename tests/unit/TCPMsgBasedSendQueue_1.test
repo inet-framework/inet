@@ -15,7 +15,7 @@ TCPMsgBasedSendQueue sendQueue;
 TCPMsgBasedSendQueue *q = &sendQueue;
 
 q->init(1000);
-EV << q->info() <<"\n";
+EV << q->str() <<"\n";
 
 enqueue(q, "msg1", 100); // 1000..1100
 enqueue(q, "msg2", 400); // 1100..1500
