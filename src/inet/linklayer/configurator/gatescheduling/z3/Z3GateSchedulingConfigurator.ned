@@ -15,13 +15,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.configurator.z3;
+package inet.linklayer.configurator.gatescheduling.z3;
 
-simple Z3GateSchedulingConfigurator
+import inet.linklayer.configurator.gatescheduling.base.GateSchedulingConfiguratorBase;
+import inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfigurator;
+
+simple Z3GateSchedulingConfigurator extends GateSchedulingConfiguratorBase like IGateSchedulingConfigurator
 {
     parameters:
-        double gateCycleDuration @unit(s); // the globally used gating schedule period in each PeriodicGate modules
-        object configuration = default([]); // a vector of objects (e.g. [{...}, {...}]) where each object has the following fields: type, priority, source, destination, packetLength, packetInterval, maxLatency
-                                            // here is an example: [{type: "unicast", priority: 0, source: "wheel*", destination: "hud", packetLength: 100B, packetInterval: 5ms, maxLatency: 100us}]
-        @display("i=block/cogwheel");
+        @class(Z3GateSchedulingConfigurator);
 }
