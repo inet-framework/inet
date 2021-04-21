@@ -66,7 +66,7 @@ void TcpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const 
     tcp.th_win = htons(tcpHeader->getWindow());
     tcp.th_urp = htons(tcpHeader->getUrgentPointer());
     if (B(tcpHeader->getHeaderLength()).get() % 4 != 0)
-        throw cRuntimeError("invalid Tcp header length=%u: must be dividable by 4", tcpHeader->getHeaderLength());
+        throw cRuntimeError("invalid Tcp header length=%s: must be dividable by 4 bytes", tcpHeader->getHeaderLength().str().c_str());
     tcp.th_offs = B(tcpHeader->getHeaderLength()).get() / 4;
 
     stream.writeBytes((uint8_t *)&tcp, TCP_MIN_HEADER_LENGTH);

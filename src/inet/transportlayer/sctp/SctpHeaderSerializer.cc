@@ -1110,7 +1110,7 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     // check the serialized packet length
     if (writtenbytes != B(msg->getChunkLength()).get()) {
         throw cRuntimeError("Sctp Serializer error: writtenbytes (%lu) != msgLength(%lu) in message (%s)%s",
-                writtenbytes, (unsigned long)B(msg->getChunkLength()).get(), msg->getClassName(), msg->getFullName());
+                (unsigned long)writtenbytes, (unsigned long)B(msg->getChunkLength()).get(), msg->getClassName(), msg->getFullName());
     }
     stream.writeBytes((uint8_t *)&buffer, B(writtenbytes));
 }

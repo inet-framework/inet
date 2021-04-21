@@ -56,7 +56,7 @@ Placement parsePlacement(const char *s)
         else if (!strcmp("any", token))
             placement |= PLACEMENT_ANY;
         else
-            throw cRuntimeError("Unknown placement: %s", placement);
+            throw cRuntimeError("Unknown placement: %s", token);
     }
     return static_cast<Placement>(placement);
 }

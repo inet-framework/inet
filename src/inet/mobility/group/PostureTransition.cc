@@ -95,14 +95,14 @@ int PostureTransition::addMatrix(std::string name, double **matrix, bool thisDef
     for (matrixIt = matrixList.begin(); matrixIt != matrixList.end(); matrixIt++) {
         if ((*matrixIt)->name == name) {
             std::string str = "There are multiple matrices with the same name: " + name + " in the configuration file!";
-            throw cRuntimeError(str.c_str());
+            throw cRuntimeError("%s", str.c_str());
         }
     }
 
     // verify if the given matrix is Markovian
     if (!isMarkovian(matrix)) {
         std::string str = "Given transition matrix " + name + " is not Markovian!";
-        throw cRuntimeError(str.c_str());
+        throw cRuntimeError("%s", str.c_str());
     }
 
     TransMatrix *mat = new TransMatrix;
@@ -135,14 +135,14 @@ int PostureTransition::addSteadyState(std::string name, double *iVector)
     for (matrixIt = matrixList.begin(); matrixIt != matrixList.end(); matrixIt++) {
         if ((*matrixIt)->name == name) {
             std::string str = "There are multiple matrices with the same name: " + name + " in the configuration file!";
-            throw cRuntimeError(str.c_str());
+            throw cRuntimeError("%s", str.c_str());
         }
     }
 
     // check if the given matrix is Markovian
     if (!isMarkovian(iVector)) {
         std::string str = "Given steady state vector " + name + " cannot be true!";
-        throw cRuntimeError(str.c_str());
+        throw cRuntimeError("%s", str.c_str());
     }
 
     // make a local copy of the input steady state vector
@@ -171,7 +171,7 @@ int PostureTransition::addAreaType(std::string name)
     for (areaIt = areaTypeList.begin(); areaIt != areaTypeList.end(); areaIt++) {
         if ((*areaIt)->name == name) {
             std::string str = "There are multiple area types with the same name: " + name + " in the configuration file!";
-            throw cRuntimeError(str.c_str());
+            throw cRuntimeError("%s", str.c_str());
         }
     }
 
@@ -206,7 +206,7 @@ int PostureTransition::addTimeDomain(std::string name)
     for (timeIt = timeDomainList.begin(); timeIt != timeDomainList.end(); timeIt++) {
         if ((*timeIt)->name == name) {
             std::string str = "There are multiple time domains with the same name: " + name + " in the configuration file!";
-            throw cRuntimeError(str.c_str());
+            throw cRuntimeError("%s", str.c_str());
         }
     }
 
@@ -258,7 +258,7 @@ bool PostureTransition::addCombination(std::string areaName, std::string timeNam
     // in the input name is empty, it means that no area type is specified for this combination.
     if (comb->areaID == -1 && !areaName.empty()) {
         std::string str = "Undefined area type name is given in a combinations: " + areaName + ", " + timeName + ", " + matrixName;
-        throw cRuntimeError(str.c_str());
+        throw cRuntimeError("%s", str.c_str());
     }
 
     // look for matching time domain name.
@@ -273,7 +273,7 @@ bool PostureTransition::addCombination(std::string areaName, std::string timeNam
     }
     if (comb->timeID == -1 && !timeName.empty()) {
         std::string str = "Undefined time domain name is given in a combinations: " + areaName + ", " + timeName + ", " + matrixName;
-        throw cRuntimeError(str.c_str());
+        throw cRuntimeError("%s", str.c_str());
     }
 
     if (comb->areaID == -1 && comb->timeID == -1)

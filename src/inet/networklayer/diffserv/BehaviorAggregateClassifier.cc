@@ -95,7 +95,7 @@ void BehaviorAggregateClassifier::initialize(int stage)
         parseDSCPs(par("dscps"), "dscps", dscps);
         int numDscps = (int)dscps.size();
         if (numDscps > numOutGates)
-            throw cRuntimeError("%s dscp values are given, but the module has only %d out gates",
+            throw cRuntimeError("%d dscp values are given, but the module has only %d out gates",
                     numDscps, numOutGates);
         for (int i = 0; i < numDscps; ++i)
             dscpToGateIndexMap[dscps[i]] = i;

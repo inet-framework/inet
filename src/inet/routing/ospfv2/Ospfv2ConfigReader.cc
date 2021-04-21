@@ -341,7 +341,7 @@ void Ospfv2ConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfi
         else if (metricType == "Type2")
             tosInfo.E_ExternalMetricType = true;
         else
-            throw cRuntimeError("Invalid 'externalInterfaceOutputType' at interface '%s' at ", ie->getInterfaceName(), externalRouteConfig.getSourceLocation());
+            throw cRuntimeError("Invalid 'externalInterfaceOutputType' at interface '%s' at '%s'", ie->getInterfaceName(), externalRouteConfig.getSourceLocation());
 
         tosInfo.forwardingAddress = ipv4AddressFromAddressString(getStrAttrOrPar(externalRouteConfig, "forwardingAddress"));
 

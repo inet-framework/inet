@@ -244,9 +244,9 @@ void Ieee80211MgmtSta::sendManagementFrame(const char *name, const Ptr<Ieee80211
 void Ieee80211MgmtSta::startAuthentication(ApInfo *ap, simtime_t timeout)
 {
     if (ap->authTimeoutMsg)
-        throw cRuntimeError("startAuthentication: authentication currently in progress with AP address=", ap->address.str().c_str());
+        throw cRuntimeError("startAuthentication: authentication currently in progress with AP address='%s'", ap->address.str().c_str());
     if (ap->isAuthenticated)
-        throw cRuntimeError("startAuthentication: already authenticated with AP address=", ap->address.str().c_str());
+        throw cRuntimeError("startAuthentication: already authenticated with AP address='%s'", ap->address.str().c_str());
 
     changeChannel(ap->channel);
 
@@ -272,7 +272,7 @@ void Ieee80211MgmtSta::startAssociation(ApInfo *ap, simtime_t timeout)
     if (mib->bssStationData.isAssociated || assocTimeoutMsg)
         throw cRuntimeError("startAssociation: already associated or association currently in progress");
     if (!ap->isAuthenticated)
-        throw cRuntimeError("startAssociation: not yet authenticated with AP address=", ap->address.str().c_str());
+        throw cRuntimeError("startAssociation: not yet authenticated with AP address='%s'", ap->address.str().c_str());
 
     // switch to that channel
     changeChannel(ap->channel);

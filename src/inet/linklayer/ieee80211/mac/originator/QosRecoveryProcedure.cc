@@ -244,7 +244,7 @@ int QosRecoveryProcedure::getRc(Packet *packet, const Ptr<const Ieee80211DataHea
     if (it != retryCounter.end())
         return it->second;
     else
-        throw cRuntimeError("The retry counter entry doesn't exist for message id: %d", packet->getId());
+        throw cRuntimeError("The retry counter entry doesn't exist for message id: %ld", packet->getId());
 }
 
 bool QosRecoveryProcedure::isMulticastFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)

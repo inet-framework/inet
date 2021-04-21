@@ -106,7 +106,7 @@ void RadioMedium::initialize(int stage)
         else if (!strcmp(rangeFilterString, "communicationRange"))
             rangeFilter = RANGE_FILTER_COMMUNICATION_RANGE;
         else
-            throw cRuntimeError("Unknown range filter: '%s'", rangeFilter);
+            throw cRuntimeError("Unknown range filter: '%s'", rangeFilterString);
         radioModeFilter = par("radioModeFilter");
         listeningFilter = par("listeningFilter");
         macAddressFilter = par("macAddressFilter");

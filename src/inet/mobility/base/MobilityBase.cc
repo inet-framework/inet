@@ -402,7 +402,7 @@ void MobilityBase::handleIfOutside(BorderPolicy policy, Coord& targetPosition, C
             break;
 
         default:
-            throw cRuntimeError("Invalid outside policy=%d in module", policy, getFullPath().c_str());
+            throw cRuntimeError("Invalid outside policy=%d in module '%s'", policy, getFullPath().c_str());
     }
 }
 
