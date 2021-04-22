@@ -26,7 +26,7 @@ Define_Module(NextHopNetworkConfigurator);
 
 void NextHopNetworkConfigurator::initialize(int stage)
 {
-    NetworkConfiguratorBase::initialize(stage);
+    L3NetworkConfiguratorBase::initialize(stage);
     if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         long initializeStartTime = clock();
         Topology topology;

@@ -17,7 +17,7 @@
 
 package inet.networklayer.configurator.ipv4;
 
-import inet.networklayer.configurator.contract.INetworkConfigurator;
+import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 
 //
 // Configures IPv4 addresses and routing tables for a "flat" network,
@@ -58,7 +58,7 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 // interfaces register themselves in the ~InterfaceTable modules, and
 // in stage 1, routing files are read.)
 //
-simple Ipv4FlatNetworkConfigurator like INetworkConfigurator
+simple Ipv4FlatNetworkConfigurator like IL3NetworkConfigurator
 {
     parameters:
         string networkAddress = default("192.168.0.0"); // network part of the address (see netmask parameter)

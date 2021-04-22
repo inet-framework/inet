@@ -21,7 +21,7 @@
 #include <algorithm>
 
 #include "inet/common/Topology.h"
-#include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
+#include "inet/networklayer/configurator/base/L3NetworkConfiguratorBase.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
@@ -35,26 +35,26 @@ namespace inet {
  *
  * For more info please see the NED file.
  */
-class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
+class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase
 {
   protected:
     /**
      * Represents a node in the network.
      */
-    class Node : public NetworkConfiguratorBase::Node {
+    class Node : public L3NetworkConfiguratorBase::Node {
       public:
         std::vector<Ipv4Route *> staticRoutes;
         std::vector<Ipv4MulticastRoute *> staticMulticastRoutes;
 
       public:
-        Node(cModule *module) : NetworkConfiguratorBase::Node(module) {}
+        Node(cModule *module) : L3NetworkConfiguratorBase::Node(module) {}
         ~Node() {
             for (size_t i = 0; i < staticRoutes.size(); i++) delete staticRoutes[i];
             for (size_t i = 0; i < staticMulticastRoutes.size(); i++) delete staticMulticastRoutes[i];
         }
     };
 
-    class Topology : public NetworkConfiguratorBase::Topology {
+    class Topology : public L3NetworkConfiguratorBase::Topology {
       protected:
         virtual Node *createNode(cModule *module) override { return new Ipv4NetworkConfigurator::Node(module); }
     };
@@ -62,7 +62,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     /**
      * Represents an interface in the network.
      */
-    class InterfaceInfo : public NetworkConfiguratorBase::InterfaceInfo {
+    class InterfaceInfo : public L3NetworkConfiguratorBase::InterfaceInfo {
       public:
         uint32_t address; // the bits
         uint32_t addressSpecifiedBits; // 1 means the bit is specified, 0 means the bit is unspecified
@@ -226,14 +226,14 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
     virtual void dumpConfig(Topology& topology);
 
     // helper functions
-    virtual InterfaceInfo *createInterfaceInfo(NetworkConfiguratorBase::Topology& topology, NetworkConfiguratorBase::Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface) override;
+    virtual InterfaceInfo *createInterfaceInfo(L3NetworkConfiguratorBase::Topology& topology, L3NetworkConfiguratorBase::Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface) override;
     virtual void parseAddressAndSpecifiedBits(const char *addressAttr, uint32_t& outAddress, uint32_t& outAddressSpecifiedBits);
     virtual bool linkContainsMatchingHostExcept(LinkInfo *linkInfo, Matcher *hostMatcher, cModule *exceptModule);
     virtual void resolveInterfaceAndGateway(Node *node, const char *interfaceAttr, const char *gatewayAttr, NetworkInterface *& outIE, Ipv4Address& outGateway, Topology& topology);
     virtual InterfaceInfo *findInterfaceOnLinkByNode(LinkInfo *linkInfo, cModule *node);
     virtual InterfaceInfo *findInterfaceOnLinkByNodeAddress(LinkInfo *linkInfo, Ipv4Address address);
     virtual LinkInfo *findLinkOfInterface(Topology& topology, NetworkInterface *networkInterface);
-    virtual IRoutingTable *findRoutingTable(NetworkConfiguratorBase::Node *node) override;
+    virtual IRoutingTable *findRoutingTable(L3NetworkConfiguratorBase::Node *node) override;
     virtual void assignAddresses(std::vector<LinkInfo *> links);
 
     // helpers for address assignment

@@ -35,7 +35,7 @@ Define_Module(Ipv4NetworkConfigurator);
 #define ADDRLEN_BITS    32
 
 Ipv4NetworkConfigurator::InterfaceInfo::InterfaceInfo(Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface) :
-    NetworkConfiguratorBase::InterfaceInfo(node, linkInfo, networkInterface),
+    L3NetworkConfiguratorBase::InterfaceInfo(node, linkInfo, networkInterface),
     address(0),
     addressSpecifiedBits(0),
     netmask(0),
@@ -63,7 +63,7 @@ Ipv4NetworkConfigurator::RouteInfo *Ipv4NetworkConfigurator::RoutingTableInfo::f
 
 void Ipv4NetworkConfigurator::initialize(int stage)
 {
-    NetworkConfiguratorBase::initialize(stage);
+    L3NetworkConfiguratorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         assignAddressesParameter = par("assignAddresses");
         assignUniqueAddresses = par("assignUniqueAddresses");
@@ -607,7 +607,7 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
     }
 }
 
-Ipv4NetworkConfigurator::InterfaceInfo *Ipv4NetworkConfigurator::createInterfaceInfo(NetworkConfiguratorBase::Topology& topology, NetworkConfiguratorBase::Node *node, LinkInfo *linkInfo, NetworkInterface *ie)
+Ipv4NetworkConfigurator::InterfaceInfo *Ipv4NetworkConfigurator::createInterfaceInfo(L3NetworkConfiguratorBase::Topology& topology, L3NetworkConfiguratorBase::Node *node, LinkInfo *linkInfo, NetworkInterface *ie)
 {
     InterfaceInfo *interfaceInfo = new InterfaceInfo(static_cast<Ipv4NetworkConfigurator::Node *>(node), linkInfo, ie);
     auto ipv4Data = ie->findProtocolDataForUpdate<Ipv4InterfaceData>();
@@ -1260,7 +1260,7 @@ Ipv4NetworkConfigurator::InterfaceInfo *Ipv4NetworkConfigurator::findInterfaceOn
             return interfaceInfo;
 
         // if some other interface of the same node has the address, we accept that too
-        NetworkConfiguratorBase::Node *node = interfaceInfo->node;
+        L3NetworkConfiguratorBase::Node *node = interfaceInfo->node;
         for (auto& it : node->interfaceInfos)
             if (static_cast<InterfaceInfo *>(it)->getAddress() == address)
                 return interfaceInfo;
@@ -1279,7 +1279,7 @@ Ipv4NetworkConfigurator::LinkInfo *Ipv4NetworkConfigurator::findLinkOfInterface(
     return nullptr;
 }
 
-IRoutingTable *Ipv4NetworkConfigurator::findRoutingTable(NetworkConfiguratorBase::Node *node)
+IRoutingTable *Ipv4NetworkConfigurator::findRoutingTable(L3NetworkConfiguratorBase::Node *node)
 {
     return L3AddressResolver().findIpv4RoutingTableOf(node->module);
 }

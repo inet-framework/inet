@@ -18,7 +18,7 @@
 #ifndef __INET_NEXTHOPNETWORKCONFIGURATOR_H
 #define __INET_NEXTHOPNETWORKCONFIGURATOR_H
 
-#include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
+#include "inet/networklayer/configurator/base/L3NetworkConfiguratorBase.h"
 
 namespace inet {
 
@@ -29,7 +29,7 @@ class PatternMatcher;
  *
  * For more info please see the NED file.
  */
-class INET_API NextHopNetworkConfigurator : public NetworkConfiguratorBase
+class INET_API NextHopNetworkConfigurator : public L3NetworkConfiguratorBase
 {
   protected:
     // parameters

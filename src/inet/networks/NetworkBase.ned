@@ -18,7 +18,7 @@
 package inet.networks;
 
 import inet.common.packet.recorder.PcapRecorder;
-import inet.networklayer.configurator.contract.INetworkConfigurator;
+import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 import inet.visualizer.contract.IIntegratedVisualizer;
 
 network NetworkBase
@@ -38,7 +38,7 @@ network NetworkBase
             parameters:
                 @display("p=100,200;is=s");
         }
-        configurator: <default("Ipv4NetworkConfigurator")> like INetworkConfigurator if typename != "" {
+        configurator: <default("Ipv4NetworkConfigurator")> like IL3NetworkConfigurator if typename != "" {
             parameters:
                 @display("p=100,300;is=s");
         }
