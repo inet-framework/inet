@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2021-04-22  ------ inet-3.7.1 released ------
+
 2021-01-04  Zoltan Bojthe
 
 	VoipStreamServer: bugfix: swapped inBytesPerSample, outBytesPerSample.

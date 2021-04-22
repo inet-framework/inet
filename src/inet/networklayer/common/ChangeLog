@@ -1,5 +1,7 @@
 ====== inet-3.x ======
 
+2021-04-22  ------ inet-3.7.1 released ------
+
 2020-11-05  Andras Varga
 
 	IPProtocolId.msg: added IP_PROT_AH and IP_PROT_ESP

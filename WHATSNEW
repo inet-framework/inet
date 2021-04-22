@@ -1,6 +1,16 @@
 Recent changes in the INET Framework
 ====================================
 
+INET 3.7.1 (April 2021) - stable
+--------------------------------
+
+This release contains compatibility fixes for OMNeT++ 6.0 preview 11,
+plus minor bugfixes:
+
+  - localPort parameter didn't take effect in TCPAppBase
+  - use BYPASS for multicast packets to allow unfiltered multicast traffic in IPSec
+
+
 INET 3.7 (January 2021) - stable
 --------------------------------
 
