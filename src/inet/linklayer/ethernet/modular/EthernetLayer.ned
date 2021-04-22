@@ -29,7 +29,6 @@ module EthernetLayer like IEthernetLayer
         bool hasSocketSupport = default(false);
         *.interfaceTableModule = default(this.interfaceTableModule);
         *.socketTableModule = default(absPath(".socketTable"));
-        paddingInserter.minLength = default(60B);
         @display("i=block/layer");
     gates:
         input upperLayerIn;
@@ -43,25 +42,21 @@ module EthernetLayer like IEthernetLayer
         socketCommandProcessor: <default(hasSocketSupport ? "EthernetSocketCommandProcessor" : "OmittedPacketFlow")> like IPacketFlow {
             @display("p=300,100");
         }
-        macHeaderInserter: <default("EthernetMacHeaderInserter")> like IProtocolHeaderInserter {
+        macEncapsulator: <default("EthernetMacEncapsulator")> like IProtocolHeaderInserter {
             @display("p=300,200");
-        }
-        paddingInserter: <default("PaddingInserter")> like IPacketFlow {
-            @display("p=300,300");
         }
         socketPacketProcessor: <default(hasSocketSupport ? "EthernetSocketPacketProcessor" : "OmittedPacketFlow")> like IPacketFlow {
             @display("p=600,100");
         }
-        macHeaderChecker: <default("EthernetMacHeaderChecker")> like IProtocolHeaderChecker {
+        macDecapsulator: <default("EthernetMacDecapsulator")> like IProtocolHeaderChecker {
             @display("p=600,200");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> socketCommandProcessor.in;
-        socketCommandProcessor.out --> macHeaderInserter.in;
-        macHeaderInserter.out --> paddingInserter.in;
-        paddingInserter.out --> { @display("m=s"); } --> lowerLayerOut;
+        socketCommandProcessor.out --> macEncapsulator.in;
+        macEncapsulator.out --> { @display("m=s"); } --> lowerLayerOut;
 
-        lowerLayerIn --> { @display("m=s"); } --> macHeaderChecker.in;
-        macHeaderChecker.out --> socketPacketProcessor.in;
+        lowerLayerIn --> { @display("m=s"); } --> macDecapsulator.in;
+        macDecapsulator.out --> socketPacketProcessor.in;
         socketPacketProcessor.out --> { @display("m=n"); } --> upperLayerOut;
 }

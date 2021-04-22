@@ -53,7 +53,7 @@ module EthernetMacLayer like IEthernetMacLayer
         streamer: <default("OmittedPacketFlow")> like IPacketFlow {
             @display("p=200,300");
         }
-        fcsInserter: <default("EthernetFcsInserter")> like IPacketFlow {
+        fcsSetter: <default("EthernetFcsSetter")> like IPacketFlow {
             @display("p=200,400");
         }
         outboundEmitter: <default("PacketEmitter")> like IPacketFlow {
@@ -69,8 +69,8 @@ module EthernetMacLayer like IEthernetMacLayer
         upperLayerIn --> { @display("m=n"); } --> queue.in;
         queue.out --> server.in;
         server.out --> streamer.in;
-        streamer.out --> fcsInserter.in;
-        fcsInserter.out --> outboundEmitter.in;
+        streamer.out --> fcsSetter.in;
+        fcsSetter.out --> outboundEmitter.in;
         outboundEmitter.out --> { @display("m=s"); } --> lowerLayerOut;
 
         lowerLayerIn --> { @display("m=s"); } --> inboundEmitter.in;
