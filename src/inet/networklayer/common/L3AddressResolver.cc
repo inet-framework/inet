@@ -548,30 +548,30 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
             for (int i = 0; i < itable->getNumInterfaces(); i++) {
                 NetworkInterface *entry = itable->getInterface(i);
                 switch (add.getType()) {
-#ifdef INET_WITH_IPv6
-                    case L3Address::IPv6: {
-                        auto protocolData = entry->findProtocolData<Ipv6InterfaceData>();
-                        if (protocolData != nullptr && protocolData->hasAddress(add.toIpv6()))
-                            return mod;
-                        break;
-                    }
-
-#endif // ifdef INET_WITH_IPv6
-#ifdef INET_WITH_IPv4
-                    case L3Address::IPv4: {
-                        auto protocolData = entry->findProtocolData<Ipv4InterfaceData>();
-                        if (protocolData != nullptr && protocolData->getIPAddress() == add.toIpv4())
-                            return mod;
-                        break;
-                    }
-
-#endif // ifdef INET_WITH_IPv4
+#ifdef WITH_IPv6
+                    case L3Address::IPv6:
+#endif // ifdef WITH_IPv6
+#ifdef WITH_IPv4
+                    case L3Address::IPv4:
+#endif // ifdef WITH_IPv4
                     case L3Address::MAC:
-                        if (entry->getMacAddress() == add.toMac())
+                        if (entry->hasNetworkAddress(add))
                             return mod;
                         break;
+                    case L3Address::MODULEPATH: {
+                        if(entry->getModulePathAddress() == add.toModulePath()){
+                            return mod;
+                        }
+                        break;
+                    }
+                    case L3Address::MODULEID: {
+                        if(entry->getModuleIdAddress() == add.toModuleId()){
+                            return mod;
+                        }
+                        break;
+                    }
                     default:
-                        (void)entry; // eliminate warning: unused variable 'entry'
+                        (void)entry;    // eliminate warning: unused variable 'entry'
                         throw cRuntimeError("findHostWithAddress() doesn't accept AddressType '%s', yet", L3Address::getTypeName(add.getType()));
                         break;
                 }
