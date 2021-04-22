@@ -548,12 +548,8 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
             for (int i = 0; i < itable->getNumInterfaces(); i++) {
                 NetworkInterface *entry = itable->getInterface(i);
                 switch (add.getType()) {
-#ifdef WITH_IPv6
                     case L3Address::IPv6:
-#endif // ifdef WITH_IPv6
-#ifdef WITH_IPv4
                     case L3Address::IPv4:
-#endif // ifdef WITH_IPv4
                     case L3Address::MAC:
                         if (entry->hasNetworkAddress(add))
                             return mod;
