@@ -19,6 +19,7 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/EthernetCRC.h"
+#include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
 
@@ -30,9 +31,10 @@ bool EthernetFragmentFcsChecker::checkComputedFcs(const Packet *packet, uint32_t
 {
     auto data = packet->peekDataAsBytes();
     auto bytes = data->getBytes();
-    uint32_t fragmentFcs = ethernetCRC(bytes.data(), packet->getByteLength() - 4);
+    unsigned int length = packet->getByteLength() - ETHER_FCS_BYTES.get();
+    uint32_t fragmentFcs = ethernetCRC(bytes.data(), length);
     auto& fragmentTag = packet->getTag<FragmentTag>();
-    currentFragmentCompleteFcs = ethernetCRC(bytes.data(), packet->getByteLength() - 4, fragmentTag->getFirstFragment() ? 0 : lastFragmentCompleteFcs);
+    currentFragmentCompleteFcs = ethernetCRC(bytes.data(), length, fragmentTag->getFirstFragment() ? 0 : lastFragmentCompleteFcs);
     bool lastFragment = receivedFcs != (fragmentFcs ^ 0xFFFF0000);
     return !lastFragment || receivedFcs == currentFragmentCompleteFcs;
 }
@@ -53,17 +55,15 @@ bool EthernetFragmentFcsChecker::checkFcs(const Packet *packet, FcsMode fcsMode,
 
 void EthernetFragmentFcsChecker::processPacket(Packet *packet)
 {
-    const auto& trailer = packet->popAtBack<EthernetFragmentFcs>(B(4));
+    const auto& trailer = packet->peekAtBack<EthernetFragmentFcs>(ETHER_FCS_BYTES);
     auto& fragmentTag = packet->getTagForUpdate<FragmentTag>();
     fragmentTag->setLastFragment(!trailer->getMCrc());
-    auto packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
-    packetProtocolTag->setBackOffset(packetProtocolTag->getBackOffset() + trailer->getChunkLength());
     lastFragmentCompleteFcs = currentFragmentCompleteFcs;
 }
 
 bool EthernetFragmentFcsChecker::matchesPacket(const Packet *packet) const
 {
-    const auto& trailer = packet->peekAtBack<EthernetFragmentFcs>(B(4));
+    const auto& trailer = packet->peekAtBack<EthernetFragmentFcs>(ETHER_FCS_BYTES);
     auto fcsMode = trailer->getFcsMode();
     auto fcs = trailer->getFcs();
     return checkFcs(packet, fcsMode, fcs);

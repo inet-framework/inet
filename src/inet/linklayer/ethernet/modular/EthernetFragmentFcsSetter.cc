@@ -15,18 +15,19 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ethernet/modular/EthernetFragmentFcsInserter.h"
+#include "inet/linklayer/ethernet/modular/EthernetFragmentFcsSetter.h"
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/EthernetCRC.h"
+#include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/protocolelement/fragmentation/tag/FragmentTag_m.h"
 
 namespace inet {
 
-Define_Module(EthernetFragmentFcsInserter);
+Define_Module(EthernetFragmentFcsSetter);
 
-uint32_t EthernetFragmentFcsInserter::computeComputedFcs(const Packet *packet) const
+uint32_t EthernetFragmentFcsSetter::computeComputedFcs(const Packet *packet) const
 {
     auto data = packet->peekDataAsBytes();
     auto bytes = data->getBytes();
@@ -38,7 +39,7 @@ uint32_t EthernetFragmentFcsInserter::computeComputedFcs(const Packet *packet) c
         return ethernetCRC(bytes.data(), packet->getByteLength()) ^ 0xFFFF0000;
 }
 
-uint32_t EthernetFragmentFcsInserter::computeFcs(const Packet *packet, FcsMode fcsMode) const
+uint32_t EthernetFragmentFcsSetter::computeFcs(const Packet *packet, FcsMode fcsMode) const
 {
     switch (fcsMode) {
         case FCS_DECLARED_CORRECT:
@@ -52,8 +53,9 @@ uint32_t EthernetFragmentFcsInserter::computeFcs(const Packet *packet, FcsMode f
     }
 }
 
-void EthernetFragmentFcsInserter::processPacket(Packet *packet)
+void EthernetFragmentFcsSetter::processPacket(Packet *packet)
 {
+    packet->removeAtBack<EthernetFcs>(ETHER_FCS_BYTES);
     const auto& header = makeShared<EthernetFragmentFcs>();
     auto fragmentTag = packet->getTag<FragmentTag>();
     auto fcs = computeFcs(packet, fcsMode);
@@ -61,12 +63,9 @@ void EthernetFragmentFcsInserter::processPacket(Packet *packet)
     header->setFcsMode(fcsMode);
     header->setMCrc(!fragmentTag->getLastFragment());
     packet->insertAtBack(header);
-    auto& packetProtocolTag = packet->findTagForUpdate<PacketProtocolTag>();
-    if (packetProtocolTag != nullptr)
-        packetProtocolTag->setBackOffset(packetProtocolTag->getBackOffset() - header->getChunkLength());
 }
 
-void EthernetFragmentFcsInserter::handlePacketProcessed(Packet *packet)
+void EthernetFragmentFcsSetter::handlePacketProcessed(Packet *packet)
 {
     FcsInserterBase::handlePacketProcessed(packet);
     lastFragmentCompleteFcs = currentFragmentCompleteFcs;

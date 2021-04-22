@@ -15,23 +15,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERNETFCSINSERTER_H
-#define __INET_ETHERNETFCSINSERTER_H
+package inet.linklayer.ethernet.modular;
 
-#include "inet/protocolelement/checksum/base/FcsInserterBase.h"
+import inet.queueing.base.PacketFlowBase;
+import inet.queueing.contract.IPacketFlow;
 
-namespace inet {
-
-using namespace inet::queueing;
-
-class INET_API EthernetFcsInserter : public FcsInserterBase
+simple EthernetFcsSetter extends PacketFlowBase like IPacketFlow
 {
-  protected:
-    virtual uint32_t computeFcs(const Packet *packet, FcsMode fcsMode) const override;
-    virtual void processPacket(Packet *packet) override;
-};
-
-} // namespace inet
-
-#endif
-
+    parameters:
+        string fcsMode @enum("disabled","declared","computed") = default("declared");
+        @class(EthernetFcsSetter);
+        @display("i=block/inserter");
+}

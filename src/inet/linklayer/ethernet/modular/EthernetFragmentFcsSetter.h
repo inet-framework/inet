@@ -15,15 +15,29 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ethernet.modular;
+#ifndef __INET_ETHERNETFRAGMENTFCSINSERTER_H
+#define __INET_ETHERNETFRAGMENTFCSINSERTER_H
 
-import inet.queueing.base.PacketFlowBase;
-import inet.queueing.contract.IPacketFlow;
+#include "inet/protocolelement/checksum/base/FcsInserterBase.h"
 
-simple EthernetFcsInserter extends PacketFlowBase like IPacketFlow
+namespace inet {
+
+using namespace inet::queueing;
+
+class INET_API EthernetFragmentFcsSetter : public FcsInserterBase
 {
-    parameters:
-        string fcsMode @enum("disabled","declared","computed") = default("declared");
-        @class(EthernetFcsInserter);
-        @display("i=block/inserter");
-}
+  protected:
+    uint32_t lastFragmentCompleteFcs = 0;
+    mutable uint32_t currentFragmentCompleteFcs = 0;
+
+  protected:
+    virtual uint32_t computeComputedFcs(const Packet *packet) const override;
+    virtual uint32_t computeFcs(const Packet *packet, FcsMode fcsMode) const override;
+    virtual void processPacket(Packet *packet) override;
+    virtual void handlePacketProcessed(Packet *packet) override;
+};
+
+} // namespace inet
+
+#endif
+

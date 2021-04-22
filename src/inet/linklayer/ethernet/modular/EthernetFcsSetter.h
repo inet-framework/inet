@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERNETFRAGMENTFCSINSERTER_H
-#define __INET_ETHERNETFRAGMENTFCSINSERTER_H
+#ifndef __INET_ETHERNETFCSSETTER_H
+#define __INET_ETHERNETFCSSETTER_H
 
 #include "inet/protocolelement/checksum/base/FcsInserterBase.h"
 
@@ -24,17 +24,11 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API EthernetFragmentFcsInserter : public FcsInserterBase
+class INET_API EthernetFcsSetter : public FcsInserterBase
 {
   protected:
-    uint32_t lastFragmentCompleteFcs = 0;
-    mutable uint32_t currentFragmentCompleteFcs = 0;
-
-  protected:
-    virtual uint32_t computeComputedFcs(const Packet *packet) const override;
     virtual uint32_t computeFcs(const Packet *packet, FcsMode fcsMode) const override;
     virtual void processPacket(Packet *packet) override;
-    virtual void handlePacketProcessed(Packet *packet) override;
 };
 
 } // namespace inet

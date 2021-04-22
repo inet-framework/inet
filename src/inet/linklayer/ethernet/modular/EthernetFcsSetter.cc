@@ -15,16 +15,17 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ethernet/modular/EthernetFcsInserter.h"
+#include "inet/linklayer/ethernet/modular/EthernetFcsSetter.h"
 
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 
 namespace inet {
 
-Define_Module(EthernetFcsInserter);
+Define_Module(EthernetFcsSetter);
 
-uint32_t EthernetFcsInserter::computeFcs(const Packet *packet, FcsMode fcsMode) const
+uint32_t EthernetFcsSetter::computeFcs(const Packet *packet, FcsMode fcsMode) const
 {
     switch (fcsMode) {
         case FCS_DECLARED_CORRECT:
@@ -38,17 +39,13 @@ uint32_t EthernetFcsInserter::computeFcs(const Packet *packet, FcsMode fcsMode) 
     }
 }
 
-void EthernetFcsInserter::processPacket(Packet *packet)
+void EthernetFcsSetter::processPacket(Packet *packet)
 {
-    const auto& header = makeShared<EthernetFcs>();
+    const auto& fcsChunk = packet->removeAtBack<EthernetFcs>(ETHER_FCS_BYTES);
     auto fcs = computeFcs(packet, fcsMode);
-    header->setFcs(fcs);
-    header->setFcsMode(fcsMode);
-    packet->insertAtBack(header);
-    auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
-    packetProtocolTag->setProtocol(&Protocol::ethernetMac);
-    packetProtocolTag->setFrontOffset(b(0));
-    packetProtocolTag->setBackOffset(b(0));
+    fcsChunk->setFcsMode(fcsMode);
+    fcsChunk->setFcs(fcs);
+    packet->insertAtBack(fcsChunk);
 }
 
 } // namespace inet

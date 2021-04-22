@@ -41,9 +41,6 @@ bool EthernetFcsChecker::checkFcs(const Packet *packet, FcsMode fcsMode, uint32_
 
 void EthernetFcsChecker::processPacket(Packet *packet)
 {
-    const auto& trailer = packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
-    auto& packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
-    packetProtocolTag->setBackOffset(packetProtocolTag->getBackOffset() + trailer->getChunkLength());
 }
 
 bool EthernetFcsChecker::matchesPacket(const Packet *packet) const

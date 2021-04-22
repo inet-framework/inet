@@ -20,10 +20,10 @@ package inet.linklayer.ethernet.modular;
 import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
-simple EthernetFragmentFcsInserter extends PacketFlowBase like IPacketFlow
+simple EthernetFragmentFcsSetter extends PacketFlowBase like IPacketFlow
 {
     parameters:
         string fcsMode @enum("disabled","declared","computed") = default("declared");
-        @class(EthernetFragmentFcsInserter);
+        @class(EthernetFragmentFcsSetter);
         @display("i=block/inserter");
 }
