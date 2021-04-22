@@ -19,7 +19,7 @@
 
 package inet.networklayer.configurator.ipv6;
 
-import inet.networklayer.configurator.contract.INetworkConfigurator;
+import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 
 //
 // Configures Ipv6 addresses and routing tables for a "flat" network,
@@ -30,7 +30,7 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 //
 // @see ~Ipv4FlatNetworkConfigurator
 //
-simple Ipv6FlatNetworkConfigurator like INetworkConfigurator
+simple Ipv6FlatNetworkConfigurator like IL3NetworkConfigurator
 {
     parameters:
         @display("i=block/cogwheel");
