@@ -28,6 +28,8 @@ class INET_API DefragmenterBase : public PacketPusherBase
 {
   protected:
     bool deleteSelf = false;
+    b headerLength;
+    b footerLength;
 
     int expectedFragmentNumber = 0;
     Packet *defragmentedPacket = nullptr;

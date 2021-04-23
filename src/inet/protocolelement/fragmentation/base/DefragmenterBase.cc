@@ -27,8 +27,11 @@ DefragmenterBase::~DefragmenterBase()
 void DefragmenterBase::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
         deleteSelf = par("deleteSelf");
+        headerLength = b(par("headerLength"));
+        footerLength = b(par("footerLength"));
+    }
 }
 
 void DefragmenterBase::startDefragmentation(Packet *fragmentPacket)
@@ -39,11 +42,22 @@ void DefragmenterBase::startDefragmentation(Packet *fragmentPacket)
     if (pos != std::string::npos)
         name = name.substr(0, pos);
     defragmentedPacket = new Packet(name.c_str());
+    // add header
+    if (headerLength > b(0))
+        defragmentedPacket->insertAtFront(fragmentPacket->peekDataAt(b(0), headerLength));
+    // add footer
+    if (footerLength > b(0))
+        defragmentedPacket->insertAtBack(fragmentPacket->peekDataAt(defragmentedPacket->getDataLength() - footerLength, footerLength));
 }
 
 void DefragmenterBase::continueDefragmentation(Packet *fragmentPacket)
 {
-    defragmentedPacket->insertAtBack(fragmentPacket->peekData());
+    // remove old footer
+    if (footerLength > b(0))
+        defragmentedPacket->removeAtBack(footerLength);
+    // add body and new footer
+    defragmentedPacket->insertAtBack(fragmentPacket->peekDataAt(headerLength, fragmentPacket->getDataLength() - headerLength));
+
     defragmentedPacket->copyTags(*fragmentPacket);
     expectedFragmentNumber++;
     numProcessedPackets++;

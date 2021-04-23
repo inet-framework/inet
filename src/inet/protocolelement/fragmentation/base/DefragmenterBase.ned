@@ -23,6 +23,8 @@ simple DefragmenterBase extends PacketPusherBase
 {
     parameters:
         bool deleteSelf = default(false);
+        int headerLength @unit(b) = default(0b);
+        int footerLength @unit(b) = default(0b);
         @display("i=block/join");
         @class(DefragmenterBase);
 }
