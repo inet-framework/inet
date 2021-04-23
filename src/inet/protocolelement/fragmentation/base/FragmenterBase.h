@@ -30,6 +30,8 @@ class INET_API FragmenterBase : public PacketPusherBase
   protected:
     bool deleteSelf;
     IFragmenterPolicy *fragmenterPolicy = nullptr;
+    b headerLength;
+    b footerLength;
 
   protected:
     virtual void initialize(int stage) override;

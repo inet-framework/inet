@@ -26,6 +26,8 @@ module FragmenterBase extends PacketPusherBase
         bool deleteSelf = default(false);
         string fragmenterPolicyClass = default("");
         string fragmenterPolicyModule = default(".fragmenterPolicy");
+        int headerLength @unit(b) = default(0b);
+        int footerLength @unit(b) = default(0b);
         @display("i=block/fork");
         @class(FragmenterBase);
     submodules:

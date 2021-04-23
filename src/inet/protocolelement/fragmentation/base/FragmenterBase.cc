@@ -27,6 +27,8 @@ void FragmenterBase::initialize(int stage)
     PacketPusherBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         deleteSelf = par("deleteSelf");
+        headerLength = b(par("headerLength"));
+        footerLength = b(par("footerLength"));
         const char *fragmenterPolicyClass = par("fragmenterPolicyClass");
         if (*fragmenterPolicyClass != '\0')
             fragmenterPolicy = createFragmenterPolicy(fragmenterPolicyClass);
