@@ -32,6 +32,8 @@ class INET_API PreemptableStreamer : public ClockUserModuleMixin<PacketProcessor
     bps datarate = bps(NaN);
     b minPacketLength = b(-1);
     b roundingLength = b(-1);
+    b headerLength;
+    b footerLength;
 
     cGate *inputGate = nullptr;
     IActivePacketSource *producer = nullptr;

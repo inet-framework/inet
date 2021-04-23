@@ -31,6 +31,8 @@ simple PreemptableStreamer extends PacketProcessorBase like IPacketFlow
         double datarate @unit(bps) = default(nan bps);
         int minPacketLength @unit(b);
         int roundingLength @unit(b) = default(1B);
+        int headerLength @unit(b) = default(0b);
+        int footerLength @unit(b) = default(0b);
         @class(PreemptableStreamer);
         @display("i=block/cogwheel");
     gates:

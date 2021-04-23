@@ -39,6 +39,8 @@ void PreemptableStreamer::initialize(int stage)
         datarate = bps(par("datarate"));
         minPacketLength = b(par("minPacketLength"));
         roundingLength = b(par("roundingLength"));
+        headerLength = b(par("headerLength"));
+        footerLength = b(par("footerLength"));
         inputGate = gate("in");
         outputGate = gate("out");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
@@ -157,11 +159,11 @@ Packet *PreemptableStreamer::pullPacketEnd(cGate *gate)
     Enter_Method("pullPacketEnd");
     EV_INFO << "Ending streaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     auto packet = streamedPacket;
-    b pulledLength = streamDatarate * s((simTime() - streamStart).dbl());
+    b pulledLength = streamDatarate * s((simTime() - streamStart).dbl()) + footerLength;
     b preemptedLength = roundingLength * ((pulledLength + roundingLength - b(1)) / roundingLength);
     if (preemptedLength < minPacketLength)
         preemptedLength = minPacketLength;
-    if (preemptedLength + minPacketLength <= packet->getTotalLength()) {
+    if (packet->getTotalLength() - (preemptedLength - footerLength) + headerLength >= minPacketLength ) {
         // already pulled part
         const auto& fragmentTag = packet->getTagForUpdate<FragmentTag>();
         fragmentTag->setLastFragment(false);
@@ -174,8 +176,12 @@ Packet *PreemptableStreamer::pullPacketEnd(cGate *gate)
         packet->removeTagIfPresent<PacketProtocolTag>();
         // remaining part
         std::string remainingPacketName = basePacketName + "-frag" + std::to_string(fragmentNumber + 1);
-        const auto& remainingData = packet->removeAtBack(packet->getTotalLength() - preemptedLength);
+        const auto& remainingData = packet->removeAt(preemptedLength - footerLength, packet->getDataLength() - preemptedLength);
         remainingPacket = new Packet(remainingPacketName.c_str(), remainingData);
+        if (headerLength > b(0))
+            remainingPacket->insertAtFront(packet->peekAtFront(headerLength));
+        if (footerLength > b(0))
+            remainingPacket->insertAtBack(packet->peekAtBack(footerLength));
         remainingPacket->copyTags(*packet);
         const auto& remainingPacketFragmentTag = remainingPacket->getTagForUpdate<FragmentTag>();
         remainingPacketFragmentTag->setFirstFragment(false);
