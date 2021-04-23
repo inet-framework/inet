@@ -77,7 +77,7 @@ module CustomMacLayer extends EthernetMacLayer
         streamer.typename = default("OmittedPacketFlow"); // Packet streaming begins in queue module
         receiver.typename = default("StreamingReceiver");
         transmitter.typename = default("StreamingTransmitter");
-        fcsInserter.typename = default("EthernetFragmentFcsInserter");
+        fcsSetter.typename = default("EthernetFragmentFcsSetter");
         phyHeaderInserter.typename = default("EthernetFragmentPhyHeaderInserter");
         fcsChecker.typename = default("EthernetFragmentFcsChecker");
         phyHeaderChecker.typename = default("EthernetFragmentPhyHeaderChecker");
