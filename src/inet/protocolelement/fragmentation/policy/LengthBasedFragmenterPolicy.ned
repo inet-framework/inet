@@ -26,5 +26,6 @@ simple LengthBasedFragmenterPolicy like IFragmenterPolicy
         int maxFragmentLength @unit(b);
         int roundingLength @unit(b) = default(1B);
         int fragmentHeaderLength @unit(b) = default(0b);
+        int fragmentFooterLength @unit(b) = default(0b);
         @class(LengthBasedFragmenterPolicy);
 }
