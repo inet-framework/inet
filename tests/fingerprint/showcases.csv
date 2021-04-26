@@ -1,5 +1,8 @@
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
 
+/showcases/ethernet/cutthrough/,        -f omnetpp.ini -c StoreAndForward,        1s,         2c0b-155b/tplx;dae0-5535/~tNl;fe3c-4e51/~tND;0000-0000/tyf, PASS,
+/showcases/ethernet/cutthrough/,        -f omnetpp.ini -c Cutthrough,        1s,         c15f-8a94/tplx;807e-bdab/~tNl;4c84-8665/~tND;0000-0000/tyf, PASS,
+
 /showcases/ethernet/preemption/,        -f omnetpp.ini -c Default,        1s,         ccd8-a45c/tplx;1f58-18c7/~tNl;5f4c-e464/~tND;0000-0000/tyf, PASS,
 /showcases/ethernet/preemption/,        -f omnetpp.ini -c PriorityQueue,        1s,         3d23-2242/tplx;6838-1b29/~tNl;c901-a2f1/~tND;0000-0000/tyf, PASS,
 /showcases/ethernet/preemption/,        -f omnetpp.ini -c Preemption,        1s,         8ccf-1c5b/tplx;2879-4a1a/~tNl;24c2-8f3c/~tND;0000-0000/tyf, PASS,
