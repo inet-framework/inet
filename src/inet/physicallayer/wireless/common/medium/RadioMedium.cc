@@ -712,6 +712,8 @@ void RadioMedium::pickUpSignals(IRadio *receiverRadio)
 
 void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == IRadio::radioModeChangedSignal) {
         Enter_Method("radioModeChanged");
         auto radio = check_and_cast<Radio *>(source);
@@ -734,6 +736,8 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, intval_t
 
 void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == interfaceConfigChangedSignal) {
         Enter_Method("interfaceConfigChanged");
         auto interfaceChange = check_and_cast<NetworkInterfaceChangeDetails *>(value);

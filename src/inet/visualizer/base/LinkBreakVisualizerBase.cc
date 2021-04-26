@@ -121,7 +121,8 @@ void LinkBreakVisualizerBase::unsubscribe()
 
 void LinkBreakVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == linkBrokenSignal) {
         MacAddress transmitterAddress;
         MacAddress receiverAddress;

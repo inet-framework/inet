@@ -80,6 +80,8 @@ const char *PacketBasedTokenGenerator::resolveDirective(char directive) const
 
 void PacketBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == TokenBasedServer::tokensDepletedSignal) {
         Enter_Method("tokensDepleted");
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());

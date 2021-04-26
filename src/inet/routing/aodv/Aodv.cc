@@ -1022,7 +1022,8 @@ IRoute *Aodv::createRoute(const L3Address& destAddr, const L3Address& nextHop,
 
 void Aodv::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method("receiveChangeNotification");
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
     if (signalID == linkBrokenSignal) {
         EV_DETAIL << "Received link break signal" << endl;
         Packet *datagram = check_and_cast<Packet *>(obj);

@@ -232,7 +232,7 @@ void Igmpv2::addWatches()
 
 void Igmpv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method("%s", cComponent::getSignalName(signalID));
 
     NetworkInterface *ie;
     int interfaceId;

@@ -208,7 +208,8 @@ void MediumVisualizerBase::handleParameterChange(const char *name)
 
 void MediumVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == IRadioMedium::radioAddedSignal)
         handleRadioAdded(check_and_cast<IRadio *>(object));
     else if (signal == IRadioMedium::radioRemovedSignal)

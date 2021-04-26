@@ -66,6 +66,8 @@ void StateBasedCcEnergyConsumer::initialize(int stage)
 
 void StateBasedCcEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == IRadio::radioModeChangedSignal ||
         signal == IRadio::receptionStateChangedSignal ||
         signal == IRadio::transmissionStateChangedSignal ||
@@ -81,6 +83,8 @@ void StateBasedCcEnergyConsumer::receiveSignal(cComponent *source, simsignal_t s
 
 void StateBasedCcEnergyConsumer::receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == ICcEnergySource::currentConsumptionChangedSignal) {
         if (energySource->getOutputVoltage() < minSupplyVoltage)
             radio->setRadioMode(IRadio::RADIO_MODE_OFF);

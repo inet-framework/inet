@@ -120,7 +120,8 @@ void CreditBasedGate::emitCurrentCredit()
 
 void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, cObject *object, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method("%s", cComponent::getSignalName(simsignal));
+
     if (simsignal == transmissionStartedSignal || simsignal == transmissionEndedSignal) {
         auto signal = check_and_cast<physicallayer::Signal *>(object);
         auto packet = check_and_cast<Packet *>(signal->getEncapsulatedPacket());

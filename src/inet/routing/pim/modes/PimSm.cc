@@ -232,7 +232,8 @@ void PimSm::handleMessageWhenUp(cMessage *msg)
 
 void PimSm::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
     printSignalBanner(signalID, obj, details);
 
     if (signalID == ipv4MulticastGroupRegisteredSignal) {

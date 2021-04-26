@@ -254,6 +254,8 @@ const Quaternion& SuperpositioningMobility::getCurrentAngularAcceleration()
 
 void SuperpositioningMobility::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (IMobility::mobilityStateChangedSignal == signal)
         emitMobilityStateChangedSignal();
 }

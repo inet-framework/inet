@@ -463,7 +463,7 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
 
 void Gptp::receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method("%s", cComponent::getSignalName(signal));
 
     if (signal == receptionEndedSignal) {
         auto signal = check_and_cast<cPacket *>(obj);

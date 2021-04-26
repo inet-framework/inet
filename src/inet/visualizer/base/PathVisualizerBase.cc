@@ -281,7 +281,8 @@ void PathVisualizerBase::processPathEnd(cModule *networkNode, const char *label,
 
 void PathVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == startPathSignal) {
         auto module = check_and_cast<cModule *>(source);
         if (isPathStart(module)) {

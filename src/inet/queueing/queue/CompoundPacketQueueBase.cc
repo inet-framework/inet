@@ -84,21 +84,18 @@ void CompoundPacketQueueBase::removePacket(Packet *packet)
 
 void CompoundPacketQueueBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == packetPushedSignal) {
-        Enter_Method("receivePacketPushedSignal");
     }
     else if (signal == packetPulledSignal) {
-        Enter_Method("receivePacketPulledSignal");
     }
     else if (signal == packetRemovedSignal) {
-        Enter_Method("receivePacketRemovedSignal");
     }
     else if (signal == packetDroppedSignal) {
-        Enter_Method("receivePacketDroppedSignal");
         numDroppedPackets++;
     }
     else if (signal == packetCreatedSignal) {
-        Enter_Method("receivePacketCreatedSignal");
         numCreatedPackets++;
     }
     else

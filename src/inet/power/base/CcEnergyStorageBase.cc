@@ -69,7 +69,8 @@ void CcEnergyStorageBase::removeEnergyGenerator(const IEnergyGenerator *energyGe
 
 void CcEnergyStorageBase::receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == ICcEnergyConsumer::currentConsumptionChangedSignal)
         updateTotalCurrentConsumption();
     else if (signal == ICcEnergyGenerator::currentGenerationChangedSignal)

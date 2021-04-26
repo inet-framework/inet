@@ -117,7 +117,8 @@ void Ieee80211AgentSta::handleResponse(cMessage *msg)
 
 void Ieee80211AgentSta::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
     printSignalBanner(signalID, obj, details);
 
     if (signalID == l2BeaconLostSignal) {

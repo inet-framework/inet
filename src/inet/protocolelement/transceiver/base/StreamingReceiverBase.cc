@@ -35,7 +35,8 @@ void StreamingReceiverBase::initialize(int stage)
 
 void StreamingReceiverBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     // TODO handle if the channel is cut at the receiver
 }
 

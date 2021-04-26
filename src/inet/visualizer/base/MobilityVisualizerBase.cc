@@ -134,7 +134,8 @@ void MobilityVisualizerBase::removeAllMobilityVisualizations()
 
 void MobilityVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == IMobility::mobilityStateChangedSignal) {
         if (moduleFilter.matches(check_and_cast<cModule *>(source))) {
             auto mobility = dynamic_cast<IMobility *>(source);

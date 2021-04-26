@@ -105,7 +105,7 @@ void Ospfv2::unsubscribe()
  */
 void Ospfv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method("%s", cComponent::getSignalName(signalID));
 
     const NetworkInterface *ie;
     const NetworkInterfaceChangeDetails *change;

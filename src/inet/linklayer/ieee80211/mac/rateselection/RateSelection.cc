@@ -158,7 +158,8 @@ const IIeee80211Mode *RateSelection::computeMode(Packet *packet, const Ptr<const
 
 void RateSelection::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
     if (signalID == modesetChangedSignal) {
         modeSet = check_and_cast<Ieee80211ModeSet *>(obj);
         fastestMandatoryMode = modeSet->getFastestMandatoryMode();

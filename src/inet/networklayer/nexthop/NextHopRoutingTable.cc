@@ -126,6 +126,8 @@ void NextHopRoutingTable::handleMessage(cMessage *msg)
 
 void NextHopRoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
     // TODO
 }
 

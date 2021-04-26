@@ -49,6 +49,8 @@ void NetworkNodeVisualizerBase::handleParameterChange(const char *name)
 
 void NetworkNodeVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == POST_MODEL_CHANGE) {
         if (auto moduleInit = dynamic_cast<cPreModuleInitNotification *>(object)) {
             auto module = moduleInit->module;

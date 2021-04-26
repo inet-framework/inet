@@ -216,7 +216,8 @@ void NetworkInterface::handleParameterChange(const char *name)
 
 void NetworkInterface::receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == POST_MODEL_CHANGE) {
         if (auto notification = dynamic_cast<cPostPathCreateNotification *>(obj)) {
             if (rxIn == notification->pathEndGate || txOut == notification->pathStartGate) {

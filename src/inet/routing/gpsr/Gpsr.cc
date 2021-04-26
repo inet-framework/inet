@@ -813,7 +813,8 @@ void Gpsr::handleCrashOperation(LifecycleOperation *operation)
 
 void Gpsr::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    Enter_Method("receiveChangeNotification");
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
     if (signalID == linkBrokenSignal) {
         EV_WARN << "Received link break" << endl;
         // TODO remove the neighbor

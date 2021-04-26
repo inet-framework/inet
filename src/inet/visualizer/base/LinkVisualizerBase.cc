@@ -244,7 +244,8 @@ void LinkVisualizerBase::updateLinkVisualization(cModule *source, cModule *desti
 
 void LinkVisualizerBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if ((activityLevel == ACTIVITY_LEVEL_SERVICE && signal == packetReceivedFromUpperSignal) ||
         (activityLevel == ACTIVITY_LEVEL_PEER && signal == packetSentToPeerSignal) ||
         (activityLevel == ACTIVITY_LEVEL_PROTOCOL && signal == packetSentToLowerSignal))

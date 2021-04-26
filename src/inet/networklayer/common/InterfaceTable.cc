@@ -100,8 +100,9 @@ void InterfaceTable::handleMessageWhenUp(cMessage *msg)
 
 void InterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
     // nothing needed here at the moment
-    Enter_Method("receiveSignal");
     printSignalBanner(signalID, obj, details);
 }
 

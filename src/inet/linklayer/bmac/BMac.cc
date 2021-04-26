@@ -561,7 +561,8 @@ void BMac::sendDataPacket()
 
 void BMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
 {
-    Enter_Method("receiveSignal");
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
     if (signalID == IRadio::radioModeChangedSignal) {
         IRadio::RadioMode radioMode = static_cast<IRadio::RadioMode>(value);
         if (radioMode == IRadio::RADIO_MODE_TRANSMITTER) {

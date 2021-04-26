@@ -79,6 +79,8 @@ void L2NodeConfigurator::configureNode()
 
 void L2NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
     if (nodeStatus && nodeStatus->getState() != NodeStatus::UP)
         return;
 

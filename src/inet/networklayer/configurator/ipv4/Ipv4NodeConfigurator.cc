@@ -150,7 +150,8 @@ void Ipv4NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalI
     if (getSimulation()->getContextType() == CTX_INITIALIZE)
         return; // ignore notifications during initialize
 
-    Enter_Method("receiveSignal");
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
     printSignalBanner(signalID, obj, details);
 
     if (signalID == interfaceCreatedSignal) {

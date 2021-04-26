@@ -138,6 +138,8 @@ const char *OscillatorBasedClock::resolveDirective(char directive) const
 
 void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject *obj, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == IOscillator::preOscillatorStateChangedSignal)
         originClockTick += oscillator->computeTicksForInterval(simTime() - oscillator->getComputationOrigin());
     else if (signal == IOscillator::postOscillatorStateChangedSignal) {

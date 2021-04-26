@@ -47,6 +47,8 @@ void AttachedMobility::initialize(int stage)
 
 void AttachedMobility::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (IMobility::mobilityStateChangedSignal == signal)
         emitMobilityStateChangedSignal();
 }

@@ -313,7 +313,10 @@ void EthernetMacBase::processAtHandleMessageFinished()
 
 void EthernetMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
     MacProtocolBase::receiveSignal(source, signalID, obj, details);
+
     if (signalID == POST_MODEL_CHANGE) {
         if (auto gcobj = dynamic_cast<cPostPathCreateNotification *>(obj)) {
             if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))

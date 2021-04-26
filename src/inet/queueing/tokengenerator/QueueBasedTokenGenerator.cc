@@ -41,6 +41,8 @@ void QueueBasedTokenGenerator::initialize(int stage)
 
 void QueueBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == packetPulledSignal) {
         Enter_Method("packetPulled");
         if (queue->getNumPackets() < minNumPackets || queue->getTotalLength() < minTotalLength)
