@@ -90,6 +90,19 @@ Several configurations are possible...**TODO** such as double tagging
 Creating VLAN policies
 ~~~~~~~~~~~~~~~~~~~~~~
 
+**TODO** what are VLAN policies?
+
+**TODO** how to add policy submodule?
+
+**TODO** what it is, where it is and how to add it
+
+In Ethernet switches, VLAN policies specify how packets are assigned to VLANs, based on incoming and outgoing interfaces.
+The policies can be configured in the :ned:`VlanPolicyLayer` submodule. The VLAN policy layer is a submodule of the bridging layer in :ned:`EthernetSwitch`:
+
+**TODO** what is the bridging layer and defaults ?
+
+:ned:`EthernetSwitch` does not have a VLAN policy layer by default. To add it, the ``vlanPolicy`` submodule's type needs to be specified.
+
 The :ned:`VlanPolicyLayer` module can filter packets based on VLAN tags, and modify VLAN tags on packets. It is an optional submodule of :ned:`EthernetSwitch`. Here is the VLAN policy layer submodule inside an :ned:`EthernetSwitch`:
 
 .. figure:: media/switch2.png
@@ -201,10 +214,22 @@ The Model
 
 .. Ethernet VLANs are demonstrated with two configurations:
 
+structure:
+
+- The model
+  
+   - Config x
+   - Config y
+  
+- Results
+
+Overview
+~~~~~~~~
+
 We'll demonstrate Ethernet VLANs with the following configurations:
 
-- **VLAN between switches**: Packets are assigned to VLANs by Ethernet switches
-- **VLAN between hosts using virtual interfaces**: Packets are assigned to a VLAN by a host's virtual interface
+- ``VLAN Between Switches``: Packets are assigned to VLANs by Ethernet switches
+- ``VLAN Between Hosts Using Virtual Interfaces``: Packets are assigned to a VLAN by a host's virtual interface
 
 Config: VLAN Between Switches
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -304,7 +329,7 @@ Here is a TCP packet displayed in Qtenv's packet inspector:
 .. figure:: media/inspector2.png
    :align: center
 
-.. video:: media/vlan1.mp4
+.. video:: media/vlan3.mp4
    :width: 100%
 
 VLAN Between Virtual Interfaces
