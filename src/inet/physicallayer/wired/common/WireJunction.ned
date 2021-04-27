@@ -36,7 +36,7 @@ simple WireJunction
 {
     parameters:
         @display("i=misc/node_vs");
-        @signal[packetReceived](type=cMessage);
+        @signal[packetReceived](type=cPacket);
         @statistic[packetReceived](title="packets"; source=packetReceived; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
         inout port[];
