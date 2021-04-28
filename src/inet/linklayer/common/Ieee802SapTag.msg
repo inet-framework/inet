@@ -38,8 +38,8 @@ enum SapCode
 
 class Ieee802SapTagBase extends TagBase
 {
-    int ssap;        // used with IEEE 802 LLC (see ~EtherFrameWithLlc)
-    int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLlc)
+    int ssap = -1;        // used with IEEE 802 LLC (see ~EtherFrameWithLlc)
+    int dsap = -1;        // used with IEEE 802 LLC (see ~EtherFrameWithLlc)
 }
 
 class Ieee802SapReq extends Ieee802SapTagBase
