@@ -17,7 +17,7 @@
 
 package inet.networklayer.configurator.contract;
 
-moduleinterface IL3NetworkConfigurator
+moduleinterface IL3NetworkConfigurator extends INetworkConfigurator
 {
     parameters:
         @display("i=block/cogwheel");
