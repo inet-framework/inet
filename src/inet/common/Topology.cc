@@ -51,7 +51,6 @@ Topology::LinkOut *Topology::Node::getLinkOut(int i)
 
 Topology::Topology(const char *name) : cOwnedObject(name)
 {
-    target = nullptr;
 }
 
 Topology::Topology(const Topology& topo) : cOwnedObject(topo)
@@ -356,14 +355,14 @@ void Topology::unlinkFromDestNode(Link *link)
     destInLinks.erase(it);
 }
 
-Topology::Node *Topology::getNode(int i)
+Topology::Node *Topology::getNode(int i) const
 {
     if (i < 0 || i >= (int)nodes.size())
         throw cRuntimeError(this, "invalid node index %d", i);
     return nodes[i];
 }
 
-Topology::Node *Topology::getNodeFor(cModule *mod)
+Topology::Node *Topology::getNodeFor(cModule *mod) const
 {
     // binary search because nodes[] is ordered by module ID
     Node tmpNode(mod->getId());
@@ -372,13 +371,13 @@ Topology::Node *Topology::getNodeFor(cModule *mod)
     return it == nodes.end() || (*it)->moduleId != mod->getId() ? nullptr : *it;
 }
 
-void Topology::calculateUnweightedSingleShortestPathsTo(Node *_target)
+void Topology::calculateUnweightedSingleShortestPathsTo(Node *_target) const
 {
     // multiple paths not supported :-(
 
     if (!_target)
         throw cRuntimeError(this, "..ShortestPathTo(): target node is nullptr");
-    target = _target;
+    auto target = _target;
 
     for (auto& elem : nodes) {
         elem->dist = INFINITY;
@@ -414,11 +413,11 @@ void Topology::calculateUnweightedSingleShortestPathsTo(Node *_target)
     }
 }
 
-void Topology::calculateWeightedSingleShortestPathsTo(Node *_target)
+void Topology::calculateWeightedSingleShortestPathsTo(Node *_target) const
 {
     if (!_target)
         throw cRuntimeError(this, "..ShortestPathTo(): target node is nullptr");
-    target = _target;
+    auto target = _target;
 
     // clean path infos
     for (auto& elem : nodes) {
