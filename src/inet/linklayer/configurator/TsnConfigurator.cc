@@ -290,6 +290,8 @@ void TsnConfigurator::configureStreams()
             pathFragmentsParameterValue->add(pathFragmentParameterValue);
         }
         streamParameterValue->set("pathFragments", pathFragmentsParameterValue);
+        streamParameterValue->set("name", streamConfiguration->get("name").stringValue());
+        streamParameterValue->set("application", streamConfiguration->get("application"));
         streamParameterValue->set("source", source);
         streamParameterValue->set("destination", destination);
         streamParameterValue->set("priority", streamConfiguration->get("priority").intValue());
