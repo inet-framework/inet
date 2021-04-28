@@ -15,16 +15,11 @@
 
 package inet.examples.ethernet.invehicle;
 
-import inet.linklayer.configurator.GateSchedulingConfigurator;
+import inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfigurator;
 import inet.networks.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
-import inet.queueing.contract.IPacketClassifier;
-import inet.queueing.contract.IPacketGate;
-import inet.queueing.contract.IPacketQueue;
-import inet.queueing.contract.IPacketScheduler;
-import inet.queueing.queue.CompoundPacketQueueBase;
 
 module Ecu extends StandardHost
 {
@@ -43,7 +38,7 @@ network InVehicleNetworkExample extends WiredNetworkBase
             @display("ls=,3");
         }
     submodules:
-        gateSchedulingConfigurator: GateSchedulingConfigurator if hasGateSchedulingConfigurator {
+        gateSchedulingConfigurator: <default("")> like IGateSchedulingConfigurator if typename != "" {
             @display("p=100,400;is=s");
         }
         frontSwitch: EthernetSwitch {

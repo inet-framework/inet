@@ -15,9 +15,9 @@
 
 package inet.examples.ethernet.redundancy;
 
-import inet.linklayer.configurator.GateSchedulingConfigurator;
 import inet.linklayer.configurator.StreamRedundancyConfigurator;
 import inet.linklayer.configurator.TsnConfigurator;
+import inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfigurator;
 import inet.networks.WiredNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.ethernet.EthernetSwitch;
@@ -26,7 +26,6 @@ import inet.node.inet.StandardHost;
 network EthernetRedundancyExample extends WiredNetworkBase
 {
     parameters:
-        bool hasGateSchedulingConfigurator = default(false);
         bool hasStreamRedundancyConfigurator = default(false);
         bool hasTsnConfigurator = default(false);
     types:
@@ -35,7 +34,7 @@ network EthernetRedundancyExample extends WiredNetworkBase
             per = 0.2;
         }
     submodules:
-        gateSchedulingConfigurator: GateSchedulingConfigurator if hasGateSchedulingConfigurator {
+        gateSchedulingConfigurator: <default("")> like IGateSchedulingConfigurator if typename != "" {
             @display("p=100,500;is=s");
         }
         streamRedundancyConfigurator: StreamRedundancyConfigurator if hasStreamRedundancyConfigurator {
