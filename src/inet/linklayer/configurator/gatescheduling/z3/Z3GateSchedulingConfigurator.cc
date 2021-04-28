@@ -17,160 +17,16 @@
 
 #include "inet/linklayer/configurator/gatescheduling/z3/Z3GateSchedulingConfigurator.h"
 
-#include <queue>
-#include <set>
-#include <sstream>
-#include <vector>
-
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/stlutils.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-
 namespace inet {
 
 Define_Module(Z3GateSchedulingConfigurator);
 
-void Z3GateSchedulingConfigurator::initialize(int stage)
+Z3GateSchedulingConfigurator::Output *Z3GateSchedulingConfigurator::computeGateScheduling(const Input& input) const
 {
-    if (stage == INITSTAGE_LOCAL) {
-        gateCycleDuration = par("gateCycleDuration");
-        configuration = check_and_cast<cValueArray *>(par("configuration").objectValue());
-    }
-    else if (stage == INITSTAGE_QUEUEING) {
-        computeConfiguration();
-        configureGateScheduling();
-        configureApplicationOffsets();
-    }
-}
-
-void Z3GateSchedulingConfigurator::extractTopology(Topology& topology)
-{
-    topology.extractByProperty("networkNode");
-    EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
-
-    if (topology.getNumNodes() == 0)
-        throw cRuntimeError("Empty network!");
-
-    // extract nodes, fill in interfaceTable and routingTable members in node
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        Node *node = (Node *)topology.getNode(i);
-        node->module = node->getModule();
-        node->interfaceTable = dynamic_cast<IInterfaceTable *>(node->module->getSubmodule("interfaceTable"));
-        node->routingTable = L3AddressResolver().findIpv4RoutingTableOf(node->module);
-    }
-
-    // extract links and interfaces
-    std::set<NetworkInterface *> interfacesSeen;
-    std::queue<Node *> unvisited; // unvisited nodes in the graph
-    auto rootNode = (Node *)topology.getNode(0);
-    unvisited.push(rootNode);
-    while (!unvisited.empty()) {
-        Node *node = unvisited.front();
-        unvisited.pop();
-        IInterfaceTable *interfaceTable = node->interfaceTable;
-        if (interfaceTable) {
-            // push neighbors to the queue
-            for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-                NetworkInterface *networkInterface = interfaceTable->getInterface(i);
-                if (interfacesSeen.count(networkInterface) == 0) {
-                    // visiting this interface
-                    interfacesSeen.insert(networkInterface);
-                    Topology::LinkOut *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
-                    Node *childNode = nullptr;
-                    if (linkOut) {
-                        childNode = (Node *)linkOut->getRemoteNode();
-                        unvisited.push(childNode);
-                    }
-                    InterfaceInfo *info = new InterfaceInfo(networkInterface);
-                    node->interfaceInfos.push_back(info);
-                }
-            }
-        }
-    }
-    // annotate links with interfaces
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        Node *node = (Node *)topology.getNode(i);
-        for (int j = 0; j < node->getNumOutLinks(); j++) {
-            Topology::LinkOut *linkOut = node->getLinkOut(j);
-            Link *link = (Link *)linkOut;
-            Node *localNode = (Node *)linkOut->getLocalNode();
-            if (localNode->interfaceTable)
-                link->sourceInterfaceInfo = findInterfaceInfo(localNode, localNode->interfaceTable->findInterfaceByNodeOutputGateId(linkOut->getLocalGateId()));
-            Node *remoteNode = (Node *)linkOut->getRemoteNode();
-            if (remoteNode->interfaceTable)
-                link->destinationInterfaceInfo = findInterfaceInfo(remoteNode, remoteNode->interfaceTable->findInterfaceByNodeInputGateId(linkOut->getRemoteGateId()));
-        }
-    }
-}
-
-void Z3GateSchedulingConfigurator::clearConfiguration()
-{
-    topology.clear();
-}
-
-void Z3GateSchedulingConfigurator::computeConfiguration()
-{
-    long initializeStartTime = clock();
-    TIME(extractTopology(topology));
-    TIME(computeStreamReservations());
-    TIME(computeGateScheduling());
-    printElapsedTime("initialize", initializeStartTime);
-}
-
-void Z3GateSchedulingConfigurator::computeStreamReservations()
-{
-    EV_DEBUG << "Computing stream reservations according to configuration" << EV_FIELD(configuration) << EV_ENDL;
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        auto sourceNode = (Node *)topology.getNode(i);
-        cModule *source = sourceNode->module;
-        for (int j = 0; j < topology.getNumNodes(); j++) {
-            auto destinationNode = (Node *)topology.getNode(j);
-            cModule *destination = destinationNode->module;
-            for (int k = 0; k < configuration->size(); k++) {
-                auto entry = check_and_cast<cValueMap *>(configuration->get(k).objectValue());
-                PatternMatcher sourceMatcher(entry->get("source").stringValue(), true, false, false);
-                PatternMatcher destinationMatcher(entry->get("destination").stringValue(), true, false, false);
-                if (sourceMatcher.matches(sourceNode->module->getFullPath().c_str()) &&
-                    destinationMatcher.matches(destinationNode->module->getFullPath().c_str()))
-                {
-                    int priority = entry->get("priority").intValue();
-                    b packetLength = b(entry->get("packetLength").doubleValueInUnit("b"));
-                    simtime_t packetInterval = entry->get("packetInterval").doubleValueInUnit("s");
-                    simtime_t maxLatency = entry->get("maxLatency").doubleValueInUnit("s");
-                    bps datarate = packetLength / s(packetInterval.dbl());
-                    EV_DEBUG << "Adding stream reservation from configuration" << EV_FIELD(source) << EV_FIELD(destination) << EV_FIELD(priority) << EV_FIELD(packetLength) << EV_FIELD(packetInterval, packetInterval.ustr()) << EV_FIELD(datarate) << EV_FIELD(maxLatency, maxLatency.ustr()) << EV_ENDL;
-                    StreamReservation streamReservation;
-                    streamReservation.source = sourceNode;
-                    streamReservation.destination = destinationNode;
-                    streamReservation.priority = priority;
-                    streamReservation.packetLength = packetLength;
-                    streamReservation.packetInterval = packetInterval;
-                    streamReservation.maxLatency = maxLatency;
-                    streamReservation.datarate = datarate;
-                    if (entry->containsKey("pathFragments")) {
-                        auto pathFragments = check_and_cast<cValueArray *>(entry->get("pathFragments").objectValue());
-                        for (int l = 0; l < pathFragments->size(); l++) {
-                            std::vector<std::string> path;
-                            auto pathFragment = check_and_cast<cValueArray *>(pathFragments->get(l).objectValue());
-                            for (int m = 0; m < pathFragment->size(); m++)
-                                path.push_back(pathFragment->get(m).stringValue());
-                            streamReservation.pathFragments.push_back(path);
-                        }
-                    }
-                    else
-                        streamReservation.pathFragments.push_back(computePath(sourceNode, destinationNode));
-                    streamReservations.push_back(streamReservation);
-                }
-            }
-        }
-    }
-}
-
-void Z3GateSchedulingConfigurator::computeGateScheduling()
-{
+    auto output = new Output();
+    std::map<cModule *, cObject *> devices;
+    std::map<Input::Flow *, Flow *> flows;
+    std::map<cModule *, Cycle *> interfaceCycles;
     Network *network = new Network();
     for (int i = 0; i < topology.getNumNodes(); i++) {
         auto node = (Node *)topology.getNode(i);
@@ -178,13 +34,13 @@ void Z3GateSchedulingConfigurator::computeGateScheduling()
         if (isBridgeNode(node)) {
             double cycleDurationUpperBound = (gateCycleDuration * 1000000).dbl();
             Switch *tsnSwitch = new Switch(networkNode->getFullName(), 0, cycleDurationUpperBound);
-            node->device = tsnSwitch;
+            devices[node->module] = tsnSwitch;
             network->addSwitch(tsnSwitch);
         }
         else {
             Device *device = new Device(0, 0, 0, 0);
             device->setName(networkNode->getFullName());
-            node->device = device;
+            devices[node->module] = device;
         }
     }
     for (int i = 0; i < topology.getNumNodes(); i++) {
@@ -195,201 +51,446 @@ void Z3GateSchedulingConfigurator::computeGateScheduling()
                 Node *localNode = (Node *)link->getLocalNode();
                 Node *remoteNode = (Node *)link->getRemoteNode();
                 Cycle *cycle = new Cycle((gateCycleDuration * 1000000).dbl(), 0, (gateCycleDuration * 1000000).dbl());
-                ((Link *)link)->sourceInterfaceInfo->cycle = cycle;
+                interfaceCycles[((Link *)link)->sourceInterfaceInfo->networkInterface] = cycle;
                 // TODO datarate, propagation time
                 double datarate = 1E+9 / 1000000;
                 double propagationTime = 50E-9 * 1000000;
                 double guardBand = 0;
-                for (auto& streamReservation : streamReservations) {
-                    double v = b(streamReservation.packetLength).get() / datarate;
+                for (auto& flow : input.flows) {
+                    double v = b(flow->startApplication->packetLength).get() / datarate;
                     if (guardBand < v)
                         guardBand = v;
                 }
-                check_and_cast<Switch *>(localNode->device)->createPort(remoteNode->device, cycle, 1500 * 8, propagationTime, datarate, guardBand);
+                check_and_cast<Switch *>(devices[localNode->module])->createPort(devices[remoteNode->module], cycle, 1500 * 8, propagationTime, datarate, guardBand);
             }
         }
     }
-    for (auto& streamReservation : streamReservations) {
+    for (auto f : input.flows) {
         Flow *flow = new Flow(Flow::UNICAST);
         flow->setFixedPriority(true);
-        flow->setPriorityValue(streamReservation.priority);
-        topology.calculateUnweightedSingleShortestPathsTo(streamReservation.destination);
-        auto startDevice = check_and_cast<Device *>(streamReservation.source->device);
-        startDevice->setPacketPeriodicity((streamReservation.packetInterval * 1000000).dbl());
-        startDevice->setPacketSize(streamReservation.packetLength.get() + 12 * 8);
-        startDevice->setHardConstraintTime((streamReservation.maxLatency * 1000000).dbl());
+        flow->setPriorityValue(f->startApplication->priority);
+        auto startDevice = check_and_cast<Device *>(devices[f->startApplication->device->module]);
+        startDevice->setPacketPeriodicity((f->startApplication->packetInterval * 1000000).dbl());
+        startDevice->setPacketSize(b(f->startApplication->packetLength + B(12)).get());
+        startDevice->setHardConstraintTime((f->startApplication->maxLatency * 1000000).dbl());
         flow->setStartDevice(startDevice);
-        auto node = streamReservation.source;
-        node = (Node *)node->getPath(0)->getRemoteNode();
-        while (node != streamReservation.destination) {
-            flow->addToPath(check_and_cast<Switch *>(node->device));
-            node = (Node *)node->getPath(0)->getRemoteNode();
+        for (auto pathFragment : f->pathFragments) {
+            for (auto networkNode : pathFragment->networkNodes) {
+                if (dynamic_cast<Input::Switch *>(networkNode))
+                    flow->addToPath(check_and_cast<Switch *>(devices[networkNode->module]));
+            }
         }
-        flow->setEndDevice(check_and_cast<Device *>(streamReservation.destination->device));
+        flow->setEndDevice(check_and_cast<Device *>(devices[f->endDevice->module]));
         network->addFlow(flow);
-        streamReservation.flow = flow;
+        flows[f] = flow;
     }
     generateSchedule(network);
-}
-
-void Z3GateSchedulingConfigurator::configureGateScheduling()
-{
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        auto node = (Node *)topology.getNode(i);
-        auto networkNode = node->module;
-        for (auto& elem : node->interfaceInfos) {
-            auto interfaceInfo = static_cast<InterfaceInfo *>(elem);
-            auto queue = interfaceInfo->networkInterface->findModuleByPath(".macLayer.queue");
-            if (queue != nullptr) {
-                for (cModule::SubmoduleIterator it(queue); !it.end(); ++it) {
-                    cModule *gate = *it;
-                    if (!strcmp(gate->getName(), "gate"))
-                        configureGateScheduling(networkNode, gate, interfaceInfo);
+    for (auto switch_ : input.switches) {
+        for (auto port : switch_->ports) {
+            Cycle *cycle = interfaceCycles[port->module];
+            auto& schedules = output->gateSchedules[port];
+            for (int priority = 0; priority < port->numPriorities; priority++) {
+                auto schedule = new Output::Schedule();
+                schedule->port = port;
+                schedule->priority = priority;
+                schedule->cycleStart = us(cycle->getCycleStart()).get();
+                schedule->cycleDuration = us(cycle->getCycleDuration()).get();
+                for (int i = 0; i < cycle->getSlotsUsed().size(); i++) {
+                    if (priority == cycle->getSlotsUsed().at(i)) {
+                        // find all slot durations for priority
+                        // second loop, because there could be more slots than priorities
+                        for (int j = 0; j < cycle->getSlotDuration().at(i).size(); j++) {
+                            auto slotStart = us(cycle->getSlotStart(priority, j));
+                            auto slotDuration = us(cycle->getSlotDuration(priority, j));
+                            // slot with length 0 are not used
+                            if (slotDuration == s(0))
+                                continue;
+                            schedule->slotStarts.push_back(s(slotStart).get());
+                            schedule->slotDurations.push_back(s(slotDuration).get());
+                        }
+                    }
                 }
+                schedules.push_back(schedule);
             }
         }
     }
-}
-
-void Z3GateSchedulingConfigurator::configureGateScheduling(cModule *networkNode, cModule *gate, InterfaceInfo *interfaceInfo)
-{
-    int priority = gate->getIndex();
-    Cycle *cycle = interfaceInfo->cycle;
-    auto cycleStart = us(cycle->getCycleStart());
-    auto cycleDuration = us(cycle->getCycleDuration());
-    auto networkInterface = interfaceInfo->networkInterface;
-    EV_DEBUG << "Configuring cycle" << EV_FIELD(networkNode) << EV_FIELD(networkInterface) << EV_FIELD(priority) << EV_FIELD(cycleDuration) << EV_FIELD(cycleStart) << EV_ENDL;
-    std::vector<std::pair<simtime_t, simtime_t>> startsAndDurations;
-    for (int i = 0; i < cycle->getSlotsUsed().size(); i++) {
-        int currentQ = cycle->getSlotsUsed().at(i);
-        if (priority != currentQ)
-            continue;
-//        //convert queue ID to binary encoded value
-//        int binCurrentQ = (int) Math.pow(2,currentQ);
-        // find all slot durations for Q i
-        // second loop, because there could be more slots than priorities
-        for (int j = 0; j < cycle->getSlotDuration().at(i).size(); j++) {
-            auto slotStart = us(cycle->getSlotStart(currentQ, j));
-            auto slotDuration = us(cycle->getSlotDuration(currentQ, j));
-            // slot with length 0 are not used
-            if (slotDuration == s(0))
-                continue;
-            EV_DEBUG << "Configuring slot" << EV_FIELD(networkNode) << EV_FIELD(networkInterface) << EV_FIELD(priority) << EV_FIELD(slotStart) << EV_FIELD(slotDuration) << EV_ENDL;
-            startsAndDurations.push_back({s(slotStart).get(), s(slotDuration).get()});
-            // check if slot duration is smaller than an unsigned 32 bit integer
-            // (type provided by TrustNode yang model) roughly 4,29 seconds
-//            if (slotDuration <= MAX_UINT32) {
-//                long slotStart = (long) cycle->getSlotStart(currentQ, j);
-//
-//                // sort all values into a list of triples
-//                allSlots.add(new Triple(binCurrentQ, slotStart, slotDuration));
-//            }
-//            else {
-//                throw new NumberFormatException("Cycle duration too large.");
-//            }
-        }
-    }
-    simtime_t offset = 0;
-    bool initiallyOpen = true; // TODO ?
-    auto durations = computeDurations(startsAndDurations, initiallyOpen);
-    EV_DEBUG << "Configuring gate scheduling parameters" << EV_FIELD(networkNode) << EV_FIELD(networkInterface) << EV_FIELD(gate) << EV_FIELD(initiallyOpen) << EV_FIELD(offset) << EV_FIELD(durations) << EV_ENDL;
-    gate->par("initiallyOpen") = initiallyOpen;
-    gate->par("offset") = offset.dbl(); // TODO ? cycleStart.get();
-    cPar& durationsPar = gate->par("durations");
-    durationsPar.copyIfShared();
-    durationsPar.setObjectValue(durations);
-}
-
-cValueArray *Z3GateSchedulingConfigurator::computeDurations(std::vector<std::pair<simtime_t, simtime_t>>& startsAndDurations, bool& initiallyOpen)
-{
-    cValueArray *durations = new cValueArray();
-    std::map<simtime_t, simtime_t> durationMap;
-    initiallyOpen = false;
-    simtime_t endTime = 0;
-    for (auto & entry : startsAndDurations) {
-        if (entry.first == 0)
-            initiallyOpen = true;
-        else {
-            simtime_t duration = entry.first - endTime;
-            if (duration < 0)
-                duration = 0; // KLUDGE TODO to avoid numeric accuracy errors
-            durations->add(cValue(duration.dbl(), "s"));
-        }
-        durations->add(cValue(entry.second.dbl(), "s"));
-        endTime = entry.first + entry.second;
-    }
-    simtime_t remainingDuration = gateCycleDuration - endTime;
-    if (endTime != 0) {
-        if (remainingDuration != 0)
-            durations->add(cValue(remainingDuration.dbl(), "s"));
-        if (durations->size() % 2 != 0)
-            durations->add(cValue(0, "s"));
-    }
-    return durations;
-}
-
-void Z3GateSchedulingConfigurator::configureApplicationOffsets()
-{
-    for (auto& streamReservation : streamReservations) {
-        // TODO datarate
-        double datarate = 1E+9;
-        auto startOffset = us(streamReservation.flow->getFlowFirstSendingTime()) - s((streamReservation.packetLength.get() + 12 * 8) / datarate);
+    for (auto& it : flows) {
+        auto application = it.first->startApplication;
+        // TODO
+        bps datarate = Gbps(1.0);
+        auto startTime = (us(it.second->getFlowFirstSendingTime()) - s((application->packetLength + B(12)) / datarate)).get();
         // KLUDGE TODO workaround a numerical accuracy problem that this number comes out negative sometimes
-        if (startOffset < s(0))
-            startOffset = s(0);
-        ASSERT(startOffset >= s(0));
-        auto networkNode = streamReservation.source->module;
-        // KLUDGE:
-        auto sourceModule = networkNode->getModuleByPath(".app[0].source");
-        EV_DEBUG << "Setting initial packet production offset for application source" << EV_FIELD(sourceModule) << EV_FIELD(startOffset) << EV_ENDL;
-        sourceModule->par("initialProductionOffset") = s(startOffset).get();
+        if (startTime < 0)
+            startTime = 0;
+        output->applicationStartTimes[application] = startTime;
+    }
+    return output;
+}
+
+void Z3GateSchedulingConfigurator::configureNetwork(Network *net, context& ctx, solver& solver) const
+{
+    for(Flow *flw : net->getFlows()) {
+           flw->modifyIfUsingCustomVal();
+        flw->convertUnicastFlow();
+        flw->setUpPeriods(flw->getPathTree()->getRoot());
+    }
+
+    for(Switch *swt : net->getSwitches()) {
+        swt->setUpCycleSize(solver, ctx);
+    }
+
+
+    // On all network flows: Data given by the user will be converted to z3 values
+    for(Flow *flw : net->getFlows()) {
+        flw->toZ3(ctx);
+        flw->setNumberOfPacketsSent(flw->getPathTree()->getRoot());
+    }
+
+    // On all network switches: Data given by the user will be converted to z3 values
+    for(Switch *swt : net->getSwitches()) {
+        swt->toZ3(ctx, solver);
+    }
+
+    // Sets up the hard constraint for each individual flow in the network
+    net->setJitterUpperBoundRangeZ3(ctx, 25);
+    net->secureHC(solver, ctx);
+}
+
+void Z3GateSchedulingConfigurator::generateSchedule(Network *net) const
+{
+//    std::cout << "Z3 Major Version: " << version.getMajor() << std::endl;
+//    std::cout << "Z3 Full Version: " << version.getString() << std::endl;
+//    std::cout << "Z3 Full Version std::string: " << version.getFullVersion() << std::endl;
+    config cfg;
+    cfg.set("model", "true");
+    context *ctx = new context(cfg);
+    solver solver(*ctx);     //Creating the solver to generate unknown values based on the given context
+
+    this->configureNetwork(net, *ctx, solver);
+    // net.loadNetwork(ctx, solver);
+
+
+    // A switch is picked in order to evaluate the unknown values
+    Switch *switch1 = nullptr;
+    switch1 = (Switch *) net->getSwitches().at(0);
+    // The duration of the cycle is given as a question to z3, so all the
+    // constraints will have to be evaluated in order to z3 to know this cycle
+    // duration
+    std::shared_ptr<expr> switch1CycDuration = switch1->getCycle(0)->getCycleDurationZ3();
+
+
+    /* find model for the constraints above */
+//           model model = nullptr;
+//           LocalTime time = LocalTime.now();
+
+    std::cout << "Rules set. Checking solver." << std::endl;
+    std::cout << solver << std::endl;
+//           std::cout << std::string("Current time of the day: ") << time << std::endl;
+
+    if (sat == solver.check())
+    {
+        model model = solver.get_model();
+        std::cout << model << std::endl;
+        expr v = model.eval(*switch1CycDuration, false);
+//               if (v != nullptr)
+//               {
+            std::cout << "Model generated." << std::endl;
+
+//                   try {
+//                       PrintWriter out = new PrintWriter("log.txt");
+
+                std::cout << "SCHEDULER LOG:\n\n" << std::endl;
+
+                std::cout << "SWITCH LIST:" << std::endl;
+
+                // For every switch in the network, store its information in the log
+                for(Switch *auxSwt : net->getSwitches()) {
+                    std::cout << std::string("  Switch name: ") << auxSwt->getName();
+//                        std::cout << std::string("    Max packet size: ") << auxSwt->getMaxPacketSize();
+//                        std::cout << std::string("    Port speed: ") << auxSwt->getPortSpeed();
+//                        std::cout << std::string("    Time to Travel: ") << auxSwt->getTimeToTravel();
+//                        std::cout << std::string("    Transmission time: ") << auxSwt->getTransmissionTime();
+//                           std::cout << "    Cycle information -" << std::endl;
+//                           std::cout << std::string("        First cycle start: ") + model.eval(((TSNSwitch *)auxSwt).getCycleStart(), false));
+//                           std::cout << std::string("        Cycle duration: ") + model.eval(((TSNSwitch *)auxSwt).getCycleDuration(), false));
+                    std::cout << "" << std::endl;
+                    /*
+                    for (Port port : ((TSNSwitch *)auxSwt).getPorts()) {
+                        std::cout << std::string("        Port name (Virtual Index): ") + port->getName());
+                        std::cout << std::string("        First cycle start: ") + model.eval(port->getCycle()->getFirstCycleStartZ3(), false));
+                        std::cout << std::string("        Cycle duration: ") + model.eval(port->getCycle()->getCycleDurationZ3(), false));
+                        std::cout << "" << std::endl;
+                    }
+                    */
+
+
+                    // [EXTRACTING OUTPUT]: Obtaining the z3 output of the switch properties,
+                    // converting it from string to double and storing in the objects
+
+                    for (Port *port : ((Switch *)auxSwt)->getPorts()) {
+                        port
+                            ->getCycle()
+                            ->setCycleStart(
+                                this->stringToFloat(model.eval(*port->getCycle()->getFirstCycleStartZ3(), false).to_string())
+                            );
+                    }
+
+                    // cycleDuration
+                    for (Port *port : ((Switch *)auxSwt)->getPorts()) {
+                        port
+                            ->getCycle()
+                            ->setCycleDuration(
+                                this->stringToFloat(model.eval(*port->getCycle()->getCycleDurationZ3(), false).to_string())
+                            );
+                    }
+
+                }
+
+                std::cout << "" << std::endl;
+
+                std::cout << "FLOW LIST:" << std::endl;
+                //For every flow in the network, store its information in the log
+                for(Flow *f : net->getFlows()) {
+                    std::cout << std::string("  Flow name: ") + f->getName() << std::endl;
+                    // std::cout << std::string("    Flow priority: ") + model.eval(f->getFlowPriority(), false) << std::endl;
+                    std::cout << std::string("    Start dev. first t1: ") << model.eval(*f->getStartDevice()->getFirstT1TimeZ3(), false).to_string() << std::endl;
+                    std::cout << std::string("    Start dev. HC: ") << model.eval(*f->getStartDevice()->getHardConstraintTimeZ3(), false).to_string() << std::endl;
+                    std::cout << std::string("    Start dev. packet periodicity: ") << model.eval(*f->getStartDevice()->getPacketPeriodicityZ3(), false).to_string() << std::endl;
+
+                    f->setFlowFirstSendingTime(stringToFloat(model.eval(*f->getStartDevice()->getFirstT1TimeZ3(), false).to_string()));
+
+                    // IF FLOW IS UNICAST
+                    /*
+                    Observation: The flow is broken in smaller flow fragments.
+                    In order to know the departure, arrival, scheduled times
+                    and other properties of the flow the switch that the flow fragment
+                    belongs to must be retrieved. The flow is then used on the switch
+                    to find the port to its destination. The port and the flow fragment
+                    can now be used to retrieve information about the flow.
+
+                    The way in which unicast and publish subscribe flows are
+                    structured here are different. So this process is done differently
+                    in each case.
+                    */
+                    if(f->getType() == Flow::UNICAST) {
+                        // TODO: Throw error. UNICAST data structure are not allowed at this point
+                        // Everything should had been converted into the multicast model.
+                    } else if(f->getType() == Flow::PUBLISH_SUBSCRIBE) { //IF FLOW IS PUB-SUB
+
+                        /*
+                         * In case of a publish subscribe flow, it is easier to
+                         * traverse through the path three than iterate over the
+                         * nodes as it could be done with the unicast flow.
+                         */
+
+                        PathTree *pathTree;
+                        PathNode *pathNode;
+
+                        pathTree = f->getPathTree();
+                        pathNode = pathTree->getRoot();
+
+                        std::cout << "    Flow type: Multicast" << std::endl;
+                        std::vector<PathNode *> *auxNodes;
+                        std::vector<FlowFragment *> *auxFlowFragments;
+                        int auxCount = 0;
+
+                        std::cout << "    List of leaves: ";
+                        for(PathNode *node : *f->getPathTree()->getLeaves()) {
+                            std::cout << ((Device *) node->getNode())->getName() + std::string(", ");
+                        }
+                        std::cout << "" << std::endl;
+                        for(PathNode *node : *f->getPathTree()->getLeaves()) {
+                            auxNodes = f->getNodesFromRootToNode((Device *) node->getNode());
+                            auxFlowFragments = f->getFlowFromRootToNode((Device *) node->getNode());
+
+                            std::cout << std::string("    Path to ") + ((Device *) node->getNode())->getName() + std::string(": ");
+                            auxCount = 0;
+                            for(PathNode *auxNode : *auxNodes) {
+                                if(dynamic_cast<Device *>(auxNode->getNode())) {
+                                    std::cout << ((Device *) auxNode->getNode())->getName() + std::string(", ");
+                                } else if (dynamic_cast<Switch *>(auxNode->getNode())) {
+                                    std::cout <<
+                                        ((Switch *) auxNode->getNode())->getName() +
+                                        std::string("(") +
+                                        auxFlowFragments->at(auxCount)->getName() +
+                                        "), ";
+                                    auxCount++;
+                                }
+
+                            }
+                            std::cout << "" << std::endl;
+                        }
+                        std::cout << "" << std::endl;
+
+                        //Start the data storing and log printing process from the root
+                        this->writePathTree(pathNode, model, *ctx);
+                    }
+
+                    std::cout << "" << std::endl;
+
+                }
+//
+//                   } catch (FileNotFoundException e) {
+//                       e.printStackTrace();
+//                   }
+
+//               } else
+//               {
+//                   std::cout << "Failed to evaluate" << std::endl;
+//               }
+    } else
+    {
+        std::cout << solver.unsat_core() << std::endl;
+        throw cRuntimeError("The specified constraints might not be satisfiable.");
     }
 }
 
-std::vector<std::string> Z3GateSchedulingConfigurator::computePath(Node *source, Node *destination)
+double Z3GateSchedulingConfigurator::stringToFloat(std::string str) const
 {
-    std::vector<std::string> path;
-    topology.calculateUnweightedSingleShortestPathsTo(destination);
-    auto node = source;
-    while (node != destination) {
-        auto networkNode = node->module;
-        path.push_back(networkNode->getFullName());
-        node = (Node *)node->getPath(0)->getRemoteNode();
+    int index = str.find('/');
+    if (index != std::string::npos) {
+        str = str.substr(3, str.length() - 1);
+        index = str.find(' ');
+        double val1 = atof(str.substr(0, index).c_str());
+        double val2 = atof(str.substr(index + 1).c_str());
+        return val1 / val2;
     }
-    path.push_back(destination->module->getFullName());
-    return path;
+    else
+        return atof(str.c_str());
 }
 
-Z3GateSchedulingConfigurator::Link *Z3GateSchedulingConfigurator::findLinkOut(Node *node, const char *neighbor)
+void Z3GateSchedulingConfigurator::writePathTree(PathNode *pathNode, model& model, context& ctx) const
 {
-    for (int i = 0; i < node->getNumOutLinks(); i++)
-        if (!strcmp(node->getLinkOut(i)->getRemoteNode()->getModule()->getFullName(), neighbor))
-            return check_and_cast<Link *>(static_cast<Topology::Link *>(node->getLinkOut(i)));
-    return nullptr;
-}
+    Switch *swt;
+    std::shared_ptr<expr> indexZ3 = nullptr;
 
-Topology::LinkOut *Z3GateSchedulingConfigurator::findLinkOut(Node *node, int gateId)
-{
-    for (int i = 0; i < node->getNumOutLinks(); i++)
-        if (node->getLinkOut(i)->getLocalGateId() == gateId)
-            return node->getLinkOut(i);
-    return nullptr;
-}
+    if(dynamic_cast<Device *>(pathNode->getNode()) && (pathNode->getParent() != nullptr)) {
+        std::cout << "    [END OF BRANCH]" << std::endl;
 
-Z3GateSchedulingConfigurator::InterfaceInfo *Z3GateSchedulingConfigurator::findInterfaceInfo(Node *node, NetworkInterface *networkInterface)
-{
-    if (networkInterface == nullptr)
-        return nullptr;
-    for (auto& interfaceInfo : node->interfaceInfos)
-        if (interfaceInfo->networkInterface == networkInterface)
-            return interfaceInfo;
+    }
 
-    return nullptr;
-}
 
-bool Z3GateSchedulingConfigurator::isBridgeNode(Node *node)
-{
-    return !node->routingTable || !node->interfaceTable;
+    /*
+     * Once given a node, an iteration through its children will begin. For
+     * each switch children, there will be a flow fragment, and to each device
+     * children, there will be an end of branch.
+     *
+     * The logic for storing and printing the data on the publish subscribe
+     * flows is similar but easier than the unicast flows. The pathNode object
+     * stores references to both flow fragment and switch, so no search is needed.
+     */
+    for(PathNode *child : pathNode->getChildren()) {
+        if(dynamic_cast<Switch *>(child->getNode())) {
+
+            for(FlowFragment *ffrag : child->getFlowFragments()) {
+                std::cout << std::string("    Fragment name: ") << ffrag->getName() << std::endl;
+                std::cout << std::string("        Fragment node: ") << ffrag->getNodeName() << std::endl;
+                std::cout << std::string("        Fragment next hop: ") << ffrag->getNextHop() << std::endl;
+                std::cout << std::string("        Fragment priority: ") << model.eval(*ffrag->getFragmentPriorityZ3(), false) << std::endl;
+                for(int index = 0; index < ((Switch *) child->getNode())->getPortOf(ffrag->getNextHop())->getCycle()->getNumOfSlots(); index++) {
+                    indexZ3 = std::make_shared<expr>(ctx.int_val(index));
+                    std::cout << std::string("        Fragment slot start ") << index << std::string(": ")
+                            << this->stringToFloat(
+                                    model.eval(*((Switch *) child->getNode())
+                                           ->getPortOf(ffrag->getNextHop())
+                                           ->getCycle()
+                                           ->slotStartZ3(ctx, *ffrag->getFragmentPriorityZ3(), *indexZ3)
+                                           , false).to_string()) << std::endl;
+                    std::cout << std::string("        Fragment slot duration ") << index << std::string(" : ")
+                             << this->stringToFloat(
+                                 model.eval(*((Switch *) child->getNode())
+                                            ->getPortOf(ffrag->getNextHop())
+                                            ->getCycle()
+                                            ->slotDurationZ3(ctx, *ffrag->getFragmentPriorityZ3(), *indexZ3)
+                                            , false).to_string()) << std::endl;
+
+                }
+
+                std::cout << "        Fragment times-" << std::endl;
+                ffrag->getParent()->addToTotalNumOfPackets(ffrag->getNumOfPacketsSent());
+
+                for(int i = 0; i < ffrag->getParent()->getNumOfPacketsSent(); i++) {
+                        std::cout << std::string("On " + ffrag->getName() + std::string(" - ")) <<
+                         ((Switch *)child->getNode())->departureTime(ctx, i, ffrag)->to_string() << std::string(" - ") <<
+                           ((Switch *)child->getNode())->scheduledTime(ctx, i, ffrag)->to_string() << std::endl;
+                    // std::cout << ((TSNSwitch *)child->getNode())->departureTime(ctx, i, ffrag).to_string() << std::endl;
+                    // std::cout << ((TSNSwitch *)child->getNode())->arrivalTime(ctx, i, ffrag).to_string() << std::endl;
+                    // std::cout << ((TSNSwitch *)child->getNode())->scheduledTime(ctx, i, ffrag).to_string() << std::endl;
+
+                    if(i < ffrag->getParent()->getNumOfPacketsSent()) {
+                        std::cout << std::string("          (") << std::to_string(i) << std::string(") Fragment departure time: ") << this->stringToFloat(model.eval(*((Switch *) child->getNode())->departureTime(ctx, i, ffrag), false).to_string()) << std::endl;
+                        std::cout << std::string("          (") << std::to_string(i) << std::string(") Fragment arrival time: ") << this->stringToFloat(model.eval(*((Switch *) child->getNode())->arrivalTime(ctx, i, ffrag), false).to_string()) << std::endl;
+                        std::cout << std::string("          (") << std::to_string(i) << std::string(") Fragment scheduled time: ") << this->stringToFloat(model.eval(*((Switch *) child->getNode())->scheduledTime(ctx, i, ffrag), false).to_string()) << std::endl;
+                        std::cout << "          ----------------------------" << std::endl;
+                    }
+
+                    ffrag->setFragmentPriority(
+                        atoi(
+                            model.eval(*ffrag->getFragmentPriorityZ3(), false).to_string().c_str()
+                        )
+                    );
+
+                    ffrag->addDepartureTime(
+                        this->stringToFloat(
+                            model.eval(*((Switch *) child->getNode())->departureTime(ctx, i, ffrag) , false).to_string()
+                        )
+                    );
+                    ffrag->addArrivalTime(
+                        this->stringToFloat(
+                            model.eval(*((Switch *) child->getNode())->arrivalTime(ctx, i, ffrag) , false).to_string()
+                        )
+                    );
+                    ffrag->addScheduledTime(
+                        this->stringToFloat(
+                            model.eval(*((Switch *) child->getNode())->scheduledTime(ctx, i, ffrag) , false).to_string()
+                        )
+                    );
+
+                }
+
+                swt = (Switch *) child->getNode();
+
+                for (Port *port : ((Switch *) swt)->getPorts()) {
+
+                    auto flowFragments = port->getFlowFragments();
+                    if(std::find(flowFragments.begin(), flowFragments.end(), ffrag) == flowFragments.end()) {
+                        continue;
+                    }
+
+                    std::vector<double> listOfStart;
+                    std::vector<double> listOfDuration;
+
+
+                    for(int index = 0; index < ((Switch *) child->getNode())->getPortOf(ffrag->getNextHop())->getCycle()->getNumOfSlots(); index++) {
+                        indexZ3 = std::make_shared<expr>(ctx.int_val(index));
+
+                        listOfStart.push_back(
+                            this->stringToFloat(model.eval(
+                                *((Switch *) child->getNode())
+                                ->getPortOf(ffrag->getNextHop())
+                                ->getCycle()->slotStartZ3(ctx, *ffrag->getFragmentPriorityZ3(), *indexZ3) , false).to_string())
+                        );
+                        listOfDuration.push_back(
+                            this->stringToFloat(model.eval(
+                                *((Switch *) child->getNode())
+                                ->getPortOf(ffrag->getNextHop())
+                                ->getCycle()->slotDurationZ3(ctx, *ffrag->getFragmentPriorityZ3(), *indexZ3) , false).to_string())
+                        );
+                    }
+
+                    port->getCycle()->addSlotUsed(
+                        (int) this->stringToFloat(model.eval(*ffrag->getFragmentPriorityZ3(), false).to_string()),
+                        listOfStart,
+                        listOfDuration
+                    );
+                }
+
+            }
+
+            this->writePathTree(child, model, ctx);
+        }
+    }
+
 }
 
 } // namespace inet
