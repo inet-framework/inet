@@ -166,7 +166,7 @@ void EtherAppClient::sendPacket()
     sprintf(msgname, "req-%d-%ld", getId(), seqNum);
     EV_INFO << "Generating packet `" << msgname << "'\n";
 
-    Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
+    Packet *datapacket = new Packet(msgname);
     const auto& data = makeShared<EtherAppReq>();
 
     long len = *reqLength;
