@@ -17,7 +17,7 @@
 
 package inet.examples.inet.hierarchical99;
 
-import inet.networklayer.configurator.contract.INetworkConfigurator;
+import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth10G;
@@ -106,7 +106,7 @@ network Hierarchical99
         recorder: RoutingTableRecorder {
             @display("p=100,200;is=s");
         }
-        networkConfigurator: <> like INetworkConfigurator {
+        networkConfigurator: <> like IL3NetworkConfigurator {
             @display("p=100,100;is=s");
         }
         area11: Area {
