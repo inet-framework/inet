@@ -186,6 +186,7 @@ simple Ospfv2 like IOspf
         string authenticationKey = default("0x00");  // 0xnn..nn
 
         @display("i=block/network2");
+        @selfMessageKinds(inet::ospfv2::Ospfv2TimerType);
     gates:
         input ipIn @labels(Ipv4ControlInfo/up);
         output ipOut @labels(Ipv4ControlInfo/down);

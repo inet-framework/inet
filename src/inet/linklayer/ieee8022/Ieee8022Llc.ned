@@ -24,8 +24,8 @@ simple Ieee8022Llc like IIeee8022Llc
         @display("i=block/layer");
         @signal[packetDropped](type=inet::Packet);
     gates:
-        input upperLayerIn;
-        output upperLayerOut;
+        input upperLayerIn; // TODO accepts packets and socket commands with  @messageKinds(inet::SocketCommandCode), too
+        output upperLayerOut; // TODO sends packets and socket indications with @messageKinds(inet::SocketStatusInd), too
         input lowerLayerIn;
         output lowerLayerOut;
 }

@@ -46,7 +46,7 @@ simple Bgp like IBgp
         int ebgpMultihop = default(1);
         @display("i=block/network2");
     gates:
-        input socketIn;
-        output socketOut;
+        input socketIn @messageKinds(inet::TcpStatusInd);
+        output socketOut @messageKinds(inet::TcpCommandCode);
 }
 
