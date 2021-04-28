@@ -359,7 +359,6 @@ class INET_API Topology : public cOwnedObject
 
   protected:
     std::vector<Node *> nodes;
-    Node *target;
 
     // note: the purpose of the (unsigned int) cast is that nodes with moduleId==-1 are inserted at the end of the vector
     static bool lessByModuleId(Node *a, Node *b) { return (unsigned int)a->moduleId < (unsigned int)b->moduleId; }
@@ -554,7 +553,7 @@ class INET_API Topology : public cOwnedObject
      * Returns pointer to the ith node in the graph. Node's methods
      * can be used to further examine the node's connectivity, etc.
      */
-    Node *getNode(int i);
+    Node *getNode(int i) const;
 
     /**
      * Returns the graph node which corresponds to the given module in the
@@ -563,7 +562,7 @@ class INET_API Topology : public cOwnedObject
      * network, that is, it was probably created with one of the
      * extract...() functions.
      */
-    Node *getNodeFor(cModule *mod);
+    Node *getNodeFor(cModule *mod) const;
     //@}
 
     /** @name Algorithms to find shortest paths. */
@@ -578,20 +577,14 @@ class INET_API Topology : public cOwnedObject
      * Apply the Dijkstra algorithm to find all shortest paths to the given
      * graph node. The paths found can be extracted via Node's methods.
      */
-    void calculateUnweightedSingleShortestPathsTo(Node *target);
+    void calculateUnweightedSingleShortestPathsTo(Node *target) const;
 
     /**
      * Apply the Dijkstra algorithm to find all shortest paths to the given
      * graph node. The paths found can be extracted via Node's methods.
      * Uses weights in nodes and links.
      */
-    void calculateWeightedSingleShortestPathsTo(Node *target);
-
-    /**
-     * Returns the node that was passed to the most recently called
-     * shortest path finding function.
-     */
-    Node *getTargetNode() const { return target; }
+    void calculateWeightedSingleShortestPathsTo(Node *target) const;
     //@}
 
   protected:
