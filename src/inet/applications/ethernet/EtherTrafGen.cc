@@ -150,10 +150,8 @@ MacAddress EtherTrafGen::resolveDestMacAddress()
 {
     MacAddress destMacAddress;
     const char *destAddress = par("destAddress");
-    if (destAddress[0]) {
-        if (!destMacAddress.tryParse(destAddress))
-            destMacAddress = L3AddressResolver().resolve(destAddress, L3AddressResolver::ADDR_MAC).toMac();
-    }
+    if (destAddress[0])
+        destMacAddress = L3AddressResolver().resolve(destAddress, L3AddressResolver::ADDR_MAC).toMac();
     return destMacAddress;
 }
 
@@ -166,7 +164,7 @@ void EtherTrafGen::sendBurstPackets()
         char msgname[40];
         sprintf(msgname, "pk-%d-%ld", getId(), seqNum);
 
-        Packet *datapacket = new Packet(msgname, IEEE802CTRL_DATA);
+        Packet *datapacket = new Packet(msgname, SOCKET_C_DATA);
         long len = *packetLength;
         const auto& payload = makeShared<ByteCountChunk>(B(len));
         payload->addTag<CreationTimeTag>()->setCreationTime(simTime());
