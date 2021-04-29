@@ -21,8 +21,8 @@ import inet.linklayer.configurator.gatescheduling.base.GateSchedulingConfigurato
 import inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfigurator;
 
 //
-// This module configures the scheduling of all ~PeriodicGate modules in the
-// network to be open all the time.
+// This module provides a trivial gate scheduling algorithm that makes all gates
+// in the network to be open all the time.
 //
 simple AlwaysOpenGateSchedulingConfigurator extends GateSchedulingConfiguratorBase like IGateSchedulingConfigurator
 {
