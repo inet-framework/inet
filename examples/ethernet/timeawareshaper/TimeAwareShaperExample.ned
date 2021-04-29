@@ -27,48 +27,40 @@ module Ecu extends StandardHost
         @display("i=device/card");
 }
 
+module TsnSwitch extends EthernetSwitch
+{
+    parameters:
+        @defaultStatistic("gateStateChanged:vector"; module="eth[0].macLayer.queue.gate[0]");
+}
+
 network TimeAwareShaperExample extends WiredNetworkBase
 {
     parameters:
         @display("bgi=background/car;bgb=1280,720");
-    types:
-        channel Eth1G extends inet.node.ethernet.Eth1G
-        {
-            @display("ls=,3");
-        }
     submodules:
         gateSchedulingConfigurator: <default("")> like IGateSchedulingConfigurator if typename != "" {
             @display("p=100,400;is=s");
         }
-        frontSwitch: EthernetSwitch {
+        frontSwitch: TsnSwitch {
             @display("p=742,350");
         }
-        frontLeftSwitch: EthernetSwitch {
+        frontLeftSwitch: TsnSwitch {
             @display("p=912,276");
         }
-        frontRightSwitch: EthernetSwitch {
+        frontRightSwitch: TsnSwitch {
             @display("p=912,417");
         }
-        rearSwitch: EthernetSwitch {
+        rearSwitch: TsnSwitch {
             @display("p=478,350");
         }
-        rearLeftSwitch: EthernetSwitch {
+        rearLeftSwitch: TsnSwitch {
             @display("p=381,283");
         }
-        rearRightSwitch: EthernetSwitch {
+        rearRightSwitch: TsnSwitch {
             @display("p=381,408");
         }
-        obu: Ecu {
-            @display("p=263,351");
-        }
         hud: Ecu {
-            @display("p=742,429");
-        }
-        steering: Ecu {
             @display("p=742,277");
-        }
-        lidar: Ecu {
-            @display("p=1016,351");
         }
         camera1: Ecu {
             @display("p=289,231");
@@ -95,16 +87,12 @@ network TimeAwareShaperExample extends WiredNetworkBase
             @display("p=850,500");
         }
     connections:
-        frontSwitch.ethg++ <--> Eth1G <--> hud.ethg++;
-        frontSwitch.ethg++ <--> Eth1G { @display("m=m,40,40,40,40"); } <--> rearSwitch.ethg++;
-        frontSwitch.ethg++ <--> Eth1G { @display("m=m,60,60,60,60"); } <--> rearSwitch.ethg++;
-        frontSwitch.ethg++ <--> Eth100M <--> lidar.ethg++;
+        frontSwitch.ethg++ <--> Eth100M <--> hud.ethg++;
+        frontSwitch.ethg++ <--> Eth100M <--> rearSwitch.ethg++;
         frontSwitch.ethg++ <--> Eth100M <--> frontLeftSwitch.ethg++;
         frontSwitch.ethg++ <--> Eth100M <--> frontRightSwitch.ethg++;
-        frontSwitch.ethg++ <--> Eth100M <--> steering.ethg++;
         rearSwitch.ethg++ <--> Eth100M <--> rearLeftSwitch.ethg++;
         rearSwitch.ethg++ <--> Eth100M <--> rearRightSwitch.ethg++;
-        rearSwitch.ethg++ <--> Eth100M <--> obu.ethg++;
         frontRightSwitch.ethg++ <--> Eth100M <--> wheel4.ethg++;
         frontRightSwitch.ethg++ <--> Eth100M <--> camera4.ethg++;
         frontLeftSwitch.ethg++ <--> Eth100M <--> wheel2.ethg++;
