@@ -30,7 +30,6 @@ module Ecu extends StandardHost
 network InVehicleNetworkExample extends WiredNetworkBase
 {
     parameters:
-        bool hasGateSchedulingConfigurator = default(false);
         @display("bgi=background/car;bgb=1280,720");
     types:
         channel Eth1G extends inet.node.ethernet.Eth1G
