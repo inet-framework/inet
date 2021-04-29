@@ -20,6 +20,8 @@ package inet.linklayer.configurator;
 simple TsnConfigurator
 {
     parameters:
+        string streamRedundancyConfiguratorModule = default("streamRedundancyConfigurator");
+        string gateSchedulingConfiguratorModule = default("gateSchedulingConfigurator");
         object configuration = default([]);
         @display("i=block/cogwheel");
 }
