@@ -13,7 +13,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.//
 //
 
-package inet.examples.ethernet.invehicle;
+package inet.examples.ethernet.timeawareshaper;
 
 import inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfigurator;
 import inet.networks.WiredNetworkBase;
