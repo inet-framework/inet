@@ -249,7 +249,7 @@ bool TsnConfigurator::checkLinkFailureProtection(cValueArray *configuration, con
 
 void TsnConfigurator::configureStreams()
 {
-    auto streamRedundancyConfigurator = check_and_cast<StreamRedundancyConfigurator *>(getParentModule()->findModuleByPath(".streamRedundancyConfigurator"));
+    auto streamRedundancyConfigurator = check_and_cast<StreamRedundancyConfigurator *>(findModuleByPath(par("streamRedundancyConfiguratorModule")));
     cValueArray *streamsParameterValue = new cValueArray();
     for (auto& streamConfiguration : streamConfigurations) {
         cValueMap *streamParameterValue = new cValueMap();
@@ -274,7 +274,7 @@ void TsnConfigurator::configureStreams()
     }
     EV_INFO << "Configuring stream configurator" << EV_FIELD(streamRedundancyConfigurator) << EV_FIELD(streamsParameterValue) << EV_ENDL;
     streamRedundancyConfigurator->par("configuration") = streamsParameterValue;
-    auto gateSchedulingConfigurator = getParentModule()->findModuleByPath(".gateSchedulingConfigurator");
+    auto gateSchedulingConfigurator = findModuleByPath(par("gateSchedulingConfiguratorModule"));
     cValueArray *parameterValue = new cValueArray();
     for (int i = 0; i < configuration->size(); i++) {
         cValueMap *streamConfiguration = check_and_cast<cValueMap *>(configuration->get(i).objectValue());
@@ -301,7 +301,6 @@ void TsnConfigurator::configureStreams()
         parameterValue->add(streamParameterValue);
     }
     gateSchedulingConfigurator->par("configuration") = parameterValue;
-    std::cout << parameterValue << "\n";
 }
 
 void TsnConfigurator::collectAllPaths(Node *source, Node *destination, std::vector<std::vector<std::string>>& paths)
