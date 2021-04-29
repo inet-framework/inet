@@ -80,7 +80,7 @@ def fpGroup2Str(fpGroup, separ1=';', separ2=' '):
 
 
 def str2FpGroup(str, separ1=';', separ2=' '):
-    return list(set(x.split(separ2)) for x in str.split(separ1))
+    return list(list(x.split(separ2)) for x in str.split(separ1))
 
 
 def filteringFpGroup(fpGroup, fpFilterList, excludeFpFilterList):
@@ -88,7 +88,7 @@ def filteringFpGroup(fpGroup, fpFilterList, excludeFpFilterList):
         # filtering with fpFilterList
         l1 = list()
         for i in range(len(fpGroup)):
-            s = set(filter(lambda x : x.split('/', 1)[1] in fpFilterList, fpGroup[i]))
+            s = list(filter(lambda x : x.split('/', 1)[1] in fpFilterList, fpGroup[i]))
             if s:
                 l1.append(s)
     else:
@@ -98,7 +98,7 @@ def filteringFpGroup(fpGroup, fpFilterList, excludeFpFilterList):
         # filtering with excludeFpFilterList
         l2 = list()
         for i in range(len(l1)):
-            s = set(filter(lambda x : x.split('/', 1)[1] not in excludeFpFilterList, l1[i]))
+            s = list(filter(lambda x : x.split('/', 1)[1] not in excludeFpFilterList, l1[i]))
             if s:
                 l2.append(s)
     else:
@@ -110,8 +110,22 @@ def filteringFpGroup(fpGroup, fpFilterList, excludeFpFilterList):
 def fpGroupMerge(mFp, otherFp):
     for i in range(len(otherFp)):
         if i >= len(mFp):
-            mFp.append(set())
-        mFp[i].update(otherFp[i])
+            mFp.append(list())
+        s = list(filter(lambda x : x not in mFp[i], otherFp[i]))
+        if s:
+            mFp[i].extend(s)
+        #mFp[i].append(otherFp[i])  # TODO filter to unique
+
+
+def diffFpGroups(actualFpGroup, expectedFpGroup):
+    actFp = actualFpGroup.copy()
+    expFp = expectedFpGroup.copy()
+    for act in actualFpGroup:
+        for exp in expectedFpGroup:
+            if len(set(exp) & set(act)) > 0:
+                actFp.remove(act)
+                expFp.remove(exp)
+    return (actFp, expFp)
 
 
 class FingerprintTestCaseGenerator():
@@ -249,16 +263,17 @@ class FingerprintTestCaseGenerator():
                     newLine = lines[line]
                     errFlag = False
                     for i in range(len(oldFingerprint)):
-                        oldFpStr = ' '.join(oldFingerprint[i])
-                        newFpStr = ' '.join(newFingerprint[i])
-                        pattern = "\\b" + oldFpStr + "\\b"
-                        (newLine, cnt) = re.subn(pattern, newFpStr, newLine)
-                        if (cnt != 1):
-                            errFlag = True
-                    if errFlag:
-                        print("ERROR: Cannot replace fingerprint '%s' to '%s' at '%s' line %d:\n     %s" % (oldFpStr, newFpStr, csvFile, line, lines[line]))
-                    else:
-                        lines[line] = newLine
+                        if len(set(oldFingerprint[i]) & set(newFingerprint[i])) == 0:
+                            oldFpStr = ' '.join(oldFingerprint[i])
+                            newFpStr = ' '.join(newFingerprint[i])
+                            patternStr = "\\b" + oldFpStr + "\\b"
+                            pattern = re.compile(patternStr)
+                            #print("INFO: replace fingerprint '%s' to '%s' at '%s' line %d:\n     %s" % (oldFpStr, newFpStr, csvFile, line, newLine))
+                            (newLine, cnt) = pattern.subn(newFpStr, newLine)
+                            if (cnt != 1):
+                                errFlag = True
+                                print("ERROR: Cannot replace fingerprint '%s' to '%s' at '%s' line %d (cnt: %d):\n     %s" % (oldFpStr, newFpStr, csvFile, line, cnt, lines[line]))
+                    lines[line] = newLine
                 else:
                     print("ERROR: Cannot replace fingerprint '%s' to '%s' at '%s' line %d:\n     %s" % (fpGroup2Str(oldFingerprint), fpGroup2Str(newFingerprint), csvFile, line, lines[line]))
 
@@ -463,9 +478,9 @@ class FingerprintTestCase(SimulationTestCase):
                 fpGroupMerge(computedFingerprints, curFp)
 
         if anyFingerprintBad:
-            fp = fpGroup2Str(computedFingerprints)
             self.storeFingerprintCallback(computedFingerprints)
-            assert False, "some fingerprint mismatch: actual '" + fp + "', expected: '" + fpGroup2Str(self.fingerprint) + "'"
+            (afp, efp) = diffFpGroups(computedFingerprints, self.fingerprint)
+            assert False, "some fingerprint mismatch: actual '" + fpGroup2Str(afp) + "', expected: '" + fpGroup2Str(efp) + "'"
 
     def __str__(self):
         return self.title
