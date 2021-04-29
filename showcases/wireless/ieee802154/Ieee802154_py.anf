@@ -21,7 +21,7 @@ filter_expression = props["filter"]
 
 # query scalar data into dataframe
 try:
-    df = results.get_scalars(filter_expression, include_attrs=True, include_itervars=True, include_runattrs=True)
+    df = results.get_scalars(filter_expression, include_fields=True, include_attrs=True, include_itervars=True, include_runattrs=True)
 except ValueError as e:
     plot.set_warning("Error while querying results: " + str(e))
     exit(1)

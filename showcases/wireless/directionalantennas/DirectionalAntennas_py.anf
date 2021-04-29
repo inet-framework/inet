@@ -562,7 +562,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Reception power [nW]"/>
             <property name="title" value="Isotropic antenna"/>
-            <property name="vector_operations" value="apply:multiply_by, a=1000000000 # You can change the multiplier constant"/>
+            <property name="vector_operations" value="apply:multiply_by(a=1000000000) # You can change the multiplier constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>
@@ -1145,7 +1145,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Reception power [nW]"/>
             <property name="title" value="Parabolic antenna"/>
-            <property name="vector_operations" value="apply:multiply_by, a=1000000000 # You can change the multiplier constant"/>
+            <property name="vector_operations" value="apply:multiply_by(a=1000000000) # You can change the multiplier constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>
@@ -1728,7 +1728,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Reception power [nW]"/>
             <property name="title" value="Dipole antenna"/>
-            <property name="vector_operations" value="apply:multiply_by, a=1000000000 # You can change the multiplier constant"/>
+            <property name="vector_operations" value="apply:multiply_by(a=1000000000) # You can change the multiplier constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>
@@ -2311,7 +2311,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Reception power [nW]"/>
             <property name="title" value="Cosine antenna"/>
-            <property name="vector_operations" value="apply:multiply_by, a=1000000000 # You can change the multiplier constant"/>
+            <property name="vector_operations" value="apply:multiply_by(a=1000000000) # You can change the multiplier constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>
@@ -2894,7 +2894,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Reception power [nW]"/>
             <property name="title" value="Axially symmetric antenna"/>
-            <property name="vector_operations" value="apply:multiply_by, a=1000000000 # You can change the multiplier constant"/>
+            <property name="vector_operations" value="apply:multiply_by(a=1000000000) # You can change the multiplier constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>
@@ -3477,7 +3477,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="'Reception power [nW]"/>
             <property name="title" value="Axially symmetric antenna"/>
-            <property name="vector_operations" value="apply:multiply_by, a=1000000000 # You can change the multiplier constant"/>
+            <property name="vector_operations" value="apply:multiply_by(a=1000000000) # You can change the multiplier constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="true"/>
             <property name="image_export_height" value="4"/>
@@ -4118,7 +4118,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Reception power [nW]"/>
             <property name="title" value="Axially symmetric antenna"/>
-            <property name="vector_operations" value="apply:multiply_by, a=1000000000 # You can change the multiplier constant"/>
+            <property name="vector_operations" value="apply:multiply_by(a=1000000000) # You can change the multiplier constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>
@@ -4729,7 +4729,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Reception power [nW]"/>
             <property name="title" value="All antennas"/>
-            <property name="vector_operations" value="apply:multiply_by, a=1000000000 # You can change the multiplier constant"/>
+            <property name="vector_operations" value="apply:multiply_by(a=1000000000) # You can change the multiplier constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>

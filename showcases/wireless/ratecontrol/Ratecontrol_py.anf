@@ -558,7 +558,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Bitrate [Mbps]"/>
             <property name="title" value="No rate control"/>
-            <property name="vector_operations" value="apply:divide_by, a=1000000 # Divides every value in each vector by a constant"/>
+            <property name="vector_operations" value="apply:divide_by(1000000) # Divides every value in each vector by a constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>
@@ -1140,7 +1140,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Bitrate [Mbps]"/>
             <property name="title" value="AarfRateControl"/>
-            <property name="vector_operations" value="apply:divide_by, a=1000000 # Divides every value in each vector by a constant"/>
+            <property name="vector_operations" value="apply:divide_by(1000000) # Divides every value in each vector by a constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>
@@ -1720,7 +1720,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Application-level throughput [Mbps]"/>
             <property name="title" value="Throughput"/>
-            <property name="vector_operations" value="apply:divide_by, a=1000000 # Divides every value in each vector by a constant"/>
+            <property name="vector_operations" value="apply:divide_by(1000000) # Divides every value in each vector by a constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>
@@ -2300,7 +2300,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Selected bitrate [Mbps]"/>
             <property name="title" value="Bitrate"/>
-            <property name="vector_operations" value="apply:divide_by, a=1000000 # Divides every value in each vector by a constant"/>
+            <property name="vector_operations" value="apply:divide_by(1000000) # Divides every value in each vector by a constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>

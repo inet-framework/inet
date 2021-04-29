@@ -1808,7 +1808,7 @@ plt.savefig('jitter_nonqos.png', dpi=150, transparent=True)
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Instantaneous packet delay variation [ms]"/>
             <property name="title" value=""/>
-            <property name="vector_operations" value="apply:difference # The difference of each value compared to the previous&#10;apply:multiply_by, a=1000 # You can change the multiplier constant"/>
+            <property name="vector_operations" value="apply:difference # The difference of each value compared to the previous&#10;apply:multiply_by(a=1000) # You can change the multiplier constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>
@@ -2443,7 +2443,7 @@ plt.savefig('jitter_qos.png', dpi=150, transparent=True)
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Instantaneous packet delay variation [ms]"/>
             <property name="title" value=""/>
-            <property name="vector_operations" value="apply:difference # The difference of each value compared to the previous&#10;apply:multiply_by, a=1000 # You can change the multiplier constant"/>
+            <property name="vector_operations" value="apply:difference # The difference of each value compared to the previous&#10;multiply_by(a=1000) # You can change the multiplier constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>

@@ -3104,7 +3104,8 @@ df = df.replace(['StatisticLMac'],'LMac')
 
 if confidence_level_str == "none":
     df = pd.pivot_table(df, index=groups, columns=series, values='value')
-    utils.plot_bars(df, props, names)
+    print("df:\n",df)
+    utils.plot_bars(df, props)
 else:
     confidence_level = float(confidence_level_str[:-1])/100
     conf_int = lambda values: utils.confidence_interval(confidence_level, values) if len(values) > 1 else math.nan
@@ -3829,7 +3830,7 @@ confidence_level_str = props["confidence_level"] if "confidence_level" in props 
 
 if confidence_level_str == "none":
     df = pd.pivot_table(df, index=groups, columns=series, values='value')
-    utils.plot_bars(df, props, names)
+    utils.plot_bars(df, props)
 else:
     confidence_level = float(confidence_level_str[:-1])/100
     conf_int = lambda values: utils.confidence_interval(confidence_level, values) if len(values) > 1 else math.nan
@@ -4548,7 +4549,7 @@ ax.legend(handles, newlabels, loc=1, markerscale=2)
 
 if confidence_level_str == "none":
     df = pd.pivot_table(df, index=groups, columns=series, values='value')
-    utils.plot_bars(df, props, names)
+    utils.plot_bars(df, props)
 else:
     confidence_level = float(confidence_level_str[:-1])/100
     conf_int = lambda values: utils.confidence_interval(confidence_level, values) if len(values) > 1 else math.nan

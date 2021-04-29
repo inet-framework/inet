@@ -1216,7 +1216,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Throughput [Mbps]"/>
             <property name="title" value=""/>
-            <property name="vector_operations" value="apply:divide_by, a=1000000 # Divides every value in each vector by a constant&#10;apply:slidingwinavg, window_size=10 # The average of the last window_size values"/>
+            <property name="vector_operations" value="apply: divide_by(1000000) # Divides every value in each vector by a constant&#10;apply: slidingwinavg(window_size=10) # The average of the last window_size values"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>
@@ -1861,7 +1861,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value=""/>
             <property name="title" value=""/>
-            <property name="vector_operations" value="apply:multiply_by, a=1000 # You can change the multiplier constant"/>
+            <property name="vector_operations" value="apply:multiply_by(a=1000) # You can change the multiplier constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>

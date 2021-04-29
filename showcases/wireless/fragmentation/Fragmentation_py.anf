@@ -1215,7 +1215,7 @@ plt.savefig('throughput.png', transparent=True, dpi=150, bbox_inches='tight')
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Throughput [Mbps]"/>
             <property name="title" value=""/>
-            <property name="vector_operations" value="apply:divide_by, a=1000000 # Divides every value in each vector by a constant"/>
+            <property name="vector_operations" value="apply:divide_by(a=1000000) # Divides every value in each vector by a constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>
@@ -1262,7 +1262,7 @@ xaxis_itervar = props["xaxis_itervar"]
 iso_itervar = props["iso_itervar"]
 
 # query data into a data frame
-df = results.get_scalars(filter_expression, include_runattrs=True, include_attrs=True, include_itervars=True)
+df = results.get_scalars(filter_expression, include_fields=True, include_runattrs=True, include_attrs=True, include_itervars=True)
 
 if df.empty:
     plot.set_warning("The result filter returned no data.")
@@ -1993,7 +1993,7 @@ xaxis_itervar = props["xaxis_itervar"]
 iso_itervar = props["iso_itervar"]
 
 # query data into a data frame
-df = results.get_scalars(filter_expression, include_runattrs=True, include_attrs=True, include_itervars=True)
+df = results.get_scalars(filter_expression, include_fields=True, include_runattrs=True, include_attrs=True, include_itervars=True)
 
 if df.empty:
     plot.set_warning("The result filter returned no data.")
@@ -2726,7 +2726,7 @@ xaxis_itervar = props["xaxis_itervar"]
 iso_itervar = props["iso_itervar"]
 
 # query data into a data frame
-df = results.get_scalars(filter_expression, include_runattrs=True, include_attrs=True, include_itervars=True)
+df = results.get_scalars(filter_expression, include_fields=True, include_runattrs=True, include_attrs=True, include_itervars=True)
 
 if df.empty:
     plot.set_warning("The result filter returned no data.")
@@ -3455,14 +3455,14 @@ filter_expression_snir = """(module =~ "FragmentationShowcase.wifiHost2.wlan[0].
 # The data is returned as a Pandas DataFrame
 
 # Get the minSnir:histogram results
-df_snir = results.get_scalars(filter_expression_snir, include_attrs=True, include_itervars=True, include_runattrs=True)
+df_snir = results.get_scalars(filter_expression_snir, include_fields=True, include_attrs=True, include_itervars=True, include_runattrs=True)
 # The mean column of this data frame will be the x coordinate
 df_snir = df_snir.pivot_table(index='txPower', columns='experiment', values='value')
 print("SNIR:")
 print(df_snir)
 
 # Get the throughput vectors
-df_tp = results.get_scalars(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True)
+df_tp = results.get_scalars(filter_expression, include_fields=True, include_attrs=True, include_runattrs=True, include_itervars=True)
 # Apply mean to vector values to reduce each vector to a single number
 # and add it to a new column (mean)
 #df_tp['mean'] = df_tp['vecvalue'].apply(np.mean)
