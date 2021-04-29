@@ -21,9 +21,9 @@ import inet.linklayer.configurator.gatescheduling.base.GateSchedulingConfigurato
 import inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfigurator;
 
 //
-// This module configures the scheduling of all ~PeriodicGate modules in the
-// network according to the to be reserved streams described by the configuration
-// parameter. The streams are reserved in the order of priority (0 being the highest).
+// This module provides an gate scheduling algorithm that eagerly reserves time
+// slots for the configured streams in the order of their priority (0 being the
+// highest).
 //
 simple SimpleGateSchedulingConfigurator extends GateSchedulingConfiguratorBase like IGateSchedulingConfigurator
 {

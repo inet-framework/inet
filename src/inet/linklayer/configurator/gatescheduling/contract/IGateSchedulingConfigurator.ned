@@ -19,6 +19,9 @@ package inet.linklayer.configurator.gatescheduling.contract;
 
 import inet.networklayer.configurator.contract.INetworkConfigurator;
 
+//
+// This module interface is implemented by gate scheduling configurator modules.
+//
 moduleinterface IGateSchedulingConfigurator extends INetworkConfigurator
 {
     parameters:
