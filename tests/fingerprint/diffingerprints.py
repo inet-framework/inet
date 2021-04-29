@@ -16,12 +16,12 @@ def computeUniqueFingerprints(fingerprints):
 
 def readFingerprints1(eventlogFile):
     "RegExp version"
-    regExp = re.compile("^E # (\d+) t .+ m \d+ ce \d+ msg \d+ f ([0-z]{4}-[0-z]{4})")
+    regExp = re.compile("^E # ([0-9]+) t ((?:[0-9]*\.)?[0-9]+) m [0-9]+ ce [0-9]+ msg [0-9]+ f (?:\"([^\"]*)\"|(\S+))$")
     fingerprints = list()
     for line in eventlogFile:
         match = regExp.match(line)
         if match:
-            fingerprint = match.group(2)
+            fingerprint = match.group(3)
             fingerprints.append(fingerprint)
     return fingerprints
 
@@ -62,3 +62,4 @@ print(diffingerprint(uniqueElog1Fingerprints, uniqueElog2Fingerprints))
 
 elog1File.close()
 elog2File.close()
+
