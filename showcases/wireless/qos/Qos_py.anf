@@ -3038,7 +3038,7 @@ plt.savefig('throughput_nonqos_.png', dpi=150, transparent=True)]]>
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Application-level throughput [Mbps]"/>
             <property name="title" value=""/>
-            <property name="vector_operations" value="apply:divide_by, a=1000000 # Divides every value in each vector by a constant"/>
+            <property name="vector_operations" value="apply:divide_by(1000000) # Divides every value in each vector by a constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>
@@ -3637,7 +3637,7 @@ plt.savefig('throughput_qos_.png', dpi=150, transparent=True)]]>
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Application-level throughput [Mbps]"/>
             <property name="title" value=""/>
-            <property name="vector_operations" value="apply:divide_by, a=1000000 # Divides every value in each vector by a constant"/>
+            <property name="vector_operations" value="apply:divide_by(1000000) # Divides every value in each vector by a constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="4"/>
