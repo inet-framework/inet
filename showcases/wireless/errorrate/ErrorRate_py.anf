@@ -23,7 +23,7 @@ xaxis_itervar = props["xaxis_itervar"]
 iso_itervar = props["iso_itervar"]
 
 # query data into a data frame
-df = results.get_scalars(filter_expression, include_runattrs=True, include_attrs=True, include_itervars=True)
+df = results.get_scalars(filter_expression, include_fields = True, include_runattrs=True, include_attrs=True, include_itervars=True)
 
 if df.empty:
     plot.set_warning("The result filter returned no data.")
@@ -745,8 +745,8 @@ filter_expression_snir = """module =~ "ErrorRateShowcase.destinationHost.wlan[*]
 # query vector data into a data frame
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
-    df_per = results.get_scalars(filter_expression_per, include_attrs=True, include_itervars=True, include_runattrs=True)
-    df_snir = results.get_scalars(filter_expression_snir, include_attrs=True, include_itervars=True, include_runattrs=True)
+    df_per = results.get_scalars(filter_expression_per, include_fields = True, include_attrs=True, include_itervars=True, include_runattrs=True)
+    df_snir = results.get_scalars(filter_expression_snir, include_fields = True, include_attrs=True, include_itervars=True, include_runattrs=True)
 except ValueError as e:
     plot.set_warning("Error while querying results: " + str(e))
     exit(1)
@@ -1374,7 +1374,7 @@ xaxis_itervar = props["xaxis_itervar"]
 iso_itervar = props["iso_itervar"]
 
 # query data into a data frame
-df = results.get_scalars(filter_expression, include_runattrs=True, include_attrs=True, include_itervars=True)
+df = results.get_scalars(filter_expression, include_fields = True, include_runattrs=True, include_attrs=True, include_itervars=True)
 
 if df.empty:
     plot.set_warning("The result filter returned no data.")
@@ -2092,7 +2092,7 @@ xaxis_itervar = props["xaxis_itervar"]
 iso_itervar = props["iso_itervar"]
 
 # query data into a data frame
-df = results.get_scalars(filter_expression, include_runattrs=True, include_attrs=True, include_itervars=True)
+df = results.get_scalars(filter_expression, include_fields = True, include_runattrs=True, include_attrs=True, include_itervars=True)
 
 print(df)
 print(df['value'][0])
