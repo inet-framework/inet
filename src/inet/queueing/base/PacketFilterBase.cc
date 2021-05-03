@@ -173,6 +173,7 @@ void PacketFilterBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bo
 
 bool PacketFilterBase::canPullSomePacket(cGate *gate) const
 {
+    Enter_Method("canPullSomePacket");
     auto providerGate = inputGate->getPathStartGate();
     while (true) {
         auto packet = provider->canPullPacket(providerGate);
