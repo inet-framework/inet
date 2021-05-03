@@ -28,85 +28,94 @@ using namespace units::values;
 class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
 {
   protected:
+    // input parameters for the gate scheduler
     class INET_API Input
     {
       public:
         class Port;
 
+        // all network nodes
         class NetworkNode
         {
           public:
-            std::vector<Port *> ports;
-            cModule *module = nullptr;
+            std::vector<Port *> ports; // list of network interfaces
+            cModule *module = nullptr; // corresponding OMNeT++ module
 
           public:
             virtual ~NetworkNode() {}
         };
 
+        // an end device (network node) that runs applications
         class Device : public NetworkNode
         {
         };
 
+        // an application that generates traffic
         class Application
         {
           public:
-            cModule *module = nullptr;
-            int priority = -1;
-            b packetLength = b(-1);
-            simtime_t packetInterval = -1;
-            simtime_t maxLatency = -1;
-            Device *device = nullptr;
+            cModule *module = nullptr; // corresponding OMNeT++ module
+            int priority = -1; // traffic class (index of subqueue)
+            b packetLength = b(-1); // packet size in bits
+            simtime_t packetInterval = -1; // packet inter-arrival time in seconds
+            simtime_t maxLatency = -1; // maximum allowed latency in seconds
+            Device *device = nullptr; // the device where the application is running
         };
 
+        // parameters for a gate scheduling cycle
         class Cycle
         {
           public:
-            std::string name;
-            simtime_t maxCycleTime = NaN;
-            simtime_t maxSlotDuration = NaN;
+            std::string name; // for user identification
+            simtime_t maxCycleTime = -1; // maximum length of the cycle
+            simtime_t maxSlotDuration = -1; // maximum slot duration in the cycle
         };
 
+        // network interface
         class Port
         {
           public:
-            cModule *module = nullptr;
-            int numPriorities = -1;
-            bps datarate = bps(NaN);
-            simtime_t propagationTime = NaN;
-            b maxPacketLength = b(-1);
-            simtime_t guardBand = NaN;
-            Cycle *cycle = nullptr;
-            NetworkNode *startNode = nullptr;
-            NetworkNode *endNode = nullptr;
+            cModule *module = nullptr; // corresponding OMNeT++ module
+            int numPriorities = -1; // number of traffic classes (number of subqueues)
+            bps datarate = bps(NaN); // transmission bitrate in bits per second
+            simtime_t propagationTime = -1; // time to travel to the connected port in seconds
+            b maxPacketLength = b(-1); // maximum packet size in bits
+            simtime_t guardBand = -1; // guard band in seconds
+            Cycle *cycle = nullptr; // the cycle parameters
+            NetworkNode *startNode = nullptr; // the network node where this port is
+            NetworkNode *endNode = nullptr; // the network node to which this port is connected
         };
 
+        // an Ethernet switch
         class Switch : public NetworkNode
         {
         };
 
+        // part of a flow's paths
         class PathFragment
         {
           public:
-            std::vector<NetworkNode *> networkNodes;
+            std::vector<NetworkNode *> networkNodes; // list of network nodes the path goes through
         };
 
+        // a flow of packets from the application of the start device to the end device
         class Flow
         {
           public:
-            std::string name;
-            Application *startApplication = nullptr;
-            Device *endDevice = nullptr;
-            std::vector<PathFragment *> pathFragments;
+            std::string name; // for user identification
+            Application *startApplication = nullptr; // the application that generates the packets
+            Device *endDevice = nullptr; // the device where the flow ends
+            std::vector<PathFragment *> pathFragments; // list of path fragments (may use redundancy)
         };
 
       public:
-        std::vector<Device *> devices;
-        std::vector<Application *> applications;
-        std::vector<Cycle *> cycles;
-        std::vector<Port *> ports;
-        std::vector<Switch *> switches;
-        std::vector<Flow *> flows;
-        std::vector<NetworkNode *> networkNodes;
+        std::vector<Device *> devices; // list of end devices in the network
+        std::vector<Application *> applications; // list of applications in the network
+        std::vector<Cycle *> cycles; // all cycles in the network
+        std::vector<Port *> ports; // all ports of all switches in the network
+        std::vector<Switch *> switches; // list of switches in the network
+        std::vector<Flow *> flows; // list of traffic flows in the network
+        std::vector<NetworkNode *> networkNodes; // list of all network nodes (devices and switches)
 
       public:
         ~Input() {
@@ -161,23 +170,25 @@ class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
         }
     };
 
+    // output parameters for the gate scheduler
     class INET_API Output
     {
       public:
+        // a gate scheduling for a specific priority (traffic class) of a specific port
         class Schedule
         {
           public:
-            Input::Port *port = nullptr;
-            int priority = -1;
-            simtime_t cycleStart = NaN;
-            simtime_t cycleDuration = NaN;
-            std::vector<simtime_t> slotStarts;
-            std::vector<simtime_t> slotDurations;
+            Input::Port *port = nullptr; // reference to the port
+            int priority = -1; // index of the subqueue
+            simtime_t cycleStart = -1; // start of the cycle in seconds
+            simtime_t cycleDuration = -1; // duration of the cycle in seconds
+            std::vector<simtime_t> slotStarts; // start times of slots in seconds
+            std::vector<simtime_t> slotDurations; // durations of slots in seconds
         };
 
       public:
-        std::map<Input::Port *, std::vector<Schedule *>> gateSchedules;
-        std::map<Input::Application *, simtime_t> applicationStartTimes;
+        std::map<Input::Port *, std::vector<Schedule *>> gateSchedules; // maps ports to schedules per priority (traffic class)
+        std::map<Input::Application *, simtime_t> applicationStartTimes; // maps applications to start times
 
       public:
         ~Output() {
