@@ -27,7 +27,7 @@ void PacketGateBase::initialize(int stage)
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         bitrate = bps(par("bitrate"));
-        guardBand = par("guardBand");
+        extraDuration = par("extraDuration");
         getDisplayString().setTagArg("i", 2, 20);
         WATCH(isOpen_);
     }
