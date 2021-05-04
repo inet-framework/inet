@@ -99,6 +99,10 @@ Creating VLAN policies
 In Ethernet switches, VLAN policies specify how packets are assigned to VLANs, based on incoming and outgoing interfaces.
 VLAN policies can be created using the :ned:`VlanPolicyLayer` submodule, which is a submodule of the bridging layer in :ned:`EthernetSwitch`. The bridging layer contains optional submodules such as **TODO**
 
+In Ethernet switches, VLAN policies specify the set of allowed VLAN IDs at various incoming and outgoing interfaces, and can add/alter VLAN tags.
+
+In Ethernet switches, VLAN policies specify the set of allowed VLAN IDs at various incoming and outgoing interfaces, and can map vlan ids
+
 **TODO** what is the bridging layer and defaults ?
 
 :ned:`EthernetSwitch` does not have a VLAN policy layer by default. To add it, the ``vlanPolicy`` submodule's type needs to be specified.
