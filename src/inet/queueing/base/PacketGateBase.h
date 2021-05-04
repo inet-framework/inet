@@ -34,6 +34,7 @@ class INET_API PacketGateBase : public PacketFlowBase, public virtual IPacketGat
 
   protected:
     bps bitrate = bps(NaN);
+    b extraLength = b(NaN);
     simtime_t extraDuration;
 
     bool isOpen_ = false;

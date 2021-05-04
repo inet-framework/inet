@@ -27,6 +27,7 @@ simple PacketGateBase extends PacketFlowBase
     parameters:
         displayStringTextFormat = default("passed %p pk (%l)");
         double bitrate @unit(bps) = default(nan bps);
+        int extraLength @unit(b) = default(0b);
         double extraDuration @unit(s) = default(0s);
         @class(PacketGateBase);
         @display("i=block/cogwheel");
