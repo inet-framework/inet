@@ -17,12 +17,22 @@
 
 package inet.linklayer.configurator;
 
-simple StreamRedundancyConfigurator
+import inet.networklayer.configurator.contract.INetworkConfigurator;
+
+//
+// This module provides Time-Sensitive Networking (TSN) static stream redundancy
+// configuration. The module automaticall configures all the necessary modules
+// related to stream splitting, stream merging and stream filtering in all network
+// nodes. The configuration parameter specifies the streams with a set of path
+// fragments.
+//
+simple StreamRedundancyConfigurator like INetworkConfigurator
 {
     parameters:
-        int minVlanId = default(0);
-        int maxVlanId = default(4095);
-        object configuration = default([]);
+        int minVlanId = default(0); // lowest available VLAN ID
+        int maxVlanId = default(4095); // highest available VLAN ID
+        object configuration = default([]); // a vector of objects (e.g. [{...}, {...}]) where each object has the following fields: name, source, destination, packetFilter, paths
+                                            // here is an example: [{name: "S1", packetFilter: "*", source: "source", destination: "destination", paths: [["s1", "s2a", "s3a"], ["s1", "s2b", "s3b"], ["s1", "s2a", "s2b", "s3b"], ["s1", "s2b", "s2a", "s3a"]]}]
         @display("i=block/cogwheel");
 }
 
