@@ -1,5 +1,8 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2021 OpenSim Ltd. and the original authors
+//
+// This file is partly copied from the following project with the explicit
+// permission from the authors: https://github.com/ACassimiro/TSNsched
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
