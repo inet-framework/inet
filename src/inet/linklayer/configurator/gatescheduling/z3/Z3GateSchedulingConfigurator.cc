@@ -161,9 +161,9 @@ void Z3GateSchedulingConfigurator::configureNetwork(Network *net, context& ctx, 
 
 void Z3GateSchedulingConfigurator::generateSchedule(Network *net) const
 {
-//    std::cout << "Z3 Major Version: " << version.getMajor() << std::endl;
-//    std::cout << "Z3 Full Version: " << version.getString() << std::endl;
-//    std::cout << "Z3 Full Version std::string: " << version.getFullVersion() << std::endl;
+//    EV_DEBUG << "Z3 Major Version: " << version.getMajor() << std::endl;
+//    EV_DEBUG << "Z3 Full Version: " << version.getString() << std::endl;
+//    EV_DEBUG << "Z3 Full Version std::string: " << version.getFullVersion() << std::endl;
     config cfg;
     cfg.set("model", "true");
     context *ctx = new context(cfg);
@@ -186,43 +186,43 @@ void Z3GateSchedulingConfigurator::generateSchedule(Network *net) const
 //           model model = nullptr;
 //           LocalTime time = LocalTime.now();
 
-    std::cout << "Rules set. Checking solver." << std::endl;
-    std::cout << solver << std::endl;
-//           std::cout << std::string("Current time of the day: ") << time << std::endl;
+    EV_INFO << "Rules set. Checking solver." << std::endl;
+    EV_INFO << solver << std::endl;
+//           EV_DEBUG << std::string("Current time of the day: ") << time << std::endl;
 
     if (sat == solver.check())
     {
         model model = solver.get_model();
-        std::cout << model << std::endl;
+        EV_INFO << model << std::endl;
         expr v = model.eval(*switch1CycDuration, false);
 //               if (v != nullptr)
 //               {
-            std::cout << "Model generated." << std::endl;
+            EV_INFO << "Model generated." << std::endl;
 
 //                   try {
 //                       PrintWriter out = new PrintWriter("log.txt");
 
-                std::cout << "SCHEDULER LOG:\n\n" << std::endl;
+                EV_DEBUG << "SCHEDULER LOG:\n\n" << std::endl;
 
-                std::cout << "SWITCH LIST:" << std::endl;
+                EV_DEBUG << "SWITCH LIST:" << std::endl;
 
                 // For every switch in the network, store its information in the log
                 for(Switch *auxSwt : net->getSwitches()) {
-                    std::cout << std::string("  Switch name: ") << auxSwt->getName();
-//                        std::cout << std::string("    Max packet size: ") << auxSwt->getMaxPacketSize();
-//                        std::cout << std::string("    Port speed: ") << auxSwt->getPortSpeed();
-//                        std::cout << std::string("    Time to Travel: ") << auxSwt->getTimeToTravel();
-//                        std::cout << std::string("    Transmission time: ") << auxSwt->getTransmissionTime();
-//                           std::cout << "    Cycle information -" << std::endl;
-//                           std::cout << std::string("        First cycle start: ") + model.eval(((TSNSwitch *)auxSwt).getCycleStart(), false));
-//                           std::cout << std::string("        Cycle duration: ") + model.eval(((TSNSwitch *)auxSwt).getCycleDuration(), false));
-                    std::cout << "" << std::endl;
+                    EV_DEBUG << std::string("  Switch name: ") << auxSwt->getName();
+//                        EV_DEBUG << std::string("    Max packet size: ") << auxSwt->getMaxPacketSize();
+//                        EV_DEBUG << std::string("    Port speed: ") << auxSwt->getPortSpeed();
+//                        EV_DEBUG << std::string("    Time to Travel: ") << auxSwt->getTimeToTravel();
+//                        EV_DEBUG << std::string("    Transmission time: ") << auxSwt->getTransmissionTime();
+//                           EV_DEBUG << "    Cycle information -" << std::endl;
+//                           EV_DEBUG << std::string("        First cycle start: ") + model.eval(((TSNSwitch *)auxSwt).getCycleStart(), false));
+//                           EV_DEBUG << std::string("        Cycle duration: ") + model.eval(((TSNSwitch *)auxSwt).getCycleDuration(), false));
+                    EV_DEBUG << "" << std::endl;
                     /*
                     for (Port port : ((TSNSwitch *)auxSwt).getPorts()) {
-                        std::cout << std::string("        Port name (Virtual Index): ") + port->getName());
-                        std::cout << std::string("        First cycle start: ") + model.eval(port->getCycle()->getFirstCycleStartZ3(), false));
-                        std::cout << std::string("        Cycle duration: ") + model.eval(port->getCycle()->getCycleDurationZ3(), false));
-                        std::cout << "" << std::endl;
+                        EV_DEBUG << std::string("        Port name (Virtual Index): ") + port->getName());
+                        EV_DEBUG << std::string("        First cycle start: ") + model.eval(port->getCycle()->getFirstCycleStartZ3(), false));
+                        EV_DEBUG << std::string("        Cycle duration: ") + model.eval(port->getCycle()->getCycleDurationZ3(), false));
+                        EV_DEBUG << "" << std::endl;
                     }
                     */
 
@@ -249,16 +249,16 @@ void Z3GateSchedulingConfigurator::generateSchedule(Network *net) const
 
                 }
 
-                std::cout << "" << std::endl;
+                EV_DEBUG << "" << std::endl;
 
-                std::cout << "FLOW LIST:" << std::endl;
+                EV_DEBUG << "FLOW LIST:" << std::endl;
                 //For every flow in the network, store its information in the log
                 for(Flow *f : net->getFlows()) {
-                    std::cout << std::string("  Flow name: ") + f->getName() << std::endl;
-                    // std::cout << std::string("    Flow priority: ") + model.eval(f->getFlowPriority(), false) << std::endl;
-                    std::cout << std::string("    Start dev. first t1: ") << model.eval(*f->getStartDevice()->getFirstT1TimeZ3(), false).to_string() << std::endl;
-                    std::cout << std::string("    Start dev. HC: ") << model.eval(*f->getStartDevice()->getHardConstraintTimeZ3(), false).to_string() << std::endl;
-                    std::cout << std::string("    Start dev. packet periodicity: ") << model.eval(*f->getStartDevice()->getPacketPeriodicityZ3(), false).to_string() << std::endl;
+                    EV_DEBUG << std::string("  Flow name: ") + f->getName() << std::endl;
+                    // EV_DEBUG << std::string("    Flow priority: ") + model.eval(f->getFlowPriority(), false) << std::endl;
+                    EV_DEBUG << std::string("    Start dev. first t1: ") << model.eval(*f->getStartDevice()->getFirstT1TimeZ3(), false).to_string() << std::endl;
+                    EV_DEBUG << std::string("    Start dev. HC: ") << model.eval(*f->getStartDevice()->getHardConstraintTimeZ3(), false).to_string() << std::endl;
+                    EV_DEBUG << std::string("    Start dev. packet periodicity: ") << model.eval(*f->getStartDevice()->getPacketPeriodicityZ3(), false).to_string() << std::endl;
 
                     f->setFlowFirstSendingTime(stringToFloat(model.eval(*f->getStartDevice()->getFirstT1TimeZ3(), false).to_string()));
 
@@ -292,27 +292,27 @@ void Z3GateSchedulingConfigurator::generateSchedule(Network *net) const
                         pathTree = f->getPathTree();
                         pathNode = pathTree->getRoot();
 
-                        std::cout << "    Flow type: Multicast" << std::endl;
+                        EV_DEBUG << "    Flow type: Multicast" << std::endl;
                         std::vector<PathNode *> *auxNodes;
                         std::vector<FlowFragment *> *auxFlowFragments;
                         int auxCount = 0;
 
-                        std::cout << "    List of leaves: ";
+                        EV_DEBUG << "    List of leaves: ";
                         for(PathNode *node : *f->getPathTree()->getLeaves()) {
-                            std::cout << ((Device *) node->getNode())->getName() + std::string(", ");
+                            EV_DEBUG << ((Device *) node->getNode())->getName() + std::string(", ");
                         }
-                        std::cout << "" << std::endl;
+                        EV_DEBUG << "" << std::endl;
                         for(PathNode *node : *f->getPathTree()->getLeaves()) {
                             auxNodes = f->getNodesFromRootToNode((Device *) node->getNode());
                             auxFlowFragments = f->getFlowFromRootToNode((Device *) node->getNode());
 
-                            std::cout << std::string("    Path to ") + ((Device *) node->getNode())->getName() + std::string(": ");
+                            EV_DEBUG << std::string("    Path to ") + ((Device *) node->getNode())->getName() + std::string(": ");
                             auxCount = 0;
                             for(PathNode *auxNode : *auxNodes) {
                                 if(dynamic_cast<Device *>(auxNode->getNode())) {
-                                    std::cout << ((Device *) auxNode->getNode())->getName() + std::string(", ");
+                                    EV_DEBUG << ((Device *) auxNode->getNode())->getName() + std::string(", ");
                                 } else if (dynamic_cast<Switch *>(auxNode->getNode())) {
-                                    std::cout <<
+                                    EV_DEBUG <<
                                         ((Switch *) auxNode->getNode())->getName() +
                                         std::string("(") +
                                         auxFlowFragments->at(auxCount)->getName() +
@@ -321,15 +321,15 @@ void Z3GateSchedulingConfigurator::generateSchedule(Network *net) const
                                 }
 
                             }
-                            std::cout << "" << std::endl;
+                            EV_DEBUG << "" << std::endl;
                         }
-                        std::cout << "" << std::endl;
+                        EV_DEBUG << "" << std::endl;
 
                         //Start the data storing and log printing process from the root
                         this->writePathTree(pathNode, model, *ctx);
                     }
 
-                    std::cout << "" << std::endl;
+                    EV_DEBUG << "" << std::endl;
 
                 }
 //
@@ -339,11 +339,11 @@ void Z3GateSchedulingConfigurator::generateSchedule(Network *net) const
 
 //               } else
 //               {
-//                   std::cout << "Failed to evaluate" << std::endl;
+//                   EV_DEBUG << "Failed to evaluate" << std::endl;
 //               }
     } else
     {
-        std::cout << solver.unsat_core() << std::endl;
+        EV_WARN << solver.unsat_core() << std::endl;
         throw cRuntimeError("The specified constraints might not be satisfiable.");
     }
 }
@@ -368,7 +368,7 @@ void Z3GateSchedulingConfigurator::writePathTree(PathNode *pathNode, model& mode
     std::shared_ptr<expr> indexZ3 = nullptr;
 
     if(dynamic_cast<Device *>(pathNode->getNode()) && (pathNode->getParent() != nullptr)) {
-        std::cout << "    [END OF BRANCH]" << std::endl;
+        EV_DEBUG << "    [END OF BRANCH]" << std::endl;
 
     }
 
@@ -386,20 +386,20 @@ void Z3GateSchedulingConfigurator::writePathTree(PathNode *pathNode, model& mode
         if(dynamic_cast<Switch *>(child->getNode())) {
 
             for(FlowFragment *ffrag : child->getFlowFragments()) {
-                std::cout << std::string("    Fragment name: ") << ffrag->getName() << std::endl;
-                std::cout << std::string("        Fragment node: ") << ffrag->getNodeName() << std::endl;
-                std::cout << std::string("        Fragment next hop: ") << ffrag->getNextHop() << std::endl;
-                std::cout << std::string("        Fragment priority: ") << model.eval(*ffrag->getFragmentPriorityZ3(), false) << std::endl;
+                EV_DEBUG << std::string("    Fragment name: ") << ffrag->getName() << std::endl;
+                EV_DEBUG << std::string("        Fragment node: ") << ffrag->getNodeName() << std::endl;
+                EV_DEBUG << std::string("        Fragment next hop: ") << ffrag->getNextHop() << std::endl;
+                EV_DEBUG << std::string("        Fragment priority: ") << model.eval(*ffrag->getFragmentPriorityZ3(), false) << std::endl;
                 for(int index = 0; index < ((Switch *) child->getNode())->getPortOf(ffrag->getNextHop())->getCycle()->getNumOfSlots(); index++) {
                     indexZ3 = std::make_shared<expr>(ctx.int_val(index));
-                    std::cout << std::string("        Fragment slot start ") << index << std::string(": ")
+                    EV_DEBUG << std::string("        Fragment slot start ") << index << std::string(": ")
                             << this->stringToFloat(
                                     model.eval(*((Switch *) child->getNode())
                                            ->getPortOf(ffrag->getNextHop())
                                            ->getCycle()
                                            ->slotStartZ3(ctx, *ffrag->getFragmentPriorityZ3(), *indexZ3)
                                            , false).to_string()) << std::endl;
-                    std::cout << std::string("        Fragment slot duration ") << index << std::string(" : ")
+                    EV_DEBUG << std::string("        Fragment slot duration ") << index << std::string(" : ")
                              << this->stringToFloat(
                                  model.eval(*((Switch *) child->getNode())
                                             ->getPortOf(ffrag->getNextHop())
@@ -409,22 +409,22 @@ void Z3GateSchedulingConfigurator::writePathTree(PathNode *pathNode, model& mode
 
                 }
 
-                std::cout << "        Fragment times-" << std::endl;
+                EV_DEBUG << "        Fragment times-" << std::endl;
                 ffrag->getParent()->addToTotalNumOfPackets(ffrag->getNumOfPacketsSent());
 
                 for(int i = 0; i < ffrag->getParent()->getNumOfPacketsSent(); i++) {
-                        std::cout << std::string("On " + ffrag->getName() + std::string(" - ")) <<
+                        EV_DEBUG << std::string("On " + ffrag->getName() + std::string(" - ")) <<
                          ((Switch *)child->getNode())->departureTime(ctx, i, ffrag)->to_string() << std::string(" - ") <<
                            ((Switch *)child->getNode())->scheduledTime(ctx, i, ffrag)->to_string() << std::endl;
-                    // std::cout << ((TSNSwitch *)child->getNode())->departureTime(ctx, i, ffrag).to_string() << std::endl;
-                    // std::cout << ((TSNSwitch *)child->getNode())->arrivalTime(ctx, i, ffrag).to_string() << std::endl;
-                    // std::cout << ((TSNSwitch *)child->getNode())->scheduledTime(ctx, i, ffrag).to_string() << std::endl;
+                    // EV_DEBUG << ((TSNSwitch *)child->getNode())->departureTime(ctx, i, ffrag).to_string() << std::endl;
+                    // EV_DEBUG << ((TSNSwitch *)child->getNode())->arrivalTime(ctx, i, ffrag).to_string() << std::endl;
+                    // EV_DEBUG << ((TSNSwitch *)child->getNode())->scheduledTime(ctx, i, ffrag).to_string() << std::endl;
 
                     if(i < ffrag->getParent()->getNumOfPacketsSent()) {
-                        std::cout << std::string("          (") << std::to_string(i) << std::string(") Fragment departure time: ") << this->stringToFloat(model.eval(*((Switch *) child->getNode())->departureTime(ctx, i, ffrag), false).to_string()) << std::endl;
-                        std::cout << std::string("          (") << std::to_string(i) << std::string(") Fragment arrival time: ") << this->stringToFloat(model.eval(*((Switch *) child->getNode())->arrivalTime(ctx, i, ffrag), false).to_string()) << std::endl;
-                        std::cout << std::string("          (") << std::to_string(i) << std::string(") Fragment scheduled time: ") << this->stringToFloat(model.eval(*((Switch *) child->getNode())->scheduledTime(ctx, i, ffrag), false).to_string()) << std::endl;
-                        std::cout << "          ----------------------------" << std::endl;
+                        EV_DEBUG << std::string("          (") << std::to_string(i) << std::string(") Fragment departure time: ") << this->stringToFloat(model.eval(*((Switch *) child->getNode())->departureTime(ctx, i, ffrag), false).to_string()) << std::endl;
+                        EV_DEBUG << std::string("          (") << std::to_string(i) << std::string(") Fragment arrival time: ") << this->stringToFloat(model.eval(*((Switch *) child->getNode())->arrivalTime(ctx, i, ffrag), false).to_string()) << std::endl;
+                        EV_DEBUG << std::string("          (") << std::to_string(i) << std::string(") Fragment scheduled time: ") << this->stringToFloat(model.eval(*((Switch *) child->getNode())->scheduledTime(ctx, i, ffrag), false).to_string()) << std::endl;
+                        EV_DEBUG << "          ----------------------------" << std::endl;
                     }
 
                     ffrag->setFragmentPriority(
