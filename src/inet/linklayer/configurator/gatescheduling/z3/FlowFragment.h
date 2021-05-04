@@ -1,3 +1,23 @@
+//
+// Copyright (C) 2021 by original authors
+//
+// This file is copied from the following project with the explicit permission
+// from the authors: https://github.com/ACassimiro/TSNsched
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+
 #ifndef __INET_Z3_FLOWFRAGMENT_H
 #define __INET_Z3_FLOWFRAGMENT_H
 
