@@ -241,7 +241,7 @@ L3Address NextHopRoutingTable::getRouterIdAsGeneric() const
 
 bool NextHopRoutingTable::isLocalAddress(const L3Address& dest) const
 {
-    // TODO Enter_Method("isLocalAddress(%s)", dest.str().c_str());
+    Enter_Method("isLocalAddress(%s)", dest.str().c_str());
 
     // collect interface addresses if not yet done
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
@@ -254,6 +254,8 @@ bool NextHopRoutingTable::isLocalAddress(const L3Address& dest) const
 
 NetworkInterface *NextHopRoutingTable::getInterfaceByAddress(const L3Address& address) const
 {
+    Enter_Method("getInterfaceByAddress(%s)", address.str().c_str());
+
     // collect interface addresses if not yet done
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         NetworkInterface *ie = ift->getInterface(i);
@@ -266,7 +268,7 @@ NetworkInterface *NextHopRoutingTable::getInterfaceByAddress(const L3Address& ad
 
 NextHopRoute *NextHopRoutingTable::findBestMatchingRoute(const L3Address& dest) const
 {
-    // TODO Enter_Method("findBestMatchingRoute(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
+    Enter_Method("findBestMatchingRoute(%s)", dest.str().c_str());
 
     // find best match (one with longest prefix)
     // default route has zero prefix length, so (if exists) it'll be selected as last resort
@@ -283,7 +285,7 @@ NextHopRoute *NextHopRoutingTable::findBestMatchingRoute(const L3Address& dest) 
 
 NetworkInterface *NextHopRoutingTable::getOutputInterfaceForDestination(const L3Address& dest) const
 {
-    // TODO Enter_Method("getInterfaceForDestAddr(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
+    Enter_Method("getInterfaceForDestAddr(%s)", dest.str().c_str());
 
     const IRoute *e = findBestMatchingRoute(dest);
     return e ? e->getInterface() : nullptr;
@@ -291,7 +293,7 @@ NetworkInterface *NextHopRoutingTable::getOutputInterfaceForDestination(const L3
 
 L3Address NextHopRoutingTable::getNextHopForDestination(const L3Address& dest) const
 {
-    // TODO Enter_Method("getGatewayForDestAddr(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
+    Enter_Method("getGatewayForDestAddr(%s)", dest.str().c_str());
 
     const IRoute *e = findBestMatchingRoute(dest);
     return e ? e->getNextHopAsGeneric() : L3Address();
@@ -299,11 +301,15 @@ L3Address NextHopRoutingTable::getNextHopForDestination(const L3Address& dest) c
 
 bool NextHopRoutingTable::isLocalMulticastAddress(const L3Address& dest) const
 {
+    Enter_Method("isLocalMulticastAddress(%s)", dest.str().c_str());
+
     return dest.isMulticast(); // TODO
 }
 
 IMulticastRoute *NextHopRoutingTable::findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const
 {
+    Enter_Method("findBestMatchingMulticastRoute(%s, %s)", origin.str().c_str(), group.str().c_str());
+
     return nullptr; // TODO
 }
 
@@ -347,18 +353,26 @@ IRoute *NextHopRoutingTable::removeRoute(IRoute *route)
     Enter_Method("removeRoute(...)");
 
     NextHopRoute *entry = internalRemoveRoute(check_and_cast<NextHopRoute *>(route));
-    if (entry) {
+    if (entry != nullptr) {
+        EV_INFO << "remove route " << entry->str() << "\n";
         emit(routeDeletedSignal, entry);
+        entry->setRoutingTable(nullptr);
     }
 
     return entry;
 }
 
-bool NextHopRoutingTable::deleteRoute(IRoute *entry)
+bool NextHopRoutingTable::deleteRoute(IRoute *route)
 {
-    IRoute *route = removeRoute(entry);
-    delete route;
-    return route != nullptr;
+    Enter_Method("deleteRoute(...)");
+
+    NextHopRoute *entry = internalRemoveRoute(check_and_cast<NextHopRoute *>(route));
+    if (entry != nullptr) {
+        EV_INFO << "remove route " << entry->str() << "\n";
+        emit(routeDeletedSignal, entry);
+        delete entry;
+    }
+    return entry != nullptr;
 }
 
 void NextHopRoutingTable::internalAddRoute(NextHopRoute *route)
@@ -379,7 +393,6 @@ NextHopRoute *NextHopRoutingTable::internalRemoveRoute(NextHopRoute *route)
     if (i != routes.end()) {
         ASSERT(route->getRoutingTableAsGeneric() == this);
         routes.erase(i);
-        route->setRoutingTable(nullptr);
         return route;
     }
     return nullptr;
@@ -397,16 +410,22 @@ IMulticastRoute *NextHopRoutingTable::getMulticastRoute(int k) const
 
 void NextHopRoutingTable::addMulticastRoute(IMulticastRoute *entry)
 {
+    Enter_Method("addMulticastRoute(...)");
+
     // TODO
 }
 
 IMulticastRoute *NextHopRoutingTable::removeMulticastRoute(IMulticastRoute *entry)
 {
+    Enter_Method("removeMulticastRoute(...)");
+
     return nullptr; // TODO
 }
 
 bool NextHopRoutingTable::deleteMulticastRoute(IMulticastRoute *entry)
 {
+    Enter_Method("deleteMulticastRoute(...)");
+
     return false; // TODO
 }
 

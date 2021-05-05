@@ -356,6 +356,8 @@ bool Ipv4RoutingTable::isLocalBroadcastAddress(const Ipv4Address& dest) const
 
 NetworkInterface *Ipv4RoutingTable::findInterfaceByLocalBroadcastAddress(const Ipv4Address& dest) const
 {
+    Enter_Method("findInterfaceByLocalBroadcastAddress(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
+
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         NetworkInterface *ie = ift->getInterface(i);
         if (!ie->isBroadcast())
