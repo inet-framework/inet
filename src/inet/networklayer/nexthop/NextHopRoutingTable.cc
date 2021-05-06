@@ -173,6 +173,11 @@ void NextHopRoutingTable::configureRouterId()
 
 void NextHopRoutingTable::configureInterface(NetworkInterface *ie)
 {
+    configureInterface(ie, addressType);
+}
+
+void NextHopRoutingTable::configureInterface(NetworkInterface *ie,
+        const L3Address::AddressType addressType) {
     int metric = (int)(ceil(2e9 / ie->getDatarate())); // use OSPF cost as default
     int interfaceModuleId = ie->getId();
     // mac
@@ -422,4 +427,3 @@ void NextHopRoutingTable::printRoutingTable() const
 }
 
 } // namespace inet
-
