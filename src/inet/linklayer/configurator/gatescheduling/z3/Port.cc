@@ -184,7 +184,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
         addAssert(solver,  // Time to Transmit constraint.
             mkGe(
                 this->scheduledTime(ctx, i, flowFrag),
-                mkAdd(this->arrivalTime(ctx, i, flowFrag), mkDiv(flowFrag->getPacketSizeZ3(), this->portSpeedZ3))));
+                mkAdd(this->arrivalTime(ctx, i, flowFrag), *flowFrag->getPacketSizeZ3() / *this->portSpeedZ3)));
 
     }
 
@@ -241,7 +241,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                                 *this->scheduledTime(ctx, j, auxFragment) ==
                                 mkAdd(
                                     this->scheduledTime(ctx, i, flowFrag),
-                                    mkDiv(flowFrag->getPacketSizeZ3(), this->portSpeedZ3)))));
+                                    *flowFrag->getPacketSizeZ3() / *this->portSpeedZ3))));
 
 
 
@@ -273,7 +273,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                                                 mkAdd(
                                                     cycle->slotDurationZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3),
                                                     cycle->cycleStartZ3(ctx, ctx.int_val(j)))),
-                                            mkDiv(flowFrag->getPacketSizeZ3(), this->portSpeedZ3))),
+                                            *flowFrag->getPacketSizeZ3() / *this->portSpeedZ3)),
                                     mkGe(
                                         this->arrivalTime(ctx, i, flowFrag),
                                         mkAdd(
@@ -282,7 +282,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                                     *this->scheduledTime(ctx, i, flowFrag) ==
                                     mkAdd(
                                         this->arrivalTime(ctx, i, flowFrag),
-                                        mkDiv(flowFrag->getPacketSizeZ3(), this->portSpeedZ3)))));
+                                        *flowFrag->getPacketSizeZ3() / *this->portSpeedZ3))));
 
 
                     /*
@@ -310,7 +310,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                                             mkAdd(
                                                 cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3),
                                                 cycle->cycleStartZ3(ctx, j)),
-                                            mkDiv(flowFrag->getPacketSizeZ3(), this->portSpeedZ3)))));
+                                            *flowFrag->getPacketSizeZ3() / *this->portSpeedZ3))));
                     } else if (index < this->cycle->getNumOfSlots()) {
                         auxExp2 = std::make_shared<expr>(mkAnd(auxExp2,
                                 implies(
@@ -326,13 +326,13 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                                                 mkAdd(
                                                     cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), ctx.int_val(index - 1)),
                                                     cycle->slotDurationZ3(ctx, *flowFrag->getFragmentPriorityZ3(), ctx.int_val(index - 1)))),
-                                            mkDiv(flowFrag->getPacketSizeZ3(), this->portSpeedZ3))),
+                                            *flowFrag->getPacketSizeZ3() / *this->portSpeedZ3)),
                                         *this->scheduledTime(ctx, i, flowFrag) ==
                                         mkAdd(
                                             mkAdd(
                                                 cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3),
                                                 cycle->cycleStartZ3(ctx, j)),
-                                            mkDiv(flowFrag->getPacketSizeZ3(), this->portSpeedZ3)))));
+                                            *flowFrag->getPacketSizeZ3() / *this->portSpeedZ3))));
                     }
 
                     /*
@@ -453,7 +453,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                                 cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3),
                                 mkAdd(
                                     cycle->cycleStartZ3(ctx, j),
-                                    mkDiv(flowFrag->getPacketSizeZ3(), this->portSpeedZ3)))),
+                                    *flowFrag->getPacketSizeZ3() / *this->portSpeedZ3))),
                         mkLe(
                             this->scheduledTime(ctx, i, flowFrag),
                             mkAdd(
@@ -475,7 +475,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                 this->scheduledTime(ctx, i + 1, flowFrag),
                 mkAdd(
                         this->scheduledTime(ctx, i, flowFrag),
-                        mkDiv(flowFrag->getPacketSizeZ3(), this->portSpeedZ3))));
+                        *flowFrag->getPacketSizeZ3() / *this->portSpeedZ3)));
     }
 
     for (int i = 0; i < flowFrag->getNumOfPacketsSent(); i++) {
@@ -566,7 +566,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                             this->scheduledTime(ctx, i, flowFrag),
                             mkSub(
                                 this->scheduledTime(ctx, j, auxFlowFrag),
-                                mkDiv(auxFlowFrag->getPacketSizeZ3(), this->portSpeedZ3)))));
+                                *auxFlowFrag->getPacketSizeZ3() / *this->portSpeedZ3))));
 
                 /*
                 if (!(flowFrag->equals(auxFlowFrag) && i == j)) {

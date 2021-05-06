@@ -704,13 +704,13 @@ class INET_API Flow {
      */
     std::shared_ptr<expr> getAvgLatency(solver& solver, context& ctx) {
         if (this->type == UNICAST) {
-            return std::make_shared<expr>(mkDiv(
-                    getSumOfLatencyZ3(solver, ctx, this->numOfPacketsSentInFragment - 1),
-                    ctx.real_val(this->numOfPacketsSentInFragment)));
+            return std::make_shared<expr>(
+                    *getSumOfLatencyZ3(solver, ctx, this->numOfPacketsSentInFragment - 1) /
+                    ctx.real_val(this->numOfPacketsSentInFragment));
         } else if (this->type == PUBLISH_SUBSCRIBE) {
-            return std::make_shared<expr>(mkDiv(
-                    getSumOfAllDevLatencyZ3(solver, ctx, this->numOfPacketsSentInFragment - 1),
-                    ctx.real_val((this->numOfPacketsSentInFragment) * this->pathTree->getLeaves()->size())));
+            return std::make_shared<expr>(
+                    *getSumOfAllDevLatencyZ3(solver, ctx, this->numOfPacketsSentInFragment - 1) /
+                    ctx.real_val((this->numOfPacketsSentInFragment) * this->pathTree->getLeaves()->size()));
         } else {
             // TODO: THROW ERROR
         }
@@ -730,9 +730,9 @@ class INET_API Flow {
      */
     std::shared_ptr<expr> getAvgLatency(Device *dev, solver& solver, context& ctx) {
 
-        return std::make_shared<expr>(mkDiv(
-                this->getSumOfLatencyZ3(dev, solver, ctx, this->numOfPacketsSentInFragment - 1),
-                ctx.real_val(this->numOfPacketsSentInFragment)));
+        return std::make_shared<expr>(
+                *this->getSumOfLatencyZ3(dev, solver, ctx, this->numOfPacketsSentInFragment - 1) /
+                ctx.real_val(this->numOfPacketsSentInFragment));
 
     }
 
