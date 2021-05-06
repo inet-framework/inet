@@ -18,6 +18,7 @@
 #include "inet/linklayer/configurator/gatescheduling/base/GateSchedulingConfiguratorBase.h"
 
 #include "inet/common/PatternMatcher.h"
+#include "inet/queueing/gate/PeriodicGate.h"
 
 namespace inet {
 
@@ -241,7 +242,7 @@ void GateSchedulingConfiguratorBase::configureGateScheduling()
             if (queue != nullptr) {
                 for (cModule::SubmoduleIterator it(queue); !it.end(); ++it) {
                     cModule *gate = *it;
-                    if (!strcmp(gate->getName(), "gate"))
+                    if (dynamic_cast<queueing::PeriodicGate *>(gate) != nullptr)
                         configureGateScheduling(networkNode, gate, interfaceInfo);
                 }
             }
