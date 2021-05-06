@@ -75,17 +75,16 @@ void Port::setUpCycleRules(solver& solver, context& ctx) {
 
                 addAssert(solver,
                     implies(!(*flowPriority == *auxFlowPriority),
-                        mkOr(
                             mkGe(
                                 cycle->slotStartZ3(ctx, *flowPriority, indexZ3),
                                 mkAdd(
                                     cycle->slotStartZ3(ctx, *auxFlowPriority, indexZ3),
-                                    cycle->slotDurationZ3(ctx, *auxFlowPriority, indexZ3))),
+                                    cycle->slotDurationZ3(ctx, *auxFlowPriority, indexZ3))) ||
                             mkLe(
                                 mkAdd(
                                     cycle->slotStartZ3(ctx, *flowPriority, indexZ3),
                                     cycle->slotDurationZ3(ctx, *flowPriority, indexZ3)),
-                                cycle->slotStartZ3(ctx, *auxFlowPriority, indexZ3)))));
+                                cycle->slotStartZ3(ctx, *auxFlowPriority, indexZ3))));
             }
 
 
@@ -233,7 +232,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                  * fit one of the three base cases.
                  *
                  *****************************************************/
-                auxExp = std::make_shared<expr>(mkOr(auxExp,
+                auxExp = std::make_shared<expr>(auxExp ||
                         mkAnd(
                             mkAnd(
                                 *auxFragment->getFragmentPriorityZ3() == *flowFrag->getFragmentPriorityZ3(),
@@ -241,7 +240,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                                 *this->scheduledTime(ctx, j, auxFragment) ==
                                 mkAdd(
                                     this->scheduledTime(ctx, i, flowFrag),
-                                    *flowFrag->getPacketSizeZ3() / *this->portSpeedZ3))));
+                                    *flowFrag->getPacketSizeZ3() / *this->portSpeedZ3)));
 
 
 
@@ -423,7 +422,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
             }
 
             //auxExp = mkOr((expr)ctx.bool_val(false)(), (expr)auxExp2);
-            auxExp = std::make_shared<expr>(mkOr(auxExp, auxExp2));
+            auxExp = std::make_shared<expr>(auxExp || auxExp2);
 
 
             if (exp == nullptr) {
@@ -462,7 +461,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                                     cycle->slotDurationZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3),
                                     cycle->cycleStartZ3(ctx, j))))));
 
-                exp = std::make_shared<expr>(mkOr(exp, auxExp));
+                exp = std::make_shared<expr>(exp || auxExp);
             }
         }
         addAssert(solver, *exp);
