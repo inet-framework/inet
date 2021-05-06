@@ -91,9 +91,8 @@ void Port::setUpCycleRules(solver& solver, context& ctx) {
 
             if (index < this->cycle->getNumOfSlots() - 1) {
                 addAssert(solver,
-                    mkLt(
-                        cycle->slotStartZ3(ctx, *flowPriority, indexZ3),
-                        cycle->slotStartZ3(ctx, *flowPriority, ctx.int_val(index + 1))));
+                        *cycle->slotStartZ3(ctx, *flowPriority, indexZ3) <
+                        *cycle->slotStartZ3(ctx, *flowPriority, ctx.int_val(index + 1)));
             }
 
 
@@ -161,7 +160,7 @@ void Port::setupTimeSlots(solver& solver, context& ctx, FlowFragment *flowFrag) 
 
         // Every flow must have a priority (Priority assignment constraint)
         addAssert(solver, mkGe(flowFrag->getFragmentPriorityZ3(), ctx.int_val(0)));
-        addAssert(solver, mkLt(flowFrag->getFragmentPriorityZ3(), ctx.int_val(this->cycle->getNumOfPrts())));
+        addAssert(solver, *flowFrag->getFragmentPriorityZ3() < ctx.int_val(this->cycle->getNumOfPrts()));
 
         // Slot start must be <= cycle time - slot duration
         addAssert(solver,
@@ -299,11 +298,10 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                         auxExp2 = std::make_shared<expr>(mkAnd(auxExp2, // Arrived before slot start constraint
                                 implies(
                                     mkAnd(
-                                        mkLt(
-                                            this->arrivalTime(ctx, i, flowFrag),
-                                            mkAdd(
-                                                cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3),
-                                                cycle->cycleStartZ3(ctx, j))),
+                                        *this->arrivalTime(ctx, i, flowFrag) <
+                                        mkAdd(
+                                            cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3),
+                                            cycle->cycleStartZ3(ctx, j)),
                                         mkGe(
                                             this->arrivalTime(ctx, i, flowFrag),
                                             cycle->cycleStartZ3(ctx, j))),
@@ -317,11 +315,10 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                         auxExp2 = std::make_shared<expr>(mkAnd(auxExp2,
                                 implies(
                                     mkAnd(
-                                        mkLt(
-                                            this->arrivalTime(ctx, i, flowFrag),
-                                            mkAdd(
-                                                cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3),
-                                                cycle->cycleStartZ3(ctx, j))),
+                                        *this->arrivalTime(ctx, i, flowFrag) <
+                                        mkAdd(
+                                            cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3),
+                                            cycle->cycleStartZ3(ctx, j)),
                                         *this->arrivalTime(ctx, i, flowFrag) >
                                         mkSub(
                                             mkAdd(
@@ -847,9 +844,8 @@ std::shared_ptr<expr> Port::getScheduledTimeOfPreviousPacket(context& ctx, FlowF
                         mkAnd(
                             *auxFrag->getFragmentPriorityZ3() == *f->getFragmentPriorityZ3(),
                             mkAnd(
-                                mkLt(
-                                    this->scheduledTime(ctx, i, auxFrag),
-                                    this->scheduledTime(ctx, index, f)),
+                                *this->scheduledTime(ctx, i, auxFrag) <
+                                *this->scheduledTime(ctx, index, f),
                                 *this->scheduledTime(ctx, i, auxFrag) >
                                 *prevPacketST)) ?
                         *this->scheduledTime(ctx, i, auxFrag) :
