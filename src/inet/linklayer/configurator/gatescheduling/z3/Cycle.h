@@ -282,9 +282,7 @@ class INET_API Cycle {
                 addAssert(solver,
                     mkEq(
                         this->slotDurationZ3_.get(prt).get(slotIndex),
-                        ctx.real_val(std::to_string(this->slotDuration.get(prt).get(slotIndex)))
-                    )
-                );
+                        ctx.real_val(std::to_string(this->slotDuration.get(prt).get(slotIndex)))));
             }
             */
         }

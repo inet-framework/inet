@@ -385,17 +385,13 @@ void Z3GateSchedulingConfigurator::writePathTree(PathNode *pathNode, model& mode
                     }
 
                     ffrag->setFragmentPriority(
-                        atoi(model.eval(*ffrag->getFragmentPriorityZ3(), false).to_string().c_str())
-                    );
+                        atoi(model.eval(*ffrag->getFragmentPriorityZ3(), false).to_string().c_str()));
                     ffrag->addDepartureTime(
-                        stringToFloat(model.eval(*((Switch *) child->getNode())->departureTime(ctx, i, ffrag) , false).to_string())
-                    );
+                        stringToFloat(model.eval(*((Switch *) child->getNode())->departureTime(ctx, i, ffrag) , false).to_string()));
                     ffrag->addArrivalTime(
-                        stringToFloat(model.eval(*((Switch *) child->getNode())->arrivalTime(ctx, i, ffrag) , false).to_string())
-                    );
+                        stringToFloat(model.eval(*((Switch *) child->getNode())->arrivalTime(ctx, i, ffrag) , false).to_string()));
                     ffrag->addScheduledTime(
-                        stringToFloat(model.eval(*((Switch *) child->getNode())->scheduledTime(ctx, i, ffrag) , false).to_string())
-                    );
+                        stringToFloat(model.eval(*((Switch *) child->getNode())->scheduledTime(ctx, i, ffrag) , false).to_string()));
                 }
 
                 swt = (Switch *) child->getNode();
@@ -414,21 +410,18 @@ void Z3GateSchedulingConfigurator::writePathTree(PathNode *pathNode, model& mode
                             stringToFloat(model.eval(
                                 *((Switch *) child->getNode())
                                 ->getPortOf(ffrag->getNextHop())
-                                ->getCycle()->slotStartZ3(ctx, *ffrag->getFragmentPriorityZ3(), *indexZ3) , false).to_string())
-                        );
+                                ->getCycle()->slotStartZ3(ctx, *ffrag->getFragmentPriorityZ3(), *indexZ3) , false).to_string()));
                         listOfDuration.push_back(
                             stringToFloat(model.eval(
                                 *((Switch *) child->getNode())
                                 ->getPortOf(ffrag->getNextHop())
-                                ->getCycle()->slotDurationZ3(ctx, *ffrag->getFragmentPriorityZ3(), *indexZ3) , false).to_string())
-                        );
+                                ->getCycle()->slotDurationZ3(ctx, *ffrag->getFragmentPriorityZ3(), *indexZ3) , false).to_string()));
                     }
 
                     port->getCycle()->addSlotUsed(
                         (int) stringToFloat(model.eval(*ffrag->getFragmentPriorityZ3(), false).to_string()),
                         listOfStart,
-                        listOfDuration
-                    );
+                        listOfDuration);
                 }
             }
             writePathTree(child, model, ctx);

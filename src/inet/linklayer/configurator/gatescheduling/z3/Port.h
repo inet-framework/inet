@@ -366,11 +366,8 @@ class INET_API Port {
                         mkITE(
                             mkAnd(
                                 mkEq(frag->getFlowPriority(), ctx.int_val(i)),
-                                mkEq(frag->get, ctx.int_val(j))
-                            )
-                                ,
-                                )
-                    );
+                                mkEq(frag->get, ctx.int_val(j)))
+                                ,));
                 }
             }
         }
@@ -401,14 +398,12 @@ class INET_API Port {
             setUpMicroCycles(solver, ctx);
 
             addAssert(solver,
-                mkEq(*this->cycle->getCycleDurationZ3(), ctx.real_val(std::to_string(this->microCycleSize).c_str()))
-            );
+                mkEq(*this->cycle->getCycleDurationZ3(), ctx.real_val(std::to_string(this->microCycleSize).c_str())));
         } else if (useHyperCycle && this->listOfPeriods.size() > 0) {
             setUpHyperCycle(solver, ctx);
 
             addAssert(solver,
-                mkEq(*this->cycle->getCycleDurationZ3(), ctx.real_val(std::to_string(this->definedHyperCycleSize).c_str()))
-            );
+                mkEq(*this->cycle->getCycleDurationZ3(), ctx.real_val(std::to_string(this->definedHyperCycleSize).c_str())));
         }
     }
 
@@ -436,8 +431,7 @@ class INET_API Port {
         if (this->flowFragments.size() == 0) {
             addAssert(solver, mkEq(
                 ctx.real_val(std::to_string(0).c_str()),
-                this->cycle->getCycleDurationZ3()
-            ));
+                this->cycle->getCycleDurationZ3()));
             //    addAssert(solver, mkEq(
             //    ctx.real_val(std::to_string(0)),
             //    this->cycle->getFirstCycleStartZ3()
@@ -450,13 +444,11 @@ class INET_API Port {
         if (useMicroCycles && this->flowFragments.size() > 0) {
             addAssert(solver, mkEq(
                 ctx.real_val(std::to_string(this->microCycleSize)),
-                this->cycle->getCycleDurationZ3()
-            ));
+                this->cycle->getCycleDurationZ3()));
         } else if (useHyperCycle && this->flowFragments.size() > 0) {
             addAssert(solver, mkEq(
                 ctx.real_val(std::to_string(this->definedHyperCycleSize)),
-                this->cycle->getCycleDurationZ3()
-            ));
+                this->cycle->getCycleDurationZ3()));
         } else {
             for (FlowFragment flowFrag : this->flowFragments) {
                 flowFrag->setNumOfPacketsSent(this->packetUpperBoundRange);
@@ -510,8 +502,7 @@ class INET_API Port {
                mkGe(index, ctx.int_val(1)),
                mkAdd(
                        flowFrag->getDepartureTimeZ3(int.parseInt(index.toString())),
-                       mkMul(flowFrag->getPacketPeriodicity(), index)
-                       ),
+                       mkMul(flowFrag->getPacketPeriodicity(), index)),
                flowFrag->getDepartureTimeZ3(int.parseInt(index.toString())));
         */
     }
@@ -548,8 +539,7 @@ class INET_API Port {
 
        return (z3::expr) mkAdd(
                       departureTime(ctx, index, flowFrag),
-                      timeToTravelZ3
-                      );
+                      timeToTravelZ3);
     }
     */
 
@@ -750,12 +740,10 @@ class INET_API Port {
 
         expr relativeST = mkSub(
                 this->scheduledTime(ctx, index, f),
-                this->cycle->getFirstCycleStartZ3()
-        );
+                this->cycle->getFirstCycleStartZ3());
 
         cycleIndex = std::make_shared<expr>(mkReal2Int(
-                        (z3::expr) mkDiv(relativeST, this->cycle->getCycleDurationZ3())
-                     ));
+                        (z3::expr) mkDiv(relativeST, this->cycle->getCycleDurationZ3())));
 
         return cycleIndex;
     }
@@ -766,12 +754,10 @@ class INET_API Port {
 
         expr relativeST = mkSub(
                 time,
-                this->cycle->getFirstCycleStartZ3()
-        );
+                this->cycle->getFirstCycleStartZ3());
 
         cycleIndex = std::make_shared<expr>(mkReal2Int(
-                        (z3::expr) mkDiv(relativeST, this->cycle->getCycleDurationZ3())
-                     ));
+                        (z3::expr) mkDiv(relativeST, this->cycle->getCycleDurationZ3())));
 
         return cycleIndex;
     }

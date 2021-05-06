@@ -315,9 +315,7 @@ class INET_API Flow {
             auto children = auxNode->getParent()->getChildren();
             flowFragments->push_back(
                     auxNode->getParent()->getFlowFragments().at(
-                            std::find(children.begin(), children.end(), auxNode) - children.begin()
-                    )
-            );
+                            std::find(children.begin(), children.end(), auxNode) - children.begin()));
 
             auxNode = auxNode->getParent();
         }
@@ -578,8 +576,7 @@ class INET_API Flow {
                         fabs(
                                 this->getScheduledTime(this->flowFragments.size() - 1, i) -
                                         this->getDepartureTime(0, i) -
-                                        averageLatency
-                        );
+                                        averageLatency);
             }
 
             averageJitter = averageJitter / (timeListSize);
@@ -709,13 +706,11 @@ class INET_API Flow {
         if (this->type == UNICAST) {
             return std::make_shared<expr>(mkDiv(
                     getSumOfLatencyZ3(solver, ctx, this->numOfPacketsSentInFragment - 1),
-                    ctx.real_val(this->numOfPacketsSentInFragment)
-            ));
+                    ctx.real_val(this->numOfPacketsSentInFragment)));
         } else if (this->type == PUBLISH_SUBSCRIBE) {
             return std::make_shared<expr>(mkDiv(
                     getSumOfAllDevLatencyZ3(solver, ctx, this->numOfPacketsSentInFragment - 1),
-                    ctx.real_val((this->numOfPacketsSentInFragment) * this->pathTree->getLeaves()->size())
-            ));
+                    ctx.real_val((this->numOfPacketsSentInFragment) * this->pathTree->getLeaves()->size())));
         } else {
             // TODO: THROW ERROR
         }
@@ -737,8 +732,7 @@ class INET_API Flow {
 
         return std::make_shared<expr>(mkDiv(
                 this->getSumOfLatencyZ3(dev, solver, ctx, this->numOfPacketsSentInFragment - 1),
-                ctx.real_val(this->numOfPacketsSentInFragment)
-        ));
+                ctx.real_val(this->numOfPacketsSentInFragment)));
 
     }
 
@@ -760,14 +754,11 @@ class INET_API Flow {
         return std::make_shared<expr>(mkITE(
                 mkGe(
                         latency,
-                        avgLatency
-                ),
+                        avgLatency),
                 mkSub(latency , avgLatency),
                 mkMul(
                         mkSub(latency , avgLatency),
-                        ctx.real_val(-1)
-                )
-        ));
+                        ctx.real_val(-1))));
     }
 
     /**

@@ -145,8 +145,7 @@ class INET_API Switch : public cObject {
             /* The cycle of every port must have the same duration
             addAssert(solver, mkEq( // Equal cycle constraints
                 this->cycleDuration,
-                port.getCycle()->getCycleDurationZ3()
-            ));
+                port.getCycle()->getCycleDurationZ3()));
             */
 
             // The cycle of every port must have the same starting point
@@ -373,16 +372,12 @@ class INET_API Switch : public cObject {
         addAssert(solver,
             mkEq(
                 this->cycleDurationUpperBoundZ3,
-                ctx.real_val(std::to_string(this->cycleDurationUpperBound))
-            )
-        );
+                ctx.real_val(std::to_string(this->cycleDurationUpperBound))));
 
         addAssert(solver,
             mkEq(
                 this->cycleDurationLowerBoundZ3,
-                ctx.real_val(std::to_string(this->cycleDurationLowerBound))
-            )
-        );
+                ctx.real_val(std::to_string(this->cycleDurationLowerBound))));
         */
 
         if (!ports.empty()) {

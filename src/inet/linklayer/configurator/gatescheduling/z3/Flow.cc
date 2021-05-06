@@ -45,12 +45,10 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
             // Setting next hop
             if (dynamic_cast<Switch *>(n->getNode())) {
                 flowFrag->setNextHop(
-                        ((Switch *) n->getNode())->getName()
-                );
+                        ((Switch *) n->getNode())->getName());
             } else {
                 flowFrag->setNextHop(
-                        ((Device *) n->getNode())->getName()
-                );
+                        ((Device *) n->getNode())->getName());
             }
 
             if (((Switch *)auxN->getNode())->getPortOf(flowFrag->getNextHop())->checkIfAutomatedApplicationPeriod()) {
@@ -66,9 +64,7 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
                     flowFrag->addDepartureTimeZ3(
                             (z3::expr) mkAdd(
                                     this->flowFirstSendingTimeZ3,
-                                    ctx.real_val(std::to_string(this->flowSendingPeriodicity * i).c_str())
-                            )
-                    );
+                                    ctx.real_val(std::to_string(this->flowSendingPeriodicity * i).c_str())));
                 }
             } else { // Fragment first departure = last fragment scheduled time
 
@@ -79,9 +75,7 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
                                     ->scheduledTime(
                                             ctx,
                                             i,
-                                            auxN->getParent()->getFlowFragments().at(auxN->getParent()->getChildIndex(auxN))
-                                    )
-                    );
+                                            auxN->getParent()->getFlowFragments().at(auxN->getParent()->getChildIndex(auxN))));
                 }
 
                 flowFrag->setNodeName(((Switch *) auxN->getNode())->getName());
@@ -98,13 +92,11 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
             int portIndex = std::find(connectsTo.begin(), connectsTo.end(), flowFrag->getNextHop()) - connectsTo.begin();
             flowFrag->setPort(
                     ((Switch *) auxN->getNode())
-                            ->getPorts().at(portIndex)
-            );
+                            ->getPorts().at(portIndex));
 
             for (int i = 0; i<flowFrag->getNumOfPacketsSent(); i++){
                 flowFrag->addScheduledTimeZ3(
-                    *flowFrag->getPort()->scheduledTime(ctx, i, flowFrag)
-                );
+                    *flowFrag->getPort()->scheduledTime(ctx, i, flowFrag));
             }
 
             flowFrag->setPacketPeriodicityZ3(*this->flowSendingPeriodicityZ3);
@@ -156,15 +148,12 @@ void Flow::pathToZ3(context& ctx, Switch *swt, int currentSwitchIndex)
             flowFrag->addDepartureTimeZ3( // Packet departure constraint
                     (z3::expr) mkAdd(
                             this->flowFirstSendingTimeZ3,
-                            ctx.real_val(std::to_string(this->flowSendingPeriodicity * i).c_str())
-                    )
-            );
+                            ctx.real_val(std::to_string(this->flowSendingPeriodicity * i).c_str())));
         }
     } else {
         for (int i = 0; i < numberOfPackets; i++) {
             flowFrag->addDepartureTimeZ3(
-                    *((Switch *) path.at(currentSwitchIndex - 1))->scheduledTime(ctx, i, flowFragments.at(flowFragments.size() - 1))
-            );
+                    *((Switch *) path.at(currentSwitchIndex - 1))->scheduledTime(ctx, i, flowFragments.at(flowFragments.size() - 1)));
         }
     }
     flowFrag->setNodeName(((Switch *) path.at(currentSwitchIndex))->getName());
@@ -184,8 +173,7 @@ void Flow::pathToZ3(context& ctx, Switch *swt, int currentSwitchIndex)
         flowFrag->setNextHop(this->endDevice->getName());
     } else {
         flowFrag->setNextHop(
-                path.at(currentSwitchIndex + 1)->getName()
-        );
+                path.at(currentSwitchIndex + 1)->getName());
     }
 
     /*
@@ -210,9 +198,7 @@ void Flow::bindToNextFragment(solver& solver, context& ctx, FlowFragment *frag)
                 addAssert(solver,
                     mkEq(
                         frag->getPort()->scheduledTime(ctx, i, frag),
-                        childFrag->getPort()->departureTime(ctx, i, childFrag)
-                    )
-                );
+                        childFrag->getPort()->departureTime(ctx, i, childFrag)));
             }
 
             this->bindToNextFragment(solver, ctx, childFrag);
