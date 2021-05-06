@@ -46,7 +46,6 @@ class INET_API PathNode : public cObject {
     std::vector<PathNode *> children; // The children of the current FlowNode
     std::vector<FlowFragment *> flowFragments;
 
-
     /**
      * [Method]: PathNode
      * [Usage]: Overloaded constructor method of the this class.
@@ -57,7 +56,7 @@ class INET_API PathNode : public cObject {
      */
     PathNode (cObject *node)
     {
-        if(dynamic_cast<Switch *>(node)) {
+        if (dynamic_cast<Switch *>(node)) {
             this->node = node;
             children.clear();
             flowFragments.clear();
@@ -130,7 +129,6 @@ class INET_API PathNode : public cObject {
     void setFlowFragment(std::vector<FlowFragment *>  flowFragments) {
         this->flowFragments = flowFragments;
     }
-
 };
 
 }

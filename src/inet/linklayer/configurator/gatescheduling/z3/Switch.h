@@ -91,7 +91,6 @@ class INET_API Switch : public cObject {
         this->connectsTo.clear();
     }
 
-
     /**
      * [Method]: TSNSwitch
      * [Usage]: Overloaded constructor method of this class.
@@ -101,8 +100,8 @@ class INET_API Switch : public cObject {
      * @param name                  Name of the switch
      */
     Switch(std::string name,
-              double cycleDurationLowerBound,
-              double cycleDurationUpperBound) {
+           double cycleDurationLowerBound,
+           double cycleDurationUpperBound) {
         this->name = name;
         this->ports.clear();
         this->connectsTo.clear();
@@ -137,7 +136,7 @@ class INET_API Switch : public cObject {
         for (Port *port : this->ports) {
             port->toZ3(ctx);
 
-            for(FlowFragment *frag : port->getFlowFragments()) {
+            for (FlowFragment *frag : port->getFlowFragments()) {
                 addAssert(solver, *port->getCycle()->getFirstCycleStartZ3() <= *this->arrivalTime(ctx, 0, frag)); // Maximum cycle start constraint
             }
 
@@ -155,7 +154,6 @@ class INET_API Switch : public cObject {
         }
 
         addAssert(solver, *this->cycleStart == ctx.int_val(0));
-
     }
 
     /**
@@ -169,10 +167,9 @@ class INET_API Switch : public cObject {
      */
     void setupSchedulingRules(solver& solver, context& ctx) {
 
-        for(Port *port : this->ports) {
+        for (Port *port : this->ports) {
                 port->setupSchedulingRules(solver, ctx);
         }
-
     }
 
     /**
@@ -186,8 +183,7 @@ class INET_API Switch : public cObject {
      * @param cycle             Cycle used by the port
      */
     void createPort(cObject *destination, Cycle *cycle, double maxPacketSize, double timeToTravel, double portSpeed, double gbSize) {
-
-        if(dynamic_cast<Device *>(destination)) {
+        if (dynamic_cast<Device *>(destination)) {
             this->connectsTo.push_back(((Device *)destination)->getName());
             this->ports.push_back(
                     new Port(this->name + std::string("Port") + std::to_string(this->portNum),
@@ -197,9 +193,7 @@ class INET_API Switch : public cObject {
                             timeToTravel,
                             portSpeed,
                             gbSize,
-                            cycle
-                    )
-            );
+                            cycle));
         } else if (dynamic_cast<Switch *>(destination)) {
             this->connectsTo.push_back(((Switch *)destination)->getName());
 
@@ -210,8 +204,7 @@ class INET_API Switch : public cObject {
                     timeToTravel,
                     portSpeed,
                     gbSize,
-                    cycle
-            );
+                    cycle);
 
             newPort->setPortNum(this->portNum);
 
@@ -219,11 +212,6 @@ class INET_API Switch : public cObject {
         }
         else
             ; // [TODO]: THROW ERROR
-
-
-
-
-
         this->portNum++;
     }
 
@@ -248,13 +236,10 @@ class INET_API Switch : public cObject {
                         timeToTravel,
                         portSpeed,
                         gbSize,
-                        cycle
-                )
-        );
+                        cycle));
 
         this->portNum++;
     }
-
 
     /**
      * [Method]: addToFragmentList
@@ -293,11 +278,10 @@ class INET_API Switch : public cObject {
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
     void setUpCycleSize(solver& solver, context& ctx) {
-        for(Port *port : this->ports) {
+        for (Port *port : this->ports) {
             port->setUpCycle(solver, ctx);
         }
     }
-
 
     /**
      * [Method]: arrivalTime
@@ -401,8 +385,8 @@ class INET_API Switch : public cObject {
         );
         */
 
-        if(!ports.empty()) {
-            for(Port *port : this->ports) {
+        if (!ports.empty()) {
+            for (Port *port : this->ports) {
                 //System.out.println(port.getIsModifiedOrCreated());
                 port->loadZ3(ctx, solver);
 

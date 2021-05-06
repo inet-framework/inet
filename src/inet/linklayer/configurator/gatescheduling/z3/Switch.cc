@@ -38,7 +38,7 @@ void Switch::addToFragmentList(FlowFragment *flowFrag)
     System.out.println(std::string("Next hop: ") + flowFrag->getNextHop());
     System.out.println(std::string("Index of port: ") + index);
     System.out.print("Connects to: ");
-    for(std::string connect : this->connectsTo) {
+    for (std::string connect : this->connectsTo) {
         System.out.print(connect + std::string(", "));
     }
 

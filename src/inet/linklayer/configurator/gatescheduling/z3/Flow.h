@@ -40,7 +40,6 @@ using namespace z3;
  * The flows can be unicast type or publish subscribe type flows.
  *
  */
-
 class INET_API Flow {
   public:
     // TODO: CHECK FUNCTIONS FOR UNICAST FLOWS
@@ -53,8 +52,6 @@ class INET_API Flow {
 
     static int instanceCounter;
     int instance = 0;
-
-
 
     std::string name;
     int type = 0;
@@ -90,9 +87,7 @@ class INET_API Flow {
      * Must be explicit due to call on child class.
      */
     Flow() {
-
     }
-
 
     /**
      * [Method]: Flow
@@ -107,7 +102,7 @@ class INET_API Flow {
         this->instance = instanceCounter;
         this->name = std::string("flow") + std::to_string(instanceCounter);
 
-        if(type == UNICAST) {
+        if (type == UNICAST) {
             //Its not a unicast flow
             this->type = 0;
             path.clear();
@@ -120,9 +115,6 @@ class INET_API Flow {
             instanceCounter--;
             //[TODO]: Throw error
         }
-
-
-
     }
 
     /**
@@ -137,7 +129,7 @@ class INET_API Flow {
         this->instance = instanceCounter;
         this->name = std::string("flow") + std::to_string(instanceCounter);
 
-        if(type == UNICAST) {
+        if (type == UNICAST) {
             //Its not a unicast flow
             this->type = 0;
             path.clear();
@@ -155,9 +147,7 @@ class INET_API Flow {
         this->flowSendingPeriodicity = flowSendingPeriodicity;
 
         this->useCustomValues = true;
-
     }
-
 
     /**
      * [Method]: addToPath
@@ -176,11 +166,10 @@ class INET_API Flow {
      * structure without a branching path.
      *
      */
-
     void convertUnicastFlow() {
         // AVOID USING THE ARRAY LIST
         // TODO: REMOVE OPTION TO DISTINGUISH BETWEEN UNICAST AND MULTICAST LATER
-        if(this->type == UNICAST) {
+        if (this->type == UNICAST) {
             std::deque<PathNode *> nodeList;
 
             PathTree *pathTree = new PathTree();
@@ -188,7 +177,7 @@ class INET_API Flow {
             pathNode = pathTree->addRoot(this->startDevice);
             pathNode = pathNode->addChild(path.at(0));
             nodeList.push_back(pathNode);
-            for(int i = 1;  i < path.size(); i++) {
+            for (int i = 1;  i < path.size(); i++) {
                 nodeList.push_back(nodeList.front()->addChild(path.at(i)));
                 nodeList.pop_front();
             }
@@ -200,7 +189,6 @@ class INET_API Flow {
         }
     }
 
-
     /**
      * [Method]: toZ3
      * [Usage]: After setting all the numeric input values of the class,
@@ -210,8 +198,7 @@ class INET_API Flow {
      * @param ctx      context variable containing the z3 environment used
      */
     void toZ3(context& ctx) {
-
-        if(this->type == UNICAST) { // If flow is unicast
+        if (this->type == UNICAST) { // If flow is unicast
             // Convert start device to z3
             startDevice->toZ3(ctx);
 
@@ -236,19 +223,16 @@ class INET_API Flow {
             this->startDevice = (Device *) this->pathTree->getRoot()->getNode();
             this->startDevice->toZ3(ctx);
 
-
-
-            if(this->priorityValue < 0 || this->priorityValue > 7) {
+            if (this->priorityValue < 0 || this->priorityValue > 7) {
                 this->flowPriority = std::make_shared<expr>(ctx.int_const((this->name + std::string("Priority")).c_str()));
             } else {
                 this->flowPriority = std::make_shared<expr>(ctx.int_val(this->priorityValue));
             }
 
-
-            if(this->useCustomValues) {
+            if (this->useCustomValues) {
                 this->flowSendingPeriodicityZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->flowSendingPeriodicity).c_str()));
 
-                if(this->flowFirstSendingTime >= 0){
+                if (this->flowFirstSendingTime >= 0){
                     this->flowFirstSendingTimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->flowFirstSendingTime).c_str()));
                 } else {
                     this->flowFirstSendingTimeZ3 = std::make_shared<expr>(ctx.real_const((std::string("flow") + std::to_string(this->instance) + std::string("FirstSendingTime")).c_str()));
@@ -259,9 +243,7 @@ class INET_API Flow {
             }
 
             this->nodeToZ3(ctx, this->pathTree->getRoot(), nullptr);
-
         }
-
     }
 
     /**
@@ -291,14 +273,12 @@ class INET_API Flow {
     void bindToNextFragment(solver& solver, context& ctx, FlowFragment *frag);
 
     void bindAllFragments(solver& solver, context& ctx){
-        for(PathNode node : this->pathTree->getRoot()->getChildren()){
-            for(FlowFragment *frag : node.getFlowFragments()){
+        for (PathNode node : this->pathTree->getRoot()->getChildren()){
+            for (FlowFragment *frag : node.getFlowFragments()){
                 this->bindToNextFragment(solver, ctx, frag);
             }
         }
     }
-
-
 
     /**
      * [Method]: getFlowFromRootToNode
@@ -314,19 +294,18 @@ class INET_API Flow {
         std::vector<Device *> flowEndDevices;
         PathNode *auxNode = nullptr;
 
-
         // Iterate over leaves, get reference to the leaf of end device
-        for(PathNode *node : *this->pathTree->getLeaves()) {
+        for (PathNode *node : *this->pathTree->getLeaves()) {
             flowEndDevices.push_back((Device *) node->getNode());
 
-            if(dynamic_cast<Device *>((node->getNode())) &&
+            if (dynamic_cast<Device *>((node->getNode())) &&
                     ((Device *) node->getNode())->getName() == endDevice->getName()) {
                 auxNode = node;
             }
         }
 
         // If no leaf contains the desired end device, throw error returns nullptr
-        if(std::find(flowEndDevices.begin(), flowEndDevices.end(), endDevice) == flowEndDevices.end()) {
+        if (std::find(flowEndDevices.begin(), flowEndDevices.end(), endDevice) == flowEndDevices.end()) {
             // TODO [Priority: Low]: Throw error
             return nullptr;
         }
@@ -368,16 +347,16 @@ class INET_API Flow {
         PathNode *auxNode = nullptr;
 
         // Iterate over leaves, get reference to the leaf of end device
-        for(PathNode *node : *this->pathTree->getLeaves()) {
+        for (PathNode *node : *this->pathTree->getLeaves()) {
             flowEndDevices.push_back((Device *) node->getNode());
-            if(dynamic_cast<Device *>((node->getNode())) &&
+            if (dynamic_cast<Device *>((node->getNode())) &&
                     ((Device *) node->getNode())->getName() == endDevice->getName()) {
                 auxNode = node;
             }
         }
 
         // If no leaf contains the desired end device, throw error returns nullptr
-        if(std::find(flowEndDevices.begin(), flowEndDevices.end(), endDevice) == flowEndDevices.end()) {
+        if (std::find(flowEndDevices.begin(), flowEndDevices.end(), endDevice) == flowEndDevices.end()) {
             // TODO [Priority: Low]: Throw error
             return nullptr;
         }
@@ -399,7 +378,6 @@ class INET_API Flow {
         return pathNodes;
     }
 
-
     /**
      * [Method]: getDepartureTime
      * [Usage]: On a unicast flow, returns the departure time
@@ -412,27 +390,25 @@ class INET_API Flow {
      */
     double getDepartureTime(int hop, int packetNum);
 
-
     /**
      * [Method]: setUpPeriods
      * [Usage]: Iterate over the switches in the path of the flow.
      * Adds its periodicity to the periodicity list in the switch.
      * This will be used for the automated application cycles.
      */
-
     void setUpPeriods(PathNode *node) {
-        if(node->getChildren().empty()) {
+        if (node->getChildren().empty()) {
             return;
         } else if (dynamic_cast<Device *>(node->getNode())) {
-            for(PathNode *child : node->getChildren()) {
+            for (PathNode *child : node->getChildren()) {
                 this->setUpPeriods(child);
             }
         } else {
             Switch *swt = (Switch *) node->getNode(); //no good. Need the port
             Port *port = nullptr;
 
-            for(PathNode *child : node->getChildren()) {
-                if(dynamic_cast<Device *>(child->getNode())) {
+            for (PathNode *child : node->getChildren()) {
+                if (dynamic_cast<Device *>(child->getNode())) {
                     port = swt->getPortOf(((Device *) child->getNode())->getName());
                     this->setUpPeriods(child);
                 } else if (dynamic_cast<Switch *>(child->getNode())) {
@@ -444,14 +420,13 @@ class INET_API Flow {
                 }
 
                 auto periods = port->getListOfPeriods();
-                if(std::find(periods.begin(), periods.end(), this->flowSendingPeriodicity) == periods.end()) {
+                if (std::find(periods.begin(), periods.end(), this->flowSendingPeriodicity) == periods.end()) {
                     port->addToListOfPeriods(this->flowSendingPeriodicity);
                 }
             }
 
         }
     }
-
 
     /**
      * [Method]: getDepartureTime
@@ -481,7 +456,6 @@ class INET_API Flow {
      */
     double getDepartureTime(Device *targetDevice, int hop, int packetNum);
 
-
     /**
      * [Method]: getArrivalTime
      * [Usage]: On a unicast flow, returns the arrival time
@@ -493,7 +467,6 @@ class INET_API Flow {
      * @return              Arrival time of the specific packet
      */
     double getArrivalTime(int hop, int packetNum);
-
 
     /**
      * [Method]: getArrivalTime
@@ -534,7 +507,6 @@ class INET_API Flow {
      * @return              Scheduled time of the specific packet
      */
     double getScheduledTime(int hop, int packetNum);
-
 
     /**
      * [Method]: getScheduledTime
@@ -581,7 +553,6 @@ class INET_API Flow {
 
     double getAverageLatencyToDevice(Device *dev);
 
-
     /**
      * [Method]: getAverageJitter
      * [Usage]: Returns the average jitter of this flow.
@@ -602,7 +573,7 @@ class INET_API Flow {
 
         if (type == UNICAST) {
             timeListSize = this->getTimeListSize();
-            for(int i = 0; i < timeListSize; i++) {
+            for (int i = 0; i < timeListSize; i++) {
                 averageJitter +=
                         fabs(
                                 this->getScheduledTime(this->flowFragments.size() - 1, i) -
@@ -612,9 +583,9 @@ class INET_API Flow {
             }
 
             averageJitter = averageJitter / (timeListSize);
-        } else if(type == PUBLISH_SUBSCRIBE) {
+        } else if (type == PUBLISH_SUBSCRIBE) {
 
-            for(PathNode *node : *this->pathTree->getLeaves()) {
+            for (PathNode *node : *this->pathTree->getLeaves()) {
 
                 auxAverageJitter = this->getAverageJitterToDevice(((Device *) node->getNode()));
                 averageJitter += auxAverageJitter;
@@ -629,7 +600,6 @@ class INET_API Flow {
 
         return averageJitter;
     }
-
 
     /**
      * [Method]: getAverageJitterToDevice
@@ -678,13 +648,11 @@ class INET_API Flow {
      * @return          Z3 variable containing sum of latency up to index packet
      */
     std::shared_ptr<expr> getSumOfLatencyZ3(solver& solver, context& ctx, int index) {
-
-        if(index == 0) {
+        if (index == 0) {
             return getLatencyZ3(solver, ctx, 0);
         }
 
         return std::make_shared<expr>(mkAdd(getLatencyZ3(solver, ctx, index), getSumOfLatencyZ3(solver, ctx, index - 1)));
-
     }
 
     /**
@@ -699,7 +667,7 @@ class INET_API Flow {
      * @return          Z3 variable containing sum of latency up to index packet
      */
     std::shared_ptr<expr> getSumOfLatencyZ3(Device *dev, solver& solver, context& ctx, int index) {
-        if(index == 0) {
+        if (index == 0) {
             return getLatencyZ3(solver, dev, ctx, 0);
         }
 
@@ -720,7 +688,7 @@ class INET_API Flow {
         expr sumValue = ctx.real_val(0);
         Device *currentDev = nullptr;
 
-        for(PathNode *node : *this->pathTree->getLeaves()) {
+        for (PathNode *node : *this->pathTree->getLeaves()) {
             currentDev = (Device *) node->getNode();
             sumValue = (z3::expr) mkAdd(this->getSumOfLatencyZ3(currentDev, solver, ctx, index), sumValue);
         }
@@ -738,7 +706,7 @@ class INET_API Flow {
      * @return          Z3 variable containing the average latency of the flow
      */
     std::shared_ptr<expr> getAvgLatency(solver& solver, context& ctx) {
-        if(this->type == UNICAST) {
+        if (this->type == UNICAST) {
             return std::make_shared<expr>(mkDiv(
                     getSumOfLatencyZ3(solver, ctx, this->numOfPacketsSentInFragment - 1),
                     ctx.real_val(this->numOfPacketsSentInFragment)
@@ -754,7 +722,6 @@ class INET_API Flow {
 
         return nullptr;
     }
-
 
     /**
      * [Method]: getAvgLatency
@@ -801,7 +768,6 @@ class INET_API Flow {
                         ctx.real_val(-1)
                 )
         ));
-
     }
 
     /**
@@ -828,7 +794,7 @@ class INET_API Flow {
      * @return          Z3 variable containing the sum of all jitter
      */
     std::shared_ptr<expr> getSumOfJitterZ3(solver& solver, context& ctx, int index) {
-        if(index == 0) {
+        if (index == 0) {
             return getJitterZ3(solver, ctx, 0);
         }
 
@@ -848,7 +814,7 @@ class INET_API Flow {
      * @return          Z3 variable containing the sum of all jitter
      */
     std::shared_ptr<expr> getSumOfJitterZ3(Device *dev, solver& solver, context& ctx, int index) {
-        if(index == 0) {
+        if (index == 0) {
             return getJitterZ3(dev, solver, ctx, 0);
         }
 
@@ -869,14 +835,13 @@ class INET_API Flow {
         expr sumValue = ctx.real_val(0);
         Device *currentDev = nullptr;
 
-        for(PathNode *node : *this->pathTree->getLeaves()) {
+        for (PathNode *node : *this->pathTree->getLeaves()) {
             currentDev = (Device *) node->getNode();
             sumValue = (z3::expr) mkAdd(this->getSumOfJitterZ3(currentDev, solver, ctx, index), sumValue);
         }
 
         return std::make_shared<expr>(sumValue);
     }
-
 
     /**
      * [Method]: setNumberOfPacketsSent
@@ -888,7 +853,7 @@ class INET_API Flow {
     void setNumberOfPacketsSent(PathNode *node);
 
     void modifyIfUsingCustomVal(){
-        if(!this->useCustomValues) {
+        if (!this->useCustomValues) {
             this->flowSendingPeriodicity = startDevice->getPacketPeriodicity();
             this->flowFirstSendingTime = startDevice->getFirstT1Time();
         }
@@ -905,7 +870,7 @@ class INET_API Flow {
     void setStartDevice(Device *startDevice) {
         this->startDevice = startDevice;
 
-        if(!this->useCustomValues) {
+        if (!this->useCustomValues) {
             this->flowSendingPeriodicity = startDevice->getPacketPeriodicity();
             this->flowFirstSendingTime = startDevice->getFirstT1Time();
         }
@@ -1070,7 +1035,6 @@ class INET_API Flow {
     void setIsModifiedOrCreated(bool isModifiedOrCreated) {
         this->isModifiedOrCreated = isModifiedOrCreated;
     }
-
 };
 
 }

@@ -193,7 +193,7 @@ class INET_API Device : public cObject {
         this->name = name;
     }
 
-     double getPacketPeriodicity() {
+    double getPacketPeriodicity() {
         return packetPeriodicity;
     }
 
@@ -237,35 +237,35 @@ class INET_API Device : public cObject {
      *  Z3 GETTERS AND SETTERS
      */
 
-     std::shared_ptr<expr> getPacketPeriodicityZ3() {
+    std::shared_ptr<expr> getPacketPeriodicityZ3() {
         return packetPeriodicityZ3;
     }
 
-     void setPacketPeriodicityZ3(std::shared_ptr<expr> packetPeriodicity) {
+    void setPacketPeriodicityZ3(std::shared_ptr<expr> packetPeriodicity) {
         this->packetPeriodicityZ3 = packetPeriodicity;
     }
 
-     std::shared_ptr<expr> getFirstT1TimeZ3() {
+    std::shared_ptr<expr> getFirstT1TimeZ3() {
         return firstT1TimeZ3;
     }
 
-     void setFirstT1TimeZ3(std::shared_ptr<expr> firstT1Time) {
+    void setFirstT1TimeZ3(std::shared_ptr<expr> firstT1Time) {
         this->firstT1TimeZ3 = firstT1Time;
     }
 
-     std::shared_ptr<expr> getHardConstraintTimeZ3() {
+    std::shared_ptr<expr> getHardConstraintTimeZ3() {
         return hardConstraintTimeZ3;
     }
 
-     void setHardConstraintTimeZ3(std::shared_ptr<expr> hardConstraintTime) {
+    void setHardConstraintTimeZ3(std::shared_ptr<expr> hardConstraintTime) {
         this->hardConstraintTimeZ3 = hardConstraintTime;
     }
 
-     std::shared_ptr<expr> getSoftConstraintTimeZ3() {
+    std::shared_ptr<expr> getSoftConstraintTimeZ3() {
         return softConstraintTimeZ3;
     }
 
-     void setSoftConstraintTimeZ3(std::shared_ptr<expr> softConstraintTime) {
+    void setSoftConstraintTimeZ3(std::shared_ptr<expr> softConstraintTime) {
         this->softConstraintTimeZ3 = softConstraintTime;
     }
 

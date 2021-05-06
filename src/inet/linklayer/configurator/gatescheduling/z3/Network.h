@@ -71,7 +71,6 @@ class INET_API Network {
         this->timeToTravel = 2;
     }
 
-
     /**
      * [Method]: Network
      * [Usage]: Default constructor method of class Network. Creates
@@ -109,8 +108,7 @@ class INET_API Network {
      * @param ctx       z3 context which specify the environment of constants, functions and variables
      */
     void secureHC(solver& solver, context& ctx) {
-
-        if(jitterUpperBoundRange != -1) { // If there is a value on the upperBoundRange, it was set through the network
+        if (jitterUpperBoundRange != -1) { // If there is a value on the upperBoundRange, it was set through the network
             this->setJitterUpperBoundRangeZ3(ctx, this->jitterUpperBoundRange);
         }
 
@@ -134,7 +132,7 @@ class INET_API Network {
          *  constraint
          */
 
-        for(Flow *flw : this->getFlows()) {
+        for (Flow *flw : this->getFlows()) {
             flw->setNumberOfPacketsSent(flw->getPathTree()->getRoot());
 
             flw->bindAllFragments(solver, ctx);
@@ -154,14 +152,14 @@ class INET_API Network {
 
 
 
-            if(flw->getType() == Flow::UNICAST) {
+            if (flw->getType() == Flow::UNICAST) {
 
                 std::vector<FlowFragment *> currentFrags = flw->getFlowFragments();
                 std::vector<Switch *> path = flw->getPath();
 
 
                 //Make sure that HC is respected
-                for(int i = 0; i < flw->getNumOfPacketsSent(); i++) {
+                for (int i = 0; i < flw->getNumOfPacketsSent(); i++) {
                     addAssert(solver,
                             mkLe(
                                 mkSub(
@@ -179,15 +177,15 @@ class INET_API Network {
                 std::vector<PathNode *> parents;
 
                 // Make list of parents of all leaves
-                for(PathNode *leaf : *leaves) {
+                for (PathNode *leaf : *leaves) {
 
-                    if(std::find(parents.begin(), parents.end(), leaf->getParent()) == parents.end()){
+                    if (std::find(parents.begin(), parents.end(), leaf->getParent()) == parents.end()){
                         parents.push_back(leaf->getParent());
                     }
 
 
                     // Set the maximum allowed jitter
-                    for(int index = 0; index < flw->getNumOfPacketsSent(); index++) {
+                    for (int index = 0; index < flw->getNumOfPacketsSent(); index++) {
                         addAssert(solver,  // Maximum allowed jitter constraint
                             mkLe(
                                 flw->getJitterZ3((Device *) leaf->getNode(), solver, ctx, index),
@@ -199,9 +197,9 @@ class INET_API Network {
                 }
 
                 // Iterate over the flows of each leaf parent, assert HC
-                for(PathNode *parent : parents) {
-                    for(FlowFragment *ffrag : parent->getFlowFragments()) {
-                        for(int i = 0; i < flw->getNumOfPacketsSent(); i++) {
+                for (PathNode *parent : parents) {
+                    for (FlowFragment *ffrag : parent->getFlowFragments()) {
+                        for (int i = 0; i < flw->getNumOfPacketsSent(); i++) {
                             addAssert(solver,  // Maximum Allowed Latency constraint
                                 mkLe(
                                     mkSub(
@@ -241,7 +239,7 @@ class INET_API Network {
 
                 // TODO: Remove code for debugging
                 avgOfAllLatency = flw->getAvgLatency(solver, ctx);
-                for(PathNode *node : *flw->getPathTree()->getLeaves()) {
+                for (PathNode *node : *flw->getPathTree()->getLeaves()) {
                     Device *endDev = (Device *) node->getNode();
 
                     this->avgLatencyPerDev.push_back(std::make_shared<expr>(
@@ -257,9 +255,7 @@ class INET_API Network {
             }
 
         }
-
     }
-
 
     /**
      * [Method]: loadNetwork
@@ -271,20 +267,19 @@ class INET_API Network {
      * @param solver    solver object
      */
     void loadNetwork(context& ctx, solver& solver) {
-
         // TODO: Don't forget to load the values of this class
 
         // On all network flows: Data given by the user will be converted to z3 values
-       for(Flow *flw : this->flows) {
-           // flw->toZ3(ctx);
-           flw->flowPriority = std::make_shared<expr>(ctx.int_val((flw->name + std::string("Priority")).c_str()));
-           ((Device *) flw->getPathTree()->getRoot()->getNode())->toZ3(ctx);
-       }
+        for (Flow *flw : this->flows) {
+            // flw->toZ3(ctx);
+            flw->flowPriority = std::make_shared<expr>(ctx.int_val((flw->name + std::string("Priority")).c_str()));
+            ((Device *) flw->getPathTree()->getRoot()->getNode())->toZ3(ctx);
+        }
 
-       // On all network switches: Data given by the user will be converted to z3 values
-        for(Switch *swt : this->switches) {
-            for(Port *port : swt->getPorts()) {
-                for(FlowFragment *frag : port->getFlowFragments()) {
+        // On all network switches: Data given by the user will be converted to z3 values
+        for (Switch *swt : this->switches) {
+            for (Port *port : swt->getPorts()) {
+                for (FlowFragment *frag : port->getFlowFragments()) {
                     frag->createNewDepartureTimeZ3List();
                     frag->addDepartureTimeZ3(ctx.real_val(std::to_string(frag->getDepartureTime(0)).c_str()));
                 }
@@ -294,8 +289,8 @@ class INET_API Network {
         }
 
         /*
-        for(Switch swt : this->getSwitches()) {
-            if(dynamic_cast<TSNSwitch *>(swt)) {
+        for (Switch swt : this->getSwitches()) {
+            if (dynamic_cast<TSNSwitch *>(swt)) {
                 ((TSNSwitch *) swt).loadZ3(ctx, solver);
             }
         }
@@ -343,7 +338,6 @@ class INET_API Network {
     void addSwitch (Switch *swt) {
         this->switches.push_back(swt);
     }
-
 };
 
 }

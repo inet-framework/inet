@@ -77,7 +77,6 @@ class INET_API Port {
     std::shared_ptr<expr> timeToTravelZ3;
     std::shared_ptr<expr> portSpeedZ3;
 
-
     /**
      * [Method]: Port
      * [Usage]: Overloaded constructor of this class. Will start
@@ -91,13 +90,13 @@ class INET_API Port {
      * @param cycle                 Cycle used by the port
      */
     Port (std::string name,
-            int portNum,
-            std::string connectsTo,
-            double maxPacketSize,
-            double timeToTravel,
-            double portSpeed,
-            double gbSize,
-            Cycle *cycle) {
+          int portNum,
+          std::string connectsTo,
+          double maxPacketSize,
+          double timeToTravel,
+          double portSpeed,
+          double gbSize,
+          Cycle *cycle) {
         this->name = name;
         this->portNum = portNum;
         this->connectsTo = connectsTo;
@@ -126,11 +125,10 @@ class INET_API Port {
         this->portSpeedZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(portSpeed).c_str()));
         this->bestEffortPercentZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(bestEffortPercent).c_str()));
 
-        if(this->cycle->getFirstCycleStartZ3() == nullptr) {
+        if (this->cycle->getFirstCycleStartZ3() == nullptr) {
             this->cycle->toZ3(ctx);
         }
     }
-
 
     /**
      * [Method]: setUpCycleRules
@@ -196,7 +194,6 @@ class INET_API Port {
         return gcd(fmod(b, a), a);
     }
 
-
     /**
      * [Method]: findGCD
      * [Usage]: Retrieves the value of the greatest common divisor
@@ -213,7 +210,6 @@ class INET_API Port {
 
         return gdc;
     }
-
 
     /**
      * [Method]: findLCM
@@ -262,7 +258,6 @@ class INET_API Port {
         return res;
     }
 
-
     /**
      * [Method]: setUpHyperCycle
      * [Usage]: Set up the cycle duration and number of packets and slots
@@ -275,11 +270,11 @@ class INET_API Port {
         int numOfPacketsScheduled = 0;
 
         /*
-        for(FlowFragment *flowFrag : this->flowFragments) {
+        for (FlowFragment *flowFrag : this->flowFragments) {
             System.out.println(flowFrag->getStartDevice());
             listOfPeriods.add(flowFrag->getStartDevice().getPacketPeriodicity());
         }
-        for(double periodicity : this->listOfPeriods) {
+        for (double periodicity : this->listOfPeriods) {
             System.out.println(std::string("Periodicidade: ") + periodicity);
         }
         */
@@ -292,14 +287,14 @@ class INET_API Port {
         this->cycleUpperBoundRange = 1;
 
         /*
-        for(FlowFragment *flowFrag : this->flowFragments) {
+        for (FlowFragment *flowFrag : this->flowFragments) {
             flowFrag->setNumOfPacketsSent((int) (hyperCycleSize/flowFrag->getStartDevice().getPacketPeriodicity()));
             System.out.println(std::string("Frag num packets: ") + flowFrag->getNumOfPacketsSent());
             numOfPacketsScheduled += (int) (hyperCycleSize/flowFrag->getStartDevice().getPacketPeriodicity());
         }
         */
 
-        for(double periodicity : this->listOfPeriods) {
+        for (double periodicity : this->listOfPeriods) {
             numOfPacketsScheduled += (int) (hyperCycleSize/periodicity);
         }
 
@@ -324,7 +319,7 @@ class INET_API Port {
     void setUpMicroCycles(solver& solver, context& ctx) {
 
         /*
-        for(FlowFragment *flowFrag : this->flowFragments) {
+        for (FlowFragment *flowFrag : this->flowFragments) {
             System.out.println(flowFrag->getStartDevice());
             listOfPeriods.add(flowFrag->getStartDevice().getPacketPeriodicity());
         }
@@ -338,7 +333,7 @@ class INET_API Port {
         this->cycleUpperBoundRange = (int) (hyperCycleSize/microCycleSize);
 
         /*
-        for(FlowFragment *flowFrag : this->flowFragments) {
+        for (FlowFragment *flowFrag : this->flowFragments) {
             flowFrag->setNumOfPacketsSent((int) (hyperCycleSize/flowFrag->getStartDevice().getPacketPeriodicity()));
             System.out.println(std::string("Frag num packets: ") + flowFrag->getNumOfPacketsSent());
         }
@@ -349,7 +344,6 @@ class INET_API Port {
         this->cycle->setUpperBoundCycleTime(microCycleSize + 1);
         this->cycle->setLowerBoundCycleTime(microCycleSize - 1);
     }
-
 
     /**
      * [Method]: bindTimeSlots
@@ -364,10 +358,10 @@ class INET_API Port {
         // Ideia = se a prioridade de um flow e' igual a um numero,
         // mkEq nele com o slot the cycle (getSlotS/D(prt, slotnum))
         /*
-        for(FlowFragment *frag : this->flowFragments) {
+        for (FlowFragment *frag : this->flowFragments) {
 
-            for(int i = 0; i < this->cycle->getNumOfPrts(); i++) {
-                for(int j = 0; j < this->cycle->getNumOfSlots(); j++) {
+            for (int i = 0; i < this->cycle->getNumOfPrts(); i++) {
+                for (int j = 0; j < this->cycle->getNumOfSlots(); j++) {
                     addAssert(solver,
                         mkITE(
                             mkAnd(
@@ -398,12 +392,12 @@ class INET_API Port {
 
         // System.out.println(std::string("On port: " + this->name + std::string(" with: ") + this->listOfPeriods.size() + " fragments"));
 
-        if(this->listOfPeriods.size() < 1) {
+        if (this->listOfPeriods.size() < 1) {
             return;
         }
 
 
-        if(useMicroCycles && this->listOfPeriods.size() > 0) {
+        if (useMicroCycles && this->listOfPeriods.size() > 0) {
             setUpMicroCycles(solver, ctx);
 
             addAssert(solver,
@@ -416,7 +410,6 @@ class INET_API Port {
                 mkEq(*this->cycle->getCycleDurationZ3(), ctx.real_val(std::to_string(this->definedHyperCycleSize).c_str()))
             );
         }
-
     }
 
     /**
@@ -454,7 +447,7 @@ class INET_API Port {
         }
 
         /*
-        if(useMicroCycles && this->flowFragments.size() > 0) {
+        if (useMicroCycles && this->flowFragments.size() > 0) {
             addAssert(solver, mkEq(
                 ctx.real_val(std::to_string(this->microCycleSize)),
                 this->cycle->getCycleDurationZ3()
@@ -465,7 +458,7 @@ class INET_API Port {
                 this->cycle->getCycleDurationZ3()
             ));
         } else {
-            for(FlowFragment flowFrag : this->flowFragments) {
+            for (FlowFragment flowFrag : this->flowFragments) {
                 flowFrag->setNumOfPacketsSent(this->packetUpperBoundRange);
             }
         }
@@ -482,13 +475,13 @@ class INET_API Port {
          */
 
 
-        for(FlowFragment *flowFrag : this->flowFragments) {
+        for (FlowFragment *flowFrag : this->flowFragments) {
             setupTimeSlots(solver, ctx, flowFrag);
             setupDevPacketTimes(solver, ctx, flowFrag);
         }
 
         /*
-        if(flowFragments.size() > 0) {
+        if (flowFragments.size() > 0) {
             setupBestEffort(solver, ctx);
         }
         */
@@ -576,8 +569,7 @@ class INET_API Port {
 
         return std::make_shared<expr>(mkAdd( // Arrival time value constraint
                         departureTime(ctx, index, flowFrag),
-                        timeToTravelZ3
-                        ));
+                        timeToTravelZ3));
     }
 
     /**
@@ -629,11 +621,10 @@ class INET_API Port {
      * @return bool value. True if automated application period methodology is used, false elsewhise
      */
     bool checkIfAutomatedApplicationPeriod() {
-        if(this->useHyperCycle || this->useMicroCycles)
+        if (this->useHyperCycle || this->useMicroCycles)
             return true;
         return false;
     }
-
 
     /**
      * [Method]: loadNetwork
@@ -710,7 +701,7 @@ class INET_API Port {
         return listOfPeriods;
     }
 
-     void setListOfPeriods(std::vector<double> listOfPeriods) {
+    void setListOfPeriods(std::vector<double> listOfPeriods) {
         this->listOfPeriods = listOfPeriods;
     }
 
@@ -718,23 +709,23 @@ class INET_API Port {
         return cycleUpperBoundRange;
     }
 
-     void setCycleUpperBoundRange(int cycleUpperBoundRange) {
+    void setCycleUpperBoundRange(int cycleUpperBoundRange) {
         this->cycleUpperBoundRange = cycleUpperBoundRange;
     }
 
-     double getDefinedHyperCycleSize() {
+    double getDefinedHyperCycleSize() {
         return definedHyperCycleSize;
     }
 
-     void setDefinedHyperCycleSize(double definedHyperCycleSize) {
+    void setDefinedHyperCycleSize(double definedHyperCycleSize) {
         this->definedHyperCycleSize = definedHyperCycleSize;
     }
 
-     int getPortNum() {
+    int getPortNum() {
         return portNum;
     }
 
-     void setPortNum(int portNum) {
+    void setPortNum(int portNum) {
         this->portNum = portNum;
     }
 
@@ -745,7 +736,6 @@ class INET_API Port {
     void setFlowFragments(std::vector<FlowFragment *> flowFragments) {
         this->flowFragments = flowFragments;
     }
-
 
     /***************************************************
      *
