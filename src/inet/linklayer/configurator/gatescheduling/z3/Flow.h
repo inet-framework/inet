@@ -755,8 +755,7 @@ class INET_API Flow {
                 mkGe(latency,
                      avgLatency) ?
                 mkSub(latency , avgLatency) :
-                mkMul(mkSub(latency , avgLatency),
-                      ctx.real_val(-1)));
+                mkSub(latency , avgLatency) * ctx.real_val(-1));
     }
 
     /**
