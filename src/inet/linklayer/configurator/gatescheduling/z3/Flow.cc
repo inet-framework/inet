@@ -486,7 +486,7 @@ std::shared_ptr<expr> Flow::getJitterZ3(Device *dev, solver& solver, context &ct
                             firstFragmentInList->getNextHop())->departureTime(
                             ctx, index, firstFragmentInList));
     addAssert(solver, *jitter ==
-                    (mkGe(latency, avgLatency) ? mkSub(latency, avgLatency) :
+                    (latency >= avgLatency ? mkSub(latency, avgLatency) :
                             mkSub(avgLatency, latency)));
     return jitter;
 }

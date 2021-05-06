@@ -98,22 +98,6 @@ inline expr operator<=(const std::shared_ptr<expr>& a, const std::shared_ptr<exp
     return *a <= *b;
 }
 
-inline expr mkGe(const expr& a, const expr& b) {
-    return a >= b;
-}
-
-inline expr mkGe(const expr& a, const std::shared_ptr<expr>& b) {
-    return a >= *b;
-}
-
-inline expr mkGe(const std::shared_ptr<expr>& a, const expr& b) {
-    return *a >= b;
-}
-
-inline expr mkGe(const std::shared_ptr<expr>& a, const std::shared_ptr<expr>& b) {
-    return *a >= *b;
-}
-
 inline expr mkLe(const expr& a, const expr& b) {
     return a <= b;
 }
