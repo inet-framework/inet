@@ -138,9 +138,8 @@ class INET_API Network {
             flw->bindAllFragments(solver, ctx);
 
             addAssert(solver,  // No negative cycle values constraint
-                mkGe(
-                    flw->getStartDevice()->getFirstT1TimeZ3(),
-                    ctx.real_val(0)));
+                    flw->getStartDevice()->getFirstT1TimeZ3() >=
+                    ctx.real_val(0));
             addAssert(solver,  // Maximum transmission offset constraint
                 mkLe(
                     flw->getStartDevice()->getFirstT1TimeZ3(),
