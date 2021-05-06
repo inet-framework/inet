@@ -643,11 +643,10 @@ void Port::setupBestEffort(solver& solver, context& ctx) {
     addAssert(solver,  // Best-effort bandwidth reservation constraint
         mkLe(
             sumOfPrtTime,
-            mkMul(
                 mkSub(
                     ctx.real_val(1),
-                    bestEffortPercentZ3),
-                this->cycle->getCycleDurationZ3())));
+                    bestEffortPercentZ3) *
+                *this->cycle->getCycleDurationZ3()));
 
     /*
     addAssert(solver,
@@ -737,7 +736,7 @@ std::shared_ptr<expr> Port::departureTime(context& ctx, int auxIndex, FlowFragme
         departureTime = std::make_shared<expr>(
                 mkAdd(
                         flowFrag->getDepartureTimeZ3(auxIndex),
-                    mkMul(ctx.real_val(cycleNum), this->cycle->getCycleDurationZ3())));
+                    ctx.real_val(cycleNum) * *this->cycle->getCycleDurationZ3()));
 
 
         return departureTime;
@@ -764,7 +763,7 @@ std::shared_ptr<expr> Port::scheduledTime(context& ctx, int auxIndex, FlowFragme
         scheduledTime = std::make_shared<expr>(
                 mkAdd(
                     ctx.real_const((flowFrag->getName() + std::string("ScheduledTime") + index->to_string()).c_str()),
-                    mkMul(ctx.real_val(cycleNum), this->cycle->getCycleDurationZ3())));
+                    ctx.real_val(cycleNum) * *this->cycle->getCycleDurationZ3()));
 
         return scheduledTime;
     }

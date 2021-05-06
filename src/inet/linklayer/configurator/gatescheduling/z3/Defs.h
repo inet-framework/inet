@@ -134,22 +134,6 @@ inline expr mkSub(const std::shared_ptr<expr>& a, const std::shared_ptr<expr>& b
     return *a - *b;
 }
 
-inline expr mkMul(const expr& a, const expr& b) {
-    return a * b;
-}
-
-inline expr mkMul(const expr& a, const std::shared_ptr<expr>& b) {
-    return a * *b;
-}
-
-inline expr mkMul(const std::shared_ptr<expr>& a, const expr& b) {
-    return *a * b;
-}
-
-inline expr mkMul(const std::shared_ptr<expr>& a, const std::shared_ptr<expr>& b) {
-    return *a * *b;
-}
-
 inline expr mkDiv(const expr& a, const expr& b) {
     return a / b;
 }
