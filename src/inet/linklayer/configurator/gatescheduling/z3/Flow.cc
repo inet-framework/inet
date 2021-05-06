@@ -419,11 +419,10 @@ std::shared_ptr<expr> Flow::getLatencyZ3(solver& solver, context &ctx, int index
             flowFragments.size() - 1);
     Switch *firstSwitchInPath = ((Switch*) (path.at(0)));
     FlowFragment *firstFragmentInList = flowFragments.at(0);
-    addAssert(solver, *latency ==
-                    mkSub(
+    addAssert(solver, *latency == (
                             lastSwitchInPath->getPortOf(
                                     lastFragmentInList->getNextHop())->scheduledTime(
-                                    ctx, index, lastFragmentInList),
+                                    ctx, index, lastFragmentInList) -
                             firstSwitchInPath->getPortOf(
                                     firstFragmentInList->getNextHop())->departureTime(
                                     ctx, index, firstFragmentInList)));
@@ -448,11 +447,9 @@ std::shared_ptr<expr> Flow::getLatencyZ3(solver& solver, Device *dev, context &c
     Switch *firstSwitchInPath = ((Switch*) (nodes->at(1)->getNode())); // 1 since the first node is the publisher
     FlowFragment *firstFragmentInList = flowFrags->at(0);
     addAssert(solver,
-              latency ==
-                    mkSub(
-                            lastSwitchInPath->getPortOf(
+              latency == (  lastSwitchInPath->getPortOf(
                                     lastFragmentInList->getNextHop())->scheduledTime(
-                                    ctx, index, lastFragmentInList),
+                                    ctx, index, lastFragmentInList) -
                             firstSwitchInPath->getPortOf(
                                     firstFragmentInList->getNextHop())->departureTime(
                                     ctx, index, firstFragmentInList)));
@@ -477,17 +474,15 @@ std::shared_ptr<expr> Flow::getJitterZ3(Device *dev, solver& solver, context &ct
     FlowFragment *firstFragmentInList = nodes->at(1)->getFlowFragments().at(0);
     // z3::expr avgLatency = (z3::expr) mkDiv(getSumOfLatencyZ3(solver, dev, ctx, index), ctx.int_val(PACKETUPPERBOUNDRANGE - 1));
     std::shared_ptr<expr> avgLatency = getAvgLatency(dev, solver, ctx);
-    expr latency =
-            mkSub(
+    expr latency = (
                     lastSwitchInPath->getPortOf(
                             lastFragmentInList->getNextHop())->scheduledTime(
-                            ctx, index, lastFragmentInList),
+                            ctx, index, lastFragmentInList) -
                     firstSwitchInPath->getPortOf(
                             firstFragmentInList->getNextHop())->departureTime(
                             ctx, index, firstFragmentInList));
     addAssert(solver, *jitter ==
-                    (latency >= avgLatency ? mkSub(latency, avgLatency) :
-                            mkSub(avgLatency, latency)));
+                    (latency >= avgLatency ? latency - avgLatency : avgLatency - latency));
     return jitter;
 }
 
