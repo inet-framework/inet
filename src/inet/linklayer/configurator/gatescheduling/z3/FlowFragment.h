@@ -110,7 +110,7 @@ class INET_API FlowFragment : public Flow {
      */
 
     std::string getName() {
-        return this->name;
+        return name;
     }
 
     std::shared_ptr<expr> getDepartureTimeZ3(int index) {
@@ -138,7 +138,7 @@ class INET_API FlowFragment : public Flow {
     }
 
     std::shared_ptr<expr> getPacketSizeZ3() {
-        return this->packetSize;
+        return packetSize;
     }
 
     void setPacketSizeZ3(z3::expr packetSize) {
@@ -266,7 +266,7 @@ class INET_API FlowFragment : public Flow {
     }
 
     Port *getPort() {
-        return this->port;
+        return port;
     }
 
     std::shared_ptr<expr> getScheduledTimeZ3(int index) {

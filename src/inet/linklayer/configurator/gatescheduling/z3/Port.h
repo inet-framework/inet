@@ -106,7 +106,7 @@ class INET_API Port {
         this->gbSize = gbSize;
         this->cycle = cycle;
         this->flowFragments.clear();
-        this->cycle->setPortName(this->name);
+        this->cycle->setPortName(name);
     }
 
 
@@ -120,12 +120,12 @@ class INET_API Port {
      */
     void toZ3(context& ctx) {
         this->gbSizeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(gbSize).c_str()));
-        this->maxPacketSizeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->maxPacketSize).c_str()));
-        this->timeToTravelZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->timeToTravel).c_str()));
+        this->maxPacketSizeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(maxPacketSize).c_str()));
+        this->timeToTravelZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(timeToTravel).c_str()));
         this->portSpeedZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(portSpeed).c_str()));
         this->bestEffortPercentZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(bestEffortPercent).c_str()));
 
-        if (this->cycle->getFirstCycleStartZ3() == nullptr) {
+        if (cycle->getFirstCycleStartZ3() == nullptr) {
             this->cycle->toZ3(ctx);
         }
     }
@@ -270,11 +270,11 @@ class INET_API Port {
         int numOfPacketsScheduled = 0;
 
         /*
-        for (FlowFragment *flowFrag : this->flowFragments) {
+        for (FlowFragment *flowFrag : flowFragments) {
             System.out.println(flowFrag->getStartDevice());
             listOfPeriods.add(flowFrag->getStartDevice().getPacketPeriodicity());
         }
-        for (double periodicity : this->listOfPeriods) {
+        for (double periodicity : listOfPeriods) {
             System.out.println(std::string("Periodicidade: ") + periodicity);
         }
         */
@@ -287,18 +287,18 @@ class INET_API Port {
         this->cycleUpperBoundRange = 1;
 
         /*
-        for (FlowFragment *flowFrag : this->flowFragments) {
+        for (FlowFragment *flowFrag : flowFragments) {
             flowFrag->setNumOfPacketsSent((int) (hyperCycleSize/flowFrag->getStartDevice().getPacketPeriodicity()));
             System.out.println(std::string("Frag num packets: ") + flowFrag->getNumOfPacketsSent());
             numOfPacketsScheduled += (int) (hyperCycleSize/flowFrag->getStartDevice().getPacketPeriodicity());
         }
         */
 
-        for (double periodicity : this->listOfPeriods) {
+        for (double periodicity : listOfPeriods) {
             numOfPacketsScheduled += (int) (hyperCycleSize/periodicity);
         }
 
-        // System.out.println(std::string("Num of Cycles: ") + this->cycleUpperBoundRange);
+        // System.out.println(std::string("Num of Cycles: ") + cycleUpperBoundRange);
 
         this->cycle->setNumOfSlots(numOfPacketsScheduled);
 
@@ -319,7 +319,7 @@ class INET_API Port {
     void setUpMicroCycles(solver& solver, context& ctx) {
 
         /*
-        for (FlowFragment *flowFrag : this->flowFragments) {
+        for (FlowFragment *flowFrag : flowFragments) {
             System.out.println(flowFrag->getStartDevice());
             listOfPeriods.add(flowFrag->getStartDevice().getPacketPeriodicity());
         }
@@ -333,11 +333,11 @@ class INET_API Port {
         this->cycleUpperBoundRange = (int) (hyperCycleSize/microCycleSize);
 
         /*
-        for (FlowFragment *flowFrag : this->flowFragments) {
+        for (FlowFragment *flowFrag : flowFragments) {
             flowFrag->setNumOfPacketsSent((int) (hyperCycleSize/flowFrag->getStartDevice().getPacketPeriodicity()));
             System.out.println(std::string("Frag num packets: ") + flowFrag->getNumOfPacketsSent());
         }
-        System.out.println(std::string("Num of Cycles: ") + this->cycleUpperBoundRange);
+        System.out.println(std::string("Num of Cycles: ") + cycleUpperBoundRange);
           */
 
         // In order to use the value cycle time obtained, we must override the minimum and maximum cycle times
@@ -358,10 +358,10 @@ class INET_API Port {
         // Ideia = se a prioridade de um flow e' igual a um numero,
         // mkEq nele com o slot the cycle (getSlotS/D(prt, slotnum))
         /*
-        for (FlowFragment *frag : this->flowFragments) {
+        for (FlowFragment *frag : flowFragments) {
 
-            for (int i = 0; i < this->cycle->getNumOfPrts(); i++) {
-                for (int j = 0; j < this->cycle->getNumOfSlots(); j++) {
+            for (int i = 0; i < cycle->getNumOfPrts(); i++) {
+                for (int j = 0; j < cycle->getNumOfSlots(); j++) {
                     addAssert(solver,
                         mkITE(
                             mkAnd(
@@ -387,23 +387,23 @@ class INET_API Port {
 
         this->cycle->toZ3(ctx);
 
-        // System.out.println(std::string("On port: " + this->name + std::string(" with: ") + this->listOfPeriods.size() + " fragments"));
+        // System.out.println(std::string("On port: " + name + std::string(" with: ") + listOfPeriods.size() + " fragments"));
 
-        if (this->listOfPeriods.size() < 1) {
+        if (listOfPeriods.size() < 1) {
             return;
         }
 
 
-        if (useMicroCycles && this->listOfPeriods.size() > 0) {
+        if (useMicroCycles && listOfPeriods.size() > 0) {
             setUpMicroCycles(solver, ctx);
 
             addAssert(solver,
-                *this->cycle->getCycleDurationZ3() == ctx.real_val(std::to_string(this->microCycleSize).c_str()));
-        } else if (useHyperCycle && this->listOfPeriods.size() > 0) {
+                *cycle->getCycleDurationZ3() == ctx.real_val(std::to_string(microCycleSize).c_str()));
+        } else if (useHyperCycle && listOfPeriods.size() > 0) {
             setUpHyperCycle(solver, ctx);
 
             addAssert(solver,
-                *this->cycle->getCycleDurationZ3() == ctx.real_val(std::to_string(this->definedHyperCycleSize).c_str()));
+                *cycle->getCycleDurationZ3() == ctx.real_val(std::to_string(definedHyperCycleSize).c_str()));
         }
     }
 
@@ -428,10 +428,10 @@ class INET_API Port {
      */
     void setupSchedulingRules(solver& solver, context& ctx) {
 
-        if (this->flowFragments.size() == 0) {
+        if (flowFragments.size() == 0) {
             addAssert(solver,
                 ctx.real_val(std::to_string(0).c_str()) ==
-                *this->cycle->getCycleDurationZ3());
+                *cycle->getCycleDurationZ3());
             //    addAssert(solver, mkEq(
             //    ctx.real_val(std::to_string(0)),
             //    this->cycle->getFirstCycleStartZ3()
@@ -441,17 +441,17 @@ class INET_API Port {
         }
 
         /*
-        if (useMicroCycles && this->flowFragments.size() > 0) {
+        if (useMicroCycles && flowFragments.size() > 0) {
             addAssert(solver, mkEq(
-                ctx.real_val(std::to_string(this->microCycleSize)),
+                ctx.real_val(std::to_string(microCycleSize)),
                 this->cycle->getCycleDurationZ3()));
-        } else if (useHyperCycle && this->flowFragments.size() > 0) {
+        } else if (useHyperCycle && flowFragments.size() > 0) {
             addAssert(solver, mkEq(
-                ctx.real_val(std::to_string(this->definedHyperCycleSize)),
+                ctx.real_val(std::to_string(definedHyperCycleSize)),
                 this->cycle->getCycleDurationZ3()));
         } else {
-            for (FlowFragment flowFrag : this->flowFragments) {
-                flowFrag->setNumOfPacketsSent(this->packetUpperBoundRange);
+            for (FlowFragment flowFrag : flowFragments) {
+                flowFrag->setNumOfPacketsSent(packetUpperBoundRange);
             }
         }
         */
@@ -467,7 +467,7 @@ class INET_API Port {
          */
 
 
-        for (FlowFragment *flowFrag : this->flowFragments) {
+        for (FlowFragment *flowFrag : flowFragments) {
             setupTimeSlots(solver, ctx, flowFrag);
             setupDevPacketTimes(solver, ctx, flowFrag);
         }
@@ -495,7 +495,7 @@ class INET_API Port {
     std::shared_ptr<expr> departureTime(context& ctx, z3::expr index, FlowFragment *flowFrag){
 
         // If the index is 0, then its the first departure time, else add index * periodicity
-        return this->departureTime(ctx, atoi(index.to_string().c_str()), flowFrag);
+        return departureTime(ctx, atoi(index.to_string().c_str()), flowFrag);
 
         /*
         return (z3::expr) mkITE(
@@ -611,7 +611,7 @@ class INET_API Port {
      * @return bool value. True if automated application period methodology is used, false elsewhise
      */
     bool checkIfAutomatedApplicationPeriod() {
-        if (this->useHyperCycle || this->useMicroCycles)
+        if (useHyperCycle || useMicroCycles)
             return true;
         return false;
     }

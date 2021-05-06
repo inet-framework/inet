@@ -109,7 +109,7 @@ class INET_API Network {
      */
     void secureHC(solver& solver, context& ctx) {
         if (jitterUpperBoundRange != -1) { // If there is a value on the upperBoundRange, it was set through the network
-            this->setJitterUpperBoundRangeZ3(ctx, this->jitterUpperBoundRange);
+            this->setJitterUpperBoundRangeZ3(ctx, jitterUpperBoundRange);
         }
 
         std::stack<std::shared_ptr<expr>> jitterList;
@@ -119,7 +119,7 @@ class INET_API Network {
         //switch1.setupSchedulingRules(solver, ctx);
 
 
-        for (Switch *swt : this->getSwitches()) {
+        for (Switch *swt : getSwitches()) {
             swt->setupSchedulingRules(solver, ctx);
         }
 
@@ -132,7 +132,7 @@ class INET_API Network {
          *  constraint
          */
 
-        for (Flow *flw : this->getFlows()) {
+        for (Flow *flw : getFlows()) {
             flw->setNumberOfPacketsSent(flw->getPathTree()->getRoot());
 
             flw->bindAllFragments(solver, ctx);
@@ -251,14 +251,14 @@ class INET_API Network {
         // TODO: Don't forget to load the values of this class
 
         // On all network flows: Data given by the user will be converted to z3 values
-        for (Flow *flw : this->flows) {
+        for (Flow *flw : flows) {
             // flw->toZ3(ctx);
             flw->flowPriority = std::make_shared<expr>(ctx.int_val((flw->name + std::string("Priority")).c_str()));
             ((Device *) flw->getPathTree()->getRoot()->getNode())->toZ3(ctx);
         }
 
         // On all network switches: Data given by the user will be converted to z3 values
-        for (Switch *swt : this->switches) {
+        for (Switch *swt : switches) {
             for (Port *port : swt->getPorts()) {
                 for (FlowFragment *frag : port->getFlowFragments()) {
                     frag->createNewDepartureTimeZ3List();
@@ -270,7 +270,7 @@ class INET_API Network {
         }
 
         /*
-        for (Switch swt : this->getSwitches()) {
+        for (Switch swt : getSwitches()) {
             if (dynamic_cast<TSNSwitch *>(swt)) {
                 ((TSNSwitch *) swt).loadZ3(ctx, solver);
             }

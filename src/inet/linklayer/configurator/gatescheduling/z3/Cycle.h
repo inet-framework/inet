@@ -185,11 +185,11 @@ class INET_API Cycle {
         this->slotStartZ3_.clear();
         this->slotDurationZ3_.clear();
 
-        for (int i = 0; i < this->numOfPrts; i++) {
+        for (int i = 0; i < numOfPrts; i++) {
             this->slotStartZ3_.push_back(std::vector<std::shared_ptr<expr> >());
             this->slotDurationZ3_.push_back(std::vector<std::shared_ptr<expr> >());
-            for (int j = 0; j < this->numOfSlots; j++) {
-                expr v = ctx.real_const((std::string("cycleOfPort") + this->portName + std::string("prt") + std::to_string(i+1) + std::string("slot") + std::to_string(j+1)).c_str());
+            for (int j = 0; j < numOfSlots; j++) {
+                expr v = ctx.real_const((std::string("cycleOfPort") + portName + std::string("prt") + std::to_string(i+1) + std::string("slot") + std::to_string(j+1)).c_str());
                 this->slotStartZ3_.at(i).push_back(std::make_shared<expr>(v));
             }
         }
@@ -262,27 +262,27 @@ class INET_API Cycle {
         // maximumSlotDurationZ3 already started on toZ3;
 
         addAssert(solver,
-                *this->cycleDurationZ3 ==
-                ctx.real_val(std::to_string(this->cycleDuration).c_str()));
+                *cycleDurationZ3 ==
+                ctx.real_val(std::to_string(cycleDuration).c_str()));
 
         addAssert(solver,
-                *this->firstCycleStartZ3 ==
-                ctx.real_val(std::to_string(this->firstCycleStart).c_str()));
+                *firstCycleStartZ3 ==
+                ctx.real_val(std::to_string(firstCycleStart).c_str()));
 
-        for (int prt : this->getSlotsUsed()) {
+        for (int prt : getSlotsUsed()) {
             // Where are the slot duration per priority instantiated? Must do it before loading
-            for (int slotIndex = 0; slotIndex < this->numOfSlots; slotIndex++) {
+            for (int slotIndex = 0; slotIndex < numOfSlots; slotIndex++) {
                 addAssert(solver,
-                        *this->slotStartZ3_.at(prt).at(slotIndex) ==
-                        ctx.real_val(std::to_string(this->slotStart.at(std::find(slotsUsed.begin(), slotsUsed.end(), prt) - slotsUsed.begin()).at(slotIndex)).c_str()));
+                        *slotStartZ3_.at(prt).at(slotIndex) ==
+                        ctx.real_val(std::to_string(slotStart.at(std::find(slotsUsed.begin(), slotsUsed.end(), prt) - slotsUsed.begin()).at(slotIndex)).c_str()));
             }
 
             /*
-            for (int slotIndex = 0; slotIndex < this->numOfSlots; slotIndex++) {
+            for (int slotIndex = 0; slotIndex < numOfSlots; slotIndex++) {
                 addAssert(solver,
                     mkEq(
                         this->slotDurationZ3_.get(prt).get(slotIndex),
-                        ctx.real_val(std::to_string(this->slotDuration.get(prt).get(slotIndex)))));
+                        ctx.real_val(std::to_string(slotDuration.get(prt).get(slotIndex)))));
             }
             */
         }
@@ -378,7 +378,7 @@ class INET_API Cycle {
     }
 
     int getNumOfPrts() {
-        return this->numOfPrts;
+        return numOfPrts;
     }
 
     void setNumOfPrts(int numOfPrts) {
@@ -402,7 +402,7 @@ class INET_API Cycle {
     }
 
     std::vector<int> getSlotsUsed (){
-        return this->slotsUsed;
+        return slotsUsed;
     }
 
     std::vector<std::vector<double>> getSlotDuration() {
@@ -410,11 +410,11 @@ class INET_API Cycle {
     }
 
     double getSlotStart(int prt, int index) {
-        return this->slotStart.at(std::find(slotsUsed.begin(), slotsUsed.end(), prt) - slotsUsed.begin()).at(index);
+        return slotStart.at(std::find(slotsUsed.begin(), slotsUsed.end(), prt) - slotsUsed.begin()).at(index);
     }
 
     double getSlotDuration(int prt, int index) {
-        return this->slotDuration.at(std::find(slotsUsed.begin(), slotsUsed.end(), prt) - slotsUsed.begin()).at(index);
+        return slotDuration.at(std::find(slotsUsed.begin(), slotsUsed.end(), prt) - slotsUsed.begin()).at(index);
     }
 
     std::string getPortName() {
@@ -426,12 +426,12 @@ class INET_API Cycle {
     }
 
     std::shared_ptr<expr> getSlotStartZ3(int prt, int slotNum) {
-        return this->slotStartZ3_.at(prt).at(slotNum);
+        return slotStartZ3_.at(prt).at(slotNum);
     }
 
     /*
      std::shared_ptr<expr> getSlotDurationZ3(int prt, int slotNum) {
-        return this->slotDurationZ3.get(prt).get(slotNum);
+        return slotDurationZ3.get(prt).get(slotNum);
     }
     */
 };

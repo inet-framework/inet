@@ -25,8 +25,8 @@ namespace inet {
 
 void Port::setUpCycleRules(solver& solver, context& ctx) {
 
-    for (FlowFragment *frag : this->flowFragments) {
-        for (int index = 0; index < this->cycle->getNumOfSlots(); index++) {
+    for (FlowFragment *frag : flowFragments) {
+        for (int index = 0; index < cycle->getNumOfSlots(); index++) {
             std::shared_ptr<expr> flowPriority = frag->getFragmentPriorityZ3();
             expr indexZ3 = ctx.int_val(index);
 
@@ -56,7 +56,7 @@ void Port::setUpCycleRules(solver& solver, context& ctx) {
              * properties) (Same priority, same slot constraint)
              */
 
-            for (FlowFragment *auxFrag : this->flowFragments) {
+            for (FlowFragment *auxFrag : flowFragments) {
                 addAssert(solver,
                     implies(*frag->getFragmentPriorityZ3() == *auxFrag->getFragmentPriorityZ3(),
                         mkAnd(*cycle->slotStartZ3(ctx, *frag->getFragmentPriorityZ3(), indexZ3) ==
@@ -66,7 +66,7 @@ void Port::setUpCycleRules(solver& solver, context& ctx) {
             }
 
             // No two slots can overlap (No overlapping slots constraint)
-            for (FlowFragment *auxFrag : this->flowFragments) {
+            for (FlowFragment *auxFrag : flowFragments) {
                 if (auxFrag == frag) {
                     continue;
                 }
@@ -88,7 +88,7 @@ void Port::setUpCycleRules(solver& solver, context& ctx) {
             }
 
 
-            if (index < this->cycle->getNumOfSlots() - 1) {
+            if (index < cycle->getNumOfSlots() - 1) {
                 addAssert(solver,
                         *cycle->slotStartZ3(ctx, *flowPriority, indexZ3) <
                         *cycle->slotStartZ3(ctx, *flowPriority, ctx.int_val(index + 1)));
@@ -101,8 +101,8 @@ void Port::setUpCycleRules(solver& solver, context& ctx) {
              * of at least gbSize (the size of the guard band) between them
              * (guard band constraint).
              *
-            for (FlowFragment auxFrag : this->flowFragments) {
-                for (int auxIndex = 0; auxIndex < this->cycle->getNumOfSlots(); auxIndex++) {
+            for (FlowFragment auxFrag : flowFragments) {
+                for (int auxIndex = 0; auxIndex < cycle->getNumOfSlots(); auxIndex++) {
                     std::shared_ptr<expr> auxIndexZ3 = ctx.int_val(auxIndex);
 
                     if (auxFrag->equals(frag)) {
@@ -143,7 +143,7 @@ void Port::setUpCycleRules(solver& solver, context& ctx) {
 
 void Port::setupTimeSlots(solver& solver, context& ctx, FlowFragment *flowFrag) {
     // If there is a flow assigned to the slot, slotDuration must be greater than transmission time
-    for (int index = 0; index < this->cycle->getNumOfSlots(); index++) {
+    for (int index = 0; index < cycle->getNumOfSlots(); index++) {
         addAssert(solver,
             mkGe(
                 cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), ctx.int_val(index+1)),
@@ -152,14 +152,14 @@ void Port::setupTimeSlots(solver& solver, context& ctx, FlowFragment *flowFrag) 
                         cycle->slotDurationZ3(ctx, *flowFrag->getFragmentPriorityZ3(), ctx.int_val(index)))));
     }
 
-    for (int index = 0; index < this->cycle->getNumOfSlots(); index++) {
+    for (int index = 0; index < cycle->getNumOfSlots(); index++) {
         expr indexZ3 = ctx.int_val(index);
 
-        // addAssert(solver, mkGe(cycle->slotDurationZ3(ctx, flowFrag->getFlowPriority(), indexZ3), this->transmissionTimeZ3));
+        // addAssert(solver, mkGe(cycle->slotDurationZ3(ctx, flowFrag->getFlowPriority(), indexZ3), transmissionTimeZ3));
 
         // Every flow must have a priority (Priority assignment constraint)
         addAssert(solver, mkGe(flowFrag->getFragmentPriorityZ3(), ctx.int_val(0)));
-        addAssert(solver, *flowFrag->getFragmentPriorityZ3() < ctx.int_val(this->cycle->getNumOfPrts()));
+        addAssert(solver, *flowFrag->getFragmentPriorityZ3() < ctx.int_val(cycle->getNumOfPrts()));
 
         // Slot start must be <= cycle time - slot duration
         addAssert(solver,
@@ -183,7 +183,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
         addAssert(solver,  // Time to Transmit constraint.
             mkGe(
                 this->scheduledTime(ctx, i, flowFrag),
-                mkAdd(this->arrivalTime(ctx, i, flowFrag), flowFrag->getPacketSizeZ3() / portSpeedZ3)));
+                mkAdd(arrivalTime(ctx, i, flowFrag), flowFrag->getPacketSizeZ3() / portSpeedZ3)));
 
     }
 
@@ -192,7 +192,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
     std::shared_ptr<expr> auxExp2 = std::make_shared<expr>(ctx.bool_val(true));
     std::shared_ptr<expr> exp = nullptr;
 
-    for (FlowFragment *auxFragment : this->flowFragments) {
+    for (FlowFragment *auxFragment : flowFragments) {
 
         /*
         System.out.println(std::string("Num de pacotes escalonados:") + auxFragment->getNumOfPacketsSent());
@@ -236,8 +236,8 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                         mkAnd(
                             mkAnd(
                                 *auxFragment->getFragmentPriorityZ3() == *flowFrag->getFragmentPriorityZ3(),
-                                mkLe(this->arrivalTime(ctx, i, flowFrag), this->arrivalTime(ctx, j, auxFragment))),
-                                *this->scheduledTime(ctx, j, auxFragment) ==
+                                mkLe(arrivalTime(ctx, i, flowFrag), arrivalTime(ctx, j, auxFragment))),
+                                *scheduledTime(ctx, j, auxFragment) ==
                                 mkAdd(
                                     this->scheduledTime(ctx, i, flowFrag),
                                     flowFrag->getPacketSizeZ3() / portSpeedZ3)));
@@ -247,7 +247,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
             }
 
 
-            for (int j = 0; j < this->cycleUpperBoundRange; j++) {
+            for (int j = 0; j < cycleUpperBoundRange; j++) {
 
                 /*
                 T2 IS INSIDE SLOT, HAS ENOUGH TIME TO TRANSMIT
@@ -258,7 +258,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                 ; **************************************
                 */
 
-                for (int index = 0; index < this->cycle->getNumOfSlots(); index++) {
+                for (int index = 0; index < cycle->getNumOfSlots(); index++) {
                     indexZ3 = std::make_shared<expr>(ctx.int_val(index));
 
                     auxExp2 = std::make_shared<expr>(mkAnd(auxExp2, // Arrived during a time slot predicate
@@ -278,7 +278,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                                         mkAdd(
                                             cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3),
                                             cycle->cycleStartZ3(ctx, j)))),
-                                    *this->scheduledTime(ctx, i, flowFrag) ==
+                                    *scheduledTime(ctx, i, flowFrag) ==
                                     mkAdd(
                                         this->arrivalTime(ctx, i, flowFrag),
                                         flowFrag->getPacketSizeZ3() / portSpeedZ3))));
@@ -297,28 +297,28 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                         auxExp2 = std::make_shared<expr>(mkAnd(auxExp2, // Arrived before slot start constraint
                                 implies(
                                     mkAnd(
-                                        *this->arrivalTime(ctx, i, flowFrag) <
+                                        *arrivalTime(ctx, i, flowFrag) <
                                         mkAdd(
                                             cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3),
                                             cycle->cycleStartZ3(ctx, j)),
                                         mkGe(
                                             this->arrivalTime(ctx, i, flowFrag),
                                             cycle->cycleStartZ3(ctx, j))),
-                                        *this->scheduledTime(ctx, i, flowFrag) ==
+                                        *scheduledTime(ctx, i, flowFrag) ==
                                         mkAdd(
                                             mkAdd(
                                                 cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3),
                                                 cycle->cycleStartZ3(ctx, j)),
                                             flowFrag->getPacketSizeZ3() / portSpeedZ3))));
-                    } else if (index < this->cycle->getNumOfSlots()) {
+                    } else if (index < cycle->getNumOfSlots()) {
                         auxExp2 = std::make_shared<expr>(mkAnd(auxExp2,
                                 implies(
                                     mkAnd(
-                                        *this->arrivalTime(ctx, i, flowFrag) <
+                                        *arrivalTime(ctx, i, flowFrag) <
                                         mkAdd(
                                             cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3),
                                             cycle->cycleStartZ3(ctx, j)),
-                                        *this->arrivalTime(ctx, i, flowFrag) >
+                                        *arrivalTime(ctx, i, flowFrag) >
                                         mkSub(
                                             mkAdd(
                                                 cycle->cycleStartZ3(ctx, j),
@@ -326,7 +326,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                                                     cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), ctx.int_val(index - 1)),
                                                     cycle->slotDurationZ3(ctx, *flowFrag->getFragmentPriorityZ3(), ctx.int_val(index - 1)))),
                                             flowFrag->getPacketSizeZ3() / portSpeedZ3)),
-                                        *this->scheduledTime(ctx, i, flowFrag) ==
+                                        *scheduledTime(ctx, i, flowFrag) ==
                                         mkAdd(
                                             mkAdd(
                                                 cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3),
@@ -344,7 +344,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                     ; ****************************************************************************
                     */
 
-                    if (index == this->cycle->getNumOfSlots() - 1) {
+                    if (index == cycle->getNumOfSlots() - 1) {
                         auxExp2 = std::make_shared<expr>(mkAnd(auxExp2, // Arrived after slot end constraint
                                 implies(
                                     mkAnd(
@@ -369,7 +369,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                     * THE CODE BELLOW HAS ISSUES REGARDING NOT COVERING ALL CASES (ALLOWS DELAY).
                     * REVIEW LATER.
 
-                    if (j < this->cycleUpperBoundRange - 1 && index == this->cycle->getNumOfSlots() - 1) {
+                    if (j < cycleUpperBoundRange - 1 && index == cycle->getNumOfSlots() - 1) {
                         auxExp2 = mkAnd((expr) auxExp2, // Arrived after slot end constraint
                                 implies(
                                     mkAnd(
@@ -394,7 +394,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                                                 cycle->slotStartZ3(ctx, flowFrag->getFlowPriority(), ctx.int_val(0)),
                                                 cycle->cycleStartZ3(ctx, j + 1)),
                                             this->transmissionTimeZ3))));
-                    } else if (j == this->cycleUpperBoundRange - 1 && index == this->cycle->getNumOfSlots() - 1) {
+                    } else if (j == cycleUpperBoundRange - 1 && index == cycle->getNumOfSlots() - 1) {
                         auxExp2 = mkAnd((expr) auxExp2,
                                 implies(
                                     mkAnd(
@@ -442,8 +442,8 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
 
     //Every packet must be transmitted inside a timeslot (transmit inside a time slot constraint)
     for (int i = 0; i < flowFrag->getNumOfPacketsSent(); i++) {
-        for (int j = 0; j < this->cycleUpperBoundRange; j++) {
-            for (int index = 0; index < this->cycle->getNumOfSlots(); index++) {
+        for (int j = 0; j < cycleUpperBoundRange; j++) {
+            for (int index = 0; index < cycle->getNumOfSlots(); index++) {
                 indexZ3 = std::make_shared<expr>(ctx.int_val(index));
                 auxExp = std::make_shared<expr>(mkAnd(
                          mkGe(
@@ -478,7 +478,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
     }
 
     for (int i = 0; i < flowFrag->getNumOfPacketsSent(); i++) {
-        for (FlowFragment *auxFlowFrag : this->flowFragments) {
+        for (FlowFragment *auxFlowFrag : flowFragments) {
             for (int j = 0; j < auxFlowFrag->getNumOfPacketsSent(); j++) {
 
                if (auxFlowFrag == flowFrag) {
@@ -546,7 +546,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
      * should be transmitted first (FIFO priority queue constraint)
      */
     for (int i = 0; i < flowFrag->getNumOfPacketsSent(); i++) {
-        for (FlowFragment *auxFlowFrag : this->flowFragments) {
+        for (FlowFragment *auxFlowFrag : flowFragments) {
             for (int j = 0; j < auxFlowFrag->getNumOfPacketsSent(); j++) {
 
                 if ((flowFrag == auxFlowFrag && i == j)) {
@@ -592,15 +592,15 @@ void Port::setupBestEffort(solver& solver, context& ctx) {
     std::shared_ptr<expr> sumOfPrtTime = nullptr;
 
     for (int i = 0; i < 8; i++) {
-        slotStart[i] = std::make_shared<expr>(ctx.real_const((this->name + std::string("SlotStart") + std::to_string(i)).c_str()));
-        slotDuration[i] = std::make_shared<expr>(ctx.real_const((this->name + std::string("SlotDuration") + std::to_string(i)).c_str()));
+        slotStart[i] = std::make_shared<expr>(ctx.real_const((name + std::string("SlotStart") + std::to_string(i)).c_str()));
+        slotDuration[i] = std::make_shared<expr>(ctx.real_const((name + std::string("SlotDuration") + std::to_string(i)).c_str()));
     }
 
-    for (FlowFragment f : this->flowFragments) {
+    for (FlowFragment f : flowFragments) {
         // expr sumOfSlotsStart = ctx.real_val(0);
         std::shared_ptr<expr> sumOfSlotsDuration = std::make_shared<expr>(ctx.real_val(0));
 
-        for (int i = 0; i < this->cycle->getNumOfSlots(); i++) {
+        for (int i = 0; i < cycle->getNumOfSlots(); i++) {
             sumOfSlotsDuration = std::make_shared<expr>(mkAdd(sumOfSlotsDuration, cycle->slotDurationZ3(ctx, *f.getFragmentPriorityZ3(), ctx.int_val(i))));
         }
 
@@ -614,7 +614,7 @@ void Port::setupBestEffort(solver& solver, context& ctx) {
     for (int i = 1; i<=8; i++) {
         firstPartOfImplication = nullptr;
 
-        for (FlowFragment f : this->flowFragments) {
+        for (FlowFragment f : flowFragments) {
             if (firstPartOfImplication == nullptr) {
                 firstPartOfImplication = std::make_shared<expr>(!(*f.getFragmentPriorityZ3() == ctx.int_val(i)));
             } else {
@@ -645,18 +645,18 @@ void Port::setupBestEffort(solver& solver, context& ctx) {
                 mkSub(
                     ctx.real_val(1),
                     bestEffortPercentZ3) *
-                *this->cycle->getCycleDurationZ3()));
+                this->cycle->getCycleDurationZ3()));
 
     /*
     addAssert(solver,
             mkLe(
                 sumOfPrtTime,
-                mkMul(bestEffortPercentZ3, this->cycle->getCycleDurationZ3())));
+                mkMul(bestEffortPercentZ3, cycle->getCycleDurationZ3())));
 
     addAssert(solver,
         mkGe(
             bestEffortPercentZ3,
-            mkDiv(sumOfPrtTime, this->cycle->getCycleDurationZ3())));
+            mkDiv(sumOfPrtTime, cycle->getCycleDurationZ3())));
     */
 
 }
@@ -667,9 +667,9 @@ void Port::zeroOutNonUsedSlots(solver& solver, context& ctx)
     std::shared_ptr<expr> exp2;
     std::shared_ptr<expr> indexZ3;
 
-    for (int prtIndex = 0; prtIndex < this->cycle->getNumOfPrts(); prtIndex++) {
-        for (FlowFragment *frag : this->flowFragments) {
-            for (int slotIndex = 0; slotIndex < this->cycle->getNumOfSlots(); slotIndex++) {
+    for (int prtIndex = 0; prtIndex < cycle->getNumOfPrts(); prtIndex++) {
+        for (FlowFragment *frag : flowFragments) {
+            for (int slotIndex = 0; slotIndex < cycle->getNumOfSlots(); slotIndex++) {
                 addAssert(solver,
                     implies(*frag->getFragmentPriorityZ3() == ctx.int_val(prtIndex),
                         mkAnd(*cycle->slotStartZ3(ctx, *frag->getFragmentPriorityZ3(), ctx.int_val(slotIndex)) ==
@@ -681,12 +681,12 @@ void Port::zeroOutNonUsedSlots(solver& solver, context& ctx)
     }
 
 
-    for (int prtIndex = 0; prtIndex < this->cycle->getNumOfPrts(); prtIndex++) {
-        for (int cycleNum = 0; cycleNum < this->cycleUpperBoundRange; cycleNum++) {
-            for (int indexNum = 0; indexNum < this->cycle->getNumOfSlots(); indexNum++) {
+    for (int prtIndex = 0; prtIndex < cycle->getNumOfPrts(); prtIndex++) {
+        for (int cycleNum = 0; cycleNum < cycleUpperBoundRange; cycleNum++) {
+            for (int indexNum = 0; indexNum < cycle->getNumOfSlots(); indexNum++) {
                 indexZ3 = std::make_shared<expr>(ctx.int_val(indexNum));
                 exp1 = std::make_shared<expr>(ctx.bool_val(true));
-                for (FlowFragment *frag : this->flowFragments) {
+                for (FlowFragment *frag : flowFragments) {
                     for (int packetNum = 0; packetNum < frag->getNumOfPacketsSent(); packetNum++) {
                         exp1 = std::make_shared<expr>(mkAnd(
                                 exp1,
@@ -735,7 +735,7 @@ std::shared_ptr<expr> Port::departureTime(context& ctx, int auxIndex, FlowFragme
         departureTime = std::make_shared<expr>(
                 mkAdd(
                         flowFrag->getDepartureTimeZ3(auxIndex),
-                    ctx.real_val(cycleNum) * *this->cycle->getCycleDurationZ3()));
+                    ctx.real_val(cycleNum) * cycle->getCycleDurationZ3()));
 
 
         return departureTime;
@@ -762,7 +762,7 @@ std::shared_ptr<expr> Port::scheduledTime(context& ctx, int auxIndex, FlowFragme
         scheduledTime = std::make_shared<expr>(
                 mkAdd(
                     ctx.real_const((flowFrag->getName() + std::string("ScheduledTime") + index->to_string()).c_str()),
-                    ctx.real_val(cycleNum) * *this->cycle->getCycleDurationZ3()));
+                    ctx.real_val(cycleNum) * cycle->getCycleDurationZ3()));
 
         return scheduledTime;
     }
@@ -780,7 +780,7 @@ void Port::loadZ3(context& ctx, solver& solver)
 
     this->cycle->loadZ3(ctx, solver);
 
-    for (FlowFragment *frag : this->flowFragments) {
+    for (FlowFragment *frag : flowFragments) {
 
         frag->setFragmentPriorityZ3(
             ctx.int_val(
@@ -793,15 +793,15 @@ void Port::loadZ3(context& ctx, solver& solver)
                 ctx.int_val(frag->getFragmentPriority())));
         */
 
-        for (int index = 0; index < this->cycle->getNumOfSlots(); index++) {
+        for (int index = 0; index < cycle->getNumOfSlots(); index++) {
             addAssert(solver,
-                    *this->cycle->slotDurationZ3(ctx, *frag->getFragmentPriorityZ3(), ctx.int_val(index)) ==
+                    *cycle->slotDurationZ3(ctx, *frag->getFragmentPriorityZ3(), ctx.int_val(index)) ==
                     ctx.real_val(
                         std::to_string(
                             this->cycle->getSlotDuration(frag->getFragmentPriority(), index)).c_str()));
 
             addAssert(solver,
-                    *this->cycle->slotStartZ3(ctx, *frag->getFragmentPriorityZ3(), ctx.int_val(index)) ==
+                    *cycle->slotStartZ3(ctx, *frag->getFragmentPriorityZ3(), ctx.int_val(index)) ==
                     ctx.real_val(
                         std::to_string(
                             this->cycle->getSlotStart(frag->getFragmentPriority(), index)).c_str()));
@@ -819,11 +819,11 @@ void Port::loadZ3(context& ctx, solver& solver)
                 frag->addDepartureTimeZ3(ctx.real_val(std::to_string(frag->getDepartureTime(i)).c_str()));
 
             addAssert(solver,
-                    *this->arrivalTime(ctx, i, frag) ==
+                    *arrivalTime(ctx, i, frag) ==
                     ctx.real_val(std::to_string(frag->getArrivalTime(i)).c_str()));
 
             addAssert(solver,
-                    *this->scheduledTime(ctx, i, frag) ==
+                    *scheduledTime(ctx, i, frag) ==
                     ctx.real_val(std::to_string(frag->getScheduledTime(i)).c_str()));
 
         }
@@ -835,18 +835,18 @@ std::shared_ptr<expr> Port::getScheduledTimeOfPreviousPacket(context& ctx, FlowF
 {
     std::shared_ptr<expr> prevPacketST = std::make_shared<expr>(ctx.real_val(0));
 
-    for (FlowFragment *auxFrag : this->flowFragments) {
+    for (FlowFragment *auxFrag : flowFragments) {
 
         for (int i = 0; i < f->getNumOfPacketsSent(); i++) {
             prevPacketST = std::make_shared<expr>(
                         mkAnd(
                             *auxFrag->getFragmentPriorityZ3() == *f->getFragmentPriorityZ3(),
                             mkAnd(
-                                *this->scheduledTime(ctx, i, auxFrag) <
-                                *this->scheduledTime(ctx, index, f),
-                                *this->scheduledTime(ctx, i, auxFrag) >
+                                *scheduledTime(ctx, i, auxFrag) <
+                                *scheduledTime(ctx, index, f),
+                                *scheduledTime(ctx, i, auxFrag) >
                                 *prevPacketST)) ?
-                        *this->scheduledTime(ctx, i, auxFrag) :
+                        *scheduledTime(ctx, i, auxFrag) :
                         *prevPacketST);
 
         }
@@ -855,7 +855,7 @@ std::shared_ptr<expr> Port::getScheduledTimeOfPreviousPacket(context& ctx, FlowF
 
     return std::make_shared<expr>(
                 *prevPacketST == ctx.real_val(0) ?
-                *this->scheduledTime(ctx, index, f) :
+                *scheduledTime(ctx, index, f) :
                 *prevPacketST);
 }
 

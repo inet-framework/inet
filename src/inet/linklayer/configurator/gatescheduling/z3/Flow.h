@@ -169,19 +169,19 @@ class INET_API Flow {
     void convertUnicastFlow() {
         // AVOID USING THE ARRAY LIST
         // TODO: REMOVE OPTION TO DISTINGUISH BETWEEN UNICAST AND MULTICAST LATER
-        if (this->type == UNICAST) {
+        if (type == UNICAST) {
             std::deque<PathNode *> nodeList;
 
             PathTree *pathTree = new PathTree();
             PathNode *pathNode;
-            pathNode = pathTree->addRoot(this->startDevice);
+            pathNode = pathTree->addRoot(startDevice);
             pathNode = pathNode->addChild(path.at(0));
             nodeList.push_back(pathNode);
             for (int i = 1;  i < path.size(); i++) {
                 nodeList.push_back(nodeList.front()->addChild(path.at(i)));
                 nodeList.pop_front();
             }
-            nodeList.front()->addChild(this->endDevice);
+            nodeList.front()->addChild(endDevice);
             nodeList.pop_front();
             this->setPathTree(pathTree);
 
@@ -198,7 +198,7 @@ class INET_API Flow {
      * @param ctx      context variable containing the z3 environment used
      */
     void toZ3(context& ctx) {
-        if (this->type == UNICAST) { // If flow is unicast
+        if (type == UNICAST) { // If flow is unicast
             // Convert start device to z3
             startDevice->toZ3(ctx);
 
@@ -208,41 +208,41 @@ class INET_API Flow {
              */
 
             int currentSwitchIndex = 0;
-            for (Switch *swt : this->path) {
+            for (Switch *swt : path) {
                 this->pathToZ3(ctx, swt, currentSwitchIndex);
                 currentSwitchIndex++;
             }
 
-        } else if (this->type == PUBLISH_SUBSCRIBE) { // If flow is publish subscribe
+        } else if (type == PUBLISH_SUBSCRIBE) { // If flow is publish subscribe
             /*
              * Converts the properties of the root to z3 and traverse the tree
              * doing the same and creating flow fragments for every stream
              * going out of a switch.
              */
 
-            this->startDevice = (Device *) this->pathTree->getRoot()->getNode();
+            this->startDevice = (Device *) pathTree->getRoot()->getNode();
             this->startDevice->toZ3(ctx);
 
-            if (this->priorityValue < 0 || this->priorityValue > 7) {
-                this->flowPriority = std::make_shared<expr>(ctx.int_const((this->name + std::string("Priority")).c_str()));
+            if (priorityValue < 0 || priorityValue > 7) {
+                this->flowPriority = std::make_shared<expr>(ctx.int_const((name + std::string("Priority")).c_str()));
             } else {
-                this->flowPriority = std::make_shared<expr>(ctx.int_val(this->priorityValue));
+                this->flowPriority = std::make_shared<expr>(ctx.int_val(priorityValue));
             }
 
-            if (this->useCustomValues) {
-                this->flowSendingPeriodicityZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->flowSendingPeriodicity).c_str()));
+            if (useCustomValues) {
+                this->flowSendingPeriodicityZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(flowSendingPeriodicity).c_str()));
 
-                if (this->flowFirstSendingTime >= 0){
-                    this->flowFirstSendingTimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->flowFirstSendingTime).c_str()));
+                if (flowFirstSendingTime >= 0){
+                    this->flowFirstSendingTimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(flowFirstSendingTime).c_str()));
                 } else {
-                    this->flowFirstSendingTimeZ3 = std::make_shared<expr>(ctx.real_const((std::string("flow") + std::to_string(this->instance) + std::string("FirstSendingTime")).c_str()));
+                    this->flowFirstSendingTimeZ3 = std::make_shared<expr>(ctx.real_const((std::string("flow") + std::to_string(instance) + std::string("FirstSendingTime")).c_str()));
                 }
             } else {
-                this->flowFirstSendingTimeZ3 = this->startDevice->getFirstT1TimeZ3();
-                this->flowSendingPeriodicityZ3 = this->startDevice->getPacketPeriodicityZ3();
+                this->flowFirstSendingTimeZ3 = startDevice->getFirstT1TimeZ3();
+                this->flowSendingPeriodicityZ3 = startDevice->getPacketPeriodicityZ3();
             }
 
-            this->nodeToZ3(ctx, this->pathTree->getRoot(), nullptr);
+            this->nodeToZ3(ctx, pathTree->getRoot(), nullptr);
         }
     }
 
@@ -273,7 +273,7 @@ class INET_API Flow {
     void bindToNextFragment(solver& solver, context& ctx, FlowFragment *frag);
 
     void bindAllFragments(solver& solver, context& ctx){
-        for (PathNode node : this->pathTree->getRoot()->getChildren()){
+        for (PathNode node : pathTree->getRoot()->getChildren()){
             for (FlowFragment *frag : node.getFlowFragments()){
                 this->bindToNextFragment(solver, ctx, frag);
             }
@@ -295,7 +295,7 @@ class INET_API Flow {
         PathNode *auxNode = nullptr;
 
         // Iterate over leaves, get reference to the leaf of end device
-        for (PathNode *node : *this->pathTree->getLeaves()) {
+        for (PathNode *node : *pathTree->getLeaves()) {
             flowEndDevices.push_back((Device *) node->getNode());
 
             if (dynamic_cast<Device *>((node->getNode())) &&
@@ -345,7 +345,7 @@ class INET_API Flow {
         PathNode *auxNode = nullptr;
 
         // Iterate over leaves, get reference to the leaf of end device
-        for (PathNode *node : *this->pathTree->getLeaves()) {
+        for (PathNode *node : *pathTree->getLeaves()) {
             flowEndDevices.push_back((Device *) node->getNode());
             if (dynamic_cast<Device *>((node->getNode())) &&
                     ((Device *) node->getNode())->getName() == endDevice->getName()) {
@@ -418,8 +418,8 @@ class INET_API Flow {
                 }
 
                 auto periods = port->getListOfPeriods();
-                if (std::find(periods.begin(), periods.end(), this->flowSendingPeriodicity) == periods.end()) {
-                    port->addToListOfPeriods(this->flowSendingPeriodicity);
+                if (std::find(periods.begin(), periods.end(), flowSendingPeriodicity) == periods.end()) {
+                    port->addToListOfPeriods(flowSendingPeriodicity);
                 }
             }
 
@@ -566,15 +566,15 @@ class INET_API Flow {
     double getAverageJitter() {
         double averageJitter = 0;
         double auxAverageJitter = 0;
-        double averageLatency = this->getAverageLatency();
+        double averageLatency = getAverageLatency();
         int timeListSize = 0;
 
         if (type == UNICAST) {
-            timeListSize = this->getTimeListSize();
+            timeListSize = getTimeListSize();
             for (int i = 0; i < timeListSize; i++) {
                 averageJitter +=
                         fabs(
-                                this->getScheduledTime(this->flowFragments.size() - 1, i) -
+                                this->getScheduledTime(flowFragments.size() - 1, i) -
                                         this->getDepartureTime(0, i) -
                                         averageLatency);
             }
@@ -582,14 +582,14 @@ class INET_API Flow {
             averageJitter = averageJitter / (timeListSize);
         } else if (type == PUBLISH_SUBSCRIBE) {
 
-            for (PathNode *node : *this->pathTree->getLeaves()) {
+            for (PathNode *node : *pathTree->getLeaves()) {
 
-                auxAverageJitter = this->getAverageJitterToDevice(((Device *) node->getNode()));
+                auxAverageJitter = getAverageJitterToDevice(((Device *) node->getNode()));
                 averageJitter += auxAverageJitter;
 
             }
 
-            averageJitter = averageJitter / this->pathTree->getLeaves()->size();
+            averageJitter = averageJitter / pathTree->getLeaves()->size();
         } else {
             // TODO: Throw error
             ;
@@ -685,9 +685,9 @@ class INET_API Flow {
         expr sumValue = ctx.real_val(0);
         Device *currentDev = nullptr;
 
-        for (PathNode *node : *this->pathTree->getLeaves()) {
+        for (PathNode *node : *pathTree->getLeaves()) {
             currentDev = (Device *) node->getNode();
-            sumValue = (z3::expr) mkAdd(this->getSumOfLatencyZ3(currentDev, solver, ctx, index), sumValue);
+            sumValue = (z3::expr) mkAdd(getSumOfLatencyZ3(currentDev, solver, ctx, index), sumValue);
         }
 
         return std::make_shared<expr>(sumValue);
@@ -703,14 +703,14 @@ class INET_API Flow {
      * @return          Z3 variable containing the average latency of the flow
      */
     std::shared_ptr<expr> getAvgLatency(solver& solver, context& ctx) {
-        if (this->type == UNICAST) {
+        if (type == UNICAST) {
             return std::make_shared<expr>(
-                    getSumOfLatencyZ3(solver, ctx, this->numOfPacketsSentInFragment - 1) /
-                    ctx.real_val(this->numOfPacketsSentInFragment));
-        } else if (this->type == PUBLISH_SUBSCRIBE) {
+                    getSumOfLatencyZ3(solver, ctx, numOfPacketsSentInFragment - 1) /
+                    ctx.real_val(numOfPacketsSentInFragment));
+        } else if (type == PUBLISH_SUBSCRIBE) {
             return std::make_shared<expr>(
-                    getSumOfAllDevLatencyZ3(solver, ctx, this->numOfPacketsSentInFragment - 1) /
-                    ctx.real_val((this->numOfPacketsSentInFragment) * this->pathTree->getLeaves()->size()));
+                    getSumOfAllDevLatencyZ3(solver, ctx, numOfPacketsSentInFragment - 1) /
+                    ctx.real_val((numOfPacketsSentInFragment) * pathTree->getLeaves()->size()));
         } else {
             // TODO: THROW ERROR
         }
@@ -731,8 +731,8 @@ class INET_API Flow {
     std::shared_ptr<expr> getAvgLatency(Device *dev, solver& solver, context& ctx) {
 
         return std::make_shared<expr>(
-                getSumOfLatencyZ3(dev, solver, ctx, this->numOfPacketsSentInFragment - 1) /
-                ctx.real_val(this->numOfPacketsSentInFragment));
+                getSumOfLatencyZ3(dev, solver, ctx, numOfPacketsSentInFragment - 1) /
+                ctx.real_val(numOfPacketsSentInFragment));
 
     }
 
@@ -748,8 +748,8 @@ class INET_API Flow {
      * @return          Z3 variable for the jitter of packet [index]
      */
     std::shared_ptr<expr> getJitterZ3(solver& solver, context& ctx, int index) {
-        std::shared_ptr<expr> avgLatency = this->getAvgLatency(solver, ctx);
-        std::shared_ptr<expr> latency = this->getLatencyZ3(solver, ctx, index);
+        std::shared_ptr<expr> avgLatency = getAvgLatency(solver, ctx);
+        std::shared_ptr<expr> latency = getLatencyZ3(solver, ctx, index);
 
         return std::make_shared<expr>(
                 mkGe(latency,
@@ -823,9 +823,9 @@ class INET_API Flow {
         expr sumValue = ctx.real_val(0);
         Device *currentDev = nullptr;
 
-        for (PathNode *node : *this->pathTree->getLeaves()) {
+        for (PathNode *node : *pathTree->getLeaves()) {
             currentDev = (Device *) node->getNode();
-            sumValue = (z3::expr) mkAdd(this->getSumOfJitterZ3(currentDev, solver, ctx, index), sumValue);
+            sumValue = (z3::expr) mkAdd(getSumOfJitterZ3(currentDev, solver, ctx, index), sumValue);
         }
 
         return std::make_shared<expr>(sumValue);
@@ -841,7 +841,7 @@ class INET_API Flow {
     void setNumberOfPacketsSent(PathNode *node);
 
     void modifyIfUsingCustomVal(){
-        if (!this->useCustomValues) {
+        if (!useCustomValues) {
             this->flowSendingPeriodicity = startDevice->getPacketPeriodicity();
             this->flowFirstSendingTime = startDevice->getFirstT1Time();
         }
@@ -858,7 +858,7 @@ class INET_API Flow {
     void setStartDevice(Device *startDevice) {
         this->startDevice = startDevice;
 
-        if (!this->useCustomValues) {
+        if (!useCustomValues) {
             this->flowSendingPeriodicity = startDevice->getPacketPeriodicity();
             this->flowFirstSendingTime = startDevice->getFirstT1Time();
         }
@@ -940,7 +940,7 @@ class INET_API Flow {
     }
 
     void addToTotalNumOfPackets(int num) {
-        this->totalNumOfPackets = this->totalNumOfPackets + num;
+        this->totalNumOfPackets = totalNumOfPackets + num;
     }
 
     int getInstance() {
@@ -952,11 +952,11 @@ class INET_API Flow {
     }
 
     double getPacketSize() {
-        return this->startDevice->getPacketSize();
+        return startDevice->getPacketSize();
     }
 
     std::shared_ptr<expr> getPacketSizeZ3() {
-        return this->startDevice->getPacketSizeZ3();
+        return startDevice->getPacketSizeZ3();
     }
 
     double getFlowFirstSendingTime() {

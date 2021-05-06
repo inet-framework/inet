@@ -122,22 +122,22 @@ class INET_API Switch : public cObject {
         this->cycleDurationUpperBoundZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(cycleDurationUpperBound).c_str()));
 
         // Creating the cycle duration and start for this switch
-        this->cycleDuration = std::make_shared<expr>(ctx.real_const((std::string("cycleOf") + this->name + std::string("Duration")).c_str()));
-        this->cycleStart = std::make_shared<expr>(ctx.real_const((std::string("cycleOf") + this->name + std::string("Start")).c_str()));
+        this->cycleDuration = std::make_shared<expr>(ctx.real_const((std::string("cycleOf") + name + std::string("Duration")).c_str()));
+        this->cycleStart = std::make_shared<expr>(ctx.real_const((std::string("cycleOf") + name + std::string("Start")).c_str()));
 
 
         // Creating the cycle setting up the bounds for the duration (Cycle duration constraint)
-        addAssert(solver, *this->cycleDuration >= *this->cycleDurationLowerBoundZ3);
-        addAssert(solver, *this->cycleDuration <= *this->cycleDurationUpperBoundZ3);
+        addAssert(solver, *cycleDuration >= *cycleDurationLowerBoundZ3);
+        addAssert(solver, *cycleDuration <= *cycleDurationUpperBoundZ3);
 
         // A cycle must start on a point in time, so it must be greater than 0
-        addAssert(solver, *this->cycleStart >= ctx.int_val(0)); // No negative cycle values constraint
+        addAssert(solver, *cycleStart >= ctx.int_val(0)); // No negative cycle values constraint
 
-        for (Port *port : this->ports) {
+        for (Port *port : ports) {
             port->toZ3(ctx);
 
             for (FlowFragment *frag : port->getFlowFragments()) {
-                addAssert(solver, *port->getCycle()->getFirstCycleStartZ3() <= *this->arrivalTime(ctx, 0, frag)); // Maximum cycle start constraint
+                addAssert(solver, *port->getCycle()->getFirstCycleStartZ3() <= *arrivalTime(ctx, 0, frag)); // Maximum cycle start constraint
             }
 
             addAssert(solver, *port->getCycle()->getFirstCycleStartZ3() >= ctx.int_val(0)); // No negative cycle values constraint
@@ -149,10 +149,10 @@ class INET_API Switch : public cObject {
             */
 
             // The cycle of every port must have the same starting point
-            addAssert(solver, *this->cycleStart == *port->getCycle()->getFirstCycleStartZ3()); // Equal cycle constraints
+            addAssert(solver, *cycleStart == *port->getCycle()->getFirstCycleStartZ3()); // Equal cycle constraints
         }
 
-        addAssert(solver, *this->cycleStart == ctx.int_val(0));
+        addAssert(solver, *cycleStart == ctx.int_val(0));
     }
 
     /**
@@ -166,7 +166,7 @@ class INET_API Switch : public cObject {
      */
     void setupSchedulingRules(solver& solver, context& ctx) {
 
-        for (Port *port : this->ports) {
+        for (Port *port : ports) {
                 port->setupSchedulingRules(solver, ctx);
         }
     }
@@ -185,7 +185,7 @@ class INET_API Switch : public cObject {
         if (dynamic_cast<Device *>(destination)) {
             this->connectsTo.push_back(((Device *)destination)->getName());
             this->ports.push_back(
-                    new Port(this->name + std::string("Port") + std::to_string(this->portNum),
+                    new Port(name + std::string("Port") + std::to_string(portNum),
                             this->portNum,
                             ((Device *)destination)->getName(),
                             maxPacketSize,
@@ -196,7 +196,7 @@ class INET_API Switch : public cObject {
         } else if (dynamic_cast<Switch *>(destination)) {
             this->connectsTo.push_back(((Switch *)destination)->getName());
 
-            Port *newPort = new Port(this->name + std::string("Port") + std::to_string(this->portNum),
+            Port *newPort = new Port(name + std::string("Port") + std::to_string(portNum),
                     this->portNum,
                     ((Switch *)destination)->getName(),
                     maxPacketSize,
@@ -205,7 +205,7 @@ class INET_API Switch : public cObject {
                     gbSize,
                     cycle);
 
-            newPort->setPortNum(this->portNum);
+            newPort->setPortNum(portNum);
 
             this->ports.push_back(newPort);
         }
@@ -228,7 +228,7 @@ class INET_API Switch : public cObject {
         this->connectsTo.push_back(destination);
 
         this->ports.push_back(
-                new Port(this->name + std::string("Port") + std::to_string(this->portNum),
+                new Port(name + std::string("Port") + std::to_string(portNum),
                         this->portNum,
                         destination,
                         maxPacketSize,
@@ -261,9 +261,9 @@ class INET_API Switch : public cObject {
     Port *getPortOf(std::string name) {
         int index = std::find(connectsTo.begin(), connectsTo.end(), name) - connectsTo.begin();
 
-        // System.out.println(std::string("On switch " + this->getName() + std::string(" looking for port to ")) + name);
+        // System.out.println(std::string("On switch " + getName() + std::string(" looking for port to ")) + name);
 
-        Port *port = this->ports.at(index);
+        Port *port = ports.at(index);
 
         return port;
     }
@@ -277,7 +277,7 @@ class INET_API Switch : public cObject {
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
     void setUpCycleSize(solver& solver, context& ctx) {
-        for (Port *port : this->ports) {
+        for (Port *port : ports) {
             port->setUpCycle(solver, ctx);
         }
     }
@@ -307,8 +307,8 @@ class INET_API Switch : public cObject {
      * @return              Returns the z3 variable for the arrival time of the desired packet
      *
     std::shared_ptr<expr> arrivalTime(context& ctx, z3::expr index, FlowFragment flowFrag){
-    int portIndex = this->connectsTo.indexOf(flowFrag->getNextHop());
-    return (z3::expr) this->ports.get(portIndex).arrivalTime(ctx, index, flowFrag);
+    int portIndex = connectsTo.indexOf(flowFrag->getNextHop());
+    return (z3::expr) ports.get(portIndex).arrivalTime(ctx, index, flowFrag);
     }
     */
 
@@ -349,8 +349,8 @@ class INET_API Switch : public cObject {
      * @return              Returns the z3 variable for the scheduled time of the desired packet
      *
     std::shared_ptr<expr> scheduledTime(context& ctx, z3::expr index, FlowFragment flowFrag){
-    int portIndex = this->connectsTo.indexOf(flowFrag->getNextHop());
-    return (z3::expr) this->ports.get(portIndex).scheduledTime(ctx, index, flowFrag);
+    int portIndex = connectsTo.indexOf(flowFrag->getNextHop());
+    return (z3::expr) ports.get(portIndex).scheduledTime(ctx, index, flowFrag);
     }
     */
 
@@ -372,16 +372,16 @@ class INET_API Switch : public cObject {
         addAssert(solver,
             mkEq(
                 this->cycleDurationUpperBoundZ3,
-                ctx.real_val(std::to_string(this->cycleDurationUpperBound))));
+                ctx.real_val(std::to_string(cycleDurationUpperBound))));
 
         addAssert(solver,
             mkEq(
                 this->cycleDurationLowerBoundZ3,
-                ctx.real_val(std::to_string(this->cycleDurationLowerBound))));
+                ctx.real_val(std::to_string(cycleDurationLowerBound))));
         */
 
         if (!ports.empty()) {
-            for (Port *port : this->ports) {
+            for (Port *port : ports) {
                 //System.out.println(port.getIsModifiedOrCreated());
                 port->loadZ3(ctx, solver);
 
@@ -400,12 +400,12 @@ class INET_API Switch : public cObject {
     }
 
     std::string getName() {
-        return this->name;
+        return name;
     }
 
     Cycle *getCycle(int index) {
 
-        return this->ports.at(index)->getCycle();
+        return ports.at(index)->getCycle();
     }
 
     void setCycle(Cycle *cycle, int index) {
@@ -450,7 +450,7 @@ class INET_API Switch : public cObject {
     }
 
     std::vector<std::string> getConnectsTo(){
-        return this->connectsTo;
+        return connectsTo;
     }
 };
 

@@ -173,12 +173,12 @@ class INET_API Device : public cObject {
      * @param ctx      context variable containing the z3 environment used
      */
      void toZ3(context& ctx) {
-        this->packetPeriodicityZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->packetPeriodicity).c_str()));
-        //this->firstT1TimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->firstT1Time))); // In case of fixed firstT1Time
-        this->firstT1TimeZ3 = std::make_shared<expr>(ctx.real_const((this->name + std::string("FirstT1Time")).c_str()));
-        this->hardConstraintTimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->hardConstraintTime).c_str()));
-        this->softConstraintTimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->softConstraintTime).c_str()));
-        this->packetSizeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(this->packetSize).c_str()));
+        this->packetPeriodicityZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(packetPeriodicity).c_str()));
+        //firstT1TimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(firstT1Time))); // In case of fixed firstT1Time
+        this->firstT1TimeZ3 = std::make_shared<expr>(ctx.real_const((name + std::string("FirstT1Time")).c_str()));
+        this->hardConstraintTimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(hardConstraintTime).c_str()));
+        this->softConstraintTimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(softConstraintTime).c_str()));
+        this->packetSizeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(packetSize).c_str()));
     }
 
     /*
