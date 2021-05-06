@@ -110,10 +110,10 @@ void GateSchedulingConfiguratorBase::addPorts(Input& input) const
         auto networkNode = input.getNetworkNode(node->module);
         for (auto interfaceInfo : node->interfaceInfos) {
             auto networkInterface = interfaceInfo->networkInterface;
-            auto subqueue = networkInterface->findModuleByPath(".macLayer.queue.queue[0]");
-            if (subqueue != nullptr) {
+            if (!networkInterface->isLoopback()) {
+                auto subqueue = networkInterface->findModuleByPath(".macLayer.queue.queue[0]");
                 auto port = new Input::Port();
-                port->numPriorities = subqueue->getVectorSize();
+                port->numPriorities = subqueue != nullptr ? subqueue->getVectorSize() : -1;
                 port->module = interfaceInfo->networkInterface;
                 port->datarate = bps(interfaceInfo->networkInterface->getDatarate());
                 port->propagationTime = check_and_cast<cDatarateChannel *>(interfaceInfo->networkInterface->getTxTransmissionChannel())->getDelay();
