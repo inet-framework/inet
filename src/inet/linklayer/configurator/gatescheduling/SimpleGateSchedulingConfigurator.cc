@@ -17,11 +17,6 @@
 
 #include "inet/linklayer/configurator/gatescheduling/SimpleGateSchedulingConfigurator.h"
 
-#include <queue>
-#include <set>
-#include <sstream>
-#include <vector>
-
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/stlutils.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -30,6 +25,11 @@
 namespace inet {
 
 Define_Module(SimpleGateSchedulingConfigurator);
+
+simtime_t simtimeModulo(simtime_t a, simtime_t b)
+{
+    return SimTime::fromRaw(a.raw() % b.raw());
+}
 
 SimpleGateSchedulingConfigurator::Output *SimpleGateSchedulingConfigurator::computeGateScheduling(const Input& input) const
 {
@@ -47,12 +47,6 @@ SimpleGateSchedulingConfigurator::Output *SimpleGateSchedulingConfigurator::comp
         ASSERT(gateCycleDuration == count * flow->startApplication->packetInterval);
         addGateScheduling(*flow, 1, count, startOffset, interfaceSchedules);
     }
-    for (auto& it : interfaceSchedules) {
-        auto& slots = it.second;
-        std::sort(slots.begin(), slots.end(), [] (const Slot& slot1, const Slot& slot2) {
-            return slot1.gateOpenTime < slot2.gateOpenTime;
-        });
-    }
     for (auto networkNode : input.networkNodes) {
         for (auto port : networkNode->ports) {
             auto& schedules = output->gateSchedules[port];
@@ -65,10 +59,30 @@ SimpleGateSchedulingConfigurator::Output *SimpleGateSchedulingConfigurator::comp
                 schedule->cycleDuration = gateCycleDuration;
                 for (auto& slot : slots) {
                     if (slot.gateOpenIndex == priority) {
-                        schedule->slotStarts.push_back(slot.gateOpenTime);
-                        schedule->slotDurations.push_back(slot.gateCloseTime - slot.gateOpenTime);
+                        simtime_t slotStart = slot.gateOpenTime;
+                        simtime_t slotEnd = slot.gateCloseTime;
+                        simtime_t slotDuration = slot.gateCloseTime - slot.gateOpenTime;
+                        if (slotStart < gateCycleDuration && slotEnd > gateCycleDuration) {
+                            Output::Slot scheduleSlot;
+                            scheduleSlot.start = slotStart;
+                            scheduleSlot.duration = gateCycleDuration - slotStart;
+                            schedule->slots.push_back(scheduleSlot);
+                            scheduleSlot.start = 0;
+                            scheduleSlot.duration = slotDuration - scheduleSlot.duration;
+                            schedule->slots.push_back(scheduleSlot);
+                        }
+                        else {
+                            Output::Slot scheduleSlot;
+                            scheduleSlot.start = simtimeModulo(slotStart, gateCycleDuration);
+                            scheduleSlot.duration = slotDuration;
+                            schedule->slots.push_back(scheduleSlot);
+                        }
                     }
                 }
+                auto& slots = schedule->slots;
+                std::sort(slots.begin(), slots.end(), [] (const Output::Slot& slot1, const Output::Slot& slot2) {
+                    return slot1.start < slot2.start;
+                });
                 schedules.push_back(schedule);
             }
         }
@@ -217,7 +231,7 @@ void SimpleGateSchedulingConfigurator::addGateSchedulingForPathFragments(Input::
                         }
                         simtime_t extraDelay = gateOpenTime - nextGateOpenTime;
                         EV_DEBUG << "Extending gate scheduling for stream reservation" << EV_FIELD(networkNode) << EV_FIELD(networkInterface) << EV_FIELD(priority) << EV_FIELD(interfaceDatarate) << EV_FIELD(packetLength) << EV_FIELD(index) << EV_FIELD(startTime, startTime.ustr()) << EV_FIELD(gateOpenTime, gateOpenTime.ustr()) << EV_FIELD(gateCloseTime, gateCloseTime.ustr()) << EV_FIELD(gateOpenDuration, gateOpenDuration.ustr()) << EV_FIELD(extraDelay, extraDelay.ustr()) << EV_ENDL;
-                        if (gateCloseTime > gateCycleDuration)
+                        if (gateCloseTime > startTime + gateCycleDuration)
                             throw cRuntimeError("Gate scheduling doesn't fit into cycle duration");
                         Slot entry;
                         entry.gateOpenIndex = flow.startApplication->priority;
@@ -230,6 +244,8 @@ void SimpleGateSchedulingConfigurator::addGateSchedulingForPathFragments(Input::
                         nextGateOpenTime += transmissionDuration + propagationDelay;
                 }
                 auto endNetworkNodeName = pathFragment->networkNodes.back()->module->getFullName();
+                if (endNetworkNodeName == destination->getFullName() && nextGateOpenTime - startTime > flow.startApplication->maxLatency)
+                    throw cRuntimeError("Cannot fit scheduling int maximum allowed latency");
                 if (endNetworkNodeName != destination->getFullName() && std::find(extendedPath.begin(), extendedPath.end(), endNetworkNodeName) == extendedPath.end())
                     todos.push_back({endNetworkNodeName, nextGateOpenTime, extendedPath});
             }
