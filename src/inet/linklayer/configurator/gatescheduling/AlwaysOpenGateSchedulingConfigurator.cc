@@ -31,8 +31,10 @@ AlwaysOpenGateSchedulingConfigurator::Output *AlwaysOpenGateSchedulingConfigurat
             schedule->priority = priority;
             schedule->cycleStart = 0;
             schedule->cycleDuration = gateCycleDuration;
-            schedule->slotStarts.push_back(0);
-            schedule->slotDurations.push_back(gateCycleDuration);
+            Output::Slot slot;
+            slot.start = 0;
+            slot.duration = gateCycleDuration;
+            schedule->slots.push_back(slot);
             output->gateSchedules[port].push_back(schedule);
         }
     }
