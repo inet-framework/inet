@@ -66,7 +66,10 @@ class INET_API NextHopRoutingTable : public cSimpleModule, public IRoutingTable,
     virtual void refreshDisplay() const override;
 
     virtual void configureInterface(NetworkInterface *ie);
+public:
+    static void configureInterface(NetworkInterface *ie, L3Address::AddressType addrType);
 
+protected:
     virtual void configureLoopback();
 
     static bool routeLessThan(const NextHopRoute *a, const NextHopRoute *b);

@@ -29,6 +29,7 @@ void NextHopNetworkConfigurator::initialize(int stage)
     NetworkConfiguratorBase::initialize(stage);
     if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         long initializeStartTime = clock();
+
         Topology topology;
         // extract topology into the Topology object, then fill in a LinkInfo[] vector
         TIME(extractTopology(topology));
@@ -58,6 +59,16 @@ void NextHopNetworkConfigurator::addStaticRoutes(Topology& topology)
     // add static routes for all routing tables
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *sourceNode = (Node *)topology.getNode(i);
+
+        // If devices has no routing table, intervene to set NextHopInterfaceData
+        IInterfaceTable *entries = sourceNode->interfaceTable;
+        if (sourceNode->routingTable == nullptr && entries != nullptr){
+            for (int i = 0; i < entries->getNumInterfaces(); ++i) {
+                auto ie = entries->getInterface(i);
+                NextHopRoutingTable::configureInterface(ie, L3Address::MODULEPATH);
+            }
+        }
+
         if (isBridgeNode(sourceNode))
             continue;
         NextHopRoutingTable *sourceRoutingTable = dynamic_cast<NextHopRoutingTable *>(sourceNode->routingTable);
