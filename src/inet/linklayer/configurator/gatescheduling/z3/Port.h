@@ -398,12 +398,12 @@ class INET_API Port {
             setUpMicroCycles(solver, ctx);
 
             addAssert(solver,
-                *cycle->getCycleDurationZ3() == ctx.real_val(std::to_string(microCycleSize).c_str()));
+                cycle->getCycleDurationZ3() == ctx.real_val(std::to_string(microCycleSize).c_str()));
         } else if (useHyperCycle && listOfPeriods.size() > 0) {
             setUpHyperCycle(solver, ctx);
 
             addAssert(solver,
-                *cycle->getCycleDurationZ3() == ctx.real_val(std::to_string(definedHyperCycleSize).c_str()));
+                cycle->getCycleDurationZ3() == ctx.real_val(std::to_string(definedHyperCycleSize).c_str()));
         }
     }
 
@@ -431,7 +431,7 @@ class INET_API Port {
         if (flowFragments.size() == 0) {
             addAssert(solver,
                 ctx.real_val(std::to_string(0).c_str()) ==
-                *cycle->getCycleDurationZ3());
+                cycle->getCycleDurationZ3());
             //    addAssert(solver, mkEq(
             //    ctx.real_val(std::to_string(0)),
             //    this->cycle->getFirstCycleStartZ3()

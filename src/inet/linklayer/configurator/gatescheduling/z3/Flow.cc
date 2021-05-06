@@ -196,8 +196,8 @@ void Flow::bindToNextFragment(solver& solver, context& ctx, FlowFragment *frag)
 //                    System.out.println(std::string("On fragment " + frag->getName() + std::string(" making " + frag->getPort()->scheduledTime(ctx, i, frag) + " = " + childFrag->getPort()->departureTime(ctx, i, childFrag) + " that leads to ")) + childFrag->getPort()->scheduledTime(ctx, i, childFrag)
 //                            + std::string(" on cycle of port ") + frag->getPort()->getCycle().getFirstCycleStartZ3());
                 addAssert(solver,
-                        *frag->getPort()->scheduledTime(ctx, i, frag) ==
-                        *childFrag->getPort()->departureTime(ctx, i, childFrag));
+                        frag->getPort()->scheduledTime(ctx, i, frag) ==
+                        childFrag->getPort()->departureTime(ctx, i, childFrag));
             }
 
             this->bindToNextFragment(solver, ctx, childFrag);
@@ -448,7 +448,7 @@ std::shared_ptr<expr> Flow::getLatencyZ3(solver& solver, Device *dev, context &c
     Switch *firstSwitchInPath = ((Switch*) (nodes->at(1)->getNode())); // 1 since the first node is the publisher
     FlowFragment *firstFragmentInList = flowFrags->at(0);
     addAssert(solver,
-              *latency ==
+              latency ==
                     mkSub(
                             lastSwitchInPath->getPortOf(
                                     lastFragmentInList->getNextHop())->scheduledTime(
