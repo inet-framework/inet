@@ -1,6 +1,12 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-4.2.3 (May 6, 2021) - Stable
+---------------------------------
+
+This release contains fixes for linker errors on Windows.
+
+
 INET-4.2.3 (April 22, 2021) - Stable
 ------------------------------------
 
