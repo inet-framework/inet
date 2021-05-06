@@ -265,9 +265,11 @@ void GateSchedulingConfiguratorBase::configureGateScheduling(cModule *networkNod
         throw cRuntimeError("Cannot find schedule for priority, interface = %s, priority = %d", port->module->getFullPath().c_str(), priority);
     auto schedule = schedules[priority];
     cValueArray *durations = new cValueArray();
-    for (int i = 0; i < schedule->slotStarts.size(); i++) {
-        simtime_t slotStart = schedule->slotStarts[i];
-        simtime_t slotDuration = schedule->slotDurations[i];
+    for (auto& slot : schedule->slots) {
+        simtime_t slotStart = slot.start;
+        simtime_t slotDuration = slot.duration;
+        if (slotStart < 0 || slotStart + slotDuration > gateCycleDuration)
+            throw cRuntimeError("Invalid slot start and/or duration");
         if (slotStart == 0)
             initiallyOpen = true;
         else {
