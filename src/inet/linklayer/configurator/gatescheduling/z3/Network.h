@@ -141,9 +141,8 @@ class INET_API Network {
                     flw->getStartDevice()->getFirstT1TimeZ3() >=
                     ctx.real_val(0));
             addAssert(solver,  // Maximum transmission offset constraint
-                mkLe(
-                    flw->getStartDevice()->getFirstT1TimeZ3(),
-                    flw->getStartDevice()->getPacketPeriodicityZ3()));
+                    flw->getStartDevice()->getFirstT1TimeZ3() <=
+                    flw->getStartDevice()->getPacketPeriodicityZ3());
 
 
 
@@ -156,11 +155,10 @@ class INET_API Network {
                 //Make sure that HC is respected
                 for (int i = 0; i < flw->getNumOfPacketsSent(); i++) {
                     addAssert(solver,
-                            mkLe(
                                 mkSub(
                                     ((Switch *) path.at(path.size() - 1))->scheduledTime(ctx, i, currentFrags.at(currentFrags.size() - 1)),
-                                    ((Switch *) path.at(0))->departureTime(ctx, i, currentFrags.at(0))),
-                                flw->getStartDevice()->getHardConstraintTimeZ3()));
+                                    ((Switch *) path.at(0))->departureTime(ctx, i, currentFrags.at(0))) <=
+                                flw->getStartDevice()->getHardConstraintTimeZ3());
                 }
 
             } else if (flw->getType() == Flow::PUBLISH_SUBSCRIBE) {
@@ -179,9 +177,8 @@ class INET_API Network {
                     // Set the maximum allowed jitter
                     for (int index = 0; index < flw->getNumOfPacketsSent(); index++) {
                         addAssert(solver,  // Maximum allowed jitter constraint
-                            mkLe(
-                                flw->getJitterZ3((Device *) leaf->getNode(), solver, ctx, index),
-                                this->jitterUpperBoundRangeZ3));
+                                flw->getJitterZ3((Device *) leaf->getNode(), solver, ctx, index) <=
+                                this->jitterUpperBoundRangeZ3);
                     }
 
                 }
@@ -191,12 +188,11 @@ class INET_API Network {
                     for (FlowFragment *ffrag : parent->getFlowFragments()) {
                         for (int i = 0; i < flw->getNumOfPacketsSent(); i++) {
                             addAssert(solver,  // Maximum Allowed Latency constraint
-                                mkLe(
                                     mkSub(
                                         ((Switch *) parent->getNode())->scheduledTime(ctx, i, ffrag),
                                         ((Switch *) root->getChildren().at(0)->getNode())->departureTime(ctx, i,
-                                            root->getChildren().at(0)->getFlowFragments().at(0))),
-                                    flw->getStartDevice()->getHardConstraintTimeZ3()));
+                                            root->getChildren().at(0)->getFlowFragments().at(0))) <=
+                                    flw->getStartDevice()->getHardConstraintTimeZ3());
                         }
                     }
 
