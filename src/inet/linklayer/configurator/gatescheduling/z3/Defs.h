@@ -38,18 +38,6 @@ inline void addAssert(solver& solver, const expr& expr) {
 
 inline expr mkReal2Int(expr const & a) { Z3_ast i = Z3_mk_real2int(a.ctx(), a); a.check_error(); return expr(a.ctx(), i); }
 
-inline expr mkITE(const expr& i, const expr& t, const expr& e) {
-    return i ? t : e;
-}
-
-inline expr mkITE(const expr& i, const std::shared_ptr<expr>& t, const std::shared_ptr<expr>& e) {
-    return i ? *t : *e;
-}
-
-inline expr mkITE(const std::shared_ptr<expr>& i, const std::shared_ptr<expr>& t, const std::shared_ptr<expr>& e) {
-    return *i ? *t : *e;
-}
-
 inline expr mkEq(const expr& a, const expr& b) {
     return a == b;
 }

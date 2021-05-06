@@ -751,14 +751,12 @@ class INET_API Flow {
         std::shared_ptr<expr> avgLatency = this->getAvgLatency(solver, ctx);
         std::shared_ptr<expr> latency = this->getLatencyZ3(solver, ctx, index);
 
-        return std::make_shared<expr>(mkITE(
-                mkGe(
-                        latency,
-                        avgLatency),
-                mkSub(latency , avgLatency),
-                mkMul(
-                        mkSub(latency , avgLatency),
-                        ctx.real_val(-1))));
+        return std::make_shared<expr>(
+                mkGe(latency,
+                     avgLatency) ?
+                mkSub(latency , avgLatency) :
+                mkMul(mkSub(latency , avgLatency),
+                      ctx.real_val(-1)));
     }
 
     /**

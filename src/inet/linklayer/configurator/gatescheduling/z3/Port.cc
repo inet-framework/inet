@@ -882,7 +882,6 @@ std::shared_ptr<expr> Port::getScheduledTimeOfPreviousPacket(context& ctx, FlowF
 
         for (int i = 0; i < f->getNumOfPacketsSent(); i++) {
             prevPacketST = std::make_shared<expr>(
-                    mkITE(
                         mkAnd(
                             mkEq(auxFrag->getFragmentPriorityZ3(), f->getFragmentPriorityZ3()),
                             mkAnd(
@@ -891,20 +890,18 @@ std::shared_ptr<expr> Port::getScheduledTimeOfPreviousPacket(context& ctx, FlowF
                                     this->scheduledTime(ctx, index, f)),
                                 mkGt(
                                     this->scheduledTime(ctx, i, auxFrag),
-                                    prevPacketST))),
-                        this->scheduledTime(ctx, i, auxFrag),
-                        prevPacketST
-));
+                                    prevPacketST))) ?
+                        *this->scheduledTime(ctx, i, auxFrag) :
+                        *prevPacketST);
 
         }
 
     }
 
     return std::make_shared<expr>(
-            mkITE(
-                mkEq(prevPacketST, ctx.real_val(0)),
-                this->scheduledTime(ctx, index, f),
-                prevPacketST));
+                mkEq(prevPacketST, ctx.real_val(0)) ?
+                *this->scheduledTime(ctx, index, f) :
+                *prevPacketST);
 }
 
 }
