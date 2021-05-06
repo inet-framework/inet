@@ -50,14 +50,6 @@ inline expr mkITE(const std::shared_ptr<expr>& i, const std::shared_ptr<expr>& t
     return *i ? *t : *e;
 }
 
-inline expr mkNot(const expr& a) {
-    return !a;
-}
-
-inline expr mkNot(const std::shared_ptr<expr>& a) {
-    return !(*a);
-}
-
 inline expr mkEq(const expr& a, const expr& b) {
     return a == b;
 }

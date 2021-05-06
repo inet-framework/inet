@@ -81,10 +81,9 @@ void Port::setUpCycleRules(solver& solver, context& ctx) {
 
                 addAssert(solver,
                     implies(
-                        mkNot(
-                            mkEq(
-                                flowPriority,
-                                auxFlowPriority)),
+                        !mkEq(
+                            flowPriority,
+                            auxFlowPriority),
                         mkOr(
                             mkGe(
                                 cycle->slotStartZ3(ctx, *flowPriority, indexZ3),
@@ -644,14 +643,14 @@ void Port::setupBestEffort(solver& solver, context& ctx) {
 
         for (FlowFragment f : this->flowFragments) {
             if (firstPartOfImplication == nullptr) {
-                firstPartOfImplication = std::make_shared<expr>(mkNot(mkEq(
+                firstPartOfImplication = std::make_shared<expr>(!mkEq(
                                             *f.getFragmentPriorityZ3(),
-                                            ctx.int_val(i))));
+                                            ctx.int_val(i)));
             } else {
                 firstPartOfImplication = std::make_shared<expr>(mkAnd(firstPartOfImplication,
-                                         mkNot(mkEq(
+                                         !mkEq(
                                              *f.getFragmentPriorityZ3(),
-                                             ctx.int_val(i)))));
+                                             ctx.int_val(i))));
             }
         }
 
@@ -731,20 +730,19 @@ void Port::zeroOutNonUsedSlots(solver& solver, context& ctx)
                         exp1 = std::make_shared<expr>(mkAnd(
                                 exp1,
                                 mkAnd(
-                                    mkNot(
-                                        mkAnd(
-                                            mkGe(
-                                                this->scheduledTime(ctx, packetNum, frag),
+                                    !mkAnd(
+                                        mkGe(
+                                            this->scheduledTime(ctx, packetNum, frag),
+                                            mkAdd(
+                                                cycle->slotStartZ3(ctx, ctx.int_val(prtIndex), *indexZ3),
+                                                cycle->cycleStartZ3(ctx, ctx.int_val(cycleNum)))),
+                                        mkLe(
+                                            this->scheduledTime(ctx, packetNum, frag),
+                                            mkAdd(
+                                                cycle->slotStartZ3(ctx, ctx.int_val(prtIndex), *indexZ3),
                                                 mkAdd(
-                                                    cycle->slotStartZ3(ctx, ctx.int_val(prtIndex), *indexZ3),
-                                                    cycle->cycleStartZ3(ctx, ctx.int_val(cycleNum)))),
-                                            mkLe(
-                                                this->scheduledTime(ctx, packetNum, frag),
-                                                mkAdd(
-                                                    cycle->slotStartZ3(ctx, ctx.int_val(prtIndex), *indexZ3),
-                                                    mkAdd(
-                                                            cycle->slotDurationZ3(ctx, ctx.int_val(prtIndex), *indexZ3),
-                                                            cycle->cycleStartZ3(ctx, ctx.int_val(cycleNum))))))),
+                                                        cycle->slotDurationZ3(ctx, ctx.int_val(prtIndex), *indexZ3),
+                                                        cycle->cycleStartZ3(ctx, ctx.int_val(cycleNum)))))),
                                     mkEq(ctx.int_val(prtIndex), frag->getFragmentPriorityZ3()))));
                     }
 
