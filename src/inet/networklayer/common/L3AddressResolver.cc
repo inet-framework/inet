@@ -15,7 +15,6 @@
 #ifdef INET_WITH_IPv4
 #include "inet/networklayer/configurator/ipv4/Ipv4NetworkConfigurator.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #endif // ifdef INET_WITH_IPv4
 
 #ifdef INET_WITH_IPv6
@@ -301,10 +300,11 @@ bool L3AddressResolver::getIpv6AddressFrom(L3Address& retAddr, IInterfaceTable *
     for (int i = 0; i < ift->getNumInterfaces() && retScope != Ipv6Address::GLOBAL; i++) {
         NetworkInterface *ie = ift->getInterface(i);
         auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
-        if (!ipv6Data || ie->isLoopback())
+        L3Address curAddr;
+        bool ieHasIpv6Addr = getInterfaceIpv6Address(curAddr, ie, false);
+        if (!ieHasIpv6Addr || ie->isLoopback())
             continue;
-        Ipv6Address curAddr = ipv6Data->getPreferredAddress();
-        Ipv6Address::Scope curScope = curAddr.getScope();
+        Ipv6Address::Scope curScope = curAddr.toIpv6().getScope();
         if (curScope > retScope) {
             retAddr = curAddr;
             retScope = curScope;
@@ -385,12 +385,10 @@ bool L3AddressResolver::getInterfaceIpv6Address(L3Address& ret, NetworkInterface
 bool L3AddressResolver::getInterfaceIpv4Address(L3Address& ret, NetworkInterface *ie, bool netmask)
 {
 #ifdef INET_WITH_IPv4
-    if (auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>()) {
-        Ipv4Address addr = ipv4Data->getIPAddress();
-        if (!addr.isUnspecified()) {
-            ret.set(netmask ? ipv4Data->getNetmask() : addr);
-            return true;
-        }
+    Ipv4Address addr = ie->getIpv4Address();
+    if (!addr.isUnspecified()) {
+        ret.set(netmask ? ie->getIpv4Netmask() : addr);
+        return true;
     }
     else {
         // find address in the configurator's notebook
@@ -545,11 +543,8 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
     for (cModule *mod : networkNodes) {
         IInterfaceTable *itable = L3AddressResolver().findInterfaceTableOf(mod);
         if (itable != nullptr) {
-            for (int i = 0; i < itable->getNumInterfaces(); i++) {
-                NetworkInterface *entry = itable->getInterface(i);
-                if (entry->hasNetworkAddress(add))
-                    return mod;
-            }
+            if(itable->isLocalAddress(add))
+                return mod;
         }
     }
     return nullptr;
