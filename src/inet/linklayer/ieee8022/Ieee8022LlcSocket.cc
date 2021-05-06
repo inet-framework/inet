@@ -29,9 +29,16 @@ void Ieee8022LlcSocket::sendOut(cMessage *msg)
 {
     auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
-    tags.addTagIfAbsent<Ieee802SapReq>()->setSsap(localSap);
-    if (interfaceId != -1)
-        tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
+    if (localSap != -1) {
+        auto& sapReq = tags.addTagIfAbsent<Ieee802SapReq>();
+        if (sapReq->getSsap() == -1)
+            sapReq->setSsap(localSap);
+    }
+    if (interfaceId != -1) {
+        auto& interfaceReq = tags.addTagIfAbsent<InterfaceReq>();
+        if (interfaceReq->getInterfaceId() == -1)
+            interfaceReq->setInterfaceId(interfaceId);
+    }
     SocketBase::sendOut(msg);
 }
 
