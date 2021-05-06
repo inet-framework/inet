@@ -227,7 +227,7 @@ class INET_API Network {
                     Device *endDev = (Device *) node->getNode();
 
                     this->avgLatencyPerDev.push_back(std::make_shared<expr>(
-                            *flw->getSumOfJitterZ3(endDev, solver, ctx, flw->getNumOfPacketsSent() - 1) /
+                            flw->getSumOfJitterZ3(endDev, solver, ctx, flw->getNumOfPacketsSent() - 1) /
                             ctx.int_val(flw->getNumOfPacketsSent())));
 
 
