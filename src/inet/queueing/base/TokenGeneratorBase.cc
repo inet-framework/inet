@@ -26,6 +26,7 @@ simsignal_t TokenGeneratorBase::tokensCreatedSignal = cComponent::registerSignal
 
 void TokenGeneratorBase::initialize(int stage)
 {
+    PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         displayStringTextFormat = par("displayStringTextFormat");
         server.reference(this, "serverModule", true);

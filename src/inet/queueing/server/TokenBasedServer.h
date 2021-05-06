@@ -33,7 +33,6 @@ class INET_API TokenBasedServer : public PacketServerBase
   protected:
     cPar *tokenConsumptionPerPacketParameter = nullptr;
     cPar *tokenConsumptionPerBitParameter = nullptr;
-    const char *displayStringTextFormat = nullptr;
     double maxNumTokens = NaN;
 
     bool tokensDepletedSignaled = true;

@@ -35,7 +35,6 @@ class INET_API CreditBasedGate : public PacketGateBase, public cListener
     double transmitCreditLimit = NaN;
     double minCredit = NaN;
     double maxCredit = NaN;
-    const char *displayStringTextFormat = nullptr;
 
     // state
     double currentCredit = NaN;

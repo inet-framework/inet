@@ -32,7 +32,6 @@ class INET_API TokenGeneratorBase : public PacketProcessorBase
     static simsignal_t tokensCreatedSignal;
 
   protected:
-    const char *displayStringTextFormat = nullptr;
     ModuleRefByPar<TokenBasedServer> server;
     int numTokensGenerated = -1;
 

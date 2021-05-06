@@ -27,7 +27,6 @@ namespace queueing {
 class INET_API PacketQueueBase : public PacketProcessorBase, public virtual IPacketQueue
 {
   protected:
-    const char *displayStringTextFormat = nullptr;
     int numPushedPackets = -1;
     int numPulledPackets = -1;
     int numRemovedPackets = -1;

@@ -25,6 +25,7 @@ namespace queueing {
 
 void PacketQueueBase::initialize(int stage)
 {
+    PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         outputGate = gate("out");
