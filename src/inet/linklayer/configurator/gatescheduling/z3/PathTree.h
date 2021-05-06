@@ -58,7 +58,6 @@ class INET_API PathTree {
         return root;
     }
 
-
     /**
      * [Method]: changeRoot
      * [Usage]: Given a new PathNode object, make it the
@@ -76,7 +75,6 @@ class INET_API PathTree {
         this->root=newRoot;
     }
 
-
     /**
      * [Method]: searchLeaves
      * [Usage]: Adds all leaves to the leaves std::vector starting
@@ -88,18 +86,15 @@ class INET_API PathTree {
      * @param node      Starter node of the search
      */
     void searchLeaves(PathNode *node) {
-
-        if(node->getChildren().size() == 0) {
+        if (node->getChildren().size() == 0) {
             leaves->push_back(node);
             return;
         }
 
-        for(PathNode *auxNode : node->getChildren()) {
+        for (PathNode *auxNode : node->getChildren()) {
             searchLeaves(auxNode);
         }
-
     }
-
 
     /**
      * [Method]: getLeaves
@@ -116,11 +111,9 @@ class INET_API PathTree {
         return leaves;
     }
 
-
     /*
      * GETTERS AND SETTERS
      */
-
 
     PathNode *getRoot() {
         return root;
@@ -129,7 +122,6 @@ class INET_API PathTree {
     void setRoot(PathNode *root) {
         this->root = root;
     }
-
 };
 
 }

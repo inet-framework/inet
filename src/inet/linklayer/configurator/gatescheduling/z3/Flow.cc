@@ -28,22 +28,22 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
     FlowFragment *flowFrag = nullptr;
 
     // If, by chance, the given node has no child, then its a leaf
-    if(node->getChildren().size() == 0) {
+    if (node->getChildren().size() == 0) {
         //System.out.println(std::string("On flow " + this->name + std::string(" leaving on node ")) + ((Device *) node.getNode())->getName());
         return flowFrag;
     }
 
     // Iterate over node's children
-    for(PathNode *auxN : node->getChildren()) {
+    for (PathNode *auxN : node->getChildren()) {
 
         // For each grand children of the current child node
-        for(PathNode *n : auxN->getChildren()) {
+        for (PathNode *n : auxN->getChildren()) {
 
             // Create a new flow fragment
             flowFrag = new FlowFragment(this);
 
             // Setting next hop
-            if(dynamic_cast<Switch *>(n->getNode())) {
+            if (dynamic_cast<Switch *>(n->getNode())) {
                 flowFrag->setNextHop(
                         ((Switch *) n->getNode())->getName()
                 );
@@ -53,12 +53,12 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
                 );
             }
 
-            if(((Switch *)auxN->getNode())->getPortOf(flowFrag->getNextHop())->checkIfAutomatedApplicationPeriod()) {
+            if (((Switch *)auxN->getNode())->getPortOf(flowFrag->getNextHop())->checkIfAutomatedApplicationPeriod()) {
                 numberOfPackets = (int) (((Switch *)auxN->getNode())->getPortOf(flowFrag->getNextHop())->getDefinedHyperCycleSize()/this->flowSendingPeriodicity);
             }
             flowFrag->setNumOfPacketsSent(numberOfPackets);
 
-            if(auxN->getParent()->getParent() == nullptr) { //First flow fragment, fragment first departure = device's first departure
+            if (auxN->getParent()->getParent() == nullptr) { //First flow fragment, fragment first departure = device's first departure
                 flowFrag->setNodeName(((Switch *)auxN->getNode())->getName());
 
                 for (int i = 0; i < numberOfPackets; i++) {
@@ -69,10 +69,7 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
                                     ctx.real_val(std::to_string(this->flowSendingPeriodicity * i).c_str())
                             )
                     );
-
                 }
-
-
             } else { // Fragment first departure = last fragment scheduled time
 
                 for (int i = 0; i < numberOfPackets; i++) {
@@ -85,16 +82,13 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
                                             auxN->getParent()->getFlowFragments().at(auxN->getParent()->getChildIndex(auxN))
                                     )
                     );
-
                 }
 
                 flowFrag->setNodeName(((Switch *) auxN->getNode())->getName());
-
             }
 
-
             // Setting z3 properties of the flow fragment
-            if(this->fixedPriority) {
+            if (this->fixedPriority) {
                 flowFrag->setFragmentPriorityZ3(*this->flowPriority); // FIXED PRIORITY (Fixed priority per flow constraint)
             } else {
                 flowFrag->setFragmentPriorityZ3(ctx.int_const((flowFrag->getName() + std::string("Priority")).c_str()));
@@ -125,11 +119,11 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
 
         }
 
-        if(flowFrag == nullptr){
+        if (flowFrag == nullptr){
             continue;
         }
 
-        if(frag != nullptr && flowFrag->getPreviousFragment() == nullptr) {
+        if (frag != nullptr && flowFrag->getPreviousFragment() == nullptr) {
             flowFrag->setPreviousFragment(frag);
         }
 
@@ -137,7 +131,7 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
         FlowFragment *nextFragment = this->nodeToZ3(ctx, auxN, flowFrag);
 
 
-        if(nextFragment != nullptr) {
+        if (nextFragment != nullptr) {
             flowFrag->addToNextFragments(nextFragment);
         }
     }
@@ -155,7 +149,7 @@ void Flow::pathToZ3(context& ctx, Switch *swt, int currentSwitchIndex)
      * this fragment departure time = source device departure time. Else,
      * this fragment departure time = last fragment scheduled time.
      */
-    if(flowFragments.size() == 0) {
+    if (flowFragments.size() == 0) {
         // If no flowFragment has been added to the path, flowPriority is nullptr, so initiate it
         //flowFrag->setNodeName(this->startDevice->getName());
         for (int i = 0; i < numberOfPackets; i++) {
@@ -186,7 +180,7 @@ void Flow::pathToZ3(context& ctx, Switch *swt, int currentSwitchIndex)
      * the next switch in the path.
      */
 
-    if((path.size() - 1) == currentSwitchIndex) {
+    if ((path.size() - 1) == currentSwitchIndex) {
         flowFrag->setNextHop(this->endDevice->getName());
     } else {
         flowFrag->setNextHop(
@@ -206,9 +200,9 @@ void Flow::pathToZ3(context& ctx, Switch *swt, int currentSwitchIndex)
 
 void Flow::bindToNextFragment(solver& solver, context& ctx, FlowFragment *frag)
 {
-    if(frag->getNextFragments().size() > 0){
+    if (frag->getNextFragments().size() > 0){
 
-        for(FlowFragment *childFrag : frag->getNextFragments()){
+        for (FlowFragment *childFrag : frag->getNextFragments()){
 
             for (int i = 0; i < this->numOfPacketsSentInFragment; i++){
 //                    System.out.println(std::string("On fragment " + frag->getName() + std::string(" making " + frag->getPort()->scheduledTime(ctx, i, frag) + " = " + childFrag->getPort()->departureTime(ctx, i, childFrag) + " that leads to ")) + childFrag->getPort()->scheduledTime(ctx, i, childFrag)
@@ -533,7 +527,7 @@ void Flow::setNumberOfPacketsSent(PathNode *node)
             // System.out.println(std::string("On node ") + ((TSNSwitch *)node->getNode())->getName() + std::string(" trying to reach children"));
             // System.out.println(std::string("Node has: ") + node.getFlowFragments().size() + std::string(" frags"));
             // System.out.println(std::string("Node has: ") + node->getChildren().size() + std::string(" children"));
-            // for(PathNode n : node->getChildren()) {
+            // for (PathNode n : node->getChildren()) {
             //         System.out.println(std::string("Child is a: ") + (dynamic_cast<Device *>(n->getNode()) ? "Device" : "Switch"));
             // }
             this->setNumberOfPacketsSent(node->getChildren().at(index));

@@ -95,7 +95,7 @@ class INET_API FlowFragment : public Flow {
          * there must be a type check before assigning the names
          */
 
-        if(parent->getType() == UNICAST) {
+        if (parent->getType() == UNICAST) {
             this->name = parent->getName() + std::string("Fragment") + std::to_string(parent->getFlowFragments().size() + 1);
         } else if (parent->getType() == PUBLISH_SUBSCRIBE) {
             this->name = parent->getName() + std::string("Fragment") + std::to_string(parent->pathTreeCount + 1);
@@ -103,7 +103,6 @@ class INET_API FlowFragment : public Flow {
         } else {
             // Throw error
         }
-
     }
 
     /*
@@ -138,7 +137,6 @@ class INET_API FlowFragment : public Flow {
         this->packetPeriodicityZ3 = std::make_shared<expr>(packetPeriodicity);
     }
 
-
     std::shared_ptr<expr> getPacketSizeZ3() {
         return this->packetSize;
     }
@@ -154,7 +152,6 @@ class INET_API FlowFragment : public Flow {
     void setFragmentPriorityZ3(z3::expr flowPriority) {
         this->fragmentPriorityZ3 = std::make_shared<expr>(flowPriority);
     }
-
 
     void addDepartureTime(double val) {
         departureTime.push_back(val);
@@ -291,7 +288,6 @@ class INET_API FlowFragment : public Flow {
     void setPort(Port *port) {
         this->port = port;
     }
-
 };
 
 }
