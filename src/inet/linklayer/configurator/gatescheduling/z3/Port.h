@@ -742,7 +742,7 @@ class INET_API Port {
                 this->scheduledTime(ctx, index, f),
                 this->cycle->getFirstCycleStartZ3());
 
-        cycleIndex = std::make_shared<expr>(mkReal2Int(relativeST / *this->cycle->getCycleDurationZ3()));
+        cycleIndex = std::make_shared<expr>(mkReal2Int(relativeST / cycle->getCycleDurationZ3()));
 
         return cycleIndex;
     }
@@ -755,7 +755,7 @@ class INET_API Port {
                 time,
                 this->cycle->getFirstCycleStartZ3());
 
-        cycleIndex = std::make_shared<expr>(mkReal2Int(relativeST / *this->cycle->getCycleDurationZ3()));
+        cycleIndex = std::make_shared<expr>(mkReal2Int(relativeST / cycle->getCycleDurationZ3()));
 
         return cycleIndex;
     }
