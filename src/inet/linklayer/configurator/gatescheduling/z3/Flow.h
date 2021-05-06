@@ -649,7 +649,7 @@ class INET_API Flow {
             return getLatencyZ3(solver, ctx, 0);
         }
 
-        return std::make_shared<expr>(mkAdd(getLatencyZ3(solver, ctx, index), getSumOfLatencyZ3(solver, ctx, index - 1)));
+        return std::make_shared<expr>(getLatencyZ3(solver, ctx, index) + getSumOfLatencyZ3(solver, ctx, index - 1));
     }
 
     /**
@@ -668,7 +668,7 @@ class INET_API Flow {
             return getLatencyZ3(solver, dev, ctx, 0);
         }
 
-        return std::make_shared<expr>(mkAdd(getLatencyZ3(solver, dev, ctx, index), getSumOfLatencyZ3(dev, solver, ctx, index - 1)));
+        return std::make_shared<expr>(getLatencyZ3(solver, dev, ctx, index) + getSumOfLatencyZ3(dev, solver, ctx, index - 1));
     }
 
     /**
@@ -687,7 +687,7 @@ class INET_API Flow {
 
         for (PathNode *node : *pathTree->getLeaves()) {
             currentDev = (Device *) node->getNode();
-            sumValue = (z3::expr) mkAdd(getSumOfLatencyZ3(currentDev, solver, ctx, index), sumValue);
+            sumValue = getSumOfLatencyZ3(currentDev, solver, ctx, index) + sumValue;
         }
 
         return std::make_shared<expr>(sumValue);
@@ -781,7 +781,7 @@ class INET_API Flow {
             return getJitterZ3(solver, ctx, 0);
         }
 
-        return std::make_shared<expr>(mkAdd(getJitterZ3(solver, ctx, index), getSumOfJitterZ3(solver, ctx, index - 1)));
+        return std::make_shared<expr>(getJitterZ3(solver, ctx, index) + getSumOfJitterZ3(solver, ctx, index - 1));
     }
 
     /**
@@ -801,7 +801,7 @@ class INET_API Flow {
             return getJitterZ3(dev, solver, ctx, 0);
         }
 
-        return std::make_shared<expr>(mkAdd(getJitterZ3(dev, solver, ctx, index), getSumOfJitterZ3(dev, solver, ctx, index - 1)));
+        return std::make_shared<expr>(getJitterZ3(dev, solver, ctx, index) + getSumOfJitterZ3(dev, solver, ctx, index - 1));
     }
 
     /**
@@ -820,7 +820,7 @@ class INET_API Flow {
 
         for (PathNode *node : *pathTree->getLeaves()) {
             currentDev = (Device *) node->getNode();
-            sumValue = (z3::expr) mkAdd(getSumOfJitterZ3(currentDev, solver, ctx, index), sumValue);
+            sumValue = getSumOfJitterZ3(currentDev, solver, ctx, index) + sumValue;
         }
 
         return std::make_shared<expr>(sumValue);
