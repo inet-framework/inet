@@ -31,61 +31,50 @@ Z3GateSchedulingConfigurator::Output *Z3GateSchedulingConfigurator::computeGateS
     std::map<Input::Flow *, Flow *> flows;
     std::map<cModule *, Cycle *> interfaceCycles;
     Network *network = new Network();
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        auto node = (Node *)topology.getNode(i);
-        auto networkNode = node->module;
-        if (isBridgeNode(node)) {
-            double cycleDurationUpperBound = (gateCycleDuration * 1000000).dbl();
-            Switch *tsnSwitch = new Switch(networkNode->getFullName(), 0, cycleDurationUpperBound);
-            devices[node->module] = tsnSwitch;
-            network->addSwitch(tsnSwitch);
-        }
-        else {
-            Device *device = new Device(0, 0, 0, 0);
-            device->setName(networkNode->getFullName());
-            devices[node->module] = device;
-        }
+    for (auto inputDevice : input.devices) {
+        Device *device = new Device(0, 0, 0, 0);
+        device->setName(inputDevice->module->getFullName());
+        devices[inputDevice->module] = device;
     }
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        auto node = (Node *)topology.getNode(i);
-        if (isBridgeNode(node)) {
-            for (int j = 0; j < node->getNumOutLinks(); j++) {
-                auto link = node->getLinkOut(j);
-                Node *localNode = (Node *)link->getLocalNode();
-                Node *remoteNode = (Node *)link->getRemoteNode();
-                Cycle *cycle = new Cycle((gateCycleDuration * 1000000).dbl(), 0, (gateCycleDuration * 1000000).dbl());
-                interfaceCycles[((Link *)link)->sourceInterfaceInfo->networkInterface] = cycle;
-                // TODO datarate, propagation time
-                double datarate = 1E+9 / 1000000;
-                double propagationTime = 50E-9 * 1000000;
-                double guardBand = 0;
-                for (auto& flow : input.flows) {
-                    double v = b(flow->startApplication->packetLength).get() / datarate;
-                    if (guardBand < v)
-                        guardBand = v;
-                }
-                check_and_cast<Switch *>(devices[localNode->module])->createPort(devices[remoteNode->module], cycle, 1500 * 8, propagationTime, datarate, guardBand);
+    for (auto inputSwitch : input.switches) {
+        Switch *switch_ = new Switch(inputSwitch->module->getFullName(), 0, (gateCycleDuration * 1000000).dbl());
+        devices[inputSwitch->module] = switch_;
+        network->addSwitch(switch_);
+    }
+    for (auto switch_ : input.switches) {
+        for (auto port : switch_->ports) {
+            Cycle *cycle = new Cycle((gateCycleDuration * 1000000).dbl(), 0, (gateCycleDuration * 1000000).dbl());
+            interfaceCycles[port->module] = cycle;
+            double datarate = bps(port->datarate).get() / 1000000;
+            double propagationTime = (port->propagationTime * 1000000).dbl();
+            double guardBand = 0;
+            // TODO KLUDGE this is a wild guess
+            for (auto& flow : input.flows) {
+                double v = b(flow->startApplication->packetLength).get() / datarate;
+                if (guardBand < v)
+                    guardBand = v;
             }
+            check_and_cast<Switch *>(devices[switch_->module])->createPort(devices[port->endNode->module], cycle, 1500 * 8, propagationTime, datarate, guardBand);
         }
     }
-    for (auto f : input.flows) {
+    for (auto inputFlow : input.flows) {
         Flow *flow = new Flow(Flow::UNICAST);
         flow->setFixedPriority(true);
-        flow->setPriorityValue(f->startApplication->priority);
-        auto startDevice = check_and_cast<Device *>(devices[f->startApplication->device->module]);
-        startDevice->setPacketPeriodicity((f->startApplication->packetInterval * 1000000).dbl());
-        startDevice->setPacketSize(b(f->startApplication->packetLength + B(12)).get());
-        startDevice->setHardConstraintTime((f->startApplication->maxLatency * 1000000).dbl());
+        flow->setPriorityValue(inputFlow->startApplication->priority);
+        auto startDevice = check_and_cast<Device *>(devices[inputFlow->startApplication->device->module]);
+        startDevice->setPacketPeriodicity((inputFlow->startApplication->packetInterval * 1000000).dbl());
+        startDevice->setPacketSize(b(inputFlow->startApplication->packetLength + B(12)).get());
+        startDevice->setHardConstraintTime((inputFlow->startApplication->maxLatency * 1000000).dbl());
         flow->setStartDevice(startDevice);
-        for (auto pathFragment : f->pathFragments) {
+        for (auto pathFragment : inputFlow->pathFragments) {
             for (auto networkNode : pathFragment->networkNodes) {
                 if (dynamic_cast<Input::Switch *>(networkNode))
                     flow->addToPath(check_and_cast<Switch *>(devices[networkNode->module]));
             }
         }
-        flow->setEndDevice(check_and_cast<Device *>(devices[f->endDevice->module]));
+        flow->setEndDevice(check_and_cast<Device *>(devices[inputFlow->endDevice->module]));
         network->addFlow(flow);
-        flows[f] = flow;
+        flows[inputFlow] = flow;
     }
     generateSchedule(network);
     for (auto switch_ : input.switches) {
@@ -108,23 +97,28 @@ Z3GateSchedulingConfigurator::Output *Z3GateSchedulingConfigurator::computeGateS
                             // slot with length 0 are not used
                             if (slotDuration == s(0))
                                 continue;
-                            schedule->slotStarts.push_back(s(slotStart).get());
-                            schedule->slotDurations.push_back(s(slotDuration).get());
+                            Output::Slot slot;
+                            slot.start = s(slotStart).get();
+                            slot.duration = s(slotDuration).get();
+                            schedule->slots.push_back(slot);
                         }
                     }
                 }
+                auto& slots = schedule->slots;
+                std::sort(slots.begin(), slots.end(), [] (const Output::Slot& slot1, const Output::Slot& slot2) {
+                    return slot1.start < slot2.start;
+                });
                 schedules.push_back(schedule);
             }
         }
     }
-    for (auto& it : flows) {
-        auto application = it.first->startApplication;
-        // TODO
-        bps datarate = Gbps(1.0);
-        auto startTime = (us(it.second->getFlowFirstSendingTime()) - s((application->packetLength + B(12)) / datarate)).get();
-        // KLUDGE TODO workaround a numerical accuracy problem that this number comes out negative sometimes
+    for (auto& flow : flows) {
+        auto application = flow.first->startApplication;
+        // KLUDGE TODO use the datarate of the actual port, should have been added by the SAT solver
+        bps datarate = application->device->ports[0]->datarate;
+        auto startTime = s(us(flow.second->getFlowFirstSendingTime()) - s(application->packetLength / datarate)).get();
         if (startTime < 0)
-            startTime = 0;
+            startTime += gateCycleDuration.dbl();
         output->applicationStartTimes[application] = startTime;
     }
     return output;
@@ -343,7 +337,7 @@ void Z3GateSchedulingConfigurator::generateSchedule(Network *net) const
 //               }
     } else
     {
-        EV_WARN << solver.unsat_core() << std::endl;
+        EV_WARN << "Unsatisfiable core: " << solver.unsat_core() << std::endl;
         throw cRuntimeError("The specified constraints might not be satisfiable.");
     }
 }
