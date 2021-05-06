@@ -557,9 +557,9 @@ class INET_API Port {
     std::shared_ptr<expr> arrivalTime(context& ctx, int auxIndex, FlowFragment *flowFrag) {
         expr index = ctx.int_val(auxIndex);
 
-        return std::make_shared<expr>(mkAdd( // Arrival time value constraint
-                        departureTime(ctx, index, flowFrag),
-                        timeToTravelZ3));
+        return std::make_shared<expr>(// Arrival time value constraint
+                        departureTime(ctx, index, flowFrag) +
+                        timeToTravelZ3);
     }
 
     /**

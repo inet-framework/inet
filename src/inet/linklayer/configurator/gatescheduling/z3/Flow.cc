@@ -62,9 +62,8 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
                 for (int i = 0; i < numberOfPackets; i++) {
 
                     flowFrag->addDepartureTimeZ3(
-                            (z3::expr) mkAdd(
-                                    this->flowFirstSendingTimeZ3,
-                                    ctx.real_val(std::to_string(flowSendingPeriodicity * i).c_str())));
+                                    this->flowFirstSendingTimeZ3 +
+                                    ctx.real_val(std::to_string(flowSendingPeriodicity * i).c_str()));
                 }
             } else { // Fragment first departure = last fragment scheduled time
 
@@ -146,9 +145,8 @@ void Flow::pathToZ3(context& ctx, Switch *swt, int currentSwitchIndex)
         //flowFrag->setNodeName(startDevice->getName());
         for (int i = 0; i < numberOfPackets; i++) {
             flowFrag->addDepartureTimeZ3( // Packet departure constraint
-                    (z3::expr) mkAdd(
-                            this->flowFirstSendingTimeZ3,
-                            ctx.real_val(std::to_string(flowSendingPeriodicity * i).c_str())));
+                            this->flowFirstSendingTimeZ3 +
+                            ctx.real_val(std::to_string(flowSendingPeriodicity * i).c_str()));
         }
     } else {
         for (int i = 0; i < numberOfPackets; i++) {
