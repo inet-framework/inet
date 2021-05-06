@@ -38,7 +38,7 @@ void Switch::addToFragmentList(FlowFragment *flowFrag)
     System.out.println(std::string("Next hop: ") + flowFrag->getNextHop());
     System.out.println(std::string("Index of port: ") + index);
     System.out.print("Connects to: ");
-    for (std::string connect : this->connectsTo) {
+    for (std::string connect : connectsTo) {
         System.out.print(connect + std::string(", "));
     }
 
@@ -55,27 +55,27 @@ std::shared_ptr<expr> Switch::arrivalTime(context& ctx, int auxIndex, FlowFragme
     std::shared_ptr<expr> index = std::make_shared<expr>(ctx.int_val(auxIndex));
     int portIndex = std::find(connectsTo.begin(), connectsTo.end(), flowFrag->getNextHop()) - connectsTo.begin();
 
-    return this->ports.at(portIndex)->arrivalTime(ctx, auxIndex, flowFrag);
+    return ports.at(portIndex)->arrivalTime(ctx, auxIndex, flowFrag);
 }
 
 std::shared_ptr<expr> Switch::departureTime(context& ctx, z3::expr index, FlowFragment *flowFrag)
 {
     int portIndex = std::find(connectsTo.begin(), connectsTo.end(), flowFrag->getNextHop()) - connectsTo.begin();
-    return this->ports.at(portIndex)->departureTime(ctx, index, flowFrag);
+    return ports.at(portIndex)->departureTime(ctx, index, flowFrag);
 }
 
 std::shared_ptr<expr> Switch::departureTime(context& ctx, int auxIndex, FlowFragment *flowFrag)
 {
     expr index = ctx.int_val(auxIndex);
     int portIndex = std::find(connectsTo.begin(), connectsTo.end(), flowFrag->getNextHop()) - connectsTo.begin();
-    return this->ports.at(portIndex)->departureTime(ctx, index, flowFrag);
+    return ports.at(portIndex)->departureTime(ctx, index, flowFrag);
 }
 
 std::shared_ptr<expr> Switch::scheduledTime(context& ctx, int auxIndex, FlowFragment *flowFrag)
 {
     // z3::expr index = ctx.int_val(auxIndex);
     int portIndex = std::find(connectsTo.begin(), connectsTo.end(), flowFrag->getNextHop()) - connectsTo.begin();
-    return this->ports.at(portIndex)->scheduledTime(ctx, auxIndex, flowFrag);
+    return ports.at(portIndex)->scheduledTime(ctx, auxIndex, flowFrag);
 }
 
 }

@@ -68,7 +68,7 @@ class INET_API PathTree {
      */
     void changeRoot(PathNode *newRoot)
     {
-        PathNode *oldRoot=this->root;
+        PathNode *oldRoot=root;
         newRoot->setParent(nullptr);
         newRoot->addChild(oldRoot);
         oldRoot->setParent(newRoot);
