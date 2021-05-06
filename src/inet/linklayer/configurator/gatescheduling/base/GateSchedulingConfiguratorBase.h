@@ -174,6 +174,14 @@ class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
     class INET_API Output
     {
       public:
+        // a single slot in a schedule
+        class Slot
+        {
+          public:
+            simtime_t start; // start time in seconds
+            simtime_t duration; // duration in seconds
+        };
+
         // a gate scheduling for a specific priority (traffic class) of a specific port
         class Schedule
         {
@@ -182,8 +190,7 @@ class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
             int priority = -1; // index of the subqueue
             simtime_t cycleStart = -1; // start of the cycle in seconds
             simtime_t cycleDuration = -1; // duration of the cycle in seconds
-            std::vector<simtime_t> slotStarts; // start times of slots in seconds
-            std::vector<simtime_t> slotDurations; // durations of slots in seconds
+            std::vector<Slot> slots; // list of slots ordered by start time
         };
 
       public:
