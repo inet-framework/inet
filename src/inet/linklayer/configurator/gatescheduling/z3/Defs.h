@@ -50,22 +50,6 @@ inline expr mkITE(const std::shared_ptr<expr>& i, const std::shared_ptr<expr>& t
     return *i ? *t : *e;
 }
 
-inline expr mkImplies(const expr& a, const expr& b) {
-    return implies(a, b);
-}
-
-inline expr mkImplies(const expr& a, const std::shared_ptr<expr>& b) {
-    return implies(a, *b);
-}
-
-inline expr mkImplies(const std::shared_ptr<expr>& a, const expr& b) {
-    return implies(*a, b);
-}
-
-inline expr mkImplies(const std::shared_ptr<expr>& a, const std::shared_ptr<expr>& b) {
-    return implies(*a, *b);
-}
-
 inline expr mkNot(const expr& a) {
     return !a;
 }
