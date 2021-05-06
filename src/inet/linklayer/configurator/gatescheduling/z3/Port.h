@@ -398,12 +398,12 @@ class INET_API Port {
             setUpMicroCycles(solver, ctx);
 
             addAssert(solver,
-                mkEq(*this->cycle->getCycleDurationZ3(), ctx.real_val(std::to_string(this->microCycleSize).c_str())));
+                *this->cycle->getCycleDurationZ3() == ctx.real_val(std::to_string(this->microCycleSize).c_str()));
         } else if (useHyperCycle && this->listOfPeriods.size() > 0) {
             setUpHyperCycle(solver, ctx);
 
             addAssert(solver,
-                mkEq(*this->cycle->getCycleDurationZ3(), ctx.real_val(std::to_string(this->definedHyperCycleSize).c_str())));
+                *this->cycle->getCycleDurationZ3() == ctx.real_val(std::to_string(this->definedHyperCycleSize).c_str()));
         }
     }
 
@@ -429,9 +429,9 @@ class INET_API Port {
     void setupSchedulingRules(solver& solver, context& ctx) {
 
         if (this->flowFragments.size() == 0) {
-            addAssert(solver, mkEq(
-                ctx.real_val(std::to_string(0).c_str()),
-                this->cycle->getCycleDurationZ3()));
+            addAssert(solver,
+                ctx.real_val(std::to_string(0).c_str()) ==
+                *this->cycle->getCycleDurationZ3());
             //    addAssert(solver, mkEq(
             //    ctx.real_val(std::to_string(0)),
             //    this->cycle->getFirstCycleStartZ3()
