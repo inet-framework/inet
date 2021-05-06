@@ -750,10 +750,7 @@ class INET_API Flow {
     std::shared_ptr<expr> getJitterZ3(solver& solver, context& ctx, int index) {
         std::shared_ptr<expr> avgLatency = getAvgLatency(solver, ctx);
         std::shared_ptr<expr> latency = getLatencyZ3(solver, ctx, index);
-
-        return std::make_shared<expr>(latency >= avgLatency ?
-                mkSub(latency , avgLatency) :
-                mkSub(latency , avgLatency) * ctx.real_val(-1));
+        return std::make_shared<expr>(latency >= avgLatency ? latency - avgLatency : avgLatency - latency);
     }
 
     /**

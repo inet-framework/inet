@@ -737,26 +737,16 @@ class INET_API Port {
 
     std::shared_ptr<expr> getCycleOfScheduledTime(context& ctx, FlowFragment *f, int index) {
         std::shared_ptr<expr> cycleIndex = nullptr;
-
-        expr relativeST = mkSub(
-                this->scheduledTime(ctx, index, f),
-                this->cycle->getFirstCycleStartZ3());
-
+        expr relativeST =  scheduledTime(ctx, index, f) - cycle->getFirstCycleStartZ3();
         cycleIndex = std::make_shared<expr>(mkReal2Int(relativeST / cycle->getCycleDurationZ3()));
-
         return cycleIndex;
     }
 
 
     std::shared_ptr<expr> getCycleOfTime(context& ctx, z3::expr time) {
         std::shared_ptr<expr> cycleIndex = nullptr;
-
-        expr relativeST = mkSub(
-                time,
-                this->cycle->getFirstCycleStartZ3());
-
+        expr relativeST = time - cycle->getFirstCycleStartZ3();
         cycleIndex = std::make_shared<expr>(mkReal2Int(relativeST / cycle->getCycleDurationZ3()));
-
         return cycleIndex;
     }
 
