@@ -58,7 +58,7 @@ void Port::setUpCycleRules(solver& solver, context& ctx) {
 
             for (FlowFragment *auxFrag : this->flowFragments) {
                 addAssert(solver,
-                    mkImplies(
+                    implies(
                         mkEq(frag->getFragmentPriorityZ3(), *auxFrag->getFragmentPriorityZ3()),
                         mkAnd(
 
@@ -80,7 +80,7 @@ void Port::setUpCycleRules(solver& solver, context& ctx) {
                 std::shared_ptr<expr> auxFlowPriority = auxFrag->getFragmentPriorityZ3();
 
                 addAssert(solver,
-                    mkImplies(
+                    implies(
                         mkNot(
                             mkEq(
                                 flowPriority,
@@ -124,7 +124,7 @@ void Port::setUpCycleRules(solver& solver, context& ctx) {
                     std::shared_ptr<expr> auxFlowPriority = auxFrag->getFlowPriority();
 
                     addAssert(solver,
-                        mkImplies(
+                        implies(
                             mkAnd(
                                 mkNot(
                                     mkAnd(
@@ -275,7 +275,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                     indexZ3 = std::make_shared<expr>(ctx.int_val(index));
 
                     auxExp2 = std::make_shared<expr>(mkAnd(auxExp2, // Arrived during a time slot predicate
-                            mkImplies(
+                            implies(
                                 mkAnd(
                                     mkLe(
                                         this->arrivalTime(ctx, i, flowFrag),
@@ -309,7 +309,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
 
                     if (index == 0) {
                         auxExp2 = std::make_shared<expr>(mkAnd(auxExp2, // Arrived before slot start constraint
-                                mkImplies(
+                                implies(
                                     mkAnd(
                                         mkLt(
                                             this->arrivalTime(ctx, i, flowFrag),
@@ -329,7 +329,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
 ))));
                     } else if (index < this->cycle->getNumOfSlots()) {
                         auxExp2 = std::make_shared<expr>(mkAnd(auxExp2,
-                                mkImplies(
+                                implies(
                                     mkAnd(
                                         mkLt(
                                             this->arrivalTime(ctx, i, flowFrag),
@@ -367,7 +367,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
 
                     if (index == this->cycle->getNumOfSlots() - 1) {
                         auxExp2 = std::make_shared<expr>(mkAnd(auxExp2, // Arrived after slot end constraint
-                                mkImplies(
+                                implies(
                                     mkAnd(
                                         mkGe(
                                             this->arrivalTime(ctx, i, flowFrag),
@@ -392,7 +392,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
 
                     if (j < this->cycleUpperBoundRange - 1 && index == this->cycle->getNumOfSlots() - 1) {
                         auxExp2 = mkAnd((expr) auxExp2, // Arrived after slot end constraint
-                                mkImplies(
+                                implies(
                                     mkAnd(
                                         mkGt(
                                             this->arrivalTime(ctx, i, flowFrag),
@@ -417,7 +417,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                                             this->transmissionTimeZ3))));
                     } else if (j == this->cycleUpperBoundRange - 1 && index == this->cycle->getNumOfSlots() - 1) {
                         auxExp2 = mkAnd((expr) auxExp2,
-                                mkImplies(
+                                implies(
                                     mkAnd(
                                         mkGt(
                                             this->arrivalTime(ctx, i, flowFrag),
@@ -517,7 +517,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                 * FIFO constraint.
                 *
                addAssert(solver,
-                   mkImplies(
+                   implies(
                        mkEq(
                            auxFlowFrag->getFlowPriority(),
                            flowFrag->getFlowPriority()),
@@ -545,7 +545,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                 *
 
                addAssert(solver,
-                   mkImplies(
+                   implies(
                       mkEq(
                           flowFrag->getFlowPriority(),
                            auxFlowFrag->getFlowPriority()),
@@ -575,7 +575,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                 }
 
                 addAssert(solver,  // Packet transmission order constraint
-                    mkImplies(
+                    implies(
                         mkAnd(
                             mkLe(
                                 this->arrivalTime(ctx, i, flowFrag),
@@ -628,7 +628,7 @@ void Port::setupBestEffort(solver& solver, context& ctx) {
 
         for (int i = 1; i <= 8; i++) {
             addAssert(solver,
-                mkImplies(
+                implies(
                     mkEq(
                         f.getFragmentPriorityZ3(),
                         ctx.int_val(i)),
@@ -656,8 +656,8 @@ void Port::setupBestEffort(solver& solver, context& ctx) {
         }
 
         addAssert(solver,  // Queue not used constraint
-            mkImplies(
-                firstPartOfImplication,
+            implies(
+                *firstPartOfImplication,
                 mkAnd(
                     mkEq(slotStart[i-1], ctx.real_val(0)),
                     mkEq(slotDuration[i-1], ctx.real_val(0)))
@@ -707,7 +707,7 @@ void Port::zeroOutNonUsedSlots(solver& solver, context& ctx)
         for (FlowFragment *frag : this->flowFragments) {
             for (int slotIndex = 0; slotIndex < this->cycle->getNumOfSlots(); slotIndex++) {
                 addAssert(solver,
-                    mkImplies(
+                    implies(
                         mkEq(frag->getFragmentPriorityZ3(), ctx.int_val(prtIndex)),
                         mkAnd(
                             mkEq(
@@ -751,8 +751,8 @@ void Port::zeroOutNonUsedSlots(solver& solver, context& ctx)
                 }
 
                 addAssert(solver,
-                    mkImplies(
-                        exp1,
+                    implies(
+                        *exp1,
                         mkEq(cycle->slotDurationZ3(ctx, ctx.int_val(prtIndex), *indexZ3), ctx.int_val(0))));
             }
 
