@@ -322,15 +322,14 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                                             mkAdd(
                                                 cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3),
                                                 cycle->cycleStartZ3(ctx, j))),
-                                        mkGt(
-                                            this->arrivalTime(ctx, i, flowFrag),
-                                            mkSub(
+                                        *this->arrivalTime(ctx, i, flowFrag) >
+                                        mkSub(
+                                            mkAdd(
+                                                cycle->cycleStartZ3(ctx, j),
                                                 mkAdd(
-                                                    cycle->cycleStartZ3(ctx, j),
-                                                    mkAdd(
-                                                        cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), ctx.int_val(index - 1)),
-                                                        cycle->slotDurationZ3(ctx, *flowFrag->getFragmentPriorityZ3(), ctx.int_val(index - 1)))),
-                                                mkDiv(flowFrag->getPacketSizeZ3(), this->portSpeedZ3)))),
+                                                    cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), ctx.int_val(index - 1)),
+                                                    cycle->slotDurationZ3(ctx, *flowFrag->getFragmentPriorityZ3(), ctx.int_val(index - 1)))),
+                                            mkDiv(flowFrag->getPacketSizeZ3(), this->portSpeedZ3))),
                                         *this->scheduledTime(ctx, i, flowFrag) ==
                                         mkAdd(
                                             mkAdd(
@@ -851,9 +850,8 @@ std::shared_ptr<expr> Port::getScheduledTimeOfPreviousPacket(context& ctx, FlowF
                                 mkLt(
                                     this->scheduledTime(ctx, i, auxFrag),
                                     this->scheduledTime(ctx, index, f)),
-                                mkGt(
-                                    this->scheduledTime(ctx, i, auxFrag),
-                                    prevPacketST))) ?
+                                *this->scheduledTime(ctx, i, auxFrag) >
+                                *prevPacketST)) ?
                         *this->scheduledTime(ctx, i, auxFrag) :
                         *prevPacketST);
 
