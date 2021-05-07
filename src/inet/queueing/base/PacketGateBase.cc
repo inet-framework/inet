@@ -36,6 +36,16 @@ void PacketGateBase::initialize(int stage)
         emit(gateStateChangedSignal, isOpen_);
 }
 
+cGate *PacketGateBase::getRegistrationForwardingGate(cGate *gate)
+{
+    if (gate == outputGate)
+        return inputGate;
+    else if (gate == inputGate)
+        return outputGate;
+    else
+        throw cRuntimeError("Unknown gate");
+}
+
 void PacketGateBase::open()
 {
     ASSERT(!isOpen_);
