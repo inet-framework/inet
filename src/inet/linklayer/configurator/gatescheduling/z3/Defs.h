@@ -98,19 +98,15 @@ inline expr operator<=(const std::shared_ptr<expr>& a, const std::shared_ptr<exp
     return *a <= *b;
 }
 
-inline expr mkAnd(const expr& a, const expr& b) {
-    return a && b;
-}
-
-inline expr mkAnd(const expr& a, const std::shared_ptr<expr>& b) {
+inline expr operator&&(const expr& a, const std::shared_ptr<expr>& b) {
     return a && *b;
 }
 
-inline expr mkAnd(const std::shared_ptr<expr>& a, const expr& b) {
+inline expr operator&&(const std::shared_ptr<expr>& a, const expr& b) {
     return *a && b;
 }
 
-inline expr mkAnd(const std::shared_ptr<expr>& a, const std::shared_ptr<expr>& b) {
+inline expr operator&&(const std::shared_ptr<expr>& a, const std::shared_ptr<expr>& b) {
     return *a && *b;
 }
 
