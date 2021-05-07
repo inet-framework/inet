@@ -18,21 +18,13 @@
 #ifndef __INET_STREAMREDUNDANCYCONFIGURATOR_H
 #define __INET_STREAMREDUNDANCYCONFIGURATOR_H
 
-#include <algorithm>
-#include <vector>
-
-#include "inet/common/PatternMatcher.h"
-#include "inet/common/Topology.h"
-#include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
 
 namespace inet {
 
-class INET_API StreamRedundancyConfigurator : public cSimpleModule
+class INET_API StreamRedundancyConfigurator : public NetworkConfiguratorBase
 {
   protected:
-    class InterfaceInfo;
-
     class StreamIdentification
     {
       public:
@@ -74,11 +66,8 @@ class INET_API StreamRedundancyConfigurator : public cSimpleModule
     /**
      * Represents a node in the network.
      */
-    class Node : public Topology::Node {
+    class Node : public NetworkConfiguratorBase::Node {
       public:
-        cModule *module;
-        IInterfaceTable *interfaceTable;
-        std::vector<InterfaceInfo *> interfaceInfos;
         std::vector<StreamIdentification> streamIdentifications;
         std::vector<StreamEncoding> streamEncodings;
         std::vector<StreamDecoding> streamDecodings;
@@ -86,35 +75,12 @@ class INET_API StreamRedundancyConfigurator : public cSimpleModule
         std::vector<StreamSplitting> streamSplittings;
 
       public:
-        Node(cModule *module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = nullptr; }
-        ~Node() { for (size_t i = 0; i < interfaceInfos.size(); i++) delete interfaceInfos[i]; }
+        Node(cModule *module) : NetworkConfiguratorBase::Node(module) { }
     };
 
-    /**
-     * Represents an interface in the network.
-     */
-    class InterfaceInfo : public cObject {
-      public:
-        NetworkInterface *networkInterface;
-
-      public:
-        InterfaceInfo(NetworkInterface *networkInterface) : networkInterface(networkInterface) {}
-        virtual std::string getFullPath() const override { return networkInterface->getInterfaceFullPath(); }
-    };
-
-    class Link : public Topology::Link {
-      public:
-        InterfaceInfo *sourceInterfaceInfo;
-        InterfaceInfo *destinationInterfaceInfo;
-
-      public:
-        Link() { sourceInterfaceInfo = nullptr; destinationInterfaceInfo = nullptr; }
-    };
-
-    class Topology : public inet::Topology {
+    class Topology : public NetworkConfiguratorBase::Topology {
       protected:
         virtual Node *createNode(cModule *module) override { return new StreamRedundancyConfigurator::Node(module); }
-        virtual Link *createLink() override { return new StreamRedundancyConfigurator::Link(); }
     };
 
   protected:
@@ -122,24 +88,14 @@ class INET_API StreamRedundancyConfigurator : public cSimpleModule
     int maxVlanId = -1;
     cValueArray *configuration;
 
-    Topology topology;
     std::map<std::pair<std::string, std::string>, std::vector<std::string>> streamSenders; // maps network node name and stream name to list of previous sender network node names
     std::map<std::pair<std::string, std::string>, std::vector<std::string>> receivers; // maps network node name and stream name to list of next receiver network node names
     std::map<std::pair<std::string, std::string>, int> nextVlanIds; // maps network node name and destination node name to next available VLAN ID
     std::map<std::tuple<std::string, std::string, std::string, std::string>, int> assignedVlanIds; // maps network node name, receiver network node name, destination network node name and stream name to VLAN ID
 
   protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
-    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
-
-    /**
-     * Extracts network topology by walking through the module hierarchy.
-     * Creates vertices from modules having @networkNode property.
-     * Creates edges from connections (wired and wireless) between network interfaces.
-     */
-    virtual void extractTopology(Topology& topology);
 
     /**
      * Computes the network configuration for all nodes in the network.
@@ -155,11 +111,6 @@ class INET_API StreamRedundancyConfigurator : public cSimpleModule
 
     virtual void configureStreams();
     virtual void configureStreams(Node *node);
-
-    virtual Link *findLinkIn(Node *node, const char *neighbor);
-    virtual Link *findLinkOut(Node *node, const char *neighbor);
-    virtual Topology::LinkOut *findLinkOut(Node *node, int gateId);
-    virtual InterfaceInfo *findInterfaceInfo(Node *node, NetworkInterface *networkInterface);
 
   public:
     virtual std::vector<std::vector<std::string>> getPathFragments(const char *stream);
