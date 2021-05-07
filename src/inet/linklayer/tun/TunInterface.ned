@@ -27,8 +27,8 @@ module TunInterface extends InterfaceEntry like ITunnelInterface
         @class(InterfaceEntry);
         string interfaceTableModule;    // The path to the InterfaceTable module
         int mtu @unit(B) = default(1500B);
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         @display("i=block/tunnel");
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
     gates:
         input upperLayerIn;    // from upper layers
         output upperLayerOut;  // to upper layers

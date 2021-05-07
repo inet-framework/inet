@@ -41,7 +41,7 @@ module PriorityQueue extends CompoundPacketQueue
         }
         queue[numQueues]: <default("PacketQueue")> like IPacketQueue {
             parameters:
-                bufferModule = default(exists(buffer) ? "^.buffer" : "");
+                bufferModule = default(exists(parent.buffer) ? "^.buffer" : "");
                 @display("p=325,100,column,125");
         }
         scheduler: <default("PriorityScheduler")> like IPacketScheduler {

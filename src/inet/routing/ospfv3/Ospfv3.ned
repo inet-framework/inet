@@ -23,9 +23,9 @@ module Ospfv3 like IOspf
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string routingTableModule6;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.routingTableModule = default(absPath(routingTableModule));
-        *.routingTableModule6 = default(absPath(routingTableModule6));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        *.routingTableModule = default(absPath(this.routingTableModule));
+        *.routingTableModule6 = default(absPath(this.routingTableModule6));
         @display("bgb=510,238;i=block/network2");
     gates:
         input ipIn @labels(Ipv6ControlInfo/up);

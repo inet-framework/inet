@@ -28,8 +28,8 @@ module Ieee802154NarrowbandInterface extends InterfaceEntry like IWirelessInterf
         @class(InterfaceEntry);
         string interfaceTableModule;
         string energySourceModule = default("");
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.energySourceModule = default(absPath(energySourceModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        *.energySourceModule = default(absPath(this.energySourceModule));
         @display("i=block/ifcard");
     gates:
         input upperLayerIn;

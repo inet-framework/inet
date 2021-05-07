@@ -24,7 +24,7 @@ module VlanInterface extends InterfaceEntry like IVlanInterface
 {
     parameters:
         string interfaceTableModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         @display("i=block/tunnel");
         @class(InterfaceEntry);
     gates:

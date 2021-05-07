@@ -29,7 +29,7 @@ module StandardHost6 extends StandardHost
     parameters:
         @display("i=device/pc2");
         xml routes = default(xml("<routingTable/>"));
-        ipv6.routingTable.routes = routes;
+        ipv6.routingTable.routes = this.routes;
         hasIpv4 = default(false);
         hasIpv6 = default(true);
         *.routingTableModule = "^.ipv6.routingTable";

@@ -41,8 +41,8 @@ module EthernetInterface extends InterfaceEntry like IEthernetInterface
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         string fcsMode @enum("declared","computed") = default("declared");
         @display("i=block/ifcard;bgl=2");
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.fcsMode = fcsMode;
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        *.fcsMode = this.fcsMode;
     gates:
         input upperLayerIn;
         output upperLayerOut;

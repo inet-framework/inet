@@ -53,13 +53,13 @@ module EtherSwitch
         string spanningTreeProtocol = default("Stp");
         int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
         eth[*].encap.typename = "EtherEncapDummy";
-        eth[*].csmacdSupport = csmacdSupport;
+        eth[*].csmacdSupport = this.csmacdSupport;
         eth[*].mac.typename = default(csmacdSupport ? "EtherMac" : "EtherMacFullDuplex");
-        *.fcsMode = fcsMode;
+        *.fcsMode = this.fcsMode;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.macTableModule = default(absPath(".macTable"));
 
-        relayUnit.hasStp = hasStp;
+        relayUnit.hasStp = this.hasStp;
         encap.registerProtocol = true;
 
     gates:

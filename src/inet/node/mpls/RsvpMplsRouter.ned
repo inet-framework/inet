@@ -42,7 +42,7 @@ module RsvpMplsRouter
         string peers;
         string routerId = default("auto");
         *.forwarding = true;
-        *.routingTable.routerId = routerId;
+        *.routingTable.routerId = this.routerId;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(absPath(".ipv4.routingTable"));
         *.tedModule = default(absPath(".ted"));
@@ -64,12 +64,12 @@ module RsvpMplsRouter
         }
         linkStateRouting: LinkStateRouting {
             parameters:
-                peers = peers;
+                peers = parent.peers;
                 @display("p=600,80");
         }
         rsvp: RsvpTe {
             parameters:
-                peers = peers;
+                peers = parent.peers;
                 classifierModule = "^.classifier";
                 @display("p=300,80");
         }

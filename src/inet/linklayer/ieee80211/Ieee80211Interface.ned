@@ -47,14 +47,14 @@ module Ieee80211Interface extends InterfaceEntry like IWirelessInterface
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
         double bitrate @unit(bps) = default(-1bps);
-        **.opMode = opMode;
-        **.bitrate = bitrate;
-        mac.modeSet = default(opMode);
-        mac.*.rateSelection.dataFrameBitrate = default(bitrate);
+        **.opMode = this.opMode;
+        **.bitrate = this.bitrate;
+        mac.modeSet = default(this.opMode);
+        mac.*.rateSelection.dataFrameBitrate = default(this.bitrate);
         *.macModule = default(absPath(".mac"));
         *.mibModule = default(absPath(".mib"));
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.energySourceModule = default(absPath(energySourceModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        *.energySourceModule = default(absPath(this.energySourceModule));
         @display("i=block/ifcard");
     gates:
         input upperLayerIn; // to upper layers

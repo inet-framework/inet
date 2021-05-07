@@ -28,7 +28,7 @@ module Ieee802154UwbIrInterface extends InterfaceEntry like IWirelessInterface
     parameters:
         @class(InterfaceEntry);
         string interfaceTableModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         @display("i=block/ifcard");
     gates:
         input upperLayerIn;

@@ -43,7 +43,7 @@ module LdpMplsRouter
         string peers;
         string routerId = default("auto");
         *.forwarding = true;
-        *.routingTable.routerId = routerId;
+        *.routingTable.routerId = this.routerId;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(absPath(".ipv4.routingTable"));
         *.tedModule = default(absPath(".ted"));
@@ -60,8 +60,8 @@ module LdpMplsRouter
         }
         ldp: Ldp {
             parameters:
-                holdTime = holdTime;
-                helloInterval = helloInterval;
+                holdTime = parent.holdTime;
+                helloInterval = parent.helloInterval;
                 @display("p=450,80");
         }
         at: MessageDispatcher {
@@ -74,7 +74,7 @@ module LdpMplsRouter
         }
         linkStateRouting: LinkStateRouting {
             parameters:
-                peers = peers;
+                peers = parent.peers;
                 @display("p=900,80");
         }
         tcp: <default(firstAvailable("Tcp","TcpLwip","TcpNsc"))> like ITcp {
@@ -106,7 +106,7 @@ module LdpMplsRouter
         }
         mpls: Mpls {
             parameters:
-                //peers = peers,
+                //peers = parent.peers;
                 classifierModule = "^.ldp";
                 @display("p=500,480");
         }

@@ -31,9 +31,9 @@ module NextHopNetworkLayer like INetworkLayer
         bool forwarding = default(false);
         bool multicastForwarding = default(false);
         string interfaceTableModule;
-        *.forwarding = forwarding;
-        *.multicastForwarding = multicastForwarding;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.forwarding = this.forwarding;
+        *.multicastForwarding = this.multicastForwarding;
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         *.routingTableModule = default(absPath(".routingTable"));
         *.arpModule = default(absPath(".arp"));
         @display("i=block/fork");

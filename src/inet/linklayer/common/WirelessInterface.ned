@@ -28,8 +28,8 @@ module WirelessInterface extends InterfaceEntry like IWirelessInterface
         @class(InterfaceEntry);
         string interfaceTableModule;
         string energySourceModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.energySourceModule = default(absPath(energySourceModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        *.energySourceModule = default(absPath(this.energySourceModule));
         @display("i=block/ifcard");
     gates:
         input upperLayerIn;

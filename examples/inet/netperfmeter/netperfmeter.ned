@@ -92,7 +92,7 @@ network testNetwork
             parameters:
                 @display("p=500,150,c,150;i=abstract/router_l,gold");
             gates:
-                pppg[1 + systems];
+                pppg[1 + parent.systems];
         }
         westernCoreRouter: Router {
             parameters:
@@ -110,7 +110,7 @@ network testNetwork
             parameters:
                 @display("p=1200,150,c,150;i=abstract/router_l,gold");
             gates:
-                pppg[1 + systems];
+                pppg[1 + parent.systems];
         }
 
         // ------ Systems -----------------------------------------------------
