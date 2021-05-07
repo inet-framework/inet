@@ -32,21 +32,6 @@ int assertionCount = 0;
 void Switch::addToFragmentList(FlowFragment *flowFrag)
 {
     int index = std::find(connectsTo.begin(), connectsTo.end(), flowFrag->getNextHop()) - connectsTo.begin();
-
-    /*
-    System.out.println(std::string("Current node: ") + flowFrag->getNodeName());
-    System.out.println(std::string("Next hop: ") + flowFrag->getNextHop());
-    System.out.println(std::string("Index of port: ") + index);
-    System.out.print("Connects to: ");
-    for (std::string connect : connectsTo) {
-        System.out.print(connect + std::string(", "));
-    }
-
-    System.out.println("");
-    System.out.println("------------------");
-
-    */
-
     this->ports.at(index)->addToFragmentList(flowFrag);
 }
 
@@ -73,7 +58,6 @@ std::shared_ptr<expr> Switch::departureTime(context& ctx, int auxIndex, FlowFrag
 
 std::shared_ptr<expr> Switch::scheduledTime(context& ctx, int auxIndex, FlowFragment *flowFrag)
 {
-    // z3::expr index = ctx.int_val(auxIndex);
     int portIndex = std::find(connectsTo.begin(), connectsTo.end(), flowFrag->getNextHop()) - connectsTo.begin();
     return ports.at(portIndex)->scheduledTime(ctx, auxIndex, flowFrag);
 }

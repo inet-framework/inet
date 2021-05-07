@@ -70,7 +70,7 @@ class INET_API Switch : public cObject {
     Switch(std::string name) {
         this->name = name;
         ports.clear();
-        this->connectsTo.clear();
+        connectsTo.clear();
     }
 
     /**
@@ -82,9 +82,9 @@ class INET_API Switch : public cObject {
      * that will be used in future works.
      */
     Switch() {
-        this->name = std::string("dev") + std::to_string(indexCounter++);
-        this->ports.clear();
-        this->connectsTo.clear();
+        name = std::string("dev") + std::to_string(indexCounter++);
+        ports.clear();
+        connectsTo.clear();
     }
 
     /**
@@ -99,10 +99,10 @@ class INET_API Switch : public cObject {
            double cycleDurationLowerBound,
            double cycleDurationUpperBound) {
         this->name = name;
-        this->ports.clear();
-        this->connectsTo.clear();
         this->cycleDurationLowerBound = cycleDurationLowerBound;
         this->cycleDurationUpperBound = cycleDurationUpperBound;
+        ports.clear();
+        connectsTo.clear();
     }
 
     /**
@@ -114,12 +114,12 @@ class INET_API Switch : public cObject {
      * @param ctx      context variable containing the z3 environment used
      */
     void toZ3(context& ctx, solver& solver) {
-        this->cycleDurationLowerBoundZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(cycleDurationLowerBound).c_str()));
-        this->cycleDurationUpperBoundZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(cycleDurationUpperBound).c_str()));
+        cycleDurationLowerBoundZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(cycleDurationLowerBound).c_str()));
+        cycleDurationUpperBoundZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(cycleDurationUpperBound).c_str()));
 
         // Creating the cycle duration and start for this switch
-        this->cycleDuration = std::make_shared<expr>(ctx.real_const((std::string("cycleOf") + name + std::string("Duration")).c_str()));
-        this->cycleStart = std::make_shared<expr>(ctx.real_const((std::string("cycleOf") + name + std::string("Start")).c_str()));
+        cycleDuration = std::make_shared<expr>(ctx.real_const((std::string("cycleOf") + name + std::string("Duration")).c_str()));
+        cycleStart = std::make_shared<expr>(ctx.real_const((std::string("cycleOf") + name + std::string("Start")).c_str()));
 
 
         // Creating the cycle setting up the bounds for the duration (Cycle duration constraint)
@@ -132,9 +132,8 @@ class INET_API Switch : public cObject {
         for (Port *port : ports) {
             port->toZ3(ctx);
 
-            for (FlowFragment *frag : port->getFlowFragments()) {
+            for (FlowFragment *frag : port->getFlowFragments())
                 addAssert(solver, port->getCycle()->getFirstCycleStartZ3() <= arrivalTime(ctx, 0, frag)); // Maximum cycle start constraint
-            }
 
             addAssert(solver, port->getCycle()->getFirstCycleStartZ3() >= ctx.int_val(0)); // No negative cycle values constraint
 
@@ -155,10 +154,8 @@ class INET_API Switch : public cObject {
      * @param ctx           z3 context which specify the environment of constants, functions and variables
      */
     void setupSchedulingRules(solver& solver, context& ctx) {
-
-        for (Port *port : ports) {
-                port->setupSchedulingRules(solver, ctx);
-        }
+        for (Port *port : ports)
+            port->setupSchedulingRules(solver, ctx);
     }
 
     /**
@@ -201,7 +198,7 @@ class INET_API Switch : public cObject {
         }
         else
             ; // [TODO]: THROW ERROR
-        this->portNum++;
+        portNum++;
     }
 
     /**
@@ -215,9 +212,8 @@ class INET_API Switch : public cObject {
      * @param cycle             Cycle used by the port
      */
     void createPort(std::string destination, Cycle *cycle, double maxPacketSize, double timeToTravel, double portSpeed, double gbSize) {
-        this->connectsTo.push_back(destination);
-
-        this->ports.push_back(
+        connectsTo.push_back(destination);
+        ports.push_back(
                 new Port(name + std::string("Port") + std::to_string(portNum),
                         portNum,
                         destination,
@@ -226,8 +222,7 @@ class INET_API Switch : public cObject {
                         portSpeed,
                         gbSize,
                         cycle));
-
-        this->portNum++;
+        portNum++;
     }
 
     /**
@@ -250,12 +245,7 @@ class INET_API Switch : public cObject {
      */
     Port *getPortOf(std::string name) {
         int index = std::find(connectsTo.begin(), connectsTo.end(), name) - connectsTo.begin();
-
-        // System.out.println(std::string("On switch " + getName() + std::string(" looking for port to ")) + name);
-
-        Port *port = ports.at(index);
-
-        return port;
+        return ports.at(index);
     }
 
     /**
@@ -286,23 +276,6 @@ class INET_API Switch : public cObject {
     std::shared_ptr<expr> arrivalTime(context& ctx, int auxIndex, FlowFragment *flowFrag);
 
     /**
-     * [Method]: arrivalTime
-     * [Usage]: Retrieves the arrival time of a packet from a flow fragment
-     * specified by the index given as a parameter. The arrival time is the
-     * time when a packet reaches this switch's port.
-     *
-     * @param ctx           z3 context which specify the environment of constants, functions and variables
-     * @param auxIndex      Index of the packet of the flow fragment as a z3 variable
-     * @param flowFrag      Flow fragment that the packets belong to
-     * @return              Returns the z3 variable for the arrival time of the desired packet
-     *
-    std::shared_ptr<expr> arrivalTime(context& ctx, z3::expr index, FlowFragment flowFrag){
-    int portIndex = connectsTo.indexOf(flowFrag->getNextHop());
-    return (z3::expr) ports.get(portIndex).arrivalTime(ctx, index, flowFrag);
-    }
-    */
-
-    /**
      * [Method]: departureTime
      * [Usage]: Retrieves the departure time of a packet from a flow fragment
      * specified by the index given as a parameter. The departure time is the
@@ -327,22 +300,6 @@ class INET_API Switch : public cObject {
      * @return              Returns the z3 variable for the arrival time of the desired packet
      */
     std::shared_ptr<expr> departureTime(context& ctx, int auxIndex, FlowFragment *flowFrag);
-    /**
-     * [Method]: scheduledTime
-     * [Usage]: Retrieves the scheduled time of a packet from a flow fragment
-     * specified by the index given as a parameter. The scheduled time is the
-     * time when a packet leaves this switch for its next destination.
-     *
-     * @param ctx           z3 context which specify the environment of constants, functions and variables
-     * @param index         Index of the packet of the flow fragment as a z3 variable
-     * @param flowFrag      Flow fragment that the packets belong to
-     * @return              Returns the z3 variable for the scheduled time of the desired packet
-     *
-    std::shared_ptr<expr> scheduledTime(context& ctx, z3::expr index, FlowFragment flowFrag){
-    int portIndex = connectsTo.indexOf(flowFrag->getNextHop());
-    return (z3::expr) ports.get(portIndex).scheduledTime(ctx, index, flowFrag);
-    }
-    */
 
     /**
      * [Method]: scheduledTime
@@ -367,26 +324,20 @@ class INET_API Switch : public cObject {
 
     }
 
-
-    /*
-     *  GETTERS AND SETTERS
-     */
+    std::string getName() {
+        return name;
+    }
 
     void setName(std::string name) {
         this->name = name;
     }
 
-    std::string getName() {
-        return name;
-    }
-
     Cycle *getCycle(int index) {
-
         return ports.at(index)->getCycle();
     }
 
     void setCycle(Cycle *cycle, int index) {
-        this->ports.at(index)->setCycle(cycle);
+        ports.at(index)->setCycle(cycle);
     }
 
     std::vector<Port *> getPorts() {
@@ -398,8 +349,8 @@ class INET_API Switch : public cObject {
     }
 
     void addPort(Port *port, std::string name) {
-        this->ports.push_back(port);
-        this->connectsTo.push_back(name);
+        ports.push_back(port);
+        connectsTo.push_back(name);
     }
 
     std::shared_ptr<expr> getCycleDuration() {
