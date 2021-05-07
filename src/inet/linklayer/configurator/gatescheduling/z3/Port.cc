@@ -152,152 +152,148 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
 
             }
 
+            /*
+            T2 IS INSIDE SLOT, HAS ENOUGH TIME TO TRANSMIT
+            ; **************************************
+            ; |------------------------------------|
+            ; CS       S    t2-------t3    E       CE
+            ;               transmission
+            ; **************************************
+            */
 
-            for (int j = 0; j < 1; j++) {
+            for (int index = 0; index < cycle->getNumOfSlots(); index++) {
+                indexZ3 = std::make_shared<expr>(ctx.int_val(index));
+
+                auxExp2 = std::make_shared<expr>(auxExp2 && // Arrived during a time slot predicate
+                        implies(
+                                    arrivalTime(ctx, i, flowFrag) <=
+                                            cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
+                                                (cycle->slotDurationZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
+                                                cycle->cycleStartZ3(ctx, ctx.int_val(0))) -
+                                        flowFrag->getPacketSizeZ3() / portSpeedZ3 &&
+                                    arrivalTime(ctx, i, flowFrag) >=
+                                        cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
+                                        cycle->cycleStartZ3(ctx, 0),
+                                scheduledTime(ctx, i, flowFrag) ==
+                                    arrivalTime(ctx, i, flowFrag) +
+                                    flowFrag->getPacketSizeZ3() / portSpeedZ3));
+
 
                 /*
-                T2 IS INSIDE SLOT, HAS ENOUGH TIME TO TRANSMIT
+                ; T2 IS BEFORE THE SLOT
                 ; **************************************
                 ; |------------------------------------|
-                ; CS       S    t2-------t3    E       CE
+                ; CS     t2      S-------t3    E       CE
                 ;               transmission
                 ; **************************************
                 */
 
-                for (int index = 0; index < cycle->getNumOfSlots(); index++) {
-                    indexZ3 = std::make_shared<expr>(ctx.int_val(index));
-
-                    auxExp2 = std::make_shared<expr>(auxExp2 && // Arrived during a time slot predicate
+                if (index == 0) {
+                    auxExp2 = std::make_shared<expr>(auxExp2 && // Arrived before slot start constraint
                             implies(
-                                        arrivalTime(ctx, i, flowFrag) <=
-                                                cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
-                                                    (cycle->slotDurationZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
-                                                    cycle->cycleStartZ3(ctx, ctx.int_val(j))) -
-                                            flowFrag->getPacketSizeZ3() / portSpeedZ3 &&
-                                        arrivalTime(ctx, i, flowFrag) >=
-                                            cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
-                                            cycle->cycleStartZ3(ctx, j),
+                                    arrivalTime(ctx, i, flowFrag) <
+                                        cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
+                                        cycle->cycleStartZ3(ctx, 0) &&
+                                    arrivalTime(ctx, i, flowFrag) >=
+                                    cycle->cycleStartZ3(ctx, 0),
                                     scheduledTime(ctx, i, flowFrag) ==
-                                        arrivalTime(ctx, i, flowFrag) +
-                                        flowFrag->getPacketSizeZ3() / portSpeedZ3));
-
-
-                    /*
-                    ; T2 IS BEFORE THE SLOT
-                    ; **************************************
-                    ; |------------------------------------|
-                    ; CS     t2      S-------t3    E       CE
-                    ;               transmission
-                    ; **************************************
-                    */
-
-                    if (index == 0) {
-                        auxExp2 = std::make_shared<expr>(auxExp2 && // Arrived before slot start constraint
-                                implies(
-                                        arrivalTime(ctx, i, flowFrag) <
-                                            cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
-                                            cycle->cycleStartZ3(ctx, j) &&
-                                        arrivalTime(ctx, i, flowFrag) >=
-                                        cycle->cycleStartZ3(ctx, j),
-                                        scheduledTime(ctx, i, flowFrag) ==
-                                                (cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
-                                                cycle->cycleStartZ3(ctx, j) +
-                                            flowFrag->getPacketSizeZ3() / portSpeedZ3)));
-                    } else if (index < cycle->getNumOfSlots()) {
-                        auxExp2 = std::make_shared<expr>(auxExp2 &&
-                                implies(
-                                        arrivalTime(ctx, i, flowFrag) <
-                                            cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
-                                            cycle->cycleStartZ3(ctx, j) &&
-                                        arrivalTime(ctx, i, flowFrag) >
-                                                cycle->cycleStartZ3(ctx, j) +
-                                                    (cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), ctx.int_val(index - 1)) +
-                                                    cycle->slotDurationZ3(ctx, *flowFrag->getFragmentPriorityZ3(), ctx.int_val(index - 1))) -
-                                            flowFrag->getPacketSizeZ3() / portSpeedZ3,
-                                        scheduledTime(ctx, i, flowFrag) ==
-                                                (cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
-                                                cycle->cycleStartZ3(ctx, j) +
-                                            flowFrag->getPacketSizeZ3() / portSpeedZ3)));
-                    }
-
-                    /*
-                    ; T2 IS AFTER THE SLOT OR INSIDE WITHOUT ENOUGH TIME. The packet won't be trans-
-                    ; mitted. This happens due to the usage of hyper and micro-cycles.
-                    ; ****************************************************************************
-                    ; |------------------------------------|------------------------------------|
-                    ; CS        S        t2     E        CE/CS       S----------t3   E         CE
-                    ;                                                transmission
-                    ; ****************************************************************************
-                    */
-
-                    if (index == cycle->getNumOfSlots() - 1) {
-                        auxExp2 = std::make_shared<expr>(auxExp2 && // Arrived after slot end constraint
-                                implies(
-                                        arrivalTime(ctx, i, flowFrag) >=
-                                        cycle->cycleStartZ3(ctx, j) &&
-                                            arrivalTime(ctx, i, flowFrag) <=
-                                                cycle->getCycleDurationZ3() +
-                                                cycle->cycleStartZ3(ctx, j),
-                                        scheduledTime(ctx, i, flowFrag) <=
-                                            cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
-                                                (cycle->slotDurationZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
-                                                cycle->cycleStartZ3(ctx, j))));
-                    }
-
-                    /**
-                    * THE CODE BELLOW HAS ISSUES REGARDING NOT COVERING ALL CASES (ALLOWS DELAY).
-                    * REVIEW LATER.
-
-                    if (j < cycleUpperBoundRange - 1 && index == cycle->getNumOfSlots() - 1) {
-                        auxExp2 = mkAnd((expr) auxExp2, // Arrived after slot end constraint
-                                implies(
-                                    mkAnd(
-                                        mkGt(
-                                            arrivalTime(ctx, i, flowFrag),
-                                            mkSub(
-                                                mkAdd(
-                                                    cycle->slotStartZ3(ctx, flowFrag->getFlowPriority(), indexZ3),
-                                                    cycle->slotDurationZ3(ctx, flowFrag->getFlowPriority(), indexZ3),
-                                                    cycle->cycleStartZ3(ctx, j)),
-                                                transmissionTimeZ3)),
-                                        mkLe(
-                                            arrivalTime(ctx, i, flowFrag),
-                                            mkAdd(
-                                                cycle->cycleStartZ3(ctx, j),
-                                                cycle->getCycleDurationZ3()))),
-
-                                    mkEq(
-                                        scheduledTime(ctx, i, flowFrag),
-                                        mkAdd(
-                                            mkAdd(
-                                                cycle->slotStartZ3(ctx, flowFrag->getFlowPriority(), ctx.int_val(0)),
-                                                cycle->cycleStartZ3(ctx, j + 1)),
-                                            transmissionTimeZ3))));
-                    } else if (j == cycleUpperBoundRange - 1 && index == cycle->getNumOfSlots() - 1) {
-                        auxExp2 = mkAnd((expr) auxExp2,
-                                implies(
-                                    mkAnd(
-                                        mkGt(
-                                            arrivalTime(ctx, i, flowFrag),
-                                            mkSub(
-                                                mkAdd(
-                                                    cycle->slotStartZ3(ctx, flowFrag->getFlowPriority(), indexZ3),
-                                                    cycle->slotDurationZ3(ctx, flowFrag->getFlowPriority(), indexZ3),
-                                                    cycle->cycleStartZ3(ctx, j)),
-                                                transmissionTimeZ3)),
-                                        mkLe(
-                                            arrivalTime(ctx, i, flowFrag),
-                                            mkAdd(
-                                                cycle->cycleStartZ3(ctx, j),
-                                                cycle->getCycleDurationZ3()))),
-
-                                    mkEq(
-                                        scheduledTime(ctx, i, flowFrag),
-                                        arrivalTime(ctx, i, flowFrag))
-));
-                    }
-                    */
+                                            (cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
+                                            cycle->cycleStartZ3(ctx, 0) +
+                                        flowFrag->getPacketSizeZ3() / portSpeedZ3)));
+                } else if (index < cycle->getNumOfSlots()) {
+                    auxExp2 = std::make_shared<expr>(auxExp2 &&
+                            implies(
+                                    arrivalTime(ctx, i, flowFrag) <
+                                        cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
+                                        cycle->cycleStartZ3(ctx, 0) &&
+                                    arrivalTime(ctx, i, flowFrag) >
+                                            cycle->cycleStartZ3(ctx, 0) +
+                                                (cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), ctx.int_val(index - 1)) +
+                                                cycle->slotDurationZ3(ctx, *flowFrag->getFragmentPriorityZ3(), ctx.int_val(index - 1))) -
+                                        flowFrag->getPacketSizeZ3() / portSpeedZ3,
+                                    scheduledTime(ctx, i, flowFrag) ==
+                                            (cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
+                                            cycle->cycleStartZ3(ctx, 0) +
+                                        flowFrag->getPacketSizeZ3() / portSpeedZ3)));
                 }
+
+                /*
+                ; T2 IS AFTER THE SLOT OR INSIDE WITHOUT ENOUGH TIME. The packet won't be trans-
+                ; mitted. This happens due to the usage of hyper and micro-cycles.
+                ; ****************************************************************************
+                ; |------------------------------------|------------------------------------|
+                ; CS        S        t2     E        CE/CS       S----------t3   E         CE
+                ;                                                transmission
+                ; ****************************************************************************
+                */
+
+                if (index == cycle->getNumOfSlots() - 1) {
+                    auxExp2 = std::make_shared<expr>(auxExp2 && // Arrived after slot end constraint
+                            implies(
+                                    arrivalTime(ctx, i, flowFrag) >=
+                                    cycle->cycleStartZ3(ctx, 0) &&
+                                        arrivalTime(ctx, i, flowFrag) <=
+                                            cycle->getCycleDurationZ3() +
+                                            cycle->cycleStartZ3(ctx, 0),
+                                    scheduledTime(ctx, i, flowFrag) <=
+                                        cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
+                                            (cycle->slotDurationZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
+                                            cycle->cycleStartZ3(ctx, 0))));
+                }
+
+                /**
+                * THE CODE BELLOW HAS ISSUES REGARDING NOT COVERING ALL CASES (ALLOWS DELAY).
+                * REVIEW LATER.
+
+                if (j < cycleUpperBoundRange - 1 && index == cycle->getNumOfSlots() - 1) {
+                    auxExp2 = mkAnd((expr) auxExp2, // Arrived after slot end constraint
+                            implies(
+                                mkAnd(
+                                    mkGt(
+                                        arrivalTime(ctx, i, flowFrag),
+                                        mkSub(
+                                            mkAdd(
+                                                cycle->slotStartZ3(ctx, flowFrag->getFlowPriority(), indexZ3),
+                                                cycle->slotDurationZ3(ctx, flowFrag->getFlowPriority(), indexZ3),
+                                                cycle->cycleStartZ3(ctx, j)),
+                                            transmissionTimeZ3)),
+                                    mkLe(
+                                        arrivalTime(ctx, i, flowFrag),
+                                        mkAdd(
+                                            cycle->cycleStartZ3(ctx, j),
+                                            cycle->getCycleDurationZ3()))),
+
+                                mkEq(
+                                    scheduledTime(ctx, i, flowFrag),
+                                    mkAdd(
+                                        mkAdd(
+                                            cycle->slotStartZ3(ctx, flowFrag->getFlowPriority(), ctx.int_val(0)),
+                                            cycle->cycleStartZ3(ctx, j + 1)),
+                                        transmissionTimeZ3))));
+                } else if (j == cycleUpperBoundRange - 1 && index == cycle->getNumOfSlots() - 1) {
+                    auxExp2 = mkAnd((expr) auxExp2,
+                            implies(
+                                mkAnd(
+                                    mkGt(
+                                        arrivalTime(ctx, i, flowFrag),
+                                        mkSub(
+                                            mkAdd(
+                                                cycle->slotStartZ3(ctx, flowFrag->getFlowPriority(), indexZ3),
+                                                cycle->slotDurationZ3(ctx, flowFrag->getFlowPriority(), indexZ3),
+                                                cycle->cycleStartZ3(ctx, j)),
+                                            transmissionTimeZ3)),
+                                    mkLe(
+                                        arrivalTime(ctx, i, flowFrag),
+                                        mkAdd(
+                                            cycle->cycleStartZ3(ctx, j),
+                                            cycle->getCycleDurationZ3()))),
+
+                                mkEq(
+                                    scheduledTime(ctx, i, flowFrag),
+                                    arrivalTime(ctx, i, flowFrag))
+));
+                }
+                */
             }
 
             //auxExp = mkOr((expr)ctx.bool_val(false)(), (expr)auxExp2);
@@ -321,21 +317,19 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
 
     //Every packet must be transmitted inside a timeslot (transmit inside a time slot constraint)
     for (int i = 0; i < flowFrag->getNumOfPacketsSent(); i++) {
-        for (int j = 0; j < 1; j++) {
-            for (int index = 0; index < cycle->getNumOfSlots(); index++) {
-                indexZ3 = std::make_shared<expr>(ctx.int_val(index));
-                auxExp = std::make_shared<expr>(
-                            scheduledTime(ctx, i, flowFrag) >=
-                                cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
-                                    (cycle->cycleStartZ3(ctx, j) +
-                                    flowFrag->getPacketSizeZ3() / portSpeedZ3) &&
-                            scheduledTime(ctx, i, flowFrag) <=
-                                cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
-                                    (cycle->slotDurationZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
-                                    cycle->cycleStartZ3(ctx, j)));
+        for (int index = 0; index < cycle->getNumOfSlots(); index++) {
+            indexZ3 = std::make_shared<expr>(ctx.int_val(index));
+            auxExp = std::make_shared<expr>(
+                        scheduledTime(ctx, i, flowFrag) >=
+                            cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
+                                (cycle->cycleStartZ3(ctx, 0) +
+                                flowFrag->getPacketSizeZ3() / portSpeedZ3) &&
+                        scheduledTime(ctx, i, flowFrag) <=
+                            cycle->slotStartZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
+                                (cycle->slotDurationZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
+                                cycle->cycleStartZ3(ctx, 0)));
 
-                exp = std::make_shared<expr>(exp || auxExp);
-            }
+            exp = std::make_shared<expr>(exp || auxExp);
         }
         addAssert(solver, *exp);
         exp = std::make_shared<expr>(ctx.bool_val(false));
@@ -453,31 +447,27 @@ void Port::zeroOutNonUsedSlots(solver& solver, context& ctx)
 
 
     for (int prtIndex = 0; prtIndex < cycle->getNumOfPrts(); prtIndex++) {
-        for (int cycleNum = 0; cycleNum < 1; cycleNum++) {
-            for (int indexNum = 0; indexNum < cycle->getNumOfSlots(); indexNum++) {
-                indexZ3 = std::make_shared<expr>(ctx.int_val(indexNum));
-                exp1 = std::make_shared<expr>(ctx.bool_val(true));
-                for (FlowFragment *frag : flowFragments) {
-                    for (int packetNum = 0; packetNum < frag->getNumOfPacketsSent(); packetNum++) {
-                        exp1 = std::make_shared<expr>(
-                                exp1 &&
-                                (!(scheduledTime(ctx, packetNum, frag) >=
-                                   cycle->slotStartZ3(ctx, ctx.int_val(prtIndex), *indexZ3) +
-                                   cycle->cycleStartZ3(ctx, ctx.int_val(cycleNum)) &&
-                                   scheduledTime(ctx, packetNum, frag) <=
-                                   cycle->slotStartZ3(ctx, ctx.int_val(prtIndex), *indexZ3) +
-                                   (cycle->slotDurationZ3(ctx, ctx.int_val(prtIndex), *indexZ3) +
-                                   cycle->cycleStartZ3(ctx, ctx.int_val(cycleNum)))) &&
-                                ctx.int_val(prtIndex) == *frag->getFragmentPriorityZ3()));
-                    }
-
+        for (int indexNum = 0; indexNum < cycle->getNumOfSlots(); indexNum++) {
+            indexZ3 = std::make_shared<expr>(ctx.int_val(indexNum));
+            exp1 = std::make_shared<expr>(ctx.bool_val(true));
+            for (FlowFragment *frag : flowFragments) {
+                for (int packetNum = 0; packetNum < frag->getNumOfPacketsSent(); packetNum++) {
+                    exp1 = std::make_shared<expr>(
+                            exp1 &&
+                            (!(scheduledTime(ctx, packetNum, frag) >=
+                               cycle->slotStartZ3(ctx, ctx.int_val(prtIndex), *indexZ3) +
+                               cycle->cycleStartZ3(ctx, ctx.int_val(0)) &&
+                               scheduledTime(ctx, packetNum, frag) <=
+                               cycle->slotStartZ3(ctx, ctx.int_val(prtIndex), *indexZ3) +
+                               (cycle->slotDurationZ3(ctx, ctx.int_val(prtIndex), *indexZ3) +
+                               cycle->cycleStartZ3(ctx, ctx.int_val(0)))) &&
+                            ctx.int_val(prtIndex) == *frag->getFragmentPriorityZ3()));
                 }
 
-                addAssert(solver, implies(*exp1, *cycle->slotDurationZ3(ctx, ctx.int_val(prtIndex), *indexZ3) == ctx.int_val(0)));
             }
 
+            addAssert(solver, implies(*exp1, *cycle->slotDurationZ3(ctx, ctx.int_val(prtIndex), *indexZ3) == ctx.int_val(0)));
         }
-
     }
 }
 
