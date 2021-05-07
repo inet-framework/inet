@@ -37,7 +37,8 @@ void TsnConfigurator::initialize(int stage)
 void TsnConfigurator::computeConfiguration()
 {
     long initializeStartTime = clock();
-    TIME(extractTopology(topology));
+    topology = new Topology();
+    TIME(extractTopology(*topology));
     TIME(computeStreams());
     printElapsedTime("initialize", initializeStartTime);
 }
@@ -59,9 +60,9 @@ void TsnConfigurator::computeStream(cValueMap *configuration)
     auto destinationNetworkNodeName = configuration->get("destination").stringValue();
     streamConfiguration.source = sourceNetworkNodeName;
     streamConfiguration.destination = destinationNetworkNodeName;
-    Node *source = static_cast<Node *>(topology.getNodeFor(getParentModule()->getSubmodule(sourceNetworkNodeName)));
-    Node *destination = static_cast<Node *>(topology.getNodeFor(getParentModule()->getSubmodule(destinationNetworkNodeName)));
-    topology.calculateUnweightedSingleShortestPathsTo(source);
+    Node *source = static_cast<Node *>(topology->getNodeFor(getParentModule()->getSubmodule(sourceNetworkNodeName)));
+    Node *destination = static_cast<Node *>(topology->getNodeFor(getParentModule()->getSubmodule(destinationNetworkNodeName)));
+    topology->calculateUnweightedSingleShortestPathsTo(source);
     std::vector<std::vector<std::string>> allPaths;
     collectAllPaths(source, destination, allPaths);
     streamConfiguration.paths = selectBestPathsSubset(configuration, allPaths);
@@ -264,8 +265,8 @@ void TsnConfigurator::collectAllPaths(Node *source, Node *destination, Node *nod
 std::vector<std::string> TsnConfigurator::collectNetworkNodes(std::string filter)
 {
     std::vector<std::string> result;
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        auto node = (Node *)topology.getNode(i);
+    for (int i = 0; i < topology->getNumNodes(); i++) {
+        auto node = (Node *)topology->getNode(i);
         auto name = node->module->getFullName();
         if (matchesFilter(name, filter))
             result.push_back(name);
@@ -276,8 +277,8 @@ std::vector<std::string> TsnConfigurator::collectNetworkNodes(std::string filter
 std::vector<std::string> TsnConfigurator::collectNetworkLinks(std::string filter)
 {
     std::vector<std::string> result;
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        auto localNode = (Node *)topology.getNode(i);
+    for (int i = 0; i < topology->getNumNodes(); i++) {
+        auto localNode = (Node *)topology->getNode(i);
         std::string localName = localNode->module->getFullName();
         for (int j = 0; j < localNode->getNumOutLinks(); j++) {
             auto remoteNode = (Node *)localNode->getLinkOut(j)->getRemoteNode();

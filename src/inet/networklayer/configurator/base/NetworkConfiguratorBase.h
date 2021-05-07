@@ -73,7 +73,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule
     };
 
   protected:
-    Topology topology;
+    Topology *topology = nullptr;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -90,6 +90,8 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule
     virtual std::vector<Link *> computeShortestLinkPath(Node *source, Node *destination) const;
 
     virtual bool isBridgeNode(Node *node) const;
+
+    virtual Link *findLinkIn(Node *node, const char *neighbor);
     virtual Link *findLinkOut(Node *node, const char *neighbor) const;
     virtual Topology::LinkOut *findLinkOut(Node *node, int gateId) const;
     virtual InterfaceInfo *findInterfaceInfo(Node *node, NetworkInterface *networkInterface) const;

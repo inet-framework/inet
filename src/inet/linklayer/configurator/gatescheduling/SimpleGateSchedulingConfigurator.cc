@@ -129,7 +129,7 @@ simtime_t SimpleGateSchedulingConfigurator::computeStartOffsetForPathFragments(I
                     auto networkNodeName = pathFragment->networkNodes[i]->module->getFullName();
                     extendedPath.push_back(networkNodeName);
                     auto networkNode = getParentModule()->getSubmodule(networkNodeName);
-                    auto node = (Node *)topology.getNodeFor(networkNode);
+                    auto node = (Node *)topology->getNodeFor(networkNode);
                     auto link = (Link *)findLinkOut(node, pathFragment->networkNodes[i + 1]->module->getFullName());
                     auto interfaceInfo = link->sourceInterfaceInfo;
                     auto networkInterface = interfaceInfo->networkInterface;
@@ -205,7 +205,7 @@ void SimpleGateSchedulingConfigurator::addGateSchedulingForPathFragments(Input::
                     auto networkNodeName = pathFragment->networkNodes[i]->module->getFullName();
                     extendedPath.push_back(networkNodeName);
                     auto networkNode = getParentModule()->getSubmodule(networkNodeName);
-                    auto node = (Node *)topology.getNodeFor(networkNode);
+                    auto node = (Node *)topology->getNodeFor(networkNode);
                     auto link = (Link *)findLinkOut(node, pathFragment->networkNodes[i + 1]->module->getFullName());
                     auto interfaceInfo = link->sourceInterfaceInfo;
                     auto networkInterface = interfaceInfo->networkInterface;
