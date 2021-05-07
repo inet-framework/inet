@@ -18,21 +18,13 @@
 #ifndef __INET_TSNCONFIGURATOR_H
 #define __INET_TSNCONFIGURATOR_H
 
-#include <algorithm>
-#include <vector>
-
-#include "inet/common/PatternMatcher.h"
-#include "inet/common/Topology.h"
-#include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
 
 namespace inet {
 
-class INET_API TsnConfigurator : public cSimpleModule
+class INET_API TsnConfigurator : public NetworkConfiguratorBase
 {
   protected:
-    class InterfaceInfo;
-
     class StreamConfiguration
     {
       public:
@@ -43,64 +35,13 @@ class INET_API TsnConfigurator : public cSimpleModule
         std::vector<std::vector<std::string>> paths;
     };
 
-    /**
-     * Represents a node in the network.
-     */
-    class Node : public Topology::Node {
-      public:
-        cModule *module;
-        IInterfaceTable *interfaceTable;
-        std::vector<InterfaceInfo *> interfaceInfos;
-
-      public:
-        Node(cModule *module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = nullptr; }
-        ~Node() { for (size_t i = 0; i < interfaceInfos.size(); i++) delete interfaceInfos[i]; }
-    };
-
-    /**
-     * Represents an interface in the network.
-     */
-    class InterfaceInfo : public cObject {
-      public:
-        NetworkInterface *networkInterface;
-
-      public:
-        InterfaceInfo(NetworkInterface *networkInterface) : networkInterface(networkInterface) {}
-        virtual std::string getFullPath() const override { return networkInterface->getInterfaceFullPath(); }
-    };
-
-    class Link : public Topology::Link {
-      public:
-        InterfaceInfo *sourceInterfaceInfo;
-        InterfaceInfo *destinationInterfaceInfo;
-
-      public:
-        Link() { sourceInterfaceInfo = nullptr; destinationInterfaceInfo = nullptr; }
-    };
-
-    class Topology : public inet::Topology {
-      protected:
-        virtual Node *createNode(cModule *module) override { return new TsnConfigurator::Node(module); }
-        virtual Link *createLink() override { return new TsnConfigurator::Link(); }
-    };
-
   protected:
     cValueArray *configuration;
 
-    Topology topology;
     std::vector<StreamConfiguration> streamConfigurations;
 
   protected:
     virtual void initialize(int stage) override;
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
-
-    /**
-     * Extracts network topology by walking through the module hierarchy.
-     * Creates vertices from modules having @networkNode property.
-     * Creates edges from connections (wired and wireless) between network interfaces.
-     */
-    virtual void extractTopology(Topology& topology);
 
     /**
      * Computes the network configuration for all nodes in the network.
@@ -125,9 +66,6 @@ class INET_API TsnConfigurator : public cSimpleModule
 
     virtual bool matchesFilter(std::string name, std::string filter);
     virtual bool intersects(std::vector<std::string> list1, std::vector<std::string> list2);
-
-    virtual Topology::LinkOut *findLinkOut(Node *node, int gateId);
-    virtual InterfaceInfo *findInterfaceInfo(Node *node, NetworkInterface *networkInterface);
 };
 
 } // namespace inet
