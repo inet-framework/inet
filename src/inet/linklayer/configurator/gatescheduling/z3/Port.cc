@@ -51,7 +51,7 @@ void Port::setUpCycleRules(solver& solver, context& ctx) {
              */
 
             for (FlowFragment *auxFrag : flowFragments) {
-                addAssert(solver, implies(*frag->getFragmentPriorityZ3() == *auxFrag->getFragmentPriorityZ3(),
+                addAssert(solver, implies(frag->getFragmentPriorityZ3() == auxFrag->getFragmentPriorityZ3(),
                                       cycle->slotStartZ3(ctx, *frag->getFragmentPriorityZ3(), indexZ3) ==
                                       cycle->slotStartZ3(ctx, *auxFrag->getFragmentPriorityZ3(), indexZ3) &&
                                       cycle->slotDurationZ3(ctx, *frag->getFragmentPriorityZ3(), indexZ3) ==
@@ -66,7 +66,7 @@ void Port::setUpCycleRules(solver& solver, context& ctx) {
 
                 std::shared_ptr<expr> auxFlowPriority = auxFrag->getFragmentPriorityZ3();
 
-                addAssert(solver, implies(!(*flowPriority == *auxFlowPriority),
+                addAssert(solver, implies(!(flowPriority == auxFlowPriority),
                                       cycle->slotStartZ3(ctx, *flowPriority, indexZ3) >=
                                       cycle->slotStartZ3(ctx, *auxFlowPriority, indexZ3) +
                                       cycle->slotDurationZ3(ctx, *auxFlowPriority, indexZ3) ||
@@ -143,7 +143,7 @@ void Port::setupTimeSlots(solver& solver, context& ctx, FlowFragment *flowFrag) 
 
         // Every flow must have a priority (Priority assignment constraint)
         addAssert(solver, flowFrag->getFragmentPriorityZ3() >= ctx.int_val(0));
-        addAssert(solver, *flowFrag->getFragmentPriorityZ3() < ctx.int_val(cycle->getNumOfPrts()));
+        addAssert(solver, flowFrag->getFragmentPriorityZ3() < ctx.int_val(cycle->getNumOfPrts()));
 
         // Slot start must be <= cycle time - slot duration
         addAssert(solver, cycle->slotDurationZ3(ctx, *flowFrag->getFragmentPriorityZ3(), indexZ3) +
@@ -536,7 +536,7 @@ void Port::setupBestEffort(solver& solver, context& ctx) {
         }
 
         for (int i = 1; i <= 8; i++) {
-            addAssert(solver, implies(*f.getFragmentPriorityZ3() == ctx.int_val(i), slotDuration[i-1] == *sumOfSlotsDuration));
+            addAssert(solver, implies(f.getFragmentPriorityZ3() == ctx.int_val(i), slotDuration[i-1] == sumOfSlotsDuration));
         }
     }
 
@@ -591,7 +591,7 @@ void Port::zeroOutNonUsedSlots(solver& solver, context& ctx)
     for (int prtIndex = 0; prtIndex < cycle->getNumOfPrts(); prtIndex++) {
         for (FlowFragment *frag : flowFragments) {
             for (int slotIndex = 0; slotIndex < cycle->getNumOfSlots(); slotIndex++) {
-                addAssert(solver, implies(*frag->getFragmentPriorityZ3() == ctx.int_val(prtIndex),
+                addAssert(solver, implies(frag->getFragmentPriorityZ3() == ctx.int_val(prtIndex),
                                       cycle->slotStartZ3(ctx, *frag->getFragmentPriorityZ3(), ctx.int_val(slotIndex)) ==
                                       cycle->slotStartZ3(ctx, ctx.int_val(prtIndex), ctx.int_val(slotIndex)) &&
                                       cycle->slotDurationZ3(ctx, *frag->getFragmentPriorityZ3(), ctx.int_val(slotIndex)) ==
