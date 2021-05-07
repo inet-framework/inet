@@ -261,20 +261,15 @@ class INET_API Cycle {
     void loadZ3(context& ctx, solver& solver) {
         // maximumSlotDurationZ3 already started on toZ3;
 
-        addAssert(solver,
-                cycleDurationZ3 ==
-                ctx.real_val(std::to_string(cycleDuration).c_str()));
-
-        addAssert(solver,
-                firstCycleStartZ3 ==
-                ctx.real_val(std::to_string(firstCycleStart).c_str()));
+        addAssert(solver, cycleDurationZ3 == ctx.real_val(std::to_string(cycleDuration).c_str()));
+        addAssert(solver, firstCycleStartZ3 == ctx.real_val(std::to_string(firstCycleStart).c_str()));
 
         for (int prt : getSlotsUsed()) {
             // Where are the slot duration per priority instantiated? Must do it before loading
             for (int slotIndex = 0; slotIndex < numOfSlots; slotIndex++) {
                 addAssert(solver,
-                        slotStartZ3_.at(prt).at(slotIndex) ==
-                        ctx.real_val(std::to_string(slotStart.at(std::find(slotsUsed.begin(), slotsUsed.end(), prt) - slotsUsed.begin()).at(slotIndex)).c_str()));
+                    slotStartZ3_.at(prt).at(slotIndex) ==
+                    ctx.real_val(std::to_string(slotStart.at(std::find(slotsUsed.begin(), slotsUsed.end(), prt) - slotsUsed.begin()).at(slotIndex)).c_str()));
             }
 
             /*
