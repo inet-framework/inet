@@ -55,7 +55,7 @@ module EthernetSwitch
         string spanningTreeProtocol = default("Stp");
         int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
         eth[*].encap.typename = default("OmittedEthernetEncapsulation");
-        *.fcsMode = fcsMode;
+        *.fcsMode = this.fcsMode;
         **.interfaceTableModule = default(absPath(".interfaceTable"));
         **.macTableModule = default(absPath(".macTable"));
 

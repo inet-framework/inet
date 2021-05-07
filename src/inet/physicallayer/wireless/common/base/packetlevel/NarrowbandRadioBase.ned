@@ -27,7 +27,7 @@ module NarrowbandRadioBase extends Radio
     parameters:
         double centerFrequency @unit(Hz);     // center frequency of the band where the radio transmits and receives signals on the medium
         double bandwidth @unit(Hz);            // bandwidth of the band where the radio transmits and receives signals on the medium
-        *.centerFrequency = default(centerFrequency); // passed down to transmitter and receiver by default
-        *.bandwidth = default(bandwidth);               // passed down to transmitter and receiver by default
+        *.centerFrequency = default(this.centerFrequency); // passed down to transmitter and receiver by default
+        *.bandwidth = default(this.bandwidth);               // passed down to transmitter and receiver by default
 }
 

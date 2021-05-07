@@ -47,7 +47,7 @@ module Hcf like IHcf
         string txModule;
 
         *.rateSelectionModule = "^.rateSelection";
-        *.rxModule = "^." + rxModule;
+        *.rxModule = "^." + this.rxModule;
         *.*.originatorMacDataServiceModule = "^.^.originatorMacDataService";
 
         @class(Hcf);

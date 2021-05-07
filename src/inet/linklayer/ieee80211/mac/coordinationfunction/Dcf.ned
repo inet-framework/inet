@@ -43,7 +43,7 @@ module Dcf like IDcf
         string txModule;
 
         *.rateSelectionModule = "^.rateSelection";
-        *.rxModule = "^." + rxModule;
+        *.rxModule = "^." + this.rxModule;
 
         @class(Dcf);
         @display("i=block/layer");

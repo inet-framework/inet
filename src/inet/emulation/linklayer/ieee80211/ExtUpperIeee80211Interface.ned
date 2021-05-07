@@ -39,14 +39,14 @@ module ExtUpperIeee80211Interface extends ExtInterface like IWirelessInterface
         string energySourceModule = default("");
         string opMode @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","p","ac") = default("g(mixed)");
         double bitrate @unit(bps) = default(-1bps);
-        **.opMode = opMode;
-        **.bitrate = bitrate;
-        mac.modeSet = default(opMode);
-        mac.*.rateSelection.dataFrameBitrate = default(bitrate);
+        **.opMode = this.opMode;
+        **.bitrate = this.bitrate;
+        mac.modeSet = default(this.opMode);
+        mac.*.rateSelection.dataFrameBitrate = default(this.bitrate);
         *.macModule = default(absPath(".mac"));
         *.mibModule = default(absPath(".mib"));
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.energySourceModule = default(absPath(energySourceModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        *.energySourceModule = default(absPath(this.energySourceModule));
     gates:
         input radioIn @labels(IWirelessSignal); // to receive signals
     submodules:

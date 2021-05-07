@@ -27,7 +27,7 @@ module EthernetLayer like IEthernetLayer
     parameters:
         string interfaceTableModule;
         bool hasSocketSupport = default(false);
-        *.interfaceTableModule = default(interfaceTableModule);
+        *.interfaceTableModule = default(this.interfaceTableModule);
         *.socketTableModule = default(absPath(".socketTable"));
         paddingInserter.minLength = default(60B);
         @display("i=block/layer");

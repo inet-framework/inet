@@ -52,7 +52,7 @@ module EthernetPreemptingMacLayer like IEthernetMacLayer
             @display("p=200,400");
         }
         preemptingServer: PreemptingServer {
-            datarate = default(bitrate);
+            datarate = default(parent.bitrate);
             @display("p=200,500");
         }
         inboundClassifier: PacketClassifier {

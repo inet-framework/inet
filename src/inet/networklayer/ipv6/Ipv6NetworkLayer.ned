@@ -42,9 +42,9 @@ module Ipv6NetworkLayer like INetworkLayer
         bool multicastForwarding = default(false);
         *.xmipv6Module = xMIPv6Support ? absPath(".mipv6support.xMobileIPv6") : "";
         string interfaceTableModule;
-        *.forwarding = forwarding;
-        *.multicastForwarding = multicastForwarding;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.forwarding = this.forwarding;
+        *.multicastForwarding = this.multicastForwarding;
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         *.routingTableModule = default(absPath(".routingTable"));
         *.ipv6NeighbourDiscoveryModule = default(absPath(".neighbourDiscovery"));
         *.icmpv6Module = default(absPath(".icmpv6"));

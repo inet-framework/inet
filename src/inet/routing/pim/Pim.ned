@@ -33,8 +33,8 @@ module Pim like IPim
         string interfaceTableModule;
         string routingTableModule;
         string crcMode @enum("declared", "computed") = default("declared");
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.routingTableModule = default(absPath(routingTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        *.routingTableModule = default(absPath(this.routingTableModule));
         *.pimInterfaceTableModule = default("^.pimInterfaceTable");
         *.pimNeighborTableModule = default("^.pimNeighborTable");
 

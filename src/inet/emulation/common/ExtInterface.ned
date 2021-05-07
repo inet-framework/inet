@@ -35,9 +35,9 @@ module ExtInterface extends NetworkInterface like IExternalInterface
         bool multicast = default(true);
         bool pointToPoint = default(false);
         int mtu @unit(B) = default(4470B);
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.device = default(device);
-        *.namespace = default(namespace);
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        *.device = default(this.device);
+        *.namespace = default(this.namespace);
         @class(ExtInterface);
     gates:
         input upperLayerIn @loose;

@@ -18,7 +18,7 @@ network ber
             parameters:
                 datarate = 10Mbps;
                 delay = 0.565us;
-                per = n;
+                per = parent.n;
                 thruputDisplayFormat = default("p b u");
         }
     submodules:

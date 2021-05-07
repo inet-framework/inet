@@ -22,8 +22,8 @@ module EthernetCutthroughLayer
     parameters:
         string macTableModule;
         double bitrate @unit(bps);
-        *.datarate = default(bitrate);
-        *.macTableModule = default(macTableModule);
+        *.datarate = default(this.bitrate);
+        *.macTableModule = default(this.macTableModule);
         @display("i=block/layer");
     gates:
         input upperLayerIn;

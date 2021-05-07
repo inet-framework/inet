@@ -25,7 +25,7 @@ module Ieee8021qLayer like IIeee8021qLayer
     parameters:
         string vlanTagType = default("c");
         bool hasSocketSupport = default(false);
-        *.vlanTagType = default(vlanTagType);
+        *.vlanTagType = default(this.vlanTagType);
         *.socketTableModule = default(absPath(".socketTable"));
         @display("i=block/layer");
     gates:

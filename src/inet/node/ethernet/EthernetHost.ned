@@ -41,9 +41,9 @@ module EthernetHost
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/pc2");
-        eth.csmacdSupport = csmacdSupport;
+        eth.csmacdSupport = this.csmacdSupport;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
-        *.fcsMode = fcsMode;
+        *.fcsMode = this.fcsMode;
         eth.encap.typename = "OmittedEthernetEncapsulation";
     gates:
         inout ethg @labels(EtherFrame-conn);

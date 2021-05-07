@@ -84,7 +84,7 @@ module VoIPStreamMediumLAN
     submodules:
         switch: EthernetSwitch {
             parameters:
-                numEthInterfaces = n+2;
+                numEthInterfaces = parent.n+2;
                 eth[0].duplexMode = false;
                 @display("is=s");
         }

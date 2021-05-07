@@ -36,6 +36,6 @@ module Ieee80211ReceiverBase extends NarrowbandReceiverBase
         modulation = default("BPSK"); // TODO this is simply wrong
         errorModel.typename = default("Ieee80211NistErrorModel");
         // TODO remove when opMode is removed from the error model
-        *.opMode = opMode;
+        *.opMode = this.opMode;
 }
 

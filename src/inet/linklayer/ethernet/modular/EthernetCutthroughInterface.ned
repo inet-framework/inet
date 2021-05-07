@@ -35,8 +35,8 @@ module EthernetCutthroughInterface extends NetworkInterface like IEthernetInterf
         double bitrate @unit(bps);
         string interfaceTableModule;
         string macTableModule;
-        *.bitrate = default(bitrate);
-        *.macTableModule = default(macTableModule);
+        *.bitrate = default(this.bitrate);
+        *.macTableModule = default(this.macTableModule);
         @class(EthernetCutthroughInterface);
     gates:
         input upperLayerIn;

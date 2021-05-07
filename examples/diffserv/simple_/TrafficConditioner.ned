@@ -33,7 +33,7 @@ module TrafficConditioner like ITrafficConditioner
 {
     parameters:
         string interfaceTableModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         @display("i=block/classifier");
     gates:
         input in;
