@@ -31,7 +31,6 @@ namespace inet {
 using namespace z3;
 
 /**
- * [Class]: Switch
  * This class contains the information needed to
  * specify a switch capable of complying with the TSN patterns
  * to the schedule. Aside from part of the z3 data used to

@@ -32,7 +32,6 @@ using namespace z3;
 class FlowFragment;
 
 /**
- * [Class]: PathNode
  * Contains the data needed in each node of
  * a pathTree. Can reference a father, possesses an
  * device or switch, a list of children and a flow
