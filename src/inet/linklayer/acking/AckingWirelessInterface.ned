@@ -41,9 +41,9 @@ module AckingWirelessInterface extends NetworkInterface like IWirelessInterface
         string interfaceTableModule;
         string energySourceModule = default("");
         double bitrate @unit(bps);
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.energySourceModule = default(absPath(energySourceModule));
-        **.bitrate = bitrate;
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        *.energySourceModule = default(absPath(this.energySourceModule));
+        **.bitrate = this.bitrate;
     gates:
         input upperLayerIn;
         output upperLayerOut;

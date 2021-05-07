@@ -44,7 +44,7 @@ module EigrpProcessDS like IEigrp
         bool enableIPv4 = default(true);
         bool enableIPv6 = default(true);
         xml configData = default(xmldoc("config.xml"));
-		string interfaceTableModule;
+        string interfaceTableModule;
         string routingTableModule;
         string routingTableModule6;
     gates:
@@ -57,9 +57,9 @@ module EigrpProcessDS like IEigrp
         }
         eigrpIpv4Pdm: EigrpIpv4Pdm if enableIPv4 {
             @display("p=64,66;i=block/circle");
-            configData = configData;
-            routingTableModule = routingTableModule;
-            interfaceTableModule = interfaceTableModule;
+            configData = parent.configData;
+            routingTableModule = parent.routingTableModule;
+            interfaceTableModule = parent.interfaceTableModule;
         }
         eigrpInterfaceTable: EigrpInterfaceTable if enableIPv4 {
             @display("p=185,180");
@@ -79,9 +79,9 @@ module EigrpProcessDS like IEigrp
         }
         eigrpIpv6Pdm: EigrpIpv6Pdm if enableIPv6 {
             @display("p=433,66;i=block/circle");
-            configData = configData;
-            interfaceTableModule = interfaceTableModule;
-            routingTableModule = routingTableModule6;
+            configData = parent.configData;
+            interfaceTableModule = parent.interfaceTableModule;
+            routingTableModule = parent.routingTableModule6;
         }
         eigrpIpv6NeighborTable: EigrpIpv6NeighborTable if enableIPv6 {
             @display("p=320,45");

@@ -26,7 +26,7 @@ module VlanPolicyLayer like IProtocolLayer
     parameters:
         @display("i=block/layer");
         string interfaceTableModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
     gates:
         input upperLayerIn;
         output upperLayerOut;

@@ -34,8 +34,8 @@ module EthernetHost2
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string fcsMode @enum("declared","computed") = default("declared");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
-        *.fcsMode = fcsMode;
-        eth.csmacdSupport = csmacdSupport;
+        *.fcsMode = this.fcsMode;
+        eth.csmacdSupport = this.csmacdSupport;
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/pc2");

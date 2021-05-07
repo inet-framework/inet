@@ -40,8 +40,8 @@ module BGPRouterEx
         @display("i=abstract/router");
         bool forwarding = true;
         bool multicastForwarding = default(false);
-        *.forwarding = forwarding;
-        *.multicastForwarding = multicastForwarding;
+        *.forwarding = this.forwarding;
+        *.multicastForwarding = this.multicastForwarding;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(absPath(".ipv4.routingTable"));
     gates:

@@ -29,7 +29,7 @@ module SimpleNetworkLayer like INetworkLayer
 {
     parameters:
         string interfaceTableModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         @display("i=block/fork");
 
     gates:

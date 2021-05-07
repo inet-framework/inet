@@ -24,7 +24,7 @@ module Ieee8021qLayer like IIeee8021qLayer
     parameters:
         @display("i=block/layer");
         string interfaceTableModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
     gates:
         input upperLayerIn;
         output upperLayerOut;

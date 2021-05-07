@@ -27,8 +27,8 @@ module Edca
         string rxModule;
         string rateSelectionModule;
 
-        *.rateSelectionModule = "^." + rateSelectionModule;
-        *.rxModule = "^." + rxModule;
+        *.rateSelectionModule = "^." + this.rateSelectionModule;
+        *.rxModule = "^." + this.rxModule;
         *.collisionControllerModule = "^.collisionController";
 
         edcaf[0].accessCategory = default("AC_BK");

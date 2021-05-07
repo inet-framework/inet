@@ -29,7 +29,7 @@ module EthernetPreemptingMacLayer like IEthernetMacLayer
 {
     parameters:
         volatile double bitrate @unit(bps);
-        *.bitrate = default(bitrate);
+        *.bitrate = default(this.bitrate);
         lifetimer.collectionModule = default("^.queue");
         @display("i=block/layer");
     gates:
@@ -58,7 +58,7 @@ module EthernetPreemptingMacLayer like IEthernetMacLayer
             @display("p=200,400");
         }
         preemptingServer: PreemptingServer {
-            datarate = default(bitrate);
+            datarate = default(parent.bitrate);
             @display("p=200,500");
         }
         inboundClassifier: PacketClassifier {

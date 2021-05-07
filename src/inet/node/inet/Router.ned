@@ -70,7 +70,7 @@ module Router extends ApplicationLayerNodeBase
         }
         bgp: <"Bgp"> like IBgp if hasBgp {
             parameters:
-                ospfRoutingModule = default(hasOspf ? "^.ospf" : "");
+                ospfRoutingModule = default(parent.hasOspf ? "^.ospf" : "");
                 @display("p=600,100");
         }
         rip: <"Rip"> like IApp if hasRip {
@@ -87,8 +87,8 @@ module Router extends ApplicationLayerNodeBase
         }
         eigrp: <"EigrpProcessDS"> like IEigrp if hasEigrp {
             parameters:
-                enableIPv6 = hasIpv6;
-                enableIPv4 = hasIpv4;
+                enableIPv6 = parent.hasIpv6;
+                enableIPv4 = parent.hasIpv4;
                 @display("p=1113,225");
         }
 

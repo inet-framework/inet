@@ -33,7 +33,7 @@ network UdpClientServer
         {
             datarate = 10Mbps;
             delay = 0.1us;
-            per = per;
+            per = parent.per;
         }
     submodules:
         client1: StandardHost {

@@ -40,9 +40,9 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
         bool csmacdSupport = default(!duplexMode);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         double bitrate @unit(bps) = default(0 bps);
         string fcsMode @enum("declared","computed") = default("declared");
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.fcsMode = fcsMode;
-        *.duplexMode = duplexMode;
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        *.fcsMode = this.fcsMode;
+        *.duplexMode = this.duplexMode;
     gates:
         input upperLayerIn;
         output upperLayerOut;

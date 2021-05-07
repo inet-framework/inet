@@ -32,8 +32,8 @@ module GatingPriorityQueue extends CompoundPacketQueueBase
     parameters:
         int numQueues;
         double bitrate @unit(bps);
-        *.bitrate = default(bitrate);
-        *.guardBand = default(replaceUnit(96.0 / dropUnit(bitrate), "s"));
+        *.bitrate = default(this.bitrate);
+        *.guardBand = default(replaceUnit(96.0 / dropUnit(this.bitrate), "s"));
     submodules:
         buffer: <default("PriorityBuffer")> like IPacketBuffer if typename != "" {
             parameters:

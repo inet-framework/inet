@@ -28,7 +28,7 @@ module EthernetMacLayer like IEthernetMacLayer
 {
     parameters:
         double bitrate @unit(bps);
-        *.bitrate = default(bitrate);
+        *.bitrate = default(this.bitrate);
         lifetimer.collectionModule = default("^.queue");
         outboundEmitter.signalName = "packetSentToLower";
         outboundEmitter.direction = "outbound";

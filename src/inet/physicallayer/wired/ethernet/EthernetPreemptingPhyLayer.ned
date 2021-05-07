@@ -33,7 +33,7 @@ module EthernetPreemptingPhyLayer like IEthernetPhyLayer
         outboundEmitter.direction = "outbound";
         inboundEmitter.signalName = "packetReceivedFromLower";
         inboundEmitter.direction = "inbound";
-        *.bitrate = default(bitrate);
+        *.bitrate = default(this.bitrate);
         @display("i=block/layer");
     gates:
         input upperLayerIn;
@@ -55,14 +55,14 @@ module EthernetPreemptingPhyLayer like IEthernetPhyLayer
             @display("p=200,300");
         }
         interFrameGapInserter: InterpacketGapInserter {
-            duration = default(96s / dropUnit(bitrate));
+            duration = default(96s / dropUnit(parent.bitrate));
             @display("p=200,400");
         }
         outboundEmitter: <default("PacketEmitter")> like IPacketFlow {
             @display("p=200,500");
         }
         transmitter: <default("StreamThroughTransmitter")> like IPacketTransmitter {
-            datarate = default(bitrate);
+            datarate = default(parent.bitrate);
             @display("p=200,600");
         }
         m2: PacketMultiplexer {
@@ -82,7 +82,7 @@ module EthernetPreemptingPhyLayer like IEthernetPhyLayer
             @display("p=600,500");
         }
         receiver: <default("DestreamingReceiver")> like IPacketReceiver {
-            datarate = default(bitrate);
+            datarate = default(parent.bitrate);
             @display("p=600,600");
         }
     connections:

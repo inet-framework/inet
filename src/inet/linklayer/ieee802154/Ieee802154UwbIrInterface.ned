@@ -31,7 +31,7 @@ module Ieee802154UwbIrInterface extends NetworkInterface like IWirelessInterface
     parameters:
         @class(NetworkInterface);
         string interfaceTableModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
     gates:
         input upperLayerIn;
         output upperLayerOut;
