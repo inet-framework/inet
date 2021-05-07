@@ -48,7 +48,6 @@ class FlowFragment;
  */
 class INET_API Port {
   public:
-    bool useMicroCycles = false;
     bool useHyperCycle = true;
 
     std::vector<double> listOfPeriods;
@@ -63,7 +62,6 @@ class INET_API Port {
 
     Cycle *cycle;
     std::vector<FlowFragment *> flowFragments;
-    int cycleUpperBoundRange = 25; // Limits the applications of rules to the cycles
 
     double gbSize;
 
@@ -158,8 +156,7 @@ class INET_API Port {
      * [Usage]: Sets the core scheduling rules for a certain number of
      * packets of a flow fragment. The number of packets is specified
      * by the packetUpperBound range variable. The scheduler will attempt
-     * to fit these packets within a certain number of cycles, specified
-     * by the cycleUpperBoundRange variable.
+     * to fit these packets within a certain number of cycles.
      *
      * @param solver        z3 solver object used to discover the variables' values
      * @param ctx           z3 context which specify the environment of constants, functions and variables
@@ -284,8 +281,6 @@ class INET_API Port {
         this->definedHyperCycleSize = hyperCycleSize;
         this->cycle->setCycleDuration(hyperCycleSize);
 
-        this->cycleUpperBoundRange = 1;
-
         /*
         for (FlowFragment *flowFrag : flowFragments) {
             flowFrag->setNumOfPacketsSent((int) (hyperCycleSize/flowFrag->getStartDevice().getPacketPeriodicity()));
@@ -298,51 +293,11 @@ class INET_API Port {
             numOfPacketsScheduled += (int) (hyperCycleSize/periodicity);
         }
 
-        // System.out.println(std::string("Num of Cycles: ") + cycleUpperBoundRange);
-
         this->cycle->setNumOfSlots(numOfPacketsScheduled);
 
         // In order to use the value cycle time obtained, we must override the minimum and maximum cycle times
         this->cycle->setUpperBoundCycleTime(hyperCycleSize + 1);
         this->cycle->setLowerBoundCycleTime(hyperCycleSize - 1);
-
-    }
-
-    /**
-     * [Method]: setUpMicroCycles
-     * [Usage]: Set up the cycle duration and number of packets, cycles and slots
-     * to be scheduled according to the micro cycle approach.
-     *
-     * @param solver    solver object
-     * @param ctx        context object for the solver
-     */
-    void setUpMicroCycles(solver& solver, context& ctx) {
-
-        /*
-        for (FlowFragment *flowFrag : flowFragments) {
-            System.out.println(flowFrag->getStartDevice());
-            listOfPeriods.add(flowFrag->getStartDevice().getPacketPeriodicity());
-        }
-        */
-
-        this->microCycleSize = findGCD(listOfPeriods);
-        double hyperCycleSize = findLCM(listOfPeriods);
-
-        this->definedHyperCycleSize = hyperCycleSize;
-
-        this->cycleUpperBoundRange = (int) (hyperCycleSize/microCycleSize);
-
-        /*
-        for (FlowFragment *flowFrag : flowFragments) {
-            flowFrag->setNumOfPacketsSent((int) (hyperCycleSize/flowFrag->getStartDevice().getPacketPeriodicity()));
-            System.out.println(std::string("Frag num packets: ") + flowFrag->getNumOfPacketsSent());
-        }
-        System.out.println(std::string("Num of Cycles: ") + cycleUpperBoundRange);
-          */
-
-        // In order to use the value cycle time obtained, we must override the minimum and maximum cycle times
-        this->cycle->setUpperBoundCycleTime(microCycleSize + 1);
-        this->cycle->setLowerBoundCycleTime(microCycleSize - 1);
     }
 
     /**
@@ -365,10 +320,7 @@ class INET_API Port {
         }
 
 
-        if (useMicroCycles && listOfPeriods.size() > 0) {
-            setUpMicroCycles(solver, ctx);
-            addAssert(solver, cycle->getCycleDurationZ3() == ctx.real_val(std::to_string(microCycleSize).c_str()));
-        } else if (useHyperCycle && listOfPeriods.size() > 0) {
+        if (listOfPeriods.size() > 0) {
             setUpHyperCycle(solver, ctx);
             addAssert(solver, cycle->getCycleDurationZ3() == ctx.real_val(std::to_string(definedHyperCycleSize).c_str()));
         }
@@ -554,9 +506,7 @@ class INET_API Port {
      * @return bool value. True if automated application period methodology is used, false elsewhise
      */
     bool checkIfAutomatedApplicationPeriod() {
-        if (useHyperCycle || useMicroCycles)
-            return true;
-        return false;
+        return useHyperCycle;
     }
 
     /**
@@ -636,14 +586,6 @@ class INET_API Port {
 
     void setListOfPeriods(std::vector<double> listOfPeriods) {
         this->listOfPeriods = listOfPeriods;
-    }
-
-    int getCycleUpperBoundRange() {
-        return cycleUpperBoundRange;
-    }
-
-    void setCycleUpperBoundRange(int cycleUpperBoundRange) {
-        this->cycleUpperBoundRange = cycleUpperBoundRange;
     }
 
     double getDefinedHyperCycleSize() {
