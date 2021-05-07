@@ -126,7 +126,7 @@ class INET_API Port {
         this->bestEffortPercentZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(bestEffortPercent).c_str()));
 
         if (cycle->getFirstCycleStartZ3() == nullptr) {
-            this->cycle->toZ3(ctx);
+            cycle->toZ3(ctx);
         }
     }
 
@@ -444,11 +444,11 @@ class INET_API Port {
         if (useMicroCycles && flowFragments.size() > 0) {
             addAssert(solver, mkEq(
                 ctx.real_val(std::to_string(microCycleSize)),
-                this->cycle->getCycleDurationZ3()));
+                cycle->getCycleDurationZ3()));
         } else if (useHyperCycle && flowFragments.size() > 0) {
             addAssert(solver, mkEq(
                 ctx.real_val(std::to_string(definedHyperCycleSize)),
-                this->cycle->getCycleDurationZ3()));
+                cycle->getCycleDurationZ3()));
         } else {
             for (FlowFragment flowFrag : flowFragments) {
                 flowFrag->setNumOfPacketsSent(packetUpperBoundRange);

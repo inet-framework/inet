@@ -144,7 +144,7 @@ class INET_API Switch : public cObject {
 
             /* The cycle of every port must have the same duration
             addAssert(solver, mkEq( // Equal cycle constraints
-                this->cycleDuration,
+                cycleDuration,
                 port.getCycle()->getCycleDurationZ3()));
             */
 
@@ -183,10 +183,10 @@ class INET_API Switch : public cObject {
      */
     void createPort(cObject *destination, Cycle *cycle, double maxPacketSize, double timeToTravel, double portSpeed, double gbSize) {
         if (dynamic_cast<Device *>(destination)) {
-            this->connectsTo.push_back(((Device *)destination)->getName());
-            this->ports.push_back(
+            connectsTo.push_back(((Device *)destination)->getName());
+            ports.push_back(
                     new Port(name + std::string("Port") + std::to_string(portNum),
-                            this->portNum,
+                            portNum,
                             ((Device *)destination)->getName(),
                             maxPacketSize,
                             timeToTravel,
@@ -194,10 +194,10 @@ class INET_API Switch : public cObject {
                             gbSize,
                             cycle));
         } else if (dynamic_cast<Switch *>(destination)) {
-            this->connectsTo.push_back(((Switch *)destination)->getName());
+            connectsTo.push_back(((Switch *)destination)->getName());
 
             Port *newPort = new Port(name + std::string("Port") + std::to_string(portNum),
-                    this->portNum,
+                    portNum,
                     ((Switch *)destination)->getName(),
                     maxPacketSize,
                     timeToTravel,
@@ -207,7 +207,7 @@ class INET_API Switch : public cObject {
 
             newPort->setPortNum(portNum);
 
-            this->ports.push_back(newPort);
+            ports.push_back(newPort);
         }
         else
             ; // [TODO]: THROW ERROR
@@ -229,7 +229,7 @@ class INET_API Switch : public cObject {
 
         this->ports.push_back(
                 new Port(name + std::string("Port") + std::to_string(portNum),
-                        this->portNum,
+                        portNum,
                         destination,
                         maxPacketSize,
                         timeToTravel,
@@ -371,12 +371,12 @@ class INET_API Switch : public cObject {
         /*
         addAssert(solver,
             mkEq(
-                this->cycleDurationUpperBoundZ3,
+                cycleDurationUpperBoundZ3,
                 ctx.real_val(std::to_string(cycleDurationUpperBound))));
 
         addAssert(solver,
             mkEq(
-                this->cycleDurationLowerBoundZ3,
+                cycleDurationLowerBoundZ3,
                 ctx.real_val(std::to_string(cycleDurationLowerBound))));
         */
 

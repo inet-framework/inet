@@ -109,7 +109,7 @@ class INET_API Network {
      */
     void secureHC(solver& solver, context& ctx) {
         if (jitterUpperBoundRange != -1) { // If there is a value on the upperBoundRange, it was set through the network
-            this->setJitterUpperBoundRangeZ3(ctx, jitterUpperBoundRange);
+            setJitterUpperBoundRangeZ3(ctx, jitterUpperBoundRange);
         }
 
         std::stack<std::shared_ptr<expr>> jitterList;
@@ -177,7 +177,7 @@ class INET_API Network {
                     for (int index = 0; index < flw->getNumOfPacketsSent(); index++) {
                         addAssert(solver,  // Maximum allowed jitter constraint
                                 flw->getJitterZ3((Device *) leaf->getNode(), solver, ctx, index) <=
-                                this->jitterUpperBoundRangeZ3);
+                                jitterUpperBoundRangeZ3);
                     }
 
                 }
@@ -219,7 +219,7 @@ class INET_API Network {
                 for (PathNode *node : *flw->getPathTree()->getLeaves()) {
                     Device *endDev = (Device *) node->getNode();
 
-                    this->avgLatencyPerDev.push_back(std::make_shared<expr>(
+                    avgLatencyPerDev.push_back(std::make_shared<expr>(
                             flw->getSumOfJitterZ3(endDev, solver, ctx, flw->getNumOfPacketsSent() - 1) /
                             ctx.int_val(flw->getNumOfPacketsSent())));
 

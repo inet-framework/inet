@@ -104,12 +104,12 @@ class INET_API Flow {
 
         if (type == UNICAST) {
             //Its not a unicast flow
-            this->type = 0;
+            type = 0;
             path.clear();
             flowFragments.clear();
         } else if (type == PUBLISH_SUBSCRIBE) {
             //Its a publish subscribe flow
-            this->type = 1;
+            type = 1;
             pathTree = new PathTree();
         } else {
             instanceCounter--;
@@ -131,12 +131,12 @@ class INET_API Flow {
 
         if (type == UNICAST) {
             //Its not a unicast flow
-            this->type = 0;
+            type = 0;
             path.clear();
             flowFragments.clear();
         } else if (type == PUBLISH_SUBSCRIBE) {
             //Its a publish subscribe flow
-            this->type = 1;
+            type = 1;
             pathTree = new PathTree();
         } else {
             instanceCounter--;
@@ -183,9 +183,9 @@ class INET_API Flow {
             }
             nodeList.front()->addChild(endDevice);
             nodeList.pop_front();
-            this->setPathTree(pathTree);
+            setPathTree(pathTree);
 
-            this->type = PUBLISH_SUBSCRIBE;
+            type = PUBLISH_SUBSCRIBE;
         }
     }
 
@@ -209,7 +209,7 @@ class INET_API Flow {
 
             int currentSwitchIndex = 0;
             for (Switch *swt : path) {
-                this->pathToZ3(ctx, swt, currentSwitchIndex);
+                pathToZ3(ctx, swt, currentSwitchIndex);
                 currentSwitchIndex++;
             }
 
@@ -220,29 +220,29 @@ class INET_API Flow {
              * going out of a switch.
              */
 
-            this->startDevice = (Device *) pathTree->getRoot()->getNode();
-            this->startDevice->toZ3(ctx);
+            startDevice = (Device *) pathTree->getRoot()->getNode();
+            startDevice->toZ3(ctx);
 
             if (priorityValue < 0 || priorityValue > 7) {
-                this->flowPriority = std::make_shared<expr>(ctx.int_const((name + std::string("Priority")).c_str()));
+                flowPriority = std::make_shared<expr>(ctx.int_const((name + std::string("Priority")).c_str()));
             } else {
-                this->flowPriority = std::make_shared<expr>(ctx.int_val(priorityValue));
+                flowPriority = std::make_shared<expr>(ctx.int_val(priorityValue));
             }
 
             if (useCustomValues) {
-                this->flowSendingPeriodicityZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(flowSendingPeriodicity).c_str()));
+                flowSendingPeriodicityZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(flowSendingPeriodicity).c_str()));
 
                 if (flowFirstSendingTime >= 0){
-                    this->flowFirstSendingTimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(flowFirstSendingTime).c_str()));
+                    flowFirstSendingTimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(flowFirstSendingTime).c_str()));
                 } else {
-                    this->flowFirstSendingTimeZ3 = std::make_shared<expr>(ctx.real_const((std::string("flow") + std::to_string(instance) + std::string("FirstSendingTime")).c_str()));
+                    flowFirstSendingTimeZ3 = std::make_shared<expr>(ctx.real_const((std::string("flow") + std::to_string(instance) + std::string("FirstSendingTime")).c_str()));
                 }
             } else {
-                this->flowFirstSendingTimeZ3 = startDevice->getFirstT1TimeZ3();
-                this->flowSendingPeriodicityZ3 = startDevice->getPacketPeriodicityZ3();
+                flowFirstSendingTimeZ3 = startDevice->getFirstT1TimeZ3();
+                flowSendingPeriodicityZ3 = startDevice->getPacketPeriodicityZ3();
             }
 
-            this->nodeToZ3(ctx, pathTree->getRoot(), nullptr);
+            nodeToZ3(ctx, pathTree->getRoot(), nullptr);
         }
     }
 
@@ -275,7 +275,7 @@ class INET_API Flow {
     void bindAllFragments(solver& solver, context& ctx){
         for (PathNode node : pathTree->getRoot()->getChildren()){
             for (FlowFragment *frag : node.getFlowFragments()){
-                this->bindToNextFragment(solver, ctx, frag);
+                bindToNextFragment(solver, ctx, frag);
             }
         }
     }
@@ -399,7 +399,7 @@ class INET_API Flow {
             return;
         } else if (dynamic_cast<Device *>(node->getNode())) {
             for (PathNode *child : node->getChildren()) {
-                this->setUpPeriods(child);
+                setUpPeriods(child);
             }
         } else {
             Switch *swt = (Switch *) node->getNode(); //no good. Need the port
@@ -408,10 +408,10 @@ class INET_API Flow {
             for (PathNode *child : node->getChildren()) {
                 if (dynamic_cast<Device *>(child->getNode())) {
                     port = swt->getPortOf(((Device *) child->getNode())->getName());
-                    this->setUpPeriods(child);
+                    setUpPeriods(child);
                 } else if (dynamic_cast<Switch *>(child->getNode())) {
                     port = swt->getPortOf(((Switch *) child->getNode())->getName());
-                    this->setUpPeriods(child);
+                    setUpPeriods(child);
                 } else {
                     std::cout << "Unrecognized node\n";
                     return;
@@ -574,8 +574,8 @@ class INET_API Flow {
             for (int i = 0; i < timeListSize; i++) {
                 averageJitter +=
                         fabs(
-                                this->getScheduledTime(flowFragments.size() - 1, i) -
-                                        this->getDepartureTime(0, i) -
+                                getScheduledTime(flowFragments.size() - 1, i) -
+                                        getDepartureTime(0, i) -
                                         averageLatency);
             }
 
@@ -837,8 +837,8 @@ class INET_API Flow {
 
     void modifyIfUsingCustomVal(){
         if (!useCustomValues) {
-            this->flowSendingPeriodicity = startDevice->getPacketPeriodicity();
-            this->flowFirstSendingTime = startDevice->getFirstT1Time();
+            flowSendingPeriodicity = startDevice->getPacketPeriodicity();
+            flowFirstSendingTime = startDevice->getFirstT1Time();
         }
     }
 
@@ -854,8 +854,8 @@ class INET_API Flow {
         this->startDevice = startDevice;
 
         if (!useCustomValues) {
-            this->flowSendingPeriodicity = startDevice->getPacketPeriodicity();
-            this->flowFirstSendingTime = startDevice->getFirstT1Time();
+            flowSendingPeriodicity = startDevice->getPacketPeriodicity();
+            flowFirstSendingTime = startDevice->getFirstT1Time();
         }
     }
 
