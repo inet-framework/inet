@@ -18,6 +18,7 @@
 #ifndef __INET_PACKETCLASSIFIERBASE_H
 #define __INET_PACKETCLASSIFIERBASE_H
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IPacketSink.h"
 #include "inet/queueing/contract/IPacketSource.h"
@@ -25,7 +26,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketClassifierBase : public PacketProcessorBase, public virtual IPacketSink, public virtual IPacketSource
+class INET_API PacketClassifierBase : public PacketProcessorBase, public TransparentProtocolRegistrationListener, public virtual IPacketSink, public virtual IPacketSource
 {
   protected:
     bool reverseOrder = false;
@@ -44,6 +45,8 @@ class INET_API PacketClassifierBase : public PacketProcessorBase, public virtual
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
+
+    virtual void mapRegistrationForwardingGates(cGate *gate, std::function<void(cGate *)> f) override;
 
     virtual size_t getOutputGateIndex(size_t i) const { return reverseOrder ? outputGates.size() - i - 1 : i; }
     virtual int classifyPacket(Packet *packet) = 0;

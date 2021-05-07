@@ -18,19 +18,23 @@
 #ifndef __INET_LABELFILTER_H
 #define __INET_LABELFILTER_H
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/PatternMatcher.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API LabelFilter : public PacketFilterBase
+class INET_API LabelFilter : public PacketFilterBase, public TransparentProtocolRegistrationListener
 {
   protected:
     cMatchExpression labelFilter;
 
   protected:
     virtual void initialize(int stage) override;
+
+    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+
     virtual bool matchesPacket(const Packet *packet) const override;
 };
 
