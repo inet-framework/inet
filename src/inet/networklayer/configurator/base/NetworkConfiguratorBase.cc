@@ -97,6 +97,19 @@ std::vector<NetworkConfiguratorBase::Node *> NetworkConfiguratorBase::computeSho
     return path;
 }
 
+std::vector<NetworkConfiguratorBase::Link *> NetworkConfiguratorBase::computeShortestLinkPath(Node *source, Node *destination) const
+{
+    std::vector<Link *> path;
+    topology.calculateUnweightedSingleShortestPathsTo(destination);
+    auto node = source;
+    while (node != destination) {
+        auto link = (Link *)node->getPath(0);
+        path.push_back(link);
+        node = (Node *)node->getPath(0)->getRemoteNode();
+    }
+    return path;
+}
+
 bool NetworkConfiguratorBase::isBridgeNode(Node *node) const
 {
     return !node->routingTable || !node->interfaceTable;
