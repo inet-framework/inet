@@ -43,9 +43,6 @@ class INET_API Switch : public cObject {
   public:
     std::string name;
 
-    bool isModifiedOrCreated = true;
-
-    // private Cycle cycle;
     std::vector<std::string> connectsTo;
     std::vector<Port *> ports;
     double cycleDurationUpperBound;
@@ -58,7 +55,6 @@ class INET_API Switch : public cObject {
     int portNum = 0;
 
     static int indexCounter;
-
 
     /**
      * [Method]: TSNSwitch
@@ -420,14 +416,6 @@ class INET_API Switch : public cObject {
 
     void setCycleStart(z3::expr cycleStart) {
         this->cycleStart = std::make_shared<expr>(cycleStart);
-    }
-
-    bool getIsModifiedOrCreated() {
-        return isModifiedOrCreated;
-    }
-
-    void setIsModifiedOrCreated(bool isModifiedOrCreated) {
-        this->isModifiedOrCreated = isModifiedOrCreated;
     }
 
     std::vector<std::string> getConnectsTo(){
