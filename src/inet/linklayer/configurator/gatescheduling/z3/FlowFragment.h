@@ -103,10 +103,6 @@ class INET_API FlowFragment : public Flow {
         }
     }
 
-    /*
-     * GETTERS AND SETTERS
-     */
-
     std::string getName() {
         return name;
     }

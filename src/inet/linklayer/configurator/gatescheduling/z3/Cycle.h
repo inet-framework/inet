@@ -188,7 +188,6 @@ class INET_API Cycle {
                 slotStartZ3_.at(i).push_back(std::make_shared<expr>(v));
             }
         }
-
     }
 
 
@@ -264,10 +263,6 @@ class INET_API Cycle {
             }
         }
     }
-
-    /*
-     *  GETTERS AND SETTERS
-     */
 
     double getUpperBoundCycleTime() {
         return upperBoundCycleTime;
@@ -405,12 +400,6 @@ class INET_API Cycle {
     std::shared_ptr<expr> getSlotStartZ3(int prt, int slotNum) {
         return slotStartZ3_.at(prt).at(slotNum);
     }
-
-    /*
-     std::shared_ptr<expr> getSlotDurationZ3(int prt, int slotNum) {
-        return slotDurationZ3.get(prt).get(slotNum);
-    }
-    */
 };
 
 }

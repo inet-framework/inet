@@ -29,8 +29,6 @@ namespace inet {
 
 using namespace z3;
 
-// CLASS WHERE DEVICE PROPERTIES AND CONDITIONS ARE SPECIFIED
-
 /**
  * Specifies properties of device nodes in the network.
  * They can be used as sending devices and receiving devices.
@@ -140,10 +138,6 @@ class INET_API Device : public cObject {
         this->packetSizeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(packetSize).c_str()));
     }
 
-    /*
-     *  GETTERS AND SETTERS
-     */
-
     std::string getName() {
         return name;
     }
@@ -183,10 +177,6 @@ class INET_API Device : public cObject {
     void setPacketSize(double packetSize) {
         this->packetSize = packetSize;
     }
-
-    /*
-     *  Z3 GETTERS AND SETTERS
-     */
 
     std::shared_ptr<expr> getPacketPeriodicityZ3() {
         return packetPeriodicityZ3;
