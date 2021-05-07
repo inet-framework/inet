@@ -41,13 +41,9 @@ using namespace z3;
  */
 class INET_API Network {
   public:
-    std::string db_name;
-    std::string file_id;
-
     //TODO: Remove debugging variables:
     std::shared_ptr<expr> avgOfAllLatency;
     std::vector<std::shared_ptr<expr>> avgLatencyPerDev;
-
 
     std::vector<Switch *> switches;
     std::vector<Flow *> flows;
