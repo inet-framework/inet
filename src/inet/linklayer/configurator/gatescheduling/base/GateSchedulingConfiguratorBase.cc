@@ -50,7 +50,7 @@ void GateSchedulingConfiguratorBase::handleParameterChange(const char *name)
 
 void GateSchedulingConfiguratorBase::clearConfiguration()
 {
-    topology.clear();
+    topology->clear();
     delete gateSchedulingInput;
     gateSchedulingInput = nullptr;
     delete gateSchedulingOutput;
@@ -60,7 +60,8 @@ void GateSchedulingConfiguratorBase::clearConfiguration()
 void GateSchedulingConfiguratorBase::computeConfiguration()
 {
     long startTime = clock();
-    TIME(extractTopology(topology));
+    topology = new Topology();
+    TIME(extractTopology(*topology));
     TIME(gateSchedulingInput = createGateSchedulingInput());
     TIME(gateSchedulingOutput = computeGateScheduling(*gateSchedulingInput));
     printElapsedTime("computeConfiguration", startTime);
@@ -78,8 +79,8 @@ GateSchedulingConfiguratorBase::Input *GateSchedulingConfiguratorBase::createGat
 
 void GateSchedulingConfiguratorBase::addDevices(Input& input) const
 {
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        auto node = (Node *)topology.getNode(i);
+    for (int i = 0; i < topology->getNumNodes(); i++) {
+        auto node = (Node *)topology->getNode(i);
         if (!isBridgeNode(node)) {
             auto device = new Input::Device();
             device->module = node->module;
@@ -91,8 +92,8 @@ void GateSchedulingConfiguratorBase::addDevices(Input& input) const
 
 void GateSchedulingConfiguratorBase::addSwitches(Input& input) const
 {
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        auto node = (Node *)topology.getNode(i);
+    for (int i = 0; i < topology->getNumNodes(); i++) {
+        auto node = (Node *)topology->getNode(i);
         if (isBridgeNode(node)) {
             auto switch_ = new Input::Switch();
             switch_->module = node->module;
@@ -104,8 +105,8 @@ void GateSchedulingConfiguratorBase::addSwitches(Input& input) const
 
 void GateSchedulingConfiguratorBase::addPorts(Input& input) const
 {
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        auto node = (Node *)topology.getNode(i);
+    for (int i = 0; i < topology->getNumNodes(); i++) {
+        auto node = (Node *)topology->getNode(i);
         auto networkNode = input.getNetworkNode(node->module);
         for (auto interfaceInfo : node->interfaceInfos) {
             auto networkInterface = interfaceInfo->networkInterface;
@@ -127,7 +128,7 @@ void GateSchedulingConfiguratorBase::addPorts(Input& input) const
         }
     }
     for (auto switch_ : input.switches) {
-        auto node = check_and_cast<Node *>(topology.getNodeFor(switch_->module));
+        auto node = check_and_cast<Node *>(topology->getNodeFor(switch_->module));
         for (auto port : switch_->ports) {
             auto networkInterface = check_and_cast<NetworkInterface *>(port->module);
             auto linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
@@ -146,11 +147,11 @@ void GateSchedulingConfiguratorBase::addFlows(Input& input) const
     EV_DEBUG << "Computing flows from configuration" << EV_FIELD(configuration) << EV_ENDL;
     for (int k = 0; k < configuration->size(); k++) {
         auto entry = check_and_cast<cValueMap *>(configuration->get(k).objectValue());
-        for (int i = 0; i < topology.getNumNodes(); i++) {
-            auto sourceNode = (Node *)topology.getNode(i);
+        for (int i = 0; i < topology->getNumNodes(); i++) {
+            auto sourceNode = (Node *)topology->getNode(i);
             cModule *source = sourceNode->module;
-            for (int j = 0; j < topology.getNumNodes(); j++) {
-                auto destinationNode = (Node *)topology.getNode(j);
+            for (int j = 0; j < topology->getNumNodes(); j++) {
+                auto destinationNode = (Node *)topology->getNode(j);
                 cModule *destination = destinationNode->module;
                 PatternMatcher sourceMatcher(entry->get("source").stringValue(), true, false, false);
                 PatternMatcher destinationMatcher(entry->get("destination").stringValue(), true, false, false);
@@ -221,8 +222,8 @@ void GateSchedulingConfiguratorBase::addFlows(Input& input) const
 
 void GateSchedulingConfiguratorBase::configureGateScheduling()
 {
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        auto node = (Node *)topology.getNode(i);
+    for (int i = 0; i < topology->getNumNodes(); i++) {
+        auto node = (Node *)topology->getNode(i);
         auto networkNode = node->module;
         for (auto interfaceInfo : node->interfaceInfos) {
             auto queue = interfaceInfo->networkInterface->findModuleByPath(".macLayer.queue");

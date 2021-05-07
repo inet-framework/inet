@@ -87,7 +87,7 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
 std::vector<NetworkConfiguratorBase::Node *> NetworkConfiguratorBase::computeShortestNodePath(Node *source, Node *destination) const
 {
     std::vector<Node *> path;
-    topology.calculateUnweightedSingleShortestPathsTo(destination);
+    topology->calculateUnweightedSingleShortestPathsTo(destination);
     auto node = source;
     while (node != destination) {
         path.push_back(node);
@@ -100,7 +100,7 @@ std::vector<NetworkConfiguratorBase::Node *> NetworkConfiguratorBase::computeSho
 std::vector<NetworkConfiguratorBase::Link *> NetworkConfiguratorBase::computeShortestLinkPath(Node *source, Node *destination) const
 {
     std::vector<Link *> path;
-    topology.calculateUnweightedSingleShortestPathsTo(destination);
+    topology->calculateUnweightedSingleShortestPathsTo(destination);
     auto node = source;
     while (node != destination) {
         auto link = (Link *)node->getPath(0);
@@ -113,6 +113,14 @@ std::vector<NetworkConfiguratorBase::Link *> NetworkConfiguratorBase::computeSho
 bool NetworkConfiguratorBase::isBridgeNode(Node *node) const
 {
     return !node->routingTable || !node->interfaceTable;
+}
+
+NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkIn(Node *node, const char *neighbor)
+{
+    for (int i = 0; i < node->getNumInLinks(); i++)
+        if (!strcmp(node->getLinkIn(i)->getRemoteNode()->getModule()->getFullName(), neighbor))
+            return check_and_cast<Link *>(static_cast<Topology::Link *>(node->getLinkIn(i)));
+    return nullptr;
 }
 
 NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkOut(Node *node, const char *neighbor) const
