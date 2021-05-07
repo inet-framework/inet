@@ -76,7 +76,6 @@ class INET_API Port {
     std::shared_ptr<expr> portSpeedZ3;
 
     /**
-     * [Method]: Port
      * [Usage]: Overloaded constructor of this class. Will start
      * the port with setting properties given as parameters.
      *
@@ -109,7 +108,6 @@ class INET_API Port {
 
 
     /**
-     * [Method]: toZ3
      * [Usage]: After setting all the numeric input values of the class,
      * generates the z3 equivalent of these values and creates any extra
      * variable needed.
@@ -129,7 +127,6 @@ class INET_API Port {
     }
 
     /**
-     * [Method]: setUpCycleRules
      * [Usage]: This method is responsible for setting up the scheduling rules related
      * to the cycle of this port. Assertions about how the time slots are supposed to be
      * are also specified here.
@@ -140,7 +137,6 @@ class INET_API Port {
     void setUpCycleRules(solver& solver, context& ctx);
 
     /**
-     * [Method]: setupTimeSlots
      * [Usage]: Given a single flow fragment, establish the scheduling rules
      * regarding its proper slot, referencing it using the fragment's priority.
      *
@@ -152,7 +148,6 @@ class INET_API Port {
     void setupTimeSlots(solver& solver, context& ctx, FlowFragment *flowFrag);
 
     /**
-     * [Method]: setupDevPacketTimes
      * [Usage]: Sets the core scheduling rules for a certain number of
      * packets of a flow fragment. The number of packets is specified
      * by the packetUpperBound range variable. The scheduler will attempt
@@ -165,7 +160,6 @@ class INET_API Port {
     void setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowFrag);
 
     /**
-     * [Method]: setupBestEffort
      * [Usage]: Use in order to enable the best effort traffic reservation
      * constraint.
      *
@@ -175,7 +169,6 @@ class INET_API Port {
     void setupBestEffort(solver& solver, context& ctx);
 
     /**
-     * [Method]: gcd
      * [Usage]: Method used to obtain the greatest common
      * divisor of two values.
      *
@@ -192,7 +185,6 @@ class INET_API Port {
     }
 
     /**
-     * [Method]: findGCD
      * [Usage]: Retrieves the value of the greatest common divisor
      * of all the values in an array.
      *
@@ -209,7 +201,6 @@ class INET_API Port {
     }
 
     /**
-     * [Method]: findLCM
      * [Usage]: Retrieves the least common multiple of all values in
      * an array.
      *
@@ -256,7 +247,6 @@ class INET_API Port {
     }
 
     /**
-     * [Method]: setUpHyperCycle
      * [Usage]: Set up the cycle duration and number of packets and slots
      * to be scheduled according to the hyper cycle approach.
      *
@@ -301,7 +291,6 @@ class INET_API Port {
     }
 
     /**
-     * [Method]: setUpCycle
      * [Usage]: If the port is configured to use a specific automated
      * application period methodology, it will configure its cycle size.
      * Also calls the toZ3 method for the cycle
@@ -327,7 +316,6 @@ class INET_API Port {
     }
 
     /**
-     * [Method]: zeroOutNonUsedSlots
      * [Usage]: Iterates over the slots adding a constraint that states that
      * if no packet its transmitted inside it, its size must be 0. Can be used
      * to filter out non-used slots and avoid losing bandwidth.
@@ -338,7 +326,6 @@ class INET_API Port {
     void zeroOutNonUsedSlots(solver& solver, context& ctx);
 
     /**
-     * [Method]: setupSchedulingRules
      * [Usage]: Calls the set of functions that will set the z3 rules
      * regarding the cycles, time slots, priorities and timing of packets.
      *
@@ -376,7 +363,6 @@ class INET_API Port {
     }
 
     /**
-     * [Method]: departureTime
      * [Usage]: Retrieves the departure time of a packet from a flow fragment
      * specified by the index given as a parameter. The departure time is the
      * time when a packet leaves its previous node with this switch as a destination.
@@ -403,7 +389,6 @@ class INET_API Port {
     }
 
     /**
-     * [Method]: departureTime
      * [Usage]: Retrieves the departure time of a packet from a flow fragment
      * specified by the index given as a parameter. The departure time is the
      * time when a packet leaves its previous node with this switch as a destination.
@@ -416,7 +401,6 @@ class INET_API Port {
     std::shared_ptr<expr> departureTime(context& ctx, int auxIndex, FlowFragment *flowFrag);
 
     /**
-     * [Method]: arrivalTime
      * [Usage]: Retrieves the arrival time of a packet from a flow fragment
      * specified by the index given as a parameter. The arrival time is the
      * time when a packet reaches this switch's port.
@@ -439,7 +423,6 @@ class INET_API Port {
     */
 
     /**
-     * [Method]: arrivalTime
      * [Usage]: Retrieves the arrival time of a packet from a flow fragment
      * specified by the index given as a parameter. The arrival time is the
      * time when a packet reaches this switch's port.
@@ -458,7 +441,6 @@ class INET_API Port {
     }
 
     /**
-     * [Method]: scheduledTime
      * [Usage]: Retrieves the scheduled time of a packet from a flow fragment
      * specified by the index given as a parameter. The scheduled time is the
      * time when a packet leaves this switch for its next destination.
@@ -481,7 +463,6 @@ class INET_API Port {
     */
 
     /**
-     * [Method]: scheduledTime
      * [Usage]: Retrieves the scheduled time of a packet from a flow fragment
      * specified by the index given as a parameter. The scheduled time is the
      * time when a packet leaves this switch for its next destination.
@@ -499,7 +480,6 @@ class INET_API Port {
     std::shared_ptr<expr> scheduledTime(context& ctx, int auxIndex, FlowFragment *flowFrag);
 
     /**
-     * [Method]: checkIfAutomatedApplicationPeriod
      * [Usage]: Returns true if the port uses an automated application period
      * methodology.
      *
@@ -510,7 +490,6 @@ class INET_API Port {
     }
 
     /**
-     * [Method]: loadNetwork
      * [Usage]: From the primitive values retrieved in the object
      * deserialization process, instantiate the z3 objects that represent
      * the same properties.

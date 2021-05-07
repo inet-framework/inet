@@ -47,7 +47,6 @@ class INET_API PathNode : public cObject {
     std::vector<FlowFragment *> flowFragments;
 
     /**
-     * [Method]: PathNode
      * [Usage]: Overloaded constructor method of the this class.
      * Receives an object that must be either a device or a switch.
      * In case of switch, creates a list of children and flowFragments.
@@ -71,7 +70,6 @@ class INET_API PathNode : public cObject {
     }
 
     /**
-     * [Method]: addChild
      * [Usage]: Adds a child to this node.
      *
      * @param node      Object representing the child device or switch

@@ -55,7 +55,6 @@ class INET_API Network {
     std::shared_ptr<expr> jitterUpperBoundRangeZ3;
 
     /**
-     * [Method]: Network
      * [Usage]: Default constructor method of class Network. Creates
      * the std::vectors for the switches and flows. Sets up the default
      * time to travel for 2 (Needs revision).
@@ -68,7 +67,6 @@ class INET_API Network {
     }
 
     /**
-     * [Method]: Network
      * [Usage]: Default constructor method of class Network. Creates
      * the std::vectors for the switches and flows. Sets up the default
      * time to travel for 2 (Needs revision).
@@ -80,7 +78,6 @@ class INET_API Network {
     }
 
     /**
-     * [Method]: Network
      * [Usage]: Overloaded constructor method of class Network. Will
      * create a network with the given std::vectors for switches, flows
      * and time to travel.
@@ -96,7 +93,6 @@ class INET_API Network {
     }
 
     /**
-     * [Method]: SecureHC
      * [Usage]: Iterates over the flows of the network, assuring that
      * each flow will have its hard constraint established.
      *
@@ -201,7 +197,6 @@ class INET_API Network {
     }
 
     /**
-     * [Method]: loadNetwork
      * [Usage]: From the primitive values retrieved in the object
      * deserialization process, instantiate the z3 objects that represent
      * the same properties.

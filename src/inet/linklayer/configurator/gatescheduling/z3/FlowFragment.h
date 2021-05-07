@@ -70,7 +70,6 @@ class INET_API FlowFragment : public Flow {
     std::vector<double> scheduledTime;
 
     /**
-     * [Method]: FlowFragment
      * [Usage]: Overloaded constructor method of this class. Receives a
      * flow as a parameter so it can retrieve properties of the flows
      * that it belongs to.

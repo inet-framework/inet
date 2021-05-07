@@ -91,7 +91,6 @@ class INET_API Cycle {
     int numOfSlots = 1;
 
     /**
-     * [Method]: Cycle
      * [Usage]: Overloaded method of this class. Will create
      * an object setting up the minimum and maximum cycle time,
      * the first cycle start and the maximum duration of a
@@ -118,7 +117,6 @@ class INET_API Cycle {
     }
 
     /**
-     * [Method]: Cycle
      * [Usage]: Overloaded method of this class. Will create
      * an object setting up the minimum and maximum cycle time,
      * the first cycle start and the maximum duration of a
@@ -141,7 +139,6 @@ class INET_API Cycle {
     }
 
     /**
-     * [Method]: Cycle
      * [Usage]: Overloaded method of this class. Will create
      * an object setting up the minimum and maximum cycle time,
      * the first cycle start and the maximum duration of a
@@ -166,7 +163,6 @@ class INET_API Cycle {
     }
 
     /**
-     * [Method]: toZ3
      * [Usage]: After setting all the numeric input values of the class,
      * generates the z3 equivalent of these values and creates any extra
      * variable needed.
@@ -198,7 +194,6 @@ class INET_API Cycle {
 
 
     /**
-     * [Method]: cycleStartZ3
      * [Usage]: Returns the time of the start of a cycle
      * specified by its index. The index is given as a z3
      * variable
@@ -214,7 +209,6 @@ class INET_API Cycle {
     }
 
     /**
-     * [Method]: cycleStartZ3
      * [Usage]: Returns the time of the start of a cycle
      * specified by its index. The index is given as integer
      *
@@ -232,7 +226,6 @@ class INET_API Cycle {
 
 
     /**
-     * [Method]: addSlotUsed
      * [Usage]: After generating the schedule, the z3 values are
      * converted to doubles and integers. The used slots are now
      * placed on a arrayList, and so are the slot start and duration.
@@ -250,7 +243,6 @@ class INET_API Cycle {
     }
 
     /**
-     * [Method]: loadZ3
      * [Usage]: From the loaded primitive values of the class
      * obtained in the deserialization process, initialize the
      * z3 variables.
