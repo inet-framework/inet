@@ -96,9 +96,9 @@ class INET_API FlowFragment : public Flow {
          */
 
         if (parent->getType() == UNICAST) {
-            this->name = parent->getName() + std::string("Fragment") + std::to_string(parent->getFlowFragments().size() + 1);
+            name = parent->getName() + std::string("Fragment") + std::to_string(parent->getFlowFragments().size() + 1);
         } else if (parent->getType() == PUBLISH_SUBSCRIBE) {
-            this->name = parent->getName() + std::string("Fragment") + std::to_string(parent->pathTreeCount + 1);
+            name = parent->getName() + std::string("Fragment") + std::to_string(parent->pathTreeCount + 1);
             parent->pathTreeCount++;
         } else {
             // Throw error

@@ -62,7 +62,7 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
                 for (int i = 0; i < numberOfPackets; i++) {
 
                     flowFrag->addDepartureTimeZ3(
-                                    this->flowFirstSendingTimeZ3 +
+                                    flowFirstSendingTimeZ3 +
                                     ctx.real_val(std::to_string(flowSendingPeriodicity * i).c_str()));
                 }
             } else { // Fragment first departure = last fragment scheduled time
@@ -145,7 +145,7 @@ void Flow::pathToZ3(context& ctx, Switch *swt, int currentSwitchIndex)
         //flowFrag->setNodeName(startDevice->getName());
         for (int i = 0; i < numberOfPackets; i++) {
             flowFrag->addDepartureTimeZ3( // Packet departure constraint
-                            this->flowFirstSendingTimeZ3 +
+                            flowFirstSendingTimeZ3 +
                             ctx.real_val(std::to_string(flowSendingPeriodicity * i).c_str()));
         }
     } else {
@@ -198,7 +198,7 @@ void Flow::bindToNextFragment(solver& solver, context& ctx, FlowFragment *frag)
                         childFrag->getPort()->departureTime(ctx, i, childFrag));
             }
 
-            this->bindToNextFragment(solver, ctx, childFrag);
+            bindToNextFragment(solver, ctx, childFrag);
 
         }
 
@@ -335,7 +335,7 @@ double Flow::getAverageLatency()
         timeListSize = getTimeListSize();
         for (int i = 0; i < timeListSize; i++) {
             averageLatency += getScheduledTime(
-                    this->flowFragments.size() - 1, i)
+                    flowFragments.size() - 1, i)
                     - getDepartureTime(0, i);
         }
 
@@ -345,7 +345,7 @@ double Flow::getAverageLatency()
 
         for (PathNode *node : *pathTree->getLeaves()) {
             timeListSize =
-                    this->pathTree->getRoot()->getChildren().at(0)->getFlowFragments().at(
+                    pathTree->getRoot()->getChildren().at(0)->getFlowFragments().at(
                             0)->getArrivalTimeList().size();
             ;
             endDevice = (Device*) node->getNode();
@@ -353,7 +353,7 @@ double Flow::getAverageLatency()
 
             for (int i = 0; i < timeListSize; i++) {
                 auxAverageLatency += getScheduledTime(endDevice,
-                        this->getFlowFromRootToNode(endDevice)->size() - 1, i)
+                        getFlowFromRootToNode(endDevice)->size() - 1, i)
                         - getDepartureTime(endDevice, 0, i);
             }
 
@@ -396,8 +396,8 @@ double Flow::getAverageJitterToDevice(Device *dev)
     std::vector<FlowFragment*> *fragments = getFlowFromRootToNode(dev);
     for (int i = 0; i < fragments->at(0)->getNumOfPacketsSent(); i++) {
         averageJitter += fabs(
-                this->getScheduledTime(dev,
-                        this->getFlowFromRootToNode(dev)->size() - 1, i)
+                getScheduledTime(dev,
+                        getFlowFromRootToNode(dev)->size() - 1, i)
                         - getDepartureTime(dev, 0, i) - averageLatency);
     }
     averageJitter = averageJitter / fragments->at(0)->getNumOfPacketsSent();
@@ -491,14 +491,14 @@ void Flow::setNumberOfPacketsSent(PathNode *node)
         return;
     } else if (dynamic_cast<Device*>(node->getNode())) {
         for (PathNode *child : node->getChildren()) {
-            this->setNumberOfPacketsSent(child);
+            setNumberOfPacketsSent(child);
         }
     } else {
         int index = 0;
         for (FlowFragment *frag : node->getFlowFragments()) {
             if (numOfPacketsSentInFragment
                     < frag->getNumOfPacketsSent()) {
-                this->numOfPacketsSentInFragment = frag->getNumOfPacketsSent();
+                numOfPacketsSentInFragment = frag->getNumOfPacketsSent();
             }
             // System.out.println(std::string("On node ") + ((TSNSwitch *)node->getNode())->getName() + std::string(" trying to reach children"));
             // System.out.println(std::string("Node has: ") + node.getFlowFragments().size() + std::string(" frags"));
@@ -506,7 +506,7 @@ void Flow::setNumberOfPacketsSent(PathNode *node)
             // for (PathNode n : node->getChildren()) {
             //         System.out.println(std::string("Child is a: ") + (dynamic_cast<Device *>(n->getNode()) ? "Device" : "Switch"));
             // }
-            this->setNumberOfPacketsSent(node->getChildren().at(index));
+            setNumberOfPacketsSent(node->getChildren().at(index));
             index = index + 1;
         }
     }
