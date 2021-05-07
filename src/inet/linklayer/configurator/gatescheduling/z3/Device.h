@@ -42,14 +42,12 @@ class INET_API Device : public cObject {
     double packetPeriodicity;
     double firstT1Time;
     double hardConstraintTime;
-    double softConstraintTime;
     double packetSize;
 
     static int indexCounter;
     std::shared_ptr<expr> packetPeriodicityZ3;
     std::shared_ptr<expr> firstT1TimeZ3;
     std::shared_ptr<expr> hardConstraintTimeZ3;
-    std::shared_ptr<expr> softConstraintTimeZ3;
     std::shared_ptr<expr> packetSizeZ3;
     std::shared_ptr<expr> flowPriority;
 
@@ -77,7 +75,6 @@ class INET_API Device : public cObject {
         this->packetPeriodicity = packetPeriodicity;
         this->firstT1Time = 0;
         this->hardConstraintTime = hardConstraintTime;
-        this->softConstraintTime = 0;
         this->packetSize = 0;
         this->name = std::string("dev") + std::to_string(++indexCounter);
     }
@@ -91,31 +88,6 @@ class INET_API Device : public cObject {
      * @param packetPeriodicity     Periodicity of packet sending
      * @param firstT1Time           Time where the first packet is sent
      * @param hardConstraintTime    Maximum latency tolerated by this device
-     * @param softConstraintTime    Recommended latency for using this device
-     * @param packetSize            Size of the packets sent by this device
-     */
-    Device(double packetPeriodicity,
-           double firstT1Time,
-           double hardConstraintTime,
-           double softConstraintTime,
-           double packetSize) {
-        this->packetPeriodicity = packetPeriodicity;
-        this->firstT1Time = firstT1Time;
-        this->hardConstraintTime = hardConstraintTime;
-        this->softConstraintTime = softConstraintTime;
-        this->packetSize = packetSize;
-        this->name = std::string("dev") + std::to_string(++indexCounter);
-    }
-
-    /**
-     * Overloaded constructor method of a device.
-     * Can create a device specifying its properties through
-     * double values. These values will later be converted to
-     * z3 values.
-     *
-     * @param packetPeriodicity     Periodicity of packet sending
-     * @param firstT1Time           Time where the first packet is sent
-     * @param hardConstraintTime    Maximum latency tolerated by this device
      * @param packetSize            Size of the packets sent by this device
      */
     Device(double packetPeriodicity,
@@ -125,11 +97,9 @@ class INET_API Device : public cObject {
         this->packetPeriodicity = packetPeriodicity;
         this->firstT1Time = firstT1Time;
         this->hardConstraintTime = hardConstraintTime;
-        this->softConstraintTime = 0;
         this->packetSize = packetSize;
         this->name = std::string("dev") + std::to_string(++indexCounter);
     }
-
 
     /**
      * Overloaded constructor method of a device.
@@ -139,20 +109,17 @@ class INET_API Device : public cObject {
      * @param packetPeriodicityZ3       Periodicity of packet sending
      * @param firstT1TimeZ3             Time where the first packet is sent
      * @param hardConstraintTimeZ3      Maximum latency tolerated by this device
-     * @param softConstraintTimeZ3      Recommended latency for using this device
      * @param packetSizeZ3              Size of the packets sent by this device
      * @param flowPriority              Defines the priority queue in which this device packets belongs to (Not used yet)
      */
      Device(std::shared_ptr<expr> packetPeriodicityZ3,
             std::shared_ptr<expr> firstT1TimeZ3,
             std::shared_ptr<expr> hardConstraintTimeZ3,
-            std::shared_ptr<expr> softConstraintTimeZ3,
             std::shared_ptr<expr> packetSizeZ3,
             std::shared_ptr<expr> flowPriority) {
         this->packetPeriodicityZ3 = packetPeriodicityZ3;
         this->firstT1TimeZ3 = firstT1TimeZ3;
         this->hardConstraintTimeZ3 = hardConstraintTimeZ3;
-        this->softConstraintTimeZ3 = softConstraintTimeZ3;
         this->packetSizeZ3 = packetSizeZ3;
         this->flowPriority = flowPriority;
         this->name = std::string("dev") + std::to_string(indexCounter++);
@@ -170,7 +137,6 @@ class INET_API Device : public cObject {
         //firstT1TimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(firstT1Time))); // In case of fixed firstT1Time
         this->firstT1TimeZ3 = std::make_shared<expr>(ctx.real_const((name + std::string("FirstT1Time")).c_str()));
         this->hardConstraintTimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(hardConstraintTime).c_str()));
-        this->softConstraintTimeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(softConstraintTime).c_str()));
         this->packetSizeZ3 = std::make_shared<expr>(ctx.real_val(std::to_string(packetSize).c_str()));
     }
 
@@ -210,14 +176,6 @@ class INET_API Device : public cObject {
         this->hardConstraintTime = hardConstraintTime;
     }
 
-    double getSoftConstraintTime() {
-        return softConstraintTime;
-    }
-
-    void setSoftConstraintTime(double softConstraintTime) {
-        this->softConstraintTime = softConstraintTime;
-    }
-
     double getPacketSize() {
         return packetSize;
     }
@@ -252,14 +210,6 @@ class INET_API Device : public cObject {
 
     void setHardConstraintTimeZ3(std::shared_ptr<expr> hardConstraintTime) {
         this->hardConstraintTimeZ3 = hardConstraintTime;
-    }
-
-    std::shared_ptr<expr> getSoftConstraintTimeZ3() {
-        return softConstraintTimeZ3;
-    }
-
-    void setSoftConstraintTimeZ3(std::shared_ptr<expr> softConstraintTime) {
-        this->softConstraintTimeZ3 = softConstraintTime;
     }
 
     std::shared_ptr<expr> getPacketSizeZ3() {
