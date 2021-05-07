@@ -42,7 +42,6 @@ class INET_API PathTree {
     std::vector<PathNode *> *leaves = new std::vector<PathNode *>();
 
     /**
-     * [Method]: addRoot
      * [Usage]: Adds a root node to the pathTree.
      * The user must give a device or switch to
      * be the root of the tree.
@@ -59,7 +58,6 @@ class INET_API PathTree {
     }
 
     /**
-     * [Method]: changeRoot
      * [Usage]: Given a new PathNode object, make it the
      * new root of this pathTree. Old root becomes child
      * of new root.
@@ -76,7 +74,6 @@ class INET_API PathTree {
     }
 
     /**
-     * [Method]: searchLeaves
      * [Usage]: Adds all leaves to the leaves std::vector starting
      * from the node given as a parameter. In the way it is
      * implemented, must be used only once.
@@ -94,7 +91,6 @@ class INET_API PathTree {
     }
 
     /**
-     * [Method]: getLeaves
      * [Usage]: Returns an std::vector with all the nodes of the
      * pathTree.
      *

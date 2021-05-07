@@ -57,7 +57,6 @@ class INET_API Switch : public cObject {
     static int indexCounter;
 
     /**
-     * [Method]: Switch
      * [Usage]: Overloaded constructor method of this class.
      * Creates a switch, giving it a name and creating a new
      * list of ports and labels of devices that it can reach.
@@ -74,7 +73,6 @@ class INET_API Switch : public cObject {
     }
 
     /**
-     * [Method]: Switch
      * [Usage]: Overloaded constructor method of this class.
      * Instantiates a new Switch object setting up its properties
      * that are given as parameters. Used for simplified configurations.
@@ -88,7 +86,6 @@ class INET_API Switch : public cObject {
     }
 
     /**
-     * [Method]: Switch
      * [Usage]: Overloaded constructor method of this class.
      * Instantiates a new Switch object setting up its properties
      * that are given as parameters.
@@ -106,7 +103,6 @@ class INET_API Switch : public cObject {
     }
 
     /**
-     * [Method]: toZ3
      * [Usage]: After setting all the numeric input values of the class,
      * generates the z3 equivalent of these values and creates any extra
      * variable needed.
@@ -145,7 +141,6 @@ class INET_API Switch : public cObject {
     }
 
     /**
-     * [Method]: setupSchedulingRules
      * [Usage]: Iterates over the ports of the switch, calling the
      * method responsible for setting up the rules for each individual port
      * on the switch.
@@ -159,7 +154,6 @@ class INET_API Switch : public cObject {
     }
 
     /**
-     * [Method]: createPort
      * [Usage]: Adds a port to the switch. A cycle to that port and
      * the device object that it connects to (since TSN ports connect to
      * individual nodes in the approach of this schedule) must be given
@@ -202,7 +196,6 @@ class INET_API Switch : public cObject {
     }
 
     /**
-     * [Method]: createPort
      * [Usage]: Adds a port to the switch. A cycle to that port and
      * the device name that it connects to (since TSN ports connect to
      * individual nodes in the approach of this schedule) must be given
@@ -226,7 +219,6 @@ class INET_API Switch : public cObject {
     }
 
     /**
-     * [Method]: addToFragmentList
      * [Usage]: Given a flow fragment, it finds the port that connects to
      * its destination and adds the it to the fragment list of that specific
      * port.
@@ -236,7 +228,6 @@ class INET_API Switch : public cObject {
     void addToFragmentList(FlowFragment *flowFrag);
 
     /**
-     * [Method]: getPortOf
      * [Usage]: Given a name of a node, returns the port that
      * can reach this node.
      *
@@ -249,7 +240,6 @@ class INET_API Switch : public cObject {
     }
 
     /**
-     * [Method]: setUpCycleSize
      * [Usage]: Iterate over its ports. The ones using automated application
      * periods will calculate their cycle size.
      *
@@ -263,7 +253,6 @@ class INET_API Switch : public cObject {
     }
 
     /**
-     * [Method]: arrivalTime
      * [Usage]: Retrieves the arrival time of a packet from a flow fragment
      * specified by the index given as a parameter. The arrival time is the
      * time when a packet reaches this switch's port.
@@ -276,7 +265,6 @@ class INET_API Switch : public cObject {
     std::shared_ptr<expr> arrivalTime(context& ctx, int auxIndex, FlowFragment *flowFrag);
 
     /**
-     * [Method]: departureTime
      * [Usage]: Retrieves the departure time of a packet from a flow fragment
      * specified by the index given as a parameter. The departure time is the
      * time when a packet leaves its previous node with this switch as a destination.
@@ -289,7 +277,6 @@ class INET_API Switch : public cObject {
     std::shared_ptr<expr> departureTime(context& ctx, z3::expr index, FlowFragment *flowFrag);
 
     /**
-     * [Method]: departureTime
      * [Usage]: Retrieves the departure time of a packet from a flow fragment
      * specified by the index given as a parameter. The departure time is the
      * time when a packet leaves its previous node with this switch as a destination.
@@ -302,7 +289,6 @@ class INET_API Switch : public cObject {
     std::shared_ptr<expr> departureTime(context& ctx, int auxIndex, FlowFragment *flowFrag);
 
     /**
-     * [Method]: scheduledTime
      * [Usage]: Retrieves the scheduled time of a packet from a flow fragment
      * specified by the index given as a parameter. The scheduled time is the
      * time when a packet leaves this switch for its next destination.

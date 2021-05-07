@@ -55,7 +55,6 @@ class INET_API Device : public cObject {
     std::shared_ptr<expr> flowPriority;
 
     /**
-     * [Method]: Device
      * [Usage]: Default constructor method of a device.
      * Sets the newly created device name.
      */
@@ -64,7 +63,6 @@ class INET_API Device : public cObject {
     }
 
     /**
-     * [Method]: Device
      * [Usage]: Overloaded constructor method of a device.
      * Can create a device specifying its properties through
      * double values. These values will later be converted tostd::to_string(
@@ -86,7 +84,6 @@ class INET_API Device : public cObject {
     }
 
     /**
-     * [Method]: Device
      * [Usage]: Overloaded constructor method of a device.
      * Can create a device specifying its properties through
      * double values. These values will later be converted to
@@ -112,7 +109,6 @@ class INET_API Device : public cObject {
     }
 
     /**
-     * [Method]: Device
      * [Usage]: Overloaded constructor method of a device.
      * Can create a device specifying its properties through
      * double values. These values will later be converted to
@@ -137,7 +133,6 @@ class INET_API Device : public cObject {
 
 
     /**
-     * [Method]: Device
      * [Usage]: Overloaded constructor method of a device.
      * Can create a device specifying its properties through
      * z3 values.
@@ -165,7 +160,6 @@ class INET_API Device : public cObject {
     }
 
     /**
-     * [Method]: toZ3
      * [Usage]: After setting all the numeric input values of the class,
      * generates the z3 equivalent of these values and creates any extra
      * variable needed.
