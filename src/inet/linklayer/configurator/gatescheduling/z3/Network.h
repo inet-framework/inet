@@ -150,9 +150,9 @@ class INET_API Network {
 
                 //Make sure that HC is respected
                 for (int i = 0; i < flw->getNumOfPacketsSent(); i++) {
-                    addAssert(solver, ((Switch *) path.at(path.size() - 1))->scheduledTime(ctx, i, currentFrags.at(currentFrags.size() - 1)) -
-                                      ((Switch *) path.at(0))->departureTime(ctx, i, currentFrags.at(0)) <=
-                                          flw->getStartDevice()->getHardConstraintTimeZ3());
+                    addAssert(solver, path.back()->scheduledTime(ctx, i, currentFrags.at(currentFrags.size() - 1)) -
+                                      path.front()->departureTime(ctx, i, currentFrags.at(0)) <=
+                                      flw->getStartDevice()->getHardConstraintTimeZ3());
                 }
 
             } else if (flw->getType() == Flow::PUBLISH_SUBSCRIBE) {
@@ -171,7 +171,7 @@ class INET_API Network {
                     // Set the maximum allowed jitter
                     for (int index = 0; index < flw->getNumOfPacketsSent(); index++) {
                         // Maximum allowed jitter constraint
-                        addAssert(solver, flw->getJitterZ3((Device *) leaf->getNode(), solver, ctx, index) <= jitterUpperBoundRangeZ3);
+                        addAssert(solver, flw->getJitterZ3((Device *)leaf->getNode(), solver, ctx, index) <= jitterUpperBoundRangeZ3);
                     }
 
                 }
@@ -214,11 +214,8 @@ class INET_API Network {
                     Device *endDev = (Device *) node->getNode();
 
                     avgLatencyPerDev.push_back(std::make_shared<expr>(
-                            flw->getSumOfJitterZ3(endDev, solver, ctx, flw->getNumOfPacketsSent() - 1) /
-                            ctx.int_val(flw->getNumOfPacketsSent())));
-
-
-
+                        flw->getSumOfJitterZ3(endDev, solver, ctx, flw->getNumOfPacketsSent() - 1) /
+                        ctx.int_val(flw->getNumOfPacketsSent())));
                 }
             }
 

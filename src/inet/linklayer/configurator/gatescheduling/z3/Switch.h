@@ -127,20 +127,20 @@ class INET_API Switch : public cObject {
 
 
         // Creating the cycle setting up the bounds for the duration (Cycle duration constraint)
-        addAssert(solver, *cycleDuration >= *cycleDurationLowerBoundZ3);
-        addAssert(solver, *cycleDuration <= *cycleDurationUpperBoundZ3);
+        addAssert(solver, cycleDuration >= cycleDurationLowerBoundZ3);
+        addAssert(solver, cycleDuration <= cycleDurationUpperBoundZ3);
 
         // A cycle must start on a point in time, so it must be greater than 0
-        addAssert(solver, *cycleStart >= ctx.int_val(0)); // No negative cycle values constraint
+        addAssert(solver, cycleStart >= ctx.int_val(0)); // No negative cycle values constraint
 
         for (Port *port : ports) {
             port->toZ3(ctx);
 
             for (FlowFragment *frag : port->getFlowFragments()) {
-                addAssert(solver, *port->getCycle()->getFirstCycleStartZ3() <= *arrivalTime(ctx, 0, frag)); // Maximum cycle start constraint
+                addAssert(solver, port->getCycle()->getFirstCycleStartZ3() <= arrivalTime(ctx, 0, frag)); // Maximum cycle start constraint
             }
 
-            addAssert(solver, *port->getCycle()->getFirstCycleStartZ3() >= ctx.int_val(0)); // No negative cycle values constraint
+            addAssert(solver, port->getCycle()->getFirstCycleStartZ3() >= ctx.int_val(0)); // No negative cycle values constraint
 
             /* The cycle of every port must have the same duration
             addAssert(solver, mkEq( // Equal cycle constraints
@@ -149,10 +149,10 @@ class INET_API Switch : public cObject {
             */
 
             // The cycle of every port must have the same starting point
-            addAssert(solver, *cycleStart == *port->getCycle()->getFirstCycleStartZ3()); // Equal cycle constraints
+            addAssert(solver, cycleStart == port->getCycle()->getFirstCycleStartZ3()); // Equal cycle constraints
         }
 
-        addAssert(solver, *cycleStart == ctx.int_val(0));
+        addAssert(solver, cycleStart == ctx.int_val(0));
     }
 
     /**
