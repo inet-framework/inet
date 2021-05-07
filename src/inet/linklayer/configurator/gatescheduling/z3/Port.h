@@ -346,35 +346,6 @@ class INET_API Port {
     }
 
     /**
-     * [Method]: bindTimeSlots
-     * [Usage]: IN DEVELOPMENT - Bind timeslots to a fixed name instead
-     * of a variable.
-     *
-     * @param solver    solver object
-     * @param ctx        context object for the solver
-     */
-    void bindTimeSlots(solver& solver, context& ctx) {
-
-        // Ideia = se a prioridade de um flow e' igual a um numero,
-        // mkEq nele com o slot the cycle (getSlotS/D(prt, slotnum))
-        /*
-        for (FlowFragment *frag : flowFragments) {
-
-            for (int i = 0; i < cycle->getNumOfPrts(); i++) {
-                for (int j = 0; j < cycle->getNumOfSlots(); j++) {
-                    addAssert(solver,
-                        mkITE(
-                            mkAnd(
-                                mkEq(frag->getFlowPriority(), ctx.int_val(i)),
-                                mkEq(frag->get, ctx.int_val(j)))
-                                ,));
-                }
-            }
-        }
-        */
-    }
-
-    /**
      * [Method]: setUpCycle
      * [Usage]: If the port is configured to use a specific automated
      * application period methodology, it will configure its cycle size.
@@ -426,30 +397,8 @@ class INET_API Port {
 
         if (flowFragments.size() == 0) {
             addAssert(solver, ctx.real_val(std::to_string(0).c_str()) == cycle->getCycleDurationZ3());
-            //    addAssert(solver, mkEq(
-            //    ctx.real_val(std::to_string(0)),
-            //    this->cycle->getFirstCycleStartZ3()
-            // ));
-
             return;
         }
-
-        /*
-        if (useMicroCycles && flowFragments.size() > 0) {
-            addAssert(solver, mkEq(
-                ctx.real_val(std::to_string(microCycleSize)),
-                cycle->getCycleDurationZ3()));
-        } else if (useHyperCycle && flowFragments.size() > 0) {
-            addAssert(solver, mkEq(
-                ctx.real_val(std::to_string(definedHyperCycleSize)),
-                cycle->getCycleDurationZ3()));
-        } else {
-            for (FlowFragment flowFrag : flowFragments) {
-                flowFrag->setNumOfPacketsSent(packetUpperBoundRange);
-            }
-        }
-        */
-
 
         setUpCycleRules(solver, ctx);
         zeroOutNonUsedSlots(solver, ctx);
