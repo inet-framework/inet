@@ -407,15 +407,7 @@ NetworkInterface *Ipv6RoutingTable::getInterfaceByAddress(const Ipv6Address& add
 {
     Enter_Method("getInterfaceByAddress(%s)=?", addr.str().c_str());
 
-    if (addr.isUnspecified())
-        return nullptr;
-
-    for (int i = 0; i < ift->getNumInterfaces(); ++i) {
-        NetworkInterface *ie = ift->getInterface(i);
-        if (ie->getProtocolData<Ipv6InterfaceData>()->hasAddress(addr))
-            return ie;
-    }
-    return nullptr;
+    return ift->findInterfaceByAddress(addr);
 }
 
 NetworkInterface *Ipv6RoutingTable::getInterfaceByAddress(const L3Address& address) const
@@ -428,11 +420,8 @@ bool Ipv6RoutingTable::isLocalAddress(const Ipv6Address& dest) const
     Enter_Method("isLocalAddress(%s) y/n", dest.str().c_str());
 
     // first, check if we have an interface with this address
-    for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        NetworkInterface *ie = ift->getInterface(i);
-        if (ie->getProtocolData<Ipv6InterfaceData>()->hasAddress(dest))
-            return true;
-    }
+    if (ift->isLocalAddress(dest))
+        return true;
 
     // then check for special, preassigned multicast addresses
     // (these addresses occur more rarely than specific interface addresses,
