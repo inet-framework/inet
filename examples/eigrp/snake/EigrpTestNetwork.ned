@@ -40,7 +40,7 @@ network EigrpTestNetwork
             parameters:
                 config = xml("<config>"+
                             "<interface among='R1 R2' address='10.0.12.x' netmask='255.255.255.252' />"+
-							"<interface among='R2 R3' address='10.0.23.x' netmask='255.255.255.252' />"+
+                            "<interface among='R2 R3' address='10.0.23.x' netmask='255.255.255.252' />"+
                             "<interface among='R1 LAN1' address='10.0.1.x' netmask='255.255.255.0' />"+
                             "<interface among='R2 LAN2' address='10.0.2.x' netmask='255.255.255.0' />"+
                             "<interface among='R3 LAN3' address='10.0.3.x' netmask='255.255.255.0' />"+

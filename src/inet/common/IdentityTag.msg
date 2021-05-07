@@ -44,13 +44,13 @@ cplusplus(IdentityTag) {{
 
     virtual const Ptr<TagBase> changeRegion(b offsetDelta, b lengthDelta) const override {
         if (offsetDelta == b(0))
-        	return const_cast<IdentityTag *>(this)->shared_from_this();
-    	else {
+            return const_cast<IdentityTag *>(this)->shared_from_this();
+        else {
             const auto& result = staticPtrCast<IdentityTag>(dupShared());
             result->identityStart += b(offsetDelta).get();
             return result;
-    	}
-	}
+        }
+    }
 }}
 
 cplusplus(cc) {{

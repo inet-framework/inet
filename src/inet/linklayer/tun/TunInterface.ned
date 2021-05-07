@@ -38,7 +38,7 @@ module TunInterface extends NetworkInterface like ITunnelInterface
     submodules:
         tun: Tun {
             parameters:
-	            @display("p=300,100");
+                @display("p=300,100");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> tun.upperLayerIn;

@@ -22,10 +22,10 @@ network small
             parameters:
                 config = xml("<config>"+
                             "<interface among='Router1 Router2 Router3 Router4' address='192.168.1.x' netmask='255.255.255.0' />"+
-							"<interface among='Router1 Host1' address='172.16.10.x' netmask='255.255.255.0' />"+
-							"<interface among='Router2 Host2' address='172.16.20.x' netmask='255.255.255.0' />"+
-							"<interface among='Router3 Host3' address='172.16.30.x' netmask='255.255.255.0' />"+
-							"<interface among='Router4 Host4' address='172.16.40.x' netmask='255.255.255.0' />"+
+                            "<interface among='Router1 Host1' address='172.16.10.x' netmask='255.255.255.0' />"+
+                            "<interface among='Router2 Host2' address='172.16.20.x' netmask='255.255.255.0' />"+
+                            "<interface among='Router3 Host3' address='172.16.30.x' netmask='255.255.255.0' />"+
+                            "<interface among='Router4 Host4' address='172.16.40.x' netmask='255.255.255.0' />"+
                             "</config>");
                 @display("p=211,62");
         }

@@ -19,7 +19,7 @@ network NetworkDaisyChain
         channel Ethernet100 extends ned.DatarateChannel
         {
             datarate = 100Mbps;
-            delay = 25ns;		// Length of connection is 5 meters
+            delay = 25ns;       // Length of connection is 5 meters
         }
     submodules:
         gptpBridge0: GptpBridge {

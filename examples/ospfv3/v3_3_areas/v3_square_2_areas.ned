@@ -24,8 +24,8 @@ network v3_3_areas
                             "</config>"
                             );
                 addStaticRoutes = false;
-           	 	addDefaultRoutes = false;
-            	addSubnetRoutes = false;
+                addDefaultRoutes = false;
+                addSubnetRoutes = false;
                 @display("p=147,54");
         }
         Router1: Ospfv3Router {

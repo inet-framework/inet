@@ -220,8 +220,8 @@ class Ospfv3NetworkLsa  extends Ospfv3Lsa
 // Inter-Area-Prefix-LSAs
 class Ospfv3InterAreaPrefixLsa  extends Ospfv3Lsa
 {
-    uint8_t reserved1 = 0;		// 8 bits
-    uint32_t metric;			// 24 bits
+    uint8_t reserved1 = 0;      // 8 bits
+    uint32_t metric;            // 24 bits
     Ospfv3LsaPrefix0 prefix;
 }
 

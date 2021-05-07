@@ -12,6 +12,6 @@ network OpenStreetMapExample
         }
         coordinateSystem: SimpleGeographicCoordinateSystem {
             parameters:
-	            @display("p=100,200");
+                @display("p=100,200");
         }
 }

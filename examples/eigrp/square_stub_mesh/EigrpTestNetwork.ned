@@ -39,8 +39,8 @@ network EigrpTestNetwork
         configurator: Ipv4NetworkConfigurator {
             parameters:
                 config = xml("<config>"+
-							"<interface among='R1 R2' address='10.0.12.x' netmask='255.255.255.252' />"+
-							"<interface among='R2 R4' address='10.0.24.x' netmask='255.255.255.252' />"+
+                            "<interface among='R1 R2' address='10.0.12.x' netmask='255.255.255.252' />"+
+                            "<interface among='R2 R4' address='10.0.24.x' netmask='255.255.255.252' />"+
                             "<interface among='R1 R4' address='10.0.14.x' netmask='255.255.255.252' />"+
                             "<interface among='R2 R3' address='10.0.23.x' netmask='255.255.255.252' />"+
                             "<interface among='R1 R3' address='10.0.13.x' netmask='255.255.255.252' />"+

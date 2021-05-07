@@ -63,9 +63,9 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder;
 //
 // There are two modes:
 //  - "truncated" : The trellis graph traceback path always starts in the all-zeros state
-//					and ends with the best metric.
+//                  and ends with the best metric.
 //  - "terminated": The trellis graph traceback path always starts and ends in the all-zeros
-//					state.
+//                  state.
 // The encoding process works in accordance with the industry-standards and starts
 // in the all-zeros state.
 //

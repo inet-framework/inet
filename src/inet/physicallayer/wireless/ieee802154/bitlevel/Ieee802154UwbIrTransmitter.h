@@ -17,15 +17,15 @@
  * author:      Jerome Rousselot <jerome.rousselot@csem.ch>
  *
  * copyright:   (C) 2008 Centre Suisse d'Electronique et Microtechnique (CSEM) SA
- * 				Systems Engineering
+ *              Systems Engineering
  *              Real-Time Software and Networking
  *              Jaquet-Droz 1, CH-2002 Neuchatel, Switzerland.
  *
  * description: this class holds constants specified in IEEE 802.15.4A UWB-IR Phy
  * acknowledgment: this work was supported (in part) by the National Competence
- * 			    Center in Research on Mobile Information and Communication Systems
- * 				NCCR-MICS, a center supported by the Swiss National Science
- * 				Foundation under grant number 5005-67322.
+ *              Center in Research on Mobile Information and Communication Systems
+ *              NCCR-MICS, a center supported by the Swiss National Science
+ *              Foundation under grant number 5005-67322.
  ***************************************************************************/
 
 #ifndef __INET_IEEE802154UWBIRTRANSMITTER_H

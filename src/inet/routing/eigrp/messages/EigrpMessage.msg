@@ -53,20 +53,20 @@ enum EigrpTlvTypeLow
 // Struct for K-values
 struct EigrpKValues
 {
-	uint16_t K1 = 1;
-	uint16_t K2 = 0;
-	uint16_t K3 = 1;
-	uint16_t K4 = 0;
-	uint16_t K5 = 0;
-	uint16_t K6 = 0;
+    uint16_t K1 = 1;
+    uint16_t K2 = 0;
+    uint16_t K3 = 1;
+    uint16_t K4 = 0;
+    uint16_t K5 = 0;
+    uint16_t K6 = 0;
 }
 
 // 8 bit flags field, only three flags specified
 struct EigrpRouteFlags
 {
-    bool SW;				// Source Withdraw			
-    bool CD;				// Candidate Default
-    bool active;			// Active path
+    bool SW;        // Source Withdraw
+    bool CD;        // Candidate Default
+    bool active;    // Active path
 }
 
 // Struct for wide metric paramaters
@@ -121,12 +121,12 @@ struct EigrpTlvParameter
 //    // length
 //    uint16_t length = 28;
 //    // value
-//    IPv4Address routerID;		// IP of originating router (also in exterior TLV)
-// 	IPv4Address nextHop;   
-// 	EigrpMetricPar metric;
-// 	EigrpRouteFlags flags;
-// 	IPv4Address destMask;	 	// Destination
-// 	IPv4Address destAddress;
+//    IPv4Address routerID;     // IP of originating router (also in exterior TLV)
+//    IPv4Address nextHop;
+//    EigrpMetricPar metric;
+//    EigrpRouteFlags flags;
+//    IPv4Address destMask;     // Destination
+//    IPv4Address destAddress;
 //};
 
 // Multiprotocol Ipv4 (IPv4Address used) Internal TLV route
@@ -136,16 +136,16 @@ struct EigrpMpIpv4Internal
     char typeHigh = 6;
     char typeLow = EIGRP_TLV_ROUTE;
     // value
-    uint16_t afi;				// Address Family ID, IPv4 = 1, Ipv6 = 2
-    uint16_t tid;				// Topology ID
-    Ipv4Address routerID;		// Router ID
+    uint16_t afi;           // Address Family ID, IPv4 = 1, Ipv6 = 2
+    uint16_t tid;           // Topology ID
+    Ipv4Address routerID;   // Router ID
 
- 	EigrpWideMetricPar metric;
- 	EigrpRouteFlags flags;
- 	
- 	Ipv4Address nextHop;
- 	Ipv4Address destMask;
- 	Ipv4Address destAddress;
+    EigrpWideMetricPar metric;
+    EigrpRouteFlags flags;
+
+    Ipv4Address nextHop;
+    Ipv4Address destMask;
+    Ipv4Address destAddress;
 };
 
 
@@ -156,16 +156,16 @@ struct EigrpMpIpv6Internal
     char typeHigh = 6;
     char typeLow = EIGRP_TLV_ROUTE;
     // value
-    uint16_t afi = 2;				// Address Family ID, IPv4 = 1, Ipv6 = 2
-    uint16_t tid;				// Topology ID
-    Ipv4Address routerID;		// Router ID
+    uint16_t afi = 2;       // Address Family ID, IPv4 = 1, Ipv6 = 2
+    uint16_t tid;           // Topology ID
+    Ipv4Address routerID;   // Router ID
 
- 	EigrpWideMetricPar metric;
- 	EigrpRouteFlags flags;
- 	
- 	Ipv6Address nextHop;
- 	Ipv6Address destMask;
- 	Ipv6Address destAddress;
+    EigrpWideMetricPar metric;
+    EigrpRouteFlags flags;
+
+    Ipv6Address nextHop;
+    Ipv6Address destMask;
+    Ipv6Address destAddress;
 };
 
 
@@ -173,32 +173,32 @@ struct EigrpMpIpv6Internal
 class EigrpMessage extends FieldsChunk
 {
     chunkLength = B(4);
-    char version = 2;	// Version of EIGRP header
-	int8_t opcode;		// Type of message
-	// flags
-	bool init;			// Initialization - establishment of neighborship
-	bool cr;			// Conditionally Received
-	bool rs;			// Reset
-	bool eot;			// End of table
-	
-	int seqNum;			// Sequence number
-	int ackNum;			// Acknowledgement number
-	uint16_t vrid;		// Virtual Router ID
-	uint16_t asNum;		// Autonomous system number
+    char version = 2;   // Version of EIGRP header
+    int8_t opcode;      // Type of message
+    // flags
+    bool init;          // Initialization - establishment of neighborship
+    bool cr;            // Conditionally Received
+    bool rs;            // Reset
+    bool eot;           // End of table
+
+    int seqNum;         // Sequence number
+    int ackNum;         // Acknowledgement number
+    uint16_t vrid;      // Virtual Router ID
+    uint16_t asNum;     // Autonomous system number
 };
 
 // EIGRP Hello message
 
 class EigrpIpv4Hello extends EigrpMessage
 {
-    EigrpTlvParameter parameterTlv;		// Always present
-	EigrpTlvStub stubTlv;
+    EigrpTlvParameter parameterTlv;     // Always present
+    EigrpTlvStub stubTlv;
 };
 
 class EigrpIpv6Hello extends EigrpMessage
 {
-    EigrpTlvParameter parameterTlv;		// Always present
-	EigrpTlvStub stubTlv;
+    EigrpTlvParameter parameterTlv;     // Always present
+    EigrpTlvStub stubTlv;
 };
 
 // Ack message - temporarily
@@ -257,7 +257,7 @@ class EigrpIpv6Reply extends EigrpIpv6Message
 struct EigrpMsgRoute
 {
     int sourceId;           // ID of source for route
-    int routeId;           	// ID of route 
+    int routeId;            // ID of route 
     bool unreachable;       // Route with maximal metric 
     bool invalid;
     Ipv4Address originator;
@@ -267,25 +267,22 @@ struct EigrpMsgRoute
 message EigrpMsgReq
 {
     @customize(true);
-   	
-   	int8_t opcode;			// Type of message
-   	bool goodbyeMsg = false; // Message is Hello goodbye
-   	
-   	// flags
-	bool init;			// Initialization - establishment of neighborship
-	bool cr;			// Conditionally Received
-	bool rs;			// Reset
-	bool eot;			// End of table
-	
-    int destNeighbor;    	// ID of neighbor that is destination of message 
-    int destInterface;      // ID of destination interface
+    int8_t opcode;              // Type of message
+    bool goodbyeMsg = false;    // Message is Hello goodbye
 
-    uint32_t seqNumber;     // Sequence number for reliable transmission
-    uint32_t ackNumber;     // Ack number for reliable transmission
+    // flags
+    bool init;                  // Initialization - establishment of neighborship
+    bool cr;                    // Conditionally Received
+    bool rs;                    // Reset
+    bool eot;                   // End of table
 
-    int numOfAck;			// Number of acknowledges 
+    int destNeighbor;           // ID of neighbor that is destination of message 
+    int destInterface;          // ID of destination interface
+
+    uint32_t seqNumber;         // Sequence number for reliable transmission
+    uint32_t ackNumber;         // Ack number for reliable transmission
+
+    int numOfAck;               // Number of acknowledges 
     EigrpMsgRoute routes[];
 };
-    
-    
-    
+

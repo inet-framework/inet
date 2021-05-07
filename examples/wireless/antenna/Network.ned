@@ -25,8 +25,8 @@ import inet.visualizer.contract.IIntegratedVisualizer;
 network AntennaDirectionalSelectivityExample
 {
     parameters:
-	    @display("bgb=1000,1000");
-    	@statistic[receptionPower](source="receptionMinSignalPower(radioMedium.signalArrivalStarted)"; record=vector);
+        @display("bgb=1000,1000");
+        @statistic[receptionPower](source="receptionMinSignalPower(radioMedium.signalArrivalStarted)"; record=vector);
     submodules:
         visualizer: <default(firstAvailableOrEmpty("IntegratedCanvasVisualizer"))> like IIntegratedVisualizer if typename != "" {
             parameters:

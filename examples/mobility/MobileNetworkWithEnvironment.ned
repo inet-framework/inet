@@ -35,8 +35,8 @@ network MobileNetworkWithEnvironment
             parameters:
                 @display("p=300,200;r=,,#707070");
         }
-	environment: PhysicalEnvironment {
-	    parameters:
-		@display("p=550,50");
-	}
+        environment: PhysicalEnvironment {
+            parameters:
+                @display("p=550,50");
+        }
 }

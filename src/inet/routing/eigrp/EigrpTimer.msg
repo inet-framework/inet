@@ -24,9 +24,9 @@
 // types of timers
 enum EigrpTimerType
 {
-    EIGRP_HELLO_TIMER = 1;	// Hello timer
-    EIGRP_HOLD_TIMER = 2;	// Hold timer
-    // EIGRP_PACING_TIMER = 3;	// Pacing timer
+    EIGRP_HELLO_TIMER = 1;      // Hello timer
+    EIGRP_HOLD_TIMER = 2;       // Hold timer
+//    EIGRP_PACING_TIMER = 3;    // Pacing timer
 };
 
 // general timer structure 
