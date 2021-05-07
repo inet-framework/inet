@@ -86,7 +86,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule
      */
     virtual void extractTopology(Topology& topology);
 
-    virtual std::vector<Node *> computeShortestPath(Node *source, Node *destination) const;
+    virtual std::vector<Node *> computeShortestNodePath(Node *source, Node *destination) const;
 
     virtual bool isBridgeNode(Node *node) const;
     virtual Link *findLinkOut(Node *node, const char *neighbor) const;
