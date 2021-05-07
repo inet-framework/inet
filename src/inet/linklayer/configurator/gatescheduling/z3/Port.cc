@@ -80,51 +80,7 @@ void Port::setUpCycleRules(solver& solver, context& ctx) {
                 addAssert(solver, cycle->slotStartZ3(ctx, *flowPriority, indexZ3) <
                                   cycle->slotStartZ3(ctx, *flowPriority, ctx.int_val(index + 1)));
             }
-
-
-
-            /*
-             * If 2 slots are not consecutive, then there must be a space
-             * of at least gbSize (the size of the guard band) between them
-             * (guard band constraint).
-             *
-            for (FlowFragment auxFrag : flowFragments) {
-                for (int auxIndex = 0; auxIndex < cycle->getNumOfSlots(); auxIndex++) {
-                    std::shared_ptr<expr> auxIndexZ3 = ctx.int_val(auxIndex);
-
-                    if (auxFrag->equals(frag)) {
-                        continue;
-                    }
-
-                    std::shared_ptr<expr> auxFlowPriority = auxFrag->getFlowPriority();
-
-                    addAssert(solver,
-                        implies(
-                            mkAnd(
-                                mkNot(
-                                    mkAnd(
-                                        mkEq(flowPriority, auxFlowPriority),
-                                        mkEq(indexZ3, auxIndexZ3))),
-                                mkNot(
-                                    mkEq(
-                                        cycle->slotStartZ3(ctx, flowPriority, indexZ3),
-                                        mkAdd(
-                                            cycle->slotDurationZ3(ctx, auxFlowPriority, auxIndexZ3),
-                                            cycle->slotStartZ3(ctx, auxFlowPriority, auxIndexZ3)))),
-                                mkGt(
-                                    cycle->slotStartZ3(ctx, flowPriority, indexZ3),
-                                    cycle->slotStartZ3(ctx, auxFlowPriority, auxIndexZ3))),
-                            mkGe(
-                                cycle->slotStartZ3(ctx, flowPriority, indexZ3),
-                                mkAdd(
-                                    cycle->slotStartZ3(ctx, auxFlowPriority, auxIndexZ3),
-                                    cycle->slotDurationZ3(ctx, auxFlowPriority, auxIndexZ3),
-                                    gbSizeZ3))));
-                }
-            }
-            */
         }
-
     }
 }
 
@@ -138,8 +94,6 @@ void Port::setupTimeSlots(solver& solver, context& ctx, FlowFragment *flowFrag) 
 
     for (int index = 0; index < cycle->getNumOfSlots(); index++) {
         expr indexZ3 = ctx.int_val(index);
-
-        // addAssert(solver, mkGe(cycle->slotDurationZ3(ctx, flowFrag->getFlowPriority(), indexZ3), transmissionTimeZ3));
 
         // Every flow must have a priority (Priority assignment constraint)
         addAssert(solver, flowFrag->getFragmentPriorityZ3() >= ctx.int_val(0));
@@ -172,38 +126,14 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
     std::shared_ptr<expr> exp = nullptr;
 
     for (FlowFragment *auxFragment : flowFragments) {
-
-        /*
-        System.out.println(std::string("Num de pacotes escalonados:") + auxFragment->getNumOfPacketsSent());
-
-        for (int i = 0; i < auxFragment->getNumOfPacketsSent(); i++) {
-            addAssert(solver,
-                mkEq(
-                    arrivalTime(ctx, i, auxFragment),
-                    mkAdd(
-                            departureTime(ctx, i, auxFragment),
-                            timeToTravelZ3)));
-
-            addAssert(solver,
-                mkGe(
-                    scheduledTime(ctx, i, auxFragment),
-                    mkAdd(
-                            arrivalTime(ctx, i, auxFragment),
-                            transmissionTimeZ3)));
-        }
-        */
-
-
         for (int i = 0; i < flowFrag->getNumOfPacketsSent(); i++) {
             for (int j = 0; j < auxFragment->getNumOfPacketsSent(); j++) {
                 if (auxExp == nullptr) {
                     auxExp = std::make_shared<expr>(ctx.bool_val(false));
                 }
 
-                if (auxFragment == flowFrag && i == j) {
+                if (auxFragment == flowFrag && i == j)
                     continue;
-                }
-
 
                 /*****************************************************
                  *
@@ -419,63 +349,8 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
     for (int i = 0; i < flowFrag->getNumOfPacketsSent(); i++) {
         for (FlowFragment *auxFlowFrag : flowFragments) {
             for (int j = 0; j < auxFlowFrag->getNumOfPacketsSent(); j++) {
-
-               if (auxFlowFrag == flowFrag) {
+               if (auxFlowFrag == flowFrag)
                    continue;
-               }
-
-
-
-               /*
-                * Given that packets from two different flows have
-                * the same priority in this switch, they must not
-                * be transmitted at the same time
-                *
-                * OBS: This constraint might not be needed due to the
-                * FIFO constraint.
-                *
-               addAssert(solver,
-                   implies(
-                       mkEq(
-                           auxFlowFrag->getFlowPriority(),
-                           flowFrag->getFlowPriority()),
-                       mkOr(
-                           mkLe(
-                               scheduledTime(ctx, i, flowFrag),
-                               mkSub(
-                                   scheduledTime(ctx, j, auxFlowFrag),
-                                   transmissionTimeZ3)),
-                           mkGe(
-                               scheduledTime(ctx, i, flowFrag),
-                               mkAdd(
-                                   scheduledTime(ctx, j, auxFlowFrag),
-                                   transmissionTimeZ3)))));
-               */
-
-               /*
-                * Frame isolation constraint as specified by:
-                *   Craciunas, Silviu S., et al. "Scheduling real-time communication in IEEE
-                *   802.1 Qbv time sensitive networks." Proceedings of the 24th International
-                *   Conference on Real-Time Networks and Systems. ACM, 2016.
-                *
-                * Two packets from different flows cannot be in the same priority queue
-                * at the same time
-                *
-
-               addAssert(solver,
-                   implies(
-                      mkEq(
-                          flowFrag->getFlowPriority(),
-                           auxFlowFrag->getFlowPriority()),
-                       mkOr(
-                           mkLt(
-                               scheduledTime(ctx, i, flowFrag),
-                               arrivalTime(ctx, j, auxFlowFrag)),
-                           mkGt(
-                               arrivalTime(ctx, i, flowFrag),
-                               scheduledTime(ctx, j, auxFlowFrag)))));
-               */
-
             }
         }
     }
@@ -497,17 +372,6 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                             flowFrag->getFragmentPriorityZ3() == auxFlowFrag->getFragmentPriorityZ3(),
                             scheduledTime(ctx, i, flowFrag) <=
                             scheduledTime(ctx, j, auxFlowFrag) - auxFlowFrag->getPacketSizeZ3() / portSpeedZ3));
-
-                /*
-                if (!(flowFrag->equals(auxFlowFrag) && i == j)) {
-                    addAssert(solver,
-                        mkNot(
-                            mkEq(
-                                arrivalTime(ctx, i, flowFrag),
-                                arrivalTime(ctx, j, auxFlowFrag))));
-                }
-                */
-
             }
         }
     }
@@ -567,19 +431,6 @@ void Port::setupBestEffort(solver& solver, context& ctx) {
 
     // Best-effort bandwidth reservation constraint
     addAssert(solver, sumOfPrtTime <= (ctx.real_val(1) - bestEffortPercentZ3) * cycle->getCycleDurationZ3());
-
-    /*
-    addAssert(solver,
-            mkLe(
-                sumOfPrtTime,
-                mkMul(bestEffortPercentZ3, cycle->getCycleDurationZ3())));
-
-    addAssert(solver,
-        mkGe(
-            bestEffortPercentZ3,
-            mkDiv(sumOfPrtTime, cycle->getCycleDurationZ3())));
-    */
-
 }
 
 void Port::zeroOutNonUsedSlots(solver& solver, context& ctx)
@@ -694,13 +545,6 @@ void Port::loadZ3(context& ctx, solver& solver)
             ctx.int_val(
                     frag->getFragmentPriority()));
 
-        /*
-        addAssert(solver,
-            mkEq(
-                frag->getFragmentPriorityZ3(),
-                ctx.int_val(frag->getFragmentPriority())));
-        */
-
         for (int index = 0; index < cycle->getNumOfSlots(); index++) {
             addAssert(solver, cycle->slotDurationZ3(ctx, *frag->getFragmentPriorityZ3(), ctx.int_val(index)) ==
                               ctx.real_val(std::to_string(cycle->getSlotDuration(frag->getFragmentPriority(), index)).c_str()));
@@ -710,12 +554,6 @@ void Port::loadZ3(context& ctx, solver& solver)
         }
 
         for (int i = 0; i < frag->getNumOfPacketsSent(); i++) {
-            /*
-            addAssert(solver,
-                mkEq(
-                    departureTime(ctx, i, frag),
-                    ctx.real_val(std::to_string(frag->getDepartureTime(i)))));
-            */
             if (i > 0)
                 frag->addDepartureTimeZ3(ctx.real_val(std::to_string(frag->getDepartureTime(i)).c_str()));
 

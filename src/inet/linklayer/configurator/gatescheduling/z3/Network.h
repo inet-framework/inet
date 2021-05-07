@@ -190,24 +190,6 @@ class INET_API Network {
 
                 }
 
-                /*
-
-                // TODO: CHECK FAIRNESS CONSTRAINT (?)
-
-                sumOfAllJitter = flw->getSumOfAllDevJitterZ3(solver, ctx, Network.PACKETUPPERBOUNDRANGE - 1);
-
-                jitterList.push(sumOfAllJitter);
-                totalNumOfLeaves += flw->getPathTree().getLeaves().size();
-
-                // SET THE MAXIMUM JITTER FOR THE FLOW
-                addAssert(solver,
-                    mkLe(
-                        mkDiv(
-                            sumOfAllJitter,
-                            ctx.real_val(flw->getPathTree().getLeaves().size() * (PACKETUPPERBOUNDRANGE))),
-                        jitterUpperBoundRangeZ3));
-                */
-
                 // TODO: Remove code for debugging
                 avgOfAllLatency = flw->getAvgLatency(solver, ctx);
                 for (PathNode *node : *flw->getPathTree()->getLeaves()) {

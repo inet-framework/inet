@@ -142,12 +142,6 @@ class INET_API Switch : public cObject {
 
             addAssert(solver, port->getCycle()->getFirstCycleStartZ3() >= ctx.int_val(0)); // No negative cycle values constraint
 
-            /* The cycle of every port must have the same duration
-            addAssert(solver, mkEq( // Equal cycle constraints
-                cycleDuration,
-                port.getCycle()->getCycleDurationZ3()));
-            */
-
             // The cycle of every port must have the same starting point
             addAssert(solver, cycleStart == port->getCycle()->getFirstCycleStartZ3()); // Equal cycle constraints
         }
@@ -368,23 +362,10 @@ class INET_API Switch : public cObject {
     std::shared_ptr<expr> scheduledTime(context& ctx, int auxIndex, FlowFragment *flowFrag);
 
     void loadZ3(context& ctx, solver& solver) {
-        /*
-        addAssert(solver,
-            mkEq(
-                cycleDurationUpperBoundZ3,
-                ctx.real_val(std::to_string(cycleDurationUpperBound))));
-
-        addAssert(solver,
-            mkEq(
-                cycleDurationLowerBoundZ3,
-                ctx.real_val(std::to_string(cycleDurationLowerBound))));
-        */
-
         if (!ports.empty()) {
             for (Port *port : ports) {
                 //System.out.println(port.getIsModifiedOrCreated());
                 port->loadZ3(ctx, solver);
-
             }
         }
 

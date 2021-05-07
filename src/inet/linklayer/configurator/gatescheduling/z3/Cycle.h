@@ -271,15 +271,6 @@ class INET_API Cycle {
                     slotStartZ3_.at(prt).at(slotIndex) ==
                     ctx.real_val(std::to_string(slotStart.at(std::find(slotsUsed.begin(), slotsUsed.end(), prt) - slotsUsed.begin()).at(slotIndex)).c_str()));
             }
-
-            /*
-            for (int slotIndex = 0; slotIndex < numOfSlots; slotIndex++) {
-                addAssert(solver,
-                    mkEq(
-                        slotDurationZ3_.get(prt).get(slotIndex),
-                        ctx.real_val(std::to_string(slotDuration.get(prt).get(slotIndex)))));
-            }
-            */
         }
     }
 
