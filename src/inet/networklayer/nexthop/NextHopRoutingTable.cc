@@ -234,27 +234,14 @@ bool NextHopRoutingTable::isLocalAddress(const L3Address& dest) const
 {
     Enter_Method("isLocalAddress(%s)", dest.str().c_str());
 
-    // collect interface addresses if not yet done
-    for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        L3Address interfaceAddr = ift->getInterface(i)->getProtocolData<NextHopInterfaceData>()->getAddress();
-        if (interfaceAddr == dest)
-            return true;
-    }
-    return false;
+    return ift->isLocalAddress(dest);
 }
 
 NetworkInterface *NextHopRoutingTable::getInterfaceByAddress(const L3Address& address) const
 {
     Enter_Method("getInterfaceByAddress(%s)", address.str().c_str());
 
-    // collect interface addresses if not yet done
-    for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        NetworkInterface *ie = ift->getInterface(i);
-        L3Address interfaceAddr = ie->getProtocolData<NextHopInterfaceData>()->getAddress();
-        if (interfaceAddr == address)
-            return ie;
-    }
-    return nullptr;
+    return ift->findInterfaceByAddress(address);
 }
 
 NextHopRoute *NextHopRoutingTable::findBestMatchingRoute(const L3Address& dest) const

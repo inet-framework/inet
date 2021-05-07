@@ -296,15 +296,7 @@ std::vector<Ipv4Address> Ipv4RoutingTable::gatherAddresses() const
 NetworkInterface *Ipv4RoutingTable::getInterfaceByAddress(const Ipv4Address& addr) const
 {
     Enter_Method("getInterfaceByAddress(%u.%u.%u.%u)", addr.getDByte(0), addr.getDByte(1), addr.getDByte(2), addr.getDByte(3)); // note: str().c_str() too slow here
-
-    if (addr.isUnspecified())
-        return nullptr;
-    for (int i = 0; i < ift->getNumInterfaces(); ++i) {
-        NetworkInterface *ie = ift->getInterface(i);
-        if (ie->hasNetworkAddress(addr))
-            return ie;
-    }
-    return nullptr;
+    return ift->findInterfaceByAddress(addr);
 }
 
 // ---
@@ -312,12 +304,7 @@ NetworkInterface *Ipv4RoutingTable::getInterfaceByAddress(const Ipv4Address& add
 bool Ipv4RoutingTable::isLocalAddress(const Ipv4Address& dest) const
 {
     Enter_Method("isLocalAddress(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
-
-    for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        if (ift->getInterface(i)->hasNetworkAddress(dest))
-            return true;
-    }
-    return false;
+    return ift->isLocalAddress(dest);
 }
 
 // JcM add: check if the dest addr is local network broadcast
