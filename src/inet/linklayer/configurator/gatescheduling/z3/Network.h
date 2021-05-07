@@ -137,14 +137,10 @@ class INET_API Network {
 
             flw->bindAllFragments(solver, ctx);
 
-            addAssert(solver,  // No negative cycle values constraint
-                    flw->getStartDevice()->getFirstT1TimeZ3() >=
-                    ctx.real_val(0));
-            addAssert(solver,  // Maximum transmission offset constraint
-                    flw->getStartDevice()->getFirstT1TimeZ3() <=
-                    flw->getStartDevice()->getPacketPeriodicityZ3());
-
-
+            // No negative cycle values constraint
+            addAssert(solver, flw->getStartDevice()->getFirstT1TimeZ3() >= ctx.real_val(0));
+            // Maximum transmission offset constraint
+            addAssert(solver, flw->getStartDevice()->getFirstT1TimeZ3() <= flw->getStartDevice()->getPacketPeriodicityZ3());
 
             if (flw->getType() == Flow::UNICAST) {
 
@@ -154,10 +150,9 @@ class INET_API Network {
 
                 //Make sure that HC is respected
                 for (int i = 0; i < flw->getNumOfPacketsSent(); i++) {
-                    addAssert(solver,
-                                    ((Switch *) path.at(path.size() - 1))->scheduledTime(ctx, i, currentFrags.at(currentFrags.size() - 1)) -
-                                    ((Switch *) path.at(0))->departureTime(ctx, i, currentFrags.at(0)) <=
-                                flw->getStartDevice()->getHardConstraintTimeZ3());
+                    addAssert(solver, ((Switch *) path.at(path.size() - 1))->scheduledTime(ctx, i, currentFrags.at(currentFrags.size() - 1)) -
+                                      ((Switch *) path.at(0))->departureTime(ctx, i, currentFrags.at(0)) <=
+                                          flw->getStartDevice()->getHardConstraintTimeZ3());
                 }
 
             } else if (flw->getType() == Flow::PUBLISH_SUBSCRIBE) {
@@ -175,9 +170,8 @@ class INET_API Network {
 
                     // Set the maximum allowed jitter
                     for (int index = 0; index < flw->getNumOfPacketsSent(); index++) {
-                        addAssert(solver,  // Maximum allowed jitter constraint
-                                flw->getJitterZ3((Device *) leaf->getNode(), solver, ctx, index) <=
-                                jitterUpperBoundRangeZ3);
+                        // Maximum allowed jitter constraint
+                        addAssert(solver, flw->getJitterZ3((Device *) leaf->getNode(), solver, ctx, index) <= jitterUpperBoundRangeZ3);
                     }
 
                 }
@@ -187,10 +181,10 @@ class INET_API Network {
                     for (FlowFragment *ffrag : parent->getFlowFragments()) {
                         for (int i = 0; i < flw->getNumOfPacketsSent(); i++) {
                             addAssert(solver,  // Maximum Allowed Latency constraint
-                                        ((Switch *) parent->getNode())->scheduledTime(ctx, i, ffrag) -
-                                        ((Switch *) root->getChildren().at(0)->getNode())->departureTime(ctx, i,
-                                            root->getChildren().at(0)->getFlowFragments().at(0)) <=
-                                    flw->getStartDevice()->getHardConstraintTimeZ3());
+                                ((Switch *) parent->getNode())->scheduledTime(ctx, i, ffrag) -
+                                ((Switch *) root->getChildren().at(0)->getNode())->departureTime(ctx, i,
+                                        root->getChildren().at(0)->getFlowFragments().at(0)) <=
+                                flw->getStartDevice()->getHardConstraintTimeZ3());
                         }
                     }
 

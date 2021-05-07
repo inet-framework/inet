@@ -193,9 +193,8 @@ void Flow::bindToNextFragment(solver& solver, context& ctx, FlowFragment *frag)
             for (int i = 0; i < numOfPacketsSentInFragment; i++){
 //                    System.out.println(std::string("On fragment " + frag->getName() + std::string(" making " + frag->getPort()->scheduledTime(ctx, i, frag) + " = " + childFrag->getPort()->departureTime(ctx, i, childFrag) + " that leads to ")) + childFrag->getPort()->scheduledTime(ctx, i, childFrag)
 //                            + std::string(" on cycle of port ") + frag->getPort()->getCycle().getFirstCycleStartZ3());
-                addAssert(solver,
-                        frag->getPort()->scheduledTime(ctx, i, frag) ==
-                        childFrag->getPort()->departureTime(ctx, i, childFrag));
+                addAssert(solver, frag->getPort()->scheduledTime(ctx, i, frag) ==
+                                  childFrag->getPort()->departureTime(ctx, i, childFrag));
             }
 
             bindToNextFragment(solver, ctx, childFrag);
@@ -417,13 +416,12 @@ std::shared_ptr<expr> Flow::getLatencyZ3(solver& solver, context &ctx, int index
             flowFragments.size() - 1);
     Switch *firstSwitchInPath = ((Switch*) (path.at(0)));
     FlowFragment *firstFragmentInList = flowFragments.at(0);
-    addAssert(solver, *latency == (
-                            lastSwitchInPath->getPortOf(
-                                    lastFragmentInList->getNextHop())->scheduledTime(
-                                    ctx, index, lastFragmentInList) -
-                            firstSwitchInPath->getPortOf(
-                                    firstFragmentInList->getNextHop())->departureTime(
-                                    ctx, index, firstFragmentInList)));
+    addAssert(solver, latency == (lastSwitchInPath->getPortOf(
+                                      lastFragmentInList->getNextHop())->scheduledTime(
+                                      ctx, index, lastFragmentInList) -
+                                  firstSwitchInPath->getPortOf(
+                                      firstFragmentInList->getNextHop())->departureTime(
+                                      ctx, index, firstFragmentInList)));
     return latency;
 }
 
@@ -444,13 +442,12 @@ std::shared_ptr<expr> Flow::getLatencyZ3(solver& solver, Device *dev, context &c
     FlowFragment *lastFragmentInList = flowFrags->at(flowFrags->size() - 1);
     Switch *firstSwitchInPath = ((Switch*) (nodes->at(1)->getNode())); // 1 since the first node is the publisher
     FlowFragment *firstFragmentInList = flowFrags->at(0);
-    addAssert(solver,
-              latency == (  lastSwitchInPath->getPortOf(
-                                    lastFragmentInList->getNextHop())->scheduledTime(
-                                    ctx, index, lastFragmentInList) -
-                            firstSwitchInPath->getPortOf(
-                                    firstFragmentInList->getNextHop())->departureTime(
-                                    ctx, index, firstFragmentInList)));
+    addAssert(solver, latency == (lastSwitchInPath->getPortOf(
+                                      lastFragmentInList->getNextHop())->scheduledTime(
+                                      ctx, index, lastFragmentInList) -
+                                  firstSwitchInPath->getPortOf(
+                                      firstFragmentInList->getNextHop())->departureTime(
+                                      ctx, index, firstFragmentInList)));
     return latency;
 }
 
@@ -479,8 +476,7 @@ std::shared_ptr<expr> Flow::getJitterZ3(Device *dev, solver& solver, context &ct
                     firstSwitchInPath->getPortOf(
                             firstFragmentInList->getNextHop())->departureTime(
                             ctx, index, firstFragmentInList));
-    addAssert(solver, *jitter ==
-                    (latency >= avgLatency ? latency - avgLatency : avgLatency - latency));
+    addAssert(solver, jitter == (latency >= avgLatency ? latency - avgLatency : avgLatency - latency));
     return jitter;
 }
 
