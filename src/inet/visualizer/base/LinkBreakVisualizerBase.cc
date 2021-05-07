@@ -174,8 +174,8 @@ cModule *LinkBreakVisualizerBase::findNode(MacAddress address)
         auto networkNode = *it;
         if (isNetworkNode(networkNode)) {
             auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
-            for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
-                if (interfaceTable->getInterface(i)->getMacAddress() == address)
+            if (interfaceTable != nullptr)
+                if(interfaceTable->isLocalAddress(L3Address(address)))
                     return networkNode;
         }
     }
