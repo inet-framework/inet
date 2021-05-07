@@ -198,7 +198,7 @@ void GateSchedulingConfiguratorBase::addFlows(Input& input) const
                     }
                     else {
                         auto pathFragment = new Input::PathFragment();
-                        auto path = computeShortestPath(sourceNode, destinationNode);
+                        auto path = computeShortestNodePath(sourceNode, destinationNode);
                         for (auto node : path) {
                             for (auto networkNode : input.networkNodes) {
                                 if (networkNode->module == node->module) {

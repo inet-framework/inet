@@ -84,7 +84,7 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     }
 }
 
-std::vector<NetworkConfiguratorBase::Node *> NetworkConfiguratorBase::computeShortestPath(Node *source, Node *destination) const
+std::vector<NetworkConfiguratorBase::Node *> NetworkConfiguratorBase::computeShortestNodePath(Node *source, Node *destination) const
 {
     std::vector<Node *> path;
     topology.calculateUnweightedSingleShortestPathsTo(destination);
