@@ -81,11 +81,7 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
             }
 
             // Setting z3 properties of the flow fragment
-            if (fixedPriority) {
-                flowFrag->setFragmentPriorityZ3(*flowPriority); // FIXED PRIORITY (Fixed priority per flow constraint)
-            } else {
-                flowFrag->setFragmentPriorityZ3(ctx.int_const((flowFrag->getName() + std::string("Priority")).c_str()));
-            }
+            flowFrag->setFragmentPriorityZ3(*flowPriority);
 
             auto connectsTo = ((Switch *) auxN->getNode())->getConnectsTo();
             int portIndex = std::find(connectsTo.begin(), connectsTo.end(), flowFrag->getNextHop()) - connectsTo.begin();

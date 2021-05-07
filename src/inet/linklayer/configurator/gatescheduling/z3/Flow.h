@@ -56,7 +56,6 @@ class INET_API Flow {
     int type = 0;
     int totalNumOfPackets = 0;
 
-    bool fixedPriority = false;
     int priorityValue = -1;
 
     std::vector<Switch *> path;
@@ -947,15 +946,6 @@ class INET_API Flow {
 
     void setFlowSendingPeriodicityZ3(z3::expr flowSendingPeriodicityZ3) {
         this->flowSendingPeriodicityZ3 = std::make_shared<expr>(flowSendingPeriodicityZ3);
-    }
-
-
-    bool isFixedPriority() {
-        return fixedPriority;
-    }
-
-    void setFixedPriority(bool fixedPriority) {
-        this->fixedPriority = fixedPriority;
     }
 
     int getPriorityValue() {

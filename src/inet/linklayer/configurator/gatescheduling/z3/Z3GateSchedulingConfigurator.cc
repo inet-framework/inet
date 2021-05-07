@@ -59,7 +59,6 @@ Z3GateSchedulingConfigurator::Output *Z3GateSchedulingConfigurator::computeGateS
     }
     for (auto inputFlow : input.flows) {
         Flow *flow = new Flow(Flow::UNICAST);
-        flow->setFixedPriority(true);
         flow->setPriorityValue(inputFlow->startApplication->priority);
         auto startDevice = check_and_cast<Device *>(devices[inputFlow->startApplication->device->module]);
         startDevice->setPacketPeriodicity((inputFlow->startApplication->packetInterval * 1000000).dbl());
