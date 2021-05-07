@@ -32,7 +32,6 @@ namespace inet {
 using namespace z3;
 
 /**
- * [Class]: Network
  * Using this class, the user can specify the network
  * topology using switches and flows. The network will be given
  * to the scheduler generator so it can iterate over the network's

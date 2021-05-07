@@ -32,7 +32,6 @@ namespace inet {
 using namespace z3;
 
 /**
- * [Class]: Flow
  * This class specifies a flow (or a stream, in other
  * words) of packets from one source to one or multiple destinations.
  * It contains references for all the data related to this flow,

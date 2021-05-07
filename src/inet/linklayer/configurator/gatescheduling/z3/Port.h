@@ -32,7 +32,6 @@ using namespace z3;
 class FlowFragment;
 
 /**
- * [Class]: Port
  * This class is used to implement the logical role of a
  * port of a switch for the schedule. The core of the scheduling
  * process happens here. Simplifying the whole process, the other

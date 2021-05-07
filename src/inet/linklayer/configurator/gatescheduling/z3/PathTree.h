@@ -30,7 +30,6 @@ namespace inet {
 using namespace z3;
 
 /**
- * [Class]: PathTree
  * Used to specify the path on publish subscribe
  * flows. It is basically a tree of path nodes with a few
  * simple and classic tree methods.

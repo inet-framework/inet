@@ -32,7 +32,6 @@ namespace inet {
 using namespace z3;
 
 /**
- * [Class]: FlowFragment
  * This class is used to represent a fragment of a flow.
  * Simply put, a flow fragment is represents the flow it belongs to
  * regarding a specific switch in the path. With this approach,

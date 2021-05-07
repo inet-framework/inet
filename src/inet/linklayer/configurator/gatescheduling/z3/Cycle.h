@@ -32,7 +32,6 @@ namespace inet {
 using namespace z3;
 
 /**
- * [Class]: Cycle
  * Contains all properties of a TSN cycle.
  * After the specification of its properties through
  * user input, the toZ3 method can be used to convert

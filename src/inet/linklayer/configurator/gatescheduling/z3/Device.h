@@ -32,7 +32,6 @@ using namespace z3;
 // CLASS WHERE DEVICE PROPERTIES AND CONDITIONS ARE SPECIFIED
 
 /**
- * [Class]: Device
  * Specifies properties of device nodes in the network.
  * They can be used as sending devices and receiving devices.
  * Their properties specify part of the core of a flow.
