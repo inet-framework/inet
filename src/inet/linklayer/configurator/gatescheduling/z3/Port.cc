@@ -153,7 +153,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
             }
 
 
-            for (int j = 0; j < cycleUpperBoundRange; j++) {
+            for (int j = 0; j < 1; j++) {
 
                 /*
                 T2 IS INSIDE SLOT, HAS ENOUGH TIME TO TRANSMIT
@@ -321,7 +321,7 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
 
     //Every packet must be transmitted inside a timeslot (transmit inside a time slot constraint)
     for (int i = 0; i < flowFrag->getNumOfPacketsSent(); i++) {
-        for (int j = 0; j < cycleUpperBoundRange; j++) {
+        for (int j = 0; j < 1; j++) {
             for (int index = 0; index < cycle->getNumOfSlots(); index++) {
                 indexZ3 = std::make_shared<expr>(ctx.int_val(index));
                 auxExp = std::make_shared<expr>(
@@ -453,7 +453,7 @@ void Port::zeroOutNonUsedSlots(solver& solver, context& ctx)
 
 
     for (int prtIndex = 0; prtIndex < cycle->getNumOfPrts(); prtIndex++) {
-        for (int cycleNum = 0; cycleNum < cycleUpperBoundRange; cycleNum++) {
+        for (int cycleNum = 0; cycleNum < 1; cycleNum++) {
             for (int indexNum = 0; indexNum < cycle->getNumOfSlots(); indexNum++) {
                 indexZ3 = std::make_shared<expr>(ctx.int_val(indexNum));
                 exp1 = std::make_shared<expr>(ctx.bool_val(true));
@@ -486,7 +486,6 @@ std::shared_ptr<expr> Port::departureTime(context& ctx, int auxIndex, FlowFragme
     std::shared_ptr<expr> index = nullptr;
     std::shared_ptr<expr> departureTime;
     int cycleNum = 0;
-
 
     if (auxIndex + 1 > flowFrag->getNumOfPacketsSent()) {
         cycleNum = (auxIndex - (auxIndex % flowFrag->getNumOfPacketsSent()))/flowFrag->getNumOfPacketsSent();
