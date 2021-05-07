@@ -17,22 +17,13 @@
 
 #include "inet/linklayer/configurator/StreamRedundancyConfigurator.h"
 
-#include <queue>
-#include <set>
-#include <sstream>
-#include <vector>
-
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/stlutils.h"
-#include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
-
 namespace inet {
 
 Define_Module(StreamRedundancyConfigurator);
 
 void StreamRedundancyConfigurator::initialize(int stage)
 {
+    NetworkConfiguratorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         minVlanId = par("minVlanId");
         maxVlanId = par("maxVlanId");
@@ -56,78 +47,20 @@ void StreamRedundancyConfigurator::handleParameterChange(const char *name)
     }
 }
 
-void StreamRedundancyConfigurator::extractTopology(Topology& topology)
-{
-    topology.extractByProperty("networkNode");
-    EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
-
-    if (topology.getNumNodes() == 0)
-        throw cRuntimeError("Empty network!");
-
-    // extract nodes, fill in interfaceTable and routingTable members in node
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        Node *node = (Node *)topology.getNode(i);
-        node->module = node->getModule();
-        node->interfaceTable = dynamic_cast<IInterfaceTable *>(node->module->getSubmodule("interfaceTable"));
-    }
-
-    // extract links and interfaces
-    std::set<NetworkInterface *> interfacesSeen;
-    std::queue<Node *> unvisited; // unvisited nodes in the graph
-    auto rootNode = (Node *)topology.getNode(0);
-    unvisited.push(rootNode);
-    while (!unvisited.empty()) {
-        Node *node = unvisited.front();
-        unvisited.pop();
-        IInterfaceTable *interfaceTable = node->interfaceTable;
-        if (interfaceTable) {
-            // push neighbors to the queue
-            for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-                NetworkInterface *networkInterface = interfaceTable->getInterface(i);
-                if (interfacesSeen.count(networkInterface) == 0) {
-                    // visiting this interface
-                    interfacesSeen.insert(networkInterface);
-                    Topology::LinkOut *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
-                    Node *childNode = nullptr;
-                    if (linkOut) {
-                        childNode = (Node *)linkOut->getRemoteNode();
-                        unvisited.push(childNode);
-                    }
-                    InterfaceInfo *info = new InterfaceInfo(networkInterface);
-                    node->interfaceInfos.push_back(info);
-                }
-            }
-        }
-    }
-    // annotate links with interfaces
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        Node *node = (Node *)topology.getNode(i);
-        for (int j = 0; j < node->getNumOutLinks(); j++) {
-            Topology::LinkOut *linkOut = node->getLinkOut(j);
-            Link *link = (Link *)linkOut;
-            Node *localNode = (Node *)linkOut->getLocalNode();
-            if (localNode->interfaceTable)
-                link->sourceInterfaceInfo = findInterfaceInfo(localNode, localNode->interfaceTable->findInterfaceByNodeOutputGateId(linkOut->getLocalGateId()));
-            Node *remoteNode = (Node *)linkOut->getRemoteNode();
-            if (remoteNode->interfaceTable)
-                link->destinationInterfaceInfo = findInterfaceInfo(remoteNode, remoteNode->interfaceTable->findInterfaceByNodeInputGateId(linkOut->getRemoteGateId()));
-        }
-    }
-}
-
 void StreamRedundancyConfigurator::clearConfiguration()
 {
     streamSenders.clear();
     receivers.clear();
     nextVlanIds.clear();
     assignedVlanIds.clear();
-    topology.clear();
+    topology->clear();
 }
 
 void StreamRedundancyConfigurator::computeConfiguration()
 {
     long initializeStartTime = clock();
-    TIME(extractTopology(topology));
+    topology = new Topology();
+    TIME(extractTopology(*topology));
     TIME(computeStreams());
     printElapsedTime("initialize", initializeStartTime);
 }
@@ -144,8 +77,8 @@ void StreamRedundancyConfigurator::computeStreams()
 
 void StreamRedundancyConfigurator::computeStreamSendersAndReceivers(cValueMap *streamConfiguration)
 {
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        auto node = (Node *)topology.getNode(i);
+    for (int i = 0; i < topology->getNumNodes(); i++) {
+        auto node = (Node *)topology->getNode(i);
         auto networkNode = node->module;
         auto networkNodeName = networkNode->getFullName();
         cValueArray *paths = check_and_cast<cValueArray *>(streamConfiguration->get("paths").objectValue());
@@ -178,8 +111,8 @@ void StreamRedundancyConfigurator::computeStreamSendersAndReceivers(cValueMap *s
 
 void StreamRedundancyConfigurator::computeStreamEncodings(cValueMap *streamConfiguration)
 {
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        auto node = (Node *)topology.getNode(i);
+    for (int i = 0; i < topology->getNumNodes(); i++) {
+        auto node = (Node *)topology->getNode(i);
         auto networkNode = node->module;
         auto networkNodeName = networkNode->getFullName();
         std::string sourceNetworkNodeName = streamConfiguration->get("source");
@@ -208,8 +141,8 @@ void StreamRedundancyConfigurator::computeStreamEncodings(cValueMap *streamConfi
 
 void StreamRedundancyConfigurator::computeStreamPolicyConfigurations(cValueMap *streamConfiguration)
 {
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        auto node = (Node *)topology.getNode(i);
+    for (int i = 0; i < topology->getNumNodes(); i++) {
+        auto node = (Node *)topology->getNode(i);
         auto networkNode = node->module;
         auto networkNodeName = networkNode->getFullName();
         std::string sourceNetworkNodeName = streamConfiguration->get("source");
@@ -262,8 +195,8 @@ void StreamRedundancyConfigurator::computeStreamPolicyConfigurations(cValueMap *
 
 void StreamRedundancyConfigurator::configureStreams()
 {
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        auto node = (Node *)topology.getNode(i);
+    for (int i = 0; i < topology->getNumNodes(); i++) {
+        auto node = (Node *)topology->getNode(i);
         configureStreams(node);
     }
 }
@@ -372,7 +305,7 @@ std::vector<std::vector<std::string>> StreamRedundancyConfigurator::getPathFragm
                 for (int k = 0; k < path->size(); k++) {
                     auto nodeName = path->get(k).stringValue();
                     auto module = getParentModule()->getSubmodule(nodeName);
-                    Node *node = (Node *)topology.getNodeFor(module);
+                    Node *node = (Node *)topology->getNodeFor(module);
                     bool isMerging = false;
                     for (auto streamMerging : node->streamMergings)
                         if (streamMerging.outputStream == streamName)
@@ -397,41 +330,6 @@ std::vector<std::vector<std::string>> StreamRedundancyConfigurator::getPathFragm
         }
     }
     throw cRuntimeError("Stream not found");
-}
-
-StreamRedundancyConfigurator::Link *StreamRedundancyConfigurator::findLinkIn(Node *node, const char *neighbor)
-{
-    for (int i = 0; i < node->getNumInLinks(); i++)
-        if (!strcmp(node->getLinkIn(i)->getRemoteNode()->getModule()->getFullName(), neighbor))
-            return check_and_cast<Link *>(static_cast<Topology::Link *>(node->getLinkIn(i)));
-    return nullptr;
-}
-
-StreamRedundancyConfigurator::Link *StreamRedundancyConfigurator::findLinkOut(Node *node, const char *neighbor)
-{
-    for (int i = 0; i < node->getNumOutLinks(); i++)
-        if (!strcmp(node->getLinkOut(i)->getRemoteNode()->getModule()->getFullName(), neighbor))
-            return check_and_cast<Link *>(static_cast<Topology::Link *>(node->getLinkOut(i)));
-    return nullptr;
-}
-
-Topology::LinkOut *StreamRedundancyConfigurator::findLinkOut(Node *node, int gateId)
-{
-    for (int i = 0; i < node->getNumOutLinks(); i++)
-        if (node->getLinkOut(i)->getLocalGateId() == gateId)
-            return node->getLinkOut(i);
-    return nullptr;
-}
-
-StreamRedundancyConfigurator::InterfaceInfo *StreamRedundancyConfigurator::findInterfaceInfo(Node *node, NetworkInterface *networkInterface)
-{
-    if (networkInterface == nullptr)
-        return nullptr;
-    for (auto& interfaceInfo : node->interfaceInfos)
-        if (interfaceInfo->networkInterface == networkInterface)
-            return interfaceInfo;
-
-    return nullptr;
 }
 
 } // namespace inet
