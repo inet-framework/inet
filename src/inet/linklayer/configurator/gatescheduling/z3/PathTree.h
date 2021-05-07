@@ -31,7 +31,7 @@ using namespace z3;
 
 /**
  * [Class]: PathTree
- * [Usage]: Used to specify the path on publish subscribe
+ * Used to specify the path on publish subscribe
  * flows. It is basically a tree of path nodes with a few
  * simple and classic tree methods.
  *
@@ -42,7 +42,7 @@ class INET_API PathTree {
     std::vector<PathNode *> *leaves = new std::vector<PathNode *>();
 
     /**
-     * [Usage]: Adds a root node to the pathTree.
+     * Adds a root node to the pathTree.
      * The user must give a device or switch to
      * be the root of the tree.
      *
@@ -58,7 +58,7 @@ class INET_API PathTree {
     }
 
     /**
-     * [Usage]: Given a new PathNode object, make it the
+     * Given a new PathNode object, make it the
      * new root of this pathTree. Old root becomes child
      * of new root.
      *
@@ -74,7 +74,7 @@ class INET_API PathTree {
     }
 
     /**
-     * [Usage]: Adds all leaves to the leaves std::vector starting
+     * Adds all leaves to the leaves std::vector starting
      * from the node given as a parameter. In the way it is
      * implemented, must be used only once.
      *
@@ -91,7 +91,7 @@ class INET_API PathTree {
     }
 
     /**
-     * [Usage]: Returns an std::vector with all the nodes of the
+     * Returns an std::vector with all the nodes of the
      * pathTree.
      *
      * @return      std::vector with all leaves as PathNodes

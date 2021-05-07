@@ -33,7 +33,7 @@ class FlowFragment;
 
 /**
  * [Class]: Port
- * [Usage]: This class is used to implement the logical role of a
+ * This class is used to implement the logical role of a
  * port of a switch for the schedule. The core of the scheduling
  * process happens here. Simplifying the whole process, the other
  * classes in this project are used to create, manage and break
@@ -76,7 +76,7 @@ class INET_API Port {
     std::shared_ptr<expr> portSpeedZ3;
 
     /**
-     * [Usage]: Overloaded constructor of this class. Will start
+     * Overloaded constructor of this class. Will start
      * the port with setting properties given as parameters.
      *
      * @param name                  Logical index of the port for z3
@@ -108,7 +108,7 @@ class INET_API Port {
 
 
     /**
-     * [Usage]: After setting all the numeric input values of the class,
+     * After setting all the numeric input values of the class,
      * generates the z3 equivalent of these values and creates any extra
      * variable needed.
      *
@@ -127,7 +127,7 @@ class INET_API Port {
     }
 
     /**
-     * [Usage]: This method is responsible for setting up the scheduling rules related
+     * This method is responsible for setting up the scheduling rules related
      * to the cycle of this port. Assertions about how the time slots are supposed to be
      * are also specified here.
      *
@@ -137,7 +137,7 @@ class INET_API Port {
     void setUpCycleRules(solver& solver, context& ctx);
 
     /**
-     * [Usage]: Given a single flow fragment, establish the scheduling rules
+     * Given a single flow fragment, establish the scheduling rules
      * regarding its proper slot, referencing it using the fragment's priority.
      *
      *
@@ -148,7 +148,7 @@ class INET_API Port {
     void setupTimeSlots(solver& solver, context& ctx, FlowFragment *flowFrag);
 
     /**
-     * [Usage]: Sets the core scheduling rules for a certain number of
+     * Sets the core scheduling rules for a certain number of
      * packets of a flow fragment. The number of packets is specified
      * by the packetUpperBound range variable. The scheduler will attempt
      * to fit these packets within a certain number of cycles.
@@ -160,7 +160,7 @@ class INET_API Port {
     void setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowFrag);
 
     /**
-     * [Usage]: Use in order to enable the best effort traffic reservation
+     * Use in order to enable the best effort traffic reservation
      * constraint.
      *
      * @param solver    solver object
@@ -169,7 +169,7 @@ class INET_API Port {
     void setupBestEffort(solver& solver, context& ctx);
 
     /**
-     * [Usage]: Method used to obtain the greatest common
+     * Method used to obtain the greatest common
      * divisor of two values.
      *
      * @param a        First value
@@ -185,7 +185,7 @@ class INET_API Port {
     }
 
     /**
-     * [Usage]: Retrieves the value of the greatest common divisor
+     * Retrieves the value of the greatest common divisor
      * of all the values in an array.
      *
      * @param arr    Array of double values
@@ -201,7 +201,7 @@ class INET_API Port {
     }
 
     /**
-     * [Usage]: Retrieves the least common multiple of all values in
+     * Retrieves the least common multiple of all values in
      * an array.
      *
      * @param arr         Array of double values
@@ -247,7 +247,7 @@ class INET_API Port {
     }
 
     /**
-     * [Usage]: Set up the cycle duration and number of packets and slots
+     * Set up the cycle duration and number of packets and slots
      * to be scheduled according to the hyper cycle approach.
      *
      * @param solver    solver object
@@ -291,7 +291,7 @@ class INET_API Port {
     }
 
     /**
-     * [Usage]: If the port is configured to use a specific automated
+     * If the port is configured to use a specific automated
      * application period methodology, it will configure its cycle size.
      * Also calls the toZ3 method for the cycle
      *
@@ -316,7 +316,7 @@ class INET_API Port {
     }
 
     /**
-     * [Usage]: Iterates over the slots adding a constraint that states that
+     * Iterates over the slots adding a constraint that states that
      * if no packet its transmitted inside it, its size must be 0. Can be used
      * to filter out non-used slots and avoid losing bandwidth.
      *
@@ -326,7 +326,7 @@ class INET_API Port {
     void zeroOutNonUsedSlots(solver& solver, context& ctx);
 
     /**
-     * [Usage]: Calls the set of functions that will set the z3 rules
+     * Calls the set of functions that will set the z3 rules
      * regarding the cycles, time slots, priorities and timing of packets.
      *
      * @param solver        z3 solver object used to discover the variables' values
@@ -363,7 +363,7 @@ class INET_API Port {
     }
 
     /**
-     * [Usage]: Retrieves the departure time of a packet from a flow fragment
+     * Retrieves the departure time of a packet from a flow fragment
      * specified by the index given as a parameter. The departure time is the
      * time when a packet leaves its previous node with this switch as a destination.
      *
@@ -389,7 +389,7 @@ class INET_API Port {
     }
 
     /**
-     * [Usage]: Retrieves the departure time of a packet from a flow fragment
+     * Retrieves the departure time of a packet from a flow fragment
      * specified by the index given as a parameter. The departure time is the
      * time when a packet leaves its previous node with this switch as a destination.
      *
@@ -401,7 +401,7 @@ class INET_API Port {
     std::shared_ptr<expr> departureTime(context& ctx, int auxIndex, FlowFragment *flowFrag);
 
     /**
-     * [Usage]: Retrieves the arrival time of a packet from a flow fragment
+     * Retrieves the arrival time of a packet from a flow fragment
      * specified by the index given as a parameter. The arrival time is the
      * time when a packet reaches this switch's port.
      *
@@ -423,7 +423,7 @@ class INET_API Port {
     */
 
     /**
-     * [Usage]: Retrieves the arrival time of a packet from a flow fragment
+     * Retrieves the arrival time of a packet from a flow fragment
      * specified by the index given as a parameter. The arrival time is the
      * time when a packet reaches this switch's port.
      *
@@ -441,7 +441,7 @@ class INET_API Port {
     }
 
     /**
-     * [Usage]: Retrieves the scheduled time of a packet from a flow fragment
+     * Retrieves the scheduled time of a packet from a flow fragment
      * specified by the index given as a parameter. The scheduled time is the
      * time when a packet leaves this switch for its next destination.
      *
@@ -463,7 +463,7 @@ class INET_API Port {
     */
 
     /**
-     * [Usage]: Retrieves the scheduled time of a packet from a flow fragment
+     * Retrieves the scheduled time of a packet from a flow fragment
      * specified by the index given as a parameter. The scheduled time is the
      * time when a packet leaves this switch for its next destination.
      *
@@ -480,7 +480,7 @@ class INET_API Port {
     std::shared_ptr<expr> scheduledTime(context& ctx, int auxIndex, FlowFragment *flowFrag);
 
     /**
-     * [Usage]: Returns true if the port uses an automated application period
+     * Returns true if the port uses an automated application period
      * methodology.
      *
      * @return bool value. True if automated application period methodology is used, false elsewhise
@@ -490,7 +490,7 @@ class INET_API Port {
     }
 
     /**
-     * [Usage]: From the primitive values retrieved in the object
+     * From the primitive values retrieved in the object
      * deserialization process, instantiate the z3 objects that represent
      * the same properties.
      *

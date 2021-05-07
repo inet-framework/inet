@@ -33,7 +33,7 @@ using namespace z3;
 
 /**
  * [Class]: Cycle
- * [Usage]: Contains all properties of a TSN cycle.
+ * Contains all properties of a TSN cycle.
  * After the specification of its properties through
  * user input, the toZ3 method can be used to convert
  * the values to z3 variables and query the unknown
@@ -91,7 +91,7 @@ class INET_API Cycle {
     int numOfSlots = 1;
 
     /**
-     * [Usage]: Overloaded method of this class. Will create
+     * Overloaded method of this class. Will create
      * an object setting up the minimum and maximum cycle time,
      * the first cycle start and the maximum duration of a
      * priority slot. Other constructors either are deprecated
@@ -117,7 +117,7 @@ class INET_API Cycle {
     }
 
     /**
-     * [Usage]: Overloaded method of this class. Will create
+     * Overloaded method of this class. Will create
      * an object setting up the minimum and maximum cycle time,
      * the first cycle start and the maximum duration of a
      * priority slot.
@@ -139,7 +139,7 @@ class INET_API Cycle {
     }
 
     /**
-     * [Usage]: Overloaded method of this class. Will create
+     * Overloaded method of this class. Will create
      * an object setting up the minimum and maximum cycle time,
      * the first cycle start and the maximum duration of a
      * priority slot. These properties must be given as z3
@@ -163,7 +163,7 @@ class INET_API Cycle {
     }
 
     /**
-     * [Usage]: After setting all the numeric input values of the class,
+     * After setting all the numeric input values of the class,
      * generates the z3 equivalent of these values and creates any extra
      * variable needed.
      *
@@ -194,7 +194,7 @@ class INET_API Cycle {
 
 
     /**
-     * [Usage]: Returns the time of the start of a cycle
+     * Returns the time of the start of a cycle
      * specified by its index. The index is given as a z3
      * variable
      *
@@ -209,7 +209,7 @@ class INET_API Cycle {
     }
 
     /**
-     * [Usage]: Returns the time of the start of a cycle
+     * Returns the time of the start of a cycle
      * specified by its index. The index is given as integer
      *
      * @param ctx       context containing the z3 environment
@@ -226,7 +226,7 @@ class INET_API Cycle {
 
 
     /**
-     * [Usage]: After generating the schedule, the z3 values are
+     * After generating the schedule, the z3 values are
      * converted to doubles and integers. The used slots are now
      * placed on a arrayList, and so are the slot start and duration.
      *
@@ -243,7 +243,7 @@ class INET_API Cycle {
     }
 
     /**
-     * [Usage]: From the loaded primitive values of the class
+     * From the loaded primitive values of the class
      * obtained in the deserialization process, initialize the
      * z3 variables.
      *

@@ -33,7 +33,7 @@ using namespace z3;
 
 /**
  * [Class]: Flow
- * [Usage]: This class specifies a flow (or a stream, in other
+ * This class specifies a flow (or a stream, in other
  * words) of packets from one source to one or multiple destinations.
  * It contains references for all the data related to this flow,
  * including path, timing, packet properties and so on and so forth.
@@ -82,14 +82,14 @@ class INET_API Flow {
     bool useCustomValues = false;
 
     /**
-     * [Usage]: Default constructor method for flow objects.
+     * Default constructor method for flow objects.
      * Must be explicit due to call on child class.
      */
     Flow() {
     }
 
     /**
-     * [Usage]: Overloaded constructor method of a flow.
+     * Overloaded constructor method of a flow.
      * Specifies the type of the flow.
      *
      * @param type      Value specifying the type of the flow (0 - Unicast; 1 - Publish subscribe)
@@ -116,7 +116,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: Overloaded constructor method of a flow.
+     * Overloaded constructor method of a flow.
      * Specifies the type of the flow.
      *
      * @param type      Value specifying the type of the flow (0 - Unicast; 1 - Publish subscribe)
@@ -147,7 +147,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: Adds a switch to the path of switches of the flow
+     * Adds a switch to the path of switches of the flow
      *
      * @param swt   Switch to be added to the list
      */
@@ -156,7 +156,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: Most of the unicast functionalities are not supported anymore.
+     * Most of the unicast functionalities are not supported anymore.
      * At the beginning of the scheduling process, convert the to a multicast
      * structure without a branching path.
      *
@@ -185,7 +185,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: After setting all the numeric input values of the class,
+     * After setting all the numeric input values of the class,
      * generates the z3 equivalent of these values and creates any extra
      * variable needed.
      *
@@ -241,7 +241,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: Given a node of a tree, the method iterate over its children.
+     * Given a node of a tree, the method iterate over its children.
      * For each grand-child, a flow fragment is created. This represents the
      * departure time from the current node, the arrival time in the child and
      * the scheduled time (departure time for grand-child).
@@ -252,7 +252,7 @@ class INET_API Flow {
     FlowFragment *nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag);
 
     /**
-     * [Usage]: On a unicast flow, the path is a simple std::vector.
+     * On a unicast flow, the path is a simple std::vector.
      * Each switch in the path will be given as a parameter for this function
      * so a flow fragment for each hop on the path can be created.
      *
@@ -273,7 +273,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: Given an end device of a publish subscriber flow, or in other
+     * Given an end device of a publish subscriber flow, or in other
      * words, a leaf in the pathTree, returns the flow fragments used to go from
      * the root to the leaf.
      *
@@ -322,7 +322,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: Given an end device of a publish subscriber flow, or in other
+     * Given an end device of a publish subscriber flow, or in other
      * words, a leaf in the pathTree, returns the nodes of the path used to go from
      * the root to the leaf.
      *
@@ -367,7 +367,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: On a unicast flow, returns the departure time
+     * On a unicast flow, returns the departure time
      * of a certain packet in a certain hop specified by the
      * parameters.
      *
@@ -378,7 +378,7 @@ class INET_API Flow {
     double getDepartureTime(int hop, int packetNum);
 
     /**
-     * [Usage]: Iterate over the switches in the path of the flow.
+     * Iterate over the switches in the path of the flow.
      * Adds its periodicity to the periodicity list in the switch.
      * This will be used for the automated application cycles.
      */
@@ -415,7 +415,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: On a publish subscribe flow, returns the departure time
+     * On a publish subscribe flow, returns the departure time
      * of a certain packet in a certain hop that reaches a certain device.
      * The specifications of the packet and destination are given as
      * parameters.
@@ -428,7 +428,7 @@ class INET_API Flow {
     double getDepartureTime(std::string deviceName, int hop, int packetNum);
 
     /**
-     * [Usage]: On a publish subscribe flow, returns the departure time
+     * On a publish subscribe flow, returns the departure time
      * of a certain packet in a certain hop that reaches a certain device.
      * The specifications of the packet and destination are given as
      * parameters.
@@ -441,7 +441,7 @@ class INET_API Flow {
     double getDepartureTime(Device *targetDevice, int hop, int packetNum);
 
     /**
-     * [Usage]: On a unicast flow, returns the arrival time
+     * On a unicast flow, returns the arrival time
      * of a certain packet in a certain hop specified by the
      * parameters.
      *
@@ -452,7 +452,7 @@ class INET_API Flow {
     double getArrivalTime(int hop, int packetNum);
 
     /**
-     * [Usage]: On a publish subscribe flow, returns the arrival time
+     * On a publish subscribe flow, returns the arrival time
      * of a certain packet in a certain hop that reaches a certain
      * device. The specifications of the packet and destination are
      * given as parameters.
@@ -465,7 +465,7 @@ class INET_API Flow {
     double getArrivalTime(std::string deviceName, int hop, int packetNum);
 
     /**
-     * [Usage]: On a publish subscribe flow, returns the arrival time
+     * On a publish subscribe flow, returns the arrival time
      * of a certain packet in a certain hop that reaches a certain device.
      * The specifications of the packet and destination are given as
      * parameters.
@@ -478,7 +478,7 @@ class INET_API Flow {
     double getArrivalTime(Device *targetDevice, int hop, int packetNum);
 
     /**
-     * [Usage]: On a unicast flow, returns the scheduled time
+     * On a unicast flow, returns the scheduled time
      * of a certain packet in a certain hop specified by the
      * parameters.
      *
@@ -489,7 +489,7 @@ class INET_API Flow {
     double getScheduledTime(int hop, int packetNum);
 
     /**
-     * [Usage]: On a publish subscribe flow, returns the scheduled time
+     * On a publish subscribe flow, returns the scheduled time
      * of a certain packet in a certain hop that reaches a certain
      * device. The specifications of the packet and destination are
      * given as parameters.
@@ -502,7 +502,7 @@ class INET_API Flow {
     double getScheduledTime(std::string deviceName, int hop, int packetNum);
 
     /**
-     * [Usage]: On a publish subscribe flow, returns the scheduled time
+     * On a publish subscribe flow, returns the scheduled time
      * of a certain packet in a certain hop that reaches a certain device.
      * The specifications of the packet and destination are given as
      * parameters.
@@ -515,7 +515,7 @@ class INET_API Flow {
     double getScheduledTime(Device *targetDevice, int hop, int packetNum);
 
     /**
-     * [Usage]: Returns the average latency from this flow.
+     * Returns the average latency from this flow.
      * On a unicast flow, gets the last scheduled time of
      * every packet and subtracts by the first departure
      * time of same packet, then divides by the quantity
@@ -531,7 +531,7 @@ class INET_API Flow {
     double getAverageLatencyToDevice(Device *dev);
 
     /**
-     * [Usage]: Returns the average jitter of this flow.
+     * Returns the average jitter of this flow.
      * Each absolute value resulting of the difference between
      * the last scheduled time, the first departure time and the
      * average latency of the flow is added up to a variable.
@@ -577,7 +577,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: From the path tree, retrieve the average jitter of
+     * From the path tree, retrieve the average jitter of
      * the stream aimed at a specific device.
      *
      * @param dev         Specific end-device of the flow to retrieve the jitter
@@ -586,7 +586,7 @@ class INET_API Flow {
     double getAverageJitterToDevice(Device *dev);
 
     /**
-     * [Usage]: Gets the Z3 variable containing the latency
+     * Gets the Z3 variable containing the latency
      * of the flow for a certain packet specified by the index.
      *
      * @param solver    solver in which the rules of the problem will be added
@@ -597,7 +597,7 @@ class INET_API Flow {
     std::shared_ptr<expr> getLatencyZ3(solver& solver, context &ctx, int index);
 
     /**
-     * [Usage]: Gets the Z3 variable containing the latency
+     * Gets the Z3 variable containing the latency
      * of the flow for a certain packet specified by the index
      * for a certain device.
      *
@@ -610,7 +610,7 @@ class INET_API Flow {
     std::shared_ptr<expr> getLatencyZ3(solver& solver, Device *dev, context &ctx, int index);
 
     /**
-     * [Usage]: Recursively creates values to sum the z3 latencies
+     * Recursively creates values to sum the z3 latencies
      * of the flow from 0 up to a certain packet.
      *
      * @param solver    solver in which the rules of the problem will be added
@@ -627,7 +627,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: Recursively creates values to sum the z3 latencies
+     * Recursively creates values to sum the z3 latencies
      * of the flow from 0 up to a certain packet for a certain device.
      *
      * @param dev       Destination of the packet
@@ -645,7 +645,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: Returns the sum of all latency for all destinations
+     * Returns the sum of all latency for all destinations
      * of the flow for the [index] number of packets sent.
      *
      * @param solver    solver in which the rules of the problem will be added
@@ -666,7 +666,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: Returns the sum of all latency for all destinations
+     * Returns the sum of all latency for all destinations
      * of the flow for the [index] number of packets sent.
      *
      * @param solver    solver in which the rules of the problem will be added
@@ -690,7 +690,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: Retrieves the average latency for one of the subscribers
+     * Retrieves the average latency for one of the subscribers
      * of the flow.
      *
      * @param dev         Subscriber to which the average latency will be calculated
@@ -707,7 +707,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: Returns the z3 variable containing the jitter of that
+     * Returns the z3 variable containing the jitter of that
      * packet.
      *
      *
@@ -723,7 +723,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: Returns the z3 variable containing the jitter of that
+     * Returns the z3 variable containing the jitter of that
      * packet.
      *
      *
@@ -735,7 +735,7 @@ class INET_API Flow {
     std::shared_ptr<expr> getJitterZ3(Device *dev, solver& solver, context &ctx, int index);
 
     /**
-     * [Usage]: Returns the sum of all jitter from packet 0
+     * Returns the sum of all jitter from packet 0
      * to packet of the given index as a Z3 variable.
      *
      * @param solver    solver in which the rules of the problem will be added
@@ -752,7 +752,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: Returns the sum of all jitter from packet 0
+     * Returns the sum of all jitter from packet 0
      * to packet of the given index to a specific destination
      * on a pub sub flow as a Z3 variable.
      *
@@ -771,7 +771,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: Returns the sum of all jitter for all destinations
+     * Returns the sum of all jitter for all destinations
      * of the flow from 0 to the [index] packet.
      *
      * @param solver    solver in which the rules of the problem will be added
@@ -792,7 +792,7 @@ class INET_API Flow {
     }
 
     /**
-     * [Usage]: Search through the flow fragments in order to find the highest
+     * Search through the flow fragments in order to find the highest
      * number of packets scheduled in a fragment. This is useful to set the hard
      * constraint for all packets scheduled within the flow.
      */

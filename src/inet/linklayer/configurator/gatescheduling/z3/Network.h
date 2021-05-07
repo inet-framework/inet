@@ -33,7 +33,7 @@ using namespace z3;
 
 /**
  * [Class]: Network
- * [Usage]: Using this class, the user can specify the network
+ * Using this class, the user can specify the network
  * topology using switches and flows. The network will be given
  * to the scheduler generator so it can iterate over the network's
  * flows and switches setting up the scheduling rules.
@@ -55,7 +55,7 @@ class INET_API Network {
     std::shared_ptr<expr> jitterUpperBoundRangeZ3;
 
     /**
-     * [Usage]: Default constructor method of class Network. Creates
+     * Default constructor method of class Network. Creates
      * the std::vectors for the switches and flows. Sets up the default
      * time to travel for 2 (Needs revision).
      */
@@ -67,7 +67,7 @@ class INET_API Network {
     }
 
     /**
-     * [Usage]: Default constructor method of class Network. Creates
+     * Default constructor method of class Network. Creates
      * the std::vectors for the switches and flows. Sets up the default
      * time to travel for 2 (Needs revision).
      */
@@ -78,7 +78,7 @@ class INET_API Network {
     }
 
     /**
-     * [Usage]: Overloaded constructor method of class Network. Will
+     * Overloaded constructor method of class Network. Will
      * create a network with the given std::vectors for switches, flows
      * and time to travel.
      *
@@ -93,7 +93,7 @@ class INET_API Network {
     }
 
     /**
-     * [Usage]: Iterates over the flows of the network, assuring that
+     * Iterates over the flows of the network, assuring that
      * each flow will have its hard constraint established.
      *
      * @param solver    z3 solver object used to discover the variables' values
@@ -197,7 +197,7 @@ class INET_API Network {
     }
 
     /**
-     * [Usage]: From the primitive values retrieved in the object
+     * From the primitive values retrieved in the object
      * deserialization process, instantiate the z3 objects that represent
      * the same properties.
      *
