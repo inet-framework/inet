@@ -233,8 +233,8 @@ class INET_API Network {
 
         /*
         for (Switch swt : getSwitches()) {
-            if (dynamic_cast<TSNSwitch *>(swt)) {
-                ((TSNSwitch *) swt).loadZ3(ctx, solver);
+            if (dynamic_cast<Switch *>(swt)) {
+                ((Switch *) swt).loadZ3(ctx, solver);
             }
         }
         */

@@ -190,11 +190,11 @@ void Z3GateSchedulingConfigurator::generateSchedule(Network *net) const
 //                        EV_DEBUG << std::string("    Time to Travel: ") << auxSwt->getTimeToTravel();
 //                        EV_DEBUG << std::string("    Transmission time: ") << auxSwt->getTransmissionTime();
 //                           EV_DEBUG << "    Cycle information -" << std::endl;
-//                           EV_DEBUG << std::string("        First cycle start: ") + model.eval(((TSNSwitch *)auxSwt).getCycleStart(), false));
-//                           EV_DEBUG << std::string("        Cycle duration: ") + model.eval(((TSNSwitch *)auxSwt).getCycleDuration(), false));
+//                           EV_DEBUG << std::string("        First cycle start: ") + model.eval(((Switch *)auxSwt).getCycleStart(), false));
+//                           EV_DEBUG << std::string("        Cycle duration: ") + model.eval(((Switch *)auxSwt).getCycleDuration(), false));
             EV_DEBUG << std::endl;
             /*
-            for (Port port : ((TSNSwitch *)auxSwt).getPorts()) {
+            for (Port port : ((Switch *)auxSwt).getPorts()) {
                 EV_DEBUG << std::string("        Port name (Virtual Index): ") + port->getName());
                 EV_DEBUG << std::string("        First cycle start: ") + model.eval(port->getCycle()->getFirstCycleStartZ3(), false));
                 EV_DEBUG << std::string("        Cycle duration: ") + model.eval(port->getCycle()->getCycleDurationZ3(), false));
@@ -373,9 +373,9 @@ void Z3GateSchedulingConfigurator::writePathTree(PathNode *pathNode, model& mode
                         EV_DEBUG << std::string("On " + ffrag->getName() + std::string(" - ")) <<
                          ((Switch *)child->getNode())->departureTime(ctx, i, ffrag)->to_string() << std::string(" - ") <<
                            ((Switch *)child->getNode())->scheduledTime(ctx, i, ffrag)->to_string() << std::endl;
-                    // EV_DEBUG << ((TSNSwitch *)child->getNode())->departureTime(ctx, i, ffrag).to_string() << std::endl;
-                    // EV_DEBUG << ((TSNSwitch *)child->getNode())->arrivalTime(ctx, i, ffrag).to_string() << std::endl;
-                    // EV_DEBUG << ((TSNSwitch *)child->getNode())->scheduledTime(ctx, i, ffrag).to_string() << std::endl;
+                    // EV_DEBUG << ((Switch *)child->getNode())->departureTime(ctx, i, ffrag).to_string() << std::endl;
+                    // EV_DEBUG << ((Switch *)child->getNode())->arrivalTime(ctx, i, ffrag).to_string() << std::endl;
+                    // EV_DEBUG << ((Switch *)child->getNode())->scheduledTime(ctx, i, ffrag).to_string() << std::endl;
 
                     if (i < ffrag->getParent()->getNumOfPacketsSent()) {
                         EV_DEBUG << std::string("          (") << std::to_string(i) << std::string(") Fragment departure time: ") << stringToFloat(model.eval(*((Switch *) child->getNode())->departureTime(ctx, i, ffrag), false).to_string()) << std::endl;
