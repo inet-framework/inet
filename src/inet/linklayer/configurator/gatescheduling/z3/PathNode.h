@@ -33,7 +33,7 @@ class FlowFragment;
 
 /**
  * [Class]: PathNode
- * [Usage]: Contains the data needed in each node of
+ * Contains the data needed in each node of
  * a pathTree. Can reference a father, possesses an
  * device or switch, a list of children and a flow
  * fragment for each children in case of being a switch.
@@ -47,7 +47,7 @@ class INET_API PathNode : public cObject {
     std::vector<FlowFragment *> flowFragments;
 
     /**
-     * [Usage]: Overloaded constructor method of the this class.
+     * Overloaded constructor method of the this class.
      * Receives an object that must be either a device or a switch.
      * In case of switch, creates a list of children and flowFragments.
      *
@@ -70,7 +70,7 @@ class INET_API PathNode : public cObject {
     }
 
     /**
-     * [Usage]: Adds a child to this node.
+     * Adds a child to this node.
      *
      * @param node      Object representing the child device or switch
      * @return          A reference to the newly created node

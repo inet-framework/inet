@@ -33,7 +33,7 @@ using namespace z3;
 
 /**
  * [Class]: FlowFragment
- * [Usage]: This class is used to represent a fragment of a flow.
+ * This class is used to represent a fragment of a flow.
  * Simply put, a flow fragment is represents the flow it belongs to
  * regarding a specific switch in the path. With this approach,
  * a flow, regardless of its type, can be broken into flow fragments
@@ -70,7 +70,7 @@ class INET_API FlowFragment : public Flow {
     std::vector<double> scheduledTime;
 
     /**
-     * [Usage]: Overloaded constructor method of this class. Receives a
+     * Overloaded constructor method of this class. Receives a
      * flow as a parameter so it can retrieve properties of the flows
      * that it belongs to.
      *

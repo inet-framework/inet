@@ -33,7 +33,7 @@ using namespace z3;
 
 /**
  * [Class]: Device
- * [Usage]: Specifies properties of device nodes in the network.
+ * Specifies properties of device nodes in the network.
  * They can be used as sending devices and receiving devices.
  * Their properties specify part of the core of a flow.
  */
@@ -55,7 +55,7 @@ class INET_API Device : public cObject {
     std::shared_ptr<expr> flowPriority;
 
     /**
-     * [Usage]: Default constructor method of a device.
+     * Default constructor method of a device.
      * Sets the newly created device name.
      */
     Device() {
@@ -63,7 +63,7 @@ class INET_API Device : public cObject {
     }
 
     /**
-     * [Usage]: Overloaded constructor method of a device.
+     * Overloaded constructor method of a device.
      * Can create a device specifying its properties through
      * double values. These values will later be converted tostd::to_string(
      * z3 values. Used for simplified configurations. Other
@@ -84,7 +84,7 @@ class INET_API Device : public cObject {
     }
 
     /**
-     * [Usage]: Overloaded constructor method of a device.
+     * Overloaded constructor method of a device.
      * Can create a device specifying its properties through
      * double values. These values will later be converted to
      * z3 values.
@@ -109,7 +109,7 @@ class INET_API Device : public cObject {
     }
 
     /**
-     * [Usage]: Overloaded constructor method of a device.
+     * Overloaded constructor method of a device.
      * Can create a device specifying its properties through
      * double values. These values will later be converted to
      * z3 values.
@@ -133,7 +133,7 @@ class INET_API Device : public cObject {
 
 
     /**
-     * [Usage]: Overloaded constructor method of a device.
+     * Overloaded constructor method of a device.
      * Can create a device specifying its properties through
      * z3 values.
      *
@@ -160,7 +160,7 @@ class INET_API Device : public cObject {
     }
 
     /**
-     * [Usage]: After setting all the numeric input values of the class,
+     * After setting all the numeric input values of the class,
      * generates the z3 equivalent of these values and creates any extra
      * variable needed.
      *
