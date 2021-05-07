@@ -804,10 +804,6 @@ class INET_API Flow {
         }
     }
 
-    /*
-     * GETTERS AND SETTERS:
-     */
-
     Device *getStartDevice() {
         return startDevice;
     }

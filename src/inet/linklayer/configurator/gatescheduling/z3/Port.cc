@@ -240,60 +240,6 @@ void Port::setupDevPacketTimes(solver& solver, context& ctx, FlowFragment *flowF
                                             (cycle->slotDurationZ3(ctx, *flowFrag->getFragmentPriorityZ3(), *indexZ3) +
                                             cycle->cycleStartZ3(ctx, 0))));
                 }
-
-                /**
-                * THE CODE BELLOW HAS ISSUES REGARDING NOT COVERING ALL CASES (ALLOWS DELAY).
-                * REVIEW LATER.
-
-                if (j < cycleUpperBoundRange - 1 && index == cycle->getNumOfSlots() - 1) {
-                    auxExp2 = mkAnd((expr) auxExp2, // Arrived after slot end constraint
-                            implies(
-                                mkAnd(
-                                    mkGt(
-                                        arrivalTime(ctx, i, flowFrag),
-                                        mkSub(
-                                            mkAdd(
-                                                cycle->slotStartZ3(ctx, flowFrag->getFlowPriority(), indexZ3),
-                                                cycle->slotDurationZ3(ctx, flowFrag->getFlowPriority(), indexZ3),
-                                                cycle->cycleStartZ3(ctx, j)),
-                                            transmissionTimeZ3)),
-                                    mkLe(
-                                        arrivalTime(ctx, i, flowFrag),
-                                        mkAdd(
-                                            cycle->cycleStartZ3(ctx, j),
-                                            cycle->getCycleDurationZ3()))),
-
-                                mkEq(
-                                    scheduledTime(ctx, i, flowFrag),
-                                    mkAdd(
-                                        mkAdd(
-                                            cycle->slotStartZ3(ctx, flowFrag->getFlowPriority(), ctx.int_val(0)),
-                                            cycle->cycleStartZ3(ctx, j + 1)),
-                                        transmissionTimeZ3))));
-                } else if (j == cycleUpperBoundRange - 1 && index == cycle->getNumOfSlots() - 1) {
-                    auxExp2 = mkAnd((expr) auxExp2,
-                            implies(
-                                mkAnd(
-                                    mkGt(
-                                        arrivalTime(ctx, i, flowFrag),
-                                        mkSub(
-                                            mkAdd(
-                                                cycle->slotStartZ3(ctx, flowFrag->getFlowPriority(), indexZ3),
-                                                cycle->slotDurationZ3(ctx, flowFrag->getFlowPriority(), indexZ3),
-                                                cycle->cycleStartZ3(ctx, j)),
-                                            transmissionTimeZ3)),
-                                    mkLe(
-                                        arrivalTime(ctx, i, flowFrag),
-                                        mkAdd(
-                                            cycle->cycleStartZ3(ctx, j),
-                                            cycle->getCycleDurationZ3()))),
-
-                                mkEq(
-                                    scheduledTime(ctx, i, flowFrag),
-                                    arrivalTime(ctx, i, flowFrag))
-));
-                }
-                */
             }
 
             //auxExp = mkOr((expr)ctx.bool_val(false)(), (expr)auxExp2);

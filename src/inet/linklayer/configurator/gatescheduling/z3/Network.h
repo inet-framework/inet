@@ -122,7 +122,6 @@ class INET_API Network {
          *  departure time of the first child of the root lesser than the hard
          *  constraint
          */
-
         for (Flow *flw : getFlows()) {
             flw->setNumberOfPacketsSent(flw->getPathTree()->getRoot());
 
@@ -208,7 +207,6 @@ class INET_API Network {
 
         // On all network flows: Data given by the user will be converted to z3 values
         for (Flow *flw : flows) {
-            // flw->toZ3(ctx);
             flw->flowPriority = std::make_shared<expr>(ctx.int_val((flw->name + std::string("Priority")).c_str()));
             ((Device *) flw->getPathTree()->getRoot()->getNode())->toZ3(ctx);
         }
@@ -225,20 +223,7 @@ class INET_API Network {
             swt->loadZ3(ctx, solver);
         }
 
-        /*
-        for (Switch swt : getSwitches()) {
-            if (dynamic_cast<Switch *>(swt)) {
-                ((Switch *) swt).loadZ3(ctx, solver);
-            }
-        }
-        */
-
     }
-
-
-    /*
-     * GETTERS AND SETTERS
-     */
 
     std::shared_ptr<expr> getJitterUpperBoundRangeZ3() {
         return jitterUpperBoundRangeZ3;
