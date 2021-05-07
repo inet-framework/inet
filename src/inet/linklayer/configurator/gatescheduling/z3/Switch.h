@@ -31,7 +31,7 @@ namespace inet {
 using namespace z3;
 
 /**
- * [Class]: TSNSwitch
+ * [Class]: Switch
  * [Usage]: This class contains the information needed to
  * specify a switch capable of complying with the TSN patterns
  * to the schedule. Aside from part of the z3 data used to
@@ -57,7 +57,7 @@ class INET_API Switch : public cObject {
     static int indexCounter;
 
     /**
-     * [Method]: TSNSwitch
+     * [Method]: Switch
      * [Usage]: Overloaded constructor method of this class.
      * Creates a switch, giving it a name and creating a new
      * list of ports and labels of devices that it can reach.
@@ -74,9 +74,9 @@ class INET_API Switch : public cObject {
     }
 
     /**
-     * [Method]: TSNSwitch
+     * [Method]: Switch
      * [Usage]: Overloaded constructor method of this class.
-     * Instantiates a new TSNSwitch object setting up its properties
+     * Instantiates a new Switch object setting up its properties
      * that are given as parameters. Used for simplified configurations.
      * Other constructors either are deprecated or set parameters
      * that will be used in future works.
@@ -88,9 +88,9 @@ class INET_API Switch : public cObject {
     }
 
     /**
-     * [Method]: TSNSwitch
+     * [Method]: Switch
      * [Usage]: Overloaded constructor method of this class.
-     * Instantiates a new TSNSwitch object setting up its properties
+     * Instantiates a new Switch object setting up its properties
      * that are given as parameters.
      *
      * @param name                  Name of the switch
@@ -168,7 +168,7 @@ class INET_API Switch : public cObject {
      * individual nodes in the approach of this schedule) must be given
      * as parameters.
      *
-     * @param destination       Destination of the port as TSNSwitch or Device
+     * @param destination       Destination of the port as Switch or Device
      * @param cycle             Cycle used by the port
      */
     void createPort(cObject *destination, Cycle *cycle, double maxPacketSize, double timeToTravel, double portSpeed, double gbSize) {

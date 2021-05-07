@@ -106,7 +106,7 @@ FlowFragment *Flow::nodeToZ3(context& ctx, PathNode *node, FlowFragment *frag)
             //Adding fragment to the fragment list and to the switch's fragment list
             auxN->addFlowFragment(flowFrag);
             ((Switch *)auxN->getNode())->addToFragmentList(flowFrag);
-            // System.out.println(std::string("Adding fragment to switch " + ((TSNSwitch *)auxN->getNode())->getName() + std::string(" has ") + auxN->getChildren().size() + " children"));
+            // System.out.println(std::string("Adding fragment to switch " + ((Switch *)auxN->getNode())->getName() + std::string(" has ") + auxN->getChildren().size() + " children"));
 
         }
 
@@ -496,7 +496,7 @@ void Flow::setNumberOfPacketsSent(PathNode *node)
                     < frag->getNumOfPacketsSent()) {
                 numOfPacketsSentInFragment = frag->getNumOfPacketsSent();
             }
-            // System.out.println(std::string("On node ") + ((TSNSwitch *)node->getNode())->getName() + std::string(" trying to reach children"));
+            // System.out.println(std::string("On node ") + ((Switch *)node->getNode())->getName() + std::string(" trying to reach children"));
             // System.out.println(std::string("Node has: ") + node.getFlowFragments().size() + std::string(" frags"));
             // System.out.println(std::string("Node has: ") + node->getChildren().size() + std::string(" children"));
             // for (PathNode n : node->getChildren()) {
