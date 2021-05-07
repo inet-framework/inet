@@ -17,16 +17,7 @@
 
 #include "inet/linklayer/configurator/TsnConfigurator.h"
 
-#include <queue>
-#include <set>
-#include <sstream>
-#include <vector>
-
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/stlutils.h"
 #include "inet/linklayer/configurator/StreamRedundancyConfigurator.h"
-#include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
@@ -34,70 +25,12 @@ Define_Module(TsnConfigurator);
 
 void TsnConfigurator::initialize(int stage)
 {
+    NetworkConfiguratorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         configuration = check_and_cast<cValueArray *>(par("configuration").objectValue());
     else if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         computeConfiguration();
         configureStreams();
-    }
-}
-
-void TsnConfigurator::extractTopology(Topology& topology)
-{
-    topology.extractByProperty("networkNode");
-    EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
-
-    if (topology.getNumNodes() == 0)
-        throw cRuntimeError("Empty network!");
-
-    // extract nodes, fill in interfaceTable and routingTable members in node
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        Node *node = (Node *)topology.getNode(i);
-        node->module = node->getModule();
-        node->interfaceTable = dynamic_cast<IInterfaceTable *>(node->module->getSubmodule("interfaceTable"));
-    }
-
-    // extract links and interfaces
-    std::set<NetworkInterface *> interfacesSeen;
-    std::queue<Node *> unvisited; // unvisited nodes in the graph
-    auto rootNode = (Node *)topology.getNode(0);
-    unvisited.push(rootNode);
-    while (!unvisited.empty()) {
-        Node *node = unvisited.front();
-        unvisited.pop();
-        IInterfaceTable *interfaceTable = node->interfaceTable;
-        if (interfaceTable) {
-            // push neighbors to the queue
-            for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-                NetworkInterface *networkInterface = interfaceTable->getInterface(i);
-                if (interfacesSeen.count(networkInterface) == 0) {
-                    // visiting this interface
-                    interfacesSeen.insert(networkInterface);
-                    Topology::LinkOut *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
-                    Node *childNode = nullptr;
-                    if (linkOut) {
-                        childNode = (Node *)linkOut->getRemoteNode();
-                        unvisited.push(childNode);
-                    }
-                    InterfaceInfo *info = new InterfaceInfo(networkInterface);
-                    node->interfaceInfos.push_back(info);
-                }
-            }
-        }
-    }
-    // annotate links with interfaces
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        Node *node = (Node *)topology.getNode(i);
-        for (int j = 0; j < node->getNumOutLinks(); j++) {
-            Topology::LinkOut *linkOut = node->getLinkOut(j);
-            Link *link = (Link *)linkOut;
-            Node *localNode = (Node *)linkOut->getLocalNode();
-            if (localNode->interfaceTable)
-                link->sourceInterfaceInfo = findInterfaceInfo(localNode, localNode->interfaceTable->findInterfaceByNodeOutputGateId(linkOut->getLocalGateId()));
-            Node *remoteNode = (Node *)linkOut->getRemoteNode();
-            if (remoteNode->interfaceTable)
-                link->destinationInterfaceInfo = findInterfaceInfo(remoteNode, remoteNode->interfaceTable->findInterfaceByNodeInputGateId(linkOut->getRemoteGateId()));
-        }
     }
 }
 
@@ -371,25 +304,6 @@ bool TsnConfigurator::intersects(std::vector<std::string> list1, std::vector<std
         if (contains(list2, element))
             return true;
     return false;
-}
-
-Topology::LinkOut *TsnConfigurator::findLinkOut(Node *node, int gateId)
-{
-    for (int i = 0; i < node->getNumOutLinks(); i++)
-        if (node->getLinkOut(i)->getLocalGateId() == gateId)
-            return node->getLinkOut(i);
-    return nullptr;
-}
-
-TsnConfigurator::InterfaceInfo *TsnConfigurator::findInterfaceInfo(Node *node, NetworkInterface *networkInterface)
-{
-    if (networkInterface == nullptr)
-        return nullptr;
-    for (auto& interfaceInfo : node->interfaceInfos)
-        if (interfaceInfo->networkInterface == networkInterface)
-            return interfaceInfo;
-
-    return nullptr;
 }
 
 } // namespace inet
