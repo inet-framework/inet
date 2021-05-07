@@ -56,9 +56,11 @@ void TSNschedGateSchedulingConfigurator::writeJavaCode(const Input& input, std::
                  << "f, " << b(application->packetLength + B(12)).get() << ");\n";
     }
 
-    for (auto cycle : input.cycles) {
-        javaFile <<
-"       Cycle " << getJavaName(cycle->name) << " = new Cycle(" << (gateCycleDuration * 1000000).dbl() << ", 0, " << (gateCycleDuration * 1000000).dbl() << ");\n";
+    for (auto switch_ : input.switches) {
+        for (auto port : switch_->ports) {
+            javaFile <<
+"       Cycle " << (getJavaName(port->module->getFullName()) + "Cycle") << " = new Cycle(" << (gateCycleDuration * 1000000).dbl() << ", 0, " << (gateCycleDuration * 1000000).dbl() << ");\n";
+        }
     }
 
     for (auto switch_ : input.switches) {
@@ -81,7 +83,7 @@ void TSNschedGateSchedulingConfigurator::writeJavaCode(const Input& input, std::
         for (auto port : switch_->ports) {
             javaFile <<
 "       " << getJavaName(switch_->module->getFullName()) << ".createPort(" << getJavaName(port->endNode->module->getFullName()) << ", "
-          << getJavaName(port->cycle->name) << ");\n";
+          << (getJavaName(port->module->getFullName()) + "Cycle") << ");\n";
         }
     }
 

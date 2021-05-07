@@ -72,7 +72,6 @@ GateSchedulingConfiguratorBase::Input *GateSchedulingConfiguratorBase::createGat
     addDevices(*input);
     addSwitches(*input);
     addPorts(*input);
-    addCycles(*input);
     addFlows(*input);
     return input;
 }
@@ -119,6 +118,8 @@ void GateSchedulingConfiguratorBase::addPorts(Input& input) const
                 port->propagationTime = check_and_cast<cDatarateChannel *>(interfaceInfo->networkInterface->getTxTransmissionChannel())->getDelay();
                 port->maxPacketLength = B(interfaceInfo->networkInterface->getMtu());
                 port->guardBand = s(port->maxPacketLength / port->datarate).get();
+                port->maxCycleTime = gateCycleDuration;
+                port->maxSlotDuration = gateCycleDuration;
                 port->startNode = networkNode;
                 networkNode->ports.push_back(port);
                 input.ports.push_back(port);
@@ -135,20 +136,6 @@ void GateSchedulingConfiguratorBase::addPorts(Input& input) const
                 if (networkNode->module == remoteNode->module)
                     port->endNode = networkNode;
             }
-        }
-    }
-}
-
-void GateSchedulingConfiguratorBase::addCycles(Input& input) const
-{
-    for (auto switch_ : input.switches) {
-        for (auto port : switch_->ports) {
-            auto cycle = new Input::Cycle();
-            cycle->name = std::string(switch_->module->getFullName()) + "." + std::string(port->module->getFullName());
-            cycle->maxCycleTime = gateCycleDuration;
-            cycle->maxSlotDuration = gateCycleDuration;
-            port->cycle = cycle;
-            input.cycles.push_back(cycle);
         }
     }
 }

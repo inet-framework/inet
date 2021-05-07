@@ -62,15 +62,6 @@ class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
             Device *device = nullptr; // the device where the application is running
         };
 
-        // parameters for a gate scheduling cycle
-        class Cycle
-        {
-          public:
-            std::string name; // for user identification
-            simtime_t maxCycleTime = -1; // maximum length of the cycle
-            simtime_t maxSlotDuration = -1; // maximum slot duration in the cycle
-        };
-
         // network interface
         class Port
         {
@@ -81,7 +72,8 @@ class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
             simtime_t propagationTime = -1; // time to travel to the connected port in seconds
             b maxPacketLength = b(-1); // maximum packet size in bits
             simtime_t guardBand = -1; // guard band in seconds
-            Cycle *cycle = nullptr; // the cycle parameters
+            simtime_t maxCycleTime = -1; // maximum length of the cycle
+            simtime_t maxSlotDuration = -1; // maximum slot duration in the cycle
             NetworkNode *startNode = nullptr; // the network node where this port is
             NetworkNode *endNode = nullptr; // the network node to which this port is connected
         };
@@ -111,7 +103,6 @@ class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
       public:
         std::vector<Device *> devices; // list of end devices in the network
         std::vector<Application *> applications; // list of applications in the network
-        std::vector<Cycle *> cycles; // all cycles in the network
         std::vector<Port *> ports; // all ports of all switches in the network
         std::vector<Switch *> switches; // list of switches in the network
         std::vector<Flow *> flows; // list of traffic flows in the network
@@ -121,7 +112,6 @@ class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
         ~Input() {
             for (auto device : devices) delete device;
             for (auto application : applications) delete application;
-            for (auto cycle : cycles) delete cycle;
             for (auto port : ports) delete port;
             for (auto switch_ : switches) delete switch_;
             for (auto flow : flows) delete flow;
@@ -226,7 +216,6 @@ class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
     virtual void addDevices(Input& input) const;
     virtual void addSwitches(Input& input) const;
     virtual void addPorts(Input& input) const;
-    virtual void addCycles(Input& input) const;
     virtual void addFlows(Input& input) const;
 
     virtual void configureGateScheduling();
