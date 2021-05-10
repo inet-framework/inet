@@ -49,7 +49,7 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
         std::string name;
         std::string packetFilter;
         std::string source;
-        std::string destination;
+        std::vector<std::string> destinations;
         std::vector<Tree> trees;
     };
 

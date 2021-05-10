@@ -17,6 +17,7 @@
 
 #include "inet/linklayer/configurator/TsnConfigurator.h"
 
+#include "inet/common/MatchableObject.h"
 #include "inet/linklayer/configurator/StreamRedundancyConfigurator.h"
 
 namespace inet {
@@ -57,12 +58,20 @@ void TsnConfigurator::computeStream(cValueMap *configuration)
     streamConfiguration.name = configuration->get("name").stringValue();
     streamConfiguration.packetFilter = configuration->get("packetFilter").stringValue();
     auto sourceNetworkNodeName = configuration->get("source").stringValue();
-    auto destinationNetworkNodeName = configuration->get("destination").stringValue();
     streamConfiguration.source = sourceNetworkNodeName;
-    streamConfiguration.destination = destinationNetworkNodeName;
     Node *source = static_cast<Node *>(topology->getNodeFor(getParentModule()->getSubmodule(sourceNetworkNodeName)));
-    Node *destination = static_cast<Node *>(topology->getNodeFor(getParentModule()->getSubmodule(destinationNetworkNodeName)));
-    auto allTrees = collectAllTrees(source, std::vector<Node *>({destination}));
+    std::vector<Node *> destinations;
+    cMatchExpression destinationFilter;
+    destinationFilter.setPattern(configuration->get("destination").stringValue(), false, false, true);
+    for (int i = 0; i < topology->getNumNodes(); i++) {
+        auto node = (Node *)topology->getNode(i);
+        MatchableObject matchableObject(MatchableObject::ATTRIBUTE_FULLNAME, node->module);
+        if (destinationFilter.matches(&matchableObject)) {
+            destinations.push_back(node);
+            streamConfiguration.destinations.push_back(node->module->getFullName());
+        }
+    }
+    auto allTrees = collectAllTrees(source, destinations);
     streamConfiguration.trees = selectBestTreeSubset(configuration, allTrees);
     streamConfigurations.push_back(streamConfiguration);
 }
@@ -189,7 +198,7 @@ void TsnConfigurator::configureStreams()
         streamParameterValue->set("name", streamConfiguration.name.c_str());
         streamParameterValue->set("packetFilter", streamConfiguration.packetFilter.c_str());
         streamParameterValue->set("source", streamConfiguration.source.c_str());
-        streamParameterValue->set("destination", streamConfiguration.destination.c_str());
+        streamParameterValue->set("destination", streamConfiguration.destinations[0].c_str());
         for (auto& tree : streamConfiguration.trees) {
             cValueArray *treeParameterValue = new cValueArray();
             for (int i = 0; i < tree.paths[0].nodes.size(); i++) {
