@@ -190,58 +190,64 @@ bool TsnConfigurator::checkLinkFailureProtection(cValueArray *configuration, con
 
 void TsnConfigurator::configureStreams()
 {
-    auto streamRedundancyConfigurator = check_and_cast<StreamRedundancyConfigurator *>(findModuleByPath(par("streamRedundancyConfiguratorModule")));
-    cValueArray *streamsParameterValue = new cValueArray();
-    for (auto& streamConfiguration : streamConfigurations) {
-        cValueMap *streamParameterValue = new cValueMap();
-        cValueArray *treesParameterValue = new cValueArray();
-        streamParameterValue->set("name", streamConfiguration.name.c_str());
-        streamParameterValue->set("packetFilter", streamConfiguration.packetFilter.c_str());
-        streamParameterValue->set("source", streamConfiguration.source.c_str());
-        streamParameterValue->set("destination", streamConfiguration.destinations[0].c_str());
-        for (auto& tree : streamConfiguration.trees) {
-            cValueArray *treeParameterValue = new cValueArray();
-            for (int i = 0; i < tree.paths[0].nodes.size(); i++) {
-                // skip source and destination in the alternative paths because they are implied
-                if (i != 0 && i != tree.paths[0].nodes.size() - 1) {
-                    auto name = tree.paths[0].nodes[i];
-                    treeParameterValue->add(name);
+    const char *streamRedundancyConfiguratorModulePath = par("streamRedundancyConfiguratorModule");
+    if (strlen(streamRedundancyConfiguratorModulePath) != 0) {
+        auto streamRedundancyConfigurator = check_and_cast<StreamRedundancyConfigurator *>(getModuleByPath(streamRedundancyConfiguratorModulePath));
+        cValueArray *streamsParameterValue = new cValueArray();
+        for (auto& streamConfiguration : streamConfigurations) {
+            cValueMap *streamParameterValue = new cValueMap();
+            cValueArray *treesParameterValue = new cValueArray();
+            streamParameterValue->set("name", streamConfiguration.name.c_str());
+            streamParameterValue->set("packetFilter", streamConfiguration.packetFilter.c_str());
+            streamParameterValue->set("source", streamConfiguration.source.c_str());
+            streamParameterValue->set("destination", streamConfiguration.destinations[0].c_str());
+            for (auto& tree : streamConfiguration.trees) {
+                cValueArray *treeParameterValue = new cValueArray();
+                for (int i = 0; i < tree.paths[0].nodes.size(); i++) {
+                    // skip source and destination in the alternative paths because they are implied
+                    if (i != 0 && i != tree.paths[0].nodes.size() - 1) {
+                        auto name = tree.paths[0].nodes[i];
+                        treeParameterValue->add(name);
+                    }
                 }
+                treesParameterValue->add(treeParameterValue);
             }
-            treesParameterValue->add(treeParameterValue);
+            streamParameterValue->set("paths", treesParameterValue);
+            streamsParameterValue->add(streamParameterValue);
         }
-        streamParameterValue->set("paths", treesParameterValue);
-        streamsParameterValue->add(streamParameterValue);
-    }
-    EV_INFO << "Configuring stream configurator" << EV_FIELD(streamRedundancyConfigurator) << EV_FIELD(streamsParameterValue) << EV_ENDL;
-    streamRedundancyConfigurator->par("configuration") = streamsParameterValue;
-    auto gateSchedulingConfigurator = findModuleByPath(par("gateSchedulingConfiguratorModule"));
-    cValueArray *parameterValue = new cValueArray();
-    for (int i = 0; i < configuration->size(); i++) {
-        cValueMap *streamConfiguration = check_and_cast<cValueMap *>(configuration->get(i).objectValue());
-        auto source = streamConfiguration->get("source").stringValue();
-        auto destination = streamConfiguration->get("destination").stringValue();
-        auto pathFragments = streamRedundancyConfigurator->getPathFragments(streamConfiguration->get("name").stringValue());
-        cValueMap *streamParameterValue = new cValueMap();
-        cValueArray *pathFragmentsParameterValue = new cValueArray();
-        for (auto& pathFragment : pathFragments) {
-            cValueArray *pathFragmentParameterValue = new cValueArray();
-            for (auto nodeName : pathFragment)
-                pathFragmentParameterValue->add(nodeName);
-            pathFragmentsParameterValue->add(pathFragmentParameterValue);
+        EV_INFO << "Configuring stream configurator" << EV_FIELD(streamRedundancyConfigurator) << EV_FIELD(streamsParameterValue) << EV_ENDL;
+        streamRedundancyConfigurator->par("configuration") = streamsParameterValue;
+        const char *gateSchedulingConfiguratorModulePath = par("gateSchedulingConfiguratorModule");
+        if (strlen(gateSchedulingConfiguratorModulePath) != 0) {
+            auto gateSchedulingConfigurator = getModuleByPath(gateSchedulingConfiguratorModulePath);
+            cValueArray *parameterValue = new cValueArray();
+            for (int i = 0; i < configuration->size(); i++) {
+                cValueMap *streamConfiguration = check_and_cast<cValueMap *>(configuration->get(i).objectValue());
+                auto source = streamConfiguration->get("source").stringValue();
+                auto destination = streamConfiguration->get("destination").stringValue();
+                auto pathFragments = streamRedundancyConfigurator->getPathFragments(streamConfiguration->get("name").stringValue());
+                cValueMap *streamParameterValue = new cValueMap();
+                cValueArray *pathFragmentsParameterValue = new cValueArray();
+                for (auto& pathFragment : pathFragments) {
+                    cValueArray *pathFragmentParameterValue = new cValueArray();
+                    for (auto nodeName : pathFragment)
+                        pathFragmentParameterValue->add(nodeName);
+                    pathFragmentsParameterValue->add(pathFragmentParameterValue);
+                }
+                streamParameterValue->set("pathFragments", pathFragmentsParameterValue);
+                streamParameterValue->set("name", streamConfiguration->get("name").stringValue());
+                streamParameterValue->set("application", streamConfiguration->get("application"));
+                streamParameterValue->set("source", source);
+                streamParameterValue->set("destination", destination);
+                streamParameterValue->set("priority", streamConfiguration->get("priority").intValue());
+                streamParameterValue->set("packetLength", cValue(streamConfiguration->get("packetLength").doubleValueInUnit("B"), "B"));
+                streamParameterValue->set("packetInterval", cValue(streamConfiguration->get("packetInterval").doubleValueInUnit("s"), "s"));
+                streamParameterValue->set("maxLatency", cValue(streamConfiguration->get("maxLatency").doubleValueInUnit("s"), "s"));
+                parameterValue->add(streamParameterValue);
+            }
+            gateSchedulingConfigurator->par("configuration") = parameterValue;
         }
-        streamParameterValue->set("pathFragments", pathFragmentsParameterValue);
-        streamParameterValue->set("name", streamConfiguration->get("name").stringValue());
-        streamParameterValue->set("application", streamConfiguration->get("application"));
-        streamParameterValue->set("source", source);
-        streamParameterValue->set("destination", destination);
-        streamParameterValue->set("priority", streamConfiguration->get("priority").intValue());
-        streamParameterValue->set("packetLength", cValue(streamConfiguration->get("packetLength").doubleValueInUnit("B"), "B"));
-        streamParameterValue->set("packetInterval", cValue(streamConfiguration->get("packetInterval").doubleValueInUnit("s"), "s"));
-        streamParameterValue->set("maxLatency", cValue(streamConfiguration->get("maxLatency").doubleValueInUnit("s"), "s"));
-        parameterValue->add(streamParameterValue);
     }
-    gateSchedulingConfigurator->par("configuration") = parameterValue;
 }
 
 std::vector<TsnConfigurator::Tree> TsnConfigurator::collectAllTrees(Node *source, std::vector<Node *> destinations)
