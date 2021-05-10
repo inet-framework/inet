@@ -25,6 +25,16 @@ namespace inet {
 class INET_API TsnConfigurator : public NetworkConfiguratorBase
 {
   protected:
+    class Path
+    {
+      public:
+        std::vector<std::string> nodes;
+
+      public:
+        Path(const std::vector<std::string>& nodes) : nodes(nodes) { }
+    };
+    };
+
     class StreamConfiguration
     {
       public:
@@ -32,7 +42,7 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
         std::string packetFilter;
         std::string source;
         std::string destination;
-        std::vector<std::vector<std::string>> paths;
+        std::vector<Path> paths;
     };
 
   protected:
@@ -52,14 +62,14 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
     virtual void computeStreams();
     virtual void computeStream(cValueMap *streamConfiguration);
 
-    virtual std::vector<std::vector<std::string>> selectBestPathsSubset(cValueMap *configuration, const std::vector<std::vector<std::string>>& paths);
-    virtual bool checkNodeFailureProtection(cValueArray *configuration, const std::vector<std::vector<std::string>>& paths);
-    virtual bool checkLinkFailureProtection(cValueArray *configuration, const std::vector<std::vector<std::string>>& paths);
+    virtual std::vector<Path> selectBestPathsSubset(cValueMap *configuration, const std::vector<Path>& paths);
+    virtual bool checkNodeFailureProtection(cValueArray *configuration, const std::vector<Path>& paths);
+    virtual bool checkLinkFailureProtection(cValueArray *configuration, const std::vector<Path>& paths);
 
     virtual void configureStreams();
 
-    virtual void collectAllPaths(Node *source, Node *destination, std::vector<std::vector<std::string>>& paths);
-    virtual void collectAllPaths(Node *source, Node *destination, Node *node, std::vector<std::vector<std::string>>& paths, std::vector<std::string>& current);
+    virtual void collectAllPaths(Node *source, Node *destination, std::vector<Path>& paths);
+    virtual void collectAllPaths(Node *source, Node *destination, Node *node, std::vector<Path>& paths, std::vector<std::string>& current);
 
     virtual std::vector<std::string> collectNetworkNodes(std::string filter);
     virtual std::vector<std::string> collectNetworkLinks(std::string filter);
