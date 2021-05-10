@@ -62,9 +62,7 @@ void TsnConfigurator::computeStream(cValueMap *configuration)
     streamConfiguration.destination = destinationNetworkNodeName;
     Node *source = static_cast<Node *>(topology->getNodeFor(getParentModule()->getSubmodule(sourceNetworkNodeName)));
     Node *destination = static_cast<Node *>(topology->getNodeFor(getParentModule()->getSubmodule(destinationNetworkNodeName)));
-    topology->calculateUnweightedSingleShortestPathsTo(source);
-    std::vector<Tree> allTrees;
-    collectAllTrees(source, destination, allTrees);
+    auto allTrees = collectAllTrees(source, std::vector<Node *>({destination}));
     streamConfiguration.trees = selectBestTreeSubset(configuration, allTrees);
     streamConfigurations.push_back(streamConfiguration);
 }
@@ -237,15 +235,13 @@ void TsnConfigurator::configureStreams()
     gateSchedulingConfigurator->par("configuration") = parameterValue;
 }
 
-void TsnConfigurator::collectAllTrees(Node *source, Node *destination, std::vector<Tree>& trees)
+std::vector<TsnConfigurator::Tree> TsnConfigurator::collectAllTrees(Node *source, std::vector<Node *> destinations)
 {
-    collectAllTrees(source, std::vector<Node *>({destination}), trees);
-}
-
-void TsnConfigurator::collectAllTrees(Node *source, std::vector<Node *> destinations, std::vector<Tree>& trees)
-{
+    std::vector<Tree> trees;
     std::vector<std::string> current;
+    topology->calculateUnweightedSingleShortestPathsTo(source);
     collectAllTrees(source, destinations, destinations[0], trees, current);
+    return trees;
 }
 
 void TsnConfigurator::collectAllTrees(Node *source, std::vector<Node *> destinations, Node *node, std::vector<Tree>& trees, std::vector<std::string>& current)

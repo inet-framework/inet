@@ -76,8 +76,7 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
 
     virtual void configureStreams();
 
-    virtual void collectAllTrees(Node *source, Node *destination, std::vector<Tree>& trees);
-    virtual void collectAllTrees(Node *source, std::vector<Node *> destinations, std::vector<Tree>& trees);
+    virtual std::vector<Tree> collectAllTrees(Node *source, std::vector<Node *> destinations);
     virtual void collectAllTrees(Node *source, std::vector<Node *> destinations, Node *node, std::vector<Tree>& trees, std::vector<std::string>& current);
 
     virtual std::vector<std::string> collectNetworkNodes(std::string filter);
