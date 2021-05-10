@@ -263,9 +263,21 @@ All hosts are in the same subnet (addresses are sequential from 10.0.0.1 to 10.0
 
 The two switches are configured to be VLAN aware, but the hosts are not. (Thus the switches are responsible for creating the VLANs and adding VLAN tags to packets.
 
+Here is part of the ``General`` configuration with Ethernet settings:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: encap
+   :end-at: bitrate
+   :language: ini
+
+The first three lines configure all network nodes to use the composable Ethernet model. The switches are configured to have a :ned:`Ieee8021qLayer` submodule. Finally, the connection speed is set on all interfaces.
+
+
 - the configs
 
 **TODO** traffic
+
+
 
 .. For traffic, host1 in the upper VLAN broadcasts UDP packets to host4 in the same VLAN. Similarly, host4 in the lower VLAN send packets to hostX.
 
@@ -285,59 +297,101 @@ A UDP application in host1 and host4 generate packets, which are broadcast to th
 
 **TODO** config
 
+In the ``VLANBetweenSwitches`` configuration, the switches are configured to have a VLAN policy layer submodule:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: VlanPolicyLayer
+   :end-at: VlanPolicyLayer
+   :language: ini
+
+In the ``VLANBetweenSwitches`` configuration, the switches are configured to be VLAN-aware. Since the VLAN awareness is only between the two switches, the interfaces which are between the two switches are configured to understand the 802.1q protocol.
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: ieee8021qctag
+   :end-at: switch2
+   :language: ini
+
+The traffic generator UDP apps in host1 and host4 are configured to broadcast UDP packets to the entire subnet:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: destAddresses
+   :end-at: host4
+   :language: ini
+
+We configure the switches to have a VLAN policy layer, and configure the policies themselves in each switch:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: VlanPolicyLayer
+   :end-at: switch2.bridging.vlanPolicy.outboundFilter.acceptedVlanIds
+   :language: ini
+
+**TODO** explain this
+
+.. .. figure:: media/schematic.png
+   :align: center
+
+The configured VLAN policies are illustrated on the following image:
+
+.. figure:: media/10.png
+   :align: center
+
+so
+
+- in switch one, map the incoming packets to VLANs based on incoming interface
+- in switch two, outgoing interfaces filter packets based on VLAN IDz
+
 Config: VLAN Between Hosts Using Virtual Interfaces
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Before we get to the example simulation, here is part of the ``General`` configuration with Ethernet settings:
+   In this configuration, host1 sends UDP packets to host2 via a virtual interface in each host.
 
-.. literalinclude:: ../omnetpp.ini
-   :start-at: encap
-   :end-at: bitrate
-   :language: ini
+In this configuration, VLAN tags are added to packets in a host. 
 
-The first three lines configure all network nodes to use the composable Ethernet model. The switches are configured to have a :ned:`Ieee8021qLayer` submodule. Finally, the connection speed is set on all interfaces.
+Two UDP applications in host1 send packets to host2. One application sends packets via the two hosts' Ethernet interfaces, the other a pair of virtual interfaces (which in turn use the Ethernet interface to carry the packets). The packets sent between the virtual interfaces are configured to be VLAN tagged and the ones between the Ethernet interfaces are not.
 
-**TODO** Ieee8021q in switches only ?
+The virtual interface in host1 adds a VLAN tag request to outgoing packets, and VLAN tags are attached by host1's 802.1q submodule.
 
-The example simulation is defined in the ``BetweenSwitches`` config in omnetpp.ini:
+.. **TODO** Ieee8021q in switches only ?
 
-.. literalinclude:: ../omnetpp.ini
+.. The example simulation is defined in the ``BetweenSwitches`` config in omnetpp.ini:
+
+.. .. literalinclude:: ../omnetpp.ini
    :start-at: Config VLANBetweenSwitches
    :end-at: switch2.policy.outboundFilter.acceptedVlanIds
    :language: ini
 
-The configuration adds a :ned:`VlanPolicyLayer` module to the switches. **TODO** qtag
+.. The configuration adds a :ned:`VlanPolicyLayer` module to the switches. **TODO** qtag
 
-so
+   so
 
-- the accepted vlan ids are defined
-- eth0 interfaces in both switches face the connected hosts
-- eth1 interfaces face the other switch
-- on eth1, add vlan tag 42
-- on eth0, remove tag (or dont add)(we dont want tags)
+   - the accepted vlan ids are defined
+   - eth0 interfaces in both switches face the connected hosts
+   - eth1 interfaces face the other switch
+   - on eth1, add vlan tag 42
+   - on eth0, remove tag (or dont add)(we dont want tags)
 
-- so the syntax replaces an accepted vlan id to another one on an interface
-(replace -1 with 42, that is if there is no tag add tag 42 -> if there is tag 1, does it get replaced?)
+   - so the syntax replaces an accepted vlan id to another one on an interface
+   (replace -1 with 42, that is if there is no tag add tag 42 -> if there is tag 1, does it get replaced?)
 
-To separate the VLANs, the policy submodule's mapper in ``switch1`` is configured to add VLAN tags to packets based on the incoming interface (VLAN ID 1 on eth0 and VLAN ID 2 on eth1). The policy submodule's mapper in ``switch2`` is configured to send packets with VLAN ID 1 to the upper hosts, and those with VLAN ID 2 to the lower hosts.
+   To separate the VLANs, the policy submodule's mapper in ``switch1`` is configured to add VLAN tags to packets based on the incoming interface (VLAN ID 1 on eth0 and VLAN ID 2 on eth1). The policy submodule's mapper in ``switch2`` is configured to send packets with VLAN ID 1 to the upper hosts, and those with VLAN ID 2 to the lower hosts.
 
-This line maps incoming packets on eth0 from VLAN -1 to VLAN 1 (-1 meaning no VLAN tag present on the packet).
-Similarly, it maps incoming packets on eth1 from VLAN -1 to VLAN 2.
+   This line maps incoming packets on eth0 from VLAN -1 to VLAN 1 (-1 meaning no VLAN tag present on the packet).
+   Similarly, it maps incoming packets on eth1 from VLAN -1 to VLAN 2.
 
-Note that this configurations only separates traffic going in one direction; this is not a problem now, since we're just using UDP in one direction. Policies for the other direction can be set up similarly if needed (e.g. TCP).
+   Note that this configurations only separates traffic going in one direction; this is not a problem now, since we're just using UDP in one direction. Policies for the other direction can be set up similarly if needed (e.g. TCP).
 
 
 
-Here is a TCP packet displayed in Qtenv's packet inspector:
+   Here is a TCP packet displayed in Qtenv's packet inspector:
 
-.. figure:: media/inspector2.png
-   :align: center
+   .. figure:: media/inspector2.png
+      :align: center
 
-.. video:: media/vlan3.mp4
-   :width: 100%
+   .. video:: media/vlan3.mp4
+      :width: 100%
 
-VLAN Between Virtual Interfaces
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. VLAN Between Virtual Interfaces
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This configuration demonstrates how to use VLANs with virtual interfaces. It uses the following network:
 
