@@ -70,15 +70,15 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
     virtual void computeStreams();
     virtual void computeStream(cValueMap *streamConfiguration);
 
-    virtual std::vector<Tree> selectBestPathsSubset(cValueMap *configuration, const std::vector<Tree>& paths);
-    virtual bool checkNodeFailureProtection(cValueArray *configuration, const std::vector<Tree>& paths);
-    virtual bool checkLinkFailureProtection(cValueArray *configuration, const std::vector<Tree>& paths);
+    virtual std::vector<Tree> selectBestTreeSubset(cValueMap *configuration, const std::vector<Tree>& trees);
+    virtual bool checkNodeFailureProtection(cValueArray *configuration, const std::vector<Tree>& trees);
+    virtual bool checkLinkFailureProtection(cValueArray *configuration, const std::vector<Tree>& trees);
 
     virtual void configureStreams();
 
-    virtual void collectAllTrees(Node *source, Node *destination, std::vector<Tree>& paths);
-    virtual void collectAllTrees(Node *source, std::vector<Node *> destinations, std::vector<Tree>& paths);
-    virtual void collectAllTrees(Node *source, std::vector<Node *> destinations, Node *node, std::vector<Tree>& paths, std::vector<std::string>& current);
+    virtual void collectAllTrees(Node *source, Node *destination, std::vector<Tree>& trees);
+    virtual void collectAllTrees(Node *source, std::vector<Node *> destinations, std::vector<Tree>& trees);
+    virtual void collectAllTrees(Node *source, std::vector<Node *> destinations, Node *node, std::vector<Tree>& trees, std::vector<std::string>& current);
 
     virtual std::vector<std::string> collectNetworkNodes(std::string filter);
     virtual std::vector<std::string> collectNetworkLinks(std::string filter);
