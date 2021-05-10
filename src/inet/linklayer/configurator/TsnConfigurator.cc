@@ -63,13 +63,13 @@ void TsnConfigurator::computeStream(cValueMap *configuration)
     Node *source = static_cast<Node *>(topology->getNodeFor(getParentModule()->getSubmodule(sourceNetworkNodeName)));
     Node *destination = static_cast<Node *>(topology->getNodeFor(getParentModule()->getSubmodule(destinationNetworkNodeName)));
     topology->calculateUnweightedSingleShortestPathsTo(source);
-    std::vector<Tree> allPaths;
-    collectAllTrees(source, destination, allPaths);
-    streamConfiguration.trees = selectBestPathsSubset(configuration, allPaths);
+    std::vector<Tree> allTrees;
+    collectAllTrees(source, destination, allTrees);
+    streamConfiguration.trees = selectBestTreeSubset(configuration, allTrees);
     streamConfigurations.push_back(streamConfiguration);
 }
 
-std::vector<TsnConfigurator::Tree> TsnConfigurator::selectBestPathsSubset(cValueMap *configuration, const std::vector<Tree>& trees)
+std::vector<TsnConfigurator::Tree> TsnConfigurator::selectBestTreeSubset(cValueMap *configuration, const std::vector<Tree>& trees)
 {
     cValueArray *nodeFailureProtection = configuration->containsKey("nodeFailureProtection") ? check_and_cast<cValueArray *>(configuration->get("nodeFailureProtection").objectValue()) : nullptr;
     cValueArray *linkFailureProtection = configuration->containsKey("linkFailureProtection") ? check_and_cast<cValueArray *>(configuration->get("linkFailureProtection").objectValue()) : nullptr;
@@ -106,7 +106,7 @@ std::vector<TsnConfigurator::Tree> TsnConfigurator::selectBestPathsSubset(cValue
             return result;
         }
     }
-    throw cRuntimeError("Cannot find path combination that protects against all configured node and link failures");
+    throw cRuntimeError("Cannot find tree combination that protects against all configured node and link failures");
 }
 
 bool TsnConfigurator::checkNodeFailureProtection(cValueArray *configuration, const std::vector<Tree>& trees)
@@ -187,23 +187,23 @@ void TsnConfigurator::configureStreams()
     cValueArray *streamsParameterValue = new cValueArray();
     for (auto& streamConfiguration : streamConfigurations) {
         cValueMap *streamParameterValue = new cValueMap();
-        cValueArray *pathsParameterValue = new cValueArray();
+        cValueArray *treesParameterValue = new cValueArray();
         streamParameterValue->set("name", streamConfiguration.name.c_str());
         streamParameterValue->set("packetFilter", streamConfiguration.packetFilter.c_str());
         streamParameterValue->set("source", streamConfiguration.source.c_str());
         streamParameterValue->set("destination", streamConfiguration.destination.c_str());
         for (auto& tree : streamConfiguration.trees) {
-            cValueArray *pathParameterValue = new cValueArray();
+            cValueArray *treeParameterValue = new cValueArray();
             for (int i = 0; i < tree.paths[0].nodes.size(); i++) {
                 // skip source and destination in the alternative paths because they are implied
                 if (i != 0 && i != tree.paths[0].nodes.size() - 1) {
                     auto name = tree.paths[0].nodes[i];
-                    pathParameterValue->add(name);
+                    treeParameterValue->add(name);
                 }
             }
-            pathsParameterValue->add(pathParameterValue);
+            treesParameterValue->add(treeParameterValue);
         }
-        streamParameterValue->set("paths", pathsParameterValue);
+        streamParameterValue->set("paths", treesParameterValue);
         streamsParameterValue->add(streamParameterValue);
     }
     EV_INFO << "Configuring stream configurator" << EV_FIELD(streamRedundancyConfigurator) << EV_FIELD(streamsParameterValue) << EV_ENDL;
@@ -237,15 +237,15 @@ void TsnConfigurator::configureStreams()
     gateSchedulingConfigurator->par("configuration") = parameterValue;
 }
 
-void TsnConfigurator::collectAllTrees(Node *source, Node *destination, std::vector<Tree>& paths)
+void TsnConfigurator::collectAllTrees(Node *source, Node *destination, std::vector<Tree>& trees)
 {
-    collectAllTrees(source, std::vector<Node *>({destination}), paths);
+    collectAllTrees(source, std::vector<Node *>({destination}), trees);
 }
 
-void TsnConfigurator::collectAllTrees(Node *source, std::vector<Node *> destinations, std::vector<Tree>& paths)
+void TsnConfigurator::collectAllTrees(Node *source, std::vector<Node *> destinations, std::vector<Tree>& trees)
 {
     std::vector<std::string> current;
-    collectAllTrees(source, destinations, destinations[0], paths, current);
+    collectAllTrees(source, destinations, destinations[0], trees, current);
 }
 
 void TsnConfigurator::collectAllTrees(Node *source, std::vector<Node *> destinations, Node *node, std::vector<Tree>& trees, std::vector<std::string>& current)
