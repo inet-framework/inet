@@ -64,7 +64,7 @@ void TsnConfigurator::computeStream(cValueMap *configuration)
     Node *destination = static_cast<Node *>(topology->getNodeFor(getParentModule()->getSubmodule(destinationNetworkNodeName)));
     topology->calculateUnweightedSingleShortestPathsTo(source);
     std::vector<Tree> allPaths;
-    collectAllPaths(source, destination, allPaths);
+    collectAllTrees(source, destination, allPaths);
     streamConfiguration.trees = selectBestPathsSubset(configuration, allPaths);
     streamConfigurations.push_back(streamConfiguration);
 }
@@ -237,13 +237,18 @@ void TsnConfigurator::configureStreams()
     gateSchedulingConfigurator->par("configuration") = parameterValue;
 }
 
-void TsnConfigurator::collectAllPaths(Node *source, Node *destination, std::vector<Tree>& paths)
+void TsnConfigurator::collectAllTrees(Node *source, Node *destination, std::vector<Tree>& paths)
 {
-    std::vector<std::string> current;
-    collectAllPaths(source, destination, destination, paths, current);
+    collectAllTrees(source, std::vector<Node *>({destination}), paths);
 }
 
-void TsnConfigurator::collectAllPaths(Node *source, Node *destination, Node *node, std::vector<Tree>& trees, std::vector<std::string>& current)
+void TsnConfigurator::collectAllTrees(Node *source, std::vector<Node *> destinations, std::vector<Tree>& paths)
+{
+    std::vector<std::string> current;
+    collectAllTrees(source, destinations, destinations[0], paths, current);
+}
+
+void TsnConfigurator::collectAllTrees(Node *source, std::vector<Node *> destinations, Node *node, std::vector<Tree>& trees, std::vector<std::string>& current)
 {
     auto networkNodeName = node->module->getFullName();
     current.push_back(networkNodeName);
@@ -256,7 +261,7 @@ void TsnConfigurator::collectAllPaths(Node *source, Node *destination, Node *nod
             auto nextNode = (Node *)node->getPath(i)->getRemoteNode();
             auto nextNetworkNodeName = nextNode->module->getFullName();
             if (std::find(current.begin(), current.end(), nextNetworkNodeName) == current.end())
-                collectAllPaths(source, destination, nextNode, trees, current);
+                collectAllTrees(source, destinations, nextNode, trees, current);
         }
     }
     current.erase(current.end() - 1);
