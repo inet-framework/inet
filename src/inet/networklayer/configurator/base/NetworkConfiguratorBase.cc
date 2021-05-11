@@ -115,7 +115,7 @@ bool NetworkConfiguratorBase::isBridgeNode(Node *node) const
     return !node->routingTable || !node->interfaceTable;
 }
 
-NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkIn(Node *node, const char *neighbor)
+NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkIn(const Node *node, const char *neighbor) const
 {
     for (int i = 0; i < node->getNumInLinks(); i++)
         if (!strcmp(node->getLinkIn(i)->getRemoteNode()->getModule()->getFullName(), neighbor))
@@ -123,7 +123,7 @@ NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkIn(Node *node, c
     return nullptr;
 }
 
-NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkOut(Node *node, const char *neighbor) const
+NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkOut(const Node *node, const char *neighbor) const
 {
     for (int i = 0; i < node->getNumOutLinks(); i++)
         if (!strcmp(node->getLinkOut(i)->getRemoteNode()->getModule()->getFullName(), neighbor))
@@ -131,7 +131,15 @@ NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkOut(Node *node, 
     return nullptr;
 }
 
-Topology::LinkOut *NetworkConfiguratorBase::findLinkOut(Node *node, int gateId) const
+NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkOut(const Node *node, const Node *neighbor) const
+{
+    for (int i = 0; i < node->getNumOutLinks(); i++)
+        if (node->getLinkOut(i)->getRemoteNode() == neighbor)
+            return check_and_cast<Link *>(static_cast<Topology::Link *>(node->getLinkOut(i)));
+    return nullptr;
+}
+
+Topology::LinkOut *NetworkConfiguratorBase::findLinkOut(const Node *node, int gateId) const
 {
     for (int i = 0; i < node->getNumOutLinks(); i++)
         if (node->getLinkOut(i)->getLocalGateId() == gateId)
@@ -139,7 +147,7 @@ Topology::LinkOut *NetworkConfiguratorBase::findLinkOut(Node *node, int gateId) 
     return nullptr;
 }
 
-NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::findInterfaceInfo(Node *node, NetworkInterface *networkInterface) const
+NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::findInterfaceInfo(const Node *node, NetworkInterface *networkInterface) const
 {
     if (networkInterface == nullptr)
         return nullptr;
