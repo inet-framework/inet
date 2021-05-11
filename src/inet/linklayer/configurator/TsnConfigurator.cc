@@ -38,6 +38,7 @@ void TsnConfigurator::initialize(int stage)
 void TsnConfigurator::computeConfiguration()
 {
     long initializeStartTime = clock();
+    delete topology;
     topology = new Topology();
     TIME(extractTopology(*topology));
     TIME(computeStreams());
