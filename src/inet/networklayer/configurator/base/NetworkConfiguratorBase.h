@@ -91,10 +91,11 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule
 
     virtual bool isBridgeNode(Node *node) const;
 
-    virtual Link *findLinkIn(Node *node, const char *neighbor);
-    virtual Link *findLinkOut(Node *node, const char *neighbor) const;
-    virtual Topology::LinkOut *findLinkOut(Node *node, int gateId) const;
-    virtual InterfaceInfo *findInterfaceInfo(Node *node, NetworkInterface *networkInterface) const;
+    virtual Link *findLinkIn(const Node *node, const char *neighbor) const;
+    virtual Link *findLinkOut(const Node *node, const char *neighbor) const;
+    virtual Link *findLinkOut(const Node *node, const Node *neighbor) const;
+    virtual Topology::LinkOut *findLinkOut(const Node *node, int gateId) const;
+    virtual InterfaceInfo *findInterfaceInfo(const Node *node, NetworkInterface *networkInterface) const;
 };
 
 } // namespace inet
