@@ -33,14 +33,14 @@ namespace inet {
 
 Register_Class(Topology);
 
-Topology::LinkIn *Topology::Node::getLinkIn(int i)
+Topology::LinkIn *Topology::Node::getLinkIn(int i) const
 {
     if (i < 0 || i >= (int)inLinks.size())
         throw cRuntimeError("Topology::Node::getLinkIn: invalid link index %d", i);
     return (Topology::LinkIn *)inLinks[i];
 }
 
-Topology::LinkOut *Topology::Node::getLinkOut(int i)
+Topology::LinkOut *Topology::Node::getLinkOut(int i) const
 {
     if (i < 0 || i >= (int)outLinks.size())
         throw cRuntimeError("Topology::Node::getLinkOut: invalid index %d", i);

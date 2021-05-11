@@ -176,7 +176,7 @@ class INET_API Topology : public cOwnedObject
         /**
          * Returns ith incoming link of graph node.
          */
-        LinkIn *getLinkIn(int i);
+        LinkIn *getLinkIn(int i) const;
 
         /**
          * Returns the number of outgoing links from this graph node.
@@ -186,7 +186,7 @@ class INET_API Topology : public cOwnedObject
         /**
          * Returns ith outgoing link of graph node.
          */
-        LinkOut *getLinkOut(int i);
+        LinkOut *getLinkOut(int i) const;
         //@}
 
         /** @name Result of shortest path extraction. */
