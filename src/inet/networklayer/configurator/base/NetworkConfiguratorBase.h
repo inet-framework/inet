@@ -76,6 +76,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule
     Topology *topology = nullptr;
 
   protected:
+    virtual ~NetworkConfiguratorBase() { delete topology; }
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("Invalid operation"); }
 

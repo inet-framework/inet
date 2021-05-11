@@ -60,6 +60,7 @@ void GateSchedulingConfiguratorBase::clearConfiguration()
 void GateSchedulingConfiguratorBase::computeConfiguration()
 {
     long startTime = clock();
+    delete topology;
     topology = new Topology();
     TIME(extractTopology(*topology));
     TIME(gateSchedulingInput = createGateSchedulingInput());

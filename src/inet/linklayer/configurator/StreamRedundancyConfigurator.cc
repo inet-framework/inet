@@ -59,6 +59,7 @@ void StreamRedundancyConfigurator::clearConfiguration()
 void StreamRedundancyConfigurator::computeConfiguration()
 {
     long initializeStartTime = clock();
+    delete topology;
     topology = new Topology();
     TIME(extractTopology(*topology));
     TIME(computeStreams());
