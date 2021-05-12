@@ -299,16 +299,20 @@ void TsnConfigurator::configureStreams() const
             streamParameterValue->set("destination", streamConfiguration.destinations[0].c_str());
             for (auto& tree : streamConfiguration.trees) {
                 cValueArray *treeParameterValue = new cValueArray();
-                for (int i = 0; i < tree.paths[0].nodes.size(); i++) {
-                    // skip source and destination in the alternative paths because they are implied
-                    if (i != 0 && i != tree.paths[0].nodes.size() - 1) {
-                        auto name = tree.paths[0].nodes[i]->module->getFullName();
-                        treeParameterValue->add(name);
+                for (auto& path : tree.paths) {
+                    cValueArray *pathParameterValue = new cValueArray();
+                    for (int j = 0; j < path.nodes.size(); j++) {
+                        // skip source and destination in the alternative paths because they are implied
+                        if (j != 0 && j != tree.paths[0].nodes.size() - 1) {
+                            auto name = tree.paths[0].nodes[j]->module->getFullName();
+                            pathParameterValue->add(name);
+                        }
                     }
+                    treeParameterValue->add(pathParameterValue);
                 }
                 treesParameterValue->add(treeParameterValue);
             }
-            streamParameterValue->set("paths", treesParameterValue);
+            streamParameterValue->set("trees", treesParameterValue);
             streamsParameterValue->add(streamParameterValue);
         }
         EV_INFO << "Configuring stream configurator" << EV_FIELD(streamRedundancyConfigurator) << EV_FIELD(streamsParameterValue) << EV_ENDL;
