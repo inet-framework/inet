@@ -155,10 +155,8 @@ double TsnConfigurator::computeTreeCost(const Node *sourceNode, const std::vecto
 
 TsnConfigurator::Tree TsnConfigurator::computeCanonicalTree(const Tree& tree) const
 {
-//    std::cout << "ORIGINAL FORM: " << tree << std::endl;
     Tree canonicalTree({});
     for (auto& path : tree.paths) {
-//        std::cout << "BUILDING: " << canonicalTree << std::endl;
         auto startNode = path.nodes[0];
         auto itStart = std::find_if(canonicalTree.paths.begin(), canonicalTree.paths.end(), [&] (auto path) {
             return path.nodes.front() == startNode;
@@ -198,7 +196,6 @@ TsnConfigurator::Tree TsnConfigurator::computeCanonicalTree(const Tree& tree) co
             }
         }
     }
-//    std::cout << "CANONICAL FORM: " << canonicalTree << std::endl;
     return canonicalTree;
 }
 
@@ -219,11 +216,11 @@ bool TsnConfigurator::checkNodeFailureProtection(cValueArray *configuration, con
         do {
             EV_DEBUG << "Assuming failed nodes: ";
             std::vector<const Node *> failedNodes;
+            bool first = true;
             for (int i = 0; i < n; i++) {
                 if (mask[i]) {
                     auto node = networkNodes[i];
-                    if (i != 0)
-                        EV_DEBUG << ", ";
+                    if (!first) { EV_DEBUG << ", "; first = false; }
                     EV_DEBUG << node->module->getFullName();
                     failedNodes.push_back(node);
                 }
@@ -260,11 +257,11 @@ bool TsnConfigurator::checkLinkFailureProtection(cValueArray *configuration, con
         do {
             EV_DEBUG << "Assuming failed links: ";
             std::vector<const Link *> failedLinks;
+            bool first = true;
             for (int i = 0; i < n; i++) {
                 if (mask[i]) {
                     auto link = (Topology::LinkOut *)networkLinks[i];
-                    if (i != 0)
-                        EV_DEBUG << ", ";
+                    if (!first) { EV_DEBUG << ", "; first = false; }
                     EV_DEBUG << ((Node *)link->getLocalNode())->module->getFullName() << " -> " << ((Node *)link->getRemoteNode())->module->getFullName();
                     failedLinks.push_back(networkLinks[i]);
                 }
@@ -301,13 +298,8 @@ void TsnConfigurator::configureStreams() const
                 cValueArray *treeParameterValue = new cValueArray();
                 for (auto& path : tree.paths) {
                     cValueArray *pathParameterValue = new cValueArray();
-                    for (int j = 0; j < path.nodes.size(); j++) {
-                        // skip source and destination in the alternative paths because they are implied
-                        if (j != 0 && j != tree.paths[0].nodes.size() - 1) {
-                            auto name = tree.paths[0].nodes[j]->module->getFullName();
-                            pathParameterValue->add(name);
-                        }
-                    }
+                    for (auto& node : path.nodes)
+                        pathParameterValue->add(node->module->getFullName());
                     treeParameterValue->add(pathParameterValue);
                 }
                 treesParameterValue->add(treeParameterValue);
