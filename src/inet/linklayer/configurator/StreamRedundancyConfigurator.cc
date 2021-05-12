@@ -53,7 +53,8 @@ void StreamRedundancyConfigurator::clearConfiguration()
     receivers.clear();
     nextVlanIds.clear();
     assignedVlanIds.clear();
-    topology->clear();
+    if (topology != nullptr)
+        topology->clear();
 }
 
 void StreamRedundancyConfigurator::computeConfiguration()
