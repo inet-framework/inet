@@ -161,6 +161,7 @@ const Protocol Protocol::probabilistic("probabilistic", "Probabilistic", Protoco
 const Protocol Protocol::shortcutMac("shortcutmac", "Shortcut MAC");
 const Protocol Protocol::shortcutPhy("shortcutphy", "Shortcut PHY", Protocol::PhysicalLayer);
 const Protocol Protocol::unitDisk("unitdisk", "UnitDisk");
+const Protocol Protocol::unknown("unknown", "Unknown");
 const Protocol Protocol::wiseRoute("wiseroute", "WiseRoute"); // WiseRoute Network Protocol
 
 const Protocol Protocol::gptp("gptp", "gPTP");
