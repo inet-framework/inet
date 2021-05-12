@@ -92,14 +92,11 @@ void StreamRedundancyConfigurator::computeStreamSendersAndReceivers(cValueMap *s
             cValueArray *tree = check_and_cast<cValueArray*>(trees->get(j).objectValue());
             for (int k = 0; k < tree->size(); k++) {
                 cValueArray *path = check_and_cast<cValueArray*>(tree->get(k).objectValue());
-                for (int l = 0; l < path->size() + 2; l++) {
-                    auto getElement = [&] (int i) {
-                        return i == 0 ? sourceNetworkNodeName.c_str() : i == path->size() + 1 ? destinationNetworkNodeName.c_str() : path->get(i - 1).stringValue();
-                    };
-                    const char *elementNetworkNodeName = getElement(l);
+                for (int l = 0; l < path->size(); l++) {
+                    const char *elementNetworkNodeName = path->get(l).stringValue();
                     if (!strcmp(elementNetworkNodeName, networkNode->getFullName())) {
-                        auto senderNetworkNodeName = l != 0 ? getElement(l - 1) : nullptr;
-                        auto receiverNetworkNodeName = l != path->size() + 1 ? getElement(l + 1) : nullptr;
+                        auto senderNetworkNodeName = l != 0 ? path->get(l - 1).stringValue() : nullptr;
+                        auto receiverNetworkNodeName = l != path->size() - 1 ? path->get(l + 1).stringValue() : nullptr;
                         if (senderNetworkNodeName != nullptr && std::find(senderNetworkNodeNames.begin(), senderNetworkNodeNames.end(), senderNetworkNodeName) == senderNetworkNodeNames.end())
                             senderNetworkNodeNames.push_back(senderNetworkNodeName);
                         if (receiverNetworkNodeName != nullptr && std::find(receiverNetworkNodeNames.begin(), receiverNetworkNodeNames.end(), receiverNetworkNodeName) == receiverNetworkNodeNames.end())
@@ -309,7 +306,7 @@ std::vector<std::vector<std::string>> StreamRedundancyConfigurator::getPathFragm
                     cValueArray *path = check_and_cast<cValueArray*>(tree->get(k).objectValue());
                     std::vector<std::string> memberStream;
                     memberStream.push_back(source);
-                    for (int l = 0; l < path->size(); l++) {
+                    for (int l = 1; l < path->size() - 1; l++) {
                         auto nodeName = path->get(l).stringValue();
                         auto module = getParentModule()->getSubmodule(nodeName);
                         Node *node = (Node *)topology->getNodeFor(module);
