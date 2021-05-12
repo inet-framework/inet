@@ -88,8 +88,8 @@ class INET_API StreamRedundancyConfigurator : public NetworkConfiguratorBase
     int maxVlanId = -1;
     cValueArray *configuration;
 
-    std::map<std::pair<std::string, std::string>, std::vector<std::string>> streamSenders; // maps network node name and stream name to list of previous sender network node names
-    std::map<std::pair<std::string, std::string>, std::vector<std::string>> receivers; // maps network node name and stream name to list of next receiver network node names
+    std::map<std::tuple<std::string, std::string, int>, std::vector<std::string>> senders; // maps network node name and stream name to list of previous sender network node names
+    std::map<std::tuple<std::string, std::string, int>, std::vector<std::string>> receivers; // maps network node name and stream name to list of next receiver network node names
     std::map<std::pair<std::string, std::string>, int> nextVlanIds; // maps network node name and destination node name to next available VLAN ID
     std::map<std::tuple<std::string, std::string, std::string, std::string>, int> assignedVlanIds; // maps network node name, receiver network node name, destination network node name and stream name to VLAN ID
 
