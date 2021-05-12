@@ -50,7 +50,8 @@ void GateSchedulingConfiguratorBase::handleParameterChange(const char *name)
 
 void GateSchedulingConfiguratorBase::clearConfiguration()
 {
-    topology->clear();
+    if (topology != nullptr)
+        topology->clear();
     delete gateSchedulingInput;
     gateSchedulingInput = nullptr;
     delete gateSchedulingOutput;
