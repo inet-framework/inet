@@ -83,3 +83,56 @@ network EthernetVlanShowcase2
     connections:
         host1.ethg++ <--> Eth100M <--> host2.ethg++;
 }
+
+network EthernetVlanShowcase3
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator {
+            @display("p=100,100;is=s");
+        }
+        host1: StandardHost {
+            @display("p=251,69;i=,#CC0000");
+        }
+        switch1: EthernetSwitch {
+            @display("p=450,150");
+        }
+        switch2: EthernetSwitch {
+            @display("p=650,150");
+        }
+        host3: StandardHost {
+            @display("p=850,57;i=,#CC0000");
+        }
+        visualizer: IntegratedCanvasVisualizer {
+            @display("p=100,200;is=s");
+        }
+        host6: StandardHost {
+            @display("p=850,215;i=,#204A87");
+        }
+        host4: StandardHost {
+            @display("p=251,208;i=,#204A87");
+        }
+        host2: StandardHost {
+            @display("p=744,57;i=,#CC0000");
+        }
+        host5: StandardHost {
+            @display("p=744,215;i=,#204A87");
+        }
+        switchA: EthernetSwitch {
+            @display("p=548,68");
+        }
+        switchB: EthernetSwitch {
+            @display("p=548,222");
+        }
+    connections:
+
+        switch1.ethg++ <--> Eth100M <--> host1.ethg++;
+        switch1.ethg++ <--> Eth100M <--> host4.ethg++;
+        switch2.ethg++ <--> Eth100M <--> host2.ethg++;
+        switch2.ethg++ <--> Eth100M <--> host3.ethg++;
+        switch2.ethg++ <--> Eth100M <--> host5.ethg++;
+        switch2.ethg++ <--> Eth100M <--> host6.ethg++;
+        switch1.ethg++ <--> switchA.ethg++;
+        switchA.ethg++ <--> switch2.ethg++;
+        switch1.ethg++ <--> switchB.ethg++;
+        switchB.ethg++ <--> switch2.ethg++;
+}
