@@ -50,14 +50,23 @@ class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacke
 
     virtual void updateDisplayString() const;
 
-    virtual void animateSend(Packet *packet, cGate *gate, const SendOptions& sendOptions) const;
-    virtual void animateSendPacket(Packet *packet, cGate *gate) const;
-    virtual void animateSendPacketStart(Packet *packet, cGate *gate, bps datarate, long transmissionId) const;
-    virtual void animateSendPacketStart(Packet *packet, cGate *gate, bps datarate, const SendOptions& sendOptions) const;
-    virtual void animateSendPacketEnd(Packet *packet, cGate *gate, long transmissionId) const;
-    virtual void animateSendPacketEnd(Packet *packet, cGate *gate, const SendOptions& sendOptions) const;
-    virtual void animateSendPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength, long transmissionId) const;
-    virtual void animateSendPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength, const SendOptions& sendOptions) const;
+    virtual void animatePull(Packet *packet, cGate *gate, const SendOptions& sendOptions) const;
+    virtual void animatePush(Packet *packet, cGate *gate, const SendOptions& sendOptions) const;
+
+    virtual void animatePullPacket(Packet *packet, cGate *gate) const;
+    virtual void animatePushPacket(Packet *packet, cGate *gate) const;
+    virtual void animatePullPacketStart(Packet *packet, cGate *gate, bps datarate, long transmissionId) const;
+    virtual void animatePullPacketStart(Packet *packet, cGate *gate, bps datarate, const SendOptions& sendOptions) const;
+    virtual void animatePushPacketStart(Packet *packet, cGate *gate, bps datarate, long transmissionId) const;
+    virtual void animatePushPacketStart(Packet *packet, cGate *gate, bps datarate, const SendOptions& sendOptions) const;
+    virtual void animatePullPacketEnd(Packet *packet, cGate *gate, long transmissionId) const;
+    virtual void animatePullPacketEnd(Packet *packet, cGate *gate, const SendOptions& sendOptions) const;
+    virtual void animatePushPacketEnd(Packet *packet, cGate *gate, long transmissionId) const;
+    virtual void animatePushPacketEnd(Packet *packet, cGate *gate, const SendOptions& sendOptions) const;
+    virtual void animatePullPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength, long transmissionId) const;
+    virtual void animatePullPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength, const SendOptions& sendOptions) const;
+    virtual void animatePushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength, long transmissionId) const;
+    virtual void animatePushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength, const SendOptions& sendOptions) const;
 
   public:
     virtual bool supportsPacketSending(cGate *gate) const override { return true; }
