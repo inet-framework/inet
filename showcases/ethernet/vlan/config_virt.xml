@@ -1,0 +1,5 @@
+<config>
+   <interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/>
+   <route hosts='host1' destination='host2%virt0' netmask='255.255.255.255' interface='virt0'/>
+   <route hosts='host2' destination='host1%virt0' netmask='255.255.255.255' interface='virt0'/>   
+</config>
