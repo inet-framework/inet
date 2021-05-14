@@ -347,9 +347,13 @@ Config: VLAN Between Hosts Using Virtual Interfaces
 
 In this configuration, VLAN tags are added to packets in a host. 
 
-Two UDP applications in host1 send packets to host2. One application sends packets via the two hosts' Ethernet interfaces, the other a pair of virtual interfaces (which in turn use the Ethernet interface to carry the packets). The packets sent between the virtual interfaces are configured to be VLAN tagged and the ones between the Ethernet interfaces are not.
+The configuration uses the same network as the previous one. In addition to the Ethernet interface, host1 and host2 contains a virtual interface as well. Two UDP applications in host1 send packets to host2: one of them via the two hosts' Ethernet interfaces, the other via a pair of virtual interfaces (which in turn use the Ethernet interface to carry the packets). The packets sent between the virtual interfaces are configured to be VLAN tagged and the ones between the Ethernet interfaces are not.
+
+.. **TODO** host1 and host2 contains a virtual interface
 
 The virtual interface in host1 adds a VLAN tag request to outgoing packets, and VLAN tags are attached by host1's 802.1q submodule.
+
+The VLAN policy submodule in switch2 is configured to forward only VLAN-tagged packets. Thus packets sent by the Ethernet interface are dropped by switch2, but those sent by the virtual interface are forwarded to host2, so that host2 is accessible only through the virtual interfaces.
 
 .. **TODO** Ieee8021q in switches only ?
 
@@ -393,21 +397,21 @@ The virtual interface in host1 adds a VLAN tag request to outgoing packets, and 
 .. VLAN Between Virtual Interfaces
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This configuration demonstrates how to use VLANs with virtual interfaces. It uses the following network:
+.. This configuration demonstrates how to use VLANs with virtual interfaces. It uses the following network:
 
-.. figure:: media/network7.png
-   :align: center
+   .. figure:: media/network7.png
+      :align: center
 
-The network contains two :ned:`StandardHost`'s connected with 100Mbps Ethernet. Both hosts have a regular Ethernet interface (``eth0``) and a virtual interface (``virt0``), which tunnels packets through the Ethernet interface.
+.. The network contains two :ned:`StandardHost`'s connected with 100Mbps Ethernet. Both hosts have a regular Ethernet interface (``eth0``) and a virtual interface (``virt0``), which tunnels packets through the Ethernet interface.
 
-.. figure:: media/virt.png
-   :align: center
+.. .. figure:: media/virt.png
+      :align: center
 
 The simulation is defined in the ``VirtualInterfaces`` configuration in omnetpp.ini:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: Config VirtualInterfaces
-   :end-at: UdpBasicAppData-virt
+   :start-at: Config VirtualInterfaces2
+   :end-at: acceptedVlanIds
    :language: ini
 
 Two UDP apps in host1 generate traffic, one of them for host2's eth0 and the other for host2's virt0 interface.
