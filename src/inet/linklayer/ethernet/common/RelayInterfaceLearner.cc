@@ -19,6 +19,7 @@
 
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
@@ -46,11 +47,13 @@ cGate *RelayInterfaceLearner::getRegistrationForwardingGate(cGate *gate)
 
 void RelayInterfaceLearner::processPacket(Packet *packet)
 {
-    auto macAddressInd = packet->getTag<MacAddressInd>();
+    unsigned int vid = 0;
+    if (auto vlanInd = packet->findTag<VlanInd>())
+        vid = vlanInd->getVlanId();
     auto incomingInterface = interfaceTable->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
-    auto sourceAddress = macAddressInd->getSrcAddress();
+    auto sourceAddress = packet->getTag<MacAddressInd>()->getSrcAddress();
     EV_INFO << "Learning peer address" << EV_FIELD(sourceAddress) << EV_FIELD(incomingInterface) << EV_ENDL;
-    macAddressTable->updateTableWithAddress(incomingInterface->getInterfaceId(), sourceAddress);
+    macAddressTable->updateTableWithAddress(incomingInterface->getInterfaceId(), sourceAddress, vid);
 }
 
 } // namespace inet
