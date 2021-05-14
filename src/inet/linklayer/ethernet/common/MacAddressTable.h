@@ -50,14 +50,14 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
         bool operator()(const MacAddress& u1, const MacAddress& u2) const { return u1.compareTo(u2) < 0; }
     };
 
-    typedef std::map<MacAddress, AddressEntry, MacCompare> AddressTable;
-    typedef std::map<unsigned int, AddressTable *> VlanAddressTable;
+    typedef std::pair<unsigned int, MacAddress> AddressTableKey;
+    friend std::ostream& operator<<(std::ostream& os, const AddressTableKey& key);
+    typedef std::map<AddressTableKey, AddressEntry> AddressTable;
 
     simtime_t agingTime; // Max idle time for address table entries
     simtime_t lastPurge; // Time of the last call of removeAgedEntriesFromAllVlans()
-    AddressTable *addressTable = nullptr; // VLAN-unaware address lookup (vid = 0)
+    AddressTable addressTable;
     ModuleRefByPar<IInterfaceTable> ifTable;
-    VlanAddressTable vlanAddressTable; // VLAN-aware address lookup
 
   protected:
 
@@ -71,11 +71,6 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
     virtual const char *resolveDirective(char directive) const override;
 
     virtual void parseAddressTableParameter();
-
-    /**
-     * @brief Returns a MAC Address Table for a specified VLAN ID
-     */
-    AddressTable *getTableForVid(unsigned int vid);
 
   public:
 
@@ -115,10 +110,6 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
      */
     virtual void copyTable(int interfaceIdA, int interfaceIdB) override;
 
-    /**
-     * @brief Remove aged entries from a specified VLAN
-     */
-    virtual void removeAgedEntriesFromVlan(unsigned int vid = 0) override;
     /**
      * @brief Remove aged entries from all VLANs
      */

@@ -58,10 +58,6 @@ class INET_API IMacAddressTable
     virtual void copyTable(int portA, int portB) = 0;
 
     /**
-     * @brief Remove aged entries from a specified VLAN
-     */
-    virtual void removeAgedEntriesFromVlan(unsigned int vid = 0) = 0;
-    /**
      * @brief Remove aged entries from all VLANs
      */
     virtual void removeAgedEntriesFromAllVlans() = 0;

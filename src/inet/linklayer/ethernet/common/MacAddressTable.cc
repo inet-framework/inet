@@ -36,6 +36,12 @@ std::ostream& operator<<(std::ostream& os, const MacAddressTable::AddressEntry& 
     return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const MacAddressTable::AddressTableKey& key)
+{
+    os << "{VID=" << key.first << ", addr=" << key.second << "}";
+    return os;
+}
+
 MacAddressTable::MacAddressTable()
 {
 }
@@ -47,6 +53,7 @@ void MacAddressTable::initialize(int stage)
         agingTime = par("agingTime");
         lastPurge = SIMTIME_ZERO;
         ifTable.reference(this, "interfaceTableModule", true);
+        WATCH_MAP(addressTable);
     }
 }
 
@@ -113,10 +120,9 @@ const char *MacAddressTable::resolveDirective(char directive) const
     static std::string result;
     switch (directive) {
         case 'a':
-            result = addressTable ? std::to_string(addressTable->size()) : "0";
+            result = std::to_string(addressTable.size());
             break;
         case 'v':
-            result = std::to_string(vlanAddressTable.size());
             break;
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
@@ -130,36 +136,21 @@ const char *MacAddressTable::resolveDirective(char directive) const
  * or nullptr pointer if it is not found
  */
 
-MacAddressTable::AddressTable *MacAddressTable::getTableForVid(unsigned int vid)
-{
-    if (vid == 0)
-        return addressTable;
-
-    auto iter = vlanAddressTable.find(vid);
-    if (iter != vlanAddressTable.end())
-        return iter->second;
-    return nullptr;
-}
-
 int MacAddressTable::getInterfaceIdForAddress(const MacAddress& address, unsigned int vid)
 {
     Enter_Method("getInterfaceIdForAddress");
 
-    AddressTable *table = getTableForVid(vid);
-    // VLAN ID vid does not exist
-    if (table == nullptr)
-        return -1;
+    AddressTableKey key(vid, address);
+    auto iter = addressTable.find(key);
 
-    auto iter = table->find(address);
-
-    if (iter == table->end()) {
+    if (iter == addressTable.end()) {
         // not found
         return -1;
     }
     if (iter->second.insertionTime + agingTime <= simTime()) {
         // don't use (and throw out) aged entries
         EV << "Ignoring and deleting aged entry: " << iter->first << " --> interfaceId " << iter->second.interfaceId << "\n";
-        table->erase(iter);
+        addressTable.erase(iter);
         return -1;
     }
     return iter->second.interfaceId;
@@ -176,32 +167,15 @@ bool MacAddressTable::updateTableWithAddress(int interfaceId, const MacAddress& 
     if (address.isMulticast()) // broadcast or multicast
         return false;
 
-    AddressTable::iterator iter;
-    AddressTable *table = getTableForVid(vid);
+    AddressTableKey key(vid, address);
+    auto iter = addressTable.find(key);
 
-    if (table == nullptr) {
-        // MAC Address Table does not exist for VLAN ID vid, so we create it
-        table = new AddressTable();
-
-        // set 'the addressTable' to VLAN ID 0
-        if (vid == 0) {
-            this->addressTable = table;
-            AddressTable& addressTable = *table; // magic to hide the '*' from the name of the watch below
-            WATCH_MAP(addressTable);
-        }
-
-        vlanAddressTable[vid] = table;
-        iter = table->end();
-    }
-    else
-        iter = table->find(address);
-
-    if (iter == table->end()) {
+    if (iter == addressTable.end()) {
         removeAgedEntriesIfNeeded();
 
         // Add entry to table
         EV << "Adding entry" << EV_FIELD(address) << EV_FIELD(interfaceId) << EV_FIELD(vid) << EV_ENDL;
-        (*table)[address] = AddressEntry(vid, interfaceId, simTime());
+        addressTable[key] = AddressEntry(vid, interfaceId, simTime());
         return false;
     }
     else {
@@ -221,13 +195,11 @@ bool MacAddressTable::updateTableWithAddress(int interfaceId, const MacAddress& 
 void MacAddressTable::flush(int interfaceId)
 {
     Enter_Method("flush");
-    for (auto& elem : vlanAddressTable) {
-        AddressTable *table = elem.second;
-        for (auto j = table->begin(); j != table->end();) {
-            auto cur = j++;
-            if (cur->second.interfaceId == interfaceId)
-                table->erase(cur);
-        }
+    for (auto cur = addressTable.begin(); cur != addressTable.end();) {
+        if (cur->second.interfaceId == interfaceId)
+            cur = addressTable.erase(cur);
+        else
+            ++cur;
     }
 }
 
@@ -239,55 +211,30 @@ void MacAddressTable::printState()
 {
     EV << endl << "MAC Address Table" << endl;
     EV << "VLAN ID    MAC    IfId    Inserted" << endl;
-    for (auto& elem : vlanAddressTable) {
-        AddressTable *table = elem.second;
-        for (auto& table_j : *table)
-            EV << table_j.second.vid << "   " << table_j.first << "   " << table_j.second.interfaceId << "   " << table_j.second.insertionTime << endl;
-    }
+    for (auto& elem : addressTable)
+        EV << elem.first.first << "   " << elem.first.second << "   " << elem.second.interfaceId << "   " << elem.second.insertionTime << endl;
 }
 
+//TODO rename it (replace interfaceIdA to interfaceIdB in table)
 void MacAddressTable::copyTable(int interfaceIdA, int interfaceIdB)
 {
-    for (auto& elem : vlanAddressTable) {
-        AddressTable *table = elem.second;
-        for (auto& table_j : *table)
-            if (table_j.second.interfaceId == interfaceIdA)
-                table_j.second.interfaceId = interfaceIdB;
-
-    }
-}
-
-void MacAddressTable::removeAgedEntriesFromVlan(unsigned int vid)
-{
-    AddressTable *table = getTableForVid(vid);
-    if (table == nullptr)
-        return;
-    // TODO this part could be factored out
-    for (auto iter = table->begin(); iter != table->end();) {
-        auto cur = iter++; // iter will get invalidated after erase()
-        AddressEntry& entry = cur->second;
-        if (entry.insertionTime + agingTime <= simTime()) {
-            EV << "Removing aged entry from Address Table: "
-               << cur->first << " --> interfaceId " << cur->second.interfaceId << "\n";
-            table->erase(cur);
-        }
+    for (auto& elem : addressTable) {
+        if (elem.second.interfaceId == interfaceIdA)
+            elem.second.interfaceId = interfaceIdB;
     }
 }
 
 void MacAddressTable::removeAgedEntriesFromAllVlans()
 {
-    for (auto& elem : vlanAddressTable) {
-        AddressTable *table = elem.second;
-        // TODO this part could be factored out
-        for (auto j = table->begin(); j != table->end();) {
-            auto cur = j++; // iter will get invalidated after erase()
-            AddressEntry& entry = cur->second;
-            if (entry.insertionTime + agingTime <= simTime()) {
-                EV << "Removing aged entry from Address Table: "
-                   << cur->first << " --> interfaceId " << cur->second.interfaceId << "\n";
-                table->erase(cur);
-            }
+    for (auto cur = addressTable.begin(); cur != addressTable.end();) {
+        AddressEntry& entry = cur->second;
+        if (entry.insertionTime + agingTime <= simTime()) {
+            EV << "Removing aged entry from Address Table: "
+               << cur->first.first << " " << cur->first.second << " --> interfaceId " << cur->second.interfaceId << "\n";
+            cur = addressTable.erase(cur);
         }
+        else
+            ++cur;
     }
 }
 
@@ -295,7 +242,7 @@ void MacAddressTable::removeAgedEntriesIfNeeded()
 {
     simtime_t now = simTime();
 
-    if (now >= lastPurge + 1)
+    if (now >= lastPurge + SimTime(1, SIMTIME_S))
         removeAgedEntriesFromAllVlans();
 
     lastPurge = simTime();
@@ -360,23 +307,8 @@ void MacAddressTable::readAddressTable(const char *fileName)
 
         // Create an entry with address and interfaceId and insert into table
         AddressEntry entry(vlanId, interfaceId, 0);
-        AddressTable *table = getTableForVid(entry.vid);
-
-        if (table == nullptr) {
-            // MAC Address Table does not exist for VLAN ID vid, so we create it
-            table = new AddressTable();
-
-            // set 'the addressTable' to VLAN ID 0
-            if (entry.vid == 0) {
-                this->addressTable = table;
-                AddressTable& addressTable = *table; // magic to hide the '*' from the name of the watch below
-                WATCH_MAP(addressTable);
-            }
-
-            vlanAddressTable[entry.vid] = table;
-        }
-
-        (*table)[macAddress] = entry;
+        AddressTableKey key(vlanId, macAddress);
+        addressTable[key] = entry;
     }
     fclose(fp);
 }
@@ -409,26 +341,15 @@ void MacAddressTable::initializeTable()
     const char *addressTableFile = par("addressTableFile");
     if (addressTableFile && *addressTableFile)
         readAddressTable(addressTableFile);
-
-    if (this->addressTable != nullptr) { // setup a WATCH on VLANID 0 if present
-        AddressTable& addressTable = *this->addressTable; // magic to hide the '*' from the name of the watch below
-        WATCH_MAP(addressTable);
-    }
 }
 
 void MacAddressTable::clearTable()
 {
-    for (auto& elem : vlanAddressTable)
-        delete elem.second;
-
-    vlanAddressTable.clear();
-    addressTable = nullptr;
+    addressTable.clear();
 }
 
 MacAddressTable::~MacAddressTable()
 {
-    for (auto& elem : vlanAddressTable)
-        delete elem.second;
 }
 
 void MacAddressTable::setAgingTime(simtime_t agingTime)
