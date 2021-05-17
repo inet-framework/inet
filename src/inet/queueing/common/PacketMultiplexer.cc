@@ -138,8 +138,7 @@ void PacketMultiplexer::handleRegisterService(const Protocol& protocol, cGate *g
     if (g == outputGate) {
         int size = gateSize("in");
         for (int i = 0; i < size; i++)
-            if (i != g->getIndex())
-                registerService(protocol, gate("in", i), servicePrimitive);
+            registerService(protocol, gate("in", i), servicePrimitive);
     }
 }
 
