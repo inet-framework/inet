@@ -50,6 +50,7 @@ module EthernetSwitch
         @labels(node,ethernet-node);
         @display("i=device/switch");
         int numPcapRecorders = default(0);
+        int numApps = default(0);
         bool hasStatus = default(false);
         bool hasStp = default(false);
         bool hasGptp = default(false);
@@ -94,6 +95,10 @@ module EthernetSwitch
         gptp: <default("Gptp")> like IApp if hasGptp {
             @display("p=700,75");
 	        gptpNodeType = default("BRIDGE_NODE"); // @enum("gptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE
+        }
+        app[numApps]: <> like IApp {
+            parameters:
+                @display("p=900,75,row,150");
         }
         sc: MessageDispatcher {
             @display("p=800,150;b=1200,5");
@@ -184,6 +189,11 @@ module EthernetSwitch
         if hasGptp {
             gptp.socketOut --> sc.in++;
             sc.out++ --> gptp.socketIn;
+        }
+
+        for i=0..numApps-1 {
+            app[i].socketOut --> sc.in++;
+            app[i].socketIn <-- sc.out++;
         }
 }
 
