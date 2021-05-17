@@ -65,5 +65,6 @@ enum IpProtocolId
     IP_PROT_WISE = 252;    // INET specific: Probabilistic Network Protocol
     IP_PROT_NEXT_HOP_FORWARDING = 253; // INET specific: Next Hop Forwarding
     IP_PROT_ECHO = 254; // INET specific: Echo Protocol
+    IP_PROT_UNKNOWN = 255; // INET specific: Unknown Protocol
 }
 
