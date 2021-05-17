@@ -84,6 +84,7 @@ ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { ETHERTYPE_8021Q_TAG, &Protocol::ieee8021qCTag },
     { ETHERTYPE_IPv6, &Protocol::ipv6 },
     { ETHERTYPE_INET_PROBABILISTIC, &Protocol::probabilistic },     // INET specific non-standard protocol
+    { ETHERTYPE_UNKNOWN, &Protocol::unknown }, // INET specific non-standard protocol
     { ETHERTYPE_INET_WISEROUTE, &Protocol::wiseRoute },         // INET specific non-standard protocol
     { ETHERTYPE_NEXT_HOP_FORWARDING, &Protocol::nextHopForwarding }, // INET specific non-standard protocol
     { ETHERTYPE_FLOW_CONTROL, &Protocol::ethernetFlowCtrl },
@@ -101,6 +102,7 @@ ProtocolGroup ProtocolGroup::pppprotocol("pppprotocol", {
     { 0x0021, &Protocol::ipv4 },
     { 0x0057, &Protocol::ipv6 },
     { 0x0281, &Protocol::mpls },
+    { 0x39FB, &Protocol::unknown },           // INET specific non-standard protocol
     { 0x39FC, &Protocol::flooding },          // INET specific non-standard protocol
     { 0x39FD, &Protocol::probabilistic },     // INET specific non-standard protocol
     { 0x39FE, &Protocol::wiseRoute },         // INET specific non-standard protocol
@@ -134,6 +136,7 @@ ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { IP_PROT_WISE, &Protocol::wiseRoute },         // INET specific non-standard protocol
     { IP_PROT_NEXT_HOP_FORWARDING, &Protocol::nextHopForwarding }, // INET specific non-standard protocol
     { IP_PROT_ECHO, &Protocol::echo },              // INET specific non-standard protocol
+    { IP_PROT_UNKNOWN, &Protocol::unknown }, // INET specific non-standard protocol
 });
 
 ProtocolGroup ProtocolGroup::snapOui("snapOui", {
@@ -145,11 +148,13 @@ ProtocolGroup ProtocolGroup::ieee8022protocol("ieee8022protocol", {
     { 0x4242, &Protocol::stp },
     { 0xAAAA, &Protocol::ieee8022snap },
     { 0xFE00, &Protocol::isis },
+    { 0xFFFF, &Protocol::unknown }, // INET specific non-standard protocol
 });
 
 ProtocolGroup ProtocolGroup::udpprotocol("udpprotocol", {
     { 554, &Protocol::rtsp },
     { 6696, &Protocol::babel },
+    { 11111, &Protocol::unknown }, // INET specific non-standard protocol
 });
 
 ProtocolGroup ProtocolGroup::tcpprotocol("tcpprotocol", {
@@ -158,6 +163,7 @@ ProtocolGroup ProtocolGroup::tcpprotocol("tcpprotocol", {
     { 23, &Protocol::telnet },
     { 80, &Protocol::http },
     { 554, &Protocol::rtsp },
+    { 11111, &Protocol::unknown }, // INET specific non-standard protocol
 });
 
 } // namespace inet
