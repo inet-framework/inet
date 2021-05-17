@@ -46,7 +46,7 @@ class INET_API MacRelayUnitBase : public LayeredProtocolBase, public StringForma
     virtual bool isForwardingInterface(NetworkInterface *networkInterface) const { return !networkInterface->isLoopback() && networkInterface->isBroadcast(); }
     virtual void broadcastPacket(Packet *packet, const MacAddress& destinationAddress, NetworkInterface *incomingInterface);
     virtual void sendPacket(Packet *packet, const MacAddress& destinationAddress, NetworkInterface *outgoingInterface);
-    virtual void updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress);
+    virtual void updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress, unsigned int vlanId);
 
     //@{ for lifecycle:
     virtual void handleStartOperation(LifecycleOperation *operation) override {}

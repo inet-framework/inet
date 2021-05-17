@@ -62,7 +62,7 @@ class INET_API Ieee8021dRelay : public MacRelayUnitBase
     virtual void handleUpperPacket(Packet *packet) override;
     virtual void handleLowerPacket(Packet *packet) override;
 
-    virtual void updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress) override;
+    virtual void updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress, unsigned int vlanId) override;
 
     virtual void sendUp(Packet *packet);
     virtual bool isForwardingInterface(NetworkInterface *networkInterface) const override;

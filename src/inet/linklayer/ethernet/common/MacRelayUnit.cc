@@ -38,8 +38,11 @@ void MacRelayUnit::handleLowerPacket(Packet *incomingPacket)
     auto interfaceInd = incomingPacket->getTag<InterfaceInd>();
     int incomingInterfaceId = interfaceInd->getInterfaceId();
     auto incomingInterface = interfaceTable->getInterfaceById(incomingInterfaceId);
+    unsigned int vlanId = 0;
+    if (auto vlanInd = incomingPacket->findTag<VlanInd>())
+        vlanId = vlanInd->getVlanId();
     EV_INFO << "Processing packet from network" << EV_FIELD(incomingInterface) << EV_FIELD(incomingPacket) << EV_ENDL;
-    updatePeerAddress(incomingInterface, sourceAddress);
+    updatePeerAddress(incomingInterface, sourceAddress, vlanId);
 
     auto outgoingPacket = incomingPacket->dup();
     outgoingPacket->trim();

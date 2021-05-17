@@ -68,8 +68,11 @@ void Ieee8021dRelay::handleLowerPacket(Packet *incomingPacket)
     auto interfaceInd = incomingPacket->getTag<InterfaceInd>();
     int incomingInterfaceId = interfaceInd->getInterfaceId();
     auto incomingInterface = interfaceTable->getInterfaceById(incomingInterfaceId);
+    unsigned int vlanId = 0;
+    if (auto vlanInd = incomingPacket->findTag<VlanInd>())
+        vlanId = vlanInd->getVlanId();
     EV_INFO << "Processing packet from network" << EV_FIELD(incomingInterface) << EV_FIELD(incomingPacket) << EV_ENDL;
-    updatePeerAddress(incomingInterface, sourceAddress);
+    updatePeerAddress(incomingInterface, sourceAddress, vlanId);
 
     const auto& incomingInterfaceData = incomingInterface->findProtocolData<Ieee8021dInterfaceData>();
     // BPDU Handling
@@ -172,11 +175,11 @@ bool Ieee8021dRelay::isForwardingInterface(NetworkInterface *networkInterface) c
     return (interfaceData == nullptr || interfaceData->isForwarding());
 }
 
-void Ieee8021dRelay::updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress)
+void Ieee8021dRelay::updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress, unsigned int vlanId)
 {
     const auto& interfaceData = incomingInterface->findProtocolData<Ieee8021dInterfaceData>();
     if (interfaceData == nullptr || interfaceData->isLearning())
-        MacRelayUnitBase::updatePeerAddress(incomingInterface, sourceAddress);
+        MacRelayUnitBase::updatePeerAddress(incomingInterface, sourceAddress, vlanId);
 }
 
 void Ieee8021dRelay::sendUp(Packet *packet)
