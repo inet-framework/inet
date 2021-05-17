@@ -83,13 +83,33 @@ class INET_API StreamRedundancyConfigurator : public NetworkConfiguratorBase
         virtual Node *createNode(cModule *module) override { return new StreamRedundancyConfigurator::Node(module); }
     };
 
+    class StreamTree
+    {
+      public:
+        std::map<std::string, std::vector<std::string>> senders; // maps network node name to list of previous sender network node names
+        std::map<std::string, std::vector<std::string>> receivers; // maps network node name to list of next receiver network node names
+    };
+
+    class StreamNode
+    {
+      public:
+        std::vector<std::string> senders; // tree index to list of previous sender network node names
+        std::vector<std::vector<std::string>> receivers; // tree index to list of next receiver network node names
+        std::vector<std::vector<std::string>> distinctReceivers; // distinct non-empty receiver sets
+    };
+
+    class Stream
+    {
+      public:
+        std::map<std::string, StreamNode> streamNodes;
+    };
+
   protected:
     int minVlanId = -1;
     int maxVlanId = -1;
     cValueArray *configuration;
 
-    std::map<std::tuple<std::string, std::string, int>, std::vector<std::string>> senders; // maps network node name and stream name to list of previous sender network node names
-    std::map<std::tuple<std::string, std::string, int>, std::vector<std::string>> receivers; // maps network node name and stream name to list of next receiver network node names
+    std::map<std::string, Stream> streams;
     std::map<std::pair<std::string, std::string>, int> nextVlanIds; // maps network node name and destination node name to next available VLAN ID
     std::map<std::tuple<std::string, std::string, std::string, std::string>, int> assignedVlanIds; // maps network node name, receiver network node name, destination network node name and stream name to VLAN ID
 
