@@ -328,8 +328,10 @@ void PacketErrorRateFromErrorRateIndFilter::receiveSignal(cResultFilter *prev, s
 #ifdef WITH_RADIO
     if (auto pk = dynamic_cast<Packet *>(object)) {
         auto tag = pk->findTag<ErrorRateInd>();
-        if (tag)
-            fire(this, t, tag->getPacketErrorRate(), details);  //TODO isNaN?
+        if (tag){
+            const double per = tag->getPacketErrorRate();
+            fire(this, t, (per<2e-320)?0.0:per, details);  //TODO isNaN?
+        }
     }
 #endif  // WITH_RADIO
 }
@@ -342,8 +344,10 @@ void BitErrorRateFromErrorRateIndFilter::receiveSignal(cResultFilter *prev, simt
 #ifdef WITH_RADIO
     if (auto pk = dynamic_cast<Packet *>(object)) {
         auto tag = pk->findTag<ErrorRateInd>();
-        if (tag)
-            fire(this, t, tag->getBitErrorRate(), details);  //TODO isNaN?
+        if (tag){
+            const double ber = tag->getBitErrorRate();
+            fire(this, t, (ber<2e-320)?0.0:ber, details);  //TODO isNaN?
+        }
     }
 #endif  // WITH_RADIO
 }
@@ -356,8 +360,10 @@ void SymbolErrorRateFromErrorRateIndFilter::receiveSignal(cResultFilter *prev, s
 #ifdef WITH_RADIO
     if (auto pk = dynamic_cast<Packet *>(object)) {
         auto tag = pk->findTag<ErrorRateInd>();
-        if (tag)
-            fire(this, t, tag->getSymbolErrorRate(), details);  //TODO isNaN?
+        if (tag){
+            const double ser = tag->getSymbolErrorRate();
+            fire(this, t, (ser<2e-320)?0.0:ser, details);  //TODO isNaN?
+        }
     }
 #endif  // WITH_RADIO
 }
