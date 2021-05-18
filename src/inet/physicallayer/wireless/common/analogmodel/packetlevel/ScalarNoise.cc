@@ -40,8 +40,15 @@ W ScalarNoise::computeMinPower(simtime_t startTime, simtime_t endTime) const
     W noisePower = W(0);
     W minNoisePower = W(NaN);
     for (const auto& elem : *powerChanges) {
+        if(endTime <= elem.first){
+            // Power change after or at end time
+            if (std::isnan(minNoisePower.get()) || noisePower < minNoisePower)
+                // Previous power change was before start time, set to current power if not first change
+                minNoisePower = noisePower;
+            break;
+        }
         noisePower += elem.second;
-        if ((std::isnan(minNoisePower.get()) || noisePower < minNoisePower) && startTime <= elem.first && elem.first < endTime)
+        if ((std::isnan(minNoisePower.get()) || noisePower < minNoisePower) && startTime <= elem.first)
             minNoisePower = noisePower;
     }
     return minNoisePower;
@@ -52,8 +59,16 @@ W ScalarNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
     W noisePower = W(0);
     W maxNoisePower = W(0);
     for (const auto& elem : *powerChanges) {
+        if(endTime <= elem.first){
+            // Power change after or at end time
+            if (std::isnan(maxNoisePower.get()) || noisePower > maxNoisePower)
+                // Previous power change was before start time, set to current power if not first change
+                maxNoisePower = noisePower;
+            break;
+        }
+
         noisePower += elem.second;
-        if ((std::isnan(maxNoisePower.get()) || noisePower > maxNoisePower) && startTime <= elem.first && elem.first < endTime)
+        if ((std::isnan(maxNoisePower.get()) || noisePower > maxNoisePower) && startTime <= elem.first)
             maxNoisePower = noisePower;
     }
     return maxNoisePower;
