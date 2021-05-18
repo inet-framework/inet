@@ -135,6 +135,10 @@ const char *PacketDropVisualizerBase::DirectiveResolver::resolveDirective(char d
             else if(res == 13)
                 result = "NO PORT FOUND";
             else if(res == 14)
+                result = "DUPLICATE DETECTED";
+            else if(res == 15)
+                result = "VLAN POLICY";
+            else if(res == 99)
                 result = "OTHER REASON";
             else
                 result = "unknown";
