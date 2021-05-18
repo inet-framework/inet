@@ -22,6 +22,10 @@ namespace inet {
 
 namespace utils {
 
+#if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1512
+#define doubleValueRaw() doubleValue()
+#endif
+
 cNEDValue nedf_hasVisualizer(cComponent *context, cNEDValue argv[], int argc)
 {
 #ifdef WITH_VISUALIZERS
@@ -192,7 +196,7 @@ Define_NED_Function2(nedf_firstAvailableOrEmpty,
 
 cNEDValue nedf_nanToZero(cComponent *context, cNEDValue argv[], int argc)
 {
-    double x = argv[0].doubleValue();
+    double x = argv[0].doubleValueRaw();
     const char *unit = argv[0].getUnit();
     return std::isnan(x) ? cNEDValue(0.0, unit) : argv[0];
 }
@@ -211,7 +215,7 @@ static cNedValue nedf_intWithUnit(cComponent *contextComponent, cNedValue argv[]
         case cNedValue::INT:
             return argv[0];
         case cNedValue::DOUBLE:
-            return cNedValue(checked_int_cast<OMNETPP5_CODE(intpar_t) OMNETPP6_CODE(intval_t)>(floor(argv[0].doubleValue())), argv[0].getUnit());
+            return cNedValue(checked_int_cast<OMNETPP5_CODE(intpar_t) OMNETPP6_CODE(intval_t)>(floor(argv[0].doubleValueRaw())), argv[0].getUnit());
         case cNedValue::STRING:
             throw cRuntimeError("intWithUnit(): Cannot convert string to int");
         case OMNETPP5_CODE(cNedValue::XML) OMNETPP6_CODE(cNedValue::OBJECT) :
