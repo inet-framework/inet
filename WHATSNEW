@@ -1,7 +1,18 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-4.2.3 (May 6, 2021) - Stable
+INET-4.2.5 (May 18, 2021) - Stable
+----------------------------------
+
+This release contains:
+
+  - Compatibility fixes for OMNeT++ 6.0 Preview 11.
+  - Fixed default type names for 802.15.4 transmitter and receiver.
+  - Fixed worng statechange signal in Radio
+  - Fixed crash in rare cases when accessing receptionTimer.
+
+
+INET-4.2.4 (May 6, 2021) - Stable
 ---------------------------------
 
 This release contains fixes for linker errors on Windows.
