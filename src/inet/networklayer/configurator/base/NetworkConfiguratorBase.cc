@@ -62,7 +62,7 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
                         childNode = (Node *)linkOut->getRemoteNode();
                         unvisited.push(childNode);
                     }
-                    InterfaceInfo *info = new InterfaceInfo(networkInterface);
+                    InterfaceInfo *info = new InterfaceInfo(node, networkInterface);
                     node->interfaceInfos.push_back(info);
                 }
             }
