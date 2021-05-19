@@ -139,6 +139,16 @@ NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkOut(const Node *
     return nullptr;
 }
 
+NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkOut(const InterfaceInfo *interfaceInfo) const
+{
+    for (int i = 0; i < interfaceInfo->node->getNumOutLinks(); i++) {
+        auto link = check_and_cast<Link *>(static_cast<Topology::Link *>(interfaceInfo->node->getLinkOut(i)));
+        if (link->sourceInterfaceInfo == interfaceInfo)
+            return link;
+    }
+    return nullptr;
+}
+
 Topology::LinkOut *NetworkConfiguratorBase::findLinkOut(const Node *node, int gateId) const
 {
     for (int i = 0; i < node->getNumOutLinks(); i++)
