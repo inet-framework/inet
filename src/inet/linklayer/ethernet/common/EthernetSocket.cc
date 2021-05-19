@@ -28,7 +28,8 @@ namespace inet {
 void EthernetSocket::sendOut(cMessage *msg)
 {
     auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
-    tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
+    if (networkInterface != nullptr)
+        tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
     tags.addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
     SocketBase::sendOut(msg);
 }
