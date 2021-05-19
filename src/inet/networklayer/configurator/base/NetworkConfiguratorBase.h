@@ -50,10 +50,11 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule
      */
     class InterfaceInfo : public cObject {
       public:
+        Node *node;
         NetworkInterface *networkInterface;
 
       public:
-        InterfaceInfo(NetworkInterface *networkInterface) : networkInterface(networkInterface) {}
+        InterfaceInfo(Node *node, NetworkInterface *networkInterface) : node(node), networkInterface(networkInterface) {}
         virtual std::string getFullPath() const override { return networkInterface->getInterfaceFullPath(); }
     };
 
