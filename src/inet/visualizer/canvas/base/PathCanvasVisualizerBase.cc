@@ -52,7 +52,7 @@ static Coord intersectLines(const LineSegment& segment1, const LineSegment& segm
     return Coord(x, y, 0);
 }
 
-bool isPointOnSegment(const LineSegment& segment, const Coord& point)
+static bool isPointOnSegment(const LineSegment& segment, const Coord& point)
 {
     auto& p1 = segment.getPoint1();
     auto& p2 = segment.getPoint2();
