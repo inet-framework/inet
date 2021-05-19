@@ -28,10 +28,25 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
     class Path
     {
       public:
-        std::vector<const Node *> nodes;
+        std::vector<const InterfaceInfo *> interfaces;
 
       public:
-        Path(const std::vector<const Node *>& nodes) : nodes(nodes) { }
+        Path(const std::vector<const InterfaceInfo *>& interfaces) : interfaces(interfaces) { }
+
+        friend std::ostream& operator<<(std::ostream& os, const TsnConfigurator::Path& path)
+        {
+            os << "[";
+            for (int i = 0; i < path.interfaces.size(); i++) {
+                auto interface = path.interfaces[i];
+                if (i != 0)
+                    os << ", ";
+                os << interface->node->module->getFullName();
+                if (TsnConfigurator::countParalellLinks(interface) > 1)
+                    os << "." << interface->networkInterface->getInterfaceName();
+            }
+            os << "]";
+            return os;
+        }
     };
 
     class Tree
@@ -41,6 +56,19 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
 
       public:
         Tree(const std::vector<Path>& paths) : paths(paths) { }
+
+        friend std::ostream& operator<<(std::ostream& os, const TsnConfigurator::Tree& tree)
+        {
+            os << "{";
+            for (int i = 0; i < tree.paths.size(); i++) {
+                auto path = tree.paths[i];
+                if (i != 0)
+                    os << ", ";
+                os << path;
+            }
+            os << "}";
+            return os;
+        }
     };
 
     class StreamConfiguration
@@ -49,6 +77,7 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
         std::string name;
         std::string packetFilter;
         std::string source;
+        std::string destinationAddress;
         std::vector<std::string> destinations;
         std::vector<Tree> trees;
     };
@@ -57,6 +86,28 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
     cValueArray *configuration;
 
     std::vector<StreamConfiguration> streamConfigurations;
+
+  public:
+    const std::vector<StreamConfiguration>& getStreams() const { return streamConfigurations; }
+
+    static Node *findConnectedNode(const InterfaceInfo *interface) {
+        auto node = interface->node;
+        for (int i = 0; i < node->getNumOutLinks(); i++) {
+            auto link = (Link *)node->getLinkOut(i);
+            if (link->sourceInterfaceInfo == interface)
+                return link->destinationInterfaceInfo->node;
+        }
+        return nullptr;
+    }
+
+    static int countParalellLinks(const InterfaceInfo *interface) {
+        int count = 0;
+        auto node = interface->node;
+        for (auto otherInterface : node->interfaceInfos)
+            if (findConnectedNode(interface) == findConnectedNode(otherInterface))
+                count++;
+        return count;
+    }
 
   protected:
     virtual void initialize(int stage) override;
@@ -82,7 +133,7 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
     virtual void collectAllTrees(const std::vector<const Node *>& stopNodes, const std::vector<const Node *>& destinationNodes, int destinationNodeIndex, std::vector<Path>& currentTree, std::vector<Tree>& allTrees) const;
 
     virtual std::vector<Path> collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *destinationNode) const;
-    virtual void collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *currentNode, std::vector<const Node *>& currentPath, std::vector<Path>& allPaths) const;
+    virtual void collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *currentNode, std::vector<const InterfaceInfo *>& currentPath, std::vector<Path>& allPaths) const;
 
     virtual std::vector<const Node *> collectNetworkNodes(const std::string& filter) const;
     virtual std::vector<const Link *> collectNetworkLinks(const std::string& filter) const;
@@ -92,32 +143,6 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
 
     virtual bool matchesFilter(const std::string& name, const std::string& filter) const;
 };
-
-std::ostream& operator<<(std::ostream& os, const TsnConfigurator::Path& path)
-{
-    os << "[";
-    for (int i = 0; i < path.nodes.size(); i++) {
-        auto node = path.nodes[i];
-        if (i != 0)
-            os << ", ";
-        os << node->module->getFullName();
-    }
-    os << "]";
-    return os;
-}
-
-std::ostream& operator<<(std::ostream& os, const TsnConfigurator::Tree& tree)
-{
-    os << "{";
-    for (int i = 0; i < tree.paths.size(); i++) {
-        auto path = tree.paths[i];
-        if (i != 0)
-            os << ", ";
-        os << path;
-    }
-    os << "}";
-    return os;
-}
 
 } // namespace inet
 

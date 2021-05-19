@@ -55,8 +55,9 @@ void TsnConfigurator::computeStreams()
 
 void TsnConfigurator::computeStream(cValueMap *configuration)
 {
+    auto streamName = configuration->get("name").stringValue();
     StreamConfiguration streamConfiguration;
-    streamConfiguration.name = configuration->get("name").stringValue();
+    streamConfiguration.name = streamName;
     streamConfiguration.packetFilter = configuration->get("packetFilter").stringValue();
     auto sourceNetworkNodeName = configuration->get("source").stringValue();
     streamConfiguration.source = sourceNetworkNodeName;
@@ -72,9 +73,10 @@ void TsnConfigurator::computeStream(cValueMap *configuration)
             streamConfiguration.destinations.push_back(node->module->getFullName());
         }
     }
+    streamConfiguration.destinationAddress = configuration->containsKey("destinationAddress") ? configuration->get("destinationAddress").stringValue() : streamConfiguration.destinations[0];
     auto allTrees = collectAllTrees(sourceNode, destinationNodes);
     streamConfiguration.trees = selectBestTreeSubset(configuration, sourceNode, destinationNodes, allTrees);
-    EV_INFO << "Found smallest subset of trees with best cost that are sufficient for node and link failure protection" << EV_ENDL;
+    EV_INFO << "Smallest best cost subset of trees that provide failure protection" << EV_FIELD(streamName) << EV_ENDL;
     for (auto tree : streamConfiguration.trees)
         EV_INFO << "  " << tree << std::endl;
     streamConfigurations.push_back(streamConfiguration);
@@ -135,15 +137,15 @@ double TsnConfigurator::computeTreeCost(const Node *sourceNode, const std::vecto
             auto startNode = it.first;
             auto startCost = it.second;
             for (auto path : tree.paths) {
-                if (path.nodes[0] == startNode) {
-                    for (int i = 0; i < path.nodes.size(); i++) {
-                        auto node = path.nodes[i];
-                        if (node == destinationNode) {
+                if (path.interfaces[0]->node == startNode) {
+                    for (int i = 0; i < path.interfaces.size(); i++) {
+                        auto interface = path.interfaces[i];
+                        if (interface->node == destinationNode) {
                             cost += startCost + i;
                             goto nextDestinationNode;
                         }
-                        if (node != startNode)
-                            todoNodes.push_back({node, startCost + i});
+                        if (interface->node != startNode)
+                            todoNodes.push_back({interface->node, startCost + i});
                     }
                 }
             }
@@ -157,25 +159,28 @@ TsnConfigurator::Tree TsnConfigurator::computeCanonicalTree(const Tree& tree) co
 {
     Tree canonicalTree({});
     for (auto& path : tree.paths) {
-        auto startNode = path.nodes[0];
+        auto startInterface = path.interfaces[0];
         auto itStart = std::find_if(canonicalTree.paths.begin(), canonicalTree.paths.end(), [&] (auto path) {
-            return path.nodes.front() == startNode;
+            return path.interfaces.front()->node == startInterface->node;
         });
         if (itStart != canonicalTree.paths.end())
             // just insert the path into the tree
             canonicalTree.paths.push_back(path);
         else {
             auto itEnd = std::find_if(canonicalTree.paths.begin(), canonicalTree.paths.end(), [&] (auto path) {
-                return path.nodes.back() == startNode;
+                return path.interfaces.back()->node == startInterface->node;
             });
             if (itEnd != canonicalTree.paths.end()) {
                 // append the path to a path that is already in the tree
                 auto& canonicalPath = *itEnd;
-                canonicalPath.nodes.insert(canonicalPath.nodes.end(), path.nodes.begin() + 1, path.nodes.end());
+                canonicalPath.interfaces.insert(canonicalPath.interfaces.end(), path.interfaces.begin() + 1, path.interfaces.end());
             }
             else {
                 auto itMiddle = std::find_if(canonicalTree.paths.begin(), canonicalTree.paths.end(), [&] (auto path) {
-                    return std::find(path.nodes.begin(), path.nodes.end(), startNode) != path.nodes.end();
+                    auto jt = std::find_if(path.interfaces.begin(), path.interfaces.end(), [&] (auto interface) {
+                        return interface->node == startInterface->node;
+                    });
+                    return jt != path.interfaces.end();
                 });
                 if (itMiddle == canonicalTree.paths.end())
                     // just insert the path into the tree
@@ -183,11 +188,13 @@ TsnConfigurator::Tree TsnConfigurator::computeCanonicalTree(const Tree& tree) co
                 else {
                     // split an existing path that is already in the tree and insert the path into the tree
                     auto& canonicalPath = *itMiddle;
-                    auto it = std::find(canonicalPath.nodes.begin(), canonicalPath.nodes.end(), startNode);
+                    auto it = std::find_if(canonicalPath.interfaces.begin(), canonicalPath.interfaces.end(), [&] (auto interface) {
+                        return interface->node == startInterface->node;
+                    });
                     Path firstPathFragment({});
                     Path secondPathFragment({});
-                    firstPathFragment.nodes.insert(firstPathFragment.nodes.begin(), canonicalPath.nodes.begin(), it + 1);
-                    secondPathFragment.nodes.insert(secondPathFragment.nodes.begin(), it, canonicalPath.nodes.end());
+                    firstPathFragment.interfaces.insert(firstPathFragment.interfaces.begin(), canonicalPath.interfaces.begin(), it + 1);
+                    secondPathFragment.interfaces.insert(secondPathFragment.interfaces.begin(), it, canonicalPath.interfaces.end());
                     canonicalTree.paths.erase(itMiddle);
                     canonicalTree.paths.push_back(firstPathFragment);
                     canonicalTree.paths.push_back(secondPathFragment);
@@ -260,9 +267,9 @@ bool TsnConfigurator::checkLinkFailureProtection(cValueArray *configuration, con
             bool first = true;
             for (int i = 0; i < n; i++) {
                 if (mask[i]) {
-                    auto link = (Topology::LinkOut *)networkLinks[i];
+                    auto link = (Link *)networkLinks[i];
                     if (!first) { EV_DEBUG << ", "; first = false; }
-                    EV_DEBUG << ((Node *)link->getLocalNode())->module->getFullName() << " -> " << ((Node *)link->getRemoteNode())->module->getFullName();
+                    EV_DEBUG << link->sourceInterfaceInfo->node->module->getFullName() << "." << link->sourceInterfaceInfo->networkInterface->getInterfaceName() << " -> " << link->destinationInterfaceInfo->node->module->getFullName() << "." << link->destinationInterfaceInfo->networkInterface->getInterfaceName();
                     failedLinks.push_back(networkLinks[i]);
                 }
             }
@@ -293,13 +300,20 @@ void TsnConfigurator::configureStreams() const
             streamParameterValue->set("name", streamConfiguration.name.c_str());
             streamParameterValue->set("packetFilter", streamConfiguration.packetFilter.c_str());
             streamParameterValue->set("source", streamConfiguration.source.c_str());
+            // TODO KLUDGE
             streamParameterValue->set("destination", streamConfiguration.destinations[0].c_str());
+            streamParameterValue->set("destinationAddress", streamConfiguration.destinationAddress.c_str());
             for (auto& tree : streamConfiguration.trees) {
                 cValueArray *treeParameterValue = new cValueArray();
                 for (auto& path : tree.paths) {
                     cValueArray *pathParameterValue = new cValueArray();
-                    for (auto& node : path.nodes)
-                        pathParameterValue->add(node->module->getFullName());
+                    for (auto& interface : path.interfaces) {
+                        std::string name;
+                        name = interface->node->module->getFullName();
+                        if (TsnConfigurator::countParalellLinks(interface) > 1)
+                            name = name + "." + interface->networkInterface->getInterfaceName();
+                        pathParameterValue->add(name.c_str());
+                    }
                     treeParameterValue->add(pathParameterValue);
                 }
                 treesParameterValue->add(treeParameterValue);
@@ -368,7 +382,9 @@ void TsnConfigurator::collectAllTrees(const std::vector<const Node *>& stopNodes
             auto allPaths = collectAllPaths(stopNodes, destinationNode);
             for (auto& path : allPaths) {
                 auto destinationStopNodes = stopNodes;
-                destinationStopNodes.insert(destinationStopNodes.end(), path.nodes.begin(), path.nodes.end());
+                for (auto interface : path.interfaces)
+                    if (std::find(destinationStopNodes.begin(), destinationStopNodes.end(), interface->node) == destinationStopNodes.end())
+                        destinationStopNodes.push_back(interface->node);
                 currentTree.push_back(path);
                 collectAllTrees(destinationStopNodes, destinationNodes, destinationNodeIndex + 1, currentTree, allTrees);
                 currentTree.erase(currentTree.end() - 1);
@@ -380,26 +396,31 @@ void TsnConfigurator::collectAllTrees(const std::vector<const Node *>& stopNodes
 std::vector<TsnConfigurator::Path> TsnConfigurator::collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *destinationNode) const
 {
     std::vector<Path> allPaths;
-    std::vector<const Node *> currentPath;
+    std::vector<const InterfaceInfo *> currentPath;
     collectAllPaths(stopNodes, destinationNode, currentPath, allPaths);
     return allPaths;
 }
 
-void TsnConfigurator::collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *currentNode, std::vector<const Node *>& currentPath, std::vector<Path>& allPaths) const
+void TsnConfigurator::collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *currentNode, std::vector<const InterfaceInfo *>& currentPath, std::vector<Path>& allPaths) const
 {
-    currentPath.push_back(currentNode);
     if (std::find(stopNodes.begin(), stopNodes.end(), currentNode) != stopNodes.end()) {
         allPaths.push_back(Path(currentPath));
-        std::reverse(allPaths.back().nodes.begin(), allPaths.back().nodes.end());
+        std::reverse(allPaths.back().interfaces.begin(), allPaths.back().interfaces.end());
     }
     else {
         for (int i = 0; i < currentNode->getNumPaths(); i++) {
+            auto link = (Link *)currentNode->getPath(i);
             auto nextNode = (Node *)currentNode->getPath(i)->getRemoteNode();
-            if (std::find(currentPath.begin(), currentPath.end(), nextNode) == currentPath.end())
+            if (std::find_if(currentPath.begin(), currentPath.end(), [&] (const InterfaceInfo *interfaceInfo) { return interfaceInfo->node == nextNode; }) == currentPath.end()) {
+                bool first = currentPath.empty();
+                if (first)
+                    currentPath.push_back(link->sourceInterfaceInfo);
+                currentPath.push_back(link->destinationInterfaceInfo);
                 collectAllPaths(stopNodes, nextNode, currentPath, allPaths);
+                currentPath.erase(currentPath.end() - (first ? 2 : 1), currentPath.end());
+            }
         }
     }
-    currentPath.erase(currentPath.end() - 1);
 }
 
 std::vector<const TsnConfigurator::Node *> TsnConfigurator::collectNetworkNodes(const std::string& filter) const
@@ -440,15 +461,15 @@ void TsnConfigurator::collectReachedNodes(const Node *sourceNode, const std::vec
         auto startNode = todoNodes.front();
         todoNodes.pop_front();
         for (auto path : tree.paths) {
-            if (path.nodes[0] == startNode) {
-                for (auto node : path.nodes) {
-                    if (std::find(failedNodes.begin(), failedNodes.end(), node) != failedNodes.end())
+            if (path.interfaces[0]->node == startNode) {
+                for (auto interface : path.interfaces) {
+                    if (std::find(failedNodes.begin(), failedNodes.end(), interface->node) != failedNodes.end())
                         break;
-                    auto it = std::find(destinationNodes.begin(), destinationNodes.end(), node);
+                    auto it = std::find_if(destinationNodes.begin(), destinationNodes.end(), [&] (const Node *node) { return interface->node == node; });
                     if (it != destinationNodes.end())
                         reachedDestinationNodes[it - destinationNodes.begin()] = true;
-                    if (node != startNode)
-                        todoNodes.push_back(node);
+                    if (interface->node != startNode)
+                        todoNodes.push_back(interface->node);
                 }
             }
         }
@@ -463,20 +484,22 @@ void TsnConfigurator::collectReachedNodes(const Node *sourceNode, const std::vec
         auto startNode = todoNodes.front();
         todoNodes.pop_front();
         for (auto path : tree.paths) {
-            if (path.nodes[0] == startNode) {
-                const Node *previousNode = nullptr;
-                for (auto node : path.nodes) {
-                    if (previousNode != nullptr) {
-                        Link *pathLink = findLinkOut(previousNode, node);
+            if (path.interfaces[0]->node == startNode) {
+                const InterfaceInfo *previousInterface = nullptr;
+                for (auto interface : path.interfaces) {
+                    if (previousInterface != nullptr) {
+                        Link *pathLink = findLinkOut(previousInterface);
+                        if (pathLink->destinationInterfaceInfo->node != interface->node)
+                            pathLink = findLinkOut(previousInterface->node, interface->node);
                         if (std::find(failedLinks.begin(), failedLinks.end(), pathLink) != failedLinks.end())
                             break;
                     }
-                    auto it = std::find(destinationNodes.begin(), destinationNodes.end(), node);
+                    auto it = std::find_if(destinationNodes.begin(), destinationNodes.end(), [&] (const Node *node) { return interface->node == node; });
                     if (it != destinationNodes.end())
                         reachedDestinationNodes[it - destinationNodes.begin()] = true;
-                    if (node != startNode)
-                        todoNodes.push_back(node);
-                    previousNode = node;
+                    if (interface->node != startNode)
+                        todoNodes.push_back(interface->node);
+                    previousInterface = interface;
                 }
             }
         }
