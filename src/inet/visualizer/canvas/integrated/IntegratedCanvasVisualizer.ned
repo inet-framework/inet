@@ -39,9 +39,11 @@ import inet.visualizer.contract.IRadioVisualizer;
 import inet.visualizer.contract.IRoutingTableVisualizer;
 import inet.visualizer.contract.ISceneVisualizer;
 import inet.visualizer.contract.IStatisticVisualizer;
+import inet.visualizer.contract.IStreamRedundancyConfigurationVisualizer;
 import inet.visualizer.contract.ITracingObstacleLossVisualizer;
 import inet.visualizer.contract.ITransportConnectionVisualizer;
 import inet.visualizer.contract.ITransportRouteVisualizer;
+import inet.visualizer.contract.ITsnConfigurationVisualizer;
 
 //
 // This module integrates all canvas visualizers into a single module. It
@@ -152,6 +154,14 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
         transportConnectionVisualizer: <default("TransportConnectionCanvasVisualizer")> like ITransportConnectionVisualizer if typename != "" {
             parameters:
                 @display("p=450,1200");
+        }
+        tsnConfigurationVisualizer: <default("TsnConfigurationCanvasVisualizer")> like ITsnConfigurationVisualizer if typename != "" {
+            parameters:
+                @display("p=750,100");
+        }
+        streamRedundancyConfigurationVisualizer: <default("StreamRedundancyConfigurationCanvasVisualizer")> like IStreamRedundancyConfigurationVisualizer if typename != "" {
+            parameters:
+                @display("p=750,100");
         }
 }
 
