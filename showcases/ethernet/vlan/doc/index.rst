@@ -14,9 +14,10 @@ Goals
 
 .. Ethernet Virtual Local Area Networks (VLANs) separate physical networks into virtual networks at the data link layer level, so that virtual LANs behave as if they were physically separate LANs.
 
+This showcase demonstrates the VLAN support of INET's modular Ethernet model.
+
 Ethernet Virtual Local Area Networks (VLANs) are physical Ethernet networks separated into virtual networks at the data link layer level, so that virtual LANs behave as if they were physically separate LANs.
 
-This showcase demonstrates the VLAN support of INET's modular Ethernet model.
 
 .. The Model
    ---------
@@ -60,7 +61,8 @@ Overview
 
 .. **V1** Ethernet VLANs are created by adding an extra header to Ethernet frames. The header contains VLAN tags. The VLAN-aware parts of the network filter traffic based on these VLAN tags. The VLAN-aware parts of the network filter traffic at interfaces, based on VLAN tags and VLAN ID. Each interface has a set of allowed VLAN IDs. Packets without VLAN tags are considered to be part of the native VLAN and are not filtered.
 
-Ethernet VLANs are created by assigning VLAN IDs to ethernet frames, by adding an extra header containing VLAN tags which store the VLAN ID. The VLAN-aware parts of the network filter traffic at interfaces, based on VLAN ID. Each interface has a set of allowed VLAN IDs. Packets without VLAN tags are considered to be part of the native VLAN (which can be allowed/disallowed as well). This mechanism removes connections from a physical network by filtering packets at the data link layer, but cannot create new connections.
+Ethernet VLANs are created by assigning VLAN IDs to ethernet frames. This is done by adding an extra header (802.1q header) containing a VLAN tag that stores the VLAN ID. The VLAN-aware parts of the network (typically Ethernet switches) filter traffic at interfaces, based on this VLAN ID. Each interface has a set of allowed VLAN IDs. Packets without VLAN tags are considered to be part of the native VLAN (which can be allowed/disallowed as well). 
+Interfaces can also remap VLAN IDs. The VLAN mechanism removes connections from a physical network by filtering packets at the data link layer, but cannot create new connections.
 
 .. and are not filtered.
 
@@ -238,7 +240,9 @@ We'll demonstrate Ethernet VLANs with the following configurations:
 Config: VLAN Between Switches
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This simulation uses the following network:
+As mentioned above, packets are assigned to VLANs in Ethernet switches. The switches also divide the network into two VLANs by filtering packets based on VLAN ID.
+
+The simulation use the following network (also reused for the next example simulation):
 
 .. .. figure:: media/network.png
       :align: center
@@ -259,9 +263,11 @@ This simulation uses the following network:
 
 The network contains six hosts (:ned:`StandardHost`) and two switches (:ned:`EthernetSwitch`). 
 
-All hosts are in the same subnet (addresses are sequential from 10.0.0.1 to 10.0.0.6). We separate the network into two virtual networks with three hosts each, indicated on the image with red and blue colors. We assign VLAN ID 1 to the upper VLAN, and VLAN ID 2 to the lower VLAN.
+We assign IP addresses so that all hosts are in the same subnet (addresses are sequential from 10.0.0.1 to 10.0.0.6). We separate the network into two virtual networks, with three hosts each, indicated on the image with red and blue tint of the hosts. We assign VLAN ID 1 to the upper VLAN, and VLAN ID 2 to the lower VLAN.
 
 The two switches are configured to be VLAN aware, but the hosts are not. (Thus the switches are responsible for creating the VLANs and adding VLAN tags to packets.
+
+VLAN IDs are assigned by switch one, depending on a packet's incoming interface, so that packets from host1 have VLAN ID 1, and packets from host2 have VLAN ID 2. Furthermode, switch2 sends VLAN ID 1 packets only to the blue tinted hosts, and VLAN ID 2 packets to the red ones.
 
 Here is part of the ``General`` configuration with Ethernet settings:
 
@@ -270,7 +276,9 @@ Here is part of the ``General`` configuration with Ethernet settings:
    :end-at: bitrate
    :language: ini
 
-The first three lines configure all network nodes to use the composable Ethernet model. The switches are configured to have a :ned:`Ieee8021qLayer` submodule. Finally, the connection speed is set on all interfaces.
+The first three lines configure all network nodes to use the composable Ethernet model, and the last one sets the Ethernet connection speed on all interfaces.
+
+.. The switches are configured to have a :ned:`Ieee8021qLayer` submodule. 
 
 
 - the configs
@@ -281,7 +289,7 @@ The first three lines configure all network nodes to use the composable Ethernet
 
 .. For traffic, host1 in the upper VLAN broadcasts UDP packets to host4 in the same VLAN. Similarly, host4 in the lower VLAN send packets to hostX.
 
-A UDP application in host1 and host4 generate packets, which are broadcast to the entire LAN (to address 10.0.0.7). However, the switches only deliver packets in the same VLAN they originate from (host1 to host2 and host3, host4 to host5 and host6).
+A UDP application in host1 and host4 generate packets, which are broadcast to the entire LAN (to address 10.0.0.7). However, the switches are configured to only deliver packets in the same VLAN they originate from (host1 to host2 and host3, host4 to host5 and host6).
 
 .. **TODO** each is a different subnet -> how about they weren't ? can they have the same address ?
 
@@ -345,16 +353,41 @@ Config: VLAN Between Hosts Using Virtual Interfaces
 
    In this configuration, host1 sends UDP packets to host2 via a virtual interface in each host.
 
-In this configuration, VLAN tags are added to packets in a host. 
+**V1** In this configuration, VLAN tags are added to packets in a host. 
 
-The configuration uses the same network as the previous one. In addition to the Ethernet interface, host1 and host2 contains a virtual interface as well. Two UDP applications in host1 send packets to host2: one of them via the two hosts' Ethernet interfaces, the other via the virtual interfaces (which use the Ethernet interface to carry the packets). The packets sent between the virtual interfaces are configured to be VLAN tagged and the ones between the Ethernet interfaces are not.
+**V2** In this configuration, a host adds VLAN tags to packets; (as opposed to switches).
+
+.. - in this configuration, a host's interface adds a VLAN tag to packets (actually no but a request)
+   - in this configuration, a host adds VLAN tags to packets
+   - the switches filter packets according to configured VLAN policies
+
+In this configuration, a host interface adds VLAN tags to packets, and switches filter packets according to configured VLAN policies.
+
+The configuration uses the same network as the previous one. However, in addition to the Ethernet interfaces (``eth``), host1 and host2 each contain a virtual interface (``virt``) as well:
+
+.. **TODO** image
+
+.. figure:: media/virt.png
+   :align: center
+
+.. .. note:: a virtual interface (:ned:`VirtualInterface`) acts as a real network interface, i.e. it has its own IP address. Packets sent via the virtual interface are transmitted via real network interfaces, and have the virtual interface's address as source IP address. 
+
+.. note:: A virtual interface (:ned:`VirtualInterface`) acts as a real network interface, i.e. it has its own IP address, and packets can be sent to and from it. The virtual interface uses a real interface to transmit packets on. These packets have the virtual interface's address as source or destination IP address. The interface's functionality is implemented by its tunnel submodule (:ned:`VirtualTunnel`). 
+
+.. These packets are transmitted via real network interfaces, and have the virtual interface's address as source or destination IP address. 
+
+.. VirtualInterface contains a :ned:`VirtualTunnel` submodule.
+
+Our goal is to make host2 accessible from host1 only through a virtual tunnel, i.e. only for traffic going between the two hosts' virtual interfaces. To that end, we configure the VLAN policy submodule in switch2 to forward only VLAN-tagged packets on its interface connected to host2). 
+
+Two UDP applications in host1 send packets to host2: one of them via the two hosts' Ethernet interfaces, the other via the virtual interfaces. The virtual interfaces use the hosts' Ethernet interfaces to carry the packets. The packets sent between the virtual interfaces are configured to be VLAN tagged and the ones between the Ethernet interfaces are not.
 
 .. **TODO** host1 and host2 contains a virtual interface
 
 
-The VLAN policy submodule in switch2 is configured to forward only VLAN-tagged packets. Thus packets sent by the Ethernet interface are dropped by switch2, but those sent by the virtual interface are forwarded to host2, so that host2 is accessible only through the virtual interfaces.
+.. Thus, packets sent by host1's Ethernet interface are dropped by switch2, but those sent by the virtual interface are forwarded to host2.
 
-The virtual interface in host1 adds a VLAN tag request to outgoing packets, and VLAN tags are attached by host1's 802.1q submodule.
+.. **TODO** not here The virtual interface in host1 adds a VLAN tag request to outgoing packets, and VLAN tags are attached by host1's 802.1q submodule.
 
 .. **TODO** Ieee8021q in switches only ?
 
@@ -408,7 +441,7 @@ The virtual interface in host1 adds a VLAN tag request to outgoing packets, and 
 .. .. figure:: media/virt.png
       :align: center
 
-The simulation is defined in the ``VirtualInterfaces`` configuration in omnetpp.ini. Let's see some excerpts from the configuration below.
+The simulation is defined in the ``VirtualInterfaces`` configuration in omnetpp.ini. Let's see some excerpts from the configuration below. First, we configure host1 and host2 to have a virtual interface:
 
 .. First, the virtual interfaces are configured:
 
@@ -419,16 +452,21 @@ The simulation is defined in the ``VirtualInterfaces`` configuration in omnetpp.
 
 .. The virtual interfaces connect to the 802.1q submodule via a socket, thus the 802.1q submodule is configured to have a socket in both host1 and host2. The tunnel submodules in the virtual interfaces are configured to use the real Ethernet interface (eth0) of the host. The protocol parameter needs to be specified so that the interface is VLAN-aware???? We also set the VLAN ID.
 
-First, host1 and host2 are configured to have a virtual interface:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: Config VirtualInterfaces2
    :end-at: numVirtInterfaces
    :language: ini
 
-Then, some parameters of the virtual interfaces need to be configured, i.e. via which real interface to send packets, and how to connect to the 802.1q submodule of the host. 
+.. Virtual interface basically has a VirtualTunnel in it.
 
-Sockets are used by modules, such as applications, to access protocol services in a network node. In this case, the tunnel submodule of the virtual interface accesses the 802.1q module via a socket; hence the 802.1q is configured to have one:
+Some parameters of the virtual tunnel need to be configured, such as which real interface to send packets on, and how to connect to the 802.1q submodule of the host. 
+
+The tunnel submodule of the virtual interface accesses the 802.1q module via a socket. (In INET, sockets are used by modules, such as applications, to access protocol services in a network node.) We need to enable the 802.1q module's socket so that the tunnel can use the module's protocol service:
+
+.. the 802.1q is configured to have one:
+
+.. Sockets are used by modules, such as applications, to access protocol services in a network node. In this case, the tunnel submodule of the virtual interface accesses the 802.1q module via a socket; hence the 802.1q is configured to have one:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: *.host*.ieee8021q.hasSocketSupport = true
@@ -442,7 +480,7 @@ Here is the configuration for the virtual interface's tunnel submodule:
    :end-at: vlanId
    :language: ini
 
-It is set to use the real Ethernet interface (eth0) for sending packets. The :par:`protocol` parameter selects that the tunnel should connect to the 802.1q protocol module via a socket. Finally, the VLAN ID is specified; vlan request tags are inserted by the tunnel to outgoing packets (the 802.1q module adds the VLAN tags with the specified VLAN ID when the packets get to it).
+The tunnel/virtual interface is set to use the real Ethernet interface (eth0) for sending packets. The :par:`protocol` parameter selects that the tunnel should connect to the 802.1q protocol module via a socket. Finally, the VLAN ID is specified; vlan request tags are inserted by the tunnel to outgoing packets (the 802.1q module adds the VLAN tags with the specified VLAN ID when the packets get to it).
 
 .. VLAN tags with the specified VLAN ID are added later by the 8021q module.
 
@@ -452,25 +490,31 @@ It is set to use the real Ethernet interface (eth0) for sending packets. The :pa
 
 .. **TODO** routes
 
-Some routing configuration is required. The Ipv4NetworkConfigurator module can assign addresses to virtual interfaces automatically, but cannot set up routes for them, because it does not know the network topology (i.e. which real interface the virtual ones use) so routes for the virtual interfaces need to be added manually. Here is the xml configuration for the configurator:
+The virtual interfaces require manual routing configuration. The Ipv4NetworkConfigurator module can assign addresses to virtual interfaces automatically, but cannot set up routes for them because it does not know where the virtual interfaces are in the network topology (i.e. which real interface they use). Thus routes for the virtual interfaces need to be added to the configator's xml config file:
+
+.. We need to do some manual route configuration because of the virtual interfaces. 
+
+.. /. Here is the xml configuration for the configurator:
+
+.. Virtual interfaces need manual route configuration. We need to configure the routes to the virtual interfaces manually. Some routing configuration is required/We need to configure some of the routing manually. 
 
 .. literalinclude:: ../config_virt.xml
    :language: xml
 
-The xml configuration adds routes for the virtual interfaces in both hosts.
+.. The xml configuration adds routes for the virtual interfaces in both hosts.
 
-.. note:: we use global arp
+.. note:: we use global arp; works with normal arp tho
 
 **TODO** traffic
 
-Two UDP apps in host1 generate packets, one targetting host2's eth interface, the other host2's virt interface:
+The only traffic in the simulation is generated by two UDP apps in host1, one targetting host2's eth interface, the other host2's virt interface:
 
 .. literalinclude:: ../omnetpp.ini
    :start-after: *.host1.app[*].typename = "UdpBasicApp"
    :end-at: destAddresses = "host2%virt0"
    :language: ini
 
-The apps are also configured to include the outgoing interface in the packet name (eth and virt).
+The apps are also configured to include the outgoing interface in the packet name (eth and virt), so that we can tell the packets apart in Qtenv.
 
 Our goal is to make host2 only accessible via the two virtual interfaces, so we configure the VLAN policy like so:
 
@@ -479,9 +523,17 @@ Our goal is to make host2 only accessible via the two virtual interfaces, so we 
    :end-at: outboundFilter
    :language: ini
 
-Packets sent by host1's virtual interface have a VLAN ID of 1. We only need to have an outbound filter submodule in the VLAN policy layer module in switch2 to only allow packets with VLAN ID 1 on its eth1 interface (the one towards host2). Packets without VLAN tags are allowed on the other interfaces. 
-
+Packets sent by host1's virtual interface have a VLAN ID of 1. We only need to have an outbound filter submodule in the VLAN policy layer module in switch2, which we configure to only allow packets with VLAN ID 1 on its eth1 interface (the one towards host2). Packets without VLAN tags are allowed on the other interfaces. 
+/The other interfaces of switch2 only allow packets without VLAN tags.
 The inbound filter and both mapper submodules of VlanPolicy are not needed, so they are disabled.
+
+The configured VLAN policies are illustrated on the following image: 
+
+.. .. figure:: media/11.png
+      :align: center
+
+.. figure:: media/virt_schematic.png
+   :align: center
 
 .. The other, unneeded submodules are disabled.
 
@@ -504,6 +556,8 @@ The inbound filter and both mapper submodules of VlanPolicy are not needed, so t
    Two UDP apps in host1 generate traffic, one of them for host2's eth0 and the other for host2's virt0 interface.
    The virtual interface is configured to assign packets to VLAN 1.
 
+   **TODO** note that the host tint has no relevance in this configuration (it just uses the same network as the previous one)
+
    so
 
    - two hosts connected with 100Mbps Ethernet
@@ -518,3 +572,6 @@ The inbound filter and both mapper submodules of VlanPolicy are not needed, so t
    - it doesnt know the topology...i.e. how the virtual interfaces are connected
    - this is about how to use vlans with virtual interfaces
    - the application doesnt know anything about the vlan the packets are assigned to (they could)
+
+Results
+-------
