@@ -53,10 +53,28 @@ void RelayInterfaceSelector::pushPacket(Packet *packet, cGate *gates)
 {
     auto macAddressReq = packet->getTag<MacAddressReq>();
     auto destinationAddress = macAddressReq->getDestAddress();
-    auto interfaceInd = packet->getTag<InterfaceInd>();
-    auto incomingInterface = interfaceTable->getInterfaceById(interfaceInd->getInterfaceId());
+    auto interfaceInd = packet->findTag<InterfaceInd>();
+    auto incomingInterface = interfaceInd != nullptr ? interfaceTable->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
     if (destinationAddress.isBroadcast())
         broadcastPacket(packet, destinationAddress, incomingInterface);
+    else if (destinationAddress.isMulticast()) {
+        auto vlanReq = packet->findTag<VlanReq>();
+        int vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : 0;
+        auto outgoingInterfaceIds = macAddressTable->getInterfaceIdsForAddress(destinationAddress, vlanId);
+        if (outgoingInterfaceIds.size() == 0)
+            broadcastPacket(packet, destinationAddress, incomingInterface);
+        else {
+            for (auto outgoingInterfaceId : outgoingInterfaceIds) {
+                if (interfaceInd != nullptr && outgoingInterfaceId == interfaceInd->getInterfaceId())
+                    EV_WARN << "Ignoring outgoing interface because it is the same as incoming interface" << EV_FIELD(destinationAddress) << EV_FIELD(incomingInterface) << EV_FIELD(packet) << EV_ENDL;
+                else {
+                    auto outgoingInterface = interfaceTable->getInterfaceById(outgoingInterfaceId);
+                    sendPacket(packet->dup(), destinationAddress, outgoingInterface);
+                }
+            }
+            delete packet;
+        }
+    }
     else {
         auto vlanReq = packet->findTag<VlanReq>();
         int vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : 0;
@@ -65,7 +83,7 @@ void RelayInterfaceSelector::pushPacket(Packet *packet, cGate *gates)
         int outgoingInterfaceId = macForwardingTable->getUnicastAddressForwardingInterface(destinationAddress, vlanId);
         // should not send out the same packet on the same interface
         // (although wireless interfaces are ok to receive the same message)
-        if (outgoingInterfaceId == interfaceInd->getInterfaceId()) {
+        if (interfaceInd != nullptr && outgoingInterfaceId == interfaceInd->getInterfaceId()) {
             EV_WARN << "Discarding packet because outgoing interface is the same as incoming interface" << EV_FIELD(destinationAddress) << EV_FIELD(incomingInterface) << EV_FIELD(packet) << EV_ENDL;
             numDroppedFrames++;
             PacketDropDetails details;
