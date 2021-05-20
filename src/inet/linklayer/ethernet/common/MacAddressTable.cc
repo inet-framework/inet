@@ -30,9 +30,21 @@ namespace inet {
 
 Define_Module(MacAddressTable);
 
+std::ostream& operator<<(std::ostream& os, const std::vector<int>& ids)
+{
+    os << "[";
+    for (int i = 0; i < ids.size(); i++) {
+        auto id = ids[i];
+        if (i != 0)
+            os << ", ";
+        os << id;
+    }
+    return os << "]";
+}
+
 std::ostream& operator<<(std::ostream& os, const MacAddressTable::AddressEntry& entry)
 {
-    os << "{VID=" << entry.vid << ", interfaceId=" << entry.interfaceId << ", insertionTime=" << entry.insertionTime << "}";
+    os << "{VID=" << entry.vid << ", interfaceIds=" << entry.interfaceIds << ", insertionTime=" << entry.insertionTime << "}";
     return os;
 }
 
@@ -149,11 +161,33 @@ int MacAddressTable::getInterfaceIdForAddress(const MacAddress& address, unsigne
     }
     if (iter->second.insertionTime + agingTime <= simTime()) {
         // don't use (and throw out) aged entries
-        EV << "Ignoring and deleting aged entry: " << iter->first << " --> interfaceId " << iter->second.interfaceId << "\n";
+        EV << "Ignoring and deleting aged entry: " << iter->first << " --> interfaceIds " << iter->second.interfaceIds << "\n";
         addressTable.erase(iter);
         return -1;
     }
-    return iter->second.interfaceId;
+    if (iter->second.interfaceIds.size() != 1)
+        throw cRuntimeError("Invalid number of interfaces");
+    return iter->second.interfaceIds[0];
+}
+
+std::vector<int> MacAddressTable::getInterfaceIdsForAddress(const MacAddress& address, unsigned int vid)
+{
+    Enter_Method("getInterfaceIdsForAddress");
+
+    AddressTableKey key(vid, address);
+    auto iter = addressTable.find(key);
+
+    if (iter == addressTable.end()) {
+        // not found
+        return std::vector<int>();
+    }
+    if (iter->second.insertionTime + agingTime <= simTime()) {
+        // don't use (and throw out) aged entries
+        EV << "Ignoring and deleting aged entry: " << iter->first << " --> interfaceIds " << iter->second.interfaceIds << "\n";
+        addressTable.erase(iter);
+        return std::vector<int>();
+    }
+    return iter->second.interfaceIds;
 }
 
 /*
@@ -161,12 +195,17 @@ int MacAddressTable::getInterfaceIdForAddress(const MacAddress& address, unsigne
  * True if refreshed. False if it is new.
  */
 
-bool MacAddressTable::updateTableWithAddress(int interfaceId, const MacAddress& address, unsigned int vid)
+bool MacAddressTable::learnMacAddress(int interfaceId, const MacAddress& address, unsigned int vid)
 {
-    Enter_Method("updateTableWithAddress");
-    if (address.isMulticast()) // broadcast or multicast
+    Enter_Method("learnMacAddress");
+    if (address.isBroadcast() || address.isMulticast())
         return false;
+    else
+        return updateMacAddressTable(interfaceId, address, vid);
+}
 
+bool MacAddressTable::updateMacAddressTable(int interfaceId, const MacAddress& address, unsigned int vid)
+{
     AddressTableKey key(vid, address);
     auto iter = addressTable.find(key);
 
@@ -175,7 +214,7 @@ bool MacAddressTable::updateTableWithAddress(int interfaceId, const MacAddress& 
 
         // Add entry to table
         EV << "Adding entry" << EV_FIELD(address) << EV_FIELD(interfaceId) << EV_FIELD(vid) << EV_ENDL;
-        addressTable[key] = AddressEntry(vid, interfaceId, simTime());
+        addressTable[key] = AddressEntry(vid, {interfaceId}, simTime());
         return false;
     }
     else {
@@ -183,7 +222,10 @@ bool MacAddressTable::updateTableWithAddress(int interfaceId, const MacAddress& 
         EV << "Updating entry" << EV_FIELD(address) << EV_FIELD(interfaceId) << EV_FIELD(vid) << EV_ENDL;
         AddressEntry& entry = iter->second;
         entry.insertionTime = simTime();
-        entry.interfaceId = interfaceId;
+        for (auto id : entry.interfaceIds)
+            if (id == interfaceId)
+                return true;
+        entry.interfaceIds.push_back(interfaceId);
     }
     return true;
 }
@@ -196,7 +238,9 @@ void MacAddressTable::flush(int interfaceId)
 {
     Enter_Method("flush");
     for (auto cur = addressTable.begin(); cur != addressTable.end();) {
-        if (cur->second.interfaceId == interfaceId)
+        auto& interfaceIds = cur->second.interfaceIds;
+        interfaceIds.erase(std::remove(interfaceIds.begin(), interfaceIds.end(), interfaceId), interfaceIds.end());
+        if (interfaceIds.empty())
             cur = addressTable.erase(cur);
         else
             ++cur;
@@ -210,17 +254,18 @@ void MacAddressTable::flush(int interfaceId)
 void MacAddressTable::printState()
 {
     EV << endl << "MAC Address Table" << endl;
-    EV << "VLAN ID    MAC    IfId    Inserted" << endl;
+    EV << "VLAN ID    MAC    IfIds    Inserted" << endl;
     for (auto& elem : addressTable)
-        EV << elem.first.first << "   " << elem.first.second << "   " << elem.second.interfaceId << "   " << elem.second.insertionTime << endl;
+        EV << elem.first.first << "   " << elem.first.second << "   " << elem.second.interfaceIds << "   " << elem.second.insertionTime << endl;
 }
 
 //TODO rename it (replace interfaceIdA to interfaceIdB in table)
 void MacAddressTable::copyTable(int interfaceIdA, int interfaceIdB)
 {
     for (auto& elem : addressTable) {
-        if (elem.second.interfaceId == interfaceIdA)
-            elem.second.interfaceId = interfaceIdB;
+        for (auto& interfaceId : elem.second.interfaceIds)
+        if (interfaceId == interfaceIdA)
+            interfaceId = interfaceIdB;
     }
 }
 
@@ -230,7 +275,7 @@ void MacAddressTable::removeAgedEntriesFromAllVlans()
         AddressEntry& entry = cur->second;
         if (entry.insertionTime + agingTime <= simTime()) {
             EV << "Removing aged entry from Address Table: "
-               << cur->first.first << " " << cur->first.second << " --> interfaceId " << cur->second.interfaceId << "\n";
+               << cur->first.first << " " << cur->first.second << " --> interfaceIds " << cur->second.interfaceIds << "\n";
             cur = addressTable.erase(cur);
         }
         else
@@ -306,7 +351,7 @@ void MacAddressTable::readAddressTable(const char *fileName)
         interfaceId = ie->getInterfaceId();
 
         // Create an entry with address and interfaceId and insert into table
-        AddressEntry entry(vlanId, interfaceId, 0);
+        AddressEntry entry(vlanId, {interfaceId}, 0);
         AddressTableKey key(vlanId, macAddress);
         addressTable[key] = entry;
     }
@@ -328,7 +373,7 @@ void MacAddressTable::parseAddressTableParameter()
         auto networkInterface = ifTable->findInterfaceByName(interfaceName);
         if (networkInterface == nullptr)
             throw cRuntimeError("Cannot find network interface '%s'", interfaceName);
-        updateTableWithAddress(networkInterface->getInterfaceId(), macAddress, vlan);
+        updateMacAddressTable(networkInterface->getInterfaceId(), macAddress, vlan);
     }
 }
 

@@ -37,18 +37,14 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
   protected:
     struct AddressEntry {
         unsigned int vid = 0; // VLAN ID
-        int interfaceId = -1; // Input interface ID
+        std::vector<int> interfaceIds; // network interface IDs
         simtime_t insertionTime; // Arrival time of Lookup Address Table entry
         AddressEntry() {}
-        AddressEntry(unsigned int vid, int interfaceId, simtime_t insertionTime) :
-            vid(vid), interfaceId(interfaceId), insertionTime(insertionTime) {}
+        AddressEntry(unsigned int vid, const std::vector<int>& interfaceIds, simtime_t insertionTime) :
+            vid(vid), interfaceIds(interfaceIds), insertionTime(insertionTime) {}
     };
 
     friend std::ostream& operator<<(std::ostream& os, const AddressEntry& entry);
-
-    struct MacCompare {
-        bool operator()(const MacAddress& u1, const MacAddress& u2) const { return u1.compareTo(u2) < 0; }
-    };
 
     typedef std::pair<unsigned int, MacAddress> AddressTableKey;
     friend std::ostream& operator<<(std::ostream& os, const AddressTableKey& key);
@@ -71,6 +67,7 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
     virtual const char *resolveDirective(char directive) const override;
 
     virtual void parseAddressTableParameter();
+    virtual bool updateMacAddressTable(int interfaceId, const MacAddress& address, unsigned int vid);
 
   public:
 
@@ -81,18 +78,26 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
     // Table management
 
     /**
-     * @brief For a known arriving interfaceId, V-TAG and destination MAC. It finds out the interfaceId where relay component should deliver the message
+     * @brief For a given port, V-TAG and destination MAC it finds out the interface Id where relay component should deliver the message.
      * @param address MAC destination
      * @param vid VLAN ID
-     * @return Output interfaceId for address, or -1 if unknown.
+     * @return Output interface Id for address, or -1 if unknown.
      */
     virtual int getInterfaceIdForAddress(const MacAddress& address, unsigned int vid = 0) override;
+
+    /**
+     * @brief For a given port, V-TAG and destination MAC it finds out the interface Ids where relay component should deliver the message.
+     * @param address MAC destination
+     * @param vid VLAN ID
+     * @return Output interface Ids for address, or empty list unknown.
+     */
+    virtual std::vector<int> getInterfaceIdsForAddress(const MacAddress& address, unsigned int vid = 0) override;
 
     /**
      * @brief Register a new MAC address at AddressTable.
      * @return True if refreshed. False if it is new.
      */
-    virtual bool updateTableWithAddress(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
+    virtual bool learnMacAddress(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
 
     /**
      *  @brief Clears interfaceId cache
