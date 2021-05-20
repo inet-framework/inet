@@ -110,16 +110,16 @@ void GateSchedulingConfiguratorBase::addPorts(Input& input) const
     for (int i = 0; i < topology->getNumNodes(); i++) {
         auto node = (Node *)topology->getNode(i);
         auto networkNode = input.getNetworkNode(node->module);
-        for (auto interfaceInfo : node->interfaceInfos) {
-            auto networkInterface = interfaceInfo->networkInterface;
+        for (auto interface : node->interfaces) {
+            auto networkInterface = interface->networkInterface;
             if (!networkInterface->isLoopback()) {
                 auto subqueue = networkInterface->findModuleByPath(".macLayer.queue.queue[0]");
                 auto port = new Input::Port();
                 port->numPriorities = subqueue != nullptr ? subqueue->getVectorSize() : -1;
-                port->module = interfaceInfo->networkInterface;
-                port->datarate = bps(interfaceInfo->networkInterface->getDatarate());
-                port->propagationTime = check_and_cast<cDatarateChannel *>(interfaceInfo->networkInterface->getTxTransmissionChannel())->getDelay();
-                port->maxPacketLength = B(interfaceInfo->networkInterface->getMtu());
+                port->module = interface->networkInterface;
+                port->datarate = bps(interface->networkInterface->getDatarate());
+                port->propagationTime = check_and_cast<cDatarateChannel *>(interface->networkInterface->getTxTransmissionChannel())->getDelay();
+                port->maxPacketLength = B(interface->networkInterface->getMtu());
                 port->guardBand = s(port->maxPacketLength / port->datarate).get();
                 port->maxCycleTime = gateCycleDuration;
                 port->maxSlotDuration = gateCycleDuration;
@@ -227,22 +227,22 @@ void GateSchedulingConfiguratorBase::configureGateScheduling()
     for (int i = 0; i < topology->getNumNodes(); i++) {
         auto node = (Node *)topology->getNode(i);
         auto networkNode = node->module;
-        for (auto interfaceInfo : node->interfaceInfos) {
-            auto queue = interfaceInfo->networkInterface->findModuleByPath(".macLayer.queue");
+        for (auto interface : node->interfaces) {
+            auto queue = interface->networkInterface->findModuleByPath(".macLayer.queue");
             if (queue != nullptr) {
                 for (cModule::SubmoduleIterator it(queue); !it.end(); ++it) {
                     cModule *gate = *it;
                     if (dynamic_cast<queueing::PeriodicGate *>(gate) != nullptr)
-                        configureGateScheduling(networkNode, gate, interfaceInfo);
+                        configureGateScheduling(networkNode, gate, interface);
                 }
             }
         }
     }
 }
 
-void GateSchedulingConfiguratorBase::configureGateScheduling(cModule *networkNode, cModule *gate, InterfaceInfo *interfaceInfo)
+void GateSchedulingConfiguratorBase::configureGateScheduling(cModule *networkNode, cModule *gate, Interface *interface)
 {
-    auto networkInterface = interfaceInfo->networkInterface;
+    auto networkInterface = interface->networkInterface;
     bool initiallyOpen = false;
     simtime_t offset = 0;
     simtime_t slotEnd = 0;

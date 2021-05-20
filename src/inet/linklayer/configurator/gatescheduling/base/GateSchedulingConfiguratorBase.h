@@ -219,7 +219,7 @@ class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
     virtual void addFlows(Input& input) const;
 
     virtual void configureGateScheduling();
-    virtual void configureGateScheduling(cModule *networkNode, cModule *gate, InterfaceInfo *interfaceInfo);
+    virtual void configureGateScheduling(cModule *networkNode, cModule *gate, Interface *interface);
     virtual void configureApplicationOffsets();
 
     virtual Output *computeGateScheduling(const Input& input) const = 0;

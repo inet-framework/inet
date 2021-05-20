@@ -269,7 +269,7 @@ bool TsnConfigurator::checkLinkFailureProtection(cValueArray *configuration, con
                 if (mask[i]) {
                     auto link = (Link *)networkLinks[i];
                     if (!first) { EV_DEBUG << ", "; first = false; }
-                    EV_DEBUG << link->sourceInterfaceInfo->node->module->getFullName() << "." << link->sourceInterfaceInfo->networkInterface->getInterfaceName() << " -> " << link->destinationInterfaceInfo->node->module->getFullName() << "." << link->destinationInterfaceInfo->networkInterface->getInterfaceName();
+                    EV_DEBUG << link->sourceInterface->node->module->getFullName() << "." << link->sourceInterface->networkInterface->getInterfaceName() << " -> " << link->destinationInterface->node->module->getFullName() << "." << link->destinationInterface->networkInterface->getInterfaceName();
                     failedLinks.push_back(networkLinks[i]);
                 }
             }
@@ -396,12 +396,12 @@ void TsnConfigurator::collectAllTrees(const std::vector<const Node *>& stopNodes
 std::vector<TsnConfigurator::Path> TsnConfigurator::collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *destinationNode) const
 {
     std::vector<Path> allPaths;
-    std::vector<const InterfaceInfo *> currentPath;
+    std::vector<const Interface *> currentPath;
     collectAllPaths(stopNodes, destinationNode, currentPath, allPaths);
     return allPaths;
 }
 
-void TsnConfigurator::collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *currentNode, std::vector<const InterfaceInfo *>& currentPath, std::vector<Path>& allPaths) const
+void TsnConfigurator::collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *currentNode, std::vector<const Interface *>& currentPath, std::vector<Path>& allPaths) const
 {
     if (std::find(stopNodes.begin(), stopNodes.end(), currentNode) != stopNodes.end()) {
         allPaths.push_back(Path(currentPath));
@@ -411,11 +411,11 @@ void TsnConfigurator::collectAllPaths(const std::vector<const Node *>& stopNodes
         for (int i = 0; i < currentNode->getNumPaths(); i++) {
             auto link = (Link *)currentNode->getPath(i);
             auto nextNode = (Node *)currentNode->getPath(i)->getRemoteNode();
-            if (std::find_if(currentPath.begin(), currentPath.end(), [&] (const InterfaceInfo *interfaceInfo) { return interfaceInfo->node == nextNode; }) == currentPath.end()) {
+            if (std::find_if(currentPath.begin(), currentPath.end(), [&] (const Interface *interface) { return interface->node == nextNode; }) == currentPath.end()) {
                 bool first = currentPath.empty();
                 if (first)
-                    currentPath.push_back(link->sourceInterfaceInfo);
-                currentPath.push_back(link->destinationInterfaceInfo);
+                    currentPath.push_back(link->sourceInterface);
+                currentPath.push_back(link->destinationInterface);
                 collectAllPaths(stopNodes, nextNode, currentPath, allPaths);
                 currentPath.erase(currentPath.end() - (first ? 2 : 1), currentPath.end());
             }
@@ -485,11 +485,11 @@ void TsnConfigurator::collectReachedNodes(const Node *sourceNode, const std::vec
         todoNodes.pop_front();
         for (auto path : tree.paths) {
             if (path.interfaces[0]->node == startNode) {
-                const InterfaceInfo *previousInterface = nullptr;
+                const Interface *previousInterface = nullptr;
                 for (auto interface : path.interfaces) {
                     if (previousInterface != nullptr) {
                         Link *pathLink = findLinkOut(previousInterface);
-                        if (pathLink->destinationInterfaceInfo->node != interface->node)
+                        if (pathLink->destinationInterface->node != interface->node)
                             pathLink = findLinkOut(previousInterface->node, interface->node);
                         if (std::find(failedLinks.begin(), failedLinks.end(), pathLink) != failedLinks.end())
                             break;

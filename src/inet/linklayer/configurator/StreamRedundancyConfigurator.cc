@@ -114,15 +114,15 @@ void StreamRedundancyConfigurator::computeStreamSendersAndReceivers(cValueMap *s
                         if (senderName != nullptr && std::find(senderNetworkNodeNames.begin(), senderNetworkNodeNames.end(), senderNetworkNodeName) == senderNetworkNodeNames.end())
                             senderNetworkNodeNames.push_back(senderNetworkNodeName);
                         if (receiverName != nullptr && std::find(receiverNetworkNodeNames.begin(), receiverNetworkNodeNames.end(), receiverNetworkNodeName) == receiverNetworkNodeNames.end()) {
-                            InterfaceInfo *interfaceInfo = nullptr;
+                            Interface *interface = nullptr;
                             if (interfaceName.empty())
-                                interfaceInfo = findLinkOut(node, receiverNetworkNodeName.c_str())->sourceInterfaceInfo;
+                                interface = findLinkOut(node, receiverNetworkNodeName.c_str())->sourceInterface;
                             else
-                                interfaceInfo = *std::find_if(node->interfaceInfos.begin(), node->interfaceInfos.end(), [&] (auto interfaceInfo) {
-                                    return interfaceInfo->networkInterface->getInterfaceName() == interfaceName;
+                                interface = *std::find_if(node->interfaces.begin(), node->interfaces.end(), [&] (auto interface) {
+                                    return interface->networkInterface->getInterfaceName() == interfaceName;
                                 });
                             receiverNetworkNodeNames.push_back(receiverNetworkNodeName);
-                            interfaces.push_back(interfaceInfo->networkInterface);
+                            interfaces.push_back(interface->networkInterface);
                         }
                     }
                 }
@@ -230,7 +230,7 @@ void StreamRedundancyConfigurator::computeStreamPolicyConfigurations(cValueMap *
             auto vlanId = assignedVlanIds[{senderNetworkNodeName, networkNodeName, destinationAddress, streamName}];
             StreamDecoding streamDecoding;
             streamDecoding.name = inputStreamName;
-            streamDecoding.networkInterface = linkIn->destinationInterfaceInfo->networkInterface;
+            streamDecoding.networkInterface = linkIn->destinationInterface->networkInterface;
             streamDecoding.vlanId = vlanId;
             if (streamDecoding.vlanId > maxVlanId)
                 throw cRuntimeError("Cannot assign VLAN ID in the available range");

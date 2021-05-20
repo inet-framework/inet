@@ -62,8 +62,8 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
                         childNode = (Node *)linkOut->getRemoteNode();
                         unvisited.push(childNode);
                     }
-                    InterfaceInfo *info = new InterfaceInfo(node, networkInterface);
-                    node->interfaceInfos.push_back(info);
+                    Interface *interface = new Interface(node, networkInterface);
+                    node->interfaces.push_back(interface);
                 }
             }
         }
@@ -76,10 +76,10 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
             Link *link = (Link *)linkOut;
             Node *localNode = (Node *)linkOut->getLocalNode();
             if (localNode->interfaceTable)
-                link->sourceInterfaceInfo = findInterfaceInfo(localNode, localNode->interfaceTable->findInterfaceByNodeOutputGateId(linkOut->getLocalGateId()));
+                link->sourceInterface = findInterface(localNode, localNode->interfaceTable->findInterfaceByNodeOutputGateId(linkOut->getLocalGateId()));
             Node *remoteNode = (Node *)linkOut->getRemoteNode();
             if (remoteNode->interfaceTable)
-                link->destinationInterfaceInfo = findInterfaceInfo(remoteNode, remoteNode->interfaceTable->findInterfaceByNodeInputGateId(linkOut->getRemoteGateId()));
+                link->destinationInterface = findInterface(remoteNode, remoteNode->interfaceTable->findInterfaceByNodeInputGateId(linkOut->getRemoteGateId()));
         }
     }
 }
@@ -139,11 +139,11 @@ NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkOut(const Node *
     return nullptr;
 }
 
-NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkOut(const InterfaceInfo *interfaceInfo) const
+NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkOut(const Interface *interface) const
 {
-    for (int i = 0; i < interfaceInfo->node->getNumOutLinks(); i++) {
-        auto link = check_and_cast<Link *>(static_cast<Topology::Link *>(interfaceInfo->node->getLinkOut(i)));
-        if (link->sourceInterfaceInfo == interfaceInfo)
+    for (int i = 0; i < interface->node->getNumOutLinks(); i++) {
+        auto link = check_and_cast<Link *>(static_cast<Topology::Link *>(interface->node->getLinkOut(i)));
+        if (link->sourceInterface == interface)
             return link;
     }
     return nullptr;
@@ -157,13 +157,13 @@ Topology::LinkOut *NetworkConfiguratorBase::findLinkOut(const Node *node, int ga
     return nullptr;
 }
 
-NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::findInterfaceInfo(const Node *node, NetworkInterface *networkInterface) const
+NetworkConfiguratorBase::Interface *NetworkConfiguratorBase::findInterface(const Node *node, NetworkInterface *networkInterface) const
 {
     if (networkInterface == nullptr)
         return nullptr;
-    for (auto& interfaceInfo : node->interfaceInfos)
-        if (interfaceInfo->networkInterface == networkInterface)
-            return interfaceInfo;
+    for (auto& interface : node->interfaces)
+        if (interface->networkInterface == networkInterface)
+            return interface;
     return nullptr;
 }
 
