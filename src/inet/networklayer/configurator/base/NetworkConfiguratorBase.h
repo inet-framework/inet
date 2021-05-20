@@ -28,7 +28,7 @@ namespace inet {
 class INET_API NetworkConfiguratorBase : public cSimpleModule
 {
   protected:
-    class InterfaceInfo;
+    class Interface;
 
     /**
      * Represents a node in the network.
@@ -38,33 +38,33 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule
         cModule *module;
         IInterfaceTable *interfaceTable;
         IRoutingTable *routingTable = nullptr;
-        std::vector<InterfaceInfo *> interfaceInfos;
+        std::vector<Interface *> interfaces;
 
       public:
         Node(cModule *module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = nullptr; }
-        ~Node() { for (size_t i = 0; i < interfaceInfos.size(); i++) delete interfaceInfos[i]; }
+        ~Node() { for (size_t i = 0; i < interfaces.size(); i++) delete interfaces[i]; }
     };
 
     /**
      * Represents an interface in the network.
      */
-    class InterfaceInfo : public cObject {
+    class Interface : public cObject {
       public:
         Node *node;
         NetworkInterface *networkInterface;
 
       public:
-        InterfaceInfo(Node *node, NetworkInterface *networkInterface) : node(node), networkInterface(networkInterface) {}
+        Interface(Node *node, NetworkInterface *networkInterface) : node(node), networkInterface(networkInterface) {}
         virtual std::string getFullPath() const override { return networkInterface->getInterfaceFullPath(); }
     };
 
     class Link : public Topology::Link {
       public:
-        InterfaceInfo *sourceInterfaceInfo;
-        InterfaceInfo *destinationInterfaceInfo;
+        Interface *sourceInterface;
+        Interface *destinationInterface;
 
       public:
-        Link() { sourceInterfaceInfo = nullptr; destinationInterfaceInfo = nullptr; }
+        Link() { sourceInterface = nullptr; destinationInterface = nullptr; }
     };
 
     class Topology : public inet::Topology {
@@ -96,9 +96,9 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule
     virtual Link *findLinkIn(const Node *node, const char *neighbor) const;
     virtual Link *findLinkOut(const Node *node, const char *neighbor) const;
     virtual Link *findLinkOut(const Node *node, const Node *neighbor) const;
-    virtual Link *findLinkOut(const InterfaceInfo *interfaceInfo) const;
+    virtual Link *findLinkOut(const Interface *interface) const;
     virtual Topology::LinkOut *findLinkOut(const Node *node, int gateId) const;
-    virtual InterfaceInfo *findInterfaceInfo(const Node *node, NetworkInterface *networkInterface) const;
+    virtual Interface *findInterface(const Node *node, NetworkInterface *networkInterface) const;
 };
 
 } // namespace inet

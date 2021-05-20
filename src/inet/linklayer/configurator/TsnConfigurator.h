@@ -28,10 +28,10 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
     class Path
     {
       public:
-        std::vector<const InterfaceInfo *> interfaces;
+        std::vector<const Interface *> interfaces;
 
       public:
-        Path(const std::vector<const InterfaceInfo *>& interfaces) : interfaces(interfaces) { }
+        Path(const std::vector<const Interface *>& interfaces) : interfaces(interfaces) { }
 
         friend std::ostream& operator<<(std::ostream& os, const TsnConfigurator::Path& path)
         {
@@ -90,20 +90,20 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
   public:
     const std::vector<StreamConfiguration>& getStreams() const { return streamConfigurations; }
 
-    static Node *findConnectedNode(const InterfaceInfo *interface) {
+    static Node *findConnectedNode(const Interface *interface) {
         auto node = interface->node;
         for (int i = 0; i < node->getNumOutLinks(); i++) {
             auto link = (Link *)node->getLinkOut(i);
-            if (link->sourceInterfaceInfo == interface)
-                return link->destinationInterfaceInfo->node;
+            if (link->sourceInterface == interface)
+                return link->destinationInterface->node;
         }
         return nullptr;
     }
 
-    static int countParalellLinks(const InterfaceInfo *interface) {
+    static int countParalellLinks(const Interface *interface) {
         int count = 0;
         auto node = interface->node;
-        for (auto otherInterface : node->interfaceInfos)
+        for (auto otherInterface : node->interfaces)
             if (findConnectedNode(interface) == findConnectedNode(otherInterface))
                 count++;
         return count;
@@ -133,7 +133,7 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
     virtual void collectAllTrees(const std::vector<const Node *>& stopNodes, const std::vector<const Node *>& destinationNodes, int destinationNodeIndex, std::vector<Path>& currentTree, std::vector<Tree>& allTrees) const;
 
     virtual std::vector<Path> collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *destinationNode) const;
-    virtual void collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *currentNode, std::vector<const InterfaceInfo *>& currentPath, std::vector<Path>& allPaths) const;
+    virtual void collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *currentNode, std::vector<const Interface *>& currentPath, std::vector<Path>& allPaths) const;
 
     virtual std::vector<const Node *> collectNetworkNodes(const std::string& filter) const;
     virtual std::vector<const Link *> collectNetworkLinks(const std::string& filter) const;

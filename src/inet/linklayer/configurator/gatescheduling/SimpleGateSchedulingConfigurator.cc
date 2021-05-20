@@ -131,8 +131,8 @@ simtime_t SimpleGateSchedulingConfigurator::computeStartOffsetForPathFragments(I
                     auto networkNode = getParentModule()->getSubmodule(networkNodeName);
                     auto node = (Node *)topology->getNodeFor(networkNode);
                     auto link = (Link *)findLinkOut(node, pathFragment->networkNodes[i + 1]->module->getFullName());
-                    auto interfaceInfo = link->sourceInterfaceInfo;
-                    auto networkInterface = interfaceInfo->networkInterface;
+                    auto interface = link->sourceInterface;
+                    auto networkInterface = interface->networkInterface;
                     auto& interfaceSchedule = interfaceSchedules[networkInterface];
                     bps interfaceDatarate = bps(networkInterface->getDatarate());
                     simtime_t transmissionDuration = s(packetLength / interfaceDatarate).get();
@@ -207,8 +207,8 @@ void SimpleGateSchedulingConfigurator::addGateSchedulingForPathFragments(Input::
                     auto networkNode = getParentModule()->getSubmodule(networkNodeName);
                     auto node = (Node *)topology->getNodeFor(networkNode);
                     auto link = (Link *)findLinkOut(node, pathFragment->networkNodes[i + 1]->module->getFullName());
-                    auto interfaceInfo = link->sourceInterfaceInfo;
-                    auto networkInterface = interfaceInfo->networkInterface;
+                    auto interface = link->sourceInterface;
+                    auto networkInterface = interface->networkInterface;
                     auto& interfaceSchedule = interfaceSchedules[networkInterface];
                     bps interfaceDatarate = bps(networkInterface->getDatarate());
                     simtime_t transmissionDuration = s(packetLength / interfaceDatarate).get();
