@@ -30,6 +30,18 @@ namespace inet {
 
 Define_Module(MacAddressTable);
 
+std::ostream& operator<<(std::ostream& os, const std::vector<int>& ids)
+{
+    os << "[";
+    for (int i = 0; i < ids.size(); i++) {
+        auto id = ids[i];
+        if (i != 0)
+            os << ", ";
+        os << id;
+    }
+    return os << "]";
+}
+
 std::ostream& operator<<(std::ostream& os, const MacAddressTable::AddressEntry& entry)
 {
     os << "{VID=" << entry.vid << ", interfaceId=" << entry.interfaceId << ", insertionTime=" << entry.insertionTime << "}";
@@ -39,6 +51,12 @@ std::ostream& operator<<(std::ostream& os, const MacAddressTable::AddressEntry& 
 std::ostream& operator<<(std::ostream& os, const MacAddressTable::AddressTableKey& key)
 {
     os << "{VID=" << key.first << ", addr=" << key.second << "}";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const MacAddressTable::MulticastAddressEntry& entry)
+{
+    os << "{VID=" << entry.vid << ", interfaceIds=" << entry.interfaceIds << "}";
     return os;
 }
 
@@ -54,6 +72,7 @@ void MacAddressTable::initialize(int stage)
         lastPurge = SIMTIME_ZERO;
         ifTable.reference(this, "interfaceTableModule", true);
         WATCH_MAP(addressTable);
+        WATCH_MAP(multicastAddressTable);
     }
 }
 
@@ -154,6 +173,18 @@ int MacAddressTable::getInterfaceIdForAddress(const MacAddress& address, unsigne
         return -1;
     }
     return iter->second.interfaceId;
+}
+
+std::vector<int> MacAddressTable::getInterfaceIdsForMulticastAddress(const MacAddress& address, unsigned int vid)
+{
+    Enter_Method("getInterfaceIdsForMulticastAddress");
+    ASSERT(address.isMulticast());
+    AddressTableKey key(vid, address);
+    auto iter = multicastAddressTable.find(key);
+    if (iter == multicastAddressTable.end())
+        return std::vector<int>();
+    else
+        return iter->second.interfaceIds;
 }
 
 /*

@@ -44,7 +44,16 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
             vid(vid), interfaceId(interfaceId), insertionTime(insertionTime) {}
     };
 
+    struct MulticastAddressEntry {
+        unsigned int vid = 0; // VLAN ID
+        std::vector<int> interfaceIds; // network interface IDs
+        MulticastAddressEntry() {}
+        MulticastAddressEntry(unsigned int vid, const std::vector<int>& interfaceIds) :
+            vid(vid), interfaceIds(interfaceIds) {}
+    };
+
     friend std::ostream& operator<<(std::ostream& os, const AddressEntry& entry);
+    friend std::ostream& operator<<(std::ostream& os, const MulticastAddressEntry& entry);
 
     struct MacCompare {
         bool operator()(const MacAddress& u1, const MacAddress& u2) const { return u1.compareTo(u2) < 0; }
@@ -53,10 +62,12 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
     typedef std::pair<unsigned int, MacAddress> AddressTableKey;
     friend std::ostream& operator<<(std::ostream& os, const AddressTableKey& key);
     typedef std::map<AddressTableKey, AddressEntry> AddressTable;
+    typedef std::map<AddressTableKey, MulticastAddressEntry> MulticastAddressTable;
 
     simtime_t agingTime; // Max idle time for address table entries
     simtime_t lastPurge; // Time of the last call of removeAgedEntriesFromAllVlans()
     AddressTable addressTable;
+    MulticastAddressTable multicastAddressTable;
     ModuleRefByPar<IInterfaceTable> ifTable;
 
   protected:
@@ -87,6 +98,14 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
      * @return Output interfaceId for address, or -1 if unknown.
      */
     virtual int getInterfaceIdForAddress(const MacAddress& address, unsigned int vid = 0) override;
+
+    /**
+     * @brief For a given port, V-TAG and destination MAC it finds out the interface Ids where relay component should deliver the message.
+     * @param address MAC destination
+     * @param vid VLAN ID
+     * @return Output interface Ids for address, or empty list unknown.
+     */
+    virtual std::vector<int> getInterfaceIdsForMulticastAddress(const MacAddress& address, unsigned int vid = 0) override;
 
     /**
      * @brief Register a new MAC address at AddressTable.
