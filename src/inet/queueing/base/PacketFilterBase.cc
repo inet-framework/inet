@@ -205,7 +205,7 @@ Packet *PacketFilterBase::pullPacket(cGate *gate)
             processPacket(packet);
             handlePacketProcessed(packet);
             EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
-            animateSendPacket(packet, outputGate);
+            animatePullPacket(packet, outputGate);
             updateDisplayString();
             emit(packetPulledSignal, packet);
             return packet;

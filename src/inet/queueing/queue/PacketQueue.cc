@@ -132,7 +132,7 @@ Packet *PacketQueue::pullPacket(cGate *gate)
     insertPacketEvent(this, packet, PEK_QUEUED, queueingTime, packetEvent);
     increaseTimeTag<QueueingTimeTag>(packet, queueingTime);
     emit(packetPulledSignal, packet);
-    animateSendPacket(packet, outputGate);
+    animatePullPacket(packet, outputGate);
     updateDisplayString();
     return packet;
 }
