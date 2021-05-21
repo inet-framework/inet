@@ -53,7 +53,7 @@ void RelayInterfaceLearner::processPacket(Packet *packet)
     auto incomingInterface = interfaceTable->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     auto sourceAddress = packet->getTag<MacAddressInd>()->getSrcAddress();
     EV_INFO << "Learning peer address" << EV_FIELD(sourceAddress) << EV_FIELD(incomingInterface) << EV_ENDL;
-    macAddressTable->updateTableWithAddress(incomingInterface->getInterfaceId(), sourceAddress, vid);
+    macAddressTable->learnMacAddress(incomingInterface->getInterfaceId(), sourceAddress, vid);
 }
 
 } // namespace inet
