@@ -27,6 +27,9 @@ namespace visualizer {
 class INET_API StreamRedundancyConfigurationCanvasVisualizer : public TreeCanvasVisualizerBase
 {
   protected:
+    cMatchExpression streamFilter;
+
+  protected:
     virtual void initialize(int stage) override;
     virtual const TreeVisualization *createTreeVisualization(const std::vector<std::vector<int>>& tree) const override;
 };

@@ -29,18 +29,26 @@ Define_Module(TsnConfigurationCanvasVisualizer);
 void TsnConfigurationCanvasVisualizer::initialize(int stage) {
     TreeCanvasVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
-    if (stage == INITSTAGE_LAST) {
-        auto tsnConfigurator = getModuleFromPar<TsnConfigurator>(par("tsnConfiguratorModule"), this);
-        for (auto& stream : tsnConfigurator->getStreams()) {
-            for (auto& tree : stream.trees) {
-                std::vector<std::vector<int>> moduleIds;
-                for (auto& path : tree.paths) {
-                    moduleIds.push_back(std::vector<int>());
-                    for (auto interface : path.interfaces)
-                        moduleIds[moduleIds.size() - 1].push_back(interface->node->module->getId());
+    if (stage == INITSTAGE_LOCAL) {
+        streamFilter.setPattern(par("streamFilter"), false, true, true);
+    }
+    else if (stage == INITSTAGE_LAST) {
+        if (displayTrees) {
+            auto tsnConfigurator = getModuleFromPar<TsnConfigurator>(par("tsnConfiguratorModule"), this);
+            for (auto& stream : tsnConfigurator->getStreams()) {
+                cMatchableString matchableString(stream.name.c_str());
+                if (streamFilter.matches(&matchableString)) {
+                    for (auto& tree : stream.trees) {
+                        std::vector<std::vector<int>> moduleIds;
+                        for (auto& path : tree.paths) {
+                            moduleIds.push_back(std::vector<int>());
+                            for (auto interface : path.interfaces)
+                                moduleIds[moduleIds.size() - 1].push_back(interface->node->module->getId());
+                        }
+                        auto treeVisualization = createTreeVisualization(moduleIds);
+                        addTreeVisualization(treeVisualization);
+                    }
                 }
-                auto treeVisualization = createTreeVisualization(moduleIds);
-                addTreeVisualization(treeVisualization);
             }
         }
     }
