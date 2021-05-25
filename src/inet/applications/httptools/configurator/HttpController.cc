@@ -431,7 +431,7 @@ void HttpController::parseOptionsFile(std::string file, std::string section)
                 // Format: {time};{www name};{event kind};{p value};{amortization factor}
                 // Event kind is not used at the present
 
-                cStringTokenizer tokenizer = cStringTokenizer(line.c_str(), ";");
+                cStringTokenizer tokenizer(line.c_str(), ";");
                 std::vector<std::string> res = tokenizer.asVector();
                 if (res.size() != 5)
                     throw cRuntimeError("Invalid format of event config line in '%s' Line: '%s'", file.c_str(), line.c_str());

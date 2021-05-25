@@ -190,7 +190,7 @@ void rdHistogram::__parseBinString(std::string binstr)
     // The bins string is of the form [(count1,sum1);(count2,sum2);...;(countn,sumn)]
     binstr = trimLeft(binstr, "[");
     binstr = trimRight(binstr, "]");
-    cStringTokenizer tokenizer = cStringTokenizer(binstr.c_str(), ";");
+    cStringTokenizer tokenizer(binstr.c_str(), ";");
     std::string curtuple, countstr, sumstr;
     std::vector<std::string> res = tokenizer.asVector();
     for (auto & re : res) {
