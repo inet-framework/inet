@@ -55,9 +55,6 @@ void StreamEncoder::processPacket(Packet *packet)
     auto streamName = streamReq->getStreamName();
     auto vlanId = streamNameToVlanIdMapping->get(streamName).intValue();
     packet->addTagIfAbsent<VlanReq>()->setVlanId(vlanId);
-    std::string packetName = packet->getName();
-    packetName = packetName + "-" + streamName;
-    packet->setName(packetName.c_str());
 }
 
 } // namespace inet
