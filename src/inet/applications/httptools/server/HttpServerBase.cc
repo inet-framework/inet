@@ -215,7 +215,7 @@ Packet *HttpServerBase::handleReceivedMessage(Packet *msg)
     Packet *replymsg = nullptr;
 
     // Parse the request string on spaces
-    cStringTokenizer tokenizer = cStringTokenizer(request->getHeading(), " ");
+    cStringTokenizer tokenizer(request->getHeading(), " ");
     std::vector<std::string> res = tokenizer.asVector();
     if (res.size() != 3) {
         EV_ERROR << "Invalid request string: " << request->getHeading() << endl;
@@ -448,7 +448,7 @@ void HttpServerBase::readSiteDefinition(std::string file)
             resourceSection = sectionsub == "RESOURCES";
         }
         else {
-            cStringTokenizer tokenizer = cStringTokenizer(line.c_str(), ";");
+            cStringTokenizer tokenizer(line.c_str(), ";");
             std::vector<std::string> res = tokenizer.asVector();
 
             if (siteSection) {
