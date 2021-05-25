@@ -29,22 +29,30 @@ Define_Module(StreamRedundancyConfigurationCanvasVisualizer);
 void StreamRedundancyConfigurationCanvasVisualizer::initialize(int stage) {
     TreeCanvasVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
-    if (stage == INITSTAGE_LAST) {
-        auto streamRedundancyConfigurator = getModuleFromPar<StreamRedundancyConfigurator>(par("streamRedundancyConfiguratorModule"), this);
-        for (auto streamName : streamRedundancyConfigurator->getStreamNames()) {
-            std::vector<std::vector<int>> moduleIds;
-            auto pathFragments = streamRedundancyConfigurator->getPathFragments(streamName.c_str());
-            for (auto& path : pathFragments) {
-                moduleIds.push_back(std::vector<int>());
-                for (auto name : path) {
-                    auto it = name.find('.');
-                    auto node = it == std::string::npos ? name : name.substr(0, it);
-                    auto module = getModuleByPath(node.c_str());
-                    moduleIds[moduleIds.size() - 1].push_back(module->getId());
+    if (stage == INITSTAGE_LOCAL) {
+        streamFilter.setPattern(par("streamFilter"), false, true, true);
+    }
+    else if (stage == INITSTAGE_LAST) {
+        if (displayTrees) {
+            auto streamRedundancyConfigurator = getModuleFromPar<StreamRedundancyConfigurator>(par("streamRedundancyConfiguratorModule"), this);
+            for (auto streamName : streamRedundancyConfigurator->getStreamNames()) {
+                cMatchableString matchableString(streamName.c_str());
+                if (streamFilter.matches(&matchableString)) {
+                    std::vector<std::vector<int>> moduleIds;
+                    auto pathFragments = streamRedundancyConfigurator->getPathFragments(streamName.c_str());
+                    for (auto& path : pathFragments) {
+                        moduleIds.push_back(std::vector<int>());
+                        for (auto name : path) {
+                            auto it = name.find('.');
+                            auto node = it == std::string::npos ? name : name.substr(0, it);
+                            auto module = getModuleByPath(node.c_str());
+                            moduleIds[moduleIds.size() - 1].push_back(module->getId());
+                        }
+                    }
+                    auto treeVisualization = createTreeVisualization(moduleIds);
+                    addTreeVisualization(treeVisualization);
                 }
             }
-            auto treeVisualization = createTreeVisualization(moduleIds);
-            addTreeVisualization(treeVisualization);
         }
     }
 }

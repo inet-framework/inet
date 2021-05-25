@@ -24,6 +24,7 @@ simple TsnConfigurationCanvasVisualizer extends TreeVisualizerBase like ITsnConf
 {
     parameters:
         string tsnConfiguratorModule = default("tsnConfigurator");
+        string streamFilter = default("*");
         double zIndex = default(3); // determines the drawing order of figures relative to other visualizers
         @class(TsnConfigurationCanvasVisualizer);
 }
