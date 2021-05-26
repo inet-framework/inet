@@ -140,8 +140,8 @@ class INET_API Udp : public TransportProtocolBase
     virtual SockDesc *getSocketById(int sockId);
     virtual SockDesc *getOrCreateSocket(int sockId);
     virtual SockDesc *createSocket(int sockId, const L3Address& localAddr, int localPort);
-    virtual void bind(int sockId, int gateIndex, const L3Address& localAddr, int localPort);
-    virtual void connect(int sockId, int gateIndex, const L3Address& remoteAddr, int remotePort);
+    virtual void bind(int sockId, const L3Address& localAddr, int localPort);
+    virtual void connect(int sockId, const L3Address& remoteAddr, int remotePort);
     virtual void close(int sockId);
     virtual void destroySocket(int sockId);
     void destroySocket(SocketsByIdMap::iterator it);
