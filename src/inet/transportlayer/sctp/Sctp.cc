@@ -295,14 +295,14 @@ void Sctp::handleMessage(cMessage *msg)
                         }
                     }
                 }
-                    if (controlInfo->getGate() != -1)
-                        appGateIndex = controlInfo->getGate();
-                    else
-                        appGateIndex = msg->getArrivalGate()->getIndex();
-                    if (controlInfo && assocId == -1) {
-                        fd = controlInfo->getFd();
-                        assocId = findAssocForFd(fd);
-                    }
+            if (controlInfo->getGate() != -1)
+                appGateIndex = controlInfo->getGate();
+            else
+                appGateIndex = msg->getArrivalGate()->isVector() ? msg->getArrivalGate()->getIndex() : 0;
+            if (controlInfo && assocId == -1) {
+                fd = controlInfo->getFd();
+                assocId = findAssocForFd(fd);
+            }
             EV_INFO << "msg arrived from app for assoc " << assocId << "\n";
             SctpAssociation *assoc = findAssocForApp(appGateIndex, assocId);
 
