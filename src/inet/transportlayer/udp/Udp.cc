@@ -150,14 +150,14 @@ void Udp::handleUpperCommand(cMessage *msg)
         case UDP_C_BIND: {
             int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
             UdpBindCommand *ctrl = check_and_cast<UdpBindCommand *>(msg->getControlInfo());
-            bind(socketId, msg->getArrivalGate()->getIndex(), ctrl->getLocalAddr(), ctrl->getLocalPort());
+            bind(socketId, ctrl->getLocalAddr(), ctrl->getLocalPort());
             break;
         }
 
         case UDP_C_CONNECT: {
             int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
             UdpConnectCommand *ctrl = check_and_cast<UdpConnectCommand *>(msg->getControlInfo());
-            connect(socketId, msg->getArrivalGate()->getIndex(), ctrl->getRemoteAddr(), ctrl->getRemotePort());
+            connect(socketId, ctrl->getRemoteAddr(), ctrl->getRemotePort());
             break;
         }
 
@@ -297,7 +297,7 @@ void Udp::handleUpperCommand(cMessage *msg)
     delete msg; // also deletes control info in it
 }
 
-void Udp::bind(int sockId, int gateIndex, const L3Address& localAddr, int localPort)
+void Udp::bind(int sockId, const L3Address& localAddr, int localPort)
 {
     if (sockId == -1)
         throw cRuntimeError("sockId in BIND message not filled in");
@@ -385,7 +385,7 @@ ushort Udp::getEphemeralPort()
     return lastEphemeralPort;
 }
 
-void Udp::connect(int sockId, int gateIndex, const L3Address& remoteAddr, int remotePort)
+void Udp::connect(int sockId, const L3Address& remoteAddr, int remotePort)
 {
     if (remoteAddr.isUnspecified())
         throw cRuntimeError("connect: unspecified remote address");
