@@ -310,7 +310,7 @@ void Sctp::handleMessage(cMessage *msg)
             if (controlInfo->getGate() != -1)
                 appGateIndex = controlInfo->getGate();
             else
-                appGateIndex = msg->getArrivalGate()->getIndex();
+                appGateIndex = msg->getArrivalGate()->isVector() ? msg->getArrivalGate()->getIndex() : 0;
             if (controlInfo && assocId == -1) {
                 fd = controlInfo->getFd();
                 assocId = findAssocForFd(fd);
