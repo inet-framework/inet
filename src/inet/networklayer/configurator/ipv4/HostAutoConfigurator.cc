@@ -38,10 +38,6 @@ void HostAutoConfigurator::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         interfaceTable.reference(this, "interfaceTableModule", true);
     }
-    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
-        for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
-            interfaceTable->getInterface(i)->addProtocolData<Ipv4InterfaceData>();
-    }
 }
 
 void HostAutoConfigurator::finish()
@@ -108,6 +104,24 @@ void HostAutoConfigurator::setupNetworkLayer()
             ipv4Data->joinMulticastGroup(mcastGroup);
         }
     }
+}
+
+void HostAutoConfigurator::handleStartOperation(LifecycleOperation *operation)
+{
+    if (operation == nullptr) {
+        // in initialize:
+        for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
+            interfaceTable->getInterface(i)->addProtocolData<Ipv4InterfaceData>();
+    }
+    setupNetworkLayer();
+}
+
+void HostAutoConfigurator::handleStopOperation(LifecycleOperation *operation)
+{
+}
+
+void HostAutoConfigurator::handleCrashOperation(LifecycleOperation *operation)
+{
 }
 
 } // namespace inet
