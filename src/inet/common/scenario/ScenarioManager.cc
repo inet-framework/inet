@@ -1,10 +1,10 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,14 +12,15 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
+
+#include "inet/common/scenario/ScenarioManager.h"
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/XMLUtils.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/scenario/ScenarioManager.h"
 #include "inet/common/scenario/ScenarioTimer_m.h"
 
 namespace inet {
@@ -310,11 +311,29 @@ void ScenarioManager::processCreateModuleCommand(const cXMLElement *node)
         throw cRuntimeError("Parent module '%s' is not found", parentModulePath);
     cModule *submodule = parentModule->getSubmodule(submoduleName, 0);
     bool vector = xmlutils::getAttributeBoolValue(node, ATTR_VECTOR, submodule != nullptr);
+
+    // TODO solution for inconsistent out-of-date vectorSize values in OMNeT++
+    int submoduleVectorSize = 0;
+    for (SubmoduleIterator it(parentModule); !it.end(); ++it) {
+        cModule *submodule = *it;
+        if (submodule->isVector() && submodule->isName(submoduleName)) {
+            if (submoduleVectorSize < submodule->getVectorSize())
+                submoduleVectorSize = submodule->getVectorSize();
+        }
+    }
+
     cModule *module = nullptr;
     if (vector) {
-        cModule *submodule = parentModule->getSubmodule(submoduleName, 0);
-        int submoduleIndex = submodule == nullptr ? 0 : submodule->getVectorSize();
-        module = moduleType->create(submoduleName, parentModule, submoduleIndex + 1, submoduleIndex);
+#if OMNETPP_VERSION >= 0x0600 && OMNETPP_BUILDNUM >= 1516
+        if (!parentModule->hasSubmoduleVector(submoduleName)) {
+            parentModule->addSubmoduleVector(submoduleName, submoduleVectorSize + 1);
+        }
+        else
+            parentModule->setSubmoduleVectorSize(submoduleName, submoduleVectorSize + 1);
+        module = moduleType->create(submoduleName, parentModule, submoduleVectorSize);
+#else
+        module = moduleType->create(submoduleName, parentModule, submoduleVectorSize + 1, submoduleVectorSize);
+#endif
     }
     else {
         module = moduleType->create(submoduleName, parentModule);
@@ -349,7 +368,6 @@ void ScenarioManager::createConnection(const cXMLElementList& paramList, cChanne
 
         // set parameters:
         for (auto child : paramList) {
-
             const char *name = xmlutils::getMandatoryFilledAttribute(*child, ATTR_NAME);
             const char *value = xmlutils::getMandatoryAttribute(*child, ATTR_VALUE);
             channel->par(name).parse(value);
