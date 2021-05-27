@@ -1,9 +1,9 @@
 <scenario>
     <at t="10">
-        <create-module type="inet.examples.wireless.dynamic.DynamicHost" parent="." submodule="sourceNode"/>
+        <create-module type="inet.examples.wireless.dynamic.DynamicHost" parent="." submodule="sourceNode" vector="true"/>
     </at>
     <at t="15">
-        <create-module type="inet.examples.wireless.dynamic.DynamicHost" parent="." submodule="sourceNode"/>
+        <create-module type="inet.examples.wireless.dynamic.DynamicHost" parent="." submodule="sourceNode" vector="true"/>
     </at>
     <at t="20">
         <delete-module module="sourceNode[0]"/>

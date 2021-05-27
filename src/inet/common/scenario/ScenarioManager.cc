@@ -16,10 +16,13 @@
 //
 
 #include "inet/common/scenario/ScenarioManager.h"
+#include "inet/common/XMLUtils.h"
 
 namespace inet {
 
 Define_Module(ScenarioManager);
+
+static const char *ATTR_VECTOR = "vector";
 
 void ScenarioManager::initialize()
 {
@@ -198,10 +201,34 @@ void ScenarioManager::processCreateModuleCommand(cXMLElement *node)
         throw cRuntimeError("module type '%s' is not found", moduleTypeName);
     cModule *parentModule = getSimulation()->getSystemModule()->getModuleByPath(parentModulePath);
     if (parentModule == nullptr)
-        throw cRuntimeError("parent module '%s' is not found", parentModulePath);
-    cModule *submodule = parentModule->getSubmodule(submoduleName, 0);
-    int submoduleIndex = submodule == nullptr ? 0 : submodule->getVectorSize();
-    cModule *module = moduleType->create(submoduleName, parentModule, submoduleIndex + 1, submoduleIndex);
+        throw cRuntimeError("Parent module '%s' is not found", parentModulePath);
+    // TODO solution for inconsistent out-of-date vectorSize values in OMNeT++
+    int submoduleVectorSize = 0;
+    for (SubmoduleIterator it(parentModule); !it.end(); ++it) {
+        cModule *submodule = *it;
+        if (submodule->isVector() && submodule->isName(submoduleName)) {
+            if (submoduleVectorSize < submodule->getVectorSize())
+                submoduleVectorSize = submodule->getVectorSize();
+        }
+    }
+
+    bool vector = xmlutils::getAttributeBoolValue(node, ATTR_VECTOR, submoduleVectorSize > 0);
+    cModule *module = nullptr;
+    if (vector) {
+#if OMNETPP_VERSION >= 0x0600 && OMNETPP_BUILDNUM >= 1516
+        if (!parentModule->hasSubmoduleVector(submoduleName)) {
+            parentModule->addSubmoduleVector(submoduleName, submoduleVectorSize + 1);
+        }
+        else
+            parentModule->setSubmoduleVectorSize(submoduleName, submoduleVectorSize + 1);
+        module = moduleType->create(submoduleName, parentModule, submoduleVectorSize);
+#else
+        module = moduleType->create(submoduleName, parentModule, submoduleVectorSize + 1, submoduleVectorSize);
+#endif
+    }
+    else {
+        module = moduleType->create(submoduleName, parentModule);
+    }
     module->finalizeParameters();
     module->buildInside();
     module->callInitialize();
@@ -226,7 +253,6 @@ void ScenarioManager::createConnection(cXMLElementList& paramList, cChannelType 
 
         // set parameters:
         for (auto child : paramList) {
-            
             const char *name = getRequiredAttribute(child, "name");
             const char *value = getRequiredAttribute(child, "value");
             channel->par(name).parse(value);
