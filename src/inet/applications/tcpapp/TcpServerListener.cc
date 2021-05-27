@@ -23,6 +23,8 @@ namespace inet {
 
 Define_Module(TcpServerListener);
 
+const char *TcpServerListener::submoduleVectorName = "connection";
+
 void TcpServerListener::handleStartOperation(LifecycleOperation *operation)
 {
     const char *localAddress = par("localAddress");
@@ -31,6 +33,10 @@ void TcpServerListener::handleStartOperation(LifecycleOperation *operation)
     serverSocket.setCallback(this);
     serverSocket.bind(localAddress[0] ? L3Address(localAddress) : L3Address(), localPort);
     serverSocket.listen();
+#if OMNETPP_VERSION >= 0x0600 && OMNETPP_BUILDNUM >= 1516
+    if (!getParentModule()->hasSubmoduleVector(submoduleVectorName))
+        throw cRuntimeError("The submodule vector '%s' missing from %s", submoduleVectorName, getParentModule()->getFullPath().c_str());
+#endif
 }
 
 void TcpServerListener::handleStopOperation(LifecycleOperation *operation)
@@ -72,9 +78,16 @@ void TcpServerListener::socketAvailable(TcpSocket *socket, TcpAvailableInfo *ava
 {
     const char *serverConnectionModuleType = par("serverConnectionModuleType");
     cModuleType *moduleType = cModuleType::get(serverConnectionModuleType);
-    cModule *submodule = getParentModule()->getSubmodule("connection", 0);
+    cModule *parentModule = getParentModule();
+#if OMNETPP_VERSION >= 0x0600 && OMNETPP_BUILDNUM >= 1516
+    int submoduleIndex = parentModule->getSubmoduleVectorSize(submoduleVectorName);
+    parentModule->setSubmoduleVectorSize(submoduleVectorName, submoduleIndex + 1);
+    auto connection = moduleType->create(submoduleVectorName, parentModule, submoduleIndex);
+#else
+    cModule *submodule = parentModule->getSubmodule(submoduleVectorName, 0);
     int submoduleIndex = submodule == nullptr ? 0 : submodule->getVectorSize();
-    auto connection = moduleType->create("connection", getParentModule(), submoduleIndex + 1, submoduleIndex);
+    auto connection = moduleType->create(submoduleVectorName, parentModule, submoduleIndex + 1, submoduleIndex);
+#endif
     connection->finalizeParameters();
     connection->buildInside();
     connection->callInitialize();
