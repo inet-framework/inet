@@ -321,7 +321,16 @@ void ScenarioManager::processCreateModuleCommand(const cXMLElement *node)
     bool vector = xmlutils::getAttributeBoolValue(node, ATTR_VECTOR, submoduleVectorSize > 0);
     cModule *module = nullptr;
     if (vector) {
+#if OMNETPP_VERSION >= 0x0600 && OMNETPP_BUILDNUM >= 1516
+        if (!parentModule->hasSubmoduleVector(submoduleName)) {
+            parentModule->addSubmoduleVector(submoduleName, submoduleVectorSize + 1);
+        }
+        else
+            parentModule->setSubmoduleVectorSize(submoduleName, submoduleVectorSize + 1);
+        module = moduleType->create(submoduleName, parentModule, submoduleVectorSize);
+#else
         module = moduleType->create(submoduleName, parentModule, submoduleVectorSize + 1, submoduleVectorSize);
+#endif
     }
     else {
         module = moduleType->create(submoduleName, parentModule);
@@ -356,7 +365,6 @@ void ScenarioManager::createConnection(const cXMLElementList& paramList, cChanne
 
         // set parameters:
         for (auto child : paramList) {
-
             const char *name = xmlutils::getMandatoryFilledAttribute(*child, ATTR_NAME);
             const char *value = xmlutils::getMandatoryAttribute(*child, ATTR_VALUE);
             channel->par(name).parse(value);
