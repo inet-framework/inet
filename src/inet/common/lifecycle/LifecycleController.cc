@@ -54,6 +54,7 @@ void vector_delete_element(std::vector<T *>& v, T *p)
 
 bool LifecycleController::initiateOperation(LifecycleOperation *operation, IDoneCallback *completionCallback)
 {
+    ASSERT(getSimulation()->getContextModule() == check_and_cast<cComponent *>(this));
     operation->currentStage = 0;
     operation->operationCompletionCallback = completionCallback;
     operation->insideInitiateOperation = true;
@@ -103,6 +104,7 @@ void LifecycleController::doOneStage(LifecycleOperation *operation, cModule *sub
 
 void LifecycleController::moduleOperationStageCompleted(Callback *callback)
 {
+    omnetpp::cMethodCallContextSwitcher __ctx(check_and_cast<cComponent *>(this)); __ctx.methodCall(__FUNCTION__);
     LifecycleOperation *operation = callback->operation;
     std::string moduleFullPath = callback->module->getFullPath();
     vector_delete_element(operation->pendingList, (IDoneCallback *)callback);
