@@ -112,7 +112,7 @@ void SimpleEpEnergyStorage::executeNodeOperation(J newResidualCapacity)
         LifecycleOperation::StringMap params;
         ModuleCrashOperation *operation = new ModuleCrashOperation();
         operation->initialize(networkNode, params);
-        lifecycleController.initiateOperation(operation);
+        initiateOperation(operation);
     }
 }
 

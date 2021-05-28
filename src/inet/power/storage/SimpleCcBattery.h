@@ -28,7 +28,7 @@ namespace inet {
 
 namespace power {
 
-class INET_API SimpleCcBattery : public CcEnergyStorageBase, public StringFormat::IDirectiveResolver
+class INET_API SimpleCcBattery : public CcEnergyStorageBase, public StringFormat::IDirectiveResolver, public LifecycleController
 {
   protected:
     // parameters
@@ -42,7 +42,6 @@ class INET_API SimpleCcBattery : public CcEnergyStorageBase, public StringFormat
 
     cModule *networkNode = nullptr;
     NodeStatus *nodeStatus = nullptr;
-    LifecycleController lifecycleController;
 
   protected:
     virtual void initialize(int stage) override;

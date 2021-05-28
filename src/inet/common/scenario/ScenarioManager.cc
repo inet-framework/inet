@@ -469,7 +469,7 @@ void ScenarioManager::processLifecycleCommand(const cXMLElement *node)
         throw cRuntimeError("Unknown parameter '%s' for operation %s", paramsCopy.begin()->first.c_str(), operationName.c_str());
 
     // do the operation
-    lifecycleController.initiateOperation(operation);
+    initiateOperation(operation);
 }
 
 void ScenarioManager::refreshDisplay() const

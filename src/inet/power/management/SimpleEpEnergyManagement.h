@@ -27,7 +27,7 @@ namespace inet {
 
 namespace power {
 
-class INET_API SimpleEpEnergyManagement : public cSimpleModule, public virtual IEpEnergyManagement, public cListener
+class INET_API SimpleEpEnergyManagement : public cSimpleModule, public virtual IEpEnergyManagement, public cListener, public LifecycleController
 {
   protected:
     // parameters
@@ -40,8 +40,6 @@ class INET_API SimpleEpEnergyManagement : public cSimpleModule, public virtual I
     NodeStatus *nodeStatus = nullptr;
     cMessage *lifecycleOperationTimer = nullptr;
     J targetCapacity = J(NaN);
-
-    LifecycleController lifecycleController;
 
   protected:
     virtual void initialize(int stage) override;

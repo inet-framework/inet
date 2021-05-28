@@ -39,7 +39,7 @@ namespace power {
  * See the corresponding NED file for more details.
  *
  */
-class INET_API SimpleEpEnergyStorage : public EpEnergyStorageBase, public StringFormat::IDirectiveResolver
+class INET_API SimpleEpEnergyStorage : public EpEnergyStorageBase, public StringFormat::IDirectiveResolver, public LifecycleController
 {
   protected:
     /**
@@ -82,11 +82,6 @@ class INET_API SimpleEpEnergyStorage : public EpEnergyStorageBase, public String
      * The status of the node.
      */
     NodeStatus *nodeStatus = nullptr;
-
-    /**
-     * LifecycleController.
-     */
-    LifecycleController lifecycleController;
 
   protected:
     virtual void initialize(int stage) override;

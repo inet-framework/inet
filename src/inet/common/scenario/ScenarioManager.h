@@ -48,14 +48,12 @@ class INET_API cPostModuleInitNotification : public cModelChangeNotification
  *
  * @see IScriptable
  */
-class INET_API ScenarioManager : public cSimpleModule
+class INET_API ScenarioManager : public cSimpleModule, public LifecycleController
 {
   protected:
     // total number of changes, and number of changes already done
     int numChanges = 0;
     int numDone = 0;
-
-    LifecycleController lifecycleController;
 
   protected:
     // utilities

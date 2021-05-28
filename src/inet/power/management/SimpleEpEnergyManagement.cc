@@ -81,14 +81,14 @@ void SimpleEpEnergyManagement::executeNodeOperation(J estimatedEnergyCapacity)
         LifecycleOperation::StringMap params;
         ModuleStopOperation *operation = new ModuleStopOperation();
         operation->initialize(networkNode, params);
-        lifecycleController.initiateOperation(operation);
+        initiateOperation(operation);
     }
     else if (!std::isnan(nodeStartCapacity.get()) && estimatedEnergyCapacity >= nodeStartCapacity && nodeStatus->getState() == NodeStatus::DOWN) {
         EV_INFO << "Capacity reached node start threshold" << endl;
         LifecycleOperation::StringMap params;
         ModuleStartOperation *operation = new ModuleStartOperation();
         operation->initialize(networkNode, params);
-        lifecycleController.initiateOperation(operation);
+        initiateOperation(operation);
     }
 }
 
