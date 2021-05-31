@@ -15,16 +15,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/queueing/filter/RateLimiter.h"
+#include "inet/queueing/filter/StatisticalRateLimiter.h"
 
 #include "inet/queueing/common/RateTag_m.h"
 
 namespace inet {
 namespace queueing {
 
-Define_Module(RateLimiter);
+Define_Module(StatisticalRateLimiter);
 
-void RateLimiter::initialize(int stage)
+void StatisticalRateLimiter::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
@@ -33,7 +33,7 @@ void RateLimiter::initialize(int stage)
     }
 }
 
-bool RateLimiter::matchesPacket(const Packet *packet) const
+bool StatisticalRateLimiter::matchesPacket(const Packet *packet) const
 {
     auto rateTag = packet->getTag<RateTag>();
     double p = 0;

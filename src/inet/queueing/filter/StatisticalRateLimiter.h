@@ -15,15 +15,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_RATELIMITER_H
-#define __INET_RATELIMITER_H
+#ifndef __INET_STATISTICALRATELIMITER_H
+#define __INET_STATISTICALRATELIMITER_H
 
 #include "inet/queueing/base/PacketFilterBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API RateLimiter : public PacketFilterBase
+class INET_API StatisticalRateLimiter : public PacketFilterBase
 {
   protected:
     bps maxDatarate = bps(NaN);
