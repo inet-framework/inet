@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/queueing/meter/RateMeter.h"
+#include "inet/queueing/meter/ExponentialRateMeter.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/queueing/common/RateTag_m.h"
@@ -23,16 +23,16 @@
 namespace inet {
 namespace queueing {
 
-Define_Module(RateMeter);
+Define_Module(ExponentialRateMeter);
 
-void RateMeter::initialize(int stage)
+void ExponentialRateMeter::initialize(int stage)
 {
     PacketMeterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         alpha = par("alpha");
 }
 
-void RateMeter::meterPacket(Packet *packet)
+void ExponentialRateMeter::meterPacket(Packet *packet)
 {
     auto now = simTime();
     if (now != lastUpdate) {

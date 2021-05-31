@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_RATEMETER_H
-#define __INET_RATEMETER_H
+#ifndef __INET_EXPONENTIALRATEMETER_H
+#define __INET_EXPONENTIALRATEMETER_H
 
 #include "inet/queueing/base/PacketMeterBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
@@ -24,7 +24,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API RateMeter : public PacketMeterBase
+class INET_API ExponentialRateMeter : public PacketMeterBase
 {
   protected:
     double alpha = NaN;
