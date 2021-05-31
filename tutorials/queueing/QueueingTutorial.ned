@@ -22,13 +22,13 @@ import inet.queueing.contract.IPassivePacketSink;
 import inet.queueing.contract.IPassivePacketSource;
 import inet.queueing.filter.ContentBasedFilter;
 import inet.queueing.filter.OrdinalBasedDropper;
-import inet.queueing.filter.RateLimiter;
+import inet.queueing.filter.StatisticalRateLimiter;
 import inet.queueing.filter.RedDropper;
 import inet.queueing.gate.PacketGate;
 import inet.queueing.marker.ContentBasedLabeler;
 import inet.queueing.marker.ContentBasedTagger;
 import inet.queueing.marker.PacketTagger;
-import inet.queueing.meter.RateMeter;
+import inet.queueing.meter.ExponentialRateMeter;
 import inet.queueing.queue.CompoundPacketQueueBase;
 import inet.queueing.queue.DropTailQueue;
 import inet.queueing.queue.PacketQueue;
@@ -803,10 +803,10 @@ network MeterTutorialStep
         producer: ActivePacketSource {
             @display("p=100,100");
         }
-        meter: RateMeter {
+        meter: ExponentialRateMeter {
             @display("p=325,100");
         }
-        limiter: RateLimiter {
+        limiter: StatisticalRateLimiter {
             @display("p=550,100");
         }
         consumer: PassivePacketSink {
