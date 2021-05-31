@@ -491,10 +491,10 @@
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,            9b31-5784/tplx;92ce-7549/~tNl;92f8-a058/tyf, PASS,
 /examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,            b33c-cdda/tplx;4854-3d14/~tNl;673d-9d99/~tND;3ffa-c6c5/tyf, PASS,
 
-/examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,           f698-818e/tplx;b015-6f81/~tNl;e938-0faf/~tND;d23e-a557/tyf, PASS, igmp
-/examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           ca78-1c4b/tplx;7c48-14c9/~tNl;bc11-d963/~tND;2112-65aa/tyf, PASS,
-/examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           cb0e-c186/tplx;b668-e417/~tNl;8d77-3b47/~tND;7f1b-7316/tyf, PASS,
-/examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,           b588-9fdd/tplx;a91c-463a/~tNl;484a-e1c5/~tND;d129-063b/tyf, PASS,
+/examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,           fbff-abab/tplx;b015-6f81/~tNl;e938-0faf/~tND;d23e-a557/tyf, PASS, igmp
+/examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           115b-de80/tplx;7c48-14c9/~tNl;bc11-d963/~tND;2112-65aa/tyf, PASS,
+/examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           5bf4-d052/tplx;b668-e417/~tNl;8d77-3b47/~tND;7f1b-7316/tyf, PASS,
+/examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,           dcee-da4b/tplx;a91c-463a/~tNl;484a-e1c5/~tND;d129-063b/tyf, PASS,
 
 /examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            19ba-322a/tplx;a8ee-8eaf/~tNl;068a-0196/~tND;10f5-f3ef/tyf, PASS,
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            a2d0-ff3c/tplx;4183-df02/~tNl;5a0d-3ec7/~tND;cf01-7d4f/tyf, PASS,
