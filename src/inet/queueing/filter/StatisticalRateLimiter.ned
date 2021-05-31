@@ -26,10 +26,10 @@ import inet.queueing.contract.IPacketFilter;
 //
 // @see ~RateMeter
 //
-simple RateLimiter extends PacketFilterBase like IPacketFilter
+simple StatisticalRateLimiter extends PacketFilterBase like IPacketFilter
 {
     parameters:
         double maxDatarate @unit(bps) = default(nan);
         double maxPacketrate = default(nan);
-        @class(RateLimiter);
+        @class(StatisticalRateLimiter);
 }
