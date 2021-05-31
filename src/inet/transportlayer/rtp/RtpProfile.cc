@@ -156,17 +156,17 @@ void RtpProfile::createSenderModule(RtpInnerPacket *rinp)
     EV_TRACE << "createSenderModule Enter" << endl;
     int ssrc = rinp->getSsrc();
     int payloadType = rinp->getPayloadType();
-    char moduleName[100];
 
     EV_INFO << "ProfileName: " << _profileName << " payloadType: " << payloadType << endl;
-    const char *pkgPrefix = "inet.transportlayer.rtp."; // FIXME hardcoded string
-    sprintf(moduleName, "%sRtp%sPayload%iSender", pkgPrefix, _profileName, payloadType);
 
-    cModuleType *moduleType = cModuleType::find(moduleName);
+    std::string moduleTypeName(std::string("inet.transportlayer.rtp.Rtp") + _profileName + "Payload" + std::to_string(payloadType) + "Sender");
+    std::string moduleName(std::string("rtp") + _profileName + "Payload" + std::to_string(payloadType) + "Sender");
+
+    cModuleType *moduleType = cModuleType::find(moduleTypeName.c_str());
     if (moduleType == nullptr)
-        throw cRuntimeError("RtpProfile: payload sender module '%s' not found", moduleName);
+        throw cRuntimeError("RtpProfile: payload sender module '%s' not found", moduleTypeName.c_str());
 
-    RtpPayloadSender *rtpPayloadSender = check_and_cast<RtpPayloadSender *>(moduleType->create(moduleName, this));
+    RtpPayloadSender *rtpPayloadSender = check_and_cast<RtpPayloadSender *>(moduleType->create(moduleName.c_str(), this));
     rtpPayloadSender->finalizeParameters();
 
     gate("payloadSenderOut")->connectTo(rtpPayloadSender->gate("profileIn"));
@@ -218,17 +218,14 @@ void RtpProfile::dataIn(RtpInnerPacket *rinp)
 
     if (!ssrcGate) {
         ssrcGate = newSSRCGate(ssrc);
-        char payloadReceiverName[100];
-        const char *pkgPrefix = "inet.transportlayer.rtp."; // FIXME hardcoded string
-        sprintf(payloadReceiverName, "%sRtp%sPayload%iReceiver",
-                pkgPrefix, _profileName, rtpHeader->getPayloadType());
-
-        cModuleType *moduleType = cModuleType::find(payloadReceiverName);
+        std::string payloadReceiverTypeName(std::string("inet.transportlayer.rtp.Rtp") + _profileName + "Payload" + std::to_string(rtpHeader->getPayloadType()) + "Receiver");
+        std::string payloadReceiverName(std::string("rtp") + _profileName + "Payload" + std::to_string(rtpHeader->getPayloadType()) + "Receiver" + std::to_string(ssrc));
+        cModuleType *moduleType = cModuleType::find(payloadReceiverTypeName.c_str());
         if (moduleType == nullptr)
-            throw cRuntimeError("Receiver module type %s not found", payloadReceiverName);
+            throw cRuntimeError("Receiver module type %s not found", payloadReceiverTypeName.c_str());
         else {
             RtpPayloadReceiver *receiverModule =
-                check_and_cast<RtpPayloadReceiver *>(moduleType->create(payloadReceiverName, this));
+                check_and_cast<RtpPayloadReceiver *>(moduleType->create(payloadReceiverName.c_str(), this));
             if (_autoOutputFileNames) {
                 char outputFileName[100];
                 sprintf(outputFileName, "id%i.sim", receiverModule->getId());
