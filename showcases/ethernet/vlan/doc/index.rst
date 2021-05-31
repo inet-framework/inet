@@ -1,7 +1,7 @@
 :orphan:
 
-Ethernet VLAN
-=============
+Ethernet Virtual LAN
+====================
 
 Goals
 -----
@@ -16,9 +16,9 @@ Goals
 
 This showcase demonstrates the Virtual Local Area Network (VLAN) support of INET's modular Ethernet model.
 
-**V1** Ethernet VLANs are physical Ethernet networks separated into virtual networks at the data link layer, so that virtual LANs behave as if they were physically separate LANs.
+.. **V1** Ethernet VLANs are physical Ethernet networks separated into virtual networks at the data link layer, so that virtual LANs behave as if they were physically separate LANs.
 
-**V2** Physical Ethernet networks can be separated into virtual networks at the data link layer, so that these virtual LANs behave as if they were physically separate LANs.
+A physical Ethernet network can be separated into virtual networks at the data link layer, so that these virtual LANs behave as if they were physically separate networks.
 
 
 .. The Model
@@ -58,8 +58,33 @@ This showcase demonstrates the Virtual Local Area Network (VLAN) support of INET
 VLAN Overview
 -------------
 
-Ethernet VLANs are created by assigning VLAN IDs to Ethernet frames. This is done by adding an extra header (802.1q header) containing a VLAN tag that stores the VLAN ID. The VLAN-aware parts of the network (typically Ethernet switches) filter traffic at interfaces, based on this VLAN ID. Each interface has a set of allowed VLAN IDs. Packets without VLAN tags are considered to be part of the native VLAN (which can be allowed/disallowed as well). 
-Interfaces can also remap VLAN IDs. The VLAN mechanism removes connections from a physical network by filtering packets at the data link layer, but cannot create new connections. **TODO** "which can be allowed/disallowed..." too INET specific, not here; "remap", might be INET specific; wikipedia links?
+**V1** Ethernet VLANs are created by assigning VLAN IDs to Ethernet frames. This is done by adding an extra header (802.1q header) containing a VLAN tag that stores the VLAN ID. The VLAN-aware parts of the network (typically Ethernet switches) filter traffic at interfaces, based on this VLAN ID. Packets without VLAN tags are considered to be part of the native VLAN **(which can be allowed/disallowed as well).** 
+**Interfaces can also remap VLAN IDs.** The VLAN mechanism removes connections from a physical network by filtering packets at the data link layer, but cannot create new connections. 
+
+.. **TODO** "which can be allowed/disallowed..." too INET specific, not here; "remap", might be INET specific; wikipedia links?
+
+**V2** Ethernet VLANs are created by assigning VLAN IDs to Ethernet frames. This is done by adding an extra header (802.1q header) containing a VLAN tag that stores the VLAN ID. Each frame can only be within one VLAN. The VLAN-aware parts of the network filter traffic at interfaces, based on VLAN ID. Packets without VLAN tags are considered to be part of the native VLAN. The VLAN mechanism removes connections from a physical network by filtering packets at the data link layer, but cannot create new connections. 
+
+**V3** Ethernet VLANs are created by assigning VLAN IDs to Ethernet frames. The VLAN-aware parts of the network can filter traffic at interfaces, based on VLAN ID. Some conventions:
+
+- Each frame can only be within one VLAN. 
+- Packets without VLAN tags are considered to be part of the native VLAN.
+
+VLAN IDs are assigned by adding an extra header (802.1q header) to Ethernet frames. The header contains a VLAN tag that stores the VLAN ID.
+
+.. note:: The VLAN mechanism removes connections from a physical network (by filtering packets at the data link layer), but cannot create new connections. 
+
+.. (typically Ethernet switches) 
+
+.. Portions of the network which are VLAN-aware (i.e., IEEE 802.1Q conformant) can include VLAN tags. When a frame enters the VLAN-aware portion of the network, a tag is added to represent the VLAN membership.Each frame must be distinguishable as being within exactly one VLAN. A frame in the VLAN-aware portion of the network that does not contain a VLAN tag is assumed to be flowing on the native VLAN. (from Wikipedia). **TODO** is this needed?
+
+.. **TODO** "which can be allowed/disallowed..." too INET specific, not here; "remap", might be INET specific; wikipedia links?
+
+.. Each interface has a set of allowed VLAN IDs. TODO place
+
+..  (which can be allowed/disallowed as well) TODO place
+
+.. Interfaces can also remap VLAN IDs. TODO place
 
 INET's VLAN support
 -------------------
@@ -79,19 +104,56 @@ Overview
 
 .. In INET, several modules...
 
-In INET, various modules (such as hosts and policy submodules) can add a VLAN tag request to packets. The actual VLAN tags are then added by 802.1q submodules. Its possible that a VLAN tag request is added in one network node and the VLAN tag is added in another (e.g. an app in a host adds request, the 802.1q submodule in a switch adds tag).
+In INET, various modules (such as hosts and policy submodules) can add a VLAN tag request to packets. The actual VLAN tag is then added by a 802.1q submodule (:ned:`Ieee8021qProtocol`). Its possible that a VLAN tag request is added in one network node and the VLAN tag is added in another (e.g. an app in a host adds request, the 802.1q submodule in a switch adds tag).
 
 .. **TODO** example for this process somewhere (for example, host's app adds request, connected switch's 802.1q module adds tag)
 
 .. **TODO** (even if its in another host which is vlan aware/has 802.1q module)
 
-As such, the presence of the 802.1q submodule makes the network node VLAN-aware. **TODO** meaning what ?
-that the network node can read VLAN tags on packets ?
--> the presence of the 802.1q submodule makes the network node able to filter packets based on VLAN tags ?
+.. As such, the presence of the 802.1q submodule makes the network node VLAN-aware. **TODO** meaning what ?
+   that the network node can read VLAN tags on packets ?
+   -> the presence of the 802.1q submodule makes the network node able to filter packets based on VLAN tags ?
 
-Several configurations are possible...**TODO** such as double tagging
+.. - some parts of the network/some interfaces need to be VLAN-aware...that is be able to understand
+   802.1q headers because it either manipulates or does something based on that
+   - that is set in the Ethernet interface
 
-**TODO** protocol = 8021qtag
+.. - interfaces which are supposed to add VLAN tags/802.1q headers to packets should be VLAN-aware, i.e.
+   be able to understand 802.1q headers, by setting the protocol parameter to 802.1qtag
+   so that if a packet going out the interface doesnt have a 802.1q header is sent to the 802.1q module, which adds it if it doesnt have one
+
+.. - if an outgoing interface has to filter packets based on VLAN tag or map VLAN tags if needs to be VLAN-aware
+   - other interfaces don't but they still can forward packets with VLAN tags 802.1q headers
+
+Some interfaces of the network need to be VLAN-aware, i.e. be able to understand 802.1q headers.
+These are `outgoing` interfaces that either filter packets based on VLAN ID, or map VLAN IDs on packets.
+Interfaces in the network without VLAN-awareness can still forward packets with 802.1q headers.
+
+The requirements for an interface to be VLAN-aware are the following:
+
+- The containing network node needs to be set to have a 802.1q submodule:
+
+  ``*.switch.ieee8021q.typename = "Ieee8021qProtocol"``
+
+- The interface needs to be set to connect to the 802.1q submodule:
+
+  ``*.switch.eth[0].protocol = "ieee8021qctag"``
+
+.. This configures the interface to send packets coming from higher layers to the 802.1q module, so that the module can add a 802.1q header if the packet doesn't already has one./Use the protocol services of the 802.1q module
+
+Specifying the :par:`protocol` parameter configures the interface to use the protocol services of the 802.1q module, i.e. to send packets coming from higher layers to the 802.1q module. The module can add a 802.1q header if the packet doesn't already have one.
+
+Several configurations are possible, such as the following: 
+
+- Assigning VLAN IDs in a network node's 802.1q submodule
+- Different VLAN IDs for different traffic directions
+- VLAN Double tagging
+
+For more possibilities, see the VLAN example (``inet/examples/ethernet/vlan``).
+
+.. **TODO** protocol = 8021qtag
+
+.. **TODO** 802.1q submodule NED type
 
 .. The VlanPolicyLayer submodule
    -----------------------------
@@ -99,20 +161,27 @@ Several configurations are possible...**TODO** such as double tagging
 Creating VLAN policies
 ~~~~~~~~~~~~~~~~~~~~~~
 
-**TODO** what are VLAN policies?
+.. **TODO** what are VLAN policies?
 
-**TODO** how to add policy submodule?
+.. **TODO** how to add policy submodule?
 
-**TODO** what it is, where it is and how to add it
+.. **TODO** what it is, where it is and how to add it
 
-In Ethernet switches, VLAN policies specify how packets are assigned to VLANs, based on incoming and outgoing interfaces.
+For VLANs to be useful, we need to set up policies that govern how packets are assigned to VLANs.
+In Ethernet switches, VLAN policies specify this, based on incoming and outgoing interfaces, and also how packets are filtered on interfaces **TODO**
 VLAN policies can be created using the :ned:`VlanPolicyLayer` submodule, which is an optional submodule of the bridging layer in :ned:`EthernetSwitch`. (The bridging layer contains optional submodules such as **TODO**)
+
+.. /how packets are assigned to VLANs
+
+**TODO** also, VLAN IDs can be assigned in hosts' interfaces as well (static mapping?)
+
+.. In Ethernet switches, VLAN policies specify how packets are assigned to VLANs, and how they are filtered on interfaces.
 
 .. In Ethernet switches, VLAN policies specify the set of allowed VLAN IDs at various incoming and outgoing interfaces, and can add/alter VLAN tags.
 
 .. In Ethernet switches, VLAN policies specify the set of allowed VLAN IDs at various incoming and outgoing interfaces, and can map vlan ids
 
-**TODO** what is the bridging layer and defaults ?
+.. **TODO** what is the bridging layer and defaults ?
 
 .. To add it, the ``vlanPolicy`` submodule's type needs to be specified.
 
@@ -122,7 +191,7 @@ VLAN policies can be created using the :ned:`VlanPolicyLayer` submodule, which i
 
 .. Here is the VLAN policy layer submodule inside an :ned:`EthernetSwitch`:
 
-To add a :ned:`VlanPolicyLayer` to :ned:`EthernetSwitch`, set the ``bridging`` submodule's type in the switch to :ned:`Bridging`, then the ``vlanPolicy`` submodule's type in the briding module to :ned:`VlanPolicyLayer`.
+To add a :ned:`VlanPolicyLayer` to :ned:`EthernetSwitch`, set the ``bridging`` submodule's type in the switch to :ned:`Bridging`, then the ``vlanPolicy`` submodule's type to :ned:`VlanPolicyLayer` in the briding module.
 
 .. .. figure:: media/switch2.png
    :align: center
@@ -143,7 +212,11 @@ The :ned:`VlanPolicyLayer` module can filter packets based on VLAN tags, and mod
    
 .. The default submodules of the Vlan Policy Layer module**
 
-In the filter submodules, the set of allowed VLAN IDs can be specified with the :par:`acceptedVlanIds` parameter, using the following syntax:
+.. .. note:: (we set it to an omitted type, so that the module is not there in the simulation, but the other modules are connected properly) **TODO** omitted thing not here but INET's VLAN support section
+
+.. note:: The submodules of :ned:`VlanPolicyLayer` can be disabled by setting their type to an omitted type. Omitted-type modules are not there in the simulation, but the other modules are connected properly. To disable mapper modules, set their type to :ned:`OmittedPacketFlow`; to disable filter modules, set the type to :ned:`OmittedPacketFilter`.
+
+In the filter submodules, the set of allowed VLAN IDs can be specified with the :par:`acceptedVlanIds` parameter, using the following syntax (VLAN ID -1 means the packet has no VLAN tag):
 
 .. code-block:: text
 
@@ -170,22 +243,20 @@ In the mapper submodules, VLAN ID mappings can be specified with the :par:`mappe
    
 .. For example: **TODO**
 
-For example, mapping untagged packets of eth1 to VLAN ID 1, and packets of eth2 on VLAN ID 2:
+For example, mapping untagged packets (VLAN ID -1) of eth1 to VLAN ID 1, and those of eth2 to VLAN ID 2:
 
 .. code-block:: ini
 
    mappedVlanIds = {"eth1" : {"-1" : 1}, "eth2" : {"-1" : 2}}
-
-**TODO** more VLAN IDs for an interface
 
 .. .. literalinclude:: ../omnetpp.ini
       :start-at: switch1.policy.outboundFilter.acceptedVlanIds
       :end-at: switch1.policy.outboundFilter.acceptedVlanIds
       :language: ini
 
-Some explanation on the syntax for the mapper:
+.. Some explanation on the syntax for the mapper:
 
-.. literalinclude:: ../omnetpp.ini
+.. .. literalinclude:: ../omnetpp.ini
    :start-at: switch1.bridging.vlanPolicy.inboundMapper.mappedVlanIds
    :end-at: switch1.bridging.vlanPolicy.inboundMapper.mappedVlanIds
    :language: ini
@@ -193,6 +264,8 @@ Some explanation on the syntax for the mapper:
 .. **TODO** adds vlan id request/indication tags
 
 **TODO** vlan tags in qtenv ?
+
+.. **TODO** [-1] is [none]
 
 .. so
 
@@ -246,8 +319,8 @@ Some explanation on the syntax for the mapper:
 .. The Model/Configuration/The example simulations
    -----------------------------------------------
 
-The Model
----------
+The Model and Results
+---------------------
 
 .. Ethernet VLANs are demonstrated with two configurations:
 
@@ -260,8 +333,8 @@ structure:
   
 - Results
 
-Overview
-~~~~~~~~
+.. Overview
+   ~~~~~~~~
 
 We'll demonstrate Ethernet VLANs with the following configurations:
 
@@ -273,7 +346,7 @@ Config: VLAN Between Switches
 
 As mentioned above, packets are assigned to VLANs in Ethernet switches in this simulation. The switches also divide the network into two VLANs by filtering packets based on VLAN ID.
 
-The simulation use the following network (also reused for the next example simulation):
+The simulation uses the following network (also reused for the next example simulation), containing six hosts (:ned:`StandardHost`) and two switches (:ned:`EthernetSwitch`):
 
 .. .. figure:: media/network.png
       :align: center
@@ -287,30 +360,39 @@ The simulation use the following network (also reused for the next example simul
 .. .. figure:: media/network7.png
    :align: center
 
-.. figure:: media/network9.png
+.. figure:: media/network10.png
    :align: center
 
    Figure X. The network and the upper and lower VLANs
 
-**TODO** crop eth0
+.. **TODO** crop eth0
 
 .. It contains a network of two switches (:ned:`EthernetSwitch`). A host (:ned:`StandardHost`) is connected to each switch.
 
-The network contains six hosts (:ned:`StandardHost`) and two switches (:ned:`EthernetSwitch`). 
+.. The network contains six hosts (:ned:`StandardHost`) and two switches (:ned:`EthernetSwitch`). 
 
-**TODO** the scenario...two VLANs, upper and lower
+.. **TODO** the scenario...two VLANs, upper and lower
 
-Our goal is to separate the network into two virtual networks, with three hosts each, indicated on the image with red and blue tint of the hosts. We assign VLAN ID 1 to the upper VLAN, and VLAN ID 2 to the lower VLAN.
+Our goal is to separate the network into two virtual networks (upper and lower), with three hosts each, indicated on the image with red and blue tint of the hosts. We assign VLAN ID 1 to the upper VLAN, and VLAN ID 2 to the lower VLAN.
+To demonstrate that the two VLANs are separate, we broadcast packets from host1 and host2 to the entire network, and observe as they are only delivered to hosts in their originating VLAN. 
 
-To demonstrate that the two VLANs are separate, we broadcast packets to the entire network, and observe as they are only delivered to hosts in their originating VLAN. We assign IP addresses so that all hosts are in the same subnet (addresses are sequential from 10.0.0.1 to 10.0.0.6).
+Note that IP addresses are assigned by default so that all hosts are in the same subnet (addresses are sequential from 10.0.0.1 to 10.0.0.6). We can use the 10.0.0.7 address to broadcast packets. 
+
+.. **TODO** not here?
+
+.. We just need to broadcast packets using the 10.0.0.7 address. **TODO** not here?
+
+.. /so that we can broadcast packets using the 10.0.0.7 address. **TODO** actually this is the default
 
 .. **TODO** why is it important that we assign sequential IPs?
 
-The two switches are configured to be VLAN aware, but the hosts are not. (Thus the switches are responsible for creating the VLANs and adding VLAN tags to packets. **TODO** redundant ?
+.. The two switches are configured to be VLAN aware, but the hosts are not. (Thus the switches are responsible for creating the VLANs and adding VLAN tags to packets. **TODO** redundant ?
 
-VLAN IDs are assigned by switch one, depending on a packet's incoming interface, so that packets from host1 have VLAN ID 1, and packets from host2 have VLAN ID 2. Furthermode, switch2 sends VLAN ID 1 packets only to the blue tinted hosts, and VLAN ID 2 packets to the red ones. **TODO** redundant ?; merge with "UDP application..."
+.. VLAN IDs are assigned by switch one, depending on a packet's incoming interface, so that packets from host1 have VLAN ID 1, and packets from host2 have VLAN ID 2. Furthermode, switch2 sends VLAN ID 1 packets only to the blue tinted hosts, and VLAN ID 2 packets to the red ones. **TODO** redundant ?; merge with "UDP application..."
 
-Here is part of the ``General`` configuration with Ethernet settings:
+Let's see some of the settings that are shared by the two simulations. Here is part of the ``General`` configuration with Ethernet settings:
+
+.. we need to configure 
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: encap
@@ -318,6 +400,18 @@ Here is part of the ``General`` configuration with Ethernet settings:
    :language: ini
 
 The first three lines configure all network nodes to use the composable Ethernet model, and the last one sets the Ethernet connection speed on all interfaces.
+
+.. The VLANs are created/managed by the switches, so the other parts of the network don't even need to be "VLAN-aware", i.e. understand 802.1q protocol headers in Ethernet frames.
+   Since the VLAN awareness is only between the two switches, we configure the two interfaces between the two switches to understand 802.1q protocol headers:
+
+.. **TODO** how does that work? or not even here
+
+.. The VLANs are managed by the switches, so the only part of the network that needs to be "VLAN-aware", i.e. understand 802.1q protocol headers in Ethernet frames, is the two interfaces that are between the two switches.
+   We configure these two interfaces to understand 802.1q protocol headers:
+
+**TODO** so the switches dont need a socket to connect to the 8021q module ?
+
+**TODO** VLANBetweenVirtualInterfaces: where is the 8021q module?
 
 .. The switches are configured to have a :ned:`Ieee8021qLayer` submodule. 
 
@@ -330,44 +424,43 @@ The first three lines configure all network nodes to use the composable Ethernet
 
 .. For traffic, host1 in the upper VLAN broadcasts UDP packets to host4 in the same VLAN. Similarly, host4 in the lower VLAN send packets to hostX.
 
-A UDP application in host1 and host4 generate packets, which are broadcast to the entire LAN (to address 10.0.0.7). However, the switches are configured to only deliver packets in the same VLAN they originate from (host1 -> host2 and host3, host4 -> host5 and host6).
+.. ----------------------------------------------
 
-.. (host1 to host2 and host3, host4 to host5 and host6)
+   A UDP application in host1 and host4 generate packets, which are broadcast to the entire LAN (to address 10.0.0.7). However, the switches are configured to only deliver packets in the same VLAN they originate from (host1 -> host2 and host3, host4 -> host5 and host6).
 
-.. **TODO** each is a different subnet -> how about they weren't ? can they have the same address ?
+   .. (host1 to host2 and host3, host4 to host5 and host6)
 
-.. For traffic, one of the hosts in each VLAN send UDP packets to another host in the same VLAN. The switches separate the packets.
+   .. **TODO** each is a different subnet -> how about they weren't ? can they have the same address ?
 
-.. **V1** There are two configurations in this showcase:
+   .. For traffic, one of the hosts in each VLAN send UDP packets to another host in the same VLAN. The switches separate the packets.
 
-   - Config ``BetweenSwitches``: All packets between the5switches are assigned to VLAN 42.
-   - Config ``VirtualInterface``: All packets between the hosts are assigned to VLAN 42 and use virtual interfaces in the hosts.
+   .. **V1** There are two configurations in this showcase:
 
-.. Example: VLAN between the Switches
-   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      - Config ``BetweenSwitches``: All packets between the5switches are assigned to VLAN 42.
+      - Config ``VirtualInterface``: All packets between the hosts are assigned to VLAN 42 and use virtual interfaces in the hosts.
 
-.. **TODO** config
+   .. Example: VLAN between the Switches
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let's see the relevant parts of configuring VLAN in the switches. In the ``VLANBetweenSwitches`` configuration, the switches are configured to have a VLAN policy layer submodule:
+   .. **TODO** config
 
-.. literalinclude:: ../omnetpp.ini
-   :start-at: VlanPolicyLayer
-   :end-at: VlanPolicyLayer
-   :language: ini
+   Let's see the relevant parts of configuring VLAN in the switches. In the ``VLANBetweenSwitches`` configuration, the switches are configured to have a VLAN policy layer submodule:
 
-In the ``VLANBetweenSwitches`` configuration, the switches are configured to be VLAN-aware. Since the VLAN awareness is only between the two switches, the interfaces which are between the two switches are configured to understand the 802.1q protocol. **TODO** rewrite
+   .. literalinclude:: ../omnetpp.ini
+      :start-at: VlanPolicyLayer
+      :end-at: VlanPolicyLayer
+      :language: ini
 
-The VLANs are created/managed by the switches, so the other parts of the network don't even need to be "VLAN-aware", i.e. understand 802.1q protocol headers in Ethernet frames.
-Since the VLAN awareness is only between the two switches, we configure the two interfaces between the two switches to understand 802.1q protocol headers:
+   **TODO** not here
 
-.. the interfaces that are between the two switches are configured to understand the 802.1q protocol.
+   ----------------------------------------------
 
-.. literalinclude:: ../omnetpp.ini
-   :start-at: ieee8021qctag
-   :end-at: switch2
-   :language: ini
+.. In the ``VLANBetweenSwitches`` configuration, the switches are configured to be VLAN-aware. Since the VLAN awareness is only between the two switches, the interfaces which are between the two switches are configured to understand the 802.1q protocol. **TODO** rewrite
 
-**TODO** so the switches dont need a socket to connect to the 8021q module ?
+Let's see some of the VLANBetweenSwitches .ini configuration/Let's see the traffic and VLAN settings in the ``VLANBetweenSwitches`` .ini configuration. 
+
+Traffic Settings
+++++++++++++++++
 
 The traffic generator UDP apps in host1 and host4 are configured to broadcast UDP packets to the entire subnet. The VLAN the packets belong to (lower or upper) is added to the packet name, so we can tell them apart in Qtenv's animations:
 
@@ -376,6 +469,9 @@ The traffic generator UDP apps in host1 and host4 are configured to broadcast UD
    :end-at: UdpBasicAppData-lower
    :language: ini
 
+VLAN Settings
++++++++++++++
+
 As mentioned above, our goal is to divide the hosts in the network into two VLANs, upper and lower. To do that, we configure the following VLAN policies in the two switches:
 
 .. The configured VLAN policies are illustrated on the following image:
@@ -383,9 +479,36 @@ As mentioned above, our goal is to divide the hosts in the network into two VLAN
 .. figure:: media/10.png
    :align: center
 
-   **Figure X. The configured VLAN policies**
+   Figure X. The configured VLAN policies
 
-So switch1 assigns VLAN IDs to packets based on incoming interface. Switch2 only sends packets to the appropriate hosts, so that packets stay in their own VLAN. Let's see this VLAN policy configuration in omnetpp.ini/How is this configured in :ned:`VlanPolicyLayer`? We configure the switches to have a VLAN policy layer, and specify the policies themselves in each switch:
+**TODO** this could be smaller
+
+.. So/According to this policy, switch1 assigns VLAN IDs to packets based on incoming interface. Switch2 only sends packets to the appropriate hosts, so that packets stay in their own VLAN.
+
+.. The summary of the policy is the following:
+
+To summarize:
+
+- Switch1 assigns VLAN IDs to packets based on incoming interface
+- Switch2 only sends packets to the appropriate hosts, so that packets stay in their own VLAN
+
+VLAN IDs are assigned by switches1, so the only part of the network that needs to be "VLAN-aware", i.e. understand 802.1q protocol headers in Ethernet frames, is the switch1's outgoing interface.
+We configure this interface to understand 802.1q protocol headers/use 802.1q protocol services:
+
+.. **TODO** not here -> this is actually config specific
+
+.. The VLAN-aware part of the network is between the two switches, so the two interfaces that are between the who switches need to be vlan aware...
+
+.. the interfaces that are between the two switches are configured to understand the 802.1q protocol.
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: *.switch1.eth[2].protocol = "ieee8021qctag"
+   :end-at: *.switch1.eth[2].protocol = "ieee8021qctag"
+   :language: ini
+
+How is the above policy configured in :ned:`VlanPolicyLayer`? We configure the switches to have a VLAN policy layer, and specify the policies themselves in each switch:
+
+.. Let's see this VLAN policy configuration in omnetpp.ini/
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: VlanPolicyLayer
@@ -400,12 +523,12 @@ Let's explain what this does:
 
 .. **TODO** explain this
 
-- In switch1, we don't want to filter inbound packets, so we disable the inbound filter (we set it to an omitted type, so that the module is not there in the simulation, but the other modules are connected properly) **TODO** omitted thing not here but INET's VLAN support section
-- We do need the optional inbound mapper module to assign VLAN IDs to packets based on which interface they come in on, so we set the inbound submodule type to :ned:`VlanIndMapper`
-- The mapper assigns VLAN ID 1 to packets incoming on eth0, and VLAN ID 2 to those incoming on eth2
+- In switch1, we don't want to filter inbound packets, so we disable the inbound filter
+- We need the optional inbound mapper module to assign VLAN IDs to packets based on which interface they come in on, so we set the inbound submodule type to :ned:`VlanIndMapper`
+- The mapper assigns VLAN ID 1 to native-VLAN packets incoming on eth0, and VLAN ID 2 to those incoming on eth2
 - The outbound mapper isn't needed either, so we disable it
 - In switch2, we only need the outbound filter. The filter only allows **TODO**
-- The other submodules are disabled
+- The other submodules (**TODO**) are disabled
 
 .. **TODO** omitted modules mean the modules are not there (but the others are connected properly)
 
@@ -424,18 +547,17 @@ Let's explain what this does:
 Config: VLAN Between Hosts Using Virtual Interfaces
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-   In this configuration, host1 sends UDP packets to host2 via a virtual interface in each host.
+.. In this configuration, host1 sends UDP packets to host2 via a virtual interface in each host.
 
-**V1** In this configuration, VLAN tags are added to packets in a host. 
+.. **V1** In this configuration, VLAN tags are added to packets in a host. 
 
-**V2** In this configuration, a host adds VLAN tags to packets; (as opposed to switches).
+.. **V2** In this configuration, a host adds VLAN tags to packets; (as opposed to switches).
 
 .. - in this configuration, a host's interface adds a VLAN tag to packets (actually no but a request)
    - in this configuration, a host adds VLAN tags to packets
    - the switches filter packets according to configured VLAN policies
 
 In this configuration, a host interface adds VLAN tags to packets, and switches filter packets according to configured VLAN policies.
-
 The configuration uses the same network as the previous one. However, in addition to the Ethernet interfaces (``eth``), host1 and host2 each contain a virtual interface (``virt``) as well:
 
 .. **TODO** image
@@ -538,8 +660,7 @@ The simulation is defined in the ``VirtualInterfaces`` configuration in omnetpp.
 .. Virtual interface basically has a VirtualTunnel in it.
 
 Some parameters of the virtual tunnel need to be configured, such as which real interface to send packets on, and how to connect to the 802.1q submodule of the host. 
-
-The tunnel submodule of the virtual interface accesses the 802.1q module via a socket. (In INET, sockets are used by modules, such as applications, to access protocol services in a network node.) We need to enable the 802.1q module's socket so that the tunnel can use the module's protocol service:
+The tunnel submodule of the virtual interface accesses the 802.1q module via a socket. (In INET, sockets are used by modules, such as applications, to access protocol services in a network node.) **We need to enable the 802.1q module's socket so that the tunnel can use the module's protocol service:**
 
 .. the 802.1q is configured to have one:
 
@@ -582,7 +703,7 @@ The virtual interfaces require manual routing configuration. The Ipv4NetworkConf
 
 .. note:: we use global arp; works with normal arp tho
 
-**TODO** traffic
+.. **TODO** traffic
 
 The only traffic in the simulation is generated by two UDP apps in host1, one targetting host2's eth interface, the other host2's virt interface:
 
@@ -593,7 +714,23 @@ The only traffic in the simulation is generated by two UDP apps in host1, one ta
 
 The apps are also configured to include the outgoing interface in the packet name (eth and virt), so that we can tell the packets apart in Qtenv.
 
-Our goal is to make host2 only accessible via the two virtual interfaces, so we configure the VLAN policy like so:
+.. Our goal is to make host2 only accessible via the two virtual interfaces, so we configure the VLAN policy like so:
+
+Our goal is to make host2 only accessible via the two virtual interfaces, so we configure the following VLAN policy:
+
+.. The configured VLAN policies are illustrated on the following image: The configured VLAN policies are illustrated on the following image: 
+
+.. .. figure:: media/11.png
+      :align: center
+
+.. figure:: media/virt_schematic.png
+   :align: center
+
+   Figure 4: The configured VLAN policies
+
+**TODO** protocol = 802.1qtag
+
+This policy is configured in omnetpp.ini as follows:
 
 .. literalinclude:: ../omnetpp.ini
    :start-after: GlobalArp
@@ -603,16 +740,6 @@ Our goal is to make host2 only accessible via the two virtual interfaces, so we 
 Packets sent by host1's virtual interface have a VLAN ID of 1. We only need to have an outbound filter submodule in the VLAN policy layer module in switch2, which we configure to only allow packets with VLAN ID 1 on its eth1 interface (the one towards host2). Packets without VLAN tags are allowed on the other interfaces. 
 /The other interfaces of switch2 only allow packets without VLAN tags.
 The inbound filter and both mapper submodules of VlanPolicy are not needed, so they are disabled.
-
-The configured VLAN policies are illustrated on the following image: 
-
-.. .. figure:: media/11.png
-      :align: center
-
-.. figure:: media/virt_schematic.png
-   :align: center
-
-   **Figure 4: The configured VLAN policies**
 
 .. The other, unneeded submodules are disabled.
 
