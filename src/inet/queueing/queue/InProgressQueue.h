@@ -21,8 +21,7 @@
 #include "inet/queueing/queue/PacketQueue.h"
 
 namespace inet {
-
-using namespace inet::queueing;
+namespace queueing {
 
 class INET_API InProgressQueue : public PacketQueue
 {
@@ -31,6 +30,7 @@ class INET_API InProgressQueue : public PacketQueue
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
 };
 
+} // namespace queueing
 } // namespace inet
 
 #endif
