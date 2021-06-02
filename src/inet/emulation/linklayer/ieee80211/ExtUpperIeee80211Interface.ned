@@ -62,7 +62,7 @@ module ExtUpperIeee80211Interface extends ExtInterface like IWirelessInterface
             parameters:
                 @display("p=300,200");
         }
-        classifier: <default("")> like IIeee8021dQosClassifier if typename != "" {
+        classifier: <default("OmittedIeee8021dQosClassifier")> like IIeee8021dQosClassifier {
             parameters:
                 @display("p=500,150");
         }
@@ -94,12 +94,11 @@ module ExtUpperIeee80211Interface extends ExtInterface like IWirelessInterface
         mgmt.agentIn <-- agent.mgmtOut if exists(agent);
 
         llc.upperLayerOut --> { @display("m=n"); } --> tap.lowerLayerIn;
-        llc.upperLayerIn <-- { @display("m=n"); } <-- tap.lowerLayerOut if !exists(classifier);
-        llc.upperLayerIn <-- { @display("m=n"); } <-- classifier.out if exists(classifier);
+        llc.upperLayerIn <-- { @display("m=n"); } <-- classifier.out;
 
         llc.lowerLayerOut --> mac.upperLayerIn;
         llc.lowerLayerIn <-- mac.upperLayerOut;
 
-        classifier.in <-- { @display("m=n"); } <-- tap.lowerLayerOut if exists(classifier);
+        classifier.in <-- { @display("m=n"); } <-- tap.lowerLayerOut;
 }
 

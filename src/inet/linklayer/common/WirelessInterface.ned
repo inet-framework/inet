@@ -38,7 +38,7 @@ module WirelessInterface extends NetworkInterface like IWirelessInterface
         output upperLayerOut;
         input radioIn @labels(IWirelessSignal);
     submodules:
-        classifier: <default("")> like IIeee8021dQosClassifier if typename != "" {
+        classifier: <default("OmittedIeee8021dQosClassifier")> like IIeee8021dQosClassifier {
             parameters:
                 @display("p=500,100");
         }
@@ -51,9 +51,8 @@ module WirelessInterface extends NetworkInterface like IWirelessInterface
                 @display("p=300,300");
         }
     connections allowunconnected:
-        upperLayerIn --> { @display("m=n"); } --> mac.upperLayerIn if !exists(classifier);
-        upperLayerIn --> { @display("m=n"); } --> classifier.in if exists(classifier);
-        classifier.out --> mac.upperLayerIn if exists(classifier);
+        upperLayerIn --> { @display("m=n"); } --> classifier.in;
+        classifier.out --> mac.upperLayerIn;
         mac.lowerLayerOut --> radio.upperLayerIn if exists(radio);
 
         radioIn --> { @display("m=s"); } --> radio.radioIn if exists(radio);

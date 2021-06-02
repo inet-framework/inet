@@ -68,7 +68,7 @@ module Ieee80211Interface extends NetworkInterface like IWirelessInterface
             parameters:
                 @display("p=300,200");
         }
-        classifier: <default("")> like IIeee8021dQosClassifier if typename != "" {
+        classifier: <default("OmittedIeee8021dQosClassifier")> like IIeee8021dQosClassifier {
             parameters:
                 @display("p=500,100");
         }
@@ -100,12 +100,11 @@ module Ieee80211Interface extends NetworkInterface like IWirelessInterface
         mgmt.agentIn <-- agent.mgmtOut if exists(agent);
 
         llc.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
-        llc.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if !exists(classifier);
-        llc.upperLayerIn <-- { @display("m=n"); } <-- classifier.out if exists(classifier);
+        llc.upperLayerIn <-- { @display("m=n"); } <-- classifier.out;
 
         llc.lowerLayerOut --> mac.upperLayerIn;
         llc.lowerLayerIn <-- mac.upperLayerOut;
 
-        classifier.in <-- { @display("m=n"); } <-- upperLayerIn if exists(classifier);
+        classifier.in <-- { @display("m=n"); } <-- upperLayerIn;
 }
 

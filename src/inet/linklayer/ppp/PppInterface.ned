@@ -34,11 +34,11 @@ module PppInterface extends NetworkInterface like IPppInterface
         output upperLayerOut;
         inout phys @labels(PppFrame);
     submodules:
-        ingressTC: <default("")> like ITrafficConditioner if typename != "" {
+        ingressTC: <default("OmittedTrafficConditioner")> like ITrafficConditioner {
             parameters:
                 @display("p=500,100");
         }
-        egressTC: <default("")> like ITrafficConditioner if typename != "" {
+        egressTC: <default("OmittedTrafficConditioner")> like ITrafficConditioner {
             parameters:
                 @display("p=300,100");
         }
@@ -48,16 +48,12 @@ module PppInterface extends NetworkInterface like IPppInterface
                 @display("p=400,200");
         }
     connections:
-        upperLayerIn --> { @display("m=n"); } --> egressTC.in if exists(egressTC);
-        upperLayerIn --> { @display("m=n"); } --> ppp.upperLayerIn if !exists(egressTC);
-
-        egressTC.out --> ppp.upperLayerIn if exists(egressTC);
+        upperLayerIn --> { @display("m=n"); } --> egressTC.in;
+        egressTC.out --> ppp.upperLayerIn;
 
         phys <--> { @display("m=s"); } <--> ppp.phys;
 
-        ppp.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if !exists(ingressTC);
-
-        ppp.upperLayerOut --> ingressTC.in if exists(ingressTC);
-        ingressTC.out --> { @display("m=n"); } --> upperLayerOut if exists(ingressTC);
+        ppp.upperLayerOut --> ingressTC.in;
+        ingressTC.out --> { @display("m=n"); } --> upperLayerOut;
 }
 
