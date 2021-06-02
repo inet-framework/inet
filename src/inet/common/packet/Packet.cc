@@ -52,7 +52,6 @@ void Packet::selfDoc(const char * packetAction, const char *typeName)
 #else
 #define SELFDOC_FUNCTION
 #define SELFDOC_FUNCTION_CHUNK(chunk)
-#define SELFDOC_FUNCTION_T
 #endif // INET_WITH_SELFDOC
 
 Packet::Packet(const char *name, short kind) :
