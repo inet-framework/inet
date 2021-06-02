@@ -18,7 +18,7 @@ This showcase demonstrates the Virtual Local Area Network (VLAN) support of INET
 
 .. **V1** Ethernet VLANs are physical Ethernet networks separated into virtual networks at the data link layer, so that virtual LANs behave as if they were physically separate LANs.
 
-A physical Ethernet network can be separated into virtual networks at the data link layer, so that these virtual LANs behave as if they were physically separate networks.
+A physical Ethernet network can be separated into virtual networks at the data link layer, so that these virtual LANs behave as if they were physically separate networks. Virtual LANs are disribed in IEEE 802.1Q.
 
 
 .. The Model
@@ -58,19 +58,24 @@ A physical Ethernet network can be separated into virtual networks at the data l
 VLAN Overview
 -------------
 
-**V1** Ethernet VLANs are created by assigning VLAN IDs to Ethernet frames. This is done by adding an extra header (802.1q header) containing a VLAN tag that stores the VLAN ID. The VLAN-aware parts of the network (typically Ethernet switches) filter traffic at interfaces, based on this VLAN ID. Packets without VLAN tags are considered to be part of the native VLAN **(which can be allowed/disallowed as well).** 
-**Interfaces can also remap VLAN IDs.** The VLAN mechanism removes connections from a physical network by filtering packets at the data link layer, but cannot create new connections. 
+.. **V1** Ethernet VLANs are created by assigning VLAN IDs to Ethernet frames. This is done by adding an extra header (802.1q header) containing a VLAN tag that stores the VLAN ID. The VLAN-aware parts of the network (typically Ethernet switches) filter traffic at interfaces, based on this VLAN ID. Packets without VLAN tags are considered to be part of the native VLAN **(which can be allowed/disallowed as well).** 
+   **Interfaces can also remap VLAN IDs.** The VLAN mechanism removes connections from a physical network by filtering packets at the data link layer, but cannot create new connections. 
 
 .. **TODO** "which can be allowed/disallowed..." too INET specific, not here; "remap", might be INET specific; wikipedia links?
 
-**V2** Ethernet VLANs are created by assigning VLAN IDs to Ethernet frames. This is done by adding an extra header (802.1q header) containing a VLAN tag that stores the VLAN ID. Each frame can only be within one VLAN. The VLAN-aware parts of the network filter traffic at interfaces, based on VLAN ID. Packets without VLAN tags are considered to be part of the native VLAN. The VLAN mechanism removes connections from a physical network by filtering packets at the data link layer, but cannot create new connections. 
+.. **V2** Ethernet VLANs are created by assigning VLAN IDs to Ethernet frames. This is done by adding an extra header (802.1q header) containing a VLAN tag that stores the VLAN ID. Each frame can only be within one VLAN. The VLAN-aware parts of the network filter traffic at interfaces, based on VLAN ID. Packets without VLAN tags are considered to be part of the native VLAN. The VLAN mechanism removes connections from a physical network by filtering packets at the data link layer, but cannot create new connections. 
 
-**V3** Ethernet VLANs are created by assigning VLAN IDs to Ethernet frames. The VLAN-aware parts of the network can filter traffic at interfaces, based on VLAN ID. Some conventions:
+Ethernet VLANs are created by assigning VLAN IDs to Ethernet frames. The VLAN-aware parts of the network can filter traffic at interfaces, based on VLAN ID. Each frame can only be assigned to one VLAN. 
 
-- Each frame can only be within one VLAN. 
-- Packets without VLAN tags are considered to be part of the native VLAN.
+.. - Packets without VLAN tags are considered to be part of the native VLAN. **TODO** not needed
 
-VLAN IDs are assigned by adding an extra header (802.1q header) to Ethernet frames. The header contains a VLAN tag that stores the VLAN ID.
+.. **TODO** in schematic none -> untagged
+
+.. **TODO** 802.1q nem header hanem tag...link a megfelelo message fileba 8021qtagheader.msg -> itt le van dokumentalva
+
+.. **V1** VLAN IDs are assigned by adding an extra header (802.1q header) to Ethernet frames. The header contains a VLAN tag that stores the VLAN ID.
+
+VLAN IDs are assigned by adding a VLAN tag (or 802.1Q tag) to Ethernet frames. This tag contains the VLAN ID. (For more information, see the Ieee8021qTagHeader.msg file).
 
 .. note:: The VLAN mechanism removes connections from a physical network (by filtering packets at the data link layer), but cannot create new connections. 
 
@@ -216,6 +221,8 @@ The :ned:`VlanPolicyLayer` module can filter packets based on VLAN tags, and mod
 
 .. note:: The submodules of :ned:`VlanPolicyLayer` can be disabled by setting their type to an omitted type. Omitted-type modules are not there in the simulation, but the other modules are connected properly. To disable mapper modules, set their type to :ned:`OmittedPacketFlow`; to disable filter modules, set the type to :ned:`OmittedPacketFilter`.
 
+**TODO** should be called no-op filter; it doesnt appear at runtime
+
 In the filter submodules, the set of allowed VLAN IDs can be specified with the :par:`acceptedVlanIds` parameter, using the following syntax (VLAN ID -1 means the packet has no VLAN tag):
 
 .. code-block:: text
@@ -263,7 +270,14 @@ For example, mapping untagged packets (VLAN ID -1) of eth1 to VLAN ID 1, and tho
 
 .. **TODO** adds vlan id request/indication tags
 
-**TODO** vlan tags in qtenv ?
+.. **TODO** vlan tags in qtenv ?
+
+Here is a VLAN tag in Qtenv (VLAN ID highlighted):
+
+.. figure:: media/vlantag.png
+   :align: center
+
+   Figure X. VLAN tag in Qtenv
 
 .. **TODO** [-1] is [none]
 
@@ -324,14 +338,14 @@ The Model and Results
 
 .. Ethernet VLANs are demonstrated with two configurations:
 
-structure:
+.. structure:
 
-- The model
-  
-   - Config x
-   - Config y
-  
-- Results
+  - The model
+    
+     - Config x
+     - Config y
+    
+  - Results
 
 .. Overview
    ~~~~~~~~
@@ -476,7 +490,7 @@ As mentioned above, our goal is to divide the hosts in the network into two VLAN
 
 .. The configured VLAN policies are illustrated on the following image:
 
-.. figure:: media/10.png
+.. figure:: media/12.png
    :align: center
 
    Figure X. The configured VLAN policies
@@ -543,6 +557,10 @@ Let's explain what this does:
 
    - in switch one, map the incoming packets to VLANs based on incoming interface
    - in switch two, outgoing interfaces filter packets based on VLAN IDz
+
+.. video:: media/vlan3.mp4
+   :align: center
+   :width: 100%
 
 Config: VLAN Between Hosts Using Virtual Interfaces
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -779,5 +797,6 @@ The inbound filter and both mapper submodules of VlanPolicy are not needed, so t
    - this is about how to use vlans with virtual interfaces
    - the application doesnt know anything about the vlan the packets are assigned to (they could)
 
-Results
--------
+.. video:: media/virt2.mp4
+   :align: center
+   :width: 100%
