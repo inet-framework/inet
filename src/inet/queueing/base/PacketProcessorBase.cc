@@ -194,21 +194,108 @@ void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *gate, 
     }
 }
 
-void PacketProcessorBase::dropPacket(Packet *packet, PacketDropReason reason, int limit)
+void PacketProcessorBase::animatePush(Packet *packet, cGate *gate, const SendOptions& sendOptions) const
 {
-    PacketDropDetails details;
-    details.setReason(reason);
-    details.setLimit(limit);
-    emit(packetDroppedSignal, packet, &details);
-    delete packet;
+    auto endGate = gate->getPathEndGate();
+    packet->setTransmissionId(sendOptions.transmissionId_);
+    packet->setArrival(endGate->getOwnerModule()->getId(), endGate->getId(), simTime());
+    packet->setSentFrom(gate->getOwnerModule(), gate->getId(), simTime());
+
+#ifdef INET_WITH_SELFDOC
+    if (SelfDoc::generateSelfdoc) {
+        auto from = gate->getOwnerModule();
+        auto to = endGate->getOwnerModule();
+        auto ctrl = packet->getControlInfo();
+        {
+            std::ostringstream os;
+            os << "=SelfDoc={ " << SelfDoc::keyVal("module", from->getComponentType()->getFullName())
+                    << ", " << SelfDoc::keyVal("action", "PUSH_OUT")
+                    << ", " << SelfDoc::val("details") << " : {"
+                    << SelfDoc::keyVal("gate", SelfDoc::gateInfo(gate))
+                    << ", "<< SelfDoc::keyVal("msg", opp_typename(typeid(*packet)))
+                    << ", " << SelfDoc::keyVal("kind", SelfDoc::kindToStr(packet->getKind(), gate->getProperties(), "messageKinds", endGate->getProperties(), "messageKinds"))
+                    << ", " << SelfDoc::keyVal("ctrl", ctrl ? opp_typename(typeid(*ctrl)) : "")
+                    << ", " << SelfDoc::tagsToJson("tags", packet)
+                    << " } }"
+                    ;
+            globalSelfDoc.insert(os.str());
+        }
+        {
+            std::ostringstream os;
+            os << "=SelfDoc={ " << SelfDoc::keyVal("module", to->getComponentType()->getFullName())
+                    << ", " << SelfDoc::keyVal("action", "PUSHED_IN")
+                    << ", " << SelfDoc::val("details") << " : {"
+                    << SelfDoc::keyVal("gate", SelfDoc::gateInfo(endGate))
+                    << ", " << SelfDoc::keyVal("msg", opp_typename(typeid(*packet)))
+                    << ", " << SelfDoc::keyVal("kind", SelfDoc::kindToStr(packet->getKind(), endGate->getProperties(), "messageKinds", gate->getProperties(), "messageKinds"))
+                    << ", " << SelfDoc::keyVal("ctrl", ctrl ? opp_typename(typeid(*ctrl)) : "")
+                    << ", " << SelfDoc::tagsToJson("tags", packet)
+                    << " } }"
+                    ;
+            globalSelfDoc.insert(os.str());
+        }
+    }
+#endif // INET_WITH_SELFDOC
+
+    auto envir = getEnvir();
+    if (envir->isGUI() && gate->getNextGate() != nullptr) {
+        envir->beginSend(packet, sendOptions);
+        while (gate->getNextGate() != nullptr) {
+            ChannelResult result;
+            result.duration = sendOptions.duration_;
+            result.remainingDuration = sendOptions.remainingDuration;
+            envir->messageSendHop(packet, gate, result);
+            gate = gate->getNextGate();
+        }
+        envir->endSend(packet);
+    }
 }
 
-void PacketProcessorBase::updateDisplayString() const
+void PacketProcessorBase::animatePushPacket(Packet *packet, cGate *gate) const
 {
-    if (getEnvir()->isGUI() && displayStringTextFormat != nullptr) {
-        auto text = StringFormat::formatString(displayStringTextFormat, this);
-        getDisplayString().setTagArg("t", 0, text);
-    }
+    SendOptions sendOptions;
+    sendOptions.duration_ = 0;
+    sendOptions.remainingDuration = 0;
+    animatePush(packet, gate, sendOptions);
+}
+
+void PacketProcessorBase::animatePushPacketStart(Packet *packet, cGate *gate, bps datarate, long transmissionId) const
+{
+    simtime_t duration = s(packet->getDataLength() / datarate).get();
+    SendOptions sendOptions;
+    sendOptions.duration_ = duration;
+    sendOptions.remainingDuration = duration;
+    sendOptions.transmissionId(transmissionId);
+    animatePushPacketStart(packet, gate, datarate, sendOptions);
+}
+
+void PacketProcessorBase::animatePushPacketStart(Packet *packet, cGate *gate, bps datarate, const SendOptions& sendOptions) const
+{
+    animatePush(packet, gate, sendOptions);
+}
+
+void PacketProcessorBase::animatePushPacketEnd(Packet *packet, cGate *gate, long transmissionId) const
+{
+    SendOptions sendOptions;
+    sendOptions.updateTx(transmissionId, 0);
+    animatePushPacketEnd(packet, gate, sendOptions);
+}
+
+void PacketProcessorBase::animatePushPacketEnd(Packet *packet, cGate *gate, const SendOptions& sendOptions) const
+{
+    animatePush(packet, gate, sendOptions);
+}
+
+void PacketProcessorBase::animatePushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength, long transmissionId) const
+{
+    SendOptions sendOptions;
+    sendOptions.transmissionId(transmissionId);
+    animatePushPacketProgress(packet, gate, datarate, position, extraProcessableLength, sendOptions);
+}
+
+void PacketProcessorBase::animatePushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength, const SendOptions& sendOptions) const
+{
+    animatePush(packet, gate, sendOptions);
 }
 
 void PacketProcessorBase::animatePull(Packet *packet, cGate *gate, const SendOptions& sendOptions) const
@@ -267,77 +354,12 @@ void PacketProcessorBase::animatePull(Packet *packet, cGate *gate, const SendOpt
     }
 }
 
-void PacketProcessorBase::animatePush(Packet *packet, cGate *gate, const SendOptions& sendOptions) const
-{
-    auto endGate = gate->getPathEndGate();
-    packet->setTransmissionId(sendOptions.transmissionId_);
-    packet->setArrival(endGate->getOwnerModule()->getId(), endGate->getId(), simTime());
-    packet->setSentFrom(gate->getOwnerModule(), gate->getId(), simTime());
-
-#ifdef INET_WITH_SELFDOC
-    if (SelfDoc::generateSelfdoc) {
-        auto from = gate->getOwnerModule();
-        auto to = endGate->getOwnerModule();
-        auto ctrl = packet->getControlInfo();
-        {
-            std::ostringstream os;
-            os << "=SelfDoc={ " << SelfDoc::keyVal("module", from->getComponentType()->getFullName())
-                    << ", " << SelfDoc::keyVal("action", "PUSH_OUT")
-                    << ", " << SelfDoc::val("details") << " : {"
-                    << SelfDoc::keyVal("gate", SelfDoc::gateInfo(gate))
-                    << ", "<< SelfDoc::keyVal("msg", opp_typename(typeid(*packet)))
-                    << ", " << SelfDoc::keyVal("kind", SelfDoc::kindToStr(packet->getKind(), gate->getProperties(), "messageKinds", endGate->getProperties(), "messageKinds"))
-                    << ", " << SelfDoc::keyVal("ctrl", ctrl ? opp_typename(typeid(*ctrl)) : "")
-                    << ", " << SelfDoc::tagsToJson("tags", packet)
-                    << " } }"
-                    ;
-            globalSelfDoc.insert(os.str());
-        }
-        {
-            std::ostringstream os;
-            os << "=SelfDoc={ " << SelfDoc::keyVal("module", to->getComponentType()->getFullName())
-                    << ", " << SelfDoc::keyVal("action", "PUSHED_IN")
-                    << ", " << SelfDoc::val("details") << " : {"
-                    << SelfDoc::keyVal("gate", SelfDoc::gateInfo(endGate))
-                    << ", " << SelfDoc::keyVal("msg", opp_typename(typeid(*packet)))
-                    << ", " << SelfDoc::keyVal("kind", SelfDoc::kindToStr(packet->getKind(), endGate->getProperties(), "messageKinds", gate->getProperties(), "messageKinds"))
-                    << ", " << SelfDoc::keyVal("ctrl", ctrl ? opp_typename(typeid(*ctrl)) : "")
-                    << ", " << SelfDoc::tagsToJson("tags", packet)
-                    << " } }"
-                    ;
-            globalSelfDoc.insert(os.str());
-        }
-    }
-#endif // INET_WITH_SELFDOC
-
-    auto envir = getEnvir();
-    if (envir->isGUI() && gate->getNextGate() != nullptr) {
-        envir->beginSend(packet, sendOptions);
-        while (gate->getNextGate() != nullptr) {
-            ChannelResult result;
-            result.duration = sendOptions.duration_;
-            result.remainingDuration = sendOptions.remainingDuration;
-            envir->messageSendHop(packet, gate, result);
-            gate = gate->getNextGate();
-        }
-        envir->endSend(packet);
-    }
-}
-
 void PacketProcessorBase::animatePullPacket(Packet *packet, cGate *gate) const
 {
     SendOptions sendOptions;
     sendOptions.duration_ = 0;
     sendOptions.remainingDuration = 0;
     animatePull(packet, gate, sendOptions);
-}
-
-void PacketProcessorBase::animatePushPacket(Packet *packet, cGate *gate) const
-{
-    SendOptions sendOptions;
-    sendOptions.duration_ = 0;
-    sendOptions.remainingDuration = 0;
-    animatePush(packet, gate, sendOptions);
 }
 
 void PacketProcessorBase::animatePullPacketStart(Packet *packet, cGate *gate, bps datarate, long transmissionId) const
@@ -355,21 +377,6 @@ void PacketProcessorBase::animatePullPacketStart(Packet *packet, cGate *gate, bp
     animatePull(packet, gate, sendOptions);
 }
 
-void PacketProcessorBase::animatePushPacketStart(Packet *packet, cGate *gate, bps datarate, long transmissionId) const
-{
-    simtime_t duration = s(packet->getDataLength() / datarate).get();
-    SendOptions sendOptions;
-    sendOptions.duration_ = duration;
-    sendOptions.remainingDuration = duration;
-    sendOptions.transmissionId(transmissionId);
-    animatePushPacketStart(packet, gate, datarate, sendOptions);
-}
-
-void PacketProcessorBase::animatePushPacketStart(Packet *packet, cGate *gate, bps datarate, const SendOptions& sendOptions) const
-{
-    animatePush(packet, gate, sendOptions);
-}
-
 void PacketProcessorBase::animatePullPacketEnd(Packet *packet, cGate *gate, long transmissionId) const
 {
     SendOptions sendOptions;
@@ -380,18 +387,6 @@ void PacketProcessorBase::animatePullPacketEnd(Packet *packet, cGate *gate, long
 void PacketProcessorBase::animatePullPacketEnd(Packet *packet, cGate *gate, const SendOptions& sendOptions) const
 {
     animatePull(packet, gate, sendOptions);
-}
-
-void PacketProcessorBase::animatePushPacketEnd(Packet *packet, cGate *gate, long transmissionId) const
-{
-    SendOptions sendOptions;
-    sendOptions.updateTx(transmissionId, 0);
-    animatePushPacketEnd(packet, gate, sendOptions);
-}
-
-void PacketProcessorBase::animatePushPacketEnd(Packet *packet, cGate *gate, const SendOptions& sendOptions) const
-{
-    animatePush(packet, gate, sendOptions);
 }
 
 void PacketProcessorBase::animatePullPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength, long transmissionId) const
@@ -406,16 +401,21 @@ void PacketProcessorBase::animatePullPacketProgress(Packet *packet, cGate *gate,
     animatePull(packet, gate, sendOptions);
 }
 
-void PacketProcessorBase::animatePushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength, long transmissionId) const
+void PacketProcessorBase::dropPacket(Packet *packet, PacketDropReason reason, int limit)
 {
-    SendOptions sendOptions;
-    sendOptions.transmissionId(transmissionId);
-    animatePushPacketProgress(packet, gate, datarate, position, extraProcessableLength, sendOptions);
+    PacketDropDetails details;
+    details.setReason(reason);
+    details.setLimit(limit);
+    emit(packetDroppedSignal, packet, &details);
+    delete packet;
 }
 
-void PacketProcessorBase::animatePushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength, const SendOptions& sendOptions) const
+void PacketProcessorBase::updateDisplayString() const
 {
-    animatePush(packet, gate, sendOptions);
+    if (getEnvir()->isGUI() && displayStringTextFormat != nullptr) {
+        auto text = StringFormat::formatString(displayStringTextFormat, this);
+        getDisplayString().setTagArg("t", 0, text);
+    }
 }
 
 const char *PacketProcessorBase::resolveDirective(char directive) const
