@@ -1561,4 +1561,18 @@
         compileFlags = "-DINET_WITH_SELFDOC"
         linkerFlags = ""
         />
+    <feature
+        id = "Z3GateSchedulingConfigurator"
+        name = "Z3 Gate Scheduling Configurator"
+        description = "Z3 SAT solver based TSN gate scheduling configurator"
+        initiallyEnabled = "true"
+        requires = "Ethernet"
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.configurator.z3
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
 </features>
