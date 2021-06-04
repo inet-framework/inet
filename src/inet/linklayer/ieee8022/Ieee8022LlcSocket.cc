@@ -34,6 +34,11 @@ void Ieee8022LlcSocket::sendOut(cMessage *msg)
         if (sapReq->getSsap() == -1)
             sapReq->setSsap(localSap);
     }
+    if (remoteSap != -1) {
+        auto& sapReq = tags.addTagIfAbsent<Ieee802SapReq>();
+        if (sapReq->getDsap() == -1)
+            sapReq->setDsap(remoteSap);
+    }
     if (interfaceId != -1) {
         auto& interfaceReq = tags.addTagIfAbsent<InterfaceReq>();
         if (interfaceReq->getInterfaceId() == -1)
@@ -42,12 +47,15 @@ void Ieee8022LlcSocket::sendOut(cMessage *msg)
     SocketBase::sendOut(msg);
 }
 
-void Ieee8022LlcSocket::open(int interfaceId, int localSap)
+void Ieee8022LlcSocket::open(int interfaceId, int localSap, int remoteSap)
 {
     if (localSap < -1 || localSap > 255)
-        throw cRuntimeError("LlcSocket::open(): Invalid localSap value: %d", localSap);
+        throw cRuntimeError("Invalid localSap value: %d", localSap);
+    if (remoteSap < -1 || remoteSap > 255)
+        throw cRuntimeError("Invalid remoteSap value: %d", remoteSap);
     this->interfaceId = interfaceId;
     this->localSap = localSap;
+    this->remoteSap = remoteSap;
     auto request = new Request("LLC_OPEN", SOCKET_C_OPEN);
     Ieee8022LlcSocketOpenCommand *command = new Ieee8022LlcSocketOpenCommand();
     command->setLocalSap(localSap);
