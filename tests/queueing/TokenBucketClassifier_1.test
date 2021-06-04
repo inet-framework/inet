@@ -1,0 +1,89 @@
+%description:
+
+TODO
+
+%file: test.ned
+
+import inet.queueing.classifier.TokenBucketClassifier;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+
+network TestTokenBucket
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        classifier: TokenBucketClassifier {
+            @display("p=200,100");
+        }
+        greenConsumer: PassivePacketSink {
+            @display("p=300,100");
+        }
+        redConsumer: PassivePacketSink {
+            @display("p=300,200");
+        }
+        consumer: PassivePacketSink {
+            @display("p=300,100");
+        }
+    connections allowunconnected:
+        producer.out --> classifier.in;
+        classifier.out++ --> greenConsumer.in;
+        classifier.out++ --> redConsumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestTokenBucket
+sim-time-limit = 10s
+cmdenv-log-prefix = "%M: "
+cmdenv-event-banners = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = exponential(1s)
+*.classifier.tokenProductionRate = 4
+*.classifier.label = "green"
+
+%contains-regex: stdout
+.*?producer: Producing packet, .*?producer-0.*?
+.*?classifier: Classifying packet, .*?producer-0.*?
+.*?classifier: Checking tokens for packet, .*?8.*?0.*?producer-0.*?
+.*?classifier: Insufficient number of tokens for packet, .*?8.*?0.*?producer-0.*?
+.*?redConsumer: Consuming packet, .*?producer-0.*?
+
+Running simulation...
+.*?producer: Producing packet, .*?producer-1.*?
+.*?classifier: Classifying packet, .*?producer-1.*?
+.*?classifier: Checking tokens for packet, .*?8.*?3.1835.*?producer-1.*?
+.*?classifier: Insufficient number of tokens for packet, .*?8.*?3.1835.*?producer-1.*?
+.*?redConsumer: Consuming packet, .*?producer-1.*?
+.*?producer: Producing packet, .*?producer-2.*?
+.*?classifier: Classifying packet, .*?producer-2.*?
+.*?classifier: Checking tokens for packet, .*?8.*?6.77774.*?producer-2.*?
+.*?classifier: Insufficient number of tokens for packet, .*?8.*?6.77774.*?producer-2.*?
+.*?redConsumer: Consuming packet, .*?producer-2.*?
+.*?producer: Producing packet, .*?producer-3.*?
+.*?classifier: Classifying packet, .*?producer-3.*?
+.*?classifier: Checking tokens for packet, .*?8.*?11.8015.*?producer-3.*?
+.*?classifier: Removed tokens for packet, .*?8.*?3.80146.*?producer-3.*?
+.*?greenConsumer: Consuming packet, .*?producer-3.*?
+.*?producer: Producing packet, .*?producer-4.*?
+.*?classifier: Classifying packet, .*?producer-4.*?
+.*?classifier: Checking tokens for packet, .*?8.*?11.2399.*?producer-4.*?
+.*?classifier: Removed tokens for packet, .*?8.*?3.23988.*?producer-4.*?
+.*?greenConsumer: Consuming packet, .*?producer-4.*?
+.*?producer: Producing packet, .*?producer-5.*?
+.*?classifier: Classifying packet, .*?producer-5.*?
+.*?classifier: Checking tokens for packet, .*?8.*?6.93277.*?producer-5.*?
+.*?classifier: Insufficient number of tokens for packet, .*?8.*?6.93277.*?producer-5.*?
+.*?redConsumer: Consuming packet, .*?producer-5.*?
+.*?producer: Producing packet, .*?producer-6.*?
+.*?classifier: Classifying packet, .*?producer-6.*?
+.*?classifier: Checking tokens for packet, .*?8.*?14.739.*?producer-6.*?
+.*?classifier: Removed tokens for packet, .*?8.*?6.73895.*?producer-6.*?
+.*?greenConsumer: Consuming packet, .*?producer-6.*?
+.*?producer: Producing packet, .*?producer-7.*?
+.*?classifier: Classifying packet, .*?producer-7.*?
+.*?classifier: Checking tokens for packet, .*?8.*?9.88776.*?producer-7.*?
+.*?classifier: Removed tokens for packet, .*?8.*?1.88776.*?producer-7.*?
+.*?greenConsumer: Consuming packet, .*?producer-7.*?
