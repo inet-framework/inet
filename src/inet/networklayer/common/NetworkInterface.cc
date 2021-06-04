@@ -362,7 +362,7 @@ const L3Address NetworkInterface::getNetworkAddress() const
     if (auto nextHopData = findProtocolData<NextHopInterfaceData>())
         return nextHopData->getAddress();
 #endif // ifdef INET_WITH_NEXTHOP
-    return getModulePathAddress();
+    return L3Address();
 }
 
 bool NetworkInterface::hasNetworkAddress(const L3Address& address) const
