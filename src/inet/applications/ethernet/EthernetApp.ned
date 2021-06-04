@@ -30,7 +30,7 @@ module EthernetApp like IApp
 {
     parameters:
         string interfaceTableModule;
-        *.interfaceTableModule = default(absPath(".interfaceTable"));
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
         @display("i=block/app");
     gates:
         input socketIn;
