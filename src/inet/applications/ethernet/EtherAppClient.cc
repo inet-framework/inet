@@ -80,7 +80,7 @@ void EtherAppClient::handleMessageWhenUp(cMessage *msg)
         if (msg->getKind() == START) {
             EV_DEBUG << getFullPath() << " registering DSAP " << localSap << "\n";
             int interfaceId = CHK(interfaceTable->findInterfaceByName(par("interface")))->getInterfaceId();
-            llcSocket.open(interfaceId, localSap);
+            llcSocket.open(interfaceId, localSap, -1);
 
             destMacAddress = resolveDestMacAddress();
             // if no dest address given, nothing to do

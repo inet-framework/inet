@@ -88,7 +88,7 @@ void EtherTrafGen::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         if (msg->getKind() == START) {
-            llcSocket.open(-1, ssap);
+            llcSocket.open(-1, ssap, -1);
             destMacAddress = resolveDestMacAddress();
             // if no dest address given, nothing to do
             if (destMacAddress.isUnspecified())

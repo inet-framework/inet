@@ -138,7 +138,7 @@ void EtherAppServer::registerDsap(int dsap)
 {
     EV_DEBUG << getFullPath() << " registering DSAP " << dsap << "\n";
 
-    llcSocket.open(-1, dsap);
+    llcSocket.open(-1, dsap, -1);
 }
 
 void EtherAppServer::finish()
