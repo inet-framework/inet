@@ -19,7 +19,6 @@
 #define __INET_EXPONENTIALRATEMETER_H
 
 #include "inet/queueing/base/PacketMeterBase.h"
-#include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
 namespace queueing {
