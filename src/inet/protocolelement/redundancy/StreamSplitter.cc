@@ -53,17 +53,23 @@ void StreamSplitter::pushPacket(Packet *packet, cGate *gate)
     Enter_Method("pushPacket");
     take(packet);
     auto streamReq = packet->findTag<StreamReq>();
-    auto streamName = streamReq != nullptr ? streamReq->getStreamName() : "";
-    if (streamMapping->containsKey(streamName)) {
-        cValueArray *outputStreams = check_and_cast<cValueArray *>(streamMapping->get(streamName).objectValue());
-        for (int i = 0; i < outputStreams->size(); i++) {
-            const char *splitStreamName = outputStreams->get(i).stringValue();
-            auto duplicate = packet->dup();
-            duplicate->addTagIfAbsent<StreamReq>()->setStreamName(splitStreamName);
-            pushOrSendPacket(duplicate, outputGate, consumer);
+    if (streamReq != nullptr) {
+        auto streamName = streamReq->getStreamName();
+        if (streamMapping->containsKey(streamName)) {
+            cValueArray *outputStreams = check_and_cast<cValueArray *>(streamMapping->get(streamName).objectValue());
+            for (int i = 0; i < outputStreams->size(); i++) {
+                const char *splitStreamName = outputStreams->get(i).stringValue();
+                auto duplicate = packet->dup();
+                duplicate->addTagIfAbsent<StreamReq>()->setStreamName(splitStreamName);
+                pushOrSendPacket(duplicate, outputGate, consumer);
+            }
+            handlePacketProcessed(packet);
+            delete packet;
         }
-        handlePacketProcessed(packet);
-        delete packet;
+        else {
+            handlePacketProcessed(packet);
+            pushOrSendPacket(packet, outputGate, consumer);
+        }
     }
     else {
         handlePacketProcessed(packet);
