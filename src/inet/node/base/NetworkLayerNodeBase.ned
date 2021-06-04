@@ -61,14 +61,11 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         generic.ifIn <-- nl.out++ if exists(generic);
         generic.ifOut --> nl.in++ if exists(generic);
 
-        ethernet.upperLayerOut --> nl.in++ if exists(ethernet);
-        nl.out++ --> ethernet.upperLayerIn if exists(ethernet);
+        l.out++ --> nl.in++;
+        l.in++ <-- nl.out++;
 
-        ieee8021q.upperLayerOut --> nl.in++ if exists(ieee8021q);
-        nl.out++ --> ieee8021q.upperLayerIn if exists(ieee8021q);
-
-        ieee8021r.upperLayerOut --> nl.in++ if exists(ieee8021r);
-        nl.out++ --> ieee8021r.upperLayerIn if exists(ieee8021r);
+        llc.upperLayerOut --> nl.in++ if exists(llc);
+        llc.upperLayerIn <-- nl.out++ if exists(llc);
 
         nl.out++ --> li.in++;
         nl.in++ <-- li.out++;

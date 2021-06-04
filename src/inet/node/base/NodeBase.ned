@@ -48,7 +48,7 @@ module NodeBase like INetworkNode
         *.energyGeneratorModule = default(exists(energyGenerator) ? absPath(".energyGenerator") : "");
         *.clockModule = default(exists(clock) ? absPath(".clock") : "");
         @class(NodeBase);
-        @display("bgb=1256,822");
+        @display("bgb=1256,972");
     submodules:
         status: NodeStatus if hasStatus {
             parameters:

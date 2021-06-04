@@ -28,6 +28,7 @@ import inet.linklayer.contract.IWirelessInterface;
 import inet.linklayer.ethernet.contract.IEthernetLayer;
 import inet.linklayer.ieee8021q.IIeee8021qLayer;
 import inet.linklayer.ieee8021r.IIeee8021rLayer;
+import inet.linklayer.ieee8022.IIeee8022Llc;
 import inet.networklayer.common.InterfaceTable;
 
 module LinkLayerNodeBase extends NodeBase
@@ -45,10 +46,10 @@ module LinkLayerNodeBase extends NodeBase
         mobility.typename = default(numWlanInterfaces > 0 ? "StationaryMobility" : "");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
-        @figure[linkLayer](type=rectangle; pos=250,456; size=1000,130; fillColor=#0000ff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
+        @figure[linkLayer](type=rectangle; pos=250,456; size=1000,280; fillColor=#0000ff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
         @figure[linkLayer.title](type=text; pos=1245,461; anchor=ne; text="link layer");
-        @figure[interfaceLayer](type=rectangle; pos=250,606; size=1000,210; fillColor=#00ffff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
-        @figure[interfaceLayer.title](type=text; pos=1245,611; anchor=ne; text="interface layer");
+        @figure[interfaceLayer](type=rectangle; pos=250,756; size=1000,210; fillColor=#00ffff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
+        @figure[interfaceLayer.title](type=text; pos=1245,761; anchor=ne; text="interface layer");
 
     gates:
         input radioIn[numWlanInterfaces] @directIn;
@@ -64,49 +65,69 @@ module LinkLayerNodeBase extends NodeBase
             parameters:
                 @display("p=125,240;is=s");
         }
-        li: MessageDispatcher {
+        l: MessageDispatcher {
             parameters:
                 @display("p=750,596;b=1000,5,,,,1");
         }
-        ethernet: <default("")> like IEthernetLayer if typename != "" {
-            parameters:
-                @display("p=375,526");
-        }
-        ieee8021q: <default("")> like IIeee8021qLayer if typename != "" {
-            parameters:
-                @display("p=525,526");
-        }
-        ieee8021r: <default("")> like IIeee8021rLayer if typename != "" {
+        llc: <default("Ieee8022Llc")> like IIeee8022Llc if typename != "" {
             parameters:
                 @display("p=675,526");
         }
+        li: MessageDispatcher {
+            parameters:
+                @display("p=750,746;b=1000,5,,,,1");
+        }
+        ethernet: <default("")> like IEthernetLayer if typename != "" {
+            parameters:
+                @display("p=375,676");
+        }
+        ieee8021q: <default("")> like IIeee8021qLayer if typename != "" {
+            parameters:
+                @display("p=525,676");
+        }
+        ieee8021r: <default("")> like IIeee8021rLayer if typename != "" {
+            parameters:
+                @display("p=675,676");
+        }
         lo[numLoInterfaces]: <default("LoopbackInterface")> like ILoopbackInterface {
             parameters:
-                @display("p=750,676,row,150");
+                @display("p=750,826,row,150");
         }
         // TODO move wlan interfaces after eth interfaces, but it changes IP address assignment and breaks examples/inet/configurator/complex.ini
         wlan[numWlanInterfaces]: <default("Ieee80211Interface")> like IWirelessInterface {
             parameters:
-                @display("p=375,766,row,150;q=queue");
+                @display("p=375,916,row,150;q=queue");
         }
         ppp[sizeof(pppg)]: <default("PppInterface")> like IPppInterface {
             parameters:
-                @display("p=300,676,row,150;q=txQueue");
+                @display("p=300,826,row,150;q=txQueue");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
-                @display("p=900,676,row,150;q=txQueue");
+                @display("p=900,826,row,150;q=txQueue");
         }
         tun[numTunInterfaces]: <default("TunInterface")> like ITunnelInterface {
             parameters:
-                @display("p=975,766,row,150;q=txQueue");
+                @display("p=975,916,row,150;q=txQueue");
         }
         virt[numVirtInterfaces]: <default("VirtualInterface")> like IVirtualInterface {
             parameters:
-                @display("p=975,766,row,150;q=txQueue");
+                @display("p=975,916,row,150;q=txQueue");
         }
 
     connections allowunconnected:
+        llc.lowerLayerOut --> l.in++ if exists(llc);
+        llc.lowerLayerIn <-- l.out++ if exists(llc);
+
+        l.out++ --> ieee8021q.upperLayerIn if exists(ieee8021q);
+        ieee8021q.upperLayerOut --> l.in++ if exists(ieee8021q);
+
+        l.out++ --> ieee8021r.upperLayerIn if exists(ieee8021r);
+        ieee8021r.upperLayerOut --> l.in++ if exists(ieee8021r);
+
+        l.out++ --> ethernet.upperLayerIn if exists(ethernet);
+        ethernet.upperLayerOut --> l.in++ if exists(ethernet);
+
         ieee8021q.lowerLayerOut --> li.in++ if exists(ieee8021q);
         li.out++ --> ieee8021q.lowerLayerIn if exists(ieee8021q);
 
