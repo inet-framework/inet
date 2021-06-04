@@ -121,7 +121,12 @@ extern INET_API simsignal_t // admin
     transmissionStartedSignal,
     transmissionEndedSignal,
     receptionStartedSignal,
-    receptionEndedSignal;
+    receptionEndedSignal,
+
+    tokensChangedSignal,
+    tokensAddedSignal,
+    tokensRemovedSignal,
+    tokensDepletedSignal;
 
 /**
  * Utility function

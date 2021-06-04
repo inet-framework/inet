@@ -25,10 +25,6 @@ namespace queueing {
 
 Define_Module(TokenBasedServer);
 
-simsignal_t TokenBasedServer::tokensAddedSignal = cComponent::registerSignal("tokensAdded");
-simsignal_t TokenBasedServer::tokensRemovedSignal = cComponent::registerSignal("tokensRemoved");
-simsignal_t TokenBasedServer::tokensDepletedSignal = cComponent::registerSignal("tokensDepleted");
-
 void TokenBasedServer::initialize(int stage)
 {
     PacketServerBase::initialize(stage);
