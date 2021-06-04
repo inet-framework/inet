@@ -24,6 +24,7 @@ simple EthernetSocketIo
 {
     parameters:
         string interfaceTableModule;
+        string interface = default("");
         string localAddress = default("");
         string remoteAddress = default("");
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
