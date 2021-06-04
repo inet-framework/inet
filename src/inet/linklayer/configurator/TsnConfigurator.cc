@@ -348,7 +348,8 @@ void TsnConfigurator::configureStreams() const
                 streamParameterValue->set("priority", streamConfiguration->get("priority").intValue());
                 streamParameterValue->set("packetLength", cValue(streamConfiguration->get("packetLength").doubleValueInUnit("B"), "B"));
                 streamParameterValue->set("packetInterval", cValue(streamConfiguration->get("packetInterval").doubleValueInUnit("s"), "s"));
-                streamParameterValue->set("maxLatency", cValue(streamConfiguration->get("maxLatency").doubleValueInUnit("s"), "s"));
+                if (streamConfiguration->containsKey("maxLatency"))
+                    streamParameterValue->set("maxLatency", cValue(streamConfiguration->get("maxLatency").doubleValueInUnit("s"), "s"));
                 parameterValue->add(streamParameterValue);
             }
             gateSchedulingConfigurator->par("configuration") = parameterValue;
