@@ -38,23 +38,23 @@ module EthernetApp like IApp
     submodules:
         source: <default("ActivePacketSource")> like IActivePacketSource {
             parameters:
-                @display("p=100,100");
+                @display("p=200,200");
         }
         outbound: <default("OmittedPacketFlow")> like IPacketFlow {
             parameters:
-                @display("p=100,200");
+                @display("p=200,400");
         }
         sink: <default("PassivePacketSink")> like IPassivePacketSink {
             parameters:
-                @display("p=200,100");
+                @display("p=600,200");
         }
         inbound: <default("OmittedPacketFlow")> like IPacketFlow {
             parameters:
-                @display("p=200,200");
+                @display("p=600,400");
         }
         io: EthernetSocketIo {
             parameters:
-                @display("p=150,300");
+                @display("p=400,600");
         }
     connections:
         source.out --> outbound.in;
