@@ -29,6 +29,5 @@ simple ExponentialRateMeter extends PacketMeterBase like IPacketMeter
 {
     parameters:
         double alpha; // parameter in the range of (0, 1) for the exponential weight decrease
-        @display("i=block/star");
         @class(ExponentialRateMeter);
 }
