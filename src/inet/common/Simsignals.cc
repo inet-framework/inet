@@ -106,6 +106,8 @@ simsignal_t packetReceivedSignal = cComponent::registerSignal("packetReceived");
 simsignal_t packetPushedSignal = cComponent::registerSignal("packetPushed");
 simsignal_t packetPulledSignal = cComponent::registerSignal("packetPulled");
 
+simsignal_t packetFilteredSignal = cComponent::registerSignal("packetFiltered");
+
 simsignal_t packetFlowStartedSignal = cComponent::registerSignal("packetFlowStarted");
 simsignal_t packetFlowEndedSignal = cComponent::registerSignal("packetFlowEnded");
 
