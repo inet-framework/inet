@@ -29,6 +29,5 @@ simple SlidingWindowRateMeter extends PacketMeterBase like IPacketMeter
 {
     parameters:
         double timeWindow @unit(s); // amount of time to look back from the current simulation time
-        @display("i=block/star");
         @class(SlidingWindowRateMeter);
 }
