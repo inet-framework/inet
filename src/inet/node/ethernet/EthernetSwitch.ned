@@ -31,7 +31,7 @@ import inet.linklayer.contract.ISpanningTree;
 import inet.linklayer.ethernet.contract.IEthernetLayer;
 import inet.linklayer.ieee8021q.IIeee8021qLayer;
 import inet.linklayer.ieee8021r.IIeee8021rLayer;
-import inet.linklayer.ieee8022.Ieee8022Llc;
+import inet.linklayer.ieee8022.IIeee8022Llc;
 import inet.networklayer.common.InterfaceTable;
 import inet.protocolelement.contract.IProtocolLayer;
 
@@ -94,7 +94,7 @@ module EthernetSwitch
         }
         gptp: <default("Gptp")> like IApp if hasGptp {
             @display("p=700,75");
-	        gptpNodeType = default("BRIDGE_NODE"); // @enum("gptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE
+            gptpNodeType = default("BRIDGE_NODE"); // @enum("gptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE
         }
         app[numApps]: <> like IApp {
             parameters:
@@ -103,7 +103,7 @@ module EthernetSwitch
         sc: MessageDispatcher {
             @display("p=800,150;b=1200,5");
         }
-        llc: Ieee8022Llc {
+        llc: <default("Ieee8022Llc")> like IIeee8022Llc if typename != "" {
             @display("p=700,225");
         }
         cb: MessageDispatcher {
@@ -151,14 +151,14 @@ module EthernetSwitch
         bl.out++ --> li.in++;
         li.out++ --> bl.in++;
 
-        llc.upperLayerOut --> sc.in++;
-        sc.out++ --> llc.upperLayerIn;
+        llc.upperLayerOut --> sc.in++ if exists(llc);
+        sc.out++ --> llc.upperLayerIn if exists(llc);
 
         sc.out++ --> cb.in++;
         cb.out++ --> sc.in++;
 
-        cb.out++ --> llc.lowerLayerIn;
-        llc.lowerLayerOut --> cb.in++;
+        cb.out++ --> llc.lowerLayerIn if exists(llc);
+        llc.lowerLayerOut --> cb.in++ if exists(llc);
 
         cb.out++ --> bridging.upperLayerIn;
         bridging.upperLayerOut --> cb.in++;
