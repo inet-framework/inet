@@ -51,10 +51,12 @@ cGate *StreamEncoder::getRegistrationForwardingGate(cGate *gate)
 
 void StreamEncoder::processPacket(Packet *packet)
 {
-    auto streamReq = packet->getTag<StreamReq>();
-    auto streamName = streamReq->getStreamName();
-    auto vlanId = streamNameToVlanIdMapping->get(streamName).intValue();
-    packet->addTagIfAbsent<VlanReq>()->setVlanId(vlanId);
+    auto streamReq = packet->findTag<StreamReq>();
+    if (streamReq != nullptr) {
+        auto streamName = streamReq->getStreamName();
+        auto vlanId = streamNameToVlanIdMapping->get(streamName).intValue();
+        packet->addTagIfAbsent<VlanReq>()->setVlanId(vlanId);
+    }
 }
 
 } // namespace inet

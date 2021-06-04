@@ -54,35 +54,41 @@ cGate *StreamMerger::getRegistrationForwardingGate(cGate *gate)
 
 void StreamMerger::processPacket(Packet *packet)
 {
-    const auto& streamInd = packet->getTag<StreamInd>();
-    auto inputStreamName = streamInd->getStreamName();
-    if (streamMapping->containsKey(inputStreamName)) {
-        auto outputStreamName = streamMapping->get(inputStreamName).stringValue();
-        auto& it = sequenceNumbers[outputStreamName];
-        it.push_back(packet->getTag<SequenceNumberInd>()->getSequenceNumber());
-        if (it.size() > bufferSize)
-            it.erase(it.begin(), it.begin() + it.size() - bufferSize);
-        if (*outputStreamName != '\0')
-            packet->getTagForUpdate<StreamInd>()->setStreamName(outputStreamName);
-        else {
-            packet->removeTag<StreamInd>();
-            packet->removeTag<SequenceNumberInd>();
+    const auto& streamInd = packet->findTag<StreamInd>();
+    if (streamInd != nullptr) {
+        auto inputStreamName = streamInd->getStreamName();
+        if (streamMapping->containsKey(inputStreamName)) {
+            auto outputStreamName = streamMapping->get(inputStreamName).stringValue();
+            auto& it = sequenceNumbers[outputStreamName];
+            it.push_back(packet->getTag<SequenceNumberInd>()->getSequenceNumber());
+            if (it.size() > bufferSize)
+                it.erase(it.begin(), it.begin() + it.size() - bufferSize);
+            if (*outputStreamName != '\0')
+                packet->getTagForUpdate<StreamInd>()->setStreamName(outputStreamName);
+            else {
+                packet->removeTag<StreamInd>();
+                packet->removeTag<SequenceNumberInd>();
+            }
         }
     }
 }
 
 bool StreamMerger::matchesPacket(const Packet *packet) const
 {
-    const auto& streamInd = packet->getTag<StreamInd>();
-    auto inputStreamName = streamInd->getStreamName();
-    if (!streamMapping->containsKey(inputStreamName))
+    const auto& streamInd = packet->findTag<StreamInd>();
+    if (streamInd == nullptr)
         return true;
     else {
-        auto outputStreamName = streamMapping->get(inputStreamName).stringValue();
-        if (!matchesInputStream(inputStreamName))
-            throw cRuntimeError("Unknown stream");
-        else
-            return matchesSequenceNumber(outputStreamName, packet->getTag<SequenceNumberInd>()->getSequenceNumber());
+        auto inputStreamName = streamInd->getStreamName();
+        if (!streamMapping->containsKey(inputStreamName))
+            return true;
+        else {
+            auto outputStreamName = streamMapping->get(inputStreamName).stringValue();
+            if (!matchesInputStream(inputStreamName))
+                throw cRuntimeError("Unknown stream");
+            else
+                return matchesSequenceNumber(outputStreamName, packet->getTag<SequenceNumberInd>()->getSequenceNumber());
+        }
     }
 }
 

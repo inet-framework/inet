@@ -55,19 +55,21 @@ cGate *StreamDecoder::getRegistrationForwardingGate(cGate *gate)
 
 void StreamDecoder::processPacket(Packet *packet)
 {
-    auto vlanInd = packet->getTag<VlanInd>();
-    auto interfaceInd = packet->getTag<InterfaceInd>();
-    auto interfaceName = interfaceTable->getInterfaceById(interfaceInd->getInterfaceId())->getInterfaceName();
-    for (int i = 0; i < streamMappings->size(); i++) {
-        auto streamMapping = check_and_cast<cValueMap *>(streamMappings->get(i).objectValue());
-        auto interfaceNamePattern = streamMapping->containsKey("interface") ? streamMapping->get("interface").stringValue() : "*";
-        auto vlanId = streamMapping->containsKey("vlan") ? std::to_string(streamMapping->get("vlan").intValue()) : "*";
-        cPatternMatcher interfaceNameMatcher;
-        interfaceNameMatcher.setPattern(interfaceNamePattern, false, false, false);
-        if (interfaceNameMatcher.matches(interfaceName) && vlanId == std::to_string(vlanInd->getVlanId())) {
-            auto streamName = streamMapping->get("stream");
-            packet->addTag<StreamInd>()->setStreamName(streamName);
-            break;
+    auto vlanInd = packet->findTag<VlanInd>();
+    if (vlanInd != nullptr) {
+        auto interfaceInd = packet->getTag<InterfaceInd>();
+        auto interfaceName = interfaceTable->getInterfaceById(interfaceInd->getInterfaceId())->getInterfaceName();
+        for (int i = 0; i < streamMappings->size(); i++) {
+            auto streamMapping = check_and_cast<cValueMap *>(streamMappings->get(i).objectValue());
+            auto interfaceNamePattern = streamMapping->containsKey("interface") ? streamMapping->get("interface").stringValue() : "*";
+            auto vlanId = streamMapping->containsKey("vlan") ? std::to_string(streamMapping->get("vlan").intValue()) : "*";
+            cPatternMatcher interfaceNameMatcher;
+            interfaceNameMatcher.setPattern(interfaceNamePattern, false, false, false);
+            if (interfaceNameMatcher.matches(interfaceName) && vlanId == std::to_string(vlanInd->getVlanId())) {
+                auto streamName = streamMapping->get("stream");
+                packet->addTag<StreamInd>()->setStreamName(streamName);
+                break;
+            }
         }
     }
     handlePacketProcessed(packet);
