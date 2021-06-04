@@ -18,6 +18,7 @@
 package inet.linklayer.ethernet.basic;
 
 import inet.linklayer.ethernet.contract.IEthernetEncapsulation;
+import inet.linklayer.ieee8022.Ieee8022Llc;
 
 //
 // Performs Ethernet II or Ethernet with LLC/SNAP encapsulation/decapsulation.
@@ -40,16 +41,16 @@ import inet.linklayer.ethernet.contract.IEthernetEncapsulation;
 //   higher layers. Accepts ~EthernetMacHeader, ~Ieee8022LlcHeader, and
 //   ~Ieee8022LlcSnapHeader too.
 //
-simple EthernetEncapsulation like IEthernetEncapsulation
+simple EthernetEncapsulation extends Ieee8022Llc like IEthernetEncapsulation
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         bool useSNAP = default(false);  // create EtherFrameWithSNAP frames instead of EthernetIIFrame
         string fcsMode @enum("declared","computed");
-        bool registerProtocol = default(false);     //FIXME //KLUDGE should redesign place of EthernetEncapsulation and LLC modules
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
+        @class(EthernetEncapsulation);
         @display("i=block/square");
         @signal[encapPk](type=cPacket);
         @signal[decapPk](type=cPacket);
@@ -58,10 +59,5 @@ simple EthernetEncapsulation like IEthernetEncapsulation
         @statistic[encapPk](title="packets encapsulated"; source=encapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[decapPk](title="packets decapsulated"; source=decapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[pauseSent](title="pause sent"; record=count,sum,vector);
-    gates:
-        input upperLayerIn @labels(Ieee802Ctrl/down); // higher layer
-        output upperLayerOut @labels(Ieee802Ctrl/up); // higher layer
-        input lowerLayerIn @labels(EtherFrame);   // to Ethernet MAC
-        output lowerLayerOut @labels(EtherFrame); // to Ethernet MAC
 }
 
