@@ -163,7 +163,7 @@ void GateSchedulingConfiguratorBase::addFlows(Input& input) const
                     int priority = entry->get("priority").intValue();
                     b packetLength = b(entry->get("packetLength").doubleValueInUnit("b"));
                     simtime_t packetInterval = entry->get("packetInterval").doubleValueInUnit("s");
-                    simtime_t maxLatency = entry->get("maxLatency").doubleValueInUnit("s");
+                    simtime_t maxLatency = entry->containsKey("maxLatency") ? entry->get("maxLatency").doubleValueInUnit("s") : -1;
                     bps datarate = packetLength / s(packetInterval.dbl());
                     auto startDevice = input.getDevice(source);
                     auto endDevice = input.getDevice(destination);
