@@ -33,16 +33,32 @@ void EthernetSocketIo::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        const char *localAddressString = par("localAddress");
-        if (*localAddressString != '\0')
-            localAddress = MacAddress(localAddressString);
-        const char *remoteAddressString = par("remoteAddress");
-        if (*remoteAddressString != '\0')
-            remoteAddress = MacAddress(remoteAddressString);
         numSent = 0;
         numReceived = 0;
         WATCH(numSent);
         WATCH(numReceived);
+    }
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION + 1) {
+        const char *localAddressString = par("localAddress");
+        if (*localAddressString != '\0') {
+            L3Address l3Address;
+            L3AddressResolver addressResolver;
+            addressResolver.tryResolve(localAddressString, l3Address, L3AddressResolver::ADDR_MAC);
+            if (l3Address.getType() == L3Address::MAC)
+                localAddress = l3Address.toMac();
+            else
+                localAddress = MacAddress(localAddressString);
+        }
+        const char *remoteAddressString = par("remoteAddress");
+        if (*remoteAddressString != '\0') {
+            L3Address l3Address;
+            L3AddressResolver addressResolver;
+            addressResolver.tryResolve(remoteAddressString, l3Address, L3AddressResolver::ADDR_MAC);
+            if (l3Address.getType() == L3Address::MAC)
+                remoteAddress = l3Address.toMac();
+            else
+                remoteAddress = MacAddress(remoteAddressString);
+        }
     }
 }
 
