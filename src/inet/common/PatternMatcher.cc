@@ -235,7 +235,7 @@ std::string PatternMatcher::debugStrFrom(int from)
     return result;
 }
 
-bool PatternMatcher::isInSet(char c, const char *set)
+bool PatternMatcher::isInSet(char c, const char *set) const
 {
     ASSERT((strlen(set) & 1) == 0);
     if (!iscasesensitive)
@@ -248,10 +248,10 @@ bool PatternMatcher::isInSet(char c, const char *set)
     return false;
 }
 
-bool PatternMatcher::doMatch(const char *s, int k, int suffixlen)
+bool PatternMatcher::doMatch(const char *s, int k, int suffixlen) const
 {
     while (true) {
-        Elem& e = pattern[k];
+        const Elem& e = pattern[k];
         long num; // case NUMRANGE
         int len; // case LITERALSTRING
         switch (e.type) {
@@ -345,7 +345,7 @@ bool PatternMatcher::doMatch(const char *s, int k, int suffixlen)
     }
 }
 
-bool PatternMatcher::matches(const char *line)
+bool PatternMatcher::matches(const char *line) const
 {
     ASSERT(pattern[pattern.size() - 1].type == END);
 
@@ -356,7 +356,7 @@ bool PatternMatcher::matches(const char *line)
     // case. omnetpp.ini is case sensitive.)
 
     if (pattern.size() >= 2 && iscasesensitive) {
-        Elem& e = pattern[pattern.size() - 2];
+        const Elem& e = pattern[pattern.size() - 2];
         if (e.type == LITERALSTRING) {
             // return if last 2 chars don't match
             int pattlen = e.literalstring.size();

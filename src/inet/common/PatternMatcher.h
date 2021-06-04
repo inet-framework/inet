@@ -109,9 +109,9 @@ class INET_API PatternMatcher
     void parseLiteralString(const char *& s, Elem& e);
     bool parseNumRange(const char *& str, char closingchar, long& lo, long& up);
     std::string debugStrFrom(int from);
-    bool isInSet(char c, const char *set);
+    bool isInSet(char c, const char *set) const;
     // match line from pattern[patternpos]; with last string literal, ignore last suffixlen of pattern
-    bool doMatch(const char *line, int patternpos, int suffixlen);
+    bool doMatch(const char *line, int patternpos, int suffixlen) const;
 
   public:
     /**
@@ -140,7 +140,7 @@ class INET_API PatternMatcher
      * Returns true if the line matches the pattern with the given settings.
      * See setPattern().
      */
-    bool matches(const char *line);
+    bool matches(const char *line) const;
 
     /**
      * Similar to matches(): it returns non-nullptr iif (1) the pattern ends in
