@@ -25,11 +25,6 @@ namespace queueing {
 
 class INET_API TokenBasedServer : public PacketServerBase
 {
-  public:
-    static simsignal_t tokensAddedSignal;
-    static simsignal_t tokensRemovedSignal;
-    static simsignal_t tokensDepletedSignal;
-
   protected:
     cPar *tokenConsumptionPerPacketParameter = nullptr;
     cPar *tokenConsumptionPerBitParameter = nullptr;

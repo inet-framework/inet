@@ -114,6 +114,11 @@ simsignal_t transmissionEndedSignal = cComponent::registerSignal("transmissionEn
 simsignal_t receptionStartedSignal = cComponent::registerSignal("receptionStarted");
 simsignal_t receptionEndedSignal = cComponent::registerSignal("receptionEnded");
 
+simsignal_t tokensChangedSignal = cComponent::registerSignal("tokensChanged");
+simsignal_t tokensAddedSignal = cComponent::registerSignal("tokensAdded");
+simsignal_t tokensRemovedSignal = cComponent::registerSignal("tokensRemoved");
+simsignal_t tokensDepletedSignal = cComponent::registerSignal("tokensDepleted");
+
 void printSignalBanner(simsignal_t signalID, const cObject *obj, const cObject *details)
 {
     EV << "** Signal at T=" << simTime()
