@@ -82,6 +82,14 @@ void EthernetSocketIo::refreshDisplay() const
 void EthernetSocketIo::setSocketOptions()
 {
     socket.setCallback(this);
+    const char *interface = par("interface");
+    if (interface[0] != '\0') {
+        auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        auto networkInterface = interfaceTable->findInterfaceByName(interface);
+        if (networkInterface == nullptr)
+            throw cRuntimeError("Cannot find network interface");
+        socket.setNetworkInterface(networkInterface);
+    }
 }
 
 void EthernetSocketIo::socketDataArrived(EthernetSocket *socket, Packet *packet)
