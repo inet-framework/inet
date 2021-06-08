@@ -20,7 +20,5 @@ Planned Showcases:
 -Neuralnetworkerrormodel -> training data generation, training, error model generation -> include these
 -Timing measurement and packet flows and packet events
 -Time sensitive Ethernet:
- -preemption
- -cut-through
  -gating
  -VLAN
