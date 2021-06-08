@@ -17,9 +17,9 @@ Ethernet VLANs are created by assigning VLAN IDs to Ethernet frames. Each frame 
 
 .. **TODO** 802.1q nem header hanem tag...link a megfelelo message fileba 8021qtagheader.msg -> itt le van dokumentalva
 
-VLAN IDs are assigned by adding a VLAN tag (or 802.1Q tag) to Ethernet frames. This tag contains the VLAN ID. (For more information, see the Ieee8021qTagHeader.msg file).
+VLAN IDs are assigned by adding a VLAN tag (or 802.1Q tag) to Ethernet frames. This tag contains the VLAN ID. (For more information, see the Ieee8021qTagHeader.msg file). **TODO** link
 
-.. note:: The VLAN mechanism removes connections from a physical network (by filtering packets at the data link layer), but cannot create new connections. 
+.. note:: VLAN connections are a subset of the physical connections in the network.  
 
 INET's VLAN support
 -------------------
@@ -27,44 +27,76 @@ INET's VLAN support
 Overview
 ~~~~~~~~
 
-In INET, various modules (such as apps, interfaces and policy submodules) can add a VLAN tag request to packets. The actual VLAN tag is then added by a 802.1q submodule (:ned:`Ieee8021qProtocol`). Its possible that a VLAN tag request is added in one network node and the VLAN tag is added in another (e.g. an app in a host adds request, the 802.1q submodule in a switch adds tag).
+   In INET, various modules (such as apps, interfaces and policy submodules) can add a VLAN tag request (:cc:`VlanReq`) to packets. The actual VLAN tag is then added by the 802.1q submodule (:ned:`Ieee8021qProtocol`) in the same network node. 
 
-Some interfaces of the network need to be VLAN-aware, i.e. be able to understand 802.1q headers.
-These are `outgoing` interfaces that either filter packets based on VLAN ID, or map VLAN IDs on packets.
-Interfaces in the network without VLAN-awareness can still forward packets with 802.1q headers.
+   Some interfaces of the network need to be VLAN-aware, i.e. be able to understand 802.1q headers.
+   These are `outgoing` interfaces that either filter packets based on VLAN ID, or map VLAN IDs on packets.
+   Interfaces in the network without VLAN-awareness can still forward packets with 802.1q headers.
 
-The requirements for an interface to be VLAN-aware are the following:
+   The requirements for an interface to be VLAN-aware are the following:
 
-- The containing network node needs to be set to have a 802.1q submodule:
+   - The containing network node needs to be set to have a 802.1q submodule:
 
-  ``*.switch.ieee8021q.typename = "Ieee8021qProtocol"``
+   ``*.switch.ieee8021q.typename = "Ieee8021qProtocol"``
 
-- The interface needs to be set to connect to the 802.1q submodule:
+   - The interface needs to be set to connect to the 802.1q submodule:
 
-  ``*.switch.eth[0].protocol = "ieee8021qctag"``
+   ``*.switch.eth[0].protocol = "ieee8021qctag"``
 
-Specifying the :par:`protocol` parameter configures the interface to use the protocol services of the 802.1q module, i.e. to send packets coming from higher layers to the 802.1q module. The module can add a 802.1q header if the packet doesn't already have one.
+   Specifying the :par:`protocol` parameter configures the interface to use the protocol services of the 802.1q module, i.e. to send packets coming from higher layers to the 802.1q module. The module can add a 802.1q header if the packet doesn't already have one.
 
-Several VLAN schemes/configurations are possible with INET's Ethernet model. For example, as demonstrated in this showcase, VLAN IDs can be assigned by a host's interface or in an Ethernet switch. Some other possibilities are the following:
+   Several VLAN schemes/configurations are possible with INET's Ethernet model. For example, as demonstrated in this showcase, VLAN IDs can be assigned by a host's interface or in an Ethernet switch. Some other possibilities are the following:
 
-- Assigning VLAN IDs in a network node's 802.1q submodule
-- Different VLAN IDs for different traffic directions
-- VLAN Double tagging
+   - Assigning VLAN IDs in a network node's 802.1q submodule
+   - Different VLAN IDs for different traffic directions
+   - VLAN Double tagging
 
-For more examples, check out ``inet/examples/ethernet/vlan``.
+   For more examples, check out ``inet/examples/ethernet/vlan``.
+
+ **TODO** this shouldnt work like this
+
+VLAN use cases
+~~~~~~~~~~~~~~
+
+**TODO** :cc:`VlanReq` everywhere (no VLAN req)
+
+from the perspective of the use cases:
+
+- simplest case: packet receives VLAN ID in application, travels the VLAN to its destination (has the same VLAN ID)
+- second: packet is sent by application (app doesnt know about VLAN). Virtual interface adds VLAN ID, travels the VLAN to its destination (has the same VLAN ID)
+- third: host sends packet (host doesnt know about VLAN). Arrives at first switch, switchs adds VLAN ID. Last switch removes VLAN ID -> need VLAN policy in switch
+- forth: host sends packet (host doesnt know about VLAN). complex network with several subnetworks. VLAN ID changes (packet goes from one VLAN to another) -> need VLAN policy in switch
+
+**TODO** Introduce VLAN policy
+
+   Typically applications and virtual interfaces can add a certain VLAN ID :cc:`VlanReq` to packets 
+   Various modules in hosts can assign a specific VLAN ID to packets, such as apps and virtual interfaces.
+   Howeever, for VLANs to be more complex, we can set up policies that govern how packets are assigned to VLANs.
+   In Ethernet switches, VLAN policies specify how to filter and re-map VLAN IDs on packets, based on incoming and outgoing interfaces.
 
 Creating VLAN policies
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Various modules in hosts can assign a specific VLAN ID to packets, such as apps and interfaces.
-Howeever, for VLANs to be more complex, we can set up policies that govern how packets are assigned to VLANs.
-In Ethernet switches, VLAN policies specify how to filter and re-map VLAN IDs on packets, based on incoming and outgoing interfaces.
-
-VLAN policies can be created using the :ned:`VlanPolicyLayer` submodule, which is an optional submodule of the bridging layer in :ned:`EthernetSwitch`. (The bridging layer contains optional submodules such as **TODO**)
+VLAN policies can be configured using the :ned:`VlanPolicyLayer` submodule, which is an optional submodule of the bridging layer in :ned:`EthernetSwitch`. (The bridging layer contains optional submodules such as **TODO**)
 
 To add a :ned:`VlanPolicyLayer` to :ned:`EthernetSwitch`, set the ``bridging`` submodule's type in the switch to :ned:`Bridging`, then the ``vlanPolicy`` submodule's type to :ned:`VlanPolicyLayer` in the briding module.
 
-The :ned:`VlanPolicyLayer` module can filter packets based on VLAN tags, and modify VLAN tags on packets. The policy module has four optional submodules: a `mapper` and a `filter` module, for each traffic direction (inbound/outbound). By default, the module has the following submodules:
+bridgingben amikor visszakanyarodik a csomag -> ind becomes req (incoming -> outgoing)(typically ind -> req)
+
+Policy introduction: Policy filters incoming packets based on VLAN ID.... -> incoming mapper -> change the VLAN ID so it appears to have come from that VLAN ID
+
+-> it can change and filter VLAN IDs
+
+VLAN Policy can filter out incoming and outgoing packets based on their VLAN ID, and optionally can also change the packets' VLAN ID. (VLAN ID in this case is some metainformation attached to the packet, in contrast to the actual 802.1Q tag VLAN ID field).
+
+**TODO** What is VLanInd and VlanReq; who puts it on the packets (ind: 802.1Q tag processing, e.g. :ned:`Ieee8021qTagEpdHeaderChecker`).
+
+VlanReq is typically added by an applications, a virtual interface, or the bridging (forwarding component in the bridging layer (which makes ind -> req turn-around);
+but in general any component/protocol can.
+
+VlanInd is typically added by the header...
+
+The :ned:`VlanPolicyLayer` module can filter incoming packets based on :cc:`VlanInd`, and outgoing packets based on :cc:`VlanReq`. It can also modify :cc:`VlanInd` and :cc:`VlanReq` on packets. The policy module has four optional submodules: a `mapper` and a `filter` module, for each traffic direction (inbound/outbound). By default, the module has the following submodules:
 
 .. figure:: media/policy.png
    :align: center
