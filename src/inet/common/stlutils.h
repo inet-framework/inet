@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2012 OpenSim Ltd.
+// Copyright (C) 2021 OpenSim Ltd.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
@@ -19,10 +19,13 @@
 #define __INET_STLUTILS_H
 
 // various utility functions to make STL containers more usable
+// (Copy of omnetpp stlutil.h)
 
 #include <algorithm>
 #include <map>
 #include <set>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "inet/common/INETDefs.h" // for ASSERT
@@ -42,8 +45,9 @@ typename std::set<T>& addAll(std::set<T>& s, const std::set<T>& t) {
 }
 
 template<typename K, typename V>
-inline std::map<K, V>& addAll(std::map<K, V>& m, const std::map<K, V>& n) {
+inline std::map<K,V>& addAll(std::map<K,V>& m, const std::map<K,V>& n) {
     m.insert(n.begin(), n.end());
+    return m;
 }
 
 template<typename T>
@@ -72,8 +76,23 @@ inline bool contains(const std::vector<T>& v, const T& a) {
     return find(v, a) != v.end();
 }
 
+template<typename T>
+inline bool contains(const std::set<T>& s, const T& a) {
+    return s.find(a) != s.end();
+}
+
+template<typename T>
+inline bool contains(const std::unordered_set<T>& s, const T& a) {
+    return s.find(a) != s.end();
+}
+
 template<typename K, typename V>
-inline bool containsKey(const std::map<K, V>& m, const K& a) {
+inline bool containsKey(const std::map<K,V>& m, const K& a) {
+    return m.find(a) != m.end();
+}
+
+template<typename K, typename V>
+inline bool containsKey(const std::unordered_map<K,V>& m, const K& a) {
     return m.find(a) != m.end();
 }
 
@@ -91,11 +110,12 @@ void erase(std::vector<T>& v, int pos) {
 
 template<typename T, typename A>
 inline void remove(std::vector<T>& v, const A& a) {
-    v.erase(std::remove(v.begin(), v.end(), a), v.end());
+    if (!v.empty()) // optimization
+        v.erase(std::remove(v.begin(), v.end(), a), v.end());
 }
 
 template<typename K, typename V>
-inline std::vector<K> keys(const std::map<K, V>& m) {
+inline std::vector<K> keys(const std::map<K,V>& m) {
     std::vector<K> result;
     for (auto it = m.begin(); it != m.end(); ++it)
         result.push_back(it->first);
@@ -103,7 +123,7 @@ inline std::vector<K> keys(const std::map<K, V>& m) {
 }
 
 template<typename K, typename V>
-inline std::vector<V> values(const std::map<K, V>& m) {
+inline std::vector<V> values(const std::map<K,V>& m) {
     std::vector<V> result;
     for (auto it = m.begin(); it != m.end(); ++it)
         result.push_back(it->second);
@@ -122,7 +142,7 @@ std::vector<T> sorted(const std::vector<T>& v) {
     return result;
 }
 
-template<typename T>
+template <typename T>
 std::string to_str(const std::vector<T>& v) {
     std::stringstream out;
     out << '[';
@@ -135,8 +155,8 @@ std::string to_str(const std::vector<T>& v) {
     return out.str();
 }
 
-template<typename K, typename V>
-std::string to_str(const std::map<K, V>& m) {
+template <typename K, typename V>
+std::string to_str(const std::map<K,V>& m) {
     std::stringstream out;
     out << '{';
     for (auto it = m.begin(); it != m.end(); ++it) {
@@ -147,6 +167,21 @@ std::string to_str(const std::map<K, V>& m) {
     out << "}";
     return out.str();
 }
+
+template <class T>
+inline void hash_combine(std::size_t& seed, const T& v) // from boost
+{
+    std::hash<T> hasher;
+    seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+}
+
+struct pair_hash
+{
+    template <class T1, class T2>
+    std::size_t operator() (const std::pair<T1, T2> &pair) const {
+        return std::hash<T1>()(pair.first) ^ std::hash<T2>()(pair.second); // combining could be more sophisticated
+    }
+};
 
 } // namespace inet
 
