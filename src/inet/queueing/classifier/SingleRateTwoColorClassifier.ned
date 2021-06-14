@@ -22,6 +22,8 @@ simple SingleRateTwoColorClassifier extends TokenBucketClassifier
     parameters:
         double cir @unit(bps); // committed information rate
         int cbs @unit(b); // committed burst size
-        maxNumTokens = cbs;
-        tokenProductionRate = cir;
+        int bitsPerToken = default(8); // how many bits are represented by 1 token
+        tokenConsumptionPerBit = default(1 / bitsPerToken);
+        maxNumTokens = dropUnit(cbs) / bitsPerToken;
+        tokenProductionRate = dropUnit(cir) / bitsPerToken;
 }
