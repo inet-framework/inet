@@ -50,17 +50,15 @@ class INET_API MultiTokenBucketMixin : public T, public ITokenStorage
         T::initialize(stage);
         if (stage == INITSTAGE_LOCAL) {
             cValueArray *bucketConfigurations = check_and_cast<cValueArray*>(T::par("buckets").objectValue());
-            TokenBucket *previousTokenBucket = nullptr;
-            for (int i = bucketConfigurations->size() - 1; i >= 0; i--) {
+            tokenBuckets.resize(bucketConfigurations->size());
+            for (int i = 0; i < bucketConfigurations->size(); i++) {
                 cValueMap *bucketConfiguration = check_and_cast<cValueMap*>(bucketConfigurations->get(i).objectValue());
-                double numTokens = bucketConfiguration->containsKey("initialNumTokens") ? bucketConfiguration->get("initialNumTokens").intValue() : 0;
-                double maxNumTokens = bucketConfiguration->containsKey("maxNumTokens") ? bucketConfiguration->get("maxNumTokens").intValue() : -1;
+                double numTokens = bucketConfiguration->containsKey("initialNumTokens") ? bucketConfiguration->get("initialNumTokens").doubleValue() : 0;
+                double maxNumTokens = bucketConfiguration->containsKey("maxNumTokens") ? bucketConfiguration->get("maxNumTokens").doubleValue() : -1;
                 double tokenProductionRate = bucketConfiguration->get("tokenProductionRate");
-                auto excessTokenModule = bucketConfiguration->containsKey("excessTokenModule") ? getExcessTokenStorage(bucketConfiguration->get("excessTokenModule")) : previousTokenBucket;
-                tokenBuckets.push_back(TokenBucket(numTokens, maxNumTokens, tokenProductionRate, excessTokenModule));
-                previousTokenBucket = &tokenBuckets.back();
+                auto excessTokenStorage = bucketConfiguration->containsKey("excessTokenModule") ? getExcessTokenStorage(bucketConfiguration->get("excessTokenModule")) : (i < bucketConfigurations->size() - 1 ? &tokenBuckets[i + 1] : nullptr);
+                tokenBuckets[i] = (TokenBucket(numTokens, maxNumTokens, tokenProductionRate, excessTokenStorage));
             }
-            std::reverse(tokenBuckets.begin(), tokenBuckets.end());
             WATCH_VECTOR(tokenBuckets);
         }
         else if (stage == INITSTAGE_QUEUEING)
