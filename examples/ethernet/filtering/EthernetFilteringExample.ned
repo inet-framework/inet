@@ -15,9 +15,9 @@
 
 package inet.examples.ethernet.filtering;
 
-import inet.linklayer.ieee8021q.Ieee8021qciFilter;
 import inet.protocolelement.redundancy.StreamIdentifier;
 import inet.queueing.common.PacketMultiplexer;
+import inet.queueing.contract.IPacketFilter;
 import inet.queueing.sink.PassivePacketSink;
 import inet.queueing.source.ActivePacketSource;
 
@@ -35,7 +35,7 @@ network EthernetFilteringExample
         identifier: StreamIdentifier {
             @display("p=500,100");
         }
-        filter: Ieee8021qciFilter {
+        filter: <default("SimpleIeee8021qciFilter")> like IPacketFilter {
             @display("p=700,100");
         }
         sink: PassivePacketSink {
