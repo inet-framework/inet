@@ -22,7 +22,7 @@ namespace queueing {
 
 TokenBucket::TokenBucket(double numTokens, double maxNumTokens, double tokenProductionRate, ITokenStorage *excessTokenStorage) :
     maxNumTokens(maxNumTokens),
-    internalTokenProductionRate(tokenProductionRate),
+    tokenProductionRate(tokenProductionRate),
     excessTokenStorage(excessTokenStorage)
 {
     addTokens(numTokens);
@@ -36,12 +36,13 @@ double TokenBucket::getNumTokens() const
 
 void TokenBucket::addTokens(double addedNumTokens)
 {
+    ASSERT(addedNumTokens >= 0);
     numTokens += addedNumTokens;
     if (maxNumTokens > 0 && numTokens >= maxNumTokens) {
         if (excessTokenStorage != nullptr) {
-            excessTokenStorage->addTokens(maxNumTokens - numTokens);
-            excessTokenStorage->addTokenProductionRate(getTokenProductionRate() - excessTokenProductionRate);
-            excessTokenProductionRate = getTokenProductionRate();
+            excessTokenStorage->addTokens(numTokens - maxNumTokens);
+            excessTokenStorage->addTokenProductionRate(tokenProductionRate - excessTokenProductionRate);
+            excessTokenProductionRate = tokenProductionRate;
         }
         numTokens = maxNumTokens;
     }
@@ -49,8 +50,11 @@ void TokenBucket::addTokens(double addedNumTokens)
 
 void TokenBucket::removeTokens(double removedNumTokens)
 {
-    if (numTokens == maxNumTokens && excessTokenStorage != nullptr)
+    ASSERT(removedNumTokens >= 0);
+    if (numTokens == maxNumTokens && excessTokenStorage != nullptr) {
         excessTokenStorage->removeTokenProductionRate(excessTokenProductionRate);
+        excessTokenProductionRate = 0;
+    }
     if (numTokens < removedNumTokens)
         throw cRuntimeError("Insufficient number of tokens");
     numTokens -= removedNumTokens;
@@ -58,33 +62,35 @@ void TokenBucket::removeTokens(double removedNumTokens)
 
 void TokenBucket::addTokenProductionRate(double tokenRate)
 {
+    ASSERT(tokenRate >= 0);
     if (numTokens == maxNumTokens) {
         if (excessTokenStorage != nullptr) {
             excessTokenStorage->addTokenProductionRate(tokenRate);
             excessTokenProductionRate += tokenRate;
         }
     }
-    else
-        externalTokenProductionRate += tokenRate;
+    tokenProductionRate += tokenRate;
+    ASSERT(tokenProductionRate >= 0);
 }
 
 void TokenBucket::removeTokenProductionRate(double tokenRate)
 {
+    ASSERT(tokenRate >= 0);
     if (numTokens == maxNumTokens) {
         if (excessTokenStorage != nullptr) {
             excessTokenStorage->removeTokenProductionRate(tokenRate);
             excessTokenProductionRate -= tokenRate;
         }
     }
-    else
-        externalTokenProductionRate -= tokenRate;
+    tokenProductionRate -= tokenRate;
+    ASSERT(tokenProductionRate >= 0);
 }
 
 simtime_t TokenBucket::getOverflowTime()
 {
     double numTokens = getNumTokens();
     if (maxNumTokens > 0 && maxNumTokens != numTokens) {
-        simtime_t overflowTime = simTime() + (maxNumTokens - numTokens) / (getTokenProductionRate());
+        simtime_t overflowTime = simTime() + (maxNumTokens - numTokens) / tokenProductionRate;
         return SimTime::fromRaw(overflowTime.raw() + 1);
     }
     else
@@ -95,20 +101,8 @@ void TokenBucket::updateNumTokens()
 {
     simtime_t now = simTime();
     simtime_t elapsedTime = now - lastUpdate;
-    addTokens(getTokenProductionRate() * elapsedTime.dbl());
+    addTokens(tokenProductionRate * elapsedTime.dbl());
     lastUpdate = now;
-}
-
-bool TokenBucket::putPacket(Packet *packet)
-{
-    updateNumTokens();
-    double packetNumTokens = b(packet->getDataLength()).get();
-    if (numTokens >= packetNumTokens) {
-        removeTokens(packetNumTokens);
-        return true;
-    }
-    else
-        return false;
 }
 
 } // namespace queueing
