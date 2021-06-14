@@ -33,6 +33,8 @@ simple TokenBucketMeter extends PacketMeterBase like IPacketMeter
         double initialNumTokens = default(0); // initial number of tokens in the bucket
         double maxNumTokens = default(inf); // maximum number of tokens in the bucket
         double tokenProductionRate; // the rate of internal token production per second
+        double tokenConsumptionPerPacket = default(0); // how many tokens are consumed per packet
+        double tokenConsumptionPerBit = default(1); // how many tokens are consumed per bit
         string label; // the label that is attached to packets if there are enough tokens in the bucket
         string defaultLabel = default(""); // the label that is attached to packets if there are not enouth tokens in the bucket, no label by default
         object labelPriority = default([]); // the list of labels in the order of priority, if specified packets can only be promoted in this order

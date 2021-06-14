@@ -19,16 +19,16 @@
 #define __INET_TOKENBUCKETMETER_H
 
 #include "inet/queueing/base/PacketMeterBase.h"
+#include "inet/queueing/base/TokenBucketMeterMixin.h"
 #include "inet/queueing/base/TokenBucketMixin.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API TokenBucketMeter : public TokenBucketMixin<PacketMeterBase>
+class INET_API TokenBucketMeter : public TokenBucketMeterMixin<TokenBucketMixin<PacketMeterBase>>
 {
   protected:
     const char *label = nullptr;
-    const char *defaultLabel = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
