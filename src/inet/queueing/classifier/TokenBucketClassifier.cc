@@ -22,11 +22,11 @@ namespace queueing {
 
 Define_Module(TokenBucketClassifier);
 
-template class TokenBucketMixin<PacketClassifierBase>;
+template class TokenBucketClassifierMixin<TokenBucketMixin<PacketClassifierBase>>;
 
 void TokenBucketClassifier::initialize(int stage)
 {
-    TokenBucketMixin<PacketClassifierBase>::initialize(stage);
+    TokenBucketClassifierMixin<TokenBucketMixin<PacketClassifierBase>>::initialize(stage);
     if (stage == INITSTAGE_QUEUEING) {
         if (outputGates.size() != 2)
             throw cRuntimeError("Number of output gates must be 2");
@@ -36,9 +36,10 @@ void TokenBucketClassifier::initialize(int stage)
 int TokenBucketClassifier::classifyPacket(Packet *packet)
 {
     emit(tokensChangedSignal, getNumTokens());
-    auto numTokens = b(packet->getDataLength()).get();
+    auto numTokens = getNumPacketTokens(packet);
     EV_DEBUG << "Checking tokens for packet" << EV_FIELD(numTokens) << EV_FIELD(tokenBucket) << EV_FIELD(packet) << EV_ENDL;
-    if (tokenBucket.putPacket(packet)) {
+    if (tokenBucket.getNumTokens() > numTokens) {
+        tokenBucket.removeTokens(numTokens);
         EV_INFO << "Removed tokens for packet" << EV_FIELD(numTokens) << EV_FIELD(tokenBucket) << EV_FIELD(packet) << EV_ENDL;
         emit(tokensChangedSignal, tokenBucket.getNumTokens());
         return 0;

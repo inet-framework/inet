@@ -22,11 +22,11 @@ namespace queueing {
 
 Define_Module(MultiTokenBucketClassifier);
 
-template class MultiTokenBucketMixin<PacketClassifierBase>;
+template class TokenBucketClassifierMixin<MultiTokenBucketMixin<PacketClassifierBase>>;
 
 void MultiTokenBucketClassifier::initialize(int stage)
 {
-    MultiTokenBucketMixin<PacketClassifierBase>::initialize(stage);
+    TokenBucketClassifierMixin<MultiTokenBucketMixin<PacketClassifierBase>>::initialize(stage);
     if (stage == INITSTAGE_QUEUEING) {
         if (tokenBuckets.size() != outputGates.size() - 1)
             throw cRuntimeError("Number of buckets must be 1 less than the number of output gates");
@@ -36,11 +36,12 @@ void MultiTokenBucketClassifier::initialize(int stage)
 int MultiTokenBucketClassifier::classifyPacket(Packet *packet)
 {
     emit(tokensChangedSignal, getNumTokens());
-    auto numTokens = b(packet->getDataLength()).get();
+    auto numTokens = getNumPacketTokens(packet);
     for (int i = 0; i < tokenBuckets.size(); i++) {
         auto& tokenBucket = tokenBuckets[i];
         EV_DEBUG << "Checking tokens for packet" << EV_FIELD(numTokens) << EV_FIELD(tokenBucket) << EV_FIELD(packet) << EV_ENDL;
-        if (tokenBucket.putPacket(packet)) {
+        if (tokenBucket.getNumTokens() > numTokens) {
+            tokenBucket.removeTokens(numTokens);
             EV_INFO << "Removed tokens from ith bucket for packet" << EV_FIELD(numTokens) << EV_FIELD(i) << EV_FIELD(tokenBucket) << EV_FIELD(packet) << EV_ENDL;
             emit(tokensChangedSignal, getNumTokens());
             return i;
