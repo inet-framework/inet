@@ -1,31 +1,24 @@
-INET 4.3 release TODO items:
+INET 4.4 release TODO items:
 
-1. Review
+1. Fix
 
- - Review new examples preemption, cutthrough, gating, and vlan.
- - Review socket table, socket command processor and socket packet processor components.
- - Review packet streaming API and implementation in all affected components.
- - Review all added components in protocol support model.
+ - Network interface protocol parameter should be replaced with a more flexible
+   approach because the current behavior cannot be used to send packets both
+   with and without IEEE 802.1Q tags on the same interface.
+
+2. Review
+
+ - Review new examples
+ - Review all added components.
  - Review folder names and module names.
 
-2. User's Guide
-
- - Add packet flow documentation.
- - Add packet events documentation.
- - Add timing measurement documentation.
-
-3. Developer's Guide 
-
- - Update packet API tags and region tags documentation with respect to shared pointers.
- - Extend packet API documentation with new packet data insertion, replace and update API.
-
-4. Release
+3. Release
 
  - Fix important bugs from github.
  - Merge important pull requests from github.
  - Complete WHATSNEW and ChangeLog.
 
-5. Testing
+4. Testing
 
  - Make all fingerprint, module, unit, packet, drill, queueing, protocol, and leak tests PASS.
 
