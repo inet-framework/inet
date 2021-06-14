@@ -36,6 +36,11 @@ void PacketProcessorBase::initialize(int stage)
         updateDisplayString();
 }
 
+void PacketProcessorBase::refreshDisplay() const
+{
+    updateDisplayString();
+}
+
 void PacketProcessorBase::handlePacketProcessed(Packet *packet)
 {
     numProcessedPackets++;
@@ -249,6 +254,7 @@ void PacketProcessorBase::animate(Packet *packet, cGate *gate, const SendOptions
         }
         envir->endSend(packet);
     }
+    envir->pausePoint();
 }
 
 void PacketProcessorBase::animatePacket(Packet *packet, cGate *gate, Action action) const
