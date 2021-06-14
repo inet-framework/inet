@@ -24,33 +24,31 @@ namespace queueing {
 
 Define_Module(TokenBucketMeter);
 
-template class TokenBucketMixin<PacketMeterBase>;
+template class TokenBucketMeterMixin<TokenBucketMixin<PacketMeterBase>>;
 
 void TokenBucketMeter::initialize(int stage)
 {
-    TokenBucketMixin<PacketMeterBase>::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    TokenBucketMeterMixin<TokenBucketMixin<PacketMeterBase>>::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
         label = par("label");
-        defaultLabel = par("defaultLabel");
-    }
 }
 
 void TokenBucketMeter::meterPacket(Packet *packet)
 {
     emit(tokensChangedSignal, getNumTokens());
-    auto numTokens = b(packet->getDataLength()).get();
+    auto numTokens = getNumPacketTokens(packet);
     EV_DEBUG << "Checking tokens for packet" << EV_FIELD(numTokens) << EV_FIELD(tokenBucket) << EV_FIELD(packet) << EV_ENDL;
-    if (tokenBucket.putPacket(packet)) {
+    if (tokenBucket.getNumTokens() >= numTokens) {
+        tokenBucket.removeTokens(numTokens);
         EV_INFO << "Removed tokens, labeling packet" << EV_FIELD(numTokens) << EV_FIELD(tokenBucket) << EV_FIELD(label) << EV_FIELD(packet) << EV_ENDL;
-        auto labelsTag = packet->addTagIfAbsent<LabelsTag>();
-        labelsTag->insertLabels(label);
+        labelPacket(packet, label);
         emit(tokensChangedSignal, tokenBucket.getNumTokens());
         rescheduleOverflowTimer();
     }
     else {
         EV_INFO << "Insufficient number of tokens for packet" << EV_FIELD(numTokens) << EV_FIELD(tokenBucket) << EV_FIELD(packet) << EV_ENDL;
         if (defaultLabel != nullptr)
-            packet->addTagIfAbsent<LabelsTag>()->insertLabels(defaultLabel);
+            labelPacket(packet, defaultLabel);
     }
 }
 

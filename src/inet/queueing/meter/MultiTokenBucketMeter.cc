@@ -24,18 +24,17 @@ namespace queueing {
 
 Define_Module(MultiTokenBucketMeter);
 
-template class MultiTokenBucketMixin<PacketMeterBase>;
+template class TokenBucketMeterMixin<MultiTokenBucketMixin<PacketMeterBase>>;
 
 void MultiTokenBucketMeter::initialize(int stage)
 {
-    MultiTokenBucketMixin<PacketMeterBase>::initialize(stage);
+    TokenBucketMeterMixin<MultiTokenBucketMixin<PacketMeterBase>>::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         cValueArray *bucketConfigurations = check_and_cast<cValueArray *>(par("buckets").objectValue());
         for (int i = 0; i < bucketConfigurations->size(); i++) {
             cValueMap *bucketConfiguration = check_and_cast<cValueMap *>(bucketConfigurations->get(i).objectValue());
             labels.push_back(bucketConfiguration->get("label").stringValue());
         }
-        defaultLabel = par("defaultLabel");
         WATCH_VECTOR(tokenBuckets);
     }
 }
@@ -43,11 +42,12 @@ void MultiTokenBucketMeter::initialize(int stage)
 void MultiTokenBucketMeter::meterPacket(Packet *packet)
 {
     emit(tokensChangedSignal, getNumTokens());
-    auto numTokens = b(packet->getDataLength()).get();
+    auto numTokens = getNumPacketTokens(packet);
     for (int i = 0; i < tokenBuckets.size(); i++) {
         auto& tokenBucket = tokenBuckets[i];
         EV_DEBUG << "Checking tokens for packet" << EV_FIELD(numTokens) << EV_FIELD(tokenBucket) << EV_FIELD(packet) << EV_ENDL;
-        if (tokenBucket.putPacket(packet)) {
+        if (tokenBucket.getNumTokens() >= numTokens) {
+            tokenBucket.removeTokens(numTokens);
             auto label = labels[i].c_str();
             EV_INFO << "Removed tokens, labeling packet" << EV_FIELD(numTokens) << EV_FIELD(tokenBucket) << EV_FIELD(label) << EV_FIELD(packet) << EV_ENDL;
             packet->addTagIfAbsent<LabelsTag>()->insertLabels(label);
