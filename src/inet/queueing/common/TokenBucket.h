@@ -29,15 +29,13 @@ class INET_API TokenBucket : public ITokenStorage
   protected:
     double numTokens = 0;
     double maxNumTokens = -1;
-    double internalTokenProductionRate = NaN;
-    double externalTokenProductionRate = 0;
+    double tokenProductionRate = 0;
     double excessTokenProductionRate = 0;
     ITokenStorage *excessTokenStorage = nullptr;
 
     simtime_t lastUpdate;
 
   protected:
-    double getTokenProductionRate() const { return internalTokenProductionRate + externalTokenProductionRate; }
     void updateNumTokens();
 
   public:
@@ -56,13 +54,6 @@ class INET_API TokenBucket : public ITokenStorage
      * current rate of token production.
      */
     virtual simtime_t getOverflowTime();
-
-    /**
-     * Puts the packet into the token bucket and checks if the required number
-     * of tokens are available. If yes then reduces the number of tokens with
-     * the required number of tokens and returns true, otherwise returns false.
-     */
-    virtual bool putPacket(Packet *packet);
 };
 
 inline std::ostream& operator<<(std::ostream& out, const TokenBucket& tokenBucket)
