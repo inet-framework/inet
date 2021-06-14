@@ -43,6 +43,7 @@ class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacke
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
+    virtual void refreshDisplay() const override;
     virtual void handlePacketProcessed(Packet *packet);
 
     virtual void checkPacketOperationSupport(cGate *gate) const;
