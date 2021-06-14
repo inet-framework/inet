@@ -233,6 +233,26 @@ Define_NED_Function2(nedf_xmlattr,
         "It returns the defaultValue (or throws an error) if the attribute does not exists."
         )
 
+cNEDValue nedf_findArrayObjectElement(cComponent *context, cNEDValue argv[], int argc)
+{
+    cValueArray *array = check_and_cast<cValueArray *>(argv[0].objectValue());
+    for (int index = 0; index < array->size(); index++) {
+        cValueMap *map = check_and_cast<cValueMap *>(array->get(index).objectValue());
+        for (int i = 1; i < argc; i += 2)
+            if (map->get(argv[i].stringValue()).intValue() != argv[i + 1].intValue())
+                goto next;
+        return map;
+        next:;
+    }
+    return cNEDValue((cObject *)nullptr);
+}
+
+Define_NED_Function2(nedf_findArrayObjectElement,
+        "bool findArrayObjectElement(any array, string key, any value, ...)",
+        "misc",
+        "Returns the first object from the array that matches the given set of key-value pairs"
+        );
+
 } // namespace utils
 
 } // namespace inet
