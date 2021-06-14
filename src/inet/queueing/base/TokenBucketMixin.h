@@ -78,7 +78,7 @@ class INET_API TokenBucketMixin : public T, public ITokenStorage
                 break;
             }
             default:
-                return TokenBucketMixin<T>::resolveDirective(directive);
+                return T::resolveDirective(directive);
         }
         return result.c_str();
     }
