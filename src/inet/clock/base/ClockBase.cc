@@ -81,8 +81,9 @@ void ClockBase::scheduleClockEventAfter(clocktime_t clockTimeDelay, ClockEvent *
 
 ClockEvent *ClockBase::cancelClockEvent(ClockEvent *msg)
 {
+    getTargetModule()->cancelEvent(msg);
     msg->setClock(nullptr);
-    return static_cast<ClockEvent *>(getTargetModule()->cancelEvent(msg));
+    return msg;
 }
 
 void ClockBase::handleClockEvent(ClockEvent *msg)

@@ -90,8 +90,10 @@ void ClockUserModuleMixin<T>::cancelAndDeleteClockEvent(ClockEvent *msg) {
 #ifndef NDEBUG
     usedClockApi = true;
 #endif
-    if (clock)
-        delete clock->cancelClockEvent(msg);
+    if (clock) {
+        if (msg)
+            delete clock->cancelClockEvent(msg);
+    }
     else
         T::cancelAndDelete(msg);
 }
