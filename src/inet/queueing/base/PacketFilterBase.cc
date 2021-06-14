@@ -86,6 +86,7 @@ void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
         processPacket(packet);
         handlePacketProcessed(packet);
         EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
+        emit(packetFilteredSignal, packet);
         pushOrSendPacket(packet, outputGate, consumer);
     }
     else {
@@ -126,6 +127,7 @@ void PacketFilterBase::pushPacketEnd(Packet *packet, cGate *gate)
         processPacket(packet);
         EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
         endPacketStreaming(packet);
+        emit(packetFilteredSignal, packet);
         pushOrSendPacketEnd(packet, outputGate, consumer, packet->getTransmissionId());
     }
     else {
@@ -205,6 +207,7 @@ Packet *PacketFilterBase::pullPacket(cGate *gate)
             processPacket(packet);
             handlePacketProcessed(packet);
             EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
+            emit(packetFilteredSignal, packet);
             animatePullPacket(packet, outputGate);
             updateDisplayString();
             emit(packetPulledSignal, packet);

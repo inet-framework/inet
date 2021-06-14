@@ -32,9 +32,11 @@ simple PacketFilterBase extends PacketProcessorBase
         @display("i=block/downarrow");
         @signal[packetPushed](type=inet::Packet);
         @signal[packetPulled](type=inet::Packet);
+        @signal[packetFiltered](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
         @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetPulled](title="packets pulled"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetFiltered](title="packets filtered"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropped](title="packets dropped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         input in @labels(send,push,pull,pass,stream);
