@@ -28,6 +28,8 @@ import inet.queueing.contract.IPacketClassifier;
 simple MultiTokenBucketClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
+        double tokenConsumptionPerPacket = default(0); // how many tokens are consumed per packet
+        double tokenConsumptionPerBit = default(1); // how many tokens are consumed per bit
         object buckets; // array of objects specifying the token buckets
         				// example: [{initialNumTokens: 100, maxNumTokens: 1000, tokenProductionRate: 10, excessTokenModule: ".other"}]
         displayStringTextFormat = default("contains %n tk\nmetered %p pk (%l)");

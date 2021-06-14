@@ -19,12 +19,13 @@
 #define __INET_TOKENBUCKETCLASSIFIER_H
 
 #include "inet/queueing/base/PacketClassifierBase.h"
+#include "inet/queueing/base/TokenBucketClassifierMixin.h"
 #include "inet/queueing/base/TokenBucketMixin.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API TokenBucketClassifier : public TokenBucketMixin<PacketClassifierBase>
+class INET_API TokenBucketClassifier : public TokenBucketClassifierMixin<TokenBucketMixin<PacketClassifierBase>>
 {
   protected:
     virtual void initialize(int stage) override;
