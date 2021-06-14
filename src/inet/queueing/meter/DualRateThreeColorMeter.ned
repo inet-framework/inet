@@ -24,7 +24,11 @@ simple DualRateThreeColorMeter extends MultiTokenBucketMeter
         double eir @unit(bps); // excess information rate
         int cbs @unit(b); // committed burst size
         int ebs @unit(b); // excess burst size
-        buckets = [{maxNumTokens: cbs, tokenProductionRate: cir, label: "green"},
-                   {maxNumTokens: ebs, tokenProductionRate: eir, label: "yellow"}];
+        int bitsPerToken = default(8); // how many bits are represented by 1 token
+        bool colorAware = default(false); // enables color-aware mode
+        tokenConsumptionPerBit = default(1 / bitsPerToken);
+        buckets = [{maxNumTokens: dropUnit(cbs) / bitsPerToken, tokenProductionRate: dropUnit(cir) / bitsPerToken, label: "green"},
+                   {maxNumTokens: dropUnit(ebs) / bitsPerToken, tokenProductionRate: dropUnit(eir) / bitsPerToken, label: "yellow"}];
         defaultLabel = default("red");
+        labelPriority = default(colorAware ? ["green", "yellow", "red"] : []);
 }
