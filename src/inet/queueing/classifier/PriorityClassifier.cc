@@ -26,7 +26,7 @@ int PriorityClassifier::classifyPacket(Packet *packet)
 {
     for (size_t i = 0; i < consumers.size(); i++) {
         size_t outputGateIndex = getOutputGateIndex(i);
-        if (consumers[outputGateIndex]->canPushSomePacket(outputGates[outputGateIndex]))
+        if (consumers[outputGateIndex]->canPushPacket(packet, outputGates[outputGateIndex]))
             return outputGateIndex;
     }
     return -1;
