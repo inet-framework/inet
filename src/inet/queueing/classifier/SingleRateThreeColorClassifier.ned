@@ -23,6 +23,8 @@ simple SingleRateThreeColorClassifier extends MultiTokenBucketClassifier
         double cir @unit(bps); // committed information rate
         int cbs @unit(b); // committed burst size
         int ebs @unit(b); // excess burst size
-        buckets = [{maxNumTokens: cbs, tokenProductionRate: cir},
-                   {maxNumTokens: ebs, tokenProductionRate: 0}];
+        int bitsPerToken = default(8); // how many bits are represented by 1 token
+        tokenConsumptionPerBit = default(1 / bitsPerToken);
+        buckets = [{maxNumTokens: dropUnit(cbs) / bitsPerToken, tokenProductionRate: dropUnit(cir) / bitsPerToken},
+                   {maxNumTokens: dropUnit(ebs) / bitsPerToken, tokenProductionRate: 0}];
 }
