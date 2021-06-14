@@ -28,6 +28,8 @@ namespace queueing {
 class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPacketFilter
 {
   protected:
+    bool backpressure = false;
+
     cGate *inputGate = nullptr;
     ModuleRef<IActivePacketSource> producer;
     ModuleRef<IPassivePacketSource> provider;

@@ -27,6 +27,7 @@ void PacketFilterBase::initialize(int stage)
 {
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        backpressure = par("backpressure");
         inputGate = gate("in");
         outputGate = gate("out");
         producer.reference(inputGate, false);
@@ -73,7 +74,10 @@ bool PacketFilterBase::canPushSomePacket(cGate *gate) const
 
 bool PacketFilterBase::canPushPacket(Packet *packet, cGate *gate) const
 {
-    return consumer == nullptr || consumer->canPushPacket(packet, outputGate->getPathEndGate()) || !matchesPacket(packet);
+    if (backpressure)
+        return matchesPacket(packet) && consumer != nullptr && consumer->canPushPacket(packet, outputGate->getPathEndGate());
+    else
+        return !matchesPacket(packet) || consumer == nullptr || consumer->canPushPacket(packet, outputGate->getPathEndGate());
 }
 
 void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
