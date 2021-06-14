@@ -27,22 +27,8 @@ Define_Module(LabelFilter);
 void LabelFilter::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        cValueArray *includeLabels = check_and_cast<cValueArray *>(par("includeLabels").objectValue());
-        for (int i = 0; i < includeLabels->size(); i++) {
-            auto includeLabel = includeLabels->get(i).stringValue();
-            PatternMatcher patternMatcher;
-            patternMatcher.setPattern(includeLabel, false, true, true);
-            includeLabelMatchers.push_back(patternMatcher);
-        }
-        cValueArray *excludeLabels = check_and_cast<cValueArray *>(par("excludeLabels").objectValue());
-        for (int i = 0; i < excludeLabels->size(); i++) {
-            auto excludeLabel = excludeLabels->get(i).stringValue();
-            PatternMatcher patternMatcher;
-            patternMatcher.setPattern(excludeLabel, false, true, true);
-            excludeLabelMatchers.push_back(patternMatcher);
-        }
-    }
+    if (stage == INITSTAGE_LOCAL)
+        labelFilter.setPattern(par("labelFilter"), false, true, true);
 }
 
 bool LabelFilter::matchesPacket(const Packet *packet) const
@@ -51,14 +37,9 @@ bool LabelFilter::matchesPacket(const Packet *packet) const
     if (labelsTag != nullptr) {
         for (int i = 0; i < labelsTag->getLabelsArraySize(); i++) {
             auto label = labelsTag->getLabels(i);
-            for (auto& excludeLabelMatcher : excludeLabelMatchers) {
-                if (excludeLabelMatcher.matches(label))
-                    return false;
-            }
-            for (auto& includeLabelMatcher : includeLabelMatchers) {
-                if (includeLabelMatcher.matches(label))
-                    return true;
-            }
+            cMatchableString matchableString(label);
+            if (const_cast<cMatchExpression *>(&labelFilter)->matches(&matchableString))
+                return true;
         }
     }
     return false;

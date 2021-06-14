@@ -23,7 +23,6 @@ import inet.queueing.contract.IPacketFilter;
 simple LabelFilter extends PacketFilterBase like IPacketFilter
 {
     parameters:
-        object includeLabels = default(["*"]);
-        object excludeLabels = default([]);
+        string labelFilter;
         @class(LabelFilter);
 }
