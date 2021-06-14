@@ -27,8 +27,7 @@ namespace queueing {
 class INET_API LabelFilter : public PacketFilterBase
 {
   protected:
-    std::vector<PatternMatcher> includeLabelMatchers;
-    std::vector<PatternMatcher> excludeLabelMatchers;
+    cMatchExpression labelFilter;
 
   protected:
     virtual void initialize(int stage) override;
