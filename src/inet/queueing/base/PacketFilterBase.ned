@@ -27,6 +27,7 @@ package inet.queueing.base;
 simple PacketFilterBase extends PacketProcessorBase
 {
     parameters:
+        bool backpressure = default(false);
         displayStringTextFormat = default("dropped %d/%p pk (%k/%l)"); // determines the text that is written on top of the submodule
         @class(PacketFilterBase);
         @display("i=block/downarrow");
