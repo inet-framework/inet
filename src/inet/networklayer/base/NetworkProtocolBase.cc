@@ -61,6 +61,8 @@ void NetworkProtocolBase::sendUp(cMessage *message)
 {
     if (Packet *packet = dynamic_cast<Packet *>(message)) {
         const Protocol *protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+        if (!protocol)
+            throw cRuntimeError("Packet does not have a protocol tag");
         const auto& addr = packet->getTag<L3AddressInd>();
         auto remoteAddress(addr->getSrcAddress());
         auto localAddress(addr->getDestAddress());
