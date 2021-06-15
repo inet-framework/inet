@@ -36,7 +36,7 @@ static uint32_t swapByteOrder32(uint32_t v)
 
 void PcapReader::openPcap(const char *filename, const char *packetNameFormat)
 {
-    if (!filename || !filename[0])
+    if (opp_isempty(filename))
         throw cRuntimeError("Cannot open pcap file: file name is empty");
     this->packetNameFormat = packetNameFormat;
     inet::utils::makePathForFile(filename);

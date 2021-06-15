@@ -29,10 +29,6 @@
 
 namespace inet {
 
-// TODO move to some utility file
-inline bool isEmpty(const char *s) { return !s || !s[0]; }
-inline bool isNotEmpty(const char *s) { return s && s[0]; }
-
 class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressResolver
 {
   public:

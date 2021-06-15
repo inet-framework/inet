@@ -61,7 +61,7 @@ PcapWriter::~PcapWriter()
 
 void PcapWriter::open(const char *filename, unsigned int snaplen_par)
 {
-    if (!filename || !filename[0])
+    if (opp_isempty(filename))
         throw cRuntimeError("Cannot open pcap file: file name is empty");
 
     inet::utils::makePathForFile(filename);

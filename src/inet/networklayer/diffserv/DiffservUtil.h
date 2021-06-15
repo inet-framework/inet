@@ -27,11 +27,6 @@ namespace DiffservUtil {
 enum Color { GREEN, YELLOW, RED };
 
 /**
- * Returns true, if the string is empty (nullptr or "");
- */
-inline bool isEmpty(const char *str) { return !str || !(*str); }
-
-/**
  * Parses the information rate parameter (bits/sec).
  * Supported formats:
  *  - absolute (e.g. 10Mbps)

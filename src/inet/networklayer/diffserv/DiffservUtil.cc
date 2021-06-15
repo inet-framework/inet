@@ -40,7 +40,7 @@ cEnum *protocolEnum = nullptr;
 
 double parseInformationRate(const char *attrValue, const char *attrName, IInterfaceTable *ift, cSimpleModule& owner, int defaultValue)
 {
-    if (isEmpty(attrValue))
+    if (opp_isempty(attrValue))
         return defaultValue;
 
     const char *percentPtr = strchr(attrValue, '%');
@@ -67,7 +67,7 @@ double parseInformationRate(const char *attrValue, const char *attrName, IInterf
 
 int parseIntAttribute(const char *attrValue, const char *attrName, bool isOptional)
 {
-    if (isEmpty(attrValue)) {
+    if (opp_isempty(attrValue)) {
         if (isOptional)
             return -1;
         else
@@ -92,7 +92,7 @@ int parseIntAttribute(const char *attrValue, const char *attrName, bool isOption
 
 int parseProtocol(const char *attrValue, const char *attrName)
 {
-    if (isEmpty(attrValue))
+    if (opp_isempty(attrValue))
         return -1;
     if (isdigit(*attrValue))
         return parseIntAttribute(attrValue, attrName);
@@ -110,7 +110,7 @@ int parseProtocol(const char *attrValue, const char *attrName)
 
 int parseDSCP(const char *attrValue, const char *attrName)
 {
-    if (isEmpty(attrValue))
+    if (opp_isempty(attrValue))
         throw cRuntimeError("missing %s attribute", attrName);
     if (isdigit(*attrValue)) {
         int dscp = parseIntAttribute(attrValue, attrName);
@@ -136,7 +136,7 @@ int parseDSCP(const char *attrValue, const char *attrName)
 
 void parseDSCPs(const char *attrValue, const char *attrName, std::vector<int>& result)
 {
-    if (isEmpty(attrValue))
+    if (opp_isempty(attrValue))
         return;
     if (*attrValue == '*' && *(attrValue + 1) == '\0') {
         for (int dscp = 0; dscp < DSCP_MAX; ++dscp)

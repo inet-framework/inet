@@ -25,12 +25,6 @@ namespace inet {
 // from common/stringutil.h
 inline bool opp_isdigit(unsigned char c) { return isdigit(c); }
 inline char opp_toupper(unsigned char c) { return toupper(c); }
-static bool opp_stringendswith(const char *s, const char *ending)
-{
-    int slen = strlen(s);
-    int endinglen = strlen(ending);
-    return slen >= endinglen && strcmp(s + slen - endinglen, ending) == 0;
-}
 
 PatternMatcher::PatternMatcher()
 {

@@ -66,9 +66,7 @@ void Int128::set(const char *sz)
     lo = 0u;
     hi = 0;
 
-    if (!sz)
-        return;
-    if (!sz[0])
+    if (opp_isempty(sz))
         return;
 
     uint32_t radix = 10;

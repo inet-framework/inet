@@ -433,7 +433,7 @@ void TcpConnection::initConnection(TcpOpenCommand *openCmd)
     // create algorithm
     const char *tcpAlgorithmClass = openCmd->getTcpAlgorithmClass();
 
-    if (!tcpAlgorithmClass || !tcpAlgorithmClass[0])
+    if (opp_isempty(tcpAlgorithmClass))
         tcpAlgorithmClass = tcpMain->par("tcpAlgorithmClass");
 
     tcpAlgorithm = check_and_cast<TcpAlgorithm *>(inet::utils::createOne(tcpAlgorithmClass));

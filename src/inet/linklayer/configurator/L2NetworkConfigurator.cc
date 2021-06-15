@@ -31,16 +31,6 @@ namespace inet {
 
 Define_Module(L2NetworkConfigurator);
 
-inline bool isEmpty(const char *s)
-{
-    return !s || !s[0];
-}
-
-inline bool isNotEmpty(const char *s)
-{
-    return s && s[0];
-}
-
 void L2NetworkConfigurator::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
@@ -180,15 +170,15 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node *rootNode)
                             && (portsMatcher.matchesAny() || portsMatcher.matches(port.c_str())))
                         {
                             // cost
-                            if (isNotEmpty(cost))
+                            if (!opp_isempty(cost))
                                 currentNode->interfaceInfos[i]->portData.linkCost = atoi(cost);
 
                             // priority
-                            if (isNotEmpty(priority))
+                            if (!opp_isempty(priority))
                                 currentNode->interfaceInfos[i]->portData.priority = atoi(priority);
 
                             // edge
-                            if (isNotEmpty(edge))
+                            if (!opp_isempty(edge))
                                 currentNode->interfaceInfos[i]->portData.edge = strcmp(edge, "true") ? false : true;
                             EV_DEBUG << hostModule->getFullPath() << ":" << ifEntry->getInterfaceName() << endl;
 
@@ -291,7 +281,7 @@ L2NetworkConfigurator::Matcher::~Matcher()
 
 L2NetworkConfigurator::Matcher::Matcher(const char *pattern)
 {
-    matchesany = isEmpty(pattern);
+    matchesany = opp_isempty(pattern);
 
     if (matchesany)
         return;

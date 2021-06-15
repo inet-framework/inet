@@ -29,7 +29,7 @@ Define_Module(MatrixCloudDelayer);
 // FIXME modified copy of 'Matcher' class from Ipv4NetworkConfigurator
 MatrixCloudDelayer::Matcher::Matcher(const char *pattern)
 {
-    matchesany = !pattern || !pattern[0];
+    matchesany = opp_isempty(pattern);
     if (matchesany)
         return;
     cStringTokenizer tokenizer(pattern);

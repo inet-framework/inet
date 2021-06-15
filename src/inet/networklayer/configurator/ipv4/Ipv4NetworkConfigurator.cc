@@ -134,7 +134,7 @@ void Ipv4NetworkConfigurator::dumpConfiguration()
     if (par("dumpRoutes"))
         TIME(dumpRoutes(topology));
     // print current configuration to an XML file
-    if (!isEmpty(par("dumpConfig")))
+    if (!opp_isempty(par("dumpConfig")))
         TIME(dumpConfig(topology));
 }
 
@@ -662,8 +662,8 @@ void Ipv4NetworkConfigurator::readInterfaceConfiguration(Topology& topology)
             Matcher towardsMatcher(towardsAttr);
 
             // parse address/netmask constraints
-            bool haveAddressConstraint = isNotEmpty(addressAttr);
-            bool haveNetmaskConstraint = isNotEmpty(netmaskAttr);
+            bool haveAddressConstraint = !opp_isempty(addressAttr);
+            bool haveNetmaskConstraint = !opp_isempty(netmaskAttr);
 
             uint32_t address, addressSpecifiedBits, netmask, netmaskSpecifiedBits;
             if (haveAddressConstraint)
@@ -710,15 +710,15 @@ void Ipv4NetworkConfigurator::readInterfaceConfiguration(Topology& topology)
                             interfaceInfo->addSubnetRoute = addSubnetRouteAttr;
 
                             // mtu
-                            if (isNotEmpty(mtuAttr))
+                            if (!opp_isempty(mtuAttr))
                                 interfaceInfo->mtu = atoi(mtuAttr);
 
                             // metric
-                            if (isNotEmpty(metricAttr))
+                            if (!opp_isempty(metricAttr))
                                 interfaceInfo->metric = atoi(metricAttr);
 
                             // groups
-                            if (isNotEmpty(groupsAttr)) {
+                            if (!opp_isempty(groupsAttr)) {
                                 cStringTokenizer tokenizer(groupsAttr);
                                 while (tokenizer.hasMoreTokens())
                                     interfaceInfo->multicastGroups.push_back(Ipv4Address(tokenizer.nextToken()));
@@ -1026,10 +1026,10 @@ void Ipv4NetworkConfigurator::readManualRouteConfiguration(Topology& topology)
         try {
             // parse and check the attributes
             Ipv4Address destination;
-            if (!isEmpty(destinationAttr) && strcmp(destinationAttr, "*"))
+            if (!opp_isempty(destinationAttr) && strcmp(destinationAttr, "*"))
                 destination = resolve(destinationAttr, L3AddressResolver::ADDR_IPv4).toIpv4();
             Ipv4Address netmask;
-            if (!isEmpty(netmaskAttr) && strcmp(netmaskAttr, "*")) {
+            if (!opp_isempty(netmaskAttr) && strcmp(netmaskAttr, "*")) {
                 if (netmaskAttr[0] == '/')
                     netmask = Ipv4Address::makeNetmask(atoi(netmaskAttr + 1));
                 else
@@ -1037,7 +1037,7 @@ void Ipv4NetworkConfigurator::readManualRouteConfiguration(Topology& topology)
             }
             if (!netmask.isValidNetmask())
                 throw cRuntimeError("Wrong netmask %s", netmask.str().c_str());
-            if (isEmpty(interfaceAttr) && isEmpty(gatewayAttr))
+            if (opp_isempty(interfaceAttr) && opp_isempty(gatewayAttr))
                 throw cRuntimeError("Incomplete route: either gateway or interface (or both) must be specified");
 
             // find matching host(s), and add the route
@@ -1060,7 +1060,7 @@ void Ipv4NetworkConfigurator::readManualRouteConfiguration(Topology& topology)
                         route->setNetmask(netmask);
                         route->setGateway(gateway); // may be unspecified
                         route->setInterface(ie);
-                        if (isNotEmpty(metricAttr))
+                        if (!opp_isempty(metricAttr))
                             route->setMetric(atoi(metricAttr));
                         node->staticRoutes.push_back(route);
                     }
@@ -1088,10 +1088,10 @@ void Ipv4NetworkConfigurator::readManualMulticastRouteConfiguration(Topology& to
         try {
             // parse and check the attributes
             Ipv4Address source;
-            if (!isEmpty(sourceAttr) && strcmp(sourceAttr, "*"))
+            if (!opp_isempty(sourceAttr) && strcmp(sourceAttr, "*"))
                 source = resolve(sourceAttr, L3AddressResolver::ADDR_IPv4).toIpv4();
             Ipv4Address netmask;
-            if (!isEmpty(netmaskAttr) && strcmp(netmaskAttr, "*")) {
+            if (!opp_isempty(netmaskAttr) && strcmp(netmaskAttr, "*")) {
                 if (netmaskAttr[0] == '/')
                     netmask = Ipv4Address::makeNetmask(atoi(netmaskAttr + 1));
                 else
@@ -1102,7 +1102,7 @@ void Ipv4NetworkConfigurator::readManualMulticastRouteConfiguration(Topology& to
                 throw cRuntimeError("Wrong netmask %s", netmask.str().c_str());
 
             std::vector<Ipv4Address> groups;
-            if (isEmpty(groupsAttr))
+            if (opp_isempty(groupsAttr))
                 groups.push_back(Ipv4Address::UNSPECIFIED_ADDRESS);
             else {
                 cStringTokenizer tokenizer(groupsAttr);
@@ -1124,7 +1124,7 @@ void Ipv4NetworkConfigurator::readManualMulticastRouteConfiguration(Topology& to
                     std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
                     if (atMatcher.matches(hostShortenedFullPath.c_str()) || atMatcher.matches(hostFullPath.c_str())) {
                         NetworkInterface *parent = nullptr;
-                        if (!isEmpty(parentAttr)) {
+                        if (!opp_isempty(parentAttr)) {
                             parent = node->interfaceTable->findInterfaceByName(parentAttr);
                             if (!parent)
                                 throw cRuntimeError("Parent interface '%s' not found.", parentAttr);
@@ -1148,7 +1148,7 @@ void Ipv4NetworkConfigurator::readManualMulticastRouteConfiguration(Topology& to
                             route->setOriginNetmask(netmask);
                             route->setMulticastGroup(group);
                             route->setInInterface(parent ? new Ipv4MulticastRoute::InInterface(parent) : nullptr);
-                            if (isNotEmpty(metricAttr))
+                            if (!opp_isempty(metricAttr))
                                 route->setMetric(atoi(metricAttr));
                             for (auto& child : children)
                                 route->addOutInterface(new Ipv4MulticastRoute::OutInterface(child, false /*TODOisLeaf*/));
@@ -1168,7 +1168,7 @@ void Ipv4NetworkConfigurator::resolveInterfaceAndGateway(Node *node, const char 
         NetworkInterface *& outIE, Ipv4Address& outGateway, Topology& topology)
 {
     // resolve interface name
-    if (isEmpty(interfaceAttr)) {
+    if (opp_isempty(interfaceAttr)) {
         outIE = nullptr;
     }
     else {
@@ -1179,12 +1179,12 @@ void Ipv4NetworkConfigurator::resolveInterfaceAndGateway(Node *node, const char 
     }
 
     // if gateway is not specified, we are done
-    if (isEmpty(gatewayAttr) || !strcmp(gatewayAttr, "*")) {
+    if (opp_isempty(gatewayAttr) || !strcmp(gatewayAttr, "*")) {
         outGateway = Ipv4Address();
         return; // outInterface also already done -- we're done
     }
 
-    ASSERT(isNotEmpty(gatewayAttr)); // see "if" above
+    ASSERT(!opp_isempty(gatewayAttr)); // see "if" above
 
     // check syntax of gatewayAttr, and obtain an initial value
     outGateway = resolve(gatewayAttr, L3AddressResolver::ADDR_IPv4).toIpv4();

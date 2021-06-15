@@ -528,7 +528,7 @@ void SctpAssociation::initAssociation(SctpOpenReq *openCmd)
     outboundStreams = openCmd->getOutboundStreams();
     // create algorithm
     const char *sctpAlgorithmClass = openCmd->getSctpAlgorithmClass();
-    if (!sctpAlgorithmClass || !sctpAlgorithmClass[0])
+    if (opp_isempty(sctpAlgorithmClass))
         sctpAlgorithmClass = sctpMain->par("sctpAlgorithmClass");
     sctpAlgorithm = check_and_cast<SctpAlgorithm *>(inet::utils::createOne(sctpAlgorithmClass));
     sctpAlgorithm->setAssociation(this);

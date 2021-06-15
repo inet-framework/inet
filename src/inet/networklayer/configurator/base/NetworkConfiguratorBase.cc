@@ -581,7 +581,7 @@ NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::createInterface
 
 NetworkConfiguratorBase::Matcher::Matcher(const char *pattern)
 {
-    matchesany = isEmpty(pattern);
+    matchesany = opp_isempty(pattern);
     if (matchesany)
         return;
     cStringTokenizer tokenizer(pattern);
@@ -608,7 +608,7 @@ bool NetworkConfiguratorBase::Matcher::matches(const char *s)
 
 NetworkConfiguratorBase::InterfaceMatcher::InterfaceMatcher(const char *pattern)
 {
-    matchesany = isEmpty(pattern);
+    matchesany = opp_isempty(pattern);
     if (matchesany)
         return;
     cStringTokenizer tokenizer(pattern);

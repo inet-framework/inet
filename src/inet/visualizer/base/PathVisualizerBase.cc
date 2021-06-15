@@ -85,7 +85,7 @@ void PathVisualizerBase::initialize(int stage)
         labelFormat.parseFormat(par("labelFormat"));
         labelFont = cFigure::parseFont(par("labelFont"));
         labelColorAsString = par("labelColor");
-        if (!isEmpty(labelColorAsString))
+        if (!opp_isempty(labelColorAsString))
             labelColor = cFigure::Color(labelColorAsString);
         fadeOutMode = par("fadeOutMode");
         fadeOutTime = par("fadeOutTime");

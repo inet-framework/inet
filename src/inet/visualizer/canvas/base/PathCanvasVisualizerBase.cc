@@ -153,7 +153,7 @@ const PathVisualizerBase::PathVisualization *PathCanvasVisualizerBase::createPat
     polylineFigure->setLineColor(lineColor);
     auto labelFigure = figure->getLabelFigure();
     labelFigure->setFont(labelFont);
-    labelFigure->setColor(isEmpty(labelColorAsString) ? lineColor : labelColor);
+    labelFigure->setColor(opp_isempty(labelColorAsString) ? lineColor : labelColor);
     return new PathCanvasVisualization(label, path, figure);
 }
 

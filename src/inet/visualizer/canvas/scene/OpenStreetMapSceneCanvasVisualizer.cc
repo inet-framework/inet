@@ -27,16 +27,6 @@ namespace visualizer {
 
 Define_Module(OpenStreetMapSceneCanvasVisualizer);
 
-inline const char *nullToEmpty(const char *s)
-{
-    return s ? s : "";
-}
-
-inline bool isEmpty(const char *s)
-{
-    return !s || !s[0];
-}
-
 void OpenStreetMapSceneCanvasVisualizer::initialize(int stage)
 {
     SceneVisualizerBase::initialize(stage);
@@ -108,7 +98,7 @@ cGroupFigure *OpenStreetMapSceneCanvasVisualizer::createMapFigure(const OpenStre
             if (name != nullptr)
                 polyline->setTooltip(name);
 
-            std::string highwayType = nullToEmpty(way->getTag("highway"));
+            std::string highwayType = opp_nulltoempty(way->getTag("highway"));
             if (highwayType == "primary" || highwayType == "secondary" || highwayType == "tertiary" ||
                 highwayType == "primary_link" || highwayType == "secondary_link" || highwayType == "tertiary_link")
             {
@@ -150,7 +140,7 @@ cGroupFigure *OpenStreetMapSceneCanvasVisualizer::createMapFigure(const OpenStre
             polygon->setFillOpacity(0.1);
             polygon->setLineOpacity(0.5);
             polygon->setLineColor(cFigure::GREY);
-            if (!isEmpty(way->getTag("building")))
+            if (!opp_isempty(way->getTag("building")))
                 polygon->setFillColor(cFigure::RED);
             else
                 polygon->setFillColor(cFigure::GREEN);

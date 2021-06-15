@@ -78,16 +78,6 @@ inline id_t parseId(const char *s)
     return std::strtoll(s, nullptr, 10);
 }
 
-inline const char *nullToEmpty(const char *s)
-{
-    return s ? s : "";
-}
-
-inline bool isEmpty(const char *s)
-{
-    return !s || !s[0];
-}
-
 const char *OpenStreetMap::getPooled(const char *s)
 {
     if (s == nullptr)
