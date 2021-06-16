@@ -54,8 +54,10 @@ void StreamEncoder::processPacket(Packet *packet)
     auto streamReq = packet->findTag<StreamReq>();
     if (streamReq != nullptr) {
         auto streamName = streamReq->getStreamName();
-        auto vlanId = streamNameToVlanIdMapping->get(streamName).intValue();
-        packet->addTagIfAbsent<VlanReq>()->setVlanId(vlanId);
+        if (streamNameToVlanIdMapping->containsKey(streamName)) {
+            auto vlanId = streamNameToVlanIdMapping->get(streamName).intValue();
+            packet->addTagIfAbsent<VlanReq>()->setVlanId(vlanId);
+        }
     }
 }
 
