@@ -178,7 +178,7 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
             }
         }
         else
-            throw cRuntimeError("handlePacket(): Unknown service primitive: %d, pathStartGate = %s, pathEndGate = %s", static_cast<int>(servicePrimitive), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
+            throw cRuntimeError("handlePacket(): Unknown service primitive: servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", static_cast<int>(servicePrimitive), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
     }
     const auto& interfaceReq = packet->findTag<InterfaceReq>();
     if (interfaceReq != nullptr) {
