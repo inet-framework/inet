@@ -32,18 +32,22 @@ module BridgingLayer like IProtocolLayer
         reversingLayer: <default("ReversingLayer")> like IProtocolLayer {
             @display("p=300,150");
         }
-        streamPolicy: <default("OmittedProtocolLayer")> like IProtocolLayer {
+        filterPolicy: <default("OmittedProtocolLayer")> like IProtocolLayer {
             @display("p=300,300");
         }
-        relayLayer: <default("RelayLayer")> like IProtocolLayer {
+        streamPolicy: <default("OmittedProtocolLayer")> like IProtocolLayer {
             @display("p=300,450");
         }
-        vlanPolicy: <default("OmittedProtocolLayer")> like IProtocolLayer {
+        relayLayer: <default("RelayLayer")> like IProtocolLayer {
             @display("p=300,600");
+        }
+        vlanPolicy: <default("OmittedProtocolLayer")> like IProtocolLayer {
+            @display("p=300,750");
         }
     connections:
         upperLayerIn --> reversingLayer.upperLayerIn;
-        reversingLayer.lowerLayerOut --> streamPolicy.upperLayerIn;
+        reversingLayer.lowerLayerOut --> filterPolicy.upperLayerIn;
+        filterPolicy.lowerLayerOut --> streamPolicy.upperLayerIn;
         streamPolicy.lowerLayerOut --> relayLayer.upperLayerIn;
         relayLayer.lowerLayerOut --> vlanPolicy.upperLayerIn;
         vlanPolicy.lowerLayerOut --> lowerLayerOut;
@@ -51,6 +55,7 @@ module BridgingLayer like IProtocolLayer
         lowerLayerIn --> vlanPolicy.lowerLayerIn;
         vlanPolicy.upperLayerOut --> relayLayer.lowerLayerIn;
         relayLayer.upperLayerOut --> streamPolicy.lowerLayerIn;
-        streamPolicy.upperLayerOut --> reversingLayer.lowerLayerIn;
+        streamPolicy.upperLayerOut --> filterPolicy.lowerLayerIn;
+        filterPolicy.upperLayerOut --> reversingLayer.lowerLayerIn;
         reversingLayer.upperLayerOut --> upperLayerOut;
 }
