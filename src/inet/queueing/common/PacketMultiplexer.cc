@@ -50,6 +50,18 @@ void PacketMultiplexer::handleMessage(cMessage *message)
     pushPacket(packet, packet->getArrivalGate());
 }
 
+void PacketMultiplexer::mapRegistrationForwardingGates(cGate *gate, std::function<void(cGate *)> f)
+{
+    if (gate == outputGate) {
+        for (auto inputGate : inputGates)
+            f(inputGate);
+    }
+    else if (std::find(inputGates.begin(), inputGates.end(), gate) != inputGates.end())
+        f(outputGate);
+    else
+        throw cRuntimeError("Unknown gate");
+}
+
 void PacketMultiplexer::checkPacketStreaming(Packet *packet)
 {
     if (inProgressStreamId != -1 && (packet == nullptr || packet->getTreeId() != inProgressStreamId))
@@ -130,28 +142,6 @@ void PacketMultiplexer::handleCanPushPacketChanged(cGate *gate)
 void PacketMultiplexer::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
     Enter_Method("handlePushPacketProcessed");
-}
-
-void PacketMultiplexer::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterService");
-    if (g == outputGate) {
-        int size = gateSize("in");
-        for (int i = 0; i < size; i++)
-            registerService(protocol, gate("in", i), servicePrimitive);
-    }
-}
-
-void PacketMultiplexer::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    // NOTE: this may be called before initstage local
-    auto outputGate = gate("out");
-    if (g != outputGate)
-        registerProtocol(protocol, outputGate, servicePrimitive);
-    else if (g == outputGate && servicePrimitive == SP_INDICATION)
-        for (auto& inputGate : inputGates)
-            registerProtocol(protocol, inputGate, servicePrimitive);
 }
 
 } // namespace queueing
