@@ -30,14 +30,27 @@ using namespace inet::queueing;
 class INET_API StreamDecoder : public PacketFlowBase, public TransparentProtocolRegistrationListener
 {
   protected:
-    cValueArray *streamMappings = nullptr;
+    class INET_API Stream
+    {
+      public:
+        MacAddress source;
+        MacAddress destination;
+        cPatternMatcher *interfaceNameMatcher = nullptr;
+        int vlanId = -1;
+        int pcp = -1;
+        std::string name;
+    };
+
+  protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
+    std::vector<Stream> streams;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
     virtual void processPacket(Packet *packet) override;
 
+    virtual void configureStreams();
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 
