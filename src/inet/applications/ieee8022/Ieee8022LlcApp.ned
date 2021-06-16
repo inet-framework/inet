@@ -30,7 +30,7 @@ module Ieee8022LlcApp like IApp
 {
     parameters:
         string interfaceTableModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         @display("i=block/app");
     gates:
         input socketIn;
