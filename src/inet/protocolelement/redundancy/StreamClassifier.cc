@@ -27,6 +27,7 @@ void StreamClassifier::initialize(int stage)
 {
     PacketClassifierBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        mode = par("mode");
         defaultGateIndex = par("defaultGateIndex");
         cStringTokenizer tokenizer(par("streamsToGateIndices"));
         while (tokenizer.hasMoreTokens()) {
@@ -39,8 +40,28 @@ void StreamClassifier::initialize(int stage)
 
 int StreamClassifier::classifyPacket(Packet *packet)
 {
-    auto streamReq = packet->getTag<StreamReq>();
-    auto it = streamsToGateIndexMap.find(streamReq->getStreamName());
+    const char *streamName = nullptr;
+    switch (*mode) {
+        case 'r':
+            streamName = packet->getTag<StreamReq>()->getStreamName();
+            break;
+        case 'i':
+            streamName = packet->getTag<StreamInd>()->getStreamName();
+            break;
+        case 'b':
+            auto streamReq = packet->findTag<StreamReq>();
+            if (streamReq != nullptr)
+                streamName = streamReq->getStreamName();
+            else {
+                auto streamInd = packet->findTag<StreamInd>();
+                if (streamInd != nullptr)
+                    streamName = streamInd->getStreamName();
+                else
+                    throw cRuntimeError("Neither StreamReq nor StreamInd found");
+            }
+            break;
+    }
+    auto it = streamsToGateIndexMap.find(streamName);
     if (it != streamsToGateIndexMap.end())
         return it->second;
     else
