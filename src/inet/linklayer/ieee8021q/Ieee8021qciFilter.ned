@@ -40,6 +40,7 @@ module Ieee8021qciFilter like IPacketFilter
             @display("p=100,100");
         }
         streamFilter[numStreams]: <default("StreamFilter")> like IPacketFilter {
+            streamNameFilter = default(parent.streamFilterTable.get(index).get("stream"));
             @display("p=300,100,column,150");
         }
         sm[numGates]: PacketMultiplexer {
