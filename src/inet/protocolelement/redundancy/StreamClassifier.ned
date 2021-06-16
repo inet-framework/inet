@@ -21,11 +21,13 @@ import inet.queueing.base.PacketClassifierBase;
 import inet.queueing.contract.IPacketClassifier;
 
 //
-// This module classifies packets based on the attached streams in a ~StreamInd.
+// This module classifies packets based on the stream they are part of. The stream
+// is determined by a StreamReq or a StreamInd or both.
 //
 simple StreamClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
+        string mode @enum("req", "ind", "both") = default("both");
         int defaultGateIndex = default(0); // default gate index if no matching streams are found
         string streamsToGateIndices; // space separated list of stream and gate index pairs
         @class(StreamClassifier);

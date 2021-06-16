@@ -25,6 +25,7 @@ namespace inet {
 class INET_API StreamClassifier : public queueing::PacketClassifierBase
 {
   protected:
+    const char *mode = nullptr;
     int defaultGateIndex = -1;
     std::map<std::string, int> streamsToGateIndexMap;
 
