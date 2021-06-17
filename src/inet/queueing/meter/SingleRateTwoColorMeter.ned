@@ -24,9 +24,10 @@ simple SingleRateTwoColorMeter extends TokenBucketMeter
         int cbs @unit(b); // committed burst size
         int bitsPerToken = default(8); // how many bits are represented by 1 token
         bool colorAware = default(false); // enables color-aware mode
-        tokenConsumptionPerBit = default(1 / bitsPerToken);
+        initialNumTokens = default(maxNumTokens);
         maxNumTokens = dropUnit(cbs) / bitsPerToken;
         tokenProductionRate = dropUnit(cir) / bitsPerToken;
+        tokenConsumptionPerBit = 1 / bitsPerToken;
         label = default("green");
         defaultLabel = default("red");
         labelPriority = default(colorAware ? ["green", "red"] : []);
