@@ -21,6 +21,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
@@ -220,7 +221,7 @@ void Dymo::cancelRouteDiscovery(const L3Address& target)
 
 bool Dymo::hasOngoingRouteDiscovery(const L3Address& target)
 {
-    return targetAddressToRREQTimer.find(target) != targetAddressToRREQTimer.end();
+    return containsKey(targetAddressToRREQTimer, target);
 }
 
 //
@@ -259,7 +260,7 @@ void Dymo::eraseDelayedDatagrams(const L3Address& target)
 
 bool Dymo::hasDelayedDatagrams(const L3Address& target)
 {
-    return targetAddressToDelayedPackets.find(target) != targetAddressToDelayedPackets.end();
+    return containsKey(targetAddressToDelayedPackets, target);
 }
 
 //
@@ -269,12 +270,14 @@ bool Dymo::hasDelayedDatagrams(const L3Address& target)
 void Dymo::cancelRreqTimer(const L3Address& target)
 {
     auto tt = targetAddressToRREQTimer.find(target);
+    ASSERT(tt != targetAddressToRREQTimer.end());
     cancelEvent(tt->second);
 }
 
 void Dymo::deleteRreqTimer(const L3Address& target)
 {
     auto tt = targetAddressToRREQTimer.find(target);
+    ASSERT(tt != targetAddressToRREQTimer.end());
     delete tt->second;
 }
 

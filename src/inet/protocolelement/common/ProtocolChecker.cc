@@ -18,6 +18,7 @@
 #include "inet/protocolelement/common/ProtocolChecker.h"
 
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/stlutils.h"
 
 namespace inet {
 
@@ -35,7 +36,7 @@ bool ProtocolChecker::matchesPacket(const Packet *packet) const
 {
     const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
-    return protocol != nullptr && protocols.find(protocol) != protocols.end();
+    return protocol != nullptr && contains(protocols, protocol);
 }
 
 void ProtocolChecker::dropPacket(Packet *packet)

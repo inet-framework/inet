@@ -24,6 +24,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/EthernetCRC.h"
 #include "inet/common/socket/SocketTag_m.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/common/Ieee802Ctrl.h"
@@ -265,7 +266,7 @@ void EthernetEncapsulation::processPacketFromMac(Packet *packet)
         }
         if (steal)
             delete packet;
-        else if (payloadProtocol != nullptr && upperProtocols.find(payloadProtocol) != upperProtocols.end()) {
+        else if (payloadProtocol != nullptr && contains(upperProtocols, payloadProtocol)) {
             EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
                       << packet->getName() << "' to higher layer\n";
 

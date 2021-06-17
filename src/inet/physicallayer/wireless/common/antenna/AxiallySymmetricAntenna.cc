@@ -17,6 +17,8 @@
 
 #include "inet/physicallayer/wireless/common/antenna/AxiallySymmetricAntenna.h"
 
+#include "inet/common/stlutils.h"
+
 namespace inet {
 
 namespace physicallayer {
@@ -62,9 +64,9 @@ AxiallySymmetricAntenna::AntennaGain::AntennaGain(const char *axis, double baseG
             maxGain = gain;
         gainMap.insert(std::pair<rad, double>(angle, gain));
     }
-    if (gainMap.find(deg(0)) == gainMap.end())
+    if (!containsKey(gainMap, deg(0)))
         throw cRuntimeError("The first angle must be 0");
-    if (gainMap.find(deg(180)) == gainMap.end())
+    if (!containsKey(gainMap, deg(180)))
         throw cRuntimeError("The last angle must be 180");
 }
 

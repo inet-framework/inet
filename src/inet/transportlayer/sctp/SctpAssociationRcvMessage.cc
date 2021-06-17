@@ -22,6 +22,7 @@
 
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketTag_m.h"
+#include "inet/common/stlutils.h"
 
 #ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
@@ -649,8 +650,7 @@ bool SctpAssociation::processInitArrived(SctpInitChunk *initchunk, int32_t srcPo
                     qCounter.roomRetransQ[path->remoteAddress] = 0;
                 }
             }
-            auto ite = sctpPathMap.find(remoteAddr);
-            if (ite == sctpPathMap.end()) {
+            if (!containsKey(sctpPathMap, remoteAddr)) {
                 SctpPathVariables *path = new SctpPathVariables(remoteAddr, this, rt);
                 EV_INFO << "Get new path for " << remoteAddr << "\n";
                 sctpPathMap[remoteAddr] = path;
@@ -778,8 +778,7 @@ bool SctpAssociation::processInitAckArrived(SctpInitAckChunk *initAckChunk)
                     }
                 }
             }
-            auto ite = sctpPathMap.find(remoteAddr);
-            if (ite == sctpPathMap.end()) {
+            if (!containsKey(sctpPathMap, remoteAddr)) {
                 EV_INFO << " get new path for " << remoteAddr << "\n";
                 SctpPathVariables *path = new SctpPathVariables(remoteAddr, this, rt);
                 sctpPathMap[remoteAddr] = path;
@@ -2258,7 +2257,7 @@ SctpEventCode SctpAssociation::processDataArrived(SctpDataChunk *dataChunk)
                 putInDeliveryQ(dataChunk->getSid());
                 if (simTime() > state->lastThroughputTime + 1) {
                     for (uint16_t i = 0; i < inboundStreams; i++) {
-                        if (streamThroughputVectors.find(i) == streamThroughputVectors.end()) {
+                        if (!containsKey(streamThroughputVectors, i)) {
                             char vectorName[128];
                             snprintf(vectorName, sizeof(vectorName), "Stream %d Throughput", i);
                             streamThroughputVectors[i] = new cOutVector(vectorName);

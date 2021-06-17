@@ -18,8 +18,7 @@
 
 #include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
-#include <algorithm>
-
+#include "inet/common/stlutils.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/routing/ospfv2/router/Lsa.h"
 
@@ -803,7 +802,7 @@ void Router::rebuildRoutingTable()
 
 bool Router::deleteRoute(Ospfv2RoutingTableEntry *entry)
 {
-    auto i = std::find(ospfRoutingTable.begin(), ospfRoutingTable.end(), entry);
+    auto i = find(ospfRoutingTable, entry);
     if (i != ospfRoutingTable.end()) {
         delete *i;
         ospfRoutingTable.erase(i);
@@ -1298,8 +1297,7 @@ void Router::notifyAboutRoutingTableChanges(std::vector<Ospfv2RoutingTableEntry 
                                     originatedLSAMap[lsaKey] = true;
                                 }
                                 else { // no more entries in this range -> delete it
-                                    std::map<LsaKeyType, bool, LsaKeyType_Less>::const_iterator deletedIt = deletedLSAMap.find(lsaKey);
-                                    if (deletedIt == deletedLSAMap.end()) {
+                                    if (!containsKey(deletedLSAMap, lsaKey)) {
                                         summaryLSA->getHeaderForUpdate().setLsAge(MAX_AGE);
                                         floodLSA(summaryLSA, areas[i]->getAreaID());
 
@@ -1316,8 +1314,7 @@ void Router::notifyAboutRoutingTableChanges(std::vector<Ospfv2RoutingTableEntry 
         // iterate over the old routing table and look for deleted entries
         for (uint32_t j = 0; j < oldRoutingTable.size(); j++) {
             Ipv4AddressRange destination(oldRoutingTable[j]->getDestination() & oldRoutingTable[j]->getNetmask(), oldRoutingTable[j]->getNetmask());
-            auto destIt = newTableMap.find(destination);
-            if (destIt == newTableMap.end()) { // deleted routing entry
+            if (!containsKey(newTableMap, destination)) { // deleted routing entry
                 Ipv4AddressRange destinationAddressRange(oldRoutingTable[j]->getDestination(), oldRoutingTable[j]->getNetmask());
 
                 if ((oldRoutingTable[j]->getDestinationType() == Ospfv2RoutingTableEntry::NETWORK_DESTINATION) &&
@@ -1358,7 +1355,7 @@ void Router::notifyAboutRoutingTableChanges(std::vector<Ospfv2RoutingTableEntry 
                             originatedLSAMap[lsaKey] = true;
                         }
                         else { // no more entries in this range -> delete it
-                            std::map<LsaKeyType, bool, LsaKeyType_Less>::const_iterator deletedIt = deletedLSAMap.find(lsaKey);
+                            auto deletedIt = deletedLSAMap.find(lsaKey);
                             if (deletedIt == deletedLSAMap.end()) {
                                 summaryLSA->getHeaderForUpdate().setLsAge(MAX_AGE);
                                 floodLSA(summaryLSA, areas[i]->getAreaID());

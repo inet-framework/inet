@@ -83,7 +83,8 @@ void AdaptiveProbabilisticBroadcast::handleSelfMessage(cMessage *msg)
         const NeighborMap::key_type& node = *static_cast<NeighborMap::key_type *>(msg->getContextPointer());
         EV << "handleSelfMsg(): Remove node " << node << " from NeighMap!" << endl;
         auto it = neighMap.find(node);
-        cancelAndDelete(neighMap.find(it->first)->second);
+        ASSERT(it != neighMap.end());
+        cancelAndDelete(it->second);
         neighMap.erase(it);
         updateBeta();
     }

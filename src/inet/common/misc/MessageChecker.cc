@@ -18,6 +18,8 @@
 
 #include "inet/common/misc/MessageChecker.h"
 
+#include "inet/common/stlutils.h"
+
 namespace inet {
 
 Define_Module(MessageChecker);
@@ -87,7 +89,7 @@ void MessageChecker::checkFields(void *object, cClassDescriptor *descriptor, con
         int field = findFieldIndex(object, descriptor, attr["name"]);
 
         // check the field type into the client object (if requiered)
-        if (attr.find("type") != attr.end())
+        if (containsKey(attr, "type"))
             checkFieldType(object, descriptor, field, attr);
 
         if (patternType == "fieldValue")

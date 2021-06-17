@@ -21,6 +21,7 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
+#include "inet/common/stlutils.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -46,7 +47,7 @@ void LifecycleController::Callback::invoke()
 template<typename T>
 void vector_delete_element(std::vector<T *>& v, T *p)
 {
-    auto it = std::find(v.begin(), v.end(), p);
+    auto it = find(v, p);
     ASSERT(it != v.end());
     v.erase(it);
     delete p;

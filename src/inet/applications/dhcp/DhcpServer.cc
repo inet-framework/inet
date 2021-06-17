@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #include "inet/common/Simsignals.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -261,8 +262,8 @@ void DhcpServer::processDhcpMessage(Packet *packet)
                 }
                 else { // renewing or rebinding: in this case ciaddr must be filled in with client's IP address
                     auto it = leased.find(dhcpMsg->getCiaddr());
-                    DhcpLease *lease = &it->second;
                     if (it != leased.end()) {
+                        DhcpLease *lease = &it->second;
                         EV_INFO << "Request for renewal/rebinding IP " << lease->ip << " to " << lease->mac << "." << endl;
                         lease->xid = dhcpMsg->getXid();
                         lease->leaseTime = leaseTime;
@@ -511,7 +512,7 @@ DhcpLease *DhcpServer::getAvailableLease(Ipv4Address requestedAddress, const Mac
 
     // try to allocate the requested address if that address is valid and not already allocated
     if (!requestedAddress.isUnspecified()) { // valid
-        if (leased.find(requestedAddress) != leased.end() && !leased[requestedAddress].leased) // not already leased (allocated)
+        if (containsKey(leased, requestedAddress) && !leased[requestedAddress].leased) // not already leased (allocated)
             return &leased[requestedAddress];
 
         // lease does not exist, create it
@@ -526,7 +527,7 @@ DhcpLease *DhcpServer::getAvailableLease(Ipv4Address requestedAddress, const Mac
     // allocate new address from server's pool of available addresses
     for (unsigned int i = 0; i < maxNumOfClients; i++) {
         Ipv4Address ip(beginAddr + i);
-        if (leased.find(ip) != leased.end()) {
+        if (containsKey(leased, ip)) {
             // lease exists but not allocated (e.g. expired or released)
             if (!leased[ip].leased)
                 return &(leased[ip]);

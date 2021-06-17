@@ -21,6 +21,7 @@
 
 #include "inet/common/IPrintableObject.h"
 #include "inet/common/OmittedModule.h"
+#include "inet/common/stlutils.h"
 
 namespace inet {
 
@@ -74,7 +75,7 @@ void layoutSubmodulesWithGates(cModule *module, int dimensionIndex, double modul
             }
             else
                 throw cRuntimeError("Unknown gate type");
-            auto jt = std::find(submodules.begin(), submodules.end(), connectedModule);
+            auto jt = find(submodules, connectedModule);
             if (jt != submodules.end() && jt - submodules.begin() < i) {
                 auto connectedPosition = getPosition(connectedModule, dimensionIndex);
                 maxPosition = std::max(maxPosition, connectedPosition);

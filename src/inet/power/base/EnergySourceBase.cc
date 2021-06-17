@@ -19,6 +19,8 @@
 
 #include <algorithm>
 
+#include "inet/common/stlutils.h"
+
 namespace inet {
 
 namespace power {
@@ -35,7 +37,7 @@ void EnergySourceBase::addEnergyConsumer(const IEnergyConsumer *energyConsumer)
 
 void EnergySourceBase::removeEnergyConsumer(const IEnergyConsumer *energyConsumer)
 {
-    auto it = std::find(energyConsumers.begin(), energyConsumers.end(), energyConsumer);
+    auto it = find(energyConsumers, energyConsumer);
     if (it == energyConsumers.end())
         throw cRuntimeError("Energy consumer not found");
     else

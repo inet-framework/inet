@@ -43,9 +43,9 @@ const ProtocolPrinter *ProtocolPrinterRegistry::findProtocolPrinter(const Protoc
 
 const ProtocolPrinter *ProtocolPrinterRegistry::getProtocolPrinter(const Protocol *protocol) const
 {
-    auto protocolPrinter = findProtocolPrinter(protocol);
-    if (protocolPrinter != nullptr)
-        return protocolPrinter;
+    auto it = protocolPrinters.find(protocol);
+    if (it != protocolPrinters.end())
+        return it->second;
     else
         throw cRuntimeError("Cannot find protocol printer for %s", protocol->getName());
 }

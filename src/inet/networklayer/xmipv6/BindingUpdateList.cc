@@ -22,6 +22,7 @@
 
 #include "inet/networklayer/xmipv6/BindingUpdateList.h"
 
+#include "inet/common/stlutils.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 
 namespace inet {
@@ -198,7 +199,6 @@ void BindingUpdateList::addOrUpdateBUL(const Ipv6Address& dest, const Ipv6Addres
 BindingUpdateList::BindingUpdateListEntry *BindingUpdateList::lookup(const Ipv6Address& dest)
 {
     auto i = bindingUpdateList.find(dest);
-
     return (i == bindingUpdateList.end()) ? nullptr : &(i->second);
 }
 
@@ -297,14 +297,13 @@ bool BindingUpdateList::isCareOfTokenAvailable(const Ipv6Address& dest, NetworkI
 
 bool BindingUpdateList::isInBindingUpdateList(const Ipv6Address& dest) const
 {
-    return bindingUpdateList.find(dest) != bindingUpdateList.end();
+    return containsKey(bindingUpdateList, dest);
 }
 
 uint BindingUpdateList::getSequenceNumber(const Ipv6Address& dest)
 {
     // search for entry
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
-
     if (entry == nullptr)
         return 0;
 
@@ -324,7 +323,6 @@ const Ipv6Address& BindingUpdateList::getCoA(const Ipv6Address& dest)
 bool BindingUpdateList::isInBindingUpdateList(const Ipv6Address& dest, const Ipv6Address& HoA)
 {
     auto pos = bindingUpdateList.find(dest);
-
     if (pos == bindingUpdateList.end())
         return false;
 
@@ -334,7 +332,6 @@ bool BindingUpdateList::isInBindingUpdateList(const Ipv6Address& dest, const Ipv
 bool BindingUpdateList::isValidBinding(const Ipv6Address& dest)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
-
     if (entry == nullptr)
         return false;
 

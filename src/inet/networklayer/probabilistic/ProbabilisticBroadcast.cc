@@ -11,6 +11,7 @@
 
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -224,14 +225,12 @@ void ProbabilisticBroadcast::finish()
 
 bool ProbabilisticBroadcast::messageKnown(unsigned int msgId)
 {
-    auto pos = knownMsgIds.find(msgId);
-    return pos != knownMsgIds.end();
+    return contains(knownMsgIds, msgId);
 }
 
 bool ProbabilisticBroadcast::debugMessageKnown(unsigned int msgId)
 {
-    auto pos = debugMsgIdSet.find(msgId);
-    return pos != debugMsgIdSet.end();
+    return contains(debugMsgIdSet, msgId);
 }
 
 void ProbabilisticBroadcast::insertMessage(simtime_t_cref bcastDelay, tMsgDesc *msgDesc)

@@ -18,6 +18,7 @@
 #include "inet/physicallayer/wireless/common/neighborcache/NeighborListNeighborCache.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/stlutils.h"
 
 namespace inet {
 namespace physicallayer {
@@ -113,7 +114,7 @@ void NeighborListNeighborCache::addRadio(const IRadio *radio)
 
 void NeighborListNeighborCache::removeRadio(const IRadio *radio)
 {
-    auto it = find(radios.begin(), radios.end(), radioToEntry[radio]);
+    auto it = find(radios, radioToEntry[radio]);
     if (it != radios.end()) {
         removeRadioFromNeighborLists(radio);
         radios.erase(it);
@@ -137,7 +138,7 @@ void NeighborListNeighborCache::removeRadioFromNeighborLists(const IRadio *radio
 {
     for (auto& elem : radios) {
         Radios neighborVector = elem->neighborVector;
-        auto it = find(neighborVector.begin(), neighborVector.end(), radio);
+        auto it = find(neighborVector, radio);
         if (it != neighborVector.end())
             neighborVector.erase(it);
     }

@@ -19,7 +19,7 @@
 
 #include "inet/routing/pim/tables/PimNeighborTable.h"
 
-#include <algorithm>
+#include "inet/common/stlutils.h"
 
 namespace inet {
 
@@ -135,7 +135,7 @@ bool PimNeighborTable::deleteNeighbor(PimNeighbor *neighbor)
     auto it = neighbors.find(neighbor->getInterfaceId());
     if (it != neighbors.end()) {
         PimNeighborVector& neighborsOnInterface = it->second;
-        auto it2 = find(neighborsOnInterface.begin(), neighborsOnInterface.end(), neighbor);
+        auto it2 = find(neighborsOnInterface, neighbor);
         if (it2 != neighborsOnInterface.end()) {
             neighborsOnInterface.erase(it2);
 

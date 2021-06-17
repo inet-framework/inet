@@ -22,6 +22,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
+#include "inet/common/stlutils.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 #include "inet/networklayer/nexthop/NextHopRoute.h"
@@ -389,7 +390,7 @@ void NextHopRoutingTable::internalAddRoute(NextHopRoute *route)
 
 NextHopRoute *NextHopRoutingTable::internalRemoveRoute(NextHopRoute *route)
 {
-    auto i = std::find(routes.begin(), routes.end(), route);
+    auto i = find(routes, route);
     if (i != routes.end()) {
         ASSERT(route->getRoutingTableAsGeneric() == this);
         routes.erase(i);

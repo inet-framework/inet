@@ -17,6 +17,7 @@
 
 #include "inet/protocolelement/redundancy/StreamMerger.h"
 
+#include "inet/common/stlutils.h"
 #include "inet/protocolelement/redundancy/SequenceNumberTag_m.h"
 #include "inet/protocolelement/redundancy/StreamTag_m.h"
 
@@ -96,7 +97,7 @@ bool StreamMerger::matchesSequenceNumber(const char *streamName, int sequenceNum
     if (it == sequenceNumbers.end())
         return true;
     else
-        return std::find(it->second.begin(), it->second.end(), sequenceNumber) == it->second.end();
+        return !contains(it->second, sequenceNumber);
 }
 
 } // namespace inet

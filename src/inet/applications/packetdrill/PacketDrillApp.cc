@@ -28,6 +28,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/socket/SocketTag_m.h"
+#include "inet/common/stlutils.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/configurator/ipv4/Ipv4NodeConfigurator.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
@@ -655,12 +656,7 @@ void PacketDrillApp::closeAllSockets()
 
 bool PacketDrillApp::findSeqNumMap(uint32_t num)
 {
-    std::map<uint32_t, uint32_t>::iterator it;
-
-    it = seqNumMap.find(num);
-    if (it != seqNumMap.end())
-        return true;
-    return false;
+   return containsKey(seqNumMap, num);
 }
 
 void PacketDrillApp::runSystemCallEvent(PacketDrillEvent *event, struct syscall_spec *syscall)

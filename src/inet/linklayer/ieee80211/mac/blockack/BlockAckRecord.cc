@@ -17,6 +17,8 @@
 
 #include "inet/linklayer/ieee80211/mac/blockack/BlockAckRecord.h"
 
+#include "inet/common/stlutils.h"
+
 namespace inet {
 namespace ieee80211 {
 
@@ -38,8 +40,7 @@ bool BlockAckRecord::getAckState(SequenceNumberCyclic sequenceNumber, FragmentNu
     // The status of MPDUs that are considered “old” and prior to the sequence number
     // range for which the receiver maintains status shall be reported as successfully
     // received (i.e., the corresponding bit in the bitmap shall be set to 1).
-    auto it = acknowledgmentState.find(SequenceControlField(sequenceNumber.get(), fragmentNumber));
-    if (it != acknowledgmentState.end()) {
+    if (containsKey(acknowledgmentState, SequenceControlField(sequenceNumber.get(), fragmentNumber))) {
         return true;
     }
     else if (acknowledgmentState.size() == 0) {

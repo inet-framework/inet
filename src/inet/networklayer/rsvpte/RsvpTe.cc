@@ -24,6 +24,7 @@
 #include "inet/common/XMLUtils.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/stlutils.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -602,7 +603,7 @@ void RsvpTe::refreshResv(ResvStateBlock *rsbEle)
             if (tedmod->isLocalAddress(elem.Previous_Hop_Address))
                 continue; // IR nothing to refresh
 
-            if (!find(phops, elem.Previous_Hop_Address))
+            if (!contains(phops, elem.Previous_Hop_Address))
                 phops.push_back(elem.Previous_Hop_Address);
         }
 

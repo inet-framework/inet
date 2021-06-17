@@ -27,6 +27,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -1387,8 +1388,7 @@ void xMIPv6::triggerRouteOptimization(const Ipv6Address& destAddress, const Ipv6
             EV_INFO << "Initialise Route Optimization for: " << destAddress << "\n";
             initReturnRoutability(destAddress, ie);
 
-            auto CRiterator = find(cnList.begin(), cnList.end(), destAddress);
-            if (CRiterator == cnList.end())
+            if (!contains(cnList, destAddress))
                 cnList.push_back(destAddress);
         }
     }
@@ -2227,11 +2227,9 @@ bool xMIPv6::cancelTimerIfEntry(const Ipv6Address& dest, int interfaceID, int ms
 bool xMIPv6::pendingTimerIfEntry(Ipv6Address& dest, int interfaceID, int msgType)
 {
     Key key(dest, interfaceID, msgType);
-    auto pos = transmitIfList.find(key);
-
     // return true if there is an entry
     // and false otherwise
-    return pos != transmitIfList.end();
+    return containsKey(transmitIfList, key);
 }
 
 xMIPv6::TimerIfEntry *xMIPv6::getTimerIfEntry(Key& key, int timerType)

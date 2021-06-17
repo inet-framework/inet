@@ -17,6 +17,7 @@
 
 #include "inet/linklayer/ieee80211/mac/originator/NonQosRecoveryProcedure.h"
 
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRtsPolicy.h"
 
 namespace inet {
@@ -72,7 +73,7 @@ void NonQosRecoveryProcedure::incrementStationLrc(StationRetryCounters *stationC
 void NonQosRecoveryProcedure::incrementCounter(const Ptr<const Ieee80211DataOrMgmtHeader>& header, std::map<SequenceControlField, int>& retryCounter)
 {
     auto id = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
-    if (retryCounter.find(id) != retryCounter.end())
+    if (containsKey(retryCounter, id))
         retryCounter[id]++;
     else
         retryCounter.insert(std::make_pair(id, 1));

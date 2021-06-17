@@ -24,6 +24,7 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/stlutils.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
@@ -197,7 +198,7 @@ Ipv4AddressVector Ted::calculateShortestPath(Ipv4AddressVector dest,
         if (V[i].dist >= minDist)
             continue;
 
-        if (find(dest.begin(), dest.end(), V[i].node) == dest.end())
+        if (!contains(dest, V[i].node))
             continue;
 
         minDist = V[i].dist;

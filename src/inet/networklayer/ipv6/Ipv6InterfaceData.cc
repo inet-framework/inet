@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <sstream>
 
+#include "inet/common/stlutils.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
@@ -464,7 +465,7 @@ simtime_t Ipv6InterfaceData::generateReachableTime()
 bool Ipv6InterfaceData::isMemberOfMulticastGroup(const Ipv6Address& multicastAddress) const
 {
     const Ipv6AddressVector& multicastGroups = getJoinedMulticastGroups();
-    return find(multicastGroups.begin(), multicastGroups.end(), multicastAddress) != multicastGroups.end();
+    return contains(multicastGroups, multicastAddress);
 }
 
 void Ipv6InterfaceData::joinMulticastGroup(const Ipv6Address& multicastAddress)
@@ -522,7 +523,7 @@ void Ipv6InterfaceData::leaveMulticastGroup(const Ipv6Address& multicastAddress)
 bool Ipv6InterfaceData::hasMulticastListener(const Ipv6Address& multicastAddress) const
 {
     const Ipv6AddressVector& multicastGroups = getRouterData()->reportedMulticastGroups;
-    return find(multicastGroups.begin(), multicastGroups.end(), multicastAddress) != multicastGroups.end();
+    return contains(multicastGroups, multicastAddress);
 }
 
 void Ipv6InterfaceData::addMulticastListener(const Ipv6Address& multicastAddress)

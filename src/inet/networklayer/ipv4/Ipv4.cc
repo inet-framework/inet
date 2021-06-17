@@ -166,7 +166,7 @@ void Ipv4::handleRequest(Request *request)
     }
     else if (Ipv4SocketConnectCommand *command = dynamic_cast<Ipv4SocketConnectCommand *>(ctrl)) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        if (socketIdToSocketDescriptor.find(socketId) == socketIdToSocketDescriptor.end())
+        if (!containsKey(socketIdToSocketDescriptor, socketId))
             throw cRuntimeError("Ipv4Socket: should use bind() before connect()");
         socketIdToSocketDescriptor[socketId]->remoteAddress = command->getRemoteAddress();
         delete request;
@@ -777,7 +777,7 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
             hasSocket = true;
         }
     }
-    if (upperProtocols.find(protocol) != upperProtocols.end()) {
+    if (contains(upperProtocols, protocol)) {
         EV_INFO << "Passing up to protocol " << *protocol << "\n";
         emit(packetSentToUpperSignal, packet);
         send(packet, "transportOut");
@@ -1080,7 +1080,7 @@ void Ipv4::sendDatagramToOutput(Packet *packet)
             pendingPackets[nextHopAddr].insert(packet);
         }
         else {
-            ASSERT2(pendingPackets.find(nextHopAddr) == pendingPackets.end(), "Ipv4-ARP error: nextHopAddr found in ARP table, but Ipv4 queue for nextHopAddr not empty");
+            ASSERT2(!containsKey(pendingPackets, nextHopAddr), "Ipv4-ARP error: nextHopAddr found in ARP table, but Ipv4 queue for nextHopAddr not empty");
             packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(nextHopMacAddr);
             sendPacketToNIC(packet);
         }

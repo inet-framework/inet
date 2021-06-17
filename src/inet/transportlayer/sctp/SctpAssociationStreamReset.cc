@@ -939,20 +939,12 @@ void SctpAssociation::resetSsn(uint16_t id)
 
 bool SctpAssociation::sendStreamPresent(uint16_t id)
 {
-    auto iterator = sendStreams.find(id);
-    if (iterator == sendStreams.end())
-        return false;
-    else
-        return true;
+    return containsKey(sendStreams, id);
 }
 
 bool SctpAssociation::receiveStreamPresent(uint16_t id)
 {
-    auto iterator = receiveStreams.find(id);
-    if (iterator == receiveStreams.end())
-        return false;
-    else
-        return true;
+    return containsKey(receiveStreams, id);
 }
 
 } // namespace sctp

@@ -65,7 +65,7 @@ void Ospfv3Splitter::handleMessage(cMessage *msg)
             NetworkInterface *ie = ift->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
             if (ie != nullptr) {
                 char *ieName = (char *)ie->getInterfaceName();
-                std::map<std::string, std::pair<int, int>>::iterator it = this->interfaceToProcess.find(ieName);
+                auto it = this->interfaceToProcess.find(ieName);
                 // Is there a process with this interface??
                 if (it != this->interfaceToProcess.end()) {
                     this->send(msg, "processOut", it->second.first); // first is always there
@@ -114,14 +114,12 @@ void Ospfv3Splitter::parseConfig(cXMLElement *routingConfig, cXMLElement *intCon
         int processCount = processElements.size();
         for (int i = 0; i < processCount; i++) {
             const char *processID = processElements.at(i)->getAttribute("id");
-            std::map<std::string, int>::iterator procIt;
-            procIt = this->processInVector.find(processID);
+            auto procIt = this->processInVector.find(processID);
             int processPosition = procIt->second;
 
             // find interface in interfaceToProcess, if this is the first time, set first int to process position
             // and second int to -1
-            std::map<std::string, std::pair<int, int>>::iterator intProc;
-            intProc = this->interfaceToProcess.find(intName);
+            auto intProc = this->interfaceToProcess.find(intName);
             std::pair<int, int> procInts;
             if (intProc == this->interfaceToProcess.end()) {
                 EV_DEBUG << "Process " << processID << " is assigned to interface " << intName << " as the first process. Its position in vector is" << processPosition << "\n";

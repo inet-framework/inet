@@ -26,6 +26,7 @@
 #include "inet/common/Protocol.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
@@ -753,7 +754,7 @@ void Igmpv2::sendToIP(Packet *msg, NetworkInterface *ie, const Ipv4Address& dest
 Igmpv2::RouterGroupData *Igmpv2::createRouterGroupData(NetworkInterface *ie, const Ipv4Address& group)
 {
     RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
-    ASSERT(interfaceData->groups.find(group) == interfaceData->groups.end());
+    ASSERT(!containsKey(interfaceData->groups, group));
     RouterGroupData *data = new RouterGroupData(this, group);
     interfaceData->groups[group] = data;
     return data;
@@ -762,7 +763,7 @@ Igmpv2::RouterGroupData *Igmpv2::createRouterGroupData(NetworkInterface *ie, con
 Igmpv2::HostGroupData *Igmpv2::createHostGroupData(NetworkInterface *ie, const Ipv4Address& group)
 {
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
-    ASSERT(interfaceData->groups.find(group) == interfaceData->groups.end());
+    ASSERT(!containsKey(interfaceData->groups, group));
     HostGroupData *data = new HostGroupData(this, group);
     interfaceData->groups[group] = data;
     return data;

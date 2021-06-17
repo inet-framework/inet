@@ -17,6 +17,8 @@
 
 #include "inet/routing/gpsr/PositionTable.h"
 
+#include "inet/common/stlutils.h"
+
 namespace inet {
 
 std::vector<L3Address> PositionTable::getAddresses() const

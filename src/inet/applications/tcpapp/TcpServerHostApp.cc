@@ -19,6 +19,7 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/stlutils.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
@@ -77,7 +78,7 @@ void TcpServerHostApp::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         TcpServerThreadBase *thread = (TcpServerThreadBase *)msg->getContextPointer();
-        if (threadSet.find(thread) == threadSet.end())
+        if (!contains(threadSet, thread))
             throw cRuntimeError("Invalid thread pointer in the timer (msg->contextPointer is invalid)");
         thread->timerExpired(msg);
     }

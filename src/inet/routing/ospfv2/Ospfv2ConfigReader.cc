@@ -29,6 +29,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/PatternMatcher.h"
 #include "inet/common/XMLUtils.h"
+#include "inet/common/stlutils.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
@@ -151,7 +152,7 @@ void Ospfv2ConfigReader::getAreaListFromXML(const cXMLElement& routerNode, std::
             (nodeName == "PointToMultiPointInterface"))
         {
             AreaId areaID = Ipv4Address(getStrAttrOrPar(*elem, "areaID"));
-            if (areaList.find(areaID) == areaList.end())
+            if (!contains(areaList, areaID))
                 areaList.insert(areaID);
         }
     }

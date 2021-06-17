@@ -19,6 +19,8 @@
 
 #include <algorithm>
 
+#include "inet/common/stlutils.h"
+
 namespace inet {
 
 namespace power {
@@ -35,7 +37,7 @@ void EnergySinkBase::addEnergyGenerator(const IEnergyGenerator *energyGenerator)
 
 void EnergySinkBase::removeEnergyGenerator(const IEnergyGenerator *energyGenerator)
 {
-    auto it = std::find(energyGenerators.begin(), energyGenerators.end(), energyGenerator);
+    auto it = find(energyGenerators, energyGenerator);
     if (it == energyGenerators.end())
         throw cRuntimeError("Energy generator not found");
     else

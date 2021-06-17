@@ -17,6 +17,8 @@
 
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocketTable.h"
 
+#include "inet/common/stlutils.h"
+
 namespace inet {
 
 Define_Module(Ieee8022LlcSocketTable);
@@ -34,8 +36,7 @@ void Ieee8022LlcSocketTable::initialize()
 
 void Ieee8022LlcSocketTable::addSocket(int socketId, int localSap, int remoteSap)
 {
-    auto it = socketIdToSocketMap.find(socketId);
-    if (it != socketIdToSocketMap.end())
+    if (containsKey(socketIdToSocketMap, socketId))
         throw cRuntimeError("Socket already added");
     Socket *socket = new Socket(socketId);
     socket->localSap = localSap;

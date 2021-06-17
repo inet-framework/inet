@@ -170,7 +170,7 @@ MacAddress GlobalArp::mapUnicastAddress(L3Address address)
 #ifdef INET_WITH_IPv4
         case L3Address::IPv4: {
             Ipv4Address ipv4Address = address.toIpv4();
-            ArpCache::const_iterator it = globalArpCache.find(ipv4Address);
+            auto it = globalArpCache.find(ipv4Address);
             if (it != globalArpCache.end())
                 return it->second->networkInterface->getMacAddress();
             throw cRuntimeError("GlobalArp does not support dynamic address resolution");
@@ -180,7 +180,7 @@ MacAddress GlobalArp::mapUnicastAddress(L3Address address)
 #ifdef INET_WITH_IPv6
         case L3Address::IPv6: {
             Ipv6Address ipv6Address = address.toIpv6();
-            ArpCache::const_iterator it = globalArpCache.find(ipv6Address);
+            auto it = globalArpCache.find(ipv6Address);
             if (it != globalArpCache.end())
                 return it->second->networkInterface->getMacAddress();
             throw cRuntimeError("GlobalArp does not support dynamic address resolution");

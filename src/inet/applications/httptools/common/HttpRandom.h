@@ -23,6 +23,7 @@
 
 #include "inet/applications/httptools/common/HttpUtils.h"
 #include "inet/common/INETMath.h"
+#include "inet/common/stlutils.h"
 
 namespace inet {
 
@@ -47,7 +48,7 @@ class INET_API rdObject
     DistrType m_type = dt_normal;
 
   protected:
-    bool _hasKey(cXMLAttributeMap attributes, std::string key) { return attributes.find(key) != attributes.end(); }
+    bool _hasKey(cXMLAttributeMap attributes, std::string key) { return containsKey(attributes, key); }
 
   public:
     virtual ~rdObject() {}

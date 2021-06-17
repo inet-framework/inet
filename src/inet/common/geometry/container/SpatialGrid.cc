@@ -17,6 +17,8 @@
 
 #include "inet/common/geometry/container/SpatialGrid.h"
 
+#include "inet/common/stlutils.h"
+
 namespace inet {
 
 bool SpatialGrid::insertObject(const cObject *object, const Coord& pos, const Coord& boundingBoxSize)
@@ -104,7 +106,7 @@ void SpatialGrid::rangeQuery(const Coord& pos, double range, const IVisitor *vis
 
 void SpatialGrid::lineSegmentQuery(const LineSegment& lineSegment, const IVisitor *visitor) const
 {
-    std::map<const cObject *, bool> visited;
+    std::set<const cObject *> visited;
     for (LineSegmentIterator it(this, lineSegment, voxelSizes, numVoxels); !it.end(); ++it) {
         Triplet<int> ind = it.getMatrixIndices();
         unsigned int voxelIndex = rowMajorIndex(ind);
@@ -112,10 +114,10 @@ void SpatialGrid::lineSegmentQuery(const LineSegment& lineSegment, const IVisito
             throw cRuntimeError("Out of index, gridVectorLength = %d, voxelIndex = %d", gridVectorLength, voxelIndex);
         const Voxel& intersectedVoxel = grid[voxelIndex];
         for (const auto& elem : intersectedVoxel) {
-            std::map<const cObject *, bool>::const_iterator objIter = visited.find(elem);
-            if (objIter == visited.end() || !objIter->second)
+            if (!contains(visited, elem)) {
                 visitor->visit(elem);
-            visited.insert(std::pair<const cObject *, bool>(elem, true));
+                visited.insert(elem);
+            }
         }
     }
 }

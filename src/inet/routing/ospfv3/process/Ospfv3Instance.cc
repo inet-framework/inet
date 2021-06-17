@@ -1,5 +1,6 @@
 #include "inet/routing/ospfv3/process/Ospfv3Instance.h"
 
+#include "inet/common/stlutils.h"
 #include "inet/routing/ospfv3/interface/Ospfv3Interface.h"
 
 namespace inet {
@@ -24,11 +25,7 @@ Ospfv3Instance::~Ospfv3Instance()
 
 bool Ospfv3Instance::hasArea(Ipv4Address areaId)
 {
-    std::map<Ipv4Address, Ospfv3Area *>::iterator areaIt = this->areasById.find(areaId);
-    if (areaIt == this->areasById.end())
-        return false;
-
-    return true;
+    return containsKey(this->areasById, areaId);
 } // hasArea
 
 void Ospfv3Instance::addArea(Ospfv3Area *newArea)

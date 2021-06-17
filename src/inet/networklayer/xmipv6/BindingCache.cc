@@ -22,6 +22,8 @@
 
 #include "inet/networklayer/xmipv6/BindingCache.h"
 
+#include "inet/common/stlutils.h"
+
 namespace inet {
 
 Define_Module(BindingCache);
@@ -76,54 +78,37 @@ uint BindingCache::readBCSequenceNumber(const Ipv6Address& HoA) const
     // the code from above creates a new (empty) entry if
     // the provided HoA does not yet exist.
     BindingCache6::const_iterator pos = bindingCache.find(HoA);
-
-    if (pos == bindingCache.end())
-        return 0; // HoA not yet registered
-    else
-        return pos->second.sequenceNumber;
+    return (pos == bindingCache.end()) ? 0 : pos->second.sequenceNumber;
 }
 
 bool BindingCache::isInBindingCache(const Ipv6Address& HoA, const Ipv6Address& CoA) const
 {
     BindingCache6::const_iterator pos = bindingCache.find(HoA);
-
-    if (pos == bindingCache.end())
-        return false; // if HoA is not registered then there's obviously no valid entry in the BC
-
-    return pos->second.careOfAddress == CoA; // if CoA corresponds to HoA, everything is fine
+    return (pos == bindingCache.end()) ? false : pos->second.careOfAddress == CoA;
 }
 
 bool BindingCache::isInBindingCache(const Ipv6Address& HoA) const
 {
-    return bindingCache.find(HoA) != bindingCache.end();
+    return containsKey(bindingCache, HoA);
 }
 
 void BindingCache::deleteEntry(const Ipv6Address& HoA)
 {
     auto pos = bindingCache.find(HoA);
-
-    if (pos != bindingCache.end()) // update 11.9.07 - CB
+    if (pos != bindingCache.end())
         bindingCache.erase(pos);
 }
 
 bool BindingCache::getHomeRegistration(const Ipv6Address& HoA) const
 {
     BindingCache6::const_iterator pos = bindingCache.find(HoA);
-
-    if (pos == bindingCache.end())
-        return false; // HoA not yet registered; should not occur anyway
-    else
-        return pos->second.isHomeRegisteration;
+    return (pos == bindingCache.end()) ? false : pos->second.isHomeRegisteration;
 }
 
 uint BindingCache::getLifetime(const Ipv6Address& HoA) const
 {
     BindingCache6::const_iterator pos = bindingCache.find(HoA);
-
-    if (pos == bindingCache.end())
-        return 0; // HoA not yet registered; should not occur anyway
-    else
-        return pos->second.bindingLifetime;
+    return (pos == bindingCache.end()) ? 0 : pos->second.bindingLifetime;
 }
 
 int BindingCache::generateHomeToken(const Ipv6Address& HoA, int nonce)

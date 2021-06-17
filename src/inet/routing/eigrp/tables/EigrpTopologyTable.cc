@@ -380,7 +380,7 @@ EigrpRouteSource<IPAddress> *EigrpTopologyTable<IPAddress>::removeRoute(EigrpRou
 {
     typename RouteVector::iterator it;
 
-    if ((it = std::find(routeVec.begin(), routeVec.end(), source)) != routeVec.end()) {
+    if ((it = find(routeVec, source)) != routeVec.end()) {
         removeRoute(it);
         return source;
     }
@@ -495,7 +495,7 @@ EigrpRoute<IPAddress> *EigrpTopologyTable<IPAddress>::removeRouteInfo(EigrpRoute
 {
     typename RouteInfoVector::iterator it;
 
-    if ((it = std::find(routeInfoVec.begin(), routeInfoVec.end(), route)) != routeInfoVec.end()) {
+    if ((it = find(routeInfoVec, route)) != routeInfoVec.end()) {
         routeInfoVec.erase(it);
         return route;
     }

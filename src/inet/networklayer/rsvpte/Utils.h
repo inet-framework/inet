@@ -39,22 +39,7 @@ void removeDuplicates(std::vector<int>& vec);
 /**
  * TODO documentation
  */
-bool find(std::vector<int>& vec, int value);
-
-/**
- * TODO documentation
- */
-bool find(const Ipv4AddressVector& vec, Ipv4Address addr); // use TEMPLATE
-
-/**
- * TODO documentation
- */
 void append(std::vector<int>& dest, const std::vector<int>& src);
-
-/**
- * TODO documentation
- */
-int find(const EroVector& ERO, Ipv4Address node);
 
 /**
  * TODO function appears to be unused

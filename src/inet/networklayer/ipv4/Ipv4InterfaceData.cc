@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <sstream>
 
+#include "inet/common/stlutils.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
@@ -33,8 +34,8 @@ const Ipv4MulticastSourceList Ipv4MulticastSourceList::ALL_SOURCES(MCAST_EXCLUDE
 
 bool Ipv4MulticastSourceList::contains(Ipv4Address source)
 {
-    return (filterMode == MCAST_INCLUDE_SOURCES && find(sources.begin(), sources.end(), source) != sources.end()) ||
-           (filterMode == MCAST_EXCLUDE_SOURCES && find(sources.begin(), sources.end(), source) == sources.end());
+    return (filterMode == MCAST_INCLUDE_SOURCES && inet::contains(sources, source)) ||
+           (filterMode == MCAST_EXCLUDE_SOURCES && !inet::contains(sources, source));
 }
 
 bool Ipv4MulticastSourceList::add(Ipv4Address source)
@@ -308,9 +309,8 @@ bool Ipv4InterfaceData::HostMulticastGroupData::updateSourceList()
         // If some socket is in EXCLUDE mode, then the sourceList contains the sources that are
         // excluded by all EXCLUDE mode sockets except if there is a socket including the source.
         for (auto& elem : excludeCounts)
-            if (elem.second == numOfExcludeModeSockets && includeCounts.find(elem.first) == includeCounts.end())
+            if (elem.second == numOfExcludeModeSockets && !containsKey(includeCounts, elem.first))
                 sourceList.push_back(elem.first);
-
     }
 
     if (this->sourceList.filterMode != filterMode || this->sourceList.sources != sourceList) {

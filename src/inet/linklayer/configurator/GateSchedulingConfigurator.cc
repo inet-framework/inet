@@ -269,7 +269,7 @@ simtime_t GateSchedulingConfigurator::computeStartOffsetForPathFragments(StreamR
                         nextGateOpenTime += transmissionDuration + propagationDelay;
                 }
                 auto endNetworkNodeName = pathFragment.back();
-                if (endNetworkNodeName != destination->getFullName() && std::find(extendedPath.begin(), extendedPath.end(), endNetworkNodeName) == extendedPath.end())
+                if (endNetworkNodeName != destination->getFullName() && !contains(extendedPath, endNetworkNodeName))
                     todos.push_back({endNetworkNodeName, nextGateOpenTime, extendedPath});
             }
         }
@@ -347,7 +347,7 @@ void GateSchedulingConfigurator::addGateSchedulingForPathFragments(StreamReserva
                         nextGateOpenTime += transmissionDuration + propagationDelay;
                 }
                 auto endNetworkNodeName = pathFragment.back();
-                if (endNetworkNodeName != destination->getFullName() && std::find(extendedPath.begin(), extendedPath.end(), endNetworkNodeName) == extendedPath.end())
+                if (endNetworkNodeName != destination->getFullName() && !contains(extendedPath, endNetworkNodeName))
                     todos.push_back({endNetworkNodeName, nextGateOpenTime, extendedPath});
             }
         }

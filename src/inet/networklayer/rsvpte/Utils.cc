@@ -88,34 +88,6 @@ void removeDuplicates(std::vector<int>& vec)
     }
 }
 
-int find(const EroVector& ERO, Ipv4Address node)
-{
-    for (unsigned int i = 0; i < ERO.size(); i++)
-        if (ERO[i].node == node)
-            return i;
-
-    ASSERT(false);
-    return -1; // to prevent warning
-}
-
-bool find(std::vector<int>& vec, int value)
-{
-    for (auto& elem : vec)
-        if (elem == value)
-            return true;
-
-    return false;
-}
-
-bool find(const Ipv4AddressVector& vec, Ipv4Address addr)
-{
-    for (auto& elem : vec)
-        if (elem == addr)
-            return true;
-
-    return false;
-}
-
 void append(std::vector<int>& dest, const std::vector<int>& src)
 {
     for (auto& elem : src)

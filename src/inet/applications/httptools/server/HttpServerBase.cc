@@ -19,6 +19,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/stlutils.h"
 
 namespace inet {
 
@@ -259,12 +260,12 @@ Packet *HttpServerBase::handleGetRequest(Packet *pk, std::string resource)
 
     if (cat == CT_HTML) {
         if (scriptedMode) {
-            if (resource.empty() && htmlPages.find("root") != htmlPages.end()) {
+            if (resource.empty() && containsKey(htmlPages, "root")) {
                 EV_DEBUG << "Generating root resource" << endl;
                 return generateDocument(pk, "root");
             }
-            if (htmlPages.find(resource) == htmlPages.end()) {
-                if (htmlPages.find("default") != htmlPages.end()) {
+            if (!containsKey(htmlPages, resource)) {
+                if (containsKey(htmlPages, "default")) {
                     EV_DEBUG << "Generating default resource" << endl;
                     return generateDocument(pk, "default");
                 }
@@ -277,7 +278,7 @@ Packet *HttpServerBase::handleGetRequest(Packet *pk, std::string resource)
         return generateDocument(pk, resource.c_str());
     }
     else if (cat == CT_TEXT || cat == CT_IMAGE) {
-        if (scriptedMode && resources.find(resource) == resources.end()) {
+        if (scriptedMode && !containsKey(resources, resource)) {
             EV_ERROR << "Resource not found: " << resource << endl;
             return generateErrorReply(request, 404);
         }
@@ -411,7 +412,7 @@ void HttpServerBase::registerWithController()
 {
     // Find controller object and register
     HttpController *controller = getModuleFromPar<HttpController>(par("httpControllerModule"), this);
-    controller->registerServer(this, host->getFullPath().c_str(), hostName.c_str(), port, INSERT_END, activationTime);
+    controller->registerServer(this, host->getFullPath(), hostName, port, INSERT_END, activationTime);
 }
 
 void HttpServerBase::readSiteDefinition(std::string file)
@@ -457,7 +458,7 @@ void HttpServerBase::readSiteDefinition(std::string file)
                             file.c_str(), linecount, line.c_str());
                 key = trimLeft(res[0], "/");
                 if (key.empty()) {
-                    if (htmlPages.find("root") == htmlPages.end())
+                    if (!containsKey(htmlPages, "root"))
                         key = "root";
                     else
                         throw cRuntimeError("Second root page found in site definition file %s, line (%d): %s",

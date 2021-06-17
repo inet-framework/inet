@@ -29,8 +29,10 @@
 
 #include <algorithm>
 
+#include "inet/common/stlutils.h"
 #include "inet/routing/eigrp/messages/EigrpMessage_m.h"
 #include "inet/routing/eigrp/pdms/EigrpMetricHelper.h"
+
 namespace inet {
 
 template<typename IPAddress> class EigrpRouteSource;
@@ -268,12 +270,7 @@ EigrpRoute<IPAddress>::~EigrpRoute()
 template<typename IPAddress>
 bool EigrpRoute<IPAddress>::getReplyStatus(int neighborId)
 {
-    std::vector<int>::iterator it;
-
-    if ((it = std::find(replyStatusTable.begin(), replyStatusTable.end(), neighborId)) != replyStatusTable.end())
-        return true;
-
-    return false;
+    return contains(replyStatusTable, neighborId);
 }
 
 /**
@@ -282,9 +279,8 @@ bool EigrpRoute<IPAddress>::getReplyStatus(int neighborId)
 template<typename IPAddress>
 bool EigrpRoute<IPAddress>::unsetReplyStatus(int neighborId)
 {
-    std::vector<int>::iterator it;
-
-    if ((it = std::find(replyStatusTable.begin(), replyStatusTable.end(), neighborId)) != replyStatusTable.end()) {
+    auto it = find(replyStatusTable, neighborId);
+    if (it != replyStatusTable.end()) {
         replyStatusTable.erase(it);
         return true;
     }

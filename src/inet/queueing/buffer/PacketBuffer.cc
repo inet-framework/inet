@@ -21,6 +21,7 @@
 
 #include "inet/common/Simsignals.h"
 #include "inet/common/StringFormat.h"
+#include "inet/common/stlutils.h"
 #include "inet/queueing/compat/cpacketqueue.h"
 
 namespace inet {
@@ -74,7 +75,7 @@ void PacketBuffer::addPacket(Packet *packet)
             while (!isEmpty() && isOverloaded()) {
                 auto packet = packetDropperFunction->selectPacket(this);
                 EV_INFO << "Dropping packet" << EV_FIELD(packet) << EV_ENDL;
-                packets.erase(find(packets.begin(), packets.end(), packet));
+                packets.erase(find(packets, packet));
                 auto queue = dynamic_cast<cPacketQueue *>(packet->getOwner());
                 if (queue != nullptr) {
                     ICallback *callback = dynamic_cast<ICallback *>(queue->getOwner());
@@ -97,7 +98,7 @@ void PacketBuffer::removePacket(Packet *packet)
     Enter_Method("removePacket");
     EV_INFO << "Removing packet" << EV_FIELD(packet) << EV_ENDL;
     emit(packetRemovedSignal, packet);
-    packets.erase(find(packets.begin(), packets.end(), packet));
+    packets.erase(find(packets, packet));
     updateDisplayString();
     auto queue = dynamic_cast<cPacketQueue *>(packet->getOwner());
     if (queue != nullptr) {

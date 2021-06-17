@@ -18,9 +18,9 @@
 #include "inet/applications/httptools/configurator/HttpController.h"
 
 #include "inet/applications/httptools/server/HttpServerBase.h"
+#include "inet/common/stlutils.h"
 
 namespace inet {
-
 namespace httptools {
 
 Define_Module(HttpController);
@@ -119,20 +119,20 @@ void HttpController::handleMessage(cMessage *msg)
     }
 }
 
-void HttpController::registerServer(HttpServerBase *serverAppModule, const char *objectName, const char *wwwName, int port, int rank, simtime_t activationTime)
+void HttpController::registerServer(HttpServerBase *serverAppModule, const std::string& objectName, const std::string& wwwName, int port, int rank, simtime_t activationTime)
 {
     Enter_Method("registerServer");
 
-    std::string serverName = extractServerName(wwwName);
+    std::string serverName = extractServerName(wwwName.c_str());
 
     EV_DEBUG << "Registering www server: " << objectName << ", " << wwwName
              << " (" << port << "). Activation time is " << activationTime << endl;
 
-    if (webSiteList.find(wwwName) != webSiteList.end())
+    if (containsKey(webSiteList, wwwName))
         EV_ERROR << "Server " << wwwName << " is already registered\n";
 
     if (serverAppModule == nullptr)
-        throw cRuntimeError("Server %s does not have a WWW module", wwwName);
+        throw cRuntimeError("Server %s does not have a WWW module", wwwName.c_str());
 
     WebServerEntry *en = new WebServerEntry();
 
@@ -178,7 +178,7 @@ cModule *HttpController::getServerModule(const char *wwwName)
 
     std::string serverUrl = extractServerName(wwwName);
 
-    if (webSiteList.find(serverUrl) == webSiteList.end()) { // The www name is not in the map
+    if (!containsKey(webSiteList, serverUrl)) { // The www name is not in the map
         EV_ERROR << "Could not find module name for " << wwwName << endl;
         return nullptr;
     }
@@ -225,7 +225,7 @@ int HttpController::getServerInfo(const char *wwwName, char *module, int& port)
 
     std::string serverUrl = extractServerName(wwwName);
 
-    if (webSiteList.find(serverUrl) == webSiteList.end()) { // The www name is not in the map
+    if (!containsKey(webSiteList, serverUrl)) { // The www name is not in the map
         EV_ERROR << "Could not find module name for " << wwwName << endl;
         return -1;
     }
@@ -273,7 +273,7 @@ int HttpController::getAnyServerInfo(char *wwwName, char *module, int& port)
 
 void HttpController::setSpecialStatus(const char *www, ServerStatus status, double p, double amortize)
 {
-    if (webSiteList.find(www) == webSiteList.end()) { // The www name is not in the map
+    if (!containsKey(webSiteList, www)) { // The www name is not in the map
         EV_ERROR << "Could not find module name for " << www << ". Cannot set special status" << endl;
         return;
     }
@@ -474,6 +474,5 @@ HttpController::WebServerEntry *HttpController::__getRandomServerInfo()
 }
 
 } // namespace httptools
-
 } // namespace inet
 

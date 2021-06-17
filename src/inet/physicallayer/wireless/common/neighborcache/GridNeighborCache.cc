@@ -18,6 +18,7 @@
 #include "inet/physicallayer/wireless/common/neighborcache/GridNeighborCache.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/stlutils.h"
 
 namespace inet {
 namespace physicallayer {
@@ -113,7 +114,7 @@ void GridNeighborCache::addRadio(const IRadio *radio)
 
 void GridNeighborCache::removeRadio(const IRadio *radio)
 {
-    auto it = find(radios.begin(), radios.end(), radio);
+    auto it = find(radios, radio);
     if (it != radios.end()) {
         radios.erase(it);
         Coord newConstraintAreaMin = radioMedium->getMediumLimitCache()->getMinConstraintArea();

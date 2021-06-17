@@ -584,7 +584,7 @@ void Ipv4NetworkConfigurator::assignAddresses(std::vector<LinkInfo *> links)
                 uint32_t completeNetmask = networkNetmask;
 
                 // check if we could really find a unique IP address
-                if (assignUniqueAddresses && assignedAddressToNetworkInterfaceMap.find(completeAddress) != assignedAddressToNetworkInterfaceMap.end())
+                if (assignUniqueAddresses && containsKey(assignedAddressToNetworkInterfaceMap, completeAddress))
                     throw cRuntimeError("Failed to configure unique address for %s. Please refine your parameters and try again!", networkInterface->getInterfaceFullPath().c_str());
                 assignedAddressToNetworkInterfaceMap[completeAddress] = compatibleInterface->networkInterface;
                 assignedInterfaceAddresses.push_back(completeAddress);

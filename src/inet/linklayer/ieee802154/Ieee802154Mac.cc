@@ -42,6 +42,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ieee802154/Ieee802154MacHeader_m.h"
@@ -199,7 +200,7 @@ void Ieee802154Mac::handleUpperPacket(Packet *packet)
     macPkt->setSrcAddr(networkInterface->getMacAddress());
 
     if (useMACAcks) {
-        if (SeqNrParent.find(dest) == SeqNrParent.end()) {
+        if (!containsKey(SeqNrParent, dest)) {
             // no record of current parent -> add next sequence number to map
             SeqNrParent[dest] = 1;
             macPkt->setSequenceId(0);
@@ -838,7 +839,7 @@ void Ieee802154Mac::handleLowerPacket(Packet *packet)
                 ackMessage->insertAtFront(csmaHeader);
                 ackMessage->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee802154);
                 // Check for duplicates by checking expected seqNr of sender
-                if (SeqNrChild.find(src) == SeqNrChild.end()) {
+                if (!containsKey(SeqNrChild, src)) {
                     // no record of current child -> add expected next number to map
                     SeqNrChild[src] = SeqNr + 1;
                     EV_DETAIL << "Adding a new child to the map of Sequence numbers:" << src << endl;

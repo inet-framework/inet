@@ -115,7 +115,7 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
         if (interfaceTable) {
             for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
                 NetworkInterface *networkInterface = interfaceTable->getInterface(j);
-                if (!networkInterface->isLoopback() && interfacesSeen.find(networkInterface->getId()) == interfacesSeen.end()) {
+                if (!networkInterface->isLoopback() && !containsKey(interfacesSeen, networkInterface->getId())) {
                     if (isBridgeNode(node))
                         createInterfaceInfo(topology, node, nullptr, networkInterface);
                     else {
@@ -207,7 +207,7 @@ void NetworkConfiguratorBase::extractWiredNeighbors(Topology& topology, Topology
         if (!networkInterface) {
             // no such interface (node is probably down); we should probably get the information from our (future) internal database
         }
-        else if (interfacesSeen.find(networkInterface->getId()) == interfacesSeen.end()) {
+        else if (!containsKey(interfacesSeen, networkInterface->getId())) {
             InterfaceInfo *neighborInterfaceInfo = createInterfaceInfo(topology, node, linkInfo, networkInterface);
             linkInfo->interfaceInfos.push_back(neighborInterfaceInfo);
             interfacesSeen[networkInterface->getId()] = networkInterface;
@@ -227,7 +227,7 @@ void NetworkConfiguratorBase::extractWirelessNeighbors(Topology& topology, const
         if (interfaceTable) {
             for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
                 NetworkInterface *networkInterface = interfaceTable->getInterface(j);
-                if (!networkInterface->isLoopback() && interfacesSeen.find(networkInterface->getId()) == interfacesSeen.end() && isWirelessInterface(networkInterface)) {
+                if (!networkInterface->isLoopback() && !containsKey(interfacesSeen, networkInterface->getId()) && isWirelessInterface(networkInterface)) {
                     if (getWirelessId(networkInterface) == wirelessId) {
                         if (!isBridgeNode(node)) {
                             InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, linkInfo, networkInterface);
@@ -253,7 +253,7 @@ void NetworkConfiguratorBase::extractDeviceNeighbors(Topology& topology, Node *n
         // switch and access point
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
             NetworkInterface *networkInterface = interfaceTable->getInterface(i);
-            if (!networkInterface->isLoopback() && interfacesSeen.find(networkInterface->getId()) == interfacesSeen.end()) {
+            if (!networkInterface->isLoopback() && !containsKey(interfacesSeen, networkInterface->getId())) {
                 if (isWirelessInterface(networkInterface))
                     extractWirelessNeighbors(topology, getWirelessId(networkInterface).c_str(), linkInfo, interfacesSeen, deviceNodesVisited);
                 else {

@@ -25,7 +25,9 @@
 
 #include <algorithm>
 
+#include "inet/common/stlutils.h"
 #include "inet/routing/eigrp/tables/EigrpInterfaceTable.h"
+
 namespace inet {
 namespace eigrp {
 
@@ -54,9 +56,9 @@ void EigrpDisabledInterfaces::addInterface(EigrpInterface *interface)
 
 EigrpInterface *EigrpDisabledInterfaces::removeInterface(EigrpInterface *iface)
 {
-    std::vector<EigrpInterface *>::iterator it;
+    auto it = find(ifVector, iface);
 
-    if ((it = std::find(ifVector.begin(), ifVector.end(), iface)) != ifVector.end()) {
+    if (it != ifVector.end()) {
         ifVector.erase(it);
         return iface;
     }
@@ -66,10 +68,9 @@ EigrpInterface *EigrpDisabledInterfaces::removeInterface(EigrpInterface *iface)
 
 EigrpInterface *EigrpDisabledInterfaces::findInterface(int ifaceId)
 {
-    std::vector<EigrpInterface *>::iterator it;
     EigrpInterface *iface;
 
-    for (it = ifVector.begin(); it != ifVector.end(); it++) {
+    for (auto it = ifVector.begin(); it != ifVector.end(); it++) {
         iface = *it;
         if (iface->getInterfaceId() == ifaceId) {
             return iface;

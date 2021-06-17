@@ -334,7 +334,7 @@ const Ieee80211HtMode *Ieee80211HtCompliantModes::getCompliantMode(const Ieee802
     const char *name = ""; // TODO
     auto htModeId = std::make_tuple(mcsMode->getBandwidth(), mcsMode->getMcsIndex(), guardIntervalType);
     auto mode = singleton.modeCache.find(htModeId);
-    if (mode == std::end(singleton.modeCache)) {
+    if (mode == singleton.modeCache.end()) {
         const Ieee80211OfdmSignalMode *legacySignal = nullptr;
         const Ieee80211HtSignalMode *htSignal = nullptr;
         switch (preambleFormat) {

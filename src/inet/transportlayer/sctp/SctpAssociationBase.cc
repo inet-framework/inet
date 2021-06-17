@@ -17,15 +17,17 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#include "inet/transportlayer/sctp/SctpAssociation.h"
+
 #include <assert.h>
 #include <string.h>
 
 #include <sstream>
 
+#include "inet/common/stlutils.h"
 #include "inet/transportlayer/contract/sctp/SctpCommand_m.h"
 #include "inet/transportlayer/sctp/Sctp.h"
 #include "inet/transportlayer/sctp/SctpAlgorithm.h"
-#include "inet/transportlayer/sctp/SctpAssociation.h"
 #include "inet/transportlayer/sctp/SctpQueue.h"
 
 namespace inet {
@@ -508,16 +510,12 @@ SctpStateVariables::~SctpStateVariables()
 
 bool SctpStateVariables::findRequestNum(uint32_t num)
 {
-    if (requests.find(num) != requests.end())
-        return true;
-    return false;
+    return containsKey(requests, num);
 }
 
 bool SctpStateVariables::findPeerRequestNum(uint32_t num)
 {
-    if (peerRequests.find(num) != peerRequests.end())
-        return true;
-    return false;
+    return containsKey(peerRequests, num);
 }
 
 bool SctpStateVariables::findPeerStreamToReset(uint16_t num)

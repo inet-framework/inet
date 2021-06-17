@@ -19,6 +19,8 @@
 
 #include <algorithm>
 
+#include "inet/common/stlutils.h"
+
 namespace inet {
 
 /*
@@ -166,12 +168,10 @@ Polyhedron::Edges Polyhedron::computeHorizonEdges(const Faces& visibleFaces) con
         PolyhedronFace *visibleFace = *it;
         Edges& edges = visibleFace->getEdges();
         for (auto visibleEdge : edges) {
-            PolyhedronFace *jointFace = visibleEdge->getJointFace();
-            Faces::const_iterator visibleJointFace = std::find(visibleFaces.begin(), visibleFaces.end(), jointFace);
             // If the jointFace is not visible then we just have found a horizon edge, that is, a boundary edge
             // of the visible region from an arbitrary point.
             // If we found the jointFace among the visibleFaces then we are just examining an inner face.
-            if (visibleJointFace == visibleFaces.end())
+            if (!contains(visibleFaces, visibleEdge->getJointFace()))
                 horizonEdges.push_back(visibleEdge);
         }
     }
@@ -243,7 +243,7 @@ void Polyhedron::setContlictListForNewFace(PolyhedronFace *newFace, const Polyhe
         }
     }
     for (auto point : conflict2) {
-        if (visited.find(point) == visited.end() && newFace->isVisibleFrom(point)) {
+        if (!containsKey(visited, point) && newFace->isVisibleFrom(point)) {
             point->addConflictFace(newFace);
             newFace->addConflictPoint(point);
         }
@@ -256,7 +256,7 @@ void Polyhedron::cleanConflictGraph(const Faces& conflictVector)
         Points& pConflict = face->getConflictVector();
         for (auto point : pConflict) {
             Faces& currFConflict = point->getConflictVector();
-            auto fit2 = std::find(currFConflict.begin(), currFConflict.end(), face);
+            auto fit2 = find(currFConflict, face);
             if (fit2 == currFConflict.end())
                 throw cRuntimeError("PolyhedronFace not found in the point's conflict vector");
             currFConflict.erase(fit2);

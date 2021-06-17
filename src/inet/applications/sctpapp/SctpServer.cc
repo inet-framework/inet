@@ -446,7 +446,7 @@ void SctpServer::handleMessage(cMessage *msg)
                 Message *message = check_and_cast<Message *>(msg);
                 id = message->getTag<SocketInd>()->getSocketId();
                 EV_INFO << "server: SCTP_I_CLOSED for assoc " << id << endl;
-                ServerAssocStatMap::iterator i = serverAssocStatMap.find(id);
+                auto i = serverAssocStatMap.find(id);
                 i->second.stop = simTime();
                 i->second.lifeTime = i->second.stop - i->second.start;
                 if (delayTimer->isScheduled())

@@ -95,14 +95,13 @@ void Tun::handleUpperCommand(cMessage *message)
     cObject *controlInfo = message->getControlInfo();
     int socketId = check_and_cast<Request *>(message)->getTag<SocketReq>()->getSocketId();
     if (dynamic_cast<TunOpenCommand *>(controlInfo) != nullptr) {
-        auto it = std::find(socketIds.begin(), socketIds.end(), socketId);
-        if (it != socketIds.end())
+        if (contains(socketIds, socketId))
             throw cRuntimeError("Socket is already open: %d", socketId);
         socketIds.push_back(socketId);
         delete message;
     }
     else if (dynamic_cast<TunCloseCommand *>(controlInfo) != nullptr) {
-        auto it = std::find(socketIds.begin(), socketIds.end(), socketId);
+        auto it = find(socketIds, socketId);
         if (it != socketIds.end())
             socketIds.erase(it);
         delete message;
@@ -113,7 +112,7 @@ void Tun::handleUpperCommand(cMessage *message)
         send(indication, "upperLayerOut");
     }
     else if (dynamic_cast<TunDestroyCommand *>(controlInfo) != nullptr) {
-        auto it = std::find(socketIds.begin(), socketIds.end(), socketId);
+        auto it = find(socketIds, socketId);
         if (it != socketIds.end())
             socketIds.erase(it);
         delete message;

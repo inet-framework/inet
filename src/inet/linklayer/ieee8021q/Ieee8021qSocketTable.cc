@@ -17,6 +17,8 @@
 
 #include "inet/linklayer/ieee8021q/Ieee8021qSocketTable.h"
 
+#include "inet/common/stlutils.h"
+
 namespace inet {
 
 Define_Module(Ieee8021qSocketTable);
@@ -41,8 +43,7 @@ Ieee8021qSocketTable::~Ieee8021qSocketTable()
 
 void Ieee8021qSocketTable::addSocket(int socketId, const Protocol *protocol, int vlanId, bool steal)
 {
-    auto it = socketIdToSocketMap.find(socketId);
-    if (it != socketIdToSocketMap.end())
+    if (containsKey(socketIdToSocketMap, socketId))
         throw cRuntimeError("Socket already added");
     Socket *socket = new Socket(socketId);
     socket->protocol = protocol;

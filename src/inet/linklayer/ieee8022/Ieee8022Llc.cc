@@ -24,6 +24,7 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/socket/SocketTag_m.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/common/Ieee802SapTag_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcSocketCommand_m.h"
 
@@ -147,7 +148,7 @@ bool Ieee8022Llc::deliverCopyToSockets(Packet *packet)
 bool Ieee8022Llc::isDeliverableToUpperLayer(Packet *packet)
 {
     const auto& protocolTag = packet->findTag<PacketProtocolTag>();
-    return (protocolTag != nullptr && upperProtocols.find(protocolTag->getProtocol()) != upperProtocols.end());
+    return (protocolTag != nullptr && contains(upperProtocols, protocolTag->getProtocol()));
 }
 
 void Ieee8022Llc::processPacketFromMac(Packet *packet)

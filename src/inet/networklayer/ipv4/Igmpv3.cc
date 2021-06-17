@@ -696,7 +696,7 @@ void Igmpv3::processReport(Packet *packet)
                 // INCLUDE(A)   -> IS_EX(B) -> EXCLUDE(A*B,B-A): Delete (A-B)
                 // EXCLUDE(X,Y) -> IS_EX(A) -> EXCLUDE(A-Y,Y*A): Delete (X-A) Delete (Y-A)
                 for (auto it = groupData->sources.begin(); it != groupData->sources.end(); ++it) {
-                    if (find(receivedSources.begin(), receivedSources.end(), it->first) == receivedSources.end()) {
+                    if (!contains(receivedSources, it->first)) {
                         EV_DETAIL << "Deleting source record of '" << it->first << "'.\n";
                         groupData->deleteSourceRecord(it->first);
                     }
@@ -845,7 +845,7 @@ void Igmpv3::processReport(Packet *packet)
 
                     // Delete A-B
                     for (auto& elem : sourcesA) {
-                        if (find(receivedSources.begin(), receivedSources.end(), elem) == receivedSources.end()) {
+                        if (!contains(receivedSources, elem)) {
                             EV_DETAIL << "Deleting source record of '" << elem << "'.\n";
                             groupData->deleteSourceRecord(elem);
                         }
@@ -875,7 +875,7 @@ void Igmpv3::processReport(Packet *packet)
                     for (auto it = groupData->sources.begin(); it != groupData->sources.end();) {
                         auto rec = it->first;
                         ++it; // let's advance the iterator now because the deleteSourcerecord call will invalidate it and we wont be able to increment it after that
-                        if (find(receivedSources.begin(), receivedSources.end(), it->first) == receivedSources.end()) {
+                        if (!contains(receivedSources, it->first)) {
                             EV_DETAIL << "Deleting source record of '" << rec << "'.\n";
                             groupData->deleteSourceRecord(rec);
                         }
@@ -1152,7 +1152,7 @@ Igmpv3::RouterGroupData::~RouterGroupData()
 
 Igmpv3::SourceRecord *Igmpv3::RouterGroupData::createSourceRecord(Ipv4Address source)
 {
-    ASSERT(sources.find(source) == sources.end());
+    ASSERT(!containsKey(sources, source));
     SourceRecord *record = new SourceRecord(this, source);
     sources[source] = record;
     return record;

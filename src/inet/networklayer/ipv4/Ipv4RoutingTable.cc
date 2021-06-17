@@ -30,6 +30,7 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/stlutils.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv4/Ipv4Route.h"
@@ -350,8 +351,7 @@ bool Ipv4RoutingTable::isLocalBroadcastAddress(const Ipv4Address& dest) const
         }
     }
 
-    auto it = localBroadcastAddresses.find(dest);
-    return it != localBroadcastAddresses.end();
+    return contains(localBroadcastAddresses, dest);
 }
 
 NetworkInterface *Ipv4RoutingTable::findInterfaceByLocalBroadcastAddress(const Ipv4Address& dest) const
@@ -565,7 +565,7 @@ void Ipv4RoutingTable::addRoute(Ipv4Route *entry)
 
 Ipv4Route *Ipv4RoutingTable::internalRemoveRoute(Ipv4Route *entry)
 {
-    auto i = std::find(routes.begin(), routes.end(), entry);
+    auto i = find(routes, entry);
     if (i != routes.end()) {
         routes.erase(i);
         invalidateCache();
@@ -668,7 +668,7 @@ void Ipv4RoutingTable::addMulticastRoute(Ipv4MulticastRoute *entry)
 
 Ipv4MulticastRoute *Ipv4RoutingTable::internalRemoveMulticastRoute(Ipv4MulticastRoute *entry)
 {
-    auto i = std::find(multicastRoutes.begin(), multicastRoutes.end(), entry);
+    auto i = find(multicastRoutes, entry);
     if (i != multicastRoutes.end()) {
         multicastRoutes.erase(i);
         invalidateCache();

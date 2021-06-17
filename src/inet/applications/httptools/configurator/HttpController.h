@@ -119,7 +119,7 @@ class INET_API HttpController : public cSimpleModule
      * play a role when zipf or other non-uniform selection probability is used (the pick list is basically mapped to
      * the non-uniform distribution).
      */
-    void registerServer(HttpServerBase *serverAppModule, const char *objectName, const char *wwwName, int port, int rank = INSERT_RANDOM, simtime_t activationTime = 0.0);
+    void registerServer(HttpServerBase *serverAppModule, const std::string& objectName, const std::string& wwwName, int port, int rank = INSERT_RANDOM, simtime_t activationTime = 0.0);
 
     /**
      * Get a specific server module reference.

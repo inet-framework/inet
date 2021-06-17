@@ -970,7 +970,7 @@ Rip::RouteVector::iterator Rip::purgeRoute(RipRoute *ripRoute)
     }
 
     // erase the ripRoute from the vector
-    auto itt = ripRoutingTable.erase(std::find(ripRoutingTable.begin(), ripRoutingTable.end(), ripRoute));
+    auto itt = ripRoutingTable.erase(find(ripRoutingTable, ripRoute));
 
     delete ripRoute;
     ripRoute = nullptr;

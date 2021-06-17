@@ -20,6 +20,7 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/SocketTag_m.h"
+#include "inet/common/stlutils.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
@@ -36,7 +37,7 @@ ISocket *SocketMap::findSocketFor(cMessage *msg)
 
 void SocketMap::addSocket(ISocket *socket)
 {
-    ASSERT(socketMap.find(socket->getSocketId()) == socketMap.end());
+    ASSERT(!containsKey(socketMap, socket->getSocketId()));
     socketMap[socket->getSocketId()] = socket;
 }
 

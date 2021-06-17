@@ -20,6 +20,8 @@
 
 #include "inet/linklayer/base/MacRelayUnitBase.h"
 
+#include "inet/common/stlutils.h"
+
 namespace inet {
 
 //
@@ -43,7 +45,7 @@ class INET_API Ieee8021dRelay : public MacRelayUnitBase
 
     bool in_range(const std::set<MacAddressPair, Comp>& ranges, MacAddress value)
     {
-        return ranges.find(MacAddressPair(value, value)) != ranges.end();
+        return contains(ranges, MacAddressPair(value, value));
     }
 
     std::set<MacAddressPair, Comp> registeredMacAddresses;

@@ -28,6 +28,7 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/stlutils.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 #include "inet/networklayer/ipv4/IgmpMessage.h"
@@ -154,7 +155,7 @@ class INET_API Igmpv3 : public cSimpleModule, protected cListener
 
         RouterGroupData(RouterInterfaceData *parent, Ipv4Address group);
         virtual ~RouterGroupData();
-        bool hasSourceRecord(Ipv4Address source) { return sources.find(source) != sources.end(); }
+        bool hasSourceRecord(Ipv4Address source) { return containsKey(sources, source); }
         SourceRecord *createSourceRecord(Ipv4Address source);
         SourceRecord *getOrCreateSourceRecord(Ipv4Address source);
         void deleteSourceRecord(Ipv4Address source);

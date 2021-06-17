@@ -19,6 +19,7 @@
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
+#include "inet/common/stlutils.h"
 
 namespace inet {
 
@@ -62,7 +63,7 @@ int PacketPrinter::getScoreFor(cMessage *msg) const
 
 bool PacketPrinter::isEnabledOption(const Options *options, const char *name) const
 {
-    return options->enabledTags.find(name) != options->enabledTags.end();
+    return contains(options->enabledTags, name);
 }
 
 bool PacketPrinter::isEnabledInfo(const Options *options, const Protocol *protocol) const

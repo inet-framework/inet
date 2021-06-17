@@ -411,7 +411,7 @@ MacAddress Arp::resolveL3Address(const L3Address& address, const NetworkInterfac
     Enter_Method("resolveMACAddress(%s,%s)", address.str().c_str(), ie->getInterfaceName());
 
     Ipv4Address addr = address.toIpv4();
-    ArpCache::const_iterator it = arpCache.find(addr);
+    auto it = arpCache.find(addr);
     if (it == arpCache.end()) {
         // no cache entry: launch ARP request
         ArpCacheEntry *entry = new ArpCacheEntry();

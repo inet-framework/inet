@@ -115,7 +115,7 @@ static bool selectByModulePath(cModule *mod, void *data)
 static bool selectByNedTypeName(cModule *mod, void *data)
 {
     const std::vector<std::string>& v = *(const std::vector<std::string> *)data;
-    return std::find(v.begin(), v.end(), mod->getNedTypeName()) != v.end();
+    return contains(v, mod->getNedTypeName());
 }
 
 static bool selectByProperty(cModule *mod, void *data)
@@ -408,7 +408,7 @@ void Topology::calculateUnweightedSingleShortestPathsTo(Node *_target)
                 q.push_back(w);
             }
             // the first one will be the shortest
-            if (std::find(w->outPaths.begin(), w->outPaths.end(), v->inLinks[i]) == w->outPaths.end())
+            if (!contains(w->outPaths, v->inLinks[i]))
                 w->outPaths.push_back(v->inLinks[i]);
         }
     }
@@ -471,7 +471,7 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *_target)
 
                 q.insert(it, src);
             }
-            else if (std::find(src->outPaths.begin(), src->outPaths.end(), dest->inLinks[i]) == src->outPaths.end())
+            else if (!contains(src->outPaths, dest->inLinks[i]))
                 src->outPaths.push_back(dest->inLinks[i]);
         }
     }

@@ -19,6 +19,8 @@
 
 #include "inet/networklayer/icmpv6/Ipv6NeighbourCache.h"
 
+#include "inet/common/stlutils.h"
+
 namespace inet {
 
 void Ipv6NeighbourCache::DefaultRouterList::add(Neighbour& router)
@@ -99,7 +101,7 @@ const Ipv6NeighbourCache::Key *Ipv6NeighbourCache::lookupKeyAddr(Key& key)
 Ipv6NeighbourCache::Neighbour *Ipv6NeighbourCache::addNeighbour(const Ipv6Address& addr, int interfaceID)
 {
     Key key(addr, interfaceID);
-    ASSERT(neighbourMap.find(key) == neighbourMap.end()); // entry must not exist yet
+    ASSERT(!containsKey(neighbourMap, key)); // entry must not exist yet
     Neighbour& nbor = neighbourMap[key];
 
     nbor.nceKey = lookupKeyAddr(key);
@@ -112,7 +114,7 @@ Ipv6NeighbourCache::Neighbour *Ipv6NeighbourCache::addNeighbour(const Ipv6Addres
 Ipv6NeighbourCache::Neighbour *Ipv6NeighbourCache::addNeighbour(const Ipv6Address& addr, int interfaceID, MacAddress macAddress)
 {
     Key key(addr, interfaceID);
-    ASSERT(neighbourMap.find(key) == neighbourMap.end()); // entry must not exist yet
+    ASSERT(!containsKey(neighbourMap, key)); // entry must not exist yet
     Neighbour& nbor = neighbourMap[key];
 
     nbor.nceKey = lookupKeyAddr(key);
@@ -132,7 +134,7 @@ Ipv6NeighbourCache::Neighbour *Ipv6NeighbourCache::addRouter(const Ipv6Address& 
         int interfaceID, MacAddress macAddress, simtime_t expiryTime, bool isHomeAgent)
 {
     Key key(addr, interfaceID);
-    ASSERT(neighbourMap.find(key) == neighbourMap.end()); // entry must not exist yet
+    ASSERT(!containsKey(neighbourMap, key)); // entry must not exist yet
     Neighbour& nbor = neighbourMap[key];
 
     nbor.nceKey = lookupKeyAddr(key);

@@ -178,7 +178,7 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
     cPacket *packet = dynamic_cast<cPacket *>(obj);
 
     if (packet) {
-        SignalList::const_iterator i = signalList.find(signalID);
+        auto i = signalList.find(signalID);
         Direction direction = (i != signalList.end()) ? i->second : DIRECTION_UNDEFINED;
         recordPacket(packet, direction, source);
     }

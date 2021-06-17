@@ -26,6 +26,8 @@
 
 #include <algorithm>
 
+#include "inet/common/stlutils.h"
+
 namespace inet {
 namespace eigrp {
 
@@ -152,8 +154,7 @@ void EigrpInterfaceTable::addInterface(EigrpInterface *interface)
 EigrpInterface *EigrpInterfaceTable::removeInterface(EigrpInterface *iface)
 {
     InterfaceVector::iterator it;
-    it = std::find(eigrpInterfaces.begin(), eigrpInterfaces.end(), iface);
-
+    it = find(eigrpInterfaces, iface);
     if (it != eigrpInterfaces.end()) {
         eigrpInterfaces.erase(it);
         return iface;

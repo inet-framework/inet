@@ -21,6 +21,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -252,7 +253,7 @@ Aodv::Aodv()
 
 bool Aodv::hasOngoingRouteDiscovery(const L3Address& target)
 {
-    return waitForRREPTimers.find(target) != waitForRREPTimers.end();
+    return containsKey(waitForRREPTimers, target);
 }
 
 void Aodv::startRouteDiscovery(const L3Address& target, unsigned timeToLive)
@@ -786,8 +787,7 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
 
     // A node ignores all RREQs received from any node in its blacklist set.
 
-    auto blackListIt = blacklist.find(sourceAddr);
-    if (blackListIt != blacklist.end()) {
+    if (containsKey(blacklist, sourceAddr)) {
         EV_INFO << "The sender node " << sourceAddr << " is in our blacklist. Ignoring the Route Request" << endl;
         return;
     }
@@ -1280,7 +1280,7 @@ void Aodv::handleWaitForRREP(WaitForRrep *rrepTimer)
     EV_INFO << "We didn't get any Route Reply within RREP timeout" << endl;
     L3Address destAddr = rrepTimer->getDestAddr();
 
-    ASSERT(addressToRreqRetries.find(destAddr) != addressToRreqRetries.end());
+    ASSERT(containsKey(addressToRreqRetries, destAddr));
     if (addressToRreqRetries[destAddr] == rreqRetries) {
         cancelRouteDiscovery(destAddr);
         EV_WARN << "Re-discovery attempts for node " << destAddr << " reached RREQ_RETRIES= " << rreqRetries << " limit. Stop sending RREQ." << endl;

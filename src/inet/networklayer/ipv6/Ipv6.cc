@@ -146,7 +146,7 @@ void Ipv6::handleRequest(Request *request)
     }
     else if (auto *command = dynamic_cast<Ipv6SocketConnectCommand *>(ctrl)) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        if (socketIdToSocketDescriptor.find(socketId) == socketIdToSocketDescriptor.end())
+        if (!containsKey(socketIdToSocketDescriptor, socketId))
             throw cRuntimeError("Ipv6Socket: should use bind() before connect()");
         socketIdToSocketDescriptor[socketId]->remoteAddress = command->getRemoteAddress();
         delete request;
@@ -732,7 +732,7 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
         EV_INFO << "Tunnelled IP datagram\n";
         send(packet, "upperTunnelingOut");
     }
-    else if (upperProtocols.find(protocol) != upperProtocols.end()) {
+    else if (contains(upperProtocols, protocol)) {
         EV_INFO << "Passing up to protocol " << *protocol << "\n";
         send(packet, "transportOut");
     }

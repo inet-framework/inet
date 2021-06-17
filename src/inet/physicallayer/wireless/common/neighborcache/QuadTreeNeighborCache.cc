@@ -18,6 +18,7 @@
 #include "inet/physicallayer/wireless/common/neighborcache/QuadTreeNeighborCache.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/stlutils.h"
 
 namespace inet {
 namespace physicallayer {
@@ -93,7 +94,7 @@ void QuadTreeNeighborCache::addRadio(const IRadio *radio)
 
 void QuadTreeNeighborCache::removeRadio(const IRadio *radio)
 {
-    auto it = find(radios.begin(), radios.end(), radio);
+    auto it = find(radios, radio);
     if (it != radios.end()) {
         radios.erase(it);
         Coord newConstraintAreaMin = radioMedium->getMediumLimitCache()->getMinConstraintArea();

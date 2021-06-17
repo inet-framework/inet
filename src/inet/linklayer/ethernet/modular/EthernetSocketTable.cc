@@ -17,6 +17,8 @@
 
 #include "inet/linklayer/ethernet/modular/EthernetSocketTable.h"
 
+#include "inet/common/stlutils.h"
+
 namespace inet {
 
 Define_Module(EthernetSocketTable);
@@ -42,8 +44,7 @@ void EthernetSocketTable::initialize(int stage)
 
 void EthernetSocketTable::addSocket(int socketId, MacAddress localAddress, MacAddress remoteAddress, const Protocol *protocol, bool steal)
 {
-    auto it = socketIdToSocketMap.find(socketId);
-    if (it != socketIdToSocketMap.end())
+    if (containsKey(socketIdToSocketMap, socketId))
         throw cRuntimeError("Socket already added");
     Socket *socket = new Socket(socketId);
     socket->localAddress = localAddress;

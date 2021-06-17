@@ -24,6 +24,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/stlutils.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
@@ -721,7 +722,7 @@ void Ipv6RoutingTable::internalAddRoute(Ipv6Route *route)
 
 Ipv6Route *Ipv6RoutingTable::internalRemoveRoute(Ipv6Route *route)
 {
-    auto i = std::find(routeList.begin(), routeList.end(), route);
+    auto i = find(routeList, route);
     if (i != routeList.end()) {
         ASSERT(route->getRoutingTable() == this);
         routeList.erase(i);
@@ -744,7 +745,7 @@ Ipv6RoutingTable::RouteList::iterator Ipv6RoutingTable::internalDeleteRoute(Rout
 
 bool Ipv6RoutingTable::deleteRoute(Ipv6Route *route)
 {
-    auto it = std::find(routeList.begin(), routeList.end(), route);
+    auto it = find(routeList, route);
     if (it == routeList.end())
         return false;
 

@@ -17,6 +17,8 @@
 
 #include "inet/common/geometry/container/QuadTree.h"
 
+#include "inet/common/stlutils.h"
+
 namespace inet {
 
 bool QuadTree::insert(const cObject *point, const Coord& pos)
@@ -84,11 +86,9 @@ void QuadTree::splitPoints()
     // so we have to split its point
     for (auto& elem : points) {
         auto it = lastPosition->find(elem);
-        Coord pos;
-        if (it != lastPosition->end())
-            pos = it->second;
-        else
+        if (it == lastPosition->end())
             throw cRuntimeError("Last position not found for object: %s", elem->getFullName());
+        Coord pos = it->second;
         unsigned int quadrantNum = whichQuadrant(pos);
         // We recursively call insert() for each points
         quadrants[quadrantNum]->insert(elem, pos);
@@ -158,14 +158,13 @@ bool QuadTree::remove(const cObject *point)
     // the whole QuadTree and check each node's vector one by one.
     Coord lastPos;
     auto lastIt = lastPosition->find(point);
-    if (lastIt != lastPosition->end())
-        lastPos = lastIt->second;
-    else
+    if (lastIt == lastPosition->end())
         return false;
+    lastPos = lastIt->second;
     QuadTree *quadrant = searchQuadrant(lastPos);
     if (quadrant == nullptr)
         throw cRuntimeError("Quadrant not found for point: (%f, %f, %f)", lastPos.x, lastPos.y, lastPos.z);
-    auto it = find(quadrant->points.begin(), quadrant->points.end(), point);
+    auto it = find(quadrant->points, point);
     // If we find the object then we erase it from the quadrant's vector and lastPosition map
     if (it != quadrant->points.end()) {
         lastPosition->erase(lastIt);
@@ -238,7 +237,7 @@ bool QuadTree::move(const cObject *point, const Coord& newPos)
     // boundary coordinates equal to the constraint area coordinates.
     if (quadrant == nullptr)
         throw cRuntimeError("Quadrant not found for point (%f %f %f)", newPos.x, newPos.y, newPos.z);
-    auto it = find(quadrant->points.begin(), quadrant->points.end(), point);
+    auto it = find(quadrant->points, point);
     // If we search for a quadrant with the object's current position and then we find
     // it in the quadrant's vector, then the move occurred inside this quadrant,
     // thus we have nothing to do with this case

@@ -175,13 +175,13 @@ class INET_API NetPerfMeter : public cSimpleModule
     std::map<unsigned int, ReceiverStatistics *> ReceiverStatisticsMap;
 
     inline SenderStatistics *getSenderStatistics(const unsigned int streamID) {
-        std::map<unsigned int, SenderStatistics *>::iterator found = SenderStatisticsMap.find(streamID);
+        auto found = SenderStatisticsMap.find(streamID);
         assert(found != SenderStatisticsMap.end());
         return found->second;
     }
 
     inline ReceiverStatistics *getReceiverStatistics(const unsigned int streamID) {
-        std::map<unsigned int, ReceiverStatistics *>::iterator found = ReceiverStatisticsMap.find(streamID);
+        auto found = ReceiverStatisticsMap.find(streamID);
         assert(found != ReceiverStatisticsMap.end());
         return found->second;
     }

@@ -24,6 +24,7 @@
 #include "inet/common/geometry/shape/Prism.h"
 #include "inet/common/geometry/shape/Sphere.h"
 #include "inet/common/geometry/shape/polyhedron/Polyhedron.h"
+#include "inet/common/stlutils.h"
 
 namespace inet {
 
@@ -95,7 +96,7 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
         int id = -1;
         if (idAttribute)
             id = atoi(idAttribute);
-        if (idToShapeMap.find(id) != idToShapeMap.end())
+        if (containsKey(idToShapeMap, id))
             throw cRuntimeError("Shape already exists with the same id: '%d'", id);
         // type
         const char *typeAttribute = element->getAttribute("type");
@@ -208,7 +209,7 @@ void PhysicalEnvironment::parseMaterials(cXMLElement *xml)
             throw cRuntimeError("Missing mandatory relativePermeability attribute of material");
         double relativePermeability = atof(relativePermeabilityAttribute);
         // insert
-        if (idToMaterialMap.find(id) != idToMaterialMap.end())
+        if (containsKey(idToMaterialMap, id))
             throw cRuntimeError("Material already exists with the same id: '%d'", id);
         Material *material = new Material(name, resistivity, relativePermittivity, relativePermeability);
         materials.push_back(material);
@@ -365,7 +366,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         const char *materialAttribute = element->getAttribute("material");
         if (!materialAttribute)
             throw cRuntimeError("Missing material attribute of object");
-        else if (nameToMaterialMap.find(materialAttribute) != nameToMaterialMap.end())
+        else if (containsKey(nameToMaterialMap, materialAttribute))
             material = nameToMaterialMap[materialAttribute];
         else if (MaterialRegistry::singleton.getMaterial(materialAttribute))
             material = MaterialRegistry::singleton.getMaterial(materialAttribute);

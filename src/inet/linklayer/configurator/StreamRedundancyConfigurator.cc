@@ -163,9 +163,9 @@ void StreamRedundancyConfigurator::computeStreamSendersAndReceivers(cValueMap *s
                 if (!strcmp(elementNetworkNodeName, networkNode->getFullName())) {
                     auto senderNetworkNodeName = k != 0 ? getElement(k - 1) : nullptr;
                     auto receiverNetworkNodeName = k != path->size() + 1 ? getElement(k + 1) : nullptr;
-                    if (senderNetworkNodeName != nullptr && std::find(senderNetworkNodeNames.begin(), senderNetworkNodeNames.end(), senderNetworkNodeName) == senderNetworkNodeNames.end())
+                    if (senderNetworkNodeName != nullptr && !contains(senderNetworkNodeNames, senderNetworkNodeName))
                         senderNetworkNodeNames.push_back(senderNetworkNodeName);
-                    if (receiverNetworkNodeName != nullptr && std::find(receiverNetworkNodeNames.begin(), receiverNetworkNodeNames.end(), receiverNetworkNodeName) == receiverNetworkNodeNames.end())
+                    if (receiverNetworkNodeName != nullptr && !contains(receiverNetworkNodeNames, receiverNetworkNodeName))
                         receiverNetworkNodeNames.push_back(receiverNetworkNodeName);
                 }
             }
@@ -383,14 +383,14 @@ std::vector<std::vector<std::string>> StreamRedundancyConfigurator::getPathFragm
                             isSplitting = true;
                     memberStream.push_back(nodeName);
                     if (isMerging || isSplitting) {
-                        if (!memberStream.empty() && std::find(memberStreams.begin(), memberStreams.end(), memberStream) == memberStreams.end())
+                        if (!memberStream.empty() && !contains(memberStreams, memberStream))
                             memberStreams.push_back(memberStream);
                         memberStream.clear();
                         memberStream.push_back(nodeName);
                     }
                 }
                 memberStream.push_back(destination);
-                if (!memberStream.empty() && std::find(memberStreams.begin(), memberStreams.end(), memberStream) == memberStreams.end())
+                if (!memberStream.empty() && !contains(memberStreams, memberStream))
                     memberStreams.push_back(memberStream);
             }
             return memberStreams;

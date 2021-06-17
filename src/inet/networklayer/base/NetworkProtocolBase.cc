@@ -23,6 +23,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketTag_m.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -79,7 +80,7 @@ void NetworkProtocolBase::sendUp(cMessage *message)
                 hasSocket = true;
             }
         }
-        if (upperProtocols.find(protocol) != upperProtocols.end()) {
+        if (contains(upperProtocols, protocol)) {
             EV_INFO << "Passing up to protocol " << protocol->getName() << "\n";
             emit(packetSentToUpperSignal, packet);
             send(packet, "transportOut");
@@ -152,7 +153,7 @@ void NetworkProtocolBase::handleUpperCommand(cMessage *msg)
     }
     else if (auto *command = dynamic_cast<L3SocketConnectCommand *>(msg->getControlInfo())) {
         int socketId = request->getTag<SocketReq>()->getSocketId();
-        if (socketIdToSocketDescriptor.find(socketId) == socketIdToSocketDescriptor.end())
+        if (!containsKey(socketIdToSocketDescriptor, socketId))
             throw cRuntimeError("Ipv4Socket: should use bind() before connect()");
         socketIdToSocketDescriptor[socketId]->remoteAddress = command->getRemoteAddress();
         delete msg;

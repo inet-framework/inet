@@ -112,7 +112,7 @@ class INET_API Ipv4NetworkConfigurator : public NetworkConfiguratorBase
         ~RoutingTableInfo() {}
 
         int addRouteInfo(RouteInfo *routeInfo);
-        void removeRouteInfo(const RouteInfo *routeInfo) { routeInfos.erase(std::find(routeInfos.begin(), routeInfos.end(), routeInfo)); }
+        void removeRouteInfo(const RouteInfo *routeInfo) { routeInfos.erase(find(routeInfos.begin(), routeInfos.end(), routeInfo)); }
         RouteInfo *findBestMatchingRouteInfo(const uint32_t destination, int begin = 0, int end = -1) const { return findBestMatchingRouteInfo(routeInfos, destination, 0, end == -1 ? routeInfos.size() : end); }
         static RouteInfo *findBestMatchingRouteInfo(const std::vector<RouteInfo *>& routeInfos, const uint32_t destination, int begin, int end);
         static bool routeInfoLessThan(const RouteInfo *a, const RouteInfo *b) { return a->netmask != b->netmask ? a->netmask > b->netmask : a->destination < b->destination; }

@@ -319,8 +319,8 @@ void TsnConfigurator::collectAllPaths(Node *source, Node *destination, Node *nod
     else {
         for (int i = 0; i < node->getNumPaths(); i++) {
             auto nextNode = (Node *)node->getPath(i)->getRemoteNode();
-            auto nextNetworkNodeName = nextNode->module->getFullName();
-            if (std::find(current.begin(), current.end(), nextNetworkNodeName) == current.end())
+            std::string nextNetworkNodeName = nextNode->module->getFullName();
+            if (!contains(current, nextNetworkNodeName))
                 collectAllPaths(source, destination, nextNode, paths, current);
         }
     }
@@ -367,7 +367,7 @@ bool TsnConfigurator::matchesFilter(std::string name, std::string filter)
 bool TsnConfigurator::intersects(std::vector<std::string> list1, std::vector<std::string> list2)
 {
     for (auto element : list1)
-        if (std::find(list2.begin(), list2.end(), element) != list2.end())
+        if (contains(list2, element))
             return true;
     return false;
 }

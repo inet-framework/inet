@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+#include "inet/common/stlutils.h"
+
 namespace inet {
 namespace ospfv3 {
 
@@ -76,11 +78,7 @@ void Ospfv3Area::init()
 
 bool Ospfv3Area::hasInterface(std::string interfaceName)
 {
-    std::map<std::string, Ospfv3Interface *>::iterator interfaceIt = this->interfaceByName.find(interfaceName);
-    if (interfaceIt == this->interfaceByName.end())
-        return false;
-
-    return true;
+    return containsKey(this->interfaceByName, interfaceName);
 } // hasArea
 
 Ospfv3Interface *Ospfv3Area::getInterfaceById(int id)

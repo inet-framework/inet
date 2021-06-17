@@ -17,6 +17,7 @@
 
 #include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
 
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRtsPolicy.h"
 
 namespace inet {
@@ -75,8 +76,8 @@ void QosRecoveryProcedure::incrementStationLrc()
 
 void QosRecoveryProcedure::incrementCounter(const Ptr<const Ieee80211DataHeader>& header, std::map<std::pair<Tid, SequenceControlField>, int>& retryCounter)
 {
-    auto id = std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()));
-    if (retryCounter.find(id) != retryCounter.end())
+    auto id = std::make_pair((Tid)header->getTid(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()));
+    if (containsKey(retryCounter, id))
         retryCounter[id]++;
     else
         retryCounter[id] = 1;
