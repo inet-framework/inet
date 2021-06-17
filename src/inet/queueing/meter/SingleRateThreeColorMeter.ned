@@ -25,9 +25,9 @@ simple SingleRateThreeColorMeter extends MultiTokenBucketMeter
         int ebs @unit(b); // excess burst size
         int bitsPerToken = default(8); // how many bits are represented by 1 token
         bool colorAware = default(false); // enables color-aware mode
-        tokenConsumptionPerBit = default(1 / bitsPerToken);
-        buckets = [{maxNumTokens: dropUnit(cbs) / bitsPerToken, tokenProductionRate: dropUnit(cir) / bitsPerToken, label: "green"},
-                   {maxNumTokens: dropUnit(ebs) / bitsPerToken, tokenProductionRate: 0, label: "yellow"}];
+        buckets = [{initialNumTokens: dropUnit(cbs) / bitsPerToken, maxNumTokens: dropUnit(cbs) / bitsPerToken, tokenProductionRate: dropUnit(cir) / bitsPerToken, label: "green"},
+                   {initialNumTokens: dropUnit(ebs) / bitsPerToken, maxNumTokens: dropUnit(ebs) / bitsPerToken, tokenProductionRate: 0, label: "yellow"}];
+        tokenConsumptionPerBit = 1 / bitsPerToken;
         defaultLabel = default("red");
         labelPriority = default(colorAware ? ["green", "yellow", "red"] : []);
 }
