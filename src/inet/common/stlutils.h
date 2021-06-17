@@ -38,14 +38,14 @@ typename std::vector<T>& addAll(std::vector<T>& v, const std::vector<T>& w) {
     return v;
 }
 
-template<typename T>
-typename std::set<T>& addAll(std::set<T>& s, const std::set<T>& t) {
+template<typename T, typename _C, typename _C2>
+typename std::set<T,_C>& addAll(std::set<T,_C>& s, const std::set<T,_C2>& t) {
     s.insert(t.begin(), t.end());
     return s;
 }
 
-template<typename K, typename V>
-inline std::map<K,V>& addAll(std::map<K,V>& m, const std::map<K,V>& n) {
+template<typename K, typename V, typename _C, typename _C2>
+inline std::map<K,V,_C>& addAll(std::map<K,V,_C>& m, const std::map<K,V,_C2>& n) {
     m.insert(n.begin(), n.end());
     return m;
 }
@@ -76,23 +76,28 @@ inline bool contains(const std::vector<T>& v, const T& a) {
     return find(v, a) != v.end();
 }
 
-template<typename T>
-inline bool contains(const std::set<T>& s, const T& a) {
+template<typename T, typename _C>
+inline bool contains(const std::set<T,_C>& s, const T& a) {
     return s.find(a) != s.end();
 }
 
-template<typename T>
-inline bool contains(const std::unordered_set<T>& s, const T& a) {
+template<typename T, typename _H, typename _P>
+inline bool contains(const std::unordered_set<T,_H,_P>& s, const T& a) {
     return s.find(a) != s.end();
 }
 
-template<typename K, typename V>
-inline bool containsKey(const std::map<K,V>& m, const K& a) {
+template<typename K, typename V, typename _C>
+inline bool containsKey(const std::map<K,V,_C>& m, const K& a) {
     return m.find(a) != m.end();
 }
 
-template<typename K, typename V>
-inline bool containsKey(const std::unordered_map<K,V>& m, const K& a) {
+template<typename K, typename V, typename _C>
+inline bool containsKey(const std::multimap<K,V,_C>& m, const K& a) {
+    return m.find(a) != m.end();
+}
+
+template<typename K, typename V, typename _H, typename _P>
+inline bool containsKey(const std::unordered_map<K,V,_H,_P>& m, const K& a) {
     return m.find(a) != m.end();
 }
 
@@ -108,8 +113,8 @@ void erase(std::vector<T>& v, int pos) {
     v.erase(v.begin() + pos);
 }
 
-template<typename T, typename A>
-inline void remove(std::vector<T>& v, const A& a) {
+template<typename T>
+inline void remove(std::vector<T>& v, const T& a) {
     if (!v.empty()) // optimization
         v.erase(std::remove(v.begin(), v.end(), a), v.end());
 }
@@ -155,8 +160,8 @@ std::string to_str(const std::vector<T>& v) {
     return out.str();
 }
 
-template <typename K, typename V>
-std::string to_str(const std::map<K,V>& m) {
+template <typename K, typename V, typename _C>
+std::string to_str(const std::map<K,V,_C>& m) {
     std::stringstream out;
     out << '{';
     for (auto it = m.begin(); it != m.end(); ++it) {
