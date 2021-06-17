@@ -22,3 +22,5 @@ Planned Showcases:
 -Time sensitive Ethernet:
  -gating
  -VLAN
+-Optimizing performance: recording, logging, event log, debug vs release - how they affect performance; 
+ sysprof; tests/speed folder; 
