@@ -28,7 +28,7 @@ simple StreamClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
         string mode @enum("req", "ind", "both") = default("both");
+        object mapping; // maps stream name to gate index
         int defaultGateIndex = default(0); // default gate index if no matching streams are found
-        string streamsToGateIndices; // space separated list of stream and gate index pairs
         @class(StreamClassifier);
 }
