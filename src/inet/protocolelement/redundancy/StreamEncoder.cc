@@ -28,14 +28,14 @@ void StreamEncoder::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        streamNameToVlanIdMapping = check_and_cast<cValueMap *>(par("streamNameToVlanIdMapping").objectValue());
+        mapping = check_and_cast<cValueMap *>(par("mapping").objectValue());
 }
 
 void StreamEncoder::handleParameterChange(const char *name)
 {
     if (name != nullptr) {
-        if (!strcmp(name, "streamNameToVlanIdMapping"))
-            streamNameToVlanIdMapping = check_and_cast<cValueMap *>(par("streamNameToVlanIdMapping").objectValue());
+        if (!strcmp(name, "mapping"))
+            mapping = check_and_cast<cValueMap *>(par("mapping").objectValue());
    }
 }
 
@@ -54,8 +54,8 @@ void StreamEncoder::processPacket(Packet *packet)
     auto streamReq = packet->findTag<StreamReq>();
     if (streamReq != nullptr) {
         auto streamName = streamReq->getStreamName();
-        if (streamNameToVlanIdMapping->containsKey(streamName)) {
-            auto vlanId = streamNameToVlanIdMapping->get(streamName).intValue();
+        if (mapping->containsKey(streamName)) {
+            auto vlanId = mapping->get(streamName).intValue();
             packet->addTagIfAbsent<VlanReq>()->setVlanId(vlanId);
         }
     }
