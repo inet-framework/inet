@@ -20,7 +20,7 @@ package inet.linklayer.ieee8021q;
 import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.contract.IPacketFilter;
 
-module FilterPolicyLayer like IProtocolLayer
+module StreamFilterLayer like IProtocolLayer
 {
     parameters:
         @display("i=block/layer");
@@ -28,14 +28,19 @@ module FilterPolicyLayer like IProtocolLayer
         input upperLayerIn;
         output upperLayerOut;
         input lowerLayerIn;
-        output lowerLayerOut;        
+        output lowerLayerOut;
     submodules:
-        filter: <default("SimpleIeee8021qciFilter")> like IPacketFilter {
+        ingress: <default("SimpleIeee8021qciFilter")> like IPacketFilter {
             @display("p=200,150");
         }
+        egress: <default("OmittedPacketFilter")> like IPacketFilter {
+            @display("p=500,150");
+        }
     connections:
-        upperLayerIn --> lowerLayerOut;
+        upperLayerIn --> { @display("m=n"); } --> egress.in;
+        egress.out --> { @display("m=s"); } --> lowerLayerOut;
 
-        lowerLayerIn -->  { @display("m=s"); } --> filter.in;
-        filter.out -->  { @display("m=n"); } --> upperLayerOut;
+        lowerLayerIn --> { @display("m=s"); } --> ingress.in;
+        ingress.out --> { @display("m=n"); } --> upperLayerOut;
 }
+
