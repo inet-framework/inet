@@ -21,8 +21,7 @@ import inet.common.MessageDispatcher;
 import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.common.PacketMultiplexer;
 
-
-module ReversingLayer like IProtocolLayer
+module DirectionReverserLayer like IProtocolLayer
 {
     parameters:
         @display("i=block/layer");
