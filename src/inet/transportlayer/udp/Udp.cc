@@ -568,8 +568,7 @@ void Udp::blockMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address mu
     bool changed = false;
     for (auto& elem : sourceList) {
         const L3Address& sourceAddress = elem;
-        auto it = std::find(excludedSources.begin(), excludedSources.end(), sourceAddress);
-        if (it != excludedSources.end()) {
+        if (!contains(excludedSources, sourceAddress)) {
             excludedSources.push_back(sourceAddress);
             changed = true;
         }
@@ -668,8 +667,7 @@ void Udp::joinMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address mul
     bool changed = false;
     for (auto& elem : sourceList) {
         const L3Address& sourceAddress = elem;
-        auto it = std::find(includedSources.begin(), includedSources.end(), sourceAddress);
-        if (it != includedSources.end()) {
+        if (!contains(includedSources, sourceAddress)) {
             includedSources.push_back(sourceAddress);
             changed = true;
         }
