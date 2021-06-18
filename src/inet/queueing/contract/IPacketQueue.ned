@@ -26,5 +26,6 @@ package inet.queueing.contract;
 moduleinterface IPacketQueue extends IPassivePacketSink, IPassivePacketSource
 {
     parameters:
+        @omittedTypename(OmittedPacketQueue);
         @display("i=block/queue");
 }

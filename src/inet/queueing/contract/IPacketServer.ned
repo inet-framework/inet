@@ -26,5 +26,6 @@ package inet.queueing.contract;
 moduleinterface IPacketServer extends IActivePacketSink, IActivePacketSource
 {
     parameters:
+        @omittedTypename(OmittedPacketServer);
         @display("i=block/server");
 }

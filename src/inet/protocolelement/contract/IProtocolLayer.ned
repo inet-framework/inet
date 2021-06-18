@@ -20,6 +20,7 @@ package inet.protocolelement.contract;
 moduleinterface IProtocolLayer
 {
     parameters:
+        @omittedTypename(OmittedProtocolLayer);
         @display("i=block/layer");
     gates:
         input upperLayerIn;

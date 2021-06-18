@@ -27,5 +27,6 @@ package inet.queueing.contract;
 moduleinterface IPacketFlow extends IPacketSink, IPacketSource
 {
     parameters:
+        @omittedTypename(OmittedPacketFlow);
         @display("i=block/star");
 }

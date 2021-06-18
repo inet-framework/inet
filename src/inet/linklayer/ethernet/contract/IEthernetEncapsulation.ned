@@ -23,6 +23,7 @@ package inet.linklayer.ethernet.contract;
 moduleinterface IEthernetEncapsulation
 {
     parameters:
+        @omittedTypename(OmittedEthernetEncapsulation);
         @display("i=block/square");
     gates:
         input upperLayerIn @labels(Ieee802Ctrl/down); // higher layer

@@ -20,6 +20,7 @@ package inet.protocolelement.trafficconditioner;
 moduleinterface ITrafficConditionerLayer
 {
     parameters:
+        @omittedTypename(OmittedTrafficConditionerLayer);
         @display("i=block/layer");
     gates:
         input upperLayerIn;

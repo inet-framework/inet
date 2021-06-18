@@ -28,5 +28,6 @@ package inet.queueing.contract;
 moduleinterface IPacketFilter extends IPacketFlow
 {
     parameters:
+        @omittedTypename(OmittedPacketFilter);
         @display("i=block/filter");
 }

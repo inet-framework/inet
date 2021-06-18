@@ -20,6 +20,7 @@ package inet.protocolelement.measurement;
 moduleinterface IMeasurementLayer
 {
     parameters:
+        @omittedTypename(OmittedMeasurementLayer);
         @display("i=block/layer");
     gates:
         input upperLayerIn;

@@ -26,5 +26,6 @@ package inet.queueing.contract;
 moduleinterface IPacketGate extends IPacketSink, IPacketSource
 {
     parameters:
+        @omittedTypename(OmittedPacketGate);
         @display("i=block/star");
 }

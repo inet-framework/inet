@@ -27,5 +27,6 @@ package inet.queueing.contract;
 moduleinterface ITrafficConditioner extends IPassivePacketSink, IActivePacketSource
 {
     parameters:
+        @omittedTypename(OmittedTrafficConditioner);
         @display("i=block/downarrow");
 }
