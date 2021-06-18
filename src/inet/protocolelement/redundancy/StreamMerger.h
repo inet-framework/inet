@@ -28,7 +28,7 @@ using namespace inet::queueing;
 class INET_API StreamMerger : public PacketFilterBase, public TransparentProtocolRegistrationListener
 {
   protected:
-    cValueMap *streamMapping = nullptr;
+    cValueMap *mapping = nullptr;
     int bufferSize = -1;
 
     std::map<std::string, std::vector<int>> sequenceNumbers;
