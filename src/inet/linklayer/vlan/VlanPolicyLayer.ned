@@ -34,20 +34,16 @@ module VlanPolicyLayer like IProtocolLayer
         output lowerLayerOut;
     submodules:
         outboundMapper: <default("VlanReqMapper")> like IPacketFlow {
-            parameters:
-                @display("p=200,100");
+            @display("p=200,150");
         }
         outboundFilter: <default("VlanReqFilter")> like IPacketFilter {
-            parameters:
-                @display("p=200,200");
+            @display("p=200,300");
         }
         inboundMapper: <default("OmittedPacketFlow")> like IPacketFlow {
-            parameters:
-                @display("p=500,100");
+            @display("p=500,150");
         }
         inboundFilter: <default("VlanIndFilter")> like IPacketFilter {
-            parameters:
-                @display("p=500,200");
+            @display("p=500,300");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> outboundMapper.in;
