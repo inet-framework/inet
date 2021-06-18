@@ -44,11 +44,11 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
         output cutthroughOut @loose;
         inout phys @labels(EthernetSignal);
     submodules:
-        trafficConditionerLayer: <default("OmittedTrafficConditionerLayer")> like ITrafficConditionerLayer {
+        trafficConditionerLayer: <default("")> like ITrafficConditionerLayer {
             parameters:
                 @display("p=400,100");
         }
-        measurementLayer: <default("OmittedMeasurementLayer")> like IMeasurementLayer {
+        measurementLayer: <default("")> like IMeasurementLayer {
             parameters:
                 @display("p=400,200");
         }

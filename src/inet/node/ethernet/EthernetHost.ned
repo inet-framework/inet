@@ -49,7 +49,7 @@ module EthernetHost
         eth.csmacdSupport = this.csmacdSupport;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.fcsMode = this.fcsMode;
-        eth.encap.typename = "OmittedEthernetEncapsulation";
+        eth.encap.typename = "";
         llc.registerProtocol = true;
     gates:
         inout ethg @labels(EtherFrame-conn);

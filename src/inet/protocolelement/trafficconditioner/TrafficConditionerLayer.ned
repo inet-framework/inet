@@ -31,10 +31,10 @@ module TrafficConditionerLayer like ITrafficConditionerLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        egressConditioner: <default("OmittedTrafficConditioner")> like ITrafficConditioner {
+        egressConditioner: <default("")> like ITrafficConditioner {
             @display("p=100,100");
         }
-        ingressConditioner: <default("OmittedTrafficConditioner")> like ITrafficConditioner {
+        ingressConditioner: <default("")> like ITrafficConditioner {
             @display("p=300,100");
         }
     connections:

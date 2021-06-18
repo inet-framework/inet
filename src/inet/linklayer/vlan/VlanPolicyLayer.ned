@@ -39,7 +39,7 @@ module VlanPolicyLayer like IProtocolLayer
         outboundFilter: <default("VlanReqFilter")> like IPacketFilter {
             @display("p=200,300");
         }
-        inboundMapper: <default("OmittedPacketFlow")> like IPacketFlow {
+        inboundMapper: <default("")> like IPacketFlow {
             @display("p=500,150");
         }
         inboundFilter: <default("VlanIndFilter")> like IPacketFilter {
