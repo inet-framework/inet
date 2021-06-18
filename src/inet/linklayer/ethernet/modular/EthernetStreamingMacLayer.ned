@@ -20,7 +20,7 @@ package inet.linklayer.ethernet.modular;
 module EthernetStreamingMacLayer extends EthernetMacLayer
 {
     parameters:
-        server.typename = default("OmittedPacketServer");
+        server.typename = default("");
         streamer.typename = default("PacketStreamer");
         transmitter.typename = default("StreamingTransmitter");
         receiver.typename = default("DestreamingReceiver");

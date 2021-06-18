@@ -40,7 +40,7 @@ module EthernetApp like IApp
             parameters:
                 @display("p=200,200");
         }
-        outbound: <default("OmittedPacketFlow")> like IPacketFlow {
+        outbound: <default("")> like IPacketFlow {
             parameters:
                 @display("p=200,400");
         }
@@ -48,7 +48,7 @@ module EthernetApp like IApp
             parameters:
                 @display("p=600,200");
         }
-        inbound: <default("OmittedPacketFlow")> like IPacketFlow {
+        inbound: <default("")> like IPacketFlow {
             parameters:
                 @display("p=600,400");
         }

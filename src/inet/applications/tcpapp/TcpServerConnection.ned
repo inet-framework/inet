@@ -40,7 +40,7 @@ module TcpServerConnection like IApp
             parameters:
                 @display("p=100,100");
         }
-        outbound: <default("OmittedPacketFlow")> like IPacketFlow {
+        outbound: <default("")> like IPacketFlow {
             parameters:
                 @display("p=100,200");
         }
@@ -48,7 +48,7 @@ module TcpServerConnection like IApp
             parameters:
                 @display("p=200,100");
         }
-        inbound: <default("OmittedPacketFlow")> like IPacketFlow {
+        inbound: <default("")> like IPacketFlow {
             parameters:
                 @display("p=200,200");
         }

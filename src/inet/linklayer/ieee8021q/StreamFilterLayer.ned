@@ -33,7 +33,7 @@ module StreamFilterLayer like IProtocolLayer
         ingress: <default("SimpleIeee8021qciFilter")> like IPacketFilter {
             @display("p=200,150");
         }
-        egress: <default("OmittedPacketFilter")> like IPacketFilter {
+        egress: <default("")> like IPacketFilter {
             @display("p=500,150");
         }
     connections:

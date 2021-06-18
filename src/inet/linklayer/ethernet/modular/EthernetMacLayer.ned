@@ -50,7 +50,7 @@ module EthernetMacLayer like IEthernetMacLayer
         server: <default("InstantServer")> like IPacketServer {
             @display("p=200,200");
         }
-        streamer: <default("OmittedPacketFlow")> like IPacketFlow {
+        streamer: <default("")> like IPacketFlow {
             @display("p=200,300");
         }
         fcsInserter: <default("EthernetFcsInserter")> like IPacketFlow {

@@ -41,7 +41,7 @@ module EthernetPreemptingMacLayer like IEthernetMacLayer
         lifetimer: <default("")> like IPacketLifeTimer if typename != "" {
             @display("p=100,100;is=s");
         }
-        queue: <default("OmittedPacketQueue")> like IPacketQueue if typename != "" {
+        queue: <default("")> like IPacketQueue if typename != "" {
             @display("p=200,100");
         }
         outboundClassifier: PacketClassifier {

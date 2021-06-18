@@ -36,13 +36,13 @@ module Ieee8021qProtocol like IIeee8021qLayer
         socketTable: Ieee8021qSocketTable if hasSocketSupport {
             @display("p=100,100");
         }
-        socketCommandProcessor: <default(hasSocketSupport ? "Ieee8021qSocketCommandProcessor" : "OmittedPacketFlow")> like IPacketFlow {
+        socketCommandProcessor: <default(hasSocketSupport ? "Ieee8021qSocketCommandProcessor" : "")> like IPacketFlow {
             @display("p=300,100");
         }
         qTagHeaderInserter: <default("Ieee8021qTagEpdHeaderInserter")> like IIeee8021qTagEpdHeaderInserter {
             @display("p=300,200");
         }
-        socketPacketProcessor: <default(hasSocketSupport ? "Ieee8021qSocketPacketProcessor" : "OmittedPacketFlow")> like IPacketFlow {
+        socketPacketProcessor: <default(hasSocketSupport ? "Ieee8021qSocketPacketProcessor" : "")> like IPacketFlow {
             @display("p=600,100");
         }
         qTagHeaderChecker: <default("Ieee8021qTagEpdHeaderChecker")> like IIeee8021qTagEpdHeaderChecker {

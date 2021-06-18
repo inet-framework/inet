@@ -53,7 +53,7 @@ module AccessPoint
         wlan[*].llc.typename = default("Ieee80211Portal");
         wlan[*].agent.typename = default("");
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
-        eth[*].encap.typename = "OmittedEthernetEncapsulation";
+        eth[*].encap.typename = "";
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         bridging.hasStp = false;
     gates:

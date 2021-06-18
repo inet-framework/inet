@@ -22,7 +22,7 @@ import inet.protocolelement.fragmentation.FragmentTagBasedDefragmenter;
 module EthernetFragmentingMacLayer extends EthernetMacLayer
 {
     parameters:
-        server.typename = default("OmittedPacketServer");
+        server.typename = default("");
         streamer.typename = default("PreemptableStreamer");
         streamer.minPacketLength = 60B;
         fcsInserter.typename = default("EthernetFragmentFcsInserter");
