@@ -28,13 +28,8 @@ void StreamClassifier::initialize(int stage)
     PacketClassifierBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         mode = par("mode");
+        mapping = check_and_cast<cValueMap *>(par("mapping").objectValue());
         defaultGateIndex = par("defaultGateIndex");
-        cStringTokenizer tokenizer(par("streamsToGateIndices"));
-        while (tokenizer.hasMoreTokens()) {
-            auto stream = tokenizer.nextToken();
-            auto index = tokenizer.nextToken();
-            streamsToGateIndexMap[stream] = atoi(index);
-        }
     }
 }
 
@@ -61,9 +56,8 @@ int StreamClassifier::classifyPacket(Packet *packet)
             }
             break;
     }
-    auto it = streamsToGateIndexMap.find(streamName);
-    if (it != streamsToGateIndexMap.end())
-        return it->second;
+    if (mapping->containsKey(streamName))
+        return mapping->get(streamName).intValue();
     else
         return defaultGateIndex;
 }
