@@ -28,7 +28,7 @@ using namespace inet::queueing;
 class INET_API StreamSplitter : public PacketDuplicatorBase, public TransparentProtocolRegistrationListener
 {
   protected:
-    cValueMap *streamMapping = nullptr;
+    cValueMap *mapping = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
