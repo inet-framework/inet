@@ -29,33 +29,43 @@ module BridgingLayer like IProtocolLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        reversingLayer: <default("ReversingLayer")> like IProtocolLayer {
+        directionReverser: <default("DirectionReverserLayer")> like IProtocolLayer {
             @display("p=300,150");
         }
-        filterPolicy: <default("OmittedProtocolLayer")> like IProtocolLayer {
+        streamIdentifier: <default("")> like IProtocolLayer {
             @display("p=300,300");
         }
-        streamPolicy: <default("OmittedProtocolLayer")> like IProtocolLayer {
+        streamRelay: <default("")> like IProtocolLayer {
             @display("p=300,450");
         }
-        relayLayer: <default("RelayLayer")> like IProtocolLayer {
+        interfaceRelay: <default("InterfaceRelayLayer")> like IProtocolLayer {
             @display("p=300,600");
         }
-        vlanPolicy: <default("OmittedProtocolLayer")> like IProtocolLayer {
+        vlanPolicy: <default("")> like IProtocolLayer {
             @display("p=300,750");
         }
+        streamFilter: <default("")> like IProtocolLayer {
+            @display("p=300,900");
+        }
+        streamCoder: <default("")> like IProtocolLayer {
+            @display("p=300,1050");
+        }
     connections:
-        upperLayerIn --> reversingLayer.upperLayerIn;
-        reversingLayer.lowerLayerOut --> filterPolicy.upperLayerIn;
-        filterPolicy.lowerLayerOut --> streamPolicy.upperLayerIn;
-        streamPolicy.lowerLayerOut --> relayLayer.upperLayerIn;
-        relayLayer.lowerLayerOut --> vlanPolicy.upperLayerIn;
-        vlanPolicy.lowerLayerOut --> lowerLayerOut;
+        upperLayerIn --> directionReverser.upperLayerIn;
+        directionReverser.lowerLayerOut --> streamIdentifier.upperLayerIn;
+        streamIdentifier.lowerLayerOut --> streamRelay.upperLayerIn;
+        streamRelay.lowerLayerOut --> interfaceRelay.upperLayerIn;
+        interfaceRelay.lowerLayerOut --> vlanPolicy.upperLayerIn;
+        vlanPolicy.lowerLayerOut --> streamFilter.upperLayerIn;
+        streamFilter.lowerLayerOut --> streamCoder.upperLayerIn;
+        streamCoder.lowerLayerOut --> lowerLayerOut;
 
-        lowerLayerIn --> vlanPolicy.lowerLayerIn;
-        vlanPolicy.upperLayerOut --> relayLayer.lowerLayerIn;
-        relayLayer.upperLayerOut --> streamPolicy.lowerLayerIn;
-        streamPolicy.upperLayerOut --> filterPolicy.lowerLayerIn;
-        filterPolicy.upperLayerOut --> reversingLayer.lowerLayerIn;
-        reversingLayer.upperLayerOut --> upperLayerOut;
+        lowerLayerIn --> streamCoder.lowerLayerIn;
+        streamCoder.upperLayerOut --> streamFilter.lowerLayerIn;
+        streamFilter.upperLayerOut --> vlanPolicy.lowerLayerIn;
+        vlanPolicy.upperLayerOut --> interfaceRelay.lowerLayerIn;
+        interfaceRelay.upperLayerOut --> streamRelay.lowerLayerIn;
+        streamRelay.upperLayerOut --> streamIdentifier.lowerLayerIn;
+        streamIdentifier.upperLayerOut --> directionReverser.lowerLayerIn;
+        directionReverser.upperLayerOut --> upperLayerOut;
 }

@@ -152,7 +152,7 @@ package inet;
 //  - ~StreamEncoder
 //  - ~StreamDecoder
 //  - ~StreamMerger
-//  - ~StreamLayer
+//  - ~StreamSwitchingLayer
 //
 // Static configurators:
 //  - ~StreamRedundancyConfigurator
