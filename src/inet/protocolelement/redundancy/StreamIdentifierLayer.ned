@@ -18,11 +18,9 @@
 package inet.protocolelement.redundancy;
 
 import inet.protocolelement.contract.IProtocolLayer;
-import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
-import inet.queueing.contract.IPacketPusher;
 
-module StreamLayer like IProtocolLayer
+module StreamIdentifierLayer like IProtocolLayer
 {
     parameters:
         @display("i=block/layer");
@@ -32,33 +30,13 @@ module StreamLayer like IProtocolLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        streamMerger: <default("StreamMerger")> like IPacketFilter if typename != "" {
-            parameters:
-                @display("p=200,150;i=block/join");
-        }
-        streamDecoder: <default("StreamDecoder")> like IPacketFlow if typename != "" {
-            parameters:
-                @display("p=200,300;i=block/blackboard");
-        }
         streamIdentifier: <default("StreamIdentifier")> like IPacketFlow if typename != "" {
             parameters:
-                @display("p=500,150;i=block/blackboard");
-        }
-        streamSplitter: <default("StreamSplitter")> like IPacketPusher if typename != "" {
-            parameters:
-                @display("p=500,300;i=block/fork");
-        }
-        streamEncoder: <default("StreamEncoder")> like IPacketFlow if typename != "" {
-            parameters:
-                @display("p=500,450;i=block/blackboard");
+                @display("p=200,150;i=block/blackboard");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> streamIdentifier.in;
-        streamIdentifier.out --> streamSplitter.in;
-        streamSplitter.out --> streamEncoder.in;
-        streamEncoder.out --> { @display("m=s"); } --> lowerLayerOut;
+        streamIdentifier.out --> { @display("m=s"); } --> lowerLayerOut;
 
-        lowerLayerIn --> { @display("m=s"); } --> streamDecoder.in;
-        streamDecoder.out --> streamMerger.in;
-        streamMerger.out --> { @display("m=n"); } --> upperLayerOut;
+        lowerLayerIn --> upperLayerOut;
 }
