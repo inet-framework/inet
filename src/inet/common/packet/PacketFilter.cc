@@ -32,8 +32,7 @@ void PacketFilter::setPattern(const char *packetPattern, const char *chunkPatter
 bool PacketFilter::matches(const cPacket *cpacket) const
 {
     MatchableObject matchableObject(MatchableObject::ATTRIBUTE_FULLNAME, cpacket);
-    // TODO eliminate const_cast when cMatchExpression::matches becomes const
-    if (!const_cast<PacketFilter *>(this)->packetMatchExpression.matches(&matchableObject))
+    if (!packetMatchExpression.matches(&matchableObject))
         return false;
     else if (auto packet = dynamic_cast<const Packet *>(cpacket)) {
         if (matchesAllChunks)

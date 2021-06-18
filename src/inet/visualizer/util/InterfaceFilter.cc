@@ -29,8 +29,7 @@ void InterfaceFilter::setPattern(const char *pattern)
 bool InterfaceFilter::matches(const NetworkInterface *networkInterface) const
 {
     MatchableObject matchableObject(MatchableObject::ATTRIBUTE_FULLNAME, networkInterface);
-    // TODO eliminate const_cast when cMatchExpression::matches becomes const
-    return const_cast<InterfaceFilter *>(this)->matchExpression.matches(&matchableObject);
+    return matchExpression.matches(&matchableObject);
 }
 
 } // namespace visualizer

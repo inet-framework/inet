@@ -29,8 +29,7 @@ void GateFilter::setPattern(const char *pattern)
 bool GateFilter::matches(const queueing::IPacketGate *gate) const
 {
     MatchableObject matchableObject(MatchableObject::ATTRIBUTE_FULLPATH, check_and_cast<const cObject *>(gate));
-    // TODO eliminate const_cast when cMatchExpression::matches becomes const
-    return const_cast<GateFilter *>(this)->matchExpression.matches(&matchableObject);
+    return matchExpression.matches(&matchableObject);
 }
 
 } // namespace visualizer

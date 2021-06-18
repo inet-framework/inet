@@ -29,8 +29,7 @@ void ModuleFilter::setPattern(const char *pattern)
 bool ModuleFilter::matches(const cModule *module) const
 {
     MatchableObject matchableObject(MatchableObject::ATTRIBUTE_FULLPATH, module);
-    // TODO eliminate const_cast when cMatchExpression::matches becomes const
-    return const_cast<ModuleFilter *>(this)->matchExpression.matches(&matchableObject);
+    return matchExpression.matches(&matchableObject);
 }
 
 } // namespace visualizer
