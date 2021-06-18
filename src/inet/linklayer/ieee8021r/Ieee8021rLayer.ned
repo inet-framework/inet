@@ -29,7 +29,7 @@ module Ieee8021rLayer like IIeee8021rLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        policy: <default("StreamLayer")> like IProtocolLayer {
+        policy: <default("StreamPolicyLayer")> like IProtocolLayer {
             @display("p=300,150");
         }
         protocol: <default("Ieee8021rProtocol")> like IIeee8021rLayer {

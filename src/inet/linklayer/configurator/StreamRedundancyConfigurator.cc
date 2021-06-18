@@ -275,14 +275,17 @@ void StreamRedundancyConfigurator::configureStreams(Node *node)
     auto networkNode = node->module;
     auto macForwardingTable = networkNode->findModuleByPath(".macTable");
     auto ieee8021qTagHeaderChecker = networkNode->findModuleByPath(".ieee8021q.qTagHeaderChecker");
-    auto streamPolicy = networkNode->findModuleByPath(".bridging.streamPolicy");
-    if (streamPolicy == nullptr)
-        streamPolicy = networkNode->findModuleByPath(".ieee8021r.policy");
-    auto streamIdentifier = streamPolicy->getSubmodule("streamIdentifier");
-    auto streamDecoder = streamPolicy->getSubmodule("streamDecoder");
-    auto streamMerger = streamPolicy->getSubmodule("streamMerger");
-    auto streamSplitter = streamPolicy->getSubmodule("streamSplitter");
-    auto streamEncoder = streamPolicy->getSubmodule("streamEncoder");
+    auto streamSwitching = networkNode->findModuleByPath(".bridging.streamSwitching");
+    if (streamSwitching == nullptr)
+        streamSwitching = networkNode->findModuleByPath(".ieee8021r.streamSwitching");
+    auto streamIdentifier = streamSwitching->getSubmodule("streamIdentifier");
+    auto streamMerger = streamSwitching->getSubmodule("streamMerger");
+    auto streamSplitter = streamSwitching->getSubmodule("streamSplitter");
+    auto streamCoding = networkNode->findModuleByPath(".bridging.streamCoding");
+    if (streamCoding == nullptr)
+        streamCoding = networkNode->findModuleByPath(".ieee8021r.streamCoding");
+    auto streamDecoder = streamCoding->getSubmodule("streamDecoder");
+    auto streamEncoder = streamCoding->getSubmodule("streamEncoder");
     if (streamIdentifier != nullptr && !node->streamIdentifications.empty()) {
         cValueArray *parameterValue = new cValueArray();
         for (auto& streamIdentification : node->streamIdentifications) {
@@ -292,7 +295,7 @@ void StreamRedundancyConfigurator::configureStreams(Node *node)
             parameterValue->add(value);
         }
         EV_INFO << "Configuring stream merging" << EV_FIELD(networkNode) << EV_FIELD(streamIdentifier) << EV_FIELD(parameterValue) << EV_ENDL;
-        streamIdentifier->par("streamMappings") = parameterValue;
+        streamIdentifier->par("mapping") = parameterValue;
     }
     if (streamDecoder != nullptr && !node->streamDecodings.empty()) {
         cValueArray *parameterValue = new cValueArray();
@@ -304,7 +307,7 @@ void StreamRedundancyConfigurator::configureStreams(Node *node)
             parameterValue->add(value);
         }
         EV_INFO << "Configuring stream decoding" << EV_FIELD(networkNode) << EV_FIELD(streamDecoder) << EV_FIELD(parameterValue) << EV_ENDL;
-        streamDecoder->par("streamMappings") = parameterValue;
+        streamDecoder->par("mapping") = parameterValue;
     }
     if (streamMerger != nullptr && !node->streamMergings.empty()) {
         cValueMap *parameterValue = new cValueMap();
@@ -313,7 +316,7 @@ void StreamRedundancyConfigurator::configureStreams(Node *node)
                 parameterValue->set(inputStream.c_str(), streamMerging.outputStream.c_str());
         }
         EV_INFO << "Configuring stream merging" << EV_FIELD(networkNode) << EV_FIELD(streamMerger) << EV_FIELD(parameterValue) << EV_ENDL;
-        streamMerger->par("streamMapping") = parameterValue;
+        streamMerger->par("mapping") = parameterValue;
     }
     if (streamSplitter != nullptr && !node->streamSplittings.empty()) {
         cValueMap *parameterValue = new cValueMap();
@@ -324,14 +327,14 @@ void StreamRedundancyConfigurator::configureStreams(Node *node)
             parameterValue->set(streamSplitting.inputStream.c_str(), value);
         }
         EV_INFO << "Configuring stream splitting" << EV_FIELD(networkNode) << EV_FIELD(streamSplitter) << EV_FIELD(parameterValue) << EV_ENDL;
-        streamSplitter->par("streamMapping") = parameterValue;
+        streamSplitter->par("mapping") = parameterValue;
     }
     if (streamEncoder != nullptr && !node->streamEncodings.empty()) {
         cValueMap *parameterValue = new cValueMap();
         for (auto& streamEncoding : node->streamEncodings)
             parameterValue->set(streamEncoding.name.c_str(), streamEncoding.vlanId);
         EV_INFO << "Configuring stream encoding" << EV_FIELD(networkNode) << EV_FIELD(streamEncoder) << EV_FIELD(parameterValue) << EV_ENDL;
-        streamEncoder->par("streamNameToVlanIdMapping") = parameterValue;
+        streamEncoder->par("mapping") = parameterValue;
     }
     if (macForwardingTable != nullptr && !node->streamEncodings.empty()) {
         cValueArray *parameterValue = new cValueArray();
