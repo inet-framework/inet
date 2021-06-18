@@ -23,7 +23,7 @@ import inet.queueing.contract.IPacketPusher;
 simple StreamSplitter extends PacketPusherBase like IPacketPusher
 {
     parameters:
-        object streamMapping @mutable = default({}); // map from input stream names to array of output stream names, empty string means no stream
+        object mapping @mutable = default({}); // map from input stream names to array of output stream names, empty string means no stream
         @class(StreamSplitter);
         @display("i=block/fork");
 }

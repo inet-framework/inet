@@ -27,14 +27,14 @@ void StreamSplitter::initialize(int stage)
 {
     PacketDuplicatorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        streamMapping = check_and_cast<cValueMap *>(par("streamMapping").objectValue());
+        mapping = check_and_cast<cValueMap *>(par("mapping").objectValue());
 }
 
 void StreamSplitter::handleParameterChange(const char *name)
 {
     if (name != nullptr) {
-        if (!strcmp(name, "streamMapping"))
-            streamMapping = check_and_cast<cValueMap *>(par("streamMapping").objectValue());
+        if (!strcmp(name, "mapping"))
+            mapping = check_and_cast<cValueMap *>(par("mapping").objectValue());
    }
 }
 
@@ -55,8 +55,8 @@ void StreamSplitter::pushPacket(Packet *packet, cGate *gate)
     auto streamReq = packet->findTag<StreamReq>();
     if (streamReq != nullptr) {
         auto streamName = streamReq->getStreamName();
-        if (streamMapping->containsKey(streamName)) {
-            cValueArray *outputStreams = check_and_cast<cValueArray *>(streamMapping->get(streamName).objectValue());
+        if (mapping->containsKey(streamName)) {
+            cValueArray *outputStreams = check_and_cast<cValueArray *>(mapping->get(streamName).objectValue());
             for (int i = 0; i < outputStreams->size(); i++) {
                 const char *splitStreamName = outputStreams->get(i).stringValue();
                 auto duplicate = packet->dup();
@@ -82,8 +82,8 @@ int StreamSplitter::getNumPacketDuplicates(Packet *packet)
 {
     auto streamReq = packet->findTag<StreamReq>();
     auto streamName = streamReq != nullptr ? streamReq->getStreamName() : "";
-    if (streamMapping->containsKey(streamName)) {
-        cValueArray *outputStreams = check_and_cast<cValueArray *>(streamMapping->get(streamName).objectValue());
+    if (mapping->containsKey(streamName)) {
+        cValueArray *outputStreams = check_and_cast<cValueArray *>(mapping->get(streamName).objectValue());
         return outputStreams->size() - 1;
     }
     else
