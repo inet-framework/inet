@@ -30,8 +30,7 @@ bool PortFilter::matches(int value) const
 {
     std::string text = std::to_string(value);
     cMatchableString matchableString(text.c_str());
-    // TODO eliminate const_cast when cMatchExpression::matches becomes const
-    return const_cast<PortFilter *>(this)->matchExpression.matches(&matchableString);
+    return matchExpression.matches(&matchableString);
 }
 
 } // namespace visualizer

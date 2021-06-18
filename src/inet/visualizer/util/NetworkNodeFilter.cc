@@ -29,8 +29,7 @@ void NetworkNodeFilter::setPattern(const char *pattern)
 bool NetworkNodeFilter::matches(const cModule *module) const
 {
     MatchableObject matchableObject(MatchableObject::ATTRIBUTE_FULLNAME, module);
-    // TODO eliminate const_cast when cMatchExpression::matches becomes const
-    return const_cast<NetworkNodeFilter *>(this)->matchExpression.matches(&matchableObject);
+    return matchExpression.matches(&matchableObject);
 }
 
 } // namespace visualizer

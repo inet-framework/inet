@@ -99,8 +99,7 @@ void PacketDropVisualizerBase::DetailsFilter::setPattern(const char *pattern)
 bool PacketDropVisualizerBase::DetailsFilter::matches(const PacketDropDetails *details) const
 {
     MatchableObject matchableObject(MatchableObject::ATTRIBUTE_FULLNAME, details);
-    // TODO eliminate const_cast when cMatchExpression::matches becomes const
-    return const_cast<DetailsFilter *>(this)->matchExpression.matches(&matchableObject);
+    return matchExpression.matches(&matchableObject);
 }
 
 void PacketDropVisualizerBase::preDelete(cComponent *root)
