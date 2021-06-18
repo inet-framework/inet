@@ -8,6 +8,7 @@
 #ifndef __INET_FLOWMEASUREMENTSTARTER_H
 #define __INET_FLOWMEASUREMENTSTARTER_H
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/PacketFilter.h"
 #include "inet/queueing/base/PacketFlowBase.h"
@@ -15,7 +16,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API FlowMeasurementStarter : public PacketFlowBase
+class INET_API FlowMeasurementStarter : public PacketFlowBase, public TransparentProtocolRegistrationListener
 {
   protected:
     PacketFilter packetFilter;
@@ -32,6 +33,8 @@ class INET_API FlowMeasurementStarter : public PacketFlowBase
 
   protected:
     virtual void initialize(int stage) override;
+
+    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
     template<typename T>
     void startMeasurement(Packet *packet, b offset, b length, simtime_t value) const {

@@ -42,6 +42,16 @@ void FlowMeasurementStarter::initialize(int stage)
     }
 }
 
+cGate *FlowMeasurementStarter::getRegistrationForwardingGate(cGate *gate)
+{
+    if (gate == outputGate)
+        return inputGate;
+    else if (gate == inputGate)
+        return outputGate;
+    else
+        throw cRuntimeError("Unknown gate");
+}
+
 void FlowMeasurementStarter::processPacket(Packet *packet)
 {
     if (packetFilter.matches(packet)) {
