@@ -18,12 +18,15 @@
 package inet.linklayer.ethernet.common;
 
 import inet.protocolelement.contract.IProtocolLayer;
+import inet.queueing.contract.IPacketFlow;
 
-module RelayLayer like IProtocolLayer
+module InterfaceRelayLayer like IProtocolLayer
 {
     parameters:
-        *.macTableModule = default("^.^.macTable");
-        *.interfaceTableModule = default("^.^.interfaceTable");
+        string macTableModule;
+        string interfaceTableModule;
+        *.macTableModule = default(absPath(this.macTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         @display("i=block/layer");
     gates:
         input upperLayerIn;
@@ -31,11 +34,11 @@ module RelayLayer like IProtocolLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        learner: RelayInterfaceLearner {
-            @display("p=100,100");
+        learner: <default("RelayInterfaceLearner")> like IPacketFlow {
+            @display("p=200,150");
         }
-        selector: RelayInterfaceSelector {
-            @display("p=300,100");
+        selector: <default("RelayInterfaceSelector")> like IPacketFlow {
+            @display("p=500,150");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> selector.in;
