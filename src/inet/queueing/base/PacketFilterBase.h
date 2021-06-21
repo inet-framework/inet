@@ -80,7 +80,7 @@ class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPa
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 
     virtual bool canPullSomePacket(cGate *gate) const override;
-    virtual Packet *canPullPacket(cGate *gate) const override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *canPullPacket(cGate *gate) const override;
 
     virtual Packet *pullPacket(cGate *gate) override;
 
