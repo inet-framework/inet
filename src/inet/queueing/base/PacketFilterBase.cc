@@ -180,13 +180,21 @@ void PacketFilterBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bo
 bool PacketFilterBase::canPullSomePacket(cGate *gate) const
 {
     Enter_Method("canPullSomePacket");
+    return canPullPacket(gate) != nullptr;
+}
+
+Packet *PacketFilterBase::canPullPacket(cGate *gate) const
+{
+    Enter_Method("canPullPacket");
     auto providerGate = inputGate->getPathStartGate();
     while (true) {
         auto packet = provider->canPullPacket(providerGate);
         if (packet == nullptr)
-            return false;
+            return nullptr;
         else if (matchesPacket(packet))
-            return true;
+            return packet;
+        else if (backpressure)
+            return nullptr;
         else {
             auto nonConstThisPtr = const_cast<PacketFilterBase *>(this);
             packet = provider->pullPacket(providerGate);
