@@ -18,6 +18,7 @@
 #ifndef __INET_TAGBASE_H
 #define __INET_TAGBASE_H
 
+#include "inet/common/IPrintableObject.h"
 #include "inet/common/Ptr.h"
 #include "inet/common/Units.h"
 
@@ -25,7 +26,7 @@ namespace inet {
 
 using namespace inet::units::values;
 
-class INET_API TagBase : public cObject, public SharedBase<TagBase>
+class INET_API TagBase : public cObject, public SharedBase<TagBase>, public IPrintableObject
 {
   public:
     virtual const Ptr<TagBase> dupShared() const { return Ptr<TagBase>(static_cast<TagBase *>(dup())); }
@@ -35,7 +36,11 @@ class INET_API TagBase : public cObject, public SharedBase<TagBase>
     virtual void parsimPack(cCommBuffer *buffer) const override {}
     virtual void parsimUnpack(cCommBuffer *buffer) override {}
 
-    virtual std::string str() const override { return getClassName(); }
+    virtual std::ostream& printToStream(std::ostream &stream, int level, int evFlags) const override;
+
+    virtual std::ostream& printFieldsToStream(std::ostream &stream, int level, int evFlags) const;
+
+    virtual std::string str() const override;
 };
 
 } // namespace inet
