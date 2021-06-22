@@ -2,7 +2,7 @@
 
 echo Generating...
 
-opp_neddoc . --no-automatic-hyperlinks -x \
+opp_neddoc --no-automatic-hyperlinks -x \
 /inet/src/inet/clock,\
 /inet/src/inet/linklayer/configurator,\
 /inet/src/inet/linklayer/ethernet,\
@@ -10,8 +10,13 @@ opp_neddoc . --no-automatic-hyperlinks -x \
 /inet/src/inet/linklayer/ieee8021r,\
 /inet/src/inet/linklayer/vlan,\
 /inet/src/inet/physicallayer,\
-/inet/src/inet/protocolelement,\
-/inet/examples/,\
+/inet/examples/ethernet/clocksynchronization,\
+/inet/examples/ethernet/creditbasedshaper,\
+/inet/examples/ethernet/cutthrough,\
+/inet/examples/ethernet/gatepreemption,\
+/inet/examples/ethernet/preemption,\
+/inet/examples/ethernet/redundancy,\
+/inet/examples/ethernet/timeawareshaper,\
 MARKER,\
 /inet/src/inet/applications,\
 /inet/src/inet/common,\
@@ -113,10 +118,10 @@ MARKER,\
 /inet/examples/voipstream,\
 /inet/examples/wireless,\
 /inet/showcases,\
-/inet/tutorials
+/inet/tutorials .
 
 echo Uploading...
 
-rsync -r -e 'ssh -p 2200' --progress doc/neddoc/* com@server.omnest.com:~/httpdocs/tmp/tsn
+cd doc/neddoc && rsync -r -e 'ssh -p 2200' . --delete --progress com@server.omnest.com:~/httpdocs/tmp/tsn
 
 echo Done.
