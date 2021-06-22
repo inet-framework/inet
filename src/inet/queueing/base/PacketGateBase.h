@@ -53,6 +53,7 @@ class INET_API PacketGateBase : public PacketFlowBase, public TransparentProtoco
 
   public:
     virtual bool isOpen() const override { return isOpen_; }
+    virtual bool isClosed() const { return !isOpen_; }
     virtual void open() override;
     virtual void close() override;
 
