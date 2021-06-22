@@ -40,39 +40,25 @@ void QosAckHandler::initialize(int stage)
 QosAckHandler::Status QosAckHandler::getQoSDataAckStatus(const QoSKey& id)
 {
     auto it = ackStatuses.find(id);
-    if (it == ackStatuses.end())
-        return Status::FRAME_NOT_YET_TRANSMITTED;
-    else
-        return it->second;
+    return (it != ackStatuses.end()) ? it->second : Status::FRAME_NOT_YET_TRANSMITTED;
 }
 
 QosAckHandler::Status QosAckHandler::getMgmtOrNonQoSAckStatus(const Key& id)
 {
     auto it = mgmtAckStatuses.find(id);
-    if (it == mgmtAckStatuses.end())
-        return Status::FRAME_NOT_YET_TRANSMITTED;
-    else
-        return it->second;
+    return (it != mgmtAckStatuses.end()) ? it->second : Status::FRAME_NOT_YET_TRANSMITTED;
 }
 
 QosAckHandler::Status QosAckHandler::getMgmtOrNonQoSAckStatus(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     auto id = std::make_pair(header->getReceiverAddress(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()));
-    auto it = mgmtAckStatuses.find(id);
-    if (it == mgmtAckStatuses.end())
-        return Status::FRAME_NOT_YET_TRANSMITTED;
-    else
-        return it->second;
+    return getMgmtOrNonQoSAckStatus(id);
 }
 
 QosAckHandler::Status QosAckHandler::getQoSDataAckStatus(const Ptr<const Ieee80211DataHeader>& header)
 {
     auto id = std::make_pair(header->getReceiverAddress(), std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber())));
-    auto it = ackStatuses.find(id);
-    if (it == ackStatuses.end())
-        return Status::FRAME_NOT_YET_TRANSMITTED;
-    else
-        return it->second;
+    return getQoSDataAckStatus(id);
 }
 
 void QosAckHandler::processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader)

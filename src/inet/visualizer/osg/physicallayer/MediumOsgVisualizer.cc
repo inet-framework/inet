@@ -131,10 +131,7 @@ void MediumOsgVisualizer::setAnimationSpeed() const
 osg::Node *MediumOsgVisualizer::getRadioOsgNode(const IRadio *radio) const
 {
     auto it = radioOsgNodes.find(radio->getId());
-    if (it == radioOsgNodes.end())
-        return nullptr;
-    else
-        return it->second;
+    return (it == radioOsgNodes.end()) ? nullptr : it->second;
 }
 
 void MediumOsgVisualizer::setRadioOsgNode(const IRadio *radio, osg::Node *node)
@@ -156,10 +153,7 @@ osg::Node *MediumOsgVisualizer::removeRadioOsgNode(const IRadio *radio)
 osg::Node *MediumOsgVisualizer::getSignalOsgNode(const ITransmission *transmission) const
 {
     auto it = signalOsgNodes.find(transmission->getId());
-    if (it == signalOsgNodes.end())
-        return nullptr;
-    else
-        return it->second;
+    return (it == signalOsgNodes.end()) ? nullptr : it->second;
 }
 
 void MediumOsgVisualizer::setSignalOsgNode(const ITransmission *transmission, osg::Node *node)

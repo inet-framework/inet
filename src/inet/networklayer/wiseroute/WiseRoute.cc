@@ -406,10 +406,7 @@ WiseRoute::tFloodTable::key_type WiseRoute::getRoute(const tFloodTable::key_type
     // If I am the origin of the packet and no route exists, use flood, hence return broadcast
     // address for next hop.
     tRouteTable::const_iterator pos = routeTable.find(destAddr);
-    if (pos != routeTable.end())
-        return pos->second.nextHop;
-    else
-        return myNetwAddr.getAddressType()->getBroadcastAddress();
+    return (pos != routeTable.end()) ? pos->second.nextHop : myNetwAddr.getAddressType()->getBroadcastAddress();
 }
 
 /**

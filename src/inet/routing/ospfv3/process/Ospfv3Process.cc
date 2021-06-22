@@ -674,11 +674,8 @@ void Ospfv3Process::debugDump()
 
 Ospfv3Instance *Ospfv3Process::getInstanceById(int instanceId)
 {
-    std::map<int, Ospfv3Instance *>::iterator instIt = this->instancesById.find(instanceId);
-    if (instIt == this->instancesById.end())
-        return nullptr;
-
-    return instIt->second;
+    auto instIt = this->instancesById.find(instanceId);
+    return (instIt == this->instancesById.end()) ? nullptr : instIt->second;
 }
 
 void Ospfv3Process::addInstance(Ospfv3Instance *newInstance)

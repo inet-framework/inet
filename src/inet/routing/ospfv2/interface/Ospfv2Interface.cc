@@ -267,19 +267,13 @@ void Ospfv2Interface::sendLsAcknowledgement(const Ospfv2LsaHeader *lsaHeader, Ip
 Neighbor *Ospfv2Interface::getNeighborById(RouterId neighborID)
 {
     auto neighborIt = neighboringRoutersByID.find(neighborID);
-    if (neighborIt != neighboringRoutersByID.end())
-        return neighborIt->second;
-    else
-        return nullptr;
+    return (neighborIt != neighboringRoutersByID.end()) ? neighborIt->second : nullptr;
 }
 
 Neighbor *Ospfv2Interface::getNeighborByAddress(Ipv4Address address)
 {
     auto neighborIt = neighboringRoutersByAddress.find(address);
-    if (neighborIt != neighboringRoutersByAddress.end())
-        return neighborIt->second;
-    else
-        return nullptr;
+    return (neighborIt != neighboringRoutersByAddress.end()) ? neighborIt->second : nullptr;
 }
 
 void Ospfv2Interface::addNeighbor(Neighbor *neighbor)

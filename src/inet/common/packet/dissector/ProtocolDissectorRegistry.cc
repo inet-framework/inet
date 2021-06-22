@@ -35,10 +35,7 @@ void ProtocolDissectorRegistry::registerProtocolDissector(const Protocol *protoc
 const ProtocolDissector *ProtocolDissectorRegistry::findProtocolDissector(const Protocol *protocol) const
 {
     auto it = protocolDissectors.find(protocol);
-    if (it != protocolDissectors.end())
-        return it->second;
-    else
-        return nullptr;
+    return (it != protocolDissectors.end()) ? it->second : nullptr;
 }
 
 const ProtocolDissector *ProtocolDissectorRegistry::getProtocolDissector(const Protocol *protocol) const

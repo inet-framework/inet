@@ -776,10 +776,7 @@ void MediumCanvasVisualizer::setAnimationSpeed()
 cFigure *MediumCanvasVisualizer::getSignalDepartureFigure(const IRadio *radio) const
 {
     auto it = signalDepartureFigures.find(radio->getId());
-    if (it == signalDepartureFigures.end())
-        return nullptr;
-    else
-        return it->second;
+    return (it == signalDepartureFigures.end()) ? nullptr : it->second;
 }
 
 void MediumCanvasVisualizer::setSignalDepartureFigure(const IRadio *radio, cFigure *figure)
@@ -801,10 +798,7 @@ cFigure *MediumCanvasVisualizer::removeSignalDepartureFigure(const IRadio *radio
 cFigure *MediumCanvasVisualizer::getSignalArrivalFigure(const IRadio *radio) const
 {
     auto it = signalArrivalFigures.find(radio->getId());
-    if (it == signalArrivalFigures.end())
-        return nullptr;
-    else
-        return it->second;
+    return (it == signalArrivalFigures.end()) ? nullptr : it->second;
 }
 
 void MediumCanvasVisualizer::setSignalArrivalFigure(const IRadio *radio, cFigure *figure)
@@ -826,10 +820,7 @@ cFigure *MediumCanvasVisualizer::removeSignalArrivalFigure(const IRadio *radio)
 cFigure *MediumCanvasVisualizer::getSignalFigure(const ITransmission *transmission) const
 {
     auto it = signalFigures.find(transmission->getId());
-    if (it == signalFigures.end())
-        return nullptr;
-    else
-        return it->second;
+    return (it == signalFigures.end()) ? nullptr : it->second;
 }
 
 void MediumCanvasVisualizer::setSignalFigure(const ITransmission *transmission, cFigure *figure)

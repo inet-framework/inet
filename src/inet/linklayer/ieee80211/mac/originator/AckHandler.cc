@@ -34,20 +34,13 @@ void AckHandler::initialize(int stage)
 AckHandler::Status AckHandler::getAckStatus(SequenceControlField id)
 {
     auto it = ackStatuses.find(id);
-    if (it == ackStatuses.end())
-        return Status::FRAME_NOT_YET_TRANSMITTED;
-    else
-        return it->second;
+    return (it != ackStatuses.end()) ? it->second : Status::FRAME_NOT_YET_TRANSMITTED;
 }
 
 AckHandler::Status AckHandler::getAckStatus(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     auto id = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
-    auto it = ackStatuses.find(id);
-    if (it == ackStatuses.end())
-        return Status::FRAME_NOT_YET_TRANSMITTED;
-    else
-        return it->second;
+    return getAckStatus(id);
 }
 
 void AckHandler::processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader)

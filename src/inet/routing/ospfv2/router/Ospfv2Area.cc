@@ -189,7 +189,7 @@ Ipv4AddressRange Ospfv2Area::getContainingAddressRange(Ipv4AddressRange addressR
     for (int i = 0; i < addressRangeNum; i++) {
         if (areaAddressRanges[i].contains(addressRange)) {
             if (advertise != nullptr) {
-                std::map<Ipv4AddressRange, bool>::const_iterator rangeIt = advertiseAddressRanges.find(areaAddressRanges[i]);
+                auto rangeIt = advertiseAddressRanges.find(areaAddressRanges[i]);
                 if (rangeIt != advertiseAddressRanges.end()) {
                     *advertise = rangeIt->second;
                 }
@@ -340,67 +340,37 @@ bool Ospfv2Area::installSummaryLSA(const Ospfv2SummaryLsa *lsa)
 RouterLsa *Ospfv2Area::findRouterLSA(LinkStateId linkStateID)
 {
     auto lsaIt = routerLSAsByID.find(linkStateID);
-    if (lsaIt != routerLSAsByID.end()) {
-        return lsaIt->second;
-    }
-    else {
-        return nullptr;
-    }
+    return (lsaIt != routerLSAsByID.end()) ? lsaIt->second : nullptr;
 }
 
 const RouterLsa *Ospfv2Area::findRouterLSA(LinkStateId linkStateID) const
 {
     auto lsaIt = routerLSAsByID.find(linkStateID);
-    if (lsaIt != routerLSAsByID.end()) {
-        return lsaIt->second;
-    }
-    else {
-        return nullptr;
-    }
+    return (lsaIt != routerLSAsByID.end()) ? lsaIt->second : nullptr;
 }
 
 NetworkLsa *Ospfv2Area::findNetworkLSA(LinkStateId linkStateID)
 {
     auto lsaIt = networkLSAsByID.find(linkStateID);
-    if (lsaIt != networkLSAsByID.end()) {
-        return lsaIt->second;
-    }
-    else {
-        return nullptr;
-    }
+    return (lsaIt != networkLSAsByID.end()) ? lsaIt->second : nullptr;
 }
 
 const NetworkLsa *Ospfv2Area::findNetworkLSA(LinkStateId linkStateID) const
 {
     auto lsaIt = networkLSAsByID.find(linkStateID);
-    if (lsaIt != networkLSAsByID.end()) {
-        return lsaIt->second;
-    }
-    else {
-        return nullptr;
-    }
+    return (lsaIt != networkLSAsByID.end()) ? lsaIt->second :nullptr;
 }
 
 SummaryLsa *Ospfv2Area::findSummaryLSA(LsaKeyType lsaKey)
 {
     auto lsaIt = summaryLSAsByID.find(lsaKey);
-    if (lsaIt != summaryLSAsByID.end()) {
-        return lsaIt->second;
-    }
-    else {
-        return nullptr;
-    }
+    return (lsaIt != summaryLSAsByID.end()) ? lsaIt->second : nullptr;
 }
 
 const SummaryLsa *Ospfv2Area::findSummaryLSA(LsaKeyType lsaKey) const
 {
     auto lsaIt = summaryLSAsByID.find(lsaKey);
-    if (lsaIt != summaryLSAsByID.end()) {
-        return lsaIt->second;
-    }
-    else {
-        return nullptr;
-    }
+    return (lsaIt != summaryLSAsByID.end()) ? lsaIt->second : nullptr;
 }
 
 void Ospfv2Area::ageDatabase()

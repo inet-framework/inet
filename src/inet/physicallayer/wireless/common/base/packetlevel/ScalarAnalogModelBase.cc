@@ -68,12 +68,12 @@ void ScalarAnalogModelBase::addReception(const IReception *reception, simtime_t&
     W power = check_and_cast<const IScalarSignal *>(reception->getAnalogModel())->getPower();
     simtime_t startTime = reception->getStartTime();
     simtime_t endTime = reception->getEndTime();
-    std::map<simtime_t, W>::iterator itStartTime = powerChanges->find(startTime);
+    auto itStartTime = powerChanges->find(startTime);
     if (itStartTime != powerChanges->end())
         itStartTime->second += power;
     else
         powerChanges->insert(std::pair<simtime_t, W>(startTime, power));
-    std::map<simtime_t, W>::iterator itEndTime = powerChanges->find(endTime);
+    auto itEndTime = powerChanges->find(endTime);
     if (itEndTime != powerChanges->end())
         itEndTime->second -= power;
     else
@@ -88,7 +88,7 @@ void ScalarAnalogModelBase::addNoise(const ScalarNoise *noise, simtime_t& noiseS
 {
     const std::map<simtime_t, W> *noisePowerChanges = noise->getPowerChanges();
     for (const auto& noisePowerChange : *noisePowerChanges) {
-        std::map<simtime_t, W>::iterator jt = powerChanges->find(noisePowerChange.first);
+        auto jt = powerChanges->find(noisePowerChange.first);
         if (jt != powerChanges->end())
             jt->second += noisePowerChange.second;
         else

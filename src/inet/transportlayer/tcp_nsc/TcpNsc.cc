@@ -177,8 +177,6 @@ uint32_t TcpNsc::mapRemote2Nsc(L3Address const& addrP)
     // add new pair to maps
     remote2NscMapM[addrP] = ret;
     nsc2RemoteMapM[ret] = addrP;
-    ASSERT(remote2NscMapM.find(addrP) != remote2NscMapM.end());
-    ASSERT(nsc2RemoteMapM.find(ret) != nsc2RemoteMapM.end());
     return ret;
 }
 

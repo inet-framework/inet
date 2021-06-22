@@ -31,17 +31,13 @@ std::vector<L3Address> PositionTable::getAddresses() const
 
 bool PositionTable::hasPosition(const L3Address& address) const
 {
-    AddressToPositionMap::const_iterator it = addressToPositionMap.find(address);
-    return it != addressToPositionMap.end();
+    return containsKey(addressToPositionMap, address);
 }
 
 Coord PositionTable::getPosition(const L3Address& address) const
 {
-    AddressToPositionMap::const_iterator it = addressToPositionMap.find(address);
-    if (it == addressToPositionMap.end())
-        return Coord(NaN, NaN, NaN);
-    else
-        return it->second.second;
+    auto it = addressToPositionMap.find(address);
+    return (it == addressToPositionMap.end()) ? Coord(NaN, NaN, NaN) : it->second.second;
 }
 
 void PositionTable::setPosition(const L3Address& address, const Coord& coord)

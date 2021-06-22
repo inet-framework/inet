@@ -209,10 +209,7 @@ void LinkVisualizerBase::removeAllLinkVisualizations()
 cModule *LinkVisualizerBase::getLastModule(int treeId)
 {
     auto it = lastModules.find(treeId);
-    if (it == lastModules.end())
-        return nullptr;
-    else
-        return getSimulation()->getModule(it->second);
+    return (it == lastModules.end()) ? nullptr : getSimulation()->getModule(it->second);
 }
 
 void LinkVisualizerBase::setLastModule(int treeId, cModule *module)

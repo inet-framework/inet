@@ -211,10 +211,7 @@ void PathVisualizerBase::removeAllPathVisualizations()
 const std::vector<int> *PathVisualizerBase::getIncompletePath(const std::string& label, int chunkId)
 {
     auto it = incompletePaths.find({ label, chunkId });
-    if (it == incompletePaths.end())
-        return nullptr;
-    else
-        return &it->second;
+    return (it == incompletePaths.end()) ? nullptr : &it->second;
 }
 
 void PathVisualizerBase::addToIncompletePath(const std::string& label, int chunkId, cModule *module)

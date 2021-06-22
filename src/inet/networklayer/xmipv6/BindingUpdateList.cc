@@ -205,21 +205,13 @@ BindingUpdateList::BindingUpdateListEntry *BindingUpdateList::lookup(const Ipv6A
 BindingUpdateList::BindingUpdateListEntry *BindingUpdateList::fetch(const Ipv6Address& dest)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
-
-    if (entry == nullptr)
-        return createBULEntry(dest);
-    else
-        return entry;
+    return (entry == nullptr) ? createBULEntry(dest) : entry;
 }
 
 BindingUpdateList::MobilityState BindingUpdateList::getMobilityState(const Ipv6Address& dest) const
 {
     BindingUpdateList6::const_iterator i = bindingUpdateList.find(dest);
-
-    if (i == bindingUpdateList.end())
-        return NONE;
-    else
-        return i->second.state;
+    return (i == bindingUpdateList.end()) ? NONE : i->second.state;
 }
 
 void BindingUpdateList::setMobilityState(const Ipv6Address& dest, BindingUpdateList::MobilityState state)
@@ -304,10 +296,7 @@ uint BindingUpdateList::getSequenceNumber(const Ipv6Address& dest)
 {
     // search for entry
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
-    if (entry == nullptr)
-        return 0;
-
-    return entry->sequenceNumber;
+    return (entry != nullptr) ? entry->sequenceNumber : 0;
 }
 
 const Ipv6Address& BindingUpdateList::getCoA(const Ipv6Address& dest)
@@ -323,29 +312,19 @@ const Ipv6Address& BindingUpdateList::getCoA(const Ipv6Address& dest)
 bool BindingUpdateList::isInBindingUpdateList(const Ipv6Address& dest, const Ipv6Address& HoA)
 {
     auto pos = bindingUpdateList.find(dest);
-    if (pos == bindingUpdateList.end())
-        return false;
-
-    return pos->second.homeAddress == HoA;
+    return (pos == bindingUpdateList.end()) ? false : pos->second.homeAddress == HoA;
 }
 
 bool BindingUpdateList::isValidBinding(const Ipv6Address& dest)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
-    if (entry == nullptr)
-        return false;
-
-    return entry->BAck && (entry->bindingLifetime < SIMTIME_DBL(simTime()));
+    return (entry == nullptr) ? false : entry->BAck && (entry->bindingLifetime < SIMTIME_DBL(simTime()));
 }
 
 bool BindingUpdateList::isBindingAboutToExpire(const Ipv6Address& dest)
 {
     BindingUpdateList::BindingUpdateListEntry *entry = lookup(dest);
-
-    if (entry == nullptr)
-        return true;
-
-    return entry->bindingLifetime < SIMTIME_DBL(simTime()) - PRE_BINDING_EXPIRY;
+    return (entry == nullptr) ? true : entry->bindingLifetime < SIMTIME_DBL(simTime()) - PRE_BINDING_EXPIRY;
 }
 
 bool BindingUpdateList::sentBindingUpdate(const Ipv6Address& dest)

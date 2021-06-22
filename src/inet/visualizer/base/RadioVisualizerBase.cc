@@ -119,10 +119,7 @@ void RadioVisualizerBase::refreshDisplay() const
 const RadioVisualizerBase::RadioVisualization *RadioVisualizerBase::getRadioVisualization(int radioModuleId)
 {
     auto it = radioVisualizations.find(radioModuleId);
-    if (it == radioVisualizations.end())
-        return nullptr;
-    else
-        return it->second;
+    return (it == radioVisualizations.end()) ? nullptr : it->second;
 }
 
 void RadioVisualizerBase::addRadioVisualization(const RadioVisualization *radioVisualization)

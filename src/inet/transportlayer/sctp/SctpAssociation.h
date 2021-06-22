@@ -1058,10 +1058,7 @@ class INET_API SctpAssociation : public cObject
     SctpPathVariables *getPath(const L3Address& pathId) const
     {
         SctpPathMap::const_iterator iterator = sctpPathMap.find(pathId);
-        if (iterator != sctpPathMap.end()) {
-            return iterator->second;
-        }
-        return nullptr;
+        return (iterator != sctpPathMap.end()) ? iterator->second : nullptr;
     }
 
     void printSctpPathMap() const;
@@ -1347,8 +1344,8 @@ class INET_API SctpAssociation : public cObject
     /** Methods for Stream Reset **/
     void resetSsns();
     void resetExpectedSsns();
-    bool sendStreamPresent(uint16_t sid);
-    bool receiveStreamPresent(uint16_t sid);
+    bool sendStreamPresent(uint32_t sid);
+    bool receiveStreamPresent(uint32_t sid);
     void resetSsn(uint16_t id);
     void resetExpectedSsn(uint16_t id);
     uint32_t getExpectedSsnOfStream(uint16_t id);

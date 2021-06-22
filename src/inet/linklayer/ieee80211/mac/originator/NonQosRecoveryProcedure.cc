@@ -244,10 +244,7 @@ bool NonQosRecoveryProcedure::isRtsFrameRetryLimitReached(Packet *packet, const 
 int NonQosRecoveryProcedure::getRc(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header, std::map<SequenceControlField, int>& retryCounter)
 {
     auto count = retryCounter.find(SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()));
-    if (count != retryCounter.end())
-        return count->second;
-    else
-        return 0;
+    return (count != retryCounter.end()) ? count->second : 0;
 }
 
 bool NonQosRecoveryProcedure::isMulticastFrame(const Ptr<const Ieee80211MacHeader>& header)

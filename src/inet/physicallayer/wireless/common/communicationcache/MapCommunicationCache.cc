@@ -72,10 +72,7 @@ void MapCommunicationCache::removeRadio(const IRadio *radio)
 const IRadio *MapCommunicationCache::getRadio(int id) const
 {
     auto it = radioCache.find(id);
-    if (it == radioCache.end())
-        return nullptr;
-    else
-        return it->second.radio;
+    return (it == radioCache.end()) ? nullptr : it->second.radio;
 }
 
 void MapCommunicationCache::mapRadios(std::function<void(const IRadio *)> f) const
@@ -117,10 +114,7 @@ void MapCommunicationCache::removeTransmission(const ITransmission *transmission
 const ITransmission *MapCommunicationCache::getTransmission(int id) const
 {
     auto it = transmissionCache.find(id);
-    if (it == transmissionCache.end())
-        return nullptr;
-    else
-        return it->second.transmission;
+    return (it == transmissionCache.end()) ? nullptr : it->second.transmission;
 }
 
 void MapCommunicationCache::mapTransmissions(std::function<void(const ITransmission *)> f) const

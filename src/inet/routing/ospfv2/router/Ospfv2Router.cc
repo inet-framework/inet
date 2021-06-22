@@ -75,12 +75,7 @@ void Router::addArea(Ospfv2Area *area)
 Ospfv2Area *Router::getAreaByID(AreaId areaID)
 {
     auto areaIt = areasByID.find(areaID);
-    if (areaIt != areasByID.end()) {
-        return areaIt->second;
-    }
-    else {
-        return nullptr;
-    }
+    return (areaIt != areasByID.end()) ? areaIt->second : nullptr;
 }
 
 Ospfv2Area *Router::getAreaByAddr(Ipv4Address address)
@@ -283,23 +278,13 @@ Ospfv2Lsa *Router::findLSA(Ospfv2LsaType lsaType, LsaKeyType lsaKey, AreaId area
 AsExternalLsa *Router::findASExternalLSA(LsaKeyType lsaKey)
 {
     auto lsaIt = asExternalLSAsByID.find(lsaKey);
-    if (lsaIt != asExternalLSAsByID.end()) {
-        return lsaIt->second;
-    }
-    else {
-        return nullptr;
-    }
+    return (lsaIt != asExternalLSAsByID.end()) ? lsaIt->second : nullptr;
 }
 
 const AsExternalLsa *Router::findASExternalLSA(LsaKeyType lsaKey) const
 {
-    std::map<LsaKeyType, AsExternalLsa *, LsaKeyType_Less>::const_iterator lsaIt = asExternalLSAsByID.find(lsaKey);
-    if (lsaIt != asExternalLSAsByID.end()) {
-        return lsaIt->second;
-    }
-    else {
-        return nullptr;
-    }
+    auto lsaIt = asExternalLSAsByID.find(lsaKey);
+    return (lsaIt != asExternalLSAsByID.end()) ? lsaIt->second : nullptr;
 }
 
 void Router::ageDatabase()

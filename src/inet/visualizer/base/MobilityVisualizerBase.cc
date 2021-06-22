@@ -105,10 +105,7 @@ void MobilityVisualizerBase::unsubscribe()
 MobilityVisualizerBase::MobilityVisualization *MobilityVisualizerBase::getMobilityVisualization(const IMobility *mobility) const
 {
     auto it = mobilityVisualizations.find(mobility->getId());
-    if (it == mobilityVisualizations.end())
-        return nullptr;
-    else
-        return it->second;
+    return (it == mobilityVisualizations.end()) ? nullptr : it->second;
 }
 
 void MobilityVisualizerBase::addMobilityVisualization(const IMobility *mobility, MobilityVisualization *mobilityVisualization)

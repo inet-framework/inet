@@ -454,11 +454,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
 
 const PhysicalObject *PhysicalEnvironment::getObjectById(int id) const
 {
-    std::map<int, const PhysicalObject *>::const_iterator it = idToObjectMap.find(id);
-    if (it == idToObjectMap.end())
-        return nullptr;
-    else
-        return it->second;
+    auto it = idToObjectMap.find(id);
+    return (it != idToObjectMap.end()) ? it->second : nullptr;
 }
 
 void PhysicalEnvironment::visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const

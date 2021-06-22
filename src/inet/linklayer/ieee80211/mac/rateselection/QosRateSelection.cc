@@ -215,11 +215,7 @@ const IIeee80211Mode *QosRateSelection::computeControlFrameMode(const Ptr<const 
         if (!dynamicPtrCast<const Ieee80211BasicBlockAck>(header) && !dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header)) {
             // TODO frame sequence context
             auto it = lastTransmittedFrameMode.find(header->getReceiverAddress());
-            if (it != lastTransmittedFrameMode.end()) {
-                return it->second;
-            }
-            else
-                return fastestMandatoryMode;
+            return (it != lastTransmittedFrameMode.end()) ? it->second : fastestMandatoryMode;
         }
         // A BlockAckReq or BlockAck that is carried in a non-HT PPDU shall be transmitted by the STA using a rate
         // supported by the receiver STA, as reported in the Supported Rates element and/or Extended Supported Rates

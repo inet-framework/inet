@@ -197,10 +197,7 @@ const StatisticVisualizerBase::StatisticVisualization *StatisticVisualizerBase::
 {
     auto key = std::pair<int, simsignal_t>(source->getId(), signal);
     auto it = statisticVisualizations.find(key);
-    if (it == statisticVisualizations.end())
-        return nullptr;
-    else
-        return it->second;
+    return (it == statisticVisualizations.end()) ? nullptr : it->second;
 }
 
 void StatisticVisualizerBase::addStatisticVisualization(const StatisticVisualization *statisticVisualization)

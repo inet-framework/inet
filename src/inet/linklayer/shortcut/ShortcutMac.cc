@@ -101,10 +101,7 @@ void ShortcutMac::handleLowerPacket(Packet *packet)
 ShortcutMac *ShortcutMac::findPeer(MacAddress address)
 {
     auto it = shortcutMacs.find(address);
-    if (it == shortcutMacs.end())
-        return nullptr;
-    else
-        return it->second;
+    return (it == shortcutMacs.end()) ? nullptr : it->second;
 }
 
 void ShortcutMac::sendToPeer(Packet *packet, ShortcutMac *peer)

@@ -227,10 +227,7 @@ class INET_API Sctp : public cSimpleModule
     AssocStat *getAssocStat(uint32_t assocId)
     {
         auto found = assocStatMap.find(assocId);
-        if (found != assocStatMap.end()) {
-            return &found->second;
-        }
-        return nullptr;
+        return (found != assocStatMap.end()) ? &found->second : nullptr;
     }
 
     /**

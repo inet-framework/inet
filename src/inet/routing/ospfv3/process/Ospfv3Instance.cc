@@ -36,12 +36,9 @@ void Ospfv3Instance::addArea(Ospfv3Area *newArea)
 
 Ospfv3Area *Ospfv3Instance::getAreaById(Ipv4Address areaId)
 {
-    std::map<Ipv4Address, Ospfv3Area *>::iterator areaIt = this->areasById.find(areaId);
-    if (areaIt == this->areasById.end())
-        return nullptr;
-
-    return areaIt->second;
-} // getAreaById
+    auto areaIt = this->areasById.find(areaId);
+    return (areaIt == this->areasById.end()) ? nullptr : areaIt->second;
+}
 
 void Ospfv3Instance::processPacket(Packet *pk)
 {

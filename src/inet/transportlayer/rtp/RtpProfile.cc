@@ -279,9 +279,7 @@ void RtpProfile::processOutgoingPacket(RtpInnerPacket *rinp)
 RtpProfile::SsrcGate *RtpProfile::findSSRCGate(uint32_t ssrc)
 {
     auto objectIndex = _ssrcGates.find(ssrc);
-    if (objectIndex == _ssrcGates.end())
-        return nullptr;
-    return objectIndex->second;
+    return (objectIndex == _ssrcGates.end()) ? nullptr : objectIndex->second;
 }
 
 RtpProfile::SsrcGate *RtpProfile::newSSRCGate(uint32_t ssrc)

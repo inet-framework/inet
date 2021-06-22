@@ -1693,16 +1693,13 @@ bool Ospfv3Interface::isOnAnyRetransmissionList(LSAKeyType lsaKey) const
 
 Ospfv3Neighbor *Ospfv3Interface::getNeighborById(Ipv4Address neighborId)
 {
-    std::map<Ipv4Address, Ospfv3Neighbor *>::iterator neighborIt = this->neighborsById.find(neighborId);
-    if (neighborIt == this->neighborsById.end())
-        return nullptr;
-
-    return neighborIt->second;
-} // getNeighborById
+    auto neighborIt = this->neighborsById.find(neighborId);
+    return (neighborIt == this->neighborsById.end()) ? nullptr : neighborIt->second;
+}
 
 void Ospfv3Interface::removeNeighborByID(Ipv4Address neighborId)
 {
-    std::map<Ipv4Address, Ospfv3Neighbor *>::iterator neighborIt = this->neighborsById.find(neighborId);
+    auto neighborIt = this->neighborsById.find(neighborId);
     if (neighborIt != this->neighborsById.end()) {
         this->neighborsById.erase(neighborIt);
     }

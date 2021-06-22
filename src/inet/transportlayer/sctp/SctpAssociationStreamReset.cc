@@ -937,12 +937,12 @@ void SctpAssociation::resetSsn(uint16_t id)
     EV_INFO << "SSn " << id << " resetted on " << localAddr << "\n";
 }
 
-bool SctpAssociation::sendStreamPresent(uint16_t id)
+bool SctpAssociation::sendStreamPresent(uint32_t id)
 {
     return containsKey(sendStreams, id);
 }
 
-bool SctpAssociation::receiveStreamPresent(uint16_t id)
+bool SctpAssociation::receiveStreamPresent(uint32_t id)
 {
     return containsKey(receiveStreams, id);
 }

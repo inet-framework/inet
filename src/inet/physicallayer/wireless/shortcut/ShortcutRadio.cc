@@ -86,10 +86,7 @@ void ShortcutRadio::handleUpperPacket(Packet *packet)
 ShortcutRadio *ShortcutRadio::findPeer(MacAddress address)
 {
     auto it = shortcutRadios.find(address);
-    if (it == shortcutRadios.end())
-        return nullptr;
-    else
-        return it->second;
+    return (it == shortcutRadios.end()) ? nullptr : it->second;
 }
 
 void ShortcutRadio::sendToPeer(Packet *packet, ShortcutRadio *peer)
