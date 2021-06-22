@@ -35,9 +35,9 @@ module MyIpv4NetworkLayer like INetworkLayer
         bool multicastForwarding = default(false);
         string interfaceTableModule;
         string displayStringTextFormat = default("%i");
-        *.forwarding = forwarding;
-        *.multicastForwarding = multicastForwarding;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.forwarding = this.forwarding;
+        *.multicastForwarding = this.multicastForwarding;
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         *.displayStringTextFormat = displayStringTextFormat;
         *.routingTableModule = default(absPath(".routingTable"));
         *.arpModule = default(absPath(".arp"));
