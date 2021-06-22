@@ -42,6 +42,7 @@ class INET_API FlowMeasurementRecorder : public PacketFlowBase, public Transpare
     virtual void endMeasurements(Packet *packet);
 
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+    virtual bool isForwardingService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) const override { return false; }
 
     template<typename T>
     void endMeasurement(Packet *packet, b offset, b length) {
