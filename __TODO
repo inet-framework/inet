@@ -31,6 +31,10 @@ INET 4.3 release TODO items:
 
 ===============================================================================
 
+ - packet region tags don't follow packet data insertion/removal, should be fixed
+ - chunk queue and various chunk buffers don't have region tags, there's no place to store data specific tags from packets when reassembling data
+ - fragmentation and defragmentation doesn't copy packet region tags, for example Ipv4
+
  - visualizer/canvas/spectrum -> GHz overlapping with node label
  - visualizer/instrumentfigures -> plot figure size parameter not working
  - visualizer/styling -> switching config lead to crash
