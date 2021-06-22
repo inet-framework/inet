@@ -50,71 +50,71 @@ inline std::map<K,V,_C>& addAll(std::map<K,V,_C>& m, const std::map<K,V,_C2>& n)
     return m;
 }
 
-template<typename T>
-typename std::vector<T>::iterator find(std::vector<T>& v, const T& a) {
+template<typename T, typename Tk>
+typename std::vector<T>::iterator find(std::vector<T>& v, const Tk& a) {
     return std::find(v.begin(), v.end(), a);
 }
 
-template<typename T>
-typename std::vector<T>::const_iterator find(const std::vector<T>& v, const T& a) {
+template<typename T, typename Tk>
+typename std::vector<T>::const_iterator find(const std::vector<T>& v, const Tk& a) {
     return std::find(v.begin(), v.end(), a);
 }
 
-template<typename T>
-inline int count(const std::vector<T>& v, const T& a) {
+template<typename T, typename Tk>
+inline int count(const std::vector<T>& v, const Tk& a) {
     return std::count(v.begin(), v.end(), a);
 }
 
-template<typename T>
-int indexOf(const std::vector<T>& v, const T& a) {
+template<typename T, typename Tk>
+int indexOf(const std::vector<T>& v, const Tk& a) {
     auto it = find(v, a);
     return it == v.end() ? -1 : it - v.begin();
 }
 
-template<typename T>
-inline bool contains(const std::vector<T>& v, const T& a) {
+template<typename T, typename Tk>
+inline bool contains(const std::vector<T>& v, const Tk& a) {
     return find(v, a) != v.end();
 }
 
-template<typename T, typename _C>
-inline bool contains(const std::set<T,_C>& s, const T& a) {
+template<typename T, typename _C, typename Tk>
+inline bool contains(const std::set<T,_C>& s, const Tk& a) {
     return s.find(a) != s.end();
 }
 
-template<typename T, typename _H, typename _P>
-inline bool contains(const std::unordered_set<T,_H,_P>& s, const T& a) {
+template<typename T, typename _H, typename _P, typename Tk>
+inline bool contains(const std::unordered_set<T,_H,_P>& s, const Tk& a) {
     return s.find(a) != s.end();
 }
 
-template<typename K, typename V, typename _C>
-inline bool containsKey(const std::map<K,V,_C>& m, const K& a) {
+template<typename K, typename V, typename _C, typename Tk>
+inline bool containsKey(const std::map<K,V,_C>& m, const Tk& a) {
     return m.find(a) != m.end();
 }
 
-template<typename K, typename V, typename _C>
-inline bool containsKey(const std::multimap<K,V,_C>& m, const K& a) {
+template<typename K, typename V, typename _C, typename Tk>
+inline bool containsKey(const std::multimap<K,V,_C>& m, const Tk& a) {
     return m.find(a) != m.end();
 }
 
-template<typename K, typename V, typename _H, typename _P>
-inline bool containsKey(const std::unordered_map<K,V,_H,_P>& m, const K& a) {
+template<typename K, typename V, typename _H, typename _P, typename Tk>
+inline bool containsKey(const std::unordered_map<K,V,_H,_P>& m, const Tk& a) {
     return m.find(a) != m.end();
 }
 
-template<typename T>
-void insert(std::vector<T>& v, int pos, const T& a) {
+template<typename T, typename Tk>
+void insert(std::vector<T>& v, int pos, const Tk& a) {
     ASSERT(pos >= 0 && pos <= (int)v.size());
     v.insert(v.begin() + pos, a);
 }
 
 template<typename T>
 void erase(std::vector<T>& v, int pos) {
-    ASSERT(pos >= 0 && pos < (int)v.size());
+    ASSERT(pos >= 0 && (size_t)pos < v.size());
     v.erase(v.begin() + pos);
 }
 
-template<typename T>
-inline void remove(std::vector<T>& v, const T& a) {
+template<typename T, typename Tk>
+inline void remove(std::vector<T>& v, const Tk& a) {
     if (!v.empty()) // optimization
         v.erase(std::remove(v.begin(), v.end(), a), v.end());
 }
