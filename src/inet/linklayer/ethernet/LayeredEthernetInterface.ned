@@ -28,6 +28,7 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
         double bitrate @unit(bps);
         int mtu @unit(B) = default(1500B);
         string interfaceTableModule;
+        int mtu @unit(B) = default(1500B);
         *.bitrate = default(this.bitrate);
     gates:
         input upperLayerIn;
