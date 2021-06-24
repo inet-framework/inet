@@ -23,6 +23,8 @@ import inet.queueing.contract.IPacketFlow;
 module StreamCoderLayer like IProtocolLayer
 {
     parameters:
+        string interfaceTableModule;
+        *.interfaceTableModule = default(this.interfaceTableModule);
         @display("i=block/layer");
     gates:
         input upperLayerIn;

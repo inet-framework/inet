@@ -23,7 +23,7 @@ import inet.queueing.contract.IPacketFlow;
 simple StreamDecoder extends PacketFlowBase like IPacketFlow
 {
     parameters:
-        string interfaceTableModule = default("^.^.^.interfaceTable");
+        string interfaceTableModule;
         object mapping = default([]);
         @class(StreamDecoder);
         @display("i=block/blackboard");

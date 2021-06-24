@@ -22,6 +22,8 @@ import inet.protocolelement.contract.IProtocolLayer;
 module BridgingLayer like IProtocolLayer
 {
     parameters:
+        string interfaceTableModule;
+        *.interfaceTableModule = default(this.interfaceTableModule);
         @display("i=block/layer");
     gates:
         input upperLayerIn;

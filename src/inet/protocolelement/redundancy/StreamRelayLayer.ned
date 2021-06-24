@@ -24,6 +24,8 @@ import inet.queueing.contract.IPacketPusher;
 module StreamRelayLayer like IProtocolLayer
 {
     parameters:
+        string interfaceTableModule;
+        *.interfaceTableModule = default(this.interfaceTableModule);
         @display("i=block/layer");
     gates:
         input upperLayerIn;

@@ -22,6 +22,8 @@ import inet.protocolelement.contract.IProtocolLayer;
 module Ieee8021rLayer like IIeee8021rLayer
 {
     parameters:
+        string interfaceTableModule;
+        *.interfaceTableModule = default(this.interfaceTableModule);
         @display("i=block/layer");
     gates:
         input upperLayerIn;
