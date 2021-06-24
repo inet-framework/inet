@@ -51,7 +51,7 @@ class INET_API MultiTokenBucketMixin : public T, public ITokenStorage
         if (stage == INITSTAGE_LOCAL) {
             cValueArray *bucketConfigurations = check_and_cast<cValueArray*>(T::par("buckets").objectValue());
             tokenBuckets.resize(bucketConfigurations->size());
-            for (int i = 0; i < bucketConfigurations->size(); i++) {
+            for (int i = bucketConfigurations->size() - 1; i >= 0; i--) {
                 cValueMap *bucketConfiguration = check_and_cast<cValueMap*>(bucketConfigurations->get(i).objectValue());
                 double numTokens = bucketConfiguration->containsKey("initialNumTokens") ? bucketConfiguration->get("initialNumTokens").doubleValue() : 0;
                 double maxNumTokens = bucketConfiguration->containsKey("maxNumTokens") ? bucketConfiguration->get("maxNumTokens").doubleValue() : -1;
