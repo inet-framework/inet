@@ -275,17 +275,20 @@ void StreamRedundancyConfigurator::configureStreams(Node *node)
     auto networkNode = node->module;
     auto macAddressTable = networkNode->findModuleByPath(".macTable");
     auto ieee8021qTagHeaderChecker = networkNode->findModuleByPath(".ieee8021q.qTagHeaderChecker");
-    auto streamSwitching = networkNode->findModuleByPath(".bridging.streamSwitching");
-    if (streamSwitching == nullptr)
-        streamSwitching = networkNode->findModuleByPath(".ieee8021r.streamSwitching");
-    auto streamIdentifier = streamSwitching->getSubmodule("streamIdentifier");
-    auto streamMerger = streamSwitching->getSubmodule("streamMerger");
-    auto streamSplitter = streamSwitching->getSubmodule("streamSplitter");
-    auto streamCoding = networkNode->findModuleByPath(".bridging.streamCoding");
-    if (streamCoding == nullptr)
-        streamCoding = networkNode->findModuleByPath(".ieee8021r.streamCoding");
-    auto streamDecoder = streamCoding->getSubmodule("streamDecoder");
-    auto streamEncoder = streamCoding->getSubmodule("streamEncoder");
+    auto streamRelay = networkNode->findModuleByPath(".bridging.streamRelay");
+    if (streamRelay == nullptr)
+        streamRelay = networkNode->findModuleByPath(".ieee8021r.policy.streamRelay");
+    auto streamIdentifierLayer = networkNode->findModuleByPath(".bridging.streamIdentifier");
+    if (streamIdentifierLayer == nullptr)
+        streamIdentifierLayer = networkNode->findModuleByPath(".ieee8021r.policy.streamIdentifier");
+    auto streamIdentifier = streamIdentifierLayer->getSubmodule("identifier");
+    auto streamMerger = streamRelay->getSubmodule("merger");
+    auto streamSplitter = streamRelay->getSubmodule("splitter");
+    auto streamCoder = networkNode->findModuleByPath(".bridging.streamCoder");
+    if (streamCoder == nullptr)
+        streamCoder = networkNode->findModuleByPath(".ieee8021r.policy.streamCoder");
+    auto streamDecoder = streamCoder->getSubmodule("decoder");
+    auto streamEncoder = streamCoder->getSubmodule("encoder");
     if (streamIdentifier != nullptr && !node->streamIdentifications.empty()) {
         cValueArray *parameterValue = new cValueArray();
         for (auto& streamIdentification : node->streamIdentifications) {
