@@ -35,20 +35,20 @@ module StreamPolicyLayer like IIeee8021rLayer
         streamIdentifier: <default("StreamIdentifierLayer")> like IProtocolLayer {
             @display("p=300,150");
         }
-        streamRelay: <default("StreamSwitchingLayer")> like IProtocolLayer {
+        streamRelay: <default("StreamRelayLayer")> like IProtocolLayer {
             @display("p=300,300");
         }
-        streamCoding: <default("StreamCodingLayer")> like IProtocolLayer {
+        streamCoder: <default("StreamCoderLayer")> like IProtocolLayer {
             @display("p=300,450");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> streamIdentifier.upperLayerIn;
         streamIdentifier.lowerLayerOut --> streamRelay.upperLayerIn;
-        streamRelay.lowerLayerOut --> streamCoding.upperLayerIn;
-        streamCoding.lowerLayerOut --> { @display("m=s"); } --> lowerLayerOut;
+        streamRelay.lowerLayerOut --> streamCoder.upperLayerIn;
+        streamCoder.lowerLayerOut --> { @display("m=s"); } --> lowerLayerOut;
 
-        lowerLayerIn --> { @display("m=s"); } --> streamCoding.lowerLayerIn;
-        streamCoding.upperLayerOut --> streamRelay.lowerLayerIn;
+        lowerLayerIn --> { @display("m=s"); } --> streamCoder.lowerLayerIn;
+        streamCoder.upperLayerOut --> streamRelay.lowerLayerIn;
         streamRelay.upperLayerOut --> streamIdentifier.lowerLayerIn;
         streamIdentifier.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
