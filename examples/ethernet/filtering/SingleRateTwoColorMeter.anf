@@ -582,7 +582,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
             <property name="markersize" value="5"/>
-            <property name="drawstyle" value="steps-post"/>
+            <property name="drawstyle" value="linear"/>
             <property name="marker" value="none"/>
             <property name="legend_show" value="true"/>
             <property name="simplify" value="false"/>
