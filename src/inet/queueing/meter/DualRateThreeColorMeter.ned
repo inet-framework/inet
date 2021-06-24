@@ -20,14 +20,14 @@ package inet.queueing.meter;
 simple DualRateThreeColorMeter extends MultiTokenBucketMeter
 {
     parameters:
-        double cir @unit(bps); // committed information rate
-        double eir @unit(bps); // excess information rate
-        int cbs @unit(b); // committed burst size
-        int ebs @unit(b); // excess burst size
+        double committedInformationRate @unit(bps); // committed information rate
+        double excessInformationRate @unit(bps); // excess information rate
+        int committedBurstSize @unit(b); // committed burst size
+        int excessBurstSize @unit(b); // excess burst size
         int bitsPerToken = default(8); // how many bits are represented by 1 token
         bool colorAware = default(false); // enables color-aware mode
-        buckets = [{initialNumTokens: dropUnit(cbs) / bitsPerToken, maxNumTokens: dropUnit(cbs) / bitsPerToken, tokenProductionRate: dropUnit(cir) / bitsPerToken, label: "green"},
-                   {initialNumTokens: dropUnit(ebs) / bitsPerToken, maxNumTokens: dropUnit(ebs) / bitsPerToken, tokenProductionRate: dropUnit(eir) / bitsPerToken, label: "yellow"}];
+        buckets = [{initialNumTokens: dropUnit(committedBurstSize) / bitsPerToken, maxNumTokens: dropUnit(committedBurstSize) / bitsPerToken, tokenProductionRate: dropUnit(committedInformationRate) / bitsPerToken, label: "green"},
+                   {initialNumTokens: dropUnit(excessBurstSize) / bitsPerToken, maxNumTokens: dropUnit(excessBurstSize) / bitsPerToken, tokenProductionRate: dropUnit(excessInformationRate) / bitsPerToken, label: "yellow"}];
         tokenConsumptionPerBit = 1 / bitsPerToken;
         defaultLabel = default("red");
         labelPriority = default(colorAware ? ["green", "yellow", "red"] : []);

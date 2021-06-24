@@ -20,11 +20,11 @@ package inet.queueing.classifier;
 simple SingleRateThreeColorClassifier extends MultiTokenBucketClassifier
 {
     parameters:
-        double cir @unit(bps); // committed information rate
-        int cbs @unit(b); // committed burst size
-        int ebs @unit(b); // excess burst size
+        double committedInformationRate @unit(bps); // committed information rate
+        int committedBurstSize @unit(b); // committed burst size
+        int excessBurstSize @unit(b); // excess burst size
         int bitsPerToken = default(8); // how many bits are represented by 1 token
-        buckets = [{initialNumTokens: dropUnit(cbs) / bitsPerToken, maxNumTokens: dropUnit(cbs) / bitsPerToken, tokenProductionRate: dropUnit(cir) / bitsPerToken},
-                   {initialNumTokens: dropUnit(ebs) / bitsPerToken, maxNumTokens: dropUnit(ebs) / bitsPerToken, tokenProductionRate: 0}];
+        buckets = [{initialNumTokens: dropUnit(committedBurstSize) / bitsPerToken, maxNumTokens: dropUnit(committedBurstSize) / bitsPerToken, tokenProductionRate: dropUnit(committedInformationRate) / bitsPerToken},
+                   {initialNumTokens: dropUnit(excessBurstSize) / bitsPerToken, maxNumTokens: dropUnit(excessBurstSize) / bitsPerToken, tokenProductionRate: 0}];
         tokenConsumptionPerBit = 1 / bitsPerToken;
 }

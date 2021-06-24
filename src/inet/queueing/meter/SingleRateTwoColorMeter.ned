@@ -20,13 +20,13 @@ package inet.queueing.meter;
 simple SingleRateTwoColorMeter extends TokenBucketMeter
 {
     parameters:
-        double cir @unit(bps); // committed information rate
-        int cbs @unit(b); // committed burst size
+        double committedInformationRate @unit(bps); // committed information rate
+        int committedBurstSize @unit(b); // committed burst size
         int bitsPerToken = default(8); // how many bits are represented by 1 token
         bool colorAware = default(false); // enables color-aware mode
         initialNumTokens = default(maxNumTokens);
-        maxNumTokens = dropUnit(cbs) / bitsPerToken;
-        tokenProductionRate = dropUnit(cir) / bitsPerToken;
+        maxNumTokens = dropUnit(committedBurstSize) / bitsPerToken;
+        tokenProductionRate = dropUnit(committedInformationRate) / bitsPerToken;
         tokenConsumptionPerBit = 1 / bitsPerToken;
         label = default("green");
         defaultLabel = default("red");
