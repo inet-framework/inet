@@ -26,6 +26,7 @@
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/protocolelement/redundancy/SequenceNumberTag_m.h"
 #include "inet/protocolelement/redundancy/StreamTag_m.h"
+#include "inet/protocolelement/shaper/EligibilityTimeTag_m.h"
 
 namespace inet {
 
@@ -42,6 +43,7 @@ void PacketDirectionReverser::processPacket(Packet *packet)
 {
     auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto directionTag = packet->findTag<DirectionTag>();
+    auto eligibilityTimeTag = packet->findTag<EligibilityTimeTag>();
     auto macAddressInd = packet->findTag<MacAddressInd>();
     auto vlanInd = packet->findTag<VlanInd>();
     auto userPriorityInd = packet->findTag<UserPriorityInd>();
@@ -57,6 +59,8 @@ void PacketDirectionReverser::processPacket(Packet *packet)
             throw cRuntimeError("Packet must be inbound");
         packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
     }
+    if (eligibilityTimeTag != nullptr)
+        packet->addTag<EligibilityTimeTag>()->setEligibilityTime(eligibilityTimeTag->getEligibilityTime());
     if (interfaceInd != nullptr)
         packet->addTag<InterfaceInd>()->setInterfaceId(interfaceInd->getInterfaceId());
     if (macAddressInd != nullptr) {
