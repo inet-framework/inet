@@ -44,7 +44,7 @@ module EthernetMacLayer like IEthernetMacLayer
         lifetimer: <default("")> like IPacketLifeTimer if typename != "" {
             @display("p=100,100;is=s");
         }
-        queue: <default("PacketQueue")> like IPacketQueue if typename != "" {
+        queue: <default("PacketQueue")> like IPacketQueue {
             @display("p=200,100");
         }
         server: <default("InstantServer")> like IPacketServer {
