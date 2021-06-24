@@ -30,13 +30,13 @@ module StreamIdentifierLayer like IProtocolLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        streamIdentifier: <default("StreamIdentifier")> like IPacketFlow if typename != "" {
+        identifier: <default("StreamIdentifier")> like IPacketFlow if typename != "" {
             parameters:
                 @display("p=200,150;i=block/blackboard");
         }
     connections:
-        upperLayerIn --> { @display("m=n"); } --> streamIdentifier.in;
-        streamIdentifier.out --> { @display("m=s"); } --> lowerLayerOut;
+        upperLayerIn --> { @display("m=n"); } --> identifier.in;
+        identifier.out --> { @display("m=s"); } --> lowerLayerOut;
 
         lowerLayerIn --> upperLayerOut;
 }
