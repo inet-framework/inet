@@ -20,7 +20,15 @@ import inet.common.TagBase;
 
 namespace inet;
 
+//
+// This tag carries the module id of the ~CreditBasedGate which the packet passed
+// through.
+//
+// This tag is part of the credit based shaper infrastructure.
+//
+// @see ~CreditBasedGate
+//
 class CreditGateTag extends TagBase
 {
-    int id = -1;
+    int id = -1; // module id of the ~CreditBasedGate which the packet passed through
 }
