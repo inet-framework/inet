@@ -28,7 +28,7 @@ using namespace inet::queueing;
 class INET_API EligibilityTimeFilter : public PacketFilterBase, public TransparentProtocolRegistrationListener
 {
   protected:
-    simtime_t maxResidenceTime = 0;
+    simtime_t maxResidenceTime = -1;
 
   protected:
     virtual void initialize(int stage) override;
