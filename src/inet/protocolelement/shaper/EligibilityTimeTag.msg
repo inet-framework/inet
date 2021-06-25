@@ -20,7 +20,15 @@ import inet.common.TagBase;
 
 namespace inet;
 
+//
+// This tag specifies the simulation time after which the packet becomes eligible
+// for transmission according to the asynchronous shaper.
+//
+// This tag is used by the asynchronous shaper infrastructure.
+//
+// @see ~EligibilityTimeGate, ~EligibilityTimeFilter, ~EligibilityTimeMeter, ~EligibilityTimeQueue
+//
 class EligibilityTimeTag extends TagBase
 {
-    simtime_t eligibilityTime;
+    simtime_t eligibilityTime; // the simulation time after which the packet is eligible for transmission
 }
