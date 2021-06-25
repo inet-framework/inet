@@ -620,8 +620,6 @@ if df.empty:
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
 df = df.sort_values('name', ascending=False)
-print(df)
-
 
 # plot
 utils.plot_vectors(df, props)
