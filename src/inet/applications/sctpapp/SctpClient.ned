@@ -28,7 +28,7 @@ import inet.applications.contract.IApp;
 simple SctpClient like IApp
 {
     parameters:
-        string localAddress = default(""); // comma separated list of addresses
+        object localAddress = default([]); // list of local addresses
         int localPort = default(0); // port number to listen on
         string connectAddress;  // server address (may be symbolic)
         int connectPort; // port number to connect to
@@ -54,8 +54,8 @@ simple SctpClient like IApp
         double primaryTime @unit(s) = default(0s);
         string newPrimary = default("");
         string streamRequestLengths = default("");
-        string streamRequestRatio = default("");
-        string streamPriorities = default("");
+        object streamRequestRatio = default([]);
+        object streamPriorities = default([]);
         bool finishEndsSimulation = default(false);
         @signal[packetSent](type=inet::Packet);
         @signal[packetReceived](type=inet::Packet);

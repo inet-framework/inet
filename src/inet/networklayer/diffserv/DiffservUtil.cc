@@ -134,19 +134,20 @@ int parseDSCP(const char *attrValue, const char *attrName)
     return dscp;
 }
 
-void parseDSCPs(const char *attrValue, const char *attrName, std::vector<int>& result)
+std::vector<int> parseDSCPs(const std::vector<std::string>& attrValue, const char *attrName)
 {
-    if (opp_isempty(attrValue))
-        return;
-    if (*attrValue == '*' && *(attrValue + 1) == '\0') {
+    std::vector<int> result;
+    if (attrValue.empty())
+        return result;
+    if (attrValue.size() == 1 && attrValue[0] == "*") {
         for (int dscp = 0; dscp < DSCP_MAX; ++dscp)
             result.push_back(dscp);
     }
     else {
-        cStringTokenizer tokens(attrValue);
-        while (tokens.hasMoreTokens())
-            result.push_back(parseDSCP(tokens.nextToken(), attrName));
+        for (const auto& elem : attrValue)
+            result.push_back(parseDSCP(elem.c_str(), attrName));
     }
+    return result;
 }
 
 std::string dscpToString(int dscp)

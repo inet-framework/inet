@@ -18,6 +18,7 @@
 #include "inet/linklayer/ieee8021q/Ieee8021qTagTpidHeaderChecker.h"
 
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/stlutils.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/ieee8021q/Ieee8021qTagHeader_m.h"
@@ -37,7 +38,7 @@ void Ieee8021qTagTpidHeaderChecker::initialize(int stage)
             tpid = 0x8100;
         else
             throw cRuntimeError("Unknown tag type");
-        vlanIdFilter = check_and_cast<cValueArray *>(par("vlanIdFilter").objectValue());
+        vlanIdFilter = check_and_cast<cValueArray *>(par("vlanIdFilter").objectValue())->asIntVector();
     }
 }
 
@@ -63,14 +64,7 @@ bool Ieee8021qTagTpidHeaderChecker::matchesPacket(const Packet *packet) const
         return false;
     else {
         auto vlanId = header->getVid();
-        if (vlanIdFilter->size() == 0)
-            return true;
-        else {
-            for (int i = 0; i < vlanIdFilter->size(); i++)
-                if (vlanIdFilter->get(i).intValue() == vlanId)
-                    return true;
-            return false;
-        }
+        return (vlanIdFilter.size() == 0) || contains(vlanIdFilter, vlanId);
     }
 }
 

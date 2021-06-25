@@ -21,42 +21,41 @@ namespace inet {
 
 namespace visualizer {
 
-Placement parsePlacement(const char *s)
+Placement parsePlacement(cObject *arr)
 {
     int placement = PLACEMENT_NONE;
-    cStringTokenizer tokenizer(s);
-    while (tokenizer.hasMoreTokens()) {
-        auto token = tokenizer.nextToken();
-        if (!strcmp("left", token))
+    auto tokens = check_and_cast<cValueArray*>(arr)->asStringVector();
+    for (const auto& token : tokens) {
+        if (token == "left")
             placement |= PLACEMENT_TOP_LEFT | PLACEMENT_CENTER_LEFT | PLACEMENT_BOTTOM_LEFT;
-        else if (!strcmp("right", token))
+        else if (token == "right")
             placement |= PLACEMENT_TOP_RIGHT | PLACEMENT_CENTER_RIGHT | PLACEMENT_BOTTOM_RIGHT;
-        else if (!strcmp("top", token))
+        else if (token == "top")
             placement |= PLACEMENT_TOP_LEFT | PLACEMENT_TOP_CENTER | PLACEMENT_TOP_RIGHT;
-        else if (!strcmp("bottom", token))
+        else if (token == "bottom")
             placement |= PLACEMENT_BOTTOM_LEFT | PLACEMENT_BOTTOM_CENTER | PLACEMENT_BOTTOM_RIGHT;
-        else if (!strcmp("topLeft", token))
+        else if (token == "topLeft")
             placement |= PLACEMENT_TOP_LEFT;
-        else if (!strcmp("topCenter", token))
+        else if (token == "topCenter")
             placement |= PLACEMENT_TOP_CENTER;
-        else if (!strcmp("topRight", token))
+        else if (token == "topRight")
             placement |= PLACEMENT_TOP_RIGHT;
-        else if (!strcmp("centerLeft", token))
+        else if (token == "centerLeft")
             placement |= PLACEMENT_CENTER_LEFT;
-        else if (!strcmp("centerCenter", token))
+        else if (token == "centerCenter")
             placement |= PLACEMENT_CENTER_CENTER;
-        else if (!strcmp("centerRight", token))
+        else if (token == "centerRight")
             placement |= PLACEMENT_CENTER_RIGHT;
-        else if (!strcmp("bottomLeft", token))
+        else if (token == "bottomLeft")
             placement |= PLACEMENT_BOTTOM_LEFT;
-        else if (!strcmp("bottomCenter", token))
+        else if (token == "bottomCenter")
             placement |= PLACEMENT_BOTTOM_CENTER;
-        else if (!strcmp("bottomRight", token))
+        else if (token == "bottomRight")
             placement |= PLACEMENT_BOTTOM_RIGHT;
-        else if (!strcmp("any", token))
+        else if (token == "any")
             placement |= PLACEMENT_ANY;
         else
-            throw cRuntimeError("Unknown placement: %s", token);
+            throw cRuntimeError("Unknown placement: %s", token.c_str());
     }
     return static_cast<Placement>(placement);
 }

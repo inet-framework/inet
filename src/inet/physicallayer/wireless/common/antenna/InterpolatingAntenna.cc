@@ -32,7 +32,10 @@ void InterpolatingAntenna::initialize(int stage)
 {
     AntennaBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        gain = makeShared<AntennaGain>(par("elevationGains"), par("headingGains"), par("bankGains"));
+        auto elevationGains = check_and_cast<cValueMap*>(par("elevationGains").objectValue());
+        auto headingGains = check_and_cast<cValueMap*>(par("headingGains").objectValue());
+        auto bankGains = check_and_cast<cValueMap*>(par("bankGains").objectValue());
+        gain = makeShared<AntennaGain>(this, elevationGains, headingGains, bankGains);
     }
 }
 
@@ -44,40 +47,37 @@ std::ostream& InterpolatingAntenna::printToStream(std::ostream& stream, int leve
     return AntennaBase::printToStream(stream, level);
 }
 
-InterpolatingAntenna::AntennaGain::AntennaGain(const char *elevation, const char *heading, const char *bank) :
-    minGain(NaN), maxGain(NaN)
+InterpolatingAntenna::AntennaGain::AntennaGain(cModule *module, const cValueMap *elevation, const cValueMap *heading, const cValueMap *bank) :
+    module(module), minGain(NaN), maxGain(NaN)
 {
-    parseMap(elevationGainMap, elevation);
-    parseMap(headingGainMap, heading);
-    parseMap(bankGainMap, bank);
+    elevationGainMap = parseMap(elevation);
+    headingGainMap = parseMap(heading);
+    bankGainMap = parseMap(bank);
 }
 
-void InterpolatingAntenna::AntennaGain::parseMap(std::map<rad, double>& gainMap, const char *text)
+std::map<rad, double> InterpolatingAntenna::AntennaGain::parseMap(const cValueMap *gains)
 {
-    cStringTokenizer tokenizer(text);
-    const char *firstAngle = tokenizer.nextToken();
-    if (!firstAngle)
-        throw cRuntimeError("Insufficient number of values");
-    if (strcmp(firstAngle, "0"))
-        throw cRuntimeError("The first angle must be 0");
-    const char *firstGain = tokenizer.nextToken();
-    if (!firstGain)
-        throw cRuntimeError("Insufficient number of values");
-    gainMap.insert(std::pair<rad, double>(rad(0), math::dB2fraction(atof(firstGain))));
-    gainMap.insert(std::pair<rad, double>(rad(2 * M_PI), math::dB2fraction(atof(firstGain))));
-    while (tokenizer.hasMoreTokens()) {
-        const char *angleString = tokenizer.nextToken();
-        const char *gainString = tokenizer.nextToken();
-        if (!angleString || !gainString)
-            throw cRuntimeError("Insufficient number of values");
-        auto angle = deg(atof(angleString));
-        double gain = math::dB2fraction(atof(gainString));
+    std::map<rad, double> gainMap;
+
+    for (const auto& elem: gains->getFields()) {
+        cDynamicExpression angleExpression;
+        angleExpression.parse(elem.first.c_str());
+        rad angle = rad(angleExpression.doubleValue(module, "rad"));
+        double gain = math::dB2fraction(elem.second.doubleValueInUnit("dB"));
         if (std::isnan(minGain) || gain < minGain)
             minGain = gain;
         if (std::isnan(maxGain) || gain > maxGain)
             maxGain = gain;
         gainMap.insert(std::pair<rad, double>(angle, gain));
     }
+
+    auto it = gainMap.find(rad(0.0));
+    if (it == gainMap.end())
+        throw cRuntimeError("The angle 0 must be specified");
+    else
+        gainMap.insert(std::pair<rad, double>(rad(2 * M_PI), it->second));
+
+    return gainMap;
 }
 
 double InterpolatingAntenna::AntennaGain::computeGain(const std::map<rad, double>& gainMap, rad angle) const

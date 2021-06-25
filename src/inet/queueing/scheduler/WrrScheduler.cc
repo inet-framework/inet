@@ -37,15 +37,13 @@ void WrrScheduler::initialize(int stage)
         weights = new int[providers.size()];
         buckets = new int[providers.size()];
 
-        cStringTokenizer tokenizer(par("weights"));
-        int i;
-        for (i = 0; i < (int)providers.size() && tokenizer.hasMoreTokens(); ++i)
-            buckets[i] = weights[i] = (int)utils::atoul(tokenizer.nextToken());
-
-        if (i < (int)providers.size())
+        auto weightsArray = check_and_cast<cValueArray *>(par("weights").objectValue())->asIntVector();
+        if (weightsArray.size() < providers.size())
             throw cRuntimeError("Too few values given in the weights parameter.");
-        if (tokenizer.hasMoreTokens())
+        if (weightsArray.size() > providers.size())
             throw cRuntimeError("Too many values given in the weights parameter.");
+        for (size_t i = 0; i < providers.size(); ++i)
+            buckets[i] = weights[i] = weightsArray[i];
 
         for (auto provider : providers)
             collections.push_back(dynamic_cast<IPacketCollection *>(provider));

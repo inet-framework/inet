@@ -470,13 +470,10 @@ int32_t SctpAssociation::pathStreamSchedulerManual(SctpPathVariables *path, bool
         }
 
         // Fill Stream to Path map
-        uint16_t streamNum = 0;
-        cStringTokenizer prioTokenizer(sctpMain->par("streamsToPaths"));
-        while (prioTokenizer.hasMoreTokens()) {
-            const char *token = prioTokenizer.nextToken();
-            state->ssStreamToPathMap[streamNum] = (uint32_t)atoi(token);
-            streamNum++;
-        }
+        auto prioVector = check_and_cast<cValueArray*>(sctpMain->par("streamsToPaths").objectValue())->asIntVector();
+        for (uint16_t streamNum = 0; streamNum < prioVector.size(); streamNum++)
+            state->ssStreamToPathMap[streamNum] = prioVector[streamNum];
+
         if (state->ssStreamToPathMap.empty())
             throw cRuntimeError("streamsToPaths not defined");
     }

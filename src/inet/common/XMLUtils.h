@@ -10,7 +10,7 @@ namespace xmlutils {
 INET_API const cXMLElement *getUniqueChild(const cXMLElement *node, const char *name);
 INET_API const cXMLElement *getUniqueChildIfExists(const cXMLElement *node, const char *name);
 
-INET_API void checkTags(const cXMLElement *node, const char *allowed);
+INET_API void checkTags(const cXMLElement *node, const std::vector<std::string>& allowed);
 
 INET_API bool getParameterBoolValue(const cXMLElement *ptr, const char *name, bool def);
 INET_API bool getParameterBoolValue(const cXMLElement *ptr, const char *name);

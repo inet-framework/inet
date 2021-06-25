@@ -55,7 +55,6 @@ class INET_API Dymo : public RoutingProtocolBase, public cListener, public Netfi
 {
   private:
     // Dymo parameters from RFC
-    const char *clientAddresses;
     bool useMulticastRREP;
     const char *interfaces;
     double activeInterval;

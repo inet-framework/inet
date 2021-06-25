@@ -43,12 +43,7 @@ void SomeUDPApp::initialize(int stage)
         destPort = par("destPort");
         msgLength = par("messageLength");
 
-        const char *destAddrs = par("destAddresses");
-        cStringTokenizer tokenizer(destAddrs);
-        const char *token;
-        while ((token = tokenizer.nextToken())!=NULL)
-            destAddresses.push_back(AddressResolver().resolve(token));
-
+        destAddresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("destAddresses").objectValue())->asStringVector());
         if (destAddresses.empty())
             return;
 

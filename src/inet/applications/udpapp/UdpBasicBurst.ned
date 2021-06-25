@@ -102,7 +102,7 @@ simple UdpBasicBurst like IApp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
-        string destAddresses; // space-separated list of destination IP addresses, can be empty;
+        object destAddresses; // array of destination IP addresses, can be empty;
                               // see module description for possibilities
         bool excludeLocalDestAddresses = default(true);     // excluding local addresses from destAddresses
         string chooseDestAddrMode @enum("once","perBurst","perSend"); // when to change the destination address

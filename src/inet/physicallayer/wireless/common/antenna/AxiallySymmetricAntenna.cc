@@ -35,7 +35,9 @@ void AxiallySymmetricAntenna::initialize(int stage)
     AntennaBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         double baseGain = math::dB2fraction(par("baseGain"));
-        gain = makeShared<AntennaGain>(par("axisOfSymmetry"), baseGain, par("gains"));
+        auto coord = Coord::parse(par("axisOfSymmetry"));
+        auto gains = check_and_cast<cValueMap*>(par("gains").objectValue());
+        gain = makeShared<AntennaGain>(this, coord, baseGain, gains);
     }
 }
 
@@ -45,19 +47,16 @@ std::ostream& AxiallySymmetricAntenna::printToStream(std::ostream& stream, int l
     return AntennaBase::printToStream(stream, level);
 }
 
-AxiallySymmetricAntenna::AntennaGain::AntennaGain(const char *axis, double baseGain, const char *gains) :
+AxiallySymmetricAntenna::AntennaGain::AntennaGain(cModule *module, const Coord& axis, double baseGain, const cValueMap *gains) :
     minGain(NaN),
     maxGain(NaN)
 {
-    axisOfSymmetryDirection = Coord::parse(axis);
-    cStringTokenizer tokenizer(gains);
-    while (tokenizer.hasMoreTokens()) {
-        const char *angleString = tokenizer.nextToken();
-        const char *gainString = tokenizer.nextToken();
-        if (!angleString || !gainString)
-            throw cRuntimeError("Insufficient number of values");
-        auto angle = deg(atof(angleString));
-        double gain = baseGain * math::dB2fraction(atof(gainString));
+    axisOfSymmetryDirection = axis;
+    for (const auto& elem: gains->getFields()) {
+        cDynamicExpression angleExpression;
+        angleExpression.parse(elem.first.c_str());
+        rad angle = rad(angleExpression.doubleValue(module, "rad"));
+        double gain = baseGain * math::dB2fraction(elem.second.doubleValueInUnit("dB"));
         if (std::isnan(minGain) || gain < minGain)
             minGain = gain;
         if (std::isnan(maxGain) || gain > maxGain)
@@ -65,9 +64,9 @@ AxiallySymmetricAntenna::AntennaGain::AntennaGain(const char *axis, double baseG
         gainMap.insert(std::pair<rad, double>(angle, gain));
     }
     if (!containsKey(gainMap, deg(0)))
-        throw cRuntimeError("The first angle must be 0");
+        throw cRuntimeError("The first angle must be deg(0)");
     if (!containsKey(gainMap, deg(180)))
-        throw cRuntimeError("The last angle must be 180");
+        throw cRuntimeError("The last angle must be deg(180)");
 }
 
 double AxiallySymmetricAntenna::AntennaGain::computeGain(const Quaternion& direction) const

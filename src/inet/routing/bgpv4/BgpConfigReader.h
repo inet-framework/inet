@@ -55,6 +55,7 @@ class INET_API BgpConfigReader
     bool getBoolAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
     int getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
     const char *getStrAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
+    std::vector<std::string> getStrVectorAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
 };
 
 } // namespace bgp

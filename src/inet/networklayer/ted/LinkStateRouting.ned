@@ -33,7 +33,7 @@ simple LinkStateRouting
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         string tedModule;
-        string peers;
+        object peers;
         @display("i=block/network2");
     gates:
         input ipIn @labels(Ipv4ControlInfo/up);

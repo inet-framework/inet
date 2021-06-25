@@ -30,10 +30,9 @@ void SignalBasedTokenGenerator::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         numTokensParameter = &par("numTokens");
         auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
-        cStringTokenizer tokenizer(par("signals"));
-        while (tokenizer.hasMoreTokens()) {
-            auto signal = tokenizer.nextToken();
-            subscriptionModule->subscribe(signal, this);
+        auto signals = check_and_cast<cValueArray *>(par("signals").objectValue())->asStringVector();
+        for (const auto& signal : signals) {
+            subscriptionModule->subscribe(signal.c_str(), this);
         }
     }
 }

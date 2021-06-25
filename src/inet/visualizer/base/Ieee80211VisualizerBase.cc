@@ -52,10 +52,7 @@ void Ieee80211VisualizerBase::initialize(int stage)
         interfaceFilter.setPattern(par("interfaceFilter"));
         minPowerDbm = par("minPower");
         maxPowerDbm = par("maxPower");
-        const char *iconsAsString = par("icons");
-        cStringTokenizer tokenizer(iconsAsString);
-        while (tokenizer.hasMoreTokens())
-            icons.push_back(tokenizer.nextToken());
+        icons = check_and_cast<cValueArray *>(par("labelsToGateIndices").objectValue())->asStringVector();
         iconColorSet.parseColors(par("iconColor"));
         labelFont = cFigure::parseFont(par("labelFont"));
         labelColor = cFigure::Color(par("labelColor"));

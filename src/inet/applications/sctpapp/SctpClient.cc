@@ -109,8 +109,7 @@ void SctpClient::initialize(int stage)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
         // parameters
-        const char *addressesString = par("localAddress");
-        AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+        AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddress").objectValue())->asStringVector());
         int port = par("localPort");
         socket.setOutputGate(gate("socketOut"));
         socket.setCallback(this);
@@ -179,14 +178,10 @@ void SctpClient::connect()
         streamRequestRatioSendMap[i] = 1;
     }
 
-    unsigned int streamNum = 0;
-    cStringTokenizer ratioTokenizer(par("streamRequestRatio"));
-    while (ratioTokenizer.hasMoreTokens()) {
-        const char *token = ratioTokenizer.nextToken();
-        streamRequestRatioMap[streamNum] = atoi(token);
-        streamRequestRatioSendMap[streamNum] = atoi(token);
-
-        streamNum++;
+    auto streamRequestRatioArray = check_and_cast<cValueArray *>(par("streamRequestRatio").objectValue())->asIntVector();
+    for (int streamNum = 0; streamNum < streamRequestRatioArray.size(); streamNum++) {
+        streamRequestRatioMap[streamNum] = streamRequestRatioArray[streamNum];
+        streamRequestRatioSendMap[streamNum] = streamRequestRatioArray[streamNum];
     }
 
     numSessions++;

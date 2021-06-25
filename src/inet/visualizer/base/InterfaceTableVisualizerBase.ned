@@ -56,7 +56,7 @@ simple InterfaceTableVisualizerBase extends VisualizerBase
         string interfaceFilter = default("not(lo*)"); // which interfaces are considered, matches all non-local interfaces by default
 
         string format = default("%N %\\%a/%l"); // determines what interface data is displayed
-        string placementHint = default("top"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        object placementHint = default(["top"]); // annotation placement hint; list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double placementPriority = default(0); // determines the order of annotation positioning
 
         string font = default("<default>"); // interface text font, automatic by default

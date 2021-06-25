@@ -60,11 +60,10 @@ void LinkStateRouting::initialize(int stage)
 
         // peers are given as interface names in the "peers" module parameter;
         // store corresponding interface addresses in peerIfAddrs[]
-        cStringTokenizer tokenizer(par("peers"));
+        auto array = check_and_cast<cValueArray *>(par("peers").objectValue())->asStringVector();
         IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        const char *token;
-        while ((token = tokenizer.nextToken()) != nullptr) {
-            peerIfAddrs.push_back(CHK(ift->findInterfaceByName(token))->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+        for (const auto& token : array) {
+            peerIfAddrs.push_back(CHK(ift->findInterfaceByName(token.c_str()))->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
         }
 
         // schedule start of flooding link state info

@@ -23,7 +23,7 @@ import inet.applications.contract.IApp;
 simple SctpNatServer like IApp
 {
     parameters:
-        string localAddress = default(""); // may be left empty ("")
+        object localAddress = default([]); // may be left empty ([])
         int localPort = default(0); // port number to listen on
         int numPacketsToSendPerClient = default(0);  // number of requests sent per session
         int numPacketsToReceivePerClient = default(1);

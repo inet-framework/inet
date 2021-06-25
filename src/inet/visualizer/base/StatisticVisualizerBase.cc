@@ -81,9 +81,7 @@ void StatisticVisualizerBase::initialize(int stage)
         statisticUnit = par("statisticUnit");
         statisticExpression = par("statisticExpression");
         format.parseFormat(par("format"));
-        cStringTokenizer tokenizer(par("unit"));
-        while (tokenizer.hasMoreTokens())
-            units.push_back(tokenizer.nextToken());
+        units = check_and_cast<cValueArray *>(par("unit").objectValue())->asStringVector();
         font = cFigure::parseFont(par("font"));
         textColor = cFigure::Color(par("textColor"));
         backgroundColor = cFigure::Color(par("backgroundColor"));

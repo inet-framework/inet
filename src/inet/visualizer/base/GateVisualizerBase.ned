@@ -34,7 +34,7 @@ simple GateVisualizerBase extends VisualizerBase
         double width = default(100);
         double height = default(8);
         double spacing = default(2);
-        string placementHint = default("right"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        object placementHint = default(["right"]); // annotation placement hint; list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double placementPriority = default(0); // determines the order of annotation positioning
 
         double displayDuration @unit(s) = default(0s); // gate operation time duration visualized in the amount of space available, use gate period by default

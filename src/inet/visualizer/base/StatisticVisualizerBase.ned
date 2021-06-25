@@ -49,13 +49,13 @@ simple StatisticVisualizerBase extends VisualizerBase
         string sourceFilter = default("**"); // pattern that must match the signal source, no source filter by default
 
         string format = default("%n: %v %u"); // determines what is displayed, info by default
-        string unit = default(""); // display the value in one of the specified units, statistic unit by default
+        object unit = default([]); // display the value in one of the specified units, statistic unit by default
 
         string font = default("<default>"); // statistic value font, automatic by default
         string textColor = default("black"); // statistic value font color, black by default
         string backgroundColor = default("white"); // statistic value background color, white by default
         double opacity = default(1.0); // opacity of the visualization
-        string placementHint = default("top"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
+        object placementHint = default(["top"]); // annotation placement hint; list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double placementPriority = default(0); // determines the order of annotation positioning
 
         @class(StatisticVisualizerBase);

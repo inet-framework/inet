@@ -100,8 +100,7 @@ class INET_API L3AddressResolver
 
     /**
      * Utility function: Calls resolve() for each item in the string vector, and
-     * returns the result in an address vector. The string vector may come e.g.
-     * from cStringTokenizer::asVector().
+     * returns the result in an address vector.
      */
     virtual std::vector<L3Address> resolve(std::vector<std::string> strs, int addrType = DEFAULT_ADDR_TYPE);
 

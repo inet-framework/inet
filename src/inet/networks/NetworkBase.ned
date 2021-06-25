@@ -31,7 +31,7 @@ network NetworkBase
     submodules:
         pcapRecorder[numPcapRecorders]: PcapRecorder {
             parameters:
-                moduleNamePatterns = ".^";
+                moduleNamePatterns = [".^"];
                 @display("p=100,100;is=s");
         }
         visualizer: <default(firstAvailableOrEmpty("IntegratedCanvasVisualizer"))> like IIntegratedVisualizer if typename != "" {

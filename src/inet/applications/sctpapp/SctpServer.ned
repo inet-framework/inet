@@ -28,7 +28,7 @@ import inet.applications.contract.IApp;
 simple SctpServer like IApp
 {
     parameters:
-        string localAddress = default(""); // comma separated list of addresses
+        object localAddress = default([]); // comma separated list of addresses
         int localPort = default(0); // port number to listen on
         bool echo = default(false);  // echoes received packages when true
         volatile double echoDelay @unit(s) = default(0s);
@@ -50,7 +50,7 @@ simple SctpServer like IApp
         bool streamReset = default(false);
         double streamRequestTime @unit(s) = default(0s);
         int streamToReset = default(0);
-        string streamPriorities = default("");
+        object streamPriorities = default([]);
     gates:
         input socketIn;
         output socketOut;

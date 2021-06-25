@@ -29,7 +29,7 @@ void LabelScheduler::initialize(int stage)
     PacketSchedulerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         defaultGateIndex = par("defaultGateIndex");
-        labels = cStringTokenizer(par("labels")).asVector();
+        labels = check_and_cast<cValueArray *>(par("labels").objectValue())->asStringVector();
         for (auto provider : providers)
             collections.push_back(dynamic_cast<IPacketCollection *>(provider));
     }

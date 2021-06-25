@@ -135,16 +135,13 @@ void PingApp::initialize(int stage)
 void PingApp::parseDestAddressesPar()
 {
     srcAddr = L3AddressResolver().resolve(par("srcAddr"));
-    const char *destAddrs = par("destAddr");
-    if (!strcmp(destAddrs, "*")) {
+    auto destAddrs = check_and_cast<cValueArray *>(par("destAddr").objectValue())->asStringVector();
+    if (destAddrs.size() == 1 && destAddrs[0] == "*") {
         destAddresses = getAllAddresses();
     }
     else {
-        cStringTokenizer tokenizer(destAddrs);
-        const char *token;
-
-        while ((token = tokenizer.nextToken()) != nullptr) {
-            L3Address addr = L3AddressResolver().resolve(token);
+        for (const auto& p : destAddrs) {
+            L3Address addr = L3AddressResolver().resolve(p.c_str());
             destAddresses.push_back(addr);
         }
     }
@@ -374,7 +371,8 @@ void PingApp::cancelNextPingRequest()
 
 bool PingApp::isEnabled()
 {
-    return par("destAddr").stringValue()[0] && (count == -1 || sentCount < count);
+    return check_and_cast<cValueArray *>(par("destAddr").objectValue())->size() > 0
+            && (count == -1 || sentCount < count);
 }
 
 void PingApp::sendPingRequest()

@@ -37,15 +37,13 @@ void WrrClassifier::initialize(int stage)
         weights = new int[consumers.size()];
         buckets = new int[consumers.size()];
 
-        cStringTokenizer tokenizer(par("weights"));
-        int i;
-        for (i = 0; i < (int)consumers.size() && tokenizer.hasMoreTokens(); ++i)
-            buckets[i] = weights[i] = (int)utils::atoul(tokenizer.nextToken());
-
-        if (i < (int)consumers.size())
+        auto weightsArray = check_and_cast<cValueArray *>(par("weights").objectValue())->asIntVector();
+        if (weightsArray.size() < consumers.size())
             throw cRuntimeError("Too few values given in the weights parameter.");
-        if (tokenizer.hasMoreTokens())
+        if (weightsArray.size() > consumers.size())
             throw cRuntimeError("Too many values given in the weights parameter.");
+        for (size_t i = 0; i < consumers.size(); ++i)
+            buckets[i] = weights[i] = weightsArray[i];
     }
 }
 

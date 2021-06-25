@@ -23,7 +23,7 @@ import inet.applications.contract.IApp;
 simple SctpNatPeer like IApp
 {
     parameters:
-        string localAddress = default(""); // comma separated list of addresses
+        object localAddress = default([]); // list of local addresses
         int localPort = default(0); // port number to listen on
         string connectAddress;  // server address (may be symbolic)
         int connectPort; // port number to connect to
@@ -54,7 +54,7 @@ simple SctpNatPeer like IApp
         int peerName = default(0);
         bool rendezvous = default(false);
         bool multi= default(false);
-        string streamPriorities = default("");
+        object streamPriorities = default([]);
     gates:
         input socketIn;
         output socketOut;

@@ -50,9 +50,9 @@ void QosClassifier::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         defaultUp = parseUserPriority(par("defaultUp"));
-        parseUserPriorityMap(par("ipProtocolUpMap"), ipProtocolUpMap);
-        parseUserPriorityMap(par("udpPortUpMap"), udpPortUpMap);
-        parseUserPriorityMap(par("tcpPortUpMap"), tcpPortUpMap);
+        ipProtocolUpMap = parseUserPriorityMap(check_and_cast<cValueMap *>(par("ipProtocolUpMap").objectValue()));
+        udpPortUpMap = parseUserPriorityMap(check_and_cast<cValueMap *>(par("udpPortUpMap").objectValue()));
+        tcpPortUpMap = parseUserPriorityMap(check_and_cast<cValueMap *>(par("tcpPortUpMap").objectValue()));
     }
 }
 
@@ -85,18 +85,15 @@ int QosClassifier::parseUserPriority(const char *text)
         throw cRuntimeError("Unknown user priority: '%s'", text);
 }
 
-void QosClassifier::parseUserPriorityMap(const char *text, std::map<int, int>& upMap)
+std::map<int, int> QosClassifier::parseUserPriorityMap(const cValueMap *parMap)
 {
-    cStringTokenizer tokenizer(text);
-    while (tokenizer.hasMoreTokens()) {
-        const char *keyString = tokenizer.nextToken();
-        const char *upString = tokenizer.nextToken();
-        if (!keyString || !upString)
-            throw cRuntimeError("Insufficient number of values in: '%s'", text);
-        int key = std::atoi(keyString);
-        int up = parseUserPriority(upString);
+    std::map<int, int> upMap;
+    for (auto elem : parMap->getFields()) {
+        int key = std::atoi(elem.first.c_str());
+        int up = parseUserPriority(elem.second.stringValue());
         upMap.insert(std::pair<int, int>(key, up));
     }
+    return upMap;
 }
 
 int QosClassifier::getUserPriority(cMessage *msg)

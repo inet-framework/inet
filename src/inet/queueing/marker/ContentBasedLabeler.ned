@@ -26,7 +26,7 @@ import inet.queueing.contract.IPacketMarker;
 simple ContentBasedLabeler extends PacketLabelerBase like IPacketMarker
 {
     parameters:
-        string packetFilters = default("*"); // semicolon separated packet filter expressions (e.g. ping-*), matches all packets by default
-        string packetDataFilters = default("*"); // semicolon separated packet data filter expression (e.g. inet::Ipv4Header and srcAddress = "10.0.0.1"), matches all packets by default
+        object packetFilters = default(["*"]); // semicolon separated packet filter expressions (e.g. ping-*), matches all packets by default
+        object packetDataFilters = default(["*"]); // semicolon separated packet data filter expression (e.g. inet::Ipv4Header and srcAddress = "10.0.0.1"), matches all packets by default
         @class(ContentBasedLabeler);
 }

@@ -94,8 +94,7 @@ void SctpNatPeer::initialize(int stage)
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // parameters
-        const char *addressesString = par("localAddress");
-        AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+        AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddress").objectValue())->asStringVector());
         int32_t port = par("localPort");
         echo = par("echo");
         delay = par("echoDelay");
@@ -177,13 +176,9 @@ void SctpNatPeer::connectx(AddressVector connectAddressList, int32_t connectPort
         EV << "StreamReset Timer scheduled at " << simTime() << "\n";
         scheduleAfter(par("streamRequestTime").doubleValue(), cmsg);
     }
-    uint32_t streamNum = 0;
-    cStringTokenizer tokenizer(par("streamPriorities"));
-    while (tokenizer.hasMoreTokens()) {
-        const char *token = tokenizer.nextToken();
-        clientSocket.setStreamPriority(streamNum, static_cast<uint32_t>(atoi(token)));
-
-        streamNum++;
+    auto streamPrioritiesArray = check_and_cast<cValueArray *>(par("streamPriorities").objectValue())->asIntVector();
+    for (uint32_t streamNum = 0; streamNum < streamPrioritiesArray.size(); streamNum++) {
+        clientSocket.setStreamPriority(streamNum, streamPrioritiesArray[streamNum]);
     }
 }
 
@@ -205,13 +200,10 @@ void SctpNatPeer::connect(L3Address connectAddress, int32_t connectPort)
         EV << "StreamReset Timer scheduled at " << simTime() << "\n";
         scheduleAfter(par("streamRequestTime").doubleValue(), cmsg);
     }
-    uint32_t streamNum = 0;
-    cStringTokenizer tokenizer(par("streamPriorities"));
-    while (tokenizer.hasMoreTokens()) {
-        const char *token = tokenizer.nextToken();
-        clientSocket.setStreamPriority(streamNum, static_cast<uint32_t>(atoi(token)));
 
-        streamNum++;
+    auto streamPrioritiesArray = check_and_cast<cValueArray *>(par("streamPriorities").objectValue())->asIntVector();
+    for (uint32_t streamNum = 0; streamNum < streamPrioritiesArray.size(); streamNum++) {
+        clientSocket.setStreamPriority(streamNum, streamPrioritiesArray[streamNum]);
     }
 }
 
@@ -560,8 +552,7 @@ void SctpNatPeer::socketPeerClosed(SctpSocket *socket)
         setStatusString("closed");
         clientSocket.close();
         if (rendezvous) {
-            const char *addressesString = par("localAddress");
-            AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+            AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddress").objectValue())->asStringVector());
             int32_t port = par("localPort");
             rendezvousSocket.setOutputGate(gate("socketOut"));
             rendezvousSocket.setOutboundStreams(outboundStreams);
@@ -592,8 +583,7 @@ void SctpNatPeer::socketClosed(SctpSocket *socket)
     setStatusString("closed");
     clientSocket.close();
     if (rendezvous) {
-        const char *addressesString = par("localAddress");
-        AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+        AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddress").objectValue())->asStringVector());
         int32_t port = par("localPort");
         rendezvousSocket.setOutputGate(gate("socketOut"));
         rendezvousSocket.setOutboundStreams(outboundStreams);

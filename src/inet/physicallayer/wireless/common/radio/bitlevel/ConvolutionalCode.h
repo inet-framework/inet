@@ -23,6 +23,8 @@
 namespace inet {
 namespace physicallayer {
 
+// TODO redesign for object NED parameters
+
 class INET_API ConvolutionalCode : public IForwardErrorCorrection
 {
   protected:

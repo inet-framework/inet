@@ -1,3 +1,4 @@
+#include "inet/common/stlutils.h"
 #include "inet/common/XMLUtils.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -52,22 +53,10 @@ bool parseBool(const char *text)
         throw cRuntimeError("Unknown bool constant: %s", text);
 }
 
-void checkTags(const cXMLElement *node, const char *allowed)
+void checkTags(const cXMLElement *node, const std::vector<std::string>& allowed)
 {
-    std::vector<const char *> tags;
-
-    cStringTokenizer st(allowed, " ");
-    const char *nt;
-    while ((nt = st.nextToken()) != nullptr)
-        tags.push_back(nt);
-
     for (cXMLElement *child = node->getFirstChild(); child; child = child->getNextSibling()) {
-        unsigned int i;
-        for (i = 0; i < tags.size(); i++)
-            if (!strcmp(child->getTagName(), tags[i]))
-                break;
-
-        if (i == tags.size())
+        if (!contains(allowed, child->getTagName()))
             throw cRuntimeError("Subtag <%s> not expected in <%s>",
                     child->getTagName(), node->getTagName());
     }

@@ -123,33 +123,16 @@ void Radio::setRadioMode(RadioMode newRadioMode)
 
 void Radio::parseRadioModeSwitchingTimes()
 {
-    const char *times = par("switchingTimes");
-
-    char prefix[3];
-    unsigned int count = sscanf(times, "%s", prefix);
-
-    if (count > 2)
-        throw cRuntimeError("Metric prefix should be no more than two characters long");
-
-    double metric = 1;
-
-    if (strcmp("s", prefix) == 0)
-        metric = 1;
-    else if (strcmp("ms", prefix) == 0)
-        metric = 0.001;
-    else if (strcmp("ns", prefix) == 0)
-        metric = 0.000000001;
-    else
-        throw cRuntimeError("Undefined or missed metric prefix for switchingTimes parameter");
-
-    cStringTokenizer tok(times + count + 1);
-    unsigned int idx = 0;
-    while (tok.hasMoreTokens()) {
-        switchingTimes[idx / RADIO_MODE_SWITCHING][idx % RADIO_MODE_SWITCHING] = atof(tok.nextToken()) * metric;
-        idx++;
+    auto times = check_and_cast<cValueArray*>(par("switchingTimes").objectValue());
+    if (times->size() != RADIO_MODE_SWITCHING)
+        throw cRuntimeError("Check your switchingTimes parameter! Need %u rows", RADIO_MODE_SWITCHING);
+    for (unsigned int i = 0; i < RADIO_MODE_SWITCHING; ++i) {
+        auto timeRow = check_and_cast<cValueArray*>((*times)[i].objectValue())->asDoubleVectorInUnit("s");
+        if (timeRow.size() != RADIO_MODE_SWITCHING)
+            throw cRuntimeError("Check your switchingTimes parameter! Need %u columns at row %u", RADIO_MODE_SWITCHING, i+1);
+        for (unsigned int j = 0; j < RADIO_MODE_SWITCHING; ++j)
+            switchingTimes[i][j] = timeRow[j];
     }
-    if (idx != RADIO_MODE_SWITCHING * RADIO_MODE_SWITCHING)
-        throw cRuntimeError("Check your switchingTimes parameter! Some parameters may be missed");
 }
 
 void Radio::startRadioModeSwitch(RadioMode newRadioMode, simtime_t switchingTime)

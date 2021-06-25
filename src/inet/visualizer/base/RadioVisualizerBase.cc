@@ -47,15 +47,9 @@ void RadioVisualizerBase::initialize(int stage)
         displayRadioMode = par("displayRadioMode");
         displayReceptionState = par("displayReceptionState");
         displayTransmissionState = par("displayTransmissionState");
-        cStringTokenizer radioModeImagesTokenizer(par("radioModeImages"));
-        while (radioModeImagesTokenizer.hasMoreTokens())
-            radioModeImages.push_back(radioModeImagesTokenizer.nextToken());
-        cStringTokenizer receptionStateImagesTokenizer(par("receptionStateImages"));
-        while (receptionStateImagesTokenizer.hasMoreTokens())
-            receptionStateImages.push_back(receptionStateImagesTokenizer.nextToken());
-        cStringTokenizer transmissionStateImagesTokenizer(par("transmissionStateImages"));
-        while (transmissionStateImagesTokenizer.hasMoreTokens())
-            transmissionStateImages.push_back(transmissionStateImagesTokenizer.nextToken());
+        radioModeImages = check_and_cast<cValueArray *>(par("radioModeImages").objectValue())->asStringVector();
+        receptionStateImages = check_and_cast<cValueArray *>(par("receptionStateImages").objectValue())->asStringVector();
+        transmissionStateImages = check_and_cast<cValueArray *>(par("transmissionStateImages").objectValue())->asStringVector();
         radioFilter.setPattern(par("radioFilter"));
         width = par("width");
         height = par("height");

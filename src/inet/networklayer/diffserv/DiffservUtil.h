@@ -58,7 +58,7 @@ int parseDSCP(const char *attrValue, const char *attrName);
  * Parses a space separated list of DSCP values and puts them into the result vector.
  * "*" is interpreted as all possible DSCP values (i.e. the 0..63 range).
  */
-void parseDSCPs(const char *attrValue, const char *attrName, std::vector<int>& result);
+std::vector<int> parseDSCPs(const std::vector<std::string>& attrValue, const char *attrName);
 
 /**
  * Returns the string representation of the given DSCP value.

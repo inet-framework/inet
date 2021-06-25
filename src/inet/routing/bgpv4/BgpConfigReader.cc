@@ -216,7 +216,7 @@ void BgpConfigReader::loadASConfig(cXMLElementList& ASConfig)
             Ipv4Address internalAddr = Ipv4Address(elem->getAttribute("interAddr"));
             if (isInInterfaceTable(ift, internalAddr) != -1) {
                 bgpRouter->setRedistributeInternal(getBoolAttrOrPar(*elem, "redistributeInternal"));
-                bgpRouter->setRedistributeOspf(getStrAttrOrPar(*elem, "redistributeOspf"));
+                bgpRouter->setRedistributeOspf(getStrVectorAttrOrPar(*elem, "redistributeOspf"));
                 bgpRouter->setRedistributeRip(getBoolAttrOrPar(*elem, "redistributeRip"));
 
                 for (auto& entry : elem->getChildren()) {
@@ -332,6 +332,14 @@ const char *BgpConfigReader::getStrAttrOrPar(const cXMLElement& ifConfig, const 
     if (attrStr && *attrStr)
         return attrStr;
     return bgpModule->par(name);
+}
+
+std::vector<std::string> BgpConfigReader::getStrVectorAttrOrPar(const cXMLElement& ifConfig, const char *name) const
+{
+    const char *attrStr = ifConfig.getAttribute(name);
+    if (attrStr && *attrStr)
+        return cStringTokenizer(attrStr).asVector();
+    return check_and_cast<cValueArray*>(bgpModule->par(name).objectValue())->asStringVector();
 }
 
 } // namespace bgp

@@ -35,7 +35,7 @@ class INET_API AxiallySymmetricAntenna : public AntennaBase
         std::map<rad, double> gainMap;
 
       public:
-        AntennaGain(const char *axis, double baseGain, const char *gains);
+        AntennaGain(cModule *module, const Coord& axis, double baseGain, const cValueMap *gains);
 
         virtual double getMinGain() const override { return minGain; }
         virtual double getMaxGain() const override { return maxGain; }

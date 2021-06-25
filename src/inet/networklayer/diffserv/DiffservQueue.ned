@@ -55,7 +55,7 @@ module DiffservQueue extends CompoundPacketQueueBase
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
     submodules:
         classifier: BehaviorAggregateClassifier {
-            dscps = "EF AF11 AF12 AF13 AF21 AF22 AF23 AF31 AF32 AF33 AF41 AF42 AF43";
+            dscps = ["EF", "AF11", "AF12", "AF13", "AF21", "AF22", "AF23", "AF31", "AF32", "AF33", "AF41", "AF42", "AF43"];
             @display("p=100,330");
         }
         efMeter: TokenBucketMeter {
@@ -86,7 +86,7 @@ module DiffservQueue extends CompoundPacketQueueBase
             @display("p=250,630");
         }
         wrr: WrrScheduler {
-            weights = default("1 1 1 1 1");
+            weights = default([1, 1, 1, 1, 1]);
             @display("p=400,330");
         }
         priority: PriorityScheduler {

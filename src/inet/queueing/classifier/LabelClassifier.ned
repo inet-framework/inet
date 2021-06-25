@@ -27,6 +27,6 @@ simple LabelClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
         int defaultGateIndex = default(0); // default gate index if no matching labels are found
-        string labelsToGateIndices; // space separated list of label and gate index pairs
+        object labelsToGateIndices; // map of label to gate index pairs
         @class(LabelClassifier);
 }

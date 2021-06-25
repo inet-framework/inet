@@ -93,14 +93,12 @@ void IpvxTrafGen::handleMessageWhenUp(cMessage *msg)
     if (msg == timer) {
         if (msg->getKind() == START) {
             destAddresses.clear();
-            const char *destAddrs = par("destAddresses");
-            cStringTokenizer tokenizer(destAddrs);
-            const char *token;
-            while ((token = tokenizer.nextToken()) != nullptr) {
+            auto v = check_and_cast<cValueArray *>(par("destAddresses").objectValue())->asStringVector();
+            for (const auto& p : v) {
                 L3Address result;
-                L3AddressResolver().tryResolve(token, result);
+                L3AddressResolver().tryResolve(p.c_str(), result);
                 if (result.isUnspecified())
-                    EV_ERROR << "cannot resolve destination address: " << token << endl;
+                    EV_ERROR << "cannot resolve destination address: " << p << endl;
                 else
                     destAddresses.push_back(result);
             }

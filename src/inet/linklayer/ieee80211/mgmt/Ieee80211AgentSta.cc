@@ -46,10 +46,7 @@ void Ieee80211AgentSta::initialize(int stage)
         maxChannelTime = par("maxChannelTime");
         authenticationTimeout = par("authenticationTimeout");
         associationTimeout = par("associationTimeout");
-        cStringTokenizer tokenizer(par("channelsToScan"));
-        const char *token;
-        while ((token = tokenizer.nextToken()) != nullptr)
-            channelsToScan.push_back(atoi(token));
+        channelsToScan = check_and_cast<cValueArray *>(par("channelsToScan").objectValue())->asIntVector();
 
         cModule *host = getContainingNode(this);
         host->subscribe(l2BeaconLostSignal, this);

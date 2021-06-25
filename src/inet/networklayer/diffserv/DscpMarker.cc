@@ -45,7 +45,8 @@ void DscpMarker::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         outputGate = gate("out");
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
-        parseDSCPs(par("dscps"), "dscps", dscps);
+        auto dscpPar = check_and_cast<cValueArray *>(par("dscps").objectValue())->asStringVector();
+        dscps = parseDSCPs(dscpPar, "dscps");
         if (dscps.empty())
             dscps.push_back(DSCP_BE);
         while ((int)dscps.size() < gateSize("in"))

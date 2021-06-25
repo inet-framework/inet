@@ -41,16 +41,21 @@ void MarkovScheduler::initialize(int stage)
         consumer = findConnectedModule<IPassivePacketSink>(outputGate);
         state = par("initialState");
         int numStates = gateSize("in");
-        cStringTokenizer transitionProbabilitiesTokenizer(par("transitionProbabilities"));
-        for (int i = 0; i < numStates; i++) {
-            transitionProbabilities.push_back({});
-            for (int j = 0; j < numStates; j++)
-                transitionProbabilities[i].push_back(atof(transitionProbabilitiesTokenizer.nextToken()));
+        auto transitionProbabilitiesMatrix = check_and_cast<cValueArray*>(par("transitionProbabilities").objectValue());
+        if (transitionProbabilitiesMatrix->size() != numStates)
+            throw cRuntimeError("Check your transitionProbabilities parameter! Need %u rows", numStates);
+        transitionProbabilities.resize(numStates);
+        for (unsigned int i = 0; i < numStates; ++i) {
+            transitionProbabilities[i] = check_and_cast<cValueArray*>((*transitionProbabilitiesMatrix)[i].objectValue())->asDoubleVector();
+            if (transitionProbabilities[i].size() != numStates)
+                throw cRuntimeError("Check your transitionProbabilities parameter! Need %u columns at row %u", numStates, i+1);
         }
-        cStringTokenizer waitIntervalsTokenizer(par("waitIntervals"));
-        for (int i = 0; i < numStates; i++) {
+        auto waitIntervalsTokens = check_and_cast<cValueArray*>(par("waitIntervals").objectValue())->asStringVector();
+        if (waitIntervalsTokens.size() != numStates)
+            throw cRuntimeError("Check your waitIntervals parameter! Need %u element", numStates);
+        for (const auto& token : waitIntervalsTokens) {
             cDynamicExpression expression;
-            expression.parse(waitIntervalsTokenizer.nextToken());
+            expression.parse(token.c_str());
             waitIntervals.push_back(expression);
         }
         waitTimer = new ClockEvent("WaitTimer");
@@ -94,7 +99,7 @@ int MarkovScheduler::schedulePacket()
 
 void MarkovScheduler::scheduleWaitTimer()
 {
-    scheduleClockEventAfter(waitIntervals[state].doubleValue(this), waitTimer);
+    scheduleClockEventAfter(waitIntervals[state].doubleValue(this, "s"), waitTimer);
 }
 
 bool MarkovScheduler::canPushSomePacket(cGate *gate) const

@@ -87,8 +87,8 @@ void BehaviorAggregateClassifier::initialize(int stage)
     PacketClassifierBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         numOutGates = gateSize("out");
-        std::vector<int> dscps;
-        parseDSCPs(par("dscps"), "dscps", dscps);
+        auto dscpPar = check_and_cast<cValueArray *>(par("dscps").objectValue())->asStringVector();
+        std::vector<int> dscps = parseDSCPs(dscpPar, "dscps");
         int numDscps = (int)dscps.size();
         if (numDscps > numOutGates)
             throw cRuntimeError("%d dscp values are given, but the module has only %d out gates",

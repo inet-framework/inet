@@ -30,7 +30,7 @@ class INET_API Ieee8021qTagEpdHeaderChecker : public PacketFilterBase
 {
   protected:
     const Protocol *qtagProtocol = nullptr;
-    cValueArray *vlanIdFilter = nullptr;
+    std::vector<intval_t> vlanIdFilter;
 
   protected:
     virtual void initialize(int stage) override;

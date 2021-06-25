@@ -43,7 +43,6 @@ Define_Module(Dymo);
 //
 
 Dymo::Dymo() :
-    clientAddresses(nullptr),
     useMulticastRREP(false),
     interfaces(nullptr),
     activeInterval(NaN),
@@ -91,7 +90,6 @@ void Dymo::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         // Dymo parameters from RFC
-        clientAddresses = par("clientAddresses");
         useMulticastRREP = par("useMulticastRREP");
         interfaces = par("interfaces");
         activeInterval = par("activeInterval");
@@ -117,19 +115,20 @@ void Dymo::initialize(int stage)
         // internal
         expungeTimer = new cMessage("ExpungeTimer");
         L3AddressResolver addressResolver;
-        cStringTokenizer tokenizer(clientAddresses);
-        while (tokenizer.hasMoreTokens()) {
-            const char *clientAddress = tokenizer.nextToken();
-            char *slash = const_cast<char *>(strchr(clientAddress, '/'));
-            if (slash)
-                *slash = 0;
-            const L3Address address = addressResolver.resolve(clientAddress);
-            int prefixLength = address.getAddressType()->getMaxPrefixLength();
-            if (slash) {
-                int pLength = atoi(slash + 1);
-                if (pLength < 0 || pLength > prefixLength)
-                    throw cRuntimeError("invalid prefix length in 'clientAddresses' parameter: '%s/%s'", clientAddress, slash);
-                prefixLength = pLength;
+        auto clientAddresses = check_and_cast<cValueArray *>(par("clientAddresses").objectValue())->asStringVector();
+        for (const auto& clientAddress : clientAddresses) {
+            size_t slash = clientAddress.find('/');
+            L3Address address;
+            int prefixLength;
+            if (slash == std::string::npos) {
+                address = addressResolver.resolve(clientAddress.c_str());
+                prefixLength = address.getAddressType()->getMaxPrefixLength();
+            }
+            else {
+                address = addressResolver.resolve(clientAddress.substr(0, slash).c_str());
+                prefixLength = atoi(&clientAddress[slash + 1]);
+                if (prefixLength < 0 || prefixLength > address.getAddressType()->getMaxPrefixLength())
+                    throw cRuntimeError("invalid prefix length in 'clientAddresses' parameter: '%s'", clientAddress.c_str());
             }
             clientAddressAndPrefixLengthPairs.push_back(std::pair<L3Address, int>(address, prefixLength));
         }

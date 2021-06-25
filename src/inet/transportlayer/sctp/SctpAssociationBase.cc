@@ -1656,16 +1656,14 @@ void SctpAssociation::stateEntered(int32_t status)
             state->rpScaleBlockingTimeout = sctpMain->par("rpScaleBlockingTimeout");
             state->rpMinCwnd = sctpMain->par("rpMinCwnd");
 
-            cStringTokenizer pathGroupsTokenizer(sctpMain->par("cmtCCPathGroups").stringValue());
-            if (pathGroupsTokenizer.hasMoreTokens()) {
+            auto pathGroups = check_and_cast<cValueArray*>(sctpMain->par("cmtCCPathGroups").objectValue())->asIntVector();
+            if (!pathGroups.empty()) {
+                if (sctpPathMap.size() > pathGroups.size())
+                    throw cRuntimeError("Too few cmtCCGroup values to cover all paths!");
                 auto pathIterator = sctpPathMap.begin();
-                while (pathIterator != sctpPathMap.end()) {
-                    const char *token = pathGroupsTokenizer.nextToken();
-                    if (token == nullptr) {
-                        throw cRuntimeError("Too few cmtCCGroup values to cover all paths!");
-                    }
+                for (auto cmtCCGroup : pathGroups) {
                     SctpPathVariables *path = pathIterator->second;
-                    path->cmtCCGroup = atol(token);
+                    path->cmtCCGroup = cmtCCGroup;
                     pathIterator++;
                 }
             }

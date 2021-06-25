@@ -104,8 +104,7 @@ void SctpPeer::initialize(int stage)
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // parameters
-        const char *addressesString = par("localAddress");
-        AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+        AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddress").objectValue())->asStringVector());
         int port = par("localPort");
         echo = par("echo");
         delay = par("echoDelay");
@@ -206,13 +205,9 @@ void SctpPeer::connect()
         scheduleAfter(par("streamRequestTime"), cmsg);
     }
 
-    unsigned int streamNum = 0;
-    cStringTokenizer tokenizer(par("streamPriorities"));
-    while (tokenizer.hasMoreTokens()) {
-        const char *token = tokenizer.nextToken();
-        clientSocket.setStreamPriority(streamNum, (unsigned int)atoi(token));
-
-        streamNum++;
+    auto streamPrioritiesArray = check_and_cast<cValueArray *>(par("streamPriorities").objectValue())->asIntVector();
+    for (uint32_t streamNum = 0; streamNum < streamPrioritiesArray.size(); streamNum++) {
+        clientSocket.setStreamPriority(streamNum, streamPrioritiesArray[streamNum]);
     }
 }
 

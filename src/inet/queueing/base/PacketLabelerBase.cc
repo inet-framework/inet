@@ -27,7 +27,7 @@ void PacketLabelerBase::initialize(int stage)
 {
     PacketMarkerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        labels = cStringTokenizer(par("labels")).asVector();
+        labels = check_and_cast<cValueArray *>(par("labels").objectValue())->asStringVector();
     }
 }
 

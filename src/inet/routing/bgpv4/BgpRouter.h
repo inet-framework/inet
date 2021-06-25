@@ -87,7 +87,7 @@ class INET_API BgpRouter : public TcpSocket::ReceiveQueueBasedCallback
     bool getRedistributeRip() { return redistributeRip; }
     void setRedistributeRip(bool x) { this->redistributeRip = x; }
     bool getRedistributeOspf() { return redistributeOspf; }
-    void setRedistributeOspf(std::string x);
+    void setRedistributeOspf(const std::vector<std::string>& x);
     void printSessionSummary();
     void addWatches();
     void recordStatistics();

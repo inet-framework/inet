@@ -162,7 +162,7 @@ void BgpRouter::setDefaultConfig()
 {
     // per router params
     bool redistributeInternal = bgpModule->par("redistributeInternal").boolValue();
-    std::string redistributeOspf = bgpModule->par("redistributeOspf").stdstringValue();
+    auto redistributeOspf = check_and_cast<cValueArray*>(bgpModule->par("redistributeOspf").objectValue())->asStringVector();
     bool redistributeRip = bgpModule->par("redistributeRip").boolValue();
     setRedistributeInternal(redistributeInternal);
     setRedistributeOspf(redistributeOspf);
@@ -263,17 +263,15 @@ void BgpRouter::setLocalPreference(Ipv4Address peer, int localPref)
         throw cRuntimeError("Neighbor address '%s' cannot be found in BGP router %s", peer.str(false).c_str(), bgpModule->getOwner()->getFullName());
 }
 
-void BgpRouter::setRedistributeOspf(std::string str)
+void BgpRouter::setRedistributeOspf(const std::vector<std::string>& tokens)
 {
-    if (str == "") {
+    if (tokens.empty()) {
         redistributeOspf = false;
         return;
     }
 
     redistributeOspf = true;
-    std::vector<std::string> tokens = cStringTokenizer(str.c_str()).asVector();
-
-    for (auto& Ospfv2RouteType : tokens) {
+    for (auto Ospfv2RouteType : tokens) {
         std::transform(Ospfv2RouteType.begin(), Ospfv2RouteType.end(), Ospfv2RouteType.begin(), ::tolower);
         if (Ospfv2RouteType == "o")
             redistributeOspfType.intraArea = true;

@@ -60,39 +60,32 @@ void PcapRecorder::initialize()
     packetFilter.setPattern(par("packetFilter"), par("packetDataFilter"));
 
     {
-        cStringTokenizer signalTokenizer(par("sendingSignalNames"));
-
-        while (signalTokenizer.hasMoreTokens())
-            signalList[registerSignal(signalTokenizer.nextToken())] = DIRECTION_OUTBOUND;
+        auto array = check_and_cast<cValueArray *>(par("sendingSignalNames").objectValue())->asStringVector();
+        for (const auto& elem : array)
+            signalList[registerSignal(elem.c_str())] = DIRECTION_OUTBOUND;
     }
 
     {
-        cStringTokenizer signalTokenizer(par("receivingSignalNames"));
-
-        while (signalTokenizer.hasMoreTokens())
-            signalList[registerSignal(signalTokenizer.nextToken())] = DIRECTION_INBOUND;
+        auto array = check_and_cast<cValueArray *>(par("receivingSignalNames").objectValue())->asStringVector();
+        for (const auto& elem : array)
+            signalList[registerSignal(elem.c_str())] = DIRECTION_INBOUND;
     }
 
     {
-        cStringTokenizer protocolTokenizer(par("dumpProtocols"));
-
-        while (protocolTokenizer.hasMoreTokens())
-            dumpProtocols.push_back(Protocol::getProtocol(protocolTokenizer.nextToken()));
+        auto array = check_and_cast<cValueArray *>(par("dumpProtocols").objectValue())->asStringVector();
+        for (const auto& elem : array)
+            dumpProtocols.push_back(Protocol::getProtocol(elem.c_str()));
     }
 
     {
-        cStringTokenizer protocolTokenizer(par("helpers"));
-
-        while (protocolTokenizer.hasMoreTokens())
-            helpers.push_back(check_and_cast<IHelper *>(createOne(protocolTokenizer.nextToken())));
+        auto array = check_and_cast<cValueArray *>(par("helpers").objectValue())->asStringVector();
+        for (const auto& elem : array)
+            helpers.push_back(check_and_cast<IHelper *>(createOne(elem.c_str())));
     }
 
-    const char *moduleNames = par("moduleNamePatterns");
-    cStringTokenizer moduleTokenizer(moduleNames);
-
-    while (moduleTokenizer.hasMoreTokens()) {
+    auto moduleNames = check_and_cast<cValueArray *>(par("moduleNamePatterns").objectValue())->asStringVector();
+    for (auto mname : moduleNames) {
         bool found = false;
-        std::string mname(moduleTokenizer.nextToken());
         bool isAllIndex = (mname.length() > 3) && mname.rfind("[*]") == mname.length() - 3;
 
         if (isAllIndex)

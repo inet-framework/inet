@@ -32,10 +32,10 @@ simple HostAutoConfigurator like IIpv4NodeConfigurator
 {
     parameters:
         string interfaceTableModule;
-        string interfaces = default("wlan");         // list of interfaces to autoassign addresses to, separated by a single space characters
+        object interfaces = default(["wlan"]);       // list of interfaces to autoassign addresses to
         string addressBase = default("10.0.0.0");    // start of address range from which to automatically assign an address to the autoassignInterfaces
         string netmask = default("255.0.0.0");       // netmask of subnet in which to automatically assign an address to the autoassignInterfaces
-        string mcastGroups = default("");         // list of IP addresses of multicast groups to join, separated by a single space characters
+        object mcastGroups = default([]);            // list of IP addresses of multicast groups to join
         @display("i=block/cogwheel");
 }
 

@@ -34,13 +34,13 @@ void ContentBasedLabeler::initialize(int stage)
 {
     PacketLabelerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        cStringTokenizer packetFiltersTokenizer(par("packetFilters"), ";");
-        cStringTokenizer packetDataFiltersTokenizer(par("packetDataFilters"), ";");
-        while (packetFiltersTokenizer.hasMoreTokens()) {
-            auto packetFilter = packetFiltersTokenizer.nextToken();
-            auto packetDataFilter = packetDataFiltersTokenizer.nextToken();
+        auto packetFilterTokens = check_and_cast<cValueArray *>(par("packetFilters").objectValue())->asStringVector();
+        auto packetDataFilterTokens = check_and_cast<cValueArray *>(par("packetDataFilters").objectValue())->asStringVector();
+        if (packetFilterTokens.size() != packetDataFilterTokens.size())
+            throw cRuntimeError("Parameter error: element count differs in packetFilters and in packetDataFilters");
+        for (size_t i = 0; i < packetFilterTokens.size(); i++) {
             auto filter = new PacketFilter();
-            filter->setPattern(packetFilter, packetDataFilter);
+            filter->setPattern(packetFilterTokens[i].c_str(), packetDataFilterTokens[i].c_str());
             filters.push_back(filter);
         }
     }

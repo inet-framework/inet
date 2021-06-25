@@ -157,7 +157,7 @@ void RsvpTe::readTrafficFromXML(const cXMLElement *traffic)
 {
     ASSERT(traffic);
     ASSERT(!strcmp(traffic->getTagName(), "sessions"));
-    checkTags(traffic, "session");
+    checkTags(traffic, {"session"});
     cXMLElementList list = traffic->getChildrenByTagName("session");
     for (auto& elem : list)
         readTrafficSessionFromXML(elem);
@@ -165,7 +165,7 @@ void RsvpTe::readTrafficFromXML(const cXMLElement *traffic)
 
 EroVector RsvpTe::readTrafficRouteFromXML(const cXMLElement *route)
 {
-    checkTags(route, "node lnode");
+    checkTags(route, {"node", "lnode"});
 
     EroVector ERO;
 
@@ -190,7 +190,7 @@ EroVector RsvpTe::readTrafficRouteFromXML(const cXMLElement *route)
 
 void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
 {
-    checkTags(session, "tunnel_id endpoint setup_pri holding_pri paths");
+    checkTags(session, {"tunnel_id", "endpoint", "setup_pri", "holding_pri", "paths"});
 
     traffic_session_t newSession;
 
@@ -225,11 +225,11 @@ void RsvpTe::readTrafficSessionFromXML(const cXMLElement *session)
     }
 
     const cXMLElement *paths = getUniqueChild(session, "paths");
-    checkTags(paths, "path");
+    checkTags(paths, {"path"});
 
     cXMLElementList list = paths->getChildrenByTagName("path");
     for (auto path : list) {
-        checkTags(path, "sender lspid bandwidth max_delay route permanent owner color");
+        checkTags(path, {"sender", "lspid", "bandwidth", "max_delay", "route", "permanent", "owner", "color"});
 
         int lspid = getParameterIntValue(path, "lspid");
 
@@ -316,10 +316,9 @@ void RsvpTe::setupHello()
     helloInterval = par("helloInterval");
     helloTimeout = par("helloTimeout");
 
-    cStringTokenizer tokenizer(par("peers"));
-    const char *token;
-    while ((token = tokenizer.nextToken()) != nullptr) {
-        Ipv4Address peer = tedmod->getPeerByLocalAddress(CHK(ift->findInterfaceByName(token))->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
+    auto array = check_and_cast<cValueArray *>(par("peers").objectValue())->asStringVector();
+    for (const auto& token : array) {
+        Ipv4Address peer = tedmod->getPeerByLocalAddress(CHK(ift->findInterfaceByName(token.c_str()))->getProtocolData<Ipv4InterfaceData>()->getIPAddress());
 
         HelloState h;
 
@@ -1756,7 +1755,7 @@ void RsvpTe::delSession(const cXMLElement& node)
 {
     Enter_Method("delSession");
 
-    checkTags(&node, "tunnel_id extended_tunnel_id endpoint paths");
+    checkTags(&node, {"tunnel_id", "extended_tunnel_id", "endpoint", "paths"});
 
     SessionObj sobj;
 
@@ -1773,7 +1772,7 @@ void RsvpTe::delSession(const cXMLElement& node)
     if (paths) {
         // only specified paths will be removed, session remains
 
-        checkTags(paths, "path");
+        checkTags(paths, {"path"});
         pathList = paths->getChildrenByTagName("path");
     }
 

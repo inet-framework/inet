@@ -34,9 +34,9 @@ void PacketLabeler::initialize(int stage)
 {
     PacketLabelerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        cStringTokenizer tokenizer(par("filterClasses"));
-        while (tokenizer.hasMoreTokens()) {
-            auto filter = createFilterFunction(tokenizer.nextToken());
+        auto array = check_and_cast<cValueArray *>(par("filterClasses").objectValue())->asStringVector();
+        for (const auto& elem : array) {
+            auto filter = createFilterFunction(elem.c_str());
             filters.push_back(filter);
         }
     }

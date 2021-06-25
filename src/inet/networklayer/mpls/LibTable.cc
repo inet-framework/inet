@@ -114,12 +114,12 @@ void LibTable::readTableFromXML(const cXMLElement *libtable)
 
     ASSERT(libtable);
     ASSERT(!strcmp(libtable->getTagName(), "libtable"));
-    checkTags(libtable, "libentry");
+    checkTags(libtable, {"libentry"});
     cXMLElementList list = libtable->getChildrenByTagName("libentry");
     for (auto& elem : list) {
         const cXMLElement& entry = *elem;
 
-        checkTags(&entry, "inLabel inInterface outLabel outInterface color");
+        checkTags(&entry, {"inLabel", "inInterface", "outLabel", "outInterface", "color"});
 
         LibEntry newItem;
         newItem.inLabel = getParameterIntValue(&entry, "inLabel");

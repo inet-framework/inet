@@ -135,17 +135,14 @@ void UdpBasicApp::processStart()
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
     setSocketOptions();
 
-    const char *destAddrs = par("destAddresses");
-    cStringTokenizer tokenizer(destAddrs);
-    const char *token;
+    destAddressStr = check_and_cast<cValueArray *>(par("destAddresses").objectValue())->asStringVector();
 
-    while ((token = tokenizer.nextToken()) != nullptr) {
-        destAddressStr.push_back(token);
+    for (const auto& token : destAddressStr) {
         L3Address result;
-        L3AddressResolver().tryResolve(token, result);
+        L3AddressResolver().tryResolve(token.c_str(), result);
+        destAddresses.push_back(result);
         if (result.isUnspecified())
             EV_ERROR << "cannot resolve destination address: " << token << endl;
-        destAddresses.push_back(result);
     }
 
     if (!destAddresses.empty()) {

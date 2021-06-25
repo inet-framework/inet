@@ -49,13 +49,13 @@ simple PcapRecorder
         string fileFormat @enum("pcap", "pcapng") = default("pcapng");
         int snaplen = default(65535);  // maximum number of bytes to record per packet
         bool dumpBadFrames = default(true); // enable dump of frames with hasBitError
-        string moduleNamePatterns = default("wlan[*] eth[*] ppp[*]"); // space-separated list of sibling module names to listen on
-        string sendingSignalNames = default("packetSentToLower"); // space-separated list of outbound packet signals to subscribe to
-        string receivingSignalNames = default("packetReceivedFromLower"); // space-separated list of inbound packet signals to subscribe to
-        string dumpProtocols = default("ethernetmac ppp ieee80211mac"); // space-separated list of protocol names as defined in the Protocol class
+        object moduleNamePatterns = default(["wlan[*]", "eth[*]", "ppp[*]"]); // space-separated list of sibling module names to listen on
+        object sendingSignalNames = default(["packetSentToLower"]); // space-separated list of outbound packet signals to subscribe to
+        object receivingSignalNames = default(["packetReceivedFromLower"]); // space-separated list of inbound packet signals to subscribe to
+        object dumpProtocols = default(["ethernetmac", "ppp", "ieee80211mac"]); // space-separated list of protocol names as defined in the Protocol class
         string packetFilter = default("*"); // which packets are considered, matches all packets by default
         string packetDataFilter = default("*"); // which packets are considered based on the data they contain, matches all packets by default
-        string helpers = default("");    // usable PcapRecorder::IHelper helpers for accept packettype and store/convert packet as specified linktype
+        object helpers = default([]);    // usable PcapRecorder::IHelper helpers for accept packettype and store/convert packet as specified linktype
                                          // currently available: "inet::AckingMacToEthernetPcapRecorderHelper"
         bool alwaysFlush = default(false); // flush the pcapFile after each write to ensure that all packets are captured in case of a crash
         string displayStringTextFormat = default("rec: %n pks");

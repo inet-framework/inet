@@ -29,11 +29,11 @@ void LabelClassifier::initialize(int stage)
     PacketClassifierBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         defaultGateIndex = par("defaultGateIndex");
-        cStringTokenizer tokenizer(par("labelsToGateIndices"));
-        while (tokenizer.hasMoreTokens()) {
-            auto label = tokenizer.nextToken();
-            auto index = tokenizer.nextToken();
-            labelsToGateIndexMap[label] = atoi(index);
+        auto labelsToGateIndices = check_and_cast<cValueMap *>(par("labelsToGateIndices").objectValue());
+        for (auto elem : labelsToGateIndices->getFields()) {
+            auto label = elem.first;
+            auto index = elem.second.intValue();
+            labelsToGateIndexMap[label] = index;
         }
     }
 }

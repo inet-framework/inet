@@ -44,7 +44,7 @@ module RsvpMplsRouter
         @display("i=abstract/router");
         bool hasStatus = default(false);
         int numLoInterfaces = default(1);
-        string peers;
+        object peers;
         string routerId = default("auto");
         *.forwarding = true;
         *.routingTable.routerId = this.routerId;
@@ -69,12 +69,12 @@ module RsvpMplsRouter
         }
         linkStateRouting: LinkStateRouting {
             parameters:
-                peers = parent.peers;
+                peers = dup(parent.peers);
                 @display("p=600,80");
         }
         rsvp: RsvpTe {
             parameters:
-                peers = parent.peers;
+                peers = dup(parent.peers);
                 classifierModule = "^.classifier";
                 @display("p=300,80");
         }

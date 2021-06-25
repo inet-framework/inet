@@ -23,7 +23,7 @@ import inet.applications.contract.IApp;
 simple SctpPeer like IApp
 {
     parameters:
-        string localAddress = default(""); // comma separated list of addresses
+        object localAddress = default([]); // list of local addresses
         int localPort = default(0); // port number to listen on
         bool echo = default(false);  // echoes received packages when true
         double echoDelay @unit(s) = default(0s);
@@ -45,7 +45,7 @@ simple SctpPeer like IApp
         double startTime @unit(s) = default(1s); // time first session begins
         int numRequestsPerSession = default(1);  // number of requests sent per session
         int numPacketsToReceive = default(0);
-        string streamPriorities = default("");
+        object streamPriorities = default([]);
 
         @display("i=block/app");
         @signal[packetSent](type=inet::Packet);

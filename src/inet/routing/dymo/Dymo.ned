@@ -39,10 +39,10 @@ simple Dymo like IManetRouting
         string networkProtocolModule = default(absPath("^.ipv4.ip"));
 
         // 1. Dymo parameter group
-        string clientAddresses = default("10.10.0.0/24 10.20.0.0"); // CLIENT_ADDRESSES
+        object clientAddresses = default(["10.10.0.0/24","10.20.0.0"]); // CLIENT_ADDRESSES
         bool useMulticastRREP = default(false); // USE_MULTICAST_RREP
         // string DEFAULT_METRIC_TYPE = default("HOP_COUNT");
-        string interfaces = default("*"); // AODVv2_INTERFACES
+        string interfaces = default("*"); // AODVv2_INTERFACES , pattern for cPatternMatcher
 
         // 2. Dymo parameter group
         double activeInterval @unit(s) = default(5s); // ACTIVE_INTERVAL

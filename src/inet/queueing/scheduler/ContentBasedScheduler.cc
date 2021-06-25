@@ -33,11 +33,13 @@ void ContentBasedScheduler::initialize(int stage)
     PacketSchedulerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         defaultGateIndex = par("defaultGateIndex");
-        cStringTokenizer packetFilterTokenizer(par("packetFilters"), ";");
-        cStringTokenizer packetDataFilterTokenizer(par("packetDataFilters"), ";");
-        while (packetFilterTokenizer.hasMoreTokens() && packetDataFilterTokenizer.hasMoreTokens()) {
+        auto packetFilterTokens = check_and_cast<cValueArray *>(par("packetFilters").objectValue())->asStringVector();
+        auto packetDataFilterTokens = check_and_cast<cValueArray *>(par("packetDataFilters").objectValue())->asStringVector();
+        if (packetFilterTokens.size() != packetDataFilterTokens.size())
+            throw cRuntimeError("Parameter error: element count differs in packetFilters and in packetDataFilters");
+        for (size_t i = 0; i < packetFilterTokens.size(); i++) {
             auto filter = new PacketFilter();
-            filter->setPattern(packetFilterTokenizer.nextToken(), packetDataFilterTokenizer.nextToken());
+            filter->setPattern(packetFilterTokens[i].c_str(), packetDataFilterTokens[i].c_str());
             filters.push_back(filter);
         }
     }

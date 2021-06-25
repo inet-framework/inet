@@ -42,6 +42,7 @@ void DimensionalTransmitterBase::initialize(int stage)
 template<typename T>
 std::vector<DimensionalTransmitterBase::GainEntry<T>> DimensionalTransmitterBase::parseGains(const char *text) const
 {
+    // TODO redesign it for using object NED parameters
     std::vector<GainEntry<T>> gains;
     cStringTokenizer tokenizer(text);
     tokenizer.nextToken();

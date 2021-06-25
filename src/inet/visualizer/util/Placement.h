@@ -38,7 +38,7 @@ enum Placement {
     PLACEMENT_ANY           = 0xFFFF
 };
 
-Placement parsePlacement(const char *s);
+Placement parsePlacement(cObject *arr);
 
 } // namespace visualizer
 

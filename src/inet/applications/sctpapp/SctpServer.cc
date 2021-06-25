@@ -73,8 +73,7 @@ void SctpServer::initialize(int stage)
             readInt = true;
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
-        const char *addressesString = par("localAddress");
-        AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+        AddressVector addresses = L3AddressResolver().resolve(check_and_cast<cValueArray *>(par("localAddress").objectValue())->asStringVector());
         int port = par("localPort");
         int messagesToPush = par("messagesToPush");
 
@@ -90,10 +89,10 @@ void SctpServer::initialize(int stage)
 
         socket->listen(true, par("streamReset"), par("numPacketsToSendPerClient"), messagesToPush);
         EV_INFO << "SctpServer::initialized listen port=" << port << "\n";
-        cStringTokenizer tokenizer(par("streamPriorities"));
-        for (unsigned int streamNum = 0; tokenizer.hasMoreTokens(); streamNum++) {
-            const char *token = tokenizer.nextToken();
-            socket->setStreamPriority(streamNum, (unsigned int)atoi(token));
+
+        auto streamPrioritiesArray = check_and_cast<cValueArray *>(par("streamPriorities").objectValue())->asIntVector();
+        for (uint32_t streamNum = 0; streamNum < streamPrioritiesArray.size(); streamNum++) {
+            socket->setStreamPriority(streamNum, streamPrioritiesArray[streamNum]);
         }
 
         cModule *node = findContainingNode(this);

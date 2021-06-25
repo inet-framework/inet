@@ -23,7 +23,7 @@ package inet.queueing.base;
 simple PacketLabelerBase extends PacketMarkerBase
 {
     parameters:
-        string labels = default(""); // a space separated list of labels
+        object labels = default([]); // list of labels
         @class(PacketLabelerBase);
         @display("i=block/star");
 }
