@@ -111,7 +111,7 @@ ned-path = .;../../../../src;../../lib
 *.host[0].app[*].typename = "PingApp"
 *.host[0].app[0].startTime = uniform(1s,5s)
 *.host[0].app[0].printPing = true
-*.host[0].app[0].destAddr = "host[1](ipv4)"
+*.host[0].app[0].destAddr = ["host[1](ipv4)"]
 
 # lifecycle
 **.hasStatus = true

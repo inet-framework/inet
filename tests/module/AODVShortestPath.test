@@ -96,7 +96,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.sender.app[0].typename = "PingApp"
 **.sender.app[0].startTime = uniform(1s,5s)
 **.sender.app[0].printPing = true
-**.sender.app[0].destAddr = "receiver(ipv4)"
+**.sender.app[0].destAddr = ["receiver(ipv4)"]
 
 # nic settings
 **.wlan[*].typename = "AckingWirelessInterface"

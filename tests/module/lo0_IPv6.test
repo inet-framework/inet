@@ -45,7 +45,7 @@ total-stack = 7MiB
 **.app[*].destPort = 100
 **.app[*].messageLength = 5000B
 **.app[*].sendInterval = 5s
-**.app[*].destAddresses = "::1"
+**.app[*].destAddresses = ["::1"]
 
 **.app[*].startTime = 60s+uniform(0s,5s)
 **.app[*].stopTime = 1059.99s

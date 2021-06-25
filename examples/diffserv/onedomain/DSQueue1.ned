@@ -30,7 +30,7 @@ module DSQueue1 extends CompoundPacketQueueBase
 {
     submodules:
         classifier: BehaviorAggregateClassifier {
-            dscps = "EF AF11 AF21 AF31 AF41";
+            dscps = ["EF", "AF11", "AF21", "AF31", "AF41"];
             @display("p=100,350");
         }
         efQueue: DropTailQueue {

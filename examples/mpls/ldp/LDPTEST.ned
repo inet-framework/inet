@@ -49,35 +49,35 @@ network LDPTEST
     submodules:
         LSR1: LdpMplsRouter {
             parameters:
-                peers = "ppp0 ppp1 ppp2";
+                peers = ["ppp0", "ppp1", "ppp2"];
                 @display("p=400,300");
             gates:
                 pppg[4];
         }
         LSR2: LdpMplsRouter {
             parameters:
-                peers = "ppp0 ppp1 ppp2 ppp3";
+                peers = ["ppp0", "ppp1", "ppp2", "ppp3"];
                 @display("p=550,300");
             gates:
                 pppg[4];
         }
         LSR3: LdpMplsRouter {
             parameters:
-                peers = "ppp0 ppp1 ppp2";
+                peers = ["ppp0", "ppp1", "ppp2"];
                 @display("p=700,300");
             gates:
                 pppg[4];
         }
         LSR4: LdpMplsRouter {
             parameters:
-                peers = "ppp0 ppp1 ppp2";
+                peers = ["ppp0", "ppp1", "ppp2"];
                 @display("p=550,200");
             gates:
                 pppg[4];
         }
         LSR5: LdpMplsRouter {
             parameters:
-                peers = "ppp0 ppp1 ppp2";
+                peers = ["ppp0", "ppp1", "ppp2"];
                 @display("p=550,400");
             gates:
                 pppg[4];

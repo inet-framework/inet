@@ -32,7 +32,7 @@ module DSQueue2 extends CompoundPacketQueueBase
 {
     submodules:
         classifier: BehaviorAggregateClassifier {
-            dscps = "AF11 AF12 AF13";
+            dscps = ["AF11", "AF12", "AF13"];
             @display("p=100,200");
         }
         red1: RedDropper {

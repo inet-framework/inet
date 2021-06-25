@@ -95,7 +95,7 @@ network TestNetwork
 {
   submodules:
     app: TestApp;
-    classifier: BehaviorAggregateClassifier { dscps = "*"; }
+    classifier: BehaviorAggregateClassifier { dscps = ["*"]; }
   connections:
     app.out --> classifier.in;
     for i=0..63 {

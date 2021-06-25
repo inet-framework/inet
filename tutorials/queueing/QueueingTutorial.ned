@@ -1198,8 +1198,8 @@ module TelnetClientTraffic
         }
         scheduler: <default("MarkovScheduler")> like IPacketScheduler {
             parameters:
-                transitionProbabilities = "0 1 0 0 0 1 1 0 0"; // character -> enter -> wait -> character
-                waitIntervals = "uniform(0,3) 0 uniform(10,30)";
+                transitionProbabilities = [[0, 1, 0], [0, 0, 1], [1, 0, 0]]; // character -> enter -> wait -> character
+                waitIntervals = [ "uniform(0s,3s)", "0s", "uniform(10s,30s)" ];
                 @display("p=300,200");
         }
         consumer: <default("PassivePacketSink")> like IPassivePacketSink {

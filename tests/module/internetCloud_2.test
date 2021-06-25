@@ -53,7 +53,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 *.sender[*].numApps = 1
 *.sender[*].app[0].typename = "PingApp"
-*.sender[*].app[0].destAddr = "recip"
+*.sender[*].app[0].destAddr = ["recip"]
 *.sender[*].app[0].startTime = 10s
 *.sender[*].app[0].stopTime = 10.5s
 *.sender[*].app[0].sendInterval = 1s

@@ -53,38 +53,38 @@ module TrafficConditioner like ITrafficConditioner
             @display("p=450,300");
         }
         efMarker: DscpMarker {
-            dscps = "EF";
+            dscps = ["EF"];
             @display("p=250,100");
         }
         af11Marker: DscpMarker {
-            dscps = "AF11";
+            dscps = ["AF11"];
             @display("p=250,200");
         }
         af21Marker: DscpMarker {
-            dscps = "AF21";
+            dscps = ["AF21"];
             @display("p=250,300");
         }
         af13Marker: DscpMarker {
-            dscps = "AF13";
+            dscps = ["AF13"];
             @display("p=700,350");
         }
         af23Marker: DscpMarker {
-            dscps = "AF23";
+            dscps = ["AF23"];
             @display("p=700,450");
         }
         join: PacketMultiplexer {
             @display("p=850,250");
         }
         beMarker: DscpMarker {
-            dscps = "BE";
+            dscps = ["BE"];
             @display("p=250,400");
         }
         baClassifier: BehaviorAggregateClassifier {
-            dscps = "AF11 AF21";
+            dscps = ["AF11", "AF21"];
             @display("p=550,350");
         }
         af11Marker2: DscpMarker {
-            dscps = "AF11";
+            dscps = ["AF11"];
             @display("p=550,100");
         }
         dropper: PassivePacketSink {

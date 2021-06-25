@@ -36,49 +36,49 @@ network RSVPTE4
     submodules:
         LSR1: RsvpMplsRouter {
             parameters:
-                peers = "ppp0 ppp1";
+                peers = ["ppp0", "ppp1"];
                 @display("p=400,230");
             gates:
                 pppg[5];
         }
         LSR2: RsvpMplsRouter {
             parameters:
-                peers = "ppp0 ppp1 ppp2";
+                peers = ["ppp0", "ppp1", "ppp2"];
                 @display("p=500,330");
             gates:
                 pppg[3];
         }
         LSR3: RsvpMplsRouter {
             parameters:
-                peers = "ppp0 ppp1 ppp2";
+                peers = ["ppp0", "ppp1", "ppp2"];
                 @display("p=500,130");
             gates:
                 pppg[3];
         }
         LSR4: RsvpMplsRouter {
             parameters:
-                peers = "ppp0 ppp1 ppp2";
+                peers = ["ppp0", "ppp1", "ppp2"];
                 @display("p=600,230");
             gates:
                 pppg[3];
         }
         LSR5: RsvpMplsRouter {
             parameters:
-                peers = "ppp0 ppp3 ppp4";
+                peers = ["ppp0", "ppp3", "ppp4"];
                 @display("p=800,230");
             gates:
                 pppg[5];
         }
         LSR6: RsvpMplsRouter {
             parameters:
-                peers = "ppp0 ppp1";
+                peers = ["ppp0", "ppp1"];
                 @display("p=700,360");
             gates:
                 pppg[2];
         }
         LSR7: RsvpMplsRouter {
             parameters:
-                peers = "ppp0 ppp1";
+                peers = ["ppp0", "ppp1"];
                 @display("p=700,100");
             gates:
                 pppg[2];

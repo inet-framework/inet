@@ -42,8 +42,8 @@ cmdenv-event-banners = false
 *.provider.packetLength = 1B
 *.collector1.collectionInterval = uniform(0s, 20s)
 *.collector2.collectionInterval = uniform(0s, 2s)
-*.classifier.transitionProbabilities = "0 1 1 0"
-*.classifier.waitIntervals = "40 4"
+*.classifier.transitionProbabilities = [[0, 1], [1, 0]]
+*.classifier.waitIntervals = ["40s", "4s"]
 
 %contains-regex: stdout
 Providing packet, .*?provider-0.*?

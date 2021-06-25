@@ -34,7 +34,12 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.mobility.initialX = 500m
 **.mobility.initialY = 500m
 **.mobility.initialZ = 0m
-**.switchingTimes = "ms 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10"
+**.switchingTimes = [
+        [10ms, 10ms, 10ms, 10ms, 10ms],
+        [10ms, 10ms, 10ms, 10ms, 10ms],
+        [10ms, 10ms, 10ms, 10ms, 10ms],
+        [10ms, 10ms, 10ms, 10ms, 10ms],
+        [10ms, 10ms, 10ms, 10ms, 10ms]]
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned

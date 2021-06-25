@@ -63,7 +63,7 @@ cmdenv-express-mode = false
 # ping app
 *.hostSource.numApps = 1
 *.hostSource.app[0].typename = "PingApp"
-*.hostSource.app[0].destAddr = "hostDestination"
+*.hostSource.app[0].destAddr = ["hostDestination"]
 *.hostSource.app[0].printPing = true
 
 %contains: stdout

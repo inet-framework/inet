@@ -104,7 +104,7 @@ network TestNetwork
 {
   submodules:
     app: TestApp;
-    marker: DscpMarker { dscps = "*"; }
+    marker: DscpMarker { dscps = ["*"]; }
   connections:
     for i=0..63 {
       app.out++ --> marker.in++;

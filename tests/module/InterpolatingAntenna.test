@@ -83,7 +83,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 # antenna
 **.antenna.typename = "InterpolatingAntenna"
-**.headingGains = "0 0 180 10 360 0"
+**.headingGains = {0deg: 0dB, 180deg: 10dB, 360deg: 0dB}
 
 %#--------------------------------------------------------------------------------------------------------------
 %# remove colorizing

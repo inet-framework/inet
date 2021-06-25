@@ -26,7 +26,7 @@ cmdenv-log-prefix="[%c]: "
 
 # client test apps
 *.cli_app.active = true
-*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localAddress = "10.0.0.1"
 *.cli_app.localPort=1000
 *.cli_app.connectAddress="10.0.0.2"
 *.cli_app.connectPort=2000
@@ -39,7 +39,7 @@ cmdenv-log-prefix="[%c]: "
 
 # server test apps
 *.srv_app.active=false
-*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localAddress = "10.0.0.2"
 *.srv_app.localPort=2000
 *.srv_app.connectAddress="10.0.0.1"
 *.srv_app.connectPort=1000

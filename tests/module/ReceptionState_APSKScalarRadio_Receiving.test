@@ -72,7 +72,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 *.host1.app[0].typename = "PingApp"
 *.host1.app[0].count = 1
 *.host1.app[0].printPing = true
-*.host1.app[0].destAddr = "host2"
+*.host1.app[0].destAddr = ["host2"]
 *.host1.app[0].startTime = 0s
 
 %#--------------------------------------------------------------------------------------------------------------
