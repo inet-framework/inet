@@ -44,7 +44,7 @@ bool EligibilityTimeFilter::matchesPacket(const Packet *packet) const
 {
     simtime_t arrivalTime = simTime();
     const auto& eligibilityTimeTag = packet->findTag<EligibilityTimeTag>();
-    return eligibilityTimeTag != nullptr && (maxResidenceTime == 0 || eligibilityTimeTag->getEligibilityTime() <= arrivalTime + maxResidenceTime);
+    return eligibilityTimeTag != nullptr && (maxResidenceTime == -1 || eligibilityTimeTag->getEligibilityTime() <= arrivalTime + maxResidenceTime);
 }
 
 } // namespace inet

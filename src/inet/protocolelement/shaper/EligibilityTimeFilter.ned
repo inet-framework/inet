@@ -23,6 +23,6 @@ import inet.queueing.contract.IPacketFilter;
 simple EligibilityTimeFilter extends PacketFilterBase like IPacketFilter
 {
     parameters:
-        double maxResidenceTime @unit(s) = default(0s);
+        double maxResidenceTime @unit(s) = default(-1s); // optional max residence time limit, not used by default
         @class(EligibilityTimeFilter);
 }
