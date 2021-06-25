@@ -20,11 +20,21 @@ package inet.protocolelement.shaper;
 import inet.queueing.base.PacketMeterBase;
 import inet.queueing.contract.IPacketMeter;
 
+//
+// This module is a packet meter which measures the packet flow that is passing
+// through and optionally attaches an ~EligibilityTimeTag to the packets. The
+// tag contains the calculated simulation time when the packet becomes eligibile
+// for transmission according to the asynchronous shaper algorithm.
+//
+// This module is part of the asynchronous shaper infrastructure.
+//
+// @see ~EligibilityTimeGate, ~EligibilityTimeFilter, ~EligibilityTimeQueue, ~EligibilityTimeTag
+//
 simple EligibilityTimeMeter extends PacketMeterBase like IPacketMeter
 {
     parameters:
-        double comittedInformationRate @unit(bps);
-        int comittedBurstSize @unit(b);
-        double maxResidenceTime @unit(s);
+        double comittedInformationRate @unit(bps); // committed information rate of the packet flow
+        int comittedBurstSize @unit(b); // committed burst size of the packet flow
+        double maxResidenceTime @unit(s); // maximum packet residence time measures from the packet arrival time to this module to the transmission eligiblity time
         @class(EligibilityTimeMeter);
 }
