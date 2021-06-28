@@ -61,7 +61,7 @@ Define_NED_Function2(nedf_haveClass,
 
 cNEDValue nedf_moduleListByPath(cComponent *context, cNEDValue argv[], int argc)
 {
-    std::string modulenames;
+    auto modulenames = new cValueArray();
     cTopology topo;
     std::vector<std::string> paths;
     for (int i = 0; i < argc; i++)
@@ -71,24 +71,21 @@ cNEDValue nedf_moduleListByPath(cComponent *context, cNEDValue argv[], int argc)
 
     for (int i = 0; i < topo.getNumNodes(); i++) {
         std::string path = topo.getNode(i)->getModule()->getFullPath();
-        if (modulenames.length() > 0)
-            modulenames = modulenames + " " + path;
-        else
-            modulenames = path;
+        modulenames->add(cValue(path));
     }
-    return modulenames;
+    return cValue(modulenames);
 }
 
 Define_NED_Function2(nedf_moduleListByPath,
-        "string moduleListByPath(string modulePath,...)",
+        "object moduleListByPath(string modulePath,...)",
         "string",
-        "Returns a space-separated list of the modules at the given path(s). "
+        "Returns a cValueArray, contains list of the modules at the given path(s). "
         "See cTopology::extractByModulePath()."
         );
 
 cNEDValue nedf_moduleListByNedType(cComponent *context, cNEDValue argv[], int argc)
 {
-    std::string modulenames;
+    auto modulenames = new cValueArray();
     cTopology topo;
     std::vector<std::string> paths;
     for (int i = 0; i < argc; i++)
@@ -98,18 +95,15 @@ cNEDValue nedf_moduleListByNedType(cComponent *context, cNEDValue argv[], int ar
 
     for (int i = 0; i < topo.getNumNodes(); i++) {
         std::string path = topo.getNode(i)->getModule()->getFullPath();
-        if (modulenames.length() > 0)
-            modulenames = modulenames + " " + path;
-        else
-            modulenames = path;
+        modulenames->add(cValue(path));
     }
-    return modulenames;
+    return cValue(modulenames);
 }
 
 Define_NED_Function2(nedf_moduleListByNedType,
-        "string moduleListByNedType(string nedTypeName,...)",
+        "object moduleListByNedType(string nedTypeName,...)",
         "string",
-        "Returns a space-separated list of the modules with the given NED type(s). "
+        "Returns a cValueArray, contains list of the modules with the given NED type(s). "
         "See cTopology::extractByNedTypeName()."
         );
 
