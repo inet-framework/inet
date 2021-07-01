@@ -77,8 +77,8 @@ bool FieldsChunk::containsSameData(const Chunk& other) const
         auto otherDescriptor = other.getDescriptor();
         if (thisDescriptor != otherDescriptor)
             return false;
-        auto thisVoidPtr = static_cast<void *>(const_cast<FieldsChunk *>(this));
-        auto otherVoidPtr = static_cast<void *>(const_cast<FieldsChunk *>(static_cast<const FieldsChunk *>(&other)));
+        auto thisVoidPtr = toAnyPtr(this);
+        auto otherVoidPtr = toAnyPtr(static_cast<const FieldsChunk *>(&other));
         for (int field = 0; field < thisDescriptor->getFieldCount(); field++) {
             auto declaredOn = thisDescriptor->getFieldDeclaredOn(field);
             if (!strcmp(declaredOn, "omnetpp::cObject") || !strcmp(declaredOn, "inet::Chunk") || !strcmp(declaredOn, "inet::FieldsChunk"))
@@ -133,7 +133,7 @@ std::ostream& FieldsChunk::printFieldsToStream(std::ostream& stream, int level, 
     if (level <= PRINT_LEVEL_DETAIL)
         for (int i = 0; i < descriptor->getFieldCount(); i++)
             if (!descriptor->getFieldIsArray(i) && !strcmp(className, descriptor->getFieldDeclaredOn(i)))
-                stream << ", " << EV_BOLD << descriptor->getFieldName(i) << EV_NORMAL << " = " << descriptor->getFieldValueAsString((void *)this, i, 0);
+                stream << ", " << EV_BOLD << descriptor->getFieldName(i) << EV_NORMAL << " = " << descriptor->getFieldValueAsString(toAnyPtr(this), i, 0);
     return stream;
 }
 
