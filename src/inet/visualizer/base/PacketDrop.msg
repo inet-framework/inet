@@ -5,6 +5,7 @@
 import inet.common.INETDefs;
 import inet.common.Simsignals;
 import inet.common.geometry.Geometry;
+import inet.networklayer.common.InterfaceEntry;
 
 cplusplus{{
 #include "inet/visualizer/base/PacketDropVisualizerBase.h"
@@ -19,7 +20,7 @@ class PacketDrop extends inet::PacketDropDetails
     cPacket *packet_;
     cModule *module;
     cModule *networkNode;
-    cObject *networkInterface;
+    InterfaceEntry *networkInterface;
     Coord position;
 }
 
