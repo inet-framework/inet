@@ -35,13 +35,13 @@ class TemporarySharedPtrClassDescriptor : public cClassDescriptor
     cClassDescriptor *classDescriptor;
 
   protected:
-    const Ptr<const T> getSharedPtr(void *object) const { return static_cast<TemporarySharedPtr<T> *>(object)->getObject(); }
-    T *getObjectPointer(void *object) const { return const_cast<T *>(getSharedPtr(object).get()); }
+    const Ptr<const T> getSharedPtr(any_ptr object) const { return check_and_cast<TemporarySharedPtr<T> *>(fromAnyPtr<cObject>(object))->getObject(); }
+    any_ptr getObjectPointer(any_ptr object) const { return toAnyPtr(const_cast<T *>(getSharedPtr(object).get())); }
 
   public:
     TemporarySharedPtrClassDescriptor(cClassDescriptor *classDescriptor) : cClassDescriptor(classDescriptor->getClassName()), classDescriptor(classDescriptor) {}
 
-    virtual bool doesSupport(cObject *object) const override { return classDescriptor->doesSupport(getObjectPointer(object)); }
+    virtual bool doesSupport(cObject *object) const override { return classDescriptor->doesSupport(fromAnyPtr<cObject>(getObjectPointer(toAnyPtr(object)))); }
     virtual cClassDescriptor *getBaseClassDescriptor() const override { return classDescriptor->getBaseClassDescriptor(); }
     virtual const char **getPropertyNames() const override { return classDescriptor->getPropertyNames(); }
     virtual const char *getProperty(const char *propertyname) const override { return classDescriptor->getProperty(propertyname); }
@@ -53,14 +53,14 @@ class TemporarySharedPtrClassDescriptor : public cClassDescriptor
     virtual const char *getFieldTypeString(int field) const override { return classDescriptor->getFieldTypeString(field); }
     virtual const char **getFieldPropertyNames(int field) const override { return classDescriptor->getFieldPropertyNames(field); }
     virtual const char *getFieldProperty(int field, const char *propertyname) const override { return classDescriptor->getFieldProperty(field, propertyname); }
-    virtual int getFieldArraySize(void *object, int field) const override { return classDescriptor->getFieldArraySize(getObjectPointer(object), field); }
-    virtual void setFieldArraySize(void *object, int field, int size) const override { classDescriptor->setFieldArraySize(getObjectPointer(object), field, size); }
-    virtual const char *getFieldDynamicTypeString(void *object, int field, int i) const override { return classDescriptor->getFieldDynamicTypeString(getObjectPointer(object), field, i); }
-    virtual std::string getFieldValueAsString(void *object, int field, int i) const override { return classDescriptor->getFieldValueAsString(getObjectPointer(object), field, i); }
-    virtual void setFieldValueAsString(void *object, int field, int i, const char *value) const override { classDescriptor->setFieldValueAsString(getObjectPointer(object), field, i, value); }
+    virtual int getFieldArraySize(any_ptr object, int field) const override { return classDescriptor->getFieldArraySize(getObjectPointer(object), field); }
+    virtual void setFieldArraySize(any_ptr object, int field, int size) const override { classDescriptor->setFieldArraySize(getObjectPointer(object), field, size); }
+    virtual const char *getFieldDynamicTypeString(any_ptr object, int field, int i) const override { return classDescriptor->getFieldDynamicTypeString(getObjectPointer(object), field, i); }
+    virtual std::string getFieldValueAsString(any_ptr object, int field, int i) const override { return classDescriptor->getFieldValueAsString(getObjectPointer(object), field, i); }
+    virtual void setFieldValueAsString(any_ptr object, int field, int i, const char *value) const override { classDescriptor->setFieldValueAsString(getObjectPointer(object), field, i, value); }
     virtual const char *getFieldStructName(int field) const override { return classDescriptor->getFieldStructName(field); }
-    virtual void *getFieldStructValuePointer(void *object, int field, int i) const override { return classDescriptor->getFieldStructValuePointer(getObjectPointer(object), field, i); }
-    virtual void setFieldStructValuePointer(void *object, int field, int i, void *ptr) const override { classDescriptor->setFieldStructValuePointer(getObjectPointer(object), field, i, ptr); }
+    virtual any_ptr getFieldStructValuePointer(any_ptr object, int field, int i) const override { return classDescriptor->getFieldStructValuePointer(getObjectPointer(object), field, i); }
+    virtual void setFieldStructValuePointer(any_ptr object, int field, int i, any_ptr ptr) const override { classDescriptor->setFieldStructValuePointer(getObjectPointer(object), field, i, ptr); }
 };
 
 /**

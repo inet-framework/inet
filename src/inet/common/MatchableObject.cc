@@ -99,7 +99,7 @@ const char *MatchableObject::getAsString(const char *attribute) const
     if (!found)
         return nullptr;
 
-    attributeValue = classDescriptor->getFieldValueAsString((void *)object, fieldId, index);
+    attributeValue = classDescriptor->getFieldValueAsString(toAnyPtr(object), fieldId, index);
     return attributeValue.c_str();
 }
 
