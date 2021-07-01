@@ -56,7 +56,7 @@ void MessageChecker::checkMessage(cMessage *msg)
             int occurence = atol(messagePattern.getAttribute("occurence"));
             if (occurence > 0) {
                 if (messagePattern.hasChildren())
-                    checkFields(msg, msg->getDescriptor(), messagePattern.getChildren());
+                    checkFields(toAnyPtr(msg), msg->getDescriptor(), messagePattern.getChildren());
 
                 occurence--;
                 std::ostringstream occur_str;
@@ -73,7 +73,7 @@ void MessageChecker::checkMessage(cMessage *msg)
     }
 }
 
-void MessageChecker::checkFields(void *object, cClassDescriptor *descriptor, const cXMLElementList& msgPattern) const
+void MessageChecker::checkFields(any_ptr object, cClassDescriptor *descriptor, const cXMLElementList& msgPattern) const
 {
     // fldPatternList contains the list of fields to be inspected
     cXMLElementList::const_iterator iter = msgPattern.begin();
@@ -104,7 +104,7 @@ void MessageChecker::checkFields(void *object, cClassDescriptor *descriptor, con
     }
 }
 
-void MessageChecker::checkFieldValue(void *object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr, int i) const
+void MessageChecker::checkFieldValue(any_ptr object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr, int i) const
 {
     // get the field string value from the client object
     std::string value = descriptor->getFieldValueAsString(object, field, i);
@@ -123,20 +123,20 @@ void MessageChecker::checkFieldValue(void *object, cClassDescriptor *descriptor,
                 attr["name"].data(), forwardedMsg, value.data(), attr["value"].data());
 }
 
-void MessageChecker::checkFieldObject(void *object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr, const cXMLElement& pattern, int i) const
+void MessageChecker::checkFieldObject(any_ptr object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr, const cXMLElement& pattern, int i) const
 {
     // get the client object associated to the field
-    void *obj = descriptor->getFieldStructValuePointer(object, field, i);
+    any_ptr obj = descriptor->getFieldStructValuePointer(object, field, i);
 
     // get the client object associated to the field, and its descriptor class
     cClassDescriptor *descr = descriptor->getFieldIsCObject(field) ?
-        cClassDescriptor::getDescriptorFor((cObject *)obj) :
+        cClassDescriptor::getDescriptorFor(fromAnyPtr<cObject>(obj)) :
         cClassDescriptor::getDescriptorFor(descriptor->getFieldStructName(field));
 
     checkFields(obj, descr, pattern.getChildren());
 }
 
-int MessageChecker::checkFieldArray(void *object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr) const
+int MessageChecker::checkFieldArray(any_ptr object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr) const
 {
     if (!descriptor->getFieldIsArray(field))
         throw cRuntimeError("The field \"%s\" in message %d isn't an array", attr["name"].data(), forwardedMsg);
@@ -151,7 +151,7 @@ int MessageChecker::checkFieldArray(void *object, cClassDescriptor *descriptor, 
     return fieldSize;
 }
 
-void MessageChecker::checkFieldValueInArray(void *object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr) const
+void MessageChecker::checkFieldValueInArray(any_ptr object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr) const
 {
     int fieldSize = checkFieldArray(object, descriptor, field, attr);
 
@@ -165,7 +165,7 @@ void MessageChecker::checkFieldValueInArray(void *object, cClassDescriptor *desc
     checkFieldValue(object, descriptor, field, attr, i);
 }
 
-void MessageChecker::checkFieldObjectInArray(void *object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr, const cXMLElement& pattern) const
+void MessageChecker::checkFieldObjectInArray(any_ptr object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr, const cXMLElement& pattern) const
 {
     int fieldSize = checkFieldArray(object, descriptor, field, attr);
 
@@ -179,12 +179,12 @@ void MessageChecker::checkFieldObjectInArray(void *object, cClassDescriptor *des
     checkFieldObject(object, descriptor, field, attr, pattern, i);
 }
 
-void MessageChecker::checkFieldType(void *object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr, int i) const
+void MessageChecker::checkFieldType(any_ptr object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr, int i) const
 {
     std::string type;
 
     if (descriptor->getFieldIsCObject(field))
-        type = ((cObject *)descriptor->getFieldStructValuePointer(object, field, i))->getClassName();
+        type = fromAnyPtr<cObject>(descriptor->getFieldStructValuePointer(object, field, i))->getClassName();
     else
         type = descriptor->getFieldTypeString(field);
 
@@ -193,7 +193,7 @@ void MessageChecker::checkFieldType(void *object, cClassDescriptor *descriptor, 
                 attr["name"].data(), forwardedMsg, type.data(), attr["type"].data());
 }
 
-int MessageChecker::findFieldIndex(void *object, cClassDescriptor *descriptor, const std::string& fieldName) const
+int MessageChecker::findFieldIndex(any_ptr object, cClassDescriptor *descriptor, const std::string& fieldName) const
 {
     std::ostringstream availableFields;
     for (int i = 0; i < descriptor->getFieldCount(); i++) {

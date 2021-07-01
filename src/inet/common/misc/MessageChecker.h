@@ -36,16 +36,16 @@ class INET_API MessageChecker : public cSimpleModule
     void forwardMessage(cMessage *msg);
     void finish() override;
 
-    void checkFields(void *object, cClassDescriptor *descriptor, const cXMLElementList& msgPattern) const;
+    void checkFields(any_ptr object, cClassDescriptor *descriptor, const cXMLElementList& msgPattern) const;
 
-    void checkFieldValue(void *object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr, int i = 0) const;
-    void checkFieldObject(void *object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr, const cXMLElement& pattern, int i = 0) const;
-    int checkFieldArray(void *object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr) const;
-    void checkFieldValueInArray(void *object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr) const;
-    void checkFieldObjectInArray(void *object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr, const cXMLElement& pattern) const;
+    void checkFieldValue(any_ptr object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr, int i = 0) const;
+    void checkFieldObject(any_ptr object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr, const cXMLElement& pattern, int i = 0) const;
+    int checkFieldArray(any_ptr object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr) const;
+    void checkFieldValueInArray(any_ptr object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr) const;
+    void checkFieldObjectInArray(any_ptr object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attr, const cXMLElement& pattern) const;
 
-    void checkFieldType(void *object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attrList, int i = 0) const;
-    int findFieldIndex(void *object, cClassDescriptor *descriptor, const std::string& fieldName) const;
+    void checkFieldType(any_ptr object, cClassDescriptor *descriptor, int field, cXMLAttributeMap& attrList, int i = 0) const;
+    int findFieldIndex(any_ptr object, cClassDescriptor *descriptor, const std::string& fieldName) const;
 
     cXMLElementList m_checkingInfo;    /// List of checking information
     cXMLElementList::iterator m_iterChk;    /// Interator of the list of chacking information

@@ -41,7 +41,7 @@ class INET_API ChunkBuffer : public cNamedObject
   friend class ChunkBufferDescriptor;
   friend class ChunkBuffer__RegionDescriptor;
 
-  protected:
+  public:
     class INET_API Region {
       friend class ChunkBuffer__RegionDescriptor;
 
