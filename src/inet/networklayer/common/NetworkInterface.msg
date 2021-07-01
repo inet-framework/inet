@@ -25,9 +25,10 @@ cplusplus {{
 
 namespace inet;
 
-class NetworkInterface extends cModule
+class NetworkInterface extends cSimpleModule
 {
     @existingClass;
+    @implements(cIListener);
     @descriptor(readonly);
     bool up @getter("isUp");
     bool broadcast @getter("isBroadcast");

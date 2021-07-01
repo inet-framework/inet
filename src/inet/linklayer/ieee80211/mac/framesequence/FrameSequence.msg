@@ -39,7 +39,7 @@ class IFrameSequenceStep
     @descriptor(readonly);
 }
 
-class TransmitStep extends cObject
+class TransmitStep extends IFrameSequenceStep
 {
     @existingClass;
     @descriptor(readonly);
@@ -47,7 +47,7 @@ class TransmitStep extends cObject
     simtime_t ifs;
 }
 
-class ReceiveStep extends cObject
+class ReceiveStep extends IFrameSequenceStep
 {
     @existingClass;
     @descriptor(readonly);
