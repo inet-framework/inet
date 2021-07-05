@@ -31,7 +31,7 @@ ConvolutionalCode::ConvolutionalCode(const char *transferFunctionMatrix, const c
     memory(0),
     mode(mode)
 {
-    cStringTokenizer tokenizer(constraintLengthVector);
+    cStringTokenizer tokenizer(constraintLengthVector);   // TODO redesign NED parameter and parsing
     while (tokenizer.hasMoreTokens())
         memory = std::max(memory, atoi(tokenizer.nextToken()) - 1);
 }

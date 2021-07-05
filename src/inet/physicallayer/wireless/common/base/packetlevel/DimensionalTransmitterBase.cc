@@ -44,7 +44,7 @@ std::vector<DimensionalTransmitterBase::GainEntry<T>> DimensionalTransmitterBase
 {
     // TODO redesign it for using object NED parameters
     std::vector<GainEntry<T>> gains;
-    cStringTokenizer tokenizer(text);
+    cStringTokenizer tokenizer(text);   // TODO redesign NED parameter and parsing
     tokenizer.nextToken();
     while (tokenizer.hasMoreTokens()) {
         char *token = const_cast<char *>(tokenizer.nextToken());
@@ -97,7 +97,7 @@ std::vector<DimensionalTransmitterBase::GainEntry<T>> DimensionalTransmitterBase
 void DimensionalTransmitterBase::parseTimeGains(const char *text)
 {
     if (strcmp(text, "left s 0dB either e 0dB right")) {
-        firstTimeInterpolator = createInterpolator<simsec, double>(cStringTokenizer(text).nextToken());
+        firstTimeInterpolator = createInterpolator<simsec, double>(cStringTokenizer(text).nextToken());   // TODO redesign NED parameter and parsing
         timeGains = parseGains<simsec>(text);
     }
     else {
@@ -109,7 +109,7 @@ void DimensionalTransmitterBase::parseTimeGains(const char *text)
 void DimensionalTransmitterBase::parseFrequencyGains(const char *text)
 {
     if (strcmp(text, "left s 0dB either e 0dB right")) {
-        firstFrequencyInterpolator = createInterpolator<Hz, double>(cStringTokenizer(text).nextToken());
+        firstFrequencyInterpolator = createInterpolator<Hz, double>(cStringTokenizer(text).nextToken());   // TODO redesign NED parameter and parsing
         frequencyGains = parseGains<Hz>(text);
     }
     else {

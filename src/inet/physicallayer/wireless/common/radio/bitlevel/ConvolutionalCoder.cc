@@ -294,7 +294,7 @@ bool ConvolutionalCoder::isCompletelyDecoded(unsigned int encodedLength, unsigne
 
 void ConvolutionalCoder::parseMatrix(const char *strMatrix, std::vector<std::vector<int>>& matrix) const
 {
-    cStringTokenizer tokenizer(strMatrix, ";");
+    cStringTokenizer tokenizer(strMatrix, ";");   // TODO redesign NED parameter and parsing
     while (tokenizer.hasMoreTokens()) {
         std::vector<int> row;
         parseVector(tokenizer.nextToken(), row);
@@ -304,7 +304,7 @@ void ConvolutionalCoder::parseMatrix(const char *strMatrix, std::vector<std::vec
 
 void ConvolutionalCoder::parseVector(const char *strVector, std::vector<int>& vector) const
 {
-    cStringTokenizer tokenizer(strVector);
+    cStringTokenizer tokenizer(strVector);   // TODO redesign NED parameter and parsing
     while (tokenizer.hasMoreTokens())
         vector.push_back(atoi(tokenizer.nextToken()));
 }
