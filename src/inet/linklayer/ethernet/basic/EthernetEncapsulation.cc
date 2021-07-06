@@ -178,9 +178,10 @@ void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)
         if (protocolTag) {
             const Protocol *protocol = protocolTag->getProtocol();
             if (protocol) {
-                int ethType = ProtocolGroup::ethertype.findProtocolNumber(protocol);
-                if (ethType != -1)
-                    typeOrLength = ethType;
+                if (*protocol == Protocol::ieee8022llc)
+                    typeOrLength = packet->getByteLength();
+                else
+                    typeOrLength = ProtocolGroup::ethertype.findProtocolNumber(protocol);
             }
         }
     }
