@@ -137,7 +137,10 @@ void TestApp::finalize()
 void TestApp::handleMessage(cMessage *msg)
 {
   cGate *gate = msg->getArrivalGate();
-  out << msg->getName() << ": " << gate->getName() << "[" << gate->getIndex() << "]\n";
+  out << msg->getName() << ": " << gate->getName();
+  if (gate->isVector())
+      out << "[" << gate->getIndex() << "]";
+  out << "\n";
   delete msg;
 }
 
@@ -216,7 +219,7 @@ ipv4-14: in[12]
 ipv6-15: in[12]
 ipv4-16: in[13]
 ipv6-17: in[13]
-ipv4-18: defaultIn[0]
+ipv4-18: defaultIn
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
