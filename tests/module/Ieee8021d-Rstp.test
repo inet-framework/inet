@@ -81,6 +81,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.agingTime = 1s
 network = LargeNet
 
+**.switch*.eth[*].encap.typename = "SimpleEthernetEncapsulation"
 **.switch1.**.address="AAAAAA000001"
 **.switch2.**.address="AAAAAA000002"
 **.switch3.**.address="AAAAAA000003"
