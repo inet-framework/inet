@@ -25,11 +25,13 @@ namespace inet {
 class INET_API TSNschedGateSchedulingConfigurator : public GateSchedulingConfiguratorBase
 {
   protected:
-    virtual std::string getJavaName(std::string name) const;
-    virtual void writeJavaCode(const Input& input, std::string fileName) const;
-    virtual void compileJavaCode(std::string fileName) const;
-    virtual void executeJavaCode(std::string className) const;
-    virtual Output *readGateScheduling(std::string directoryName) const;
+    virtual cValueMap *convertInputToJson(const Input& input) const;
+    virtual Output *convertJsonToOutput(const Input& input, const cValueMap *json) const;
+
+    virtual void writeInputToFile(const Input& input, std::string fileName) const;
+    virtual Output *readOutputFromFile(const Input& input, std::string fileName) const;
+
+    virtual void executeTSNsched(std::string fileName) const;
 
     virtual Output *computeGateScheduling(const Input& input) const override;
 };
