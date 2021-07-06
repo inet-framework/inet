@@ -23,47 +23,63 @@ namespace inet {
 
 Define_Module(TSNschedGateSchedulingConfigurator);
 
-std::string TSNschedGateSchedulingConfigurator::getJavaName(std::string name) const
+static void printJson(std::ostream& stream, const cValue& value, int level = 0)
 {
-    std::replace(name.begin(), name.end(), '.', '_');
-    std::replace(name.begin(), name.end(), '[', '_');
-    std::replace(name.begin(), name.end(), ']', '_');
-    return name;
+    std::string indent(level * 2, ' ');
+    if (value.getType() == cValue::OBJECT) {
+        auto object = value.objectValue();
+        if (auto array = dynamic_cast<cValueArray *>(object)) {
+            if (array->size() == 0)
+                stream << "[]";
+            else {
+                stream << "[\n";
+                for (int i = 0; i < array->size(); i++) {
+                    if (i != 0)
+                        stream << ",\n";
+                    stream << indent << "  ";
+                    printJson(stream, array->get(i), level + 1);
+                }
+                stream << "\n" << indent << "]";
+            }
+        }
+        else if (auto map = dynamic_cast<cValueMap *>(object)) {
+            if (map->size() == 0)
+                stream << "{}";
+            else {
+                stream << "{\n";
+                auto it = map->getFields().begin();
+                for (int i = 0; i < map->size(); i++, ++it) {
+                    if (i != 0)
+                        stream << ",\n";
+                    stream << indent << "  " << it->first << ": ";
+                    printJson(stream, it->second, level + 1);
+                }
+                stream << "\n" << indent << "}";
+            }
+        }
+        else
+            throw cRuntimeError("Unknown object type");
+    }
+    else
+        stream << value.str();
 }
 
-void TSNschedGateSchedulingConfigurator::writeJavaCode(const Input& input, std::string fileName) const
+cValueMap *TSNschedGateSchedulingConfigurator::convertInputToJson(const Input& input) const
 {
-    std::string className = fileName.substr(0, fileName.find('.'));
-    std::ofstream javaFile;
-    javaFile.open(fileName.c_str());
-    javaFile <<
-"import java.util.*;\n"
-"import java.io.*;\n"
-"import schedule_generator.*;\n"
-"\n"
-"public class " << className << " {\n"
-"   public static void main(String[] args) {\n";
-
+    cValueMap *json = new cValueMap();
+    cValueArray *jsonDevices = new cValueArray();
+    json->set("devices", jsonDevices);
     for (auto device : input.devices) {
-        auto application = *std::find_if(input.applications.begin(), input.applications.end(), [&] (Input::Application *application) { return application->device == device; });
-        if (application == nullptr)
-            javaFile <<
-"       Device " << getJavaName(device->module->getFullName()) << " = new Device(0, 0, 0, 0);\n";
-        else
-            javaFile <<
-"       Device " << getJavaName(device->module->getFullName()) << " = new Device("
-                 << (application->packetInterval * 1000000).dbl() << "f, 0, " << (application->maxLatency * 1000000).dbl()
-                 << "f, " << b(application->packetLength + B(12)).get() << ");\n";
+        cValueMap *jsonDevice = new cValueMap();
+        jsonDevices->add(jsonDevice);
+        jsonDevice->set("name", device->module->getFullName());
     }
-
-    for (auto switch_ : input.switches) {
-        for (auto port : switch_->ports) {
-            javaFile <<
-"       Cycle " << (getJavaName(port->module->getFullName()) + "Cycle") << " = new Cycle(" << (gateCycleDuration * 1000000).dbl() << ", 0, " << (gateCycleDuration * 1000000).dbl() << ");\n";
-        }
-    }
-
-    for (auto switch_ : input.switches) {
+    cValueArray *jsonSwitches = new cValueArray();
+    json->set("switches", jsonSwitches);
+    for (int i = 0; i < input.switches.size(); i++) {
+        auto switch_ = input.switches[i];
+        cValueMap *jsonSwitch = new cValueMap();
+        jsonSwitches->add(jsonSwitch);
         // KLUDGE TODO use per port parameters
         double datarate = 1E+9 / 1000000;
         double propagationTime = 50E-9 * 1000000;
@@ -74,90 +90,150 @@ void TSNschedGateSchedulingConfigurator::writeJavaCode(const Input& input, std::
             if (guardBand < v)
                 guardBand = v;
         }
-        javaFile << // TODO parameters
-"       TSNSwitch " << getJavaName(switch_->module->getFullName()) << " = new TSNSwitch(\"" << switch_->module->getFullName() << "\", "
-                    << 1500 << ", " << propagationTime << "f, " << datarate << ", " << guardBand << "f, 0, " << (gateCycleDuration * 1000000).dbl() << ");\n";
-    }
-
-    for (auto switch_ : input.switches) {
-        for (auto port : switch_->ports) {
-            javaFile <<
-"       " << getJavaName(switch_->module->getFullName()) << ".createPort(" << getJavaName(port->endNode->module->getFullName()) << ", "
-          << (getJavaName(port->module->getFullName()) + "Cycle") << ");\n";
+        auto jsonPorts = new cValueArray();
+        jsonSwitch->set("name", switch_->module->getFullName());
+        jsonSwitch->set("ports", jsonPorts);
+        for (int j = 0; j < switch_->ports.size(); j++) {
+            auto port = switch_->ports[j];
+            auto jsonPort = new cValueMap();
+            jsonPorts->add(jsonPort);
+            jsonPort->set("name", port->module->getFullName());
+            jsonPort->set("connectsTo", port->endNode->module->getFullName());
+            jsonPort->set("timeToTravel", propagationTime);
+            jsonPort->set("timeToTravelUnit", "us");
+            jsonPort->set("guardBandSize", guardBand);
+            jsonPort->set("guardBandSizeUnit", "us");
+            jsonPort->set("portSpeed", datarate);
+            jsonPort->set("portSpeedSizeUnit", "b");
+            jsonPort->set("portSpeedTimeUnit", "us");
+            jsonPort->set("cycleStart", 0);
+            jsonPort->set("cycleStartUnit", "us");
+            jsonPort->set("maximumSlotDuration", gateCycleDuration.dbl() * 1000000);
+            jsonPort->set("maximumSlotDurationUnit", "us");
         }
     }
-
+    cValueArray *jsonFlows = new cValueArray();
+    json->set("flows", jsonFlows);
     for (auto flow : input.flows) {
-        javaFile <<
-"       Flow " << getJavaName(flow->name) << " = new Flow(Flow.UNICAST);\n"
-"       " << getJavaName(flow->name) << ".setFixedPriority(true);\n"
-"       " << getJavaName(flow->name) << ".setPriorityValue(" << flow->startApplication->priority << ");\n"
-"       " << getJavaName(flow->name) << ".setStartDevice(" << getJavaName(flow->startApplication->device->module->getFullName()) << ");\n"
-        "       " << getJavaName(flow->name) << ".setEndDevice(" << getJavaName(flow->endDevice->module->getFullName()) << ");\n";
+        cValueMap *jsonFlow = new cValueMap();
+        jsonFlows->add(jsonFlow);
+        jsonFlow->set("name", flow->name);
+        jsonFlow->set("type", "unicast");
+        jsonFlow->set("sourceDevice", flow->startApplication->device->module->getFullName());
+        jsonFlow->set("priority", flow->startApplication->priority);
+        jsonFlow->set("packetPeriodicity", flow->startApplication->packetInterval.dbl() * 1000000);
+        jsonFlow->set("packetPeriodicityUnit", "us");
+        jsonFlow->set("packetSize", b(flow->startApplication->packetLength + B(12)).get());
+        jsonFlow->set("packetSizeUnit", "b");
+        jsonFlow->set("hardConstraintTime", flow->startApplication->maxLatency.dbl() * 1000000);
+        jsonFlow->set("hardConstraintTimeUnit", "us");
+        cValueArray *endDevices = new cValueArray();
+        jsonFlow->set("endDevices", endDevices);
+        endDevices->add(cValue(flow->endDevice->module->getFullName()));
+        cValueArray *hops = new cValueArray();
+        jsonFlow->set("hops", hops);
         for (int j = 0; j < flow->pathFragments.size(); j++) {
             auto pathFragment = flow->pathFragments[j];
-            for (int k = 0; k < pathFragment->networkNodes.size(); k++) {
+            for (int k = 0; k < pathFragment->networkNodes.size() - 1; k++) {
                 auto networkNode = pathFragment->networkNodes[k];
-                if (dynamic_cast<Input::Switch *>(networkNode))
-                    javaFile <<
-"       " << getJavaName(flow->name) << ".addToPath(" << getJavaName(networkNode->module->getFullName()) << ");\n";
+                auto nextNetworkNode = pathFragment->networkNodes[k + 1];
+                cValueMap *hop = new cValueMap();
+                hops->add(hop);
+                hop->set("currentNodeName", networkNode->module->getFullName());
+                hop->set("nextNodeName", nextNetworkNode->module->getFullName());
             }
         }
     }
-
-    javaFile <<
-"       Network network = new Network();\n";
-    for (auto switch_ : input.switches) {
-        javaFile <<
-"       network.addSwitch(" << getJavaName(switch_->module->getFullName()) << ");\n";
-    }
-    for (auto flow : input.flows) {
-        javaFile <<
-"       network.addFlow(" << getJavaName(flow->name) << ");\n";
-    }
-
-    javaFile <<
-"       ScheduleGenerator scheduleGenerator = new ScheduleGenerator();\n"
-"       scheduleGenerator.generateSchedule(network);\n";
-
-    javaFile <<
-"   }\n"
-"}\n";
-    javaFile.close();
+    return json;
 }
 
-void TSNschedGateSchedulingConfigurator::compileJavaCode(std::string fileName) const
-{
-    std::string classpath = "${TSNSCHED_HOME}/libs/com.microsoft.z3.jar:${TSNSCHED_HOME}/libs/ScheduleGeneratorHyperCycle.jar:${TSNSCHED_HOME}/libs/ScheduleGeneratorMicroCycle.jar";
-    std::string command = std::string("javac -classpath ") + classpath + " " + fileName;
-    std::system(command.c_str());
-}
-
-void TSNschedGateSchedulingConfigurator::executeJavaCode(std::string fileName) const
-{
-    std::string classpath = ".:${TSNSCHED_HOME}/libs/com.microsoft.z3.jar:${TSNSCHED_HOME}/libs/ScheduleGeneratorHyperCycle.jar:${TSNSCHED_HOME}/libs/ScheduleGeneratorMicroCycle.jar";
-    std::string command = std::string("java -classpath ") + classpath + " " + fileName;
-    std::system(command.c_str());
-}
-
-TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::readGateScheduling(std::string directoryName) const
+TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::convertJsonToOutput(const Input& input, const cValueMap *json) const
 {
     auto output = new Output();
+    auto jsonSwitches = check_and_cast<cValueArray *>(json->get("switches").objectValue());
+    for (int i = 0; i < jsonSwitches->size(); i++) {
+        auto jsonSwitch = check_and_cast<cValueMap *>(jsonSwitches->get(i).objectValue());
+        std::string switchName = jsonSwitch->get("name").stringValue();
+        auto switch_ = *std::find_if(input.switches.begin(), input.switches.end(), [&] (Input::Switch *switch_) { return switch_->module->getFullName() == switchName; });
+        auto jsonPorts = check_and_cast<cValueArray *>(jsonSwitch->get("ports").objectValue());
+        for (int j = 0; j < jsonPorts->size(); j++) {
+            auto jsonPort = check_and_cast<cValueMap *>(jsonPorts->get(j).objectValue());
+            std::string portName = jsonPort->get("name").stringValue();
+            auto port = *std::find_if(switch_->ports.begin(), switch_->ports.end(), [&] (Input::Port *port) { return port->module->getFullName() == switchName; });
+            auto& schedules = output->gateSchedules[port];
+            for (int priority = 0; priority < port->numPriorities; priority++) {
+                auto schedule = new Output::Schedule();
+                schedule->port = port;
+                schedule->priority = priority;
+                auto jsonPrioritySlots = check_and_cast<cValueArray *>(jsonPort->get("prioritySlotData").objectValue());
+                for (int k = 0; k < jsonPorts->size(); k++) {
+                    auto jsonPrioritySlot = check_and_cast<cValueMap *>(jsonPrioritySlots->get(k).objectValue());
+                    if (priority == jsonPrioritySlot->get("priority").intValue()) {
+                        auto jsonSlotData = check_and_cast<cValueMap *>(jsonPrioritySlot->get("slotsData").objectValue());
+                        simtime_t slotStart = jsonSlotData->get("slotStart").doubleValue();
+                        simtime_t slotDuration = jsonSlotData->get("slotDuration").doubleValue();
+                        // slot with length 0 are not used
+                        if (slotDuration == 0)
+                            continue;
+                        Output::Slot slot;
+                        slot.start = slotStart;
+                        slot.duration = slotDuration;
+                        schedule->slots.push_back(slot);
+                    }
+                }
+                auto& slots = schedule->slots;
+                std::sort(slots.begin(), slots.end(), [] (const Output::Slot& slot1, const Output::Slot& slot2) {
+                    return slot1.start < slot2.start;
+                });
+                schedules.push_back(schedule);
+            }
+        }
+    }
+    auto jsonFlows = check_and_cast<cValueArray *>(json->get("flows").objectValue());
+    for (int i = 0; i < jsonFlows->size(); i++) {
+        auto jsonFlow = check_and_cast<cValueMap *>(jsonFlows->get(i).objectValue());
+        auto name = jsonFlow->get("name").stringValue();
+        auto flow = *std::find_if(input.flows.begin(), input.flows.end(), [&] (Input::Flow *flow) { return flow->name == name; });
+        auto firstSendingTime = jsonFlow->get("firstSendingTime").doubleValue();
+        output->applicationStartTimes[flow->startApplication] = firstSendingTime;
+    }
     return output;
+}
+
+void TSNschedGateSchedulingConfigurator::writeInputToFile(const Input& input, std::string fileName) const
+{
+    auto json = convertInputToJson(input);
+    std::ofstream stream;
+    stream.open(fileName.c_str());
+    printJson(stream, cValue(json));
+    delete json;
+}
+
+TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::readOutputFromFile(const Input& input, std::string fileName) const
+{
+    std::string expression = std::string("readJSON(\"") + fileName + "\")";
+    cDynamicExpression dynamicExression;
+    dynamicExression.parse(expression.c_str());
+    auto json = check_and_cast<cValueMap *>(dynamicExression.evaluate().objectValue());
+    auto output = convertJsonToOutput(input, json);
+    delete json;
+    return output;
+}
+
+void TSNschedGateSchedulingConfigurator::executeTSNsched(std::string inputFileName) const
+{
+    std::string classpath = "${TSNSCHED_HOME}/libs/com.microsoft.z3.jar";
+    std::string command = std::string("java -classpath ") + classpath + " -jar ${TSNSCHED_HOME}/libs/TSNsched.jar " + inputFileName;
+    std::system(command.c_str());
 }
 
 TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::computeGateScheduling(const Input& input) const
 {
-    opp_mkdir("XMLExporterFiles", 0755);
-    std::string className = getSimulation()->getSystemModule()->getComponentType()->getName();
-    std::string classFileName = className + ".class";
-    std::string sourceFileName = className + ".java";
-    writeJavaCode(input, sourceFileName);
-    compileJavaCode(sourceFileName);
-    executeJavaCode(className);
-    unlink(sourceFileName.c_str());
-    unlink(classFileName.c_str());
-    return readGateScheduling("XMLExporterFiles");
+    std::string inputFileName = "input.json";
+    std::string outputFileName = "output.json";
+    writeInputToFile(input, inputFileName);
+    executeTSNsched(inputFileName);
+    return readOutputFromFile(input, outputFileName);
 }
 
 } // namespace inet
