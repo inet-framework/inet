@@ -1,4 +1,1 @@
-*.java
-*.class
-XMLExporterFiles
-log.txt
+*.json
