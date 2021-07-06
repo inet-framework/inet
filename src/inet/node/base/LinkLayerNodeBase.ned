@@ -69,7 +69,7 @@ module LinkLayerNodeBase extends NodeBase
             parameters:
                 @display("p=750,596;b=1000,5,,,,1");
         }
-        llc: <default("Ieee8022Llc")> like IIeee8022Llc if typename != "" {
+        llc: <default("")> like IIeee8022Llc if typename != "" {
             parameters:
                 @display("p=675,526");
         }
