@@ -357,5 +357,10 @@ inline std::ostream& operator<<(std::ostream& os, const ClockTime& x)
 
 } // namespace inet
 
+namespace omnetpp {
+inline any_ptr toAnyPtr(const inet::ClockTime *p) {return any_ptr(p);}
+template<> inline inet::ClockTime *fromAnyPtr(any_ptr ptr) { return ptr.get<inet::ClockTime>(); }
+}  // namespace omnetpp
+
 #endif
 
