@@ -13,16 +13,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.showcases.general.timing;
+package inet.showcases.general.flowmeasurement;
 
 import inet.networklayer.contract.INetworkLayer;
 import inet.networklayer.ipv4.Ipv4NetworkLayer;
 import inet.networks.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.INetworkNode;
 import inet.node.inet.StandardHost;
 import inet.protocolelement.measurement.IMeasurementLayer;
-import inet.protocolelement.measurement.OmittedMeasurementLayer;
 
 
 module MyIpv4NetworkLayer like INetworkLayer
@@ -89,13 +89,26 @@ module MyInheritedIpv4NetworkLayer extends Ipv4NetworkLayer
         measurementLayer.lowerLayerIn <-- { @reconnect; } <-- ifIn;
 }
 
-network TimingShowcase extends WiredNetworkBase
+module MyStandardHost extends StandardHost
 {
     submodules:
-        client1: StandardHost {
+        measurementLayer: <default("OmittedMeasurementLayer")> like IMeasurementLayer {
+            @display("p=450,250");
+        }
+    connections:
+        udp.ipOut --> { @reconnect; } --> measurementLayer.upperLayerIn if hasUdp;
+        measurementLayer.lowerLayerOut --> { @reconnect; } --> tn.in++ if hasUdp;
+        udp.ipIn <-- { @reconnect; } <-- measurementLayer.upperLayerOut if hasUdp;
+        measurementLayer.lowerLayerIn <-- { @reconnect; } <-- tn.out++ if hasUdp;
+}
+
+network FlowMeasurementShowcase extends WiredNetworkBase
+{
+    submodules:
+        client1: <default("StandardHost")> like INetworkNode {
             @display("p=300,150");
         }
-        client2: StandardHost {
+        client2: <default("StandardHost")> like INetworkNode {
             @display("p=300,350");
         }
         switch1: EthernetSwitch {
@@ -104,10 +117,10 @@ network TimingShowcase extends WiredNetworkBase
         switch2: EthernetSwitch {
             @display("p=700,250");
         }
-        server1: StandardHost {
+        server1: <default("StandardHost")> like INetworkNode {
             @display("p=900,150");
         }
-        server2: StandardHost {
+        server2: <default("StandardHost")> like INetworkNode {
             @display("p=900,350");
         }
     connections:
