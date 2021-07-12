@@ -9,6 +9,7 @@
 #define __INET_INETUTILS_H
 
 #include <string>
+#include <vector>
 
 #include "inet/common/INETDefs.h"
 
@@ -101,6 +102,8 @@ INET_API bool fileExists(const char *pathname);
 INET_API void splitFileName(const char *pathname, std::string& dir, std::string& fnameonly);
 INET_API void makePath(const char *pathname);
 INET_API void makePathForFile(const char *filename);
+
+INET_API std::vector<std::vector<intval_t>> asIntMatrix(const cValueArray* array);
 
 } // namespace utils
 

@@ -236,6 +236,24 @@ void makePathForFile(const char *filename)
     makePath(pathprefix.c_str());
 }
 
+std::vector<std::vector<intval_t>> asIntMatrix(const cValueArray* matrix)
+{
+    std::vector<std::vector<intval_t>> result;
+    size_t numRows = matrix->size();
+    size_t numCols = 0;
+    result.resize(numRows);
+    for (size_t i = 0; i < numRows; ++i) {
+        result[i] = check_and_cast<cValueArray*>((*matrix)[i].objectValue())->asIntVector();
+        if (i == 0)
+            numCols = result[i].size();
+        else
+            if (result[i].size() != numCols)
+                throw cRuntimeError("The row %u size %u differents to previous rows sizes %u", i, result[i].size(), numCols);
+    }
+    //TODO check column numbers equality
+    return result;
+}
+
 } // namespace utils
 
 } // namespace inet
