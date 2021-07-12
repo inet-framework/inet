@@ -28,23 +28,27 @@ namespace physicallayer {
 class INET_API ConvolutionalCode : public IForwardErrorCorrection
 {
   protected:
-    const char *transferFunctionMatrix;
-    const char *puncturingMatrix;
-    const char *constraintLengthVector;
+    const std::vector<std::vector<intval_t>> transferFunctionMatrix;
+    const std::vector<std::vector<intval_t>> puncturingMatrix;
+    const std::vector<intval_t> constraintLengthVector;
     int codeRatePuncturingK;
     int codeRatePuncturingN;
-    int memory;
+    intval_t memory;
     const char *mode;
 
   public:
-    ConvolutionalCode(const char *transferFunctionMatrix, const char *puncturingMatrix, const char *constraintLengthVector, int codeRatePuncturingK, int codeRatePuncturingN, const char *mode);
+    ConvolutionalCode(
+            const std::vector<std::vector<intval_t>>& transferFunctionMatrix,
+            const std::vector<std::vector<intval_t>>& puncturingMatrix,
+            const std::vector<intval_t>& constraintLengthVector,
+            int codeRatePuncturingK, int codeRatePuncturingN, const char *mode);
 
     int getCodeRatePuncturingK() const { return codeRatePuncturingK; }
     int getCodeRatePuncturingN() const { return codeRatePuncturingN; }
-    const char *getConstraintLengthVector() const { return constraintLengthVector; }
+    const std::vector<intval_t>& getConstraintLengthVector() const { return constraintLengthVector; }
     const char *getMode() const { return mode; }
-    const char *getPuncturingMatrix() const { return puncturingMatrix; }
-    const char *getTransferFunctionMatrix() const { return transferFunctionMatrix; }
+    const std::vector<std::vector<intval_t>>& getPuncturingMatrix() const { return puncturingMatrix; }
+    const std::vector<std::vector<intval_t>>& getTransferFunctionMatrix() const { return transferFunctionMatrix; }
     std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual double getCodeRate() const override;
     virtual int getEncodedLength(int decodedLength) const override;

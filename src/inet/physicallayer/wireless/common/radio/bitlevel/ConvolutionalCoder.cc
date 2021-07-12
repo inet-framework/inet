@@ -309,10 +309,9 @@ void ConvolutionalCoder::parseVector(const char *strVector, std::vector<int>& ve
         vector.push_back(atoi(tokenizer.nextToken()));
 }
 
-void ConvolutionalCoder::convertToShortBitVectorMatrix(std::vector<std::vector<int>>& matrix, std::vector<ShortBitVector>& boolMatrix) const
+void ConvolutionalCoder::convertToShortBitVectorMatrix(std::vector<std::vector<intval_t>>& matrix, std::vector<ShortBitVector>& boolMatrix) const
 {
-    for (auto& elem : matrix) {
-        std::vector<int> matrixRow = elem;
+    for (auto& matrixRow : matrix) {
         ShortBitVector row;
         for (auto& matrixRow_j : matrixRow) {
             if (matrixRow_j == 1)
@@ -339,10 +338,10 @@ ShortBitVector ConvolutionalCoder::octalToBinary(int octalNum, int fixedSize) co
     return ShortBitVector(decimal, fixedSize);
 }
 
-void ConvolutionalCoder::setTransferFunctionMatrix(std::vector<std::vector<int>>& transferFMatrix)
+void ConvolutionalCoder::setTransferFunctionMatrix(const std::vector<std::vector<intval_t>>& transferFMatrix)
 {
     for (unsigned int i = 0; i < transferFMatrix.size(); i++) {
-        const std::vector<int>& row = transferFMatrix.at(i);
+        const auto& row = transferFMatrix.at(i);
         std::vector<ShortBitVector> bitRow;
         for (auto& elem : row) {
             ShortBitVector bin = octalToBinary(elem, constraintLengths.at(i));
@@ -497,20 +496,15 @@ std::pair<BitVector, bool> ConvolutionalCoder::decode(const BitVector& encodedBi
 
 ConvolutionalCoder::ConvolutionalCoder(const ConvolutionalCode *convolutionalCode) : convolutionalCode(convolutionalCode)
 {
-    const char *strTransferFunctionMatrix = convolutionalCode->getTransferFunctionMatrix();
-    const char *strPuncturingMatrix = convolutionalCode->getPuncturingMatrix();
-    const char *strConstraintLengthVector = convolutionalCode->getConstraintLengthVector();
+    auto transferFMatrix = convolutionalCode->getTransferFunctionMatrix();
+    auto pMatrix = convolutionalCode->getPuncturingMatrix();
     mode = convolutionalCode->getMode();
     if (strcmp(mode, "terminated") && strcmp(mode, "truncated"))
         throw cRuntimeError("Unknown (= %s ) coding mode", mode);
     codeRatePuncturingK = convolutionalCode->getCodeRatePuncturingK();
     codeRatePuncturingN = convolutionalCode->getCodeRatePuncturingN();
-    parseVector(strConstraintLengthVector, constraintLengths);
-    std::vector<std::vector<int>> pMatrix;
-    parseMatrix(strPuncturingMatrix, pMatrix);
+    constraintLengths = convolutionalCode->getConstraintLengthVector();
     convertToShortBitVectorMatrix(pMatrix, puncturingMatrix);
-    std::vector<std::vector<int>> transferFMatrix;
-    parseMatrix(strTransferFunctionMatrix, transferFMatrix);
     codeRateParamaterK = transferFMatrix.size();
     codeRateParamaterN = transferFMatrix.at(0).size();
     for (unsigned int i = 0; i < transferFMatrix.size(); i++) {

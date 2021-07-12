@@ -68,7 +68,7 @@ class INET_API ConvolutionalCoder : public IFecCoder
     unsigned int codeRatePuncturingK, codeRatePuncturingN; // the k/n code rate after puncturing
     int memorySizeSum; // sum of memorySizes
     std::vector<int> memorySizes; // constraintLengths[i] - 1 for all i
-    std::vector<int> constraintLengths; // the delay for the encoder's k input bit streams
+    std::vector<intval_t> constraintLengths; // the delay for the encoder's k input bit streams
     int numberOfStates; // 2^memorySizeSum
     int numberOfInputSymbols; // 2^k, where k is the parameter from k/n
     int numberOfOutputSymbols; // 2^n where n is the parameter from k/n
@@ -85,7 +85,7 @@ class INET_API ConvolutionalCoder : public IFecCoder
 
   protected:
     inline bool eXOR(bool alpha, bool beta) const { return alpha != beta; }
-    void setTransferFunctionMatrix(std::vector<std::vector<int>>& transferFMatrix);
+    void setTransferFunctionMatrix(const std::vector<std::vector<intval_t>>& transferFMatrix);
     ShortBitVector inputSymbolToOutputSymbol(const ShortBitVector& state, const ShortBitVector& inputSymbol) const;
     bool modulo2Adder(const ShortBitVector& shiftRegisters, const ShortBitVector& generatorPolynomial) const;
     ShortBitVector giveNextOutputSymbol(const BitVector& encodedBits, int decodedLength, const BitVector& isPunctured, ShortBitVector& excludedFromHammingDistance) const;
@@ -120,7 +120,7 @@ class INET_API ConvolutionalCoder : public IFecCoder
     void printTransferFunctionMatrix() const;
     void parseMatrix(const char *strMatrix, std::vector<std::vector<int>>& matrix) const;
     void parseVector(const char *strVector, std::vector<int>& vector) const;
-    void convertToShortBitVectorMatrix(std::vector<std::vector<int>>& matrix, std::vector<ShortBitVector>& boolMatrix) const;
+    void convertToShortBitVectorMatrix(std::vector<std::vector<intval_t>>& matrix, std::vector<ShortBitVector>& boolMatrix) const;
     ShortBitVector octalToBinary(int octalNum, int fixedSize) const;
     int octalToDec(int octalNum) const;
     std::pair<BitVector, bool> traversePath(const TrellisGraphNode& bestNode, TrellisGraphNode **bestPaths, bool isTruncatedMode) const;
@@ -137,7 +137,7 @@ class INET_API ConvolutionalCoder : public IFecCoder
      * Getters for the encoder's/decoder's parameters
      */
     unsigned int getMemorySizeSum() const { return memorySizeSum; }
-    const std::vector<int>& getConstraintLengthVector() const { return constraintLengths; }
+    const std::vector<intval_t>& getConstraintLengthVector() const { return constraintLengths; }
     const ShortBitVectorMatrix& getTransferFunctionMatrix() const { return transferFunctionMatrix; }
     const std::vector<ShortBitVector>& getPuncturingMatrix() const { return puncturingMatrix; }
     int getNumberOfStates() const { return numberOfStates; }

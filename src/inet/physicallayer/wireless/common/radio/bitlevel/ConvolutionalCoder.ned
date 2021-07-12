@@ -72,12 +72,12 @@ import inet.physicallayer.wireless.common.contract.bitlevel.IFecCoder;
 module ConvolutionalCoder like IFecCoder
 {
     parameters:
-        string transferFunctionMatrix = default("133 171");
+        object transferFunctionMatrix = default([[133, 171]]);
         string mode = default("truncated");
-        string puncturingMatrix = default("1;1");
+        object puncturingMatrix = default([[1], [1]]);
         int punctureK = default(1);
         int punctureN = default(2);
-        string constraintLengthVector = default("7");
+        object constraintLengthVector = default([7]);
         @display("i=block/segm");
         @class(ConvolutionalCoderModule);
 }

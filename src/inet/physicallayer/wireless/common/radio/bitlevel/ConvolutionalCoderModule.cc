@@ -17,6 +17,8 @@
 
 #include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCoderModule.h"
 
+#include "inet/common/INETUtils.h"
+
 namespace inet {
 namespace physicallayer {
 
@@ -25,13 +27,16 @@ Define_Module(ConvolutionalCoderModule);
 void ConvolutionalCoderModule::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        const char *transferFunctionMatrix = par("transferFunctionMatrix");
-        const char *puncturingMatrix = par("puncturingMatrix");
-        const char *constraintLengthVector = par("constraintLengthVector");
+        const cValueArray *transferFunctionMatrix = check_and_cast<cValueArray*>(par("transferFunctionMatrix").objectValue());
+        const cValueArray *puncturingMatrix = check_and_cast<cValueArray*>(par("puncturingMatrix").objectValue());
+        auto constraintLengthVector = check_and_cast<cValueArray*>(par("constraintLengthVector").objectValue());
         const char *mode = par("mode");
         int codeRatePuncturingK = par("punctureK");
         int codeRatePuncturingN = par("punctureN");
-        ConvolutionalCode *convolutionalCode = new ConvolutionalCode(transferFunctionMatrix, puncturingMatrix, constraintLengthVector, codeRatePuncturingK, codeRatePuncturingN, mode);
+        ConvolutionalCode *convolutionalCode = new ConvolutionalCode(
+                utils::asIntMatrix(transferFunctionMatrix),
+                utils::asIntMatrix(puncturingMatrix),
+                constraintLengthVector->asIntVector(), codeRatePuncturingK, codeRatePuncturingN, mode);
         convolutionalCoder = new ConvolutionalCoder(convolutionalCode);
     }
 }

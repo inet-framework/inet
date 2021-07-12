@@ -22,7 +22,11 @@
 namespace inet {
 namespace physicallayer {
 
-ConvolutionalCode::ConvolutionalCode(const char *transferFunctionMatrix, const char *puncturingMatrix, const char *constraintLengthVector, int codeRatePuncturingK, int codeRatePuncturingN, const char *mode) :
+ConvolutionalCode::ConvolutionalCode(
+        const std::vector<std::vector<intval_t>>& transferFunctionMatrix,
+        const std::vector<std::vector<intval_t>>& puncturingMatrix,
+        const std::vector<intval_t>& constraintLengthVector,
+        int codeRatePuncturingK, int codeRatePuncturingN, const char *mode) :
     transferFunctionMatrix(transferFunctionMatrix),
     puncturingMatrix(puncturingMatrix),
     constraintLengthVector(constraintLengthVector),
@@ -31,17 +35,15 @@ ConvolutionalCode::ConvolutionalCode(const char *transferFunctionMatrix, const c
     memory(0),
     mode(mode)
 {
-    cStringTokenizer tokenizer(constraintLengthVector);   // TODO redesign NED parameter and parsing
-    while (tokenizer.hasMoreTokens())
-        memory = std::max(memory, atoi(tokenizer.nextToken()) - 1);
+    for (auto elem : constraintLengthVector)
+        memory = std::max(memory, elem - 1);
 }
 
 std::ostream& ConvolutionalCode::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "ConvolutionalCode";
     if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(codeRatePuncturingK)
-               << EV_FIELD(codeRatePuncturingN);
+        stream << EV_FIELD(codeRatePuncturingK) << EV_FIELD(codeRatePuncturingN);
     return stream;
 }
 
