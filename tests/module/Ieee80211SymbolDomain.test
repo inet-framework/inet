@@ -85,16 +85,16 @@ network = SymbolDomainTest
 **.ieee80211OFDMSignalDecoder.deinterleaver.numberOfCodedBitsPerSymbol = 48
 
 # Data FEC
-**.ieee80211OFDMDataDecoder.fecDecoder.transferFunctionMatrix = "133 171"
-**.ieee80211OFDMDataDecoder.fecDecoder.constraintLengthVector = "7"
-**.ieee80211OFDMDataDecoder.fecDecoder.puncturingMatrix = "1 1 0; 1 0 1"
+**.ieee80211OFDMDataDecoder.fecDecoder.transferFunctionMatrix = [[133, 171]]
+**.ieee80211OFDMDataDecoder.fecDecoder.constraintLengthVector = [7]
+**.ieee80211OFDMDataDecoder.fecDecoder.puncturingMatrix = [[1, 1, 0], [1, 0, 1]]
 **.ieee80211OFDMDataDecoder.fecDecoder.punctureK = 3
 **.ieee80211OFDMDataDecoder.fecDecoder.punctureN = 4
 
 # Signal FEC
-**.ieee80211OFDMSignalDecoder.fecDecoder.transferFunctionMatrix = "133 171"
-**.ieee80211OFDMSignalDecoder.fecDecoder.constraintLengthVector = "7"
-**.ieee80211OFDMSignalDecoder.fecDecoder.puncturingMatrix = "1; 1"
+**.ieee80211OFDMSignalDecoder.fecDecoder.transferFunctionMatrix = [[133, 171]]
+**.ieee80211OFDMSignalDecoder.fecDecoder.constraintLengthVector = [7]
+**.ieee80211OFDMSignalDecoder.fecDecoder.puncturingMatrix = [[1], [1]]
 **.ieee80211OFDMSignalDecoder.fecDecoder.punctureK = 1
 **.ieee80211OFDMSignalDecoder.fecDecoder.punctureN = 2
 
@@ -111,16 +111,16 @@ network = SymbolDomainTest
 **.ieee80211OFDMSignalEncoder.interleaver.numberOfCodedBitsPerSymbol = 48
 
 # Data FEC
-**.ieee80211OFDMDataEncoder.fecEncoder.transferFunctionMatrix = "133 171"
-**.ieee80211OFDMDataEncoder.fecEncoder.constraintLengthVector = "7"
-**.ieee80211OFDMDataEncoder.fecEncoder.puncturingMatrix = "1 1 0; 1 0 1"
+**.ieee80211OFDMDataEncoder.fecEncoder.transferFunctionMatrix = [[133, 171]]
+**.ieee80211OFDMDataEncoder.fecEncoder.constraintLengthVector = [7]
+**.ieee80211OFDMDataEncoder.fecEncoder.puncturingMatrix = [[1, 1, 0], [1 0 1]]
 **.ieee80211OFDMDataEncoder.fecEncoder.punctureK = 3
 **.ieee80211OFDMDataEncoder.fecEncoder.punctureN = 4
 
 # Signal FEC
-**.ieee80211OFDMSignalEncoder.fecEncoder.transferFunctionMatrix = "133 171"
-**.ieee80211OFDMSignalEncoder.fecEncoder.constraintLengthVector = "7"
-**.ieee80211OFDMSignalEncoder.fecEncoder.puncturingMatrix = "1; 1"
+**.ieee80211OFDMSignalEncoder.fecEncoder.transferFunctionMatrix = [[133, 171]]
+**.ieee80211OFDMSignalEncoder.fecEncoder.constraintLengthVector = [7]
+**.ieee80211OFDMSignalEncoder.fecEncoder.puncturingMatrix = [[1], [1]]
 **.ieee80211OFDMSignalEncoder.fecEncoder.punctureK = 1
 **.ieee80211OFDMSignalEncoder.fecEncoder.punctureN = 2
 

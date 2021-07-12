@@ -59,9 +59,9 @@ network = BitDomainTest
 **.scrambler.seed = "1011101"
 **.scrambler.generatorPolynomial = "0001001"
 **.ieee80211BitDomainTest.testFile = "ieee80211example.test"
-**.transferFunctionMatrix = "133 171"
-**.constraintLengthVector = "7"
-**.puncturingMatrix = "1 1 0; 1 0 1"
+**.transferFunctionMatrix = [[133, 171]]
+**.constraintLengthVector = [7]
+**.puncturingMatrix = [[1, 1, 0], [1, 0, 1]]
 **.punctureK = 3
 **.punctureN = 4
 

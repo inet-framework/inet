@@ -34,9 +34,9 @@ network = ConvCoder
 **.testType = "convCoder"
 
 **.ieee80211BitDomainTest.testFile = "input.test"
-**.transferFunctionMatrix = "133 171"
-**.constraintLengthVector = "7"
-**.puncturingMatrix = "1 1 0; 1 0 1"
+**.transferFunctionMatrix = [[133, 171]]
+**.constraintLengthVector = [7]
+**.puncturingMatrix = [[1, 1, 0], [1, 0, 1]]
 **.punctureK = 3
 **.punctureN = 4
 
