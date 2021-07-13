@@ -17,7 +17,6 @@
 
 package inet.linklayer.ethernet.common;
 
-import inet.common.MessageDispatcher;
 import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.common.PacketMultiplexer;
 
@@ -32,7 +31,7 @@ module ReversingLayer like IProtocolLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        fork: MessageDispatcher {
+        fork: EthernetForker {
             @display("p=100,100;i=-;b=10,10,oval,grey,,1");
         }
         reverser: PacketDirectionReverser {
@@ -45,7 +44,7 @@ module ReversingLayer like IProtocolLayer
         upperLayerIn --> { @display("m=n"); } --> join.in++;
         join.out --> { @display("m=s"); } --> lowerLayerOut;
 
-        lowerLayerIn --> { @display("m=s"); } --> fork.in++;
+        lowerLayerIn --> { @display("m=s"); } --> fork.in;
         fork.out++ --> { @display("m=n"); } --> upperLayerOut;
 
         fork.out++ --> reverser.in;
