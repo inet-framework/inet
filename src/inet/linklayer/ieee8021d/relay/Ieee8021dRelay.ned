@@ -38,5 +38,6 @@ simple Ieee8021dRelay extends MacRelayUnitBase like IMacRelayUnit
 {
     parameters:
         @class(Ieee8021dRelay);
+        object localDeliveryMacAddresses = default([["01:80:C2:00:00:00", "01:80:C2:00:00:0F"]]);   // array of arrays of MAC addresses, one inner array contains 1 or 2 MAC addresses: [[a,b], [c]] means a..b, c
 }
 

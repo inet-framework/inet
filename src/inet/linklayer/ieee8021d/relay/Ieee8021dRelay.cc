@@ -37,6 +37,21 @@ void Ieee8021dRelay::initialize(int stage)
         numDispatchedBDPUFrames = numDispatchedNonBPDUFrames = numDeliveredBDPUsToSTP = 0;
         numReceivedBPDUsFromSTP = numReceivedNetworkFrames = 0;
 
+        auto localDeliveryMacAddresses = check_and_cast<cValueArray*>(par("localDeliveryMacAddresses").objectValue())->asObjectVector<cValueArray>();
+        for (auto elem : localDeliveryMacAddresses) {
+            if (elem->size() == 1) {
+                MacAddress addr(elem->get(0).stringValue());
+                registerAddresses(addr, addr);
+            }
+            else if (elem->size() == 2) {
+                MacAddress startAddr(elem->get(0).stringValue());
+                MacAddress endAddr(elem->get(1).stringValue());
+                registerAddresses(startAddr, endAddr);
+            }
+            else
+                throw cRuntimeError("Need one or two MAC address in one elem.");
+        }
+
         WATCH(bridgeAddress);
         WATCH(numReceivedNetworkFrames);
         WATCH(numReceivedBPDUsFromSTP);
