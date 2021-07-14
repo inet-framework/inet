@@ -60,29 +60,34 @@ void TsnConfigurator::computeStream(cValueMap *configuration)
     streamConfiguration.packetFilter = configuration->get("packetFilter").stringValue();
     auto sourceNetworkNodeName = configuration->get("source").stringValue();
     streamConfiguration.source = sourceNetworkNodeName;
-    Node *source = static_cast<Node *>(topology->getNodeFor(getParentModule()->getSubmodule(sourceNetworkNodeName)));
-    std::vector<Node *> destinations;
+    Node *sourceNode = static_cast<Node *>(topology->getNodeFor(getParentModule()->getSubmodule(sourceNetworkNodeName)));
+    std::vector<const Node *> destinationNodes;
     cMatchExpression destinationFilter;
     destinationFilter.setPattern(configuration->get("destination").stringValue(), false, false, true);
     for (int i = 0; i < topology->getNumNodes(); i++) {
         auto node = (Node *)topology->getNode(i);
         MatchableObject matchableObject(MatchableObject::ATTRIBUTE_FULLNAME, node->module);
         if (destinationFilter.matches(&matchableObject)) {
-            destinations.push_back(node);
+            destinationNodes.push_back(node);
             streamConfiguration.destinations.push_back(node->module->getFullName());
         }
     }
-    auto allTrees = collectAllTrees(source, destinations);
-    streamConfiguration.trees = selectBestTreeSubset(configuration, allTrees);
+    auto allTrees = collectAllTrees(sourceNode, destinationNodes);
+    streamConfiguration.trees = selectBestTreeSubset(configuration, sourceNode, destinationNodes, allTrees);
+    EV_INFO << "Found smallest subset of trees with best cost that are sufficient for node and link failure protection" << EV_ENDL;
+    for (auto tree : streamConfiguration.trees)
+        EV_INFO << "  " << tree << std::endl;
     streamConfigurations.push_back(streamConfiguration);
 }
 
-std::vector<TsnConfigurator::Tree> TsnConfigurator::selectBestTreeSubset(cValueMap *configuration, const std::vector<Tree>& trees)
+std::vector<TsnConfigurator::Tree> TsnConfigurator::selectBestTreeSubset(cValueMap *configuration, const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const std::vector<Tree>& trees) const
 {
     cValueArray *nodeFailureProtection = configuration->containsKey("nodeFailureProtection") ? check_and_cast<cValueArray *>(configuration->get("nodeFailureProtection").objectValue()) : nullptr;
     cValueArray *linkFailureProtection = configuration->containsKey("linkFailureProtection") ? check_and_cast<cValueArray *>(configuration->get("linkFailureProtection").objectValue()) : nullptr;
     int n = trees.size();
-    for (int k = 1; k <= trees.size(); k++) {
+    int maxRedundancy = configuration->containsKey("maxRedundancy") ? configuration->get("maxRedundancy").intValue() : n;
+    for (int k = 1; k <= maxRedundancy; k++) {
+        EV_INFO << "Trying to find best tree subset for " << k << " trees" << EV_ENDL;
         std::vector<bool> mask(k, true); // k leading 1's
         mask.resize(n, false); // n-k trailing 0's
         std::vector<bool> bestMask;
@@ -91,15 +96,15 @@ std::vector<TsnConfigurator::Tree> TsnConfigurator::selectBestTreeSubset(cValueM
             double cost = 0;
             for (int i = 0; i < n; i++)
                 if (mask[i])
-                    cost += trees[i].paths[0].nodes.size();
+                    cost += computeTreeCost(sourceNode, destinationNodes, trees[i]);
             cost /= k;
             if (cost < bestCost) {
                 std::vector<Tree> candidate;
                 for (int i = 0; i < n; i++)
                     if (mask[i])
                         candidate.push_back(trees[i]);
-                if ((nodeFailureProtection == nullptr || checkNodeFailureProtection(nodeFailureProtection, candidate)) &&
-                    (linkFailureProtection == nullptr || checkLinkFailureProtection(linkFailureProtection, candidate)))
+                if ((nodeFailureProtection == nullptr || checkNodeFailureProtection(nodeFailureProtection, sourceNode, destinationNodes, candidate)) &&
+                    (linkFailureProtection == nullptr || checkLinkFailureProtection(linkFailureProtection, sourceNode, destinationNodes, candidate)))
                 {
                     bestCost = cost;
                     bestMask = mask;
@@ -117,8 +122,91 @@ std::vector<TsnConfigurator::Tree> TsnConfigurator::selectBestTreeSubset(cValueM
     throw cRuntimeError("Cannot find tree combination that protects against all configured node and link failures");
 }
 
-bool TsnConfigurator::checkNodeFailureProtection(cValueArray *configuration, const std::vector<Tree>& trees)
+double TsnConfigurator::computeTreeCost(const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const Tree& tree) const
 {
+    double cost = 0;
+    // sum up the total number of links in the shortest paths to all destinations
+    for (auto destinationNode : destinationNodes) {
+        std::deque<std::pair<const Node *, int>> todoNodes;
+        todoNodes.push_back({sourceNode, 0});
+        while (!todoNodes.empty()) {
+            auto it = todoNodes.front();
+            todoNodes.pop_front();
+            auto startNode = it.first;
+            auto startCost = it.second;
+            for (auto path : tree.paths) {
+                if (path.nodes[0] == startNode) {
+                    for (int i = 0; i < path.nodes.size(); i++) {
+                        auto node = path.nodes[i];
+                        if (node == destinationNode) {
+                            cost += startCost + i;
+                            goto nextDestinationNode;
+                        }
+                        if (node != startNode)
+                            todoNodes.push_back({node, startCost + i});
+                    }
+                }
+            }
+        }
+        nextDestinationNode:;
+    }
+    return cost;
+}
+
+TsnConfigurator::Tree TsnConfigurator::computeCanonicalTree(const Tree& tree) const
+{
+//    std::cout << "ORIGINAL FORM: " << tree << std::endl;
+    Tree canonicalTree({});
+    for (auto& path : tree.paths) {
+//        std::cout << "BUILDING: " << canonicalTree << std::endl;
+        auto startNode = path.nodes[0];
+        auto itStart = std::find_if(canonicalTree.paths.begin(), canonicalTree.paths.end(), [&] (auto path) {
+            return path.nodes.front() == startNode;
+        });
+        if (itStart != canonicalTree.paths.end())
+            // just insert the path into the tree
+            canonicalTree.paths.push_back(path);
+        else {
+            auto itEnd = std::find_if(canonicalTree.paths.begin(), canonicalTree.paths.end(), [&] (auto path) {
+                return path.nodes.back() == startNode;
+            });
+            if (itEnd != canonicalTree.paths.end()) {
+                // append the path to a path that is already in the tree
+                auto& canonicalPath = *itEnd;
+                canonicalPath.nodes.insert(canonicalPath.nodes.end(), path.nodes.begin() + 1, path.nodes.end());
+            }
+            else {
+                auto itMiddle = std::find_if(canonicalTree.paths.begin(), canonicalTree.paths.end(), [&] (auto path) {
+                    return std::find(path.nodes.begin(), path.nodes.end(), startNode) != path.nodes.end();
+                });
+                if (itMiddle == canonicalTree.paths.end())
+                    // just insert the path into the tree
+                    canonicalTree.paths.push_back(path);
+                else {
+                    // split an existing path that is already in the tree and insert the path into the tree
+                    auto& canonicalPath = *itMiddle;
+                    auto it = std::find(canonicalPath.nodes.begin(), canonicalPath.nodes.end(), startNode);
+                    Path firstPathFragment({});
+                    Path secondPathFragment({});
+                    firstPathFragment.nodes.insert(firstPathFragment.nodes.begin(), canonicalPath.nodes.begin(), it + 1);
+                    secondPathFragment.nodes.insert(secondPathFragment.nodes.begin(), it, canonicalPath.nodes.end());
+                    canonicalTree.paths.erase(itMiddle);
+                    canonicalTree.paths.push_back(firstPathFragment);
+                    canonicalTree.paths.push_back(secondPathFragment);
+                    canonicalTree.paths.push_back(path);
+                }
+            }
+        }
+    }
+//    std::cout << "CANONICAL FORM: " << canonicalTree << std::endl;
+    return canonicalTree;
+}
+
+bool TsnConfigurator::checkNodeFailureProtection(cValueArray *configuration, const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const std::vector<Tree>& trees) const
+{
+    EV_INFO << "Checking trees for node failure protection" << EV_ENDL;
+    for (auto& tree : trees)
+        EV_INFO << "  " << tree << std::endl;
     for (int i = 0; i < configuration->size(); i++) {
         cValueMap *protection = check_and_cast<cValueMap *>(configuration->get(i).objectValue());
         auto of = protection->containsKey("of") ? protection->get("of").stringValue() : "*";
@@ -127,41 +215,39 @@ bool TsnConfigurator::checkNodeFailureProtection(cValueArray *configuration, con
         int k = protection->get("any").intValue();
         std::vector<bool> mask(k, true); // k leading 1's
         mask.resize(n, false); // n-k trailing 0's
+        EV_INFO << "Checking node failure protection for " << k << " failed nodes out of " << networkNodes.size() << " nodes" << EV_ENDL;
         do {
-            std::vector<std::string> failed;
-            for (int i = 0; i < n; i++)
-                if (mask[i])
-                    failed.push_back(networkNodes[i]);
-            bool isProtected = false;
-            for (int i = 0; i < trees.size(); i++) {
-                if (!intersects(trees[i].paths[0].nodes, failed)) {
-                    isProtected = true;
-                    break;
+            EV_DEBUG << "Assuming failed nodes: ";
+            std::vector<const Node *> failedNodes;
+            for (int i = 0; i < n; i++) {
+                if (mask[i]) {
+                    auto node = networkNodes[i];
+                    if (i != 0)
+                        EV_DEBUG << ", ";
+                    EV_DEBUG << node->module->getFullName();
+                    failedNodes.push_back(node);
                 }
             }
+            EV_DEBUG << std::endl;
+            std::vector<bool> reachedDestinationNodes;
+            reachedDestinationNodes.resize(destinationNodes.size(), false);
+            for (int i = 0; i < trees.size(); i++)
+                collectReachedNodes(sourceNode, destinationNodes, trees[i], failedNodes, reachedDestinationNodes);
+            bool isProtected = std::all_of(reachedDestinationNodes.begin(), reachedDestinationNodes.end(), [] (bool v) { return v; });
+            EV_DEBUG << "Node failure protection " << (isProtected ? "succeeded" : "failed") << EV_ENDL;
             if (!isProtected)
                 return false;
         } while (std::prev_permutation(mask.begin(), mask.end()));
+        EV_INFO << "Node failure protection succeeded for " << k << " failed nodes out of " << networkNodes.size() << " nodes" << EV_ENDL;
     }
     return true;
 }
 
-bool TsnConfigurator::checkLinkFailureProtection(cValueArray *configuration, const std::vector<Tree>& trees)
+bool TsnConfigurator::checkLinkFailureProtection(cValueArray *configuration, const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const std::vector<Tree>& trees) const
 {
-    std::vector<Tree> linkTrees;
-    for (auto tree : trees) {
-        std::vector<std::string> linkPath;
-        std::string previousNode;
-        for (int i = 0; i < tree.paths[0].nodes.size(); i++) {
-            auto node = tree.paths[0].nodes[i];
-            if (!previousNode.empty()) {
-                auto link = previousNode + "->" + node;
-                linkPath.push_back(link);
-            }
-            previousNode = node;
-        }
-        linkTrees.push_back(Tree({Path(linkPath)}));
-    }
+    EV_INFO << "Checking trees for link failure protection" << EV_ENDL;
+    for (auto& tree : trees)
+        EV_INFO << "  " << tree << std::endl;
     for (int i = 0; i < configuration->size(); i++) {
         cValueMap *protection = check_and_cast<cValueMap *>(configuration->get(i).objectValue());
         auto of = protection->containsKey("of") ? protection->get("of").stringValue() : "*";
@@ -170,26 +256,35 @@ bool TsnConfigurator::checkLinkFailureProtection(cValueArray *configuration, con
         int k = protection->get("any").intValue();
         std::vector<bool> mask(k, true); // k leading 1's
         mask.resize(n, false); // n-k trailing 0's
+        EV_INFO << "Checking link failure protection for " << k << " failed links out of " << networkLinks.size() << " links" << EV_ENDL;
         do {
-            std::vector<std::string> failed;
-            for (int i = 0; i < n; i++)
-                if (mask[i])
-                    failed.push_back(networkLinks[i]);
-            bool isProtected = false;
-            for (int i = 0; i < linkTrees.size(); i++) {
-                if (!intersects(linkTrees[i].paths[0].nodes, failed)) {
-                    isProtected = true;
-                    break;
+            EV_DEBUG << "Assuming failed links: ";
+            std::vector<const Link *> failedLinks;
+            for (int i = 0; i < n; i++) {
+                if (mask[i]) {
+                    auto link = (Topology::LinkOut *)networkLinks[i];
+                    if (i != 0)
+                        EV_DEBUG << ", ";
+                    EV_DEBUG << ((Node *)link->getLocalNode())->module->getFullName() << " -> " << ((Node *)link->getRemoteNode())->module->getFullName();
+                    failedLinks.push_back(networkLinks[i]);
                 }
             }
+            EV_DEBUG << std::endl;
+            std::vector<bool> reachedDestinationNodes;
+            reachedDestinationNodes.resize(destinationNodes.size(), false);
+            for (int i = 0; i < trees.size(); i++)
+                collectReachedNodes(sourceNode, destinationNodes, trees[i], failedLinks, reachedDestinationNodes);
+            bool isProtected = std::all_of(reachedDestinationNodes.begin(), reachedDestinationNodes.end(), [] (bool v) { return v; });
+            EV_DEBUG << "Link failure protection " << (isProtected ? "succeeded" : "failed") << EV_ENDL;
             if (!isProtected)
                 return false;
         } while (std::prev_permutation(mask.begin(), mask.end()));
+        EV_INFO << "Link failure protection succeeded for " << k << " failed links out of " << networkLinks.size() << " links" << EV_ENDL;
     }
     return true;
 }
 
-void TsnConfigurator::configureStreams()
+void TsnConfigurator::configureStreams() const
 {
     const char *streamRedundancyConfiguratorModulePath = par("streamRedundancyConfiguratorModule");
     if (strlen(streamRedundancyConfiguratorModulePath) != 0) {
@@ -207,7 +302,7 @@ void TsnConfigurator::configureStreams()
                 for (int i = 0; i < tree.paths[0].nodes.size(); i++) {
                     // skip source and destination in the alternative paths because they are implied
                     if (i != 0 && i != tree.paths[0].nodes.size() - 1) {
-                        auto name = tree.paths[0].nodes[i];
+                        auto name = tree.paths[0].nodes[i]->module->getFullName();
                         treeParameterValue->add(name);
                     }
                 }
@@ -251,77 +346,153 @@ void TsnConfigurator::configureStreams()
     }
 }
 
-std::vector<TsnConfigurator::Tree> TsnConfigurator::collectAllTrees(Node *source, std::vector<Node *> destinations)
+std::vector<TsnConfigurator::Tree> TsnConfigurator::collectAllTrees(Node *sourceNode, const std::vector<const Node *>& destinationNodes) const
 {
-    std::vector<Tree> trees;
-    std::vector<std::string> current;
-    topology->calculateUnweightedSingleShortestPathsTo(source);
-    collectAllTrees(source, destinations, destinations[0], trees, current);
-    return trees;
+    std::vector<Tree> allTrees;
+    topology->calculateUnweightedSingleShortestPathsTo(sourceNode);
+    std::vector<Path> currentTree;
+    std::vector<const Node *> stopNodes;
+    stopNodes.push_back(sourceNode);
+    EV_INFO << "Collecting all possible trees" << EV_ENDL;
+    collectAllTrees(stopNodes, destinationNodes, 0, currentTree, allTrees);
+    for (auto tree : allTrees)
+        EV_INFO << "  " << tree << std::endl;
+    return allTrees;
 }
 
-void TsnConfigurator::collectAllTrees(Node *source, std::vector<Node *> destinations, Node *node, std::vector<Tree>& trees, std::vector<std::string>& current)
+void TsnConfigurator::collectAllTrees(const std::vector<const Node *>& stopNodes, const std::vector<const Node *>& destinationNodes, int destinationNodeIndex, std::vector<Path>& currentTree, std::vector<Tree>& allTrees) const
 {
-    auto networkNodeName = node->module->getFullName();
-    current.push_back(networkNodeName);
-    if (node == source) {
-        trees.push_back(Tree({Path(current)}));
-        std::reverse(trees.back().paths[0].nodes.begin(), trees.back().paths[0].nodes.end());
-    }
+    if (destinationNodes.size() == destinationNodeIndex)
+        allTrees.push_back(computeCanonicalTree(currentTree));
     else {
-        for (int i = 0; i < node->getNumPaths(); i++) {
-            auto nextNode = (Node *)node->getPath(i)->getRemoteNode();
-            auto nextNetworkNodeName = nextNode->module->getFullName();
-            if (std::find(current.begin(), current.end(), nextNetworkNodeName) == current.end())
-                collectAllTrees(source, destinations, nextNode, trees, current);
+        auto destinationNode = destinationNodes[destinationNodeIndex];
+        if (std::find(stopNodes.begin(), stopNodes.end(), destinationNode) != stopNodes.end())
+            collectAllTrees(stopNodes, destinationNodes, destinationNodeIndex + 1, currentTree, allTrees);
+        else {
+            auto allPaths = collectAllPaths(stopNodes, destinationNode);
+            for (auto& path : allPaths) {
+                auto destinationStopNodes = stopNodes;
+                destinationStopNodes.insert(destinationStopNodes.end(), path.nodes.begin(), path.nodes.end());
+                currentTree.push_back(path);
+                collectAllTrees(destinationStopNodes, destinationNodes, destinationNodeIndex + 1, currentTree, allTrees);
+                currentTree.erase(currentTree.end() - 1);
+            }
         }
     }
-    current.erase(current.end() - 1);
 }
 
-std::vector<std::string> TsnConfigurator::collectNetworkNodes(std::string filter)
+std::vector<TsnConfigurator::Path> TsnConfigurator::collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *destinationNode) const
 {
-    std::vector<std::string> result;
+    std::vector<Path> allPaths;
+    std::vector<const Node *> currentPath;
+    collectAllPaths(stopNodes, destinationNode, currentPath, allPaths);
+    return allPaths;
+}
+
+void TsnConfigurator::collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *currentNode, std::vector<const Node *>& currentPath, std::vector<Path>& allPaths) const
+{
+    currentPath.push_back(currentNode);
+    if (std::find(stopNodes.begin(), stopNodes.end(), currentNode) != stopNodes.end()) {
+        allPaths.push_back(Path(currentPath));
+        std::reverse(allPaths.back().nodes.begin(), allPaths.back().nodes.end());
+    }
+    else {
+        for (int i = 0; i < currentNode->getNumPaths(); i++) {
+            auto nextNode = (Node *)currentNode->getPath(i)->getRemoteNode();
+            if (std::find(currentPath.begin(), currentPath.end(), nextNode) == currentPath.end())
+                collectAllPaths(stopNodes, nextNode, currentPath, allPaths);
+        }
+    }
+    currentPath.erase(currentPath.end() - 1);
+}
+
+std::vector<const TsnConfigurator::Node *> TsnConfigurator::collectNetworkNodes(const std::string& filter) const
+{
+    std::vector<const Node *> result;
     for (int i = 0; i < topology->getNumNodes(); i++) {
         auto node = (Node *)topology->getNode(i);
         auto name = node->module->getFullName();
         if (matchesFilter(name, filter))
-            result.push_back(name);
+            result.push_back(node);
     }
     return result;
 }
 
-std::vector<std::string> TsnConfigurator::collectNetworkLinks(std::string filter)
+std::vector<const TsnConfigurator::Link *> TsnConfigurator::collectNetworkLinks(const std::string& filter) const
 {
-    std::vector<std::string> result;
+    std::vector<const Link *> result;
     for (int i = 0; i < topology->getNumNodes(); i++) {
         auto localNode = (Node *)topology->getNode(i);
         std::string localName = localNode->module->getFullName();
         for (int j = 0; j < localNode->getNumOutLinks(); j++) {
-            auto remoteNode = (Node *)localNode->getLinkOut(j)->getRemoteNode();
+            auto link = localNode->getLinkOut(j);
+            auto remoteNode = (Node *)link->getRemoteNode();
             std::string remoteName = remoteNode->module->getFullName();
             std::string linkName = localName + "->" + remoteName;
             if (matchesFilter(linkName.c_str(), filter))
-                result.push_back(linkName);
+                result.push_back((Link *)link);
         }
     }
     return result;
 }
 
-bool TsnConfigurator::matchesFilter(std::string name, std::string filter)
+void TsnConfigurator::collectReachedNodes(const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const Tree& tree, const std::vector<const Node *>& failedNodes, std::vector<bool>& reachedDestinationNodes) const
+{
+    std::deque<const Node *> todoNodes;
+    todoNodes.push_back(sourceNode);
+    while (!todoNodes.empty()) {
+        auto startNode = todoNodes.front();
+        todoNodes.pop_front();
+        for (auto path : tree.paths) {
+            if (path.nodes[0] == startNode) {
+                for (auto node : path.nodes) {
+                    if (std::find(failedNodes.begin(), failedNodes.end(), node) != failedNodes.end())
+                        break;
+                    auto it = std::find(destinationNodes.begin(), destinationNodes.end(), node);
+                    if (it != destinationNodes.end())
+                        reachedDestinationNodes[it - destinationNodes.begin()] = true;
+                    if (node != startNode)
+                        todoNodes.push_back(node);
+                }
+            }
+        }
+    }
+}
+
+void TsnConfigurator::collectReachedNodes(const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const Tree& tree, const std::vector<const Link *>& failedLinks, std::vector<bool>& reachedDestinationNodes) const
+{
+    std::deque<const Node *> todoNodes;
+    todoNodes.push_back(sourceNode);
+    while (!todoNodes.empty()) {
+        auto startNode = todoNodes.front();
+        todoNodes.pop_front();
+        for (auto path : tree.paths) {
+            if (path.nodes[0] == startNode) {
+                const Node *previousNode = nullptr;
+                for (auto node : path.nodes) {
+                    if (previousNode != nullptr) {
+                        Link *pathLink = findLinkOut(previousNode, node);
+                        if (std::find(failedLinks.begin(), failedLinks.end(), pathLink) != failedLinks.end())
+                            break;
+                    }
+                    auto it = std::find(destinationNodes.begin(), destinationNodes.end(), node);
+                    if (it != destinationNodes.end())
+                        reachedDestinationNodes[it - destinationNodes.begin()] = true;
+                    if (node != startNode)
+                        todoNodes.push_back(node);
+                    previousNode = node;
+                }
+            }
+        }
+    }
+}
+
+bool TsnConfigurator::matchesFilter(const std::string& name, const std::string& filter) const
 {
     cMatchExpression matchExpression;
     matchExpression.setPattern(filter.c_str(), false, false, true);
     cMatchableString matchableString(name.c_str());
     return matchExpression.matches(&matchableString);
-}
-
-bool TsnConfigurator::intersects(std::vector<std::string> list1, std::vector<std::string> list2)
-{
-    for (auto element : list1)
-        if (contains(list2, element))
-            return true;
-    return false;
 }
 
 } // namespace inet

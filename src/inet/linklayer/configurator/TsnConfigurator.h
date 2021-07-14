@@ -24,14 +24,14 @@ namespace inet {
 
 class INET_API TsnConfigurator : public NetworkConfiguratorBase
 {
-  protected:
+  public:
     class Path
     {
       public:
-        std::vector<std::string> nodes;
+        std::vector<const Node *> nodes;
 
       public:
-        Path(const std::vector<std::string>& nodes) : nodes(nodes) { }
+        Path(const std::vector<const Node *>& nodes) : nodes(nodes) { }
     };
 
     class Tree
@@ -70,21 +70,54 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
     virtual void computeStreams();
     virtual void computeStream(cValueMap *streamConfiguration);
 
-    virtual std::vector<Tree> selectBestTreeSubset(cValueMap *configuration, const std::vector<Tree>& trees);
-    virtual bool checkNodeFailureProtection(cValueArray *configuration, const std::vector<Tree>& trees);
-    virtual bool checkLinkFailureProtection(cValueArray *configuration, const std::vector<Tree>& trees);
+    virtual std::vector<Tree> selectBestTreeSubset(cValueMap *configuration, const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const std::vector<Tree>& trees) const;
+    virtual double computeTreeCost(const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const Tree& tree) const;
+    virtual Tree computeCanonicalTree(const Tree& tree) const;
+    virtual bool checkNodeFailureProtection(cValueArray *configuration, const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const std::vector<Tree>& trees) const;
+    virtual bool checkLinkFailureProtection(cValueArray *configuration, const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const std::vector<Tree>& trees) const;
 
-    virtual void configureStreams();
+    virtual void configureStreams() const;
 
-    virtual std::vector<Tree> collectAllTrees(Node *source, std::vector<Node *> destinations);
-    virtual void collectAllTrees(Node *source, std::vector<Node *> destinations, Node *node, std::vector<Tree>& trees, std::vector<std::string>& current);
+    virtual std::vector<Tree> collectAllTrees(Node *sourceNode, const std::vector<const Node *>& destinationNodes) const;
+    virtual void collectAllTrees(const std::vector<const Node *>& stopNodes, const std::vector<const Node *>& destinationNodes, int destinationNodeIndex, std::vector<Path>& currentTree, std::vector<Tree>& allTrees) const;
 
-    virtual std::vector<std::string> collectNetworkNodes(std::string filter);
-    virtual std::vector<std::string> collectNetworkLinks(std::string filter);
+    virtual std::vector<Path> collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *destinationNode) const;
+    virtual void collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *currentNode, std::vector<const Node *>& currentPath, std::vector<Path>& allPaths) const;
 
-    virtual bool matchesFilter(std::string name, std::string filter);
-    virtual bool intersects(std::vector<std::string> list1, std::vector<std::string> list2);
+    virtual std::vector<const Node *> collectNetworkNodes(const std::string& filter) const;
+    virtual std::vector<const Link *> collectNetworkLinks(const std::string& filter) const;
+
+    virtual void collectReachedNodes(const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const Tree& tree, const std::vector<const Node *>& failedNodes, std::vector<bool>& reachedDestinationNodes) const;
+    virtual void collectReachedNodes(const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const Tree& tree, const std::vector<const Link *>& failedLinks, std::vector<bool>& reachedDestinationNodes) const;
+
+    virtual bool matchesFilter(const std::string& name, const std::string& filter) const;
 };
+
+std::ostream& operator<<(std::ostream& os, const TsnConfigurator::Path& path)
+{
+    os << "[";
+    for (int i = 0; i < path.nodes.size(); i++) {
+        auto node = path.nodes[i];
+        if (i != 0)
+            os << ", ";
+        os << node->module->getFullName();
+    }
+    os << "]";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const TsnConfigurator::Tree& tree)
+{
+    os << "{";
+    for (int i = 0; i < tree.paths.size(); i++) {
+        auto path = tree.paths[i];
+        if (i != 0)
+            os << ", ";
+        os << path;
+    }
+    os << "}";
+    return os;
+}
 
 } // namespace inet
 
