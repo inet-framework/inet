@@ -63,18 +63,18 @@ void TsnConfigurator::computeStream(cValueMap *configuration)
     Node *source = static_cast<Node *>(topology->getNodeFor(getParentModule()->getSubmodule(sourceNetworkNodeName)));
     Node *destination = static_cast<Node *>(topology->getNodeFor(getParentModule()->getSubmodule(destinationNetworkNodeName)));
     topology->calculateUnweightedSingleShortestPathsTo(source);
-    std::vector<Path> allPaths;
+    std::vector<Tree> allPaths;
     collectAllPaths(source, destination, allPaths);
-    streamConfiguration.paths = selectBestPathsSubset(configuration, allPaths);
+    streamConfiguration.trees = selectBestPathsSubset(configuration, allPaths);
     streamConfigurations.push_back(streamConfiguration);
 }
 
-std::vector<TsnConfigurator::Path> TsnConfigurator::selectBestPathsSubset(cValueMap *configuration, const std::vector<Path>& paths)
+std::vector<TsnConfigurator::Tree> TsnConfigurator::selectBestPathsSubset(cValueMap *configuration, const std::vector<Tree>& trees)
 {
     cValueArray *nodeFailureProtection = configuration->containsKey("nodeFailureProtection") ? check_and_cast<cValueArray *>(configuration->get("nodeFailureProtection").objectValue()) : nullptr;
     cValueArray *linkFailureProtection = configuration->containsKey("linkFailureProtection") ? check_and_cast<cValueArray *>(configuration->get("linkFailureProtection").objectValue()) : nullptr;
-    int n = paths.size();
-    for (int k = 1; k <= paths.size(); k++) {
+    int n = trees.size();
+    for (int k = 1; k <= trees.size(); k++) {
         std::vector<bool> mask(k, true); // k leading 1's
         mask.resize(n, false); // n-k trailing 0's
         std::vector<bool> bestMask;
@@ -83,13 +83,13 @@ std::vector<TsnConfigurator::Path> TsnConfigurator::selectBestPathsSubset(cValue
             double cost = 0;
             for (int i = 0; i < n; i++)
                 if (mask[i])
-                    cost += paths[i].nodes.size();
+                    cost += trees[i].paths[0].nodes.size();
             cost /= k;
             if (cost < bestCost) {
-                std::vector<Path> candidate;
+                std::vector<Tree> candidate;
                 for (int i = 0; i < n; i++)
                     if (mask[i])
-                        candidate.push_back(paths[i]);
+                        candidate.push_back(trees[i]);
                 if ((nodeFailureProtection == nullptr || checkNodeFailureProtection(nodeFailureProtection, candidate)) &&
                     (linkFailureProtection == nullptr || checkLinkFailureProtection(linkFailureProtection, candidate)))
                 {
@@ -99,17 +99,17 @@ std::vector<TsnConfigurator::Path> TsnConfigurator::selectBestPathsSubset(cValue
             }
         } while (std::prev_permutation(mask.begin(), mask.end()));
         if (bestCost != DBL_MAX) {
-            std::vector<Path> result;
+            std::vector<Tree> result;
             for (int i = 0; i < n; i++)
                 if (bestMask[i])
-                    result.push_back(paths[i]);
+                    result.push_back(trees[i]);
             return result;
         }
     }
     throw cRuntimeError("Cannot find path combination that protects against all configured node and link failures");
 }
 
-bool TsnConfigurator::checkNodeFailureProtection(cValueArray *configuration, const std::vector<Path>& paths)
+bool TsnConfigurator::checkNodeFailureProtection(cValueArray *configuration, const std::vector<Tree>& trees)
 {
     for (int i = 0; i < configuration->size(); i++) {
         cValueMap *protection = check_and_cast<cValueMap *>(configuration->get(i).objectValue());
@@ -125,8 +125,8 @@ bool TsnConfigurator::checkNodeFailureProtection(cValueArray *configuration, con
                 if (mask[i])
                     failed.push_back(networkNodes[i]);
             bool isProtected = false;
-            for (int i = 0; i < paths.size(); i++) {
-                if (!intersects(paths[i].nodes, failed)) {
+            for (int i = 0; i < trees.size(); i++) {
+                if (!intersects(trees[i].paths[0].nodes, failed)) {
                     isProtected = true;
                     break;
                 }
@@ -138,21 +138,21 @@ bool TsnConfigurator::checkNodeFailureProtection(cValueArray *configuration, con
     return true;
 }
 
-bool TsnConfigurator::checkLinkFailureProtection(cValueArray *configuration, const std::vector<Path>& paths)
+bool TsnConfigurator::checkLinkFailureProtection(cValueArray *configuration, const std::vector<Tree>& trees)
 {
-    std::vector<Path> linkPaths;
-    for (auto path : paths) {
+    std::vector<Tree> linkTrees;
+    for (auto tree : trees) {
         std::vector<std::string> linkPath;
         std::string previousNode;
-        for (int i = 0; i < path.nodes.size(); i++) {
-            auto node = path.nodes[i];
+        for (int i = 0; i < tree.paths[0].nodes.size(); i++) {
+            auto node = tree.paths[0].nodes[i];
             if (!previousNode.empty()) {
                 auto link = previousNode + "->" + node;
                 linkPath.push_back(link);
             }
             previousNode = node;
         }
-        linkPaths.push_back(Path(linkPath));
+        linkTrees.push_back(Tree({Path(linkPath)}));
     }
     for (int i = 0; i < configuration->size(); i++) {
         cValueMap *protection = check_and_cast<cValueMap *>(configuration->get(i).objectValue());
@@ -168,8 +168,8 @@ bool TsnConfigurator::checkLinkFailureProtection(cValueArray *configuration, con
                 if (mask[i])
                     failed.push_back(networkLinks[i]);
             bool isProtected = false;
-            for (int i = 0; i < linkPaths.size(); i++) {
-                if (!intersects(linkPaths[i].nodes, failed)) {
+            for (int i = 0; i < linkTrees.size(); i++) {
+                if (!intersects(linkTrees[i].paths[0].nodes, failed)) {
                     isProtected = true;
                     break;
                 }
@@ -192,12 +192,12 @@ void TsnConfigurator::configureStreams()
         streamParameterValue->set("packetFilter", streamConfiguration.packetFilter.c_str());
         streamParameterValue->set("source", streamConfiguration.source.c_str());
         streamParameterValue->set("destination", streamConfiguration.destination.c_str());
-        for (auto& path : streamConfiguration.paths) {
+        for (auto& tree : streamConfiguration.trees) {
             cValueArray *pathParameterValue = new cValueArray();
-            for (int i = 0; i < path.nodes.size(); i++) {
+            for (int i = 0; i < tree.paths[0].nodes.size(); i++) {
                 // skip source and destination in the alternative paths because they are implied
-                if (i != 0 && i != path.nodes.size() - 1) {
-                    auto name = path.nodes[i];
+                if (i != 0 && i != tree.paths[0].nodes.size() - 1) {
+                    auto name = tree.paths[0].nodes[i];
                     pathParameterValue->add(name);
                 }
             }
@@ -237,26 +237,26 @@ void TsnConfigurator::configureStreams()
     gateSchedulingConfigurator->par("configuration") = parameterValue;
 }
 
-void TsnConfigurator::collectAllPaths(Node *source, Node *destination, std::vector<Path>& paths)
+void TsnConfigurator::collectAllPaths(Node *source, Node *destination, std::vector<Tree>& paths)
 {
     std::vector<std::string> current;
     collectAllPaths(source, destination, destination, paths, current);
 }
 
-void TsnConfigurator::collectAllPaths(Node *source, Node *destination, Node *node, std::vector<Path>& paths, std::vector<std::string>& current)
+void TsnConfigurator::collectAllPaths(Node *source, Node *destination, Node *node, std::vector<Tree>& trees, std::vector<std::string>& current)
 {
     auto networkNodeName = node->module->getFullName();
     current.push_back(networkNodeName);
     if (node == source) {
-        paths.push_back(Path(current));
-        std::reverse(paths.back().nodes.begin(), paths.back().nodes.end());
+        trees.push_back(Tree({Path(current)}));
+        std::reverse(trees.back().paths[0].nodes.begin(), trees.back().paths[0].nodes.end());
     }
     else {
         for (int i = 0; i < node->getNumPaths(); i++) {
             auto nextNode = (Node *)node->getPath(i)->getRemoteNode();
-            std::string nextNetworkNodeName = nextNode->module->getFullName();
-            if (!contains(current, nextNetworkNodeName))
-                collectAllPaths(source, destination, nextNode, paths, current);
+            auto nextNetworkNodeName = nextNode->module->getFullName();
+            if (std::find(current.begin(), current.end(), nextNetworkNodeName) == current.end())
+                collectAllPaths(source, destination, nextNode, trees, current);
         }
     }
     current.erase(current.end() - 1);
