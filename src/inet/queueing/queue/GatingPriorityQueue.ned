@@ -33,10 +33,7 @@ module GatingPriorityQueue extends CompoundPacketQueueBase
         int numQueues;
         double bitrate @unit(bps);
         *.bitrate = default(this.bitrate);
-        // KLUDGE TODO this 96 bit time is for the 4B CRC and 8B physical header and the actual guard band from the user's point of view is 0s
-        // TODO we should just have a function parameter which tells how much the transmission time will be for a particular packet
-        // TODO for example, this can be different for each packet in 802.11 and may use two different bitrates (header and data) and a constant time for preamble
-        *.guardBand = default(replaceUnit(96.0 / dropUnit(this.bitrate), "s"));
+        *.extraLength = default(96b);
     submodules:
         buffer: <default("PriorityBuffer")> like IPacketBuffer if typename != "" {
             parameters:
