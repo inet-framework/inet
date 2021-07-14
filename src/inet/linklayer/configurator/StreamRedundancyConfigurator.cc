@@ -82,25 +82,28 @@ void StreamRedundancyConfigurator::computeStreamSendersAndReceivers(cValueMap *s
         auto node = (Node *)topology->getNode(i);
         auto networkNode = node->module;
         auto networkNodeName = networkNode->getFullName();
-        cValueArray *paths = check_and_cast<cValueArray *>(streamConfiguration->get("paths").objectValue());
+        cValueArray *trees = check_and_cast<cValueArray *>(streamConfiguration->get("trees").objectValue());
         std::string sourceNetworkNodeName = streamConfiguration->get("source");
         std::string destinationNetworkNodeName = streamConfiguration->get("destination");
         std::vector<std::string> senderNetworkNodeNames;
         std::vector<std::string> receiverNetworkNodeNames;
-        for (int j = 0; j < paths->size(); j++) {
-            cValueArray *path = check_and_cast<cValueArray*>(paths->get(j).objectValue());
-            for (int k = 0; k < path->size() + 2; k++) {
-                auto getElement = [&] (int i) {
-                    return i == 0 ? sourceNetworkNodeName.c_str() : i == path->size() + 1 ? destinationNetworkNodeName.c_str() : path->get(i - 1).stringValue();
-                };
-                const char *elementNetworkNodeName = getElement(k);
-                if (!strcmp(elementNetworkNodeName, networkNode->getFullName())) {
-                    auto senderNetworkNodeName = k != 0 ? getElement(k - 1) : nullptr;
-                    auto receiverNetworkNodeName = k != path->size() + 1 ? getElement(k + 1) : nullptr;
-                    if (senderNetworkNodeName != nullptr && !contains(senderNetworkNodeNames, senderNetworkNodeName))
-                        senderNetworkNodeNames.push_back(senderNetworkNodeName);
-                    if (receiverNetworkNodeName != nullptr && !contains(receiverNetworkNodeNames, receiverNetworkNodeName))
-                        receiverNetworkNodeNames.push_back(receiverNetworkNodeName);
+        for (int j = 0; j < trees->size(); j++) {
+            cValueArray *tree = check_and_cast<cValueArray*>(trees->get(j).objectValue());
+            for (int k = 0; k < tree->size(); k++) {
+                cValueArray *path = check_and_cast<cValueArray*>(tree->get(k).objectValue());
+                for (int l = 0; l < path->size() + 2; l++) {
+                    auto getElement = [&] (int i) {
+                        return i == 0 ? sourceNetworkNodeName.c_str() : i == path->size() + 1 ? destinationNetworkNodeName.c_str() : path->get(i - 1).stringValue();
+                    };
+                    const char *elementNetworkNodeName = getElement(l);
+                    if (!strcmp(elementNetworkNodeName, networkNode->getFullName())) {
+                        auto senderNetworkNodeName = l != 0 ? getElement(l - 1) : nullptr;
+                        auto receiverNetworkNodeName = l != path->size() + 1 ? getElement(l + 1) : nullptr;
+                        if (senderNetworkNodeName != nullptr && std::find(senderNetworkNodeNames.begin(), senderNetworkNodeNames.end(), senderNetworkNodeName) == senderNetworkNodeNames.end())
+                            senderNetworkNodeNames.push_back(senderNetworkNodeName);
+                        if (receiverNetworkNodeName != nullptr && std::find(receiverNetworkNodeNames.begin(), receiverNetworkNodeNames.end(), receiverNetworkNodeName) == receiverNetworkNodeNames.end())
+                            receiverNetworkNodeNames.push_back(receiverNetworkNodeName);
+                    }
                 }
             }
         }
@@ -298,34 +301,37 @@ std::vector<std::vector<std::string>> StreamRedundancyConfigurator::getPathFragm
             auto source = streamConfiguration->get("source").stringValue();
             auto destination = streamConfiguration->get("destination").stringValue();
             std::string streamName = streamConfiguration->get("name").stringValue();
-            cValueArray *paths = check_and_cast<cValueArray *>(streamConfiguration->get("paths").objectValue());
-            for (int j = 0; j < paths->size(); j++) {
-                std::vector<std::string> memberStream;
-                memberStream.push_back(source);
-                cValueArray *path = check_and_cast<cValueArray*>(paths->get(j).objectValue());
-                for (int k = 0; k < path->size(); k++) {
-                    auto nodeName = path->get(k).stringValue();
-                    auto module = getParentModule()->getSubmodule(nodeName);
-                    Node *node = (Node *)topology->getNodeFor(module);
-                    bool isMerging = false;
-                    for (auto streamMerging : node->streamMergings)
-                        if (streamMerging.outputStream == streamName)
-                            isMerging = true;
-                    bool isSplitting = false;
-                    for (auto streamSplitting : node->streamSplittings)
-                        if (streamSplitting.inputStream == streamName)
-                            isSplitting = true;
-                    memberStream.push_back(nodeName);
-                    if (isMerging || isSplitting) {
-                        if (!memberStream.empty() && !contains(memberStreams, memberStream))
-                            memberStreams.push_back(memberStream);
-                        memberStream.clear();
+            cValueArray *trees = check_and_cast<cValueArray *>(streamConfiguration->get("trees").objectValue());
+            for (int j = 0; j < trees->size(); j++) {
+                cValueArray *tree = check_and_cast<cValueArray*>(trees->get(j).objectValue());
+                for (int k = 0; k < tree->size(); k++) {
+                    cValueArray *path = check_and_cast<cValueArray*>(tree->get(k).objectValue());
+                    std::vector<std::string> memberStream;
+                    memberStream.push_back(source);
+                    for (int l = 0; l < path->size(); l++) {
+                        auto nodeName = path->get(l).stringValue();
+                        auto module = getParentModule()->getSubmodule(nodeName);
+                        Node *node = (Node *)topology->getNodeFor(module);
+                        bool isMerging = false;
+                        for (auto streamMerging : node->streamMergings)
+                            if (streamMerging.outputStream == streamName)
+                                isMerging = true;
+                        bool isSplitting = false;
+                        for (auto streamSplitting : node->streamSplittings)
+                            if (streamSplitting.inputStream == streamName)
+                                isSplitting = true;
                         memberStream.push_back(nodeName);
+                        if (isMerging || isSplitting) {
+                            if (!memberStream.empty() && std::find(memberStreams.begin(), memberStreams.end(), memberStream) == memberStreams.end())
+                                memberStreams.push_back(memberStream);
+                            memberStream.clear();
+                            memberStream.push_back(nodeName);
+                        }
                     }
+                    memberStream.push_back(destination);
+                    if (!memberStream.empty() && std::find(memberStreams.begin(), memberStreams.end(), memberStream) == memberStreams.end())
+                        memberStreams.push_back(memberStream);
                 }
-                memberStream.push_back(destination);
-                if (!memberStream.empty() && !contains(memberStreams, memberStream))
-                    memberStreams.push_back(memberStream);
             }
             return memberStreams;
         }
