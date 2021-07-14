@@ -50,6 +50,8 @@ Define_Module(ExampleQosClassifier);
 void ExampleQosClassifier::initialize()
 {
     // TODO parameters
+    inputGate = gate("in");
+    outputGate = gate("out");
 }
 
 void ExampleQosClassifier::handleMessage(cMessage *msg)
@@ -141,22 +143,14 @@ int ExampleQosClassifier::getUserPriority(cMessage *msg)
     return UP_BE;
 }
 
-void ExampleQosClassifier::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
+cGate *ExampleQosClassifier::getRegistrationForwardingGate(cGate *gate)
 {
-    Enter_Method("handleRegisterService");
-    if (!strcmp("in", g->getName()))
-        registerService(protocol, gate("out"), servicePrimitive);
+    if (gate == outputGate)
+        return inputGate;
+    else if (gate == inputGate)
+        return outputGate;
     else
-        throw cRuntimeError("Unknown gate: %s", g->getName());
-}
-
-void ExampleQosClassifier::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    if (!strcmp("in", g->getName()))
-        registerProtocol(protocol, gate("out"), servicePrimitive);
-    else
-        throw cRuntimeError("Unknown gate: %s", g->getName());
+        throw cRuntimeError("Unknown gate");
 }
 
 } // namespace inet

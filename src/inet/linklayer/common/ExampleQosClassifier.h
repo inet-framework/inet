@@ -26,17 +26,18 @@ namespace inet {
 /**
  * An example packet classifier based on the UDP/TCP port number.
  */
-class INET_API ExampleQosClassifier : public cSimpleModule, public DefaultProtocolRegistrationListener
+class INET_API ExampleQosClassifier : public cSimpleModule, public TransparentProtocolRegistrationListener
 {
   protected:
     virtual int getUserPriority(cMessage *msg);
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    cGate *inputGate = nullptr;
+    cGate *outputGate = nullptr;
 
   public:
     ExampleQosClassifier() {}
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
+    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 
 } // namespace inet
