@@ -21,6 +21,10 @@
 #include "inet/networklayer/ipv4/Ipv4.h"
 #endif
 
+#ifdef INET_WITH_IPv6
+#include "inet/networklayer/ipv6/Ipv6.h"
+#endif
+
 namespace inet {
 
 namespace visualizer {
@@ -34,6 +38,11 @@ bool NetworkRouteCanvasVisualizer::isPathStart(cModule *module) const
         return true;
 #endif
 
+#ifdef INET_WITH_IPv6
+    if (dynamic_cast<Ipv6 *>(module) != nullptr)
+        return true;
+#endif
+
     return false;
 }
 
@@ -41,6 +50,11 @@ bool NetworkRouteCanvasVisualizer::isPathEnd(cModule *module) const
 {
 #ifdef INET_WITH_IPv4
     if (dynamic_cast<Ipv4 *>(module) != nullptr)
+        return true;
+#endif
+
+#ifdef INET_WITH_IPv6
+    if (dynamic_cast<Ipv6 *>(module) != nullptr)
         return true;
 #endif
 
@@ -65,6 +79,11 @@ bool NetworkRouteCanvasVisualizer::isPathElement(cModule *module) const
 
 #ifdef INET_WITH_IPv4
     if (dynamic_cast<Ipv4 *>(module) != nullptr)
+        return true;
+#endif
+
+#ifdef INET_WITH_IPv6
+    if (dynamic_cast<Ipv6 *>(module) != nullptr)
         return true;
 #endif
 

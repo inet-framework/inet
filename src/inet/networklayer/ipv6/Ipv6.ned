@@ -59,7 +59,10 @@ simple Ipv6
         double procDelay @unit(s) = default(0s);
         @display("i=block/network2");
         @signal[packetDropped](type=cPacket);
-        @signal[packetSentToUpper](type=inet::Packet);
+        @signal[packetSentToUpper](type=cPacket);
+        @signal[packetReceivedFromUpper](type=cPacket);
+        @signal[packetSentToLower](type=cPacket);
+        @signal[packetReceivedFromLower](type=cPacket);
     gates:
         input transportIn @labels(Ipv6ControlInfo/down,TcpHeader,UdpHeader);
         output transportOut @labels(Ipv6ControlInfo/up,TcpHeader,UdpHeader);

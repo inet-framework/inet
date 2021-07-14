@@ -248,6 +248,8 @@ void Ipv6::handleMessage(cMessage *msg)
             delete ctrl;
             resolveMACAddressAndSendPacket(packet, interfaceId, nextHop, fromHL);
         }
+        else
+            emit(packetReceivedFromLowerSignal, msg);
 
         // Do not handle header biterrors, because
         // 1. Ipv6 header does not contain checksum for the header fields, each field is
@@ -351,6 +353,7 @@ void Ipv6::handleMessageFromHL(Packet *msg)
             destIE = ift->findFirstLoopbackInterface();
         ASSERT(destIE);
     }
+    emit(packetReceivedFromUpperSignal, msg);
     L3Address nextHopAddr(Ipv6Address::UNSPECIFIED_ADDRESS);
     if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT)
         datagramLocalOut(packet, destIE, nextHopAddr.toIpv6());
@@ -722,6 +725,7 @@ void Ipv6::localDeliver(Packet *packet, const NetworkInterface *fromIE)
     }
     else if (contains(upperProtocols, protocol)) {
         EV_INFO << "Passing up to protocol " << *protocol << "\n";
+        emit(packetSentToUpperSignal, packet);
         send(packet, "transportOut");
     }
     else if (!hasSocket) {
