@@ -33,8 +33,8 @@ void PacketBasedTokenGenerator::initialize(int stage)
         numTokensPerBitParameter = &par("numTokensPerBit");
         inputGate = gate("in");
         producer = getConnectedModule<IActivePacketSource>(inputGate);
-        server.reference(this, "serverModule", true);
-        server->subscribe(TokenBasedServer::tokensDepletedSignal, this);
+        storage.reference(this, "storageModule", true);
+        getModuleFromPar<cModule>(par("storageModule"), this)->subscribe(tokensDepletedSignal, this);
         numTokensGenerated = 0;
         WATCH(numTokensGenerated);
     }
@@ -51,7 +51,7 @@ void PacketBasedTokenGenerator::pushPacket(Packet *packet, cGate *gate)
     auto numTokens = numTokensPerPacketParameter->doubleValue() + numTokensPerBitParameter->doubleValue() * packet->getTotalLength().get();
     numTokensGenerated += numTokens;
     emit(TokenGeneratorBase::tokensCreatedSignal, numTokens);
-    server->addTokens(numTokens);
+    storage->addTokens(numTokens);
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
     updateDisplayString();
@@ -63,7 +63,7 @@ const char *PacketBasedTokenGenerator::resolveDirective(char directive) const
     static std::string result;
     switch (directive) {
         case 's': {
-            result = par("serverModule").stringValue();
+            result = par("storageModule").stringValue();
             break;
         }
         case 't': {
@@ -82,7 +82,7 @@ void PacketBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t si
 {
     Enter_Method("%s", cComponent::getSignalName(signal));
 
-    if (signal == TokenBasedServer::tokensDepletedSignal) {
+    if (signal == tokensDepletedSignal) {
         Enter_Method("tokensDepleted");
         producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     }

@@ -50,7 +50,7 @@ module ResponseProducer like IActivePacketSource
             @display("p=300,350");
         }
         tokenGenerator: SignalBasedTokenGenerator {
-            serverModule = default("^." + parent.requestConsumerModule + ".server");
+            storageModule = default("^." + parent.requestConsumerModule + ".server");
             signals = default("tokensDepleted");
             @display("p=100,100");
         }

@@ -38,7 +38,7 @@ cmdenv-event-banners = false
 *.producer.packetLength = 1B
 *.producer.productionInterval = uniform(0s, 2s)
 *.bucket.server.maxNumTokens = 10
-*.tokenGenerator.serverModule = "^.bucket.server"
+*.tokenGenerator.storageModule = "^.bucket.server"
 *.tokenGenerator.generationInterval = uniform(0s, 2s)
 
 %contains-regex: stdout

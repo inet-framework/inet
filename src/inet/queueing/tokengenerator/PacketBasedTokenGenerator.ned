@@ -27,7 +27,7 @@ import inet.queueing.contract.IPassivePacketSink;
 simple PacketBasedTokenGenerator extends PacketSinkBase like IPassivePacketSink
 {
     parameters:
-        string serverModule; // module path of the packet server where the tokens are generated via C++ method call
+        string storageModule; // module path of the packet server where the tokens are generated via C++ method call
         volatile double numTokensPerPacket = default(1); // number of tokens per consumed packet
         volatile double numTokensPerBit = default(0); // number of tokens per consumed bit
         displayStringTextFormat = default("processed %p pk (%l)\ngenerated %t tk\nto %s"); // %p number of packet, %l total length

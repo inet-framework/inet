@@ -29,7 +29,7 @@ void TokenGeneratorBase::initialize(int stage)
     PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         displayStringTextFormat = par("displayStringTextFormat");
-        server.reference(this, "serverModule", true);
+        storage.reference(this, "storageModule", true);
         numTokensGenerated = 0;
         WATCH(numTokensGenerated);
     }
@@ -40,7 +40,7 @@ const char *TokenGeneratorBase::resolveDirective(char directive) const
     static std::string result;
     switch (directive) {
         case 's': {
-            result = par("serverModule").stringValue();
+            result = par("storageModule").stringValue();
             break;
         }
         case 't': {
