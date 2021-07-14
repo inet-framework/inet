@@ -43,7 +43,7 @@ module QueueFiller like IActivePacketSource
         }
         tokenGenerator: QueueBasedTokenGenerator {
             parameters:
-                serverModule = default("^.server");
+                storageModule = default("^.server");
                 @display("p=100,100");
         }
     connections:

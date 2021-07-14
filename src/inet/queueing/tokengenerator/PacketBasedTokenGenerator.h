@@ -20,7 +20,7 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/queueing/base/PassivePacketSinkBase.h"
-#include "inet/queueing/server/TokenBasedServer.h"
+#include "inet/queueing/contract/ITokenStorage.h"
 
 namespace inet {
 namespace queueing {
@@ -33,7 +33,7 @@ class INET_API PacketBasedTokenGenerator : public PassivePacketSinkBase, public 
 
     cGate *inputGate = nullptr;
     opp_component_ptr<IActivePacketSource> producer;
-    ModuleRefByPar<TokenBasedServer> server;
+    ModuleRefByPar<ITokenStorage> storage;
 
     int numTokensGenerated = -1;
 
@@ -44,8 +44,8 @@ class INET_API PacketBasedTokenGenerator : public PassivePacketSinkBase, public 
     virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
 
-    virtual bool canPushSomePacket(cGate *gate) const override { return server->getNumTokens() == 0; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return server->getNumTokens() == 0; }
+    virtual bool canPushSomePacket(cGate *gate) const override { return storage->getNumTokens() == 0; }
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return storage->getNumTokens() == 0; }
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
     virtual const char *resolveDirective(char directive) const override;

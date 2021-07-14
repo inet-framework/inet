@@ -19,9 +19,9 @@
 #define __INET_TOKENGENERATORBASE_H
 
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/common/StringFormat.h"
+#include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IPacketProcessor.h"
-#include "inet/queueing/server/TokenBasedServer.h"
+#include "inet/queueing/contract/ITokenStorage.h"
 
 namespace inet {
 namespace queueing {
@@ -32,7 +32,7 @@ class INET_API TokenGeneratorBase : public PacketProcessorBase
     static simsignal_t tokensCreatedSignal;
 
   protected:
-    ModuleRefByPar<TokenBasedServer> server;
+    ModuleRefByPar<ITokenStorage> storage;
     int numTokensGenerated = -1;
 
   protected:

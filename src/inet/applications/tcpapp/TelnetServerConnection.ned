@@ -67,7 +67,7 @@ module TelnetServerConnection like IApp
         }
         enterTokenGenerator: PacketBasedTokenGenerator {
             parameters:
-                serverModule = default("^.responseServer");
+                storageModule = default("^.responseServer");
                 @display("p=600,300");
         }
         io: TcpServerSocketIo {

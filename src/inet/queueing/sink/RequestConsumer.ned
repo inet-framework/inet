@@ -50,7 +50,7 @@ module RequestConsumer like IPassivePacketSink
             @display("p=200,350");
         }
         tokenGenerator[numKind]: <default("PacketBasedTokenGenerator")> like IPassivePacketSink {
-            serverModule = default("^." + parent.responseProducerModule + ".server[" + string(index) + "]");
+            storageModule = default("^." + parent.responseProducerModule + ".server[" + string(index) + "]");
             @display("p=200,475,row,300");
         }
     connections:
