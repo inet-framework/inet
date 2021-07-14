@@ -36,8 +36,8 @@ simple TsnConfigurator like INetworkConfigurator
     parameters:
         string streamRedundancyConfiguratorModule = default("streamRedundancyConfigurator");
         string gateSchedulingConfiguratorModule = default("gateSchedulingConfigurator");
-        object configuration = default([]); // a vector of objects (e.g. [{...}, {...}]) where each object has the following fields: name, type, application, source, destination, priority, packetFilter, packetLength, packetInterval, maxLatency, linkFailureProtection, nodeFailureProtection
-                                            // here is an example: [{name: "s1", application: "app[0]", source: "source", destination: "destination", priority: 0, packetFilter: "*", packetLength: 200B, packetInterval: 500us, maxLatency: 100us, linkFailureProtection: [{any: 1, of: "*"}]}]
+        object configuration = default([]); // a vector of objects (e.g. [{...}, {...}]) where each object has the following fields: name, type, application, source, destination, priority, packetFilter, packetLength, packetInterval, maxLatency, linkFailureProtection, nodeFailureProtection, maxRedundancy
+                                            // here is an example: [{name: "s1", application: "app[0]", source: "source", destination: "destination", priority: 0, packetFilter: "*", packetLength: 200B, packetInterval: 500us, maxLatency: 100us, linkFailureProtection: [{any: 1, of: "*"}], maxRedundancy: 2}]
         @display("i=block/cogwheel");
 }
 
