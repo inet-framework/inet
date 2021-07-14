@@ -23,119 +23,30 @@
 
 #include "inet/common/PatternMatcher.h"
 #include "inet/common/Topology.h"
+#include "inet/linklayer/configurator/gatescheduling/base/GateSchedulingConfiguratorBase.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
-// TODO: derive from GateSchedulingConfiguratorBase
-class INET_API SimpleGateSchedulingConfigurator : public cSimpleModule
+class INET_API SimpleGateSchedulingConfigurator : public GateSchedulingConfiguratorBase
 {
   protected:
-    class InterfaceInfo;
-
-    /**
-     * Represents a node in the network.
-     */
-    class Node : public Topology::Node {
+    class Slot {
       public:
-        cModule *module;
-        IInterfaceTable *interfaceTable;
-        std::vector<InterfaceInfo *> interfaceInfos;
-
-      public:
-        Node(cModule *module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = nullptr; }
-        ~Node() { for (size_t i = 0; i < interfaceInfos.size(); i++) delete interfaceInfos[i]; }
-    };
-
-    /**
-     * Represents an interface in the network.
-     */
-    class InterfaceInfo : public cObject {
-      public:
-        NetworkInterface *networkInterface;
-        std::vector<int> gateOpenIndices;
-        std::vector<simtime_t> gateOpenTimes;
-        std::vector<simtime_t> gateCloseTimes;
-
-      public:
-        InterfaceInfo(NetworkInterface *networkInterface) : networkInterface(networkInterface) {}
-        virtual std::string getFullPath() const override { return networkInterface->getInterfaceFullPath(); }
-    };
-
-    class Link : public Topology::Link {
-      public:
-        InterfaceInfo *sourceInterfaceInfo;
-        InterfaceInfo *destinationInterfaceInfo;
-
-      public:
-        Link() { sourceInterfaceInfo = nullptr; destinationInterfaceInfo = nullptr; }
-    };
-
-    class Topology : public inet::Topology {
-      protected:
-        virtual Node *createNode(cModule *module) override { return new SimpleGateSchedulingConfigurator::Node(module); }
-        virtual Link *createLink() override { return new SimpleGateSchedulingConfigurator::Link(); }
-    };
-
-    class StreamReservation
-    {
-      public:
-        Node *source = nullptr;
-        Node *destination = nullptr;
-        int priority = -1;
-        b packetLength = b(-1);
-        simtime_t packetInterval = -1;
-        simtime_t maxLatency = -1;
-        bps datarate = bps(NaN);
-        simtime_t startOffset = -1;
-        std::vector<std::vector<std::string>> pathFragments;
+        int gateOpenIndex = -1;
+        simtime_t gateOpenTime = -1;
+        simtime_t gateCloseTime = -1;
     };
 
   protected:
-    cValueArray *configuration;
-    simtime_t gateCycleDuration;
+    virtual Output *computeGateScheduling(const Input& input) const override;
 
-    Topology topology;
-    std::vector<StreamReservation> streamReservations;
+    virtual simtime_t computeStreamStartOffset(Input::Flow& flow, std::map<NetworkInterface *, std::vector<Slot>>& interfaceSchedules) const;
+    virtual simtime_t computeStartOffsetForPathFragments(Input::Flow& flow, std::string startNetworkNodeName, simtime_t startTime, std::map<NetworkInterface *, std::vector<Slot>>& interfaceSchedules) const;
 
-  protected:
-    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage) override;
-    virtual void handleParameterChange(const char *name) override;
-    virtual void handleMessage(cMessage *msg) override { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
-
-    /**
-     * Extracts network topology by walking through the module hierarchy.
-     * Creates vertices from modules having @networkNode property.
-     * Creates edges from connections (wired and wireless) between network interfaces.
-     */
-    virtual void extractTopology(Topology& topology);
-
-    virtual void clearConfiguration();
-    /**
-     * Computes the network configuration for all nodes in the network.
-     * The result of the computation is only stored in the configurator.
-     */
-    virtual void computeConfiguration();
-    virtual void computeStreamReservations();
-    virtual void computeGateScheduling();
-
-    virtual void computeStreamStartOffset(StreamReservation& streamReservation);
-    virtual simtime_t computeStartOffsetForPathFragments(StreamReservation& streamReservation, std::string startNetworkNodeName, simtime_t startTime);
-
-    virtual void addGateScheduling(StreamReservation& streamReservation, int startIndex, int endIndex);
-    virtual void addGateSchedulingForPathFragments(StreamReservation& streamReservation, std::string startNetworkNodeName, simtime_t startTime, int index);
-
-    virtual void configureGateScheduling();
-    virtual void configureGateScheduling(cModule *networkNode, cModule *gate, InterfaceInfo *interfaceInfo);
-    virtual void configureApplicationOffsets();
-
-    virtual std::vector<std::string> computePath(Node *source, Node *destination);
-
-    virtual Link *findLinkOut(Node *node, const char *neighbor);
-    virtual Topology::LinkOut *findLinkOut(Node *node, int gateId);
-    virtual InterfaceInfo *findInterfaceInfo(Node *node, NetworkInterface *networkInterface);
+    virtual void addGateScheduling(Input::Flow& flow, int startIndex, int endIndex, simtime_t startOffset, std::map<NetworkInterface *, std::vector<Slot>>& interfaceSchedules) const;
+    virtual void addGateSchedulingForPathFragments(Input::Flow& flow, std::string startNetworkNodeName, simtime_t startTime, int index, std::map<NetworkInterface *, std::vector<Slot>>& interfaceSchedules) const;
 };
 
 } // namespace inet
