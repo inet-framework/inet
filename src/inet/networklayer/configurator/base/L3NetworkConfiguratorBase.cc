@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
+#include "inet/networklayer/configurator/base/L3NetworkConfiguratorBase.h"
 
 #include <set>
 
@@ -52,7 +52,7 @@ namespace inet {
 using namespace inet::physicallayer;
 #endif
 
-NetworkConfiguratorBase::InterfaceInfo::InterfaceInfo(Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface)
+L3NetworkConfiguratorBase::InterfaceInfo::InterfaceInfo(Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface)
 {
     this->node = node;
     this->linkInfo = linkInfo;
@@ -65,7 +65,7 @@ NetworkConfiguratorBase::InterfaceInfo::InterfaceInfo(Node *node, LinkInfo *link
     addSubnetRoute = true;
 }
 
-void NetworkConfiguratorBase::initialize(int stage)
+void L3NetworkConfiguratorBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         minLinkWeight = par("minLinkWeight");
@@ -74,7 +74,7 @@ void NetworkConfiguratorBase::initialize(int stage)
     }
 }
 
-void NetworkConfiguratorBase::extractTopology(Topology& topology)
+void L3NetworkConfiguratorBase::extractTopology(Topology& topology)
 {
     // extract topology
     topology.extractByProperty("networkNode");
@@ -197,7 +197,7 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
         linkInfo->gatewayInterfaceInfo = determineGatewayForLink(linkInfo);
 }
 
-void NetworkConfiguratorBase::extractWiredNeighbors(Topology& topology, Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
+void L3NetworkConfiguratorBase::extractWiredNeighbors(Topology& topology, Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
 {
     Node *node = (Node *)linkOut->getRemoteNode();
     int inputGateId = linkOut->getRemoteGateId();
@@ -219,7 +219,7 @@ void NetworkConfiguratorBase::extractWiredNeighbors(Topology& topology, Topology
     }
 }
 
-void NetworkConfiguratorBase::extractWirelessNeighbors(Topology& topology, const char *wirelessId, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
+void L3NetworkConfiguratorBase::extractWirelessNeighbors(Topology& topology, const char *wirelessId, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
 {
     for (int nodeIndex = 0; nodeIndex < topology.getNumNodes(); nodeIndex++) {
         Node *node = (Node *)topology.getNode(nodeIndex);
@@ -245,7 +245,7 @@ void NetworkConfiguratorBase::extractWirelessNeighbors(Topology& topology, const
     }
 }
 
-void NetworkConfiguratorBase::extractDeviceNeighbors(Topology& topology, Node *node, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
+void L3NetworkConfiguratorBase::extractDeviceNeighbors(Topology& topology, Node *node, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
 {
     deviceNodesVisited.push_back(node);
     IInterfaceTable *interfaceTable = node->interfaceTable;
@@ -275,17 +275,17 @@ void NetworkConfiguratorBase::extractDeviceNeighbors(Topology& topology, Node *n
 
 // TODO replace isBridgeNode with isBridgedInterfaces(NetworkInterface *entry1, NetworkInterface *entry2)
 // TODO where the two interfaces must be in the same node (meaning they are on the same link)
-bool NetworkConfiguratorBase::isBridgeNode(Node *node)
+bool L3NetworkConfiguratorBase::isBridgeNode(Node *node)
 {
     return !node->routingTable || !node->interfaceTable;
 }
 
-bool NetworkConfiguratorBase::isWirelessInterface(NetworkInterface *networkInterface)
+bool L3NetworkConfiguratorBase::isWirelessInterface(NetworkInterface *networkInterface)
 {
     return !strncmp(networkInterface->getInterfaceName(), "wlan", 4);
 }
 
-Topology::LinkOut *NetworkConfiguratorBase::findLinkOut(Node *node, int gateId)
+Topology::LinkOut *L3NetworkConfiguratorBase::findLinkOut(Node *node, int gateId)
 {
     for (int i = 0; i < node->getNumOutLinks(); i++)
         if (node->getLinkOut(i)->getLocalGateId() == gateId)
@@ -294,7 +294,7 @@ Topology::LinkOut *NetworkConfiguratorBase::findLinkOut(Node *node, int gateId)
     return nullptr;
 }
 
-NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::findInterfaceInfo(Node *node, NetworkInterface *networkInterface)
+L3NetworkConfiguratorBase::InterfaceInfo *L3NetworkConfiguratorBase::findInterfaceInfo(Node *node, NetworkInterface *networkInterface)
 {
     if (networkInterface == nullptr)
         return nullptr;
@@ -317,7 +317,7 @@ static double parseCostAttribute(const char *costAttribute)
     }
 }
 
-double NetworkConfiguratorBase::computeNodeWeight(Node *node, const char *metric, cXMLElement *parameters)
+double L3NetworkConfiguratorBase::computeNodeWeight(Node *node, const char *metric, cXMLElement *parameters)
 {
     const char *costAttribute = parameters->getAttribute("cost");
     if (costAttribute != nullptr)
@@ -330,7 +330,7 @@ double NetworkConfiguratorBase::computeNodeWeight(Node *node, const char *metric
     }
 }
 
-double NetworkConfiguratorBase::computeLinkWeight(Link *link, const char *metric, cXMLElement *parameters)
+double L3NetworkConfiguratorBase::computeLinkWeight(Link *link, const char *metric, cXMLElement *parameters)
 {
     if ((link->sourceInterfaceInfo && isWirelessInterface(link->sourceInterfaceInfo->networkInterface)) ||
         (link->destinationInterfaceInfo && isWirelessInterface(link->destinationInterfaceInfo->networkInterface)))
@@ -339,7 +339,7 @@ double NetworkConfiguratorBase::computeLinkWeight(Link *link, const char *metric
         return computeWiredLinkWeight(link, metric, parameters);
 }
 
-double NetworkConfiguratorBase::computeWiredLinkWeight(Link *link, const char *metric, cXMLElement *parameters)
+double L3NetworkConfiguratorBase::computeWiredLinkWeight(Link *link, const char *metric, cXMLElement *parameters)
 {
     const char *costAttribute = parameters->getAttribute("cost");
     if (costAttribute != nullptr)
@@ -380,7 +380,7 @@ double NetworkConfiguratorBase::computeWiredLinkWeight(Link *link, const char *m
     }
 }
 
-double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char *metric, cXMLElement *parameters)
+double L3NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char *metric, cXMLElement *parameters)
 {
     const char *costAttribute = parameters->getAttribute("cost");
     if (costAttribute != nullptr)
@@ -470,7 +470,7 @@ double NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char
  * will be regarded as being in the same wireless network. (The actual value
  * of the string doesn't count.)
  */
-std::string NetworkConfiguratorBase::getWirelessId(NetworkInterface *networkInterface)
+std::string L3NetworkConfiguratorBase::getWirelessId(NetworkInterface *networkInterface)
 {
     // use the configuration
     cModule *hostModule = networkInterface->getInterfaceTable()->getHostModule();
@@ -537,7 +537,7 @@ std::string NetworkConfiguratorBase::getWirelessId(NetworkInterface *networkInte
  * If this link has exactly one node that connects to other links as well, we can assume
  * it is a "gateway" and return that (we'll use it in routing); otherwise return nullptr.
  */
-NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::determineGatewayForLink(LinkInfo *linkInfo)
+L3NetworkConfiguratorBase::InterfaceInfo *L3NetworkConfiguratorBase::determineGatewayForLink(LinkInfo *linkInfo)
 {
     InterfaceInfo *gatewayInterfaceInfo = nullptr;
     for (auto& interfaceInfo : linkInfo->interfaceInfos) {
@@ -561,17 +561,17 @@ NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::determineGatewa
     return gatewayInterfaceInfo;
 }
 
-IInterfaceTable *NetworkConfiguratorBase::findInterfaceTable(Node *node)
+IInterfaceTable *L3NetworkConfiguratorBase::findInterfaceTable(Node *node)
 {
     return L3AddressResolver::findInterfaceTableOf(node->module);
 }
 
-IRoutingTable *NetworkConfiguratorBase::findRoutingTable(Node *node)
+IRoutingTable *L3NetworkConfiguratorBase::findRoutingTable(Node *node)
 {
     return nullptr;
 }
 
-NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::createInterfaceInfo(Topology& topology, Node *node, LinkInfo *linkInfo, NetworkInterface *ie)
+L3NetworkConfiguratorBase::InterfaceInfo *L3NetworkConfiguratorBase::createInterfaceInfo(Topology& topology, Node *node, LinkInfo *linkInfo, NetworkInterface *ie)
 {
     InterfaceInfo *interfaceInfo = new InterfaceInfo(node, linkInfo, ie);
     node->interfaceInfos.push_back(interfaceInfo);
@@ -579,7 +579,7 @@ NetworkConfiguratorBase::InterfaceInfo *NetworkConfiguratorBase::createInterface
     return interfaceInfo;
 }
 
-NetworkConfiguratorBase::Matcher::Matcher(const char *pattern)
+L3NetworkConfiguratorBase::Matcher::Matcher(const char *pattern)
 {
     matchesany = opp_isempty(pattern);
     if (matchesany)
@@ -589,13 +589,13 @@ NetworkConfiguratorBase::Matcher::Matcher(const char *pattern)
         matchers.push_back(new inet::PatternMatcher(tokenizer.nextToken(), true, true, true));
 }
 
-NetworkConfiguratorBase::Matcher::~Matcher()
+L3NetworkConfiguratorBase::Matcher::~Matcher()
 {
     for (auto& matcher : matchers)
         delete matcher;
 }
 
-bool NetworkConfiguratorBase::Matcher::matches(const char *s)
+bool L3NetworkConfiguratorBase::Matcher::matches(const char *s)
 {
     if (matchesany)
         return true;
@@ -606,7 +606,7 @@ bool NetworkConfiguratorBase::Matcher::matches(const char *s)
     return false;
 }
 
-NetworkConfiguratorBase::InterfaceMatcher::InterfaceMatcher(const char *pattern)
+L3NetworkConfiguratorBase::InterfaceMatcher::InterfaceMatcher(const char *pattern)
 {
     matchesany = opp_isempty(pattern);
     if (matchesany)
@@ -621,7 +621,7 @@ NetworkConfiguratorBase::InterfaceMatcher::InterfaceMatcher(const char *pattern)
     }
 }
 
-NetworkConfiguratorBase::InterfaceMatcher::~InterfaceMatcher()
+L3NetworkConfiguratorBase::InterfaceMatcher::~InterfaceMatcher()
 {
     for (auto& nameMatcher : nameMatchers)
         delete nameMatcher;
@@ -629,7 +629,7 @@ NetworkConfiguratorBase::InterfaceMatcher::~InterfaceMatcher()
         delete towardsMatcher;
 }
 
-bool NetworkConfiguratorBase::InterfaceMatcher::matches(InterfaceInfo *interfaceInfo)
+bool L3NetworkConfiguratorBase::InterfaceMatcher::matches(InterfaceInfo *interfaceInfo)
 {
     if (matchesany)
         return true;
@@ -656,7 +656,7 @@ bool NetworkConfiguratorBase::InterfaceMatcher::matches(InterfaceInfo *interface
     return false;
 }
 
-void NetworkConfiguratorBase::dumpTopology(Topology& topology)
+void L3NetworkConfiguratorBase::dumpTopology(Topology& topology)
 {
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);

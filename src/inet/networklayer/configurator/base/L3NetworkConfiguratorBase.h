@@ -29,7 +29,7 @@
 
 namespace inet {
 
-class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressResolver
+class INET_API L3NetworkConfiguratorBase : public cSimpleModule, public L3AddressResolver
 {
   public:
     class LinkInfo;
@@ -109,8 +109,8 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
         virtual ~Topology() { for (auto& linkInfo : linkInfos) delete linkInfo; }
 
       protected:
-        virtual Node *createNode(cModule *module) override { return new NetworkConfiguratorBase::Node(module); }
-        virtual Link *createLink() override { return new NetworkConfiguratorBase::Link(); }
+        virtual Node *createNode(cModule *module) override { return new L3NetworkConfiguratorBase::Node(module); }
+        virtual Link *createLink() override { return new L3NetworkConfiguratorBase::Link(); }
     };
 
     class Matcher {
@@ -180,13 +180,13 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule, public L3AddressR
     virtual void dumpTopology(Topology& topology);
 };
 
-inline std::ostream& operator<<(std::ostream& stream, const NetworkConfiguratorBase::Link& link)
+inline std::ostream& operator<<(std::ostream& stream, const L3NetworkConfiguratorBase::Link& link)
 {
     return stream << (link.sourceInterfaceInfo != nullptr ? link.sourceInterfaceInfo->getFullPath() : "") << " -> "
                   << (link.destinationInterfaceInfo != nullptr ? link.destinationInterfaceInfo->getFullPath() : "");
 }
 
-inline std::ostream& operator<<(std::ostream& stream, const NetworkConfiguratorBase::Link *link)
+inline std::ostream& operator<<(std::ostream& stream, const L3NetworkConfiguratorBase::Link *link)
 {
     return stream << *link;
 }
