@@ -24,6 +24,14 @@ namespace inet {
 
 Define_Module(RandomQosClassifier);
 
+void RandomQosClassifier::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL) {
+        inputGate = gate("in");
+        outputGate = gate("out");
+    }
+}
+
 void RandomQosClassifier::handleMessage(cMessage *msg)
 {
     auto packet = check_and_cast<Packet *>(msg);
@@ -31,22 +39,14 @@ void RandomQosClassifier::handleMessage(cMessage *msg)
     send(msg, "out");
 }
 
-void RandomQosClassifier::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
+std::vector<cGate *> RandomQosClassifier::getRegistrationForwardingGates(cGate *gate)
 {
-    Enter_Method("handleRegisterService");
-    if (!strcmp("in", g->getName()))
-        registerService(protocol, gate("out"), servicePrimitive);
+    if (gate == outputGate)     // TODO this case was missed from original code
+        return std::vector<cGate *>({inputGate});
+    else if (gate == inputGate)
+        return std::vector<cGate *>({outputGate});
     else
-        throw cRuntimeError("Unknown gate: %s", g->getName());
-}
-
-void RandomQosClassifier::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    if (!strcmp("in", g->getName()))
-        registerProtocol(protocol, gate("out"), servicePrimitive);
-    else
-        throw cRuntimeError("Unknown gate: %s", g->getName());
+        throw cRuntimeError("Unknown gate");
 }
 
 } // namespace inet

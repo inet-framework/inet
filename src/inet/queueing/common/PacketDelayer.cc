@@ -41,12 +41,12 @@ void PacketDelayer::handleMessage(cMessage *message)
         PacketPusherBase::handleMessage(message);
 }
 
-cGate *PacketDelayer::getRegistrationForwardingGate(cGate *gate)
+std::vector<cGate *> PacketDelayer::getRegistrationForwardingGates(cGate *gate)
 {
     if (gate == outputGate)
-        return inputGate;
+        return std::vector<cGate *>({inputGate});
     else if (gate == inputGate)
-        return outputGate;
+        return std::vector<cGate *>({outputGate});
     else
         throw cRuntimeError("Unknown gate");
 }

@@ -48,7 +48,7 @@ class INET_API RelayInterfaceLearner : public PacketFlowBase, public Transparent
     virtual bool isForwardingProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) const override { return servicePrimitive == SP_INDICATION; }
     virtual bool isForwardingAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) const override { return servicePrimitive == SP_INDICATION; }
 
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+    virtual std::vector<cGate *> getRegistrationForwardingGates(cGate *gate) override;
 };
 
 } // namespace inet

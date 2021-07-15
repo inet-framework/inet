@@ -36,12 +36,12 @@ void VlanIndFilter::initialize(int stage)
     }
 }
 
-cGate *VlanIndFilter::getRegistrationForwardingGate(cGate *gate)
+std::vector<cGate *> VlanIndFilter::getRegistrationForwardingGates(cGate *gate)
 {
     if (gate == outputGate)
-        return inputGate;
+        return std::vector<cGate *>({inputGate});
     else if (gate == inputGate)
-        return outputGate;
+        return std::vector<cGate *>({outputGate});
     else
         throw cRuntimeError("Unknown gate");
 }

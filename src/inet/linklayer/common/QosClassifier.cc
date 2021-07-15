@@ -49,6 +49,8 @@ Define_Module(QosClassifier);
 void QosClassifier::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+        inputGate = gate("in");
+        outputGate = gate("out");
         defaultUp = parseUserPriority(par("defaultUp"));
         parseUserPriorityMap(par("ipProtocolUpMap"), ipProtocolUpMap);
         parseUserPriorityMap(par("udpPortUpMap"), udpPortUpMap);
@@ -172,22 +174,14 @@ int QosClassifier::getUserPriority(cMessage *msg)
     return defaultUp;
 }
 
-void QosClassifier::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
+std::vector<cGate *> QosClassifier::getRegistrationForwardingGates(cGate *gate)
 {
-    Enter_Method("handleRegisterService");
-    if (!strcmp("in", g->getName()))
-        registerService(protocol, gate("out"), servicePrimitive);
+    if (gate == outputGate)
+        return std::vector<cGate *>({inputGate});
+    else if (gate == inputGate)
+        return std::vector<cGate *>({outputGate});
     else
-        throw cRuntimeError("Unknown gate: %s", g->getName());
-}
-
-void QosClassifier::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    if (!strcmp("in", g->getName()))
-        registerProtocol(protocol, gate("out"), servicePrimitive);
-    else
-        throw cRuntimeError("Unknown gate: %s", g->getName());
+        throw cRuntimeError("Unknown gate");
 }
 
 } // namespace inet

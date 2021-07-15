@@ -34,12 +34,12 @@ void EthernetSocketPacketProcessor::initialize(int stage)
         socketTable.reference(this, "socketTableModule", true);
 }
 
-cGate *EthernetSocketPacketProcessor::getRegistrationForwardingGate(cGate *gate)
+std::vector<cGate *>EthernetSocketPacketProcessor::getRegistrationForwardingGates(cGate *gate)
 {
     if (gate == outputGate)
-        return inputGate;
+        return std::vector<cGate *>({inputGate});
     else if (gate == inputGate)
-        return outputGate;
+        return std::vector<cGate *>({outputGate});
     else
         throw cRuntimeError("Unknown gate");
 }

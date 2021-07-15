@@ -42,12 +42,12 @@ void StreamMerger::handleParameterChange(const char *name)
    }
 }
 
-cGate *StreamMerger::getRegistrationForwardingGate(cGate *gate)
+std::vector<cGate *> StreamMerger::getRegistrationForwardingGates(cGate *gate)
 {
     if (gate == outputGate)
-        return inputGate;
+        return std::vector<cGate *>({inputGate});
     else if (gate == inputGate)
-        return outputGate;
+        return std::vector<cGate *>({outputGate});
     else
         throw cRuntimeError("Unknown gate");
 }

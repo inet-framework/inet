@@ -32,12 +32,12 @@ void Ieee8021qSocketCommandProcessor::initialize(int stage)
         socketTable.reference(this, "socketTableModule", true);
 }
 
-cGate *Ieee8021qSocketCommandProcessor::getRegistrationForwardingGate(cGate *gate)
+std::vector<cGate *>Ieee8021qSocketCommandProcessor::getRegistrationForwardingGates(cGate *gate)
 {
     if (gate == outputGate)
-        return inputGate;
+        return std::vector<cGate *>({inputGate});
     else if (gate == inputGate)
-        return outputGate;
+        return std::vector<cGate *>({outputGate});
     else
         throw cRuntimeError("Unknown gate");
 }

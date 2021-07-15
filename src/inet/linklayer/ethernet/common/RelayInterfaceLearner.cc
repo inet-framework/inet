@@ -35,12 +35,12 @@ void RelayInterfaceLearner::initialize(int stage)
     }
 }
 
-cGate *RelayInterfaceLearner::getRegistrationForwardingGate(cGate *gate)
+std::vector<cGate *> RelayInterfaceLearner::getRegistrationForwardingGates(cGate *gate)
 {
     if (gate == outputGate)
-        return inputGate;
+        return std::vector<cGate *>({inputGate});
     else if (gate == inputGate)
-        return outputGate;
+        return std::vector<cGate *>({outputGate});
     else
         throw cRuntimeError("Unknown gate");
 }

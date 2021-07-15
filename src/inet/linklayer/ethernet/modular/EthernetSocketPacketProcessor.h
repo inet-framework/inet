@@ -35,7 +35,7 @@ class INET_API EthernetSocketPacketProcessor : public queueing::PacketPusherBase
 
   public:
     virtual void pushPacket(Packet *packet, cGate *gate) override;
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+    virtual std::vector<cGate *> getRegistrationForwardingGates(cGate *gate) override;
 };
 
 } // namespace inet

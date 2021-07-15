@@ -26,7 +26,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IPassivePacketSink, public virtual IActivePacketSource, public DefaultProtocolRegistrationListener
+class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IPassivePacketSink, public virtual IActivePacketSource, public TransparentProtocolRegistrationListener
 {
   protected:
     std::vector<cGate *> inputGates;
@@ -65,8 +65,16 @@ class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IP
     virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    // TransparentProtocolRegistrationListener:
+    virtual bool isForwardingProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) const override;
+    virtual bool isForwardingProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) const override;
+    virtual bool isForwardingAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) const override;
+
+    virtual bool isForwardingService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) const override;
+    virtual bool isForwardingServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) const override;
+    virtual bool isForwardingAnyService(cGate *gate, ServicePrimitive servicePrimitive) const override;
+
+    virtual std::vector<cGate *> getRegistrationForwardingGates(cGate *gate) override;
 };
 
 } // namespace queueing

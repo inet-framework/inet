@@ -38,7 +38,7 @@ class INET_API StreamIdentifier : public PacketFlowBase, public TransparentProto
     virtual void processPacket(Packet *packet) override;
     virtual int incrementSequenceNumber(const char *stream);
 
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+    virtual std::vector<cGate *> getRegistrationForwardingGates(cGate *gate) override;
 };
 
 } // namespace inet

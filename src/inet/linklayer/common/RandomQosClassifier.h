@@ -26,13 +26,17 @@ namespace inet {
  * A QoS classifier that assigns a random User Priority. This is useful
  * for testing purposes.
  */
-class INET_API RandomQosClassifier : public cSimpleModule, public DefaultProtocolRegistrationListener
+class INET_API RandomQosClassifier : public cSimpleModule, public TransparentProtocolRegistrationListener
 {
   protected:
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    cGate *inputGate = nullptr;
+    cGate *outputGate = nullptr;
+
+    virtual std::vector<cGate *> getRegistrationForwardingGates(cGate *gate) override;
 
   public:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
     void handleMessage(cMessage *msg) override;
 };
 

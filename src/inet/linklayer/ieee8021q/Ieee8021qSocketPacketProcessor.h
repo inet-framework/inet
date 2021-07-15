@@ -33,7 +33,7 @@ class INET_API Ieee8021qSocketPacketProcessor : public queueing::PacketPusherBas
   protected:
     virtual void initialize(int stage) override;
 
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+    virtual std::vector<cGate *> getRegistrationForwardingGates(cGate *gate) override;
 
   public:
     virtual void pushPacket(Packet *packet, cGate *gate) override;

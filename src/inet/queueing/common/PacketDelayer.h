@@ -30,7 +30,7 @@ class INET_API PacketDelayer : public ClockUserModuleMixin<PacketPusherBase>, pu
   protected:
     virtual void handleMessage(cMessage *message) override;
 
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+    virtual std::vector<cGate *> getRegistrationForwardingGates(cGate *gate) override;
 
   public:
     virtual void pushPacket(Packet *packet, cGate *gate) override;

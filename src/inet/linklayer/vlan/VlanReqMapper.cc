@@ -36,12 +36,12 @@ void VlanReqMapper::initialize(int stage)
     }
 }
 
-cGate *VlanReqMapper::getRegistrationForwardingGate(cGate *gate)
+std::vector<cGate *> VlanReqMapper::getRegistrationForwardingGates(cGate *gate)
 {
     if (gate == outputGate)
-        return inputGate;
+        return std::vector<cGate *>({inputGate});
     else if (gate == inputGate)
-        return outputGate;
+        return std::vector<cGate *>({outputGate});
     else
         throw cRuntimeError("Unknown gate");
 }

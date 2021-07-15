@@ -38,7 +38,7 @@ class INET_API VlanReqFilter : public PacketFilterBase, public TransparentProtoc
     virtual void processPacket(Packet *packet) override {}
     virtual void dropPacket(Packet *packet) override;
 
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+    virtual std::vector<cGate *>getRegistrationForwardingGates(cGate *gate) override;
 
   public:
     virtual bool matchesPacket(const Packet *packet) const override;

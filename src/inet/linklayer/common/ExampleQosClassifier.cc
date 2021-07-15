@@ -143,12 +143,12 @@ int ExampleQosClassifier::getUserPriority(cMessage *msg)
     return UP_BE;
 }
 
-cGate *ExampleQosClassifier::getRegistrationForwardingGate(cGate *gate)
+std::vector<cGate *> ExampleQosClassifier::getRegistrationForwardingGates(cGate *gate)
 {
     if (gate == outputGate)
-        return inputGate;
+        return std::vector<cGate *>({inputGate});
     else if (gate == inputGate)
-        return outputGate;
+        return std::vector<cGate *>({outputGate});
     else
         throw cRuntimeError("Unknown gate");
 }

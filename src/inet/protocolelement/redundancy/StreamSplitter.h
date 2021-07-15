@@ -37,7 +37,7 @@ class INET_API StreamSplitter : public PacketDuplicatorBase, public TransparentP
 
     virtual int getNumPacketDuplicates(Packet *packet) override;
 
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+    virtual std::vector<cGate *> getRegistrationForwardingGates(cGate *gate) override;
 };
 
 } // namespace inet

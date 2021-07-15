@@ -38,7 +38,7 @@ class INET_API StreamDecoder : public PacketFlowBase, public TransparentProtocol
     virtual void handleParameterChange(const char *name) override;
     virtual void processPacket(Packet *packet) override;
 
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+    virtual std::vector<cGate *> getRegistrationForwardingGates(cGate *gate) override;
 };
 
 } // namespace inet

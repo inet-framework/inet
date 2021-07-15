@@ -38,12 +38,12 @@ void StreamSplitter::handleParameterChange(const char *name)
    }
 }
 
-cGate *StreamSplitter::getRegistrationForwardingGate(cGate *gate)
+std::vector<cGate *> StreamSplitter::getRegistrationForwardingGates(cGate *gate)
 {
     if (gate == outputGate)
-        return inputGate;
+        return std::vector<cGate *>({inputGate});
     else if (gate == inputGate)
-        return outputGate;
+        return std::vector<cGate *>({outputGate});
     else
         throw cRuntimeError("Unknown gate");
 }

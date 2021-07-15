@@ -42,7 +42,7 @@ class INET_API StreamMerger : public PacketFilterBase, public TransparentProtoco
     virtual bool matchesInputStream(const char *streamName) const;
     virtual bool matchesSequenceNumber(const char *streamName, int sequenceNumber) const;
 
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+    virtual std::vector<cGate *> getRegistrationForwardingGates(cGate *gate) override;
 };
 
 } // namespace inet

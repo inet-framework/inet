@@ -38,7 +38,7 @@ namespace inet {
 /**
  * Implements the MPLS protocol; see the NED file for more info.
  */
-class INET_API Mpls : public cSimpleModule, public DefaultProtocolRegistrationListener, public IInterfaceRegistrationListener
+class INET_API Mpls : public cSimpleModule, public TransparentProtocolRegistrationListener, public IInterfaceRegistrationListener
 {
   protected:
     simtime_t delay1;
@@ -51,6 +51,7 @@ class INET_API Mpls : public cSimpleModule, public DefaultProtocolRegistrationLi
     ModuleRefByPar<IIngressClassifier> pct;
 
   protected:
+    virtual std::vector<cGate *> getRegistrationForwardingGates(cGate *gate) override;
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
@@ -73,10 +74,6 @@ class INET_API Mpls : public cSimpleModule, public DefaultProtocolRegistrationLi
 
     // IInterfaceRegistrationListener:
     virtual void handleRegisterInterface(const NetworkInterface& interface, cGate *in, cGate *out) override;
-
-    // IProtocolRegistrationListener:
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 };
 
 } // namespace inet

@@ -25,21 +25,22 @@ namespace inet {
 /**
  * This module classifies and assigns User Priority to packets.
  */
-class INET_API QosClassifier : public cSimpleModule, public DefaultProtocolRegistrationListener
+class INET_API QosClassifier : public cSimpleModule, public TransparentProtocolRegistrationListener
 {
   protected:
     int defaultUp;
     std::map<int, int> ipProtocolUpMap;
     std::map<int, int> udpPortUpMap;
     std::map<int, int> tcpPortUpMap;
+    cGate *inputGate = nullptr;
+    cGate *outputGate = nullptr;
 
     virtual int parseUserPriority(const char *text);
     virtual void parseUserPriorityMap(const char *text, std::map<int, int>& upMap);
 
     virtual int getUserPriority(cMessage *msg);
 
-    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
-    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    virtual std::vector<cGate *> getRegistrationForwardingGates(cGate *gate) override;
 
   public:
     QosClassifier() {}

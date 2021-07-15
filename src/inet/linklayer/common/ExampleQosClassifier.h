@@ -29,15 +29,16 @@ namespace inet {
 class INET_API ExampleQosClassifier : public cSimpleModule, public TransparentProtocolRegistrationListener
 {
   protected:
-    virtual int getUserPriority(cMessage *msg);
     cGate *inputGate = nullptr;
     cGate *outputGate = nullptr;
+
+    virtual int getUserPriority(cMessage *msg);
+    virtual std::vector<cGate *> getRegistrationForwardingGates(cGate *gate) override;
 
   public:
     ExampleQosClassifier() {}
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 
 } // namespace inet

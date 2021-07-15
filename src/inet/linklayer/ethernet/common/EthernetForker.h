@@ -63,7 +63,7 @@ class INET_API EthernetForker : public queueing::PacketClassifierBase, public Tr
      */
     virtual int classifyPacket(Packet *packet) override;
 
-    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+    virtual std::vector<cGate *> getRegistrationForwardingGates(cGate *gate) override;
 };
 
 } // namespace inet

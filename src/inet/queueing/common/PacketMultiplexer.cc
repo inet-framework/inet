@@ -17,6 +17,7 @@
 
 #include "inet/queueing/common/PacketMultiplexer.h"
 
+#include "inet/common/stlutils.h"
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
@@ -132,27 +133,46 @@ void PacketMultiplexer::handlePushPacketProcessed(Packet *packet, cGate *gate, b
     Enter_Method("handlePushPacketProcessed");
 }
 
-void PacketMultiplexer::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
+bool PacketMultiplexer::isForwardingProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) const
 {
-    Enter_Method("handleRegisterService");
-    if (g == outputGate) {
-        int size = gateSize("in");
-        for (int i = 0; i < size; i++)
-            registerService(protocol, gate("in", i), servicePrimitive);
-    }
+    return isForwardingAnyProtocol(gate, servicePrimitive);
 }
 
-void PacketMultiplexer::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
+bool PacketMultiplexer::isForwardingProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) const
 {
-    Enter_Method("handleRegisterProtocol");
-    // NOTE: this may be called before initstage local
-    auto outputGate = gate("out");
-    if (g != outputGate)
-        registerProtocol(protocol, outputGate, servicePrimitive);
-    else if (g == outputGate && servicePrimitive == SP_INDICATION)
-        for (auto& inputGate : inputGates)
-            registerProtocol(protocol, inputGate, servicePrimitive);
+    return isForwardingAnyProtocol(gate, servicePrimitive);
 }
+
+bool PacketMultiplexer::isForwardingAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) const
+{
+    return (gate == outputGate && servicePrimitive == SP_INDICATION) || contains(inputGates, gate);
+}
+
+bool PacketMultiplexer::isForwardingService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) const
+{
+    return isForwardingAnyProtocol(gate, servicePrimitive);
+}
+
+bool PacketMultiplexer::isForwardingServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) const
+{
+    return isForwardingAnyProtocol(gate, servicePrimitive);
+}
+
+bool PacketMultiplexer::isForwardingAnyService(cGate *gate, ServicePrimitive servicePrimitive) const
+{
+    return gate == outputGate;
+}
+
+std::vector<cGate *> PacketMultiplexer::getRegistrationForwardingGates(cGate *gate)
+{
+    if (gate == outputGate)
+        return inputGates;
+    else if (contains(inputGates, gate))
+        return std::vector<cGate *>({outputGate});
+    else
+        throw cRuntimeError("Unknown gate");
+}
+
 
 } // namespace queueing
 } // namespace inet
