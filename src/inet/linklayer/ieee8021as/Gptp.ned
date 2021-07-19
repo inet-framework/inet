@@ -19,6 +19,7 @@ simple Gptp like IApp
         string clockModule = default(""); // relative path of a module that implements IClock; optional
         string interfaceTableModule;
         string gptpNodeType; // @enum("GptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE
+        int domainNumber = default(0);
         string slavePort = default(""); // port for receiving time (empty for MASTER_NODE)
         object masterPorts = default([]); // ports for sending out time (empty for SLAVE_NODE)
         double correctionField @unit(s) = default(0s);

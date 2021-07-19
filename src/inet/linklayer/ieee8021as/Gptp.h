@@ -26,6 +26,7 @@ class Gptp : public ClockUserModuleBase, public cListener
     ModuleRefByPar<IInterfaceTable> interfaceTable;
 
     GptpNodeType gptpNodeType;
+    int domainNumber = -1;
     int slavePortId = -1; // interface ID of slave port
     std::set<int> masterPortIds; // interface IDs of master ports
     clocktime_t correctionField;
