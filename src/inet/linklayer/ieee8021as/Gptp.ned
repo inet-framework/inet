@@ -26,7 +26,7 @@ simple Gptp like IApp
         double syncInterval @unit(s) = default(0.125s);
         double pdelayInterval @unit(s) = default(1s);
         double syncInitialOffset @unit(s) = default(syncInterval);
-        double pdelayInitialOffset @unit(s) = default(pdelayInterval);
+        double pdelayInitialOffset @unit(s) = default(0s);
 
         // following parameters are used to schedule follow_up and pdelay_resp messages.
         // These numbers must be enough large to prevent creating queue in MAC layer.
