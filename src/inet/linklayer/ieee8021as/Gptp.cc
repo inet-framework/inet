@@ -88,10 +88,14 @@ void Gptp::initialize(int stage)
         }
 
         if (slavePortId != -1) {
-            interfaceTable->getInterfaceById(slavePortId)->addMulticastMacAddress(GPTP_MULTICAST_ADDRESS);
+            auto networkInterface = interfaceTable->getInterfaceById(slavePortId);
+            if (!networkInterface->matchesMulticastMacAddress(GPTP_MULTICAST_ADDRESS))
+                networkInterface->addMulticastMacAddress(GPTP_MULTICAST_ADDRESS);
         }
         for (auto id: masterPortIds) {
-            interfaceTable->getInterfaceById(id)->addMulticastMacAddress(GPTP_MULTICAST_ADDRESS);
+            auto networkInterface = interfaceTable->getInterfaceById(id);
+            if (!networkInterface->matchesMulticastMacAddress(GPTP_MULTICAST_ADDRESS))
+                networkInterface->addMulticastMacAddress(GPTP_MULTICAST_ADDRESS);
         }
 
         correctionField = par("correctionField");
