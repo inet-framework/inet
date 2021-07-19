@@ -26,7 +26,7 @@ import inet.clock.contract.IOscillator;
 simple IdealOscillator extends OscillatorBase like IOscillator
 {
     parameters:
-        double tickLength @unit(s);
+        double tickLength @unit(s) = default(0s);
         @class(IdealOscillator);
 }
 
