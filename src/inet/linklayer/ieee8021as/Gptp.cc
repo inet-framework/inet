@@ -480,7 +480,16 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, c
         auto signal = check_and_cast<cPacket *>(obj);
         auto packet = check_and_cast_nullable<Packet *>(signal->getEncapsulatedPacket());
         if (packet) {
-            packet->addTagIfAbsent<GptpIngressTimeInd>()->setArrivalClockTime(clock->getClockTime());
+            auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+            if (*protocol == Protocol::ethernetPhy) {
+                const auto& ethPhyHeader = packet->peekAtFront<physicallayer::EthernetPhyHeader>();
+                const auto& ethMacHeader = packet->peekAt<EthernetMacHeader>(ethPhyHeader->getChunkLength());
+                if (ethMacHeader->getTypeOrLength() == ETHERTYPE_GPTP) {
+                    const auto& gptp = packet->peekAt<GptpBase>(ethPhyHeader->getChunkLength() + ethMacHeader->getChunkLength());
+                    if (gptp->getDomainNumber() == domainNumber)
+                        packet->addTagIfAbsent<GptpIngressTimeInd>()->setArrivalClockTime(clock->getClockTime());
+                }
+            }
         }
     }
     else if (signal == transmissionEndedSignal) {
