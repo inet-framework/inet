@@ -27,6 +27,8 @@ void IdealOscillator::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         origin = simTime();
         tickLength = par("tickLength");
+        if (tickLength == 0)
+            tickLength.setRaw(1);
         WATCH(tickLength);
         emit(driftRateChangedSignal, 0);
     }
