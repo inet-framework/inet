@@ -36,7 +36,7 @@ std::ostream& TagBase::printFieldsToStream(std::ostream &stream, int level, int 
     if (level <= PRINT_LEVEL_DETAIL)
         for (int i = 0; i < descriptor->getFieldCount(); i++)
             if (!descriptor->getFieldIsArray(i) && strcmp("omnetpp::cObject", descriptor->getFieldDeclaredOn(i)))
-                stream << ", " << EV_BOLD << descriptor->getFieldName(i) << EV_NORMAL << " = " << descriptor->getFieldValueAsString((void*) (cObject*) this, i, 0);
+                stream << ", " << EV_BOLD << descriptor->getFieldName(i) << EV_NORMAL << " = " << descriptor->getFieldValueAsString(toAnyPtr(this), i, 0);
     return stream;
 }
 
