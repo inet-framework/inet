@@ -37,13 +37,19 @@ int StreamClassifier::classifyPacket(Packet *packet)
 {
     const char *streamName = nullptr;
     switch (*mode) {
-        case 'r':
-            streamName = packet->getTag<StreamReq>()->getStreamName();
+        case 'r': {
+            auto streamReq = packet->findTag<StreamReq>();
+            if (streamReq != nullptr)
+                streamName = streamReq->getStreamName();
             break;
-        case 'i':
-            streamName = packet->getTag<StreamInd>()->getStreamName();
+        }
+        case 'i': {
+            auto streamInd = packet->findTag<StreamInd>();
+            if (streamInd != nullptr)
+                streamName = streamInd->getStreamName();
             break;
-        case 'b':
+        }
+        case 'b': {
             auto streamReq = packet->findTag<StreamReq>();
             if (streamReq != nullptr)
                 streamName = streamReq->getStreamName();
@@ -51,12 +57,11 @@ int StreamClassifier::classifyPacket(Packet *packet)
                 auto streamInd = packet->findTag<StreamInd>();
                 if (streamInd != nullptr)
                     streamName = streamInd->getStreamName();
-                else
-                    throw cRuntimeError("Neither StreamReq nor StreamInd found");
             }
             break;
+        }
     }
-    if (mapping->containsKey(streamName))
+    if (streamName != nullptr && mapping->containsKey(streamName))
         return mapping->get(streamName).intValue();
     else
         return defaultGateIndex;
