@@ -377,6 +377,7 @@ void Gptp::synchronize()
      *****************************************************************************/
     clocktime_t newTime = peerSentTimeSync + peerDelay + correctionField + residenceTime;
 
+    ASSERT(gptpNodeType != MASTER_NODE);
     check_and_cast<SettableClock *>(clock.get())->setClockTime(newTime);
 
     // TODO computeGmRateRatio:
