@@ -30,14 +30,14 @@ void IdealOscillator::initialize(int stage)
         if (tickLength == 0)
             tickLength.setRaw(1);
         WATCH(tickLength);
-        emit(driftRateChangedSignal, 0);
+        emit(driftRateChangedSignal, 0.0);
     }
 }
 
 void IdealOscillator::finish()
 {
     OscillatorBase::finish();
-    emit(driftRateChangedSignal, 0);
+    emit(driftRateChangedSignal, 0.0);
 }
 
 int64_t IdealOscillator::computeTicksForInterval(simtime_t timeInterval) const
