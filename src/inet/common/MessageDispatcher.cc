@@ -136,8 +136,11 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
     if (socketInd != nullptr) {
         int socketId = socketInd->getSocketId();
         auto it = socketIdToGateIndex.find(socketId);
-        if (it != socketIdToGateIndex.end())
-            return gate("out", it->second);
+        if (it != socketIdToGateIndex.end()) {
+            auto outGate = gate("out", it->second);
+            EV_INFO << "Dispatching packet to socket" << EV_FIELD(socketId) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(packet) << EV_ENDL;
+            return outGate;
+        }
         else
             throw cRuntimeError("handlePacket(): Unknown socket: socketId = %d, pathStartGate = %s, pathEndGate = %s", socketId, inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
     }
@@ -155,24 +158,36 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
         auto protocol = dispatchProtocolReq->getProtocol();
         if (servicePrimitive == SP_REQUEST) {
             auto it = serviceToGateIndex.find(Key(protocol->getId(), servicePrimitive));
-            if (it != serviceToGateIndex.end())
-                return gate("out", it->second);
+            if (it != serviceToGateIndex.end()) {
+                auto outGate = gate("out", it->second);
+                EV_INFO << "Dispatching packet to service" << EV_FIELD(protocol, *protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(packet) << EV_ENDL;
+                return outGate;
+            }
             else {
                 auto it = serviceToGateIndex.find(Key(-1, servicePrimitive));
-                if (it != serviceToGateIndex.end())
-                    return gate("out", it->second);
+                if (it != serviceToGateIndex.end()) {
+                    auto outGate = gate("out", it->second);
+                    EV_INFO << "Dispatching packet to any service" << EV_FIELD(servicePrimitive) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(packet) << EV_ENDL;
+                    return outGate;
+                }
                 else
                     throw cRuntimeError("handlePacket(): Unknown protocol: protocolId = %d, protocolName = %s, servicePrimitive = REQUEST, pathStartGate = %s, pathEndGate = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
             }
         }
         else if (servicePrimitive == SP_INDICATION) {
             auto it = protocolToGateIndex.find(Key(protocol->getId(), servicePrimitive));
-            if (it != protocolToGateIndex.end())
-                return gate("out", it->second);
+            if (it != protocolToGateIndex.end()) {
+                auto outGate = gate("out", it->second);
+                EV_INFO << "Dispatching packet to protocol" << EV_FIELD(protocol, *protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(packet) << EV_ENDL;
+                return outGate;
+            }
             else {
                 auto it = protocolToGateIndex.find(Key(-1, servicePrimitive));
-                if (it != protocolToGateIndex.end())
-                    return gate("out", it->second);
+                if (it != protocolToGateIndex.end()) {
+                    auto outGate = gate("out", it->second);
+                    EV_INFO << "Dispatching packet to any protocol" << EV_FIELD(servicePrimitive) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(packet) << EV_ENDL;
+                    return outGate;
+                }
                 else
                     throw cRuntimeError("handlePacket(): Unknown protocol: protocolId = %d, protocolName = %s, servicePrimitive = INDICATION, pathStartGate = %s, pathEndGate = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
             }
@@ -184,8 +199,11 @@ cGate *MessageDispatcher::handlePacket(Packet *packet, cGate *inGate)
     if (interfaceReq != nullptr) {
         int interfaceId = interfaceReq->getInterfaceId();
         auto it = interfaceIdToGateIndex.find(interfaceId);
-        if (it != interfaceIdToGateIndex.end())
-            return gate("out", it->second);
+        if (it != interfaceIdToGateIndex.end()) {
+            auto outGate = gate("out", it->second);
+            EV_INFO << "Dispatching packet to interface" << EV_FIELD(interfaceId) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(packet) << EV_ENDL;
+            return outGate;
+        }
         else
             throw cRuntimeError("handlePacket(): Unknown interface: interfaceId = %d, pathStartGate = %s, pathEndGate = %s", interfaceId, inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
     }
@@ -207,8 +225,11 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
     if (socketInd != nullptr) {
         int socketId = socketInd->getSocketId();
         auto it = socketIdToGateIndex.find(socketId);
-        if (it != socketIdToGateIndex.end())
-            return gate("out", it->second);
+        if (it != socketIdToGateIndex.end()) {
+            auto outGate = gate("out", it->second);
+            EV_INFO << "Dispatching message to socket" << EV_FIELD(socketId) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(message) << EV_ENDL;
+            return outGate;
+        }
         else
             throw cRuntimeError("handleMessage(): Unknown socket: socketId = %d, pathStartGate = %s, pathEndGate = %s", socketId, inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
     }
@@ -221,24 +242,36 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
         auto protocol = dispatchProtocolReq->getProtocol();
         if (servicePrimitive == SP_REQUEST) {
             auto it = serviceToGateIndex.find(Key(protocol->getId(), servicePrimitive));
-            if (it != serviceToGateIndex.end())
-                return gate("out", it->second);
+            if (it != serviceToGateIndex.end()) {
+                auto outGate = gate("out", it->second);
+                EV_INFO << "Dispatching message to service" << EV_FIELD(protocol, *protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(message) << EV_ENDL;
+                return outGate;
+            }
             else {
                 auto it = serviceToGateIndex.find(Key(-1, servicePrimitive));
-                if (it != serviceToGateIndex.end())
-                    return gate("out", it->second);
+                if (it != serviceToGateIndex.end()) {
+                    auto outGate = gate("out", it->second);
+                    EV_INFO << "Dispatching message to any service" << EV_FIELD(servicePrimitive) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(message) << EV_ENDL;
+                    return outGate;
+                }
                 else
                     throw cRuntimeError("handleMessage(): Unknown protocol: protocolId = %d, protocolName = %s, servicePrimitive = REQUEST, pathStartGate = %s, pathEndGate = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
             }
         }
         else if (servicePrimitive == SP_INDICATION) {
             auto it = protocolToGateIndex.find(Key(protocol->getId(), servicePrimitive));
-            if (it != protocolToGateIndex.end())
-                return gate("out", it->second);
+            if (it != protocolToGateIndex.end()) {
+                auto outGate = gate("out", it->second);
+                EV_INFO << "Dispatching message to protocol" << EV_FIELD(protocol, *protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(message) << EV_ENDL;
+                return outGate;
+            }
             else {
                 auto it = protocolToGateIndex.find(Key(-1, servicePrimitive));
-                if (it != protocolToGateIndex.end())
-                    return gate("out", it->second);
+                if (it != protocolToGateIndex.end()) {
+                    auto outGate = gate("out", it->second);
+                    EV_INFO << "Dispatching message to any protocol" << EV_FIELD(servicePrimitive) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(message) << EV_ENDL;
+                    return outGate;
+                }
                 else
                     throw cRuntimeError("handleMessage(): Unknown protocol: protocolId = %d, protocolName = %s, servicePrimitive = INDICATION, pathStartGate = %s, pathEndGate = %s", protocol->getId(), protocol->getName(), inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
             }
@@ -250,8 +283,11 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
     if (interfaceReq != nullptr) {
         int interfaceId = interfaceReq->getInterfaceId();
         auto it = interfaceIdToGateIndex.find(interfaceId);
-        if (it != interfaceIdToGateIndex.end())
-            return gate("out", it->second);
+        if (it != interfaceIdToGateIndex.end()) {
+            auto outGate = gate("out", it->second);
+            EV_INFO << "Dispatching message to interface" << EV_FIELD(interfaceId) << EV_FIELD(inGate) << EV_FIELD(outGate) << EV_FIELD(message) << EV_ENDL;
+            return outGate;
+        }
         else
             throw cRuntimeError("handleMessage(): Unknown interface: interfaceId = %d, pathStartGate = %s, pathEndGate = %s", interfaceId, inGate->getPathStartGate()->getFullPath().c_str(), inGate->getPathEndGate()->getFullPath().c_str());
     }
