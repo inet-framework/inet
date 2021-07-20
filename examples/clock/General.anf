@@ -555,7 +555,7 @@ utils.export_data_if_needed(df, props)
             <property name="Legend.Border" value="false"/>
             <property name="title" value=""/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
-            <property name="vector_operations" value="apply:lineartrend, a=-1 # Add a linear trend to the values, with the given steepness"/>
+            <property name="vector_operations" value="apply:lineartrend(-1)"/>
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
