@@ -20,9 +20,13 @@ package inet.queueing.filter;
 import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
+//
+// This packet filter module drops packets that don't match the given packet
+// filter criteria. The criteria can use wildcards and boolean operators.
+//
 simple LabelFilter extends PacketFilterBase like IPacketFilter
 {
     parameters:
-        string labelFilter;
+        string labelFilter; // the label filter as a match expression (e.g. green or red)
         @class(LabelFilter);
 }
