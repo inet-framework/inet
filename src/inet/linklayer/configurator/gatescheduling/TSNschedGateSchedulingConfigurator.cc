@@ -80,13 +80,10 @@ cValueMap *TSNschedGateSchedulingConfigurator::convertInputToJson(const Input& i
         auto switch_ = input.switches[i];
         cValueMap *jsonSwitch = new cValueMap();
         jsonSwitches->add(jsonSwitch);
-        // KLUDGE TODO use per port parameters
-        double datarate = 1E+9 / 1000000;
-        double propagationTime = 50E-9 * 1000000;
         // TODO KLUDGE this is a wild guess
         double guardBand = 0;
         for (auto flow : input.flows) {
-            double v = b(flow->startApplication->packetLength).get() / datarate;
+            double v = b(flow->startApplication->packetLength).get();
             if (guardBand < v)
                 guardBand = v;
         }
@@ -97,15 +94,18 @@ cValueMap *TSNschedGateSchedulingConfigurator::convertInputToJson(const Input& i
             auto port = switch_->ports[j];
             auto jsonPort = new cValueMap();
             jsonPorts->add(jsonPort);
-            jsonPort->set("name", port->module->getFullName());
+            // KLUDGE: port name should not be unique in the network but only in the network node
+            std::string nodeName = port->startNode->module->getFullName();
+            jsonPort->set("name", nodeName + "-" + port->module->getFullName());
             jsonPort->set("connectsTo", port->endNode->module->getFullName());
-            jsonPort->set("timeToTravel", propagationTime);
+            jsonPort->set("timeToTravel", port->propagationTime.dbl() * 1000000);
             jsonPort->set("timeToTravelUnit", "us");
-            jsonPort->set("guardBandSize", guardBand);
-            jsonPort->set("guardBandSizeUnit", "us");
-            jsonPort->set("portSpeed", datarate);
-            jsonPort->set("portSpeedSizeUnit", "b");
+//            jsonPort->set("guardBandSize", guardBand);
+//            jsonPort->set("guardBandSizeUnit", "bit");
+            jsonPort->set("portSpeed", bps(port->datarate).get() / 1000000);
+            jsonPort->set("portSpeedSizeUnit", "bit");
             jsonPort->set("portSpeedTimeUnit", "us");
+            jsonPort->set("scheduleType", "Hypercycle");
             jsonPort->set("cycleStart", 0);
             jsonPort->set("cycleStartUnit", "us");
             jsonPort->set("maximumSlotDuration", gateCycleDuration.dbl() * 1000000);
@@ -120,11 +120,12 @@ cValueMap *TSNschedGateSchedulingConfigurator::convertInputToJson(const Input& i
         jsonFlow->set("name", flow->name);
         jsonFlow->set("type", "unicast");
         jsonFlow->set("sourceDevice", flow->startApplication->device->module->getFullName());
-        jsonFlow->set("priority", flow->startApplication->priority);
+        jsonFlow->set("fixedPriority", "true");
+        jsonFlow->set("priorityValue", flow->startApplication->priority);
         jsonFlow->set("packetPeriodicity", flow->startApplication->packetInterval.dbl() * 1000000);
         jsonFlow->set("packetPeriodicityUnit", "us");
-        jsonFlow->set("packetSize", b(flow->startApplication->packetLength + B(12)).get());
-        jsonFlow->set("packetSizeUnit", "b");
+        jsonFlow->set("packetSize", b(flow->startApplication->packetLength).get());
+        jsonFlow->set("packetSizeUnit", "bit");
         jsonFlow->set("hardConstraintTime", flow->startApplication->maxLatency.dbl() * 1000000);
         jsonFlow->set("hardConstraintTimeUnit", "us");
         cValueArray *endDevices = new cValueArray();
@@ -154,31 +155,42 @@ TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::
     for (int i = 0; i < jsonSwitches->size(); i++) {
         auto jsonSwitch = check_and_cast<cValueMap *>(jsonSwitches->get(i).objectValue());
         std::string switchName = jsonSwitch->get("name").stringValue();
-        auto switch_ = *std::find_if(input.switches.begin(), input.switches.end(), [&] (Input::Switch *switch_) { return switch_->module->getFullName() == switchName; });
+        auto it = std::find_if(input.switches.begin(), input.switches.end(), [&] (Input::Switch *switch_) { return switch_->module->getFullName() == switchName; });
+        if (it == input.switches.end())
+            throw cRuntimeError("Cannot find switch: %s", switchName.c_str());
+        auto switch_ = *it;
         auto jsonPorts = check_and_cast<cValueArray *>(jsonSwitch->get("ports").objectValue());
         for (int j = 0; j < jsonPorts->size(); j++) {
             auto jsonPort = check_and_cast<cValueMap *>(jsonPorts->get(j).objectValue());
             std::string portName = jsonPort->get("name").stringValue();
-            auto port = *std::find_if(switch_->ports.begin(), switch_->ports.end(), [&] (Input::Port *port) { return port->module->getFullName() == switchName; });
+            // KLUDGE: port name should not be unique in the network but only in the network node
+            portName = portName.substr(portName.find('-') + 1);
+            auto jt = std::find_if(switch_->ports.begin(), switch_->ports.end(), [&] (Input::Port *port) { return port->startNode == switch_ && port->module->getFullName() == portName; });
+            if (jt == switch_->ports.end())
+                throw cRuntimeError("Cannot find port: %s", portName.c_str());
+            auto port = *jt;
             auto& schedules = output->gateSchedules[port];
             for (int priority = 0; priority < port->numPriorities; priority++) {
                 auto schedule = new Output::Schedule();
                 schedule->port = port;
                 schedule->priority = priority;
-                auto jsonPrioritySlots = check_and_cast<cValueArray *>(jsonPort->get("prioritySlotData").objectValue());
-                for (int k = 0; k < jsonPorts->size(); k++) {
+                auto jsonPrioritySlots = check_and_cast<cValueArray *>(jsonPort->get("prioritySlotsData").objectValue());
+                for (int k = 0; k < jsonPrioritySlots->size(); k++) {
                     auto jsonPrioritySlot = check_and_cast<cValueMap *>(jsonPrioritySlots->get(k).objectValue());
                     if (priority == jsonPrioritySlot->get("priority").intValue()) {
-                        auto jsonSlotData = check_and_cast<cValueMap *>(jsonPrioritySlot->get("slotsData").objectValue());
-                        simtime_t slotStart = jsonSlotData->get("slotStart").doubleValue();
-                        simtime_t slotDuration = jsonSlotData->get("slotDuration").doubleValue();
-                        // slot with length 0 are not used
-                        if (slotDuration == 0)
-                            continue;
-                        Output::Slot slot;
-                        slot.start = slotStart;
-                        slot.duration = slotDuration;
-                        schedule->slots.push_back(slot);
+                        auto jsonSlots = check_and_cast<cValueArray *>(jsonPrioritySlot->get("slotsData").objectValue());
+                        for (int l = 0; l < jsonSlots->size(); l++) {
+                            auto jsonSlot = check_and_cast<cValueMap *>(jsonSlots->get(l).objectValue());
+                            simtime_t slotStart = jsonSlot->get("slotStart").doubleValue() / 1000000;
+                            simtime_t slotDuration = jsonSlot->get("slotDuration").doubleValue() / 1000000;
+                            // slot with length 0 are not used
+                            if (slotDuration == 0)
+                                continue;
+                            Output::Slot slot;
+                            slot.start = slotStart;
+                            slot.duration = slotDuration;
+                            schedule->slots.push_back(slot);
+                        }
                     }
                 }
                 auto& slots = schedule->slots;
@@ -192,10 +204,18 @@ TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::
     auto jsonFlows = check_and_cast<cValueArray *>(json->get("flows").objectValue());
     for (int i = 0; i < jsonFlows->size(); i++) {
         auto jsonFlow = check_and_cast<cValueMap *>(jsonFlows->get(i).objectValue());
-        auto name = jsonFlow->get("name").stringValue();
-        auto flow = *std::find_if(input.flows.begin(), input.flows.end(), [&] (Input::Flow *flow) { return flow->name == name; });
-        auto firstSendingTime = jsonFlow->get("firstSendingTime").doubleValue();
-        output->applicationStartTimes[flow->startApplication] = firstSendingTime;
+        std::string name = jsonFlow->get("name").stringValue();
+        auto it = std::find_if(input.flows.begin(), input.flows.end(), [&] (Input::Flow *flow) { return flow->name == name; });
+        if (it == input.flows.end())
+            throw cRuntimeError("Cannot find flow: %s", name.c_str());
+        auto flow = *it;
+        auto application = flow->startApplication;
+        auto firstSendingTime = jsonFlow->get("firstSendingTime").doubleValue() / 1000000;
+        bps datarate = application->device->ports[0]->datarate;
+        auto startTime = firstSendingTime - s(application->packetLength / datarate).get();
+        if (startTime < 0)
+            startTime += gateCycleDuration.dbl();
+        output->applicationStartTimes[application] = startTime;
     }
     return output;
 }
@@ -229,7 +249,9 @@ void TSNschedGateSchedulingConfigurator::executeTSNsched(std::string inputFileNa
 
 TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::computeGateScheduling(const Input& input) const
 {
-    std::string inputFileName = "input.json";
+    std::string baseName = getEnvir()->getConfig()->substituteVariables("${resultdir}/${configname}-${iterationvarsf}#${repetition}");
+    std::string inputFileName = baseName + "-TSNsched-input.json";
+    // TODO: std::string outputFileName = baseName + "-TSNsched-output.json";
     std::string outputFileName = "output.json";
     writeInputToFile(input, inputFileName);
     executeTSNsched(inputFileName);
