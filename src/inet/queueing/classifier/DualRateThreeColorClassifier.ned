@@ -17,6 +17,22 @@
 
 package inet.queueing.classifier;
 
+//
+// This packet classifier module classifies packets using two token buckets.
+// Each packet is classified depending on which token bucket is the first one
+// that contains the required number of tokens for the packet.
+//
+// The first token bucket is filled with tokens using the committed information
+// rate. The maximum number of tokens is determined by the committed burst size.
+// The second token bucket is filled with tokens using the excess information
+// rate. The maximum number of tokens is determined by the excess burst size.
+// Excess tokens from the first token bucket overflow into the second token bucket.
+//
+// By default, packets consume 1 token per byte.
+//
+// @see ~SingleRateTwoColorMeter, ~SingleRateThreeColorMeter, ~DualRateThreeColorMeter
+// @see ~SingleRateTwoColorClassifier, ~SingleRateThreeColorClassifier
+//
 simple DualRateThreeColorClassifier extends MultiTokenBucketClassifier
 {
     parameters:
