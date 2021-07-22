@@ -14,6 +14,8 @@
 
 package inet.examples.gptp;
 
+import inet.common.scenario.ScenarioManager;
+import inet.linklayer.configurator.MacAddressTableConfigurator;
 import inet.networks.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EthernetSwitch;
@@ -59,6 +61,12 @@ network GptpTreeExample extends WiredNetworkBase
 network GptpRingExample extends WiredNetworkBase
 {
     submodules:
+        macAddressTableConfigurator: MacAddressTableConfigurator {
+            @display("p=100,400;is=s");
+        }
+        scenarioManager: ScenarioManager {
+            @display("p=100,500;is=s");
+        }
         grandMaster1: StandardHost {
             @display("p=400,150");
         }

@@ -17,6 +17,8 @@
 
 #include "inet/protocolelement/transceiver/PacketTransmitter.h"
 
+#include "inet/networklayer/common/NetworkInterface.h"
+
 namespace inet {
 
 Define_Module(PacketTransmitter);
@@ -50,21 +52,34 @@ void PacketTransmitter::pushPacket(Packet *packet, cGate *gate)
 
 void PacketTransmitter::startTx(Packet *packet)
 {
-    // 1. check current state
-    ASSERT(!isTransmitting());
-    // 2. store transmission progress
-    txDatarate = bps(*dataratePar);
-    txStartTime = simTime();
-    txStartClockTime = getClockTime();
-    // 3. create signal
-    auto signal = encodePacket(packet);
-    txSignal = signal->dup();
-    // 4. send signal start and notify subscribers
-    emit(transmissionStartedSignal, signal);
-    prepareSignal(signal);
-    send(signal, SendOptions().duration(signal->getDuration()), outputGate);
-    // 5. schedule transmission end timer
-    scheduleTxEndTimer(txSignal);
+    auto networkInterface = getContainingNicModule(this);
+    if (!networkInterface->isUp()) {
+        EV_WARN << "Network interface is down, dropping packet" << EV_FIELD(networkInterface) << EV_FIELD(packet) << EV_ENDL;
+        // TODO emit packetDropped signal
+        delete packet;
+    }
+    else if (!networkInterface->hasCarrier()) {
+        EV_WARN << "Network interface has no carrier, dropping packet" << EV_FIELD(networkInterface) << EV_FIELD(packet) << EV_ENDL;
+        // TODO emit packetDropped signal
+        delete packet;
+    }
+    else {
+        // 1. check current state
+        ASSERT(!isTransmitting());
+        // 2. store transmission progress
+        txDatarate = bps(*dataratePar);
+        txStartTime = simTime();
+        txStartClockTime = getClockTime();
+        // 3. create signal
+        auto signal = encodePacket(packet);
+        txSignal = signal->dup();
+        // 4. send signal start and notify subscribers
+        emit(transmissionStartedSignal, signal);
+        prepareSignal(signal);
+        send(signal, SendOptions().duration(signal->getDuration()), outputGate);
+        // 5. schedule transmission end timer
+        scheduleTxEndTimer(txSignal);
+    }
 }
 
 void PacketTransmitter::endTx()
