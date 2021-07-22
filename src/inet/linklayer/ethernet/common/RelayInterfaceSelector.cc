@@ -51,6 +51,8 @@ cGate *RelayInterfaceSelector::getRegistrationForwardingGate(cGate *gate)
 
 void RelayInterfaceSelector::pushPacket(Packet *packet, cGate *gates)
 {
+    Enter_Method("pushPacket");
+    take(packet);
     auto interfaceReq = packet->findTag<InterfaceReq>();
     auto macAddressReq = packet->getTag<MacAddressReq>();
     auto destinationAddress = macAddressReq->getDestAddress();
