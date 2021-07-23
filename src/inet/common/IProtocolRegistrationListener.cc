@@ -183,5 +183,78 @@ void registerAnyProtocol(cGate *requestOut, cGate *indicationIn, cGate *response
         registerAnyProtocol(confirmIn, SP_CONFIRM);
 }
 
+void TransparentProtocolRegistrationListener::mapRegistrationForwardingGates(cGate *gate, std::function<void(cGate *)> f)
+{
+    auto forwardingGate = getRegistrationForwardingGate(gate);
+    if (forwardingGate != nullptr)
+        f(forwardingGate);
+}
+
+void TransparentProtocolRegistrationListener::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
+{
+    Enter_Method2("handleRegisterService");
+    if (isForwardingService(protocol, gate, servicePrimitive)) {
+        EV_INFO << "Forwarding service" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+        mapRegistrationForwardingGates(gate, [&] (cGate *gate) {
+            registerService(protocol, gate, servicePrimitive);
+        });
+    }
+}
+
+void TransparentProtocolRegistrationListener::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
+{
+    Enter_Method2("handleRegisterProtocol");
+    if (isForwardingProtocol(protocol, gate, servicePrimitive)) {
+        EV_INFO << "Forwarding protocol" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+        mapRegistrationForwardingGates(gate, [&] (cGate *gate) {
+            registerProtocol(protocol, gate, servicePrimitive);
+        });
+    }
+}
+
+void TransparentProtocolRegistrationListener::handleRegisterServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive)
+{
+    Enter_Method2("handleRegisterServiceGroup");
+    if (isForwardingServiceGroup(protocolGroup, gate, servicePrimitive)) {
+        EV_INFO << "Forwarding service group" << EV_FIELD(protocolGroup) << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+        mapRegistrationForwardingGates(gate, [&] (cGate *gate) {
+            registerServiceGroup(protocolGroup, gate, servicePrimitive);
+        });
+    }
+}
+
+void TransparentProtocolRegistrationListener::handleRegisterProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive)
+{
+    Enter_Method2("handleRegisterProtocolGroup");
+    if (isForwardingProtocolGroup(protocolGroup, gate, servicePrimitive)) {
+        EV_INFO << "Forwarding protocol group" << EV_FIELD(protocolGroup) << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+        mapRegistrationForwardingGates(gate, [&] (cGate *gate) {
+            registerProtocolGroup(protocolGroup, gate, servicePrimitive);
+        });
+    }
+}
+
+void TransparentProtocolRegistrationListener::handleRegisterAnyService(cGate *gate, ServicePrimitive servicePrimitive)
+{
+    Enter_Method2("handleRegisterAnyService");
+    if (isForwardingAnyService(gate, servicePrimitive)) {
+        EV_INFO << "Forwarding any service" << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+        mapRegistrationForwardingGates(gate, [&] (cGate *gate) {
+            registerAnyService(gate, servicePrimitive);
+        });
+    }
+}
+
+void TransparentProtocolRegistrationListener::handleRegisterAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive)
+{
+    Enter_Method2("handleRegisterAnyProtocol");
+    if (isForwardingAnyProtocol(gate, servicePrimitive)) {
+        EV_INFO << "Forwarding any protocol" << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+        mapRegistrationForwardingGates(gate, [&] (cGate *gate) {
+            registerAnyProtocol(gate, servicePrimitive);
+        });
+    }
+}
+
 } // namespace inet
 
