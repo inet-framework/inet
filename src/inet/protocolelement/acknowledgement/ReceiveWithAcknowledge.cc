@@ -29,7 +29,7 @@ Define_Module(ReceiveWithAcknowledge);
 void ReceiveWithAcknowledge::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LINK_LAYER) {
         registerService(AccessoryProtocol::withAcknowledge, nullptr, inputGate);
         registerProtocol(AccessoryProtocol::withAcknowledge, nullptr, outputGate);
     }

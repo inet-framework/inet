@@ -34,6 +34,8 @@ void SendToMacAddress::initialize(int stage)
         const char *addressAsString = par("address");
         if (strlen(addressAsString) != 0)
             address = MacAddress(addressAsString);
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(AccessoryProtocol::destinationMacAddress, inputGate, nullptr);
         registerProtocol(AccessoryProtocol::destinationMacAddress, outputGate, nullptr);
     }

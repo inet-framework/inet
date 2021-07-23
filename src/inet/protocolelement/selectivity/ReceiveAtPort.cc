@@ -32,6 +32,8 @@ void ReceiveAtPort::initialize(int stage)
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         port = par("port");
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(AccessoryProtocol::destinationPort, nullptr, inputGate);
         registerProtocol(AccessoryProtocol::destinationPort, nullptr, outputGate);
     }

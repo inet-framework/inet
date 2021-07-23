@@ -28,7 +28,7 @@ Define_Module(SubpacketLengthHeaderBasedDeaggregator);
 void SubpacketLengthHeaderBasedDeaggregator::initialize(int stage)
 {
     DeaggregatorBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LINK_LAYER) {
         registerService(AccessoryProtocol::aggregation, nullptr, inputGate);
         registerProtocol(AccessoryProtocol::aggregation, nullptr, outputGate);
     }

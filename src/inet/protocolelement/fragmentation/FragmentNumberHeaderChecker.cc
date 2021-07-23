@@ -31,6 +31,8 @@ void FragmentNumberHeaderChecker::initialize(int stage)
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         headerPosition = parseHeaderPosition(par("headerPosition"));
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(AccessoryProtocol::fragmentation, nullptr, inputGate);
         registerProtocol(AccessoryProtocol::fragmentation, nullptr, outputGate);
     }

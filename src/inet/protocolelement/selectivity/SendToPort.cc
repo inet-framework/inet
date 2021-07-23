@@ -33,6 +33,8 @@ void SendToPort::initialize(int stage)
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         port = par("port");
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(AccessoryProtocol::destinationPort, inputGate, nullptr);
         registerProtocol(AccessoryProtocol::destinationPort, outputGate, nullptr);
     }

@@ -28,7 +28,7 @@ Define_Module(Reordering);
 void Reordering::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LINK_LAYER) {
         registerService(AccessoryProtocol::sequenceNumber, inputGate, nullptr);
         registerProtocol(AccessoryProtocol::sequenceNumber, outputGate, nullptr);
     }

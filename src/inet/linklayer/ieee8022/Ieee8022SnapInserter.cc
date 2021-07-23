@@ -29,7 +29,7 @@ Define_Module(Ieee8022SnapInserter);
 void Ieee8022SnapInserter::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LINK_LAYER) {
         registerService(Protocol::ieee8022snap, inputGate, nullptr);
         registerProtocol(Protocol::ieee8022snap, outputGate, outputGate);
     }

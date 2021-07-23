@@ -33,6 +33,8 @@ void SendWithAcknowledge::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         acknowledgeTimeout = par("acknowledgeTimeout");
         sequenceNumber = 0;
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(AccessoryProtocol::withAcknowledge, inputGate, nullptr);
         registerProtocol(AccessoryProtocol::withAcknowledge, outputGate, nullptr);
         registerService(AccessoryProtocol::acknowledge, gate("ackIn"), gate("ackIn"));

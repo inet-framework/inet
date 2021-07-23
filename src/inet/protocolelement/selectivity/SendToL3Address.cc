@@ -32,6 +32,8 @@ void SendToL3Address::initialize(int stage)
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         address = Ipv4Address(par("address").stringValue());
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(AccessoryProtocol::destinationL3Address, inputGate, nullptr);
         registerProtocol(AccessoryProtocol::destinationL3Address, outputGate, nullptr);
     }

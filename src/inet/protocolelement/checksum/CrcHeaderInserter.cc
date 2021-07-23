@@ -31,6 +31,8 @@ void CrcHeaderInserter::initialize(int stage)
     CrcInserterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         headerPosition = parseHeaderPosition(par("headerPosition"));
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(AccessoryProtocol::crc, inputGate, nullptr);
         registerProtocol(AccessoryProtocol::crc, outputGate, nullptr);
     }

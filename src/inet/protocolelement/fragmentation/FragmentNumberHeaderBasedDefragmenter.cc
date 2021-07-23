@@ -30,6 +30,8 @@ void FragmentNumberHeaderBasedDefragmenter::initialize(int stage)
     DefragmenterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         headerPosition = parseHeaderPosition(par("headerPosition"));
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(AccessoryProtocol::fragmentation, nullptr, inputGate);
         registerProtocol(AccessoryProtocol::fragmentation, nullptr, outputGate);
     }

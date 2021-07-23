@@ -29,7 +29,7 @@ Define_Module(ReceiveWithHopLimit);
 void ReceiveWithHopLimit::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LINK_LAYER) {
         registerService(AccessoryProtocol::hopLimit, nullptr, inputGate);
         registerProtocol(AccessoryProtocol::hopLimit, nullptr, outputGate);
     }

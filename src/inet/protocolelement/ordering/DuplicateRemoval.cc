@@ -28,7 +28,7 @@ Define_Module(DuplicateRemoval);
 void DuplicateRemoval::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LINK_LAYER) {
         registerService(AccessoryProtocol::sequenceNumber, nullptr, inputGate);
         registerProtocol(AccessoryProtocol::sequenceNumber, nullptr, outputGate);
     }

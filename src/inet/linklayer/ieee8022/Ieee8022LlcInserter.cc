@@ -29,7 +29,7 @@ Define_Module(Ieee8022LlcInserter);
 void Ieee8022LlcInserter::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LINK_LAYER) {
         registerService(Protocol::ieee8022llc, inputGate, nullptr);
         registerProtocol(Protocol::ieee8022llc, outputGate, outputGate);
     }

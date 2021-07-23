@@ -31,6 +31,8 @@ void FcsHeaderInserter::initialize(int stage)
     FcsInserterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         headerPosition = parseHeaderPosition(par("headerPosition"));
+    }
+    else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(AccessoryProtocol::fcs, inputGate, nullptr);
         registerProtocol(AccessoryProtocol::fcs, outputGate, nullptr);
     }
