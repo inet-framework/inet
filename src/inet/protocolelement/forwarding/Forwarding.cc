@@ -35,7 +35,7 @@ void Forwarding::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         const char *addressAsString = par("address");
         if (strlen(addressAsString) != 0)
-            address = L3AddressResolver().resolve(addressAsString);
+            address = L3AddressResolver().resolve(addressAsString); // TODO the resolve is too early
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         registerService(AccessoryProtocol::forwarding, inputGate, inputGate);
