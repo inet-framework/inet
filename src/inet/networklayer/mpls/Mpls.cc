@@ -311,28 +311,18 @@ void Mpls::handleRegisterInterface(const NetworkInterface& interface, cGate *out
         registerInterface(interface, gate("netwIn"), gate("netwOut"));
 }
 
-void Mpls::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
+cGate *Mpls::getRegistrationForwardingGate(cGate *gatePar)
 {
-    Enter_Method("handleRegisterService");
-    if (!strcmp("ifOut", g->getName()))
-        registerService(protocol, gate("netwIn"), servicePrimitive);
-    else if (!strcmp("netwOut", g->getName()))
-        registerService(protocol, gate("ifIn"), servicePrimitive);
+    if (gatePar->isName("ifOut"))
+        return gate("netwIn");
+    else if (gatePar->isName("netwOut"))
+        return gate("ifIn");
+    else if (gatePar->isName("ifIn"))
+        return gate("netwOut");
+    else if (gatePar->isName("netwIn"))
+        return gate("ifOut");
     else
-        throw cRuntimeError("Unknown gate: %s", g->getName());
-}
-
-void Mpls::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
-{
-    Enter_Method("handleRegisterProtocol");
-    if (!strcmp("ifIn", g->getName()))
-        registerProtocol(protocol, gate("netwOut"), servicePrimitive);
-    else if (!strcmp("netwOut", g->getName()))
-        registerProtocol(protocol, gate("ifIn"), servicePrimitive);
-    else if (!strcmp("netwIn", g->getName()))
-        ; // void
-    else
-        throw cRuntimeError("Unknown gate: %s", g->getName());
+        throw cRuntimeError("Unknown gate");
 }
 
 } // namespace inet
