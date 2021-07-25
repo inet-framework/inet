@@ -34,6 +34,6 @@ class IApskModulation
 {
     @existingClass;
     @descriptor(readonly);
-    int codeWordSize;
-    int constellationSize;
+    unsigned int codeWordSize;
+    unsigned int constellationSize;
 };
