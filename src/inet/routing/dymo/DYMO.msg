@@ -38,6 +38,8 @@ class DYMOSequenceNumber
     @fromString(string2ulong($));
     @toString(ulong2string($));
     @defaultValue(0);
+    @toValue((omnetpp::intval_t)($));
+    @fromValue(omnetpp::checked_int_cast<uint32_t>($.intValue()));
 }
 
 

@@ -26,5 +26,7 @@ class L3Address
     @existingClass;
     @opaque;
     @toString(.str());
+    @toValue(.str());
+    @fromValue(L3Address($.stringValue()));
 }
 
