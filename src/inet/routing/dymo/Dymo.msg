@@ -40,6 +40,8 @@ class DymoSequenceNumber
     @fromString(string2ulong($));
     @toString(ulong2string($));
     @defaultValue(0);
+    @toValue((int)$);
+    @fromValue($.intValue());
 }
 
 //
