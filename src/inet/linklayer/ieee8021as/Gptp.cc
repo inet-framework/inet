@@ -412,8 +412,6 @@ void Gptp::synchronize()
 
 void Gptp::processPdelayReq(Packet *packet, const GptpPdelayReq* gptp)
 {
-    peerRequestReceiptTimestamp = clock->getClockTime();
-
     auto resp = new GptpReqAnswerEvent("selfMsgPdelayResp", GPTP_SELF_REQ_ANSWER_KIND);
     resp->setPortId(packet->getTag<InterfaceInd>()->getInterfaceId());
     resp->setIngressTimestamp(packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime());
