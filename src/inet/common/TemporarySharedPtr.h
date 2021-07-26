@@ -58,6 +58,8 @@ class TemporarySharedPtrClassDescriptor : public cClassDescriptor
     virtual const char *getFieldDynamicTypeString(any_ptr object, int field, int i) const override { return classDescriptor->getFieldDynamicTypeString(getObjectPointer(object), field, i); }
     virtual std::string getFieldValueAsString(any_ptr object, int field, int i) const override { return classDescriptor->getFieldValueAsString(getObjectPointer(object), field, i); }
     virtual void setFieldValueAsString(any_ptr object, int field, int i, const char *value) const override { classDescriptor->setFieldValueAsString(getObjectPointer(object), field, i, value); }
+    virtual cValue getFieldValue(any_ptr object, int field, int i) const override  { return classDescriptor->getFieldValue(getObjectPointer(object), field, i); }
+    virtual void setFieldValue(any_ptr object, int field, int i, const cValue& value) const override { classDescriptor->setFieldValue(getObjectPointer(object), field, i, value); }
     virtual const char *getFieldStructName(int field) const override { return classDescriptor->getFieldStructName(field); }
     virtual any_ptr getFieldStructValuePointer(any_ptr object, int field, int i) const override { return classDescriptor->getFieldStructValuePointer(getObjectPointer(object), field, i); }
     virtual void setFieldStructValuePointer(any_ptr object, int field, int i, any_ptr ptr) const override { classDescriptor->setFieldStructValuePointer(getObjectPointer(object), field, i, ptr); }
