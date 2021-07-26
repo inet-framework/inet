@@ -23,6 +23,7 @@ namespace inet {
 
 void PacketMeterBase::initialize(int stage)
 {
+    PacketProcessorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         inputGate = gate("in");
         producer = findConnectedModule<IActivePacketSource>(inputGate);
