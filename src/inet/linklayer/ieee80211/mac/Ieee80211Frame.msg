@@ -36,13 +36,13 @@ class BitVector
     @toString(.toString());
 }
 
+namespace inet::ieee80211;
+
 class SequenceNumber
 {
     @existingClass;
     @opaque;
 }
-
-namespace inet::ieee80211;
 
 cplusplus {{
 const b LENGTH_RTS = b(160);    //bits
