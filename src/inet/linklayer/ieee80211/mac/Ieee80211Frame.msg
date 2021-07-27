@@ -34,13 +34,13 @@ class BitVector
     @toString(.toString());
 }
 
+namespace inet::ieee80211;
+
 class SequenceNumberCyclic
 {
     @existingClass;
     @opaque;
 }
-
-namespace inet::ieee80211;
 
 cplusplus {{
 const b LENGTH_RTS = b(160);    //bits
@@ -478,6 +478,6 @@ class Ieee80211MultiTidBlockAck extends Ieee80211BlockAck
     multiTid = 1;
     compressedBitmap = 1;
 
-    // TODO: unimplemented
+    // TODO unimplemented
 }
 
