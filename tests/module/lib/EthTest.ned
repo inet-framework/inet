@@ -20,9 +20,9 @@ module EthTestHost
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string queueType = default(""); // DropTailQueue, DiffServQueue, or empty to use the internal queue
         *.interfaceTableModule = "";
-        eth.csmacdSupport = csmacdSupport;
+        eth.csmacdSupport = this.csmacdSupport;
         eth.encap.typename = "OmittedEthernetEncapsulation";
-        eth.queueType = queueType;
+        eth.queueType = this.queueType;
         @networkNode();
     gates:
         inout ethg @labels(EtherFrame-conn);

@@ -59,7 +59,7 @@ module EthernetSwitch
         **.interfaceTableModule = default(absPath(".interfaceTable"));
         **.macTableModule = default(absPath(".macTable"));
 
-        relayUnit.hasStp = hasStp;
+        relayUnit.hasStp = this.hasStp;
         encap.registerProtocol = true;
         eth[*].mac.promiscuous = default(true);
         ethernet.*.promiscuous = default(true);
