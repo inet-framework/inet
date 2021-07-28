@@ -48,6 +48,16 @@ using namespace omnetpp;
 #define INET_VERSION  0x0402
 #define INET_PATCH_LEVEL 0x05
 
+#if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1525
+namespace omnetpp {
+typedef void * any_ptr;
+inline any_ptr toAnyPtr(void *p) { return p; }
+inline any_ptr toAnyPtr(const void *p) { return const_cast<void *>(p); }
+template<typename T> inline T *fromAnyPtr(any_ptr ptr) { return check_and_cast<T*>(ptr); }
+template<> inline omnetpp::cObject *fromAnyPtr(any_ptr ptr) { return static_cast<omnetpp::cObject*>(ptr); }
+}
+#endif
+
 #if OMNETPP_VERSION < 0x0600
 #define OMNETPP5_CODE(x) x
 typedef long intval_t;
