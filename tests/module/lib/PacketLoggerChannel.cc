@@ -34,7 +34,11 @@ class INET_API PacketLoggerChannel : public cDatarateChannel
 
   public:
     explicit PacketLoggerChannel(const char *name = NULL) : cDatarateChannel(name) { counter = 0; }
-    virtual void processMessage(cMessage *msg, simtime_t t, result_t& result);
+#if OMNETPP_VERSION < 0x0600
+    virtual void processMessage(cMessage *msg, simtime_t t, result_t& result) override;
+#else
+    virtual cChannel::Result processMessage(cMessage *msg, const SendOptions& options, simtime_t t) override;
+#endif
 
   protected:
     virtual void initialize();
@@ -58,10 +62,19 @@ void PacketLoggerChannel::initialize()
     counter = 0;
 }
 
+#if OMNETPP_VERSION < 0x0600
 void PacketLoggerChannel::processMessage(cMessage *msg, simtime_t t, result_t& result)
 {
     EV << "PacketLogger processMessage()\n";
     cDatarateChannel::processMessage(msg, t, result);
+#else
+cChannel::Result PacketLoggerChannel::processMessage(cMessage *msg, const SendOptions& options, simtime_t t)
+{
+    cChannel::Result result;
+
+    EV << "PacketLogger processMessage()\n";
+    result = cDatarateChannel::processMessage(msg, options, t);
+#endif
 
     counter++;
     if (logfile.is_open())
@@ -73,6 +86,9 @@ void PacketLoggerChannel::processMessage(cMessage *msg, simtime_t t, result_t& r
         logfile << " discard:" << result.discard << ", delay:" << result.delay.raw() << ", duration:" << result.duration.raw();
         logfile << endl;
     }
+#if OMNETPP_VERSION >= 0x0600
+    return result;
+#endif
 }
 
 void PacketLoggerChannel::finish()
