@@ -27,6 +27,8 @@ module SimpleIeee8021qciFilter like IPacketFilter
 {
     parameters:
         int numStreams;
+        bool directPath = default(false);
+        int startY = default(directPath ? 200 : 100);
         @display("i=block/filter");
     gates:
         input in;
@@ -36,20 +38,21 @@ module SimpleIeee8021qciFilter like IPacketFilter
             @display("p=100,100");
         }
         meter[numStreams]: <default("DualRateThreeColorMeter")> like IPacketMeter {
-            @display("p=300,100,column,150");
+            @display("p=300,$startY,column,150");
         }
         filter[numStreams]: <default("LabelFilter")> like IPacketFilter {
             labelFilter = default("green");
-            @display("p=500,100,column,150");
+            @display("p=500,$startY,column,150");
         }
         gate[numStreams]: <default("InteractiveGate")> like IPacketGate {
-            @display("p=700,100,column,150");
+            @display("p=700,$startY,column,150");
         }
         multiplexer: PacketMultiplexer {
             @display("p=900,100");
         }
     connections:
         in --> { @display("m=w"); } --> classifier.in;
+        classifier.out++ --> multiplexer.in++ if directPath;
         for i=0..numStreams-1 {
             classifier.out++ --> meter[i].in;
             meter[i].out --> filter[i].in;
