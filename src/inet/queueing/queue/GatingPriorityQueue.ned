@@ -42,7 +42,7 @@ module GatingPriorityQueue extends CompoundPacketQueueBase
         }
         queue[numQueues]: <default("PacketQueue")> like IPacketQueue {
             parameters:
-                bufferModule = default(exists(buffer) ? "^.buffer" : "");
+                bufferModule = default(exists(parent.buffer) ? "^.buffer" : "");
                 @display("p=300,100,column,125");
         }
         gate[numQueues]: <default("PeriodicGate")> like IPacketGate {
