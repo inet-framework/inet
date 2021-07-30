@@ -15,7 +15,7 @@
 /tutorials/configurator/,            -f omnetpp.ini -c Step9 -r 0,                              100s,           834d-bfc5/tplx;2c74-b7cf/~tNl;6e8d-9a20/~tND;a42c-71a2/tyf, PASS,    wireless
 /tutorials/configurator/,            -f omnetpp.ini -c Step10A -r 0,                            100s,           4b6f-7cd9/tplx;0000-0000/~tNl;0000-0000/~tND;6a42-b44d/tyf, PASS,   wireless # Step10A extended
 /tutorials/configurator/,            -f omnetpp.ini -c Step10B -r 0,                            100s,           4b6f-7cd9/tplx;0000-0000/~tNl;0000-0000/~tND;168b-1b32/tyf, PASS,   wireless # Step10B extended
-/tutorials/configurator/,            -f omnetpp.ini -c Step10C -r 0,                            100s,           71f5-b341/tplx;4a61-20ba/~tNl;7612-50df/~tND;0bae-3c06/tyf, PASS,    wireless
+/tutorials/configurator/,            -f omnetpp.ini -c Step10C -r 0,                            100s,           71f5-b341/tplx;4a61-20ba/~tNl;7612-50df/~tND;c4e0-53fd/tyf, PASS,    wireless
 /tutorials/configurator/,            -f omnetpp.ini -c Step11A -r 0,                            500s,           0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;6643-8e97/tyf, PASS,
 /tutorials/configurator/,            -f omnetpp.ini -c Step11B -r 0,                            500s,           b2ae-c80d/tplx;725c-f075/~tNl;15a3-3f79/~tND;421d-a83f/tyf, PASS,
 /tutorials/configurator/,            -f omnetpp.ini -c Step12 -r 0,                             100s,           5d92-856e/tplx;3e2c-9c0a/~tNl;ebfa-0719/~tND;3597-f8d1/tyf, PASS,    wireless
