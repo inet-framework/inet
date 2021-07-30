@@ -202,13 +202,13 @@ void TestIGMP::processCommand(const cXMLElement &node)
 
     if (!strcmp(tag, "join")) {
         if (!ie)
-            throw cRuntimeError("'ifname' attribute is missing at XML node ", node.str().c_str());
+            throw cRuntimeError("'ifname' attribute is missing at XML node %s", node.str().c_str());
         const char *group = node.getAttribute("group");
         ie->getProtocolData<Ipv4InterfaceData>()->joinMulticastGroup(Ipv4Address(group));
     }
     else if (!strcmp(tag, "leave")) {
         if (!ie)
-            throw cRuntimeError("'ifname' attribute is missing at XML node ", node.str().c_str());
+            throw cRuntimeError("'ifname' attribute is missing at XML node %s", node.str().c_str());
         const char *group = node.getAttribute("group");
         ie->getProtocolData<Ipv4InterfaceData>()->leaveMulticastGroup(Ipv4Address(group));
     }
@@ -216,7 +216,7 @@ void TestIGMP::processCommand(const cXMLElement &node)
         const char *what = node.getAttribute("what");
         if (!strcmp(what, "groups")) {
             if (!ie)
-                throw cRuntimeError("'ifname' attribute is missing at XML node ", node.str().c_str());
+                throw cRuntimeError("'ifname' attribute is missing at XML node %s", node.str().c_str());
             Ipv4AddressVector joinedGroups;
             const int count = ie->getProtocolData<Ipv4InterfaceData>()->getNumOfJoinedMulticastGroups();
             for (int i = 0; i < count; ++i)
@@ -225,7 +225,7 @@ void TestIGMP::processCommand(const cXMLElement &node)
         }
         else if (!strcmp(what, "listeners")) {
             if (!ie)
-                throw cRuntimeError("'ifname' attribute is missing at XML node ", node.str().c_str());
+                throw cRuntimeError("'ifname' attribute is missing at XML node %s", node.str().c_str());
             Ipv4AddressVector reportedGroups;
             const int count = ie->getProtocolData<Ipv4InterfaceData>()->getNumOfReportedMulticastGroups();
             for (int i = 0; i < count; ++i)
