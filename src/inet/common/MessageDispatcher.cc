@@ -407,7 +407,7 @@ void MessageDispatcher::handleRegisterInterface(const NetworkInterface& interfac
         interfaceIdToGateIndex[interface.getInterfaceId()] = out->getIndex();
         int size = gateSize("out");
         for (int i = 0; i < size; i++)
-            if (i != in->getIndex())
+            if (i != in->getIndex() && gate("in", i)->isConnected() && gate("out", i)->isConnected())
                 registerInterface(interface, gate("in", i), gate("out", i));
     }
 }
