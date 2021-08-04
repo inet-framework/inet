@@ -46,7 +46,7 @@ protected:
     virtual void initialize(int stage) override;
     virtual void sendPackets();
     void processPacket(cPacket *pk);
-    virtual void handleMessageWhenUp(cMessage* msg);
+    virtual void handleMessageWhenUp(cMessage* msg) override;
 
   public:
     MpduGen() {}
