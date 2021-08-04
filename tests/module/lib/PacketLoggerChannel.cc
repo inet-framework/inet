@@ -41,8 +41,8 @@ class INET_API PacketLoggerChannel : public cDatarateChannel
 #endif
 
   protected:
-    virtual void initialize();
-    void finish();
+    virtual void initialize() override;
+    virtual void finish() override;
 };
 
 
