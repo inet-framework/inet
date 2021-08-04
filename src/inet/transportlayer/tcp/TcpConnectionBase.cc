@@ -295,6 +295,7 @@ bool TcpConnection::processTCPSegment(Packet *packet, const Ptr<const TcpHeader>
 {
     Enter_Method_Silent();
 
+    take(packet);
     printConnBrief();
     if (!localAddr.isUnspecified()) {
         ASSERT(localAddr == segDestAddr);
@@ -320,6 +321,7 @@ bool TcpConnection::processAppCommand(cMessage *msg)
 {
     Enter_Method_Silent();
 
+    take(msg);
     printConnBrief();
 
     // first do actions
