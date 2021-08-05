@@ -47,8 +47,8 @@ void PacketDelayer::handleMessage(cMessage *message)
 void PacketDelayer::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
-    EV_INFO << "Delaying packet " << packet->getName() << "." << endl;
     take(packet);
+    EV_INFO << "Delaying packet " << packet->getName() << "." << endl;
     packet->setArrival(getId(), inputGate->getId(), simTime());
     scheduleAt(simTime() + par("delay"), packet);
     numProcessedPackets++;

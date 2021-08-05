@@ -49,6 +49,8 @@ void TokenBucketMeter::initialize(int stage)
 
 void TokenBucketMeter::pushPacket(Packet *packet, cGate *inputGate)
 {
+    Enter_Method("pushPacket");
+    take(packet);
     numRcvd++;
     cGate *outputGate = nullptr;
     int color = meterPacket(packet);

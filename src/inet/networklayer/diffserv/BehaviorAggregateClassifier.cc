@@ -107,6 +107,8 @@ void BehaviorAggregateClassifier::initialize(int stage)
 
 void BehaviorAggregateClassifier::pushPacket(Packet *packet, cGate *inputGate)
 {
+    Enter_Method("pushPacket");
+    take(packet);
     EV_INFO << "Classifying packet " << packet->getName() << ".\n";
     numRcvd++;
     int index = classifyPacket(packet);

@@ -249,8 +249,10 @@ void EtherMac::handleUpperPacket(Packet *packet)
     EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
     txQueue->pushPacket(packet);
 
-    if (!currentTxFrame && !txQueue->isEmpty())
+    if (!currentTxFrame && !txQueue->isEmpty()) {
         currentTxFrame = txQueue->popPacket();
+        take(currentTxFrame);
+    }
 
     if ((duplexMode || receiveState == RX_IDLE_STATE) && transmitState == TX_IDLE_STATE) {
         EV_DETAIL << "No incoming carrier signals detected, frame clear to send\n";

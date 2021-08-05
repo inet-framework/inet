@@ -53,6 +53,8 @@ void TwoRateThreeColorMeter::initialize(int stage)
 
 void TwoRateThreeColorMeter::pushPacket(Packet *packet, cGate *inputGate)
 {
+    Enter_Method("pushPacket");
+    take(packet);
     numRcvd++;
     cGate *outputGate = nullptr;
     int color = meterPacket(packet);

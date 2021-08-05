@@ -42,6 +42,7 @@ void PacketMarkerBase::initialize(int stage)
 void PacketMarkerBase::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     EV_INFO << "Marking packet " << packet->getName() << "." << endl;
     markPacket(packet);
     pushOrSendPacket(packet, outputGate, consumer);
@@ -59,6 +60,7 @@ Packet *PacketMarkerBase::popPacket(cGate *gate)
 {
     Enter_Method("popPacket");
     auto packet = provider->popPacket(inputGate->getPathStartGate());
+    take(packet);
     EV_INFO << "Marking packet " << packet->getName() << "." << endl;
     markPacket(packet);
     numProcessedPackets++;

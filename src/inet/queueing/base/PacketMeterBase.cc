@@ -42,6 +42,7 @@ void PacketMeterBase::initialize(int stage)
 void PacketMeterBase::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+    take(packet);
     EV_INFO << "Metering packet " << packet->getName() << "." << endl;
     meterPacket(packet);
     pushOrSendPacket(packet, outputGate, consumer);
@@ -59,6 +60,7 @@ Packet *PacketMeterBase::popPacket(cGate *gate)
 {
     Enter_Method("popPacket");
     auto packet = provider->popPacket(inputGate->getPathStartGate());
+    take(packet);
     EV_INFO << "Metering packet " << packet->getName() << "." << endl;
     meterPacket(packet);
     numProcessedPackets++;

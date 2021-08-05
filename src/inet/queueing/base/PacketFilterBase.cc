@@ -71,8 +71,9 @@ bool PacketFilterBase::canPopSomePacket(cGate *gate) const
         else if (nonConstThisPtr->matchesPacket(packet))
             return true;
         else {
+            Enter_Method("canPopSomePacket");
             packet = provider->popPacket(providerGate);
-            const_cast<PacketFilterBase *>(this)->take(packet);
+            nonConstThisPtr->take(packet);
             EV_INFO << "Filtering out packet " << packet->getName() << "." << endl;
             nonConstThisPtr->dropPacket(packet, OTHER_PACKET_DROP);
             nonConstThisPtr->numProcessedPackets++;

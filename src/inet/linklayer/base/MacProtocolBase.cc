@@ -119,6 +119,7 @@ void MacProtocolBase::flushQueue(PacketDropDetails& details)
     if (txQueue)
         while (!txQueue->isEmpty()) {
             auto packet = txQueue->popPacket();
+            take(packet);
             emit(packetDroppedSignal, packet, &details); //FIXME this signal lumps together packets from the network and packets from higher layers! separate them
             delete packet;
         }
@@ -127,8 +128,11 @@ void MacProtocolBase::flushQueue(PacketDropDetails& details)
 void MacProtocolBase::clearQueue()
 {
     if (txQueue)
-        while (!txQueue->isEmpty())
-            delete txQueue->popPacket();
+        while (!txQueue->isEmpty()) {
+            auto packet = txQueue->popPacket();
+            take(packet);
+            delete packet;
+        }
 }
 
 void MacProtocolBase::handleMessageWhenDown(cMessage *msg)

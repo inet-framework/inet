@@ -419,8 +419,10 @@ void LMac::handleSelfMessage(cMessage *msg)
 
         case SEND_CONTROL:
             if (msg->getKind() == LMAC_SEND_CONTROL) {
-                if (!SETUP_PHASE && currentTxFrame == nullptr && !txQueue->isEmpty())
+                if (!SETUP_PHASE && currentTxFrame == nullptr && !txQueue->isEmpty()) {
                     currentTxFrame = txQueue->popPacket();
+                    take(currentTxFrame);
+                }
                 // send first a control message, so that non-receiving nodes can switch off.
                 EV << "Sending a control packet.\n";
                 auto control = makeShared<LMacControlFrame>();

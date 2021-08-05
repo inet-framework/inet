@@ -362,6 +362,7 @@ void EtherMacBase::processConnectDisconnect()
         // Clear queue
         while (!txQueue->isEmpty()) {
             Packet *msg = txQueue->popPacket();
+            take(msg);
             EV_DETAIL << "Interface is not connected, dropping packet " << msg << endl;
             numDroppedPkFromHLIfaceDown++;
             PacketDropDetails details;
