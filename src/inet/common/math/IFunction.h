@@ -170,13 +170,19 @@ class INET_API IFunction : public cObject, public SharedBase<IFunction<R, D>>
      * Prints the internal data structure of this function in a human readable form to the provided stream.
      */
     virtual void printStructure(std::ostream& os, int level = 0) const = 0;
+
+#if OMNETPP_VERSION >= 0x0600
+    virtual std::ostream& printOn(std::ostream& os) const override { print(os); return os; }
+#endif
 };
 
+#if OMNETPP_VERSION < 0x0600
 template<typename R, typename... T>
 inline std::ostream& operator<<(std::ostream& os, const IFunction<R, Domain<T ...>>& f) {
     f.print(os);
     return os;
 }
+#endif
 
 } // namespace math
 
