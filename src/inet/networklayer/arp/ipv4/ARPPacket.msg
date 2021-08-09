@@ -15,18 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-
-cplusplus {{
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/linklayer/common/MACAddress.h"
-}}
+import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.linklayer.common.MACAddress;
 
 namespace inet;
-
-class noncobject IPv4Address;
-
-class noncobject MACAddress;
 
 cplusplus {{
 // ARP header length for IPv4 (4-byte addresses) and 802 LANs (6-byte MAC addrs)
@@ -34,13 +26,11 @@ cplusplus {{
 }}
 
 
-
 //
 // The list of practically important ARP opcodes
 //
 enum ARPOpcode
 {
-
     ARP_REQUEST = 1;      // Request. RFC 826
     ARP_REPLY = 2;        // Reply. RFC 826, RFC 1868
     ARP_RARP_REQUEST = 3; // Request Reverse. RFC 903

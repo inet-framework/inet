@@ -15,13 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/routing/bgpv4/BGPMessage/BGPHeader_m.h"
-}}
+import inet.routing.bgpv4.BGPMessage.BGPHeader;
 
 namespace inet::bgp;
-
-class BGPHeader;
 
 //
 // Represents a BGPv4 KEEPALIVE message.

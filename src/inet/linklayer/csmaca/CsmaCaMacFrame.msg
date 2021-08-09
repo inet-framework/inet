@@ -15,12 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+import inet.linklayer.common.MACAddress;
+import inet.linklayer.contract.IMACFrame;
+
 cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
 #include "inet/linklayer/contract/IMACFrame.h"
 }}
-
-class noncobject MACAddress;
 
 namespace inet;
 

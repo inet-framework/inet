@@ -2,14 +2,10 @@
 //
 // @author Anna Foerster
 
-cplusplus {{
-    #include "inet/linklayer/base/MACFrameBase_m.h"
-}}
+import inet.linklayer.common.MACAddress;
+import inet.linklayer.base.MACFrameBase;
 
 namespace inet;
-
-class noncobject MACAddress;
-class MACFrameBase;
 
 packet LMacFrame extends MACFrameBase
 {

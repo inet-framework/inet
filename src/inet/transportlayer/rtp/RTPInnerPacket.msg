@@ -17,17 +17,16 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.transportlayer.rtp.RTPSenderControlMessage;
+import inet.transportlayer.rtp.RTPSenderStatusMessage;
+
 cplusplus {{
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "inet/transportlayer/rtp/RTPPacket.h"
-#include "inet/transportlayer/rtp/RTPSenderControlMessage_m.h"
-#include "inet/transportlayer/rtp/RTPSenderStatusMessage_m.h"
 }}
 
 namespace inet::rtp;
-
-class noncobject IPv4Address;
 
 //
 // This enumeration is a list of all possibly types of

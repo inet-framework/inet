@@ -15,14 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-   #include "inet/networklayer/common/L3Address.h"
-}}
+import inet.networklayer.common.L3Address;
 
 namespace inet;
-
-class noncobject L3Address;
-
 
 packet NetworkDatagramBase
 {

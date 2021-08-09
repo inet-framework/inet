@@ -13,14 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+import inet.networklayer.common.L3Address;
+
 cplusplus {{
-#include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/tcp/TCPConnection.h"
 }}
 
 namespace inet::tcp;
-
-class noncobject L3Address;
 
 class TCPConnection extends cObject
 {

@@ -15,20 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+import inet.routing.bgpv4.BGPMessage.BGPHeader;
+import inet.networklayer.contract.ipv4.IPv4Address;
+
 cplusplus {{
-#include "inet/routing/bgpv4/BGPMessage/BGPHeader_m.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-
 namespace inet { namespace bgp { const int BGP_OPEN_OCTETS = 10; } }
-
 }}
 
-
 namespace inet::bgp;
-
-class BGPHeader;
-
-class noncobject IPv4Address;
 
 struct BGPParameterValues
 {

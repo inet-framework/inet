@@ -14,41 +14,20 @@
 //
 
 
-cplusplus {{
-#include "inet/networklayer/rsvp_te/IntServ_m.h"
+import inet.networklayer.rsvp_te.IntServ;
 
-#define PATH_MESSAGE   1
-#define RESV_MESSAGE   2
-#define PTEAR_MESSAGE  3
-#define RTEAR_MESSAGE  4
-#define PERROR_MESSAGE 5
-#define RERROR_MESSAGE 6
-#define HELLO_MESSAGE   7
-}}
+enum RSVP_ENUMS
+{
+    PATH_MESSAGE = 1;
+    RESV_MESSAGE = 2;
+    PTEAR_MESSAGE = 3;
+    RTEAR_MESSAGE = 4;
+    PERROR_MESSAGE = 5;
+    RERROR_MESSAGE = 6;
+    HELLO_MESSAGE = 7;
+};
 
 namespace inet;
-
-struct SessionObj_t;
-
-struct RsvpHopObj_t;
-
-struct SenderTemplateObj_t;
-
-struct SenderTspecObj_t;
-
-struct FlowSpecObj_t;
-
-struct FilterSpecObj_t;
-
-struct LabelRequestObj_t;
-
-struct SenderDescriptor_t;
-
-struct FlowDescriptor_t;
-
-struct EroObj_t;
-
-
 
 //
 // RSVP message common part

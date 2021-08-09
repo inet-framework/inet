@@ -16,13 +16,9 @@
 //
 
 
-cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
-}}
-class noncobject MACAddress;
+import inet.linklayer.common.MACAddress;
+
 namespace inet;
-
-
 
 //
 // Message kind values used with in communication between L3 and IEEE 802 L2
@@ -73,7 +69,7 @@ enum EtherType
 //
 // Control structure for communication between LLC and higher layers
 //
-class Ieee802Ctrl
+class Ieee802Ctrl extends cObject
 {
     @customize(true);
 

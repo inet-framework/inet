@@ -14,28 +14,14 @@
 //
 
 
+import inet.networklayer.rsvp_te.RSVPPacket;
+
 cplusplus {{
 #include "inet/networklayer/rsvp_te/IntServ.h"
 #include "inet/networklayer/rsvp_te/RSVPPacket.h"
 }}
 
 namespace inet;
-
-struct RsvpHopObj_t;
-
-struct SenderTemplateObj_t;
-
-struct LabelRequestObj_t;
-
-struct SenderDescriptor_t;
-
-
-class noncobject IPv4Address;
-
-class noncobject EroVector;
-
-class RSVPPacket;
-
 
 //
 // FIXME missing documentation

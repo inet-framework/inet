@@ -17,22 +17,16 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/common/TLVOption.h"
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
-#include "inet/networklayer/ipv6/IPv6Datagram.h"
-#include "inet/networklayer/common/IPProtocolId_m.h"
+import inet.common.TLVOption;
+import inet.networklayer.contract.ipv6.IPv6Address;
+import inet.networklayer.common.IPProtocolId;
 
+cplusplus {{
 #define IPv6_FRAGMENT_HEADER_LENGTH 8
+
 }}
 
 namespace inet;
-
-class noncobject IPv6Address;
-
-class noncobject IPv6ExtensionHeader;
-
-class noncobject TLVOptions;
 
 //
 // IPv6 TLV option types
@@ -45,10 +39,20 @@ enum IPv6TLVOptionTypes
 };
 
 
+class IPv6ExtensionHeader extends cObject
+{
+    short extensionType;
+    short byteLength = 0;   // byteLength = n * 8;
+}
+
+
 //
 // Hop-by-Hop Options Header.
 // RFC 2460 Section 4.3
 // Next Header Value: 0
+//
+//
+// This serves as the base class for all the other extension headers.
 //
 class IPv6HopByHopOptionsHeader extends IPv6ExtensionHeader
 {

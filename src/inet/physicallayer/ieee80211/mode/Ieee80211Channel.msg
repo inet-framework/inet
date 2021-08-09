@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2006 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,23 +12,42 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
 import inet.common.Units;
-import inet.physicallayer.base.packetlevel.NarrowbandTransmissionBase;
 
 cplusplus {{
-#include "inet/physicallayer/base/packetlevel/FlatTransmissionBase.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211Band.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211Channel.h"
 }}
 
 namespace inet::physicallayer;
 
-class FlatTransmissionBase extends NarrowbandTransmissionBase
+class IIeee80211Band
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
-    int headerBitLength;
-    int dataBitLength;
-    bps bitrate @opaque;
+    string name;
+    Hz centerFrequency[] @sizeGetter(getNumChannels);
+}
+
+class Ieee80211EnumeratedBand extends IIeee80211Band
+{
+    @existingClass;
+    @descriptor(readonly);
+}
+
+class Ieee80211ArithmeticalBand extends IIeee80211Band
+{
+    @existingClass;
+    @descriptor(readonly);
+}
+
+class Ieee80211Channel
+{
+    @existingClass;
+    @descriptor(readonly);
+    IIeee80211Band *band;
+    int channelNumber;
 }

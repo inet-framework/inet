@@ -15,19 +15,22 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 
-//
-// Required for MACAddress declarations
-//
+
+import inet.linklayer.common.MACAddress;
+import inet.linklayer.common.Ieee802Ctrl;
+
 cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
-#include "inet/linklayer/common/Ieee802Ctrl_m.h" // for ~EtherType
 #include "inet/common/BitVector.h"
 }}
 
-class noncobject MACAddress;
-class noncobject BitVector;
+namespace inet;
 
-enum EtherType;
+class BitVector
+{
+    @existingClass;
+    @opaque;
+    @toString(.toString());
+}
 
 namespace inet::ieee80211;
 

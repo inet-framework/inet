@@ -1,4 +1,6 @@
 //
+// Copyright (C) 2021 OpenSim Ltd.
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -10,25 +12,18 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-import inet.networklayer.contract.ipv4.IPv4Address;
-
 cplusplus {{
-#include "inet/networklayer/ipv4/IPv4Route.h"
+#include "inet/physicallayer/contract/packetlevel/IModulation.h"
 }}
 
-namespace inet;
+namespace inet::physicallayer;
 
-class IPv4Route extends cNamedObject
+class IModulation
 {
-    @existingClass(true);
+    @existingClass;
     @descriptor(readonly);
-    IPv4Address destination @byValue;
-    IPv4Address netmask @byValue;
-    IPv4Address gateway @byValue;
-    int metric;
-    int prefixLength;
-    string interfaceName;
-}
+};
+

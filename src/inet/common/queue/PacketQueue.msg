@@ -19,7 +19,7 @@ cplusplus {{
 
 namespace inet;
 
-class cPacketQueue extends cObject;
+//class cPacketQueue extends cObject;
 
 class PacketQueue extends cPacketQueue
 {

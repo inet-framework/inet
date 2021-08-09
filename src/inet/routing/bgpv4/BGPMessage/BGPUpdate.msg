@@ -15,28 +15,17 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/routing/bgpv4/BGPMessage/BGPHeader_m.h"
-#include "inet/routing/bgpv4/BGPMessage/BGPUpdatePathAttributes_m.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+import inet.routing.bgpv4.BGPMessage.BGPHeader;
+import inet.routing.bgpv4.BGPMessage.BGPUpdatePathAttributes;
+import inet.networklayer.contract.ipv4.IPv4Address;
 
+cplusplus {{
 namespace inet {
 const int BGP_EMPTY_UPDATE_OCTETS = 4; // UnfeasibleRoutesLength (2) + TotalPathAttributeLength (2)
 } // namespace inet
-
 }}
 
-
 namespace inet::bgp;
-
-class BGPHeader;
-
-class noncobject BGPUpdatePathAttributesOrigin;
-class noncobject BGPUpdatePathAttributesASPath;
-class noncobject BGPUpdatePathAttributesNextHop;
-class noncobject BGPUpdatePathAttributesLocalPref;
-class noncobject BGPUpdatePathAttributesAtomicAggregate;
-class noncobject IPv4Address;
 
 struct BGPUpdateWithdrawnRoutes
 {
@@ -54,7 +43,7 @@ struct BGPUpdateNLRI
 // Represents the list of path attributes in a BGPv4 UPDATE message.
 // See RFC 4271, section 4.3
 //
-class BGPUpdatePathAttributeList
+class BGPUpdatePathAttributeList extends cObject
 {
     BGPUpdatePathAttributesOrigin origin; // mandatory attribute
     BGPUpdatePathAttributesASPath asPath[]; // mandatory attribute

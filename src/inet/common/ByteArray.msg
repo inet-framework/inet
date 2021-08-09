@@ -23,7 +23,7 @@ namespace inet;
 // Class that carries raw bytes.
 // For example, used by ~RawPacket and some TCP queues.
 //
-class ByteArray
+class ByteArray extends cObject
 {
     @customize(true);
     char data[];

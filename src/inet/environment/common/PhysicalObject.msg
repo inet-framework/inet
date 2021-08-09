@@ -17,10 +17,9 @@ cplusplus {{
 #include "inet/environment/common/PhysicalObject.h"
 }}
 
-namespace inet::physicalenvironment;
+import inet.common.geometry.Geometry;
 
-class noncobject Coord;
-class noncobject EulerAngles;
+namespace inet::physicalenvironment;
 
 class PhysicalObject extends cNamedObject
 {

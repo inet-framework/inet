@@ -17,15 +17,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-}}
+import inet.linklayer.common.MACAddress;
+import inet.networklayer.contract.ipv4.IPv4Address;
 
 namespace inet;
-
-class noncobject MACAddress;
-class noncobject IPv4Address;
 
 enum DHCPOpcode
 {
@@ -71,7 +66,7 @@ enum DHCPOptionCode
 //
 // @see DHCPMessage, DHCPClient, DHCPServer
 //
-class DHCPOptions {
+class DHCPOptions extends cObject {
     int messageType @enum(DHCPMessageType); // to convey the type of the DHCP message
     string hostName; // name of the client
     int parameterRequestList[]; // used by a DHCP client to request values for specified configuration parameters

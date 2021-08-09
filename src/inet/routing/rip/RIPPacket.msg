@@ -16,11 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-class noncobject L3Address;
-
-cplusplus {{
-#include "inet/networklayer/common/L3Address.h"
-}}
+import inet.networklayer.common.L3Address;
 
 namespace inet;
 

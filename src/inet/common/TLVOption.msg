@@ -24,7 +24,7 @@ cplusplus {{
 
 namespace inet;
 
-class TLVOptionBase
+class TLVOptionBase extends cObject
 {
     short type = -1;
     short length = 0;   // total length of option
@@ -35,9 +35,33 @@ class TLVOptionRaw extends TLVOptionBase
     char bytes[];
 }
 
-class TLVOptions
+class TLVOptions extends cObject
 {
-    @customize(true);
-    abstract TLVOptionBase tlvOption[];
+    TLVOptionBase *tlvOption[] @owned;
 }
+
+cplusplus(TLVOptions) {{
+  public:
+    /*
+     * Removes option from optionVector and returns option when removed, otherwise returns nullptr.
+     */
+    TLVOptionBase *dropTlvOption(TLVOptionBase *option);
+
+    /*
+     * Removes all options or first only option where type is the specified type.
+     */
+    void deleteOptionByType(int type, bool firstOnly = true);
+
+    /*
+     * Calculate and returns the total length of all stored options in bytes
+     */
+    virtual int getLength() const;
+
+    /*
+     * Find the first option with specified type. Search started with element at firstPos.
+     * Returns the position of found option, or return -1 if not found
+     */
+    int findByType(short int type, int firstPos=0) const;
+}}
+
 

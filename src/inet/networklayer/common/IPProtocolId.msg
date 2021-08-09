@@ -60,7 +60,7 @@ enum IPProtocolId
     IP_PROT_IPv6EXT_MOB = 135;      // Mobility Header for MIPv6 support.
 }
 
-class IPRegisterProtocolCommand
+class IPRegisterProtocolCommand extends cObject
 {
     int protocol @enum(IPProtocolId);
 }

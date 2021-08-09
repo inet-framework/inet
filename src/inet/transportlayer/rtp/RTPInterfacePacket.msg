@@ -19,18 +19,13 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/transportlayer/rtp/RTPSenderControlMessage_m.h"
-#include "inet/transportlayer/rtp/RTPSenderStatusMessage_m.h"
 }}
 
-class noncobject inet::IPv4Address;
+import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.transportlayer.rtp.RTPSenderControlMessage;
+import inet.transportlayer.rtp.RTPSenderStatusMessage;
 
 namespace inet::rtp;
-
-enum RTPSenderControlMessageCommands;
-
-enum RTPSenderStatus;
 
 //
 // An enumeration to distinguish the different functions of the
@@ -61,7 +56,7 @@ message RTPControlMsg
 };
 
 // base class
-class RTPControlInfo
+class RTPControlInfo extends cObject
 {
     short type @enum(RTP_IFP_TYPE);
 };

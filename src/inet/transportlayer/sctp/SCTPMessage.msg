@@ -16,35 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/networklayer/common/L3Address.h"
-}}
+import inet.networklayer.common.L3Address;
 
 namespace inet::sctp;
-
-cplusplus {{
-typedef cPacket *cPacketPtr;
-}}
-
-
-struct cPacketPtr;
-
-
-class noncobject L3Address;
-
-message SCTPMessage extends cPacket
-{
-    @customize(true);
-    // Source Port
-    uint16 srcPort;
-    // Destination Port
-    uint16 destPort;
-    // Verification Tag
-    uint32 tag;
-    bool checksumOk;
-    abstract cPacketPtr chunks[];
-}
-
 
 message SCTPChunk extends cPacket
 {
@@ -78,6 +52,15 @@ message SCTPInitChunk extends SCTPChunk
     uint8 random[]; //Random Parameter for SCTP AUTH
 }
 
+message SCTPCookie extends cPacket
+{
+    simtime_t creationTime;
+    uint32 localTag;
+    uint32 peerTag;
+    uint8 localTieTag[];
+    uint8 peerTieTag[];
+}
+
 message SCTPInitAckChunk extends SCTPChunk
 {
     // Initiate Tag
@@ -96,7 +79,7 @@ message SCTPInitAckChunk extends SCTPChunk
     L3Address addresses[];
     char cookie[];
     uint8 unrecognizedParameters[];
-    cPacketPtr stateCookie = nullptr;
+    SCTPCookie *stateCookie @owned = nullptr;
     uint32 msg_rwnd;
     uint8 random[]; //Random Number
     uint16 chunkTypes[];
@@ -104,22 +87,11 @@ message SCTPInitAckChunk extends SCTPChunk
     uint16 hmacTypes[];
 }
 
-
-
 message SCTPCookieEchoChunk extends SCTPChunk
 {
     char cookie[];
-    cPacketPtr stateCookie = nullptr;
+    SCTPCookie *stateCookie @owned @allowReplace = nullptr;
     uint8 unrecognizedParameters[]; //for the serializer to send an Error chunk bundled with a Cookie-Echo
-}
-
-message SCTPCookie extends cPacket
-{
-    simtime_t creationTime;
-    uint32 localTag;
-    uint32 peerTag;
-    uint8 localTieTag[];
-    uint8 peerTieTag[];
 }
 
 message SCTPCookieAckChunk extends SCTPChunk
@@ -232,17 +204,17 @@ message SCTPShutdownCompleteChunk extends SCTPChunk
     bool TBit = 0;
 }
 
+message SCTPParameter extends cPacket
+{
+    uint16 parameterType;
+}
+
 message SCTPErrorChunk extends SCTPChunk
 {
     @customize(true);
     bool TBit = 0;
     bool MBit = 0;
-    abstract cPacketPtr parameters[];
-}
-
-message SCTPParameter extends cPacket
-{
-    uint16 parameterType;
+    SCTPParameter *parameters[] @owned;
 }
 
 message SCTPPacketDropChunk extends SCTPChunk
@@ -259,7 +231,7 @@ message SCTPPacketDropChunk extends SCTPChunk
 message SCTPStreamResetChunk extends SCTPChunk
 {
     @customize(true);
-    abstract cPacketPtr parameters[];
+    SCTPParameter *parameters[] @owned;
 }
 
 message SCTPOutgoingSSNResetRequestParameter extends SCTPParameter
@@ -319,14 +291,14 @@ message SCTPAsconfChunk extends SCTPChunk
     uint32 serialNumber;
     L3Address addressParam;
     uint32 peerVTag; //for NAT
-    abstract cPacketPtr asconfParams[];
+    SCTPParameter *asconfParams[] @owned;
 }
 
 message SCTPAsconfAckChunk extends SCTPChunk
 {
     @customize(true);
     uint32 serialNumber;
-    abstract cPacketPtr asconfResponse[];
+    SCTPParameter *asconfResponse[] @owned;
 }
 
 message SCTPAddIPParameter extends SCTPParameter
@@ -378,3 +350,17 @@ message NatMessage extends cPacket
     L3Address     peer2Addresses[];
     uint32      portPeer2;
 }
+
+message SCTPMessage extends cPacket
+{
+    @customize(true);
+    // Source Port
+    uint16 srcPort;
+    // Destination Port
+    uint16 destPort;
+    // Verification Tag
+    uint32 tag;
+    bool checksumOk;
+    SCTPChunk *chunks[] @owned;
+}
+

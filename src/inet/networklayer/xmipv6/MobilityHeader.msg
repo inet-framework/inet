@@ -21,20 +21,15 @@
 //
 
 
+import inet.networklayer.contract.ipv6.IPv6Address;
+import inet.networklayer.ipv6.IPv6Datagram;
+
 cplusplus {{
 #include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
-#include "inet/networklayer/ipv6/IPv6Datagram.h" // added by CB
-#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h" // 17.10.07 - CB
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
 }}
 
 namespace inet;
-
-class noncobject IPv6Address;
-
-class noncobject IPv6ExtensionHeader;
-
-class noncobject IPv6DestinationOptionsHeader;
 
 enum MobilityHeaderType
 {
@@ -169,7 +164,7 @@ packet BindingRefreshRequest extends MobilityHeader
 ///////////////////////////////////////////
 // 17.10.07 - CB
 ///////////////////////////////////////////
-packet HomeAddressOption extends IPv6DestinationOptionsHeader
+class HomeAddressOption extends IPv6DestinationOptionsHeader
 {
     @customize(true);
     IPv6Address homeAddress;

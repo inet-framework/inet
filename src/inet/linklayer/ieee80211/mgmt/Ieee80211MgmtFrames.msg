@@ -15,15 +15,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 
-//
-// Required for MACAddress declarations
-//
-cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
-}}
-
-class noncobject MACAddress;
+import inet.linklayer.common.MACAddress;
+import inet.linklayer.ieee80211.mac.Ieee80211Frame;
 
 namespace inet::ieee80211;
 
@@ -31,8 +24,6 @@ cplusplus {{
 #define PREQElemLen 11
 #define PERRElemLen 13
 }}
-
-packet Ieee80211ManagementFrame;
 
 //
 // Capability Information field format. This field is not used
@@ -139,7 +130,7 @@ struct Ieee80211SupportedRatesElement
 //
 // Frame body base class used to hide various frame body types
 //
-class Ieee80211FrameBody
+class Ieee80211FrameBody extends cObject
 {
     short bodyLength; // not an actual frame field
 }

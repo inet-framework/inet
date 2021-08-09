@@ -15,19 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/routing/bgpv4/BGPMessage/BGPASPathSegment_m.h"
-#include "inet/routing/bgpv4/BGPCommon_m.h"
-}}
+import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.routing.bgpv4.BGPMessage.BGPASPathSegment;
+import inet.routing.bgpv4.BGPCommon;
 
 namespace inet::bgp;
 
 enum BGPSessionType;
-
-class noncobject IPv4Address;
-class noncobject BGPASPathSegment;
-
 
 enum BGPUpdateAttributeTypeCode
 {
@@ -52,7 +46,7 @@ struct BGPUpdateAttributeType
     unsigned char typeCode @enum(BGPUpdateAttributeTypeCode);
 }
 
-class BGPUpdatePathAttributes
+class BGPUpdatePathAttributes extends cObject
 {
     BGPUpdateAttributeType type; // 2 octets
     unsigned short length; // 2 octets

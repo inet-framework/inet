@@ -13,14 +13,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-cplusplus {{
-#include "inet/linklayer/common/MACAddress.h"
-}}
+import inet.linklayer.common.MACAddress;
 
 namespace inet;
-
-class noncobject MACAddress;
-
 
 //
 // Represents a BPDU (Bridge PDU) used by the STP and RSTP protocols,

@@ -11,20 +11,15 @@
 //
 
 
-cplusplus {{
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-
-// base header: version, length, LSR ID, Label space
-#define LDP_BASEHEADER_BYTES  10
-
-// FIXME: the length below is just a guess. TBD find lengths for individual TLVs
-// making up different LDP packet types, and determine length for each packet type
-#define LDP_HEADER_BYTES  (LDP_BASEHEADER_BYTES+20)
-}}
+import inet.networklayer.contract.ipv4.IPv4Address;
 
 namespace inet;
 
-class noncobject IPv4Address;
+enum LDP_CONSTANTS
+{
+    LDP_BASEHEADER_BYTES = 10;
+    LDP_HEADER_BYTES = 30; // LDP_BASEHEADER_BYTES + 20
+}
 
 //
 // LDP message types

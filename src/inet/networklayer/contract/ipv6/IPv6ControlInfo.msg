@@ -15,30 +15,15 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+import inet.networklayer.contract.ipv6.IPv6Address;
+import inet.networklayer.contract.ipv6.IPv6ExtensionHeaders;
+import inet.networklayer.common.IPProtocolId;
 
 cplusplus {{
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
-#include "inet/networklayer/common/IPProtocolId_m.h"
+#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 }}
 
 namespace inet;
-
-enum IPProtocolId;
-
-class noncobject IPv6Address;
-class noncobject IPv6ExtensionHeaderPtr;
-
-cplusplus {{
-class IPv6ExtensionHeader;
-typedef IPv6ExtensionHeader *IPv6ExtensionHeaderPtr;
-std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh);
-
-#ifndef WITH_IPv6
-inline std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh) {return os;}
-#endif
-}}
-
-
 
 //
 // Control information for sending/receiving packets over IPv6.
@@ -64,7 +49,7 @@ inline std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh) {re
 // ~IPv6 also puts the original datagram object into the control info, because
 // it may be needed by higher layers.
 //
-class IPv6ControlInfo
+class IPv6ControlInfo extends cObject
 {
     @customize(true);
     short protocol @enum(IPProtocolId);  // transport layer protocol
@@ -77,5 +62,6 @@ class IPv6ControlInfo
     int interfaceId = -1; // interface on which the datagram was received, or
                           // should be sent (see ~InterfaceTable)
     bool multicastLoop;   // if true, sent multicast datagrams will be looped back
-    abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~IPv6ExtensionHeader
+    abstract IPv6ExtensionHeader * extensionHeader[]; // array of extension headers, subclassed from ~IPv6ExtensionHeader
 }
+

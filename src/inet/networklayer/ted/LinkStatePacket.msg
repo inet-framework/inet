@@ -12,17 +12,9 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-
-cplusplus {{
-#include "inet/networklayer/ted/TED_m.h"
-}}
+import inet.networklayer.ted.TED;
 
 namespace inet;
-
-// Represents a link in the ~TED and in ~LinkStateMsg packets; from TED.msg.
-struct TELinkStateInfo;
-
-
 
 //
 // Packet for disseminating link state information (~TELinkStateInfo[]) by the

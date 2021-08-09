@@ -1,12 +1,9 @@
-cplusplus {{
-    #include "inet/linklayer/common/MACAddress.h"
-}}
+
+import inet.linklayer.common.MACAddress;
 
 namespace inet;
 
-class noncobject MACAddress;
-
-class SimpleLinkLayerControlInfo
+class SimpleLinkLayerControlInfo extends cObject
 {
     @customize(true);
 

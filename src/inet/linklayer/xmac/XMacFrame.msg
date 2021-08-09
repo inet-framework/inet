@@ -15,14 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/common/INETDefs.h"
-#include "inet/linklayer/common/MACAddress.h"
-}}
+import inet.linklayer.common.MACAddress;
 
 namespace inet;
-
-class noncobject MACAddress;
 
 //
 // Frame for ~XMac. Frame size is configurable

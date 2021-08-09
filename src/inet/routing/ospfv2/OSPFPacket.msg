@@ -15,13 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-}}
+import inet.networklayer.contract.ipv4.IPv4Address;
 
 namespace inet::ospf;
-
-class noncobject IPv4Address;
 
 enum OSPFPacketType
 {
@@ -92,7 +88,7 @@ enum LSAType
 //
 // Represents an OSPF LSA header
 //
-class OSPFLSAHeader
+class OSPFLSAHeader extends cObject
 {
     unsigned short lsAge = 0;
     OSPFOptions lsOptions;
@@ -106,7 +102,7 @@ class OSPFLSAHeader
 //
 // common ancestor type for all LSAs
 //
-class OSPFLSA
+class OSPFLSA extends cObject
 {
     OSPFLSAHeader header;
 }
@@ -125,7 +121,7 @@ struct TOSData
     unsigned char tosMetric[3];
 }
 
-class Link
+class Link extends cObject
 {
     IPv4Address linkID;
     unsigned long linkData = 0;
@@ -177,7 +173,7 @@ struct ExternalTOSInfo
 //
 // Represents the contents of an OSPF AS External LSA
 //
-class OSPFASExternalLSAContents
+class OSPFASExternalLSAContents extends cObject
 {
     IPv4Address networkMask;
     bool E_ExternalMetricType = false;

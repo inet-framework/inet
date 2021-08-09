@@ -16,19 +16,11 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/networklayer/icmpv6/ICMPv6Message_m.h"
-#include "inet/networklayer/contract/ipv6/IPv6Address.h"
-#include "inet/linklayer/common/MACAddress.h"
-}}
+import inet.networklayer.icmpv6.ICMPv6Message;
+import inet.networklayer.contract.ipv6.IPv6Address;
+import inet.linklayer.common.MACAddress;
 
 namespace inet;
-
-packet ICMPv6Message;
-
-class noncobject IPv6Address;
-
-class noncobject MACAddress;
 
 // TLB options (type, length, bytes), length must be divisible by eight, max value is 8*255
 // Length in bytes:
@@ -51,7 +43,7 @@ enum IPv6NDOptionTypes {
 // RFC 2461 / RFC 4861 Section 4.6.2
 // RFC 3775 Section 7.2 (routerAddressFlag)
 //
-class IPv6NDPrefixInformation
+class IPv6NDPrefixInformation extends cObject
 {
     unsigned short prefixLength;
     bool onlinkFlag;        //L-bit
@@ -65,14 +57,14 @@ class IPv6NDPrefixInformation
 // MIPv6 New Advertisement Interval Option
 // RFC 3775 Section 7.3
 //
-class MIPv6NDAdvertisementInterval
+class MIPv6NDAdvertisementInterval extends cObject
 {
     unsigned int advertisementInterval;    // milliseconds
 }
 
 //MIPv6 Home Agent Information Option
 //RFC 3775 Section 7.4
-class MIPv6HAInformation
+class MIPv6HAInformation extends cObject
 {
     unsigned int homeAgentPreference;
     unsigned int homeAgentLifetime;    // seconds
@@ -182,7 +174,7 @@ packet IPv6Redirect extends IPv6NDMessage
         //Redirected Header Encapsulated Msg
 }
 
-class IPv6NDControlInfo
+class IPv6NDControlInfo extends cObject
 {
     IPv6Address nextHop;   // next hop address
     int interfaceId = -1; // interface on which the datagram should be sent

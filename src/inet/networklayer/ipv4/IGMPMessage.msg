@@ -16,20 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/common/INETDefs.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include <vector>
-}}
+import inet.networklayer.contract.ipv4.IPv4Address;
 
 namespace inet;
-
-cplusplus {{
-typedef std::vector<IPv4Address> IPv4AddressVector;
-}}
-
-class noncobject IPv4Address;
-class noncobject IPv4AddressVector;
 
 enum IGMPType
 {

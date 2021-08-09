@@ -13,6 +13,7 @@
 // See the GNU Lesser General Public License for more details.
 //
 
+import inet.networklayer.rsvp_te.RSVPPacket;
 
 cplusplus {{
 #include "inet/networklayer/rsvp_te/IntServ.h"
@@ -20,16 +21,6 @@ cplusplus {{
 }}
 
 namespace inet;
-
-struct RsvpHopObj_t;
-
-
-class noncobject IPv4Address;
-
-class noncobject FlowDescriptorVector;
-
-class RSVPPacket;
-
 
 //
 // FIXME missing documentation

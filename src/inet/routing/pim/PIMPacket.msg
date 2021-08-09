@@ -18,9 +18,9 @@
 //          Tamas Borbely (tomi@omnetpp.org)
 
 
-cplusplus {{
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+import inet.networklayer.contract.ipv4.IPv4Address;
 
+cplusplus {{
 #define PIM_HEADER_LENGTH 4
 #define ENCODED_UNICODE_ADDRESS_LENGTH 6 // IPv4 only
 #define ENCODED_GROUP_ADDRESS_LENGTH   8 // IPv4 only
@@ -28,9 +28,6 @@ cplusplus {{
 }}
 
 namespace inet;
-
-//struct IPAddress;
-class noncobject IPv4Address;
 
 enum PIMPacketType
 {
@@ -56,7 +53,7 @@ enum PIMHelloOptionType
    AddressList = 24;
 }
 
-class HelloOption
+class HelloOption extends cObject
 {
     short type @enum(PIMHelloOptionType);
 }
@@ -92,7 +89,6 @@ class GenerationIDOption extends HelloOption
 //}
 
 cplusplus {{ class HelloOption; typedef HelloOption *HelloOptionPtr; }}
-class noncobject HelloOptionPtr;
 
 struct EncodedAddress
 {
@@ -104,7 +100,7 @@ struct EncodedAddress
 
 // Record for Join/Prune message
 // in structure it is not possible to use dynamic arrays, iit is needed to use class
-class JoinPruneGroup
+class JoinPruneGroup extends cObject
 {
     IPv4Address     groupAddress;
     EncodedAddress     joinedSourceAddress[];
@@ -123,9 +119,8 @@ packet PIMPacket
 // DM, SM
 packet PIMHello extends PIMPacket
 {
-    @customize(true);
     type = Hello;
-    abstract HelloOptionPtr  options[];
+    HelloOption *options[] @owned @allowReplace;
 }
 
 // Join/Prune message

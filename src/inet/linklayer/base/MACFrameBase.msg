@@ -15,13 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-   #include "inet/linklayer/common/MACAddress.h"
-}}
+import inet.linklayer.common.MACAddress;
 
 namespace inet;
-
-class noncobject MACAddress;
 
 packet MACFrameBase
 {

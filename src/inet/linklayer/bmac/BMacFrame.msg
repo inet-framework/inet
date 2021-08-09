@@ -15,14 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-    #include "inet/linklayer/base/MACFrameBase_m.h"
-}}
+import inet.linklayer.base.MACFrameBase;
 
 namespace inet;
-
-class noncobject MACAddress;
-class MACFrameBase;
 
 packet BMacFrame extends MACFrameBase
 {

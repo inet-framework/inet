@@ -15,9 +15,11 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+import inet.common.Units;
+import inet.physicallayer.contract.packetlevel.RadioControlInfo;
+import inet.physicallayer.ieee80211.mode.Ieee80211Channel;
+
 cplusplus {{
-#include "inet/common/Units.h"
-#include "inet/physicallayer/contract/packetlevel/RadioControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211ModeSet.h"
@@ -25,9 +27,6 @@ cplusplus {{
 
 
 namespace inet::physicallayer;
-
-class noncobject bps;
-class noncobject Hz;
 
 cplusplus {{
 typedef const IIeee80211Mode ConstIIeee80211Mode;
@@ -41,23 +40,6 @@ typedef const IIeee80211HeaderMode* IIeee80211HeaderModePtr;
 typedef const IIeee80211DataMode* IIeee80211DataModePtr;
 }}
 
-class IIeee80211Band
-{
-    @existingClass;
-    string name @editable(false);
-    Hz centerFrequency[] @sizeGetter(getNumChannels) @opaque;
-}
-
-class Ieee80211EnumeratedBand extends IIeee80211Band
-{
-    @existingClass;
-}
-
-class Ieee80211ArithmeticalBand extends IIeee80211Band
-{
-    @existingClass;
-}
-
 class IIeee80211PreambleMode
 {
     @existingClass;
@@ -67,8 +49,8 @@ class IIeee80211PreambleMode
 class IIeee80211HeaderMode
 {
     @existingClass;
-    bps netBitrate @editable(false) @opaque;
-    bps grossBitrate @editable(false) @opaque;
+    bps netBitrate @editable(false);
+    bps grossBitrate @editable(false);
     int bitLength @editable(false);
     simtime_t duration @editable(false);
 //    IModulation *modulation @editable(false);
@@ -77,6 +59,7 @@ class IIeee80211HeaderMode
 class IIeee80211DataMode
 {
     @existingClass;
+    @descriptor(readonly);
     bps netBitrate @editable(false) @opaque;
     bps grossBitrate @editable(false) @opaque;
 //    IModulation *modulation @editable(false);
@@ -86,6 +69,7 @@ class IIeee80211DataMode
 class IIeee80211Mode extends cObject
 {
     @existingClass;
+    @descriptor(readonly);
     int legacyCwMin @editable(false);
     int legacyCwMax @editable(false);
     string name @editable(false);
@@ -106,6 +90,7 @@ class IIeee80211Mode extends cObject
 class Ieee80211ModeSet extends cObject
 {
     @existingClass;
+    @descriptor(readonly);
     IIeee80211Mode *slowestMode @getter(_getSlowestMode) @editable(false);
     IIeee80211Mode *fastestMode @getter(_getFastestMode) @editable(false);
     IIeee80211Mode *slowestMandatoryMode @getter(_getSlowestMandatoryMode) @editable(false);
@@ -117,14 +102,6 @@ class Ieee80211ModeSet extends cObject
     int cwMax @editable(false);
 }
 
-class noncobject IIeee80211ModePtr;
-class noncobject Ieee80211ModeSetPtr;
-class noncobject IIeee80211ModePtr;
-class noncobject IIeee80211BandPtr;
-class noncobject Ieee80211ChannelPtr;
-class noncobject ConfigureRadioCommand;
-class noncobject TransmissionRequest;
-class noncobject ReceptionIndication;
 //
 // Control info attached to a configure command that is sent to the ~Radio.
 //
@@ -132,10 +109,10 @@ class Ieee80211ConfigureRadioCommand extends ConfigureRadioCommand
 {
     @descriptor(false);
     string opMode;                         // new default operation mode or "" if not set.
-    Ieee80211ModeSetPtr modeSet = nullptr @opaque @tostring($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>")); // new default mode set or nullptr if not set.
-    IIeee80211ModePtr mode = nullptr @opaque @tostring($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>"));      // new default transmission mode or nullptr if not set.
-    IIeee80211BandPtr band = nullptr @opaque @tostring($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>"));      // new default band or nullptr if not set.
-    Ieee80211ChannelPtr channel = nullptr @opaque @tostring($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>")); // new default band and channel or nullptr if not set.
+    Ieee80211ModeSet *modeSet = nullptr @opaque @toString($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>")); // new default mode set or nullptr if not set.
+    IIeee80211Mode *mode = nullptr @opaque @toString($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>"));      // new default transmission mode or nullptr if not set.
+    IIeee80211Band *band = nullptr @opaque @toString($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>"));      // new default band or nullptr if not set.
+    Ieee80211Channel *channel = nullptr @opaque @toString($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>")); // new default band and channel or nullptr if not set.
     int channelNumber = -1;                // new default channel number in the range [0, numChannels] or -1 if not set.
 }
 
@@ -145,9 +122,9 @@ class Ieee80211ConfigureRadioCommand extends ConfigureRadioCommand
 class Ieee80211TransmissionRequest extends TransmissionRequest
 {
     @descriptor(false);
-    IIeee80211ModePtr mode = nullptr @opaque @tostring($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>"));      // override default transmission mode or nullptr if not set.
+    IIeee80211Mode *mode = nullptr @opaque @toString($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>"));      // override default transmission mode or nullptr if not set.
     int channelNumber = -1;                // override default channel or -1 if not set.
-    Ieee80211ChannelPtr channel = nullptr @opaque @tostring($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>")); // override default band and channel or nullptr if not set.
+    Ieee80211Channel *channel = nullptr @opaque @toString($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>")); // override default band and channel or nullptr if not set.
 }
 
 //
@@ -156,8 +133,8 @@ class Ieee80211TransmissionRequest extends TransmissionRequest
 class Ieee80211ReceptionIndication extends ReceptionIndication
 {
     @descriptor(false);
-    IIeee80211ModePtr mode = nullptr;      // specifies reception mode.
-    Ieee80211ChannelPtr channel = nullptr @opaque @tostring($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>")); // specifies reception band and channel
+    IIeee80211Mode *mode = nullptr;      // specifies reception mode.
+    Ieee80211Channel *channel = nullptr @opaque @toString($ ? $->getCompleteStringRepresentation() : std::string("<nullptr>")); // specifies reception band and channel
     // TODO: remove already inherited fields
     double snr;
     double lossRate;

@@ -15,13 +15,12 @@
 
 cplusplus {{
 #include "inet/common/INETDefs.h"
-
 #include "inet/common/ByteArray.h"
 }}
 
-namespace inet;
+import inet.common.ByteArray;
 
-class noncobject ByteArray;
+namespace inet;
 
 //
 // Packet that carries raw network bytes.

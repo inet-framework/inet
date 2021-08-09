@@ -17,8 +17,6 @@ cplusplus{{
 #include "inet/common/INETDefs.h"
 }}
 
-class cArray;
-
 namespace inet::rtp;
 
 enum RTCPPacketType

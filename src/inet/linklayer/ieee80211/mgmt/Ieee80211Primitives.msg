@@ -14,22 +14,11 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 
-//
-// Required for MACAddress declarations
-//
-cplusplus {{
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrames_m.h"
-}}
 
-class noncobject MACAddress;
+import inet.linklayer.common.MACAddress;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtFrames;
 
 namespace inet::ieee80211;
-
-
-class noncobject Ieee80211SupportedRatesElement;
-
-enum Ieee80211ReasonCode;
-
 
 //
 // IEEE 802.11 command codes, sent by the agent to the management entity.
@@ -93,14 +82,14 @@ enum Ieee80211PrimResultCode
 //
 // Base class for request primitives
 //
-class Ieee80211PrimRequest
+class Ieee80211PrimRequest extends cObject
 {
 }
 
 //
 // Base class for confirm primitives
 //
-class Ieee80211PrimConfirm
+class Ieee80211PrimConfirm extends cObject
 {
     int resultCode @enum(Ieee80211PrimResultCode);
 }
@@ -120,7 +109,7 @@ class Ieee80211Prim_ScanRequest extends Ieee80211PrimRequest
     simtime_t maxChannelTime; // maximum time to spend on each channel when scanning
 }
 
-class Ieee80211Prim_BSSDescription
+class Ieee80211Prim_BSSDescription extends cObject
 {
     int channelNumber;
     MACAddress BSSID;

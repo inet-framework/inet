@@ -25,21 +25,16 @@
 // *
 // *   Contact: dreibh@iem.uni-due.de
 
-cplusplus {{
-#include "inet/transportlayer/contract/sctp/SCTPCommand_m.h"
-}}
+import inet.transportlayer.contract.sctp.SCTPCommand;
 
 namespace inet;
-
-class noncobject SCTPSimpleMessage;
-
 
 message NetPerfMeterTransmitTimer
 {
    unsigned int streamID;
 }
 
-
 message NetPerfMeterDataMessage extends SCTPSimpleMessage
 {
 }
+

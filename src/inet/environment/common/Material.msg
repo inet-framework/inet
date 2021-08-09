@@ -13,13 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
+import inet.common.Units;
+
 cplusplus {{
 #include "inet/environment/common/Material.h"
 }}
 
 namespace inet::physicalenvironment;
-
-class noncobject Ohmm;
 
 class Material extends cNamedObject
 {

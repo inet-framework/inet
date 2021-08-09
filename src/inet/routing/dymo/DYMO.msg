@@ -17,24 +17,31 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+import inet.networklayer.common.L3Address;
+
 cplusplus {{
-#include "inet/networklayer/common/L3Address.h"
 #include "inet/routing/dymo/DYMOdefs.h"
 }}
 
 namespace inet::dymo;
 
-class noncobject L3Address;
+class DYMOSequenceNumber
+{
+    @existingClass;
+    @opaque;
+    @byValue;
+    @fromString(string2ulong($));
+    @toString(ulong2string($));
+    @defaultValue(0);
+}
 
-class noncobject DYMOSequenceNumber;
-
-class noncobject DYMOMetricType;
 
 //
 // classes
 //
 
-class AddressBlock {
+class AddressBlock extends cObject
+{
     L3Address address;
     int prefixLength;
     bool hasValidityTime;

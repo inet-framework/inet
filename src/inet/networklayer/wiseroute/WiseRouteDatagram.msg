@@ -15,14 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-   #include "inet/networklayer/base/NetworkDatagramBase_m.h"
-}}
+import inet.networklayer.base.NetworkDatagramBase;
 
 namespace inet;
-
-class noncobject L3Address;
-class NetworkDatagramBase;
 
 packet WiseRouteDatagram extends NetworkDatagramBase
 {

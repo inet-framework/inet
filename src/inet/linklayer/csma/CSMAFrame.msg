@@ -19,13 +19,9 @@
 // *              - subclass to create your own MAC layer packets
 // **************************************************************************/
 
-cplusplus {{
-    #include "inet/linklayer/base/MACFrameBase_m.h"
-}}
+import inet.linklayer.base.MACFrameBase;
 
 namespace inet;
-
-class MACFrameBase;
 
 //
 // A CSMA mac packet format definition

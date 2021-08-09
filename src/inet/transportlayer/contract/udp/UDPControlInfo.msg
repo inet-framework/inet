@@ -17,14 +17,9 @@
 //
 
 
-cplusplus {{
-#include "inet/networklayer/common/L3Address.h"
-}}
+import inet.networklayer.common.L3Address;
 
 namespace inet;
-
-class noncobject L3Address;
-
 
 //
 // UDP command codes, sent by the application to ~UDP. These constants
@@ -64,7 +59,7 @@ enum UDPStatusInd
 //
 // @see ~UDPCommandCode
 //
-class UDPControlInfo
+class UDPControlInfo extends cObject
 {
     int sockId = -1;  // must uniquely identify the socket in the ~UDP module
 }

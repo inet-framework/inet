@@ -17,20 +17,11 @@
 //
 
 
-cplusplus {{
-#include "inet/common/TLVOption.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/common/IPProtocolId_m.h"
-}}
+import inet.common.TLVOption;
+import inet.networklayer.contract.ipv4.IPv4Address;
+import inet.networklayer.common.IPProtocolId;
 
 namespace inet;
-
-class noncobject TLVOptionBase;
-class noncobject TLVOptions;
-
-class noncobject IPv4Address;
-
-enum IPProtocolId;
 
 cplusplus {{
 // default IPv4 header length: 20 bytes

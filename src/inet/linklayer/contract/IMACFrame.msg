@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2012 Opensim Ltd.
+// Copyright (C) 2021 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,33 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-import inet.common.TLVOption;
-import inet.networklayer.common.L3Address;
-import inet.networklayer.common.IPProtocolId;
+import inet.linklayer.common.MACAddress;
+
+cplusplus {{
+#include "inet/linklayer/contract/IMACFrame.h"
+}}
 
 namespace inet;
 
 //
-// Generic protocol TLV option types
+// This purely virtual interface provides an abstraction for different link layer frames.
 //
-enum GenericTLVOptionTypes
+class IMACFrame
 {
-    GENERIC_TLVOPTION_NOP1 = 0;
-    GENERIC_TLVOPTION_NOPN = 1;
-    GENERIC_TLVOPTION_TLV_GPSR = 47;
+    @existingClass;
+    MACAddress transmitterAddress;
+    MACAddress receiverAddress;
 };
 
-
-
-//
-// Represents a generic network datagram with generic network addresses. 
-//
-packet GenericDatagram
-{
-    @customize(true);
-    L3Address sourceAddress @getter(_getSrcAddr);
-    L3Address destinationAddress @getter(_getDestAddr);
-    int transportProtocol @enum(IPProtocolId) = IP_PROT_NONE;
-    short hopLimit;
-    TLVOptions tlvOptions;
-}

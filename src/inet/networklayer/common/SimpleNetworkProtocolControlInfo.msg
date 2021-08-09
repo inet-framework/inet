@@ -15,19 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-cplusplus {{
-#include "inet/networklayer/common/L3Address.h"
-}}
+import inet.networklayer.common.L3Address;
 
 namespace inet;
-
-class noncobject L3Address;
 
 //
 // Network level control information for sending/receiving packets.
 //
-class SimpleNetworkProtocolControlInfo
+class SimpleNetworkProtocolControlInfo extends cObject
 {
     @customize(true);
     L3Address destinationAddress @getter(_getDestinationAddress);

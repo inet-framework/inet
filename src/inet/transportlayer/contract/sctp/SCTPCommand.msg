@@ -20,9 +20,10 @@
 cplusplus {{
 #include <vector>
 
-#include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/sctp/SCTPCommand.h"
 }}
+
+import inet.networklayer.common.L3Address;
 
 namespace inet;
 
@@ -30,9 +31,11 @@ cplusplus {{
 typedef std::vector<L3Address> AddressVector;
 }}
 
-class noncobject L3Address;
-
-class noncobject AddressVector;
+class AddressVector
+{
+   @existingClass;
+   //FIXME tostring, ...
+}
 
 //
 // Currently not in use.

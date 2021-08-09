@@ -15,18 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-cplusplus {{
-#include "inet/routing/bgpv4/BGPCommon_m.h"
-}}
+import inet.routing.bgpv4.BGPCommon;
 
 namespace inet::bgp;
-
-enum BGPPathSegmentType;
 
 //
 // Represents a BGPv4 AS_PATH path attribute (RFC 4271 Section 4.3)
 //
-class BGPASPathSegment
+class BGPASPathSegment extends cObject
 {
     unsigned char type @enum(BGPPathSegmentType);
     unsigned char length;
