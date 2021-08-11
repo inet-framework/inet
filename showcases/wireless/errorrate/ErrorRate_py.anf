@@ -6,8 +6,7 @@
     </inputs>
     <charts>
         <chart icon="icons/full/obj/scatterchart.png" id="1424" name="SNIR vs distance" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
-            <script>
-                <![CDATA[import math
+            <script><![CDATA[import math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -116,10 +115,8 @@ plt.savefig("SNIR_distance_v2.png", dpi=150, transparent=True)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-            </script>
-            <dialogPage id="Input" label="Input">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -156,10 +153,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Lines" label="Lines">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -252,10 +247,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Plot" label="Plot">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -419,10 +412,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Confidence Interval" label="Confidence Interval">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Confidence Interval" label="Confidence Interval"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -490,10 +481,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Styling" label="Styling">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -600,10 +589,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Advanced" label="Advanced">
-                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -622,10 +609,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Export" label="Export">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -680,8 +665,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
+]]></dialogPage>
             <property name="error_style" value="Error bars"/>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
@@ -724,8 +708,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="grid.linestyle : --&#10;figure.figsize : 10,6"/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="1482" name="PER vs SNIR" template="linechart_mpl" type="MATPLOTLIB">
-            <script>
-                <![CDATA[import math
+            <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, plot, vectorops as ops
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -811,10 +794,8 @@ plt.savefig("PER_SNIR_v3.png", dpi=150, transparent=True)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-            </script>
-            <dialogPage id="Input" label="Input">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -863,10 +844,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Lines" label="Lines">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -959,10 +938,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Plot" label="Plot">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1126,10 +1103,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Styling" label="Styling">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1236,10 +1211,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Advanced" label="Advanced">
-                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -1258,10 +1231,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Export" label="Export">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1316,8 +1287,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
+]]></dialogPage>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="grid_show" value="true"/>
@@ -1357,8 +1327,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="grid.linestyle : --&#10;figure.figsize : 10,6"/>
         </chart>
         <chart icon="icons/full/obj/scatterchart.png" id="1427" name="PER vs distance" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
-            <script>
-                <![CDATA[import math
+            <script><![CDATA[import math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -1467,10 +1436,8 @@ plt.savefig("PER_distance_v3.png", dpi=150, transparent=True)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-            </script>
-            <dialogPage id="Input" label="Input">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -1507,10 +1474,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Lines" label="Lines">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1603,10 +1568,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Plot" label="Plot">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1770,10 +1733,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Confidence Interval" label="Confidence Interval">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Confidence Interval" label="Confidence Interval"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1841,10 +1802,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Styling" label="Styling">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1951,10 +1910,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Advanced" label="Advanced">
-                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -1973,10 +1930,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Export" label="Export">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2031,17 +1986,16 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
+]]></dialogPage>
             <property name="error_style" value="Error bars"/>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="grid_show" value="true"/>
             <property name="linecolor" value=""/>
-            <property name="confidence_level" value="95%"/>
+            <property name="confidence_level" value="none"/>
             <property name="matplotlibrc.figure.facecolor" value=""/>
             <property name="legend_labels" value="result titles"/>
-            <property name="yaxis_title" value="Distance [m]"/>
+            <property name="yaxis_title" value="Packet error rate"/>
             <property name="title" value="PER vs distance"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="true"/>
@@ -2049,7 +2003,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="Packet error rate"/>
+            <property name="xaxis_title" value="Distance [m]"/>
             <property name="grid_density" value="Major"/>
             <property name="xaxis_itervar" value="distance"/>
             <property name="yaxis_min" value=""/>
@@ -2075,8 +2029,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="grid.linestyle : --&#10;figure.figsize : 10,6"/>
         </chart>
         <chart icon="icons/full/obj/scatterchart.png" id="1429" name="Effective bitrate vs distance" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
-            <script>
-                <![CDATA[import math
+            <script><![CDATA[import math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -2200,10 +2153,8 @@ plt.savefig("throughput_distance3.png", dpi=150, transparent=True)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-            </script>
-            <dialogPage id="Input" label="Input">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -2240,10 +2191,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Lines" label="Lines">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2336,10 +2285,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Plot" label="Plot">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2503,10 +2450,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Confidence Interval" label="Confidence Interval">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Confidence Interval" label="Confidence Interval"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2574,10 +2519,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Styling" label="Styling">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2684,10 +2627,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Advanced" label="Advanced">
-                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -2706,10 +2647,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Export" label="Export">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2764,14 +2703,13 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
+]]></dialogPage>
             <property name="error_style" value="Error bars"/>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="grid_show" value="true"/>
             <property name="linecolor" value=""/>
-            <property name="confidence_level" value="95%"/>
+            <property name="confidence_level" value="none"/>
             <property name="matplotlibrc.figure.facecolor" value=""/>
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Effective bitrate [Mbps]"/>
