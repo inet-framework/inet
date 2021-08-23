@@ -34,6 +34,7 @@ import inet.queueing.contract.IPacketFilter;
 simple EligibilityTimeFilter extends PacketFilterBase like IPacketFilter
 {
     parameters:
+        string clockModule = default(""); // relative path of a module that implements IClock; optional
         double maxResidenceTime @unit(s) = default(-1s); // optional max residence time limit, not used by default
         @class(EligibilityTimeFilter);
 }

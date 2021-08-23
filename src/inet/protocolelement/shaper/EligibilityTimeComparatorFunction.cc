@@ -20,7 +20,7 @@
 
 namespace inet {
 
-static simtime_t getPacketEligibilityTime(cObject *object)
+static clocktime_t getPacketEligibilityTime(cObject *object)
 {
     auto packet = static_cast<Packet *>(object);
     return packet->getTag<EligibilityTimeTag>()->getEligibilityTime();

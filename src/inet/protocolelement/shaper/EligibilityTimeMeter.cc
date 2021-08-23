@@ -25,7 +25,7 @@ Define_Module(EligibilityTimeMeter);
 
 void EligibilityTimeMeter::initialize(int stage)
 {
-    PacketMeterBase::initialize(stage);
+    ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         comittedInformationRate = bps(par("comittedInformationRate"));
         comittedBurstSize = b(par("comittedBurstSize"));
@@ -38,12 +38,13 @@ void EligibilityTimeMeter::initialize(int stage)
 
 void EligibilityTimeMeter::meterPacket(Packet *packet)
 {
-    simtime_t arrivalTime = simTime();
-    simtime_t lengthRecoveryDuration = s(packet->getDataLength() / comittedInformationRate).get();
-    simtime_t emptyToFullDuration = s(comittedBurstSize / comittedInformationRate).get();
-    simtime_t schedulerEligibilityTime = bucketEmptyTime + lengthRecoveryDuration;
-    simtime_t bucketFullTime = bucketEmptyTime + emptyToFullDuration;
-    simtime_t eligibilityTime = SimTime::fromRaw(std::max(std::max(arrivalTime.raw(), groupEligibilityTime.raw()), schedulerEligibilityTime.raw()));
+    clocktime_t arrivalTime = getClockTime();
+    clocktime_t lengthRecoveryDuration = s(packet->getDataLength() / comittedInformationRate).get();
+    clocktime_t emptyToFullDuration = s(comittedBurstSize / comittedInformationRate).get();
+    clocktime_t schedulerEligibilityTime = bucketEmptyTime + lengthRecoveryDuration;
+    clocktime_t bucketFullTime = bucketEmptyTime + emptyToFullDuration;
+    clocktime_t eligibilityTime;
+    eligibilityTime.setRaw(std::max(std::max(arrivalTime.raw(), groupEligibilityTime.raw()), schedulerEligibilityTime.raw()));
     if (eligibilityTime <= arrivalTime + maxResidenceTime) {
         groupEligibilityTime = eligibilityTime;
         bucketEmptyTime = eligibilityTime < bucketFullTime ? schedulerEligibilityTime : schedulerEligibilityTime + eligibilityTime - bucketFullTime;

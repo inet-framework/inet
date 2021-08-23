@@ -18,21 +18,22 @@
 #ifndef __INET_ELIGIBILITYTIMEMETER_H
 #define __INET_ELIGIBILITYTIMEMETER_H
 
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketMeterBase.h"
 
 namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API EligibilityTimeMeter : public PacketMeterBase
+class INET_API EligibilityTimeMeter : public ClockUserModuleMixin<PacketMeterBase>
 {
   protected:
     bps comittedInformationRate = bps(NaN);
     b comittedBurstSize = b(NaN);
 
-    simtime_t groupEligibilityTime = 0;
-    simtime_t bucketEmptyTime = 0;
-    simtime_t maxResidenceTime = 0;
+    clocktime_t groupEligibilityTime = 0;
+    clocktime_t bucketEmptyTime = 0;
+    clocktime_t maxResidenceTime = 0;
 
   protected:
     virtual void initialize(int stage) override;

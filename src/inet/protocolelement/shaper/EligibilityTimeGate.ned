@@ -33,5 +33,6 @@ import inet.queueing.contract.IPacketGate;
 simple EligibilityTimeGate extends PacketGateBase like IPacketGate
 {
     parameters:
+        string clockModule = default(""); // relative path of a module that implements IClock; optional
         @class(EligibilityTimeGate);
 }

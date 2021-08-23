@@ -25,9 +25,9 @@ Define_Module(EligibilityTimeGate);
 
 void EligibilityTimeGate::initialize(int stage)
 {
-    PacketGateBase::initialize(stage);
+    ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        eligibilityTimer = new cMessage("EligibilityTimer");
+        eligibilityTimer = new ClockEvent("EligibilityTimer");
     else if (stage == INITSTAGE_QUEUEING)
         updateOpen();
 }
@@ -43,7 +43,7 @@ void EligibilityTimeGate::handleMessage(cMessage *message)
 void EligibilityTimeGate::updateOpen()
 {
     auto packet = provider->canPullPacket(inputGate->getPathStartGate());
-    if (packet == nullptr || packet->getTag<EligibilityTimeTag>()->getEligibilityTime() <= simTime()) {
+    if (packet == nullptr || packet->getTag<EligibilityTimeTag>()->getEligibilityTime() <= getClockTime()) {
         if (isClosed())
             open();
     }
@@ -53,9 +53,9 @@ void EligibilityTimeGate::updateOpen()
     }
     packet = provider->canPullPacket(inputGate->getPathStartGate());
     if (packet != nullptr) {
-        simtime_t eligibilityTime = packet->getTag<EligibilityTimeTag>()->getEligibilityTime();
-        if (eligibilityTime > simTime())
-            rescheduleAt(eligibilityTime, eligibilityTimer);
+        clocktime_t eligibilityTime = packet->getTag<EligibilityTimeTag>()->getEligibilityTime();
+        if (eligibilityTime > getClockTime())
+            rescheduleClockEventAt(eligibilityTime, eligibilityTimer);
     }
 }
 
