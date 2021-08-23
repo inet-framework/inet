@@ -18,16 +18,17 @@
 #ifndef __INET_ELIGIBILITYTIMEGATE_H
 #define __INET_ELIGIBILITYTIMEGATE_H
 
+#include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketGateBase.h"
 
 namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API EligibilityTimeGate : public PacketGateBase
+class INET_API EligibilityTimeGate : public ClockUserModuleMixin<PacketGateBase>
 {
   protected:
-    cMessage *eligibilityTimer = nullptr;
+    ClockEvent *eligibilityTimer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;

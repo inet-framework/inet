@@ -17,6 +17,7 @@
 
 import inet.common.INETDefs;
 import inet.common.TagBase;
+import inet.clock.common.ClockTime;
 
 namespace inet;
 
@@ -30,5 +31,5 @@ namespace inet;
 //
 class EligibilityTimeTag extends TagBase
 {
-    simtime_t eligibilityTime; // the simulation time after which the packet is eligible for transmission
+    clocktime_t eligibilityTime; // the simulation time after which the packet is eligible for transmission
 }

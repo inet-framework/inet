@@ -19,11 +19,14 @@
 
 #include "inet/applications/base/ApplicationBase.h"
 #include "inet/common/lifecycle/OperationalMixin.h"
+
 #ifdef INET_WITH_QUEUEING
 #include "inet/queueing/base/ActivePacketSinkBase.h"
 #include "inet/queueing/base/ActivePacketSourceBase.h"
 #include "inet/queueing/base/PacketClassifierBase.h"
+#include "inet/queueing/base/PacketFilterBase.h"
 #include "inet/queueing/base/PacketGateBase.h"
+#include "inet/queueing/base/PacketMeterBase.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/base/PacketPusherBase.h"
 #include "inet/queueing/base/PacketSchedulerBase.h"
@@ -44,7 +47,9 @@ template class ClockUserModuleMixin<OperationalMixin<queueing::PacketProcessorBa
 template class ClockUserModuleMixin<queueing::ActivePacketSinkBase>;
 template class ClockUserModuleMixin<queueing::ActivePacketSourceBase>;
 template class ClockUserModuleMixin<queueing::PacketClassifierBase>;
+template class ClockUserModuleMixin<queueing::PacketFilterBase>;
 template class ClockUserModuleMixin<queueing::PacketGateBase>;
+template class ClockUserModuleMixin<queueing::PacketMeterBase>;
 template class ClockUserModuleMixin<queueing::PacketProcessorBase>;
 template class ClockUserModuleMixin<queueing::PacketPusherBase>;
 template class ClockUserModuleMixin<queueing::PacketSchedulerBase>;

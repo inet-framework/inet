@@ -25,7 +25,7 @@ Define_Module(EligibilityTimeFilter);
 
 void EligibilityTimeFilter::initialize(int stage)
 {
-    PacketFilterBase::initialize(stage);
+    ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         maxResidenceTime = par("maxResidenceTime");
 }
@@ -42,7 +42,7 @@ cGate *EligibilityTimeFilter::getRegistrationForwardingGate(cGate *gate)
 
 bool EligibilityTimeFilter::matchesPacket(const Packet *packet) const
 {
-    simtime_t arrivalTime = simTime();
+    clocktime_t arrivalTime = getClockTime();
     const auto& eligibilityTimeTag = packet->findTag<EligibilityTimeTag>();
     return eligibilityTimeTag != nullptr && (maxResidenceTime == -1 || eligibilityTimeTag->getEligibilityTime() <= arrivalTime + maxResidenceTime);
 }
