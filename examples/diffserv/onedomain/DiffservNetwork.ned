@@ -34,13 +34,13 @@ network DiffservNetwork
         channel edgeline extends ThruputMeteringChannel
         {
             delay = 2ms;
-            datarate = edgeDatarate;
+            datarate = parent.edgeDatarate;
             thruputDisplayFormat = "b B U";
         }
         channel coreline extends ThruputMeteringChannel
         {
             delay = 2ms;
-            datarate = coreDatarate;
+            datarate = parent.coreDatarate;
             thruputDisplayFormat = "b B U";
         }
         channel ethernetline extends ThruputMeteringChannel

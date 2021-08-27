@@ -49,9 +49,9 @@ module Ieee80211Radio extends FlatRadioBase
         receiver.sensitivity = default(-85dBm);
         receiver.energyDetection = default(-85dBm);
         receiver.snirThreshold = default(4dB);
-        *.opMode = opMode;
-        *.bandName = bandName;
-        *.channelNumber = channelNumber;
+        *.opMode = this.opMode;
+        *.bandName = this.bandName;
+        *.channelNumber = this.channelNumber;
         @class(Ieee80211Radio);
         @signal[radioChannelChanged](type=long);
         @statistic[radioChannel](title="Radio channel"; source=radioChannelChanged; record=histogram,vector; interpolationmode=sample-hold);

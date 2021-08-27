@@ -50,11 +50,11 @@ module EtherHost2
         }
         queue: EtherQoSQueue if queueType != "" {
             parameters:
-                dataQueueType = queueType;
+                dataQueueType = parent.queueType;
                 @display("p=87,207;q=l2queue");
         }
         mac: <macType> like IEtherMAC {
-            queueModule = (queueType == "" ? "" : "^.queue");
+            queueModule = (parent.queueType == "" ? "" : "^.queue");
             @display("p=155,272;q=txQueue");
         }
     connections:

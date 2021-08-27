@@ -31,8 +31,8 @@ module PIMRouting like IPIMRouting
         @display("i=block/network2;bgl=4;bgb=350,207");
         string interfaceTableModule;
         string routingTableModule;
-        *.interfaceTableModule = default(interfaceTableModule);
-        *.routingTableModule = default(routingTableModule);
+        *.interfaceTableModule = default(this.interfaceTableModule);
+        *.routingTableModule = default(this.routingTableModule);
         *.pimInterfaceTableModule = default("^.pimInterfaceTable");
         *.pimNeighborTableModule = default("^.pimNeighborTable");
 

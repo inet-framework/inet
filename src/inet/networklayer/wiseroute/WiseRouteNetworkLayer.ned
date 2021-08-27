@@ -29,7 +29,7 @@ module WiseRouteNetworkLayer like INetworkLayer
 {
     parameters:
         string interfaceTableModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         @display("i=block/fork");
 
     gates:
@@ -49,8 +49,8 @@ module WiseRouteNetworkLayer like INetworkLayer
                 arpModule = "^.arp";
                 @display("p=85,95;q=queue");
             gates:
-                lowerLayerIn[sizeof(ifIn)];
-                lowerLayerOut[sizeof(ifOut)];
+                lowerLayerIn[sizeof(parent.ifIn)];
+                lowerLayerOut[sizeof(parent.ifOut)];
         }
         echo: EchoProtocol {
             parameters:

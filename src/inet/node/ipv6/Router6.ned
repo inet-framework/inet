@@ -33,6 +33,6 @@ module Router6 extends NodeBase
         xml routes = default(xml("<routingTable/>"));
         networkLayerType = "IPv6NetworkLayer";
         routingTableType = "IPv6RoutingTable";
-        routingTable.routes = routes;
+        routingTable.routes = this.routes;
 }
 

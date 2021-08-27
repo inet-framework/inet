@@ -55,7 +55,7 @@ module RSVP_LSR
         routingTable: IPv4RoutingTable {
             parameters:
                 forwarding = true;
-                routerId = routerId;
+                routerId = parent.routerId;
                 @display("p=58,174;is=s");
         }
         interfaceTable: InterfaceTable {
@@ -68,12 +68,12 @@ module RSVP_LSR
         }
         linkStateRouting: LinkStateRouting {
             parameters:
-                peers = peers;
+                peers = parent.peers;
                 @display("p=254,115");
         }
         rsvp: RSVP {
             parameters:
-                peers = peers;
+                peers = parent.peers;
                 classifierModule = "^.classifier";
                 @display("p=156,67");
         }
@@ -85,8 +85,8 @@ module RSVP_LSR
             parameters:
                 @display("p=192,195");
             gates:
-                ifIn[sizeof(pppg)+1];
-                ifOut[sizeof(pppg)+1];
+                ifIn[sizeof(parent.pppg)+1];
+                ifOut[sizeof(parent.pppg)+1];
         }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
@@ -97,10 +97,10 @@ module RSVP_LSR
                 classifierModule = "^.classifier";
                 @display("p=192,270");
             gates:
-                netwIn[sizeof(pppg)+1];
-                netwOut[sizeof(pppg)+1];
-                ifIn[sizeof(pppg)+1];
-                ifOut[sizeof(pppg)+1];
+                netwIn[sizeof(parent.pppg)+1];
+                netwOut[sizeof(parent.pppg)+1];
+                ifIn[sizeof(parent.pppg)+1];
+                ifOut[sizeof(parent.pppg)+1];
         }
         libTable: LIBTable {
             parameters:

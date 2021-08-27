@@ -51,7 +51,7 @@ module Hcf
         string txModule;
 
         *.rateSelectionModule = "^.rateSelection";
-        *.rxModule = "^." + rxModule;
+        *.rxModule = "^." + this.rxModule;
 
         @class(Hcf);
         @display("i=block/queue");
@@ -61,7 +61,7 @@ module Hcf
     submodules:
         edca: Edca {
             parameters:
-                numEdcafs = numEdcafs;
+                numEdcafs = parent.numEdcafs;
                 @display("p=150,100");
         }
         hcca: Hcca {

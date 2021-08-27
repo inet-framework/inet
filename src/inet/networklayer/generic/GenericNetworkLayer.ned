@@ -30,8 +30,8 @@ module GenericNetworkLayer like INetworkLayer
     parameters:
         string interfaceTableModule;
         string routingTableModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.routingTableModule = default(absPath(routingTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        *.routingTableModule = default(absPath(this.routingTableModule));
         *.arpModule = default(absPath(".arp"));
         @display("i=block/fork");
     gates:
@@ -47,8 +47,8 @@ module GenericNetworkLayer like INetworkLayer
             parameters:
                 @display("p=85,95;q=queue");
             gates:
-                queueIn[sizeof(ifIn)];
-                queueOut[sizeof(ifOut)];
+                queueIn[sizeof(parent.ifIn)];
+                queueOut[sizeof(parent.ifOut)];
         }
         echo: EchoProtocol {
             parameters:

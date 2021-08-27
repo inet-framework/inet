@@ -36,9 +36,9 @@ module xMIPv6Support like IxMIPv6Support
         string interfaceTableModule;
         string ipv6TunnelingModule;
         string ipv6NeighbourDiscoveryModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.ipv6TunnelingModule = default(absPath(ipv6TunnelingModule));
-        *.ipv6NeighbourDiscoveryModule = default(absPath(ipv6NeighbourDiscoveryModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        *.ipv6TunnelingModule = default(absPath(this.ipv6TunnelingModule));
+        *.ipv6NeighbourDiscoveryModule = default(absPath(this.ipv6NeighbourDiscoveryModule));
         *.bindingUpdateListModule = default(absPath(".buList"));
         *.bindingCacheModule = default(absPath(".bindingCache"));
         @display("i=block/classifier2;bgb=163,154");
@@ -47,8 +47,8 @@ module xMIPv6Support like IxMIPv6Support
         output toIPv6;
     submodules:
         xMobileIPv6: xMIPv6 {
-            isHomeAgent = isHomeAgent;
-            isMobileNode = isMobileNode;
+            isHomeAgent = parent.isHomeAgent;
+            isMobileNode = parent.isMobileNode;
             @display("p=104,79");
         }
         buList: BindingUpdateList {

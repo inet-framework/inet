@@ -43,7 +43,7 @@ module EthernetInterface like IWiredNic
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
         @display("i=block/ifcard;bgl=2");
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
     gates:
         input upperLayerIn;
         output upperLayerOut;
@@ -63,13 +63,13 @@ module EthernetInterface like IWiredNic
         }
         queue: EtherQoSQueue if queueType != "" {
             parameters:
-                dataQueueType = queueType;
+                dataQueueType = parent.queueType;
                 @display("p=107,263;q=l2queue");
         }
         mac: <macType> like IEtherMAC {
             parameters:
-                queueModule = (queueType == "" ? "" : "^.queue");
-                txQueueLimit = (queueType == "" ? 10000 : 1); // queue sends one packet at a time
+                queueModule = (parent.queueType == "" ? "" : "^.queue");
+                txQueueLimit = (parent.queueType == "" ? 10000 : 1); // queue sends one packet at a time
                 @display("p=182,321");
         }
         encap: <encapType> like IEtherEncap {

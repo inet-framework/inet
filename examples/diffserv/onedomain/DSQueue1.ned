@@ -43,27 +43,27 @@ module DSQueue1 like IOutputQueue
             @display("p=41,284");
         }
         efQueue: DropTailQueue {
-            frameCapacity = frameCapacity;
+            frameCapacity = parent.frameCapacity;
             @display("p=195,95");
         }
         af1xQueue: DropTailQueue {
-            frameCapacity = frameCapacity;
+            frameCapacity = parent.frameCapacity;
             @display("p=195,224");
         }
         af2xQueue: DropTailQueue {
-            frameCapacity = frameCapacity;
+            frameCapacity = parent.frameCapacity;
             @display("p=195,329");
         }
         af3xQueue: DropTailQueue {
-            frameCapacity = frameCapacity;
+            frameCapacity = parent.frameCapacity;
             @display("p=195,421");
         }
         af4xQueue: DropTailQueue {
-            frameCapacity = frameCapacity;
+            frameCapacity = parent.frameCapacity;
             @display("p=195,537");
         }
         beQueue: DropTailQueue {
-            frameCapacity = frameCapacity;
+            frameCapacity = parent.frameCapacity;
             @display("p=195,628");
         }
         wrr: WRRScheduler {

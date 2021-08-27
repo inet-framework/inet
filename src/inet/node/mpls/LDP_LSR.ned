@@ -60,13 +60,13 @@ module LDP_LSR
         routingTable: IPv4RoutingTable {
             parameters:
                 forwarding = true;
-                routerId = routerId;
+                routerId = parent.routerId;
                 @display("p=70,240");
         }
         ldp: LDP {
             parameters:
-                holdTime = holdTime;
-                helloInterval = helloInterval;
+                holdTime = parent.holdTime;
+                helloInterval = parent.helloInterval;
                 @display("p=222,67");
         }
         ted: TED {
@@ -75,7 +75,7 @@ module LDP_LSR
         }
         linkStateRouting: LinkStateRouting {
             parameters:
-                peers = peers;
+                peers = parent.peers;
                 @display("p=360,150");
         }
         tcp: <tcpType> like ITCP {
@@ -90,8 +90,8 @@ module LDP_LSR
             parameters:
                 @display("p=224,223");
             gates:
-                ifIn[sizeof(pppg)+1];
-                ifOut[sizeof(pppg)+1];
+                ifIn[sizeof(parent.pppg)+1];
+                ifOut[sizeof(parent.pppg)+1];
         }
         lo0: LoopbackInterface {
             @display("p=50,388");
@@ -106,10 +106,10 @@ module LDP_LSR
                 classifierModule = "^.ldp";
                 @display("p=224,302");
             gates:
-                netwIn[sizeof(pppg)+1];
-                netwOut[sizeof(pppg)+1];
-                ifIn[sizeof(pppg)+1];
-                ifOut[sizeof(pppg)+1];
+                netwIn[sizeof(parent.pppg)+1];
+                netwOut[sizeof(parent.pppg)+1];
+                ifIn[sizeof(parent.pppg)+1];
+                ifOut[sizeof(parent.pppg)+1];
         }
         libTable: LIBTable {
             parameters:

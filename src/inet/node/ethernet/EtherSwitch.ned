@@ -49,8 +49,8 @@ module EtherSwitch
         string relayUnitType = default(firstAvailable("Ieee8021dRelay","MACRelayUnit")); // type of the ~IMACRelayUnit;
         string macTableType = default("MACAddressTable"); // type of the ~IMACAddressTable
         eth[*].encapType = "EtherEncapDummy";
-        eth[*].csmacdSupport = csmacdSupport;
-        eth[*].macType = macType;
+        eth[*].csmacdSupport = this.csmacdSupport;
+        eth[*].macType = this.macType;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
     gates:
         inout ethg[] @labels(EtherFrame-conn);
@@ -71,8 +71,8 @@ module EtherSwitch
             parameters:
                 @display("p=263,50;is=m");
             gates:
-                ifIn[sizeof(ethg)];
-                ifOut[sizeof(ethg)];
+                ifIn[sizeof(parent.ethg)];
+                ifOut[sizeof(parent.ethg)];
         }
         stp: <spanningTreeProtocol> like ISpanningTree if spanningTreeProtocol != "" {
             @display("p=168,50");

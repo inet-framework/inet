@@ -62,8 +62,8 @@ module NodeBase like INetworkNode
         string energyStorageType = default("");
         string energyManagementType = default("");
         string energyGeneratorType = default("");
-        routingTable.forwarding = forwarding;
-        routingTable.multicastForwarding = multicastForwarding;   // for IPv4, IPv6, Generic
+        routingTable.forwarding = this.forwarding;
+        routingTable.multicastForwarding = this.multicastForwarding;   // for IPv4, IPv6, Generic
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(routingTableType != "" ? absPath(".routingTable") : "");
         *.energySourceModule = default(energyStorageType != "" ? absPath(".energyStorage") : "");

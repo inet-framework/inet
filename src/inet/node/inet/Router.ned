@@ -67,7 +67,7 @@ module Router extends NodeBase
         }
         bgp: <"BGPRouting"> like IBGPRouting if hasBGP {
             parameters:
-                ospfRoutingModule = default(hasOSPF ? "^.ospf" : "");
+                ospfRoutingModule = default(parent.hasOSPF ? "^.ospf" : "");
                 @display("p=214,80;i=block/network");
         }
         tcp: <tcpType> like ITCP if hasBGP && tcpType != "" {

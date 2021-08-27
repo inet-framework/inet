@@ -39,7 +39,7 @@ module PPPInterface like IWiredNic
         string egressTCType = default(""); // a module type implementing ~ITrafficConditioner for optional traffic conditioning of outgoing traffic
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
     gates:
         input upperLayerIn;
         output upperLayerOut;
@@ -63,8 +63,8 @@ module PPPInterface like IWiredNic
         }
         ppp: PPP {
             parameters:
-                queueModule = (queueType == "" ? "" : "^.queue");
-                txQueueLimit = (queueType == "" ? 10000 : 1); // queue sends one packet at a time
+                queueModule = (parent.queueType == "" ? "" : "^.queue");
+                txQueueLimit = (parent.queueType == "" ? 10000 : 1); // queue sends one packet at a time
                 @display("p=98,207");
         }
     connections:

@@ -79,8 +79,8 @@ module BGPRouterEx
                 proxyARP = true;
                 @display("p=120,284;i=block/layer;q=queue");
             gates:
-                ifIn[sizeof(pppg)+sizeof(ethg)];
-                ifOut[sizeof(pppg)+sizeof(ethg)];
+                ifIn[sizeof(parent.pppg)+sizeof(parent.ethg)];
+                ifOut[sizeof(parent.pppg)+sizeof(parent.ethg)];
         }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:

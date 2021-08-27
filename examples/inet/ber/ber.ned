@@ -30,5 +30,5 @@ network ber
             @display("p=199,34");
         }
     connections:
-        client.pppg[0] <--> {  datarate = 10Mbps; delay = 0.565us; per = 0; ber = n; } <--> server.pppg[0];
+        client.pppg[0] <--> {  datarate = 10Mbps; delay = 0.565us; per = 0; ber = parent.n; } <--> server.pppg[0];
 }

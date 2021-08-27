@@ -34,7 +34,7 @@ module LoopbackInterface like INic
         string interfaceTableModule;
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
     gates:
         input upperLayerIn;
         output upperLayerOut;

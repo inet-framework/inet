@@ -29,8 +29,8 @@ module WirelessNic like IWirelessNic
         string radioType;
         string interfaceTableModule;
         string energySourceModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.energySourceModule = default(absPath(energySourceModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        *.energySourceModule = default(absPath(this.energySourceModule));
         @display("i=block/ifcard;bgb=250,300");
     gates:
         input upperLayerIn;

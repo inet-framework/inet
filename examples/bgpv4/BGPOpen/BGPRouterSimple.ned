@@ -73,8 +73,8 @@ module BGPRouterSimple
                 proxyARP = true;
                 @display("p=120,284;i=block/layer;q=queue");
             gates:
-                ifIn[sizeof(pppg)];
-                ifOut[sizeof(pppg)];
+                ifIn[sizeof(parent.pppg)];
+                ifOut[sizeof(parent.pppg)];
         }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:

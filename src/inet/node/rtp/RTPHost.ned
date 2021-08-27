@@ -27,12 +27,12 @@ module RTPHost extends StandardHost
     submodules:
         rtpApp: RTPApplication {
             parameters:
-                profileName = profileName;
-                destinationAddress = destinationAddress;
-                portNumber = portNumber;
-                bandwidth = bandwidth;
-                fileName = fileName;
-                payloadType = payloadType;
+                profileName = parent.profileName;
+                destinationAddress = parent.destinationAddress;
+                portNumber = parent.portNumber;
+                bandwidth = parent.bandwidth;
+                fileName = parent.fileName;
+                payloadType = parent.payloadType;
                 @display("p=254,42");
         }
         rtp: RTP {

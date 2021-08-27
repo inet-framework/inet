@@ -46,10 +46,10 @@ module Ieee80211Nic like IWirelessNic
         string opMode @enum("a", "b", "g(erp)", "g(mixed)", "n", "p") = default("g(mixed)");
         double bitrate @unit("bps") = default(-1bps);
         bool _agentNeeded = (mgmtType == "Ieee80211MgmtSTA");   // internal par. do not use, shows if optional agent module is needed
-        **.opMode = opMode;
-        **.bitrate = bitrate;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        *.energySourceModule = default(absPath(energySourceModule));
+        **.opMode = this.opMode;
+        **.bitrate = this.bitrate;
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        *.energySourceModule = default(absPath(this.energySourceModule));
         @nic;
         @display("i=block/ifcard");
     gates:

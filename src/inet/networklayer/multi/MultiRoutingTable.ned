@@ -29,7 +29,7 @@ module MultiRoutingTable like IRoutingTable
 {
     parameters:
         string interfaceTableModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         @display("i=block/table");
         bool enableIPv4 = default(haveClass("inet::IPv4RoutingTable"));
         bool enableIPv6 = default(haveClass("inet::IPv6RoutingTable"));
@@ -40,17 +40,17 @@ module MultiRoutingTable like IRoutingTable
     submodules:
         ipv4: <"IPv4RoutingTable"> like IRoutingTable if enableIPv4 {
             @display("p=50,50;is=s");
-            forwarding = forwarding;
-            multicastForwarding = multicastForwarding;
+            forwarding = parent.forwarding;
+            multicastForwarding = parent.multicastForwarding;
         }
         ipv6: <"IPv6RoutingTable"> like IRoutingTable if enableIPv6 {
             @display("p=50,100;is=s");
-            forwarding = forwarding;
-            multicastForwarding = multicastForwarding;
+            forwarding = parent.forwarding;
+            multicastForwarding = parent.multicastForwarding;
         }
         generic: <"GenericRoutingTable"> like IRoutingTable if enableGeneric {
             @display("p=50,150;is=s");
-            forwarding = forwarding;
-            multicastForwarding = multicastForwarding;
+            forwarding = parent.forwarding;
+            multicastForwarding = parent.multicastForwarding;
         }
 }

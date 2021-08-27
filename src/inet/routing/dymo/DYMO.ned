@@ -103,12 +103,12 @@ module MultiDYMO like IDYMO
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
 
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
-        ipv4.routingTableModule = default(absPath(routingTableModule)  + ".ipv4");
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        ipv4.routingTableModule = default(absPath(this.routingTableModule)  + ".ipv4");
         ipv4.networkProtocolModule = default("^.^.networkLayer.ipv4.ip");
-        ipv6.routingTableModule = default(absPath(routingTableModule)  + ".ipv6");
+        ipv6.routingTableModule = default(absPath(this.routingTableModule)  + ".ipv6");
         ipv6.networkProtocolModule = default("^.^.networkLayer.ipv6.ipv6");
-        generic.routingTableModule = default(absPath(routingTableModule)  + ".generic");
+        generic.routingTableModule = default(absPath(this.routingTableModule)  + ".generic");
         generic.networkProtocolModule = default("^.^.networkLayer.generic.gnp");
 
     gates:

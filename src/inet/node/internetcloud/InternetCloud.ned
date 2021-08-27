@@ -65,8 +65,8 @@ module InternetCloud
                 bool proxyARP = default(true);
                 string interfaceTableModule;
                 string routingTableModule;
-                *.interfaceTableModule = default(absPath(interfaceTableModule));
-                *.routingTableModule = default(absPath(routingTableModule));
+                *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+                *.routingTableModule = default(absPath(this.routingTableModule));
                 *.arpModule = default(absPath(".arp"));
                 *.icmpModule = default(absPath(".icmp"));
             gates:
@@ -85,8 +85,8 @@ module InternetCloud
                     gates:
                         transportIn[1];
                         transportOut[1];
-                        queueIn[sizeof(ifIn)];
-                        queueOut[sizeof(ifOut)];
+                        queueIn[sizeof(parent.ifIn)];
+                        queueOut[sizeof(parent.ifOut)];
                 }
 
                 delayer: <default("MatrixCloudDelayer")> like ICloudDelayer {
@@ -94,7 +94,7 @@ module InternetCloud
                 }
                 arp: ARP {
                     parameters:
-                        respondToProxyARP = proxyARP;
+                        respondToProxyARP = parent.proxyARP;
                         routingTableModule = "^.^.routingTable";
                         @display("p=163,206;q=pendingQueue");
                 }
@@ -141,8 +141,8 @@ module InternetCloud
             parameters:
                 @display("p=267,157;q=queue");
             gates:
-                ifIn[sizeof(pppg)+sizeof(ethg)];
-                ifOut[sizeof(pppg)+sizeof(ethg)];
+                ifIn[sizeof(parent.pppg)];
+                ifOut[sizeof(parent.pppg)];
         }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:

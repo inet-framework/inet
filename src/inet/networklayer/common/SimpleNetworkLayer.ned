@@ -28,7 +28,7 @@ module SimpleNetworkLayer like INetworkLayer
     parameters:
         string interfaceTableModule;
         string networkProtocolType;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         @display("i=block/fork");
 
     gates:
@@ -44,8 +44,8 @@ module SimpleNetworkLayer like INetworkLayer
             parameters:
                 @display("p=85,95;q=queue");
             gates:
-                lowerLayerIn[sizeof(ifIn)];
-                lowerLayerOut[sizeof(ifOut)];
+                lowerLayerIn[sizeof(parent.ifIn)];
+                lowerLayerOut[sizeof(parent.ifOut)];
         }
         echo: EchoProtocol {
             parameters:

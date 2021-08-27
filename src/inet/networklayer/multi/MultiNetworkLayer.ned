@@ -86,11 +86,11 @@ module MultiNetworkLayer like INetworkLayer
         bool enableIPv6 = default(haveClass("inet::IPv6RoutingTable"));
         bool enableGeneric = default(haveClass("inet::GenericRoutingTable"));
         string interfaceTableModule;
-        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         string routingTableModule;
-        ipv4.routingTableModule = default(absPath(routingTableModule) + ".ipv4");
-        ipv6.routingTableModule = default(absPath(routingTableModule) + ".ipv6");
-        generic.routingTableModule = default(absPath(routingTableModule) + ".generic");
+        ipv4.routingTableModule = default(absPath(this.routingTableModule) + ".ipv4");
+        ipv6.routingTableModule = default(absPath(this.routingTableModule) + ".ipv6");
+        generic.routingTableModule = default(absPath(this.routingTableModule) + ".generic");
 
     gates:
         input ifIn[] @labels(INetworkDatagram);
@@ -113,16 +113,16 @@ module MultiNetworkLayer like INetworkLayer
         upperMultiplexer: MultiNetworkLayerUpperMultiplexer {
             @display("p=300,100");
             gates:
-                transportLowerIn[3*sizeof(transportOut)];
-                transportLowerOut[3*sizeof(transportIn)];
-                pingLowerIn[3*sizeof(pingOut)];
-                pingLowerOut[3*sizeof(pingIn)];
+                transportLowerIn[3*sizeof(parent.transportOut)];
+                transportLowerOut[3*sizeof(parent.transportIn)];
+                pingLowerIn[3*sizeof(parent.pingOut)];
+                pingLowerOut[3*sizeof(parent.pingIn)];
         }
         lowerMultiplexer: MultiNetworkLayerLowerMultiplexer {
             @display("p=300,500");
             gates:
-                ifUpperOut[3*sizeof(ifIn)];
-                ifUpperIn[3*sizeof(ifOut)];
+                ifUpperOut[3*sizeof(parent.ifIn)];
+                ifUpperIn[3*sizeof(parent.ifOut)];
         }
 
     connections allowunconnected:
