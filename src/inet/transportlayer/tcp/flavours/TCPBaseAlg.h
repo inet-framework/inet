@@ -35,7 +35,7 @@ class INET_API TCPBaseAlgStateVariables : public TCPStateVariables
   public:
     TCPBaseAlgStateVariables();
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const OMNETPP5_CODE(override);
+    virtual std::string detailedInfo() const override;
 
     /// retransmit count
     //@{

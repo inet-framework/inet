@@ -34,7 +34,7 @@ class INET_API TCPTahoeRenoFamilyStateVariables : public TCPBaseAlgStateVariable
   public:
     TCPTahoeRenoFamilyStateVariables();
     virtual std::string str() const override;
-    virtual std::string detailedInfo() const OMNETPP5_CODE(override);
+    virtual std::string detailedInfo() const override;
     virtual void setSendQueueLimit(uint32 newLimit);
 
     uint32 ssthresh;    ///< slow start threshold
