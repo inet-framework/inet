@@ -37,7 +37,9 @@
 
 #include "inet/common/Compat.h"
 
+namespace inet {
 using namespace omnetpp;
+}
 
 #if OMNETPP_VERSION < 0x0507 || OMNETPP_BUILDNUM < 1020
 #  error At least OMNeT++/OMNEST version 5.7 required
