@@ -49,8 +49,8 @@ using namespace omnetpp;
 #  error At least OMNeT++/OMNEST version 6.0pre12 required when use OMNeT++/OMNEST 6.0 versions
 #endif
 
-#define INET_VERSION  0x0307
-#define INET_PATCH_LEVEL 0x01
+#define INET_VERSION  0x0308
+#define INET_PATCH_LEVEL 0x00
 
 #if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1525
 namespace omnetpp {
