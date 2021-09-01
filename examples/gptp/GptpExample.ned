@@ -68,40 +68,40 @@ network GptpRingExample extends WiredNetworkBase
             @display("p=100,500;is=s");
         }
         grandMaster1: StandardHost {
-            @display("p=400,150");
+            @display("p=500,150");
         }
         grandMaster2: StandardHost {
-            @display("p=800,600");
+            @display("p=900,600");
         }
         bridge1: EthernetSwitch {
-            @display("p=600,150");
+            @display("p=700,150");
         }
         bridge2: EthernetSwitch {
-            @display("p=400,300");
+            @display("p=500,300");
         }
         bridge3: EthernetSwitch {
-            @display("p=400,450");
+            @display("p=500,450");
         }
         bridge4: EthernetSwitch {
-            @display("p=600,600");
+            @display("p=700,600");
         }
         bridge5: EthernetSwitch {
-            @display("p=800,450");
+            @display("p=900,450");
         }
         bridge6: EthernetSwitch {
-            @display("p=800,300");
+            @display("p=900,300");
         }
         endStation1: StandardHost {
-            @display("p=200,300");
+            @display("p=300,300");
         }
         endStation2: StandardHost {
-            @display("p=200,450");
+            @display("p=300,450");
         }
         endStation3: StandardHost {
-            @display("p=1000,450");
+            @display("p=1100,450");
         }
         endStation4: StandardHost {
-            @display("p=1000,300");
+            @display("p=1100,300");
         }
     connections:
         grandMaster1.ethg++ <--> Eth100M <--> bridge1.ethg++;
