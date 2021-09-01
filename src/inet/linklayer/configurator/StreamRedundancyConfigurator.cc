@@ -335,9 +335,13 @@ void StreamRedundancyConfigurator::configureStreams(Node *node)
         streamSplitter->par("mapping") = parameterValue;
     }
     if (streamEncoder != nullptr && !node->streamEncodings.empty()) {
-        cValueMap *parameterValue = new cValueMap();
-        for (auto& streamEncoding : node->streamEncodings)
-            parameterValue->set(streamEncoding.name.c_str(), streamEncoding.vlanId);
+        cValueArray *parameterValue = new cValueArray();
+        for (auto& streamEncoding : node->streamEncodings) {
+            cValueMap *value = new cValueMap();
+            value->set("stream", streamEncoding.name.c_str());
+            value->set("vlan", streamEncoding.vlanId);
+            parameterValue->add(value);
+        }
         EV_INFO << "Configuring stream encoding" << EV_FIELD(networkNode) << EV_FIELD(streamEncoder) << EV_FIELD(parameterValue) << EV_ENDL;
         streamEncoder->par("mapping") = parameterValue;
     }
