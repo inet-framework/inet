@@ -22,8 +22,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/INETMath.h"
 
-// for the moment commented out as omnet cannot instatiate it from a namespace
-//namespace inet {
+namespace inet {
 
 class INET_API ProgressMeterFigure : public cGroupFigure, public inet::IIndicatorFigure
 {
@@ -97,7 +96,7 @@ class INET_API ProgressMeterFigure : public cGroupFigure, public inet::IIndicato
 
 };
 
-// } // namespace inet
+} // namespace inet
 
 #endif
 
