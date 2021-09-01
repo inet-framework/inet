@@ -221,6 +221,7 @@ void StreamRedundancyConfigurator::computeStreamPolicyConfigurations(cValueMap *
             StreamIdentification streamIdentification;
             streamIdentification.stream = streamConfiguration->get("name").stringValue();
             streamIdentification.packetFilter = streamConfiguration->get("packetFilter").stringValue();
+            streamIdentification.packetDataFilter = streamConfiguration->get("packetDataFilter").stringValue();
             node->streamIdentifications.push_back(streamIdentification);
         }
         // decoding configuration
@@ -294,6 +295,7 @@ void StreamRedundancyConfigurator::configureStreams(Node *node)
         for (auto& streamIdentification : node->streamIdentifications) {
             cValueMap *value = new cValueMap();
             value->set("packetFilter", streamIdentification.packetFilter);
+            value->set("packetDataFilter", streamIdentification.packetDataFilter);
             value->set("stream", streamIdentification.stream);
             parameterValue->add(value);
         }
