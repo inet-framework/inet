@@ -38,7 +38,7 @@ module ShaperPriorityQueue extends CompoundPacketQueueBase
         }
     connections:
         in --> classifier.in;
-        for i=0..numShapers {
+        for i=0..numShapers-1 {
             classifier.out++ --> shaper[i].in;
             shaper[i].out --> scheduler.in++;
         }
