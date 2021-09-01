@@ -36,65 +36,73 @@ double TokenBucket::getNumTokens() const
 
 void TokenBucket::addTokens(double addedNumTokens)
 {
-    EV_TRACE << " Adding tokens: numTokens = " << numTokens << ", addedNumTokens = " << addedNumTokens << std::endl;
     ASSERT(addedNumTokens >= 0);
-    numTokens += addedNumTokens;
-    if (maxNumTokens > 0 && numTokens >= maxNumTokens) {
-        if (excessTokenStorage != nullptr) {
-            excessTokenStorage->addTokens(numTokens - maxNumTokens);
-            excessTokenStorage->addTokenProductionRate(tokenProductionRate - excessTokenProductionRate);
-            excessTokenProductionRate = tokenProductionRate;
+    if (addedNumTokens > 0) {
+        EV_TRACE << " Adding tokens: numTokens = " << numTokens << ", addedNumTokens = " << addedNumTokens << std::endl;
+        numTokens += addedNumTokens;
+        if (maxNumTokens > 0 && numTokens >= maxNumTokens) {
+            if (excessTokenStorage != nullptr) {
+                excessTokenStorage->addTokens(numTokens - maxNumTokens);
+                excessTokenStorage->addTokenProductionRate(tokenProductionRate - excessTokenProductionRate);
+                excessTokenProductionRate = tokenProductionRate;
+            }
+            numTokens = maxNumTokens;
         }
-        numTokens = maxNumTokens;
+        EV_TRACE << " Added tokens: numTokens = " << numTokens << ", addedNumTokens = " << addedNumTokens << std::endl;
     }
-    EV_TRACE << " Added tokens: numTokens = " << numTokens << ", addedNumTokens = " << addedNumTokens << std::endl;
 }
 
 void TokenBucket::removeTokens(double removedNumTokens)
 {
-    EV_TRACE << " Removing tokens: numTokens = " << numTokens << ", removedNumTokens = " << removedNumTokens << std::endl;
     ASSERT(removedNumTokens >= 0);
-    if (numTokens == maxNumTokens && excessTokenStorage != nullptr) {
-        ASSERT(tokenProductionRate == excessTokenProductionRate);
-        excessTokenStorage->removeTokenProductionRate(excessTokenProductionRate);
-        excessTokenProductionRate = 0;
+    if (removedNumTokens > 0) {
+        EV_TRACE << " Removing tokens: numTokens = " << numTokens << ", removedNumTokens = " << removedNumTokens << std::endl;
+        if (numTokens == maxNumTokens && excessTokenStorage != nullptr) {
+            ASSERT(tokenProductionRate == excessTokenProductionRate);
+            excessTokenStorage->removeTokenProductionRate(excessTokenProductionRate);
+            excessTokenProductionRate = 0;
+        }
+        if (numTokens < removedNumTokens)
+            throw cRuntimeError("Insufficient number of tokens");
+        numTokens -= removedNumTokens;
+        EV_TRACE << " Removed tokens: numTokens = " << numTokens << ", removedNumTokens = " << removedNumTokens << std::endl;
     }
-    if (numTokens < removedNumTokens)
-        throw cRuntimeError("Insufficient number of tokens");
-    numTokens -= removedNumTokens;
-    EV_TRACE << " Removed tokens: numTokens = " << numTokens << ", removedNumTokens = " << removedNumTokens << std::endl;
 }
 
 void TokenBucket::addTokenProductionRate(double tokenRate)
 {
-    EV_TRACE << " Adding rate: tokenProductionRate = " << tokenProductionRate << ", excessTokenProductionRate = " << excessTokenProductionRate << ", tokenRate = " << tokenRate << std::endl;
     ASSERT(tokenRate >= 0);
-    if (numTokens == maxNumTokens) {
-        if (excessTokenStorage != nullptr) {
-            ASSERT(tokenProductionRate == excessTokenProductionRate);
-            excessTokenStorage->addTokenProductionRate(tokenRate);
-            excessTokenProductionRate += tokenRate;
+    if (tokenRate > 0) {
+        EV_TRACE << " Adding rate: tokenProductionRate = " << tokenProductionRate << ", excessTokenProductionRate = " << excessTokenProductionRate << ", tokenRate = " << tokenRate << std::endl;
+        if (numTokens == maxNumTokens) {
+            if (excessTokenStorage != nullptr) {
+                ASSERT(tokenProductionRate == excessTokenProductionRate);
+                excessTokenStorage->addTokenProductionRate(tokenRate);
+                excessTokenProductionRate += tokenRate;
+            }
         }
+        tokenProductionRate += tokenRate;
+        ASSERT(tokenProductionRate >= 0);
+        EV_TRACE << " Added rate: tokenProductionRate = " << tokenProductionRate << ", excessTokenProductionRate = " << excessTokenProductionRate << ", tokenRate = " << tokenRate << std::endl;
     }
-    tokenProductionRate += tokenRate;
-    ASSERT(tokenProductionRate >= 0);
-    EV_TRACE << " Added rate: tokenProductionRate = " << tokenProductionRate << ", excessTokenProductionRate = " << excessTokenProductionRate << ", tokenRate = " << tokenRate << std::endl;
 }
 
 void TokenBucket::removeTokenProductionRate(double tokenRate)
 {
-    EV_TRACE << " Removing rate: tokenProductionRate = " << tokenProductionRate << ", excessTokenProductionRate = " << excessTokenProductionRate << ", tokenRate = " << tokenRate << std::endl;
     ASSERT(tokenRate >= 0);
-    if (numTokens == maxNumTokens) {
-        if (excessTokenStorage != nullptr) {
-            ASSERT(tokenProductionRate == excessTokenProductionRate);
-            excessTokenStorage->removeTokenProductionRate(tokenRate);
-            excessTokenProductionRate -= tokenRate;
+    if (tokenRate > 0) {
+        EV_TRACE << " Removing rate: tokenProductionRate = " << tokenProductionRate << ", excessTokenProductionRate = " << excessTokenProductionRate << ", tokenRate = " << tokenRate << std::endl;
+        if (numTokens == maxNumTokens) {
+            if (excessTokenStorage != nullptr) {
+                ASSERT(tokenProductionRate == excessTokenProductionRate);
+                excessTokenStorage->removeTokenProductionRate(tokenRate);
+                excessTokenProductionRate -= tokenRate;
+            }
         }
+        tokenProductionRate -= tokenRate;
+        ASSERT(tokenProductionRate >= 0);
+        EV_TRACE << " Removed rate: tokenProductionRate = " << tokenProductionRate << ", excessTokenProductionRate = " << excessTokenProductionRate << ", tokenRate = " << tokenRate << std::endl;
     }
-    tokenProductionRate -= tokenRate;
-    ASSERT(tokenProductionRate >= 0);
-    EV_TRACE << " Removed rate: tokenProductionRate = " << tokenProductionRate << ", excessTokenProductionRate = " << excessTokenProductionRate << ", tokenRate = " << tokenRate << std::endl;
 }
 
 simtime_t TokenBucket::getOverflowTime()
