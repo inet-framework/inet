@@ -281,14 +281,14 @@ void StreamRedundancyConfigurator::configureStreams(Node *node)
     auto streamIdentifierLayer = networkNode->findModuleByPath(".bridging.streamIdentifier");
     if (streamIdentifierLayer == nullptr)
         streamIdentifierLayer = networkNode->findModuleByPath(".ieee8021r.policy.streamIdentifier");
-    auto streamIdentifier = streamIdentifierLayer->getSubmodule("identifier");
-    auto streamMerger = streamRelay->getSubmodule("merger");
-    auto streamSplitter = streamRelay->getSubmodule("splitter");
+    auto streamIdentifier = streamIdentifierLayer != nullptr ? streamIdentifierLayer->getSubmodule("identifier") : streamIdentifierLayer;
+    auto streamMerger = streamRelay != nullptr ? streamRelay->getSubmodule("merger") : nullptr;
+    auto streamSplitter = streamRelay != nullptr ? streamRelay->getSubmodule("splitter") : streamRelay;
     auto streamCoder = networkNode->findModuleByPath(".bridging.streamCoder");
     if (streamCoder == nullptr)
         streamCoder = networkNode->findModuleByPath(".ieee8021r.policy.streamCoder");
-    auto streamDecoder = streamCoder->getSubmodule("decoder");
-    auto streamEncoder = streamCoder->getSubmodule("encoder");
+    auto streamDecoder = streamCoder != nullptr ? streamCoder->getSubmodule("decoder") : nullptr;
+    auto streamEncoder = streamCoder != nullptr ? streamCoder->getSubmodule("encoder") : nullptr;
     if (streamIdentifier != nullptr && !node->streamIdentifications.empty()) {
         cValueArray *parameterValue = new cValueArray();
         for (auto& streamIdentification : node->streamIdentifications) {
