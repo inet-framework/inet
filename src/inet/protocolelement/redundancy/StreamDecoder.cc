@@ -19,6 +19,7 @@
 
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -34,24 +35,28 @@ void StreamDecoder::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
         interfaceTable.reference(this, "interfaceTableModule", true);
     else if (stage == INITSTAGE_QUEUEING)
-        configureStreams();
+        configureMappings();
 }
 
 void StreamDecoder::handleParameterChange(const char *name)
 {
     if (name != nullptr) {
         if (!strcmp(name, "mapping"))
-            configureStreams();
+            configureMappings();
    }
 }
 
-void StreamDecoder::configureStreams()
+void StreamDecoder::configureMappings()
 {
     auto mappingParameter = check_and_cast<cValueArray *>(par("mapping").objectValue());
     L3AddressResolver addressResolver;
+    mappings.resize(mappingParameter->size());
     for (int i = 0; i < mappingParameter->size(); i++) {
         auto element = check_and_cast<cValueMap *>(mappingParameter->get(i).objectValue());
-        Mapping mapping;
+        Mapping& mapping = mappings[i];
+        auto packetPattern = element->containsKey("packetFilter") ? element->get("packetFilter").stringValue() : "*";
+        auto dataPattern = element->containsKey("dataFilter") ? element->get("dataFilter").stringValue() : "*";
+        mapping.packetFilter.setPattern(packetPattern, dataPattern);
         L3Address l3Address;
         L3AddressResolver addressResolver;
         if (element->containsKey("source")) {
@@ -64,13 +69,12 @@ void StreamDecoder::configureStreams()
         }
         mapping.vlanId = element->containsKey("vlan") ? element->get("vlan").intValue() : -1;
         mapping.pcp = element->containsKey("pcp") ? element->get("pcp").intValue() : -1;
-        mapping.name = element->get("stream").stringValue();
+        mapping.stream = element->get("stream").stringValue();
         if (element->containsKey("interface")) {
             auto interfaceNamePattern = element->get("interface").stringValue();
             mapping.interfaceNameMatcher = new cPatternMatcher();
             mapping.interfaceNameMatcher->setPattern(interfaceNamePattern, false, false, false);
         }
-        mappings.push_back(mapping);
     }
 }
 
@@ -87,25 +91,27 @@ cGate *StreamDecoder::getRegistrationForwardingGate(cGate *gate)
 void StreamDecoder::processPacket(Packet *packet)
 {
     auto vlanInd = packet->findTag<VlanInd>();
-    for (auto& stream : mappings) {
+    for (auto& mapping : mappings) {
         bool matches = true;
         const auto& macAddressInd = packet->findTag<MacAddressInd>();
+        const auto& pcpInd = packet->findTag<PcpInd>();
         const auto& vlanInd = packet->findTag<VlanInd>();
         const auto& interfaceInd = packet->findTag<InterfaceInd>();
-        if (stream.interfaceNameMatcher != nullptr) {
+        matches &= mapping.packetFilter.matches(packet);
+        if (mapping.interfaceNameMatcher != nullptr) {
             auto interfaceName = interfaceInd != nullptr ? interfaceTable->getInterfaceById(interfaceInd->getInterfaceId())->getInterfaceName() : nullptr;
-            matches &= interfaceInd != nullptr && stream.interfaceNameMatcher->matches(interfaceName);
+            matches &= interfaceInd != nullptr && mapping.interfaceNameMatcher->matches(interfaceName);
         }
-        if (!stream.source.isUnspecified())
-            matches &= macAddressInd != nullptr && macAddressInd->getSrcAddress() == stream.source;
-        if (!stream.destination.isUnspecified())
-            matches &= macAddressInd != nullptr && macAddressInd->getDestAddress() == stream.destination;
-        if (stream.vlanId != -1)
-            matches &= vlanInd != nullptr && vlanInd->getVlanId() == stream.vlanId;
-        if (stream.pcp != -1)
-            matches &= true; // TODO
+        if (!mapping.source.isUnspecified())
+            matches &= macAddressInd != nullptr && macAddressInd->getSrcAddress() == mapping.source;
+        if (!mapping.destination.isUnspecified())
+            matches &= macAddressInd != nullptr && macAddressInd->getDestAddress() == mapping.destination;
+        if (mapping.vlanId != -1)
+            matches &= vlanInd != nullptr && vlanInd->getVlanId() == mapping.vlanId;
+        if (mapping.pcp != -1)
+            matches &= pcpInd != nullptr && pcpInd->getPcp() == mapping.pcp;
         if (matches) {
-            packet->addTag<StreamInd>()->setStreamName(stream.name.c_str());
+            packet->addTag<StreamInd>()->setStreamName(mapping.stream.c_str());
             break;
         }
     }

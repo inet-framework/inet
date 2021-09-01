@@ -20,6 +20,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/packet/PacketFilter.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
@@ -33,12 +34,13 @@ class INET_API StreamDecoder : public PacketFlowBase, public TransparentProtocol
     class INET_API Mapping
     {
       public:
+        PacketFilter packetFilter;
         MacAddress source;
         MacAddress destination;
         cPatternMatcher *interfaceNameMatcher = nullptr;
         int vlanId = -1;
         int pcp = -1;
-        std::string name;
+        std::string stream;
     };
 
   protected:
@@ -50,7 +52,7 @@ class INET_API StreamDecoder : public PacketFlowBase, public TransparentProtocol
     virtual void handleParameterChange(const char *name) override;
     virtual void processPacket(Packet *packet) override;
 
-    virtual void configureStreams();
+    virtual void configureMappings();
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 };
 
