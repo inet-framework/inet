@@ -59,6 +59,7 @@ void TsnConfigurator::computeStream(cValueMap *configuration)
     StreamConfiguration streamConfiguration;
     streamConfiguration.name = streamName;
     streamConfiguration.packetFilter = configuration->get("packetFilter").stringValue();
+    streamConfiguration.packetDataFilter = configuration->containsKey("packetDataFilter") ? configuration->get("packetDataFilter").stringValue() : "";
     auto sourceNetworkNodeName = configuration->get("source").stringValue();
     streamConfiguration.source = sourceNetworkNodeName;
     Node *sourceNode = static_cast<Node *>(topology->getNodeFor(getParentModule()->getSubmodule(sourceNetworkNodeName)));
@@ -299,6 +300,7 @@ void TsnConfigurator::configureStreams() const
             cValueArray *treesParameterValue = new cValueArray();
             streamParameterValue->set("name", streamConfiguration.name.c_str());
             streamParameterValue->set("packetFilter", streamConfiguration.packetFilter.c_str());
+            streamParameterValue->set("packetDataFilter", streamConfiguration.packetDataFilter.c_str());
             streamParameterValue->set("source", streamConfiguration.source.c_str());
             // TODO KLUDGE
             streamParameterValue->set("destination", streamConfiguration.destinations[0].c_str());
