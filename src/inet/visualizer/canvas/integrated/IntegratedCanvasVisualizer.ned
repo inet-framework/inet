@@ -161,7 +161,7 @@ module IntegratedCanvasVisualizer like IIntegratedVisualizer
         }
         streamRedundancyConfigurationVisualizer: <default("StreamRedundancyConfigurationCanvasVisualizer")> like IStreamRedundancyConfigurationVisualizer if typename != "" {
             parameters:
-                @display("p=750,100");
+                @display("p=750,200");
         }
 }
 
