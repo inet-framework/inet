@@ -77,6 +77,10 @@ class TemporarySharedPtrClassDescriptor : public cClassDescriptor
     virtual any_ptr getFieldStructValuePointer(any_ptr object, int field, int i) const override { return classDescriptor->getFieldStructValuePointer(getObjectPointer(object), field, i); }
 #if OMNETPP_VERSION >= 0x0600
     virtual void setFieldStructValuePointer(any_ptr object, int field, int i, any_ptr ptr) const override { classDescriptor->setFieldStructValuePointer(getObjectPointer(object), field, i, ptr); }
+#if OMNETPP_BUILDNUM >= 1526
+    virtual cValue getFieldValue(any_ptr object, int field, int i) const override { return classDescriptor->getFieldValue(object, field, i); }
+    virtual void setFieldValue(any_ptr object, int field, int i, const cValue& value) const override { classDescriptor->setFieldValue(object, field, i, value); }
+#endif
 #endif
 };
 
