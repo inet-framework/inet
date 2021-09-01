@@ -27,7 +27,7 @@ module Ecu extends StandardHost
         @display("i=device/card");
 }
 
-module TsnSwitch extends EthernetSwitch
+module LocalEthernetSwitch extends EthernetSwitch
 {
     parameters:
         @defaultStatistic("gateStateChanged:vector"; module="eth[0].macLayer.queue.gate[0]");
@@ -41,22 +41,22 @@ network TimeAwareShaperExample extends WiredNetworkBase
         gateSchedulingConfigurator: <default("")> like IGateSchedulingConfigurator if typename != "" {
             @display("p=100,400;is=s");
         }
-        frontSwitch: TsnSwitch {
+        frontSwitch: LocalEthernetSwitch {
             @display("p=742,350");
         }
-        frontLeftSwitch: TsnSwitch {
+        frontLeftSwitch: LocalEthernetSwitch {
             @display("p=912,276");
         }
-        frontRightSwitch: TsnSwitch {
+        frontRightSwitch: LocalEthernetSwitch {
             @display("p=912,417");
         }
-        rearSwitch: TsnSwitch {
+        rearSwitch: LocalEthernetSwitch {
             @display("p=478,350");
         }
-        rearLeftSwitch: TsnSwitch {
+        rearLeftSwitch: LocalEthernetSwitch {
             @display("p=381,283");
         }
-        rearRightSwitch: TsnSwitch {
+        rearRightSwitch: LocalEthernetSwitch {
             @display("p=381,408");
         }
         hud: Ecu {
