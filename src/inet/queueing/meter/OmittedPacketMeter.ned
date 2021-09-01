@@ -15,19 +15,19 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.queueing.contract;
+package inet.queueing.meter;
 
-//
-// This module interface is implemented by packet meter modules. A packet meter
-// connects one input to one output. It can operate in both active and passive
-// mode. Packets can be pushed into its input or packets can be pulled from its
-// output. When processing packets, a meter attaches some information (such as
-// the packet rate) to the packets based on the data and meta data they contain.
-// The packets are processed as part of a stream.
-//
-moduleinterface IPacketMeter extends IPacketFlow
+import inet.queueing.contract.IPacketMeter;
+
+module OmittedPacketMeter like IPacketMeter
 {
     parameters:
-        @omittedTypename(OmittedPacketMeter);
-        @display("i=block/star");
+        @class(::inet::OmittedModule);
+        @display("i=block/star,black,50");
+    gates:
+        input in;
+        output out;
+    connections:
+        in --> out;
 }
+
