@@ -60,19 +60,24 @@ int StreamIdentifier::incrementSequenceNumber(const char *stream)
 
 void StreamIdentifier::processPacket(Packet *packet)
 {
-    for (int i = 0; i < mapping->size(); i++) {
-        auto element = check_and_cast<cValueMap *>(mapping->get(i).objectValue());
-        PacketFilter packetFilter;
-        auto packetPattern = element->containsKey("packet") ? element->get("packet").stringValue() : "*";
-        auto dataPattern = element->containsKey("data") ? element->get("data").stringValue() : "*";
-        packetFilter.setPattern(packetPattern, dataPattern);
-        if (packetFilter.matches(packet)) {
-            auto streamName = element->get("stream").stringValue();
-            packet->addTag<StreamReq>()->setStreamName(streamName);
-            auto sequenceNumber = incrementSequenceNumber(streamName);
-            const auto& sequenceNumberTag = packet->addTag<SequenceNumberReq>();
-            sequenceNumberTag->setSequenceNumber(sequenceNumber);
-            break;
+    const char *streamName = nullptr;
+    auto streamReq = packet->findTag<StreamReq>();
+    if (streamReq != nullptr)
+        streamName = streamReq->getStreamName();
+    else {
+        for (int i = 0; i < mapping->size(); i++) {
+            auto element = check_and_cast<cValueMap *>(mapping->get(i).objectValue());
+            PacketFilter packetFilter;
+            auto packetPattern = element->containsKey("packetFilter") ? element->get("packetFilter").stringValue() : "*";
+            auto dataPattern = element->containsKey("dataFilter") ? element->get("dataFilter").stringValue() : "*";
+            packetFilter.setPattern(packetPattern, dataPattern);
+            if (packetFilter.matches(packet)) {
+                streamName = element->get("stream").stringValue();
+                packet->addTag<StreamReq>()->setStreamName(streamName);
+                auto sequenceNumber = incrementSequenceNumber(streamName);
+                packet->addTag<SequenceNumberReq>()->setSequenceNumber(sequenceNumber);
+                break;
+            }
         }
     }
     handlePacketProcessed(packet);
