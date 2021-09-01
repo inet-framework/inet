@@ -28,8 +28,8 @@ using namespace inet::queueing;
 class INET_API EligibilityTimeMeter : public ClockUserModuleMixin<PacketMeterBase>
 {
   protected:
-    bps comittedInformationRate = bps(NaN);
-    b comittedBurstSize = b(NaN);
+    bps committedInformationRate = bps(NaN);
+    b committedBurstSize = b(NaN);
 
     clocktime_t groupEligibilityTime = 0;
     clocktime_t bucketEmptyTime = 0;

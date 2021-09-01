@@ -27,8 +27,8 @@ void EligibilityTimeMeter::initialize(int stage)
 {
     ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        comittedInformationRate = bps(par("comittedInformationRate"));
-        comittedBurstSize = b(par("comittedBurstSize"));
+        committedInformationRate = bps(par("committedInformationRate"));
+        committedBurstSize = b(par("committedBurstSize"));
         maxResidenceTime = par("maxResidenceTime");
         WATCH(groupEligibilityTime);
         WATCH(bucketEmptyTime);
@@ -39,8 +39,8 @@ void EligibilityTimeMeter::initialize(int stage)
 void EligibilityTimeMeter::meterPacket(Packet *packet)
 {
     clocktime_t arrivalTime = getClockTime();
-    clocktime_t lengthRecoveryDuration = s(packet->getDataLength() / comittedInformationRate).get();
-    clocktime_t emptyToFullDuration = s(comittedBurstSize / comittedInformationRate).get();
+    clocktime_t lengthRecoveryDuration = s(packet->getDataLength() / committedInformationRate).get();
+    clocktime_t emptyToFullDuration = s(committedBurstSize / committedInformationRate).get();
     clocktime_t schedulerEligibilityTime = bucketEmptyTime + lengthRecoveryDuration;
     clocktime_t bucketFullTime = bucketEmptyTime + emptyToFullDuration;
     clocktime_t eligibilityTime;
