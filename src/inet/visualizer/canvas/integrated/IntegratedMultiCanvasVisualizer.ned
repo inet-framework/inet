@@ -38,9 +38,11 @@ import inet.visualizer.contract.IRadioVisualizer;
 import inet.visualizer.contract.IRoutingTableVisualizer;
 import inet.visualizer.contract.ISceneVisualizer;
 import inet.visualizer.contract.IStatisticVisualizer;
+import inet.visualizer.contract.IStreamRedundancyConfigurationVisualizer;
 import inet.visualizer.contract.ITracingObstacleLossVisualizer;
 import inet.visualizer.contract.ITransportConnectionVisualizer;
 import inet.visualizer.contract.ITransportRouteVisualizer;
+import inet.visualizer.contract.ITsnConfigurationVisualizer;
 
 //
 // This module integrates all canvas visualizers into a single module. It
@@ -76,6 +78,8 @@ module IntegratedMultiCanvasVisualizer like IIntegratedVisualizer
         int numRoutingTableVisualizers = default(1);
         int numTransportRouteVisualizers = default(1);
         int numTransportConnectionVisualizers = default(1);
+        int numTsnConfigurationVisualizers = default(1);
+        int numStreamRedundancyConfigurationVisualizers = default(1);
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
         *.networkNodeVisualizerModule = default(absPath(".networkNodeVisualizer[0]"));
@@ -171,6 +175,14 @@ module IntegratedMultiCanvasVisualizer like IIntegratedVisualizer
         transportConnectionVisualizer[numTransportConnectionVisualizers]: <default("TransportConnectionCanvasVisualizer")> like ITransportConnectionVisualizer {
             parameters:
                 @display("p=450,1200,row,100");
+        }
+        tsnConfigurationVisualizer[numTsnConfigurationVisualizers]: <default("TsnConfigurationCanvasVisualizer")> like ITsnConfigurationVisualizer {
+            parameters:
+                @display("p=750,100");
+        }
+        streamRedundancyConfigurationVisualizer[numStreamRedundancyConfigurationVisualizers]: <default("StreamRedundancyConfigurationCanvasVisualizer")> like IStreamRedundancyConfigurationVisualizer {
+            parameters:
+                @display("p=750,200");
         }
 }
 
