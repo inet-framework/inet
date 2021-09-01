@@ -225,6 +225,8 @@ void TSNschedGateSchedulingConfigurator::writeInputToFile(const Input& input, st
     auto json = convertInputToJson(input);
     std::ofstream stream;
     stream.open(fileName.c_str());
+    if (stream.fail())
+        throw cRuntimeError("Cannot open file %s", fileName.c_str());
     printJson(stream, cValue(json));
     delete json;
 }
