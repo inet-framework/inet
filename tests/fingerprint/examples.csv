@@ -243,8 +243,8 @@
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             d98f-3a25/tplx
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             2092-041f/tplx
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             db5f-b8ff/tplx
-/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           cd51-cd0a/tplx
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           26de-bc68/tplx
+/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           bfcb-498c/tplx
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           07d6-47a8/tplx
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            4c11-bb60/tplx
 
 ### /examples/manetrouting/* : see manet.csv
