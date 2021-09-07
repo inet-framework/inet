@@ -82,6 +82,19 @@ RadioMedium::~RadioMedium()
         communicationLog.close();
 }
 
+#if OMNETPP_BUILDNUM >= 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9 KLUDGE
+void RadioMedium::preDelete(cComponent *root)
+{
+    (void)root;
+    for (const auto transmission : transmissions) {
+        delete communicationCache->getCachedFrame(transmission);
+        communicationCache->removeCachedFrame(transmission);
+        delete transmission;
+    }
+    transmissions.clear();
+}
+#endif
+
 void RadioMedium::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {

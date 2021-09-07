@@ -316,6 +316,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     RadioMedium();
     virtual ~RadioMedium();
 
+#if OMNETPP_BUILDNUM >= 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9 KLUDGE
+    virtual void preDelete(cComponent *root) override;
+#endif
+
     virtual std::ostream& printToStream(std::ostream &stream, int level) const override;
 
     virtual const IMaterial *getMaterial() const override { return material; }
