@@ -35,6 +35,7 @@ class INET_API TransmitStep : public ITransmitStep
             frameToTransmit(frame),
             ifs(ifs)
         { }
+
         virtual ~TransmitStep()
         {
 #if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9
