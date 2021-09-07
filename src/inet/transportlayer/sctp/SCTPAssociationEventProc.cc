@@ -314,7 +314,7 @@ void SCTPAssociation::process_RECEIVE_REQUEST(SCTPEventCode& event, SCTPCommand 
 void SCTPAssociation::process_PRIMARY(SCTPEventCode& event, SCTPCommand *sctpCommand)
 {
     SCTPPathInfo *pinfo = check_and_cast<SCTPPathInfo *>(sctpCommand);
-    state->setPrimaryPath(getPath(pinfo->getRemoteAddress()));
+    state->setPrimaryPath(findPath(pinfo->getRemoteAddress()));
 }
 
 void SCTPAssociation::process_STREAM_RESET(SCTPCommand *sctpCommand)

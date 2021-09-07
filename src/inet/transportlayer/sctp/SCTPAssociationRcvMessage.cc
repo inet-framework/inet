@@ -97,7 +97,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
         }
     }
 
-    SCTPPathVariables *path = getPath(src);
+    SCTPPathVariables *path = findPath(src);
     const uint16 srcPort = sctpmsg->getDestPort();
     const uint16 destPort = sctpmsg->getSrcPort();
     const uint32 numberOfChunks = sctpmsg->getChunksArraySize();
@@ -596,7 +596,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk *initchunk, int32 srcPort
         if (!state->initReceived) {
             state->initReceived = true;
             state->initialPrimaryPath = remoteAddr;
-            state->setPrimaryPath(getPath(remoteAddr));
+            state->setPrimaryPath(findPath(remoteAddr));
             if (initchunk->getAddressesArraySize() == 0) {
                 EV_INFO << " get new path for " << remoteAddr << "\n";
                 SCTPPathVariables *rPath = new SCTPPathVariables(remoteAddr, this, rt);
@@ -656,7 +656,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk *initchunk, int32 srcPort
                 if (initchunk->getAddresses(j).getType() == L3Address::IPv6)
                     continue;
                 // set path variables for this pathlocalAddresses
-                if (!getPath(initchunk->getAddresses(j))) {
+                if (!findPath(initchunk->getAddresses(j))) {
                     SCTPPathVariables *path = new SCTPPathVariables(initchunk->getAddresses(j), this, rt);
                     EV_INFO << " get new path for " << initchunk->getAddresses(j) << " ptr=" << path << "\n";
                     for (auto & elem : state->localAddresses) {
@@ -3277,7 +3277,7 @@ SCTPEventCode SCTPAssociation::processAsconfAckArrived(SCTPAsconfAckChunk *ascon
     std::vector<uint32> errorCorrId;
     bool errorFound = false;
 
-    sctpasconf = check_and_cast<SCTPAsconfChunk *>(state->asconfChunk->dup());
+    sctpasconf = state->asconfChunk->dup();
     if (asconfAckChunk->getSerialNumber() == sctpasconf->getSerialNumber()) {
         stopTimer(getPath(remoteAddr)->AsconfTimer);
         state->errorCount = 0;

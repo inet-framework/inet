@@ -1055,9 +1055,16 @@ class INET_API SCTPAssociation : public cObject
     inline SCTPPathVariables *getPath(const L3Address& pathId) const
     {
         SCTPPathMap::const_iterator iterator = sctpPathMap.find(pathId);
-        if (iterator != sctpPathMap.end()) {
+        if (iterator != sctpPathMap.end())
             return iterator->second;
-        }
+        throw cRuntimeError("model error: getPath: Path not found");
+    }
+
+    inline SCTPPathVariables *findPath(const L3Address& pathId) const
+    {
+        SCTPPathMap::const_iterator iterator = sctpPathMap.find(pathId);
+        if (iterator != sctpPathMap.end())
+            return iterator->second;
         return nullptr;
     }
 

@@ -516,7 +516,7 @@ void SCTPAssociation::sendInit()
     if (localPort == 0)
         throw cRuntimeError("Error processing command ASSOCIATE: local port unspecified");
 
-    state->setPrimaryPath(getPath(remoteAddr));
+    state->setPrimaryPath(findPath(remoteAddr));
     // create message consisting of INIT chunk
     SCTPMessage *sctpmsg = new SCTPMessage();
     sctpmsg->setByteLength(SCTP_COMMON_HEADER);
