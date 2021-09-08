@@ -74,8 +74,8 @@ void TelnetApp::handleStopOperation(LifecycleOperation *operation)
 {
     cancelEvent(timeoutMsg);
     if (socket.isOpen()) {
-        close();
-        delayActiveOperationFinish(par("stopOperationTimeout"));
+//        close();
+//        delayActiveOperationFinish(par("stopOperationTimeout"));
     }
 }
 
@@ -190,10 +190,10 @@ void TelnetApp::socketClosed(TcpSocket *socket)
         timeoutMsg->setKind(MSGKIND_CONNECT);
         checkedScheduleAt(simTime() + par("idleInterval"), timeoutMsg);
     }
-    else if (operationalState == State::STOPPING_OPERATION) {
-        if (!this->socket.isOpen())
-            startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
-    }
+//    else if (operationalState == State::STOPPING_OPERATION) {
+//        if (!this->socket.isOpen())
+//            startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
+//    }
 }
 
 void TelnetApp::socketFailure(TcpSocket *socket, int code)
