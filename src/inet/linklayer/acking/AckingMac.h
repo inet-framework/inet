@@ -60,6 +60,10 @@ class INET_API AckingMac : public MacProtocolBase, public IMacProtocol, public q
     virtual void handleSelfMessage(cMessage *message) override;
     //@}
 
+    virtual void handleStartOperation(LifecycleOperation *operation);
+    virtual void handleStopOperation(LifecycleOperation *operation);
+    virtual void handleCrashOperation(LifecycleOperation *operation);
+
   public:
     AckingMac();
     virtual ~AckingMac();

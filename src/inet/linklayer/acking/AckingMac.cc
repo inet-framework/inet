@@ -58,11 +58,6 @@ void AckingMac::initialize(int stage)
         transmissionState = radio->getTransmissionState();
         if (useAck)
             ackTimeoutMsg = new cMessage("link-break");
-        if (currentTxFrame == nullptr    // not an active transmission
-                && transmissionState != IRadio::TRANSMISSION_STATE_TRANSMITTING
-                && canDequeuePacket()
-                )
-            processUpperPacket();
     }
 }
 
@@ -278,6 +273,29 @@ void AckingMac::processUpperPacket()
 {
     auto packet = dequeuePacket();
     handleUpperPacket(packet);
+
+}
+
+void AckingMac::handleStartOperation(LifecycleOperation *operation)
+{
+    if (transmissionState != IRadio::TRANSMISSION_STATE_TRANSMITTING && canDequeuePacket())
+        processUpperPacket();
+}
+
+void AckingMac::handleStopOperation(LifecycleOperation *operation)
+{
+    MacProtocolBase::handleStopOperation(operation);
+    if (useAck) {
+        cancelEvent(ackTimeoutMsg);
+    }
+}
+
+void AckingMac::handleCrashOperation(LifecycleOperation *operation)
+{
+    MacProtocolBase::handleCrashOperation(operation);
+    if (useAck) {
+        cancelEvent(ackTimeoutMsg);
+    }
 }
 
 } // namespace inet
