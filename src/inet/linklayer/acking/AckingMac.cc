@@ -67,10 +67,6 @@ void AckingMac::initialize(int stage)
         radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
         if (useAck)
             ackTimeoutMsg = new cMessage("link-break");
-        if (!txQueue->isEmpty()) {
-            popTxQueue();
-            startTransmitting();
-        }
     }
 }
 
@@ -266,6 +262,28 @@ void AckingMac::decapsulate(Packet *packet)
     auto payloadProtocol = ProtocolGroup::ethertype.getProtocol(macHeader->getNetworkProtocol());
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
+}
+
+void AckingMac::handleStartOperation(LifecycleOperation *operation){
+    if (!txQueue->isEmpty()) {
+        popTxQueue();
+        startTransmitting();
+    }
+}
+
+void AckingMac::handleStopOperation(LifecycleOperation *operation){
+    MacProtocolBase::handleStopOperation(operation);
+    if(useAck){
+        cancelEvent(ackTimeoutMsg);
+    }
+}
+
+void AckingMac::handleCrashOperation(LifecycleOperation *operation){
+    MacProtocolBase::handleCrashOperation(operation);
+    if(useAck){
+        cancelEvent(ackTimeoutMsg);
+    }
+
 }
 
 } // namespace inet
