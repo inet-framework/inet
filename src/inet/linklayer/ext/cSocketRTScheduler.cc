@@ -40,11 +40,7 @@
 
 namespace inet {
 
-#if OMNETPP_BUILDNUM <= 1003
-#define FES(sim) (&sim->msgQueue)
-#else
 #define FES(sim) (sim->getFES())
-#endif
 
 std::vector<cModule *> cSocketRTScheduler::modules;
 std::vector<pcap_t *> cSocketRTScheduler::pds;
@@ -231,11 +227,7 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     simtime_t t(curTime - cSocketRTScheduler::baseTime, SIMTIME_US);
 #endif
     // TBD assert that it's somehow not smaller than previous event's time
-#if OMNETPP_BUILDNUM <= 1003
-    notificationMsg->setArrival(module, -1, t);
-#else
     notificationMsg->setArrival(module->getId(), -1, t);
-#endif
     FES(getSimulation())->insert(notificationMsg);
 }
 
