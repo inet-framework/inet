@@ -145,17 +145,20 @@ void FrameSequenceHandler::finishFrameSequenceStep()
 void FrameSequenceHandler::finishFrameSequence()
 {
     EV_INFO << "Frame sequence finished\n";
+    auto inProgressFrames = context->getInProgressFrames();
+    callback->frameSequenceFinished();
     delete context;
     delete frameSequence;
     context = nullptr;
     frameSequence = nullptr;
-    callback->frameSequenceFinished();
     callback = nullptr;
+    inProgressFrames->clearDroppedFrames();
 }
 
 void FrameSequenceHandler::abortFrameSequence()
 {
     EV_INFO << "Frame sequence aborted\n";
+    auto inProgressFrames = context->getInProgressFrames();
     auto step = context->getLastStep();
     auto failedTxStep = check_and_cast<ITransmitStep*>(dynamic_cast<IReceiveStep*>(step) ? context->getStepBeforeLast() : step);
     auto frameToTransmit = failedTxStep->getFrameToTransmit();
@@ -163,12 +166,13 @@ void FrameSequenceHandler::abortFrameSequence()
         callback->originatorProcessFailedFrame(dataOrMgmtFrame);
     else if (auto rtsTxStep = dynamic_cast<RtsTransmitStep *>(failedTxStep))
         callback->originatorProcessRtsProtectionFailed(rtsTxStep->getProtectedFrame());
+    callback->frameSequenceFinished();
     delete context;
     delete frameSequence;
     context = nullptr;
     frameSequence = nullptr;
-    callback->frameSequenceFinished();
     callback = nullptr;
+    inProgressFrames->clearDroppedFrames();
 }
 
 FrameSequenceHandler::~FrameSequenceHandler()

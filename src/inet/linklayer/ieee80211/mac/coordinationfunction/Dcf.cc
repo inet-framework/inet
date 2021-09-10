@@ -325,6 +325,16 @@ void Dcf::corruptedFrameReceived()
     }
 }
 
+#if OMNETPP_BUILDNUM >= 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9
+void Dcf::preDelete(cComponent *)
+{
+    delete inProgressFrames;
+    inProgressFrames = nullptr;
+    delete pendingQueue;
+    pendingQueue = nullptr;
+}
+#endif
+
 Dcf::~Dcf()
 {
     cancelAndDelete(startRxTimer);

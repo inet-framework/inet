@@ -46,7 +46,7 @@ class DataFs : public IFrameSequence
                     case 0: {
                         Ieee80211Frame *frame = new Ieee80211Frame("DATA");
                         frame->setType(ST_DATA);
-                        return new TransmitStep(frame, 0);
+                        return new TransmitStep(frame, 0, false);
                     }
                     case 1:
                         return nullptr;
@@ -54,7 +54,7 @@ class DataFs : public IFrameSequence
                         throw cRuntimeError("Unknown step");
                 }
             }
-			else {
+            else {
                 switch (step) {
                     case 0:
                         return new ReceiveStep();
@@ -119,7 +119,7 @@ class INET_API AckFs : public IFrameSequence {
                     case 0: {
                         Ieee80211Frame *frame = new Ieee80211Frame("ACK");
                         frame->setType(ST_ACK);
-                        return new TransmitStep(frame, 0);
+                        return new TransmitStep(frame, 0, false);
                     }
                     case 1:
                         return nullptr;
@@ -174,7 +174,7 @@ class RtsCtsFs : public IFrameSequence {
                     case 0: {
                         Ieee80211Frame *frame = new Ieee80211Frame("RTS");
                         frame->setType(ST_RTS);
-                        return new TransmitStep(frame, 0);
+                        return new TransmitStep(frame, 0, false);
                     }
                     case 1:
                         return new ReceiveStep();
@@ -191,7 +191,7 @@ class RtsCtsFs : public IFrameSequence {
                     case 1: {
                         Ieee80211Frame *frame = new Ieee80211Frame("CTS");
                         frame->setType(ST_CTS);
-                        return new TransmitStep(frame, 0);
+                        return new TransmitStep(frame, 0, false);
                     }
                     case 2:
                         return nullptr;
@@ -200,7 +200,7 @@ class RtsCtsFs : public IFrameSequence {
                 }
             }
         }
-        
+
         bool completeStep(FrameSequenceContext *context) override {
             if (context == originatorContext) {
                 switch (step) {
@@ -250,7 +250,7 @@ static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequ
     Ieee80211Frame *recipientFrame = nullptr;
     recipientContext = new FrameSequenceContext(MACAddress(RECIPIENT), nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     recipientFrameSequence->startSequence(recipientContext, 0);
-    
+
     // run frame sequence
     while (isOriginatorRunning || isRecipientRunning) {
         if (isOriginatorRunning) {
@@ -263,7 +263,7 @@ static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequ
             else
                 originatorContext->addStep(originatorStep);
         }
-        
+
         if (isRecipientRunning) {
             // advance recipient
             recipientStep = recipientFrameSequence->prepareStep(recipientContext);
@@ -275,7 +275,7 @@ static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequ
                 recipientContext->addStep(recipientStep);
         }
 
-        // handle originator transmit        
+        // handle originator transmit
         if (isOriginatorRunning) {
             if (originatorStep->getType() == IFrameSequenceStep::Type::TRANSMIT) {
                 ITransmitStep *transmitStep = check_and_cast<ITransmitStep *>(originatorStep);
@@ -283,7 +283,7 @@ static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequ
                 EV_INFO << "originator transmit: " << originatorFrame->getName() << "\n";
             }
         }
-        
+
         // handle recipient transmit
         if (isRecipientRunning) {
             if (recipientStep->getType() == IFrameSequenceStep::Type::TRANSMIT) {
@@ -330,7 +330,7 @@ static void runFrameSequence(IFrameSequence *originatorFrameSequence, IFrameSequ
                 isRecipientRunning = false;
             }
         }
-        
+
         delete originatorFrame;
         delete recipientFrame;
         originatorFrame = nullptr;

@@ -31,8 +31,10 @@ Define_Module(Tx);
 Tx::~Tx()
 {
     cancelAndDelete(endIfsTimer);
-    if (frame && !transmitting)
+    if (frame && !transmitting) {
+        take(frame);
         delete frame;
+    }
 }
 
 void Tx::initialize(int stage)

@@ -136,6 +136,10 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
        virtual bool isForUs(Ieee80211Frame *frame) const;
 
     public:
+#if OMNETPP_BUILDNUM >= 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9
+       virtual void preDelete(cComponent *root) override;
+#endif
+
         virtual ~Dcf();
 
         // ICoordinationFunction

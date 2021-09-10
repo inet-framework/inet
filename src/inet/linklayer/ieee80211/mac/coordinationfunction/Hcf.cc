@@ -95,8 +95,8 @@ void Hcf::handleMessage(cMessage* msg)
 void Hcf::processUpperFrame(Ieee80211DataOrMgmtFrame* frame)
 {
     Enter_Method("processUpperFrame(%s)", frame->getName());
-    take(frame);
     EV_INFO << "Processing upper frame: " << frame->getName() << endl;
+    take(frame);
     // TODO:
     // A QoS STA should send individually addressed Management frames that are addressed to a non-QoS STA
     // using the access category AC_BE and shall send all other management frames using the access category
@@ -144,8 +144,8 @@ void Hcf::scheduleInactivityTimer(simtime_t timeout)
 void Hcf::processLowerFrame(Ieee80211Frame* frame)
 {
     Enter_Method("processLowerFrame(%s)", frame->getName());
-    take(frame);
     EV_INFO << "Processing lower frame: " << frame->getName() << endl;
+    take(frame);
     auto edcaf = edca->getChannelOwner();
     if (edcaf && frameSequenceHandler->isSequenceRunning()) {
         // TODO: always call processResponse?
@@ -169,6 +169,7 @@ void Hcf::processLowerFrame(Ieee80211Frame* frame)
 
 void Hcf::channelGranted(IChannelAccess* channelAccess)
 {
+    Enter_Method_Silent();
     auto edcaf = check_and_cast<Edcaf*>(channelAccess);
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
@@ -187,17 +188,20 @@ void Hcf::channelGranted(IChannelAccess* channelAccess)
 
 FrameSequenceContext* Hcf::buildContext(AccessCategory ac)
 {
+    Enter_Method_Silent();
     auto qosContext = new QoSContext(originatorAckPolicy, originatorBlockAckProcedure, originatorBlockAckAgreementHandler, edcaTxops[ac]);
     return new FrameSequenceContext(mac->getAddress(), modeSet, edcaInProgressFrames[ac], rtsProcedure, rtsPolicy, nullptr, qosContext);
 }
 
 void Hcf::startFrameSequence(AccessCategory ac)
 {
+    Enter_Method_Silent();
     frameSequenceHandler->startFrameSequence(new HcfFs(), buildContext(ac), this);
 }
 
 void Hcf::handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs)
 {
+    Enter_Method_Silent();
     for (auto edcaf : internallyCollidedEdcafs) {
         AccessCategory ac = edcaf->getAccessCategory();
         Ieee80211DataOrMgmtFrame *internallyCollidedFrame = edcaInProgressFrames[ac]->getFrameToTransmit();
@@ -240,6 +244,7 @@ void Hcf::handleInternalCollision(std::vector<Edcaf*> internallyCollidedEdcafs)
 
 void Hcf::frameSequenceFinished()
 {
+    Enter_Method_Silent();
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
         bool startContention = hasFrameToTransmit(); // TODO: outstanding frame
@@ -261,6 +266,8 @@ void Hcf::frameSequenceFinished()
 
 void Hcf::recipientProcessReceivedFrame(Ieee80211Frame* frame)
 {
+    Enter_Method("recipientProcessReceivedFrame");
+    take(frame);
     if (auto dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame))
         recipientAckProcedure->processReceivedFrame(dataOrMgmtFrame, check_and_cast<IRecipientAckPolicy*>(recipientAckPolicy), this);
     if (auto dataFrame = dynamic_cast<Ieee80211DataFrame*>(frame)) {
@@ -271,8 +278,9 @@ void Hcf::recipientProcessReceivedFrame(Ieee80211Frame* frame)
     else if (auto mgmtFrame = dynamic_cast<Ieee80211ManagementFrame*>(frame)) {
         sendUp(recipientDataService->managementFrameReceived(mgmtFrame));
         recipientProcessReceivedManagementFrame(mgmtFrame);
-        if (dynamic_cast<Ieee80211ActionFrame *>(mgmtFrame))
+        if (dynamic_cast<Ieee80211ActionFrame *>(mgmtFrame)) {
             delete mgmtFrame;
+        }
     }
     else { // TODO: else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
         sendUp(recipientDataService->controlFrameReceived(frame, recipientBlockAckAgreementHandler));
@@ -283,6 +291,7 @@ void Hcf::recipientProcessReceivedFrame(Ieee80211Frame* frame)
 
 void Hcf::recipientProcessReceivedControlFrame(Ieee80211Frame* frame)
 {
+    Enter_Method_Silent();
     if (auto rtsFrame = dynamic_cast<Ieee80211RTSFrame *>(frame))
         ctsProcedure->processReceivedRts(rtsFrame, ctsPolicy, this);
     else if (auto blockAckRequest = dynamic_cast<Ieee80211BasicBlockAckReq*>(frame)) {
@@ -297,6 +306,7 @@ void Hcf::recipientProcessReceivedControlFrame(Ieee80211Frame* frame)
 
 void Hcf::recipientProcessReceivedManagementFrame(Ieee80211ManagementFrame* frame)
 {
+    Enter_Method_Silent();
     if (recipientBlockAckAgreementHandler && originatorBlockAckAgreementHandler) {
         if (auto addbaRequest = dynamic_cast<Ieee80211AddbaRequest *>(frame))
             recipientBlockAckAgreementHandler->processReceivedAddbaRequest(addbaRequest, recipientBlockAckAgreementPolicy, this);
@@ -317,6 +327,7 @@ void Hcf::recipientProcessReceivedManagementFrame(Ieee80211ManagementFrame* fram
 
 void Hcf::transmissionComplete(Ieee80211Frame *frame)
 {
+    Enter_Method("transmissionComplete");
     auto edcaf = edca->getChannelOwner();
     if (edcaf)
         frameSequenceHandler->transmissionComplete();
@@ -324,11 +335,13 @@ void Hcf::transmissionComplete(Ieee80211Frame *frame)
         throw cRuntimeError("Hcca is unimplemented!");
     else
         recipientProcessTransmittedControlResponseFrame(frame);
+    take(frame);
     delete frame;
 }
 
 void Hcf::originatorProcessRtsProtectionFailed(Ieee80211DataOrMgmtFrame* protectedFrame)
 {
+    Enter_Method_Silent();
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
         EV_INFO << "RTS frame transmission failed\n";
@@ -361,6 +374,7 @@ void Hcf::originatorProcessRtsProtectionFailed(Ieee80211DataOrMgmtFrame* protect
 
 void Hcf::originatorProcessTransmittedFrame(Ieee80211Frame* transmittedFrame)
 {
+    Enter_Method_Silent();
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
@@ -384,6 +398,7 @@ void Hcf::originatorProcessTransmittedFrame(Ieee80211Frame* transmittedFrame)
 
 void Hcf::originatorProcessTransmittedDataFrame(Ieee80211DataFrame* dataFrame, AccessCategory ac)
 {
+    Enter_Method_Silent();
     edcaAckHandlers[ac]->processTransmittedDataOrMgmtFrame(dataFrame);
     if (originatorBlockAckAgreementHandler)
         originatorBlockAckAgreementHandler->processTransmittedDataFrame(dataFrame, originatorBlockAckAgreementPolicy, this);
@@ -393,6 +408,7 @@ void Hcf::originatorProcessTransmittedDataFrame(Ieee80211DataFrame* dataFrame, A
 
 void Hcf::originatorProcessTransmittedManagementFrame(Ieee80211ManagementFrame* mgmtFrame, AccessCategory ac)
 {
+    Enter_Method_Silent();
     if (originatorAckPolicy->isAckNeeded(mgmtFrame))
         edcaAckHandlers[ac]->processTransmittedDataOrMgmtFrame(mgmtFrame);
     if (auto addbaReq = dynamic_cast<Ieee80211AddbaRequest*>(mgmtFrame)) {
@@ -412,6 +428,7 @@ void Hcf::originatorProcessTransmittedManagementFrame(Ieee80211ManagementFrame* 
 
 void Hcf::originatorProcessTransmittedControlFrame(Ieee80211Frame* controlFrame, AccessCategory ac)
 {
+    Enter_Method_Silent();
     if (auto blockAckReq = dynamic_cast<Ieee80211BlockAckReq*>(controlFrame))
         edcaAckHandlers[ac]->processTransmittedBlockAckReq(blockAckReq);
     else if (auto rtsFrame = dynamic_cast<Ieee80211RTSFrame*>(controlFrame))
@@ -422,6 +439,7 @@ void Hcf::originatorProcessTransmittedControlFrame(Ieee80211Frame* controlFrame,
 
 void Hcf::originatorProcessFailedFrame(Ieee80211DataOrMgmtFrame* failedFrame)
 {
+    Enter_Method_Silent();
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
@@ -476,6 +494,7 @@ void Hcf::originatorProcessFailedFrame(Ieee80211DataOrMgmtFrame* failedFrame)
 
 void Hcf::originatorProcessReceivedFrame(Ieee80211Frame* frame, Ieee80211Frame* lastTransmittedFrame)
 {
+    Enter_Method_Silent();
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
@@ -497,6 +516,7 @@ void Hcf::originatorProcessReceivedManagementFrame(Ieee80211ManagementFrame* fra
 
 void Hcf::originatorProcessReceivedControlFrame(Ieee80211Frame* frame, Ieee80211Frame* lastTransmittedFrame, AccessCategory ac)
 {
+    Enter_Method_Silent();
     if (auto ackFrame = dynamic_cast<Ieee80211ACKFrame *>(frame)) {
         if (auto dataFrame = dynamic_cast<Ieee80211DataFrame *>(lastTransmittedFrame)) {
             if (dataAndMgmtRateControl) {
@@ -552,6 +572,7 @@ void Hcf::originatorProcessReceivedDataFrame(Ieee80211DataFrame* frame, Ieee8021
 
 bool Hcf::hasFrameToTransmit(AccessCategory ac)
 {
+    Enter_Method_Silent();
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
@@ -563,6 +584,7 @@ bool Hcf::hasFrameToTransmit(AccessCategory ac)
 
 bool Hcf::hasFrameToTransmit()
 {
+    Enter_Method_Silent();
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
@@ -574,6 +596,7 @@ bool Hcf::hasFrameToTransmit()
 
 void Hcf::sendUp(const std::vector<Ieee80211Frame*>& completeFrames)
 {
+    Enter_Method_Silent();
     for (auto frame : completeFrames) {
         // FIXME: mgmt module does not handle addba req ..
         if (!dynamic_cast<Ieee80211ActionFrame *>(frame))
@@ -583,6 +606,7 @@ void Hcf::sendUp(const std::vector<Ieee80211Frame*>& completeFrames)
 
 void Hcf::transmitFrame(Ieee80211Frame* frame, simtime_t ifs)
 {
+    Enter_Method_Silent();
     auto channelOwner = edca->getChannelOwner();
     if (channelOwner) {
         AccessCategory ac = channelOwner->getAccessCategory();
@@ -609,6 +633,7 @@ void Hcf::transmitFrame(Ieee80211Frame* frame, simtime_t ifs)
 
 void Hcf::transmitControlResponseFrame(Ieee80211Frame* responseFrame, Ieee80211Frame* receivedFrame)
 {
+    Enter_Method("transmitControlResponseFrame");
     const IIeee80211Mode *responseMode = nullptr;
     if (auto rtsFrame = dynamic_cast<Ieee80211RTSFrame*>(receivedFrame))
         responseMode = rateSelection->computeResponseCtsFrameMode(rtsFrame);
@@ -620,11 +645,13 @@ void Hcf::transmitControlResponseFrame(Ieee80211Frame* responseFrame, Ieee80211F
         throw cRuntimeError("Unknown received frame type");
     setFrameMode(responseFrame, responseMode);
     tx->transmitFrame(responseFrame, modeSet->getSifsTime(), this);
+    take(responseFrame);
     delete responseFrame;
 }
 
 void Hcf::recipientProcessTransmittedControlResponseFrame(Ieee80211Frame* frame)
 {
+    Enter_Method_Silent();
     if (auto ctsFrame = dynamic_cast<Ieee80211CTSFrame*>(frame))
         ctsProcedure->processTransmittedCts(ctsFrame);
     else if (auto blockAck = dynamic_cast<Ieee80211BlockAck*>(frame)) {

@@ -29,17 +29,22 @@ class INET_API TransmitStep : public ITransmitStep
         Completion completion = Completion::UNDEFINED;
         Ieee80211Frame *frameToTransmit = nullptr;
         simtime_t ifs = -1;
+        bool owner = false;
 
     public:
-        TransmitStep(Ieee80211Frame *frame, simtime_t ifs) :
+        TransmitStep(Ieee80211Frame *frame, simtime_t ifs, bool owner) :
             frameToTransmit(frame),
-            ifs(ifs)
+            ifs(ifs),
+            owner(owner)
         { }
 
         virtual ~TransmitStep()
         {
 #if OMNETPP_BUILDNUM < 1505   //OMNETPP_VERSION < 0x0600    // 6.0 pre9
             if (!dynamic_cast<Ieee80211DataOrMgmtFrame*>(frameToTransmit))
+                delete frameToTransmit;
+#else
+            if (owner)
                 delete frameToTransmit;
 #endif
         }
@@ -57,7 +62,7 @@ class INET_API RtsTransmitStep : public TransmitStep
 
     public:
         RtsTransmitStep(Ieee80211DataOrMgmtFrame *protectedFrame, Ieee80211Frame *frame, simtime_t ifs) :
-            TransmitStep(frame, ifs),
+            TransmitStep(frame, ifs, true),
             protectedFrame(protectedFrame)
         { }
 

@@ -118,7 +118,7 @@ IFrameSequenceStep *DataFs::prepareStep(FrameSequenceContext *context)
     switch (step) {
         case 0: {
             auto frame = check_and_cast<Ieee80211DataFrame *>(context->getInProgressFrames()->getFrameToTransmit());
-            return new TransmitStep(frame, context->getIfs());
+            return new TransmitStep(frame, context->getIfs(), false);
         }
         case 1:
             return nullptr;
@@ -149,7 +149,7 @@ IFrameSequenceStep *ManagementAckFs::prepareStep(FrameSequenceContext *context)
     switch (step) {
         case 0: {
             auto mgmtFrame = check_and_cast<Ieee80211ManagementFrame *>(context->getInProgressFrames()->getFrameToTransmit());
-            return new TransmitStep(mgmtFrame, context->getIfs());
+            return new TransmitStep(mgmtFrame, context->getIfs(), false);
         }
         case 1: {
             auto txStep = check_and_cast<TransmitStep*>(context->getLastStep());
@@ -192,7 +192,7 @@ IFrameSequenceStep *ManagementFs::prepareStep(FrameSequenceContext *context)
     switch (step) {
         case 0: {
             auto mgmtFrame = check_and_cast<Ieee80211ManagementFrame *>(context->getInProgressFrames()->getFrameToTransmit());
-            return new TransmitStep(mgmtFrame, context->getIfs());
+            return new TransmitStep(mgmtFrame, context->getIfs(), false);
         }
         case 1:
             return nullptr;
@@ -301,7 +301,7 @@ IFrameSequenceStep *FragFrameAckFs::prepareStep(FrameSequenceContext *context)
     switch (step) {
         case 0: {
             auto frame = context->getInProgressFrames()->getFrameToTransmit();
-            return new TransmitStep(frame, context->getIfs());
+            return new TransmitStep(frame, context->getIfs(), false);
         }
         case 1: {
             auto txStep = check_and_cast<TransmitStep *>(context->getLastStep());
@@ -343,7 +343,7 @@ IFrameSequenceStep *LastFrameAckFs::prepareStep(FrameSequenceContext *context)
     switch (step) {
         case 0: {
             auto frame = context->getInProgressFrames()->getFrameToTransmit();
-            return new TransmitStep(frame, context->getIfs());
+            return new TransmitStep(frame, context->getIfs(), false);
         }
         case 1: {
             auto txStep = check_and_cast<TransmitStep *>(context->getLastStep());
@@ -389,7 +389,7 @@ IFrameSequenceStep *BlockAckReqBlockAckFs::prepareStep(FrameSequenceContext *con
             auto startingSequenceNumber = std::get<1>(blockAckReqParams);
             auto tid = std::get<2>(blockAckReqParams);
             auto blockAckReq = context->getQoSContext()->blockAckProcedure->buildBasicBlockAckReqFrame(receiverAddr, tid, startingSequenceNumber);
-            return new TransmitStep(blockAckReq, context->getIfs());
+            return new TransmitStep(blockAckReq, context->getIfs(), true);
         }
         case 1: {
             auto txStep = check_and_cast<ITransmitStep *>(context->getLastStep());
