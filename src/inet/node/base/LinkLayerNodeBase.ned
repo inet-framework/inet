@@ -41,7 +41,7 @@ module LinkLayerNodeBase extends NodeBase
         int numPppInterfaces = default(0);  // minimum number of PPP interfaces
         int numTunInterfaces = default(0);
         int numVirtInterfaces = default(0);
-        pcapRecorder[*].pcapFile = default("results/" + fullPath() + ".pcap");
+        pcapRecorder[*].pcapFile = default("results/" + expand("${configname}-") + fullPath() + ".pcap");
         mobility.typename = default(numWlanInterfaces > 0 ? "StationaryMobility" : "");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
