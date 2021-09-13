@@ -61,9 +61,6 @@ network GptpTreeExample extends WiredNetworkBase
 network GptpRingExample extends WiredNetworkBase
 {
     submodules:
-        macAddressTableConfigurator: MacAddressTableConfigurator {
-            @display("p=100,400;is=s");
-        }
         scenarioManager: ScenarioManager {
             @display("p=100,500;is=s");
         }
