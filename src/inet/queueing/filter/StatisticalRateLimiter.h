@@ -18,12 +18,13 @@
 #ifndef __INET_STATISTICALRATELIMITER_H
 #define __INET_STATISTICALRATELIMITER_H
 
+#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API StatisticalRateLimiter : public PacketFilterBase
+class INET_API StatisticalRateLimiter : public PacketFilterBase, public TransparentProtocolRegistrationListener
 {
   protected:
     bps maxDatarate = bps(NaN);
@@ -31,6 +32,9 @@ class INET_API StatisticalRateLimiter : public PacketFilterBase
 
   protected:
     virtual void initialize(int stage) override;
+
+    virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+
     virtual bool matchesPacket(const Packet *packet) const override;
 };
 
