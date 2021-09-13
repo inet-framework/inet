@@ -7,15 +7,15 @@
 
 package inet.linklayer.ieee8021as;
 
+import inet.applications.contract.IApp;
 import inet.node.inet.StandardHost;
-
 
 module GptpEndstation extends StandardHost
 {
     parameters:
         clock.typename = default("SettableClock");
     submodules:
-        gptp: Gptp {
+        gptp: <default("Gptp")> like IApp {
             @display("p=700.11755,75.166");
         }
     connections:
