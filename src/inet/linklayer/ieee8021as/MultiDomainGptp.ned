@@ -27,12 +27,14 @@ module MultiDomainGptp like IApp
         string clockModule;
         string interfaceTableModule;
         int numDomains;
+        string gptpNodeType; // @enum("GptpNodeType"): MASTER_NODE, BRIDGE_NODE, SLAVE_NODE
         @display("i=block/app");
     gates:
         input socketIn;
         output socketOut;
     submodules:
         domain[numDomains]: <default("Gptp")> like IApp {
+            gptpNodeType = default(parent.gptpNodeType);
             clockModule = default(absPath(parent.clockModule) + ".clock[" + string(this.index) + "]");
             interfaceTableModule = default(absPath(parent.interfaceTableModule));
             domainNumber = default(this.index);
