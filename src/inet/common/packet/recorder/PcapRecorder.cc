@@ -175,12 +175,14 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
 
-    cPacket *packet = dynamic_cast<cPacket *>(obj);
+    if (pcapWriter->isOpen()) {
+        cPacket *packet = dynamic_cast<cPacket *>(obj);
 
-    if (packet) {
-        auto i = signalList.find(signalID);
-        Direction direction = (i != signalList.end()) ? i->second : DIRECTION_UNDEFINED;
-        recordPacket(packet, direction, source);
+        if (packet) {
+            auto i = signalList.find(signalID);
+            Direction direction = (i != signalList.end()) ? i->second : DIRECTION_UNDEFINED;
+            recordPacket(packet, direction, source);
+        }
     }
 }
 
@@ -222,11 +224,6 @@ void PcapRecorder::recordPacket(const cPacket *cpacket, Direction direction, cCo
                 auto pcapLinkType = protocolToLinkType(protocol);
                 if (pcapLinkType == LINKTYPE_INVALID)
                     throw cRuntimeError("Cannot determine the PCAP link type from protocol '%s'", protocol->getName());
-
-                if (!pcapWriter->isOpen()) {
-                    pcapWriter->open(par("pcapFile"), snaplen);
-                    pcapWriter->setFlush(par("alwaysFlush"));
-                }
 
                 if (matchesLinkType(pcapLinkType, protocol)) {
                     pcapWriter->writePacket(simTime(), packet, direction, networkInterface, pcapLinkType);
