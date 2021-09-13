@@ -29,7 +29,7 @@ module NetworkInterface
         string displayStringTextFormat = default("%a (%i)\n%m");
         bool recordPcap = default(false);
         int numPcapRecorders = default(recordPcap ? 1 : 0);
-        pcapRecorder[*].pcapFile = default("results/" + fullPath() + ".pcap");
+        pcapRecorder[*].pcapFile = default("results/" + expand("${configname}-") + fullPath() + ".pcap");
         **.clockModule = default(exists(clock) ? absPath(".clock") : "");
         @networkInterface();
         @class(NetworkInterface);
