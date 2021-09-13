@@ -51,6 +51,7 @@ int InitStageRegistry::getNumInitStages()
 
 void InitStageRegistry::assignInitStageNumbers()
 {
+    EV_DEBUG << "Assigning initialization stage numbers" << EV_ENDL;
     for (auto stage : stages) {
         stage->number = -1;
         stage->followingStages.clear();
@@ -84,7 +85,7 @@ void InitStageRegistry::assignInitStageNumbers()
     EV_STATICCONTEXT;
     for (auto stage : stages)
         EV_DEBUG << "Initialization stage: " << stage->name << " = " << stage->number << std::endl;
-    EV_DEBUG << "Total initialization stages: " << numInitStages << std::endl;
+    EV_DEBUG << "Total number of initialization stages: " << numInitStages << std::endl;
 }
 
 } // namespace inet

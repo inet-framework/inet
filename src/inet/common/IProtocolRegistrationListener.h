@@ -110,18 +110,34 @@ class INET_API TransparentProtocolRegistrationListener : public virtual IProtoco
             f(forwardingGate);
     }
 
-    virtual bool isForwardingProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) const { return true; }
-    virtual bool isForwardingProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) const { return true; }
-    virtual bool isForwardingAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) const { return true; }
+    virtual bool isForwardingProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) const { return isForwardingProtocol(gate, servicePrimitive); }
+    virtual bool isForwardingProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) const { return isForwardingProtocol(gate, servicePrimitive); }
+    virtual bool isForwardingAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) const { return isForwardingProtocol(gate, servicePrimitive); }
+    virtual bool isForwardingProtocol(cGate *gate, ServicePrimitive servicePrimitive) const {
+        if (gate->getType() == cGate::INPUT)
+            return servicePrimitive == SP_REQUEST || servicePrimitive == SP_RESPONSE;
+        else if (gate->getType() == cGate::OUTPUT)
+            return servicePrimitive == SP_INDICATION || servicePrimitive == SP_CONFIRM;
+        else
+            throw cRuntimeError("Unknown gate type");
+    }
 
-    virtual bool isForwardingService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) const { return true; }
-    virtual bool isForwardingServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) const { return true; }
-    virtual bool isForwardingAnyService(cGate *gate, ServicePrimitive servicePrimitive) const { return true; }
+    virtual bool isForwardingService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) const { return isForwardingService(gate, servicePrimitive); }
+    virtual bool isForwardingServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) const { return isForwardingService(gate, servicePrimitive); }
+    virtual bool isForwardingAnyService(cGate *gate, ServicePrimitive servicePrimitive) const { return isForwardingService(gate, servicePrimitive); }
+    virtual bool isForwardingService(cGate *gate, ServicePrimitive servicePrimitive) const {
+        if (gate->getType() == cGate::INPUT)
+            return servicePrimitive == SP_INDICATION || servicePrimitive == SP_CONFIRM;
+        else if (gate->getType() == cGate::OUTPUT)
+            return servicePrimitive == SP_REQUEST || servicePrimitive == SP_RESPONSE;
+        else
+            throw cRuntimeError("Unknown gate type");
+    }
 
     virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override {
         Enter_Method2("handleRegisterService");
         if (isForwardingService(protocol, gate, servicePrimitive)) {
-            EV_INFO << "Forwarding service" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+            EV_INFO << "Forwarding service registration" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
             mapRegistrationForwardingGates(gate, [&] (cGate *gate) {
                 registerService(protocol, gate, servicePrimitive);
             });
@@ -130,8 +146,8 @@ class INET_API TransparentProtocolRegistrationListener : public virtual IProtoco
 
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override {
         Enter_Method2("handleRegisterProtocol");
-        if (isForwardingProtocol(protocol, gate, servicePrimitive)) {
-            EV_INFO << "Forwarding protocol" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+        if ( isForwardingProtocol(protocol, gate, servicePrimitive)) {
+            EV_INFO << "Forwarding protocol registration" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
             mapRegistrationForwardingGates(gate, [&] (cGate *gate) {
                 registerProtocol(protocol, gate, servicePrimitive);
             });
@@ -141,7 +157,7 @@ class INET_API TransparentProtocolRegistrationListener : public virtual IProtoco
     virtual void handleRegisterServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) override {
         Enter_Method2("handleRegisterServiceGroup");
         if (isForwardingServiceGroup(protocolGroup, gate, servicePrimitive)) {
-            EV_INFO << "Forwarding service group" << EV_FIELD(protocolGroup) << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+            EV_INFO << "Forwarding service group registration" << EV_FIELD(protocolGroup) << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
             mapRegistrationForwardingGates(gate, [&] (cGate *gate) {
                 registerServiceGroup(protocolGroup, gate, servicePrimitive);
             });
@@ -151,7 +167,7 @@ class INET_API TransparentProtocolRegistrationListener : public virtual IProtoco
     virtual void handleRegisterProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive) override {
         Enter_Method2("handleRegisterProtocolGroup");
         if (isForwardingProtocolGroup(protocolGroup, gate, servicePrimitive)) {
-            EV_INFO << "Forwarding protocol group" << EV_FIELD(protocolGroup) << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+            EV_INFO << "Forwarding protocol group registration" << EV_FIELD(protocolGroup) << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
             mapRegistrationForwardingGates(gate, [&] (cGate *gate) {
                 registerProtocolGroup(protocolGroup, gate, servicePrimitive);
             });
@@ -161,7 +177,7 @@ class INET_API TransparentProtocolRegistrationListener : public virtual IProtoco
     virtual void handleRegisterAnyService(cGate *gate, ServicePrimitive servicePrimitive) override {
         Enter_Method2("handleRegisterAnyService");
         if (isForwardingAnyService(gate, servicePrimitive)) {
-            EV_INFO << "Forwarding any service" << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+            EV_INFO << "Forwarding any service registration" << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
             mapRegistrationForwardingGates(gate, [&] (cGate *gate) {
                 registerAnyService(gate, servicePrimitive);
             });
@@ -171,7 +187,7 @@ class INET_API TransparentProtocolRegistrationListener : public virtual IProtoco
     virtual void handleRegisterAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) override {
         Enter_Method2("handleRegisterAnyProtocol");
         if (isForwardingAnyProtocol(gate, servicePrimitive)) {
-            EV_INFO << "Forwarding any protocol" << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
+            EV_INFO << "Forwarding any protocol registration" << EV_FIELD(servicePrimitive) << EV_FIELD(gate) << EV_ENDL;
             mapRegistrationForwardingGates(gate, [&] (cGate *gate) {
                 registerAnyProtocol(gate, servicePrimitive);
             });
