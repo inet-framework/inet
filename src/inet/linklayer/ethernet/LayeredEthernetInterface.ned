@@ -61,7 +61,7 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
                 transmitter.clockModule = default("");
                 @display("p=400,400");
         }
-    connections:
+    connections allowunconnected:
         upperLayerIn --> { @display("m=n"); } --> trafficConditionerLayer.upperLayerIn;
         trafficConditionerLayer.lowerLayerOut --> measurementLayer.upperLayerIn;
         measurementLayer.lowerLayerOut --> macLayer.upperLayerIn;
