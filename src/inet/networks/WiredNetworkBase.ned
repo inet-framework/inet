@@ -17,6 +17,15 @@
 
 package inet.networks;
 
+import inet.networklayer.configurator.contract.INetworkConfigurator;
+
 network WiredNetworkBase extends NetworkBase
 {
+    parameters:
+        bool hasGlobalArp = default(false);
+        *.ipv4.arp.typename = default(hasGlobalArp ? "GlobalArp" : "Arp");
+    submodules:
+        macAddressTableConfigurator: <default(hasGlobalArp ? "MacAddressTableConfigurator" : "")> like INetworkConfigurator if typename != "" {
+            @display("p=100,400;is=s");
+        }
 }
