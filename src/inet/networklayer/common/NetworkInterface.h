@@ -93,7 +93,7 @@ class INET_API NetworkInterfaceChangeDetails : public cObject
  *
  * @see IInterfaceTable
  */
-class INET_API NetworkInterface : public cSimpleModule, public queueing::IPassivePacketSink, public queueing::IPacketProcessor, public ILifecycle, public cListener, public StringFormat::IDirectiveResolver
+class INET_API NetworkInterface : public cModule, public queueing::IPassivePacketSink, public queueing::IPacketProcessor, public ILifecycle, public cListener, public StringFormat::IDirectiveResolver
 {
     friend class InterfaceProtocolData; // to call protocolDataChanged()
 
