@@ -54,7 +54,7 @@ module EthernetSwitch
         bool hasStatus = default(false);
         bool hasStp = default(false);
         bool hasGptp = default(false);
-        bool enableCutthrough = default(false);
+        bool hasCutthroughSwitching = default(false);
         string fcsMode @enum("declared","computed") = default("declared");
         string spanningTreeProtocol = default("Stp");
         int numEthInterfaces = default(0);  // minimum number of ethernet interfaces
@@ -127,10 +127,10 @@ module EthernetSwitch
         li: MessageDispatcher {
             @display("p=800,600;b=1200,5");
         }
-        cutthrough: MessageDispatcher if enableCutthrough {
+        cutthrough: MessageDispatcher if hasCutthroughSwitching {
             @display("p=800,675;b=1200,5");
         }
-        eth[sizeof(ethg)]: <default(enableCutthrough ? "EthernetCutthroughInterface" : "EthernetInterface")> like IEthernetInterface {
+        eth[sizeof(ethg)]: <default(hasCutthroughSwitching ? "EthernetCutthroughInterface" : "EthernetInterface")> like IEthernetInterface {
             @display("p=250,750,row,150;q=txQueue");
         }
     connections:
@@ -144,8 +144,8 @@ module EthernetSwitch
         li.out++ --> ieee8021r.lowerLayerIn if exists(ieee8021r);
 
         for i=0..sizeof(ethg)-1 {
-            eth[i].cutthroughOut --> cutthrough.in++ if enableCutthrough;
-            eth[i].cutthroughIn <-- cutthrough.out++ if enableCutthrough;
+            eth[i].cutthroughOut --> cutthrough.in++ if hasCutthroughSwitching;
+            eth[i].cutthroughIn <-- cutthrough.out++ if hasCutthroughSwitching;
         }
 
         bl.out++ --> li.in++;
