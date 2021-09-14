@@ -20,17 +20,19 @@
 
 #include "inet/common/ModuleRef.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/contract/IPacketCollection.h"
 #include "inet/queueing/contract/IPacketFlow.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketFlowBase : public PacketProcessorBase, public virtual IPacketFlow
+class INET_API PacketFlowBase : public PacketProcessorBase, public virtual IPacketFlow, public virtual IPacketCollection
 {
   protected:
     cGate *inputGate = nullptr;
     ModuleRef<IActivePacketSource> producer;
     ModuleRef<IPassivePacketSource> provider;
+    ModuleRef<IPacketCollection> collection;
 
     cGate *outputGate = nullptr;
     ModuleRef<IPassivePacketSink> consumer;
@@ -78,6 +80,15 @@ class INET_API PacketFlowBase : public PacketProcessorBase, public virtual IPack
 
     virtual void handleCanPullPacketChanged(cGate *gate) override;
     virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
+
+    virtual int getMaxNumPackets() const override { return collection->getMaxNumPackets(); }
+    virtual int getNumPackets() const override { return collection->getNumPackets(); }
+    virtual b getMaxTotalLength() const override { return collection->getMaxTotalLength(); }
+    virtual b getTotalLength() const override { return collection->getTotalLength(); }
+    virtual Packet *getPacket(int index) const override { return collection->getPacket(index); }
+    virtual bool isEmpty() const override { return collection->isEmpty(); }
+    virtual void removePacket(Packet *packet) override { collection->removePacket(packet); }
+    virtual void removeAllPackets() override { collection->removeAllPackets(); }
 };
 
 } // namespace queueing
