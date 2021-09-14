@@ -81,6 +81,13 @@ void PriorityScheduler::removePacket(Packet *packet)
     throw cRuntimeError("Cannot find packet");
 }
 
+void PriorityScheduler::removeAllPackets()
+{
+    Enter_Method("removeAllPackets");
+    for (auto collection : collections)
+        collection->removeAllPackets();
+}
+
 int PriorityScheduler::schedulePacket()
 {
     for (size_t i = 0; i < providers.size(); i++) {

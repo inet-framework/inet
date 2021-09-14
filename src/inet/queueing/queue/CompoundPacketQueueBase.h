@@ -49,6 +49,7 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     virtual bool isEmpty() const override { return collection->isEmpty(); }
     virtual Packet *getPacket(int index) const override { return collection->getPacket(index); }
     virtual void removePacket(Packet *packet) override;
+    virtual void removeAllPackets() override;
 
     virtual bool supportsPacketPushing(cGate *gate) const override { return inputGate == gate; }
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }

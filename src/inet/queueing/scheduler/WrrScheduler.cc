@@ -68,6 +68,13 @@ b WrrScheduler::getTotalLength() const
     return totalLength;
 }
 
+void WrrScheduler::removeAllPackets()
+{
+    Enter_Method("removeAllPackets");
+    for (auto collection : collections)
+        collection->removeAllPackets();
+}
+
 int WrrScheduler::schedulePacket()
 {
     bool isEmpty = true;

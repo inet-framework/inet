@@ -64,6 +64,7 @@ class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICall
     virtual bool isEmpty() const override { return getNumPackets() == 0; }
     virtual Packet *getPacket(int index) const override;
     virtual void removePacket(Packet *packet) override;
+    virtual void removeAllPackets() override;
 
     virtual bool supportsPacketPushing(cGate *gate) const override { return inputGate == gate; }
     virtual bool canPushSomePacket(cGate *gate) const override;

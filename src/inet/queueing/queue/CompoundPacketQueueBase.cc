@@ -82,6 +82,13 @@ void CompoundPacketQueueBase::removePacket(Packet *packet)
     updateDisplayString();
 }
 
+void CompoundPacketQueueBase::removeAllPackets()
+{
+    Enter_Method("removeAllPacket");
+    collection->removeAllPackets();
+    updateDisplayString();
+}
+
 void CompoundPacketQueueBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signal));
