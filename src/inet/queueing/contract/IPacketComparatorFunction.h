@@ -19,7 +19,6 @@
 #define __INET_IPACKETCOMPARATORFUNCTION_H
 
 #include "inet/common/packet/Packet.h"
-#include "inet/queueing/compat/cqueue.h"
 
 namespace inet {
 namespace queueing {

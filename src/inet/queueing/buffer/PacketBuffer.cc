@@ -22,7 +22,6 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/StringFormat.h"
 #include "inet/common/stlutils.h"
-#include "inet/queueing/compat/cpacketqueue.h"
 
 namespace inet {
 namespace queueing {
