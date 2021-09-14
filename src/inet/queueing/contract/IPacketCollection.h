@@ -65,6 +65,11 @@ class INET_API IPacketCollection
      * Removes a packet from the collection. The collection must contain the packet.
      */
     virtual void removePacket(Packet *packet) = 0;
+
+    /**
+     * Removes all packets from the collection.
+     */
+    virtual void removeAllPackets() = 0;
 };
 
 } // namespace queueing
