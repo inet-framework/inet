@@ -108,6 +108,24 @@ void PacketBuffer::removePacket(Packet *packet)
     }
 }
 
+void PacketBuffer::removeAllPackets()
+{
+    Enter_Method("removeAllPacket");
+    EV_INFO << "Removing all packets" << EV_ENDL;
+    while (!isEmpty()) {
+        auto packet = getPacket(0);
+        emit(packetRemovedSignal, packet);
+        packets.erase(packets.begin());
+        auto queue = dynamic_cast<cPacketQueue *>(packet->getOwner());
+        if (queue != nullptr) {
+            ICallback *callback = dynamic_cast<ICallback *>(queue->getOwner());
+            if (callback != nullptr)
+                callback->handlePacketRemoved(packet);
+        }
+    }
+    updateDisplayString();
+}
+
 Packet *PacketBuffer::getPacket(int index) const
 {
     if (index < 0 || (size_t)index >= packets.size())

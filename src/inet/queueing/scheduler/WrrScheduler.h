@@ -51,6 +51,7 @@ class INET_API WrrScheduler : public PacketSchedulerBase, public virtual IPacket
     virtual bool isEmpty() const override { return getNumPackets() == 0; }
     virtual Packet *getPacket(int index) const override { throw cRuntimeError("Invalid operation"); }
     virtual void removePacket(Packet *packet) override { throw cRuntimeError("Invalid operation"); }
+    virtual void removeAllPackets() override;
 };
 
 } // namespace queueing

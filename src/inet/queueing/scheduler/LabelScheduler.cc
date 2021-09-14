@@ -61,6 +61,13 @@ void LabelScheduler::removePacket(Packet *packet)
     throw cRuntimeError("TODO");
 }
 
+void LabelScheduler::removeAllPackets()
+{
+    Enter_Method("removeAllPackets");
+    for (auto collection : collections)
+        collection->removeAllPackets();
+}
+
 int LabelScheduler::schedulePacket()
 {
     for (auto label : labels) {

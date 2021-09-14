@@ -141,13 +141,26 @@ void PacketQueue::removePacket(Packet *packet)
 {
     Enter_Method("removePacket");
     EV_INFO << "Removing packet" << EV_FIELD(packet) << EV_ENDL;
-    if (buffer != nullptr) {
-        queue.remove(packet);
+    queue.remove(packet);
+    if (buffer != nullptr)
         buffer->removePacket(packet);
-    }
-    else
-        queue.remove(packet);
     emit(packetRemovedSignal, packet);
+    updateDisplayString();
+}
+
+void PacketQueue::removeAllPackets()
+{
+    Enter_Method("removeAllPackets");
+    EV_INFO << "Removing all packets" << EV_ENDL;
+    std::vector<Packet *> packets;
+    for (int i = 0; i < getNumPackets(); i++)
+        packets.push_back(check_and_cast<Packet *>(queue.pop()));
+    if (buffer != nullptr)
+        buffer->removeAllPackets();
+    for (auto packet : packets) {
+        emit(packetRemovedSignal, packet);
+        delete packet;
+    }
     updateDisplayString();
 }
 
