@@ -73,15 +73,16 @@ static void printobject(cObject* object)
 {
     EV << object->getClassName() << ":" << endl;
     cClassDescriptor *descriptor = object->getDescriptor();
+    any_ptr anyObj = toAnyPtr(object);
     for (int i = 0; i < descriptor->getFieldCount(); i++) {
         EV << "    " << descriptor->getFieldName(i) << ": ";
         if (descriptor->getFieldIsArray(i)) {
-            for (int j = 0; j < descriptor->getFieldArraySize(object, i); j++) {
-                EV << "      [" << j << "]: " << descriptor->getFieldValueAsString(object,i,j) << endl;
+            for (int j = 0; j < descriptor->getFieldArraySize(anyObj, i); j++) {
+                EV << "      [" << j << "]: " << descriptor->getFieldValueAsString(anyObj, i, j) << endl;
             }
         }
         else
-            EV << descriptor->getFieldValueAsString(object,i,0) << endl;
+            EV << descriptor->getFieldValueAsString(toAnyPtr(object),i,0) << endl;
     }
 }
 
