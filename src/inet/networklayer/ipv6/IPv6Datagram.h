@@ -31,19 +31,12 @@ namespace inet {
  */
 class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
 {
-  protected:
-    typedef std::vector<IPv6ExtensionHeader *> ExtensionHeaders;
-    ExtensionHeaders extensionHeaders;
-
   private:
-    void copy(const IPv6Datagram& other);
-    void clean();
     int getExtensionHeaderOrder(IPv6ExtensionHeader *eh);
 
   public:
     IPv6Datagram(const char *name = nullptr, int kind = 0) : IPv6Datagram_Base(name, kind) {}
-    IPv6Datagram(const IPv6Datagram& other) : IPv6Datagram_Base(other) { copy(other); }
-    IPv6Datagram& operator=(const IPv6Datagram& other);
+    IPv6Datagram(const IPv6Datagram& other) : IPv6Datagram_Base(other) {}
     ~IPv6Datagram();
 
     virtual IPv6Datagram *dup() const override { return new IPv6Datagram(*this); }
@@ -68,23 +61,6 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
      */
     virtual void setExplicitCongestionNotification(int ecn) override { setTrafficClass((getTrafficClass() & 0x3f) | ((ecn & 0x3) << 6)); }
 
-    /** Generated but unused method, should not be called. */
-    virtual void setExtensionHeaderArraySize(unsigned int size) override;
-
-    /** Generated but unused method, should not be called. */
-    virtual void setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderPtr& extensionHeader_var) override;
-
-    /**
-     * Returns the number of extension headers in this datagram
-     */
-    virtual unsigned int getExtensionHeaderArraySize() const override;
-
-    /**
-     * Returns the kth extension header in this datagram
-     */
-    virtual IPv6ExtensionHeaderPtr& getExtensionHeader(unsigned int k) override;
-    virtual const IPv6ExtensionHeaderPtr& getExtensionHeader(unsigned int k) const override {return const_cast<IPv6Datagram*>(this)->getExtensionHeader(k);}
-
     /**
      * Returns the extension header of the specified type,
      * or nullptr. If index is 0, then the first, if 1 then the
@@ -98,7 +74,7 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
      * The atPos parameter should not be used, the extension
      * headers are stored in the order specified in RFC 2460 4.1.
      */
-    virtual void addExtensionHeader(IPv6ExtensionHeader *eh, int atPos = -1);
+    virtual void addExtensionHeader(IPv6ExtensionHeader *eh);
 
     /**
      * Calculates the length of the IPv6 header plus the extension
@@ -127,6 +103,8 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
      * Removes and returns the first extension header with the given type.
      */
     virtual IPv6ExtensionHeader *removeExtensionHeader(IPProtocolId extensionType);
+
+
 
     virtual L3Address getSourceAddress() const override { return L3Address(getSrcAddress()); }
     virtual void setSourceAddress(const L3Address& address) override { setSrcAddress(address.toIPv6()); }

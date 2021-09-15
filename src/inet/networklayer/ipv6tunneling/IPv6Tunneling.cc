@@ -38,6 +38,7 @@
 
 #include "inet/networklayer/contract/ipv6/IPv6ControlInfo.h"
 #include "inet/networklayer/ipv6/IPv6Datagram.h"
+#include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #include "inet/networklayer/ipv6/IPv6RoutingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
