@@ -31,6 +31,7 @@ import inet.linklayer.ieee8021r.IIeee8021rLayer;
 import inet.linklayer.ieee8022.IIeee8022Llc;
 import inet.networklayer.common.InterfaceTable;
 import inet.node.inet.IEthernetNetworkNode;
+import inet.protocolelement.contract.IProtocolLayer;
 
 module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
 {
@@ -63,20 +64,19 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
                 @display("p=125,640;is=s");
         }
         interfaceTable: InterfaceTable {
-            parameters:
-                @display("p=125,240;is=s");
-        }
-        l: MessageDispatcher {
-            parameters:
-                @display("p=750,596;b=1000,5,,,,1");
+            @display("p=125,240;is=s");
         }
         llc: <default("")> like IIeee8022Llc if typename != "" {
-            parameters:
-                @display("p=675,526");
+            @display("p=375,525");
         }
-        li: MessageDispatcher {
-            parameters:
-                @display("p=750,746;b=1000,5,,,,1");
+        cb: MessageDispatcher {
+            @display("p=750,600;b=1000,5");
+        }
+        bridging: <default("")> like IProtocolLayer if typename != "" {
+            @display("p=750,675");
+        }
+        bl: MessageDispatcher {
+            @display("p=750,750;b=1000,5");
         }
         ethernet: <default("")> like IEthernetLayer if typename != "" {
             parameters:
@@ -87,8 +87,10 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
                 @display("p=525,676");
         }
         ieee8021r: <default("")> like IIeee8021rLayer if typename != "" {
-            parameters:
-                @display("p=675,676");
+            @display("p=675,825");
+        }
+        li: MessageDispatcher {
+            @display("p=750,900;b=1000,5,,,,1");
         }
         lo[numLoInterfaces]: <default("LoopbackInterface")> like ILoopbackInterface {
             parameters:
@@ -115,19 +117,30 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
             parameters:
                 @display("p=975,916,row,150;q=txQueue");
         }
-
     connections allowunconnected:
-        llc.lowerLayerOut --> l.in++ if exists(llc);
-        llc.lowerLayerIn <-- l.out++ if exists(llc);
+        llc.lowerLayerOut --> cb.in++ if exists(llc);
+        llc.lowerLayerIn <-- cb.out++ if exists(llc);
 
-        l.out++ --> ieee8021q.upperLayerIn if exists(ieee8021q);
-        ieee8021q.upperLayerOut --> l.in++ if exists(ieee8021q);
+        cb.out++ --> bridging.upperLayerIn if exists(bridging);
+        bridging.upperLayerOut --> cb.in++ if exists(bridging);
 
-        l.out++ --> ieee8021r.upperLayerIn if exists(ieee8021r);
-        ieee8021r.upperLayerOut --> l.in++ if exists(ieee8021r);
+        bridging.lowerLayerOut --> bl.in++ if exists(bridging);
+        bl.out++ --> bridging.lowerLayerIn if exists(bridging);
 
-        l.out++ --> ethernet.upperLayerIn if exists(ethernet);
-        ethernet.upperLayerOut --> l.in++ if exists(ethernet);
+        cb.out++ --> bl.in++ if !exists(bridging);
+        bl.out++ --> cb.in++ if !exists(bridging);
+
+        bl.out++ --> li.in++;
+        li.out++ --> bl.in++;
+
+        bl.out++ --> ieee8021q.upperLayerIn if exists(ieee8021q);
+        ieee8021q.upperLayerOut --> bl.in++ if exists(ieee8021q);
+
+        bl.out++ --> ieee8021r.upperLayerIn if exists(ieee8021r);
+        ieee8021r.upperLayerOut --> bl.in++ if exists(ieee8021r);
+
+        bl.out++ --> ethernet.upperLayerIn if exists(ethernet);
+        ethernet.upperLayerOut --> bl.in++ if exists(ethernet);
 
         ieee8021q.lowerLayerOut --> li.in++ if exists(ieee8021q);
         li.out++ --> ieee8021q.lowerLayerIn if exists(ieee8021q);
