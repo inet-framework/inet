@@ -952,7 +952,7 @@ bool SCTPAssociation::processTimer(cMessage *msg)
     }
     else if (msg == StartAddIP) {
         state->corrIdNum = state->asconfSn;
-        const char *type = (const char *)sctpMain->par("addIpType");
+        const char *type = sctpMain->par("addIpType").stringValue();
         sendAsconf(type);
     }
     else if (msg == FairStartTimer) {

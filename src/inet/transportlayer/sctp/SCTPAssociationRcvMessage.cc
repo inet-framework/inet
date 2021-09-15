@@ -79,13 +79,13 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
              << " remoteAddr=" << remoteAddr << endl;
     state->pktDropSent = false;
     if ((sctpmsg->hasBitError() || !sctpmsg->getChecksumOk())) {
-        if (((SCTPChunk *)(sctpmsg->getChunks(0)))->getChunkType() == INIT_ACK) {
+        if (sctpmsg->getChunks(0)->getChunkType() == INIT_ACK) {
             stopTimer(T1_InitTimer);
             EV_WARN << "InitAck with bit-error. Retransmit Init" << endl;
             retransmitInit();
             startTimer(T1_InitTimer, state->initRexmitTimeout);
         }
-        if (((SCTPChunk *)(sctpmsg->getChunks(0)))->getChunkType() == COOKIE_ACK) {
+        if (sctpmsg->getChunks(0)->getChunkType() == COOKIE_ACK) {
             stopTimer(T1_InitTimer);
             EV_WARN << "CookieAck with bit-error. Retransmit CookieEcho" << endl;
             retransmitCookieEcho();
@@ -135,7 +135,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
     bool shutdownCalled = false;
     bool sackWasReceived = false;
     for (uint32 i = 0; i < numberOfChunks; i++) {
-        SCTPChunk *header = (SCTPChunk *)(sctpmsg->removeChunk());
+        SCTPChunk *header = sctpmsg->removeChunk();
         const uint8 type = header->getChunkType();
 
         if ((type != INIT) &&
@@ -180,10 +180,9 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
         }
 
         switch (type) {
-            case INIT:
+            case INIT: {
                 EV_INFO << "INIT received" << endl;
-                SCTPInitChunk *initChunk;
-                initChunk = check_and_cast<SCTPInitChunk *>(header);
+                SCTPInitChunk *initChunk = check_and_cast<SCTPInitChunk *>(header);
                 if ((initChunk->getNoInStreams() != 0) &&
                     (initChunk->getNoOutStreams() != 0) &&
                     (initChunk->getInitTag() != 0))
@@ -193,12 +192,12 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                 i = numberOfChunks - 1;
                 delete initChunk;
                 break;
+            }
 
-            case INIT_ACK:
+            case INIT_ACK: {
                 EV_INFO << "INIT_ACK received" << endl;
                 if (fsm->getState() == SCTP_S_COOKIE_WAIT) {
-                    SCTPInitAckChunk *initAckChunk;
-                    initAckChunk = check_and_cast<SCTPInitAckChunk *>(header);
+                    SCTPInitAckChunk *initAckChunk = check_and_cast<SCTPInitAckChunk *>(header);
                     if ((initAckChunk->getNoInStreams() != 0) &&
                         (initAckChunk->getNoOutStreams() != 0) &&
                         (initAckChunk->getInitTag() != 0))
@@ -217,26 +216,27 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                     EV_INFO << "INIT_ACK will be ignored" << endl;
                 }
                 break;
+            }
 
-            case COOKIE_ECHO:
+            case COOKIE_ECHO: {
                 EV_INFO << "COOKIE_ECHO received" << endl;
-                SCTPCookieEchoChunk *cookieEchoChunk;
-                cookieEchoChunk = check_and_cast<SCTPCookieEchoChunk *>(header);
+                SCTPCookieEchoChunk *cookieEchoChunk = check_and_cast<SCTPCookieEchoChunk *>(header);
                 trans = processCookieEchoArrived(cookieEchoChunk, src);
                 delete cookieEchoChunk;
                 break;
+            }
 
-            case COOKIE_ACK:
+            case COOKIE_ACK: {
                 EV_INFO << "COOKIE_ACK received" << endl;
                 if (fsm->getState() == SCTP_S_COOKIE_ECHOED) {
-                    SCTPCookieAckChunk *cookieAckChunk;
-                    cookieAckChunk = check_and_cast<SCTPCookieAckChunk *>(header);
+                    SCTPCookieAckChunk *cookieAckChunk = check_and_cast<SCTPCookieAckChunk *>(header);
                     trans = processCookieAckArrived();
                     delete cookieAckChunk;
                 }
                 break;
+            }
 
-            case DATA:
+            case DATA: {
                 EV_INFO << "DATA received" << endl;
                 if (fsm->getState() == SCTP_S_CLOSED) {
                     sendAbort(1);
@@ -261,8 +261,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                     return true;
                 }
                 if (!(fsm->getState() == SCTP_S_SHUTDOWN_RECEIVED || fsm->getState() == SCTP_S_SHUTDOWN_ACK_SENT)) {
-                    SCTPDataChunk *dataChunk;
-                    dataChunk = check_and_cast<SCTPDataChunk *>(header);
+                    SCTPDataChunk *dataChunk = check_and_cast<SCTPDataChunk *>(header);
                     if ((dataChunk->getByteLength() - SCTP_DATA_CHUNK_LENGTH) > 0) {
                         dacPacketsRcvd++;
                         const SCTPEventCode event = processDataArrived(dataChunk);
@@ -303,13 +302,13 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                 }
                 trans = true;
                 break;
+            }
 
             case SACK:
             case NR_SACK: {
                 EV_INFO << "SACK received" << endl;
                 const int32 scount = qCounter.roomSumSendStreams;
-                SCTPSackChunk *sackChunk;
-                sackChunk = check_and_cast<SCTPSackChunk *>(header);
+                SCTPSackChunk *sackChunk = check_and_cast<SCTPSackChunk *>(header);
                 processSackArrived(sackChunk);
                 trans = true;
                 sendAllowed = true;
@@ -330,9 +329,8 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                 break;
             }
 
-            case ABORT:
-                SCTPAbortChunk *abortChunk;
-                abortChunk = check_and_cast<SCTPAbortChunk *>(header);
+            case ABORT: {
+                SCTPAbortChunk *abortChunk = check_and_cast<SCTPAbortChunk *>(header);
                 EV_INFO << "ABORT with T-Bit "
                         << abortChunk->getT_Bit() << " received" << endl;
                 if (sctpmsg->getTag() == localVTag || sctpmsg->getTag() == peerVTag) {
@@ -341,11 +339,11 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                 }
                 delete abortChunk;
                 break;
+            }
 
-            case HEARTBEAT:
+            case HEARTBEAT: {
                 EV_INFO << "HEARTBEAT received" << endl;
-                SCTPHeartbeatChunk *heartbeatChunk;
-                heartbeatChunk = check_and_cast<SCTPHeartbeatChunk *>(header);
+                SCTPHeartbeatChunk *heartbeatChunk = check_and_cast<SCTPHeartbeatChunk *>(header);
                 if (!(fsm->getState() == SCTP_S_CLOSED)) {
                     sendHeartbeatAck(heartbeatChunk, dest, src);
                 }
@@ -356,25 +354,25 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                     path->vectorPathRcvdHb->record(path->numberOfHeartbeatsRcvd);
                 }
                 break;
+            }
 
-            case HEARTBEAT_ACK:
+            case HEARTBEAT_ACK: {
                 EV_INFO << "HEARTBEAT_ACK received" << endl;
                 if (fsm->getState() == SCTP_S_COOKIE_ECHOED) {
                     trans = performStateTransition(SCTP_E_RCV_COOKIE_ACK);
                 }
-                SCTPHeartbeatAckChunk *heartbeatAckChunk;
-                heartbeatAckChunk = check_and_cast<SCTPHeartbeatAckChunk *>(header);
+                SCTPHeartbeatAckChunk *heartbeatAckChunk = check_and_cast<SCTPHeartbeatAckChunk *>(header);
                 if (path) {
                     processHeartbeatAckArrived(heartbeatAckChunk, path);
                 }
                 trans = true;
                 delete heartbeatAckChunk;
                 break;
+            }
 
-            case SHUTDOWN:
+            case SHUTDOWN: {
                 EV_INFO << "SHUTDOWN received" << endl;
-                SCTPShutdownChunk *shutdownChunk;
-                shutdownChunk = check_and_cast<SCTPShutdownChunk *>(header);
+                SCTPShutdownChunk *shutdownChunk = check_and_cast<SCTPShutdownChunk *>(header);
                 if (shutdownChunk->getCumTsnAck() > state->lastTsnAck) {
                     simtime_t rttEstimation = SIMTIME_MAX;
                     dequeueAckedChunks(shutdownChunk->getCumTsnAck(),
@@ -387,14 +385,15 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                 delete shutdownChunk;
                 if (state->resetChunk != nullptr) {
                     delete state->resetChunk;
+                    state->resetChunk = nullptr;
                 }
                 break;
+            }
 
-            case SHUTDOWN_ACK:
+            case SHUTDOWN_ACK: {
                 EV_INFO << "SHUTDOWN_ACK received" << endl;
                 if (fsm->getState() != SCTP_S_ESTABLISHED) {
-                    SCTPShutdownAckChunk *shutdownAckChunk;
-                    shutdownAckChunk = check_and_cast<SCTPShutdownAckChunk *>(header);
+                    SCTPShutdownAckChunk *shutdownAckChunk = check_and_cast<SCTPShutdownAckChunk *>(header);
                     sendShutdownComplete();
                     stopTimers();
                     stopTimer(T2_ShutdownTimer);
@@ -413,14 +412,15 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                     delete shutdownAckChunk;
                     if (state->resetChunk != nullptr) {
                         delete state->resetChunk;
+                        state->resetChunk = nullptr;
                     }
                 }
                 break;
+            }
 
-            case SHUTDOWN_COMPLETE:
+            case SHUTDOWN_COMPLETE: {
                 EV_INFO << "Shutdown Complete arrived" << endl;
-                SCTPShutdownCompleteChunk *shutdownCompleteChunk;
-                shutdownCompleteChunk = check_and_cast<SCTPShutdownCompleteChunk *>(header);
+                SCTPShutdownCompleteChunk *shutdownCompleteChunk = check_and_cast<SCTPShutdownCompleteChunk *>(header);
                 trans = performStateTransition(SCTP_E_RCV_SHUTDOWN_COMPLETE);
                 sendIndicationToApp(SCTP_I_PEER_CLOSED);    // necessary for NAT-Rendezvous
                 if (trans == true) {
@@ -429,61 +429,63 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                 stopTimer(T2_ShutdownTimer);
                 stopTimer(T5_ShutdownGuardTimer);
                 delete state->shutdownAckChunk;
+                state->shutdownAckChunk = nullptr;
                 delete shutdownCompleteChunk;
                 break;
+            }
 
-            case FORWARD_TSN:
+            case FORWARD_TSN: {
                 EV_INFO << "FORWARD_TSN received" << endl;
-                SCTPForwardTsnChunk *forwChunk;
-                forwChunk = check_and_cast<SCTPForwardTsnChunk *>(header);
+                SCTPForwardTsnChunk *forwChunk = check_and_cast<SCTPForwardTsnChunk *>(header);
                 processForwardTsnArrived(forwChunk);
                 trans = true;
                 sendAllowed = true;
                 dataChunkReceived = true;
                 delete forwChunk;
                 break;
+            }
 
-            case RE_CONFIG:
+            case RE_CONFIG: {
                 EV_INFO << "StreamReset received" << endl;
                 if (fsm->getState() != SCTP_S_ESTABLISHED) {
                     delete header;
                     break;
                 }
-                SCTPStreamResetChunk *strResChunk;
-                strResChunk = check_and_cast<SCTPStreamResetChunk *>(header);
+                SCTPStreamResetChunk *strResChunk = check_and_cast<SCTPStreamResetChunk *>(header);
                 processStreamResetArrived(strResChunk);
                 trans = true;
                 sendAllowed = true;
                 delete strResChunk;
                 break;
+            }
 
-            case ASCONF:
+            case ASCONF: {
                 EV_INFO << "ASCONF received" << endl;
                 if (fsm->getState() == SCTP_S_COOKIE_ECHOED) {
                     trans = performStateTransition(SCTP_E_RCV_COOKIE_ACK);
                 }
-                SCTPAsconfChunk *asconfChunk;
-                asconfChunk = check_and_cast<SCTPAsconfChunk *>(header);
+                SCTPAsconfChunk *asconfChunk = check_and_cast<SCTPAsconfChunk *>(header);
                 processAsconfArrived(asconfChunk);
                 trans = true;
                 delete asconfChunk;
                 break;
+            }
 
-            case ASCONF_ACK:
+            case ASCONF_ACK: {
                 EV_INFO << "ASCONF_ACK received" << endl;
-                SCTPAsconfAckChunk *asconfAckChunk;
-                asconfAckChunk = check_and_cast<SCTPAsconfAckChunk *>(header);
+                SCTPAsconfAckChunk *asconfAckChunk = check_and_cast<SCTPAsconfAckChunk *>(header);
                 processAsconfAckArrived(asconfAckChunk);
                 trans = true;
                 delete state->asconfChunk;
+                state->asconfChunk = nullptr;
                 delete asconfAckChunk;
                 break;
+            }
 
-            case PKTDROP:
+            case PKTDROP: {
                 EV_INFO << "PKTDROP received" << endl;
                 if (sctpMain->pktdrop) {
-                    SCTPPacketDropChunk *packetDropChunk;
-                    packetDropChunk = check_and_cast<SCTPPacketDropChunk *>(header);
+                    SCTPPacketDropChunk *packetDropChunk = check_and_cast<SCTPPacketDropChunk *>(header);
                     if (packetDropChunk->getBFlag() && !packetDropChunk->getMFlag())
                         processPacketDropArrived(packetDropChunk);
 
@@ -492,15 +494,16 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
                     delete packetDropChunk;
                 }
                 break;
+            }
 
-            case ERRORTYPE:
+            case ERRORTYPE: {
                 EV_INFO << "ERROR received" << endl;
-                SCTPErrorChunk *errorChunk;
-                errorChunk = check_and_cast<SCTPErrorChunk *>(header);
+                SCTPErrorChunk *errorChunk = check_and_cast<SCTPErrorChunk *>(header);
                 processErrorArrived(errorChunk);
                 trans = true;
                 delete errorChunk;
                 break;
+            }
 
             default:
                 EV_ERROR << "different type" << endl;    // TODO
@@ -844,11 +847,10 @@ bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk *initAckChunk)
 bool SCTPAssociation::processCookieEchoArrived(SCTPCookieEchoChunk *cookieEcho, L3Address addr)
 {
     bool trans = false;
-    SCTPCookie *cookie = check_and_cast<SCTPCookie *>(cookieEcho->getStateCookieForUpdate());
+    const SCTPCookie * cookie = cookieEcho->getStateCookie();
     if (cookie->getCreationTime() + sctpMain->par("validCookieLifetime") < simTime()) {
         EV_INFO << "stale Cookie: sendAbort\n";
         sendAbort();
-        delete cookie;
         return trans;
     }
     if (fsm->getState() == SCTP_S_CLOSED) {
@@ -866,7 +868,6 @@ bool SCTPAssociation::processCookieEchoArrived(SCTPCookieEchoChunk *cookieEcho, 
             }
             if (!same) {
                 sendAbort();
-                delete cookie;
                 return trans;
             }
         }
@@ -912,7 +913,6 @@ bool SCTPAssociation::processCookieEchoArrived(SCTPCookieEchoChunk *cookieEcho, 
         EV_DETAIL << "State=" << fsm->getState() << "\n";
         trans = true;
     }
-    delete cookie;
     return trans;
 }
 
@@ -923,10 +923,8 @@ bool SCTPAssociation::processCookieAckArrived()
     if (fsm->getState() == SCTP_S_COOKIE_ECHOED) {
         stopTimer(T1_InitTimer);
         trans = performStateTransition(SCTP_E_RCV_COOKIE_ACK);
-        if (state->cookieChunk->getCookieArraySize() == 0) {
-            delete state->cookieChunk->getStateCookie();
-        }
         delete state->cookieChunk;
+        state->cookieChunk = nullptr;
         return trans;
     }
     else
@@ -3264,7 +3262,7 @@ SCTPEventCode SCTPAssociation::processAsconfArrived(SCTPAsconfChunk *asconfChunk
         if (StartAddIP->isScheduled()) {
             stopTimer(StartAddIP);
             state->corrIdNum = state->asconfSn;
-            const char *type = (const char *)sctpMain->par("addIpType");
+            const char *type = sctpMain->par("addIpType").stringValue();
             sendAsconf(type, false);
         }
     }
@@ -3493,7 +3491,7 @@ void SCTPAssociation::processErrorArrived(SCTPErrorChunk *errorChunk)
                     if (StartAddIP->isScheduled())
                         stopTimer(StartAddIP);
                     state->corrIdNum = state->asconfSn;
-                    const char *type = (const char *)sctpMain->par("addIpType");
+                    const char *type = sctpMain->par("addIpType").stringValue();
                     sendAsconf(type, true);
                 }
                 break;

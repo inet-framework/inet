@@ -241,10 +241,11 @@ void SCTP::handleMessage(cMessage *msg)
             SCTPCommand* indication = new SCTPCommand("SCTP_I_SENDSOCKETOPTIONS");
             cmsg->setControlInfo(indication);
             socketOptions = collectSocketOptions();
-            cmsg->setContextPointer((void*) socketOptions);
+            cmsg->setContextPointer(socketOptions);
             send(cmsg, "to_appl", 0);
             delete msg;
-        } else {
+        }
+        else {
             SCTPCommand *controlInfo = check_and_cast<SCTPCommand *>(msg->getControlInfo());
 
             int32 appGateIndex;

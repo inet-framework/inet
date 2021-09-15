@@ -30,7 +30,7 @@ namespace inet {
 
 typedef std::vector<L3Address> AddressVector;
 
-typedef struct {
+struct SocketOptions {
     int maxInitRetrans;
     int maxInitRetransTimeout;
     double rtoInitial;
@@ -45,13 +45,13 @@ typedef struct {
     int pathMaxRetrans;
     double hbInterval;
     int assocMaxRtx;
-} SocketOptions;
+};
 
-typedef struct {
+struct AppSocketOptions {
     int inboundStreams;
     int outboundStreams;
     bool streamReset;
-} AppSocketOptions;
+};
 
 class INET_API SCTPSocket
 {

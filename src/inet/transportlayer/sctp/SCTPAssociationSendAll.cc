@@ -1405,7 +1405,6 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                             bytes.packet = false;
                             SCTPDataChunk *pkt = check_and_cast<SCTPDataChunk *>(sctpMsg->getChunksForUpdate(sctpMsg->getChunksArraySize() - 1));
                             pkt->setIBit(sctpMain->sackNow);
-                            sctpMsg->replaceChunk(pkt, sctpMsg->getChunksArraySize() - 1);
                         }
 
                         // Set I-bit when this is the final packet for this path!
@@ -1413,7 +1412,6 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                         if ((((a > 0) && (nextChunkFitsIntoPacket(path, a) == false)) || (!firstPass)) && !forwardPresent) {
                             SCTPDataChunk *pkt = check_and_cast<SCTPDataChunk *>(sctpMsg->getChunksForUpdate(sctpMsg->getChunksArraySize() - 1));
                             pkt->setIBit(sctpMain->sackNow);
-                            sctpMsg->replaceChunk(pkt, sctpMsg->getChunksArraySize() - 1);
                         }
 
                         if (dataChunksAdded > 0) {

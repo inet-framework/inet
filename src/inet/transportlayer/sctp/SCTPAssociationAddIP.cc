@@ -156,7 +156,7 @@ void SCTPAssociation::sendAsconf(const char *type, const bool remote)
         }
         sctpAsconf->addChunk(asconfChunk);
 
-        state->asconfChunk = check_and_cast<SCTPAsconfChunk *>(asconfChunk->dup());
+        state->asconfChunk = asconfChunk->dup();
         state->asconfChunk->setName("STATE-ASCONF");
 
         sendToIP(sctpAsconf, targetAddr);

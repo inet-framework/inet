@@ -362,7 +362,7 @@ void SCTPAssociation::sendToIP(SCTPMessage *sctpmsg,
     sctpmsg->setDestPort(remotePort);
     sctpmsg->setChecksumOk(true);
     EV_INFO << "SendToIP: localPort=" << localPort << " remotePort=" << remotePort << " dest=" << dest << "\n";
-    const SCTPChunk *chunk = (const SCTPChunk *)(sctpmsg->peekFirstChunk());
+    const SCTPChunk *chunk = sctpmsg->getChunks(0);
     uint8 chunkType = chunk->getChunkType();
     if (chunkType == ABORT) {
         const SCTPAbortChunk *abortChunk = check_and_cast<const SCTPAbortChunk *>(chunk);
@@ -377,7 +377,7 @@ void SCTPAssociation::sendToIP(SCTPMessage *sctpmsg,
         sctpmsg->setTag(localVTag);
     }
 
-    if ((bool)sctpMain->par("udpEncapsEnabled")) {
+    if (sctpMain->par("udpEncapsEnabled").boolValue()) {
         sctpMain->udpSocket.sendTo(sctpmsg, remoteAddr, SCTP_UDP_PORT);
     }
     else {
@@ -923,7 +923,7 @@ void SCTPAssociation::sendCookieEcho(SCTPInitAckChunk *initAckChunk)
         cookieEchoChunk->setByteLength((SCTP_COOKIE_ACK_LENGTH + len));
     }
     else {
-        SCTPCookie *cookie = check_and_cast<SCTPCookie *>(initAckChunk->getStateCookieForUpdate());
+        SCTPCookie *cookie = initAckChunk->getStateCookie()->dup();
         cookieEchoChunk->setStateCookie(cookie);
         cookieEchoChunk->setByteLength(SCTP_COOKIE_ACK_LENGTH + cookie->getByteLength());
     }

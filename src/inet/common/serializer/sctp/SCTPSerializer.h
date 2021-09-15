@@ -50,7 +50,7 @@ class INET_API SCTPSerializer : public SerializerBase
      */
     void parse(const uint8 *buf, uint32 bufsize, sctp::SCTPMessage *dest);
 
-    static uint32 checksum(const uint8 *buf, register uint32 len);
+    static uint32 checksum(const uint8 *buf, uint32 len);
     static void hmacSha1(const uint8 *buf, uint32 buflen, const uint8 *key, uint32 keylen, uint8 *digest);
     void calculateSharedKey();
     bool compareRandom();
