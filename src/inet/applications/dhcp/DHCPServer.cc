@@ -454,7 +454,7 @@ DHCPLease *DHCPServer::getLeaseByMac(MACAddress mac)
     return nullptr;
 }
 
-DHCPLease *DHCPServer::getAvailableLease(IPv4Address requestedAddress, MACAddress& clientMAC)
+DHCPLease *DHCPServer::getAvailableLease(IPv4Address requestedAddress, const MACAddress& clientMAC)
 {
     int beginAddr = ipAddressStart.getInt();    // the first address that we might use
 

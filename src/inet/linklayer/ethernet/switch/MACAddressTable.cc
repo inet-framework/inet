@@ -103,7 +103,7 @@ MACAddressTable::AddressTable *MACAddressTable::getTableForVid(unsigned int vid)
  * returns false if not found
  */
 
-int MACAddressTable::getPortForAddress(MACAddress& address, unsigned int vid)
+int MACAddressTable::getPortForAddress(const MACAddress& address, unsigned int vid)
 {
     Enter_Method("MACAddressTable::getPortForAddress()");
 
@@ -132,7 +132,7 @@ int MACAddressTable::getPortForAddress(MACAddress& address, unsigned int vid)
  * True if refreshed. False if it is new.
  */
 
-bool MACAddressTable::updateTableWithAddress(int portno, MACAddress& address, unsigned int vid)
+bool MACAddressTable::updateTableWithAddress(int portno, const MACAddress& address, unsigned int vid)
 {
     Enter_Method("MACAddressTable::updateTableWithAddress()");
     if (address.isBroadcast())

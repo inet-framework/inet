@@ -81,7 +81,7 @@ class INET_API DHCPServer : public cSimpleModule, public cListener, public ILife
     /*
      * Gets the next available lease to be assigned.
      */
-    virtual DHCPLease *getAvailableLease(IPv4Address requestedAddress, MACAddress& clientMAC);
+    virtual DHCPLease *getAvailableLease(IPv4Address requestedAddress, const MACAddress& clientMAC);
 
     /*
      * Implements the server's state machine.

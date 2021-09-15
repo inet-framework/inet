@@ -77,13 +77,13 @@ class INET_API MACAddressTable : public cSimpleModule, public IMACAddressTable
      * @param vid VLAN ID
      * @return Output port for address, or -1 if unknown.
      */
-    virtual int getPortForAddress(MACAddress& address, unsigned int vid = 0) override;
+    virtual int getPortForAddress(const MACAddress& address, unsigned int vid = 0) override;
 
     /**
      * @brief Register a new MAC address at AddressTable.
      * @return True if refreshed. False if it is new.
      */
-    virtual bool updateTableWithAddress(int portno, MACAddress& address, unsigned int vid = 0) override;
+    virtual bool updateTableWithAddress(int portno, const MACAddress& address, unsigned int vid = 0) override;
 
     /**
      *  @brief Clears portno cache
