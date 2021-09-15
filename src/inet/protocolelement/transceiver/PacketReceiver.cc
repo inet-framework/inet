@@ -32,6 +32,7 @@ void PacketReceiver::handleMessageWhenUp(cMessage *message)
 
 void PacketReceiver::receiveSignal(Signal *signal)
 {
+    EV_INFO << "Receiving signal from channel" << EV_FIELD(signal) << EV_ENDL;
     emit(receptionEndedSignal, signal);
     auto packet = decodePacket(signal);
     handlePacketProcessed(packet);

@@ -62,6 +62,7 @@ void PacketTransmitter::startTx(Packet *packet)
     // 4. send signal start and notify subscribers
     emit(transmissionStartedSignal, signal);
     prepareSignal(signal);
+    EV_INFO << "Transmitting signal to channel" << EV_FIELD(signal) << EV_ENDL;
     send(signal, SendOptions().duration(signal->getDuration()), outputGate);
     // 5. schedule transmission end timer
     scheduleTxEndTimer(txSignal);

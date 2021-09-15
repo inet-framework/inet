@@ -94,7 +94,7 @@ void PacketTransmitterBase::prepareSignal(Signal *signal)
 
 void PacketTransmitterBase::sendSignalStart(Signal *signal, int transmissionId)
 {
-    EV_INFO << "Sending signal start to channel" << EV_FIELD(signal) << EV_ENDL;
+    EV_INFO << "Transmitting signal start to channel" << EV_FIELD(signal) << EV_ENDL;
     prepareSignal(signal);
     send(signal, SendOptions().duration(signal->getDuration()).transmissionId(transmissionId), outputGate);
 }
@@ -102,14 +102,14 @@ void PacketTransmitterBase::sendSignalStart(Signal *signal, int transmissionId)
 void PacketTransmitterBase::sendSignalProgress(Signal *signal, int transmissionId, b bitPosition, clocktime_t timePosition)
 {
     simtime_t remainingDuration = signal->getDuration() - CLOCKTIME_AS_SIMTIME(timePosition);
-    EV_INFO << "Sending signal progress to channel" << EV_FIELD(signal) << EV_FIELD(transmissionId) << EV_FIELD(remainingDuration, simsec(remainingDuration)) << EV_ENDL;
+    EV_INFO << "Transmitting signal progress to channel" << EV_FIELD(signal) << EV_FIELD(transmissionId) << EV_FIELD(remainingDuration, simsec(remainingDuration)) << EV_ENDL;
     prepareSignal(signal);
     send(signal, SendOptions().duration(signal->getDuration()).updateTx(transmissionId, remainingDuration), outputGate);
 }
 
 void PacketTransmitterBase::sendSignalEnd(Signal *signal, int transmissionId)
 {
-    EV_INFO << "Sending signal end to channel" << EV_FIELD(signal) << EV_FIELD(transmissionId) << EV_ENDL;
+    EV_INFO << "Transmitting signal end to channel" << EV_FIELD(signal) << EV_FIELD(transmissionId) << EV_ENDL;
     prepareSignal(signal);
     send(signal, SendOptions().duration(signal->getDuration()).finishTx(transmissionId), outputGate);
 }

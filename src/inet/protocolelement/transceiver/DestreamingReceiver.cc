@@ -59,14 +59,19 @@ void DestreamingReceiver::receivePacketStart(cPacket *cpacket, cGate *gate, bps 
 {
     ASSERT(rxSignal == nullptr);
     take(cpacket);
-    rxSignal = check_and_cast<Signal *>(cpacket);
+    auto signal = check_and_cast<Signal *>(cpacket);
+    EV_INFO << "Receiving signal start from channel" << EV_FIELD(signal) << EV_ENDL;
+    rxSignal = signal;
     emit(receptionStartedSignal, rxSignal);
 }
 
 void DestreamingReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, bps datarate)
 {
+    take(cpacket);
+    auto signal = check_and_cast<Signal *>(cpacket);
+    EV_INFO << "Receiving signal end from channel" << EV_FIELD(signal) << EV_ENDL;
     delete rxSignal;
-    rxSignal = check_and_cast<Signal *>(cpacket);
+    rxSignal = signal;
     emit(receptionEndedSignal, rxSignal);
     auto packet = decodePacket(rxSignal);
     handlePacketProcessed(packet);
@@ -78,8 +83,10 @@ void DestreamingReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, bps da
 void DestreamingReceiver::receivePacketProgress(cPacket *cpacket, cGate *gate, bps datarate, b position, simtime_t timePosition, b extraProcessableLength, simtime_t extraProcessableDuration)
 {
     take(cpacket);
+    auto signal = check_and_cast<Signal *>(cpacket);
+    EV_INFO << "Receiving signal progress from channel" << EV_FIELD(signal) << EV_ENDL;
     delete rxSignal;
-    rxSignal = check_and_cast<Signal *>(cpacket);
+    rxSignal = signal;
 }
 
 } // namespace inet
