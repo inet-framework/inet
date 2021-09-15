@@ -31,7 +31,7 @@ module NetworkInterface
         int numPcapRecorders = default(recordPcap ? 1 : 0);
         pcapRecorder[*].pcapFile = default("results/" + expand("${configname}-") + fullPath() + ".pcap");
         **.clockModule = default(exists(clock) ? absPath(".clock") : "");
-        @networkInterface();
+        @networkInterface;
         @lifecycleSupport;
         @class(NetworkInterface);
         @display("i=block/ifcard");
