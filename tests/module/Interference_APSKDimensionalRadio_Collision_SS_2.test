@@ -83,8 +83,8 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 
 %contains: results/General-0.elog
 Changing radio reception state from IDLE to RECEIVING.
-%contains: results/General-0.elog
-Received (inet::IdealMacFrame)ping0 contains bit errors or collision, dropping it
+%contains-regex: results/General-0.elog
+Received \(inet::IdealMacFrame\)ping0 [^\r\n]*contains bit errors or collision, dropping it
 %not-contains: results/General-0.elog
 Passing up contained packet `ping0' to higher layer
 %#--------------------------------------------------------------------------------------------------------------
