@@ -365,7 +365,7 @@ void RTCP::processIncomingRTPPacket(RTPPacket *packet, IPv4Address address, int 
 void RTCP::processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPv4Address address, int port)
 {
     calculateAveragePacketSize(packet->getByteLength());
-    cArray& rtcpPackets = packet->getRtcpPackets();
+    cArray& rtcpPackets = packet->getRtcpPacketsForUpdate();
     simtime_t arrivalTime = packet->getArrivalTime();
 
     for (int i = 0; i < rtcpPackets.size(); i++) {
@@ -424,9 +424,9 @@ void RTCP::processIncomingRTCPSenderReportPacket(RTCPSenderReportPacket *rtcpSen
             // check for ssrc conflict
         }
     }
-    participantInfo->processSenderReport(rtcpSenderReportPacket->getSenderReport(), simTime());
+    participantInfo->processSenderReport(rtcpSenderReportPacket->getSenderReportForUpdate(), simTime());
 
-    cArray& receptionReports = rtcpSenderReportPacket->getReceptionReports();
+    cArray& receptionReports = rtcpSenderReportPacket->getReceptionReportsForUpdate();
     for (int j = 0; j < receptionReports.size(); j++) {
         if (receptionReports.exist(j)) {
             ReceptionReport *receptionReport = (ReceptionReport *)(receptionReports.remove(j));
@@ -461,7 +461,7 @@ void RTCP::processIncomingRTCPReceiverReportPacket(RTCPReceiverReportPacket *rtc
         }
     }
 
-    cArray& receptionReports = rtcpReceiverReportPacket->getReceptionReports();
+    cArray& receptionReports = rtcpReceiverReportPacket->getReceptionReportsForUpdate();
     for (int j = 0; j < receptionReports.size(); j++) {
         if (receptionReports.exist(j)) {
             ReceptionReport *receptionReport = (ReceptionReport *)(receptionReports.remove(j));
@@ -477,7 +477,7 @@ void RTCP::processIncomingRTCPReceiverReportPacket(RTCPReceiverReportPacket *rtc
 
 void RTCP::processIncomingRTCPSDESPacket(RTCPSDESPacket *rtcpSDESPacket, IPv4Address address, int port, simtime_t arrivalTime)
 {
-    cArray& sdesChunks = rtcpSDESPacket->getSdesChunks();
+    cArray& sdesChunks = rtcpSDESPacket->getSdesChunksForUpdate();
 
     for (int j = 0; j < sdesChunks.size(); j++) {
         if (sdesChunks.exist(j)) {

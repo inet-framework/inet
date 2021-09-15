@@ -724,9 +724,9 @@ void xMIPv6::processBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
     validBUMessage = validateBUMessage(bu, ctrlInfo);
 
     if (validBUMessage) {
-        IPv6Address& HoA = bu->getHomeAddressMN();
-        IPv6Address& CoA = ctrlInfo->getSrcAddr();
-        IPv6Address& destAddress = ctrlInfo->getDestAddr();
+        IPv6Address HoA = bu->getHomeAddressMN();
+        IPv6Address CoA = ctrlInfo->getSrcAddr();
+        IPv6Address destAddress = ctrlInfo->getDestAddr();
         uint buLifetime = bu->getLifetime() * 4;    /* 6.1.7 One time unit is 4 seconds. */
         uint buSequence = bu->getSequence();
         bool homeRegistration = bu->getHomeRegistrationFlag();
@@ -979,7 +979,7 @@ bool xMIPv6::validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
     // ################################
     //bool result = true;
 
-    IPv6Address& src = ctrlInfo->getSrcAddr();
+    IPv6Address src = ctrlInfo->getSrcAddr();
     IPv6Address homeAddress = bu->getHomeAddressMN();    //confirm whether it is getHomeAddressMN() or simply homeAddress()
     uint seqNumber = bu->getSequence();    //The seq Number of the recieved BU
     uint bcSeqNumber = bc->readBCSequenceNumber(homeAddress);    //The seq Number of the last recieved BU in the Binding cache
@@ -1015,7 +1015,7 @@ bool xMIPv6::validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
            address, then the receiving node MUST send back a Binding
            Acknowledgement with status code 135, and the last accepted sequence
            number in the Sequence Number field of the Binding Acknowledgement.*/
-        IPv6Address& destAddress = ctrlInfo->getDestAddr();
+        const IPv6Address& destAddress = ctrlInfo->getDestAddr();
         createAndSendBAMessage(destAddress, homeAddress, ctrlInfo, REGISTRATION_TYPE_CHANGE_DISALLOWED,
                 bu->getBindingAuthorizationData(), bcSeqNumber, 0);
 
@@ -1158,7 +1158,7 @@ void xMIPv6::processBAMessage(BindingAcknowledgement *ba, IPv6ControlInfo *ctrlI
 {
     EV_TRACE << "\n<<<<<<<<<This is where BA gets processed>>>>>>>>>\n";
     //bool retransmitBU = false; // update 11.6.08 - CB
-    IPv6Address& baSource = ctrlInfo->getSrcAddr();
+    IPv6Address baSource = ctrlInfo->getSrcAddr();
     InterfaceEntry *ie = ift->getInterfaceById(ctrlInfo->getInterfaceId());    //the interface on which the BAck was received
 
     if (rt6->isMobileNode()) {
@@ -1742,7 +1742,7 @@ void xMIPv6::createAndSendCoTIMessage(const IPv6Address& cnDest, InterfaceEntry 
 void xMIPv6::processHoTIMessage(HomeTestInit *HoTI, IPv6ControlInfo *ctrlInfo)
 {
     // 9.4.1 & 9.4.3
-    IPv6Address& HoA = ctrlInfo->getDestAddr();
+    IPv6Address HoA = ctrlInfo->getDestAddr();
 
     HomeTest *HoT = new HomeTest("HoT");
     HoT->setMobilityHeaderType(HOME_TEST);
@@ -1764,7 +1764,7 @@ void xMIPv6::processHoTIMessage(HomeTestInit *HoTI, IPv6ControlInfo *ctrlInfo)
 void xMIPv6::processCoTIMessage(CareOfTestInit *CoTI, IPv6ControlInfo *ctrlInfo)
 {
     // 9.4.2 & 9.4.4
-    IPv6Address& CoA = ctrlInfo->getDestAddr();
+    IPv6Address CoA = ctrlInfo->getDestAddr();
 
     CareOfTest *CoT = new CareOfTest("CoT");
     CoT->setMobilityHeaderType(CARE_OF_TEST);
@@ -1789,7 +1789,7 @@ void xMIPv6::processHoTMessage(HomeTest *HoT, IPv6ControlInfo *ctrlInfo)
         EV_WARN << "HoT validation not passed: dropping message" << endl;
     else {
         EV_WARN << "HoT validation passed: updating BUL" << endl;
-        IPv6Address& srcAddr = ctrlInfo->getSrcAddr();
+        IPv6Address srcAddr = ctrlInfo->getSrcAddr();
         //IPv6Address& destAddr = ctrlInfo->destAddr();
         int interfaceID = ctrlInfo->getInterfaceId();
         InterfaceEntry *ie = ift->getInterfaceById(interfaceID);
@@ -1876,7 +1876,7 @@ void xMIPv6::processCoTMessage(CareOfTest *CoT, IPv6ControlInfo *ctrlInfo)
     else {
         EV_INFO << "CoT validation passed: updating BUL" << endl;
 
-        IPv6Address& srcAddr = ctrlInfo->getSrcAddr();
+        IPv6Address srcAddr = ctrlInfo->getSrcAddr();
         //IPv6Address& destAddr = ctrlInfo->destAddr();
         int interfaceID = ctrlInfo->getInterfaceId();
         InterfaceEntry *ie = ift->getInterfaceById(interfaceID);
@@ -2058,7 +2058,7 @@ void xMIPv6::processType2RH(IPv6Datagram *datagram, IPv6RoutingHeader *rh)
     }
 
     bool validRH2 = false;
-    IPv6Address& HoA = rh->getAddress(0);
+    IPv6Address HoA = rh->getAddress(0);
 
     /*11.3.3
        A node receiving a packet addressed to itself (i.e., one of the
@@ -2142,8 +2142,8 @@ void xMIPv6::processHoAOpt(IPv6Datagram *datagram, HomeAddressOption *hoaOpt)
 {
     // datagram from MN to CN
     bool validHoAOpt = false;
-    IPv6Address& HoA = hoaOpt->getHomeAddress();
-    IPv6Address& CoA = datagram->getSrcAddress();
+    IPv6Address HoA = hoaOpt->getHomeAddress();
+    IPv6Address CoA = datagram->getSrcAddress();
 
     /*9.3.1
        Packets containing a
@@ -2495,8 +2495,8 @@ void xMIPv6::processBRRMessage(BindingRefreshRequest *brr, IPv6ControlInfo *ctrl
        the source of the Binding Refresh Request, and the mobile node wants
        to retain its binding cache entry at the correspondent node, then the
        mobile node should start a return routability procedure.*/
-    IPv6Address& cnAddress = ctrlInfo->getSrcAddr();
-    IPv6Address& HoA = ctrlInfo->getDestAddr();
+    IPv6Address cnAddress = ctrlInfo->getSrcAddr();
+    IPv6Address HoA = ctrlInfo->getDestAddr();
 
     if (!bul->isInBindingUpdateList(cnAddress, HoA)) {
         EV_WARN << "BRR not accepted - no binding for this CN. Dropping message." << endl;

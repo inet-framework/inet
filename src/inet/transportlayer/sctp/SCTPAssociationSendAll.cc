@@ -60,8 +60,7 @@ void SCTPAssociation::storePacket(SCTPPathVariables *pathVar,
 {
     uint32 packetBytes = 0;
     for (uint16 i = 0; i < sctpMsg->getChunksArraySize(); i++) {
-        cPacketPtr& chunkPtr = sctpMsg->getChunks(i);
-        SCTPDataChunk* dataChunk = dynamic_cast<SCTPDataChunk*>(chunkPtr);
+        const SCTPDataChunk* dataChunk = dynamic_cast<const SCTPDataChunk*>(sctpMsg->getChunks(i));
         if(dataChunk != nullptr) {
             const uint32_t tsn = dataChunk->getTsn();
             SCTPDataVariables* chunk = retransmissionQ->payloadQueue.find(tsn)->second;
@@ -110,8 +109,7 @@ void SCTPAssociation::loadPacket(SCTPPathVariables *pathVar,
     qCounter.bookedSumSendStreams -= state->packetBytes;
 
     for (uint16 i = 0; i < (*sctpMsg)->getChunksArraySize(); i++) {
-        cPacketPtr& chunkPtr = (*sctpMsg)->getChunks(i);
-        SCTPDataChunk* dataChunk = dynamic_cast<SCTPDataChunk*>(chunkPtr);
+        const SCTPDataChunk* dataChunk = dynamic_cast<const SCTPDataChunk*>((*sctpMsg)->getChunks(i));
         if(dataChunk != nullptr) {
             const uint32_t tsn = dataChunk->getTsn();
             SCTPDataVariables* chunk = retransmissionQ->payloadQueue.find(tsn)->second;
@@ -1405,7 +1403,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                             sendOneMorePacket = false;
                             bytesToSend = 0;
                             bytes.packet = false;
-                            SCTPDataChunk *pkt = check_and_cast<SCTPDataChunk *>(sctpMsg->getChunks(sctpMsg->getChunksArraySize() - 1));
+                            SCTPDataChunk *pkt = check_and_cast<SCTPDataChunk *>(sctpMsg->getChunksForUpdate(sctpMsg->getChunksArraySize() - 1));
                             pkt->setIBit(sctpMain->sackNow);
                             sctpMsg->replaceChunk(pkt, sctpMsg->getChunksArraySize() - 1);
                         }
@@ -1413,7 +1411,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables *pathId, bool firstPass)
                         // Set I-bit when this is the final packet for this path!
                         const int32 a = (int32)path->cwnd - (int32)path->outstandingBytes;
                         if ((((a > 0) && (nextChunkFitsIntoPacket(path, a) == false)) || (!firstPass)) && !forwardPresent) {
-                            SCTPDataChunk *pkt = check_and_cast<SCTPDataChunk *>(sctpMsg->getChunks(sctpMsg->getChunksArraySize() - 1));
+                            SCTPDataChunk *pkt = check_and_cast<SCTPDataChunk *>(sctpMsg->getChunksForUpdate(sctpMsg->getChunksArraySize() - 1));
                             pkt->setIBit(sctpMain->sackNow);
                             sctpMsg->replaceChunk(pkt, sctpMsg->getChunksArraySize() - 1);
                         }

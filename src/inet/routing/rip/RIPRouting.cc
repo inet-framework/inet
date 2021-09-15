@@ -295,7 +295,7 @@ void RIPRouting::sendRIPRequest(const RIPInterfaceEntry& ripInterface)
     RIPPacket *packet = new RIPPacket("RIP request");
     packet->setCommand(RIP_REQUEST);
     packet->setEntryArraySize(1);
-    RIPEntry& entry = packet->getEntry(0);
+    RIPEntry& entry = packet->getEntryForUpdate(0);
     entry.addressFamilyId = RIP_AF_NONE;
     entry.metric = RIP_INFINITE_METRIC;
     emit(sentRequestSignal, packet);
@@ -611,7 +611,7 @@ void RIPRouting::processRequest(RIPPacket *packet)
 
     RIPRoute *ripRoute;
     for (int i = 0; i < numEntries; ++i) {
-        RIPEntry& entry = packet->getEntry(i);
+        RIPEntry& entry = packet->getEntryForUpdate(i);
         switch (entry.addressFamilyId) {
             case RIP_AF_NONE:
                 if (numEntries == 1 && entry.metric == RIP_INFINITE_METRIC) {
@@ -686,7 +686,7 @@ void RIPRouting::sendRoutes(const L3Address& address, int port, const RIPInterfa
                  << " metric=" << metric << std::endl;
 
         // fill next entry
-        RIPEntry& entry = packet->getEntry(k++);
+        RIPEntry& entry = packet->getEntryForUpdate(k++);
         entry.addressFamilyId = RIP_AF_INET;
         entry.address = ripRoute->getDestination();
         entry.prefixLength = ripRoute->getPrefixLength();
@@ -770,7 +770,7 @@ void RIPRouting::processResponse(RIPPacket *packet)
     EV_INFO << "response received from " << srcAddr << "\n";
     int numEntries = packet->getEntryArraySize();
     for (int i = 0; i < numEntries; ++i) {
-        RIPEntry& entry = packet->getEntry(i);
+        const RIPEntry& entry = packet->getEntry(i);
         int metric = std::min((int)entry.metric + incomingIe->metric, RIP_INFINITE_METRIC);
         L3Address nextHop = entry.nextHop.isUnspecified() ? srcAddr : entry.nextHop;
 
@@ -833,7 +833,7 @@ bool RIPRouting::isValidResponse(RIPPacket *packet)
     // validate entries
     int numEntries = packet->getEntryArraySize();
     for (int i = 0; i < numEntries; ++i) {
-        RIPEntry& entry = packet->getEntry(i);
+        const RIPEntry& entry = packet->getEntry(i);
 
         // check that metric is in range [1,16]
         if (entry.metric < 1 || entry.metric > RIP_INFINITE_METRIC) {

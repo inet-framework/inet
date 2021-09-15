@@ -51,7 +51,7 @@ void DatabaseDescriptionHandler::processPacket(OSPFPacket *packet, Interface *in
                 break;
 
             case Neighbor::EXCHANGE_START_STATE: {
-                OSPFDDOptions& ddOptions = ddPacket->getDdOptions();
+                const OSPFDDOptions& ddOptions = ddPacket->getDdOptions();
 
                 if (ddOptions.I_Init && ddOptions.M_More && ddOptions.MS_MasterSlave &&
                     (ddPacket->getLsaHeadersArraySize() == 0))
@@ -201,7 +201,7 @@ bool DatabaseDescriptionHandler::processDDPacket(OSPFDatabaseDescriptionPacket *
     unsigned int headerCount = ddPacket->getLsaHeadersArraySize();
 
     for (unsigned int i = 0; i < headerCount; i++) {
-        OSPFLSAHeader& currentHeader = ddPacket->getLsaHeaders(i);
+        const OSPFLSAHeader& currentHeader = ddPacket->getLsaHeaders(i);
         LSAType lsaType = static_cast<LSAType>(currentHeader.getLsType());
 
         EV_DETAIL << "    " << currentHeader;

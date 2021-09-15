@@ -100,7 +100,7 @@ const ReceptionIndication *Ieee80211ReceiverBase::computeReceptionIndication(con
 
     const Ieee80211TransmissionBase *transmission = check_and_cast<const Ieee80211TransmissionBase *>(snir->getReception()->getTransmission());
     //FIXME fill indication
-    indication->setMode(transmission->getMode());
+    indication->setMode(const_cast<IIeee80211Mode *>(transmission->getMode()));
     indication->setChannel(const_cast<Ieee80211Channel *>(transmission->getChannel()));
     //indication->setSnr();
     //indication->setLossRate();

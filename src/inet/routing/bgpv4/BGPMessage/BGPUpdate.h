@@ -32,7 +32,7 @@ class INET_API BGPUpdateMessage : public BGPUpdateMessage_Base
   public:
     BGPUpdateMessage(const char *name = nullptr, int kind = 0) : BGPUpdateMessage_Base(name, kind) {}
     virtual BGPUpdateMessage *dup() const override { return new BGPUpdateMessage(*this); }
-    void setWithdrawnRoutesArraySize(unsigned int size) override;
+    void setWithdrawnRoutesArraySize(size_t size) override;
     void setPathAttributeList(const BGPUpdatePathAttributeList& pathAttributeList_var);
     void setNLRI(const BGPUpdateNLRI& NLRI_var) override;
 };

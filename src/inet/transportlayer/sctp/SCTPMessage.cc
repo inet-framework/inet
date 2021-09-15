@@ -241,22 +241,22 @@ void SCTPStreamResetChunk::copy(const SCTPStreamResetChunk& other)
     }
 }
 
-void SCTPStreamResetChunk::setParametersArraySize(const uint32 size)
+void SCTPStreamResetChunk::setParametersArraySize(size_t size)
 {
     throw new cException(this, "setParametersArraySize() not supported, use addParameter()");
 }
 
-uint32 SCTPStreamResetChunk::getParametersArraySize() const
+size_t SCTPStreamResetChunk::getParametersArraySize() const
 {
     return parameterList.size();
 }
 
-cPacketPtr& SCTPStreamResetChunk::getParameters(uint32 k)
+const cPacket *SCTPStreamResetChunk::getParameters(size_t k)
 {
     return parameterList.at(k);
 }
 
-void SCTPStreamResetChunk::setParameters(const uint32 k, const cPacketPtr& chunks_var)
+void SCTPStreamResetChunk::setParameters(size_t k, cPacket *chunks_var)
 {
     throw new cException(this, "setParameters() not supported, use addParameter()");
 }

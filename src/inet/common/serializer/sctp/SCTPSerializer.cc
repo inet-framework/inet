@@ -411,7 +411,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 }
                 int32 cookielen = initAckChunk->getCookieArraySize();
                 if (cookielen == 0) {
-                    SCTPCookie *stateCookie = check_and_cast<SCTPCookie *>(initAckChunk->getStateCookie());
+                    auto *stateCookie = check_and_cast<const SCTPCookie *>(initAckChunk->getStateCookie());
                     struct init_cookie_parameter *cookie = (struct init_cookie_parameter *)(((unsigned char *)iac) + size_init_chunk + parPtr);
                     cookie->type = htons(INIT_PARAM_COOKIE);
                     cookie->length = htons(SCTP_COOKIE_LENGTH + 4);
@@ -647,7 +647,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         cec->state_cookie[i] = cookieChunk->getCookie(i);
                 }
                 else {
-                    SCTPCookie *stateCookie = check_and_cast<SCTPCookie *>(cookieChunk->getStateCookie());
+                    const SCTPCookie *stateCookie = check_and_cast<const SCTPCookie *>(cookieChunk->getStateCookie());
                     struct cookie_parameter *cookie = (struct cookie_parameter *)(buf + writtenbytes + 4);
                     cookie->creationTime = htonl((uint32)stateCookie->getCreationTime().dbl());
                     cookie->localTag = htonl(stateCookie->getLocalTag());
@@ -792,7 +792,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 ipv4addr->address = htonl(asconfChunk->getAddressParam().toIPv4().getInt());
                 parPtr += 8;
                 for (unsigned int i = 0; i < asconfChunk->getAsconfParamsArraySize(); i++) {
-                    SCTPParameter *parameter = check_and_cast<SCTPParameter *>(asconfChunk->getAsconfParams(i));
+                    SCTPParameter *parameter = check_and_cast<SCTPParameter *>(asconfChunk->getAsconfParamsForUpdate(i));
                     switch (parameter->getParameterType()) {
                         case ADD_IP_ADDRESS: {
                             SCTPAddIPParameter *addip = check_and_cast<SCTPAddIPParameter *>(parameter);
@@ -852,10 +852,10 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 asconfack->serial = htonl(asconfAckChunk->getSerialNumber());
                 int parPtr = 0;
                 for (unsigned int i = 0; i < asconfAckChunk->getAsconfResponseArraySize(); i++) {
-                    SCTPParameter *parameter = check_and_cast<SCTPParameter *>(asconfAckChunk->getAsconfResponse(i));
+                    const SCTPParameter *parameter = check_and_cast<const SCTPParameter *>(asconfAckChunk->getAsconfResponse(i));
                     switch (parameter->getParameterType()) {
                         case ERROR_CAUSE_INDICATION: {
-                            SCTPErrorCauseParameter *error = check_and_cast<SCTPErrorCauseParameter *>(parameter);
+                            const SCTPErrorCauseParameter *error = check_and_cast<const SCTPErrorCauseParameter *>(parameter);
                             struct add_ip_parameter *addip = (struct add_ip_parameter *)(((unsigned char *)asconfack) + sizeof(struct asconf_ack_chunk) + parPtr);
                             addip->type = htons(error->getParameterType());
                             addip->length = htons(error->getByteLength());
@@ -917,7 +917,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         }
 
                         case SUCCESS_INDICATION: {
-                            SCTPSuccessIndication *success = check_and_cast<SCTPSuccessIndication *>(parameter);
+                            const SCTPSuccessIndication *success = check_and_cast<const SCTPSuccessIndication *>(parameter);
                             struct add_ip_parameter *addip = (struct add_ip_parameter *)(((unsigned char *)asconfack) + sizeof(struct asconf_ack_chunk) + parPtr);
                             addip->type = htons(success->getParameterType());
                             addip->length = htons(8);
@@ -944,10 +944,10 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 error->length = htons(errorchunk->getByteLength());
 
                 if (errorchunk->getParametersArraySize() > 0) {
-                    SCTPParameter *parameter = check_and_cast<SCTPParameter *>(errorchunk->getParameters(0));
+                    const SCTPParameter *parameter = errorchunk->getParameters(0);
                     switch (parameter->getParameterType()) {
                         case MISSING_NAT_ENTRY: {
-                            SCTPSimpleErrorCauseParameter *ecp = check_and_cast<SCTPSimpleErrorCauseParameter *>(parameter);
+                            const SCTPSimpleErrorCauseParameter *ecp = check_and_cast<const SCTPSimpleErrorCauseParameter *>(parameter);
                             struct error_cause *errorc = (struct error_cause *)(((unsigned char *)error) + sizeof(struct error_chunk));
                             errorc->cause_code = htons(ecp->getParameterType());
                             if (check_and_cast<IPv4Datagram *>(ecp->getEncapsulatedPacket()) != nullptr) {
@@ -959,7 +959,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                             break;
                         }
                         case INVALID_STREAM_IDENTIFIER: {
-                            SCTPSimpleErrorCauseParameter *ecp = check_and_cast<SCTPSimpleErrorCauseParameter *>(parameter);
+                            const SCTPSimpleErrorCauseParameter *ecp = check_and_cast<const SCTPSimpleErrorCauseParameter *>(parameter);
                             struct error_cause_with_int *errorc = (struct error_cause_with_int *)(((unsigned char *)error) + sizeof(struct error_chunk));
                             errorc->cause_code = htons(ecp->getParameterType());
                             errorc->length = htons(ecp->getByteLength());
@@ -984,10 +984,10 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 int parPtr = 0;
                 uint16 numParameters = streamReset->getParametersArraySize();
                 for (int i = 0; i < numParameters; i++) {
-                    SCTPParameter *parameter = check_and_cast<SCTPParameter *>(streamReset->getParameters(i));
+                    const SCTPParameter *parameter = streamReset->getParameters(i);
                     switch (parameter->getParameterType()) {
                         case OUTGOING_RESET_REQUEST_PARAMETER: {
-                            SCTPOutgoingSSNResetRequestParameter *outparam = check_and_cast<SCTPOutgoingSSNResetRequestParameter *>(parameter);
+                            const SCTPOutgoingSSNResetRequestParameter *outparam = check_and_cast<const SCTPOutgoingSSNResetRequestParameter *>(parameter);
                             struct outgoing_reset_request_parameter *out = (outgoing_reset_request_parameter *)(((unsigned char *)stream) + sizeof(struct stream_reset_chunk) + parPtr);
                             out->type = htons(outparam->getParameterType());
                             out->srReqSn = htonl(outparam->getSrReqSn());
@@ -1009,7 +1009,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         }
 
                         case INCOMING_RESET_REQUEST_PARAMETER: {
-                            SCTPIncomingSSNResetRequestParameter *inparam = check_and_cast<SCTPIncomingSSNResetRequestParameter *>(parameter);
+                            const SCTPIncomingSSNResetRequestParameter *inparam = check_and_cast<const SCTPIncomingSSNResetRequestParameter *>(parameter);
                             struct incoming_reset_request_parameter *in = (incoming_reset_request_parameter *)(((unsigned char *)stream) + sizeof(struct stream_reset_chunk) + parPtr);
                             in->type = htons(inparam->getParameterType());
                             in->srReqSn = htonl(inparam->getSrReqSn());
@@ -1029,7 +1029,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         }
 
                         case SSN_TSN_RESET_REQUEST_PARAMETER: {
-                            SCTPSSNTSNResetRequestParameter *ssnparam = check_and_cast<SCTPSSNTSNResetRequestParameter *>(parameter);
+                            const SCTPSSNTSNResetRequestParameter *ssnparam = check_and_cast<const SCTPSSNTSNResetRequestParameter *>(parameter);
                             struct ssn_tsn_reset_request_parameter *ssn = (struct ssn_tsn_reset_request_parameter *)(((unsigned char *)stream) + sizeof(struct stream_reset_chunk) + parPtr);
                             ssn->type = htons(ssnparam->getParameterType());
                             ssn->length = htons(8);
@@ -1039,7 +1039,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         }
 
                         case STREAM_RESET_RESPONSE_PARAMETER: {
-                            SCTPStreamResetResponseParameter *response = check_and_cast<SCTPStreamResetResponseParameter *>(parameter);
+                            const SCTPStreamResetResponseParameter *response = check_and_cast<const SCTPStreamResetResponseParameter *>(parameter);
                             struct stream_reset_response_parameter *resp = (struct stream_reset_response_parameter *)(((unsigned char *)stream) + sizeof(struct stream_reset_chunk) + parPtr);
                             resp->type = htons(response->getParameterType());
                             resp->srResSn = htonl(response->getSrResSn());
@@ -1056,7 +1056,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         }
 
                         case ADD_INCOMING_STREAMS_REQUEST_PARAMETER: {
-                            SCTPAddStreamsRequestParameter *instreams = check_and_cast<SCTPAddStreamsRequestParameter *>(parameter);
+                            const SCTPAddStreamsRequestParameter *instreams = check_and_cast<const SCTPAddStreamsRequestParameter *>(parameter);
                             struct add_streams_request_parameter *addinp = (struct add_streams_request_parameter *)(((unsigned char *)stream) + sizeof(struct stream_reset_chunk) + parPtr);
                             addinp->type = htons(instreams->getParameterType());
                             addinp->srReqSn = htonl(instreams->getSrReqSn());
@@ -1068,7 +1068,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         }
 
                        case ADD_OUTGOING_STREAMS_REQUEST_PARAMETER: {
-                            SCTPAddStreamsRequestParameter *outstreams = check_and_cast<SCTPAddStreamsRequestParameter *>(parameter);
+                            const SCTPAddStreamsRequestParameter *outstreams = check_and_cast<const SCTPAddStreamsRequestParameter *>(parameter);
                             struct add_streams_request_parameter *addoutp = (struct add_streams_request_parameter *)(((unsigned char *)stream) + sizeof(struct stream_reset_chunk) + parPtr);
                             addoutp->type = htons(outstreams->getParameterType());
                             addoutp->srReqSn = htonl(outstreams->getSrReqSn());

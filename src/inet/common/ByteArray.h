@@ -118,7 +118,9 @@ class INET_API ByteArray : public ByteArray_Base
      */
     virtual void expandData(unsigned int addLeft, unsigned int addRight);
 
-    virtual char *getDataPtr()  { return data; }
+    virtual const char *getDataPtr() const { return data; }
+
+    virtual char *getDataPtrForUpdate() { return data; }
 };
 
 } // namespace inet

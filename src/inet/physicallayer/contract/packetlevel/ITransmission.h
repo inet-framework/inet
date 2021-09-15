@@ -118,22 +118,22 @@ class INET_API ITransmission : public IPrintableObject
     /**
      * Returns the antenna's position when the transmitter started this transmission.
      */
-    virtual const Coord getStartPosition() const = 0;
+    virtual const Coord& getStartPosition() const = 0;
 
     /**
      * Returns the antenna's position when the transmitter ended this transmission.
      */
-    virtual const Coord getEndPosition() const = 0;
+    virtual const Coord& getEndPosition() const = 0;
 
     /**
      * Returns the antenna's orientation when the transmitter started this transmission.
      */
-    virtual const EulerAngles getStartOrientation() const = 0;
+    virtual const EulerAngles& getStartOrientation() const = 0;
 
     /**
      * Returns the antenna's orientation when the transmitter ended this transmission.
      */
-    virtual const EulerAngles getEndOrientation() const = 0;
+    virtual const EulerAngles& getEndOrientation() const = 0;
 
     /**
      * Returns the analog model of the transmitted signal.

@@ -39,10 +39,11 @@ class INET_API RSVPPathMsg : public RSVPPathMsg_Base
     inline IPv4Address getNHOP() { return getHop().Next_Hop_Address; }
     inline IPv4Address getLIH() { return getHop().Logical_Interface_Handle; }
     inline double getBW() { return getSender_descriptor().Sender_Tspec_Object.req_bandwidth; }
-    inline SenderTemplateObj_t& getSenderTemplate() { return getSender_descriptor().Sender_Template_Object; }
-    inline void setSenderTemplate(const SenderTemplateObj_t& s) { getSender_descriptor().Sender_Template_Object = s; }
-    inline SenderTspecObj_t& getSenderTspec() { return getSender_descriptor().Sender_Tspec_Object; }
-    inline void setSenderTspec(const SenderTspecObj_t& s) { getSender_descriptor().Sender_Tspec_Object = s; }
+    inline SenderTemplateObj_t& getSenderTemplate() { return getSender_descriptorForUpdate().Sender_Template_Object; }
+    inline void setSenderTemplate(const SenderTemplateObj_t& s) { getSender_descriptorForUpdate().Sender_Template_Object = s; }
+    inline const SenderTspecObj_t& getSenderTspec() { return getSender_descriptor().Sender_Tspec_Object; }
+    inline SenderTspecObj_t& getSenderTspecForUpdate() { return getSender_descriptorForUpdate().Sender_Tspec_Object; }
+    inline void setSenderTspec(const SenderTspecObj_t& s) { getSender_descriptorForUpdate().Sender_Tspec_Object = s; }
 };
 
 /**
@@ -83,10 +84,12 @@ class INET_API RSVPPathError : public RSVPPathError_Base
     inline int getLspId() { return getSender_descriptor().Sender_Template_Object.Lsp_Id; }
     inline double getBW() { return getSender_descriptor().Sender_Tspec_Object.req_bandwidth; }
 
-    inline SenderTemplateObj_t& getSenderTemplate() { return getSender_descriptor().Sender_Template_Object; }
-    inline void setSenderTemplate(const SenderTemplateObj_t& s) { getSender_descriptor().Sender_Template_Object = s; }
-    inline SenderTspecObj_t& getSenderTspec() { return getSender_descriptor().Sender_Tspec_Object; }
-    inline void setSenderTspec(const SenderTspecObj_t& s) { getSender_descriptor().Sender_Tspec_Object = s; }
+    inline const SenderTemplateObj_t& getSenderTemplate() { return getSender_descriptor().Sender_Template_Object; }
+    inline SenderTemplateObj_t& getSenderTemplateForUpdate() { return getSender_descriptorForUpdate().Sender_Template_Object; }
+    inline void setSenderTemplate(const SenderTemplateObj_t& s) { getSender_descriptorForUpdate().Sender_Template_Object = s; }
+    inline const SenderTspecObj_t& getSenderTspec() { return getSender_descriptor().Sender_Tspec_Object; }
+    inline SenderTspecObj_t& getSenderTspecForUpdate() { return getSender_descriptorForUpdate().Sender_Tspec_Object; }
+    inline void setSenderTspec(const SenderTspecObj_t& s) { getSender_descriptorForUpdate().Sender_Tspec_Object = s; }
 };
 
 } // namespace inet

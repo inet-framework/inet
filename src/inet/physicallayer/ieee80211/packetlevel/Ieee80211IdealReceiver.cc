@@ -59,7 +59,7 @@ const ReceptionIndication *Ieee80211IdealReceiver::computeReceptionIndication(co
     indication->setPacketErrorRate(errorRate);
     // TODO: should match and get the mode and channel from the receiver
     const Ieee80211TransmissionBase *transmission = check_and_cast<const Ieee80211TransmissionBase *>(snir->getReception()->getTransmission());
-    indication->setMode(transmission->getMode());
+    indication->setMode(const_cast<IIeee80211Mode *>(transmission->getMode()));
     indication->setChannel(const_cast<Ieee80211Channel *>(transmission->getChannel()));
     return indication;
 }

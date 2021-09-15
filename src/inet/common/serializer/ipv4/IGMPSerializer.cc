@@ -159,7 +159,7 @@ cPacket *IGMPSerializer::deserialize(const Buffer &b, Context& c)
                 pkt->setQueryIntervalCode(b.readByte());
                 unsigned int vs = b.readUint16();
                 for (unsigned int i = 0; i < vs && !b.hasError(); i++)
-                    pkt->getSourceList()[i] = b.readIPv4Address();
+                    pkt->getSourceListForUpdate()[i] = b.readIPv4Address();
                 pkt->setByteLength(b.getPos() - startPos);
             }
             break;

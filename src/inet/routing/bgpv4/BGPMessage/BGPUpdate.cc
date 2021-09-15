@@ -23,10 +23,10 @@ namespace bgp {
 
 Register_Class(BGPUpdateMessage)
 
-void BGPUpdateMessage::setWithdrawnRoutesArraySize(unsigned int size)
+void BGPUpdateMessage::setWithdrawnRoutesArraySize(size_t size)
 {
-    unsigned short delta_size = size - getWithdrawnRoutesArraySize();
-    unsigned short delta_bytes = delta_size * 5;    // 5 = Withdrawn Route length
+    size_t delta_size = size - getWithdrawnRoutesArraySize();
+    size_t delta_bytes = delta_size * 5;    // 5 = Withdrawn Route length
     setByteLength(getByteLength() + delta_bytes);
 }
 

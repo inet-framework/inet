@@ -95,23 +95,23 @@ IPv6Datagram *IPv6ControlInfo::removeOrigDatagram()
 #endif // ifdef WITH_IPv6
 }
 
-unsigned int IPv6ControlInfo::getExtensionHeaderArraySize() const
+size_t IPv6ControlInfo::getExtensionHeaderArraySize() const
 {
     return extensionHeaders.size();
 }
 
-void IPv6ControlInfo::setExtensionHeaderArraySize(unsigned int size)
+void IPv6ControlInfo::setExtensionHeaderArraySize(size_t size)
 {
     throw cRuntimeError(this, "setExtensionHeaderArraySize() not supported, use addExtensionHeader()");
 }
 
-IPv6ExtensionHeaderPtr& IPv6ControlInfo::getExtensionHeader(unsigned int k)
+const IPv6ExtensionHeader *IPv6ControlInfo::getExtensionHeader(size_t k) const
 {
     ASSERT(k < extensionHeaders.size());
     return extensionHeaders[k];
 }
 
-void IPv6ControlInfo::setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderPtr& extensionHeader_var)
+void IPv6ControlInfo::setExtensionHeader(size_t k, IPv6ExtensionHeader *extensionHeader_var)
 {
     throw cRuntimeError(this, "setExtensionHeader() not supported, use addExtensionHeader()");
 }

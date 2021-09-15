@@ -236,7 +236,7 @@ void Ieee80211AgentSTA::processScanConfirm(Ieee80211Prim_ScanConfirm *resp)
     dumpAPList(resp);
     emit(acceptConfirmSignal, PR_SCAN_CONFIRM);
 
-    Ieee80211Prim_BSSDescription& bssDesc = resp->getBssList(bssIndex);
+    const Ieee80211Prim_BSSDescription& bssDesc = resp->getBssList(bssIndex);
     EV << "Chosen AP address=" << bssDesc.getBSSID() << " from list, starting authentication\n";
     sendAuthenticateRequest(bssDesc.getBSSID());
 }
@@ -245,7 +245,7 @@ void Ieee80211AgentSTA::dumpAPList(Ieee80211Prim_ScanConfirm *resp)
 {
     EV << "Received AP list:\n";
     for (int i = 0; i < (int)resp->getBssListArraySize(); i++) {
-        Ieee80211Prim_BSSDescription& bssDesc = resp->getBssList(i);
+        const Ieee80211Prim_BSSDescription& bssDesc = resp->getBssList(i);
         EV << "    " << i << ". "
            << " address=" << bssDesc.getBSSID()
            << " channel=" << bssDesc.getChannelNumber()

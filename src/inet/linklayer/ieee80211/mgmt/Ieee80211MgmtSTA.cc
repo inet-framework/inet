@@ -317,7 +317,7 @@ void Ieee80211MgmtSTA::startAuthentication(APInfo *ap, simtime_t timeout)
 
     // create and send first authentication frame
     Ieee80211AuthenticationFrame *frame = new Ieee80211AuthenticationFrame("Auth");
-    frame->getBody().setSequenceNumber(1);
+    frame->getBodyForUpdate().setSequenceNumber(1);
     //XXX frame length could be increased to account for challenge text length etc.
     sendManagementFrame(frame, ap->address);
 
@@ -470,7 +470,7 @@ void Ieee80211MgmtSTA::sendProbeRequest()
 {
     EV << "Sending Probe Request, BSSID=" << scanning.bssid << ", SSID=\"" << scanning.ssid << "\"\n";
     Ieee80211ProbeRequestFrame *frame = new Ieee80211ProbeRequestFrame("ProbeReq");
-    frame->getBody().setSSID(scanning.ssid.c_str());
+    frame->getBodyForUpdate().setSSID(scanning.ssid.c_str());
     sendManagementFrame(frame, scanning.bssid);
 }
 
@@ -486,7 +486,7 @@ void Ieee80211MgmtSTA::sendScanConfirm()
     //XXX filter for req'd bssid and ssid
     for (int i = 0; i < n; i++, it++) {
         APInfo *ap = &(*it);
-        Ieee80211Prim_BSSDescription& bss = confirm->getBssList(i);
+        Ieee80211Prim_BSSDescription& bss = confirm->getBssListForUpdate(i);
         bss.setChannelNumber(ap->channel);
         bss.setBSSID(ap->address);
         bss.setSSID(ap->ssid.c_str());
@@ -527,7 +527,7 @@ void Ieee80211MgmtSTA::processDeauthenticateCommand(Ieee80211Prim_Deauthenticate
 
     // create and send deauthentication request
     Ieee80211DeauthenticationFrame *frame = new Ieee80211DeauthenticationFrame("Deauth");
-    frame->getBody().setReasonCode(ctrl->getReasonCode());
+    frame->getBodyForUpdate().setReasonCode(ctrl->getReasonCode());
     sendManagementFrame(frame, address);
 }
 
@@ -562,7 +562,7 @@ void Ieee80211MgmtSTA::processDisassociateCommand(Ieee80211Prim_DisassociateRequ
 
     // create and send disassociation request
     Ieee80211DisassociationFrame *frame = new Ieee80211DisassociationFrame("Disass");
-    frame->getBody().setReasonCode(ctrl->getReasonCode());
+    frame->getBodyForUpdate().setReasonCode(ctrl->getReasonCode());
     sendManagementFrame(frame, address);
 }
 
@@ -645,7 +645,7 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *f
         // wrong sequence number: send error and return
         EV << "Wrong sequence number, " << ap->authSeqExpected << " expected\n";
         Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth-ERROR");
-        resp->getBody().setStatusCode(SC_AUTH_OUT_OF_SEQ);
+        resp->getBodyForUpdate().setStatusCode(SC_AUTH_OUT_OF_SEQ);
         sendManagementFrame(resp, frame->getTransmitterAddress());
         delete frame;
 
@@ -659,13 +659,13 @@ void Ieee80211MgmtSTA::handleAuthenticationFrame(Ieee80211AuthenticationFrame *f
     // check if more exchanges are needed for auth to be complete
     int statusCode = frame->getBody().getStatusCode();
 
-    if (statusCode == SC_SUCCESSFUL && !frame->getBody().getIsLast()) {
+    if (statusCode == SC_SUCCESSFUL && !frame->getBody().isLast()) {
         EV << "More steps required, sending another Authentication frame\n";
 
         // more steps required, send another Authentication frame
         Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth");
-        resp->getBody().setSequenceNumber(frameAuthSeq + 1);
-        resp->getBody().setStatusCode(SC_SUCCESSFUL);
+        resp->getBodyForUpdate().setSequenceNumber(frameAuthSeq + 1);
+        resp->getBodyForUpdate().setStatusCode(SC_SUCCESSFUL);
         // XXX frame length could be increased to account for challenge text length etc.
         sendManagementFrame(resp, address);
         ap->authSeqExpected += 2;

@@ -386,7 +386,7 @@ cPacket* PacketDrill::buildSCTPPacket(int address_family, enum direction_t direc
                 case SCTP_RECONFIG_CHUNK_TYPE:
                     SCTPStreamResetChunk* reconfig = check_and_cast<SCTPStreamResetChunk*>(sctpchunk);
                     for (unsigned int i = 0; i < reconfig->getParametersArraySize(); i++) {
-                        SCTPParameter *parameter = check_and_cast<SCTPParameter *>(reconfig->getParameters(i));
+                        SCTPParameter *parameter = check_and_cast<SCTPParameter *>(reconfig->getParametersForUpdate(i));
                         switch (parameter->getParameterType()) {
                             case OUTGOING_RESET_REQUEST_PARAMETER: {
                                 printf("OUTGOING_RESET_REQUEST_PARAMETER\n");

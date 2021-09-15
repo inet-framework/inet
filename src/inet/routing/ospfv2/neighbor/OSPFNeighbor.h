@@ -139,13 +139,13 @@ class INET_API Neighbor
     void sendLinkStateRequestPacket();
     void retransmitUpdatePacket();
     bool needAdjacency();
-    void addToRetransmissionList(OSPFLSA *lsa);
+    void addToRetransmissionList(const OSPFLSA *lsa);
     void removeFromRetransmissionList(LSAKeyType lsaKey);
     bool isLinkStateRequestListEmpty(LSAKeyType lsaKey) const;
     OSPFLSA *findOnRetransmissionList(LSAKeyType lsaKey);
     void startUpdateRetransmissionTimer();
     void clearUpdateRetransmissionTimer();
-    void addToRequestList(OSPFLSAHeader *lsaHeader);
+    void addToRequestList(const OSPFLSAHeader *lsaHeader);
     void removeFromRequestList(LSAKeyType lsaKey);
     bool isLSAOnRequestList(LSAKeyType lsaKey) const;
     OSPFLSAHeader *findOnRequestList(LSAKeyType lsaKey);

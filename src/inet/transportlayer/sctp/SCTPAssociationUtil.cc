@@ -923,7 +923,7 @@ void SCTPAssociation::sendCookieEcho(SCTPInitAckChunk *initAckChunk)
         cookieEchoChunk->setByteLength((SCTP_COOKIE_ACK_LENGTH + len));
     }
     else {
-        SCTPCookie *cookie = check_and_cast<SCTPCookie *>(initAckChunk->getStateCookie());
+        SCTPCookie *cookie = check_and_cast<SCTPCookie *>(initAckChunk->getStateCookieForUpdate());
         cookieEchoChunk->setStateCookie(cookie);
         cookieEchoChunk->setByteLength(SCTP_COOKIE_ACK_LENGTH + cookie->getByteLength());
     }

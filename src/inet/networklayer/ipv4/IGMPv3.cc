@@ -855,7 +855,7 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
     IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)msg->getControlInfo();
     InterfaceEntry *ie = ift->getInterfaceById(controlInfo->getInterfaceId());
     IPv4Address groupAddr = msg->getGroupAddress();
-    IPv4AddressVector& queriedSources = msg->getSourceList();
+    IPv4AddressVector queriedSources = msg->getSourceList();
     double maxRespTime = decodeTime(msg->getMaxRespCode());
 
     ASSERT(ie->isMulticast());

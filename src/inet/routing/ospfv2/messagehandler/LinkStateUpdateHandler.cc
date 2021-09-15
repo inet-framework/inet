@@ -85,7 +85,7 @@ void LinkStateUpdateHandler::processPacket(OSPFPacket *packet, Interface *intf, 
             }
 
             for (unsigned int i = 0; i < lsaCount; i++) {
-                OSPFLSA *currentLSA;
+                const OSPFLSA *currentLSA;
 
                 switch (currentType) {
                     case ROUTERLSA_TYPE:
@@ -193,11 +193,11 @@ void LinkStateUpdateHandler::processPacket(OSPFPacket *packet, Interface *intf, 
 
                         router->removeFromAllRetransmissionLists(lsaKey);
                     }
-                    shouldRebuildRoutingTable |= router->installLSA(currentLSA, areaID);
+                    shouldRebuildRoutingTable |= router->installLSA(const_cast<OSPFLSA *>(currentLSA), areaID);
 
                     // Add externalIPRoute in IPRoutingTable if this route is learned by BGP
                     if (currentType == AS_EXTERNAL_LSA_TYPE) {
-                        OSPFASExternalLSA *externalLSA = &(lsUpdatePacket->getAsExternalLSAs(0));
+                        const OSPFASExternalLSA *externalLSA = &(lsUpdatePacket->getAsExternalLSAs(0));
                         if (externalLSA->getContents().getExternalRouteTag() == OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP) {
                             IPv4Address externalAddr = currentLSA->getHeader().getLinkStateID();
                             int ifName = intf->getIfIndex();
@@ -213,18 +213,18 @@ void LinkStateUpdateHandler::processPacket(OSPFPacket *packet, Interface *intf, 
                          (router->isLocalAddress(currentLSA->getHeader().getLinkStateID()))))
                     {
                         if (ackFlags.noLSAInstanceInDatabase) {
-                            currentLSA->getHeader().setLsAge(MAX_AGE);
+                            const_cast<OSPFLSA *>(currentLSA)->getHeaderForUpdate().setLsAge(MAX_AGE);
                             router->floodLSA(currentLSA, areaID);
                         }
                         else {
                             if (ackFlags.lsaIsNewer) {
                                 long sequenceNumber = currentLSA->getHeader().getLsSequenceNumber();
                                 if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
-                                    lsaInDatabase->getHeader().setLsAge(MAX_AGE);
+                                    lsaInDatabase->getHeaderForUpdate().setLsAge(MAX_AGE);
                                     router->floodLSA(lsaInDatabase, areaID);
                                 }
                                 else {
-                                    lsaInDatabase->getHeader().setLsSequenceNumber(sequenceNumber + 1);
+                                    lsaInDatabase->getHeaderForUpdate().setLsSequenceNumber(sequenceNumber + 1);
                                     router->floodLSA(lsaInDatabase, areaID);
                                 }
                             }
@@ -288,7 +288,7 @@ void LinkStateUpdateHandler::processPacket(OSPFPacket *packet, Interface *intf, 
     }
 }
 
-void LinkStateUpdateHandler::acknowledgeLSA(OSPFLSAHeader& lsaHeader,
+void LinkStateUpdateHandler::acknowledgeLSA(const OSPFLSAHeader& lsaHeader,
         Interface *intf,
         LinkStateUpdateHandler::AcknowledgementFlags acknowledgementFlags,
         RouterID lsaSource)

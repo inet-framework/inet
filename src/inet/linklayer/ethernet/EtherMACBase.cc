@@ -406,7 +406,7 @@ EtherFrame *EtherMACBase::decapsulate(EtherPhyFrame* phyFrame)
 
     if (RawPacket *rawPacket = dynamic_cast<RawPacket *>(frame)) {
         using namespace serializer;
-        Buffer b(rawPacket->getByteArray().getDataPtr(), rawPacket->getByteArray().getDataArraySize());
+        Buffer b(const_cast<char *>(rawPacket->getByteArray().getDataPtr()), rawPacket->getByteArray().getDataArraySize());
         Context c;
         frame = SerializerBase::lookupAndDeserialize(b, c, LINKTYPE, LINKTYPE_ETHERNET);
         if (!frame)

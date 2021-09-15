@@ -48,18 +48,18 @@ class INET_API SCTPMessage : public SCTPMessage_Base, public ITransportPacket
     SCTPMessage& operator=(const SCTPMessage& other);
     virtual SCTPMessage *dup() const override { return new SCTPMessage(*this); }
     /** Generated but unused method, should not be called. */
-    virtual void setChunksArraySize(uint32 size) override;
+    virtual void setChunksArraySize(size_t size) override;
     /** Generated but unused method, should not be called. */
-    virtual void setChunks(uint32 k, const cPacketPtr& chunks_var) override;
+    virtual void setChunks(size_t k, cPacket *chunks_var) override;
     /**
      * Returns the number of chunks in this SCTP packet
      */
-    virtual uint32 getChunksArraySize() const override;
+    virtual size_t getChunksArraySize() const override;
 
     /**
      * Returns the kth chunk in this SCTP packet
      */
-    virtual cPacketPtr& getChunks(uint32 k) override;
+    virtual const cPacket *getChunks(size_t k) const override;
     /**
      * Adds a message object to the SCTP packet. The packet length will be adjusted
      */
@@ -72,7 +72,7 @@ class INET_API SCTPMessage : public SCTPMessage_Base, public ITransportPacket
     virtual cPacket *removeLastChunk();
     virtual cPacket *peekFirstChunk();
     virtual cPacket *peekLastChunk();
-    virtual void replaceChunk(cPacket *msg, uint32 k);
+    virtual void replaceChunk(cPacket *msg, size_t k);
 
     virtual unsigned int getSourcePort() const override { return SCTPMessage_Base::getSrcPort(); }
     virtual void setSourcePort(unsigned int port) override { SCTPMessage_Base::setSrcPort(port); }
@@ -96,15 +96,15 @@ class INET_API SCTPErrorChunk : public SCTPErrorChunk_Base
     ~SCTPErrorChunk();
 
     virtual SCTPErrorChunk *dup() const override { return new SCTPErrorChunk(*this); }
-    virtual void setParametersArraySize(uint32 size) override;
-    virtual uint32 getParametersArraySize() const override;
+    virtual void setParametersArraySize(size_t size) override;
+    virtual size_t getParametersArraySize() const override;
     /** Generated but unused method, should not be called. */
-    virtual void setParameters(uint32 k, const cPacketPtr& parameters_var) override;
+    virtual void setParameters(size_t k, cPacket *parameters_var) override;
 
     /**
      * Returns the kth parameter in this SCTP Reset Chunk
      */
-    virtual cPacketPtr& getParameters(uint32 k) override;
+    virtual const cPacket *getParameters(size_t k) const override;
 
     /**
      * Adds a message object to the SCTP packet. The packet length will be adjusted
@@ -133,16 +133,16 @@ class INET_API SCTPStreamResetChunk : public SCTPStreamResetChunk_Base
     ~SCTPStreamResetChunk();
 
     virtual SCTPStreamResetChunk *dup() const override { return new SCTPStreamResetChunk(*this); }
-    virtual void setParametersArraySize(const uint32 size) override;
-    virtual uint32 getParametersArraySize() const override;
+    virtual void setParametersArraySize(size_t size) override;
+    virtual size_t getParametersArraySize() const override;
 
     /** Generated but unused method, should not be called. */
-    virtual void setParameters(const uint32 k, const cPacketPtr& parameters_var) override;
+    virtual void setParameters(size_t k, cPacket *parameters_var) override;
 
     /**
      * Returns the kth parameter in this SCTP Reset Chunk
      */
-    virtual cPacketPtr& getParameters(uint32 k) override;
+    virtual const cPacket *getParameters(size_t k) const override;
 
     /**
      * Adds a message object to the SCTP packet. The packet length will be adjusted
@@ -166,16 +166,16 @@ class INET_API SCTPAsconfChunk : public SCTPAsconfChunk_Base
     SCTPAsconfChunk& operator=(const SCTPAsconfChunk& other);
 
     virtual SCTPAsconfChunk *dup() const override { return new SCTPAsconfChunk(*this); };
-    virtual void setAsconfParamsArraySize(const uint32 size) override;
-    virtual uint32 getAsconfParamsArraySize() const override;
+    virtual void setAsconfParamsArraySize(size_t size) override;
+    virtual size_t getAsconfParamsArraySize() const override;
 
     /** Generated but unused method, should not be called. */
-    virtual void setAsconfParams(const uint32 k, const cPacketPtr& parameters_var) override;
+    virtual void setAsconfParams(size_t k, cPacket *parameters_var) override;
 
     /**
      * Returns the kth parameter in this SCTP Reset Chunk
      */
-    virtual cPacketPtr& getAsconfParams(uint32 k) override;
+    virtual const cPacket *getAsconfParams(size_t k) const override;
 
     /**
      * Adds a message object to the SCTP packet. The packet length will be adjusted
@@ -211,16 +211,16 @@ class INET_API SCTPAsconfAckChunk : public SCTPAsconfAckChunk_Base
     SCTPAsconfAckChunk& operator=(const SCTPAsconfAckChunk& other);
 
     virtual SCTPAsconfAckChunk *dup() const override { return new SCTPAsconfAckChunk(*this); }
-    virtual void setAsconfResponseArraySize(const uint32 size) override;
-    virtual uint32 getAsconfResponseArraySize() const override;
+    virtual void setAsconfResponseArraySize(size_t size) override;
+    virtual size_t getAsconfResponseArraySize() const override;
 
     /** Generated but unused method, should not be called. */
-    virtual void setAsconfResponse(const uint32 k, const cPacketPtr& parameters_var) override;
+    virtual void setAsconfResponse(const size_t k, cPacket *parameters_var) override;
 
     /**
      * Returns the kth parameter in this SCTP Reset Chunk
      */
-    virtual cPacketPtr& getAsconfResponse(uint32 k) override;
+    virtual const cPacket *getAsconfResponse(size_t k) const override;
 
     /**
      * Adds a message object to the SCTP packet. The packet length will be adjusted

@@ -71,11 +71,11 @@ class INET_API TransmissionBase : public virtual ITransmission, public virtual I
     virtual const simtime_t getHeaderDuration() const override { return headerDuration; }
     virtual const simtime_t getDataDuration() const override { return dataDuration; }
 
-    virtual const Coord getStartPosition() const override { return startPosition; }
-    virtual const Coord getEndPosition() const override { return endPosition; }
+    virtual const Coord& getStartPosition() const override { return startPosition; }
+    virtual const Coord& getEndPosition() const override { return endPosition; }
 
-    virtual const EulerAngles getStartOrientation() const override { return startOrientation; }
-    virtual const EulerAngles getEndOrientation() const override { return endOrientation; }
+    virtual const EulerAngles& getStartOrientation() const override { return startOrientation; }
+    virtual const EulerAngles& getEndOrientation() const override { return endOrientation; }
 
     virtual const ITransmissionAnalogModel *getAnalogModel() const override { return check_and_cast<const ITransmissionAnalogModel *>(this); }
 };

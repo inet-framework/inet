@@ -40,14 +40,14 @@ void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, Nei
         if (routerLSA != nullptr) {
             long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
             if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
-                routerLSA->getHeader().setLsAge(MAX_AGE);
+                routerLSA->getHeaderForUpdate().setLsAge(MAX_AGE);
                 neighbor->getInterface()->getArea()->floodLSA(routerLSA);
                 routerLSA->incrementInstallTime();
             }
             else {
                 RouterLSA *newLSA = neighbor->getInterface()->getArea()->originateRouterLSA();
 
-                newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
+                newLSA->getHeaderForUpdate().setLsSequenceNumber(sequenceNumber + 1);
                 shouldRebuildRoutingTable |= routerLSA->update(newLSA);
                 delete newLSA;
 
@@ -61,7 +61,7 @@ void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, Nei
             if (networkLSA != nullptr) {
                 long sequenceNumber = networkLSA->getHeader().getLsSequenceNumber();
                 if (sequenceNumber == MAX_SEQUENCE_NUMBER) {
-                    networkLSA->getHeader().setLsAge(MAX_AGE);
+                    networkLSA->getHeaderForUpdate().setLsAge(MAX_AGE);
                     neighbor->getInterface()->getArea()->floodLSA(networkLSA);
                     networkLSA->incrementInstallTime();
                 }
@@ -69,12 +69,12 @@ void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, Nei
                     NetworkLSA *newLSA = neighbor->getInterface()->getArea()->originateNetworkLSA(neighbor->getInterface());
 
                     if (newLSA != nullptr) {
-                        newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
+                        newLSA->getHeaderForUpdate().setLsSequenceNumber(sequenceNumber + 1);
                         shouldRebuildRoutingTable |= networkLSA->update(newLSA);
                         delete newLSA;
                     }
                     else {    // no neighbors on the network -> old NetworkLSA must be flushed
-                        networkLSA->getHeader().setLsAge(MAX_AGE);
+                        networkLSA->getHeaderForUpdate().setLsAge(MAX_AGE);
                         networkLSA->incrementInstallTime();
                     }
 

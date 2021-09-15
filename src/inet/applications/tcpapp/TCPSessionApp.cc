@@ -160,7 +160,7 @@ cPacket *TCPSessionApp::createDataPacket(long sendBytes)
             for (int i = 0; i < sendBytes; i++)
                 ptr[i] = (bytesSent + i) & 0xFF;
 
-            msg->getByteArray().assignBuffer(ptr, sendBytes);
+            msg->getByteArrayForUpdate().assignBuffer(ptr, sendBytes);
             msg->setByteLength(sendBytes);
             return msg;
         }

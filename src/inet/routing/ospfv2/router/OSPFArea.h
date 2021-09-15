@@ -112,7 +112,7 @@ class INET_API Area : public cObject
     bool hasAnyNeighborInStates(int states) const;
     void removeFromAllRetransmissionLists(LSAKeyType lsaKey);
     bool isOnAnyRetransmissionList(LSAKeyType lsaKey) const;
-    bool floodLSA(OSPFLSA *lsa, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
+    bool floodLSA(const OSPFLSA *lsa, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
     bool isLocalAddress(IPv4Address address) const;
     RouterLSA *originateRouterLSA();
     NetworkLSA *originateNetworkLSA(const Interface *intf);
@@ -130,7 +130,7 @@ class INET_API Area : public cObject
     SummaryLSA *originateSummaryLSA(const SummaryLSA *summaryLSA);
     bool hasLink(OSPFLSA *fromLSA, OSPFLSA *toLSA) const;
     std::vector<NextHop> *calculateNextHops(OSPFLSA *destination, OSPFLSA *parent) const;
-    std::vector<NextHop> *calculateNextHops(Link& destination, OSPFLSA *parent) const;
+    std::vector<NextHop> *calculateNextHops(const Link& destination, OSPFLSA *parent) const;
 
     LinkStateID getUniqueLinkStateID(IPv4AddressRange destination,
             Metric destinationCost,

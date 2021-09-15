@@ -197,7 +197,7 @@ void IPv4::handleIncomingDatagram(IPv4Datagram *datagram, const InterfaceEntry *
 
 void IPv4::preroutingFinish(IPv4Datagram *datagram, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv4Address nextHopAddr)
 {
-    IPv4Address& destAddr = datagram->getDestAddress();
+    IPv4Address destAddr = datagram->getDestAddress();
 
     // remove control info
     delete datagram->removeControlInfo();
@@ -344,7 +344,7 @@ void IPv4::datagramLocalOut(IPv4Datagram *datagram, const InterfaceEntry *destIE
     }
 
     // send
-    IPv4Address& destAddr = datagram->getDestAddress();
+    IPv4Address destAddr = datagram->getDestAddress();
 
     EV_DETAIL << "Sending datagram " << datagram << " with destination = " << destAddr << "\n";
 

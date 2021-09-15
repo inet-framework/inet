@@ -59,7 +59,7 @@ Ieee80211BlockAck* RecipientBlockAckProcedure::buildBlockAck(Ieee80211BlockAckRe
         Ieee80211BasicBlockAck *blockAck = new Ieee80211BasicBlockAck("BasicBlockAck");
         int startingSequenceNumber = basicBlockAckReq->getStartingSequenceNumber();
         for (SequenceNumber seqNum = startingSequenceNumber; seqNum < startingSequenceNumber + 64; seqNum++) {
-            BitVector &bitmap = blockAck->getBlockAckBitmap(seqNum - startingSequenceNumber);
+            BitVector &bitmap = blockAck->getBlockAckBitmapForUpdate(seqNum - startingSequenceNumber);
             for (FragmentNumber fragNum = 0; fragNum < 16; fragNum++) {
                 bool ackState = agreement->getBlockAckRecord()->getAckState(seqNum, fragNum);
                 bitmap.setBit(fragNum, ackState);

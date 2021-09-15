@@ -175,7 +175,7 @@ class INET_API Router
      * @param neighbor [in] The Nieghbor this LSA arrived from.
      * @return True if the LSA was floooded back out on the receiving Interface, false otherwise.
      */
-    bool floodLSA(OSPFLSA *lsa, AreaID areaID = BACKBONE_AREAID, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
+    bool floodLSA(const OSPFLSA *lsa, AreaID areaID = BACKBONE_AREAID, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
 
     /**
      * Returns true if the input IPv4 address falls into any of the Router's Areas' configured

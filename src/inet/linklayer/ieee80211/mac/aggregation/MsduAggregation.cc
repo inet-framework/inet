@@ -82,7 +82,7 @@ Ieee80211DataFrame *MsduAggregation::aggregateFrames(std::vector<Ieee80211DataFr
         setSubframeAddress(&msduSubframe, dataFrame);
         msduSubframe.encapsulate(msdu);
         aMsdu->setSubframes(i, msduSubframe);
-        aMsdu->getSubframes(i).setName(dataFrame->getName());
+        aMsdu->getSubframesForUpdate(i).setName(dataFrame->getName());
         delete dataFrame;
     }
     aMsdu->setByteLength(aMsduLength);

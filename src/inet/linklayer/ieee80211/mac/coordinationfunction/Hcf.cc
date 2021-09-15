@@ -648,7 +648,7 @@ void Hcf::setFrameMode(Ieee80211Frame *frame, const IIeee80211Mode *mode) const
     ASSERT(mode != nullptr);
     delete frame->removeControlInfo();
     Ieee80211TransmissionRequest *ctrl = new Ieee80211TransmissionRequest();
-    ctrl->setMode(mode);
+    ctrl->setMode(const_cast<IIeee80211Mode *>(mode));
     frame->setControlInfo(ctrl);
 }
 

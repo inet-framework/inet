@@ -41,8 +41,8 @@ class INET_API LinkStateUpdateHandler : public IMessageHandler
     };
 
   private:
-    bool validateLSChecksum(OSPFLSA *lsa) { return true; }    // not implemented
-    void acknowledgeLSA(OSPFLSAHeader& lsaHeader, Interface *intf, AcknowledgementFlags acknowledgementFlags, RouterID lsaSource);
+    bool validateLSChecksum(const OSPFLSA *lsa) { return true; }    // not implemented
+    void acknowledgeLSA(const OSPFLSAHeader& lsaHeader, Interface *intf, AcknowledgementFlags acknowledgementFlags, RouterID lsaSource);
 
   public:
     LinkStateUpdateHandler(Router *containingRouter);

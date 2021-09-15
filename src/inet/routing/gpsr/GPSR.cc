@@ -30,6 +30,7 @@
 #endif
 
 #ifdef WITH_IPv6
+#include "inet/networklayer/ipv6/IPv6Datagram.h"
 #include "inet/networklayer/ipv6/IPv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/IPv6InterfaceData.h"
 #endif
@@ -532,8 +533,8 @@ L3Address GPSR::findPerimeterRoutingNextHop(INetworkDatagram *datagram, const L3
         return findGreedyRoutingNextHop(datagram, destination);
     }
     else {
-        L3Address& firstSenderAddress = gpsrOption->getCurrentFaceFirstSenderAddress();
-        L3Address& firstReceiverAddress = gpsrOption->getCurrentFaceFirstReceiverAddress();
+        const L3Address& firstSenderAddress = gpsrOption->getCurrentFaceFirstSenderAddress();
+        const L3Address& firstReceiverAddress = gpsrOption->getCurrentFaceFirstReceiverAddress();
         L3Address nextNeighborAddress = getSenderNeighborAddress(datagram);
         bool hasIntersection;
         do {
@@ -618,7 +619,7 @@ void GPSR::setGpsrOptionOnNetworkDatagram(INetworkDatagram *datagram)
             hdr->setByteLength(8);
             dgram->addExtensionHeader(hdr);
         }
-        hdr->getTlvOptions().add(gpsrOption);
+        hdr->getTlvOptionsForUpdate().insertTlvOption(gpsrOption);
         hdr->setByteLength(utils::roundUp(2 + hdr->getTlvOptions().getLength(), 8));
         int newHlen = dgram->calculateHeaderByteLength();
         dgram->addByteLength(newHlen - oldHlen);
@@ -630,7 +631,7 @@ void GPSR::setGpsrOptionOnNetworkDatagram(INetworkDatagram *datagram)
         gpsrOption->setType(GENERIC_TLVOPTION_TLV_GPSR);
         GenericDatagram *dgram = static_cast<GenericDatagram *>(networkPacket);
         int oldHlen = dgram->getTlvOptions().getLength();
-        dgram->getTlvOptions().add(gpsrOption);
+        dgram->getTlvOptionsForUpdate().insertTlvOption(gpsrOption);
         int newHlen = dgram->getTlvOptions().getLength();
         dgram->addByteLength(newHlen - oldHlen);
     }
@@ -659,7 +660,7 @@ GPSROption *GPSR::findGpsrOptionInNetworkDatagram(INetworkDatagram *datagram)
         if (hdr != nullptr) {
             int i = (hdr->getTlvOptions().findByType(IPv6TLVOPTION_TLV_GPSR));
             if (i >= 0)
-                gpsrOption = check_and_cast_nullable<GPSROption *>(&(hdr->getTlvOptions().at(i)));
+                gpsrOption = check_and_cast_nullable<GPSROption *>(hdr->getTlvOptionsForUpdate().getTlvOptionForUpdate(i));
         }
     }
     else
@@ -669,7 +670,7 @@ GPSROption *GPSR::findGpsrOptionInNetworkDatagram(INetworkDatagram *datagram)
         GenericDatagram *dgram = static_cast<GenericDatagram *>(networkPacket);
         int i = (dgram->getTlvOptions().findByType(GENERIC_TLVOPTION_TLV_GPSR));
         if (i >= 0)
-            gpsrOption = check_and_cast_nullable<GPSROption *>(&(dgram->getTlvOptions().at(i)));
+            gpsrOption = check_and_cast_nullable<GPSROption *>(dgram->getTlvOptionsForUpdate().getTlvOptionForUpdate(i));
     }
     else
 #endif

@@ -140,7 +140,7 @@ void Ieee80211MgmtAP::sendBeacon()
 {
     EV << "Sending beacon\n";
     Ieee80211BeaconFrame *frame = new Ieee80211BeaconFrame("Beacon");
-    Ieee80211BeaconFrameBody& body = frame->getBody();
+    Ieee80211BeaconFrameBody& body = frame->getBodyForUpdate();
     body.setSSID(ssid.c_str());
     body.setSupportedRates(supportedRates);
     body.setBeaconInterval(beaconInterval);
@@ -232,7 +232,7 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *fr
         // wrong sequence number: send error and return
         EV << "Wrong sequence number, " << sta->authSeqExpected << " expected\n";
         Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth-ERROR");
-        resp->getBody().setStatusCode(SC_AUTH_OUT_OF_SEQ);
+        resp->getBodyForUpdate().setStatusCode(SC_AUTH_OUT_OF_SEQ);
         sendManagementFrame(resp, frame->getTransmitterAddress());
         delete frame;
         sta->authSeqExpected = 1;    // go back to start square
@@ -246,9 +246,9 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *fr
     // successful authentication every time)
     EV << "Sending Authentication frame, seqNum=" << (frameAuthSeq + 1) << "\n";
     Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame(isLast ? "Auth-OK" : "Auth");
-    resp->getBody().setSequenceNumber(frameAuthSeq + 1);
-    resp->getBody().setStatusCode(SC_SUCCESSFUL);
-    resp->getBody().setIsLast(isLast);
+    resp->getBodyForUpdate().setSequenceNumber(frameAuthSeq + 1);
+    resp->getBodyForUpdate().setStatusCode(SC_SUCCESSFUL);
+    resp->getBodyForUpdate().setIsLast(isLast);
     // XXX frame length could be increased to account for challenge text length etc.
     sendManagementFrame(resp, frame->getTransmitterAddress());
 
@@ -292,7 +292,7 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Ieee80211AssociationRequestF
     if (!sta || sta->status == NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
         Ieee80211DeauthenticationFrame *resp = new Ieee80211DeauthenticationFrame("Deauth");
-        resp->getBody().setReasonCode(RC_NONAUTH_ASS_REQUEST);
+        resp->getBodyForUpdate().setReasonCode(RC_NONAUTH_ASS_REQUEST);
         sendManagementFrame(resp, frame->getTransmitterAddress());
         delete frame;
         return;
@@ -307,7 +307,7 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Ieee80211AssociationRequestF
 
     // send OK response
     Ieee80211AssociationResponseFrame *resp = new Ieee80211AssociationResponseFrame("AssocResp-OK");
-    Ieee80211AssociationResponseFrameBody& body = resp->getBody();
+    Ieee80211AssociationResponseFrameBody& body = resp->getBodyForUpdate();
     body.setStatusCode(SC_SUCCESSFUL);
     body.setAid(0);    //XXX
     body.setSupportedRates(supportedRates);
@@ -328,7 +328,7 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Ieee80211ReassociationRequ
     if (!sta || sta->status == NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
         Ieee80211DeauthenticationFrame *resp = new Ieee80211DeauthenticationFrame("Deauth");
-        resp->getBody().setReasonCode(RC_NONAUTH_ASS_REQUEST);
+        resp->getBodyForUpdate().setReasonCode(RC_NONAUTH_ASS_REQUEST);
         sendManagementFrame(resp, frame->getTransmitterAddress());
         delete frame;
         return;
@@ -341,7 +341,7 @@ void Ieee80211MgmtAP::handleReassociationRequestFrame(Ieee80211ReassociationRequ
 
     // send OK response
     Ieee80211ReassociationResponseFrame *resp = new Ieee80211ReassociationResponseFrame("ReassocResp-OK");
-    Ieee80211ReassociationResponseFrameBody& body = resp->getBody();
+    Ieee80211ReassociationResponseFrameBody& body = resp->getBodyForUpdate();
     body.setStatusCode(SC_SUCCESSFUL);
     body.setAid(0);    //XXX
     body.setSupportedRates(supportedRates);
@@ -385,7 +385,7 @@ void Ieee80211MgmtAP::handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame)
 
     EV << "Sending ProbeResponse frame\n";
     Ieee80211ProbeResponseFrame *resp = new Ieee80211ProbeResponseFrame("ProbeResp");
-    Ieee80211ProbeResponseFrameBody& body = resp->getBody();
+    Ieee80211ProbeResponseFrameBody& body = resp->getBodyForUpdate();
     body.setSSID(ssid.c_str());
     body.setSupportedRates(supportedRates);
     body.setBeaconInterval(beaconInterval);

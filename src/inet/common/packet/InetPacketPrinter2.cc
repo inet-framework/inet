@@ -486,7 +486,7 @@ std::string InetPacketPrinter2::formatRIPPacket(RIPPacket *packet) const
     }
     unsigned int size = packet->getEntryArraySize();
     for (unsigned int i = 0; i < size; ++i) {
-        RIPEntry& entry = packet->getEntry(i);
+        const RIPEntry& entry = packet->getEntry(i);
         if (i > 0)
             os << "; ";
         if (i > 2) {

@@ -222,7 +222,7 @@ InterfaceEntry *IPv6::getSourceInterfaceFrom(cPacket *msg)
 
 void IPv6::preroutingFinish(IPv6Datagram *datagram, const InterfaceEntry *fromIE, const InterfaceEntry *destIE, IPv6Address nextHopAddr)
 {
-    IPv6Address& destAddr = datagram->getDestAddress();
+    const IPv6Address& destAddr = datagram->getDestAddress();
     // remove control info
     delete datagram->removeControlInfo();
 

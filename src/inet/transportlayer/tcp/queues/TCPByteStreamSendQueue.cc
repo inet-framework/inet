@@ -84,7 +84,7 @@ TCPSegment *TCPByteStreamSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong
     char *buffer = new char[numBytes];
     unsigned int bytes = dataBuffer.getBytesToBuffer(buffer, numBytes, fromOffs);
     ASSERT(bytes == numBytes);
-    tcpseg->getByteArray().assignBuffer(buffer, bytes);
+    tcpseg->getByteArrayForUpdate().assignBuffer(buffer, bytes);
 
     // give segment a name
     char msgname[80];

@@ -31,12 +31,12 @@ int IPv4Datagram::getTotalLengthField() const
 TLVOptionBase *IPv4Datagram::findOptionByType(short int optionType, int index)
 {
     int i = options.findByType(optionType, index);
-    return i >= 0 ? &getOption(i) : nullptr;
+    return i >= 0 ? &getOptionForUpdate(i) : nullptr;
 }
 
 void IPv4Datagram::addOption(TLVOptionBase *opt, int atPos)
 {
-    options.add(opt, atPos);
+    options.insertTlvOption(atPos, opt);
 }
 
 int IPv4Datagram::calculateHeaderByteLength() const

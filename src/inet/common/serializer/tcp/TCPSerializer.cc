@@ -330,7 +330,7 @@ cPacket* TCPSerializer::deserialize(const Buffer &b, Context& c)
     tcpseg->setByteLength(b._getBufSize());
     unsigned int payloadLength = b.getRemainingSize();
     tcpseg->setPayloadLength(payloadLength);
-    tcpseg->getByteArray().setDataFromBuffer(b.accessNBytes(payloadLength), payloadLength);
+    tcpseg->getByteArrayForUpdate().setDataFromBuffer(b.accessNBytes(payloadLength), payloadLength);
 
     if (b.hasError())
         tcpseg->setBitError(true);

@@ -149,7 +149,7 @@ cPacket *TcpLwipByteStreamReceiveQueue::extractBytesUpTo()
         char *data = new char[extractBytes];
         unsigned int extractedBytes = byteArrayBufferM.popBytesToBuffer(data, extractBytes);
         dataMsg->setByteLength(extractedBytes);
-        dataMsg->getByteArray().assignBuffer(data, extractedBytes);
+        dataMsg->getByteArrayForUpdate().assignBuffer(data, extractedBytes);
     }
 
     return dataMsg;

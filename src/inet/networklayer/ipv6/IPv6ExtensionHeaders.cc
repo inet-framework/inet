@@ -19,7 +19,7 @@
 
 namespace inet {
 
-void IPv6RoutingHeader::setAddressArraySize(unsigned int size)
+void IPv6RoutingHeader::setAddressArraySize(size_t size)
 {
     IPv6RoutingHeader_Base::setAddressArraySize(size);
     setByteLength(8 + 16 * size);

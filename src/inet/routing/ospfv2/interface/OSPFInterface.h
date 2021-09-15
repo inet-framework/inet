@@ -112,7 +112,7 @@ class INET_API Interface
     void processEvent(InterfaceEventType event);
     void reset();
     void sendHelloPacket(IPv4Address destination, short ttl = 1);
-    void sendLSAcknowledgement(OSPFLSAHeader *lsaHeader, IPv4Address destination);
+    void sendLSAcknowledgement(const OSPFLSAHeader *lsaHeader, IPv4Address destination);
     Neighbor *getNeighborByID(RouterID neighborID);
     Neighbor *getNeighborByAddress(IPv4Address address);
     void addNeighbor(Neighbor *neighbor);
@@ -121,12 +121,12 @@ class INET_API Interface
     bool hasAnyNeighborInStates(int states) const;
     void removeFromAllRetransmissionLists(LSAKeyType lsaKey);
     bool isOnAnyRetransmissionList(LSAKeyType lsaKey) const;
-    bool floodLSA(OSPFLSA *lsa, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
-    void addDelayedAcknowledgement(OSPFLSAHeader& lsaHeader);
+    bool floodLSA(const OSPFLSA *lsa, Interface *intf = nullptr, Neighbor *neighbor = nullptr);
+    void addDelayedAcknowledgement(const OSPFLSAHeader& lsaHeader);
     void sendDelayedAcknowledgements();
     void ageTransmittedLSALists();
 
-    OSPFLinkStateUpdatePacket *createUpdatePacket(OSPFLSA *lsa);
+    OSPFLinkStateUpdatePacket *createUpdatePacket(const OSPFLSA *lsa);
 
     void setType(OSPFInterfaceType ifType) { interfaceType = ifType; }
     OSPFInterfaceType getType() const { return interfaceType; }

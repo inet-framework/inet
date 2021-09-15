@@ -173,7 +173,7 @@ void Interface::sendHelloPacket(IPv4Address destination, short ttl)
     parentArea->getRouter()->getMessageHandler()->sendPacket(helloPacket, destination, ifIndex, ttl);
 }
 
-void Interface::sendLSAcknowledgement(OSPFLSAHeader *lsaHeader, IPv4Address destination)
+void Interface::sendLSAcknowledgement(const OSPFLSAHeader *lsaHeader, IPv4Address destination)
 {
     OSPFOptions options;
     OSPFLinkStateAcknowledgementPacket *lsAckPacket = new OSPFLinkStateAcknowledgementPacket();
@@ -297,7 +297,7 @@ bool Interface::isOnAnyRetransmissionList(LSAKeyType lsaKey) const
 /**
  * @see RFC2328 Section 13.3.
  */
-bool Interface::floodLSA(OSPFLSA *lsa, Interface *intf, Neighbor *neighbor)
+bool Interface::floodLSA(const OSPFLSA *lsa, Interface *intf, Neighbor *neighbor)
 {
     bool floodedBackOut = false;
 
@@ -430,14 +430,14 @@ bool Interface::floodLSA(OSPFLSA *lsa, Interface *intf, Neighbor *neighbor)
     return floodedBackOut;
 }
 
-OSPFLinkStateUpdatePacket *Interface::createUpdatePacket(OSPFLSA *lsa)
+OSPFLinkStateUpdatePacket *Interface::createUpdatePacket(const OSPFLSA *lsa)
 {
     LSAType lsaType = static_cast<LSAType>(lsa->getHeader().getLsType());
-    OSPFRouterLSA *routerLSA = (lsaType == ROUTERLSA_TYPE) ? dynamic_cast<OSPFRouterLSA *>(lsa) : nullptr;
-    OSPFNetworkLSA *networkLSA = (lsaType == NETWORKLSA_TYPE) ? dynamic_cast<OSPFNetworkLSA *>(lsa) : nullptr;
-    OSPFSummaryLSA *summaryLSA = ((lsaType == SUMMARYLSA_NETWORKS_TYPE) ||
-                                  (lsaType == SUMMARYLSA_ASBOUNDARYROUTERS_TYPE)) ? dynamic_cast<OSPFSummaryLSA *>(lsa) : nullptr;
-    OSPFASExternalLSA *asExternalLSA = (lsaType == AS_EXTERNAL_LSA_TYPE) ? dynamic_cast<OSPFASExternalLSA *>(lsa) : nullptr;
+    const OSPFRouterLSA *routerLSA = (lsaType == ROUTERLSA_TYPE) ? dynamic_cast<const OSPFRouterLSA *>(lsa) : nullptr;
+    const OSPFNetworkLSA *networkLSA = (lsaType == NETWORKLSA_TYPE) ? dynamic_cast<const OSPFNetworkLSA *>(lsa) : nullptr;
+    const OSPFSummaryLSA *summaryLSA = ((lsaType == SUMMARYLSA_NETWORKS_TYPE) ||
+                                  (lsaType == SUMMARYLSA_ASBOUNDARYROUTERS_TYPE)) ? dynamic_cast<const OSPFSummaryLSA *>(lsa) : nullptr;
+    const OSPFASExternalLSA *asExternalLSA = (lsaType == AS_EXTERNAL_LSA_TYPE) ? dynamic_cast<const OSPFASExternalLSA *>(lsa) : nullptr;
 
     if (((lsaType == ROUTERLSA_TYPE) && (routerLSA != nullptr)) ||
         ((lsaType == NETWORKLSA_TYPE) && (networkLSA != nullptr)) ||
@@ -463,10 +463,10 @@ OSPFLinkStateUpdatePacket *Interface::createUpdatePacket(OSPFLSA *lsa)
                 updatePacket->setRouterLSAs(0, *routerLSA);
                 unsigned short lsAge = updatePacket->getRouterLSAs(0).getHeader().getLsAge();
                 if (lsAge < MAX_AGE - interfaceTransmissionDelay) {
-                    updatePacket->getRouterLSAs(0).getHeader().setLsAge(lsAge + interfaceTransmissionDelay);
+                    updatePacket->getRouterLSAsForUpdate(0).getHeaderForUpdate().setLsAge(lsAge + interfaceTransmissionDelay);
                 }
                 else {
-                    updatePacket->getRouterLSAs(0).getHeader().setLsAge(MAX_AGE);
+                    updatePacket->getRouterLSAsForUpdate(0).getHeaderForUpdate().setLsAge(MAX_AGE);
                 }
                 packetLength += calculateLSASize(routerLSA);
             }
@@ -477,10 +477,10 @@ OSPFLinkStateUpdatePacket *Interface::createUpdatePacket(OSPFLSA *lsa)
                 updatePacket->setNetworkLSAs(0, *networkLSA);
                 unsigned short lsAge = updatePacket->getNetworkLSAs(0).getHeader().getLsAge();
                 if (lsAge < MAX_AGE - interfaceTransmissionDelay) {
-                    updatePacket->getNetworkLSAs(0).getHeader().setLsAge(lsAge + interfaceTransmissionDelay);
+                    updatePacket->getNetworkLSAsForUpdate(0).getHeaderForUpdate().setLsAge(lsAge + interfaceTransmissionDelay);
                 }
                 else {
-                    updatePacket->getNetworkLSAs(0).getHeader().setLsAge(MAX_AGE);
+                    updatePacket->getNetworkLSAsForUpdate(0).getHeaderForUpdate().setLsAge(MAX_AGE);
                 }
                 packetLength += calculateLSASize(networkLSA);
             }
@@ -492,10 +492,10 @@ OSPFLinkStateUpdatePacket *Interface::createUpdatePacket(OSPFLSA *lsa)
                 updatePacket->setSummaryLSAs(0, *summaryLSA);
                 unsigned short lsAge = updatePacket->getSummaryLSAs(0).getHeader().getLsAge();
                 if (lsAge < MAX_AGE - interfaceTransmissionDelay) {
-                    updatePacket->getSummaryLSAs(0).getHeader().setLsAge(lsAge + interfaceTransmissionDelay);
+                    updatePacket->getSummaryLSAsForUpdate(0).getHeaderForUpdate().setLsAge(lsAge + interfaceTransmissionDelay);
                 }
                 else {
-                    updatePacket->getSummaryLSAs(0).getHeader().setLsAge(MAX_AGE);
+                    updatePacket->getSummaryLSAsForUpdate(0).getHeaderForUpdate().setLsAge(MAX_AGE);
                 }
                 packetLength += calculateLSASize(summaryLSA);
             }
@@ -506,10 +506,10 @@ OSPFLinkStateUpdatePacket *Interface::createUpdatePacket(OSPFLSA *lsa)
                 updatePacket->setAsExternalLSAs(0, *asExternalLSA);
                 unsigned short lsAge = updatePacket->getAsExternalLSAs(0).getHeader().getLsAge();
                 if (lsAge < MAX_AGE - interfaceTransmissionDelay) {
-                    updatePacket->getAsExternalLSAs(0).getHeader().setLsAge(lsAge + interfaceTransmissionDelay);
+                    updatePacket->getAsExternalLSAsForUpdate(0).getHeaderForUpdate().setLsAge(lsAge + interfaceTransmissionDelay);
                 }
                 else {
-                    updatePacket->getAsExternalLSAs(0).getHeader().setLsAge(MAX_AGE);
+                    updatePacket->getAsExternalLSAsForUpdate(0).getHeaderForUpdate().setLsAge(MAX_AGE);
                 }
                 packetLength += calculateLSASize(asExternalLSA);
             }
@@ -526,7 +526,7 @@ OSPFLinkStateUpdatePacket *Interface::createUpdatePacket(OSPFLSA *lsa)
     return nullptr;
 }
 
-void Interface::addDelayedAcknowledgement(OSPFLSAHeader& lsaHeader)
+void Interface::addDelayedAcknowledgement(const OSPFLSAHeader& lsaHeader)
 {
     if (interfaceType == Interface::BROADCAST) {
         if ((getState() == Interface::DESIGNATED_ROUTER_STATE) ||

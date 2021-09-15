@@ -536,26 +536,26 @@ void DHCPClient::sendRequest()
     request->setChaddr(macAddress);    // my mac address;
     request->setSname("");    // no server name given
     request->setFile("");    // no file given
-    request->getOptions().setMessageType(DHCPREQUEST);
-    request->getOptions().setClientIdentifier(macAddress);
+    request->getOptionsForUpdate().setMessageType(DHCPREQUEST);
+    request->getOptionsForUpdate().setClientIdentifier(macAddress);
 
     // set the parameters to request
-    request->getOptions().setParameterRequestListArraySize(4);
-    request->getOptions().setParameterRequestList(0, SUBNET_MASK);
-    request->getOptions().setParameterRequestList(1, ROUTER);
-    request->getOptions().setParameterRequestList(2, DNS);
-    request->getOptions().setParameterRequestList(3, NTP_SRV);
+    request->getOptionsForUpdate().setParameterRequestListArraySize(4);
+    request->getOptionsForUpdate().setParameterRequestList(0, SUBNET_MASK);
+    request->getOptionsForUpdate().setParameterRequestList(1, ROUTER);
+    request->getOptionsForUpdate().setParameterRequestList(2, DNS);
+    request->getOptionsForUpdate().setParameterRequestList(3, NTP_SRV);
 
     // RFC 4.3.6 Table 4
     if (clientState == INIT_REBOOT) {
-        request->getOptions().setRequestedIp(lease->ip);
+        request->getOptionsForUpdate().setRequestedIp(lease->ip);
         request->setCiaddr(IPv4Address());    // zero
         EV_INFO << "Sending DHCPREQUEST asking for IP " << lease->ip << " via broadcast." << endl;
         sendToUDP(request, clientPort, IPv4Address::ALLONES_ADDRESS, serverPort);
     }
     else if (clientState == REQUESTING) {
-        request->getOptions().setServerIdentifier(lease->serverId);
-        request->getOptions().setRequestedIp(lease->ip);
+        request->getOptionsForUpdate().setServerIdentifier(lease->serverId);
+        request->getOptionsForUpdate().setRequestedIp(lease->ip);
         request->setCiaddr(IPv4Address());    // zero
         EV_INFO << "Sending DHCPREQUEST asking for IP " << lease->ip << " via broadcast." << endl;
         sendToUDP(request, clientPort, IPv4Address::ALLONES_ADDRESS, serverPort);
@@ -591,16 +591,16 @@ void DHCPClient::sendDiscover()
     discover->setChaddr(macAddress);    // my mac address
     discover->setSname("");    // no server name given
     discover->setFile("");    // no file given
-    discover->getOptions().setMessageType(DHCPDISCOVER);
-    discover->getOptions().setClientIdentifier(macAddress);
-    discover->getOptions().setRequestedIp(IPv4Address());
+    discover->getOptionsForUpdate().setMessageType(DHCPDISCOVER);
+    discover->getOptionsForUpdate().setClientIdentifier(macAddress);
+    discover->getOptionsForUpdate().setRequestedIp(IPv4Address());
 
     // set the parameters to request
-    discover->getOptions().setParameterRequestListArraySize(4);
-    discover->getOptions().setParameterRequestList(0, SUBNET_MASK);
-    discover->getOptions().setParameterRequestList(1, ROUTER);
-    discover->getOptions().setParameterRequestList(2, DNS);
-    discover->getOptions().setParameterRequestList(3, NTP_SRV);
+    discover->getOptionsForUpdate().setParameterRequestListArraySize(4);
+    discover->getOptionsForUpdate().setParameterRequestList(0, SUBNET_MASK);
+    discover->getOptionsForUpdate().setParameterRequestList(1, ROUTER);
+    discover->getOptionsForUpdate().setParameterRequestList(2, DNS);
+    discover->getOptionsForUpdate().setParameterRequestList(3, NTP_SRV);
 
     EV_INFO << "Sending DHCPDISCOVER." << endl;
     sendToUDP(discover, clientPort, IPv4Address::ALLONES_ADDRESS, serverPort);
@@ -621,8 +621,8 @@ void DHCPClient::sendDecline(IPv4Address declinedIp)
     decline->setChaddr(macAddress);    // my MAC address
     decline->setSname("");    // no server name given
     decline->setFile("");    // no file given
-    decline->getOptions().setMessageType(DHCPDECLINE);
-    decline->getOptions().setRequestedIp(declinedIp);
+    decline->getOptionsForUpdate().setMessageType(DHCPDECLINE);
+    decline->getOptionsForUpdate().setRequestedIp(declinedIp);
     EV_INFO << "Sending DHCPDECLINE." << endl;
     sendToUDP(decline, clientPort, IPv4Address::ALLONES_ADDRESS, serverPort);
 }

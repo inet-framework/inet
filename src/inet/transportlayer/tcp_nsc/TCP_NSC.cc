@@ -326,7 +326,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
             //       with IP header size difference
             unsigned short numOptions = tcpsegP->getHeaderOptionArraySize();
             for (unsigned short i = 0; i < numOptions; i++) {
-                TCPOption* option = tcpsegP->getHeaderOption(i);
+                TCPOption* option = tcpsegP->getHeaderOptionForUpdate(i);
                 if (option->getKind() == TCPOPTION_MAXIMUM_SEGMENT_SIZE) {
                     TCPOptionMaxSegmentSize *mssOption = dynamic_cast<TCPOptionMaxSegmentSize *>(option);
                     if (mssOption) {

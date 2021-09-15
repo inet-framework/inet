@@ -342,7 +342,7 @@ VoIPStreamPacket *VoIPStreamSender::generatePacket()
         outFile.write(sampleBuffer.readPtr(), inBytes);
     sampleBuffer.notifyRead(inBytes);
 
-    vp->getBytes().setDataFromBuffer(opacket.data, opacket.size);
+    vp->getBytesForUpdate().setDataFromBuffer(opacket.data, opacket.size);
 
     if (isSilent) {
         vp->setName("SILENCE");
