@@ -28,26 +28,21 @@ module TransportLayerNodeBase extends NetworkLayerNodeBase
         bool hasUdp = default(firstAvailableOrEmpty("Udp") != "");
         bool hasTcp = default(firstAvailableOrEmpty("Tcp", "TcpLwip", "TcpNsc") != "");
         bool hasSctp = default(false);
-        @figure[transportLayer](type=rectangle; pos=250,156; size=1000,130; fillColor=#ff0000; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
-        @figure[transportLayer.title](type=text; pos=1245,161; anchor=ne; text="transport layer");
+        @figure[transportLayer](type=rectangle; pos=250,158; size=1000,134; fillColor=#ff0000; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
+        @figure[transportLayer.title](type=text; pos=1245,163; anchor=ne; text="transport layer");
     submodules:
         udp: <default(firstAvailableOrEmpty("Udp"))> like IUdp if hasUdp {
-            parameters:
-                @display("p=375,226");
+            @display("p=375,225");
         }
         tcp: <default(firstAvailableOrEmpty("Tcp", "TcpLwip", "TcpNsc"))> like ITcp if hasTcp {
-            parameters:
-                @display("p=525,226");
+            @display("p=525,225");
         }
         sctp: <default(firstAvailableOrEmpty("Sctp"))> like ISctp if hasSctp {
-            parameters:
-                @display("p=675,226");
+            @display("p=675,225");
         }
         tn: MessageDispatcher {
-            parameters:
-                @display("p=750,296;b=1000,5,,,,1");
+            @display("p=750,300;b=1000,5,,,,1");
         }
-
     connections allowunconnected:
         udp.ipOut --> tn.in++ if hasUdp;
         udp.ipIn <-- tn.out++ if hasUdp;
