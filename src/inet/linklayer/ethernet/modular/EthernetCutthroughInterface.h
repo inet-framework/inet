@@ -27,8 +27,10 @@ using namespace inet::queueing;
 class INET_API EthernetCutthroughInterface : public NetworkInterface
 {
   protected:
+    cGate *cutthroughInputGate = nullptr;
     cGate *cutthroughOutputGate = nullptr;
-    queueing::IPassivePacketSink *cutthroughConsumer = nullptr;
+    queueing::IPassivePacketSink *cutthroughInputConsumer = nullptr;
+    queueing::IPassivePacketSink *cutthroughOutputConsumer = nullptr;
 
   protected:
     virtual void initialize(int stage) override;

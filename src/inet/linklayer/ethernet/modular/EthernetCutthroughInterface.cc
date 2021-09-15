@@ -29,24 +29,40 @@ void EthernetCutthroughInterface::initialize(int stage)
 {
     NetworkInterface::initialize(stage);
     if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+        cutthroughInputGate = gate("cutthroughIn");
         cutthroughOutputGate = gate("cutthroughOut");
-        cutthroughConsumer = findConnectedModule<IPassivePacketSink>(cutthroughOutputGate);
-        inet::registerInterface(*this, gate("cutthroughIn"), cutthroughOutputGate);
+        cutthroughInputConsumer = findConnectedModule<IPassivePacketSink>(cutthroughInputGate, 1);
+        cutthroughOutputConsumer = findConnectedModule<IPassivePacketSink>(cutthroughOutputGate, 1);
+        inet::registerInterface(*this, cutthroughInputGate, cutthroughOutputGate);
     }
 }
 
 void EthernetCutthroughInterface::pushPacketStart(Packet *packet, cGate *gate, bps datarate)
 {
     Enter_Method("pushPacketStart");
-    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
-    cutthroughConsumer->pushPacketStart(packet, cutthroughOutputGate->getPathEndGate(), datarate);
+    take(packet);
+    if (gate == cutthroughInputGate)
+        cutthroughInputConsumer->pushPacketStart(packet, cutthroughInputGate->getPathEndGate(), datarate);
+    else if (gate == cutthroughOutputGate) {
+        packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
+        cutthroughOutputConsumer->pushPacketStart(packet, cutthroughOutputGate->getPathEndGate(), datarate);
+    }
+    else
+        NetworkInterface::pushPacketStart(packet, gate, datarate);
 }
 
 void EthernetCutthroughInterface::pushPacketEnd(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacketEnd");
-    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
-    cutthroughConsumer->pushPacketEnd(packet, cutthroughOutputGate->getPathEndGate());
+    take(packet);
+    if (gate == cutthroughInputGate)
+        cutthroughInputConsumer->pushPacketEnd(packet, cutthroughInputGate->getPathEndGate());
+    else if (gate == cutthroughOutputGate) {
+        packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(interfaceId);
+        cutthroughOutputConsumer->pushPacketEnd(packet, cutthroughOutputGate->getPathEndGate());
+    }
+    else
+        NetworkInterface::pushPacketEnd(packet, gate);
 }
 
 } // namespace inet
