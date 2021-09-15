@@ -35,6 +35,7 @@ module EthernetMacLayer like IEthernetMacLayer
         inboundEmitter.signalName = "packetReceivedFromLower";
         inboundEmitter.direction = "inbound";
         @display("i=block/layer");
+        @class(EthernetMacLayer);
     gates:
         input upperLayerIn;
         output upperLayerOut;
