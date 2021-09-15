@@ -1,9 +1,9 @@
 .DEFAULT_GOAL := all-pch
 
 #
-# Use the older message compiler. New compiler was introduced in OMNeT++ 5.3
+# Use the Newer message compiler. New compiler was introduced in OMNeT++ 5.3
 #
-MSGC:=$(MSGC) --msg4
+MSGC:=$(MSGC) --msg6
 
 ifeq ($(PLATFORM),win32.x86_64)
   #
