@@ -252,7 +252,8 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
     //
     // RFC 793: fourth, check the SYN bit,
     //
-    if (tcpseg->getSynBit()) {
+    if (tcpseg->getSynBit()
+            && !(fsm.getState() == TCP_S_SYN_RCVD && tcpseg->getAckBit())) {
         //"
         // If the SYN is in the window it is an error, send a reset, any
         // outstanding RECEIVEs and SEND should receive "reset" responses,
@@ -264,6 +265,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
         // and an ack would have been sent in the first step (sequence
         // number check).
         //"
+        // Zoltan Bojthe: but accept SYN+ACK in SYN_RCVD state for simultaneous open
 
         ASSERT(isSegmentAcceptable(tcpseg));    // assert SYN is in the window
         EV_DETAIL << "SYN is in the window: performing connection reset, closing connection\n";
