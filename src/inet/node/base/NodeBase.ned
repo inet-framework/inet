@@ -25,7 +25,6 @@ import inet.power.contract.IEnergyGenerator;
 import inet.power.contract.IEnergyManagement;
 import inet.power.contract.IEnergyStorage;
 
-
 //
 // This module contains the most basic infrastructure for network nodes that is
 // not strictly communication protocol related.
@@ -48,32 +47,26 @@ module NodeBase like INetworkNode
         *.energyGeneratorModule = default(exists(energyGenerator) ? absPath(".energyGenerator") : "");
         *.clockModule = default(exists(clock) ? absPath(".clock") : "");
         @class(NodeBase);
-        @display("bgb=1256,972");
+        @display("bgb=1256,1125");
     submodules:
         status: NodeStatus if hasStatus {
-            parameters:
-                @display("p=125,80;is=s");
+            @display("p=125,80;is=s");
         }
         clock: <default("")> like IClock if typename != "" {
-            parameters:
-                @display("p=125,320;is=s");
+            @display("p=125,320;is=s");
         }
         energyStorage: <default("")> like IEnergyStorage if typename != "" {
-            parameters:
-                @display("p=125,400;is=s");
+            @display("p=125,400;is=s");
         }
         energyManagement: <default("")> like IEnergyManagement if typename != "" {
-            parameters:
-                @display("p=125,480;is=s");
+            @display("p=125,480;is=s");
         }
         energyGenerator: <default("")> like IEnergyGenerator if typename != "" {
-            parameters:
-                @display("p=125,560;is=s");
+            @display("p=125,560;is=s");
         }
         // TODO move mobility right after status to have it in the same order as in their positions, changes fingerprints
         mobility: <default("")> like IMobility if typename != "" {
-            parameters:
-                @display("p=125,160;is=s");
+            @display("p=125,160;is=s");
         }
 }
 

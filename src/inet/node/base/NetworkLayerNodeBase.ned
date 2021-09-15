@@ -30,27 +30,21 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
         bool multicastForwarding = default(false);
         *.forwarding = this.forwarding;
         *.multicastForwarding = this.multicastForwarding;
-        @figure[networkLayer](type=rectangle; pos=250,306; size=1000,130; fillColor=#00ff00; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
-        @figure[networkLayer.title](type=text; pos=1245,311; anchor=ne; text="network layer");
-
+        @figure[networkLayer](type=rectangle; pos=250,308; size=1000,134; fillColor=#00ff00; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
+        @figure[networkLayer.title](type=text; pos=1245,313; anchor=ne; text="network layer");
     submodules:
         ipv4: <default("Ipv4NetworkLayer")> like INetworkLayer if hasIpv4 {
-            parameters:
-                @display("p=375,376;q=queue");
+            @display("p=375,375;q=queue");
         }
         ipv6: <default("Ipv6NetworkLayer")> like INetworkLayer if hasIpv6 {
-            parameters:
-                @display("p=525,376;q=queue");
+            @display("p=525,375;q=queue");
         }
         generic: <default("")> like INetworkLayer if hasGn {
-            parameters:
-                @display("p=675,376;q=queue");
+            @display("p=675,375;q=queue");
         }
         nl: MessageDispatcher {
-            parameters:
-                @display("p=750,446;b=1000,5,,,,1");
+            @display("p=750,450;b=1000,5,,,,1");
         }
-
     connections allowunconnected:
         ipv4.ifIn <-- nl.out++ if hasIpv4;
         ipv4.ifOut --> nl.in++ if hasIpv4;

@@ -48,20 +48,17 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
         mobility.typename = default(numWlanInterfaces > 0 ? "StationaryMobility" : "");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
-        @figure[linkLayer](type=rectangle; pos=250,456; size=1000,280; fillColor=#0000ff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
-        @figure[linkLayer.title](type=text; pos=1245,461; anchor=ne; text="link layer");
-        @figure[interfaceLayer](type=rectangle; pos=250,756; size=1000,210; fillColor=#00ffff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
-        @figure[interfaceLayer.title](type=text; pos=1245,761; anchor=ne; text="interface layer");
-
+        @figure[linkLayer](type=rectangle; pos=250,458; size=1000,284; fillColor=#0000ff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
+        @figure[linkLayer.title](type=text; pos=1245,463; anchor=ne; text="link layer");
+        @figure[interfaceLayer](type=rectangle; pos=250,758; size=1000,360; fillColor=#00ffff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
+        @figure[interfaceLayer.title](type=text; pos=1245,763; anchor=ne; text="interface layer");
     gates:
         input radioIn[numWlanInterfaces] @directIn;
         inout pppg[numPppInterfaces] @labels(PppFrame-conn) @allowUnconnected;
         inout ethg[numEthInterfaces] @labels(EtherFrame-conn) @allowUnconnected;
-
     submodules:
         pcapRecorder[numPcapRecorders]: PcapRecorder {
-            parameters:
-                @display("p=125,640;is=s");
+            @display("p=125,640;is=s");
         }
         interfaceTable: InterfaceTable {
             @display("p=125,240;is=s");
@@ -79,12 +76,10 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
             @display("p=750,750;b=1000,5");
         }
         ethernet: <default("")> like IEthernetLayer if typename != "" {
-            parameters:
-                @display("p=375,676");
+            @display("p=375,825");
         }
         ieee8021q: <default("")> like IIeee8021qLayer if typename != "" {
-            parameters:
-                @display("p=525,676");
+            @display("p=525,825");
         }
         ieee8021r: <default("")> like IIeee8021rLayer if typename != "" {
             @display("p=675,825");
@@ -93,29 +88,23 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
             @display("p=750,900;b=1000,5,,,,1");
         }
         lo[numLoInterfaces]: <default("LoopbackInterface")> like ILoopbackInterface {
-            parameters:
-                @display("p=750,826,row,150");
+            @display("p=750,975,row,150");
         }
         // TODO move wlan interfaces after eth interfaces, but it changes IP address assignment and breaks examples/inet/configurator/complex.ini
         wlan[numWlanInterfaces]: <default("Ieee80211Interface")> like IWirelessInterface {
-            parameters:
-                @display("p=375,916,row,150;q=queue");
+            @display("p=375,1000,row,150;q=queue");
         }
         ppp[sizeof(pppg)]: <default("PppInterface")> like IPppInterface {
-            parameters:
-                @display("p=300,826,row,150;q=txQueue");
+            @display("p=300,975,row,150;q=txQueue");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
-            parameters:
-                @display("p=900,826,row,150;q=txQueue");
+            @display("p=900,975,row,150;q=txQueue");
         }
         tun[numTunInterfaces]: <default("TunInterface")> like ITunnelInterface {
-            parameters:
-                @display("p=975,916,row,150;q=txQueue");
+            @display("p=975,1000,row,150;q=txQueue");
         }
         virt[numVirtInterfaces]: <default("VirtualInterface")> like IVirtualInterface {
-            parameters:
-                @display("p=975,916,row,150;q=txQueue");
+            @display("p=975,1000,row,150;q=txQueue");
         }
     connections allowunconnected:
         llc.lowerLayerOut --> cb.in++ if exists(llc);

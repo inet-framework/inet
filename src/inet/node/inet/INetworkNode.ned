@@ -23,7 +23,7 @@ package inet.node.inet;
 moduleinterface INetworkNode
 {
     parameters:
-        @display("bgb=,448");
+        @display("i=device/pc");
         @networkNode;
         @labels(node,ethernet-node,wireless-node);
 }

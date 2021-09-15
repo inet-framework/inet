@@ -24,19 +24,15 @@ module ApplicationLayerNodeBase extends TransportLayerNodeBase
 {
     parameters:
         int numApps = default(0);
-        @figure[applicationLayer](type=rectangle; pos=250,6; size=1000,130; lineColor=#808080; cornerRadius=5; fillColor=#ffff00; fillOpacity=0.1);
-        @figure[applicationLayer.title](type=text; pos=1245,11; anchor=ne; text="application layer");
-
+        @figure[applicationLayer](type=rectangle; pos=250,5; size=1000,137; lineColor=#808080; cornerRadius=5; fillColor=#ffff00; fillOpacity=0.1);
+        @figure[applicationLayer.title](type=text; pos=1245,10; anchor=ne; text="application layer");
     submodules:
         app[numApps]: <> like IApp {
-            parameters:
-                @display("p=375,76,row,150");
+            @display("p=375,75,row,150");
         }
         at: MessageDispatcher {
-            parameters:
-                @display("p=750,146;b=1000,5,,,,1");
+            @display("p=750,150;b=1000,5,,,,1");
         }
-
     connections allowunconnected:
         for i=0..numApps-1 {
             app[i].socketOut --> at.in++;
