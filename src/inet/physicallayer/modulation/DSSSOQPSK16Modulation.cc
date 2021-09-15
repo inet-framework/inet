@@ -44,7 +44,7 @@ double DSSSOQPSK16Modulation::calculateBER(double snir, Hz bandwidth, bps bitrat
 
     const double dSNRFct = 20.0 * snir;
     double dSumK = 0;
-    register int k = 2;
+    int k = 2;
 
     /* following loop was optimized by using n_choose_k symmetries
        for (k=2; k <= 16; ++k) {
