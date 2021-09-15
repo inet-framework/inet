@@ -31,14 +31,9 @@ void registerService(const Protocol& protocol, cGate *gate, ServicePrimitive ser
     }
 }
 
-void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationOut)
-{
-    EV_INFO << "Registering service" << EV_FIELD(protocol) << EV_FIELD(requestIn) << EV_FIELD(indicationOut) << EV_ENDL;
-    registerService(protocol, requestIn, indicationOut, requestIn, indicationOut);
-}
-
 void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationOut, cGate *responseIn, cGate *confirmOut)
 {
+    EV_INFO << "Registering service" << EV_FIELD(protocol) << EV_FIELD(requestIn) << EV_FIELD(indicationOut) << EV_FIELD(responseIn) << EV_FIELD(confirmOut) << EV_ENDL;
     if (requestIn != nullptr)
         registerService(protocol, requestIn, SP_REQUEST);
     if (indicationOut != nullptr)
@@ -59,14 +54,9 @@ void registerServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, Servi
     }
 }
 
-void registerServiceGroup(const ProtocolGroup& protocolGroup, cGate *requestIn, cGate *indicationOut)
-{
-    EV_INFO << "Registering service group" << EV_FIELD(protocolGroup) << EV_FIELD(requestIn) << EV_FIELD(indicationOut) << EV_ENDL;
-    registerServiceGroup(protocolGroup, requestIn, indicationOut, requestIn, indicationOut);
-}
-
 void registerServiceGroup(const ProtocolGroup& protocolGroup, cGate *requestIn, cGate *indicationOut, cGate *responseIn, cGate *confirmOut)
 {
+    EV_INFO << "Registering service group" << EV_FIELD(protocolGroup) << EV_FIELD(requestIn) << EV_FIELD(indicationOut) << EV_FIELD(responseIn) << EV_FIELD(confirmOut) << EV_ENDL;
     if (requestIn != nullptr)
         registerServiceGroup(protocolGroup, requestIn, SP_REQUEST);
     if (indicationOut != nullptr)
@@ -87,14 +77,9 @@ void registerAnyService(cGate *gate, ServicePrimitive servicePrimitive)
     }
 }
 
-void registerAnyService(cGate *requestIn, cGate *indicationOut)
-{
-    EV_INFO << "Registering any service" << EV_FIELD(requestIn) << EV_FIELD(indicationOut) << EV_ENDL;
-    registerAnyService(requestIn, indicationOut, requestIn, indicationOut);
-}
-
 void registerAnyService(cGate *requestIn, cGate *indicationOut, cGate *responseIn, cGate *confirmOut)
 {
+    EV_INFO << "Registering any service" << EV_FIELD(requestIn) << EV_FIELD(indicationOut) << EV_FIELD(responseIn) << EV_FIELD(confirmOut) << EV_ENDL;
     if (requestIn != nullptr)
         registerAnyService(requestIn, SP_REQUEST);
     if (indicationOut != nullptr)
@@ -115,14 +100,9 @@ void registerProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive se
     }
 }
 
-void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationIn)
-{
-    EV_INFO << "Registering protocol" << EV_FIELD(protocol) << EV_FIELD(requestOut) << EV_FIELD(indicationIn) << EV_ENDL;
-    registerProtocol(protocol, requestOut, indicationIn, requestOut, indicationIn);
-}
-
 void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationIn, cGate *responseOut, cGate *confirmIn)
 {
+    EV_INFO << "Registering protocol" << EV_FIELD(protocol) << EV_FIELD(requestOut) << EV_FIELD(indicationIn) << EV_FIELD(responseOut) << EV_FIELD(confirmIn) << EV_ENDL;
     if (requestOut != nullptr)
         registerProtocol(protocol, requestOut, SP_REQUEST);
     if (indicationIn != nullptr)
@@ -143,14 +123,9 @@ void registerProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, Serv
     }
 }
 
-void registerProtocolGroup(const ProtocolGroup& protocolGroup, cGate *requestOut, cGate *indicationIn)
-{
-    EV_INFO << "Registering protocol group" << EV_FIELD(protocolGroup) << EV_FIELD(requestOut) << EV_FIELD(indicationIn) << EV_ENDL;
-    registerProtocolGroup(protocolGroup, requestOut, indicationIn, requestOut, indicationIn);
-}
-
 void registerProtocolGroup(const ProtocolGroup& protocolGroup, cGate *requestOut, cGate *indicationIn, cGate *responseOut, cGate *confirmIn)
 {
+    EV_INFO << "Registering protocol group" << EV_FIELD(protocolGroup) << EV_FIELD(requestOut) << EV_FIELD(indicationIn) << EV_FIELD(responseOut) << EV_FIELD(confirmIn) << EV_ENDL;
     if (requestOut != nullptr)
         registerProtocolGroup(protocolGroup, requestOut, SP_REQUEST);
     if (indicationIn != nullptr)
@@ -171,14 +146,9 @@ void registerAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive)
     }
 }
 
-void registerAnyProtocol(cGate *requestOut, cGate *indicationIn)
-{
-    EV_INFO << "Registering any protocol" << EV_FIELD(requestOut) << EV_FIELD(indicationIn) << EV_ENDL;
-    registerAnyProtocol(requestOut, indicationIn, requestOut, indicationIn);
-}
-
 void registerAnyProtocol(cGate *requestOut, cGate *indicationIn, cGate *responseOut, cGate *confirmIn)
 {
+    EV_INFO << "Registering any protocol" << EV_FIELD(requestOut) << EV_FIELD(indicationIn) << EV_FIELD(responseOut) << EV_FIELD(confirmIn) << EV_ENDL;
     if (requestOut != nullptr)
         registerAnyProtocol(requestOut, SP_REQUEST);
     if (indicationIn != nullptr)
