@@ -209,8 +209,13 @@ void PacketProcessorBase::pushOrSendPacketProgress(Packet *packet, cGate *gate, 
 
 void PacketProcessorBase::animate(Packet *packet, cGate *gate, const SendOptions& sendOptions, Action action) const
 {
-    auto endGate = gate->getPathEndGate();
+    packet->setIsUpdate(sendOptions.isUpdate);
     packet->setTransmissionId(sendOptions.transmissionId_);
+    if (sendOptions.isUpdate && sendOptions.transmissionId_ == -1)
+        throw cRuntimeError("No transmissionId specified in SendOptions for a transmission update");
+    packet->setDuration(SIMTIME_ZERO);
+    packet->setRemainingDuration(SIMTIME_ZERO);
+    auto endGate = gate->getPathEndGate();
     packet->setArrival(endGate->getOwnerModule()->getId(), endGate->getId(), simTime());
     packet->setSentFrom(gate->getOwnerModule(), gate->getId(), simTime());
 
