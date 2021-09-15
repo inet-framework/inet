@@ -451,11 +451,11 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
 
                 // following code to be kept consistent with initConnection()
                 const char *sendQueueClass = c.sendQueueM->getClassName();
-                conn->sendQueueM = check_and_cast<TCP_NSC_SendQueue *>(inet::utils::createOne(sendQueueClass));
+                conn->sendQueueM = check_and_cast<TCP_NSC_SendQueue *>(::inet::utils::createOne(sendQueueClass));
                 conn->sendQueueM->setConnection(conn);
 
                 const char *receiveQueueClass = c.receiveQueueM->getClassName();
-                conn->receiveQueueM = check_and_cast<TCP_NSC_ReceiveQueue *>(inet::utils::createOne(receiveQueueClass));
+                conn->receiveQueueM = check_and_cast<TCP_NSC_ReceiveQueue *>(::inet::utils::createOne(receiveQueueClass));
                 conn->receiveQueueM->setConnection(conn);
                 EV_DETAIL << this << ": NSC: got accept!\n";
 
