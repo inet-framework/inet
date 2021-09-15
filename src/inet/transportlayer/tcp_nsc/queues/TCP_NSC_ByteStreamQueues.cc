@@ -81,7 +81,7 @@ TCPSegment *TCP_NSC_ByteStreamSendQueue::createSegmentWithBytes(const void *tcpD
     uint32 numBytes = tcpseg->getPayloadLength();
 
     char msgname[80];
-    sprintf(msgname, "%.10s%s%s%s(l=%lu,%u bytes)",
+    sprintf(msgname, "%.10s%s%s%s(l=%lu,%lu bytes)",
             "tcpseg",
             tcpseg->getSynBit() ? " SYN" : "",
             tcpseg->getFinBit() ? " FIN" : "",

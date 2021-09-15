@@ -220,7 +220,7 @@ int QoSRecoveryProcedure::getRc(Ieee80211DataFrame* frame, std::map<std::pair<Ti
     if (it != retryCounter.end())
         return it->second;
     else
-        throw cRuntimeError("The retry counter entry doesn't exist for message id: %d", frame->getId());
+        throw cRuntimeError("The retry counter entry doesn't exist for message id: %ld", frame->getId());
 }
 
 bool QoSRecoveryProcedure::isMulticastFrame(Ieee80211Frame* frame)

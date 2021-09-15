@@ -346,9 +346,9 @@ void EtherMAC::processMsgFromNetwork(cPacket *msg)
         simtime_t propagationTime = simTime() - msg->getSendingTime();
         if (propagationTime >= curEtherDescr->maxPropagationDelay) {
             throw cRuntimeError("Very long frame propagation time detected, maybe cable exceeds "
-                                "maximum allowed length? (%lgs corresponds to an approx. %lgm cable)",
+                                "maximum allowed length? (%s corresponds to an approx. %lgm cable)",
                     SIMTIME_STR(propagationTime),
-                    SIMTIME_STR(propagationTime * SPEED_OF_LIGHT_IN_CABLE));
+                    SIMTIME_DBL(propagationTime) * SPEED_OF_LIGHT_IN_CABLE);
         }
     }
 

@@ -1131,7 +1131,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
     // check the serialized packet length
     if (writtenbytes != msg->getByteLength()) {
         throw cRuntimeError("SCTP Serializer error: writtenbytes (%lu) != msgLength(%lu) in message (%s)%s",
-                writtenbytes, (unsigned long)msg->getByteLength(), msg->getClassName(), msg->getFullName());
+                (unsigned long)writtenbytes, (unsigned long)msg->getByteLength(), msg->getClassName(), msg->getFullName());
     }
 
     return writtenbytes;

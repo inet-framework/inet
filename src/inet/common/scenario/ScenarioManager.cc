@@ -195,7 +195,7 @@ void ScenarioManager::processCreateModuleCommand(cXMLElement *node)
     const char *parentModulePath = getRequiredAttribute(node, "parent");
     cModuleType *moduleType = cModuleType::get(moduleTypeName);
     if (moduleType == nullptr)
-        throw cRuntimeError("module type '%s' is not found", moduleType);
+        throw cRuntimeError("module type '%s' is not found", moduleTypeName);
     cModule *parentModule = getSimulation()->getSystemModule()->getModuleByPath(parentModulePath);
     if (parentModule == nullptr)
         throw cRuntimeError("parent module '%s' is not found", parentModulePath);

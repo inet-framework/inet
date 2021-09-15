@@ -338,7 +338,7 @@ void OSPFConfigReader::loadExternalRoute(const cXMLElement& externalRouteConfig)
         //externalRoutingEntry.setPathType(RoutingTableEntry::TYPE1_EXTERNAL);
     }
     else {
-        throw cRuntimeError("Invalid 'externalInterfaceOutputType' at interface '%s' at ", ie->getName(), externalRouteConfig.getSourceLocation());
+        throw cRuntimeError("Invalid 'externalInterfaceOutputType' at interface '%s' at %s", ie->getName(), externalRouteConfig.getSourceLocation());
     }
 
     asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString(getRequiredAttribute(externalRouteConfig, "forwardingAddress")));
@@ -417,7 +417,7 @@ void OSPFConfigReader::loadVirtualLink(const cXMLElement& virtualLinkConfig)
         backbone->addInterface(intf);
     }
     else {
-        throw cRuntimeError("Loading VirtualLink to %s through Area %s aborted at ", endPoint.c_str(), intf->getAreaID().str(false).c_str(), virtualLinkConfig.getSourceLocation());
+        throw cRuntimeError("Loading VirtualLink to %s through Area %s aborted at %s", endPoint.c_str(), intf->getAreaID().str(false).c_str(), virtualLinkConfig.getSourceLocation());
         //delete intf;
     }
 }

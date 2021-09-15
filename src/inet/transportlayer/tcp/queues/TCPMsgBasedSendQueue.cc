@@ -102,9 +102,9 @@ TCPSegment *TCPMsgBasedSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong n
     // give segment a name
     char msgname[80];
     if (!payloadName)
-        sprintf(msgname, "tcpseg(l=%lu,%dmsg)", numBytes, tcpseg->getPayloadArraySize());
+        sprintf(msgname, "tcpseg(l=%lu,%lumsg)", numBytes, tcpseg->getPayloadMsgArraySize());
     else
-        sprintf(msgname, "%.10s(l=%lu,%dmsg)", payloadName, numBytes, tcpseg->getPayloadArraySize());
+        sprintf(msgname, "%.10s(l=%lu,%lumsg)", payloadName, numBytes, tcpseg->getPayloadMsgArraySize());
     tcpseg->setName(msgname);
 
     return tcpseg;

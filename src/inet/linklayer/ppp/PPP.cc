@@ -298,7 +298,7 @@ void PPP::handleMessage(cMessage *msg)
                 EV_DETAIL << "Received " << msg << " for transmission but transmitter busy, queueing.\n";
 
                 if (txQueueLimit && txQueue.getLength() > txQueueLimit)
-                    throw cRuntimeError("txQueue length exceeds %d -- this is probably due to "
+                    throw cRuntimeError("txQueue length exceeds %ld -- this is probably due to "
                                         "a bogus app model generating excessive traffic "
                                         "(or if this is normal, increase txQueueLimit!)",
                             txQueueLimit);

@@ -134,10 +134,8 @@ Define_NED_Function2(nedf_moduleListByNedType,
 cNEDValue nedf_select(cComponent *context, cNEDValue argv[], int argc)
 {
     long index = argv[0];
-    if (index < 0)
-        throw cRuntimeError("select(): negative index %ld", index);
-    if (index >= argc - 1)
-        throw cRuntimeError("select(): index=%ld is too large", index, argc - 1);
+    if (index < 0 || index >= argc - 1)
+        throw cRuntimeError("select(): index=%ld is out of range [0..%d]", index, argc - 1);
     return argv[index + 1];
 }
 

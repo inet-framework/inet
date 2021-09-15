@@ -60,7 +60,7 @@ double parseInformationRate(const char *attrValue, const char *attrName, IInterf
         if (e != percentPtr)
             throw cRuntimeError("malformed %s attribute: %s", attrName, attrValue);
         if (percent < 0.0 || percent > 100.0)
-            throw cRuntimeError("%s must be between 0\% and 100\%, found: %s", attrName, attrValue);
+            throw cRuntimeError("%s must be between 0%% and 100%%, found: %s", attrName, attrValue);
 
         double datarate = getInterfaceDatarate(ift, &owner);
         if (datarate < 0.0)
@@ -125,7 +125,7 @@ int parseDSCP(const char *attrValue, const char *attrName)
     if (isdigit(*attrValue)) {
         int dscp = parseIntAttribute(attrValue, attrName);
         if (dscp < 0 || dscp >= DSCP_MAX)
-            throw cRuntimeError("value of %s attribute is out of range [0,%d)", DSCP_MAX);
+            throw cRuntimeError("value of %s attribute is out of range [0,%d)", attrName, DSCP_MAX);
         return dscp;
     }
     if (!dscpEnum)
