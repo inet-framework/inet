@@ -137,7 +137,7 @@ void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *gate, IPassive
 {
     if (consumer != nullptr) {
         animatePushPacket(packet, gate);
-        consumer->pushPacket(packet, gate->getPathEndGate());
+        consumer->pushPacket(packet, findConnectedGate<IPacketProcessor>(gate));
     }
     else
         send(packet, gate);
@@ -151,7 +151,7 @@ void PacketProcessorBase::pushOrSendPacketStart(Packet *packet, cGate *gate, IPa
     sendOptions.updateTx(transmissionId, duration);
     if (consumer != nullptr) {
         animatePushPacketStart(packet, gate, datarate, sendOptions);
-        consumer->pushPacketStart(packet, gate->getPathEndGate(), datarate);
+        consumer->pushPacketStart(packet, findConnectedGate<IPacketProcessor>(gate), datarate);
     }
     else {
         auto progressTag = packet->addTagIfAbsent<ProgressTag>();
@@ -168,7 +168,7 @@ void PacketProcessorBase::pushOrSendPacketEnd(Packet *packet, cGate *gate, IPass
     sendOptions.updateTx(transmissionId, 0);
     if (consumer != nullptr) {
         animatePushPacketEnd(packet, gate, sendOptions);
-        consumer->pushPacketEnd(packet, gate->getPathEndGate());
+        consumer->pushPacketEnd(packet, findConnectedGate<IPacketProcessor>(gate));
     }
     else {
         auto progressTag = packet->addTagIfAbsent<ProgressTag>();
