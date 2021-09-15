@@ -94,3 +94,51 @@
 /tutorials/wireless/,                -f omnetpp.ini -c Wireless12 -r 0,                         25s,           5a6c-3e3b/tplx;2181-2648/~tNl;3eed-65c9/~tND;6161-233e/tyf, PASS, wireless adhoc # Wireless12 extended
 /tutorials/wireless/,                -f omnetpp.ini -c Wireless13 -r 0,                         25s,           0679-43eb/tplx;92b5-3258/~tNl;d3fa-c14e/~tND;ff81-d81a/tyf, PASS, wireless adhoc # Wireless13 extended
 /tutorials/wireless/,                -f omnetpp.ini -c Wireless14 -r 0,                         25s,           9684-e2b0/tplx;1ff1-5244/~tNl;d2dd-5814/~tND;4925-6a22/tyf, PASS, wireless adhoc
+
+/tutorials/queueing/,                -f omnetpp.ini -c ActiveSourcePassiveSink -r 0,            10s,           ecb4-1904/tplx;0000-0000/~tNl;0000-0000/~tND;3b80-76b8/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c PassiveSourceActiveSink -r 0,            10s,           14ca-0145/tplx;0000-0000/~tNl;0000-0000/~tND;3b80-76b8/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c PacketQueue -r 0,                        10s,           6a37-bd13/tplx;0000-0000/~tNl;0000-0000/~tND;8c04-e469/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c DropTailQueue -r 0,                      10s,           b7da-bb21/tplx;0000-0000/~tNl;0000-0000/~tND;446f-e3f1/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c Comparator -r 0,                         10s,           8877-a0f1/tplx;0000-0000/~tNl;0000-0000/~tND;fb84-476d/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c Buffer -r 0,                             10s,           641d-e879/tplx;0000-0000/~tNl;0000-0000/~tND;c510-21f7/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c PriorityClassifier -r 0,                 10s,           c208-5ed9/tplx;0000-0000/~tNl;0000-0000/~tND;65cd-6297/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c WrrClassifier -r 0,                      100s,           17d2-85c5/tplx;0000-0000/~tNl;0000-0000/~tND;9f84-d373/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c ContentBasedClassifier -r 0,             10s,           ddc4-3f48/tplx;0000-0000/~tNl;0000-0000/~tND;7c4d-39bd/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c MarkovClassifier -r 0,                   100s,           e36a-e722/tplx;0000-0000/~tNl;0000-0000/~tND;d332-154e/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c GenericClassifier -r 0,                  10s,           cb5b-62cf/tplx;0000-0000/~tNl;0000-0000/~tND;7c4d-39bd/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c PriorityScheduler -r 0,                  10s,           e584-ef97/tplx;0000-0000/~tNl;0000-0000/~tND;08d5-0096/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c WrrScheduler -r 0,                       100s,           3ca1-945b/tplx;0000-0000/~tNl;0000-0000/~tND;6d39-2982/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c ContentBasedScheduler -r 0,              10s,           ac1b-c61e/tplx;0000-0000/~tNl;0000-0000/~tND;54ef-bb9d/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c MarkovScheduler -r 0,                    100s,           0ee2-ce5a/tplx;0000-0000/~tNl;0000-0000/~tND;0aad-c066/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c GenericScheduler -r 0,                   10s,           54c4-3e00/tplx;0000-0000/~tNl;0000-0000/~tND;14af-ab8d/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c PriorityBuffer -r 0,                     10s,           08fd-0c1d/tplx;0000-0000/~tNl;0000-0000/~tND;b2c0-7910/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c PriorityQueue -r 0,                      10s,           00ab-6034/tplx;0000-0000/~tNl;0000-0000/~tND;287d-8c98/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c CompoundQueue -r 0,                      10s,           d190-e19e/tplx;0000-0000/~tNl;0000-0000/~tND;d9e1-7cec/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c Filter1 -r 0,                            10s,           b037-1970/tplx;0000-0000/~tNl;0000-0000/~tND;3be5-cada/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c Filter2 -r 0,                            10s,           f05f-77fe/tplx;0000-0000/~tNl;0000-0000/~tND;9ab4-7a40/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c OrdinalBasedDropper -r 0,                10s,           be66-a8df/tplx;0000-0000/~tNl;0000-0000/~tND;0ace-f04e/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c RedDropper -r 0,                         100s,           c3f0-02e1/tplx;0000-0000/~tNl;0000-0000/~tND;e50f-6f9c/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c Server -r 0,                             10s,           87e9-9232/tplx;0000-0000/~tNl;0000-0000/~tND;0874-9fe0/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c TokenBasedServer -r 0,                   10s,           41ff-9436/tplx;0000-0000/~tNl;0000-0000/~tND;4d08-4f0c/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c TimeBasedTokenGenerator -r 0,            10s,           012b-3ee2/tplx;0000-0000/~tNl;0000-0000/~tND;39ac-a3bc/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c PacketBasedTokenGenerator -r 0,          10s,           a18d-79f4/tplx;0000-0000/~tNl;0000-0000/~tND;5656-7328/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c QueueBasedTokenGenerator -r 0,           10s,           abc6-399e/tplx;0000-0000/~tNl;0000-0000/~tND;5352-80f7/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c SignalBasedTokenGenerator -r 0,          10s,           d4ba-ede7/tplx;0000-0000/~tNl;0000-0000/~tND;28e7-bcf7/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c Meter -r 0,                              100s,           9c61-6d1d/tplx;0000-0000/~tNl;0000-0000/~tND;379e-a9f0/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c Tagger -r 0,                             10s,           feef-1a0b/tplx;0000-0000/~tNl;0000-0000/~tND;97f4-4af7/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c ContentBasedTagger -r 0,                 10s,           c10b-6d62/tplx;0000-0000/~tNl;0000-0000/~tND;c5fe-b58c/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c Labeler -r 0,                            10s,           9c33-20d1/tplx;0000-0000/~tNl;0000-0000/~tND;30cc-7f25/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c LeakyBucket -r 0,                        10s,           34ba-2548/tplx;0000-0000/~tNl;0000-0000/~tND;2302-d56b/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c TokenBucket -r 0,                        10s,           2dd8-206d/tplx;0000-0000/~tNl;0000-0000/~tND;8535-754e/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c Delayer -r 0,                            10s,           1e41-8c30/tplx;0000-0000/~tNl;0000-0000/~tND;834a-a9d8/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c Multiplexer -r 0,                        10s,           3168-2ead/tplx;0000-0000/~tNl;0000-0000/~tND;5ddc-127d/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c Demultiplexer -r 0,                      10s,           8b17-a0c8/tplx;0000-0000/~tNl;0000-0000/~tND;15a6-ab71/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c Gate1 -r 0,                              10s,           bfe7-2d19/tplx;0000-0000/~tNl;0000-0000/~tND;2285-6d96/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c Gate2 -r 0,                              10s,           ea91-9dbb/tplx;0000-0000/~tNl;0000-0000/~tND;2285-6d96/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c Duplicator -r 0,                         10s,           1b2a-b9ea/tplx;0000-0000/~tNl;0000-0000/~tND;e5fa-54c5/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c OrdinalBasedDuplicator -r 0,             10s,           24c9-51cb/tplx;0000-0000/~tNl;0000-0000/~tND;c70b-184d/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c Cloner -r 0,                             10s,           d411-8ce3/tplx;0000-0000/~tNl;0000-0000/~tND;2e3c-ad6d/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c QueueFiller -r 0,                        10s,           e5da-87e5/tplx;0000-0000/~tNl;0000-0000/~tND;b637-41c2/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c RequestResponse -r 0,                    100s,           7d97-5413/tplx;0000-0000/~tNl;0000-0000/~tND;f278-fca6/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c Telnet -r 0,                             100s,           f176-070e/tplx;0000-0000/~tNl;0000-0000/~tND;0643-66ad/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c ExampleNetwork -r 0,                     10s,           3783-f5ed/tplx;0000-0000/~tNl;0000-0000/~tND;0b52-303c/tyf, PASS, queueing
