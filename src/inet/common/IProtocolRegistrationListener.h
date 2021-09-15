@@ -36,37 +36,31 @@ namespace inet {
  * on upperLayerOut.
  */
 INET_API void registerService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive);
-INET_API void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationOut, cGate *responseIn, cGate *confirmOut);
-INET_API void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationOut);
+INET_API void registerService(const Protocol& protocol, cGate *requestIn, cGate *indicationOut, cGate *responseIn = nullptr, cGate *confirmOut = nullptr);
 
 INET_API void registerServiceGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive);
-INET_API void registerServiceGroup(const ProtocolGroup& protocolGroup, cGate *requestIn, cGate *indicationOut, cGate *responseIn, cGate *confirmOut);
-INET_API void registerServiceGroup(const ProtocolGroup& protocolGroup, cGate *requestIn, cGate *indicationOut);
+INET_API void registerServiceGroup(const ProtocolGroup& protocolGroup, cGate *requestIn, cGate *indicationOut, cGate *responseIn = nullptr, cGate *confirmOut = nullptr);
 
 INET_API void registerAnyService(cGate *gate, ServicePrimitive servicePrimitive);
-INET_API void registerAnyService(cGate *requestIn, cGate *indicationOut, cGate *responseIn, cGate *confirmOut);
-INET_API void registerAnyService(cGate *requestIn, cGate *indicationOut);
+INET_API void registerAnyService(cGate *requestIn, cGate *indicationOut, cGate *responseIn = nullptr, cGate *confirmOut = nullptr);
 
 /**
  * Registers a protocol primitive (PDU processing) at the given gate.
  *
- * For example, IP receives protocol indiciations on lowerLayerIn and sends IP
+ * For example, IP receives protocol indications on lowerLayerIn and sends IP
  * protocol packets (e.g. Ethernet service requests) on lowerLayerOut.
  *
  * For another example, Ethernet receives protocol indications on lowerLayerIn
  * and sends protocol packets (e.g. transmission service requests) on lowerLayerOut.
  */
 INET_API void registerProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive);
-INET_API void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationIn, cGate *responseOut, cGate *confirmIn);
-INET_API void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationIn);
+INET_API void registerProtocol(const Protocol& protocol, cGate *requestOut, cGate *indicationIn, cGate *responseOut = nullptr, cGate *confirmIn = nullptr);
 
 INET_API void registerProtocolGroup(const ProtocolGroup& protocolGroup, cGate *gate, ServicePrimitive servicePrimitive);
-INET_API void registerProtocolGroup(const ProtocolGroup& protocolGroup, cGate *requestOut, cGate *indicationIn, cGate *responseOut, cGate *confirmIn);
-INET_API void registerProtocolGroup(const ProtocolGroup& protocolGroup, cGate *requestOut, cGate *indicationIn);
+INET_API void registerProtocolGroup(const ProtocolGroup& protocolGroup, cGate *requestOut, cGate *indicationIn, cGate *responseOut = nullptr, cGate *confirmIn = nullptr);
 
 INET_API void registerAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive);
-INET_API void registerAnyProtocol(cGate *requestOut, cGate *indicationIn, cGate *responseOut, cGate *confirmIn);
-INET_API void registerAnyProtocol(cGate *requestOut, cGate *indicationIn);
+INET_API void registerAnyProtocol(cGate *requestOut, cGate *indicationIn, cGate *responseOut = nullptr, cGate *confirmIn = nullptr);
 
 /**
  * This interface defines methods that are called during protocol service
