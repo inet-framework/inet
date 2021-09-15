@@ -24,16 +24,6 @@
 
 namespace inet {
 
-enum GPSRForwardingMode {
-    GPSR_GREEDY_ROUTING,
-    GPSR_PERIMETER_ROUTING
-};
-
-enum GPSRPlanarizationMode {
-    GPSR_GG_PLANARIZATION,
-    GPSR_RNG_PLANARIZATION
-};
-
 } // namespace inet
 
 #endif // ifndef __INET_GPSRDEFS_H

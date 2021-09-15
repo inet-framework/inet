@@ -25,6 +25,11 @@ cplusplus {{
 
 namespace inet::dymo;
 
+// TODO metric types are defined in a separate [RFC 6551]
+enum DYMOMetricType {
+    HOP_COUNT = 3;    // Hop Count has Metric Type assignment 3
+};
+
 class DYMOSequenceNumber
 {
     @existingClass;
