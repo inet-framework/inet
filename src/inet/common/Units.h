@@ -899,7 +899,13 @@ typedef milli<m>::type mm;
 typedef kilo<m>::type km;
 typedef milli<kg>::type g;
 typedef milli<g>::type mg;
+typedef pico<s>::type ps;
+typedef nano<s>::type ns;
+typedef micro<s>::type us;
 typedef milli<s>::type ms;
+typedef pico<W>::type pW;
+typedef nano<W>::type nW;
+typedef micro<W>::type uW;
 typedef milli<W>::type mW;
 typedef milli<Ah>::type mAh;
 typedef kilo<Hz>::type kHz;
@@ -984,7 +990,8 @@ typedef scale<kPa, 10> millibar;
 // Informatics
 typedef compose<b, pow<s, -1> > bps;
 typedef scale<bps, 1, 1000> kbps;
-typedef scale<bps, 1, 1000000> Mbps;
+typedef scale<kbps, 1, 1000> Mbps;
+typedef scale<Mbps, 1, 1000> Gbps;
 
 // Other
 typedef scale<Hz, 60> rpm;
@@ -1051,7 +1058,7 @@ typedef value<double, units::K> K;
 typedef value<double, units::A> A;
 typedef value<double, units::mol> mol;
 typedef value<double, units::cd> cd;
-typedef value<double, units::m> b;
+typedef value<double, units::b> b;
 
 // SI derived
 typedef value<double, units::rad> rad;
@@ -1086,7 +1093,13 @@ typedef value<double, units::mm> mm;
 typedef value<double, units::km> km;
 typedef value<double, units::g> g;
 typedef value<double, units::mg> mg;
+typedef value<double, units::ps> ps;
+typedef value<double, units::ns> ns;
+typedef value<double, units::us> us;
 typedef value<double, units::ms> ms;
+typedef value<double, units::pW> pW;
+typedef value<double, units::nW> nW;
+typedef value<double, units::uW> uW;
 typedef value<double, units::mW> mW;
 typedef value<double, units::mAh> mAh;
 typedef value<double, units::kHz> kHz;
@@ -1148,13 +1161,99 @@ typedef value<double, units::millibar> millibar;
 typedef value<double, units::bps> bps;
 typedef value<double, units::kbps> kbps;
 typedef value<double, units::Mbps> Mbps;
+typedef value<double, units::Gbps> Gbps;
 
 typedef value<double, units::percent> percent;
 typedef value<double, units::rpm> rpm;
 typedef value<double, units::dozen> dozen;
 typedef value<double, units::bakers_dozen> bakers_dozen;
 
+template<typename Value, typename Unit>
+std::string unit2string(const value<Value, Unit>& value) {
+    std::stringstream ss;
+    ss << value;
+    return ss.str();
+}
+
 } // namespace values
+
+// TODO extract these SI prefix printing fallback mechanisms
+template<typename Value>
+std::ostream& operator<<(std::ostream& os, const value<Value, units::W>& value)
+{
+    if (value == values::W(0))
+        os << "0 W";
+    else if (value > values::pW(-1000.0) && value < values::pW(1000.0))
+        os << values::pW(value);
+    else if (value > values::nW(-1000.0) && value < values::nW(1000.0))
+        os << values::nW(value);
+    else if (value > values::uW(-1000.0) && value < values::uW(1000.0))
+        os << values::uW(value);
+    else if (value > values::mW(-1000.0) && value < values::mW(1000.0))
+        os << values::mW(value);
+    else {
+        os << value.get() << ' ';
+        output_unit<units::W>::fn(os);
+    }
+    return os;
+}
+
+// TODO extract these SI prefix printing fallback mechanisms
+template<typename Value>
+std::ostream& operator<<(std::ostream& os, const value<Value, units::Hz>& value)
+{
+    if (value >= values::GHz(1.0))
+        os << values::GHz(value);
+    else if (value >= values::MHz(1.0))
+        os << values::MHz(value);
+    else if (value >= values::kHz(1.0))
+        os << values::kHz(value);
+    else {
+        os << value.get() << ' ';
+        output_unit<units::Hz>::fn(os);
+    }
+    return os;
+}
+
+// TODO extract these SI prefix printing fallback mechanisms
+template<typename Value>
+std::ostream& operator<<(std::ostream& os, const value<Value, units::bps>& value)
+{
+    if (value >= values::Gbps(1.0))
+        os << values::Gbps(value);
+    else if (value >= values::Mbps(1.0))
+        os << values::Mbps(value);
+    else if (value >= values::kbps(1.0))
+        os << values::kbps(value);
+    else {
+        os << value.get() << ' ';
+        output_unit<units::bps>::fn(os);
+    }
+    return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const value<double, units::s>& value)
+{
+    if (value == values::s(0))
+        os << "0 s";
+    else if (value.get() == INFINITY)
+        os << "inf s";
+    else if (value.get() == -INFINITY)
+        os << "-inf s";
+    else if (value > values::ps(-1000.0) && value < values::ps(1000.0))
+        os << values::ps(value);
+    else if (value > values::ns(-1000.0) && value < values::ns(1000.0))
+        os << values::ns(value);
+    else if (value > values::us(-1000.0) && value < values::us(1000.0))
+        os << values::us(value);
+    else if (value > values::ms(-1000.0) && value < values::ms(1000.0))
+        os << values::ms(value);
+    else {
+        os << value.get() << ' ';
+        output_unit<units::s>::fn(os);
+    }
+    return os;
+}
 
 namespace constants {
 
