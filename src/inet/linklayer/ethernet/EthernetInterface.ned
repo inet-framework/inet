@@ -31,7 +31,6 @@ import inet.queueing.contract.ITrafficConditioner;
 module EthernetInterface extends NetworkInterface like IEthernetInterface
 {
     parameters:
-        @lifecycleSupport;
         string interfaceTableModule;
         string protocol = default("");
         string address @mutable = default("auto");   // MAC address as hex string (12 hex digits), or
