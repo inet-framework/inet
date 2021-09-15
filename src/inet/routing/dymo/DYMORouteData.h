@@ -23,6 +23,7 @@
 #include <omnetpp.h>
 #include "inet/networklayer/contract/IRoute.h"
 #include "inet/routing/dymo/DYMOdefs.h"
+#include "inet/routing/dymo/DYMO_m.h"
 
 namespace inet {
 
