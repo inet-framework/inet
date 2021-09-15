@@ -59,7 +59,7 @@ class INET_API LinkStateRouting : public cSimpleModule, public cListener
     cMessage *announceMsg = nullptr;
     IPv4Address routerId;
 
-    IPAddressVector peerIfAddrs;    // addresses of interfaces towards neighbouring routers
+    IPv4AddressVector peerIfAddrs;    // addresses of interfaces towards neighbouring routers
 
   public:
     LinkStateRouting();

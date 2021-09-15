@@ -23,9 +23,9 @@
 
 namespace inet {
 
-EroVector routeToEro(const IPAddressVector& rro);
-std::string vectorToString(const IPAddressVector& vec);
-std::string vectorToString(const IPAddressVector& vec, const char *delim);
+EroVector routeToEro(const IPv4AddressVector& rro);
+std::string vectorToString(const IPv4AddressVector& vec);
+std::string vectorToString(const IPv4AddressVector& vec, const char *delim);
 std::string vectorToString(const EroVector& vec);
 std::string vectorToString(const EroVector& vec, const char *delim);
 
@@ -42,7 +42,7 @@ bool find(std::vector<int>& vec, int value);
 /**
  * TODO documentation
  */
-bool find(const IPAddressVector& vec, IPv4Address addr);    // use TEMPLATE
+bool find(const IPv4AddressVector& vec, IPv4Address addr);    // use TEMPLATE
 
 /**
  * TODO documentation

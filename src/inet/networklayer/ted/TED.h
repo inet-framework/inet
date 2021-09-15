@@ -74,7 +74,7 @@ class INET_API TED : public cSimpleModule, public ILifecycle
 
     virtual void initializeTED();
 
-    virtual IPAddressVector calculateShortestPath(IPAddressVector dest,
+    virtual IPv4AddressVector calculateShortestPath(IPv4AddressVector dest,
             const TELinkStateInfoVector& topology, double req_bandwidth, int priority);
 
   public:
@@ -88,7 +88,7 @@ class INET_API TED : public cSimpleModule, public ILifecycle
     virtual bool isLocalAddress(IPv4Address addr);
     virtual unsigned int linkIndex(IPv4Address localInf);
     virtual unsigned int linkIndex(IPv4Address advrouter, IPv4Address linkid);
-    virtual IPAddressVector getLocalAddress();
+    virtual IPv4AddressVector getLocalAddress();
 
     virtual void rebuildRoutingTable();
     //@}
@@ -100,7 +100,7 @@ class INET_API TED : public cSimpleModule, public ILifecycle
     IInterfaceTable *ift = nullptr;
     IPv4Address routerId;
 
-    IPAddressVector interfaceAddrs;    // list of local interface addresses
+    IPv4AddressVector interfaceAddrs;    // list of local interface addresses
 
     int maxMessageId = 0;
 
