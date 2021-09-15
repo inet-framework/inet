@@ -36,6 +36,12 @@ class INET_API Quaternion
         Quaternion(double realPart, const Coord& vectorPart) :
             realPart(realPart), vectorPart(vectorPart) {};
 
+        double getRealPart() const { return realPart; }
+        void setRealPart(double s) { this->realPart = s; }
+
+        const Coord& getVectorPart() const { return vectorPart; }
+        void setVectorPart(const Coord& v) { this->vectorPart = v; }
+
         Quaternion operator*(double scalar) const;
         friend Quaternion operator*(double scalar, const Quaternion& lhs);
         Quaternion operator+(const Quaternion& rhs) const;

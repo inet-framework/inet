@@ -28,6 +28,15 @@ class INET_API EulerAngles
     EulerAngles(double alpha, double beta = 0.0, double gamma = 0.0)
         : alpha(alpha), beta(beta), gamma(gamma) {}
 
+    double getAlpha() const { return alpha; }
+    void setAlpha(double alpha) { this->alpha = alpha; }
+
+    double getBeta() const { return beta; }
+    void setBeta(double beta) { this->beta = beta; }
+
+    double getGamma() const { return gamma; }
+    void setGamma(double gamma) { this->gamma = gamma; }
+
     bool isNil() const
     {
         return this == &NIL;

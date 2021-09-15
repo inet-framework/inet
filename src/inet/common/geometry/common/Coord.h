@@ -67,6 +67,15 @@ class INET_API Coord : public cObject
     Coord(const Coord& other)
         : cObject(other) { copy(other); }
 
+    double getX() const { return x; }
+    void setX(double x) { this->x = x; }
+
+    double getY() const { return y; }
+    void setY(double y) { this->y = y; }
+
+    double getZ() const { return z; }
+    void setZ(double z) { this->z = z; }
+
     /** @brief Returns a string with the value of the coordinate. */
     std::string str() const override;
 
