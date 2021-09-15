@@ -95,6 +95,7 @@ cChannel::Result PacketLoggerChannel::processMessage(cMessage *msg, const SendOp
         logfile << " discard:" << result.discard << ", delay:" << result.delay.raw() << ", duration:" << result.duration.raw();
         logfile << endl;
     }
+    return result;
 }
 #endif
 
