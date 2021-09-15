@@ -37,11 +37,12 @@ TCPSegment *createSegmentWithBytes(TCPMsgBasedSendQueue *sq, uint32 fromSeq, uin
     ulong numBytes = toSeq-fromSeq;
     TCPSegment *tcpseg = sq->createSegmentWithBytes(fromSeq, numBytes);
 
-    for (int i=0; i<tcpseg->getPayloadArraySize(); i++)
+    for (int i=0; i<tcpseg->getPayloadMsgArraySize(); i++)
     {
-        TCPPayloadMessage& payload = tcpseg->getPayload(i);
-        uint32_t startSeq = payload.endSequenceNo - payload.msg->getByteLength();
-        EV << (i?", ":" ") << payload.msg->getName() << '[' << startSeq << ".." << payload.endSequenceNo <<')';
+        const cPacket *payloadMsg = tcpseg->getPayloadMsg(i);
+        uint32_t payloadSeq = tcpseg->getPayloadEndSequenceNo(i);
+        uint32_t startSeq = payloadSeq - payloadMsg->getByteLength();
+        EV << (i?", ":" ") << payloadMsg->getName() << '[' << startSeq << ".." << payloadSeq <<')';
     }
     EV << "\n";
 
