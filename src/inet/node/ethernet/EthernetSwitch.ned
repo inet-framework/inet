@@ -33,6 +33,7 @@ import inet.linklayer.ieee8021q.IIeee8021qLayer;
 import inet.linklayer.ieee8021r.IIeee8021rLayer;
 import inet.linklayer.ieee8022.IIeee8022Llc;
 import inet.networklayer.common.InterfaceTable;
+import inet.node.inet.IEthernetNetworkNode;
 import inet.protocolelement.contract.IProtocolLayer;
 
 //
@@ -43,7 +44,7 @@ import inet.protocolelement.contract.IProtocolLayer;
 // it must be set to false, otherwise it can be set to true.
 // By default used half duples CSMA/CD mac
 //
-module EthernetSwitch
+module EthernetSwitch like IEthernetNetworkNode
 {
     parameters:
         @networkNode();
