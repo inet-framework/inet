@@ -51,6 +51,14 @@ void PacketProcessorBase::checkPacketOperationSupport(cGate *gate) const
 {
     auto startGate = findConnectedGate<IPacketProcessor>(gate, -1);
     auto endGate = findConnectedGate<IPacketProcessor>(gate, 1);
+    if (gate->getPreviousGate() != nullptr)
+        checkPacketOperationSupport(startGate, gate);
+    if (gate->getNextGate() != nullptr)
+        checkPacketOperationSupport(gate, endGate);
+}
+
+void PacketProcessorBase::checkPacketOperationSupport(cGate *startGate, cGate *endGate) const
+{
     auto startElement = startGate == nullptr ? nullptr : check_and_cast<IPacketProcessor *>(startGate->getOwnerModule());
     auto endElement = endGate == nullptr ? nullptr : check_and_cast<IPacketProcessor *>(endGate->getOwnerModule());
     if (startElement != nullptr && endElement != nullptr) {
@@ -94,7 +102,7 @@ void PacketProcessorBase::checkPacketOperationSupport(cGate *gate) const
                     throw cRuntimeError(startGate->getOwnerModule(), "doesn't support packet pulling on gate %s", startGate->getFullPath().c_str());
             }
             else
-                throw cRuntimeError(endGate->getOwnerModule(), "neither supports packet pushing nor packet pulling on gate %s", gate->getFullPath().c_str());
+                throw cRuntimeError(endGate->getOwnerModule(), "neither supports packet pushing nor packet pulling on gates %s - %s", startGate->getFullPath().c_str(), endGate->getFullPath().c_str());
         }
         if (!bothPassing && !bothStreaming) {
             if (eitherPassing) {
@@ -110,7 +118,7 @@ void PacketProcessorBase::checkPacketOperationSupport(cGate *gate) const
                     throw cRuntimeError(startGate->getOwnerModule(), "doesn't support packet streaming on gate %s", startGate->getFullPath().c_str());
             }
             else
-                throw cRuntimeError(endGate->getOwnerModule(), "neither supports packet passing nor packet streaming on gate %s", gate->getFullPath().c_str());
+                throw cRuntimeError(endGate->getOwnerModule(), "neither supports packet passing nor packet streaming on gates %s - %s", startGate->getFullPath().c_str(), endGate->getFullPath().c_str());
         }
     }
     else if (startElement != nullptr && endElement == nullptr) {
@@ -122,7 +130,7 @@ void PacketProcessorBase::checkPacketOperationSupport(cGate *gate) const
             throw cRuntimeError(endGate->getOwnerModule(), "doesn't support packet sending on gate %s", endGate->getFullPath().c_str());
     }
     else
-        throw cRuntimeError("Cannot check packet operation support on gate %s", gate->getFullPath().c_str());
+        throw cRuntimeError("Cannot check packet operation support on gates %s - %s", startGate->getFullPath().c_str(), endGate->getFullPath().c_str());
 }
 
 void PacketProcessorBase::pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSink *consumer)

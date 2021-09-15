@@ -47,6 +47,7 @@ class INET_API PacketProcessorBase : public cSimpleModule, public virtual IPacke
     virtual void handlePacketProcessed(Packet *packet);
 
     virtual void checkPacketOperationSupport(cGate *gate) const;
+    virtual void checkPacketOperationSupport(cGate *startGate, cGate *endGate) const;
 
     virtual void animate(Packet *packet, cGate *gate, const SendOptions& sendOptions, Action action) const;
     virtual void animatePacket(Packet *packet, cGate *gate, Action action) const;
