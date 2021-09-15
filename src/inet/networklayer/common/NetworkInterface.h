@@ -18,17 +18,18 @@
 #ifndef __INET_NETWORKINTERFACE_H
 #define __INET_NETWORKINTERFACE_H
 
+#include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/common/packet/tag/TagSet.h"
 #include "inet/common/Protocol.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/StringFormat.h"
 #include "inet/common/TagBase.h"
-#include "inet/common/lifecycle/ILifecycle.h"
-#include "inet/common/packet/tag/TagSet.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/InterfaceToken.h"
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
+#include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IPacketProcessor.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
 
@@ -93,7 +94,7 @@ class INET_API NetworkInterfaceChangeDetails : public cObject
  *
  * @see IInterfaceTable
  */
-class INET_API NetworkInterface : public cModule, public queueing::IPassivePacketSink, public queueing::IPacketProcessor, public ILifecycle, public cListener, public StringFormat::IDirectiveResolver
+class INET_API NetworkInterface : public queueing::PacketProcessorBase, public queueing::IPassivePacketSink, public ILifecycle, public cListener
 {
     friend class InterfaceProtocolData; // to call protocolDataChanged()
 
@@ -101,12 +102,14 @@ class INET_API NetworkInterface : public cModule, public queueing::IPassivePacke
     enum State { UP, DOWN, GOING_UP, GOING_DOWN };
 
   protected:
+    cGate *upperLayerIn = nullptr;
     cGate *upperLayerOut = nullptr;
     cGate *rxIn = nullptr;
     cGate *txOut = nullptr;
     cChannel *rxTransmissionChannel = nullptr;
     cChannel *txTransmissionChannel = nullptr;
-    queueing::IPassivePacketSink *consumer = nullptr;
+    queueing::IPassivePacketSink *upperLayerInConsumer = nullptr;
+    queueing::IPassivePacketSink *upperLayerOutConsumer = nullptr;
 
     const Protocol *protocol = nullptr;
     ModuleRefByPar<IInterfaceTable> interfaceTable; ///< IInterfaceTable that contains this interface, or nullptr
@@ -128,6 +131,17 @@ class INET_API NetworkInterface : public cModule, public queueing::IPassivePacke
 
     TagSet protocolDataSet;
     std::vector<MacEstimateCostProcess *> estimateCostProcessArray;
+
+  protected:
+    class LocalGate : public cGate {
+      protected:
+        NetworkInterface *networkInterface;
+
+      public:
+        LocalGate(NetworkInterface *networkInterface) : networkInterface(networkInterface) { }
+
+        virtual bool deliver(cMessage *msg, const SendOptions &options, simtime_t t) override;
+    };
 
   private:
     // copying not supported: following are private and also left undefined
@@ -154,9 +168,12 @@ class INET_API NetworkInterface : public cModule, public queueing::IPassivePacke
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
     virtual void refreshDisplay() const override;
-    virtual void updateDisplayString() const;
+    virtual void updateDisplayString() const override;
     virtual const char *resolveDirective(char directive) const override;
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
+    virtual cGate *createGateObject(cGate::Type type) override {
+        return type == cGate::INPUT ? new LocalGate(this) : cModule::createGateObject(type);
+    }
 
     virtual double computeDatarate() const;
     virtual bool computeCarrier() const;
@@ -186,8 +203,8 @@ class INET_API NetworkInterface : public cModule, public queueing::IPassivePacke
     virtual bool canPushSomePacket(cGate *gate) const override { return true; }
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
     virtual void pushPacket(Packet *packet, cGate *gate) override;
-    virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
-    virtual void pushPacketEnd(Packet *packet, cGate *gate) override { throw cRuntimeError("Invalid operation"); }
+    virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override;
+    virtual void pushPacketEnd(Packet *packet, cGate *gate) override;
     virtual void pushPacketProgress(Packet *packet, cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
 
     /**
