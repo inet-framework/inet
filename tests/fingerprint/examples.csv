@@ -502,6 +502,35 @@
 
 /examples/timing/,                   -f omnetpp.ini -c General -r 0,                0.1s,             0029-0683/tplx;2b60-28b2/~tNl;3ad0-14cf/~tND;80ab-0584/tyf, PASS,
 
+/examples/tsn/cutthroughswitching/, -f omnetpp.ini -c StoreAndForward -r 0,                   1s,           0dc0-b53e/tplx;c4e0-e59d/~tNl, PASS, tsn
+/examples/tsn/cutthroughswitching/, -f omnetpp.ini -c CutthroughSwitching -r 0,               1s,           c011-dda7/tplx;e277-badb/~tNl, PASS, tsn
+
+/examples/tsn/gatescheduling/,      -f omnetpp.ini -c AlwaysOpen -r 0,                        0.1s,         32dc-7153/tplx;e0dd-1ced/~tNl, PASS, tsn
+/examples/tsn/gatescheduling/,      -f omnetpp.ini -c Simple -r 0,                            0.1s,         bbb3-bb08/tplx;a866-b601/~tNl, PASS, tsn
+/examples/tsn/gatescheduling/,      -f omnetpp.ini -c SAT -r 0,                               0.1s,         00d8-10f6/tplx;0e53-8cb5/~tNl, PASS, tsn
+/examples/tsn/gatescheduling/,      -f omnetpp.ini -c TSNsched -r 0,                          0.1s,         bef8-c047/tplx;7bc2-a615/~tNl, PASS, tsn
+
+/examples/tsn/framepreemption/,     -f omnetpp.ini -c NormalOperation -r 0,                   1s,           2f6c-38ce/tplx;7314-623a/~tNl, PASS, tsn
+/examples/tsn/framepreemption/,     -f omnetpp.ini -c FramePreemption -r 0,                   1s,           7133-d0bf/tplx;94ac-5c45/~tNl, PASS, tsn
+
+/examples/tsn/framereplication/,    -f omnetpp.ini -c ManualRedundancy -r 0,                  1s,           6505-7983/tplx;2a58-52f2/~tNl, PASS, tsn
+/examples/tsn/framereplication/,    -f omnetpp.ini -c StreamRedundancyConfigurator -r 0,      1s,           6505-7983/tplx;2a58-52f2/~tNl, PASS, tsn
+/examples/tsn/framereplication/,    -f omnetpp.ini -c TsnConfigurator -r 0,                   10s,          bcde-1c93/tplx;5ba1-806c/~tNl, PASS, tsn
+
+/examples/tsn/streamfiltering/,     -f omnetpp.ini -c SingleRateTwoColorMeter -r 0,           2s,           77ff-afe0/tplx;565b-5dab/~tNl, PASS, tsn
+/examples/tsn/streamfiltering/,     -f omnetpp.ini -c SlidingWindowRateMeter -r 0,            2s,           3573-d16a/tplx;2d67-77b9/~tNl, PASS, tsn
+
+/examples/tsn/timesynchronization/, -f omnetpp.ini -c OneMasterOneSyncDomain -r 0,            4s,           3f2b-c35c/tplx;60f4-76f9/~tNl, PASS, tsn
+/examples/tsn/timesynchronization/, -f omnetpp.ini -c TwoMastersOneSyncDomain -r 0,           4s,           f84f-8ec7/tplx;ae89-08f3/~tNl, PASS, tsn
+/examples/tsn/timesynchronization/, -f omnetpp.ini -c TwoMastersTwoSyncDomains -r 0,          4s,           4ff0-c900/tplx;6115-5b2b/~tNl, PASS, tsn
+/examples/tsn/timesynchronization/, -f omnetpp.ini -c NormalOperation -r 0,                   4s,           2d2c-972c/tplx;0f0e-ab05/~tNl, PASS, tsn
+/examples/tsn/timesynchronization/, -f omnetpp.ini -c LinkFailure -r 0,                       4s,           cbab-c78a/tplx;fd17-26a0/~tNl, PASS, tsn
+/examples/tsn/timesynchronization/, -f omnetpp.ini -c Failover -r 0,                          4s,           e585-37db/tplx;a85a-c103/~tNl, PASS, tsn
+
+/examples/tsn/trafficshaping/,      -f omnetpp.ini -c CreditBasedShaper -r 0,                 0.1s,         a82d-5644/tplx;9d42-80ec/~tNl, PASS, tsn
+/examples/tsn/trafficshaping/,      -f omnetpp.ini -c TimeAwareShaper -r 0,                   0.1s,         9eba-eb83/tplx;62f5-72bc/~tNl, PASS, tsn
+/examples/tsn/trafficshaping/,      -f omnetpp.ini -c AsynchronousShaper -r 0,                0.1s,         6606-5127/tplx;fb46-e9e1/~tNl, PASS, tsn
+
 /examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            635a-0571/tplx;8bed-195e/~tNl;15ad-3e8a/tyf, PASS,
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            eb50-fbaa/tplx;be78-aee4/~tNl;3a74-1a78/tyf, PASS,
 /examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0,        200s,            4095-fad1/tplx;2ba1-3f1a/~tNl;1cff-ef99/tyf, PASS,
