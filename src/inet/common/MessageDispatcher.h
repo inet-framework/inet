@@ -63,6 +63,9 @@ class INET_API MessageDispatcher :
     };
 
   protected:
+    bool forwardServiceRegistration;
+    bool forwardProtocolRegistration;
+
     std::map<int, int> socketIdToGateIndex;
     std::map<int, int> interfaceIdToGateIndex;
     std::map<Key, int> serviceToGateIndex;

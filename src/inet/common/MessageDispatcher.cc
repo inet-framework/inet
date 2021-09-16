@@ -35,6 +35,8 @@ void MessageDispatcher::initialize(int stage)
     PacketProcessorBase::initialize(stage);
 #endif // #ifdef INET_WITH_QUEUEING
     if (stage == INITSTAGE_LOCAL) {
+        forwardServiceRegistration = par("forwardServiceRegistration");
+        forwardProtocolRegistration = par("forwardProtocolRegistration");
         WATCH_MAP(socketIdToGateIndex);
         WATCH_MAP(interfaceIdToGateIndex);
         WATCH_MAP(serviceToGateIndex);
@@ -306,14 +308,16 @@ void MessageDispatcher::handleRegisterService(const Protocol& protocol, cGate *g
     }
     else {
         serviceToGateIndex[key] = g->getIndex();
-        auto connectedGate = g->getType() == cGate::INPUT ? g->getPathStartGate() : g->getPathEndGate();
-        auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
-        int size = gateSize(gateName);
-        for (int i = 0; i < size; i++) {
-            auto otherGate = gate(gateName, i);
-            auto otherConnectedGate = otherGate->getType() == cGate::INPUT ? otherGate->getPathStartGate() : otherGate->getPathEndGate();
-            if (connectedGate->getOwner() != otherConnectedGate->getOwner())
-                registerService(protocol, otherGate, servicePrimitive);
+        if (forwardServiceRegistration) {
+            auto connectedGate = g->getType() == cGate::INPUT ? g->getPathStartGate() : g->getPathEndGate();
+            auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
+            int size = gateSize(gateName);
+            for (int i = 0; i < size; i++) {
+                auto otherGate = gate(gateName, i);
+                auto otherConnectedGate = otherGate->getType() == cGate::INPUT ? otherGate->getPathStartGate() : otherGate->getPathEndGate();
+                if (connectedGate->getOwner() != otherConnectedGate->getOwner())
+                    registerService(protocol, otherGate, servicePrimitive);
+            }
         }
     }
 }
@@ -330,14 +334,16 @@ void MessageDispatcher::handleRegisterAnyService(cGate *g, ServicePrimitive serv
     }
     else {
         serviceToGateIndex[key] = g->getIndex();
-        auto connectedGate = g->getType() == cGate::INPUT ? g->getPathStartGate() : g->getPathEndGate();
-        auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
-        int size = gateSize(gateName);
-        for (int i = 0; i < size; i++) {
-            auto otherGate = gate(gateName, i);
-            auto otherConnectedGate = otherGate->getType() == cGate::INPUT ? otherGate->getPathStartGate() : otherGate->getPathEndGate();
-            if (connectedGate->getOwner() != otherConnectedGate->getOwner())
-                registerAnyService(otherGate, servicePrimitive);
+        if (forwardServiceRegistration) {
+            auto connectedGate = g->getType() == cGate::INPUT ? g->getPathStartGate() : g->getPathEndGate();
+            auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
+            int size = gateSize(gateName);
+            for (int i = 0; i < size; i++) {
+                auto otherGate = gate(gateName, i);
+                auto otherConnectedGate = otherGate->getType() == cGate::INPUT ? otherGate->getPathStartGate() : otherGate->getPathEndGate();
+                if (connectedGate->getOwner() != otherConnectedGate->getOwner())
+                    registerAnyService(otherGate, servicePrimitive);
+            }
         }
     }
 }
@@ -354,14 +360,16 @@ void MessageDispatcher::handleRegisterProtocol(const Protocol& protocol, cGate *
     }
     else {
         protocolToGateIndex[key] = g->getIndex();
-        auto connectedGate = g->getType() == cGate::INPUT ? g->getPathStartGate() : g->getPathEndGate();
-        auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
-        int size = gateSize(gateName);
-        for (int i = 0; i < size; i++) {
-            auto otherGate = gate(gateName, i);
-            auto otherConnectedGate = otherGate->getType() == cGate::INPUT ? otherGate->getPathStartGate() : otherGate->getPathEndGate();
-            if (connectedGate->getOwner() != otherConnectedGate->getOwner())
-                registerProtocol(protocol, otherGate, servicePrimitive);
+        if (forwardProtocolRegistration) {
+            auto connectedGate = g->getType() == cGate::INPUT ? g->getPathStartGate() : g->getPathEndGate();
+            auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
+            int size = gateSize(gateName);
+            for (int i = 0; i < size; i++) {
+                auto otherGate = gate(gateName, i);
+                auto otherConnectedGate = otherGate->getType() == cGate::INPUT ? otherGate->getPathStartGate() : otherGate->getPathEndGate();
+                if (connectedGate->getOwner() != otherConnectedGate->getOwner())
+                    registerProtocol(protocol, otherGate, servicePrimitive);
+            }
         }
     }
 }
@@ -378,14 +386,16 @@ void MessageDispatcher::handleRegisterAnyProtocol(cGate *g, ServicePrimitive ser
     }
     else {
         protocolToGateIndex[key] = g->getIndex();
-        auto connectedGate = g->getType() == cGate::INPUT ? g->getPathStartGate() : g->getPathEndGate();
-        auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
-        int size = gateSize(gateName);
-        for (int i = 0; i < size; i++) {
-            auto otherGate = gate(gateName, i);
-            auto otherConnectedGate = otherGate->getType() == cGate::INPUT ? otherGate->getPathStartGate() : otherGate->getPathEndGate();
-            if (connectedGate->getOwner() != otherConnectedGate->getOwner())
-                registerAnyProtocol(otherGate, servicePrimitive);
+        if (forwardProtocolRegistration) {
+            auto connectedGate = g->getType() == cGate::INPUT ? g->getPathStartGate() : g->getPathEndGate();
+            auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
+            int size = gateSize(gateName);
+            for (int i = 0; i < size; i++) {
+                auto otherGate = gate(gateName, i);
+                auto otherConnectedGate = otherGate->getType() == cGate::INPUT ? otherGate->getPathStartGate() : otherGate->getPathEndGate();
+                if (connectedGate->getOwner() != otherConnectedGate->getOwner())
+                    registerAnyProtocol(otherGate, servicePrimitive);
+            }
         }
     }
 }
