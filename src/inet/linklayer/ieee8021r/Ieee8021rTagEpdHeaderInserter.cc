@@ -58,8 +58,16 @@ void Ieee8021rTagEpdHeaderInserter::processPacket(Packet *packet)
     packet->insertAtFront(header);
     packetProtocolTag->setProtocol(&Protocol::ieee8021rTag);
     packetProtocolTag->setFrontOffset(b(0));
-    if (nextProtocol != nullptr)
-        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(nextProtocol);
+    const Protocol *dispatchProtocol = nullptr;
+    if (auto encapsulationProtocolReq = packet->findTagForUpdate<EncapsulationProtocolReq>()) {
+        dispatchProtocol = encapsulationProtocolReq->getProtocols(0);
+        encapsulationProtocolReq->eraseProtocols(0);
+    }
+    else if (nextProtocol != nullptr)
+        dispatchProtocol = nextProtocol;
+    else
+        dispatchProtocol = &Protocol::ethernetMac;
+    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(dispatchProtocol);
 }
 
 } // namespace inet

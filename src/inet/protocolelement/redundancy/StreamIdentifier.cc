@@ -80,6 +80,13 @@ void StreamIdentifier::processPacket(Packet *packet)
             }
         }
     }
+    if (streamName != nullptr) {
+        if (auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>()) {
+            auto encapsulationReq = packet->addTagIfAbsent<EncapsulationProtocolReq>();
+            encapsulationReq->insertProtocols(0, dispatchProtocolReq->getProtocol());
+        }
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8021rTag);
+    }
     handlePacketProcessed(packet);
     updateDisplayString();
 }
