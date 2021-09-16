@@ -303,7 +303,7 @@ void MessageDispatcher::handleRegisterService(const Protocol& protocol, cGate *g
     auto key = Key(protocol.getId(), servicePrimitive);
     auto it = serviceToGateIndex.find(key);
     if (it != serviceToGateIndex.end()) {
-        if (it->second != g->getIndex())
+        if (servicePrimitive == SP_REQUEST && it->second != g->getIndex())
             throw cRuntimeError("handleRegisterService(): service is already registered: protocolId = %d, protocolName = %s, servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", protocol.getId(), protocol.str().c_str(), static_cast<int>(servicePrimitive), g->getPathStartGate()->getFullPath().c_str(), g->getPathEndGate()->getFullPath().c_str());
     }
     else {
@@ -329,7 +329,7 @@ void MessageDispatcher::handleRegisterAnyService(cGate *g, ServicePrimitive serv
     auto key = Key(-1, servicePrimitive);
     auto it = serviceToGateIndex.find(key);
     if (it != serviceToGateIndex.end()) {
-        if (it->second != g->getIndex())
+        if (servicePrimitive == SP_REQUEST && it->second != g->getIndex())
             throw cRuntimeError("handleRegisterAnyService(): any service is already registered: servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", static_cast<int>(servicePrimitive), g->getPathStartGate()->getFullPath().c_str(), g->getPathEndGate()->getFullPath().c_str());
     }
     else {
@@ -355,7 +355,7 @@ void MessageDispatcher::handleRegisterProtocol(const Protocol& protocol, cGate *
     auto key = Key(protocol.getId(), servicePrimitive);
     auto it = protocolToGateIndex.find(key);
     if (it != protocolToGateIndex.end()) {
-        if (it->second != g->getIndex())
+        if (servicePrimitive == SP_INDICATION && it->second != g->getIndex())
             throw cRuntimeError("handleRegisterProtocol(): protocol is already registered: protocolId = %d, protocolName = %s, servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", protocol.getId(), protocol.str().c_str(), static_cast<int>(servicePrimitive), g->getPathStartGate()->getFullPath().c_str(), g->getPathEndGate()->getFullPath().c_str());
     }
     else {
@@ -381,7 +381,7 @@ void MessageDispatcher::handleRegisterAnyProtocol(cGate *g, ServicePrimitive ser
     auto key = Key(-1, servicePrimitive);
     auto it = protocolToGateIndex.find(key);
     if (it != protocolToGateIndex.end()) {
-        if (it->second != g->getIndex())
+        if (servicePrimitive == SP_INDICATION && it->second != g->getIndex())
             throw cRuntimeError("handleRegisterAnyProtocol(): any protocol is already registered: servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", static_cast<int>(servicePrimitive), g->getPathStartGate()->getFullPath().c_str(), g->getPathEndGate()->getFullPath().c_str());
     }
     else {
