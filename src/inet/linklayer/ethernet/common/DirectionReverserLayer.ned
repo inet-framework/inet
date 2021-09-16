@@ -32,12 +32,14 @@ module DirectionReverserLayer like IProtocolLayer
         output lowerLayerOut;
     submodules:
         fork: MessageDispatcher {
+            forwardServiceRegistration = false;
             @display("p=100,100;i=-;b=10,10,oval,grey,,1");
         }
         reverser: PacketDirectionReverser {
             @display("p=300,100");
         }
         join: PacketMultiplexer {
+            forwardProtocolRegistration = false;
             @display("p=500,100");
         }
     connections:
