@@ -1,3 +1,18 @@
+# TODO
+#standard          = INET
+#meter + scheduler = meter + filter + meter + filter
+
+#Meter + filter = Milter
+#Qci filtering using a classifier and multiple milters and scheduler where a milter can be a MultiPacketMilter
+
+determining the next protocol for a packet in a protocol module (DispatchProtocolReq)
+ - use protocol for specific address type (Ipv4, Ipv6)
+ - use protocol based on socket type
+ - use first protocol in encapsulation protocol list request (EncapsulationProtocolReq)
+ - use the requested transport protocol, network protocol, MAC protocol (TransportProtocolReq, NetworkProtocolReq, MacProtocolReq)
+ - use native protocol of network interface (specified as NetworkInterface protocol parameter)
+ - use default next protocol of protocol module (hard-coded or specified as protocol parameter)
+
 INET 4.4 release TODO items:
 
 1. Fix
