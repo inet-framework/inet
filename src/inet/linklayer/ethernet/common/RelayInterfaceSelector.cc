@@ -131,10 +131,14 @@ void RelayInterfaceSelector::sendPacket(Packet *packet, const MacAddress& destin
     packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
     auto protocol = outgoingInterface->getProtocol();
-    if (protocol != nullptr)
-        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
-    else
-        packet->removeTagIfPresent<DispatchProtocolReq>();
+    if (protocol != nullptr) {
+        if (auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>()) {
+            auto encapsulationProtocolReq = packet->addTagIfAbsent<EncapsulationProtocolReq>();
+            encapsulationProtocolReq->insertProtocols(protocol);
+        }
+        else
+            packet->addTag<DispatchProtocolReq>()->setProtocol(protocol);
+    }
     pushOrSendPacket(packet, outputGate, consumer);
 }
 
