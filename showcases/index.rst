@@ -34,6 +34,7 @@ All showcases:
 
    emulation/index
    ethernet/index
+   tsn/index
    general/index
    mobility/index
    routing/index
