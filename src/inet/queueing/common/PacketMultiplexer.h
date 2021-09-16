@@ -29,6 +29,9 @@ namespace queueing {
 class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IPassivePacketSink, public virtual IActivePacketSource, public TransparentProtocolRegistrationListener
 {
   protected:
+    bool forwardServiceRegistration;
+    bool forwardProtocolRegistration;
+
     std::vector<cGate *> inputGates;
     std::vector<IActivePacketSource *> producers;
 
@@ -66,6 +69,9 @@ class INET_API PacketMultiplexer : public PacketProcessorBase, public virtual IP
 
     virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
+
+    virtual bool isForwardingService(cGate *gate, ServicePrimitive servicePrimitive) const override { return forwardServiceRegistration; }
+    virtual bool isForwardingProtocol(cGate *gate, ServicePrimitive servicePrimitive) const override { return forwardProtocolRegistration; }
 };
 
 } // namespace queueing
