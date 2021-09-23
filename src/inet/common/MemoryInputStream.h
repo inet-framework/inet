@@ -365,6 +365,36 @@ class INET_API MemoryInputStream
     }
 
     /**
+     * Reads a 48 bit unsigned integer at the current position of the stream in
+     * big endian byte order and MSB to LSB bit order.
+     */
+    uint64_t readUint48Be() {
+        uint64_t value = 0;
+        value |= (static_cast<uint64_t>(readByte()) << 40);
+        value |= (static_cast<uint64_t>(readByte()) << 32);
+        value |= (static_cast<uint64_t>(readByte()) << 24);
+        value |= (static_cast<uint64_t>(readByte()) << 16);
+        value |= (static_cast<uint64_t>(readByte()) << 8);
+        value |= (static_cast<uint64_t>(readByte()) << 0);
+        return value;
+    }
+
+    /**
+     * Reads a 48 bit unsigned integer at the current position of the stream in
+     * little endian byte order and MSB to LSB bit order.
+     */
+    uint64_t readUint48Le() {
+        uint64_t value = 0;
+        value |= (static_cast<uint64_t>(readByte()) << 0);
+        value |= (static_cast<uint64_t>(readByte()) << 8);
+        value |= (static_cast<uint64_t>(readByte()) << 16);
+        value |= (static_cast<uint64_t>(readByte()) << 24);
+        value |= (static_cast<uint64_t>(readByte()) << 32);
+        value |= (static_cast<uint64_t>(readByte()) << 40);
+        return value;
+    }
+
+    /**
      * Reads a 64 bit unsigned integer at the current position of the stream in
      * big endian byte order and MSB to LSB bit order.
      */
