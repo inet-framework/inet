@@ -17,14 +17,12 @@ The network contains a source and a destination node and five switches.
 
 Here is the network:
 
-.. .. image:: media/Network.png
+.. figure:: media/Network.png
    :align: center
-   :width: 100%
 
 Here is the configuration:
 
 .. literalinclude:: ../omnetpp.ini
-   :align: center
    :language: ini
 
 Results
@@ -36,11 +34,16 @@ The following video shows the behavior in Qtenv:
    :align: center
    :width: 90%
 
-Here are the simulation results:
+Here is the number of packets received and sent:
 
-.. .. image:: media/results.png
+.. figure:: media/packetsreceivedsent.svg
    :align: center
    :width: 100%
+
+Here is the ratio of received and sent packets:
+
+.. figure:: media/packetratio.png
+   :align: center
 
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`FrerAndTasShowcase.ned <../FrerAndTasShowcase.ned>`

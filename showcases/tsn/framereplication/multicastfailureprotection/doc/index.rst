@@ -17,30 +17,28 @@ sent through the network from one of the switches to all other switches.
 
 Here is the network:
 
-.. .. image:: media/Network.png
+.. figure:: media/Network.png
    :align: center
-   :width: 100%
 
 Here is the configuration:
 
 .. literalinclude:: ../omnetpp.ini
-   :align: center
    :language: ini
 
 Results
 -------
 
-The following video shows the behavior in Qtenv:
+.. The following video shows the behavior in Qtenv:
 
-.. video:: media/behavior.mp4
-   :align: center
-   :width: 90%
+   .. video:: media/behavior.mp4
+      :align: center
+      :width: 90%
 
-Here are the simulation results:
+   Here are the simulation results:
 
-.. .. image:: media/results.png
-   :align: center
-   :width: 100%
+   .. .. image:: media/results.png
+      :align: center
+      :width: 100%
 
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`MulticastFailureProtectionShowcase.ned <../MulticastFailureProtectionShowcase.ned>`
