@@ -15,21 +15,41 @@ The Model
 
 Here is the network:
 
-.. .. image:: media/Network.png
+.. figure:: media/Network.png
    :align: center
-   :width: 100%
 
-Here is the configuration:
+Here is the ``General`` configuration:
 
 .. literalinclude:: ../omnetpp.ini
-   :align: center
    :language: ini
+   :end-before: NormalOperation
 
 Normal Operation
 ----------------
 
 In this configuration time synchronization is operating properly. The end-to-end
 delay is a constant low value.
+
+Here is the configuration:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: NormalOperation
+   :end-before: LinkFailure
+
+Here are the results:
+
+.. figure:: media/primaryclocktimedomain.svg
+   :align: center
+   :width: 100%
+
+.. figure:: media/hotstandbytimedomain.svg
+   :align: center
+   :width: 100%
+
+.. figure:: media/bridgesendstations.svg
+   :align: center
+   :width: 100%
 
 Link Failure of Master Clock
 ----------------------------
@@ -40,6 +60,30 @@ end-to-end delay suddenly increases dramatically. The reason is that frames ofte
 wait for the next gate scheduling cycle because they miss the allocated time slot
 due to improperly synchronized clocks.
 
+Here is the configuration:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: LinkFailure
+   :end-before: Failover
+
+Here are the results:
+
+.. figure:: media/linkfailure_primarymaster.svg
+   :align: center
+   :width: 100%
+
+.. figure:: media/linkfailure_hotstandby.svg
+   :align: center
+   :width: 100%
+
+.. figure:: media/linkfailure_bridgesendstations.svg
+   :align: center
+   :width: 100%
+
+.. figure:: media/linkfailure_endtoenddelay.png
+   :align: center
+
 Failover to Hot-Standby Clock
 -----------------------------
 
@@ -47,20 +91,43 @@ In this configuration the hot-standby master clock failover happens and the time
 synchronization continues to keep the difference of clocks in the network below
 the required limit.
 
-Results
--------
+Here is the configuration:
 
-The following video shows the behavior in Qtenv:
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: Failover
 
-.. video:: media/behavior.mp4
-   :align: center
-   :width: 90%
+Here are the results:
 
-Here are the simulation results:
-
-.. .. image:: media/results.png
+.. figure:: media/failover_primarymaster.svg
    :align: center
    :width: 100%
+
+.. figure:: media/failover_hotstandby.svg
+   :align: center
+   :width: 100%
+
+.. figure:: media/failover_bridgesendstations.svg
+   :align: center
+   :width: 100%
+
+.. figure:: media/failover_endtoenddelay.png
+   :align: center
+
+.. Results
+   -------
+
+   The following video shows the behavior in Qtenv:
+
+   .. video:: media/behavior.mp4
+      :align: center
+      :width: 90%
+
+   Here are the simulation results:
+
+   .. .. image:: media/results.png
+      :align: center
+      :width: 100%
 
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`GptpAndTasShowcase.ned <../GptpAndTasShowcase.ned>`

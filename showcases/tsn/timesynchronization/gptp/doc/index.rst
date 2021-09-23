@@ -14,23 +14,32 @@ reliable time synchronization throughout the whole network.
 The Model
 ---------
 
-Here is the network:
-
-.. .. image:: media/Network.png
-   :align: center
-   :width: 100%
-
-Here is the configuration:
+Here is the ``General`` configuration:
 
 .. literalinclude:: ../omnetpp.ini
-   :align: center
    :language: ini
+   :end-before: OneMasterClock
 
 One Master Clock
 ----------------
 
 In this configuration the network topology is a simple tree. The network contains
-one master clock, one bridge and two end stations.
+one master clock, one bridge and two end stations:
+
+.. figure:: media/OneMasterClockNetwork.png
+   :align: center
+
+Here is the configuration:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: OneMasterClock
+   :end-before: PrimaryAndHotStandbyMasterClocks
+
+Here are the results for one master clock:
+
+.. figure:: media/OneMasterClock.png
+   :align: center
 
 Primary and Hot-Standby Master Clocks
 -------------------------------------
@@ -43,6 +52,28 @@ which is also synchronized to the primary master clock. This connection effectiv
 causes the two time domains to be totally synchronized and allows seamless failover
 in the case of the master clock failure.
 
+Here is the network:
+
+.. figure:: media/PrimaryAndHotStandbyNetwork.png
+   :align: center
+
+Here is the configuration:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: PrimaryAndHotStandbyMasterClocks
+   :end-before: TwoMasterClocksExploitingNetworkRedundancy
+
+Here are the results for the primary and hot standby clocks:
+
+.. figure:: media/PrimaryAndHotStandby2.svg
+   :align: center
+
+And here are the time domains of the primary and hot standby clocks:
+
+.. figure:: media/TimeDomainsPrimaryAndHotStandby2.svg
+   :align: center
+
 Two Master Clocks Exploiting Network Redundancy
 -----------------------------------------------
 
@@ -54,20 +85,43 @@ provides protection against a single link failure in the ring topology because
 all bridges can be reached in both directions by one of the time synchronization
 domains of both master clocks.
 
-Results
--------
+Here is the network:
 
-The following video shows the behavior in Qtenv:
-
-.. video:: media/behavior.mp4
+.. figure:: media/TwoMasterClocksNetwork.png
    :align: center
-   :width: 90%
 
-Here are the simulation results:
+Here is the configuration:
 
-.. .. image:: media/results.png
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: TwoMasterClocksExploitingNetworkRedundancy
+
+Here are the results for two master clocks:
+
+.. figure:: media/TwoMasterClocks.svg
    :align: center
    :width: 100%
+
+And here are the time domains of the two master clocks:
+
+.. figure:: media/TimeDomainsTwoMasterClocks.svg
+   :align: center
+   :width: 100%
+
+.. Results
+   -------
+
+   The following video shows the behavior in Qtenv:
+
+   .. video:: media/behavior.mp4
+      :align: center
+      :width: 90%
+
+   Here are the simulation results:
+
+   .. .. image:: media/results.png
+      :align: center
+      :width: 100%
 
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`GptpShowcase.ned <../GptpShowcase.ned>`

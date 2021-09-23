@@ -20,30 +20,40 @@ packet sources.
 
 Here is the network:
 
-.. .. image:: media/Network.png
+.. image:: media/Network.png
    :align: center
    :width: 100%
 
 Here is the configuration:
 
 .. literalinclude:: ../omnetpp.ini
-   :align: center
    :language: ini
 
 Results
 -------
 
-The following video shows the behavior in Qtenv:
+Here are the results:
 
-.. video:: media/behavior.mp4
+.. figure:: media/stream1.png
    :align: center
-   :width: 90%
 
-Here are the simulation results:
-
-.. .. image:: media/results.png
+.. figure:: media/stream2.png
    :align: center
-   :width: 100%
+
+.. figure:: media/stream3.png
+   :align: center
+
+.. The following video shows the behavior in Qtenv:
+
+   .. video:: media/behavior.mp4
+      :align: center
+      :width: 90%
+
+   Here are the simulation results:
+
+   .. .. image:: media/results.png
+      :align: center
+      :width: 100%
 
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PeekingUnderTheHoodShowcase.ned <../PeekingUnderTheHoodShowcase.ned>`

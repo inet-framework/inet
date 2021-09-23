@@ -15,15 +15,15 @@ The Model
 
 Here is the network:
 
-.. .. image:: media/Network.png
+.. image:: media/Network.png
    :align: center
    :width: 100%
 
-Here is the configuration:
+Here is the ``General`` configuration:
 
 .. literalinclude:: ../omnetpp.ini
-   :align: center
    :language: ini
+   :end-before: SingleRateTwoColorMeter
 
 Single Rate Two Color Meter
 ---------------------------
@@ -32,6 +32,27 @@ In this configuration we use a single rate two color meter for each of the four
 streams. This meter consists of a token bucket and has two parameters: committed
 information rate, committed burst size. Packets are labeled green or red, and
 red packets are dropped.
+
+Here is the configuration:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: SingleRateTwoColorMeter
+   :end-before: DualRateThreeColorMeter
+
+Here are the results:
+
+.. figure:: media/TwoColorBGswitch1.png
+   :align: center
+
+.. figure:: media/TwoColorBGswitch2.png
+   :align: center
+
+.. figure:: media/TwoColorVIDswitch1.png
+   :align: center
+
+.. figure:: media/TwoColorVIDswitch2.png
+   :align: center
 
 Dual Rate Three Color Meter
 ---------------------------
@@ -43,20 +64,40 @@ excess burst size. Tokens overflow from the committed bucket into the excess
 bucket. Packets are labeled green, yellow or red. In this example only red packets
 are dropped. Normally, yellow packets would also be treated differently.
 
-Results
--------
+Here is the configuration:
 
-The following video shows the behavior in Qtenv:
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: DualRateThreeColorMeter
 
-.. video:: media/behavior.mp4
+Here are the results:
+
+.. figure:: media/ThreeColorBGswitch1.png
    :align: center
-   :width: 90%
 
-Here are the simulation results:
-
-.. .. image:: media/results.png
+.. figure:: media/ThreeColorBGswitch2.png
    :align: center
-   :width: 100%
+
+.. figure:: media/ThreeColorVIDswitch1.png
+   :align: center
+
+.. figure:: media/ThreeColorVIDswitch2.png
+   :align: center
+
+.. Results
+   -------
+
+   The following video shows the behavior in Qtenv:
+
+   .. video:: media/behavior.mp4
+      :align: center
+      :width: 90%
+
+   Here are the simulation results:
+
+   .. .. image:: media/results.png
+      :align: center
+      :width: 100%
 
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`TokenBucketBasedPolicingShowcase.ned <../TokenBucketBasedPolicingShowcase.ned>`
