@@ -229,7 +229,7 @@ void Gptp::sendSync()
     if (gptpNodeType == MASTER_NODE) {
         originTimestamp = clock->getClockTime();
     }
-    gptp->setOriginTimestamp(CLOCKTIME_ZERO);
+    //gptp->setOriginTimestamp(CLOCKTIME_ZERO);
     gptp->setSequenceId(sequenceId++);
 
     sentTimeSyncSync = clock->getClockTime();
@@ -261,7 +261,7 @@ void Gptp::sendFollowUp(int portId, const GptpSync *sync, clocktime_t preciseOri
         // gptp->setCorrectionField(correctionField + peerDelay + sentTimeSyncSync - receivedTimeSync);  // TODO revise it!!! see prev. comment, where is the (1-f),  ???
         gptp->setCorrectionField(CLOCKTIME_ZERO);  // TODO revise it!!! see prev. comment, where is the (1-f),  ???
     }
-    gptp->setRateRatio(gmRateRatio);
+    gptp->getFollowUpInformationTLVForUpdate().setRateRatio(gmRateRatio);
     packet->insertAtFront(gptp);
     sendPacketToNIC(packet, portId);
 }
@@ -320,7 +320,7 @@ void Gptp::processSync(Packet *packet, const GptpSync* gptp)
     rcvdGptpSync = true;
     lastReceivedGptpSyncSequenceId = gptp->getSequenceId();
 
-    peerSentTimeSync = gptp->getOriginTimestamp();  // TODO this is unfilled in two-step mode
+    // peerSentTimeSync = gptp->getOriginTimestamp();  // TODO this is unfilled in two-step mode
     syncIngressTimestamp = packet->getTag<GptpIngressTimeInd>()->getArrivalClockTime();
 }
 
@@ -340,7 +340,7 @@ void Gptp::processFollowUp(Packet *packet, const GptpFollowUp* gptp)
 
     peerSentTimeSync = gptp->getPreciseOriginTimestamp();
     correctionField = gptp->getCorrectionField();
-    receivedRateRatio = gptp->getRateRatio();
+    receivedRateRatio = gptp->getFollowUpInformationTLV().getRateRatio();
 
     synchronize();
 
