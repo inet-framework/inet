@@ -27,8 +27,8 @@ namespace inet;
 packet CsmaCaMacFrame
 {
     @implements(IMACFrame);
-    MACAddress transmitterAddress;
-    MACAddress receiverAddress;
+    MACAddress transmitterAddress @overrideGetter @overrideSetter;
+    MACAddress receiverAddress @overrideGetter @overrideSetter;
 }
 
 packet CsmaCaMacAckFrame extends CsmaCaMacFrame

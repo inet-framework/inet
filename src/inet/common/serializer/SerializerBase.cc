@@ -36,7 +36,7 @@ void SerializerBase::serializePacket(const cPacket *pkt, Buffer &b, Context& c)
     unsigned int startPos = b.getPos();
     serialize(pkt, b, c);
     if (!b.hasError() && (b.getPos() - startPos != pkt->getByteLength()))
-        throw cRuntimeError("%s serializer error: packet %s (%s) length is %ld but serialized length is %u", getClassName(), pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos);
+        throw cRuntimeError("%s serializer error: packet %s (%s) length is %" PRId64 " but serialized length is %u", getClassName(), pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos);
 }
 
 cPacket *SerializerBase::deserializePacket(const Buffer &b, Context& context)
@@ -53,7 +53,7 @@ cPacket *SerializerBase::deserializePacket(const Buffer &b, Context& context)
     ASSERT(pkt);
     if (!pkt->hasBitError() && !b.hasError() && (b.getPos() - startPos != pkt->getByteLength())) {
         const char *encclass = pkt->getEncapsulatedPacket() ? pkt->getEncapsulatedPacket()->getClassName() : "<nullptr>";
-        throw cRuntimeError("%s deserializer error: packet %s (%s) length is %ld but deserialized length is %u (encapsulated packet is %s)", getClassName(), pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos, encclass);
+        throw cRuntimeError("%s deserializer error: packet %s (%s) length is %" PRId64 " but deserialized length is %u (encapsulated packet is %s)", getClassName(), pkt->getName(), pkt->getClassName(), pkt->getByteLength(), b.getPos() - startPos, encclass);
     }
     if (b.hasError())
         pkt->setBitError(true);
