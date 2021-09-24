@@ -74,7 +74,7 @@ module CustomMacLayer extends EthernetMacLayer
 {
     parameters:
         server.typename = default("PreemptingServer");
-        streamer.typename = default("OmittedPacketFlow"); // Packet streaming begins in queue module
+        streamer.typename = default(""); // Packet streaming begins in queue module
         receiver.typename = default("StreamingReceiver");
         transmitter.typename = default("StreamingTransmitter");
         fcsInserter.typename = default("EthernetFragmentFcsInserter");
