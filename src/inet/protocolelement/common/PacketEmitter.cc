@@ -57,7 +57,7 @@ void PacketEmitter::processPacket(Packet *packet)
 
 void PacketEmitter::pushPacket(Packet *packet, cGate *gate)
 {
-    emitPacket(packet);
+//    emitPacket(packet);
     PacketFlowBase::pushPacket(packet, gate);
 }
 

@@ -1,3 +1,80 @@
+- reconnect in gptpandtas example doesn't work???
+
+- send python result analysis documentation links
+
+- qci/qcr offered/filtered/passed thruput
+- path end-to-end delay measurements, packet jitter, channel/port utilization/thruput (vectors) 
+- split up and drill down to individual parts, which queue, which transmission, which propagation, etc.
+
+- PCAP recording duplicates???
+
+- NED/User Guide/Showcases
+
+
+- add packet level total times to timing measurements
+- For example: in the transmission time tag for each bit in a marked region the packet total time measures
+   the sum of the total transmission time for all packets where the bit was actually transmitted,
+   neighboring bits may have the same value despite the fact that they were transmitted in different packets
+   class TimeTagBase extends TagBase
+   {
+       string flowNames[];
+       simtime_t bitTotalTimes[];
+       simtime_t packetTotalTimes[];
+   }
+
+- move measurement code from FlowMeasurementRecorder module to result filters
+- create result filters for the flow measurements that can do weighted statistics (region length, packet average)
+- add examples to flow measurements for store-and-forward, A-MPDU aggregation, preemption, cut-through and their effects on the bit and packet total times
+
+
+
+TODO example with combined Ethernet virtual LANs and TSN features
+example with Pcp and PriorityToTrafficClassClassifier classifier example
+Gptp messages must be serializable for PCAP
+what are the metrics to pull out from the simulation? per-stream end-to-end delay
+
+credit based shaper changes (drop credit if no more packets, don't increase credit if CDT is open, increase credit if there are packets to send)
+
+spendRate = lineRate - idleSlopRate
+TODO naming things according to standards, have parameter names according to the standard
+TODO have modules named as TransmissionSelectionAlgorithm
+TODO local clocks in asynchronous shaper
+
+implement multicast support in one gate scheduling configurator
+add compound gate submodule to invehicle example (PeriodicGate and CreditBasedGate)
+
+UDP/IP, ethernet or LLC application?
+
+Qci queue vs queue for gate scheduling?
+
+order of features in tutorial
+
+Ethernet TSN (Time-Sensitive Networking) example with
+ + time-aware shaper (timeawareshaper)
+ + asynchronous shaper (asynchronousshaper)
+ - Z3 SAT based gate scheduling
+ + clock drift (clocksynchronization)
+ + time synchronization (clocksynchronization)
+ + credit-based shaping (creditbasedshaper)
+ + per-stream filtering and policying (filtering/filtering2)
+ + link failure protection with stream redundancy (redundancy/redundancy2)
+ - unicast and multicast streams
+ + frame preemption (preemption)
+ + cut-through switching (cutthrough)
+
+1. time synchronization
+2. bounded low-latency
+   strict priority
+   time-aware shaper
+   preemption
+   cut-through
+3. ultra reliability
+   redundancy
+   per stream filtering
+4. dedicated sources and APIs
+   stream reservation protocol?
+   gate scheduling?
+
 # TODO
 #standard          = INET
 #meter + scheduler = meter + filter + meter + filter

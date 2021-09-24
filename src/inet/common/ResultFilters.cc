@@ -18,11 +18,12 @@
 #include "inet/common/ResultFilters.h"
 
 #include "inet/applications/base/ApplicationPacket_m.h"
+#include "inet/common/FlowTag.h"
+#include "inet/common/geometry/common/Coord.h"
+#include "inet/common/packet/Packet.h"
 #include "inet/common/ResultRecorders.h"
 #include "inet/common/Simsignals_m.h"
 #include "inet/common/TimeTag_m.h"
-#include "inet/common/geometry/common/Coord.h"
-#include "inet/common/packet/Packet.h"
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceptionBase.h"
@@ -126,6 +127,14 @@ void ZCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject 
         fire(this, t, ((Coord *)wrapper->getObject())->z, details);
 }
 
+Register_ResultFilter("packetDuration", PacketDurationFilter);
+
+void PacketDurationFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    auto packet = check_and_cast<cPacket *>(object);
+    fire(this, t, packet->getDuration(), details);
+}
+
 Register_ResultFilter("sourceAddr", MessageSourceAddrFilter);
 
 void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
@@ -137,6 +146,54 @@ void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref 
         if (addresses != nullptr) {
             fire(this, t, addresses->getSrcAddress().str().c_str(), details);
         }
+    }
+}
+
+Register_ResultFilter("utilization", UtilizationFilter);
+
+bool UtilizationFilter::process(simtime_t& t, double& value, cObject *details)
+{
+    // TODO:
+    return true;
+}
+
+Register_ResultFilter("flowName", FlowNameFilter);
+
+void FlowNameFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    std::set<std::string> flows;
+    Packet *packet;
+    if (dynamic_cast<Packet *>(object))
+        packet = check_and_cast<Packet *>(object);
+    else
+        packet = check_and_cast<Packet *>(check_and_cast<cPacket *>(object)->getEncapsulatedPacket());
+    packet->mapAllRegionTags<FlowTag>(b(0), packet->getTotalLength(), [&] (b o, b l, const Ptr<const FlowTag>& flowTag) {
+        for (int i = 0; i < flowTag->getNamesArraySize(); i++) {
+            auto flowName = flowTag->getNames(i);
+            if (flows.find(flowName) == flows.end()) {
+                cNamedObject flowNameDetails(flowName);
+                fire(this, t, object, &flowNameDetails);
+                flows.insert(flowName);
+            }
+        }
+    });
+}
+
+Register_ResultFilter("flowPacketBytes", FlowPacketBytesFilter);
+
+void FlowPacketBytesFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    std::map<std::string, b> flowDataLengths;
+    auto packet = check_and_cast<Packet *>(object);
+    packet->mapAllRegionTags<FlowTag>(b(0), packet->getTotalLength(), [&] (b o, b l, const Ptr<const FlowTag>& flowTag) {
+        for (int i = 0; i < flowTag->getNamesArraySize(); i++) {
+            auto flowName = flowTag->getNames(i);
+            flowDataLengths[flowName] += l;
+        }
+    });
+    for (auto& it : flowDataLengths) {
+        cNamedObject flowNameDetails(it.first.c_str());
+        fire(this, t, it.second.get(), &flowNameDetails);
     }
 }
 

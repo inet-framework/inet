@@ -28,7 +28,11 @@ simple PacketTransmitterBase extends PacketProcessorBase
         @display("i=block/wtx");
         @signal[transmissionStarted](type=inet::physicallayer::Signal);
         @signal[transmissionEnded](type=inet::physicallayer::Signal);
-        @statistic[transmitting](title="transmitting"; type=int; source=count(transmissionStarted) - count(transmissionEnded); record=vector; interpolationmode=sample-hold);
+        @statistic[throughput](title="throughput"; type=double; source=throughput(transmissionEnded); record=vector,histogram; interpolationmode=linear);
+        @statistic[transmitting](title="transmitting"; type=bool; source=count(transmissionStarted) - count(transmissionEnded); record=vector; interpolationmode=sample-hold);
+        @statistic[utilization](title="utilization"; type=double; source=utilization(count(transmissionStarted) - count(transmissionEnded)); record=vector,histogram; interpolationmode=linear);
+        @statistic[transmissionTime](title="transmission time"; type=simtime_t; source=packetDuration(transmissionEnded); record=vector,histogram; interpolationmode=none);
+        @statistic[flowTransmissionTime](title="flow transmission time"; type=simtime_t; source=packetDuration(demux(flowName(transmissionEnded))); record=vector,histogram; interpolationmode=none);
     gates:
         input in;
         output out;

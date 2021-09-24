@@ -50,6 +50,7 @@ module EthernetSwitch like IEthernetNetworkNode
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/switch");
+        // TODO: hasPcapRecorder?
         int numPcapRecorders = default(0);
         int numApps = default(0);
         bool hasStatus = default(false);

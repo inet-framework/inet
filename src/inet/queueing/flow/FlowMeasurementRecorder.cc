@@ -22,13 +22,23 @@
 namespace inet {
 namespace queueing {
 
-simsignal_t FlowMeasurementRecorder::lifeTimeSignal = cComponent::registerSignal("lifeTime");
-simsignal_t FlowMeasurementRecorder::elapsedTimeSignal = cComponent::registerSignal("elapsedTime");
-simsignal_t FlowMeasurementRecorder::delayingTimeSignal = cComponent::registerSignal("delayingTime");
-simsignal_t FlowMeasurementRecorder::queueingTimeSignal = cComponent::registerSignal("queueingTime");
-simsignal_t FlowMeasurementRecorder::processingTimeSignal = cComponent::registerSignal("processingTime");
-simsignal_t FlowMeasurementRecorder::transmissionTimeSignal = cComponent::registerSignal("transmissionTime");
-simsignal_t FlowMeasurementRecorder::propagationTimeSignal = cComponent::registerSignal("propagationTime");
+simsignal_t FlowMeasurementRecorder::bitLifeTimeSignal = cComponent::registerSignal("bitLifeTime");
+simsignal_t FlowMeasurementRecorder::bitElapsedTimeSignal = cComponent::registerSignal("bitElapsedTime");
+simsignal_t FlowMeasurementRecorder::totalBitDelayingTimeSignal = cComponent::registerSignal("totalBitDelayingTime");
+simsignal_t FlowMeasurementRecorder::totalBitQueueingTimeSignal = cComponent::registerSignal("totalBitQueueingTime");
+simsignal_t FlowMeasurementRecorder::totalBitProcessingTimeSignal = cComponent::registerSignal("totalBitProcessingTime");
+simsignal_t FlowMeasurementRecorder::totalBitTransmissionTimeSignal = cComponent::registerSignal("totalBitTransmissionTime");
+simsignal_t FlowMeasurementRecorder::totalBitPropagationTimeSignal = cComponent::registerSignal("totalBitPropagationTime");
+simsignal_t FlowMeasurementRecorder::totalPacketTransmissionTimePerBitSignal = cComponent::registerSignal("totalPacketTransmissionTimePerBit");
+
+simsignal_t FlowMeasurementRecorder::bitLifeTimePerRegionSignal = cComponent::registerSignal("bitLifeTimePerRegion");
+simsignal_t FlowMeasurementRecorder::bitElapsedTimePerRegionSignal = cComponent::registerSignal("bitElapsedTimePerRegion");
+simsignal_t FlowMeasurementRecorder::totalBitDelayingTimePerRegionSignal = cComponent::registerSignal("totalBitDelayingTimePerRegion");
+simsignal_t FlowMeasurementRecorder::totalBitQueueingTimePerRegionSignal = cComponent::registerSignal("totalBitQueueingTimePerRegion");
+simsignal_t FlowMeasurementRecorder::totalBitProcessingTimePerRegionSignal = cComponent::registerSignal("totalBitProcessingTimePerRegion");
+simsignal_t FlowMeasurementRecorder::totalBitTransmissionTimePerRegionSignal = cComponent::registerSignal("totalBitTransmissionTimePerRegion");
+simsignal_t FlowMeasurementRecorder::totalBitPropagationTimePerRegionSignal = cComponent::registerSignal("totalBitPropagationTimePerRegion");
+simsignal_t FlowMeasurementRecorder::totalPacketTransmissionTimePerRegionSignal = cComponent::registerSignal("totalPacketTransmissionTimePerRegion");
 
 Define_Module(FlowMeasurementRecorder);
 
@@ -69,14 +79,21 @@ void FlowMeasurementRecorder::processPacket(Packet *packet)
     }
 }
 
-void FlowMeasurementRecorder::makeMeasurement(Packet *packet, b offset, b length, const char *flowName, simsignal_t signal, simtime_t value)
+void FlowMeasurementRecorder::makeMeasurement(Packet *packet, b offset, b length, const char *flowName, simsignal_t bitSignal, simsignal_t bitPerRegionSignal, simsignal_t packetPerBitSignal, simsignal_t packetPerRegionSignal, simtime_t bitValue, simtime_t packetValue)
 {
     EV_INFO << "Making measurement on packet" << EV_FIELD(offset) << EV_FIELD(length);
     if (flowName != nullptr && *flowName != '\0')
         EV_INFO << EV_FIELD(flowName);
-    EV_INFO << EV_FIELD(signal, cComponent::getSignalName(signal)) << EV_FIELD(value) << EV_FIELD(packet) << EV_ENDL;
+    EV_INFO << EV_FIELD(bitSignal, cComponent::getSignalName(bitSignal)) << EV_FIELD(bitValue) << EV_FIELD(packet) << EV_ENDL;
     cNamedObject details(flowName);
-    emit(signal, value, &details);
+    for (int i = 0; i < length.get(); i++) {
+        emit(bitSignal, bitValue, &details);
+        if (packetPerBitSignal != -1)
+            emit(packetPerBitSignal, packetValue, &details);
+    }
+    emit(bitPerRegionSignal, bitValue, &details);
+    if (packetPerRegionSignal != -1)
+        emit(packetPerRegionSignal, packetValue, &details);
 }
 
 void FlowMeasurementRecorder::makeMeasurements(Packet *packet)
@@ -84,7 +101,7 @@ void FlowMeasurementRecorder::makeMeasurements(Packet *packet)
     b length = this->length == b(-1) ? packet->getTotalLength() - offset : this->length;
     if (measureLifeTime)
         packet->mapAllRegionTags<CreationTimeTag>(offset, length, [&] (b o, b l, const Ptr<const CreationTimeTag>& timeTag) {
-            makeMeasurement(packet, o, l, nullptr, lifeTimeSignal, simTime() - timeTag->getCreationTime());
+            makeMeasurement(packet, o, l, nullptr, bitLifeTimeSignal, bitLifeTimePerRegionSignal, -1, -1, simTime() - timeTag->getCreationTime(), -1);
         });
     if (measureElapsedTime) {
         packet->mapAllRegionTags<ElapsedTimeTag>(offset, length, [&] (b o, b l, const Ptr<const ElapsedTimeTag>& timeTag) {
@@ -92,20 +109,20 @@ void FlowMeasurementRecorder::makeMeasurements(Packet *packet)
                 auto flowName = timeTag->getFlowNames(i);
                 cMatchableString matchableFlowName(flowName);
                 if (flowNameMatcher.matches(&matchableFlowName))
-                    makeMeasurement(packet, o, l, flowName, elapsedTimeSignal, simTime() - timeTag->getBitTotalTimes(i));
+                    makeMeasurement(packet, o, l, flowName, bitElapsedTimeSignal, bitElapsedTimePerRegionSignal, -1, -1, simTime() - timeTag->getBitTotalTimes(i), -1);
             }
         });
     }
     if (measureDelayingTime)
-        makeMeasurement<DelayingTimeTag>(packet, offset, length, delayingTimeSignal);
+        makeMeasurement<DelayingTimeTag>(packet, offset, length, totalBitDelayingTimeSignal, totalBitDelayingTimePerRegionSignal, -1, -1);
     if (measureQueueingTime)
-        makeMeasurement<QueueingTimeTag>(packet, offset, length, queueingTimeSignal);
+        makeMeasurement<QueueingTimeTag>(packet, offset, length, totalBitQueueingTimeSignal, totalBitQueueingTimePerRegionSignal, -1, -1);
     if (measureProcessingTime)
-        makeMeasurement<ProcessingTimeTag>(packet, offset, length, processingTimeSignal);
+        makeMeasurement<ProcessingTimeTag>(packet, offset, length, totalBitProcessingTimeSignal, totalBitProcessingTimePerRegionSignal, -1, -1);
     if (measureTransmissionTime)
-        makeMeasurement<TransmissionTimeTag>(packet, offset, length, transmissionTimeSignal);
+        makeMeasurement<TransmissionTimeTag>(packet, offset, length, totalBitTransmissionTimeSignal, totalBitTransmissionTimePerRegionSignal, totalPacketTransmissionTimePerBitSignal, totalPacketTransmissionTimePerRegionSignal);
     if (measurePropagationTime)
-        makeMeasurement<PropagationTimeTag>(packet, offset, length, propagationTimeSignal);
+        makeMeasurement<PropagationTimeTag>(packet, offset, length, totalBitPropagationTimeSignal, totalBitPropagationTimePerRegionSignal, -1, -1);
 }
 
 void FlowMeasurementRecorder::endMeasurements(Packet *packet)

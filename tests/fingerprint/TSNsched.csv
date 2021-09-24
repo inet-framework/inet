@@ -1,0 +1,3 @@
+# this file requirs TSNsched to be installed, see TSNschedGateSchedulingConfigurator
+/examples/ethernet/timeawareshaper/,       -f omnetpp.ini -c TSNschedTAS -r 0,                    100ms,   6b61-6cca/tplx;9bed-6249/~tNl;c4b7-d607/~tND;2afc-e539/tyf, PASS, ethernet layered tsn
+/examples/ethernet/timeawareshaper/,       -f omnetpp.ini -c BrokenCameraTSNschedTAS -r 0,        100ms,   2a59-1574/tplx;f69e-0d9c/~tNl;a399-79f7/~tND;059c-bfb3/tyf, PASS, ethernet layered tsn

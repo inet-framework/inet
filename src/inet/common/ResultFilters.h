@@ -143,12 +143,49 @@ class INET_API ZCoordFilter : public cPointerResultFilter
 };
 
 /**
+ * Filter that expects a packet and outputs its duration
+ */
+class INET_API PacketDurationFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
  * Filter that expects a cMessage and outputs its source address as string
  */
 class INET_API MessageSourceAddrFilter : public cObjectResultFilter
 {
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+class INET_API FlowNameFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+class INET_API FlowPacketBytesFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
+ * Filter that expects a boolean and outputs the utilization as double.
+ * Throughput is computed for the *past* interval every 0.1s or 100 values,
+ * whichever comes first.
+ *
+ * Recommended interpolation mode: backward sample-hold.
+ */
+class INET_API UtilizationFilter : public cNumericResultFilter
+{
+  protected:
+    // TODO:
+
+  protected:
+    virtual bool process(simtime_t& t, double& value, cObject *details) override;
 };
 
 /**

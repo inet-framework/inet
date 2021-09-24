@@ -39,6 +39,12 @@ simple PacketFilterBase extends PacketProcessorBase
         @statistic[packetPulled](title="packets pulled"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetFiltered](title="packets filtered"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropped](title="packets dropped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[pushedTraffic](title="pushed traffic"; source=throughput(packetBytes(packetPushed)); interpolationmode=linear);
+        @statistic[filteredTraffic](title="filtered traffic"; source=throughput(packetBytes(packetFiltered)); interpolationmode=linear);
+        @statistic[doppedTraffic](title="dropped traffic"; source=throughput(packetBytes(packetDropped)); interpolationmode=linear);
+        @statistic[flowPushedTraffic](title="flow pushed traffic"; source=throughput(demux(flowPacketBytes(packetPushed))); interpolationmode=linear);
+        @statistic[flowFilteredTraffic](title="flow filtered traffic"; source=throughput(demux(flowPacketBytes(packetFiltered))); interpolationmode=linear);
+        @statistic[flowDoppedTraffic](title="flow dropped traffic"; source=throughput(demux(flowPacketBytes(packetDropped))); interpolationmode=linear);
     gates:
         input in @labels(send,push,pull,pass,stream);
         output out @labels(send,push,pull,pass,stream);
