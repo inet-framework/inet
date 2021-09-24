@@ -20,6 +20,13 @@ package inet.node.tsn;
 import inet.applications.contract.IApp;
 import inet.node.inet.StandardHost;
 
+//
+// This module represents a Time-Sensitive Networking (TSN) hardware end device
+// that supports time synchronization, per-stream filtering and policing, scheduling
+// and traffic shaping, frame replication and elimination, frame preemption for
+// Ethernet networks. All TSN features are optional and they can be combined with
+// other Ethernet features.
+//
 module TsnDevice extends StandardHost
 {
     parameters:

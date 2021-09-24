@@ -20,6 +20,9 @@ package inet.networks;
 import inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfigurator;
 import inet.networklayer.configurator.contract.INetworkConfigurator;
 
+//
+// This module serves as a network base module for Time-Sensitive Networking (TSN).
+//
 network TsnNetworkBase extends WiredNetworkBase
 {
     parameters:
