@@ -32,6 +32,12 @@ namespace inet {
 namespace utils {
 namespace filters {
 
+class INET_API Flow : public cNamedObject
+{
+  public:
+    Flow(const char *name) : cNamedObject(name) { }
+};
+
 Register_ResultFilter("dataAge", DataAgeFilter);
 
 void DataAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
@@ -124,6 +130,38 @@ void ZCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject 
 {
     if (auto wrapper = dynamic_cast<VoidPtrWrapper *>(object))
         fire(this, t, ((Coord *)wrapper->getObject())->z, details);
+}
+
+Register_ResultFilter("packetDuration", PacketDurationFilter);
+
+void PacketDurationFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    auto packet = check_and_cast<cPacket *>(object);
+    fire(this, t, packet->getDuration(), details);
+}
+
+Register_ResultFilter("packetLength", PacketLengthFilter);
+
+void PacketLengthFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    auto packet = check_and_cast<Packet *>(object);
+    fire(this, t, packet->getDataLength().get(), details);
+}
+
+Register_ResultFilter("flowPacketLength", FlowPacketLengthFilter);
+
+void FlowPacketLengthFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    auto packet = check_and_cast<Packet *>(object);
+    auto flow = check_and_cast<Flow *>(details);
+    b length = b(0);
+    packet->mapAllRegionTags<FlowTag>(b(0), packet->getTotalLength(), [&] (b o, b l, const Ptr<const FlowTag>& flowTag) {
+        for (int i = 0; i < flowTag->getNamesArraySize(); i++) {
+            if (!strcmp(flowTag->getNames(i), flow->getName()))
+                length += l;
+        }
+    });
+    fire(this, t, length.get(), details);
 }
 
 Register_ResultFilter("sourceAddr", MessageSourceAddrFilter);

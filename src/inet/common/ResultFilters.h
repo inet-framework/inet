@@ -143,6 +143,33 @@ class INET_API ZCoordFilter : public cPointerResultFilter
 };
 
 /**
+ * Filter that expects a packet and outputs its duration
+ */
+class INET_API PacketDurationFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
+ * Filter that expects a packet and outputs its length
+ */
+class INET_API PacketLengthFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
+ * Filter that expects a packet and a flow and outputs the flow specific data length
+ */
+class INET_API FlowPacketLengthFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+/**
  * Filter that expects a cMessage and outputs its source address as string
  */
 class INET_API MessageSourceAddrFilter : public cObjectResultFilter
