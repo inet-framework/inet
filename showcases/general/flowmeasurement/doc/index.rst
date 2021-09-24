@@ -49,15 +49,17 @@ The :ned:`FlowMeasurementStarter` and :ned:`FlowMeasurementRecorder` modules hav
 
 By default, the filters match all packets (``*``). The :par:`measure` parameter is a list containinig elements from the following set, separated by spaces:
 
-- ``delayingTime``, ``queueingTime``, ``processingTime``, ``transmissionTime``, ``propagationTime``: Time for the different cases
+- ``delayingTime``, ``queueingTime``, ``processingTime``, ``transmissionTime``, ``propagationTime``: Time for the different cases, on a per-bit basis
 - ``elapsedTime``: The total elapsed time for the packet being in the flow (note that this not necessarily the sum of all the above durations; see **TODO** the manual)
 - ``packetEvent``: Record all events that happen to the packet (more details below)
 
 .. **TODO** Components of `ElapsedTime` here (if we want it) -> DELETE -> refine and paste to manual
 
-The ``packetEvent`` measurement is special, because it records the history of the packet as it travels through the network, instead of taking a specific measurement. For example, it records events of the packet's delaying, queueing, processing, transmission, etc. There is no built-in module that makes use of the packet event measurement data, this can be implemented by the user. This can be useful for more detailed analysis based on a packet's history.
+Some notes:
 
-.. note:: Although both the measurement starter and recorder modules have a :par:`measure` parameter, its meaning is slightly different. For the measurement starter module, the parameter specifies which measurement data to include in the attached flow tag. For the measurement recorder module, it specifies which measurements to record as statistics. Generally, the parameter values for the recorder module should be the same or a subset of the starter module's parameters. If a recorder module is configured to record a measurement that isn't on the packet (not set to record in the starter module), the measurement silently fails. Thus it is the user's responsibility to set up the :par:`measure` parameters properly.
+- Evaluating the measured data can be complex if there is cut-through switching, or intra-node packet streaming in the network. This is due to the fact that the measurements are done on a per-bit basis. In a network with only store-and-forward switching and no packet streaming, all bits of a packet have the same measured time values, as the packet is handled as a whole. However, when it is not (e.g. cut-through switching), the different bits of the packet can have different time measurements. For more information, see the **TODO** INET manual. 
+- The ``packetEvent`` measurement is special, because it records the history of the packet as it travels through the network, instead of taking a specific measurement. For example, it records events of the packet's delaying, queueing, processing, transmission, etc. There is no built-in module that makes use of the packet event measurement data, this can be implemented by the user. This can be useful for more detailed analysis based on a packet's history.
+- Although both the measurement starter and recorder modules have a :par:`measure` parameter, its meaning is slightly different. For the measurement starter module, the parameter specifies which measurement data to include in the attached flow tag. For the measurement recorder module, it specifies which measurements to record as statistics. Generally, the parameter values for the recorder module should be the same or a subset of the starter module's parameters. If a recorder module is configured to record a measurement that isn't on the packet (not set to record in the starter module), the measurement silently fails. Thus it is the user's responsibility to set up the :par:`measure` parameters properly.
 
 Adding Measurement Modules to the Network
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
