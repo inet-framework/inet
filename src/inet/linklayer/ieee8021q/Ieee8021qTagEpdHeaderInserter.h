@@ -31,6 +31,7 @@ class INET_API Ieee8021qTagEpdHeaderInserter : public PacketFlowBase
     const Protocol *qtagProtocol = nullptr;
     const Protocol *nextProtocol = nullptr;
     int defaultVlanId = -1;
+    int defaultPcp = -1;
     int defaultUserPriority = -1;
 
   protected:

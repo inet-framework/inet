@@ -18,6 +18,7 @@
 #include "inet/linklayer/ieee8021q/Ieee8021qTagTpidHeaderInserter.h"
 
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/linklayer/ieee8021q/Ieee8021qTagHeader_m.h"
@@ -41,6 +42,7 @@ void Ieee8021qTagTpidHeaderInserter::initialize(int stage)
         if (*nextProtocolAsString != '\0')
             nextProtocol = Protocol::getProtocol(nextProtocolAsString);
         defaultVlanId = par("defaultVlanId");
+        defaultPcp = par("defaultPcp");
         defaultUserPriority = par("defaultUserPriority");
     }
 }
@@ -55,6 +57,13 @@ void Ieee8021qTagTpidHeaderInserter::processPacket(Packet *packet)
         EV_INFO << "Setting PCP" << EV_FIELD(pcp, userPriority) << EV_ENDL;
         header->setPcp(userPriority);
         packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(userPriority);
+    }
+    auto pcpReq = packet->removeTagIfPresent<PcpReq>();
+    auto pcp = pcpReq != nullptr ? pcpReq->getPcp() : defaultPcp;
+    if (pcp != -1) {
+        EV_INFO << "Setting PCP" << EV_FIELD(vid, pcp) << EV_ENDL;
+        header->setPcp(pcp);
+        packet->addTagIfAbsent<PcpInd>()->setPcp(pcp);
     }
     auto vlanReq = packet->removeTagIfPresent<VlanReq>();
     auto vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : defaultVlanId;
