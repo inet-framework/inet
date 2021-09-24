@@ -336,10 +336,20 @@ void StreamRedundancyConfigurator::configureStreams(Node *node)
     }
     if (streamEncoder != nullptr && !node->streamEncodings.empty()) {
         cValueArray *parameterValue = new cValueArray();
+        std::map<std::string, int> mapping;
         for (auto& streamEncoding : node->streamEncodings) {
+            auto it = mapping.find(streamEncoding.name);
+            if (it != mapping.end()) {
+                if (it->second != streamEncoding.vlanId)
+                    throw cRuntimeError("Invalid state");
+            }
+            else
+                mapping[streamEncoding.name] = streamEncoding.vlanId;
+        }
+        for (auto& it : mapping) {
             cValueMap *value = new cValueMap();
-            value->set("stream", streamEncoding.name.c_str());
-            value->set("vlan", streamEncoding.vlanId);
+            value->set("stream", it.first);
+            value->set("vlan", it.second);
             parameterValue->add(value);
         }
         EV_INFO << "Configuring stream encoding" << EV_FIELD(networkNode) << EV_FIELD(streamEncoder) << EV_FIELD(parameterValue) << EV_ENDL;
