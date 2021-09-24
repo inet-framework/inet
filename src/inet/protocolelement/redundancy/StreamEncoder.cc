@@ -79,6 +79,7 @@ void StreamEncoder::processPacket(Packet *packet)
                     encapsulationReq->insertProtocols(0, dispatchProtocolReq->getProtocol());
                 }
                 packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8021qCTag);
+                break;
             }
         }
     }
