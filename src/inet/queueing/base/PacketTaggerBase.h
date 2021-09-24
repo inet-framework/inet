@@ -33,6 +33,7 @@ class INET_API PacketTaggerBase : public PacketMarkerBase
     int interfaceId = -1;
     int hopLimit = -1;
     int vlanId = -1;
+    int pcp = -1;
     W transmissionPower = W(NaN);
 
   protected:
