@@ -15,25 +15,25 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/ieee8021q/PcpClassifier.h"
+#include "inet/linklayer/ieee8021q/PcpTrafficClassClassifier.h"
 
 #include "inet/linklayer/common/PcpTag_m.h"
 
 namespace inet {
 
-Define_Module(PcpClassifier);
+Define_Module(PcpTrafficClassClassifier);
 
-void PcpClassifier::initialize(int stage)
+void PcpTrafficClassClassifier::initialize(int stage)
 {
     PacketClassifierBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         mode = par("mode");
-        pcpToGateIndex = check_and_cast<cValueArray *>(par("pcpToGateIndex").objectValue());
+        mapping = check_and_cast<cValueArray *>(par("mapping").objectValue());
         defaultGateIndex = par("defaultGateIndex");
     }
 }
 
-int PcpClassifier::classifyPacket(Packet *packet)
+int PcpTrafficClassClassifier::classifyPacket(Packet *packet)
 {
     int pcp = -1;
     switch (*mode) {
@@ -61,8 +61,11 @@ int PcpClassifier::classifyPacket(Packet *packet)
             break;
         }
     }
-    if (pcp != -1)
-        return pcpToGateIndex->get(pcp).intValue();
+    if (pcp != -1) {
+        int numTrafficClasses = gateSize("out");
+        auto pcpToGateIndex = check_and_cast<cValueArray *>(mapping->get(pcp).objectValue());
+        return pcpToGateIndex->get(numTrafficClasses - 1);
+    }
     else
         return defaultGateIndex;
 }

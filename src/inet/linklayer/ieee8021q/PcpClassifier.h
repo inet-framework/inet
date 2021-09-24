@@ -25,6 +25,8 @@ namespace inet {
 class INET_API PcpClassifier : public queueing::PacketClassifierBase
 {
   protected:
+    const char *mode = nullptr;
+    cValueArray *pcpToGateIndex = nullptr;
     int defaultGateIndex = -1;
 
   protected:
