@@ -15,15 +15,26 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ieee8021q;
+#ifndef __INET_PCPTRAFFICCLASSCLASSIFIER_H
+#define __INET_PCPTRAFFICCLASSCLASSIFIER_H
 
-import inet.queueing.base.PacketClassifierBase;
-import inet.queueing.contract.IPacketClassifier;
+#include "inet/queueing/base/PacketClassifierBase.h"
 
-simple PcpClassifier extends PacketClassifierBase like IPacketClassifier
+namespace inet {
+
+class INET_API PcpTrafficClassClassifier : public queueing::PacketClassifierBase
 {
-    parameters:
-        object pcpToGateIndex; // specifies the gate index for all PCP values in ascending order
-        int defaultGateIndex = default(0); // default gate index if no PCP found
-        @class(PcpClassifier);
-}
+  protected:
+    const char *mode = nullptr;
+    cValueArray *mapping = nullptr;
+    int defaultGateIndex = -1;
+
+  protected:
+    virtual void initialize(int stage) override;
+    virtual int classifyPacket(Packet *packet) override;
+};
+
+} // namespace inet
+
+#endif
+
