@@ -1,6 +1,26 @@
 Recent changes in the INET Framework
 ====================================
 
+INET 3.8 (September 2021) - stable
+----------------------------------
+
+This release requires OMNeT++ 5.7 or 6.0 preview 13. For older OMNeT++ versions
+please use INET 3.7.x. This version serves as a stepping stone for porting
+older INET based models to OMNeT++ 6 and INET 4.x. A recommended way is to
+port first to INET 3.8 (and OMNeT++ 5.7), then upgrade to OMNeT++ 6 and finally
+port the model to INET 4.x.
+
+Main changes since 3.7:
+
+  - MSG files are now in OMNeT++ 6 compatible format (i.e. using --msg6 
+    because OMNeT++ 6 no longer supports --msg4)
+  - NED files are now compatible with both OMNeT++ 5.7 and 6.0 (i.e. they are
+    explictly using `parent.foo` and `this.foo` in experssions of submodule
+    and connection blocks.)
+  - Follow OMNeT++ API changes: use AnyPtr instead of void*
+  - Fix #92: TcpConnection: accepts simultaneous open requests
+
+
 INET 3.7.1 (April 2021) - stable
 --------------------------------
 
