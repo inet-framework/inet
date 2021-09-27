@@ -1,0 +1,36 @@
+<config>
+	<class id="root">
+		<parentId>NULL</parentId>
+		<rate type="int">50000</rate>
+		<ceil type="int">50000</ceil>
+		<!-- <burst type="int">2000</burst>
+		<cburst type="int">2000</cburst> -->
+		<level type="int">1</level>
+		<quantum type="int">1500</quantum>
+		<mbuffer type="int">60</mbuffer>
+	</class>
+	<class id="leafhostFDO0">
+		<parentId>root</parentId>
+		<rate type="int">5000</rate>
+		<ceil type="int">30000</ceil>
+		<!-- <burst type="int">2000</burst>
+		<cburst type="int">2000</cburst> -->
+		<level type="int">0</level>
+		<quantum type="int">1500</quantum>
+		<mbuffer type="int">60</mbuffer>
+		<priority>0</priority>
+		<queueNum type="int">0</queueNum>
+	</class>
+	<class id="leafhostFDO1">
+		<parentId>root</parentId>
+		<rate type="int">5000</rate>
+		<ceil type="int">30000</ceil>
+		<!-- <burst type="int">2000</burst>
+		<cburst type="int">2000</cburst> -->
+		<level type="int">0</level>
+		<quantum type="int">1500</quantum>
+		<mbuffer type="int">60</mbuffer>
+		<priority>1</priority>
+		<queueNum type="int">1</queueNum>
+	</class>
+</config>
