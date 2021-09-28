@@ -88,11 +88,11 @@ void FlowMeasurementRecorder::makeMeasurements(Packet *packet)
         });
     if (measureElapsedTime) {
         packet->mapAllRegionTags<ElapsedTimeTag>(offset, length, [&] (b o, b l, const Ptr<const ElapsedTimeTag>& timeTag) {
-            for (int i = 0; i < (int)timeTag->getTotalTimesArraySize(); i++) {
+            for (int i = 0; i < (int)timeTag->getBitTotalTimesArraySize(); i++) {
                 auto flowName = timeTag->getFlowNames(i);
                 cMatchableString matchableFlowName(flowName);
                 if (flowNameMatcher.matches(&matchableFlowName))
-                    makeMeasurement(packet, o, l, flowName, elapsedTimeSignal, simTime() - timeTag->getTotalTimes(i));
+                    makeMeasurement(packet, o, l, flowName, elapsedTimeSignal, simTime() - timeTag->getBitTotalTimes(i));
             }
         });
     }
