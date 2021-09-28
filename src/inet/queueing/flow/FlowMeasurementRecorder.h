@@ -60,11 +60,11 @@ class INET_API FlowMeasurementRecorder : public PacketFlowBase
     template<typename T>
     void makeMeasurement(Packet *packet, b offset, b length, simsignal_t signal) {
         packet->mapAllRegionTags<T>(offset, length, [&] (b o, b l, const Ptr<const T>& timeTag) {
-            for (int i = 0; i < (int)timeTag->getTotalTimesArraySize(); i++) {
+            for (int i = 0; i < (int)timeTag->getBitTotalTimesArraySize(); i++) {
                 auto flowName = timeTag->getFlowNames(i);
                 cMatchableString matchableFlowName(flowName);
                 if (flowNameMatcher.matches(&matchableFlowName))
-                    makeMeasurement(packet, o, l, flowName, signal, timeTag->getTotalTimes(i));
+                    makeMeasurement(packet, o, l, flowName, signal, timeTag->getBitTotalTimes(i));
             }
         });
     }
@@ -72,7 +72,7 @@ class INET_API FlowMeasurementRecorder : public PacketFlowBase
     template<typename T>
     void endMeasurement(Packet *packet, b offset, b length) {
         packet->mapAllRegionTagsForUpdate<T>(offset, length, [&] (b o, b l, const Ptr<T>& timeTag) {
-            for (int i = 0; i < (int)timeTag->getTotalTimesArraySize(); i++) {
+            for (int i = 0; i < (int)timeTag->getBitTotalTimesArraySize(); i++) {
                 auto flowName = timeTag->getFlowNames(i);
                 cMatchableString matchableFlowName(flowName);
                 if (flowNameMatcher.matches(&matchableFlowName)) {
@@ -81,7 +81,7 @@ class INET_API FlowMeasurementRecorder : public PacketFlowBase
                         EV_INFO << EV_FIELD(flowName);
                     EV_INFO << EV_FIELD(packet) << EV_ENDL;
                     timeTag->eraseFlowNames(i);
-                    timeTag->eraseTotalTimes(i);
+                    timeTag->eraseBitTotalTimes(i);
                     i--;
                     break;
                 }
