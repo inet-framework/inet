@@ -34,7 +34,7 @@ void PacketDelayer::handleMessage(cMessage *message)
             delete message;
         simtime_t delay = simTime() - message->getSendingTime();
         insertPacketEvent(this, packet, PEK_DELAYED, delay / packet->getBitLength());
-        increaseTimeTag<DelayingTimeTag>(packet, delay / packet->getBitLength());
+        increaseTimeTag<DelayingTimeTag>(packet, delay / packet->getBitLength(), delay);
         pushOrSendPacket(packet, outputGate, consumer);
     }
     else
