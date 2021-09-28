@@ -27,8 +27,8 @@ template<typename T>
 void increaseTimeTag(const Ptr<Chunk>& chunk, simtime_t duration)
 {
     chunk->mapAllTagsForUpdate<T>(b(0), chunk->getChunkLength(), [&] (b offset, b length, T *timeTag) {
-        for (int i = 0; i < (int)timeTag->getTotalTimesArraySize(); i++)
-            timeTag->setTotalTimes(i, timeTag->getTotalTimes(i) + duration);
+        for (int i = 0; i < (int)timeTag->getBitTotalTimesArraySize(); i++)
+            timeTag->setBitTotalTimes(i, timeTag->getBitTotalTimes(i) + duration);
     });
 }
 
@@ -36,8 +36,8 @@ template<typename T>
 void increaseTimeTag(Packet *packet, simtime_t duration)
 {
     packet->mapAllRegionTagsForUpdate<T>(b(0), packet->getTotalLength(), [&] (b offset, b length, const Ptr<T>& timeTag) {
-        for (int i = 0; i < (int)timeTag->getTotalTimesArraySize(); i++)
-            timeTag->setTotalTimes(i, timeTag->getTotalTimes(i) + duration);
+        for (int i = 0; i < (int)timeTag->getBitTotalTimesArraySize(); i++)
+            timeTag->setBitTotalTimes(i, timeTag->getBitTotalTimes(i) + duration);
     });
 }
 
