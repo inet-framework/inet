@@ -29,6 +29,7 @@ class TimeTagBase extends TagBase
 {
     string flowNames[];
     simtime_t bitTotalTimes[];
+    simtime_t packetTotalTimes[];
 }
 
 class ElapsedTimeTag extends TimeTagBase
