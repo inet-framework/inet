@@ -140,7 +140,7 @@
 
 /examples/ieee8021as/,               -f omnetpp.ini -c Network -r 0,                     200s,       dbdf-e1e6/tplx;f90e-68a4/~tNl;3bf8-272c/~tND;b91b-ddf3/tyf, PASS, gptp
 /examples/ieee8021as/,               -f omnetpp.ini -c Network_with_cross_traffic -r 0,  200s,       e61c-b545/tplx;3a22-4398/~tNl;b567-d931/~tND;c332-acd1/tyf, PASS, gptp
-/examples/ieee8021as/,               -f omnetpp.ini -c Network_daisy_chain -r 0,         200s,       0998-d0fb/tplx;87a9-1c25/~tNl;948d-5186/~tND;baf1-ba0e/tyf, PASS, gptp
+/examples/ieee8021as/,               -f omnetpp.ini -c Network_daisy_chain -r 0,         200s,       0998-d0fb/tplx;87a9-1c25/~tNl;0c20-84f0/~tND;baf1-ba0e/tyf, PASS, gptp
 
 # /examples/ieee8021d/,                -f omnetpp.ini -c LargeNet -r 0,               100s,            0, ERROR,   # LargeNet extended
 # /examples/ieee8021d/,                -f omnetpp.ini -c RSTP -r 0,                   100s,            0, ERROR,   # RSTP extended
