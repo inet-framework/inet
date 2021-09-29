@@ -41,7 +41,7 @@ namespace inet {
 using namespace omnetpp;
 } // namespace inet
 
-#if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1517
+#if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1525
 #  error At least OMNeT++/OMNEST version 6.0pre12 required
 #endif
 
