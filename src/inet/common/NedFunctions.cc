@@ -22,10 +22,6 @@ namespace inet {
 
 namespace utils {
 
-#if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1512
-#define doubleValueRaw() doubleValue()
-#endif
-
 cNEDValue nedf_hasModule(cComponent *context, cNEDValue argv[], int argc)
 {
     cRegistrationList *types = componentTypes.getInstance();

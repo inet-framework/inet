@@ -321,16 +321,12 @@ void ScenarioManager::processCreateModuleCommand(const cXMLElement *node)
     bool vector = xmlutils::getAttributeBoolValue(node, ATTR_VECTOR, submoduleVectorSize > 0);
     cModule *module = nullptr;
     if (vector) {
-#if OMNETPP_VERSION >= 0x0600 && OMNETPP_BUILDNUM >= 1516
         if (!parentModule->hasSubmoduleVector(submoduleName)) {
             parentModule->addSubmoduleVector(submoduleName, submoduleVectorSize + 1);
         }
         else
             parentModule->setSubmoduleVectorSize(submoduleName, submoduleVectorSize + 1);
         module = moduleType->create(submoduleName, parentModule, submoduleVectorSize);
-#else
-        module = moduleType->create(submoduleName, parentModule, submoduleVectorSize + 1, submoduleVectorSize);
-#endif
     }
     else {
         module = moduleType->create(submoduleName, parentModule);

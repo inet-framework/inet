@@ -36,7 +36,7 @@ class INET_API QueueVisualizerBase : public VisualizerBase
         std::vector<queueing::IPacketQueue *> queues;
 
       public:
-        virtual VISIT_RETURNTYPE visit(cObject *object) override;
+        virtual bool visit(cObject *object) override;
     };
 
     class INET_API QueueVisualization {

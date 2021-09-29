@@ -20,10 +20,6 @@
 #ifndef __INET_SELFDOC_H
 #define __INET_SELFDOC_H
 
-#if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1516
-#error "At least OMNeT++/OMNEST version 6.0 required for SelfDoc feature. Please update OMNeT++/OMNEST, or disable the SelfDoc feature."
-#endif // if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1516
-
 namespace inet {
 
 class INET_API SelfDoc
