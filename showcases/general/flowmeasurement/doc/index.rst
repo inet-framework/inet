@@ -49,15 +49,19 @@ The :ned:`FlowMeasurementStarter` and :ned:`FlowMeasurementRecorder` modules hav
 
 By default, the filters match all packets (``*``). The :par:`measure` parameter is a list containinig elements from the following set, separated by spaces:
 
-- ``delayingTime``, ``queueingTime``, ``processingTime``, ``transmissionTime``, ``propagationTime``: Time for the different cases, on a per-bit basis
-- ``elapsedTime``: The total elapsed time for the packet being in the flow (note that this not necessarily the sum of all the above durations; see **TODO** the manual)
-- ``packetEvent``: Record all events that happen to the packet (more details below)
+- ``delayingTime``, ``queueingTime``, ``processingTime``, ``transmissionTime``, ``propagationTime``: Time for the different cases, on a *per-bit* basis
+- ``elapsedTime``: The total elapsed time for the packet being in the flow (see first note below)
+- ``packetEvent``: Record all events that happen to the packet (see second note below)
+
+.. note that this not necessarily the sum of all the above durations; see **TODO** the manual
 
 .. **TODO** Components of `ElapsedTime` here (if we want it) -> DELETE -> refine and paste to manual
 
 Some notes:
 
-- Evaluating the measured data can be complex if there is cut-through switching, or intra-node packet streaming in the network. This is due to the fact that the measurements are done on a per-bit basis. In a network with only store-and-forward switching and no packet streaming, all bits of a packet have the same measured time values, as the packet is handled as a whole. However, when it is not (e.g. cut-through switching), the different bits of the packet can have different time measurements. For more information, see the **TODO** INET manual. 
+.. - **V1** Evaluating the measured data can be complex if there is cut-through switching, or intra-node packet streaming in the network. This is due to the fact that the measurements are done on a per-bit basis. In a network with only store-and-forward switching and no packet streaming, all bits of a packet have the same measured time values, as the packet is handled as a whole. However, when it is not (e.g. cut-through switching), the different bits of the packet can have different time measurements. For more information, see the **TODO** INET manual.
+
+- Evaluating the measured data when there is cut-through switching or intra-node packet streaming in the network can be more complex than if there is not. This is because measurements are recorded on a per-bit basis, and the transmission time can be different for each bit if there is packet streaming in the network. Also, bits waiting in the transmitter for other bits of a packet to be transmitted and received is only included in the elapsed time measurement. Because of this, the sum of all other measurements might not be equal to the elapsed time. For more information, see the **TODO** section in the INET manual. 
 - The ``packetEvent`` measurement is special, because it records the history of the packet as it travels through the network, instead of taking a specific measurement. For example, it records events of the packet's delaying, queueing, processing, transmission, etc. There is no built-in module that makes use of the packet event measurement data, this can be implemented by the user. This can be useful for more detailed analysis based on a packet's history.
 - Although both the measurement starter and recorder modules have a :par:`measure` parameter, its meaning is slightly different. For the measurement starter module, the parameter specifies which measurement data to include in the attached flow tag. For the measurement recorder module, it specifies which measurements to record as statistics. Generally, the parameter values for the recorder module should be the same or a subset of the starter module's parameters. If a recorder module is configured to record a measurement that isn't on the packet (not set to record in the starter module), the measurement silently fails. Thus it is the user's responsibility to set up the :par:`measure` parameters properly.
 
@@ -197,10 +201,17 @@ We set up the four flows between the clients and the servers, and also the flow 
 Results
 +++++++
 
-The measured timing data is available as a statistic of the measurement recorder modules. For example, here are the histograms of the two flows originating in ``client1`` measured at both end points (``server1`` and ``server2``), displayed in the `browse data` tab in the Analysis Tool:
+The measured timing data is available as a statistic of the measurement recorder modules. For example, here are the statistics recorded from the measurements in ``server1`` (``c1s1`` and ``c2s1`` flows), displayed in the `browse data` tab in the Analysis Tool:
 
-.. figure:: media/client1bothflows.png
+.. here are the histograms of the two flows originating in ``client1`` measured at both end points (``server1`` and ``server2``), 
+
+.. .. figure:: media/client1bothflows.png
+      :align: center
+
+.. figure:: media/BasicBrowseData.png
    :align: center
+
+   Figure X. The measurements recorded for the ``c1s1`` and ``c2s1`` flows in ``server1``
 
 .. Here is the same data displayed on a histogram:
 
@@ -218,7 +229,7 @@ The measured timing data is available as a statistic of the measurement recorder
 
 .. **TODO** add transmission time; -> or not; actually remove
 
-**TODO** analysis tool screenshot when the flowname:statistic is implemented and the NaN histrogram error fixed
+.. **TODO** analysis tool screenshot when the flowname:statistic is implemented and the NaN histrogram error fixed
 
 Example 2: Inserting New Measurement Modules
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -308,14 +319,19 @@ Note that:
 Results
 +++++++
 
-The measured elapsed time and queueing time values are available as the statistics of the measurement recorder modules. For example, here are the two elapsed time vectors (for the ``BG`` and ``VID`` flows) recorded as separate statitics by the measurement recorder modules in ``server1``, displayed in the IDE's analysis tool:
+.. The measured elapsed time and queueing time values are available as the statistics of the measurement recorder modules. For example, here are the two elapsed time vectors (for the ``BG`` and ``VID`` flows) recorded as separate statitics by the measurement recorder modules in ``server1``, displayed in the IDE's analysis tool:
 
-**TODO** analysis tool screenshot when the flowname:statistic is implemented and the NaN histrogram error fixed
+.. **TODO** analysis tool screenshot when the flowname:statistic is implemented and the NaN histrogram error fixed
 
-.. figure:: media/BrowseData.png
+.. .. figure:: media/BrowseData.png
+      :align: center
+
+      Figure X. Elapsed time vectors in ``server1``'s measurement layer
+
+.. figure:: media/AnyLocationBrowseData.png
    :align: center
 
-   Figure X. Elapsed time vectors in ``server1``'s measurement layer
+**TODO** need to contain both BG and VID flows; but there are NaN's
 
 .. Here is the same data selection plotted on a scatter chart:
 
