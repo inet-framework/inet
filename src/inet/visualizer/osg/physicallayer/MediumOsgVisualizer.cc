@@ -145,8 +145,9 @@ osg::Node *MediumOsgVisualizer::removeRadioOsgNode(const IRadio *radio)
     if (it == radioOsgNodes.end())
         return nullptr;
     else {
+        osg::Node *node = it->second;
         radioOsgNodes.erase(it);
-        return it->second;
+        return node;
     }
 }
 
@@ -472,7 +473,7 @@ void MediumOsgVisualizer::handleSignalArrivalStarted(const IReception *reception
         setAnimationSpeed();
     if (displaySignalArrivals) {
         auto group = static_cast<osg::Group *>(getRadioOsgNode(reception->getReceiver()));
-        auto node = static_cast<osg::Node *>(group->getChild(1));
+        auto node = static_cast<osg::Node *>(group->getChild(displaySignalDepartures ? 1 : 0));
         node->setNodeMask(1);
     }
 }
@@ -485,7 +486,7 @@ void MediumOsgVisualizer::handleSignalArrivalEnded(const IReception *reception)
     if (displaySignalArrivals) {
         auto receiver = reception->getReceiver();
         auto group = static_cast<osg::Group *>(getRadioOsgNode(receiver));
-        auto node = static_cast<osg::Node *>(group->getChild(1));
+        auto node = static_cast<osg::Node *>(group->getChild(displaySignalDepartures ? 1 : 0));
         node->setNodeMask(0);
     }
 }
