@@ -30,7 +30,7 @@ network AntennaOrientation
 
     submodules:
         rover: StandardHost {
-            @display("p=247.632,395.568;b=100,64,rect,$minus,$minus;i=-");
+            @display("p=247.632,395.568;b=100,64,rect,$minus,$minus;i=misc/car3");
         }
         visualizer: IntegratedMultiVisualizer {
             @display("p=61.104,57.888");
