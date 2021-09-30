@@ -67,6 +67,22 @@ simple FlowMeasurementRecorder extends PacketFlowBase like IPacketFlow
         @signal[totalPacketProcessingTimePerRegion](type=simtime_t);
         @signal[totalPacketTransmissionTimePerRegion](type=simtime_t);
 
+//
+//		Example table for transmission time statistics (applicable to the other statistics as well):
+//        
+//        +==========================================+===================================+=============================+
+//        | Recording granularity \ What is totalled |       Bit transmission time       |  Packet transmission time   |
+//        +==========================================+===================================+=============================+
+//        | Statistic value per bit                  | totalBitTransmissionTime          |                             |
+//        +------------------------------------------+-----------------------------------+-----------------------------+
+//        | Statistic value per region               | totalBitTransmissionTimePerRegion | totalPacketTransmissionTime |
+//        +------------------------------------------+-----------------------------------+-----------------------------+
+//
+//
+//
+//		Statistics recorded for every bit
+//
+
         // the statistics value is the time difference of the current simulation time and the creation time of the bit
         @statistic[bitLifeTime](title="Total bit life time"; source=demux(bitLifeTime); record=histogram);
         // the statistics value is the elapsed time from the moment the bit entered the flow
@@ -83,6 +99,10 @@ simple FlowMeasurementRecorder extends PacketFlowBase like IPacketFlow
         @statistic[totalBitPropagationTime](title="Total bit propagation time"; source=demux(totalBitPropagationTime); record=histogram);
         // the statistics value is the sum of the transmission duration of the complete packets for all transmitters where the bit was transmitted
         @statistic[totalPacketTransmissionTimePerBit](title="Total packet transmission time per bit"; source=demux(totalPacketTransmissionTimePerBit); record=histogram; interpolationmode=none);
+        
+//        
+//        Statistics recorded for every region
+//        
 
         // the statistics value (the same for all bits in the region) is the time difference of the current simulation time and the creation time of any bit in the region
         @statistic[bitLifeTimePerRegion](title="Total bit life time per region"; source=demux(bitLifeTimePerRegion); record=vector,histogram; interpolationmode=none);
