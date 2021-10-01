@@ -25,16 +25,15 @@ import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketScheduler;
 
-module HtbQueue extends CompoundPacketQueue
+module HtbQueue extends CompoundPacketQueueBase
 {
     parameters:
         int numQueues;
         bool htbHysterisis = default(false); // Use hysterisis?
         xml htbTreeConfig = default(xml("<config></config>")); // The htb tree structure
     submodules:
-        classifier: <default("HtbClassifier")> like IPacketClassifier {
+        classifier: <default("ContentBasedClassifier")> like IPacketClassifier {
             parameters:
-                htbTreeConfig = default(htbTreeConfig);
                 @display("p=100,100");
         }
         queue[numQueues]: <default("PacketQueue")> like IPacketQueue {
@@ -44,8 +43,8 @@ module HtbQueue extends CompoundPacketQueue
         }
         scheduler: <default("HtbScheduler")> like IPacketScheduler {
             parameters:
-                htbHysterisis = htbHysterisis; // Use hysterisis?
-                htbTreeConfig = default(htbTreeConfig);
+                htbHysterisis = parent.htbHysterisis; // Use hysterisis?
+                htbTreeConfig = default(parent.htbTreeConfig);
                 @display("p=550,100");
         }
     connections:
