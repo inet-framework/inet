@@ -40,7 +40,7 @@
 namespace inet {
 namespace queueing {
 
-class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollection
+class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollection, public cListener
 {
   protected:
     simsignal_t dequeueIndexSignal;
@@ -157,7 +157,7 @@ class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollecti
     virtual Packet *getPacket(int index) const override;
     virtual void removePacket(Packet *packet) override;
 
-    void htbEnqueue(int index, Packet *packet);
+    void htbEnqueue(int index);
     int htbDequeue(int priority, int level);
     void printClass(htbClass *cl);
     void printLevel(htbLevel *level, int index);
@@ -184,6 +184,8 @@ class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollecti
 
     virtual void scheduleAt(simtime_t t, cMessage *msg) override;
     virtual cMessage *cancelEvent(cMessage *msg) override;
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 
 };
 

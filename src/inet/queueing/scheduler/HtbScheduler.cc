@@ -141,7 +141,7 @@ HtbScheduler::htbClass *HtbScheduler::createAndAddNewClass(cXMLElement* oneClass
     newClass->level = level;
     int quantum = atoi(oneClass->getFirstChildWithTag("quantum")->getNodeValue());
     if (valueCorectnessCheck == true && quantum < mtu) {
-        throw cRuntimeError("Class %s quantum of %llu Bytes is smaller than minimum recommended  of %llu Bytes!", newClass->name, quantum, mtu);
+        throw cRuntimeError("Class %s quantum of %d Bytes is smaller than minimum recommended  of %llu Bytes!", newClass->name, quantum, mtu);
     }
     if (valueCorectnessAdj == true && quantum < mtu) {
         quantum = mtu;
@@ -248,6 +248,8 @@ void HtbScheduler::initialize(int stage)
         mtu = par("mtu");
         valueCorectnessCheck = par("checkHTBTreeValuesForCorectness");
         valueCorectnessAdj = par("adjustHTBTreeValuesForCorectness");
+        getParentModule()->subscribe(packetPushedSignal, this);
+        EV_INFO << "HtbScheduler: parent = " << getParentModule()->getFullPath() << endl;
         // Get the datarate of the link connected to interface
         EV_INFO << "Get link datarate" << endl;
         int interfaceIndex = getParentModule()->getParentModule()->getParentModule()->getIndex();
@@ -527,7 +529,7 @@ void HtbScheduler::deactivateClass(htbClass *cl, int priority) {
 }
 
 // Inform the htb about a newly enqueued packet. Enqueueing is actually done in the classifier.
-void HtbScheduler::htbEnqueue(int index, Packet *packet) {
+void HtbScheduler::htbEnqueue(int index) {
     htbClass *currLeaf = leafClasses.at(index);
     activateClass(currLeaf, currLeaf->leaf.priority);
     return;
@@ -603,7 +605,7 @@ int HtbScheduler::htbDequeue(int priority, int level) {
             cl = next;
             continue;
         }
-        thePacketToPop = providers[cl->leaf.queueId]->canPopPacket();
+        thePacketToPop = providers[cl->leaf.queueId]->canPullPacket(inputGates[cl->leaf.queueId]);
 
         if (thePacketToPop != nullptr) {
             retIndex = cl->leaf.queueId;
@@ -935,6 +937,20 @@ void HtbScheduler::chargeClass(htbClass *leafCl, int borrowLevel, Packet *packet
     return;
 }
 
+
+void HtbScheduler::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(signal));
+    if (signal == packetPushedSignal) {
+        if (std::string(source->getClassName()).find("inet::queueing::PacketQueue") != std::string::npos) { // Might need adjustment so that we can use compound packet queues as queues
+            int index = dynamic_cast<cModule*>(source)->getIndex();
+            EV_INFO << "HtbScheduler::receiveSignal: PacketQueue " << index << " emitted a packetPushed signal! Call htbEnqueue for leaf " << index << endl;
+            htbEnqueue(index);
+        }
+    }
+    else
+        throw cRuntimeError("Unknown signal");
+}
 
 
 } // namespace queueing
