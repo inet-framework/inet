@@ -16,13 +16,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // 
 
-package _5gns.simulations;
+package inet.examples.htb;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
-import inet.visualizer.integrated.IntegratedVisualizer;
-import inet.visualizer.linklayer.InterfaceTableVisualizer;
 import ned.DatarateChannel;
 import inet.node.internetcloud.InternetCloud;
 //import inet.applications.generic.linkAdjuster;
@@ -48,10 +46,6 @@ network htbEvaluation
        
         hostFDO[nFDO]: StandardHost {
             @display("p=140,203");
-        }
-        
-        visualizer: IntegratedVisualizer {
-            @display("p=18,71");
         }
     
         serverFDO: StandardHost {
