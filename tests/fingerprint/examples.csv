@@ -125,6 +125,15 @@
 
 /examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,            75d0-cba9/tplx;ce1d-d136/~tNl;51b3-9d40/~tND;900d-aaeb/tyf, PASS, wireless
 
+/examples/htb/,                      -f omnetpp.ini -c scenarioUDP1 -r 0,           1s,         fc52-1d80/tplx;0000-0000/~tNl;7460-1bab/tyf, PASS,
+/examples/htb/,                      -f omnetpp.ini -c scenarioUDP2 -r 0,           1s,         fc52-1d80/tplx;0000-0000/~tNl;7460-1bab/tyf, PASS,
+/examples/htb/,                      -f omnetpp.ini -c scenarioUDP3 -r 0,           1s,         005c-a373/tplx;0000-0000/~tNl;60f5-dd9c/tyf, PASS,
+/examples/htb/,                      -f omnetpp.ini -c scenarioUDP4 -r 0,           1s,         fc52-1d80/tplx;0000-0000/~tNl;7460-1bab/tyf, PASS,
+/examples/htb/,                      -f omnetpp.ini -c scenarioTCP1 -r 0,           1s,         3085-c846/tplx;0000-0000/~tNl;6fd0-f7ee/tyf, PASS,
+/examples/htb/,                      -f omnetpp.ini -c scenarioTCP2 -r 0,           1s,         3085-c846/tplx;0000-0000/~tNl;6fd0-f7ee/tyf, PASS,
+/examples/htb/,                      -f omnetpp.ini -c scenarioTCP3 -r 0,           1s,         7503-24f1/tplx;0000-0000/~tNl;fe75-b651/tyf, PASS,
+/examples/htb/,                      -f omnetpp.ini -c scenarioTCP4 -r 0,           1s,         3085-c846/tplx;0000-0000/~tNl;6fd0-f7ee/tyf, PASS,
+
 /examples/httptools/direct/flashdirect/, -f omnetpp.ini -c General -r 0,               500000s,      f607-5921/tplx;428e-2e61/~tNl;8154-c757/tyf, PASS,
 /examples/httptools/direct/pairdirect/, -f omnetpp.ini -c random -r 0,                 500000s,      6fc8-681d/tplx;128c-5b0a/~tNl;f06b-220a/tyf, PASS,
 /examples/httptools/direct/pairdirect/, -f omnetpp.ini -c scripted -r 0,               500000s,      128c-6b2d/tplx;2949-7cdf/~tNl;d600-4c74/tyf, PASS,
