@@ -72,6 +72,7 @@ simple PacketQueue extends PacketQueueBase like IPacketQueue
         @statistic[packetDropQueueOverflow](title="packet drops: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[queueingTime](title="queueing times"; source=queueingTime(packetPulled); record=histogram,vector; unit=s; interpolationmode=none);
         @statistic[queueLength](title="queue length"; type=int; source=warmup(count(packetPushed) - count(packetPulled) - count(packetRemoved) - count(packetDropped)); record=max,timeavg,vector; interpolationmode=sample-hold; autoWarmupFilter=false);
+        @statistic[flowQueueingTime](title="flow queueing times"; source=queueingTime(demuxFlow(packetPulled)); record=histogram,vector; unit=s; interpolationmode=none);
         @statistic[pushedTraffic](title="pushed traffic"; source=throughput(packetPushed); record=vector; unit=bps; interpolationmode=linear);
         @statistic[pulledTraffic](title="pulled traffic"; source=throughput(packetPulled); record=vector; unit=bps; interpolationmode=linear);
         @statistic[flowPushedTraffic](title="flow pushed traffic"; source=throughput(flowPacketLength(demuxFlow(packetPushed))); record=vector; unit=bps; interpolationmode=linear);
