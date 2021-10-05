@@ -18,7 +18,7 @@
 #ifndef __INET_RESULTFILTERS_H
 #define __INET_RESULTFILTERS_H
 
-#include "inet/common/INETDefs.h"
+#include "inet/common/INETMath.h"
 
 namespace inet {
 
@@ -240,6 +240,60 @@ class INET_API WeightTimesFilter : public cObjectResultFilter
 };
 
 class INET_API DemuxFlowFilter : public DemuxFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+class INET_API ResidenceTimePerRegionFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+class INET_API LifeTimePerRegionFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+class INET_API ElapsedTimePerRegionFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+class INET_API DelayingTimePerRegionFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+class INET_API ProcessingTimePerRegionFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+class INET_API QueueingTimePerRegionFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+class INET_API PropagationTimePerRegionFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+class INET_API TransmissionTimePerRegionFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+class INET_API PacketTransmissionTimePerRegionFilter : public cObjectResultFilter
 {
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
