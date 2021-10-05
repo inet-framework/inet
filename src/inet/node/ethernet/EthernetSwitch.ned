@@ -51,7 +51,8 @@ module EthernetSwitch like IEthernetNetworkNode
         @networkNode();
         @labels(node,ethernet-node);
         @display("i=device/switch");
-        int numPcapRecorders = default(0);
+        bool recordPcap = default(false);
+        int numPcapRecorders = default(recordPcap ? 1 : 0);
         int numApps = default(0);
         bool hasStatus = default(false);
         bool hasStp = default(false);
