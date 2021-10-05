@@ -33,6 +33,10 @@ simple PacketFlowBase extends PacketProcessorBase
         @signal[packetPulled](type=inet::Packet);
         @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetPulled](title="packets pulled"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[pushedTraffic](title="pushed traffic"; source=throughput(packetPushed); record=vector; unit=bps; interpolationmode=linear);
+        @statistic[pulledTraffic](title="pulled traffic"; source=throughput(packetPulled); record=vector; unit=bps; interpolationmode=linear);
+        @statistic[flowPushedTraffic](title="flow pushed traffic"; source=throughput(flowPacketLength(demuxFlow(packetPushed))); record=vector; unit=bps; interpolationmode=linear);
+        @statistic[flowPulledTraffic](title="flow pulled traffic"; source=throughput(flowPacketLength(demuxFlow(packetPulled))); record=vector; unit=bps; interpolationmode=linear);
     gates:
         input in @labels(send,push,pull,pass,stream);
         output out @labels(send,push,pull,pass,stream);
