@@ -178,6 +178,61 @@ void MessageSourceAddrFilter::receiveSignal(cResultFilter *prev, simtime_t_cref 
     }
 }
 
+Register_ResultFilter("variance", VarianceFilter);
+
+bool VarianceFilter::process(simtime_t& t, double& value, cObject *details)
+{
+    if (std::isnan(value))
+        throw cRuntimeError(this, "collect(): NaN values are not allowed");
+    numValues++;
+    sumValues += value;
+    sumSquaredValues += value * value;
+    value = getVariance();
+    return true;
+}
+
+double VarianceFilter::getVariance() const
+{
+    // note: no checks for division by zero, we prefer to return Inf or NaN
+    if (numValues == 0)
+        return NaN;
+    else {
+        double var = (numValues * sumSquaredValues - sumValues * sumValues) / (numValues * numValues - sumSquaredValues);
+        return var < 0 ? 0 : var;
+    }
+}
+
+Register_ResultFilter("stddev", StddevFilter);
+
+bool StddevFilter::process(simtime_t& t, double& value, cObject *details)
+{
+    bool result = VarianceFilter::process(t, value, details);
+    value = sqrt(value);
+    return result;
+}
+
+Register_ResultFilter("jitter", JitterFilter);
+
+bool JitterFilter::process(simtime_t& t, double& value, cObject *details)
+{
+    double jitter = value - last;
+    last = value;
+    value = jitter;
+    return true;
+}
+
+Register_ResultFilter("differenceToMean", DifferenceToMeanFilter);
+
+bool DifferenceToMeanFilter::process(simtime_t& t, double& value, cObject *details)
+{
+    if (std::isnan(value))
+        return false;
+    count++;
+    sum += value;
+    value = sum / count - value;
+    return true;
+}
+
 Register_ResultFilter("throughput", ThroughputFilter);
 
 void ThroughputFilter::emitThroughput(simtime_t endInterval, cObject *details)

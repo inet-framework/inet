@@ -179,6 +179,55 @@ class INET_API MessageSourceAddrFilter : public cObjectResultFilter
 };
 
 /**
+ * Filter that expects numbers and outputs their variance
+ */
+class INET_API VarianceFilter : public cNumericResultFilter
+{
+  protected:
+    int64_t numValues = 0;
+    double sumValues = 0;
+    double sumSquaredValues = 0;
+
+  protected:
+    virtual bool process(simtime_t& t, double& value, cObject *details) override;
+    virtual double getVariance() const;
+};
+
+/**
+ * Filter that expects numbers and outputs their standard deviation
+ */
+class INET_API StddevFilter : public VarianceFilter
+{
+  protected:
+    virtual bool process(simtime_t& t, double& value, cObject *details) override;
+};
+
+/**
+ * Filter that expects numbers and outputs their jitter (difference between subsequent values)
+ */
+class INET_API JitterFilter : public cNumericResultFilter
+{
+  protected:
+    double last = 0;
+
+  protected:
+    virtual bool process(simtime_t& t, double& value, cObject *details) override;
+};
+
+/**
+ * Filter that expects numbers and outputs their difference to their mean
+ */
+class INET_API DifferenceToMeanFilter : public cNumericResultFilter
+{
+  protected:
+    intval_t count = 0;
+    double sum = 0;
+
+  protected:
+    virtual bool process(simtime_t& t, double& value, cObject *details) override;
+};
+
+/**
  * Filter that expects a Packet or a packet length and outputs the throughput as double.
  * Throughput is computed for the *past* interval every 0.1s or 100 packets,
  * whichever comes first.
