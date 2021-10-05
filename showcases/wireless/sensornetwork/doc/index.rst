@@ -593,7 +593,8 @@ consumption per packet. The conclusion is that in this scenario, with
 the selected parameter values, :ned:`XMac` turned out to be the most energy
 efficient MAC protocol, although :ned:`LMac` carried a bit more traffic.
 
-Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`SensorNetworkShowcase.ned <../SensorNetworkShowcase.ned>`, :download:`config.xml <../config.xml>`
+| Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`SensorNetworkShowcase.ned <../SensorNetworkShowcase.ned>`, :download:`config.xml <../config.xml>`
+| Extra configurations: :download:`extras.ini <../extras.ini>`, :download:`ExtrasSensorNetworkShowcase.ned <../ExtrasSensorNetworkShowcase.ned>` 
 
 Further information
 -------------------
