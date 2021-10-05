@@ -51,6 +51,7 @@ class INET_API PacketTransmitterBase : public ClockUserModuleMixin<OperationalMi
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void finish() override;
     virtual void handleMessageWhenUp(cMessage *message) override;
 
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }

@@ -29,6 +29,7 @@ simple PacketTransmitterBase extends PacketProcessorBase
         @signal[transmissionStarted](type=inet::physicallayer::Signal);
         @signal[transmissionEnded](type=inet::physicallayer::Signal);
         @statistic[transmitting](title="transmitting"; type=int; source=count(transmissionStarted) - count(transmissionEnded); record=vector; interpolationmode=sample-hold);
+        @statistic[propagationTime](title="propagation time"; unit=s);
     gates:
         input in;
         output out;

@@ -50,6 +50,12 @@ void PacketTransmitterBase::initialize(int stage)
     }
 }
 
+void PacketTransmitterBase::finish()
+{
+    if (auto channel = dynamic_cast<cDatarateChannel *>(outputGate->findTransmissionChannel()))
+        recordScalar("propagationTime", channel->getDelay());
+}
+
 void PacketTransmitterBase::handleMessageWhenUp(cMessage *message)
 {
     auto packet = check_and_cast<Packet *>(message);
