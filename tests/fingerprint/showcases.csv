@@ -30,7 +30,7 @@
 /showcases/mobility/combining/,      -f omnetpp.ini -c Attached2 -r 0,              100s,         1fca-7a6f/tplx;0000-0000/~tNl;0000-0000/~tND;1a6b-13f8/tyf, PASS,
 /showcases/mobility/combining/,      -f omnetpp.ini -c Superpositioning1 -r 0,      100s,         1380-5e68/tplx;0000-0000/~tNl;0000-0000/~tND;9882-b558/tyf, PASS,
 /showcases/mobility/combining/,      -f omnetpp.ini -c Superpositioning2 -r 0,      100s,         37d4-b1ec/tplx;0000-0000/~tNl;0000-0000/~tND;4d87-8af1/tyf, PASS,
-/showcases/mobility/combining/,      -f omnetpp.ini -c AntennaOrientation -r 0,     100s,         8b9e-18a2/tplx;0000-0000/~tNl;0000-0000/~tND;d4e8-5d87/tyf, PASS,
+/showcases/mobility/combining/,      -f omnetpp.ini -c AntennaOrientation -r 0,     100s,         8b9e-18a2/tplx;0000-0000/~tNl;0000-0000/~tND;cbca-ae3b/tyf, PASS,
 /showcases/mobility/combining/,      -f omnetpp.ini -c Attached3D -r 0,             100s,         37d4-b1ec/tplx;0000-0000/~tNl;0000-0000/~tND;b760-36fa/tyf, PASS,
 /showcases/mobility/spatial/,        -f omnetpp.ini -c Spiral -r 0,                 100s,         1380-5e68/tplx;0000-0000/~tNl;0000-0000/~tND;31a9-9fed/tyf, PASS,
 /showcases/mobility/spatial/,        -f omnetpp.ini -c Drone -r 0,                  100s,         a626-644b/tplx;0000-0000/~tNl;0000-0000/~tND;4e12-2cf3/tyf, PASS,
@@ -60,7 +60,7 @@
 /showcases/visualizer/canvas/ieee80211/, -f omnetpp.ini -c OneNetwork -r 0,                                  5s,            7718-4aa3/tplx;3fb3-944c/~tNl;ea2f-cb76/~tND;adbf-cf44/tyf, PASS,    wireless
 /showcases/visualizer/canvas/ieee80211/, -f omnetpp.ini -c MultipleNetworks -r 0,                            5s,            f245-b388/tplx;e363-02c5/~tNl;67cc-2e4e/~tND;09a7-c8b0/tyf, PASS,    wireless
 /showcases/visualizer/canvas/ieee80211/, -f omnetpp.ini -c VisualizingHandover -r 0,                         250s,            ae46-26fa/tplx;fc0e-8aba/~tNl;93a6-21b6/~tND;975d-c3a6/tyf, PASS,    wireless
-/showcases/visualizer/canvas/ieee80211/,    -f omnetpp.ini -c SignalLevels -r 0,           100s,         d78c-d2b3/tplx;9da2-e719/~tNl;6448-a105/~tND;d4c3-0c38/tyf, PASS,
+/showcases/visualizer/canvas/ieee80211/,    -f omnetpp.ini -c SignalLevels -r 0,           100s,         d78c-d2b3/tplx;9da2-e719/~tNl;6448-a105/~tND;074b-dad1/tyf, PASS,
 
 /showcases/visualizer/canvas/submoduleinfo/,         -f omnetpp.ini -c PacketCounts -r 0,                    5s,            271c-6821/tplx;3c0c-db82/~tNl;32ff-eec4/~tND;7f58-4fda/tyf, PASS,   wireless # VisualizingSubmoduleInformation extended
 /showcases/visualizer/canvas/submoduleinfo/,         -f omnetpp.ini -c MACStates -r 0,                                    5s,            271c-6821/tplx;3c0c-db82/~tNl;32ff-eec4/~tND;5bf8-8b5e/tyf, PASS,    wireless
