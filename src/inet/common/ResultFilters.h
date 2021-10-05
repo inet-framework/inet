@@ -239,6 +239,12 @@ class INET_API WeightTimesFilter : public cObjectResultFilter
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
+class INET_API DemuxFlowFilter : public DemuxFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
 /**
  * Filter that expects numbers and outputs their variance
  */

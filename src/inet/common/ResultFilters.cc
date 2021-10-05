@@ -417,6 +417,28 @@ void LengthWeightedValuePerRegionFilter::receiveSignal(cResultFilter *prev, simt
     fire(this, t, &weightedValue, details);
 }
 
+Register_ResultFilter("demuxFlow", DemuxFlowFilter);
+
+void DemuxFlowFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    std::set<std::string> flows;
+    Packet *packet;
+    if (dynamic_cast<Packet *>(object))
+        packet = check_and_cast<Packet *>(object);
+    else
+        packet = check_and_cast<Packet *>(check_and_cast<cPacket *>(object)->getEncapsulatedPacket());
+    packet->mapAllRegionTags<FlowTag>(b(0), packet->getTotalLength(), [&] (b o, b l, const Ptr<const FlowTag>& flowTag) {
+        for (int i = 0; i < flowTag->getNamesArraySize(); i++) {
+            auto flowName = flowTag->getNames(i);
+            if (flows.find(flowName) == flows.end()) {
+                Flow flow(flowName);
+                DemuxFilter::receiveSignal(prev, t, object, &flow);
+                flows.insert(flowName);
+            }
+        }
+    });
+}
+
 Register_ResultFilter("throughput", ThroughputFilter);
 
 void ThroughputFilter::emitThroughput(simtime_t endInterval, cObject *details)
