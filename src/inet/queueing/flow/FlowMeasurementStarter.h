@@ -55,6 +55,7 @@ class INET_API FlowMeasurementStarter : public PacketFlowBase
         packet->mapAllRegionTagsForUpdate<T>(offset, length, [&] (b o, b l, const Ptr<T>& timeTag) {
             timeTag->insertFlowNames(flowName);
             timeTag->insertBitTotalTimes(value);
+            timeTag->insertPacketTotalTimes(value);
         });
     }
 
