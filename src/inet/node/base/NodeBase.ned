@@ -18,6 +18,7 @@
 package inet.node.base;
 
 import inet.clock.contract.IClock;
+import inet.common.IMeasurer;
 import inet.common.lifecycle.NodeStatus;
 import inet.mobility.contract.IMobility;
 import inet.node.inet.INetworkNode;
@@ -67,6 +68,9 @@ module NodeBase like INetworkNode
         // TODO move mobility right after status to have it in the same order as in their positions, changes fingerprints
         mobility: <default("")> like IMobility if typename != "" {
             @display("p=125,160;is=s");
+        }
+        measurer: <default("")> like IMeasurer if typename != "" {
+            @display("p=125,660;is=s");
         }
 }
 

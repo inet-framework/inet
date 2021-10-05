@@ -21,6 +21,7 @@ package inet.node.ethernet;
 
 import inet.applications.contract.IApp;
 import inet.clock.contract.IClock;
+import inet.common.IMeasurer;
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.common.packet.recorder.PcapRecorder;
@@ -89,6 +90,9 @@ module EthernetSwitch like IEthernetNetworkNode
         }
         pcapRecorder[numPcapRecorders]: PcapRecorder {
             @display("p=100,600;is=s");
+        }
+        measurer: <default("")> like IMeasurer if typename != "" {
+            @display("p=125,700;is=s");
         }
         stp: <spanningTreeProtocol> like ISpanningTree if hasStp {
             @display("p=500,75");
