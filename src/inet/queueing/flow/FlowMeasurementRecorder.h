@@ -28,13 +28,7 @@ namespace queueing {
 class INET_API FlowMeasurementRecorder : public PacketFlowBase
 {
   public:
-    static simsignal_t lifeTimeSignal;
-    static simsignal_t elapsedTimeSignal;
-    static simsignal_t delayingTimeSignal;
-    static simsignal_t queueingTimeSignal;
-    static simsignal_t processingTimeSignal;
-    static simsignal_t transmissionTimeSignal;
-    static simsignal_t propagationTimeSignal;
+    static simsignal_t packetFlowMeasuredSignal;
 
   protected:
     PacketFilter packetFilter;
@@ -53,18 +47,18 @@ class INET_API FlowMeasurementRecorder : public PacketFlowBase
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void makeMeasurement(Packet *packet, b offset, b length, const char *flowName, simsignal_t signal, simtime_t value);
+    virtual void makeMeasurement(Packet *packet, b offset, b length, const char *flowName, simsignal_t bitSignal, simsignal_t bitPerRegionSignal, simsignal_t packetPerBitSignal, simsignal_t packetPerRegionSignal, simtime_t bitValue, simtime_t packetValue);
     virtual void makeMeasurements(Packet *packet);
     virtual void endMeasurements(Packet *packet);
 
     template<typename T>
-    void makeMeasurement(Packet *packet, b offset, b length, simsignal_t signal) {
+    void makeMeasurement(Packet *packet, b offset, b length, simsignal_t bitSignal, simsignal_t bitPerRegionSignal, simsignal_t packetPerBitSignal, simsignal_t packetPerRegionSignal) {
         packet->mapAllRegionTags<T>(offset, length, [&] (b o, b l, const Ptr<const T>& timeTag) {
             for (int i = 0; i < (int)timeTag->getBitTotalTimesArraySize(); i++) {
                 auto flowName = timeTag->getFlowNames(i);
                 cMatchableString matchableFlowName(flowName);
                 if (flowNameMatcher.matches(&matchableFlowName))
-                    makeMeasurement(packet, o, l, flowName, signal, timeTag->getBitTotalTimes(i));
+                    makeMeasurement(packet, o, l, flowName, bitSignal, bitPerRegionSignal, packetPerBitSignal, packetPerRegionSignal, timeTag->getBitTotalTimes(i), timeTag->getPacketTotalTimes(i));
             }
         });
     }
@@ -82,6 +76,7 @@ class INET_API FlowMeasurementRecorder : public PacketFlowBase
                     EV_INFO << EV_FIELD(packet) << EV_ENDL;
                     timeTag->eraseFlowNames(i);
                     timeTag->eraseBitTotalTimes(i);
+                    timeTag->erasePacketTotalTimes(i);
                     i--;
                     break;
                 }
