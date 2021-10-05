@@ -25,6 +25,14 @@ class CreationTimeTag extends TagBase
     simtime_t creationTime = simTime();
 }
 
+class ResidenceTimeTag extends TagBase
+{
+    simtime_t receptionStartTime = -1;
+    simtime_t receptionEndTime = -1;
+    simtime_t transmissionStartTime = -1;
+    simtime_t transmissionEndTime = -1;
+}
+
 class TimeTagBase extends TagBase
 {
     string flowNames[];
