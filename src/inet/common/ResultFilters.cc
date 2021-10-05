@@ -249,6 +249,67 @@ bool DifferenceToMeanFilter::process(simtime_t& t, double& value, cObject *detai
     return true;
 }
 
+Register_ResultFilter("utilization", UtilizationFilter);
+
+bool UtilizationFilter::process(simtime_t& t, double& value, cObject *details)
+{
+    ASSERT(value == 0 || value == 1);
+    const simtime_t now = simTime();
+    numValues++;
+    if (numValues >= numValueLimit) {
+        totalValue += value * (now - lastValue).dbl();
+        emitUtilization(now, details);
+    }
+    else if (lastSignal + interval <= now) {
+        emitUtilization(lastSignal + interval, details);
+        if (emitIntermediateZeros) {
+            while (lastSignal + interval <= now)
+                emitUtilization(lastSignal + interval, details);
+        }
+        else {
+            if (lastSignal + interval <= now) { // no packets arrived for a long period
+                // zero should have been signaled at the beginning of this packet (approximation)
+                emitUtilization(now - interval, details);
+            }
+        }
+        totalValue += value * (now - lastValue).dbl();
+    }
+    else
+        totalValue += value * (now - lastValue).dbl();
+    lastValue = now;
+    return false;
+}
+
+void UtilizationFilter::emitUtilization(simtime_t endInterval, cObject *details)
+{
+    if (totalValue == 0) {
+        fire(this, endInterval, 0.0, details);
+        lastSignal = endInterval;
+    }
+    else {
+        double utilization = totalValue / (endInterval - lastSignal).dbl();
+        fire(this, endInterval, utilization, details);
+        lastSignal = endInterval;
+        totalValue = 0;
+        numValues = 0;
+    }
+}
+
+void UtilizationFilter::finish(cComponent *component, simsignal_t signal)
+{
+    const simtime_t now = simTime();
+    if (lastSignal < now) {
+        cObject *details = nullptr;
+        if (lastSignal + interval < now) {
+            emitUtilization(lastSignal + interval, details);
+            if (emitIntermediateZeros) {
+                while (lastSignal + interval < now)
+                    emitUtilization(lastSignal + interval, details);
+            }
+        }
+        emitUtilization(now, details);
+    }
+}
 
 Register_ResultFilter("maxPerGroup", MaxPerGroupFilter);
 
