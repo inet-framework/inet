@@ -45,6 +45,15 @@ class INET_API WeightedValue : public cObject
     cValue value;
 };
 
+class INET_API PacketRegionValue : public cObject
+{
+  public:
+    Packet *packet = nullptr;
+    b offset = b(-1);
+    b length = b(-1);
+    cValue value;
+};
+
 Register_ResultFilter("dataAge", DataAgeFilter);
 
 void DataAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
@@ -323,6 +332,28 @@ void WeightTimesFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cOb
         throw cRuntimeError("Only integer values are allowed");
     for (int i = 0; i < weightedValue->weight; i++)
         fire(this, t, weightedValue->value.doubleValue(), details);
+}
+
+Register_ResultFilter("groupRegionsPerPacket", GroupRegionsPerPacketFilter);
+
+void GroupRegionsPerPacketFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    auto packetRegionValue = check_and_cast<PacketRegionValue *>(object);
+    WeightedValue weightedValue;
+    weightedValue.weight = packetRegionValue->length.get();
+    weightedValue.value = packetRegionValue->value;
+    fire(this, t, &weightedValue, packetRegionValue->packet);
+}
+
+Register_ResultFilter("lengthWeightedValuePerRegion", LengthWeightedValuePerRegionFilter);
+
+void LengthWeightedValuePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    auto packetRegionValue = check_and_cast<PacketRegionValue *>(object);
+    WeightedValue weightedValue;
+    weightedValue.weight = packetRegionValue->length.get();
+    weightedValue.value = packetRegionValue->value;
+    fire(this, t, &weightedValue, details);
 }
 
 Register_ResultFilter("throughput", ThroughputFilter);
