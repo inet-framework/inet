@@ -1,3 +1,5 @@
+
+
 package inet.showcases.wireless.sensornetwork;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
@@ -9,42 +11,18 @@ import inet.routing.contract.IManetRouting;
 import inet.visualizer.common.IntegratedVisualizer;
 
 
-network SensorNetworkShowcaseA
+module ManetSensorNode extends SensorNode
 {
-    @display("bgb=60,30;bgi=showcases/warehouse,s");
     submodules:
-        configurator: Ipv4NetworkConfigurator {
-            @display("p=3.4662657,4.033473");
-        }
-        visualizer: IntegratedVisualizer {
-            @display("p=3.4662657,9.264383");
-        }
-        radioMedium: ApskScalarRadioMedium {
-            @display("p=3.4032426,14.0541315");
-        }
-        sensor4: SensorNode {
-            @display("p=22,6.5;i=misc/sensor2");
-        }
-        sensor1: SensorNode {
-            @display("p=16.482326,20.196255;i=misc/sensor2");
-        }
-        sensor2: SensorNode {
-            @display("p=33.772572,16.275303;i=misc/sensor2");
-        }
-        sensor3: SensorNode {
-            @display("p=35,6.5;i=misc/sensor2");
-        }
-        gateway: SensorNode {
-            @display("p=28.5,13;i=misc/sensorgateway");
-        }
-        server: StandardHost {
-            @display("p=38.35591,12.96182");
+        routing: <default("")> like IManetRouting if typename != "" {
+            @display("p=913,225");
         }
     connections:
-        gateway.ethg++ <--> Eth100M <--> server.ethg++;
+        routing.ipOut --> tn.in++ if exists(routing);
+        routing.ipIn <-- tn.out++ if exists(routing);
 }
 
-network SensorNetworkShowcaseB
+network ManetSensorNetwork
 {
     @display("bgb=40,40");
     submodules:
@@ -57,19 +35,19 @@ network SensorNetworkShowcaseB
         radioMedium: ApskScalarRadioMedium {
             @display("p=4.0054626,14.219392");
         }
-        sensor4: SensorNode {
+        sensor4: ManetSensorNode {
             @display("p=17.290247,6.6757708;i=misc/sensor2");
         }
-        sensor1: SensorNode {
+        sensor1: ManetSensorNode {
             @display("p=11.482326,21.696255;i=misc/sensor2");
         }
-        sensor2: SensorNode {
+        sensor2: ManetSensorNode {
             @display("p=28.772572,30.775303;i=misc/sensor2");
         }
-        sensor3: SensorNode {
+        sensor3: ManetSensorNode {
             @display("p=32.978306,6.6757708;i=misc/sensor2");
         }
-        gateway: SensorNode {
+        gateway: ManetSensorNode {
             @display("p=23.89926,17.557278;i=misc/sensorgateway");
         }
         server: StandardHost {
@@ -78,4 +56,3 @@ network SensorNetworkShowcaseB
     connections:
         gateway.ethg++ <--> Eth100M <--> server.ethg++;
 }
-
