@@ -38,6 +38,13 @@ class INET_API Flow : public cNamedObject
     Flow(const char *name) : cNamedObject(name) { }
 };
 
+class INET_API WeightedValue : public cObject
+{
+  public:
+    double weight = NaN;
+    cValue value;
+};
+
 Register_ResultFilter("dataAge", DataAgeFilter);
 
 void DataAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
@@ -231,6 +238,91 @@ bool DifferenceToMeanFilter::process(simtime_t& t, double& value, cObject *detai
     sum += value;
     value = sum / count - value;
     return true;
+}
+
+
+Register_ResultFilter("maxPerGroup", MaxPerGroupFilter);
+
+void MaxPerGroupFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    if (details != identifier) {
+        if (identifier != nullptr)
+            fire(this, time, max, details);
+        max = 0;
+        identifier = details;
+    }
+    auto weightedValue = check_and_cast<WeightedValue *>(object);
+    max = std::max(max, weightedValue->value.doubleValue());
+    time = t;
+}
+
+void MaxPerGroupFilter::finish(cComponent *component, simsignal_t signal)
+{
+    if (identifier != nullptr)
+        fire(this, time, max, nullptr);
+}
+
+Register_ResultFilter("weightedMeanPerGroup", WeighedMeanPerGroupFilter);
+
+void WeighedMeanPerGroupFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    if (details != identifier) {
+        if (identifier != nullptr)
+            fire(this, time, sum / weight, details);
+        weight = 0;
+        sum = 0;
+        identifier = details;
+    }
+    auto weightedValue = check_and_cast<WeightedValue *>(object);
+    sum += weightedValue->weight * weightedValue->value.doubleValue();
+    weight += weightedValue->weight;
+    time = t;
+}
+
+void WeighedMeanPerGroupFilter::finish(cComponent *component, simsignal_t signal)
+{
+    if (identifier != nullptr)
+        fire(this, time, sum / weight, nullptr);
+}
+
+Register_ResultFilter("weightedSumPerGroup", WeighedSumPerGroupFilter);
+
+void WeighedSumPerGroupFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    if (details != identifier) {
+        if (identifier != nullptr)
+            fire(this, time, sum, details);
+        sum = 0;
+        identifier = details;
+    }
+    auto weightedValue = check_and_cast<WeightedValue *>(object);
+    sum += weightedValue->weight * weightedValue->value.doubleValue();
+    time = t;
+}
+
+void WeighedSumPerGroupFilter::finish(cComponent *component, simsignal_t signal)
+{
+    if (identifier != nullptr)
+        fire(this, time, sum, nullptr);
+}
+
+Register_ResultFilter("dropWeight", DropWeightFilter);
+
+void DropWeightFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    auto weightedValue = check_and_cast<WeightedValue *>(object);
+    fire(this, t, weightedValue->value.doubleValue(), details);
+}
+
+Register_ResultFilter("weightTimes", WeightTimesFilter);
+
+void WeightTimesFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
+{
+    auto weightedValue = check_and_cast<WeightedValue *>(object);
+    if (std::floor(weightedValue->weight) != weightedValue->weight)
+        throw cRuntimeError("Only integer values are allowed");
+    for (int i = 0; i < weightedValue->weight; i++)
+        fire(this, t, weightedValue->value.doubleValue(), details);
 }
 
 Register_ResultFilter("throughput", ThroughputFilter);

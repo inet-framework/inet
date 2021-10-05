@@ -178,6 +178,55 @@ class INET_API MessageSourceAddrFilter : public cObjectResultFilter
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
+class INET_API MaxPerGroupFilter : public cObjectResultFilter
+{
+  protected:
+    double max = NaN;
+    cObject *identifier = nullptr;
+    simtime_t time = -1;
+
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+    virtual void finish(cComponent *component, simsignal_t signalID) override;
+};
+
+class INET_API WeighedMeanPerGroupFilter : public cObjectResultFilter
+{
+  protected:
+    double weight = NaN;
+    double sum = NaN;
+    cObject *identifier = nullptr;
+    simtime_t time = -1;
+
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+    virtual void finish(cComponent *component, simsignal_t signalID) override;
+};
+
+class INET_API WeighedSumPerGroupFilter : public cObjectResultFilter
+{
+  protected:
+    double sum = NaN;
+    cObject *identifier = nullptr;
+    simtime_t time = -1;
+
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+    virtual void finish(cComponent *component, simsignal_t signalID) override;
+};
+
+class INET_API DropWeightFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
+class INET_API WeightTimesFilter : public cObjectResultFilter
+{
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
+};
+
 /**
  * Filter that expects numbers and outputs their variance
  */
