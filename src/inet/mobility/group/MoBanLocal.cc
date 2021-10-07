@@ -136,5 +136,9 @@ const Coord& MoBanLocal::getCurrentVelocity()
     return lastCompositeVelocity;
 }
 
+void MoBanLocal::processBorderPolicy()
+{
+}
+
 } // namespace inet
 
