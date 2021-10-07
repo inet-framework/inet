@@ -15,6 +15,7 @@ Define_Module(GaussMarkovMobility);
 
 GaussMarkovMobility::GaussMarkovMobility()
 {
+    borderPolicy = REFLECT;
 }
 
 void GaussMarkovMobility::initialize(int stage)
@@ -57,11 +58,15 @@ void GaussMarkovMobility::preventBorderHugging()
         angleMean = deg(180.0);
 }
 
+void GaussMarkovMobility::processBorderPolicy()
+{
+    handleIfOutside(borderPolicy, lastPosition, lastVelocity, angle);
+}
+
 void GaussMarkovMobility::move()
 {
     preventBorderHugging();
     LineSegmentsMobilityBase::move();
-    handleIfOutside(REFLECT, lastPosition, lastVelocity, angle);
 }
 
 void GaussMarkovMobility::setTargetPosition()

@@ -44,6 +44,8 @@ class INET_API GaussMarkovMobility : public LineSegmentsMobilityBase
     /** @brief Calculate a new target position to move to. */
     virtual void setTargetPosition() override;
 
+    virtual void processBorderPolicy() override;
+
   public:
     virtual double getMaxSpeed() const override { return speed; }
     GaussMarkovMobility();
