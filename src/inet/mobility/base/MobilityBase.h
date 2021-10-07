@@ -55,7 +55,6 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     enum BorderPolicy {
         REFLECT, ///< reflect off the wall
         WRAP, ///< reappear at the opposite edge (torus)
-        PLACERANDOMLY, ///< placed at a randomly chosen position within the constraint area
         RAISEERROR ///< stop the simulation with error
     };
 
@@ -140,14 +139,6 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
      * (Pass a dummy you don't have it).
      */
     virtual void wrapIfOutside(Coord& targetPosition);
-
-    /** @brief Utility function to place the node randomly if it goes
-     * outside the constraint area.
-     *
-     * Decision is made on lastPosition, but targetPosition will also be updated.
-     * (Pass a dummy you don't have it).
-     */
-    virtual void placeRandomlyIfOutside(Coord& targetPosition);
 
     /** @brief Utility function to raise an error if the node gets outside
      * the constraint area.
