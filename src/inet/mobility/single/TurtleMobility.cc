@@ -151,8 +151,6 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
                 borderPolicy = REFLECT;
             else if (!strcmp(bpAttr, "wrap"))
                 borderPolicy = WRAP;
-            else if (!strcmp(bpAttr, "placerandomly"))
-                borderPolicy = PLACERANDOMLY;
             else if (!strcmp(bpAttr, "error"))
                 borderPolicy = RAISEERROR;
             else
