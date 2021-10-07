@@ -27,8 +27,22 @@ class INET_API LineSegmentsMobilityBase : public MovingMobilityBase
     /** @brief End position of current linear movement. */
     Coord targetPosition;
 
+    /** @brief The velocity in current segment. */
+    Coord segmentVelocity;
+
+    /** @brief Start position of current linear movement. */
+    Coord segmentStartPosition;
+
+    /** @brief Start time of current linear movement. */
+    simtime_t segmentStartTime;
+
+    BorderPolicy borderPolicy = RAISEERROR;
+
   protected:
     virtual void initializePosition() override;
+
+    // helper function: call setTargetPosition() and save segment start infos.
+    void doSetTargetPosition();
 
     virtual void move() override;
 
@@ -39,6 +53,9 @@ class INET_API LineSegmentsMobilityBase : public MovingMobilityBase
      * sequence, it should set nextChange to -1.
      */
     virtual void setTargetPosition() = 0;
+
+    /** @brief processing border policy. */
+    virtual void processBorderPolicy();
 
   public:
     LineSegmentsMobilityBase();
