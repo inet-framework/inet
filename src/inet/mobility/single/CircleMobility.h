@@ -33,6 +33,7 @@ class INET_API CircleMobility : public MovingMobilityBase
     rad angle = rad(0);
 
     simtime_t startTime;
+    Quaternion angularVelocity;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

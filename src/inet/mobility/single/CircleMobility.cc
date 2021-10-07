@@ -29,8 +29,9 @@ void CircleMobility::initialize(int stage)
         omega = speed / r;
         stationary = (omega == 0);
         startTime = simTime();
-        lastAngularVelocity = Quaternion(EulerAngles(rad(omega), rad(0), rad(0)));
-        WATCH(lastAngularVelocity);
+        angularVelocity = Quaternion(EulerAngles(rad(omega), rad(0), rad(0)));
+        WATCH(angularVelocity);
+        lastAngularVelocity = angularVelocity;
     }
 }
 
@@ -51,9 +52,11 @@ void CircleMobility::move()
     lastVelocity.x = -sinAngle * speed;
     lastVelocity.y = cosAngle * speed;
     lastVelocity.z = 0;
+    lastAngularVelocity = angularVelocity;
     // do something if we reach the wall
     Coord dummyCoord;
-    handleIfOutside(REFLECT, dummyCoord, dummyCoord);
+    rad a;
+    handleIfOutside(REFLECT, dummyCoord, lastVelocity, a, a, lastAngularVelocity);
 }
 
 } // namespace inet
