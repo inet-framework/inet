@@ -133,8 +133,37 @@ The example configurations are the following:
 
 The simulations use the following network:
 
-.. figure:: media/Network.png
+.. figure:: media/Network2.png
    :align: center
+
+In the ``General`` configuration, ``source1`` is configured to send UDP packets to ``sink1``, and ``source2`` to ``sink2``. All Ethernet interfaces are configured to be layered (:ned:`LayeredEthernetInterface`).
+
+**TODO** WHY are we doing this?
+
+We configure the EthernetMacLayer in ``switch1`` to contain a GatingPriorityQueue, with two inner queues: 
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: GatingPriorityQueue
+   :end-at: numQueues
+   :language: ini
+
+Inner queues in the GatingPriorityQueue each have their own gate. The gates connect to a PriorityScheduler, so the gating piority queue prioritizes packets from the first inner queue. Here is a gating priority queue with two inner queues:
+
+.. figure:: media/GatingPriorityQueue.png
+   :align: center
+
+Here is the rest of the gating priority queue configuration:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: ContentBasedClassifier
+   :end-at: offset
+   :language: ini
+
+In our case, we configure the classifier (set to ContentBasedClassifier) to send packets from source1 to the first queue and those from source2 to the second, thus the gating priority queue prioritizes packets from source1. The gates are configured to open and close every 10us, with the second gate offset by a 10us period (so they alternate being open).
+
+.. Inner queues in the GatingPriorityQueue each have their own gate. The scheduler is a PriorityScheduler, so it prioritizes packets from the first inner queue. In our case, we configure the gating priority queue to have two inner queues, and the classifier (set to ContentBasedClassifier) sends packets from source1 to the first queue and those from source2 to the second, thus the gating priority queue prioritizes packets from source1.
+
+.. A gating priority queue looks like this/here is a gating priority queue:
 
 Here is the parts common for all the example simulations below, in the ``General`` configuration:
 
