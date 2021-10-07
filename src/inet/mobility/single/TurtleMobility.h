@@ -31,7 +31,6 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
     double speed;
     rad heading;
     rad elevation;
-    BorderPolicy borderPolicy;
     std::stack<long> loopVars; // for <repeat>
     double maxSpeed;
 
@@ -48,7 +47,7 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
     virtual void setTargetPosition() override;
 
     /** @brief Overridden from LineSegmentsMobilityBase.*/
-    virtual void move() override;
+    virtual void processBorderPolicy() override;
 
     /** @brief Process next statements from script */
     virtual void resumeScript();

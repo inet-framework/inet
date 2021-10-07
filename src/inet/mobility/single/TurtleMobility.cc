@@ -19,9 +19,9 @@ TurtleMobility::TurtleMobility() :
     speed(0),
     heading(deg(0)),
     elevation(deg(0)),
-    borderPolicy(REFLECT),
     maxSpeed(0)
 {
+    borderPolicy = REFLECT;
 }
 
 void TurtleMobility::initialize(int stage)
@@ -67,11 +67,10 @@ void TurtleMobility::setTargetPosition()
     resumeScript();
 }
 
-void TurtleMobility::move()
+void TurtleMobility::processBorderPolicy()
 {
-    LineSegmentsMobilityBase::move();
     Coord dummyCoord;
-    handleIfOutside(borderPolicy, targetPosition, dummyCoord, heading, elevation);
+    handleIfOutside(borderPolicy, dummyCoord, dummyCoord, heading, elevation);
 }
 
 /**
