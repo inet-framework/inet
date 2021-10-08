@@ -119,8 +119,8 @@ void MoBanLocal::setMoBANParameters(Coord referencePoint, double radius, double 
     this->referencePosition = referencePoint;
     this->radius = radius;
     this->speed = speed;
-    setTargetPosition();
-    lastVelocity = (targetPosition - lastPosition) / (nextChange - simTime()).dbl();
+    moveAndUpdate();   // for set lastPosition variable to current position
+    doSetTargetPosition();
     scheduleUpdate();
 }
 
