@@ -36,7 +36,7 @@ module Ieee8022LlcApp like IApp
         input socketIn;
         output socketOut;
     submodules:
-        source: <default("ActivePacketSource")> like IActivePacketSource {
+        source: <default("ActivePacketSource")> like IActivePacketSource if typename != "" {
             parameters:
                 @display("p=200,200");
         }
@@ -44,7 +44,7 @@ module Ieee8022LlcApp like IApp
             parameters:
                 @display("p=200,400");
         }
-        sink: <default("PassivePacketSink")> like IPassivePacketSink {
+        sink: <default("PassivePacketSink")> like IPassivePacketSink if typename != "" {
             parameters:
                 @display("p=600,200");
         }
@@ -56,12 +56,12 @@ module Ieee8022LlcApp like IApp
             parameters:
                 @display("p=400,600");
         }
-    connections:
-        source.out --> outbound.in;
+    connections allowunconnected:
+        source.out --> outbound.in if exists(source);
         outbound.out --> io.trafficIn;
         io.socketOut --> socketOut;
 
         socketIn --> io.socketIn;
         io.trafficOut --> inbound.in;
-        inbound.out --> sink.in;
+        inbound.out --> sink.in if exists(sink);
 }
