@@ -31,10 +31,11 @@ simple PassivePacketSource extends PacketSourceBase like IPassivePacketSource
         volatile double providingInterval @unit(s) = default(0s); // elapsed time between subsequent packets allowed to be pulled by the connected packet collector, 0 means any number of packets can be pulled at the same simulation time
         bool scheduleForAbsoluteTime = default(true); // when a clock is used relative means that setting the clock will not affect the simulation time of the event
         @class(PassivePacketSource);
-        @signal[packetPulled](type=inet::Packet);
         @signal[packetCreated](type=inet::Packet);
-        @statistic[packetPulled](title="packets pulled"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @signal[packetPulled](type=inet::Packet);
         @statistic[packetCreated](title="packets created"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetPulled](title="packets pulled"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[pulledTraffic](title="pulled traffic"; source=throughput(packetPulled); record=vector; unit=bps; interpolationmode=linear);
     gates:
         output out @labels(pull);
 }

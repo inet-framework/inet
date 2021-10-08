@@ -70,6 +70,7 @@ void ActivePacketSource::producePacket()
 {
     auto packet = createPacket();
     EV_INFO << "Producing packet" << EV_FIELD(packet) << EV_ENDL;
+    emit(packetPushedSignal, packet);
     pushOrSendPacket(packet, outputGate, consumer);
     updateDisplayString();
 }
