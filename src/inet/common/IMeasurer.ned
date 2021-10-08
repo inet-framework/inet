@@ -19,4 +19,6 @@ package inet.common;
 
 moduleinterface IMeasurer
 {
+    parameters:
+        @display("i=block/cogwheel");
 }

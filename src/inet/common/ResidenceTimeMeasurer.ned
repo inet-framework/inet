@@ -30,6 +30,7 @@ simple ResidenceTimeMeasurer like IMeasurer
     parameters:
         string measurementStartSignal = default("receptionEnded");
         string measurementEndSignal = default("transmissionStarted");
+        @display("i=block/timer");
         @signal[packetStayed](type=inet::Packet);
         // the statistics value is the maximum residence time for any bit in the outgoing packet
         @statistic[maxBitResidenceTimePerPacket](title="maximum bit residence time per packet"; source=maxPerGroup(groupRegionsPerPacket(residenceTimePerRegion(packetStayed))); record=vector?,histogram?; unit=s; interpolationmode=none);
