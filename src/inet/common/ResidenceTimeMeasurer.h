@@ -21,7 +21,6 @@
 #include "inet/common/ProtocolTag_m.h"
 
 namespace inet {
-namespace queueing {
 
 class INET_API ResidenceTimeMeasurer : public cSimpleModule, public cListener
 {
@@ -35,7 +34,6 @@ class INET_API ResidenceTimeMeasurer : public cSimpleModule, public cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 
-} // namespace queueing
 } // namespace inet
 
 #endif

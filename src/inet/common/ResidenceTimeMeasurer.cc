@@ -23,7 +23,6 @@
 #include "inet/common/TimeTag_m.h"
 
 namespace inet {
-namespace queueing {
 
 simsignal_t ResidenceTimeMeasurer::packetStayedSignal = cComponent::registerSignal("packetStayed");
 
@@ -75,6 +74,5 @@ void ResidenceTimeMeasurer::receiveSignal(cComponent *source, simsignal_t signal
         throw cRuntimeError("Unknown signal");
 }
 
-} // namespace queueing
 } // namespace inet
 
