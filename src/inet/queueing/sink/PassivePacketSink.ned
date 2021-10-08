@@ -33,6 +33,7 @@ simple PassivePacketSink extends PacketSinkBase like IPassivePacketSink
         @class(PassivePacketSink);
         @signal[packetPushed](type=inet::Packet);
         @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[pushedTraffic](title="pushed traffic"; source=throughput(packetPushed); record=vector; unit=bps; interpolationmode=linear);
     gates:
         input in @labels(push);
 }

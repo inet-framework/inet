@@ -67,6 +67,7 @@ void ActivePacketSink::collectPacket()
 {
     auto packet = provider->pullPacket(inputGate->getPathStartGate());
     take(packet);
+    emit(packetPulledSignal, packet);
     EV_INFO << "Collecting packet" << EV_FIELD(packet) << EV_ENDL;
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();
