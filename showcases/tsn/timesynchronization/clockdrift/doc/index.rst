@@ -138,43 +138,45 @@ The simulations use the following network:
 
 In the ``General`` configuration, ``source1`` is configured to send UDP packets to ``sink1``, and ``source2`` to ``sink2``. All Ethernet interfaces are configured to be layered (:ned:`LayeredEthernetInterface`).
 
-**TODO** WHY are we doing this?
+.. note:: To demonstrate the effects of drifting clocks, we configure the Ethernet MAC layer in switch1 to alternate between forwarding frames from ``switch1`` and ``switch2`` every 10 us. More details about this are provided in the **TODO** section.
 
-We configure the EthernetMacLayer in ``switch1`` to contain a GatingPriorityQueue, with two inner queues: 
+.. **TODO** WHY are we doing this?
 
-.. literalinclude:: ../omnetpp.ini
-   :start-at: GatingPriorityQueue
-   :end-at: numQueues
-   :language: ini
+   We configure the EthernetMacLayer in ``switch1`` to contain a GatingPriorityQueue, with two inner queues: 
 
-Inner queues in the GatingPriorityQueue each have their own gate. The gates connect to a PriorityScheduler, so the gating piority queue prioritizes packets from the first inner queue. Here is a gating priority queue with two inner queues:
+   .. literalinclude:: ../omnetpp.ini
+      :start-at: GatingPriorityQueue
+      :end-at: numQueues
+      :language: ini
 
-.. figure:: media/GatingPriorityQueue.png
-   :align: center
+   Inner queues in the GatingPriorityQueue each have their own gate. The gates connect to a PriorityScheduler, so the gating piority queue prioritizes packets from the first inner queue. Here is a gating priority queue with two inner queues:
 
-Here is the rest of the gating priority queue configuration:
+   .. figure:: media/GatingPriorityQueue.png
+      :align: center
 
-.. literalinclude:: ../omnetpp.ini
-   :start-at: ContentBasedClassifier
-   :end-at: offset
-   :language: ini
+   Here is the rest of the gating priority queue configuration:
 
-In our case, we configure the classifier (set to ContentBasedClassifier) to send packets from source1 to the first queue and those from source2 to the second, thus the gating priority queue prioritizes packets from source1. The gates are configured to open and close every 10us, with the second gate offset by a 10us period (so they alternate being open).
+   .. literalinclude:: ../omnetpp.ini
+      :start-at: ContentBasedClassifier
+      :end-at: offset
+      :language: ini
 
-.. Inner queues in the GatingPriorityQueue each have their own gate. The scheduler is a PriorityScheduler, so it prioritizes packets from the first inner queue. In our case, we configure the gating priority queue to have two inner queues, and the classifier (set to ContentBasedClassifier) sends packets from source1 to the first queue and those from source2 to the second, thus the gating priority queue prioritizes packets from source1.
+   In our case, we configure the classifier (set to ContentBasedClassifier) to send packets from source1 to the first queue and those from source2 to the second, thus the gating priority queue prioritizes packets from source1. The gates are configured to open and close every 10us, with the second gate offset by a 10us period (so they alternate being open).
 
-.. A gating priority queue looks like this/here is a gating priority queue:
+   .. Inner queues in the GatingPriorityQueue each have their own gate. The scheduler is a PriorityScheduler, so it prioritizes packets from the first inner queue. In our case, we configure the gating priority queue to have two inner queues, and the classifier (set to ContentBasedClassifier) sends packets from source1 to the first queue and those from source2 to the second, thus the gating priority queue prioritizes packets from source1.
 
-Here is the parts common for all the example simulations below, in the ``General`` configuration:
+   .. A gating priority queue looks like this/here is a gating priority queue:
 
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :end-before: NoClockDrift
+.. Here is the parts common for all the example simulations below, in the ``General`` configuration:
+
+.. .. literalinclude:: ../omnetpp.ini
+      :language: ini
+      :end-before: NoClockDrift
 
 .. In this case, the time of all clocks is the same as the simulation time.
 
-No Clock Drift
-~~~~~~~~~~~~~~
+Example: No Clock Drift
+~~~~~~~~~~~~~~~~~~~~~~~
 
 In this configuration network nodes don't have clocks. Applications and gate
 schedules are synchronized by simulation time.
@@ -186,8 +188,8 @@ Here is the configuration:
    :start-at: NoClockDrift
    :end-before: ConstantClockDrift
 
-Constant Clock Drift
-~~~~~~~~~~~~~~~~~~~~
+Example: Constant Clock Drift
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In this configuration all network nodes have a clock with a random constant drift.
 Clocks drift away from each other over time.
@@ -204,8 +206,8 @@ Here are the results:
 .. figure:: media/ConstantClockDrift.png
    :align: center
 
-Out-of-Band Synchronization of Clocks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Example: Out-of-Band Synchronization of Clocks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In this configuration the network node clocks are periodically synchronized by an
 out-of-band mechanism that doesn't use the underlying network.
@@ -223,8 +225,8 @@ Here are the results:
    :align: center
    :width: 100%
 
-Synchronizing Clocks using gPTP
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Example: Synchronizing Clocks using gPTP
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In this configuration the clocks in network nodes are periodically synchronized
 to a master clock using the Generic Precision Time Protocol (gPTP). The time
@@ -257,6 +259,49 @@ Here are the results:
 .. .. image:: media/results.png
    :align: center
    :width: 100%
+
+Effects of Clock Drift on End-to-end Delay
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. **TODO** WHY are we doing this?
+
+This section aims to demonstrate that clock drift can have profound effects on the operation of the network. To this end, in all simulations, the Ethernet MAC layer in ``switch1`` is configured to alternate forwarding packets from ``source1`` and ``source2`` every 10 us; note that the UDP applications are sending packets every 20 us, with packets from source2 offset by 10 us compared to source1.
+
+We configure the EthernetMacLayer in ``switch1`` to contain a GatingPriorityQueue, with two inner queues: 
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: GatingPriorityQueue
+   :end-at: numQueues
+   :language: ini
+
+Inner queues in the GatingPriorityQueue each have their own gate. The gates connect to a PriorityScheduler, so the gating piority queue prioritizes packets from the first inner queue. Here is a gating priority queue with two inner queues:
+
+.. figure:: media/GatingPriorityQueue.png
+   :align: center
+
+Here is the rest of the gating priority queue configuration:
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: ContentBasedClassifier
+   :end-at: offset
+   :language: ini
+
+In our case, we configure the classifier (set to ContentBasedClassifier) to send packets from source1 to the first queue and those from source2 to the second, thus the gating priority queue prioritizes packets from source1. The gates are configured to open and close every 10us, with the second gate offset by a 10us period (so they alternate being open).
+
+.. Inner queues in the GatingPriorityQueue each have their own gate. The scheduler is a PriorityScheduler, so it prioritizes packets from the first inner queue. In our case, we configure the gating priority queue to have two inner queues, and the classifier (set to ContentBasedClassifier) sends packets from source1 to the first queue and those from source2 to the second, thus the gating priority queue prioritizes packets from source1.
+
+.. A gating priority queue looks like this/here is a gating priority queue:
+
+Here are the results:
+
+.. figure:: media/delay.png
+   :align: center
+
+In the case of ``NoClockDrift``, the end-to-end delay is fairly constant, as the applications send packets in sync with the opening of the gates in the queue in ``switch1``. The delay depends only on the bitrate and packet length. In the case of ``OutOfBandSynchronization`` and ``GptpSynchronization``, the clock drift but the drift is periodically eliminated by synchronization, so the delay is fairly constant and bounded.
+
+In the case of ``ConstandClockDrift``, it's more complicated. The delay's characteristic depends on the drift between the clocks, and the drift's direction.
+
+In this case, the clocks in switch1 and the other network nodes have a different rate, and the their time keeps diverging as the simulation progresses. It might be easy to think of the constant drift rate as time dilation. From the point of view of switch1, the clock of source1 is slower, so the density of the packet stream is thinner. In ideal conditions (no clock drift), the packets in both sources are generated in sync with the send windows (when the corresponding gate is open), and they are forwarded immediatelly by switch1.
 
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ClockDriftShowcase.ned <../ClockDriftShowcase.ned>`
