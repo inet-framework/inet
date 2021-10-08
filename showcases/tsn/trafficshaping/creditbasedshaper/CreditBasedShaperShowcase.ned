@@ -23,17 +23,17 @@ import inet.node.tsn.TsnSwitch;
 network CreditBaseShaperShowcase extends TsnNetworkBase
 {
     submodules:
-        device1: TsnDevice {
+        source: TsnDevice {
             @display("p=350,200");
         }
         switch: TsnSwitch {
             @display("p=550,200");
         }
-        device2: TsnDevice {
+        destination: TsnDevice {
             @display("p=750,200");
         }
     connections:
-        device1.ethg++ <--> EthernetLink <--> switch.ethg++;
-        switch.ethg++ <--> EthernetLink <--> device2.ethg++;
+        source.ethg++ <--> EthernetLink <--> switch.ethg++;
+        switch.ethg++ <--> EthernetLink <--> destination.ethg++;
 }
 
