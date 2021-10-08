@@ -186,7 +186,7 @@ void Dsdv::handleSelfMessage(cMessage *msg)
     else {
         for (auto it = forwardList->begin(); it != forwardList->end(); it++) {
             if ((*it)->event == msg) {
-                EV << "Vou mandar forward do " << (*it)->hello->peekData<DsdvHello>()->getSrcAddress() << endl; // todo
+                EV << "I will forward the " << (*it)->hello->peekData<DsdvHello>()->getSrcAddress() << endl; // todo
                 send((*it)->hello, "ipOut");
                 (*it)->hello = nullptr;
                 delete *it;
