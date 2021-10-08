@@ -130,9 +130,9 @@ void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, c
             updateCurrentCredit();
             emitCurrentCredit();
             if (simsignal == transmissionStartedSignal)
-                currentCreditGainRate -= transmitCreditSpendRate;
+                currentCreditGainRate = -transmitCreditSpendRate;
             else if (simsignal == transmissionEndedSignal)
-                currentCreditGainRate += transmitCreditSpendRate;
+                currentCreditGainRate = idleCreditGainRate;
             else
                 throw cRuntimeError("Unknown signal");
             scheduleChangeTimer();
