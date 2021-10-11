@@ -301,7 +301,9 @@ In the case of ``NoClockDrift``, the end-to-end delay is fairly constant, as the
 
 In the case of ``ConstandClockDrift``, it's more complicated. The delay's characteristic depends on the drift between the clocks, and the drift's direction.
 
-In this case, the clocks in switch1 and the other network nodes have a different rate, and the their time keeps diverging as the simulation progresses. It might be easy to think of the constant drift rate as time dilation. From the point of view of switch1, the clock of source1 is slower, so the density of the packet stream is thinner. In ideal conditions (no clock drift), the packets in both sources are generated in sync with the send windows (when the corresponding gate is open), and they are forwarded immediatelly by switch1.
+In this case, the clocks in switch1 and the other network nodes have a different rate, and the their time keeps diverging as the simulation progresses. It might be easy to think of the constant drift rate as time dilation. From the point of view of switch1, the clock of source1 is slower, so the density of the packet stream is thinner. In ideal conditions (no clock drift), the packets in both sources are generated in sync with the send windows (when the corresponding gate is open), and they are forwarded immediatelly by switch1. If the frequency of arriving frames is lower than the ideal case, the frames fit in the send window.
+
+**TODO** because of clock drift, there are two phenomena: time dilation, and diverging periods of transmissions and gates - and there is a direction ?
 
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ClockDriftShowcase.ned <../ClockDriftShowcase.ned>`
