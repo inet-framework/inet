@@ -4,7 +4,7 @@ Measuring End-to-end Delay
 Goals
 -----
 
-In this example we explore
+In this example we explore the end-to-end delay statistics of applications.
 
 | INET version: ``4.4``
 | Source files location: `inet/showcases/measurement/endtoenddelay <https://github.com/inet-framework/inet-showcases/tree/master/measurement/endtoenddelay>`__
@@ -12,7 +12,8 @@ In this example we explore
 The Model
 ---------
 
-TODO
+The end-to-end delay is measured from the moment the packet leaves the source
+application to the moment the same packet arrives at the destination application.
 
 Here is the network:
 
@@ -27,11 +28,10 @@ Here is the configuration:
 Results
 -------
 
-The following video shows the behavior in Qtenv:
+Here are the results:
 
-.. .. video:: media/behavior.mp4
+.. figure:: media/Results.png
    :align: center
-   :width: 90%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`EndToEndDelayMeasurementShowcase.ned <../EndToEndDelayMeasurementShowcase.ned>`
 

@@ -34,11 +34,10 @@ Here is the configuration:
 Results
 -------
 
-The following video shows the behavior in Qtenv:
+Here are the results:
 
-.. .. video:: media/behavior.mp4
+.. figure:: media/Results.png
    :align: center
-   :width: 90%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PropagationTimeMeasurementShowcase.ned <../PropagationTimeMeasurementShowcase.ned>`
 

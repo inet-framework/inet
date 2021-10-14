@@ -5,8 +5,7 @@ Goals
 -----
 
 In this example we explore the channel throughput statistics of wired and wireless
-mediums. Throughput is measured by observing the packets transmitted through the
-medium over time.
+transmission mediums.
 
 | INET version: ``4.4``
 | Source files location: `inet/showcases/measurement/throughput <https://github.com/inet-framework/inet-showcases/tree/master/measurement/throughput>`__
@@ -14,7 +13,10 @@ medium over time.
 The Model
 ---------
 
-TODO
+The channel throughput is measured by observing the packets which are transmitted
+through the transmission medium over time. For both wired and wireless channels,
+the throughput is measured for any pair of communicating network interfaces,
+separately for both directions.
 
 Here is the network:
 
@@ -29,11 +31,10 @@ Here is the configuration:
 Results
 -------
 
-The following video shows the behavior in Qtenv:
+Here are the results:
 
-.. video:: media/behavior.mp4
+.. figure:: media/Results.png
    :align: center
-   :width: 90%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ChannelThroughputMeasurementShowcase.ned <../ChannelThroughputMeasurementShowcase.ned>`
 

@@ -4,8 +4,8 @@ Measuring Channel Utilization
 Goals
 -----
 
-In this example we explore the channel utilization statistics of wired channels.
-Channel utilization is measured by observing the transmitted packets on the medium.
+In this example we explore the channel utilization statistics of wired and wireless
+transmission mediums.
 
 | INET version: ``4.4``
 | Source files location: `inet/showcases/measurement/utilization <https://github.com/inet-framework/inet-showcases/tree/master/measurement/utilization>`__
@@ -13,7 +13,12 @@ Channel utilization is measured by observing the transmitted packets on the medi
 The Model
 ---------
 
-TODO
+The channel utilization statistic is measured by observing the packets which
+are transmitted through the transmission medium over time. For both wired and
+wireless channels, the utilization is measured for any pair of communicating
+network interfaces, separately for both directions. This statistic expresses
+the relative usage of the channel with a value between 0 and 1, where 0 means
+the channel is not used at all and 1 means the channel is fully utilized.
 
 Here is the network:
 
@@ -28,11 +33,10 @@ Here is the configuration:
 Results
 -------
 
-The following video shows the behavior in Qtenv:
+Here are the results:
 
-.. video:: media/behavior.mp4
+.. figure:: media/Results.png
    :align: center
-   :width: 90%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ChannelUtilizationMeasurementShowcase.ned <../ChannelUtilizationMeasurementShowcase.ned>`
 
