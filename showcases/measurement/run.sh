@@ -1,0 +1,7 @@
+(cd datarate ; ./run.sh)
+(cd flow ; ./run.sh)
+(cd jitter ; ./run.sh)
+(cd queueingtime ; ./run.sh)
+(cd residencetime ; ./run.sh)
+(cd throughput ; ./run.sh)
+(cd utilization ; ./run.sh)

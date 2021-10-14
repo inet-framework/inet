@@ -36,6 +36,7 @@ All showcases:
    ethernet/index
    tsn/index
    general/index
+   measurement/index
    mobility/index
    routing/index
    visualizer/canvas/index
