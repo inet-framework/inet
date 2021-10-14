@@ -13,15 +13,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.showcases.general.flowmeasurement;
+package inet.showcases.measurement.flow;
 
 import inet.networks.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EthernetSwitch;
-import inet.node.inet.INetworkNode;
+import inet.node.inet.IEthernetNetworkNode;
 import inet.node.inet.StandardHost;
 import inet.protocolelement.measurement.IMeasurementLayer;
-
 
 module MyStandardHost extends StandardHost
 {
@@ -39,10 +38,10 @@ module MyStandardHost extends StandardHost
 network FlowMeasurementShowcase extends WiredNetworkBase
 {
     submodules:
-        client1: <default("StandardHost")> like INetworkNode {
+        client1: <default("StandardHost")> like IEthernetNetworkNode {
             @display("p=300,150");
         }
-        client2: <default("StandardHost")> like INetworkNode {
+        client2: <default("StandardHost")> like IEthernetNetworkNode {
             @display("p=300,350");
         }
         switch1: EthernetSwitch {
@@ -51,10 +50,10 @@ network FlowMeasurementShowcase extends WiredNetworkBase
         switch2: EthernetSwitch {
             @display("p=700,250");
         }
-        server1: <default("StandardHost")> like INetworkNode {
+        server1: <default("StandardHost")> like IEthernetNetworkNode {
             @display("p=900,150");
         }
-        server2: <default("StandardHost")> like INetworkNode {
+        server2: <default("StandardHost")> like IEthernetNetworkNode {
             @display("p=900,350");
         }
     connections:
