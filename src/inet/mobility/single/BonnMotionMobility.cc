@@ -20,6 +20,7 @@ BonnMotionMobility::BonnMotionMobility()
     lines = nullptr;
     currentLine = -1;
     maxSpeed = 0;
+    borderPolicy = RAISEERROR;
 }
 
 void BonnMotionMobility::computeMaxSpeed()
@@ -53,6 +54,7 @@ void BonnMotionMobility::initialize(int stage)
 
     EV_TRACE << "initializing BonnMotionMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
+        borderPolicy = RAISEERROR;
         is3D = par("is3D");
         int nodeId = par("nodeId");
         if (nodeId == -1)
@@ -90,12 +92,6 @@ void BonnMotionMobility::setTargetPosition()
     targetPosition.y = vec[currentLine + 2];
     targetPosition.z = is3D ? vec[currentLine + 3] : 0;
     currentLine += (is3D ? 4 : 3);
-}
-
-void BonnMotionMobility::move()
-{
-    LineSegmentsMobilityBase::move();
-    raiseErrorIfOutside();
 }
 
 } // namespace inet
