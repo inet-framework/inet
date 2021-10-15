@@ -8,7 +8,7 @@ In this example we explore the channel propagation time statistics for wired and
 wireless transmission mediums.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/measurement/propagationtime <https://github.com/inet-framework/inet-showcases/tree/master/measurement/propagationtime>`__
+| Source files location: `inet/showcases/measurement/propagationtime <https://github.com/inet-framework/inet/tree/master/showcases/measurement/propagationtime>`__
 
 The Model
 ---------

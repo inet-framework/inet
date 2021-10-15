@@ -8,7 +8,7 @@ In this example we demonstrate how time synchronization affect end-to-end delay
 in network that is using time-aware traffic shaping.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/tsn/combiningfeatures/gptpandtas <https://github.com/inet-framework/inet-showcases/tree/master/tsn/combiningfeatures/gptpandtas>`__
+| Source files location: `inet/showcases/tsn/combiningfeatures/gptpandtas <https://github.com/inet-framework/tree/master/showcases/tsn/combiningfeatures/gptpandtas>`__
 
 The Model
 ---------

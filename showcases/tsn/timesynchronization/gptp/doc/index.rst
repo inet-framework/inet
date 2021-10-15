@@ -9,7 +9,7 @@ Protocol, IEEE 802.1 AS) master clocks, bridges, and end stations to achieve
 reliable time synchronization throughout the whole network.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/tsn/timesynhronization/gptp <https://github.com/inet-framework/inet-showcases/tree/master/tsn/timesynchronization/gptp>`__
+| Source files location: `inet/showcases/tsn/timesynhronization/gptp <https://github.com/inet-framework/tree/master/showcases/tsn/timesynchronization/gptp>`__
 
 The Model
 ---------

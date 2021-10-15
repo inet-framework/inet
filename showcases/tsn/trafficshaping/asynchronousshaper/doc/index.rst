@@ -8,7 +8,7 @@ In this example we demonstrate how to use a asynchronous shaper for shaping the
 traffic differently of two independent data streams.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/tsn/trafficshaping/asynchronousshaper <https://github.com/inet-framework/inet-showcases/tree/master/tsn/trafficshaping/asynchronousshaper>`__
+| Source files location: `inet/showcases/tsn/trafficshaping/asynchronousshaper <https://github.com/inet-framework/tree/master/showcases/tsn/trafficshaping/asynchronousshaper>`__
 
 The Model
 ---------

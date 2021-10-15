@@ -8,7 +8,7 @@ In this example we explore the channel utilization statistics of wired and wirel
 transmission mediums.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/measurement/utilization <https://github.com/inet-framework/inet-showcases/tree/master/measurement/utilization>`__
+| Source files location: `inet/showcases/measurement/utilization <https://github.com/inet-framework/inet/tree/master/showcases/measurement/utilization>`__
 
 The Model
 ---------

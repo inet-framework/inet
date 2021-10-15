@@ -7,7 +7,7 @@ Goals
 TODO
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/tsn/trafficshaping/mixingshapers <https://github.com/inet-framework/inet-showcases/tree/master/tsn/trafficshaping/mixingshapers>`__
+| Source files location: `inet/showcases/tsn/trafficshaping/mixingshapers <https://github.com/inet-framework/tree/master/showcases/tsn/trafficshaping/mixingshapers>`__
 
 The Model
 ---------

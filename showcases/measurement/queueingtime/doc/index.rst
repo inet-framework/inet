@@ -8,7 +8,7 @@ In this example we explore the queueing time statistics of queue modules of
 network interfaces.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/measurement/queueingtime <https://github.com/inet-framework/inet-showcases/tree/master/measurement/queueingtime>`__
+| Source files location: `inet/showcases/measurement/queueingtime <https://github.com/inet-framework/inet/tree/master/showcases/measurement/queueingtime>`__
 
 The Model
 ---------

@@ -7,7 +7,7 @@ Goals
 In this example we demonstrate how to use a credit-based shaping.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/tsn/trafficshaping/creditbasedshaper <https://github.com/inet-framework/inet-showcases/tree/master/tsn/trafficshaping/creditbasedshaper>`__
+| Source files location: `inet/showcases/tsn/trafficshaping/creditbasedshaper <https://github.com/inet-framework/tree/master/showcases/tsn/trafficshaping/creditbasedshaper>`__
 
 The Model
 ---------

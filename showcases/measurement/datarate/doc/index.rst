@@ -8,7 +8,7 @@ In this example we explore the data rate statistics of application, queue, and
 filter modules inside network nodes.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/measurement/datarate <https://github.com/inet-framework/inet-showcases/tree/master/measurement/datarate>`__
+| Source files location: `inet/showcases/measurement/datarate <https://github.com/inet-framework/inet/tree/master/showcases/measurement/datarate>`__
 
 The Model
 ---------

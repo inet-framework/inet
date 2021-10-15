@@ -8,7 +8,7 @@ In this example we explore the channel throughput statistics of wired and wirele
 transmission mediums.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/measurement/throughput <https://github.com/inet-framework/inet-showcases/tree/master/measurement/throughput>`__
+| Source files location: `inet/showcases/measurement/throughput <https://github.com/inet-framework/inet/tree/master/showcases/measurement/throughput>`__
 
 The Model
 ---------

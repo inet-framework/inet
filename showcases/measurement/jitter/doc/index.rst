@@ -7,7 +7,7 @@ Goals
 In this example we explore the various packet jitter statistics of application modules.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/measurement/jitter <https://github.com/inet-framework/inet-showcases/tree/master/measurement/jitter>`__
+| Source files location: `inet/showcases/measurement/jitter <https://github.com/inet-framework/inet/tree/master/showcases/measurement/jitter>`__
 
 The Model
 ---------
