@@ -41,7 +41,7 @@ class INET_API Ns2MotionMobility : public LineSegmentsMobilityBase
   protected:
     // state
     unsigned int vecpos;
-    Ns2MotionFile *ns2File;
+    Ns2MotionFile *ns2File = nullptr;
     int nodeId;
     double scrollX;
     double scrollY;
@@ -60,9 +60,6 @@ class INET_API Ns2MotionMobility : public LineSegmentsMobilityBase
 
     /** @brief Overridden from LineSegmentsMobilityBase.*/
     virtual void setTargetPosition() override;
-
-    /** @brief Overridden from LineSegmentsMobilityBase.*/
-    virtual void move() override;
 
     virtual void computeMaxSpeed();
 
