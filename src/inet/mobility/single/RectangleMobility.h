@@ -21,10 +21,11 @@ class INET_API RectangleMobility : public MovingMobilityBase
 {
   protected:
     // configuration
-    double speed; ///< speed of the host
+    double speed; ///< speed of the host [m/s]
 
     // state
-    double d; ///< distance from (x1,y1), measured clockwise on the perimeter
+    simtime_t startTime;
+    double startPosition;
     double corner1, corner2, corner3, corner4;
 
   protected:
