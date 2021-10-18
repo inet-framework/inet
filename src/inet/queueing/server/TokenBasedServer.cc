@@ -53,9 +53,10 @@ void TokenBasedServer::processPackets()
             if (numTokens >= numRequiredTokens) {
                 packet = provider->pullPacket(inputGate->getPathStartGate());
                 take(packet);
+                emit(packetPulledSignal, packet);
                 EV_INFO << "Processing packet" << EV_FIELD(packet) << EV_ENDL;
                 processedTotalLength += packet->getDataLength();
-                emit(packetServedSignal, packet);
+                emit(packetPushedSignal, packet);
                 pushOrSendPacket(packet, outputGate, consumer);
                 numProcessedPackets++;
                 numTokens -= numRequiredTokens;

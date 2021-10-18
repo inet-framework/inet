@@ -28,8 +28,20 @@ simple PacketServerBase extends PacketProcessorBase
         displayStringTextFormat = default("served %p pk (%l)");
         @class(PacketServerBase);
         @display("i=block/server");
-        @signal[packetServed](type=inet::Packet);
-        @statistic[packetServed](title="packets served"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @signal[packetPushed](type=inet::Packet);
+        @signal[packetPulled](type=inet::Packet);
+        // the statistical value is the incoming packet
+        @statistic[incomingPackets](title="incoming packets"; source=packetPulled; record=count; unit=pk);
+        // the statistical value is the length of the incoming packet
+        @statistic[incomingPacketLengths](title="incoming packet lengths"; source=packetLength(packetPulled); record=sum,histogram,vector; unit=b; interpolationmode=none);
+        // the statistical value is the data rate of the incoming packets
+        @statistic[incomingDataRate](title="incoming datarate"; source=throughput(packetPulled); record=vector; unit=bps; interpolationmode=linear);
+        // the statistical value is the outgoing packet
+        @statistic[outgoingPackets](title="outgoing packets"; source=packetPushed; record=count; unit=pk);
+        // the statistical value is the length of the outgoing packet
+        @statistic[outgoingPacketLengths](title="outgoing packet lengths"; source=packetLength(packetPushed); record=sum,histogram,vector; unit=b; interpolationmode=none);
+        // the statistical value is the data rate of the outgoing packets
+        @statistic[outgoingDataRate](title="outgoing datarate"; source=throughput(packetPushed); record=vector; unit=bps; interpolationmode=linear);
     gates:
         input in;
         output out;

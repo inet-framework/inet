@@ -40,10 +40,11 @@ void InstantServer::processPacket()
 {
     auto packet = provider->pullPacket(inputGate->getPathStartGate());
     take(packet);
+    emit(packetPulledSignal, packet);
     std::string packetName = packet->getName();
     auto packetLength = packet->getDataLength();
     EV_INFO << "Processing packet started" << EV_FIELD(packet) << EV_ENDL;
-    emit(packetServedSignal, packet);
+    emit(packetPushedSignal, packet);
     pushOrSendPacket(packet, outputGate, consumer);
     processedTotalLength += packetLength;
     numProcessedPackets++;

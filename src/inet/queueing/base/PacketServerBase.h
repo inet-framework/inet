@@ -27,9 +27,6 @@ namespace queueing {
 
 class INET_API PacketServerBase : public PacketProcessorBase, public virtual IActivePacketSink, public virtual IActivePacketSource
 {
-  public:
-    static simsignal_t packetServedSignal;
-
   protected:
     cGate *inputGate = nullptr;
     IPassivePacketSource *provider = nullptr;

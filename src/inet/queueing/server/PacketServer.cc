@@ -65,6 +65,7 @@ void PacketServer::startProcessingPacket()
 {
     packet = provider->pullPacket(inputGate->getPathStartGate());
     take(packet);
+    emit(packetPulledSignal, packet);
     EV_INFO << "Processing packet started" << EV_FIELD(packet) << EV_ENDL;
 }
 
@@ -76,7 +77,7 @@ void PacketServer::endProcessingPacket()
     insertPacketEvent(this, packet, PEK_PROCESSED, bitProcessingTime);
     increaseTimeTag<ProcessingTimeTag>(packet, bitProcessingTime, packetProcessingTime);
     processedTotalLength += packet->getDataLength();
-    emit(packetServedSignal, packet);
+    emit(packetPushedSignal, packet);
     pushOrSendPacket(packet, outputGate, consumer);
     numProcessedPackets++;
     packet = nullptr;
