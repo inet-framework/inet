@@ -484,8 +484,6 @@ void ElapsedTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_cr
     auto packet = check_and_cast<Packet *>(object);
     packet->mapAllRegionTags<ElapsedTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const ElapsedTimeTag>& tag) {
         for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
-            // TODO: filter for flow name in details
-            auto flowName = tag->getFlowNames(i);
             PacketRegionValue packetRegionValue;
             packetRegionValue.packet = packet;
             packetRegionValue.offset = o;
@@ -504,8 +502,6 @@ void DelayingTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_c
     auto packet = check_and_cast<Packet *>(object);
     packet->mapAllRegionTags<DelayingTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const DelayingTimeTag>& tag) {
         for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
-            // TODO: filter for flow name in details
-            auto flowName = tag->getFlowNames(i);
             PacketRegionValue packetRegionValue;
             packetRegionValue.packet = packet;
             packetRegionValue.offset = o;
@@ -524,8 +520,6 @@ void ProcessingTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t
     auto packet = check_and_cast<Packet *>(object);
     packet->mapAllRegionTags<ProcessingTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const ProcessingTimeTag>& tag) {
         for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
-            // TODO: filter for flow name in details
-            auto flowName = tag->getFlowNames(i);
             PacketRegionValue packetRegionValue;
             packetRegionValue.packet = packet;
             packetRegionValue.offset = o;
@@ -544,8 +538,6 @@ void QueueingTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_c
     auto packet = check_and_cast<Packet *>(object);
     packet->mapAllRegionTags<QueueingTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const QueueingTimeTag>& tag) {
         for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
-            // TODO: filter for flow name in details
-            auto flowName = tag->getFlowNames(i);
             PacketRegionValue packetRegionValue;
             packetRegionValue.packet = packet;
             packetRegionValue.offset = o;
@@ -564,8 +556,6 @@ void PropagationTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_
     auto packet = check_and_cast<Packet *>(object);
     packet->mapAllRegionTags<PropagationTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const PropagationTimeTag>& tag) {
         for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
-            // TODO: filter for flow name in details
-            auto flowName = tag->getFlowNames(i);
             PacketRegionValue packetRegionValue;
             packetRegionValue.packet = packet;
             packetRegionValue.offset = o;
@@ -584,8 +574,6 @@ void TransmissionTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime
     auto packet = check_and_cast<Packet *>(object);
     packet->mapAllRegionTags<TransmissionTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const TransmissionTimeTag>& tag) {
         for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
-            // TODO: filter for flow name in details
-            auto flowName = tag->getFlowNames(i);
             PacketRegionValue packetRegionValue;
             packetRegionValue.packet = packet;
             packetRegionValue.offset = o;
@@ -604,8 +592,6 @@ void PacketTransmissionTimePerRegionFilter::receiveSignal(cResultFilter *prev, s
     auto packet = check_and_cast<Packet *>(object);
     packet->mapAllRegionTags<TransmissionTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const TransmissionTimeTag>& tag) {
         for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
-            // TODO: filter for flow name in details
-            auto flowName = tag->getFlowNames(i);
             PacketRegionValue packetRegionValue;
             packetRegionValue.packet = packet;
             packetRegionValue.offset = o;
