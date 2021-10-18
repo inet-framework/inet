@@ -27,4 +27,9 @@ simple TokenGeneratorBase extends PacketProcessorBase
         displayStringTextFormat = default("generated %t tk\nto %s"); // determines display string text above the submodule
         @class(TokenGeneratorBase);
         @display("i=block/control");
+        @signal[tokensCreated](type=double);
+        // the statistical value is the number of times tokens were created
+        @statistic[tokensCreated](title="tokens created"; source=count(tokensCreated); record=count; unit=tk);
+        // the statistical value is the number of created tokens
+        @statistic[numTokensCreated](title="number of created tokens"; source=tokensCreated; record=sum,vector; unit=tk; interpolationmode=none);
 }
