@@ -47,7 +47,7 @@ simple FlowMeasurementRecorder extends PacketFlowBase like IPacketFlow
         @signal[packetFlowMeasured](type=inet::Packet);
         @signal[packetFlowEnded](type=inet::Packet);
         // the statistic value is the throughput of the measured flow
-        @statistic[flowTraffic](title="flow traffic"; source=throughput(packetLength(demuxFlow(packetFlowMeasured))); record=vector; unit=bps; interpolationmode=linear);
+        @statistic[flowDataRate](title="flow data rate"; source=throughput(packetLength(demuxFlow(packetFlowMeasured))); record=vector; unit=bps; interpolationmode=linear);
         // the statistical value is the time difference of the current simulation time and the creation time of the bit
         @statistic[bitLifeTime](title="bit life time"; source=weightTimes(lengthWeightedValuePerRegion(lifeTimePerRegion(demuxFlow(packetFlowMeasured)))); record=histogram?; unit=s; interpolationmode=none);
         // the statistical value is the elapsed time from the moment the bit entered the flow
@@ -98,8 +98,8 @@ simple FlowMeasurementRecorder extends PacketFlowBase like IPacketFlow
         @statistic[meanTotalPacketTransmissionTime](title="mean total packet transmission time"; source=weightedMeanPerGroup(groupRegionsPerPacket(packetTransmissionTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector,histogram; unit=s; interpolationmode=none);
         // the statistical value is the difference of subsequent values of the mean bit elapsed time per packet
         @statistic[packetJitter](title="packet jitter"; source=jitter(weightedMeanPerGroup(groupRegionsPerPacket(elapsedTimePerRegion(demuxFlow(packetFlowMeasured))))); record=vector,histogram; unit=s; interpolationmode=none);
-        @statistic[packetDelayDifferenceToMean](title="packet delay diffference to mean"; source=differenceToMean(weightedMeanPerGroup(groupRegionsPerPacket(packetTransmissionTimePerRegion(demuxFlow(packetFlowMeasured))))); record=vector,histogram; unit=s; interpolationmode=none);
         // the statistical value is the difference of the current and the mean bit elapsed time per packet
+        @statistic[packetDelayDifferenceToMean](title="packet delay difference to mean"; source=differenceToMean(weightedMeanPerGroup(groupRegionsPerPacket(elapsedTimePerRegion(demuxFlow(packetFlowMeasured))))); record=vector,histogram; unit=s; interpolationmode=none);
         // the statistical value is the variation of the mean bit elapsed time per packet
         @statistic[packetDelayVariation](title="packet delay variation"; source=stddev(weightedMeanPerGroup(groupRegionsPerPacket(elapsedTimePerRegion(demuxFlow(packetFlowMeasured))))); record=vector,histogram; unit=s);
 }
