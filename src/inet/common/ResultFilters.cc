@@ -446,16 +446,8 @@ void ResidenceTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_
 {
     auto packet = check_and_cast<Packet *>(object);
     packet->mapAllRegionTags<ResidenceTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const ResidenceTimeTag>& tag) {
-        simtime_t endTime = -1;
-        simtime_t startTime = -1;
-        if (tag->getReceptionStartTime() != -1)
-            startTime = tag->getReceptionStartTime();
-        else if (tag->getReceptionEndTime() != -1)
-            startTime = tag->getReceptionEndTime();
-        if (tag->getTransmissionStartTime() != -1)
-            endTime = tag->getTransmissionStartTime();
-        else if (tag->getTransmissionEndTime() != -1)
-            endTime = tag->getTransmissionEndTime();
+        simtime_t startTime = tag->getStartTime();
+        simtime_t endTime = tag->getEndTime();
         if (startTime != -1 && endTime != -1) {
             PacketRegionValue packetRegionValue;
             packetRegionValue.packet = packet;
