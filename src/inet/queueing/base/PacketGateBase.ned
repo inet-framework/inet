@@ -32,5 +32,5 @@ simple PacketGateBase extends PacketFlowBase
         @class(PacketGateBase);
         @display("i=block/cogwheel");
         @signal[gateStateChanged](type=bool);
-        @statistic[gateStateChanged](title="gate states"; type=enum; enum=CLOSED, OPEN; record=vector; interpolationmode=sample-hold);
+        @statistic[gateState](title="gate state"; type=enum; enum=CLOSED, OPEN; source=gateStateChanged; record=vector; interpolationmode=sample-hold);
 }

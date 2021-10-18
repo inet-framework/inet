@@ -45,6 +45,6 @@ simple CreditBasedGate extends PacketGateBase like IPacketGate
         double maxCredit = default(inf); // maximum number of credits
         displayStringTextFormat = default("contains %n cr\nserved %p pk (%l)"); // determines display string text above the submodule
         @class(CreditBasedGate);
-        @signal[currentCreditChanged](type=double);
-        @statistic[currentCredit](title="current credit"; source=currentCreditChanged; record=vector; interpolationmode=linear);
+        @signal[creditsChanged](type=double);
+        @statistic[numCredits](title="number of credits"; source=creditsChanged; record=vector; unit=cr; interpolationmode=linear);
 }

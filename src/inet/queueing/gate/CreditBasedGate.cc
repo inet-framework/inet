@@ -28,7 +28,7 @@ namespace queueing {
 
 Define_Module(CreditBasedGate);
 
-simsignal_t CreditBasedGate::currentCreditChangedSignal = cComponent::registerSignal("currentCreditChanged");
+simsignal_t CreditBasedGate::creditsChangedSignal = cComponent::registerSignal("creditsChanged");
 
 void CreditBasedGate::initialize(int stage)
 {
@@ -113,7 +113,7 @@ void CreditBasedGate::updateCurrentCredit()
 
 void CreditBasedGate::emitCurrentCredit()
 {
-    emit(currentCreditChangedSignal, currentCredit);
+    emit(creditsChangedSignal, currentCredit);
     lastCurrentCreditEmitted = currentCredit;
     lastCurrentCreditEmittedTime = simTime();
 }

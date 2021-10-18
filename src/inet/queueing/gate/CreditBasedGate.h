@@ -26,7 +26,7 @@ namespace queueing {
 class INET_API CreditBasedGate : public PacketGateBase, public cListener
 {
   public:
-    static simsignal_t currentCreditChangedSignal;
+    static simsignal_t creditsChangedSignal;
 
   protected:
     // parameters
