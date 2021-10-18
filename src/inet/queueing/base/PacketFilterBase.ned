@@ -31,20 +31,41 @@ simple PacketFilterBase extends PacketProcessorBase
         displayStringTextFormat = default("dropped %d/%p pk (%k/%l)"); // determines the text that is written on top of the submodule
         @class(PacketFilterBase);
         @display("i=block/downarrow");
-        @signal[packetPushed](type=inet::Packet);
-        @signal[packetPulled](type=inet::Packet);
-        @signal[packetFiltered](type=inet::Packet);
+        @signal[packetPushedIn](type=inet::Packet);
+        @signal[packetPushedOut](type=inet::Packet);
+        @signal[packetPulledIn](type=inet::Packet);
+        @signal[packetPulledOut](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
-        @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetPulled](title="packets pulled"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetFiltered](title="packets filtered"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetDropped](title="packets dropped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[pushedTraffic](title="pushed traffic"; source=throughput(packetPushed); record=vector; unit=bps; interpolationmode=linear);
-        @statistic[filteredTraffic](title="filtered traffic"; source=throughput(packetFiltered); record=vector; unit=bps; interpolationmode=linear);
-        @statistic[droppedTraffic](title="dropped traffic"; source=throughput(packetDropped); record=vector; unit=bps; interpolationmode=linear);
-        @statistic[flowPushedTraffic](title="flow pushed traffic"; source=throughput(flowPacketLength(demuxFlow(packetPushed))); record=vector; unit=bps; interpolationmode=linear);
-        @statistic[flowFilteredTraffic](title="flow filtered traffic"; source=throughput(flowPacketLength(demuxFlow(packetFiltered))); record=vector; unit=bps; interpolationmode=linear);
-        @statistic[flowDroppedTraffic](title="flow dropped traffic"; source=throughput(flowPacketLength(demuxFlow(packetDropped))); record=vector; unit=bps; interpolationmode=linear);
+        // the statistical value is the incoming packet
+        @statistic[incomingPackets](title="incoming packets"; source=merge(packetPushedIn, packetPulledIn); record=count; unit=pk);
+        // the statistical value is the length of the incoming packet
+        @statistic[incomingPacketLengths](title="incoming packet lengths"; source=packetLength(merge(packetPushedIn, packetPulledIn)); record=sum,histogram,vector; unit=b; interpolationmode=none);
+        // the statistical value is the data rate of the incoming packets
+        @statistic[incomingDataRate](title="incoming data rate"; source=throughput(merge(packetPushedIn, packetPulledIn)); record=vector; unit=bps; interpolationmode=linear);
+        // the statistical value is the outgoing packet
+        @statistic[outgoingPackets](title="outgoing packets"; source=merge(packetPushedOut, packetPulledOut); record=count; unit=pk);
+        // the statistical value is the length of the outgoing packet
+        @statistic[outgoingPacketLengths](title="outgoing packet lengths"; source=packetLength(merge(packetPushedOut, packetPulledOut)); record=sum,histogram,vector; unit=b; interpolationmode=none);
+        // the statistical value is the data rate of the outgoing packets
+        @statistic[outgoingDataRate](title="outgoing data rate"; source=throughput(merge(packetPushedOut, packetPulledOut)); record=vector; unit=bps; interpolationmode=linear);
+        // the statistical value is the dropped packet
+        @statistic[droppedPackets](title="dropped packets"; source=packetDropped; record=count; unit=pk);
+        // the statistical value is the length of the dropped packet
+        @statistic[droppedPacketLengths](title="dropped packet lengths"; source=packetLength(packetDropped); record=sum,histogram,vector; unit=b; interpolationmode=none);
+        // the statistical value is the data rate of the dropped packets
+        @statistic[droppedDataRate](title="dropped data rate"; source=throughput(packetDropped); record=vector; unit=bps; interpolationmode=linear);
+        // the statistical value is the flow specific length of the incoming packet
+        @statistic[flowIncomingPacketLengths](title="flow specific incoming packet lengths"; source=packetLength(demuxFlow(merge(packetPushedIn, packetPulledIn))); record=sum,histogram,vector; unit=b; interpolationmode=none);
+        // the statistical value is the flow specific data rate of the incoming packets
+        @statistic[flowIncomingDataRate](title="flow specific incoming data rate"; source=throughput(demuxFlow(merge(packetPushedIn, packetPulledIn))); record=vector; unit=bps; interpolationmode=linear);
+        // the statistical value is the flow specific length of the outgoing packet
+        @statistic[flowOutgoingPacketLengths](title="flow specific outgoing packet lengths"; source=packetLength(demuxFlow(merge(packetPushedOut, packetPulledOut))); record=sum,histogram,vector; unit=b; interpolationmode=none);
+        // the statistical value is the flow specific data rate of the outgoing packets
+        @statistic[flowOutgoingDataRate](title="flow specific outgoing data rate"; source=throughput(demuxFlow(merge(packetPushedOut, packetPulledOut))); record=vector; unit=bps; interpolationmode=linear);
+        // the statistical value is the flow specific length of the dropped packet
+        @statistic[flowDroppedPacketLengths](title="flow specific dropped packet lengths"; source=packetLength(demuxFlow(packetDropped)); record=sum,histogram,vector; unit=b; interpolationmode=none);
+        // the statistical value is the flow specific data rate of the dropped packets
+        @statistic[flowDroppedDataRate](title="flow specific dropped data rate"; source=throughput(demuxFlow(packetDropped)); record=vector; unit=bps; interpolationmode=linear);
     gates:
         input in @labels(send,push,pull,pass,stream);
         output out @labels(send,push,pull,pass,stream);

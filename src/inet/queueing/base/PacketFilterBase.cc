@@ -62,7 +62,7 @@ void PacketFilterBase::startPacketStreaming(Packet *packet)
 
 void PacketFilterBase::endPacketStreaming(Packet *packet)
 {
-    emit(packetPushedSignal, packet);
+    emit(packetPushedInSignal, packet);
     handlePacketProcessed(packet);
     inProgressStreamId = -1;
 }
@@ -85,12 +85,12 @@ void PacketFilterBase::pushPacket(Packet *packet, cGate *gate)
     Enter_Method("pushPacket");
     take(packet);
     checkPacketStreaming(nullptr);
-    emit(packetPushedSignal, packet);
+    emit(packetPushedInSignal, packet);
     if (matchesPacket(packet)) {
         processPacket(packet);
         handlePacketProcessed(packet);
         EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
-        emit(packetFilteredSignal, packet);
+        emit(packetPushedOutSignal, packet);
         pushOrSendPacket(packet, outputGate, consumer);
     }
     else {
@@ -131,7 +131,7 @@ void PacketFilterBase::pushPacketEnd(Packet *packet, cGate *gate)
         processPacket(packet);
         EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
         endPacketStreaming(packet);
-        emit(packetFilteredSignal, packet);
+        emit(packetPushedOutSignal, packet);
         pushOrSendPacketEnd(packet, outputGate, consumer, packet->getTransmissionId());
     }
     else {
@@ -199,6 +199,7 @@ Packet *PacketFilterBase::canPullPacket(cGate *gate) const
             auto nonConstThisPtr = const_cast<PacketFilterBase *>(this);
             packet = provider->pullPacket(providerGate);
             nonConstThisPtr->take(packet);
+            nonConstThisPtr->emit(packetPulledInSignal, packet);
             EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
             // KLUDGE
             nonConstThisPtr->handlePacketProcessed(packet);
@@ -215,14 +216,14 @@ Packet *PacketFilterBase::pullPacket(cGate *gate)
     while (true) {
         auto packet = provider->pullPacket(providerGate);
         take(packet);
+        emit(packetPulledInSignal, packet);
         if (matchesPacket(packet)) {
             processPacket(packet);
             handlePacketProcessed(packet);
             EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
-            emit(packetFilteredSignal, packet);
             animatePullPacket(packet, outputGate);
             updateDisplayString();
-            emit(packetPulledSignal, packet);
+            emit(packetPulledOutSignal, packet);
             return packet;
         }
         else {
