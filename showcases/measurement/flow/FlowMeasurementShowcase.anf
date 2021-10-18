@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/examples/timing/results/General-*.vec"/>
-        <input pattern="/inet/examples/timing/results/General-*.sca"/>
+        <input pattern="/inet/showcases/measurement/flow/results/*.vec"/>
+        <input pattern="/inet/showcases/measurement/flow/results/*.sca"/>
     </inputs>
     <charts>
         <chart icon="icons/full/obj/histogramchart.png" id="7" name="Server2, Queueing time, histograms (by name)" template="histogramchart_native" type="HISTOGRAM">
@@ -495,7 +495,7 @@ Show over_underflow cell?
             <property name="image_export_filename" value=""/>
             <property name="cumulative" value="false"/>
             <property name="xaxis_min" value=""/>
-            <property name="filter" value="module =~ &quot;*.inbound&quot; AND name =~ &quot;q*&quot; AND (runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;TimingExample.server2.app[0].inbound&quot; AND name =~ &quot;queueingTime:histogram:client1&quot; OR &#10;runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;TimingExample.server2.app[0].inbound&quot; AND name =~ &quot;queueingTime:histogram:client2&quot;)"/>
+            <property name="filter" value="module =~ &quot;*.inbound&quot; AND&#10;(runattr:experiment =~ Basic AND module =~ &quot;*.server2.app[0].inbound&quot; AND name =~ &quot;c1s2:meanTotalBitQueueingTimePerPacket:histogram&quot; OR &#10; runattr:experiment =~ Basic AND module =~ &quot;*.server2.app[0].inbound&quot; AND name =~ &quot;c2s2:meanTotalBitQueueingTimePerPacket:histogram&quot;)"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="drawstyle" value="Solid"/>
             <property name="show_overflows" value="true"/>
@@ -995,7 +995,7 @@ Show over_underflow cell?
             <property name="image_export_filename" value=""/>
             <property name="cumulative" value="false"/>
             <property name="xaxis_min" value=""/>
-            <property name="filter" value="module =~ &quot;*.inbound&quot; AND name =~ &quot;q*&quot; AND (runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;TimingExample.server1.app[0].inbound&quot; AND name =~ &quot;queueingTime:histogram:client1&quot; OR &#10;runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;TimingExample.server1.app[0].inbound&quot; AND name =~ &quot;queueingTime:histogram:client2&quot;)"/>
+            <property name="filter" value="module =~ &quot;*.inbound&quot; AND (&#10;runattr:experiment =~ Basic AND module =~ &quot;*.server1.app[0].inbound&quot; AND name =~ &quot;c1s1:meanTotalBitQueueingTimePerPacket:histogram&quot; OR &#10;runattr:experiment =~ Basic AND module =~ &quot;*.server1.app[0].inbound&quot; AND name =~ &quot;c2s1:meanTotalBitQueueingTimePerPacket::histogram&quot;)"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="drawstyle" value="Solid"/>
             <property name="show_overflows" value="true"/>
