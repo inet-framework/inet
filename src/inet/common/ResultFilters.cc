@@ -475,15 +475,15 @@ void LifeTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_cref 
 {
     simtime_t now = simTime();
     auto packet = check_and_cast<Packet *>(object);
-    packet->mapAllRegionTags<CreationTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const CreationTimeTag>& timeTag) {
+    for (auto& region : packet->peekData()->getAllTags<CreationTimeTag>()) {
         PacketRegionValue packetRegionValue;
         packetRegionValue.packet = packet;
-        packetRegionValue.offset = o;
-        packetRegionValue.length = l;
+        packetRegionValue.offset = region.getOffset();
+        packetRegionValue.length = region.getLength();
         // TODO: no type conversion please
-        packetRegionValue.value = cValue((now - timeTag->getCreationTime()).dbl());
+        packetRegionValue.value = cValue((now - region.getTag()->getCreationTime()).dbl());
         fire(this, t, &packetRegionValue, details);
-    });
+    }
 }
 
 Register_ResultFilter("elapsedTimePerRegion", ElapsedTimePerRegionFilter);
