@@ -30,7 +30,10 @@ Results
 
 Here are the results:
 
-.. figure:: media/Results.png
+.. figure:: media/EndToEndDelayHistogram.png
+   :align: center
+
+.. figure:: media/EndToEndDelayVector.png
    :align: center
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`EndToEndDelayMeasurementShowcase.ned <../EndToEndDelayMeasurementShowcase.ned>`

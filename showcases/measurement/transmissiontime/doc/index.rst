@@ -37,7 +37,10 @@ Results
 
 Here are the results:
 
-.. figure:: media/Results.png
+.. figure:: media/TransmissionTimeHistogram.png
+   :align: center
+
+.. figure:: media/TransmissionTimeVector.png
    :align: center
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`TransmissionTimeMeasurementShowcase.ned <../TransmissionTimeMeasurementShowcase.ned>`

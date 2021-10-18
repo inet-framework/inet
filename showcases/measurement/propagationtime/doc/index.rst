@@ -36,7 +36,7 @@ Results
 
 Here are the results:
 
-.. figure:: media/Results.png
+.. figure:: media/PropagationTime.png
    :align: center
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PropagationTimeMeasurementShowcase.ned <../PropagationTimeMeasurementShowcase.ned>`

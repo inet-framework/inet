@@ -32,7 +32,22 @@ Results
 
 Here are the results:
 
-.. figure:: media/Results.png
+.. figure:: media/PacketJitterHistogram.png
+   :align: center
+
+.. figure:: media/PacketJitterVector.png
+   :align: center
+
+.. figure:: media/PacketDelayDifferenceToMeanHistogram.png
+   :align: center
+
+.. figure:: media/PacketDelayDifferenceToMeanVector.png
+   :align: center
+
+.. figure:: media/PacketDelayVariationHistogram.png
+   :align: center
+
+.. figure:: media/PacketDelayVariationVector.png
    :align: center
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`JitterMeasurementShowcase.ned <../JitterMeasurementShowcase.ned>`

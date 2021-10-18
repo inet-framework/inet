@@ -35,7 +35,10 @@ Results
 
 Here are the results:
 
-.. figure:: media/Results.png
+.. figure:: media/ChannelUtilizationHistogram.png
+   :align: center
+
+.. figure:: media/ChannelUtilizationVector.png
    :align: center
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ChannelUtilizationMeasurementShowcase.ned <../ChannelUtilizationMeasurementShowcase.ned>`

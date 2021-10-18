@@ -7,7 +7,7 @@ Goals
 In this example we explore the packet residence time statistics of network nodes.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/measurement/residencetime <https://github.com/inet-framework/inet-showcases/tree/master/measurement/residencetime>`__
+| Source files location: `inet/showcases/measurement/residencetime <https://github.com/inet-framework/inet/tree/master/showcases/measurement/residencetime>`__
 
 The Model
 ---------
@@ -24,7 +24,7 @@ Here is the network:
 
 Here is the configuration:
 
-.. .. literalinclude:: ../omnetpp.ini
+.. literalinclude:: ../omnetpp.ini
    :language: ini
 
 Results
@@ -32,7 +32,22 @@ Results
 
 Here are the results:
 
-.. figure:: media/Results.png
+.. figure:: media/SourceHistogram.png
+   :align: center
+
+.. figure:: media/SourceVector.png
+   :align: center
+
+.. figure:: media/SwitchHistogram.png
+   :align: center
+
+.. figure:: media/SwitchVector.png
+   :align: center
+
+.. figure:: media/DestinationHistogram.png
+   :align: center
+
+.. figure:: media/DestinationVector.png
    :align: center
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ResidenceTimeMeasurementShowcase.ned <../ResidenceTimeMeasurementShowcase.ned>`
