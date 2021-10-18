@@ -32,7 +32,7 @@ void OmittedModule::initialize(int stage)
                 auto gateOut = gateIn->getNextGate();
                 auto previousGate = gateIn->getPreviousGate();
                 auto nextGate = gateOut->getNextGate();
-                if (previousGate != nullptr) {
+                if (previousGate != nullptr && nextGate != nullptr) {
                     EV_INFO << "Reconnecting gates: " << previousGate->getFullPath() << " --> " << nextGate->getFullPath() << std::endl;
                     gateOut->disconnect();
                     previousGate->disconnect();
