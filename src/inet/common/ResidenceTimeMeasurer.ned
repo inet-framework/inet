@@ -28,6 +28,7 @@ package inet.common;
 simple ResidenceTimeMeasurer like IMeasurer
 {
     parameters:
+        string subscriptionModule = default("^");
         string measurementStartSignal = default("receptionEnded");
         string measurementEndSignal = default("transmissionStarted");
         @display("i=block/timer");

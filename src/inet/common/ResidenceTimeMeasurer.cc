@@ -31,47 +31,71 @@ Define_Module(ResidenceTimeMeasurer);
 void ResidenceTimeMeasurer::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        auto networkNode = getContainingNode(this);
+        auto subscriptionModule = getModuleFromPar<cModule>(par("subscriptionModule"), this);
         auto measurementStartSignal = registerSignal(par("measurementStartSignal"));
         auto measurementEndSignal = registerSignal(par("measurementEndSignal"));
-        networkNode->subscribe(measurementStartSignal, this);
-        networkNode->subscribe(measurementEndSignal, this);
+        subscriptionModule->subscribe(measurementStartSignal, this);
+        subscriptionModule->subscribe(measurementEndSignal, this);
+        subscriptionModule->subscribe(packetCreatedSignal, this);
+        subscriptionModule->subscribe(packetDroppedSignal, this);
     }
 }
 
 void ResidenceTimeMeasurer::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
-    auto physicalSignal = check_and_cast<cPacket *>(object);
-    auto packet = check_and_cast<Packet *>(physicalSignal->getEncapsulatedPacket());
-    b offset = b(0);
-    b length = packet->getDataLength();
-    packet->addRegionTagsWhereAbsent<ResidenceTimeTag>(offset, length);
-    if (signal == receptionStartedSignal) {
+    if (signal == packetCreatedSignal) {
+        auto packet = check_and_cast<Packet *>(object);
+        b offset = b(0);
+        b length = packet->getDataLength();
+        packet->addRegionTagsWhereAbsent<ResidenceTimeTag>(offset, length);
         packet->mapAllRegionTagsForUpdate<ResidenceTimeTag>(offset, length, [&] (b o, b l, const Ptr<ResidenceTimeTag>& tag) {
-            tag->setReceptionStartTime(simTime());
+            tag->setStartTime(simTime());
         });
     }
-    else if (signal == receptionEndedSignal) {
+    else if (signal == packetDroppedSignal) {
+        auto packet = check_and_cast<Packet *>(object);
+        b offset = b(0);
+        b length = packet->getDataLength();
         packet->mapAllRegionTagsForUpdate<ResidenceTimeTag>(offset, length, [&] (b o, b l, const Ptr<ResidenceTimeTag>& tag) {
-            tag->setReceptionEndTime(simTime());
-        });
-    }
-    else if (signal == transmissionStartedSignal) {
-        packet->mapAllRegionTagsForUpdate<ResidenceTimeTag>(offset, length, [&] (b o, b l, const Ptr<ResidenceTimeTag>& tag) {
-            tag->setTransmissionStartTime(simTime());
+            tag->setEndTime(simTime());
         });
         emit(packetStayedSignal, packet);
-        packet->removeRegionTagIfPresent<ResidenceTimeTag>(offset, length);
+        packet->removeRegionTagsWherePresent<ResidenceTimeTag>(offset, length);
     }
-    else if (signal == transmissionEndedSignal) {
-        packet->mapAllRegionTagsForUpdate<ResidenceTimeTag>(offset, length, [&] (b o, b l, const Ptr<ResidenceTimeTag>& tag) {
-            tag->setTransmissionEndTime(simTime());
-        });
-        emit(packetStayedSignal, packet);
-        packet->removeRegionTagIfPresent<ResidenceTimeTag>(offset, length);
+    else {
+        auto physicalSignal = check_and_cast<cPacket *>(object);
+        auto packet = check_and_cast<Packet *>(physicalSignal->getEncapsulatedPacket());
+        b offset = b(0);
+        b length = packet->getDataLength();
+        if (signal == receptionStartedSignal) {
+            packet->addRegionTagsWhereAbsent<ResidenceTimeTag>(offset, length);
+            packet->mapAllRegionTagsForUpdate<ResidenceTimeTag>(offset, length, [&] (b o, b l, const Ptr<ResidenceTimeTag>& tag) {
+                tag->setStartTime(simTime());
+            });
+        }
+        else if (signal == receptionEndedSignal) {
+            packet->addRegionTagsWhereAbsent<ResidenceTimeTag>(offset, length);
+            packet->mapAllRegionTagsForUpdate<ResidenceTimeTag>(offset, length, [&] (b o, b l, const Ptr<ResidenceTimeTag>& tag) {
+                tag->setStartTime(simTime());
+            });
+        }
+        else if (signal == transmissionStartedSignal) {
+            packet->mapAllRegionTagsForUpdate<ResidenceTimeTag>(offset, length, [&] (b o, b l, const Ptr<ResidenceTimeTag>& tag) {
+                tag->setEndTime(simTime());
+            });
+            emit(packetStayedSignal, packet);
+            packet->removeRegionTagsWherePresent<ResidenceTimeTag>(offset, length);
+        }
+        else if (signal == transmissionEndedSignal) {
+            packet->mapAllRegionTagsForUpdate<ResidenceTimeTag>(offset, length, [&] (b o, b l, const Ptr<ResidenceTimeTag>& tag) {
+                tag->setEndTime(simTime());
+            });
+            emit(packetStayedSignal, packet);
+            packet->removeRegionTagsWherePresent<ResidenceTimeTag>(offset, length);
+        }
+        else
+            throw cRuntimeError("Unknown signal");
     }
-    else
-        throw cRuntimeError("Unknown signal");
 }
 
 } // namespace inet
