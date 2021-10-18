@@ -10,11 +10,10 @@
     </inputs>
     <charts>
         <chart icon="icons/full/obj/barchart.png" id="1370" name="Number of packets reveiced" template="barchart_mpl" type="MATPLOTLIB">
-            <script>
-                <![CDATA[import math
+            <script><![CDATA[import math
 import numpy as np
 import pandas as pd
-from omnetpp.scave import results, chart, plot, utils
+from omnetpp.scave import results, chart, ideplot, utils
 import matplotlib.pyplot as plt
 
 # get chart properties
@@ -28,7 +27,7 @@ filter_expression = props["filter"]
 df = results.get_scalars(filter_expression, include_attrs=True, include_itervars=True, include_runattrs=True)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 groups = props["groups"].split(",")
@@ -38,7 +37,7 @@ if not groups[0] and not series[0]:
     print("The Groups and Series options were not set in the dialog, inferring them from the data.")
     g, s = ("module", "name") if len(df) == 1 else utils.pick_two_columns(df)
     if not g or not s:
-        plot.set_warning("Please set the Groups and Series options in the dialog!")
+        ideplot.set_warning("Please set the Groups and Series options in the dialog!")
         exit(1)
     groups, series = [g], [s]
 
@@ -88,14 +87,11 @@ plt.legend().remove()
 plt.grid(axis='y', linestyle='--')
 plt.xticks(rotation=0)
 plt.xlabel('')
-plt.savefig('receivedpackets_t.png', dpi=120, bbox_inches='tight', transparent=True)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-            </script>
-            <dialogPage id="Input" label="Input">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -138,10 +134,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Bars" label="Bars">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Bars" label="Bars"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -193,10 +187,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Confidence Interval" label="Confidence Interval">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Confidence Interval" label="Confidence Interval"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -237,10 +229,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Plot" label="Plot">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -390,10 +380,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Styling" label="Styling">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -500,10 +488,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Advanced" label="Advanced">
-                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -522,10 +508,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Export" label="Export">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -580,8 +564,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
+]]></dialogPage>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="grid_show" value="true"/>
@@ -593,7 +576,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="bar_placement" value="Aligned"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="6"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value=""/>
@@ -602,7 +585,7 @@ utils.export_data_if_needed(df, props)
             <property name="groups" value="experiment"/>
             <property name="yaxis_min" value=""/>
             <property name="baseline" value="0"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="receivedpackets_t"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="cap_size" value="4"/>
             <property name="filter" value="type =~ scalar AND isfield =~ false AND module =~ &quot;*.host2.*&quot; AND name =~ packetReceived:count&#10;AND NOT (type =~ scalar AND runattr:replication =~ &quot;#0&quot; AND module =~ &quot;AggregationShowcase.host2.udp&quot; AND name =~ packetReceived:count AND (&#10;    (runattr:experiment =~ Aggregation) OR&#10;    (runattr:experiment =~ NoAggregation) OR&#10;    (runattr:experiment =~ VoicePriorityAggregation)&#10;))"/>
@@ -612,13 +595,12 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value=""/>
+            <property name="image_export_width" value="8"/>
+            <property name="matplotlibrc" value="savefig.bbox: tight&#10;savefig.transparent : True"/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="1528" name="Average throughput" template="linechart_mpl" type="MATPLOTLIB">
-            <script>
-                <![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+            <script><![CDATA[import math
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -636,7 +618,7 @@ end_time = float(props["vector_end_time"] or math.inf)
 df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, include_runattrs=True, start_time=start_time, end_time=end_time)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -700,10 +682,8 @@ plt.savefig('avgthroughput_t.png', dpi=150, transparent=True)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-            </script>
-            <dialogPage id="Input" label="Input">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -752,10 +732,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Lines" label="Lines">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -848,10 +826,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Plot" label="Plot">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1015,10 +991,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Styling" label="Styling">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1125,10 +1099,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Advanced" label="Advanced">
-                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -1147,10 +1119,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Export" label="Export">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1205,8 +1175,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
+]]></dialogPage>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="grid_show" value="false"/>
@@ -1219,14 +1188,14 @@ utils.export_data_if_needed(df, props)
             <property name="vector_operations" value="apply: divide_by(1000000) # Divides every value in each vector by a constant&#10;apply: slidingwinavg(window_size=10) # The average of the last window_size values"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="6"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value="Simulation time [s]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="avgthroughput_t"/>
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -1242,13 +1211,12 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value="figure.figsize : 8,6"/>
+            <property name="image_export_width" value="8"/>
+            <property name="matplotlibrc" value="savefig.transparent: True&#10;savefig.bbox : tight"/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="1536" name="End-to-end delay" template="linechart_mpl" type="MATPLOTLIB">
-            <script>
-                <![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+            <script><![CDATA[import math
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -1266,7 +1234,7 @@ end_time = float(props["vector_end_time"] or math.inf)
 df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, include_runattrs=True, start_time=start_time, end_time=end_time)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -1345,10 +1313,8 @@ if zoomed:
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-            </script>
-            <dialogPage id="Input" label="Input">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -1397,10 +1363,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Lines" label="Lines">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1493,10 +1457,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Plot" label="Plot">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1660,10 +1622,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Styling" label="Styling">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1770,10 +1730,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Advanced" label="Advanced">
-                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -1792,10 +1750,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Export" label="Export">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1850,8 +1806,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
+]]></dialogPage>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="grid_show" value="false"/>

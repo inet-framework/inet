@@ -6,8 +6,7 @@
     </inputs>
     <charts>
         <chart icon="icons/full/obj/barchart.png" id="1602" name="Wifi performance" template="barchart_mpl" type="MATPLOTLIB">
-            <script>
-                <![CDATA[import math
+            <script><![CDATA[import math
 import numpy as np
 import pandas as pd
 from omnetpp.scave import results, chart, plot, utils
@@ -65,7 +64,7 @@ print(df)
 df.columns=['Number of packets received']
 df.index=['Wifi only','Wifi+WPAN coexistence']
 
-df.plot(kind='bar', ax=plt.gca(), zorder=2, align='center', width=0.8, figsize=(8,6))
+df.plot(kind='bar', ax=plt.gca(), zorder=2, align='center', width=0.8)
 
 plt.legend()
 plt.grid(axis='y', linestyle='--')
@@ -81,17 +80,10 @@ for p in ax.patches:
 bottom, top = plt.ylim()
 plt.ylim(bottom, top*1.05)
 
-#plt.tight_layout()
-
-#plt.savefig('rcvdpackets.png', dpi=120, bbox_inches='tight')
-plt.savefig('wifiperformance.png', dpi=120, bbox_inches='tight', transparent=True)
-
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-            </script>
-            <dialogPage id="Input" label="Input">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -134,10 +126,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Bars" label="Bars">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Bars" label="Bars"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -189,10 +179,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Confidence Interval" label="Confidence Interval">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Confidence Interval" label="Confidence Interval"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -233,10 +221,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Plot" label="Plot">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -386,10 +372,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Styling" label="Styling">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -496,10 +480,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Advanced" label="Advanced">
-                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -518,10 +500,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Export" label="Export">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -576,8 +556,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
+]]></dialogPage>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="grid_show" value="false"/>
@@ -589,7 +568,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="bar_placement" value="Aligned"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="6"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value=""/>
@@ -598,7 +577,7 @@ utils.export_data_if_needed(df, props)
             <property name="groups" value="configname"/>
             <property name="yaxis_min" value=""/>
             <property name="baseline" value="0"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="wifiperformance"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="cap_size" value="4"/>
             <property name="filter" value="type =~ scalar AND isfield =~ false AND module =~ &quot;CoexistenceShowcase.wifiHost2.app[0]&quot; AND name =~ packetReceived:count&#10;AND NOT (type =~ scalar AND runattr:experiment =~ WpanOnly AND module =~ &quot;CoexistenceShowcase.wifiHost2.app[0]&quot; AND name =~ packetReceived:count AND (&#10;    (runattr:replication =~ &quot;#0&quot;) OR&#10;    (runattr:replication =~ &quot;#1&quot;) OR&#10;    (runattr:replication =~ &quot;#2&quot;) OR&#10;    (runattr:replication =~ &quot;#3&quot;) OR&#10;    (runattr:replication =~ &quot;#4&quot;) OR&#10;    (runattr:replication =~ &quot;#5&quot;) OR&#10;    (runattr:replication =~ &quot;#6&quot;) OR&#10;    (runattr:replication =~ &quot;#7&quot;)&#10;))"/>
@@ -608,12 +587,11 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value=""/>
+            <property name="image_export_width" value="8"/>
+            <property name="matplotlibrc" value="savefig.bbox: tight&#10;savefig.transparent: True"/>
         </chart>
         <chart icon="icons/full/obj/barchart.png" id="1600" name="Wpan performance" template="barchart_mpl" type="MATPLOTLIB">
-            <script>
-                <![CDATA[import math
+            <script><![CDATA[import math
 import numpy as np
 import pandas as pd
 from omnetpp.scave import results, chart, plot, utils
@@ -672,7 +650,7 @@ print(df)
 df.columns=['Number of packets received']
 df.index=['WPAN only','Wifi+WPAN coexistence']
 
-df.plot(kind='bar', ax=plt.gca(), zorder=2, align='center', width=0.8, figsize=(8,6))
+df.plot(kind='bar', ax=plt.gca(), zorder=2, align='center', width=0.8)
 
 #utils.postconfigure_plot(props)
 
@@ -690,17 +668,10 @@ for p in ax.patches:
 bottom, top = plt.ylim()
 plt.ylim(bottom, top*1.1)
 
-#plt.tight_layout()
-
-#plt.savefig('rcvdpackets.png', dpi=120, bbox_inches='tight')
-plt.savefig('wpanperformance.png', dpi=120, bbox_inches='tight', transparent=True)
-
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-            </script>
-            <dialogPage id="Input" label="Input">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -743,10 +714,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Bars" label="Bars">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Bars" label="Bars"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -798,10 +767,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Confidence Interval" label="Confidence Interval">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Confidence Interval" label="Confidence Interval"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -842,10 +809,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Plot" label="Plot">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -995,10 +960,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Styling" label="Styling">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1105,10 +1068,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Advanced" label="Advanced">
-                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -1127,10 +1088,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Export" label="Export">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1185,8 +1144,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
+]]></dialogPage>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="grid_show" value="false"/>
@@ -1198,7 +1156,7 @@ utils.export_data_if_needed(df, props)
             <property name="cycle_seed" value="0"/>
             <property name="bar_placement" value="Aligned"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="6"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value=""/>
@@ -1207,7 +1165,7 @@ utils.export_data_if_needed(df, props)
             <property name="groups" value=""/>
             <property name="yaxis_min" value=""/>
             <property name="baseline" value="0"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="wpanperformance"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="cap_size" value="4"/>
             <property name="filter" value="type =~ scalar AND isfield =~ false AND module =~ &quot;CoexistenceShowcase.wpanHost2.app[0]&quot; AND name =~ packetReceived:count&#10;AND NOT (type =~ scalar AND runattr:experiment =~ WifiOnly AND module =~ &quot;CoexistenceShowcase.wpanHost2.app[0]&quot; AND name =~ packetReceived:count AND (&#10;    (runattr:replication =~ &quot;#0&quot;) OR&#10;    (runattr:replication =~ &quot;#1&quot;) OR&#10;    (runattr:replication =~ &quot;#2&quot;) OR&#10;    (runattr:replication =~ &quot;#3&quot;) OR&#10;    (runattr:replication =~ &quot;#4&quot;) OR&#10;    (runattr:replication =~ &quot;#5&quot;) OR&#10;    (runattr:replication =~ &quot;#6&quot;) OR&#10;    (runattr:replication =~ &quot;#7&quot;)&#10;))"/>
@@ -1217,8 +1175,8 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value=""/>
+            <property name="image_export_width" value="8"/>
+            <property name="matplotlibrc" value="savefig.bbox : tight&#10;savefig.transparent : True"/>
         </chart>
     </charts>
 </analysis>

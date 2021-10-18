@@ -54,8 +54,6 @@ plt.tight_layout()
 # TODO this should be done in the dialog
 plt.title('End-to-end delay, non-QoS')
 
-plt.savefig('delay_nonqos.png', dpi=150, transparent=True)
-
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]></script>
@@ -571,7 +569,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_title" value="Time [s]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value="0"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="delay_nonqos"/>
             <property name="xaxis_min" value="0.5"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -587,8 +585,8 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value="0.2"/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value="figure.figsize : 7.5,4"/>
+            <property name="image_export_width" value="7.5"/>
+            <property name="matplotlibrc" value="savefig.transparent : True&#10;savefig.bbox : tight"/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="1484" name="End-to-end delay, QoS" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
@@ -637,8 +635,6 @@ plt.tight_layout()
 
 # TODO this should be done in the dialog
 plt.title('End-to-end delay, QoS')
-
-plt.savefig('delay_qos.png', dpi=150, transparent=True)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -1155,7 +1151,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_title" value="Time [s]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="delay_qos"/>
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -1171,8 +1167,8 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value="2"/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value="figure.figsize : 7.5,4"/>
+            <property name="image_export_width" value="7.5"/>
+            <property name="matplotlibrc" value="savefig.transparent : True&#10;savefig.bbox : tight"/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="1486" name="Instantaneous packet delay variation, non-QoS" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
@@ -1261,8 +1257,6 @@ def on_ylims_change(axes):
     
 ax.callbacks.connect('xlim_changed', on_xlims_change)
 ax.callbacks.connect('ylim_changed', on_ylims_change)
-
-plt.savefig('jitter_nonqos.png', dpi=150, transparent=True)
 ]]></script>
             <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
@@ -1776,7 +1770,7 @@ plt.savefig('jitter_nonqos.png', dpi=150, transparent=True)
             <property name="xaxis_title" value="Time [s]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="jitter_nonqos"/>
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -1792,8 +1786,8 @@ plt.savefig('jitter_nonqos.png', dpi=150, transparent=True)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value="figure.figsize : 7.5,4"/>
+            <property name="image_export_width" value="7.5"/>
+            <property name="matplotlibrc" value="savefig.transparent : True&#10;savefig.bbox : tight"/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="1597" name="Instantaneous packet delay variation, non-QoS" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
@@ -1882,8 +1876,6 @@ def on_ylims_change(axes):
     
 ax.callbacks.connect('xlim_changed', on_xlims_change)
 ax.callbacks.connect('ylim_changed', on_ylims_change)
-
-plt.savefig('jitter_qos.png', dpi=150, transparent=True)
 ]]></script>
             <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
@@ -2397,7 +2389,7 @@ plt.savefig('jitter_qos.png', dpi=150, transparent=True)
             <property name="xaxis_title" value="Time [s]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="jitter_qos"/>
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -2413,8 +2405,8 @@ plt.savefig('jitter_qos.png', dpi=150, transparent=True)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value="figure.figsize : 7.5,4"/>
+            <property name="image_export_width" value="7.5"/>
+            <property name="matplotlibrc" value="savefig.transparent : True&#10;savefig.bbox : tight"/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="1537" name="Throughput, non-QoS" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
@@ -2463,9 +2455,7 @@ plt.title('Throughput, non-QoS')
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 
-plt.legend(markerscale=4)
-
-plt.savefig('throughput_nonqos_.png', dpi=150, transparent=True)]]></script>
+plt.legend(markerscale=4)]]></script>
             <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2978,7 +2968,7 @@ plt.savefig('throughput_nonqos_.png', dpi=150, transparent=True)]]></script>
             <property name="xaxis_title" value="Time [s]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value="-0.1"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="throughput_nonqos_"/>
             <property name="xaxis_min" value="0.5"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -2994,8 +2984,8 @@ plt.savefig('throughput_nonqos_.png', dpi=150, transparent=True)]]></script>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value="6"/>
             <property name="xaxis_max" value="8"/>
-            <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value="figure.figsize : 7.5,4"/>
+            <property name="image_export_width" value="7.5"/>
+            <property name="matplotlibrc" value="savefig.transparent : True&#10;savefig.bbox : tight"/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="1538" name="Throughput, QoS" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
@@ -3035,22 +3025,21 @@ utils.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
-utils.export_image_if_needed(props)
-utils.export_data_if_needed(df, props)
-
 plt.grid(linestyle='--')
 #plt.tight_layout(1.5)
 
-plt.title('Throughput, QoS')
-plt.xlabel('Time [s]')
-plt.ylabel('Application-level throughput [Mbps]')
+#plt.title('Throughput, QoS')
+#plt.xlabel('Time [s]')
+#plt.ylabel('Application-level throughput [Mbps]')
+
+#plt.legend(markerscale=4)
+
+utils.export_image_if_needed(props)
+utils.export_data_if_needed(df, props)
 
 plt.ylim(-0.1,6)
 plt.xlim(0.5,8)
-
-plt.legend(markerscale=4)
-
-plt.savefig('throughput_qos_.png', dpi=150, transparent=True)]]></script>
+]]></script>
             <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -3552,7 +3541,7 @@ plt.savefig('throughput_qos_.png', dpi=150, transparent=True)]]></script>
             <property name="matplotlibrc.figure.facecolor" value=""/>
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Application-level throughput [Mbps]"/>
-            <property name="title" value=""/>
+            <property name="title" value="Throughput, QoS"/>
             <property name="vector_operations" value="apply:divide_by(1000000) # Divides every value in each vector by a constant"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
@@ -3563,7 +3552,7 @@ plt.savefig('throughput_qos_.png', dpi=150, transparent=True)]]></script>
             <property name="xaxis_title" value="Time [s]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value="-0.1"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="throughput_qos_"/>
             <property name="xaxis_min" value="0.5"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -3574,13 +3563,13 @@ plt.savefig('throughput_qos_.png', dpi=150, transparent=True)]]></script>
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="s (square)"/>
             <property name="plt.style" value="default"/>
-            <property name="legend_show" value="false"/>
+            <property name="legend_show" value="true"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value="6"/>
             <property name="xaxis_max" value="8"/>
-            <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value="figure.figsize : 7.5,4"/>
+            <property name="image_export_width" value="7.5"/>
+            <property name="matplotlibrc" value="savefig.transparent : True&#10;savefig.bbox : tight&#10;legend.markerscale : 4"/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="1601" name="Instantaneous packet delay variation, both" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math

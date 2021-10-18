@@ -111,8 +111,6 @@ for i in labels:
     newlabels.append(i.replace('bitrate=','') + ' Mbps')
 ax.legend(handles, newlabels, loc=1, markerscale=2)
 
-plt.savefig("SNIR_distance_v2.png", dpi=150, transparent=True)
-
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]></script>
@@ -678,7 +676,7 @@ utils.export_data_if_needed(df, props)
             <property name="title" value="SNIR vs distance"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="6"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -686,7 +684,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="xaxis_itervar" value="distance"/>
             <property name="yaxis_min" value="0"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="SNIR_distance_v2"/>
             <property name="xaxis_min" value="0"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -704,8 +702,8 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value="grid.linestyle : --&#10;figure.figsize : 10,6"/>
+            <property name="image_export_width" value="10"/>
+            <property name="matplotlibrc" value="grid.linestyle : --&#10;savefig.transparent : True"/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="1482" name="PER vs SNIR" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
@@ -789,8 +787,6 @@ plt.xlabel('Signal-to-noise-plus-interference ratio')
 plt.ylabel('Packet error rate')
 
 utils.postconfigure_plot(props)
-
-plt.savefig("PER_SNIR_v3.png", dpi=150, transparent=True)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -1300,14 +1296,14 @@ utils.export_data_if_needed(df, props)
             <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="true"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="6"/>
             <property name="xaxis_log" value="true"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value="Signal-to-noise-plus-interference ratio"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="PER_SNIR_v3"/>
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -1323,8 +1319,8 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value="grid.linestyle : --&#10;figure.figsize : 10,6"/>
+            <property name="image_export_width" value="10"/>
+            <property name="matplotlibrc" value="grid.linestyle : --&#10;savefig.transparent : True"/>
         </chart>
         <chart icon="icons/full/obj/scatterchart.png" id="1427" name="PER vs distance" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
@@ -1431,8 +1427,6 @@ newlabels = []
 for i in labels:
     newlabels.append(i.replace('bitrate=','') + ' Mbps')
 ax.legend(handles, newlabels, loc=1, markerscale=2)
-
-plt.savefig("PER_distance_v3.png", dpi=150, transparent=True)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -1999,7 +1993,7 @@ utils.export_data_if_needed(df, props)
             <property name="title" value="PER vs distance"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="true"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="6"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -2007,7 +2001,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="xaxis_itervar" value="distance"/>
             <property name="yaxis_min" value=""/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="PER_distance_v3"/>
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -2025,8 +2019,8 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
-            <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value="grid.linestyle : --&#10;figure.figsize : 10,6"/>
+            <property name="image_export_width" value="10"/>
+            <property name="matplotlibrc" value="grid.linestyle : --&#10;savefig.transparent : True"/>
         </chart>
         <chart icon="icons/full/obj/scatterchart.png" id="1429" name="Effective bitrate vs distance" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
@@ -2148,8 +2142,6 @@ for i in labels:
 ax.legend(handles, newlabels, loc=1, markerscale=2)
 
 plt.title("Effective bitrate vs distance")
-
-plt.savefig("throughput_distance3.png", dpi=150, transparent=True)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -2743,7 +2735,7 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value="550"/>
             <property name="image_export_width" value="6"/>
-            <property name="matplotlibrc" value="grid.linestyle : --&#10;figure.figsize : 10,6"/>
+            <property name="matplotlibrc" value="grid.linestyle : --&#10;savefig.transparent : True"/>
         </chart>
     </charts>
 </analysis>
