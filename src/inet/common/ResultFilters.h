@@ -389,7 +389,8 @@ class INET_API UtilizationFilter : public cNumericResultFilter
 /**
  * Filter that expects a Packet or a packet length and outputs the throughput as double.
  * Throughput is computed for the *past* interval every 0.1s or 100 packets,
- * whichever comes first.
+ * whichever comes first. The filter reads the interval and numLengthLimit
+ * parameters from the INI file configuration.
  *
  * Note that this filter is unsuitable for interactive use (with instrument figures,
  * for example), because zeroes for long silent periods are only emitted retroactively,
@@ -400,8 +401,8 @@ class INET_API UtilizationFilter : public cNumericResultFilter
 class INET_API ThroughputFilter : public cObjectResultFilter
 {
   protected:
-    simtime_t interval = 0.1;
-    int numLengthLimit = 100;
+    simtime_t interval = -1;
+    int numLengthLimit = -1;
     bool emitIntermediateZeros = true;
 
     simtime_t lastSignal = 0;
@@ -409,7 +410,9 @@ class INET_API ThroughputFilter : public cObjectResultFilter
     int numLengths = 0;
 
   protected:
-    void emitThroughput(simtime_t endInterval, cObject *details);
+    virtual void init(cComponent *component, cProperty *attrsProperty) override;
+
+    virtual void emitThroughput(simtime_t endInterval, cObject *details);
 
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t value, cObject *details) override;

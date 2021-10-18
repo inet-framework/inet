@@ -614,6 +614,16 @@ void PacketTransmissionTimePerRegionFilter::receiveSignal(cResultFilter *prev, s
 
 Register_ResultFilter("throughput", ThroughputFilter);
 
+void ThroughputFilter::init(cComponent *component, cProperty *attrsProperty)
+{
+    cObjectResultFilter::init(component, attrsProperty);
+    std::string fullPath = component->getFullPath() + "." + attrsProperty->getIndex() + ".throughput";
+    auto intervalValue = getEnvir()->getConfig()->getPerObjectConfigValue(fullPath.c_str(), "interval");
+    interval = cConfiguration::parseDouble(intervalValue, "s", nullptr, 0.1);
+    auto numLengthLimitValue = getEnvir()->getConfig()->getPerObjectConfigValue(fullPath.c_str(), "numLengthLimit");
+    numLengthLimit = cConfiguration::parseLong(numLengthLimitValue, nullptr, 100);
+}
+
 void ThroughputFilter::emitThroughput(simtime_t endInterval, cObject *details)
 {
     if (totalLength == 0) {
@@ -633,7 +643,7 @@ void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, intv
 {
     const simtime_t now = simTime();
     numLengths++;
-    if (numLengths >= numLengthLimit) {
+    if (numLengthLimit != 0 && numLengths >= numLengthLimit) {
         totalLength += length;
         emitThroughput(now, details);
     }
