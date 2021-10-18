@@ -420,6 +420,14 @@ void LengthWeightedValuePerRegionFilter::receiveSignal(cResultFilter *prev, simt
 
 Register_ResultFilter("demuxFlow", DemuxFlowFilter);
 
+void DemuxFlowFilter::init(cComponent *component, cProperty *attrsProperty)
+{
+    DemuxFilter::init(component, attrsProperty);
+    std::string fullPath = component->getFullPath() + "." + attrsProperty->getIndex() + ".demuxFlow";
+    auto value = getEnvir()->getConfig()->getPerObjectConfigValue(fullPath.c_str(), "flowName");
+    flowNameMatcher.setPattern(value != nullptr ? value : "*", false, true, true);
+}
+
 void DemuxFlowFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     std::set<std::string> flows;
@@ -431,7 +439,8 @@ void DemuxFlowFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObje
     packet->mapAllRegionTags<FlowTag>(b(0), packet->getTotalLength(), [&] (b o, b l, const Ptr<const FlowTag>& flowTag) {
         for (int i = 0; i < flowTag->getNamesArraySize(); i++) {
             auto flowName = flowTag->getNames(i);
-            if (flows.find(flowName) == flows.end()) {
+            cMatchableString matchableFlowName(flowName);
+            if (flows.find(flowName) == flows.end() && flowNameMatcher.matches(&matchableFlowName)) {
                 Flow flow(flowName);
                 DemuxFilter::receiveSignal(prev, t, object, &flow);
                 flows.insert(flowName);

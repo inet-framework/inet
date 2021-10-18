@@ -239,8 +239,19 @@ class INET_API WeightTimesFilter : public cObjectResultFilter
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
 
+/**
+ * The filter expects a packet and forwards it along with the flow names as details
+ * that were found. The filter has a flowName parameter that is read from the INI
+ * file configuration.
+ */
 class INET_API DemuxFlowFilter : public DemuxFilter
 {
+  protected:
+    cMatchExpression flowNameMatcher;
+
+  protected:
+    virtual void init(cComponent *component, cProperty *attrsProperty) override;
+
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
 };
