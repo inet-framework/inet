@@ -48,58 +48,58 @@ simple FlowMeasurementRecorder extends PacketFlowBase like IPacketFlow
         @signal[packetFlowEnded](type=inet::Packet);
         // the statistic value is the throughput of the measured flow
         @statistic[flowTraffic](title="flow traffic"; source=throughput(packetLength(demuxFlow(packetFlowMeasured))); record=vector; unit=bps; interpolationmode=linear);
-        // the statistics value is the time difference of the current simulation time and the creation time of the bit
+        // the statistical value is the time difference of the current simulation time and the creation time of the bit
         @statistic[bitLifeTime](title="bit life time"; source=weightTimes(lengthWeightedValuePerRegion(lifeTimePerRegion(demuxFlow(packetFlowMeasured)))); record=histogram?; unit=s; interpolationmode=none);
-        // the statistics value is the elapsed time from the moment the bit entered the flow
+        // the statistical value is the elapsed time from the moment the bit entered the flow
         @statistic[bitElapsedTime](title="bit elapsed time"; source=weightTimes(lengthWeightedValuePerRegion(elapsedTimePerRegion(demuxFlow(packetFlowMeasured)))); record=histogram?; unit=s; interpolationmode=none);
-        // the statistics value is the sum of the delaying time of the bit for all delayers where the bit was delayed
+        // the statistical value is the sum of the delaying time of the bit for all delayers where the bit was delayed
         @statistic[totalBitDelayingTime](title="total bit delaying time"; source=weightTimes(lengthWeightedValuePerRegion(delayingTimePerRegion(demuxFlow(packetFlowMeasured)))); record=histogram?; unit=s; interpolationmode=none);
-        // the statistics value is the sum of the processing time of the bit for all processors where the bit was processed
+        // the statistical value is the sum of the processing time of the bit for all processors where the bit was processed
         @statistic[totalBitProcessingTime](title="total bit processing time"; source=weightTimes(lengthWeightedValuePerRegion(processingTimePerRegion(demuxFlow(packetFlowMeasured)))); record=histogram?; unit=s; interpolationmode=none);
-        // the statistics value is the sum of the queueing time of the bit for all queues where the bit was enqueued
+        // the statistical value is the sum of the queueing time of the bit for all queues where the bit was enqueued
         @statistic[totalBitQueueingTime](title="total bit queueing time"; source=weightTimes(lengthWeightedValuePerRegion(queueingTimePerRegion(demuxFlow(packetFlowMeasured)))); record=histogram?; unit=s; interpolationmode=none);
-        // the statistics value is the sum of the propagation time of the bit for all channels where the bit was propagated
+        // the statistical value is the sum of the propagation time of the bit for all channels where the bit was propagated
         @statistic[totalBitPropagationTime](title="total bit propagation time"; source=weightTimes(lengthWeightedValuePerRegion(propagationTimePerRegion(demuxFlow(packetFlowMeasured)))); record=histogram?; unit=s; interpolationmode=none);
-        // the statistics value is the sum of the transmission duration of the bit for all transmitters where the bit was transmitted
+        // the statistical value is the sum of the transmission duration of the bit for all transmitters where the bit was transmitted
         @statistic[totalBitTransmissionTime](title="total bit transmission time"; source=weightTimes(lengthWeightedValuePerRegion(transmissionTimePerRegion(demuxFlow(packetFlowMeasured)))); record=histogram?; unit=s; interpolationmode=none);
-        // the statistics value is the sum of the transmission duration of the complete packets for all transmitters where the bit was transmitted
+        // the statistical value is the sum of the transmission duration of the complete packets for all transmitters where the bit was transmitted
         @statistic[totalPacketTransmissionTimePerBit](title="total packet transmission time per bit"; source=weightTimes(lengthWeightedValuePerRegion(packetTransmssionTimePerRegion(demuxFlow(packetFlowMeasured)))); record=histogram?; unit=s; interpolationmode=none);
-        // the statistics value (the same for all bits in the region) is the time difference of the current simulation time and the creation time of any bit in the region
+        // the statistical value (the same for all bits in the region) is the time difference of the current simulation time and the creation time of any bit in the region
         @statistic[bitLifeTimePerRegion](title="bit life time per region"; source=dropWeight(lengthWeightedValuePerRegion(lifeTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector?,histogram?; unit=s; interpolationmode=none);
-        // the statistics value (the same for all bits in the region) is the elapsed time from the moment any bit in the region entered the flow
+        // the statistical value (the same for all bits in the region) is the elapsed time from the moment any bit in the region entered the flow
         @statistic[bitElapsedTimePerRegion](title="bit elapsed time per region"; source=dropWeight(lengthWeightedValuePerRegion(elapsedTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector?,histogram?; unit=s; interpolationmode=none);
-        // the statistics value (the same for all bits in the region) is the sum of the delaying time of any bit in the region for all delayers where that particular bit was delayed
+        // the statistical value (the same for all bits in the region) is the sum of the delaying time of any bit in the region for all delayers where that particular bit was delayed
         @statistic[totalBitDelayingTimePerRegion](title="total bit delaying time per region"; source=dropWeight(lengthWeightedValuePerRegion(delayingTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector?,histogram?; unit=s; interpolationmode=none);
-        // the statistics value (the same for all bits in the region) is the sum of the processing time of any bit in the region for all processors where that particular bit was processed
+        // the statistical value (the same for all bits in the region) is the sum of the processing time of any bit in the region for all processors where that particular bit was processed
         @statistic[totalBitProcessingTimePerRegion](title="total bit processing time per region"; source=dropWeight(lengthWeightedValuePerRegion(processingTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector?,histogram?; unit=s; interpolationmode=none);
-        // the statistics value (the same for all bits in the region) is the sum of the queueing time of any bit in the region for all queues where that particular bit was enqueued
+        // the statistical value (the same for all bits in the region) is the sum of the queueing time of any bit in the region for all queues where that particular bit was enqueued
         @statistic[totalBitQueueingTimePerRegion](title="total bit queueing time per region"; source=dropWeight(lengthWeightedValuePerRegion(queueingTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector?,histogram?; unit=s; interpolationmode=none);
-        // the statistics value (the same for all bits in the region) is the sum of the propagation time of any bit in the region for all channels where that particular bit was propagated
+        // the statistical value (the same for all bits in the region) is the sum of the propagation time of any bit in the region for all channels where that particular bit was propagated
         @statistic[totalBitPropagationTimePerRegion](title="total bit propagation time per region"; source=dropWeight(lengthWeightedValuePerRegion(propagationTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector?,histogram?; unit=s; interpolationmode=none);
-        // the statistics value (the same for all bits in the region) is the sum of the transmission duration of any bit in the region for all transmitters where that particular bit was transmitted
+        // the statistical value (the same for all bits in the region) is the sum of the transmission duration of any bit in the region for all transmitters where that particular bit was transmitted
         @statistic[totalBitTransmissionTimePerRegion](title="total bit transmission time per region"; source=dropWeight(lengthWeightedValuePerRegion(transmissionTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector?,histogram?; unit=s; interpolationmode=none);
-        // the statistics value (the same for all bits in the region) is the sum of the transmission duration of the complete packets for all transmitters where the particular bit of the region was transmitted
+        // the statistical value (the same for all bits in the region) is the sum of the transmission duration of the complete packets for all transmitters where the particular bit of the region was transmitted
         @statistic[totalPacketTransmissionTimePerRegion](title="total packet transmission time per region"; source=dropWeight(lengthWeightedValuePerRegion(packetTransmissionTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector?,histogram?; unit=s; interpolationmode=none);
-        // the statistics value is the time difference of the current simulation time and the creation time of any bit in the region
+        // the statistical value is the time difference of the current simulation time and the creation time of any bit in the region
         @statistic[meanBitLifeTimePerPacket](title="mean bit life time per packet"; source=weightedMeanPerGroup(groupRegionsPerPacket(lifeTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector,histogram; unit=s; interpolationmode=none);
-        // the statistics value is the elapsed time from the moment any bit in the region entered the flow
+        // the statistical value is the elapsed time from the moment any bit in the region entered the flow
         @statistic[meanBitElapsedTimePerPacket](title="mean bit elapsed time per packet"; source=weightedMeanPerGroup(groupRegionsPerPacket(elapsedTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector,histogram; unit=s; interpolationmode=none);
-        // the statistics value is the sum of the delaying time of any bit in the region for all delayers where that particular bit was delayed
+        // the statistical value is the sum of the delaying time of any bit in the region for all delayers where that particular bit was delayed
         @statistic[meanTotalBitDelayingTimePerPacket](title="mean total bit delaying time per packet"; source=weightedMeanPerGroup(groupRegionsPerPacket(delayingTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector,histogram; unit=s; interpolationmode=none);
-        // the statistics value is the sum of the processing time of any bit in the region for all processors where that particular bit was processed
+        // the statistical value is the sum of the processing time of any bit in the region for all processors where that particular bit was processed
         @statistic[meanTotalBitProcessingTimePerPacket](title="mean total bit processing time per packet"; source=weightedMeanPerGroup(groupRegionsPerPacket(processingTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector,histogram; unit=s; interpolationmode=none);
-        // the statistics value is the sum of the queueing time of any bit in the region for all queues where that particular bit was enqueued
+        // the statistical value is the sum of the queueing time of any bit in the region for all queues where that particular bit was enqueued
         @statistic[meanTotalBitQueueingTimePerPacket](title="mean total bit queueing time per packet"; source=weightedMeanPerGroup(groupRegionsPerPacket(queueingTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector,histogram; unit=s; interpolationmode=none);
-        // the statistics value is the sum of the propagation time of any bit in the region for all channels where that particular bit was propagated
+        // the statistical value is the sum of the propagation time of any bit in the region for all channels where that particular bit was propagated
         @statistic[meanTotalBitPropagationTimePerPacket](title="mean total bit propagation time per packet"; source=weightedMeanPerGroup(groupRegionsPerPacket(propagationTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector,histogram; unit=s; interpolationmode=none);
-        // the statistics value is the sum of the transmission duration of any bit in the region for all transmitters where that particular bit was transmitted
+        // the statistical value is the sum of the transmission duration of any bit in the region for all transmitters where that particular bit was transmitted
         @statistic[meanTotalBitTransmissionTimePerPacket](title="mean total bit transmission time per packet"; source=weightedMeanPerGroup(groupRegionsPerPacket(transmissionTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector,histogram; unit=s; interpolationmode=none);
-        // the statistics value is the sum of the transmission duration of the complete packets for all transmitters where the particular bit of the region was transmitted
+        // the statistical value is the sum of the transmission duration of the complete packets for all transmitters where the particular bit of the region was transmitted
         @statistic[meanTotalPacketTransmissionTime](title="mean total packet transmission time"; source=weightedMeanPerGroup(groupRegionsPerPacket(packetTransmissionTimePerRegion(demuxFlow(packetFlowMeasured)))); record=vector,histogram; unit=s; interpolationmode=none);
-        // the statistics value is the difference of subsequent values of the mean bit elapsed time per packet
+        // the statistical value is the difference of subsequent values of the mean bit elapsed time per packet
         @statistic[packetJitter](title="packet jitter"; source=jitter(weightedMeanPerGroup(groupRegionsPerPacket(elapsedTimePerRegion(demuxFlow(packetFlowMeasured))))); record=vector,histogram; unit=s; interpolationmode=none);
-        // the statistics value is the difference of the current and the mean bit elapsed time per packet
         @statistic[packetDelayDifferenceToMean](title="packet delay diffference to mean"; source=differenceToMean(weightedMeanPerGroup(groupRegionsPerPacket(packetTransmissionTimePerRegion(demuxFlow(packetFlowMeasured))))); record=vector,histogram; unit=s; interpolationmode=none);
-        // the statistics value is the variation of the mean bit elapsed time per packet
+        // the statistical value is the difference of the current and the mean bit elapsed time per packet
+        // the statistical value is the variation of the mean bit elapsed time per packet
         @statistic[packetDelayVariation](title="packet delay variation"; source=stddev(weightedMeanPerGroup(groupRegionsPerPacket(elapsedTimePerRegion(demuxFlow(packetFlowMeasured))))); record=vector,histogram; unit=s);
 }
