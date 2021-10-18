@@ -128,7 +128,7 @@ void EthernetMac::startFrameTransmission()
     signal->encapsulate(frame);
     ASSERT(curTxSignal == nullptr);
     curTxSignal = signal->dup();
-    emit(transmissionStartedSignal, curTxSignal);
+    emit(transmissionStartedSignal, signal);
     send(signal, physOutGate);
 
     scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxTimer);
