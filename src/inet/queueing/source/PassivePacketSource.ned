@@ -17,25 +17,20 @@
 
 package inet.queueing.source;
 
-import inet.queueing.base.PacketSourceBase;
+import inet.queueing.base.PassivePacketSourceBase;
 import inet.queueing.contract.IPassivePacketSource;
 
 //
 // This module is a passive packet source which can be pulled for packets from
 // the connected packet collector.
 //
-simple PassivePacketSource extends PacketSourceBase like IPassivePacketSource
+simple PassivePacketSource extends PassivePacketSourceBase like IPassivePacketSource
 {
     parameters:
         string clockModule = default(""); // relative path of a module that implements IClock; optional
         volatile double providingInterval @unit(s) = default(0s); // elapsed time between subsequent packets allowed to be pulled by the connected packet collector, 0 means any number of packets can be pulled at the same simulation time
         bool scheduleForAbsoluteTime = default(true); // when a clock is used relative means that setting the clock will not affect the simulation time of the event
         @class(PassivePacketSource);
-        @signal[packetCreated](type=inet::Packet);
-        @signal[packetPulled](type=inet::Packet);
-        @statistic[packetCreated](title="packets created"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetPulled](title="packets pulled"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[pulledTraffic](title="pulled traffic"; source=throughput(packetPulled); record=vector; unit=bps; interpolationmode=linear);
     gates:
         output out @labels(pull);
 }

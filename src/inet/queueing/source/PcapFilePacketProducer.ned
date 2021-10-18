@@ -17,6 +17,7 @@
 
 package inet.queueing.source;
 
+import inet.queueing.base.ActivePacketSourceBase;
 import inet.queueing.contract.IActivePacketSource;
 
 //
@@ -32,15 +33,12 @@ import inet.queueing.contract.IActivePacketSource;
 //  %i - packet data information
 //  %n - number of packets read so far
 //
-simple PcapFilePacketProducer like IActivePacketSource
+simple PcapFilePacketProducer extends ActivePacketSourceBase like IActivePacketSource
 {
     parameters:
         string filename; // the PCAP file to be read
-        string packetNameFormat = default("Pcap-%p-%t-%n"); // determines the name of the packets read from the PCAP file
+        packetNameFormat = default("Pcap-%p-%t-%n"); // determines the name of the packets read from the PCAP file
         @class(PcapFilePacketProducer);
-        @display("i=block/source");
-        @signal[packetCreated](type=inet::Packet);
-        @statistic[packetCreated](title="packets created"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         output out @labels(push);
 }

@@ -29,5 +29,10 @@ simple PacketSinkBase extends PacketProcessorBase
         @class(PacketSinkBase);
         @display("i=block/sink");
         @signal[packetDropped](type=inet::Packet);
-        @statistic[packetDropped](title="packets dropped"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        // the statistical value is the dropped packet
+        @statistic[droppedPackets](title="dropped packets"; source=packetDropped; record=count; unit=pk);
+        // the statistical value is the length of the dropped packet
+        @statistic[droppedPacketLengths](title="dropped packet lengths"; source=packetLength(packetDropped); record=sum,histogram,vector; unit=b; interpolationmode=none);
+        // the statistical value is the data rate of the dropped packets
+        @statistic[droppedDataRate](title="dropped data rate"; source=throughput(packetDropped); record=vector; unit=bps; interpolationmode=linear);
 }

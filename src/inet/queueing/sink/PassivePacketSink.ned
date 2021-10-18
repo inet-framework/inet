@@ -17,23 +17,20 @@
 
 package inet.queueing.sink;
 
-import inet.queueing.base.PacketSinkBase;
+import inet.queueing.base.PassivePacketSinkBase;
 import inet.queueing.contract.IPassivePacketSink;
 
 //
 // This module is a passive packet sink which is pushed with packets by the
 // connected packet producer. All pushed packets are counted and deleted.
 //
-simple PassivePacketSink extends PacketSinkBase like IPassivePacketSink
+simple PassivePacketSink extends PassivePacketSinkBase like IPassivePacketSink
 {
     parameters:
         string clockModule = default(""); // relative path of a module that implements IClock; optional
         volatile double consumptionInterval @unit(s) = default(0s); // elapsed time between subsequent packets allowed to be pushed by the connected packet producer, 0 means any number of packets can be pushed at the same simulation time
         bool scheduleForAbsoluteTime = default(true); // when a clock is used relative means that setting the clock will not affect the simulation time of the event
         @class(PassivePacketSink);
-        @signal[packetPushed](type=inet::Packet);
-        @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[pushedTraffic](title="pushed traffic"; source=throughput(packetPushed); record=vector; unit=bps; interpolationmode=linear);
     gates:
         input in @labels(push);
 }

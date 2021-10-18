@@ -17,14 +17,14 @@
 
 package inet.queueing.source;
 
-import inet.queueing.base.PacketSourceBase;
+import inet.queueing.base.ActivePacketSourceBase;
 import inet.queueing.contract.IActivePacketSource;
 
 //
 // This module is an active packet source which pushes packets into the connected
 // packet consumer.
 //
-simple ActivePacketSource extends PacketSourceBase like IActivePacketSource
+simple ActivePacketSource extends ActivePacketSourceBase like IActivePacketSource
 {
     parameters:
         string clockModule = default(""); // relative path of a module that implements IClock; optional
@@ -32,12 +32,6 @@ simple ActivePacketSource extends PacketSourceBase like IActivePacketSource
         volatile double productionInterval @unit(s); // elapsed time between subsequent packets pushed to the connected packet consumer
         bool scheduleForAbsoluteTime = default(true); // when a clock is used relative means that setting the clock will not affect the simulation time of the event
         @class(ActivePacketSource);
-        @display("i=block/source");
-        @signal[packetCreated](type=inet::Packet);
-        @signal[packetPushed](type=inet::Packet);
-        @statistic[packetCreated](title="packets created"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[pushedTraffic](title="pushed traffic"; source=throughput(packetPushed); record=vector; unit=bps; interpolationmode=linear);
     gates:
         output out @labels(push);
 }
