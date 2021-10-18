@@ -22,7 +22,7 @@ import inet.queueing.contract.IPacketScheduler;
 import inet.queueing.contract.IPacketShaper;
 import inet.queueing.queue.CompoundPacketQueueBase;
 
-module ShaperPriorityQueue extends CompoundPacketQueueBase
+module PriorityShaper extends CompoundPacketQueueBase like IPacketShaper
 {
     parameters:
         int numShapers;
