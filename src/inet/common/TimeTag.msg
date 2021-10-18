@@ -27,10 +27,8 @@ class CreationTimeTag extends TagBase
 
 class ResidenceTimeTag extends TagBase
 {
-    simtime_t receptionStartTime = -1;
-    simtime_t receptionEndTime = -1;
-    simtime_t transmissionStartTime = -1;
-    simtime_t transmissionEndTime = -1;
+    simtime_t startTime = -1;
+    simtime_t endTime = -1;
 }
 
 class TimeTagBase extends TagBase
