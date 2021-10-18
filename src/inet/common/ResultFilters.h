@@ -411,7 +411,7 @@ class INET_API ThroughputFilter : public cObjectResultFilter
 
   protected:
     virtual void init(cComponent *component, cProperty *attrsProperty) override;
-
+    virtual ThroughputFilter *clone() const override;
     virtual void emitThroughput(simtime_t endInterval, cObject *details);
 
   public:

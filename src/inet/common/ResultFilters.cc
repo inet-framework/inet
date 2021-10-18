@@ -624,6 +624,14 @@ void ThroughputFilter::init(cComponent *component, cProperty *attrsProperty)
     numLengthLimit = cConfiguration::parseLong(numLengthLimitValue, nullptr, 100);
 }
 
+ThroughputFilter *ThroughputFilter::clone() const
+{
+    auto clone = new ThroughputFilter();
+    clone->interval = interval;
+    clone->numLengthLimit = numLengthLimit;
+    return clone;
+}
+
 void ThroughputFilter::emitThroughput(simtime_t endInterval, cObject *details)
 {
     if (totalLength == 0) {
