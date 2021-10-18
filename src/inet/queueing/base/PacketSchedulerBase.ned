@@ -32,7 +32,12 @@ simple PacketSchedulerBase extends PacketProcessorBase
         @class(PacketSchedulerBase);
         @display("i=block/join");
         @signal[packetPulled](type=inet::Packet);
-        @statistic[packetPulled](title="packets pulled"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        // the statistical value is the scheduled packet
+        @statistic[packets](title="packets"; source=packetPulled; record=count; unit=pk);
+        // the statistical value is the length of the scheduled packet
+        @statistic[packetLengths](title="packet lengths"; source=packetLength(packetPulled); record=sum,histogram,vector; unit=b; interpolationmode=none);
+        // the statistical value is the data rate of the scheduled packets
+        @statistic[dataRate](title="data rate"; source=throughput(packetPulled); record=vector; unit=bps; interpolationmode=linear);
     gates:
         input in[];
         output out;

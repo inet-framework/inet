@@ -35,8 +35,12 @@ simple PacketMultiplexer extends PacketProcessorBase like IActivePacketSource //
         @display("i=-;b=10,10,oval,grey,,1");
         @signal[packetPushed](type=inet::Packet);
         @signal[packetPulled](type=inet::Packet);
-        @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[packetPulled](title="packets pulled"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        // the statistical value is the multiplexed packet
+        @statistic[packets](title="packets"; source=merge(packetPushed, packetPulled); record=count; unit=pk);
+        // the statistical value is the length of the multiplexed packet
+        @statistic[packetLengths](title="packet lengths"; source=packetLength(merge(packetPushed, packetPulled)); record=sum,histogram,vector; unit=b; interpolationmode=none);
+        // the statistical value is the data rate of the multiplexed packets
+        @statistic[dataRate](title="data rate"; source=throughput(merge(packetPushed, packetPulled)); record=vector; unit=bps; interpolationmode=linear);
     gates:
         input in[] @labels(push);
         output out @labels(push);

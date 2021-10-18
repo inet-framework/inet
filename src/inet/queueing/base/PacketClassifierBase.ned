@@ -32,7 +32,12 @@ simple PacketClassifierBase extends PacketProcessorBase
         @class(PacketClassifierBase);
         @display("i=block/classifier");
         @signal[packetPushed](type=inet::Packet);
-        @statistic[packetPushed](title="packets pushed"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        // the statistical value is the classified packet
+        @statistic[packets](title="packets"; source=packetPushed; record=count; unit=pk);
+        // the statistical value is the length of the classified packet
+        @statistic[packetLengths](title="packet lengths"; source=packetLength(packetPushed); record=sum,histogram,vector; unit=b; interpolationmode=none);
+        // the statistical value is the data rate of the classified packets
+        @statistic[dataRate](title="data rate"; source=throughput(packetPushed); record=vector; unit=bps; interpolationmode=linear);
     gates:
         input in;
         output out[];
