@@ -667,8 +667,8 @@ void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, intv
 
 void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    if (auto packet = dynamic_cast<Packet *>(object))
-        receiveSignal(prev, t, packet->getDataLength().get(), details);
+    if (auto packet = dynamic_cast<cPacket *>(object))
+        receiveSignal(prev, t, packet->getByteLength(), details);
 }
 
 void ThroughputFilter::finish(cComponent *component, simsignal_t signalID)
