@@ -39,6 +39,6 @@ simple TokenBucketClassifier extends PacketClassifierBase like IPacketClassifier
         string excessTokenModule = default(""); // specifies the module (~ITokenConsumer) that receives the excess tokens that are produced by this module
         displayStringTextFormat = default("contains %n tk\nmetered %p pk (%l)");
         @signal[tokensChanged](type=double);
-        @statistic[tokensChanged](title="tokens changed"; record=vector; interpolationmode=linear);
+        @statistic[numTokens](title="number of tokens"; source=tokensChanged; record=vector; unit=tk; interpolationmode=linear);
         @class(TokenBucketClassifier);
 }
