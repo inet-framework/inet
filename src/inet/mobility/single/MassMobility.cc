@@ -18,6 +18,7 @@ Define_Module(MassMobility);
 
 MassMobility::MassMobility()
 {
+    borderPolicy = REFLECT;
 }
 
 void MassMobility::initialize(int stage)
@@ -54,30 +55,32 @@ void MassMobility::setTargetPosition()
 
     simtime_t nextChangeInterval = *changeIntervalParameter;
     EV_DEBUG << "interval: " << nextChangeInterval << endl;
-    sourcePosition = lastPosition;
     targetPosition = lastPosition + direction * (*speedParameter) * nextChangeInterval.dbl();
-    previousChange = simTime();
-    nextChange = previousChange + nextChangeInterval;
+    nextChange = segmentStartTime + nextChangeInterval;
+}
+
+void MassMobility::processBorderPolicy()
+{
+    Coord dummyCoord;
+    rad dummyAngle;
+    handleIfOutside(borderPolicy, targetPosition, lastVelocity, dummyAngle, dummyAngle, quaternion);
 }
 
 void MassMobility::move()
 {
     simtime_t now = simTime();
-    rad dummyAngle;
     if (now == nextChange) {
         lastPosition = targetPosition;
-        handleIfOutside(REFLECT, targetPosition, lastVelocity, dummyAngle, dummyAngle, quaternion);
+        processBorderPolicy();
+        ASSERT(lastPosition == targetPosition);
         EV_INFO << "reached current target position = " << lastPosition << endl;
-        setTargetPosition();
-        EV_INFO << "new target position = " << targetPosition << ", next change = " << nextChange << endl;
-        lastVelocity = (targetPosition - lastPosition) / (nextChange - simTime()).dbl();
-        handleIfOutside(REFLECT, targetPosition, lastVelocity, dummyAngle, dummyAngle, quaternion);
+        doSetTargetPosition();
     }
     else if (now > lastUpdate) {
         ASSERT(nextChange == -1 || now < nextChange);
-        double alpha = (now - previousChange) / (nextChange - previousChange);
-        lastPosition = sourcePosition * (1 - alpha) + targetPosition * alpha;
-        handleIfOutside(REFLECT, targetPosition, lastVelocity, dummyAngle, dummyAngle, quaternion);
+        double alpha = (now - segmentStartTime) / (nextChange - segmentStartTime);
+        lastPosition = segmentStartPosition * (1.0 - alpha) + targetPosition * alpha;
+        processBorderPolicy();
     }
 }
 
