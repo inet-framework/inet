@@ -41,6 +41,7 @@ void GaussMarkovMobility::initialize(int stage)
 
 void GaussMarkovMobility::preventBorderHugging()
 {
+    // TODO this code made a nondeterministic mobility model.
     bool left = (lastPosition.x < constraintAreaMin.x + margin);
     bool right = (lastPosition.x >= constraintAreaMax.x - margin);
     bool top = (lastPosition.y < constraintAreaMin.y + margin);

@@ -38,6 +38,7 @@ void LinearMobility::initialize(int stage)
 
 void LinearMobility::move()
 {
+    // TODO should redesign for deterministic calculation: current calculation depends on time of previous move() call.
     double elapsedTime = (simTime() - lastUpdate).dbl();
     lastPosition += lastVelocity * elapsedTime;
 

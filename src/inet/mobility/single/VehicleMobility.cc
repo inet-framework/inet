@@ -82,6 +82,7 @@ void VehicleMobility::readWaypointsFromFile(const char *fileName)
 
 void VehicleMobility::move()
 {
+    // TODO should redesign for deterministic calculation: current calculation depends on time of previous move() call.
     Waypoint target = waypoints[targetPointIndex];
     double dx = target.x - lastPosition.x;
     double dy = target.y - lastPosition.y;
