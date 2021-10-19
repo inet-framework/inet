@@ -8,6 +8,7 @@
 #ifndef __INET_SUPERPOSITIONINGMOBILITY_H
 #define __INET_SUPERPOSITIONINGMOBILITY_H
 
+#include "inet/common/ModuleRef.h"
 #include "inet/mobility/base/MobilityBase.h"
 
 namespace inet {
@@ -42,7 +43,7 @@ class INET_API SuperpositioningMobility : public MobilityBase, public cListener
     OrientationComposition orientationComposition = OrientationComposition::OC_UNDEFINED;
     int positionElementIndex = -1;
     int orientationElementIndex = -1;
-    std::vector<IMobility *> elements;
+    std::vector<opp_component_ptr<IMobility>> elements;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
