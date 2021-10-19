@@ -77,6 +77,7 @@ void AnsimMobility::initialize(int stage)
 
     EV_TRACE << "initializing AnsimMobility stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
+        borderPolicy = RAISEERROR;
         nodeId = par("nodeId");
         if (nodeId == -1)
             nodeId = getContainingNode(this)->getIndex();
@@ -151,12 +152,6 @@ void AnsimMobility::extractDataFrom(cXMLElement *node)
     nextChange = atof(endTimeStr);
     targetPosition.x = atof(xStr);
     targetPosition.y = atof(yStr);
-}
-
-void AnsimMobility::move()
-{
-    LineSegmentsMobilityBase::move();
-    raiseErrorIfOutside();
 }
 
 } // namespace inet

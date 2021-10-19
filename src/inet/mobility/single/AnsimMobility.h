@@ -39,9 +39,6 @@ class INET_API AnsimMobility : public LineSegmentsMobilityBase
     /** @brief Overridden from LineSegmentsMobilityBase. */
     virtual void setTargetPosition() override;
 
-    /** @brief Overridden from LineSegmentsMobilityBase. */
-    virtual void move() override;
-
     /** @brief Finds the next \<position_change> element. */
     virtual cXMLElement *findNextPositionChange(cXMLElement *positionChange);
 
