@@ -32,6 +32,8 @@ class INET_API CircleMobility : public MovingMobilityBase
     /** @brief Direction from the center of the circle. */
     rad angle = rad(0);
 
+    simtime_t startTime;
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 

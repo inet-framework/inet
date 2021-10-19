@@ -28,6 +28,7 @@ void CircleMobility::initialize(int stage)
         speed = par("speed");
         omega = speed / r;
         stationary = (omega == 0);
+        startTime = simTime();
         lastAngularVelocity = Quaternion(EulerAngles(rad(omega), rad(0), rad(0)));
         WATCH(lastAngularVelocity);
     }
@@ -41,7 +42,7 @@ void CircleMobility::setInitialPosition()
 
 void CircleMobility::move()
 {
-    angle = startAngle + rad(omega * simTime().dbl());
+    angle = startAngle + rad(omega * (simTime() - startTime).dbl());
     double cosAngle = cos(rad(angle).get());
     double sinAngle = sin(rad(angle).get());
     lastPosition.x = cx + r * cosAngle;
