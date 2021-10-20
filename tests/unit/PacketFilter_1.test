@@ -10,7 +10,7 @@ Test for packet filtering.
 using namespace omnetpp;
 using namespace inet;
 
-#define TEST(CONDITION, PACKET) filter.setPattern(CONDITION); try { bool result = filter.matches(&PACKET); std::cout << CONDITION << " -> " << (result ? "true" : "false") << std::endl; } catch (std::exception& e) { std::cout << CONDITION << " -> " << e.what() << std::endl; }
+#define TEST(CONDITION, PACKET) filter.setExpression(CONDITION); try { bool result = filter.matches(&PACKET); std::cout << CONDITION << " -> " << (result ? "true" : "false") << std::endl; } catch (std::exception& e) { std::cout << CONDITION << " -> " << e.what() << std::endl; }
 
 %activity:
 
@@ -81,6 +81,7 @@ TEST("udp.destPort <= 40", packet);
 TEST("udp.foo == 42", packet);
 TEST("udp[0].destPort == 42", packet);
 TEST("udp[1].destPort == 42", packet);
+TEST("ethernetmac == null", packet);
 
 // implicit variables starting with upper case letter can mean protocol specific chunk types of the packet
 TEST("Ipv4Header.destAddress.getInt() == 0x0A000001", packet);
@@ -93,6 +94,7 @@ TEST("UdpHeader.destPort == 42", packet);
 TEST("UdpHeader.foo", packet);
 TEST("UdpHeader[0].destPort == 42", packet);
 TEST("UdpHeader[1].destPort == 42", packet);
+TEST("EthernetMacHeader == null", packet);
 
 // logical expressions
 TEST("name == 'P1' && totalLength == 128B && ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42", packet);
@@ -141,6 +143,7 @@ udp.destPort <= 40 -> false
 udp.foo == 42 -> Cannot resolve member 'foo' of object (inet::UdpHeader)
 udp[0].destPort == 42 -> true
 udp[1].destPort == 42 -> Cannot resolve variable 'udp[1]'
+ethernetmac == null -> true
 Ipv4Header.destAddress.getInt() == 0x0A000001 -> true
 Ipv4Header.destAddress.str() == '10.0.0.1' -> true
 Ipv4Header.foo -> Cannot resolve member 'foo' of object (inet::Ipv4Header)
@@ -151,4 +154,5 @@ UdpHeader.destPort == 42 -> true
 UdpHeader.foo -> Cannot resolve member 'foo' of object (inet::UdpHeader)
 UdpHeader[0].destPort == 42 -> true
 UdpHeader[1].destPort == 42 -> Cannot resolve variable 'UdpHeader[1]'
+EthernetMacHeader == null -> true
 name == 'P1' && totalLength == 128B && ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42 -> true
