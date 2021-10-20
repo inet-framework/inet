@@ -151,7 +151,7 @@ void XMac::configureNetworkInterface()
 
     // capabilities
     networkInterface->setMtu(par("mtu"));
-    networkInterface->setMulticast(false);
+    networkInterface->setMulticast(true);
     networkInterface->setBroadcast(true);
 }
 
