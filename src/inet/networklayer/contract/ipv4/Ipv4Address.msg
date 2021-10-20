@@ -34,8 +34,6 @@ class Ipv4Address
     @opaque;
     @toString(.str());
     @fromString(Ipv4Address($));
-    @toValue($.str());
-    @fromValue(Ipv4Address($.stringValue()));
 }
 
 class Ipv4AddressVector
