@@ -38,7 +38,7 @@ void ContentBasedLabeler::initialize(int stage)
         while (packetFiltersTokenizer.hasMoreTokens()) {
             auto packetFilter = packetFiltersTokenizer.nextToken();
             auto filter = new PacketFilter();
-            filter->setPattern(packetFilter);
+            filter->setExpression(packetFilter);
             filters.push_back(filter);
         }
     }

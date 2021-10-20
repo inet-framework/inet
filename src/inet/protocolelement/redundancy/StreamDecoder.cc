@@ -55,7 +55,7 @@ void StreamDecoder::configureMappings()
         auto element = check_and_cast<cValueMap *>(mappingParameter->get(i).objectValue());
         Mapping& mapping = mappings[i];
         auto packetPattern = element->containsKey("packetFilter") ? element->get("packetFilter").stringValue() : "true";
-        mapping.packetFilter.setPattern(packetPattern);
+        mapping.packetFilter.setExpression(packetPattern);
         L3Address l3Address;
         L3AddressResolver addressResolver;
         if (element->containsKey("source")) {

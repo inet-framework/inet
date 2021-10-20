@@ -73,7 +73,7 @@ void PathVisualizerBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         displayRoutes = par("displayRoutes");
         nodeFilter.setPattern(par("nodeFilter"));
-        packetFilter.setPattern(par("packetFilter"));
+        packetFilter.setExpression(par("packetFilter"));
         lineColorSet.parseColors(par("lineColor"));
         lineStyle = cFigure::parseLineStyle(par("lineStyle"));
         lineWidth = par("lineWidth");
@@ -105,7 +105,7 @@ void PathVisualizerBase::handleParameterChange(const char *name)
         if (!strcmp(name, "nodeFilter"))
             nodeFilter.setPattern(par("nodeFilter"));
         else if (!strcmp(name, "packetFilter"))
-            packetFilter.setPattern(par("packetFilter"));
+            packetFilter.setExpression(par("packetFilter"));
         removeAllPathVisualizations();
     }
 }

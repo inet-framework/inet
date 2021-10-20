@@ -26,7 +26,7 @@ void ContentBasedTagger::initialize(int stage)
 {
     PacketTaggerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        filter.setPattern(par("packetFilter"));
+        filter.setExpression(par("packetFilter"));
 }
 
 void ContentBasedTagger::markPacket(Packet *packet)

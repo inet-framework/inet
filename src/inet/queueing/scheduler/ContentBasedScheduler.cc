@@ -36,7 +36,7 @@ void ContentBasedScheduler::initialize(int stage)
         cStringTokenizer packetFilterTokenizer(par("packetFilters"), ";");
         while (packetFilterTokenizer.hasMoreTokens()) {
             auto filter = new PacketFilter();
-            filter->setPattern(packetFilterTokenizer.nextToken());
+            filter->setExpression(packetFilterTokenizer.nextToken());
             filters.push_back(filter);
         }
     }
