@@ -72,7 +72,7 @@ class INET_API PacketFilter
   public:
     virtual ~PacketFilter() { delete packetDissectorCallback; }
 
-    void setPattern(const char *packetPattern, const char *chunkPattern);
+    void setPattern(const char *expression);
 
     bool matches(const cPacket *packet) const;
 };

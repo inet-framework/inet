@@ -23,11 +23,11 @@
 
 namespace inet {
 
-void PacketFilter::setPattern(const char *packetPattern, const char *chunkPattern)
+void PacketFilter::setPattern(const char *expression)
 {
     packetDissectorCallback = new PacketDissectorCallback(this);
     dynamicExpressionResolver = new DynamicExpressionResolver(this);
-    filterExpression.parse(packetPattern, dynamicExpressionResolver);
+    filterExpression.parse(expression, dynamicExpressionResolver);
 }
 
 bool PacketFilter::matches(const cPacket *cpacket) const
