@@ -72,24 +72,6 @@ void MassMobility::processBorderPolicy()
     }
 }
 
-void MassMobility::move()
-{
-    simtime_t now = simTime();
-    if (now == nextChange) {
-        lastPosition = targetPosition;
-        processBorderPolicy();
-        targetPosition = lastPosition;
-        EV_INFO << "reached current target position = " << lastPosition << endl;
-        doSetTargetPosition();
-    }
-    else if (now > lastUpdate) {
-        ASSERT(nextChange == -1 || now < nextChange);
-        double alpha = (now - segmentStartTime) / (nextChange - segmentStartTime);
-        lastPosition = segmentStartPosition * (1.0 - alpha) + targetPosition * alpha;
-        processBorderPolicy();
-    }
-}
-
 double MassMobility::getMaxSpeed() const
 {
     return speedParameter->isExpression() ? NaN : speedParameter->doubleValue();
