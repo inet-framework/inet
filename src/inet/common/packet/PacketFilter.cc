@@ -23,7 +23,7 @@
 
 namespace inet {
 
-void PacketFilter::setPattern(const char *expression)
+void PacketFilter::setExpression(const char *expression)
 {
     packetDissectorCallback = new PacketDissectorCallback(this);
     dynamicExpressionResolver = new DynamicExpressionResolver(this);
