@@ -10,7 +10,7 @@ Test for packet filtering.
 using namespace omnetpp;
 using namespace inet;
 
-#define TEST(CONDITION, PACKET) filter.setPattern(CONDITION, ""); try { bool result = filter.matches(&PACKET); std::cout << CONDITION << " -> " << (result ? "true" : "false") << std::endl; } catch (std::exception& e) { std::cout << CONDITION << " -> " << e.what() << std::endl; }
+#define TEST(CONDITION, PACKET) filter.setPattern(CONDITION); try { bool result = filter.matches(&PACKET); std::cout << CONDITION << " -> " << (result ? "true" : "false") << std::endl; } catch (std::exception& e) { std::cout << CONDITION << " -> " << e.what() << std::endl; }
 
 %activity:
 
@@ -28,6 +28,10 @@ packet.insertAtBack(makeShared<ByteCountChunk>(B(100)));
 packet.addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
 
 PacketFilter filter;
+
+// constants
+TEST("false", packet);
+TEST("true", packet);
 
 // implicit variables can mean fields of the packet
 TEST("name == 'P1'", packet);
@@ -94,6 +98,8 @@ TEST("UdpHeader[1].destPort == 42", packet);
 TEST("name == 'P1' && totalLength == 128B && ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42", packet);
 
 %contains: stdout
+false -> false
+true -> true
 name == 'P1' -> true
 name == 'P2' -> false
 name =~ 'P*' -> true
