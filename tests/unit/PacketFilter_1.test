@@ -1,0 +1,148 @@
+%description:
+Test for packet filtering.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/PacketFilter.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+
+using namespace omnetpp;
+using namespace inet;
+
+#define TEST(CONDITION, PACKET) filter.setPattern(CONDITION, ""); try { bool result = filter.matches(&PACKET); std::cout << CONDITION << " -> " << (result ? "true" : "false") << std::endl; } catch (std::exception& e) { std::cout << CONDITION << " -> " << e.what() << std::endl; }
+
+%activity:
+
+Packet packet;
+packet.setName("P1");
+auto ipv4Header = makeShared<Ipv4Header>();
+ipv4Header->setProtocolId(IP_PROT_UDP);
+ipv4Header->setDestAddress(Ipv4Address("10.0.0.1"));
+packet.insertAtBack(ipv4Header);
+auto udpHeader = makeShared<UdpHeader>();
+udpHeader->setTotalLengthField(B(100 + 8));
+udpHeader->setDestPort(42);
+packet.insertAtBack(udpHeader);
+packet.insertAtBack(makeShared<ByteCountChunk>(B(100)));
+packet.addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+
+PacketFilter filter;
+
+// implicit variables can mean fields of the packet
+TEST("name == 'P1'", packet);
+TEST("name == 'P2'", packet);
+TEST("name =~ 'P*'", packet);
+TEST("name =~ '*2'", packet);
+TEST("totalLength == 128B", packet);
+TEST("totalLength == 256B", packet);
+TEST("totalLength >= 100B", packet);
+TEST("totalLength >= 200B", packet);
+TEST("hasBitError", packet);
+TEST("foo == 'P1'", packet);
+
+// implicit pk variable means the packet
+TEST("pk.name == 'P1'", packet);
+TEST("pk.name == 'P2'", packet);
+TEST("pk.name =~ 'P*'", packet);
+TEST("pk.name =~ '*2'", packet);
+TEST("pk.totalLength == 128B", packet);
+TEST("pk.totalLength == 256B", packet);
+TEST("pk.totalLength >= 100B", packet);
+TEST("pk.totalLength >= 200B", packet);
+TEST("pk.hasBitError", packet);
+
+// implicit pk fields can mean protocol specific chunks of the packet
+TEST("pk.ipv4 != null", packet);
+TEST("pk.ipv4.destAddress.getInt() == 0x0A000001", packet);
+TEST("pk.ipv4.destAddress.str() == '10.0.0.1'", packet);
+TEST("pk.ipv4.destAddress.str() =~ '10.0.0.*'", packet);
+TEST("pk.ipv4.foo == '10.0.0.1'", packet);
+TEST("pk.udp.destPort == 42", packet);
+TEST("pk.udp.destPort <= 40", packet);
+TEST("pk.udp.foo == 42", packet);
+TEST("pk.ethernetmac == null", packet);
+TEST("pk.foo == null", packet);
+
+// implicit variables starting with lower case letter can mean protocol specific chunks of the packet
+TEST("ipv4.destAddress.getInt() == 0x0A000001", packet);
+TEST("ipv4.destAddress.str() == '10.0.0.1'", packet);
+TEST("ipv4.destAddress.str() =~ '10.0.0.*'", packet);
+TEST("ipv4.foo == '10.0.0.1'", packet);
+TEST("ipv4[0].destAddress.getInt() == 0x0A000001", packet);
+TEST("ipv4[0].destAddress.str() == '10.0.0.1'", packet);
+TEST("ipv4[1].destAddress.str() == '10.0.0.1'", packet);
+TEST("udp.destPort == 42", packet);
+TEST("udp.destPort <= 40", packet);
+TEST("udp.foo == 42", packet);
+TEST("udp[0].destPort == 42", packet);
+TEST("udp[1].destPort == 42", packet);
+
+// implicit variables starting with upper case letter can mean protocol specific chunk types of the packet
+TEST("Ipv4Header.destAddress.getInt() == 0x0A000001", packet);
+TEST("Ipv4Header.destAddress.str() == '10.0.0.1'", packet);
+TEST("Ipv4Header.foo", packet);
+TEST("Ipv4Header[0].destAddress.getInt() == 0x0A000001", packet);
+TEST("Ipv4Header[0].destAddress.str() == '10.0.0.1'", packet);
+TEST("Ipv4Header[1].destAddress.str() == '10.0.0.1'", packet);
+TEST("UdpHeader.destPort == 42", packet);
+TEST("UdpHeader.foo", packet);
+TEST("UdpHeader[0].destPort == 42", packet);
+TEST("UdpHeader[1].destPort == 42", packet);
+
+// logical expressions
+TEST("name == 'P1' && totalLength == 128B && ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42", packet);
+
+%contains: stdout
+name == 'P1' -> true
+name == 'P2' -> false
+name =~ 'P*' -> true
+name =~ '*2' -> false
+totalLength == 128B -> true
+totalLength == 256B -> false
+totalLength >= 100B -> true
+totalLength >= 200B -> false
+hasBitError -> false
+foo == 'P1' -> Cannot resolve variable 'foo'
+pk.name == 'P1' -> true
+pk.name == 'P2' -> false
+pk.name =~ 'P*' -> true
+pk.name =~ '*2' -> false
+pk.totalLength == 128B -> true
+pk.totalLength == 256B -> false
+pk.totalLength >= 100B -> true
+pk.totalLength >= 200B -> false
+pk.hasBitError -> false
+pk.ipv4 != null -> true
+pk.ipv4.destAddress.getInt() == 0x0A000001 -> true
+pk.ipv4.destAddress.str() == '10.0.0.1' -> true
+pk.ipv4.destAddress.str() =~ '10.0.0.*' -> true
+pk.ipv4.foo == '10.0.0.1' -> Cannot resolve member 'foo' of object (inet::Ipv4Header)
+pk.udp.destPort == 42 -> true
+pk.udp.destPort <= 40 -> false
+pk.udp.foo == 42 -> Cannot resolve member 'foo' of object (inet::UdpHeader)
+pk.ethernetmac == null -> true
+pk.foo == null -> Cannot resolve member 'foo' of object (inet::Packet)Test.P1
+ipv4.destAddress.getInt() == 0x0A000001 -> true
+ipv4.destAddress.str() == '10.0.0.1' -> true
+ipv4.destAddress.str() =~ '10.0.0.*' -> true
+ipv4.foo == '10.0.0.1' -> Cannot resolve member 'foo' of object (inet::Ipv4Header)
+ipv4[0].destAddress.getInt() == 0x0A000001 -> true
+ipv4[0].destAddress.str() == '10.0.0.1' -> true
+ipv4[1].destAddress.str() == '10.0.0.1' -> Cannot resolve variable 'ipv4[1]'
+udp.destPort == 42 -> true
+udp.destPort <= 40 -> false
+udp.foo == 42 -> Cannot resolve member 'foo' of object (inet::UdpHeader)
+udp[0].destPort == 42 -> true
+udp[1].destPort == 42 -> Cannot resolve variable 'udp[1]'
+Ipv4Header.destAddress.getInt() == 0x0A000001 -> true
+Ipv4Header.destAddress.str() == '10.0.0.1' -> true
+Ipv4Header.foo -> Cannot resolve member 'foo' of object (inet::Ipv4Header)
+Ipv4Header[0].destAddress.getInt() == 0x0A000001 -> true
+Ipv4Header[0].destAddress.str() == '10.0.0.1' -> true
+Ipv4Header[1].destAddress.str() == '10.0.0.1' -> Cannot resolve variable 'Ipv4Header[1]'
+UdpHeader.destPort == 42 -> true
+UdpHeader.foo -> Cannot resolve member 'foo' of object (inet::UdpHeader)
+UdpHeader[0].destPort == 42 -> true
+UdpHeader[1].destPort == 42 -> Cannot resolve variable 'UdpHeader[1]'
+name == 'P1' && totalLength == 128B && ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42 -> true
