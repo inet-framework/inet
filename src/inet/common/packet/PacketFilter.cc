@@ -62,6 +62,8 @@ cValue PacketFilter::DynamicExpressionResolver::readVariable(cExpression::Contex
             auto it = packetFilter->classNameToChunkMap.find(name);
             if (it != packetFilter->classNameToChunkMap.end())
                 return it->second;
+            else
+                return cValue(any_ptr(nullptr));
         }
         else {
             auto protocol = Protocol::findProtocol(name);
@@ -69,6 +71,8 @@ cValue PacketFilter::DynamicExpressionResolver::readVariable(cExpression::Contex
                 auto it = packetFilter->protocolToChunkMap.find(protocol);
                 if (it != packetFilter->protocolToChunkMap.end())
                     return it->second;
+                else
+                    return cValue(any_ptr(nullptr));
             }
         }
         auto classDescriptor = packetFilter->cpacket->getDescriptor();
