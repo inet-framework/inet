@@ -15,16 +15,17 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.node.inet;
+package inet.node.contract;
 
 //
-// Contains the common interface for all node types in a network.
+// Contains the common interface for all Ethernet node types in a network.
 //
-moduleinterface INetworkNode
+moduleinterface IEthernetNetworkNode extends INetworkNode
 {
     parameters:
+        int numEthInterfaces;
         @display("i=device/pc");
-        @networkNode;
-        @labels(node,ethernet-node,wireless-node);
+    gates:
+        inout ethg[numEthInterfaces];
 }
 
