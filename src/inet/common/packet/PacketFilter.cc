@@ -92,22 +92,24 @@ cValue PacketFilter::DynamicExpressionResolver::readVariable(cExpression::Contex
     if (isClassName) {
         if (index < packetFilter->classNameToChunkMap.count(name)) {
             auto it = packetFilter->classNameToChunkMap.lower_bound(name);
-            while (index-- > 0 && it != packetFilter->classNameToChunkMap.end())
+            while (index-- > 0)
                 it++;
-            if (it != packetFilter->classNameToChunkMap.end())
-                return it->second;
+            return it->second;
         }
+        else
+            return cValue(any_ptr(nullptr));
     }
     else {
         auto protocol = Protocol::findProtocol(name);
         if (protocol != nullptr) {
-            if (index != packetFilter->protocolToChunkMap.count(protocol)) {
+            if (index < packetFilter->protocolToChunkMap.count(protocol)) {
                 auto it = packetFilter->protocolToChunkMap.lower_bound(protocol);
-                while (index-- > 0 && it != packetFilter->protocolToChunkMap.end())
+                while (index-- > 0)
                     it++;
-                if (it != packetFilter->protocolToChunkMap.end())
-                    return it->second;
+                return it->second;
             }
+            else
+                return cValue(any_ptr(nullptr));
         }
     }
     return ResolverBase::readVariable(context, name, index);
@@ -117,7 +119,8 @@ cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context 
 {
     if (object.getType() == cValue::OBJECT) {
         if (dynamic_cast<Packet *>(object.objectValue())) {
-            if (cObjectFactory::find(name, "inet", false) != nullptr) {
+            bool isClassName = isupper(name[0]);
+            if (isClassName) {
                 auto it = packetFilter->classNameToChunkMap.find(name);
                 if (it != packetFilter->classNameToChunkMap.end())
                     return it->second;
@@ -136,14 +139,59 @@ cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context 
             }
         }
         auto cobject = object.objectValue();
-        auto classDescriptor = cobject->getDescriptor();
-        int field = classDescriptor->findField(name);
-        if (field != -1) {
-            auto fieldValue = classDescriptor->getFieldValueAsString(toAnyPtr(cobject), field, 0);
-            return classDescriptor->getFieldValue(toAnyPtr(cobject), field, 0);
+        if (cobject != nullptr) {
+            auto classDescriptor = cobject->getDescriptor();
+            int field = classDescriptor->findField(name);
+            if (field != -1) {
+                auto fieldValue = classDescriptor->getFieldValueAsString(toAnyPtr(cobject), field, 0);
+                return classDescriptor->getFieldValue(toAnyPtr(cobject), field, 0);
+            }
         }
-        else
-            return ResolverBase::readMember(context, object, name);
+        return ResolverBase::readMember(context, object, name);
+    }
+    else
+        return ResolverBase::readMember(context, object, name);
+}
+
+cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context *context, const cValue &object, const char *name, intval_t index)
+{
+    if (object.getType() == cValue::OBJECT) {
+        if (dynamic_cast<Packet *>(object.objectValue())) {
+            bool isClassName = isupper(name[0]);
+            if (isClassName) {
+                if (index < packetFilter->classNameToChunkMap.count(name)) {
+                    auto it = packetFilter->classNameToChunkMap.lower_bound(name);
+                    while (index-- > 0)
+                        it++;
+                    return it->second;
+                }
+                else
+                    return cValue(any_ptr(nullptr));
+            }
+            else {
+                auto protocol = Protocol::findProtocol(name);
+                if (protocol != nullptr) {
+                    if (index < packetFilter->protocolToChunkMap.count(protocol)) {
+                        auto it = packetFilter->protocolToChunkMap.lower_bound(protocol);
+                        while (index-- > 0)
+                            it++;
+                        return it->second;
+                    }
+                    else
+                        return cValue(any_ptr(nullptr));
+                }
+            }
+        }
+        auto cobject = object.objectValue();
+        if (cobject != nullptr) {
+            auto classDescriptor = cobject->getDescriptor();
+            int field = classDescriptor->findField(name);
+            if (field != -1) {
+                auto fieldValue = classDescriptor->getFieldValueAsString(toAnyPtr(cobject), field, 0);
+                return classDescriptor->getFieldValue(toAnyPtr(cobject), field, 0);
+            }
+        }
+        return ResolverBase::readMember(context, object, name);
     }
     else
         return ResolverBase::readMember(context, object, name);
@@ -180,6 +228,14 @@ cValue PacketFilter::DynamicExpressionResolver::callMethod(cExpression::Context 
         }
     }
     return ResolverBase::callMethod(context, object, name, argv, argc);
+}
+
+cValue PacketFilter::DynamicExpressionResolver::callFunction(cExpression::Context *context, const char *name, cValue argv[], int argc)
+{
+    if (!strcmp("has", name))
+        return argv[0].objectValue() != nullptr;
+    else
+        return ResolverBase::callFunction(context, name, argv, argc);
 }
 
 } // namespace inet
