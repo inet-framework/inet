@@ -33,19 +33,8 @@ PacketFilter filter;
 TEST("false", packet);
 TEST("true", packet);
 
-// implicit variables can mean fields of the packet
-TEST("name == 'P1'", packet);
-TEST("name == 'P2'", packet);
-TEST("name =~ 'P*'", packet);
-TEST("name =~ '*2'", packet);
-TEST("totalLength == 128B", packet);
-TEST("totalLength == 256B", packet);
-TEST("totalLength >= 100B", packet);
-TEST("totalLength >= 200B", packet);
-TEST("hasBitError", packet);
-TEST("foo == 'P1'", packet);
-
 // implicit pk variable means the packet
+TEST("pk.hasBitError", packet);
 TEST("pk.name == 'P1'", packet);
 TEST("pk.name == 'P2'", packet);
 TEST("pk.name =~ 'P*'", packet);
@@ -54,7 +43,26 @@ TEST("pk.totalLength == 128B", packet);
 TEST("pk.totalLength == 256B", packet);
 TEST("pk.totalLength >= 100B", packet);
 TEST("pk.totalLength >= 200B", packet);
-TEST("pk.hasBitError", packet);
+
+// implicit pk fields can be used to check the presence of a chunk of a specific protocol or of a chunk of a specific type
+TEST("has(pk.ipv4)", packet);
+TEST("has(pk.ipv4[0])", packet);
+TEST("has(pk.ipv4[1])", packet);
+TEST("has(pk.Ipv4Header)", packet);
+TEST("has(pk.Ipv4Header[0])", packet);
+TEST("has(pk.Ipv4Header[1])", packet);
+TEST("has(pk.udp)", packet);
+TEST("has(pk.udp[0])", packet);
+TEST("has(pk.udp[1])", packet);
+TEST("has(pk.UdpHeader)", packet);
+TEST("has(pk.UdpHeader[0])", packet);
+TEST("has(pk.UdpHeader[1])", packet);
+TEST("has(pk.ethernetmac)", packet);
+TEST("has(pk.ethernetmac[0])", packet);
+TEST("has(pk.ethernetmac[1])", packet);
+TEST("has(pk.EthernetMacHeader)", packet);
+TEST("has(pk.EthernetMacHeader[0])", packet);
+TEST("has(pk.EthernetMacHeader[1])", packet);
 
 // implicit pk fields can mean protocol specific chunks of the packet
 TEST("pk.ipv4 != null", packet);
@@ -62,13 +70,47 @@ TEST("pk.ipv4.destAddress.getInt() == 0x0A000001", packet);
 TEST("pk.ipv4.destAddress.str() == '10.0.0.1'", packet);
 TEST("pk.ipv4.destAddress.str() =~ '10.0.0.*'", packet);
 TEST("pk.ipv4.foo == '10.0.0.1'", packet);
+TEST("pk.udp != null", packet);
 TEST("pk.udp.destPort == 42", packet);
 TEST("pk.udp.destPort <= 40", packet);
 TEST("pk.udp.foo == 42", packet);
 TEST("pk.ethernetmac == null", packet);
 TEST("pk.foo == null", packet);
 
+// implicit variables can mean fields of the packet
+TEST("hasBitError", packet);
+TEST("name == 'P1'", packet);
+TEST("name == 'P2'", packet);
+TEST("name =~ 'P*'", packet);
+TEST("name =~ '*2'", packet);
+TEST("totalLength == 128B", packet);
+TEST("totalLength == 256B", packet);
+TEST("totalLength >= 100B", packet);
+TEST("totalLength >= 200B", packet);
+TEST("foo == 'P1'", packet);
+
+// implicit variables can be used to check the presence of a chunk of a specific protocol or of a chunk of a specific type
+TEST("has(ipv4)", packet);
+TEST("has(ipv4[0])", packet);
+TEST("has(ipv4[1])", packet);
+TEST("has(Ipv4Header)", packet);
+TEST("has(Ipv4Header[0])", packet);
+TEST("has(Ipv4Header[1])", packet);
+TEST("has(udp)", packet);
+TEST("has(udp[0])", packet);
+TEST("has(udp[1])", packet);
+TEST("has(UdpHeader)", packet);
+TEST("has(UdpHeader[0])", packet);
+TEST("has(UdpHeader[1])", packet);
+TEST("has(ethernetmac)", packet);
+TEST("has(ethernetmac[0])", packet);
+TEST("has(ethernetmac[1])", packet);
+TEST("has(EthernetMacHeader)", packet);
+TEST("has(EthernetMacHeader[0])", packet);
+TEST("has(EthernetMacHeader[1])", packet);
+
 // implicit variables starting with lower case letter can mean protocol specific chunks of the packet
+TEST("ipv4 != null", packet);
 TEST("ipv4.destAddress.getInt() == 0x0A000001", packet);
 TEST("ipv4.destAddress.str() == '10.0.0.1'", packet);
 TEST("ipv4.destAddress.str() =~ '10.0.0.*'", packet);
@@ -76,6 +118,7 @@ TEST("ipv4.foo == '10.0.0.1'", packet);
 TEST("ipv4[0].destAddress.getInt() == 0x0A000001", packet);
 TEST("ipv4[0].destAddress.str() == '10.0.0.1'", packet);
 TEST("ipv4[1].destAddress.str() == '10.0.0.1'", packet);
+TEST("udp != null", packet);
 TEST("udp.destPort == 42", packet);
 TEST("udp.destPort <= 40", packet);
 TEST("udp.foo == 42", packet);
@@ -102,16 +145,7 @@ TEST("name == 'P1' && totalLength == 128B && ipv4.destAddress.str() == '10.0.0.1
 %contains: stdout
 false -> false
 true -> true
-name == 'P1' -> true
-name == 'P2' -> false
-name =~ 'P*' -> true
-name =~ '*2' -> false
-totalLength == 128B -> true
-totalLength == 256B -> false
-totalLength >= 100B -> true
-totalLength >= 200B -> false
-hasBitError -> false
-foo == 'P1' -> Cannot resolve variable 'foo'
+pk.hasBitError -> false
 pk.name == 'P1' -> true
 pk.name == 'P2' -> false
 pk.name =~ 'P*' -> true
@@ -120,39 +154,87 @@ pk.totalLength == 128B -> true
 pk.totalLength == 256B -> false
 pk.totalLength >= 100B -> true
 pk.totalLength >= 200B -> false
-pk.hasBitError -> false
+has(pk.ipv4) -> true
+has(pk.ipv4[0]) -> true
+has(pk.ipv4[1]) -> false
+has(pk.Ipv4Header) -> true
+has(pk.Ipv4Header[0]) -> true
+has(pk.Ipv4Header[1]) -> false
+has(pk.udp) -> true
+has(pk.udp[0]) -> true
+has(pk.udp[1]) -> false
+has(pk.UdpHeader) -> true
+has(pk.UdpHeader[0]) -> true
+has(pk.UdpHeader[1]) -> false
+has(pk.ethernetmac) -> false
+has(pk.ethernetmac[0]) -> false
+has(pk.ethernetmac[1]) -> false
+has(pk.EthernetMacHeader) -> false
+has(pk.EthernetMacHeader[0]) -> false
+has(pk.EthernetMacHeader[1]) -> false
 pk.ipv4 != null -> true
 pk.ipv4.destAddress.getInt() == 0x0A000001 -> true
 pk.ipv4.destAddress.str() == '10.0.0.1' -> true
 pk.ipv4.destAddress.str() =~ '10.0.0.*' -> true
 pk.ipv4.foo == '10.0.0.1' -> Cannot resolve member 'foo' of object (inet::Ipv4Header)
+pk.udp != null -> true
 pk.udp.destPort == 42 -> true
 pk.udp.destPort <= 40 -> false
 pk.udp.foo == 42 -> Cannot resolve member 'foo' of object (inet::UdpHeader)
 pk.ethernetmac == null -> true
 pk.foo == null -> Cannot resolve member 'foo' of object (inet::Packet)Test.P1
+hasBitError -> false
+name == 'P1' -> true
+name == 'P2' -> false
+name =~ 'P*' -> true
+name =~ '*2' -> false
+totalLength == 128B -> true
+totalLength == 256B -> false
+totalLength >= 100B -> true
+totalLength >= 200B -> false
+foo == 'P1' -> Cannot resolve variable 'foo'
+has(ipv4) -> true
+has(ipv4[0]) -> true
+has(ipv4[1]) -> false
+has(Ipv4Header) -> true
+has(Ipv4Header[0]) -> true
+has(Ipv4Header[1]) -> false
+has(udp) -> true
+has(udp[0]) -> true
+has(udp[1]) -> false
+has(UdpHeader) -> true
+has(UdpHeader[0]) -> true
+has(UdpHeader[1]) -> false
+has(ethernetmac) -> false
+has(ethernetmac[0]) -> false
+has(ethernetmac[1]) -> false
+has(EthernetMacHeader) -> false
+has(EthernetMacHeader[0]) -> false
+has(EthernetMacHeader[1]) -> false
+ipv4 != null -> true
 ipv4.destAddress.getInt() == 0x0A000001 -> true
 ipv4.destAddress.str() == '10.0.0.1' -> true
 ipv4.destAddress.str() =~ '10.0.0.*' -> true
 ipv4.foo == '10.0.0.1' -> Cannot resolve member 'foo' of object (inet::Ipv4Header)
 ipv4[0].destAddress.getInt() == 0x0A000001 -> true
 ipv4[0].destAddress.str() == '10.0.0.1' -> true
-ipv4[1].destAddress.str() == '10.0.0.1' -> Cannot resolve variable 'ipv4[1]'
+ipv4[1].destAddress.str() == '10.0.0.1' -> Cannot resolve member 'destAddress' of object nullptr
+udp != null -> true
 udp.destPort == 42 -> true
 udp.destPort <= 40 -> false
 udp.foo == 42 -> Cannot resolve member 'foo' of object (inet::UdpHeader)
 udp[0].destPort == 42 -> true
-udp[1].destPort == 42 -> Cannot resolve variable 'udp[1]'
+udp[1].destPort == 42 -> Cannot resolve member 'destPort' of object nullptr
 ethernetmac == null -> true
 Ipv4Header.destAddress.getInt() == 0x0A000001 -> true
 Ipv4Header.destAddress.str() == '10.0.0.1' -> true
 Ipv4Header.foo -> Cannot resolve member 'foo' of object (inet::Ipv4Header)
 Ipv4Header[0].destAddress.getInt() == 0x0A000001 -> true
 Ipv4Header[0].destAddress.str() == '10.0.0.1' -> true
-Ipv4Header[1].destAddress.str() == '10.0.0.1' -> Cannot resolve variable 'Ipv4Header[1]'
+Ipv4Header[1].destAddress.str() == '10.0.0.1' -> Cannot resolve member 'destAddress' of object nullptr
 UdpHeader.destPort == 42 -> true
 UdpHeader.foo -> Cannot resolve member 'foo' of object (inet::UdpHeader)
 UdpHeader[0].destPort == 42 -> true
-UdpHeader[1].destPort == 42 -> Cannot resolve variable 'UdpHeader[1]'
+UdpHeader[1].destPort == 42 -> Cannot resolve member 'destPort' of object nullptr
 EthernetMacHeader == null -> true
 name == 'P1' && totalLength == 128B && ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42 -> true
