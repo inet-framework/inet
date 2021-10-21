@@ -16,8 +16,8 @@
 package inet.showcases.measurement.utilization;
 
 import inet.networks.WiredNetworkBase;
+import inet.node.contract.IEthernetNetworkNode;
 import inet.node.ethernet.EthernetLink;
-import inet.node.inet.IEthernetNetworkNode;
 import inet.node.tsn.TsnDevice;
 
 network ExampleNetwork extends WiredNetworkBase

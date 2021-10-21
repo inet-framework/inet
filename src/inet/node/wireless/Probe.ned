@@ -18,7 +18,7 @@
 package inet.node.wireless;
 
 import inet.mobility.contract.IMobility;
-import inet.node.inet.INetworkNode;
+import inet.node.contract.INetworkNode;
 import inet.physicallayer.wireless.common.contract.packetlevel.IAntenna;
 
 module Probe like INetworkNode

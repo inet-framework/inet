@@ -15,8 +15,7 @@
 
 package inet.tutorials.wireless;
 
-import inet.node.inet.INetworkNode;
-
+import inet.node.contract.INetworkNode;
 
 network WirelessB extends WirelessA
 {

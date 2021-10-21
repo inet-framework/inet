@@ -16,9 +16,8 @@
 package inet.showcases.tsn.combiningfeatures.invechicle;
 
 import inet.networks.TsnNetworkBase;
+import inet.node.contract.IEthernetNetworkNode;
 import inet.node.ethernet.Eth100M;
-import inet.node.inet.IEthernetNetworkNode;
-import inet.node.tsn.TsnClock;
 
 network InVehicleNetworkShowcase extends TsnNetworkBase
 {
