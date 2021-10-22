@@ -1,6 +1,82 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-4.4 (December 2021) - Stable
+---------------------------------
+
+Time-Sensitive Networking:
+ - time synchronization
+   - multiple time domains
+ - per-stream filtering
+   - token bucket based metering
+   - statistical metering
+ - traffic shaping
+   - credit based shaper
+   - time-aware shaper
+   - asynchronous shaper
+ - frame replication and elimination
+   - stream identification, splitting, merging, encoding, decoding
+
+Network level automatic configuration:
+ - MAC address table (MAC forwarding information database)
+ - gate scheduling
+   - simple eager
+   - Z3 SAT solver
+   - external TSNsched
+ - stream redundancy
+ - TSN combined
+
+Packet filter expression syntax
+
+Applications:
+ - IEEE 802.2 LLC applications
+ - simple clock synchronizer
+
+Infrastructure:
+ - Bridging layer
+
+Queueing:
+ - token bucked meters/classifiers
+ - interactive gate
+
+Protocol elements:
+ - stream related modules
+
+Statistics:
+ - Added residence time measurer
+ - Added several new statistics
+ - Renamed several existing statistics
+
+Signals:
+ - Added packetPushedIn/packetPushedOut and packetPulledIn/packetPulledOut
+ - Removed delayingTime, elapsedTime, lifeTime, processingTime, propagationTime, queueingTime, transmissionTime, packetServed
+
+Tags:
+ - EnapsulationProtocolReq/EnapsulationProtocolInd
+ - PcpReq/PcpInd, StreamReq/StreamInd, SequenceNumberReq/SequenceNumberInd
+ - ResidenceTimeTag, EligibilityTimeTag
+ - CreditGateTag
+
+Chunks:
+ - IEEE 802.1 r
+
+Chunk serializers:
+ - IEEE 802.1as (gPTP)
+ - IEEE 802.1r
+
+Project features:
+ - IEEE 802.1as
+ - IEEE 802.1r
+ - Z3 SAT gate scheduling configurator
+ - self documenter
+
+Visualization:
+ - gate scheduling visualizer
+ - stream redundancy visualizer
+
+Documentation:
+ - new chapter on Time-Sensitive Networking
+
 INET-4.3 (January 2021) - Stable
 ---------------------------------
 
