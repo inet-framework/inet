@@ -46,14 +46,14 @@ class INET_API PacketFilter
         virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override;
     };
 
-    class INET_API DynamicExpressionResolver : public cDynamicExpression::ResolverBase {
+    class INET_API DynamicExpressionResolver : public cDynamicExpression::IResolver {
       protected:
         PacketFilter *packetFilter = nullptr;
 
       public:
         DynamicExpressionResolver(PacketFilter *packetFilter) : packetFilter(packetFilter) { }
 
-        virtual IResolver *dup() const override { throw cRuntimeError("Not implemented"); }
+        virtual IResolver *dup() const override { return new DynamicExpressionResolver(packetFilter); }
 
         virtual cValue readVariable(cExpression::Context *context, const char *name) override;
         virtual cValue readVariable(cExpression::Context *context, const char *name, intval_t index) override;
@@ -64,17 +64,23 @@ class INET_API PacketFilter
     };
 
   protected:
-    cDynamicExpression filterExpression;
+    cDynamicExpression *filterExpression = nullptr;
+    cMatchExpression *matchExpression = nullptr;
     PacketDissectorCallback *packetDissectorCallback = nullptr;
-    DynamicExpressionResolver *dynamicExpressionResolver = nullptr;
     mutable const cPacket *cpacket = nullptr;
     mutable std::multimap<const Protocol *, Chunk *> protocolToChunkMap;
     mutable std::multimap<std::string, Chunk *> classNameToChunkMap;
 
   public:
-    virtual ~PacketFilter() { delete packetDissectorCallback; }
+    PacketFilter();
+    virtual ~PacketFilter();
 
+    void setPattern(const char *pattern);
     void setExpression(const char *expression);
+    void setExpression(cDynamicExpression *expression);
+    void setExpression(cValueHolder *expression);
+    void setExpression(cObject *expression);
+    void setExpression(cValue& expression);
 
     bool matches(const cPacket *packet) const;
 };

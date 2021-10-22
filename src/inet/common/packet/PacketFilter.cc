@@ -23,11 +23,60 @@
 
 namespace inet {
 
-void PacketFilter::setExpression(const char *expression)
+PacketFilter::PacketFilter()
 {
     packetDissectorCallback = new PacketDissectorCallback(this);
-    dynamicExpressionResolver = new DynamicExpressionResolver(this);
-    filterExpression.parse(expression, dynamicExpressionResolver);
+}
+
+PacketFilter::~PacketFilter()
+{
+    delete filterExpression;
+    delete matchExpression;
+    delete packetDissectorCallback;
+}
+
+
+void PacketFilter::setPattern(const char *pattern)
+{
+    delete matchExpression;
+    matchExpression = new cMatchExpression();
+    matchExpression->setPattern(pattern, false, true, true);
+}
+
+void PacketFilter::setExpression(const char *expression)
+{
+    delete filterExpression;
+    filterExpression = new cDynamicExpression();
+    filterExpression->parse(expression, new DynamicExpressionResolver(this));
+}
+
+void PacketFilter::setExpression(cDynamicExpression *expression)
+{
+    filterExpression = expression;
+    filterExpression->setResolver(new DynamicExpressionResolver(this));
+}
+
+void PacketFilter::setExpression(cValueHolder *expression)
+{
+    auto& value = expression->get();
+    if (value.getType() == cValue::POINTER)
+        setExpression(check_and_cast<cDynamicExpression *>(value.objectValue())->dup());
+    else
+        setPattern(value.stringValue());
+}
+
+void PacketFilter::setExpression(cObject *expression)
+{
+    auto valueHolder = check_and_cast<cValueHolder *>(expression);
+    setExpression(valueHolder);
+}
+
+void PacketFilter::setExpression(cValue& expression)
+{
+    if (expression.getType() == cValue::POINTER)
+        setExpression(expression.objectValue());
+    else
+        setPattern(expression.stringValue());
 }
 
 bool PacketFilter::matches(const cPacket *cpacket) const
@@ -39,7 +88,14 @@ bool PacketFilter::matches(const cPacket *cpacket) const
         PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, *packetDissectorCallback);
         packetDissector.dissectPacket(const_cast<Packet *>(packet));
     }
-    return filterExpression.evaluate().boolValue();
+    bool result = true;
+    if (matchExpression != nullptr) {
+        cMatchableString matchableString(cpacket->getFullName());
+        result &= matchExpression->matches(&matchableString);
+    }
+    if (filterExpression != nullptr)
+        result &= filterExpression->evaluate().boolValue();
+    return result;
 }
 
 void PacketFilter::PacketDissectorCallback::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
@@ -82,7 +138,7 @@ cValue PacketFilter::DynamicExpressionResolver::readVariable(cExpression::Contex
             return classDescriptor->getFieldValue(toAnyPtr(packetFilter->cpacket), field, 0);
         }
         else
-            return ResolverBase::readVariable(context, name);
+            return IResolver::readVariable(context, name);
     }
 }
 
@@ -112,7 +168,7 @@ cValue PacketFilter::DynamicExpressionResolver::readVariable(cExpression::Contex
                 return cValue(any_ptr(nullptr));
         }
     }
-    return ResolverBase::readVariable(context, name, index);
+    return IResolver::readVariable(context, name, index);
 }
 
 cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context *context, const cValue &object, const char *name)
@@ -147,10 +203,10 @@ cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context 
                 return classDescriptor->getFieldValue(toAnyPtr(cobject), field, 0);
             }
         }
-        return ResolverBase::readMember(context, object, name);
+        return IResolver::readMember(context, object, name);
     }
     else
-        return ResolverBase::readMember(context, object, name);
+        return IResolver::readMember(context, object, name);
 }
 
 cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context *context, const cValue &object, const char *name, intval_t index)
@@ -191,10 +247,10 @@ cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context 
                 return classDescriptor->getFieldValue(toAnyPtr(cobject), field, 0);
             }
         }
-        return ResolverBase::readMember(context, object, name);
+        return IResolver::readMember(context, object, name, index);
     }
     else
-        return ResolverBase::readMember(context, object, name);
+        return IResolver::readMember(context, object, name, index);
 }
 
 cValue PacketFilter::DynamicExpressionResolver::callMethod(cExpression::Context *context, const cValue& object, const char *name, cValue argv[], int argc)
@@ -227,7 +283,7 @@ cValue PacketFilter::DynamicExpressionResolver::callMethod(cExpression::Context 
                 return l3Address->str();
         }
     }
-    return ResolverBase::callMethod(context, object, name, argv, argc);
+    return IResolver::callMethod(context, object, name, argv, argc);
 }
 
 cValue PacketFilter::DynamicExpressionResolver::callFunction(cExpression::Context *context, const char *name, cValue argv[], int argc)
@@ -235,7 +291,7 @@ cValue PacketFilter::DynamicExpressionResolver::callFunction(cExpression::Contex
     if (!strcmp("has", name))
         return argv[0].objectValue() != nullptr;
     else
-        return ResolverBase::callFunction(context, name, argv, argc);
+        return IResolver::callFunction(context, name, argv, argc);
 }
 
 } // namespace inet
