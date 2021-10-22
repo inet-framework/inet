@@ -17,8 +17,12 @@
 
 package inet.applications.ieee8022;
 
-module Ieee8022LlcSink extends Ieee8022LlcApp
+//
+// This module implements an IEEE 802.2 LLC application that only receives packets.
+//
+module Ieee8022LlcSinkApp extends Ieee8022LlcApp
 {
     parameters:
-        source.typename = "EmptyPacketSource";
+        source.typename = "";
+        io.destPort = -1;
 }
