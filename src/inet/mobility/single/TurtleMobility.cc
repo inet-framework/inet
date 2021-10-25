@@ -154,7 +154,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
                 borderPolicy = RAISEERROR;
             else
                 throw cRuntimeError("<set>: value for attribute borderPolicy is invalid, should be "
-                                    "'reflect', 'wrap', 'placerandomly' or 'error' at %s",
+                                    "'reflect', 'wrap' or 'error' at %s",
                         stmt->getSourceLocation());
         }
     }
