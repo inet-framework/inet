@@ -28,7 +28,7 @@ class INET_API LineSegmentsMobilityBase : public MovingMobilityBase
     Coord targetPosition;
 
     /** @brief The velocity in current segment. */
-    Coord segmentVelocity;
+    Coord segmentStartVelocity;
 
     /** @brief Start position of current linear movement. */
     Coord segmentStartPosition;
