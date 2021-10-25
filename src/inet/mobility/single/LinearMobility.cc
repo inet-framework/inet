@@ -31,16 +31,21 @@ void LinearMobility::initialize(int stage)
         rad heading = deg(fmod(par("initialMovementHeading").doubleValue(), 360));
         rad elevation = deg(fmod(par("initialMovementElevation").doubleValue(), 360));
         Coord direction = Quaternion(EulerAngles(heading, -elevation, rad(0))).rotate(Coord::X_AXIS);
+        startTime = simTime();
 
-        lastVelocity = direction * speed;
+        lastVelocity = startVelocity = direction * speed;
+    }
+    else if (stage == INITSTAGE_SINGLE_MOBILITY) {
+        startPosition = lastPosition;
     }
 }
 
 void LinearMobility::move()
 {
-    // TODO should redesign for deterministic calculation: current calculation depends on time of previous move() call.
-    double elapsedTime = (simTime() - lastUpdate).dbl();
-    lastPosition += lastVelocity * elapsedTime;
+    // TODO longer elapsed time --> smaller precision.
+    double elapsedTime = (simTime() - startTime).dbl();
+    lastPosition = startPosition + startVelocity * elapsedTime;
+    lastVelocity = startVelocity;
 
     // do something if we reach the wall
     Coord dummyCoord;
