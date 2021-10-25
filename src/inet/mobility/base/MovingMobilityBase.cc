@@ -73,6 +73,8 @@ void MovingMobilityBase::handleSelfMessage(cMessage *message)
         moveAndUpdate();
         scheduleUpdate();
     }
+    else
+        throw cRuntimeError("Unknown self message %s", message->getClassAndFullName().c_str());
 }
 
 void MovingMobilityBase::scheduleUpdate()
