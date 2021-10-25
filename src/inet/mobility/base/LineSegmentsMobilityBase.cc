@@ -44,6 +44,7 @@ void LineSegmentsMobilityBase::move()
     simtime_t now = simTime();
     if (now == nextChange) {
         lastPosition = targetPosition;
+        lastVelocity = segmentVelocity;
         processBorderPolicy();
         targetPosition = lastPosition;
         EV_INFO << "reached current target position = " << lastPosition << endl;
