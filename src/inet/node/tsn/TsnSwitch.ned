@@ -49,6 +49,6 @@ module TsnSwitch extends EthernetSwitch
         bridging.streamRelay.typename = default(hasStreamRedundancy ? "StreamRelayLayer" : ""); // enable stream merging and stream splitting when stream redundancy is enabled
         bridging.streamFilter.typename = default(hasIngressTrafficFiltering ? "StreamFilterLayer" : ""); // enable stream filtering when ingress traffic filtering is enabled
         bridging.streamFilter.ingress.typename = default(hasIngressTrafficFiltering ? "SimpleIeee8021qciFilter" : ""); // use 802.1 Qci ingress filtering when ingress traffic filtering is enabled
-        bridging.streamCoder.typename = default(hasStreamRedundancy ? "StreamCoderLayer" : ""); // enable stream endocing/decoding when stream redundancy is enabled
+        bridging.streamCoder.typename = default(hasIngressTrafficFiltering || hasStreamRedundancy ? "StreamCoderLayer" : ""); // enable stream endocing/decoding when stream redundancy is enabled
         llc.typename = default("");
 }
