@@ -32,8 +32,8 @@ module SimpleIeee8021qciFilter like IPacketFilter
 {
     parameters:
         int numStreams; // number of different streams to filter for
-        bool directPath = default(false);
-        int startY = default(directPath ? 200 : 100);
+        bool hasDirectPath = default(false);
+        int startY = default(hasDirectPath ? 200 : 100);
         @display("i=block/filter");
     gates:
         input in;
@@ -57,7 +57,7 @@ module SimpleIeee8021qciFilter like IPacketFilter
         }
     connections:
         in --> { @display("m=w"); } --> classifier.in;
-        classifier.out++ --> multiplexer.in++ if directPath;
+        classifier.out++ --> multiplexer.in++ if hasDirectPath;
         for i=0..numStreams-1 {
             classifier.out++ --> meter[i].in;
             meter[i].out --> filter[i].in;
