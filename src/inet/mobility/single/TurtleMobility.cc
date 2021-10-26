@@ -180,6 +180,8 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         }
     }
     else if (!strcmp(tag, "forward")) {
+        segmentStartPosition = targetPosition;
+
         const char *dAttr = stmt->getAttribute("d");
         const char *tAttr = stmt->getAttribute("t");
 
@@ -251,6 +253,8 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         nextChange += t; // targetPosition is unchanged
     }
     else if (!strcmp(tag, "moveto")) {
+        segmentStartPosition = targetPosition;
+
         const char *xAttr = stmt->getAttribute("x");
         const char *yAttr = stmt->getAttribute("y");
         const char *zAttr = stmt->getAttribute("z");
@@ -286,6 +290,8 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         nextChange += t;
     }
     else if (!strcmp(tag, "moveby")) {
+        segmentStartPosition = targetPosition;
+
         const char *xAttr = stmt->getAttribute("x");
         const char *yAttr = stmt->getAttribute("y");
         const char *zAttr = stmt->getAttribute("z");
