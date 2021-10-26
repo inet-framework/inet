@@ -99,6 +99,11 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
     const char *tag = stmt->getTagName();
 
     EV_DEBUG << "doing <" << tag << ">\n";
+    EV_TRACE
+            << " lastPosition = " << lastPosition
+            << ", segmentStartPosition = " << segmentStartPosition
+            << ", targetPosition = " << targetPosition
+            << ">\n";
 
     if (!strcmp(tag, "repeat")) {
         const char *nAttr = stmt->getAttribute("n");
@@ -124,23 +129,35 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         const char *zAttr = stmt->getAttribute("z");
         const char *bpAttr = stmt->getAttribute("borderPolicy");
 
-        if (speedAttr)
+        if (speedAttr) {
             speed = getValue(speedAttr);
+            EV_TRACE << "  set speed = " << speed << ">\n";
+        }
 
-        if (headingAttr)
+        if (headingAttr) {
             heading = deg(getValue(headingAttr));
+            EV_TRACE << "  set heading = " << deg(heading) << ">\n";
+        }
 
-        if (elevationAttr)
+        if (elevationAttr) {
             elevation = deg(getValue(elevationAttr));
+            EV_TRACE << "  set elevation = " << deg(elevation) << ">\n";
+        }
 
-        if (xAttr)
+        if (xAttr) {
             targetPosition.x = lastPosition.x = getValue(xAttr);
+            EV_TRACE << "  set target.x = " << targetPosition.x << ">\n";
+        }
 
-        if (yAttr)
+        if (yAttr) {
             targetPosition.y = lastPosition.y = getValue(yAttr);
+            EV_TRACE << "  set target.y = " << targetPosition.z << ">\n";
+        }
 
-        if (zAttr)
+        if (zAttr) {
             targetPosition.z = lastPosition.z = getValue(zAttr);
+            EV_TRACE << "  set target.z = " << targetPosition.z << ">\n";
+        }
 
         if (speed <= 0)
             throw cRuntimeError("<set>: speed is negative or zero at %s", stmt->getSourceLocation());
@@ -156,6 +173,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
                 throw cRuntimeError("<set>: value for attribute borderPolicy is invalid, should be "
                                     "'reflect', 'wrap' or 'error' at %s",
                         stmt->getSourceLocation());
+            EV_TRACE << "  set borderpolicy = " << bpAttr << ">\n";
         }
     }
     else if (!strcmp(tag, "forward")) {
@@ -171,16 +189,19 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
             // cover distance d in time t (current speed is ignored)
             d = getValue(dAttr);
             t = getValue(tAttr);
+            EV_TRACE << "  forward d = " << d << ", t = " << t << ">\n";
         }
         else if (dAttr) {
             // travel distance d at current speed
             d = getValue(dAttr);
             t = d / speed;
+            EV_TRACE << "  forward d = " << d << ">\n";
         }
         else {
             // tAttr only: travel for time t at current speed
             t = getValue(tAttr);
             d = speed * t;
+            EV_TRACE << "  forward t = " << t << ">\n";
         }
 
         if (t < 0)
@@ -200,11 +221,17 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
             headingAttr = stmt->getAttribute("angle"); // for backward compatibility
         const char *elevationAttr = stmt->getAttribute("elevation");
 
-        if (headingAttr)
-            heading += deg(getValue(headingAttr));
+        if (headingAttr) {
+            auto d = deg(getValue(headingAttr));
+            heading += d;
+            EV_TRACE << "  turn heading with " << d << " to " << deg(heading) << ">\n";
+        }
 
-        if (elevationAttr)
-            elevation += deg(getValue(elevationAttr));
+        if (elevationAttr) {
+            auto d = deg(getValue(elevationAttr));
+            elevation += d;
+            EV_TRACE << "  turn elevation with " << d << " to " << deg(elevation) << ">\n";
+        }
     }
     else if (!strcmp(tag, "wait")) {
         const char *tAttr = stmt->getAttribute("t");
@@ -217,6 +244,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         if (t < 0)
             throw cRuntimeError("<wait>: time (attribute t) is negative (%g) at %s", t, stmt->getSourceLocation());
 
+        EV_TRACE << "  wait t = " << t << ">\n";
         nextChange += t; // targetPosition is unchanged
     }
     else if (!strcmp(tag, "moveto")) {
@@ -225,17 +253,29 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         const char *zAttr = stmt->getAttribute("z");
         const char *tAttr = stmt->getAttribute("t");
 
-        if (xAttr)
+        if (xAttr) {
             targetPosition.x = getValue(xAttr);
+            EV_TRACE << "  moveto target.x = " << targetPosition.x << ">\n";
+        }
 
-        if (yAttr)
+        if (yAttr) {
             targetPosition.y = getValue(yAttr);
+            EV_TRACE << "  moveto target.y = " << targetPosition.y << ">\n";
+        }
 
-        if (zAttr)
+        if (zAttr) {
             targetPosition.z = getValue(zAttr);
+            EV_TRACE << "  moveto target.z = " << targetPosition.z << ">\n";
+        }
 
         // travel to targetPosition at current speed, or get there in time t (ignoring current speed then)
-        double t = tAttr ? getValue(tAttr) : lastPosition.distance(targetPosition) / speed;
+        double t;
+        if (tAttr) {
+            t = getValue(tAttr);
+            EV_TRACE << "  moveto t = " << t << ">\n";
+        }
+        else
+            t = segmentStartPosition.distance(targetPosition) / speed;
 
         if (t < 0)
             throw cRuntimeError("<wait>: time (attribute t) is negative at %s", stmt->getSourceLocation());
@@ -248,17 +288,32 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         const char *zAttr = stmt->getAttribute("z");
         const char *tAttr = stmt->getAttribute("t");
 
-        if (xAttr)
-            targetPosition.x += getValue(xAttr);
+        if (xAttr) {
+            double d = getValue(xAttr);
+            EV_TRACE << "  moveby x = " << d << ">\n";
+            targetPosition.x += d;
+        }
 
-        if (yAttr)
-            targetPosition.y += getValue(yAttr);
+        if (yAttr) {
+            double d = getValue(yAttr);
+            EV_TRACE << "  moveby y = " << d << ">\n";
+            targetPosition.y += d;
+        }
 
-        if (zAttr)
-            targetPosition.z += getValue(zAttr);
+        if (zAttr) {
+            double d = getValue(zAttr);
+            EV_TRACE << "  moveby z = " << d << ">\n";
+            targetPosition.z += d;
+        }
 
         // travel to targetPosition at current speed, or get there in time t (ignoring current speed then)
-        double t = tAttr ? getValue(tAttr) : lastPosition.distance(targetPosition) / speed;
+        double t;
+        if (tAttr) {
+            t = getValue(tAttr);
+            EV_TRACE << "  moveby t = " << t << ">\n";
+        }
+        else
+            t = segmentStartPosition.distance(targetPosition) / speed;
 
         if (t < 0)
             throw cRuntimeError("<wait>: time (attribute t) is negative at %s", stmt->getSourceLocation());
