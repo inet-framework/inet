@@ -15,16 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ieee8021q.shaper;
-
-import inet.queueing.shaper.PacketShaper;
+package inet.linklayer.ieee8021q;
 
 //
-// This module implements a time-aware shaper using a gate submodule opens and
-// closes according to a time-based schedule.
+// This module implements the IEEE 802.1Q credit-based shaper.
 //
-module TimeAwareShaper extends PacketShaper
+module Ieee8021qCreditBasedShaper extends Ieee8021qCreditBasedGate
 {
-    parameters:
-        gate.typename = default("PeriodicGate");
 }
+

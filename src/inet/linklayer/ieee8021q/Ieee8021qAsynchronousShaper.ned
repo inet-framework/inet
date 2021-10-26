@@ -15,21 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.ieee8021q.shaper;
+package inet.linklayer.ieee8021q;
 
-import inet.queueing.shaper.PacketShaper;
+import inet.protocolelement.shaper.EligibilityTimeGate;
 
 //
-// This module implements an asynchronous shaper. The queue sorts packets based
-// on the transmission eligibility time (~EligibilityTimeTag) attached to each
-// packet. The gate prevents packets to be transmitter earlier than the attached
-// transmission eligibility time.
+// This module implements the IEEE 802.1Q asynchronous shaper.
 //
-// @see ~EligibilityTimeMeter, ~EligibilityTimeFilter, ~EligibilityTimeQueue, ~EligibilityTimeGate
-//
-module AsynchronousShaper extends PacketShaper
+module Ieee8021qAsynchronousShaper extends EligibilityTimeGate
 {
-    parameters:
-        queue.typename = default("EligibilityTimeQueue");
-        gate.typename = default("EligibilityTimeGate");
 }
+
