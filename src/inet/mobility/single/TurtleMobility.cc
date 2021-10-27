@@ -73,7 +73,7 @@ void TurtleMobility::processBorderPolicy()
     if (simTime() == nextChange)
         handleIfOutside(borderPolicy, dummyCoord, dummyCoord, heading, elevation);
     else
-        handleIfOutside(borderPolicy, targetPosition, dummyCoord);
+        handleIfOutside(borderPolicy, dummyCoord, dummyCoord);
 }
 
 /**
