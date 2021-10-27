@@ -108,11 +108,11 @@ void MobilityBase::initialize(int stage)
     }
     else if (stage == INITSTAGE_SINGLE_MOBILITY) {
         initializeOrientation();
-        initializePosition();
+        initializeMobilityData();
     }
 }
 
-void MobilityBase::initializePosition()
+void MobilityBase::initializeMobilityData()
 {
     setInitialMobilityData();
     checkPosition();

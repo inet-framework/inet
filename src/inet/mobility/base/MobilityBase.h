@@ -88,7 +88,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     virtual void initialize(int stage) override;
 
     /** @brief Initializes mobility position. */
-    virtual void initializePosition();
+    virtual void initializeMobilityData();
 
     /** @brief Initializes the position from the display string or from module parameters. */
     virtual void setInitialMobilityData();

@@ -16,9 +16,9 @@ LineSegmentsMobilityBase::LineSegmentsMobilityBase()
     targetPosition = Coord::ZERO;
 }
 
-void LineSegmentsMobilityBase::initializePosition()
+void LineSegmentsMobilityBase::initializeMobilityData()
 {
-    MobilityBase::initializePosition();
+    MobilityBase::initializeMobilityData();
     doSetTargetPosition();
     lastUpdate = simTime();
     scheduleUpdate();

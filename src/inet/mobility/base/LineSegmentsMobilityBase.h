@@ -42,7 +42,7 @@ class INET_API LineSegmentsMobilityBase : public MovingMobilityBase
     BorderPolicy borderPolicy = RAISEERROR;
 
   protected:
-    virtual void initializePosition() override;
+    virtual void initializeMobilityData() override;
 
     // helper function: call setTargetPosition() and save segment start infos.
     void doSetTargetPosition();

@@ -34,9 +34,9 @@ void MovingMobilityBase::initialize(int stage)
     }
 }
 
-void MovingMobilityBase::initializePosition()
+void MovingMobilityBase::initializeMobilityData()
 {
-    MobilityBase::initializePosition();
+    MobilityBase::initializeMobilityData();
     lastUpdate = simTime();
     scheduleUpdate();
 }

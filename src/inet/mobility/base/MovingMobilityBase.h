@@ -54,7 +54,7 @@ class INET_API MovingMobilityBase : public MobilityBase
 
     virtual void initialize(int stage) override;
 
-    virtual void initializePosition() override;
+    virtual void initializeMobilityData() override;
 
     virtual void handleSelfMessage(cMessage *message) override;
 
