@@ -33,6 +33,9 @@ class INET_API LineSegmentsMobilityBase : public MovingMobilityBase
     /** @brief Start position of current linear movement. */
     Coord segmentStartPosition;
 
+    /** @brief The Orientation in current segment. */
+    Quaternion segmentStartOrientation;
+
     /** @brief Start time of current linear movement. */
     simtime_t segmentStartTime;
 

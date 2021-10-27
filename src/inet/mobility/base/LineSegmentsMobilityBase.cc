@@ -31,6 +31,8 @@ void LineSegmentsMobilityBase::doSetTargetPosition()
     setTargetPosition();
     EV_INFO << "new target position = " << targetPosition << ", next change = " << nextChange << endl;
     lastVelocity = segmentStartVelocity = stationary ? Coord::ZERO : (targetPosition - segmentStartPosition) / (nextChange - segmentStartTime).dbl();
+    if (faceForward && (lastVelocity != Coord::ZERO))
+        lastOrientation = segmentStartOrientation = getOrientOfVelocity(segmentStartVelocity);
 }
 
 void LineSegmentsMobilityBase::processBorderPolicy()
@@ -42,18 +44,19 @@ void LineSegmentsMobilityBase::processBorderPolicy()
 void LineSegmentsMobilityBase::move()
 {
     simtime_t now = simTime();
+    lastVelocity = segmentStartVelocity;
+    lastOrientation = segmentStartOrientation;
     if (now == nextChange) {
         lastPosition = targetPosition;
-        lastVelocity = segmentStartVelocity;
         processBorderPolicy();
         targetPosition = lastPosition;
+        segmentStartVelocity = lastVelocity;
         EV_INFO << "reached current target position = " << lastPosition << endl;
         doSetTargetPosition();
     }
     else if (now > lastUpdate) {
         ASSERT(nextChange == -1 || now < nextChange);
         lastPosition = segmentStartPosition + segmentStartVelocity * (now - segmentStartTime).dbl();
-        lastVelocity = segmentStartVelocity;
         processBorderPolicy();
     }
 }
