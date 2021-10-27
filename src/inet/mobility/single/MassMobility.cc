@@ -63,12 +63,14 @@ void MassMobility::processBorderPolicy()
 {
     Coord dummyCoord;
     rad dummyAngle;
+    Quaternion dummyQuaternion;
+
     if (simTime() == nextChange) {
         handleIfOutside(borderPolicy, targetPosition, lastVelocity, dummyAngle, dummyAngle, quaternion);
         orient();
     }
     else {
-        handleIfOutside(borderPolicy, dummyCoord, lastVelocity, dummyAngle, dummyAngle, lastOrientation);
+        handleIfOutside(borderPolicy, dummyCoord, lastVelocity, dummyAngle, dummyAngle, faceForward ? lastOrientation : dummyQuaternion);
     }
 }
 
