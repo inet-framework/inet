@@ -71,6 +71,12 @@ class INET_API MovingMobilityBase : public MobilityBase
      */
     virtual void move() = 0;
 
+    /** Called from timer handler at nextChange time.
+     *
+     * Subclasses can override for specify new target data for mobility
+     *  */
+    virtual void changeMobilityData() {}
+
     virtual void orient();
 
 

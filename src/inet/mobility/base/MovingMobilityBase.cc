@@ -73,6 +73,8 @@ void MovingMobilityBase::handleSelfMessage(cMessage *message)
 {
     if (message == moveTimer) {
         moveAndUpdate();
+        if (simTime() == nextChange)
+            changeMobilityData();
         scheduleUpdate();
     }
     else
