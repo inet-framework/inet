@@ -38,7 +38,7 @@ class INET_API RectangleMobility : public MovingMobilityBase
     virtual void initialize(int stage) override;
 
     /** @brief Initializes the position according to the mobility model. */
-    virtual void setInitialPosition() override;
+    virtual void setInitialMobilityData() override;
 
     /** @brief Move the host */
     virtual void move() override;

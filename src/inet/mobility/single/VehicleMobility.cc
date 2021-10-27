@@ -34,7 +34,7 @@ void VehicleMobility::initialize(int stage)
     }
 }
 
-void VehicleMobility::setInitialPosition()
+void VehicleMobility::setInitialMobilityData()
 {
     lastPosition.x = waypoints[targetPointIndex].x;
     lastPosition.y = waypoints[targetPointIndex].y;

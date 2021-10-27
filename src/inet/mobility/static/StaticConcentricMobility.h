@@ -23,7 +23,7 @@ class INET_API StaticConcentricMobility : public StationaryMobilityBase
 {
   protected:
     /** @brief Initializes the position according to the mobility model. */
-    virtual void setInitialPosition() override;
+    virtual void setInitialMobilityData() override;
 
   public:
     StaticConcentricMobility() {};

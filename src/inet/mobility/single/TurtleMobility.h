@@ -41,7 +41,7 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
     virtual void initialize(int stage) override;
 
     /** @brief Initializes the position according to the mobility model. */
-    virtual void setInitialPosition() override;
+    virtual void setInitialMobilityData() override;
 
     /** @brief Overridden from LineSegmentsMobilityBase. Invokes resumeScript().*/
     virtual void setTargetPosition() override;

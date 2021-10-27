@@ -49,7 +49,7 @@ class INET_API SuperpositioningMobility : public MobilityBase, public cListener
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleSelfMessage(cMessage *msg) override { throw cRuntimeError("Unknown self message"); }
-    virtual void setInitialPosition() override;
+    virtual void setInitialMobilityData() override;
 
   public:
     virtual const Coord& getCurrentPosition() override;

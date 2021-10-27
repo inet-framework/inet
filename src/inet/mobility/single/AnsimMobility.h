@@ -34,7 +34,7 @@ class INET_API AnsimMobility : public LineSegmentsMobilityBase
     virtual void initialize(int stage) override;
 
     /** @brief Initializes the position according to the mobility model. */
-    virtual void setInitialPosition() override;
+    virtual void setInitialMobilityData() override;
 
     /** @brief Overridden from LineSegmentsMobilityBase. */
     virtual void setTargetPosition() override;

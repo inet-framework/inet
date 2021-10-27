@@ -114,12 +114,12 @@ void MobilityBase::initialize(int stage)
 
 void MobilityBase::initializePosition()
 {
-    setInitialPosition();
+    setInitialMobilityData();
     checkPosition();
     emitMobilityStateChangedSignal();
 }
 
-void MobilityBase::setInitialPosition()
+void MobilityBase::setInitialMobilityData()
 {
     // reading the coordinates from omnetpp.ini makes predefined scenarios a lot easier
     auto coordinateSystem = findModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this);

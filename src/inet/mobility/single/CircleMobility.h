@@ -42,7 +42,7 @@ class INET_API CircleMobility : public MovingMobilityBase
     virtual void initialize(int stage) override;
 
     /** @brief Initializes the position according to the mobility model. */
-    virtual void setInitialPosition() override;
+    virtual void setInitialMobilityData() override;
 
     /** @brief Move the host according to the current simulation time. */
     virtual void move() override;

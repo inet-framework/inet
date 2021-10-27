@@ -34,7 +34,7 @@ class INET_API StaticLinearMobility : public StationaryMobilityBase
     virtual void initialize(int stage) override;
 
     /** @brief Initializes the position according to the mobility model. */
-    virtual void setInitialPosition() override;
+    virtual void setInitialMobilityData() override;
 
     /** @brief Save the host position. */
     virtual void finish() override;

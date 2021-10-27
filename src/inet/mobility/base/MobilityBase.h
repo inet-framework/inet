@@ -91,7 +91,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     virtual void initializePosition();
 
     /** @brief Initializes the position from the display string or from module parameters. */
-    virtual void setInitialPosition();
+    virtual void setInitialMobilityData();
 
     /** @brief Checks whether the position is valid or not. */
     virtual void checkPosition();

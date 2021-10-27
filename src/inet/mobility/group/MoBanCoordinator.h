@@ -161,7 +161,7 @@ class INET_API MoBanCoordinator : public LineSegmentsMobilityBase
 
     virtual void initialize(int) override;
 
-    virtual void setInitialPosition() override;
+    virtual void setInitialMobilityData() override;
 
     /** @brief Set a new target position from the next posture. */
     virtual void setTargetPosition() override;

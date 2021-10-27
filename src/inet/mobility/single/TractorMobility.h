@@ -36,7 +36,7 @@ class INET_API TractorMobility : public LineSegmentsMobilityBase
     virtual void initialize(int) override;
 
     /** @brief Initializes the position according to the mobility model. */
-    virtual void setInitialPosition() override;
+    virtual void setInitialMobilityData() override;
 
     /** @brief Calculate a new target position to move to. */
     void setTargetPosition() override;

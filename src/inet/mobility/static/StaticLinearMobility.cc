@@ -30,7 +30,7 @@ void StaticLinearMobility::initialize(int stage)
     }
 }
 
-void StaticLinearMobility::setInitialPosition()
+void StaticLinearMobility::setInitialMobilityData()
 {
     int index = subjectModule->getIndex();
     Coord initialPos;

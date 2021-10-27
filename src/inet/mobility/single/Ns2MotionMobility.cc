@@ -138,7 +138,7 @@ void Ns2MotionMobility::initialize(int stage)
     }
 }
 
-void Ns2MotionMobility::setInitialPosition()
+void Ns2MotionMobility::setInitialMobilityData()
 {
     lastPosition.x = ns2File->initial[0] + scrollX;
     lastPosition.y = ns2File->initial[1] + scrollY;

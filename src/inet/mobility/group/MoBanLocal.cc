@@ -70,7 +70,7 @@ void MoBanLocal::initialize(int stage)
         computeMaxSpeed();
 }
 
-void MoBanLocal::setInitialPosition()
+void MoBanLocal::setInitialMobilityData()
 {
     lastPosition = referencePosition;
 }

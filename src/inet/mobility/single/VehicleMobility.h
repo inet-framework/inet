@@ -39,7 +39,7 @@ class INET_API VehicleMobility : public MovingMobilityBase
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void setInitialPosition() override;
+    virtual void setInitialMobilityData() override;
     virtual void move() override;
     virtual void orient() override;
 

@@ -83,7 +83,7 @@ class INET_API MoBanLocal : public LineSegmentsMobilityBase
 
     virtual void initialize(int) override;
 
-    virtual void setInitialPosition() override;
+    virtual void setInitialMobilityData() override;
 
     virtual void setTargetPosition() override;
 

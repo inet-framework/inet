@@ -55,7 +55,7 @@ void SuperpositioningMobility::initialize(int stage)
         initializePosition();
 }
 
-void SuperpositioningMobility::setInitialPosition()
+void SuperpositioningMobility::setInitialMobilityData()
 {
     lastPosition = getCurrentPosition();
 }
