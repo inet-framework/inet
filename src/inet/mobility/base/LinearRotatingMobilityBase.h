@@ -19,7 +19,7 @@ class INET_API LinearRotatingMobilityBase : public RotatingMobilityBase
     Quaternion targetOrientation;
 
   protected:
-    virtual void initializeOrientation() override;
+    virtual void initializeMobilityData() override;
 
     virtual void rotate() override;
 

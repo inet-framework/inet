@@ -46,8 +46,6 @@ class INET_API RotatingMobilityBase : public MobilityBase
 
     virtual void initialize(int stage) override;
 
-    virtual void initializeOrientation() override;
-
     virtual void handleSelfMessage(cMessage *message) override;
 
     /** @brief Schedules the move timer that will update the mobility state. */

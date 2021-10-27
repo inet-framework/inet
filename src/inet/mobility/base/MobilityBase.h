@@ -96,9 +96,6 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief Checks whether the position is valid or not. */
     virtual void checkPosition();
 
-    /** @brief Initializes the orientation from module parameters. */
-    virtual void initializeOrientation();
-
     /** @brief Moves the visual representation module's icon to the new position on the screen. */
     virtual void refreshDisplay() const override;
     virtual void updateDisplayStringFromMobilityState() const;

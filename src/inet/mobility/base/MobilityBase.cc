@@ -107,7 +107,6 @@ void MobilityBase::initialize(int stage)
         WATCH(lastOrientation);
     }
     else if (stage == INITSTAGE_SINGLE_MOBILITY) {
-        initializeOrientation();
         initializeMobilityData();
     }
 }
@@ -121,6 +120,15 @@ void MobilityBase::initializeMobilityData()
 
 void MobilityBase::setInitialMobilityData()
 {
+    // reading the orientation
+    if (hasPar("initialHeading") && hasPar("initialElevation") && hasPar("initialBank")) {
+        auto alpha = deg(par("initialHeading"));
+        auto initialElevation = deg(par("initialElevation"));
+        // NOTE: negation is needed, see IMobility comments on orientation
+        auto beta = -initialElevation;
+        auto gamma = deg(par("initialBank"));
+        lastOrientation = Quaternion(EulerAngles(alpha, beta, gamma));
+    }
     // reading the coordinates from omnetpp.ini makes predefined scenarios a lot easier
     auto coordinateSystem = findModuleFromPar<IGeographicCoordinateSystem>(par("coordinateSystemModule"), this);
     if (subjectModule != nullptr && hasPar("initFromDisplayString") && par("initFromDisplayString")) {
@@ -171,18 +179,6 @@ void MobilityBase::checkPosition()
                 lastPosition.x, lastPosition.y, lastPosition.z,
                 constraintAreaMin.x, constraintAreaMin.y, constraintAreaMin.z,
                 constraintAreaMax.x, constraintAreaMax.y, constraintAreaMax.z);
-}
-
-void MobilityBase::initializeOrientation()
-{
-    if (hasPar("initialHeading") && hasPar("initialElevation") && hasPar("initialBank")) {
-        auto alpha = deg(par("initialHeading"));
-        auto initialElevation = deg(par("initialElevation"));
-        // NOTE: negation is needed, see IMobility comments on orientation
-        auto beta = -initialElevation;
-        auto gamma = deg(par("initialBank"));
-        lastOrientation = Quaternion(EulerAngles(alpha, beta, gamma));
-    }
 }
 
 void MobilityBase::refreshDisplay() const
