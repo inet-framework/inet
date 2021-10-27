@@ -73,6 +73,7 @@ class INET_API MovingMobilityBase : public MobilityBase
 
     virtual void orient();
 
+
   public:
     virtual const Coord& getCurrentPosition() override;
     virtual const Coord& getCurrentVelocity() override;
@@ -81,6 +82,8 @@ class INET_API MovingMobilityBase : public MobilityBase
     virtual const Quaternion& getCurrentAngularPosition() override;
     virtual const Quaternion& getCurrentAngularVelocity() override;
     virtual const Quaternion& getCurrentAngularAcceleration() override { return Quaternion::IDENTITY; }
+
+    Quaternion getOrientOfVelocity(Coord velocity) const;
 };
 
 } // namespace inet

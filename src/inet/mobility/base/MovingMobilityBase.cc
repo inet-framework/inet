@@ -52,18 +52,20 @@ void MovingMobilityBase::moveAndUpdate()
     }
 }
 
+Quaternion MovingMobilityBase::getOrientOfVelocity(Coord direction) const
+{
+    direction.normalize();
+    auto alpha = rad(atan2(direction.y, direction.x));
+    auto beta = rad(-asin(direction.z));
+    auto gamma = rad(0.0);
+    return Quaternion(EulerAngles(alpha, beta, gamma));
+}
+
 void MovingMobilityBase::orient()
 {
-    if (faceForward) {
+    if (faceForward && (lastVelocity != Coord::ZERO)) {
         // determine orientation based on direction
-        if (lastVelocity != Coord::ZERO) {
-            Coord direction = lastVelocity;
-            direction.normalize();
-            auto alpha = rad(atan2(direction.y, direction.x));
-            auto beta = rad(-asin(direction.z));
-            auto gamma = rad(0.0);
-            lastOrientation = Quaternion(EulerAngles(alpha, beta, gamma));
-        }
+        lastOrientation = getOrientOfVelocity(lastVelocity);
     }
 }
 
