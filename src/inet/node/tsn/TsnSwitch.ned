@@ -30,11 +30,11 @@ import inet.node.ethernet.EthernetSwitch;
 module TsnSwitch extends EthernetSwitch
 {
     parameters:
-        bool hasTimeSynchronization = default(true); // enable 802.1 AS time synchronization
-        bool hasIngressTrafficFiltering = default(true); // enable 802.1 Qci ingress traffic filtering
-        bool hasEgressTrafficShaping = default(true); // enable 802.1 egress traffic shaping (credit based shaping, time aware shaping, asynchronous shaping) 
-        bool hasStreamRedundancy = default(true); // enable 802.1 CB stream redundancy
-        bool hasFramePreemption = default(false); // enable 802.1 Qbu frame preemption
+        bool hasTimeSynchronization = default(false); // enable IEEE 802.1 AS time synchronization
+        bool hasIngressTrafficFiltering = default(false); // enable IEEE 802.1 Qci ingress traffic filtering
+        bool hasEgressTrafficShaping = default(false); // enable IEEE 802.1 egress traffic shaping (credit based shaping, time aware shaping, asynchronous shaping)
+        bool hasStreamRedundancy = default(false); // enable IEEE 802.1 CB frame replication and elimination
+        bool hasFramePreemption = default(false); // enable IEEE 802.1 Qbu frame preemption
         hasGptp = default(hasTimeSynchronization); // enable gPTP protocol
         gptp.gptpNodeType = default("BRIDGE_NODE"); // configure gPTP bridge node type
         gptp.slavePort = default("eth0"); // configure default gPTP bridge slave port

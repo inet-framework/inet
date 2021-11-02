@@ -30,12 +30,12 @@ import inet.node.inet.StandardHost;
 module TsnDevice extends StandardHost
 {
     parameters:
-        bool hasTimeSynchronization = default(true); // enable 802.1 AS time synchronization
-        bool hasIngressTrafficFiltering = default(false); // enable 802.1 Qci ingress traffic filtering
-        bool hasEgressTrafficShaping = default(false); // enable 802.1 egress traffic shaping (credit based shaping, time aware shaping, asynchronous shaping) 
-        bool hasStreamRedundancy = default(false); // enable 802.1 CB stream redundancy
-        bool hasOutputStreams = default(true); // enable 802.1 stream identification and stream encoding
-        bool hasFramePreemption = default(false); // enable 802.1 Qbu frame preemption
+        bool hasTimeSynchronization = default(false); // enable IEEE 802.1 AS time synchronization
+        bool hasIngressTrafficFiltering = default(false); // enable IEEE 802.1 Qci ingress traffic filtering
+        bool hasEgressTrafficShaping = default(false); // enable IEEE 802.1 egress traffic shaping (credit based shaping, time aware shaping, asynchronous shaping)
+        bool hasStreamRedundancy = default(false); // enable IEEE 802.1 CB frame replication and elimination
+        bool hasOutputStreams = default(false); // enable IEEE 802.1 stream identification and stream encoding
+        bool hasFramePreemption = default(false); // enable IEEE 802.1 Qbu frame preemption
         bool hasCutthroughSwitching = default(false); // enable cut-through switching support
         clock.typename = default(hasTimeSynchronization ? "SettableClock" : ""); // enable explicit local clock model
         ethernet.typename = default("EthernetLayer"); // use Ethernet protocol layer outside of network interfaces
