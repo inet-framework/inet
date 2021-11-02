@@ -45,7 +45,7 @@ void EligibilityTimeMeter::meterPacket(Packet *packet)
     clocktime_t bucketFullTime = bucketEmptyTime + emptyToFullDuration;
     clocktime_t eligibilityTime;
     eligibilityTime.setRaw(std::max(std::max(arrivalTime.raw(), groupEligibilityTime.raw()), schedulerEligibilityTime.raw()));
-    if (eligibilityTime <= arrivalTime + maxResidenceTime) {
+    if (maxResidenceTime == -1 || eligibilityTime <= arrivalTime + maxResidenceTime) {
         groupEligibilityTime = eligibilityTime;
         bucketEmptyTime = eligibilityTime < bucketFullTime ? schedulerEligibilityTime : schedulerEligibilityTime + eligibilityTime - bucketFullTime;
         packet->addTagIfAbsent<EligibilityTimeTag>()->setEligibilityTime(eligibilityTime);

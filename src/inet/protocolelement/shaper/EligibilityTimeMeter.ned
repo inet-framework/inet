@@ -36,6 +36,6 @@ simple EligibilityTimeMeter extends PacketMeterBase like IPacketMeter
         string clockModule = default(""); // relative path of a module that implements IClock; optional
         double committedInformationRate @unit(bps); // committed information rate of the packet flow
         int committedBurstSize @unit(b); // committed burst size of the packet flow
-        double maxResidenceTime @unit(s); // maximum packet residence time measures from the packet arrival time to this module to the transmission eligiblity time
+        double maxResidenceTime @unit(s) = default(-1s); // maximum packet residence time measured from the packet arrival time to the meter module to the transmission eligiblity time, not used by default
         @class(EligibilityTimeMeter);
 }
