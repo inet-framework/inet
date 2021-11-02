@@ -50,12 +50,12 @@ of the IEEE 802.1Q standard that was originally introduced by the Per-Stream
 Filtering and Policing (IEEE 802.1Qci-2017) amendment.
 
 The simplest module for IEEE 802.1Q per-stream filtering and policing is the
-:ned:`SimpleIeee8021qciFilter` compound module. This module combines several submodules:
+:ned:`SimpleIeee8021qFilter` compound module. This module combines several submodules:
 a packet classifier at the input, a packet multiplexer at the output, and
 one packet meter, one packet filter, and one packet gate per stream. Each
 one of the latter per-stream 3 modules are optional.
 
-When a packet arrives at the input of the :ned:`SimpleIeee8021qciFilter`, it first gets
+When a packet arrives at the input of the :ned:`SimpleIeee8021qFilter`, it first gets
 classified into one of the filtering and policing submodule paths. Then the
 packet meter measures the packet as part of the packet stream that was seen
 so far, and attaches the result of the measurement. The result may be as
@@ -63,10 +63,10 @@ simple as a label on the packet. After the metering, the packet filter checks
 if the packet matches the required conditions and either lets the packet go
 through or drops it. Finally, the packet gate allows the automatic time based
 or programmatic control of the packet passing through the selected path of the
-policing module. Packets are never enqueued in the :ned:`SimpleIeee8021qciFilter`, they
+policing module. Packets are never enqueued in the :ned:`SimpleIeee8021qFilter`, they
 either pass through or get dropped immediately.
 
-Note that any of the :ned:`SimpleIeee8021qciFilter` default submodules can be replaced
+Note that any of the :ned:`SimpleIeee8021qFilter` default submodules can be replaced
 with other variants. Moreover, other more complicated internal structures
 are also possible, this is especially the case when the packet meters are
 replaced with token bucket classifiers as described below.
@@ -75,7 +75,7 @@ As the first step, the default policing process starts with a packet classifier,
 module, the :ned:`StreamClassifier` by default, that classifies packets based on the
 attached stream information. This classifier simply maps stream names to output
 gate indices. Please note that the stream decoding and identification process
-is not part of the :ned:`SimpleIeee8021qciFilter`.
+is not part of the :ned:`SimpleIeee8021qFilter`.
 
 In the second step, the default policing process continues with a packet meter
 module, the :ned:`DualRateThreeColorMeter` by default, that labels the packets either
@@ -101,14 +101,14 @@ modules:
    and labels packets with one of N+1 labels
 
 Different packet meter modules can also be used by replacing the default
-packet meter submodules of :ned:`SimpleIeee8021qciFilter`. See the inet.queueing.meter
+packet meter submodules of :ned:`SimpleIeee8021qFilter`. See the inet.queueing.meter
 NED package for alternatives.
 
 In the third step, the default per-stream filtering and policing process
 continues with a packet filter module, the :ned:`LabelFilter` by default, that drops
 the red packets and lets through the green and yellow ones by default. Of
 course, different packet filter modules can also be used by replacing the
-default filter submodules of :ned:`SimpleIeee8021qciFilter`. See the inet.queueing.filter
+default filter submodules of :ned:`SimpleIeee8021qFilter`. See the inet.queueing.filter
 NED package for alternatives.
 
 Finally, the default policing process finishes by merging the per-stream
@@ -143,9 +143,9 @@ filtering and policing.
    and classifies packets to the N+1 output gates
 
 There is also a more complex per-stream filtering and policing module, called
-the :ned:`Ieee8021qciFilter`. This module is more similar to the architecture that
-is present in the IEEE 802.1Q standard. The :ned:`Ieee8021qciFilter` also combines
-several submodules but in a slightly different way than the :ned:`SimpleIeee8021qciFilter`.
+the :ned:`Ieee8021qFilter`. This module is more similar to the architecture that
+is present in the IEEE 802.1Q standard. The :ned:`Ieee8021qFilter` also combines
+several submodules but in a slightly different way than the :ned:`SimpleIeee8021qFilter`.
 The most important difference is that this module can be mostly configured
 through a single streamFilterTable parameter.
 
