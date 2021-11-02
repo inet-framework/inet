@@ -4,8 +4,7 @@ Asynhronous Shaper
 Goals
 -----
 
-In this example we demonstrate how to use a asynchronous shaper for shaping the
-traffic differently of two independent data streams.
+In this example we demonstrate how to use the asynchronous traffic shaper.
 
 | INET version: ``4.4``
 | Source files location: `inet/showcases/tsn/trafficshaping/asynchronousshaper <https://github.com/inet-framework/tree/master/showcases/tsn/trafficshaping/asynchronousshaper>`__
@@ -13,16 +12,21 @@ traffic differently of two independent data streams.
 The Model
 ---------
 
-In this configuration there are two independent data streams between two network
-nodes that both pass through a switch where the asynchronous traffic shaping takes
-place.
+There are three network nodes in the network. The source and destination network
+nodes are :ned:`TsnDevice` modules, and the switch is a :ned:`TsnSwitch` module.
 
-Here is the network:
-
-.. image:: media/Network.png
+.. figure:: media/Network.png
    :align: center
 
-Here is the configuration:
+There are four applications in the network forming two independent data streams
+between the source and the destination. The two traffic classes are called high
+priority and best effort. The data rate of both streams is ~48 Mbps at the
+application level in the source. Both data streams pass through the switch and
+the traffic shaping takes place in the outgoing network interface.
+
+The traffic shaper limits the data rate of the high priority stream to 40 Mbps
+and the data rate of the best effort stream to 20 Mbps. The excess traffic is
+stored in the MAC layer subqueue of the corresponding traffic class.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -30,21 +34,53 @@ Here is the configuration:
 Results
 -------
 
-.. The following video shows the behavior in Qtenv:
+The first diagram shows the data rate of the application level outgoing traffic
+in the source. The data rate varies randomly over time for both traffic classes
+but the averages are the same.
 
-   .. video:: media/behavior.mp4
-      :align: center
-      :width: 90%
-
-Here are the simulation results:
-
-.. figure:: media/receivedpackets.png
+.. figure:: media/SourceApplicationTraffic.png
    :align: center
 
-.. figure:: media/gatestate.svg
-   :align: center
-   :width: 100%
+The next diagram shows the data rate of the incoming traffic of the traffic
+shapers. This data rate is measured inside the outgoing network interface of
+the switch. This diagram is somewhat different from the previous one because
+the traffic is already in the switch, and also because it is measured at a
+different protocol level.
 
+.. figure:: media/TrafficShaperIncomingTraffic.png
+   :align: center
+
+The next diagram shows the data rate of the already shaped outgoing traffic of
+the traffic shapers. This data rate is still measured inside the outgoing network
+interface of the switch but at a different location. As it is quite apparent,
+the randomly varying data rate of the incoming traffic is already transformed
+here into a quite stable data rate.
+
+.. figure:: media/TrafficShaperOutgoingTraffic.png
+   :align: center
+
+The next diagram shows the queue lengths of the traffic classes in the outgoing
+network interface of the switch. The queue lengths increase over time because
+the data rate of the incoming traffic of the traffic shapers is greater than
+the data rate of the outgoing traffic, and packets are not dropped.
+
+.. figure:: media/TrafficShaperQueueLengths.png
+   :align: center
+
+The next diagram shows the relationships (for both traffic classes) between
+the gate state of the transmission gates and the transmitting state of the
+outgoing network interface.
+
+.. figure:: media/TrafficClasses.png
+   :align: center
+
+The last diagram shows the data rate of the application level incoming traffic
+in the destination. The data rate is somewhat lower than the data rate of the
+outgoing traffic of the corresponding traffic shaper. The reason is that they
+are measured at different protocol layers.
+
+.. figure:: media/DestinationApplicationTraffic.png
+   :align: center
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`AsynchronousShaperShowcase.ned <../AsynchronousShaperShowcase.ned>`
 

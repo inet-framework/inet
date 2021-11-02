@@ -15,15 +15,16 @@ can be difficult to replicate in a complete network.
 The Model
 ---------
 
-In this configuration we directly connect a traffic shaping module to multiple
-packet sources.
+TODO incomplete
 
-Here is the network:
+The network contains three independent packet sources which are connected to a
+single asynchronous traffic shaper using a packet multiplexer.
 
 .. figure:: media/Network.png
    :align: center
 
-Here is the configuration:
+The three sources generate the same stochastic traffic. The traffic shaper is
+driven by an active packet server module with a constant processing time.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -31,18 +32,14 @@ Here is the configuration:
 Results
 -------
 
-.. The following video shows the behavior in Qtenv:
+TODO
 
-   .. video:: media/behavior.mp4
-      :align: center
-      :width: 90%
-
-Here are the simulation results:
-
-.. figure:: media/queueingtime.png
+.. figure:: media/QueueingTime.png
    :align: center
 
-.. figure:: media/queuelength.png
+TODO
+
+.. figure:: media/QueueLength.png
    :align: center
 
 

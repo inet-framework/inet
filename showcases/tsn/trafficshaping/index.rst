@@ -13,8 +13,8 @@ The following showcases demonstrate scheduling and traffic shaping:
    creditbasedshaper/doc/index
    timeawareshaper/doc/index
    asynchronousshaper/doc/index
-   tokenbucketbasedshaper/doc/index
-   htbshaper/doc/index
    mixingshapers/doc/index
    underthehood/doc/index
 
+.. tokenbucketbasedshaper/doc/index
+.. htbshaper/doc/index

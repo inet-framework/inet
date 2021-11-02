@@ -20,7 +20,7 @@ import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnDevice;
 import inet.node.tsn.TsnSwitch;
 
-network CreditBaseShaperShowcase extends TsnNetworkBase
+network CreditBasedShaperShowcase extends TsnNetworkBase
 {
     submodules:
         source: TsnDevice {

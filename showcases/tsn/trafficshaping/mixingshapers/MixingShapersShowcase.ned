@@ -13,14 +13,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.showcases.tsn.trafficshaping.timeawareshaper;
+package inet.showcases.tsn.trafficshaping.mixingshapers;
 
-import inet.networks.TsnNetworkBase;
-import inet.node.ethernet.EthernetLink;
+import inet.networks.WiredNetworkBase;
+import inet.node.ethernet.Eth100M;
 import inet.node.tsn.TsnDevice;
 import inet.node.tsn.TsnSwitch;
 
-network TimeAwareShaperShowcase extends TsnNetworkBase
+network MixingShapersShowcase extends WiredNetworkBase
 {
     submodules:
         source: TsnDevice {
@@ -33,7 +33,7 @@ network TimeAwareShaperShowcase extends TsnNetworkBase
             @display("p=750,200");
         }
     connections:
-        source.ethg++ <--> EthernetLink <--> switch.ethg++;
-        switch.ethg++ <--> EthernetLink <--> destination.ethg++;
+        source.ethg++ <--> Eth100M <--> switch.ethg++;
+        switch.ethg++ <--> Eth100M <--> destination.ethg++;
 }
 
