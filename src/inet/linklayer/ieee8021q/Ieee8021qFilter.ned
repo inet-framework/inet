@@ -17,7 +17,6 @@
 
 package inet.linklayer.ieee8021q;
 
-import inet.queueing.classifier.PriorityClassifier;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketFilter;
@@ -25,13 +24,13 @@ import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketMeter;
 
 //
-// This module implements the IEEE 802.1Qci per-stream filtering and policing.
+// This module implements the IEEE 802.1Q per-stream filtering and policing.
 // The relationship between streams, gates and meters is not one-to-one. The
 // number of streams, gates and meters can be different and the module will take
 // care about the connections between the submodules based on the streamFilterTable
 // parameter.
 //
-module Ieee8021qciFilter like IPacketFilter
+module Ieee8021qFilter like IPacketFilter
 {
     parameters:
         int numStreams; // number of different streams to filter for
@@ -43,7 +42,7 @@ module Ieee8021qciFilter like IPacketFilter
         input in;
         output out;
     submodules:
-        classifier: PriorityClassifier {
+        classifier: <default("PriorityClassifier")> like IPacketClassifier {
             @display("p=100,100");
         }
         streamFilter[numStreams]: <default("StreamFilter")> like IPacketFilter {

@@ -31,7 +31,7 @@ import inet.queueing.contract.IPacketMeter;
 //
 // @see ~EligibilityTimeQueue, EligibilityTimeGate
 //
-module DualIeee8021qciFilter like IPacketFilter
+module DualIeee8021qFilter like IPacketFilter
 {
     parameters:
         int numStreams; // number of streams
