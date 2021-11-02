@@ -19,6 +19,7 @@
 
 #include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
+#include "inet/protocolelement/redundancy/SequenceNumberTag_m.h"
 #include "inet/protocolelement/redundancy/StreamTag_m.h"
 
 namespace inet {
@@ -74,6 +75,13 @@ void StreamEncoder::processPacket(Packet *packet)
                     packet->addTagIfAbsent<PcpReq>()->setPcp(mapping.pcp);
                 if (mapping.vlanId != -1)
                     packet->addTagIfAbsent<VlanReq>()->setVlanId(mapping.vlanId);
+                if (packet->findTag<SequenceNumberReq>() != nullptr) {
+                    if (auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>()) {
+                        auto encapsulationReq = packet->addTagIfAbsent<EncapsulationProtocolReq>();
+                        encapsulationReq->insertProtocols(0, dispatchProtocolReq->getProtocol());
+                    }
+                    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8021rTag);
+                }
                 if (auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>()) {
                     auto encapsulationReq = packet->addTagIfAbsent<EncapsulationProtocolReq>();
                     encapsulationReq->insertProtocols(0, dispatchProtocolReq->getProtocol());
