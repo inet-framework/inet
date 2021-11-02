@@ -42,7 +42,7 @@ module TsnSwitch extends EthernetSwitch
         ethernet.typename = default("EthernetLayer"); // use Ethernet protocol layer outside of network interfaces
         eth[*].typename = default(hasCutthroughSwitching ? "EthernetCutthroughInterface" : "LayeredEthernetInterface"); // switch to modular Ethernet interface
         eth[0].macLayer.typename = default(hasFramePreemption ? "EthernetPreemptingMacLayer" : "EthernetMacLayer");
-        eth[*].macLayer.queue.typename = default(hasEgressTrafficShaping ? "GatingPriorityQueue" : "PacketQueue"); // use compound priority queue having multiple subqueues controlled by separate gates when egress traffic shaping is enabled
+        eth[*].macLayer.queue.typename = default(hasEgressTrafficShaping ? "Ieee8021qTimeAwareShaper" : "PacketQueue"); // use compound priority queue having multiple subqueues controlled by separate gates when egress traffic shaping is enabled
         eth[*].phyLayer.typename = default(hasCutthroughSwitching ? "EthernetStreamThroughPhyLayer" : (hasFramePreemption ? "EthernetPreemptingPhyLayer" : "EthernetPhyLayer")); // use packet streaming when cut-through switching is enabled
         bridging.typename = default("BridgingLayer"); // switch to modular bridging
         bridging.streamIdentifier.typename = default(hasStreamRedundancy ? "StreamIdentifierLayer" : ""); // enable stream identification when stream redundancy is enabled
