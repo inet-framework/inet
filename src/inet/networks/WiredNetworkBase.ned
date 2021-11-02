@@ -22,7 +22,7 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 network WiredNetworkBase extends NetworkBase
 {
     parameters:
-        bool hasGlobalArp = default(false);
+        bool hasGlobalArp = default(true);
         *.ipv4.arp.typename = default(hasGlobalArp ? "GlobalArp" : "Arp");
     submodules:
         macAddressTableConfigurator: <default(hasGlobalArp ? "MacAddressTableConfigurator" : "")> like INetworkConfigurator if typename != "" {
