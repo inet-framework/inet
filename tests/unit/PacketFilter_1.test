@@ -176,13 +176,13 @@ pk.ipv4 != null -> true
 pk.ipv4.destAddress.getInt() == 0x0A000001 -> true
 pk.ipv4.destAddress.str() == '10.0.0.1' -> true
 pk.ipv4.destAddress.str() =~ '10.0.0.*' -> true
-pk.ipv4.foo == '10.0.0.1' -> Cannot resolve member 'foo' of object (inet::Ipv4Header)
+pk.ipv4.foo == '10.0.0.1' -> Object (inet::Ipv4Header) has no member named 'foo'
 pk.udp != null -> true
 pk.udp.destPort == 42 -> true
 pk.udp.destPort <= 40 -> false
-pk.udp.foo == 42 -> Cannot resolve member 'foo' of object (inet::UdpHeader)
+pk.udp.foo == 42 -> Object (inet::UdpHeader) has no member named 'foo'
 pk.ethernetmac == null -> true
-pk.foo == null -> Cannot resolve member 'foo' of object (inet::Packet)Test.P1
+pk.foo == null -> Object (inet::Packet)Test.P1 has no member named 'foo'
 hasBitError -> false
 name == 'P1' -> true
 name == 'P2' -> false
@@ -192,7 +192,7 @@ totalLength == 128B -> true
 totalLength == 256B -> false
 totalLength >= 100B -> true
 totalLength >= 200B -> false
-foo == 'P1' -> Cannot resolve variable 'foo'
+foo == 'P1' -> No such variable: 'foo'
 has(ipv4) -> true
 has(ipv4[0]) -> true
 has(ipv4[1]) -> false
@@ -215,26 +215,26 @@ ipv4 != null -> true
 ipv4.destAddress.getInt() == 0x0A000001 -> true
 ipv4.destAddress.str() == '10.0.0.1' -> true
 ipv4.destAddress.str() =~ '10.0.0.*' -> true
-ipv4.foo == '10.0.0.1' -> Cannot resolve member 'foo' of object (inet::Ipv4Header)
+ipv4.foo == '10.0.0.1' -> Object (inet::Ipv4Header) has no member named 'foo'
 ipv4[0].destAddress.getInt() == 0x0A000001 -> true
 ipv4[0].destAddress.str() == '10.0.0.1' -> true
-ipv4[1].destAddress.str() == '10.0.0.1' -> Cannot resolve member 'destAddress' of object nullptr
+ipv4[1].destAddress.str() == '10.0.0.1' -> Object nullptr has no member named 'destAddress'
 udp != null -> true
 udp.destPort == 42 -> true
 udp.destPort <= 40 -> false
-udp.foo == 42 -> Cannot resolve member 'foo' of object (inet::UdpHeader)
+udp.foo == 42 -> Object (inet::UdpHeader) has no member named 'foo'
 udp[0].destPort == 42 -> true
-udp[1].destPort == 42 -> Cannot resolve member 'destPort' of object nullptr
+udp[1].destPort == 42 -> Object nullptr has no member named 'destPort'
 ethernetmac == null -> true
 Ipv4Header.destAddress.getInt() == 0x0A000001 -> true
 Ipv4Header.destAddress.str() == '10.0.0.1' -> true
-Ipv4Header.foo -> Cannot resolve member 'foo' of object (inet::Ipv4Header)
+Ipv4Header.foo -> Object (inet::Ipv4Header) has no member named 'foo'
 Ipv4Header[0].destAddress.getInt() == 0x0A000001 -> true
 Ipv4Header[0].destAddress.str() == '10.0.0.1' -> true
-Ipv4Header[1].destAddress.str() == '10.0.0.1' -> Cannot resolve member 'destAddress' of object nullptr
+Ipv4Header[1].destAddress.str() == '10.0.0.1' -> Object nullptr has no member named 'destAddress'
 UdpHeader.destPort == 42 -> true
-UdpHeader.foo -> Cannot resolve member 'foo' of object (inet::UdpHeader)
+UdpHeader.foo -> Object (inet::UdpHeader) has no member named 'foo'
 UdpHeader[0].destPort == 42 -> true
-UdpHeader[1].destPort == 42 -> Cannot resolve member 'destPort' of object nullptr
+UdpHeader[1].destPort == 42 -> Object nullptr has no member named 'destPort'
 EthernetMacHeader == null -> true
 name == 'P1' && totalLength == 128B && ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42 -> true
