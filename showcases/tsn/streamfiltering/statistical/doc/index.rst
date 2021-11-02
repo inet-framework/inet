@@ -20,7 +20,7 @@ way by comparing the measured datarate to the maximum allowed datarate.
 
 Here is the network:
 
-.. image:: media/Network.png
+.. figure:: media/Network.png
    :align: center
    :width: 100%
 
@@ -54,7 +54,7 @@ Here are the results:
 
    Here are the simulation results:
 
-   .. .. image:: media/results.png
+   .. .. figure:: media/results.png
       :align: center
       :width: 100%
 

@@ -119,7 +119,7 @@ And here are the time domains of the two master clocks:
 
    Here are the simulation results:
 
-   .. .. image:: media/results.png
+   .. .. figure:: media/results.png
       :align: center
       :width: 100%
 

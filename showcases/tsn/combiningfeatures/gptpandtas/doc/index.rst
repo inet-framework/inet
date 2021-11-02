@@ -125,7 +125,7 @@ Here are the results:
 
    Here are the simulation results:
 
-   .. .. image:: media/results.png
+   .. .. figure:: media/results.png
       :align: center
       :width: 100%
 

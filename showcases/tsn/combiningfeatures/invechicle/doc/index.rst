@@ -22,7 +22,7 @@ end devices. There are several data flows between the end device applications.
 
 Here is the network:
 
-.. .. image:: media/Network.png
+.. .. figure:: media/Network.png
    :align: center
    :width: 100%
 
@@ -55,7 +55,7 @@ The following video shows the behavior in Qtenv:
 
 Here are the simulation results:
 
-.. .. image:: media/results.png
+.. .. figure:: media/results.png
    :align: center
    :width: 100%
 

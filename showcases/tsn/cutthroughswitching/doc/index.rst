@@ -38,7 +38,7 @@ start forwarding it before the whole packet is received.
 The example simulation contains two :ned:`TsnDevice` nodes connected by two
 :ned:`TsnSwitch`' nodes (all connections are 1 Gbps):
 
-.. .. image:: media/Network.png
+.. .. figure:: media/Network.png
    :align: center
    :width: 100%
 
@@ -82,18 +82,18 @@ The next video shows the cut-through behavior:
 The following sequence chart excerpt shows a packet sent from ``device1`` to ``device2`` via the switches,
 for store-and-forward and cut-through, respectively (the timeline is linear):
 
-.. .. image:: media/storeandforwardseq2.png
+.. .. figure:: media/storeandforwardseq2.png
    :align: center
    :width: 100%
 
-.. .. image:: media/seqchart2.png
+.. .. figure:: media/seqchart2.png
    :align: center
    :width: 100%
 
 We compared the end-to-end delay of the UDP packets in the case of store-and-forward switching
 vs cut-through switching:
 
-.. .. image:: media/delay.png
+.. .. figure:: media/delay.png
    :align: center
    :width: 100%
 

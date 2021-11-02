@@ -53,7 +53,7 @@ sent packets is verified by the python scripts. The expected result is around 0.
 
    Here are the simulation results:
 
-   .. .. image:: media/results.png
+   .. .. figure:: media/results.png
       :align: center
       :width: 100%
 
