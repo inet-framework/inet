@@ -35,7 +35,7 @@ module GatingPriorityQueue extends CompoundPacketQueueBase
         *.bitrate = default(this.bitrate);
         *.extraLength = default(96b);
     submodules:
-        buffer: <default("PriorityBuffer")> like IPacketBuffer if typename != "" {
+        buffer: <default("")> like IPacketBuffer if typename != "" {
             parameters:
                 @display("p=100,225");
         }

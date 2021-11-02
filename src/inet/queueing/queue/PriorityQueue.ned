@@ -31,7 +31,7 @@ module PriorityQueue extends CompoundPacketQueueBase
     parameters:
         int numQueues;
     submodules:
-        buffer: <default("PriorityBuffer")> like IPacketBuffer if typename != "" {
+        buffer: <default("")> like IPacketBuffer if typename != "" {
             parameters:
                 @display("p=100,225");
         }
