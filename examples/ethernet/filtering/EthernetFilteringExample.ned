@@ -35,7 +35,7 @@ network EthernetFilteringExample
         identifier: StreamIdentifier {
             @display("p=500,100");
         }
-        filter: <default("SimpleIeee8021qciFilter")> like IPacketFilter {
+        filter: <default("SimpleIeee8021qFilter")> like IPacketFilter {
             @display("p=700,100");
         }
         sink: PassivePacketSink {

@@ -35,7 +35,7 @@ module StreamFilterLayer like IProtocolLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        ingress: <default("SimpleIeee8021qciFilter")> like IPacketFilter {
+        ingress: <default("SimpleIeee8021qFilter")> like IPacketFilter {
             @display("p=200,150");
         }
         egress: <default("")> like IPacketFilter {
