@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.networks;
+package inet.networks.base;
 
 import inet.common.packet.recorder.PcapRecorder;
 import inet.networklayer.configurator.contract.IL3NetworkConfigurator;

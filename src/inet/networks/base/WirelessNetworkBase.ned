@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.networks;
+package inet.networks.base;
 
 import inet.environment.contract.IPhysicalEnvironment;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;

@@ -15,13 +15,17 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.networks;
+package inet.networks.base;
 
-import inet.environment.contract.IPhysicalEnvironment;
-import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;
+import inet.networklayer.configurator.contract.INetworkConfigurator;
 
-network Ieee80211NetworkBase extends WirelessNetworkBase
+network WiredNetworkBase extends NetworkBase
 {
     parameters:
-        radioMedium.typename = default("Ieee80211ScalarRadioMedium");
+        bool hasGlobalArp = default(true);
+        *.ipv4.arp.typename = default(hasGlobalArp ? "GlobalArp" : "Arp");
+    submodules:
+        macAddressTableConfigurator: <default(hasGlobalArp ? "MacAddressTableConfigurator" : "")> like INetworkConfigurator if typename != "" {
+            @display("p=100,400;is=s");
+        }
 }
