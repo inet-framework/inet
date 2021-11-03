@@ -57,6 +57,8 @@ void MassMobility::setTargetPosition()
     simtime_t nextChangeInterval = *changeIntervalParameter;
     EV_DEBUG << "interval: " << nextChangeInterval << endl;
     targetPosition = lastPosition + direction * (*speedParameter) * nextChangeInterval.dbl();
+    if (faceForward)
+        lastOrientation = segmentStartOrientation = quaternion;
     nextChange = segmentStartTime + nextChangeInterval;
 }
 
