@@ -48,7 +48,6 @@ void MovingMobilityBase::moveAndUpdate()
     simtime_t now = simTime();
     if (nextChange == now || lastUpdate != now) {
         move();
-        orient();
         lastUpdate = simTime();
         emitMobilityStateChangedSignal();
     }
@@ -61,14 +60,6 @@ Quaternion MovingMobilityBase::getOrientOfVelocity(Coord direction) const
     auto beta = rad(-asin(direction.z));
     auto gamma = rad(0.0);
     return Quaternion(EulerAngles(alpha, beta, gamma));
-}
-
-void MovingMobilityBase::orient()
-{
-    if (faceForward && (lastVelocity != Coord::ZERO)) {
-        // determine orientation based on direction
-        lastOrientation = getOrientOfVelocity(lastVelocity);
-    }
 }
 
 void MovingMobilityBase::handleSelfMessage(cMessage *message)

@@ -41,7 +41,6 @@ class INET_API VehicleMobility : public MovingMobilityBase
     virtual void initialize(int stage) override;
     virtual void setInitialMobilityData() override;
     virtual void move() override;
-    virtual void orient() override;
 
     virtual void readWaypointsFromFile(const char *fileName);
 

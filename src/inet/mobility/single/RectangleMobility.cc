@@ -88,6 +88,10 @@ void RectangleMobility::move()
         lastPosition.y = constraintAreaMax.y - d + corner3;
         lastVelocity = Coord(0, -speed, 0);
     }
+    if (faceForward && (lastVelocity != Coord::ZERO)) {
+        // determine orientation based on direction
+        lastOrientation = getOrientOfVelocity(lastVelocity);
+    }
 }
 
 } // namespace inet

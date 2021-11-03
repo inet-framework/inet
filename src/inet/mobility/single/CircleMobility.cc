@@ -38,7 +38,10 @@ void CircleMobility::initialize(int stage)
 void CircleMobility::setInitialMobilityData()
 {
     move();
-    orient();
+    if (faceForward && (lastVelocity != Coord::ZERO)) {
+        // determine orientation based on direction
+        lastOrientation = getOrientOfVelocity(lastVelocity);
+    }
 }
 
 void CircleMobility::move()
@@ -57,6 +60,10 @@ void CircleMobility::move()
     Coord dummyCoord;
     rad a;
     handleIfOutside(REFLECT, dummyCoord, lastVelocity, a, a, lastAngularVelocity);
+    if (faceForward && (lastVelocity != Coord::ZERO)) {
+        // determine orientation based on direction
+        lastOrientation = getOrientOfVelocity(lastVelocity);
+    }
 }
 
 } // namespace inet

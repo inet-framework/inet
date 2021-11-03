@@ -77,9 +77,6 @@ class INET_API MovingMobilityBase : public MobilityBase
      *  */
     virtual void changeMobilityData() {}
 
-    virtual void orient();
-
-
   public:
     virtual const Coord& getCurrentPosition() override;
     virtual const Coord& getCurrentVelocity() override;

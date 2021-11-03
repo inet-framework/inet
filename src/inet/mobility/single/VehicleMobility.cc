@@ -106,10 +106,7 @@ void VehicleMobility::move()
 
     lastVelocity = tempPosition - lastPosition;
     lastPosition = tempPosition;
-}
 
-void VehicleMobility::orient()
-{
     if (ground) {
         Coord groundNormal = ground->computeGroundNormal(lastPosition);
 
@@ -140,7 +137,10 @@ void VehicleMobility::orient()
         lastOrientation = quat;
     }
     else
-        MovingMobilityBase::orient();
+        if (faceForward && (lastVelocity != Coord::ZERO)) {
+            // determine orientation based on direction
+            lastOrientation = getOrientOfVelocity(lastVelocity);
+        }
 }
 
 } // namespace inet

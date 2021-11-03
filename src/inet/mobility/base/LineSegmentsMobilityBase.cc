@@ -59,6 +59,10 @@ void LineSegmentsMobilityBase::move()
         lastPosition = segmentStartPosition + segmentStartVelocity * (now - segmentStartTime).dbl();
         processBorderPolicy();
     }
+    if (faceForward && (lastVelocity != Coord::ZERO)) {
+        // determine orientation based on direction
+        lastOrientation = getOrientOfVelocity(lastVelocity);
+    }
 }
 
 } // namespace inet

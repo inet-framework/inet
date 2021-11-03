@@ -38,8 +38,9 @@ void MassMobility::initialize(int stage)
     }
 }
 
-void MassMobility::orient()
+void MassMobility::move()
 {
+    LineSegmentsMobilityBase::move();
     if (faceForward)
         lastOrientation = quaternion;
 }
@@ -67,7 +68,8 @@ void MassMobility::processBorderPolicy()
 
     if (simTime() == nextChange) {
         handleIfOutside(borderPolicy, targetPosition, lastVelocity, dummyAngle, dummyAngle, quaternion);
-        orient();
+        if (faceForward)
+            lastOrientation = quaternion;
     }
     else {
         handleIfOutside(borderPolicy, dummyCoord, lastVelocity, dummyAngle, dummyAngle, faceForward ? lastOrientation : dummyQuaternion);

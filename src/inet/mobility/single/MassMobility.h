@@ -40,7 +40,7 @@ class INET_API MassMobility : public LineSegmentsMobilityBase
     virtual void initialize(int stage) override;
 
     virtual void processBorderPolicy() override;
-    void orient() override;
+    void move() override;
 
     /** @brief Calculate a new target position to move to. */
     virtual void setTargetPosition() override;

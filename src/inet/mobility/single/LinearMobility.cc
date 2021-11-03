@@ -50,6 +50,11 @@ void LinearMobility::move()
     // do something if we reach the wall
     Coord dummyCoord;
     handleIfOutside(REFLECT, dummyCoord, lastVelocity);
+
+    if (faceForward && (lastVelocity != Coord::ZERO)) {
+        // determine orientation based on direction
+        lastOrientation = getOrientOfVelocity(lastVelocity);
+    }
 }
 
 } // namespace inet
