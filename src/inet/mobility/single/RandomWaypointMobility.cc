@@ -48,7 +48,7 @@ void RandomWaypointMobility::setTargetPosition()
         double distance = segmentStartPosition.distance(targetPosition);
         simtime_t travelTime = distance / speed;
         segmentStartVelocity = (targetPosition - segmentStartPosition).normalize() * speed;
-        segmentStartOrientation = faceForward ? getOrientOfVelocity(segmentStartVelocity)
+        segmentStartOrientation = faceForward ? getOrientOfVelocity(segmentStartVelocity) : lastOrientation;
 
         nextChange = simTime() + travelTime;
         nextMoveIsWait = hasWaitTime;
