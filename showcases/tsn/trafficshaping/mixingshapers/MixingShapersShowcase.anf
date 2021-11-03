@@ -5,7 +5,7 @@
         <input pattern="/inet/showcases/tsn/trafficshaping/mixingshapers/results/*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="144" name="Source application traffic" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="144" name="Client application traffic" template="linechart_native" type="LINE">
             <script>
                 <![CDATA[import re
 import math
@@ -559,7 +559,7 @@ utils.export_data_if_needed(df, props)
             <property name="Plot.Caching" value="true"/>
             <property name="yaxis_title" value="data rate [Mbps]"/>
             <property name="Legend.Border" value="false"/>
-            <property name="title" value="Source application traffic"/>
+            <property name="title" value="Client application traffic"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
             <property name="vector_operations" value="apply: divide_by(1000000)"/>
             <property name="cycle_seed" value="0"/>
@@ -576,10 +576,10 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="SourceApplicationTraffic"/>
+            <property name="image_export_filename" value="ClientApplicationTraffic"/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
-            <property name="filter" value="name =~ dataRate:vector AND module =~ &quot;*.source.app[*].source&quot;"/>
+            <property name="filter" value="module =~ &quot;*.client.app[*].source&quot; AND name =~ dataRate:vector"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
@@ -3535,7 +3535,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value="0.002"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="146" name="Destination application traffic" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="146" name="Server application traffic" template="linechart_native" type="LINE">
             <script>
                 <![CDATA[import re
 import math
@@ -4089,7 +4089,7 @@ utils.export_data_if_needed(df, props)
             <property name="Plot.Caching" value="true"/>
             <property name="yaxis_title" value="data rate [Mbps]"/>
             <property name="Legend.Border" value="false"/>
-            <property name="title" value="Destination application traffic"/>
+            <property name="title" value="Server application traffic"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
             <property name="vector_operations" value="apply: divide_by(1000000)"/>
             <property name="cycle_seed" value="0"/>
@@ -4106,10 +4106,10 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="DestinationApplicationTraffic"/>
+            <property name="image_export_filename" value="ServerApplicationTraffic"/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
-            <property name="filter" value="name =~ dataRate:vector AND module =~ &quot;*.destination.app[*].sink&quot;"/>
+            <property name="filter" value="module =~ &quot;*.server.app[*].sink&quot; AND name =~ dataRate:vector"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>

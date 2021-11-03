@@ -12,16 +12,16 @@ In this example we demonstrate how to use the time-aware traffic shaper.
 The Model
 ---------
 
-There are three network nodes in the network. The source and destination network
+There are three network nodes in the network. The client and the server network
 nodes are :ned:`TsnDevice` modules, and the switch is a :ned:`TsnSwitch` module.
 
 .. figure:: media/Network.png
    :align: center
 
 There are four applications in the network forming two independent data streams
-between the source and the destination. The two traffic classes are called high
+between the client and the server. The two traffic classes are called high
 priority and best effort. The data rate of both streams is ~48 Mbps at the
-application level in the source. Both data streams pass through the switch and
+application level in the client. Both data streams pass through the switch and
 the traffic shaping takes place in the outgoing network interface.
 
 The traffic shaper limits the data rate of the high priority stream to 40 Mbps
@@ -35,10 +35,10 @@ Results
 -------
 
 The first diagram shows the data rate of the application level outgoing traffic
-in the source. The data rate varies randomly over time for both traffic classes
+in the client. The data rate varies randomly over time for both traffic classes
 but the averages are the same.
 
-.. figure:: media/SourceApplicationTraffic.png
+.. figure:: media/ClientApplicationTraffic.png
    :align: center
 
 The next diagram shows the data rate of the incoming traffic of the traffic
@@ -77,11 +77,11 @@ outgoing network interface.
    :align: center
 
 The last diagram shows the data rate of the application level incoming traffic
-in the destination. The data rate is somewhat lower than the data rate of the
+in the server. The data rate is somewhat lower than the data rate of the
 outgoing traffic of the corresponding traffic shaper. The reason is that they
 are measured at different protocol layers.
 
-.. figure:: media/DestinationApplicationTraffic.png
+.. figure:: media/ServerApplicationTraffic.png
    :align: center
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`TimeAwareShaperShowcase.ned <../TimeAwareShaperShowcase.ned>`
