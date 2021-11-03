@@ -15,7 +15,7 @@
 
 package inet.showcases.tsn.framepreemption;
 
-import inet.networks.WiredNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.StandardHost;
 

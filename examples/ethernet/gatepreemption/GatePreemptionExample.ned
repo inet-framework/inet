@@ -15,7 +15,7 @@
 package inet.examples.ethernet.gatepreemption;
 
 import inet.linklayer.ethernet.modular.EthernetMacLayer;
-import inet.networks.WiredNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.inet.StandardHost;
 import inet.protocolelement.common.PreemptableStreamer;

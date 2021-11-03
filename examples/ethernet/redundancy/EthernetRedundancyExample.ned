@@ -18,7 +18,7 @@ package inet.examples.ethernet.redundancy;
 import inet.linklayer.configurator.StreamRedundancyConfigurator;
 import inet.linklayer.configurator.TsnConfigurator;
 import inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfigurator;
-import inet.networks.WiredNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;

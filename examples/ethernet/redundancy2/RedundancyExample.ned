@@ -17,7 +17,7 @@ package inet.examples.ethernet.redundancy2;
 
 import inet.linklayer.configurator.StreamRedundancyConfigurator;
 import inet.linklayer.configurator.TsnConfigurator;
-import inet.networks.WiredNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.Eth1G;
 import inet.node.ethernet.EthernetSwitch;
 

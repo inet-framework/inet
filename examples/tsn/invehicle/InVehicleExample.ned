@@ -15,7 +15,7 @@
 
 package inet.examples.tsn.invehicle;
 
-import inet.networks.TsnNetworkBase;
+import inet.networks.base.TsnNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.tsn.TsnClock;
 import inet.node.tsn.TsnDevice;

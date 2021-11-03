@@ -15,7 +15,7 @@
 
 package inet.examples.tsn.framereplication;
 
-import inet.networks.TsnNetworkBase;
+import inet.networks.base.TsnNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnDevice;
 import inet.node.tsn.TsnSwitch;

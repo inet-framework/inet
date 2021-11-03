@@ -15,7 +15,7 @@
 
 package inet.showcases.measurement.throughput;
 
-import inet.networks.WiredNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.inet.StandardHost;
 

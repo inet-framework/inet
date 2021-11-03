@@ -15,7 +15,7 @@
 
 package inet.showcases.measurement.utilization;
 
-import inet.networks.WiredNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.inet.StandardHost;
 

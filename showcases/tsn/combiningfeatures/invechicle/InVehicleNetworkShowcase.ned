@@ -15,7 +15,7 @@
 
 package inet.showcases.tsn.combiningfeatures.invechicle;
 
-import inet.networks.TsnNetworkBase;
+import inet.networks.base.TsnNetworkBase;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.node.ethernet.Eth100M;
 

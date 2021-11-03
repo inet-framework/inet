@@ -14,7 +14,7 @@
 
 package inet.examples.ethernet.clocksynchronization;
 
-import inet.networks.WiredNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.Eth1G;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;

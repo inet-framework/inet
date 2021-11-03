@@ -15,7 +15,7 @@
 package inet.showcases.tsn.combiningfeatures.gptpandtas;
 
 import inet.common.scenario.ScenarioManager;
-import inet.networks.TsnNetworkBase;
+import inet.networks.base.TsnNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnClock;
 import inet.node.tsn.TsnDevice;

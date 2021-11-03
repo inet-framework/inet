@@ -15,7 +15,7 @@
 
 package inet.showcases.measurement.flow;
 
-import inet.networks.WiredNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EthernetSwitch;

@@ -15,7 +15,7 @@
 
 package inet.showcases.measurement.residencetime;
 
-import inet.networks.WiredNetworkBase;
+import inet.networks.base.WiredNetworkBase;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth1G;
 import inet.node.ethernet.EthernetSwitch;

@@ -15,7 +15,7 @@
 
 package inet.showcases.tsn.framereplication.multicastfailureprotection;
 
-import inet.networks.TsnNetworkBase;
+import inet.networks.base.TsnNetworkBase;
 import inet.node.ethernet.EthernetLink;
 import inet.node.tsn.TsnSwitch;
 
