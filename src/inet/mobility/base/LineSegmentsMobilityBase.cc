@@ -38,7 +38,8 @@ void LineSegmentsMobilityBase::doSetTargetPosition()
 void LineSegmentsMobilityBase::processBorderPolicy()
 {
     Coord dummyCoord;
-    handleIfOutside(borderPolicy, dummyCoord, lastVelocity);
+    rad dummyAngle;
+    handleIfOutside(borderPolicy, dummyCoord, lastVelocity, dummyAngle, dummyAngle, lastOrientation);
 }
 
 void LineSegmentsMobilityBase::move()
@@ -51,6 +52,7 @@ void LineSegmentsMobilityBase::move()
         processBorderPolicy();
         targetPosition = lastPosition;
         segmentStartVelocity = lastVelocity;
+        segmentStartOrientation = lastOrientation;
         EV_INFO << "reached current target position = " << lastPosition << endl;
         doSetTargetPosition();
     }
@@ -58,10 +60,6 @@ void LineSegmentsMobilityBase::move()
         ASSERT(nextChange == -1 || now < nextChange);
         lastPosition = segmentStartPosition + segmentStartVelocity * (now - segmentStartTime).dbl();
         processBorderPolicy();
-    }
-    if (faceForward && (lastVelocity != Coord::ZERO)) {
-        // determine orientation based on direction
-        lastOrientation = getOrientOfVelocity(lastVelocity);
     }
 }
 
