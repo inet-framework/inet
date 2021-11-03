@@ -63,10 +63,7 @@ void ChiangMobility::setTargetPosition()
     nextChange = simTime() + stateTransitionUpdateInterval;
     Coord direction(xState - 1, yState - 1);
     double length = direction.length();
-    if (length)
-        lastVelocity = direction / length * speed;
-    else
-        lastVelocity = Coord::ZERO;
+    lastVelocity = segmentStartVelocity = length ? direction / length * speed : Coord::ZERO;
     targetPosition = lastPosition - lastVelocity * stateTransitionUpdateInterval;
 }
 
