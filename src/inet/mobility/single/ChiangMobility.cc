@@ -23,8 +23,6 @@ ChiangMobility::ChiangMobility()
 {
     speed = 0;
     stateTransitionUpdateInterval = 0;
-    xState = 0;
-    yState = 0;
     borderPolicy = REFLECT;
 }
 
@@ -37,8 +35,7 @@ void ChiangMobility::initialize(int stage)
         stateTransitionUpdateInterval = par("stateTransitionUpdateInterval");
         speed = par("speed");
         stationary = (speed == 0);
-        xState = 1;
-        yState = 1;
+        lastVelocity = Coord::ZERO;
     }
 }
 
@@ -58,6 +55,8 @@ int ChiangMobility::getNextStateIndex(int currentState)
 
 void ChiangMobility::setTargetPosition()
 {
+    int xState = lastVelocity.x < 0.0 ? 2 : lastVelocity.x > 0.0 ? 0 : 1;
+    int yState = lastVelocity.y < 0.0 ? 2 : lastVelocity.y > 0.0 ? 0 : 1;
     xState = getNextStateIndex(xState);
     yState = getNextStateIndex(yState);
     nextChange = simTime() + stateTransitionUpdateInterval;
