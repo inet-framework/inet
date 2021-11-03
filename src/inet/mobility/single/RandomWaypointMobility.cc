@@ -35,14 +35,21 @@ void RandomWaypointMobility::setTargetPosition()
 {
     if (nextMoveIsWait) {
         simtime_t waitTime = waitTimeParameter->doubleValue();
+        targetPosition = segmentStartPosition = lastPosition;
+        segmentStartOrientation = lastOrientation;
+        segmentStartVelocity = Coord::ZERO;
         nextChange = simTime() + waitTime;
         nextMoveIsWait = false;
     }
     else {
+        segmentStartPosition = lastPosition;
         targetPosition = getRandomPosition();
         double speed = speedParameter->doubleValue();
-        double distance = lastPosition.distance(targetPosition);
+        double distance = segmentStartPosition.distance(targetPosition);
         simtime_t travelTime = distance / speed;
+        segmentStartVelocity = (targetPosition - segmentStartPosition).normalize() * speed;
+        segmentStartOrientation = faceForward ? getOrientOfVelocity(segmentStartVelocity)
+
         nextChange = simTime() + travelTime;
         nextMoveIsWait = hasWaitTime;
     }
