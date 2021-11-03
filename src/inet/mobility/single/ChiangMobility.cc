@@ -65,6 +65,8 @@ void ChiangMobility::setTargetPosition()
     double length = direction.length();
     lastVelocity = segmentStartVelocity = length ? direction / length * speed : Coord::ZERO;
     targetPosition = lastPosition - lastVelocity * stateTransitionUpdateInterval;
+    if (faceForward && length)
+        lastOrientation = segmentStartOrientation = getOrientOfVelocity(direction);
 }
 
 } // namespace inet
