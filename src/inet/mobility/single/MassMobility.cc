@@ -38,13 +38,6 @@ void MassMobility::initialize(int stage)
     }
 }
 
-void MassMobility::move()
-{
-    LineSegmentsMobilityBase::move();
-    if (faceForward)
-        lastOrientation = quaternion;
-}
-
 void MassMobility::setTargetPosition()
 {
     rad angleDelta = deg(angleDeltaParameter->doubleValue());
@@ -66,15 +59,15 @@ void MassMobility::processBorderPolicy()
 {
     Coord dummyCoord;
     rad dummyAngle;
-    Quaternion dummyQuaternion;
+    Quaternion dummyQuaternion(Quaternion::NIL);
 
     if (simTime() == nextChange) {
-        handleIfOutside(borderPolicy, targetPosition, lastVelocity, dummyAngle, dummyAngle, quaternion);
+        handleIfOutside(borderPolicy, dummyCoord, lastVelocity, dummyAngle, dummyAngle, quaternion, faceForward ? lastOrientation : dummyQuaternion);
         if (faceForward)
             lastOrientation = quaternion;
     }
     else {
-        handleIfOutside(borderPolicy, dummyCoord, lastVelocity, dummyAngle, dummyAngle, faceForward ? lastOrientation : dummyQuaternion);
+        handleIfOutside(borderPolicy, dummyCoord, lastVelocity, dummyAngle, dummyAngle, faceForward ? lastOrientation : dummyQuaternion, dummyQuaternion);
     }
 }
 
