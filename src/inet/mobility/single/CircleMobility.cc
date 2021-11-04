@@ -59,7 +59,8 @@ void CircleMobility::move()
     // do something if we reach the wall
     Coord dummyCoord;
     rad a;
-    handleIfOutside(REFLECT, dummyCoord, lastVelocity, a, a, lastAngularVelocity);
+    Quaternion dummyQuaternion;
+    handleIfOutside(REFLECT, dummyCoord, lastVelocity, a, a, lastAngularVelocity, dummyQuaternion);
     if (faceForward && (lastVelocity != Coord::ZERO)) {
         // determine orientation based on direction
         lastOrientation = getOrientOfVelocity(lastVelocity);

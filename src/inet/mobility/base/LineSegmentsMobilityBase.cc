@@ -39,7 +39,8 @@ void LineSegmentsMobilityBase::processBorderPolicy()
 {
     Coord dummyCoord;
     rad dummyAngle;
-    handleIfOutside(borderPolicy, dummyCoord, lastVelocity, dummyAngle, dummyAngle, lastOrientation);
+    Quaternion dummyQuaternion;
+    handleIfOutside(borderPolicy, dummyCoord, lastVelocity, dummyAngle, dummyAngle, lastOrientation, dummyQuaternion);
 }
 
 void LineSegmentsMobilityBase::move()
