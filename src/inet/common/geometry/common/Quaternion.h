@@ -17,8 +17,8 @@ namespace inet {
 class INET_API Quaternion
 {
   public:
-    static Quaternion IDENTITY;
-    static Quaternion NIL;
+    static const Quaternion IDENTITY;
+    static const Quaternion NIL;
 
   public:
     double s = 1; //!< the real component
