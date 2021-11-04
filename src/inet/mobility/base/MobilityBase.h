@@ -127,7 +127,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
      * Decision is made on pos, but the variables passed as args will
      * also be updated. (Pass dummies you don't have some of them).
      */
-    virtual void reflectIfOutside(Coord& targetPosition, Coord& velocity, rad& angle, rad& elevation, Quaternion& quaternion);
+    virtual void reflectIfOutside(Coord& targetPosition, Coord& velocity, rad& angle, rad& elevation, Quaternion& quaternion, Quaternion& quaternion2);
 
     /** @brief Utility function to wrap the node to the opposite edge
      * (torus) if it goes outside the constraint area.
@@ -148,7 +148,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity);
     virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading);
     virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading, rad& elevation);
-    virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading, rad& elevation, Quaternion& quaternion);
+    virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading, rad& elevation, Quaternion& quaternion, Quaternion& quaternion2);
 
   public:
     virtual double getMaxSpeed() const override { return NaN; }

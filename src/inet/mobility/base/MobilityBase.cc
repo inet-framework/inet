@@ -271,7 +271,7 @@ static int reflect(double min, double max, double& coordinate, double& speed)
     return sign;
 }
 
-void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& velocity, rad& heading, rad& elevation, Quaternion& quaternion)
+void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& velocity, rad& heading, rad& elevation, Quaternion& quaternion, Quaternion& quaternion2)
 {
     int sign;
     double dummy = NaN;
@@ -285,6 +285,12 @@ void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& velocity, rad&
             quaternion.v.x *= -1;
             quaternion.v.y *= -1;
         }
+        if (sign == -1 && &quaternion2 != &Quaternion::NIL) {
+            std::swap(quaternion2.s, quaternion2.v.z);
+            std::swap(quaternion2.v.x, quaternion2.v.y);
+            quaternion2.v.x *= -1;
+            quaternion2.v.y *= -1;
+        }
     }
     if (lastPosition.y < constraintAreaMin.y || constraintAreaMax.y < lastPosition.y) {
         sign = reflect(constraintAreaMin.y, constraintAreaMax.y, lastPosition.y, velocity.y);
@@ -294,6 +300,10 @@ void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& velocity, rad&
             quaternion.v.x *= -1;
             quaternion.v.z *= -1;
         }
+        if (sign == -1 && &quaternion2 != &Quaternion::NIL) {
+            quaternion2.v.x *= -1;
+            quaternion2.v.z *= -1;
+        }
     }
     if (lastPosition.z < constraintAreaMin.z || constraintAreaMax.z < lastPosition.z) {
         sign = reflect(constraintAreaMin.z, constraintAreaMax.z, lastPosition.z, velocity.z);
@@ -302,6 +312,10 @@ void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& velocity, rad&
         if (sign == -1 && &quaternion != &Quaternion::NIL) {
             quaternion.v.x *= -1;
             quaternion.v.y *= -1;
+        }
+        if (sign == -1 && &quaternion2 != &Quaternion::NIL) {
+            quaternion2.v.x *= -1;
+            quaternion2.v.y *= -1;
         }
     }
 }
@@ -340,25 +354,28 @@ void MobilityBase::raiseErrorIfOutside()
 void MobilityBase::handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity)
 {
     rad a;
-    handleIfOutside(policy, targetPosition, velocity, a, a, Quaternion::NIL);
+    Quaternion q(Quaternion::NIL);
+    handleIfOutside(policy, targetPosition, velocity, a, a, q, q);
 }
 
 void MobilityBase::handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading)
 {
     rad dummy;
-    handleIfOutside(policy, targetPosition, velocity, heading, dummy, Quaternion::NIL);
+    Quaternion q(Quaternion::NIL);
+    handleIfOutside(policy, targetPosition, velocity, heading, dummy, q, q);
 }
 
 void MobilityBase::handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading, rad& elevation)
 {
-    handleIfOutside(policy, targetPosition, velocity, heading, elevation, Quaternion::NIL);
+    Quaternion q(Quaternion::NIL);
+    handleIfOutside(policy, targetPosition, velocity, heading, elevation, q, q);
 }
 
-void MobilityBase::handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading, rad& elevation, Quaternion& quaternion)
+void MobilityBase::handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading, rad& elevation, Quaternion& quaternion, Quaternion& quaternion2)
 {
     switch (policy) {
         case REFLECT:
-            reflectIfOutside(targetPosition, velocity, heading, elevation, quaternion);
+            reflectIfOutside(targetPosition, velocity, heading, elevation, quaternion, quaternion2);
             break;
 
         case WRAP:
