@@ -37,6 +37,10 @@ void LinearMobility::initialize(int stage)
     }
     else if (stage == INITSTAGE_SINGLE_MOBILITY) {
         startPosition = lastPosition;
+        if (faceForward && (lastVelocity != Coord::ZERO)) {
+            // determine orientation based on direction
+            lastOrientation = getOrientOfVelocity(lastVelocity);
+        }
     }
 }
 
