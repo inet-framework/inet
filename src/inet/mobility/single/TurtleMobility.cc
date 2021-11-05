@@ -70,10 +70,13 @@ void TurtleMobility::setTargetPosition()
 void TurtleMobility::processBorderPolicy()
 {
     Coord dummyCoord;
+    rad dummyRad;
+    Quaternion dummyQuaternion;
+
     if (simTime() == nextChange)
-        handleIfOutside(borderPolicy, dummyCoord, dummyCoord, heading, elevation);
+        handleIfOutside(borderPolicy, dummyCoord, lastVelocity, heading, elevation, faceForward ? lastOrientation : dummyQuaternion, dummyQuaternion);
     else
-        handleIfOutside(borderPolicy, dummyCoord, dummyCoord);
+        handleIfOutside(borderPolicy, dummyCoord, lastVelocity, dummyRad, dummyRad, faceForward ? lastOrientation : dummyQuaternion, dummyQuaternion);
 }
 
 /**
