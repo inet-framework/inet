@@ -31,6 +31,7 @@ import inet.queueing.contract.IPassivePacketSink;
 module TcpServerConnection like IApp
 {
     parameters:
+        @application;
         @display("i=block/cogwheel");
     gates:
         input socketIn;

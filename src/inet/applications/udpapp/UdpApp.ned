@@ -31,6 +31,7 @@ module UdpApp like IApp
     parameters:
         string interfaceTableModule;
         *.interfaceTableModule = default(absPath(".interfaceTable"));
+        @application;
         @display("i=block/app");
     gates:
         input socketIn;

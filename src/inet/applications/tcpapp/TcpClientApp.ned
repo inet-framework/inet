@@ -31,6 +31,7 @@ import inet.queueing.contract.IPassivePacketSink;
 module TcpClientApp like IApp
 {
     parameters:
+        @application;
         @display("i=block/app");
     gates:
         input socketIn;

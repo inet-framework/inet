@@ -31,6 +31,7 @@ module EthernetApp like IApp
     parameters:
         string interfaceTableModule; // relative module path of the interface table
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
+        @application;
         @display("i=block/app");
     gates:
         input socketIn;

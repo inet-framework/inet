@@ -26,6 +26,7 @@ import inet.queueing.contract.IPassivePacketSink;
 module SinkApp like IApp
 {
     parameters:
+        @application;
         @display("i=block/app");
     gates:
         input socketIn;
