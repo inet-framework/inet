@@ -12,23 +12,40 @@ In this example we demonstrate how to use the credit-based traffic shaper.
 The Model
 ---------
 
-There are three network nodes in the network. The client and the server network
-nodes are :ned:`TsnDevice` modules, and the switch is a :ned:`TsnSwitch` module.
+There are three network nodes in the network. The client and the server are
+:ned:`TsnDevice` modules, and the switch is a :ned:`TsnSwitch` module. The
+links between them use 100 Mbps :ned:`EthernetLink` channels.
 
 .. figure:: media/Network.png
    :align: center
 
-There are four applications in the network forming two independent data streams
-between the client and the server. The two traffic classes are called high
-priority and best effort. The data rate of both streams is ~48 Mbps at the
-application level in the client. Both data streams pass through the switch and
-the traffic shaping takes place in the outgoing network interface.
-
-The traffic shaper limits the data rate of the high priority stream to 40 Mbps
-and the data rate of the best effort stream to 20 Mbps. The excess traffic is
-stored in the MAC layer subqueue of the corresponding traffic class.
+There are four applications in the network creating two independent data streams
+between the client and the server. The data rate of both streams are ~48 Mbps at
+the application level in the client.
 
 .. literalinclude:: ../omnetpp.ini
+   :start-at: client applications
+   :end-before: outgoing streams
+   :language: ini
+
+The two streams have two different traffic classes: best effort and video. The
+bridging layer identifies the outgoing packets by their UDP destination port.
+The client encodes and the switch decodes the streams using the IEEE 802.1Q PCP
+field.
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: outgoing streams
+   :end-before: egress traffic shaping
+   :language: ini
+
+The traffic shaping takes place in the outgoing network interface of the switch
+where both streams pass through. The traffic shaper limits the data rate of the
+best effort stream to 40 Mbps and the data rate of the video stream to 20 Mbps.
+The excess traffic is stored in the MAC layer subqueues of the corresponding
+traffic class.
+
+.. literalinclude:: ../omnetpp.ini
+   :start-at: egress traffic shaping
    :language: ini
 
 Results
@@ -67,17 +84,18 @@ the data rate of the outgoing traffic, and packets are not dropped.
 .. figure:: media/TrafficShaperQueueLengths.png
    :align: center
 
-The next diagram shows the open and closed states of both traffic classes and
-the transmitting state of the outgoing network interface.
+The next diagram shows the relationships between the number of credits, the gate
+state of the credit based transmission selection algorithm, and the transmitting
+state of the outgoing network interface for the best effort traffic class.
 
-.. figure:: media/TrafficClass0.png
+.. figure:: media/BestEffortTrafficClass.png
    :align: center
 
-The next diagram shows the relationships (for the best effort traffic class)
-between the number of credits, the gate state of the credit based transmission
-selection algorithm, and the transmitting state of the outgoing network interface.
+The next diagram shows the relationships between the number of credits, the gate
+state of the credit based transmission selection algorithm, and the transmitting
+state of the outgoing network interface for the video traffic class.
 
-.. figure:: media/TrafficClass1.png
+.. figure:: media/VideoTrafficClass.png
    :align: center
 
 The last diagram shows the data rate of the application level incoming traffic
@@ -88,7 +106,7 @@ are measured at different protocol layers.
 .. figure:: media/ServerApplicationTraffic.png
    :align: center
 
-Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`CreditBasedShaperShowcase.ned <../CreditBasedShaperShowcase.ned>`
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`
 
 Discussion
 ----------

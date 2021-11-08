@@ -584,7 +584,7 @@ utils.export_data_if_needed(df, props)
             <property name="markersize" value="5"/>
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
-            <property name="legend_show" value="true"/>
+            <property name="legend_show" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
@@ -1170,7 +1170,7 @@ utils.export_data_if_needed(df, props)
             <property name="markersize" value="5"/>
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
-            <property name="legend_show" value="true"/>
+            <property name="legend_show" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>

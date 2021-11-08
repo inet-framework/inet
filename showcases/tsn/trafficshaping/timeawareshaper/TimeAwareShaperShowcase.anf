@@ -5,7 +5,7 @@
         <input pattern="/inet/showcases/tsn/trafficshaping/timeawareshaper/results/*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="292" name="Client application traffic" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="330" name="Client application traffic" template="linechart_native" type="LINE">
             <script>
                 <![CDATA[import math
 import re
@@ -33,7 +33,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df['legend'] = df['module'].map(lambda module: re.sub(".*(app\\[.*\\]).*", "\\1", module))
+df['legend'] = df['module'].map(lambda module: re.sub(".*(app\\[1\\]).*", "video", re.sub(".*(app\\[0\\]).*", "best effort", module)))
 
 # plot
 utils.plot_vectors(df, props)
@@ -593,7 +593,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="294" name="Traffic shaper incoming traffic" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="331" name="Traffic shaper incoming traffic" template="linechart_native" type="LINE">
             <script>
                 <![CDATA[import re
 import math
@@ -621,8 +621,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-
-df['legend'] = df['module'].map(lambda module: re.sub(".*(queue\\[.*\\]).*", "\\1", module))
+df['legend'] = df['module'].map(lambda module: re.sub(".*(queue\\[1\\]).*", "video", re.sub(".*(queue\\[0\\]).*", "best effort", module)))
 
 # plot
 utils.plot_vectors(df, props)
@@ -1182,7 +1181,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="295" name="Traffic shaper outgoing traffic" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="332" name="Traffic shaper outgoing traffic" template="linechart_native" type="LINE">
             <script>
                 <![CDATA[import re
 import math
@@ -1210,8 +1209,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-
-df['legend'] = df['module'].map(lambda module: re.sub(".*(queue\\[.*\\]).*", "\\1", module))
+df['legend'] = df['module'].map(lambda module: re.sub(".*(queue\\[1\\]).*", "video", re.sub(".*(queue\\[0\\]).*", "best effort", module)))
 
 # plot
 utils.plot_vectors(df, props)
@@ -1771,7 +1769,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="296" name="Traffic shaper queue lengths" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="333" name="Traffic shaper queue lengths" template="linechart_native" type="LINE">
             <script>
                 <![CDATA[import re
 import math
@@ -1799,7 +1797,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df['legend'] = df['module'].map(lambda module: re.sub(".*(queue\\[.*\\]).*", "\\1", module))
+df['legend'] = df['module'].map(lambda module: re.sub(".*(queue\\[1\\]).*", "video", re.sub(".*(queue\\[0\\]).*", "best effort", module)))
 
 # plot
 utils.plot_vectors(df, props)
@@ -2359,7 +2357,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="297" name="Gate states and transmitting state" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="297" name="Traffic classes" template="linechart_native" type="LINE">
             <script>
                 <![CDATA[import re
 import math
@@ -2387,7 +2385,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df['legend'] = df['module'].map(lambda module: re.sub(".*eth\[.*?\]\.(.*)", "\\1", module))
+df['legend'] = df['module'].map(lambda module: re.sub(".*(transmissionGate\\[1\\]).*", "video", re.sub(".*(transmissionGate\\[0\\]).*", "best effort", module)))
 
 # plot
 utils.plot_vectors(df, props)
@@ -2913,7 +2911,7 @@ utils.export_data_if_needed(df, props)
             <property name="Plot.Caching" value="true"/>
             <property name="yaxis_title" value="gate states and transmitting state [0, 1]"/>
             <property name="Legend.Border" value="false"/>
-            <property name="title" value="Gate states and transmitting state"/>
+            <property name="title" value="Traffic classes"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
             <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
@@ -2947,7 +2945,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value="0.02"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="293" name="Server application traffic" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="334" name="Server application traffic" template="linechart_native" type="LINE">
             <script>
                 <![CDATA[import re
 import math
@@ -2975,8 +2973,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-
-df['legend'] = df['module'].map(lambda module: re.sub(".*(app\\[.*\\]).*", "\\1", module))
+df['legend'] = df['module'].map(lambda module: re.sub(".*(app\\[1\\]).*", "video", re.sub(".*(app\\[0\\]).*", "best effort", module)))
 
 # plot
 utils.plot_vectors(df, props)

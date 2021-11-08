@@ -5,11 +5,11 @@
         <input pattern="/inet/showcases/tsn/trafficshaping/mixingshapers/results/*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="144" name="Client application traffic" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="357" name="Client application traffic" template="linechart_native" type="LINE">
             <script>
-                <![CDATA[import re
-import math
-from omnetpp.scave import results, chart, utils, ideplot
+                <![CDATA[import math
+import re
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -33,7 +33,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df['legend'] = df['module'].map(lambda module: re.sub(".*(app\\[.*\\]).*", "\\1", module))
+df['legend'] = df['module'].map(lambda module: re.sub(".*(app\\[1\\]).*", "video", re.sub(".*(app\\[0\\]).*", "best effort", module)))
 
 # plot
 utils.plot_vectors(df, props)
@@ -593,7 +593,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="158" name="Traffic shaper incoming traffic" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="362" name="Traffic shaper incoming traffic" template="linechart_native" type="LINE">
             <script>
                 <![CDATA[import re
 import math
@@ -621,7 +621,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df['legend'] = df['module'].map(lambda module: re.sub(".*(queue\\[.*\\]).*", "\\1", module))
+df['legend'] = df['module'].map(lambda module: re.sub(".*(queue\\[1\\]).*", "video", re.sub(".*(queue\\[0\\]).*", "best effort", module)))
 
 # plot
 utils.plot_vectors(df, props)
@@ -1181,11 +1181,11 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="143" name="Traffic shaper outgoing traffic" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="363" name="Traffic shaper outgoing traffic" template="linechart_native" type="LINE">
             <script>
                 <![CDATA[import re
 import math
-from omnetpp.scave import results, chart, utils, ideplot
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -1209,7 +1209,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df['legend'] = df['module'].map(lambda module: re.sub(".*(queue\\[.*\\]).*", "\\1", module))
+df['legend'] = df['module'].map(lambda module: re.sub(".*(queue\\[1\\]).*", "video", re.sub(".*(queue\\[0\\]).*", "best effort", module)))
 
 # plot
 utils.plot_vectors(df, props)
@@ -1769,7 +1769,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="155" name="Traffic shaper queue lengths" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="364" name="Traffic shaper queue lengths" template="linechart_native" type="LINE">
             <script>
                 <![CDATA[import re
 import math
@@ -1797,7 +1797,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df['legend'] = df['module'].map(lambda module: re.sub(".*(queue\\[.*\\]).*", "\\1", module))
+df['legend'] = df['module'].map(lambda module: re.sub(".*(queue\\[1\\]).*", "video", re.sub(".*(queue\\[0\\]).*", "best effort", module)))
 
 # plot
 utils.plot_vectors(df, props)
@@ -2357,7 +2357,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="159" name="Traffic class 0, gate state, number of credits, transmitting state" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="159" name="Best effort traffic class" template="linechart_native" type="LINE">
             <script>
                 <![CDATA[import re
 import math
@@ -2385,6 +2385,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
+df['title'] = df['title'].map(lambda title: re.sub("\, vector.*", "", title))
 
 df = df.sort_values('name', ascending=False)
 
@@ -2915,7 +2916,7 @@ utils.export_data_if_needed(df, props)
             <property name="Plot.Caching" value="true"/>
             <property name="yaxis_title" value="gate and transmitting states, number of credits normalized to [0, 1]"/>
             <property name="Legend.Border" value="false"/>
-            <property name="title" value="Traffic class 0, gate state, number of credits, transmitting state"/>
+            <property name="title" value="Best effort traffic class"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
             <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
@@ -2932,7 +2933,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value="-1.5"/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="TrafficClass0"/>
+            <property name="image_export_filename" value="BestEffortTrafficClass"/>
             <property name="xaxis_min" value="0"/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="(module =~ &quot;*.switch.eth[1].**.transmissionSelectionAlgorithm[0]&quot; OR module =~ &quot;*.switch.eth[1].**.transmitter&quot;) AND&#10;( name =~ transmitting:vector OR name =~ gateState:vector OR name =~ numCredits:vector)"/>
@@ -2949,9 +2950,10 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value="0.004"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="355" name="Traffic class 1, gate state, transmitting state" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="355" name="Video traffic class" template="linechart_native" type="LINE">
             <script>
-                <![CDATA[import math
+                <![CDATA[import re
+import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
@@ -2976,6 +2978,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
+df['title'] = df['title'].map(lambda title: re.sub("\, vector.*", "", title))
 
 # plot
 utils.plot_vectors(df, props)
@@ -3501,7 +3504,7 @@ utils.export_data_if_needed(df, props)
             <property name="Plot.Caching" value="true"/>
             <property name="yaxis_title" value="gate and transmitting states [0, 1]"/>
             <property name="Legend.Border" value="false"/>
-            <property name="title" value="Traffic class 1, gate state, transmitting state"/>
+            <property name="title" value="Video traffic class"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
             <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
@@ -3518,7 +3521,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="TrafficClass1"/>
+            <property name="image_export_filename" value="VideoTrafficClass"/>
             <property name="xaxis_min" value="0"/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="(module =~ &quot;*.switch.eth[1].**.transmissionSelectionAlgorithm[1]&quot; OR module =~ &quot;*.switch.eth[1].**.transmitter&quot;) AND&#10;(name =~ transmitting:vector OR name =~ gateState:vector)"/>
@@ -3535,11 +3538,11 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value="0.002"/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="146" name="Server application traffic" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="358" name="Server application traffic" template="linechart_native" type="LINE">
             <script>
                 <![CDATA[import re
 import math
-from omnetpp.scave import results, chart, utils, ideplot
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -3563,7 +3566,7 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df['legend'] = df['module'].map(lambda module: re.sub(".*(app\\[.*\\]).*", "\\1", module))
+df['legend'] = df['module'].map(lambda module: re.sub(".*(app\\[1\\]).*", "video", re.sub(".*(app\\[0\\]).*", "best effort", module)))
 
 # plot
 utils.plot_vectors(df, props)
