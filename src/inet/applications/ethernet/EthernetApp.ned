@@ -39,30 +39,35 @@ module EthernetApp like IApp
     submodules:
         source: <default("ActivePacketSource")> like IActivePacketSource if typename != "" {
             parameters:
-                @display("p=200,200");
+                @display("p=200,150");
         }
-        outbound: <default("")> like IPacketFlow {
+        tagger: <default("")> like IPacketFlow {
             parameters:
-                @display("p=200,400");
+                @display("p=200,300");
+        }
+        measurementStarter: <default("")> like IPacketFlow {
+            parameters:
+                @display("p=200,450");
         }
         sink: <default("PassivePacketSink")> like IPassivePacketSink if typename != "" {
             parameters:
-                @display("p=600,200");
+                @display("p=500,150");
         }
-        inbound: <default("")> like IPacketFlow {
+        measurementRecorder: <default("")> like IPacketFlow {
             parameters:
-                @display("p=600,400");
+                @display("p=500,450");
         }
         io: EthernetSocketIo {
             parameters:
                 @display("p=400,600");
         }
     connections allowunconnected:
-        source.out --> outbound.in if exists(source);
-        outbound.out --> io.trafficIn;
+        source.out --> tagger.in if exists(source);
+        tagger.out --> measurementStarter.in;
+        measurementStarter.out --> io.trafficIn;
         io.socketOut --> socketOut;
 
         socketIn --> io.socketIn;
-        io.trafficOut --> inbound.in;
-        inbound.out --> sink.in if exists(sink);
+        io.trafficOut --> measurementRecorder.in;
+        measurementRecorder.out --> sink.in if exists(sink);
 }
