@@ -108,7 +108,7 @@ void LMac::configureNetworkInterface()
 
     // capabilities
     networkInterface->setMtu(par("mtu"));
-    networkInterface->setMulticast(true);
+    networkInterface->setMulticast(false);
     networkInterface->setBroadcast(true);
 }
 
