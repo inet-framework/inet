@@ -33,7 +33,7 @@ module MeasurementLayer like IMeasurementLayer
             parameters:
                 @display("p=150,100");
         }
-        measurementMaker: <default("FlowMeasurementRecorder")> like IPacketFlow {
+        measurementRecorder: <default("FlowMeasurementRecorder")> like IPacketFlow {
             parameters:
                 @display("p=350,100");
         }
@@ -41,7 +41,7 @@ module MeasurementLayer like IMeasurementLayer
         upperLayerIn --> { @display("m=n"); } --> measurementStarter.in;
         measurementStarter.out --> { @display("m=s"); } --> lowerLayerOut;
 
-        lowerLayerIn --> { @display("m=s"); } --> measurementMaker.in;
-        measurementMaker.out --> { @display("m=n"); } --> upperLayerOut;
+        lowerLayerIn --> { @display("m=s"); } --> measurementRecorder.in;
+        measurementRecorder.out --> { @display("m=n"); } --> upperLayerOut;
 }
 
