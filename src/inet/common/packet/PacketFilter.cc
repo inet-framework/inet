@@ -56,6 +56,12 @@ void PacketFilter::setExpression(cDynamicExpression *expression)
     filterExpression->setResolver(new DynamicExpressionResolver(this));
 }
 
+void PacketFilter::setExpression(cOwnedDynamicExpression *expression)
+{
+    filterExpression = expression->dup();
+    filterExpression->setResolver(new DynamicExpressionResolver(this));
+}
+
 void PacketFilter::setExpression(cValueHolder *expression)
 {
     auto& value = expression->get();
@@ -67,8 +73,14 @@ void PacketFilter::setExpression(cValueHolder *expression)
 
 void PacketFilter::setExpression(cObject *expression)
 {
-    auto valueHolder = check_and_cast<cValueHolder *>(expression);
-    setExpression(valueHolder);
+    if (auto ownedDynamicExpression = dynamic_cast<cOwnedDynamicExpression *>(expression))
+        setExpression(ownedDynamicExpression);
+    else if (auto dynamicExpression = dynamic_cast<cDynamicExpression *>(expression))
+        setExpression(dynamicExpression);
+    else if (auto valueHolder = dynamic_cast<cValueHolder *>(expression))
+        setExpression(valueHolder);
+    else
+        throw cRuntimeError("Unknown expression type");
 }
 
 void PacketFilter::setExpression(cValue& expression)

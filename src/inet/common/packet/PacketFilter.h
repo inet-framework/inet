@@ -78,6 +78,7 @@ class INET_API PacketFilter
     void setPattern(const char *pattern);
     void setExpression(const char *expression);
     void setExpression(cDynamicExpression *expression);
+    void setExpression(cOwnedDynamicExpression *expression);
     void setExpression(cValueHolder *expression);
     void setExpression(cObject *expression);
     void setExpression(cValue& expression);
