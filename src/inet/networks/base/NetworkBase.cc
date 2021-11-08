@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/networks/NetworkBase.h"
+#include "inet/networks/base/NetworkBase.h"
 
 #include "inet/common/SubmoduleLayout.h"
 
