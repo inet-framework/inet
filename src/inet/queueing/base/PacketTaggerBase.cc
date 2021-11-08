@@ -84,10 +84,6 @@ void PacketTaggerBase::markPacket(Packet *packet)
         EV_DEBUG << "Attaching VlanReq" << EV_FIELD(packet) << EV_FIELD(vlanId) << EV_ENDL;
         packet->addTagIfAbsent<VlanReq>()->setVlanId(vlanId);
     }
-    if (vlanId != -1) {
-        EV_DEBUG << "Attaching VlanReq" << EV_FIELD(packet) << EV_FIELD(vlanId) << EV_ENDL;
-        packet->addTagIfAbsent<VlanReq>()->setVlanId(vlanId);
-    }
     if (pcp != -1) {
         EV_DEBUG << "Attaching PcpReq" << EV_FIELD(packet) << EV_FIELD(pcp) << EV_ENDL;
         packet->addTagIfAbsent<PcpReq>()->setPcp(pcp);
