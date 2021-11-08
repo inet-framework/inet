@@ -34,32 +34,19 @@ Results
 
 Here are the results:
 
-.. figure:: media/BGswitch1.png
+.. figure:: media/ClientApplicationTraffic.png
    :align: center
 
-.. figure:: media/BGswitch2.png
+.. figure:: media/BestEffortTrafficClass.png
    :align: center
 
-.. figure:: media/VIDswitch1.png
+.. figure:: media/VideoTrafficClass.png
    :align: center
 
-.. figure:: media/VIDswitch2.png
+.. figure:: media/ServerApplicationTraffic.png
    :align: center
 
-.. The following video shows the behavior in Qtenv:
-
-   .. video:: media/behavior.mp4
-      :align: center
-      :width: 90%
-
-   Here are the simulation results:
-
-   .. .. figure:: media/results.png
-      :align: center
-      :width: 100%
-
-
-Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`StatisticalPolicingShowcase.ned <../StatisticalPolicingShowcase.ned>`
+Sources: :download:`omnetpp.ini <../omnetpp.ini>`
 
 Discussion
 ----------

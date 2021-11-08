@@ -34,13 +34,13 @@ Results
 
 Here are the results:
 
-.. figure:: media/stream1.png
+.. figure:: media/TrafficClass1.png
    :align: center
 
-.. figure:: media/stream2.png
+.. figure:: media/TrafficClass2.png
    :align: center
 
-.. figure:: media/stream3.png
+.. figure:: media/TrafficClass3.png
    :align: center
 
 .. The following video shows the behavior in Qtenv:
