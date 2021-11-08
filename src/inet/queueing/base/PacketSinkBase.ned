@@ -25,7 +25,7 @@ package inet.queueing.base;
 simple PacketSinkBase extends PacketProcessorBase
 {
     parameters:
-        displayStringTextFormat = default("dropped %p pk (%l)");
+        displayStringTextFormat = default("received %p pk (%l)");
         @class(PacketSinkBase);
         @display("i=block/sink");
         @signal[packetDropped](type=inet::Packet);
