@@ -1149,11 +1149,17 @@ void Ipv4::sendPacketToNIC(Packet *packet)
     EV_INFO << "Sending " << packet << " to output interface = " << networkInterface->getInterfaceName() << ".\n";
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     packet->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv4);
-    auto protocol = networkInterface->getProtocol();
-    if (protocol != nullptr)
-        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
-    else
+    auto networkInterfaceProtocol = networkInterface->getProtocol();
+    auto dispatchProtocol = networkInterfaceProtocol;
+    if (auto encapsulationProtocolReq = packet->findTagForUpdate<EncapsulationProtocolReq>()) {
+        dispatchProtocol = encapsulationProtocolReq->getProtocols(0);
+        encapsulationProtocolReq->eraseProtocols(0);
+        encapsulationProtocolReq->insertProtocols(encapsulationProtocolReq->getProtocolsArraySize(), networkInterfaceProtocol);
+    }
+    if (dispatchProtocol == nullptr)
         packet->removeTagIfPresent<DispatchProtocolReq>();
+    else
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(dispatchProtocol);
     ASSERT(packet->findTag<InterfaceReq>() != nullptr);
     send(packet, "queueOut");
 }
