@@ -31,7 +31,7 @@ module TsnSwitch extends EthernetSwitch
 {
     parameters:
         bool hasTimeSynchronization = default(false); // enable IEEE 802.1 AS time synchronization
-        bool hasIngressTrafficFiltering = default(false); // enable IEEE 802.1 Qci ingress traffic filtering
+        bool hasIngressTrafficFiltering = default(false); // enable IEEE 802.1 Qci ingress per-stream filtering
         bool hasEgressTrafficShaping = default(false); // enable IEEE 802.1 egress traffic shaping (credit based shaping, time aware shaping, asynchronous shaping)
         bool hasStreamRedundancy = default(false); // enable IEEE 802.1 CB frame replication and elimination
         bool hasFramePreemption = default(false); // enable IEEE 802.1 Qbu frame preemption
@@ -41,14 +41,14 @@ module TsnSwitch extends EthernetSwitch
         clock.typename = default(hasTimeSynchronization ? "SettableClock" : ""); // enable explicit local clock model when time synchronization is enabled
         ethernet.typename = default("EthernetLayer"); // use Ethernet protocol layer outside of network interfaces
         eth[*].typename = default(hasCutthroughSwitching ? "EthernetCutthroughInterface" : "LayeredEthernetInterface"); // switch to modular Ethernet interface
-        eth[0].macLayer.typename = default(hasFramePreemption ? "EthernetPreemptingMacLayer" : "EthernetMacLayer");
+        eth[*].macLayer.typename = default(hasFramePreemption ? "EthernetPreemptingMacLayer" : "EthernetMacLayer");
         eth[*].macLayer.queue.typename = default(hasEgressTrafficShaping ? "Ieee8021qTimeAwareShaper" : "PacketQueue"); // use compound priority queue having multiple subqueues controlled by separate gates when egress traffic shaping is enabled
         eth[*].phyLayer.typename = default(hasCutthroughSwitching ? "EthernetStreamThroughPhyLayer" : (hasFramePreemption ? "EthernetPreemptingPhyLayer" : "EthernetPhyLayer")); // use packet streaming when cut-through switching is enabled
         bridging.typename = default("BridgingLayer"); // switch to modular bridging
         bridging.streamIdentifier.typename = default(hasStreamRedundancy ? "StreamIdentifierLayer" : ""); // enable stream identification when stream redundancy is enabled
         bridging.streamRelay.typename = default(hasStreamRedundancy ? "StreamRelayLayer" : ""); // enable stream merging and stream splitting when stream redundancy is enabled
-        bridging.streamFilter.typename = default(hasIngressTrafficFiltering ? "StreamFilterLayer" : ""); // enable stream filtering when ingress traffic filtering is enabled
-        bridging.streamFilter.ingress.typename = default(hasIngressTrafficFiltering ? "SimpleIeee8021qFilter" : ""); // use 802.1 Qci ingress filtering when ingress traffic filtering is enabled
+        bridging.streamFilter.typename = default(hasIngressTrafficFiltering ? "StreamFilterLayer" : ""); // enable stream filtering when ingress per-stream filtering is enabled
+        bridging.streamFilter.ingress.typename = default(hasIngressTrafficFiltering ? "SimpleIeee8021qFilter" : ""); // use 802.1 Qci ingress filtering when ingress per-stream filtering is enabled
         bridging.streamCoder.typename = default(hasIngressTrafficFiltering || hasStreamRedundancy ? "StreamCoderLayer" : ""); // enable stream endocing/decoding when stream redundancy is enabled
         llc.typename = default("");
 }
