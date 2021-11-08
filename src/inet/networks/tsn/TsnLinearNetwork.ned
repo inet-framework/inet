@@ -22,7 +22,7 @@ import inet.node.ethernet.EthernetLink;
 network TsnLinearNetwork extends TsnNetworkBase
 {
     parameters:
-		*.eth[*].bitrate = default(100Mbps);
+        *.eth[*].bitrate = default(100Mbps);
     submodules:
         client: <default("TsnDevice")> like IEthernetNetworkNode {
             @display("p=350,200");
