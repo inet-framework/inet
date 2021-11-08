@@ -31,7 +31,7 @@ module MultiClock like IClock
 {
     parameters:
         int numClocks; // number of subclocks
-        int activeClockIndex = default(0); // the currently active subclock
+        int activeClockIndex @mutable = default(0); // the currently active subclock
         @display("i=block/timer");
         @class(MultiClock);
         @signal[timeChanged](type=simtime_t);

@@ -29,6 +29,6 @@ import inet.queueing.contract.IPacketGate;
 simple InteractiveGate extends PacketGateBase like IPacketGate
 {
     parameters:
-        bool open = default(true);
+        bool open @mutable = default(true);
         @class(InteractiveGate);
 }
