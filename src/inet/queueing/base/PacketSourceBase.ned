@@ -22,12 +22,29 @@ package inet.queueing.base;
 // randomly with regard to packet length and packet data. The representation of
 // packet data can also be configured.
 //
+// Available packet name format directives:
+// source, application, network node
+// display name or full name, full path
+//
+//  - %a automatic application display name or application full name or module display name or module full name
+//  - %n module display name or module full name
+//  - %m application display name or application full name
+//  - %M network node display name or network node full name
+//  - %p module full path
+//  - %h application full path
+//  - %H network node full path
+//  - %c packet number
+//  - %l packet length
+//  - %d packet data
+//  - %t simulation time
+//  - %e event number
+//
 // @see ~IPacketSource
 //
 simple PacketSourceBase extends PacketProcessorBase
 {
     parameters:
-        string packetNameFormat = default("%n-%c"); // %n module name, %N network node name, %p module full path, %P network node full path, %c packet number, %l packet length, %d packet data, %t simulation time, %e event number
+        string packetNameFormat = default("%a-%c"); // see directives in module documentation
         string packetRepresentation @units("bitCount","bits","byteCount","bytes","applicationPacket") = default("byteCount"); // determines the chunk of the packet data
         volatile int packetLength @unit(b);
         volatile int packetData = default(-1);

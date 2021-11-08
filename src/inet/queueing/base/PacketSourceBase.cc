@@ -50,17 +50,36 @@ const char *PacketSourceBase::createPacketName(const Ptr<const Chunk>& data) con
     return StringFormat::formatString(packetNameFormat, [&] (char directive) {
         static std::string result;
         switch (directive) {
+            case 'a': {
+                auto application = findContainingApplication();
+                if (application != nullptr)
+                    result = application->getDisplayName() != nullptr ? application->getDisplayName() : application->getFullName();
+                else
+                    result = getDisplayName() != nullptr ? getDisplayName() :  getFullName();
+                break;
+            }
             case 'n':
-                result = getFullName();
+                result = getDisplayName() != nullptr ? getDisplayName() : getFullName();
                 break;
-            case 'N':
-                result = getContainingNode(this)->getFullName();
+            case 'm': {
+                auto application = getContainingApplication();
+                result = application->getDisplayName() != nullptr ? application->getDisplayName() : application->getFullName();
                 break;
+            }
+            case 'M': {
+                auto networkNode = getContainingNode(this);
+                result = networkNode->getDisplayName() != nullptr ? networkNode->getDisplayName() : networkNode->getFullName();
+                break;
+            }
             case 'p':
+
                 result = getFullPath();
                 break;
-            case 'P':
-                result = getContainingNode(this)->getFullName();
+            case 'h':
+                result = getContainingApplication()->getFullPath();
+                break;
+            case 'H':
+                result = getContainingNode(this)->getFullPath();
                 break;
             case 'c':
                 result = std::to_string(numProcessedPackets);
@@ -151,6 +170,30 @@ Packet *PacketSourceBase::createPacket()
     processedTotalLength += packet->getDataLength();
     emit(packetCreatedSignal, packet);
     return packet;
+}
+
+inline bool isApplication(const cModule *mod)
+{
+    cProperties *properties = mod->getProperties();
+    return properties && properties->getAsBool("application");
+}
+
+const cModule *PacketSourceBase::findContainingApplication() const
+{
+    for (const cModule *module = this; module != nullptr; module = module->getParentModule()) {
+        if (isApplication(module))
+            return module;
+    }
+    return nullptr;
+}
+
+const cModule *PacketSourceBase::getContainingApplication() const
+{
+    auto application = findContainingApplication();
+    if (application == nullptr)
+        throw cRuntimeError("Application not found");
+    else
+        return application;
 }
 
 } // namespace queueing

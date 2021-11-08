@@ -40,6 +40,8 @@ class INET_API PacketSourceBase : public PacketProcessorBase
     virtual const char *createPacketName(const Ptr<const Chunk>& data) const;
     virtual Ptr<Chunk> createPacketContent() const;
     virtual Packet *createPacket();
+    virtual const cModule *findContainingApplication() const;
+    virtual const cModule *getContainingApplication() const;
 };
 
 } // namespace queueing
