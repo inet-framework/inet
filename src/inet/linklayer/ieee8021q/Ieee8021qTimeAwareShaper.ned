@@ -30,7 +30,7 @@ import inet.queueing.queue.CompoundPacketQueueBase;
 module Ieee8021qTimeAwareShaper extends CompoundPacketQueueBase
 {
     parameters:
-        int numTrafficCategories; // number of traffic categories
+        int numTrafficClasses; // number of traffic categories
         double bitrate @unit(bps);
         *.bitrate = default(this.bitrate);
         *.extraLength = default(96b);
@@ -43,16 +43,16 @@ module Ieee8021qTimeAwareShaper extends CompoundPacketQueueBase
             parameters:
                 @display("p=100,100");
         }
-        queue[numTrafficCategories]: <default("PacketQueue")> like IPacketQueue {
+        queue[numTrafficClasses]: <default("PacketQueue")> like IPacketQueue {
             parameters:
                 bufferModule = default(exists(parent.buffer) ? "^.buffer" : "");
                 @display("p=300,100,column,125");
         }
-        transmissionSelectionAlgorithm[numTrafficCategories]: <default("")> like IPacketGate {
+        transmissionSelectionAlgorithm[numTrafficClasses]: <default("")> like IPacketGate {
             parameters:
                 @display("p=500,100,column,125");
         }
-        transmissionGate[numTrafficCategories]: <default("PeriodicGate")> like IPacketGate {
+        transmissionGate[numTrafficClasses]: <default("PeriodicGate")> like IPacketGate {
             parameters:
                 @display("p=700,100,column,125");
         }
@@ -62,7 +62,7 @@ module Ieee8021qTimeAwareShaper extends CompoundPacketQueueBase
         }
     connections:
         in --> { @display("m=w"); } --> classifier.in;
-        for i = 0 .. numTrafficCategories - 1 {
+        for i = 0 .. numTrafficClasses - 1 {
             classifier.out++ --> queue[i].in;
             queue[i].out --> transmissionSelectionAlgorithm[i].in;
             transmissionSelectionAlgorithm[i].out --> transmissionGate[i].in;
