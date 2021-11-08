@@ -18,6 +18,7 @@
 #include "inet/queueing/base/PacketTaggerBase.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
@@ -87,6 +88,8 @@ void PacketTaggerBase::markPacket(Packet *packet)
     if (pcp != -1) {
         EV_DEBUG << "Attaching PcpReq" << EV_FIELD(packet) << EV_FIELD(pcp) << EV_ENDL;
         packet->addTagIfAbsent<PcpReq>()->setPcp(pcp);
+        auto encapsulationReq = packet->addTagIfAbsent<EncapsulationProtocolReq>();
+        encapsulationReq->insertProtocols(0, &Protocol::ieee8021qCTag);
     }
     if (userPriority != -1) {
         EV_DEBUG << "Attaching UserPriorityReq" << EV_FIELD(packet) << EV_FIELD(userPriority) << EV_ENDL;
