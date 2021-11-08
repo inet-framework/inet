@@ -28,6 +28,7 @@ using namespace inet::queueing;
 class INET_API StreamIdentifier : public PacketFlowBase, public TransparentProtocolRegistrationListener
 {
   protected:
+    bool hasSequenceNumbering = false;
     cValueArray *mapping = nullptr;
 
     std::map<std::string, int> sequenceNumbers;

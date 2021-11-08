@@ -28,8 +28,10 @@ Define_Module(StreamIdentifier);
 void StreamIdentifier::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
+        hasSequenceNumbering = par("hasSequenceNumbering");
         mapping = check_and_cast<cValueArray *>(par("mapping").objectValue());
+    }
 }
 
 void StreamIdentifier::handleParameterChange(const char *name)
@@ -68,13 +70,14 @@ void StreamIdentifier::processPacket(Packet *packet)
         for (int i = 0; i < mapping->size(); i++) {
             auto element = check_and_cast<cValueMap *>(mapping->get(i).objectValue());
             PacketFilter packetFilter;
-            auto packetPattern = element->containsKey("packetFilter") ? element->get("packetFilter").stringValue() : "true";
+            auto packetPattern = element->containsKey("packetFilter") ? element->get("packetFilter") : cValue("*");
             packetFilter.setExpression(packetPattern);
             if (packetFilter.matches(packet)) {
                 streamName = element->get("stream").stringValue();
                 packet->addTag<StreamReq>()->setStreamName(streamName);
                 auto sequenceNumber = incrementSequenceNumber(streamName);
-                packet->addTag<SequenceNumberReq>()->setSequenceNumber(sequenceNumber);
+                if (hasSequenceNumbering && element->containsKey("sequenceNumbering") && element->get("sequenceNumbering").boolValue())
+                    packet->addTag<SequenceNumberReq>()->setSequenceNumber(sequenceNumber);
                 break;
             }
         }
