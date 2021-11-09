@@ -12,10 +12,11 @@ In this example we explore the various packet jitter statistics of application m
 The Model
 ---------
 
-The packet jitter is measured in several different forms. The instantaneous
-packet delay variation is the difference between the packet delay of successive
-packets. Packet jitter is also often used for the variance of packet delay or
-simply for the packet delay difference compared to the mean value.
+The packet jitter is measured in several different forms:
+
+- *Instantaneous packet delay variation*: the difference between the packet delay of successive packets (``packetJitter`` statistic)
+- *Variance of packet delay* (``packetDelayVariation`` statistic)
+- *Packet delay difference compared to the mean value* (``packetDelayDifferenceToMean`` statistic)
 
 Here is the network:
 

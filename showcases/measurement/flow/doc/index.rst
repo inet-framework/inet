@@ -26,7 +26,7 @@ A packet flow is defined by a label that is added to some packets. The label con
 
 Time measurement along packet flows is useful in situations when the timing data to be measured is associated with a packet, rather then the modules it passes through, processed or arrives at. For example, we might want to measure queueing time for a packet at all the modules it passes through, as opposed to measuring queueing time at a queue module for all packets that it processes.
 
-A packet is associated with the flow by specialized modules called `measurement starters`. These modules attach a label to the packet, that indicates which flow it is part of and what measurements are requested. When the packet travels through the network, certain modules add the measured time (or other data) to the packet as meta-information. Other specialized modules (`measurement recorders`) remove the label from the packet, and record the attached data as a statistic associated with that particular flow (then the packet can continue along its route). 
+A packet is associated with the flow by specialized modules called `measurement starters`. These modules attach a label to the packet, that indicates which flow it is part of and what measurements are requested. When the packet travels through the network, certain modules add the measured time (or other data) to the packet as meta-information. Other specialized modules (`measurement recorders`) record the attached data as a statistic associated with that particular flow. These modules can optionally remove the label from the packet (then the packet can continue along its route). 
 
 For example, a label is added to the packet in a measurement starter module specifying the flow name ``flow1``, and the queueing time measurement. As the packet is processed in various queue modules in the network, the queue modules attach the time spent in them to the packet as meta-information. The label is removed at a measurement recorder module, and the queueing time accumulated by the packet is recorded. The data can be found in the analysis tool's browse data tab as the ``flowname:statisticname`` result name of the measurement recorder module (for example, ``flow1:queueingTime:histogram``). By default, :ned:`FlowmeasurementRecorder` records the specified measurements as both vectors and historgrams. The statistics can be plotted, exported and analyzed as any other statistic.
 
@@ -40,18 +40,22 @@ Any number of flow labels can be added to a packet (it can be part of multiple f
 
 .. note:: A practical problem is that different parts of a packet may have different history, due to fragmentation and reassembly, for example. Therefore, we need to keep track of the measurements for different regions of the packet. For this purpose, each bit in a packet can have its own meta-information associating it to a flow, called a `region tag`. For more information on region tags, check out the :ref:`dg:sec:packets:region-tagging` section of the INET Developer's Guide.
 
+**TODO** more about the available statistics in FlowMeasurementRecorder.ned ?
+
 The Measurement Modules
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 The dedicated module responsible for adding flow labels and specifying measurements to be made on packets is the :ned:`FlowMeasurementStarter`. Its counterpart responsible for removing flow labels and recording measurements is the :ned:`FlowMeasurementRecorder` module.
 
-The :ned:`FlowMeasurementStarter` and :ned:`FlowMeasurementRecorder` modules have the same set of parameters that specify the flow name (:par:`flowName` parameter), the set of packets that enter or exit the flow (:par:`packetFilter` and :par:`packetDataFilter` parameters), and the required measurements (:par:`measure` parameter).
+The :ned:`FlowMeasurementStarter` and :ned:`FlowMeasurementRecorder` modules have the same set of parameters that specify the flow name (:par:`flowName` parameter), the set of packets that enter or exit the flow (:par:`packetFilter` parameter), and the required measurements (:par:`measure` parameter).
 
-By default, the filters match all packets (``*``). The :par:`measure` parameter is a list containinig elements from the following set, separated by spaces:
+By default, the filters match all packets (``packetFilter = 'true'``). The :par:`measure` parameter is a list containinig elements from the following set, separated by spaces:
 
 - ``delayingTime``, ``queueingTime``, ``processingTime``, ``transmissionTime``, ``propagationTime``: Time for the different cases, on a *per-bit* basis
 - ``elapsedTime``: The total elapsed time for the packet being in the flow (see first note below)
 - ``packetEvent``: Record all events that happen to the packet (see second note below)
+
+The :ned:`FlowMeasurementRecorder` module removes flow labels from packets by default. This is contolled by the :par:`endMeasurement` parameter (``true`` by default).
 
 .. note that this not necessarily the sum of all the above durations; see **TODO** the manual
 
@@ -64,6 +68,8 @@ Some notes:
 - Evaluating the measured data when there is cut-through switching or intra-node packet streaming in the network can be more complex than if there is not. This is because measurements are recorded on a per-bit basis, and the transmission time can be different for each bit if there is packet streaming in the network. Also, bits waiting in the transmitter for other bits of a packet to be transmitted and received is only included in the elapsed time measurement. Because of this, the sum of all other measurements might not be equal to the elapsed time. For more information, see the **TODO** section in the INET manual. 
 - The ``packetEvent`` measurement is special, because it records the history of the packet as it travels through the network, instead of taking a specific measurement. For example, it records events of the packet's delaying, queueing, processing, transmission, etc. There is no built-in module that makes use of the packet event measurement data, this can be implemented by the user. This can be useful for more detailed analysis based on a packet's history.
 - Although both the measurement starter and recorder modules have a :par:`measure` parameter, its meaning is slightly different. For the measurement starter module, the parameter specifies which measurement data to include in the attached flow tag. For the measurement recorder module, it specifies which measurements to record as statistics. Generally, the parameter values for the recorder module should be the same or a subset of the starter module's parameters. If a recorder module is configured to record a measurement that isn't on the packet (not set to record in the starter module), the measurement silently fails. Thus it is the user's responsibility to set up the :par:`measure` parameters properly.
+
+**TODO** is the first point still valid?
 
 Adding Measurement Modules to the Network
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

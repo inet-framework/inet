@@ -13,10 +13,20 @@ transmission mediums.
 The Model
 ---------
 
-The channel throughput is measured by observing the packets which are transmitted
+The channel throughput is measured by observing the packets that are transmitted
 through the transmission medium over time. For both wired and wireless channels,
 the throughput is measured for any pair of communicating network interfaces,
 separately for both directions.
+
+.. the throughput is measured as a sliding window, the parameters can be set in the ResultRecorder HOW?
+
+Channel throughput is a statistic of transmitter modules, such as the :ned:`PacketTransmitter` in :ned:`LayeredEthernetPhy`.
+Throughput is measured with a sliding window. By default, the window is 0.1s or 100 packets, whichever comes first.
+The parameters of the window, such as the window interval, are configurable from the ini file, as ``module.statistic.parameter``. For example:
+
+.. code-block:: ini
+
+   *.host.eth[0].phyLayer.transmitter.throughput.interval = 0.2s
 
 Here is the network:
 
@@ -33,8 +43,10 @@ Results
 
 Here are the results:
 
-.. figure:: media/Results.png
+.. figure:: media/throughput.png
    :align: center
+
+**TODO** is there an emitting frequency?
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ChannelThroughputMeasurementShowcase.ned <../ChannelThroughputMeasurementShowcase.ned>`
 

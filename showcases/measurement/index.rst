@@ -12,15 +12,15 @@ The following group of examples demonstrate the most commonly used statistics:
 .. toctree::
    :maxdepth: 1
 
-   utilization/doc/index
    throughput/doc/index
-   datarate/doc/index
+   utilization/doc/index
    endtoenddelay/doc/index
-   propagationtime/doc/index
+   jitter/doc/index
    transmissiontime/doc/index
+   propagationtime/doc/index
    queueingtime/doc/index
    residencetime/doc/index
-   jitter/doc/index
+   datarate/doc/index
    flow/doc/index
    relationships/doc/index
 

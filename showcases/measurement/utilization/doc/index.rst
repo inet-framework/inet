@@ -20,12 +20,28 @@ network interfaces, separately for both directions. This statistic expresses
 the relative usage of the channel with a value between 0 and 1, where 0 means
 the channel is not used at all and 1 means the channel is fully utilized.
 
+Channel utilization is a statistic of transmitter modules, such as the :ned:`PacketTransmitter` in :ned:`LayeredEthernetPhy`.
+The channel utilization is related to channel throughput in the sense that 
+utilization is the ratio of throughput to channel datarate. By default, channel utilization
+is calculated for the past 0.1s or the last 100 packets, whichever comes first.
+
+.. The parameters of the window, such as the window interval, are configurable from the ini file, as ``module.statistic.parameter``. For example:
+
+These values are configurable from the ini file with the :par:`interval` ([s]) and :par:`numValueLimit` parameters, as ``module.statistic.parameter``.
+For example:
+
+.. code-block:: ini
+
+   *.host.eth[0].phyLayer.transmitter.utilization.interval = 0.2s
+
 Here is the network:
 
 .. figure:: media/Network.png
    :align: center
 
-Here is the configuration:
+The hosts are connected by 100 Mbps Ethernet.
+
+We configure the hosts to use the layered Ethernet model, and the source host to generate UDP packets with around 48 Mbps. Here is the configuration:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
@@ -33,13 +49,16 @@ Here is the configuration:
 Results
 -------
 
-Here are the results:
+We measure the channel utilization in the source host (the ``source.eth[0].phy.transmitter.utilization`` statistic). Here are the results:
 
 .. figure:: media/ChannelUtilizationHistogram.png
    :align: center
 
 .. figure:: media/ChannelUtilizationVector.png
    :align: center
+
+.. note:: This is the channel utilization in the ``source -> destination`` direction. Utilization in the other direction on this link could be measured
+   with the utilization statistic in ``destination``, but in this case there is no traffic in that direction.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ChannelUtilizationMeasurementShowcase.ned <../ChannelUtilizationMeasurementShowcase.ned>`
 

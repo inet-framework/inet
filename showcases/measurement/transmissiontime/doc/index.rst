@@ -22,6 +22,13 @@ exception would be when the receiver is moving relative to the transmitter with
 a relatively high speed compared to the propagation speed of the physical signal,
 but it is rarely the case in communication network simulation.
 
+Packet transmission time is measured from the beginning of the
+physical signal encoding the packet leaves the network interface up to the moment
+the end of the same physical signal leaves the same network interface. 
+
+Packet transmission time is the time difference between the start and th end of the physical
+signal transmission on the outgoing interface.
+
 Here is the network:
 
 .. figure:: media/Network.png
@@ -34,6 +41,8 @@ Here is the configuration:
 
 Results
 -------
+
+**TODO** should the packet length be variable ? so the transmission time is not the same
 
 Here are the results:
 

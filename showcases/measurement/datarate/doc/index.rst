@@ -35,8 +35,19 @@ Results
 
 Here are the results:
 
-.. figure:: media/Results.png
+.. figure:: media/source_outgoing.png
    :align: center
+
+.. figure:: media/destination_incoming.png
+   :align: center
+
+.. figure:: media/switch_incoming.png
+   :align: center
+
+.. figure:: media/switch_outgoing.png
+   :align: center
+
+**TODO** why does the switch has more datarate ?
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`DataRateMeasurementShowcase.ned <../DataRateMeasurementShowcase.ned>`
 
