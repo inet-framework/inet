@@ -17,8 +17,8 @@ the simulations (NED, ini and other files) and the web pages are in the
 
 Recently released showcases:
 
-- :doc:`ethernet/cutthrough/doc/index` :sub:`(released on: 2021-04-26)`
-- :doc:`ethernet/preemption/doc/index` :sub:`(released on: 2021-04-12)`
+- :doc:`tsn/cutthroughswitching/doc/index` :sub:`(released on: 2021-04-26)`
+- :doc:`tsn/framepreemption/doc/index` :sub:`(released on: 2021-04-12)`
 - :doc:`emulation/videostreaming/doc/index` :sub:`(released on: 2020-09-08)`
 - :doc:`wireless/analogmodel/doc/index` :sub:`(released on: 2020-05-20)`
 - :doc:`wireless/crosstalk/doc/index` :sub:`(released on: 2020-03-26)`
@@ -30,7 +30,8 @@ Recently released showcases:
 All showcases:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
+   :titlesonly:
 
    emulation/index
    tsn/index
