@@ -28,5 +28,5 @@ to first match packets containing 1, then those containing 0.
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: Config ContentBasedScheduler
-   :end-at: packetDataFilters
+   :end-at: packetFilters
    :language: ini

@@ -22,5 +22,5 @@ that contain 1 to output 1.
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: Config ContentBasedClassifier
-   :end-at: packetDataFilters
+   :end-at: packetFilters
    :language: ini
