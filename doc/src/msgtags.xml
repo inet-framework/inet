@@ -5,6 +5,10 @@
     <filename>src-inet-linklayer-acking-AckingMacHeader.html</filename>
   </compound>
   <compound kind="class">
+    <name>AcknowledgeHeader</name>
+    <filename>src-inet-protocolelement-acknowledgement-AcknowledgeHeader.html</filename>
+  </compound>
+  <compound kind="class">
     <name>AckPolicy</name>
     <filename>src-inet-linklayer-ieee80211-mac-AckPolicy.html</filename>
   </compound>
@@ -34,7 +38,7 @@
   </compound>
   <compound kind="class">
     <name>ApskPhyHeader</name>
-    <filename>src-inet-physicallayer-apsk-packetlevel-ApskPhyHeader.html</filename>
+    <filename>src-inet-physicallayer-wireless-apsk-packetlevel-ApskPhyHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>ArpOpcode</name>
@@ -46,7 +50,7 @@
   </compound>
   <compound kind="class">
     <name>Arrival</name>
-    <filename>src-inet-physicallayer-common-packetlevel-Arrival.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-signal-Arrival.html</filename>
   </compound>
   <compound kind="class">
     <name>b</name>
@@ -58,7 +62,7 @@
   </compound>
   <compound kind="class">
     <name>BandListening</name>
-    <filename>src-inet-physicallayer-common-packetlevel-BandListening.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-radio-packetlevel-BandListening.html</filename>
   </compound>
   <compound kind="class">
     <name>BaStatus</name>
@@ -269,8 +273,16 @@
     <filename>src-inet-networklayer-contract-clns-ClnsAddress.html</filename>
   </compound>
   <compound kind="class">
+    <name>ClockEvent</name>
+    <filename>src-inet-clock-common-ClockEvent.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>clocktime_t</name>
+    <filename>src-inet-clock-contract-clocktime_t.html</filename>
+  </compound>
+  <compound kind="class">
     <name>ConfigureRadioCommand</name>
-    <filename>src-inet-physicallayer-contract-packetlevel-ConfigureRadioCommand.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-contract-packetlevel-ConfigureRadioCommand.html</filename>
   </compound>
   <compound kind="class">
     <name>Coord</name>
@@ -281,12 +293,20 @@
     <filename>src-inet-common-packet-chunk-cPacketChunk.html</filename>
   </compound>
   <compound kind="class">
+    <name>CrcHeader</name>
+    <filename>src-inet-protocolelement-checksum-header-CrcHeader.html</filename>
+  </compound>
+  <compound kind="class">
     <name>CrcMode</name>
     <filename>src-inet-transportlayer-common-CrcMode.html</filename>
   </compound>
   <compound kind="class">
     <name>CreationTimeTag</name>
     <filename>src-inet-common-CreationTimeTag.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>CreditGateTag</name>
+    <filename>src-inet-queueing-gate-CreditGateTag.html</filename>
   </compound>
   <compound kind="class">
     <name>CsmaCaMacAckHeader</name>
@@ -307,6 +327,22 @@
   <compound kind="class">
     <name>CsmaCaMacTrailer</name>
     <filename>src-inet-linklayer-csmaca-CsmaCaMacTrailer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>DelayingTimeTag</name>
+    <filename>src-inet-common-DelayingTimeTag.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>DestinationL3AddressHeader</name>
+    <filename>src-inet-protocolelement-selectivity-DestinationL3AddressHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>DestinationMacAddressHeader</name>
+    <filename>src-inet-protocolelement-selectivity-DestinationMacAddressHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>DestinationPortHeader</name>
+    <filename>src-inet-protocolelement-selectivity-DestinationPortHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>DhcpMessage</name>
@@ -334,7 +370,15 @@
   </compound>
   <compound kind="class">
     <name>DimensionalTransmission</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-DimensionalTransmission.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-DimensionalTransmission.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Direction</name>
+    <filename>src-inet-common-Direction.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>DirectionTag</name>
+    <filename>src-inet-common-DirectionTag.html</filename>
   </compound>
   <compound kind="class">
     <name>DispatchProtocolInd</name>
@@ -401,6 +445,130 @@
     <filename>src-inet-networklayer-common-EcnTagBase.html</filename>
   </compound>
   <compound kind="class">
+    <name>EigrpIpv4Ack</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpIpv4Ack.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpIpv4Hello</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpIpv4Hello.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpIpv4Message</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpIpv4Message.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpIpv4Query</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpIpv4Query.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpIpv4Reply</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpIpv4Reply.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpIpv4Update</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpIpv4Update.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpIpv6Ack</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpIpv6Ack.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpIpv6Hello</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpIpv6Hello.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpIpv6Message</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpIpv6Message.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpIpv6Query</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpIpv6Query.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpIpv6Reply</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpIpv6Reply.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpIpv6Update</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpIpv6Update.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpKValues</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpKValues.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpMessage</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpMessage.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpMpIpv4Internal</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpMpIpv4Internal.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpMpIpv6Internal</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpMpIpv6Internal.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpMsgReq</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpMsgReq.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpMsgRoute</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpMsgRoute.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpRouteFlags</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpRouteFlags.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpStub</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpStub.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpTimer</name>
+    <filename>src-inet-routing-eigrp-EigrpTimer.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpTimerType</name>
+    <filename>src-inet-routing-eigrp-EigrpTimerType.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpTlvParameter</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpTlvParameter.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpTlvStub</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpTlvStub.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpTlvTypeLow</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpTlvTypeLow.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EigrpWideMetricPar</name>
+    <filename>src-inet-routing-eigrp-messages-EigrpWideMetricPar.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>ElapsedTimeTag</name>
+    <filename>src-inet-common-ElapsedTimeTag.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EligibilityTimeTag</name>
+    <filename>src-inet-protocolelement-shaper-EligibilityTimeTag.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EmptyChunk</name>
+    <filename>src-inet-common-packet-chunk-EmptyChunk.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EncapsulationProtocolInd</name>
+    <filename>src-inet-common-EncapsulationProtocolInd.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EncapsulationProtocolReq</name>
+    <filename>src-inet-common-EncapsulationProtocolReq.html</filename>
+  </compound>
+  <compound kind="class">
     <name>EncodedGroupAddress</name>
     <filename>src-inet-routing-pim-EncodedGroupAddress.html</filename>
   </compound>
@@ -413,6 +581,10 @@
     <filename>src-inet-routing-pim-EncodedUnicastAddress.html</filename>
   </compound>
   <compound kind="class">
+    <name>EncryptedChunk</name>
+    <filename>src-inet-common-packet-chunk-EncryptedChunk.html</filename>
+  </compound>
+  <compound kind="class">
     <name>EroObj</name>
     <filename>src-inet-networklayer-rsvpte-EroObj.html</filename>
   </compound>
@@ -422,7 +594,7 @@
   </compound>
   <compound kind="class">
     <name>ErrorRateInd</name>
-    <filename>src-inet-physicallayer-contract-packetlevel-ErrorRateInd.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-contract-packetlevel-ErrorRateInd.html</filename>
   </compound>
   <compound kind="class">
     <name>EtherAppReq</name>
@@ -434,71 +606,75 @@
   </compound>
   <compound kind="class">
     <name>EthernetBindCommand</name>
-    <filename>src-inet-linklayer-ethernet-EthernetBindCommand.html</filename>
+    <filename>src-inet-linklayer-ethernet-common-EthernetBindCommand.html</filename>
   </compound>
   <compound kind="class">
-    <name>EthernetCloseCommand</name>
-    <filename>src-inet-linklayer-ethernet-EthernetCloseCommand.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>EthernetCommandBase</name>
-    <filename>src-inet-linklayer-ethernet-EthernetCommandBase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>EthernetCommandCode</name>
-    <filename>src-inet-linklayer-ethernet-EthernetCommandCode.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>EthernetControlFrame</name>
-    <filename>src-inet-linklayer-ethernet-EthernetControlFrame.html</filename>
+    <name>EthernetControlFrameBase</name>
+    <filename>src-inet-linklayer-ethernet-common-EthernetControlFrameBase.html</filename>
   </compound>
   <compound kind="class">
     <name>EthernetControlOpCode</name>
-    <filename>src-inet-linklayer-ethernet-EthernetControlOpCode.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>EthernetDestroyCommand</name>
-    <filename>src-inet-linklayer-ethernet-EthernetDestroyCommand.html</filename>
+    <filename>src-inet-linklayer-ethernet-common-EthernetControlOpCode.html</filename>
   </compound>
   <compound kind="class">
     <name>EthernetFcs</name>
-    <filename>src-inet-linklayer-ethernet-EthernetFcs.html</filename>
+    <filename>src-inet-linklayer-ethernet-common-EthernetFcs.html</filename>
   </compound>
   <compound kind="class">
     <name>EthernetFilledIfgSignal</name>
-    <filename>src-inet-linklayer-ethernet-EthernetFilledIfgSignal.html</filename>
+    <filename>src-inet-physicallayer-wired-ethernet-EthernetFilledIfgSignal.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EthernetFragmentFcs</name>
+    <filename>src-inet-linklayer-ethernet-common-EthernetFragmentFcs.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EthernetFragmentPhyHeader</name>
+    <filename>src-inet-physicallayer-wired-ethernet-EthernetFragmentPhyHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>EthernetJamSignal</name>
-    <filename>src-inet-linklayer-ethernet-EthernetJamSignal.html</filename>
+    <filename>src-inet-physicallayer-wired-ethernet-EthernetJamSignal.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EthernetMacAddressFields</name>
+    <filename>src-inet-linklayer-ethernet-common-EthernetMacAddressFields.html</filename>
   </compound>
   <compound kind="class">
     <name>EthernetMacHeader</name>
-    <filename>src-inet-linklayer-ethernet-EthernetMacHeader.html</filename>
+    <filename>src-inet-linklayer-ethernet-common-EthernetMacHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>EthernetPadding</name>
-    <filename>src-inet-linklayer-ethernet-EthernetPadding.html</filename>
+    <filename>src-inet-linklayer-ethernet-common-EthernetPadding.html</filename>
   </compound>
   <compound kind="class">
     <name>EthernetPauseFrame</name>
-    <filename>src-inet-linklayer-ethernet-EthernetPauseFrame.html</filename>
+    <filename>src-inet-linklayer-ethernet-common-EthernetPauseFrame.html</filename>
   </compound>
   <compound kind="class">
     <name>EthernetPhyHeader</name>
-    <filename>src-inet-linklayer-ethernet-EthernetPhyHeader.html</filename>
+    <filename>src-inet-physicallayer-wired-ethernet-EthernetPhyHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EthernetPhyHeaderBase</name>
+    <filename>src-inet-physicallayer-wired-ethernet-EthernetPhyHeaderBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>EthernetPhyHeaderType</name>
+    <filename>src-inet-physicallayer-wired-ethernet-EthernetPhyHeaderType.html</filename>
   </compound>
   <compound kind="class">
     <name>EthernetSignal</name>
-    <filename>src-inet-linklayer-ethernet-EthernetSignal.html</filename>
+    <filename>src-inet-physicallayer-wired-ethernet-EthernetSignal.html</filename>
   </compound>
   <compound kind="class">
-    <name>EthernetSocketClosedIndication</name>
-    <filename>src-inet-linklayer-ethernet-EthernetSocketClosedIndication.html</filename>
+    <name>EthernetSignalBase</name>
+    <filename>src-inet-physicallayer-wired-ethernet-EthernetSignalBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>EthernetStatusInd</name>
-    <filename>src-inet-linklayer-ethernet-EthernetStatusInd.html</filename>
+    <name>EthernetTypeOrLengthField</name>
+    <filename>src-inet-linklayer-ethernet-common-EthernetTypeOrLengthField.html</filename>
   </compound>
   <compound kind="class">
     <name>EtherType</name>
@@ -507,6 +683,10 @@
   <compound kind="class">
     <name>EulerAngles</name>
     <filename>src-inet-common-geometry-EulerAngles.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>FcsHeader</name>
+    <filename>src-inet-protocolelement-checksum-header-FcsHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>FcsMode</name>
@@ -526,11 +706,11 @@
   </compound>
   <compound kind="class">
     <name>FlatReceptionBase</name>
-    <filename>src-inet-physicallayer-base-packetlevel-FlatReceptionBase.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-base-packetlevel-FlatReceptionBase.html</filename>
   </compound>
   <compound kind="class">
     <name>FlatTransmissionBase</name>
-    <filename>src-inet-physicallayer-base-packetlevel-FlatTransmissionBase.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-base-packetlevel-FlatTransmissionBase.html</filename>
   </compound>
   <compound kind="class">
     <name>FloodingHeader</name>
@@ -549,8 +729,20 @@
     <filename>src-inet-networklayer-rsvpte-FlowSpecObj.html</filename>
   </compound>
   <compound kind="class">
+    <name>FlowTag</name>
+    <filename>src-inet-common-FlowTag.html</filename>
+  </compound>
+  <compound kind="class">
     <name>FragmentationReq</name>
     <filename>src-inet-networklayer-common-FragmentationReq.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>FragmentNumberHeader</name>
+    <filename>src-inet-protocolelement-fragmentation-header-FragmentNumberHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>FragmentTag</name>
+    <filename>src-inet-protocolelement-fragmentation-tag-FragmentTag.html</filename>
   </compound>
   <compound kind="class">
     <name>FrameSequenceContext</name>
@@ -581,12 +773,80 @@
     <filename>src-inet-routing-gpsr-GpsrPlanarizationMode.html</filename>
   </compound>
   <compound kind="class">
+    <name>GptpBase</name>
+    <filename>src-inet-linklayer-ieee8021as-GptpBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>GptpFlags</name>
+    <filename>src-inet-linklayer-ieee8021as-GptpFlags.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>GptpFollowUp</name>
+    <filename>src-inet-linklayer-ieee8021as-GptpFollowUp.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>GptpFollowUpInformationTlv</name>
+    <filename>src-inet-linklayer-ieee8021as-GptpFollowUpInformationTlv.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>GptpIngressTimeInd</name>
+    <filename>src-inet-linklayer-ieee8021as-GptpIngressTimeInd.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>GptpMessageType</name>
+    <filename>src-inet-linklayer-ieee8021as-GptpMessageType.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>GptpNodeType</name>
+    <filename>src-inet-linklayer-ieee8021as-GptpNodeType.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>GptpPdelayReq</name>
+    <filename>src-inet-linklayer-ieee8021as-GptpPdelayReq.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>GptpPdelayResp</name>
+    <filename>src-inet-linklayer-ieee8021as-GptpPdelayResp.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>GptpPdelayRespFollowUp</name>
+    <filename>src-inet-linklayer-ieee8021as-GptpPdelayRespFollowUp.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>GptpPortType</name>
+    <filename>src-inet-linklayer-ieee8021as-GptpPortType.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>GptpReqAnswerEvent</name>
+    <filename>src-inet-linklayer-ieee8021as-GptpReqAnswerEvent.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>GptpSelfMsgKind</name>
+    <filename>src-inet-linklayer-ieee8021as-GptpSelfMsgKind.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>GptpSync</name>
+    <filename>src-inet-linklayer-ieee8021as-GptpSync.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>GptpTlv</name>
+    <filename>src-inet-linklayer-ieee8021as-GptpTlv.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>GptpTlvType</name>
+    <filename>src-inet-linklayer-ieee8021as-GptpTlvType.html</filename>
+  </compound>
+  <compound kind="class">
     <name>GroupRecord</name>
     <filename>src-inet-networklayer-ipv4-GroupRecord.html</filename>
   </compound>
   <compound kind="class">
     <name>GroupRecordType</name>
     <filename>src-inet-networklayer-ipv4-GroupRecordType.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>HeaderOpcode</name>
+    <filename>src-inet-routing-eigrp-messages-HeaderOpcode.html</filename>
   </compound>
   <compound kind="class">
     <name>HelloOption</name>
@@ -615,6 +875,10 @@
   <compound kind="class">
     <name>HomeTestInit</name>
     <filename>src-inet-networklayer-xmipv6-HomeTestInit.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>HopLimitHeader</name>
+    <filename>src-inet-protocolelement-forwarding-HopLimitHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>HopLimitInd</name>
@@ -654,11 +918,15 @@
   </compound>
   <compound kind="class">
     <name>IApskModulation</name>
-    <filename>src-inet-physicallayer-contract-packetlevel-IApskModulation.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-contract-packetlevel-IApskModulation.html</filename>
   </compound>
   <compound kind="class">
     <name>IArrival</name>
-    <filename>src-inet-physicallayer-common-packetlevel-IArrival.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-signal-IArrival.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>IClock</name>
+    <filename>src-inet-clock-contract-IClock.html</filename>
   </compound>
   <compound kind="class">
     <name>IcmpDestinationUnreachableCodes</name>
@@ -679,6 +947,10 @@
   <compound kind="class">
     <name>IcmpParameterProblemSubcodes</name>
     <filename>src-inet-networklayer-ipv4-IcmpParameterProblemSubcodes.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>IcmpPtb</name>
+    <filename>src-inet-networklayer-ipv4-IcmpPtb.html</filename>
   </compound>
   <compound kind="class">
     <name>IcmpRedirectSubcodes</name>
@@ -737,6 +1009,10 @@
     <filename>src-inet-networklayer-icmpv6-Icmpv6Type.html</filename>
   </compound>
   <compound kind="class">
+    <name>IdentityTag</name>
+    <filename>src-inet-common-IdentityTag.html</filename>
+  </compound>
+  <compound kind="class">
     <name>Ieee80211AckFrame</name>
     <filename>src-inet-linklayer-ieee80211-mac-Ieee80211AckFrame.html</filename>
   </compound>
@@ -754,7 +1030,7 @@
   </compound>
   <compound kind="class">
     <name>Ieee80211ArithmeticalBand</name>
-    <filename>src-inet-physicallayer-ieee80211-mode-Ieee80211ArithmeticalBand.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-mode-Ieee80211ArithmeticalBand.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211AssociationRequestFrame</name>
@@ -798,19 +1074,19 @@
   </compound>
   <compound kind="class">
     <name>Ieee80211Channel</name>
-    <filename>src-inet-physicallayer-ieee80211-mode-Ieee80211Channel.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-mode-Ieee80211Channel.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211ChannelInd</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211ChannelInd.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211ChannelInd.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211ChannelReq</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211ChannelReq.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211ChannelReq.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211ChannelTagBase</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211ChannelTagBase.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211ChannelTagBase.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211CompressedBlockAck</name>
@@ -822,7 +1098,7 @@
   </compound>
   <compound kind="class">
     <name>Ieee80211ConfigureRadioCommand</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211ConfigureRadioCommand.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211ConfigureRadioCommand.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211CtsFrame</name>
@@ -846,7 +1122,7 @@
   </compound>
   <compound kind="class">
     <name>Ieee80211DimensionalTransmission</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211DimensionalTransmission.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211DimensionalTransmission.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211DisassociationFrame</name>
@@ -854,35 +1130,31 @@
   </compound>
   <compound kind="class">
     <name>Ieee80211DsssPhyHeader</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211DsssPhyHeader.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211DsssPhyHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211DsssPhyPreamble</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211DsssPhyPreamble.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211DsssPhyPreamble.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211EnumeratedBand</name>
-    <filename>src-inet-physicallayer-ieee80211-mode-Ieee80211EnumeratedBand.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-mode-Ieee80211EnumeratedBand.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211ErpOfdmPhyHeader</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211ErpOfdmPhyHeader.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211ErpOfdmPhyHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211ErpOfdmPhyPreamble</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211ErpOfdmPhyPreamble.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>Ieee80211EtherTypeHeader</name>
-    <filename>src-inet-linklayer-ieee80211-llc-Ieee80211EtherTypeHeader.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211ErpOfdmPhyPreamble.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211FhssPhyHeader</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211FhssPhyHeader.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211FhssPhyHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211FhssPhyPreamble</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211FhssPhyPreamble.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211FhssPhyPreamble.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211FrameType</name>
@@ -894,19 +1166,19 @@
   </compound>
   <compound kind="class">
     <name>Ieee80211HrDsssPhyHeader</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211HrDsssPhyHeader.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211HrDsssPhyHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211HrDsssPhyPreamble</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211HrDsssPhyPreamble.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211HrDsssPhyPreamble.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211HtPhyHeader</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211HtPhyHeader.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211HtPhyHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211HtPhyPreamble</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211HtPhyPreamble.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211HtPhyPreamble.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211HwmpCode</name>
@@ -914,11 +1186,11 @@
   </compound>
   <compound kind="class">
     <name>Ieee80211IrPhyHeader</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211IrPhyHeader.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211IrPhyHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211IrPhyPreamble</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211IrPhyPreamble.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211IrPhyPreamble.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211MacHeader</name>
@@ -938,19 +1210,19 @@
   </compound>
   <compound kind="class">
     <name>Ieee80211ModeInd</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211ModeInd.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211ModeInd.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211ModeReq</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211ModeReq.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211ModeReq.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211ModeSet</name>
-    <filename>src-inet-physicallayer-ieee80211-mode-Ieee80211ModeSet.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-mode-Ieee80211ModeSet.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211ModeTagBase</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211ModeTagBase.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211ModeTagBase.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211MpduSubframeHeader</name>
@@ -970,15 +1242,15 @@
   </compound>
   <compound kind="class">
     <name>Ieee80211OfdmModulation</name>
-    <filename>src-inet-physicallayer-ieee80211-mode-Ieee80211OfdmModulation.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-mode-Ieee80211OfdmModulation.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211OfdmPhyHeader</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211OfdmPhyHeader.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211OfdmPhyHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211OfdmPhyPreamble</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211OfdmPhyPreamble.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211OfdmPhyPreamble.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211OneAddressHeader</name>
@@ -986,11 +1258,11 @@
   </compound>
   <compound kind="class">
     <name>Ieee80211PhyHeader</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211PhyHeader.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211PhyHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211PhyPreamble</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211PhyPreamble.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211PhyPreamble.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211Prim_AssociateConfirm</name>
@@ -1082,7 +1354,7 @@
   </compound>
   <compound kind="class">
     <name>Ieee80211ScalarTransmission</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211ScalarTransmission.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211ScalarTransmission.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211StatusCode</name>
@@ -1110,19 +1382,43 @@
   </compound>
   <compound kind="class">
     <name>Ieee80211VhtPhyHeader</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211VhtPhyHeader.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211VhtPhyHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee80211VhtPhyPreamble</name>
-    <filename>src-inet-physicallayer-ieee80211-packetlevel-Ieee80211VhtPhyPreamble.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-packetlevel-Ieee80211VhtPhyPreamble.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee802154MacHeader</name>
     <filename>src-inet-linklayer-ieee802154-Ieee802154MacHeader.html</filename>
   </compound>
   <compound kind="class">
-    <name>Ieee8021qHeader</name>
-    <filename>src-inet-linklayer-ieee8021q-Ieee8021qHeader.html</filename>
+    <name>Ieee8021aeTagEpdHeader</name>
+    <filename>src-inet-linklayer-ieee8021ae-Ieee8021aeTagEpdHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ieee8021aeTagTpidHeader</name>
+    <filename>src-inet-linklayer-ieee8021ae-Ieee8021aeTagTpidHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ieee8021qBindCommand</name>
+    <filename>src-inet-linklayer-ieee8021q-Ieee8021qBindCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ieee8021qTagEpdHeader</name>
+    <filename>src-inet-linklayer-ieee8021q-Ieee8021qTagEpdHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ieee8021qTagTpidHeader</name>
+    <filename>src-inet-linklayer-ieee8021q-Ieee8021qTagTpidHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ieee8021rTagEpdHeader</name>
+    <filename>src-inet-linklayer-ieee8021r-Ieee8021rTagEpdHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ieee8021rTagTpidHeader</name>
+    <filename>src-inet-linklayer-ieee8021r-Ieee8021rTagTpidHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee8022LlcHeader</name>
@@ -1133,32 +1429,16 @@
     <filename>src-inet-linklayer-ieee8022-Ieee8022LlcSnapHeader.html</filename>
   </compound>
   <compound kind="class">
-    <name>Ieee8022LlcSocketCloseCommand</name>
-    <filename>src-inet-linklayer-ieee8022-Ieee8022LlcSocketCloseCommand.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>Ieee8022LlcSocketClosedIndication</name>
-    <filename>src-inet-linklayer-ieee8022-Ieee8022LlcSocketClosedIndication.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>Ieee8022LlcSocketCommand</name>
-    <filename>src-inet-linklayer-ieee8022-Ieee8022LlcSocketCommand.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>Ieee8022LlcSocketCommandCode</name>
-    <filename>src-inet-linklayer-ieee8022-Ieee8022LlcSocketCommandCode.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>Ieee8022LlcSocketDestroyCommand</name>
-    <filename>src-inet-linklayer-ieee8022-Ieee8022LlcSocketDestroyCommand.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>Ieee8022LlcSocketIndicationCode</name>
-    <filename>src-inet-linklayer-ieee8022-Ieee8022LlcSocketIndicationCode.html</filename>
-  </compound>
-  <compound kind="class">
     <name>Ieee8022LlcSocketOpenCommand</name>
     <filename>src-inet-linklayer-ieee8022-Ieee8022LlcSocketOpenCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ieee8022SnapHeader</name>
+    <filename>src-inet-linklayer-ieee8022-Ieee8022SnapHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>Ieee802EpdHeader</name>
+    <filename>src-inet-linklayer-ieee802-Ieee802EpdHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>Ieee802MessageKind</name>
@@ -1226,31 +1506,31 @@
   </compound>
   <compound kind="class">
     <name>IIeee80211Band</name>
-    <filename>src-inet-physicallayer-ieee80211-mode-IIeee80211Band.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-mode-IIeee80211Band.html</filename>
   </compound>
   <compound kind="class">
     <name>IIeee80211DataMode</name>
-    <filename>src-inet-physicallayer-ieee80211-mode-IIeee80211DataMode.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-mode-IIeee80211DataMode.html</filename>
   </compound>
   <compound kind="class">
     <name>IIeee80211HeaderMode</name>
-    <filename>src-inet-physicallayer-ieee80211-mode-IIeee80211HeaderMode.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-mode-IIeee80211HeaderMode.html</filename>
   </compound>
   <compound kind="class">
     <name>IIeee80211Mode</name>
-    <filename>src-inet-physicallayer-ieee80211-mode-IIeee80211Mode.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-mode-IIeee80211Mode.html</filename>
   </compound>
   <compound kind="class">
     <name>IIeee80211PreambleMode</name>
-    <filename>src-inet-physicallayer-ieee80211-mode-IIeee80211PreambleMode.html</filename>
+    <filename>src-inet-physicallayer-wireless-ieee80211-mode-IIeee80211PreambleMode.html</filename>
   </compound>
   <compound kind="class">
     <name>IListening</name>
-    <filename>src-inet-physicallayer-common-packetlevel-IListening.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-signal-IListening.html</filename>
   </compound>
   <compound kind="class">
     <name>IModulation</name>
-    <filename>src-inet-physicallayer-contract-packetlevel-IModulation.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-contract-packetlevel-IModulation.html</filename>
   </compound>
   <compound kind="class">
     <name>Indication</name>
@@ -1259,10 +1539,6 @@
   <compound kind="class">
     <name>InProgressFrames</name>
     <filename>src-inet-linklayer-ieee80211-mac-queue-InProgressFrames.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>NetworkInterface</name>
-    <filename>src-inet-networklayer-common-NetworkInterface.html</filename>
   </compound>
   <compound kind="class">
     <name>InterfaceInd</name>
@@ -1534,11 +1810,11 @@
   </compound>
   <compound kind="class">
     <name>IReception</name>
-    <filename>src-inet-physicallayer-common-packetlevel-IReception.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-signal-IReception.html</filename>
   </compound>
   <compound kind="class">
     <name>ITransmission</name>
-    <filename>src-inet-physicallayer-common-packetlevel-ITransmission.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-signal-ITransmission.html</filename>
   </compound>
   <compound kind="class">
     <name>JoinPruneGroup</name>
@@ -1746,11 +2022,11 @@
   </compound>
   <compound kind="class">
     <name>NarrowbandReceptionBase</name>
-    <filename>src-inet-physicallayer-base-packetlevel-NarrowbandReceptionBase.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-base-packetlevel-NarrowbandReceptionBase.html</filename>
   </compound>
   <compound kind="class">
     <name>NarrowbandTransmissionBase</name>
-    <filename>src-inet-physicallayer-base-packetlevel-NarrowbandTransmissionBase.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-base-packetlevel-NarrowbandTransmissionBase.html</filename>
   </compound>
   <compound kind="class">
     <name>NatMessage</name>
@@ -1767,6 +2043,10 @@
   <compound kind="class">
     <name>NetworkHeaderBase</name>
     <filename>src-inet-networklayer-contract-NetworkHeaderBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>NetworkInterface</name>
+    <filename>src-inet-networklayer-common-NetworkInterface.html</filename>
   </compound>
   <compound kind="class">
     <name>NetworkProtocolInd</name>
@@ -1981,6 +2261,10 @@
     <filename>src-inet-routing-ospfv3-Ospfv3RouterLsaType.html</filename>
   </compound>
   <compound kind="class">
+    <name>OverdueClockEventHandlingMode</name>
+    <filename>src-inet-clock-common-OverdueClockEventHandlingMode.html</filename>
+  </compound>
+  <compound kind="class">
     <name>Packet</name>
     <filename>src-inet-common-packet-Packet.html</filename>
   </compound>
@@ -2001,16 +2285,52 @@
     <filename>src-inet-common-PacketDropReason.html</filename>
   </compound>
   <compound kind="class">
+    <name>PacketEvent</name>
+    <filename>src-inet-common-PacketEvent.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>PacketEventKind</name>
+    <filename>src-inet-common-PacketEventKind.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>PacketEventTag</name>
+    <filename>src-inet-common-PacketEventTag.html</filename>
+  </compound>
+  <compound kind="class">
     <name>PacketHolderMessage</name>
     <filename>src-inet-routing-aodv-PacketHolderMessage.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>PacketJitterTimer</name>
+    <filename>src-inet-routing-dymo-PacketJitterTimer.html</filename>
   </compound>
   <compound kind="class">
     <name>PacketProtocolTag</name>
     <filename>src-inet-common-PacketProtocolTag.html</filename>
   </compound>
   <compound kind="class">
+    <name>PacketQueuedEvent</name>
+    <filename>src-inet-common-PacketQueuedEvent.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>PacketTransmittedEvent</name>
+    <filename>src-inet-common-PacketTransmittedEvent.html</filename>
+  </compound>
+  <compound kind="class">
     <name>PathNotifyMsg</name>
     <filename>src-inet-networklayer-rsvpte-PathNotifyMsg.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>PcpInd</name>
+    <filename>src-inet-linklayer-common-PcpInd.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>PcpReq</name>
+    <filename>src-inet-linklayer-common-PcpReq.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>PcpTagBase</name>
+    <filename>src-inet-linklayer-common-PcpTagBase.html</filename>
   </compound>
   <compound kind="class">
     <name>PhysicalObject</name>
@@ -2061,6 +2381,10 @@
     <filename>src-inet-applications-pingapp-PingSelfKinds.html</filename>
   </compound>
   <compound kind="class">
+    <name>PortIdentity</name>
+    <filename>src-inet-linklayer-ieee8021as-PortIdentity.html</filename>
+  </compound>
+  <compound kind="class">
     <name>PppHeader</name>
     <filename>src-inet-linklayer-ppp-PppHeader.html</filename>
   </compound>
@@ -2073,8 +2397,28 @@
     <filename>src-inet-networklayer-probabilistic-ProbabilisticBroadcastHeader.html</filename>
   </compound>
   <compound kind="class">
+    <name>ProcessingTimeTag</name>
+    <filename>src-inet-common-ProcessingTimeTag.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>ProgressTag</name>
+    <filename>src-inet-queueing-common-ProgressTag.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>PropagationTimeTag</name>
+    <filename>src-inet-common-PropagationTimeTag.html</filename>
+  </compound>
+  <compound kind="class">
     <name>Protocol</name>
     <filename>src-inet-common-Protocol.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>ProtocolHeader</name>
+    <filename>src-inet-protocolelement-dispatching-ProtocolHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>ProtocolListTagBase</name>
+    <filename>src-inet-common-ProtocolListTagBase.html</filename>
   </compound>
   <compound kind="class">
     <name>ProtocolTagBase</name>
@@ -2093,12 +2437,16 @@
     <filename>src-inet-common-geometry-Quaternion.html</filename>
   </compound>
   <compound kind="class">
+    <name>QueueingTimeTag</name>
+    <filename>src-inet-common-QueueingTimeTag.html</filename>
+  </compound>
+  <compound kind="class">
     <name>rad</name>
     <filename>src-inet-common-rad.html</filename>
   </compound>
   <compound kind="class">
     <name>RadioCommandCode</name>
-    <filename>src-inet-physicallayer-contract-packetlevel-RadioCommandCode.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-contract-packetlevel-RadioCommandCode.html</filename>
   </compound>
   <compound kind="class">
     <name>RateTag</name>
@@ -2114,15 +2462,11 @@
   </compound>
   <compound kind="class">
     <name>ReceptionBase</name>
-    <filename>src-inet-physicallayer-base-packetlevel-ReceptionBase.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-base-packetlevel-ReceptionBase.html</filename>
   </compound>
   <compound kind="class">
     <name>ReceptionReport</name>
     <filename>src-inet-transportlayer-rtp-ReceptionReport.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>RegionTagSet::cObjectRegionTag</name>
-    <filename>src-inet-common-packet-chunk-RegionTagSet::cObjectRegionTag.html</filename>
   </compound>
   <compound kind="class">
     <name>ReorderBuffer</name>
@@ -2139,6 +2483,10 @@
   <compound kind="class">
     <name>Rerr</name>
     <filename>src-inet-routing-dymo-Rerr.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>ResidenceTimeTag</name>
+    <filename>src-inet-common-ResidenceTimeTag.html</filename>
   </compound>
   <compound kind="class">
     <name>RipAf</name>
@@ -2390,11 +2738,11 @@
   </compound>
   <compound kind="class">
     <name>ScalarReception</name>
-    <filename>src-inet-physicallayer-analogmodel-packetlevel-ScalarReception.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-analogmodel-packetlevel-ScalarReception.html</filename>
   </compound>
   <compound kind="class">
     <name>ScalarTransmission</name>
-    <filename>src-inet-physicallayer-analogmodel-packetlevel-ScalarTransmission.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-analogmodel-packetlevel-ScalarTransmission.html</filename>
   </compound>
   <compound kind="class">
     <name>ScenarioTimer</name>
@@ -2431,6 +2779,10 @@
   <compound kind="class">
     <name>SctpChunk</name>
     <filename>src-inet-transportlayer-sctp-SctpChunk.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>SctpCommandCode</name>
+    <filename>src-inet-transportlayer-contract-sctp-SctpCommandCode.html</filename>
   </compound>
   <compound kind="class">
     <name>SctpCommandReq</name>
@@ -2475,6 +2827,10 @@
   <compound kind="class">
     <name>SctpErrorCode</name>
     <filename>src-inet-transportlayer-contract-sctp-SctpErrorCode.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>SctpFlags</name>
+    <filename>src-inet-transportlayer-contract-sctp-SctpFlags.html</filename>
   </compound>
   <compound kind="class">
     <name>SctpForwardTsnChunk</name>
@@ -2589,6 +2945,10 @@
     <filename>src-inet-transportlayer-sctp-SctpSsnTsnResetRequestParameter.html</filename>
   </compound>
   <compound kind="class">
+    <name>SctpStatusInd</name>
+    <filename>src-inet-transportlayer-contract-sctp-SctpStatusInd.html</filename>
+  </compound>
+  <compound kind="class">
     <name>SctpStatusReq</name>
     <filename>src-inet-transportlayer-contract-sctp-SctpStatusReq.html</filename>
   </compound>
@@ -2629,8 +2989,24 @@
     <filename>src-inet-common-packet-chunk-SequenceChunk.html</filename>
   </compound>
   <compound kind="class">
-    <name>SequenceNumber</name>
-    <filename>src-inet-linklayer-ieee80211-mac-SequenceNumber.html</filename>
+    <name>SequenceNumberCyclic</name>
+    <filename>src-inet-linklayer-ieee80211-mac-SequenceNumberCyclic.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>SequenceNumberHeader</name>
+    <filename>src-inet-protocolelement-ordering-SequenceNumberHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>SequenceNumberInd</name>
+    <filename>src-inet-protocolelement-redundancy-SequenceNumberInd.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>SequenceNumberReq</name>
+    <filename>src-inet-protocolelement-redundancy-SequenceNumberReq.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>SequenceNumberTagBase</name>
+    <filename>src-inet-protocolelement-redundancy-SequenceNumberTagBase.html</filename>
   </compound>
   <compound kind="class">
     <name>ServicePrimitive</name>
@@ -2641,40 +3017,44 @@
     <filename>src-inet-networklayer-rsvpte-SessionObj.html</filename>
   </compound>
   <compound kind="class">
+    <name>SharingRegionTagSet::TagBaseRegionTag</name>
+    <filename>src-inet-common-packet-chunk-SharingRegionTagSet::TagBaseRegionTag.html</filename>
+  </compound>
+  <compound kind="class">
     <name>ShortcutMacHeader</name>
     <filename>src-inet-linklayer-shortcut-ShortcutMacHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>ShortcutPhyHeader</name>
-    <filename>src-inet-physicallayer-shortcut-ShortcutPhyHeader.html</filename>
+    <filename>src-inet-physicallayer-wireless-shortcut-ShortcutPhyHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>Signal</name>
-    <filename>src-inet-physicallayer-common-packetlevel-Signal.html</filename>
+    <filename>src-inet-physicallayer-common-Signal.html</filename>
   </compound>
   <compound kind="class">
     <name>SignalBandInd</name>
-    <filename>src-inet-physicallayer-contract-packetlevel-SignalBandInd.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-contract-packetlevel-SignalBandInd.html</filename>
   </compound>
   <compound kind="class">
     <name>SignalBandReq</name>
-    <filename>src-inet-physicallayer-contract-packetlevel-SignalBandReq.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-contract-packetlevel-SignalBandReq.html</filename>
   </compound>
   <compound kind="class">
     <name>SignalBandTagBase</name>
-    <filename>src-inet-physicallayer-contract-packetlevel-SignalBandTagBase.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-contract-packetlevel-SignalBandTagBase.html</filename>
   </compound>
   <compound kind="class">
     <name>SignalBitrateInd</name>
-    <filename>src-inet-physicallayer-contract-packetlevel-SignalBitrateInd.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-contract-packetlevel-SignalBitrateInd.html</filename>
   </compound>
   <compound kind="class">
     <name>SignalBitrateReq</name>
-    <filename>src-inet-physicallayer-contract-packetlevel-SignalBitrateReq.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-contract-packetlevel-SignalBitrateReq.html</filename>
   </compound>
   <compound kind="class">
     <name>SignalBitrateTagBase</name>
-    <filename>src-inet-physicallayer-contract-packetlevel-SignalBitrateTagBase.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-contract-packetlevel-SignalBitrateTagBase.html</filename>
   </compound>
   <compound kind="class">
     <name>SignallingConstants</name>
@@ -2686,23 +3066,23 @@
   </compound>
   <compound kind="class">
     <name>SignalPowerInd</name>
-    <filename>src-inet-physicallayer-contract-packetlevel-SignalPowerInd.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-contract-packetlevel-SignalPowerInd.html</filename>
   </compound>
   <compound kind="class">
     <name>SignalPowerReq</name>
-    <filename>src-inet-physicallayer-contract-packetlevel-SignalPowerReq.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-contract-packetlevel-SignalPowerReq.html</filename>
   </compound>
   <compound kind="class">
     <name>SignalPowerTagBase</name>
-    <filename>src-inet-physicallayer-contract-packetlevel-SignalPowerTagBase.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-contract-packetlevel-SignalPowerTagBase.html</filename>
   </compound>
   <compound kind="class">
     <name>SignalTagBase</name>
-    <filename>src-inet-physicallayer-contract-packetlevel-SignalTagBase.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-contract-packetlevel-SignalTagBase.html</filename>
   </compound>
   <compound kind="class">
     <name>SignalTimeInd</name>
-    <filename>src-inet-physicallayer-contract-packetlevel-SignalTimeInd.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-contract-packetlevel-SignalTimeInd.html</filename>
   </compound>
   <compound kind="class">
     <name>SimpleVoipPacket</name>
@@ -2714,19 +3094,63 @@
   </compound>
   <compound kind="class">
     <name>SnirInd</name>
-    <filename>src-inet-physicallayer-contract-packetlevel-SnirInd.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-contract-packetlevel-SnirInd.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>SocketBindCommand</name>
+    <filename>src-inet-common-socket-SocketBindCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>SocketCloseCommand</name>
+    <filename>src-inet-common-socket-SocketCloseCommand.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>SocketClosedIndication</name>
+    <filename>src-inet-common-socket-SocketClosedIndication.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>SocketCommandBase</name>
+    <filename>src-inet-common-socket-SocketCommandBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>SocketCommandCode</name>
+    <filename>src-inet-common-socket-SocketCommandCode.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>SocketDestroyCommand</name>
+    <filename>src-inet-common-socket-SocketDestroyCommand.html</filename>
   </compound>
   <compound kind="class">
     <name>SocketInd</name>
-    <filename>src-inet-applications-common-SocketInd.html</filename>
+    <filename>src-inet-common-socket-SocketInd.html</filename>
   </compound>
   <compound kind="class">
     <name>SocketReq</name>
-    <filename>src-inet-applications-common-SocketReq.html</filename>
+    <filename>src-inet-common-socket-SocketReq.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>SocketStatusInd</name>
+    <filename>src-inet-common-socket-SocketStatusInd.html</filename>
   </compound>
   <compound kind="class">
     <name>SocketTagBase</name>
-    <filename>src-inet-applications-common-SocketTagBase.html</filename>
+    <filename>src-inet-common-socket-SocketTagBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>StreamInd</name>
+    <filename>src-inet-protocolelement-redundancy-StreamInd.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>StreamReq</name>
+    <filename>src-inet-protocolelement-redundancy-StreamReq.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>StreamTagBase</name>
+    <filename>src-inet-protocolelement-redundancy-StreamTagBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>SubpacketLengthHeader</name>
+    <filename>src-inet-protocolelement-aggregation-header-SubpacketLengthHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>TagBase</name>
@@ -2873,6 +3297,10 @@
     <filename>src-inet-networklayer-ipv4-TimestampFlag.html</filename>
   </compound>
   <compound kind="class">
+    <name>TimeTagBase</name>
+    <filename>src-inet-common-TimeTagBase.html</filename>
+  </compound>
+  <compound kind="class">
     <name>TlvOptionBase</name>
     <filename>src-inet-common-TlvOptionBase.html</filename>
   </compound>
@@ -2898,7 +3326,11 @@
   </compound>
   <compound kind="class">
     <name>TransmissionBase</name>
-    <filename>src-inet-physicallayer-base-packetlevel-TransmissionBase.html</filename>
+    <filename>src-inet-physicallayer-wireless-common-base-packetlevel-TransmissionBase.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>TransmissionTimeTag</name>
+    <filename>src-inet-common-TransmissionTimeTag.html</filename>
   </compound>
   <compound kind="class">
     <name>TransmitStep</name>
@@ -3058,11 +3490,11 @@
   </compound>
   <compound kind="class">
     <name>UnitDiskPhyHeader</name>
-    <filename>src-inet-physicallayer-unitdisk-UnitDiskPhyHeader.html</filename>
+    <filename>src-inet-physicallayer-wireless-unitdisk-UnitDiskPhyHeader.html</filename>
   </compound>
   <compound kind="class">
     <name>UnitDiskTransmission</name>
-    <filename>src-inet-physicallayer-unitdisk-UnitDiskTransmission.html</filename>
+    <filename>src-inet-physicallayer-wireless-unitdisk-UnitDiskTransmission.html</filename>
   </compound>
   <compound kind="class">
     <name>UnreachableNode</name>
@@ -3109,8 +3541,16 @@
     <filename>src-inet-routing-aodv-WaitForRrep.html</filename>
   </compound>
   <compound kind="class">
+    <name>WirelessSignal</name>
+    <filename>src-inet-physicallayer-wireless-common-signal-WirelessSignal.html</filename>
+  </compound>
+  <compound kind="class">
     <name>WiseRouteHeader</name>
     <filename>src-inet-networklayer-wiseroute-WiseRouteHeader.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>WiseRouteMsgType</name>
+    <filename>src-inet-networklayer-wiseroute-WiseRouteMsgType.html</filename>
   </compound>
   <compound kind="class">
     <name>XMacControlFrame</name>
