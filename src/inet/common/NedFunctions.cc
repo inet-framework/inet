@@ -46,7 +46,7 @@ Define_NED_Function2(nedf_hasVisualizer,
 
 cNEDValue nedf_hasModule(cComponent *context, cNEDValue argv[], int argc)
 {
-    cRegistrationList *types = componentTypes.getInstance();
+    cRegistrationList *types = OMNETPP6_CODE(omnetpp::internal::)componentTypes.getInstance();
     if (argv[0].getType() != cNEDValue::STR)
         throw cRuntimeError("hasModule(): string arguments expected");
     const char *name = argv[0].stringValue();
@@ -68,7 +68,7 @@ Define_NED_Function2(nedf_hasModule,
 
 cNEDValue nedf_haveClass(cComponent *context, cNEDValue argv[], int argc)
 {
-    return classes.getInstance()->lookup(argv[0].stringValue()) != nullptr;
+    return OMNETPP6_CODE(omnetpp::internal::)classes.getInstance()->lookup(argv[0].stringValue()) != nullptr;
 }
 
 Define_NED_Function2(nedf_haveClass,
@@ -170,7 +170,7 @@ Define_NED_Function2(nedf_absPath,
 
 cNEDValue nedf_firstAvailableOrEmpty(cComponent *context, cNEDValue argv[], int argc)
 {
-    cRegistrationList *types = componentTypes.getInstance();
+    cRegistrationList *types = OMNETPP6_CODE(omnetpp::internal::)componentTypes.getInstance();
     for (int i=0; i<argc; i++)
     {
         if (argv[i].getType() != cNEDValue::STR)
