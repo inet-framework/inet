@@ -81,14 +81,19 @@ void UdpSocketIo::setSocketOptions()
     if (tos != -1)
         socket.setTos(tos);
 
-    const char *multicastInterface = par("multicastInterface");
-    if (multicastInterface[0]) {
+    NetworkInterface *multicastInterface = nullptr;
+    const char *multicastInterfaceName = par("multicastInterface");
+    if (multicastInterfaceName[0]) {
         IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        NetworkInterface *ie = ift->findInterfaceByName(multicastInterface);
-        if (!ie)
-            throw cRuntimeError("Wrong multicastInterface setting: no interface named \"%s\"", multicastInterface);
-        socket.setMulticastOutputInterface(ie->getInterfaceId());
+        multicastInterface = ift->findInterfaceByName(multicastInterfaceName);
+        if (!multicastInterface)
+            throw cRuntimeError("Wrong multicastInterface setting: no interface named \"%s\"", multicastInterfaceName);
+        socket.setMulticastOutputInterface(multicastInterface->getInterfaceId());
     }
+
+    auto multicastAddresses = check_and_cast<cValueArray *>(par("multicastAddresses").objectValue());
+    for (int i = 0; i < multicastAddresses->size(); i++)
+        socket.joinMulticastGroup(Ipv4Address(multicastAddresses->get(0).stringValue()), multicastInterface != nullptr ? multicastInterface->getInterfaceId() : -1);
 
     bool receiveBroadcast = par("receiveBroadcast");
     if (receiveBroadcast)
@@ -125,8 +130,8 @@ void UdpSocketIo::socketClosed(UdpSocket *socket)
 
 void UdpSocketIo::handleStartOperation(LifecycleOperation *operation)
 {
-    setSocketOptions();
     socket.setOutputGate(gate("socketOut"));
+    setSocketOptions();
     const char *localAddress = par("localAddress");
     socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), par("localPort"));
     const char *destAddrs = par("destAddress");
