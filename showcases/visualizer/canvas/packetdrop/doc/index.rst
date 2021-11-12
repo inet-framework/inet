@@ -30,9 +30,9 @@ the node icon and fades away.
 The visualization of packet drops can be enabled with the visualizer's
 :par:`displayPacketDrops` parameter. By default, all packet drops at all nodes
 are visualized. This selection can be narrowed with the :par:`nodeFilter`,
-:par:`interfaceFilter` and :par:`packetFilter` parameters, which match for node, interface and packet names.
-Additionally, the :par:`packetDataFilter` parameter can be used to filter for packet data contents,
-and the :par:`detailsFilter` parameter to filter for packet drop reason.
+:par:`interfaceFilter` and :par:`packetFilter` parameters, which match for node, interface and packet.
+(The :par:`packetFilter` can filter for packet properties, such as name, fields, chunks, protocol headers, etc.)
+Additionally, and the :par:`detailsFilter` parameter to filter for packet drop reason.
 
 The :par:`packetFormat` parameter is a format string and specifies the text displayed with the packet drop animation.
 By default, the dropped packet's name is displayed.

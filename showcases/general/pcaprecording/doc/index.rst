@@ -53,24 +53,21 @@ By default, the PCAP recorder module records L2 frames, but setting the
 frames (note that the parameter's value is lowercase because it refers
 to the actual ``ipv4`` module in the host, not the module type.)
 
-Additionally, there are two packet filtering parameters. The
-:par:`packetFilter` parameter can filter for the packet class and its
-properties, most commonly the packet's name. The :par:`packetDataFilter`
-parameter can filter for the packet's contents, i.e. the contained
-chunks. Specifically, it can filter for class names of protocol headers,
-and their fields. The expression given as the parameter's value is
-evaluated for all chunks, and the set of recorded packets are narrowed
-to the ones that match the expression. The default value of both
-parameters is ``*``, thus no packets are filtered. See the following
-sections for examples.
+Additionally, the :par:`packetFilter` parameter can use an expression
+to filter packets. The expression is evaluated for all packets to
+a boolean value indicating a match. The expression can contain the packet's
+fields (such as its name), contained chunks and their fields, protocol
+headers, etc. The default value is ``true`` that matches all packets, 
+thus no packets are filtered.  For more information on the packet filter, 
+refer to the TODO section in the INET User's Guide.
 
 To summarize: the :par:`moduleNamePatterns` parameter specifies which
 modules' outputs should be captured. The :par:`pcapNetwork` parameter sets
 the link-layer header type according to the captured module outputs, so
 PCAP programs can interpret the PCAP file correctly. The
 :par:`dumpProtocols` parameter can narrow the set of recorded protocols at
-the level of capture. The :par:`packetFilter` and :par:`packetDataFilter`
-parameters can further narrow the set of captured packets.
+the level of capture. The :par:`packetFilter` parameter can further 
+narrow the set of captured packets.
 
 The configuration
 ~~~~~~~~~~~~~~~~~
@@ -136,15 +133,15 @@ headers:
 
 In ``host2``, we'll record only the ARP packets from the 802.11 traffic
 on ``wlan0``. The link-layer header type is set to 802.11, and the
-:par:`packetDataFilter` is set to record only to packets of ``ArpPacket``
+:par:`packetFilter` is set to record only to packets of ``ArpPacket``
 class:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: host2.numPcapRecorders
-   :end-at: packetDataFilter
+   :end-at: packetFilter
 
-The :par:`packetDataFilter` parameter's value ``*ArpPacket`` matches the
+The :par:`packetFilter` parameter's value ``*ArpPacket`` matches the
 ``inet::ArpPacket`` class. There is an ARP request packet open in the
 packet inspector on the following image:
 
@@ -266,7 +263,7 @@ TCP data packet, in ``ethHost2``, recorded at the IPv4 module (sent from
 
 The following images are the PCAP traces from ``host2`` and ``router2``,
 where the set of recorded packets were narrowed with
-:par:`packetDataFilter`.
+:par:`packetFilter`.
 
 The ARP packets from ``host2``:
 

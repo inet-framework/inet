@@ -37,8 +37,7 @@ The features above will be described in more detail in the following
 sections. The scope of the visualization can be adjusted with parameters
 as well. By default, all packets, interfaces, and nodes are considered
 for the visualization. The selection can be narrowed with the
-visualizer's :par:`packetFilter`, :par:`packetDataFilter`,
-:par:`interfaceFilter`, and :par:`nodeFilter` parameters. Note that one
+visualizer's :par:`packetFilter`, :par:`interfaceFilter`, and :par:`nodeFilter` parameters. Note that one
 :ned:`MediumVisualizer` module can only visualize signals of one radio
 medium module. For visualizing multiple radio medium modules, multiple
 :ned:`MediumVisualizer` modules are required.
