@@ -209,11 +209,11 @@ MacAddress GlobalArp::mapMulticastAddress(L3Address address)
     MacAddress macAddress;
     macAddress.setAddressByte(0, 0x01);
     macAddress.setAddressByte(1, 0x00);
-    macAddress.setAddressByte(2, 0x5e);
-    // TODO
-//    macAddress.setAddressByte(3, addr.getDByte(1) & 0x7f);
-//    macAddress.setAddressByte(4, addr.getDByte(2));
-//    macAddress.setAddressByte(5, addr.getDByte(3));
+    macAddress.setAddressByte(2, 0x5E);
+    Ipv4Address ipv4Address = address.toIpv4();
+    macAddress.setAddressByte(3, ipv4Address.getDByte(1) & 0x7F);
+    macAddress.setAddressByte(4, ipv4Address.getDByte(2));
+    macAddress.setAddressByte(5, ipv4Address.getDByte(3));
     return macAddress;
 }
 
