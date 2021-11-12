@@ -74,20 +74,24 @@ void HostAutoConfigurator::setupNetworkLayer()
     // look at all interface table entries
     cStringTokenizer interfaceTokenizer(interfaces.c_str());
     const char *ifname;
+    uint32_t loopbackAddr = Ipv4Address::LOOPBACK_ADDRESS.getInt();
     while ((ifname = interfaceTokenizer.nextToken()) != nullptr) {
         NetworkInterface *ie = interfaceTable->findInterfaceByName(ifname);
         if (!ie)
             throw cRuntimeError("No such interface '%s'", ifname);
 
+        auto ipv4Data = ie->getProtocolDataForUpdate<Ipv4InterfaceData>();
         // assign IP Address to all connected interfaces
         if (ie->isLoopback()) {
-            EV_INFO << "interface " << ifname << " skipped (is loopback)" << std::endl;
+            ipv4Data->setIPAddress(Ipv4Address(loopbackAddr++));
+            ipv4Data->setNetmask(Ipv4Address::LOOPBACK_NETMASK);
+            ipv4Data->setMetric(1);
+            EV_INFO << "loopback interface " << ifname << " gets " << ipv4Data->getIPAddress() << "/" << ipv4Data->getNetmask() << std::endl;
             continue;
         }
 
         EV_INFO << "interface " << ifname << " gets " << myAddress.str() << "/" << netmask.str() << std::endl;
 
-        auto ipv4Data = ie->getProtocolDataForUpdate<Ipv4InterfaceData>();
         ipv4Data->setIPAddress(myAddress);
         ipv4Data->setNetmask(netmask);
         ie->setBroadcast(true);
