@@ -7,6 +7,7 @@ else
     export INET_ROOT=$(pwd)
     echo $INET_ROOT
     export PATH=$INET_ROOT/bin:$PATH
+    export PYTHONPATH=$INET_ROOT/python:$PYTHONPATH
     export INET_OMNETPP_OPTIONS="--image-path=$INET_ROOT/images"
     export INET_GDB_OPTIONS="-quiet -ex run --args"
     export INET_VALGRIND_OPTIONS="-v --tool=memcheck --leak-check=yes --show-reachable=no --leak-resolution=high --num-callers=40 --freelist-vol=4000000"
