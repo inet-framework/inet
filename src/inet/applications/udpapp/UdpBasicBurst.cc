@@ -33,7 +33,7 @@ namespace inet {
 EXECUTE_ON_STARTUP(
         cEnum * e = cEnum::find("inet::ChooseDestAddrMode");
         if (!e)
-            enums.getInstance()->add(e = new cEnum("inet::ChooseDestAddrMode"));
+            OMNETPP6_CODE(omnetpp::internal::)enums.getInstance()->add(e = new cEnum("inet::ChooseDestAddrMode"));
         e->insert(UdpBasicBurst::ONCE, "once");
         e->insert(UdpBasicBurst::PER_BURST, "perBurst");
         e->insert(UdpBasicBurst::PER_SEND, "perSend");
