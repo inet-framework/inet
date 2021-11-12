@@ -13,7 +13,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.//
 //
 
-package inet.showcases.tsn.combiningfeatures.invechicle;
+package inet.showcases.tsn.combiningfeatures.invehicle;
 
 import inet.networks.base.TsnNetworkBase;
 import inet.node.contract.IEthernetNetworkNode;
@@ -89,7 +89,7 @@ network InVehicleNetworkShowcase extends TsnNetworkBase
         frontRightWheel: <> like IEthernetNetworkNode {
             @display("p=850,525");
         }
-        masterClock: <default("")> like IEthernetNetworkNode if typename != "" {
+        masterClock: <> like IEthernetNetworkNode if typename != "" {
             @display("p=625,400;i=device/card");
         }
     connections:

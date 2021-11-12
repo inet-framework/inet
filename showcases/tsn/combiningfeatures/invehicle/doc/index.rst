@@ -5,7 +5,7 @@ Goals
 -----
 
 In this example we demonstrate the combined features of Time-Sensitive Networking
-in a complex in-vechicle network. The network utilizes time-aware shaping, automatic
+in a complex in-vehicle network. The network utilizes time-aware shaping, automatic
 gate scheduling, clock drift, time synchronization, credit-based shaping, per-stream
 filtering and policying, stream redundancy, unicast and multicast streams, link
 failure protection, frame preemption, and cut-through switching.
