@@ -165,6 +165,7 @@ void StreamRedundancyConfigurator::computeStreamSendersAndReceivers(cValueMap *s
 
 void StreamRedundancyConfigurator::computeStreamEncodings(cValueMap *streamConfiguration)
 {
+    int pcp = streamConfiguration->containsKey("priority") ? streamConfiguration->get("priority").intValue() : -1;
     for (int i = 0; i < topology->getNumNodes(); i++) {
         auto node = (Node *)topology->getNode(i);
         auto networkNode = node->module;
@@ -198,6 +199,7 @@ void StreamRedundancyConfigurator::computeStreamEncodings(cValueMap *streamConfi
                     streamEncoding.name = outputStreamName;
                     streamEncoding.networkInterface = streamNode.interfaces[j][k];
                     streamEncoding.vlanId = vlanId;
+                    streamEncoding.pcp = pcp;
                     streamEncoding.destination = destinationAddress;
                     node->streamEncodings.push_back(streamEncoding);
                 }
@@ -334,20 +336,21 @@ void StreamRedundancyConfigurator::configureStreams(Node *node)
     }
     if (streamEncoder != nullptr && !node->streamEncodings.empty()) {
         cValueArray *parameterValue = new cValueArray();
-        std::map<std::string, int> mapping;
+        std::map<std::string, std::pair<int, int>> mapping;
         for (auto& streamEncoding : node->streamEncodings) {
             auto it = mapping.find(streamEncoding.name);
             if (it != mapping.end()) {
-                if (it->second != streamEncoding.vlanId)
+                if (it->second.first != streamEncoding.vlanId)
                     throw cRuntimeError("Invalid state");
             }
             else
-                mapping[streamEncoding.name] = streamEncoding.vlanId;
+                mapping[streamEncoding.name] = {streamEncoding.vlanId, streamEncoding.pcp};
         }
         for (auto& it : mapping) {
             cValueMap *value = new cValueMap();
             value->set("stream", it.first);
-            value->set("vlan", it.second);
+            value->set("vlan", it.second.first);
+            value->set("pcp", it.second.second);
             parameterValue->add(value);
         }
         EV_INFO << "Configuring stream encoding" << EV_FIELD(networkNode) << EV_FIELD(streamEncoder) << EV_FIELD(parameterValue) << EV_ENDL;

@@ -75,6 +75,7 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
     {
       public:
         std::string name;
+        int priority = -1;
         cValue packetFilter;
         std::string source;
         std::string destinationAddress;

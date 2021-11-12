@@ -58,6 +58,8 @@ void TsnConfigurator::computeStream(cValueMap *configuration)
     auto streamName = configuration->get("name").stringValue();
     StreamConfiguration streamConfiguration;
     streamConfiguration.name = streamName;
+    if (configuration->containsKey("priority"))
+        streamConfiguration.priority = configuration->get("priority").intValue();
     streamConfiguration.packetFilter = configuration->get("packetFilter");
     auto sourceNetworkNodeName = configuration->get("source").stringValue();
     streamConfiguration.source = sourceNetworkNodeName;
@@ -298,6 +300,7 @@ void TsnConfigurator::configureStreams() const
             cValueMap *streamParameterValue = new cValueMap();
             cValueArray *treesParameterValue = new cValueArray();
             streamParameterValue->set("name", streamConfiguration.name.c_str());
+            streamParameterValue->set("priority", streamConfiguration.priority);
             streamParameterValue->set("packetFilter", streamConfiguration.packetFilter);
             streamParameterValue->set("source", streamConfiguration.source.c_str());
             // TODO KLUDGE
@@ -345,7 +348,8 @@ void TsnConfigurator::configureStreams() const
                 streamParameterValue->set("application", streamConfiguration->get("application"));
                 streamParameterValue->set("source", source);
                 streamParameterValue->set("destination", destination);
-                streamParameterValue->set("priority", streamConfiguration->get("priority").intValue());
+                if (streamConfiguration->containsKey("priority"))
+                    streamParameterValue->set("priority", streamConfiguration->get("priority").intValue());
                 streamParameterValue->set("packetLength", cValue(streamConfiguration->get("packetLength").doubleValueInUnit("B"), "B"));
                 streamParameterValue->set("packetInterval", cValue(streamConfiguration->get("packetInterval").doubleValueInUnit("s"), "s"));
                 if (streamConfiguration->containsKey("maxLatency"))

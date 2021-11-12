@@ -61,6 +61,7 @@ class INET_API StreamRedundancyConfigurator : public NetworkConfiguratorBase
         NetworkInterface *networkInterface = nullptr;
         std::string destination;
         int vlanId = -1;
+        int pcp = -1;
     };
 
     /**
