@@ -72,7 +72,7 @@ void Ppp::initialize(int stage)
         subscribe(POST_MODEL_CHANGE, this);
         emit(transmissionStateChangedSignal, 0L);
 
-        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        txQueue = getQueue(gate(upperLayerInGateId));
     }
 }
 
@@ -170,9 +170,8 @@ void Ppp::refreshOutGateConnection(bool connected)
         networkInterface->setDatarate(datarate);
     }
 
-    if (connected && !endTransmissionEvent->isScheduled() && !txQueue->isEmpty()) {
-        popTxQueue();
-        startTransmitting();
+    if (connected && !endTransmissionEvent->isScheduled()) {
+        tryProcessUpperPackets();
     }
 }
 
@@ -227,10 +226,7 @@ void Ppp::handleSelfMessage(cMessage *message)
         // Transmission finished, we can start next one.
         EV_INFO << "Transmission successfully completed.\n";
         emit(transmissionStateChangedSignal, 0L);
-        if (!txQueue->isEmpty()) {
-            popTxQueue();
-            startTransmitting();
-        }
+        tryProcessUpperPackets();
     }
     else
         throw cRuntimeError("Unknown self message");
@@ -248,11 +244,10 @@ void Ppp::handleUpperPacket(Packet *packet)
         delete packet;
         return;
     }
-    txQueue->enqueuePacket(packet);
-    if (!endTransmissionEvent->isScheduled() && !txQueue->isEmpty()) {
-        popTxQueue();
-        startTransmitting();
-    }
+    if (currentTxFrame != nullptr)
+        throw cRuntimeError("PPP already in transmit state when packet arrived from upper layer");
+    currentTxFrame = packet;
+    startTransmitting();
 }
 
 void Ppp::handleLowerPacket(Packet *packet)
@@ -376,6 +371,44 @@ void Ppp::handleStopOperation(LifecycleOperation *operation)
         networkInterface->setState(NetworkInterface::State::DOWN);
         startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
     }
+}
+
+queueing::IPassivePacketSource *Ppp::getProvider(cGate *gate)
+{
+    return (gate->getId() == upperLayerInGateId) ? txQueue.get() : nullptr;
+}
+
+void Ppp::handleCanPullPacketChanged(cGate *gate)
+{
+    Enter_Method("handleCanPullPacketChanged");
+    tryProcessUpperPackets();
+}
+
+void Ppp::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePullPacketProcessed");
+    throw cRuntimeError("Not supported callback");
+}
+
+bool Ppp::canProcessUpperPacket() const
+{
+    return (currentTxFrame == nullptr    // not an active transmission
+            && txQueue->canPullSomePacket(gate(upperLayerInGateId)->getPathStartGate())
+            );
+}
+
+void Ppp::processUpperPacket()
+{
+    auto packet = txQueue->dequeuePacket();
+    packet->setArrival(getId(), upperLayerInGateId, simTime());
+    take(packet);
+    handleUpperPacket(packet);
+}
+
+void Ppp::tryProcessUpperPackets()
+{
+    while (canProcessUpperPacket())
+        processUpperPacket();
 }
 
 } // namespace inet
