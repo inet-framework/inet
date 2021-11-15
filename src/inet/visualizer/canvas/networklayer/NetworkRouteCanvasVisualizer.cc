@@ -17,6 +17,8 @@
 
 #include "inet/visualizer/canvas/networklayer/NetworkRouteCanvasVisualizer.h"
 
+#include "inet/protocolelement/common/PacketEmitter.h"
+
 #ifdef INET_WITH_ETHERNET
 #include "inet/linklayer/ethernet/common/MacRelayUnit.h"
 #endif
@@ -57,6 +59,10 @@ bool NetworkRouteCanvasVisualizer::isPathEnd(cModule *module) const
 
 bool NetworkRouteCanvasVisualizer::isPathElement(cModule *module) const
 {
+    // KLUDGE: for visualizing when using the layered Ethernet model
+    if (dynamic_cast<PacketEmitter *>(module) != nullptr)
+        return true;
+
 #ifdef INET_WITH_ETHERNET
     if (dynamic_cast<MacRelayUnit *>(module) != nullptr)
         return true;
