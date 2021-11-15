@@ -98,8 +98,13 @@ class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollecti
             simsignal_t deficitSig[maxHtbDepth]; // Signal for queue level statistics collection
             int queueId; // Id of the corresponding queue
         } leaf;
+        struct htbClassSetComp { // Comparator to sort the waiting classes according to their expected mode change time
+            bool operator()(htbClass* const & a, htbClass* const & b) const {
+                return a->name < b->name;
+            }
+        };
         struct htbClassInner { // Special class information for inner/root
-            std::set<htbClass*> innerFeeds[maxHtbNumPrio]; // Inner feeds of inner/root class
+            std::set<htbClass*, htbClassSetComp> innerFeeds[maxHtbNumPrio]; // Inner feeds of inner/root class
             htbClass* nextToDequeue[maxHtbNumPrio]; // DRR -> which class to dequeue next from inner feed
         } inner;
 
@@ -122,7 +127,7 @@ class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollecti
     // Struct for the tree level
     struct htbLevel {
         unsigned int levelId; // Level number. 0 = Leaf
-        std::set<htbClass*> selfFeeds[maxHtbNumPrio]; // Self feeds for each priority. Contain active green classes
+        std::set<htbClass*, htbClass::htbClassSetComp> selfFeeds[maxHtbNumPrio]; // Self feeds for each priority. Contain active green classes
         htbClass* nextToDequeue[maxHtbNumPrio]; // Next green class to dequeue on level
         std::multiset<htbClass*, waitComp> waitingClasses; // Red classes waiting to become non-red.
     };
