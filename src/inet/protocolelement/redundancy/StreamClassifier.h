@@ -26,6 +26,7 @@ class INET_API StreamClassifier : public queueing::PacketClassifierBase
 {
   protected:
     const char *mode = nullptr;
+    int gateIndexOffset = -1;
     int defaultGateIndex = -1;
     cValueMap *mapping = nullptr;
 

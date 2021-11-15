@@ -29,6 +29,7 @@ void StreamClassifier::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         mode = par("mode");
         mapping = check_and_cast<cValueMap *>(par("mapping").objectValue());
+        gateIndexOffset = par("gateIndexOffset");
         defaultGateIndex = par("defaultGateIndex");
     }
 }
@@ -62,7 +63,7 @@ int StreamClassifier::classifyPacket(Packet *packet)
         }
     }
     if (streamName != nullptr && mapping->containsKey(streamName))
-        return mapping->get(streamName).intValue();
+        return mapping->get(streamName).intValue() + gateIndexOffset;
     else
         return defaultGateIndex;
 }
