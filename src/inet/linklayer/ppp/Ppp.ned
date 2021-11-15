@@ -17,8 +17,6 @@
 
 package inet.linklayer.ppp;
 
-import inet.queueing.contract.IPacketQueue;
-
 //
 // PPP implementation.
 //
@@ -43,7 +41,7 @@ import inet.queueing.contract.IPacketQueue;
 //
 // @see ~PppInterface
 //
-module Ppp
+simple Ppp
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -74,11 +72,5 @@ module Ppp
         input upperLayerIn;
         output upperLayerOut;
         inout phys @labels(PppFrame);
-    submodules:
-        queue: <default("DropTailQueue")> like IPacketQueue {
-            parameters:
-                packetCapacity = default(1000);
-                @display("p=100,100;q=l2queue");
-        }
 }
 
