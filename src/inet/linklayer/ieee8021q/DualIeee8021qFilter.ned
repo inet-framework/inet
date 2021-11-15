@@ -34,7 +34,7 @@ import inet.queueing.contract.IPacketMeter;
 module DualIeee8021qFilter like IPacketFilter
 {
     parameters:
-        int numStreams; // number of streams
+        int numStreams = default(0); // number of streams
         bool hasDirectPath = default(false); // specifies if the non-filtered direct path should exist
         int startY = default(hasDirectPath ? 200 : 100); // used for submodule layout
         @display("i=block/filter");
