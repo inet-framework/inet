@@ -39,17 +39,17 @@ simple PacketDropVisualizerBase extends VisualizerBase
     parameters:
         bool displayPacketDrops = default(false); // display packet drops, disabled by default
 
-        string nodeFilter = default("*"); // which network nodes are considered, matches all network nodes by default
-        string interfaceFilter = default("*"); // which network interfaces are considered, matches all network interfaces by default
-        string packetFilter = default("*"); // which packets are considered, matches all packets by default
-        string packetDataFilter = default("*"); // which packets are considered based on the data they contain, matches all packets by default
-        string detailsFilter = default("*"); // which packet drops are considered, matches all packet drops by default
+        string nodeFilter @mutable = default("*"); // which network nodes are considered, matches all network nodes by default
+        string interfaceFilter @mutable = default("*"); // which network interfaces are considered, matches all network interfaces by default
+        string packetFilter @mutable = default("*"); // which packets are considered, matches all packets by default
+        string packetDataFilter @mutable = default("*"); // which packets are considered based on the data they contain, matches all packets by default
+        string detailsFilter @mutable = default("*"); // which packet drops are considered, matches all packet drops by default
 
         string icon = default("msg/packet_s"); // packet drop visualization icon
         double iconTintAmount = default(1); // colorization amount between 0 and 1, enabled by default
         string iconTintColor = default("dark"); // icon tint color is a list of colors, a set of dark colors by default
 
-        string labelFormat = default("%n"); // determines what data is displayed in the label, packet name by default
+        string labelFormat @mutable = default("%n"); // determines what data is displayed in the label, packet name by default
         string labelFont = default("<default>"); // label font, automatic by default
         string labelColor = default("black"); // label color, black by default
 

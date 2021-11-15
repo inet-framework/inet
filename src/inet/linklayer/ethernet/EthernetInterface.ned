@@ -25,6 +25,7 @@ import inet.linklayer.contract.ITrafficConditioner;
 import inet.linklayer.ieee8021q.IIeee8021qEncap;
 import inet.networklayer.common.InterfaceEntry;
 
+
 //
 // Ethernet network interface. Complements ~EtherMac and ~EtherEncap
 // with an output queue for QoS and RED support.
@@ -35,9 +36,9 @@ module EthernetInterface extends InterfaceEntry like IEthernetInterface
         @class(InterfaceEntry);
         @lifecycleSupport;
         string interfaceTableModule;
-        string address = default("auto");   // MAC address as hex string (12 hex digits), or
-                                            // "auto". "auto" values will be replaced by
-                                            // a generated MAC address in init stage 0.
+        string address @mutable = default("auto");   // MAC address as hex string (12 hex digits), or
+                                                     // "auto". "auto" values will be replaced by
+                                                     // a generated MAC address in init stage 0.
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         string fcsMode @enum("declared","computed") = default("declared");
         @display("i=block/ifcard;bgl=2");

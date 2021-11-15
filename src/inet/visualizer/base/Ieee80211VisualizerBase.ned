@@ -35,8 +35,8 @@ simple Ieee80211VisualizerBase extends VisualizerBase
 
         bool displayAssociations = default(false); // display association icon and SSID, disabled by default
 
-        string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
-        string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
+        string nodeFilter @mutable = default("*"); // which nodes are considered, matches all nodes by default
+        string interfaceFilter @mutable = default("*"); // which interfaces are considered, matches all interfaces by default
 
         double minPower @unit(dBm) = default(-85dBm); // minimum expected signal power
         double maxPower @unit(dBm) = default(-50dBm); // maximum expeceted signal power
