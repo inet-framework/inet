@@ -326,7 +326,7 @@ simtime_t HtbScheduler::doEvents(int level) {
         return 0;
     }
 
-    for (auto it = levels[level]->waitingClasses.begin(); it != levels[level]->waitingClasses.end(); ) {
+    for (auto it = levels[level]->waitingClasses.cbegin(); it != levels[level]->waitingClasses.cend(); ) {
         htbClass *cl = *it; // Class to update
         it++;
 
@@ -539,11 +539,11 @@ void HtbScheduler::htbEnqueue(int index) {
 HtbScheduler::htbClass* HtbScheduler::getLeaf(int priority, int level) {
     htbClass *cl = levels[level]->nextToDequeue[priority];
     printClass(cl);
-    if (levels[level]->selfFeeds[priority].find(cl) == levels[level]->selfFeeds[priority].end()) {
+    if (levels[level]->selfFeeds[priority].find(cl) == levels[level]->selfFeeds[priority].cend()) {
         levels[cl->level]->selfFeeds[priority].insert(cl);
         levels[cl->level]->nextToDequeue[priority] = *std::next(levels[cl->level]->selfFeeds[priority].find(cl));
-        if (levels[cl->level]->nextToDequeue[priority] == *levels[cl->level]->selfFeeds[priority].end()) {
-            levels[cl->level]->nextToDequeue[priority] = *levels[cl->level]->selfFeeds[priority].begin();
+        if (levels[cl->level]->nextToDequeue[priority] == *levels[cl->level]->selfFeeds[priority].cend()) {
+            levels[cl->level]->nextToDequeue[priority] = *levels[cl->level]->selfFeeds[priority].cbegin();
         }
         levels[cl->level]->selfFeeds[priority].erase(cl);
         cl = levels[cl->level]->nextToDequeue[priority];
@@ -560,11 +560,11 @@ HtbScheduler::htbClass* HtbScheduler::getLeaf(int priority, int level) {
         htbClass *parent = cl;
         cl = parent->inner.nextToDequeue[priority];
         printClass(cl);
-        if (parent->inner.innerFeeds[priority].find(cl) == parent->inner.innerFeeds[priority].end()) {
+        if (parent->inner.innerFeeds[priority].find(cl) == parent->inner.innerFeeds[priority].cend()) {
             parent->inner.innerFeeds[priority].insert(cl);
             parent->inner.nextToDequeue[priority] = *std::next(parent->inner.innerFeeds[priority].find(cl));
-            if (parent->inner.nextToDequeue[priority] == *parent->inner.innerFeeds[priority].end()) {
-                parent->inner.nextToDequeue[priority] = *parent->inner.innerFeeds[priority].begin();
+            if (parent->inner.nextToDequeue[priority] == *parent->inner.innerFeeds[priority].cend()) {
+                parent->inner.nextToDequeue[priority] = *parent->inner.innerFeeds[priority].cbegin();
             }
             parent->inner.innerFeeds[priority].erase(cl);
             cl = parent->inner.nextToDequeue[priority];
@@ -631,8 +631,8 @@ int HtbScheduler::htbDequeue(int priority, int level) {
                 if (tempNode->parent->inner.innerFeeds[priority].size() > 1 && tempNode->mode == may_borrow) {
                     if (tempNode->parent->inner.nextToDequeue[priority] == cl) {
                         tempNode->parent->inner.nextToDequeue[priority] = *std::next(tempNode->parent->inner.innerFeeds[priority].find(tempNode));
-                        if (tempNode->parent->inner.nextToDequeue[priority] == *tempNode->parent->inner.innerFeeds[priority].end()) {
-                            tempNode->parent->inner.nextToDequeue[priority] = *tempNode->parent->inner.innerFeeds[priority].begin();
+                        if (tempNode->parent->inner.nextToDequeue[priority] == *tempNode->parent->inner.innerFeeds[priority].cend()) {
+                            tempNode->parent->inner.nextToDequeue[priority] = *tempNode->parent->inner.innerFeeds[priority].cbegin();
                         } else {
                             break;
                         }
@@ -642,8 +642,8 @@ int HtbScheduler::htbDequeue(int priority, int level) {
                 } else if (levels[tempNode->level]->selfFeeds[priority].size() > 1 && tempNode->mode == can_send) {
                     if (levels[tempNode->level]->nextToDequeue[priority] == cl) {
                         levels[tempNode->level]->nextToDequeue[priority] = *std::next(levels[tempNode->level]->selfFeeds[priority].find(tempNode));
-                        if (levels[tempNode->level]->nextToDequeue[priority] == *levels[tempNode->level]->selfFeeds[priority].end()) {
-                            levels[tempNode->level]->nextToDequeue[priority] = *levels[tempNode->level]->selfFeeds[priority].begin();
+                        if (levels[tempNode->level]->nextToDequeue[priority] == *levels[tempNode->level]->selfFeeds[priority].cend()) {
+                            levels[tempNode->level]->nextToDequeue[priority] = *levels[tempNode->level]->selfFeeds[priority].cbegin();
                         }
                         if (levels[tempNode->level]->nextToDequeue[priority] == nullptr) {
                             throw cRuntimeError("Next to dequeue would be null even though it shouldn't be!");
@@ -752,7 +752,7 @@ void HtbScheduler::activateClassPrios(htbClass *cl) {
         for (int i = 0; i < maxHtbNumPrio; i++) { // i = priority level
             if (tempActivity[i]) { // Check if parent shoudl be actie for priority
                 parent->activePriority[i] = true; // Set parent to active on priority
-                if (parent->inner.innerFeeds[i].find(cl) == parent->inner.innerFeeds[i].end()) { // Check if we are in parent's inner feed
+                if (parent->inner.innerFeeds[i].find(cl) == parent->inner.innerFeeds[i].cend()) { // Check if we are in parent's inner feed
                     if (parent->inner.nextToDequeue[i] == NULL) {
                         parent->inner.nextToDequeue[i] = cl;
                     }
@@ -769,7 +769,7 @@ void HtbScheduler::activateClassPrios(htbClass *cl) {
     if (cl->mode == can_send && std::any_of(std::begin(newActivity), std::end(newActivity), [](bool b) {return b;})){
         for (int i = 0; i < maxHtbNumPrio; i++) { // i = priority level
             if (newActivity[i]) {
-                if (levels[cl->level]->selfFeeds[i].find(cl) == levels[cl->level]->selfFeeds[i].end()) {
+                if (levels[cl->level]->selfFeeds[i].find(cl) == levels[cl->level]->selfFeeds[i].cend()) {
                     if (levels[cl->level]->nextToDequeue[i] == NULL) {
                         levels[cl->level]->nextToDequeue[i] = cl;
                     }
@@ -796,7 +796,7 @@ void HtbScheduler::deactivateClassPrios(htbClass *cl) {
         
         for (int i = 0; i < maxHtbNumPrio; i++) { // i = priority level
             if (tempActivity[i]) {
-                if (parent->inner.innerFeeds[i].find(cl) != parent->inner.innerFeeds[i].end()) {
+                if (parent->inner.innerFeeds[i].find(cl) != parent->inner.innerFeeds[i].cend()) {
                     parent->inner.innerFeeds[i].erase(cl);
                 }
                 if (parent->inner.innerFeeds[i].empty()) {
@@ -875,7 +875,7 @@ void HtbScheduler::accountCTokens(htbClass *cl, long long bytes, long long diff)
 
 void HtbScheduler::htbAddToWaitTree(htbClass *cl, long long delay) {
     cl->nextEventTime = simTime() + SimTime(delay, SIMTIME_NS);
-    if (levels[cl->level]->waitingClasses.find(cl) != levels[cl->level]->waitingClasses.end()) {
+    if (levels[cl->level]->waitingClasses.find(cl) != levels[cl->level]->waitingClasses.cend()) {
         throw cRuntimeError("Class added to waiting classes even though it was already there!");
     }
     levels[cl->level]->waitingClasses.insert(cl);
@@ -885,7 +885,7 @@ void HtbScheduler::htbAddToWaitTree(htbClass *cl, long long delay) {
 
 void HtbScheduler::htbRemoveFromWaitTree(htbClass *cl) {
     std::multiset<htbClass*, waitComp>::iterator hit(levels[cl->level]->waitingClasses.find(cl));
-    while (hit != levels[cl->level]->waitingClasses.end()) {
+    while (hit != levels[cl->level]->waitingClasses.cend()) {
         if (*hit == cl) {
             levels[cl->level]->waitingClasses.erase(hit);
             break;
