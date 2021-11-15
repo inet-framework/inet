@@ -30,7 +30,7 @@ import inet.queueing.queue.CompoundPacketQueueBase;
 module Ieee8021qTimeAwareShaper extends CompoundPacketQueueBase
 {
     parameters:
-        int numTrafficClasses; // number of traffic categories
+        int numTrafficClasses = default(8); // number of traffic categories
         double bitrate @unit(bps);
         *.bitrate = default(this.bitrate);
         *.extraLength = default(96b);
