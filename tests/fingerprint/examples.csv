@@ -125,12 +125,12 @@
 
 /examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,            75d0-cba9/tplx;ce1d-d136/~tNl;51b3-9d40/~tND;900d-aaeb/tyf, PASS, wireless
 
-/examples/htb/,                      -f omnetpp.ini -c scenarioUDP1 -r 0,           110s,         a6ce-e384/tplx;9710-1016/~tNl;82b4-1fea/~tND, PASS,
-/examples/htb/,                      -f omnetpp.ini -c scenarioUDP2 -r 0,           100s,         e3ab-9af4/tplx;709d-a44b/~tNl;42ff-a0f2/~tND, PASS,
+/examples/htb/,                      -f omnetpp.ini -c scenarioUDP1 -r 0,           110s,         aea3-b585/tplx;dc4b-1c5e/~tNl;f062-63b1/~tND, PASS,
+/examples/htb/,                      -f omnetpp.ini -c scenarioUDP2 -r 0,           100s,         dfb3-dd1f/tplx;9f45-fedb/~tNl;bedc-acdc/~tND, PASS,
 /examples/htb/,                      -f omnetpp.ini -c scenarioUDP3 -r 0,           40s,         2e5e-a510/tplx;d05e-bd70/~tNl;4767-cda1/~tND, PASS,
 /examples/htb/,                      -f omnetpp.ini -c scenarioUDP4 -r 0,           100s,         80ab-116c/tplx;607d-5010/~tNl;de9f-c2dd/~tND, PASS,
-/examples/htb/,                      -f omnetpp.ini -c scenarioTCP1 -r 0,           100s,         c489-5df7/tplx;1469-3bad/~tNl;e222-9b8f/~tND, PASS,
-/examples/htb/,                      -f omnetpp.ini -c scenarioTCP2 -r 0,           90s,         d4cd-6af0/tplx;2feb-4705/~tNl;55f8-33e3/~tND, PASS,
+/examples/htb/,                      -f omnetpp.ini -c scenarioTCP1 -r 0,           100s,         1a2c-182a/tplx;a987-b345/~tNl;6340-8ea3/~tND, PASS,
+/examples/htb/,                      -f omnetpp.ini -c scenarioTCP2 -r 0,           90s,         4562-27ef/tplx;60da-62b3/~tNl;ec81-bec9/~tND, PASS,
 /examples/htb/,                      -f omnetpp.ini -c scenarioTCP3 -r 0,           40s,         dbe9-46ae/tplx;4ffe-5787/~tNl;d686-26fe/~tND, PASS,
 /examples/htb/,                      -f omnetpp.ini -c scenarioTCP4 -r 0,           90s,         9928-3662/tplx;01ba-05e6/~tNl;32eb-80be/~tND, PASS,
 
