@@ -943,7 +943,7 @@ void HtbScheduler::receiveSignal(cComponent *source, simsignal_t signal, cObject
     Enter_Method("%s", cComponent::getSignalName(signal));
     if (signal == packetPushedSignal) {
         if (std::string(source->getClassName()).find("inet::queueing::PacketQueue") != std::string::npos) { // Might need adjustment so that we can use compound packet queues as queues
-            int index = dynamic_cast<cModule*>(source)->getIndex();
+            int index = static_cast<cModule*>(source)->getIndex();
             EV_INFO << "HtbScheduler::receiveSignal: PacketQueue " << index << " emitted a packetPushed signal! Call htbEnqueue for leaf " << index << endl;
             htbEnqueue(index);
         }
