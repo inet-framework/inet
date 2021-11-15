@@ -100,6 +100,9 @@ class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollecti
         } leaf;
         struct htbClassSetComp { // Comparator to sort the waiting classes according to their expected mode change time
             bool operator()(htbClass* const & a, htbClass* const & b) const {
+                if (a->name == b->name) {
+                    return false;
+                }
                 return a->name < b->name;
             }
         };
@@ -118,6 +121,9 @@ class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollecti
     struct waitComp { // Comparator to sort the waiting classes according to their expected mode change time
         bool operator()(htbClass* const & a, htbClass* const & b) const {
             if (a->nextEventTime == b->nextEventTime) {
+                if (a->name == b->name) {
+                    return false;
+                }
                 return a->name < b->name;
                 // return std::less<htbClass*>{}(a, b); // Care for DRR ordering
             }
