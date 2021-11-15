@@ -35,8 +35,8 @@ module DualIeee8021qFilter like IPacketFilter
 {
     parameters:
         int numStreams = default(0); // number of streams
-        bool hasDirectPath = default(false); // specifies if the non-filtered direct path should exist
-        int startY = default(hasDirectPath ? 200 : 100); // used for submodule layout
+        bool hasDefaultPath = default(true); // specifies if the non-filtered direct path should exist
+        int startY = default(hasDefaultPath ? 200 : 100); // used for submodule layout
         @display("i=block/filter");
     gates:
         input in;
@@ -66,7 +66,7 @@ module DualIeee8021qFilter like IPacketFilter
         }
     connections:
         in --> { @display("m=w"); } --> classifier.in;
-        classifier.out++ --> multiplexer.in++ if hasDirectPath;
+        classifier.out++ --> multiplexer.in++ if hasDefaultPath;
         for i=0..numStreams-1 {
             classifier.out++ --> meter1[i].in;
             meter1[i].out --> filter1[i].in;
