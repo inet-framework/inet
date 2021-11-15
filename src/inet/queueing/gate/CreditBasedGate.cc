@@ -40,8 +40,10 @@ void CreditBasedGate::initialize(int stage)
         minCredit = par("minCredit");
         maxCredit = par("maxCredit");
         displayStringTextFormat = par("displayStringTextFormat");
-        currentCredit = lastCurrentCreditEmitted = par("initialCredit");
+        currentCredit = par("initialCredit");
         currentCreditGainRate = idleCreditGainRate;
+        lastCurrentCreditEmitted = currentCredit;
+        lastCurrentCreditEmittedTime = simTime();
         isOpen_ = currentCredit >= transmitCreditLimit;
         cModule *module = getContainingNicModule(this);
         module->subscribe(transmissionStartedSignal, this);
@@ -52,6 +54,7 @@ void CreditBasedGate::initialize(int stage)
     }
     else if (stage == INITSTAGE_QUEUEING) {
         updateCurrentCredit();
+        updateCurrentCreditGainRate();
         emitCurrentCredit();
         scheduleChangeTimer();
     }
@@ -62,9 +65,16 @@ void CreditBasedGate::initialize(int stage)
 void CreditBasedGate::handleMessage(cMessage *message)
 {
     if (message == changeTimer) {
+        // 1. timer is executed when currentCredit reaches transmitCreditLimit with currentCreditGainRate
         currentCredit = transmitCreditLimit;
+        // 2. notify listeners and update lastCurrentCreditEmitted
         emitCurrentCredit();
+        // 3. open/close gate and allow consumer to pull packet if necessary
         processChangeTimer();
+        // 4. update currentCreditGainRate to know the slope when the timer is rescheduled
+        updateCurrentCreditGainRate();
+        // 5. reschedule change timer based on currentCredit and currentCreditGainRate
+        scheduleChangeTimer();
     }
     else
         throw cRuntimeError("Unknown message");
@@ -73,22 +83,31 @@ void CreditBasedGate::handleMessage(cMessage *message)
 void CreditBasedGate::finish()
 {
     updateCurrentCredit();
+    updateCurrentCreditGainRate();
+    emitCurrentCredit();
 }
 
 void CreditBasedGate::refreshDisplay() const
 {
+    // NOTE: don't emit current credit and no need to call updateCurrentCreditGainRate
     const_cast<CreditBasedGate *>(this)->updateCurrentCredit();
     updateDisplayString();
 }
 
 void CreditBasedGate::scheduleChangeTimer()
 {
+    ASSERT(lastCurrentCreditEmitted == currentCredit);
     ASSERT(lastCurrentCreditEmittedTime == simTime());
-    double changeTime = (transmitCreditLimit - lastCurrentCreditEmitted) / currentCreditGainRate;
-    if (changeTime < 0)
+    if (currentCreditGainRate == 0)
         cancelEvent(changeTimer);
-    else if (changeTime > 0 || (isOpen_ ? currentCreditGainRate < 0 : currentCreditGainRate > 0))
-        rescheduleAfter(changeTime, changeTimer);
+    else {
+        double changeTime = (transmitCreditLimit - currentCredit) / currentCreditGainRate;
+        if (changeTime < 0)
+            cancelEvent(changeTimer);
+        else if (changeTime > 0 || (isOpen_ ? currentCreditGainRate < 0 : currentCreditGainRate > 0))
+            // NOTE: schedule for future or for now if credit change direction and gate state requires
+            rescheduleAfter(changeTime, changeTimer);
+    }
 }
 
 void CreditBasedGate::processPacket(Packet *packet)
@@ -118,28 +137,60 @@ void CreditBasedGate::emitCurrentCredit()
     lastCurrentCreditEmittedTime = simTime();
 }
 
+void CreditBasedGate::updateCurrentCreditGainRate()
+{
+    if (isTransmitting)
+        currentCreditGainRate = -transmitCreditSpendRate;
+    else if (currentCredit < 0 || hasAvailablePacket())
+        currentCreditGainRate = idleCreditGainRate;
+    else
+        currentCreditGainRate = 0;
+}
+
 void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, cObject *object, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(simsignal));
-
     if (simsignal == transmissionStartedSignal || simsignal == transmissionEndedSignal) {
         auto signal = check_and_cast<physicallayer::Signal *>(object);
         auto packet = check_and_cast<Packet *>(signal->getEncapsulatedPacket());
         auto creditGateTag = packet->findTag<CreditGateTag>();
         if (creditGateTag != nullptr && creditGateTag->getId() == getId()) {
+            // 1. update currentCredit and currentCreditGainRate because some time may have elapsed
             updateCurrentCredit();
+            updateCurrentCreditGainRate();
             emitCurrentCredit();
+            // 2. update transmitting state
             if (simsignal == transmissionStartedSignal)
-                currentCreditGainRate = -transmitCreditSpendRate;
+                isTransmitting = true;
             else if (simsignal == transmissionEndedSignal)
-                currentCreditGainRate = idleCreditGainRate;
+                isTransmitting = false;
             else
                 throw cRuntimeError("Unknown signal");
+            // 3. immediately set currentCredit to 0 if there are no packets to transmit
+            if (!isTransmitting && !hasAvailablePacket())
+                currentCredit = std::min(transmitCreditLimit, currentCredit);
+            // 4. update currentCreditGainRate and notify listeners about currentCredit change
+            updateCurrentCreditGainRate();
+            emitCurrentCredit();
+            // 5. reschedule change timer when currentCredit reaches transmitCreditLimit
             scheduleChangeTimer();
         }
     }
     else
         throw cRuntimeError("Unknown signal");
+}
+
+void CreditBasedGate::handleCanPullPacketChanged(cGate *gate)
+{
+    Enter_Method("handleCanPullPacketChanged");
+    // 1. update currentCredit and currentCreditGainRate
+    updateCurrentCredit();
+    updateCurrentCreditGainRate();
+    // 2. notify listeners about currentCredit change
+    emitCurrentCredit();
+    // 3. reschedule change timer when currentCredit reaches transmitCreditLimit
+    scheduleChangeTimer();
+    PacketGateBase::handleCanPullPacketChanged(gate);
 }
 
 const char *CreditBasedGate::resolveDirective(char directive) const

@@ -37,6 +37,7 @@ class INET_API CreditBasedGate : public PacketGateBase, public cListener
     double maxCredit = NaN;
 
     // state
+    bool isTransmitting = false;
     double currentCredit = NaN;
     double currentCreditGainRate = NaN;
     double lastCurrentCreditEmitted = NaN;
@@ -51,13 +52,17 @@ class INET_API CreditBasedGate : public PacketGateBase, public cListener
     virtual void refreshDisplay() const override;
 
     virtual void processPacket(Packet *packet) override;
+    virtual bool hasAvailablePacket() const { return provider->canPullSomePacket(inputGate->getPathStartGate()); }
     virtual void updateCurrentCredit();
+    virtual void updateCurrentCreditGainRate();
     virtual void emitCurrentCredit();
     virtual void scheduleChangeTimer();
     virtual void processChangeTimer();
 
   public:
     virtual ~CreditBasedGate() { cancelAndDelete(changeTimer); }
+
+    virtual void handleCanPullPacketChanged(cGate *gate) override;
 
     virtual const char *resolveDirective(char directive) const override;
 
