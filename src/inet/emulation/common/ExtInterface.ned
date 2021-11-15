@@ -30,7 +30,7 @@ module ExtInterface extends NetworkInterface like IExternalInterface
         string device;
         string namespace = default("");
         string copyConfiguration @enum("","copyToExt","copyFromExt") = default("");
-        string address = default("auto");
+        string address @mutable = default("auto");
         bool broadcast = default(true);
         bool multicast = default(true);
         bool pointToPoint = default(false);

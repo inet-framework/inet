@@ -34,17 +34,17 @@ simple MediumVisualizerBase extends VisualizerBase
         string mediumModule = default("radioMedium"); // the medium module that is displayed, refers to a top level submodule by default
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // the network node visualizer module, refers to a sibling submodule by default
 
-        string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
-        string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
-        string packetFilter = default("*"); // which packets are considered, matches all packets by default
-        string packetDataFilter = default("*"); // which packets are considered based on the data they contain, matches all packets by default
+        string nodeFilter @mutable = default("*"); // which nodes are considered, matches all nodes by default
+        string interfaceFilter @mutable = default("*"); // which interfaces are considered, matches all interfaces by default
+        string packetFilter @mutable = default("*"); // which packets are considered, matches all packets by default
+        string packetDataFilter @mutable = default("*"); // which packets are considered based on the data they contain, matches all packets by default
 
         bool displaySignals = default(false); // display signals propagating through the medium, disabled by default
         string signalColor @enum("light", "dark") = default("dark"); // signal color is a list of colors, a set of dark colors by default
-        double signalPropagationAnimationSpeed = default(nan); // animation speed while the very beginning or end of a signal is propagating on the medium, value must be in the range (0, +inf) or NaN, the latter means automatic setting
+        double signalPropagationAnimationSpeed @mutable = default(nan); // animation speed while the very beginning or end of a signal is propagating on the medium, value must be in the range (0, +inf) or NaN, the latter means automatic setting
         double signalPropagationAnimationTime @unit(s) = default(1s); // signal propagation animation duration when signalPropagationAnimationSpeed is unspecified
         double signalPropagationAdditionalTime @unit(s) = default(0s); // additional simulation time to animate signal propagation after leaving last receiver
-        double signalTransmissionAnimationSpeed = default(nan); // animation speed while a signal is being transmitted on the medium, value must be in the range (0, +inf) or NaN, the latter means automatic setting
+        double signalTransmissionAnimationSpeed @mutable = default(nan); // animation speed while a signal is being transmitted on the medium, value must be in the range (0, +inf) or NaN, the latter means automatic setting
         double signalTransmissionAnimationTime @unit(s) = default(1s); // signal transmission animation duration when signalTransmissionAnimationSpeed is unspecified
         string signalAnimationSpeedChangeTimeMode @enum("realTime", "animationTime", "simulationTime") = default("realTime"); // specifies the time mode for animation speed changes between propagation and transmission animation
         double signalAnimationSpeedChangeTime @unit(s) = default(1s); // animation speed changes smoothly from propagationAnimationSpeed to transmissionAnimationSpeed in the specified real time
@@ -98,8 +98,8 @@ simple MediumVisualizerBase extends VisualizerBase
         string powerDensityMapMode @enum("total", "signal", "auto") = default("auto"); // total means total transmission medium, signal means transmitted or received signal, auto means total or signal and noise if transmission or reception is in progress
         string powerDensityMapPixelMode @enum("sample", "partition", "mean") = default("mean"); // specifices the method used to determine the color of each pixel, sample method is the least accurate but the fastest (sample < partition < mean)
         int powerDensityMapApproximationSize = default(10); // medium power density function approximation along X and Y axes
-        double powerDensityMapCenterFrequency @unit(Hz) = default(nan Hz); // center frequency of medium power density sampling or integration
-        double powerDensityMapBandwidth @unit(Hz) = default(0 Hz); // bandwidth of medium power density integration, 0 means sampling, inf means total integrated power
+        double powerDensityMapCenterFrequency @mutable @unit(Hz) = default(nan Hz); // center frequency of medium power density sampling or integration
+        double powerDensityMapBandwidth @mutable @unit(Hz) = default(0 Hz); // bandwidth of medium power density integration, 0 means sampling, inf means total integrated power
         double powerDensityMapFigureWidth = default(200); // plot figure width in pixels
         double powerDensityMapFigureHeight = default(120); // plot figure height in pixels
         double powerDensityMapPixmapWidth = default(powerDensityMapFigureWidth); // pixmap resolution width

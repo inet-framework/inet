@@ -60,9 +60,9 @@ module CsmaCaMac extends MacProtocolBase like IMacProtocol
 {
     parameters:
         string radioModule = default("^.radio"); // The path to the Radio module  //FIXME remove default value
-        string address = default("auto"); // MAC address as hex string (12 hex digits), or
-                                          // "auto". "auto" values will be replaced by
-                                          // a generated MAC address in init stage 0.
+        string address @mutable = default("auto"); // MAC address as hex string (12 hex digits), or
+                                                   // "auto". "auto" values will be replaced by
+                                                   // a generated MAC address in init stage 0.
         string fcsMode @enum("declared","computed") = default("declared");
         bool useAck = default(true);
         double bitrate @unit(bps);
