@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # This script automatically updates ChangeLog files from the git history.
 # The result may need some editing before committing back into the repo.
@@ -9,8 +9,8 @@ import string
 import subprocess
 
 # configuration
-since = '2020-11-30'  # empty means "since last entry in the ChangeLog file"
-fromtag = '' # alternative for 'since': from the given tag or branch
+since = ''  # since date e.g. 2020-11-30, empty means "since last entry in the ChangeLog file"
+fromtag = 'v4.3.4' # alternative for 'since': from the given tag or branch
 
 entriesToIgnore = [
 """2017-03-03  Rudolf Hornig
