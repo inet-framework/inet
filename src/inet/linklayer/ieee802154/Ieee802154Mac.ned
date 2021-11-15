@@ -43,9 +43,9 @@ import inet.linklayer.contract.IMacProtocol;
 module Ieee802154Mac extends MacProtocolBase like IMacProtocol
 {
     parameters:
-        string address = default("auto"); // MAC address as hex string (12 hex digits), or
-                                          // "auto". "auto" values will be replaced by
-                                          // a generated MAC address in init stage 0.
+        string address @mutable = default("auto"); // MAC address as hex string (12 hex digits), or
+                                                   // "auto". "auto" values will be replaced by
+                                                   // a generated MAC address in init stage 0.
 
         // length of MAC header
         int headerLength @unit(b) = default(72 b);

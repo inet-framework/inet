@@ -23,7 +23,6 @@ import inet.linklayer.ethernet.contract.IEthernetEncapsulation;
 import inet.networklayer.common.NetworkInterface;
 import inet.queueing.contract.ITrafficConditioner;
 
-
 //
 // This module represents an Ethernet network interface.
 //
@@ -33,9 +32,9 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
         @lifecycleSupport;
         string interfaceTableModule;
         string protocol = default("");
-        string address = default("auto");   // MAC address as hex string (12 hex digits), or
-                                            // "auto". "auto" values will be replaced by
-                                            // a generated MAC address in init stage 0.
+        string address @mutable = default("auto");   // MAC address as hex string (12 hex digits), or
+                                                     // "auto". "auto" values will be replaced by
+                                                     // a generated MAC address in init stage 0.
         bool duplexMode = default(true);      // selects full-duplex (true) or half-duplex (false) operation
         bool csmacdSupport = default(!duplexMode);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         double bitrate @unit(bps) = default(0 bps);

@@ -33,7 +33,7 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
         string protocol = default("ethernetmac");
         bool broadcast = default(true);
         bool multicast = default(true);
-        string address = default("auto");
+        string address @mutable = default("auto");
         double bitrate @unit(bps);
         string interfaceTableModule;
         *.bitrate = default(this.bitrate);

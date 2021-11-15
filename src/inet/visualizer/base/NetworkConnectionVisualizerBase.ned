@@ -28,7 +28,7 @@ simple NetworkConnectionVisualizerBase extends VisualizerBase
     parameters:
         bool displayNetworkConnections = default(true);
 
-        string nodeFilter = default("*"); // determines which network connections are displayed, all connections by default
+        string nodeFilter @mutable = default("*"); // determines which network connections are displayed, all connections by default
 
         string lineColor = default("black"); // connection line color
         string lineStyle = default("solid"); // connection line style (solid, dashed, dotted)
