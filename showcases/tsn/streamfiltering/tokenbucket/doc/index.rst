@@ -47,18 +47,14 @@ separate metering and filter paths.
    :end-before: SingleRateTwoColorMeter
    :language: ini
 
-Single Rate Two Color Meter
----------------------------
-
-In this configuration we use a single rate two color meter for both streams. This
-meter contains a single token bucket and has two parameters: committed information
-rate and committed burst size. Packets are labeled green or red by the meter, and
-red packets are dropped by the filter.
+We use a single rate two color meter for both streams. This meter contains a
+single token bucket and has two parameters: committed information rate and
+committed burst size. Packets are labeled green or red by the meter, and red
+packets are dropped by the filter.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
-   :start-at: "SingleRateTwoColorMeter"
-   :end-before: DualRateThreeColorMeter
+   :start-at: SingleRateTwoColorMeter
 
 Results
 -------
@@ -74,21 +70,21 @@ The next diagram shows the operation of the per-stream filter for the best effor
 traffic class. The outgoing data rate equals with the sum of the incoming data rate
 and the dropped data rate.
 
-.. figure:: media/SingleRateBestEffortTrafficClass.png
+.. figure:: media/BestEffortTrafficClass.png
    :align: center
 
 The next diagram shows the operation of the per-stream filter for the video traffic
 class. The outgoing data rate equals with the sum of the incoming data rate and
 the dropped data rate.
 
-.. figure:: media/SingleRateVideoTrafficClass.png
+.. figure:: media/VideoTrafficClass.png
    :align: center
 
 The next diagram shows the number of tokens in the token bucket for both streams.
 The filled areas mean that the number of tokens changes quickly as packets pass
 through. The data rate is at maximum when the line is near the minimum.
 
-.. figure:: media/SingleRateTokenBuckets.png
+.. figure:: media/TokenBuckets.png
    :align: center
 
 The last diagram shows the data rate of the application level incoming traffic
@@ -96,55 +92,7 @@ in the server. The data rate is somewhat lower than the data rate of the
 outgoing traffic of the corresponding per-stream filter. The reason is that they
 are measured at different protocol layers.
 
-.. figure:: media/SingleRateServerApplicationTraffic.png
-   :align: center
-
-Dual Rate Three Color Meter
----------------------------
-
-In this configuration we use a dual rate three color meter for both streams. This
-meter contains two chained token buckets and has four parameters: committed
-information rate, committed burst size, excess information rate, and excess burst
-size. Tokens overflow from the committed bucket into the excess bucket. Packets
-are labeled green, yellow or red by the meter. In this example only red packets
-are dropped by the filter. Normally, yellow packets would be treated differently.
-
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: "DualRateThreeColorMeter"
-
-Results
--------
-
-The first diagram shows the operation of the per-stream filter for the best effort
-traffic class. The maximum of the outgoing data rate equals with the sum of the
-committed information rate and the excess information rate, which is somewhat
-higher than in the single rate case.
-
-.. figure:: media/DualRateBestEffortTrafficClass.png
-   :align: center
-
-The next diagram shows the operation of the per-stream filter for the video traffic
-class. The maximum of the outgoing data rate equals with the sum of the committed
-information rate and the excess information rate, which is somewhat higher than
-in the single rate case.
-
-.. figure:: media/DualRateVideoTrafficClass.png
-   :align: center
-
-The next diagram shows the number of tokens in the token bucket for both streams.
-The filled areas mean that the number of tokens changes quickly as packets pass
-through. The data rate is at maximum when the line is near the minimum.
-
-.. figure:: media/DualRateTokenBuckets.png
-   :align: center
-
-The last diagram shows the data rate of the application level incoming traffic
-in the server. The data rate is somewhat lower than the data rate of the
-outgoing traffic of the corresponding per-stream filter. The reason is that they
-are measured at different protocol layers.
-
-.. figure:: media/DualRateServerApplicationTraffic.png
+.. figure:: media/ServerApplicationTraffic.png
    :align: center
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`
