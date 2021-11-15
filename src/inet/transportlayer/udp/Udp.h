@@ -42,7 +42,6 @@ class Icmpv6;
 class UdpHeader;
 class NetworkInterface;
 
-const bool DEFAULT_MULTICAST_LOOP = true;
 const uint16_t UDP_MAX_MESSAGE_SIZE = 65535; // bytes
 
 class UdpCrcInsertionHook : public cSimpleModule, public NetfilterBase::HookBase
@@ -95,7 +94,7 @@ class INET_API Udp : public TransportProtocolBase
         int remotePort = -1;
         bool isBroadcast = false;
         int multicastOutputInterfaceId = -1;
-        bool multicastLoop = DEFAULT_MULTICAST_LOOP;
+        bool multicastLoop = true;
         int ttl = -1;
         short dscp = -1;
         short tos = -1;
