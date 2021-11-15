@@ -22,7 +22,7 @@
 
 namespace inet {
 
-class INET_API MacAddressTableConfigurator : public NetworkConfiguratorBase
+class INET_API MacAddressTableConfigurator : public NetworkConfiguratorBase, public cListener
 {
   protected:
     std::map<int, cValueArray *> configurations;
@@ -35,9 +35,14 @@ class INET_API MacAddressTableConfigurator : public NetworkConfiguratorBase
      * The result of the computation is only stored in the configurator.
      */
     virtual void computeConfiguration();
+    virtual void extendConfiguration(Node *destinationNode, Interface *destinationInterface, MacAddress macAddress);
 
     virtual void computeMacAddressTables();
     virtual void configureMacAddressTables() const;
+
+  public:
+    virtual ~MacAddressTableConfigurator();
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 
 } // namespace inet

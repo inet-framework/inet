@@ -18,11 +18,20 @@
 #include "inet/linklayer/configurator/MacAddressTableConfigurator.h"
 
 #include "inet/common/MatchableObject.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/configurator/StreamRedundancyConfigurator.h"
+#include "inet/networklayer/arp/ipv4/GlobalArp.h"
+#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
 namespace inet {
 
 Define_Module(MacAddressTableConfigurator);
+
+MacAddressTableConfigurator::~MacAddressTableConfigurator()
+{
+    for (auto it : configurations)
+        delete it.second;
+}
 
 void MacAddressTableConfigurator::initialize(int stage)
 {
@@ -30,6 +39,7 @@ void MacAddressTableConfigurator::initialize(int stage)
     if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         computeConfiguration();
         configureMacAddressTables();
+        getParentModule()->subscribe(ipv4MulticastChangeSignal, this);
     }
 }
 
@@ -58,28 +68,33 @@ void MacAddressTableConfigurator::computeMacAddressTables()
                 if (!destinationInterface->networkInterface->isLoopback() &&
                     !destinationInterface->networkInterface->getMacAddress().isUnspecified())
                 {
-                    for (int j = 0; j < destinationNode->getNumInLinks(); j++) {
-                        auto link = (Link *)destinationNode->getLinkIn(j);
-                        link->setWeight(link->destinationInterface != destinationInterface ? std::numeric_limits<double>::infinity() : 1);
-                    }
-                    topology->calculateWeightedSingleShortestPathsTo(destinationNode);
-                    for (int j = 0; j < topology->getNumNodes(); j++) {
-                        Node *sourceNode = (Node *)topology->getNode(j);
-                        if (sourceNode != destinationNode && isBridgeNode(sourceNode) && sourceNode->getNumPaths() != 0) {
-                            auto firstLink = (Link *)sourceNode->getPath(0);
-                            auto firstInterface = static_cast<Interface *>(firstLink->sourceInterface);
-                            auto moduleId = sourceNode->module->getSubmodule("macTable")->getId();
-                            auto it = configurations.find(moduleId);
-                            if (it == configurations.end())
-                                configurations[moduleId] = new cValueArray();
-                            auto rule = new cValueMap();
-                            rule->set("address", destinationInterface->networkInterface->getMacAddress().str());
-                            rule->set("interface", firstInterface->networkInterface->getInterfaceName());
-                            configurations[moduleId]->add(rule);
-                        }
-                    }
+                    extendConfiguration(destinationNode, destinationInterface, destinationInterface->networkInterface->getMacAddress());
                 }
             }
+        }
+    }
+}
+
+void MacAddressTableConfigurator::extendConfiguration(Node *destinationNode, Interface *destinationInterface, MacAddress macAddress)
+{
+    for (int j = 0; j < destinationNode->getNumInLinks(); j++) {
+        auto link = (Link *)destinationNode->getLinkIn(j);
+        link->setWeight(link->destinationInterface != destinationInterface ? std::numeric_limits<double>::infinity() : 1);
+    }
+    topology->calculateWeightedSingleShortestPathsTo(destinationNode);
+    for (int j = 0; j < topology->getNumNodes(); j++) {
+        Node *sourceNode = (Node *)topology->getNode(j);
+        if (sourceNode != destinationNode && isBridgeNode(sourceNode) && sourceNode->getNumPaths() != 0) {
+            auto firstLink = (Link *)sourceNode->getPath(0);
+            auto firstInterface = static_cast<Interface *>(firstLink->sourceInterface);
+            auto moduleId = sourceNode->module->getSubmodule("macTable")->getId();
+            auto it = configurations.find(moduleId);
+            if (it == configurations.end())
+                configurations[moduleId] = new cValueArray();
+            auto rule = new cValueMap();
+            rule->set("address", macAddress.str());
+            rule->set("interface", firstInterface->networkInterface->getInterfaceName());
+            configurations[moduleId]->add(rule);
         }
     }
 }
@@ -88,7 +103,18 @@ void MacAddressTableConfigurator::configureMacAddressTables() const
 {
     for (auto it : configurations) {
         auto macAddressTable = getSimulation()->getModule(it.first);
-        macAddressTable->par("addressTable") = it.second;
+        macAddressTable->par("addressTable") = it.second->dup();
+    }
+}
+
+void MacAddressTableConfigurator::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
+{
+    if (signal == ipv4MulticastChangeSignal) {
+        auto sourceInfo = check_and_cast<Ipv4MulticastGroupSourceInfo *>(object);
+        auto node = static_cast<Node *>(topology->getNodeFor(getContainingNode(sourceInfo->ie)));
+        auto interface = findInterface(node, sourceInfo->ie);
+        extendConfiguration(node, interface, GlobalArp::toMulticastMacAddress(sourceInfo->groupAddress));
+        configureMacAddressTables();
     }
 }
 
