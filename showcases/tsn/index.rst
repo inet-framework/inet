@@ -16,6 +16,7 @@ Networking:
    timesynchronization/index
    streamfiltering/index
    trafficshaping/index
+   gatescheduling/index
    framereplication/index
    framepreemption/doc/index
    cutthroughswitching/doc/index
