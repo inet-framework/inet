@@ -34,7 +34,6 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 df['legend'] = df['module'].map(lambda module: re.sub(".*(app\\[1\\]).*", "video", re.sub(".*(app\\[0\\]).*", "best effort", module)))
-print(df)
 
 # plot
 utils.plot_vectors(df, props)

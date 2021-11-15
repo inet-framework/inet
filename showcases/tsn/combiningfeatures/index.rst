@@ -12,5 +12,5 @@ Networking:
 
    gptpandtas/doc/index
    frerandtas/doc/index
-   invechicle/doc/index
+   invehicle/doc/index
 
