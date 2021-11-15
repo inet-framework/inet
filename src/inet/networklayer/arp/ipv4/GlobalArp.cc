@@ -204,16 +204,19 @@ MacAddress GlobalArp::mapUnicastAddress(L3Address address)
 
 MacAddress GlobalArp::mapMulticastAddress(L3Address address)
 {
-    ASSERT(address.isMulticast());
+    return toMulticastMacAddress(address.toIpv4());
+}
 
+MacAddress GlobalArp::toMulticastMacAddress(Ipv4Address address)
+{
+    ASSERT(address.isMulticast());
     MacAddress macAddress;
     macAddress.setAddressByte(0, 0x01);
     macAddress.setAddressByte(1, 0x00);
     macAddress.setAddressByte(2, 0x5E);
-    Ipv4Address ipv4Address = address.toIpv4();
-    macAddress.setAddressByte(3, ipv4Address.getDByte(1) & 0x7F);
-    macAddress.setAddressByte(4, ipv4Address.getDByte(2));
-    macAddress.setAddressByte(5, ipv4Address.getDByte(3));
+    macAddress.setAddressByte(3, address.getDByte(1) & 0x7F);
+    macAddress.setAddressByte(4, address.getDByte(2));
+    macAddress.setAddressByte(5, address.getDByte(3));
     return macAddress;
 }
 
