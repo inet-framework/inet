@@ -40,6 +40,7 @@ module SimpleIeee8021qFilter like IPacketFilter
         output out;
     submodules:
         classifier: <default("StreamClassifier")> like IPacketClassifier {
+            gateIndexOffset = default(parent.hasDefaultPath ? 1 : 0);
             @display("p=100,100");
         }
         meter[numStreams]: <default("DualRateThreeColorMeter")> like IPacketMeter {
