@@ -29,8 +29,6 @@ MacProtocolBase::MacProtocolBase()
 MacProtocolBase::~MacProtocolBase()
 {
     delete currentTxFrame;
-    if (hostModule)
-        hostModule->unsubscribe(interfaceDeletedSignal, this);
 }
 
 MacAddress MacProtocolBase::parseMacAddressParameter(const char *addrstr)
@@ -56,8 +54,6 @@ void MacProtocolBase::initialize(int stage)
         lowerLayerInGateId = findGate("lowerLayerIn");
         lowerLayerOutGateId = findGate("lowerLayerOut");
         hostModule = findContainingNode(this);
-        if (hostModule)
-            hostModule->subscribe(interfaceDeletedSignal, this);
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
         registerInterface();
@@ -173,11 +169,6 @@ void MacProtocolBase::handleCrashOperation(LifecycleOperation *operation)
 void MacProtocolBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
-
-    if (signalID == interfaceDeletedSignal) {
-        if (networkInterface == check_and_cast<const NetworkInterface *>(obj))
-            networkInterface = nullptr;
-    }
 }
 
 } // namespace inet
