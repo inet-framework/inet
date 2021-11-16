@@ -60,6 +60,8 @@ class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollecti
     bool valueCorectnessCheck;
     bool valueCorectnessAdj;
 
+    int lastGlobalIdUsed = 0;
+
     // Structure for the class
     struct htbClass {
         const char *name = "";
@@ -100,10 +102,11 @@ class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollecti
         } leaf;
         struct htbClassSetComp { // Comparator to sort the waiting classes according to their expected mode change time
             bool operator()(htbClass* const & a, htbClass* const & b) const {
-                if (a->name == b->name) {
-                    return false;
-                }
-                return a->name < b->name;
+                // if (a->name == b->name) {
+                //     return false;
+                // }
+                // return a->name < b->name;
+                return a->classId < b->classId;
             }
         };
         struct htbClassInner { // Special class information for inner/root
@@ -116,15 +119,18 @@ class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollecti
         simsignal_t ctokenBucket;
         simsignal_t classMode;
 
+        int classId; // Uniquie, deterministic, ID for class sorting
+
     };
 
     struct waitComp { // Comparator to sort the waiting classes according to their expected mode change time
         bool operator()(htbClass* const & a, htbClass* const & b) const {
             if (a->nextEventTime == b->nextEventTime) {
-                if (a->name == b->name) {
-                    return false;
-                }
-                return a->name < b->name;
+                // if (a->name == b->name) {
+                //     return false;
+                // }
+                // return a->name < b->name;
+                return a->classId < b->classId;
                 // return std::less<htbClass*>{}(a, b); // Care for DRR ordering
             }
             return a->nextEventTime < b->nextEventTime;
