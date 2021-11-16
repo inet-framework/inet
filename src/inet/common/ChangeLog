@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2021-11-12  Rudolf Hornig
+
+	Followed omnetpp namespace changes.
+
+2020-06-17  Levente Mészáros
+
+	Units: Changed arithmetic operator templates to return the same runtime
+	value type that C++ would return for the same operator.
+
 2021-10-15  ------ inet-4.2.7 released ------
 
 2021-09-01  ------ inet-4.2.6 released ------
