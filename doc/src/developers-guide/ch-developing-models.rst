@@ -54,9 +54,9 @@ Other labels can also be specified in the ``@labels(...)`` property.
 This has the effect that if one module with a particular label has
 already been added to the compound module being edited, other module
 types with the same label are also brought to the top of the palette.
-For example, :ned:`EtherSwitch` is annotated with
-``@labels(node,ethernet-node)``. When you drop an :ned:`EtherSwitch`
-into a compound module, that will bring :ned:`EtherHost` (which is also
+For example, :ned:`EthernetSwitch` is annotated with
+``@labels(node,ethernet-node)``. When you drop an :ned:`EthernetSwitch`
+into a compound module, that will bring :ned:`EthernetHost` (which is also
 tagged with the ``ethernet-node`` label) to the top of the palette,
 making it easier to find.
 
@@ -64,7 +64,7 @@ making it easier to find.
 
 .. code-block:: ned
 
-   module EtherSwitch
+   module EthernetSwitch
    {
        parameters:
            @node();
