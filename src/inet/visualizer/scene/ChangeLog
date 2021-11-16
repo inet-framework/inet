@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2021-11-16  ------ inet-4.2.8 released ------
+
 2021-11-15  Rudolf Hornig
 
 	added @mutable property for OMNeT++ 6 compatibility
