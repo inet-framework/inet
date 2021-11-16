@@ -72,6 +72,8 @@ void HtbScheduler::printClass(htbClass *cl) {
 HtbScheduler::htbClass *HtbScheduler::createAndAddNewClass(cXMLElement* oneClass, int queueId) {
     // Create class, set its name and parents' name
     htbClass* newClass = new htbClass();
+    lastGlobalIdUsed += 1;
+    newClass->classId = lastGlobalIdUsed;
     newClass->name = oneClass->getAttribute("id");
     const char* parentName = oneClass->getFirstChildWithTag("parentId")->getNodeValue();
 
