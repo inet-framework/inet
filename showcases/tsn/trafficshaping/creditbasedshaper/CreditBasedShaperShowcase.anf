@@ -2357,7 +2357,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="9"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="5" name="Best effort traffic class" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="5" name="Traffic classes" template="linechart_native" type="LINE">
             <script>
                 <![CDATA[import re
 import math
@@ -2385,7 +2385,12 @@ if df.empty:
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
-df['title'] = df['title'].map(lambda title: re.sub("\, vector.*", "", title))
+df['a'] = df['module'].map(lambda module: \
+   re.sub(".*(transmissionSelectionAlgorithm\\[1\\]).*", "video", \
+   re.sub(".*(transmissionSelectionAlgorithm\\[0\\]).*", "best effort", \
+   re.sub(".*(transmitter).*", "interface", module))))
+df['b'] = df['title'].map(lambda title: re.sub("\, vector.*", "", title))
+df['title']  = df['a'] + ", " + df['b']
 
 df = df.sort_values('name', ascending=False)
 
@@ -2916,9 +2921,9 @@ utils.export_data_if_needed(df, props)
             <property name="Plot.Caching" value="true"/>
             <property name="yaxis_title" value="gate and transmitting states, number of credits normalized to [0, 1]"/>
             <property name="Legend.Border" value="false"/>
-            <property name="title" value="Best effort traffic class"/>
+            <property name="title" value="Traffic classes"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
-            <property name="vector_operations" value=""/>
+            <property name="vector_operations" value="apply: timedilation(c=1000)"/>
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
@@ -2928,12 +2933,12 @@ utils.export_data_if_needed(df, props)
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="time [s]"/>
+            <property name="xaxis_title" value="time [ms]"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value="-1.5"/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="BestEffortTrafficClass"/>
+            <property name="image_export_filename" value="TrafficClasses"/>
             <property name="xaxis_min" value="0"/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="(module =~ &quot;*.switch.eth[1].**.transmissionSelectionAlgorithm[0]&quot; OR module =~ &quot;*.switch.eth[1].**.transmitter&quot;) AND&#10;(name =~ transmitting:vector OR name =~ gateState:vector OR name =~ numCredits:vector)"/>
@@ -2947,7 +2952,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value="1.5"/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="xaxis_max" value="0.002"/>
+            <property name="xaxis_max" value="2"/>
             <property name="image_export_width" value="9"/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="138" name="Video traffic class" template="linechart_native" type="LINE">
