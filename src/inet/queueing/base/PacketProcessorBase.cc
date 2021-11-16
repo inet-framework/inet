@@ -256,15 +256,17 @@ void PacketProcessorBase::animate(Packet *packet, cGate *gate, const SendOptions
 #endif // INET_WITH_SELFDOC
 
     auto envir = getEnvir();
-    envir->beginSend(packet, sendOptions);
-    while (gate->getNextGate() != nullptr) {
-        ChannelResult result;
-        result.duration = sendOptions.duration_;
-        result.remainingDuration = sendOptions.remainingDuration;
-        envir->messageSendHop(packet, gate, result);
-        gate = gate->getNextGate();
+    if (gate->getNextGate() != nullptr) {
+        envir->beginSend(packet, sendOptions);
+        while (gate->getNextGate() != nullptr) {
+            ChannelResult result;
+            result.duration = sendOptions.duration_;
+            result.remainingDuration = sendOptions.remainingDuration;
+            envir->messageSendHop(packet, gate, result);
+            gate = gate->getNextGate();
+        }
+        envir->endSend(packet);
     }
-    envir->endSend(packet);
     envir->pausePoint();
 }
 
