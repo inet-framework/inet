@@ -22,6 +22,7 @@ import inet.node.ethernet.Eth100M;
 network InVehicleNetworkShowcase extends TsnNetworkBase
 {
     parameters:
+        string brokenComponent @enum("none", "link", "wheel", "camera") = default("none");
         @display("bgi=background/car;bgb=1280,720");
     types:
         channel Eth1G extends inet.node.ethernet.Eth1G
