@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2021-11-15  Rudolf Hornig
+
+	all: added @mutable property for OMNeT++ 6 compatibility
+
+2021-11-12  Rudolf Hornig
+
+	Followed omnetpp namespace changes.
+
+2021-11-12  Zoltan Bojthe
+
+	HostAutoConfigurator: set the ipv4address on loopback interfaces, too
+
 2021-10-15  ------ inet-4.3.4 released ------
 
 2021-08-03  ------ inet-4.3.3 released ------
