@@ -37,10 +37,10 @@ simple TransportConnectionVisualizerBase extends VisualizerBase
         
         bool displayTransportConnections = default(false);// display transport connection end points, disabled by default
 
-        string sourceNodeFilter = default("*"); // which source network nodes are considered to display connections, matches no nodes by default
-        string sourcePortFilter = default("*"); // which source ports are considered to display connections, matches all ports by default
-        string destinationNodeFilter = default("*"); // which destination network nodes are considered to display connections, matches no nodes by default
-        string destinationPortFilter = default("*"); // which destination ports are considered to display connections, matches all ports by default
+        string sourceNodeFilter @mutable = default("*"); // which source network nodes are considered to display connections, matches no nodes by default
+        string sourcePortFilter @mutable = default("*"); // which source ports are considered to display connections, matches all ports by default
+        string destinationNodeFilter @mutable = default("*"); // which destination network nodes are considered to display connections, matches no nodes by default
+        string destinationPortFilter @mutable = default("*"); // which destination ports are considered to display connections, matches all ports by default
 
         string icon = default("misc/marker_s"); // transport connection visualization icon
         string iconColor @enum("light", "dark") = default("dark"); // transport connection icon color is a list of colors, a set of dark colors by default

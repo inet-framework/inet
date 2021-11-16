@@ -34,7 +34,7 @@ simple MobilityVisualizerBase extends VisualizerBase
         bool displayMovements = default(true); // display mobility movement, enabled by default
         double animationSpeed = default(0); // animation speed while objects are moving around, value must be in the range (0, +inf)
         
-        string moduleFilter = default("**"); // which mobilities are considered, matches all mobilities by default
+        string moduleFilter @mutable = default("**"); // which mobilities are considered, matches all mobilities by default
 
         bool displayOrientations = default(false); // display an arc indicating the current orientation, disabled by default
         double orientationArcSize = default(0.25); // relative size of the arc compared to the full circle 

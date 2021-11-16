@@ -44,9 +44,9 @@ import inet.linklayer.contract.IMACProtocol;
 simple BMacLayer extends MACProtocolBase like IMACProtocol
 {
     parameters:
-        string address = default("auto"); // MAC address as hex string (12 hex digits), or
-                                          // "auto". "auto" values will be replaced by
-                                          // a generated MAC address in init stage 0.
+        string address @mutable = default("auto"); // MAC address as hex string (12 hex digits), or
+                                                   // "auto". "auto" values will be replaced by
+                                                   // a generated MAC address in init stage 0.
         // BMAC specific parameters
         // how long is one slot?
         double slotDuration @unit(s) = default(0.1s);

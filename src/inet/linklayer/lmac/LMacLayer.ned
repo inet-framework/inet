@@ -25,9 +25,9 @@ import inet.linklayer.contract.IMACProtocol;
 simple LMacLayer extends MACProtocolBase like IMACProtocol
 {
     parameters:
-        string address = default("auto"); // MAC address as hex string (12 hex digits), or
-                                          // "auto". "auto" values will be replaced by
-                                          // a generated MAC address in init stage 0.
+        string address @mutable = default("auto"); // MAC address as hex string (12 hex digits), or
+                                                   // "auto". "auto" values will be replaced by
+                                                   // a generated MAC address in init stage 0.
         // how long is a slot?
         double slotDuration @unit(s) = default(100ms);
         int headerLength @unit(B) = default(10B);

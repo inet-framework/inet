@@ -59,9 +59,9 @@ simple CsmaCaMac extends MACProtocolBase like IMACProtocol
 {
     parameters:
         string radioModule = default("^.radio"); // The path to the Radio module  //FIXME remove default value
-        string address = default("auto"); // MAC address as hex string (12 hex digits), or
-                                          // "auto". "auto" values will be replaced by
-                                          // a generated MAC address in init stage 0.
+        string address @mutable = default("auto"); // MAC address as hex string (12 hex digits), or
+                                                   // "auto". "auto" values will be replaced by
+                                                   // a generated MAC address in init stage 0.
         string queueModule = default(""); // name of optional external queue module
         int maxQueueSize = default(-1); // maximum queue length in frames; only used if queueModule==""
         bool prioritizeByUP = default(false); // use priority queueing, based on IEEE 802.1d User Priority (UP)

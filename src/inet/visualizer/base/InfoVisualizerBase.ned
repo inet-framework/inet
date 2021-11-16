@@ -40,8 +40,8 @@ simple InfoVisualizerBase extends VisualizerBase
         
         bool displayInfos = default(true);
 
-        string modules = default(""); // specifies the path of the submodules of network nodes, no submodules by default
-        string format = default("%s"); // determines what is displayed on network nodes 
+        string modules @mutable = default(""); // specifies the path of the submodules of network nodes, no submodules by default
+        string format @mutable = default("%s"); // determines what is displayed on network nodes 
 
         string font = default("<default>"); // info text font, automatic by default
         string textColor = default("black"); // info text font color, black by default

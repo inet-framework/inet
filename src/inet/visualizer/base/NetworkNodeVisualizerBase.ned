@@ -26,7 +26,7 @@ package inet.visualizer.base;
 simple NetworkNodeVisualizerBase extends VisualizerBase
 {
     parameters:
-        string nodeFilter = default("*"); // determines which network nodes are displayed, all nodes by default
+        string nodeFilter @mutable = default("*"); // determines which network nodes are displayed, all nodes by default
 
         double annotationSpacing = default(4);
         double placementPenalty = default(10);

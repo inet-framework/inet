@@ -43,9 +43,9 @@ simple LinkVisualizerBase extends VisualizerBase
 
         bool displayLinks = default(false); // display arrows for active links, disabled by default
 
-        string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
-        string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
-        string packetFilter = default("*"); // which packets are considered, matches all packets by default
+        string nodeFilter @mutable = default("*"); // which nodes are considered, matches all nodes by default
+        string interfaceFilter @mutable = default("*"); // which interfaces are considered, matches all interfaces by default
+        string packetFilter @mutable = default("*"); // which packets are considered, matches all packets by default
 
         string lineColor = default("black"); // link arrow color, black by default
         string lineStyle = default("solid"); // link arrow style (solid, dashed, dotted)

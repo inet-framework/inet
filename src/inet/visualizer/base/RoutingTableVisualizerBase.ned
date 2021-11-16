@@ -46,8 +46,8 @@ simple RoutingTableVisualizerBase extends VisualizerBase
         bool displayRoutesIndividually = default(true); // display routes between the same network nodes individually, enabled by default
         bool displayLabels = default(true); // display labels on arrows, enabled by default
 
-        string destinationFilter = default("*"); // which destinations are considered, matches all destinations by default
-        string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
+        string destinationFilter @mutable = default("*"); // which destinations are considered, matches all destinations by default
+        string nodeFilter @mutable = default("*"); // which nodes are considered, matches all nodes by default
 
         string lineColor = default("black"); // route line color, black by default
         string lineStyle = default("solid"); // route line style (solid, dashed, dotted)
@@ -59,7 +59,7 @@ simple RoutingTableVisualizerBase extends VisualizerBase
         double lineContactSpacing = default(3); // spacing between arrow end and submodule icon
         string lineContactMode @enum("circular", "rectangular") = default("rectangular"); // determines how arrows are clipped at the submodules
 
-        string labelFormat = default("%d/%m -> %g (%n)"); // determines what route data is displayed
+        string labelFormat @mutable = default("%d/%m -> %g (%n)"); // determines what route data is displayed
         string labelFont = default("<default>, 8px"); // label font, automatic by default
         string labelColor = default("black"); // label color, black by default
 

@@ -36,8 +36,8 @@ simple Ieee80211VisualizerBase extends VisualizerBase
         
         bool displayAssociations = default(false); // display association icon and SSID, disabled by default
 
-        string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
-        string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
+        string nodeFilter @mutable = default("*"); // which nodes are considered, matches all nodes by default
+        string interfaceFilter @mutable = default("*"); // which interfaces are considered, matches all interfaces by default
 
         string icon = default("misc/signal_s"); // wireless network visualization icon
         string iconColor @enum("light", "dark") = default("dark"); // wireless network icon color is a list of colors, a set of dark colors by default

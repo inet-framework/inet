@@ -37,9 +37,9 @@ simple PacketDropVisualizerBase extends VisualizerBase
 
         bool displayPacketDrops = default(false); // display icons for packet drops, disabled by default
 
-        string nodeFilter = default("*"); // which network nodes are considered, matches all nodes by default
-        string interfaceFilter = default("*"); // which interfaces are considered, matches all interfaces by default
-        string packetFilter = default("*"); // which packets are considered, matches all packets by default
+        string nodeFilter @mutable = default("*"); // which network nodes are considered, matches all nodes by default
+        string interfaceFilter @mutable = default("*"); // which interfaces are considered, matches all interfaces by default
+        string packetFilter @mutable = default("*"); // which packets are considered, matches all packets by default
 
         string icon = default("msg/packet_s"); // packet drop visualization icon
         double iconTintAmount = default(0); // colorization amount between 0 and 1, disabled by default

@@ -32,9 +32,9 @@ simple SceneCanvasVisualizer extends SceneVisualizerBase like ISceneVisualizer
 {
     parameters:
         double zIndex = default(0); // determines the drawing order of figures relative to other visualizers
-        string viewAngle = default("z"); // view angle is either x, y, z, isometric, isometricN (where 0 <= N < 48) or three rotation angles separated by spaces (it uses orthographic projection that is the projection is parallel to the normal of the viewing surface)
-        string viewScale = default("1 1"); // the 2D scale is applied after the view projection
-        string viewTranslation = default("0 0"); // the 2D translation is applied after the view projection
+        string viewAngle @mutable = default("z"); // view angle is either x, y, z, isometric, isometricN (where 0 <= N < 48) or three rotation angles separated by spaces (it uses orthographic projection that is the projection is parallel to the normal of the viewing surface)
+        string viewScale @mutable = default("1 1"); // the 2D scale is applied after the view projection
+        string viewTranslation @mutable = default("0 0"); // the 2D translation is applied after the view projection
         string descriptionFigure = default(""); // if not empty, it should be the name of a text figure; it will display the active configuration's description 
         @class(SceneCanvasVisualizer);
 }

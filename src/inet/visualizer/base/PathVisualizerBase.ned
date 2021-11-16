@@ -51,8 +51,8 @@ simple PathVisualizerBase extends VisualizerBase
 
         bool displayRoutes = default(false); // display polyline arrow for active routes, disabled by default
 
-        string nodeFilter = default("*"); // which nodes are considered, matches all nodes by default
-        string packetFilter = default("*"); // which packets are considered, matches all packets by default
+        string nodeFilter @mutable = default("*"); // which nodes are considered, matches all nodes by default
+        string packetFilter @mutable = default("*"); // which packets are considered, matches all packets by default
 
         string lineColor @enum("light", "dark") = default("dark"); // route color is a list of colors, a set of dark colors by default
         string lineStyle = default("solid"); // route line style (solid, dashed, dotted)

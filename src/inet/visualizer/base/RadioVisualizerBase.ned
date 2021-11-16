@@ -33,7 +33,7 @@ simple RadioVisualizerBase extends VisualizerBase
         bool displayReceptionState = default(true);
         bool displayTransmissionState = default(true);
 
-        string radioFilter = default("**"); // which radios are considered, matches all radios by default
+        string radioFilter @mutable = default("**"); // which radios are considered, matches all radios by default
 
 		string radioModeImages = default("block/process_vs block/timer_vs block/wrx_vs block/wtx_vs block/wrxtx_vs block/cogwheel_vs");
 		string receptionStateImages = default("- - misc/reception misc/reception");
