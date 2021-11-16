@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # This script automatically updates ChangeLog files from the git history.
 # The result may need some editing before committing back into the repo.
@@ -9,8 +9,8 @@ import string
 import subprocess
 
 # configuration
-since = ''  # empty means "since last entry in the ChangeLog file"
-fromtag = '5aa6bfa' # alternative for 'since': from the given tag or branch
+since = ''  # since date e.g. 2020-11-30, empty means "since last entry in the ChangeLog file"
+fromtag = 'v3.8.0' # alternative for 'since': from the given tag or branch
 
 entriesToIgnore = [
 """2017-03-03  Rudolf Hornig
@@ -31,7 +31,7 @@ def formatChangeLog(txt):
     txt = re.sub('(?m)^    (    )?', "\t", txt) # spaces-to-tab
     txt = re.sub('(?m)[ \t]+$', '', txt)     # remove end-line spaces
     txt = re.sub("(?s)\n\n+", "\n\n", txt)   # remove multiple blank lines
-    txt = string.strip(txt)+"\n"             # remove leading/trailing blank
+    txt = txt.strip()+"\n"             # remove leading/trailing blank
     return txt
 
 def updateChangeLogIn(dir):
@@ -60,14 +60,14 @@ def updateChangeLogIn(dir):
 
     newLog = re.sub('(?m)^    (    )?', "\t", newLog) # spaces-to-tab
     for e in entriesToIgnore:
-        newLog = string.replace(newLog, formatChangeLog(e), "")     # remove ignorable entries
+        newLog = newLog.replace(formatChangeLog(e), "")     # remove ignorable entries
 
     # if there's nothing new, skip the rest
-    if string.strip(newLog) == "":
-        print "    nothing new since", since
+    if newLog.strip() == "":
+        print("    nothing new since", since)
         return
 
-    print "   ", len(re.findall('(?m)^20', newLog)), "entrie(s) since", since
+    print("   ", len(re.findall('(?m)^20', newLog)), "entrie(s) since", since)
 
     # concatenate the two logs
     marker = "----------- lines above this marker have been added from git log -----------\n\n" if addMarker else ""
@@ -83,8 +83,8 @@ def updateChangeLogIn(dir):
 # find those directories that contain ChangeLogs, and update them
 for root, dirs, files in os.walk('.'):
     if 'ChangeLog' in files:
-        print root, "contains ChangeLog, updating..."
+        print(root, "contains ChangeLog, updating...")
         updateChangeLogIn(root)
-print "\nUpdated ChangeLog files:\n", " ".join(changedFiles)
+print("\nUpdated ChangeLog files:\n", " ".join(changedFiles))
 
 
