@@ -40,7 +40,7 @@ div.admonition {
 .align-right { text-align: right; display: block; margin-left: auto; }
 
 /* 'literal and doxytag reference' roles */
-.reference-cpp, .reference-ned, .refeence-ini, .reference-msg, .reference-fp {
+.reference-cpp, .reference-ned, .reference-ini, .reference-msg, .reference-fp {
     font-size: 0.95rem;
     margin-left: 0px;
     margin-right: 0px;
@@ -51,6 +51,13 @@ div.admonition {
     text-decoration: none;
     font-family: monospace;
 }
+
+/* uncomment to highlight unresolved links with red background - for development only */
+/*
+span.reference-cpp, span.reference-ned, span.reference-ini, span.reference-msg, span.reference-fp {
+   background: rgba(255, 0, 0, 0.2);
+}
+*/
 
 .literal-cpp, .reference-cpp { color: darkblue; }
 .literal-ini, .reference-ini { color: darkorange; }

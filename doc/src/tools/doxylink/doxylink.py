@@ -286,7 +286,9 @@ def create_role(app, tag_filename, rootdir):
             url = app.env.doxylink_cache[cache_name]['mapping'][part]
         except LookupError as error:
             inliner.reporter.warning('Could not find match for `%s` in `%s` tag file. Error reported was %s' % (part, tag_filename, error), line=lineno)
-            return [nodes.inline(title, title)], []
+            pnode = nodes.inline(title, title)
+            pnode.set_class('reference-'+name)
+            return [pnode], []
         except ParseException as error:
             inliner.reporter.warning('Error while parsing `%s`. Is not a well-formed C++ function call or symbol.'
                                      'If this is not the case, it is a doxylink bug so please report it.'
