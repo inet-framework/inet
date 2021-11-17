@@ -253,11 +253,6 @@ void HtbScheduler::initialize(int stage)
         getParentModule()->subscribe(packetPushedSignal, this);
         EV_INFO << "HtbScheduler: parent = " << getParentModule()->getFullPath() << endl;
         // Get the datarate of the link connected to interface
-        EV_INFO << "Get link datarate" << endl;
-        int interfaceIndex = getParentModule()->getParentModule()->getParentModule()->getIndex();
-        linkDatarate = getParentModule()->getParentModule()->getParentModule()->getParentModule()->gateByOrdinal(interfaceIndex)->getPreviousGate()->getChannel()->getNominalDatarate();
-        // linkDatarate = -1;
-        EV_INFO << "SchedInit: Link datarate = " << linkDatarate << endl;
         //register signal for dequeue index
         dequeueIndexSignal = registerSignal("dequeueIndex");
         // Get all leaf queues. IMPORTANT: Leaf queue id MUST correspond to leaf class id!!!!!
@@ -284,6 +279,13 @@ void HtbScheduler::initialize(int stage)
         }
 
         classModeChangeEvent = new cMessage("probablyClassNotRedEvent"); // Omnet++ event to take action when new elements to dequeue are available
+    }
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+        EV_INFO << "Get link datarate" << endl;
+        auto iface = getContainingNicModule(this);
+        linkDatarate = iface->getTxTransmissionChannel()->getNominalDatarate();
+        // linkDatarate = -1;
+        EV_INFO << "SchedInit: Link datarate = " << linkDatarate << endl;
     }
 }
 
