@@ -23,7 +23,7 @@ import inet.queueing.contract.IPacketFlow;
 simple StreamEncoder extends PacketFlowBase like IPacketFlow
 {
     parameters:
-        object streamNameToVlanIdMapping = default({});
+        object streamNameToVlanIdMapping @mutable = default({});
         @class(StreamEncoder);
         @display("i=block/blackboard");
 }

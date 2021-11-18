@@ -24,7 +24,7 @@ simple StreamDecoder extends PacketFlowBase like IPacketFlow
 {
     parameters:
         string interfaceTableModule = default("^.^.^.interfaceTable");
-        object streamMappings = default([]);
+        object streamMappings @mutable = default([]);
         @class(StreamDecoder);
         @display("i=block/blackboard");
 }

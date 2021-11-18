@@ -23,7 +23,7 @@ import inet.queueing.contract.IPacketFilter;
 simple StreamMerger extends PacketFilterBase like IPacketFilter
 {
     parameters:
-        object streamMapping = default({}); // map of input streams to output streams, empty string means no stream
+        object streamMapping @mutable = default({}); // map of input streams to output streams, empty string means no stream
         int bufferSize = default(10);
         @class(StreamMerger);
         @display("i=block/join");

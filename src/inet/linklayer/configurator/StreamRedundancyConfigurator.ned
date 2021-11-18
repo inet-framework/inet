@@ -22,7 +22,7 @@ simple StreamRedundancyConfigurator
     parameters:
         int minVlanId = default(0);
         int maxVlanId = default(4095);
-        object configuration = default([]);
+        object configuration @mutable = default([]);
         @display("i=block/cogwheel");
 }
 
