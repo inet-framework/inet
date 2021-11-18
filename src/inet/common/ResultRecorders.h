@@ -90,7 +90,7 @@ class INET_API WeightedHistogramRecorder : public cNumericResultRecorder
   public:
     WeightedHistogramRecorder();
     ~WeightedHistogramRecorder();
-    virtual void init(cComponent *component, const char *statisticName, const char *recordingMode, cProperty *attrsProperty, opp_string_map *manualAttrs) override;
+    virtual void init(Context *ctx) override;
     virtual void setStatistic(cStatistic *stat);
     virtual cStatistic *getStatistic() const { return statistic; }
     virtual std::string str() const override;

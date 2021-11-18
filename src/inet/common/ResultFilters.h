@@ -201,7 +201,7 @@ class INET_API LiveThroughputFilter : public cObjectResultFilter
 
   public:
     ~LiveThroughputFilter();
-    virtual void init(cComponent *component, cProperty *attrsProperty) override;
+    virtual void init(Context *ctx) override;
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
     virtual void finish(cComponent *component, simsignal_t signalID) override;
     virtual void timerExpired();
