@@ -121,9 +121,9 @@ void WeightedHistogramRecorder::finish(cResultFilter *prev)
     getEnvir()->recordStatistic(getComponent(), getResultName().c_str(), statistic, &attributes);
 }
 
-void WeightedHistogramRecorder::init(cComponent *component, const char *statsName, const char *recordingMode, cProperty *attrsProperty, opp_string_map *manualAttrs)
+void WeightedHistogramRecorder::init(Context *ctx)
 {
-    cNumericResultRecorder::init(component, statsName, recordingMode, attrsProperty, manualAttrs);
+    cNumericResultRecorder::init(ctx);
     setStatistic(new cHistogram("histogram", true));
 }
 

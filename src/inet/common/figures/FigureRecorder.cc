@@ -22,14 +22,14 @@
 namespace inet {
 Register_ResultRecorder("figure", FigureRecorder);
 
-void FigureRecorder::init(cComponent *component, const char *statisticName, const char *recordingMode, cProperty *attrsProperty, opp_string_map *manualAttrs)
+void FigureRecorder::init(Context *ctx)
 {
-    cNumericResultRecorder::init(component, statisticName, recordingMode, attrsProperty, manualAttrs);
+    cNumericResultRecorder::init(ctx);
 
     cModule *module = check_and_cast<cModule *>(getComponent());
-    const char *figureSpec = attrsProperty->getValue("targetFigure");
+    const char *figureSpec = ctx->attrsProperty->getValue("targetFigure");
     if (!figureSpec)
-        figureSpec = statisticName;
+        figureSpec = ctx->statisticName;
     std::string figureName;
     int series;
     if (const char *lastColon = strrchr(figureSpec, ':')) {

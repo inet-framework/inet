@@ -216,9 +216,9 @@ class TimerEvent : public cEvent
     virtual void execute() override { target->timerExpired(); }
 };
 
-void LiveThroughputFilter::init(cComponent *component, cProperty *attrsProperty)
+void LiveThroughputFilter::init(Context *ctx)
 {
-    cObjectResultFilter::init(component, attrsProperty);
+    cObjectResultFilter::init(ctx);
 
     event = new TimerEvent("updateLiveThroughput", this);
     simtime_t now = simTime();
