@@ -68,7 +68,7 @@
 /showcases/visualizer/canvas/instrumentfigures/,    -f omnetpp.ini -c General -r 0,                                            3s,              6622-adb9/tplx;28ca-9f8c/~tNl;3417-d991/~tND;c3a4-244d/tyf, PASS,    wireless
 
 /showcases/visualizer/canvas/interfacetable/, -f omnetpp.ini -c EnablingVisualization -r 0,                  5s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
-/showcases/visualizer/canvas/interfacetable/, -f omnetpp.ini -c AdvancedFeatures -r 0,                       5s,            cfa7-ed6a/tplx;63d2-2fb5/~tNl;8685-c7be/~tND;0317-f8e6/tyf, PASS,    wireless
+/showcases/visualizer/canvas/interfacetable/, -f omnetpp.ini -c AdvancedFeatures -r 0,                       5s,            cfa7-ed6a/tplx;63d2-2fb5/~tNl;5bed-40e5/~tND;0317-f8e6/tyf, PASS,    wireless
 
 /showcases/visualizer/canvas/mobility/,     -f omnetpp.ini -c VisualizingFeatures -r 0,                                500s,            54a1-0f8d/tplx;0000-0000/~tNl;0000-0000/~tND;5b39-ede4/tyf, PASS,    wireless
 

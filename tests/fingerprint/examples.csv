@@ -37,10 +37,10 @@
 /examples/communicationcache/,       -f omnetpp.ini -c MapCommunicationCache -r 0,        10s,       e4f0-d0a0/tplx;2568-4e96/~tNl;85f9-5744/~tND;e05c-84d2/tyf, PASS, wireless
 /examples/communicationcache/,       -f omnetpp.ini -c VectorCommunicationCache -r 0,     10s,       e4f0-d0a0/tplx;2568-4e96/~tNl;85f9-5744/~tND;e05c-84d2/tyf, PASS, wireless
 
-/examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           9e94-2d61/tplx;023a-3c37/~tNl;6223-c03b/~tND;d6e2-9f26/tyf, PASS,
-/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            c4ce-f10b/tplx;3c78-9f43/~tNl;a8df-0872/~tND;9d50-1e27/tyf, PASS, wireless
-/examples/dhcp/,                     -f omnetpp.ini -c Wireless2DHCP -r 0,          500s,            6d4e-a1fe/tplx;c687-ec73/~tNl;02ab-f8e8/~tND;5790-6406/tyf, PASS, wireless
-/examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            0deb-8472/tplx;0610-405e/~tNl;e3eb-18eb/~tND;779e-cb59/tyf, PASS,
+/examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           9e94-2d61/tplx;023a-3c37/~tNl;fdc9-84e1/~tND;d6e2-9f26/tyf, PASS,
+/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            c4ce-f10b/tplx;3c78-9f43/~tNl;8a65-7190/~tND;9d50-1e27/tyf, PASS, wireless
+/examples/dhcp/,                     -f omnetpp.ini -c Wireless2DHCP -r 0,          500s,            6d4e-a1fe/tplx;c687-ec73/~tNl;500f-9732/~tND;5790-6406/tyf, PASS, wireless
+/examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            0deb-8472/tplx;0610-405e/~tNl;4ae3-3dec/~tND;779e-cb59/tyf, PASS,
 
 # /examples/diffserv/onedomain/,       -f omnetpp.ini -c Apps -r 0,                  10s,             0, PASS,   # Apps extended
 # /examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp1 -r 0,                  10s,             0, PASS,   # Exp1 extended
@@ -521,7 +521,7 @@
 
 /examples/wireless/crosstalk/,       -f omnetpp.ini -c General -r 0,                2s,           0a4f-e755/tplx;7ef5-c624/~tNl;105a-8a94/~tND;4b4c-0831/tyf, PASS, wireless
 
-/examples/wireless/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         4b91-925c/tplx;2b55-3ab9/~tNl;f1f1-1962/~tND;c39c-a7b0/tyf, PASS, wireless
+/examples/wireless/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         4b91-925c/tplx;2b55-3ab9/~tNl;554b-cba4/~tND;c39c-a7b0/tyf, PASS, wireless
 
 /examples/wireless/errorrate/,       -f omnetpp.ini -c General -r 0,                100s,         0bb3-adca/tplx;b0b7-4a84/~tNl;1c49-63dd/~tND;ac68-ada4/tyf, PASS, wireless
 
