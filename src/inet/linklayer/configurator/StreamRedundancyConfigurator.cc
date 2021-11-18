@@ -297,6 +297,7 @@ void StreamRedundancyConfigurator::configureStreams(Node *node)
             cValueMap *value = new cValueMap();
             value->set("packetFilter", streamIdentification.packetFilter);
             value->set("stream", streamIdentification.stream);
+            value->set("sequenceNumbering", cValue(true));
             parameterValue->add(value);
         }
         EV_INFO << "Configuring stream merging" << EV_FIELD(networkNode) << EV_FIELD(streamIdentifier) << EV_FIELD(parameterValue) << EV_ENDL;
