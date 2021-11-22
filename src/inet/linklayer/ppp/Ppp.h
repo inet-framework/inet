@@ -21,7 +21,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/linklayer/base/MacProtocolBaseExtQ.h"
 #include "inet/linklayer/ppp/PppFrame_m.h"
 #include "inet/queueing/contract/IPacketQueue.h"
 
@@ -32,7 +32,7 @@ class NetworkInterface;
 /**
  * PPP implementation.
  */
-class INET_API Ppp : public MacProtocolBase
+class INET_API Ppp : public MacProtocolBaseExtQ
 {
   protected:
     const char *displayStringTextFormat = nullptr;

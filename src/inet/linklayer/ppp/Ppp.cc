@@ -45,7 +45,7 @@ Ppp::~Ppp()
 
 void Ppp::initialize(int stage)
 {
-    MacProtocolBase::initialize(stage);
+    MacProtocolBaseExtQ::initialize(stage);
 
     // all initialization is done in the first stage
     if (stage == INITSTAGE_LOCAL) {
@@ -101,7 +101,7 @@ void Ppp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
 
-    MacProtocolBase::receiveSignal(source, signalID, obj, details);
+    MacProtocolBaseExtQ::receiveSignal(source, signalID, obj, details);
 
     if (getSimulation()->getSimulationStage() == CTX_CLEANUP)
         return;
@@ -208,7 +208,7 @@ void Ppp::startTransmitting()
 
 void Ppp::handleMessageWhenUp(cMessage *message)
 {
-    MacProtocolBase::handleMessageWhenUp(message);
+    MacProtocolBaseExtQ::handleMessageWhenUp(message);
     if (operationalState == State::STOPPING_OPERATION) {
         if (txQueue->isEmpty()) {
             networkInterface->setCarrier(false);
@@ -288,7 +288,7 @@ void Ppp::handleLowerPacket(Packet *packet)
 
 void Ppp::refreshDisplay() const
 {
-    MacProtocolBase::refreshDisplay();
+    MacProtocolBaseExtQ::refreshDisplay();
 
     if (displayStringTextFormat != nullptr) {
         auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) {
