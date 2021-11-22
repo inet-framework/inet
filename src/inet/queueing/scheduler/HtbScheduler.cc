@@ -310,7 +310,7 @@ void HtbScheduler::handleMessage(cMessage *message)
 {
     Enter_Method("handleMessage");
     if (message == classModeChangeEvent) {
-        check_and_cast<Ppp*>(getParentModule()->getParentModule())->refreshOutGateConnection(true);
+//        check_and_cast<Ppp*>(getParentModule()->getParentModule())->refreshOutGateConnection(true);
     }
     else
         throw cRuntimeError("Unknown self message");
