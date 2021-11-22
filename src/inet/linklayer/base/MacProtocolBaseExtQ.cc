@@ -103,21 +103,11 @@ void MacProtocolBaseExtQ::dropCurrentTxFrame(PacketDropDetails& details)
     currentTxFrame = nullptr;
 }
 
-void MacProtocolBaseExtQ::popTxQueue()
-{
-    if (currentTxFrame != nullptr)
-        throw cRuntimeError("Model error: incomplete transmission exists");
-    ASSERT(txQueue != nullptr);
-    currentTxFrame = txQueue->dequeuePacket();
-    currentTxFrame->setArrival(getId(), upperLayerInGateId, simTime());
-    take(currentTxFrame);
-}
-
 void MacProtocolBaseExtQ::flushQueue(PacketDropDetails& details)
 {
     // code would look slightly nicer with a pop() function that returns nullptr if empty
     if (txQueue)
-        while (!txQueue->isEmpty()) {
+        while (txQueue->canPullSomePacket(gate(upperLayerInGateId)->getPathStartGate())) {
             auto packet = txQueue->dequeuePacket();
             emit(packetDroppedSignal, packet, &details); // FIXME this signal lumps together packets from the network and packets from higher layers! separate them
             delete packet;
@@ -127,7 +117,7 @@ void MacProtocolBaseExtQ::flushQueue(PacketDropDetails& details)
 void MacProtocolBaseExtQ::clearQueue()
 {
     if (txQueue)
-        while (!txQueue->isEmpty())
+        while (txQueue->canPullSomePacket(gate(upperLayerInGateId)->getPathStartGate()))
             delete txQueue->dequeuePacket();
 }
 
@@ -169,6 +159,18 @@ void MacProtocolBaseExtQ::handleCrashOperation(LifecycleOperation *operation)
 void MacProtocolBaseExtQ::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
+}
+
+queueing::IPacketQueue *MacProtocolBaseExtQ::getQueue(cGate *gate) const
+{
+    for (auto g = gate->getPreviousGate(); g != nullptr; g = g->getPreviousGate()) {
+        if (g->getType() == cGate::OUTPUT) {
+            auto m = dynamic_cast<queueing::IPacketQueue *>(g->getOwnerModule());
+            if (m)
+                return m;
+        }
+    }
+    throw cRuntimeError("Gate %s is not connected to a module of type queueing::IPacketQueue", gate->getFullPath().c_str());
 }
 
 } // namespace inet
