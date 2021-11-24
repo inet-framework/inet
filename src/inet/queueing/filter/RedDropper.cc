@@ -56,6 +56,11 @@ void RedDropper::initialize(int stage)
         collection.reference(outputGate, false);
         if (!collection)
             collection.reference(this, "collectionModule", true);
+        cModule * cm = check_and_cast<cModule *>(collection.get());
+        cm->subscribe(packetPushedSignal, this);
+        cm->subscribe(packetPulledSignal, this);
+        cm->subscribe(packetRemovedSignal, this);
+        cm->subscribe(packetDroppedSignal, this);
     }
 }
 
@@ -71,6 +76,7 @@ RedDropper::RedResult RedDropper::doRandomEarlyDetection(const Packet *packet)
         // TD: Added behaviour for empty queue.
         const double m = SIMTIME_DBL(simTime() - q_time) * pkrate;
         avg = pow(1 - wq, m) * avg;
+        q_time = simTime();
     }
 
     if (queueLength >= packetCapacity) { // maxth is also the "hard" limit
@@ -144,18 +150,15 @@ void RedDropper::processPacket(Packet *packet)
         case RANDOMLY_BELOW_LIMIT:
         case BELOW_MIN_LIMIT:
         case QUEUE_FULL:
-            return;
+            break;
         default:
             throw cRuntimeError("Unknown RED result");
     }
 }
 
-void RedDropper::pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSink *consumer)
+void RedDropper::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    PacketFilterBase::pushOrSendPacket(packet, gate, consumer);
-    // TD: Set the time stamp q_time when the queue gets empty.
-    const int queueLength = collection->getNumPackets();
-    if (queueLength == 0)
+    if (signalID == packetPushedSignal || signalID == packetPulledSignal || signalID == packetRemovedSignal || signalID == packetDroppedSignal)
         q_time = simTime();
 }
 
