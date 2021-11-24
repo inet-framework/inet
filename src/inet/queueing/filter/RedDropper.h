@@ -29,7 +29,7 @@ namespace queueing {
 /**
  * Implementation of Random Early Detection (RED).
  */
-class INET_API RedDropper : public PacketFilterBase
+class INET_API RedDropper : public PacketFilterBase, public cListener
 {
   protected:
     enum RedResult { QUEUE_FULL, RANDOMLY_ABOVE_LIMIT, RANDOMLY_BELOW_LIMIT, ABOVE_MAX_LIMIT, BELOW_MIN_LIMIT };
@@ -54,9 +54,13 @@ class INET_API RedDropper : public PacketFilterBase
 
   protected:
     virtual void initialize(int stage) override;
+
     virtual RedResult doRandomEarlyDetection(const Packet *packet);
+
     virtual void processPacket(Packet *packet) override;
-    virtual void pushOrSendPacket(Packet *packet, cGate *gate, IPassivePacketSink *consumer) override;
+
+    // cListener:
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
   public:
     virtual bool matchesPacket(const Packet *packet) const override;
