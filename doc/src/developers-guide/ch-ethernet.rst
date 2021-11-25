@@ -47,10 +47,10 @@ EtherFrameWithLLC
 
 SAP registration
 
-:ned:`EtherLlc` and higher layers
+:ned:`Ieee8022Llc` and higher layers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :ned:`EtherLlc` module can serve several applications (higher layer
+The :ned:`Ieee8022Llc` module can serve several applications (higher layer
 protocols), and dispatch data to them. Higher layers are identified by
 DSAP. See section "Application registration" for more info.
 
@@ -61,14 +61,14 @@ IP.
 Communication between LLC and Higher Layers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Higher layers (applications or protocols) talk to the :ned:`EtherLlc`
+Higher layers (applications or protocols) talk to the :ned:`Ieee8022Llc`
 module.
 
 When a higher layer wants to send a packet via Ethernet, it just passes
-the data packet (a cMessage or any subclass) to :ned:`EtherLlc`. The
+the data packet (a cMessage or any subclass) to :ned:`Ieee8022Llc`. The
 message kind has to be set to IEEE802CTRL_DATA.
 
-In general, if :ned:`EtherLlc` receives a packet from the higher layers,
+In general, if :ned:`Ieee8022Llc` receives a packet from the higher layers,
 it interprets the message kind as a command. The commands include
 IEEE802CTRL_DATA (send a frame), IEEE802CTRL_REGISTER_DSAP (register
 highher layer) IEEE802CTRL_DEREGISTER_DSAP (deregister higher layer) and
@@ -84,7 +84,7 @@ identifier, the application sets the data packet’s message kind to
 ETH_DATA ("please send this data packet" command), fills in the
 :ned:`Ieee802Ctrl` structure with the destination MAC address and the
 protocol identifier, adds the control info to the message, then sends
-the packet to :ned:`EtherLlc`.
+the packet to :ned:`Ieee8022Llc`.
 
 When the command doesn’t involve a data packet (e.g.
 IEEE802CTRL_(DE)REGISTER_DSAP, IEEE802CTRL_SENDPAUSE), a dummy packet
@@ -120,11 +120,11 @@ protocols.
 
 So that data arriving from the network can be dispatched to the correct
 applications (higher layer protocols), applications have to register
-themselves in :ned:`EtherLlc`. The registration is done with the
+themselves in :ned:`Ieee8022Llc`. The registration is done with the
 IEEE802CTRL_REGISTER_DSAP command (see section "Communication between
 LLC and higher layers") which associates a SAP with the LLC port.
 Different applications have to connect to different ports of
-:ned:`EtherLlc`.
+:ned:`Ieee8022Llc`.
 
 The ETHERCTRL_REGISTER_DSAP/IEEE802CTRL_DEREGISTER_DSAP commands use
 only the dsap field in the :cpp:`Ieee802Ctrl` structure.
@@ -202,7 +202,7 @@ by itself. (For one thing, it doesn’t have an input buffer that can
 overflow.)
 
 :ned:`EthernetCsmaMac`, however, transmits PAUSE frames received by higher
-layers, and :ned:`EtherLlc` can be instructed by a command to send a
+layers, and :ned:`Ieee8022Llc` can be instructed by a command to send a
 PAUSE frame to MAC.
 
 Error handling

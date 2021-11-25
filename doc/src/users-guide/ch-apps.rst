@@ -480,7 +480,7 @@ multiple chunks.
 
 Both applications have a :par:`registerSAP` boolean parameter. This
 parameter should be set to ``true`` if the application is connected
-to the :ned:`EtherLlc` module which requires registration of the SAP
+to the :ned:`Ieee8022Llc` module which requires registration of the SAP
 before sending frames.
 
 Both applications collects the following statistics: sentPkBytes,
@@ -488,7 +488,7 @@ rcvdPkBytes, endToEndDelay.
 
 The client and server application works with any model that accepts
 Ieee802Ctrl control info on the packets (e.g. the 802.11 model). The
-applications should be connected directly to the :ned:`EtherLlc` or an
+applications should be connected directly to the :ned:`Ieee8022Llc` or an
 EthernetInterface NIC module.
 
 The model also contains a host component that groups the applications
