@@ -38,7 +38,7 @@ port. If the destination address or port is unspecified in the control
 info then the packet is sent to the connected target.
 
 The :ned:`Udp` module encapsulates the application’s packet into an
-:msg:`UDPPacket`, creates an appropriate IP control info and send it
+:msg:`UdpHeader`, creates an appropriate IP control info and send it
 over ipOut or ipv6Out depending on the destination address.
 
 The destination address can be the IPv4 local broadcast address
