@@ -159,40 +159,6 @@ An example configuration with fictituous types:
    **.ppp[*].ingressTC.typename = "CustomIngressTC"
    **.ppp[*].egressTC.typename = "CustomEgressTC"
 
-.. _ug:sec:interfaces:hooks:
-
-Hooks
-~~~~~
-
-Several network interfaces allow extra modules to be inserted in the
-incoming and outgoing paths of packets at the top of the netwok
-interface. Hooks are added as a submodule vector with parametric type,
-like this:
-
-.. code-block:: ned
-
-   outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0;
-   inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0;
-
-This allows any number of hook modules to be added. The hook modules are
-chained in their numeric order.
-
-Modules inserted as hooks may act as probes (for measuring or recording
-traffic) or as means of modifying or perturbing the packet flow for
-experimentation. Module types implementing the :ned:`IHook` NED
-interface include :ned:`ThruputMeter`, :ned:`Delayer`,
-:ned:`OrdinalBasedDropper`, and :ned:`OrdinalBasedDuplicator`.
-
-The following ini file fragment inserts two hook modules into the output
-paths of PPP interfaces, a delayer and a throughput meter:
-
-.. code-block:: ini
-
-   **.ppp[*].numOutputHooks = 2
-   **.ppp[*].outputHook[0].typename = "Delayer"
-   **.ppp[*].outputHook[1].typename = "ThruputMeter"
-   **.ppp[*].outputHook[0].delay = 3ms
-
 .. _ug:sec:interfaces:the-interface-table:
 
 The Interface Table
