@@ -36,18 +36,16 @@ There are several node models that can be used in an Ethernet network:
 -  :ned:`EthernetSwitch` models an Ethernet switch, i.e. a multiport
    bridging device
 
--  :ned:`EthernetHub` models an Ethernet hub or multiport repeater
-
--  :ned:`EtherBus` models the coaxial cable (10BASE2 or 10BASE5 network
-   segments) on legacy Ethernet networks
+-  :ned:`WireJunction` can models the coaxial cable (10BASE2 or 10BASE5 network
+   segments) on legacy Ethernet networks, or an Ethernet hub/multiport repeater
 
 -  :ned:`EthernetHost` is a sample node which can be used to generate “raw”
    Ethernet traffic
 
 .. _ug:sec:ethernet:etherswitch:
 
-EthernetSwitch
-~~~~~~~~~~~
+Ethernet Switch
+~~~~~~~~~~~~~~~
 
 :ned:`EthernetSwitch` models an Ethernet switch. Ethernet switches play an
 important role in modern Ethernet LANs. Unlike passive hubs and
@@ -65,10 +63,10 @@ default it uses half-duplex MAC with CSMA/CD.
 
 .. _ug:sec:ethernet:etherhub:
 
-EthernetHub
-~~~~~~~~
+Ethernet Hub
+~~~~~~~~~~~~
 
-:ned:`EthernetHub` models an Ethernet hub. Ethernet hubs are a simple
+The :ned:`WireJunction` can model an Ethernet hub. Ethernet hubs are a simple
 broadcast devices. Messages arriving on a port are regenerated and
 broadcast to every other port.
 
@@ -77,21 +75,18 @@ lengths should be reflected in the delays of the connections.
 
 .. _ug:sec:ethernet:etherbus:
 
-EtherBus
-~~~~~~~~
+Ethernet Bus
+~~~~~~~~~~~~
 
-The :ned:`EtherBus` component can model a common coaxial cable found in
-early Ethernet LANs. The nodes are attached via taps at specific
-positions on the cable. When a node sends a signal, it will propagate
+The :ned:`WireJunction` component can also model a connection to a 
+common coaxial cable found in early Ethernet LANs. Network nodes
+are attached to the :ned:`WireJunction` via a :ned:`DatarateChannel`.
+The :ned:`WireJunction` modules are connected to each other via 
+:ned:`DatarateChannel` as well. When a node sends a signal, it will propagate
 along the cable in both directions at the given propagation speed.
 
-The gates of the :ned:`EtherBus` represent taps. The positions of the
-taps are given by the :par:`positions` parameter as a space separated
-list of distances in metres. If there are more gates then positions
-given, the last distance is repeated. The bus component send the
-incoming message in one direction and a copy of the message to the other
-direction (except at the ends). The propagation delays are computed from
-the distances of the taps and the :par:`propagationSpeed` parameter.
+The speed of the connection can be set on the datarate channels; 
+all connected channels must have the same speed.
 
 .. _ug:sec:ethernet:the-physical-layer:
 
