@@ -437,7 +437,7 @@ encapsulated in the ICMP message.
 The :ned:`Icmp` module receives ping commands on the ``pingIn`` gate
 from the application. The ping command can be any packet having an
 :cpp:`Ipv4ControlInfo` control info. The packet will be encapsulated
-with an :msg:`ICMPMessage` and handed over to the IP.
+with an :msg:`IcmpHeader` and handed over to the IP.
 
 If :ned:`Icmp` receives an echo request from IP, the original message
 object will be returned as the echo reply. Of course, before sending
@@ -446,5 +446,5 @@ and the message type changed to ICMP_ECHO_REPLY.
 
 When an ICMP echo reply received, the application message decapsulated
 from it and passed to the application through the ``pingOut`` gate.
-The :cpp:`Ipv4ControlInfo` also copied from the :msg:`ICMPMessage` to
+The :cpp:`Ipv4ControlInfo` also copied from the :msg:`IcmpHeader` to
 the application message.
