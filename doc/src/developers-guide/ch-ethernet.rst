@@ -54,7 +54,7 @@ The :ned:`EtherLlc` module can serve several applications (higher layer
 protocols), and dispatch data to them. Higher layers are identified by
 DSAP. See section "Application registration" for more info.
 
-:ned:`EtherEncap` doesn’t have the functionality to dispatch to
+:ned:`EthernetEncapsulation` doesn’t have the functionality to dispatch to
 different higher layers because in practice it’ll always be used with
 IP.
 
