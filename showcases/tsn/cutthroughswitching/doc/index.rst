@@ -54,7 +54,7 @@ Here are the two configurations:
    :language: ini
 
 
-The default :ned:`EthernetInteface` in Ethernet switches doesn't support cut-through. In order to use 
+The default :ned:`EthernetInterface` in Ethernet switches doesn't support cut-through. In order to use 
 cut-through, we replace the default interface with :ned:`EthernetCutthroughInterface`. Cut-through is 
 disabled in this interface by default, thus it needs to be enabled by setting the :par:`enableCutthrough` 
 parameter to ``true``.

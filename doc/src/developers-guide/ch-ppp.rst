@@ -9,7 +9,7 @@ Overview
 --------
 
 The modules of the PPP model can be found in the
-:ned:`inet.linklayer.ppp` package. The :ned:`Ppp` simple module performs
+``inet.linklayer.ppp`` package. The :ned:`Ppp` simple module performs
 encapsulation of network datagrams into PPP frames and decapsulation of
 the incoming PPP frames.
 
