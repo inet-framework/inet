@@ -33,7 +33,7 @@ In this scenario, a VLC instance in a sender host streams a video file to anothe
 in a receiver host over the network. The hosts from the link-layer up are real; parts of the
 link-layer, as well as the physical layer and the network are simulated.
 
-We'll use the :ned:`ExtUpperEthernet` interface to connect the real and simulated parts of the scenario.
+We'll use the :ned:`ExtUpperEthernetInterface` to connect the real and simulated parts of the scenario.
 The lower part of this interface is present in the simulation, and uses TAP interfaces in the host OS
 to send and receive packets to and from the upper layers of the host OS.
 
