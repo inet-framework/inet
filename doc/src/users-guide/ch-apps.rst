@@ -401,9 +401,11 @@ The following UDP modules are provided to allow composing applications with more
 complex traffic without implementing new C++ modules:
 
 -  :ned:`UdpApp`: generic UDP application with composable traffic source and traffic sink
--  :ned:`UdpClientApp`: generic UDP client application with composable traffic source and traffic sink
--  :ned:`UdpServerApp`: generic UDP server application with a UDP session handler to create UDP server sessions
--  :ned:`UdpServerSession`: generic UDP server session with composable traffic source and traffic sink
+-  :ned:`UdpSourceApp`: generic UDP application with a traffic source
+-  :ned:`UdpSinkApp`: generic UDP application with a traffic sink
+.. -  :ned:`UdpClientApp`: generic UDP client application with composable traffic source and traffic sink
+   -  :ned:`UdpServerApp`: generic UDP server application with a UDP session handler to create UDP server sessions
+   -  :ned:`UdpServerSession`: generic UDP server session with composable traffic source and traffic sink
 -  :ned:`UdpRequestResponseApp`: generic request-response based UDP server application with configurable pre-composed traffic source and traffic sink
 
 .. _ug:sec:apps:ipv4/ipv6-traffic-generators:
