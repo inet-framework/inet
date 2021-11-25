@@ -24,7 +24,7 @@ LLC and SNAP headers. The corresponding classes are:
 :msg:`EthernetIIFrame`, :msg:`EtherFrameWithLlc` and
 :msg:`EtherFrameWithSNAP`. They all class from :msg:`EtherFrame` which
 only represents the basic MAC frame with source and destination
-addresses. :ned:`EtherMac` only deals with :msg:`EtherFrame`’s, and does
+addresses. :ned:`EthernetCsmaMac` only deals with :msg:`EtherFrame`’s, and does
 not care about the specific subclass.
 
 Ethernet frames carry data packets as encapsulated cMessage objects.
@@ -146,7 +146,7 @@ When frames collide the transmission is aborted – in this case the
 transmitting station transmits a jam signal. Jam signals are represented
 by a :msg:`EtherJam` message. The jam message contains the tree
 identifier of the frame whose transmission is aborted. When the
-:ned:`EtherMac` receives a jam signal, it knows that the corresponding
+:ned:`EthernetCsmaMac` receives a jam signal, it knows that the corresponding
 transmission ended in jamming and have been aborted. Thus when it
 receives as many jams as collided frames, it can be sure that the
 channel is free again. (Receiving a jam message marks the beginning of
@@ -196,12 +196,12 @@ expires, the receiver may elect to send another PAUSE frame to the
 transmitter with a timer value of zero, allowing the transmitter to
 resume immediately.
 
-:ned:`EtherMac` will properly respond to PAUSE frames it receives
+:ned:`EthernetCsmaMac` will properly respond to PAUSE frames it receives
 (:msg:`EtherPauseFrame` class), however it will never send a PAUSE frame
 by itself. (For one thing, it doesn’t have an input buffer that can
 overflow.)
 
-:ned:`EtherMac`, however, transmits PAUSE frames received by higher
+:ned:`EthernetCsmaMac`, however, transmits PAUSE frames received by higher
 layers, and :ned:`EtherLlc` can be instructed by a command to send a
 PAUSE frame to MAC.
 
