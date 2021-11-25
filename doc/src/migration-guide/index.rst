@@ -31,7 +31,7 @@ and commands to the intended receiver module based on various tags:
 - :cpp:`DispatchProtocolReq` specifies the receiver protocol
 
 The :ned:`MessageDispatcher` is also used inside network layer compound modules such
-as the :ned:`IPv4NetworkLayer`. This usage is not accidental, it solves dispatching
+as the :ned:`Ipv4NetworkLayer`. This usage is not accidental, it solves dispatching
 ARP, ICMP and IPv4 packets to the appropriate protocol modules.
 
 .. _mg:sec:migrationguide:extendingprotocols:
