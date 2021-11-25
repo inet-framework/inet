@@ -144,7 +144,7 @@ calculated by the MAC and detected by scheduling a self message.
 
 When frames collide the transmission is aborted – in this case the
 transmitting station transmits a jam signal. Jam signals are represented
-by a :msg:`EtherJam` message. The jam message contains the tree
+by a :msg:`EthernetJamSignal` message. The jam message contains the tree
 identifier of the frame whose transmission is aborted. When the
 :ned:`EthernetCsmaMac` receives a jam signal, it knows that the corresponding
 transmission ended in jamming and have been aborted. Thus when it
