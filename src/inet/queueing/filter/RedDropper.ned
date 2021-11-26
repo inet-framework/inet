@@ -48,10 +48,10 @@ simple RedDropper extends PacketFilterBase
 {
     parameters:
         string collectionModule = default("");
-        double wq = default(0.002);  // weight of the current queue length in the averaged queue length
+        double wq = default(0.002);  // weight of the current queue length in the averaged queue length, in range [0.0, 1.0]
         double minth = default(5);  // minimum threshold for avg queue length
-        double maxth = default(50);  // maximum threshold for avg queue length (=buffer capacity)
-        double maxp = default(0.02);  // maximum value for pbs
+        double maxth = default(50);  // maximum threshold for avg queue length (=buffer capacity), in range (minth,packetCapacity]
+        double maxp = default(0.02);  // maximum value for pbs, in range [0.0, 1.0]
         double pkrate = default(150);  // average packet rate for calculations when queue is empty
         bool useEcn = default(false); // if enabled, packets are marked with ECN if applicable
         int packetCapacity = default(int(maxth)); // packets are dropped if queue length is greater
