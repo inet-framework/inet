@@ -29,7 +29,6 @@ the network level by an interface module (``ExampleInterface``).
 
 .. literalinclude:: ../QueueingTutorial.ned
    :start-at: network ExampleNetworkTutorialStep
-   :end-before: //----
    :language: ned
 
 .. literalinclude:: ../QueueingTutorial.ned

@@ -49,10 +49,10 @@ When we rerun the fingerprint tests, now they PASS:
 As a simplisic example, we rename the ``eth`` module vector to ``ethernet`` in :ned:`LinkLayerNodeBase` and :ned:`NetworkLayerNodeBase`. This change affects all host-types such as :ned:`StandardHost` and :ned:`AdhocHost` since they are derived modules:
 
 .. literalinclude:: ../sources/LinkLayerNodeBase.ned.modified
-   :diff: ../sources/sources/LinkLayerNodeBase.ned.orig
+   :diff: ../sources/LinkLayerNodeBase.ned.orig
 
 .. literalinclude:: ../sources/NetworkLayerNodeBase.ned.modified
-   :diff: ../sources/sources/NetworkLayerNodeBase.ned.orig
+   :diff: ../sources/NetworkLayerNodeBase.ned.orig
 
 We run the fingerprint tests again:
 
@@ -85,7 +85,7 @@ Here is an example change which results in ERROR in the tests when using ``tlx``
 In :ned:`Ipv4NetworkLayer`, we rename the ``routingTable`` submodule to ``ipv4RoutingTable``:
 
 .. literalinclude:: ../sources/Ipv4NetworkLayer.ned.routingtable.modified
-   :diff: ../sources/sources/Ipv4NetworkLayer.ned.orig
+   :diff: ../sources/Ipv4NetworkLayer.ned.orig
 
 Here are the results of the fingerprint tests:
 

@@ -221,7 +221,7 @@ An example configuration:
    **.eth[0].namespace = "host0" # optional
    **.eth[0].mtu = 1500B
 
-.. note::
+.. .. note::
 
 Let us examine the paths outgoing and incoming packets take, and the
 necessary configuration requirements to make them work. We assume IPv4

@@ -29,7 +29,6 @@ Here is the network:
 Here is the configuration:
 
 .. literalinclude:: ../omnetpp.ini
-   :align: center
    :language: ini
 
 Standard Ethernet

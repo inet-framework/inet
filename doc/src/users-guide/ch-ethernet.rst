@@ -172,7 +172,7 @@ The following components are present in the model:
 .. _ug:sec:ethernet:ethermacfullduplex:
 
 EthernetMac
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
 
 From the two MAC implementation :ned:`EthernetMac` is the simpler
 one, it operates only in full-duplex mode (its :par:`duplexEnabled`
@@ -184,7 +184,7 @@ bursting.
 .. _ug:sec:ethernet:ethermac:
 
 EthernetCsmaMac
-~~~~~~~~
+~~~~~~~~~~~~~~~
 
 Ethernet MAC layer implementing CSMA/CD. It supports both half-duplex
 and full-duplex operations; in full-duplex mode it behaves as
@@ -197,7 +197,7 @@ off by setting the :par:`carrierExtension` parameter to ``false``.
 .. _ug:sec:ethernet:etherencap:
 
 EthernetEncapsulation
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 The :ned:`EthernetEncapsulation` module performs Ethernet II or Ethernet with SNAP
 encapsulation/decapsulation.
