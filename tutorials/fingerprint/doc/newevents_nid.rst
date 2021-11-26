@@ -20,7 +20,7 @@ The fingerprint calculator has four new ingredients available:
 
 To use the new ingredients, add the following line to the ``General`` configuration:
 
-.. literalinclude:: ../sources/omnetpp.ini
+.. literalinclude:: ../omnetpp.ini
    :start-at: General
    :end-at: class
    :language: ini
