@@ -177,7 +177,7 @@
 /examples/inet/configurator/,        -f omnetpp.ini -c DisableDestinationInterfaces -r 0,   10s,     767c-2ea2/tplx;ba3e-99de/~tNl;21bc-bc31/~tND;6df4-aa19/tyf, PASS,
 
 /examples/inet/dctcp/,               -f omnetpp.ini -c DcTcpIncast -r 0,            100s,         a38e-8c36/tplx;8e52-2609/~tNl;ce8b-12d8/~tND;2c81-1eee/tyf, PASS,   # DcTcpIncast extended
-/examples/inet/dctcp/,               -f omnetpp.ini -c TcpRenoIncast -r 0,          100s,         94d0-f9d9/tplx;3343-19c7/~tNl;ce7f-935e/~tND;60a0-3deb/tyf, PASS,
+/examples/inet/dctcp/,               -f omnetpp.ini -c TcpRenoIncast -r 0,          100s,         2c95-8741/tplx;eaa8-6cf5/~tNl;4f3c-7880/~tND;283c-ea41/tyf, PASS,
 
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            1bd7-ecd3/tplx;145c-4d9e/~tNl;087d-a911/~tND;6847-737f/tyf, PASS,
 
@@ -220,7 +220,7 @@
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Udp -r 0,          100s,            5726-c4f0/tplx;b44e-17d8/~tNl;c2a6-b2ba/~tND;a91d-6a84/tyf, PASS,
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Tcp -r 0,          100s,            5b6a-8f27/tplx;0309-b513/~tNl;5b37-e188/~tND;87e3-06d8/tyf, PASS,
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Sctp -r 0,              100s,            7395-7102/tplx;2dd1-fb30/~tNl;2571-7df1/~tND;df19-80e6/tyf, PASS,
-/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         30s,             89ae-6d92/tplx;b06f-f05e/~tNl;7f8f-e255/~tND;4dd2-3e4a/tyf, PASS,
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         30s,             6ba6-cc2d/tplx;4921-f3c9/~tNl;5bf3-b6dc/~tND;3ef1-fdf5/tyf, PASS,
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           ebb0-8926/tplx;6a0d-2074/~tNl;4831-3edc/~tND;26b8-17cb/tyf, PASS,
 
