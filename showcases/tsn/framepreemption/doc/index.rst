@@ -134,7 +134,7 @@ so that it can drop packets if the queue is full:
    :language: ini
 
 In the ``PriorityQueueing`` configuration, we change the queue type in the Mac layer from the 
-default :ned:`PacketQueue` to :ned:`PriorityQueueing`:
+default :ned:`PacketQueue` to :ned:`PriorityQueue`:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: Config PriorityQueueing

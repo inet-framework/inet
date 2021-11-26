@@ -38,7 +38,7 @@ you won't be able to switch to 3D view using the globe icon on the Qtenv toolbar
 The model
 ---------
 
-The simulations use the :ned:`MobilityShowcase3D` network. It contains a
+The simulations use the :ned:`MobilityShowcase` network. It contains a
 configurable number of mobile nodes (hosts) and an :ned:`IntegratedVisualizer` module.
 
 .. figure:: media/Playground2D.png

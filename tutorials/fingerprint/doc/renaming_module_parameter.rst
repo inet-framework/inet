@@ -62,7 +62,7 @@ This time we don't have to accept the fingerprint changes, because they didn't c
 
 .. note:: Before trying the following example, reset the model changes of the previous example.
 
-Renaming module parameters can also lead to ERROR in the fingerprint tests. For example, we rename the ``queue`` submodule to ``txQueue`` in :ned:`EtherMacFullDuplex.ned`:
+Renaming module parameters can also lead to ERROR in the fingerprint tests. For example, we rename the ``queue`` submodule to ``txQueue`` in `EtherMacFullDuplex.ned`:
 
 .. literalinclude:: ../sources/EtherMacFullDuplex.ned.mod
    :diff: ../sources/EtherMacFullDuplex.ned.orig
