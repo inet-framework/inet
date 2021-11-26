@@ -171,7 +171,7 @@ packets from its input until it finds one that matches the filter criteria.
 
 -  :ned:`ContentBasedFilter`: drops packets based on the data they contain
 -  :ned:`OrdinalBasedDropper`: drops packets based on their ordinal number
--  :ned:`RateLimiter`: drops packets above the specified packetrate or datarate
+-  :ned:`StatisticalRateLimiter`: drops packets above the specified packetrate or datarate
 -  :ned:`RedDropper`: drops packets based on random early detection
 
 Classifiers
@@ -242,7 +242,8 @@ Meters
 These modules measure some property of a stream of packets. Packets can be both
 pushed into the input and pulled from the output of packet meters.
 
--  :ned:`RateMeter`: measures the packetrate and datarate of the packet stream 
+-  :ned:`ExponentialRateMeter`: Measures the packetrate and datarate of the packet stream. Takes older packets into account with an exponentially decreasing weight 
+-  :ned:`SlidingWindowRateMeter`: Measures the packetrate and datarate of the packet stream. Takes packets into account only in the given time window
 
 Token generators
 ----------------
