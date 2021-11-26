@@ -393,9 +393,12 @@ describes how the radio consumes energy depending on its activity. This
 model is optional, if omitted energy consumption is ignored. The
 following list provides some examples:
 
--  :ned:`StateBasedEnergyConsumer`: the constant power consumption is
+-  :ned:`StateBasedEpEnergyConsumer`: Models energy consuption based on power. The constant power consumption is
    determined by valid combinations of the radio mode, the transmitter
-   state and the receiver state
+   state and the receiver state. To be used with energy generator and storage modules using `energy and power` (denoted with `Ep` in the module name).
+-  :ned:`StateBasedCcEnergyConsumer`: Models energy consuption based on current. The constant current consumption is
+   determined by valid combinations of the radio mode, the transmitter
+   state and the receiver state. To be used with energy generator and storage modules using `charge and current` (denoted with `Ep` in the module name).
 
 The energy consumer models are in the
 ``src/physicallayer/energyconsumer/`` directory.
