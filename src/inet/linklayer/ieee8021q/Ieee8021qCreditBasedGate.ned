@@ -28,8 +28,8 @@ simple Ieee8021qCreditBasedGate extends CreditBasedGate
     parameters:
         double idleSlope @unit(bps); // data rate of the accumulated credits when the transmission channel is idle
         double sendSlope @unit(bps) = default(idleSlope - bitrate); // data rate of the spent credits when the transmission channel is in use
-        idleCreditGainRate = dropUnit(idleSlope);
-        transmitCreditSpendRate = -dropUnit(sendSlope);
         double maxInterferenceSize @unit(b) = default(inf b);
+        idleCreditGainRate = default(dropUnit(idleSlope));
+        transmitCreditSpendRate = default(-dropUnit(sendSlope));
         maxCredit = default(dropUnit(maxInterferenceSize) * dropUnit(idleSlope / bitrate));
 }
