@@ -25,7 +25,7 @@ network GptpAndTasShowcase extends TsnNetworkBase
 {
     submodules:
         scenarioManager: ScenarioManager {
-            @display("p=100,500;is=s");
+            @display("p=100,800;is=s");
         }
         tsnClock1: TsnClock {
             @display("p=500,150");
