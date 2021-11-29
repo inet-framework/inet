@@ -58,6 +58,7 @@ module Ieee8021qTimeAwareShaper extends CompoundPacketQueueBase
         }
         transmissionSelection: <default("PriorityScheduler")> like IPacketScheduler {
             parameters:
+                reverseOrder = default(true);
                 @display("p=900,100");
         }
     connections:
