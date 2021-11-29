@@ -54,17 +54,24 @@ void InstantServer::processPacket()
 void InstantServer::handleCanPushPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
-    while (canProcessPacket())
-        processPacket();
-    updateDisplayString();
+    processPackets();
 }
 
 void InstantServer::handleCanPullPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
-    while (canProcessPacket())
-        processPacket();
-    updateDisplayString();
+    processPackets();
+}
+
+void InstantServer::processPackets()
+{
+    if (!isProcessing) {
+        isProcessing = true;
+        while (canProcessPacket())
+            processPacket();
+        isProcessing = false;
+        updateDisplayString();
+    }
 }
 
 } // namespace queueing

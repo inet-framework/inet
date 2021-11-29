@@ -26,8 +26,12 @@ namespace queueing {
 class INET_API InstantServer : public PacketServerBase
 {
   protected:
+    bool isProcessing = false;
+
+  protected:
     virtual bool canProcessPacket();
     virtual void processPacket();
+    virtual void processPackets();
 
   public:
     virtual void handleCanPushPacketChanged(cGate *gate) override;
