@@ -57,7 +57,7 @@ Additionally, the :par:`packetFilter` parameter can use an expression
 to filter packets. The expression is evaluated for all packets to
 a boolean value indicating a match. The expression can contain the packet's
 fields (such as its name), contained chunks and their fields, protocol
-headers, etc. The default value is ``true`` that matches all packets, 
+headers, etc. The default value is ``*`` that matches all packets, 
 thus no packets are filtered.  For more information on the packet filter, 
 refer to the TODO section in the INET User's Guide.
 
