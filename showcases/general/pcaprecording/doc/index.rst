@@ -27,25 +27,12 @@ in hosts and routers by specifying their :par:`numPcapRecorders` parameter
 :ned:`StandardHost` and derivatives, and router modules.)
 
 The PCAP recorder module records packets sent to and from modules that
-are in the same host as the PCAP recorder module. By default, it records
-L2 (link layer) frames (frames going in and out of the L2 layer.) It can
-also be set to record L3 frames. It writes traces in a PCAP file, which
-has to be specified by the :par:`pcapFile` parameter. This parameter acts
-as the main switch for recording, thus specifying this parameter enables
-packet capture. The PCAP recorder writes traces in the original PCAP
-format, not the next generation one (PcapNg.) There can be packets with
-only one link-layer header type in the PCAP file (this is a limitation
-of the original PCAP file format.) The PCAP file's link-layer header
-type needs to be set with the :par:`pcapNetwork` parameter, so that PCAP
-programs interpret the traces correctly. Some widely used type codes are
-the following:
-
--  Ethernet: 1
--  802.11: 105
--  PPP: 204
-
-The complete list of link-layer header type codes can be found
-`here <http://www.tcpdump.org/linktypes.html>`__.
+are in the same host as the PCAP recorder module. It writes traces in a 
+PCAP file, which has to be specified by the :par:`pcapFile` parameter. 
+This parameter acts as the main switch for recording, thus specifying 
+this parameter enables packet capture. The PCAP recorder can write traces 
+in the original or the next-generation PCAP file format, selected by the 
+:par:`fileFormat` parameter (``pcap`` or ``pcapng``).
 
 The :par:`moduleNamePatterns` parameter specifies which modules' traffic
 should be recorded. It takes a space separated list of module names. For
@@ -65,22 +52,6 @@ By default, the PCAP recorder module records L2 frames, but setting the
 ``moduleNamePatterns`` to ``ipv4``, for example, lets one record L3
 frames (note that the parameter's value is lowercase because it refers
 to the actual ``ipv4`` module in the host, not the module type.)
-To record IP frames, the :par:`pcapNetwork` parameter also needs to
-be set to the proper link-layer header type (101 - raw IP), and the
-:par:`dumpProtocols` parameter to ``ipv4`` (see the configuration section
-below.)
-
-When a node connects to the network via just one kind of interface,
-specifying the link-layer header type is sufficient for capturing a
-proper trace. However, if there are multiple kinds of interfaces the
-node connects with, the set of captured interfaces or physical layer
-protocols should be narrowed to the ones with the link-layer header type
-specified by the :par:`pcapNetwork` parameter. It is needed because traffic
-for all interfaces is included in the trace by default. Multiple PCAP
-recorder modules need to be included in the network to record packets
-with different link-layer headers. One PCAP recorder module should only
-record traces with one link-layer header type because the packets with
-the other header types would not be recognized by PCAP programs.
 
 Additionally, there are two packet filtering parameters. The
 :par:`packetFilter` parameter can filter for the packet class and its
