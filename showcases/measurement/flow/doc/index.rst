@@ -193,7 +193,7 @@ Here is the complete flow definition configuration (including the definitions al
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: *.client1.app[*].outbound.typename = "FlowMeasurementStarter"
-   :end-at: *.switch2.eth[2].measurementLayer.measurementMaker.measure = "elapsedTime or queueingTime"
+   :end-at: *.switch2.eth[2].measurementLayer.measurementRecorder.measure = "elapsedTime or queueingTime"
    :language: ini
 
 We set up the four flows between the clients and the servers, and also the flow between the two switches. We name flows based on source and destination node (e.g. ``c1s1`` for ``client1->server1``). We set the measurement modules to measure the elapsed time and the queueing time. Some notes:

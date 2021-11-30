@@ -151,7 +151,7 @@ loss algorithms, each comes with its own set of parameters:
 -  :ned:`TwoRayGroundReflection` models interference between line of
    sight and single ground reflection.
 
--  :ned:`TwoRayInterference` refines the above for inter-vechicle
+-  :ned:`TwoRayInterference` refines the above for inter-vehicle
    communication.
 
 -  :ned:`RicianFading` is a stochastical model for the anomaly caused by

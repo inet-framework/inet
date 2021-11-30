@@ -182,7 +182,7 @@ the periodic open and gate.
 
 The asynchronous shaper is in part implemented in the :ned:`AsynchronousShaper`
 compound module. This shaper is somewhat more complicated than the previous two
-because it also contains submodules that are part of the ingress traffic filtering
+because it also contains submodules that are part of the ingress per-stream filtering
 module in the bridging layer. These are the :ned:`EligibilityTimeMeter` and the
 corresponding :ned:`EligibilityTimeFilter` submodules. The first is responsible
 for calculating the transmission eligibility time for incoming packets, the
