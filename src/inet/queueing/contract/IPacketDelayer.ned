@@ -15,26 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-package inet.queueing.common;
-
-import inet.queueing.base.PacketProcessorBase;
-import inet.queueing.contract.IPacketDelayer;
+package inet.queueing.contract;
 
 //
-// This module connects one packet producer to one packet consumer. It can be
-// pushed with packets from the connected packet producer. When this happens,
-// the packet is delayed and eventually pushed to the output. Note that the
-// order of packets may change if the delay parameter is configured to be a
-// distribution.
+// This module interface is implemented by packet delayers.
 //
-simple PacketDelayer extends PacketProcessorBase like IPacketDelayer
+moduleinterface IPacketDelayer extends IPassivePacketSink, IActivePacketSource
 {
     parameters:
-        string clockModule = default(""); // relative path of a module that implements IClock; optional
-        volatile double delay @unit(s);
-        @class(PacketDelayer);
+        @omittedTypename(OmittedPacketDelayer);
         @display("i=block/delay");
-    gates:
-        input in @labels(push);
-        output out @labels(push);
 }

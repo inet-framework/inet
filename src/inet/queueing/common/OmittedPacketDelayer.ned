@@ -17,24 +17,21 @@
 
 package inet.queueing.common;
 
-import inet.queueing.base.PacketProcessorBase;
 import inet.queueing.contract.IPacketDelayer;
 
 //
-// This module connects one packet producer to one packet consumer. It can be
-// pushed with packets from the connected packet producer. When this happens,
-// the packet is delayed and eventually pushed to the output. Note that the
-// order of packets may change if the delay parameter is configured to be a
-// distribution.
+// This module implements the module given interface and can be used as an omitted
+// optional module that removes itself from the module hierarchy during initialize.
 //
-simple PacketDelayer extends PacketProcessorBase like IPacketDelayer
+module OmittedPacketDelayer like IPacketDelayer
 {
     parameters:
-        string clockModule = default(""); // relative path of a module that implements IClock; optional
-        volatile double delay @unit(s);
-        @class(PacketDelayer);
-        @display("i=block/delay");
+        @class(::inet::OmittedModule);
+        @display("i=block/delay,black,50");
     gates:
-        input in @labels(push);
-        output out @labels(push);
+        input in;
+        output out;
+    connections:
+        in --> out;
 }
+
