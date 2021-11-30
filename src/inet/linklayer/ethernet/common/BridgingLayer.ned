@@ -18,6 +18,7 @@
 package inet.linklayer.ethernet.common;
 
 import inet.protocolelement.contract.IProtocolLayer;
+import inet.protocolelement.processing.IProcessingDelayLayer;
 
 //
 // This module provides various layer 2 services such as packet forwarding,
@@ -35,29 +36,33 @@ module BridgingLayer like IProtocolLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        directionReverser: <default("DirectionReverserLayer")> like IProtocolLayer {
-            @display("p=300,150");
+        processingDelayLayer: <default("")> like IProcessingDelayLayer {
+            @display("p=400,150");
         }
-        streamIdentifier: <default("")> like IProtocolLayer {
+        directionReverser: <default("DirectionReverserLayer")> like IProtocolLayer {
             @display("p=300,300");
         }
-        streamRelay: <default("")> like IProtocolLayer {
+        streamIdentifier: <default("")> like IProtocolLayer {
             @display("p=300,450");
         }
-        vlanPolicy: <default("")> like IProtocolLayer {
+        streamRelay: <default("")> like IProtocolLayer {
             @display("p=300,600");
         }
-        streamFilter: <default("")> like IProtocolLayer {
+        vlanPolicy: <default("")> like IProtocolLayer {
             @display("p=300,750");
         }
-        streamCoder: <default("")> like IProtocolLayer {
+        streamFilter: <default("")> like IProtocolLayer {
             @display("p=300,900");
         }
-        interfaceRelay: <default("InterfaceRelayLayer")> like IProtocolLayer {
+        streamCoder: <default("")> like IProtocolLayer {
             @display("p=300,1050");
         }
+        interfaceRelay: <default("InterfaceRelayLayer")> like IProtocolLayer {
+            @display("p=300,1200");
+        }
     connections:
-        upperLayerIn --> directionReverser.upperLayerIn;
+        upperLayerIn --> processingDelayLayer.upperLayerIn;
+        processingDelayLayer.lowerLayerOut --> directionReverser.upperLayerIn;
         directionReverser.lowerLayerOut --> streamIdentifier.upperLayerIn;
         streamIdentifier.lowerLayerOut --> streamRelay.upperLayerIn;
         streamRelay.lowerLayerOut --> vlanPolicy.upperLayerIn;
@@ -73,5 +78,6 @@ module BridgingLayer like IProtocolLayer
         vlanPolicy.upperLayerOut --> streamRelay.lowerLayerIn;
         streamRelay.upperLayerOut --> streamIdentifier.lowerLayerIn;
         streamIdentifier.upperLayerOut --> directionReverser.lowerLayerIn;
-        directionReverser.upperLayerOut --> upperLayerOut;
+        directionReverser.upperLayerOut --> processingDelayLayer.lowerLayerIn;
+        processingDelayLayer.upperLayerOut --> upperLayerOut;
 }
