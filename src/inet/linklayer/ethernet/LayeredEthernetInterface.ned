@@ -22,7 +22,9 @@ import inet.linklayer.ethernet.contract.IEthernetMacLayer;
 import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.wired.ethernet.IEthernetPhyLayer;
 import inet.protocolelement.measurement.IMeasurementLayer;
+import inet.protocolelement.processing.IProcessingDelayLayer;
 import inet.protocolelement.trafficconditioner.ITrafficConditionerLayer;
+
 
 //
 // This module implements an Ethernet network interface.
@@ -44,22 +46,26 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
         output cutthroughOut @loose;
         inout phys @labels(EthernetSignal);
     submodules:
-        trafficConditionerLayer: <default("")> like ITrafficConditionerLayer {
+        processingDelayLayer: <default("")> like IProcessingDelayLayer {
             parameters:
                 @display("p=400,100");
         }
-        measurementLayer: <default("")> like IMeasurementLayer {
+        trafficConditionerLayer: <default("")> like ITrafficConditionerLayer {
             parameters:
                 @display("p=400,200");
         }
-        macLayer: <default("EthernetMacLayer")> like IEthernetMacLayer {
+        measurementLayer: <default("")> like IMeasurementLayer {
             parameters:
                 @display("p=400,300");
+        }
+        macLayer: <default("EthernetMacLayer")> like IEthernetMacLayer {
+            parameters:
+                @display("p=400,400");
         }
         phyLayer: <default("EthernetPhyLayer")> like IEthernetPhyLayer {
             parameters:
                 transmitter.clockModule = default("");
-                @display("p=400,400");
+                @display("p=400,500");
         }
     connections allowunconnected:
         upperLayerIn --> { @display("m=n"); } --> trafficConditionerLayer.upperLayerIn;
