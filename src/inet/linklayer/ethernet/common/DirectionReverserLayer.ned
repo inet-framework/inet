@@ -20,6 +20,8 @@ package inet.linklayer.ethernet.common;
 import inet.common.MessageDispatcher;
 import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.common.PacketMultiplexer;
+import inet.queueing.contract.IPacketDelayer;
+
 
 //
 // This module provides a layer that combines the decision for local delivery
@@ -40,12 +42,15 @@ module DirectionReverserLayer like IProtocolLayer
             forwardServiceRegistration = false;
             @display("p=100,100;i=-;b=10,10,oval,grey,,1");
         }
-        reverser: PacketDirectionReverser {
+        delayer: <default("")> like IPacketDelayer {
             @display("p=300,100");
+        }
+        reverser: PacketDirectionReverser {
+            @display("p=500,100");
         }
         join: PacketMultiplexer {
             forwardProtocolRegistration = false;
-            @display("p=500,100");
+            @display("p=700,100");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> join.in++;
@@ -54,6 +59,7 @@ module DirectionReverserLayer like IProtocolLayer
         lowerLayerIn --> { @display("m=s"); } --> fork.in++;
         fork.out++ --> { @display("m=n"); } --> upperLayerOut;
 
-        fork.out++ --> reverser.in;
+        fork.out++ --> delayer.in;
+        delayer.out --> reverser.in;
         reverser.out --> join.in++;
 }
