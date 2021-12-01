@@ -18,22 +18,20 @@
 #ifndef __INET_ACKINGMAC_H
 #define __INET_ACKINGMAC_H
 
-#include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/linklayer/base/MacProtocolBaseExtQ.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
-
-class AckingMacHeader;
-class NetworkInterface;
 
 /**
  * Implements a simplified ideal MAC.
  *
  * See the NED file for details.
  */
-class INET_API AckingMac : public MacProtocolBase
+class INET_API AckingMac : public MacProtocolBaseExtQ, public queueing::IActivePacketSink
 {
   protected:
     // parameters
@@ -78,6 +76,16 @@ class INET_API AckingMac : public MacProtocolBase
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
+
+    virtual bool canProcessUpperPacket() const;
+    virtual void processUpperPacket();
+    virtual void tryProcessUpperPacket();
+
+  public:
+    // IActivePacketSink:
+    virtual queueing::IPassivePacketSource *getProvider(cGate *gate) override;
+    virtual void handleCanPullPacketChanged(cGate *gate) override;
+    virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
 } // namespace inet

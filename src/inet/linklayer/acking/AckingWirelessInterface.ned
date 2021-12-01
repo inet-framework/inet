@@ -22,10 +22,6 @@ import inet.linklayer.contract.IWirelessInterface;
 import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 
-module FakeModule
-{
-}
-
 //
 // This module implements a highly abstracted wireless network interface (NIC)
 // that uses a trivial MAC protocol. It offers simplicity for scenarios where
@@ -53,7 +49,7 @@ module AckingWirelessInterface extends NetworkInterface like IWirelessInterface
         output upperLayerOut;
         input radioIn @labels(WirelessSignal);
     submodules:
-        queue: FakeModule {
+        queue: <default("DropTailQueue")> like IPacketQueue {
             parameters:
                 @display("p=200,100;q=l2queue");
         }
@@ -66,7 +62,8 @@ module AckingWirelessInterface extends NetworkInterface like IWirelessInterface
                 @display("p=300,200");
         }
     connections:
-        upperLayerIn --> { @display("m=n"); } --> mac.upperLayerIn;
+        upperLayerIn --> { @display("m=n"); } --> queue.in;
+        queue.out --> mac.upperLayerIn;
         mac.lowerLayerOut --> radio.upperLayerIn;
 
         radioIn --> { @display("m=s"); } --> radio.radioIn;
