@@ -1,0 +1,4 @@
+This validation test compares simulation results to analytical results and also
+to results from a different simulation using Core4INET.
+
+https://github.com/CoRE-RG/CoRE4INET/tree/master/examples/tsn/medium_network
