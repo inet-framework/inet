@@ -27,14 +27,23 @@ using namespace inet::queueing;
 
 class INET_API EligibilityTimeGate : public ClockUserModuleMixin<PacketGateBase>
 {
+  public:
+    static simsignal_t remainingEligibilityTimeChangedSignal;
+
   protected:
     ClockEvent *eligibilityTimer = nullptr;
+
+    simtime_t lastRemainingEligibilityTimeSignalValue = -1;
+    simtime_t lastRemainingEligibilityTimeSignalTime = -1;
+    Packet *lastRemainingEligibilityTimePacket = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
+    virtual void finish() override;
 
     virtual void updateOpen();
+    virtual void emitEligibilityTimeChangedSignal();
 
   public:
     virtual ~EligibilityTimeGate() { cancelAndDelete(eligibilityTimer); }
