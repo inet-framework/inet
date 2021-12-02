@@ -80,11 +80,11 @@
 # /tutorials/visualization/,           -f omnetpp.ini -c Visualization24 -r 0,                    500s,           0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # Visualization24 extended
 # /tutorials/visualization/,           -f omnetpp.ini -c Visualization25 -r 0,                    500s,           0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,
 
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless01 -r 0,                         25s,           85c5-fb02/tplx;e2dd-0f31/~tNl;fe88-a6b7/~tND;f655-9daa/tyf, PASS, wireless adhoc # Wireless01 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless02 -r 0,                         25s,           85c5-fb02/tplx;e2dd-0f31/~tNl;fe88-a6b7/~tND;cdcd-a729/tyf, PASS, wireless adhoc # Wireless02 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless03 -r 0,                         25s,           9cde-d65e/tplx;a116-8238/~tNl;6600-cf2f/~tND;9edd-f3b6/tyf, PASS, wireless adhoc # Wireless03 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless04 -r 0,                         25s,           f07b-7a02/tplx;4c4b-2267/~tNl;e60f-3f73/~tND;838f-4960/tyf, PASS, wireless adhoc # Wireless04 extended
-/tutorials/wireless/,                -f omnetpp.ini -c Wireless05 -r 0,                         25s,           f35f-b230/tplx;4c4b-2267/~tNl;e60f-3f73/~tND;4aea-0b3e/tyf, PASS, wireless adhoc # Wireless05 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless01 -r 0,                         25s,           85c5-fb02/tplx;e2dd-0f31/~tNl;0177-5958/~tND;03a9-2b0d/tyf, PASS, wireless adhoc AckingWirelessInterface # Wireless01 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless02 -r 0,                         25s,           85c5-fb02/tplx;e2dd-0f31/~tNl;0177-5958/~tND;0396-33ac/tyf, PASS, wireless adhoc AckingWirelessInterface # Wireless02 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless03 -r 0,                         25s,           9cde-d65e/tplx;a116-8238/~tNl;9dbf-71a2/~tND;8165-46c7/tyf, PASS, wireless adhoc AckingWirelessInterface # Wireless03 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless04 -r 0,                         25s,           f07b-7a02/tplx;4c4b-2267/~tNl;942d-d01b/~tND;0c7c-6e13/tyf, PASS, wireless adhoc AckingWirelessInterface # Wireless04 extended
+/tutorials/wireless/,                -f omnetpp.ini -c Wireless05 -r 0,                         25s,           f35f-b230/tplx;4c4b-2267/~tNl;942d-d01b/~tND;6af1-525a/tyf, PASS, wireless adhoc AckingWirelessInterface # Wireless05 extended
 /tutorials/wireless/,                -f omnetpp.ini -c Wireless06 -r 0,                         25s,           317a-5512/tplx;dee1-89f2/~tNl;f3c0-65f0/~tND;5293-c4bd/tyf, PASS, wireless adhoc # Wireless06 extended
 /tutorials/wireless/,                -f omnetpp.ini -c Wireless07 -r 0,                         25s,           09f9-23ac/tplx;23e6-cc0b/~tNl;058f-4766/~tND;8f78-fc7f/tyf, PASS, wireless adhoc # Wireless07 extended
 /tutorials/wireless/,                -f omnetpp.ini -c Wireless08 -r 0,                         25s,           09f9-23ac/tplx;23e6-cc0b/~tNl;058f-4766/~tND;d6e3-9212/tyf, PASS, wireless adhoc # Wireless08 extended
