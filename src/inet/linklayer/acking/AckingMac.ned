@@ -21,10 +21,6 @@ import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.ILinkLayer;
 import inet.linklayer.contract.IMacProtocol;
 
-module FakeModule
-{
-}
-
 //
 // This module implements a trivial MAC protocol for use in ~AckingWirelessInterface.
 //
@@ -60,10 +56,5 @@ module AckingMac extends MacProtocolBase like ILinkLayer, IMacProtocol
         @statistic[packetDropIncorrectlyReceived](title="packet drop: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropInterfaceDown](title="packet drop: interface down"; source=packetDropReasonIsInterfaceDown(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drop: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-    submodules:
-        queue: FakeModule {
-            parameters:
-                @display("p=100,100;q=l2queue");
-        }
 }
 
