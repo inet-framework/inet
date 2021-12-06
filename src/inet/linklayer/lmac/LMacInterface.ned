@@ -27,5 +27,7 @@ module LMacInterface extends WirelessInterface
     parameters:
         radio.typename = default("ApskScalarRadio");
         mac.typename = "LMac";
+        queue.typename = default("DropTailQueue");
+        queue.packetCapacity = default(10);
 }
 

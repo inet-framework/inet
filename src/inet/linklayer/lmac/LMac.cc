@@ -33,7 +33,7 @@ const MacAddress LMac::LMAC_FREE_SLOT = MacAddress::BROADCAST_ADDRESS;
 
 void LMac::initialize(int stage)
 {
-    MacProtocolBase::initialize(stage);
+    MacProtocolBaseExtQ::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         slotDuration = par("slotDuration");
         bitrate = par("bitrate");
@@ -55,7 +55,7 @@ void LMac::initialize(int stage)
         controlDuration = (double)(b(headerLength).get() + numSlots + 16) / (double)bitrate; // FIXME replace 16 to a constant
         EV << "Control packets take : " << controlDuration << " seconds to transmit\n";
 
-        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        txQueue = getQueue(gate(upperLayerInGateId));
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         radio.reference(this, "radioModule", true);
@@ -118,10 +118,7 @@ void LMac::configureNetworkInterface()
  */
 void LMac::handleUpperPacket(Packet *packet)
 {
-    encapsulate(packet);
-    txQueue->enqueuePacket(packet);
-    EV_DETAIL << "packet put in queue\n  queue size: " << txQueue->getNumPackets() << " macState: " << macState
-              << "; mySlot is " << mySlot << "; current slot is " << currSlot << endl;
+    throw cRuntimeError("Model error: this module should pull packet from upper queue, direct incoming packet not accepted");
 }
 
 /**
@@ -409,8 +406,10 @@ void LMac::handleSelfMessage(cMessage *msg)
 
         case SEND_CONTROL:
             if (msg->getKind() == LMAC_SEND_CONTROL) {
-                if (!SETUP_PHASE && currentTxFrame == nullptr && !txQueue->isEmpty())
+                if (!SETUP_PHASE && currentTxFrame == nullptr && txQueue->canPullSomePacket(gate(upperLayerInGateId)->getPathStartGate())) {
                     currentTxFrame = txQueue->dequeuePacket();
+                    encapsulate(currentTxFrame);
+                }
                 // send first a control message, so that non-receiving nodes can switch off.
                 EV << "Sending a control packet.\n";
                 auto control = makeShared<LMacControlFrame>();
@@ -646,6 +645,23 @@ void LMac::attachSignal(Packet *macPkt)
     simtime_t duration = macPkt->getBitLength() / bitrate;
     // create and initialize control info with new signal
     macPkt->setDuration(duration);
+}
+
+queueing::IPassivePacketSource *LMac::getProvider(cGate *gate)
+{
+    return (gate->getId() == upperLayerInGateId) ? txQueue.get() : nullptr;
+}
+
+void LMac::handleCanPullPacketChanged(cGate *gate)
+{
+    Enter_Method("handleCanPullPacketChanged");
+    // packed arrived from upper layer
+}
+
+void LMac::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePullPacketProcessed");
+    throw cRuntimeError("Not supported callback");
 }
 
 } // namespace inet

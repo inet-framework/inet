@@ -576,9 +576,9 @@
 /examples/wireless/nic/,             -f omnetpp.ini -c AckingMacWithUnitDiskRadio -r 0,           100s,     aa02-d13c/tplx;6268-2984/~tNl;a2df-5adc/~tND;2fdc-a5d4/tyf, PASS, wireless AckingWirelessInterface
 /examples/wireless/nic/,             -f omnetpp.ini -c AckingMacWithApskScalarRadio -r 0,         100s,     aa02-d13c/tplx;6268-2984/~tNl;97e2-fa4e/~tND;5fb3-0e09/tyf, PASS, wireless AckingWirelessInterface
 /examples/wireless/nic/,             -f omnetpp.ini -c AckingMacWithApskDimensionalRadio -r 0,    100s,     aa02-d13c/tplx;6268-2984/~tNl;97e2-fa4e/~tND;5fb3-0e09/tyf, PASS, wireless AckingWirelessInterface
-/examples/wireless/nic/,             -f omnetpp.ini -c LMacWithUnitDiskRadio -r 0,                100s,     ea19-97e7/tplx;a263-5bef/~tNl;16c0-4ce9/tyf, PASS, wireless
-/examples/wireless/nic/,             -f omnetpp.ini -c LMacWithApskScalarRadio -r 0,              100s,     2bfd-74d1/tplx;f8ab-769b/~tNl;b311-6cf3/tyf, PASS, wireless
-/examples/wireless/nic/,             -f omnetpp.ini -c LMacWithApskDimensionalRadio -r 0,         100s,     2bfd-74d1/tplx;f8ab-769b/~tNl;b311-6cf3/tyf, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c LMacWithUnitDiskRadio -r 0,                100s,     ae44-849a/tplx;a263-5bef/~tNl;cd2e-fed3/tyf, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c LMacWithApskScalarRadio -r 0,              100s,     340e-9ace/tplx;f8ab-769b/~tNl;9567-1b81/tyf, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c LMacWithApskDimensionalRadio -r 0,         100s,     340e-9ace/tplx;f8ab-769b/~tNl;9567-1b81/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithUnitDiskRadio -r 0,                100s,     574b-1204/tplx;f6e0-4dce/~tNl;fcd6-cb5c/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithApskScalarRadio -r 0,              100s,     574b-1204/tplx;f6e0-4dce/~tNl;179f-b794/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithApskDimensionalRadio -r 0,         100s,     574b-1204/tplx;f6e0-4dce/~tNl;179f-b794/tyf, PASS, wireless
