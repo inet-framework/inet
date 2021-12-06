@@ -20,6 +20,7 @@
 
 #include "inet/linklayer/base/MacProtocolBaseExtQ.h"
 #include "inet/linklayer/common/MacAddress.h"
+#include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IPacketQueue.h"
@@ -31,7 +32,7 @@ namespace inet {
  *
  * See the NED file for details.
  */
-class INET_API AckingMac : public MacProtocolBaseExtQ, public queueing::IActivePacketSink
+class INET_API AckingMac : public MacProtocolBaseExtQ, public IMacProtocol, public queueing::IActivePacketSink
 {
   protected:
     // parameters
