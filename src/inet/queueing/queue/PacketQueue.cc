@@ -92,9 +92,9 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
+    emit(packetPushInitiatedSignal, packet);
     EV_INFO << "Pushing packet" << EV_FIELD(packet) << EV_ENDL;
     queue.insert(packet);
-    emit(packetPushedSignal, packet);
     if (buffer != nullptr)
         buffer->addPacket(packet);
     else if (isOverloaded()) {
