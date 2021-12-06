@@ -36,9 +36,6 @@ void CompoundPacketQueueBase::initialize(int stage)
         packetDropperFunction = createDropperFunction(par("dropperClass"));
         if (packetDropperFunction == nullptr && (packetCapacity != -1 || dataCapacity != b(-1)))
             throw cRuntimeError("Queue capacity is limited but packet dropper function is not specified");
-        subscribe(packetPushedSignal, this);
-        subscribe(packetPulledSignal, this);
-        subscribe(packetRemovedSignal, this);
         subscribe(packetDroppedSignal, this);
         subscribe(packetCreatedSignal, this);
         WATCH(numCreatedPackets);
@@ -134,19 +131,10 @@ bool CompoundPacketQueueBase::canPushPacket(Packet *packet, cGate *gate) const
 void CompoundPacketQueueBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signal));
-
-    if (signal == packetPushedSignal) {
-    }
-    else if (signal == packetPulledSignal) {
-    }
-    else if (signal == packetRemovedSignal) {
-    }
-    else if (signal == packetDroppedSignal) {
+    if (signal == packetDroppedSignal)
         numDroppedPackets++;
-    }
-    else if (signal == packetCreatedSignal) {
+    else if (signal == packetCreatedSignal)
         numCreatedPackets++;
-    }
     else
         throw cRuntimeError("Unknown signal");
     updateDisplayString();
