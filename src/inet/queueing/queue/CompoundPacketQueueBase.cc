@@ -52,7 +52,7 @@ void CompoundPacketQueueBase::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
-    emit(packetPushedSignal, packet);
+    emit(packetPushInitiatedSignal, packet);
     if ((packetCapacity != -1 && getNumPackets() >= packetCapacity) ||
         (dataCapacity != b(-1) && getTotalLength() + packet->getTotalLength() > dataCapacity))
     {
