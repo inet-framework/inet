@@ -109,6 +109,8 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
         else
             throw cRuntimeError("Queue is overloaded but packet dropper function is not specified");
     }
+    // TODO pass packet if not deleted when weak ptrs are available
+    emit(packetPushCompletedSignal, nullptr);
     updateDisplayString();
     if (collector != nullptr && getNumPackets() != 0)
         collector->handleCanPullPacketChanged(outputGate->getPathEndGate());

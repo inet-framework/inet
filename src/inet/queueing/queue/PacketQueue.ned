@@ -75,11 +75,12 @@ simple PacketQueue extends PacketQueueBase like IPacketQueue
         displayStringTextFormat = default("contains %p pk (%l) pushed %u\npulled %o removed %r dropped %d");
         @class(PacketQueue);
         @signal[packetPushInitiated](type=inet::Packet);
+        @signal[packetPushCompleted](type=inet::Packet?);
         @signal[packetPulled](type=inet::Packet);
         @signal[packetRemoved](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
         // the statistical value is the number of packets in the queue
-        @statistic[queueLength](title="queue length"; source=warmup(count(packetPushed) - count(packetPulled) - count(packetRemoved) - count(packetDropped)); record=last,max,timeavg,vector; unit=pk; interpolationmode=sample-hold; autoWarmupFilter=false);
+        @statistic[queueLength](title="queue length"; source=warmup(totalCount(packetPushCompleted) - count(packetPulled) - count(packetRemoved) - count(packetDropped)); record=last,max,timeavg,vector; unit=pk; interpolationmode=sample-hold; autoWarmupFilter=false);
         // the statistical value is the total bit length of all packets in the queue
         @statistic[queueBitLength](title="queue bit length"; source=warmup(sum(packetLength(packetPushInitiated)) - sum(packetLength(packetPulled)) - sum(packetLength(packetRemoved)) - sum(packetLength(packetDropped))); record=last,max,timeavg,vector; unit=b; interpolationmode=sample-hold; autoWarmupFilter=false);
         // the statistical value is the queueing time of packets
