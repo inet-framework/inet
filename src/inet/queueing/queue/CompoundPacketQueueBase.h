@@ -20,6 +20,7 @@
 
 #include "inet/queueing/base/PacketQueueBase.h"
 #include "inet/queueing/contract/IPacketCollection.h"
+#include "inet/queueing/contract/IPacketDropperFunction.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
 #include "inet/queueing/contract/IPassivePacketSource.h"
 
@@ -36,8 +37,14 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     IPassivePacketSource *provider = nullptr;
     IPacketCollection *collection = nullptr;
 
+    IPacketDropperFunction *packetDropperFunction = nullptr;
+
   protected:
     virtual void initialize(int stage) override;
+
+    virtual IPacketDropperFunction *createDropperFunction(const char *dropperClass) const;
+
+    virtual bool isOverloaded() const;
 
   public:
     virtual int getMaxNumPackets() const override { return packetCapacity; }
@@ -52,7 +59,8 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     virtual void removeAllPackets() override;
 
     virtual bool supportsPacketPushing(cGate *gate) const override { return inputGate == gate; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
+    virtual bool canPushSomePacket(cGate *gate) const override;
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
     virtual bool supportsPacketPulling(cGate *gate) const override { return outputGate == gate; }

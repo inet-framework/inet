@@ -33,6 +33,9 @@ void CompoundPacketQueueBase::initialize(int stage)
         consumer = check_and_cast<IPassivePacketSink *>(inputGate->getPathEndGate()->getOwnerModule());
         provider = check_and_cast<IPassivePacketSource *>(outputGate->getPathStartGate()->getOwnerModule());
         collection = check_and_cast<IPacketCollection *>(provider);
+        packetDropperFunction = createDropperFunction(par("dropperClass"));
+        if (packetDropperFunction == nullptr && (packetCapacity != -1 || dataCapacity != b(-1)))
+            throw cRuntimeError("Queue capacity is limited but packet dropper function is not specified");
         subscribe(packetPushedSignal, this);
         subscribe(packetPulledSignal, this);
         subscribe(packetRemovedSignal, this);
@@ -48,19 +51,36 @@ void CompoundPacketQueueBase::initialize(int stage)
         updateDisplayString();
 }
 
+IPacketDropperFunction *CompoundPacketQueueBase::createDropperFunction(const char *dropperClass) const
+{
+    if (strlen(dropperClass) == 0)
+        return nullptr;
+    else
+        return check_and_cast<IPacketDropperFunction *>(createOne(dropperClass));
+}
+
+bool CompoundPacketQueueBase::isOverloaded() const
+{
+    return (packetCapacity != -1 && getNumPackets() > packetCapacity) ||
+           (dataCapacity != b(-1) && getTotalLength() > dataCapacity);
+}
+
 void CompoundPacketQueueBase::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
     emit(packetPushInitiatedSignal, packet);
-    if ((packetCapacity != -1 && getNumPackets() >= packetCapacity) ||
-        (dataCapacity != b(-1) && getTotalLength() + packet->getTotalLength() > dataCapacity))
-    {
-        EV_INFO << "Dropping packet because the queue is full" << EV_FIELD(packet) << EV_ENDL;
-        dropPacket(packet, QUEUE_OVERFLOW, packetCapacity);
+    EV_INFO << "Pushing packet" << EV_FIELD(packet) << EV_ENDL;
+    consumer->pushPacket(packet, inputGate->getPathEndGate());
+    if (packetDropperFunction != nullptr) {
+        while (isOverloaded()) {
+            auto packet = packetDropperFunction->selectPacket(this);
+            EV_INFO << "Dropping packet" << EV_FIELD(packet) << EV_ENDL;
+            removePacket(packet);
+            dropPacket(packet, QUEUE_OVERFLOW);
+        }
     }
-    else
-        consumer->pushPacket(packet, inputGate->getPathEndGate());
+    ASSERT(!isOverloaded());
     updateDisplayString();
 }
 
@@ -87,6 +107,28 @@ void CompoundPacketQueueBase::removeAllPackets()
     Enter_Method("removeAllPacket");
     collection->removeAllPackets();
     updateDisplayString();
+}
+
+bool CompoundPacketQueueBase::canPushSomePacket(cGate *gate) const
+{
+    if (packetDropperFunction)
+        return true;
+    if (getMaxNumPackets() != -1 && getNumPackets() >= getMaxNumPackets())
+        return false;
+    if (getMaxTotalLength() != b(-1) && getTotalLength() >= getMaxTotalLength())
+        return false;
+    return true;
+}
+
+bool CompoundPacketQueueBase::canPushPacket(Packet *packet, cGate *gate) const
+{
+    if (packetDropperFunction)
+        return true;
+    if (getMaxNumPackets() != -1 && getNumPackets() >= getMaxNumPackets())
+        return false;
+    if (getMaxTotalLength() != b(-1) && getMaxTotalLength() - getTotalLength() < packet->getDataLength())
+        return false;
+    return true;
 }
 
 void CompoundPacketQueueBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
