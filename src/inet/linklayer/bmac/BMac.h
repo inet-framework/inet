@@ -94,6 +94,8 @@ class INET_API BMac : public MacProtocolBaseExtQ, public IMacProtocol, public qu
     virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 
   protected:
+    void scheduleWakeUp();
+
     /** @brief The radio. */
     ModuleRefByPar<physicallayer::IRadio> radio;
     physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;

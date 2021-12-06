@@ -60,6 +60,7 @@ void BMac::initialize(int stage)
 
         macState = INIT;
         txQueue = getQueue(gate(upperLayerInGateId));
+        WATCH(macState);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         radio.reference(this, "radioModule", true);
@@ -342,11 +343,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                     EV_DETAIL << "State WAIT_TX_DATA_OVER, message BMAC_DATA_TX_OVER,"
                                  " new state  SLEEP" << endl;
                     deleteCurrentTxFrame();
-                    // if something in the queue, wakeup soon.
-                    if (!txQueue->isEmpty())
-                        scheduleAfter(dblrand() * checkInterval, wakeup);
-                    else
-                        scheduleAfter(slotDuration, wakeup);
+                    scheduleWakeUp();
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                 }
@@ -373,12 +370,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                     PacketDropDetails details;
                     details.setReason(OTHER_PACKET_DROP);
                     dropCurrentTxFrame(details);
-
-                    // if something in the queue, wakeup soon.
-                    if (!txQueue->isEmpty())
-                        scheduleAfter(dblrand() * checkInterval, wakeup);
-                    else
-                        scheduleAfter(slotDuration, wakeup);
+                    scheduleWakeUp();
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                     nbMissedAcks++;
@@ -405,11 +397,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                     lastDataPktDestAddr = MacAddress::BROADCAST_ADDRESS;
                     cancelEvent(ack_timeout);
                     deleteCurrentTxFrame();
-                    // if something in the queue, wakeup soon.
-                    if (!txQueue->isEmpty())
-                        scheduleAfter(dblrand() * checkInterval, wakeup);
-                    else
-                        scheduleAfter(slotDuration, wakeup);
+                    scheduleWakeUp();
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                     lastDataPktDestAddr = MacAddress::BROADCAST_ADDRESS;
@@ -468,11 +456,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 else {
                     EV_DETAIL << "State WAIT_DATA, message BMAC_DATA, new state SLEEP"
                               << endl;
-                    // if something in the queue, wakeup soon.
-                    if (!txQueue->isEmpty())
-                        scheduleAfter(dblrand() * checkInterval, wakeup);
-                    else
-                        scheduleAfter(slotDuration, wakeup);
+                    scheduleWakeUp();
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                 }
@@ -481,11 +465,7 @@ void BMac::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == BMAC_DATA_TIMEOUT) {
                 EV_DETAIL << "State WAIT_DATA, message BMAC_DATA_TIMEOUT, new state"
                              " SLEEP" << endl;
-                // if something in the queue, wakeup soon.
-                if (!txQueue->isEmpty())
-                    scheduleAfter(dblrand() * checkInterval, wakeup);
-                else
-                    scheduleAfter(slotDuration, wakeup);
+                scheduleWakeUp();
                 macState = SLEEP;
                 radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                 return;
@@ -508,11 +488,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                 EV_DETAIL << "State WAIT_ACK_TX, message BMAC_ACK_TX_OVER, new state"
                              " SLEEP" << endl;
                 // ack sent, go to sleep now.
-                // if something in the queue, wakeup soon.
-                if (!txQueue->isEmpty())
-                    scheduleAfter(dblrand() * checkInterval, wakeup);
-                else
-                    scheduleAfter(slotDuration, wakeup);
+                scheduleWakeUp();
                 macState = SLEEP;
                 radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                 lastDataPktSrcAddr = MacAddress::BROADCAST_ADDRESS;
@@ -710,6 +686,15 @@ void BMac::encapsulate(Packet *packet)
     packet->insertAtFront(pkt);
     EV_DETAIL << "pkt encapsulated\n";
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
+}
+
+void BMac::scheduleWakeUp()
+{
+    // if something in the queue, wakeup soon.
+    if (!txQueue->isEmpty())
+        scheduleAfter(dblrand() * checkInterval, wakeup);
+    else
+        scheduleAfter(slotDuration, wakeup);
 }
 
 queueing::IPassivePacketSource *BMac::getProvider(cGate *gate)
