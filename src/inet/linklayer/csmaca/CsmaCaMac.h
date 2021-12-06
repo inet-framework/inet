@@ -20,14 +20,16 @@
 
 #include "inet/common/FSMA.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/linklayer/base/MacProtocolBaseExtQ.h"
+#include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/linklayer/csmaca/CsmaCaMacHeader_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
 
-class INET_API CsmaCaMac : public MacProtocolBase
+class INET_API CsmaCaMac : public MacProtocolBaseExtQ, public IMacProtocol, public queueing::IActivePacketSink
 {
   protected:
     /**
@@ -198,6 +200,14 @@ class INET_API CsmaCaMac : public MacProtocolBase
     // OperationalBase:
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
+    virtual void processUpperPacket();
+
+  public:
+    // IActivePacketSink:
+    virtual queueing::IPassivePacketSource *getProvider(cGate *gate) override;
+    virtual void handleCanPullPacketChanged(cGate *gate) override;
+    virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
 } // namespace inet

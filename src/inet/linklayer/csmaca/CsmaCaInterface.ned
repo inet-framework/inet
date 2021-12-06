@@ -27,5 +27,7 @@ module CsmaCaInterface extends WirelessInterface
     parameters:
         radio.typename = default("ApskScalarRadio");
         mac.typename = default("CsmaCaMac");
+        queue.typename = default("DropTailQueue");
+        queue.packetCapacity = default(-1);
 }
 

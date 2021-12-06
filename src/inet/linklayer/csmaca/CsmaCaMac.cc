@@ -50,7 +50,7 @@ CsmaCaMac::~CsmaCaMac()
  */
 void CsmaCaMac::initialize(int stage)
 {
-    MacProtocolBase::initialize(stage);
+    MacProtocolBaseExtQ::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         EV << "Initializing stage 0\n";
         fcsMode = parseFcsMode(par("fcsMode"));
@@ -84,7 +84,7 @@ void CsmaCaMac::initialize(int stage)
         mediumStateChange = new cMessage("MediumStateChange");
 
         // set up internal queue
-        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        txQueue = getQueue(gate(upperLayerInGateId));
 
         // state variables
         fsm.setName("CsmaCaMac State Machine");
@@ -165,18 +165,14 @@ void CsmaCaMac::handleSelfMessage(cMessage *msg)
 
 void CsmaCaMac::handleUpperPacket(Packet *packet)
 {
-    auto frame = check_and_cast<Packet *>(packet);
-    encapsulate(frame);
-    const auto& macHeader = frame->peekAtFront<CsmaCaMacHeader>();
-    EV << "frame " << frame << " received from higher layer, receiver = " << macHeader->getReceiverAddress() << endl;
-    ASSERT(!macHeader->getReceiverAddress().isUnspecified());
-    txQueue->enqueuePacket(frame);
-    if (fsm.getState() != IDLE)
-        EV << "deferring upper message transmission in " << fsm.getStateName() << " state\n";
-    else if (!txQueue->isEmpty()) {
-        popTxQueue();
-        handleWithFsm(currentTxFrame);
-    }
+    auto destAddress = packet->getTag<MacAddressReq>()->getDestAddress();
+    ASSERT(!destAddress.isUnspecified());
+    EV << "frame " << packet << " received from higher layer, receiver = " << destAddress << endl;
+    encapsulate(packet);
+    if (currentTxFrame != nullptr)
+        throw cRuntimeError("Model error: incomplete transmission exists");
+    currentTxFrame = packet;
+    handleWithFsm(currentTxFrame);
 }
 
 void CsmaCaMac::handleLowerPacket(Packet *packet)
@@ -361,8 +357,7 @@ void CsmaCaMac::handleWithFsm(cMessage *msg)
         else if (currentTxFrame != nullptr)
             handleWithFsm(currentTxFrame);
         else if (!txQueue->isEmpty()) {
-            popTxQueue();
-            handleWithFsm(currentTxFrame);
+            processUpperPacket();
         }
     }
     if (isLowerMessage(msg) && frame->getOwner() == this && endSifs->getContextPointer() != frame)
@@ -656,14 +651,41 @@ uint32_t CsmaCaMac::computeFcs(const Ptr<const BytesChunk>& bytes)
 
 void CsmaCaMac::handleStopOperation(LifecycleOperation *operation)
 {
-    MacProtocolBase::handleStopOperation(operation);
+    MacProtocolBaseExtQ::handleStopOperation(operation);
     resetTransmissionVariables();
 }
 
 void CsmaCaMac::handleCrashOperation(LifecycleOperation *operation)
 {
-    MacProtocolBase::handleCrashOperation(operation);
+    MacProtocolBaseExtQ::handleCrashOperation(operation);
     resetTransmissionVariables();
+}
+
+void CsmaCaMac::processUpperPacket()
+{
+    Packet *packet = txQueue->dequeuePacket();
+    packet->setArrival(getId(), upperLayerInGateId, simTime());
+    take(packet);
+    handleUpperPacket(packet);
+}
+
+queueing::IPassivePacketSource *CsmaCaMac::getProvider(cGate *gate)
+{
+    return (gate->getId() == upperLayerInGateId) ? txQueue.get() : nullptr;
+}
+
+void CsmaCaMac::handleCanPullPacketChanged(cGate *gate)
+{
+    Enter_Method("handleCanPullPacketChanged");
+    if (fsm.getState() == IDLE && !txQueue->isEmpty()) {
+        processUpperPacket();
+    }
+}
+
+void CsmaCaMac::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePullPacketProcessed");
+    throw cRuntimeError("Not supported callback");
 }
 
 } // namespace inet
