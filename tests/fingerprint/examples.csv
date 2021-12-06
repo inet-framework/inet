@@ -585,9 +585,9 @@
 /examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithUnitDiskRadio -r 0,              100s,    09d5-e79a/tplx;ef80-ca8d/~tNl;3e22-1be0/~tND, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithApskScalarRadio -r 0,            100s,    09d5-e79a/tplx;ef80-ca8d/~tNl;58b3-4712/~tND, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithApskDimensionalRadio -r 0,       100s,    09d5-e79a/tplx;ef80-ca8d/~tNl;58b3-4712/~tND, PASS, wireless
-/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithUnitDiskRadio -r 0,                100s,     2083-12f3/tplx;0f75-f893/~tNl;d9fd-bed7/tyf, PASS, wireless
-/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithApskScalarRadio -r 0,              100s,     8743-f5af/tplx;a1b9-d598/~tNl;6f21-57b2/tyf, PASS, wireless
-/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithApskDimensionalRadio -r 0,         100s,     8743-f5af/tplx;a1b9-d598/~tNl;6f21-57b2/tyf, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithUnitDiskRadio -r 0,                100s,     8192-d648/tplx;0f75-f893/~tNl;240c-66dd/tyf, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithApskScalarRadio -r 0,              100s,     c6b1-9638/tplx;a1b9-d598/~tNl;cbb5-b07f/tyf, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithApskDimensionalRadio -r 0,         100s,     c6b1-9638/tplx;a1b9-d598/~tNl;cbb5-b07f/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c XMacWithUnitDiskRadio -r 0,                100s,     bf45-3174/tplx;0686-0808/~tNl;533f-aed0/~tND;0ff3-dd90/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c XMacWithApskScalarRadio -r 0,              100s,     bf45-3174/tplx;0686-0808/~tNl;d43b-1c55/~tND;d70c-537a/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c XMacWithApskDimensionalRadio -r 0,         100s,     bf45-3174/tplx;0686-0808/~tNl;d43b-1c55/~tND;d70c-537a/tyf, PASS, wireless

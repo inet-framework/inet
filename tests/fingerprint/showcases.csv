@@ -269,15 +269,15 @@
 #/showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioPing -r 0,                                     500s,            37e4-12cc/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,
 #/showcases/wireless/scaling/,        -f omnetpp.ini -c IdealRadioUdp -r 0,                                      500s,            b428-a77d/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,
 
-/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c BMac -r 0,                   100s,         870a-69b2/tplx;1e9e-20a6/~tNl;345f-545c/tyf, PASS,    wireless
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c BMac -r 0,                   100s,         70ce-0780/tplx;1e9e-20a6/~tNl;81cc-081e/tyf, PASS,    wireless
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c XMac -r 0,                   100s,         9d0a-4b51/tplx;1634-ad60/~tNl;02b1-46e7/tyf, PASS,    wireless
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c LMac -r 0,                   100s,         783a-7835/tplx;5f26-7b54/~tNl;74e5-6de7/tyf, PASS,    wireless
 # /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticBase -r 0,          100s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # StatisticBase extended
-/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticBMac -r 100,          100s,         c679-b660/tplx;20c0-77a8/~tNl;f1ef-bf98/tyf, PASS,    wireless
+/showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticBMac -r 100,          100s,         8cba-ef23/tplx;20c0-77a8/~tNl;3ba0-0555/tyf, PASS,    wireless
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticXMac -r 100,          100s,         3f3f-4791/tplx;2022-c179/~tNl;a504-71b6/tyf, PASS,    wireless
 /showcases/wireless/sensornetwork/,  -f omnetpp.ini -c StatisticLMac -r 100,          100s,         1ea6-bec9/tplx;dd9d-26ec/~tNl;3649-6d72/tyf, PASS,    wireless
 
-/showcases/wireless/sensornetwork/,  -f extras.ini -c BMacAodv -r 0,                   100s,         b771-6999/tplx;ddc4-6751/~tNl;7a21-68fb/tyf, PASS,    wireless
+/showcases/wireless/sensornetwork/,  -f extras.ini -c BMacAodv -r 0,                   100s,         3dff-9620/tplx;ddc4-6751/~tNl;0e6c-651a/tyf, PASS,    wireless
 /showcases/wireless/sensornetwork/,  -f extras.ini -c XMacAodv -r 0,                   100s,         3300-529f/tplx;50a0-256f/~tNl;09a6-f638/tyf, PASS,    wireless
 /showcases/wireless/sensornetwork/,  -f extras.ini -c LMacAodv -r 0,                   100s,         adb4-d987/tplx;1870-d2f9/~tNl;dc04-ccfa/tyf, PASS,    wireless
 /showcases/wireless/sensornetwork/,  -f extras.ini -c BMacDsdv -r 0,                   100s,         d1c8-2b77/tplx;4a0e-5dca/~tNl;74fc-07a6/tyf, ERROR,    wireless

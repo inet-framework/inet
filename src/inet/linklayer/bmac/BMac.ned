@@ -87,11 +87,5 @@ module BMac extends MacProtocolBase like IMacProtocol
         @statistic[packetDropQueueOverflow](title="packet drop: queue overflow"; source=packetDropReasonIsQueueOverflow(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 
         @selfMessageKinds(inet::BMacType);
-    submodules:
-        queue: <default("DropTailQueue")> like IPacketQueue {
-            parameters:
-                packetCapacity = default(20);
-                @display("p=100,100;q=l2queue");
-        }
 }
 

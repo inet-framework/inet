@@ -27,5 +27,7 @@ module BMacInterface extends WirelessInterface
     parameters:
         radio.typename = default("ApskScalarRadio");
         mac.typename = "BMac";
+        queue.typename = default("DropTailQueue");
+        queue.packetCapacity = default(20);
 }
 

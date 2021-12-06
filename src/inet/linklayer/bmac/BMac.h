@@ -16,10 +16,11 @@
 #ifndef __INET_BMAC_H
 #define __INET_BMAC_H
 
-#include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/linklayer/base/MacProtocolBaseExtQ.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
@@ -53,7 +54,7 @@ namespace inet {
  * @author Anna Foerster
  *
  */
-class INET_API BMac : public MacProtocolBase, public IMacProtocol
+class INET_API BMac : public MacProtocolBaseExtQ, public IMacProtocol, public queueing::IActivePacketSink
 {
   private:
     /** @brief Copy constructor is not allowed.
@@ -86,6 +87,11 @@ class INET_API BMac : public MacProtocolBase, public IMacProtocol
 
     /** @brief Handle control messages from lower layer */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
+
+    // IActivePacketSink:
+    virtual queueing::IPassivePacketSource *getProvider(cGate *gate) override;
+    virtual void handleCanPullPacketChanged(cGate *gate) override;
+    virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 
   protected:
     /** @brief The radio. */

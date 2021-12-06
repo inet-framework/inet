@@ -33,7 +33,7 @@ Define_Module(BMac);
 
 void BMac::initialize(int stage)
 {
-    MacProtocolBase::initialize(stage);
+    MacProtocolBaseExtQ::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         animation = par("animation");
         slotDuration = par("slotDuration");
@@ -59,7 +59,7 @@ void BMac::initialize(int stage)
         lastDataPktSrcAddr = MacAddress::BROADCAST_ADDRESS;
 
         macState = INIT;
-        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        txQueue = getQueue(gate(upperLayerInGateId));
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         radio.reference(this, "radioModule", true);
@@ -153,14 +153,7 @@ void BMac::configureNetworkInterface()
  */
 void BMac::handleUpperPacket(Packet *packet)
 {
-    encapsulate(packet);
-    txQueue->enqueuePacket(packet);
-    EV_DETAIL << "Max queue length: " << txQueue->getMaxNumPackets() << ", packet put in queue\n"
-              << "  queue size: " << txQueue->getNumPackets() << " macState: " << macState << endl;
-    // force wakeup now
-    if (!txQueue->isEmpty() && wakeup->isScheduled() && (macState == SLEEP)) {
-        rescheduleAfter(dblrand() * 0.1f, wakeup);
-    }
+    throw cRuntimeError("Model error: this module should pull packet from upper queue, direct incoming packet not accepted");
 }
 
 /**
@@ -322,7 +315,12 @@ void BMac::handleSelfMessage(cMessage *msg)
                              " BMAC_RESEND_DATA, new state WAIT_TX_DATA_OVER" << endl;
                 // send the data packet
                 if (msg->getKind() == BMAC_SEND_PREAMBLE) {
-                    popTxQueue();
+                    if (currentTxFrame != nullptr)
+                        throw cRuntimeError("Model error: incomplete transmission exists");
+                    currentTxFrame = txQueue->dequeuePacket();
+                    encapsulate(currentTxFrame);
+                    currentTxFrame->setArrival(getId(), upperLayerInGateId, simTime());
+                    take(currentTxFrame);
                 }
                 ASSERT(currentTxFrame != nullptr);
                 sendDataPacket();
@@ -712,6 +710,28 @@ void BMac::encapsulate(Packet *packet)
     packet->insertAtFront(pkt);
     EV_DETAIL << "pkt encapsulated\n";
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::bmac);
+}
+
+queueing::IPassivePacketSource *BMac::getProvider(cGate *gate)
+{
+    return (gate->getId() == upperLayerInGateId) ? txQueue.get() : nullptr;
+}
+
+void BMac::handleCanPullPacketChanged(cGate *gate)
+{
+    Enter_Method("handleCanPullPacketChanged");
+    // force wakeup now
+    if (gate->getId() == upperLayerInGateId && (macState == SLEEP) && wakeup->isScheduled()
+            && txQueue->canPullSomePacket(this->gate(upperLayerInGateId)->getPathStartGate()))
+    {
+        rescheduleAfter(dblrand() * 0.1f, wakeup);
+    }
+}
+
+void BMac::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePullPacketProcessed");
+    throw cRuntimeError("Not supported callback");
 }
 
 } // namespace inet
