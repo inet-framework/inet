@@ -34,11 +34,12 @@ module CompoundPacketQueueBase extends PacketQueueBase like IPacketQueue
         @class(CompoundPacketQueueBase);
         @defaultStatistic(queueLength);
         @signal[packetPushInitiated](type=inet::Packet);
+        @signal[packetPushCompleted](type=inet::Packet?);
         @signal[packetPulled](type=inet::Packet);
         @signal[packetRemoved](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
         // the statistical value is the number of packets in the queue
-        @statistic[queueLength](title="queue length"; source=warmup(count(localSignal(packetPushed)) - count(localSignal(packetPulled)) - count(localSignal(packetRemoved)) - count(localSignal(packetDropped))); record=last,max,timeavg,vector; interpolationmode=sample-hold; unit=pk; autoWarmupFilter=false);
+        @statistic[queueLength](title="queue length"; source=warmup(totalCount(localSignal(packetPushCompleted)) - count(localSignal(packetPulled)) - count(localSignal(packetRemoved)) - count(localSignal(packetDropped))); record=last,max,timeavg,vector; interpolationmode=sample-hold; unit=pk; autoWarmupFilter=false);
         // the statistical value is the total bit length of all packets in the queue
         @statistic[queueBitLength](title="queue bit length"; source=warmup(sum(packetLength(localSignal(packetPushInitiated))) - sum(packetLength(localSignal(packetPulled))) - sum(packetLength(localSignal(packetRemoved))) - sum(packetLength(localSignal(packetDropped)))); record=last,max,timeavg,vector; unit=b; interpolationmode=sample-hold; autoWarmupFilter=false);
         // the statistical value is the queueing time of packets

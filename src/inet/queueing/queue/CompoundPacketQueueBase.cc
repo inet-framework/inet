@@ -78,6 +78,8 @@ void CompoundPacketQueueBase::pushPacket(Packet *packet, cGate *gate)
         }
     }
     ASSERT(!isOverloaded());
+    // TODO pass packet if not deleted when weak ptrs are available
+    emit(packetPushCompletedSignal, nullptr);
     updateDisplayString();
 }
 
