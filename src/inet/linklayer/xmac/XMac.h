@@ -26,11 +26,12 @@
 #include <vector>
 
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/linklayer/base/MacProtocolBaseExtQ.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/linklayer/xmac/XMacHeader_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
@@ -54,7 +55,7 @@ class MacPkt;
  * @author Joaquim Oller and Jan Peter Drees
  *
  */
-class INET_API XMac : public MacProtocolBase, public IMacProtocol
+class INET_API XMac : public MacProtocolBaseExtQ, public IMacProtocol, public queueing::IActivePacketSink
 {
   private:
     /** @brief Copy constructor is not allowed.
@@ -66,7 +67,7 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
 
   public:
     XMac()
-        : MacProtocolBase()
+        : MacProtocolBaseExtQ()
         , nbTxDataPackets(0), nbTxPreambles(0), nbRxDataPackets(0), nbRxPreambles(0)
         , nbMissedAcks(0), nbRecvdAcks(0), nbDroppedDataPackets(0), nbTxAcks(0)
         , macState(INIT)
@@ -100,6 +101,11 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol
     virtual void handleSelfMessage(cMessage *) override;
 
     void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
+
+    // IActivePacketSink:
+    virtual queueing::IPassivePacketSource *getProvider(cGate *gate) override;
+    virtual void handleCanPullPacketChanged(cGate *gate) override;
+    virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 
   protected:
     /** implements MacBase functions */

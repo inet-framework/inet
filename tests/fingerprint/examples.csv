@@ -588,9 +588,9 @@
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithUnitDiskRadio -r 0,                100s,     8192-d648/tplx;0f75-f893/~tNl;240c-66dd/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithApskScalarRadio -r 0,              100s,     c6b1-9638/tplx;a1b9-d598/~tNl;cbb5-b07f/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithApskDimensionalRadio -r 0,         100s,     c6b1-9638/tplx;a1b9-d598/~tNl;cbb5-b07f/tyf, PASS, wireless
-/examples/wireless/nic/,             -f omnetpp.ini -c XMacWithUnitDiskRadio -r 0,                100s,     bf45-3174/tplx;0686-0808/~tNl;533f-aed0/~tND;0ff3-dd90/tyf, PASS, wireless
-/examples/wireless/nic/,             -f omnetpp.ini -c XMacWithApskScalarRadio -r 0,              100s,     bf45-3174/tplx;0686-0808/~tNl;d43b-1c55/~tND;d70c-537a/tyf, PASS, wireless
-/examples/wireless/nic/,             -f omnetpp.ini -c XMacWithApskDimensionalRadio -r 0,         100s,     bf45-3174/tplx;0686-0808/~tNl;d43b-1c55/~tND;d70c-537a/tyf, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c XMacWithUnitDiskRadio -r 0,                100s,     37a8-c2c5/tplx;0686-0808/~tNl;533f-aed0/~tND;966d-0205/tyf, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c XMacWithApskScalarRadio -r 0,              100s,     37a8-c2c5/tplx;0686-0808/~tNl;d43b-1c55/~tND;f2cc-9ba4/tyf, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c XMacWithApskDimensionalRadio -r 0,         100s,     37a8-c2c5/tplx;0686-0808/~tNl;d43b-1c55/~tND;f2cc-9ba4/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithUnitDiskRadio -r 0,        100s,     4f6c-58ca/tplx;5cf5-c40d/~tNl;5c0a-1fc2/~tND;ee35-015b/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211DimensionalRadio -r 0, 100s,     ac49-fb67/tplx;2432-7a75/~tNl;8500-9973/~tND;b3da-b44e/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211ScalarRadio -r 0, 100s,     4828-9707/tplx;088c-fb4f/~tNl;3557-c4a0/~tND;d641-a9a7/tyf, PASS, wireless

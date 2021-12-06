@@ -39,7 +39,7 @@ Define_Module(XMac);
  */
 void XMac::initialize(int stage)
 {
-    MacProtocolBase::initialize(stage);
+    MacProtocolBaseExtQ::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         animation = par("animation");
         slotDuration = par("slotDuration");
@@ -68,7 +68,7 @@ void XMac::initialize(int stage)
         lastDataPktSrcAddr = MacAddress::BROADCAST_ADDRESS;
 
         macState = INIT;
-        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        txQueue = getQueue(gate(upperLayerInGateId));
         WATCH(macState);
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
@@ -162,17 +162,7 @@ void XMac::configureNetworkInterface()
  */
 void XMac::handleUpperPacket(Packet *packet)
 {
-    encapsulate(packet);
-    EV_DETAIL << "CSMA received a message from upper layer, name is " << packet->getName() << ", CInfo removed, mac addr=" << packet->peekAtFront<XMacHeaderBase>()->getDestAddr() << endl;
-    EV_DETAIL << "pkt encapsulated, length: " << packet->getBitLength() << "\n";
-    txQueue->enqueuePacket(packet);
-    EV_DEBUG << "Max queue length: " << txQueue->getMaxNumPackets() << ", packet put in queue\n"
-             << "  queue size: " << txQueue->getNumPackets() << " macState: "
-             << macState << endl;
-    // force wakeup now
-    if (!txQueue->isEmpty() && wakeup->isScheduled() && (macState == SLEEP)) {
-        rescheduleAfter(dblrand() * 0.01f, wakeup);
-    }
+    throw cRuntimeError("Model error: this module should pull packet from upper queue, direct incoming packet not accepted");
 }
 
 /**
@@ -351,8 +341,14 @@ void XMac::handleSelfMessage(cMessage *msg)
             // radio switch from above
             if (msg->getKind() == XMAC_SWITCHING_FINISHED) {
                 if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER) {
-                    if (currentTxFrame == nullptr)
-                        popTxQueue();
+                    if (currentTxFrame == nullptr) {
+                        if (currentTxFrame != nullptr)
+                            throw cRuntimeError("Model error: incomplete transmission exists");
+                        currentTxFrame = txQueue->dequeuePacket();
+                        encapsulate(currentTxFrame);
+                        currentTxFrame->setArrival(getId(), upperLayerInGateId, simTime());
+                        take(currentTxFrame);
+                    }
                     auto pkt_preamble = currentTxFrame->peekAtFront<XMacHeaderBase>();
                     sendPreamble(pkt_preamble->getDestAddr());
                 }
@@ -532,8 +528,12 @@ void XMac::handleLowerPacket(Packet *msg)
 void XMac::sendDataPacket()
 {
     nbTxDataPackets++;
-    if (currentTxFrame == nullptr)
-        popTxQueue();
+    if (currentTxFrame == nullptr) {
+        currentTxFrame = txQueue->dequeuePacket();
+        encapsulate(currentTxFrame);
+        currentTxFrame->setArrival(getId(), upperLayerInGateId, simTime());
+        take(currentTxFrame);
+    }
     auto packet = currentTxFrame->dup();
     const auto& hdr = packet->peekAtFront<XMacHeaderBase>();
     lastDataPktDestAddr = hdr->getDestAddr();
@@ -660,6 +660,28 @@ void XMac::encapsulate(Packet *packet)
     packet->insertAtFront(pkt);
     packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::xmac);
     EV_DETAIL << "pkt encapsulated\n";
+}
+
+queueing::IPassivePacketSource *XMac::getProvider(cGate *gate)
+{
+    return (gate->getId() == upperLayerInGateId) ? txQueue.get() : nullptr;
+}
+
+void XMac::handleCanPullPacketChanged(cGate *gate)
+{
+    Enter_Method("handleCanPullPacketChanged");
+    // force wakeup now
+    if (gate->getId() == upperLayerInGateId && (macState == SLEEP) && wakeup->isScheduled()
+            && txQueue->canPullSomePacket(this->gate(upperLayerInGateId)->getPathStartGate()))
+    {
+        rescheduleAfter(dblrand() * 0.01f, wakeup);
+    }
+}
+
+void XMac::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePullPacketProcessed");
+    throw cRuntimeError("Not supported callback");
 }
 
 } // namespace inet

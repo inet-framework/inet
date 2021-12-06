@@ -27,5 +27,7 @@ module XMacInterface extends WirelessInterface
     parameters:
         radio.typename = default("ApskScalarRadio");
         mac.typename = "XMac";
+        queue.typename = default("DropTailQueue");
+        queue.packetCapacity = default(20);
 }
 
