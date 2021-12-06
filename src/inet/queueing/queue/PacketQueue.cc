@@ -97,18 +97,15 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
     queue.insert(packet);
     if (buffer != nullptr)
         buffer->addPacket(packet);
-    else if (isOverloaded()) {
-        if (packetDropperFunction != nullptr) {
-            while (!isEmpty() && isOverloaded()) {
-                auto packet = packetDropperFunction->selectPacket(this);
-                EV_INFO << "Dropping packet" << EV_FIELD(packet) << EV_ENDL;
-                queue.remove(packet);
-                dropPacket(packet, QUEUE_OVERFLOW);
-            }
+    else if (packetDropperFunction != nullptr) {
+        while (isOverloaded()) {
+            auto packet = packetDropperFunction->selectPacket(this);
+            EV_INFO << "Dropping packet" << EV_FIELD(packet) << EV_ENDL;
+            queue.remove(packet);
+            dropPacket(packet, QUEUE_OVERFLOW);
         }
-        else
-            throw cRuntimeError("Queue is overloaded but packet dropper function is not specified");
     }
+    ASSERT(!isOverloaded());
     // TODO pass packet if not deleted when weak ptrs are available
     emit(packetPushCompletedSignal, nullptr);
     updateDisplayString();
