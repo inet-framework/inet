@@ -38,7 +38,9 @@ import inet.queueing.contract.IPacketQueue;
 // until the storage limits are met according to the dropping strategy. Packets
 // are only dropped after the new packet has been inserted into the queue. This
 // method allows higher priority packets to take precedence over already stored
-// lower priority packets even if the queue is already full.
+// lower priority packets even if the queue is already full. If a packet dropper
+// function is not used and any queue capacity parameter is specified then the
+// queue provides back pressure towards its source.
 //
 // The queue can also keep the packets sorted according to a comparator function.
 // If a comparator is not configured, then packets are pushed at the back of the
@@ -49,6 +51,16 @@ import inet.queueing.contract.IPacketQueue;
 // queues. In this case, the storage limits are configured on the packet buffer,
 // which also takes care of dropping packets from either this queue or some
 // other queues as necessary.
+//
+// Some often used packet queue variants such as ~DropTailQueue are implemented
+// as dervide modules.
+//
+// Some notable packet dropper functions are: ~PacketAtCollectionBeginDropper,
+// ~PacketAtCollectionEndDropper, ~PacketWithHighestOwnerModuleIdDropper,
+// ~PacketWithLowestModuleIdDropper.
+//
+// Some notable packet comparator functions are: ~PacketUserPriorityComparator,
+// ~PacketCreationTimeComparator, ~PacketEligibilityTimeComparator.
 //
 // @see ~IPacketBuffer
 //
