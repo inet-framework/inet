@@ -22,9 +22,12 @@
 
 namespace inet {
 
+// TODO review streaming operation with respect to holding back packet push until the packet gap elapses
+
 Define_Module(InterpacketGapInserter);
 
-// TODO review streaming operation with respect to holding back packet push until the packet gap elapses
+simsignal_t InterpacketGapInserter::interpacketGapStartedSignal = cComponent::registerSignal("interpacketGapStarted");
+simsignal_t InterpacketGapInserter::interpacketGapEndedSignal = cComponent::registerSignal("interpacketGapEnded");
 
 InterpacketGapInserter::~InterpacketGapInserter()
 {
@@ -47,8 +50,11 @@ void InterpacketGapInserter::initialize(int stage)
         packetEndTime = par("initialChannelBusy") ? getClockTime() : getClockTime().setRaw(INT64_MIN / 2); // INT64_MIN / 2 to prevent overflow
     }
     else if (stage == INITSTAGE_LAST) {
-        if (packetEndTime + durationPar->doubleValue() > getClockTime())
-            scheduleClockEventAt(packetEndTime + durationPar->doubleValue(), timer);
+        if (packetEndTime + durationPar->doubleValue() > getClockTime()) {
+            double interpacketGapDuration = durationPar->doubleValue();
+            scheduleClockEventAt(packetEndTime + interpacketGapDuration, timer);
+            emit(interpacketGapStartedSignal, interpacketGapDuration);
+        }
     }
 }
 
@@ -56,6 +62,7 @@ void InterpacketGapInserter::handleMessage(cMessage *message)
 {
     if (message->isSelfMessage()) {
         if (message == timer) {
+            emit(interpacketGapEndedSignal, NaN);
             if (canPushSomePacket(inputGate))
                 if (producer != nullptr)
                     producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
@@ -154,9 +161,9 @@ void InterpacketGapInserter::handleCanPushPacketChanged(cGate *gate)
             producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
     }
     else {
-        if (timer->isScheduled())
-            cancelClockEvent(timer);
-        scheduleClockEventAt(packetEndTime + durationPar->doubleValue(), timer);
+        double interpacketGapDuration = durationPar->doubleValue();
+        rescheduleClockEventAt(packetEndTime + interpacketGapDuration, timer);
+        emit(interpacketGapStartedSignal, interpacketGapDuration);
     }
 }
 

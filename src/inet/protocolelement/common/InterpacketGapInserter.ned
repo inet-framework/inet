@@ -28,6 +28,8 @@ simple InterpacketGapInserter extends PacketProcessorBase
         displayStringTextFormat = default("delayed %p pk (%l)\nifg: %g");
         @display("i=block/timer");
         @class(InterpacketGapInserter);
+        @signal[interpacketGapStarted](type=double);
+        @signal[interpacketGapEnded](type=double);
     gates:
         input in;
         output out;
