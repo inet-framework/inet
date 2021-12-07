@@ -25,7 +25,6 @@ import inet.protocolelement.measurement.IMeasurementLayer;
 import inet.protocolelement.processing.IProcessingDelayLayer;
 import inet.protocolelement.trafficconditioner.ITrafficConditionerLayer;
 
-
 //
 // This module implements an Ethernet network interface.
 //
@@ -68,7 +67,8 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
                 @display("p=400,500");
         }
     connections allowunconnected:
-        upperLayerIn --> { @display("m=n"); } --> trafficConditionerLayer.upperLayerIn;
+        upperLayerIn --> { @display("m=n"); } --> processingDelayLayer.upperLayerIn;
+        processingDelayLayer.lowerLayerOut --> trafficConditionerLayer.upperLayerIn;
         trafficConditionerLayer.lowerLayerOut --> measurementLayer.upperLayerIn;
         measurementLayer.lowerLayerOut --> macLayer.upperLayerIn;
         macLayer.lowerLayerOut --> phyLayer.upperLayerIn;
@@ -78,6 +78,7 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
         phyLayer.upperLayerOut --> macLayer.lowerLayerIn;
         macLayer.upperLayerOut --> measurementLayer.lowerLayerIn;
         measurementLayer.upperLayerOut --> trafficConditionerLayer.lowerLayerIn;
-        trafficConditionerLayer.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
+        trafficConditionerLayer.upperLayerOut --> processingDelayLayer.lowerLayerIn;
+        processingDelayLayer.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
 }
 
