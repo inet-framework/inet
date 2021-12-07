@@ -37,7 +37,7 @@ module BridgingLayer like IProtocolLayer
         output lowerLayerOut;
     submodules:
         processingDelayLayer: <default("")> like IProcessingDelayLayer {
-            @display("p=400,150");
+            @display("p=300,150");
         }
         directionReverser: <default("DirectionReverserLayer")> like IProtocolLayer {
             @display("p=300,300");
