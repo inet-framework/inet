@@ -35,11 +35,15 @@ void EligibilityTimeMeter::initialize(int stage)
         WATCH(groupEligibilityTime);
         WATCH(bucketEmptyTime);
         WATCH(maxResidenceTime);
+        WATCH(numTokens);
     }
+    else if (stage == INITSTAGE_QUEUEING)
+        emitNumTokenChangedSignal();
 }
 
 void EligibilityTimeMeter::meterPacket(Packet *packet)
 {
+    emitNumTokenChangedSignal();
     clocktime_t arrivalTime = getClockTime();
     clocktime_t lengthRecoveryDuration = s(packet->getDataLength() / committedInformationRate).get();
     clocktime_t emptyToFullDuration = s(committedBurstSize / committedInformationRate).get();
@@ -51,6 +55,23 @@ void EligibilityTimeMeter::meterPacket(Packet *packet)
         groupEligibilityTime = eligibilityTime;
         bucketEmptyTime = eligibilityTime < bucketFullTime ? schedulerEligibilityTime : schedulerEligibilityTime + eligibilityTime - bucketFullTime;
         packet->addTagIfAbsent<EligibilityTimeTag>()->setEligibilityTime(eligibilityTime);
+        emitNumTokenChangedSignal();
+    }
+}
+
+void EligibilityTimeMeter::emitNumTokenChangedSignal()
+{
+    clocktime_t emptyToFullDuration = s(committedBurstSize / committedInformationRate).get();
+    double alpha = (getClockTime() - bucketEmptyTime).dbl() / emptyToFullDuration.dbl();
+    if (alpha > 1.0) {
+        numTokens = b(committedBurstSize).get();
+        cTimestampedValue value(CLOCKTIME_AS_SIMTIME(bucketEmptyTime + emptyToFullDuration), numTokens);
+        emit(tokensChangedSignal, &value);
+        emit(tokensChangedSignal, numTokens);
+    }
+    else {
+        numTokens = b(committedBurstSize).get() * alpha;
+        emit(tokensChangedSignal, numTokens);
     }
 }
 

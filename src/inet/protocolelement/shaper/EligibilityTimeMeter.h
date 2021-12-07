@@ -35,10 +35,14 @@ class INET_API EligibilityTimeMeter : public ClockUserModuleMixin<PacketMeterBas
     clocktime_t groupEligibilityTime;
     clocktime_t bucketEmptyTime;
 
+    double numTokens = 0;
+
   protected:
     virtual void initialize(int stage) override;
 
     virtual void meterPacket(Packet *packet) override;
+
+    virtual void emitNumTokenChangedSignal();
 };
 
 } // namespace inet

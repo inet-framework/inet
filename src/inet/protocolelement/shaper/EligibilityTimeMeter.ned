@@ -38,4 +38,6 @@ simple EligibilityTimeMeter extends PacketMeterBase like IPacketMeter
         int committedBurstSize @unit(b); // committed burst size of the packet flow
         double maxResidenceTime @unit(s) = default(-1s); // maximum packet residence time measured from the packet arrival time to the meter module to the transmission eligiblity time, not used by default
         @class(EligibilityTimeMeter);
+        @signal[tokensChanged](type=double);
+        @statistic[numTokens](title="number of tokens"; source=tokensChanged; record=vector; unit=tk; interpolationmode=linear);
 }
