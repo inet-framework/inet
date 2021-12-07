@@ -30,6 +30,8 @@ void EligibilityTimeMeter::initialize(int stage)
         committedInformationRate = bps(par("committedInformationRate"));
         committedBurstSize = b(par("committedBurstSize"));
         maxResidenceTime = par("maxResidenceTime");
+        groupEligibilityTime = 0;
+        bucketEmptyTime = s(-committedBurstSize / committedInformationRate).get();
         WATCH(groupEligibilityTime);
         WATCH(bucketEmptyTime);
         WATCH(maxResidenceTime);

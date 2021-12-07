@@ -30,10 +30,10 @@ class INET_API EligibilityTimeMeter : public ClockUserModuleMixin<PacketMeterBas
   protected:
     bps committedInformationRate = bps(NaN);
     b committedBurstSize = b(NaN);
+    clocktime_t maxResidenceTime;
 
-    clocktime_t groupEligibilityTime = 0;
-    clocktime_t bucketEmptyTime = 0;
-    clocktime_t maxResidenceTime = 0;
+    clocktime_t groupEligibilityTime;
+    clocktime_t bucketEmptyTime;
 
   protected:
     virtual void initialize(int stage) override;
