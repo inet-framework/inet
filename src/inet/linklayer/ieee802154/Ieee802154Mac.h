@@ -35,10 +35,11 @@
 #ifndef __INET_IEEE802154MAC_H
 #define __INET_IEEE802154MAC_H
 
-#include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/linklayer/base/MacProtocolBaseExtQ.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
@@ -54,11 +55,11 @@ namespace inet {
  *
  * \image html csmaFSM.png "CSMA Mac-Layer - finite state machine"
  */
-class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
+class INET_API Ieee802154Mac : public MacProtocolBaseExtQ, public IMacProtocol, public queueing::IActivePacketSink
 {
   public:
     Ieee802154Mac()
-        : MacProtocolBase()
+        : MacProtocolBaseExtQ()
         , nbTxFrames(0)
         , nbRxFrames(0)
         , nbMissedAcks(0)
@@ -116,6 +117,11 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
 
     /** @brief Handle control messages from lower layer */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
+
+    // IActivePacketSink:
+    virtual queueing::IPassivePacketSource *getProvider(cGate *gate) override;
+    virtual void handleCanPullPacketChanged(cGate *gate) override;
+    virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 
   protected:
     /** @name Different tracked statistics.*/

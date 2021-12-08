@@ -579,9 +579,9 @@
 /examples/wireless/nic/,             -f omnetpp.ini -c LMacWithUnitDiskRadio -r 0,                100s,     ae44-849a/tplx;a263-5bef/~tNl;cd2e-fed3/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c LMacWithApskScalarRadio -r 0,              100s,     340e-9ace/tplx;f8ab-769b/~tNl;9567-1b81/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c LMacWithApskDimensionalRadio -r 0,         100s,     340e-9ace/tplx;f8ab-769b/~tNl;9567-1b81/tyf, PASS, wireless
-/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithUnitDiskRadio -r 0,                100s,     574b-1204/tplx;f6e0-4dce/~tNl;fcd6-cb5c/tyf, PASS, wireless ieee802154
-/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithApskScalarRadio -r 0,              100s,     574b-1204/tplx;f6e0-4dce/~tNl;179f-b794/tyf, PASS, wireless ieee802154
-/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithApskDimensionalRadio -r 0,         100s,     574b-1204/tplx;f6e0-4dce/~tNl;179f-b794/tyf, PASS, wireless ieee802154
+/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithUnitDiskRadio -r 0,                100s,     5319-5d0c/tplx;f6e0-4dce/~tNl;c69a-76be/tyf, PASS, wireless ieee802154
+/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithApskScalarRadio -r 0,              100s,     5319-5d0c/tplx;f6e0-4dce/~tNl;f60a-b0cb/tyf, PASS, wireless ieee802154
+/examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithApskDimensionalRadio -r 0,         100s,     5319-5d0c/tplx;f6e0-4dce/~tNl;f60a-b0cb/tyf, PASS, wireless ieee802154
 /examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithUnitDiskRadio -r 0,              100s,    5365-9610/tplx;ef80-ca8d/~tNl;3e22-1be0/~tND, PASS, wireless CsmaCaInterface
 /examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithApskScalarRadio -r 0,            100s,    5365-9610/tplx;ef80-ca8d/~tNl;58b3-4712/~tND, PASS, wireless CsmaCaInterface
 /examples/wireless/nic/,             -f omnetpp.ini -c CsmaCaWithApskDimensionalRadio -r 0,       100s,    5365-9610/tplx;ef80-ca8d/~tNl;58b3-4712/~tND, PASS, wireless CsmaCaInterface
