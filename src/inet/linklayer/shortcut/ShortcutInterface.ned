@@ -28,5 +28,6 @@ module ShortcutInterface extends WirelessInterface
     parameters:
         radio.typename = "";
         mac.typename = "ShortcutMac";
+        queue.typename = "OmittedPacketQueue";
 }
 
