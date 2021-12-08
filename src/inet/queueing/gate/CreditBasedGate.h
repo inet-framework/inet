@@ -38,10 +38,11 @@ class INET_API CreditBasedGate : public PacketGateBase, public cListener
 
     // state
     bool isTransmitting = false;
+    bool isInterpacketGap = false;
     double currentCredit = NaN;
     double currentCreditGainRate = NaN;
     double lastCurrentCreditEmitted = NaN;
-    simtime_t lastCurrentCreditEmittedTime;
+    simtime_t lastCurrentCreditEmittedTime = -1;
 
     cMessage *changeTimer = nullptr;
 
@@ -66,6 +67,7 @@ class INET_API CreditBasedGate : public PacketGateBase, public cListener
 
     virtual const char *resolveDirective(char directive) const override;
 
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 
