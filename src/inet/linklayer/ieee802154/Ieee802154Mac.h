@@ -306,6 +306,7 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol
 
     virtual simtime_t scheduleBackoff();
 
+    virtual void encapsulate(Packet *packet);
     virtual void decapsulate(Packet *packet);
 
     // OperationalBase:

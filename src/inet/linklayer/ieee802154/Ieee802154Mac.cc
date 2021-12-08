@@ -183,12 +183,10 @@ void Ieee802154Mac::configureNetworkInterface()
 }
 
 /**
- * Encapsulates the message to be transmitted and pass it on
- * to the FSM main method for further processing.
+ * Encapsulates the message.
  */
-void Ieee802154Mac::handleUpperPacket(Packet *packet)
+void Ieee802154Mac::encapsulate(Packet *packet)
 {
-//    MacPkt*macPkt = encapsMsg(msg);
     auto macPkt = makeShared<Ieee802154MacHeader>();
     assert(headerLength % 8 == 0);
     macPkt->setChunkLength(b(headerLength));
@@ -213,11 +211,18 @@ void Ieee802154Mac::handleUpperPacket(Packet *packet)
         }
     }
 
-//    RadioAccNoise3PhyControlInfo *pco = new RadioAccNoise3PhyControlInfo(bitrate);
-//    macPkt->setControlInfo(pco);
     packet->insertAtFront(macPkt);
     packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee802154);
     EV_DETAIL << "pkt encapsulated, length: " << macPkt->getChunkLength() << "\n";
+}
+
+/**
+ * Encapsulates the message to be transmitted and pass it on
+ * to the FSM main method for further processing.
+ */
+void Ieee802154Mac::handleUpperPacket(Packet *packet)
+{
+    encapsulate(packet);
     executeMac(EV_SEND_REQUEST, packet);
 }
 
