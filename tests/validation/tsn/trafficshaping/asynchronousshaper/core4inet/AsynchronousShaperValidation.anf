@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/tests/validation/tsn/trafficshaping/asynchronousshaper2/results/*.vec"/>
-        <input pattern="/inet/tests/validation/tsn/trafficshaping/asynchronousshaper2/results/*.sca"/>
+        <input pattern="/inet/tests/validation/tsn/trafficshaping/asynchronousshaper/core4inet/results/*.vec"/>
+        <input pattern="/inet/tests/validation/tsn/trafficshaping/asynchronousshaper/core4inet/results/*.sca"/>
     </inputs>
     <charts>
         <chart icon="icons/full/obj/barchart.png" id="1895" name="End-to-end delay maximum" template="barchart_native" type="BAR">
@@ -1699,7 +1699,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
-            <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND name =~ queueLength:vector AND (&#10;    (module =~ &quot;CreditbasedShaperValidation.switch.eth[4].macLayer.queue.queue[1]&quot;) OR&#10;    (module =~ &quot;CreditbasedShaperValidation.switch.eth[4].macLayer.queue.queue[5]&quot;) OR&#10;    (module =~ &quot;CreditbasedShaperValidation.switch.eth[4].macLayer.queue.queue[6]&quot;) OR&#10;    (module =~ &quot;CreditbasedShaperValidation.switch.eth[4].macLayer.queue.queue[7]&quot;)&#10;)"/>
+            <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND name =~ queueLength:vector AND (&#10;    (module =~ &quot;*.switch.eth[4].macLayer.queue.queue[1]&quot;) OR&#10;    (module =~ &quot;*.switch.eth[4].macLayer.queue.queue[5]&quot;) OR&#10;    (module =~ &quot;*.switch.eth[4].macLayer.queue.queue[6]&quot;) OR&#10;    (module =~ &quot;*.switch.eth[4].macLayer.queue.queue[7]&quot;)&#10;)"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
@@ -1707,7 +1707,7 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
             <property name="legend_show" value="true"/>
-            <property name="simplify" value=""/>
+            <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
@@ -2285,7 +2285,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
-            <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND name =~ outgoingDataRate:vector AND (&#10;    (module =~ &quot;CreditbasedShaperValidation.switch.eth[4].macLayer.queue.transmissionSelectionAlgorithm[5]&quot;) OR&#10;    (module =~ &quot;CreditbasedShaperValidation.switch.eth[4].macLayer.queue.transmissionSelectionAlgorithm[6]&quot;) OR&#10;    (module =~ &quot;CreditbasedShaperValidation.switch.eth[4].macLayer.queue.transmissionSelectionAlgorithm[7]&quot;)&#10;)"/>
+            <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND name =~ outgoingDataRate:vector AND (&#10;    (module =~ &quot;*.switch.eth[4].macLayer.queue.transmissionSelectionAlgorithm[5]&quot;) OR&#10;    (module =~ &quot;*.switch.eth[4].macLayer.queue.transmissionSelectionAlgorithm[6]&quot;) OR&#10;    (module =~ &quot;*.switch.eth[4].macLayer.queue.transmissionSelectionAlgorithm[7]&quot;)&#10;)"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
@@ -2293,7 +2293,7 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
             <property name="legend_show" value="true"/>
-            <property name="simplify" value=""/>
+            <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
@@ -2871,7 +2871,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
-            <property name="filter" value="type =~ vector AND module =~ &quot;*.R.*&quot; AND name =~ dataRate:vector&#10;AND NOT (type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND name =~ dataRate:vector AND (&#10;    (module =~ &quot;CreditbasedShaperValidation.R.eth[0].macLayer.queue.classifier&quot;) OR&#10;    (module =~ &quot;CreditbasedShaperValidation.R.eth[0].macLayer.queue.transmissionSelection&quot;)&#10;))"/>
+            <property name="filter" value="type =~ vector AND module =~ &quot;*.R.*&quot; AND name =~ dataRate:vector&#10;AND NOT (type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND name =~ dataRate:vector AND (&#10;    (module =~ &quot;*.R.eth[0].macLayer.queue.classifier&quot;) OR&#10;    (module =~ &quot;*.R.eth[0].macLayer.queue.transmissionSelection&quot;)&#10;))"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
@@ -2879,7 +2879,7 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
             <property name="legend_show" value="true"/>
-            <property name="simplify" value=""/>
+            <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>

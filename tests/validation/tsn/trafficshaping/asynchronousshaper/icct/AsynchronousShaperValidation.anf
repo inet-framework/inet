@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/tests/validation/tsn/trafficshaping/asynchronousshaper/results/*.vec"/>
-        <input pattern="/inet/tests/validation/tsn/trafficshaping/asynchronousshaper/results/*.sca"/>
+        <input pattern="/inet/tests/validation/tsn/trafficshaping/asynchronousshaper/icct/results/*.vec"/>
+        <input pattern="/inet/tests/validation/tsn/trafficshaping/asynchronousshaper/icct/results/*.sca"/>
     </inputs>
     <charts>
         <folder id="1858" name="Source application traffic">
