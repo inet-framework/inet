@@ -106,14 +106,14 @@ simsignal_t packetReceivedSignal = cComponent::registerSignal("packetReceived");
 simsignal_t packetPushedSignal = cComponent::registerSignal("packetPushed");
 simsignal_t packetPushedInSignal = cComponent::registerSignal("packetPushedIn");
 simsignal_t packetPushedOutSignal = cComponent::registerSignal("packetPushedOut");
-simsignal_t packetPushInitiatedSignal = cComponent::registerSignal("packetPushInitiated");
-simsignal_t packetPushCompletedSignal = cComponent::registerSignal("packetPushCompleted");
+simsignal_t packetPushStartedSignal = cComponent::registerSignal("packetPushStarted");
+simsignal_t packetPushEndedSignal = cComponent::registerSignal("packetPushEnded");
 
 simsignal_t packetPulledSignal = cComponent::registerSignal("packetPulled");
 simsignal_t packetPulledInSignal = cComponent::registerSignal("packetPulledIn");
 simsignal_t packetPulledOutSignal = cComponent::registerSignal("packetPulledOut");
-simsignal_t packetPullInitiatedSignal = cComponent::registerSignal("packetPullInitiated");
-simsignal_t packetPullCompletedSignal = cComponent::registerSignal("packetPullCompleted");
+simsignal_t packetPullStartedSignal = cComponent::registerSignal("packetPullStarted");
+simsignal_t packetPullEndedSignal = cComponent::registerSignal("packetPullEnded");
 
 simsignal_t packetFilteredSignal = cComponent::registerSignal("packetFiltered");
 

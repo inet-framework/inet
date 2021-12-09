@@ -66,7 +66,7 @@ void CompoundPacketQueueBase::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
-    emit(packetPushInitiatedSignal, packet);
+    emit(packetPushStartedSignal, packet);
     EV_INFO << "Pushing packet" << EV_FIELD(packet) << EV_ENDL;
     consumer->pushPacket(packet, inputGate->getPathEndGate());
     if (packetDropperFunction != nullptr) {
@@ -79,7 +79,7 @@ void CompoundPacketQueueBase::pushPacket(Packet *packet, cGate *gate)
     }
     ASSERT(!isOverloaded());
     // TODO pass packet if not deleted when weak ptrs are available
-    emit(packetPushCompletedSignal, nullptr);
+    emit(packetPushEndedSignal, nullptr);
     updateDisplayString();
 }
 

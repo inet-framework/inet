@@ -74,23 +74,23 @@ simple PacketQueue extends PacketQueueBase like IPacketQueue
         string bufferModule = default(""); // relative module path to the IPacketBuffer module used by this queue, implicit buffer by default
         displayStringTextFormat = default("contains %p pk (%l) pushed %u\npulled %o removed %r dropped %d");
         @class(PacketQueue);
-        @signal[packetPushInitiated](type=inet::Packet);
-        @signal[packetPushCompleted](type=inet::Packet?);
+        @signal[packetPushStarted](type=inet::Packet);
+        @signal[packetPushEnded](type=inet::Packet?);
         @signal[packetPulled](type=inet::Packet);
         @signal[packetRemoved](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
         // the statistical value is the number of packets in the queue
-        @statistic[queueLength](title="queue length"; source=warmup(totalCount(packetPushCompleted) - count(packetPulled) - count(packetRemoved) - count(packetDropped)); record=last,max,timeavg,vector; unit=pk; interpolationmode=sample-hold; autoWarmupFilter=false);
+        @statistic[queueLength](title="queue length"; source=warmup(totalCount(packetPushEnded) - count(packetPulled) - count(packetRemoved) - count(packetDropped)); record=last,max,timeavg,vector; unit=pk; interpolationmode=sample-hold; autoWarmupFilter=false);
         // the statistical value is the total bit length of all packets in the queue
-        @statistic[queueBitLength](title="queue bit length"; source=warmup(sum(packetLength(packetPushInitiated)) - sum(packetLength(packetPulled)) - sum(packetLength(packetRemoved)) - sum(packetLength(packetDropped))); record=last,max,timeavg,vector; unit=b; interpolationmode=sample-hold; autoWarmupFilter=false);
+        @statistic[queueBitLength](title="queue bit length"; source=warmup(sum(packetLength(packetPushStarted)) - sum(packetLength(packetPulled)) - sum(packetLength(packetRemoved)) - sum(packetLength(packetDropped))); record=last,max,timeavg,vector; unit=b; interpolationmode=sample-hold; autoWarmupFilter=false);
         // the statistical value is the queueing time of packets
         @statistic[queueingTime](title="queueing times"; source=queueingTime(packetPulled); record=histogram,vector; unit=s; interpolationmode=none);
         // the statistical value is the incoming packet
-        @statistic[incomingPackets](title="incoming packets"; source=packetPushInitiated; record=count; unit=pk);
+        @statistic[incomingPackets](title="incoming packets"; source=packetPushStarted; record=count; unit=pk);
         // the statistical value is the length of the incoming packet
-        @statistic[incomingPacketLengths](title="incoming packet lengths"; source=packetLength(packetPushInitiated); record=sum,histogram,vector; unit=b; interpolationmode=none);
+        @statistic[incomingPacketLengths](title="incoming packet lengths"; source=packetLength(packetPushStarted); record=sum,histogram,vector; unit=b; interpolationmode=none);
         // the statistical value is the data rate of the incoming packets
-        @statistic[incomingDataRate](title="incoming datarate"; source=throughput(packetPushInitiated); record=vector; unit=bps; interpolationmode=linear);
+        @statistic[incomingDataRate](title="incoming datarate"; source=throughput(packetPushStarted); record=vector; unit=bps; interpolationmode=linear);
         // the statistical value is the outgoing packet
         @statistic[outgoingPackets](title="outgoing packets"; source=packetPulled; record=count; unit=pk);
         // the statistical value is the length of the outgoing packet
@@ -104,7 +104,7 @@ simple PacketQueue extends PacketQueueBase like IPacketQueue
         // the statistical value is the flow specific queueing time of packets
         @statistic[flowQueueingTime](title="flow queueing times"; source=queueingTime(demuxFlow(packetPulled)); record=histogram,vector; unit=s; interpolationmode=none);
         // the statistical value is the flow specific data rate of the incoming packets
-        @statistic[flowIncomingDataRate](title="flow specific incoming data rate"; source=throughput(flowPacketLength(demuxFlow(packetPushInitiated))); record=vector; unit=bps; interpolationmode=linear);
+        @statistic[flowIncomingDataRate](title="flow specific incoming data rate"; source=throughput(flowPacketLength(demuxFlow(packetPushStarted))); record=vector; unit=bps; interpolationmode=linear);
         // the statistical value is the flow specific data rate of the outgoing packets
         @statistic[flowOutgoingDataRate](title="flow specific outgoing data rate"; source=throughput(flowPacketLength(demuxFlow(packetPulled))); record=vector; unit=bps; interpolationmode=linear);
         @defaultStatistic(queueLength:vector);

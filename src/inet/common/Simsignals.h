@@ -115,14 +115,14 @@ extern INET_API simsignal_t // admin
     packetPushedSignal,
     packetPushedInSignal,
     packetPushedOutSignal,
-    packetPushInitiatedSignal,
-    packetPushCompletedSignal,
+    packetPushStartedSignal,
+    packetPushEndedSignal,
 
     packetPulledSignal,
     packetPulledInSignal,
     packetPulledOutSignal,
-    packetPullInitiatedSignal,
-    packetPullCompletedSignal,
+    packetPullStartedSignal,
+    packetPullEndedSignal,
 
     packetFilteredSignal,
 
