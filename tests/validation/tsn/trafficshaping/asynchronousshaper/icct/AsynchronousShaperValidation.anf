@@ -5876,6 +5876,7 @@ import math
 import numpy as np
 import pandas as pd
 from omnetpp.scave import results, chart, ideplot, utils
+from omnetpp.scave.utils import make_legend_label
 
 # get chart properties
 props = chart.get_properties()
@@ -5902,7 +5903,8 @@ df['legend'] = df['legend'].map(lambda module: re.sub(".*(N7.app\\[2[0-9]\\]).*"
 df['legend'] = df['legend'].map(lambda module: re.sub(".*(N7.app\\[3[0-4]\\]).*", "Flow 6, Class A", module))
 df['legend'] = df['legend'].map(lambda module: re.sub(".*(N7.app\\[3[5-9]\\]).*", "Flow 7, Class B", module))
 df['legend'] = df['legend'].map(lambda module: re.sub(".*(N7.app\\[40\\]).*", "Flow 8, BE", module))
-df = df.groupby(['legend', 'measurement'], as_index=False).agg(lambda x: max(x))
+df = df.groupby(['legend'], as_index=False).agg(lambda x: max(x))
+#df = df.groupby(['legend', 'measurement'], as_index=False).agg(lambda x: max(x))
 df['title'] = df['legend']
 
 if df.empty:
@@ -6426,7 +6428,7 @@ utils.export_data_if_needed(df, props)
             <property name="Legend.Font" value="Arial-regular-8"/>
             <property name="baseline" value="0"/>
             <property name="image_export_filename" value="EndToEndDelayMax"/>
-            <property name="filter" value="type =~ scalar AND name =~ meanBitLifeTimePerPacket:vector:max AND runattr:measurement =~ &quot;$cbs=80&quot;"/>
+            <property name="filter" value="type =~ scalar AND name =~ meanBitLifeTimePerPacket:vector:max"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="series" value=""/>
             <property name="legend_show" value="true"/>

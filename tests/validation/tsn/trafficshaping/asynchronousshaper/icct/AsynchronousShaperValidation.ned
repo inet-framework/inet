@@ -13,7 +13,7 @@
 // along with this program.  If Not, See <https://www.gnu.org/licenses/>.
 //
 
-package inet.validation.tsn.trafficshaping.asynchronousshaper;
+package inet.validation.tsn.trafficshaping.asynchronousshaper.icct;
 
 import inet.networks.base.TsnNetworkBase;
 import inet.node.ethernet.Eth100M;

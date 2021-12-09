@@ -1,0 +1,4 @@
+This validation test compares simulation results to analytical results presented
+in the paper titled "The Delay Bound Analysis Based on Network Calculus for
+Asynchronous Traffic Shaping under Parameter Inconsistency" from the 2020 IEEE
+20th International Conference on Communication Technology
