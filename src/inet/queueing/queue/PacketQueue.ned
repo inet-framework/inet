@@ -82,7 +82,7 @@ simple PacketQueue extends PacketQueueBase like IPacketQueue
         // the statistical value is the number of packets in the queue
         @statistic[queueLength](title="queue length"; source=warmup(totalCount(packetPushEnded) - count(packetPulled) - count(packetRemoved) - count(packetDropped)); record=last,max,timeavg,vector; unit=pk; interpolationmode=sample-hold; autoWarmupFilter=false);
         // the statistical value is the total bit length of all packets in the queue
-        @statistic[queueBitLength](title="queue bit length"; source=warmup(sum(packetLength(packetPushStarted)) - sum(packetLength(packetPulled)) - sum(packetLength(packetRemoved)) - sum(packetLength(packetDropped))); record=last,max,timeavg,vector; unit=b; interpolationmode=sample-hold; autoWarmupFilter=false);
+        @statistic[queueBitLength](title="queue bit length"; source=warmup(sum(packetLength(packetPushEnded)) - sum(packetLength(packetPulled)) - sum(packetLength(packetRemoved)) - sum(packetLength(packetDropped))); record=last,max,timeavg,vector; unit=b; interpolationmode=sample-hold; autoWarmupFilter=false);
         // the statistical value is the queueing time of packets
         @statistic[queueingTime](title="queueing times"; source=queueingTime(packetPulled); record=histogram,vector; unit=s; interpolationmode=none);
         // the statistical value is the incoming packet

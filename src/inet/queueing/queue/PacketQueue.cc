@@ -93,6 +93,7 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
     Enter_Method("pushPacket");
     take(packet);
     emit(packetPushStartedSignal, packet);
+    auto packetClone = packet->dup(); // TODO delete this code if the original packet can be emitted in packetPushEndedSignal
     EV_INFO << "Pushing packet" << EV_FIELD(packet) << EV_ENDL;
     queue.insert(packet);
     if (buffer != nullptr)
@@ -106,8 +107,9 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
         }
     }
     ASSERT(!isOverloaded());
-    // TODO pass packet if not deleted when weak ptrs are available
-    emit(packetPushEndedSignal, nullptr);
+    // TODO pass packet instead of packetClone if not deleted when weak ptrs are available
+    emit(packetPushEndedSignal, packetClone);
+    delete packetClone;
     updateDisplayString();
     if (collector != nullptr && getNumPackets() != 0)
         collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
