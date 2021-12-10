@@ -125,4 +125,3 @@ network TwoMasterClocksRingGptpShowcase extends TsnNetworkBase
         tsnSwitch5.ethg++ <--> EthernetLink <--> tsnDevice3.ethg++;
         tsnSwitch6.ethg++ <--> EthernetLink <--> tsnDevice4.ethg++;
 }
-
