@@ -91,6 +91,9 @@ const char *ClockBase::resolveDirective(char directive) const
         case 't':
             result = getClockTime().str() + " s";
             break;
+        case 'T':
+            result = getClockTime().ustr();
+            break;
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
