@@ -256,10 +256,10 @@ void EthernetCsmaMac::handleUpperPacket(Packet *packet)
 
     MacAddress address = getMacAddress();
 
-    auto frame = packet->peekAtFront<EthernetMacHeader>();
-    if (frame->getDest().equals(address)) {
+    auto macHeader = packet->peekAtFront<EthernetMacHeader>();
+    if (macHeader->getDest().equals(address)) {
         throw cRuntimeError("Logic error: frame %s from higher layer has local MAC address as dest (%s)",
-                packet->getFullName(), frame->getDest().str().c_str());
+                packet->getFullName(), macHeader->getDest().str().c_str());
     }
 
     if (packet->getDataLength() > MAX_ETHERNET_FRAME_BYTES) {
@@ -268,7 +268,7 @@ void EthernetCsmaMac::handleUpperPacket(Packet *packet)
     }
 
     if (!connected) {
-        EV_WARN << "Interface is not connected -- dropping packet " << frame << endl;
+        EV_WARN << "Interface is not connected -- dropping packet " << packet << endl;
         PacketDropDetails details;
         details.setReason(INTERFACE_DOWN);
         emit(packetDroppedSignal, packet, &details);
@@ -279,29 +279,19 @@ void EthernetCsmaMac::handleUpperPacket(Packet *packet)
     }
 
     // fill in src address if not set
-    if (frame->getSrc().isUnspecified()) {
-        // frame is immutable
-        frame = nullptr;
-        auto newFrame = packet->removeAtFront<EthernetMacHeader>();
-        newFrame->setSrc(address);
-        packet->insertAtFront(newFrame);
-        frame = newFrame;
+    if (macHeader->getSrc().isUnspecified()) {
+        // macHeader is immutable
+        macHeader = nullptr;
+        auto newHeader = packet->removeAtFront<EthernetMacHeader>();
+        newHeader->setSrc(address);
+        packet->insertAtFront(newHeader);
+        macHeader = newHeader;
     }
-
-    // store frame and possibly begin transmitting
-    EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
-    txQueue->enqueuePacket(packet);
-
-    if ((duplexMode || receiveState == RX_IDLE_STATE) && transmitState == TX_IDLE_STATE) {
-        EV_DETAIL << "No incoming carrier signals detected, frame clear to send\n";
-
-        if (!currentTxFrame && !txQueue->isEmpty()) {
-            popTxQueue();
-            addPaddingAndSetFcs(currentTxFrame, MIN_ETHERNET_FRAME_BYTES);
-        }
-
-        startFrameTransmission();
-    }
+    if (currentTxFrame != nullptr)
+        throw cRuntimeError("EthernetMac already has a transmit packet when packet arrived from upper layer");
+    addPaddingAndSetFcs(packet, MIN_ETHERNET_FRAME_BYTES);
+    currentTxFrame = packet;
+    startFrameTransmission();
 }
 
 void EthernetCsmaMac::processMsgFromNetwork(EthernetSignalBase *signal)
@@ -377,30 +367,27 @@ void EthernetCsmaMac::processDetectedCollision()
 
 void EthernetCsmaMac::handleEndIFGPeriod()
 {
-    if (transmitState != WAIT_IFG_STATE && transmitState != SEND_IFG_STATE)
-        throw cRuntimeError("Not in WAIT_IFG_STATE at the end of IFG period");
+    EV_DETAIL << "IFG elapsed\n";
 
     if (transmitState == SEND_IFG_STATE) {
         emit(transmissionEndedSignal, curTxSignal);
         txFinished();
+        if (canBeContinueBurst(b(0))) {
+            if (!tryProcessUpperPacket(SEND_IFG_STATE))
+                changeTransmissionState(TX_IDLE_STATE);
+        }
+        else
+            scheduleEndIFGPeriod();
     }
-
-    EV_DETAIL << "IFG elapsed\n";
-
-    if (frameBursting && (transmitState != SEND_IFG_STATE)) {
-        bytesSentInBurst = B(0);
-        framesSentInBurst = 0;
+    else if (transmitState == WAIT_IFG_STATE) {
+        // End of IFG period, okay to transmit, if Rx idle OR duplexMode ( checked in startFrameTransmission(); )
+        if (currentTxFrame != nullptr)
+            startFrameTransmission();
+        else if (!tryProcessUpperPacket(WAIT_IFG_STATE))
+            changeTransmissionState(TX_IDLE_STATE);
     }
-
-    // End of IFG period, okay to transmit, if Rx idle OR duplexMode ( checked in startFrameTransmission(); )
-
-    if (currentTxFrame == nullptr && !txQueue->isEmpty()) {
-        popTxQueue();
-        addPaddingAndSetFcs(currentTxFrame, MIN_ETHERNET_FRAME_BYTES);
-    }
-
-    // send frame to network
-    beginSendFrames();
+    else
+        throw cRuntimeError("Not in WAIT_IFG_STATE at the end of IFG period");
 }
 
 B EthernetCsmaMac::calculateMinFrameLength()
@@ -409,12 +396,6 @@ B EthernetCsmaMac::calculateMinFrameLength()
     B minFrameLength = duplexMode ? MIN_ETHERNET_FRAME_BYTES : (inBurst ? curEtherDescr->frameInBurstMinBytes : curEtherDescr->halfDuplexFrameMinBytes);
 
     return minFrameLength;
-}
-
-B EthernetCsmaMac::calculatePaddedFrameLength(Packet *frame)
-{
-    B minFrameLength = calculateMinFrameLength();
-    return std::max(minFrameLength, B(frame->getDataLength()));
 }
 
 void EthernetCsmaMac::startFrameTransmission()
@@ -518,11 +499,6 @@ void EthernetCsmaMac::handleEndTxPeriod()
     EV_INFO << "Transmission of " << currentTxFrame << " successfully completed.\n";
     deleteCurrentTxFrame();
     lastTxFinishTime = simTime();
-    // note: cannot be moved into handleEndIFGPeriod(), because in burst mode we need to know whether to send filled IFG or not
-    if (!duplexMode && frameBursting && framesSentInBurst > 0 && !txQueue->isEmpty()) {
-        popTxQueue();
-        addPaddingAndSetFcs(currentTxFrame, MIN_ETHERNET_FRAME_BYTES);
-    }
 
     // only count transmissions in totalSuccessfulRxTxTime if channel is half-duplex
     if (!duplexMode) {
@@ -541,8 +517,10 @@ void EthernetCsmaMac::handleEndTxPeriod()
     }
     else {
         EV_DETAIL << "Start IFG period\n";
-        scheduleEndIFGPeriod();
-        fillIFGIfInBurst();
+        if (canBeContinueBurst(INTERFRAME_GAP_BITS))
+            fillIFGInBurst();
+        else
+            scheduleEndIFGPeriod();
     }
 }
 
@@ -655,11 +633,8 @@ void EthernetCsmaMac::handleRetransmission()
         dropCurrentTxFrame(details);
         changeTransmissionState(TX_IDLE_STATE);
         backoffs = 0;
-        if (!txQueue->isEmpty()) {
-            popTxQueue();
-            addPaddingAndSetFcs(currentTxFrame, MIN_ETHERNET_FRAME_BYTES);
-        }
-        beginSendFrames();
+
+        tryProcessUpperPacket(TX_IDLE_STATE);
         return;
     }
 
@@ -831,40 +806,36 @@ void EthernetCsmaMac::processReceivedControlFrame(Packet *packet)
 
 void EthernetCsmaMac::scheduleEndIFGPeriod()
 {
+    bytesSentInBurst = B(0);
+    framesSentInBurst = 0;
+    simtime_t ifgTime = b(INTERFRAME_GAP_BITS).get() / curEtherDescr->txrate;
+    scheduleAfter(ifgTime, endIfgTimer);
     changeTransmissionState(WAIT_IFG_STATE);
-    simtime_t endIFGTime = simTime() + (b(INTERFRAME_GAP_BITS).get() / curEtherDescr->txrate);
-    scheduleAt(endIFGTime, endIfgTimer);
 }
 
-void EthernetCsmaMac::fillIFGIfInBurst()
+void EthernetCsmaMac::fillIFGInBurst()
 {
-    if (!frameBursting)
-        return;
+    EV_TRACE << "fillIFGInBurst(): t=" << simTime() << ", framesSentInBurst=" << framesSentInBurst << ", bytesSentInBurst=" << bytesSentInBurst << endl;
 
-    EV_TRACE << "fillIFGIfInBurst(): t=" << simTime() << ", framesSentInBurst=" << framesSentInBurst << ", bytesSentInBurst=" << bytesSentInBurst << endl;
+    EthernetFilledIfgSignal *gap = new EthernetFilledIfgSignal("FilledIFG");
+    gap->setBitrate(curEtherDescr->txrate);
+    bytesSentInBurst += B(gap->getByteLength());
+    simtime_t duration = gap->getBitLength() / this->curEtherDescr->txrate;
+    sendSignal(gap, duration);
+    scheduleAfter(duration, endIfgTimer);
+    changeTransmissionState(SEND_IFG_STATE);
+}
 
-    if (currentTxFrame
-        && endIfgTimer->isScheduled()
-        && (transmitState == WAIT_IFG_STATE)
-        && (simTime() == lastTxFinishTime)
-        && (simTime() == endIfgTimer->getSendingTime())
-        && (framesSentInBurst > 0)
-        && (framesSentInBurst < curEtherDescr->maxFramesInBurst)
-        && (bytesSentInBurst + INTERFRAME_GAP_BITS + PREAMBLE_BYTES + SFD_BYTES + calculatePaddedFrameLength(currentTxFrame)
-            <= curEtherDescr->maxBytesInBurst))
-    {
-        EthernetFilledIfgSignal *gap = new EthernetFilledIfgSignal("FilledIFG");
-        gap->setBitrate(curEtherDescr->txrate);
-        bytesSentInBurst += B(gap->getByteLength());
-        simtime_t duration = gap->getBitLength() / this->curEtherDescr->txrate;
-        sendSignal(gap, duration);
-        changeTransmissionState(SEND_IFG_STATE);
-        rescheduleAfter(duration, endIfgTimer);
+bool EthernetCsmaMac::canBeContinueBurst(b remainingGapLength)
+{
+    if ((frameBursting && framesSentInBurst > 0) && (framesSentInBurst < curEtherDescr->maxFramesInBurst)) {
+        if (Packet *pk = txQueue->canPullPacket(gate(upperLayerInGateId)->getPathStartGate())) {
+            // TODO before/after FilledIfg!!!
+            B pkLength = std::max(MIN_ETHERNET_FRAME_BYTES, B(pk->getDataLength()));
+            return (bytesSentInBurst + remainingGapLength + PREAMBLE_BYTES + SFD_BYTES + pkLength) <= curEtherDescr->maxBytesInBurst;
+        }
     }
-    else {
-        bytesSentInBurst = B(0);
-        framesSentInBurst = 0;
-    }
+    return false;
 }
 
 void EthernetCsmaMac::scheduleEndPausePeriod(int pauseUnits)
@@ -922,6 +893,26 @@ void EthernetCsmaMac::dropCurrentTxFrame(PacketDropDetails& details)
     EthernetMacBase::dropCurrentTxFrame(details);
     delete curTxSignal;
     curTxSignal = nullptr;
+}
+
+bool EthernetCsmaMac::tryProcessUpperPacket(MacTransmitState state)
+{
+    if (currentTxFrame == nullptr && transmitState == state && txQueue && txQueue->canPullSomePacket(gate(upperLayerInGateId)->getPathStartGate())) {
+        Packet *packet = txQueue->dequeuePacket();
+        packet->setArrival(getId(), upperLayerInGateId, simTime());
+        take(packet);
+        handleUpperPacket(packet);
+        return true;
+    }
+    else
+        return false;
+}
+
+void EthernetCsmaMac::handleCanPullPacketChanged(cGate *gate)
+{
+    Enter_Method("handleCanPullPacketChanged");
+    if (duplexMode || receiveState == RX_IDLE_STATE)
+        tryProcessUpperPacket(TX_IDLE_STATE);
 }
 
 } // namespace inet

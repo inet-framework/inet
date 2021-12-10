@@ -21,7 +21,9 @@ import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ethernet.contract.IEthernetEncapsulation;
 import inet.networklayer.common.NetworkInterface;
+import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.ITrafficConditioner;
+
 
 //
 // This module represents an Ethernet network interface.
@@ -61,6 +63,11 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
             parameters:
                 @display("p=500,200");
         }
+        queue: <default("EthernetQueue")> like IPacketQueue {
+            parameters:
+                packetCapacity = default(1000);
+                @display("p=300,250");
+        }
         mac: <default(csmacdSupport ? "EthernetCsmaMac" : "EthernetMac")> like IEtherMac {
             parameters:
                 queue.packetCapacity = default(10000);
@@ -68,7 +75,8 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
         }
     connections:
         mac.upperLayerOut --> encap.lowerLayerIn;
-        mac.upperLayerIn <-- encap.lowerLayerOut;
+        queue.in <-- encap.lowerLayerOut;
+        mac.upperLayerIn <-- queue.out;
 
         mac.phys <--> { @display("m=s"); } <--> phys;
 

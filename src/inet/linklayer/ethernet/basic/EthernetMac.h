@@ -33,6 +33,9 @@ class INET_API EthernetMac : public EthernetMacBase
   public:
     EthernetMac();
 
+    // IActivePacketSink:
+    virtual void handleCanPullPacketChanged(cGate *gate) override;
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
@@ -58,6 +61,7 @@ class INET_API EthernetMac : public EthernetMacBase
     virtual void scheduleEndIFGPeriod();
     virtual void scheduleEndPausePeriod(int pauseUnits);
     virtual void beginSendFrames();
+    virtual void tryProcessUpperPacket();
 
     // statistics
     simtime_t totalSuccessfulRxTime; // total duration of successful transmissions on channel

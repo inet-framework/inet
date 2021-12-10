@@ -17,7 +17,6 @@
 
 package inet.linklayer.ethernet.basic;
 
-import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.contract.IEtherMac;
 
 //
@@ -162,11 +161,5 @@ module EthernetMac like IEtherMac
         input upperLayerIn @labels(EtherFrame);    // to ~EthernetEncapsulation or ~IMacRelayUnit
         output upperLayerOut @labels(EtherFrame);  // to ~EthernetEncapsulation or ~IMacRelayUnit
         inout phys @labels(EthernetSignal);        // to the network
-    submodules:
-        queue: <default("EthernetQueue")> like IPacketQueue {
-            parameters:
-                packetCapacity = default(1000);
-                @display("p=100,100");
-        }
 }
 

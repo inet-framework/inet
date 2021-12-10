@@ -37,6 +37,9 @@ class INET_API EthernetCsmaMac : public EthernetMacBase
     EthernetCsmaMac() {}
     virtual ~EthernetCsmaMac();
 
+    // IActivePacketSink:
+    virtual void handleCanPullPacketChanged(cGate *gate) override;
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
@@ -99,7 +102,7 @@ class INET_API EthernetCsmaMac : public EthernetMacBase
     virtual void handleUpperPacket(Packet *msg) override;
     virtual void processMsgFromNetwork(EthernetSignalBase *msg);
     virtual void scheduleEndIFGPeriod();
-    virtual void fillIFGIfInBurst();
+    virtual void fillIFGInBurst();
     virtual void scheduleEndPausePeriod(int pauseUnits);
     virtual void beginSendFrames();
     virtual void sendJamSignal();
@@ -113,11 +116,13 @@ class INET_API EthernetCsmaMac : public EthernetMacBase
     virtual void handleSignalFromNetwork(EthernetSignalBase *signal);
     virtual void updateRxSignals(EthernetSignalBase *signal, simtime_t endRxTime);
     virtual void dropCurrentTxFrame(PacketDropDetails& details) override;
+    bool canBeContinueBurst(b remainingGapLength);
+    bool tryProcessUpperPacket(MacTransmitState state);
 
     B calculateMinFrameLength();
-    B calculatePaddedFrameLength(Packet *frame);
 
     virtual void printState();
+
 };
 
 } // namespace inet

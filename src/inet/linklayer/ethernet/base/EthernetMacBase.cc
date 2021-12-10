@@ -177,7 +177,7 @@ EthernetMacBase::~EthernetMacBase()
 
 void EthernetMacBase::initialize(int stage)
 {
-    MacProtocolBase::initialize(stage);
+    MacProtocolBaseExtQ::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         fcsMode = parseFcsMode(par("fcsMode"));
         physInGate = gate("phys$i");
@@ -185,7 +185,7 @@ void EthernetMacBase::initialize(int stage)
         lowerLayerInGateId = physInGate->getId();
         lowerLayerOutGateId = physOutGate->getId();
         transmissionChannel = nullptr;
-        txQueue = check_and_cast<queueing::IPacketQueue *>(getSubmodule("queue"));
+        txQueue = getQueue(gate(upperLayerInGateId));
 
         initializeFlags();
 
@@ -315,7 +315,7 @@ void EthernetMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cO
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
 
-    MacProtocolBase::receiveSignal(source, signalID, obj, details);
+    MacProtocolBaseExtQ::receiveSignal(source, signalID, obj, details);
 
     if (signalID == POST_MODEL_CHANGE) {
         if (auto gcobj = dynamic_cast<cPostPathCreateNotification *>(obj)) {
@@ -571,7 +571,7 @@ void EthernetMacBase::finish()
 
 void EthernetMacBase::refreshDisplay() const
 {
-    MacProtocolBase::refreshDisplay();
+    MacProtocolBaseExtQ::refreshDisplay();
 
     // icon coloring
     const char *color;
@@ -714,6 +714,16 @@ void EthernetMacBase::txFinished()
     curTxSignal = nullptr;
 }
 
+queueing::IPassivePacketSource *EthernetMacBase::getProvider(cGate *gate)
+{
+    return (gate->getId() == upperLayerInGateId) ? txQueue.get() : nullptr;
+}
+
+void EthernetMacBase::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
+{
+    Enter_Method("handlePullPacketProcessed");
+    throw cRuntimeError("Not supported callback");
+}
 
 } // namespace inet
 

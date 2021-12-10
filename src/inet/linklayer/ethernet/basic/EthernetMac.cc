@@ -137,6 +137,7 @@ void EthernetMac::startFrameTransmission()
 
 void EthernetMac::handleUpperPacket(Packet *packet)
 {
+    //ASSERT2(false, "using EthernetMac");
     EV_INFO << "Received " << packet << " from upper layer." << endl;
 
     numFramesFromHL++;
@@ -173,18 +174,13 @@ void EthernetMac::handleUpperPacket(Packet *packet)
         frame = newFrame;
     }
 
-    // store frame and possibly begin transmitting
-    EV_DETAIL << "Frame " << packet << " arrived from higher layer, enqueueing\n";
-    txQueue->enqueuePacket(packet);
-
-    if (transmitState == TX_IDLE_STATE) {
-        ASSERT(currentTxFrame == nullptr);
-        if (!txQueue->isEmpty()) {
-            popTxQueue();
-            addPaddingAndSetFcs(currentTxFrame, MIN_ETHERNET_FRAME_BYTES);
-            startFrameTransmission();
-        }
-    }
+    if (transmitState != TX_IDLE_STATE)
+        throw cRuntimeError("EthernetMac not in TX_IDLE_STATE when packet arrived from upper layer");
+    if (currentTxFrame != nullptr)
+        throw cRuntimeError("EthernetMac already has a transmit packet when packet arrived from upper layer");
+    addPaddingAndSetFcs(packet, MIN_ETHERNET_FRAME_BYTES);
+    currentTxFrame = packet;
+    startFrameTransmission();
 }
 
 void EthernetMac::processMsgFromNetwork(EthernetSignalBase *signal)
@@ -272,12 +268,8 @@ void EthernetMac::handleEndIFGPeriod()
 
     // End of IFG period, okay to transmit
     EV_DETAIL << "IFG elapsed" << endl;
-
-    if (!txQueue->isEmpty()) {
-        popTxQueue();
-        addPaddingAndSetFcs(currentTxFrame, MIN_ETHERNET_FRAME_BYTES);
-    }
-    beginSendFrames();
+    changeTransmissionState(TX_IDLE_STATE);
+    tryProcessUpperPacket();
 }
 
 void EthernetMac::handleEndTxPeriod()
@@ -340,11 +332,9 @@ void EthernetMac::handleEndPausePeriod()
         throw cRuntimeError("End of PAUSE event occurred when not in PAUSE_STATE!");
 
     EV_DETAIL << "Pause finished, resuming transmissions\n";
-    if (!currentTxFrame && !txQueue->isEmpty()) {
-        popTxQueue();
-        addPaddingAndSetFcs(currentTxFrame, MIN_ETHERNET_FRAME_BYTES);
-    }
-    beginSendFrames();
+    changeTransmissionState(TX_IDLE_STATE);
+
+    tryProcessUpperPacket();
 }
 
 void EthernetMac::processReceivedDataFrame(Packet *packet, const Ptr<const EthernetMacHeader>& frame)
@@ -422,6 +412,22 @@ void EthernetMac::beginSendFrames()
         changeTransmissionState(TX_IDLE_STATE);
         EV_DETAIL << "No more frames to send, transmitter set to idle\n";
     }
+}
+
+void EthernetMac::tryProcessUpperPacket()
+{
+    if (currentTxFrame == nullptr && transmitState == TX_IDLE_STATE && txQueue && txQueue->canPullSomePacket(gate(upperLayerInGateId)->getPathStartGate())) {
+        Packet *packet = txQueue->dequeuePacket();
+        packet->setArrival(getId(), upperLayerInGateId, simTime());
+        take(packet);
+        handleUpperPacket(packet);
+    }
+}
+
+void EthernetMac::handleCanPullPacketChanged(cGate *gate)
+{
+    Enter_Method("handleCanPullPacketChanged");
+    tryProcessUpperPacket();
 }
 
 } // namespace inet
