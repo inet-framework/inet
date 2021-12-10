@@ -44,11 +44,8 @@ module ExtLowerEthernetInterface extends ExtInterface like IEthernetInterface
                 @display("p=300,200");
         }
     connections allowunconnected:
-        upperLayerIn --> { @display("m=n"); } --> encap.upperLayerIn if exists(encap);
-        upperLayerOut <-- { @display("m=n"); } <-- encap.upperLayerOut if exists(encap);
-        encap.lowerLayerOut --> socket.upperLayerIn if exists(encap);
-        encap.lowerLayerIn <-- socket.upperLayerOut if exists(encap);
-
-        upperLayerIn --> { @display("m=n"); } --> socket.upperLayerIn if !exists(encap);
-        upperLayerOut <-- { @display("m=n"); } <-- socket.upperLayerOut if !exists(encap);
+        upperLayerIn --> { @display("m=n"); } --> encap.upperLayerIn;
+        upperLayerOut <-- { @display("m=n"); } <-- encap.upperLayerOut;
+        encap.lowerLayerOut --> socket.upperLayerIn;
+        encap.lowerLayerIn <-- socket.upperLayerOut;
 }

@@ -49,11 +49,11 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
         output cutthroughOut @loose;
         inout phys @labels(EthernetSignal);
     submodules:
-        egressTC: <default("")> like ITrafficConditioner if typename != "" {
+        egressTC: <default("")> like ITrafficConditioner {
             parameters:
                 @display("p=300,100");
         }
-        ingressTC: <default("")> like ITrafficConditioner if typename != "" {
+        ingressTC: <default("")> like ITrafficConditioner {
             parameters:
                 @display("p=700,100");
         }
@@ -72,12 +72,10 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
 
         mac.phys <--> { @display("m=s"); } <--> phys;
 
-        encap.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if !exists(ingressTC);
-        encap.upperLayerOut --> ingressTC.in if exists(ingressTC);
-        ingressTC.out --> { @display("m=n"); } --> upperLayerOut if exists(ingressTC);
+        encap.upperLayerOut --> ingressTC.in;
+        ingressTC.out --> { @display("m=n"); } --> upperLayerOut;
 
-        upperLayerIn --> { @display("m=n"); } --> encap.upperLayerIn if !exists(egressTC);
-        upperLayerIn --> { @display("m=n"); } --> egressTC.in if exists(egressTC);
-        egressTC.out --> encap.upperLayerIn if exists(egressTC);
+        upperLayerIn --> { @display("m=n"); } --> egressTC.in;
+        egressTC.out --> encap.upperLayerIn;
 }
 
