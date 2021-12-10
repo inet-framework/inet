@@ -126,3 +126,45 @@ network TwoMasterClocksRingGptpShowcase extends TsnNetworkBase
         tsnSwitch6.ethg++ <--> EthernetLink <--> tsnDevice4.ethg++;
 }
 
+//tsnSwitch1.ethg$o++ --> EthernetLink --> tsnSwitch2.ethg$i++;
+//tsnSwitch2.ethg$o++ --> EthernetLink --> tsnSwitch3.ethg$i++;
+//tsnSwitch3.ethg$o++ --> EthernetLink --> tsnSwitch4.ethg$i++;
+//tsnSwitch4.ethg$o++ --> EthernetLink --> tsnSwitch5.ethg$i++;
+//tsnSwitch5.ethg$o++ --> EthernetLink --> tsnSwitch6.ethg$i++;
+//tsnSwitch6.ethg$o++ --> EthernetLink --> tsnSwitch1.ethg$i++;
+//
+//tsnSwitch1.ethg$i++ <-- EthernetLink <-- tsnSwitch2.ethg$o++;
+//tsnSwitch2.ethg$i++ <-- EthernetLink <-- tsnSwitch3.ethg$o++;
+//tsnSwitch3.ethg$i++ <-- EthernetLink <-- tsnSwitch4.ethg$o++;
+//tsnSwitch4.ethg$i++ <-- EthernetLink <-- tsnSwitch5.ethg$o++;
+//tsnSwitch5.ethg$i++ <-- EthernetLink <-- tsnSwitch6.ethg$o++;
+//tsnSwitch6.ethg$i++ <-- EthernetLink <-- tsnSwitch1.ethg$o++;
+
+network X extends TsnNetworkBase
+{
+    parameters:
+            @display("bgb=1422,813");
+            int numSwitches = default(1);
+    submodules:
+        tsnClock: TsnClock {
+            @display("p=496,350");
+        }
+        tsnSwitch[numSwitches]: TsnSwitch {
+        }
+        tsnSwitchN: TsnSwitch {
+        }
+        tsnDevice1: TsnDevice {
+            @display("p=1231,457");
+        }
+        tsnDevice2: TsnDevice {
+            @display("p=1231,258");
+        }
+    connections:
+        tsnClock.ethg++ <--> EthernetLink <--> tsnSwitch[0].ethg++;
+        for i=0..(numSwitches-2) {
+            tsnSwitch[i].ethg++ <--> EthernetLink <--> tsnSwitch[i+1].ethg++;
+        }
+        tsnSwitch[numSwitches-1].ethg++ <--> EthernetLink <--> tsnSwitchN.ethg++;
+        tsnSwitchN.ethg++ <--> EthernetLink <--> tsnDevice1.ethg++;
+        tsnSwitchN.ethg++ <--> EthernetLink <--> tsnDevice2.ethg++;
+}
