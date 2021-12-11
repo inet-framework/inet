@@ -20,6 +20,15 @@ import inet.clock.contract.IOscillator;
 // When scheduling to a clock time or with a clock delay, this clock rounds the
 // argument value using the specified rounding method first.
 //
+// Display string format directives:
+//
+//  -t: time in seconds
+//  -T: time in natural units
+//  -d: time difference to reference clock in natural units
+//  -s: origin simulation time
+//  -c: origin clock time
+//
+
 module OscillatorBasedClock extends ClockBase like IClock
 {
     parameters:
