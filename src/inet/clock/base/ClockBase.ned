@@ -14,6 +14,7 @@ module ClockBase
 {
     parameters:
         string displayStringTextFormat = default("%t"); // determines the text that is written on top of the submodule
+        string referenceClock = default("");			// full path of reference clock
         @class(ClockBase);
         @display("i=block/timer");
         @signal[timeChanged](type=simtime_t);

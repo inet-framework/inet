@@ -12,6 +12,7 @@
 #include "inet/clock/common/ClockEvent.h"
 #include "inet/clock/contract/IClock.h"
 #include "inet/common/StringFormat.h"
+#include "inet/common/ModuleRefByPar.h"
 
 namespace inet {
 
@@ -23,6 +24,7 @@ class INET_API ClockBase : public cSimpleModule, public IClock, public StringFor
   protected:
     clocktime_t clockEventTime = -1;
     const char *displayStringTextFormat = nullptr;
+    ModuleRefByPar<IClock> referenceClockModule;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
