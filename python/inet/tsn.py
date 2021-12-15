@@ -3,7 +3,7 @@ from inet.simulation import *
 
 def generate_tsn_charts():
     # TODO
-    generate_charts(path_filter = "trafficshaping")
+    generate_charts(inet_project, path_filter = "trafficshaping")
 
 def generate_tsn_ned_documentation():
     generate_ned_documentation([

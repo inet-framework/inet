@@ -5,6 +5,7 @@ import re
 import shlex
 
 from inet.common import *
+from inet.simulation.project import *
 from inet.test.fingerprint.run import *
 
 def update_correct_fingerprints_from_csv(csv_file):
@@ -44,5 +45,5 @@ def update_correct_fingerprints_from_csv(csv_file):
     return entries
 
 def update_correct_fingerprints_from_csvs():
-    list(map(update_correct_fingerprints_from_csv, glob.glob(get_full_path("tests/fingerprint/*.csv"), recursive=True)))
+    list(map(update_correct_fingerprints_from_csv, glob.glob(inet_project.get_full_path("tests/fingerprint/*.csv"), recursive=True)))
     correct_fingerprints.write()

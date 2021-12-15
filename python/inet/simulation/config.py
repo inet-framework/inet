@@ -1,3 +1,4 @@
+import functools
 import glob
 import itertools
 import logging
@@ -9,10 +10,10 @@ import subprocess
 from inet.common import *
 
 logger = logging.getLogger(__name__)
-all_simulation_configs = None
 
 class SimulationConfig:
-    def __init__(self, working_directory, ini_file, config, num_runs, abstract, interactive, description):
+    def __init__(self, simulation_project, working_directory, ini_file, config, num_runs, abstract, interactive, description):
+        self.simulation_project = simulation_project
         self.working_directory = working_directory
         self.ini_file = ini_file
         self.config = config
@@ -32,7 +33,7 @@ def get_num_runs_fast(ini_path):
     file.close()
     return None if num_runs_fast_regex.search(text) else 1
 
-def collect_ini_file_simulation_configs(ini_path):
+def collect_ini_file_simulation_configs(simulation_project, ini_path):
     simulation_configs = []
     working_directory = os.path.dirname(ini_path)
     num_runs_fast = get_num_runs_fast(ini_path)
@@ -54,58 +55,58 @@ def collect_ini_file_simulation_configs(ini_path):
             config_dict["network"] = match.group(1)
     for config_dict in config_dicts:
         config = config_dict["config"]
-        args = ["inet", "-s", "-f", ini_file, "-c", config, "-q", "numruns"]
+        executable = simulation_project.get_full_path("bin/inet")
+        args = [executable, "-s", "-f", ini_file, "-c", config, "-q", "numruns"]
         logger.debug(args)
         if num_runs_fast:
             num_runs = num_runs_fast
         else:
-            result = subprocess.run(args, cwd=working_directory, capture_output=True)
+            env = os.environ.copy()
+            env["INET_ROOT"] = simulation_project.get_full_path(".")
+            result = subprocess.run(args, cwd=working_directory, capture_output=True, env=env)
             num_runs = int(result.stdout)
         description = config_dict["description"]
         description_abstract = (re.search("\((a|A)bstract\)", description) is not None) if description else False
         abstract = (config_dict["network"] is None and config_dict["config"] == "General") or description_abstract 
         interactive = False # TODO
-        simulation_config = SimulationConfig(os.path.relpath(working_directory, get_full_path(".")), ini_file, config, num_runs, abstract, interactive, description)
+        simulation_config = SimulationConfig(simulation_project, os.path.relpath(working_directory, simulation_project.get_full_path(".")), ini_file, config, num_runs, abstract, interactive, description)
         simulation_configs.append(simulation_config)
     return simulation_configs
 
-def collect_all_simulation_configs(ini_path_globs, concurrent=True):
+def collect_all_simulation_configs(simulation_project, ini_path_globs, concurrent=True, **kwargs):
     logger.info("Collecting all simulation configs")
     ini_paths = list(itertools.chain.from_iterable(map(lambda g: glob.glob(g, recursive=True), ini_path_globs)))
     if concurrent:
         pool = multiprocessing.Pool(multiprocessing.cpu_count())
-        result = list(itertools.chain.from_iterable(pool.map(collect_ini_file_simulation_configs, ini_paths)))
+        result = list(itertools.chain.from_iterable(pool.map(functools.partial(collect_ini_file_simulation_configs, simulation_project), ini_paths)))
     else:
-        result = list(itertools.chain.from_iterable(map(collect_ini_file_simulation_configs, ini_paths)))
+        result = list(itertools.chain.from_iterable(map(functools.partial(collect_ini_file_simulation_configs, simulation_project), ini_paths)))
     result.sort(key=lambda element: (element.working_directory, element.ini_file, element.config))
     return result
 
-def get_all_simulation_configs(**kwargs):
-    global all_simulation_configs
-    if all_simulation_configs is None:
-        if get_full_path(".") == os.getcwd():
-            ini_path_globs = [get_full_path(".") + "/examples/**/*.ini",
-                              get_full_path(".") + "/showcases/**/*.ini",
-                              get_full_path(".") + "/tutorials/**/*.ini",
-                              get_full_path(".") + "/tests/fingerprint/*.ini",
-                              get_full_path(".") + "/tests/validation/**/*.ini"]
+def get_all_simulation_configs(simulation_project, **kwargs):
+    # TODO when scripts are run from a folder, only look for simulation configs under that folder
+    if simulation_project.simulation_configs is None:
+        relative_path = os.path.relpath(os.getcwd(), simulation_project.get_full_path("."))
+        if relative_path == "." or relative_path[0:2] == "..":
+            ini_path_globs = [simulation_project.get_full_path(".") + "/examples/**/*.ini",
+                              simulation_project.get_full_path(".") + "/showcases/**/*.ini",
+                              simulation_project.get_full_path(".") + "/tutorials/**/*.ini",
+                              simulation_project.get_full_path(".") + "/tests/fingerprint/*.ini",
+                              simulation_project.get_full_path(".") + "/tests/validation/**/*.ini"]
         else:
             ini_path_globs = [os.getcwd() + "/**/*.ini"]
-        all_simulation_configs = collect_all_simulation_configs(ini_path_globs, **kwargs)
-    return all_simulation_configs
+        simulation_project.simulation_configs = collect_all_simulation_configs(simulation_project, ini_path_globs, **kwargs)
+    return simulation_project.simulation_configs
 
-def matches_filter(value, positive_filter, negative_filter, full_match):
-    return (re.search(positive_filter if full_match else ".*" + positive_filter + ".*", value) if positive_filter else True) and \
-           not (re.search(negative_filter if full_match else ".*" + negative_filter + ".*", value) if negative_filter else False)
-
-def get_simulation_configs(simulation_configs=None,
+def get_simulation_configs(simulation_project, simulation_configs=None,
                            working_directory_filter=None, exclude_working_directory_filter=None,
                            ini_file_filter=None, exclude_ini_file_filter=None,
                            config_filter=None, exclude_config_filter=None,
                            simulation_config_filter=lambda simulation_config: not simulation_config.abstract and not simulation_config.interactive,
                            full_match=False, **kwargs):
     if simulation_configs is None:
-        simulation_configs = get_all_simulation_configs()
+        simulation_configs = get_all_simulation_configs(simulation_project, **kwargs)
     return list(filter(lambda simulation_config: matches_filter(simulation_config.working_directory, working_directory_filter, exclude_working_directory_filter, full_match) and
                                                  matches_filter(simulation_config.ini_file, ini_file_filter, exclude_ini_file_filter, full_match) and
                                                  matches_filter(simulation_config.config, config_filter, exclude_config_filter, full_match) and

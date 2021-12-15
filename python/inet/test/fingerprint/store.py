@@ -5,19 +5,25 @@ import subprocess
 import time
 
 from inet.common import *
+from inet.simulation.project import *
 
 logger = logging.getLogger(__name__)
 
 class FingerprintStore:
-    def __init__(self, file_name):
+    def __init__(self, simulation_project, file_name):
+        self.simulation_project = simulation_project
         self.file_name = file_name
         self.entries = None
 
     def read(self):
         logger.info("Reading fingerprints from " + self.file_name)
-        file = open(self.file_name)
-        self.entries = json.load(file)
-        file.close()
+        if os.path.exists(self.file_name):
+            file = open(self.file_name)
+            self.entries = json.load(file)
+            file.close()
+        else:
+            self.entries = []
+            self.write()
 
     def write(self):
         logger.info("Writing fingerprints to " + self.file_name)
@@ -85,8 +91,8 @@ class FingerprintStore:
         self.get_entry(**kwargs)["fingerprint"] = fingerprint
 
     def insert_fingerprint(self, fingerprint, ingredients="tplx", test_result=None, working_directory=os.getcwd(), ini_file="omnetpp.ini", config="General", run=0, sim_time_limit=None):
-        git_hash = subprocess.run(["git", "rev-parse", "HEAD"], cwd=get_full_path("."), capture_output=True).stdout.decode("utf-8").strip()
-        git_clean = subprocess.run(["git", "diff", "--quiet"], cwd=get_full_path("."), capture_output=True).returncode == 0
+        git_hash = subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.simulation_project.get_full_path("."), capture_output=True).stdout.decode("utf-8").strip()
+        git_clean = subprocess.run(["git", "diff", "--quiet"], cwd=self.simulation_project.get_full_path("."), capture_output=True).returncode == 0
         self.get_entries().append({"working_directory": working_directory,
                                    "ini_file": ini_file,
                                    "config": config,
@@ -107,7 +113,17 @@ class FingerprintStore:
             self.insert_fingerprint(fingerprint, **kwargs)
 
     def remove_fingerprint(self, ingredients="tplx", test_result=None, working_directory=os.getcwd(), ini_file="omnetpp.ini", config="General", run=0, sim_time_limit=None):
-        pass
-    
-all_fingerprints = FingerprintStore(get_full_path("python/inet/test/fingerprint/all_fingerprints.json"))
-correct_fingerprints = FingerprintStore(get_full_path("python/inet/test/fingerprint/correct_fingerprints.json"))
+        raise Exception("TODO")
+
+all_fingerprint_stores = dict()
+correct_fingerprint_stores = dict()
+
+def get_all_fingerprint_store(simulation_project):
+    if not simulation_project in all_fingerprint_stores:
+        all_fingerprint_stores[simulation_project] = FingerprintStore(simulation_project, simulation_project.get_full_path("python/inet/test/fingerprint/all_fingerprints.json"))
+    return all_fingerprint_stores[simulation_project]
+
+def get_correct_fingerprint_store(simulation_project):
+    if not simulation_project in correct_fingerprint_stores:
+        correct_fingerprint_stores[simulation_project] = FingerprintStore(simulation_project, simulation_project.get_full_path("python/inet/test/fingerprint/correct_fingerprints.json"))
+    return correct_fingerprint_stores[simulation_project]

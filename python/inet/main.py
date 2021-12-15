@@ -2,13 +2,15 @@ import argparse
 import logging
 import sys
 
+from inet.simulation.project import *
 from inet.simulation.run import *
 from inet.test import *
 from inet.test.fingerprint.run import *
 from inet.test.smoke import *
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(description="Run the fingerprint tests specified in the input files.")
+def parse_arguments(task):
+    description = "Runs all " + task + " in the enclosing project recursively from the current working directory"
+    parser = argparse.ArgumentParser(description=description)
     # TODO not all of these arguments are meaningful for each cases
     #      it must be carefully checked and updated accordingly
     #
@@ -27,9 +29,12 @@ def parse_arguments():
     # parser.add_argument("-a", "--oppargs", action="append", metavar="oppargs", nargs=argparse.REMAINDER, help="extra opp_run arguments until the end of the line")
     # parser.add_argument("-n", type=int, default=1, help="Split the selected test cases into n sets, and only run one of these sets")
     # parser.add_argument("-i", type=int, default=0, help="Which set of test cases to run [0..n-1]")
-    parser.add_argument("-l", "--log-level", default="WARN", help="Verbose output mode")
-    parser.add_argument("-m", "--mode", help="Specifies the build mode of the executable (e.g. debug, release)")
-    parser.add_argument("--concurrent", help="Concurrent execution")
+    parser.add_argument("-l", "--log-level", choices=["ERROR", "WARN", "INFO", "DEBUG"], default="WARN", help="Verbose output mode")
+    parser.add_argument("--concurrent", default=True, action=argparse.BooleanOptionalAction, help="Concurrent execution")
+    parser.add_argument("--dry-run", default=False, action=argparse.BooleanOptionalAction, help="Display what would be done but doesn't actually do anything")
+    parser.add_argument("-m", "--mode", choices=["debug", "release"], help="Specifies the build mode of the executable")
+    parser.add_argument("--build", default=True, action=argparse.BooleanOptionalAction, help="Build executable")
+    parser.add_argument("-u", "--user-interface", choices=["Cmdenv", "Qtenv"], default="Cmdenv", help="User interface")
     parser.add_argument("-t", "--sim-time-limit", default=None, help="Simulation time limit")
     parser.add_argument("-T", "--cpu-time-limit", default=None, help="CPU time limit")
     parser.add_argument("-w", "--working-directory-filter", default=None, help="Working directory filter")
@@ -40,36 +45,43 @@ def parse_arguments():
     parser.add_argument("--exclude-config-filter", default=None, help="Exclude config filter")
     return parser.parse_args(sys.argv[1:])
 
-def process_arguments():
-    args = parse_arguments()
+def process_arguments(task):
+    args = parse_arguments(task)
     logging.getLogger().setLevel(args.log_level)
     kwargs = {k: v for k, v in vars(args).items() if v is not None}
-    kwargs["working_directory_filter"] = args.working_directory_filter or os.path.relpath(os.getcwd(), get_full_path("."))
+    kwargs["working_directory_filter"] = args.working_directory_filter or os.path.relpath(os.getcwd(), inet_project.get_full_path("."))
+    kwargs["working_directory_filter"] = re.sub("(.*)/$", "\\1", kwargs["working_directory_filter"])
     return kwargs
 
-def run_leak_tests_main():
-    print(run_leak_tests(**process_arguments()))
+def run_main(main_function, task):
+    try:
+        print(main_function(**process_arguments(task)))
+    except KeyboardInterrupt:
+        print("Program interrupted by user")
 
 def run_simulations_main():
-    print(run_simulations(**process_arguments()))
+    run_main(run_simulations, "simulations")
+
+def run_leak_tests_main():
+    run_main(run_leak_tests, "leak tests")
 
 def run_fingerprint_tests_main():
-    print(run_fingerprint_tests(**process_arguments()))
+    run_main(run_fingerprint_tests, "fingerprint tests")
 
 def run_regression_tests_main():
-    print(run_regression_tests(**process_arguments()))
+    run_main(run_regression_tests, "regression tests")
 
 def run_smoke_tests_main():
-    print(run_smoke_tests(**process_arguments()))
+    run_main(run_smoke_tests, "smoke tests")
 
 def run_speed_tests_main():
-    print(run_speed_tests(**process_arguments()))
+    run_main(run_speed_tests, "speed tests")
 
 def run_statistical_tests_main():
-    print(run_statistical_tests(**process_arguments()))
+    run_main(run_statistical_tests, "statistical tests")
 
 def run_validation_tests_main():
-    print(run_validation_tests(**process_arguments()))
+    run_main(run_validation_tests, "validation tests")
 
 def run_all_tests_main():
-    print(run_all_tests(**process_arguments()))
+    run_main(run_all_tests, "tests")
