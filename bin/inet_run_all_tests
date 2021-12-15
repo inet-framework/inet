@@ -1,0 +1,7 @@
+#!/usr/bin/env python3
+#
+# Runs all tests recursively from the current working directory
+
+from inet.main import *
+
+run_all_tests_main()
