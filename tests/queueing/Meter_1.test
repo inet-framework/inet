@@ -10,7 +10,7 @@ is higher than a predefined threshold, then packets are dropped.
 import inet.queueing.source.ActivePacketSource;
 import inet.queueing.sink.PassivePacketSink;
 import inet.queueing.filter.StatisticalRateLimiter;
-import inet.queueing.meter.RateMeter;
+import inet.queueing.meter.ExponentialRateMeter;
 
 network TestMeter
 {
@@ -18,7 +18,7 @@ network TestMeter
         producer: ActivePacketSource {
             @display("p=100,100");
         }
-        meter: RateMeter {
+        meter: ExponentialRateMeter {
             @display("p=200,100");
         }
         limiter: StatisticalRateLimiter {
