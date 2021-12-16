@@ -179,7 +179,7 @@ class INET_API MessageSourceAddrFilter : public cObjectResultFilter
 };
 
 /**
- * Filter that expects a cPacket and outputs the throughput as double.
+ * Filter that expects a Packet or a packet length and outputs the throughput as double.
  * Throughput is computed for the *past* interval every 0.1s or 100 packets,
  * whichever comes first.
  *
@@ -193,23 +193,24 @@ class INET_API ThroughputFilter : public cObjectResultFilter
 {
   protected:
     simtime_t interval = 0.1;
-    int packetLimit = 100;
+    int numLengthLimit = 100;
     bool emitIntermediateZeros = true;
 
     simtime_t lastSignal = 0;
-    double bytes = 0;
-    int packets = 0;
+    double totalLength = 0;
+    int numLengths = 0;
 
   protected:
     void emitThroughput(simtime_t endInterval, cObject *details);
 
   public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t value, cObject *details) override;
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
     virtual void finish(cComponent *component, simsignal_t signalID) override;
 };
 
 /**
- * Filter that expects a cPacket and outputs the throughput as double.
+ * Filter that expects a Packet or a packet length and outputs the throughput as double.
  * Throughput is computed and emitted for the *past* interval strictly
  * every 0.1s. (To achieve that, this filter employs a timer event.)
  *
@@ -223,12 +224,13 @@ class INET_API LiveThroughputFilter : public cObjectResultFilter
   protected:
     simtime_t interval = 0.1;
     simtime_t lastSignal = 0;
-    double bytes = 0;
+    double totalLength = 0;
     cEvent *event = nullptr;
 
   public:
     ~LiveThroughputFilter();
     virtual void init(Context *ctx) override;
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t value, cObject *details) override;
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
     virtual void finish(cComponent *component, simsignal_t signalID) override;
     virtual void timerExpired();

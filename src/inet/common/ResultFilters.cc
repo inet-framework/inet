@@ -182,45 +182,49 @@ Register_ResultFilter("throughput", ThroughputFilter);
 
 void ThroughputFilter::emitThroughput(simtime_t endInterval, cObject *details)
 {
-    if (bytes == 0) {
+    if (totalLength == 0) {
         fire(this, endInterval, 0.0, details);
         lastSignal = endInterval;
     }
     else {
-        double throughput = 8 * bytes / (endInterval - lastSignal).dbl();
+        double throughput = totalLength / (endInterval - lastSignal).dbl();
         fire(this, endInterval, throughput, details);
         lastSignal = endInterval;
-        bytes = 0;
-        packets = 0;
+        totalLength = 0;
+        numLengths = 0;
     }
+}
+
+void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t length, cObject *details)
+{
+    const simtime_t now = simTime();
+    numLengths++;
+    if (numLengths >= numLengthLimit) {
+        totalLength += length;
+        emitThroughput(now, details);
+    }
+    else if (lastSignal + interval <= now) {
+        emitThroughput(lastSignal + interval, details);
+        if (emitIntermediateZeros) {
+            while (lastSignal + interval <= now)
+                emitThroughput(lastSignal + interval, details);
+        }
+        else {
+            if (lastSignal + interval <= now) { // no packets arrived for a long period
+                // zero should have been signaled at the beginning of this packet (approximation)
+                emitThroughput(now - interval, details);
+            }
+        }
+        totalLength += length;
+    }
+    else
+        totalLength += length;
 }
 
 void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    if (auto packet = dynamic_cast<cPacket *>(object)) {
-        const simtime_t now = simTime();
-        packets++;
-        if (packets >= packetLimit) {
-            bytes += packet->getByteLength();
-            emitThroughput(now, details);
-        }
-        else if (lastSignal + interval <= now) {
-            emitThroughput(lastSignal + interval, details);
-            if (emitIntermediateZeros) {
-                while (lastSignal + interval <= now)
-                    emitThroughput(lastSignal + interval, details);
-            }
-            else {
-                if (lastSignal + interval <= now) { // no packets arrived for a long period
-                    // zero should have been signaled at the beginning of this packet (approximation)
-                    emitThroughput(now - interval, details);
-                }
-            }
-            bytes += packet->getByteLength();
-        }
-        else
-            bytes += packet->getByteLength();
-    }
+    if (auto packet = dynamic_cast<Packet *>(object))
+        receiveSignal(prev, t, packet->getDataLength().get(), details);
 }
 
 void ThroughputFilter::finish(cComponent *component, simsignal_t signalID)
@@ -272,19 +276,24 @@ LiveThroughputFilter::~LiveThroughputFilter()
     }
 }
 
+void LiveThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t length, cObject *details)
+{
+    totalLength += length;
+}
+
 void LiveThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     if (auto packet = dynamic_cast<cPacket *>(object))
-        bytes += packet->getByteLength();
+        receiveSignal(prev, t, packet->getByteLength(), details);
 }
 
 void LiveThroughputFilter::timerExpired()
 {
     simtime_t now = simTime();
-    double throughput = 8 * bytes / (now - lastSignal).dbl();
+    double throughput = totalLength / (now - lastSignal).dbl();
     fire(this, now, throughput, nullptr);
     lastSignal = now;
-    bytes = 0;
+    totalLength = 0;
 
     event->setArrivalTime(now + interval);
     getSimulation()->getFES()->insert(event);
@@ -299,7 +308,7 @@ void LiveThroughputFilter::finish(cComponent *component, simsignal_t signalID)
 {
     simtime_t now = simTime();
     if (lastSignal < now) {
-        double throughput = 8 * bytes / (now - lastSignal).dbl();
+        double throughput = totalLength / (now - lastSignal).dbl();
         fire(this, now, throughput, nullptr);
     }
 }
