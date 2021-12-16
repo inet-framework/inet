@@ -27,7 +27,7 @@ module Ecu extends StandardHost
         @display("i=device/card");
 }
 
-network InVehicleNetworkExample extends WiredNetworkBase
+network TimeAwareShaperExample extends WiredNetworkBase
 {
     parameters:
         @display("bgi=background/car;bgb=1280,720");
