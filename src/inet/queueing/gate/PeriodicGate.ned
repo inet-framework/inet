@@ -29,9 +29,9 @@ simple PeriodicGate extends PacketGateBase like IPacketGate
 {
     parameters:
         string clockModule = default(""); // relative path of a module that implements IClock; optional
-        bool initiallyOpen @mutable = default(false);
-        double offset @mutable @unit(s) = default(0s);
-        object durations @mutable @unit(s) = default([]); // space separated list of durations to stay open/closed
+        bool initiallyOpen @mutable = default(true); // specifies if the gate is initially open or closed
+        double offset @mutable @unit(s) = default(0s); // specifies where the period starts in the list of gate state change durations
+        object durations @mutable @unit(s) = default([]); // list of time durations within the period that determine if the gate is open or closed
         bool scheduleForAbsoluteTime = default(true); // when a clock is used relative means that setting the clock will not affect the simulation time of the event
         @class(PeriodicGate);
 }
