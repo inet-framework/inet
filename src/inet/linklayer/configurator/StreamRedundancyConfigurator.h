@@ -29,7 +29,7 @@ class INET_API StreamRedundancyConfigurator : public NetworkConfiguratorBase
     {
       public:
         std::string stream;
-        std::string packetFilter;
+        cValue packetFilter;
     };
 
     class StreamDecoding

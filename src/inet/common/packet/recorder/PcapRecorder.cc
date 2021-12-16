@@ -57,7 +57,7 @@ void PcapRecorder::initialize()
     snaplen = this->par("snaplen");
     dumpBadFrames = par("dumpBadFrames");
     signalList.clear();
-    packetFilter.setExpression(par("packetFilter"));
+    packetFilter.setExpression(par("packetFilter").objectValue());
 
     {
         cStringTokenizer signalTokenizer(par("sendingSignalNames"));

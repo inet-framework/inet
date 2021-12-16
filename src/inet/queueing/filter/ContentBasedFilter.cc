@@ -26,7 +26,7 @@ void ContentBasedFilter::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        filter.setExpression(par("packetFilter"));
+        filter.setExpression(par("packetFilter").objectValue());
 }
 
 bool ContentBasedFilter::matchesPacket(const Packet *packet) const

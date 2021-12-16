@@ -33,10 +33,10 @@ void ContentBasedClassifier::initialize(int stage)
     PacketClassifierBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         defaultGateIndex = par("defaultGateIndex");
-        cStringTokenizer packetFilterTokenizer(par("packetFilters"), ";");
-        while (packetFilterTokenizer.hasMoreTokens()) {
+        auto packetFilters = check_and_cast<cValueArray *>(par("packetFilters").objectValue());
+        for (int i = 0; i < packetFilters->size(); i++) {
             auto filter = new PacketFilter();
-            filter->setExpression(packetFilterTokenizer.nextToken());
+            filter->setExpression((cValue&)packetFilters->get(i));
             filters.push_back(filter);
         }
     }

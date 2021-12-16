@@ -54,7 +54,7 @@ simple PathVisualizerBase extends VisualizerBase
         string endPathSignal = default("packetSentToUpper");
 
         string nodeFilter @mutable = default("*"); // which nodes are considered, matches all nodes by default
-        string packetFilter @mutable = default("true"); // which packets are considered, matches all packets by default
+        object packetFilter @mutable = default("*"); // which packets are considered, matches all packets by default
 
         string lineColor @enum("light", "dark") = default("dark"); // route color is a list of colors, a set of dark colors by default
         string lineStyle = default("solid"); // route line style (solid, dashed, dotted)

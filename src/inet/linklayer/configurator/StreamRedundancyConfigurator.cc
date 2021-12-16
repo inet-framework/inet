@@ -220,7 +220,7 @@ void StreamRedundancyConfigurator::computeStreamPolicyConfigurations(cValueMap *
         if (networkNodeName == sourceNetworkNodeName) {
             StreamIdentification streamIdentification;
             streamIdentification.stream = streamConfiguration->get("name").stringValue();
-            streamIdentification.packetFilter = streamConfiguration->containsKey("packetFilter") ? streamConfiguration->get("packetFilter").stringValue() : "true";
+            streamIdentification.packetFilter = streamConfiguration->containsKey("packetFilter") ? streamConfiguration->get("packetFilter") : cValue("*");
             node->streamIdentifications.push_back(streamIdentification);
         }
         // decoding configuration

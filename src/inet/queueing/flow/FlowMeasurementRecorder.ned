@@ -35,7 +35,7 @@ import inet.queueing.contract.IPacketFlow;
 simple FlowMeasurementRecorder extends PacketFlowBase like IPacketFlow
 {
     parameters:
-        string packetFilter = default("true"); // which packets are considered, matches all packets by default
+        object packetFilter = default("*"); // which packets are considered, matches all packets by default
         int offset @unit(b) = default(0b); // designates the packet part to be measured
         int length @unit(b) = default(-1b); // designates the packet part to be measured
         string flowName = default(""); // use packet flow to separate measurement from other measurements

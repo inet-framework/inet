@@ -53,7 +53,7 @@ void LinkBreakVisualizerBase::initialize(int stage)
         displayLinkBreaks = par("displayLinkBreaks");
         nodeFilter.setPattern(par("nodeFilter"));
         interfaceFilter.setPattern(par("interfaceFilter"));
-        packetFilter.setExpression(par("packetFilter"));
+        packetFilter.setExpression(par("packetFilter").objectValue());
         icon = par("icon");
         iconTintAmount = par("iconTintAmount");
         if (iconTintAmount != 0)
@@ -75,7 +75,7 @@ void LinkBreakVisualizerBase::handleParameterChange(const char *name)
         else if (!strcmp(name, "interfaceFilter"))
             interfaceFilter.setPattern(par("interfaceFilter"));
         else if (!strcmp(name, "packetFilter"))
-            packetFilter.setExpression(par("packetFilter"));
+            packetFilter.setExpression(par("packetFilter").objectValue());
         removeAllLinkBreakVisualizations();
     }
 }

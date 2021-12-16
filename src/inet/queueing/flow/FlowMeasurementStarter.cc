@@ -36,7 +36,7 @@ void FlowMeasurementStarter::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        packetFilter.setExpression(par("packetFilter"));
+        packetFilter.setExpression(par("packetFilter").objectValue());
         offset = b(par("offset"));
         length = b(par("length"));
         flowName = par("flowName");

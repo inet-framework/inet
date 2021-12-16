@@ -72,7 +72,7 @@ void LinkVisualizerBase::initialize(int stage)
             throw cRuntimeError("Unknown activity level: %s", activityLevelString);
         nodeFilter.setPattern(par("nodeFilter"));
         interfaceFilter.setPattern(par("interfaceFilter"));
-        packetFilter.setExpression(par("packetFilter"));
+        packetFilter.setExpression(par("packetFilter").objectValue());
         lineColor = cFigure::Color(par("lineColor"));
         lineStyle = cFigure::parseLineStyle(par("lineStyle"));
         lineWidth = par("lineWidth");
@@ -101,7 +101,7 @@ void LinkVisualizerBase::handleParameterChange(const char *name)
         else if (!strcmp(name, "interfaceFilter"))
             interfaceFilter.setPattern(par("interfaceFilter"));
         else if (!strcmp(name, "packetFilter"))
-            packetFilter.setExpression(par("packetFilter"));
+            packetFilter.setExpression(par("packetFilter").objectValue());
         removeAllLinkVisualizations();
     }
 }

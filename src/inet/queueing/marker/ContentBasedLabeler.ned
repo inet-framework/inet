@@ -26,6 +26,6 @@ import inet.queueing.contract.IPacketMarker;
 simple ContentBasedLabeler extends PacketLabelerBase like IPacketMarker
 {
     parameters:
-        string packetFilters = default("true"); // semicolon separated packet filter expressions, matches all packets by default
+        object packetFilters = default(["*"]); // array of packet filter expressions, matches all packets by default
         @class(ContentBasedLabeler);
 }

@@ -29,7 +29,7 @@ void PacketEmitter::initialize(int stage)
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         signal = registerSignal(par("signalName"));
-        packetFilter.setExpression(par("packetFilter"));
+        packetFilter.setExpression(par("packetFilter").objectValue());
         const char *directionString = par("direction");
         if (!strcmp(directionString, "inbound"))
             direction = DIRECTION_INBOUND;

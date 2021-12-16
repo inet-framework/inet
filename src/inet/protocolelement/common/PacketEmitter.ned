@@ -23,7 +23,7 @@ import inet.queueing.contract.IPacketFlow;
 simple PacketEmitter extends PacketFlowBase like IPacketFlow
 {
     parameters:
-        string packetFilter = default("true"); // which packets are considered, matches all packets by default
+        object packetFilter = default("*"); // which packets are considered, matches all packets by default
         string direction @enum("undefined", "inbound", "outbound") = default("undefined");
         string signalName;
         @class(PacketEmitter);
