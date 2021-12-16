@@ -11,7 +11,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -27,14 +27,14 @@ df = results.get_scalars(filter_expression, include_runattrs=True, include_attrs
 df["isoline"] = df["configname"] + "-" + df["bitrate"]
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 if not xaxis_itervar and not iso_itervar:
     print("The X Axis and Iso Line options were not set in the dialog, inferring them from the data..")
     xaxis_itervar, iso_itervar = utils.pick_two_columns(df)
     if not iso_itervar or not iso_itervar:
-        plot.set_warning("Please set the X Axis and Iso Lines options in the dialog!")
+        ideplot.set_warning("Please set the X Axis and Iso Lines options in the dialog!")
         exit(1)
 
 utils.assert_columns_exist(df, [xaxis_itervar, iso_itervar])
@@ -43,13 +43,13 @@ df[xaxis_itervar] = pd.to_numeric(df[xaxis_itervar], errors="ignore")
 df[iso_itervar] = pd.to_numeric(df[iso_itervar], errors="ignore")
 
 if df.empty:
-    plot.set_warning("Select scalars for the Y axis in the Properties dialog")
+    ideplot.set_warning("Select scalars for the Y axis in the Properties dialog")
     exit(1)
 
 unique_names = df["name"].unique()
 
 if len(unique_names) != 1:
-    plot.set_warning("Selected scalars must share the same name.")
+    ideplot.set_warning("Selected scalars must share the same name.")
     exit(1)
 
 scalar_name = unique_names[0]
@@ -77,7 +77,7 @@ p.ylabel(scalar_name)
 try:
     xs = pd.to_numeric(df.index.values)
 except:
-    plot.set_warning("The X axis itervar is not purely numeric, this is not supported yet.")
+    ideplot.set_warning("The X axis itervar is not purely numeric, this is not supported yet.")
     exit(1)
 
 for c in df.columns:
@@ -715,7 +715,7 @@ utils.export_data_if_needed(df, props)
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -747,13 +747,13 @@ def plotit(df):
     df[iso_itervar] = pd.to_numeric(df[iso_itervar], errors="ignore")
 
     if df.empty:
-        plot.set_warning("Select scalars for the Y axis in the Properties dialog")
+        ideplot.set_warning("Select scalars for the Y axis in the Properties dialog")
         exit(1)
 
     unique_names = df["name"].unique()
 
     if len(unique_names) != 1:
-        plot.set_warning("Selected scalars must share the same name.")
+        ideplot.set_warning("Selected scalars must share the same name.")
         exit(1)
 
     scalar_name = unique_names[0]
@@ -780,7 +780,7 @@ def plotit(df):
     try:
         xs = pd.to_numeric(df.index.values)
     except:
-        plot.set_warning("The X axis itervar is not purely numeric, this is not supported yet.")
+        ideplot.set_warning("The X axis itervar is not purely numeric, this is not supported yet.")
         exit(1)
 
     for c in df.columns:

@@ -8,7 +8,7 @@
         <chart icon="icons/full/obj/linechart.png" id="1584" name="No rate control" template="linechart_mpl" type="MATPLOTLIB">
             <script>
                 <![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -23,13 +23,13 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 print("df\n",df)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -590,7 +590,7 @@ utils.export_data_if_needed(df, props)
         <chart icon="icons/full/obj/linechart.png" id="1586" name="AarfRateControl" template="linechart_mpl" type="MATPLOTLIB">
             <script>
                 <![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -605,13 +605,13 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 print("df\n",df)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -1172,7 +1172,7 @@ utils.export_data_if_needed(df, props)
         <chart icon="icons/full/obj/linechart.png" id="1602" name="throughput, vector (by rateControl)" template="linechart_mpl" type="MATPLOTLIB">
             <script>
                 <![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -1187,11 +1187,11 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -1752,7 +1752,7 @@ utils.export_data_if_needed(df, props)
         <chart icon="icons/full/obj/linechart.png" id="1603" name="datarates selected, vector (by rateControl)" template="linechart_mpl" type="MATPLOTLIB">
             <script>
                 <![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -1767,11 +1767,11 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations

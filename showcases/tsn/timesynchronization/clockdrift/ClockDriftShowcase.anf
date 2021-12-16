@@ -7,7 +7,7 @@
     <charts>
         <chart icon="icons/full/obj/linechart.png" id="48" name="Constant clock drift" template="linechart_native" type="LINE">
             <script><![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -22,11 +22,11 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -579,7 +579,7 @@ utils.export_data_if_needed(df, props)
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="47" name="Out-of-band time synchronization" template="linechart_native" type="LINE">
             <script><![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -594,11 +594,11 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -1151,7 +1151,7 @@ utils.export_data_if_needed(df, props)
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="46" name="gPTP time synchronization" template="linechart_native" type="LINE">
             <script><![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -1166,11 +1166,11 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -1723,7 +1723,7 @@ utils.export_data_if_needed(df, props)
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="6" name="End-to-end delay" template="linechart_native" type="LINE">
             <script><![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -1738,7 +1738,7 @@ end_time = float(props["vector_end_time"] or math.inf)
 df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, include_runattrs=True, start_time=start_time, end_time=end_time)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -2302,7 +2302,7 @@ try:
     stats = results.get_statistics(props["filter"], include_attrs=True, include_runattrs=True, include_itervars=True)
     hists = results.get_histograms(props["filter"], include_attrs=True, include_runattrs=True, include_itervars=True)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 df = pd.concat([stats, hists], sort=False)
@@ -2310,7 +2310,7 @@ df["module"] = df["module"].str.replace(".*sink1.*", "sink1")
 df["module"] = df["module"].str.replace(".*sink2.*", "sink2")
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 title, legend = utils.extract_label_columns(df)

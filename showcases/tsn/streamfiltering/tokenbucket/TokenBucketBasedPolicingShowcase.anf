@@ -7,7 +7,7 @@
     <charts>
         <chart icon="icons/full/obj/linechart.png" id="1" name="Single rate two color meter background traffic filtering on switch1" template="linechart_native" type="LINE">
             <script><![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -22,11 +22,11 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -579,7 +579,7 @@ utils.export_data_if_needed(df, props)
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="2" name="Single rate two color meter background traffic filtering on switch2" template="linechart_native" type="LINE">
             <script><![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -594,11 +594,11 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -1151,7 +1151,7 @@ utils.export_data_if_needed(df, props)
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="73" name="Single rate two color meter video traffic filtering on switch1" template="linechart_native" type="LINE">
             <script><![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -1166,11 +1166,11 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -1723,7 +1723,7 @@ utils.export_data_if_needed(df, props)
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="74" name="Single rate two color meter video traffic filtering on switch2 " template="linechart_native" type="LINE">
             <script><![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -1738,11 +1738,11 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -2295,7 +2295,7 @@ utils.export_data_if_needed(df, props)
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="255" name="Dual rate three color meter background traffic filtering on switch1" template="linechart_native" type="LINE">
             <script><![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -2310,11 +2310,11 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -2867,7 +2867,7 @@ utils.export_data_if_needed(df, props)
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="256" name="Dual rate three color meter background traffic filtering on switch2" template="linechart_native" type="LINE">
             <script><![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -2882,11 +2882,11 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -3439,7 +3439,7 @@ utils.export_data_if_needed(df, props)
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="257" name="Dual rate three color meter video traffic filtering on switch1" template="linechart_native" type="LINE">
             <script><![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -3454,11 +3454,11 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -4011,7 +4011,7 @@ utils.export_data_if_needed(df, props)
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="258" name="Dual rate three color meter video traffic filtering on switch2 " template="linechart_native" type="LINE">
             <script><![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -4026,11 +4026,11 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations

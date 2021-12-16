@@ -20,7 +20,7 @@
         <chart icon="icons/full/obj/linechart.png" id="30" name="End-to-end delay, 1200-Byte packet length" template="linechart_mpl" type="MATPLOTLIB">
             <script>
                 <![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 import matplotlib.pyplot as plt
 import re
 from matplotlib.lines import Line2D
@@ -80,7 +80,7 @@ df = results.get_vectors(filter_expression, include_runattrs=True, include_attrs
 plt.gcf().set_size_inches(8,6)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -710,7 +710,7 @@ plt.savefig('delay.png', dpi=150, transparent=True)
         <chart icon="icons/full/obj/linechart.png" id="1686" name="End-to-end delay, realistic packet length" template="linechart_mpl" type="MATPLOTLIB">
             <script>
                 <![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 import matplotlib.pyplot as plt
 import re
 from matplotlib.lines import Line2D
@@ -766,11 +766,11 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 # apply vector operations
@@ -1422,7 +1422,7 @@ utils.export_data_if_needed(df, props)
         <chart icon="icons/full/obj/linechart.png" id="1702" name="Time average of queue length" template="linechart_mpl" type="MATPLOTLIB">
             <script>
                 <![CDATA[import math
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 import matplotlib.pyplot as plt
 import re
 from matplotlib.lines import Line2D
@@ -1485,11 +1485,11 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
     
 print(df.configname)

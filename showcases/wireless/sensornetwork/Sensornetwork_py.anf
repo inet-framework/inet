@@ -11,7 +11,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -26,11 +26,11 @@ iso_itervars = utils.split(props["iso_itervar"])
 try:
     df = results.get_scalars(filter_expression, include_runattrs=True, include_attrs=True, include_itervars=True)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 if not xaxis_itervar and not iso_itervars:
@@ -43,7 +43,7 @@ if xaxis_itervar:
     utils.assert_columns_exist(df, [xaxis_itervar], "The iteration variable for the X axis could not be found")
     df[xaxis_itervar] = pd.to_numeric(df[xaxis_itervar], errors="ignore")
 else:
-    plot.set_warning("Please select the iteration variable for the X axis!")
+    ideplot.set_warning("Please select the iteration variable for the X axis!")
     exit(1)
 
 if iso_itervars:
@@ -53,7 +53,7 @@ if iso_itervars:
             df[iv] = pd.to_numeric(df[iv], errors="ignore")
 
 if df.empty:
-    plot.set_warning("Select scalars for the Y axis in the Properties dialog")
+    ideplot.set_warning("Select scalars for the Y axis in the Properties dialog")
     exit(1)
 
 uninteresting = ["runID", "value", "datetime", "iterationvars",
@@ -763,7 +763,7 @@ utils.export_data_if_needed(df, props)
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -778,11 +778,11 @@ iso_itervars = utils.split(props["iso_itervar"])
 try:
     df = results.get_scalars(filter_expression, include_runattrs=True, include_attrs=True, include_itervars=True)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 if not xaxis_itervar and not iso_itervars:
@@ -795,7 +795,7 @@ if xaxis_itervar:
     utils.assert_columns_exist(df, [xaxis_itervar], "The iteration variable for the X axis could not be found")
     df[xaxis_itervar] = pd.to_numeric(df[xaxis_itervar], errors="ignore")
 else:
-    plot.set_warning("Please select the iteration variable for the X axis!")
+    ideplot.set_warning("Please select the iteration variable for the X axis!")
     exit(1)
 
 if iso_itervars:
@@ -805,7 +805,7 @@ if iso_itervars:
             df[iv] = pd.to_numeric(df[iv], errors="ignore")
 
 if df.empty:
-    plot.set_warning("Select scalars for the Y axis in the Properties dialog")
+    ideplot.set_warning("Select scalars for the Y axis in the Properties dialog")
     exit(1)
 
 uninteresting = ["runID", "value", "datetime", "iterationvars",
@@ -1515,7 +1515,7 @@ utils.export_data_if_needed(df, props)
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 
 # get chart properties
 props = chart.get_properties()
@@ -1530,11 +1530,11 @@ iso_itervars = utils.split(props["iso_itervar"])
 try:
     df = results.get_scalars(filter_expression, include_runattrs=True, include_attrs=True, include_itervars=True)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
 
 if not xaxis_itervar and not iso_itervars:
@@ -1547,7 +1547,7 @@ if xaxis_itervar:
     utils.assert_columns_exist(df, [xaxis_itervar], "The iteration variable for the X axis could not be found")
     df[xaxis_itervar] = pd.to_numeric(df[xaxis_itervar], errors="ignore")
 else:
-    plot.set_warning("Please select the iteration variable for the X axis!")
+    ideplot.set_warning("Please select the iteration variable for the X axis!")
     exit(1)
 
 if iso_itervars:
@@ -1557,7 +1557,7 @@ if iso_itervars:
             df[iv] = pd.to_numeric(df[iv], errors="ignore")
 
 if df.empty:
-    plot.set_warning("Select scalars for the Y axis in the Properties dialog")
+    ideplot.set_warning("Select scalars for the Y axis in the Properties dialog")
     exit(1)
 
 uninteresting = ["runID", "value", "datetime", "iterationvars",
@@ -2266,7 +2266,7 @@ utils.export_data_if_needed(df, props)
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
-from omnetpp.scave import results, chart, plot, utils
+from omnetpp.scave import results, chart, ideplot, utils
 import matplotlib.pyplot as plt
 
 # get chart properties
@@ -2286,11 +2286,11 @@ try:
     df_x = results.get_scalars(filter_expression_xmac, include_runattrs=True, include_attrs=True, include_itervars=True)
     df_l = results.get_scalars(filter_expression_lmac, include_runattrs=True, include_attrs=True, include_itervars=True)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
     
 # average repetitions    
@@ -2337,7 +2337,7 @@ plt.bar(x,y, zorder=10)
 #    groups, series = [g], [s]
 
 #if not groups[0] or not series[0]:
-#    plot.set_warning("Please set both the Groups and Series properties in the dialog - or neither, for automatic setup.")
+#    ideplot.set_warning("Please set both the Groups and Series properties in the dialog - or neither, for automatic setup.")
 #    exit(1)
 
 #utils.assert_columns_exist(df, groups + series, "No such iteration variable or run attribute")
@@ -2886,7 +2886,7 @@ utils.export_data_if_needed(df, props)
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
-from omnetpp.scave import results, chart, plot, utils
+from omnetpp.scave import results, chart, ideplot, utils
 import matplotlib.pyplot as plt
 
 # get chart properties
@@ -2900,11 +2900,11 @@ filter_expression = props["filter"]
 try:
     df = results.get_scalars(filter_expression, include_attrs=True, include_itervars=True, include_runattrs=True)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
     
 print("\ndf\n--\n",df)
@@ -3017,7 +3017,7 @@ if not groups[0] and not series[0]:
     groups, series = [g], [s]
 
 if not groups[0] or not series[0]:
-    plot.set_warning("Please set both the Groups and Series properties in the dialog - or neither, for automatic setup.")
+    ideplot.set_warning("Please set both the Groups and Series properties in the dialog - or neither, for automatic setup.")
     exit(1)
 
 utils.assert_columns_exist(df, groups + series, "No such iteration variable or run attribute")
@@ -3575,7 +3575,7 @@ utils.export_data_if_needed(df, props)
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
-from omnetpp.scave import results, chart, plot, utils
+from omnetpp.scave import results, chart, ideplot, utils
 import matplotlib.pyplot as plt
 
 # get chart properties
@@ -3589,11 +3589,11 @@ filter_expression = props["filter"]
 try:
     df = results.get_scalars(filter_expression, include_attrs=True, include_itervars=True, include_runattrs=True)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
     
 print("\ndf\n--\n",df)
@@ -3727,7 +3727,7 @@ if not groups[0] and not series[0]:
     groups, series = [g], [s]
 
 if not groups[0] or not series[0]:
-    plot.set_warning("Please set both the Groups and Series properties in the dialog - or neither, for automatic setup.")
+    ideplot.set_warning("Please set both the Groups and Series properties in the dialog - or neither, for automatic setup.")
     exit(1)
 
 utils.assert_columns_exist(df, groups + series, "No such iteration variable or run attribute")
@@ -4288,7 +4288,7 @@ utils.export_data_if_needed(df, props)
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
-from omnetpp.scave import results, chart, plot, utils
+from omnetpp.scave import results, chart, ideplot, utils
 import matplotlib.pyplot as plt
 import merge
 
@@ -4303,11 +4303,11 @@ filter_expression = props["filter"]
 try:
     df = results.get_scalars(filter_expression, include_attrs=True, include_itervars=True, include_runattrs=True)
 except ValueError as e:
-    plot.set_warning("Error while querying results: " + str(e))
+    ideplot.set_warning("Error while querying results: " + str(e))
     exit(1)
 
 if df.empty:
-    plot.set_warning("The result filter returned no data.")
+    ideplot.set_warning("The result filter returned no data.")
     exit(1)
     
 print("\ndf\n--\n",df)
@@ -4421,7 +4421,7 @@ if not groups[0] and not series[0]:
     groups, series = [g], [s]
 
 if not groups[0] or not series[0]:
-    plot.set_warning("Please set both the Groups and Series properties in the dialog - or neither, for automatic setup.")
+    ideplot.set_warning("Please set both the Groups and Series properties in the dialog - or neither, for automatic setup.")
     exit(1)
 
 utils.assert_columns_exist(df, groups + series, "No such iteration variable or run attribute")
