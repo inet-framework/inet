@@ -28,7 +28,7 @@ using namespace inet::queueing;
 class INET_API StreamEncoder : public PacketFlowBase, public TransparentProtocolRegistrationListener
 {
   protected:
-    cValueMap *streamNameToVlanIdMapping = nullptr;
+    cValueMap *mapping = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
