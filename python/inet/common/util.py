@@ -1,5 +1,7 @@
-import os
 import curses.ascii
+import os
+import pickle
+import re
 
 COLOR_RED = "\033[1;31m"
 COLOR_YELLOW = "\033[1;33m"
@@ -21,8 +23,14 @@ def coalesce(*values):
     return next((v for v in values if v is not None), None)
 
 def convert_to_seconds(s):
-    seconds_per_unit = {"ns": 1E-9, "us": 1E-6, "ms": 1E-3, "s": 1, "m": 60, "h": 3600, "d": 86400, "w": 604800}
-    if curses.ascii.isdigit(s[-2]):
-        return float(s[:-1]) * seconds_per_unit[s[-1:]]
-    else:
-        return float(s[:-2]) * seconds_per_unit[s[-2:]]
+    seconds_per_unit = {"ns": 1E-9, "us": 1E-6, "ms": 1E-3, "s": 1, "second": 1, "m": 60, "min": 60, "h": 3600, "hour": 3600, "d": 86400, "day": 86400, "w": 604800, "week": 604800}
+    match = re.match("(-?[0-9]*\.?[0-9]*) *([a-zA-Z]+)", s)
+    return float(match.group(1)) * seconds_per_unit[match.group(2)]
+
+def write_object(file_name, object):
+    with open(file_name, 'wb') as file:
+        pickle.dump(object, file)
+
+def read_object(file_name):
+    with open(file_name, 'rb') as file:
+        return pickle.load(file)

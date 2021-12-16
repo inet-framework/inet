@@ -7,6 +7,10 @@ from inet.test.run import *
 
 logger = logging.getLogger(__name__)
 
+# TODO
+# all_fingerprints.insert_fingerprint(calculated_fingerprint, ingredients=ingredients, test_result=result, sim_time_limit=sim_time_limit,
+#                                     working_directory=simulation_run.working_directory, ini_file=simulation_run.ini_file, config=simulation_run.config, run=simulation_run.run)
+
 class Fingerprint:
     def __init__(self, text):
         match = re.match("(.*)/(.*)", text)
@@ -33,14 +37,17 @@ class FingerprintTestRun(TestRun):
     def __repr__(self):
         return repr(self)
 
-    def run(self, **kwargs):
+    def run(self, sim_time_limit=None, **kwargs):
         if self.fingerprint:
-            extra_args = ["--fingerprintcalculator-class", "inet::FingerprintCalculator", "--fingerprint", str(self.fingerprint), "--vector-recording", "false", "--scalar-recording", "false"]
-            return super().run(extra_args=extra_args, **kwargs)
+            return super().run(extra_args=self.get_extra_args(str(self.fingerprint)), sim_time_limit=sim_time_limit or self.sim_time_limit, **kwargs)
         else:
-            fingerprint_test_result = FingerprintTestResult(self, None, None, None, None, result = "SKIP", reason = "Correct fingerprint not found")
-            print("Running " + self.simulation_run.simulation_config.working_directory + " " + fingerprint_test_result.get_description())
+            fingerprint_test_result = FingerprintTestResult(self, None, None, None, result = "SKIP", reason = "Correct fingerprint not found")
+            print("Running " + self.simulation_run.get_simulation_parameters_string(**kwargs), end=" ")
+            print(fingerprint_test_result.get_description())
             return fingerprint_test_result
+
+    def get_extra_args(self, fingerprint_arg):
+        return ["-n", os.environ["INET_ROOT"] + "/tests/networks", "--fingerprintcalculator-class", "inet::FingerprintCalculator", "--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"]
 
 class FingerprintTestGroupRun:
     def __init__(self, sim_time_limit, fingerprint_test_runs, **kwargs):
@@ -61,7 +68,7 @@ class FingerprintTestGroupRun:
         if checked_fingerprint_test_runs:
             simulation_run = checked_fingerprint_test_runs[0].simulation_run
             fingerprint_arg = ",".join(map(lambda e: str(e.fingerprint), checked_fingerprint_test_runs))
-            extra_args = ["--fingerprintcalculator-class", "inet::FingerprintCalculator", "--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"]
+            extra_args = checked_fingerprint_test_runs[0].get_extra_args(fingerprint_arg)
             simulation_result = simulation_run.run_simulation(print_end=" ", sim_time_limit=sim_time_limit or self.sim_time_limit, extra_args=extra_args, **kwargs)
             fingerprint_test_group_results = check_fingerprint_test_group(simulation_result, self, **kwargs)
             print(fingerprint_test_group_results.get_summary())
@@ -71,18 +78,17 @@ class FingerprintTestGroupRun:
         return MultipleTestResults(self.fingerprint_test_runs, fingerprint_test_results)
 
 class FingerprintTestResult(TestResult):
-    def __init__(self, test_run, simulation_result, expected_fingerprint, calculated_fingerprint, simulation_run, **kwargs):
+    def __init__(self, test_run, simulation_result, expected_fingerprint, calculated_fingerprint, **kwargs):
         super().__init__(test_run, simulation_result, **kwargs)
         self.expected_fingerprint = expected_fingerprint
         self.calculated_fingerprint = calculated_fingerprint
         self.fingerprint_mismatch = expected_fingerprint != calculated_fingerprint
-        self.simulation_run = simulation_run
 
     def __repr__(self):
         return "Fingerprint test result: " + self.get_description()
     
-    def get_description(self):
-        return super().get_description() + (" " + str(self.calculated_fingerprint) + " (" + str(self.expected_fingerprint) + ")" if self.fingerprint_mismatch else "")
+    def get_description(self, **kwargs):
+        return super().get_description(**kwargs) + (" calculated " + str(self.calculated_fingerprint) + " (correct " + str(self.expected_fingerprint) + ")" if self.fingerprint_mismatch else "")
 
 def get_calculated_fingerprint(simulation_result, ingredients):
     stdout = simulation_result.subprocess_result.stdout.decode("utf-8")
@@ -100,17 +106,22 @@ def get_calculated_fingerprint(simulation_result, ingredients):
 def check_fingerprint_test(fingerprint_test_run, simulation_result, **kwargs):
     expected_fingerprint = fingerprint_test_run.fingerprint
     expected_result = fingerprint_test_run.test_result
-    calculated_fingerprint = get_calculated_fingerprint(simulation_result, fingerprint_test_run.fingerprint.ingredients)
-    if calculated_fingerprint is None:
-        result = "ERROR"
-        reason = "Calculated fingerprint not found"
-    elif expected_fingerprint != calculated_fingerprint:
-        result = "FAIL"
-        reason = "Fingerprint mismatch"
+    if simulation_result.result == "CANCEL":
+        result = "CANCEL"
+        reason = "Cancel by user"
+        calculated_fingerprint = None
     else:
-        result = "PASS"
-        reason = None
-    return FingerprintTestResult(fingerprint_test_run, simulation_result, expected_fingerprint, calculated_fingerprint, simulation_result.simulation_run, result=result, expected_result=expected_result, reason=reason)
+        calculated_fingerprint = get_calculated_fingerprint(simulation_result, fingerprint_test_run.fingerprint.ingredients)
+        if calculated_fingerprint is None:
+            result = "ERROR"
+            reason = "Calculated fingerprint not found"
+        elif expected_fingerprint != calculated_fingerprint:
+            result = "FAIL"
+            reason = "Fingerprint mismatch"
+        else:
+            result = "PASS"
+            reason = None
+    return FingerprintTestResult(fingerprint_test_run, simulation_result, expected_fingerprint, calculated_fingerprint, result=result, expected_result=expected_result, reason=reason)
 
 def check_fingerprint_test_group(simulation_result, fingerprint_test_group, **kwargs):
     fingerprint_test_results = []
@@ -134,10 +145,10 @@ def select_fingerprint_entry_with_smallest_sim_time_limit(fingerprint_entries):
 def select_fingerprint_entry_with_largest_sim_time_limit(fingerprint_entries):
     return select_fingerprint_entry_by_sim_time_limit(fingerprint_entries, True)
 
-def get_fingerprint_test_run(simulation_run, run=0, ingredients="tplx", sim_time_limit=None, select_fingerprint_entry=select_fingerprint_entry_with_smallest_sim_time_limit, **kwargs):
+def get_fingerprint_test_run(simulation_run, ingredients="tplx", sim_time_limit=None, select_fingerprint_entry=select_fingerprint_entry_with_smallest_sim_time_limit, **kwargs):
     simulation_config = simulation_run.simulation_config
     stored_fingerprint_entries = correct_fingerprints.filter_entries(ingredients=ingredients, sim_time_limit=sim_time_limit,
-                                                                     working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run=run)
+                                                                     working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run=simulation_run.run)
     selected_fingerprint_entry = select_fingerprint_entry(stored_fingerprint_entries) if stored_fingerprint_entries else None
     if selected_fingerprint_entry:
         sim_time_limit = selected_fingerprint_entry["sim_time_limit"]
@@ -164,11 +175,6 @@ def collect_fingerprint_test_groups(simulation_run, ingredients_list=["tplx"], s
     grouped_fingerprint_test_runs = [list(it) for k, it in itertools.groupby(sorted_fingerprint_test_runs, get_sim_time_limit)]
     return list(map(get_fingerprint_test_group_run, grouped_fingerprint_test_runs))
 
-# TODO
-# all_fingerprints.insert_fingerprint(calculated_fingerprint, ingredients=ingredients, test_result=result, sim_time_limit=sim_time_limit,
-#                                     working_directory=simulation_run.working_directory, ini_file=simulation_run.ini_file, config=simulation_run.config, run=simulation_run.run)
-
-
 def _run_fingerprint_test(test_run, **kwargs):
     return test_run.run(**kwargs)
 
@@ -186,12 +192,11 @@ def run_fingerprint_tests(**kwargs):
     logger.info("Running fingerprint tests")
     multiple_test_runs = get_fingerprint_tests(**kwargs)
     return multiple_test_runs.run()
-    # multiple_simulation_results = multiple_test_runs.run()
-    # test_results = list(itertools.chain.from_iterable(map(lambda element: element.test_results, results)))
-    # test_results = MultipleTestResults(multiple_test_runs, test_results)
-    # # TODO print simulation header before details
-    # print("\n  " + test_results.get_details())
-    # return test_results
+
+def print_correct_fingerprints(**kwargs):
+    multiple_test_runs = get_fingerprint_tests(**kwargs)
+    for test_run in multiple_test_runs.test_runs:
+        print(test_run.simulation_run.get_simulation_parameters_string(**kwargs) + " " + COLOR_GREEN + str(test_run.fingerprint) + COLOR_RESET)
 
 def update_correct_fingerprint(simulation_config, run=0, sim_time_limit=None, **kwargs):
     fingerprint_test_groups = collect_fingerprint_test_groups(simulation_config, sim_time_limit=sim_time_limit, **kwargs)

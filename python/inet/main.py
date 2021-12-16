@@ -50,8 +50,8 @@ def process_arguments():
 def run_leak_tests_main():
     print(run_leak_tests(**process_arguments()))
 
-def run_simulation_configs_main():
-    print(run_simulation_configs(**process_arguments()))
+def run_simulations_main():
+    print(run_simulations(**process_arguments()))
 
 def run_fingerprint_tests_main():
     print(run_fingerprint_tests(**process_arguments()))

@@ -24,13 +24,13 @@ class SimulationConfig:
     def __repr__(self):
         return repr(self)
 
-num_runs_fast_regex = re.compile("(?m).*^\\s*(include\\s+.*\.ini|repeat\\s*=\s*[0-9]+|${.*}).*")
+num_runs_fast_regex = re.compile(r"(?m).*^\s*(include\s+.*\.ini|repeat\s*=\s*[0-9]+|.*\$\{.*\})")
 
 def get_num_runs_fast(ini_path):
     file = open(ini_path, "r")
     text = file.read()
     file.close()
-    return None if num_runs_fast_regex.findall(text) else 1
+    return None if num_runs_fast_regex.search(text) else 1
 
 def collect_ini_file_simulation_configs(ini_path):
     simulation_configs = []
@@ -38,19 +38,22 @@ def collect_ini_file_simulation_configs(ini_path):
     num_runs_fast = get_num_runs_fast(ini_path)
     ini_file = os.path.basename(ini_path)
     file = open(ini_path)
-    config_objects = []
-    config_object = {}
+    config_dicts = []
+    config_dict = {}
     for line in file:
         match = re.match("\\[Config (.*)\\]|\\[(General)\\]", line)
         if match:
             config = match.group(1) or match.group(2)
-            config_object = {"config": config, "description": None}
-            config_objects.append(config_object)
+            config_dict = {"config": config, "description": None, "network": None}
+            config_dicts.append(config_dict)
         match = re.match("description *= *\"(.*)\"", line)
         if match:
-            config_object["description"] = match.group(1)
-    for config_object in config_objects:
-        config = config_object["config"]
+            config_dict["description"] = match.group(1)
+        match = re.match("network *= *(.*)", line)
+        if match:
+            config_dict["network"] = match.group(1)
+    for config_dict in config_dicts:
+        config = config_dict["config"]
         args = ["inet", "-s", "-f", ini_file, "-c", config, "-q", "numruns"]
         logger.debug(args)
         if num_runs_fast:
@@ -58,32 +61,37 @@ def collect_ini_file_simulation_configs(ini_path):
         else:
             result = subprocess.run(args, cwd=working_directory, capture_output=True)
             num_runs = int(result.stdout)
-        description = config_object["description"]
-        abstract = (re.search("(a|A)bstract.*", description) is not None) if description else False
+        description = config_dict["description"]
+        description_abstract = (re.search("\((a|A)bstract\)", description) is not None) if description else False
+        abstract = (config_dict["network"] is None and config_dict["config"] == "General") or description_abstract 
         interactive = False # TODO
         simulation_config = SimulationConfig(os.path.relpath(working_directory, get_full_path(".")), ini_file, config, num_runs, abstract, interactive, description)
         simulation_configs.append(simulation_config)
     return simulation_configs
 
-def collect_all_simulation_configs(ini_path_globs):
+def collect_all_simulation_configs(ini_path_globs, concurrent=True):
     logger.info("Collecting all simulation configs")
     ini_paths = list(itertools.chain.from_iterable(map(lambda g: glob.glob(g, recursive=True), ini_path_globs)))
-    pool = multiprocessing.Pool(multiprocessing.cpu_count())
-    result = list(itertools.chain.from_iterable(pool.map(collect_ini_file_simulation_configs, ini_paths)))
+    if concurrent:
+        pool = multiprocessing.Pool(multiprocessing.cpu_count())
+        result = list(itertools.chain.from_iterable(pool.map(collect_ini_file_simulation_configs, ini_paths)))
+    else:
+        result = list(itertools.chain.from_iterable(map(collect_ini_file_simulation_configs, ini_paths)))
     result.sort(key=lambda element: (element.working_directory, element.ini_file, element.config))
     return result
 
-def get_all_simulation_configs():
+def get_all_simulation_configs(**kwargs):
     global all_simulation_configs
     if all_simulation_configs is None:
         if get_full_path(".") == os.getcwd():
             ini_path_globs = [get_full_path(".") + "/examples/**/*.ini",
                               get_full_path(".") + "/showcases/**/*.ini",
                               get_full_path(".") + "/tutorials/**/*.ini",
+                              get_full_path(".") + "/tests/fingerprint/*.ini",
                               get_full_path(".") + "/tests/validation/**/*.ini"]
         else:
             ini_path_globs = [os.getcwd() + "/**/*.ini"]
-        all_simulation_configs = collect_all_simulation_configs(ini_path_globs)
+        all_simulation_configs = collect_all_simulation_configs(ini_path_globs, **kwargs)
     return all_simulation_configs
 
 def matches_filter(value, positive_filter, negative_filter, full_match):

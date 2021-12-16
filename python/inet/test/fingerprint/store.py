@@ -71,7 +71,7 @@ class FingerprintStore:
             return fingerprint["working_directory"] == working_directory and \
                    fingerprint["ini_file"] == ini_file and \
                    fingerprint["config"] == config and \
-                   fingerprint["run"] == str(run) and \
+                   fingerprint["run"] == run and \
                    (sim_time_limit is None or fingerprint["sim_time_limit"] == sim_time_limit) and \
                    (test_result is None or fingerprint["test_result"] == test_result) and \
                    fingerprint["ingredients"] == ingredients
@@ -90,7 +90,7 @@ class FingerprintStore:
         self.get_entries().append({"working_directory": working_directory,
                                    "ini_file": ini_file,
                                    "config": config,
-                                   "run": str(run),
+                                   "run": run,
                                    "sim_time_limit": sim_time_limit,
                                    "test_result": test_result,
                                    "ingredients": ingredients,
