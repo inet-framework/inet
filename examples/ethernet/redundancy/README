@@ -1,4 +1,0 @@
-This example demonstrates static stream redundancy configuration using
-Ethernet Time-Sensitive Networking. The expected number of successfully
-received packets relative to the number of sent packets is verified by
-the python scripts. The expected result is around 0.657.
