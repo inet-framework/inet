@@ -26,7 +26,6 @@ import inet.queueing.contract.IPacketMarker;
 simple ContentBasedTagger extends PacketTaggerBase like IPacketMarker
 {
     parameters:
-        string packetFilter = default("*"); // packet filter expressions (e.g. ping-*), matches all packets by default
-        string packetDataFilter = default("*"); // packet data filter expression (e.g. inet::Ipv4Header and srcAddress = "10.0.0.1"), matches all packets by default
+        string packetFilter = default("true"); // packet filter expressions, matches all packets by default
         @class(ContentBasedTagger);
 }

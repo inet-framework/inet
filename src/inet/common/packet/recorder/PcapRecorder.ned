@@ -53,8 +53,7 @@ simple PcapRecorder
         string sendingSignalNames = default("packetSentToLower"); // space-separated list of outbound packet signals to subscribe to
         string receivingSignalNames = default("packetReceivedFromLower"); // space-separated list of inbound packet signals to subscribe to
         string dumpProtocols = default("ethernetmac ppp ieee80211mac"); // space-separated list of protocol names as defined in the Protocol class
-        string packetFilter = default("*"); // which packets are considered, matches all packets by default
-        string packetDataFilter = default("*"); // which packets are considered based on the data they contain, matches all packets by default
+        string packetFilter = default("true"); // which packets are considered, matches all packets by default
         string helpers = default("");    // usable PcapRecorder::IHelper helpers for accept packettype and store/convert packet as specified linktype
                                          // currently available: "inet::AckingMacToEthernetPcapRecorderHelper"
         bool alwaysFlush = default(false); // flush the pcapFile after each write to ensure that all packets are captured in case of a crash

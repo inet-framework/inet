@@ -35,12 +35,10 @@ void ContentBasedLabeler::initialize(int stage)
     PacketLabelerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         cStringTokenizer packetFiltersTokenizer(par("packetFilters"), ";");
-        cStringTokenizer packetDataFiltersTokenizer(par("packetDataFilters"), ";");
         while (packetFiltersTokenizer.hasMoreTokens()) {
             auto packetFilter = packetFiltersTokenizer.nextToken();
-            auto packetDataFilter = packetDataFiltersTokenizer.nextToken();
             auto filter = new PacketFilter();
-            filter->setPattern(packetFilter, packetDataFilter);
+            filter->setPattern(packetFilter);
             filters.push_back(filter);
         }
     }

@@ -68,9 +68,8 @@ void StreamIdentifier::processPacket(Packet *packet)
         for (int i = 0; i < mapping->size(); i++) {
             auto element = check_and_cast<cValueMap *>(mapping->get(i).objectValue());
             PacketFilter packetFilter;
-            auto packetPattern = element->containsKey("packetFilter") ? element->get("packetFilter").stringValue() : "*";
-            auto dataPattern = element->containsKey("dataFilter") ? element->get("dataFilter").stringValue() : "*";
-            packetFilter.setPattern(packetPattern, dataPattern);
+            auto packetPattern = element->containsKey("packetFilter") ? element->get("packetFilter").stringValue() : "true";
+            packetFilter.setPattern(packetPattern);
             if (packetFilter.matches(packet)) {
                 streamName = element->get("stream").stringValue();
                 packet->addTag<StreamReq>()->setStreamName(streamName);

@@ -34,10 +34,9 @@ void ContentBasedScheduler::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         defaultGateIndex = par("defaultGateIndex");
         cStringTokenizer packetFilterTokenizer(par("packetFilters"), ";");
-        cStringTokenizer packetDataFilterTokenizer(par("packetDataFilters"), ";");
-        while (packetFilterTokenizer.hasMoreTokens() && packetDataFilterTokenizer.hasMoreTokens()) {
+        while (packetFilterTokenizer.hasMoreTokens()) {
             auto filter = new PacketFilter();
-            filter->setPattern(packetFilterTokenizer.nextToken(), packetDataFilterTokenizer.nextToken());
+            filter->setPattern(packetFilterTokenizer.nextToken());
             filters.push_back(filter);
         }
     }

@@ -44,8 +44,7 @@ simple LinkVisualizerBase extends VisualizerBase
 
         string nodeFilter @mutable = default("*"); // which nodes are considered, matches all nodes by default
         string interfaceFilter @mutable = default("*"); // which interfaces are considered, matches all interfaces by default
-        string packetFilter @mutable = default("*"); // which packets are considered, matches all packets by default
-        string packetDataFilter @mutable = default("*"); // which packets are considered based on the data they contain, matches all packets by default
+        string packetFilter @mutable = default("true"); // which packets are considered, matches all packets by default
 
         string lineColor = default("black"); // link arrow color, black by default
         string lineStyle = default("solid"); // link arrow style (solid, dashed, dotted)

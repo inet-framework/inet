@@ -86,8 +86,7 @@ void Ipv4NatTable::parseConfig()
         // filter
         PacketFilter *packetFilter = new PacketFilter();
         const char *packetFilterAttr = xmlEntry->getAttribute("packetFilter");
-        const char *packetDataFilterAttr = xmlEntry->getAttribute("packetDataFilter");
-        packetFilter->setPattern(packetFilterAttr != nullptr ? packetFilterAttr : "*", packetDataFilterAttr != nullptr ? packetDataFilterAttr : "*");
+        packetFilter->setPattern(packetFilterAttr != nullptr ? packetFilterAttr : "true");
         // NAT entry
         Ipv4NatEntry natEntry;
         const char *destAddressAttr = xmlEntry->getAttribute("destAddress");

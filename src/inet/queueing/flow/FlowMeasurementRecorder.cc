@@ -36,7 +36,7 @@ void FlowMeasurementRecorder::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        packetFilter.setPattern(par("packetFilter"), par("packetDataFilter"));
+        packetFilter.setPattern(par("packetFilter"));
         offset = b(par("offset"));
         length = b(par("length"));
         endMeasurement_ = par("endMeasurement");

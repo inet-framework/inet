@@ -31,7 +31,6 @@ simple ContentBasedClassifier extends PacketClassifierBase like IPacketClassifie
 {
     parameters:
         int defaultGateIndex = default(0); // default gate index if no matching labels are found
-        string packetFilters; // semicolon separated list of packet filter expressions (e.g. ping-*;udp-*), matches all packets by default
-        string packetDataFilters; // semicolon separated list of packet data filter expressions (e.g. inet::Ipv4Header and srcAddress = "10.0.0.1"), matches all packets by default
+        string packetFilters; // semicolon separated list of packet filter expressions, matches all packets by default
         @class(ContentBasedClassifier);
 }
