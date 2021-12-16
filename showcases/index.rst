@@ -33,7 +33,6 @@ All showcases:
    :maxdepth: 2
 
    emulation/index
-   ethernet/index
    tsn/index
    general/index
    measurement/index
