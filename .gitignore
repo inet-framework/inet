@@ -16,6 +16,7 @@ precompiled_*.h.*
 /3rdparty
 /media
 **/MoBAN_Pattern*.txt
+python/inet/test/fingerprint/all_fingerprints.json
 
 # output and result files
 .settings/
