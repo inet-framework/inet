@@ -30,7 +30,7 @@ using namespace inet::queueing;
 class INET_API StreamDecoder : public PacketFlowBase, public TransparentProtocolRegistrationListener
 {
   protected:
-    class INET_API Stream
+    class INET_API Mapping
     {
       public:
         MacAddress source;
@@ -43,7 +43,7 @@ class INET_API StreamDecoder : public PacketFlowBase, public TransparentProtocol
 
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
-    std::vector<Stream> streams;
+    std::vector<Mapping> mappings;
 
   protected:
     virtual void initialize(int stage) override;

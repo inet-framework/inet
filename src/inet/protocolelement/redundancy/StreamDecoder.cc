@@ -47,30 +47,30 @@ void StreamDecoder::handleParameterChange(const char *name)
 
 void StreamDecoder::configureStreams()
 {
-    auto streamConfigurations = check_and_cast<cValueArray *>(par("streamMappings").objectValue());
+    auto mappingParameter = check_and_cast<cValueArray *>(par("mapping").objectValue());
     L3AddressResolver addressResolver;
-    for (int i = 0; i < streamConfigurations->size(); i++) {
-        auto streamConfiguration = check_and_cast<cValueMap *>(streamConfigurations->get(i).objectValue());
-        Stream stream;
+    for (int i = 0; i < mappingParameter->size(); i++) {
+        auto element = check_and_cast<cValueMap *>(mappingParameter->get(i).objectValue());
+        Mapping mapping;
         L3Address l3Address;
         L3AddressResolver addressResolver;
-        if (streamConfiguration->containsKey("source")) {
-            addressResolver.tryResolve(streamConfiguration->get("source").stringValue(), l3Address, L3AddressResolver::ADDR_MAC);
-            stream.source = l3Address.toMac();
+        if (element->containsKey("source")) {
+            addressResolver.tryResolve(element->get("source").stringValue(), l3Address, L3AddressResolver::ADDR_MAC);
+            mapping.source = l3Address.toMac();
         }
-        if (streamConfiguration->containsKey("destination")) {
-            addressResolver.tryResolve(streamConfiguration->get("destination").stringValue(), l3Address, L3AddressResolver::ADDR_MAC);
-            stream.destination = l3Address.toMac();
+        if (element->containsKey("destination")) {
+            addressResolver.tryResolve(element->get("destination").stringValue(), l3Address, L3AddressResolver::ADDR_MAC);
+            mapping.destination = l3Address.toMac();
         }
-        stream.vlanId = streamConfiguration->containsKey("vlan") ? streamConfiguration->get("vlan").intValue() : -1;
-        stream.pcp = streamConfiguration->containsKey("pcp") ? streamConfiguration->get("pcp").intValue() : -1;
-        stream.name = streamConfiguration->get("stream").stringValue();
-        if (streamConfiguration->containsKey("interface")) {
-            auto interfaceNamePattern = streamConfiguration->get("interface").stringValue();
-            stream.interfaceNameMatcher = new cPatternMatcher();
-            stream.interfaceNameMatcher->setPattern(interfaceNamePattern, false, false, false);
+        mapping.vlanId = element->containsKey("vlan") ? element->get("vlan").intValue() : -1;
+        mapping.pcp = element->containsKey("pcp") ? element->get("pcp").intValue() : -1;
+        mapping.name = element->get("stream").stringValue();
+        if (element->containsKey("interface")) {
+            auto interfaceNamePattern = element->get("interface").stringValue();
+            mapping.interfaceNameMatcher = new cPatternMatcher();
+            mapping.interfaceNameMatcher->setPattern(interfaceNamePattern, false, false, false);
         }
-        streams.push_back(stream);
+        mappings.push_back(mapping);
     }
 }
 
@@ -87,7 +87,7 @@ cGate *StreamDecoder::getRegistrationForwardingGate(cGate *gate)
 void StreamDecoder::processPacket(Packet *packet)
 {
     auto vlanInd = packet->findTag<VlanInd>();
-    for (auto& stream : streams) {
+    for (auto& stream : mappings) {
         bool matches = true;
         const auto& macAddressInd = packet->findTag<MacAddressInd>();
         const auto& vlanInd = packet->findTag<VlanInd>();
