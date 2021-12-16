@@ -23,12 +23,20 @@ import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketMeter;
 
+//
+// This module combines two meters and their corresponding filters per path. This
+// is primarily useful for combining a token bucket based metering with an
+// asynchronous packet shaper. Note that the asynchronous packet shaper also has
+// parts in the network interface queue module.
+//
+// @see ~EligibilityTimeQueue, EligibilityTimeGate
+//
 module DualIeee8021qciFilter like IPacketFilter
 {
     parameters:
-        int numStreams;
-        bool directPath = default(false);
-        int startY = default(directPath ? 200 : 100);
+        int numStreams; // number of streams
+        bool directPath = default(false); // specifies if the non-filtered direct path should exist
+        int startY = default(directPath ? 200 : 100); // used for submodule layout
         @display("i=block/filter");
     gates:
         input in;

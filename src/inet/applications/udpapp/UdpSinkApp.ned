@@ -17,6 +17,9 @@
 
 package inet.applications.udpapp;
 
+//
+// This module implements a UDP application that only receives packets.
+//
 module UdpSinkApp extends UdpApp
 {
     parameters:

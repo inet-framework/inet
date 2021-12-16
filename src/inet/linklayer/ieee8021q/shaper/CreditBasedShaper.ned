@@ -19,6 +19,12 @@ package inet.linklayer.ieee8021q.shaper;
 
 import inet.queueing.shaper.PacketShaper;
 
+//
+// This module implements a credit based shaper using a gate submodule manages
+// the number of credits.
+//
+// @see ~CreditBasedGate
+//
 module CreditBasedShaper extends PacketShaper
 {
     parameters:

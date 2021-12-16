@@ -22,6 +22,11 @@ import inet.queueing.contract.IPacketScheduler;
 import inet.queueing.contract.IPacketShaper;
 import inet.queueing.queue.CompoundPacketQueueBase;
 
+//
+// This module combines a classifier, a scheduler and several traffic shapers
+// into a single packet shaper. Packets are classified into one of the traffic
+// shapers and the scheduler prioritizes among them.
+//
 module PriorityShaper extends CompoundPacketQueueBase like IPacketShaper
 {
     parameters:

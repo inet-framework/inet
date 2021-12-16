@@ -20,10 +20,15 @@ package inet.protocolelement.redundancy;
 import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// This module identifies the stream of a packet using packet filter expressions.
+// It can check for arbitrary packet data and assign and if a match was found then
+// the stream is attached to the packet in a ~StreamReq tag.
+//
 simple StreamIdentifier extends PacketFlowBase like IPacketFlow
 {
     parameters:
-        object mapping @mutable = default([]);
+        object mapping @mutable = default([]); // array of objects, where each object specifies a stream name, a packetFilter and a dataFilter, for example [{stream: "s0", packetFilter: "*", dataFilter: "*"}, ...]
         @class(StreamIdentifier);
         @display("i=block/blackboard");
 }

@@ -24,13 +24,20 @@ import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketMeter;
 
+//
+// This module implements the IEEE 802.1Qci per-stream filtering and policing.
+// The relationship between streams, gates and meters is not one-to-one. The
+// number of streams, gates and meters can be different and the module will take
+// care about the connections between the submodules based on the streamFilterTable
+// parameter.
+//
 module Ieee8021qciFilter like IPacketFilter
 {
     parameters:
-        int numStreams;
-        int numGates;
-        int numMeters;
-        object streamFilterTable;
+        int numStreams; // number of different streams to filter for
+        int numGates; // number of gates
+        int numMeters; // number of traffic meters
+        object streamFilterTable; // an array of objects where each object contains a stream name, gate index and meter index, for example: [{stream: "s0", gate: 0, meter: 0}, ...]
         @display("i=block/filter");
     gates:
         input in;

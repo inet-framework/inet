@@ -23,10 +23,15 @@ import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketMeter;
 
+//
+// This module implements a simplified version of the IEEE 802.1Qci per-stream
+// filtering and policing. Each filtered stream has its own path where metering
+// and filtering happens independently of any other stream.
+//
 module SimpleIeee8021qciFilter like IPacketFilter
 {
     parameters:
-        int numStreams;
+        int numStreams; // number of different streams to filter for
         bool directPath = default(false);
         int startY = default(directPath ? 200 : 100);
         @display("i=block/filter");

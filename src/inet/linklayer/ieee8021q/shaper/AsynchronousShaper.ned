@@ -19,6 +19,14 @@ package inet.linklayer.ieee8021q.shaper;
 
 import inet.queueing.shaper.PacketShaper;
 
+//
+// This module implements an asynchronous shaper. The queue sorts packets based
+// on the transmission eligibility time (~EligibilityTimeTag) attached to each
+// packet. The gate prevents packets to be transmitter earlier than the attached
+// transmission eligibility time.
+//
+// @see ~EligibilityTimeMeter, ~EligibilityTimeFilter, ~EligibilityTimeQueue, ~EligibilityTimeGate
+//
 module AsynchronousShaper extends PacketShaper
 {
     parameters:

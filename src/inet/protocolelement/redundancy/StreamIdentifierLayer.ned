@@ -20,6 +20,10 @@ package inet.protocolelement.redundancy;
 import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// This module wraps a stream identifier into a protocol layer so that it can
+// be used in a layered compound module.
+//
 module StreamIdentifierLayer like IProtocolLayer
 {
     parameters:

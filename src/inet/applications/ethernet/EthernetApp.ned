@@ -29,7 +29,7 @@ import inet.queueing.contract.IPassivePacketSink;
 module EthernetApp like IApp
 {
     parameters:
-        string interfaceTableModule;
+        string interfaceTableModule; // relative module path of the interface table
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         @display("i=block/app");
     gates:

@@ -10,6 +10,10 @@ package inet.linklayer.ieee8021as;
 import inet.applications.contract.IApp;
 import inet.node.inet.StandardHost;
 
+//
+// This module implements a gPTP end station that contains a clock module and
+// a gPTP protocol.
+//
 module GptpEndstation extends StandardHost
 {
     parameters:

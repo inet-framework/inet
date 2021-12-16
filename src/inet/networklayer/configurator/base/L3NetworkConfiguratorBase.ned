@@ -19,6 +19,9 @@ package inet.networklayer.configurator.base;
 
 import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
 
+//
+// This module serves as a base module for layer 3 network configurators.
+//
 simple L3NetworkConfiguratorBase like IL3NetworkConfigurator
 {
     parameters:

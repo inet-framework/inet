@@ -19,6 +19,9 @@ package inet.queueing.filter;
 
 import inet.queueing.contract.IPacketFilter;
 
+//
+// This module combines multiple packet filters into one.
+//
 module MultiPacketFilter like IPacketFilter
 {
     parameters:

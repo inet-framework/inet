@@ -19,11 +19,15 @@ package inet.linklayer.ieee8021q;
 
 import inet.queueing.gate.CreditBasedGate;
 
+//
+// This module is a packet gate that can be used to implement the IEEE 802.1q
+// credit based shaper algorithm in combination with a packet queue.
+//
 simple Ieee8021qCreditBasedGate extends CreditBasedGate
 {
     parameters:
-        double idleSlope @unit(bps);
-        double sendSlope @unit(bps) = default(idleSlope - bitrate);
+        double idleSlope @unit(bps); // data rate of the accumulated credits when the transmission channel is idle
+        double sendSlope @unit(bps) = default(idleSlope - bitrate); // data rate of the spent credits when the transmission channel is in use
         double maxInterferenceSize @unit(b) = default(1500B);
         idleCreditGainRate = dropUnit(idleSlope);
         transmitCreditSpendRate = -dropUnit(sendSlope);

@@ -20,6 +20,10 @@ package inet.linklayer.ethernet.common;
 import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// This module combines the interface MAC address learning from incoming packets
+// with the outgoing interface selection for outgoing packets into a single layer.
+//
 module InterfaceRelayLayer like IProtocolLayer
 {
     parameters:

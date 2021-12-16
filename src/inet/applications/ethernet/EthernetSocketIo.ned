@@ -23,10 +23,10 @@ package inet.applications.ethernet;
 simple EthernetSocketIo
 {
     parameters:
-        string interfaceTableModule;
-        string interface = default("");
-        string localAddress = default("");
-        string remoteAddress = default("");
+        string interfaceTableModule; // relative module path of the interface table
+        string interface = default(""); // network interface name
+        string localAddress = default(""); // local Ethernet MAC address
+        string remoteAddress = default(""); // remove Ethernet MAC address
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
         @lifecycleSupport();

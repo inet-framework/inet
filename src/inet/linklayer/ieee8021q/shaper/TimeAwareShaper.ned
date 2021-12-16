@@ -19,6 +19,10 @@ package inet.linklayer.ieee8021q.shaper;
 
 import inet.queueing.shaper.PacketShaper;
 
+//
+// This module implements a time-aware shaper using a gate submodule opens and
+// closes according to a time-based schedule.
+//
 module TimeAwareShaper extends PacketShaper
 {
     parameters:

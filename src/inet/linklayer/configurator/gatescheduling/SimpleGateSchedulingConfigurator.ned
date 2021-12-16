@@ -21,9 +21,14 @@ import inet.linklayer.configurator.gatescheduling.base.GateSchedulingConfigurato
 import inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfigurator;
 
 //
-// This module provides an gate scheduling algorithm that eagerly reserves time
+// This module provides a gate scheduling algorithm that eagerly reserves time
 // slots for the configured streams in the order of their priority (0 being the
-// highest).
+// highest). The allocation makes sure that only one gate (traffic category) is
+// open in all network interfaces at any given moment of time. This strategy
+// may result in wasting to much time of the gate cycle and thus end up failing.
+//
+// This configurator is primarily useful to produce statistical results that can
+// be used as a baseline in comparison with more advanced configurators.
 //
 simple SimpleGateSchedulingConfigurator extends GateSchedulingConfiguratorBase like IGateSchedulingConfigurator
 {

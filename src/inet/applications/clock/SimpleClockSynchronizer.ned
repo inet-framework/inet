@@ -21,7 +21,9 @@ import inet.applications.contract.IApp;
 
 //
 // This module periodically synchronizes the slave clock to the master clock with
-// the specified accuracy.
+// the specified accuracy. The synchronization happens directly using C++ methods
+// calls and without any packet exchange. This is primarily useful when the overhead
+// of the time synchronization protocol messages can be safely ignored.
 //
 simple SimpleClockSynchronizer like IApp
 {

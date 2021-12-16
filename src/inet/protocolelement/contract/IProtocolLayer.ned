@@ -17,6 +17,10 @@
 
 package inet.protocolelement.contract;
 
+//
+// This module interface is implemented by all protocol layer modules that
+// connect to a higher and to a lower protocol layer, both of which is optional.
+//
 moduleinterface IProtocolLayer
 {
     parameters:

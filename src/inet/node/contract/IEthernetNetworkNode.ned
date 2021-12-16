@@ -18,7 +18,7 @@
 package inet.node.contract;
 
 //
-// Contains the common interface for all Ethernet node types in a network.
+// This is the module interface for all Ethernet node types in a network.
 //
 moduleinterface IEthernetNetworkNode extends INetworkNode
 {

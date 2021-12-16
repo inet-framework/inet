@@ -20,6 +20,11 @@ package inet.protocolelement.redundancy;
 import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.contract.IPacketFlow;
 
+//
+// This module combines a stream decoder and a stream encoder into a layer. For
+// incoming packets the stream decoder determines the stream of the packet. For
+// outgoing packets the stream encoder determines the VLAN id, etc. of the packet.
+//
 module StreamCoderLayer like IProtocolLayer
 {
     parameters:

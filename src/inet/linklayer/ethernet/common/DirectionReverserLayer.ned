@@ -21,6 +21,11 @@ import inet.common.MessageDispatcher;
 import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.common.PacketMultiplexer;
 
+//
+// This module provides a layer that combines the decision for local delivery
+// with the service of reversing the direction of an incoming packet to outgoing
+// for packet forwarding.
+//
 module DirectionReverserLayer like IProtocolLayer
 {
     parameters:

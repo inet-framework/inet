@@ -19,10 +19,14 @@ package inet.linklayer.ethernet.common;
 
 import inet.protocolelement.contract.IProtocolLayer;
 
+//
+// This module provides various layer 2 services such as packet forwarding,
+// interface selection, virtual LAN handling, stream handling.
+//
 module BridgingLayer like IProtocolLayer
 {
     parameters:
-        string interfaceTableModule;
+        string interfaceTableModule; // relative module path of the interface table
         *.interfaceTableModule = default(this.interfaceTableModule);
         @display("i=block/layer");
     gates:

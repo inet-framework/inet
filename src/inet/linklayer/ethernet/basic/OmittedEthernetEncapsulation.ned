@@ -20,15 +20,8 @@ package inet.linklayer.ethernet.basic;
 import inet.linklayer.ethernet.contract.IEthernetEncapsulation;
 
 //
-// Dummy encapsulation/decapsulation module for ~EthernetInterface.
-//
-// Expected environment:
-// - lowerLayerIn, lowerLayerOut gates should be connected to an ~EthernetCsmaMac
-// - upperLayerIn, upperLayerOut gates should be connected to an ~IMacRelayUnit
-//
-// Functionality:
-// - packets coming from upper layers will be sent to MAC.
-// - Ethernet frames arriving from MAC will be sent up to the higher layers.
+// This module implements the module given interface and can be used as an omitted
+// optional module that removes itself from the module hierarchy during initialize.
 //
 module OmittedEthernetEncapsulation like IEthernetEncapsulation
 {
@@ -36,10 +29,10 @@ module OmittedEthernetEncapsulation like IEthernetEncapsulation
         @class(::inet::OmittedModule);
         @display("i=block/square,black,50");
     gates:
-        input upperLayerIn @labels(EtherFrame); // higher layer
-        output upperLayerOut @labels(EtherFrame); // higher layer
-        input lowerLayerIn @labels(EtherFrame);   // to Ethernet MAC
-        output lowerLayerOut @labels(EtherFrame); // to Ethernet MAC
+        input upperLayerIn @labels(EtherFrame);
+        output upperLayerOut @labels(EtherFrame);
+        input lowerLayerIn @labels(EtherFrame);
+        output lowerLayerOut @labels(EtherFrame);
     connections:
         upperLayerIn --> lowerLayerOut;
         lowerLayerIn --> upperLayerOut;

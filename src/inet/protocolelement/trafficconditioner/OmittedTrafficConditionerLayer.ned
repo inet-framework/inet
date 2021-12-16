@@ -17,6 +17,10 @@
 
 package inet.protocolelement.trafficconditioner;
 
+//
+// This module implements the module given interface and can be used as an omitted
+// optional module that removes itself from the module hierarchy during initialize.
+//
 module OmittedTrafficConditionerLayer like ITrafficConditionerLayer
 {
     parameters:

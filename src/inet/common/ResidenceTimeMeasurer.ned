@@ -28,9 +28,9 @@ package inet.common;
 simple ResidenceTimeMeasurer like IMeasurer
 {
     parameters:
-        string subscriptionModule = default("^");
-        string measurementStartSignal = default("receptionEnded");
-        string measurementEndSignal = default("transmissionStarted");
+        string subscriptionModule = default("^"); // relative module path where subscription happens
+        string measurementStartSignal = default("receptionEnded"); // subscribed signal for measurement start
+        string measurementEndSignal = default("transmissionStarted"); // subscribed signal for measurement end
         @display("i=block/timer");
         @signal[packetStayed](type=inet::Packet);
         // the statistics value is the maximum residence time for any bit in the outgoing packet

@@ -22,7 +22,7 @@ import inet.queueing.contract.IPacketFilter;
 
 //
 // This packet filter module drops packets that don't match the given packet
-// filter criteria. The criteria can use wildcards and boolean operators.
+// label filter criteria. The criteria can use wildcards and boolean operators.
 //
 simple LabelFilter extends PacketFilterBase like IPacketFilter
 {

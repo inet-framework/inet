@@ -19,6 +19,10 @@ package inet.queueing.meter;
 
 import inet.queueing.contract.IPacketMeter;
 
+//
+// This module implements the module given interface and can be used as an omitted
+// optional module that removes itself from the module hierarchy during initialize.
+//
 module OmittedPacketMeter like IPacketMeter
 {
     parameters:

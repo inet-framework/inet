@@ -25,6 +25,8 @@ import inet.queueing.contract.IPacketMeter;
 // packetrate of the received stream of packets. The algorithm takes older
 // packets into account with an exponentially decreasing weight.
 //
+// @see ~StatisticalRateLimiter
+//
 simple ExponentialRateMeter extends PacketMeterBase like IPacketMeter
 {
     parameters:
