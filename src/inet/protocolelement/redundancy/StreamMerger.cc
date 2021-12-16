@@ -29,7 +29,7 @@ void StreamMerger::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        streamMapping = check_and_cast<cValueMap *>(par("streamMapping").objectValue());
+        mapping = check_and_cast<cValueMap *>(par("mapping").objectValue());
         bufferSize = par("bufferSize");
     }
 }
@@ -37,8 +37,8 @@ void StreamMerger::initialize(int stage)
 void StreamMerger::handleParameterChange(const char *name)
 {
     if (name != nullptr) {
-        if (!strcmp(name, "streamMapping"))
-            streamMapping = check_and_cast<cValueMap *>(par("streamMapping").objectValue());
+        if (!strcmp(name, "mapping"))
+            mapping = check_and_cast<cValueMap *>(par("mapping").objectValue());
    }
 }
 
@@ -57,8 +57,8 @@ void StreamMerger::processPacket(Packet *packet)
     const auto& streamInd = packet->findTag<StreamInd>();
     if (streamInd != nullptr) {
         auto inputStreamName = streamInd->getStreamName();
-        if (streamMapping->containsKey(inputStreamName)) {
-            auto outputStreamName = streamMapping->get(inputStreamName).stringValue();
+        if (mapping->containsKey(inputStreamName)) {
+            auto outputStreamName = mapping->get(inputStreamName).stringValue();
             auto& it = sequenceNumbers[outputStreamName];
             it.push_back(packet->getTag<SequenceNumberInd>()->getSequenceNumber());
             if (it.size() > bufferSize)
@@ -80,10 +80,10 @@ bool StreamMerger::matchesPacket(const Packet *packet) const
         return true;
     else {
         auto inputStreamName = streamInd->getStreamName();
-        if (!streamMapping->containsKey(inputStreamName))
+        if (!mapping->containsKey(inputStreamName))
             return true;
         else {
-            auto outputStreamName = streamMapping->get(inputStreamName).stringValue();
+            auto outputStreamName = mapping->get(inputStreamName).stringValue();
             if (!matchesInputStream(inputStreamName))
                 throw cRuntimeError("Unknown stream");
             else
@@ -94,7 +94,7 @@ bool StreamMerger::matchesPacket(const Packet *packet) const
 
 bool StreamMerger::matchesInputStream(const char *streamName) const
 {
-    return streamMapping->containsKey(streamName);
+    return mapping->containsKey(streamName);
 }
 
 bool StreamMerger::matchesSequenceNumber(const char *streamName, int sequenceNumber) const
