@@ -39,9 +39,6 @@ cmdenv-event-banners = false
 *.gate.durations = [1s, 2s]
 
 %contains-regex: stdout
-Initializing...
-
-Running simulation...
 Opening gate.
 Providing packet, .*?provider-0.*?
 Passing through packet, .*?provider-0.*?
