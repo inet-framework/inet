@@ -23,7 +23,7 @@ import inet.queueing.contract.IPacketFlow;
 simple StreamIdentifier extends PacketFlowBase like IPacketFlow
 {
     parameters:
-        object streamMappings @mutable = default([]);
+        object mapping @mutable = default([]);
         @class(StreamIdentifier);
         @display("i=block/blackboard");
 }

@@ -29,14 +29,14 @@ void StreamIdentifier::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        streamMappings = check_and_cast<cValueArray *>(par("streamMappings").objectValue());
+        mapping = check_and_cast<cValueArray *>(par("mapping").objectValue());
 }
 
 void StreamIdentifier::handleParameterChange(const char *name)
 {
     if (name != nullptr) {
-        if (!strcmp(name, "streamMappings"))
-            streamMappings = check_and_cast<cValueArray *>(par("streamMappings").objectValue());
+        if (!strcmp(name, "mapping"))
+            mapping = check_and_cast<cValueArray *>(par("mapping").objectValue());
    }
 }
 
@@ -60,14 +60,14 @@ int StreamIdentifier::incrementSequenceNumber(const char *stream)
 
 void StreamIdentifier::processPacket(Packet *packet)
 {
-    for (int i = 0; i < streamMappings->size(); i++) {
-        auto streamMapping = check_and_cast<cValueMap *>(streamMappings->get(i).objectValue());
+    for (int i = 0; i < mapping->size(); i++) {
+        auto element = check_and_cast<cValueMap *>(mapping->get(i).objectValue());
         PacketFilter packetFilter;
-        auto packetPattern = streamMapping->containsKey("packet") ? streamMapping->get("packet").stringValue() : "*";
-        auto dataPattern = streamMapping->containsKey("data") ? streamMapping->get("data").stringValue() : "*";
+        auto packetPattern = element->containsKey("packet") ? element->get("packet").stringValue() : "*";
+        auto dataPattern = element->containsKey("data") ? element->get("data").stringValue() : "*";
         packetFilter.setPattern(packetPattern, dataPattern);
         if (packetFilter.matches(packet)) {
-            auto streamName = streamMapping->get("stream").stringValue();
+            auto streamName = element->get("stream").stringValue();
             packet->addTag<StreamReq>()->setStreamName(streamName);
             auto sequenceNumber = incrementSequenceNumber(streamName);
             const auto& sequenceNumberTag = packet->addTag<SequenceNumberReq>();
