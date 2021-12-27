@@ -9,6 +9,20 @@ few backported fixes from the INET 4.3.x branch.
 Requires OMNeT++ 5.7 or 6.0 preview 14.
 
 
+INET-4.3.6 (December 2021) - Stable
+-----------------------------------
+
+This release contains compatibility fixes for OMNeT++ 6.0 Preview 15.
+OMNeT++ 6.0 Preview 13 or earlier versions are NOT supported.
+
+
+INET-4.3.5 (November 2021) - Stable
+-----------------------------------
+
+This release contains compatibility fixes for OMNeT++ 6.0 Preview 14.
+OMNeT++ 6.0 Preview 13 or earlier versions are NOT supported.
+
+
 INET-4.3.4 (October 2021) - Stable
 ----------------------------------
 
