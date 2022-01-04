@@ -91,7 +91,7 @@ std::string SelfDoc::val(const char *str)
 {
     std::ostringstream os;
     os << '"';
-    char hexbuf[4];
+    char hexbuf[5];
     while (*str) {
         switch (*str) {
             case '\b': os << "\\b"; break;
