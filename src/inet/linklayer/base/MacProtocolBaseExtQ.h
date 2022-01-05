@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_MACPROTOCOLBASE_H
-#define __INET_MACPROTOCOLBASE_H
+#ifndef __INET_MACPROTOCOLBASEEXTQ_H
+#define __INET_MACPROTOCOLBASEEXTQ_H
 
 #include "inet/common/LayeredProtocolBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
