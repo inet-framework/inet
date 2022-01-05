@@ -663,9 +663,7 @@ void CsmaCaMac::handleCrashOperation(LifecycleOperation *operation)
 
 void CsmaCaMac::processUpperPacket()
 {
-    Packet *packet = txQueue->dequeuePacket();
-    packet->setArrival(getId(), upperLayerInGateId, simTime());
-    take(packet);
+    Packet *packet = dequeuePacket();
     handleUpperPacket(packet);
 }
 

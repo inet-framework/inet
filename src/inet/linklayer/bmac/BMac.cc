@@ -318,10 +318,8 @@ void BMac::handleSelfMessage(cMessage *msg)
                 if (msg->getKind() == BMAC_SEND_PREAMBLE) {
                     if (currentTxFrame != nullptr)
                         throw cRuntimeError("Model error: incomplete transmission exists");
-                    currentTxFrame = txQueue->dequeuePacket();
+                    currentTxFrame = dequeuePacket();
                     encapsulate(currentTxFrame);
-                    currentTxFrame->setArrival(getId(), upperLayerInGateId, simTime());
-                    take(currentTxFrame);
                 }
                 ASSERT(currentTxFrame != nullptr);
                 sendDataPacket();
@@ -707,7 +705,7 @@ void BMac::handleCanPullPacketChanged(cGate *gate)
     Enter_Method("handleCanPullPacketChanged");
     // force wakeup now
     if (gate->getId() == upperLayerInGateId && (macState == SLEEP) && wakeup->isScheduled()
-            && txQueue->canPullSomePacket(this->gate(upperLayerInGateId)->getPathStartGate()))
+            && canDequeuePacket())
     {
         rescheduleAfter(dblrand() * 0.1f, wakeup);
     }

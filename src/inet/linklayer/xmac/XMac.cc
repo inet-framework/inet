@@ -342,12 +342,8 @@ void XMac::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == XMAC_SWITCHING_FINISHED) {
                 if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER) {
                     if (currentTxFrame == nullptr) {
-                        if (currentTxFrame != nullptr)
-                            throw cRuntimeError("Model error: incomplete transmission exists");
-                        currentTxFrame = txQueue->dequeuePacket();
+                        currentTxFrame = dequeuePacket();
                         encapsulate(currentTxFrame);
-                        currentTxFrame->setArrival(getId(), upperLayerInGateId, simTime());
-                        take(currentTxFrame);
                     }
                     auto pkt_preamble = currentTxFrame->peekAtFront<XMacHeaderBase>();
                     sendPreamble(pkt_preamble->getDestAddr());
@@ -529,10 +525,8 @@ void XMac::sendDataPacket()
 {
     nbTxDataPackets++;
     if (currentTxFrame == nullptr) {
-        currentTxFrame = txQueue->dequeuePacket();
+        currentTxFrame = dequeuePacket();
         encapsulate(currentTxFrame);
-        currentTxFrame->setArrival(getId(), upperLayerInGateId, simTime());
-        take(currentTxFrame);
     }
     auto packet = currentTxFrame->dup();
     const auto& hdr = packet->peekAtFront<XMacHeaderBase>();
@@ -672,7 +666,7 @@ void XMac::handleCanPullPacketChanged(cGate *gate)
     Enter_Method("handleCanPullPacketChanged");
     // force wakeup now
     if (gate->getId() == upperLayerInGateId && (macState == SLEEP) && wakeup->isScheduled()
-            && txQueue->canPullSomePacket(this->gate(upperLayerInGateId)->getPathStartGate()))
+            && canDequeuePacket())
     {
         rescheduleAfter(dblrand() * 0.01f, wakeup);
     }

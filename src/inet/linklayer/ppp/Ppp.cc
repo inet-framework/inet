@@ -393,15 +393,13 @@ void Ppp::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful
 bool Ppp::canProcessUpperPacket() const
 {
     return (currentTxFrame == nullptr    // not an active transmission
-            && txQueue->canPullSomePacket(gate(upperLayerInGateId)->getPathStartGate())
+            && canDequeuePacket()
             );
 }
 
 void Ppp::processUpperPacket()
 {
-    auto packet = txQueue->dequeuePacket();
-    packet->setArrival(getId(), upperLayerInGateId, simTime());
-    take(packet);
+    auto packet = dequeuePacket();
     handleUpperPacket(packet);
 }
 

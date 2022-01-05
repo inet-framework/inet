@@ -277,15 +277,13 @@ bool AckingMac::canProcessUpperPacket() const
 {
     return (currentTxFrame == nullptr    // not an active transmission
             && transmissionState != IRadio::TRANSMISSION_STATE_TRANSMITTING
-            && txQueue->canPullSomePacket(gate(upperLayerInGateId)->getPathStartGate())
+            && canDequeuePacket()
             );
 }
 
 void AckingMac::processUpperPacket()
 {
-    auto packet = txQueue->dequeuePacket();
-    packet->setArrival(getId(), upperLayerInGateId, simTime());
-    take(packet);
+    auto packet = dequeuePacket();
     handleUpperPacket(packet);
 }
 

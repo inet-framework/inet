@@ -360,9 +360,7 @@ void Ieee802154Mac::updateStatusCCA(t_mac_event event, cMessage *msg)
                 updateMacState(TRANSMITFRAME_4);
                 radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
                 if (currentTxFrame == nullptr) {
-                    currentTxFrame = txQueue->dequeuePacket();
-                    currentTxFrame->setArrival(getId(), upperLayerInGateId, simTime());
-                    take(currentTxFrame);
+                    currentTxFrame = dequeuePacket();
                     encapsulate(currentTxFrame);
                 }
                 Packet *mac = currentTxFrame->dup();

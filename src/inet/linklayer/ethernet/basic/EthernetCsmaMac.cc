@@ -897,10 +897,8 @@ void EthernetCsmaMac::dropCurrentTxFrame(PacketDropDetails& details)
 
 bool EthernetCsmaMac::tryProcessUpperPacket(MacTransmitState state)
 {
-    if (currentTxFrame == nullptr && transmitState == state && txQueue && txQueue->canPullSomePacket(gate(upperLayerInGateId)->getPathStartGate())) {
-        Packet *packet = txQueue->dequeuePacket();
-        packet->setArrival(getId(), upperLayerInGateId, simTime());
-        take(packet);
+    if (currentTxFrame == nullptr && transmitState == state && canDequeuePacket()) {
+        Packet *packet = dequeuePacket();
         handleUpperPacket(packet);
         return true;
     }

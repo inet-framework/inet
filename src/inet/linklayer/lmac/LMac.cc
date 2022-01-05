@@ -406,8 +406,8 @@ void LMac::handleSelfMessage(cMessage *msg)
 
         case SEND_CONTROL:
             if (msg->getKind() == LMAC_SEND_CONTROL) {
-                if (!SETUP_PHASE && currentTxFrame == nullptr && txQueue->canPullSomePacket(gate(upperLayerInGateId)->getPathStartGate())) {
-                    currentTxFrame = txQueue->dequeuePacket();
+                if (!SETUP_PHASE && currentTxFrame == nullptr && canDequeuePacket()) {
+                    currentTxFrame = dequeuePacket();
                     encapsulate(currentTxFrame);
                 }
                 // send first a control message, so that non-receiving nodes can switch off.

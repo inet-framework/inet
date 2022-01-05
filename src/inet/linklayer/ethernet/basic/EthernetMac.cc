@@ -416,10 +416,8 @@ void EthernetMac::beginSendFrames()
 
 void EthernetMac::tryProcessUpperPacket()
 {
-    if (currentTxFrame == nullptr && transmitState == TX_IDLE_STATE && txQueue && txQueue->canPullSomePacket(gate(upperLayerInGateId)->getPathStartGate())) {
-        Packet *packet = txQueue->dequeuePacket();
-        packet->setArrival(getId(), upperLayerInGateId, simTime());
-        take(packet);
+    if (currentTxFrame == nullptr && transmitState == TX_IDLE_STATE && canDequeuePacket()) {
+        Packet *packet = dequeuePacket();
         handleUpperPacket(packet);
     }
 }
