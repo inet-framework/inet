@@ -117,7 +117,6 @@ class INET_API EthernetCsmaMac : public EthernetMacBase
     virtual void updateRxSignals(EthernetSignalBase *signal, simtime_t endRxTime);
     virtual void dropCurrentTxFrame(PacketDropDetails& details) override;
     bool canContinueBurst(b remainingGapLength);
-    bool tryProcessUpperPacket(MacTransmitState state);
 
     B calculateMinFrameLength();
 

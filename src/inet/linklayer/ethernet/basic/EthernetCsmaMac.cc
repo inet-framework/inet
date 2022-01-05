@@ -373,8 +373,8 @@ void EthernetCsmaMac::handleEndIFGPeriod()
         emit(transmissionEndedSignal, curTxSignal);
         txFinished();
         if (canContinueBurst(b(0))) {
-            if (!tryProcessUpperPacket(SEND_IFG_STATE))
-                changeTransmissionState(TX_IDLE_STATE);
+            Packet *packet = dequeuePacket();
+            handleUpperPacket(packet);
         }
         else
             scheduleEndIFGPeriod();
@@ -383,7 +383,11 @@ void EthernetCsmaMac::handleEndIFGPeriod()
         // End of IFG period, okay to transmit, if Rx idle OR duplexMode ( checked in startFrameTransmission(); )
         if (currentTxFrame != nullptr)
             startFrameTransmission();
-        else if (!tryProcessUpperPacket(WAIT_IFG_STATE))
+        else if (canDequeuePacket()) {
+            Packet *packet = dequeuePacket();
+            handleUpperPacket(packet);
+        }
+        else
             changeTransmissionState(TX_IDLE_STATE);
     }
     else
@@ -634,7 +638,10 @@ void EthernetCsmaMac::handleRetransmission()
         changeTransmissionState(TX_IDLE_STATE);
         backoffs = 0;
 
-        tryProcessUpperPacket(TX_IDLE_STATE);
+        if (canDequeuePacket()) {
+            Packet *packet = dequeuePacket();
+            handleUpperPacket(packet);
+        }
         return;
     }
 
@@ -895,22 +902,15 @@ void EthernetCsmaMac::dropCurrentTxFrame(PacketDropDetails& details)
     curTxSignal = nullptr;
 }
 
-bool EthernetCsmaMac::tryProcessUpperPacket(MacTransmitState state)
-{
-    if (currentTxFrame == nullptr && transmitState == state && canDequeuePacket()) {
-        Packet *packet = dequeuePacket();
-        handleUpperPacket(packet);
-        return true;
-    }
-    else
-        return false;
-}
-
 void EthernetCsmaMac::handleCanPullPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
-    if (duplexMode || receiveState == RX_IDLE_STATE)
-        tryProcessUpperPacket(TX_IDLE_STATE);
+    if (duplexMode || receiveState == RX_IDLE_STATE) {
+        if (currentTxFrame == nullptr && transmitState == TX_IDLE_STATE && canDequeuePacket()) {
+            Packet *packet = dequeuePacket();
+            handleUpperPacket(packet);
+        }
+    }
 }
 
 } // namespace inet
