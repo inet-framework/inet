@@ -372,7 +372,7 @@ void EthernetCsmaMac::handleEndIFGPeriod()
     if (transmitState == SEND_IFG_STATE) {
         emit(transmissionEndedSignal, curTxSignal);
         txFinished();
-        if (canBeContinueBurst(b(0))) {
+        if (canContinueBurst(b(0))) {
             if (!tryProcessUpperPacket(SEND_IFG_STATE))
                 changeTransmissionState(TX_IDLE_STATE);
         }
@@ -517,7 +517,7 @@ void EthernetCsmaMac::handleEndTxPeriod()
     }
     else {
         EV_DETAIL << "Start IFG period\n";
-        if (canBeContinueBurst(INTERFRAME_GAP_BITS))
+        if (canContinueBurst(INTERFRAME_GAP_BITS))
             fillIFGInBurst();
         else
             scheduleEndIFGPeriod();
@@ -826,7 +826,7 @@ void EthernetCsmaMac::fillIFGInBurst()
     changeTransmissionState(SEND_IFG_STATE);
 }
 
-bool EthernetCsmaMac::canBeContinueBurst(b remainingGapLength)
+bool EthernetCsmaMac::canContinueBurst(b remainingGapLength)
 {
     if ((frameBursting && framesSentInBurst > 0) && (framesSentInBurst < curEtherDescr->maxFramesInBurst)) {
         if (Packet *pk = txQueue->canPullPacket(gate(upperLayerInGateId)->getPathStartGate())) {
