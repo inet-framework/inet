@@ -78,9 +78,7 @@ class INET_API AckingMac : public MacProtocolBaseExtQ, public IMacProtocol, publ
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
-    virtual bool canProcessUpperPacket() const;
     virtual void processUpperPacket();
-    virtual void tryProcessUpperPacket();
 
   public:
     // IActivePacketSink:

@@ -68,7 +68,11 @@ void AckingMac::initialize(int stage)
         transmissionState = radio->getTransmissionState();
         if (useAck)
             ackTimeoutMsg = new cMessage("link-break");
-        tryProcessUpperPacket();
+        if (currentTxFrame == nullptr    // not an active transmission
+                && transmissionState != IRadio::TRANSMISSION_STATE_TRANSMITTING
+                && canDequeuePacket()
+                )
+            processUpperPacket();
     }
 }
 
@@ -101,7 +105,8 @@ void AckingMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
             radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
             transmissionState = newRadioTransmissionState;
-            tryProcessUpperPacket();
+            if (currentTxFrame == nullptr && canDequeuePacket())
+                processUpperPacket();
         }
         else
             transmissionState = newRadioTransmissionState;
@@ -176,7 +181,8 @@ void AckingMac::handleSelfMessage(cMessage *message)
         PacketDropDetails details;
         details.setReason(OTHER_PACKET_DROP);
         dropCurrentTxFrame(details);
-        tryProcessUpperPacket();
+        if (transmissionState != IRadio::TRANSMISSION_STATE_TRANSMITTING && canDequeuePacket())
+            processUpperPacket();
     }
     else {
         MacProtocolBaseExtQ::handleSelfMessage(message);
@@ -194,7 +200,8 @@ void AckingMac::acked(Packet *frame)
     EV_DEBUG << "AckingMac::acked(" << frame->getFullName() << ") is accepted\n";
     cancelEvent(ackTimeoutMsg);
     deleteCurrentTxFrame();
-    tryProcessUpperPacket();
+    if (transmissionState != IRadio::TRANSMISSION_STATE_TRANSMITTING && canDequeuePacket())
+        processUpperPacket();
 }
 
 void AckingMac::encapsulate(Packet *packet)
@@ -264,7 +271,11 @@ queueing::IPassivePacketSource *AckingMac::getProvider(cGate *gate)
 void AckingMac::handleCanPullPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
-    tryProcessUpperPacket();
+    if (currentTxFrame == nullptr    // not an active transmission
+            && transmissionState != IRadio::TRANSMISSION_STATE_TRANSMITTING
+            && canDequeuePacket()
+            )
+        processUpperPacket();
 }
 
 void AckingMac::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
@@ -273,24 +284,10 @@ void AckingMac::handlePullPacketProcessed(Packet *packet, cGate *gate, bool succ
     throw cRuntimeError("Not supported callback");
 }
 
-bool AckingMac::canProcessUpperPacket() const
-{
-    return (currentTxFrame == nullptr    // not an active transmission
-            && transmissionState != IRadio::TRANSMISSION_STATE_TRANSMITTING
-            && canDequeuePacket()
-            );
-}
-
 void AckingMac::processUpperPacket()
 {
     auto packet = dequeuePacket();
     handleUpperPacket(packet);
-}
-
-void AckingMac::tryProcessUpperPacket()
-{
-    if (canProcessUpperPacket())
-        processUpperPacket();
 }
 
 } // namespace inet
