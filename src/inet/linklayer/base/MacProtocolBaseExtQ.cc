@@ -56,8 +56,8 @@ void MacProtocolBaseExtQ::flushQueue(PacketDropDetails& details)
 {
     // code would look slightly nicer with a pop() function that returns nullptr if empty
     if (txQueue)
-        while (txQueue->canPullSomePacket(gate(upperLayerInGateId)->getPathStartGate())) {
-            auto packet = txQueue->dequeuePacket();
+        while (canDequeuePacket()) {
+            auto packet = dequeuePacket();
             emit(packetDroppedSignal, packet, &details); // FIXME this signal lumps together packets from the network and packets from higher layers! separate them
             delete packet;
         }
@@ -66,8 +66,8 @@ void MacProtocolBaseExtQ::flushQueue(PacketDropDetails& details)
 void MacProtocolBaseExtQ::clearQueue()
 {
     if (txQueue)
-        while (txQueue->canPullSomePacket(gate(upperLayerInGateId)->getPathStartGate()))
-            delete txQueue->dequeuePacket();
+        while (canDequeuePacket())
+            delete dequeuePacket();
 }
 
 void MacProtocolBaseExtQ::handleStopOperation(LifecycleOperation *operation)
@@ -98,6 +98,19 @@ queueing::IPacketQueue *MacProtocolBaseExtQ::getQueue(cGate *gate) const
         }
     }
     throw cRuntimeError("Gate %s is not connected to a module of type queueing::IPacketQueue", gate->getFullPath().c_str());
+}
+
+bool MacProtocolBaseExtQ::canDequeuePacket() const
+{
+    return txQueue && txQueue->canPullSomePacket(gate(upperLayerInGateId)->getPathStartGate());
+}
+
+Packet *MacProtocolBaseExtQ::dequeuePacket()
+{
+    Packet *packet = txQueue->dequeuePacket();
+    take(packet);
+    packet->setArrival(getId(), upperLayerInGateId, simTime());
+    return packet;
 }
 
 } // namespace inet

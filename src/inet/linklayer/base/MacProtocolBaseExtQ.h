@@ -54,6 +54,9 @@ class INET_API MacProtocolBaseExtQ : public MacProtocolBase
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
     queueing::IPacketQueue *getQueue(cGate *gate) const;
+
+    virtual bool canDequeuePacket() const;
+    virtual Packet *dequeuePacket();
 };
 
 } // namespace inet
