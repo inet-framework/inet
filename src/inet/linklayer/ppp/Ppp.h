@@ -80,9 +80,7 @@ class INET_API Ppp : public MacProtocolBaseExtQ, public queueing::IActivePacketS
     virtual void handleLowerPacket(Packet *packet) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
 
-    virtual bool canProcessUpperPacket() const;
     virtual void processUpperPacket();
-    virtual void tryProcessUpperPackets();
 
   public:
     // IActivePacketSink:

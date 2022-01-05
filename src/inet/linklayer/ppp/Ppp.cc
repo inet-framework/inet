@@ -170,8 +170,9 @@ void Ppp::refreshOutGateConnection(bool connected)
         networkInterface->setDatarate(datarate);
     }
 
-    if (connected && !endTransmissionEvent->isScheduled()) {
-        tryProcessUpperPackets();
+    if (connected && currentTxFrame == nullptr && canDequeuePacket()) {
+        ASSERT(!endTransmissionEvent->isScheduled());
+        processUpperPacket();
     }
 }
 
@@ -226,7 +227,8 @@ void Ppp::handleSelfMessage(cMessage *message)
         // Transmission finished, we can start next one.
         EV_INFO << "Transmission successfully completed.\n";
         emit(transmissionStateChangedSignal, 0L);
-        tryProcessUpperPackets();
+        if (canDequeuePacket())
+            processUpperPacket();
     }
     else
         throw cRuntimeError("Unknown self message");
@@ -381,7 +383,8 @@ queueing::IPassivePacketSource *Ppp::getProvider(cGate *gate)
 void Ppp::handleCanPullPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
-    tryProcessUpperPackets();
+    while (currentTxFrame == nullptr && canDequeuePacket())
+        processUpperPacket();
 }
 
 void Ppp::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)
@@ -390,23 +393,10 @@ void Ppp::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful
     throw cRuntimeError("Not supported callback");
 }
 
-bool Ppp::canProcessUpperPacket() const
-{
-    return (currentTxFrame == nullptr    // not an active transmission
-            && canDequeuePacket()
-            );
-}
-
 void Ppp::processUpperPacket()
 {
     auto packet = dequeuePacket();
     handleUpperPacket(packet);
-}
-
-void Ppp::tryProcessUpperPackets()
-{
-    while (canProcessUpperPacket())
-        processUpperPacket();
 }
 
 } // namespace inet
