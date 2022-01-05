@@ -90,6 +90,7 @@ void MacProtocolBaseExtQ::handleCrashOperation(LifecycleOperation *operation)
 
 queueing::IPacketQueue *MacProtocolBaseExtQ::getQueue(cGate *gate) const
 {
+    // TODO use findConnectedModule() when the function is updated
     for (auto g = gate->getPreviousGate(); g != nullptr; g = g->getPreviousGate()) {
         if (g->getType() == cGate::OUTPUT) {
             auto m = dynamic_cast<queueing::IPacketQueue *>(g->getOwnerModule());
