@@ -269,7 +269,11 @@ void EthernetMac::handleEndIFGPeriod()
     // End of IFG period, okay to transmit
     EV_DETAIL << "IFG elapsed" << endl;
     changeTransmissionState(TX_IDLE_STATE);
-    tryProcessUpperPacket();
+
+    if (canDequeuePacket()) {
+        Packet *packet = dequeuePacket();
+        handleUpperPacket(packet);
+    }
 }
 
 void EthernetMac::handleEndTxPeriod()
@@ -334,7 +338,10 @@ void EthernetMac::handleEndPausePeriod()
     EV_DETAIL << "Pause finished, resuming transmissions\n";
     changeTransmissionState(TX_IDLE_STATE);
 
-    tryProcessUpperPacket();
+    if (canDequeuePacket()) {
+        Packet *packet = dequeuePacket();
+        handleUpperPacket(packet);
+    }
 }
 
 void EthernetMac::processReceivedDataFrame(Packet *packet, const Ptr<const EthernetMacHeader>& frame)
@@ -414,18 +421,13 @@ void EthernetMac::beginSendFrames()
     }
 }
 
-void EthernetMac::tryProcessUpperPacket()
+void EthernetMac::handleCanPullPacketChanged(cGate *gate)
 {
+    Enter_Method("handleCanPullPacketChanged");
     if (currentTxFrame == nullptr && transmitState == TX_IDLE_STATE && canDequeuePacket()) {
         Packet *packet = dequeuePacket();
         handleUpperPacket(packet);
     }
-}
-
-void EthernetMac::handleCanPullPacketChanged(cGate *gate)
-{
-    Enter_Method("handleCanPullPacketChanged");
-    tryProcessUpperPacket();
 }
 
 } // namespace inet

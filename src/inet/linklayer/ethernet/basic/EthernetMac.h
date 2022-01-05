@@ -61,7 +61,6 @@ class INET_API EthernetMac : public EthernetMacBase
     virtual void scheduleEndIFGPeriod();
     virtual void scheduleEndPausePeriod(int pauseUnits);
     virtual void beginSendFrames();
-    virtual void tryProcessUpperPacket();
 
     // statistics
     simtime_t totalSuccessfulRxTime; // total duration of successful transmissions on channel
