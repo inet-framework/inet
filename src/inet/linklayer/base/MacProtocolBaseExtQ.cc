@@ -31,63 +31,12 @@ MacProtocolBaseExtQ::~MacProtocolBaseExtQ()
     delete currentTxFrame;
 }
 
-MacAddress MacProtocolBaseExtQ::parseMacAddressParameter(const char *addrstr)
-{
-    MacAddress address;
-
-    if (!strcmp(addrstr, "auto"))
-        // assign automatic address
-        address = MacAddress::generateAutoAddress();
-    else
-        address.setAddress(addrstr);
-
-    return address;
-}
-
 void MacProtocolBaseExtQ::initialize(int stage)
 {
-    LayeredProtocolBase::initialize(stage);
+    MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         currentTxFrame = nullptr;
-        upperLayerInGateId = findGate("upperLayerIn");
-        upperLayerOutGateId = findGate("upperLayerOut");
-        lowerLayerInGateId = findGate("lowerLayerIn");
-        lowerLayerOutGateId = findGate("lowerLayerOut");
-        hostModule = findContainingNode(this);
     }
-    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
-        registerInterface();
-}
-
-void MacProtocolBaseExtQ::registerInterface()
-{
-    ASSERT(networkInterface == nullptr);
-    networkInterface = getContainingNicModule(this);
-    configureNetworkInterface();
-}
-
-void MacProtocolBaseExtQ::sendUp(cMessage *message)
-{
-    if (message->isPacket())
-        emit(packetSentToUpperSignal, message);
-    send(message, upperLayerOutGateId);
-}
-
-void MacProtocolBaseExtQ::sendDown(cMessage *message)
-{
-    if (message->isPacket())
-        emit(packetSentToLowerSignal, message);
-    send(message, lowerLayerOutGateId);
-}
-
-bool MacProtocolBaseExtQ::isUpperMessage(cMessage *message)
-{
-    return message->getArrivalGateId() == upperLayerInGateId;
-}
-
-bool MacProtocolBaseExtQ::isLowerMessage(cMessage *message)
-{
-    return message->getArrivalGateId() == lowerLayerInGateId;
 }
 
 void MacProtocolBaseExtQ::deleteCurrentTxFrame()
@@ -121,22 +70,6 @@ void MacProtocolBaseExtQ::clearQueue()
             delete txQueue->dequeuePacket();
 }
 
-void MacProtocolBaseExtQ::handleMessageWhenDown(cMessage *msg)
-{
-    if (!msg->isSelfMessage() && msg->getArrivalGateId() == lowerLayerInGateId) {
-        EV << "Interface is turned off, dropping packet\n";
-        delete msg;
-    }
-    else
-        LayeredProtocolBase::handleMessageWhenDown(msg);
-}
-
-void MacProtocolBaseExtQ::handleStartOperation(LifecycleOperation *operation)
-{
-    networkInterface->setState(NetworkInterface::State::UP);
-    networkInterface->setCarrier(true);
-}
-
 void MacProtocolBaseExtQ::handleStopOperation(LifecycleOperation *operation)
 {
     PacketDropDetails details;
@@ -144,21 +77,15 @@ void MacProtocolBaseExtQ::handleStopOperation(LifecycleOperation *operation)
     if (currentTxFrame)
         dropCurrentTxFrame(details);
     flushQueue(details);
-    networkInterface->setCarrier(false);
-    networkInterface->setState(NetworkInterface::State::DOWN);
+
+    MacProtocolBase::handleStopOperation(operation);
 }
 
 void MacProtocolBaseExtQ::handleCrashOperation(LifecycleOperation *operation)
 {
     deleteCurrentTxFrame();
     clearQueue();
-    networkInterface->setCarrier(false);
-    networkInterface->setState(NetworkInterface::State::DOWN);
-}
-
-void MacProtocolBaseExtQ::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
-{
-    Enter_Method("%s", cComponent::getSignalName(signalID));
+    MacProtocolBase::handleCrashOperation(operation);
 }
 
 queueing::IPacketQueue *MacProtocolBaseExtQ::getQueue(cGate *gate) const

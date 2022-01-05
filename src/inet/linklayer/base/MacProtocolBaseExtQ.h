@@ -18,55 +18,24 @@
 #ifndef __INET_MACPROTOCOLBASEEXTQ_H
 #define __INET_MACPROTOCOLBASEEXTQ_H
 
-#include "inet/common/LayeredProtocolBase.h"
-#include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/common/packet/Packet.h"
-#include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/queueing/contract/IPacketQueue.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 
 namespace inet {
 
-class INET_API MacProtocolBaseExtQ : public LayeredProtocolBase, public cListener
+class INET_API MacProtocolBaseExtQ : public MacProtocolBase
 {
   protected:
-    /** @brief Gate ids */
-    //@{
-    int upperLayerInGateId = -1;
-    int upperLayerOutGateId = -1;
-    int lowerLayerInGateId = -1;
-    int lowerLayerOutGateId = -1;
-    //@}
-
-    opp_component_ptr<NetworkInterface> networkInterface;
-
     /** Currently transmitted frame if any */
     Packet *currentTxFrame = nullptr;
 
     /** Messages received from upper layer and to be transmitted later */
     opp_component_ptr<queueing::IPacketQueue> txQueue;
 
-    opp_component_ptr<cModule> hostModule;
-
   protected:
     MacProtocolBaseExtQ();
     virtual ~MacProtocolBaseExtQ();
 
     virtual void initialize(int stage) override;
-
-    virtual void registerInterface();
-    virtual void configureNetworkInterface() = 0;
-
-    virtual MacAddress parseMacAddressParameter(const char *addrstr);
-
-    virtual void sendUp(cMessage *message);
-    virtual void sendDown(cMessage *message);
-
-    virtual bool isUpperMessage(cMessage *message) override;
-    virtual bool isLowerMessage(cMessage *message) override;
-
-    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
-    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
-    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
 
     virtual void deleteCurrentTxFrame();
     virtual void dropCurrentTxFrame(PacketDropDetails& details);
@@ -81,10 +50,6 @@ class INET_API MacProtocolBaseExtQ : public LayeredProtocolBase, public cListene
      */
     virtual void clearQueue();
 
-    using cListener::receiveSignal;
-    virtual void handleMessageWhenDown(cMessage *msg) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
-    virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
 
