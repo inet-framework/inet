@@ -39,12 +39,6 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
 
     opp_component_ptr<NetworkInterface> networkInterface;
 
-    /** Currently transmitted frame if any */
-    Packet *currentTxFrame = nullptr;
-
-    /** Messages received from upper layer and to be transmitted later */
-    opp_component_ptr<queueing::IPacketQueue> txQueue;
-
     opp_component_ptr<cModule> hostModule;
 
   protected:
@@ -67,20 +61,6 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
     virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
     virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
-
-    virtual void deleteCurrentTxFrame();
-    virtual void dropCurrentTxFrame(PacketDropDetails& details);
-    virtual void popTxQueue();
-
-    /**
-     * should clear queue and emit signal "packetDropped" with entire packets
-     */
-    virtual void flushQueue(PacketDropDetails& details);
-
-    /**
-     * should clear queue silently
-     */
-    virtual void clearQueue();
 
     using cListener::receiveSignal;
     virtual void handleMessageWhenDown(cMessage *msg) override;

@@ -49,10 +49,6 @@ class INET_API ShortcutMac : public MacProtocolBase
     virtual ShortcutMac *findPeer(MacAddress address);
     virtual void sendToPeer(Packet *packet, ShortcutMac *peer);
     virtual void receiveFromPeer(Packet *packet);
-
-    void deleteCurrentTxFrame() override { throw cRuntimeError("model error"); }
-    void dropCurrentTxFrame(PacketDropDetails& details) override { throw cRuntimeError("model error"); }
-    void popTxQueue() override { throw cRuntimeError("model error"); }
 };
 
 } // namespace inet

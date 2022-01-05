@@ -28,7 +28,6 @@ MacProtocolBase::MacProtocolBase()
 
 MacProtocolBase::~MacProtocolBase()
 {
-    delete currentTxFrame;
 }
 
 MacAddress MacProtocolBase::parseMacAddressParameter(const char *addrstr)
@@ -48,7 +47,6 @@ void MacProtocolBase::initialize(int stage)
 {
     LayeredProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        currentTxFrame = nullptr;
         upperLayerInGateId = findGate("upperLayerIn");
         upperLayerOutGateId = findGate("upperLayerOut");
         lowerLayerInGateId = findGate("lowerLayerIn");
@@ -90,47 +88,6 @@ bool MacProtocolBase::isLowerMessage(cMessage *message)
     return message->getArrivalGateId() == lowerLayerInGateId;
 }
 
-void MacProtocolBase::deleteCurrentTxFrame()
-{
-    delete currentTxFrame;
-    currentTxFrame = nullptr;
-}
-
-void MacProtocolBase::dropCurrentTxFrame(PacketDropDetails& details)
-{
-    emit(packetDroppedSignal, currentTxFrame, &details);
-    delete currentTxFrame;
-    currentTxFrame = nullptr;
-}
-
-void MacProtocolBase::popTxQueue()
-{
-    if (currentTxFrame != nullptr)
-        throw cRuntimeError("Model error: incomplete transmission exists");
-    ASSERT(txQueue != nullptr);
-    currentTxFrame = txQueue->dequeuePacket();
-    currentTxFrame->setArrival(getId(), upperLayerInGateId, simTime());
-    take(currentTxFrame);
-}
-
-void MacProtocolBase::flushQueue(PacketDropDetails& details)
-{
-    // code would look slightly nicer with a pop() function that returns nullptr if empty
-    if (txQueue)
-        while (!txQueue->isEmpty()) {
-            auto packet = txQueue->dequeuePacket();
-            emit(packetDroppedSignal, packet, &details); // FIXME this signal lumps together packets from the network and packets from higher layers! separate them
-            delete packet;
-        }
-}
-
-void MacProtocolBase::clearQueue()
-{
-    if (txQueue)
-        while (!txQueue->isEmpty())
-            delete txQueue->dequeuePacket();
-}
-
 void MacProtocolBase::handleMessageWhenDown(cMessage *msg)
 {
     if (!msg->isSelfMessage() && msg->getArrivalGateId() == lowerLayerInGateId) {
@@ -149,19 +106,12 @@ void MacProtocolBase::handleStartOperation(LifecycleOperation *operation)
 
 void MacProtocolBase::handleStopOperation(LifecycleOperation *operation)
 {
-    PacketDropDetails details;
-    details.setReason(INTERFACE_DOWN);
-    if (currentTxFrame)
-        dropCurrentTxFrame(details);
-    flushQueue(details);
     networkInterface->setCarrier(false);
     networkInterface->setState(NetworkInterface::State::DOWN);
 }
 
 void MacProtocolBase::handleCrashOperation(LifecycleOperation *operation)
 {
-    deleteCurrentTxFrame();
-    clearQueue();
     networkInterface->setCarrier(false);
     networkInterface->setState(NetworkInterface::State::DOWN);
 }
