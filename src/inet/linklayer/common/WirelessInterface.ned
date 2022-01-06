@@ -42,11 +42,11 @@ module WirelessInterface extends NetworkInterface like IWirelessInterface
     submodules:
         classifier: <default("OmittedIeee8021dQosClassifier")> like IIeee8021dQosClassifier {
             parameters:
-                @display("p=500,100");
+                @display("p=200,100");
         }
         queue: <default("OmittedPacketQueue")> like IPacketQueue {
             parameters:
-                @display("p=100,100;q=l2queue");
+                @display("p=200,200;q=l2queue");
         }
         mac: <> like IMacProtocol {
             parameters:
