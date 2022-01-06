@@ -39,7 +39,7 @@ Define_Module(XMac);
  */
 void XMac::initialize(int stage)
 {
-    MacProtocolBaseExtQ::initialize(stage);
+    MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         animation = par("animation");
         slotDuration = par("slotDuration");

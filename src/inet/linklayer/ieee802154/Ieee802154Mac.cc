@@ -56,7 +56,7 @@ Define_Module(Ieee802154Mac);
 
 void Ieee802154Mac::initialize(int stage)
 {
-    MacProtocolBaseExtQ::initialize(stage);
+    MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         useMACAcks = par("useMACAcks");
         sifs = par("sifs");
@@ -924,7 +924,7 @@ void Ieee802154Mac::handleStartOperation(LifecycleOperation *operation)
 {
     updateMacState(IDLE_1);
     // manageQueue() to see waiting packets or set to idle if none
-    MacProtocolBaseExtQ::handleStartOperation(operation);
+    MacProtocolBase::handleStartOperation(operation);
 
     cModule *radioModule = check_and_cast<cModule *>(radio.get());
     radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
@@ -942,7 +942,7 @@ void Ieee802154Mac::handleStopOperation(LifecycleOperation *operation)
     cModule *radioModule = check_and_cast<cModule *>(radio.get());
     radioModule->unsubscribe(IRadio::transmissionStateChangedSignal, this);
 
-    MacProtocolBaseExtQ::handleStopOperation(operation);
+    MacProtocolBase::handleStopOperation(operation);
 }
 
 void Ieee802154Mac::handleCrashOperation(LifecycleOperation *operation)
@@ -955,7 +955,7 @@ void Ieee802154Mac::handleCrashOperation(LifecycleOperation *operation)
     cModule *radioModule = check_and_cast<cModule *>(radio.get());
     radioModule->unsubscribe(IRadio::transmissionStateChangedSignal, this);
 
-    MacProtocolBaseExtQ::handleCrashOperation(operation);
+    MacProtocolBase::handleCrashOperation(operation);
 }
 
 void Ieee802154Mac::refreshDisplay() const

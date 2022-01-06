@@ -41,6 +41,12 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
 
     opp_component_ptr<cModule> hostModule;
 
+    /** Currently transmitted frame if any */
+    Packet *currentTxFrame = nullptr;
+
+    /** Messages received from upper layer and to be transmitted later */
+    opp_component_ptr<queueing::IPacketQueue> txQueue;
+
   protected:
     MacProtocolBase();
     virtual ~MacProtocolBase();
@@ -52,6 +58,11 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
 
     virtual MacAddress parseMacAddressParameter(const char *addrstr);
 
+    virtual void deleteCurrentTxFrame();
+    virtual void dropCurrentTxFrame(PacketDropDetails& details);
+
+    virtual void handleMessageWhenDown(cMessage *msg) override;
+
     virtual void sendUp(cMessage *message);
     virtual void sendDown(cMessage *message);
 
@@ -62,12 +73,26 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
     virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
     virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
 
+    /**
+     * should clear queue and emit signal "packetDropped" with entire packets
+     */
+    virtual void flushQueue(PacketDropDetails& details);
+
+    /**
+     * should clear queue silently
+     */
+    virtual void clearQueue();
+
     using cListener::receiveSignal;
-    virtual void handleMessageWhenDown(cMessage *msg) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void handleStartOperation(LifecycleOperation *operation) override;
     virtual void handleStopOperation(LifecycleOperation *operation) override;
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
+
+    queueing::IPacketQueue *getQueue(cGate *gate) const;
+
+    virtual bool canDequeuePacket() const;
+    virtual Packet *dequeuePacket();
 };
 
 } // namespace inet

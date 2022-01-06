@@ -12,7 +12,7 @@
 #ifndef __INET_LMAC_H
 #define __INET_LMAC_H
 
-#include "inet/linklayer/base/MacProtocolBaseExtQ.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/linklayer/lmac/LMacHeader_m.h"
@@ -60,7 +60,7 @@ namespace inet {
  *
  * @ingroup macLayer
  **/
-class INET_API LMac : public MacProtocolBaseExtQ, public IMacProtocol, public queueing::IActivePacketSink
+class INET_API LMac : public MacProtocolBase, public IMacProtocol, public queueing::IActivePacketSink
 {
   private:
     /** @brief Copy constructor is not allowed.
@@ -72,7 +72,7 @@ class INET_API LMac : public MacProtocolBaseExtQ, public IMacProtocol, public qu
 
   public:
     LMac()
-        : MacProtocolBaseExtQ()
+        : MacProtocolBase()
         , SETUP_PHASE(true)
         , slotChange()
         , macState()

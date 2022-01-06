@@ -33,7 +33,7 @@ const MacAddress LMac::LMAC_FREE_SLOT = MacAddress::BROADCAST_ADDRESS;
 
 void LMac::initialize(int stage)
 {
-    MacProtocolBaseExtQ::initialize(stage);
+    MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         slotDuration = par("slotDuration");
         bitrate = par("bitrate");

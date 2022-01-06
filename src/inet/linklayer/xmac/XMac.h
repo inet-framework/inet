@@ -26,7 +26,7 @@
 #include <vector>
 
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/linklayer/base/MacProtocolBaseExtQ.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/linklayer/xmac/XMacHeader_m.h"
@@ -55,7 +55,7 @@ class MacPkt;
  * @author Joaquim Oller and Jan Peter Drees
  *
  */
-class INET_API XMac : public MacProtocolBaseExtQ, public IMacProtocol, public queueing::IActivePacketSink
+class INET_API XMac : public MacProtocolBase, public IMacProtocol, public queueing::IActivePacketSink
 {
   private:
     /** @brief Copy constructor is not allowed.
@@ -67,7 +67,7 @@ class INET_API XMac : public MacProtocolBaseExtQ, public IMacProtocol, public qu
 
   public:
     XMac()
-        : MacProtocolBaseExtQ()
+        : MacProtocolBase()
         , nbTxDataPackets(0), nbTxPreambles(0), nbRxDataPackets(0), nbRxPreambles(0)
         , nbMissedAcks(0), nbRecvdAcks(0), nbDroppedDataPackets(0), nbTxAcks(0)
         , macState(INIT)

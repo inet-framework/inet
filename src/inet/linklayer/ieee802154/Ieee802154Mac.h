@@ -35,7 +35,7 @@
 #ifndef __INET_IEEE802154MAC_H
 #define __INET_IEEE802154MAC_H
 
-#include "inet/linklayer/base/MacProtocolBaseExtQ.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
@@ -55,11 +55,11 @@ namespace inet {
  *
  * \image html csmaFSM.png "CSMA Mac-Layer - finite state machine"
  */
-class INET_API Ieee802154Mac : public MacProtocolBaseExtQ, public IMacProtocol, public queueing::IActivePacketSink
+class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol, public queueing::IActivePacketSink
 {
   public:
     Ieee802154Mac()
-        : MacProtocolBaseExtQ()
+        : MacProtocolBase()
         , nbTxFrames(0)
         , nbRxFrames(0)
         , nbMissedAcks(0)

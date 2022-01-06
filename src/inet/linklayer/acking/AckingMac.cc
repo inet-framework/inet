@@ -47,7 +47,7 @@ AckingMac::~AckingMac()
 
 void AckingMac::initialize(int stage)
 {
-    MacProtocolBaseExtQ::initialize(stage);
+    MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         bitrate = par("bitrate");
         headerLength = par("headerLength");
@@ -185,7 +185,7 @@ void AckingMac::handleSelfMessage(cMessage *message)
             processUpperPacket();
     }
     else {
-        MacProtocolBaseExtQ::handleSelfMessage(message);
+        MacProtocolBase::handleSelfMessage(message);
     }
 }
 

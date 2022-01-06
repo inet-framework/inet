@@ -22,7 +22,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/base/MacProtocolBaseExtQ.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
@@ -38,7 +38,7 @@ using namespace inet::physicallayer;
 /**
  * Base class for Ethernet MAC implementations.
  */
-class INET_API EthernetMacBase : public MacProtocolBaseExtQ, public queueing::IActivePacketSink
+class INET_API EthernetMacBase : public MacProtocolBase, public queueing::IActivePacketSink
 {
   public:
     enum MacTransmitState {

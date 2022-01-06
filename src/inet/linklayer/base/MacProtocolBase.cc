@@ -28,6 +28,7 @@ MacProtocolBase::MacProtocolBase()
 
 MacProtocolBase::~MacProtocolBase()
 {
+    delete currentTxFrame;
 }
 
 MacAddress MacProtocolBase::parseMacAddressParameter(const char *addrstr)
@@ -51,6 +52,7 @@ void MacProtocolBase::initialize(int stage)
         upperLayerOutGateId = findGate("upperLayerOut");
         lowerLayerInGateId = findGate("lowerLayerIn");
         lowerLayerOutGateId = findGate("lowerLayerOut");
+        currentTxFrame = nullptr;
         hostModule = findContainingNode(this);
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION)
@@ -98,6 +100,37 @@ void MacProtocolBase::handleMessageWhenDown(cMessage *msg)
         LayeredProtocolBase::handleMessageWhenDown(msg);
 }
 
+void MacProtocolBase::deleteCurrentTxFrame()
+{
+    delete currentTxFrame;
+    currentTxFrame = nullptr;
+}
+
+void MacProtocolBase::dropCurrentTxFrame(PacketDropDetails& details)
+{
+    emit(packetDroppedSignal, currentTxFrame, &details);
+    delete currentTxFrame;
+    currentTxFrame = nullptr;
+}
+
+void MacProtocolBase::flushQueue(PacketDropDetails& details)
+{
+    // code would look slightly nicer with a pop() function that returns nullptr if empty
+    if (txQueue)
+        while (canDequeuePacket()) {
+            auto packet = dequeuePacket();
+            emit(packetDroppedSignal, packet, &details); // FIXME this signal lumps together packets from the network and packets from higher layers! separate them
+            delete packet;
+        }
+}
+
+void MacProtocolBase::clearQueue()
+{
+    if (txQueue)
+        while (canDequeuePacket())
+            delete dequeuePacket();
+}
+
 void MacProtocolBase::handleStartOperation(LifecycleOperation *operation)
 {
     networkInterface->setState(NetworkInterface::State::UP);
@@ -106,12 +139,21 @@ void MacProtocolBase::handleStartOperation(LifecycleOperation *operation)
 
 void MacProtocolBase::handleStopOperation(LifecycleOperation *operation)
 {
+    PacketDropDetails details;
+    details.setReason(INTERFACE_DOWN);
+    if (currentTxFrame)
+        dropCurrentTxFrame(details);
+    flushQueue(details);
+
     networkInterface->setCarrier(false);
     networkInterface->setState(NetworkInterface::State::DOWN);
 }
 
 void MacProtocolBase::handleCrashOperation(LifecycleOperation *operation)
 {
+    deleteCurrentTxFrame();
+    clearQueue();
+
     networkInterface->setCarrier(false);
     networkInterface->setState(NetworkInterface::State::DOWN);
 }
@@ -119,6 +161,33 @@ void MacProtocolBase::handleCrashOperation(LifecycleOperation *operation)
 void MacProtocolBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
+}
+
+
+queueing::IPacketQueue *MacProtocolBase::getQueue(cGate *gate) const
+{
+    // TODO use findConnectedModule() when the function is updated
+    for (auto g = gate->getPreviousGate(); g != nullptr; g = g->getPreviousGate()) {
+        if (g->getType() == cGate::OUTPUT) {
+            auto m = dynamic_cast<queueing::IPacketQueue *>(g->getOwnerModule());
+            if (m)
+                return m;
+        }
+    }
+    throw cRuntimeError("Gate %s is not connected to a module of type queueing::IPacketQueue", gate->getFullPath().c_str());
+}
+
+bool MacProtocolBase::canDequeuePacket() const
+{
+    return txQueue && txQueue->canPullSomePacket(gate(upperLayerInGateId)->getPathStartGate());
+}
+
+Packet *MacProtocolBase::dequeuePacket()
+{
+    Packet *packet = txQueue->dequeuePacket();
+    take(packet);
+    packet->setArrival(getId(), upperLayerInGateId, simTime());
+    return packet;
 }
 
 } // namespace inet

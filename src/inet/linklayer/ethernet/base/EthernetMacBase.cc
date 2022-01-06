@@ -177,7 +177,7 @@ EthernetMacBase::~EthernetMacBase()
 
 void EthernetMacBase::initialize(int stage)
 {
-    MacProtocolBaseExtQ::initialize(stage);
+    MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         fcsMode = parseFcsMode(par("fcsMode"));
         physInGate = gate("phys$i");
@@ -315,7 +315,7 @@ void EthernetMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cO
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
 
-    MacProtocolBaseExtQ::receiveSignal(source, signalID, obj, details);
+    MacProtocolBase::receiveSignal(source, signalID, obj, details);
 
     if (signalID == POST_MODEL_CHANGE) {
         if (auto gcobj = dynamic_cast<cPostPathCreateNotification *>(obj)) {
@@ -571,7 +571,7 @@ void EthernetMacBase::finish()
 
 void EthernetMacBase::refreshDisplay() const
 {
-    MacProtocolBaseExtQ::refreshDisplay();
+    MacProtocolBase::refreshDisplay();
 
     // icon coloring
     const char *color;

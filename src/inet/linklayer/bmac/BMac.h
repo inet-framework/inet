@@ -16,7 +16,7 @@
 #ifndef __INET_BMAC_H
 #define __INET_BMAC_H
 
-#include "inet/linklayer/base/MacProtocolBaseExtQ.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
@@ -54,7 +54,7 @@ namespace inet {
  * @author Anna Foerster
  *
  */
-class INET_API BMac : public MacProtocolBaseExtQ, public IMacProtocol, public queueing::IActivePacketSink
+class INET_API BMac : public MacProtocolBase, public IMacProtocol, public queueing::IActivePacketSink
 {
   private:
     /** @brief Copy constructor is not allowed.

@@ -50,7 +50,7 @@ CsmaCaMac::~CsmaCaMac()
  */
 void CsmaCaMac::initialize(int stage)
 {
-    MacProtocolBaseExtQ::initialize(stage);
+    MacProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         EV << "Initializing stage 0\n";
         fcsMode = parseFcsMode(par("fcsMode"));
@@ -651,13 +651,13 @@ uint32_t CsmaCaMac::computeFcs(const Ptr<const BytesChunk>& bytes)
 
 void CsmaCaMac::handleStopOperation(LifecycleOperation *operation)
 {
-    MacProtocolBaseExtQ::handleStopOperation(operation);
+    MacProtocolBase::handleStopOperation(operation);
     resetTransmissionVariables();
 }
 
 void CsmaCaMac::handleCrashOperation(LifecycleOperation *operation)
 {
-    MacProtocolBaseExtQ::handleCrashOperation(operation);
+    MacProtocolBase::handleCrashOperation(operation);
     resetTransmissionVariables();
 }
 

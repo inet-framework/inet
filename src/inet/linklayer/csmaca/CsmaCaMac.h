@@ -20,7 +20,7 @@
 
 #include "inet/common/FSMA.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/linklayer/base/MacProtocolBaseExtQ.h"
+#include "inet/linklayer/base/MacProtocolBase.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/linklayer/csmaca/CsmaCaMacHeader_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
@@ -29,7 +29,7 @@
 
 namespace inet {
 
-class INET_API CsmaCaMac : public MacProtocolBaseExtQ, public IMacProtocol, public queueing::IActivePacketSink
+class INET_API CsmaCaMac : public MacProtocolBase, public IMacProtocol, public queueing::IActivePacketSink
 {
   protected:
     /**
