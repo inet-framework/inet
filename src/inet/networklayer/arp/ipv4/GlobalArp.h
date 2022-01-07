@@ -66,6 +66,7 @@ class INET_API GlobalArp : public OperationalBase, public IArp, public cListener
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
     static MacAddress toMulticastMacAddress(Ipv4Address address);
+    static MacAddress toMulticastMacAddress(Ipv6Address address);
 
     /** @name IArp implementation */
     //@{
