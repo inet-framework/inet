@@ -167,6 +167,8 @@ class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollecti
     int classMode(htbClass *cl, long long *diff);
     virtual int getMaxNumPackets() const override { return -1; }
     virtual int getNumPackets() const override;
+    virtual bool canPullSomePacket(cGate *gate) const override;
+    virtual Packet *canPullPacket(cGate *gate) const override { throw cRuntimeError("The canPullPacket() not implemented yet."); }
 
     virtual b getMaxTotalLength() const override { return b(-1); }
     virtual b getTotalLength() const override;

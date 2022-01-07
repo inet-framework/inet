@@ -430,6 +430,11 @@ int HtbScheduler::getNumPackets() const {
     return dequeueSize;
 }
 
+bool HtbScheduler::canPullSomePacket(cGate *gate) const
+{
+    // TODO write a more optimal code
+    return getNumPackets() > 0;
+}
 
 b HtbScheduler::getTotalLength() const
 {
