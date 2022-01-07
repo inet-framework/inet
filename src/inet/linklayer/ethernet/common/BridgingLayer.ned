@@ -27,7 +27,9 @@ import inet.protocolelement.processing.IProcessingDelayLayer;
 module BridgingLayer like IProtocolLayer
 {
     parameters:
+        string macTableModule = default("");
         string interfaceTableModule; // relative module path of the interface table
+        *.macTableModule = default(absPath(this.macTableModule));
         *.interfaceTableModule = default(this.interfaceTableModule);
         @display("i=block/layer");
     gates:
