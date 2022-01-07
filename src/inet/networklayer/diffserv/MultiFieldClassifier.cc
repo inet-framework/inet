@@ -141,7 +141,7 @@ simsignal_t MultiFieldClassifier::pkClassSignal = registerSignal("pkClass");
 
 void MultiFieldClassifier::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    PacketClassifierBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
         numOutGates = gateSize("out");
