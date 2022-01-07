@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-#
-# Runs all simulations recursively from the current working directory
 
 from inet.main import *
 
