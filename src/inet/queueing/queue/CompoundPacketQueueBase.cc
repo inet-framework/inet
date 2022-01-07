@@ -34,8 +34,6 @@ void CompoundPacketQueueBase::initialize(int stage)
         provider = check_and_cast<IPassivePacketSource *>(outputGate->getPathStartGate()->getOwnerModule());
         collection = check_and_cast<IPacketCollection *>(provider);
         packetDropperFunction = createDropperFunction(par("dropperClass"));
-        if (packetDropperFunction == nullptr && (packetCapacity != -1 || dataCapacity != b(-1)))
-            throw cRuntimeError("Queue capacity is limited but packet dropper function is not specified");
         subscribe(packetDroppedSignal, this);
         subscribe(packetCreatedSignal, this);
         WATCH(numCreatedPackets);
