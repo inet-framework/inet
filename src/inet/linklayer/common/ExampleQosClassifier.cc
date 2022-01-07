@@ -146,6 +146,8 @@ void ExampleQosClassifier::handleRegisterService(const Protocol& protocol, cGate
     Enter_Method("handleRegisterService");
     if (!strcmp("in", g->getName()))
         registerService(protocol, gate("out"), servicePrimitive);
+    else if (!strcmp("out", g->getName()))
+        registerService(protocol, gate("in"), servicePrimitive);
     else
         throw cRuntimeError("Unknown gate: %s", g->getName());
 }

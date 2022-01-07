@@ -177,6 +177,8 @@ void QosClassifier::handleRegisterService(const Protocol& protocol, cGate *g, Se
     Enter_Method("handleRegisterService");
     if (!strcmp("in", g->getName()))
         registerService(protocol, gate("out"), servicePrimitive);
+    else if (!strcmp("out", g->getName()))
+        registerService(protocol, gate("in"), servicePrimitive);
     else
         throw cRuntimeError("Unknown gate: %s", g->getName());
 }
@@ -186,6 +188,8 @@ void QosClassifier::handleRegisterProtocol(const Protocol& protocol, cGate *g, S
     Enter_Method("handleRegisterProtocol");
     if (!strcmp("in", g->getName()))
         registerProtocol(protocol, gate("out"), servicePrimitive);
+    else if (!strcmp("out", g->getName()))
+        registerService(protocol, gate("in"), servicePrimitive);
     else
         throw cRuntimeError("Unknown gate: %s", g->getName());
 }
