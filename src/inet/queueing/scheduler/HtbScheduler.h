@@ -23,12 +23,6 @@
 #ifndef __INET_HtbScheduler_H
 #define __INET_HtbScheduler_H
 
-#include "inet/queueing/base/PacketSchedulerBase.h"
-#include "inet/queueing/contract/IPacketCollection.h"
-#include "inet/common/XMLUtils.h"
-
-//#include "inet/common/INETDefs.h"
-
 #include <string>
 #include <set>
 #include <vector>
@@ -36,6 +30,10 @@
 #include <cstdlib>
 #include <algorithm>
 #include <functional>
+
+#include "inet/common/XMLUtils.h"
+#include "inet/queueing/base/PacketSchedulerBase.h"
+#include "inet/queueing/contract/IPacketCollection.h"
 
 namespace inet {
 namespace queueing {
@@ -120,7 +118,6 @@ class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollecti
         simsignal_t classMode;
 
         int classId; // Uniquie, deterministic, ID for class sorting
-
     };
 
     struct waitComp { // Comparator to sort the waiting classes according to their expected mode change time
@@ -155,13 +152,10 @@ class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollecti
 
     cMessage *classModeChangeEvent = nullptr;
 
-
   protected:
     virtual void initialize(int stage) override;
     virtual int schedulePacket() override;
     virtual void handleMessage(cMessage *msg) override;
-
-
 
   public:
     int classMode(htbClass *cl, long long *diff);
@@ -206,7 +200,6 @@ class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollecti
     virtual cMessage *cancelEvent(cMessage *msg) override;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
-
 };
 
 } // namespace queueing

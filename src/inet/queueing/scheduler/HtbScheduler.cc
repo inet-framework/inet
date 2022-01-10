@@ -1,20 +1,20 @@
 // Hierarchical Token Bucket Implementation for OMNeT++ & INET Framework
 // Copyright (C) 2021 Marija Gajić (NTNU), Marcin Bosk (TUM), Susanna Schwarzmann (TU Berlin), Stanislav Lange (NTNU), and Thomas Zinner (NTNU)
-// 
+//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
 // of the License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-// 
+//
 //
 // This implementation is heavily based on the implementation of Linux HTB qdisc by Martin Devera (https://github.com/torvalds/linux/blob/master/net/sched/sch_htb.c)
 // Code base taken from the "PriorityScheduler"
@@ -32,7 +32,8 @@ namespace queueing {
 
 Define_Module(HtbScheduler);
 
-void HtbScheduler::printClass(htbClass *cl) {
+void HtbScheduler::printClass(htbClass *cl)
+{
     EV_INFO << "Class: " << cl->name << endl;
 //    EV_INFO << "   - assigned rate: " << cl->assignedRate << endl;
 //    EV_INFO << "   - ceiling rate: " << cl->ceilingRate << endl;
@@ -50,17 +51,17 @@ void HtbScheduler::printClass(htbClass *cl) {
     EV_INFO << "   - current ctokens: " << cl->ctokens << endl;
     EV_INFO << "   - current class mode: " << cl->mode << endl;
 
-    char actPrios[2*maxHtbNumPrio+1];
+    char actPrios[2 * maxHtbNumPrio + 1];
 
     for (int i = 0; i < maxHtbNumPrio; i++) {
-        actPrios[2*i] = cl->activePriority[i] ? '1' : '0';
-        actPrios[2*i+1] = ';';
+        actPrios[2 * i] = cl->activePriority[i] ? '1' : '0';
+        actPrios[2 * i + 1] = ';';
     }
     actPrios[2*maxHtbNumPrio] = '\0';
 
     EV_INFO << "   - active priorities: " << actPrios << endl;
 
-    if (strstr(cl->name,"leaf")) {
+    if (strstr(cl->name, "leaf")) {
         EV_INFO << "   - leaf priority: " << cl->leaf.priority << endl;
         int leafNumPackets = collections[cl->leaf.queueId]->getNumPackets();
         EV_INFO << "   - current queue level: " << leafNumPackets << endl;
@@ -69,7 +70,8 @@ void HtbScheduler::printClass(htbClass *cl) {
 }
 
 // Gets information from XML config, creates a class (leaf/inner/root) and correctly adds it to tree structure
-HtbScheduler::htbClass *HtbScheduler::createAndAddNewClass(cXMLElement* oneClass, int queueId) {
+HtbScheduler::htbClass *HtbScheduler::createAndAddNewClass(cXMLElement* oneClass, int queueId)
+{
     // Create class, set its name and parents' name
     htbClass* newClass = new htbClass();
     lastGlobalIdUsed += 1;
@@ -78,9 +80,9 @@ HtbScheduler::htbClass *HtbScheduler::createAndAddNewClass(cXMLElement* oneClass
     const char* parentName = oneClass->getFirstChildWithTag("parentId")->getNodeValue();
 
     // Configure class settings - rate, ceil, burst, cburst, quantum, etc.
-    long long rate = atoi(oneClass->getFirstChildWithTag("rate")->getNodeValue())*1e3;
+    long long rate = atoi(oneClass->getFirstChildWithTag("rate")->getNodeValue()) * 1e3;
     newClass->assignedRate = rate;
-    long long ceil = atoi(oneClass->getFirstChildWithTag("ceil")->getNodeValue())*1e3;
+    long long ceil = atoi(oneClass->getFirstChildWithTag("ceil")->getNodeValue()) * 1e3;
     newClass->ceilingRate = ceil;
 
     // The user has an option to configure burst/cburst manually, or it can be configured automatically
@@ -90,28 +92,32 @@ HtbScheduler::htbClass *HtbScheduler::createAndAddNewClass(cXMLElement* oneClass
         burstTemp = atoi(oneClass->getFirstChildWithTag("burst")->getNodeValue()); // Burst specified in Bytes
         if (burstTemp < mtu) {
             throw cRuntimeError("Class %s burst of %llu Bytes cannot be smaller than MTU of %llu Bytes! Error regardless of the check corecctness flag!", newClass->name, burstTemp, mtu);
-        } else if (burstTemp < rate/8000) {
+        }
+        else if (burstTemp < rate / 8000) {
             EV_WARN << "Class " << newClass->name << " burst might be too small for optimal performance! Recommend setting to at least rate/8000 to allow for 1ms burst time." << endl;
             if (valueCorectnessCheck == true) {
-                throw cRuntimeError("Class %s burst of %llu Bytes is smaller than minimum recommended for optimal performance of %llu Bytes!", newClass->name, burstTemp, rate/8000);
+                throw cRuntimeError("Class %s burst of %llu Bytes is smaller than minimum recommended for optimal performance of %llu Bytes!", newClass->name, burstTemp, rate / 8000);
             }
         }
-    } else {
-        burstTemp = std::max(rate/8000, mtu);
+    }
+    else {
+        burstTemp = std::max(rate / 8000, mtu);
         EV_INFO << "User did not specify cburst. Configuring automatically to: " << burstTemp << " Bytes." << endl;
     }
     if (oneClass->getFirstChildWithTag("cburst") != nullptr) {
         cburstTemp = atoi(oneClass->getFirstChildWithTag("cburst")->getNodeValue()); // Cburst specified in Bytes
         if (cburstTemp < mtu) {
             throw cRuntimeError("Class %s cburst of %llu Bytes cannot be smaller than MTU of %llu Bytes! Error regardless of the check corecctness flag!", newClass->name, cburstTemp, mtu);
-        } else if (cburstTemp < ceil/8000) {
+        }
+        else if (cburstTemp < ceil / 8000) {
             EV_WARN << "Class " << newClass->name << " cburst might be too small for optimal performance! Recommend setting to at least ceil/8000 to allow for 1ms burst time." << endl;
             if (valueCorectnessCheck == true) {
-                throw cRuntimeError("Class %s cburst of %llu Bytes is smaller than minimum recommended for optimal performance of %llu Bytes!", newClass->name, cburstTemp, ceil/8000);
+                throw cRuntimeError("Class %s cburst of %llu Bytes is smaller than minimum recommended for optimal performance of %llu Bytes!", newClass->name, cburstTemp, ceil / 8000);
             }
         }
-    } else {
-        cburstTemp = std::max(ceil/8000, mtu);
+    }
+    else {
+        cburstTemp = std::max(ceil / 8000, mtu);
         EV_INFO << "User did not specify cburst. Configuring automatically to: " << cburstTemp << " Bytes." << endl;
     }
 
@@ -124,19 +130,19 @@ HtbScheduler::htbClass *HtbScheduler::createAndAddNewClass(cXMLElement* oneClass
     long long burstChosen = burstTemp;
     long long cburstChosen = cburstTemp;
     if (valueCorectnessAdj == true) {
-        if (burstTemp < ceil/8000) {
-            burstChosen = std::max(burstTemp, rate/8000); // Burst should not be smaller than mtu + 1ms worth of sending at rate
+        if (burstTemp < ceil / 8000) {
+            burstChosen = std::max(burstTemp, rate / 8000); // Burst should not be smaller than mtu + 1ms worth of sending at rate
             EV_WARN << "Burst adjusted to " << burstChosen << "Bytes" << endl;
         }
-        if (cburstTemp < ceil/8000) {
-            cburstChosen = std::max(cburstTemp, ceil/8000); // Cburst should not be smaller than mtu + 1ms worth of sending at ceil
+        if (cburstTemp < ceil / 8000) {
+            cburstChosen = std::max(cburstTemp, ceil / 8000); // Cburst should not be smaller than mtu + 1ms worth of sending at ceil
             EV_WARN << "Cburst adjusted to " << cburstChosen << "Bytes" << endl;
         }
     }
-    
-    long long burst = (((long long) burstChosen*8*1e+9)/(long long)rate);
-    long long cburst = (((long long) cburstChosen*8*1e+9)/(long long)ceil);
-    
+
+    long long burst = (((long long) burstChosen * 8 * 1e+9)/(long long)rate);
+    long long cburst = (((long long) cburstChosen * 8 * 1e+9)/(long long)ceil);
+
     newClass->burstSize = burst;
     newClass->cburstSize = cburst;
     int level = atoi(oneClass->getFirstChildWithTag("level")->getNodeValue()); // Level in the tree structure. 0 = LEAF!!!
@@ -149,19 +155,20 @@ HtbScheduler::htbClass *HtbScheduler::createAndAddNewClass(cXMLElement* oneClass
         quantum = mtu;
     }
     newClass->quantum = quantum;
-    long long mbuffer = atoi(oneClass->getFirstChildWithTag("mbuffer")->getNodeValue())*1e9;
+    long long mbuffer = atoi(oneClass->getFirstChildWithTag("mbuffer")->getNodeValue()) * 1e9;
     newClass->mbuffer = mbuffer;
     newClass->checkpointTime = simTime(); // Initialize to now. It says when was the last time the tokens were updated.
     newClass->tokens = burst;
     newClass->ctokens = cburst;
 
     // Handle different types of classes:
-    if (strstr(newClass->name,"inner")) { // INNER
-        if (strstr(parentName,"root")) {
+    if (strstr(newClass->name, "inner")) { // INNER
+        if (strstr(parentName, "root")) {
             newClass->parent = rootClass;
             rootClass->numChildren += 1;
             innerClasses.push_back(newClass);
-        } else if (strstr(parentName,"inner")) {
+        }
+        else if (strstr(parentName, "inner")) {
             for (auto innerCl : innerClasses) {
                 if (!strcmp(innerCl->name, parentName)) {
                     newClass->parent = innerCl;
@@ -170,12 +177,14 @@ HtbScheduler::htbClass *HtbScheduler::createAndAddNewClass(cXMLElement* oneClass
                 }
             }
         }
-    } else if (strstr(newClass->name,"leaf")) { // LEAF
-        if (strstr(parentName,"root")) {
+    }
+    else if (strstr(newClass->name, "leaf")) { // LEAF
+        if (strstr(parentName, "root")) {
             newClass->parent = rootClass;
             rootClass->numChildren += 1;
             leafClasses.push_back(newClass);
-        } else if (strstr(parentName,"inner")) {
+        }
+        else if (strstr(parentName, "inner")) {
             for (auto innerCl : innerClasses) {
                 if (!strcmp(innerCl->name, parentName)) {
                     newClass->parent = innerCl;
@@ -200,11 +209,12 @@ HtbScheduler::htbClass *HtbScheduler::createAndAddNewClass(cXMLElement* oneClass
             getEnvir()->addResultRecorders(this, newClass->leaf.deficitSig[i], deficitStatisticName, deficitStatisticTemplate);
             emit(newClass->leaf.deficitSig[i], newClass->leaf.deficit[i]);
         }
-
-    } else if (strstr(newClass->name,"root")) { // ROOT
+    }
+    else if (strstr(newClass->name, "root")) { // ROOT
         newClass->parent = NULL;
         rootClass = newClass;
-    } else {
+    }
+    else {
         newClass->parent = NULL;
     }
 
@@ -242,7 +252,6 @@ HtbScheduler::htbClass *HtbScheduler::createAndAddNewClass(cXMLElement* oneClass
     return newClass;
 }
 
-
 void HtbScheduler::initialize(int stage)
 {
     PacketSchedulerBase::initialize(stage); // Initialize the packet scheduler module
@@ -273,8 +282,8 @@ void HtbScheduler::initialize(int stage)
         printClass(rootClass);
 
         // Create all levels
-        for (int i=0;i<maxHtbDepth; i++){
-            levels[i]=new htbLevel();
+        for (int i = 0; i < maxHtbDepth; i++) {
+            levels[i] = new htbLevel();
             levels[i]->levelId = i;
         }
 
@@ -294,13 +303,15 @@ void HtbScheduler::initialize(int stage)
  */
 
 // Wrapper for scheduleAt method
-void HtbScheduler::scheduleAt(simtime_t t, cMessage *msg) {
+void HtbScheduler::scheduleAt(simtime_t t, cMessage *msg)
+{
     Enter_Method("scheduleAt");
     cSimpleModule::scheduleAt(t, msg);
 }
 
 // Wrapper for cancelEvent method
-cMessage *HtbScheduler::cancelEvent(cMessage *msg) {
+cMessage *HtbScheduler::cancelEvent(cMessage *msg)
+{
     Enter_Method("cancelEvent");
     return cSimpleModule::cancelEvent(msg);
 }
@@ -323,7 +334,8 @@ void HtbScheduler::handleMessage(cMessage *message)
 // Refreshes information on class mode when a change in the mode was expected.
 // Not a real omnet event. Called only on dequeue when the next queue to pop is determined.
 // Does all "events" on a level
-simtime_t HtbScheduler::doEvents(int level) {
+simtime_t HtbScheduler::doEvents(int level)
+{
     // No empty events = nothing to do
     if (levels[level]->waitingClasses.empty()) {
         EV_INFO << "doEvents: There were no events for level " << level << endl;
@@ -371,11 +383,11 @@ simtime_t HtbScheduler::doEvents(int level) {
     return simTime(); // If we managed all events, then just return current time.
 }
 
-
 // Returns the number of packets available to dequeue. If there are packets in the queue,
 // but none are available to dequeue will schedule an event to update the interface and
 // "force it" to dequeue again.
-int HtbScheduler::getNumPackets() const {
+int HtbScheduler::getNumPackets() const
+{
     const_cast<HtbScheduler *>(this)->cancelEvent(classModeChangeEvent);
     int fullSize = 0;  // Number of all packets in the queue
     int dequeueSize = 0; // Number of packets available for dequeueing
@@ -398,21 +410,26 @@ int HtbScheduler::getNumPackets() const {
                     if (parentMode == can_send && parent->nextEventTime <= simTime()) {
                         parentOk = true;
                         break;
-                    } else if (parentMode == cant_send) {
+                    }
+                    else if (parentMode == cant_send) {
                         break;
-                    } else if (parentMode == may_borrow && (parentMode == parent->mode || parent->nextEventTime <= simTime())) {
+                    }
+                    else if (parentMode == may_borrow && (parentMode == parent->mode || parent->nextEventTime <= simTime())) {
                         parent = parent->parent;
-                    } else {
+                    }
+                    else {
                         break;
                     }
                 }
-            } else {
+            }
+            else {
                 parentOk = true;
             }
             if (parentOk == true) {
                 if (currClassMode == can_send && leafClasses.at(leafId)->nextEventTime <= simTime()) {
                     dequeueSize += collectionNumPackets;
-                } else if (currClassMode == may_borrow && (currClassMode == leafClasses.at(leafId)->mode || leafClasses.at(leafId)->nextEventTime <= simTime())) {
+                }
+                else if (currClassMode == may_borrow && (currClassMode == leafClasses.at(leafId)->mode || leafClasses.at(leafId)->nextEventTime <= simTime())) {
                     dequeueSize += collectionNumPackets;
                 }
             }
@@ -444,7 +461,6 @@ b HtbScheduler::getTotalLength() const
     return totalLength;
 }
 
-
 Packet *HtbScheduler::getPacket(int index) const
 {
     int origIndex = index;
@@ -457,7 +473,6 @@ Packet *HtbScheduler::getPacket(int index) const
     }
     throw cRuntimeError("Index %i out of range", origIndex);
 }
-
 
 void HtbScheduler::removePacket(Packet *packet)
 {
@@ -478,9 +493,8 @@ void HtbScheduler::removePacket(Packet *packet)
 int HtbScheduler::schedulePacket() {
     int level;
     simtime_t nextEvent;
-
     int dequeueIndex = -1;
-    
+
     nextEvent = simTime();
 
     // Go over all levels until we find something to dequeue
@@ -495,7 +509,6 @@ int HtbScheduler::schedulePacket() {
             if (levels[level]->selfFeeds[prio].size() > 0) { // Next to dequeue is always right. If it's not null, then we can dequeue something there. If it's null, we know there is nothing to dequeue.
                 EV_INFO << "Dequeue - Found class to dequeue on level " << level << " and priority " << prio << endl;
                 dequeueIndex = htbDequeue(prio, level); // Do the dequeue in the HTB tree. Actual dequeue is done by the interface (I think)
-
             }
             if (dequeueIndex != -1) { // We found the first valid thing, just break!
                 break;
@@ -507,11 +520,11 @@ int HtbScheduler::schedulePacket() {
     }
     emit(dequeueIndexSignal, dequeueIndex);
     return dequeueIndex; //index returned to the interface
-
 }
 
 // Activates a class for a priority. Only really called for leafs
-void HtbScheduler::activateClass(htbClass *cl, int priority) {
+void HtbScheduler::activateClass(htbClass *cl, int priority)
+{
     EV_INFO << "activateClass called for class " << cl->name << " on priority " << priority << endl;
     if (!cl->activePriority[priority]) {
         cl->activePriority[priority] = true; // Class is now active for priority
@@ -522,9 +535,9 @@ void HtbScheduler::activateClass(htbClass *cl, int priority) {
     }
 }
 
-
 // Deactivates a class for a priority. Only really called for leafs. Leafs may only be active for one priority.
-void HtbScheduler::deactivateClass(htbClass *cl, int priority) {
+void HtbScheduler::deactivateClass(htbClass *cl, int priority)
+{
     EV_INFO << "deactivateClass called for class " << cl->name << " on priority " << priority << endl;
     if (cl->activePriority[priority]) {
         deactivateClassPrios(cl); // Take care of all other things associated with deactivating a class
@@ -538,14 +551,16 @@ void HtbScheduler::deactivateClass(htbClass *cl, int priority) {
 }
 
 // Inform the htb about a newly enqueued packet. Enqueueing is actually done in the classifier.
-void HtbScheduler::htbEnqueue(int index) {
+void HtbScheduler::htbEnqueue(int index)
+{
     htbClass *currLeaf = leafClasses.at(index);
     activateClass(currLeaf, currLeaf->leaf.priority);
     return;
 }
 
 // Gets a leaf that can be dequeued from a priority and level. Level does not have to be 0 here
-HtbScheduler::htbClass* HtbScheduler::getLeaf(int priority, int level) {
+HtbScheduler::htbClass* HtbScheduler::getLeaf(int priority, int level)
+{
     htbClass *cl = levels[level]->nextToDequeue[priority];
     printClass(cl);
     if (levels[level]->selfFeeds[priority].find(cl) == levels[level]->selfFeeds[priority].cend()) {
@@ -559,11 +574,11 @@ HtbScheduler::htbClass* HtbScheduler::getLeaf(int priority, int level) {
         printClass(cl);
     }
 
-
     // If there is nothing to dequeue just return NULL (actually)
     if (cl == NULL) {
         return cl;
     }
+
     // Otherwise, follow the tree to the leaf
     while (cl->level > 0) {
         htbClass *parent = cl;
@@ -586,14 +601,13 @@ HtbScheduler::htbClass* HtbScheduler::getLeaf(int priority, int level) {
 }
 
 // Determine which leaf queue to dequeue based on the htb tree. Based heavily on Linux HTB source code
-int HtbScheduler::htbDequeue(int priority, int level) {
+int HtbScheduler::htbDequeue(int priority, int level)
+{
     int retIndex = -1;
     htbClass *cl = getLeaf(priority, level); // Get first leaf we could find
     htbClass *start = cl;
-
     Packet *thePacketToPop = nullptr;
-
-    htbClass * delClass = nullptr;
+    htbClass *delClass = nullptr;
 
     do {
         if (delClass == start) {   // Fix start if we just deleted it
@@ -610,10 +624,10 @@ int HtbScheduler::htbDequeue(int priority, int level) {
             delClass = cl;
             next = getLeaf(priority, level); // Get next leaf available
 
-
             cl = next;
             continue;
         }
+
         thePacketToPop = providers[cl->leaf.queueId]->canPullPacket(inputGates[cl->leaf.queueId]);
 
         if (thePacketToPop != nullptr) {
@@ -642,13 +656,16 @@ int HtbScheduler::htbDequeue(int priority, int level) {
                         tempNode->parent->inner.nextToDequeue[priority] = *std::next(tempNode->parent->inner.innerFeeds[priority].find(tempNode));
                         if (tempNode->parent->inner.nextToDequeue[priority] == *tempNode->parent->inner.innerFeeds[priority].cend()) {
                             tempNode->parent->inner.nextToDequeue[priority] = *tempNode->parent->inner.innerFeeds[priority].cbegin();
-                        } else {
+                        }
+                        else {
                             break;
                         }
-                    } else {
+                    }
+                    else {
                         break;
                     }
-                } else if (levels[tempNode->level]->selfFeeds[priority].size() > 1 && tempNode->mode == can_send) {
+                }
+                else if (levels[tempNode->level]->selfFeeds[priority].size() > 1 && tempNode->mode == can_send) {
                     if (levels[tempNode->level]->nextToDequeue[priority] == cl) {
                         levels[tempNode->level]->nextToDequeue[priority] = *std::next(levels[tempNode->level]->selfFeeds[priority].find(tempNode));
                         if (levels[tempNode->level]->nextToDequeue[priority] == *levels[tempNode->level]->selfFeeds[priority].cend()) {
@@ -659,7 +676,8 @@ int HtbScheduler::htbDequeue(int priority, int level) {
                         }
                     }
                     break;
-                } else if (levels[tempNode->level]->selfFeeds[priority].size() == 1 && tempNode->mode == can_send) {
+                }
+                else if (levels[tempNode->level]->selfFeeds[priority].size() == 1 && tempNode->mode == can_send) {
                     if (levels[tempNode->level]->nextToDequeue[priority] != tempNode) {
                         throw cRuntimeError("We were green and got selected but were not next to dequeue!");
                     }
@@ -672,12 +690,12 @@ int HtbScheduler::htbDequeue(int priority, int level) {
         if (collections[cl->leaf.queueId]->getNumPackets() <= 1) {
             deactivateClass(cl, priority); // Called for leaf. Leaf can be active for only one prio
         }
-        
     }
     return retIndex;
 }
 
-void HtbScheduler::printLevel(htbLevel *level, int index) {
+void HtbScheduler::printLevel(htbLevel *level, int index)
+{
     EV_INFO << "Self feeds for Level:  " << level->levelId << endl;
     for (int i = 0; i < maxHtbNumPrio; i++) {
         std::string printSet = "";
@@ -688,7 +706,8 @@ void HtbScheduler::printLevel(htbLevel *level, int index) {
         printSet.append(" Next to dequeue: ");
         if (level->nextToDequeue[i] != NULL) {
             printSet.append(level->nextToDequeue[i]->name);
-        } else {
+        }
+        else {
             printSet.append("None");
         }
         EV_INFO << "   - Self feed for priority " << i  << ": " << printSet << endl;
@@ -696,7 +715,8 @@ void HtbScheduler::printLevel(htbLevel *level, int index) {
     EV_INFO << "Wait queue for level " << level->levelId << " contains " << level->waitingClasses.size() << " elements" << endl;
 }
 
-void HtbScheduler::printInner(htbClass *cl) {
+void HtbScheduler::printInner(htbClass *cl)
+{
     EV_INFO << "Inner feeds for Inner Class:  " << cl->name << endl;
     for (int i = 0; i < maxHtbNumPrio; i++) {
         std::string printSet = "";
@@ -707,13 +727,13 @@ void HtbScheduler::printInner(htbClass *cl) {
         printSet.append(" Next to dequeue: ");
         if (cl->inner.nextToDequeue[i] != NULL) {
             printSet.append(cl->inner.nextToDequeue[i]->name);
-        } else {
+        }
+        else {
             printSet.append("None");
         }
         EV_INFO << "   - Inner feed for priority " << i  << ": " << printSet << endl;
     }
 }
-
 
 inline long HtbScheduler::htb_lowater(htbClass *cl)
 {
@@ -726,15 +746,13 @@ inline long HtbScheduler::htb_lowater(htbClass *cl)
 inline long HtbScheduler::htb_hiwater(htbClass *cl)
 {
     if (htb_hysteresis)
-        return cl->mode == can_send? -cl->burstSize : 0;
+        return cl->mode == can_send ? -cl->burstSize : 0;
     else
         return 0;
 }
 
-
-
-
-int HtbScheduler::classMode(htbClass *cl, long long *diff) {
+int HtbScheduler::classMode(htbClass *cl, long long *diff)
+{
     long long toks;
     if ((toks = (cl->ctokens + *diff)) < htb_lowater(cl)) {
         *diff = -toks;
@@ -747,8 +765,8 @@ int HtbScheduler::classMode(htbClass *cl, long long *diff) {
     return may_borrow;
 }
 
-
-void HtbScheduler::activateClassPrios(htbClass *cl) {
+void HtbScheduler::activateClassPrios(htbClass *cl)
+{
     EV_INFO << "activateClassPrios called for class " << cl->name << endl;
     htbClass *parent = cl->parent;
 
@@ -789,20 +807,21 @@ void HtbScheduler::activateClassPrios(htbClass *cl) {
     }
 }
 
-void HtbScheduler::deactivateClassPrios(htbClass *cl) {
+void HtbScheduler::deactivateClassPrios(htbClass *cl)
+{
     EV_INFO << "deactivateClassPrios called for class " << cl->name << endl;
     htbClass *parent = cl->parent;
 
     bool newActivity[8];
     bool tempActivity[8];
     std::copy(std::begin(cl->activePriority), std::end(cl->activePriority), std::begin(newActivity));
-    
+
     while (cl->mode == may_borrow && parent != NULL && std::any_of(std::begin(newActivity), std::end(newActivity), [](bool b) {return b;})) {
         std::copy(std::begin(newActivity), std::end(newActivity), std::begin(tempActivity));
         for (int i = 0; i < maxHtbNumPrio; i++) {
             newActivity[i] = false;
         }
-        
+
         for (int i = 0; i < maxHtbNumPrio; i++) { // i = priority level
             if (tempActivity[i]) {
                 if (parent->inner.innerFeeds[i].find(cl) != parent->inner.innerFeeds[i].cend()) {
@@ -831,7 +850,8 @@ void HtbScheduler::deactivateClassPrios(htbClass *cl) {
     }
 }
 
-void HtbScheduler::updateClassMode(htbClass *cl, long long *diff) {
+void HtbScheduler::updateClassMode(htbClass *cl, long long *diff)
+{
     int newMode = classMode(cl, diff);
     EV_INFO << "updateClassMode - oldMode = " << cl->mode << "; newMode = " << newMode << endl;
     if (newMode == cl->mode)
@@ -848,7 +868,8 @@ void HtbScheduler::updateClassMode(htbClass *cl, long long *diff) {
            EV_INFO << "updateClassMode - Activate priorities for class: " << cl->name << " in new mode " << cl->mode << endl;
             activateClassPrios(cl);
         }
-    } else {
+    }
+    else {
         cl->mode = newMode;
         emit(cl->classMode, cl->mode);
     }
@@ -860,7 +881,7 @@ void HtbScheduler::accountTokens(htbClass *cl, long long bytes, long long diff) 
     if (toks > cl->burstSize) {
         toks = cl->burstSize;
     }
-    toks-= bytes*8*1e9/cl->assignedRate;
+    toks -= bytes * 8 * 1e9 / cl->assignedRate;
     if (toks <= -cl->mbuffer)
         toks = 1 - cl->mbuffer;
     cl->tokens = toks;
@@ -868,13 +889,13 @@ void HtbScheduler::accountTokens(htbClass *cl, long long bytes, long long diff) 
     return;
 }
 
-void HtbScheduler::accountCTokens(htbClass *cl, long long bytes, long long diff) {
-
+void HtbScheduler::accountCTokens(htbClass *cl, long long bytes, long long diff)
+{
     long long toks = diff + cl->ctokens;
     if (toks > cl->cburstSize) {
         toks = cl->cburstSize;
     }
-    toks-= bytes*8*1e9/cl->ceilingRate;
+    toks -= bytes * 8 * 1e9 / cl->ceilingRate;
     if (toks <= -cl->mbuffer)
         toks = 1 - cl->mbuffer;
     cl->ctokens = toks;
@@ -882,29 +903,32 @@ void HtbScheduler::accountCTokens(htbClass *cl, long long bytes, long long diff)
     return;
 }
 
-void HtbScheduler::htbAddToWaitTree(htbClass *cl, long long delay) {
+void HtbScheduler::htbAddToWaitTree(htbClass *cl, long long delay)
+{
     cl->nextEventTime = simTime() + SimTime(delay, SIMTIME_NS);
     if (levels[cl->level]->waitingClasses.find(cl) != levels[cl->level]->waitingClasses.cend()) {
         throw cRuntimeError("Class added to waiting classes even though it was already there!");
     }
     levels[cl->level]->waitingClasses.insert(cl);
     printLevel(levels[cl->level], cl->level);
-
 }
 
-void HtbScheduler::htbRemoveFromWaitTree(htbClass *cl) {
+void HtbScheduler::htbRemoveFromWaitTree(htbClass *cl)
+{
     std::multiset<htbClass*, waitComp>::iterator hit(levels[cl->level]->waitingClasses.find(cl));
     while (hit != levels[cl->level]->waitingClasses.cend()) {
         if (*hit == cl) {
             levels[cl->level]->waitingClasses.erase(hit);
             break;
-        } else {
+        }
+        else {
             hit++;
         }
     }
 }
 
-void HtbScheduler::chargeClass(htbClass *leafCl, int borrowLevel, Packet *packetToDequeue) {
+void HtbScheduler::chargeClass(htbClass *leafCl, int borrowLevel, Packet *packetToDequeue)
+{
     long long bytes = (long long) packetToDequeue->getByteLength() + 7;
     int old_mode;
     long long diff;
@@ -917,14 +941,15 @@ void HtbScheduler::chargeClass(htbClass *leafCl, int borrowLevel, Packet *packet
             throw cRuntimeError("Updating a class that was already updated exactly now!");
         }
         diff = (long long) std::min((simTime() - cl->checkpointTime).inUnit(SIMTIME_NS), (int64_t)cl->mbuffer);
-        EV_INFO << "chargeClass: Diff1 is: " << diff << "; Packet Bytes: " << bytes << "Used toks:" << bytes*8*1e9/cl->assignedRate << "Used ctoks:" << bytes*8*1e9/cl->ceilingRate << endl;
+        EV_INFO << "chargeClass: Diff1 is: " << diff << "; Packet Bytes: " << bytes << "Used toks:" << bytes * 8 * 1e9 / cl->assignedRate << "Used ctoks:" << bytes * 8 * 1e9 / cl->ceilingRate << endl;
         if (cl->level >= borrowLevel) {
             accountTokens(cl, bytes, diff);
-        } else {
+        }
+        else {
             cl->tokens += diff; /* we moved t_c; update tokens */
             emit(cl->tokenBucket, (long) cl->tokens);
         }
-        EV_INFO << "chargeClass: Diff2 is: " << diff << "; Packet Bytes: " << bytes << "Used toks:" << bytes*8*1e9/cl->assignedRate << "Used ctoks:" << bytes*8*1e9/cl->ceilingRate << endl;
+        EV_INFO << "chargeClass: Diff2 is: " << diff << "; Packet Bytes: " << bytes << "Used toks:" << bytes * 8 * 1e9 / cl->assignedRate << "Used ctoks:" << bytes * 8 * 1e9 / cl->ceilingRate << endl;
         accountCTokens(cl, bytes, diff);
         cl->checkpointTime = simTime();
 
@@ -946,7 +971,6 @@ void HtbScheduler::chargeClass(htbClass *leafCl, int borrowLevel, Packet *packet
     return;
 }
 
-
 void HtbScheduler::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signal));
@@ -961,11 +985,6 @@ void HtbScheduler::receiveSignal(cComponent *source, simsignal_t signal, cObject
         throw cRuntimeError("Unknown signal");
 }
 
-
 } // namespace queueing
 } // namespace inet
-
-
-
-
 

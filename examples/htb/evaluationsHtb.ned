@@ -19,11 +19,9 @@
 package inet.examples.htb;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
-import inet.node.internetcloud.InternetCloud;
-//import inet.applications.generic.linkAdjuster;
+
 
 network htbEvaluation
 {
@@ -42,20 +40,16 @@ network htbEvaluation
         configurator: Ipv4NetworkConfigurator {
             @display("p=10,10;is=s");
         }
-        
-       
+
         hostFDO[nFDO]: StandardHost {
             @display("p=140,203");
         }
-    
+
         serverFDO: StandardHost {
             @display("p=565,203");
         }
-  
+
     connections:
-
-        hostFDO[0].pppg++ <--> connFIX0: C {  } <--> serverFDO.pppg++;
-
-        
-        
+        hostFDO[0].pppg++ <--> connFIX0: C <--> serverFDO.pppg++;
 }
+

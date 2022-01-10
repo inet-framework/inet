@@ -29,27 +29,27 @@ simple HtbScheduler extends PacketSchedulerBase like IPacketScheduler
 {
     parameters:
         xml htbTreeConfig; // The htb tree structure
-        
+
         bool htbHysterisis = default(false);
 
-		int mtu @unit(B) = default(1500B);
-		bool checkHTBTreeValuesForCorectness = default(true); // Check if some important (burst, cburst, quantum) inputted values in the XML Tree are correct. Will throw errors on incorrect values!
-		bool adjustHTBTreeValuesForCorectness = default(true); // Adjust some important (burst, cburst, quantum) inputted values in the XML Tree if they are incorrect. Will just adjust incorrect values if the above check is disabled
-        
+        int mtu @unit(B) = default(1500B);
+        bool checkHTBTreeValuesForCorectness = default(true); // Check if some important (burst, cburst, quantum) inputted values in the XML Tree are correct. Will throw errors on incorrect values!
+        bool adjustHTBTreeValuesForCorectness = default(true); // Adjust some important (burst, cburst, quantum) inputted values in the XML Tree if they are incorrect. Will just adjust incorrect values if the above check is disabled
+
         @class(HtbScheduler);
-	
-		@signal[dequeueIndex](type=long);
-		@statistic[dequeueIndex](title="Index of a queue that just dequeued"; record=vector);
-		
-	
-		@signal[class-*-tokenLevel](type=long);
-		@statisticTemplate[tokenLevel](record=vector);
-		@signal[class-*-ctokenLevel](type=long);
-		@statisticTemplate[ctokenLevel](record=vector);
-		
-		@signal[class-*-deficit*](type=long);
-		@statisticTemplate[deficit](record=vector);
-		
-		@signal[class-*-mode](type=long);
-		@statisticTemplate[classMode](record=vector);
+
+        @signal[dequeueIndex](type=long);
+        @statistic[dequeueIndex](title="Index of a queue that just dequeued"; record=vector);
+
+
+        @signal[class-*-tokenLevel](type=long);
+        @statisticTemplate[tokenLevel](record=vector);
+        @signal[class-*-ctokenLevel](type=long);
+        @statisticTemplate[ctokenLevel](record=vector);
+
+        @signal[class-*-deficit*](type=long);
+        @statisticTemplate[deficit](record=vector);
+
+        @signal[class-*-mode](type=long);
+        @statisticTemplate[classMode](record=vector);
 }

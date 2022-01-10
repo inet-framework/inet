@@ -20,10 +20,10 @@
 
 package inet.queueing.queue;
 
-import inet.queueing.contract.IPacketBuffer;
 import inet.queueing.contract.IPacketClassifier;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketScheduler;
+
 
 module HtbQueue extends CompoundPacketQueueBase
 {
