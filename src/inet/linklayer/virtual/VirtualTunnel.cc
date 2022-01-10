@@ -99,6 +99,13 @@ void VirtualTunnel::handleMessage(cMessage *message)
     }
 }
 
+void VirtualTunnel::pushPacket(Packet *packet, cGate *gate)
+{
+    Enter_Method("pushPacket");
+    take(packet);
+    handleMessage(packet);
+}
+
 #ifdef INET_WITH_ETHERNET
 void VirtualTunnel::socketDataArrived(EthernetSocket *socket, Packet *packet)
 {
