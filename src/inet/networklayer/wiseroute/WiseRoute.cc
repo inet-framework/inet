@@ -94,8 +94,11 @@ void WiseRoute::initialize(int stage)
 
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         auto ie = interfaceTable->findFirstNonLoopbackInterface();
-        if (ie != nullptr)
+        if (ie != nullptr) {
             myNetwAddr = ie->getNetworkAddress();
+            if (myNetwAddr.isUnspecified())
+                myNetwAddr = ie->getModulePathAddress();
+        }
         else
             throw cRuntimeError("No non-loopback interface found!");
 

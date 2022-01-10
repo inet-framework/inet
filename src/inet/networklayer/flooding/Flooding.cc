@@ -73,8 +73,11 @@ void Flooding::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         auto ie = interfaceTable->findFirstNonLoopbackInterface();
-        if (ie != nullptr)
+        if (ie != nullptr) {
             myNetwAddr = ie->getNetworkAddress();
+            if (myNetwAddr.isUnspecified())
+                myNetwAddr = ie->getModulePathAddress();
+        }
         else
             throw cRuntimeError("No non-loopback interface found!");
     }
