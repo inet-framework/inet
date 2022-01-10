@@ -81,7 +81,7 @@ else:
     df = pivoted["mean"]
     errors_df = pivoted["<lambda>"]
 
-legend_cols, _ = utils.extract_label_columns(df)
+legend_cols, _ = utils.extract_label_columns(df, props)
 
 df /= 1000000
 

@@ -4,7 +4,7 @@
         <input pattern="results/General-*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/scatterchart.png" id="1" name="FreeSpacePathLoss, TwoRayGroundReflection and TwoRayInterference" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/scatterchart.png" id="581863377" name="FreeSpacePathLoss, TwoRayGroundReflection and TwoRayInterference" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
@@ -79,7 +79,7 @@ else:
     df = pivoted["mean"]
     errors_df = pivoted["<lambda>"]
 
-legend_cols, _ = utils.extract_label_columns(df)
+legend_cols, _ = utils.extract_label_columns(df, props)
 
 p = plot if chart.is_native_chart() else plt
 
@@ -721,7 +721,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.0"/>
             <property name="cap_size" value="4"/>
-            <property name="filter" value="type =~ scalar AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ PathLossShowcase AND name =~ receptionPower:last AND (&#10;itervar:pathlosstype =~ &quot;FreeSpacePathLoss&quot; OR itervar:pathlosstype =~ &quot;TwoRayGroundReflection&quot; OR itervar:pathlosstype =~ &quot;TwoRayInterference&quot; &#10;)"/>
+            <property name="filter" value="type =~ scalar AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ PathLossShowcase AND name =~ receptionPower:last AND (&#10;    (runattr:measurement =~ &quot;$distance=*, $pathlosstype=\&quot;FreeSpacePathLoss\&quot;&quot;) OR&#10;runattr:measurement =~ &quot;$distance=*, $pathlosstype=\&quot;TwoRayGroundReflection\&quot;&quot; OR&#10;runattr:measurement =~ &quot;$distance=*, $pathlosstype=\&quot;TwoRayInterference\&quot;&quot;)"/>
             <property name="linestyle" value="solid"/>
             <property name="markersize" value="5"/>
             <property name="drawstyle" value="auto"/>
@@ -737,7 +737,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="10"/>
             <property name="matplotlibrc" value="savefig.transparent : True&#10;figure.figsize : 10,6"/>
         </chart>
-        <chart icon="icons/full/obj/scatterchart.png" id="2" name="FreeSpacePathLoss, LogNormalShadowing and RicianFading" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/scatterchart.png" id="944859038" name="FreeSpacePathLoss, LogNormalShadowing and RicianFading" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
@@ -812,7 +812,7 @@ else:
     df = pivoted["mean"]
     errors_df = pivoted["<lambda>"]
 
-legend_cols, _ = utils.extract_label_columns(df)
+legend_cols, _ = utils.extract_label_columns(df, props)
 
 p = plot if chart.is_native_chart() else plt
 
@@ -1454,7 +1454,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.0"/>
             <property name="cap_size" value="4"/>
-            <property name="filter" value="type =~ scalar AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ PathLossShowcase AND name =~ receptionPower:last AND (&#10;itervar:pathlosstype =~ &quot;FreeSpacePathLoss&quot; OR itervar:pathlosstype =~ &quot;LogNormalShadowing&quot;  OR itervar:pathlosstype =~ &quot;RicianFading&quot; &#10;)"/>
+            <property name="filter" value="type =~ scalar AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND module =~ PathLossShowcase AND name =~ receptionPower:last AND (&#10;    (runattr:measurement =~ &quot;$distance=*, $pathlosstype=\&quot;FreeSpacePathLoss\&quot;&quot;) OR&#10;runattr:measurement =~ &quot;$distance=*, $pathlosstype=\&quot;LogNormalShadowing\&quot;&quot; OR&#10;runattr:measurement =~ &quot;$distance=*, $pathlosstype=\&quot;RicianFading\&quot;&quot;)"/>
             <property name="linestyle" value="solid"/>
             <property name="markersize" value="5"/>
             <property name="drawstyle" value="auto"/>

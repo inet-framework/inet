@@ -5,7 +5,7 @@
         <input pattern="results/General-*.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/scatterchart.png" id="1424" name="SNIR vs distance" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/scatterchart.png" id="292679650" name="SNIR vs distance" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
@@ -69,7 +69,7 @@ else:
     df = pivoted["mean"]
     errors_df = pivoted["<lambda>"]
 
-legend_cols, _ = utils.extract_label_columns(df)
+legend_cols, _ = utils.extract_label_columns(df, props)
 
 p = plot if chart.is_native_chart() else plt
 
@@ -705,7 +705,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="10"/>
             <property name="matplotlibrc" value="grid.linestyle : --&#10;savefig.transparent : True"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1482" name="PER vs SNIR" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="409236438" name="PER vs SNIR" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, plot, vectorops as ops
 import matplotlib.pyplot as plt
@@ -1322,7 +1322,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="10"/>
             <property name="matplotlibrc" value="grid.linestyle : --&#10;savefig.transparent : True"/>
         </chart>
-        <chart icon="icons/full/obj/scatterchart.png" id="1427" name="PER vs distance" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/scatterchart.png" id="1095649835" name="PER vs distance" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
@@ -1386,7 +1386,7 @@ else:
     df = pivoted["mean"]
     errors_df = pivoted["<lambda>"]
 
-legend_cols, _ = utils.extract_label_columns(df)
+legend_cols, _ = utils.extract_label_columns(df, props)
 
 p = plot if chart.is_native_chart() else plt
 
@@ -2022,7 +2022,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="10"/>
             <property name="matplotlibrc" value="grid.linestyle : --&#10;savefig.transparent : True"/>
         </chart>
-        <chart icon="icons/full/obj/scatterchart.png" id="1429" name="Effective bitrate vs distance" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/scatterchart.png" id="783220939" name="Effective bitrate vs distance" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
@@ -2099,7 +2099,7 @@ else:
     df = pivoted["mean"]
     errors_df = pivoted["<lambda>"]
 
-legend_cols, _ = utils.extract_label_columns(df)
+legend_cols, _ = utils.extract_label_columns(df, props)
 
 p = plot if chart.is_native_chart() else plt
 

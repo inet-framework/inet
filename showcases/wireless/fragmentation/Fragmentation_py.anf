@@ -60,7 +60,7 @@ for c in groups + series:
 df = df.set_index('configname')
 df = df.reindex(['DCFnofrag','DCFfrag','HCFfrag','HCFfragblockack'])
 
-names = utils.get_names_for_title(df, props)
+#names = utils.get_names_for_title(df, props)
 
 df.plot(kind='bar', ax=plt.gca(), zorder=2, align='center', width=0.8, figsize=(10,6))
 plt.grid(axis='y', linestyle='--')
@@ -94,6 +94,8 @@ for p in ax.patches:
         ax.annotate(str(int(p.get_height())), (p.get_x() + p.get_width() / 2, p.get_height() + 200),
                     horizontalalignment='center', verticalalignment='top', color='black', size=12)
     i += 1
+    
+ax.legend().remove()
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -1274,7 +1276,7 @@ else:
     df = pivoted["mean"]
     errors_df = pivoted["<lambda>"]
 
-legend_cols, _ = utils.extract_label_columns(df)
+legend_cols, _ = utils.extract_label_columns(df, props)
 
 p = plot if chart.is_native_chart() else plt
 
@@ -1900,7 +1902,7 @@ utils.export_data_if_needed(df, props)
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value=""/>
             <property name="grid_density" value="Major"/>
-            <property name="xaxis_itervar" value=""/>
+            <property name="xaxis_itervar" value="packetSize"/>
             <property name="yaxis_min" value=""/>
             <property name="image_export_filename" value="onlypacketsize"/>
             <property name="xaxis_min" value=""/>
@@ -1915,7 +1917,7 @@ utils.export_data_if_needed(df, props)
             <property name="marker" value="none"/>
             <property name="plt.style" value="default"/>
             <property name="legend_show" value="false"/>
-            <property name="iso_itervar" value=""/>
+            <property name="iso_itervar" value="experiment"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
@@ -1987,7 +1989,7 @@ else:
     df = pivoted["mean"]
     errors_df = pivoted["<lambda>"]
 
-legend_cols, _ = utils.extract_label_columns(df)
+legend_cols, _ = utils.extract_label_columns(df, props)
 
 p = plot if chart.is_native_chart() else plt
 
@@ -2615,7 +2617,7 @@ utils.export_data_if_needed(df, props)
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value=""/>
             <property name="grid_density" value="Major"/>
-            <property name="xaxis_itervar" value=""/>
+            <property name="xaxis_itervar" value="packetSize"/>
             <property name="yaxis_min" value=""/>
             <property name="image_export_filename" value="packetsize"/>
             <property name="xaxis_min" value=""/>
@@ -2630,7 +2632,7 @@ utils.export_data_if_needed(df, props)
             <property name="marker" value="none"/>
             <property name="plt.style" value="default"/>
             <property name="legend_show" value="true"/>
-            <property name="iso_itervar" value=""/>
+            <property name="iso_itervar" value="experiment"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
@@ -2702,7 +2704,7 @@ else:
     df = pivoted["mean"]
     errors_df = pivoted["<lambda>"]
 
-legend_cols, _ = utils.extract_label_columns(df)
+legend_cols, _ = utils.extract_label_columns(df, props)
 
 p = plot if chart.is_native_chart() else plt
 
@@ -3323,7 +3325,7 @@ utils.export_data_if_needed(df, props)
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value=""/>
             <property name="grid_density" value="Major"/>
-            <property name="xaxis_itervar" value=""/>
+            <property name="xaxis_itervar" value="threshold"/>
             <property name="yaxis_min" value=""/>
             <property name="image_export_filename" value="threshold"/>
             <property name="xaxis_min" value=""/>
@@ -3338,7 +3340,7 @@ utils.export_data_if_needed(df, props)
             <property name="marker" value="none"/>
             <property name="plt.style" value="default"/>
             <property name="legend_show" value="true"/>
-            <property name="iso_itervar" value=""/>
+            <property name="iso_itervar" value="experiment"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
