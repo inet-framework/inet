@@ -110,7 +110,7 @@
 /examples/ethernet/clocksynchronization/, -f omnetpp.ini -c SynchronizedBySimulationTime -r 0, 10ms, b1aa-0eb7/tplx;772a-528b/~tNl;478a-1ee5/~tND;1249-171e/tyf, PASS, ethernet layered tsn
 /examples/ethernet/clocksynchronization/, -f omnetpp.ini -c UnsynchronizedClocks -r 0,         10ms, 649e-c5a1/tplx;277f-0e05/~tNl;1d4b-ad82/~tND;2535-445e/tyf, PASS, ethernet layered tsn
 /examples/ethernet/clocksynchronization/, -f omnetpp.ini -c SynchronizedClocksBySimpleClockSynchronizer -r 0, 10ms, 07e3-daf1/tplx;b9c8-5318/~tNl;d4da-15eb/~tND;e06c-4cb2/tyf, PASS, ethernet layered tsn
-/examples/ethernet/clocksynchronization/, -f omnetpp.ini -c SynchronizedClocksByGPTP -r 0,     10ms, b269-6bd2/tplx;1002-0118/~tNl;e9a0-4bc6/~tND;de44-fd36/tyf, PASS, ethernet layered tsn gptp
+/examples/ethernet/clocksynchronization/, -f omnetpp.ini -c SynchronizedClocksByGPTP -r 0,     10ms, 5d00-dbe0/tplx;0c7b-1915/~tNl;beaf-989a/~tND;7cd3-a651/tyf, PASS, ethernet layered tsn gptp
 
 /examples/ethernet/invehicle/,       -f omnetpp.ini -c NoPriorityQueueing -r 0,             100ms,   7871-c190/tplx;0d7a-3ed2/~tNl;835c-9cb2/~tND;f42e-5c44/tyf, PASS, ethernet layered tsn
 /examples/ethernet/invehicle/,       -f omnetpp.ini -c NoTAS -r 0,                          100ms,   7871-c190/tplx;0d7a-3ed2/~tNl;835c-9cb2/~tND;3ef5-cd20/tyf, PASS, ethernet layered tsn
@@ -138,9 +138,9 @@
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0,          50000s,       ae30-1486/tplx;59f2-6541/~tNl;9aa6-3c97/tyf, PASS, EthernetMac
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,        50000s,       9a36-e378/tplx;37b0-2c44/~tNl;cd0a-5832/tyf, PASS, EthernetMac
 
-/examples/ieee8021as/,               -f omnetpp.ini -c Network -r 0,                     200s,       dbdf-e1e6/tplx;f90e-68a4/~tNl;3bf8-272c/~tND;b91b-ddf3/tyf, PASS, gptp
-/examples/ieee8021as/,               -f omnetpp.ini -c Network_with_cross_traffic -r 0,  200s,       e61c-b545/tplx;3a22-4398/~tNl;b567-d931/~tND;c332-acd1/tyf, PASS, gptp
-/examples/ieee8021as/,               -f omnetpp.ini -c Network_daisy_chain -r 0,         200s,       0998-d0fb/tplx;87a9-1c25/~tNl;0c20-84f0/~tND;2235-7304/tyf, PASS, gptp
+/examples/ieee8021as/,               -f omnetpp.ini -c Network -r 0,                     200s,       c25f-2574/tplx;8601-141a/~tNl;89ac-0bab/~tND;2f64-3e50/tyf, PASS, gptp
+/examples/ieee8021as/,               -f omnetpp.ini -c Network_with_cross_traffic -r 0,  200s,       a9da-c265/tplx;cad5-887f/~tNl;a44b-20f9/~tND;8d31-254b/tyf, PASS, gptp
+/examples/ieee8021as/,               -f omnetpp.ini -c Network_daisy_chain -r 0,         200s,       2c1a-a1b1/tplx;a5cf-cbf5/~tNl;646d-e981/~tND;6ff7-a656/tyf, PASS, gptp
 
 # /examples/ieee8021d/,                -f omnetpp.ini -c LargeNet -r 0,               100s,            0, ERROR,   # LargeNet extended
 # /examples/ieee8021d/,                -f omnetpp.ini -c RSTP -r 0,                   100s,            0, ERROR,   # RSTP extended
@@ -500,7 +500,7 @@
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            4cff-b978/tplx;4183-df02/~tNl;5a0d-3ec7/~tND;d866-2d12/tyf, PASS,
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            8b68-e35c/tplx;291a-b663/~tNl;10b5-fcc2/~tND;70d1-2277/tyf, PASS,
 
-/examples/timing/,                   -f omnetpp.ini -c General -r 0,                0.1s,             0029-0683/tplx;2b60-28b2/~tNl;3ad0-14cf/~tND;80ab-0584/tyf, PASS,
+/examples/timing/,                   -f omnetpp.ini -c General -r 0,                0.1s,             0029-0683/tplx;2b60-28b2/~tNl;3ad0-14cf/~tND;2aff-30ab/tyf, PASS,
 
 /examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            ca5a-018c/tplx;8bed-195e/~tNl;ac03-cafc/tyf, PASS,
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            2641-c26d/tplx;be78-aee4/~tNl;d24d-24cb/tyf, PASS,
