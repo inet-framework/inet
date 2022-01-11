@@ -351,7 +351,7 @@ void EthernetMacBase::processConnectDisconnect()
         }
 
         // Clear queue
-        while (!txQueue->isEmpty()) {
+        while (canDequeuePacket()) {
             Packet *msg = dequeuePacket();
             EV_DETAIL << "Interface is not connected, dropping packet " << msg << endl;
             numDroppedPkFromHLIfaceDown++;
