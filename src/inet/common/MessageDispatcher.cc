@@ -261,96 +261,100 @@ cGate *MessageDispatcher::handleMessage(Message *message, cGate *inGate)
 void MessageDispatcher::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
-    EV_INFO << "Registering service" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
-    auto key = Key(protocol.getId(), servicePrimitive);
-    auto it = serviceToGateIndex.find(key);
-    if (it != serviceToGateIndex.end()) {
-        if (it->second != g->getIndex())
-            throw cRuntimeError("handleRegisterService(): service is already registered: protocolId = %d, protocolName = %s, servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", protocol.getId(), protocol.str().c_str(), static_cast<int>(servicePrimitive), g->getPathStartGate()->getFullPath().c_str(), g->getPathEndGate()->getFullPath().c_str());
+    if (registeringProtocol != nullptr) {
+        if (registeringProtocol != &protocol)
+            throw cRuntimeError("handleRegisterService(): cannot register protocol while another registration is being done");
     }
     else {
-        serviceToGateIndex[key] = g->getIndex();
-        auto connectedGate = g->getType() == cGate::INPUT ? g->getPathStartGate() : g->getPathEndGate();
-        auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
-        int size = gateSize(gateName);
-        for (int i = 0; i < size; i++) {
-            auto otherGate = gate(gateName, i);
-            auto otherConnectedGate = otherGate->getType() == cGate::INPUT ? otherGate->getPathStartGate() : otherGate->getPathEndGate();
-            if (connectedGate->getOwner() != otherConnectedGate->getOwner())
-                registerService(protocol, otherGate, servicePrimitive);
+        registeringProtocol = &protocol;
+        EV_INFO << "Registering service" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
+        auto key = Key(protocol.getId(), servicePrimitive);
+        auto it = serviceToGateIndex.find(key);
+        if (it != serviceToGateIndex.end()) {
+            if (it->second != g->getIndex())
+                throw cRuntimeError("handleRegisterService(): service is already registered: protocolId = %d, protocolName = %s, servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", protocol.getId(), protocol.str().c_str(), static_cast<int>(servicePrimitive), g->getPathStartGate()->getFullPath().c_str(), g->getPathEndGate()->getFullPath().c_str());
         }
+        else {
+            serviceToGateIndex[key] = g->getIndex();
+            auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
+            int size = gateSize(gateName);
+            for (int i = 0; i < size; i++)
+                registerService(protocol, gate(gateName, i), servicePrimitive);
+        }
+        registeringProtocol = nullptr;
     }
 }
 
 void MessageDispatcher::handleRegisterAnyService(cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterAnyService");
-    EV_INFO << "Registering any service" << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
-    auto key = Key(-1, servicePrimitive);
-    auto it = serviceToGateIndex.find(key);
-    if (it != serviceToGateIndex.end()) {
-        if (it->second != g->getIndex())
-            throw cRuntimeError("handleRegisterAnyService(): any service is already registered: servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", static_cast<int>(servicePrimitive), g->getPathStartGate()->getFullPath().c_str(), g->getPathEndGate()->getFullPath().c_str());
-    }
-    else {
-        serviceToGateIndex[key] = g->getIndex();
-        auto connectedGate = g->getType() == cGate::INPUT ? g->getPathStartGate() : g->getPathEndGate();
-        auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
-        int size = gateSize(gateName);
-        for (int i = 0; i < size; i++) {
-            auto otherGate = gate(gateName, i);
-            auto otherConnectedGate = otherGate->getType() == cGate::INPUT ? otherGate->getPathStartGate() : otherGate->getPathEndGate();
-            if (connectedGate->getOwner() != otherConnectedGate->getOwner())
-                registerAnyService(otherGate, servicePrimitive);
+    if (!registeringAny) {
+        registeringAny = true;
+        EV_INFO << "Registering any service" << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
+        auto key = Key(-1, servicePrimitive);
+        auto it = serviceToGateIndex.find(key);
+        if (it != serviceToGateIndex.end()) {
+            if (it->second != g->getIndex())
+                throw cRuntimeError("handleRegisterAnyService(): any service is already registered: servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", static_cast<int>(servicePrimitive), g->getPathStartGate()->getFullPath().c_str(), g->getPathEndGate()->getFullPath().c_str());
         }
+        else {
+            serviceToGateIndex[key] = g->getIndex();
+            auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
+            int size = gateSize(gateName);
+            for (int i = 0; i < size; i++)
+                registerAnyService(gate(gateName, i), servicePrimitive);
+        }
+        registeringAny = false;
     }
 }
 
 void MessageDispatcher::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    EV_INFO << "Registering protocol" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
-    auto key = Key(protocol.getId(), servicePrimitive);
-    auto it = protocolToGateIndex.find(key);
-    if (it != protocolToGateIndex.end()) {
-        if (it->second != g->getIndex())
-            throw cRuntimeError("handleRegisterProtocol(): protocol is already registered: protocolId = %d, protocolName = %s, servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", protocol.getId(), protocol.str().c_str(), static_cast<int>(servicePrimitive), g->getPathStartGate()->getFullPath().c_str(), g->getPathEndGate()->getFullPath().c_str());
+    if (registeringProtocol != nullptr) {
+        if (registeringProtocol != &protocol)
+            throw cRuntimeError("handleRegisterProtocol(): cannot register protocol while another registration is being done");
     }
     else {
-        protocolToGateIndex[key] = g->getIndex();
-        auto connectedGate = g->getType() == cGate::INPUT ? g->getPathStartGate() : g->getPathEndGate();
-        auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
-        int size = gateSize(gateName);
-        for (int i = 0; i < size; i++) {
-            auto otherGate = gate(gateName, i);
-            auto otherConnectedGate = otherGate->getType() == cGate::INPUT ? otherGate->getPathStartGate() : otherGate->getPathEndGate();
-            if (connectedGate->getOwner() != otherConnectedGate->getOwner())
-                registerProtocol(protocol, otherGate, servicePrimitive);
+        registeringProtocol = &protocol;
+        EV_INFO << "Registering protocol" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
+        auto key = Key(protocol.getId(), servicePrimitive);
+        auto it = protocolToGateIndex.find(key);
+        if (it != protocolToGateIndex.end()) {
+            if (it->second != g->getIndex())
+                throw cRuntimeError("handleRegisterProtocol(): protocol is already registered: protocolId = %d, protocolName = %s, servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", protocol.getId(), protocol.str().c_str(), static_cast<int>(servicePrimitive), g->getPathStartGate()->getFullPath().c_str(), g->getPathEndGate()->getFullPath().c_str());
         }
+        else {
+            protocolToGateIndex[key] = g->getIndex();
+            auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
+            int size = gateSize(gateName);
+            for (int i = 0; i < size; i++)
+                registerProtocol(protocol, gate(gateName, i), servicePrimitive);
+        }
+        registeringProtocol = nullptr;
     }
 }
 
 void MessageDispatcher::handleRegisterAnyProtocol(cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterAnyProtocol");
-    EV_INFO << "Registering any protocol" << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
-    auto key = Key(-1, servicePrimitive);
-    auto it = protocolToGateIndex.find(key);
-    if (it != protocolToGateIndex.end()) {
-        if (it->second != g->getIndex())
-            throw cRuntimeError("handleRegisterAnyProtocol(): any protocol is already registered: servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", static_cast<int>(servicePrimitive), g->getPathStartGate()->getFullPath().c_str(), g->getPathEndGate()->getFullPath().c_str());
-    }
-    else {
-        protocolToGateIndex[key] = g->getIndex();
-        auto connectedGate = g->getType() == cGate::INPUT ? g->getPathStartGate() : g->getPathEndGate();
-        auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
-        int size = gateSize(gateName);
-        for (int i = 0; i < size; i++) {
-            auto otherGate = gate(gateName, i);
-            auto otherConnectedGate = otherGate->getType() == cGate::INPUT ? otherGate->getPathStartGate() : otherGate->getPathEndGate();
-            if (connectedGate->getOwner() != otherConnectedGate->getOwner())
-                registerAnyProtocol(otherGate, servicePrimitive);
+    if (!registeringAny) {
+        registeringAny = true;
+        EV_INFO << "Registering any protocol" << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
+        auto key = Key(-1, servicePrimitive);
+        auto it = protocolToGateIndex.find(key);
+        if (it != protocolToGateIndex.end()) {
+            if (it->second != g->getIndex())
+                throw cRuntimeError("handleRegisterAnyProtocol(): any protocol is already registered: servicePrimitive = %d, pathStartGate = %s, pathEndGate = %s", static_cast<int>(servicePrimitive), g->getPathStartGate()->getFullPath().c_str(), g->getPathEndGate()->getFullPath().c_str());
         }
+        else {
+            protocolToGateIndex[key] = g->getIndex();
+            auto gateName = g->getType() == cGate::INPUT ? "out" : "in";
+            int size = gateSize(gateName);
+            for (int i = 0; i < size; i++)
+                registerAnyProtocol(gate(gateName, i), servicePrimitive);
+        }
+        registeringAny = false;
     }
 }
 

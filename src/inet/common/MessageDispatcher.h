@@ -67,6 +67,8 @@ class INET_API MessageDispatcher :
     std::map<int, int> interfaceIdToGateIndex;
     std::map<Key, int> serviceToGateIndex;
     std::map<Key, int> protocolToGateIndex;
+    const Protocol *registeringProtocol = nullptr;
+    bool registeringAny = false;
 
   protected:
     virtual void initialize(int stage) override;
