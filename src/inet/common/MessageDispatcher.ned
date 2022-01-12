@@ -35,6 +35,8 @@ import inet.queueing.base.PacketProcessorBase;
 simple MessageDispatcher extends PacketProcessorBase
 {
     parameters:
+        bool forwardServiceRegistration = default(true);
+        bool forwardProtocolRegistration = default(true);
         @class(MessageDispatcher);
         @display("i=-;b=100,5,,,,1;");
     gates:
