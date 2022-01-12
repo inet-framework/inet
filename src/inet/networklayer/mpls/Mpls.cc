@@ -316,8 +316,12 @@ void Mpls::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrim
     Enter_Method("handleRegisterService");
     if (!strcmp("ifOut", g->getName()))
         registerService(protocol, gate("netwIn"), servicePrimitive);
+    else if (!strcmp("ifIn", g->getName()))
+        ;
     else if (!strcmp("netwOut", g->getName()))
         registerService(protocol, gate("ifIn"), servicePrimitive);
+    else if (!strcmp("netwIn", g->getName()))
+        ;
     else
         throw cRuntimeError("Unknown gate: %s", g->getName());
 }
@@ -327,6 +331,8 @@ void Mpls::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePri
     Enter_Method("handleRegisterProtocol");
     if (!strcmp("ifIn", g->getName()))
         registerProtocol(protocol, gate("netwOut"), servicePrimitive);
+    else if (!strcmp("ifOut", g->getName()))
+        ;
     else if (!strcmp("netwOut", g->getName()))
         registerProtocol(protocol, gate("ifIn"), servicePrimitive);
     else if (!strcmp("netwIn", g->getName()))
