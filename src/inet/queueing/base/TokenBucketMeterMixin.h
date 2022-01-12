@@ -51,7 +51,7 @@ class INET_API TokenBucketMeterMixin : public T
     {
         auto labelsTag = packet->addTagIfAbsent<LabelsTag>();
         if (labelPriority.empty())
-            labelsTag->insertLabels(label);
+            labelsTag->appendLabels(label);
         else {
             int newPriority = std::find(labelPriority.begin(), labelPriority.end(), label) - labelPriority.begin();
             for (int i = 0; i < labelsTag->getLabelsArraySize(); i++) {
@@ -64,7 +64,7 @@ class INET_API TokenBucketMeterMixin : public T
                         return;
                 }
             }
-            labelsTag->insertLabels(label);
+            labelsTag->appendLabels(label);
         }
     }
 

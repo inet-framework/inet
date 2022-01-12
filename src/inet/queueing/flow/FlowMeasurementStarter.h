@@ -55,9 +55,9 @@ class INET_API FlowMeasurementStarter : public PacketFlowBase
         EV_INFO << EV_FIELD(class, typeid(T).name()) << EV_ENDL;
         packet->addRegionTagsWhereAbsent<T>(offset, length);
         packet->mapAllRegionTagsForUpdate<T>(offset, length, [&] (b o, b l, const Ptr<T>& timeTag) {
-            timeTag->insertFlowNames(flowName);
-            timeTag->insertBitTotalTimes(value);
-            timeTag->insertPacketTotalTimes(value);
+            timeTag->appendFlowNames(flowName);
+            timeTag->appendBitTotalTimes(value);
+            timeTag->appendPacketTotalTimes(value);
         });
     }
 

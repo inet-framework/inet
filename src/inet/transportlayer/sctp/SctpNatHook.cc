@@ -309,7 +309,7 @@ void SctpNatHook::sendBackError(SctpHeader *sctp)
     errorChunk->setMBit(true);
     errorChunk->setTBit(true);
     errorChunk->addParameters(cause);
-    sctp->insertSctpChunks(errorChunk);
+    sctp->appendSctpChunks(errorChunk);
 }
 
 void SctpNatHook::finish()

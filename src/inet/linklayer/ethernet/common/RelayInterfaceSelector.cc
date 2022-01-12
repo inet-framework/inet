@@ -134,7 +134,7 @@ void RelayInterfaceSelector::sendPacket(Packet *packet, const MacAddress& destin
     if (protocol != nullptr) {
         if (auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>()) {
             auto encapsulationProtocolReq = packet->addTagIfAbsent<EncapsulationProtocolReq>();
-            encapsulationProtocolReq->insertProtocol(protocol);
+            encapsulationProtocolReq->appendProtocol(protocol);
         }
         else
             packet->addTag<DispatchProtocolReq>()->setProtocol(protocol);

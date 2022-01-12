@@ -78,7 +78,7 @@ void SctpHeader::clean()
 
 void SctpHeader::setSctpChunksArraySize(size_t size)
 {
-    throw cException(this, "setSctpChunkArraySize() not supported, use insertSctpChunks()");
+    throw cException(this, "setSctpChunkArraySize() not supported, use appendSctpChunks()");
 }
 
 void SctpHeader::setSctpChunks(size_t k, SctpChunk *chunk)
@@ -105,7 +105,7 @@ void SctpHeader::replaceSctpChunk(SctpChunk *chunk, uint32_t k)
     setSctpChunks(k, chunk);
 }
 
-void SctpHeader::insertSctpChunks(SctpChunk *chunk)
+void SctpHeader::appendSctpChunks(SctpChunk *chunk)
 {
     handleChange();
     sctpChunkList.push_back(chunk);

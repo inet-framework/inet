@@ -52,14 +52,14 @@ void MultiTokenBucketMeter::meterPacket(Packet *packet)
             tokenBucket.removeTokens(numTokens);
             auto label = labels[i].c_str();
             EV_INFO << "Removed tokens, labeling packet" << EV_FIELD(numTokens) << EV_FIELD(tokenBucket) << EV_FIELD(label) << EV_FIELD(packet) << EV_ENDL;
-            packet->addTagIfAbsent<LabelsTag>()->insertLabels(label);
+            packet->addTagIfAbsent<LabelsTag>()->appendLabels(label);
             emit(tokensChangedSignal, getNumTokens());
             return;
         }
     }
     EV_INFO << "Insufficient number of tokens for packet" << EV_FIELD(numTokens) << EV_FIELD(packet) << EV_ENDL;
     if (defaultLabel != nullptr)
-        packet->addTagIfAbsent<LabelsTag>()->insertLabels(defaultLabel);
+        packet->addTagIfAbsent<LabelsTag>()->appendLabels(defaultLabel);
 }
 
 } // namespace queueing
