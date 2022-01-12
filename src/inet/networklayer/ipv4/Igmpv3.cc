@@ -1014,7 +1014,7 @@ void Igmpv3::sendReportToIP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
 
     // TODO fill Router Alert option
     auto raOption = new Ipv4OptionRouterAlert();
-    msg->addTag<Ipv4OptionsReq>()->insertOption(raOption);
+    msg->addTag<Ipv4OptionsReq>()->appendOption(raOption);
     // TODO set Type of Service to 0xc0
     //msg->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(0xc0 >> 2);
     send(msg, "ipOut");
@@ -1033,7 +1033,7 @@ void Igmpv3::sendQueryToIP(Packet *msg, InterfaceEntry *ie, Ipv4Address dest)
 
     // TODO fill Router Alert option
     auto raOption = new Ipv4OptionRouterAlert();
-    msg->addTag<Ipv4OptionsReq>()->insertOption(raOption);
+    msg->addTag<Ipv4OptionsReq>()->appendOption(raOption);
     // set Type of Service to 0xc0
     msg->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(0xc0 >> 2);
     send(msg, "ipOut");

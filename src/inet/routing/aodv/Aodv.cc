@@ -115,8 +115,8 @@ void Aodv::handleMessageWhenUp(cMessage *msg)
         else if (msg == blacklistTimer)
             handleBlackListTimer();
         else if (msg->getKind() == KIND_DELAYEDSEND) {
-            auto timer = check_and_cast<PacketHolderMessage*>(msg);
-            socket.send(timer->dropOwnedPacket());
+            auto timer = check_and_cast<PacketHolderMessage *>(msg);
+            socket.send(timer->removeOwnedPacket());
             delete timer;
         }
         else

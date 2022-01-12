@@ -1034,7 +1034,7 @@ void Ipv4::encapsulate(Packet *transportPacket)
 
     if (Ipv4OptionsReq *optReq = transportPacket->removeTagIfPresent<Ipv4OptionsReq>()) {
         for (size_t i = 0; i < optReq->getOptionArraySize(); i++) {
-            auto opt = optReq->dropOption(i);
+            auto opt = optReq->removeOption(i);
             ipv4Header->addOption(opt);
             ipv4Header->addChunkLength(B(opt->getLength()));
         }

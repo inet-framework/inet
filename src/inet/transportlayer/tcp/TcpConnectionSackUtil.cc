@@ -585,7 +585,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
     }
 
     while (optArrSize < optArrSizeAligned) {
-        tcpseg->insertHeaderOption(new TcpOptionNop());
+        tcpseg->appendHeaderOption(new TcpOptionNop());
         optArrSize++;
     }
 
@@ -608,7 +608,7 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpseg)
 
     ASSERT(options_len <= TCP_OPTIONS_MAX_SIZE);    // Options length allowed? - maximum: 40 Bytes
 
-    tcpseg->insertHeaderOption(option);
+    tcpseg->appendHeaderOption(option);
     tcpseg->setHeaderLength(TCP_MIN_HEADER_LENGTH + tcpseg->getHeaderOptionArrayLength());
     tcpseg->setChunkLength(tcpseg->getHeaderLength());
     // update number of sent sacks

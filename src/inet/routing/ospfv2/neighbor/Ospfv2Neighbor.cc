@@ -210,7 +210,7 @@ void Neighbor::sendDatabaseDescriptionPacket(bool init)
         while ((!databaseSummaryList.empty()) && (packetSize <= (maxPacketSize - OSPFv2_LSA_HEADER_LENGTH))) {
             Ospfv2LsaHeader *lsaHeader = *(databaseSummaryList.begin());
             setLsaHeaderCrc(*lsaHeader, crcMode);
-            ddPacket->insertLsaHeaders(*lsaHeader);
+            ddPacket->appendLsaHeaders(*lsaHeader);
             delete lsaHeader;
             databaseSummaryList.pop_front();
             packetSize += OSPFv2_LSA_HEADER_LENGTH;

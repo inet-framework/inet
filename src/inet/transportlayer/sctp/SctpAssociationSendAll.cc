@@ -824,7 +824,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
             authAdded = addAuthChunkIfNecessary(sctpMsg, SACK, authAdded);
 
             // ------ Add SACK chunk -------------------------------------------
-            sctpMsg->insertSctpChunks(sackChunk);
+            sctpMsg->appendSctpChunks(sackChunk);
             sackAdded = true;
             EV_DETAIL << assocId << ": SACK added, chunksAdded now " << chunksAdded << " sackOnly=" << sackOnly << " sackWithData=" << sackWithData << "\n";
             if (sackOnly && !(bytesToSend > 0 || bytes.chunk || bytes.packet)) {
@@ -858,7 +858,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                 }
                 // ------ Create AUTH chunk, if necessary -----------------------
                 authAdded = addAuthChunkIfNecessary(sctpMsg, FORWARD_TSN, authAdded);
-                sctpMsg->insertSctpChunks(forwardChunk);
+                sctpMsg->appendSctpChunks(forwardChunk);
                 forwardPresent = true;
                 if (!path->T3_RtxTimer->isScheduled()) {
                     // Start retransmission timer, if not scheduled before
@@ -1018,7 +1018,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                             state->ackPointAdvanced = false;
                             // ------ Create AUTH chunk, if necessary -----------------------
                             authAdded = addAuthChunkIfNecessary(sctpMsg, FORWARD_TSN, authAdded);
-                            sctpMsg->insertSctpChunks(forwardChunk);
+                            sctpMsg->appendSctpChunks(forwardChunk);
                             forwardPresent = true;
                             if (!path->T3_RtxTimer->isScheduled()) {
                                 // Start retransmission timer, if not scheduled before
@@ -1306,7 +1306,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                     dataChunksAdded++;
 
                     dataChunkPtr = transformDataChunk(datVar);
-                    sctpMsg->insertSctpChunks(dataChunkPtr);
+                    sctpMsg->appendSctpChunks(dataChunkPtr);
 
                     EV_DETAIL << assocId << ": DataChunk added -  TSN:" << dataChunkPtr->getTsn() << " - length:" << dataChunkPtr->getByteLength() << " - ssn:" << dataChunkPtr->getSsn() << "\n";
 

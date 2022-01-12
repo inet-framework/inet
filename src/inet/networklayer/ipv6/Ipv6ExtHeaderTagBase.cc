@@ -25,7 +25,7 @@ Ipv6ExtensionHeader *Ipv6ExtHeaderTagBase::removeFirstExtensionHeader()
     if (extensionHeader_arraysize == 0)
         return nullptr;
 
-    Ipv6ExtensionHeader *ret = dropExtensionHeader(0);
+    Ipv6ExtensionHeader *ret = removeExtensionHeader(0);
     this->eraseExtensionHeader(0);
     return ret;
 }

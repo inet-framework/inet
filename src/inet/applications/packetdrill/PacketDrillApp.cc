@@ -617,7 +617,7 @@ void PacketDrillApp::closeAllSockets()
     pk->setName("SCTPCleanUp");
     sctpmsg->setChecksumOk(true);
     sctpmsg->setCrcMode(crcMode);
-    sctpmsg->insertSctpChunks(abortChunk);
+    sctpmsg->appendSctpChunks(abortChunk);
     pk->insertAtFront(sctpmsg);
     auto ipv4Header = makeShared<Ipv4Header>();
     ipv4Header->setSrcAddress(remoteAddress.toIpv4());

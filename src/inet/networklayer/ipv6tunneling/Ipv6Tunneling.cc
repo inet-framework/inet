@@ -425,7 +425,7 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
             t2RH->setAddress(0, rh2);
 
             // append T2RH to routing headers
-            packet->addTagIfAbsent<Ipv6ExtHeaderReq>()->insertExtensionHeader(t2RH);
+            packet->addTagIfAbsent<Ipv6ExtHeaderReq>()->appendExtensionHeader(t2RH);
 
             EV_INFO << "Added Type 2 Routing Header." << endl;
         }
@@ -438,7 +438,7 @@ void Ipv6Tunneling::encapsulateDatagram(Packet *packet)
             haOpt->setHomeAddress(rh2);
 
             // append HA option to routing headers
-            packet->addTagIfAbsent<Ipv6ExtHeaderReq>()->insertExtensionHeader(haOpt);
+            packet->addTagIfAbsent<Ipv6ExtHeaderReq>()->appendExtensionHeader(haOpt);
 
             EV_INFO << "Added Home Address Option header." << endl;
         }

@@ -30,7 +30,7 @@ void SctpAssociation::retransmitReset()
         SctpStreamResetChunk *sctpreset = check_and_cast<SctpStreamResetChunk *>(state->resetChunk->dup());
         state->numResetRequests = sctpreset->getParametersArraySize();
         sctpreset->setSctpChunkType(RE_CONFIG);
-        sctpmsg->insertSctpChunks(sctpreset);
+        sctpmsg->appendSctpChunks(sctpreset);
         state->waitForResponse = true;
         EV_INFO << "retransmitStreamReset localAddr=" << localAddr << "  remoteAddr" << remoteAddr << "\n";
         Packet *pkt = new Packet("RE_CONFIG");
@@ -201,7 +201,7 @@ void SctpAssociation::sendOutgoingResetRequest(SctpIncomingSsnResetRequestParame
         msg->setChunkLength(B(SCTP_COMMON_HEADER));
         msg->setSrcPort(localPort);
         msg->setDestPort(remotePort);
-        msg->insertSctpChunks(resetChunk);
+        msg->appendSctpChunks(resetChunk);
         state->localRequestType = RESET_OUTGOING;
         if (state->resetChunk != nullptr) {
             delete state->resetChunk;
@@ -291,8 +291,8 @@ void SctpAssociation::sendBundledOutgoingResetAndResponse(SctpIncomingSsnResetRe
         msg->setChunkLength(B(SCTP_COMMON_HEADER));
         msg->setSrcPort(localPort);
         msg->setDestPort(remotePort);
-        msg->insertSctpChunks(resetChunk);
-        msg->insertSctpChunks(resetResponseChunk);
+        msg->appendSctpChunks(resetChunk);
+        msg->appendSctpChunks(resetResponseChunk);
         state->localRequestType = RESET_OUTGOING;
         if (state->resetChunk != nullptr) {
             delete state->resetChunk;
@@ -441,7 +441,7 @@ void SctpAssociation::sendOutgoingRequestAndResponse(uint32 inRequestSn, uint32 
         state->resetChunk = nullptr;
     }
     state->resetChunk = resChunk->dup();
-    msg->insertSctpChunks(resChunk);
+    msg->appendSctpChunks(resChunk);
     Packet *pkt = new Packet("RE_CONFIG");
     sendToIP(pkt, msg, remoteAddr);
     PK(getPath(remoteAddr)->ResetTimer)->encapsulate(rt);
@@ -498,7 +498,7 @@ void SctpAssociation::sendOutgoingRequestAndResponse(SctpIncomingSsnResetRequest
     it->second.numResetRequestsSent++;
     state->resetChunk = check_and_cast<SctpStreamResetChunk *>(resChunk->dup());
     //state->resetChunk->setName("stateRstChunk");
-    msg->insertSctpChunks(resChunk);
+    msg->appendSctpChunks(resChunk);
     Packet *pkt = new Packet("RE_CONFIG");
     sendToIP(pkt, msg, remoteAddr);
     if (PK(getPath(remoteAddr)->ResetTimer)->hasEncapsulatedPacket()) {
@@ -620,7 +620,7 @@ void SctpAssociation::sendStreamResetRequest(SctpResetReq *rinfo)
         state->resetChunk = nullptr;
     }
     state->resetChunk = check_and_cast<SctpStreamResetChunk *>(resetChunk->dup());
-    msg->insertSctpChunks(resetChunk);
+    msg->appendSctpChunks(resetChunk);
     if (qCounter.roomSumSendStreams != 0) {
         storePacket(getPath(remoteAddr), msg, 1, 0, false);
         state->bundleReset = true;
@@ -676,7 +676,7 @@ void SctpAssociation::sendAddOutgoingStreamsRequest(uint16 numStreams)
     }
     state->resetChunk = check_and_cast<SctpStreamResetChunk *>(resetChunk->dup());
   //  state->resetChunk->setName("stateAddResetChunk");
-    msg->insertSctpChunks(resetChunk);
+    msg->appendSctpChunks(resetChunk);
     Packet *pkt = new Packet("RE_CONFIG");
     sendToIP(pkt, msg, remoteAddr);
     if (!(getPath(remoteAddr)->ResetTimer->isScheduled())) {
@@ -735,7 +735,7 @@ void SctpAssociation::sendAddInAndOutStreamsRequest(SctpResetReq *info)
     }
     state->resetChunk = check_and_cast<SctpStreamResetChunk *>(resetChunk->dup());
   //  state->resetChunk->setName("stateAddInOutResetChunk");
-    msg->insertSctpChunks(resetChunk);
+    msg->appendSctpChunks(resetChunk);
     Packet *pkt = new Packet("RE_CONFIG");
     sendToIP(pkt, msg, remoteAddr);
     PK(getPath(remoteAddr)->ResetTimer)->encapsulate(rt);
@@ -783,9 +783,9 @@ void SctpAssociation::sendStreamResetResponse(SctpSsnTsnResetRequestParameter *r
     }
     responseParam->setByteLength(len);
     resetChunk->addParameter(responseParam);
-    msg->insertSctpChunks(resetChunk);
+    msg->appendSctpChunks(resetChunk);
     stopTimer(SackTimer);
-    msg->insertSctpChunks(createSack());
+    msg->appendSctpChunks(createSack());
     state->ackState = 0;
     state->sackAlreadySent = true;
     Packet *pkt = new Packet("RE_CONFIG");
@@ -810,14 +810,15 @@ void SctpAssociation::sendStreamResetResponse(uint32 srrsn, int result)
     state->peerRequests[srrsn].result = result;
     responseParam->setByteLength(SCTP_STREAM_RESET_RESPONSE_PARAMETER_LENGTH);
     resetChunk->addParameter(responseParam);
-    msg->insertSctpChunks(resetChunk);
+    msg->appendSctpChunks(resetChunk);
     if (qCounter.roomSumSendStreams != 0) {
         storePacket(getPath(remoteAddr), msg, 1, 0, false);
         state->bundleReset = true;
         sendOnPath(getPath(remoteAddr), true);
         state->bundleReset = false;
-    } else {
-        msg->insertSctpChunks(createSack());
+    }
+    else {
+        msg->appendSctpChunks(createSack());
         stopTimer(SackTimer);
         state->ackState = 0;
         state->sackAlreadySent = true;
@@ -860,7 +861,7 @@ void SctpAssociation::sendDoubleStreamResetResponse(uint32 insrrsn, uint16 inres
     state->peerRequests[outsrrsn].result = outresult;
     inResponseParam->setByteLength(SCTP_STREAM_RESET_RESPONSE_PARAMETER_LENGTH);
     resetChunk->addParameter(inResponseParam);
-    msg->insertSctpChunks(resetChunk);
+    msg->appendSctpChunks(resetChunk);
     if (qCounter.roomSumSendStreams != 0) {
         storePacket(getPath(remoteAddr), msg, 1, 0, false);
         state->bundleReset = true;

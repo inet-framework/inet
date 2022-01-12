@@ -36,7 +36,7 @@ TlvOptionBase *TlvOptions::dropTlvOption(TlvOptionBase *option)
 {
     for (size_t i = 0; i < tlvOption_arraysize; i++) {
         if (tlvOption[i] == option) {
-            dropTlvOption(i);
+            removeTlvOption(i);
             eraseTlvOption(i);
             return option;
         }
@@ -48,7 +48,7 @@ void TlvOptions::deleteOptionByType(int type, bool firstOnly)
 {
     for (size_t i = 0; i < tlvOption_arraysize; ) {
         if (tlvOption[i] && tlvOption[i]->getType() == type) {
-            dropTlvOption(i);
+            removeTlvOption(i);
             eraseTlvOption(i);
             if (firstOnly)
                 break;
