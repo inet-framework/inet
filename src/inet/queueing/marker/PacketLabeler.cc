@@ -54,7 +54,7 @@ void PacketLabeler::markPacket(Packet *packet)
         auto filter = filters[i];
         if (filter->matchesPacket(packet)) {
             EV_INFO << "Marking packet" << EV_FIELD(label, labels[i]) << EV_FIELD(packet) << EV_ENDL;
-            labelsTag->insertLabels(labels[i].c_str());
+            labelsTag->appendLabels(labels[i].c_str());
         }
     }
 }

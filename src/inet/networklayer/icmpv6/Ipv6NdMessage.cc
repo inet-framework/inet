@@ -41,7 +41,7 @@ void Ipv6NdOptions::insertUniqueOption(size_t k, Ipv6NdOption *option)
 {
     if (findOption(option->getType()))
         throw cRuntimeError("Option %i already exists", (int)option->getType());
-    insertOption(option);
+    appendOption(option);
 }
 
 } // namespace inet

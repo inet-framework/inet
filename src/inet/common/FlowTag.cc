@@ -29,7 +29,7 @@ void startPacketFlow(cModule *module, Packet *packet, const char *name)
         for (int i = 0; i < (int)flowTag->getNamesArraySize(); i++)
             if (!strcmp(name, flowTag->getNames(i)))
                 throw cRuntimeError("Flow already exists");
-        flowTag->insertNames(name);
+        flowTag->appendNames(name);
     });
     cNamedObject details(name);
     module->emit(packetFlowStartedSignal, packet, &details);

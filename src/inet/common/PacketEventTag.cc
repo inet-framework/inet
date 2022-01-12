@@ -30,7 +30,7 @@ void insertPacketEvent(const cModule *module, Packet *packet, int kind, simtime_
         packetEventCopy->setSimulationTime(simulation->getSimTime());
         packetEventCopy->setDuration(duration);
         packetEventCopy->setPacketLength(packet->getTotalLength());
-        eventTag->insertPacketEvents(packetEventCopy);
+        eventTag->appendPacketEvents(packetEventCopy);
     });
     delete packetEvent;
 }

@@ -133,7 +133,7 @@ const Ptr<Chunk> Ipv6HeaderSerializer::deserialize(MemoryInputStream& stream) co
                 uint16_t hdrLen = hdrExtLen * 8 + 8;
                 extHdr->setByteLength(B(hdrLen));
                 stream.readByteRepeatedly(0, hdrLen - 2); // TODO
-                ipv6Header->insertExtensionHeader(extHdr);
+                ipv6Header->appendExtensionHeader(extHdr);
                 break;
             }
             case IP_PROT_IPv6EXT_DEST: {
@@ -144,7 +144,7 @@ const Ptr<Chunk> Ipv6HeaderSerializer::deserialize(MemoryInputStream& stream) co
                 uint16_t hdrLen = hdrExtLen * 8 + 8;
                 extHdr->setByteLength(B(hdrLen));
                 stream.readByteRepeatedly(0, hdrLen - 2); // TODO
-                ipv6Header->insertExtensionHeader(extHdr);
+                ipv6Header->appendExtensionHeader(extHdr);
                 break;
             }
             case IP_PROT_IPv6EXT_ROUTING: {
@@ -157,7 +157,7 @@ const Ptr<Chunk> Ipv6HeaderSerializer::deserialize(MemoryInputStream& stream) co
                 extHdr->setRoutingType(stream.readByte());
                 extHdr->setSegmentsLeft(stream.readByte());
                 stream.readByteRepeatedly(0, hdrLen - 2); // TODO
-                ipv6Header->insertExtensionHeader(extHdr);
+                ipv6Header->appendExtensionHeader(extHdr);
                 break;
             }
             case IP_PROT_IPv6EXT_FRAGMENT: {
@@ -171,7 +171,7 @@ const Ptr<Chunk> Ipv6HeaderSerializer::deserialize(MemoryInputStream& stream) co
                 extHdr->setReserved(stream.readUint2());
                 extHdr->setMoreFragments(stream.readBit());
                 extHdr->setIdentification(stream.readUint32Be());
-                ipv6Header->insertExtensionHeader(extHdr);
+                ipv6Header->appendExtensionHeader(extHdr);
                 break;
             }
             case IP_PROT_IPv6EXT_AUTH: {
@@ -182,7 +182,7 @@ const Ptr<Chunk> Ipv6HeaderSerializer::deserialize(MemoryInputStream& stream) co
                 uint16_t hdrLen = hdrExtLen * 8 + 8;
                 extHdr->setByteLength(B(hdrLen));
                 stream.readByteRepeatedly(0, hdrLen - 2); // TODO
-                ipv6Header->insertExtensionHeader(extHdr);
+                ipv6Header->appendExtensionHeader(extHdr);
                 break;
             }
             case IP_PROT_IPv6EXT_ESP: {
@@ -193,7 +193,7 @@ const Ptr<Chunk> Ipv6HeaderSerializer::deserialize(MemoryInputStream& stream) co
                 uint16_t hdrLen = hdrExtLen * 8 + 8;
                 extHdr->setByteLength(B(hdrLen));
                 stream.readByteRepeatedly(0, hdrLen - 2); // TODO
-                ipv6Header->insertExtensionHeader(extHdr);
+                ipv6Header->appendExtensionHeader(extHdr);
                 break;
             }
             default: {

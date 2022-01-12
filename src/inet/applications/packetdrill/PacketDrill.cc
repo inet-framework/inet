@@ -256,7 +256,7 @@ Packet *PacketDrill::buildTCPPacket(int address_family, enum direction_t directi
             PacketDrillTcpOption *opt = check_and_cast<PacketDrillTcpOption *>(*iter);
             option = setOptionValues(opt);
             // write option to tcp header
-            tcpHeader->insertHeaderOption(option);
+            tcpHeader->appendHeaderOption(option);
         } // for
     } // if options present
     tcpHeader->setHeaderLength(TCP_MIN_HEADER_LENGTH + B(tcpHeader->getHeaderOptionArrayLength()));
@@ -476,7 +476,7 @@ Packet *PacketDrill::buildSCTPPacket(int address_family, enum direction_t direct
 
     for (cQueue::Iterator iter(*chunks); !iter.end(); iter++) {
         PacketDrillSctpChunk *chunk = check_and_cast<PacketDrillSctpChunk *>(*iter);
-        sctpmsg->insertSctpChunks(chunk->getChunk());
+        sctpmsg->appendSctpChunks(chunk->getChunk());
     }
 
     insertTransportProtocolHeader(packet, Protocol::sctp, sctpmsg);

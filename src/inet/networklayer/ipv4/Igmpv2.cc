@@ -710,7 +710,7 @@ void Igmpv2::sendReport(NetworkInterface *ie, HostGroupData *group)
     packet->insertAtFront(msg);
     // TODO fill Router Alert option
     auto raOption = new Ipv4OptionRouterAlert();
-    packet->addTag<Ipv4OptionsReq>()->insertOption(raOption);
+    packet->addTag<Ipv4OptionsReq>()->appendOption(raOption);
     sendToIP(packet, ie, group->groupAddr);
     numReportsSent++;
 }
@@ -728,7 +728,7 @@ void Igmpv2::sendLeave(NetworkInterface *ie, HostGroupData *group)
     packet->insertAtFront(msg);
     // TODO fill Router Alert option
     auto raOption = new Ipv4OptionRouterAlert();
-    packet->addTag<Ipv4OptionsReq>()->insertOption(raOption);
+    packet->addTag<Ipv4OptionsReq>()->appendOption(raOption);
     sendToIP(packet, ie, Ipv4Address::ALL_ROUTERS_MCAST);
     numLeavesSent++;
 }

@@ -112,7 +112,7 @@ void deserializeIpv6NdOptions(Ipv6NdMessage& msg, Ipv6NdOptions& options, Memory
                     for (int i = 0; i < 8 * (length - 1); i++)
                         option->setPaddingBytes(i, stream.readByte());
                 }
-                options.insertOption(option);
+                options.appendOption(option);
                 break;
             }
             case IPv6ND_TARGET_LINK_LAYER_ADDR_OPTION: {
@@ -124,7 +124,7 @@ void deserializeIpv6NdOptions(Ipv6NdMessage& msg, Ipv6NdOptions& options, Memory
                     for (int i = 0; i < 8 * (length - 1); i++)
                         option->setPaddingBytes(i, stream.readByte());
                 }
-                options.insertOption(option);
+                options.appendOption(option);
                 break;
             }
             case IPv6ND_PREFIX_INFORMATION: {
@@ -145,7 +145,7 @@ void deserializeIpv6NdOptions(Ipv6NdMessage& msg, Ipv6NdOptions& options, Memory
                     for (int i = 0; i < 8 * (length - 4); i++)
                         option->setPaddingBytes(i, stream.readByte());
                 }
-                options.insertOption(option);
+                options.appendOption(option);
                 break;
             }
 //            case IPv6ND_REDIRECTED_HEADER: {
@@ -161,7 +161,7 @@ void deserializeIpv6NdOptions(Ipv6NdMessage& msg, Ipv6NdOptions& options, Memory
                     for (int i = 0; i < 8 * (length - 1); i++)
                         option->setPaddingBytes(i, stream.readByte());
                 }
-                options.insertOption(option);
+                options.appendOption(option);
                 break;
             }
             case IPv6ND_ADVERTISEMENT_INTERVAL: {
@@ -174,7 +174,7 @@ void deserializeIpv6NdOptions(Ipv6NdMessage& msg, Ipv6NdOptions& options, Memory
                     for (int i = 0; i < 8 * (length - 1); i++)
                         option->setPaddingBytes(i, stream.readByte());
                 }
-                options.insertOption(option);
+                options.appendOption(option);
                 break;
             }
             case IPv6ND_HOME_AGENT_INFORMATION_OPTION: {
@@ -188,7 +188,7 @@ void deserializeIpv6NdOptions(Ipv6NdMessage& msg, Ipv6NdOptions& options, Memory
                     for (int i = 0; i < 8 * (length - 1); i++)
                         option->setPaddingBytes(i, stream.readByte());
                 }
-                options.insertOption(option);
+                options.appendOption(option);
                 break;
             }
             default: {
@@ -198,7 +198,7 @@ void deserializeIpv6NdOptions(Ipv6NdMessage& msg, Ipv6NdOptions& options, Memory
                 option->setPaddingBytesArraySize(8 * length - 2);
                 for (int i = 0; i < 8 * length - 2; i++)
                     option->setPaddingBytes(i, stream.readByte());
-                options.insertOption(option);
+                options.appendOption(option);
             }
         }
     }

@@ -38,7 +38,7 @@ const TlvOptionBase *Ipv4Header::findOptionByType(short int optionType, int inde
 void Ipv4Header::addOption(TlvOptionBase *opt)
 {
     handleChange();
-    options.insertTlvOption(opt);
+    options.appendTlvOption(opt);
 }
 
 void Ipv4Header::addOption(TlvOptionBase *opt, int atPos)

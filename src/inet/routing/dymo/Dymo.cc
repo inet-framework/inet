@@ -405,7 +405,7 @@ void Dymo::scheduleJitterTimerPacket(cPacket *packet, double delay)
 
 void Dymo::processJitterTimerPacket(PacketJitterTimer *msg)
 {
-    sendUdpPacket(msg->dropJitteredPacket());
+    sendUdpPacket(msg->removeJitteredPacket());
     packetJitterTimers.erase(msg);
     delete msg;
 }

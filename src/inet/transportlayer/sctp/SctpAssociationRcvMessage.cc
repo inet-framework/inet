@@ -2746,8 +2746,8 @@ void SctpAssociation::processAddInAndOutResetRequestArrived(const SctpAddStreams
     state->peerRequests[addOutRequestParam->getSrReqSn()].result = PERFORMED;
     inResponseParam->setByteLength(SCTP_STREAM_RESET_RESPONSE_PARAMETER_LENGTH);
     responseChunk->addParameter(inResponseParam);
-    msg->insertSctpChunks(resetChunk);
-    msg->insertSctpChunks(responseChunk);
+    msg->appendSctpChunks(resetChunk);
+    msg->appendSctpChunks(responseChunk);
     rt->setInSN(0);
     rt->setInAcked(true);
     rt->setOutSN(srsn);
@@ -3194,7 +3194,7 @@ SctpEventCode SctpAssociation::processAsconfArrived(SctpAsconfChunk *asconfChunk
     sctpAsconfAck->setDestPort(remotePort);
     if (state->auth && state->peerAuth) {
         authChunk = createAuthChunk();
-        sctpAsconfAck->insertSctpChunks(authChunk);
+        sctpAsconfAck->appendSctpChunks(authChunk);
         auto it = sctpMain->assocStatMap.find(assocId);
         it->second.numAuthChunksSent++;
     }
@@ -3300,7 +3300,7 @@ SctpEventCode SctpAssociation::processAsconfArrived(SctpAsconfChunk *asconfChunk
                     break;
             }
         }
-        sctpAsconfAck->insertSctpChunks(asconfAckChunk);
+        sctpAsconfAck->appendSctpChunks(asconfAckChunk);
         Packet *pkt = new Packet("ASCONF-ACK");
         sendToIP(pkt, sctpAsconfAck, remoteAddr);
         if (StartAddIP->isScheduled()) {
@@ -3500,9 +3500,9 @@ bool SctpAssociation::processPacketDropArrived(SctpPacketDropChunk *packetDropCh
                             SctpForwardTsnChunk *forwardChunk = createForwardTsnChunk(remoteAddr);
                             if (state->auth && state->peerAuth && typeInChunkList(FORWARD_TSN)) {
                                 SctpAuthenticationChunk *authChunk = createAuthChunk();
-                                sctpmsg->insertSctpChunks(authChunk);
+                                sctpmsg->appendSctpChunks(authChunk);
                             }
-                            sctpmsg->insertSctpChunks(forwardChunk);
+                            sctpmsg->appendSctpChunks(forwardChunk);
                         }
                         break;
                     default:
