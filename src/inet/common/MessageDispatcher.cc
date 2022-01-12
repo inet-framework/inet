@@ -303,7 +303,7 @@ void MessageDispatcher::handleRegisterService(const Protocol& protocol, cGate *g
     }
     else {
         registeringProtocol = &protocol;
-        EV_INFO << "Registering service" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
+        EV_INFO << "Handling service registration" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
         auto key = Key(protocol.getId(), servicePrimitive);
         auto it = serviceToGateIndex.find(key);
         if (it != serviceToGateIndex.end()) {
@@ -326,7 +326,7 @@ void MessageDispatcher::handleRegisterAnyService(cGate *g, ServicePrimitive serv
     Enter_Method("handleRegisterAnyService");
     if (!registeringAny) {
         registeringAny = true;
-        EV_INFO << "Registering any service" << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
+        EV_INFO << "Handling any service registration" << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
         auto key = Key(-1, servicePrimitive);
         auto it = serviceToGateIndex.find(key);
         if (it != serviceToGateIndex.end()) {
@@ -353,7 +353,7 @@ void MessageDispatcher::handleRegisterProtocol(const Protocol& protocol, cGate *
     }
     else {
         registeringProtocol = &protocol;
-        EV_INFO << "Registering protocol" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
+        EV_INFO << "Handling protocol registration" << EV_FIELD(protocol) << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
         auto key = Key(protocol.getId(), servicePrimitive);
         auto it = protocolToGateIndex.find(key);
         if (it != protocolToGateIndex.end()) {
@@ -376,7 +376,7 @@ void MessageDispatcher::handleRegisterAnyProtocol(cGate *g, ServicePrimitive ser
     Enter_Method("handleRegisterAnyProtocol");
     if (!registeringAny) {
         registeringAny = true;
-        EV_INFO << "Registering any protocol" << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
+        EV_INFO << "Handling any protocol registration" << EV_FIELD(servicePrimitive) << EV_FIELD(gate, g) << EV_ENDL;
         auto key = Key(-1, servicePrimitive);
         auto it = protocolToGateIndex.find(key);
         if (it != protocolToGateIndex.end()) {
@@ -397,7 +397,7 @@ void MessageDispatcher::handleRegisterAnyProtocol(cGate *g, ServicePrimitive ser
 void MessageDispatcher::handleRegisterInterface(const NetworkInterface& interface, cGate *out, cGate *in)
 {
     Enter_Method("handleRegisterInterface");
-    EV_INFO << "Registering interface" << EV_FIELD(interface) << EV_FIELD(out, out) << EV_FIELD(in) << EV_ENDL;
+    EV_INFO << "Handling interface registration" << EV_FIELD(interface) << EV_FIELD(out, out) << EV_FIELD(in) << EV_ENDL;
     auto it = interfaceIdToGateIndex.find(interface.getInterfaceId());
     if (it != interfaceIdToGateIndex.end()) {
         if (it->second != out->getIndex())

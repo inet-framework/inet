@@ -39,7 +39,7 @@ void layoutSubmodulesWithoutGates(cModule *module, int dimensionIndex, double mo
         if (submodule->getGateNames().empty()) {
             auto& displayString = submodule->getDisplayString();
             const char *dimension = dimensionIndex == 0 ? "x" : "y";
-            EV_INFO << "Setting submodule position" << EV_FIELD(submodule, submodule->getFullPath()) << EV_FIELD(dimension) << EV_FIELD(position) << EV_ENDL;
+            EV_DEBUG << "Setting submodule position" << EV_FIELD(submodule, submodule->getFullPath()) << EV_FIELD(dimension) << EV_FIELD(position) << EV_ENDL;
             displayString.setTagArg("p", dimensionIndex, position);
             position += moduleSpacing;
         }
