@@ -112,31 +112,32 @@ void Ieee8021dRelay::handleLowerPacket(Packet *incomingPacket)
         if (destinationAddress.isBroadcast())
             broadcastPacket(outgoingPacket, destinationAddress, incomingInterface);
         else {
-            int outgoingInterfaceId = macForwardingTable->getUnicastAddressForwardingInterface(destinationAddress);
-            if (outgoingInterfaceId == -1)
+            auto outgoingInterfaceIds = macAddressTable->getInterfaceIdsForAddress(destinationAddress);
+            if (outgoingInterfaceIds.size() == 0)
                 broadcastPacket(outgoingPacket, destinationAddress, incomingInterface);
             else {
-                auto outgoingInterface = interfaceTable->getInterfaceById(outgoingInterfaceId);
-                if (outgoingInterfaceId != incomingInterfaceId) {
-                    if (isForwardingInterface(outgoingInterface))
-                        sendPacket(outgoingPacket, destinationAddress, outgoingInterface);
+                for (auto outgoingInterfaceId : outgoingInterfaceIds) {
+                    auto outgoingInterface = interfaceTable->getInterfaceById(outgoingInterfaceId);
+                    if (outgoingInterfaceId != incomingInterfaceId) {
+                        if (isForwardingInterface(outgoingInterface))
+                            sendPacket(outgoingPacket->dup(), destinationAddress, outgoingInterface);
+                        else {
+                            EV_WARN << "Discarding packet because output interface is currently not forwarding" << EV_FIELD(outgoingInterface) << EV_FIELD(outgoingPacket) << endl;
+                            numDroppedFrames++;
+                            PacketDropDetails details;
+                            details.setReason(NO_INTERFACE_FOUND);
+                            emit(packetDroppedSignal, outgoingPacket, &details);
+                        }
+                    }
                     else {
-                        EV_WARN << "Discarding packet because output interface is currently not forwarding" << EV_FIELD(outgoingInterface) << EV_FIELD(outgoingPacket) << endl;
+                        EV_WARN << "Discarding packet because outgoing interface is the same as incoming interface" << EV_FIELD(destinationAddress) << EV_FIELD(incomingInterface) << EV_FIELD(incomingPacket) << EV_ENDL;
                         numDroppedFrames++;
                         PacketDropDetails details;
                         details.setReason(NO_INTERFACE_FOUND);
                         emit(packetDroppedSignal, outgoingPacket, &details);
-                        delete outgoingPacket;
                     }
                 }
-                else {
-                    EV_WARN << "Discarding packet because outgoing interface is the same as incoming interface" << EV_FIELD(destinationAddress) << EV_FIELD(incomingInterface) << EV_FIELD(incomingPacket) << EV_ENDL;
-                    numDroppedFrames++;
-                    PacketDropDetails details;
-                    details.setReason(NO_INTERFACE_FOUND);
-                    emit(packetDroppedSignal, outgoingPacket, &details);
-                    delete outgoingPacket;
-                }
+                delete outgoingPacket;
             }
         }
         delete incomingPacket;
@@ -157,7 +158,7 @@ void Ieee8021dRelay::handleUpperPacket(Packet *packet)
     else if (destinationAddress.isBroadcast())
         broadcastPacket(packet, destinationAddress, nullptr);
     else {
-        int interfaceId = macForwardingTable->getUnicastAddressForwardingInterface(destinationAddress);
+        int interfaceId = macAddressTable->getInterfaceIdForAddress(destinationAddress);
         if (interfaceId == -1)
             broadcastPacket(packet, destinationAddress, nullptr);
         else {
