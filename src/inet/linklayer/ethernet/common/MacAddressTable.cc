@@ -58,10 +58,6 @@ std::ostream& operator<<(std::ostream& os, const MacAddressTable::MulticastAddre
     return os << "{interfaceIds=" << entry.interfaceIds << "}";
 }
 
-MacAddressTable::MacAddressTable()
-{
-}
-
 void MacAddressTable::initialize(int stage)
 {
     OperationalBase::initialize(stage);
@@ -410,10 +406,6 @@ void MacAddressTable::initializeTable()
 void MacAddressTable::clearTable()
 {
     addressTable.clear();
-}
-
-MacAddressTable::~MacAddressTable()
-{
 }
 
 void MacAddressTable::setAgingTime(simtime_t agingTime)

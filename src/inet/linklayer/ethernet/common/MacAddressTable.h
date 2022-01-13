@@ -83,11 +83,6 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
     virtual void parseAddressTableParameter();
 
   public:
-
-    MacAddressTable();
-    ~MacAddressTable();
-
-  public:
     // IMacForwardingTable
     virtual int getUnicastAddressForwardingInterface(const MacAddress& address, unsigned int vid = 0) const override;
     virtual void setUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
