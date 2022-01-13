@@ -20,7 +20,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/linklayer/ethernet/contract/IMacAddressTable.h"
+#include "inet/linklayer/ethernet/contract/IMacForwardingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
@@ -32,7 +32,7 @@ class INET_API RelayInterfaceLearner : public PacketFlowBase, public Transparent
 {
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
-    ModuleRefByPar<IMacAddressTable> macAddressTable;
+    ModuleRefByPar<IMacForwardingTable> macAddressTable;
 
   protected:
     virtual void initialize(int stage) override;

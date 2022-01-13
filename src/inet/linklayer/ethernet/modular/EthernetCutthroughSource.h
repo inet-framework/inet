@@ -20,7 +20,7 @@
 
 #include "inet/common/ModuleRef.h"
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/linklayer/ethernet/contract/IMacAddressTable.h"
+#include "inet/linklayer/ethernet/contract/IMacForwardingTable.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/protocolelement/common/PacketDestreamer.h"
 
@@ -35,7 +35,7 @@ class INET_API EthernetCutthroughSource : public PacketDestreamer
     ModuleRef<IPassivePacketSink> cutthroughConsumer;
 
     NetworkInterface *networkInterface = nullptr;
-    ModuleRefByPar<IMacAddressTable> macTable;
+    ModuleRefByPar<IMacForwardingTable> macTable;
 
     bool cutthroughInProgress = false;
     cMessage *cutthroughTimer = nullptr;

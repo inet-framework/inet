@@ -20,7 +20,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/linklayer/ethernet/contract/IMacAddressTable.h"
+#include "inet/linklayer/ethernet/contract/IMacForwardingTable.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/base/PacketPusherBase.h"
@@ -33,7 +33,7 @@ class INET_API RelayInterfaceSelector : public PacketPusherBase, public Transpar
 {
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
-    ModuleRefByPar<IMacAddressTable> macAddressTable;
+    ModuleRefByPar<IMacForwardingTable> macAddressTable;
 
     long numProcessedFrames = 0;
     long numDroppedFrames = 0;

@@ -22,7 +22,7 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/StringFormat.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
-#include "inet/linklayer/ethernet/contract/IMacAddressTable.h"
+#include "inet/linklayer/ethernet/contract/IMacForwardingTable.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
@@ -32,7 +32,7 @@ class INET_API MacRelayUnitBase : public LayeredProtocolBase, public StringForma
 {
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
-    ModuleRefByPar<IMacAddressTable> macAddressTable;
+    ModuleRefByPar<IMacForwardingTable> macAddressTable;
 
     long numProcessedFrames = 0;
     long numDroppedFrames = 0;
