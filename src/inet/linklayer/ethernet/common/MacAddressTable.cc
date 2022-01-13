@@ -20,6 +20,7 @@
 #include <map>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/stlutils.h"
 #include "inet/common/StringFormat.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -144,6 +145,108 @@ const char *MacAddressTable::resolveDirective(char directive) const
             throw cRuntimeError("Unknown directive: %c", directive);
     }
     return result.c_str();
+}
+
+int MacAddressTable::getUnicastAddressForwardingInterface(const MacAddress& address, unsigned int vid) const
+{
+    Enter_Method("getUnicastAddressForwardingInterface");
+    ASSERT(!address.isMulticast());
+    AddressTableKey key(vid, address);
+    auto it = addressTable.find(key);
+    if (it == addressTable.end())
+        return -1;
+    else if (it->second.insertionTime <= simTime() - agingTime) {
+        EV_TRACE << "Ignoring aged entry: " << it->first << " --> " << it->second << "\n";
+        return -1;
+    }
+    else
+        return it->second.interfaceId;
+}
+
+void MacAddressTable::setUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid)
+{
+    Enter_Method("setUnicastAddressForwardingInterface");
+    ASSERT(!address.isMulticast());
+    AddressTableKey key(vid, address);
+    auto it = addressTable.find(key);
+    if (it == addressTable.end())
+        addressTable[key] = AddressEntry(vid, interfaceId, -1);
+    else {
+        it->second.interfaceId = interfaceId;
+        it->second.insertionTime = SimTime::getMaxTime();
+    }
+}
+
+void MacAddressTable::removeUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid)
+{
+    Enter_Method("removeUnicastAddressForwardingInterface");
+    ASSERT(!address.isMulticast());
+    AddressTableKey key(vid, address);
+    auto it = addressTable.find(key);
+    if (it == addressTable.end())
+        throw cRuntimeError("Cannot find entry");
+    addressTable.erase(it);
+}
+
+void MacAddressTable::learnUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid)
+{
+    Enter_Method("learnUnicastAddressForwardingInterface");
+    ASSERT(!address.isMulticast());
+    removeAgedEntriesIfNeeded();
+    AddressTableKey key(vid, address);
+    auto it = addressTable.find(key);
+    if (it == addressTable.end()) {
+        EV << "Adding entry" << EV_FIELD(address) << EV_FIELD(interfaceId) << EV_FIELD(vid) << EV_ENDL;
+        addressTable[key] = AddressEntry(vid, interfaceId, simTime());
+    }
+    else if (it->second.insertionTime != SimTime::getMaxTime()) {
+        EV << "Updating entry" << EV_FIELD(address) << EV_FIELD(interfaceId) << EV_FIELD(vid) << EV_ENDL;
+        AddressEntry& entry = it->second;
+        entry.interfaceId = interfaceId;
+        entry.insertionTime = simTime();
+    }
+    else
+        EV << "Ignoring manually configured entry" << EV_FIELD(address) << EV_FIELD(interfaceId) << EV_FIELD(vid) << EV_ENDL;
+}
+
+std::vector<int> MacAddressTable::getMulticastAddressForwardingInterfaces(const MacAddress& address, unsigned int vid) const
+{
+    Enter_Method("getMulticastAddressForwardingInterfaces");
+    ASSERT(address.isMulticast());
+    AddressTableKey key(vid, address);
+    auto it = multicastAddressTable.find(key);
+    if (it == multicastAddressTable.end())
+        return std::vector<int>();
+    else
+        return it->second.interfaceIds;
+}
+
+void MacAddressTable::addMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid)
+{
+    Enter_Method("addMulticastAddressForwardingInterface");
+    ASSERT(address.isMulticast());
+    AddressTableKey key(vid, address);
+    auto it = multicastAddressTable.find(key);
+    if (it == multicastAddressTable.end())
+        multicastAddressTable[key] = MulticastAddressEntry(vid, {interfaceId});
+    else {
+        if (contains(it->second.interfaceIds, interfaceId))
+            throw cRuntimeError("Already contains interface");
+        it->second.interfaceIds.push_back(interfaceId);
+    }
+}
+
+void MacAddressTable::removeMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid)
+{
+    Enter_Method("removeMulticastAddressForwardingInterface");
+    ASSERT(address.isMulticast());
+    AddressTableKey key(vid, address);
+    auto it = multicastAddressTable.find(key);
+    if (it == multicastAddressTable.end())
+        throw cRuntimeError("Cannot find entry");
+    if (contains(it->second.interfaceIds, interfaceId))
+        throw cRuntimeError("Cannot find interface");
+    remove(it->second.interfaceIds, interfaceId);
 }
 
 /*

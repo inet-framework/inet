@@ -23,6 +23,7 @@
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ethernet/contract/IMacAddressTable.h"
+#include "inet/linklayer/ethernet/contract/IMacForwardingTable.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 
 namespace inet {
@@ -32,7 +33,7 @@ namespace inet {
  * NOTE that interfaceIds (interfaceId parameters) are actually the corresponding ID of the port interface.
  * i.e. this is an interfaceId and NOT an index of the some kind in a gate vector.
  */
-class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable, public StringFormat::IDirectiveResolver
+class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable, public IMacForwardingTable, public StringFormat::IDirectiveResolver
 {
   protected:
     struct AddressEntry {
@@ -87,6 +88,16 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
     ~MacAddressTable();
 
   public:
+    // IMacForwardingTable
+    virtual int getUnicastAddressForwardingInterface(const MacAddress& address, unsigned int vid = 0) const override;
+    virtual void setUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
+    virtual void removeUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
+    virtual void learnUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
+
+    virtual std::vector<int> getMulticastAddressForwardingInterfaces(const MacAddress& address, unsigned int vid = 0) const override;
+    virtual void addMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
+    virtual void removeMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
+
     // Table management
 
     /**
