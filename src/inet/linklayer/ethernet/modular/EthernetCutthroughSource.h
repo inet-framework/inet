@@ -35,7 +35,7 @@ class INET_API EthernetCutthroughSource : public PacketDestreamer
     ModuleRef<IPassivePacketSink> cutthroughConsumer;
 
     NetworkInterface *networkInterface = nullptr;
-    ModuleRefByPar<IMacForwardingTable> macTable;
+    ModuleRefByPar<IMacForwardingTable> macForwardingTable;
 
     bool cutthroughInProgress = false;
     cMessage *cutthroughTimer = nullptr;

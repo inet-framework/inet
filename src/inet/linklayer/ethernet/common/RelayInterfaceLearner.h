@@ -32,7 +32,7 @@ class INET_API RelayInterfaceLearner : public PacketFlowBase, public Transparent
 {
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
-    ModuleRefByPar<IMacForwardingTable> macAddressTable;
+    ModuleRefByPar<IMacForwardingTable> macForwardingTable;
 
   protected:
     virtual void initialize(int stage) override;

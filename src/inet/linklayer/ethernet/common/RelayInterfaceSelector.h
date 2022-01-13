@@ -33,7 +33,7 @@ class INET_API RelayInterfaceSelector : public PacketPusherBase, public Transpar
 {
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
-    ModuleRefByPar<IMacForwardingTable> macAddressTable;
+    ModuleRefByPar<IMacForwardingTable> macForwardingTable;
 
     long numProcessedFrames = 0;
     long numDroppedFrames = 0;

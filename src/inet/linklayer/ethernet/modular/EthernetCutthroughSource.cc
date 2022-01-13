@@ -35,7 +35,7 @@ void EthernetCutthroughSource::initialize(int stage)
         cutthroughOutputGate = gate("cutthroughOut");
         cutthroughConsumer.reference(cutthroughOutputGate, false);
         networkInterface = getContainingNicModule(this);
-        macTable.reference(this, "macTableModule", true);
+        macForwardingTable.reference(this, "macTableModule", true);
         cutthroughTimer = new cMessage("CutthroughTimer");
     }
 }
@@ -44,9 +44,9 @@ void EthernetCutthroughSource::handleMessage(cMessage *message)
 {
     if (message == cutthroughTimer) {
         const auto& header = streamedPacket->peekAtFront<EthernetMacAddressFields>();
-        int interfaceId = macTable->getUnicastAddressForwardingInterface(header->getDest());
+        int interfaceId = macForwardingTable->getUnicastAddressForwardingInterface(header->getDest());
         if (!header->getSrc().isMulticast())
-            macTable->learnUnicastAddressForwardingInterface(networkInterface->getInterfaceId(), header->getSrc());
+            macForwardingTable->learnUnicastAddressForwardingInterface(networkInterface->getInterfaceId(), header->getSrc());
         if (interfaceId != -1 && cutthroughConsumer->canPushPacket(streamedPacket, cutthroughOutputGate)) {
             streamedPacket->trim();
             streamedPacket->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
@@ -85,8 +85,8 @@ void EthernetCutthroughSource::pushPacketEnd(Packet *packet, cGate *gate)
         take(packet);
         const auto& header = packet->peekAtFront<EthernetMacAddressFields>();
         if (!header->getSrc().isMulticast())
-            macTable->learnUnicastAddressForwardingInterface(networkInterface->getInterfaceId(), header->getSrc());
-        int interfaceId = macTable->getUnicastAddressForwardingInterface(header->getDest());
+            macForwardingTable->learnUnicastAddressForwardingInterface(networkInterface->getInterfaceId(), header->getSrc());
+        int interfaceId = macForwardingTable->getUnicastAddressForwardingInterface(header->getDest());
         packet->trim();
         packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
         packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
