@@ -245,9 +245,9 @@ void MacAddressTable::removeMulticastAddressForwardingInterface(int interfaceId,
     remove(it->second.interfaceIds, interfaceId);
 }
 
-void MacAddressTable::flush(int interfaceId)
+void MacAddressTable::removeForwardingInterface(int interfaceId)
 {
-    Enter_Method("flush");
+    Enter_Method("removeForwardingInterface");
     for (auto cur = addressTable.begin(); cur != addressTable.end();) {
         if (cur->second.interfaceId == interfaceId)
             cur = addressTable.erase(cur);

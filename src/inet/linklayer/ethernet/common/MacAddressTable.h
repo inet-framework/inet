@@ -91,7 +91,7 @@ class INET_API MacAddressTable : public OperationalBase, public IMacForwardingTa
     virtual void addMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
     virtual void removeMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
 
-    virtual void flush(int interfaceId) override;
+    virtual void removeForwardingInterface(int interfaceId) override;
     virtual void replaceForwardingInterface(int oldInterfaceId, int newInterfaceId) override;
 
   protected:

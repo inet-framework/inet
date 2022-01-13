@@ -39,10 +39,7 @@ class INET_API IMacForwardingTable
 
     virtual void setAgingTime(simtime_t agingTime) = 0;
 
-    /**
-     *  @brief Clears portno cache
-     */
-    virtual void flush(int portno) = 0;
+    virtual void removeForwardingInterface(int interfaceId) = 0;
 
     virtual void replaceForwardingInterface(int oldInterfaceId, int newInterfaceId) = 0;
 };
