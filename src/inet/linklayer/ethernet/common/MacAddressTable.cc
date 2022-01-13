@@ -289,7 +289,7 @@ void MacAddressTable::removeAgedEntriesFromAllVlans()
 {
     for (auto cur = addressTable.begin(); cur != addressTable.end();) {
         AddressEntry& entry = cur->second;
-        if (entry.insertionTime + agingTime <= simTime()) {
+        if (entry.insertionTime <= simTime() - agingTime) {
             EV << "Removing aged entry from Address Table: "
                << cur->first.first << " " << cur->first.second << " --> interfaceId " << cur->second.interfaceId << "\n";
             cur = addressTable.erase(cur);
@@ -389,7 +389,10 @@ void MacAddressTable::parseAddressTableParameter()
         auto networkInterface = ifTable->findInterfaceByName(interfaceName);
         if (networkInterface == nullptr)
             throw cRuntimeError("Cannot find network interface '%s'", interfaceName);
-        updateTableWithAddress(networkInterface->getInterfaceId(), macAddress, vlan);
+        if (macAddress.isMulticast())
+            addMulticastAddressForwardingInterface(networkInterface->getInterfaceId(), macAddress, vlan);
+        else
+            setUnicastAddressForwardingInterface(networkInterface->getInterfaceId(), macAddress, vlan);
     }
 }
 
