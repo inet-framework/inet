@@ -51,52 +51,59 @@ cGate *RelayInterfaceSelector::getRegistrationForwardingGate(cGate *gate)
 
 void RelayInterfaceSelector::pushPacket(Packet *packet, cGate *gates)
 {
+    auto interfaceReq = packet->findTag<InterfaceReq>();
     auto macAddressReq = packet->getTag<MacAddressReq>();
     auto destinationAddress = macAddressReq->getDestAddress();
-    auto interfaceInd = packet->findTag<InterfaceInd>();
-    auto incomingInterface = interfaceInd != nullptr ? interfaceTable->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
-    if (destinationAddress.isBroadcast())
-        broadcastPacket(packet, destinationAddress, incomingInterface);
-    else if (destinationAddress.isMulticast()) {
-        auto vlanReq = packet->findTag<VlanReq>();
-        int vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : 0;
-        auto outgoingInterfaceIds = macAddressTable->getInterfaceIdsForAddress(destinationAddress, vlanId);
-        if (outgoingInterfaceIds.size() == 0)
-            broadcastPacket(packet, destinationAddress, incomingInterface);
-        else {
-            for (auto outgoingInterfaceId : outgoingInterfaceIds) {
-                if (interfaceInd != nullptr && outgoingInterfaceId == interfaceInd->getInterfaceId())
-                    EV_WARN << "Ignoring outgoing interface because it is the same as incoming interface" << EV_FIELD(destinationAddress) << EV_FIELD(incomingInterface) << EV_FIELD(packet) << EV_ENDL;
-                else {
-                    auto outgoingInterface = interfaceTable->getInterfaceById(outgoingInterfaceId);
-                    sendPacket(packet->dup(), destinationAddress, outgoingInterface);
-                }
-            }
-            delete packet;
-        }
+    if (interfaceReq != nullptr) {
+        auto networkInterface = interfaceTable->getInterfaceById(interfaceReq->getInterfaceId());
+        sendPacket(packet, destinationAddress, networkInterface);
     }
     else {
-        auto vlanReq = packet->findTag<VlanReq>();
-        int vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : 0;
-        // Find output interface of destination address and send packet to output interface
-        // if not found then broadcasts to all other interfaces instead
-        int outgoingInterfaceId = macForwardingTable->getUnicastAddressForwardingInterface(destinationAddress, vlanId);
-        // should not send out the same packet on the same interface
-        // (although wireless interfaces are ok to receive the same message)
-        if (interfaceInd != nullptr && outgoingInterfaceId == interfaceInd->getInterfaceId()) {
-            EV_WARN << "Discarding packet because outgoing interface is the same as incoming interface" << EV_FIELD(destinationAddress) << EV_FIELD(incomingInterface) << EV_FIELD(packet) << EV_ENDL;
-            numDroppedFrames++;
-            PacketDropDetails details;
-            details.setReason(NO_INTERFACE_FOUND);
-            emit(packetDroppedSignal, packet, &details);
-            delete packet;
-        }
-        else if (outgoingInterfaceId != -1) {
-            auto outgoingInterface = interfaceTable->getInterfaceById(outgoingInterfaceId);
-            sendPacket(packet, destinationAddress, outgoingInterface);
-        }
-        else
+        auto interfaceInd = packet->findTag<InterfaceInd>();
+        auto incomingInterface = interfaceInd != nullptr ? interfaceTable->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
+        if (destinationAddress.isBroadcast())
             broadcastPacket(packet, destinationAddress, incomingInterface);
+        else if (destinationAddress.isMulticast()) {
+            auto vlanReq = packet->findTag<VlanReq>();
+            int vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : 0;
+            auto outgoingInterfaceIds = macAddressTable->getInterfaceIdsForAddress(destinationAddress, vlanId);
+            if (outgoingInterfaceIds.size() == 0)
+                broadcastPacket(packet, destinationAddress, incomingInterface);
+            else {
+                for (auto outgoingInterfaceId : outgoingInterfaceIds) {
+                    if (interfaceInd != nullptr && outgoingInterfaceId == interfaceInd->getInterfaceId())
+                        EV_WARN << "Ignoring outgoing interface because it is the same as incoming interface" << EV_FIELD(destinationAddress) << EV_FIELD(incomingInterface) << EV_FIELD(packet) << EV_ENDL;
+                    else {
+                        auto outgoingInterface = interfaceTable->getInterfaceById(outgoingInterfaceId);
+                        sendPacket(packet->dup(), destinationAddress, outgoingInterface);
+                    }
+                }
+                delete packet;
+            }
+        }
+        else {
+            auto vlanReq = packet->findTag<VlanReq>();
+            int vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : 0;
+            // Find output interface of destination address and send packet to output interface
+            // if not found then broadcasts to all other interfaces instead
+            int outgoingInterfaceId = macAddressTable->getInterfaceIdForAddress(destinationAddress, vlanId);
+            // should not send out the same packet on the same interface
+            // (although wireless interfaces are ok to receive the same message)
+            if (interfaceInd != nullptr && outgoingInterfaceId == interfaceInd->getInterfaceId()) {
+                EV_WARN << "Discarding packet because outgoing interface is the same as incoming interface" << EV_FIELD(destinationAddress) << EV_FIELD(incomingInterface) << EV_FIELD(packet) << EV_ENDL;
+                numDroppedFrames++;
+                PacketDropDetails details;
+                details.setReason(NO_INTERFACE_FOUND);
+                emit(packetDroppedSignal, packet, &details);
+                delete packet;
+            }
+            else if (outgoingInterfaceId != -1) {
+                auto outgoingInterface = interfaceTable->getInterfaceById(outgoingInterfaceId);
+                sendPacket(packet, destinationAddress, outgoingInterface);
+            }
+            else
+                broadcastPacket(packet, destinationAddress, incomingInterface);
+        }
     }
     numProcessedFrames++;
     updateDisplayString();
