@@ -44,20 +44,17 @@ std::ostream& operator<<(std::ostream& os, const std::vector<int>& ids)
 
 std::ostream& operator<<(std::ostream& os, const MacAddressTable::AddressEntry& entry)
 {
-    os << "{VID=" << entry.vid << ", interfaceId=" << entry.interfaceId << ", insertionTime=" << entry.insertionTime << "}";
-    return os;
+    return os << "{interfaceId=" << entry.interfaceId << ", insertionTime=" << entry.insertionTime << "}";
 }
 
 std::ostream& operator<<(std::ostream& os, const MacAddressTable::AddressTableKey& key)
 {
-    os << "{VID=" << key.first << ", addr=" << key.second << "}";
-    return os;
+    return os << "{VID=" << key.first << ", addr=" << key.second << "}";
 }
 
 std::ostream& operator<<(std::ostream& os, const MacAddressTable::MulticastAddressEntry& entry)
 {
-    os << "{VID=" << entry.vid << ", interfaceIds=" << entry.interfaceIds << "}";
-    return os;
+    return os << "{interfaceIds=" << entry.interfaceIds << "}";
 }
 
 MacAddressTable::MacAddressTable()

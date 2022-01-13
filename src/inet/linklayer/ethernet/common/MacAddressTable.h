@@ -36,20 +36,18 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
 {
   protected:
     struct AddressEntry {
-        unsigned int vid = 0; // VLAN ID
-        int interfaceId = -1; // Input interface ID
-        simtime_t insertionTime; // Arrival time of Lookup Address Table entry
+        int interfaceId = -1;
+        simtime_t insertionTime;
         AddressEntry() {}
         AddressEntry(unsigned int vid, int interfaceId, simtime_t insertionTime) :
-            vid(vid), interfaceId(interfaceId), insertionTime(insertionTime) {}
+            interfaceId(interfaceId), insertionTime(insertionTime) {}
     };
 
     struct MulticastAddressEntry {
-        unsigned int vid = 0; // VLAN ID
-        std::vector<int> interfaceIds; // network interface IDs
+        std::vector<int> interfaceIds;
         MulticastAddressEntry() {}
         MulticastAddressEntry(unsigned int vid, const std::vector<int>& interfaceIds) :
-            vid(vid), interfaceIds(interfaceIds) {}
+            interfaceIds(interfaceIds) {}
     };
 
     friend std::ostream& operator<<(std::ostream& os, const AddressEntry& entry);
