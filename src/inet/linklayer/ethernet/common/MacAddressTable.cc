@@ -245,10 +245,6 @@ void MacAddressTable::removeMulticastAddressForwardingInterface(int interfaceId,
     remove(it->second.interfaceIds, interfaceId);
 }
 
-/*
- * Clears interfaceId MAC cache.
- */
-
 void MacAddressTable::flush(int interfaceId)
 {
     Enter_Method("flush");
@@ -259,10 +255,6 @@ void MacAddressTable::flush(int interfaceId)
             ++cur;
     }
 }
-
-/*
- * Prints verbose information
- */
 
 void MacAddressTable::printState()
 {

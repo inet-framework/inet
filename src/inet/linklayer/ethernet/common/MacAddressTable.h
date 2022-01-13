@@ -69,7 +69,6 @@ class INET_API MacAddressTable : public OperationalBase, public IMacForwardingTa
     ModuleRefByPar<IInterfaceTable> ifTable;
 
   protected:
-
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
@@ -92,23 +91,14 @@ class INET_API MacAddressTable : public OperationalBase, public IMacForwardingTa
     virtual void addMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
     virtual void removeMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
 
-    // Table management
-
-    /**
-     *  @brief Clears interfaceId cache
-     */
-    // TODO find a better name
     virtual void flush(int interfaceId) override;
+    virtual void copyTable(int interfaceIdA, int interfaceIdB) override;
 
+  protected:
     /**
      *  @brief Prints cached data
      */
     virtual void printState();
-
-    /**
-     * @brief Copy cache from interfaceIdA to interfaceIdB interface
-     */
-    virtual void copyTable(int interfaceIdA, int interfaceIdB) override;
 
     /**
      * @brief Remove aged entries from all VLANs
