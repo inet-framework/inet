@@ -44,8 +44,9 @@ void EthernetCutthroughSource::handleMessage(cMessage *message)
 {
     if (message == cutthroughTimer) {
         const auto& header = streamedPacket->peekAtFront<EthernetMacAddressFields>();
-        int interfaceId = macTable->getInterfaceIdForAddress(header->getDest());
-        macTable->updateTableWithAddress(networkInterface->getInterfaceId(), header->getSrc());
+        int interfaceId = macTable->getUnicastAddressForwardingInterface(header->getDest());
+        if (!header->getSrc().isMulticast())
+            macTable->learnUnicastAddressForwardingInterface(networkInterface->getInterfaceId(), header->getSrc());
         if (interfaceId != -1 && cutthroughConsumer->canPushPacket(streamedPacket, cutthroughOutputGate)) {
             streamedPacket->trim();
             streamedPacket->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
@@ -83,8 +84,9 @@ void EthernetCutthroughSource::pushPacketEnd(Packet *packet, cGate *gate)
         Enter_Method("pushPacketEnd");
         take(packet);
         const auto& header = packet->peekAtFront<EthernetMacAddressFields>();
-        macTable->updateTableWithAddress(networkInterface->getInterfaceId(), header->getSrc());
-        int interfaceId = macTable->getInterfaceIdForAddress(header->getDest());
+        if (!header->getSrc().isMulticast())
+            macTable->learnUnicastAddressForwardingInterface(networkInterface->getInterfaceId(), header->getSrc());
+        int interfaceId = macTable->getUnicastAddressForwardingInterface(header->getDest());
         packet->trim();
         packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
         packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);

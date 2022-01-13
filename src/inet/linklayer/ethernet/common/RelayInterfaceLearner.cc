@@ -52,8 +52,10 @@ void RelayInterfaceLearner::processPacket(Packet *packet)
         vid = vlanInd->getVlanId();
     auto incomingInterface = interfaceTable->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     auto sourceAddress = packet->getTag<MacAddressInd>()->getSrcAddress();
-    EV_INFO << "Learning peer address" << EV_FIELD(sourceAddress) << EV_FIELD(incomingInterface) << EV_ENDL;
-    macAddressTable->updateTableWithAddress(incomingInterface->getInterfaceId(), sourceAddress, vid);
+    if (!sourceAddress.isMulticast()) {
+        EV_INFO << "Learning peer address" << EV_FIELD(sourceAddress) << EV_FIELD(incomingInterface) << EV_ENDL;
+        macAddressTable->learnUnicastAddressForwardingInterface(incomingInterface->getInterfaceId(), sourceAddress, vid);
+    }
 }
 
 } // namespace inet

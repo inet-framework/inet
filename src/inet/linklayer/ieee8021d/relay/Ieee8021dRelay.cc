@@ -112,7 +112,7 @@ void Ieee8021dRelay::handleLowerPacket(Packet *incomingPacket)
         if (destinationAddress.isBroadcast())
             broadcastPacket(outgoingPacket, destinationAddress, incomingInterface);
         else {
-            int outgoingInterfaceId = macAddressTable->getInterfaceIdForAddress(destinationAddress);
+            int outgoingInterfaceId = macAddressTable->getUnicastAddressForwardingInterface(destinationAddress);
             if (outgoingInterfaceId == -1)
                 broadcastPacket(outgoingPacket, destinationAddress, incomingInterface);
             else {
@@ -157,7 +157,7 @@ void Ieee8021dRelay::handleUpperPacket(Packet *packet)
     else if (destinationAddress.isBroadcast())
         broadcastPacket(packet, destinationAddress, nullptr);
     else {
-        int interfaceId = macAddressTable->getInterfaceIdForAddress(destinationAddress);
+        int interfaceId = macAddressTable->getUnicastAddressForwardingInterface(destinationAddress);
         if (interfaceId == -1)
             broadcastPacket(packet, destinationAddress, nullptr);
         else {

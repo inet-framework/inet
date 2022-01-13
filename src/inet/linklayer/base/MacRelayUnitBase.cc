@@ -98,8 +98,10 @@ void MacRelayUnitBase::sendPacket(Packet *packet, const MacAddress& destinationA
 
 void MacRelayUnitBase::updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress, unsigned int vlanId)
 {
-    EV_INFO << "Learning peer address" << EV_FIELD(sourceAddress) << EV_FIELD(incomingInterface) << EV_ENDL;
-    macAddressTable->updateTableWithAddress(incomingInterface->getInterfaceId(), sourceAddress, vlanId);
+    if (!sourceAddress.isMulticast()) {
+        EV_INFO << "Learning peer address" << EV_FIELD(sourceAddress) << EV_FIELD(incomingInterface) << EV_ENDL;
+        macAddressTable->learnUnicastAddressForwardingInterface(incomingInterface->getInterfaceId(), sourceAddress, vlanId);
+    }
 }
 
 void MacRelayUnitBase::finish()
