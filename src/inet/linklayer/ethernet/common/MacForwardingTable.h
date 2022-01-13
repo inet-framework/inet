@@ -57,15 +57,15 @@ class INET_API MacForwardingTable : public OperationalBase, public IMacForwardin
         bool operator()(const MacAddress& u1, const MacAddress& u2) const { return u1.compareTo(u2) < 0; }
     };
 
-    typedef std::pair<unsigned int, MacAddress> AddressTableKey;
-    friend std::ostream& operator<<(std::ostream& os, const AddressTableKey& key);
-    typedef std::map<AddressTableKey, AddressEntry> AddressTable;
-    typedef std::map<AddressTableKey, MulticastAddressEntry> MulticastAddressTable;
+    typedef std::pair<unsigned int, MacAddress> ForwardingTableKey;
+    friend std::ostream& operator<<(std::ostream& os, const ForwardingTableKey& key);
+    typedef std::map<ForwardingTableKey, AddressEntry> ForwardingTable;
+    typedef std::map<ForwardingTableKey, MulticastAddressEntry> MulticastForwardingTable;
 
     simtime_t agingTime; // Max idle time for address table entries
     simtime_t lastPurge; // Time of the last call of removeAgedEntriesFromAllVlans()
-    AddressTable addressTable;
-    MulticastAddressTable multicastAddressTable;
+    ForwardingTable forwardingTable;
+    MulticastForwardingTable multicastForwardingTable;
     ModuleRefByPar<IInterfaceTable> ifTable;
 
   protected:
@@ -78,7 +78,7 @@ class INET_API MacForwardingTable : public OperationalBase, public IMacForwardin
     virtual void updateDisplayString() const;
     virtual const char *resolveDirective(char directive) const override;
 
-    virtual void parseAddressTableParameter();
+    virtual void parseForwardingTableParameter();
 
   public:
     // IMacForwardingTable
@@ -114,7 +114,7 @@ class INET_API MacForwardingTable : public OperationalBase, public IMacForwardin
     /**
      * Pre-reads in entries for Address Table during initialization.
      */
-    virtual void readAddressTable(const char *fileName);
+    virtual void readForwardingTable(const char *fileName);
 
     /**
      * For lifecycle: initialize entries for the vlanAddressTable by reading them from a file (if specified by a parameter)
