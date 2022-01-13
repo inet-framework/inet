@@ -76,6 +76,11 @@ void StreamRedundancyConfigurator::computeStreams()
     }
 }
 
+static std::string getNodeName(std::string name) {
+    auto pos = name.find('.');
+    return pos == std::string::npos ? name : name.substr(0, pos);
+}
+
 void StreamRedundancyConfigurator::computeStreamSendersAndReceivers(cValueMap *streamConfiguration)
 {
     std::string streamName = streamConfiguration->get("name").stringValue();
@@ -85,29 +90,45 @@ void StreamRedundancyConfigurator::computeStreamSendersAndReceivers(cValueMap *s
         auto networkNode = node->module;
         auto networkNodeName = networkNode->getFullName();
         std::string sourceNetworkNodeName = streamConfiguration->get("source");
-        std::string destinationNetworkNodeName = streamConfiguration->get("destination");
         cValueArray *trees = check_and_cast<cValueArray *>(streamConfiguration->get("trees").objectValue());
         stream.streamNodes[networkNodeName].senders.resize(trees->size());
         stream.streamNodes[networkNodeName].receivers.resize(trees->size());
+        stream.streamNodes[networkNodeName].interfaces.resize(trees->size());
         std::vector<std::string> senderNetworkNodeNames;
         for (int j = 0; j < trees->size(); j++) {
             std::vector<std::string> receiverNetworkNodeNames;
+            std::vector<NetworkInterface *> interfaces;
             cValueArray *tree = check_and_cast<cValueArray*>(trees->get(j).objectValue());
             for (int k = 0; k < tree->size(); k++) {
                 cValueArray *path = check_and_cast<cValueArray*>(tree->get(k).objectValue());
                 for (int l = 0; l < path->size(); l++) {
-                    const char *elementNetworkNodeName = path->get(l).stringValue();
-                    if (!strcmp(elementNetworkNodeName, networkNode->getFullName())) {
-                        auto senderNetworkNodeName = l != 0 ? path->get(l - 1).stringValue() : nullptr;
-                        auto receiverNetworkNodeName = l != path->size() - 1 ? path->get(l + 1).stringValue() : nullptr;
-                        if (senderNetworkNodeName != nullptr && std::find(senderNetworkNodeNames.begin(), senderNetworkNodeNames.end(), senderNetworkNodeName) == senderNetworkNodeNames.end())
+                    std::string name = path->get(l).stringValue();
+                    auto pos = name.find('.');
+                    auto nodeName = pos == std::string::npos ? name : name.substr(0, pos);
+                    auto interfaceName = pos == std::string::npos ? "" : name.substr(pos + 1);
+                    if (nodeName == networkNode->getFullName()) {
+                        auto senderName = l != 0 ? path->get(l - 1).stringValue() : nullptr;
+                        auto receiverName = l != path->size() - 1 ? path->get(l + 1).stringValue() : nullptr;
+                        auto senderNetworkNodeName = senderName != nullptr ? getNodeName(senderName) : "";
+                        auto receiverNetworkNodeName = receiverName != nullptr ? getNodeName(receiverName) : "";
+                        if (senderName != nullptr && std::find(senderNetworkNodeNames.begin(), senderNetworkNodeNames.end(), senderNetworkNodeName) == senderNetworkNodeNames.end())
                             senderNetworkNodeNames.push_back(senderNetworkNodeName);
-                        if (receiverNetworkNodeName != nullptr && std::find(receiverNetworkNodeNames.begin(), receiverNetworkNodeNames.end(), receiverNetworkNodeName) == receiverNetworkNodeNames.end())
+                        if (receiverName != nullptr && std::find(receiverNetworkNodeNames.begin(), receiverNetworkNodeNames.end(), receiverNetworkNodeName) == receiverNetworkNodeNames.end()) {
+                            InterfaceInfo *interfaceInfo = nullptr;
+                            if (interfaceName.empty())
+                                interfaceInfo = findLinkOut(node, receiverNetworkNodeName.c_str())->sourceInterfaceInfo;
+                            else
+                                interfaceInfo = *std::find_if(node->interfaceInfos.begin(), node->interfaceInfos.end(), [&] (auto interfaceInfo) {
+                                    return interfaceInfo->networkInterface->getInterfaceName() == interfaceName;
+                                });
                             receiverNetworkNodeNames.push_back(receiverNetworkNodeName);
+                            interfaces.push_back(interfaceInfo->networkInterface);
+                        }
                     }
                 }
             }
             stream.streamNodes[networkNodeName].receivers[j] = receiverNetworkNodeNames;
+            stream.streamNodes[networkNodeName].interfaces[j] = interfaces;
         }
         stream.streamNodes[networkNodeName].senders = senderNetworkNodeNames;
     }
@@ -125,15 +146,8 @@ void StreamRedundancyConfigurator::computeStreamSendersAndReceivers(cValueMap *s
         EV_DEBUG << "  Node " << it.first << std::endl;
         auto& streamNode = it.second;
         for (int i = 0; i < streamNode.senders.size(); i++) {
-            auto& senderNodes = streamNode.senders[i];
-            EV_DEBUG << "    Senders for tree " << i << " = [";
-            for (int j = 0; j < senderNodes.size(); j++) {
-                auto& e = senderNodes[j];
-                if (j != 0)
-                    EV_DEBUG << ", ";
-                EV_DEBUG << e;
-            }
-            EV_DEBUG << "]" << std::endl;
+            auto& e = streamNode.senders[i];
+            EV_DEBUG << "    Sender for tree " << i << " = " << e << std::endl;
         }
         for (int i = 0; i < streamNode.receivers.size(); i++) {
             auto& receiverNodes = streamNode.receivers[i];
@@ -155,12 +169,13 @@ void StreamRedundancyConfigurator::computeStreamEncodings(cValueMap *streamConfi
         auto node = (Node *)topology->getNode(i);
         auto networkNode = node->module;
         auto networkNodeName = networkNode->getFullName();
-        std::string destinationNetworkNodeName = streamConfiguration->get("destination");
+        std::string destinationAddress = streamConfiguration->containsKey("destinationAddress") ? streamConfiguration->get("destinationAddress") : streamConfiguration->get("destination");
         std::string streamName = streamConfiguration->get("name").stringValue();
         // encoding configuration
         auto& stream = streams[streamName];
         auto& streamNode = stream.streamNodes[networkNodeName];
-        for (auto& receiverNetworkNodeNames : streamNode.receivers) {
+        for (int j = 0; j < streamNode.receivers.size(); j++) {
+            auto& receiverNetworkNodeNames = streamNode.receivers[j];
             if (!receiverNetworkNodeNames.empty()) {
                 std::string streamNameSuffix;
                 for (auto receiverNetworkNodeName : receiverNetworkNodeNames)
@@ -171,19 +186,19 @@ void StreamRedundancyConfigurator::computeStreamEncodings(cValueMap *streamConfi
                 });
                 if (it != node->streamEncodings.end())
                     continue;
-                auto jt = nextVlanIds.emplace(std::pair<std::string, std::string>{networkNodeName, destinationNetworkNodeName}, 0);
+                auto jt = nextVlanIds.emplace(std::pair<std::string, std::string>{networkNodeName, destinationAddress}, 0);
                 int vlanId = jt.first->second++;
                 if (vlanId > maxVlanId)
                     throw cRuntimeError("Cannot assign VLAN ID in the available range");
-                for (auto receiverNetworkNodeName : receiverNetworkNodeNames) {
-                    auto linkOut = findLinkOut(node, receiverNetworkNodeName.c_str());
-                    EV_DEBUG << "Assigning VLAN id" << EV_FIELD(streamName) << EV_FIELD(networkNodeName) << EV_FIELD(receiverNetworkNodeName) << EV_FIELD(destinationNetworkNodeName) << EV_FIELD(vlanId) << EV_ENDL;
-                    assignedVlanIds[{networkNodeName, receiverNetworkNodeName, destinationNetworkNodeName, streamName}] = vlanId;
+                for (int k = 0; k < receiverNetworkNodeNames.size(); k++) {
+                    auto receiverNetworkNodeName = receiverNetworkNodeNames[k];
+                    EV_DEBUG << "Assigning VLAN id" << EV_FIELD(streamName) << EV_FIELD(networkNodeName) << EV_FIELD(receiverNetworkNodeName) << EV_FIELD(destinationAddress) << EV_FIELD(vlanId) << EV_ENDL;
+                    assignedVlanIds[{networkNodeName, receiverNetworkNodeName, destinationAddress, streamName}] = vlanId;
                     StreamEncoding streamEncoding;
                     streamEncoding.name = outputStreamName;
-                    streamEncoding.networkInterface = linkOut->sourceInterfaceInfo->networkInterface;
+                    streamEncoding.networkInterface = streamNode.interfaces[j][k];
                     streamEncoding.vlanId = vlanId;
-                    streamEncoding.destination = "01:00:00:00:00:00"; // TODO KLUDGE destinationNetworkNodeName;
+                    streamEncoding.destination = destinationAddress;
                     node->streamEncodings.push_back(streamEncoding);
                 }
             }
@@ -194,7 +209,7 @@ void StreamRedundancyConfigurator::computeStreamEncodings(cValueMap *streamConfi
 void StreamRedundancyConfigurator::computeStreamPolicyConfigurations(cValueMap *streamConfiguration)
 {
     std::string sourceNetworkNodeName = streamConfiguration->get("source");
-    std::string destinationNetworkNodeName = streamConfiguration->get("destination");
+    std::string destinationAddress = streamConfiguration->containsKey("destinationAddress") ? streamConfiguration->get("destinationAddress") : streamConfiguration->get("destination");
     std::string streamName = streamConfiguration->get("name").stringValue();
     auto& stream = streams[streamName];
     for (int i = 0; i < topology->getNumNodes(); i++) {
@@ -212,7 +227,7 @@ void StreamRedundancyConfigurator::computeStreamPolicyConfigurations(cValueMap *
         for (auto senderNetworkNodeName : streamNode.senders) {
             auto inputStreamName = streamNode.senders.size() == 1 ? streamName : streamName + "_" + senderNetworkNodeName;
             auto linkIn = findLinkIn(node, senderNetworkNodeName.c_str());
-            auto vlanId = assignedVlanIds[{senderNetworkNodeName, networkNodeName, destinationNetworkNodeName, streamName}];
+            auto vlanId = assignedVlanIds[{senderNetworkNodeName, networkNodeName, destinationAddress, streamName}];
             StreamDecoding streamDecoding;
             streamDecoding.name = inputStreamName;
             streamDecoding.networkInterface = linkIn->destinationInterfaceInfo->networkInterface;
@@ -342,14 +357,20 @@ void StreamRedundancyConfigurator::configureStreams(Node *node)
     }
 }
 
+std::vector<std::string> StreamRedundancyConfigurator::getStreamNames()
+{
+    std::vector<std::string> result;
+    for (auto& it : streams)
+        result.push_back(it.first);
+    return result;
+}
+
 std::vector<std::vector<std::string>> StreamRedundancyConfigurator::getPathFragments(const char *stream)
 {
     for (int i = 0; i < configuration->size(); i++) {
         cValueMap *streamConfiguration = check_and_cast<cValueMap *>(configuration->get(i).objectValue());
         if (!strcmp(streamConfiguration->get("name").stringValue(), stream)) {
             std::vector<std::vector<std::string>> memberStreams;
-            auto source = streamConfiguration->get("source").stringValue();
-            auto destination = streamConfiguration->get("destination").stringValue();
             std::string streamName = streamConfiguration->get("name").stringValue();
             cValueArray *trees = check_and_cast<cValueArray *>(streamConfiguration->get("trees").objectValue());
             for (int j = 0; j < trees->size(); j++) {
@@ -357,10 +378,11 @@ std::vector<std::vector<std::string>> StreamRedundancyConfigurator::getPathFragm
                 for (int k = 0; k < tree->size(); k++) {
                     cValueArray *path = check_and_cast<cValueArray*>(tree->get(k).objectValue());
                     std::vector<std::string> memberStream;
-                    memberStream.push_back(source);
-                    for (int l = 1; l < path->size() - 1; l++) {
-                        auto nodeName = path->get(l).stringValue();
-                        auto module = getParentModule()->getSubmodule(nodeName);
+                    for (int l = 0; l < path->size(); l++) {
+                        std::string name = path->get(l).stringValue();
+                        auto pos = name.find('.');
+                        auto nodeName = pos == std::string::npos ? name : name.substr(0, pos);
+                        auto module = findModuleByPath(nodeName.c_str());
                         Node *node = (Node *)topology->getNodeFor(module);
                         bool isMerging = false;
                         for (auto streamMerging : node->streamMergings)
@@ -370,16 +392,15 @@ std::vector<std::vector<std::string>> StreamRedundancyConfigurator::getPathFragm
                         for (auto streamSplitting : node->streamSplittings)
                             if (streamSplitting.inputStream == streamName)
                                 isSplitting = true;
-                        memberStream.push_back(nodeName);
+                        memberStream.push_back(name);
                         if (isMerging || isSplitting) {
                             if (memberStream.size() > 1 && std::find(memberStreams.begin(), memberStreams.end(), memberStream) == memberStreams.end())
                                 memberStreams.push_back(memberStream);
                             memberStream.clear();
-                            memberStream.push_back(nodeName);
+                            memberStream.push_back(name);
                         }
                     }
-                    memberStream.push_back(destination);
-                    if (!memberStream.empty() && std::find(memberStreams.begin(), memberStreams.end(), memberStream) == memberStreams.end())
+                    if (memberStream.size() > 1 && std::find(memberStreams.begin(), memberStreams.end(), memberStream) == memberStreams.end())
                         memberStreams.push_back(memberStream);
                 }
             }

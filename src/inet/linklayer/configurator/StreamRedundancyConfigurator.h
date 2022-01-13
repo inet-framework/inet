@@ -83,17 +83,23 @@ class INET_API StreamRedundancyConfigurator : public NetworkConfiguratorBase
         virtual Node *createNode(cModule *module) override { return new StreamRedundancyConfigurator::Node(module); }
     };
 
-    class StreamTree
+    // TODO use this, see below
+    class StreamNodeTreeData
     {
       public:
-        std::map<std::string, std::vector<std::string>> senders; // maps network node name to list of previous sender network node names
-        std::map<std::string, std::vector<std::string>> receivers; // maps network node name to list of next receiver network node names
+        std::string sender;
+        std::vector<std::string> receivers;
+        std::vector<std::string> distinctReceivers;
     };
 
     class StreamNode
     {
       public:
-        std::vector<std::string> senders; // tree index to list of previous sender network node names
+        // TODO use this, see above
+        std::vector<StreamNodeTreeData> treeData;
+
+        std::vector<std::string> senders; // tree index to previous sender network node name
+        std::vector<std::vector<NetworkInterface *>> interfaces; // tree index to outgoing interface name
         std::vector<std::vector<std::string>> receivers; // tree index to list of next receiver network node names
         std::vector<std::vector<std::string>> distinctReceivers; // distinct non-empty receiver sets
     };
@@ -133,6 +139,7 @@ class INET_API StreamRedundancyConfigurator : public NetworkConfiguratorBase
     virtual void configureStreams(Node *node);
 
   public:
+    virtual std::vector<std::string> getStreamNames();
     virtual std::vector<std::vector<std::string>> getPathFragments(const char *stream);
 };
 
