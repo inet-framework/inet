@@ -109,7 +109,7 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
     /**
      *  @brief Prints cached data
      */
-    virtual void printState() override;
+    virtual void printState();
 
     /**
      * @brief Copy cache from interfaceIdA to interfaceIdB interface
@@ -119,28 +119,28 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
     /**
      * @brief Remove aged entries from all VLANs
      */
-    virtual void removeAgedEntriesFromAllVlans() override;
+    virtual void removeAgedEntriesFromAllVlans();
 
     /*
      * It calls removeAgedEntriesFromAllVlans() if and only if at least
      * 1 second has passed since the method was last called.
      */
-    virtual void removeAgedEntriesIfNeeded() override;
+    virtual void removeAgedEntriesIfNeeded();
 
     /**
      * Pre-reads in entries for Address Table during initialization.
      */
-    virtual void readAddressTable(const char *fileName) override;
+    virtual void readAddressTable(const char *fileName);
 
     /**
      * For lifecycle: initialize entries for the vlanAddressTable by reading them from a file (if specified by a parameter)
      */
-    virtual void initializeTable() override;
+    virtual void initializeTable();
 
     /**
      * For lifecycle: clears all entries from the vlanAddressTable.
      */
-    virtual void clearTable() override;
+    virtual void clearTable();
 
     /*
      * Some (eg.: STP, RSTP) protocols may need to change agingTime

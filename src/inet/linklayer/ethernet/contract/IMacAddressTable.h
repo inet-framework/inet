@@ -34,40 +34,9 @@ class INET_API IMacAddressTable
     virtual void flush(int portno) = 0;
 
     /**
-     *  @brief Prints cached data
-     */
-    virtual void printState() = 0;
-
-    /**
      * @brief Copy cache from portA to portB port
      */
     virtual void copyTable(int portA, int portB) = 0;
-
-    /**
-     * @brief Remove aged entries from all VLANs
-     */
-    virtual void removeAgedEntriesFromAllVlans() = 0;
-
-    /*
-     * It calls removeAgedEntriesFromAllVlans() if and only if at least
-     * 1 second has passed since the method was last called.
-     */
-    virtual void removeAgedEntriesIfNeeded() = 0;
-
-    /**
-     * Pre-reads in entries for Address Table during initialization.
-     */
-    virtual void readAddressTable(const char *fileName) = 0;
-
-    /**
-     * For lifecycle: initialize entries for the vlanAddressTable by reading them from a file (if specified by a parameter)
-     */
-    virtual void initializeTable() = 0;
-
-    /**
-     * For lifecycle: clears all entries from the vlanAddressTable.
-     */
-    virtual void clearTable() = 0;
 
     /*
      * Some (eg.: STP, RSTP) protocols may need to change agingTime
