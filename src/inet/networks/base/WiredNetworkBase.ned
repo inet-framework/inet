@@ -25,7 +25,7 @@ network WiredNetworkBase extends NetworkBase
         bool hasGlobalArp = default(true);
         *.ipv4.arp.typename = default(hasGlobalArp ? "GlobalArp" : "Arp");
     submodules:
-        macAddressTableConfigurator: <default(hasGlobalArp ? "MacAddressTableConfigurator" : "")> like INetworkConfigurator if typename != "" {
+        macForwardingTableConfigurator: <default(hasGlobalArp ? "MacForwardingTableConfigurator" : "")> like INetworkConfigurator if typename != "" {
             @display("p=100,400;is=s");
         }
 }
