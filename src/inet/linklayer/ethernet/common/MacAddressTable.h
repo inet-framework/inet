@@ -101,28 +101,6 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
     // Table management
 
     /**
-     * @brief For a known arriving interfaceId, V-TAG and destination MAC. It finds out the interfaceId where relay component should deliver the message
-     * @param address MAC destination
-     * @param vid VLAN ID
-     * @return Output interfaceId for address, or -1 if unknown.
-     */
-    virtual int getInterfaceIdForAddress(const MacAddress& address, unsigned int vid = 0) override;
-
-    /**
-     * @brief For a given port, V-TAG and destination MAC it finds out the interface Ids where relay component should deliver the message.
-     * @param address MAC destination
-     * @param vid VLAN ID
-     * @return Output interface Ids for address, or empty list unknown.
-     */
-    virtual std::vector<int> getInterfaceIdsForMulticastAddress(const MacAddress& address, unsigned int vid = 0) override;
-
-    /**
-     * @brief Register a new MAC address at AddressTable.
-     * @return True if refreshed. False if it is new.
-     */
-    virtual bool updateTableWithAddress(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
-
-    /**
      *  @brief Clears interfaceId cache
      */
     // TODO find a better name

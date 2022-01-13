@@ -29,28 +29,6 @@ class INET_API IMacAddressTable
 {
   public:
     /**
-     * @brief For a known arriving port, V-TAG and destination MAC. It finds out the interface Id where relay component should deliver the message
-     * @param address MAC destination
-     * @param vid VLAN ID
-     * @return Output interface Id for address, or -1 if unknown.
-     */
-    virtual int getInterfaceIdForAddress(const MacAddress& address, unsigned int vid = 0) = 0;
-
-    /**
-     * @brief For a given interface, V-TAG and destination multicast MAC address it finds out the interface Ids where relay component should deliver the message.
-     * @param address MAC destination
-     * @param vid VLAN ID
-     * @return Output interface Ids for address, or empty list unknown.
-     */
-    virtual std::vector<int> getInterfaceIdsForMulticastAddress(const MacAddress& address, unsigned int vid = 0) = 0;
-
-    /**
-     * @brief Register a new MAC address at AddressTable.
-     * @return True if refreshed. False if it is new.
-     */
-    virtual bool updateTableWithAddress(int portno, const MacAddress& address, unsigned int vid = 0) = 0;
-
-    /**
      *  @brief Clears portno cache
      */
     virtual void flush(int portno) = 0;
