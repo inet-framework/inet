@@ -189,7 +189,7 @@ void Rstp::handleHelloTime(cMessage *msg)
                         candidatePort->setState(Ieee8021dInterfaceData::FORWARDING);
                         candidatePort->setLostBPDU(0);
                         flushOtherPorts(candidate);
-                        macTable->copyTable(interfaceId, candidate); // copy cache from old to new root
+                        macTable->replaceForwardingInterface(interfaceId, candidate); // copy cache from old to new root
                     }
                     else {
                         // alternate not found, selects a new root
@@ -364,7 +364,7 @@ bool Rstp::processBetterSource(const Ptr<const BpduCfg>& frame, unsigned int arr
                     arrivalPort->setRole(Ieee8021dInterfaceData::ROOT);
                     arrivalPort->setState(Ieee8021dInterfaceData::FORWARDING);
                     arrivalPort->setLostBPDU(0);
-                    macTable->copyTable(r, arrivalInterfaceId); // copy cache from old to new root
+                    macTable->replaceForwardingInterface(r, arrivalInterfaceId); // copy cache from old to new root
                     // the change does not deserve flooding
                 }
                 break;
@@ -404,7 +404,7 @@ bool Rstp::processBetterSource(const Ptr<const BpduCfg>& frame, unsigned int arr
                 arrivalPort->setState(Ieee8021dInterfaceData::FORWARDING);
                 arrivalPort->setLostBPDU(0);
                 rootPort->setRole(Ieee8021dInterfaceData::ALTERNATE); // temporary, just one port can be root at contest time
-                macTable->copyTable(r, arrivalInterfaceId); // copy cache from old to new root
+                macTable->replaceForwardingInterface(r, arrivalInterfaceId); // copy cache from old to new root
                 case3 = contestInterfacedata(r);
                 if (case3 >= 0) {
                     EV_DETAIL << "Setting current root port (port " << r << ") to alternate." << endl;
@@ -476,7 +476,7 @@ bool Rstp::processSameSource(const Ptr<const BpduCfg>& frame, unsigned int arriv
                     arrivalPort->setState(Ieee8021dInterfaceData::DISCARDING);
                     arrivalPort->setNextUpgrade(simTime() + forwardDelay);
                     scheduleNextUpgrade();
-                    macTable->copyTable(arrivalInterfaceId, alternative); // copy cache from old to new root
+                    macTable->replaceForwardingInterface(arrivalInterfaceId, alternative); // copy cache from old to new root
                     flushOtherPorts(alternative);
                     alternativePort->setRole(Ieee8021dInterfaceData::ROOT);
                     alternativePort->setState(Ieee8021dInterfaceData::FORWARDING); // comes from alternate, preserves lostBPDU
@@ -544,7 +544,7 @@ bool Rstp::processSameSource(const Ptr<const BpduCfg>& frame, unsigned int arriv
                             arrivalPort->setState(Ieee8021dInterfaceData::DISCARDING);
                         }
                         flushOtherPorts(alternative);
-                        macTable->copyTable(arrivalInterfaceId, alternative); // copy cache from old to new root
+                        macTable->replaceForwardingInterface(arrivalInterfaceId, alternative); // copy cache from old to new root
                     }
                 }
                 updateInterfacedata(frame, arrivalInterfaceId);
