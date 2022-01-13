@@ -44,10 +44,7 @@ class INET_API IMacForwardingTable
      */
     virtual void flush(int portno) = 0;
 
-    /**
-     * @brief Copy cache from portA to portB port
-     */
-    virtual void copyTable(int portA, int portB) = 0;
+    virtual void replaceForwardingInterface(int oldInterfaceId, int newInterfaceId) = 0;
 };
 
 } // namespace inet

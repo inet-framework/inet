@@ -265,11 +265,11 @@ void MacAddressTable::printState()
 }
 
 //TODO rename it (replace interfaceIdA to interfaceIdB in table)
-void MacAddressTable::copyTable(int interfaceIdA, int interfaceIdB)
+void MacAddressTable::replaceForwardingInterface(int oldInterfaceId, int newInterfaceId)
 {
     for (auto& elem : addressTable) {
-        if (elem.second.interfaceId == interfaceIdA)
-            elem.second.interfaceId = interfaceIdB;
+        if (elem.second.interfaceId == oldInterfaceId)
+            elem.second.interfaceId = newInterfaceId;
     }
 }
 
