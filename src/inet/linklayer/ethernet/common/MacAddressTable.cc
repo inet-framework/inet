@@ -410,12 +410,7 @@ void MacAddressTable::clearTable()
 
 void MacAddressTable::setAgingTime(simtime_t agingTime)
 {
-    this->agingTime = agingTime;
-}
-
-void MacAddressTable::resetDefaultAging()
-{
-    agingTime = par("agingTime");
+    this->agingTime = agingTime == -1 ? par("agingTime") : agingTime;
 }
 
 } // namespace inet

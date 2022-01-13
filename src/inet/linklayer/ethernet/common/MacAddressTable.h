@@ -141,7 +141,6 @@ class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable
      * Some (eg.: STP, RSTP) protocols may need to change agingTime
      */
     virtual void setAgingTime(simtime_t agingTime) override;
-    virtual void resetDefaultAging() override;
 
     //@{ For lifecycle
     virtual void handleStartOperation(LifecycleOperation *operation) override { initializeTable(); }

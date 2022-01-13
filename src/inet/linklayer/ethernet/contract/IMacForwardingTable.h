@@ -36,6 +36,8 @@ class INET_API IMacForwardingTable
     virtual std::vector<int> getMulticastAddressForwardingInterfaces(const MacAddress& address, unsigned int vid = 0) const = 0;
     virtual void addMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) = 0;
     virtual void removeMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) = 0;
+
+    virtual void setAgingTime(simtime_t agingTime) = 0;
 };
 
 } // namespace inet

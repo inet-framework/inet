@@ -129,7 +129,7 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const BpduCfg>& bpdu)
                 generateBPDU(elem, MacAddress::STP_MULTICAST_ADDRESS, true, false);
         }
         else {
-            macTable->resetDefaultAging();
+            macTable->setAgingTime(-1);
 
             EV_INFO << "Sending BPDUs on all designated ports." << endl;
 
