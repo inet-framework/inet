@@ -37,11 +37,10 @@ class INET_API IMacForwardingTable
     virtual void addMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) = 0;
     virtual void removeMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) = 0;
 
-    virtual void setAgingTime(simtime_t agingTime) = 0;
-
     virtual void removeForwardingInterface(int interfaceId) = 0;
-
     virtual void replaceForwardingInterface(int oldInterfaceId, int newInterfaceId) = 0;
+
+    virtual void setAgingTime(simtime_t agingTime) = 0;
 };
 
 } // namespace inet
