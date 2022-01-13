@@ -40,6 +40,8 @@ class INET_API MacAddressTableConfigurator : public NetworkConfiguratorBase, pub
     virtual void computeMacAddressTables();
     virtual void configureMacAddressTables() const;
 
+    virtual cValueMap *findForwardingRule(cValueArray *configuration, MacAddress macAddress, std::string interfaceName);
+
   public:
     virtual ~MacAddressTableConfigurator();
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;

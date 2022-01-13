@@ -87,16 +87,34 @@ void MacAddressTableConfigurator::extendConfiguration(Node *destinationNode, Int
         if (sourceNode != destinationNode && isBridgeNode(sourceNode) && sourceNode->getNumPaths() != 0) {
             auto firstLink = (Link *)sourceNode->getPath(0);
             auto firstInterface = static_cast<Interface *>(firstLink->sourceInterface);
+            auto interfaceName = firstInterface->networkInterface->getInterfaceName();
             auto moduleId = sourceNode->module->getSubmodule("macTable")->getId();
             auto it = configurations.find(moduleId);
             if (it == configurations.end())
                 configurations[moduleId] = new cValueArray();
-            auto rule = new cValueMap();
-            rule->set("address", macAddress.str());
-            rule->set("interface", firstInterface->networkInterface->getInterfaceName());
-            configurations[moduleId]->add(rule);
+            else if (findForwardingRule(it->second, macAddress, interfaceName) != nullptr)
+                continue;
+            else {
+                auto rule = new cValueMap();
+                rule->set("address", macAddress.str());
+                rule->set("interface", interfaceName);
+                it->second->add(rule);
+            }
         }
     }
+}
+
+cValueMap *MacAddressTableConfigurator::findForwardingRule(cValueArray *configuration, MacAddress macAddress, std::string interfaceName)
+{
+    for (int i = 0; i < configuration->size(); i++) {
+        auto rule = check_and_cast<cValueMap *>(configuration->get(i).objectValue());
+        if (rule->get("address").stdstringValue() == macAddress.str() &&
+            rule->get("interface").stdstringValue() == interfaceName)
+        {
+            return rule;
+        }
+    }
+    return nullptr;
 }
 
 void MacAddressTableConfigurator::configureMacAddressTables() const
