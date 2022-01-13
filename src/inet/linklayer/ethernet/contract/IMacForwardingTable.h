@@ -38,6 +38,16 @@ class INET_API IMacForwardingTable
     virtual void removeMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) = 0;
 
     virtual void setAgingTime(simtime_t agingTime) = 0;
+
+    /**
+     *  @brief Clears portno cache
+     */
+    virtual void flush(int portno) = 0;
+
+    /**
+     * @brief Copy cache from portA to portB port
+     */
+    virtual void copyTable(int portA, int portB) = 0;
 };
 
 } // namespace inet
