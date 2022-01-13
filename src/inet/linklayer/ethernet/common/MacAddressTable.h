@@ -22,7 +22,6 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/linklayer/common/MacAddress.h"
-#include "inet/linklayer/ethernet/contract/IMacAddressTable.h"
 #include "inet/linklayer/ethernet/contract/IMacForwardingTable.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 
@@ -33,7 +32,7 @@ namespace inet {
  * NOTE that interfaceIds (interfaceId parameters) are actually the corresponding ID of the port interface.
  * i.e. this is an interfaceId and NOT an index of the some kind in a gate vector.
  */
-class INET_API MacAddressTable : public OperationalBase, public IMacAddressTable, public IMacForwardingTable, public StringFormat::IDirectiveResolver
+class INET_API MacAddressTable : public OperationalBase, public IMacForwardingTable, public StringFormat::IDirectiveResolver
 {
   protected:
     struct AddressEntry {
