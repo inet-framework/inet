@@ -83,7 +83,7 @@ void EthernetEncapsulation::initialize(int stage)
         WATCH(seqNum);
         totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
         useSNAP = par("useSNAP");
-        networkInterface = findContainingNicModule(this); // TODO or getContainingNicModule() ? or use a macaddresstable?
+        networkInterface = findContainingNicModule(this); // TODO or getContainingNicModule() ? or use a MacForwardingTable?
 
         WATCH_PTRMAP(socketIdToSocketMap);
         WATCH(totalFromHigherLayer);

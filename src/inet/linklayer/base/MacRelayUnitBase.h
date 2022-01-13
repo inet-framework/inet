@@ -32,7 +32,7 @@ class INET_API MacRelayUnitBase : public LayeredProtocolBase, public StringForma
 {
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
-    ModuleRefByPar<IMacForwardingTable> macAddressTable;
+    ModuleRefByPar<IMacForwardingTable> macForwardingTable;
 
     long numProcessedFrames = 0;
     long numDroppedFrames = 0;

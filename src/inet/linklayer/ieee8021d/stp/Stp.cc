@@ -121,7 +121,7 @@ void Stp::handleBPDU(Packet *packet, const Ptr<const BpduCfg>& bpdu)
         EV_INFO << "Configuration BPDU " << bpdu << " arrived from Root Switch." << endl;
 
         if (bpdu->getTcFlag()) {
-            EV_DEBUG << "MacAddressTable aging time set to " << currentFwdDelay << "." << endl;
+            EV_DEBUG << "MacForwardingTable aging time set to " << currentFwdDelay << "." << endl;
             macTable->setAgingTime(currentFwdDelay);
 
             // config BPDU with TC flag

@@ -25,7 +25,6 @@
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
-#include "inet/linklayer/ethernet/common/MacAddressTable.h"
 #include "inet/linklayer/ieee8021d/common/Ieee8021dBpdu_m.h"
 #include "inet/linklayer/ieee8021d/common/StpBase.h"
 #include "inet/networklayer/common/InterfaceTable.h"

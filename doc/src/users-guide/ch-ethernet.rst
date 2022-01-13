@@ -170,7 +170,7 @@ The following components are present in the model:
 
 -  :ned:`MacRelayUnit`
 
--  :ned:`MacAddressTable`
+-  :ned:`MacForwardingTable`
 
 -  :ned:`Ieee8021dRelay`
 
@@ -218,7 +218,7 @@ sending/receiving Ethernet frames. They should be connected to
 :ned:`EthernetInterface` modules.
 
 The relay unit holds a table for the destination address -> output port
-mapping in a :ned:`MacAddressTable` module. When the relay unit receives
+mapping in a :ned:`MacForwardingTable` module. When the relay unit receives
 a data frame, it updates the table with the source address->input port.
 
 If the destination address is not found in the table, the frame is
@@ -231,12 +231,12 @@ watermark, PAUSE frames are sent on all ports. The watermark and the
 pause time is configurable; use zero values to disable the PAUSE
 feature.
 
-.. _ug:sec:ethernet:macaddresstable:
+.. _ug:sec:ethernet:macforwardingtable:
 
-MacAddressTable
+MacForwardingTable
 ~~~~~~~~~~~~~~~
 
-The :ned:`MacAddressTable` module stores the mapping between ports and
+The :ned:`MacForwardingTable` module stores the mapping between ports and
 MAC addresses. Entries are deleted if their age exceeds a certain limit.
 
 If needed, address tables can be pre-loaded from text files at the

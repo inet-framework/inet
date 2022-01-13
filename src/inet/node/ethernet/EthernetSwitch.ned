@@ -26,7 +26,7 @@ import inet.common.lifecycle.NodeStatus;
 import inet.common.packet.recorder.PcapRecorder;
 import inet.linklayer.configurator.L2NodeConfigurator;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.contract.IMacAddressTable;
+import inet.linklayer.contract.IMacForwardingTable;
 import inet.linklayer.contract.ISpanningTree;
 import inet.linklayer.ethernet.contract.IEthernetLayer;
 import inet.linklayer.ieee8021q.IIeee8021qLayer;
@@ -71,7 +71,7 @@ module EthernetSwitch
     gates:
         inout ethg[numEthInterfaces] @labels(EtherFrame-conn);
     submodules:
-        macTable: <default("MacAddressTable")> like IMacAddressTable {
+        macTable: <default("MacForwardingTable")> like IMacForwardingTable {
             @display("p=100,100;is=s");
         }
         interfaceTable: InterfaceTable {

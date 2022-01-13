@@ -271,7 +271,7 @@ void StreamRedundancyConfigurator::configureStreams()
 void StreamRedundancyConfigurator::configureStreams(Node *node)
 {
     auto networkNode = node->module;
-    auto macAddressTable = networkNode->findModuleByPath(".macTable");
+    auto macForwardingTable = networkNode->findModuleByPath(".macTable");
     auto ieee8021qTagHeaderChecker = networkNode->findModuleByPath(".ieee8021q.qTagHeaderChecker");
     auto streamPolicy = networkNode->findModuleByPath(".bridging.streamPolicy");
     if (streamPolicy == nullptr)
@@ -331,7 +331,7 @@ void StreamRedundancyConfigurator::configureStreams(Node *node)
         EV_INFO << "Configuring stream encoding" << EV_FIELD(networkNode) << EV_FIELD(streamEncoder) << EV_FIELD(parameterValue) << EV_ENDL;
         streamEncoder->par("streamNameToVlanIdMapping") = parameterValue;
     }
-    if (macAddressTable != nullptr && !node->streamEncodings.empty()) {
+    if (macForwardingTable != nullptr && !node->streamEncodings.empty()) {
         cValueArray *parameterValue = new cValueArray();
         for (auto& streamEncoding : node->streamEncodings) {
             cValueMap *value = new cValueMap();
@@ -340,8 +340,8 @@ void StreamRedundancyConfigurator::configureStreams(Node *node)
             value->set("interface", streamEncoding.networkInterface->getInterfaceName());
             parameterValue->add(value);
         }
-        EV_INFO << "Configuring MAC address table" << EV_FIELD(networkNode) << EV_FIELD(macAddressTable) << EV_FIELD(parameterValue) << EV_ENDL;
-        macAddressTable->par("addressTable") = parameterValue;
+        EV_INFO << "Configuring MAC address table" << EV_FIELD(networkNode) << EV_FIELD(macForwardingTable) << EV_FIELD(parameterValue) << EV_ENDL;
+        macForwardingTable->par("addressTable") = parameterValue;
     }
     if (ieee8021qTagHeaderChecker != nullptr) {
         std::set<int> vlanIds;

@@ -17,7 +17,7 @@
 
 package inet.linklayer.ethernet.common;
 
-import inet.linklayer.contract.IMacAddressTable;
+import inet.linklayer.contract.IMacForwardingTable;
 
 //
 // This module handles the mapping between ports and MAC addresses.
@@ -34,7 +34,7 @@ import inet.linklayer.contract.IMacAddressTable;
 //     Interface:    interface name, e.g. eth3 (or interface id, e.g. 103)
 //   empty lines and commented out lines starts with '#' are allowed.
 //
-simple MacAddressTable like IMacAddressTable
+simple MacForwardingTable like IMacForwardingTable
 {
     parameters:
         @display("i=block/table2");

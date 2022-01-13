@@ -69,7 +69,7 @@ simple Rstp like ISpanningTree
         // The path to the InterfaceTable module
         string interfaceTableModule = default("^.interfaceTable");
 
-        // The path to the MacAddressTable module
+        // The path to the MacForwardingTable module
         string macTableModule = default("^.macTable");
 
         // Shows the spanning tree by coloring connections in the network graphics.

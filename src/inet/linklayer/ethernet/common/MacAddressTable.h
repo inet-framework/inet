@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_MACADDRESSTABLE_H
-#define __INET_MACADDRESSTABLE_H
+#ifndef __INET_MACFORWARDINGTABLE_H
+#define __INET_MACFORWARDINGTABLE_H
 
 #include "inet/common/StringFormat.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
@@ -32,7 +32,7 @@ namespace inet {
  * NOTE that interfaceIds (interfaceId parameters) are actually the corresponding ID of the port interface.
  * i.e. this is an interfaceId and NOT an index of the some kind in a gate vector.
  */
-class INET_API MacAddressTable : public OperationalBase, public IMacForwardingTable, public StringFormat::IDirectiveResolver
+class INET_API MacForwardingTable : public OperationalBase, public IMacForwardingTable, public StringFormat::IDirectiveResolver
 {
   protected:
     struct AddressEntry {
