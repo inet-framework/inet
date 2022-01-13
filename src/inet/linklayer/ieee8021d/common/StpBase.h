@@ -22,7 +22,7 @@
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
-#include "inet/linklayer/ethernet/contract/IMacAddressTable.h"
+#include "inet/linklayer/ethernet/contract/IMacForwardingTable.h"
 #include "inet/networklayer/common/InterfaceTable.h"
 
 namespace inet {
@@ -44,7 +44,7 @@ class INET_API StpBase : public OperationalBase, public cListener
     simtime_t forwardDelay;
 
     opp_component_ptr<cModule> switchModule;
-    ModuleRefByPar<IMacAddressTable> macTable;
+    ModuleRefByPar<IMacForwardingTable> macTable;
     ModuleRefByPar<IInterfaceTable> ifTable;
     opp_component_ptr<NetworkInterface> ie;
 
