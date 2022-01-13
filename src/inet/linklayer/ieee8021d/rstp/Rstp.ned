@@ -67,10 +67,10 @@ simple Rstp like ISpanningTree
         int bridgePriority = default(32768);
 
         // The path to the InterfaceTable module
-        string interfaceTableModule = default("^.interfaceTable");
+        string interfaceTableModule;
 
         // The path to the MacForwardingTable module
-        string macTableModule = default("^.macTable");
+        string macTableModule;
 
         // Shows the spanning tree by coloring connections in the network graphics.
         // Label ethernet interface with port role and status. Mark root switch

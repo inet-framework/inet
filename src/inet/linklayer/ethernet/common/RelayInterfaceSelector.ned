@@ -30,8 +30,8 @@ import inet.queueing.contract.IPacketFlow;
 simple RelayInterfaceSelector extends PacketPusherBase like IPacketFlow
 {
     parameters:
-        string macTableModule = default("^.macTable"); // relative module path of MAC table
-        string interfaceTableModule = default("^.interfaceTable"); // relative module path of interface table
+        string macTableModule; // relative module path of MAC table
+        string interfaceTableModule; // relative module path of interface table
         @class(RelayInterfaceSelector);
         @display("i=block/fork");
         @signal[packetDropped](type=inet::Packet);

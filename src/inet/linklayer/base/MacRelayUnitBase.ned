@@ -22,8 +22,8 @@ import inet.linklayer.contract.IMacRelayUnit;
 simple MacRelayUnitBase
 {
     parameters:
-        string macTableModule = default("^.macTable");
-        string interfaceTableModule = default("^.interfaceTable");
+        string macTableModule;
+        string interfaceTableModule;
         string displayStringTextFormat = default("proc: %p\ndisc: %d");
         @display("i=block/switch");
         @signal[packetSentToLower](type=inet::Packet);

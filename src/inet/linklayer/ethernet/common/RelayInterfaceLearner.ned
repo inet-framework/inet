@@ -28,8 +28,8 @@ import inet.queueing.contract.IPacketFlow;
 simple RelayInterfaceLearner extends PacketFlowBase like IPacketFlow
 {
     parameters:
-        string macTableModule = default("^.macTable"); // relative module path of MAC table
-        string interfaceTableModule = default("^.interfaceTable"); // relative module path of interface table
+        string macTableModule; // relative module path of MAC table
+        string interfaceTableModule; // relative module path of interface table
         @class(RelayInterfaceLearner);
         @display("i=block/blackboard");
 }
