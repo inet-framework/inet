@@ -27,9 +27,9 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 // interfaces. The effect of this configuration is that the network can use the
 // ~GlobalArp module and completely eliminate the ARP protocol messages.
 //
-// @see ~MacAddressTable
+// @see ~MacForwardingTable
 //
-simple MacAddressTableConfigurator like INetworkConfigurator
+simple MacForwardingTableConfigurator like INetworkConfigurator
 {
     parameters:
         @display("i=block/cogwheel");

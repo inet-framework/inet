@@ -15,14 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_MACADDRESSTABLECONFIGURATOR_H
-#define __INET_MACADDRESSTABLECONFIGURATOR_H
+#ifndef __INET_MACFORWARDINGTABLECONFIGURATOR_H
+#define __INET_MACFORWARDINGTABLECONFIGURATOR_H
 
 #include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
 
 namespace inet {
 
-class INET_API MacAddressTableConfigurator : public NetworkConfiguratorBase, public cListener
+class INET_API MacForwardingTableConfigurator : public NetworkConfiguratorBase, public cListener
 {
   protected:
     std::map<int, cValueArray *> configurations;
@@ -37,13 +37,13 @@ class INET_API MacAddressTableConfigurator : public NetworkConfiguratorBase, pub
     virtual void computeConfiguration();
     virtual void extendConfiguration(Node *destinationNode, Interface *destinationInterface, MacAddress macAddress);
 
-    virtual void computeMacAddressTables();
-    virtual void configureMacAddressTables() const;
+    virtual void computeMacForwardingTables();
+    virtual void configureMacForwardingTables() const;
 
     virtual cValueMap *findForwardingRule(cValueArray *configuration, MacAddress macAddress, std::string interfaceName);
 
   public:
-    virtual ~MacAddressTableConfigurator();
+    virtual ~MacForwardingTableConfigurator();
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 

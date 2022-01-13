@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "inet/linklayer/configurator/MacAddressTableConfigurator.h"
+#include "inet/linklayer/configurator/MacForwardingTableConfigurator.h"
 
 #include "inet/common/MatchableObject.h"
 #include "inet/common/ModuleAccess.h"
@@ -25,35 +25,35 @@
 
 namespace inet {
 
-Define_Module(MacAddressTableConfigurator);
+Define_Module(MacForwardingTableConfigurator);
 
-MacAddressTableConfigurator::~MacAddressTableConfigurator()
+MacForwardingTableConfigurator::~MacForwardingTableConfigurator()
 {
     for (auto it : configurations)
         delete it.second;
 }
 
-void MacAddressTableConfigurator::initialize(int stage)
+void MacForwardingTableConfigurator::initialize(int stage)
 {
     NetworkConfiguratorBase::initialize(stage);
     if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
         computeConfiguration();
-        configureMacAddressTables();
+        configureMacForwardingTables();
         getParentModule()->subscribe(ipv4MulticastChangeSignal, this);
     }
 }
 
-void MacAddressTableConfigurator::computeConfiguration()
+void MacForwardingTableConfigurator::computeConfiguration()
 {
     long initializeStartTime = clock();
     delete topology;
     topology = new Topology();
     TIME(extractTopology(*topology))
-    TIME(computeMacAddressTables());
+    TIME(computeMacForwardingTables());
     printElapsedTime("initialize", initializeStartTime);
 }
 
-void MacAddressTableConfigurator::computeMacAddressTables()
+void MacForwardingTableConfigurator::computeMacForwardingTables()
 {
     // for each network node as destination
     //   for each network interface of destination
@@ -75,7 +75,7 @@ void MacAddressTableConfigurator::computeMacAddressTables()
     }
 }
 
-void MacAddressTableConfigurator::extendConfiguration(Node *destinationNode, Interface *destinationInterface, MacAddress macAddress)
+void MacForwardingTableConfigurator::extendConfiguration(Node *destinationNode, Interface *destinationInterface, MacAddress macAddress)
 {
     for (int j = 0; j < destinationNode->getNumInLinks(); j++) {
         auto link = (Link *)destinationNode->getLinkIn(j);
@@ -104,7 +104,7 @@ void MacAddressTableConfigurator::extendConfiguration(Node *destinationNode, Int
     }
 }
 
-cValueMap *MacAddressTableConfigurator::findForwardingRule(cValueArray *configuration, MacAddress macAddress, std::string interfaceName)
+cValueMap *MacForwardingTableConfigurator::findForwardingRule(cValueArray *configuration, MacAddress macAddress, std::string interfaceName)
 {
     for (int i = 0; i < configuration->size(); i++) {
         auto rule = check_and_cast<cValueMap *>(configuration->get(i).objectValue());
@@ -117,22 +117,22 @@ cValueMap *MacAddressTableConfigurator::findForwardingRule(cValueArray *configur
     return nullptr;
 }
 
-void MacAddressTableConfigurator::configureMacAddressTables() const
+void MacForwardingTableConfigurator::configureMacForwardingTables() const
 {
     for (auto it : configurations) {
-        auto macAddressTable = getSimulation()->getModule(it.first);
-        macAddressTable->par("addressTable") = it.second->dup();
+        auto macForwardingTable = getSimulation()->getModule(it.first);
+        macForwardingTable->par("addressTable") = it.second->dup();
     }
 }
 
-void MacAddressTableConfigurator::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
+void MacForwardingTableConfigurator::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     if (signal == ipv4MulticastChangeSignal) {
         auto sourceInfo = check_and_cast<Ipv4MulticastGroupSourceInfo *>(object);
         auto node = static_cast<Node *>(topology->getNodeFor(getContainingNode(sourceInfo->ie)));
         auto interface = findInterface(node, sourceInfo->ie);
         extendConfiguration(node, interface, GlobalArp::toMulticastMacAddress(sourceInfo->groupAddress));
-        configureMacAddressTables();
+        configureMacForwardingTables();
     }
 }
 
