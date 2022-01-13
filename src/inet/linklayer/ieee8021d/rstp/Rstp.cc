@@ -231,7 +231,7 @@ void Rstp::checkTC(const Ptr<const BpduCfg>& frame, int arrivalInterfaceId)
                 auto port2 = getPortInterfaceDataForUpdate(interfaceId);
                 // flushing other ports
                 // TCN over other ports
-                macTable->flush(interfaceId);
+                macTable->removeForwardingInterface(interfaceId);
                 port2->setTCWhile(simTime() + tcWhileTime);
             }
         }
@@ -246,7 +246,7 @@ void Rstp::handleBackup(const Ptr<const BpduCfg>& frame, unsigned int arrivalInt
         || ((frame->getPortPriority() == port->getPortPriority()) && (frame->getPortNum() < arrivalInterfaceId)))
     {
         // flushing arrival port
-        macTable->flush(arrivalInterfaceId);
+        macTable->removeForwardingInterface(arrivalInterfaceId);
         port->setRole(Ieee8021dInterfaceData::BACKUP);
         port->setState(Ieee8021dInterfaceData::DISCARDING);
         port->setLostBPDU(0);
@@ -257,7 +257,7 @@ void Rstp::handleBackup(const Ptr<const BpduCfg>& frame, unsigned int arrivalInt
     {
         auto port2 = getPortInterfaceDataForUpdate(frame->getPortNum());
         // flushing sender port
-        macTable->flush(frame->getPortNum()); // portNum is sender port number, it is not arrival port
+        macTable->removeForwardingInterface(frame->getPortNum()); // portNum is sender port number, it is not arrival port
         port2->setRole(Ieee8021dInterfaceData::BACKUP);
         port2->setState(Ieee8021dInterfaceData::DISCARDING);
         port2->setLostBPDU(0);
@@ -269,7 +269,7 @@ void Rstp::handleBackup(const Ptr<const BpduCfg>& frame, unsigned int arrivalInt
         // switch to disabled
         EV_DETAIL << "Unavoidable loop. Received its own message at the same port. Setting port " << frame->getPortNum() << " to disabled." << endl;
         // flushing that port
-        macTable->flush(frame->getPortNum()); // portNum is sender port number, it is not arrival port
+        macTable->removeForwardingInterface(frame->getPortNum()); // portNum is sender port number, it is not arrival port
         port2->setRole(Ieee8021dInterfaceData::DISABLED);
         port2->setState(Ieee8021dInterfaceData::DISCARDING);
     }
@@ -348,7 +348,7 @@ bool Rstp::processBetterSource(const Ptr<const BpduCfg>& frame, unsigned int arr
                 {
                     // flushing that port
                     EV_DETAIL << "The current root has better local port. Setting the arrival port to alternate." << endl;
-                    macTable->flush(arrivalInterfaceId);
+                    macTable->removeForwardingInterface(arrivalInterfaceId);
                     arrivalPort->setRole(Ieee8021dInterfaceData::ALTERNATE);
                     arrivalPort->setState(Ieee8021dInterfaceData::DISCARDING);
                     arrivalPort->setLostBPDU(0);
@@ -357,7 +357,7 @@ bool Rstp::processBetterSource(const Ptr<const BpduCfg>& frame, unsigned int arr
                     if (arrivalPort->getState() != Ieee8021dInterfaceData::FORWARDING)
                         flushOtherPorts(arrivalInterfaceId);
                     else
-                        macTable->flush(r); // flushing r, needed in case arrival were previously FORWARDING
+                        macTable->removeForwardingInterface(r); // flushing r, needed in case arrival were previously FORWARDING
                     EV_DETAIL << "This has better local port. Setting the arrival port to root. Setting current root port (port " << r << ") to alternate." << endl;
                     rootPort->setRole(Ieee8021dInterfaceData::ALTERNATE);
                     rootPort->setState(Ieee8021dInterfaceData::DISCARDING); // comes from root, preserve lostBPDU
@@ -377,7 +377,7 @@ bool Rstp::processBetterSource(const Ptr<const BpduCfg>& frame, unsigned int arr
                     if (!iPort->isEdge()) { // avoiding clients reseting
                         if (arrivalPort->getState() != Ieee8021dInterfaceData::FORWARDING)
                             iPort->setTCWhile(simTime() + tcWhileTime);
-                        macTable->flush(interfaceId);
+                        macTable->removeForwardingInterface(interfaceId);
                         if ((unsigned int)interfaceId != arrivalInterfaceId) {
                             iPort->setRole(Ieee8021dInterfaceData::NOTASSIGNED);
                             iPort->setState(Ieee8021dInterfaceData::DISCARDING);
@@ -412,7 +412,7 @@ bool Rstp::processBetterSource(const Ptr<const BpduCfg>& frame, unsigned int arr
                     rootPort->setState(Ieee8021dInterfaceData::DISCARDING);
                     // not lostBPDU reset
                     // flushing r
-                    macTable->flush(r);
+                    macTable->removeForwardingInterface(r);
                 }
                 else {
                     EV_DETAIL << "Setting current root port (port " << r << ") to designated." << endl;
@@ -443,7 +443,7 @@ bool Rstp::processBetterSource(const Ptr<const BpduCfg>& frame, unsigned int arr
                 else {
                     EV_DETAIL << "Worse route to the current root. Setting the arrival port to alternate." << endl;
                     // flush arrival
-                    macTable->flush(arrivalInterfaceId);
+                    macTable->removeForwardingInterface(arrivalInterfaceId);
                     arrivalPort->setRole(Ieee8021dInterfaceData::ALTERNATE);
                     arrivalPort->setState(Ieee8021dInterfaceData::DISCARDING);
                     arrivalPort->setLostBPDU(0);
@@ -490,7 +490,7 @@ bool Rstp::processSameSource(const Ptr<const BpduCfg>& frame, unsigned int arriv
                     // flushing all ports
                     for (unsigned int j = 0; j < numPorts; j++) {
                         int interfaceId = ifTable->getInterface(j)->getInterfaceId();
-                        macTable->flush(interfaceId);
+                        macTable->removeForwardingInterface(interfaceId);
                     }
                     case2 = compareInterfacedata(arrivalInterfaceId, frame, arrivalPort->getLinkCost());
                     if (case2 > 0) {
@@ -748,7 +748,7 @@ void Rstp::initPorts()
             jPort->setState(Ieee8021dInterfaceData::FORWARDING);
         }
         initInterfacedata(interfaceId);
-        macTable->flush(interfaceId);
+        macTable->removeForwardingInterface(interfaceId);
     }
     scheduleNextUpgrade();
 }
@@ -879,7 +879,7 @@ void Rstp::flushOtherPorts(unsigned int portId)
         auto iPort = getPortInterfaceDataForUpdate(interfaceId);
         iPort->setTCWhile(simTime() + tcWhileTime);
         if ((unsigned int)interfaceId != portId)
-            macTable->flush(interfaceId);
+            macTable->removeForwardingInterface(interfaceId);
     }
 }
 
