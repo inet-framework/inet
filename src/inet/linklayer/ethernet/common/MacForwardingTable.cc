@@ -398,6 +398,7 @@ void MacForwardingTable::initializeTable()
 void MacForwardingTable::clearTable()
 {
     addressTable.clear();
+    multicastAddressTable.clear();
 }
 
 void MacForwardingTable::setAgingTime(simtime_t agingTime)
