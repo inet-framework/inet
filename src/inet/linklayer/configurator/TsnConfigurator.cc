@@ -75,12 +75,26 @@ void TsnConfigurator::computeStream(cValueMap *configuration)
             streamConfiguration.destinations.push_back(node->module->getFullName());
         }
     }
+    auto sourceNodeName = sourceNode->module->getFullName();
+    std::stringstream destinationNodeNames;
+    destinationNodeNames << "[";
+    for (int i = 0; i < destinationNodes.size(); i++) {
+        if (i != 0)
+            destinationNodeNames << ", ";
+        destinationNodeNames << destinationNodes[i]->module->getFullName();
+    }
+    destinationNodeNames << "]";
+    EV_INFO << "Computing stream configuration" << EV_FIELD(streamName) << EV_FIELD(sourceNodeName) << EV_FIELD(destinationNodeNames) << EV_ENDL;
     streamConfiguration.destinationAddress = configuration->containsKey("destinationAddress") ? configuration->get("destinationAddress").stringValue() : streamConfiguration.destinations[0];
+    EV_INFO << "Collecting all possible trees" << EV_FIELD(streamName) << EV_ENDL;
     auto allTrees = collectAllTrees(sourceNode, destinationNodes);
+    for (auto tree : allTrees)
+        EV_INFO << "  Found tree" << EV_FIELD(streamName) << EV_FIELD(tree) << std::endl;
+    EV_INFO << "Selecting best tree subset" << EV_FIELD(streamName) << EV_ENDL;
     streamConfiguration.trees = selectBestTreeSubset(configuration, sourceNode, destinationNodes, allTrees);
-    EV_INFO << "Smallest best cost subset of trees that provide failure protection" << EV_FIELD(streamName) << EV_ENDL;
+    EV_INFO << "Smallest tree subset having the best cost that still provide failure protection" << EV_FIELD(streamName) << EV_FIELD(sourceNodeName) << EV_FIELD(destinationNodeNames) << EV_ENDL;
     for (auto tree : streamConfiguration.trees)
-        EV_INFO << "  " << tree << std::endl;
+        EV_INFO << "  Selected tree" << EV_FIELD(streamName) << EV_FIELD(tree) << std::endl;
     streamConfigurations.push_back(streamConfiguration);
 }
 
@@ -91,7 +105,7 @@ std::vector<TsnConfigurator::Tree> TsnConfigurator::selectBestTreeSubset(cValueM
     int n = trees.size();
     int maxRedundancy = configuration->containsKey("maxRedundancy") ? configuration->get("maxRedundancy").intValue() : n;
     for (int k = 1; k <= maxRedundancy; k++) {
-        EV_INFO << "Trying to find best tree subset for " << k << " trees" << EV_ENDL;
+        EV_DETAIL << "Trying to find best tree subset for " << k << " trees" << EV_ENDL;
         std::vector<bool> mask(k, true); // k leading 1's
         mask.resize(n, false); // n-k trailing 0's
         std::vector<bool> bestMask;
@@ -210,9 +224,9 @@ TsnConfigurator::Tree TsnConfigurator::computeCanonicalTree(const Tree& tree) co
 
 bool TsnConfigurator::checkNodeFailureProtection(cValueArray *configuration, const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const std::vector<Tree>& trees) const
 {
-    EV_INFO << "Checking trees for node failure protection" << EV_ENDL;
+    EV_DETAIL << "Checking trees for node failure protection" << EV_ENDL;
     for (auto& tree : trees)
-        EV_INFO << "  " << tree << std::endl;
+        EV_DETAIL << "  " << tree << std::endl;
     for (int i = 0; i < configuration->size(); i++) {
         cValueMap *protection = check_and_cast<cValueMap *>(configuration->get(i).objectValue());
         auto of = protection->containsKey("of") ? protection->get("of").stringValue() : "*";
@@ -221,7 +235,7 @@ bool TsnConfigurator::checkNodeFailureProtection(cValueArray *configuration, con
         int k = protection->get("any").intValue();
         std::vector<bool> mask(k, true); // k leading 1's
         mask.resize(n, false); // n-k trailing 0's
-        EV_INFO << "Checking node failure protection for " << k << " failed nodes out of " << networkNodes.size() << " nodes" << EV_ENDL;
+        EV_DETAIL << "Checking node failure protection for " << k << " failed nodes out of " << networkNodes.size() << " nodes" << EV_ENDL;
         do {
             EV_DEBUG << "Assuming failed nodes: ";
             std::vector<const Node *> failedNodes;
@@ -244,16 +258,16 @@ bool TsnConfigurator::checkNodeFailureProtection(cValueArray *configuration, con
             if (!isProtected)
                 return false;
         } while (std::prev_permutation(mask.begin(), mask.end()));
-        EV_INFO << "Node failure protection succeeded for " << k << " failed nodes out of " << networkNodes.size() << " nodes" << EV_ENDL;
+        EV_DETAIL << "Node failure protection succeeded for " << k << " failed nodes out of " << networkNodes.size() << " nodes" << EV_ENDL;
     }
     return true;
 }
 
 bool TsnConfigurator::checkLinkFailureProtection(cValueArray *configuration, const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const std::vector<Tree>& trees) const
 {
-    EV_INFO << "Checking trees for link failure protection" << EV_ENDL;
+    EV_DETAIL << "Checking trees for link failure protection" << EV_ENDL;
     for (auto& tree : trees)
-        EV_INFO << "  " << tree << std::endl;
+        EV_DETAIL << "  " << tree << std::endl;
     for (int i = 0; i < configuration->size(); i++) {
         cValueMap *protection = check_and_cast<cValueMap *>(configuration->get(i).objectValue());
         auto of = protection->containsKey("of") ? protection->get("of").stringValue() : "*";
@@ -262,7 +276,7 @@ bool TsnConfigurator::checkLinkFailureProtection(cValueArray *configuration, con
         int k = protection->get("any").intValue();
         std::vector<bool> mask(k, true); // k leading 1's
         mask.resize(n, false); // n-k trailing 0's
-        EV_INFO << "Checking link failure protection for " << k << " failed links out of " << networkLinks.size() << " links" << EV_ENDL;
+        EV_DETAIL << "Checking link failure protection for " << k << " failed links out of " << networkLinks.size() << " links" << EV_ENDL;
         do {
             EV_DEBUG << "Assuming failed links: ";
             std::vector<const Link *> failedLinks;
@@ -285,7 +299,7 @@ bool TsnConfigurator::checkLinkFailureProtection(cValueArray *configuration, con
             if (!isProtected)
                 return false;
         } while (std::prev_permutation(mask.begin(), mask.end()));
-        EV_INFO << "Link failure protection succeeded for " << k << " failed links out of " << networkLinks.size() << " links" << EV_ENDL;
+        EV_DETAIL << "Link failure protection succeeded for " << k << " failed links out of " << networkLinks.size() << " links" << EV_ENDL;
     }
     return true;
 }
@@ -368,10 +382,7 @@ std::vector<TsnConfigurator::Tree> TsnConfigurator::collectAllTrees(Node *source
     std::vector<Path> currentTree;
     std::vector<const Node *> stopNodes;
     stopNodes.push_back(sourceNode);
-    EV_INFO << "Collecting all possible trees" << EV_ENDL;
     collectAllTrees(stopNodes, destinationNodes, 0, currentTree, allTrees);
-    for (auto tree : allTrees)
-        EV_INFO << "  " << tree << std::endl;
     return allTrees;
 }
 
