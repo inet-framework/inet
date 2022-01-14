@@ -63,11 +63,11 @@ void RelayInterfaceSelector::pushPacket(Packet *packet, cGate *gates)
     else {
         auto interfaceInd = packet->findTag<InterfaceInd>();
         auto incomingInterface = interfaceInd != nullptr ? interfaceTable->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
+        auto vlanReq = packet->findTag<VlanReq>();
+        int vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : 0;
         if (destinationAddress.isBroadcast())
             broadcastPacket(packet, destinationAddress, incomingInterface);
         else if (destinationAddress.isMulticast()) {
-            auto vlanReq = packet->findTag<VlanReq>();
-            int vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : 0;
             auto outgoingInterfaceIds = macForwardingTable->getMulticastAddressForwardingInterfaces(destinationAddress, vlanId);
             if (outgoingInterfaceIds.size() == 0)
                 broadcastPacket(packet, destinationAddress, incomingInterface);
@@ -84,8 +84,6 @@ void RelayInterfaceSelector::pushPacket(Packet *packet, cGate *gates)
             }
         }
         else {
-            auto vlanReq = packet->findTag<VlanReq>();
-            int vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : 0;
             // Find output interface of destination address and send packet to output interface
             // if not found then broadcasts to all other interfaces instead
             int outgoingInterfaceId = macForwardingTable->getUnicastAddressForwardingInterface(destinationAddress, vlanId);
