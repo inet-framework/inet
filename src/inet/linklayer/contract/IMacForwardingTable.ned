@@ -25,6 +25,6 @@ moduleinterface IMacForwardingTable
     parameters:
         @display("i=block/table2");
         double agingTime @unit(s);
-        string addressTableFile;
+        string forwardingTableFile;
 }
 

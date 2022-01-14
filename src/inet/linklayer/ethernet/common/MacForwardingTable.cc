@@ -73,7 +73,7 @@ void MacForwardingTable::initialize(int stage)
 void MacForwardingTable::handleParameterChange(const char *name)
 {
     if (name != nullptr) {
-        if (!strcmp(name, "addressTable")) {
+        if (!strcmp(name, "forwardingTable")) {
             clearTable();
             parseForwardingTableParameter();
         }
@@ -364,7 +364,7 @@ void MacForwardingTable::readForwardingTable(const char *fileName)
 
 void MacForwardingTable::parseForwardingTableParameter()
 {
-    auto forwardingTable = check_and_cast<cValueArray *>(par("addressTable").objectValue());
+    auto forwardingTable = check_and_cast<cValueArray *>(par("forwardingTable").objectValue());
     for (int i = 0; i < forwardingTable->size(); i++) {
         cValueMap *entry = check_and_cast<cValueMap *>(forwardingTable->get(i).objectValue());
         auto vlan = entry->containsKey("vlan") ? entry->get("vlan").intValue() : 0;
@@ -390,7 +390,7 @@ void MacForwardingTable::initializeTable()
     parseForwardingTableParameter();
 
     // Option to pre-read in Address Table. To turn it off, set forwardingTableFile to empty string
-    const char *forwardingTableFile = par("addressTableFile");
+    const char *forwardingTableFile = par("forwardingTableFile");
     if (forwardingTableFile && *forwardingTableFile)
         readForwardingTable(forwardingTableFile);
 }

@@ -117,12 +117,12 @@ class INET_API MacForwardingTable : public OperationalBase, public IMacForwardin
     virtual void readForwardingTable(const char *fileName);
 
     /**
-     * For lifecycle: initialize entries for the vlanAddressTable by reading them from a file (if specified by a parameter)
+     * For lifecycle: initialize entries for the vlanForwardingTable by reading them from a file (if specified by a parameter)
      */
     virtual void initializeTable();
 
     /**
-     * For lifecycle: clears all entries from the vlanAddressTable.
+     * For lifecycle: clears all entries from the vlanForwardingTable.
      */
     virtual void clearTable();
 

@@ -236,7 +236,7 @@ MAC addresses. Entries are deleted if their age exceeds a certain limit.
 
 If needed, address tables can be pre-loaded from text files at the
 beginning of the simulation; this controlled by the
-:par:`addressTableFile` module parameter. In the file, each line
+:par:`forwardingTableFile` module parameter. In the file, each line
 contains a literal 0 (reserved for VLAN id), a hexadecimal MAC address
 and a decimal port number, separated by tabs. Comment lines beginning
 with ’#’ are also allowed:

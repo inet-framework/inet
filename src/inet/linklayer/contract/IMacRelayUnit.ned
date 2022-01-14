@@ -35,7 +35,7 @@ import inet.protocolelement.contract.IProtocolLayer;
 // Entries are also deleted if their age exceeds a certain limit.
 //
 // If needed, address tables can be pre-loaded from text files at the beginning
-// of the simulation; this controlled by the addressTableFile module parameter.
+// of the simulation; this controlled by the forwardingTableFile module parameter.
 //
 // This module is not a concrete implementation, it just defines gates and
 // parameters a ~IMacRelayUnit should have. Concrete inplementations add

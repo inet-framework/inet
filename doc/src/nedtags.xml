@@ -2685,8 +2685,8 @@
     <filename>inet.linklayer.contract.ILoopbackInterface.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.contract.IMacAddressTable</name>
-    <filename>inet.linklayer.contract.IMacAddressTable.html</filename>
+    <name>inet.linklayer.contract.IMacForwardingTable</name>
+    <filename>inet.linklayer.contract.IMacForwardingTable.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.contract.IMacProtocol</name>
@@ -3497,12 +3497,12 @@
     <filename>inet.linklayer.loopback.LoopbackInterface.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.ethernet.common.MacAddressTable</name>
-    <filename>inet.linklayer.ethernet.common.MacAddressTable.html</filename>
+    <name>inet.linklayer.ethernet.common.MacForwardingTable</name>
+    <filename>inet.linklayer.ethernet.common.MacForwardingTable.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.configurator.MacAddressTableConfigurator</name>
-    <filename>inet.linklayer.configurator.MacAddressTableConfigurator.html</filename>
+    <name>inet.linklayer.configurator.MacForwardingTableConfigurator</name>
+    <filename>inet.linklayer.configurator.MacForwardingTableConfigurator.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.base.MacProtocolBase</name>

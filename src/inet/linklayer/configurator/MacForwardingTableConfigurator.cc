@@ -121,7 +121,7 @@ void MacForwardingTableConfigurator::configureMacForwardingTables() const
 {
     for (auto it : configurations) {
         auto macForwardingTable = getSimulation()->getModule(it.first);
-        macForwardingTable->par("addressTable") = it.second->dup();
+        macForwardingTable->par("forwardingTable") = it.second->dup();
     }
 }
 

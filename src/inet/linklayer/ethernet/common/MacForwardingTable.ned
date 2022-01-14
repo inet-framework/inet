@@ -25,7 +25,7 @@ import inet.linklayer.contract.IMacForwardingTable;
 // Entries are deleted if their age exceeds a certain limit.
 //
 // If needed, address tables can be pre-loaded from text files at the beginning
-// of the simulation; this controlled by the addressTableFile module parameter.
+// of the simulation; this controlled by the forwardingTableFile module parameter.
 // File format:
 //   line oriented table with space or TAB delimited columns.
 //   columns:
@@ -39,8 +39,8 @@ simple MacForwardingTable like IMacForwardingTable
     parameters:
         @display("i=block/table2");
         double agingTime @unit(s) = default(120s);
-        object addressTable @mutable = default([]);
-        string addressTableFile = default("");
+        object forwardingTable @mutable = default([]);
+        string forwardingTableFile = default("");
         string interfaceTableModule;
         string displayStringTextFormat = default("addr: %a\nvlan: %v");
 }

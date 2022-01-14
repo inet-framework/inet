@@ -367,7 +367,7 @@ void StreamRedundancyConfigurator::configureStreams(Node *node)
             parameterValue->add(value);
         }
         EV_INFO << "Configuring MAC address table" << EV_FIELD(networkNode) << EV_FIELD(macForwardingTable) << EV_FIELD(parameterValue) << EV_ENDL;
-        macForwardingTable->par("addressTable") = parameterValue;
+        macForwardingTable->par("forwardingTable") = parameterValue;
     }
     if (ieee8021qTagHeaderChecker != nullptr) {
         std::set<int> vlanIds;
