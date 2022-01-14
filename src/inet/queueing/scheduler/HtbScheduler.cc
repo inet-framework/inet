@@ -489,6 +489,13 @@ void HtbScheduler::removePacket(Packet *packet)
     throw cRuntimeError("Cannot find packet");
 }
 
+void HtbScheduler::removeAllPackets()
+{
+    Enter_Method("removeAllPacket");
+    for (auto collection : collections)
+        collection->removeAllPackets();
+}
+
 // This is where the HTB scheduling comes into play
 int HtbScheduler::schedulePacket() {
     int level;

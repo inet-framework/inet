@@ -170,6 +170,7 @@ class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollecti
     virtual bool isEmpty() const override { return getNumPackets() == 0; }
     virtual Packet *getPacket(int index) const override;
     virtual void removePacket(Packet *packet) override;
+    virtual void removeAllPackets() override;
 
     void htbEnqueue(int index);
     int htbDequeue(int priority, int level);
