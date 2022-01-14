@@ -44,9 +44,11 @@ void EthernetCutthroughSource::handleMessage(cMessage *message)
 {
     if (message == cutthroughTimer) {
         const auto& header = streamedPacket->peekAtFront<EthernetMacAddressFields>();
-        int interfaceId = macForwardingTable->getUnicastAddressForwardingInterface(header->getDest());
-        if (!header->getSrc().isMulticast())
-            macForwardingTable->learnUnicastAddressForwardingInterface(networkInterface->getInterfaceId(), header->getSrc());
+        auto sourceAddress = header->getSrc();
+        auto destinationAddress = header->getDest();
+        if (!sourceAddress.isMulticast())
+            macForwardingTable->learnUnicastAddressForwardingInterface(networkInterface->getInterfaceId(), sourceAddress);
+        int interfaceId = destinationAddress.isMulticast() ? -1 : macForwardingTable->getUnicastAddressForwardingInterface(destinationAddress);
         if (interfaceId != -1 && cutthroughConsumer->canPushPacket(streamedPacket, cutthroughOutputGate)) {
             streamedPacket->trim();
             streamedPacket->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
@@ -84,11 +86,14 @@ void EthernetCutthroughSource::pushPacketEnd(Packet *packet, cGate *gate)
         Enter_Method("pushPacketEnd");
         take(packet);
         const auto& header = packet->peekAtFront<EthernetMacAddressFields>();
-        if (!header->getSrc().isMulticast())
-            macForwardingTable->learnUnicastAddressForwardingInterface(networkInterface->getInterfaceId(), header->getSrc());
-        int interfaceId = macForwardingTable->getUnicastAddressForwardingInterface(header->getDest());
+        auto sourceAddress = header->getSrc();
+        auto destinationAddress = header->getDest();
+        if (!sourceAddress.isMulticast())
+            macForwardingTable->learnUnicastAddressForwardingInterface(networkInterface->getInterfaceId(), sourceAddress);
         packet->trim();
-        packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
+        int interfaceId = destinationAddress.isMulticast() ? -1 : macForwardingTable->getUnicastAddressForwardingInterface(destinationAddress);
+        if (interfaceId != -1)
+            packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
         packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
         packet->removeTagIfPresent<DispatchProtocolReq>();
         delete streamedPacket;
