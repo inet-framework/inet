@@ -68,7 +68,7 @@ void RelayInterfaceSelector::pushPacket(Packet *packet, cGate *gates)
         else if (destinationAddress.isMulticast()) {
             auto vlanReq = packet->findTag<VlanReq>();
             int vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : 0;
-            auto outgoingInterfaceIds = macAddressTable->getInterfaceIdsForAddress(destinationAddress, vlanId);
+            auto outgoingInterfaceIds = macForwardingTable->getMulticastAddressForwardingInterfaces(destinationAddress, vlanId);
             if (outgoingInterfaceIds.size() == 0)
                 broadcastPacket(packet, destinationAddress, incomingInterface);
             else {
@@ -88,7 +88,7 @@ void RelayInterfaceSelector::pushPacket(Packet *packet, cGate *gates)
             int vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : 0;
             // Find output interface of destination address and send packet to output interface
             // if not found then broadcasts to all other interfaces instead
-            int outgoingInterfaceId = macAddressTable->getInterfaceIdForAddress(destinationAddress, vlanId);
+            int outgoingInterfaceId = macForwardingTable->getUnicastAddressForwardingInterface(destinationAddress, vlanId);
             // should not send out the same packet on the same interface
             // (although wireless interfaces are ok to receive the same message)
             if (interfaceInd != nullptr && outgoingInterfaceId == interfaceInd->getInterfaceId()) {
