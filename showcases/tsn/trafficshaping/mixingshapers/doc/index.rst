@@ -83,6 +83,11 @@ traffic.
 .. figure:: media/TrafficShaperOutgoingTraffic.png
    :align: center
 
+TODO
+
+.. figure:: media/TransmittingStateAndGateStates.png
+   :align: center
+
 The next diagram shows the queue lengths of the traffic shapers in the outgoing
 network interface of the switch. The queue lengths increase over time because
 the data rate of the incoming traffic of the shapers is greater than the data

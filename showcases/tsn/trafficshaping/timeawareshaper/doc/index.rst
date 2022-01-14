@@ -20,8 +20,8 @@ links between them use 100 Mbps :ned:`EthernetLink` channels.
    :align: center
 
 There are four applications in the network creating two independent data streams
-between the client and the server. The data rate of both streams are ~48 Mbps at
-the application level in the client.
+between the client and the server. The data rates are 40Mbps and 20Mbps at the
+application level in the client.
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: client applications
@@ -30,8 +30,7 @@ the application level in the client.
 
 The two streams have two different traffic classes: best effort and video. The
 bridging layer identifies the outgoing packets by their UDP destination port.
-The client encodes and the switch decodes the streams using the IEEE 802.1Q PCP
-field.
+The client encodes the streams using the PCP field of the IEEE 802.1Q header.
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: outgoing streams
@@ -41,8 +40,8 @@ field.
 The traffic shaping takes place in the outgoing network interface of the switch
 where both streams pass through. The traffic shaper limits the data rate of the
 best effort stream to 40 Mbps and the data rate of the video stream to 20 Mbps.
-The excess traffic is stored in the MAC layer subqueues of the corresponding
-traffic class.
+The excess traffic is temporarily stored in the MAC layer subqueues of the
+corresponding traffic class.
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: egress traffic shaping
@@ -52,8 +51,7 @@ Results
 -------
 
 The first diagram shows the data rate of the application level outgoing traffic
-in the client. The data rate varies randomly over time for both traffic classes
-but the averages are the same.
+in the client. The data rate varies randomly over time for both traffic classes.
 
 .. figure:: media/ClientApplicationTraffic.png
    :align: center
@@ -67,6 +65,29 @@ different protocol level.
 .. figure:: media/TrafficShaperIncomingTraffic.png
    :align: center
 
+The next diagram shows the queue lengths of the traffic classes in the outgoing
+network interface of the switch. The queue lengths increase over time because
+the data rate of the incoming traffic of the traffic shapers is greater than
+the data rate of the outgoing traffic, and packets are not dropped.
+
+.. figure:: media/TrafficShaperQueueLengths.png
+   :align: center
+
+The next diagram shows transmitting state and the gate states of the time-aware
+shaper.
+
+TODO
+
+.. figure:: media/TransmittingStateAndGateStates.png
+   :align: center
+
+The next diagram shows the relationships (for both traffic classes) between
+the gate state of the transmission gates and the transmitting state of the
+outgoing network interface.
+
+.. figure:: media/TrafficShaping.png
+   :align: center
+
 The next diagram shows the data rate of the already shaped outgoing traffic of
 the traffic shapers. This data rate is still measured inside the outgoing network
 interface of the switch but at a different location. The randomly varying data
@@ -76,21 +97,6 @@ example. The reason is that the data rate measurement interval is comparable
 with the gate open and close durations.
 
 .. figure:: media/TrafficShaperOutgoingTraffic.png
-   :align: center
-
-The next diagram shows the queue lengths of the traffic classes in the outgoing
-network interface of the switch. The queue lengths increase over time because
-the data rate of the incoming traffic of the traffic shapers is greater than
-the data rate of the outgoing traffic, and packets are not dropped.
-
-.. figure:: media/TrafficShaperQueueLengths.png
-   :align: center
-
-The next diagram shows the relationships (for both traffic classes) between
-the gate state of the transmission gates and the transmitting state of the
-outgoing network interface.
-
-.. figure:: media/TrafficClasses.png
    :align: center
 
 The last diagram shows the data rate of the application level incoming traffic

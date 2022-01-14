@@ -92,11 +92,26 @@ the data rate of the outgoing traffic, and packets are not dropped.
 .. figure:: media/TrafficShaperQueueLengths.png
    :align: center
 
+TODO
+
+.. figure:: media/NumberOfTokens.png
+   :align: center
+
+TODO
+
+.. figure:: media/RemainingEligibilityTime.png
+   :align: center
+
+TODO
+
+.. figure:: media/TransmittingStateAndGateStates.png
+   :align: center
+
 The next diagram shows the relationships (for both traffic classes) between
 the gate state of the transmission gates and the transmitting state of the
 outgoing network interface.
 
-.. figure:: media/TrafficClasses.png
+.. figure:: media/TrafficShaping.png
    :align: center
 
 The last diagram shows the data rate of the application level incoming traffic
