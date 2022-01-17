@@ -77,7 +77,7 @@ def collect_all_simulation_configs(simulation_project, ini_path_globs, concurren
     logger.info("Collecting all simulation configs")
     ini_paths = list(itertools.chain.from_iterable(map(lambda g: glob.glob(g, recursive=True), ini_path_globs)))
     if concurrent:
-        pool = multiprocessing.Pool(multiprocessing.cpu_count())
+        pool = multiprocessing.pool.ThreadPool(multiprocessing.cpu_count())
         result = list(itertools.chain.from_iterable(pool.map(functools.partial(collect_ini_file_simulation_configs, simulation_project), ini_paths)))
     else:
         result = list(itertools.chain.from_iterable(map(functools.partial(collect_ini_file_simulation_configs, simulation_project), ini_paths)))

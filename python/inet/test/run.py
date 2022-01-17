@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 def _run_test(test_run, output_stream=sys.stdout, **kwargs):
     test_result = test_run.run(output_stream=output_stream, **kwargs)
-    print(test_result.get_description(complete_error_message=False), file=output_stream)
+    test_result.print_result(complete_error_message=False, output_stream=output_stream)
     return test_result
 
 class TestRun:
@@ -47,12 +47,11 @@ class MultipleTestRuns:
     def __repr__(self):
         return repr(self)
 
-    def run(self, concurrent=None, build=True, **kwargs):
+    def run(self, simulation_project=None, concurrent=None, build=True, **kwargs):
         if concurrent is None:
             concurrent = self.multiple_simulation_runs.concurrent
         if build:
-            simulation_project = self.test_runs[0].simulation_run.simulation_config.simulation_project
-            build_project(simulation_project, **kwargs)
+            build_project(simulation_project or self.multiple_simulation_runs.simulation_project, **kwargs)
         print("Running tests " + str(kwargs))
         start_time = time.time()
         test_results = map_sequentially_or_concurrently(self.test_runs, self.multiple_simulation_runs.run_simulation_function, concurrent=concurrent, **kwargs)
@@ -73,19 +72,7 @@ class TestResult:
         self.expected_result = expected_result
         self.expected = expected_result == self.result
         self.reason = reason
-        if self.result == "PASS":
-            color = COLOR_GREEN
-        elif self.result == "SKIP":
-            color = COLOR_CYAN
-        elif self.result == "CANCEL":
-            color = COLOR_CYAN
-        elif self.result == "FAIL":
-            color = COLOR_YELLOW
-        elif self.result == "ERROR":
-            color = COLOR_RED
-        else:
-            raise("Unknown test result: " + result)
-        self.color = color
+        self.color = get_result_color(self.result)
 
     def __repr__(self):
         return "Test result: " + self.get_description()
@@ -103,6 +90,9 @@ class TestResult:
                ((COLOR_GREEN + " (expected)" + COLOR_RESET) if self.expected and self.expected_result != "PASS" else "") + \
                (" " + (self.simulation_result.error_message + " -- in module " + self.simulation_result.error_module if complete_error_message else self.simulation_result.error_message) if self.simulation_result and self.simulation_result.error_message else "") + \
                (" (" + self.reason + ")" if self.reason else "")
+
+    def print_result(self, complete_error_message=True, output_stream=sys.stdout):
+        print(self.get_description(complete_error_message=complete_error_message), file=output_stream)
 
     def rerun(self, **kwargs):
         return self.test_run.run(**kwargs)
@@ -123,13 +113,21 @@ class MultipleTestResults:
         self.num_fail_unexpected = self.count_results("FAIL", False)
         self.num_error_expected = self.count_results("ERROR", True)
         self.num_error_unexpected = self.count_results("ERROR", False)
+        self.total_result = ("ERROR" if self.num_error_unexpected != 0 else "FAIL") if self.num_fail_unexpected != 0 else ("CANCEL" if self.num_cancel_unexpected != 0 else "PASS")
+        self.total_color = get_result_color(self.total_result)
 
     def __repr__(self):
         if len(self.test_results) == 1:
             return self.test_results[0].__repr__()
         else:
             details = self.get_details(exclude_test_result_filter="SKIP|CANCEL", exclude_expected_test_result=True, include_simulation_parameters=True)
-            return ("" if details.strip() == "" else "\nDetails:\n" +details + "\n\n") + "Test summary: " + self.get_summary()
+            return ("" if details.strip() == "" else "\nDetails:\n" +details + "\n\n") + \
+                   "Multiple test results: " + self.total_color + self.total_result + COLOR_RESET + ", " + \
+                   "summary: " + self.get_summary()
+
+    def print_result(self, **kwargs):
+        for test_result in self.test_results:
+            test_result.print_result(**kwargs)
 
     def get_test_results(self):
         return self.test_results
@@ -202,7 +200,7 @@ class MultipleTestResults:
         test_runs = list(map(lambda test_result: test_result.test_run, test_results))
         simulation_runs = list(map(lambda test_run: test_run.simulation_run, test_runs))
         orignial_multiple_simulation_runs = self.multiple_test_runs.multiple_simulation_runs
-        multiple_simulation_runs = MultipleSimulationRuns(simulation_runs, concurrent=orignial_multiple_simulation_runs.concurrent, run_simulation_function=orignial_multiple_simulation_runs.run_simulation_function)
+        multiple_simulation_runs = MultipleSimulationRuns(orignial_multiple_simulation_runs.simulation_project, simulation_runs, concurrent=orignial_multiple_simulation_runs.concurrent, run_simulation_function=orignial_multiple_simulation_runs.run_simulation_function)
         multiple_test_runs = self.multiple_test_runs.__class__(multiple_simulation_runs, test_runs)
         return MultipleTestResults(multiple_test_runs, test_results)
 
@@ -217,6 +215,20 @@ class MultipleTestResults:
 
     def get_unexpected(self):
         return self.filter(exclude_result_filter="SKIP|CANCEL", exclude_expected_test_result=True)
+
+def get_result_color(result):
+    if result == "PASS":
+        return COLOR_GREEN
+    elif result == "SKIP":
+        return COLOR_CYAN
+    elif result == "CANCEL":
+        return COLOR_CYAN
+    elif result == "FAIL":
+        return COLOR_YELLOW
+    elif result == "ERROR":
+        return COLOR_RED
+    else:
+        raise("Unknown result: " + result)
 
 def check_return_code(simulation_result):
     return simulation_result.subprocess_result.returncode == 0

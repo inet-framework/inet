@@ -15,5 +15,12 @@ class SimulationProject:
     def get_full_path(self, path):
         return os.path.abspath(self.project_directory + "/" + path)
 
-inet_project = SimulationProject(get_workspace_path("inet"))
-inet_master_project = SimulationProject(get_workspace_path("inet-master"))
+simulation_projects = dict()
+
+def get_simulation_project(name):
+    if not name in simulation_projects:
+        simulation_projects[name] = SimulationProject(get_workspace_path(name))
+    return simulation_projects[name]
+
+inet_project = get_simulation_project("inet")
+inet_master_project = get_simulation_project("inet-master")

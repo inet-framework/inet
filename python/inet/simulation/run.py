@@ -13,12 +13,13 @@ from inet.simulation.build import *
 from inet.simulation.config import *
 from inet.simulation.project import *
 from scipy.sparse import _index
+from prompt_toolkit.key_binding.bindings.named_commands import complete
 
 logger = logging.getLogger(__name__)
 
 def _run_simulation(simulation_run, output_stream=sys.stdout, **kwargs):
     simulation_result = simulation_run.run_simulation(output_stream=output_stream, **kwargs)
-    print(simulation_result.get_description(complete_error_message=False), file=output_stream)
+    simulation_result.print_result(complete_error_message=False, output_stream=output_stream)
     return simulation_result
 
 class SimulationRun:
@@ -87,7 +88,8 @@ class SimulationRun:
                 return SimulationResult(self, None)
 
 class MultipleSimulationRuns:
-    def __init__(self, simulation_runs, concurrent=True, run_simulation_function=_run_simulation, **kwargs):
+    def __init__(self, simulation_project, simulation_runs, concurrent=True, run_simulation_function=_run_simulation, **kwargs):
+        self.simulation_project = simulation_project
         self.simulation_runs = simulation_runs
         self.concurrent = concurrent
         self.run_simulation_function = run_simulation_function
@@ -95,12 +97,11 @@ class MultipleSimulationRuns:
     def __repr__(self):
         return repr(self)
 
-    def run(self, concurrent=None, build=True, **kwargs):
+    def run(self, simulation_project=None, concurrent=None, build=True, **kwargs):
         if concurrent is None:
             concurrent = self.concurrent
         if build:
-            simulation_project = self.simulation_runs[0].simulation_config.simulation_project
-            build_project(simulation_project, **kwargs)
+            build_project(simulation_project = self.simulation_project, **kwargs)
         print("Running simulations " + str(kwargs))
         start_time = time.time()
         simulation_results = map_sequentially_or_concurrently(self.simulation_runs, self.run_simulation_function, concurrent=concurrent, **kwargs)
@@ -124,6 +125,9 @@ class SimulationResult:
             match = re.search("<!> Error: (.*) -- in module (.*)", stderr)
             self.error_message = match.group(1).strip() if match else None
             self.error_module = match.group(2).strip() if match else None
+            if self.error_message is None:
+                match = re.search("<!> Error: (.*)", stderr)
+                self.error_message = match.group(1).strip() if match else None
         else:
             self.last_event_number = None
             self.last_simulation_time = None
@@ -133,14 +137,22 @@ class SimulationResult:
 
     def __repr__(self):
         return "Simulation result: " + self.get_description()
-    
+
+    def get_error_message(self, complete_error_message=True):
+        error_message = self.error_message or "Error message not found"
+        error_module = self.error_module or "Error module not found"
+        return (error_message + " -- in module " + error_module if complete_error_message else error_message) if self.result == "ERROR" else None
+
     def get_description(self, complete_error_message=True, include_simulation_parameters=False):
         return (self.simulation_run.get_simulation_parameters_string() + " " if include_simulation_parameters else "") + \
                 self.color + self.result + COLOR_RESET + \
-               (" " + (self.error_message + " -- in module " + self.error_module if complete_error_message else self.error_message) if self.result == "ERROR" else "")
+               (" " + self.get_error_message(complete_error_message=complete_error_message) if self.result == "ERROR" else "")
 
     def get_subprocess_result(self):
         return self.subprocess_result
+
+    def print_result(self, complete_error_message=False, output_stream=sys.stdout):
+        print(self.get_description(complete_error_message=complete_error_message), file=output_stream)
 
     def rerun(self, **kwargs):
         return self.simulation_run.run_simulation(**kwargs)
@@ -210,7 +222,7 @@ class MultipleSimulationResults:
         simulation_results = list(filter(lambda simulation_result: re.search(result_filter if full_match else ".*" + result_filter + ".*", simulation_result.result), self.simulation_results))
         simulation_runs = list(map(lambda simulation_result: simulation_result.simulation_run, simulation_results))
         orignial_multiple_simulation_runs = self.multiple_simulation_runs
-        multiple_simulation_runs = MultipleSimulationRuns(simulation_runs, concurrent=orignial_multiple_simulation_runs.concurrent, run_simulation_function=orignial_multiple_simulation_runs.run_simulation_function)
+        multiple_simulation_runs = MultipleSimulationRuns(self.simulation_project, simulation_runs, concurrent=orignial_multiple_simulation_runs.concurrent, run_simulation_function=orignial_multiple_simulation_runs.run_simulation_function)
         return MultipleSimulationResults(multiple_simulation_runs, simulation_results)
 
 def clean_simulation_results(simulation_config):
@@ -240,7 +252,7 @@ def get_simulations(simulation_project=None, simulation_configs=None, run=None, 
         else:
             for generated_run in range(0, simulation_config.num_runs):
                 simulation_runs.append(SimulationRun(simulation_config, generated_run, sim_time_limit=sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs))
-    return MultipleSimulationRuns(simulation_runs, concurrent=concurrent, run_simulation_function=run_simulation_function)
+    return MultipleSimulationRuns(simulation_project, simulation_runs, concurrent=concurrent, run_simulation_function=run_simulation_function)
 
 def run_simulations(**kwargs):
     multiple_simulation_runs = None

@@ -90,9 +90,12 @@ class FingerprintStore:
     def set_fingerprint(self, fingerprint, **kwargs):
         self.get_entry(**kwargs)["fingerprint"] = fingerprint
 
-    def insert_fingerprint(self, fingerprint, ingredients="tplx", test_result=None, working_directory=os.getcwd(), ini_file="omnetpp.ini", config="General", run=0, sim_time_limit=None):
-        git_hash = subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.simulation_project.get_full_path("."), capture_output=True).stdout.decode("utf-8").strip()
-        git_clean = subprocess.run(["git", "diff", "--quiet"], cwd=self.simulation_project.get_full_path("."), capture_output=True).returncode == 0
+    def insert_fingerprint(self, fingerprint, ingredients="tplx", test_result=None, working_directory=os.getcwd(), ini_file="omnetpp.ini", config="General", run=0, sim_time_limit=None, git_hash=None, git_clean=None):
+        assert test_result == "ERROR" or sim_time_limit is not None
+        if git_hash is None:
+            git_hash = subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.simulation_project.get_full_path("."), capture_output=True).stdout.decode("utf-8").strip()
+        if git_clean is None:
+            git_clean = subprocess.run(["git", "diff", "--quiet"], cwd=self.simulation_project.get_full_path("."), capture_output=True).returncode == 0
         self.get_entries().append({"working_directory": working_directory,
                                    "ini_file": ini_file,
                                    "config": config,
