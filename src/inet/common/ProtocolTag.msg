@@ -46,7 +46,7 @@ class ProtocolTagBase extends TagBase
 //
 class ProtocolListTagBase extends TagBase
 {
-    const Protocol *protocols[] @toString("->str()") = nullptr; // specifies a list of protocols (internal class with an artificial identifier)
+    const Protocol *protocol[] @toString("->str()") = nullptr; // specifies a list of protocols (internal class with an artificial identifier)
 }
 
 //
