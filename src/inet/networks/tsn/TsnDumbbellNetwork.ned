@@ -22,7 +22,7 @@ import inet.node.ethernet.EthernetLink;
 network TsnDumbbellNetwork extends TsnNetworkBase
 {
     parameters:
-		*.eth[*].bitrate = default(100Mbps);
+        *.eth[*].bitrate = default(100Mbps);
     submodules:
         client1: <default("TsnDevice")> like IEthernetNetworkNode {
             @display("p=300,150");

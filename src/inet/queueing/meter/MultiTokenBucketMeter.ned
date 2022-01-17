@@ -29,7 +29,7 @@ simple MultiTokenBucketMeter extends PacketMeterBase like IPacketMeter
 {
     parameters:
         object buckets; // array of objects specifying the token buckets, see ~TokenBucketMeter for parameters
-        				// example: [{initialNumTokens: 100, maxNumTokens: 1000, tokenProductionRate: 10, label: "green", excessTokenModule: ".other"}]
+                        // example: [{initialNumTokens: 100, maxNumTokens: 1000, tokenProductionRate: 10, label: "green", excessTokenModule: ".other"}]
         double tokenConsumptionPerPacket = default(0); // how many tokens are consumed per packet
         double tokenConsumptionPerBit = default(1); // how many tokens are consumed per bit
         string defaultLabel = default(""); // the label that is attached to packets if there are not enouth tokens in the bucket, no label by default

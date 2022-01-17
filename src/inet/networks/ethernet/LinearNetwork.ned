@@ -22,7 +22,7 @@ import inet.node.ethernet.EthernetLink;
 network LinearNetwork extends WiredNetworkBase
 {
     parameters:
-		*.eth[*].bitrate = default(100Mbps);
+        *.eth[*].bitrate = default(100Mbps);
     submodules:
         client: <default("StandardHost")> like IEthernetNetworkNode {
             @display("p=350,200");

@@ -37,11 +37,11 @@ network failover
           per = 0.005;
       }
 
-	channel NormalPath extends DatarateChannel
-	{
-		parameters:
-			datarate = 1Gbps;
-	}
+    channel NormalPath extends DatarateChannel
+    {
+        parameters:
+            datarate = 1Gbps;
+    }
     submodules:
         sctp_client: StandardHost {
             parameters:

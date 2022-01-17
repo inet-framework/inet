@@ -24,7 +24,7 @@ module Ieee80211BitDomainTest
         string interleaverModule = default("");
         string scramblerModule = default("");
         int numberOfRandomErrors = default(0);
-		string testType; // interleaver, scrambler, convCoder or all
+        string testType; // interleaver, scrambler, convCoder or all
         string testFile;
         @class(Ieee80211BitDomainTest);
 }

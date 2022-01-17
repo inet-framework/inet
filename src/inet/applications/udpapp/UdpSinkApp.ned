@@ -24,5 +24,5 @@ module UdpSinkApp extends UdpApp
 {
     parameters:
         source.typename = "";
-		io.destPort = -1;
+        io.destPort = -1;
 }

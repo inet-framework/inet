@@ -22,7 +22,7 @@ import inet.node.ethernet.EthernetLink;
 network DumbbellNetwork extends WiredNetworkBase
 {
     parameters:
-		*.eth[*].bitrate = default(100Mbps);
+        *.eth[*].bitrate = default(100Mbps);
     submodules:
         client1: <default("StandardHost")> like IEthernetNetworkNode {
             @display("p=300,150");
