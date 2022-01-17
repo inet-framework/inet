@@ -78,13 +78,13 @@ void StreamEncoder::processPacket(Packet *packet)
                 if (packet->findTag<SequenceNumberReq>() != nullptr) {
                     if (auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>()) {
                         auto encapsulationReq = packet->addTagIfAbsent<EncapsulationProtocolReq>();
-                        encapsulationReq->insertProtocols(0, dispatchProtocolReq->getProtocol());
+                        encapsulationReq->insertProtocol(0, dispatchProtocolReq->getProtocol());
                     }
                     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8021rTag);
                 }
                 if (auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>()) {
                     auto encapsulationReq = packet->addTagIfAbsent<EncapsulationProtocolReq>();
-                    encapsulationReq->insertProtocols(0, dispatchProtocolReq->getProtocol());
+                    encapsulationReq->insertProtocol(0, dispatchProtocolReq->getProtocol());
                 }
                 packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8021qCTag);
                 break;

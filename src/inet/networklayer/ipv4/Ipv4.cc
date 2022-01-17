@@ -1152,9 +1152,9 @@ void Ipv4::sendPacketToNIC(Packet *packet)
     auto networkInterfaceProtocol = networkInterface->getProtocol();
     auto dispatchProtocol = networkInterfaceProtocol;
     if (auto encapsulationProtocolReq = packet->findTagForUpdate<EncapsulationProtocolReq>()) {
-        dispatchProtocol = encapsulationProtocolReq->getProtocols(0);
-        encapsulationProtocolReq->eraseProtocols(0);
-        encapsulationProtocolReq->insertProtocols(encapsulationProtocolReq->getProtocolsArraySize(), networkInterfaceProtocol);
+        dispatchProtocol = encapsulationProtocolReq->getProtocol(0);
+        encapsulationProtocolReq->eraseProtocol(0);
+        encapsulationProtocolReq->insertProtocol(encapsulationProtocolReq->getProtocolArraySize(), networkInterfaceProtocol);
     }
     if (dispatchProtocol == nullptr)
         packet->removeTagIfPresent<DispatchProtocolReq>();

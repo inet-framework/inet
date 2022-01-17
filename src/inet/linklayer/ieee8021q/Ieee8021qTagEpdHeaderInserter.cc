@@ -86,8 +86,8 @@ void Ieee8021qTagEpdHeaderInserter::processPacket(Packet *packet)
     packetProtocolTag->setFrontOffset(b(0));
     const Protocol *dispatchProtocol = nullptr;
     if (auto encapsulationProtocolReq = packet->findTagForUpdate<EncapsulationProtocolReq>()) {
-        dispatchProtocol = encapsulationProtocolReq->getProtocols(0);
-        encapsulationProtocolReq->eraseProtocols(0);
+        dispatchProtocol = encapsulationProtocolReq->getProtocol(0);
+        encapsulationProtocolReq->eraseProtocol(0);
     }
     else if (nextProtocol != nullptr)
         dispatchProtocol = nextProtocol;

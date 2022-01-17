@@ -89,7 +89,7 @@ void PacketTaggerBase::markPacket(Packet *packet)
         EV_DEBUG << "Attaching PcpReq" << EV_FIELD(packet) << EV_FIELD(pcp) << EV_ENDL;
         packet->addTagIfAbsent<PcpReq>()->setPcp(pcp);
         auto encapsulationReq = packet->addTagIfAbsent<EncapsulationProtocolReq>();
-        encapsulationReq->insertProtocols(0, &Protocol::ieee8021qCTag);
+        encapsulationReq->insertProtocol(0, &Protocol::ieee8021qCTag);
     }
     if (userPriority != -1) {
         EV_DEBUG << "Attaching UserPriorityReq" << EV_FIELD(packet) << EV_FIELD(userPriority) << EV_ENDL;
