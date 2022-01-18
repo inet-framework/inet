@@ -145,10 +145,8 @@ cValue PacketFilter::DynamicExpressionResolver::readVariable(cExpression::Contex
         }
         auto classDescriptor = packetFilter->cpacket->getDescriptor();
         int field = classDescriptor->findField(name);
-        if (field != -1) {
-            auto fieldValue = classDescriptor->getFieldValueAsString(toAnyPtr(packetFilter->cpacket), field, 0);
+        if (field != -1)
             return classDescriptor->getFieldValue(toAnyPtr(packetFilter->cpacket), field, 0);
-        }
         else
             return IResolver::readVariable(context, name);
     }
@@ -210,10 +208,8 @@ cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context 
         if (cobject != nullptr) {
             auto classDescriptor = cobject->getDescriptor();
             int field = classDescriptor->findField(name);
-            if (field != -1) {
-                auto fieldValue = classDescriptor->getFieldValueAsString(toAnyPtr(cobject), field, 0);
+            if (field != -1)
                 return classDescriptor->getFieldValue(toAnyPtr(cobject), field, 0);
-            }
         }
         return IResolver::readMember(context, object, name);
     }
@@ -254,10 +250,8 @@ cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context 
         if (cobject != nullptr) {
             auto classDescriptor = cobject->getDescriptor();
             int field = classDescriptor->findField(name);
-            if (field != -1) {
-                auto fieldValue = classDescriptor->getFieldValueAsString(toAnyPtr(cobject), field, 0);
+            if (field != -1)
                 return classDescriptor->getFieldValue(toAnyPtr(cobject), field, 0);
-            }
         }
         return IResolver::readMember(context, object, name, index);
     }
