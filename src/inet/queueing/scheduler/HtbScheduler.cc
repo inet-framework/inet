@@ -259,7 +259,7 @@ void HtbScheduler::initialize(int stage)
         mtu = par("mtu");
         valueCorectnessCheck = par("checkHTBTreeValuesForCorectness");
         valueCorectnessAdj = par("adjustHTBTreeValuesForCorectness");
-        getParentModule()->subscribe(packetPushedSignal, this);
+        getParentModule()->subscribe(packetPushEndedSignal, this);
         EV_INFO << "HtbScheduler: parent = " << getParentModule()->getFullPath() << endl;
         // Get the datarate of the link connected to interface
         //register signal for dequeue index
@@ -974,7 +974,7 @@ void HtbScheduler::chargeClass(htbClass *leafCl, int borrowLevel, Packet *packet
 void HtbScheduler::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signal));
-    if (signal == packetPushedSignal) {
+    if (signal == packetPushEndedSignal) {
         if (std::string(source->getClassName()).find("inet::queueing::PacketQueue") != std::string::npos) { // Might need adjustment so that we can use compound packet queues as queues
             int index = static_cast<cModule*>(source)->getIndex();
             EV_INFO << "HtbScheduler::receiveSignal: PacketQueue " << index << " emitted a packetPushed signal! Call htbEnqueue for leaf " << index << endl;
