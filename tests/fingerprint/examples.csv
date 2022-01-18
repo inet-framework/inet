@@ -487,7 +487,7 @@
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            4cff-b978/tplx;4183-df02/~tNl;5a0d-3ec7/~tND;d866-2d12/tyf, PASS,
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            8b68-e35c/tplx;291a-b663/~tNl;10b5-fcc2/~tND;70d1-2277/tyf, PASS,
 
-/examples/timing/,                   -f omnetpp.ini -c General -r 0,                0.1s,             0029-0683/tplx;2b60-28b2/~tNl;3ad0-14cf/~tND;2aff-30ab/tyf, PASS,
+/examples/timing/,                   -f omnetpp.ini -c General -r 0,                0.1s,             164c-e87d/tplx;2b60-28b2/~tNl;3ad0-14cf/~tND;03d5-f356/tyf, PASS,
 
 /examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            ca5a-018c/tplx;8bed-195e/~tNl;ac03-cafc/tyf, PASS,
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            2641-c26d/tplx;be78-aee4/~tNl;d24d-24cb/tyf, PASS,
