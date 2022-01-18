@@ -1,15 +1,5 @@
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
 
-/showcases/ethernet/cutthrough/,        -f omnetpp.ini -c StoreAndForward,        1s,         2c0b-155b/tplx;dae0-5535/~tNl;fe3c-4e51/~tND;5252-c094/tyf, PASS,
-/showcases/ethernet/cutthrough/,        -f omnetpp.ini -c Cutthrough,        1s,         c15f-8a94/tplx;807e-bdab/~tNl;4c84-8665/~tND;12ec-2434/tyf, PASS,
-
-/showcases/ethernet/preemption/,        -f omnetpp.ini -c Default,        1s,         ccd8-a45c/tplx;1f58-18c7/~tNl;5f4c-e464/~tND;257a-7d00/tyf, PASS,
-/showcases/ethernet/preemption/,        -f omnetpp.ini -c PriorityQueue,        1s,         3d23-2242/tplx;6838-1b29/~tNl;c901-a2f1/~tND;6274-6c15/tyf, PASS,
-/showcases/ethernet/preemption/,        -f omnetpp.ini -c Preemption,        1s,         8ccf-1c5b/tplx;2879-4a1a/~tNl;24c2-8f3c/~tND;5574-1f72/tyf, PASS,
-/showcases/ethernet/preemption/,        -f omnetpp.ini -c RealisticDefault,        1s,         5252-c0e9/tplx;2b9e-90a1/~tNl;cbd8-e510/~tND;6737-7d0f/tyf, PASS,
-/showcases/ethernet/preemption/,        -f omnetpp.ini -c RealisticPriorityQueue,        1s,         0427-a65c/tplx;68c6-2d7a/~tNl;a670-0010/~tND;9b2f-d6bb/tyf, PASS,
-/showcases/ethernet/preemption/,        -f omnetpp.ini -c RealisticPreemption,        1s,         fd75-2966/tplx;bd9f-c698/~tNl;c3e4-7746/~tND;e59e-897b/tyf, PASS,
-
 /showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithoutQoS -r 0,        50s,         f257-7dca/tplx;57e7-b592/~tNl;e1f0-d661/~tND;495c-86b8/tyf, PASS, EthernetMac
 /showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithPolicing -r 0,      50s,         b159-2ad6/tplx;0fb2-54f4/~tNl;73a3-41a4/~tND;2b24-e65d/tyf, PASS, EthernetMac
 /showcases/general/diffserv/,        -f omnetpp.ini -c VoIP_WithPolicingAndQueueing -r 0, 50s,   46c2-6e00/tplx;1f19-c3f3/~tNl;b536-9747/~tND;b094-57ed/tyf, PASS, EthernetMac

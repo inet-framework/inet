@@ -80,8 +80,6 @@
 /examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0,                500s,            0e90-8117/tplx;47b1-8963/~tNl;7156-c692/~tND;da17-cc39/tyf, PASS, EthernetMac
 /examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            cf14-4c67/tplx;3206-4a80/~tNl;96b2-5f00/~tND;13fd-cf08/tyf, PASS, EthernetMac EthernetCsmaMac
 
-/examples/ethernet/creditbasedshaper/, -f omnetpp.ini -c General -r 0,              100ms,           0bc1-642e/tplx;5ab0-6235/~tNl;702f-784c/~tND;2254-06ad/tyf, PASS, tsn
-
 # /examples/ethernet/lans/,            -f .qtenv.ini -c General -r 0
 /examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            8057-5573/tplx;46eb-2c9e/~tNl;dccb-6105/tyf, PASS, EthernetCsmaMac
 # /examples/ethernet/lans/,            -f defaults.ini -c General -r 0,               -1s,             0, ERROR,   # not a complete simulations, defaults.ini included by other ini files
@@ -102,26 +100,6 @@
 /examples/ethernet/vlan/,            -f omnetpp.ini -c Asymmetric -r 0,             10ms,            7526-1622/tplx;02e8-6ff6/~tNl;f5b8-aaef/~tND;7a40-15cb/tyf, PASS,
 /examples/ethernet/vlan/,            -f omnetpp.ini -c DoubleTagged -r 0,           10ms,            9878-e0f6/tplx;e0a0-0a56/~tNl;052a-57d9/~tND;942f-97ec/tyf, PASS,
 /examples/ethernet/vlan/,            -f omnetpp.ini -c VirtualInterface -r 0,       10ms,            a0b3-f2da/tplx;b725-0790/~tNl;849c-43ea/~tND;babc-34e0/tyf, PASS,
-
-/examples/ethernet/cutthrough/,      -f omnetpp.ini -c General -r 0,                1s,              1dc2-59ef/tplx;4965-16ac/~tNl;6e4f-a0c9/~tND;400e-7648/tyf, PASS, ethernet layered tsn
-/examples/ethernet/preemption/,      -f omnetpp.ini -c General -r 0,                1s,              13c0-0255/tplx;9f0e-e3db/~tNl;6a9a-c7a1/~tND;3408-111e/tyf, PASS, ethernet layered tsn
-/examples/ethernet/gatepreemption/,  -f omnetpp.ini -c General -r 0,                1s,              efab-2d27/tplx;d21b-a25d/~tNl;24be-38d8/~tND;5887-afd8/tyf, PASS, ethernet layered tsn
-
-/examples/ethernet/clocksynchronization/, -f omnetpp.ini -c SynchronizedBySimulationTime -r 0, 10ms, b1aa-0eb7/tplx;772a-528b/~tNl;478a-1ee5/~tND;1249-171e/tyf, PASS, ethernet layered tsn
-/examples/ethernet/clocksynchronization/, -f omnetpp.ini -c UnsynchronizedClocks -r 0,         10ms, 649e-c5a1/tplx;277f-0e05/~tNl;1d4b-ad82/~tND;2535-445e/tyf, PASS, ethernet layered tsn
-/examples/ethernet/clocksynchronization/, -f omnetpp.ini -c SynchronizedClocksBySimpleClockSynchronizer -r 0, 10ms, 07e3-daf1/tplx;b9c8-5318/~tNl;d4da-15eb/~tND;e06c-4cb2/tyf, PASS, ethernet layered tsn
-/examples/ethernet/clocksynchronization/, -f omnetpp.ini -c SynchronizedClocksByGPTP -r 0,     10ms, 5d00-dbe0/tplx;0c7b-1915/~tNl;beaf-989a/~tND;7cd3-a651/tyf, PASS, ethernet layered tsn gptp
-
-/examples/ethernet/invehicle/,       -f omnetpp.ini -c NoPriorityQueueing -r 0,             100ms,   7871-c190/tplx;0d7a-3ed2/~tNl;835c-9cb2/~tND;f42e-5c44/tyf, PASS, ethernet layered tsn
-/examples/ethernet/invehicle/,       -f omnetpp.ini -c NoTAS -r 0,                          100ms,   7871-c190/tplx;0d7a-3ed2/~tNl;835c-9cb2/~tND;3ef5-cd20/tyf, PASS, ethernet layered tsn
-/examples/ethernet/invehicle/,       -f omnetpp.ini -c TAS -r 0,                            100ms,   94f1-8116/tplx;900c-dbbb/~tNl;909a-e97f/~tND;ccd5-65d2/tyf, PASS, ethernet layered tsn
-/examples/ethernet/invehicle/,       -f omnetpp.ini -c BrokenCameraNoPriorityQueueing -r 0, 100ms,   e549-fe67/tplx;7b00-b51a/~tNl;ba04-751c/~tND;f2a7-fabb/tyf, PASS, ethernet layered tsn
-/examples/ethernet/invehicle/,       -f omnetpp.ini -c BrokenCameraNoTAS -r 0,              100ms,   2f85-3e91/tplx;5ca1-ffab/~tNl;16b3-7874/~tND;fb94-7749/tyf, PASS, ethernet layered tsn
-/examples/ethernet/invehicle/,       -f omnetpp.ini -c BrokenCameraTAS -r 0,                100ms,   96f1-de8e/tplx;b767-4c48/~tNl;cff6-4c29/~tND;4621-a4d9/tyf, PASS, ethernet layered tsn
-
-/examples/ethernet/redundancy/,       -f omnetpp.ini -c ManualRedundancy -r 0,             100ms,    7bcc-5348/tplx;a9eb-bb41/~tNl;35e9-07e0/~tND;afb4-4e62/tyf, PASS, ethernet layered tsn
-/examples/ethernet/redundancy/,       -f omnetpp.ini -c StreamRedundancyConfigurator -r 0, 100ms,    7bcc-5348/tplx;a9eb-bb41/~tNl;1a3b-089b/~tND;5f42-2ecc/tyf, PASS, ethernet layered tsn
-/examples/ethernet/redundancy/,       -f omnetpp.ini -c TsnConfigurator -r 0,              100ms,    04d4-c58c/tplx;e791-150e/~tNl;1967-457d/~tND;94c1-48ab/tyf, PASS, ethernet layered tsn
 
 /examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,            75d0-cba9/tplx;ce1d-d136/~tNl;51b3-9d40/~tND;900d-aaeb/tyf, PASS, wireless
 
