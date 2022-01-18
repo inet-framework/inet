@@ -422,10 +422,10 @@ void LengthWeightedValuePerRegionFilter::receiveSignal(cResultFilter *prev, simt
 
 Register_ResultFilter("demuxFlow", DemuxFlowFilter);
 
-void DemuxFlowFilter::init(cComponent *component, cProperty *attrsProperty)
+void DemuxFlowFilter::init(Context *ctx)
 {
-    DemuxFilter::init(component, attrsProperty);
-    std::string fullPath = component->getFullPath() + "." + attrsProperty->getIndex() + ".demuxFlow";
+    DemuxFilter::init(ctx);
+    std::string fullPath = ctx->component->getFullPath() + "." + ctx->attrsProperty->getIndex() + ".demuxFlow";
     auto value = getEnvir()->getConfig()->getPerObjectConfigValue(fullPath.c_str(), "flowName");
     flowNameMatcher.setPattern(value != nullptr ? value : "*", false, true, true);
 }
@@ -616,10 +616,10 @@ void PacketTransmissionTimePerRegionFilter::receiveSignal(cResultFilter *prev, s
 
 Register_ResultFilter("throughput", ThroughputFilter);
 
-void ThroughputFilter::init(cComponent *component, cProperty *attrsProperty)
+void ThroughputFilter::init(Context *ctx)
 {
-    cObjectResultFilter::init(component, attrsProperty);
-    std::string fullPath = component->getFullPath() + "." + attrsProperty->getIndex() + ".throughput";
+    cObjectResultFilter::init(ctx);
+    std::string fullPath = ctx->component->getFullPath() + "." + ctx->attrsProperty->getIndex() + ".throughput";
     auto intervalValue = getEnvir()->getConfig()->getPerObjectConfigValue(fullPath.c_str(), "interval");
     interval = cConfiguration::parseDouble(intervalValue, "s", nullptr, 0.1);
     auto numLengthLimitValue = getEnvir()->getConfig()->getPerObjectConfigValue(fullPath.c_str(), "numLengthLimit");

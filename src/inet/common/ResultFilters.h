@@ -252,7 +252,7 @@ class INET_API DemuxFlowFilter : public DemuxFilter
     cMatchExpression flowNameMatcher;
 
   protected:
-    virtual void init(cComponent *component, cProperty *attrsProperty) override;
+    virtual void init(Context *ctx) override;
 
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details) override;
@@ -412,7 +412,7 @@ class INET_API ThroughputFilter : public cObjectResultFilter
     int numLengths = 0;
 
   protected:
-    virtual void init(cComponent *component, cProperty *attrsProperty) override;
+    virtual void init(Context *ctx) override;
     virtual ThroughputFilter *clone() const override;
     virtual void emitThroughput(simtime_t endInterval, cObject *details);
 
