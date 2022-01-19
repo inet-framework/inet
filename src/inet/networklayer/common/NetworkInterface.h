@@ -124,6 +124,8 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     bool multicast = false; ///< interface supports multicast
     bool pointToPoint = false; ///< interface is point-to-point link
     bool loopback = false; ///< interface is loopback interface
+    bool hasModuleIdAddress = false;
+    bool hasModulePathAddress = false;
     double datarate = 0; ///< data rate in bit/s
     MacAddress macAddr; ///< link-layer address (for now, only IEEE 802 MAC addresses are supported)
     InterfaceToken token; ///< for Ipv6 stateless autoconfig (RFC 1971), interface identifier (RFC 2462)
@@ -227,8 +229,10 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     bool isUp() const { return getState() == UP && hasCarrier(); }
     bool isDown() const { return getState() != UP; }
 
-    const ModuleIdAddress getModuleIdAddress() const { return ModuleIdAddress(getId()); }
-    const ModulePathAddress getModulePathAddress() const { return ModulePathAddress(getId()); }
+    void setHasModuleIdAddress(bool value) { hasModuleIdAddress = value; }
+    void setHasModulePathAddress(bool value) { hasModulePathAddress = value; }
+    const ModuleIdAddress getModuleIdAddress() const { return hasModuleIdAddress ? ModuleIdAddress(getId()) : ModuleIdAddress(0); }
+    const ModulePathAddress getModulePathAddress() const { return hasModulePathAddress ? ModulePathAddress(getId()) : ModulePathAddress(0); }
     const L3Address getNetworkAddress() const;
     virtual bool hasNetworkAddress(const L3Address& address) const;
 

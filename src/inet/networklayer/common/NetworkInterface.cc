@@ -449,6 +449,10 @@ const L3Address NetworkInterface::getNetworkAddress() const
     if (auto nextHopData = findProtocolData<NextHopInterfaceData>())
         return nextHopData->getAddress();
 #endif // ifdef INET_WITH_NEXTHOP
+    if (hasModuleIdAddress)
+        return getModuleIdAddress();
+    if (hasModulePathAddress)
+        return getModulePathAddress();
     return L3Address();
 }
 
@@ -477,14 +481,25 @@ bool NetworkInterface::hasNetworkAddress(const L3Address& address) const
     case L3Address::MAC: {
         return getMacAddress() == address.toMac();
     }
-    case L3Address::MODULEID:
+    case L3Address::MODULEID: {
+#ifdef INET_WITH_NEXTHOP
+        auto nextHopData = findProtocolData<NextHopInterfaceData>();
+        if (nextHopData != nullptr && nextHopData->getAddress() == address)
+            return true;
+#endif // ifdef INET_WITH_NEXTHOP
+        if (hasModuleIdAddress)
+            return getModuleIdAddress() == address.toModuleId();
+        return false;
+    }
     case L3Address::MODULEPATH: {
 #ifdef INET_WITH_NEXTHOP
         auto nextHopData = findProtocolData<NextHopInterfaceData>();
-        return nextHopData != nullptr && nextHopData->getAddress() == address;
-#else
-        return false;
+        if (nextHopData != nullptr && nextHopData->getAddress() == address)
+            return true;
 #endif // ifdef INET_WITH_NEXTHOP
+        if (hasModulePathAddress)
+            return getModulePathAddress() == address.toModulePath();
+        return false;
     }
     default:
         break;
