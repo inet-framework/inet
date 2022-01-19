@@ -252,8 +252,6 @@ L3Address L3AddressResolver::getAddressFrom(IInterfaceTable *ift, int addrType)
         return ret;
     else if ((addrType & ADDR_MODULEID) && getModuleIdAddressFrom(ret, ift, netmask))
         return ret;
-    else
-        throw cRuntimeError("L3AddressResolver: unknown addrType %d", addrType);
     return ret;
 }
 
@@ -261,7 +259,6 @@ L3Address L3AddressResolver::getAddressFrom(NetworkInterface *ie, int addrType)
 {
     L3Address ret;
     bool mask = addrType & ADDR_MASK;
-
     if ((addrType & ADDR_IPv4) && getInterfaceIpv4Address(ret, ie, mask))
         return ret;
     else if ((addrType & ADDR_IPv6) && getInterfaceIpv6Address(ret, ie, mask))
@@ -272,9 +269,6 @@ L3Address L3AddressResolver::getAddressFrom(NetworkInterface *ie, int addrType)
         return ret;
     else if ((addrType & ADDR_MODULEID) && getInterfaceModuleIdAddress(ret, ie, mask))
         return ret;
-    else
-        throw cRuntimeError("L3AddressResolver: unknown addrType %d at %s", addrType, ie->getInterfaceFullPath().c_str());
-
     return ret;
 }
 
