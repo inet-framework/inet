@@ -52,8 +52,8 @@ class NetworkHeaderBase extends FieldsChunk
 {
     @existingClass;
 
-    L3Address sourceAddress @byValue;
-    L3Address destinationAddress @byValue;
+    L3Address sourceAddress @byValue @toValue(.str()) @fromValue(Ipv4Address($));
+    L3Address destinationAddress @byValue @toValue(.str()) @fromValue(Ipv4Address($));
     const Protocol *protocol;
 };
 

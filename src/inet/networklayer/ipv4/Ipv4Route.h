@@ -81,13 +81,13 @@ class INET_API Ipv4Route : public cObject, public IRoute
     virtual void setMetric(int _metric) override { if (metric != _metric) { metric = _metric; changed(F_METRIC); } }
 
     /** Destination address prefix to match */
-    Ipv4Address getDestination() const { return dest; }
+    const Ipv4Address& getDestination() const { return dest; }
 
     /** Represents length of prefix to match */
-    Ipv4Address getNetmask() const { return netmask; }
+    const Ipv4Address& getNetmask() const { return netmask; }
 
     /** Next hop address */
-    Ipv4Address getGateway() const { return gateway; }
+    const Ipv4Address& getGateway() const { return gateway; }
 
     /** Next hop interface */
     NetworkInterface *getInterface() const override { return interfacePtr; }
