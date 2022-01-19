@@ -34,6 +34,7 @@
 #endif // ifdef INET_WITH_IPv6
 
 #ifdef INET_WITH_NEXTHOP
+#include "inet/networklayer/configurator/nexthop/NextHopNetworkConfigurator.h"
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 #include "inet/networklayer/nexthop/NextHopRoutingTable.h"
 #endif // ifdef INET_WITH_NEXTHOP
@@ -423,12 +424,44 @@ bool L3AddressResolver::getInterfaceMacAddress(L3Address& ret, NetworkInterface 
 
 bool L3AddressResolver::getInterfaceModulePathAddress(L3Address& ret, NetworkInterface *ie, bool netmask)
 {
+#ifdef INET_WITH_NEXTHOP
+    if (auto nextHopData = ie->findProtocolData<NextHopInterfaceData>()) {
+        L3Address addr = nextHopData->getAddress();
+        if (!addr.isUnspecified() && addr.getType() == L3Address::MODULEPATH) {
+            ret = addr;
+            return true;
+        }
+    }
+    else {
+        // find address in the configurator's notebook
+        // TODO how do we know where is the configurator? getNextHopNetworkConfigurator the path from a NED parameter?
+        NextHopNetworkConfigurator *configurator = dynamic_cast<NextHopNetworkConfigurator *>(getSimulation()->findModuleByPath("configurator"));
+        if (configurator)
+            return static_cast<L3AddressResolver *>(configurator)->getInterfaceIpv4Address(ret, ie, netmask);
+    }
+#endif // ifdef INET_WITH_NEXTHOP
     ret = ie->getModulePathAddress();
     return true;
 }
 
 bool L3AddressResolver::getInterfaceModuleIdAddress(L3Address& ret, NetworkInterface *ie, bool netmask)
 {
+#ifdef INET_WITH_NEXTHOP
+    if (auto nextHopData = ie->findProtocolData<NextHopInterfaceData>()) {
+        L3Address addr = nextHopData->getAddress();
+        if (!addr.isUnspecified() && addr.getType() == L3Address::MODULEID) {
+            ret = addr;
+            return true;
+        }
+    }
+    else {
+        // find address in the configurator's notebook
+        // TODO how do we know where is the configurator? getNextHopNetworkConfigurator the path from a NED parameter?
+        NextHopNetworkConfigurator *configurator = dynamic_cast<NextHopNetworkConfigurator *>(getSimulation()->findModuleByPath("configurator"));
+        if (configurator)
+            return static_cast<L3AddressResolver *>(configurator)->getInterfaceIpv4Address(ret, ie, netmask);
+    }
+#endif // ifdef INET_WITH_NEXTHOP
     ret = ie->getModuleIdAddress();
     return true;
 }
