@@ -44,7 +44,7 @@ L3Address L3AddressResolver::resolve(const char *s, int addrType)
 {
     L3Address addr;
     if (!tryResolve(s, addr, addrType))
-        throw cRuntimeError("L3AddressResolver: address `%s' not configured (yet?)", s);
+        throw cRuntimeError("L3AddressResolver: Cannot resolve address `%s'", s);
     return addr;
 }
 
