@@ -102,13 +102,13 @@ class INET_API IPv4Route : public cObject, public IRoute
     virtual void setMetric(int _metric) override { if (metric != _metric) { metric = _metric; changed(F_METRIC); } }
 
     /** Destination address prefix to match */
-    IPv4Address getDestination() const { return dest; }
+    const IPv4Address& getDestination() const { return dest; }
 
     /** Represents length of prefix to match */
-    IPv4Address getNetmask() const { return netmask; }
+    const IPv4Address& getNetmask() const { return netmask; }
 
     /** Next hop address */
-    IPv4Address getGateway() const { return gateway; }
+    const IPv4Address& getGateway() const { return gateway; }
 
     /** Next hop interface */
     InterfaceEntry *getInterface() const override { return interfacePtr; }
