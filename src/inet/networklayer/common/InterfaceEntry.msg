@@ -34,7 +34,7 @@ class InterfaceEntry extends cModule
     bool loopback @getter("isLoopback");
     int mtu;
     MacAddress macAddress;
-    Ipv4Address ipv4Address @byValue;
-    Ipv4Address ipv4Netmask @byValue;
+    Ipv4Address ipv4Address @byValue @toValue(.str()) @fromValue(Ipv4Address($));
+    Ipv4Address ipv4Netmask @byValue @toValue(.str()) @fromValue(Ipv4Address($));
 }
 
