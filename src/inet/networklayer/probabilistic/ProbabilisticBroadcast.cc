@@ -45,13 +45,13 @@ void ProbabilisticBroadcast::initialize(int stage)
         nbDataPacketsForwarded = 0;
         nbHops = 0;
     }
+    else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
+        for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
+            interfaceTable->getInterface(i)->setHasModulePathAddress(true);
+    }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        auto ie = interfaceTable->findFirstNonLoopbackInterface();
-        if (ie != nullptr) {
+        if (auto ie = interfaceTable->findFirstNonLoopbackInterface())
             myNetwAddr = ie->getNetworkAddress();
-            if (myNetwAddr.isUnspecified())
-                myNetwAddr = ie->getModulePathAddress();
-        }
         else
             throw cRuntimeError("No non-loopback interface found!");
     }
