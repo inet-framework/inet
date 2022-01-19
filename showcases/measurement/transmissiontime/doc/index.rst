@@ -42,7 +42,7 @@ Here is the configuration:
 Results
 -------
 
-**TODO** should the packet length be variable ? so the transmission time is not the same
+.. **TODO** should the packet length be variable ? so the transmission time is not the same
 
 Here are the results:
 

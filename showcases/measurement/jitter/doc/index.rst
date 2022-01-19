@@ -1,10 +1,10 @@
-Measuring Packet Jitter
-=======================
+Measuring Packet Delay Variation
+================================
 
 Goals
 -----
 
-In this example we explore the various packet jitter statistics of application modules.
+In this example we explore the various packet delay variation (also known as packet jitter) statistics of application modules.
 
 | INET version: ``4.4``
 | Source files location: `inet/showcases/measurement/jitter <https://github.com/inet-framework/inet/tree/master/showcases/measurement/jitter>`__
@@ -12,7 +12,7 @@ In this example we explore the various packet jitter statistics of application m
 The Model
 ---------
 
-The packet jitter is measured in several different forms:
+The packet delay variation is measured in several different forms:
 
 - *Instantaneous packet delay variation*: the difference between the packet delay of successive packets (``packetJitter`` statistic)
 - *Variance of packet delay* (``packetDelayVariation`` statistic)

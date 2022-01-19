@@ -47,7 +47,7 @@ Here are the results:
 .. figure:: media/switch_outgoing.png
    :align: center
 
-**TODO** why does the switch has more datarate ?
+.. **TODO** why does the switch has more datarate ? protocol headers?
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`DataRateMeasurementShowcase.ned <../DataRateMeasurementShowcase.ned>`
 

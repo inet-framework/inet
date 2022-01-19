@@ -20,7 +20,7 @@ network interfaces, separately for both directions. This statistic expresses
 the relative usage of the channel with a value between 0 and 1, where 0 means
 the channel is not used at all and 1 means the channel is fully utilized.
 
-Channel utilization is a statistic of transmitter modules, such as the :ned:`PacketTransmitter` in :ned:`LayeredEthernetPhy`.
+Channel utilization is a statistic of transmitter modules, such as the :ned:`PacketTransmitter` in :ned:`EthernetPhyLayer`.
 The channel utilization is related to channel throughput in the sense that 
 utilization is the ratio of throughput to channel datarate. By default, channel utilization
 is calculated for the past 0.1s or the last 100 packets, whichever comes first.

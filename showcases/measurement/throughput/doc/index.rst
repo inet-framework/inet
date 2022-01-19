@@ -20,7 +20,7 @@ separately for both directions.
 
 .. the throughput is measured as a sliding window, the parameters can be set in the ResultRecorder HOW?
 
-Channel throughput is a statistic of transmitter modules, such as the :ned:`PacketTransmitter` in :ned:`LayeredEthernetPhy`.
+Channel throughput is a statistic of transmitter modules, such as the :ned:`PacketTransmitter` in :ned:`EthernetPhyLayer`.
 Throughput is measured with a sliding window. By default, the window is 0.1s or 100 packets, whichever comes first.
 The parameters of the window, such as the window interval, are configurable from the ini file, as ``module.statistic.parameter``. For example:
 
@@ -46,7 +46,7 @@ Here are the results:
 .. figure:: media/throughput.png
    :align: center
 
-**TODO** is there an emitting frequency?
+The frequency of data points is denser than 0.1s, so the statistic is emitted more frequently, after 100 packets.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`ChannelThroughputMeasurementShowcase.ned <../ChannelThroughputMeasurementShowcase.ned>`
 

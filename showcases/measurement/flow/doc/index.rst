@@ -40,7 +40,7 @@ Any number of flow labels can be added to a packet (it can be part of multiple f
 
 .. note:: A practical problem is that different parts of a packet may have different history, due to fragmentation and reassembly, for example. Therefore, we need to keep track of the measurements for different regions of the packet. For this purpose, each bit in a packet can have its own meta-information associating it to a flow, called a `region tag`. For more information on region tags, check out the :ref:`dg:sec:packets:region-tagging` section of the INET Developer's Guide.
 
-**TODO** more about the available statistics in FlowMeasurementRecorder.ned ?
+.. **TODO** for wip branch -> more about the available statistics in FlowMeasurementRecorder.ned ?
 
 The Measurement Modules
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -65,11 +65,12 @@ Some notes:
 
 .. - **V1** Evaluating the measured data can be complex if there is cut-through switching, or intra-node packet streaming in the network. This is due to the fact that the measurements are done on a per-bit basis. In a network with only store-and-forward switching and no packet streaming, all bits of a packet have the same measured time values, as the packet is handled as a whole. However, when it is not (e.g. cut-through switching), the different bits of the packet can have different time measurements. For more information, see the **TODO** INET manual.
 
-- Evaluating the measured data when there is cut-through switching or intra-node packet streaming in the network can be more complex than if there is not. This is because measurements are recorded on a per-bit basis, and the transmission time can be different for each bit if there is packet streaming in the network. Also, bits waiting in the transmitter for other bits of a packet to be transmitted and received is only included in the elapsed time measurement. Because of this, the sum of all other measurements might not be equal to the elapsed time. For more information, see the **TODO** section in the INET manual. 
+- Evaluating the measured data when there is cut-through switching or intra-node packet streaming in the network can be more complex than if there is not. This is because measurements are recorded on a per-bit basis, and the transmission time can be different for each bit if there is packet streaming in the network. Also, bits waiting in the transmitter for other bits of a packet to be transmitted and received is only included in the elapsed time measurement. Because of this, the sum of all other measurements might not be equal to the elapsed time. 
+.. **TODO** for wip branch -> this was part of the preceding paragraph: For more information, see the **TODO** section in the INET manual. 
 - The ``packetEvent`` measurement is special, because it records the history of the packet as it travels through the network, instead of taking a specific measurement. For example, it records events of the packet's delaying, queueing, processing, transmission, etc. There is no built-in module that makes use of the packet event measurement data, this can be implemented by the user. This can be useful for more detailed analysis based on a packet's history.
 - Although both the measurement starter and recorder modules have a :par:`measure` parameter, its meaning is slightly different. For the measurement starter module, the parameter specifies which measurement data to include in the attached flow tag. For the measurement recorder module, it specifies which measurements to record as statistics. Generally, the parameter values for the recorder module should be the same or a subset of the starter module's parameters. If a recorder module is configured to record a measurement that isn't on the packet (not set to record in the starter module), the measurement silently fails. Thus it is the user's responsibility to set up the :par:`measure` parameters properly.
 
-**TODO** is the first point still valid?
+.. **TODO** for wip branch -> is the first point still valid?
 
 Adding Measurement Modules to the Network
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -140,6 +141,7 @@ We want to measure the following:
 For this purpose, we specify five packet flows, and measure elapsed time and queueing time along the following flows:
 
 .. - Four packet flows going from each client's UDP app to the UDP app in the two servers (``client1`` -> ``server1``, ``client1`` -> ``server2``, ``client2`` -> ``server1``, ``client2`` -> ``server2``)
+
 - Four packet flows corresponding to the packet streams ``c1s1``, ``c1s2``, ``c2s1`` and ``c2s2`` (i.e. each flow is between the client and server UDP apps) 
 - A packet flow going between the Ethernet interfaces connecting ``switch1`` and ``switch2``.
 
@@ -156,25 +158,25 @@ The following is a screenshot showing the five defined packet flows in action:
 
 .. **TODO** kliensek kozott az appok kozotti traffic; switchek kozott minden -> amit szeretnenk merni
 
-Let's see how we set up these flows. The UDP apps in the clients and servers are the :ned:`UdpApp` type, i.e. the modular UDP app. This module has an optional ``outbound`` submodule that we can specify in the .INI file to be a :ned:`FlowMeasurementStarter` in the clients:
+Let's see how we set up these flows. The UDP apps in the clients and servers are the :ned:`UdpSourceApp` and :ned:`UdpSinkApp` type, which are versions of the modular :ned:`UdpApp` suitable only to work as a packet source or sink, respectively. These modules have optional ``measurementStarter`` and ``measurementRecorder`` submodules that we can enable in the .INI file. We enable the measurement starter (by setting its type to :ned:`FlowMeasurementStarter`) in the clients:
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: *.client1.app[*].outbound.typename = "FlowMeasurementStarter"
-   :end-at: *.client1.app[*].outbound.typename = "FlowMeasurementStarter"
+   :start-at: *.client*.app[*].measurementStarter.typename = "FlowMeasurementStarter"
+   :end-at: *.client*.app[*].measurementStarter.typename = "FlowMeasurementStarter"
    :language: ini
 
-Here is the :ned:`FlowMeasurementStarter` in the UDP app:
+Here is the :ned:`FlowMeasurementStarter` in a client's UDP app:
 
-.. figure:: media/Default_UdpApp3.png
+.. figure:: media/Default_UdpApp4.png
    :align: center
 
-   Figure X. :ned:`FlowMeasurementStarter` in UDP app
+   Figure X. :ned:`FlowMeasurementStarter` in client UDP app
 
-Similarly, we specify the inbound module in the server UDP apps to be a :ned:`FlowMeasurementRecorder`:
+Similarly, we enable the measurement recorder module in the server UDP apps (by setting their type to :ned:`FlowMeasurementRecorder`):
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: *.server1.app[*].inbound.typename = "FlowMeasurementRecorder"
-   :end-at: *.server1.app[*].inbound.typename = "FlowMeasurementRecorder"
+   :start-at: *.server*.app[*].measurementRecorder.typename = "FlowMeasurementRecorder"
+   :end-at: *.server*.app[*].measurementRecorder.typename = "FlowMeasurementRecorder"
    :language: ini
 
 For the packet flow between the two switches, we can enable the built-in ``measurementLayer`` submodule of :ned:`EthernetInterface`:
@@ -192,8 +194,8 @@ For the packet flow between the two switches, we can enable the built-in ``measu
 Here is the complete flow definition configuration (including the definitions already mentioned):
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: *.client1.app[*].outbound.typename = "FlowMeasurementStarter"
-   :end-at: *.switch2.eth[2].measurementLayer.measurementRecorder.measure = "elapsedTime or queueingTime"
+   :start-at: *.client*.app[*].measurementStarter.typename
+   :end-at: *.switch2.eth[2].measurementLayer.measurementRecorder.measure
    :language: ini
 
 We set up the four flows between the clients and the servers, and also the flow between the two switches. We name flows based on source and destination node (e.g. ``c1s1`` for ``client1->server1``). We set the measurement modules to measure the elapsed time and the queueing time. Some notes:
@@ -337,7 +339,7 @@ Results
 .. figure:: media/AnyLocationBrowseData.png
    :align: center
 
-**TODO** need to contain both BG and VID flows; but there are NaN's
+.. **TODO** for wip branch -> need to contain both BG and VID flows; but there are NaN's
 
 .. Here is the same data selection plotted on a scatter chart:
 
