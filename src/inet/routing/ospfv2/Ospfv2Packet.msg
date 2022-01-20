@@ -230,6 +230,13 @@ class Ospfv2DatabaseDescriptionPacket extends Ospfv2Packet
     Ospfv2LsaHeader lsaHeaders[];     //TODO
 }
 
+cplusplus(Ospfv2DatabaseDescriptionPacket) {{
+#if (OMNETPP_BUILDNUM < 1530)
+  public:
+    void appendLsaHeaders(const Ospfv2LsaHeader& lsaHeaders) { insertLsaHeaders(lsaHeaders); }
+#endif
+}}
+
 struct Ospfv2LsaRequest
 {
     unsigned long lsType;

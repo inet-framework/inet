@@ -128,6 +128,10 @@ cplusplus(Ipv6NdOptions) {{
     virtual Ipv6NdOption *findOptionForUpdate(Ipv6NdOptionTypes t);
     virtual void insertUniqueOption(size_t k, Ipv6NdOption * option);
     virtual void insertUniqueOption(Ipv6NdOption * option) { insertUniqueOption(option_arraysize, option); }
+#if (OMNETPP_BUILDNUM < 1530)
+  public:
+    void appendOption(Ipv6NdOption *option) { insertOption(option); }
+#endif
 }}
 
 //

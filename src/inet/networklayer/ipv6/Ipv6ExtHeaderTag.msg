@@ -37,6 +37,11 @@ cplusplus(Ipv6ExtHeaderTagBase) {{
      * Remove the first extension header and return it.
      */
     Ipv6ExtensionHeader *removeFirstExtensionHeader();
+
+#if (OMNETPP_BUILDNUM < 1530)
+    void appendExtensionHeader(Ipv6ExtensionHeader *extensionHeader) { insertExtensionHeader(extensionHeader); }
+    Ipv6ExtensionHeader * removeExtensionHeader(size_t k) { return dropExtensionHeader(k); }
+#endif
 }}
 
 class Ipv6ExtHeaderReq extends Ipv6ExtHeaderTagBase
