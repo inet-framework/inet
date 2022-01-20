@@ -39,15 +39,21 @@ PacketFilter::~PacketFilter()
 void PacketFilter::setPattern(const char *pattern)
 {
     delete matchExpression;
-    matchExpression = new cMatchExpression();
-    matchExpression->setPattern(pattern, false, true, true);
+    matchExpression = nullptr;
+    if (strcmp(pattern, "*")) {
+        matchExpression = new cMatchExpression();
+        matchExpression->setPattern(pattern, false, true, true);
+    }
 }
 
 void PacketFilter::setExpression(const char *expression)
 {
     delete filterExpression;
-    filterExpression = new cDynamicExpression();
-    filterExpression->parse(expression, new DynamicExpressionResolver(this));
+    filterExpression = nullptr;
+    if (strcmp(expression, "true")) {
+        filterExpression = new cDynamicExpression();
+        filterExpression->parse(expression, new DynamicExpressionResolver(this));
+    }
 }
 
 void PacketFilter::setExpression(cDynamicExpression *expression)
@@ -96,18 +102,23 @@ bool PacketFilter::matches(const cPacket *cpacket) const
     this->cpacket = cpacket;
     protocolToChunkMap.clear();
     classNameToChunkMap.clear();
-    if (auto packet = dynamic_cast<const Packet *>(cpacket)) {
-        PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, *packetDissectorCallback);
-        packetDissector.dissectPacket(const_cast<Packet *>(packet));
+    if (matchExpression == nullptr && filterExpression == nullptr)
+        return true;
+    else {
+        bool result = true;
+        if (matchExpression != nullptr) {
+            cMatchableString matchableString(cpacket->getFullName());
+            result &= matchExpression->matches(&matchableString);
+        }
+        if (filterExpression != nullptr) {
+            if (auto packet = dynamic_cast<const Packet *>(cpacket)) {
+                PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, *packetDissectorCallback);
+                packetDissector.dissectPacket(const_cast<Packet *>(packet));
+            }
+            result &= filterExpression->evaluate().boolValue();
+        }
+        return result;
     }
-    bool result = true;
-    if (matchExpression != nullptr) {
-        cMatchableString matchableString(cpacket->getFullName());
-        result &= matchExpression->matches(&matchableString);
-    }
-    if (filterExpression != nullptr)
-        result &= filterExpression->evaluate().boolValue();
-    return result;
 }
 
 void PacketFilter::PacketDissectorCallback::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
