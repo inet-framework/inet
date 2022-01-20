@@ -67,8 +67,13 @@ class INET_API SctpHeader : public SctpHeader_Base
     /**
      * Adds a message object to the SCTP packet. The packet length will be adjusted
      */
+#if (OMNETPP_BUILDNUM >= 1530)
+    virtual void appendSctpChunks(SctpChunk *sctpChunks) override;
+    using SctpHeader_Base::insertSctpChunks;
+#else
     void appendSctpChunks(SctpChunk *sctpChunks);
     virtual void insertSctpChunks(SctpChunk *sctpChunks) override { appendSctpChunks(sctpChunks); }
+#endif
     virtual void insertSctpChunks(size_t k, SctpChunk *sctpChunks) override;
     virtual void eraseSctpChunks(size_t k) override {}
     virtual void replaceSctpChunk(SctpChunk *msg, uint32_t k);
@@ -111,8 +116,13 @@ class INET_API SctpErrorChunk : public SctpErrorChunk_Base
     /** Generated but unused method, should not be called. */
     virtual void setParameters(size_t k, SctpParameter * parameters) override;
 
+#if (OMNETPP_BUILDNUM >= 1530)
+    virtual void appendParameters(SctpParameter *parameters) override { throw cRuntimeError("Unimplemented function"); }
+    using SctpErrorChunk_Base::insertParameters;
+#else
     void appendParameters(SctpParameter *parameters) { throw cRuntimeError("Unimplemented function"); }
     virtual void insertParameters(SctpParameter *parameters) override { appendParameters(parameters); }
+#endif
     virtual void insertParameters(size_t k, SctpParameter *parameters) override { throw cRuntimeError("Unimplemented function"); }
     virtual void eraseParameters(size_t k) override { throw cRuntimeError("Unimplemented function"); }
     /**
@@ -155,8 +165,13 @@ class INET_API SctpStreamResetChunk : public SctpStreamResetChunk_Base
     /** Generated but unused method, should not be called. */
     virtual void setParameters(size_t k, SctpParameter * parameters) override;
 
+#if (OMNETPP_BUILDNUM >= 1530)
+    virtual void appendParameters(SctpParameter *parameters) override { throw cRuntimeError("Unimplemented function"); }
+    using SctpStreamResetChunk_Base::insertParameters;
+#else
     void appendParameters(SctpParameter *parameters) { throw cRuntimeError("Unimplemented function"); }
     virtual void insertParameters(SctpParameter *parameters) override { appendParameters(parameters); }
+#endif
     virtual void insertParameters(size_t k, SctpParameter *parameters) override { throw cRuntimeError("Unimplemented function"); }
     virtual void eraseParameters(size_t k) override { throw cRuntimeError("Unimplemented function"); }
     /**
@@ -198,8 +213,13 @@ class INET_API SctpAsconfChunk : public SctpAsconfChunk_Base
     /** Generated but unused method, should not be called. */
     virtual void setAsconfParams(size_t k, SctpParameter * asconfParams) override;
 
+#if (OMNETPP_BUILDNUM >= 1530)
+    virtual void appendAsconfParams(SctpParameter *asconfParams) override { throw cRuntimeError("Unimplemented function"); }
+    using SctpAsconfChunk_Base::insertAsconfParams;
+#else
     void appendAsconfParams(SctpParameter *asconfParams) { throw cRuntimeError("Unimplemented function"); }
     virtual void insertAsconfParams(SctpParameter *asconfParams) override { appendAsconfParams(asconfParams); }
+#endif
     virtual void insertAsconfParams(size_t k, SctpParameter *asconfParams) override { throw cRuntimeError("Unimplemented function"); }
     virtual void eraseAsconfParams(size_t k) override { throw cRuntimeError("Unimplemented function"); }
 
@@ -243,8 +263,13 @@ class INET_API SctpAsconfAckChunk : public SctpAsconfAckChunk_Base
     /** Generated but unused method, should not be called. */
     virtual void setAsconfResponse(size_t k, SctpParameter * asconfResponse) override;
 
+#if (OMNETPP_BUILDNUM >= 1530)
+    virtual void appendAsconfResponse(SctpParameter *asconfResponse) override { throw cRuntimeError("Unimplemented function"); }
+    using SctpAsconfAckChunk_Base::insertAsconfResponse;
+#else
     void appendAsconfResponse(SctpParameter *asconfResponse) { throw cRuntimeError("Unimplemented function"); }
     virtual void insertAsconfResponse(SctpParameter *asconfResponse) override { appendAsconfResponse(asconfResponse); }
+#endif
     virtual void insertAsconfResponse(size_t k, SctpParameter *asconfResponse) override { throw cRuntimeError("Unimplemented function"); }
     virtual void eraseAsconfResponse(size_t k) override { throw cRuntimeError("Unimplemented function"); }
 
