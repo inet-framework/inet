@@ -72,7 +72,7 @@ class INET_API EthernetMacBase : public MacProtocolBase, public queueing::IActiv
     };
 
     enum {
-        NUM_OF_ETHERDESCRS = 9
+        NUM_OF_ETHERDESCRS = 10
     };
 
     struct EtherDescr {
