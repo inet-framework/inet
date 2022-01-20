@@ -193,8 +193,6 @@ void PcapRecorder::recordPacket(const cPacket *cpacket, Direction direction, cCo
         if (verbose)
             EV_DEBUG << "Dumping packet" << EV_FIELD(packet, packetPrinter.printPacketToString(const_cast<Packet *>(packet), "%i")) << EV_ENDL;
         if (recordPcap && packetFilter.matches(packet) && (dumpBadFrames || !packet->hasBitError())) {
-            auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-
             // get Direction
             if (direction == DIRECTION_UNDEFINED) {
                 if (auto directionTag = packet->findTag<DirectionTag>())
@@ -220,7 +218,9 @@ void PcapRecorder::recordPacket(const cPacket *cpacket, Direction direction, cCo
                 }
             }
 
-            if (contains(dumpProtocols, protocol)) {
+            const auto& packetProtocolTag = packet->getTag<PacketProtocolTag>();
+            auto protocol = packetProtocolTag->getProtocol();
+            if (packetProtocolTag->getFrontOffset() == b(0) && packetProtocolTag->getBackOffset() == b(0) && contains(dumpProtocols, protocol)) {
                 auto pcapLinkType = protocolToLinkType(protocol);
                 if (pcapLinkType == LINKTYPE_INVALID)
                     throw cRuntimeError("Cannot determine the PCAP link type from protocol '%s'", protocol->getName());
