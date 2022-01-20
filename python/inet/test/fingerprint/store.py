@@ -72,6 +72,9 @@ class FingerprintStore:
         result = self.filter_entries(**kwargs)
         return result[0] if result and len(result) == 1 else None
 
+    def remove_entry(self, entry):
+        self.get_entries().remove(entry)
+
     def filter_entries(self, ingredients="tplx", test_result=None, working_directory=os.getcwd(), ini_file="omnetpp.ini", config="General", run=0, sim_time_limit=None):
         def f(fingerprint):
             return fingerprint["working_directory"] == working_directory and \

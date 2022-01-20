@@ -7,6 +7,18 @@ from inet.test.fingerprint.store import *
 from inet.test.run import *
 
 logger = logging.getLogger(__name__)
+all_ingredients_extra_args = {
+    "~tND": {"--**.crcMode=\"computed\"",
+             "--**.fcsMode=\"computed\""},
+    "tyf" : {"--cmdenv-fake-gui=true",
+             "--cmdenv-fake-gui-before-event-probability=0.1",
+             "--cmdenv-fake-gui-after-event-probability=0.1",
+             "--cmdenv-fake-gui-on-hold-probability=0.1",
+             "--cmdenv-fake-gui-on-hold-numsteps=3",
+             "--cmdenv-fake-gui-on-simtime-probability=0.1",
+             "--cmdenv-fake-gui-on-simtime-numsteps=3",
+             "--**.fadeOutMode=\"animationTime\"",
+             "--**.signalAnimationSpeedChangeTimeMode=\"animationTime\""}}
 
 def _run_fingerprint_test(test_run, test_result_filter=None, exclude_test_result_filter="SKIP", output_stream=sys.stdout, **kwargs):
     test_result = test_run.run(test_result_filter=test_result_filter, exclude_test_result_filter=exclude_test_result_filter, output_stream=output_stream, **kwargs)
@@ -42,13 +54,17 @@ class FingerprintTestRun(TestRun):
     def create_cancel_result(self, simulation_result):
         return FingerprintTestResult(self, simulation_result, None, None, result="CANCEL", reason="Cancel by user")
 
-    def run(self, sim_time_limit=None, test_result_filter=None, exclude_test_result_filter="SKIP", **kwargs):
+    def run(self, sim_time_limit=None, test_result_filter=None, exclude_test_result_filter="SKIP", output_stream=sys.stdout, **kwargs):
         if self.fingerprint:
-            return super().run(extra_args=self.get_extra_args(str(self.fingerprint)), sim_time_limit=sim_time_limit or self.sim_time_limit, **kwargs)
+            return super().run(extra_args=self.get_extra_args(str(self.fingerprint)) + self.get_ingredients_extra_args(), sim_time_limit=sim_time_limit or self.sim_time_limit, output_stream=output_stream, **kwargs)
         else:
             if matches_filter("SKIP", test_result_filter, exclude_test_result_filter, True):
-                print("Running " + self.simulation_run.get_simulation_parameters_string(**kwargs), end=" ")
+                print("Running " + self.simulation_run.get_simulation_parameters_string(**kwargs), end=" ", file=output_stream)
             return FingerprintTestResult(self, None, None, None, result="SKIP", reason="Correct fingerprint not found")
+
+    def get_ingredients_extra_args(self):
+        global all_ingredients_extra_args
+        return list(all_ingredients_extra_args[self.ingredients]) if self.ingredients in all_ingredients_extra_args else []
 
     def get_extra_args(self, fingerprint_arg):
         return ["-n", os.environ["INET_ROOT"] + "/tests/networks", "--fingerprintcalculator-class", "inet::FingerprintCalculator", "--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"]
@@ -67,9 +83,9 @@ class FingerprintTestGroupRun:
         for fingerprint_test_run in self.fingerprint_test_runs:
             fingerprint_test_run.set_cancel(cancel)
 
-    def run(self, sim_time_limit=None, **kwargs):
+    def run(self, sim_time_limit=None, output_stream=sys.stdout, **kwargs):
         if len(self.fingerprint_test_runs) == 1:
-            return self.fingerprint_test_runs[0].run(sim_time_limit=sim_time_limit, **kwargs)
+            return self.fingerprint_test_runs[0].run(sim_time_limit=sim_time_limit, output_stream=output_stream, **kwargs)
         else:
             fingerprint_test_results = []
             skipped_fingerprint_test_runs = list(filter(lambda fingerprint_test_run: fingerprint_test_run.fingerprint is None, self.fingerprint_test_runs))
@@ -80,11 +96,11 @@ class FingerprintTestGroupRun:
                 simulation_run = checked_fingerprint_test_runs[0].simulation_run
                 fingerprint_arg = ",".join(map(lambda e: str(e.fingerprint), checked_fingerprint_test_runs))
                 extra_args = checked_fingerprint_test_runs[0].get_extra_args(fingerprint_arg)
-                simulation_result = simulation_run.run_simulation(print_end=" ", sim_time_limit=sim_time_limit or self.sim_time_limit, extra_args=extra_args, **kwargs)
+                ingredients_extra_args = set()
+                for checked_fingerprint_test_run in checked_fingerprint_test_runs:
+                    ingredients_extra_args = ingredients_extra_args.union(checked_fingerprint_test_run.get_ingredients_extra_args())
+                simulation_result = simulation_run.run_simulation(print_end=" ", sim_time_limit=sim_time_limit or self.sim_time_limit, output_stream=output_stream, extra_args=extra_args + list(ingredients_extra_args), **kwargs)
                 fingerprint_test_group_results = check_fingerprint_test_group(simulation_result, self, **kwargs)
-                print(fingerprint_test_group_results.get_summary())
-                if not fingerprint_test_group_results.is_all_pass():
-                    print("  " + fingerprint_test_group_results.get_details())
                 fingerprint_test_results += fingerprint_test_group_results.test_results
             return MultipleTestResults(self.fingerprint_test_runs, fingerprint_test_results)
 
@@ -380,9 +396,9 @@ class FingerprintUpdateRun:
     def set_cancel(self, cancel):
         self.simulation_run.set_cancel(cancel)
 
-    def run(self, ingredients="tplx", insert_missing_correct_fingerprints=False, sim_time_limit=None, cancel=False, **kwargs):
+    def run(self, ingredients="tplx", insert_missing_correct_fingerprints=False, sim_time_limit=None, cancel=False, output_stream=sys.stdout, **kwargs):
         if cancel or self.cancel:
-            print("Running " + self.simulation_run.get_simulation_parameters_string(sim_time_limit=sim_time_limit, **kwargs), end=" ")
+            print("Running " + self.simulation_run.get_simulation_parameters_string(sim_time_limit=sim_time_limit, **kwargs), end=" ", file=output_stream)
             return self.create_cancel_result(None)
         else:
             simulation_config = self.simulation_run.simulation_config
@@ -399,7 +415,7 @@ class FingerprintUpdateRun:
             if correct_fingerprint or insert_missing_correct_fingerprints:
                 fingerprint_arg = "0000-0000/" + ingredients
                 extra_args = ["--fingerprintcalculator-class", "inet::FingerprintCalculator", "--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"]
-                simulation_result = self.simulation_run.run_simulation(sim_time_limit=sim_time_limit, extra_args=extra_args, **kwargs)
+                simulation_result = self.simulation_run.run_simulation(sim_time_limit=sim_time_limit, output_stream=output_stream, extra_args=extra_args, **kwargs)
                 calculated_fingerprint = get_calculated_fingerprint(simulation_result, ingredients)
                 return FingerprintUpdateResult(self, simulation_result, correct_fingerprint, calculated_fingerprint)
             else:
@@ -540,3 +556,16 @@ def remove_correct_fingerprints(**kwargs):
     print("Removing correct fingerprints")
     multiple_simulation_runs = get_simulations(run_simulation_function=remove_correct_fingerprint, **kwargs)
     multiple_simulation_runs.run(**kwargs)
+
+def remove_extra_correct_fingerprints(simulation_project=inet_project, **kwargs):
+    correct_fingerprint_store = get_correct_fingerprint_store(simulation_project)
+    for entry in correct_fingerprint_store.get_entries():
+        found = False
+        for config in get_all_simulation_configs(simulation_project):
+            if config.working_directory == entry["working_directory"] and \
+               config.ini_file == entry["ini_file"] and \
+               config.config == entry["config"]:
+                found = True
+        if not found:
+            correct_fingerprint_store.remove_entry(entry)
+    correct_fingerprint_store.write()

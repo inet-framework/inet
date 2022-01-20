@@ -28,12 +28,12 @@ class TestRun:
     def create_cancel_result(self, simulation_result):
         return TestResult(self, simulation_result, result="CANCEL", reason="Cancel by user")
 
-    def run(self, sim_time_limit=None, cancel=False, **kwargs):
+    def run(self, sim_time_limit=None, cancel=False, output_stream=sys.stdout, **kwargs):
         if cancel or self.cancel:
-            print("Running " + self.simulation_run.get_simulation_parameters_string(sim_time_limit=sim_time_limit, **kwargs), end=" ")
+            print("Running " + self.simulation_run.get_simulation_parameters_string(sim_time_limit=sim_time_limit, **kwargs), end=" ", file=output_stream)
             return self.create_cancel_result(None)
         else:
-            simulation_result = self.simulation_run.run_simulation(sim_time_limit=sim_time_limit, **kwargs)
+            simulation_result = self.simulation_run.run_simulation(sim_time_limit=sim_time_limit, output_stream=output_stream, **kwargs)
             if simulation_result.result != "CANCEL":
                 return self.check_test_function(self, simulation_result, **kwargs)
             else:
@@ -125,9 +125,12 @@ class MultipleTestResults:
                    "Multiple test results: " + self.total_color + self.total_result + COLOR_RESET + ", " + \
                    "summary: " + self.get_summary()
 
-    def print_result(self, **kwargs):
+    def print_result(self, output_stream=sys.stdout, **kwargs):
+        print(self.get_summary(), file=output_stream)
         for test_result in self.test_results:
-            test_result.print_result(**kwargs)
+            if test_result.result != "PASS":
+                print("  ", end="", file=output_stream)
+                test_result.print_result(output_stream=output_stream, **kwargs)
 
     def get_test_results(self):
         return self.test_results

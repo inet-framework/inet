@@ -53,7 +53,7 @@ class SimulationRun:
                (" -r " + str(self.run) if self.run != 0 else "") + \
                (" for " + sim_time_limit if sim_time_limit else "")
 
-    def run_simulation(self, mode=None, user_interface=None, sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, index=None, count=None, print_end=" ", keyboard_interrupt_handler=None, cancel=False, dry_run=False, output_stream=sys.stdout, extra_args=[], **kwargs):
+    def run_simulation(self, mode=None, user_interface=None, sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, index=None, count=None, print_end=" ", keyboard_interrupt_handler=None, cancel=False, dry_run=False, output_stream=sys.stdout, extra_args=[], **kwargs):
         if sim_time_limit is None:
             sim_time_limit = self.sim_time_limit
         if cpu_time_limit is None:
@@ -67,10 +67,11 @@ class SimulationRun:
         sim_time_limit_args = ["--sim-time-limit", sim_time_limit] if sim_time_limit else []
         cpu_time_limit_args = ["--cpu-time-limit", cpu_time_limit] if cpu_time_limit else []
         record_eventlog_args = ["--record-eventlog", "true"] if (record_eventlog or self.record_eventlog) else []
+        record_pcap_args = ["--**.numPcapRecorders=1", "--**.crcMode=\"computed\"", "--**.fcsMode=\"computed\""] if record_pcap else []
         env = os.environ.copy()
         env["INET_ROOT"] = simulation_project.get_full_path(".")
         executable = simulation_project.get_full_path("bin/inet")
-        args = [executable, "--" + (mode or self.mode), "-s", "-u", (user_interface or self.user_interface), "-f", ini_file, "-c", config, "-r", str(self.run), *sim_time_limit_args, *cpu_time_limit_args, *record_eventlog_args, *extra_args]
+        args = [executable, "--" + (mode or self.mode), "-s", "-u", (user_interface or self.user_interface), "-f", ini_file, "-c", config, "-r", str(self.run), *sim_time_limit_args, *cpu_time_limit_args, *record_eventlog_args, *record_pcap_args, *extra_args]
         logger.debug(args)
         if cancel or self.cancel:
             return SimulationResult(self, None)
