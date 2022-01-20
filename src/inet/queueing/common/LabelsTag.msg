@@ -26,3 +26,11 @@ class LabelsTag extends TagBase
 {
     string labels[];
 }
+
+cplusplus(LabelsTag) {{
+#if (OMNETPP_BUILDNUM < 1530)
+  public:
+    void appendLabels(const char *labels) { insertLabels(labels); }
+#endif
+}}
+

@@ -132,3 +132,10 @@ message PacketHolderMessage
     Packet *ownedPacket @owned;
 }
 
+cplusplus(PacketHolderMessage) {{
+#if (OMNETPP_BUILDNUM < 1530)
+  public:
+    Packet * removeOwnedPacket() { return dropOwnedPacket(); }
+#endif
+}}
+

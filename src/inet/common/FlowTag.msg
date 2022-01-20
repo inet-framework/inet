@@ -26,3 +26,11 @@ class FlowTag extends TagBase
 {
     string names[];
 }
+
+cplusplus(FlowTag) {{
+#if (OMNETPP_BUILDNUM < 1530)
+  public:
+    void appendNames(const char *names) { insertNames(names); }
+#endif
+}}
+

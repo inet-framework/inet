@@ -60,6 +60,10 @@ cplusplus(TlvOptions) {{
      * Returns the position of found option, or return -1 if not found
      */
     int findByType(short int type, int firstPos=0) const;
-}}
 
+#if (OMNETPP_BUILDNUM < 1530)
+    void appendTlvOption(TlvOptionBase *tlvOption) { insertTlvOption(tlvOption); }
+    TlvOptionBase * removeTlvOption(size_t k) { return dropTlvOption(k); }
+#endif
+}}
 
