@@ -137,5 +137,10 @@ cplusplus(Ipv6Header) {{
     virtual const Protocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
     virtual void setProtocol(const Protocol *protocol) override { setProtocolId(static_cast<IpProtocolId>(ProtocolGroup::ipprotocol.getProtocolNumber(protocol))); }
     virtual bool isFragment() const override { return findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT) != nullptr; }
+
+#if (OMNETPP_BUILDNUM < 1530)
+    Ipv6ExtensionHeader * removeExtensionHeader(size_t k) { return dropExtensionHeader(k); }
+    void appendExtensionHeader(Ipv6ExtensionHeader * extensionHeader) { insertExtensionHeader(extensionHeader); }
+#endif
 }}
 

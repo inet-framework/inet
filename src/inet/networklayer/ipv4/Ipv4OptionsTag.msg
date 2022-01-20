@@ -26,6 +26,14 @@ class Ipv4OptionsTagBase extends TagBase
     Ipv4Option *option[] @owned;
 }
 
+cplusplus(Ipv4OptionsTagBase) {{
+#if (OMNETPP_BUILDNUM < 1530)
+  public:
+    void appendOption(Ipv4Option *option) { insertOption(option); }
+    Ipv4Option *removeOption(size_t k) { return dropOption(k); }
+#endif
+}}
+
 //
 // Determines the source and destination network addresses for an outgoing packet.
 //

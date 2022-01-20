@@ -31,6 +31,14 @@ class TimeTagBase extends TagBase
     simtime_t totalTimes[];
 }
 
+cplusplus(TimeTagBase) {{
+#if (OMNETPP_BUILDNUM < 1530)
+  public:
+    void appendFlowNames(const char *names) { insertFlowNames(names); }
+    void appendTotalTimes(omnetpp::simtime_t totalTimes) { insertTotalTimes(totalTimes); }
+#endif
+}}
+
 class ElapsedTimeTag extends TimeTagBase
 {
 }

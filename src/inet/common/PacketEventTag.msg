@@ -57,3 +57,11 @@ class PacketEventTag extends TagBase
 {
     PacketEvent *packetEvents[];
 }
+
+cplusplus(PacketEventTag) {{
+#if (OMNETPP_BUILDNUM < 1530)
+  public:
+    void appendPacketEvents(PacketEvent *packetEvents) { insertPacketEvents(packetEvents); }
+#endif
+}}
+
