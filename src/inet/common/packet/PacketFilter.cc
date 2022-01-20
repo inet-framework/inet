@@ -142,7 +142,7 @@ cValue PacketFilter::DynamicExpressionResolver::readVariable(cExpression::Contex
             if (it != packetFilter->classNameToChunkMap.end())
                 return it->second;
             else
-                return cValue(any_ptr(nullptr));
+                return cValue(any_ptr(packetFilter->findPacketTag(name)));
         }
         else {
             auto protocol = Protocol::findProtocol(name);
@@ -202,7 +202,7 @@ cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context 
                 if (it != packetFilter->classNameToChunkMap.end())
                     return it->second;
                 else
-                    return cValue(any_ptr(nullptr));
+                    return cValue(any_ptr(packetFilter->findPacketTag(name)));
             }
             else {
                 auto protocol = Protocol::findProtocol(name);
@@ -309,6 +309,24 @@ cValue PacketFilter::DynamicExpressionResolver::callFunction(cExpression::Contex
         return argv[0].objectValue() != nullptr;
     else
         return IResolver::callFunction(context, name, argv, argc);
+}
+
+const cObject *PacketFilter::findPacketTag(const char *className) const
+{
+    if (auto packet = dynamic_cast<const Packet *>(cpacket)) {
+        for (int i = 0; i < packet->getNumTags(); i++) {
+            const auto& tag = packet->getTag(i);
+            std::string tagClassName = tag->getClassName();
+            auto index = tagClassName.rfind("::");
+            if (index != std::string::npos)
+                tagClassName = tagClassName.substr(index + 2);
+            if (!strcmp(tagClassName.c_str(), className))
+                return tag.get();
+        }
+        return nullptr;
+    }
+    else
+        return nullptr;
 }
 
 } // namespace inet

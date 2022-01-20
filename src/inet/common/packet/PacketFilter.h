@@ -84,6 +84,9 @@ class INET_API PacketFilter
     void setExpression(cValue& expression);
 
     bool matches(const cPacket *packet) const;
+
+  protected:
+    const cObject *findPacketTag(const char *className) const;
 };
 
 } // namespace inet
