@@ -61,9 +61,15 @@ void PacketEmitter::pushPacket(Packet *packet, cGate *gate)
     PacketFlowBase::pushPacket(packet, gate);
 }
 
+void PacketEmitter::pushPacketEnd(Packet *packet, cGate *gate)
+{
+    emitPacket(packet);
+    PacketFlowBase::pushPacketEnd(packet, gate);
+}
+
 void PacketEmitter::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)
 {
-    emitPacket(processedPacket);
+//    emitPacket(processedPacket);
     PacketFlowBase::handlePushPacketProcessed(packet, gate, successful);
 }
 

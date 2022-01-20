@@ -45,6 +45,7 @@ class INET_API PacketEmitter : public PacketFlowBase
     virtual ~PacketEmitter() { delete processedPacket; }
 
     virtual void pushPacket(Packet *packet, cGate *gate) override;
+    virtual void pushPacketEnd(Packet *packet, cGate *gate) override;
     virtual void handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful) override;
 };
 
