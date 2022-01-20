@@ -17,7 +17,6 @@ private:
         virtual void initialize(int stage) override;
         virtual void handleMessage(cMessage *msg) override;
         virtual void finish() override;
-        using cListener::finish;
 
     protected:
         void doSchedule(clocktime_t t, ClockEvent *msg);
