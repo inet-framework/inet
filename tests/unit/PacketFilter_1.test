@@ -4,6 +4,7 @@ Test for packet filtering.
 %includes:
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/PacketFilter.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
@@ -26,6 +27,7 @@ udpHeader->setDestPort(42);
 packet.insertAtBack(udpHeader);
 packet.insertAtBack(makeShared<ByteCountChunk>(B(100)));
 packet.addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+packet.addTag<MacAddressReq>()->setDestAddress(MacAddress("0A-AA-00-00-00-01"));
 
 PacketFilter filter;
 
@@ -44,7 +46,7 @@ TEST("pk.totalLength == 256B", packet);
 TEST("pk.totalLength >= 100B", packet);
 TEST("pk.totalLength >= 200B", packet);
 
-// implicit pk fields can be used to check the presence of a chunk of a specific protocol or of a chunk of a specific type
+// implicit pk fields can be used to check the presence of a chunk of a specific protocol
 TEST("has(pk.ipv4)", packet);
 TEST("has(pk.ipv4[0])", packet);
 TEST("has(pk.ipv4[1])", packet);
@@ -54,6 +56,8 @@ TEST("has(pk.Ipv4Header[1])", packet);
 TEST("has(pk.udp)", packet);
 TEST("has(pk.udp[0])", packet);
 TEST("has(pk.udp[1])", packet);
+
+// implicit pk fields can be used to check the presence of a chunk of a specific type
 TEST("has(pk.UdpHeader)", packet);
 TEST("has(pk.UdpHeader[0])", packet);
 TEST("has(pk.UdpHeader[1])", packet);
@@ -63,6 +67,10 @@ TEST("has(pk.ethernetmac[1])", packet);
 TEST("has(pk.EthernetMacHeader)", packet);
 TEST("has(pk.EthernetMacHeader[0])", packet);
 TEST("has(pk.EthernetMacHeader[1])", packet);
+
+// implicit pk fields can be used to check the presence of a tag of a specific type
+TEST("has(pk.MacAddressReq)", packet);
+TEST("has(pk.L3AddressReq)", packet);
 
 // implicit pk fields can mean protocol specific chunks of the packet
 TEST("pk.ipv4 != null", packet);
@@ -89,7 +97,7 @@ TEST("totalLength >= 100B", packet);
 TEST("totalLength >= 200B", packet);
 TEST("foo == 'P1'", packet);
 
-// implicit variables can be used to check the presence of a chunk of a specific protocol or of a chunk of a specific type
+// implicit variables can be used to check the presence of a chunk of a specific protocol
 TEST("has(ipv4)", packet);
 TEST("has(ipv4[0])", packet);
 TEST("has(ipv4[1])", packet);
@@ -99,6 +107,8 @@ TEST("has(Ipv4Header[1])", packet);
 TEST("has(udp)", packet);
 TEST("has(udp[0])", packet);
 TEST("has(udp[1])", packet);
+
+// implicit variables can be used to check the presence of a chunk of a specific type
 TEST("has(UdpHeader)", packet);
 TEST("has(UdpHeader[0])", packet);
 TEST("has(UdpHeader[1])", packet);
@@ -108,6 +118,10 @@ TEST("has(ethernetmac[1])", packet);
 TEST("has(EthernetMacHeader)", packet);
 TEST("has(EthernetMacHeader[0])", packet);
 TEST("has(EthernetMacHeader[1])", packet);
+
+// implicit variables can be used to check the presence of a tag of a specific type
+TEST("has(MacAddressReq)", packet);
+TEST("has(L3AddressReq)", packet);
 
 // implicit variables starting with lower case letter can mean protocol specific chunks of the packet
 TEST("ipv4 != null", packet);
@@ -138,6 +152,9 @@ TEST("UdpHeader.foo", packet);
 TEST("UdpHeader[0].destPort == 42", packet);
 TEST("UdpHeader[1].destPort == 42", packet);
 TEST("EthernetMacHeader == null", packet);
+
+// implicit variables starting with upper case letter can mean tags of the packet
+TEST("MacAddressReq.destAddress.str() =~ '0A-AA-00-00-00-*'", packet);
 
 // logical expressions
 TEST("name == 'P1' && totalLength == 128B && ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42", packet);
@@ -172,6 +189,8 @@ has(pk.ethernetmac[1]) -> false
 has(pk.EthernetMacHeader) -> false
 has(pk.EthernetMacHeader[0]) -> false
 has(pk.EthernetMacHeader[1]) -> false
+has(pk.MacAddressReq) -> true
+has(pk.L3AddressReq) -> false
 pk.ipv4 != null -> true
 pk.ipv4.destAddress.getInt() == 0x0A000001 -> true
 pk.ipv4.destAddress.str() == '10.0.0.1' -> true
@@ -211,6 +230,8 @@ has(ethernetmac[1]) -> false
 has(EthernetMacHeader) -> false
 has(EthernetMacHeader[0]) -> false
 has(EthernetMacHeader[1]) -> false
+has(MacAddressReq) -> true
+has(L3AddressReq) -> false
 ipv4 != null -> true
 ipv4.destAddress.getInt() == 0x0A000001 -> true
 ipv4.destAddress.str() == '10.0.0.1' -> true
@@ -237,4 +258,5 @@ UdpHeader.foo -> Object (inet::UdpHeader) has no member named 'foo'
 UdpHeader[0].destPort == 42 -> true
 UdpHeader[1].destPort == 42 -> Object nullptr has no member named 'destPort'
 EthernetMacHeader == null -> true
+MacAddressReq.destAddress.str() =~ '0A-AA-00-00-00-*' -> true
 name == 'P1' && totalLength == 128B && ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42 -> true
