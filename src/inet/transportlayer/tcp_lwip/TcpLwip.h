@@ -30,27 +30,18 @@
 #include "inet/transportlayer/common/CrcMode_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpCrcInsertionHook.h"
+#include "inet/transportlayer/tcp_common/TcpHeader_m.h"
 #include "inet/transportlayer/tcp_lwip/LwipTcpStackIf.h"
+#include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
+#include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
 #include "lwip/lwip_tcp.h"
 
 namespace inet {
-
-// forward declarations:
-class TcpOpenCommand;
-
 namespace tcp {
 
-// forward declarations:
-class TcpHeader;
-
-class TcpLwipConnection;
-class TcpLwipReceiveQueue;
-class TcpLwipSendQueue;
-
 /**
- * Encapsulates a Network Simulation Cradle (NSC) instance.
+ * Module for using the LwIP TCP stack.
  */
-
 class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public LifecycleUnsupported
 {
   public:
@@ -58,18 +49,20 @@ class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public Lif
     virtual ~TcpLwip();
 
   protected:
-    // called by the OMNeT++ simulation kernel:
-
+    /** @name cSimpleModule redefinitions */
+    //@{
     virtual void initialize(int stage) override;
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msgP) override;
     virtual void finish() override;
+    virtual void refreshDisplay() const override;
+    //@}
 
-    // LwipTcpStackIf functions:
-
-    // sometime pcb is nullptr (tipically when send a RESET )
+    /** @name LwipTcpStackIf functions */
+    //@{
     virtual void ip_output(LwipTcpLayer::tcp_pcb *pcb,
             L3Address const& src, L3Address const& dest, void *tcpseg, int len) override;
+    // sometime the pcb is nullptr (tipically when send a RESET )
 
     virtual err_t lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
             LwipTcpLayer::lwip_event event, struct pbuf *p, u16_t size, err_t err) override;
@@ -80,22 +73,20 @@ class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public Lif
 
     virtual void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32_t seqNo,
             const void *dataptr, int len) override;
+    //@}
 
-    // internal event functions:
-
+    /** @name internal event functions */
+    //@{
     err_t tcp_event_accept(TcpLwipConnection& conn, LwipTcpLayer::tcp_pcb *pcb, err_t err);
-
     err_t tcp_event_sent(TcpLwipConnection& conn, u16_t size);
-
     err_t tcp_event_recv(TcpLwipConnection& conn, struct pbuf *p, err_t err);
-
     err_t tcp_event_conn(TcpLwipConnection& conn, err_t err);
-
     err_t tcp_event_poll(TcpLwipConnection& conn);
-
     err_t tcp_event_err(TcpLwipConnection& conn, err_t err);
+    //@}
 
-    // internal utility functions:
+    /** @name internal utility functions */
+    //@{
 
     // find a TcpLwipConnection by connection ID
     TcpLwipConnection *findAppConn(int connIdP);
@@ -103,30 +94,12 @@ class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public Lif
     // find a TcpLwipConnection by Lwip pcb
     TcpLwipConnection *findConnByPcb(LwipTcpLayer::tcp_pcb *pcb);
 
-    virtual void refreshDisplay() const override;
-
     void removeConnection(TcpLwipConnection& conn);
     void printConnBrief(TcpLwipConnection& connP);
 
-    void handleAppMessage(cMessage *msgP);
-    void handleIpInputMessage(Packet *packet);
-
-    // to be refined...
-
-    void processAppCommand(TcpLwipConnection& connP, cMessage *msgP);
-
-    // to be refined and filled in with calls into the NSC stack
-
-    void process_OPEN_ACTIVE(TcpLwipConnection& connP, TcpOpenCommand *tcpCommandP, cMessage *msgP);
-    void process_OPEN_PASSIVE(TcpLwipConnection& connP, TcpOpenCommand *tcpCommandP, cMessage *msgP);
-    void process_ACCEPT(TcpLwipConnection& connP, TcpAcceptCommand *tcpCommand, cMessage *msg);
-    void process_SEND(TcpLwipConnection& connP, Packet *msgP);
-    void process_CLOSE(TcpLwipConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP);
-    void process_ABORT(TcpLwipConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP);
-    void process_STATUS(TcpLwipConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP);
-
-    // send a connection established msg to application layer
-//    void sendEstablishedMsg(TcpLwipConnection& connP);
+    void handleUpperCommand(cMessage *msgP);
+    void handleLowerPacket(Packet *packet);
+    //@}
 
   public:
     LwipTcpLayer *getLwipTcpLayer() { return pLwipTcpLayerM; }
@@ -148,20 +121,19 @@ class INET_API TcpLwip : public cSimpleModule, public LwipTcpStackIf, public Lif
     TcpAppConnMap tcpAppConnMapM;
 
     // fast timer message:
-    cMessage *pLwipFastTimerM;
+    cMessage *pLwipFastTimerM = nullptr;
 
     // network interface:
     struct netif netIf;
 
   protected:
-    LwipTcpLayer *pLwipTcpLayerM;
-    bool isAliveM;
-    Packet *pCurTcpSegM;
+    LwipTcpLayer *pLwipTcpLayerM = nullptr;
+    bool isAliveM = false;
+    Packet *pCurTcpSegM = nullptr;
     CrcMode crcMode = CRC_MODE_UNDEFINED;
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif

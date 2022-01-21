@@ -20,18 +20,13 @@
 #ifndef __INET_LWIPTCPSTACKIF_H
 #define __INET_LWIPTCPSTACKIF_H
 
+#include "inet/networklayer/common/L3Address.h"
 #include "lwip/lwip_tcp.h"
 #include "lwip/opt.h"
+#include "lwip/pbuf.h"
 
 namespace inet {
-
-// forward declarations:
-class L3Address;
-
 namespace tcp {
-
-// forward declarations:
-struct pbuf;
 
 /**
  * Interface class between TcpLwip and LwipTcpLayer
@@ -75,7 +70,6 @@ class LwipTcpStackIf
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif

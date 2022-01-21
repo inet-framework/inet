@@ -24,6 +24,7 @@
 #include "inet/common/packet/ChunkQueue.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
 
@@ -31,7 +32,6 @@ namespace tcp {
 
 // forward declarations:
 class TcpLwipConnection;
-class TcpHeader;
 
 /**
  * TCP_LWIP send queue. In fact a single object

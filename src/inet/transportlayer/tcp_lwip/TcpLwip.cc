@@ -19,19 +19,6 @@
 
 #include "inet/transportlayer/tcp_lwip/TcpLwip.h"
 
-//#include "headers/defs.h"   // for endian macros
-//#include "headers/in_systm.h"
-#include "lwip/lwip_ip.h"
-#include "lwip/lwip_tcp.h"
-
-#ifdef INET_WITH_IPv4
-#include "inet/networklayer/ipv4/IcmpHeader_m.h"
-#endif // ifdef INET_WITH_IPv4
-
-#ifdef INET_WITH_IPv6
-#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
-#endif // ifdef INET_WITH_IPv6
-
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
@@ -41,15 +28,21 @@
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
-#include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
+
+#ifdef INET_WITH_IPv6
+#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
+#endif // ifdef INET_WITH_IPv6
+
+#ifdef INET_WITH_IPv4
+#include "inet/networklayer/ipv4/IcmpHeader_m.h"
+#endif // ifdef INET_WITH_IPv4
+
 #include "inet/transportlayer/common/L4Tools.h"
-#include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
-#include "inet/transportlayer/tcp_common/TcpHeader.h"
-#include "inet/transportlayer/tcp_common/headers/tcphdr.h"
-#include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
-#include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
+#include "lwip/lwip_ip.h"
+#include "lwip/lwip_tcp.h"
+
 
 namespace inet {
 namespace tcp {
@@ -57,11 +50,6 @@ namespace tcp {
 Define_Module(TcpLwip);
 
 TcpLwip::TcpLwip()
-    :
-    pLwipFastTimerM(nullptr),
-    pLwipTcpLayerM(nullptr),
-    isAliveM(false),
-    pCurTcpSegM(nullptr)
 {
     netIf.gw.addr = L3Address();
     netIf.flags = 0;
@@ -152,7 +140,7 @@ TcpLwip::~TcpLwip()
         delete pLwipTcpLayerM;
 }
 
-void TcpLwip::handleIpInputMessage(Packet *packet)
+void TcpLwip::handleLowerPacket(Packet *packet)
 {
     L3Address srcAddr, destAddr;
     int interfaceId = -1;
@@ -188,7 +176,6 @@ void TcpLwip::handleIpInputMessage(Packet *packet)
     memset(data, 0, maxBufferSize);
 
     ip_hdr *ih = (ip_hdr *)(data);
-//    tcphdr *tcph = (tcphdr *)(data + ipHdrLen);
 
     // set the modified lwip IP header:
     ih->_hl = ipHdrLen / 4;
@@ -412,7 +399,7 @@ struct netif *TcpLwip::ip_route(L3Address const& ipAddr)
     return &netIf;
 }
 
-void TcpLwip::handleAppMessage(cMessage *msgP)
+void TcpLwip::handleUpperCommand(cMessage *msgP)
 {
     auto& tags = check_and_cast<ITaggedObject *>(msgP)->getTags();
     int connId = tags.getTag<SocketReq>()->getSocketId();
@@ -436,7 +423,8 @@ void TcpLwip::handleAppMessage(cMessage *msgP)
         EV_INFO << this << ": TCP connection created for " << msgP << "\n";
     }
 
-    processAppCommand(*conn, msgP);
+    printConnBrief(*conn);
+    conn->processAppCommand(msgP);
 }
 
 simtime_t roundTime(const simtime_t& timeP, int secSlicesP)
@@ -470,7 +458,7 @@ void TcpLwip::handleMessage(cMessage *msgP)
         auto protocol = pk->getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::tcp) {
             EV_TRACE << this << ": handle tcp segment: " << msgP->getName() << "\n";
-            handleIpInputMessage(pk);
+            handleLowerPacket(pk);
         }
         else if (protocol == &Protocol::icmpv4 || protocol == &Protocol::icmpv6) {
             EV_WARN << "ICMP error received -- discarding\n"; // FIXME can ICMP packets really make it up to TCP???
@@ -481,7 +469,7 @@ void TcpLwip::handleMessage(cMessage *msgP)
     }
     else { // must be from app
         EV_TRACE << this << ": handle msg: " << msgP->getName() << "\n";
-        handleAppMessage(msgP);
+        handleUpperCommand(msgP);
     }
 
     if (!pLwipFastTimerM->isScheduled()) { // lwip fast timer
@@ -664,143 +652,6 @@ void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Add
     EV_INFO << " len=" << B(packet->getDataLength()) - tcpHdr->getHeaderLength() << "\n";
 
     send(packet, "ipOut");
-}
-
-void TcpLwip::processAppCommand(TcpLwipConnection& connP, cMessage *msgP)
-{
-    printConnBrief(connP);
-
-    // first do actions
-    TcpCommand *tcpCommand = check_and_cast_nullable<TcpCommand *>(msgP->removeControlInfo());
-
-    switch (msgP->getKind()) {
-        case TCP_C_OPEN_ACTIVE:
-            process_OPEN_ACTIVE(connP, check_and_cast<TcpOpenCommand *>(tcpCommand), msgP);
-            break;
-
-        case TCP_C_OPEN_PASSIVE:
-            process_OPEN_PASSIVE(connP, check_and_cast<TcpOpenCommand *>(tcpCommand), msgP);
-            break;
-
-        case TCP_C_ACCEPT:
-            process_ACCEPT(connP, check_and_cast<TcpAcceptCommand *>(tcpCommand), msgP);
-            break;
-
-        case TCP_C_SEND:
-            process_SEND(connP, check_and_cast<Packet *>(msgP));
-            break;
-
-        case TCP_C_CLOSE:
-            ASSERT(tcpCommand);
-            process_CLOSE(connP, tcpCommand, msgP);
-            break;
-
-        case TCP_C_ABORT:
-            ASSERT(tcpCommand);
-            process_ABORT(connP, tcpCommand, msgP);
-            break;
-
-        case TCP_C_STATUS:
-            ASSERT(tcpCommand);
-            process_STATUS(connP, tcpCommand, msgP);
-            break;
-
-        default:
-            throw cRuntimeError("Wrong command from app: %d", msgP->getKind());
-    }
-}
-
-void TcpLwip::process_OPEN_ACTIVE(TcpLwipConnection& connP, TcpOpenCommand *tcpCommandP,
-        cMessage *msgP)
-{
-    if (tcpCommandP->getRemoteAddr().isUnspecified() || tcpCommandP->getRemotePort() == -1)
-        throw cRuntimeError("Error processing command OPEN_ACTIVE: remote address and port must be specified");
-
-    ASSERT(pLwipTcpLayerM);
-
-    int localPort = tcpCommandP->getLocalPort();
-    if (localPort == -1)
-        localPort = 0;
-
-    EV_INFO << this << ": OPEN: "
-            << tcpCommandP->getLocalAddr() << ":" << localPort << " --> "
-            << tcpCommandP->getRemoteAddr() << ":" << tcpCommandP->getRemotePort() << "\n";
-    connP.connect(tcpCommandP->getLocalAddr(), localPort,
-            tcpCommandP->getRemoteAddr(), tcpCommandP->getRemotePort());
-
-    delete tcpCommandP;
-    delete msgP;
-}
-
-void TcpLwip::process_OPEN_PASSIVE(TcpLwipConnection& connP, TcpOpenCommand *tcpCommandP,
-        cMessage *msgP)
-{
-    ASSERT(pLwipTcpLayerM);
-
-    if (tcpCommandP->getFork() == false)
-        throw cRuntimeError("Error processing command OPEN_PASSIVE: non-forking listening connections are not supported yet");
-
-    if (tcpCommandP->getLocalPort() == -1)
-        throw cRuntimeError("Error processing command OPEN_PASSIVE: local port must be specified");
-
-    EV_INFO << this << "Starting to listen on: " << tcpCommandP->getLocalAddr() << ":"
-            << tcpCommandP->getLocalPort() << "\n";
-
-    /*
-       process passive open request
-     */
-
-    connP.listen(tcpCommandP->getLocalAddr(), tcpCommandP->getLocalPort());
-
-    delete tcpCommandP;
-    delete msgP;
-}
-
-void TcpLwip::process_ACCEPT(TcpLwipConnection& connP, TcpAcceptCommand *tcpCommand, cMessage *msg)
-{
-    connP.accept();
-    delete tcpCommand;
-    delete msg;
-}
-
-void TcpLwip::process_SEND(TcpLwipConnection& connP, Packet *msgP)
-{
-    EV_INFO << this << ": processing SEND command, len=" << msgP->getByteLength() << endl;
-
-    connP.send(msgP);
-}
-
-void TcpLwip::process_CLOSE(TcpLwipConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP)
-{
-    EV_INFO << this << ": processing CLOSE(" << connP.connIdM << ") command\n";
-
-    delete tcpCommandP;
-    delete msgP;
-
-    connP.close();
-}
-
-void TcpLwip::process_ABORT(TcpLwipConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP)
-{
-    EV_INFO << this << ": processing ABORT(" << connP.connIdM << ") command\n";
-
-    delete tcpCommandP;
-    delete msgP;
-
-    connP.abort();
-}
-
-void TcpLwip::process_STATUS(TcpLwipConnection& connP, TcpCommand *tcpCommandP, cMessage *msgP)
-{
-    EV_INFO << this << ": processing STATUS(" << connP.connIdM << ") command\n";
-
-    delete tcpCommandP; // but we'll reuse msg for reply
-
-    TcpStatusInfo *statusInfo = new TcpStatusInfo();
-    connP.fillStatusInfo(*statusInfo);
-    msgP->setControlInfo(statusInfo);
-    msgP->setKind(TCP_I_STATUS);
-    send(msgP, "appOut");
 }
 
 TcpLwipSendQueue *TcpLwip::createSendQueue()

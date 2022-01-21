@@ -24,25 +24,17 @@
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
+#include "inet/transportlayer/tcp_lwip/queues/TcpLwipQueues.h"
 #include "lwip/lwip_tcp.h"
 
 namespace inet {
-
-// forward declarations:
-class TcpConnectInfo;
-class TcpStatusInfo;
-
 namespace tcp {
 
 // forward declarations:
 class TcpLwip;
-class TcpLwipReceiveQueue;
-class TcpLwipSendQueue;
-class INetStack;
-class INetStreamSocket;
 
 /**
- *
+ * Module for representing a connection in TcpLwip stack
  */
 class INET_API TcpLwipConnection : public cSimpleModule
 {
@@ -66,35 +58,34 @@ class INET_API TcpLwipConnection : public cSimpleModule
 
     void sendIndicationToApp(int code);
 
-    void listen(const L3Address& localAddr, unsigned short localPort);
-
-    void connect(const L3Address& localAddr, unsigned short localPort, const L3Address& remoteAddr, unsigned short remotePort);
-
-    void close();
-
-    void abort();
-
-    void accept();
-
-    void send(Packet *msgP);
-
-    void fillStatusInfo(TcpStatusInfo& statusInfo);
-
     void notifyAboutSending(const TcpHeader& tcpsegP);
 
-    int send_data(void *data, int len);
-
     void do_SEND();
-
-    INetStreamSocket *getSocket();
-
-    void initStats();
 
     bool isSendUpEnabled() { return sendUpEnabled; }
 
     void sendUpData();
+
+    void processAppCommand(cMessage *msgP);
+
+  protected:
+    void listen(const L3Address& localAddr, unsigned short localPort);
+    void connect(const L3Address& localAddr, unsigned short localPort, const L3Address& remoteAddr, unsigned short remotePort);
+    void close();
+    void abort();
+    void accept();
+    void send(Packet *msgP);
+    int send_data(void *data, int len);
     void recordSend(const TcpHeader& tcpsegP);
     void recordReceive(const TcpHeader& tcpsegP);
+    void process_OPEN_ACTIVE(TcpOpenCommand *tcpCommandP, cMessage *msgP);
+    void process_OPEN_PASSIVE(TcpOpenCommand *tcpCommandP, cMessage *msgP);
+    void process_ACCEPT(TcpAcceptCommand *tcpCommand, cMessage *msg);
+    void process_SEND(Packet *msgP);
+    void process_CLOSE(TcpCommand *tcpCommandP, cMessage *msgP);
+    void process_ABORT(TcpCommand *tcpCommandP, cMessage *msgP);
+    void process_STATUS(TcpCommand *tcpCommandP, cMessage *msgP);
+    void fillStatusInfo(TcpStatusInfo& statusInfo);
 
   public:
     int connIdM;

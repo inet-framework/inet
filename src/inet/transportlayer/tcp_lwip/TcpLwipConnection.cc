@@ -370,6 +370,126 @@ void TcpLwipConnection::sendUpData()
     }
 }
 
+void TcpLwipConnection::processAppCommand(cMessage *msgP)
+{
+    // first do actions
+    TcpCommand *tcpCommand = check_and_cast_nullable<TcpCommand *>(msgP->removeControlInfo());
+
+    switch (msgP->getKind()) {
+        case TCP_C_OPEN_ACTIVE:
+            process_OPEN_ACTIVE(check_and_cast<TcpOpenCommand *>(tcpCommand), msgP);
+            break;
+
+        case TCP_C_OPEN_PASSIVE:
+            process_OPEN_PASSIVE(check_and_cast<TcpOpenCommand *>(tcpCommand), msgP);
+            break;
+
+        case TCP_C_ACCEPT:
+            process_ACCEPT(check_and_cast<TcpAcceptCommand *>(tcpCommand), msgP);
+            break;
+
+        case TCP_C_SEND:
+            process_SEND(check_and_cast<Packet *>(msgP));
+            break;
+
+        case TCP_C_CLOSE:
+            ASSERT(tcpCommand);
+            process_CLOSE(tcpCommand, msgP);
+            break;
+
+        case TCP_C_ABORT:
+            ASSERT(tcpCommand);
+            process_ABORT(tcpCommand, msgP);
+            break;
+
+        case TCP_C_STATUS:
+            ASSERT(tcpCommand);
+            process_STATUS(tcpCommand, msgP);
+            break;
+
+        default:
+            throw cRuntimeError("Wrong command from app: %d", msgP->getKind());
+    }
+}
+
+void TcpLwipConnection::process_OPEN_ACTIVE(TcpOpenCommand *tcpCommandP, cMessage *msgP)
+{
+    ASSERT(tcpLwipM->getLwipTcpLayer());
+
+    if (tcpCommandP->getRemoteAddr().isUnspecified() || tcpCommandP->getRemotePort() == -1)
+        throw cRuntimeError("Error processing command OPEN_ACTIVE: remote address and port must be specified");
+
+    int localPort = tcpCommandP->getLocalPort();
+    if (localPort == -1)
+        localPort = 0;
+
+    EV_INFO << this << ": OPEN: "
+            << tcpCommandP->getLocalAddr() << ":" << localPort << " --> "
+            << tcpCommandP->getRemoteAddr() << ":" << tcpCommandP->getRemotePort() << "\n";
+    connect(tcpCommandP->getLocalAddr(), localPort,
+            tcpCommandP->getRemoteAddr(), tcpCommandP->getRemotePort());
+    delete tcpCommandP;
+    delete msgP;
+}
+
+void TcpLwipConnection::process_OPEN_PASSIVE(TcpOpenCommand *tcpCommandP,
+        cMessage *msgP)
+{
+    ASSERT(tcpLwipM->getLwipTcpLayer());
+
+    if (tcpCommandP->getFork() == false)
+        throw cRuntimeError("Error processing command OPEN_PASSIVE: non-forking listening connections are not supported yet");
+
+    if (tcpCommandP->getLocalPort() == -1)
+        throw cRuntimeError("Error processing command OPEN_PASSIVE: local port must be specified");
+
+    EV_INFO << this << "Starting to listen on: " << tcpCommandP->getLocalAddr() << ":"
+            << tcpCommandP->getLocalPort() << "\n";
+    listen(tcpCommandP->getLocalAddr(), tcpCommandP->getLocalPort());
+    delete tcpCommandP;
+    delete msgP;
+}
+
+void TcpLwipConnection::process_ACCEPT(TcpAcceptCommand *tcpCommand, cMessage *msg)
+{
+    accept();
+    delete tcpCommand;
+    delete msg;
+}
+
+void TcpLwipConnection::process_SEND(Packet *msgP)
+{
+    EV_INFO << this << ": processing SEND command, len=" << msgP->getByteLength() << endl;
+    send(msgP);
+}
+
+void TcpLwipConnection::process_CLOSE(TcpCommand *tcpCommandP, cMessage *msgP)
+{
+    EV_INFO << this << ": processing CLOSE(" << connIdM << ") command\n";
+    delete tcpCommandP;
+    delete msgP;
+    close();
+}
+
+void TcpLwipConnection::process_ABORT(TcpCommand *tcpCommandP, cMessage *msgP)
+{
+    EV_INFO << this << ": processing ABORT(" << connIdM << ") command\n";
+    delete tcpCommandP;
+    delete msgP;
+    abort();
+}
+
+void TcpLwipConnection::process_STATUS(TcpCommand *tcpCommandP, cMessage *msgP)
+{
+    EV_INFO << this << ": processing STATUS(" << connIdM << ") command\n";
+    delete tcpCommandP; // but we'll reuse msg for reply
+    TcpStatusInfo *statusInfo = new TcpStatusInfo();
+    fillStatusInfo(*statusInfo);
+    msgP->setControlInfo(statusInfo);
+    msgP->setKind(TCP_I_STATUS);
+    tcpLwipM->send(msgP, "appOut");
+}
+
 } // namespace tcp
 } // namespace inet
 
