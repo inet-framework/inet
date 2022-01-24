@@ -134,7 +134,7 @@ void Ipv4NetworkConfigurator::dumpConfiguration()
     if (par("dumpRoutes"))
         TIME(dumpRoutes(topology));
     // print current configuration to an XML file
-    if (!opp_isempty(par("dumpConfig")))
+    if (!opp_isempty(par("dumpConfig").stringValue()))
         TIME(dumpConfig(topology));
 }
 
