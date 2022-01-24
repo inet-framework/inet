@@ -1564,14 +1564,14 @@
         id = "Z3GateSchedulingConfigurator"
         name = "Z3 Gate Scheduling Configurator"
         description = "Z3 SAT solver based TSN gate scheduling configurator"
-        initiallyEnabled = "true"
+        initiallyEnabled = "false"
         requires = "Ethernet"
         labels = ""
         nedPackages = "
                        inet.linklayer.configurator.gatescheduling.z3
                       "
         extraSourceFolders = ""
-        compileFlags = ""
+        compileFlags = "-DINET_WITH_Z3_SAT_SOLVER"
         linkerFlags = ""
         />
 </features>
