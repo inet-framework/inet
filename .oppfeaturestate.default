@@ -7,8 +7,8 @@
     <feature id="Bgpv4" enabled="true"/>
     <feature id="Bgpv4Examples" enabled="true"/>
     <feature id="BMac" enabled="true"/>
-    <feature id="Clock" enabled="false"/>
-    <feature id="ClockExamples" enabled="false"/>
+    <feature id="Clock" enabled="true"/>
+    <feature id="ClockExamples" enabled="true"/>
     <feature id="ConfiguratorTutorial" enabled="true"/>
     <feature id="CsmaCaMac" enabled="true"/>
     <feature id="Dhcp" enabled="true"/>
@@ -29,9 +29,11 @@
     <feature id="Ieee80211" enabled="true"/>
     <feature id="Ieee802154" enabled="true"/>
     <feature id="Ieee8021ae" enabled="true"/>
+    <feature id="Ieee8021as" enabled="true"/>
     <feature id="Ieee8021d" enabled="true"/>
     <feature id="Ieee8021dExamples" enabled="true"/>
     <feature id="Ieee8021q" enabled="true"/>
+    <feature id="Ieee8021r" enabled="true"/>
     <feature id="Ieee8022" enabled="true"/>
     <feature id="InternetCloud" enabled="true"/>
     <feature id="InternetCloudExamples" enabled="true"/>
@@ -101,4 +103,6 @@
     <feature id="XMac" enabled="true"/>
     <feature id="Xmipv6" enabled="true"/>
     <feature id="Xmipv6Examples" enabled="true"/>
+    <feature id="SelfDoc" enabled="false"/>
+    <feature id="Z3GateSchedulingConfigurator" enabled="false"/>
 </featurestates>

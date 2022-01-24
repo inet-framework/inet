@@ -1,12 +1,9 @@
 inet.applications.voipstream
-inet.clock.base
-inet.clock.common
-inet.clock.model
-inet.clock.oscillator
+inet.common.selfdoc
 inet.emulation
-inet.examples.clock
 inet.examples.emulation
 inet.examples.voipstream
+inet.linklayer.configurator.gatescheduling.z3
 inet.showcases.emulation
 inet.showcases.visualizer.osg
 inet.transportlayer.tcp_lwip
