@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2022-01-25  Rudolf Hornig
+
+	Relicensed the whole component to GPL v3 to match the original Google
+	packet drill code which was also GPL v3 licensed.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-16  Levente Mészáros
