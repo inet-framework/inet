@@ -10,6 +10,8 @@
 // *
 // *   Copyright (C) 2009-2015 by Thomas Dreibholz
 // *
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
