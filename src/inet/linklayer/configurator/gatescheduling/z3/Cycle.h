@@ -20,8 +20,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_Z3_CYCLE_H
-#define __INET_Z3_CYCLE_H
+#ifndef __INET_CYCLE_H
+#define __INET_CYCLE_H
 
 #include <algorithm>
 #include <memory>

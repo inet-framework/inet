@@ -27,8 +27,8 @@
  * @detail Functions prototypes for dual-stack (IPv4/IPv6) support
  */
 
-#ifndef EIGRPDUALSTACK_H_
-#define EIGRPDUALSTACK_H_
+#ifndef __INET_EIGRPDUALSTACK_H
+#define __INET_EIGRPDUALSTACK_H
 
 //#include "IPv4Address.h"
 //#include "IPv6Address.h"
@@ -95,5 +95,5 @@ Ipv6Address getPrefix(const Ipv6Address& addr, const Ipv6Address& netmask);
 Ipv6Address makeNetmask(int length);
 
 } // namespace inet
-#endif /* EIGRPDUALSTACK_H_ */
+#endif
 

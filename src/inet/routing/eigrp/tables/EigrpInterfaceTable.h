@@ -24,8 +24,8 @@
  * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
  */
 
-#ifndef __INET_EIGRPINTERFACETABLE_H_
-#define __INET_EIGRPINTERFACETABLE_H_
+#ifndef __INET_EIGRPINTERFACETABLE_H
+#define __INET_EIGRPINTERFACETABLE_H
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/NetworkInterface.h"

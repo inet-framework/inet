@@ -24,8 +24,8 @@
  * @author Vladimir Vesely (ivesely@fit.vutbr.cz)
  * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
  */
-#ifndef IEIGRPPDM_H_
-#define IEIGRPPDM_H_
+#ifndef __INET_IEIGRPPDM_H
+#define __INET_IEIGRPPDM_H
 
 //#include "IPv4Address.h"
 
@@ -119,5 +119,5 @@ class IEigrpPdm
 };
 } // eigrp
 } // inet
-#endif /* IEIGRPPDM_H_ */
+#endif
 

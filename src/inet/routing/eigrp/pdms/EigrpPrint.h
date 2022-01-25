@@ -27,8 +27,8 @@
  * @detail File contains useful functions for printing EIGRP informations (CUT + PASTE from EigrpIpv4Pdm.cc)
  */
 
-#ifndef EIGRPPRINT_H_
-#define EIGRPPRINT_H_
+#ifndef __INET_EIGRPPRINT_H
+#define __INET_EIGRPPRINT_H
 
 #include <iostream>
 
@@ -63,5 +63,5 @@ enum UserMsgCodes {
 extern const char *UserMsgs[];
 }; // end of namespace eigrp
 } // namespace inet
-#endif /* EIGRPPRINT_H_ */
+#endif
 

@@ -23,8 +23,8 @@
  * @author Vladimir Vesely (ivesely@fit.vutbr.cz)
  * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
  */
-#ifndef EIGRPMSGREQ_H_
-#define EIGRPMSGREQ_H_
+#ifndef __INET_EIGRPMSGREQ_H
+#define __INET_EIGRPMSGREQ_H
 
 #include "inet/routing/eigrp/messages/EigrpMessage_m.h"
 namespace inet {
@@ -42,5 +42,5 @@ class EigrpMsgReq : public EigrpMsgReq_Base
 
 //Register_Class(EigrpMsgReq);
 } // namespace inet
-#endif /* EIGRPMSGREQ_H_ */
+#endif
 

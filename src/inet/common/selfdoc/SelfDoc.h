@@ -92,5 +92,5 @@ class INET_API SelfDocTempOffClass
 
 } // namespace inet
 
-#endif // ifndef __INET_SELFDOC_H
+#endif
 

@@ -24,8 +24,8 @@
  * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
  */
 
-#ifndef __INET_EIGRPSPLITTER_H_
-#define __INET_EIGRPSPLITTER_H_
+#ifndef __INET_EIGRPSPLITTER_H
+#define __INET_EIGRPSPLITTER_H
 
 #include <string>
 
@@ -57,5 +57,5 @@ class INET_API EigrpSplitter : protected cListener, public cSimpleModule
 } // namespace eigrp
 } // namespace inet
 
-#endif // __INET_EIGRPSPLITTER_H_
+#endif
 

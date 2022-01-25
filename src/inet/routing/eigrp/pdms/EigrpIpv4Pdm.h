@@ -28,8 +28,8 @@
    topology table.
  */
 
-#ifndef __INET_EIGRPIPV4PDM_H_
-#define __INET_EIGRPIPV4PDM_H_
+#ifndef __INET_EIGRPIPV4PDM_H
+#define __INET_EIGRPIPV4PDM_H
 
 #include <omnetpp.h>
 

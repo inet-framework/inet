@@ -20,8 +20,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_Z3_PATHTREE_H
-#define __INET_Z3_PATHTREE_H
+#ifndef __INET_PATHTREE_H
+#define __INET_PATHTREE_H
 
 #include <z3++.h>
 

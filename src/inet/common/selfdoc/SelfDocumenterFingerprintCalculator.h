@@ -15,8 +15,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_SELFDOCUMENTERFINGERPRINTCALCULATOR_H_
-#define __INET_SELFDOCUMENTERFINGERPRINTCALCULATOR_H_
+#ifndef __INET_SELFDOCUMENTERFINGERPRINTCALCULATOR_H
+#define __INET_SELFDOCUMENTERFINGERPRINTCALCULATOR_H
 
 #include "inet/common/INETDefs.h"
 
@@ -32,5 +32,5 @@ class INET_API SelfDocumenterFingerprintCalculator : public cSingleFingerprintCa
 
 } // namespace
 
-#endif // #ifndef __INET_SELFDOCUMENTERFINGERPRINTCALCULATOR_H_
+#endif
 

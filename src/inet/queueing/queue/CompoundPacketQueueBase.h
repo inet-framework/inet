@@ -17,8 +17,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_COMPOUNDPACKETQUEUE_H
-#define __INET_COMPOUNDPACKETQUEUE_H
+#ifndef __INET_COMPOUNDPACKETQUEUEBASE_H
+#define __INET_COMPOUNDPACKETQUEUEBASE_H
 
 #include "inet/queueing/base/PacketQueueBase.h"
 #include "inet/queueing/contract/IPacketCollection.h"

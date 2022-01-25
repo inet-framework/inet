@@ -17,8 +17,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERNETSOCKETPACKETPROCESSOR_H
-#define __INET_ETHERNETSOCKETPACKETPROCESSOR_H
+#ifndef __INET_IEEE8021QSOCKETPACKETPROCESSOR_H
+#define __INET_IEEE8021QSOCKETPACKETPROCESSOR_H
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"

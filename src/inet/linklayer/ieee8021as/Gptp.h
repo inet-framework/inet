@@ -5,8 +5,8 @@
 //           University of Rostock, Germany
 //
 
-#ifndef __IEEE8021AS_GPTP_H_
-#define __IEEE8021AS_GPTP_H_
+#ifndef __INET_GPTP_H
+#define __INET_GPTP_H
 
 #include "inet/clock/contract/ClockTime.h"
 #include "inet/clock/common/ClockTime.h"
@@ -109,3 +109,4 @@ class Gptp : public ClockUserModuleBase, public cListener
 }
 
 #endif
+

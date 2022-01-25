@@ -17,8 +17,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_NETWORKCONFIGURATORBASE_H
-#define __INET_NETWORKCONFIGURATORBASE_H
+#ifndef __INET_L3NETWORKCONFIGURATORBASE_H
+#define __INET_L3NETWORKCONFIGURATORBASE_H
 
 #include <algorithm>
 

@@ -24,8 +24,8 @@
  * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
  */
 
-#ifndef EIGRPDISABLEDINTERFACES_H_
-#define EIGRPDISABLEDINTERFACES_H_
+#ifndef __INET_EIGRPDISABLEDINTERFACES_H
+#define __INET_EIGRPDISABLEDINTERFACES_H
 
 #include "inet/routing/eigrp/tables/EigrpInterfaceTable.h"
 namespace inet {
@@ -67,5 +67,5 @@ class EigrpDisabledInterfaces
 
 } // namespace eigrp
 } // namespace inet
-#endif /* EIGRPDISABLEDINTERFACES_H_ */
+#endif
 

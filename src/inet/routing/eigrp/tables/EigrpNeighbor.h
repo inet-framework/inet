@@ -27,8 +27,8 @@
  * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
  */
 
-#ifndef EIGRPNEIGHBOR_H_
-#define EIGRPNEIGHBOR_H_
+#ifndef __INET_EIGRPNEIGHBOR_H
+#define __INET_EIGRPNEIGHBOR_H
 
 // IPv6 ready
 
@@ -96,5 +96,5 @@ class EigrpNeighbor : public cObject
 };
 } // eigrp
 } // inet
-#endif /* EIGRPNEIGHBORTABLE_H_ */
+#endif
 

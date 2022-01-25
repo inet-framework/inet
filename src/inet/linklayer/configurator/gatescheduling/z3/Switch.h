@@ -20,8 +20,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_Z3_TSNSWITCH_H
-#define __INET_Z3_TSNSWITCH_H
+#ifndef __INET_SWITCH_H
+#define __INET_SWITCH_H
 
 #include <z3++.h>
 

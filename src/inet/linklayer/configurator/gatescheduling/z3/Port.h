@@ -20,8 +20,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_Z3_PORT_H
-#define __INET_Z3_PORT_H
+#ifndef __INET_PORT_H
+#define __INET_PORT_H
 
 #include <z3++.h>
 

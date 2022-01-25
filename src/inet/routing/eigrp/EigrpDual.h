@@ -24,8 +24,8 @@
  * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
  */
 
-#ifndef EIGRPDUAL_H_
-#define EIGRPDUAL_H_
+#ifndef __INET_EIGRPDUAL_H
+#define __INET_EIGRPDUAL_H
 
 #include <omnetpp.h>
 
@@ -102,5 +102,5 @@ class EigrpDual : public cObject /* cSimpleModule */
 };
 } // eigrp
 } // inet
-#endif /* EIGRPDUAL_H_ */
+#endif
 

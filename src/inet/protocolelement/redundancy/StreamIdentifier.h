@@ -17,8 +17,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TREAMIDENTIFIER_H
-#define __INET_TREAMIDENTIFIER_H
+#ifndef __INET_STREAMIDENTIFIER_H
+#define __INET_STREAMIDENTIFIER_H
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/queueing/base/PacketFlowBase.h"

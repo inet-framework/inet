@@ -24,8 +24,8 @@
  * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
  */
 
-#ifndef __INET_EIGRPRTP_H_
-#define __INET_EIGRPRTP_H_
+#ifndef __INET_EIGRPRTP_H
+#define __INET_EIGRPRTP_H
 
 #include <omnetpp.h>
 

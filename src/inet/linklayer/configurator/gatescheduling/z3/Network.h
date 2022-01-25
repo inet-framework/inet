@@ -20,8 +20,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_Z3_NETWORK_H
-#define __INET_Z3_NETWORK_H
+#ifndef __INET_NETWORK_H
+#define __INET_NETWORK_H
 
 #include <stack>
 #include <z3++.h>

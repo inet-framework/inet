@@ -24,8 +24,8 @@
  * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
  */
 
-#ifndef EIGRPMETRICHELPER_H_
-#define EIGRPMETRICHELPER_H_
+#ifndef __INET_EIGRPMETRICHELPER_H
+#define __INET_EIGRPMETRICHELPER_H
 
 //#include "InterfaceEntry.h"
 
@@ -92,5 +92,5 @@ class EigrpMetricHelper
 };
 } // eigrp
 } // inet
-#endif /* EIGRPMETRICHELPER_H_ */
+#endif
 

@@ -5,8 +5,8 @@
 //           University of Rostock, Germany
 //
 
-#ifndef GPTP_H_
-#define GPTP_H_
+#ifndef __INET_GPTP__H
+#define __INET_GPTP__H
 
 namespace inet {
 
@@ -18,4 +18,5 @@ enum gPtpHeader: int {
 
 }
 
-#endif /* GPTP_H_ */
+#endif
+

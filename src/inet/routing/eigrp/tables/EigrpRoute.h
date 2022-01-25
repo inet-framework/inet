@@ -24,8 +24,8 @@
  * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
  */
 
-#ifndef EIGRPROUTE_H_
-#define EIGRPROUTE_H_
+#ifndef __INET_EIGRPROUTE_H
+#define __INET_EIGRPROUTE_H
 
 #include <omnetpp.h>
 
@@ -290,5 +290,5 @@ bool EigrpRoute<IPAddress>::unsetReplyStatus(int neighborId)
 } // eigrp
 
 } // inet
-#endif /* EIGRPROUTE_H_ */
+#endif
 

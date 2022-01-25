@@ -24,8 +24,8 @@
  * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
  */
 
-#ifndef __INET_EIGRPTOPOLOGYTABLE_H_
-#define __INET_EIGRPTOPOLOGYTABLE_H_
+#ifndef __INET_EIGRPTOPOLOGYTABLE_H
+#define __INET_EIGRPTOPOLOGYTABLE_H
 
 // Ipv6 ready - mozny problem s originator (address vs. routerID)!!!
 

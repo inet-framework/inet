@@ -24,8 +24,8 @@
  * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
  */
 
-#ifndef __INET_EIGRPNEIGHBORTABLE_H_
-#define __INET_EIGRPNEIGHBORTABLE_H_
+#ifndef __INET_EIGRPNEIGHBORTABLE_H
+#define __INET_EIGRPNEIGHBORTABLE_H
 
 // IPv6 ready
 

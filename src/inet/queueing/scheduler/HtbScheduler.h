@@ -22,8 +22,8 @@
 // Code base taken from the "PriorityScheduler"
 //
 
-#ifndef __INET_HtbScheduler_H
-#define __INET_HtbScheduler_H
+#ifndef __INET_HTBSCHEDULER_H
+#define __INET_HTBSCHEDULER_H
 
 #include <string>
 #include <set>
@@ -208,5 +208,5 @@ class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollecti
 } // namespace queueing
 } // namespace inet
 
-#endif // ifndef __INET_HtbScheduler_H
+#endif
 

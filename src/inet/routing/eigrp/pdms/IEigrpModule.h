@@ -24,8 +24,8 @@
  * @author Vladimir Vesely (ivesely@fit.vutbr.cz)
  * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
  */
-#ifndef IEIGRPMODULE_H_
-#define IEIGRPMODULE_H_
+#ifndef __INET_IEIGRPMODULE_H
+#define __INET_IEIGRPMODULE_H
 
 #include "inet/routing/eigrp/messages/EigrpMessage_m.h"
 #include "inet/routing/eigrp/tables/EigrpNetworkTable.h"
@@ -97,5 +97,5 @@ class IEigrpModule
 };
 } // eigrp
 } // inet
-#endif /* IEIGRPMODULE_H_ */
+#endif
 

@@ -17,8 +17,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHERNETSOCKETTABLE_H
-#define __INET_ETHERNETSOCKETTABLE_H
+#ifndef __INET_IEEE8021QSOCKETTABLE_H
+#define __INET_IEEE8021QSOCKETTABLE_H
 
 #include "inet/common/Protocol.h"
 

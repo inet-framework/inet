@@ -20,8 +20,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_Z3_FLOW_H
-#define __INET_Z3_FLOW_H
+#ifndef __INET_FLOW_H
+#define __INET_FLOW_H
 
 #include <deque>
 #include <z3++.h>

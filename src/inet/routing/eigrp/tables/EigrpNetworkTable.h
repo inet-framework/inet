@@ -24,8 +24,8 @@
  * @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
  */
 
-#ifndef EIGRPNETWORKTABLE_H_
-#define EIGRPNETWORKTABLE_H_
+#ifndef __INET_EIGRPNETWORKTABLE_H
+#define __INET_EIGRPNETWORKTABLE_H
 
 #include "inet/routing/eigrp/EigrpDualStack.h"
 namespace inet {
@@ -99,5 +99,5 @@ class EigrpNetworkTable : cObject
 };
 } // eigrp
 } // inet
-#endif /* EIGRPNETWORKTABLE_H_ */
+#endif
 
