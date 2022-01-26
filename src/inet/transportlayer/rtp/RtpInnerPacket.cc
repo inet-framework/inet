@@ -1,27 +1,22 @@
 //
-// SPDX-License-Identifier: GPL-2.0-or-later
+// Copyright (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
 //
 // This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 3
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
+// You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-/***************************************************************************
-                          RtpInnerPacket.cc  -  description
-                             -------------------
-    begin                : Sat Oct 20 2001
-    copyright            : (C) 2001 by Matthias Oppitz
-    email                : Matthias.Oppitz@gmx.de
-***************************************************************************/
 
 #include "inet/transportlayer/rtp/RtpInnerPacket_m.h"
 #include "inet/transportlayer/rtp/RtpPacket_m.h"

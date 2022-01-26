@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2022-01-26  Rudolf Hornig
+
+	Changed license from GPL to LGPL v3 with the written permission
+	of original author (Matthias Oppitz).
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-16  Levente Mészáros
