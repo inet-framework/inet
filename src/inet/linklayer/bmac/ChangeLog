@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2022-01-26  Rudolf Hornig
+
+	Clarified that all of the BMac code is licensed under LGPL v3 (with the written
+	permission of the original author, Anna Foerster).
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-07-22  Levente Mészáros
