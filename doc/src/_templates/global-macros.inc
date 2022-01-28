@@ -11,3 +11,10 @@
    <p><video autoplay loop controls onclick="this.paused ? this.play() : this.pause();" src="{{ url }}"></video></p>
 
 {%- endmacro %}
+
+{% macro video_noloop(url) -%}
+.. raw:: html
+
+   <p><video autoplay controls onclick="this.paused ? this.play() : this.pause();" src="{{ url }}"></video></p>
+
+{%- endmacro %}

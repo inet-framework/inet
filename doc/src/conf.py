@@ -472,5 +472,6 @@ def setup(app):
     app.add_directive('youtube', tools.video.Youtube)
     app.add_directive('vimeo', tools.video.Vimeo)
     app.add_directive('video', tools.video.Video)
+    app.add_directive('video_noloop', tools.video.Video_noloop)
     app.add_directive('audio', tools.audio.Audio)
     app.add_directive('card', opptheme.CardDirective)
