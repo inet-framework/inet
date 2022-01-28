@@ -1563,7 +1563,7 @@
     <feature
         id = "Z3GateSchedulingConfigurator"
         name = "Z3 Gate Scheduling Configurator"
-        description = "Z3 SAT solver based TSN gate scheduling configurator"
+        description = "Z3 SAT solver based TSN gate scheduling configurator (requires external libz3-dev or z3-devel installed.)"
         initiallyEnabled = "false"
         requires = "Ethernet"
         labels = ""
@@ -1572,6 +1572,6 @@
                       "
         extraSourceFolders = ""
         compileFlags = "-DINET_WITH_Z3_SAT_SOLVER"
-        linkerFlags = ""
+        linkerFlags = "-lz3"
         />
 </features>
