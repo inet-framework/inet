@@ -1,4 +1,8 @@
 ====== inet-4.x ======
+2022-01-26  Rudolf Hornig
+
+	SCTP code is re-licensed now under LGPL v3
+	(allowed by the written permission of the original author, Irene Ruengeler, Thomaz Dreibholz).
 
 2021-01-11  ------ inet-4.3.0 released ------
 
