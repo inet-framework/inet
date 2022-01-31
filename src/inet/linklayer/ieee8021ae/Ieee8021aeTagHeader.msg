@@ -43,7 +43,7 @@ namespace inet;
 class Ieee8021aeTagTpidHeader extends FieldsChunk
 {
     chunkLength = B(8); // Length without SCI. Set it to B(16) when hasSci is true.
-    uint16_t tpid;      // Tag Protocol Identifier (TPID): 16-bit field specifying an EtherType value that is used to identify the frame as a tagged frame and to select the correct tag decoding functions. 
+    uint16_t tpid;      // Tag Protocol Identifier (TPID): 16-bit field specifying an EtherType value that is used to identify the frame as a tagged frame and to select the correct tag decoding functions.
     uint8_t tciAn;
     uint8_t sl;
     uint32_t pn;
@@ -85,5 +85,5 @@ class Ieee8021aeTagEpdHeader extends FieldsChunk
                            //        Type field indicates the number of MAC client data octets contained in the subsequent MAC Client
                            //        Data field of the basic frame (Length interpretation).
                            //     b) If the value of this field is greater than or equal to 1536 decimal (0600 hexadecimal), then the
-                           //        Length/Type field indicates the Ethertype of the MAC client protocol (Type interpretation).    
+                           //        Length/Type field indicates the Ethertype of the MAC client protocol (Type interpretation).
 }

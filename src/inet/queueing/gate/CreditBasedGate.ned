@@ -47,7 +47,7 @@ simple CreditBasedGate extends PacketGateBase like IPacketGate
         double idleCreditGainRate; // rate of credit increase while the packets that passed through this gate don't use the physical channel
         double transmitCreditSpendRate; // rate of credit decrease while the packets that passed through this gate use the physical channel
         double initialCredit = default(0); // initial number of credits
-        double transmitCreditLimit = default(0); // credit limit above which the gate is open 
+        double transmitCreditLimit = default(0); // credit limit above which the gate is open
         double minCredit = default(-inf); // minimum number of credits
         double maxCredit = default(inf); // maximum number of credits
         displayStringTextFormat = default("contains %n cr\nserved %p pk (%l)"); // determines display string text above the submodule

@@ -3,7 +3,7 @@
 //           Henning Puttnies
 //           Peter Danielis
 //           University of Rostock, Germany
-// 
+//
 
 #ifndef __IEEE8021AS_GPTP_H_
 #define __IEEE8021AS_GPTP_H_

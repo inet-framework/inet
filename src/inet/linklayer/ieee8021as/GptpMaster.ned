@@ -3,7 +3,7 @@
 //           Henning Puttnies
 //           Peter Danielis
 //           University of Rostock, Germany
-// 
+//
 
 package inet.linklayer.ieee8021as;
 

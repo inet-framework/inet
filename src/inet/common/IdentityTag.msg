@@ -32,7 +32,7 @@ namespace inet;
 // The tag is split and merged automatically when the data is split or merged.
 // This allows one to have an effective globally unique identity for each bit
 // in the simulation. This tag allows following the bits in the network through
-// the whole lifetime of the simulation. 
+// the whole lifetime of the simulation.
 //
 class IdentityTag extends TagBase
 {

@@ -21,7 +21,7 @@
 //           Henning Puttnies
 //           Peter Danielis
 //           University of Rostock, Germany
-// 
+//
 
 import inet.clock.common.ClockEvent;
 import inet.clock.common.ClockTime;

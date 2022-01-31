@@ -7,12 +7,12 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // @author Jan Zavrel (honza.zavrel96@gmail.com)
@@ -97,13 +97,13 @@ module EigrpProcessDS like IEigrp
     connections allowunconnected:
         ipIn --> eigrpSplitter.ipIn;
         ipOut <-- eigrpSplitter.ipOut;
-        
+
         eigrpSplitter.splitterOut --> eigrpIpv4Pdm.splitterIn if enableIPv4;
         eigrpSplitter.splitterIn <-- eigrpIpv4Pdm.splitterOut if enableIPv4;
 
         eigrpIpv4Pdm.rtpOut --> eigrpRtp.pdmIn if enableIPv4;
         eigrpIpv4Pdm.rtpIn <-- eigrpRtp.pdmOut if enableIPv4;
-        
+
         eigrpSplitter.splitter6Out --> eigrpIpv6Pdm.splitterIn if enableIPv6;
         eigrpSplitter.splitter6In <-- eigrpIpv6Pdm.splitterOut if enableIPv6;
 

@@ -36,7 +36,7 @@ namespace inet;
 class Ieee8021qTagTpidHeader extends FieldsChunk
 {
     chunkLength = B(4);
-    uint16_t tpid; // Tag Protocol Identifier (TPID): 16-bit field specifying an EtherType value that is used to identify the frame as a tagged frame and to select the correct tag decoding functions. 
+    uint16_t tpid; // Tag Protocol Identifier (TPID): 16-bit field specifying an EtherType value that is used to identify the frame as a tagged frame and to select the correct tag decoding functions.
     uint8_t pcp;   // Priority Code Point (PCP): a 3-bit field which refers to the IEEE 802.1p priority. It indicates the frame priority level.
                    // Values are from 0 (best effort) to 7 (highest); 1 represents the lowest priority.
                    // Priority order lowest to highest: 1 0 2 3 4 5 6 7
@@ -82,5 +82,5 @@ class Ieee8021qTagEpdHeader extends FieldsChunk
                            //        Type field indicates the number of MAC client data octets contained in the subsequent MAC Client
                            //        Data field of the basic frame (Length interpretation).
                            //     b) If the value of this field is greater than or equal to 1536 decimal (0600 hexadecimal), then the
-                           //        Length/Type field indicates the Ethertype of the MAC client protocol (Type interpretation).    
+                           //        Length/Type field indicates the Ethertype of the MAC client protocol (Type interpretation).
 }

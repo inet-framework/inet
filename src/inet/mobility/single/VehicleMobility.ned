@@ -23,7 +23,7 @@ import inet.mobility.base.MovingMobilityBase;
 
 //
 // A mobility model that simulates a vehicle turning at defined waypoints.
-// 
+//
 // Waypoints are defined in a text file as x,y,z with one waypoint per line.
 // When all waypoints have been reached, it loops back to the first one.
 //

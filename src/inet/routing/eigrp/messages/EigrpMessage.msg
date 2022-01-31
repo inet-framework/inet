@@ -7,12 +7,12 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
@@ -225,12 +225,12 @@ class EigrpIpv6Message extends EigrpMessage
 
 // EIGRP Update Message
 class EigrpIpv4Update extends EigrpIpv4Message
-{ 
+{
 };
 
 // EIGRP Update Message
 class EigrpIpv6Update extends EigrpIpv6Message
-{ 
+{
 };
 
 // EIGRP Query Message
@@ -259,8 +259,8 @@ class EigrpIpv6Reply extends EigrpIpv6Message
 struct EigrpMsgRoute
 {
     int sourceId;           // ID of source for route
-    int routeId;            // ID of route 
-    bool unreachable;       // Route with maximal metric 
+    int routeId;            // ID of route
+    bool unreachable;       // Route with maximal metric
     bool invalid;
     Ipv4Address originator;
 };
@@ -278,13 +278,13 @@ message EigrpMsgReq
     bool rs;                    // Reset
     bool eot;                   // End of table
 
-    int destNeighbor;           // ID of neighbor that is destination of message 
+    int destNeighbor;           // ID of neighbor that is destination of message
     int destInterface;          // ID of destination interface
 
     uint32_t seqNumber;         // Sequence number for reliable transmission
     uint32_t ackNumber;         // Ack number for reliable transmission
 
-    int numOfAck;               // Number of acknowledges 
+    int numOfAck;               // Number of acknowledges
     EigrpMsgRoute routes[];
 };
 

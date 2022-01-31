@@ -207,7 +207,7 @@ class TcpHeader extends TransportHeaderBase
     // to receive
     uint32_t ackNo;
 
-    // TCP Header Length including options 
+    // TCP Header Length including options
     B headerLength = TCP_MIN_HEADER_LENGTH;
 
     bool cwrBit; // CWR: congestion window reduced bit (RFC 3168)
