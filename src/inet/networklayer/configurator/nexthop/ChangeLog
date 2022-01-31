@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2021-03-23  Levente Mészáros
+
+	*NetworkConfigurator: Added check to ignore paths with infinite weight.
+	Topology provides all paths and the best path can have infinite weight.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-07-22  Levente Mészáros

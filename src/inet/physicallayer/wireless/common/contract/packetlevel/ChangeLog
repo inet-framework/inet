@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2021-09-01  Levente Mészáros
+
+	IApskModulation: Fixed field types to be the same as in the existing C++ class.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-08-26  Levente Mészáros

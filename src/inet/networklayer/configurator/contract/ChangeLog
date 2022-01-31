@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2021-04-28  Levente Mészáros
+
+	IL3NetworkConfigurator: Changed base module interface to INetworkConfigurator.
+	Added INetworkConfigurator module interface.
+
+2021-04-22  Levente Mészáros
+
+	Renamed INetworkConfigurator to IL3NetworkConfigurator.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-15  Levente Mészáros

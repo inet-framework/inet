@@ -1,5 +1,36 @@
 ====== inet-4.x ======
 
+2021-11-29  Levente Mészáros
+
+	InstantServer: Fixed reentrant calls to handleCan*PacketChanged.
+
+2021-10-18  Levente Mészáros
+
+	Refactored statistics of packet servers.
+
+2021-09-28  Levente Mészáros
+
+	Added packet time argument values for increaseTimeTag calls.
+
+2021-06-04  Levente Mészáros
+
+	TokenBasedServer: Partially implemented ITokenStorage interface.
+	Moved token*Signal fields from TokenBasedServer to Simsignals.
+
+2021-03-30  Zoltan Bojthe
+
+	InstantServer: Should not use the 'packet' after called the pushOrSendPacket()
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
+2021-01-22  Levente Mészáros
+
+	Added missing optional queueModule parameter.
+	Fixed calling base ClockUserModuleMixin class from initialize.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-12-15  Levente Mészáros

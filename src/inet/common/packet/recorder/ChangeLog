@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2022-01-20  Levente Mészáros
+
+	PcapRecorder: Record packets of a given protocol only if it is complete.
+
+2021-09-13  Levente Mészáros
+
+	PcapRecorder: Fixed bug that caused the PCAP file to be truncated when
+	packets were recorded from finish.
+
+2021-04-26  Zoltan Bojthe
+
+	Added/updated Enter_Method() info to the signalname in receiveSignal().
+
+2021-01-15  Zoltan Bojthe
+
+	Moved code from updateDisplayString() to resolveDirective().
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-11-05  Levente Mészáros

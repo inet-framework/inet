@@ -5,6 +5,39 @@
 	Clarified that all of the BMac code is licensed under LGPL v3 (with the written
 	permission of the original author, Anna Foerster).
 
+2022-01-05  Zoltan Bojthe
+
+	Changed to use canDequeuePacket(), dequeuePacket().
+
+2021-12-06  Zoltan Bojthe
+
+	Redesigned for external queue.
+
+2021-11-15  Rudolf Hornig
+
+	Added @mutable property for OMNeT++ 6 compatibility.
+
+2021-10-20  Zoltan Bojthe
+
+	Set interface multicast to true.
+
+2021-05-13  Zoltan Bojthe
+
+	Reset message kind to 0 in outgoing packets to upper layer.
+
+2021-04-26  Zoltan Bojthe
+
+	Added/updated Enter_Method() info to the signalname in receiveSignal().
+
+2021-04-19  Zoltan Bojthe
+
+	Switch to using ModuleRef, ModuleRefByPar, opp_component_ptr for pointers to other modules.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-07-22  Levente Mészáros

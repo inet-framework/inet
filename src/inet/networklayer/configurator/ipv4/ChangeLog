@@ -1,5 +1,35 @@
 ====== inet-4.x ======
 
+2022-01-24  Levente Mészáros
+
+	Ipv4NetworkConfigurator: Fixed bug #711 as suggested by Alfonso Ariza Quintana.
+
+2021-11-12  Zoltan Bojthe
+
+	HostAutoConfigurator: Set the Ipv4Address on loopback interfaces too.
+
+2021-05-27  Zoltan Bojthe
+
+	HostAutoConfigurator: Moved addProtocolData from initialize() to handleStartOperation().
+
+2021-04-26  Zoltan Bojthe
+
+	Added/updated Enter_Method() info to the signalname in receiveSignal().
+
+2021-04-19  Zoltan Bojthe
+
+	Switch to using ModuleRef, ModuleRefByPar, opp_component_ptr for pointers to other modules.
+
+2021-03-23  Levente Mészáros
+
+	*NetworkConfigurator: Added check to ignore paths with infinite weight.
+	Topology provides all paths and the best path can have infinite weight.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-16  Levente Mészáros

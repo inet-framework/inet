@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2021-04-19  Zoltan Bojthe
+
+	Switch to using ModuleRef, ModuleRefByPar, opp_component_ptr for pointers to other modules.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-08-03  Levente Mészáros

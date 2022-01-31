@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2021-04-26  Zoltan Bojthe
+
+	Added/updated Enter_Method() info to the signalname in receiveSignal().
+
+2021-04-19  Zoltan Bojthe
+
+	Switch to using ModuleRef, ModuleRefByPar, opp_component_ptr for pointers to other modules.
+
+2021-01-22  Levente Mészáros
+
+	Removed class name from Enter_Method calls, it's already known from the context.
+
+2021-01-04  Zoltan Bojthe
+
+	Rip: Fixed unhandled messages.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-16  Levente Mészáros

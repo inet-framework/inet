@@ -1,5 +1,55 @@
 ====== inet-4.x ======
 
+2021-11-08  Levente Mészáros
+
+	Refactored submodules of compound applications.
+	Added new optional tagger module. Added new optional measurement modules.
+	Removed generic inbound/outbound placeholder modules.
+	Added @application property to all compound applications.
+
+2021-10-22  Levente Mészáros
+
+	Added EthernetSinkApp and EthernetSourceApp.
+
+2021-10-08  Levente Mészáros
+
+	Changed all source and sink submodules to be optional in *App modules.
+
+2021-06-18  Levente Mészáros
+
+	Replaced default Omitted* typenames with "" now that the module interfaces specify them.
+
+2021-06-16  Levente Mészáros
+
+	Fixed passing down interfaceTableModule.
+
+2021-06-04  Levente Mészáros
+
+	EthernetApp: Fixed passing down the interfaceTableModule parameter.
+	EthernetSocketIo: Moved local/remote address resolution after the network
+	interface configuration stage.
+	EthernetSocketIo: Added optional interface parameter.
+
+2021-05-19  Levente Mészáros
+
+	Added a generic EthernetApp based on an EthernetSocketIo module.
+
+2021-04-28  Zoltan Bojthe
+
+	EtherTrafGen: fixed packet kind, optimized destaddress resolving
+	EtherAppClient: removed packet kind setting.
+
+2021-03-29  Zoltan Bojthe
+
+	EtherAppServer: send back response on the same interface using InterfaceInd
+	and InterfaceReq tags.
+	EtherAppClient: Added interfaceTableModule and interface parameter.
+
+2021-03-18  Zoltan Bojthe
+
+	EtherTrafGen: Added interface and interfaceTableModule NED parameters.
+	Added InterfaceReq tag for outgoing packets based on 'interface' NED parameter.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-01-08  ------ inet-4.2.0 released ------

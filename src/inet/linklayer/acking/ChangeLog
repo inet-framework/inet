@@ -1,5 +1,39 @@
 ====== inet-4.x ======
 
+2022-01-05  Zoltan Bojthe
+
+	Removed canProcessUpperPacket(), tryProcessUpperPacket().
+	Changed to use canDequeuePacket(), dequeuePacket()
+
+2021-12-06  Zoltan Bojthe
+
+	AckingMac implements IMacProtocol.
+
+2021-12-02  Zoltan Bojthe
+
+	Fixed packet maybe deleted after enqueuePacket().
+
+2021-12-01  Zoltan Bojthe
+
+	Redesigned AckingMac for external queue.
+
+2021-11-15  Rudolf Hornig
+
+	Added @mutable property for OMNeT++ 6 compatibility.
+
+2021-05-07  Zoltan Bojthe
+
+	Added parent or this to parameter access for OMNeT++ 6 compatibility.
+
+2021-04-26  Zoltan Bojthe
+
+	Added/updated Enter_Method() info to the signalname in receiveSignal().
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-11  Levente Mészáros

@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2021-12-10  Zoltan Bojthe
+
+	Switched to using `@omittedTypename` instead of conditional
+	connections in network interfaces.
+
+2021-03-17  Zoltan Bojthe
+
+	Added EthernetSignal label to network interface phys gates.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-16  Levente Mészáros

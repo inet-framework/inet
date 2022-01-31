@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2021-04-27  Zoltan Bojthe
+
+	WireJunction: Fixed signal type.
+
+2021-04-26  Zoltan Bojthe
+
+	Added/updated Enter_Method() info to the signalname in receiveSignal().
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-11-21  Zoltan Bojthe

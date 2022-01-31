@@ -1,5 +1,64 @@
 ====== inet-4.x ======
 
+2022-01-14  Levente Mészáros
+
+	EthernetCutthroughSource: Added support for multicast destination addresses.
+
+2022-01-13  Levente Mészáros
+
+	Renamed data members to reflect type name.
+	Replaced IMacAddressTable with IMacForwardingTable in all usages.
+	Replaced obsolete IMacAddressTable calls with new IMacForwardingTable calls.
+
+2021-11-15  Rudolf Hornig
+
+	Added @mutable property for OMNeT++ 6 compatibility.
+
+2021-09-15  Levente Mészáros
+
+	EthernetCutthroughInterface: Completed support for interrupting the packet
+	streaming flow on the cut-through gates.
+	EthernetMacLayer: Added C++ class that handles carrier lost.
+
+2021-06-24  Levente Mészáros
+
+	Ethernet*MacLayer: Fixed optional queue submodule condition after adding omittedTypename.
+
+2021-06-18  Levente Mészáros
+
+	Replaced default Omitted* typenames with "" now that the module interfaces specify them.
+
+2021-05-07  Zoltan Bojthe
+
+	Added parent or this to parameter access for OMNeT++ 6 compatibility.
+
+2021-04-19  Zoltan Bojthe
+
+	Switch to using ModuleRef, ModuleRefByPar, opp_component_ptr for pointers to other modules.
+
+2021-04-01  Levente Mészáros
+
+	Ethernet*MacLayer: Added a lifetimer submodule to purge the queue if necessary.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
+2021-03-17  Zoltan Bojthe
+
+	Ethernet interfaces: Set EthernetSignal label for phys gate.
+
+2021-02-03  Levente Mészáros
+
+	EthernetPreemptingMacLayer: Added deep parameter assignment to pass down
+	the bitrate parameter.
+
+2021-01-28  Levente Mészáros
+
+	EthernetMacLayer: Added deep parameter assignment to pass down the bitrate
+	parameter of the interface.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-10-30  Levente Mészáros

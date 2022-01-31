@@ -1,5 +1,32 @@
 ====== inet-4.x ======
 
+2021-07-14  Levente Mészáros
+
+	Renamed NetworkConfiguratorBase to L3NetworkConfiguratorBase.
+
+2021-05-20  Levente Mészáros
+
+	Removed Info suffix from inner class, method and argument names.
+
+2021-05-19  Levente Mészáros
+
+	NetworkConfiguratorBase: Added another findLinkOut method variant.
+	NetworkConfiguratorBase: Added node pointer to the InterfaceInfo class.
+
+2021-05-11  Levente Mészáros
+
+	Added missing delete operators for the topology.
+
+2021-05-07  Levente Mészáros
+
+	NetworkConfiguratorBase: Changed topology to be heap allocated.
+	NetworkConfiguratorBase: Added computeShortestLinkPath method.
+	GateSchedulingConfiguratorBase: Renamed method to computeShortestNodePath.
+
+2021-04-22  Levente Mészáros
+
+	Added a generic NetworkConfiguratorBase that only deals with extracting the topology and such.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-07-22  Levente Mészáros

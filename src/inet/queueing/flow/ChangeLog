@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2021-10-05  Levente Mészáros
+
+	FlowMeasurementRecorder: Replaced multiple signals with one and refactored statistics.
+	FlowMeasurementStarter: Added missing packet total times insertion.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-11-10  Levente Mészáros

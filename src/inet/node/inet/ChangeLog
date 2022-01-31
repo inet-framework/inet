@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2021-10-21  Levente Mészáros
+
+	Moved network node interfaces to contract folder.
+
+2021-09-15  Levente Mészáros
+
+	Changed display string parameters after adding optional LLC and bridging submodules.
+	Added IEthernetNetworkNode module interface with ethg gate vector.
+
+2021-05-07  Zoltan Bojthe
+
+	Added parent or this to parameter access for OMNeT++ 6 compatibility.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-01-08  ------ inet-4.2.0 released ------

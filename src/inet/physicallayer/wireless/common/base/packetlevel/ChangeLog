@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2021-05-07  Zoltan Bojthe
+
+	Added parent or this to parameter access for OMNeT++ 6 compatibility.
+
+2021-04-19  Zoltan Bojthe
+
+	Switch to using ModuleRef, ModuleRefByPar, opp_component_ptr for pointers to other modules.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-11-24  Levente Mészáros

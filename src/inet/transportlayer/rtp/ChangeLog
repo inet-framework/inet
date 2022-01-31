@@ -5,6 +5,15 @@
 	RTP code is re-licensed now under LGPL v3    
 	(allowed by the written permission of the original author, Matthias Oppitz).
 
+2021-05-31  Zoltan Bojthe
+
+	Create submodules with unique name.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-16  Levente Mészáros

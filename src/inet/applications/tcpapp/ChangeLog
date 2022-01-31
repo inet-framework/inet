@@ -1,5 +1,40 @@
 ====== inet-4.x ======
 
+2021-11-08  Levente Mészáros
+
+	Refactored submodules of compound applications.
+	Added new optional tagger module. Added new optional measurement modules.
+	Removed generic inbound/outbound placeholder modules.
+	Added @application property to all compound applications.
+	Changed all source and sink submodules to be optional in *App modules.
+
+2021-09-29  Zoltan Bojthe
+
+	Reduced code variants based on OMNETPP_BUILDNUM.
+
+2021-07-14  Levente Mészáros
+
+	Replaced the specific TokenBasedServer module with a more generic ITokenStorage
+	interface in token generators. Renamed parameters and field accordingly.
+
+2021-06-18  Levente Mészáros
+
+	Replaced default Omitted* typenames with "" now that the module interfaces
+	specify them.
+
+2021-05-07  Zoltan Bojthe
+
+	Added parent or this to parameter access for OMNeT++ 6 compatibility.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
+2021-01-19  Zoltan Bojthe
+
+	TcpServerHostApp: Fixed removing the deleted sockets from socketMap.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-12-08  Levente Mészáros

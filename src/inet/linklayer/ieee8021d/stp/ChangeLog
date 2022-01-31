@@ -1,5 +1,24 @@
 ====== inet-4.x ======
 
+2022-01-13  Levente Mészáros
+
+	Removed parameter assignments referencing other modules in the environment.
+	Merged resetDefaultAging into setAgingTime.
+
+2021-03-25  Zoltan Bojthe
+
+	Changed to use wired interfaces only.
+	Register STP_MULTICAST_ADDRESS on ethernet interfaces.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
+2021-03-17  Zoltan Bojthe
+
+	Send outgoing packets to ieee8022llc protocol (instead of ethernetMac)
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-07-22  Levente Mészáros

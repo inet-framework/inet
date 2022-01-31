@@ -1,5 +1,33 @@
 ====== inet-4.x ======
 
+2021-11-24  Zoltan Bojthe
+
+	RedDropper: subscribe to queue for detecting queue emptying.
+
+2021-09-13  Levente Mészáros
+
+	StatisticalRateLimiter: Adding protocol registration forwarding.
+
+2021-07-29  Levente Mészáros
+
+	Added MultiPacketFilter and MultiPacketMeter compound modules.
+
+2021-06-04  Levente Mészáros
+
+	Added a LabelFilter module that filters packets based on the attached label.
+
+2021-05-31  Levente Mészáros
+
+	Renamed RateLimiter to StatisticalRateLimiter.
+
+2021-05-07  Zoltan Bojthe
+
+	Added TransparentProtocolRegistrationListener base class to support protocol registration.
+
+2021-04-19  Zoltan Bojthe
+
+	Switch to using ModuleRef, ModuleRefByPar, opp_component_ptr for pointers to other modules.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-04  Levente Mészáros

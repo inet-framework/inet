@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2021-11-15  Rudolf Hornig
+
+	Added @mutable property for OMNeT++ 6 compatibility.
+
+2021-06-02  Zoltan Bojthe
+
+	Changed network interface to use OmittedModule instead of conditional modules.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-25  Levente Mészáros

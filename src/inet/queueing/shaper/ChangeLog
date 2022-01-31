@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2021-10-25  Levente Mészáros
+
+	Added protocol independent packet shapers.
+
+2021-07-19  Levente Mészáros
+
+	Added a generic parameterizable PacketShaper module.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-04-22  Levente Mészáros

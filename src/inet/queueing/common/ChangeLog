@@ -1,5 +1,53 @@
 ====== inet-4.x ======
 
+2021-11-30  Levente Mészáros
+
+	Added QueueingPacketDelayer module that delays packets in order.
+	Extracted IPacketDelayer module interface from PacketDelayer.
+
+2021-10-18  Levente Mészáros
+
+	Refactored statistics of packet multiplexer/schedulers/classifiers.
+
+2021-09-28  Levente Mészáros
+
+	Added packet time argument values for increaseTimeTag calls.
+
+2021-09-16  Levente Mészáros
+
+	PacketMultiplexer: Added forward*Registration parameters.
+	PacketMultiplexer: Refactored protocol registration support similar to PacketSchedulerBase.
+
+2021-06-14  Levente Mészáros
+
+	TokenBucket: Removed packet from interface, fixed production rate issues.
+
+2021-06-03  Levente Mészáros
+
+	Added TokenBucketMeter, MultiTokenBucketMeter. Added
+	SingleRateTwoColorMeter, SingleRateThreeColorMeter,
+	DualRateThreeColorMeter. Added TokenBucketClassifier,
+	MultiTokenBucketClassifier. Added SingleRateTwoColorClassifier,
+	SingleRateThreeColorClassifier, DualRateThreeColorClassifier modules.
+
+2021-05-17  Levente Mészáros
+
+	PacketMultiplexer: Fixed left-over code that prevented propagating some service registrations.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
+2021-03-18  Levente Mészáros
+
+	PacketDuplicator: Fixed module base according to C++ base class.
+	Changed direct variable modifications to call handlePacketProcessed().
+
+2021-01-22  Levente Mészáros
+
+	Added missing optional queueModule parameter.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-12-15  Levente Mészáros

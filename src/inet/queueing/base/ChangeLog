@@ -1,5 +1,138 @@
 ====== inet-4.x ======
 
+2021-11-16  Levente Mészáros
+
+	PacketProcessorBase: Fixed begin send/end send calls without send hops.
+
+2021-11-08  Levente Mészáros
+
+	PacketSourceBase: Added display name and application specific fields to packet name format.
+	PacketTaggerBase: Added EncapsulationProtocolReq for PcpReq.
+
+2021-10-18  Levente Mészáros
+
+	Separated pulled/pushed in/out signals and statistics in PacketFilterBase and PacketFlowBase.
+	Refactored statistics of packet multiplexer/schedulers/classifiers.
+	Replaced packetServed signal with packetPulled on input and packetPushed on output.
+	Moved all statistics to base modules.
+
+2021-10-05  Levente Mészáros
+
+	Added various throughput statistics to PacketQueue, PacketFilterBase and PacketFlowBase.
+
+2021-09-24  Levente Mészáros
+
+	PacketTaggerBase: Added PCP tagging parameters.
+
+2021-09-15  Levente Mészáros
+
+	PacketProcessorBase: Emulate packet send in animate() even if the environment is not a GUI.
+	PacketProcessorBase: Set packet flags before animation similarly to cSimpleModule::send().
+	PacketProcessorBase: Fixed pushOrSend* methods to use the consumer's gate.
+	PacketProcessorBase: Refactored checkPacketOperationSupport to support all cases.
+
+2021-09-14  Levente Mészáros
+
+	PacketFlowBase: Implemented IPacketCollection interface.
+
+2021-07-14  Levente Mészáros
+
+	Replaced the specific TokenBasedServer module with a more generic ITokenStorage interface in token generators.
+
+2021-06-24  Levente Mészáros
+
+	MultiTokenBucketMixin: Fixed bucket interdependency during initialization.
+
+2021-06-22  Levente Mészáros
+
+	PacketGateBase: Added isClosed method.
+
+2021-06-21  Levente Mészáros
+
+	PacketFilterBase: Added backpressure parameter support for pulling packets.
+
+2021-06-14  Levente Mészáros
+
+	PacketProcessorBase: Added pausePoint call in animate to allow stopping the
+	simulation/animation each time a packet is passed from one module to another.
+	PacketFilterBase: Added backpressure paramater that allows preventing
+	pushing/pulling packets through the filter.
+	PacketFilterBase: Added packetFilteredSignal for packets that pass through the filter.
+	MultiTokenBucketMixin: Fixed initializing the chain of TokenBuckets with respect
+	to the excessTokenStorage parameter.
+	Added TokenBucketClassifierMixin and TokenBucketMeterMixin base classes.
+
+2021-06-02  Levente Mészáros
+
+	PacketProcessorBase: Extracted common parts of animationPush*/animatePull* methods.
+	PacketProcessorBase: Regrouped methods.
+
+2021-05-07  Zoltan Bojthe
+
+	Added TransparentProtocolRegistrationListener base class to support protocol registration.
+
+2021-05-04  Levente Mészáros
+
+	PacketGateBase: Added extraLength parameter.
+	PacketGateBase: Renamed guardBand parameter to extraDuration.
+
+2021-05-03  Levente Mészáros
+
+	PacketFilterBase: Added missing Enter_Method which caused an exception to
+	be raised when the packet is deleted.
+
+2021-04-19  Zoltan Bojthe
+
+	Switch to using ModuleRef, ModuleRefByPar, opp_component_ptr for pointers to other modules.
+
+2021-04-02  Levente Mészáros
+
+	PacketProcessorBase: Fixed SendOptions duration/remainingDuration for the
+	animation of synchronous packet pushes/pulls.
+
+2021-03-18  Levente Mészáros
+
+	PacketProcessorBase: Fixed when the displayStringTextFormat is not yet initialized.
+	PacketDuplicatorBase: Fixed calling base class initialize().
+
+2021-03-22  Levente Mészáros
+
+	PacketGateBase: Moved emitting the signal to the last stage because the
+	gate state can change until then.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
+2021-02-18  Levente Mészáros
+
+	PacketGateBase: Added an updateDisplayString method which sets the icon
+	color based on whether the gate is open or not.
+
+2021-02-16  Levente Mészáros
+
+	PacketGateBase: Added enum definition to gateStateChanged statistic.
+
+2021-02-12  Levente Mészáros
+
+	PacketSourceBase: Added %N and %P directives for network node name and full path.
+
+2021-01-28  Levente Mészáros
+
+	PacketGateBase: Added bitrate and guardBand parameters.
+
+2021-01-27  Levente Mészáros
+
+	Queueing: Added guards for the cases when the connected modules cannot be cast
+	to the required collector/producer types.
+	PacketSchedulerBase: Added missing guard for the case when the to be scheduled
+	index is not known.
+
+2021-01-15  Zoltan Bojthe
+
+	Moved code from updateDisplayString() to resolveDirective().
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-12-08  Levente Mészáros

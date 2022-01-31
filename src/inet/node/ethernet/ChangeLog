@@ -1,5 +1,89 @@
 ====== inet-4.x ======
 
+2022-01-13  Levente Mészáros
+
+	Replaced remaining MacAddressTable with MacForwardingTable.
+
+2021-10-21  Levente Mészáros
+
+	Moved EthernetHost2 to tests folder, this module is only used for testing.
+
+2021-10-05  Levente Mészáros
+
+	EthernetSwitch: Added recordPcap parameter similarly to LinkLayerNodeBase and NetworkInterface.
+
+2021-10-05  Levente Mészáros
+
+	Added measurer submodules to NodeBase and EthernetSwitch.
+
+2021-09-15  Levente Mészáros
+
+	EthernetSwitch: Implemented IEthernetNetworkNode module interface.
+
+2021-09-13  Levente Mészáros
+
+	EthernetSwitch: Renamed parameter to hasCutthroughSwitching.
+
+2021-06-18  Levente Mészáros
+
+	Replaced default Omitted* typenames with "" now that the module interfaces specify them.
+
+2021-06-04  Levente Mészáros
+
+	EthernetSwitch: Changed llc submodule type to be parameterizable.
+
+2021-05-17  Levente Mészáros
+
+	EthernetSwitch: Added applications as a submodule vector.
+
+2021-05-07  Zoltan Bojthe
+
+	Added parent or this to parameter access for OMNeT++ 6 compatibility.
+
+2021-04-02  Levente Mészáros
+
+	EthernetSwitch: Added optional gPTP support.
+	EthernetSwitch/AccessPoint: Renamed dispatchers and cleaned up submodule positions.
+
+2021-03-31  Zoltan Bojthe
+
+	EthernetSwitch: Added way from 'bridging' to up for packets without LLC header
+
+2021-03-29  Zoltan Bojthe
+
+	EthernetHost: Added optional IIeee8022Llc and IEthernetLayer submodules for
+	working with LayeredEthernetInterface.
+
+2021-03-25  Levente Mészáros
+
+	Replaced IEEE 802.1Q and IEEE 802.1R submodule interface types with the protocol specific variants.
+
+2021-03-24  Zoltan Bojthe
+
+	EthernetSwitch: Added llc submodule.
+
+2021-03-22  Levente Mészáros
+
+	EthernetSwitch: Refactored to use a separate protocol layer for briding.
+	Also added IEEE 802.1R protocol support.
+
+2021-03-22  Levente Mészáros
+
+	Renamed relayUnit submodule to bridging.
+
+	This change is needed for the upcoming TSN related changes, because there
+	are more complicated cases where this module will contain various
+	policies along with the relay functionality.
+
+2021-02-04  Zoltan Bojthe
+
+	NodeBase, EthernetSwitch: Set the clock module to default clockModule
+	parameter value for all module inside the node.
+
+2021-01-22  Levente Mészáros
+
+	EthernetSwitch: Added optional clock submodule.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-11-09  Levente Mészáros

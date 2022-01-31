@@ -1,5 +1,38 @@
 ====== inet-4.x ======
 
+2022-01-07  Levente Mészáros
+
+	GlobalArp: Implemented mapping of multicast network addresses to MAC addresses.
+
+2021-11-15  Levente Mészáros
+
+	GlobalArp: Extracted toMulticastMacAddress utility method.
+
+2021-11-12  Levente Mészáros
+
+	GlobalArp: Added multicast address mapping.
+
+2021-04-26  Zoltan Bojthe
+
+	Added/updated Enter_Method() info to the signalname in receiveSignal().
+
+2021-04-19  Zoltan Bojthe
+
+	Switch to using ModuleRef, ModuleRefByPar, opp_component_ptr for pointers to other modules.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
+2021-01-11  Zoltan Bojthe
+
+	Arp: sendArpGratuitous: set last update time for gratuitous entry.
+
+2021-01-11  Zoltan Bojthe
+
+	Arp: Redesigned ArpCacheEntry, removed myIter, added ipv4Address.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-11  Levente Mészáros

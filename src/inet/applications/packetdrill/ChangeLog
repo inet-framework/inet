@@ -5,6 +5,15 @@
 	Relicensed the whole component to GPL v3 to match the original Google
 	packet drill code which was also GPL v3 licensed.
 
+2021-06-08  Zoltan Bojthe
+
+	Changed intXX types to intXX_t.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-16  Levente Mészáros

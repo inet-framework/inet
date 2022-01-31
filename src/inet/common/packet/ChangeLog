@@ -1,5 +1,31 @@
 ====== inet-4.x ======
 
+2022-01-20  Levente Mészáros
+
+	PacketFilter: Extended with filtering for packet tags.
+	PacketFilter: Changed to avoid packet dissection if not necessary.
+
+2021-11-08  Levente Mészáros
+
+	PacketFilter: Fixed ownership problem of cOwnedDynamicExpression objects.
+
+2021-10-22  Levente Mészáros
+
+	PacketFilter: Refactored packet filter expressions to use the new NED
+	expression syntax.
+
+2021-04-26  Zoltan Bojthe
+
+	Added/updated Enter_Method() info to the signalname in receiveSignal().
+
+2021-04-09  llccd
+
+	Fixed wrong function call in Chunk.h
+
+2021-01-15  Zoltan Bojthe
+
+	Moved code from updateDisplayString() to resolveDirective().
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-11-05  Levente Mészáros

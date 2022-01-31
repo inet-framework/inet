@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2022-01-07  Levente Mészáros
+	Adapted to new packet filter expression syntax.
+
+2021-03-03  Zoltan Bojthe
+
+	EcnMarker: Removed TODO: the 'Eth: padding frame and calculate fingerprint
+	when pop packet from queue' commit fixes it.
+
+2021-01-13  Zoltan Bojthe
+
+	EcnMarker: Added the IPv4 header checksum recalculation.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-04  Levente Mészáros

@@ -1,5 +1,34 @@
 ====== inet-4.x ======
 
+2021-11-12  Levente Mészáros
+
+	UdpSocketIo: Added multicastAddresses parameter.
+
+2021-11-08  Levente Mészáros
+
+	Refactored submodules of compound applications.
+	Added new optional tagger module.
+	Added new optional measurement modules.
+	Removed generic inbound and outbound placeholder modules.
+	Added @application property to all compound applications.
+
+2021-10-18  Levente Mészáros
+
+	Added UdpSinkApp and UdpSourceApp for solely sink and source UDP applications.
+
+2021-10-07  Levente Mészáros
+
+	UdpApp: Changed source and sink submodules to be optional.
+
+2021-06-18  Levente Mészáros
+
+	Replaced default Omitted* typenames with "" now that the module interfaces
+	specify them.
+
+2021-05-07  Zoltan Bojthe
+
+	Added parent or this to parameter access for OMNeT++ 6 compatibility.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-07-30  Zoltan Bojthe

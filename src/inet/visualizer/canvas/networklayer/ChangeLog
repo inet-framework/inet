@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2021-11-15  Levente Mészáros
+
+	NetworkRouteCanvasVisualizer: Extended with support for layered Ethernet model.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-11-26  Levente Mészáros

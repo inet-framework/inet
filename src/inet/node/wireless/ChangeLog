@@ -1,5 +1,29 @@
 ====== inet-4.x ======
 
+2022-01-13  Levente Mészáros
+
+	Replaced remaining MacAddressTable with MacForwardingTable.
+
+2022-01-07  Levente Mészáros
+
+	AccessPoint: Pass down the module path of the MacAddressTable submodule.
+
+2021-06-18  Levente Mészáros
+
+	Replaced default Omitted* typenames with "" now that the module interfaces specify them.
+
+2021-04-02  Levente Mészáros
+
+	EthernetSwitch/AccessPoint: Renamed dispatchers and cleaned up submodule positions.
+
+2021-03-22  Levente Mészáros
+
+	Renamed relayUnit submodule to bridging.
+
+	This change is needed for the upcoming TSN related changes, because there
+	are more complicated cases where this module will contain various
+	policies along with the relay functionality.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-15  Levente Mészáros

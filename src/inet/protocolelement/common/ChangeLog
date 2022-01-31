@@ -1,5 +1,37 @@
 ====== inet-4.x ======
 
+2022-01-20  Levente Mészáros
+
+	PacketEmitter: Fixed duplicate emit calls for a single packet.
+
+2021-12-07  Levente Mészáros
+
+	InterpacketGapInserter: Added interpacketGapStarted and interpacketGapEnded signals.
+
+2021-04-02  Levente Mészáros
+
+	PacketProcessorBase: Fixed SendOptions duration/remainingDuration for the
+	animation of synchronous packet pushes/pulls.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
+2021-03-18  Levente Mészáros
+
+	Added IProtocolLayer and OmittedProtocolLayer to protocolelement folder.
+	Queueing: Changed direct variable modifications to call handlePacketProcessed().
+
+2021-01-22  Levente Mészáros
+
+	Added missing optional queueModule parameter.
+	Fixed calling base ClockUserModuleMixin class from initialize.
+
+2021-01-14  Levente Mészáros
+
+	PreemptableStreamer: Fixed memory leak in destructor and ownership of streamed packet.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-10-19  Levente Mészáros

@@ -1,5 +1,44 @@
 ====== inet-4.x ======
 
+2021-01-15  Zoltan Bojthe
+
+	Moved code from updateDisplayString() to resolveDirective().
+
+2022-01-13  Levente Mészáros
+
+	Removed parameter assignments referencing other modules in the environment.
+	Replaced MacAddressTable with MacForwardingTable.
+	Replaced IMacAddressTable with IMacForwardingTable in all usages.
+
+2022-01-05  Zoltan Bojthe
+
+	MacProtocolBase: Refactored for external queue module in network interfaces.
+
+2021-11-15  Zoltan Bojthe
+
+	MacProtocolBase: use opp_component_ptr<> for hostModule (illegal pointer protection).
+
+2021-04-26  Zoltan Bojthe
+
+	Added/updated Enter_Method() info to the signalname in receiveSignal().
+
+2021-04-19  Zoltan Bojthe
+
+	Switched to using ModuleRef, ModuleRefByPar, opp_component_ptr for pointers to other modules.
+
+2021-03-22  Levente Mészáros
+
+	MacRelay: Renamed ifIn/ifOut gates to lowerLayerIn/lowerLayerOut gates.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
+2020-12-18  Zoltan Bojthe
+
+	MacProtocolBase, EthernetMacBase: initialization moved to base class.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-10-19  Levente Mészáros

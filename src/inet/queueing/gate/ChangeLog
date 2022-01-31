@@ -1,5 +1,86 @@
 ====== inet-4.x ======
 
+2021-12-16  Levente Mészáros
+
+	PeriodicGate: Changed initiallyOpen to be true by default.
+
+2021-12-08  Levente Mészáros
+
+	CreditBasedGate: Extended the spend credit period with the interpacket gap.
+
+2021-11-18  Zoltan Bojthe
+
+	Added missing @mutable properties.
+
+2021-11-08  Levente Mészáros
+
+	Added @mutable property to parameters which can be changed during the simulation.
+
+2021-10-18  Levente Mészáros
+
+	Refactored statistics of gate modules.
+
+2021-10-08  Levente Mészáros
+
+	CreditBasedGate: Fixed currentCreditGainRate when the channel is used.
+
+2021-06-14  Levente Mészáros
+
+	Added a new InteractiveGate module that allows the user to explicitly
+	control the gate open/closed state.
+
+2021-05-04  Levente Mészáros
+
+	PeriodicGate: Replaced getTotalLength with getDataLength because popped
+	parts should be ignored.
+
+2021-04-29  Levente Mészáros
+
+	PeriodicGate: Fixed condition when no change is scheduled, i.e. the gate
+	is open indefinitly.
+
+2021-05-04  Levente Mészáros
+
+	Added OmittedPacketGate that allows optional gate modules.
+
+2021-04-26  Zoltan Bojthe
+
+	Added/updated Enter_Method() info to the signalname in receiveSignal().
+
+2021-04-07  Zoltan Bojthe
+
+	PeriodicGate: Added scheduleForAbsoluteTime parameter.
+
+2021-03-22  Levente Mészáros
+
+	PeriodicGate: Changed duration parameter type to object (array).
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
+2021-02-18  Levente Mészáros
+
+	Added CreditBasedGate that implements the credit based shaping used in TSN networks.
+
+2021-02-12  Levente Mészáros
+
+	PeriodicGate: Moved timer initialization to INITSTAGE_QUEUEING and added handleParameterChange().
+
+2021-02-09  Levente Mészáros
+
+	PeriodicGate: Changed durations parameter to be an object array instead of string.
+
+2021-01-28  Levente Mészáros
+
+	PeriodicGate: Implemented bitrate and guardBand parameters.
+
+2021-01-22  Levente Mészáros
+
+	Added missing optional queueModule parameter.
+	Fixed calling base ClockUserModuleMixin class from initialize.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-04-23  Levente Mészáros

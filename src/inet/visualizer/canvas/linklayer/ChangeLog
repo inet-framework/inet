@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2021-07-20  Levente Mészáros
+
+	DataLinkCanvasVisualizer: Added a temporary kludge for visualizing packets
+	when using the layered Ethernet model.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-11-26  Levente Mészáros

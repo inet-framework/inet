@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2021-11-08  Levente Mészáros
+
+	Added generic SourceApp.
+	Added @application property to all compound applications.
+
+2021-07-26  Levente Mészáros
+
+	Added SinkApp application module.
+
+2021-01-28  Levente Mészáros
+
+	SimpleClockSynchronizer: Moved to a separate folder to fix #649.
+
+2021-01-22  Levente Mészáros
+
+	Added SimpleClockSynchronizer.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-10-30  Levente Mészáros

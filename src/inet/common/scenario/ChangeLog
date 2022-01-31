@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2021-09-29  Zoltan Bojthe
+
+	Reduced code variants based on OMNETPP_BUILDNUM.
+
+2021-05-28  Zoltan Bojthe
+
+	Changed ScenarioManager base class to LifecycleController.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-01-24  Zoltan Bojthe

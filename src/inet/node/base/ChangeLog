@@ -1,5 +1,45 @@
 ====== inet-4.x ======
 
+2021-10-05  Levente Mészáros
+
+	Added measurer submodules to NodeBase and EthernetSwitch.
+
+2021-09-15  Levente Mészáros
+
+	*LayerNodeBase: Added optional LLC and bridging layer submodules.
+	LinkLayerNodeBase: Implemented IEthernetNetworkNode module interface.
+	Changed display string parameters after adding optional LLC and bridging submodules.
+
+2021-09-13  Levente Mészáros
+
+	Changed default PCAP file names to contain the configname also.
+
+2021-07-06  Levente Mészáros
+
+	LinkLayerNodeBase: Removed 802.2 LLC layer by default.
+
+2021-06-04  Levente Mészáros
+
+	Added a separate LLC sublayer and the corresponding MessageDispatcher to hosts.
+
+2021-05-07  Zoltan Bojthe
+
+	Added parent or this to parameter access for OMNeT++ 6 compatibility.
+
+2021-03-25  Levente Mészáros
+
+	Replaced IEEE 802.1Q and IEEE 802.1R submodule interface types with the
+	protocol specific variants.
+
+2021-03-18  Levente Mészáros
+
+	*NodeBase: Added optional IEEE 802.1R protocol component.
+
+2021-02-04  Zoltan Bojthe
+
+	NodeBase, EthernetSwitch: Set the clock module to default clockModule
+	parameter value for all module inside the node.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-10-13  Levente Mészáros

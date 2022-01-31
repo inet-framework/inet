@@ -1,5 +1,45 @@
 ====== inet-4.x ======
 
+2021-11-08  Levente Mészáros
+
+	Added @mutable property to parameters which can be changed during the simulation.
+
+2021-11-15  Rudolf Hornig
+
+	Added @mutable property for OMNeT++ 6 compatibility.
+
+2021-09-29  Zoltan Bojthe
+
+	Reduced code variants based on OMNETPP_BUILDNUM.
+
+2021-07-01  Zoltan Bojthe
+
+	Fixed type differences between MSG and c++ code.
+
+2021-05-19  Levente Mészáros
+
+	Added support for the visualization of redundant unicast and multicast stream configurations.
+
+	Supports the visualization of the configuration computed by the TsnConfigurator
+	and StreamRedundancyConfigurator.
+
+2021-04-26  Zoltan Bojthe
+
+	Added/updated Enter_Method() info to the signalname in receiveSignal().
+
+2021-04-12  Zoltan Bojthe
+
+	cVisitor::visit() return type changed from void to bool.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
+2021-02-16  Levente Mészáros
+
+	Added Gate*Visualizer modules that visualize gate scheduling as annotation on network nodes.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-12-08  Zoltan Bojthe

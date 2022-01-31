@@ -1,5 +1,46 @@
 ====== inet-4.x ======
 
+2022-01-14  Levente Mészáros
+
+	HtbScheduler: Added missing removeAllPackets method required by interface.
+
+2022-01-07  Zoltan Bojthe
+
+	HtbScheduler: Added canPullSomePacket(), canPullPacket() methods.
+
+2021-11-17  Zoltan Bojthe
+
+	HtbScheduler: Changed to use handleCanPullPacketChanged().
+	HtbScheduler: get datarate from network interface module at INITSTAGE_NETWORK_INTERFACE_CONFIGURATION.
+
+2021-11-16  Marcin Bosk
+
+	Added class id to HTB classes.
+
+2021-11-15  Marcin Bosk
+
+	Updated comparators in htb scheduler.
+	Working on fix for deterministic behavior.
+	Changed set comparator to use the class name instead of pointer value.
+
+2021-10-01  Marcin Bosk
+
+	Added initial HTB code.
+
+2021-09-14  Levente Mészáros
+
+	Implemented recently added removeAllPackets method in IPacketCollection subclasses.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
+2021-01-22  Levente Mészáros
+
+	Added missing optional queueModule parameter.
+	Fixed calling base ClockUserModuleMixin class from initialize.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-12-15  Levente Mészáros

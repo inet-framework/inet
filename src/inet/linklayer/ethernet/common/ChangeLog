@@ -1,5 +1,120 @@
 ====== inet-4.x ======
 
+2022-01-20  Zoltan Bojthe
+
+	Added 2.5 and 5 Gbps ethernet.
+
+2022-01-14  Levente Mészáros
+
+	*RelayUnit: Added support for multicast destination addresses.
+	RelayInterfaceSelector: Fixed IMacForwardingTable usage after TSN branch rebase.
+	Replaced remaining addressTable occurances with forwardingTable.
+
+2022-01-13  Levente Mészáros
+
+	Renamed all MacAddressTable files to MacForwardingTable.
+	Replaced IMacAddressTable with IMacForwardingTable.
+	MacAddressTable: Removed old IMacAddressTable interface from base classes.
+	MacAddressTable: Adapted remaining parts to the new IMacForwardingTable interface.
+	MacAddressTable: Removed obsolete code replaced by IMacForwardingTable interface and implementation.
+	MacAddressTable: Implemented new IMacForwardingTable interface.
+	MacAddressTable: Removed superfluous vid from entry structures.
+	MacForwardingTable: Renamed several data members and methods to reflect the forwarding table naming.
+	MacForwardingTable: Fixed clearing the multicast forwarding table too.
+	RelayInterfaceSelector: Added code to handle the case when the InterfaceReq is present.
+	Removed assignments parameters referencing other modules in the environment.
+
+2022-01-12  Levente Mészáros
+
+	BridgingLayer: Reordered layer submodules to fix fingerprint tests.
+
+2022-01-07  Levente Mészáros
+
+	BridgingLayer: Added deep parameter assignment for optional macTableModule.
+
+2021-12-16  Levente Mészáros
+
+	Added missing interfaceTableModule parameter assignments for passing down.
+
+2021-11-30  Levente Mészáros
+
+	DirectionReverserLayer: Added optional packet delayer to forwarding.
+	BridgingLayer: Added processing delay layer at the top.
+
+2021-11-18  Zoltan Bojthe
+
+	Added more missing @mutable qualifiers to NED files.
+
+2021-09-24  Levente Mészáros
+
+	PacketDirectionReverser: Added PcpInd to PcpReq conversion for inbound to
+	outbound packet reversal.
+
+2021-09-16  Levente Mészáros
+
+	Added more flexible next protocol handling using DispatchProtocolReq and EncapsulationProtocolReq.
+	DirectionReverserLayer: Added default forward*Registration parameter assignments.
+
+2021-07-22  Levente Mészáros
+
+	RelayInterfaceSelector: Added missing Enter_Method and packet ownership take-over.
+
+2021-06-24  Levente Mészáros
+
+	BridingLayer: Moved interfaceRelay to the lowest layer position.
+	PacketDirectionReverser: Added handling of EligibilityTimeTag for reversed packets.
+
+2021-06-18  Levente Mészáros
+
+	Renamed RelayLayer to InterfaceRelayLayer module.
+	Renamed ReversingLayer to DirectionReverserLayer module.
+
+2021-06-16  Levente Mészáros
+
+	BridgingLayer: Extended with an optional per-stream filtering and policing module.
+
+2021-05-20  Levente Mészáros
+
+	MacAddressTable: Extended with multicast address mapping.
+
+2021-05-19  Levente Mészáros
+
+	RelayInterfaceSelector: Added multicast destination address support based
+	on MacAddressTable mapping.
+	EthernetSocket: Changed to attach InterfaceReq if the socket is bound to
+	an network interface.
+
+2021-05-17  Zoltan Bojthe
+
+	Mac relay: MAC Address learning learn it with vlan ID
+
+2021-05-14  Zoltan Bojthe
+
+	RelayInterfaceLearner: Added using vlanId for update MacAddressTable.
+	MacAddressTable: Redesigned AddressTable structure.
+
+2021-04-19  Zoltan Bojthe
+
+	Switch to using ModuleRef, ModuleRefByPar, opp_component_ptr for pointers to other modules.
+
+2021-03-18  Levente Mészáros
+
+	Added a completely new layered BridingLayer and separate relay modules.
+	Added addressTable parameter to MacAddressTable with object type to allow
+	specifying the mapping from INI files directly.
+
+2021-03-17  Zoltan Bojthe
+
+	Ieee8021dRelay, MacRelayUnit: Reduced code difference between Ieee8021dRelay and MacRelayUnit.
+
+2021-01-22  Levente Mészáros
+
+	Removed class name from Enter_Method calls, it's already known from the context.
+
+2021-01-15  Zoltan Bojthe
+
+	Moved code from updateDisplayString() to resolveDirective().
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-12-14  Adriaan Niess

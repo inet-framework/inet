@@ -1,0 +1,11 @@
+====== inet-4.x ======
+
+2021-04-21  Levente Mészáros
+
+	Added Z3GateSchedulingConfigurator module.
+
+	The source was copied from https://github.com/ACassimiro/TSNsched with the
+	permission of the original authors. The code is adapted to INET interfaces,
+	simplified and cleaned up a bit. Further changes to the original source are
+	not going to be taken over. See TSNschedGateSchedulingConfigurator for using
+	the latest version of the original work.

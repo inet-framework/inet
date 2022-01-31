@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2021-09-14  Zoltan Bojthe
+
+	Fixed bug #92: TcpConnection: processSegment1stThru8th: accept simultaneous open.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-12-16  Zoltan Bojthe

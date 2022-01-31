@@ -1,5 +1,43 @@
 ====== inet-4.x ======
 
+2021-12-16  Levente Mészáros
+
+	Added missing interfaceTableModule parameter assignments for passing down.
+
+2021-12-10  Zoltan Bojthe
+
+	EthernetInterface, ExtLowerEthernetInterface: using predefined @omittedTypename
+	instead of conditional connections.
+
+2021-12-07  Levente Mészáros
+
+	LayeredEthernetInterface: Fixed the connections of processingDelayLayer.
+
+2021-11-30  Levente Mészáros
+
+	LayeredEthernetInterface: Added optional processingDelayLayer submodule at the top.
+
+2021-09-15  Levente Mészáros
+
+	Moved @lifecycleSupport from EthernetInterface to NetworkInterface.
+
+2021-09-13  Levente Mészáros
+
+	LayeredEthernetInterface: Added allowunconnected for the case when the cut-through
+	gates are not connected inside.
+
+2021-05-07  Zoltan Bojthe
+
+	Added parent or this to parameter access for OMNeT++ 6 compatibility.
+
+2021-03-25  Zoltan Bojthe
+
+	EthernetInterface: Added 'protocol' NED parameter.
+
+2021-03-17  Zoltan Bojthe
+
+	Ethernet interfaces: Set EthernetSignal label for phys gate.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-12-15  Levente Mészáros

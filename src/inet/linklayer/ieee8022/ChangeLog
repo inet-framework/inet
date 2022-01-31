@@ -1,5 +1,39 @@
 ====== inet-4.x ======
 
+2021-06-18  Levente Mészáros
+
+	Replaced default Omitted* typenames with "" now that the module interfaces specify them.
+
+2021-06-04  Levente Mészáros
+
+	Ieee8022Llc: Fixed the case when both the SapReq and the packet protocol are present.
+	Ieee8022LlcSocket: Added support for remote sap as DSAP.
+
+2021-05-06  Zoltan Bojthe
+
+	Ieee8022LlcSocket: set SSAP and interfaceId only when not specified already.
+
+2021-04-19  Zoltan Bojthe
+
+	Switch to using ModuleRef, ModuleRefByPar, opp_component_ptr for pointers to other modules.
+
+2021-03-31  Zoltan Bojthe
+
+	Ieee8022Llc: Added DispatchProtocolReq with ethernetMac protocol for packet sending down.
+
+2021-03-30  Zoltan Bojthe
+
+	Changed register protocol on lower layer gates when parameter registerProtocol is true.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
+2021-03-17  Zoltan Bojthe
+
+	Ieee8022Llc: Added	deliverCopyToSockets() and isDeliverableToUpperLayer().
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-10-30  Levente Mészáros

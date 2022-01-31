@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2021-05-07  Zoltan Bojthe
+
+	Added parent or this to parameter access for OMNeT++ 6 compatibility.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-08-31  Levente Mészáros

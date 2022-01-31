@@ -1,0 +1,5 @@
+====== inet-4.x ======
+
+2021-09-01  Levente Mészáros
+
+	Added TsnClock, TsnDevice and TsnSwitch modules.

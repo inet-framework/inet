@@ -1,5 +1,25 @@
 ====== inet-4.x ======
 
+2022-01-05  Zoltan Bojthe
+
+	Changed to use canDequeuePacket(), dequeuePacket().
+
+2021-11-15  Zoltan Bojthe
+
+	Redesigned for the outside input queue.
+
+2021-06-02  Zoltan Bojthe
+
+	Changed to use OmittedModule instead of conditional modules.
+
+2021-05-07  Zoltan Bojthe
+
+	Added parent or this to parameter access for OMNeT++ 6 compatibility.
+
+2021-04-26  Zoltan Bojthe
+
+	Added/updated Enter_Method() info to the signalname in receiveSignal().
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-10-21  Zoltan Bojthe

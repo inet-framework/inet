@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2021-11-30  Levente Mészáros
+
+	Extracted IPacketDelayer module interface from PacketDelayer.
+
+2021-09-14  Levente Mészáros
+
+	IPacketCollection: Added removeAllPackets method.
+
+2021-06-18  Levente Mészáros
+
+	Added @omittedTypename property to several module interfaces.
+
+2021-06-14  Levente Mészáros
+
+	Added IPacketPolicing module interface and *PacketPolicing modules.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-07-24  Levente Mészáros

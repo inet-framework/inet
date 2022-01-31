@@ -1,5 +1,38 @@
 ====== inet-4.x ======
 
+2021-06-25  Levente Mészáros
+
+	Added minimal NED documentation to base modules.
+
+2021-06-14  Zoltan Bojthe
+
+	Made compatible with cancelEvent() and cancelAndDelete() functions.
+
+2021-04-09  Levente Mészáros
+
+	Fixed the bug that the clock wasn't returning the *exact* clock time of clock
+	events when they actually executed.
+	DriftingOscillatorBase: Replaced relativeSpeed with inverseDriftRate to
+	avoid double arithmetic precision loss for large simulation times.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
+2021-02-03  Zoltan Bojthe
+
+	Added emits for recording time.
+
+2021-01-28  Levente Mészáros
+
+	Extracted the ClockEvent class to be a C++ class instead of it being generated.
+	The reason is that it seems to have more and more custom code.
+
+2021-01-22  Levente Mészáros
+
+	Extracted DriftingOscillatorBase module.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-07-31  Levente Mészáros and Zoltán Böjthe

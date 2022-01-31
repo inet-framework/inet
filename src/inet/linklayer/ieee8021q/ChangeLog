@@ -1,5 +1,129 @@
 ====== inet-4.x ======
 
+2021-12-16  Levente Mészáros
+
+	Added missing interfaceTableModule parameter assignments for passing down.
+
+2021-11-29  Levente Mészáros
+
+	Ieee8021qCreditBasedGate: Changed *Rate parameters to only have default values. Changed
+	maxInterferenceSize to infinity, the user must provide the value because there's no sensible default.
+	Ieee8021qTimeAwareShaper: Reversed priority order because 0 is lowest, 7 is highest in PCP.
+	SimpleIeee8021qFilter: Changed defaultGateIndex to -1 if there's no default path.
+
+2021-11-18  Zoltan Bojthe
+
+	Added missing @mutable property to parameters.
+
+2021-11-15  Levente Mészáros
+
+	*Ieee8021qFilter: Set gateIndexOffset if default path is used. Renamed hadDirectPath
+	parameter to hasDefaultPath. Added default value for numStreams parameter.
+	Ieee8021qTimeAwareShaper: Added default value for numTrafficClasses parameter.
+
+2021-11-08  Levente Mészáros
+
+	Ieee8021qTimeAwareShaper: Renamed numTrafficCategories to numTrafficClasses.
+
+2021-11-02  Levente Mészáros
+
+	Renamed *qciFilter modules to *qFilter modules.
+
+2021-10-26  Levente Mészáros
+
+	Renamed and moved standard specific shapers.
+	Renamed parameter to hasDirectPath.
+
+2021-10-22  Levente Mészáros
+
+	PcpClassifier: Added missing parameter.
+	NED: Dropped unused and unnecessary omitted modules.
+
+2021-10-18  Levente Mészáros
+
+	Renamed ShaperPriorityQueue to PriorityShaper.
+
+2021-10-05  Levente Mészáros
+
+	Added Ieee8021qCreditBasedGate module.
+
+2021-09-24  Levente Mészáros
+
+	Added PCP request handling to Ieee8021qTag*HeaderInserter modules.
+	Completed Pcp*Classifier modules.
+
+2021-09-16  Levente Mészáros
+
+	Added more flexible next protocol handling using DispatchProtocolReq and EncapsulationProtocolReq.
+
+2021-09-15  Levente Mészáros
+
+	Added PriorityToTrafficClassClassifier and PcpClassifier module.
+
+2021-09-01  Levente Mészáros
+
+	ShaperPriorityQueue: Fixed iteration upper limit in connections section.
+	Added DualIeee80211qciFilter for the case when both token bucket filtering
+	and elibility time filtering is required.
+
+2021-07-28  Levente Mészáros
+
+	SimpleIeee8021qciFilter: Added directPath parameter for packets that don't belong to any stream.
+
+2021-07-19  Levente Mészáros
+
+	Added PcpInd tags to incoming packets in header checkers.
+	Added new compound queue called ShaperPriorityQueue that is built using shapers.
+	Added CreditBasedShaper, TimeAwareShaper and AsynchronousShaper modules.
+
+2021-06-24  Levente Mészáros
+
+	StreamPolicyLayer: Changed submodule name to streamCoder as in BridgingLayer.
+
+2021-06-18  Levente Mészáros
+
+	Replaced default Omitted* typenames with "" now that the module interfaces specify them.
+	Refactored FilterPolicyLayer into StreamFilterLayer and StreamPolicyLayer modules.
+
+2021-06-16  Levente Mészáros
+
+	Ieee8021qciFilter: Changed stream filter to take stream name from the stream filter table parameter.
+	Added a new FilterPolicyLayer module.
+
+2021-06-14  Levente Mészáros
+
+	Created a separate SimpleIeee8021qciFilter and an Ieee8021qciFilter that
+	closely matches the structure present in the standard.
+
+2021-06-04  Levente Mészáros
+
+	Added a new Ieee8021qciFilter module to provide a default 802.1Qci per-stream filtering and policing.
+
+2021-05-07  Zoltan Bojthe
+
+	Added parent or this to parameter access for OMNeT++ 6 compatibility.
+
+2021-04-19  Zoltan Bojthe
+
+	Switch to using ModuleRef, ModuleRefByPar, opp_component_ptr for pointers to other modules.
+
+2021-03-24  Zoltan Bojthe
+
+	Ieee8021qLayer: added interfaceTableModule parameter and delegated it to submodules
+
+2021-03-18  Levente Mészáros
+
+	Added Ieee8021qLayer with both the protocol and policy components.
+	Renamed Ieee8021qLayer to Ieee8021qProtocol.
+	Replaced IIeee8021qLayer and IIeee8021rLayer with the standard IProtocolLayer.
+	Added handleParameterChange for the vlanIdFilter parameter.
+	Changed vlanIdFilter parameter type to object.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-12-08  Levente Mészáros

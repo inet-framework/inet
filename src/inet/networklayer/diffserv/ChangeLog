@@ -1,5 +1,28 @@
 ====== inet-4.x ======
 
+2022-01-07  Levente Mészáros
+
+	MultiFieldClassifier: Fixed registration forwarding for defaultOut gate.
+	MultiFieldClassifier: Fixed calling base class from initialize.
+
+2021-05-07  Zoltan Bojthe
+
+	Added parent or this to parameter access for OMNeT++ 6 compatibility.
+
+2021-03-25  Levente Mészáros
+
+	Diffserv: Removed unnecessary copying of packet when calling packet dissector.
+
+2021-03-24  Zoltan Bojthe
+
+	DscpMarker: Added Enter_Method() and take() cllas.
+	Changed to use dissectPacket() to find protocol headers.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-07-22  Levente Mészáros

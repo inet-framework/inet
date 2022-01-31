@@ -1,5 +1,37 @@
 ====== inet-4.x ======
 
+2022-01-07  Levente Mészáros
+
+	*QosClassifier: Added registration forwarding for out gate.
+
+2022-01-06  Zoltan Bojthe
+
+	WirelessInterface: changed module positions for better appearance.
+
+2021-09-09  Zoltan Bojthe
+
+	Added OmittedIeee8021dQosClassifier module.
+
+2021-07-19  Levente Mészáros
+
+	Added PcpTag.msg for PCP request and indication tags.
+
+2021-06-02  Zoltan Bojthe
+
+	Changed to use OmittedModule instead of conditional modules.
+
+2021-05-07  Zoltan Bojthe
+
+	Added parent or this to parameter access for OMNeT++ 6 compatibility.
+
+2021-04-28  Zoltan Bojthe
+
+	Ieee802SapTag: Set ssap, dsap to -1.
+
+2021-01-22  Zoltan Bojthe
+
+	EtherType: Added more constants, order by value.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-16  Levente Mészáros

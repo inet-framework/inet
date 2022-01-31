@@ -1,5 +1,26 @@
 ====== inet-4.x ======
 
+2021-11-15  Levente Mészáros
+
+	Added default multicast loop parameter and removed constant.
+
+2021-06-18  Zoltan Bojthe
+
+	Fixed buf in blockMulticastSources(), joinMulticastSources(), inverted condition.
+
+2021-05-26  Zoltan Bojthe
+
+	Removed obsolete gateIndex - Udp has simple gates.
+
+2021-04-19  Zoltan Bojthe
+
+	Switch to using ModuleRef, ModuleRefByPar, opp_component_ptr for pointers to other modules.
+
+2021-03-19  Zoltan Bojthe
+
+	Changed if-else-if ladders in initialize() to separate if statements because
+	different stages may have the same number.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-08-26  Levente Mészáros

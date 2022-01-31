@@ -1,5 +1,227 @@
 ====== inet-4.x ======
 
+2022-01-17  Levente Mészáros
+
+	ProtocolListTagBase: Renamed plural protocols field to singular protocol.
+
+2022-01-12  Levente Mészáros
+
+	MessageDispatcher: Added forward*Registration parameters.
+	Enhanced logging for protocol and interface registration.
+
+2022-01-11  Levente Mészáros
+
+	MessageDispatcher: Reworked protection against re-entrant protoco/service registration.
+	It's no longer an error when the same MessageDispatcher is reached again during a
+	single registration process.
+
+2021-12-16  Levente Mészáros
+
+	ResultFilters: Extended ThroughputFilter and LiveThroughputFilter to also accept
+	length values instead of packets.
+
+2021-12-09  Levente Mészáros
+
+	Renamed signals to packet*Started and packet*Ended.
+
+2021-12-06  Levente Mészáros
+
+	Added packet+Push/Pull+Initated/Completed signals.
+
+2021-10-26  Levente Mészáros
+
+	ResultFilters: Fixed recent bug in ThroughputFilter packet length.
+
+2021-10-18  Levente Mészáros
+
+	ResultFilters: Added clone method to ThroughputFilter to copy the parameters to the clone.
+
+	ThroughputFilter: Extended with interval and numLengthLimit filter parameters
+	that are read from the INI file configuration.
+	
+	DemuxFlowFilter: Added flow name matching based on filter flowName parameter.
+
+	ResidenceTimePerRegionFilter: Adapted to new TimeTag fields.
+	ResidenceTimeMeasurer: Extended to also measure packets that are created/dropped in the network node.
+	TimeTag: Replaced the 4 reception/transmission start/end time fields with 2 start/end time fields.
+
+	OmittedModule: Added guard conditions for the case when the next module is also missing.
+
+2021-10-14  Levente Mészáros
+
+	Simsignals: Added packetPushedIn/packetPushedOut and packetPulledIn, packetPulledOut signals.
+
+2021-10-07  Levente Mészáros
+
+	OmittedModule: Fixed the case when there is nothing to be connected to when
+	the omitted module is removed.
+
+2021-10-05  Levente Mészáros
+
+	ResultFilters: Added various region level timing filters.
+
+	Added ResidenceTimePerRegionFilter, LifeTimePerRegionFilter, ElapsedTimePerRegionFilter,
+	DelayingTimePerRegionFilter, ProcessingTimePerRegionFilter, QueueingTimePerRegionFilter
+	PropagationTimePerRegionFilter, PacketTransmissionTimePerRegionFilter, DemuxFlowFilters,
+	VarianceFilter, StddevFilter, JitterFilter, DifferenceToMeanFilter, UtilizationFilter,
+	GroupRegionsPerPacketFilter, LengthWeightedValuePerRegionFilter, MaxPerGroupFilter,
+	WeighedMeanPerGroupFilter, WeighedSumPerGroupFilter, DropWeightFilter and WeightTimesFilter.
+	
+	TimeTag: Added setting packet level total times in time tags and added ResidenceTimeTag.
+	Added ResidenceTimeMeasurer and IMeasurer.
+
+2021-09-29  Zoltan Bojthe
+
+	Reduced code variants based on OMNETPP_BUILDNUM.
+
+2021-09-28  Levente Mészáros
+
+	TimeTag: Added packetTotalTimes field and renamed field to bitTotalTimes.
+
+2021-09-27  Levente Mészáros
+
+	TemporarySharedPtr: Changed omnetpp version in guard condition to work with
+	already released version.
+
+2021-09-24  Levente Mészáros
+
+	Added PacketDurationFilter, PacketLengthFilter and FlowPacketLengthFilter.
+
+2021-09-23  Zoltan Bojthe
+
+	MemoryInputStream, MemoryOutputStream: Added 48 bit unsigned integer.
+
+2021-09-15  Levente Mészáros
+
+	Added NO_CARRIER packet drop reason.
+	IProtocolRegistrationListener: Merged different variants into a fewer methods.
+	Also changed the confirmation and response gates to be optional by
+	default because they are not used in INET.
+	Simplified findConnectedGate to only look at the dynamic type of the owner.
+
+2021-09-01  Levente Mészáros
+
+	ProtocolTag: Added EncapsulationProtocol* tags.
+
+2021-07-25  Andras Varga
+
+	Added @toValue(), @fromValue() to some MSG files.
+
+2021-07-20  Levente Mészáros
+
+	MessageDispatcher: Added quite a bit of logging when dispatching packets and messages.
+
+2021-07-19  Levente Mészáros
+
+	TagBase: Fixed printing fields using any_ptr.
+
+2021-06-22  Levente Mészáros
+
+	TagBase: Added print object support, all tags display all fields by default.
+
+2021-06-22  Zoltan Bojthe
+
+	stlutils.h: checking the container type and element type compatibility
+	stlutils.h: container type and element type can differs
+
+2021-06-22  Levente Mészáros
+
+	IProtocolRegistrationListener: Added logging when protocol and service registration starts.
+
+2021-06-17  Zoltan Bojthe
+
+	stlutils.h: fixup, extend with other base typenames (except the Allocator type)
+	remove() uses same type for the container element and the removable element.
+
+2021-06-16  Levente Mészáros
+
+	TransparentProtocolRegistrationListener: Added mapRegistrationForwardingGates
+	method to allow one-to-many relationship between gates.
+
+2021-06-14  Levente Mészáros
+
+	NedFunctions: Added findArrayObjectElement function.
+	Simsignals: Added packetFilteredSignal.
+	IPrintableObject: Added std::is_polymorphic condition to avoid ambiguity.
+
+2021-06-11  Zoltan Bojthe
+
+	Refreshed stlutils.h (copy again from omnetpp stlutil.h).
+
+2021-05-17  Levente Mészáros
+
+	ProtocolGroup: Added the unknown protocol to all protocol groups.
+
+2021-05-12  Levente Mészáros
+
+	Added an unknown protocol identifier to the list of protocols.
+
+2021-04-28  Levente Mészáros
+
+	Topology: Added const qualifier to several methods. Removed unnecessary target field.
+
+2021-04-26  Zoltan Bojthe
+
+	Added/updated Enter_Method() info to the signalname in receiveSignal().
+
+2021-04-19  Zoltan Bojthe
+
+	Switch to using ModuleRef, ModuleRefByPar, opp_component_ptr for pointers to other modules.
+	ModuleRef, ModuleRefByPar: Fixed infinite loop.
+
+2021-04-07  Zoltan Bojthe
+
+	ProtocolGroup: Changed to use ipprotocol constants instead of numbers.
+
+2021-03-31  Zoltan Bojthe
+
+	ProtocolGroup: Changed to use EtherType constants instead of numbers.
+
+2021-03-24  Levente Mészáros
+
+	InitStages: Changed initialization stage numbers to be sequential and unique.
+	This allows using if/else-if statements in the initialize methods. The
+	old behavior could cause problems if two stages had the same number and
+	the user checked for them using an if/else-if statement.
+
+2021-03-22  Levente Mészáros
+
+	InitStages: Fixed exporting symbols for windows DLLs.
+
+2021-03-19  Levente Mészáros
+
+	Changed initialization stage numbering to be based on topological sort.
+	Added Define_InitStage and Define_InitStage_Dependency macros.
+	This change also allows extending initalization stages from 3rd party projects.
+
+2021-03-18  Levente Mészáros
+
+	Topology: Extended to keep track of all possible paths not just the shortest one.
+	Protocol: Added IEEE 802.1R protocol to the list of known protocols.
+	ProtocolGroup: Added IEEE 802.1R protocol to the ethertype protocol group.
+	ProtocolGroup: Added a shift operator for printing a protocol group using its name.
+	IProtocolRegistrationListener: Extended TransparentProtocolRegistrationListener
+	with guard conditions for forwarding registrations.
+
+2021-02-12  Levente Mészáros
+
+	InitStages: Moved INITSTAGE_QUEUEING after INITSTAGE_NETWORK_INTERFACE_CONFIGURATION.
+	IPrintableObject: Added cases for cObject subclasses to use their default shift operator.
+	Units: Fixed specialized printing of small negative values with units.
+	Units: Added special shift operator for values with time units.
+
+2021-01-22  Zoltan Bojthe
+
+	Added gPTP precision time sync protocol.
+
+2021-01-15  Zoltan Bojthe
+
+	Moved code from updateDisplayString() to resolveDirective().
+
+2021-01-06  Rudolf Hornig
+
+	Resolved a crash on Windows caused by wrong static initialization order.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-12-09  Zoltan Bojthe

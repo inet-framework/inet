@@ -1,6 +1,22 @@
 ====== inet-4.x ======
 
+2021-05-07  Zoltan Bojthe
+
+	Added parent or this to parameter access for OMNeT++ 6 compatibility.
+
+2021-01-15  Zoltan Bojthe
+
+	Moved code from updateDisplayString() to resolveDirective().
+
+2021-01-04  Levente Mészáros
+
+	Simplified HCF coordination function after packet ownership changes.
+
 2021-01-11  ------ inet-4.3.0 released ------
+
+2020-12-18  Levente Mészáros
+
+	Changed coordination function to take ownership of received upper and lower packets.
 
 2020-12-08  Levente Mészáros
 

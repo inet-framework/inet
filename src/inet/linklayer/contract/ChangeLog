@@ -1,5 +1,27 @@
 ====== inet-4.x ======
 
+2022-01-13  Levente Mészáros
+
+	Renamed all MacAddressTable files to MacForwardingTable.
+	Replaced remaining MacAddressTable with MacForwardingTable.
+
+2021-03-23  Levente Mészáros
+
+	IMacRelayUnit: Changed to derive from IProtocolLayer.
+
+2021-03-22  Levente Mészáros
+
+	MacRelay: Renamed ifIn/ifOut gates to lowerLayerIn/lowerLayerOut gates.
+
+2021-03-18  Levente Mészáros
+
+	Replaced IPolicyLayer with the standard IProtocolLayer and renamed
+	OmittedPolicyLayer to OmittedProtocolLayer.
+
+2021-03-17  Zoltan Bojthe
+
+	Ethernet interfaces: set EthernetSignal label for phys gate.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-10-13  Levente Mészáros
