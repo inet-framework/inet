@@ -30,7 +30,7 @@ void HtbScheduler::printClass(htbClass *cl)
     EV_INFO << "   - cburst size: " << cl->cburstSize << endl;
 //    EV_INFO << "   - quantum: " << cl->quantum << endl;
 //    EV_INFO << "   - mbuffer: " << cl->mbuffer << endl;
-    EV_INFO << "   - chackpoint time: " << cl->checkpointTime << endl;
+    EV_INFO << "   - checkpoint time: " << cl->checkpointTime << endl;
     EV_INFO << "   - level: " << cl->level << endl;
     EV_INFO << "   - number of children: " << cl->numChildren << endl;
     if (cl->parent != NULL) {
@@ -91,7 +91,7 @@ HtbScheduler::htbClass *HtbScheduler::createAndAddNewClass(cXMLElement* oneClass
     }
     else {
         burstTemp = std::max(rate / 8000, mtu);
-        EV_INFO << "User did not specify cburst. Configuring automatically to: " << burstTemp << " Bytes." << endl;
+        EV_INFO << "User did not specify burst. Configuring automatically to: " << burstTemp << " Bytes." << endl;
     }
     if (oneClass->getFirstChildWithTag("cburst") != nullptr) {
         cburstTemp = atoi(oneClass->getFirstChildWithTag("cburst")->getNodeValue()); // Cburst specified in Bytes
@@ -119,7 +119,7 @@ HtbScheduler::htbClass *HtbScheduler::createAndAddNewClass(cXMLElement* oneClass
     long long burstChosen = burstTemp;
     long long cburstChosen = cburstTemp;
     if (valueCorectnessAdj == true) {
-        if (burstTemp < ceil / 8000) {
+        if (burstTemp < rate / 8000) {
             burstChosen = std::max(burstTemp, rate / 8000); // Burst should not be smaller than mtu + 1ms worth of sending at rate
             EV_WARN << "Burst adjusted to " << burstChosen << "Bytes" << endl;
         }
@@ -648,21 +648,15 @@ int HtbScheduler::htbDequeue(int priority, int level)
             htbClass *tempNode = cl;
             while (tempNode != rootClass) {
                 if (tempNode->parent->inner.innerFeeds[priority].size() > 1 && tempNode->mode == may_borrow) {
-                    if (tempNode->parent->inner.nextToDequeue[priority] == cl) {
+                    if (tempNode->parent->inner.nextToDequeue[priority] == tempNode) {
                         tempNode->parent->inner.nextToDequeue[priority] = *std::next(tempNode->parent->inner.innerFeeds[priority].find(tempNode));
                         if (tempNode->parent->inner.nextToDequeue[priority] == *tempNode->parent->inner.innerFeeds[priority].cend()) {
                             tempNode->parent->inner.nextToDequeue[priority] = *tempNode->parent->inner.innerFeeds[priority].cbegin();
                         }
-                        else {
-                            break;
-                        }
-                    }
-                    else {
-                        break;
                     }
                 }
                 else if (levels[tempNode->level]->selfFeeds[priority].size() > 1 && tempNode->mode == can_send) {
-                    if (levels[tempNode->level]->nextToDequeue[priority] == cl) {
+                    if (levels[tempNode->level]->nextToDequeue[priority] == tempNode) {
                         levels[tempNode->level]->nextToDequeue[priority] = *std::next(levels[tempNode->level]->selfFeeds[priority].find(tempNode));
                         if (levels[tempNode->level]->nextToDequeue[priority] == *levels[tempNode->level]->selfFeeds[priority].cend()) {
                             levels[tempNode->level]->nextToDequeue[priority] = *levels[tempNode->level]->selfFeeds[priority].cbegin();
