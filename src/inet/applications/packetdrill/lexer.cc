@@ -1236,20 +1236,6 @@ char *yytext;
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 3
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301, USA.
  */
 /*
  * Author: ncardwell@google.com (Neal Cardwell)
@@ -1396,10 +1382,10 @@ printf("code_without_ifdef=%s\n", code_without_ifdef);
     free(code);
 }
 
-#line 1400 "lexer.cc"
-#line 170 "lexer.l"
+#line 1386 "lexer.cc"
+#line 156 "lexer.l"
 #define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno;
-#line 1403 "lexer.cc"
+#line 1389 "lexer.cc"
 /* A regexp for C++ comments: */
 /* Here is a summary of the regexp for C comments:
  *   open-comment
@@ -1434,7 +1420,7 @@ printf("code_without_ifdef=%s\n", code_without_ifdef);
 /* IPv4-mapped IPv6 address: */
 /* IPv4-translated IPv6 address: */
 /* IPv4-embedded IPv6 addresses: */
-#line 1438 "lexer.cc"
+#line 1424 "lexer.cc"
 
 #define INITIAL 0
 
@@ -1649,9 +1635,9 @@ YY_DECL
 		}
 
 	{
-#line 243 "lexer.l"
+#line 229 "lexer.l"
 
-#line 1655 "lexer.cc"
+#line 1641 "lexer.cc"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1720,693 +1706,693 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 244 "lexer.l"
+#line 230 "lexer.l"
 return UDP;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 245 "lexer.l"
+#line 231 "lexer.l"
 return SA_FAMILY;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 246 "lexer.l"
+#line 232 "lexer.l"
 return SIN_PORT;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 247 "lexer.l"
+#line 233 "lexer.l"
 return SIN_ADDR;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 248 "lexer.l"
+#line 234 "lexer.l"
 return ACK;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 249 "lexer.l"
+#line 235 "lexer.l"
 return EOL;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 250 "lexer.l"
+#line 236 "lexer.l"
 return ECR;
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 251 "lexer.l"
+#line 237 "lexer.l"
 return MSS;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 252 "lexer.l"
+#line 238 "lexer.l"
 return NOP;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 253 "lexer.l"
+#line 239 "lexer.l"
 return TCPSACK;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 254 "lexer.l"
+#line 240 "lexer.l"
 return SACKOK;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 255 "lexer.l"
+#line 241 "lexer.l"
 return TIMESTAMP;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 256 "lexer.l"
+#line 242 "lexer.l"
 return VAL;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 257 "lexer.l"
+#line 243 "lexer.l"
 return _HTONS_;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 258 "lexer.l"
+#line 244 "lexer.l"
 return _HTONL_;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 259 "lexer.l"
+#line 245 "lexer.l"
 return WIN;
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 260 "lexer.l"
+#line 246 "lexer.l"
 return WSCALE;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 261 "lexer.l"
+#line 247 "lexer.l"
 return MYSCTP;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 262 "lexer.l"
+#line 248 "lexer.l"
 return CHUNK;
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 263 "lexer.l"
+#line 249 "lexer.l"
 return MYDATA;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 264 "lexer.l"
+#line 250 "lexer.l"
 return MYINIT;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 265 "lexer.l"
+#line 251 "lexer.l"
 return MYINIT_ACK;
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 266 "lexer.l"
+#line 252 "lexer.l"
 return MYSACK;
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 267 "lexer.l"
+#line 253 "lexer.l"
 return MYHEARTBEAT;
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 268 "lexer.l"
+#line 254 "lexer.l"
 return MYHEARTBEAT_ACK;
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 269 "lexer.l"
+#line 255 "lexer.l"
 return MYABORT;
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 270 "lexer.l"
+#line 256 "lexer.l"
 return MYSHUTDOWN;
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 271 "lexer.l"
+#line 257 "lexer.l"
 return MYSHUTDOWN_ACK;
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 272 "lexer.l"
+#line 258 "lexer.l"
 return MYERROR;
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 273 "lexer.l"
+#line 259 "lexer.l"
 return MYCOOKIE_ECHO;
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 274 "lexer.l"
+#line 260 "lexer.l"
 return MYCOOKIE_ACK;
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 275 "lexer.l"
+#line 261 "lexer.l"
 return MYSHUTDOWN_COMPLETE;
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 276 "lexer.l"
+#line 262 "lexer.l"
 return STATE_COOKIE;
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 277 "lexer.l"
+#line 263 "lexer.l"
 return HEARTBEAT_INFORMATION;
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 278 "lexer.l"
+#line 264 "lexer.l"
 return MYSUPPORTED_EXTENSIONS;
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 279 "lexer.l"
+#line 265 "lexer.l"
 return MYSUPPORTED_ADDRESS_TYPES;
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 280 "lexer.l"
+#line 266 "lexer.l"
 return RECONFIG;
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 281 "lexer.l"
+#line 267 "lexer.l"
 return OUTGOING_SSN_RESET;
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 282 "lexer.l"
+#line 268 "lexer.l"
 return INCOMING_SSN_RESET;
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 283 "lexer.l"
+#line 269 "lexer.l"
 return SSN_TSN_RESET;
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 284 "lexer.l"
+#line 270 "lexer.l"
 return ADD_OUTGOING_STREAMS;
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 285 "lexer.l"
+#line 271 "lexer.l"
 return ADD_INCOMING_STREAMS;
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 286 "lexer.l"
+#line 272 "lexer.l"
 return MYINVALID_STREAM_IDENTIFIER;
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 287 "lexer.l"
+#line 273 "lexer.l"
 return RECONFIG_RESPONSE;
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 288 "lexer.l"
+#line 274 "lexer.l"
 return IPV4_TYPE;
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 289 "lexer.l"
+#line 275 "lexer.l"
 return IPV6_TYPE;
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 290 "lexer.l"
+#line 276 "lexer.l"
 return TYPES;
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 291 "lexer.l"
+#line 277 "lexer.l"
 return TYPE;
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 292 "lexer.l"
+#line 278 "lexer.l"
 return FLAGS;
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 293 "lexer.l"
+#line 279 "lexer.l"
 return LEN;
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 294 "lexer.l"
+#line 280 "lexer.l"
 return TAG;
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 295 "lexer.l"
+#line 281 "lexer.l"
 return A_RWND;
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 296 "lexer.l"
+#line 282 "lexer.l"
 return IS;
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 297 "lexer.l"
+#line 283 "lexer.l"
 return OS;
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 298 "lexer.l"
+#line 284 "lexer.l"
 return TSN;
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 299 "lexer.l"
+#line 285 "lexer.l"
 return MYSID;
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 300 "lexer.l"
+#line 286 "lexer.l"
 return SSN;
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 301 "lexer.l"
+#line 287 "lexer.l"
 return PPID;
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 302 "lexer.l"
+#line 288 "lexer.l"
 return CUM_TSN;
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 303 "lexer.l"
+#line 289 "lexer.l"
 return GAPS;
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 304 "lexer.l"
+#line 290 "lexer.l"
 return DUPS;
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 305 "lexer.l"
+#line 291 "lexer.l"
 return SACK_ASSOC_ID;
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 306 "lexer.l"
+#line 292 "lexer.l"
 return MYSACK_DELAY;
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 307 "lexer.l"
+#line 293 "lexer.l"
 return SACK_FREQ;
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 308 "lexer.l"
+#line 294 "lexer.l"
 return SRTO_INITIAL;
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 309 "lexer.l"
+#line 295 "lexer.l"
 return SRTO_MAX;
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 310 "lexer.l"
+#line 296 "lexer.l"
 return SRTO_MIN;
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 311 "lexer.l"
+#line 297 "lexer.l"
 return SINIT_NUM_OSTREAMS;
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 312 "lexer.l"
+#line 298 "lexer.l"
 return SINIT_MAX_INSTREAMS;
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 313 "lexer.l"
+#line 299 "lexer.l"
 return SINIT_MAX_ATTEMPTS;
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 314 "lexer.l"
+#line 300 "lexer.l"
 return SINIT_MAX_INIT_TIMEO;
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 315 "lexer.l"
+#line 301 "lexer.l"
 return ASSOC_VALUE;
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 316 "lexer.l"
+#line 302 "lexer.l"
 return ASSOC_ID;
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 317 "lexer.l"
+#line 303 "lexer.l"
 return SPP_ASSOC_ID;
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 318 "lexer.l"
+#line 304 "lexer.l"
 return SPP_ADDRESS;
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 319 "lexer.l"
+#line 305 "lexer.l"
 return SPP_HBINTERVAL;
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 320 "lexer.l"
+#line 306 "lexer.l"
 return SPP_PATHMAXRXT;
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 321 "lexer.l"
+#line 307 "lexer.l"
 return SPP_PATHMTU;
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 322 "lexer.l"
+#line 308 "lexer.l"
 return SPP_FLAGS;
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 323 "lexer.l"
+#line 309 "lexer.l"
 return SPP_IPV6_FLOWLABEL_; /* avoid name clash */
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 324 "lexer.l"
+#line 310 "lexer.l"
 return SPP_DSCP_; /* avoid name clash */
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 325 "lexer.l"
+#line 311 "lexer.l"
 return SINFO_STREAM;
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 326 "lexer.l"
+#line 312 "lexer.l"
 return SINFO_SSN;
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
-#line 327 "lexer.l"
+#line 313 "lexer.l"
 return SINFO_FLAGS;
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 328 "lexer.l"
+#line 314 "lexer.l"
 return SINFO_PPID;
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
-#line 329 "lexer.l"
+#line 315 "lexer.l"
 return SINFO_CONTEXT;
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
-#line 330 "lexer.l"
+#line 316 "lexer.l"
 return SINFO_TIMETOLIVE;
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
-#line 331 "lexer.l"
+#line 317 "lexer.l"
 return SINFO_TSN;
 	YY_BREAK
 case 89:
 YY_RULE_SETUP
-#line 332 "lexer.l"
+#line 318 "lexer.l"
 return SINFO_CUMTSN;
 	YY_BREAK
 case 90:
 YY_RULE_SETUP
-#line 333 "lexer.l"
+#line 319 "lexer.l"
 return SINFO_ASSOC_ID;
 	YY_BREAK
 case 91:
 YY_RULE_SETUP
-#line 334 "lexer.l"
+#line 320 "lexer.l"
 return SINFO_PR_VALUE;
 	YY_BREAK
 case 92:
 YY_RULE_SETUP
-#line 335 "lexer.l"
+#line 321 "lexer.l"
 return SSTAT_ASSOC_ID;
 	YY_BREAK
 case 93:
 YY_RULE_SETUP
-#line 336 "lexer.l"
+#line 322 "lexer.l"
 return SSTAT_STATE;
 	YY_BREAK
 case 94:
 YY_RULE_SETUP
-#line 337 "lexer.l"
+#line 323 "lexer.l"
 return SSTAT_RWND;
 	YY_BREAK
 case 95:
 YY_RULE_SETUP
-#line 338 "lexer.l"
+#line 324 "lexer.l"
 return SSTAT_UNACKDATA;
 	YY_BREAK
 case 96:
 YY_RULE_SETUP
-#line 339 "lexer.l"
+#line 325 "lexer.l"
 return SSTAT_PENDDATA;
 	YY_BREAK
 case 97:
 YY_RULE_SETUP
-#line 340 "lexer.l"
+#line 326 "lexer.l"
 return SSTAT_INSTRMS;
 	YY_BREAK
 case 98:
 YY_RULE_SETUP
-#line 341 "lexer.l"
+#line 327 "lexer.l"
 return SSTAT_OUTSTRMS;
 	YY_BREAK
 case 99:
 YY_RULE_SETUP
-#line 342 "lexer.l"
+#line 328 "lexer.l"
 return SSTAT_FRAGMENTATION_POINT;
 	YY_BREAK
 case 100:
 YY_RULE_SETUP
-#line 343 "lexer.l"
+#line 329 "lexer.l"
 return SSTAT_PRIMARY;
 	YY_BREAK
 case 101:
 YY_RULE_SETUP
-#line 344 "lexer.l"
+#line 330 "lexer.l"
 return SRS_ASSOC_ID;
 	YY_BREAK
 case 102:
 YY_RULE_SETUP
-#line 345 "lexer.l"
+#line 331 "lexer.l"
 return SRS_FLAGS;
 	YY_BREAK
 case 103:
 YY_RULE_SETUP
-#line 346 "lexer.l"
+#line 332 "lexer.l"
 return SRS_NUMBER_STREAMS;
 	YY_BREAK
 case 104:
 YY_RULE_SETUP
-#line 347 "lexer.l"
+#line 333 "lexer.l"
 return SRS_STREAM_LIST;
 	YY_BREAK
 case 105:
 YY_RULE_SETUP
-#line 348 "lexer.l"
+#line 334 "lexer.l"
 return SASOC_ASSOC_ID;
 	YY_BREAK
 case 106:
 YY_RULE_SETUP
-#line 349 "lexer.l"
+#line 335 "lexer.l"
 return SASOC_ASOCMAXRXT;
 	YY_BREAK
 case 107:
 YY_RULE_SETUP
-#line 350 "lexer.l"
+#line 336 "lexer.l"
 return SASOC_NUMBER_PEER_DESTINATIONS;
 	YY_BREAK
 case 108:
 YY_RULE_SETUP
-#line 351 "lexer.l"
+#line 337 "lexer.l"
 return SASOC_PEER_RWND;
 	YY_BREAK
 case 109:
 YY_RULE_SETUP
-#line 352 "lexer.l"
+#line 338 "lexer.l"
 return SASOC_LOCAL_RWND;
 	YY_BREAK
 case 110:
 YY_RULE_SETUP
-#line 353 "lexer.l"
+#line 339 "lexer.l"
 return SASOC_COOKIE_LIFE;
 	YY_BREAK
 case 111:
 YY_RULE_SETUP
-#line 354 "lexer.l"
+#line 340 "lexer.l"
 return SAS_ASSOC_ID;
 	YY_BREAK
 case 112:
 YY_RULE_SETUP
-#line 355 "lexer.l"
+#line 341 "lexer.l"
 return SAS_INSTRMS;
 	YY_BREAK
 case 113:
 YY_RULE_SETUP
-#line 356 "lexer.l"
+#line 342 "lexer.l"
 return SAS_OUTSTRMS;
 	YY_BREAK
 case 114:
 YY_RULE_SETUP
-#line 357 "lexer.l"
+#line 343 "lexer.l"
 return INET_ADDR;
 	YY_BREAK
 case 115:
 YY_RULE_SETUP
-#line 358 "lexer.l"
+#line 344 "lexer.l"
 return REQ_SN;
 	YY_BREAK
 case 116:
 YY_RULE_SETUP
-#line 359 "lexer.l"
+#line 345 "lexer.l"
 return RESP_SN;
 	YY_BREAK
 case 117:
 YY_RULE_SETUP
-#line 360 "lexer.l"
+#line 346 "lexer.l"
 return LAST_TSN;
 	YY_BREAK
 case 118:
 YY_RULE_SETUP
-#line 361 "lexer.l"
+#line 347 "lexer.l"
 return SIDS;
 	YY_BREAK
 case 119:
 YY_RULE_SETUP
-#line 362 "lexer.l"
+#line 348 "lexer.l"
 return SENDER_NEXT_TSN;
 	YY_BREAK
 case 120:
 YY_RULE_SETUP
-#line 363 "lexer.l"
+#line 349 "lexer.l"
 return RECEIVER_NEXT_TSN;
 	YY_BREAK
 case 121:
 YY_RULE_SETUP
-#line 364 "lexer.l"
+#line 350 "lexer.l"
 return NUMBER_OF_NEW_STREAMS;
 	YY_BREAK
 case 122:
 YY_RULE_SETUP
-#line 365 "lexer.l"
+#line 351 "lexer.l"
 return RESULT;
 	YY_BREAK
 case 123:
 YY_RULE_SETUP
-#line 366 "lexer.l"
+#line 352 "lexer.l"
 return ELLIPSIS;
 	YY_BREAK
 case 124:
 YY_RULE_SETUP
-#line 367 "lexer.l"
+#line 353 "lexer.l"
 yylval.string = option(yytext); return OPTION;
 	YY_BREAK
 case 125:
 YY_RULE_SETUP
-#line 368 "lexer.l"
+#line 354 "lexer.l"
 yylval.floating = atof(yytext);   return MYFLOAT;
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
-#line 369 "lexer.l"
+#line 355 "lexer.l"
 yylval.integer = atoll(yytext);  return INTEGER;
 	YY_BREAK
 case 127:
 YY_RULE_SETUP
-#line 370 "lexer.l"
+#line 356 "lexer.l"
 yylval.integer = hextol(yytext); return HEX_INTEGER;
 	YY_BREAK
 case 128:
 YY_RULE_SETUP
-#line 371 "lexer.l"
+#line 357 "lexer.l"
 yylval.string = strdup(yytext); return MYWORD;
 	YY_BREAK
 case 129:
 /* rule 129 can match eol */
 YY_RULE_SETUP
-#line 372 "lexer.l"
+#line 358 "lexer.l"
 yylval.string = quoted(yytext); return MYSTRING;
 	YY_BREAK
 case 130:
 /* rule 130 can match eol */
 YY_RULE_SETUP
-#line 373 "lexer.l"
+#line 359 "lexer.l"
 yylval.string = quoted(yytext); return BACK_QUOTED;
 	YY_BREAK
 case 131:
 YY_RULE_SETUP
-#line 374 "lexer.l"
+#line 360 "lexer.l"
 return (int) yytext[0];
 	YY_BREAK
 case 132:
 /* rule 132 can match eol */
 YY_RULE_SETUP
-#line 375 "lexer.l"
+#line 361 "lexer.l"
 /* ignore whitespace */;
 	YY_BREAK
 case 133:
 /* rule 133 can match eol */
 YY_RULE_SETUP
-#line 376 "lexer.l"
+#line 362 "lexer.l"
 /* ignore C++-style comment */;
 	YY_BREAK
 case 134:
 /* rule 134 can match eol */
 YY_RULE_SETUP
-#line 377 "lexer.l"
+#line 363 "lexer.l"
 /* ignore C-style comment */;
 	YY_BREAK
 case 135:
 /* rule 135 can match eol */
 YY_RULE_SETUP
-#line 378 "lexer.l"
+#line 364 "lexer.l"
 handle_ifdef(FreeBSD_IFDEF, yytext);
 	YY_BREAK
 case 136:
 /* rule 136 can match eol */
 YY_RULE_SETUP
-#line 379 "lexer.l"
+#line 365 "lexer.l"
 handle_ifdef(Omnet_IFDEF, yytext);
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 380 "lexer.l"
+#line 366 "lexer.l"
 {
                         if ( --ifdef_stack_ptr < 0 ) {
                             yyterminate();
@@ -2418,10 +2404,10 @@ case YY_STATE_EOF(INITIAL):
 	YY_BREAK
 case 137:
 YY_RULE_SETUP
-#line 388 "lexer.l"
+#line 374 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 2425 "lexer.cc"
+#line 2411 "lexer.cc"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -3395,7 +3381,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 388 "lexer.l"
+#line 374 "lexer.l"
 
 
 
