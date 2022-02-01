@@ -14,7 +14,6 @@
 #include "inet/transportlayer/tcp_lwip/TcpLwipConnection.h"
 
 namespace inet {
-
 namespace tcp {
 
 Register_Class(TcpLwipSendQueue);
@@ -167,6 +166,5 @@ void TcpLwipReceiveQueue::notifyAboutSending(const TcpHeader *tcpsegP)
 }
 
 } // namespace tcp
-
 } // namespace inet
 

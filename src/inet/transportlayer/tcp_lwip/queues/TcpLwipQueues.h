@@ -15,14 +15,13 @@
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
 
 namespace inet {
-
 namespace tcp {
 
 // forward declarations:
 class TcpLwipConnection;
 
 /**
- * TCP_LWIP send queue. In fact a single object
+ * TcpLwip send queue. In fact a single object
  * represents both the send queue and the retransmission queue
  * (no need to separate them). The TcpConnection object knows
  * which data in the queue have already been transmitted ("retransmission
@@ -73,18 +72,10 @@ class TcpLwipConnection;
  *
  * @see TcpLwipReceiveQueue
  */
-
 class INET_API TcpLwipSendQueue : public cObject
 {
   public:
-    /**
-     * Ctor.
-     */
     TcpLwipSendQueue();
-
-    /**
-     * Virtual dtor.
-     */
     virtual ~TcpLwipSendQueue();
 
     /**
@@ -140,22 +131,16 @@ class INET_API TcpLwipSendQueue : public cObject
     ChunkQueue dataBuffer; // dataBuffer
 };
 
+/**
+ * TcpLwip receive queue.
+ */
 class INET_API TcpLwipReceiveQueue : public cObject
 {
   public:
-    /**
-     * Ctor.
-     */
     TcpLwipReceiveQueue();
-
-    /**
-     * Virtual dtor.
-     */
     virtual ~TcpLwipReceiveQueue();
 
-    /**
-     * Add a connection queue.
-     */
+    /** Add a connection queue. */
     virtual void setConnection(TcpLwipConnection *connP);
 
     /**
@@ -216,7 +201,6 @@ class INET_API TcpLwipReceiveQueue : public cObject
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif
