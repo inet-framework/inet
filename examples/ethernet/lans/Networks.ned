@@ -1,11 +1,9 @@
 //
 // Copyright (C) 2003 CTIE, Monash University
 //
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: LGPL-3.0-or-later
 //
 //
-
-
 
 package inet.examples.ethernet.lans;
 

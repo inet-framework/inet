@@ -1,7 +1,7 @@
 //
 // copyright:   (C) 2007-2009 CSEM SA, Neuchatel, Switzerland.
 //
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: LGPL-3.0-or-later
 //
 //
 //***************************************************************************
