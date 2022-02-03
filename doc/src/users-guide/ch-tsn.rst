@@ -3,19 +3,46 @@
 Time-Sensitive Networking
 =========================
 
-This chapter describes the INET Framework modules that implement a subset of the
-IEEE standards related to Time-Sensitive Networking (TSN). Some of these modules
-are specific to the IEEE standards, but several of them are more generic and they
-are simply reused to achieve the required functionality.
+This chapter describes the part of INET Framework that implements a subset of
+the IEEE standards related to Time-Sensitive Networking (TSN). The supported
+TSN features include among others: time synchronization, per-stream filtering
+and policing, scheduling and traffic shaping, frame replication and elimination,
+frame preemption, cut-through switching, automatic network configuration for
+failure protection, stream redundancy, and gate scheduling.
+
+The above TSN features are implemented in several modules separate from other
+standard Ethernet functionality. Some of the modules presented in this chapter
+are specific to the IEEE standards, but several of them are more generic and
+they are simply reused to achieve the required functionality.
+
+However, it must be noted that several TSN features are only partially supported.
+The following sections describe the individual TSN features in detail.
 
 .. _ug:sec:tsn:devices:
 
 Devices
 -------
 
-:ned:`TsnClock`
-:ned:`TsnDevice`
-:ned:`TsnSwitch`
+TSN networks require additional functionality compared to standard Ethernet.
+To facilitate the configuration of the TSN features, INET provides several TSN
+specific network devices. These are derived from the basic INET network nodes and
+they provide several additional TSN specific parameters. The additional parameters
+mostly determine the internal module structure of the TSN specific network nodes,
+and also further parameterize the basic network node submodules. The usage of
+these network nodes is completely optional, it is possible to combine the TSN
+modules in other ways. However, it is advisable to start making TSN simulations
+using them.
+
+-  :ned:`TsnClock` models a hardware device that exclusively acts as a gPTP
+   master node for time synchronization
+-  :ned:`TsnDevice` models a TSN specific end device capable of running
+   multiple applications and all other supported TSN features
+-  :ned:`TsnSwitch` models an Ethernet switch capable of all supported TSN
+   features
+
+Using the TSN specific network nodes and having the TSN specific features enabled
+is just the first step for using Time-Sensitve Networking. Most TSN features
+require additional configuration in the corresponding modules.
 
 .. _ug:sec:tsn:timesynchronization:
 
@@ -23,22 +50,49 @@ Time Synchronization
 --------------------
 
 This section describes the modules that implement a subset of the IEEE 802.1AS
-standard titled Timing and Synchronization for Time-Sensitive Applications (IEEE
-802.1AS-2020).
+standard titled as Timing and Synchronization for Time-Sensitive Applications (IEEE
+802.1AS-2020). There are two main components for this TSN feature, clock modules
+that keep track of time in the individual network nodes, and time synchronization
+protocol modules that synchronize these clocks. All required modules are already
+included in the TSN specific network nodes.
 
-:ned:`SettableClock`
+If the default TSN specific network nodes are not used, then the following modules
+can still be used to keep track of time in the network nodes.
 
-:ned:`Gptp`
-:ned:`GptpBridge`
-:ned:`GptpEndstation`
-:ned:`GptpMaster`
-:ned:`GptpSlave`
+-  :ned:`OscillatorBasedClock` models a clock having potentially drifting
+   oscillator
+-  :ned:`SettableClock` extends the previous model with the capability of setting
+   the clock time
 
-:ned:`MultiClock`
-:ned:`MultiGptp`
+Similarly to the above the following gPTP time synchronization related protocol
+modules and network nodes can also be used to build time synchronization in a
+network:
 
-:par:`hasGptp`
-:par:`hasTimeSynchronization`
+-  :ned:`Gptp` the gPTP time synchronization protocol
+-  :ned:`GptpBridge` models a gPTP time synchronization bridge network node
+-  :ned:`GptpEndstation` models a gPTP time synchronization end station network node
+-  :ned:`GptpMaster` models a gPTP time synchronization master network node
+-  :ned:`GptpSlave` models a gPTP time synchronization slave network node
+
+In order to implement node failure (e.g. master clock) and link failure (e.g.
+between gPTP bridges) protection, multiple time synchronization domains are
+required. These time domains operate independently of each other and it's up to
+the clock user modules of each network node to decide which clock they are using.
+Typically they use the active clock of the :ned:`MultiClock` and there has to
+be some means of changing the active clocks when failover happens. The following
+modules can be used to implement multiple time domains:
+
+-  :ned:`MultiClock` contains several subclocks for the different time domains
+-  :ned:`MultiDomainGptp` contains several gPTP submodules for the different
+   time domains
+
+The following parameters can be used to enable the gPTP time synchronization
+in various predefined network nodes:
+
+-  :par:`hasTimeSynchronization` parameter enables time synchronization in TSN
+   specific network nodes
+-  :par:`hasGptp` parameter enables the gPTP time synchronization protocol in
+   gPTP specific network nodes
 
 .. _ug:sec:tsn:streamfiltering:
 
@@ -149,7 +203,11 @@ several submodules but in a slightly different way than the :ned:`SimpleIeee8021
 The most important difference is that this module can be mostly configured
 through a single streamFilterTable parameter.
 
-:par:`hasIngressTrafficFiltering`
+The TSN specific network node :ned:`TsnDevice` and :ned:`TsnSwitch` have a special
+parameter called :par:`hasIngressTrafficFiltering` which can be used to enable the
+traffic filtering and policing in the network node architecture. Of course, these
+modules can also be used in other ways.
+
 
 .. _ug:sec:tsn:trafficshaping:
 
@@ -161,17 +219,17 @@ of the IEEE 802.1Q standard that was originally introduced by the Enhancements
 for Scheduled Traffic (IEEE 802.1Qbv-2015) amendment.
 
 The traffic shaping architecture is part of the queue submodule of the MAC layer
-of each network interface. Currently three different packet shaper algorithms
+in the network interface. Currently three different packet shaper algorithms
 are supported, the credit-based shaper, the time-aware shaper, and the asynchronous
 shaper. In order to configure the network interface to use traffic shaping the
 queue submodule must be replaced with either the :ned:`GatingPriorityQueue` or
-the :ned:`PriorityShaper' compound modules. Both contain a packet classifier to
+the :ned:`PriorityShaper` compound modules. Both contain a packet classifier to
 differentiate between the traffic categories and a priority packet scheduler
 that prefers higher priority traffic categories over lower priority ones. The
 difference is in the structure of the other submodules that form the shapers.
 
 The credit-based shaper is implemented in the :ned:`CreditBasedShaper` module
-using a standard :ned:`PacketQueue` and a special purpose :ned:`Ieee8021CreditBasedGate`
+using a standard :ned:`PacketQueue` and a special purpose :ned:`Ieee8021qCreditBasedGate`
 submodule. The latter module keeps track of the available credits for the given
 traffic category and allows or forbids the transmission of packets.
 
@@ -197,7 +255,7 @@ time.
 The TSN specific network node :ned:`TsnDevice` and :ned:`TsnSwitch` have a special
 parameter called :par:`hasEgressTrafficShaping` which can be used to enable the
 traffic shaping in the network node architecture. Of course, these modules can
-also be put in place in the usual ways.
+also be used in other ways.
 
 .. _ug:sec:tsn:framereplication:
 
@@ -205,7 +263,7 @@ Frame Replication and Elimination
 ---------------------------------
 
 This section describes the modules that implement a subset of the functionality
-of the IEEE 802.1CB standard titled: Frame Replication and Elimination for
+of the IEEE 802.1CB standard titled as Frame Replication and Elimination for
 Reliability (IEEE 802.1CB-2017).
 
 The relevant modules are all part of the :ned:`BridgingLayer` compound module
@@ -222,7 +280,7 @@ name for outgoing packets by looking at their contents and meta data. For exampl
 packets can be identified by the destination MAC address and PCP request tags.
 Since at this point the packets don't yet contain any layer 2 header the decision
 can be based on the attached request tags that will be later turned into packet
-headers. 
+headers.
 
 The second layer handles incoming stream merging and outgoing stream splitting.
 This layer is called the :ned:`StreamRelayLayer` and contains two submodules
@@ -247,7 +305,7 @@ tags.
 The TSN specific network node :ned:`TsnDevice` and :ned:`TsnSwitch` have a special
 parameter called :par:`hasStreamRedundancy` which can be used to enable frame
 replication in the network node architecture. Of course, these modules can also
-be put in place in the usual ways.
+be used in other ways.
 
 .. _ug:sec:tsn:framepreemption:
 
@@ -260,46 +318,98 @@ of the IEEE 802.1Q standard that was originally introduced by the Frame Preempti
 
 Frame preemption requires the network interface to be able to interrupt an
 ongoing transmission and switch to the transmission of a higher priority frame.
-This behavior is implemented in special :ned:`EthernetPreemptingMacLayer` and
-:ned:`EthernetPreemptingPhyLayer` modules in the network interface. These modules
-use packet streaming inside the network interface in contrast with the default
-behavior where modules are passing packets around as a whole.
+This behavior is implemented in special MAC and PHY layer modules that use packet
+streaming in the network interface. This is in contrast with the default behavior
+where modules pass packets around as a whole.
 
-:ned:`PreemptableStreamer`
-:ned:`PreemptingServer`
+-  :ned:`EthernetPreemptingMacLayer` models an Ethernet MAC layer that contains
+   multiple MAC sublayers to allow the preemption of background traffic
+-  :ned:`EthernetPreemptingPhyLayer` models a PHY layer that allows the preemption
+   of an ongoing transmission
 
 The TSN specific network nodes, :ned:`TsnDevice` and :ned:`TsnSwitch`, have a
 special parameter called the :par:`hasFramePreemption` which can be used to
 enable frame preemption in the network interfaces. Of course, these modules can
-also be put in place in the usual ways.
+also be used in other ways.
 
 .. _ug:sec:tsn:cutthroughswitching:
 
 Cut-through Switching
 ---------------------
 
-:ned:`EthernetCutthroughLayer`
-:ned:`EthernetCutthroughSource`
-:ned:`EthernetCutthroughSink`
+The default store and forward mechanism in Ethernet switches greatly influences
+the end-to-end latency of application traffic. This effect can be overcome and
+drastically reduced by using cut-through switching. This methods starts forwarding
+the incoming frame before the whole frame has been received, usually right after
+the reception of the MAC header. However, cut-through switching is not a standard
+mechanism and there are all kinds of variants in operation.
 
-:par:`hasCutthroughSwitching`
+INET provides the following modules related to cut-through switching:
+
+-  :ned:`EthernetCutthroughInterface` models an Ethernet interface that contains
+   a special cut-through layer between the MAC and PHY layers that in certain
+   circumstances allows the direct forwarding of frames from the incoming network
+   interface to the outgoing
+-  :ned:`EthernetCutthroughLayer` models the cut-through layer with direct
+   connections to other cut-through interfaces inside the same network node
+-  :ned:`EthernetCutthroughSource` models the source of the cut-through forwarding
+   inside the network interface
+-  :ned:`EthernetCutthroughSink` models the sink of the cut-through forwarding
+   inside the network interface
+
+Surprisingly cut-through switch also has to be enabled in the end devices because
+the receiving switch has to be notified both at the start and at the end of the frame.
+
+The TSN specific network nodes, :ned:`TsnDevice` and :ned:`TsnSwitch`, have a
+special parameter called the :par:`hasCutthroughSwitching` which can be used to
+enable cut-through switching in the network interfaces. Of course, these modules can
+also be used in other ways.
 
 .. _ug:sec:tsn:automaticnetworkconfiguration:
 
 Automatic Network Configuration
 -------------------------------
 
-Configuring the features of Time-Sensitive Networking in a complex network topology
-with many application traffics with different requirements is a very difficult
-and error prone task.
+Configuring the features of Time-Sensitive Networking in a complex network that
+contains many applications with different traffic requirements is a difficult
+and error prone task. To facilitate this task, INET provides three types of
+network level configurators:
+
+-  gate scheduling configurators are capable of configuring the gate control
+   lists (i.e. periodic open/close states) for all traffic classes in all network
+   interfaces based on packet length, packet interval, and maximum latency parameters
+-  stream redundancy configurators are capable of configuring the stream merging
+   and stream splitting modules as well as the stream identification in all network
+   nodes to form the desired redundant streams for each application traffic
+-  failure protection configurators are capable of using the previous two to
+   achieve the desired link and node failure protections for all streams in the
+   network based on the set of failure cases
+
+All other network level configurators such as the :ned:`Ipv4NetworkConfigurator`
+or the :ned:`MacForwardingTableConfigurator` can also be used.
 
 There are several different automatic gate scheduling configurators having
-different capabilities. The :ned:`SimpleGateSchedulingConfigurator` is the
-most basic one.
+different capabilities:
 
-:ned:`Z3GateSchedulingConfigurator`
-:ned:`TSNSchedGateSchedulingConfigurator`
+-  :ned:`SimpleGateSchedulingConfigurator` eagerly allocates time slots in the
+   order of increasing traffic priority
+-  :ned:`Z3GateSchedulingConfigurator` uses a SAT solver to fulfill the traffic
+   constraints all at once
+-  :ned:`TSNschedGateSchedulingConfigurator` uses a state-of-the-art external
+   tool called TSNsched that is available at https://github.com/ACassimiro/TSNsched
 
-:ned:`StreamRedundancyConfigurator`
+There is only one stream redundancy configurator:
 
-:ned:`TsnConfigurator`
+-  :ned:`StreamRedundancyConfigurator` configures stream splitting, stream merging
+   and stream filtering in all network nodes
+
+Currently there is only one failure protection configurator:
+
+-  :ned:`TsnConfigurator` configures the gate scheduling and the stream redundancy
+   configurators to provide protection against the specified link and node failures
+
+All of these configurators automatically discover the network topology and then
+taking into account their own independent configuration they compute the necessary
+parameters for the individual underlying modules and configure them. However,
+anything they can do, can also be done from INI files manually, and the result
+can also be seen at the configured module parameters in the runtime user interface.
