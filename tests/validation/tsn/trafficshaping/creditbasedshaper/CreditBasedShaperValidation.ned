@@ -12,7 +12,7 @@ import inet.node.ethernet.Eth100M;
 import inet.node.tsn.TsnDevice;
 import inet.node.tsn.TsnSwitch;
 
-network CreditbasedShaperValidation extends TsnNetworkBase
+network CreditBasedShaperValidation extends TsnNetworkBase
 {
     submodules:
         S0: TsnDevice {
