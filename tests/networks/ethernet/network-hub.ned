@@ -1,10 +1,8 @@
 package inet.tests.ethernet;
 
-import inet.node.ethernet.EthernetHub;
-import inet.node.ethernet.EthernetHost2;
 import inet.common.scenario.ScenarioManager;
+import inet.node.ethernet.EthernetHub;
 import ned.DatarateChannel;
-
 
 network HostsWithHub
 {

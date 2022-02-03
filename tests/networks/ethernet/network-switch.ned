@@ -1,9 +1,7 @@
 package inet.tests.ethernet;
 
-import inet.node.ethernet.EthernetHost2;
 import inet.node.ethernet.EthernetSwitch;
 import ned.DatarateChannel;
-
 
 network HostsWithSwitch
 {

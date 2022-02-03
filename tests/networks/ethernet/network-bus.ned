@@ -1,15 +1,8 @@
 package inet.tests.ethernet;
 
 import inet.common.scenario.ScenarioManager;
-import inet.linklayer.ethernet.EtherBus;
-import inet.node.ethernet.Eth10M;
-import inet.node.ethernet.EthernetHost2;
 import inet.physicallayer.wired.common.WireJunction;
 import ned.DatarateChannel;
-
-//
-// Sample Ethernet LAN: hosts connected via bus
-//
 
 network HostsWithBus
 {

@@ -1,8 +1,6 @@
 package inet.tests.ethernet;
 
-import inet.node.ethernet.EthernetHost2;
 import ned.DatarateChannel;
-
 
 network TwoHosts
 {
