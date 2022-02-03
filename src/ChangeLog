@@ -145,8 +145,8 @@
     visualizer.base.GateVisualizerBase
     visualizer.base.TreeVisualizerBase
     visualizer.canvas.common.GateCanvasVisualizer
+    visualizer.canvas.configurator.FailureProtectionConfigurationCanvasVisualizer
     visualizer.canvas.configurator.StreamRedundancyConfigurationCanvasVisualizer
-    visualizer.canvas.configurator.TsnConfigurationCanvasVisualizer
     visualizer.common.GateVisualizer
     visualizer.osg.common.GateOsgVisualizer
 
@@ -247,7 +247,7 @@
     numStreamRedundancyConfigurationVisualizers
     numStreams
     numTrafficClasses
-    numTsnConfigurationVisualizers
+    numFailureProtectionConfigurationVisualizers
     open
     pDelayReqProcessingTime
     packetOverheadLength
@@ -569,8 +569,8 @@
     visualizer/base/TreeVisualizerBase
     visualizer/canvas/base/TreeCanvasVisualizerBase
     visualizer/canvas/common/GateCanvasVisualizer
+    visualizer/canvas/configurator/FailureProtectionConfigurationCanvasVisualizer
     visualizer/canvas/configurator/StreamRedundancyConfigurationCanvasVisualizer
-    visualizer/canvas/configurator/TsnConfigurationCanvasVisualizer
     visualizer/osg/common/GateOsgVisualizer
 
     Renamed C++ classes

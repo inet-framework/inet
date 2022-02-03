@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/visualizer/canvas/configurator/TsnConfigurationCanvasVisualizer.h"
+#include "inet/visualizer/canvas/configurator/FailureProtectionConfigurationCanvasVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/configurator/FailureProtectionConfigurator.h"
@@ -14,9 +14,9 @@ namespace inet {
 
 namespace visualizer {
 
-Define_Module(TsnConfigurationCanvasVisualizer);
+Define_Module(FailureProtectionConfigurationCanvasVisualizer);
 
-void TsnConfigurationCanvasVisualizer::initialize(int stage) {
+void FailureProtectionConfigurationCanvasVisualizer::initialize(int stage) {
     TreeCanvasVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
@@ -44,7 +44,7 @@ void TsnConfigurationCanvasVisualizer::initialize(int stage) {
     }
 }
 
-const TreeCanvasVisualizerBase::TreeVisualization *TsnConfigurationCanvasVisualizer::createTreeVisualization(const std::vector<std::vector<int>>& tree) const
+const TreeCanvasVisualizerBase::TreeVisualization *FailureProtectionConfigurationCanvasVisualizer::createTreeVisualization(const std::vector<std::vector<int>>& tree) const
 {
     auto treeCanvasVisualization = static_cast<const TreeCanvasVisualization *>(TreeCanvasVisualizerBase::createTreeVisualization(tree));
     for (auto figure : treeCanvasVisualization->figures) {

@@ -5,8 +5,8 @@
 //
 
 
-#ifndef __INET_TSNCONFIGURATIONCANVASVISUALIZER_H
-#define __INET_TSNCONFIGURATIONCANVASVISUALIZER_H
+#ifndef __INET_FAILUREPROTECTIONCONFIGURATIONCANVASVISUALIZER_H
+#define __INET_FAILUREPROTECTIONCONFIGURATIONCANVASVISUALIZER_H
 
 #include "inet/visualizer/canvas/base/TreeCanvasVisualizerBase.h"
 
@@ -14,7 +14,7 @@ namespace inet {
 
 namespace visualizer {
 
-class INET_API TsnConfigurationCanvasVisualizer : public TreeCanvasVisualizerBase
+class INET_API FailureProtectionConfigurationCanvasVisualizer : public TreeCanvasVisualizerBase
 {
   protected:
     cMatchExpression streamFilter;

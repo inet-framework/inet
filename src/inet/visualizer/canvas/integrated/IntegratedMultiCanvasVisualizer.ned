@@ -32,7 +32,7 @@ import inet.visualizer.contract.IStreamRedundancyConfigurationVisualizer;
 import inet.visualizer.contract.ITracingObstacleLossVisualizer;
 import inet.visualizer.contract.ITransportConnectionVisualizer;
 import inet.visualizer.contract.ITransportRouteVisualizer;
-import inet.visualizer.contract.ITsnConfigurationVisualizer;
+import inet.visualizer.contract.IFailureProtectionConfigurationVisualizer;
 
 //
 // This module integrates all canvas visualizers into a single module. It
@@ -68,7 +68,7 @@ module IntegratedMultiCanvasVisualizer like IIntegratedVisualizer
         int numRoutingTableVisualizers = default(1);
         int numTransportRouteVisualizers = default(1);
         int numTransportConnectionVisualizers = default(1);
-        int numTsnConfigurationVisualizers = default(1);
+        int numFailureProtectionConfigurationVisualizers = default(1);
         int numStreamRedundancyConfigurationVisualizers = default(1);
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
@@ -166,7 +166,7 @@ module IntegratedMultiCanvasVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=450,1200,row,100");
         }
-        tsnConfigurationVisualizer[numTsnConfigurationVisualizers]: <default("TsnConfigurationCanvasVisualizer")> like ITsnConfigurationVisualizer {
+        failureProtectionConfigurationVisualizer[numFailureProtectionConfigurationVisualizers]: <default("FailureProtectionConfigurationCanvasVisualizer")> like IFailureProtectionConfigurationVisualizer {
             parameters:
                 @display("p=750,100");
         }

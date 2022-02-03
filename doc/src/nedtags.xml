@@ -3273,8 +3273,8 @@
     <filename>inet.visualizer.contract.ITransportRouteVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.visualizer.contract.ITsnConfigurationVisualizer</name>
-    <filename>inet.visualizer.contract.ITsnConfigurationVisualizer.html</filename>
+    <name>inet.visualizer.contract.IFailureProtectionConfigurationVisualizer</name>
+    <filename>inet.visualizer.contract.IFailureProtectionConfigurationVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.contract.ITunnelInterface</name>
@@ -6197,8 +6197,8 @@
     <filename>inet.node.tsn.TsnClock.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.visualizer.canvas.configurator.TsnConfigurationCanvasVisualizer</name>
-    <filename>inet.visualizer.canvas.configurator.TsnConfigurationCanvasVisualizer.html</filename>
+    <name>inet.visualizer.canvas.configurator.FailureProtectionConfigurationCanvasVisualizer</name>
+    <filename>inet.visualizer.canvas.configurator.FailureProtectionConfigurationCanvasVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.linklayer.configurator.FailureProtectionConfigurator</name>

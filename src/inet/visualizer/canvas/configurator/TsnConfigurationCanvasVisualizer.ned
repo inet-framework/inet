@@ -8,14 +8,14 @@
 package inet.visualizer.canvas.configurator;
 
 import inet.visualizer.base.TreeVisualizerBase;
-import inet.visualizer.contract.ITsnConfigurationVisualizer;
+import inet.visualizer.contract.IFailureProtectionConfigurationVisualizer;
 
-simple TsnConfigurationCanvasVisualizer extends TreeVisualizerBase like ITsnConfigurationVisualizer
+simple FailureProtectionConfigurationCanvasVisualizer extends TreeVisualizerBase like IFailureProtectionConfigurationVisualizer
 {
     parameters:
         string failureProtectionConfiguratorModule = default("failureProtectionConfigurator");
         string streamFilter = default("*");
         double zIndex = default(3); // determines the drawing order of figures relative to other visualizers
-        @class(TsnConfigurationCanvasVisualizer);
+        @class(FailureProtectionConfigurationCanvasVisualizer);
 }
 

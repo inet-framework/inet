@@ -8,13 +8,13 @@
 package inet.visualizer.contract;
 
 //
-// This module interface allows configuring different ~ITsnConfigurationVisualizer
+// This module interface allows configuring different ~IFailureProtectionConfigurationVisualizer
 // submodules from INI files. Such a visualizer displays the TSN configuration
 // in a network.
 //
-// @see ~TsnConfigurationCanvasVisualizer, ~TsnConfigurationOsgVisualizer, ~TsnConfigurationVisualizer, ~TsnConfigurationVisualizerBase
+// @see ~FailureProtectionConfigurationCanvasVisualizer, ~FailureProtectionConfigurationOsgVisualizer, ~FailureProtectionConfigurationVisualizer, ~FailureProtectionConfigurationVisualizerBase
 //
-moduleinterface ITsnConfigurationVisualizer
+moduleinterface IFailureProtectionConfigurationVisualizer
 {
     parameters:
         @display("i=block/app");
