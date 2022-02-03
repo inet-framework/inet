@@ -53,9 +53,9 @@
     clock.model.MultiClock
     common.ResidenceTimeMeasurer
     linklayer.common.OmittedIeee8021dQosClassifier
+    linklayer.configurator.FailureProtectionConfigurator
     linklayer.configurator.MacForwardingTableConfigurator
     linklayer.configurator.StreamRedundancyConfigurator
-    linklayer.configurator.TsnConfigurator
     linklayer.configurator.gatescheduling.AlwaysOpenGateSchedulingConfigurator
     linklayer.configurator.gatescheduling.SimpleGateSchedulingConfigurator
     linklayer.configurator.gatescheduling.TSNschedGateSchedulingConfigurator
@@ -189,6 +189,7 @@
     excessTokenModule
     extraDuration
     extraLength
+    failureProtectionConfiguratorModule
     followUpInterval
     forwardProtocolRegistration
     forwardServiceRegistration
@@ -273,7 +274,6 @@
     tokenProductionRate
     transmitCreditLimit
     transmitCreditSpendRate
-    tsnConfiguratorModule
 
     Renamed parameters
     ==================
@@ -490,9 +490,9 @@
     linklayer/common/PcpInd
     linklayer/common/PcpReq
     linklayer/common/PcpTagBase
+    linklayer/configurator/FailureProtectionConfigurator
     linklayer/configurator/MacForwardingTableConfigurator
     linklayer/configurator/StreamRedundancyConfigurator
-    linklayer/configurator/TsnConfigurator
     linklayer/configurator/gatescheduling/AlwaysOpenGateSchedulingConfigurator
     linklayer/configurator/gatescheduling/SimpleGateSchedulingConfigurator
     linklayer/configurator/gatescheduling/TSNschedGateSchedulingConfigurator

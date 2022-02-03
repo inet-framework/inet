@@ -13,7 +13,7 @@ import inet.visualizer.contract.ITsnConfigurationVisualizer;
 simple TsnConfigurationCanvasVisualizer extends TreeVisualizerBase like ITsnConfigurationVisualizer
 {
     parameters:
-        string tsnConfiguratorModule = default("tsnConfigurator");
+        string failureProtectionConfiguratorModule = default("failureProtectionConfigurator");
         string streamFilter = default("*");
         double zIndex = default(3); // determines the drawing order of figures relative to other visualizers
         @class(TsnConfigurationCanvasVisualizer);

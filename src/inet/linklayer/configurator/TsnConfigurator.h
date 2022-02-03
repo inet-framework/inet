@@ -5,14 +5,14 @@
 //
 
 
-#ifndef __INET_TSNCONFIGURATOR_H
-#define __INET_TSNCONFIGURATOR_H
+#ifndef __INET_FAILUREPROTECTIONCONFIGURATOR_H
+#define __INET_FAILUREPROTECTIONCONFIGURATOR_H
 
 #include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
 
 namespace inet {
 
-class INET_API TsnConfigurator : public NetworkConfiguratorBase
+class INET_API FailureProtectionConfigurator : public NetworkConfiguratorBase
 {
   public:
     class Path
@@ -23,7 +23,7 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
       public:
         Path(const std::vector<const Interface *>& interfaces) : interfaces(interfaces) { }
 
-        friend std::ostream& operator<<(std::ostream& os, const TsnConfigurator::Path& path)
+        friend std::ostream& operator<<(std::ostream& os, const FailureProtectionConfigurator::Path& path)
         {
             os << "[";
             for (int i = 0; i < path.interfaces.size(); i++) {
@@ -31,7 +31,7 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
                 if (i != 0)
                     os << ", ";
                 os << interface->node->module->getFullName();
-                if (TsnConfigurator::countParalellLinks(interface) > 1)
+                if (FailureProtectionConfigurator::countParalellLinks(interface) > 1)
                     os << "." << interface->networkInterface->getInterfaceName();
             }
             os << "]";
@@ -47,7 +47,7 @@ class INET_API TsnConfigurator : public NetworkConfiguratorBase
       public:
         Tree(const std::vector<Path>& paths) : paths(paths) { }
 
-        friend std::ostream& operator<<(std::ostream& os, const TsnConfigurator::Tree& tree)
+        friend std::ostream& operator<<(std::ostream& os, const FailureProtectionConfigurator::Tree& tree)
         {
             os << "{";
             for (int i = 0; i < tree.paths.size(); i++) {

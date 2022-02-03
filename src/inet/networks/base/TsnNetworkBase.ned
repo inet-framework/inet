@@ -24,7 +24,7 @@ network TsnNetworkBase extends WiredNetworkBase
         streamRedundancyConfigurator: <default("")> like INetworkConfigurator if typename != "" {
             @display("p=100,600;is=s");
         }
-        tsnConfigurator: <default("")> like INetworkConfigurator if typename != "" {
+        failureProtectionConfigurator: <default("")> like INetworkConfigurator if typename != "" {
             @display("p=100,700;is=s");
         }
 }

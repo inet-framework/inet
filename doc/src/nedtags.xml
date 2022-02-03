@@ -6201,8 +6201,8 @@
     <filename>inet.visualizer.canvas.configurator.TsnConfigurationCanvasVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.configurator.TsnConfigurator</name>
-    <filename>inet.linklayer.configurator.TsnConfigurator.html</filename>
+    <name>inet.linklayer.configurator.FailureProtectionConfigurator</name>
+    <filename>inet.linklayer.configurator.FailureProtectionConfigurator.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.node.tsn.TsnDevice</name>

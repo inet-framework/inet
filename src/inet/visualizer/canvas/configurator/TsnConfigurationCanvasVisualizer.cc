@@ -8,7 +8,7 @@
 #include "inet/visualizer/canvas/configurator/TsnConfigurationCanvasVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/linklayer/configurator/TsnConfigurator.h"
+#include "inet/linklayer/configurator/FailureProtectionConfigurator.h"
 
 namespace inet {
 
@@ -24,8 +24,8 @@ void TsnConfigurationCanvasVisualizer::initialize(int stage) {
     }
     else if (stage == INITSTAGE_LAST) {
         if (displayTrees) {
-            auto tsnConfigurator = getModuleFromPar<TsnConfigurator>(par("tsnConfiguratorModule"), this);
-            for (auto& stream : tsnConfigurator->getStreams()) {
+            auto failureProtectionConfigurator = getModuleFromPar<FailureProtectionConfigurator>(par("failureProtectionConfiguratorModule"), this);
+            for (auto& stream : failureProtectionConfigurator->getStreams()) {
                 cMatchableString matchableString(stream.name.c_str());
                 if (streamFilter.matches(&matchableString)) {
                     for (auto& tree : stream.trees) {

@@ -5,16 +5,16 @@
 //
 
 
-#include "inet/linklayer/configurator/TsnConfigurator.h"
+#include "inet/linklayer/configurator/FailureProtectionConfigurator.h"
 
 #include "inet/common/MatchableObject.h"
 #include "inet/linklayer/configurator/StreamRedundancyConfigurator.h"
 
 namespace inet {
 
-Define_Module(TsnConfigurator);
+Define_Module(FailureProtectionConfigurator);
 
-void TsnConfigurator::initialize(int stage)
+void FailureProtectionConfigurator::initialize(int stage)
 {
     NetworkConfiguratorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
@@ -25,7 +25,7 @@ void TsnConfigurator::initialize(int stage)
     }
 }
 
-void TsnConfigurator::computeConfiguration()
+void FailureProtectionConfigurator::computeConfiguration()
 {
     long initializeStartTime = clock();
     delete topology;
@@ -35,7 +35,7 @@ void TsnConfigurator::computeConfiguration()
     printElapsedTime("initialize", initializeStartTime);
 }
 
-void TsnConfigurator::computeStreams()
+void FailureProtectionConfigurator::computeStreams()
 {
     for (int i = 0; i < configuration->size(); i++) {
         cValueMap *streamConfiguration = check_and_cast<cValueMap *>(configuration->get(i).objectValue());
@@ -43,7 +43,7 @@ void TsnConfigurator::computeStreams()
     }
 }
 
-void TsnConfigurator::computeStream(cValueMap *configuration)
+void FailureProtectionConfigurator::computeStream(cValueMap *configuration)
 {
     auto streamName = configuration->get("name").stringValue();
     StreamConfiguration streamConfiguration;
@@ -88,7 +88,7 @@ void TsnConfigurator::computeStream(cValueMap *configuration)
     streamConfigurations.push_back(streamConfiguration);
 }
 
-std::vector<TsnConfigurator::Tree> TsnConfigurator::selectBestTreeSubset(cValueMap *configuration, const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const std::vector<Tree>& trees) const
+std::vector<FailureProtectionConfigurator::Tree> FailureProtectionConfigurator::selectBestTreeSubset(cValueMap *configuration, const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const std::vector<Tree>& trees) const
 {
     cValueArray *nodeFailureProtection = configuration->containsKey("nodeFailureProtection") ? check_and_cast<cValueArray *>(configuration->get("nodeFailureProtection").objectValue()) : nullptr;
     cValueArray *linkFailureProtection = configuration->containsKey("linkFailureProtection") ? check_and_cast<cValueArray *>(configuration->get("linkFailureProtection").objectValue()) : nullptr;
@@ -130,7 +130,7 @@ std::vector<TsnConfigurator::Tree> TsnConfigurator::selectBestTreeSubset(cValueM
     throw cRuntimeError("Cannot find tree combination that protects against all configured node and link failures");
 }
 
-double TsnConfigurator::computeTreeCost(const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const Tree& tree) const
+double FailureProtectionConfigurator::computeTreeCost(const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const Tree& tree) const
 {
     double cost = 0;
     // sum up the total number of links in the shortest paths to all destinations
@@ -161,7 +161,7 @@ double TsnConfigurator::computeTreeCost(const Node *sourceNode, const std::vecto
     return cost;
 }
 
-TsnConfigurator::Tree TsnConfigurator::computeCanonicalTree(const Tree& tree) const
+FailureProtectionConfigurator::Tree FailureProtectionConfigurator::computeCanonicalTree(const Tree& tree) const
 {
     Tree canonicalTree({});
     for (auto& path : tree.paths) {
@@ -212,7 +212,7 @@ TsnConfigurator::Tree TsnConfigurator::computeCanonicalTree(const Tree& tree) co
     return canonicalTree;
 }
 
-bool TsnConfigurator::checkNodeFailureProtection(cValueArray *configuration, const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const std::vector<Tree>& trees) const
+bool FailureProtectionConfigurator::checkNodeFailureProtection(cValueArray *configuration, const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const std::vector<Tree>& trees) const
 {
     EV_DETAIL << "Checking trees for node failure protection" << EV_ENDL;
     for (auto& tree : trees)
@@ -253,7 +253,7 @@ bool TsnConfigurator::checkNodeFailureProtection(cValueArray *configuration, con
     return true;
 }
 
-bool TsnConfigurator::checkLinkFailureProtection(cValueArray *configuration, const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const std::vector<Tree>& trees) const
+bool FailureProtectionConfigurator::checkLinkFailureProtection(cValueArray *configuration, const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const std::vector<Tree>& trees) const
 {
     EV_DETAIL << "Checking trees for link failure protection" << EV_ENDL;
     for (auto& tree : trees)
@@ -294,7 +294,7 @@ bool TsnConfigurator::checkLinkFailureProtection(cValueArray *configuration, con
     return true;
 }
 
-void TsnConfigurator::configureStreams() const
+void FailureProtectionConfigurator::configureStreams() const
 {
     const char *streamRedundancyConfiguratorModulePath = par("streamRedundancyConfiguratorModule");
     if (strlen(streamRedundancyConfiguratorModulePath) != 0) {
@@ -317,7 +317,7 @@ void TsnConfigurator::configureStreams() const
                     for (auto& interface : path.interfaces) {
                         std::string name;
                         name = interface->node->module->getFullName();
-                        if (TsnConfigurator::countParalellLinks(interface) > 1)
+                        if (FailureProtectionConfigurator::countParalellLinks(interface) > 1)
                             name = name + "." + interface->networkInterface->getInterfaceName();
                         pathParameterValue->add(name.c_str());
                     }
@@ -365,7 +365,7 @@ void TsnConfigurator::configureStreams() const
     }
 }
 
-std::vector<TsnConfigurator::Tree> TsnConfigurator::collectAllTrees(Node *sourceNode, const std::vector<const Node *>& destinationNodes) const
+std::vector<FailureProtectionConfigurator::Tree> FailureProtectionConfigurator::collectAllTrees(Node *sourceNode, const std::vector<const Node *>& destinationNodes) const
 {
     std::vector<Tree> allTrees;
     topology->calculateUnweightedSingleShortestPathsTo(sourceNode);
@@ -376,7 +376,7 @@ std::vector<TsnConfigurator::Tree> TsnConfigurator::collectAllTrees(Node *source
     return allTrees;
 }
 
-void TsnConfigurator::collectAllTrees(const std::vector<const Node *>& stopNodes, const std::vector<const Node *>& destinationNodes, int destinationNodeIndex, std::vector<Path>& currentTree, std::vector<Tree>& allTrees) const
+void FailureProtectionConfigurator::collectAllTrees(const std::vector<const Node *>& stopNodes, const std::vector<const Node *>& destinationNodes, int destinationNodeIndex, std::vector<Path>& currentTree, std::vector<Tree>& allTrees) const
 {
     if (destinationNodes.size() == destinationNodeIndex)
         allTrees.push_back(computeCanonicalTree(currentTree));
@@ -399,7 +399,7 @@ void TsnConfigurator::collectAllTrees(const std::vector<const Node *>& stopNodes
     }
 }
 
-std::vector<TsnConfigurator::Path> TsnConfigurator::collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *destinationNode) const
+std::vector<FailureProtectionConfigurator::Path> FailureProtectionConfigurator::collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *destinationNode) const
 {
     std::vector<Path> allPaths;
     std::vector<const Interface *> currentPath;
@@ -407,7 +407,7 @@ std::vector<TsnConfigurator::Path> TsnConfigurator::collectAllPaths(const std::v
     return allPaths;
 }
 
-void TsnConfigurator::collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *currentNode, std::vector<const Interface *>& currentPath, std::vector<Path>& allPaths) const
+void FailureProtectionConfigurator::collectAllPaths(const std::vector<const Node *>& stopNodes, const Node *currentNode, std::vector<const Interface *>& currentPath, std::vector<Path>& allPaths) const
 {
     if (std::find(stopNodes.begin(), stopNodes.end(), currentNode) != stopNodes.end()) {
         allPaths.push_back(Path(currentPath));
@@ -429,7 +429,7 @@ void TsnConfigurator::collectAllPaths(const std::vector<const Node *>& stopNodes
     }
 }
 
-std::vector<const TsnConfigurator::Node *> TsnConfigurator::collectNetworkNodes(const std::string& filter) const
+std::vector<const FailureProtectionConfigurator::Node *> FailureProtectionConfigurator::collectNetworkNodes(const std::string& filter) const
 {
     std::vector<const Node *> result;
     for (int i = 0; i < topology->getNumNodes(); i++) {
@@ -441,7 +441,7 @@ std::vector<const TsnConfigurator::Node *> TsnConfigurator::collectNetworkNodes(
     return result;
 }
 
-std::vector<const TsnConfigurator::Link *> TsnConfigurator::collectNetworkLinks(const std::string& filter) const
+std::vector<const FailureProtectionConfigurator::Link *> FailureProtectionConfigurator::collectNetworkLinks(const std::string& filter) const
 {
     std::vector<const Link *> result;
     for (int i = 0; i < topology->getNumNodes(); i++) {
@@ -459,7 +459,7 @@ std::vector<const TsnConfigurator::Link *> TsnConfigurator::collectNetworkLinks(
     return result;
 }
 
-void TsnConfigurator::collectReachedNodes(const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const Tree& tree, const std::vector<const Node *>& failedNodes, std::vector<bool>& reachedDestinationNodes) const
+void FailureProtectionConfigurator::collectReachedNodes(const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const Tree& tree, const std::vector<const Node *>& failedNodes, std::vector<bool>& reachedDestinationNodes) const
 {
     std::deque<const Node *> todoNodes;
     todoNodes.push_back(sourceNode);
@@ -482,7 +482,7 @@ void TsnConfigurator::collectReachedNodes(const Node *sourceNode, const std::vec
     }
 }
 
-void TsnConfigurator::collectReachedNodes(const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const Tree& tree, const std::vector<const Link *>& failedLinks, std::vector<bool>& reachedDestinationNodes) const
+void FailureProtectionConfigurator::collectReachedNodes(const Node *sourceNode, const std::vector<const Node *>& destinationNodes, const Tree& tree, const std::vector<const Link *>& failedLinks, std::vector<bool>& reachedDestinationNodes) const
 {
     std::deque<const Node *> todoNodes;
     todoNodes.push_back(sourceNode);
@@ -512,7 +512,7 @@ void TsnConfigurator::collectReachedNodes(const Node *sourceNode, const std::vec
     }
 }
 
-bool TsnConfigurator::matchesFilter(const std::string& name, const std::string& filter) const
+bool FailureProtectionConfigurator::matchesFilter(const std::string& name, const std::string& filter) const
 {
     cMatchExpression matchExpression;
     matchExpression.setPattern(filter.c_str(), false, false, true);

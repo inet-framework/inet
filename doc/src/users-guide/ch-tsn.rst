@@ -405,7 +405,7 @@ There is only one stream redundancy configurator:
 
 Currently there is only one failure protection configurator:
 
--  :ned:`TsnConfigurator` configures the gate scheduling and the stream redundancy
+-  :ned:`FailureProtectionConfigurator` configures the gate scheduling and the stream redundancy
    configurators to provide protection against the specified link and node failures
 
 All of these configurators automatically discover the network topology and then
