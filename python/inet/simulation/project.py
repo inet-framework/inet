@@ -23,4 +23,4 @@ def get_simulation_project(name):
     return simulation_projects[name]
 
 inet_project = get_simulation_project("inet")
-inet_master_project = get_simulation_project("inet-master")
+inet_baseline_project = get_simulation_project("inet-baseline")

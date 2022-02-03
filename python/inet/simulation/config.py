@@ -12,14 +12,14 @@ from inet.common import *
 logger = logging.getLogger(__name__)
 
 class SimulationConfig:
-    def __init__(self, simulation_project, working_directory, ini_file, config, num_runs, abstract, interactive, description):
+    def __init__(self, simulation_project, working_directory, ini_file, config, num_runs, abstract, description):
         self.simulation_project = simulation_project
         self.working_directory = working_directory
         self.ini_file = ini_file
         self.config = config
         self.num_runs = num_runs
         self.abstract = abstract
-        self.interactive = interactive
+        self.emulation = working_directory.find("emulation") != -1
         self.description = description
 
     def __repr__(self):
@@ -28,7 +28,7 @@ class SimulationConfig:
 num_runs_fast_regex = re.compile(r"(?m).*^\s*(include\s+.*\.ini|repeat\s*=\s*[0-9]+|.*\$\{.*\})")
 
 def get_num_runs_fast(ini_path):
-    file = open(ini_path, "r")
+    file = open(ini_path, "r", encoding="utf-8")
     text = file.read()
     file.close()
     return None if num_runs_fast_regex.search(text) else 1
@@ -38,15 +38,18 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
     working_directory = os.path.dirname(ini_path)
     num_runs_fast = get_num_runs_fast(ini_path)
     ini_file = os.path.basename(ini_path)
-    file = open(ini_path)
+    file = open(ini_path, encoding="utf-8")
     config_dicts = []
     config_dict = {}
     for line in file:
         match = re.match("\\[Config (.*)\\]|\\[(General)\\]", line)
         if match:
             config = match.group(1) or match.group(2)
-            config_dict = {"config": config, "description": None, "network": None}
+            config_dict = {"config": config, "abstract_config": False, "description": None, "network": None}
             config_dicts.append(config_dict)
+        match = re.match("#? *abstract-config *= *(\w+)", line)
+        if match:
+            config_dict["abstract_config"] = bool(match.group(1))
         match = re.match("description *= *\"(.*)\"", line)
         if match:
             config_dict["description"] = match.group(1)
@@ -67,9 +70,8 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
             num_runs = int(result.stdout)
         description = config_dict["description"]
         description_abstract = (re.search("\((a|A)bstract\)", description) is not None) if description else False
-        abstract = (config_dict["network"] is None and config_dict["config"] == "General") or description_abstract 
-        interactive = False # TODO
-        simulation_config = SimulationConfig(simulation_project, os.path.relpath(working_directory, simulation_project.get_full_path(".")), ini_file, config, num_runs, abstract, interactive, description)
+        abstract = (config_dict["network"] is None and config_dict["config"] == "General") or config_dict["abstract_config"] or description_abstract 
+        simulation_config = SimulationConfig(simulation_project, os.path.relpath(working_directory, simulation_project.get_full_path(".")), ini_file, config, num_runs, abstract, description)
         simulation_configs.append(simulation_config)
     return simulation_configs
 
@@ -103,7 +105,7 @@ def get_simulation_configs(simulation_project, simulation_configs=None,
                            working_directory_filter=None, exclude_working_directory_filter=None,
                            ini_file_filter=None, exclude_ini_file_filter=None,
                            config_filter=None, exclude_config_filter=None,
-                           simulation_config_filter=lambda simulation_config: not simulation_config.abstract and not simulation_config.interactive,
+                           simulation_config_filter=lambda simulation_config: not simulation_config.abstract and not simulation_config.emulation,
                            full_match=False, **kwargs):
     if simulation_configs is None:
         simulation_configs = get_all_simulation_configs(simulation_project, **kwargs)

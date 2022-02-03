@@ -11,9 +11,9 @@ import time
 
 from inet.simulation.build import *
 from inet.simulation.config import *
+from inet.simulation.inprocess import *
 from inet.simulation.project import *
-from scipy.sparse import _index
-from prompt_toolkit.key_binding.bindings.named_commands import complete
+from inet.simulation.subprocess import *
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +26,7 @@ class SimulationRun:
     def __init__(self, simulation_config, run=0, mode="debug", user_interface="Cmdenv", sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, **kwargs):
         assert run is not None
         self.simulation_config = simulation_config
+        self.interactive = None # NOTE delayed to is_interactive()
         self.run = run
         self.mode = mode
         self.user_interface = user_interface
@@ -37,6 +38,21 @@ class SimulationRun:
 
     def __repr__(self):
         return repr(self)
+
+    # TODO replace this with something more efficient?
+    def is_interactive(self):
+        if self.interactive is None:
+            simulation_config = self.simulation_config
+            simulation_project = simulation_config.simulation_project
+            executable = simulation_project.get_full_path("bin/inet")
+            args = [executable, "-s", "-u", "Cmdenv", "-f", simulation_config.ini_file, "-c", simulation_config.config, "-r", "0", "--sim-time-limit", "0s"]
+            env = os.environ.copy()
+            env["INET_ROOT"] = simulation_project.get_full_path(".")
+            subprocess_result = subprocess.run(args, cwd=simulation_config.working_directory, capture_output=True, env=env)
+            stderr = subprocess_result.stderr.decode("utf-8")
+            match = re.search(r"The simulation wanted to ask a question|The simulation attempted to prompt for user input", stderr)
+            self.interactive = match is not None
+        return self.interactive
 
     def set_cancel(self, cancel):
         self.cancel = cancel
@@ -53,7 +69,7 @@ class SimulationRun:
                (" -r " + str(self.run) if self.run != 0 else "") + \
                (" for " + sim_time_limit if sim_time_limit else "")
 
-    def run_simulation(self, mode=None, user_interface=None, sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, index=None, count=None, print_end=" ", keyboard_interrupt_handler=None, cancel=False, dry_run=False, output_stream=sys.stdout, extra_args=[], **kwargs):
+    def run_simulation(self, mode=None, user_interface=None, sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, index=None, count=None, print_end=" ", keyboard_interrupt_handler=None, cancel=False, dry_run=False, output_stream=sys.stdout, extra_args=[], simulation_runner=subprocess_simulation_runner, **kwargs):
         if sim_time_limit is None:
             sim_time_limit = self.sim_time_limit
         if cpu_time_limit is None:
@@ -80,7 +96,7 @@ class SimulationRun:
                 with EnabledKeyboardInterrupts(keyboard_interrupt_handler):
                     start_time = time.time()
                     if not dry_run:
-                        subprocess_result = subprocess.run(args, cwd=simulation_project.get_full_path(working_directory), capture_output=True, env=env)
+                        subprocess_result = simulation_runner.run(self, args)
                     else:
                         subprocess_result = None
                     end_time = time.time()
