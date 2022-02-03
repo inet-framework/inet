@@ -1,9 +1,58 @@
-# TODO
-#standard          = INET
-#meter + scheduler = meter + filter + meter + filter
+INET 4.4 release TODO items:
 
-#Meter + filter = Milter
-#Qci filtering using a classifier and multiple milters and scheduler where a milter can be a MultiPacketMilter
+1. Documentation
+
+ - Add new Time-Sensitive Networking chapter to the User's Guide
+
+2. Implementation
+
+3. Review
+
+ - Review new examples.
+ - Review all added components.
+ - Review folder names and module names.
+
+4. Release
+
+ - Fix important bugs from github.
+ - Merge important pull requests from github.
+ - Complete WHATSNEW and ChangeLog.
+
+5. Testing
+
+ - Make all fingerprint, module, unit, packet, drill, queueing, protocol, and leak tests PASS.
+
+===============================================================================
+
+Clean up PCAP recording:
+ - can happen at and is provided by network interfaces
+ - doesn't have to be supported by specific MAC/PHY/etc. layer modules
+ - can be done at lower layer and/or upper layer gates of network interfaces
+ - can record inbound and/or outbound packets
+ - can record each packet start and/or packet end and/or packet progress
+ - can be used to aggregate packets for network interface/network node/network level
+ - is configured by default to record the packet end for both inbound and outbound packets at the lower layer gates of network interfaces
+
+- PacketTransmitter without transmission channel should stop in initialize? otherwise duration parameters will not work
+
+- eliminate all typename != "" from NED files using default interface ommitted typenames
+- reduce redundancy among applications, e.g. add base application with parameterizable IO submodule, perhaps even create an IO base module which uses the ISocket interface
+- replace findPathStartGate/findPathEndGate with findConnectedModule/findConnectedGate and wrap the type specific reference to the module/gate into a template class?
+- make lz3 makefrag linker options conditional on oppfeature
+
+- add examples/documentation for matching PCP value and destination MAC address for outgoing packets (identification)
+- example with Pcp and PriorityToTrafficClassClassifier classifier example
+- example with combined Ethernet virtual LANs and TSN features
+
+- duplicate animation from EthernetFcsChecker through NetworkInterface due to animate always going through the gate chain even though the packet stops at NetworkInterface to attach an InterfaceInd 
+- come up with realistic frame replication showcases such as multiple link breaks which still produce the traffic at the destination
+- replace GatingPriorityQueue with ShaperPriorityQueue/PriorityShaper?
+- add examples to flow measurements for store-and-forward, A-MPDU aggregation, preemption, cut-through and their effects on the bit and packet total times
+
+- naming things according to standards, have parameter names according to the standard
+- have modules named as TransmissionSelectionAlgorithm
+
+implement multicast support in one gate scheduling configurator
 
 determining the next protocol for a packet in a protocol module (DispatchProtocolReq)
  - use protocol for specific address type (Ipv4, Ipv6)
@@ -12,32 +61,6 @@ determining the next protocol for a packet in a protocol module (DispatchProtoco
  - use the requested transport protocol, network protocol, MAC protocol (TransportProtocolReq, NetworkProtocolReq, MacProtocolReq)
  - use native protocol of network interface (specified as NetworkInterface protocol parameter)
  - use default next protocol of protocol module (hard-coded or specified as protocol parameter)
-
-INET 4.4 release TODO items:
-
-1. Fix
-
- - Network interface protocol parameter should be replaced with a more flexible
-   approach because the current behavior cannot be used to send packets both
-   with and without IEEE 802.1Q tags on the same interface.
-
-2. Review
-
- - Review new examples
- - Review all added components.
- - Review folder names and module names.
-
-3. Release
-
- - Fix important bugs from github.
- - Merge important pull requests from github.
- - Complete WHATSNEW and ChangeLog.
-
-4. Testing
-
- - Make all fingerprint, module, unit, packet, drill, queueing, protocol, and leak tests PASS.
-
-===============================================================================
 
  - packet region tags don't follow packet data insertion/removal, should be fixed
  - chunk queue and various chunk buffers don't have region tags, there's no place to store data specific tags from packets when reassembling data
@@ -96,20 +119,7 @@ Parallel simulation support
 - Add parameters to ScenarioManager disconnect operation to allow cutting connection at either end (source or destination)
   and also support disconnecting bidirectional connections in all four combinations.
 
-Ethernet features:
- - priority queueing
- - gating
- - transmission selection
- - preemption
- - cutthrough
- - VLAN
- - MAC security
- - relaying with proper L2 protocol support
- - LLC
-
  - generic TCP/UDP socket tagging, with automatic copying of tags to outgoing packets
-
- - Complete and review Packet API: insert/replace/update
 
  - temporal and spectral and spatial energy density
    - sampling
@@ -157,8 +167,6 @@ most important topics
    - LTE PHY full support and porting to INET 4.0, source/sink separation, signal classes, etc. (e.g. probe/microwave oven)
  - port existing 3rd party models
    - help ANSA porting to INET 4.0
-
-=====================
 
  - implicit serialization of chunks for conversion must be controllable from the API with flags
  - the packet dissector may need to do implicit chunk conversion because it has to choose a representation which may or may not be the same as the one in the packet (e.g. two interoperable frameworks)
