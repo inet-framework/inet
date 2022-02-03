@@ -1,11 +1,13 @@
 import cppyy
 
+from inet.common.util import *
+
 # setup omnetpp include path
-cppyy.add_include_path("/home/levy/workspace/omnetpp/include")
-cppyy.add_include_path("/home/levy/workspace/omnetpp/src")
+cppyy.add_include_path(get_workspace_path("omnetpp/include"))
+cppyy.add_include_path(get_workspace_path("omnetpp/src"))
 
 # setup omnetpp library path
-cppyy.add_library_path("/home/levy/workspace/omnetpp/lib")
+cppyy.add_library_path(get_workspace_path("omnetpp/lib"))
 
 # load omnetpp libraries
 cppyy.load_library("liboppcmdenv")
@@ -37,10 +39,10 @@ InifileReader = omnetpp.envir.InifileReader
 SectionBasedConfiguration = omnetpp.envir.SectionBasedConfiguration
 
 # setup inet include path
-cppyy.add_include_path("/home/levy/workspace/inet/src")
+cppyy.add_include_path(get_workspace_path("inet/src"))
 
 # setup omnetpp library path
-cppyy.add_library_path("/home/levy/workspace/inet/src")
+cppyy.add_library_path(get_workspace_path("inet/src"))
 
 # load inet library
 cppyy.load_library("libINET")
