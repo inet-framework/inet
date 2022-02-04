@@ -20,8 +20,10 @@ simple HtbScheduler extends PacketSchedulerBase like IPacketScheduler
         xml htbTreeConfig; // The htb tree structure
 
         bool htbHysterisis = default(false);
-
+		
         int mtu @unit(B) = default(1500B);
+        int phyLayerHeaderLength @unit(B) = default(7B); // Adjust the PHY layer header size depending on the PHY MAC used. 7 Bytes for PPP and 8 Bytes for Ethernet. Default 7B for PPP interfaces.
+        
         bool checkHTBTreeValuesForCorectness = default(true); // Check if some important (burst, cburst, quantum) inputted values in the XML Tree are correct. Will throw errors on incorrect values!
         bool adjustHTBTreeValuesForCorectness = default(true); // Adjust some important (burst, cburst, quantum) inputted values in the XML Tree if they are incorrect. Will just adjust incorrect values if the above check is disabled
 

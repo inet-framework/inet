@@ -246,6 +246,7 @@ void HtbScheduler::initialize(int stage)
     PacketSchedulerBase::initialize(stage); // Initialize the packet scheduler module
     if (stage == INITSTAGE_LOCAL) {
         mtu = par("mtu");
+        phyHeaderSize = par("phyLayerHeaderLength");
         valueCorectnessCheck = par("checkHTBTreeValuesForCorectness");
         valueCorectnessAdj = par("adjustHTBTreeValuesForCorectness");
         getParentModule()->subscribe(packetPushEndedSignal, this);
@@ -640,7 +641,7 @@ int HtbScheduler::htbDequeue(int priority, int level)
         if (cl->leaf.deficit[level] < 0) {
             throw cRuntimeError("The class %s deficit on level %d is negative!", cl->name, level);
         }
-        cl->leaf.deficit[level] -= (thePacketToPop->getByteLength() + 7);
+        cl->leaf.deficit[level] -= (thePacketToPop->getByteLength() + phyHeaderSize);
         emit(cl->leaf.deficitSig[level], cl->leaf.deficit[level]);
         if (cl->leaf.deficit[level] < 0) {
             cl->leaf.deficit[level] += cl->quantum;
@@ -919,7 +920,7 @@ void HtbScheduler::htbRemoveFromWaitTree(htbClass *cl)
 
 void HtbScheduler::chargeClass(htbClass *leafCl, int borrowLevel, Packet *packetToDequeue)
 {
-    long long bytes = (long long) packetToDequeue->getByteLength() + 7;
+    long long bytes = (long long) packetToDequeue->getByteLength() + phyHeaderSize;
     int old_mode;
     long long diff;
 

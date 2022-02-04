@@ -44,6 +44,7 @@ class INET_API HtbScheduler : public PacketSchedulerBase, public IPacketCollecti
     double linkDatarate; // The datarate of connected link
 
     long long mtu;
+    int phyHeaderSize;
     bool valueCorectnessCheck;
     bool valueCorectnessAdj;
 
