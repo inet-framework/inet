@@ -547,30 +547,8 @@ cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
         if (itable != nullptr) {
             for (int i = 0; i < itable->getNumInterfaces(); i++) {
                 NetworkInterface *entry = itable->getInterface(i);
-                switch (add.getType()) {
-                    case L3Address::IPv6:
-                    case L3Address::IPv4:
-                    case L3Address::MAC:
-                        if (entry->hasNetworkAddress(add))
-                            return mod;
-                        break;
-                    case L3Address::MODULEPATH: {
-                        if(entry->getModulePathAddress() == add.toModulePath()){
-                            return mod;
-                        }
-                        break;
-                    }
-                    case L3Address::MODULEID: {
-                        if(entry->getModuleIdAddress() == add.toModuleId()){
-                            return mod;
-                        }
-                        break;
-                    }
-                    default:
-                        (void)entry;    // eliminate warning: unused variable 'entry'
-                        throw cRuntimeError("findHostWithAddress() doesn't accept AddressType '%s', yet", L3Address::getTypeName(add.getType()));
-                        break;
-                }
+                if (entry->hasNetworkAddress(add))
+                    return mod;
             }
         }
     }
