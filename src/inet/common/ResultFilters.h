@@ -350,27 +350,33 @@ class INET_API DifferenceToMeanFilter : public cNumericResultFilter
 };
 
 /**
- * Filter that expects 0 or 1 and outputs the utilization as double.
- * The value is computed for the *past* interval every 0.1s or 100 values,
- * whichever comes first.
+ * Filter that expects 0 or 1 as input and outputs the utilization as double.
+ * By default, the value is computed for the *past* interval every 0.1s or 200
+ * values, whichever comes first.
  *
  * Recommended interpolation mode: backward sample-hold.
  */
 class INET_API UtilizationFilter : public cNumericResultFilter
 {
   protected:
+    // parameters
     simtime_t interval = 0.1;
-    int numValueLimit = 100;
-    bool emitIntermediateZeros = true;
+    int numValueLimit = 200; // two values (1/0) per packet to match the result of the throughput filter
+    bool emitIntermediateValues = true;
 
-    simtime_t lastValue = 0;
-    simtime_t lastSignal = 0;
+    // state
+    simtime_t lastSignalTime;
+    simtime_t totalValueTime;
+    double lastValue = 0;
     double totalValue = 0;
     int numValues = 0;
 
   protected:
+    virtual void init(Context *ctx) override;
+    virtual UtilizationFilter *clone() const override;
     virtual bool process(simtime_t& t, double& value, cObject *details) override;
-    virtual void emitUtilization(simtime_t endInterval, cObject *details);
+    virtual void emitUtilization(simtime_t time, cObject *details);
+    virtual void updateTotalValue(simtime_t time);
 
   public:
     virtual void finish(cComponent *component, simsignal_t signalID) override;
