@@ -49,7 +49,7 @@ Z3GateSchedulingConfigurator::Output *Z3GateSchedulingConfigurator::computeGateS
     }
     for (auto inputFlow : input.flows) {
         Flow *flow = new Flow(Flow::UNICAST);
-        flow->setPriorityValue(inputFlow->startApplication->priority);
+        flow->setPriorityValue(inputFlow->startApplication->pcp);
         auto startDevice = check_and_cast<Device *>(devices[inputFlow->startApplication->device->module]);
         startDevice->setPacketPeriodicity((inputFlow->startApplication->packetInterval * 1000000).dbl());
         startDevice->setPacketSize(b(inputFlow->startApplication->packetLength + B(12)).get());
@@ -73,7 +73,7 @@ Z3GateSchedulingConfigurator::Output *Z3GateSchedulingConfigurator::computeGateS
             for (int priority = 0; priority < port->numPriorities; priority++) {
                 auto schedule = new Output::Schedule();
                 schedule->port = port;
-                schedule->priority = priority;
+                schedule->gateIndex = priority;
                 schedule->cycleStart = us(cycle->getCycleStart()).get();
                 schedule->cycleDuration = us(cycle->getCycleDuration()).get();
                 for (int i = 0; i < cycle->getSlotsUsed().size(); i++) {

@@ -111,7 +111,7 @@ cValueMap *TSNschedGateSchedulingConfigurator::convertInputToJson(const Input& i
         jsonFlow->set("type", "unicast");
         jsonFlow->set("sourceDevice", flow->startApplication->device->module->getFullName());
         jsonFlow->set("fixedPriority", "true");
-        jsonFlow->set("priorityValue", flow->startApplication->priority);
+        jsonFlow->set("priorityValue", flow->startApplication->pcp);
         jsonFlow->set("packetPeriodicity", flow->startApplication->packetInterval.dbl() * 1000000);
         jsonFlow->set("packetPeriodicityUnit", "us");
         jsonFlow->set("packetSize", b(flow->startApplication->packetLength).get());
@@ -163,7 +163,7 @@ TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::
             for (int priority = 0; priority < port->numPriorities; priority++) {
                 auto schedule = new Output::Schedule();
                 schedule->port = port;
-                schedule->priority = priority;
+                schedule->gateIndex = priority;
                 auto jsonPrioritySlots = check_and_cast<cValueArray *>(jsonPort->get("prioritySlotsData").objectValue());
                 for (int k = 0; k < jsonPrioritySlots->size(); k++) {
                     auto jsonPrioritySlot = check_and_cast<cValueMap *>(jsonPrioritySlots->get(k).objectValue());

@@ -105,7 +105,7 @@ void GateSchedulingConfiguratorBase::addPorts(Input& input) const
             if (!networkInterface->isLoopback()) {
                 auto subqueue = networkInterface->findModuleByPath(".macLayer.queue.queue[0]");
                 auto port = new Input::Port();
-                port->numPriorities = subqueue != nullptr ? subqueue->getVectorSize() : -1;
+                port->numGates = subqueue != nullptr ? subqueue->getVectorSize() : -1;
                 port->module = interface->networkInterface;
                 port->datarate = bps(interface->networkInterface->getDatarate());
                 port->propagationTime = check_and_cast<cDatarateChannel *>(interface->networkInterface->getTxTransmissionChannel())->getDelay();
@@ -150,7 +150,7 @@ void GateSchedulingConfiguratorBase::addFlows(Input& input) const
                 if (sourceMatcher.matches(sourceNode->module->getFullPath().c_str()) &&
                     destinationMatcher.matches(destinationNode->module->getFullPath().c_str()))
                 {
-                    int priority = entry->get("priority").intValue();
+                    int pcp = entry->get("pcp").intValue();
                     b packetLength = b(entry->get("packetLength").doubleValueInUnit("b"));
                     simtime_t packetInterval = entry->get("packetInterval").doubleValueInUnit("s");
                     simtime_t maxLatency = entry->containsKey("maxLatency") ? entry->get("maxLatency").doubleValueInUnit("s") : -1;
@@ -163,12 +163,12 @@ void GateSchedulingConfiguratorBase::addFlows(Input& input) const
                         throw cRuntimeError("Cannot find flow start application, path = %s", entry->get("application").stringValue());
                     startApplication->module = startApplicationModule;
                     startApplication->device = startDevice;
-                    startApplication->priority = priority;
+                    startApplication->pcp = pcp;
                     startApplication->packetLength = packetLength;
                     startApplication->packetInterval = packetInterval;
                     startApplication->maxLatency = maxLatency;
                     input.applications.push_back(startApplication);
-                    EV_DEBUG << "Adding flow from configuration" << EV_FIELD(source) << EV_FIELD(destination) << EV_FIELD(priority) << EV_FIELD(packetLength) << EV_FIELD(packetInterval, packetInterval.ustr()) << EV_FIELD(datarate) << EV_FIELD(maxLatency, maxLatency.ustr()) << EV_ENDL;
+                    EV_DEBUG << "Adding flow from configuration" << EV_FIELD(source) << EV_FIELD(destination) << EV_FIELD(pcp) << EV_FIELD(packetLength) << EV_FIELD(packetInterval, packetInterval.ustr()) << EV_FIELD(datarate) << EV_FIELD(maxLatency, maxLatency.ustr()) << EV_ENDL;
                     auto flow = new Input::Flow();
                     flow->name = entry->containsKey("name") ? entry->get("name").stringValue() : (std::string("flow") + std::to_string(flowIndex++)).c_str();
                     flow->startApplication = startApplication;
@@ -208,7 +208,7 @@ void GateSchedulingConfiguratorBase::addFlows(Input& input) const
         }
     }
     std::sort(input.flows.begin(), input.flows.end(), [] (const Input::Flow *r1, const Input::Flow *r2) {
-        return r1->startApplication->priority < r2->startApplication->priority;
+        return r1->startApplication->pcp < r2->startApplication->pcp;
     });
 }
 
@@ -236,15 +236,15 @@ void GateSchedulingConfiguratorBase::configureGateScheduling(cModule *networkNod
     bool initiallyOpen = false;
     simtime_t offset = 0;
     simtime_t slotEnd = 0;
-    int priority = gate->getIndex();
+    int gateIndex = gate->getIndex();
     auto port = gateSchedulingInput->getPort(networkInterface);
     auto it = gateSchedulingOutput->gateSchedules.find(port);
     if (it == gateSchedulingOutput->gateSchedules.end())
         throw cRuntimeError("Cannot find schedule for interface, interface = %s", networkInterface->getInterfaceFullPath().c_str());
     auto& schedules = it->second;
-    if (priority >= schedules.size())
-        throw cRuntimeError("Cannot find schedule for priority, interface = %s, priority = %d", port->module->getFullPath().c_str(), priority);
-    auto schedule = schedules[priority];
+    if (gateIndex >= schedules.size())
+        throw cRuntimeError("Cannot find schedule for traffic class, interface = %s, gate index = %d", port->module->getFullPath().c_str(), gateIndex);
+    auto schedule = schedules[gateIndex];
     cValueArray *durations = new cValueArray();
     for (auto& slot : schedule->slots) {
         simtime_t slotStart = slot.start;

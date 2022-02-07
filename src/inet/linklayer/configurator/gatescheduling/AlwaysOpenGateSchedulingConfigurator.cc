@@ -18,7 +18,7 @@ AlwaysOpenGateSchedulingConfigurator::Output *AlwaysOpenGateSchedulingConfigurat
         for (int priority = 0; priority < port->numPriorities; priority++) {
             Output::Schedule *schedule = new Output::Schedule();
             schedule->port = port;
-            schedule->priority = priority;
+            schedule->gateIndex = priority;
             schedule->cycleStart = 0;
             schedule->cycleDuration = gateCycleDuration;
             Output::Slot slot;

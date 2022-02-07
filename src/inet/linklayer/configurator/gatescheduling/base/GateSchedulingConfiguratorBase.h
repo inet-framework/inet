@@ -45,7 +45,7 @@ class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
         {
           public:
             cModule *module = nullptr; // corresponding OMNeT++ module
-            int priority = -1; // traffic class (index of subqueue)
+            int pcp = -1; // traffic class
             b packetLength = b(-1); // packet size in bits
             simtime_t packetInterval = -1; // packet inter-arrival time in seconds
             simtime_t maxLatency = -1; // maximum allowed latency in seconds
@@ -57,7 +57,7 @@ class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
         {
           public:
             cModule *module = nullptr; // corresponding OMNeT++ module
-            int numPriorities = -1; // number of traffic classes (number of subqueues)
+            int numGates = -1; // number of gates
             bps datarate = bps(NaN); // transmission bitrate in bits per second
             simtime_t propagationTime = -1; // time to travel to the connected port in seconds
             b maxPacketLength = b(-1); // maximum packet size in bits
@@ -162,19 +162,19 @@ class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
             simtime_t duration; // duration in seconds
         };
 
-        // a gate scheduling for a specific priority (traffic class) of a specific port
+        // a gate scheduling for a specific (traffic class) of a specific port
         class Schedule
         {
           public:
             Input::Port *port = nullptr; // reference to the port
-            int priority = -1; // index of the subqueue
+            int gateIndex = -1; // index of the ~PeriodicGate
             simtime_t cycleStart = -1; // start of the cycle in seconds
             simtime_t cycleDuration = -1; // duration of the cycle in seconds
             std::vector<Slot> slots; // list of slots ordered by start time
         };
 
       public:
-        std::map<Input::Port *, std::vector<Schedule *>> gateSchedules; // maps ports to schedules per priority (traffic class)
+        std::map<Input::Port *, std::vector<Schedule *>> gateSchedules; // maps ports to schedules per traffic class
         std::map<Input::Application *, simtime_t> applicationStartTimes; // maps applications to start times
 
       public:
