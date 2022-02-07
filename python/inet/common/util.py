@@ -1,4 +1,5 @@
 import curses.ascii
+import functools
 import io
 import logging
 import multiprocessing
@@ -125,22 +126,24 @@ def test_keyboard_interrupt_handler(a, b):
             print("Interrupted")
         print("Disabled end")
 
-def map_sequentially_or_concurrently(elements, function, concurrent=None, randomize=False, chunksize=1, **kwargs):
+def call_with_capturing_output(element, function=None, elements=None, element_count=None, **kwargs):
+    output_stream = io.StringIO()
+    element_index = elements.index(element)
+    result = function(element, output_stream=output_stream, index=element_index, count=element_count, **kwargs)
+    print(output_stream.getvalue(), end="")
+    return result
+
+def map_sequentially_or_concurrently(elements, function, concurrent=None, randomize=False, chunksize=1, pool_class=multiprocessing.pool.ThreadPool, **kwargs):
     element_count = len(elements)
-    def call_with_capturing_output(element, **kwargs):
-        output_stream = io.StringIO()
-        element_index = elements.index(element)
-        result = function(element, output_stream=output_stream, index=element_index, count=element_count, **kwargs)
-        print(output_stream.getvalue(), end="")
-        return result
     for element in elements:
         element.set_cancel(False)
     if randomize:
         elements = random.sample(elements, k=len(elements))
     if concurrent:
         try:
-            pool = multiprocessing.pool.ThreadPool(multiprocessing.cpu_count())
-            results = pool.map_async(lambda element: call_with_capturing_output(element, **kwargs), elements, chunksize=chunksize)
+            pool = pool_class(multiprocessing.cpu_count())
+            partially_applied_function = functools.partial(call_with_capturing_output, function=function, elements=elements, element_count=element_count, **kwargs)
+            results = pool.map_async(partially_applied_function, elements, chunksize=chunksize)
             return results.get(0xFFFF)
         except KeyboardInterrupt:
             for element in elements:
