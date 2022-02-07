@@ -641,6 +641,7 @@ void ThroughputFilter::init(Context *ctx)
     interval = cConfiguration::parseDouble(intervalValue, "s", nullptr, 0.1);
     auto numLengthLimitValue = getEnvir()->getConfig()->getPerObjectConfigValue(fullPath.c_str(), "numLengthLimit");
     numLengthLimit = cConfiguration::parseLong(numLengthLimitValue, nullptr, 100);
+    lastSignalTime = simTime();
 }
 
 ThroughputFilter *ThroughputFilter::clone() const
@@ -653,35 +654,30 @@ ThroughputFilter *ThroughputFilter::clone() const
 
 void ThroughputFilter::emitThroughput(simtime_t endInterval, cObject *details)
 {
-    if (totalLength == 0) {
-        fire(this, endInterval, 0.0, details);
-        lastSignal = endInterval;
-    }
-    else {
-        double throughput = totalLength / (endInterval - lastSignal).dbl();
-        fire(this, endInterval, throughput, details);
-        lastSignal = endInterval;
-        totalLength = 0;
-        numLengths = 0;
-    }
+    double throughput = endInterval == lastSignalTime ? 0 : totalLength / (endInterval - lastSignalTime).dbl();
+    fire(this, endInterval, throughput, details);
+    lastSignalTime = endInterval;
+    totalLength = 0;
+    numLengths = 0;
 }
 
 void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, intval_t length, cObject *details)
 {
     const simtime_t now = simTime();
     numLengths++;
-    if (numLengthLimit != 0 && numLengths >= numLengthLimit) {
+    ASSERT(numLengths <= numLengthLimit);
+    if (numLengthLimit > 0 && numLengths == numLengthLimit) {
         totalLength += length;
         emitThroughput(now, details);
     }
-    else if (lastSignal + interval <= now) {
-        emitThroughput(lastSignal + interval, details);
+    else if (lastSignalTime + interval <= now) {
+        emitThroughput(lastSignalTime + interval, details);
         if (emitIntermediateZeros) {
-            while (lastSignal + interval <= now)
-                emitThroughput(lastSignal + interval, details);
+            while (lastSignalTime + interval <= now)
+                emitThroughput(lastSignalTime + interval, details);
         }
         else {
-            if (lastSignal + interval <= now) { // no packets arrived for a long period
+            if (lastSignalTime + interval <= now) { // no packets arrived for a long period
                 // zero should have been signaled at the beginning of this packet (approximation)
                 emitThroughput(now - interval, details);
             }
@@ -701,13 +697,13 @@ void ThroughputFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObj
 void ThroughputFilter::finish(cComponent *component, simsignal_t signalID)
 {
     const simtime_t now = simTime();
-    if (lastSignal < now) {
+    if (lastSignalTime < now) {
         cObject *details = nullptr;
-        if (lastSignal + interval < now) {
-            emitThroughput(lastSignal + interval, details);
+        if (lastSignalTime + interval < now) {
+            emitThroughput(lastSignalTime + interval, details);
             if (emitIntermediateZeros) {
-                while (lastSignal + interval < now)
-                    emitThroughput(lastSignal + interval, details);
+                while (lastSignalTime + interval < now)
+                    emitThroughput(lastSignalTime + interval, details);
             }
         }
         emitThroughput(now, details);

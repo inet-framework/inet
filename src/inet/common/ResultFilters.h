@@ -401,7 +401,7 @@ class INET_API ThroughputFilter : public cObjectResultFilter
     int numLengthLimit = -1;
     bool emitIntermediateZeros = true;
 
-    simtime_t lastSignal = 0;
+    simtime_t lastSignalTime;
     double totalLength = 0;
     int numLengths = 0;
 
