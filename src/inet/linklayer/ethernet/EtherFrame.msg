@@ -49,6 +49,14 @@ class EthernetMacHeader extends FieldsChunk
     int typeOrLength;
 }
 
+cplusplus(EthernetMacHeader) {{
+#if (OMNETPP_BUILDNUM < 1530)
+  public:
+    Ieee8021qHeader *removeCTag() { return dropCTag(); }
+    Ieee8021qHeader *removeSTag() { return dropSTag(); }
+#endif
+}}
+
 cplusplus {{
     inline bool isEth2Header(const EthernetMacHeader& hdr)  { return isEth2Type(hdr.getTypeOrLength()); }  // typeOrLength is type
     inline bool isIeee8023Header(const EthernetMacHeader& hdr)  { return isIeee8023Length(hdr.getTypeOrLength()); }  // typeOrLength is length

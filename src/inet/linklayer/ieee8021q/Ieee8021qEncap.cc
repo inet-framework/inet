@@ -80,9 +80,9 @@ Ieee8021qHeader *Ieee8021qEncap::removeVlanTag(const Ptr<EthernetMacHeader>& eth
 {
     ethernetMacHeader->addChunkLength(B(-4));
     if (*vlanTagType == 'c')
-        return ethernetMacHeader->dropCTag();
+        return ethernetMacHeader->removeCTag();
     else if (*vlanTagType == 's')
-        return ethernetMacHeader->dropSTag();
+        return ethernetMacHeader->removeSTag();
     else
         throw cRuntimeError("Unknown VLAN tag type");
 }
