@@ -1,12 +1,11 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-4.3.5 (November 2021) - Stable
+INET-4.3.7 (February 2022) - Stable
 -----------------------------------
 
-This release contains compatibility fixes for OMNeT++ 6.0 and a
-few backported fixes from the INET 4.3.x branch.
-Requires OMNeT++ 5.7 or 6.0 preview 14.
+This release contains compatibility fixes for OMNeT++ 6.0 RC1.
+OMNeT++ 6.0 Preview 15 or earlier versions are NOT supported.
 
 
 INET-4.3.6 (December 2021) - Stable
