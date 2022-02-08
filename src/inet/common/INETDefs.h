@@ -46,11 +46,11 @@ using namespace omnetpp;
 #endif // if OMNETPP_VERSION < 0x0504
 
 #if OMNETPP_VERSION >= 0x0600 && OMNETPP_BUILDNUM < 1525
-#  error At least OMNeT++/OMNEST version 6.0pre12 required when use OMNeT++/OMNEST 6.0 versions
+#  error At least OMNeT++/OMNEST version 6.0pre12 required when using OMNeT++/OMNEST 6.0 versions
 #endif
 
 #define INET_VERSION  0x0402
-#define INET_PATCH_LEVEL 0x08
+#define INET_PATCH_LEVEL 0x09
 
 #if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1525
 namespace omnetpp {
