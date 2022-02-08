@@ -95,7 +95,12 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkPro
      */
     virtual void addExtensionHeader(IPv6ExtensionHeader *eh, int atPos = -1);
 
+#if (OMNETPP_BUILDNUM < 1530)
     virtual void insertExtensionHeader(IPv6ExtensionHeader *extensionHeader) override { addExtensionHeader(extensionHeader); }
+#else
+    [[deprecated]] void insertExtensionHeader(IPv6ExtensionHeader *extensionHeader) { addExtensionHeader(extensionHeader); }
+    virtual void appendExtensionHeader(IPv6ExtensionHeader *extensionHeader) override { addExtensionHeader(extensionHeader); }
+#endif
 
     virtual void insertExtensionHeader(size_t k, IPv6ExtensionHeader *extensionHeader) override { addExtensionHeader(extensionHeader, k); }
 
