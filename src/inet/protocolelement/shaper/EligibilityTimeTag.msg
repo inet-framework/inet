@@ -6,7 +6,7 @@
 
 import inet.common.INETDefs;
 import inet.common.TagBase;
-import inet.clock.common.ClockTime;
+import inet.clock.contract.ClockTime;
 
 namespace inet;
 

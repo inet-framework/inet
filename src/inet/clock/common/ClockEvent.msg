@@ -5,7 +5,7 @@
 //
 
 import inet.common.INETDefs;
-import inet.clock.common.ClockTime;
+import inet.clock.contract.ClockTime;
 import inet.clock.contract.IClock;
 
 namespace inet;

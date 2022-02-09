@@ -12,7 +12,7 @@
 //
 
 import inet.clock.common.ClockEvent;
-import inet.clock.common.ClockTime;
+import inet.clock.contract.ClockTime;
 import inet.common.TagBase;
 import inet.common.packet.chunk.Chunk;
 import inet.common.packet.Packet;

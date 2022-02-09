@@ -10,10 +10,8 @@
 
 #include "inet/common/INETDefs.h"
 
-namespace inet {
-
 #ifdef INET_WITH_CLOCK
-class ClockTime;
+#include "inet/clock/common/ClockTime.h"
 #define CLOCKTIME_AS_SIMTIME(x)    (x).asSimTime()
 #define SIMTIME_AS_CLOCKTIME(x)    ClockTime::from(x)
 #else
@@ -21,6 +19,8 @@ class ClockTime;
 #define CLOCKTIME_AS_SIMTIME(x)    (x)
 #define SIMTIME_AS_CLOCKTIME(x)    (x)
 #endif // INET_WITH_CLOCK
+
+namespace inet {
 
 typedef ClockTime clocktime_t;
 
