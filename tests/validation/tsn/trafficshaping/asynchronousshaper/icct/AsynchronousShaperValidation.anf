@@ -5917,7 +5917,7 @@ series = utils.split(props["series"])
 
 if not groups and not series:
     print("The Groups and Series options were not set in the dialog, inferring them from the data.")
-    g, s = ("module", "name") if len(df) == 1 else utils.pick_two_columns(df)
+    g, s = ("module", "name") if len(df) == 1 else utils.select_best_partitioning_column_pair(df, props)
     groups, series = [g], [s]
 
 if not groups or not groups[0] or not series or not series[0]:
@@ -6481,7 +6481,7 @@ if df.empty:
 
 if not xaxis_itervar and not group_by:
     print("The 'X Axis' and 'Group By' options were not set in the dialog, inferring them from the data..")
-    xaxis_itervar, group_by = utils.pick_two_columns(df)
+    xaxis_itervar, group_by = utils.select_best_partitioning_column_pair(df, props)
     group_by = [group_by] if group_by else []
     print("X Axis: " + xaxis_itervar + ", Group By: " + ",".join(group_by))
 

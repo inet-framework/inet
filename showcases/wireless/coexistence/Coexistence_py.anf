@@ -36,7 +36,7 @@ series = props["series"].split(",")
 
 if not groups[0] and not series[0]:
     print("The Groups and Series options were not set in the dialog, inferring them from the data.")
-    g, s = ("module", "name") if len(df) == 1 else utils.pick_two_columns(df)
+    g, s = ("module", "name") if len(df) == 1 else utils.select_best_partitioning_column_pair(df, props)
     groups, series = [g], [s]
 
 if not groups[0] or not series[0]:
@@ -622,7 +622,7 @@ series = props["series"].split(",")
 
 if not groups[0] and not series[0]:
     print("The Groups and Series options were not set in the dialog, inferring them from the data.")
-    g, s = ("module", "name") if len(df) == 1 else utils.pick_two_columns(df)
+    g, s = ("module", "name") if len(df) == 1 else utils.select_best_partitioning_column_pair(df, props)
     groups, series = [g], [s]
 
 if not groups[0] or not series[0]:

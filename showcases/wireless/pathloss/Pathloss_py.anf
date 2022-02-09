@@ -33,7 +33,7 @@ if df.empty:
 
 if not xaxis_itervar and not iso_itervars:
     print("The 'Itervar for X Axis' and 'Itervar for iso line' options were not set in the dialog, inferring them from the data..")
-    xaxis_itervar, iso_itervar = utils.pick_two_columns(df)
+    xaxis_itervar, iso_itervar = utils.select_best_partitioning_column_pair(df, props)
     iso_itervars = [iso_itervar] if iso_itervar else []
     print("X axis: " + xaxis_itervar + " iso lines: " + ",".join(iso_itervars))
 
@@ -766,7 +766,7 @@ if df.empty:
 
 if not xaxis_itervar and not iso_itervars:
     print("The 'Itervar for X Axis' and 'Itervar for iso line' options were not set in the dialog, inferring them from the data..")
-    xaxis_itervar, iso_itervar = utils.pick_two_columns(df)
+    xaxis_itervar, iso_itervar = utils.select_best_partitioning_column_pair(df, props)
     iso_itervars = [iso_itervar] if iso_itervar else []
     print("X axis: " + xaxis_itervar + " iso lines: " + ",".join(iso_itervars))
 

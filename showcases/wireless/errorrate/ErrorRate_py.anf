@@ -30,7 +30,7 @@ if df.empty:
 
 if not xaxis_itervar and not iso_itervar:
     print("The X Axis and Iso Line options were not set in the dialog, inferring them from the data..")
-    xaxis_itervar, iso_itervar = utils.pick_two_columns(df)
+    xaxis_itervar, iso_itervar = utils.select_best_partitioning_column_pair(df, props)
     if not xaxis_itervar:
         ideplot.set_warning("Please set the X Axis (and Iso Lines) options in the dialog!")
         exit(1)
@@ -1347,7 +1347,7 @@ if df.empty:
 
 if not xaxis_itervar and not iso_itervar:
     print("The X Axis and Iso Line options were not set in the dialog, inferring them from the data..")
-    xaxis_itervar, iso_itervar = utils.pick_two_columns(df)
+    xaxis_itervar, iso_itervar = utils.select_best_partitioning_column_pair(df, props)
     if not xaxis_itervar:
         ideplot.set_warning("Please set the X Axis (and Iso Lines) options in the dialog!")
         exit(1)
@@ -2060,7 +2060,7 @@ if df.empty:
 
 if not xaxis_itervar and not iso_itervar:
     print("The X Axis and Iso Line options were not set in the dialog, inferring them from the data..")
-    xaxis_itervar, iso_itervar = utils.pick_two_columns(df)
+    xaxis_itervar, iso_itervar = utils.select_best_partitioning_column_pair(df, props)
     if not xaxis_itervar:
         ideplot.set_warning("Please set the X Axis (and Iso Lines) options in the dialog!")
         exit(1)
