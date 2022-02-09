@@ -11,7 +11,6 @@ import time
 
 from inet.simulation.build import *
 from inet.simulation.config import *
-from inet.simulation.inprocess import *
 from inet.simulation.project import *
 from inet.simulation.subprocess import *
 
@@ -281,7 +280,7 @@ def run_simulations(**kwargs):
         simulation_results = list(map(lambda simulation_run: SimulationResult(simulation_run, None), multiple_simulation_runs.simulation_runs)) if multiple_simulation_runs else []
         return MultipleSimulationResults(multiple_simulation_runs, simulation_results)
 
-def run_simulation(working_directory, ini_file="omnetpp.ini", config="General", run=0, sim_time_limit=None, cpu_time_limit=None, **kwargs):
-    simulation_config = SimulationConfig(working_directory, ini_file, config, 1, False, False, None)
+def run_simulation(simulation_project, working_directory, ini_file="omnetpp.ini", config="General", run=0, sim_time_limit=None, cpu_time_limit=None, **kwargs):
+    simulation_config = SimulationConfig(simulation_project, working_directory, ini_file, config, 1, False, None)
     simulation_run = SimulationRun(simulation_config, run, sim_time_limit=sim_time_limit, cpu_time_limit=cpu_time_limit)
     return simulation_run.run_simulation(**kwargs)

@@ -2,7 +2,8 @@ import cppyy
 import re
 
 from inet.common import *
-from inet.simulation.cffi import * 
+from inet.simulation.cffi.inet import * 
+from inet.simulation.cffi.omnetpp import * 
 
 cppyy.cppdef("""
 #include "omnetpp/cevent.h"

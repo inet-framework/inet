@@ -1,4 +1,5 @@
 import logging
+import os
 
 from inet.common import *
 
@@ -19,7 +20,8 @@ simulation_projects = dict()
 
 def get_simulation_project(name):
     if not name in simulation_projects:
-        simulation_projects[name] = SimulationProject(get_workspace_path(name))
+        workspace_path = get_workspace_path(name)
+        simulation_projects[name] = SimulationProject(workspace_path) if workspace_path else None
     return simulation_projects[name]
 
 inet_project = get_simulation_project("inet")

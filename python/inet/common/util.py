@@ -20,7 +20,7 @@ COLOR_GREEN = "\033[0;32m"
 COLOR_RESET = "\033[0;0m"
 
 def get_workspace_path(resource):
-    return os.path.abspath(os.environ["INET_ROOT"] + "/../" + resource)
+    return os.path.abspath(os.environ["INET_ROOT"] + "/../" + resource) if "INET_ROOT" in os.environ else None
 
 def flatten(list):
     return [item for sublist in list for item in sublist]

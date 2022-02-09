@@ -17,7 +17,7 @@ def compare_test_results(result1, result2, accuracy = 0.01):
 # TSN frame replication test
 
 def run_tsn_framereplication_simulation(**kwargs):
-    return run_simulation(working_directory = "/tests/validation/tsn/framereplication/", sim_time_limit = "0.1s", print_end = " ", **kwargs)
+    return run_simulation(inet_project, working_directory = "/tests/validation/tsn/framereplication/", sim_time_limit = "0.1s", print_end = " ", **kwargs)
 
 def compute_frame_replication_success_rate_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND ((module =~ "*.destination.udp" AND name =~ packetReceived:count) OR (module =~ "*.source.udp" AND name =~ packetSent:count))"""
@@ -76,7 +76,7 @@ def run_tsn_framereplication_validation_test(test_accuracy = 0.01, **kwargs):
 # TSN traffic shaping asynchronous shaper ICCT test
 
 def run_tsn_trafficshaping_asynchronousshaper_icct_simulation(**kwargs):
-    run_simulation(working_directory = "/tests/validation/tsn/trafficshaping/asynchronousshaper/icct", sim_time_limit = "0.1s", print_end = " ", **kwargs)
+    run_simulation(inet_project, working_directory = "/tests/validation/tsn/trafficshaping/asynchronousshaper/icct", sim_time_limit = "0.1s", print_end = " ", **kwargs)
 
 def compute_asynchronousshaper_icct_endtoend_delay_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND name =~ meanBitLifeTimePerPacket:histogram:max"""
@@ -116,7 +116,7 @@ def run_tsn_trafficshaping_asynchronousshaper_icct_validation_test(**kwargs):
 # TSN traffic shaping asynchronous shaper Core4INET test
 
 def run_tsn_trafficshaping_asynchronousshaper_core4inet_simulation(**kwargs):
-    return run_simulation(working_directory = "/tests/validation/tsn/trafficshaping/asynchronousshaper/core4inet", sim_time_limit = "1s", print_end = " ", **kwargs)
+    return run_simulation(inet_project, working_directory = "/tests/validation/tsn/trafficshaping/asynchronousshaper/core4inet", sim_time_limit = "1s", print_end = " ", **kwargs)
 
 def compute_asynchronousshaper_core4inet_endtoend_delay_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND (name =~ meanBitLifeTimePerPacket:histogram:min OR name =~ meanBitLifeTimePerPacket:histogram:max OR name =~ meanBitLifeTimePerPacket:histogram:mean OR name =~ meanBitLifeTimePerPacket:histogram:stddev)"""
@@ -141,11 +141,14 @@ def compute_asynchronousshaper_core4inet_endtoend_delay_alternatively(**kwargs):
     # This validation test compares simulation results to analytical results and also
     # to results from a different simulation using Core4INET.
     # https://github.com/CoRE-RG/CoRE4INET/tree/master/examples/tsn/medium_network
-    return pd.DataFrame(index = ["Medium", "High", "Critical"],
-                        data = {"min": [88.16, 60.8, 252.8],
-                                "max": [540, 307.2, 375.84],
-                                "mean": [247.1, 161.19, 298.52],
-                                "stddev": [106.53, 73.621, 36.633]})
+    df = pd.DataFrame(index = ["Medium", "High", "Critical"],
+                      data = {"min": [88.16, 60.8, 252.8],
+                              "max": [540, 307.2, 375.84],
+                              "mean": [247.1, 161.19, 298.52],
+                              "stddev": [106.53, 73.621, 36.633]})
+    df.index.set_names(["trafficclass"], inplace=True)
+    df.columns.set_names(["name"], inplace=True)
+    return df
 
 def compute_tsn_trafficshaping_asynchronousshaper_core4inet_validation_test_results(test_accuracy = 0.01, **kwargs):
     df1 = compute_asynchronousshaper_core4inet_endtoend_delay_from_simulation_results(**kwargs)
@@ -170,7 +173,7 @@ def run_tsn_trafficshaping_asynchronousshaper_core4inet_validation_test(test_acc
 # TSN traffic shaping credit-based shaper test
 
 def run_tsn_trafficshaping_creditbasedshaper_simulation(**kwargs):
-    return run_simulation(working_directory = "/tests/validation/tsn/trafficshaping/creditbasedshaper", sim_time_limit = "1s", print_end = " ", **kwargs)
+    return run_simulation(inet_project, working_directory = "/tests/validation/tsn/trafficshaping/creditbasedshaper", sim_time_limit = "1s", print_end = " ", **kwargs)
 
 def compute_creditbasedshaper_endtoend_delay_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND (name =~ meanBitLifeTimePerPacket:histogram:min OR name =~ meanBitLifeTimePerPacket:histogram:max OR name =~ meanBitLifeTimePerPacket:histogram:mean OR name =~ meanBitLifeTimePerPacket:histogram:stddev)"""
@@ -195,11 +198,14 @@ def compute_creditbasedshaper_endtoend_delay_alternatively(**kwargs):
     # This validation test compares simulation results to analytical results and also
     # to results from a different simulation using Core4INET.
     # https://github.com/CoRE-RG/CoRE4INET/tree/master/examples/tsn/medium_network
-    return pd.DataFrame(index = ["Medium", "High", "Critical"],
-                        data = {"min": [88.16, 60.8, 252.8],
-                                "max": [540, 307.2, 375.84],
-                                "mean": [247.1, 161.19, 298.52],
-                                "stddev": [106.53, 73.621, 36.633]})
+    df = pd.DataFrame(index = ["Medium", "High", "Critical"],
+                      data = {"min": [88.16, 60.8, 252.8],
+                              "max": [540, 307.2, 375.84],
+                              "mean": [247.1, 161.19, 298.52],
+                              "stddev": [106.53, 73.621, 36.633]})
+    df.index.set_names(["trafficclass"], inplace=True)
+    df.columns.set_names(["name"], inplace=True)
+    return df
 
 def compute_tsn_trafficshaping_creditbasedshaper_validation_test_results(test_accuracy = 0.01, **kwargs):
     df1 = compute_creditbasedshaper_endtoend_delay_from_simulation_results(**kwargs)
