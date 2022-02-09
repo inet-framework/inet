@@ -10,11 +10,12 @@
 //
 
 #include <stdlib.h>
-#include "inet/queueing/scheduler/HtbScheduler.h"
 #include <string.h>
-#include "inet/common/XMLUtils.h"
 
-#include "inet/linklayer/ppp/Ppp.h"
+#include "inet/queueing/scheduler/HtbScheduler.h"
+
+#include "inet/common/XMLUtils.h"
+#include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
 namespace queueing {
