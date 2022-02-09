@@ -1035,6 +1035,7 @@
                        inet.queueing.gate
                        inet.queueing.marker
                        inet.queueing.meter
+                       inet.queueing.policing
                        inet.queueing.queue
                        inet.queueing.scheduler
                        inet.queueing.server
