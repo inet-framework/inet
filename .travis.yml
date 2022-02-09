@@ -14,7 +14,7 @@ services:
   - docker
 
 before_install:
-  - docker pull omnetpp/travis-inet:6.0pre9-201029
+  - docker pull omnetpp/travis-inet:6.0rc1-220209
 
 cache:
   directories:
@@ -24,7 +24,7 @@ cache:
 docker_command: &DOCKER_COMMAND travis_wait 30 sleep infinity &
                   docker run -ti --env TARGET_PLATFORM --env MODE --env TRAVIS_REPO_SLUG
                   -v /home/travis/build/$TRAVIS_REPO_SLUG:/$TRAVIS_REPO_SLUG
-                  -v $HOME/docker_ccache:/root/.ccache omnetpp/travis-inet:6.0pre9-201029
+                  -v $HOME/docker_ccache:/root/.ccache omnetpp/travis-inet:6.0rc1-220209
                   /bin/bash /$TRAVIS_REPO_SLUG/_scripts/travis/travis-stage-$STAGE.sh $INNER_ARGS
                    # the last two (STAGE and INNER_ARGS) come from export statements, not env: lines
 

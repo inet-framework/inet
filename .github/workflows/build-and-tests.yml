@@ -22,12 +22,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Pull Docker image
-        run: docker pull omnetpp/travis-inet:6.0pre12-210728
+        run: docker pull omnetpp/travis-inet:6.0rc1-220209
       - name: Build (native)
         run: |
           docker run -i --env TARGET_PLATFORM=linux --env MODE=${{ matrix.mode }} --env GITHUB_WORKSPACE \
             -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE \
-            omnetpp/travis-inet:6.0pre12-210728 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-build.sh
+            omnetpp/travis-inet:6.0rc1-220209 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-build.sh
       - uses: actions/upload-artifact@v2
         with:
           name: libinet-so
@@ -43,12 +43,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Pull Docker image
-        run: docker pull omnetpp/travis-inet:6.0pre12-210728
+        run: docker pull omnetpp/travis-inet:6.0rc1-220209
       - name: Build (cross)
         run: |
           docker run -i --env TARGET_PLATFORM=${{ matrix.target }} --env MODE=${{ matrix.mode }} --env GITHUB_WORKSPACE \
             -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE \
-            omnetpp/travis-inet:6.0pre12-210728 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-build.sh
+            omnetpp/travis-inet:6.0rc1-220209 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-build.sh
 
   fingerprints:
     needs: build-native
@@ -65,12 +65,12 @@ jobs:
           name: libinet-so
           path: ${{ github.workspace }}/src/
       - name: Pull Docker image
-        run: docker pull omnetpp/travis-inet:6.0pre12-210728
+        run: docker pull omnetpp/travis-inet:6.0rc1-220209
       - name: Fingerprint tests
         run: |
           docker run -i --env MODE=${{ matrix.mode }} --env GITHUB_WORKSPACE --env SPLIT_N=4 --env SPLIT_I=${{ matrix.split }} \
             -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE \
-            omnetpp/travis-inet:6.0pre12-210728 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-fingerprints.sh
+            omnetpp/travis-inet:6.0rc1-220209 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-fingerprints.sh
 
   other-tests:
     needs: build-native
@@ -89,10 +89,10 @@ jobs:
           name: libinet-so
           path: ${{ github.workspace }}/src/
       - name: Pull Docker image
-        run: docker pull omnetpp/travis-inet:6.0pre12-210728
+        run: docker pull omnetpp/travis-inet:6.0rc1-220209
       - name: Run ${{ matrix.testdir }} tests
         run: |
           docker run -i --env MODE=debug --env GITHUB_WORKSPACE --env TESTDIR=${{ matrix.testdir }} \
             -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE \
-            omnetpp/travis-inet:6.0pre12-210728 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-other-tests.sh
+            omnetpp/travis-inet:6.0rc1-220209 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-other-tests.sh
 
