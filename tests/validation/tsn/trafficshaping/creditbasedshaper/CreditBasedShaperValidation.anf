@@ -5,13 +5,12 @@
         <input pattern="/inet/tests/validation/tsn/trafficshaping/creditbasedshaper/results/*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/barchart.png" id="1895" name="End-to-end delay maximum" template="barchart_native" type="BAR">
+        <chart icon="icons/full/obj/barchart.png" id="2104585001" name="End-to-end delay" template="barchart_native" type="BAR">
             <script>
-                <![CDATA[import re
-import math
-import numpy as np
+                <![CDATA[import inet
+import re
 import pandas as pd
-from omnetpp.scave import results, chart, ideplot, utils
+from omnetpp.scave import results, chart, utils
 
 # get chart properties
 props = chart.get_properties()
@@ -19,65 +18,46 @@ utils.preconfigure_plot(props)
 
 # collect parameters for query
 filter_expression = props["filter"]
+include_fields = props["include_fields"] == "true"
 
 # query scalar data into dataframe
 try:
-    df = results.get_scalars(filter_expression, include_attrs=True, include_itervars=True, include_runattrs=True, include_fields=True)
+    df = results.get_scalars(filter_expression, include_fields=include_fields, include_attrs=True, include_runattrs=True, include_itervars=True)
 except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 df['value'] *= 1000000
-df['name'] = 'Flow'
-df['legend'] = df['module']
-df['legend'] = df['legend'].map(lambda module: re.sub(".*(R.app\\[0\\]).*", "Best Effort", module))
-df['legend'] = df['legend'].map(lambda module: re.sub(".*(R.app\\[1\\]).*", "Medium", module))
-df['legend'] = df['legend'].map(lambda module: re.sub(".*(R.app\\[2\\]).*", "High", module))
-df['legend'] = df['legend'].map(lambda module: re.sub(".*(R.app\\[3\\]).*", "Critical", module))
-df['title'] = df['legend']
+df['trafficclass'] = df['module']
+df['trafficclass'] = df['trafficclass'].map(lambda module: re.sub(".*(R.app\\[0\\]).*", "Best Effort", module))
+df['trafficclass'] = df['trafficclass'].map(lambda module: re.sub(".*(R.app\\[1\\]).*", "Medium", module))
+df['trafficclass'] = df['trafficclass'].map(lambda module: re.sub(".*(R.app\\[2\\]).*", "High", module))
+df['trafficclass'] = df['trafficclass'].map(lambda module: re.sub(".*(R.app\\[3\\]).*", "Critical", module))
 
-# determine "groups" and "series" for pivoting, and check them
-groups = utils.split(props["groups"])
-series = utils.split(props["series"])
+df_simulated = df[["name", "value", "trafficclass"]].copy()
+df_simulated["statistic"] = df["name"].map(lambda name: re.sub(".*:", "", name))
+df_simulated['type'] = "simulated"
+df_simulated.reset_index(inplace=True, drop=True)
 
-if not groups and not series:
-    print("The Groups and Series options were not set in the dialog, inferring them from the data.")
-    g, s = ("module", "name") if len(df) == 1 else utils.select_best_partitioning_column_pair(df, props)
-    groups, series = [g], [s]
+df_validation_test = inet.test.validation.compute_creditbasedshaper_endtoend_delay_alternatively()
+df_validation_test = pd.DataFrame(df_validation_test.stack())
+df_validation_test.reset_index(inplace=True)
+df_analytical = df_simulated.copy()
+df_analytical["trafficclass"] = df_validation_test["trafficclass"]
+df_analytical["statistic"] = df_validation_test["name"]
+df_analytical["value"] = df_validation_test[0]
+df_analytical['type'] = "analytical"
+df_analytical.dropna(inplace=True)
+df = df_simulated.append(df_analytical)
+df.reset_index(inplace=True, drop=True)
 
-if not groups or not groups[0] or not series or not series[0]:
-    ideplot.set_warning("Please set both the Groups and Series properties in the dialog - or neither, for automatic setup.")
-    exit(1)
+groups, series = utils.select_groups_series(df, props)
+confidence_level = utils.get_confidence_level(props)
+valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, groups, series, confidence_level)
 
-common = list(set(groups) & set(series))
-if common:
-    ideplot.set_warning("Overlap between Group and Series columns: " + ", ".join(common))
-    exit(1)
-
-utils.assert_columns_exist(df, groups + series, "No such iteration variable or run attribute")
-
-for c in groups + series:
-    df[c] = pd.to_numeric(df[c], errors="ignore")
-
-# names for title, confidence level
-names = ", ".join(utils.get_names_for_title(df, props))
-confidence_level_str = props["confidence_level"] if "confidence_level" in props else "none"
-
-# pivoting and plotting
-df.sort_values(by=groups+series, axis='index', inplace=True)
-if confidence_level_str == "none":
-    df = pd.pivot_table(df, index=groups, columns=series, values='value')
-    utils.plot_bars(df, props, names)
-else:
-    confidence_level = float(confidence_level_str[:-1])/100
-    def conf_intv(values):
-        return utils.confidence_interval(confidence_level, values)
-    df = pd.pivot_table(df, index=groups, columns=series, values='value', aggfunc=[np.mean, conf_intv], dropna=False)
-    utils.plot_bars(df["mean"], props, names, df["conf_intv"])
+utils.plot_bars(valuedf, errorsdf, metadf, props)
 
 utils.postconfigure_plot(props)
 
@@ -104,9 +84,13 @@ utils.export_data_if_needed(df, props)
     <styledText x:id="filter" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="filter" x:id.resultType="scalar">
       <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
     </styledText>
-
+    
+    <button x:id="include_fields" x:style="CHECK" text="Include fields">
+      <layoutData x:class="GridData" horizontalAlignment="END" />
+    </button>
+    
     <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
-      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="END" />
+      <layoutData x:class="GridData" horizontalAlignment="END" />
     </button>
 
     <label text="Multiple attributes can be selected in both fields below, separated by commas.">
@@ -296,13 +280,6 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalSpan="2"/>
     </button>
 
-    <!-- Display titles or names? -->
-    <label text="Label source:"/>
-    <combo x:id="legend_labels" x:id.default="result titles" x:style="BORDER|READ_ONLY">
-      <add x:p0="result names"/>
-      <add x:p0="result titles"/>
-    </combo>
-
     <!-- Placement -->
     <label text="Placement:"/>
     <combo x:id="legend_placement" x:id.default="upper right" x:style="BORDER|READ_ONLY">
@@ -338,6 +315,75 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]>
+            </dialogPage>
+            <dialogPage id="LEGEND" label="Legend">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang" />
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+  </import>
+  <layout x:class="GridLayout" numColumns="1" />
+  <x:children>
+
+        <group text="Legend labels">
+
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="false" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+          <layout x:class="GridLayout" />
+          <x:children>
+            <button x:id='legend_automatic' text='Automatic' x:style='RADIO' x:id.default="true"/>
+            <composite>
+              <layoutData x:class="GridData" horizontalIndent="30"/>
+              <layout x:class="GridLayout" marginHeight="0" marginBottom="5"/>
+              <x:children>
+                <button x:id='legend_prefer_result_titles' text='Use result title instead of name where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/>
+                <button x:id='legend_prefer_module_display_paths' text='Use module display path instead of full path where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/>
+              </x:children>
+            </composite>
+
+            <button x:id='legend_manual' text='Manual' x:style='RADIO'/>
+            <composite>
+              <layoutData x:class="GridData" horizontalIndent="30"/>
+              <layout x:class="GridLayout" numColumns="2" marginHeight="0" marginBottom="5"/>
+              <x:children>
+                <label text="Format string:"/>
+                <text x:id="legend_format" x:style="BORDER" x:id.enablerButton="legend_manual" x:id.contentAssist="columns">
+                  <layoutData x:class="GridData" widthHint="200" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="CENTER" grabExcessVerticalSpace="false" />
+                </text>
+                <label text="Hint: Add $name or ${name} to insert content of data frame column; use $$ to insert dollar sign">
+                  <layoutData x:class="GridData" horizontalSpan="2" />
+                </label>
+              </x:children>
+            </composite>
+          </x:children>
+
+        </group>
+
+        <group text="Label tweaking">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+          <layout x:class="GridLayout" numColumns="1" />
+          <x:children>
+            <label text="Sed-style regex replacements inside the labels (/foo/bar/, one per line):" />
+            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL">
+              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+            </styledText>
+            <label text="Hint: Use \1, \2, etc. to refer back to parenthesized groups; data frame colums ($name, ${name}) also recognized"/>
+            <!--
+            <label text="Examples:"/>
+            <label text='- &quot;/tcp/TCP/&quot; ==&gt; change &quot;tcp&quot; to &quot;TCP&quot;'/>
+            <label text='- &quot;/ +/ /&quot; ==&gt; replace multiple spaces with one space'/>
+            <label text="- &quot;/host\[(\d+)\]/in host \1/&quot; ==&gt; change &quot;host[21]&quot; to &quot;in host 21&quot; (note \1,\2 as group reference)"/>
+            <label text='- &quot;/\//:/&quot; or &quot;|\|:|&quot; ==&gt; replace slashes with colons'/>
+            -->
+          </x:children>
+        </group>
+
+
+  </x:children>
+</xswt>]]>
             </dialogPage>
             <dialogPage id="STYLING" label="Styling">
                 <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -533,604 +579,49 @@ utils.export_data_if_needed(df, props)
 ]]>
             </dialogPage>
             <property name="grid_show" value="true"/>
-            <property name="legend_labels" value="result titles"/>
             <property name="Plot.Caching" value="true"/>
             <property name="yaxis_title" value="delay [us]"/>
             <property name="Legend.Border" value="false"/>
-            <property name="title" value="End-to-end delay maximum"/>
+            <property name="title" value="End-to-end delay"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="bar_placement" value="Aligned"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="6"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value=""/>
+            <property name="xaxis_title" value="traffic class"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="xlabel_rotation" value="0"/>
             <property name="grid_density" value="Major"/>
-            <property name="groups" value=""/>
+            <property name="groups" value="trafficclass"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
             <property name="baseline" value="0"/>
-            <property name="image_export_filename" value=""/>
-            <property name="filter" value="type =~ scalar AND name =~ meanBitLifeTimePerPacket:histogram:max"/>
+            <property name="image_export_filename" value="EndToEndDelay"/>
+            <property name="filter" value="type =~ scalar AND (name =~ meanBitLifeTimePerPacket:histogram:min or name =~ meanBitLifeTimePerPacket:histogram:max or name =~ meanBitLifeTimePerPacket:histogram:mean or name =~ meanBitLifeTimePerPacket:histogram:stddev)"/>
             <property name="X.Label.Wrap" value="true"/>
-            <property name="series" value=""/>
+            <property name="series" value="type, statistic"/>
             <property name="legend_show" value="true"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="9"/>
+            <property name="legend_prefer_module_display_paths" value="true"/>
+            <property name="legend_prefer_result_titles" value="true"/>
+            <property name="legend_manual" value="true"/>
+            <property name="legend_replacements" value=""/>
+            <property name="legend_automatic" value="false"/>
+            <property name="legend_format" value="$type, $statistic"/>
+            <property name="include_fields" value="true"/>
         </chart>
-        <chart icon="icons/full/obj/barchart.png" id="1970" name="End-to-end delay minimum" template="barchart_native" type="BAR">
-            <script>
-                <![CDATA[import re
-import math
-import numpy as np
-import pandas as pd
-from omnetpp.scave import results, chart, ideplot, utils
-
-# get chart properties
-props = chart.get_properties()
-utils.preconfigure_plot(props)
-
-# collect parameters for query
-filter_expression = props["filter"]
-
-# query scalar data into dataframe
-try:
-    df = results.get_scalars(filter_expression, include_attrs=True, include_itervars=True, include_runattrs=True, include_fields=True)
-except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
-
-if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
-
-df['value'] *= 1000000
-df['name'] = 'Flow'
-df['legend'] = df['module']
-df['legend'] = df['legend'].map(lambda module: re.sub(".*(R.app\\[0\\]).*", "Best Effort", module))
-df['legend'] = df['legend'].map(lambda module: re.sub(".*(R.app\\[1\\]).*", "Medium", module))
-df['legend'] = df['legend'].map(lambda module: re.sub(".*(R.app\\[2\\]).*", "High", module))
-df['legend'] = df['legend'].map(lambda module: re.sub(".*(R.app\\[3\\]).*", "Critical", module))
-df['title'] = df['legend']
-
-# determine "groups" and "series" for pivoting, and check them
-groups = utils.split(props["groups"])
-series = utils.split(props["series"])
-
-if not groups and not series:
-    print("The Groups and Series options were not set in the dialog, inferring them from the data.")
-    g, s = ("module", "name") if len(df) == 1 else utils.select_best_partitioning_column_pair(df, props)
-    groups, series = [g], [s]
-
-if not groups or not groups[0] or not series or not series[0]:
-    ideplot.set_warning("Please set both the Groups and Series properties in the dialog - or neither, for automatic setup.")
-    exit(1)
-
-common = list(set(groups) & set(series))
-if common:
-    ideplot.set_warning("Overlap between Group and Series columns: " + ", ".join(common))
-    exit(1)
-
-utils.assert_columns_exist(df, groups + series, "No such iteration variable or run attribute")
-
-for c in groups + series:
-    df[c] = pd.to_numeric(df[c], errors="ignore")
-
-# names for title, confidence level
-names = ", ".join(utils.get_names_for_title(df, props))
-confidence_level_str = props["confidence_level"] if "confidence_level" in props else "none"
-
-# pivoting and plotting
-df.sort_values(by=groups+series, axis='index', inplace=True)
-if confidence_level_str == "none":
-    df = pd.pivot_table(df, index=groups, columns=series, values='value')
-    utils.plot_bars(df, props, names)
-else:
-    confidence_level = float(confidence_level_str[:-1])/100
-    def conf_intv(values):
-        return utils.confidence_interval(confidence_level, values)
-    df = pd.pivot_table(df, index=groups, columns=series, values='value', aggfunc=[np.mean, conf_intv], dropna=False)
-    utils.plot_bars(df["mean"], props, names, df["conf_intv"])
-
-utils.postconfigure_plot(props)
-
-utils.export_image_if_needed(props)
-utils.export_data_if_needed(df, props)
-]]>
-            </script>
-            <dialogPage id="INPUT" label="Input">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
-  <import xmlns="http://sweet_swt.sf.net/xswt">
-    <package name="java.lang" />
-    <package name="org.eclipse.swt.widgets" />
-    <package name="org.eclipse.swt.graphics" />
-    <package name="org.eclipse.swt.layout" />
-    <package name="org.eclipse.swt.custom" />
-  </import>
-  <layout x:class="GridLayout" numColumns="2" />
-  <x:children>
-    <label text="Filter expression:" >
-        <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </label>
-
-    <styledText x:id="filter" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="filter" x:id.resultType="scalar">
-      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
-    </styledText>
-
-    <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
-      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="END" />
-    </button>
-
-    <label text="Multiple attributes can be selected in both fields below, separated by commas.">
-        <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </label>
-
-    <label text="Groups:"/>
-    <combo x:id="groups" x:style="BORDER" x:id.content="module,name,experiment,module+name,$itervarnames,$runattrnames">
-        <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </combo>
-
-    <label text="Series:"/>
-    <combo x:id="series" x:style="BORDER" x:id.content="module,name,experiment,module+name,$itervarnames,$runattrnames">
-        <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </combo>
-
-    <label text="Scalar values will be averaged across all attributes not selected above.">
-        <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </label>
-
-  </x:children>
-</xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="BARS" label="Bars">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
-
-  <import xmlns="http://sweet_swt.sf.net/xswt">
-    <package name="java.lang"/>
-    <package name="org.eclipse.swt.widgets" />
-    <package name="org.eclipse.swt.graphics" />
-    <package name="org.eclipse.swt.layout" />
-    <package name="org.eclipse.swt.custom" />
-    <package name="org.omnetpp.common.wizard.support" />
-    <package name="org.omnetpp.ned.editor.wizards.support" />
-    <package name="org.omnetpp.cdt.wizard.support" />
-  </import>
-  <layout x:class="GridLayout"/>
-
-  <x:children>
-
-    <group text="Bars">
-      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
-      <layout x:class="GridLayout" numColumns="2"/>
-      <x:children>
-
-        <!-- Baseline -->
-        <label text="Baseline:"/>
-        <text x:id="baseline" x:id.default="0" x:style="BORDER">
-          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-        </text>
-
-        <!-- Bar placement:Aligned/Overlap/InFront/Stacked -->
-        <label text="Bar placement:"/>
-        <combo x:id="bar_placement" x:id.default="Aligned" x:style="BORDER|READ_ONLY">
-          <add x:p0="Aligned"/>
-          <add x:p0="Overlap"/>
-          <add x:p0="InFront"/>
-          <add x:p0="Stacked"/>
-        </combo>
-
-        <!-- Rotate X labels by:0/30/45/60/90 -->
-        <label text="Rotate x labels by:"/>
-        <combo x:id="xlabel_rotation" x:id.default="0" x:style="BORDER|READ_ONLY">
-          <add x:p0="0"/>
-          <add x:p0="30"/>
-          <add x:p0="45"/>
-          <add x:p0="60"/>
-          <add x:p0="90"/>
-        </combo>
-
-      </x:children>
-    </group>
-
-  </x:children>
-</xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="PLOT" label="Plot">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
-
-  <import xmlns="http://sweet_swt.sf.net/xswt">
-    <package name="java.lang"/>
-    <package name="org.eclipse.swt.widgets" />
-    <package name="org.eclipse.swt.graphics" />
-    <package name="org.eclipse.swt.layout" />
-    <package name="org.eclipse.swt.custom" />
-    <package name="org.omnetpp.common.wizard.support" />
-    <package name="org.omnetpp.ned.editor.wizards.support" />
-    <package name="org.omnetpp.cdt.wizard.support" />
-  </import>
-  <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true"/>
-
-  <x:children>
-
-    <group text="Title">
-      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-      <layout x:class="GridLayout" numColumns="2"/>
-      <x:children>
-
-    <!-- Plot title -->
-    <label text="Plot title:"/>
-    <text x:id="title" x:style="BORDER">
-      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </text>
-
-    <!-- } -->
-      </x:children>
-    </group>
-
-    <!-- X Axis { -->
-    <group text="X axis">
-      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" verticalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-      <layout x:class="GridLayout" numColumns="2"/>
-      <x:children>
-
-    <label text="Label:"/>
-    <text x:id="xaxis_title" x:style="BORDER">
-      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </text>
-
-    <!-- } -->
-      </x:children>
-    </group>
-
-    <!-- Y Axis { -->
-    <group text="Y axis">
-      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-      <layout x:class="GridLayout" numColumns="2"/>
-      <x:children>
-
-    <label text="Label:"/>
-    <text x:id="yaxis_title" x:style="BORDER">
-      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </text>
-
-    <label text="Min:"/>
-    <text x:id="yaxis_min" x:style="BORDER">
-      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </text>
-
-    <label text="Max:"/>
-    <text x:id="yaxis_max" x:style="BORDER">
-      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </text>
-
-    <button x:id="yaxis_log" x:id.default="false" text="Logarithmic" x:style="CHECK">
-      <layoutData x:class="GridData" horizontalSpan="2"/>
-    </button>
-
-    <!-- } -->
-      </x:children>
-    </group>
-
-    <!-- Grid { -->
-    <group text="Grid">
-      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
-      <layout x:class="GridLayout" numColumns="2"/>
-      <x:children>
-
-    <!-- Display Legend? -->
-    <button x:id="grid_show" x:id.default="true" text="Show grid" x:style="CHECK" x:id.isEnabler="true">
-      <layoutData x:class="GridData" horizontalSpan="2"/>
-    </button>
-
-    <!-- Show grid:None/Major/All -->
-    <label text="Density:"/>
-    <combo x:id="grid_density" x:id.default="Major" x:style="BORDER|READ_ONLY">
-      <add x:p0="Major"/>
-      <add x:p0="All"/>
-    </combo>
-
-    <!-- } -->
-      </x:children>
-    </group>
-
-    <!-- Legend { -->
-    <group text="Legend">
-      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
-      <layout x:class="GridLayout" numColumns="2"/>
-      <x:children>
-
-    <!-- Display Legend? -->
-    <button x:id="legend_show" x:id.default="true" text="Show legend" x:style="CHECK" x:id.isEnabler="true" >
-      <layoutData x:class="GridData" horizontalSpan="2"/>
-    </button>
-
-    <!-- Display titles or names? -->
-    <label text="Label source:"/>
-    <combo x:id="legend_labels" x:id.default="result titles" x:style="BORDER|READ_ONLY">
-      <add x:p0="result names"/>
-      <add x:p0="result titles"/>
-    </combo>
-
-    <!-- Placement -->
-    <label text="Placement:"/>
-    <combo x:id="legend_placement" x:id.default="upper right" x:style="BORDER|READ_ONLY">
-      <add x:p0="best"/>
-      <add x:p0="upper right"/>
-      <add x:p0="upper left"/>
-      <add x:p0="lower left"/>
-      <add x:p0="lower right"/>
-      <add x:p0="right"/>
-      <add x:p0="center left"/>
-      <add x:p0="center right"/>
-      <add x:p0="lower center"/>
-      <add x:p0="upper center"/>
-      <add x:p0="center"/>
-      <add x:p0="outside top left"/>
-      <add x:p0="outside top center"/>
-      <add x:p0="outside top right"/>
-      <add x:p0="outside bottom left"/>
-      <add x:p0="outside bottom center"/>
-      <add x:p0="outside bottom right"/>
-      <add x:p0="outside left top"/>
-      <add x:p0="outside left center"/>
-      <add x:p0="outside left bottom"/>
-      <add x:p0="outside right top"/>
-      <add x:p0="outside right center"/>
-      <add x:p0="outside right bottom"/>
-    </combo>
-
-    <!-- } -->
-      </x:children>
-    </group>
-
-  </x:children>
-</xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="STYLING" label="Styling">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
-
-  <import xmlns="http://sweet_swt.sf.net/xswt">
-    <package name="java.lang"/>
-    <package name="org.eclipse.swt.widgets" />
-    <package name="org.eclipse.swt.graphics" />
-    <package name="org.eclipse.swt.layout" />
-    <package name="org.eclipse.swt.custom" />
-    <package name="org.omnetpp.common.wizard.support" />
-    <package name="org.omnetpp.ned.editor.wizards.support" />
-    <package name="org.omnetpp.cdt.wizard.support" />
-  </import>
-  <layout x:class="GridLayout" numColumns="2"/>
-
-  <x:children>
-
-    <!-- Colors { -->
-    <group text="Colors">
-      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-      <layout x:class="GridLayout" numColumns="2"/>
-      <x:children>
-
-    <!-- backgroundColor -->
-    <label text="Background color:"/>
-    <ColorChooser x:id="Plot.BackgroundColor" x:style="BORDER">
-      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </ColorChooser>
-
-    <label text="Cycle seed:"/>
-    <spinner x:id="cycle_seed" x:id.default="0" selection="0" minimum="0" maximum="1000000" x:style="BORDER"/>
-
-    <!-- } -->
-      </x:children>
-    </group>
-
-    <group text="Fonts">
-      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-      <layout x:class="GridLayout" numColumns="2"/>
-      <x:children>
-
-    <!-- Title font -->
-    <label text="Title font:"/>
-    <FontChooser x:id="Plot.Title.Font" x:style="BORDER">
-      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </FontChooser>
-
-    <!-- Axis title font -->
-    <label text="Axis title font:"/>
-    <FontChooser x:id="Axis.Title.Font" x:style="BORDER">
-      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </FontChooser>
-
-    <!-- Label font -->
-    <label text="Label font:"/>
-    <FontChooser x:id="Axis.Label.Font" x:style="BORDER">
-      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </FontChooser>
-
-    <!-- Legend font -->
-    <label text="Legend font:"/>
-    <FontChooser x:id="Legend.Font" x:style="BORDER">
-      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-    </FontChooser>
-
-    <!-- } -->
-      </x:children>
-    </group>
-
-    <!-- Legend { -->
-    <group text="Legend">
-      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-      <layout x:class="GridLayout" numColumns="2"/>
-      <x:children>
-
-    <button x:id="Legend.Border" text="Border" x:style="CHECK">
-      <layoutData x:class="GridData" horizontalSpan="2"/>
-    </button>
-
-    <!-- } -->
-      </x:children>
-    </group>
-
-    <!-- Options { -->
-    <group text="Options">
-      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-      <layout x:class="GridLayout" numColumns="2"/>
-      <x:children>
-
-    <!-- Use antialias? -->
-    <button x:id="Plot.Antialias" text="Use antialias" x:style="CHECK">
-      <layoutData x:class="GridData" horizontalSpan="2"/>
-    </button>
-
-    <!-- Use caching? -->
-    <button x:id="Plot.Caching" text="Use caching" x:style="CHECK">
-      <layoutData x:class="GridData" horizontalSpan="2"/>
-    </button>
-
-        <!-- Border? -->
-    <button x:id="X.Label.Wrap" text="Wrap labels" x:style="CHECK">
-      <layoutData x:class="GridData" horizontalSpan="2"/>
-    </button>
-
-    <!-- } -->
-      </x:children>
-    </group>
-
-  </x:children>
-</xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="ADVANCED" label="Advanced">
-                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
-<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
-  <import xmlns='http://sweet_swt.sf.net/xswt'>
-    <package name='java.lang'/>
-    <package name='org.eclipse.swt.widgets' />
-    <package name='org.eclipse.swt.graphics' />
-    <package name='org.eclipse.swt.layout' />
-    <package name='org.eclipse.swt.custom' />
-  </import>
-  <layout x:class='GridLayout' numColumns='1'/>
-  <x:children>
-    <label text="Here you can further customize the plot using properties."/>
-    <label text="The syntax is one entry per line in the 'key : value' format; comments (#) are also accepted."/>
-    <label text="Content Assist available (hit Ctrl+Space)."/>
-    <styledText x:id="plot.properties" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="plotproperties">
-      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true"/>
-    </styledText>
-  </x:children>
-</xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="EXPORT" label="Export">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
-
-  <import xmlns="http://sweet_swt.sf.net/xswt">
-    <package name="java.lang"/>
-    <package name="org.eclipse.swt.widgets" />
-    <package name="org.eclipse.swt.graphics" />
-    <package name="org.eclipse.swt.layout" />
-    <package name="org.eclipse.swt.custom" />
-    <package name="org.omnetpp.common.wizard.support" />
-    <package name="org.omnetpp.ned.editor.wizards.support" />
-    <package name="org.omnetpp.cdt.wizard.support" />
-  </import>
-  <layout x:class="GridLayout" numColumns="2"/>
-
-  <x:children>
-
-    <group text="Image export">
-      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-      <layout x:class="GridLayout" numColumns="2"/>
-      <x:children>
-
-        <label text="Image file name (w/o extension):"/>
-        <text x:id="image_export_filename" x:style="BORDER">
-          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-        </text>
-
-        <label text="Image width (inches):"/>
-        <text x:id="image_export_width" x:id.default="6" x:style="BORDER">
-          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-        </text>
-
-        <label text="Image height (inches):"/>
-        <text x:id="image_export_height" x:id.default="4" x:style="BORDER">
-          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-        </text>
-
-      </x:children>
-    </group>
-
-    <group text="Data export">
-      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-      <layout x:class="GridLayout" numColumns="2"/>
-      <x:children>
-
-        <label text="File name (w/o extension):"/>
-        <text x:id="data_export_filename" x:style="BORDER">
-          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
-        </text>
-
-      </x:children>
-    </group>
-
-  </x:children>
-</xswt>
-]]>
-            </dialogPage>
-            <property name="grid_show" value="true"/>
-            <property name="legend_labels" value="result titles"/>
-            <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="delay [us]"/>
-            <property name="Legend.Border" value="false"/>
-            <property name="title" value="End-to-end delay minimum"/>
-            <property name="Plot.Title.Font" value="Arial-regular-10"/>
-            <property name="cycle_seed" value="0"/>
-            <property name="Axis.Title.Font" value="Arial-regular-8"/>
-            <property name="bar_placement" value="Aligned"/>
-            <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
-            <property name="Axis.Label.Font" value="Arial-regular-8"/>
-            <property name="legend_placement" value="upper right"/>
-            <property name="plot.properties" value=""/>
-            <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value=""/>
-            <property name="Plot.BackgroundColor" value="white"/>
-            <property name="xlabel_rotation" value="0"/>
-            <property name="grid_density" value="Major"/>
-            <property name="groups" value=""/>
-            <property name="yaxis_min" value=""/>
-            <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="baseline" value="0"/>
-            <property name="image_export_filename" value=""/>
-            <property name="filter" value="type =~ scalar AND name =~ meanBitLifeTimePerPacket:histogram:min"/>
-            <property name="X.Label.Wrap" value="true"/>
-            <property name="series" value=""/>
-            <property name="legend_show" value="true"/>
-            <property name="simplify" value="false"/>
-            <property name="yaxis_max" value=""/>
-            <property name="Plot.Antialias" value="true"/>
-            <property name="image_export_width" value="6"/>
-        </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1912" name="Switch queue lengths" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1072264322" name="Switch queue lengths" template="linechart_native" type="LINE">
             <script>
                 <![CDATA[import math
-from omnetpp.scave import results, chart, utils, ideplot
+from omnetpp.scave import results, chart, utils
 
 # get chart properties
 props = chart.get_properties()
@@ -1143,14 +634,12 @@ end_time = float(props["vector_end_time"] or math.inf)
 
 # query vector data into a data frame
 try:
-    df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
+    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
@@ -1436,13 +925,6 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalSpan="2"/>
     </button>
 
-    <!-- Display titles or names? -->
-    <label text="Label source:"/>
-    <combo x:id="legend_labels" x:id.default="result titles" x:style="BORDER|READ_ONLY">
-      <add x:p0="result names"/>
-      <add x:p0="result titles"/>
-    </combo>
-
     <!-- Placement -->
     <label text="Placement:"/>
     <combo x:id="legend_placement" x:id.default="upper right" x:style="BORDER|READ_ONLY">
@@ -1478,6 +960,75 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]>
+            </dialogPage>
+            <dialogPage id="LEGEND" label="Legend">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang" />
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+  </import>
+  <layout x:class="GridLayout" numColumns="1" />
+  <x:children>
+
+        <group text="Legend labels">
+
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="false" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+          <layout x:class="GridLayout" />
+          <x:children>
+            <button x:id='legend_automatic' text='Automatic' x:style='RADIO' x:id.default="true"/>
+            <composite>
+              <layoutData x:class="GridData" horizontalIndent="30"/>
+              <layout x:class="GridLayout" marginHeight="0" marginBottom="5"/>
+              <x:children>
+                <button x:id='legend_prefer_result_titles' text='Use result title instead of name where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/>
+                <button x:id='legend_prefer_module_display_paths' text='Use module display path instead of full path where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/>
+              </x:children>
+            </composite>
+
+            <button x:id='legend_manual' text='Manual' x:style='RADIO'/>
+            <composite>
+              <layoutData x:class="GridData" horizontalIndent="30"/>
+              <layout x:class="GridLayout" numColumns="2" marginHeight="0" marginBottom="5"/>
+              <x:children>
+                <label text="Format string:"/>
+                <text x:id="legend_format" x:style="BORDER" x:id.enablerButton="legend_manual" x:id.contentAssist="columns">
+                  <layoutData x:class="GridData" widthHint="200" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="CENTER" grabExcessVerticalSpace="false" />
+                </text>
+                <label text="Hint: Add $name or ${name} to insert content of data frame column; use $$ to insert dollar sign">
+                  <layoutData x:class="GridData" horizontalSpan="2" />
+                </label>
+              </x:children>
+            </composite>
+          </x:children>
+
+        </group>
+
+        <group text="Label tweaking">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+          <layout x:class="GridLayout" numColumns="1" />
+          <x:children>
+            <label text="Sed-style regex replacements inside the labels (/foo/bar/, one per line):" />
+            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL">
+              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+            </styledText>
+            <label text="Hint: Use \1, \2, etc. to refer back to parenthesized groups; data frame colums ($name, ${name}) also recognized"/>
+            <!--
+            <label text="Examples:"/>
+            <label text='- &quot;/tcp/TCP/&quot; ==&gt; change &quot;tcp&quot; to &quot;TCP&quot;'/>
+            <label text='- &quot;/ +/ /&quot; ==&gt; replace multiple spaces with one space'/>
+            <label text="- &quot;/host\[(\d+)\]/in host \1/&quot; ==&gt; change &quot;host[21]&quot; to &quot;in host 21&quot; (note \1,\2 as group reference)"/>
+            <label text='- &quot;/\//:/&quot; or &quot;|\|:|&quot; ==&gt; replace slashes with colons'/>
+            -->
+          </x:children>
+        </group>
+
+
+  </x:children>
+</xswt>]]>
             </dialogPage>
             <dialogPage id="STYLING" label="Styling">
                 <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -1675,7 +1226,6 @@ utils.export_data_if_needed(df, props)
             <property name="grid_show" value="true"/>
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
-            <property name="legend_labels" value="result titles"/>
             <property name="Plot.Caching" value="true"/>
             <property name="yaxis_title" value=""/>
             <property name="Legend.Border" value="false"/>
@@ -1699,7 +1249,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
-            <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND name =~ queueLength:vector AND (&#10;    (module =~ &quot;CreditbasedShaperValidation.switch.eth[4].macLayer.queue.queue[1]&quot;) OR&#10;    (module =~ &quot;CreditbasedShaperValidation.switch.eth[4].macLayer.queue.queue[5]&quot;) OR&#10;    (module =~ &quot;CreditbasedShaperValidation.switch.eth[4].macLayer.queue.queue[6]&quot;) OR&#10;    (module =~ &quot;CreditbasedShaperValidation.switch.eth[4].macLayer.queue.queue[7]&quot;)&#10;)"/>
+            <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND name =~ queueLength:vector AND (&#10;    (module =~ &quot;*.switch.eth[4].macLayer.queue.queue[1]&quot;) OR&#10;    (module =~ &quot;*.switch.eth[4].macLayer.queue.queue[5]&quot;) OR&#10;    (module =~ &quot;*.switch.eth[4].macLayer.queue.queue[6]&quot;) OR&#10;    (module =~ &quot;*.switch.eth[4].macLayer.queue.queue[7]&quot;)&#10;)"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
@@ -1707,16 +1257,22 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
             <property name="legend_show" value="true"/>
-            <property name="simplify" value=""/>
+            <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
+            <property name="legend_prefer_module_display_paths" value="true"/>
+            <property name="legend_prefer_result_titles" value="true"/>
+            <property name="legend_manual" value="false"/>
+            <property name="legend_replacements" value=""/>
+            <property name="legend_automatic" value="true"/>
+            <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1969" name="Shaper outgoing traffic" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1187193653" name="Shaper outgoing traffic" template="linechart_native" type="LINE">
             <script>
                 <![CDATA[import math
-from omnetpp.scave import results, chart, utils, ideplot
+from omnetpp.scave import results, chart, utils
 
 # get chart properties
 props = chart.get_properties()
@@ -1729,14 +1285,12 @@ end_time = float(props["vector_end_time"] or math.inf)
 
 # query vector data into a data frame
 try:
-    df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
+    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
@@ -2022,13 +1576,6 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalSpan="2"/>
     </button>
 
-    <!-- Display titles or names? -->
-    <label text="Label source:"/>
-    <combo x:id="legend_labels" x:id.default="result titles" x:style="BORDER|READ_ONLY">
-      <add x:p0="result names"/>
-      <add x:p0="result titles"/>
-    </combo>
-
     <!-- Placement -->
     <label text="Placement:"/>
     <combo x:id="legend_placement" x:id.default="upper right" x:style="BORDER|READ_ONLY">
@@ -2064,6 +1611,75 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]>
+            </dialogPage>
+            <dialogPage id="LEGEND" label="Legend">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang" />
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+  </import>
+  <layout x:class="GridLayout" numColumns="1" />
+  <x:children>
+
+        <group text="Legend labels">
+
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="false" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+          <layout x:class="GridLayout" />
+          <x:children>
+            <button x:id='legend_automatic' text='Automatic' x:style='RADIO' x:id.default="true"/>
+            <composite>
+              <layoutData x:class="GridData" horizontalIndent="30"/>
+              <layout x:class="GridLayout" marginHeight="0" marginBottom="5"/>
+              <x:children>
+                <button x:id='legend_prefer_result_titles' text='Use result title instead of name where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/>
+                <button x:id='legend_prefer_module_display_paths' text='Use module display path instead of full path where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/>
+              </x:children>
+            </composite>
+
+            <button x:id='legend_manual' text='Manual' x:style='RADIO'/>
+            <composite>
+              <layoutData x:class="GridData" horizontalIndent="30"/>
+              <layout x:class="GridLayout" numColumns="2" marginHeight="0" marginBottom="5"/>
+              <x:children>
+                <label text="Format string:"/>
+                <text x:id="legend_format" x:style="BORDER" x:id.enablerButton="legend_manual" x:id.contentAssist="columns">
+                  <layoutData x:class="GridData" widthHint="200" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="CENTER" grabExcessVerticalSpace="false" />
+                </text>
+                <label text="Hint: Add $name or ${name} to insert content of data frame column; use $$ to insert dollar sign">
+                  <layoutData x:class="GridData" horizontalSpan="2" />
+                </label>
+              </x:children>
+            </composite>
+          </x:children>
+
+        </group>
+
+        <group text="Label tweaking">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+          <layout x:class="GridLayout" numColumns="1" />
+          <x:children>
+            <label text="Sed-style regex replacements inside the labels (/foo/bar/, one per line):" />
+            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL">
+              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+            </styledText>
+            <label text="Hint: Use \1, \2, etc. to refer back to parenthesized groups; data frame colums ($name, ${name}) also recognized"/>
+            <!--
+            <label text="Examples:"/>
+            <label text='- &quot;/tcp/TCP/&quot; ==&gt; change &quot;tcp&quot; to &quot;TCP&quot;'/>
+            <label text='- &quot;/ +/ /&quot; ==&gt; replace multiple spaces with one space'/>
+            <label text="- &quot;/host\[(\d+)\]/in host \1/&quot; ==&gt; change &quot;host[21]&quot; to &quot;in host 21&quot; (note \1,\2 as group reference)"/>
+            <label text='- &quot;/\//:/&quot; or &quot;|\|:|&quot; ==&gt; replace slashes with colons'/>
+            -->
+          </x:children>
+        </group>
+
+
+  </x:children>
+</xswt>]]>
             </dialogPage>
             <dialogPage id="STYLING" label="Styling">
                 <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -2261,7 +1877,6 @@ utils.export_data_if_needed(df, props)
             <property name="grid_show" value="true"/>
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
-            <property name="legend_labels" value="result titles"/>
             <property name="Plot.Caching" value="true"/>
             <property name="yaxis_title" value=""/>
             <property name="Legend.Border" value="false"/>
@@ -2285,7 +1900,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
-            <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND name =~ outgoingDataRate:vector AND (&#10;    (module =~ &quot;CreditbasedShaperValidation.switch.eth[4].macLayer.queue.transmissionSelectionAlgorithm[5]&quot;) OR&#10;    (module =~ &quot;CreditbasedShaperValidation.switch.eth[4].macLayer.queue.transmissionSelectionAlgorithm[6]&quot;) OR&#10;    (module =~ &quot;CreditbasedShaperValidation.switch.eth[4].macLayer.queue.transmissionSelectionAlgorithm[7]&quot;)&#10;)"/>
+            <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND name =~ outgoingDataRate:vector AND (&#10;    (module =~ &quot;*.switch.eth[4].macLayer.queue.transmissionSelectionAlgorithm[5]&quot;) OR&#10;    (module =~ &quot;*.switch.eth[4].macLayer.queue.transmissionSelectionAlgorithm[6]&quot;) OR&#10;    (module =~ &quot;*.switch.eth[4].macLayer.queue.transmissionSelectionAlgorithm[7]&quot;)&#10;)"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
@@ -2293,16 +1908,22 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
             <property name="legend_show" value="true"/>
-            <property name="simplify" value=""/>
+            <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
+            <property name="legend_prefer_module_display_paths" value="true"/>
+            <property name="legend_prefer_result_titles" value="true"/>
+            <property name="legend_manual" value=""/>
+            <property name="legend_replacements" value=""/>
+            <property name="legend_automatic" value="true"/>
+            <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1914" name="Sink application traffic" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="579772762" name="Sink application traffic" template="linechart_native" type="LINE">
             <script>
                 <![CDATA[import math
-from omnetpp.scave import results, chart, utils, ideplot
+from omnetpp.scave import results, chart, utils
 
 # get chart properties
 props = chart.get_properties()
@@ -2315,14 +1936,12 @@ end_time = float(props["vector_end_time"] or math.inf)
 
 # query vector data into a data frame
 try:
-    df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
+    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
@@ -2608,13 +2227,6 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalSpan="2"/>
     </button>
 
-    <!-- Display titles or names? -->
-    <label text="Label source:"/>
-    <combo x:id="legend_labels" x:id.default="result titles" x:style="BORDER|READ_ONLY">
-      <add x:p0="result names"/>
-      <add x:p0="result titles"/>
-    </combo>
-
     <!-- Placement -->
     <label text="Placement:"/>
     <combo x:id="legend_placement" x:id.default="upper right" x:style="BORDER|READ_ONLY">
@@ -2650,6 +2262,75 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]>
+            </dialogPage>
+            <dialogPage id="LEGEND" label="Legend">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang" />
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+  </import>
+  <layout x:class="GridLayout" numColumns="1" />
+  <x:children>
+
+        <group text="Legend labels">
+
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="false" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+          <layout x:class="GridLayout" />
+          <x:children>
+            <button x:id='legend_automatic' text='Automatic' x:style='RADIO' x:id.default="true"/>
+            <composite>
+              <layoutData x:class="GridData" horizontalIndent="30"/>
+              <layout x:class="GridLayout" marginHeight="0" marginBottom="5"/>
+              <x:children>
+                <button x:id='legend_prefer_result_titles' text='Use result title instead of name where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/>
+                <button x:id='legend_prefer_module_display_paths' text='Use module display path instead of full path where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/>
+              </x:children>
+            </composite>
+
+            <button x:id='legend_manual' text='Manual' x:style='RADIO'/>
+            <composite>
+              <layoutData x:class="GridData" horizontalIndent="30"/>
+              <layout x:class="GridLayout" numColumns="2" marginHeight="0" marginBottom="5"/>
+              <x:children>
+                <label text="Format string:"/>
+                <text x:id="legend_format" x:style="BORDER" x:id.enablerButton="legend_manual" x:id.contentAssist="columns">
+                  <layoutData x:class="GridData" widthHint="200" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="CENTER" grabExcessVerticalSpace="false" />
+                </text>
+                <label text="Hint: Add $name or ${name} to insert content of data frame column; use $$ to insert dollar sign">
+                  <layoutData x:class="GridData" horizontalSpan="2" />
+                </label>
+              </x:children>
+            </composite>
+          </x:children>
+
+        </group>
+
+        <group text="Label tweaking">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+          <layout x:class="GridLayout" numColumns="1" />
+          <x:children>
+            <label text="Sed-style regex replacements inside the labels (/foo/bar/, one per line):" />
+            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL">
+              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+            </styledText>
+            <label text="Hint: Use \1, \2, etc. to refer back to parenthesized groups; data frame colums ($name, ${name}) also recognized"/>
+            <!--
+            <label text="Examples:"/>
+            <label text='- &quot;/tcp/TCP/&quot; ==&gt; change &quot;tcp&quot; to &quot;TCP&quot;'/>
+            <label text='- &quot;/ +/ /&quot; ==&gt; replace multiple spaces with one space'/>
+            <label text="- &quot;/host\[(\d+)\]/in host \1/&quot; ==&gt; change &quot;host[21]&quot; to &quot;in host 21&quot; (note \1,\2 as group reference)"/>
+            <label text='- &quot;/\//:/&quot; or &quot;|\|:|&quot; ==&gt; replace slashes with colons'/>
+            -->
+          </x:children>
+        </group>
+
+
+  </x:children>
+</xswt>]]>
             </dialogPage>
             <dialogPage id="STYLING" label="Styling">
                 <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -2847,7 +2528,6 @@ utils.export_data_if_needed(df, props)
             <property name="grid_show" value="true"/>
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
-            <property name="legend_labels" value="result titles"/>
             <property name="Plot.Caching" value="true"/>
             <property name="yaxis_title" value=""/>
             <property name="Legend.Border" value="false"/>
@@ -2871,7 +2551,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
-            <property name="filter" value="type =~ vector AND module =~ &quot;*.R.*&quot; AND name =~ dataRate:vector&#10;AND NOT (type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND name =~ dataRate:vector AND (&#10;    (module =~ &quot;CreditbasedShaperValidation.R.eth[0].macLayer.queue.classifier&quot;) OR&#10;    (module =~ &quot;CreditbasedShaperValidation.R.eth[0].macLayer.queue.transmissionSelection&quot;)&#10;))"/>
+            <property name="filter" value="type =~ vector AND module =~ &quot;*.R.*&quot; AND name =~ dataRate:vector&#10;AND NOT (type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND name =~ dataRate:vector AND (&#10;    (module =~ &quot;*.R.eth[0].macLayer.queue.classifier&quot;) OR&#10;    (module =~ &quot;*.R.eth[0].macLayer.queue.transmissionSelection&quot;)&#10;))"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
@@ -2879,11 +2559,17 @@ utils.export_data_if_needed(df, props)
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="none"/>
             <property name="legend_show" value="true"/>
-            <property name="simplify" value=""/>
+            <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="6"/>
+            <property name="legend_prefer_module_display_paths" value="true"/>
+            <property name="legend_prefer_result_titles" value="true"/>
+            <property name="legend_manual" value=""/>
+            <property name="legend_replacements" value=""/>
+            <property name="legend_automatic" value="true"/>
+            <property name="legend_format" value=""/>
         </chart>
     </charts>
 </analysis>
