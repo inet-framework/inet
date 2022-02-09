@@ -509,6 +509,7 @@
         requires = "Queueing"
         labels = ""
         nedPackages = "
+                       inet.applications.ieee8022
                        inet.linklayer.ieee8022
                       "
         extraSourceFolders = ""
