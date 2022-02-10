@@ -120,52 +120,9 @@ bool InterfaceTable::isLocalAddress(const L3Address& address) const
 InterfaceEntry *InterfaceTable::findInterfaceByAddress(const L3Address& address) const
 {
     if (!address.isUnspecified()) {
-        L3Address::AddressType addrType = address.getType();
-        for (auto & elem : idToInterface) {
-            InterfaceEntry *ie = elem;
-            if (ie) {
-#ifdef WITH_NEXTHOP
-                if (auto nextHopData = ie->findProtocolData<NextHopInterfaceData>())
-                    if (nextHopData->getAddress() == address)
-                        return ie;
-#endif // ifdef WITH_NEXTHOP
-                switch (addrType) {
-#ifdef WITH_IPv4
-                    case L3Address::IPv4:
-                        if (auto ipv4Data = ie->findProtocolData<Ipv4InterfaceData>())
-                            if (ipv4Data->getIPAddress() == address.toIpv4())
-                                return ie;
-                        break;
-#endif // ifdef WITH_IPv4
-
-#ifdef WITH_IPv6
-                    case L3Address::IPv6:
-                        if (auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>())
-                            if (ipv6Data->hasAddress(address.toIpv6()))
-                                return ie;
-                        break;
-#endif // ifdef WITH_IPv6
-
-                    case L3Address::MAC:
-                        if (ie->getMacAddress() == address.toMac())
-                            return ie;
-                        break;
-
-                    case L3Address::MODULEID:
-                        if (ie->getModuleIdAddress() == address.toModuleId())
-                            return ie;
-                        break;
-
-                    case L3Address::MODULEPATH:
-                        if (ie->getModulePathAddress() == address.toModulePath())
-                            return ie;
-                        break;
-
-                    default:
-                        throw cRuntimeError("Unknown address type");
-                        break;
-                }
-            }
+        for (auto ie : idToInterface) {
+            if (ie && ie->hasNetworkAddress(address))
+                return ie;
         }
     }
     return nullptr;
