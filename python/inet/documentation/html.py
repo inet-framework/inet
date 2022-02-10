@@ -6,7 +6,7 @@ from inet.simulation.project import *
 
 def generate_html_documentation():
     print("Generating HTML documentation")
-    subprocess.run(["make", "html"], cwd = get_full_path("/doc/src/"))
+    subprocess.run(["make", "html"], cwd = inet_project.get_full_path("/doc/src/"))
 
 def upload_html_documentation(path):
     print("Uploading HTML documentation, path = " + path)
