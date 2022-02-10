@@ -339,40 +339,41 @@ const L3Address NetworkInterface::getNetworkAddress() const
 
 bool NetworkInterface::hasNetworkAddress(const L3Address& address) const
 {
-    switch(address.getType()) {
-    case L3Address::NONE:
-        return false;
-
-    case L3Address::IPv4: {
-#ifdef INET_WITH_IPv4
-        auto ipv4data = findProtocolData<Ipv4InterfaceData>();
-        return ipv4data != nullptr && ipv4data->getIPAddress() == address.toIpv4();
-#else
-        return false;
-#endif // ifdef INET_WITH_IPv4
-    }
-    case L3Address::IPv6: {
-#ifdef INET_WITH_IPv6
-        auto ipv6data = findProtocolData<Ipv6InterfaceData>();
-        return ipv6data != nullptr && ipv6data->hasAddress(address.toIpv6());
-#else
-        return false;
-#endif // ifdef INET_WITH_IPv6
-    }
-    case L3Address::MAC: {
-        return getMacAddress() == address.toMac();
-    }
-    case L3Address::MODULEID:
-    case L3Address::MODULEPATH: {
 #ifdef INET_WITH_NEXTHOP
-        auto nextHopData = findProtocolData<NextHopInterfaceData>();
-        return nextHopData != nullptr && nextHopData->getAddress() == address;
-#else
-        return false;
+    auto nextHopData = findProtocolData<NextHopInterfaceData>();
+    if (nextHopData != nullptr && nextHopData->getAddress() == address)
+        return true;
 #endif // ifdef INET_WITH_NEXTHOP
-    }
-    default:
-        break;
+
+    switch(address.getType()) {
+        case L3Address::NONE:
+            return false;
+
+        case L3Address::IPv4: {
+#ifdef INET_WITH_IPv4
+            auto ipv4data = findProtocolData<Ipv4InterfaceData>();
+            return ipv4data != nullptr && ipv4data->getIPAddress() == address.toIpv4();
+#else
+            return false;
+#endif // ifdef INET_WITH_IPv4
+        }
+        case L3Address::IPv6: {
+#ifdef INET_WITH_IPv6
+            auto ipv6data = findProtocolData<Ipv6InterfaceData>();
+            return ipv6data != nullptr && ipv6data->hasAddress(address.toIpv6());
+#else
+            return false;
+#endif // ifdef INET_WITH_IPv6
+        }
+        case L3Address::MAC: {
+            return getMacAddress() == address.toMac();
+        }
+        case L3Address::MODULEID:
+            return getModuleIdAddress() == address.toModuleId();
+        case L3Address::MODULEPATH:
+            return getModulePathAddress() == address.toModulePath();
+        default:
+            break;
     }
     return false;
 }
