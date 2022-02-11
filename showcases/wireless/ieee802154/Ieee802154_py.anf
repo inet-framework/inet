@@ -1156,7 +1156,7 @@ utils.export_data_if_needed(df, props)
             <property name="Plot.Antialias" value="true"/>
             <property name="image_export_width" value="6"/>
         </chart>
-        <chart icon="icons/full/obj/barchart.png" id="1434924537" name="Residual energy capacity (3)" template="barchart_native" type="BAR">
+        <chart icon="icons/full/obj/barchart.png" id="1434924537" name="Power consumption" template="barchart_native" type="BAR">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
 
 # get chart properties
