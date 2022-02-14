@@ -299,7 +299,6 @@ bool L3AddressResolver::getIpv6AddressFrom(L3Address& retAddr, IInterfaceTable *
 
     for (int i = 0; i < ift->getNumInterfaces() && retScope != Ipv6Address::GLOBAL; i++) {
         NetworkInterface *ie = ift->getInterface(i);
-        auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
         L3Address curAddr;
         bool ieHasIpv6Addr = getInterfaceIpv6Address(curAddr, ie, false);
         if (!ieHasIpv6Addr || ie->isLoopback())
