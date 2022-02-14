@@ -619,7 +619,6 @@
 /examples/wireless/testnewmac/,      -f omnetpp.ini -c Mac -r 0,                    10s,          6bfb-22e5/tplx;6a24-b25b/~tNl;9106-7449/~tND;ce78-5d1d/tyf, PASS, wireless
 
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,           a4d8-abf4/tplx;f424-9aaf/~tNl;cee0-4358/~tND;b904-efb2/tyf, PASS, wireless
-# /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            100s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, ERROR, wireless # Throughput2 extended
-/examples/wireless/throughput/,      -f omnetpp.ini -c Mac -r 0,                    10s,         3b2b-5123/tplx;0009-ca8c/~tNl;4d9d-62df/~tND;da38-880b/tyf, PASS, wireless
+/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,         3b2b-5123/tplx;0009-ca8c/~tNl;4d9d-62df/~tND;da38-880b/tyf, PASS, wireless
 
 /examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,      7999-b7a6/tplx;21b4-766a/~tNl;8116-742d/~tND;9ee3-1be7/tyf, PASS, wireless EthernetMac
