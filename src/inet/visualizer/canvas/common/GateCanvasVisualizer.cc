@@ -88,7 +88,7 @@ void GateCanvasVisualizer::refreshGateVisualization(const GateVisualization *gat
     else {
         auto displayDuration = this->displayDuration != 0 ? this->displayDuration : scheduleDuration;
         auto currentTime = gate->getClockTime();
-        clocktime_t schedulePosition = std::fmod(currentTime.dbl(), scheduleDuration.dbl());
+        clocktime_t schedulePosition = std::fmod((currentTime + gate->getInitialOffset()).dbl(), scheduleDuration.dbl());
         auto scheduleDisplayStart = schedulePosition - (currentTimePosition / width) * displayDuration;
         auto scheduleDisplayEnd = scheduleDisplayStart + displayDuration;
         auto indexStart = (int)std::floor(scheduleDisplayStart.dbl() / scheduleDuration.dbl()) * durations->size();
