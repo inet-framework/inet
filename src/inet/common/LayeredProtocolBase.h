@@ -28,8 +28,8 @@ class INET_API LayeredProtocolBase : public OperationalBase
     virtual void handleUpperPacket(Packet *packet);
     virtual void handleLowerPacket(Packet *packet);
 
-    virtual bool isUpperMessage(cMessage *message) = 0;
-    virtual bool isLowerMessage(cMessage *message) = 0;
+    virtual bool isUpperMessage(cMessage *message) const = 0;
+    virtual bool isLowerMessage(cMessage *message) const = 0;
 };
 
 } // namespace inet

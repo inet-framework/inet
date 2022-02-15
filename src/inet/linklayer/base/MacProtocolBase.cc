@@ -70,12 +70,12 @@ void MacProtocolBase::sendDown(cMessage *message)
     send(message, lowerLayerOutGateId);
 }
 
-bool MacProtocolBase::isUpperMessage(cMessage *message)
+bool MacProtocolBase::isUpperMessage(cMessage *message) const
 {
     return message->getArrivalGateId() == upperLayerInGateId;
 }
 
-bool MacProtocolBase::isLowerMessage(cMessage *message)
+bool MacProtocolBase::isLowerMessage(cMessage *message) const
 {
     return message->getArrivalGateId() == lowerLayerInGateId;
 }

@@ -56,8 +56,8 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
     virtual void sendUp(cMessage *message);
     virtual void sendDown(cMessage *message);
 
-    virtual bool isUpperMessage(cMessage *message) override;
-    virtual bool isLowerMessage(cMessage *message) override;
+    virtual bool isUpperMessage(cMessage *message) const override;
+    virtual bool isLowerMessage(cMessage *message) const override;
 
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
     virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }

@@ -46,8 +46,8 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase, public DefaultP
     virtual void sendUp(cMessage *message);
     virtual void sendDown(cMessage *message, int interfaceId = -1);
 
-    virtual bool isUpperMessage(cMessage *message) override;
-    virtual bool isLowerMessage(cMessage *message) override;
+    virtual bool isUpperMessage(cMessage *message) const override;
+    virtual bool isLowerMessage(cMessage *message) const override;
 
     virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_NETWORK_LAYER; }
     virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_NETWORK_LAYER; }

@@ -9,12 +9,12 @@
 
 namespace inet {
 
-bool TransportProtocolBase::isUpperMessage(cMessage *msg)
+bool TransportProtocolBase::isUpperMessage(cMessage *msg) const
 {
     return msg->arrivedOn("appIn");
 }
 
-bool TransportProtocolBase::isLowerMessage(cMessage *msg)
+bool TransportProtocolBase::isLowerMessage(cMessage *msg) const
 {
     return msg->arrivedOn("ipIn");
 }

@@ -122,12 +122,12 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
     }
 }
 
-bool NetworkProtocolBase::isUpperMessage(cMessage *message)
+bool NetworkProtocolBase::isUpperMessage(cMessage *message) const
 {
     return message->getArrivalGate()->isName("transportIn");
 }
 
-bool NetworkProtocolBase::isLowerMessage(cMessage *message)
+bool NetworkProtocolBase::isLowerMessage(cMessage *message) const
 {
     return message->getArrivalGate()->isName("queueIn");
 }

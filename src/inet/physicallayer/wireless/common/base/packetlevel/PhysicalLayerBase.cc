@@ -45,12 +45,12 @@ void PhysicalLayerBase::sendUp(cMessage *message)
     send(message, upperLayerOutGateId);
 }
 
-bool PhysicalLayerBase::isUpperMessage(cMessage *message)
+bool PhysicalLayerBase::isUpperMessage(cMessage *message) const
 {
     return message->getArrivalGateId() == upperLayerInGateId;
 }
 
-bool PhysicalLayerBase::isLowerMessage(cMessage *message)
+bool PhysicalLayerBase::isLowerMessage(cMessage *message) const
 {
     return message->getArrivalGateId() == radioInGateId;
 }
