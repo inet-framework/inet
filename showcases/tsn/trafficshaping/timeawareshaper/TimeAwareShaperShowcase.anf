@@ -5,13 +5,48 @@
         <input pattern="/inet/showcases/tsn/trafficshaping/timeawareshaper/results/*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="486690696" name="Client application traffic and traffic shaper incoming traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="575649836" name="Client application traffic and traffic shaper incoming traffic" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
+#import modifiedplot
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
 def plot_vectors_(df, props, legend_func=utils.make_legend_label):
+    """
+    Creates a line plot from the dataframe, with styling and additional input
+    coming from the properties. Each row in the dataframe defines a series.
+
+    Colors and markers are assigned automatically. The `cycle_seed` property
+    allows you to select other combinations if the default one is not suitable.
+
+    A function to produce the legend labels can be passed in. By default,
+    `make_legend_label()` is used, which offers many ways to influence the
+    legend via datataframe columns and chart properties. In the absence of
+    more specified settings, the legend is normally computed from columns which best
+    differentiate among the vectors.
+
+    Parameters:
+
+    - `df`: the dataframe
+    - `props` (dict): the properties
+    - `legend_func`: the function to produce custom legend labels
+
+    Columns of the dataframe:
+
+    - `vectime`, `vecvalue` (Numpy `ndarray`'s of matching sizes): the x and y coordinates for the plot
+    - `interpolationmode` (str, optional): this column normally comes from a result attribute, and determines how the points will be connected
+    - `legend` (optional): legend label for the series; if missing, legend labels are derived from other columns
+    - `name`, `title`, `module`, etc. (optional): provide input for the legend
+
+    Notable properties that affect the plot:
+
+    - `title`: plot title (autocomputed if missing)
+    - `legend_labels`: selects whether to prefer the `name` or the `title` column for the legend
+    - `drawstyle`: Matplotlib draw style; if present, it overrides the draw style derived from `interpolationmode`.
+    - `linestyle`, `linecolor`, `linewidth`, `marker`, `markersize`: styling
+    - `cycle_seed`: Alters the sequence in which colors and markers are assigned to series.
+    """
     p = ideplot if chart.is_native_chart() else plt
 
     def get_prop(k):
@@ -718,7 +753,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value=""/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="342812154" name="Traffic Shaper Outgoing Traffic and Server Application Traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1218210111" name="Traffic Shaper Outgoing Traffic and Server Application Traffic" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -1452,7 +1487,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value=""/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1187999033" name="Traffic shaper queue lengths" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="580078643" name="Traffic shaper queue lengths" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -2087,7 +2122,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="741883235" name="Transmitting state and gate states" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="482720154" name="Transmitting state and gate states" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import re
 import math
 import matplotlib.pyplot as plt
@@ -2726,7 +2761,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value=""/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1224379905" name="Traffic shaping" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1703691125" name="Traffic shaping" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import re
 import numpy
 import math
