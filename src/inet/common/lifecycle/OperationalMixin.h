@@ -56,9 +56,9 @@ class INET_API OperationalMixin : public T, public ILifecycle
      */
     virtual State getInitialOperationalState() const;
 
-    virtual bool isInitializeStage(int stage) = 0;
-    virtual bool isModuleStartStage(int stage) = 0;
-    virtual bool isModuleStopStage(int stage) = 0;
+    virtual bool isInitializeStage(int stage) const = 0;
+    virtual bool isModuleStartStage(int stage) const = 0;
+    virtual bool isModuleStopStage(int stage) const = 0;
 
     virtual void handleActiveOperationTimeout(cMessage *message);
 

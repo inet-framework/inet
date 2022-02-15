@@ -59,9 +59,9 @@ class INET_API MacProtocolBase : public LayeredProtocolBase, public cListener
     virtual bool isUpperMessage(cMessage *message) const override;
     virtual bool isLowerMessage(cMessage *message) const override;
 
-    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
-    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
-    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
+    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
 
     /**
      * should clear queue and emit signal "packetDropped" with entire packets

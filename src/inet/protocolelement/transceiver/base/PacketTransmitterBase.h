@@ -44,9 +44,9 @@ class INET_API PacketTransmitterBase : public ClockUserModuleMixin<OperationalMi
     virtual void finish() override;
     virtual void handleMessageWhenUp(cMessage *message) override;
 
-    virtual bool isInitializeStage(int stage) override { return stage == INITSTAGE_LINK_LAYER; }
-    virtual bool isModuleStartStage(int stage) override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
-    virtual bool isModuleStopStage(int stage) override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
+    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
     virtual void handleStartOperation(LifecycleOperation *operation) override;
 
     virtual Signal *encodePacket(Packet *packet);
