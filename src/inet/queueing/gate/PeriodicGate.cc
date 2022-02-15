@@ -19,7 +19,7 @@ void PeriodicGate::initialize(int stage)
     ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         isOpen_ = par("initiallyOpen");
-        offset = par("offset");
+        initialOffset = par("offset");
         durations = check_and_cast<cValueArray *>(par("durations").objectValue());
         scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
         changeTimer = new ClockEvent("ChangeTimer");
@@ -32,7 +32,7 @@ void PeriodicGate::handleParameterChange(const char *name)
 {
     if (name != nullptr) {
         if (!strcmp(name, "offset"))
-            offset = par("offset");
+            initialOffset = par("offset");
         else if (!strcmp(name, "initiallyOpen"))
             isOpen_ = par("initiallyOpen");
         else if (!strcmp(name, "durations")) {
@@ -57,6 +57,7 @@ void PeriodicGate::initializeGating()
     if (durations->size() % 2 != 0)
         throw cRuntimeError("The duration parameter must contain an even number of values");
     index = 0;
+    offset = initialOffset;
     while (offset > 0) {
         clocktime_t duration = durations->get(index).doubleValueInUnit("s");
         if (offset > duration) {

@@ -18,6 +18,7 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
 {
   protected:
     int index = 0;
+    clocktime_t initialOffset;
     clocktime_t offset;
     cValueArray *durations = nullptr;
     bool scheduleForAbsoluteTime = false;
@@ -37,6 +38,7 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
   public:
     virtual ~PeriodicGate() { cancelAndDelete(changeTimer); }
 
+    virtual clocktime_t getInitialOffset() const { return initialOffset; }
     virtual bool getInitiallyOpen() const { return par("initiallyOpen"); }
     virtual const cValueArray *getDurations() const { return durations; }
 };
