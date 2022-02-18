@@ -134,9 +134,9 @@
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0,          50000s,       ae30-1486/tplx;59f2-6541/~tNl;9aa6-3c97/tyf, PASS, EthernetMac
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,        50000s,       9a36-e378/tplx;37b0-2c44/~tNl;cd0a-5832/tyf, PASS, EthernetMac
 
-/examples/ieee8021as/,               -f omnetpp.ini -c Network -r 0,                     200s,       c25f-2574/tplx;8601-141a/~tNl;ce96-a410/~tND;2f64-3e50/tyf, PASS, gptp
-/examples/ieee8021as/,               -f omnetpp.ini -c Network_with_cross_traffic -r 0,  200s,       a9da-c265/tplx;cad5-887f/~tNl;d1e2-9b9b/~tND;8d31-254b/tyf, PASS, gptp
-/examples/ieee8021as/,               -f omnetpp.ini -c Network_daisy_chain -r 0,         200s,       2c1a-a1b1/tplx;a5cf-cbf5/~tNl;1cbc-32a1/~tND;6ff7-a656/tyf, PASS, gptp
+/examples/ieee8021as/,               -f omnetpp.ini -c Network -r 0,                     200s,       c25f-2574/tplx;8601-141a/~tNl;bd77-a206/~tND;2f64-3e50/tyf, PASS, gptp
+/examples/ieee8021as/,               -f omnetpp.ini -c Network_with_cross_traffic -r 0,  200s,       a9da-c265/tplx;cad5-887f/~tNl;9b0e-81e7/~tND;8d31-254b/tyf, PASS, gptp
+/examples/ieee8021as/,               -f omnetpp.ini -c Network_daisy_chain -r 0,         200s,       2c1a-a1b1/tplx;a5cf-cbf5/~tNl;5f34-6588/~tND;6ff7-a656/tyf, PASS, gptp
 
 # /examples/ieee8021d/,                -f omnetpp.ini -c LargeNet -r 0,               100s,            0, ERROR,   # LargeNet extended
 # /examples/ieee8021d/,                -f omnetpp.ini -c RSTP -r 0,                   100s,            0, ERROR,   # RSTP extended

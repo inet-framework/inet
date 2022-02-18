@@ -54,7 +54,8 @@ void Gptp::initialize(int stage)
         domainNumber = par("domainNumber");
         syncInterval = par("syncInterval");
         pDelayReqProcessingTime = par("pDelayReqProcessingTime");
-        clockIdentity = getId();
+        std::hash<std::string> strHash;
+        clockIdentity = strHash(getFullPath());
     }
     if (stage == INITSTAGE_LINK_LAYER) {
         peerDelay = 0;
