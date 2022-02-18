@@ -54,6 +54,7 @@ void Gptp::initialize(int stage)
         domainNumber = par("domainNumber");
         syncInterval = par("syncInterval");
         pDelayReqProcessingTime = par("pDelayReqProcessingTime");
+        clockIdentity = getId();
     }
     if (stage == INITSTAGE_LINK_LAYER) {
         peerDelay = 0;
@@ -313,7 +314,7 @@ void Gptp::sendPdelayReq()
     gptp->setCorrectionField(CLOCKTIME_ZERO);
     //save and send IDs
     PortIdentity portId;
-    portId.clockIdentity = getId();
+    portId.clockIdentity = clockIdentity;
     portId.portNumber = slavePortId;
     gptp->setSourcePortIdentity(portId);
     lastSentPdelayReqSequenceId = sequenceId++;
@@ -424,7 +425,7 @@ void Gptp::processPdelayReq(Packet *packet, const GptpPdelayReq* gptp)
 void Gptp::processPdelayResp(Packet *packet, const GptpPdelayResp* gptp)
 {
     // verify IDs
-    if (gptp->getRequestingPortIdentity().clockIdentity != getId() || gptp->getRequestingPortIdentity().portNumber != slavePortId) {
+    if (gptp->getRequestingPortIdentity().clockIdentity != clockIdentity || gptp->getRequestingPortIdentity().portNumber != slavePortId) {
         EV_WARN << "GptpPdelayResp arrived with invalid PortIdentity, dropped";
         return;
     }
@@ -446,7 +447,7 @@ void Gptp::processPdelayRespFollowUp(Packet *packet, const GptpPdelayRespFollowU
         return;
     }
     // verify IDs
-    if (gptp->getRequestingPortIdentity().clockIdentity != getId() || gptp->getRequestingPortIdentity().portNumber != slavePortId) {
+    if (gptp->getRequestingPortIdentity().clockIdentity != clockIdentity || gptp->getRequestingPortIdentity().portNumber != slavePortId) {
         EV_WARN << "GptpPdelayRespFollowUp arrived with invalid PortIdentity, dropped";
         return;
     }
