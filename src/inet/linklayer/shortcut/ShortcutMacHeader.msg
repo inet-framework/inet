@@ -13,5 +13,5 @@ namespace inet;
 
 class ShortcutMacHeader extends FieldsChunk
 {
-    const Protocol *payloadProtocol = nullptr;
+    const Protocol *payloadProtocol;
 }

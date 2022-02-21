@@ -17,7 +17,7 @@ namespace inet::physicallayer;
 //
 class Ieee80211ModeTagBase extends TagBase
 {
-    const IIeee80211Mode *mode = nullptr; // IEEE 802.11 transmission mode
+    const IIeee80211Mode *mode; // IEEE 802.11 transmission mode
 }
 
 //
@@ -41,7 +41,7 @@ class Ieee80211ModeInd extends Ieee80211ModeTagBase
 //
 class Ieee80211ChannelTagBase extends TagBase
 {
-    const Ieee80211Channel *channel = nullptr; // IEEE 802.11 band and channel
+    const Ieee80211Channel *channel; // IEEE 802.11 band and channel
 }
 
 //

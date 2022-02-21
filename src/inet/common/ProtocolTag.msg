@@ -36,7 +36,7 @@ class ProtocolTagBase extends TagBase
 //
 class ProtocolListTagBase extends TagBase
 {
-    const Protocol *protocol[] = nullptr; // specifies a list of protocols (internal class with an artificial identifier)
+    const Protocol *protocol[]; // specifies a list of protocols (internal class with an artificial identifier)
 }
 
 cplusplus(ProtocolListTagBase) {{
@@ -177,7 +177,7 @@ class TransportProtocolReq extends ProtocolTagBase
 //
 class TransportProtocolInd extends ProtocolTagBase
 {
-    ChunkPtr transportProtocolHeader = nullptr;
+    ChunkPtr transportProtocolHeader;
 }
 
 //
@@ -195,7 +195,7 @@ class NetworkProtocolReq extends ProtocolTagBase
 //
 class NetworkProtocolInd extends ProtocolTagBase
 {
-    ChunkPtr networkProtocolHeader = nullptr;
+    ChunkPtr networkProtocolHeader;
 }
 
 //
@@ -213,5 +213,5 @@ class MacProtocolReq extends ProtocolTagBase
 //
 class MacProtocolInd extends ProtocolTagBase
 {
-    ChunkPtr macProtocolHeader = nullptr;
+    ChunkPtr macProtocolHeader;
 }

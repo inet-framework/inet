@@ -13,5 +13,6 @@ namespace inet;
 
 class ShortcutPhyHeader extends FieldsChunk
 {
-    const Protocol *payloadProtocol = nullptr;
+    const Protocol *payloadProtocol;
 }
+

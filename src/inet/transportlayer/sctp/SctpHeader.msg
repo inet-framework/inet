@@ -83,7 +83,7 @@ class SctpInitAckChunk extends SctpChunk
     L3Address addresses[];
     char cookie[];
     uint8_t unrecognizedParameters[];
-    SctpCookie *stateCookie = nullptr;
+    SctpCookie *stateCookie;
     uint32_t msg_rwnd;
     uint8_t random[]; //Random Number
     uint16_t sctpChunkTypes[];
@@ -96,7 +96,7 @@ class SctpInitAckChunk extends SctpChunk
 class SctpCookieEchoChunk extends SctpChunk
 {
     char cookie[];
-    SctpCookie *stateCookie = nullptr;
+    SctpCookie *stateCookie;
     uint8_t unrecognizedParameters[]; //for the serializer to send an Error chunk bundled with a Cookie-Echo
 }
 

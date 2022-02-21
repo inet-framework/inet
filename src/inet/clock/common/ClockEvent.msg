@@ -21,7 +21,7 @@ enum OverdueClockEventHandlingMode {
 message ClockEvent
 {
     @customize;
-    IClock *clock = nullptr;
+    IClock *clock;
     bool relative = false;
     clocktime_t arrivalClockTime = -1;
     OverdueClockEventHandlingMode overdueClockEventHandlingMode = UNSPECIFIED;

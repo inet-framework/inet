@@ -19,10 +19,10 @@ namespace inet::physicallayer;
 class Ieee80211ConfigureRadioCommand extends ConfigureRadioCommand
 {
     string opMode;                         // new default operation mode or "" if not set.
-    const Ieee80211ModeSet *modeSet = nullptr; // new default mode set or nullptr if not set.
-    const IIeee80211Mode *mode = nullptr; // new default transmission mode or nullptr if not set.
-    IIeee80211Band *band = nullptr; // new default band or nullptr if not set.
-    Ieee80211Channel *channel = nullptr; // new default band and channel or nullptr if not set.
+    const Ieee80211ModeSet *modeSet;       // new default mode set or nullptr if not set.
+    const IIeee80211Mode *mode;            // new default transmission mode or nullptr if not set.
+    IIeee80211Band *band;                  // new default band or nullptr if not set.
+    Ieee80211Channel *channel;             // new default band and channel or nullptr if not set.
     int channelNumber = -1;                // new default channel number in the range [0, numChannels] or -1 if not set.
 }
 
