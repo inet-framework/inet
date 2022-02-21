@@ -16,5 +16,6 @@ namespace inet;
 class Protocol
 {
     @existingClass;
+    @toString(".str()");
 }
 
