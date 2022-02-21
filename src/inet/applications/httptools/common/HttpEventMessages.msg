@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 
 namespace inet::httptools;
@@ -24,5 +23,3 @@ message HttpServerStatusUpdateMsg
     double pvalue;          // The initial elevated probability.
     double pamortize;       // The amortization factor -- i.e. how much the pvalue is decreased on each hit.
 }
-
-

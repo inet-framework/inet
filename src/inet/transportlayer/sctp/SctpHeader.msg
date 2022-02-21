@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.networklayer.common.L3Address;
 import inet.transportlayer.contract.TransportHeaderBase;
@@ -29,7 +28,6 @@ class SctpHeader extends TransportHeaderBase
     unsigned short headerLength = 12;
     abstract SctpChunk *sctpChunks[];
 }
-
 
 class SctpChunk extends cPacket
 {
@@ -90,8 +88,6 @@ class SctpInitAckChunk extends SctpChunk
     uint16_t sepChunks[]; //Supported extensions parameter, i.e. for StreamReset
     uint16_t hmacTypes[];
 }
-
-
 
 class SctpCookieEchoChunk extends SctpChunk
 {

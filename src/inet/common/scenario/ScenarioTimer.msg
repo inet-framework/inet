@@ -13,4 +13,3 @@ message ScenarioTimer
 {
     cXMLElement *xmlNode;
 }
-

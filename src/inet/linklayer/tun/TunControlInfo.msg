@@ -42,4 +42,3 @@ class TunDestroyCommand extends TunControlInfo
 class TunSocketClosedIndication extends TunControlInfo
 {
 }
-

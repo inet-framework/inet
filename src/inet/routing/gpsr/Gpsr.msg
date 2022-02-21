@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.common.TlvOptions;
 import inet.common.geometry.Geometry;
@@ -53,4 +52,3 @@ class GpsrOption extends TlvOptionBase {
     L3Address currentFaceFirstReceiverAddress; // e0
     L3Address senderAddress; // TODO this field is not strictly needed by GPSR (should be eliminated)
 }
-

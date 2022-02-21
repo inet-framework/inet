@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.contract.NetworkHeaderBase;
@@ -44,4 +43,3 @@ cplusplus(WiseRouteHeader) {{
     virtual void setProtocol(const Protocol *protocol) override { setProtocolId(static_cast<IpProtocolId>(ProtocolGroup::ipprotocol.getProtocolNumber(protocol))); }
     virtual bool isFragment() const override { return false; }
 }}
-

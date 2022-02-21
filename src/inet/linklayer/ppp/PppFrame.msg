@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
-
 //
 // PPP header+trailer length:
 //    - Flag(8) + Address(8) + Control(8) + Protocol(16) + FCS(16) = 7 octets.
@@ -45,4 +43,3 @@ class PppTrailer extends FieldsChunk
     short fcs = 0;      // frame check sequence, 2 byte
     short flag = 0x7e;  // 1 byte, omitted for successive PPP packets
 }
-

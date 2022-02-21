@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.common.TagBase;
 import inet.networklayer.ipv4.Ipv4Header;
@@ -37,4 +36,3 @@ class Ipv4OptionsReq extends Ipv4OptionsTagBase
 class Ipv4OptionsInd extends Ipv4OptionsTagBase
 {
 }
-

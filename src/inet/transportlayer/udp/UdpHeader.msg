@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.transportlayer.common.CrcMode;
 import inet.transportlayer.contract.TransportHeaderBase;
@@ -40,4 +39,3 @@ cplusplus(UdpHeader) {{
     virtual unsigned int getDestinationPort() const override { return getDestPort(); }
     virtual void setDestinationPort(unsigned int port) override { setDestPort(port); }
 }}
-

@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.linklayer.ieee8022.Ieee8022LlcHeader;
@@ -30,7 +29,6 @@ class Ieee8022SnapHeader extends FieldsChunk
     int oui = -1;   // organizationally unique identifier (OUI); 0 for protocols that have an EtherType (ARP, IPv4, IPv6, etc.), 3 bytes
     int protocolId = -1; // protocol identifier (PID); stores ~EtherType if orgCode is 0, 2 bytes
 }
-
 
 //
 // This chunk represents an IEEE 802.2 LLC header with SNAP extension as defined

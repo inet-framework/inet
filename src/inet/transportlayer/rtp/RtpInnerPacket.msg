@@ -163,4 +163,3 @@ cplusplus(RtpInnerPacket) {{
      */
     virtual void setDataInPkt(Packet *packet, Ipv4Address address, int port);
 }}
-

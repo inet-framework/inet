@@ -43,4 +43,3 @@ packet RtpSenderControlMessage
     float commandParameter1;
     float commandParameter2;
 };
-

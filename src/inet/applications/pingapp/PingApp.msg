@@ -13,4 +13,3 @@ enum PingSelfKinds {
     PING_CHANGE_ADDR = 1002;
     PING_SEND = 1003;
 };
-

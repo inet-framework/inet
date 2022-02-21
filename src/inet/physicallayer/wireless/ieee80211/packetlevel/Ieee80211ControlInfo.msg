@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.common.Units;
 import inet.physicallayer.wireless.common.contract.packetlevel.RadioControlInfo;
@@ -25,4 +24,3 @@ class Ieee80211ConfigureRadioCommand extends ConfigureRadioCommand
     Ieee80211Channel *channel;             // new default band and channel or nullptr if not set.
     int channelNumber = -1;                // new default channel number in the range [0, numChannels] or -1 if not set.
 }
-

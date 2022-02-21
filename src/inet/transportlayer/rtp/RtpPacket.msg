@@ -69,4 +69,3 @@ cplusplus(RtpHeader) {{
      */
     virtual void dump() const;
 }}
-

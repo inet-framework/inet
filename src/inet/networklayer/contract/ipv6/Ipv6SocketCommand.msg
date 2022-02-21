@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.common.Protocol;
 import inet.networklayer.contract.ipv6.Ipv6Address;
@@ -51,4 +50,3 @@ class Ipv6SocketDestroyCommand extends Ipv6SocketCommandBase
 class Ipv6SocketClosedIndication extends Ipv6SocketCommandBase
 {
 }
-

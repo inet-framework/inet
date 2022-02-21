@@ -35,4 +35,3 @@ class RsvpHelloMsg extends RsvpMessage
 
     rsvpKind = HELLO_MESSAGE;
 }
-

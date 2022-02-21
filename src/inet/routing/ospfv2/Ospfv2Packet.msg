@@ -74,7 +74,6 @@ class Ospfv2HelloPacket extends Ospfv2Packet
     Ipv4Address neighbor[];
 }
 
-
 enum Ospfv2LsaType
 {
     ROUTERLSA_TYPE = 1;
@@ -204,7 +203,6 @@ class Ospfv2AsExternalLsa extends Ospfv2Lsa
     Ospfv2AsExternalLsaContents contents;
 }
 
-
 // should be a byte long bitfield
 struct Ospfv2DdOptions
 {
@@ -265,4 +263,3 @@ class Ospfv2LinkStateAcknowledgementPacket extends Ospfv2Packet
 {
     Ospfv2LsaHeader lsaHeaders[];     //TODO
 }
-

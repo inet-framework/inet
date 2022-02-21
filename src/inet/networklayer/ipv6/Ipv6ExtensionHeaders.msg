@@ -33,7 +33,6 @@ enum Ipv6TlvOptionTypes
     IPv6TLVOPTION_TLV_GPSR = 47;
 };
 
-
 //
 // Hop-by-Hop Options Header.
 // RFC 2460 Section 4.3
@@ -109,4 +108,3 @@ class Ipv6EncapsulatingSecurityPayloadHeader extends Ipv6ExtensionHeader
     extensionType = IP_PROT_IPv6EXT_ESP;
     byteLength = B(8); // FIXME verify
 }
-

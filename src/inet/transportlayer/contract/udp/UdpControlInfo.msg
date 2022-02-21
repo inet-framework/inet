@@ -58,7 +58,6 @@ enum UdpStatusInd
     UDP_I_SOCKET_CLOSED = 2;
 }
 
-
 //
 // Base class for UDP control info classes. The most convenient way to handle
 // ~Udp is the UdpSocket class, which hides control info from you.
@@ -101,7 +100,6 @@ class UdpConnectCommand extends UdpControlInfo
     int remotePort = -1;
 }
 
-
 //
 // Control info for sending data via UDP. To send a packet, send it to
 // the ~Udp module with kind=UDP_C_SEND and an ~UDPSendCommand attached.
@@ -112,7 +110,6 @@ class UdpConnectCommand extends UdpControlInfo
 //
 // @see ~UdpCommandCode, ~PortsReq, ~L3AddressReq, ~InterfaceReq
 //
-
 
 //
 // Control info for closing an UDP socket. To close a socket, send a message
@@ -371,4 +368,3 @@ class UdpSetMulticastSourceFilterCommand extends UdpSetOptionCommand
     UdpSourceFilterMode filterMode;
     L3Address sourceList[];
 }
-

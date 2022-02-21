@@ -14,4 +14,3 @@ enum RtpAppSelfMsgKinds {
     RTPAPP_STOP_TRANSMISSION = 3;
     RTPAPP_LEAVE_SESSION = 4;
 };
-

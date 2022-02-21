@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.common.packet.Packet;
 
@@ -21,4 +20,3 @@ class InProgressFrames extends cOwnedObject
     int length;
     Packet *frames[] @sizeGetter(getLength);
 }
-

@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 //
 // An ~RtpMpegPacket is intended to be capsulated into an ~RtpPacket when
 // transmitting mpeg data with rtp under the rtp audio/video profile.
@@ -59,5 +58,3 @@ class RtpMpegHeader extends FieldsChunk
     //int ffv;
     //int ffc;
 }
-
-

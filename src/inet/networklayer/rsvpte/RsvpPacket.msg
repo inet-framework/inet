@@ -64,4 +64,3 @@ cplusplus(RsvpPacket) {{
     }
 
 }}
-

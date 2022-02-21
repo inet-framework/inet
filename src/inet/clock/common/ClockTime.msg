@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 cplusplus {{
 #include "inet/clock/common/ClockTime.h"
 }}

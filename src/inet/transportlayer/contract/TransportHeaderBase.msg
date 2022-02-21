@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 
@@ -27,7 +26,6 @@ class INET_API TransportHeaderBase : public FieldsChunk
 
 }}
 
-
 namespace inet;
 
 //
@@ -39,4 +37,3 @@ class TransportHeaderBase extends FieldsChunk
     unsigned int sourcePort;
     unsigned int destinationPort;
 };
-

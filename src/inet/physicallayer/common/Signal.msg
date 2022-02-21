@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 cplusplus {{
 #include "inet/physicallayer/common/Signal.h"
 }}
@@ -16,4 +15,3 @@ packet Signal
     @existingClass;
     @descriptor(readonly);
 }
-

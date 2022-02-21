@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 cplusplus {{
 #include "inet/clock/contract/ClockTime.h"
 }}
@@ -26,4 +25,3 @@ class clocktime_t
     @castFunction(false);
     @toValue(cValue($.dbl(),"s"));
 }
-

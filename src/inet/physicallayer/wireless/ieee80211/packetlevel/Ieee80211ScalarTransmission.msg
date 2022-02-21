@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.physicallayer.wireless.common.analogmodel.packetlevel.ScalarTransmission;
 import inet.physicallayer.wireless.ieee80211.mode.IIeee80211Mode;
@@ -23,4 +22,3 @@ class Ieee80211ScalarTransmission extends ScalarTransmission
     const IIeee80211Mode *mode;
     const Ieee80211Channel *channel;
 }
-

@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
-
 import inet.common.INETDefs;
 import inet.networklayer.common.IpProtocolId;
 import inet.networklayer.common.L3Address;
@@ -217,4 +215,3 @@ class TcpStatusInfo extends TcpCommand
 
     bool fin_ack_rcvd;
 }
-

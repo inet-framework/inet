@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 //
 // Required for MacAddress declarations
 //
@@ -203,4 +202,3 @@ class Ieee80211Prim_DisassociateRequest extends Ieee80211PrimRequest
     MacAddress address;
     Ieee80211ReasonCode reasonCode;
 }
-

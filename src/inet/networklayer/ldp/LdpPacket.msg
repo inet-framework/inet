@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
-
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv4.Ipv4Address;
@@ -17,7 +15,6 @@ namespace inet;
 //
 enum LdpMessageTypes
 {
-
     NOTIFICATION = 10;
     HELLO = 11;
     INITIALIZATION = 12;
@@ -33,7 +30,6 @@ enum LdpMessageTypes
 
 enum LdpStatusTypes
 {
-
     NO_ROUTE = 13;
 }
 
@@ -53,7 +49,6 @@ class LdpPacket extends FieldsChunk
     Ipv4Address receiverAddress;
 }
 
-
 //
 // LDP Label Mapping Message
 //
@@ -70,7 +65,6 @@ class LdpLabelRequest extends LdpPacket
 {
     FecTlv fec;
 }
-
 
 //
 // LDP Hello Message
@@ -114,6 +108,3 @@ class LdpAddress extends LdpPacket
     string family;
     string addresses[];
 }
-
-
-

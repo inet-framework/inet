@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.common.TagBase;
 
@@ -21,4 +20,3 @@ cplusplus(LabelsTag) {{
     void appendLabels(const char *labels) { insertLabels(labels); }
 #endif
 }}
-

@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
-
 import inet.common.INETDefs;
 
 namespace inet;
@@ -56,4 +54,3 @@ cplusplus(TlvOptions) {{
     TlvOptionBase * removeTlvOption(size_t k) { return dropTlvOption(k); }
 #endif
 }}
-

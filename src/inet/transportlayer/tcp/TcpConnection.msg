@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
-
 import inet.common.INETDefs;
 import inet.common.packet.ChunkBuffer;
 import inet.common.packet.ChunkQueue;
@@ -180,4 +178,3 @@ class TcpConnection extends cObject
     TcpAlgorithm *tcpAlgorithm;
     int fsmState;
 };
-

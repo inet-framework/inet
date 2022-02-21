@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.physicallayer.wired.ethernet.EthernetPhyConstants;
@@ -74,4 +73,3 @@ class EthernetFragmentPhyHeader extends EthernetPhyHeaderBase
     uint8_t smdNumber = 0;       // 0-3, see SMD_Sx or SMD_Cx
     uint8_t fragmentNumber = 0;  // 0-3 (real fragment number modulo 4)
 }
-

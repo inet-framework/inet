@@ -40,4 +40,3 @@ cplusplus(LlcProtocolTag) {{
     virtual const Protocol *getProtocol() const { return llc.findProtocol(getProtocolId()); }
     virtual void setProtocol(const Protocol *protocol) { setProtocolId(static_cast<LlcProtocolId>(protocol->getId())); }
 }}
-

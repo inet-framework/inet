@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 
 cplusplus {{
@@ -16,7 +15,6 @@ namespace inet;
 cplusplus {{
 typedef std::vector<Ipv4Address> Ipv4AddressVector;
 }}
-
 
 class Ipv4Address
 {
@@ -31,4 +29,3 @@ class Ipv4AddressVector
    @existingClass;
    //FIXME tostring, ...
 }
-

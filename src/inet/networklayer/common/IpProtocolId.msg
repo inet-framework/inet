@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 
 namespace inet;
@@ -55,4 +54,3 @@ enum IpProtocolId
     IP_PROT_ECHO = 254; // INET specific: Echo Protocol
     IP_PROT_UNKNOWN = 255; // INET specific: Unknown Protocol
 }
-

@@ -27,4 +27,3 @@ class DsdvHello extends FieldsChunk
     Ipv4Address nextAddress; //terminal que re-/transmite o pacote
     int hopdistance; //distancia em hops/custo
 }
-

@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 
 namespace inet;
@@ -17,7 +16,6 @@ enum CrcMode
     CRC_DECLARED_INCORRECT = 2; // the CRC is incorrectly set without the actual value, not serializable
     CRC_COMPUTED = 3; // CRC is set to a value that is potentially incorrect, serializable
 }
-
 
 cplusplus {{
 INET_API CrcMode parseCrcMode(const char *crcModeString, bool allowDisable);

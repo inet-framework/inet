@@ -60,4 +60,3 @@ cplusplus(RsvpResvError) {{
     inline Ipv4Address getNHOP() { return getHop().Next_Hop_Address; }
     inline Ipv4Address getLIH() { return getHop().Logical_Interface_Handle; }
 }}
-

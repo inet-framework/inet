@@ -9,7 +9,6 @@
 // @author Vladimir Vesely (ivesely@fit.vutbr.cz)
 // @copyright Brno University of Technology (www.fit.vutbr.cz) under GPLv3
 
-
 import inet.networklayer.contract.ipv4.Ipv4Address;
 import inet.networklayer.contract.ipv6.Ipv6Address;
 import inet.common.packet.chunk.Chunk;
@@ -144,7 +143,6 @@ struct EigrpMpIpv4Internal
     Ipv4Address destAddress;
 };
 
-
 // Multiprotocol Ipv6 (IPv6Address used) Internal TLV route
 struct EigrpMpIpv6Internal
 {
@@ -164,7 +162,6 @@ struct EigrpMpIpv6Internal
     Ipv6Address destMask;
     Ipv6Address destAddress;
 };
-
 
 // General structure of EIGRP message with header
 class EigrpMessage extends FieldsChunk
@@ -282,4 +279,3 @@ message EigrpMsgReq
     int numOfAck;               // Number of acknowledges
     EigrpMsgRoute routes[];
 };
-

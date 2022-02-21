@@ -370,4 +370,3 @@ class Ospfv3LinkStateAcknowledgementPacket extends Ospfv3Packet
 {
     Ospfv3LsaHeader lsaHeaders[];
 }
-

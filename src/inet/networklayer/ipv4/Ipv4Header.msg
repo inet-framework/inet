@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.common.TlvOptions;
 import inet.common.packet.chunk.Chunk;
@@ -37,7 +36,6 @@ const unsigned int MAX_IPADDR_OPTION_ENTRIES = 9;
 const unsigned int MAX_TIMESTAMP_OPTION_ENTRIES = 4;
 
 }}
-
 
 //
 // Ipv4 options class
@@ -155,7 +153,6 @@ class Ipv4OptionUnknown extends Ipv4Option
     uint8_t bytes[];
 }
 
-
 //
 // Represents an Ipv4 datagram.
 //
@@ -247,4 +244,3 @@ cplusplus(Ipv4Header) {{
     virtual void setProtocol(const Protocol *protocol) override { setProtocolId(static_cast<IpProtocolId>(ProtocolGroup::ipprotocol.getProtocolNumber(protocol))); }
     virtual bool isFragment() const override { return getMoreFragments() || (getFragmentOffset() != 0); }
 }}
-

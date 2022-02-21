@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 
 cplusplus{{
@@ -27,4 +26,3 @@ class m    { @existingClass; @primitive; @fromString(m(string2double($)));    @t
 class Ohmm { @existingClass; @primitive; @fromString(Ohmm(string2double($))); @toString(unit2string($)); @defaultValue(Ohmm(NaN)); @toValue(cValue($.get(),"Ohm")); @fromValue(Ohm($.doubleValueInUnit("Ohm"))); }
 class rad  { @existingClass; @primitive; @fromString(rad(string2double($)));  @toString(unit2string($)); @defaultValue(rad(NaN));  @toValue(cValue($.get(),"rad")); @fromValue(rad($.doubleValueInUnit("rad"))); }
 class W    { @existingClass; @primitive; @fromString(W(string2double($)));    @toString(unit2string($)); @defaultValue(W(NaN));    @toValue(cValue($.get(),"W"));   @fromValue(W($.doubleValueInUnit("W"))); }
-

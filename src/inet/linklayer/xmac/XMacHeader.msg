@@ -60,4 +60,3 @@ class XMacDataFrameHeader extends XMacHeaderBase
     long sequenceId; // Sequence Number to detect duplicate messages
     int networkProtocol = -1;
 }
-

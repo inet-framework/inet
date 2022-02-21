@@ -22,4 +22,3 @@ class SimpleVoipPacket extends FieldsChunk
     simtime_t voipTimestamp;            // "mouth" timestamp of begin of voice in this packet
     simtime_t voiceDuration;            // duration of voice in this packet
 }
-

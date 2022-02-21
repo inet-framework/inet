@@ -18,7 +18,6 @@ cplusplus {{
 #include "inet/networklayer/contract/ipv6/Ipv6Consts.h"
 }}
 
-
 namespace inet;
 
 cplusplus {{
@@ -111,7 +110,6 @@ cplusplus(Ipv6Header) {{
      */
     virtual Ipv6ExtensionHeader *removeFirstExtensionHeader();
 
-
     /**
      * Removes and returns the first extension header with the given type.
      */
@@ -131,4 +129,3 @@ cplusplus(Ipv6Header) {{
     void appendExtensionHeader(Ipv6ExtensionHeader * extensionHeader) { insertExtensionHeader(extensionHeader); }
 #endif
 }}
-

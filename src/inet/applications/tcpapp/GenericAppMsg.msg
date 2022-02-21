@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
-
 import inet.common.INETDefs;
 import inet.common.Units;
 import inet.common.packet.chunk.Chunk;
@@ -30,6 +28,3 @@ class GenericAppMsg extends FieldsChunk
     bool serverClose;        // with TCP: if true, server should close the
                              // connection after sending the reply
 }
-
-
-

@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 //
 // This file defines data structures used in IntServ services
 //
@@ -19,7 +18,6 @@ cplusplus {{
 typedef std::vector<struct EroObj> EroVector;
 typedef std::vector<struct FlowDescriptor_t> FlowDescriptorVector;
 }}
-
 
 class EroVector { @existingClass; }
 
@@ -57,7 +55,6 @@ struct SenderTemplateObj
     Ipv4Address SrcAddress;
     int Lsp_Id = -1;
 }
-
 
 //
 // Intserv/RSVP: Sender Tspec Structure

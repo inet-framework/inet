@@ -228,4 +228,3 @@ class Ipv6NdControlInfo extends cObject
     int interfaceId = -1; // interface on which the datagram should be sent
     bool fromHL = false;    // packet came from higher layer
 }
-

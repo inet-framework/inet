@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.common.Units;
 import inet.common.packet.chunk.Chunk;
@@ -23,4 +22,3 @@ class TransportPseudoHeader extends FieldsChunk
     int protocolId = -1;    // TCP: 6, UDP: 17
     B packetLength = B(-1);
 }
-

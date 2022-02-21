@@ -84,4 +84,3 @@ cplusplus(RsvpPathError) {{
     inline const SenderTspecObj& getSenderTspec() const { return getSender_descriptor().Sender_Tspec_Object; }
     inline void setSenderTspec(const SenderTspecObj& s) { getSender_descriptorForUpdate().Sender_Tspec_Object = s; }
 }}
-

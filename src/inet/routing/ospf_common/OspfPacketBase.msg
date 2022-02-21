@@ -36,4 +36,3 @@ class OspfPacketBase extends FieldsChunk
     uint16_t crc = 0;       // 2 bytes
     CrcMode crcMode = CRC_MODE_UNDEFINED;
 }
-

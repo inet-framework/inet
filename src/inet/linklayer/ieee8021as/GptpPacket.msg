@@ -248,4 +248,3 @@ class GptpIngressTimeInd extends TagBase
 {
     clocktime_t arrivalClockTime;
 }
-

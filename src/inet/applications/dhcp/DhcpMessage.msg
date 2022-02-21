@@ -110,4 +110,3 @@ class DhcpMessage extends FieldsChunk
     string file; // boot file name (unused in the simulation)
     DhcpOptions options; // holds DHCP options
 }
-

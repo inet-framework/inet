@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.common.Simsignals;
 import inet.common.geometry.Geometry;
@@ -26,4 +25,3 @@ class PacketDrop extends inet::PacketDropDetails
     NetworkInterface *networkInterface;
     Coord position;
 }
-

@@ -51,4 +51,3 @@ class LMacDataFrameHeader extends LMacHeaderBase
 {
     int        networkProtocol = -1;
 }
-

@@ -116,4 +116,3 @@ class Igmpv3Report extends IgmpMessage
     uint16_t resv2 = 0;
     GroupRecord groupRecord[];
 }
-

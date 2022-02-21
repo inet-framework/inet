@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.linklayer.common.MacAddress;
 import inet.networklayer.contract.ipv4.Ipv4Address;
@@ -31,4 +30,3 @@ class NetworkInterface extends cSimpleModule
     Ipv4Address ipv4Netmask @byValue @toValue(.str()) @fromValue(Ipv4Address($));
     cObject *protocolData[] @getter(getProtocolData) @sizeGetter(getNumProtocolData);
 }
-

@@ -40,7 +40,6 @@ cplusplus(SenderReport) {{
     virtual void dump(std::ostream& os) const;
 }}
 
-
 //
 // Rrepresents an RTP receiver report stored
 // in an RTPSenderReportPacket or RTPReceiverReport.
@@ -82,4 +81,3 @@ cplusplus(ReceptionReport) {{
      */
     virtual void dump(std::ostream& os) const;
 }}
-

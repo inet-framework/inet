@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.linklayer.common.MacAddress;
@@ -73,4 +72,3 @@ class BpduCfg extends BpduBase
     simtime_t helloTime;                      // 2 bytes, Hello Time of the sender bridge (in 256ths of a second)
     simtime_t forwardDelay;                   // 2 bytes, Forward Delay timer of the sender bridge (in 256ths of a second)
 }
-

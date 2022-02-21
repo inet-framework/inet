@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
-
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.linklayer.common.MacAddress;
@@ -24,7 +22,6 @@ enum ArpOpcode
     ARP_RARP_REQUEST = 3; // Request Reverse. RFC 903
     ARP_RARP_REPLY = 4;   // Reply Reverse. RFC 903
 }
-
 
 //
 // ARP packet. This is a specialized version: prepared for IEEE 802 hardware
@@ -51,4 +48,3 @@ cplusplus(ArpPacket) {{
   public:
     virtual std::string str() const override;
 }}
-

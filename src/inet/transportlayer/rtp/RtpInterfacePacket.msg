@@ -52,7 +52,6 @@ class RtpSessionControlInfo extends RtpControlInfo
     uint32_t ssrc;
 };
 
-
 // App to ~Rtp
 class RtpCiEnterSession extends RtpControlInfo
 {

@@ -30,7 +30,6 @@ class BgpAsPathSegment extends cObject
     uint16_t asValue[];
 }
 
-
 //
 // BGPv4 message types
 //
@@ -239,4 +238,3 @@ class BgpUpdateMessage extends BgpHeader
     BgpUpdatePathAttributes* pathAttributes[] @owned @allowReplace;
     BgpUpdateNlri NLRI[];
 }
-

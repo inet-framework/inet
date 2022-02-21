@@ -9,7 +9,6 @@
 //
 //
 
-
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.networklayer.contract.ipv6.Ipv6Address;
@@ -20,7 +19,6 @@ namespace inet;
 
 enum MobilityHeaderType
 {
-
     BINDING_REFRESH_REQUEST = 0;
     HOME_TEST_INIT = 1;
     CARE_OF_TEST_INIT = 2;
@@ -35,7 +33,6 @@ class MobilityHeader extends FieldsChunk  // extends Ipv6ExtensionHeader // TODO
 {
     MobilityHeaderType mobilityHeaderType;
 }
-
 
 class BindingUpdate extends MobilityHeader
 {
@@ -52,12 +49,9 @@ class BindingUpdate extends MobilityHeader
     int bindingAuthorizationData = 0; // 28.08.07 - CB
 }
 
-
 //Defining the status fields for the Binding Acknowledgement Message
-
 enum BaStatus
 {
-
     BINDING_UPDATE_ACCEPTED = 0;
     BU_ACCEPT_BUT_DISCOVER_PREFIX = 1;
     REASON_UNSPECIFIED = 128;
@@ -75,7 +69,6 @@ enum BaStatus
 }
 
 //==================Defining Binding Acknowledgement Message===================
-
 class BindingAcknowledgement extends MobilityHeader
 {
     BaStatus status;
@@ -89,33 +82,27 @@ class BindingAcknowledgement extends MobilityHeader
 }
 
 //==================Defining Binding Error Status====================
-
 enum BeStatus
 {
-
     UNKNOWN_BINDING_FOR_HOME_ADDRESS_DEST_OPTION = 1;
     UNKNOWN_MH_TYPE = 2; //Unrecognised MH Type
 }
 
 //==================Defining Binding Error Message===================
-
 class BindingError extends MobilityHeader
 {
     BeStatus status;
     Ipv6Address homeAddress;
     //Mobility Options not defined
-
 }
 
 //=============Message definition of Home Test Init Message ==========
-
 class HomeTestInit extends MobilityHeader
 {
     unsigned int homeInitCookie;
 }
 
 //=============Message definition of Home Test Message ==========
-
 class HomeTest extends MobilityHeader
 {
     unsigned int homeInitCookie;
@@ -124,21 +111,18 @@ class HomeTest extends MobilityHeader
 }
 
 //=============Message definition of Care-of Test Init Message ==========
-
 class CareOfTestInit extends MobilityHeader
 {
     unsigned int careOfInitCookie;
 }
 
 //=============Message definition of Care-of Test Message ==========
-
 class CareOfTest extends MobilityHeader
 {
     unsigned int careOfInitCookie;
     unsigned int careOfKeyGenToken;
     // care-of nonce index not modelled
 }
-
 
 ///////////////////////////////////////////
 // 18.09.07 - CB
@@ -147,7 +131,6 @@ class BindingRefreshRequest extends MobilityHeader
 {
 }
 
-
 ///////////////////////////////////////////
 // 17.10.07 - CB
 ///////////////////////////////////////////
@@ -155,4 +138,3 @@ class HomeAddressOption extends Ipv6DestinationOptionsHeader
 {
     Ipv6Address homeAddress;
 }
-

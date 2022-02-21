@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
-
 import inet.common.INETDefs;
 
 namespace inet::bgp;
@@ -22,4 +20,3 @@ enum BgpPathSegmentType
     AS_SET = 1;
     AS_SEQUENCE = 2;
 }
-

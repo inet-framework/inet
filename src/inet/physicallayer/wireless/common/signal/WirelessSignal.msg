@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 cplusplus {{
 #include "inet/physicallayer/wireless/common/signal/WirelessSignal.h"
 }}
@@ -27,4 +26,3 @@ packet WirelessSignal extends Signal
     const IListening *listening;
     const IReception *reception;
 }
-
