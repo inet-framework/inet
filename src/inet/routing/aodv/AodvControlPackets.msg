@@ -76,6 +76,7 @@ class Rrep extends AodvControlPacket
 //
 struct UnreachableNode
 {
+    @packetData;
     L3Address addr;    // The IP address of the destination that has become unreachable due to a link break.
     uint32_t seqNum;    // The sequence number in the route table entry for the destination listed in the previous Unreachable Destination IP Address field.
 };

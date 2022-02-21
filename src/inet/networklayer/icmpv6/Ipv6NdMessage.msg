@@ -36,6 +36,7 @@ enum Ipv6NdOptionTypes {
 
 class Ipv6NdOption extends cObject
 {
+    @packetData;
     Ipv6NdOptionTypes type = static_cast<Ipv6NdOptionTypes>(0);    // 1 byte, 0 is invalid
     short optionLength = 0;    // The length of the option in units of 8 octets, 0 is invalid.    // 1 byte
     char paddingBytes[];    // padding bytes on end of option
@@ -108,6 +109,7 @@ class Mipv6HaInformation extends Ipv6NdOption
 }
 
 class Ipv6NdOptions extends cObject {
+    @packetData;
     // TLV Options:
     Ipv6NdOption *option[] @owned;  // on end of message
 }

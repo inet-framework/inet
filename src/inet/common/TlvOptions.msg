@@ -12,6 +12,7 @@ namespace inet;
 
 class TlvOptionBase extends cObject
 {
+    @packetData;
     short type = -1;
     short length = 0;   // total length of option
 }
@@ -23,6 +24,7 @@ class TlvOptionRaw extends TlvOptionBase
 
 class TlvOptions extends cObject
 {
+    @packetData;
     TlvOptionBase *tlvOption[] @owned;
 }
 

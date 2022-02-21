@@ -33,6 +33,7 @@ class SctpHeader extends TransportHeaderBase
 
 class SctpChunk extends cPacket
 {
+    @packetData;
     // Chunk Type
     uint8_t sctpChunkType;
     uint32_t flags;
@@ -229,6 +230,7 @@ class SctpErrorChunk extends SctpChunk
 
 class SctpParameter extends cPacket
 {
+    @packetData;
     uint16_t parameterType;
 }
 

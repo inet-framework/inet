@@ -30,6 +30,7 @@ class FlowDescriptorVector { @existingClass; }
 //
 struct SessionObj
 {
+    @packetData;
     int Tunnel_Id;
     int Extended_Tunnel_Id;
     Ipv4Address DestAddress;
@@ -42,6 +43,7 @@ struct SessionObj
 //
 struct RsvpHopObj
 {
+    @packetData;
     Ipv4Address Next_Hop_Address;
     Ipv4Address Logical_Interface_Handle;
 }
@@ -51,6 +53,7 @@ struct RsvpHopObj
 //
 struct SenderTemplateObj
 {
+    @packetData;
     Ipv4Address SrcAddress;
     int Lsp_Id = -1;
 }
@@ -61,6 +64,7 @@ struct SenderTemplateObj
 //
 struct SenderTspecObj
 {
+    @packetData;
     double req_bandwidth = 0;
 }
 
@@ -83,6 +87,7 @@ struct FilterSpecObj extends SenderTemplateObj
 //
 struct LabelRequestObj
 {
+    @packetData;
     // request;
     int prot;
 }
@@ -92,6 +97,7 @@ struct LabelRequestObj
 //
 struct SenderDescriptor_t
 {
+    @packetData;
     SenderTemplateObj Sender_Template_Object;
     SenderTspecObj Sender_Tspec_Object;
 }
@@ -101,6 +107,7 @@ struct SenderDescriptor_t
 //
 struct EroObj
 {
+    @packetData;
     bool L = false;
     Ipv4Address node;
 }
@@ -110,6 +117,7 @@ struct EroObj
 //
 struct FlowDescriptor_t
 {
+    @packetData;
     FlowSpecObj Flowspec_Object;
     FilterSpecObj Filter_Spec_Object;
     Ipv4AddressVector RRO;

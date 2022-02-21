@@ -39,6 +39,7 @@ struct Ieee80211CapabilityInformation
 //
 struct Ieee80211HandoverParameters
 {
+    @packetData;
     double avgBackoffTime;
     double avgWaitTime;
     double avgErrorRate;

@@ -19,6 +19,7 @@ typedef std::vector<struct TeLinkStateInfo> TeLinkStateInfoVector;
 //
 struct TeLinkStateInfo
 {
+    @packetData;
     Ipv4Address advrouter; // routerId of originator of this link state entry
     Ipv4Address linkid;    // identifies link within advrouter; set to peer's address
     Ipv4Address local;     // address of local interface of this link

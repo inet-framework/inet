@@ -103,6 +103,7 @@ enum GptpTlvType {
 
 struct PortIdentity
 {
+    @packetData;
     uint64_t clockIdentity;
     uint16_t portNumber;
 };
@@ -157,6 +158,7 @@ class GptpBase extends FieldsChunk
 }
 
 class GptpTlv {
+    @packetData;
     GptpTlvType tlvType @bit(16);
     uint16_t lengthField @bit(16);
 }

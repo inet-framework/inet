@@ -42,6 +42,7 @@ enum RipAf {
 //
 struct RipEntry
 {
+    @packetData;
     RipAf addressFamilyId; // usually AF_INET (2), but NONE (0) for whole table requests
     unsigned short routeTag;        // 0 for RIPv1
     L3Address address;                // destination address

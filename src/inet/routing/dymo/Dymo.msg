@@ -38,6 +38,7 @@ class DymoSequenceNumber
 
 class AddressBlock extends cObject
 {
+    @packetData;
     L3Address address;
     int prefixLength;
     bool hasValidityTime;
