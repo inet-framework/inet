@@ -13,5 +13,6 @@ namespace inet;
 
 class UnitDiskPhyHeader extends FieldsChunk
 {
-    const Protocol *payloadProtocol @toString("->str()") = nullptr; // specifies a protocol (internal class with an artificial identifier)
+    const Protocol *payloadProtocol; // specifies a protocol (internal class with an artificial identifier)
 }
+

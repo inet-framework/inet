@@ -28,7 +28,7 @@ class ChunkPtr
 //
 class ProtocolTagBase extends TagBase
 {
-    const Protocol *protocol @toString("->str()") = nullptr; // specifies a protocol (internal class with an artificial identifier)
+    const Protocol *protocol; // specifies a protocol (internal class with an artificial identifier)
 }
 
 //
@@ -36,7 +36,7 @@ class ProtocolTagBase extends TagBase
 //
 class ProtocolListTagBase extends TagBase
 {
-    const Protocol *protocol[] @toString("->str()") = nullptr; // specifies a list of protocols (internal class with an artificial identifier)
+    const Protocol *protocol[] = nullptr; // specifies a list of protocols (internal class with an artificial identifier)
 }
 
 cplusplus(ProtocolListTagBase) {{
