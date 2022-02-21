@@ -293,18 +293,22 @@ void Ipv6::preroutingFinish(Packet *packet, const NetworkInterface *fromIE, cons
         routeMulticastPacket(packet, destIE, fromIE, false);
 }
 
-void Ipv6::handleMessageFromHL(Packet *msg)
+void Ipv6::handleMessageFromHL(Packet *packet)
 {
+    emit(packetReceivedFromUpperSignal, packet);
+
     // if no interface exists, do not send datagram
     if (ift->getNumInterfaces() == 0) {
         EV_WARN << "No interfaces exist, dropping packet\n";
-        delete msg;
+        PacketDropDetails details;
+        details.setReason(NO_INTERFACE_FOUND);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
         return;
     }
 
-    const auto& ifTag = msg->findTag<InterfaceReq>();
+    const auto& ifTag = packet->findTag<InterfaceReq>();
     const NetworkInterface *destIE = ifTag ? ift->getInterfaceById(ifTag->getInterfaceId()) : nullptr;
-    auto packet = check_and_cast<Packet *>(msg);
 
     // when source address was given, use it; otherwise it'll get the address
     // of the outgoing interface after routing
@@ -353,7 +357,6 @@ void Ipv6::handleMessageFromHL(Packet *msg)
             destIE = ift->findFirstLoopbackInterface();
         ASSERT(destIE);
     }
-    emit(packetReceivedFromUpperSignal, msg);
     L3Address nextHopAddr(Ipv6Address::UNSPECIFIED_ADDRESS);
     if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT)
         datagramLocalOut(packet, destIE, nextHopAddr.toIpv6());
