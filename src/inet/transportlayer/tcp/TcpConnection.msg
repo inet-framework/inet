@@ -138,6 +138,21 @@ struct TcpStateVariables
     uint32_t usedRcvBuffer;    // current amount of used bytes in tcp receive queue
     uint32_t freeRcvBuffer;    // current amount of free bytes in tcp receive queue
     uint32_t tcpRcvQueueDrops;    // number of drops in tcp receive queue
+
+    // ECN
+    bool ecnEchoState; // indicates if connection is in echo mode (got CE indication from IP and didn't get CWR from sender yet)
+    bool sndCwr; // set if ECE was handled
+    bool gotEce; // set if packet with ECE arrived
+    bool gotCeIndication; // set if CE was set in controlInfo from IP
+    bool ect; // set if this connection is ECN Capable (ECT stands for ECN-Capable transport - rfc-3168)
+    bool endPointIsWillingECN; // set if the other end-point is willing to use ECN
+    bool ecnSynSent; // set if ECN-setup SYN packet was sent
+    bool ecnWillingness; // set if current host is willing to use ECN
+    bool sndAck; // set if sending Ack packet, used to set relevant info in controlInfo.
+    bool rexmit; // set if retransmitting data, used to send not-ECT codepoint (rfc3168, p. 20)
+    simtime_t eceReactionTime; // records the time of the last ECE reaction
+
+    uint32_t dupthresh; // used for TcpTahoe, TcpReno and SACK (RFC 3517)
 };
 
 class TcpSendQueue extends cObject
