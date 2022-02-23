@@ -37,6 +37,8 @@ def parse_arguments(task):
     parser.add_argument("-u", "--user-interface", choices=["Cmdenv", "Qtenv"], default="Cmdenv", help="User interface")
     parser.add_argument("-t", "--sim-time-limit", default=None, help="Simulation time limit")
     parser.add_argument("-T", "--cpu-time-limit", default=None, help="CPU time limit")
+    parser.add_argument("-f", "--filter", default=None, help="Filter")
+    parser.add_argument("--exclude-filter", default=None, help="Exclude filter")
     parser.add_argument("-w", "--working-directory-filter", default=None, help="Working directory filter")
     parser.add_argument("--exclude-working-directory-filter", default=None, help="Exclude working directory filter")
     parser.add_argument("-i", "--ini-file-filter", default=None, help="INI file filter")

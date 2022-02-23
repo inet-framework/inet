@@ -1,3 +1,4 @@
+import builtins
 import functools
 import glob
 import itertools
@@ -102,6 +103,7 @@ def get_all_simulation_configs(simulation_project, **kwargs):
     return simulation_project.simulation_configs
 
 def get_simulation_configs(simulation_project, simulation_configs=None,
+                           filter=None, exclude_filter=None,
                            working_directory_filter=None, exclude_working_directory_filter=None,
                            ini_file_filter=None, exclude_ini_file_filter=None,
                            config_filter=None, exclude_config_filter=None,
@@ -109,8 +111,10 @@ def get_simulation_configs(simulation_project, simulation_configs=None,
                            full_match=False, **kwargs):
     if simulation_configs is None:
         simulation_configs = get_all_simulation_configs(simulation_project, **kwargs)
-    return list(filter(lambda simulation_config: matches_filter(simulation_config.working_directory, working_directory_filter, exclude_working_directory_filter, full_match) and
-                                                 matches_filter(simulation_config.ini_file, ini_file_filter, exclude_ini_file_filter, full_match) and
-                                                 matches_filter(simulation_config.config, config_filter, exclude_config_filter, full_match) and
-                                                 simulation_config_filter(simulation_config),
-                       simulation_configs))
+    return list(builtins.filter(lambda simulation_config:
+                                    matches_filter(simulation_config.__repr__(), filter, exclude_filter, full_match) and
+                                    matches_filter(simulation_config.working_directory, working_directory_filter, exclude_working_directory_filter, full_match) and
+                                    matches_filter(simulation_config.ini_file, ini_file_filter, exclude_ini_file_filter, full_match) and
+                                    matches_filter(simulation_config.config, config_filter, exclude_config_filter, full_match) and
+                                    simulation_config_filter(simulation_config),
+                                simulation_configs))
