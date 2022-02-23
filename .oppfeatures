@@ -323,6 +323,21 @@
         linkerFlags = ""
         />
     <feature
+        id = "GateScheduling"
+        name = "Gate scheduling configurators"
+        description = "Gate scheduling configurators for Time-Sensitive Networking (TSN)."
+        initiallyEnabled = "true"
+        requires = "Queueing"
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.configurator.gatescheduling.base
+                       inet.linklayer.configurator.gatescheduling.common
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_GATESCHEDULING"
+        linkerFlags = ""
+        />
+    <feature
         id = "GeneralShowcases"
         name = "General showcases"
         description = "Showcases that demonstrate features which are independent of any specific
