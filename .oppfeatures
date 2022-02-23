@@ -1031,7 +1031,6 @@
                        inet.queueing.common
                        inet.queueing.filter
                        inet.queueing.flow
-                       inet.queueing.function
                        inet.queueing.gate
                        inet.queueing.marker
                        inet.queueing.meter
