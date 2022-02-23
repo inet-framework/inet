@@ -1268,6 +1268,21 @@
         linkerFlags = ""
         />
     <feature
+        id = "TSN"
+        name = "Time-Sensitive Networking (TSN)"
+        description = "Provides Time-Sensitive Networking features such as time synchronization, per-stream filtering, traffic shaping, gate scheduling, stream redundancy, failure protection, etc."
+        initiallyEnabled = "true"
+        requires = "Clock Ethernet Ieee8021as Ieee8021q Ieee8021r ProtocolSupport Queueing"
+        labels = ""
+        nedPackages = "
+                       inet.networks.tsn
+                       inet.node.tsn
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DINET_WITH_TSN"
+        linkerFlags = ""
+        />
+    <feature
         id = "Tun"
         name = "TUN/TAP virtual network interface"
         description = "TUN/TAP virtual network interface."
