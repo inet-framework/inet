@@ -1283,6 +1283,20 @@
         linkerFlags = ""
         />
     <feature
+        id = "TSNShowcases"
+        name = "TSN Showcases"
+        description = "Showcases that demonstrate Time-Sensitive Networking (TSN)."
+        initiallyEnabled = "true"
+        requires = "TSN"
+        labels = ""
+        nedPackages = "
+                       inet.showcases.tsn
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id = "Tun"
         name = "TUN/TAP virtual network interface"
         description = "TUN/TAP virtual network interface."
