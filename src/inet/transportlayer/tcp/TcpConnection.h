@@ -20,10 +20,7 @@ class TcpOpenCommand;
 
 namespace tcp {
 
-class TcpHeader;
-class TcpSendQueue;
 class TcpSackRexmitQueue;
-class TcpReceiveQueue;
 class TcpAlgorithm;
 
 //
