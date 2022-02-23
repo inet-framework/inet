@@ -8,7 +8,6 @@
 #ifndef __INET_IPACKETGATE_H
 #define __INET_IPACKETGATE_H
 
-#include "inet/queueing/base/PacketFilterBase.h"
 #include "inet/queueing/contract/IPacketFlow.h"
 
 namespace inet {
