@@ -546,12 +546,14 @@ void NetworkInterface::joinMulticastGroup(const L3Address& address)
     }
 }
 
+#ifdef INET_WITH_IPv4
 static void toIpv4AddressVector(const std::vector<L3Address>& addresses, std::vector<Ipv4Address>& result)
 {
     result.reserve(addresses.size());
     for (auto& addresse : addresses)
         result.push_back(addresse.toIpv4());
 }
+#endif // ifdef INET_WITH_IPv4
 
 void NetworkInterface::changeMulticastGroupMembership(const L3Address& multicastAddress,
         McastSourceFilterMode oldFilterMode, const std::vector<L3Address>& oldSourceList,
