@@ -1025,7 +1025,6 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.queueing.base
                        inet.queueing.buffer
                        inet.queueing.classifier
                        inet.queueing.common
