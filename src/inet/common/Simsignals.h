@@ -32,6 +32,9 @@ extern INET_API simsignal_t // admin
 
     modesetChangedSignal,
 
+    interpacketGapStartedSignal,
+    interpacketGapEndedSignal,
+
 // - layer 3 (network)
     interfaceCreatedSignal,
     interfaceDeletedSignal,

@@ -39,7 +39,7 @@ void CreditBasedGate::initialize(int stage)
         cModule *module = getContainingNicModule(this);
         module->subscribe(transmissionStartedSignal, this);
         module->subscribe(transmissionEndedSignal, this);
-        module->subscribe(InterpacketGapInserter::interpacketGapEndedSignal, this);
+        module->subscribe(interpacketGapEndedSignal, this);
         changeTimer = new cMessage("ChangeTimer");
         WATCH(currentCredit);
         WATCH(currentCreditGainRate);
@@ -145,7 +145,7 @@ void CreditBasedGate::updateCurrentCreditGainRate()
 void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, double value, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(simsignal));
-    if (simsignal == InterpacketGapInserter::interpacketGapEndedSignal) {
+    if (simsignal == interpacketGapEndedSignal) {
         if (isInterpacketGap) {
             isInterpacketGap = false;
             // 1. immediately set currentCredit to 0 if there are no packets to transmit

@@ -17,10 +17,6 @@ using namespace inet::queueing;
 
 class INET_API InterpacketGapInserter : public ClockUserModuleMixin<PacketPusherBase>
 {
-  public:
-    static simsignal_t interpacketGapStartedSignal;
-    static simsignal_t interpacketGapEndedSignal;
-
   protected:
     cPar *durationPar = nullptr;
     ClockEvent *timer = nullptr;

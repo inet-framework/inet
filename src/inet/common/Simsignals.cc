@@ -23,6 +23,9 @@ simsignal_t linkBrokenSignal = cComponent::registerSignal("linkBroken");
 
 simsignal_t modesetChangedSignal = cComponent::registerSignal("modesetChanged");
 
+simsignal_t interpacketGapStartedSignal = cComponent::registerSignal("interpacketGapStarted");
+simsignal_t interpacketGapEndedSignal = cComponent::registerSignal("interpacketGapEnded");
+
 // - layer 3 (network)
 simsignal_t interfaceCreatedSignal = cComponent::registerSignal("interfaceCreated");
 simsignal_t interfaceDeletedSignal = cComponent::registerSignal("interfaceDeleted");

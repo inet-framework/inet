@@ -16,9 +16,6 @@ namespace inet {
 
 Define_Module(InterpacketGapInserter);
 
-simsignal_t InterpacketGapInserter::interpacketGapStartedSignal = cComponent::registerSignal("interpacketGapStarted");
-simsignal_t InterpacketGapInserter::interpacketGapEndedSignal = cComponent::registerSignal("interpacketGapEnded");
-
 InterpacketGapInserter::~InterpacketGapInserter()
 {
     cancelAndDelete(timer);
