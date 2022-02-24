@@ -10,8 +10,9 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/StringFormat.h"
 #include "inet/networklayer/common/NetworkInterface.h"
+#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
 #include "inet/physicallayer/common/Signal.h"
-#include "inet/protocolelement/common/InterpacketGapInserter.h"
+#endif
 #include "inet/queueing/gate/CreditGateTag_m.h"
 
 namespace inet {
@@ -167,6 +168,7 @@ void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, c
 {
     Enter_Method("%s", cComponent::getSignalName(simsignal));
     if (simsignal == transmissionStartedSignal || simsignal == transmissionEndedSignal) {
+#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
         auto signal = check_and_cast<physicallayer::Signal *>(object);
         auto packet = check_and_cast<Packet *>(signal->getEncapsulatedPacket());
         auto creditGateTag = packet->findTag<CreditGateTag>();
@@ -191,6 +193,7 @@ void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, c
             // 4. reschedule change timer when currentCredit reaches transmitCreditLimit
             scheduleChangeTimer();
         }
+#endif
     }
     else
         throw cRuntimeError("Unknown signal");

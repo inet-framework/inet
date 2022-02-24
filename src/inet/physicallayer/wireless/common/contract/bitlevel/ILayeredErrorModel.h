@@ -8,12 +8,22 @@
 #ifndef __INET_ILAYEREDERRORMODEL_H
 #define __INET_ILAYEREDERRORMODEL_H
 
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalPacketModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ISnir.h"
+
+#ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
+//TODO non-contract included and used in contract. maybe create and use ILayeredTransmission?
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
+#endif
 
 namespace inet {
 
 namespace physicallayer {
+
+#ifndef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
+//TODO non-contract included and used in contract. maybe create and use ILayeredTransmission?
+class LayeredTransmission;
+#endif
 
 /**
  * The layered error model computes the erroneous bits, symbols, or samples
