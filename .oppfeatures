@@ -1027,7 +1027,6 @@
         nedPackages = "
                        inet.queueing.buffer
                        inet.queueing.classifier
-                       inet.queueing.common
                        inet.queueing.filter
                        inet.queueing.flow
                        inet.queueing.gate
