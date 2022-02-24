@@ -73,8 +73,12 @@ void Udp::initialize(int stage)
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
         ift.reference(this, "interfaceTableModule", true);
+#ifdef INET_WITH_IPv4
         icmp = nullptr;
+#endif
+#ifdef INET_WITH_IPv6
         icmpv6 = nullptr;
+#endif
 
         numSent = 0;
         numPassedUp = 0;
@@ -1291,22 +1295,34 @@ void Udp::sendUpErrorIndication(SockDesc *sd, const L3Address& localAddr, ushort
 
 void Udp::handleStartOperation(LifecycleOperation *operation)
 {
+#ifdef INET_WITH_IPv4
     icmp = nullptr;
+#endif
+#ifdef INET_WITH_IPv6
     icmpv6 = nullptr;
+#endif
 }
 
 void Udp::handleStopOperation(LifecycleOperation *operation)
 {
     clearAllSockets();
+#ifdef INET_WITH_IPv4
     icmp = nullptr;
+#endif
+#ifdef INET_WITH_IPv6
     icmpv6 = nullptr;
+#endif
 }
 
 void Udp::handleCrashOperation(LifecycleOperation *operation)
 {
     clearAllSockets();
+#ifdef INET_WITH_IPv4
     icmp = nullptr;
+#endif
+#ifdef INET_WITH_IPv6
     icmpv6 = nullptr;
+#endif
 }
 
 void Udp::clearAllSockets()
