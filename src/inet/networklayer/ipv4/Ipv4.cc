@@ -1125,7 +1125,7 @@ MacAddress Ipv4::resolveNextHopMacAddress(cPacket *packet, Ipv4Address nextHopAd
     }
 
     if (nextHopAddr.isMulticast()) {
-        MacAddress macAddr = MacAddress::makeMulticastAddress(nextHopAddr);
+        MacAddress macAddr = nextHopAddr.mapToMulticastMacAddress();
         EV_DETAIL << "destination address is multicast, sending packet to MAC address " << macAddr << "\n";
         return macAddr;
     }

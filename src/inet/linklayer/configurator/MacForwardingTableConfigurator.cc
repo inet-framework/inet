@@ -121,7 +121,7 @@ void MacForwardingTableConfigurator::receiveSignal(cComponent *source, simsignal
         auto sourceInfo = check_and_cast<Ipv4MulticastGroupSourceInfo *>(object);
         auto node = static_cast<Node *>(topology->getNodeFor(getContainingNode(sourceInfo->ie)));
         auto interface = findInterface(node, sourceInfo->ie);
-        extendConfiguration(node, interface, GlobalArp::toMulticastMacAddress(sourceInfo->groupAddress));
+        extendConfiguration(node, interface, sourceInfo->groupAddress.mapToMulticastMacAddress());
         configureMacForwardingTables();
     }
 }

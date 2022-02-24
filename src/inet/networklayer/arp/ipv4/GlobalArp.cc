@@ -146,7 +146,7 @@ MacAddress GlobalArp::resolveL3Address(const L3Address& address, const NetworkIn
     if (address.isUnicast())
         return mapUnicastAddress(address);
     else if (address.isMulticast())
-        return mapMulticastAddress(address);
+        return address.mapToMulticastMacAddress();
     else if (address.isBroadcast())
         return MacAddress::BROADCAST_ADDRESS;
     throw cRuntimeError("Address must be one of unicast, multicast, or broadcast");
