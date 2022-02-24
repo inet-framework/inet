@@ -997,7 +997,24 @@
         requires = "PhysicalLayerCommon Queueing"
         labels = ""
         nedPackages = "
-                       inet.protocolelement
+                       inet.protocolelement.acknowledgement
+                       inet.protocolelement.aggregation
+                       inet.protocolelement.checksum
+                       inet.protocolelement.common
+                       inet.protocolelement.dispatching
+                       inet.protocolelement.forwarding
+                       inet.protocolelement.fragmentation
+                       inet.protocolelement.lifetime
+                       inet.protocolelement.measurement
+                       inet.protocolelement.ordering
+                       inet.protocolelement.processing
+                       inet.protocolelement.redundancy
+                       inet.protocolelement.selectivity
+                       inet.protocolelement.service
+                       inet.protocolelement.shaper
+                       inet.protocolelement.socket
+                       inet.protocolelement.trafficconditioner
+                       inet.protocolelement.transceiver
                       "
         extraSourceFolders = ""
         compileFlags = "-DINET_WITH_PROTOCOLSUPPORT"
