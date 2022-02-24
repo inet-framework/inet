@@ -7,19 +7,22 @@
         <input pattern="results/Default-#0.vec"/>
         <input pattern="results/DisabledPreemption-#0.sca"/>
         <input pattern="results/DisabledPreemption-#0.vec"/>
-        <input pattern="results/PriorityQueue-#0.sca"/>
-        <input pattern="results/PriorityQueue-#0.vec"/>
-        <input pattern="results/RealisticDefault-#0.sca"/>
-        <input pattern="results/RealisticDefault-#0.vec"/>
-        <input pattern="results/RealisticPriorityQueue-#0.sca"/>
-        <input pattern="results/RealisticPriorityQueue-#0.vec"/>
-        <input pattern="results/RealisticPreemption-#0.sca"/>
-        <input pattern="results/RealisticPreemption-#0.vec"/>
+        <input pattern="results/RealisticFramePreemption-#0.sca"/>
+        <input pattern="results/RealisticFramePreemption-#0.vec"/>
+        <input pattern="results/RealisticPriorityQueueing-#0.vec"/>
+        <input pattern="results/RealisticPriorityQueueing-#0.sca"/>
+        <input pattern="results/RealisticFifoQueueing-#0.vec"/>
+        <input pattern="results/RealisticFifoQueueing-#0.sca"/>
+        <input pattern="results/PriorityQueueing-#0.vec"/>
+        <input pattern="results/PriorityQueueing-#0.sca"/>
+        <input pattern="results/FramePreemption-#0.vec"/>
+        <input pattern="results/FramePreemption-#0.sca"/>
+        <input pattern="results/FifoQueueing-#0.vec"/>
+        <input pattern="results/FifoQueueing-#0.sca"/>
     </inputs>
     <charts>
         <chart icon="icons/full/obj/linechart.png" id="30" name="End-to-end delay, 1200-Byte packet length" template="linechart_mpl" type="MATPLOTLIB">
-            <script>
-                <![CDATA[import math
+            <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 import matplotlib.pyplot as plt
 import re
@@ -39,14 +42,14 @@ def plot_vectors_(df, props):
         style = utils._make_line_args(props, t, df)
         #print("style\n", style)
         #print("t\n",t)
-        if re.search("\'Preemption", str(t)):
+        if re.search("\'FramePreemption", str(t)):
             print("PREEMPTION FOUND")
             style['linestyle'] = 'solid'
-        if re.search("\'Default", str(t)):
+        if re.search("\'FifoQueueing", str(t)):
             print("NOPREEMPTION FOUND")
             style['linestyle'] = 'dotted'
             #style['linewidth'] = '2'
-        if re.search("\'PriorityQueue", str(t)):
+        if re.search("\'PriorityQueueing", str(t)):
             print("PRIORITY QUEUE FOUND")
             style['linestyle'] = 'dashed'
             
@@ -59,8 +62,8 @@ def plot_vectors_(df, props):
         print("style\n", style)
         p.plot(t.vectime, t.vecvalue, label=utils.make_legend_label(legend_cols, t), **style)
 
-    title = get_prop("title") or utils.make_chart_title(df, title_col, legend_cols)
-    utils.set_plot_title(title)
+    #title = get_prop("title") or utils.make_chart_title(df, title_col, legend_cols)
+    #utils.set_plot_title(title)
 
 #bool(re.search('ba[rzd]', 'foobarrrr'))
 
@@ -143,7 +146,7 @@ alternate_handles = [Line2D([0], [0], color='black', lw=1, linestyle=':', label=
                      Line2D([0], [0], color='r', lw=4, linestyle='', marker='s', markersize=1, label='Line'),
                      Line2D([0], [0], color='b', lw=4, linestyle='', marker='s', markersize=1, label='Line')]
 
-alternate_labels = ['Default', 'PriorityQueue', 'Preemption', 'Background', 'High-Priority']
+alternate_labels = ['FifoQueueing', 'PriorityQueueing', 'FramePreemption', 'Background', 'High-Priority']
 
 print(alternate_handles)
 
@@ -166,10 +169,8 @@ utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 
 plt.savefig('delay.png', dpi=150, transparent=True)
-]]>
-            </script>
-            <dialogPage id="Input" label="Input">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -215,10 +216,8 @@ plt.savefig('delay.png', dpi=150, transparent=True)
     </composite>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Lines" label="Lines">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -311,10 +310,8 @@ plt.savefig('delay.png', dpi=150, transparent=True)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Plot" label="Plot">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -478,10 +475,8 @@ plt.savefig('delay.png', dpi=150, transparent=True)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Styling" label="Styling">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -588,10 +583,8 @@ plt.savefig('delay.png', dpi=150, transparent=True)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Advanced" label="Advanced">
-                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -610,10 +603,8 @@ plt.savefig('delay.png', dpi=150, transparent=True)
     </styledText>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Export" label="Export">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -668,8 +659,7 @@ plt.savefig('delay.png', dpi=150, transparent=True)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
+]]></dialogPage>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="grid_show" value="true"/>
@@ -693,7 +683,7 @@ plt.savefig('delay.png', dpi=150, transparent=True)
             <property name="xaxis_min" value="0"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.0"/>
-            <property name="filter" value="name =~ endToEndDelay:vector AND ((runattr:experiment =~ Preemption OR runattr:experiment =~ Default OR runattr:experiment =~ PriorityQueue))"/>
+            <property name="filter" value="name =~ meanBitLifeTimePerPacket:vector AND ((runattr:experiment =~ FramePreemption OR runattr:experiment =~ FifoQueueing OR runattr:experiment =~ PriorityQueueing))"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
             <property name="markersize" value="0"/>
@@ -708,8 +698,7 @@ plt.savefig('delay.png', dpi=150, transparent=True)
             <property name="matplotlibrc" value=""/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="1686" name="End-to-end delay, realistic packet length" template="linechart_mpl" type="MATPLOTLIB">
-            <script>
-                <![CDATA[import math
+            <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 import matplotlib.pyplot as plt
 import re
@@ -730,14 +719,14 @@ def plot_vectors_(df, props):
         style = utils._make_line_args(props, t, df)
         #print("style\n", style)
         #print("t\n",t)
-        if re.search("\'RealisticPreemption", str(t)):
+        if re.search("\'RealisticFramePreemption", str(t)):
             print("PREEMPTION FOUND")
             style['linestyle'] = 'solid'
-        if re.search("\'RealisticDefault", str(t)):
+        if re.search("\'RealisticFifoQueueing", str(t)):
             print("NOPREEMPTION FOUND")
             style['linestyle'] = 'dotted'
             #style['linewidth'] = '2'
-        if re.search("\'RealisticPriorityQueue", str(t)):
+        if re.search("\'RealisticPriorityQueueing", str(t)):
             print("PRIORITY QUEUE FOUND")
             style['linestyle'] = 'dashed'
             
@@ -750,8 +739,8 @@ def plot_vectors_(df, props):
         print("style\n", style)
         p.plot(t.vectime, t.vecvalue, label=utils.make_legend_label(legend_cols, t), **style)
 
-    title = get_prop("title") or utils.make_chart_title(df, title_col, legend_cols)
-    utils.set_plot_title(title)
+    #title = get_prop("title") or utils.make_chart_title(df, title_col, legend_cols)
+    #utils.set_plot_title(title)
 
 # get chart properties
 props = chart.get_properties()
@@ -833,7 +822,7 @@ alternate_handles = [Line2D([0], [0], color='black', lw=1, linestyle=':', label=
                      Line2D([0], [0], color='r', lw=4, linestyle='', marker='s', markersize=1, label='Line'),
                      Line2D([0], [0], color='b', lw=4, linestyle='', marker='s', markersize=1, label='Line')]
 
-alternate_labels = ['Default', 'PriorityQueue', 'Preemption', 'Background', 'High-Priority']
+alternate_labels = ['FifoQueueing', 'PriorityQueueing', 'FramePreemption', 'Background', 'High-Priority']
 
 print(alternate_handles)
 
@@ -874,10 +863,8 @@ else:
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-            </script>
-            <dialogPage id="Input" label="Input">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -926,10 +913,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Lines" label="Lines">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1022,10 +1007,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Plot" label="Plot">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1189,10 +1172,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Styling" label="Styling">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1299,10 +1280,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Advanced" label="Advanced">
-                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -1321,10 +1300,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Export" label="Export">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1379,8 +1356,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
+]]></dialogPage>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="grid_show" value="true"/>
@@ -1404,7 +1380,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.0"/>
-            <property name="filter" value="type =~ vector AND name =~ endToEndDelay:vector&#10;AND NOT (type =~ vector AND runattr:replication =~ &quot;#0&quot; AND name =~ endToEndDelay:vector AND (&#10;    (runattr:experiment =~ Preemption AND module =~ &quot;EthernetPreemptionShowcase.host2.app[1]&quot;) OR&#10;    (runattr:experiment =~ Preemption AND module =~ &quot;EthernetPreemptionShowcase.host2.app[0]&quot;) OR&#10;    (runattr:experiment =~ Default AND module =~ &quot;EthernetPreemptionShowcase.host2.app[1]&quot;) OR&#10;    (runattr:experiment =~ Default AND module =~ &quot;EthernetPreemptionShowcase.host2.app[0]&quot;) OR&#10;    (runattr:experiment =~ PriorityQueue AND module =~ &quot;EthernetPreemptionShowcase.host2.app[1]&quot;) OR&#10;    (runattr:experiment =~ PriorityQueue AND module =~ &quot;EthernetPreemptionShowcase.host2.app[0]&quot;)&#10;))"/>
+            <property name="filter" value="type =~ vector AND runattr:replication =~ &quot;#0&quot; AND name =~ meanBitLifeTimePerPacket:vector AND (&#10;    (runattr:experiment =~ RealisticFramePreemption AND module =~ &quot;FramePreemptionShowcase.host2.app[0].sink&quot;) OR&#10;    (runattr:experiment =~ RealisticFramePreemption AND module =~ &quot;FramePreemptionShowcase.host2.app[1].sink&quot;) OR&#10;    (runattr:experiment =~ RealisticPriorityQueueing AND module =~ &quot;FramePreemptionShowcase.host2.app[0].sink&quot;) OR&#10;    (runattr:experiment =~ RealisticPriorityQueueing AND module =~ &quot;FramePreemptionShowcase.host2.app[1].sink&quot;) OR&#10;    (runattr:experiment =~ RealisticFifoQueueing AND module =~ &quot;FramePreemptionShowcase.host2.app[0].sink&quot;) OR&#10;    (runattr:experiment =~ RealisticFifoQueueing AND module =~ &quot;FramePreemptionShowcase.host2.app[1].sink&quot;)&#10;)"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
             <property name="markersize" value="5"/>
@@ -1420,8 +1396,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc" value="figure.figsize : 8,6"/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="1702" name="Time average of queue length" template="linechart_mpl" type="MATPLOTLIB">
-            <script>
-                <![CDATA[import math
+            <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 import matplotlib.pyplot as plt
 import re
@@ -1442,15 +1417,15 @@ def plot_vectors_(df, props):
         #print("style\n", style)
         #print("t\n",t)
         print("t",str(t))
-        if re.search("\'Preemption", str(t)):
+        if re.search("\'FramePreemption", str(t)):
             print("PREEMPTION FOUND")
             style['linestyle'] = 'solid'
-        if re.search("\'Default", str(t)):
+        if re.search("\'FifoQueueing", str(t)):
             print("NOPREEMPTION FOUND")
             style['linestyle'] = 'dotted'
             style['color'] = 'red'
             #style['linewidth'] = '2'
-        if re.search("\'PriorityQueue", str(t)):
+        if re.search("\'PriorityQueueing", str(t)):
             print("PRIORITY QUEUE FOUND")
             style['linestyle'] = 'dashed'
             
@@ -1514,11 +1489,11 @@ print("handles, labels\n", handles, labels)
 newlabels = []
 for i in labels:
     newlabel = re.sub(r'EthernetPreemptionShowcase.host1.eth\[0\].macLayer.','',i)
-    newlabel = re.sub(r'expressMacLayer.queue','Express Queue (Preemption)',newlabel)
-    newlabel = re.sub(r'preemptableMacLayer.queue','Preemptable Queue (Preemption)',newlabel)
-    newlabel = re.sub(r'queue.queue\[1\]','Low Priority (PriorityQueue)',newlabel)
-    newlabel = re.sub(r'queue.queue\[0\]','High Priority (PriorityQueue)',newlabel)
-    newlabel = re.sub(r'queue','FIFO Queue (Default)',newlabel)
+    newlabel = re.sub(r'expressMacLayer.queue','Express Queue (FramePreemption)',newlabel)
+    newlabel = re.sub(r'preemptableMacLayer.queue','Preemptable Queue (FramePreemption)',newlabel)
+    newlabel = re.sub(r'queue.queue\[1\]','Low Priority (PriorityQueueing)',newlabel)
+    newlabel = re.sub(r'queue.queue\[0\]','High Priority (PriorityQueueing)',newlabel)
+    newlabel = re.sub(r'queue','FIFO Queue (FifoQueueing)',newlabel)
     print("newlabel:\n", newlabel)
     newlabels.append(newlabel)
     
@@ -1557,10 +1532,8 @@ label = orderedlabels
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-            </script>
-            <dialogPage id="Input" label="Input">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -1609,10 +1582,8 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Lines" label="Lines">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1705,10 +1676,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Plot" label="Plot">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1872,10 +1841,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Styling" label="Styling">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1982,10 +1949,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Advanced" label="Advanced">
-                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -2004,10 +1969,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Export" label="Export">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2062,8 +2025,7 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
+]]></dialogPage>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="grid_show" value="true"/>
@@ -2087,7 +2049,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_min" value="0"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.0"/>
-            <property name="filter" value="type =~ vector AND runattr:replication =~ &quot;#0&quot; AND name =~ queueLength:vector AND (&#10;    (runattr:experiment =~ Preemption AND module =~ &quot;EthernetPreemptionShowcase.host1.eth[0].macLayer.expressMacLayer.queue&quot;) OR&#10;    (runattr:experiment =~ Preemption AND module =~ &quot;EthernetPreemptionShowcase.host1.eth[0].macLayer.preemptableMacLayer.queue&quot;) OR&#10;    (runattr:experiment =~ Default AND module =~ &quot;EthernetPreemptionShowcase.host1.eth[0].macLayer.queue&quot;) OR&#10;    (runattr:experiment =~ PriorityQueue AND module =~ &quot;EthernetPreemptionShowcase.host1.eth[0].macLayer.queue.queue[0]&quot;) OR&#10;    (runattr:experiment =~ PriorityQueue AND module =~ &quot;EthernetPreemptionShowcase.host1.eth[0].macLayer.queue.queue[1]&quot;)&#10;)"/>
+            <property name="filter" value="type =~ vector AND runattr:replication =~ &quot;#0&quot; AND name =~ queueLength:vector AND (&#10;    (runattr:experiment =~ FramePreemption AND module =~ &quot;FramePreemptionShowcase.host1.eth[0].macLayer.expressMacLayer.queue&quot;) OR&#10;    (runattr:experiment =~ FramePreemption AND module =~ &quot;FramePreemptionShowcase.host1.eth[0].macLayer.preemptableMacLayer.queue&quot;) OR&#10;    (runattr:experiment =~ FifoQueueing AND module =~ &quot;FramePreemptionShowcase.host1.eth[0].macLayer.queue&quot;) OR&#10;    (runattr:experiment =~ PriorityQueueing AND module =~ &quot;FramePreemptionShowcase.host1.eth[0].macLayer.queue.queue[0]&quot;) OR&#10;    (runattr:experiment =~ PriorityQueueing AND module =~ &quot;FramePreemptionShowcase.host1.eth[0].macLayer.queue.queue[1]&quot;)&#10;)"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
             <property name="markersize" value="5"/>
