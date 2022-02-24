@@ -16,14 +16,10 @@ import inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfig
 // corresponding INET feature must be enabled and the libz3-dev package must
 // be installed.
 //
-// The source was copied from https://github.com/ACassimiro/TSNsched with the
-// permission of the original authors. The code is adapted to INET interfaces,
-// simplified and cleaned up a bit. Further changes to the original source are
-// not going to be taken over. See ~TSNschedGateSchedulingConfigurator for using
-// the latest version of the state of the art original work.
-//
 simple Z3GateSchedulingConfigurator extends GateSchedulingConfiguratorBase like IGateSchedulingConfigurator
 {
     parameters:
+        bool labelAsserts = default(false);
+        bool optimizeSchedule = default(true);
         @class(Z3GateSchedulingConfigurator);
 }

@@ -8,8 +8,8 @@
 //
 
 
-#ifndef __INET_DEFS_H
-#define __INET_DEFS_H
+#ifndef __INET_OPERATOR_H
+#define __INET_OPERATOR_H
 
 #include <memory>
 #include <z3++.h>
@@ -19,12 +19,6 @@
 namespace inet {
 
 using namespace z3;
-
-extern int assertionCount;
-
-inline void addAssert(solver& solver, const expr& expr) {
-    solver.add(expr, (std::string("a") + std::to_string(assertionCount++)).c_str());
-}
 
 inline expr mkReal2Int(expr const & a) { Z3_ast i = Z3_mk_real2int(a.ctx(), a); a.check_error(); return expr(a.ctx(), i); }
 
