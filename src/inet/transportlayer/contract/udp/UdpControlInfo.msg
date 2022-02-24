@@ -6,7 +6,6 @@
 //
 
 import inet.common.INETDefs;
-import inet.networklayer.common.IpProtocolId;   //FIXME remove it, unused
 import inet.networklayer.common.L3Address;
 
 namespace inet;
