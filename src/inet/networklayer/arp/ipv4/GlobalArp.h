@@ -48,7 +48,6 @@ class INET_API GlobalArp : public OperationalBase, public IArp, public cListener
   protected:
     void ensureCacheEntry(const L3Address& address, const NetworkInterface *networkInterface);
     MacAddress mapUnicastAddress(L3Address address);
-    MacAddress mapMulticastAddress(L3Address address);
 
   public:
     GlobalArp();

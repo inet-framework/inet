@@ -418,5 +418,46 @@ ClnsAddress L3Address::toClns() const
     }
 }
 
+MacAddress L3Address::mapToMulticastMacAddress() const
+{
+    ASSERT(isMulticast());
+
+    int id = 0;
+    switch (getType()) {
+        case L3Address::IPv4:
+            return toIpv4().mapToMulticastMacAddress();
+        case L3Address::IPv6:
+            return toIpv6().mapToMulticastMacAddress();
+        case L3Address::MAC:
+            return toMac();
+        case L3Address::MODULEID: {
+            ModuleIdAddress moduleIdAddress = toModuleId();
+            id = moduleIdAddress.getId();
+            MacAddress macAddress;
+            macAddress.setAddressByte(0, 0x01);
+            macAddress.setAddressByte(1, 0x00);
+            macAddress.setAddressByte(2, (id >> 24) & 0xFF);
+            macAddress.setAddressByte(3, (id >> 16) & 0xFF);
+            macAddress.setAddressByte(4, (id >> 8)  & 0xFF);
+            macAddress.setAddressByte(5, (id >> 0)  & 0xFF);
+            return macAddress;
+        }
+        case L3Address::MODULEPATH: {
+            ModulePathAddress modulePathAddress = toModulePath();
+            id = modulePathAddress.getId();
+            MacAddress macAddress;
+            macAddress.setAddressByte(0, 0x01);
+            macAddress.setAddressByte(1, 0x00);
+            macAddress.setAddressByte(2, (id >> 24) & 0xFF);
+            macAddress.setAddressByte(3, (id >> 16) & 0xFF);
+            macAddress.setAddressByte(4, (id >> 8)  & 0xFF);
+            macAddress.setAddressByte(5, (id >> 0)  & 0xFF);
+            return macAddress;
+        }
+        default:
+            throw cRuntimeError("Unknown address type");
+    }
+}
+
 } // namespace inet
 

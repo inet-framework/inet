@@ -10,8 +10,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "inet/networklayer/common/InterfaceToken.h"
-
 namespace inet {
 
 const uint32_t LINK_LOCAL_PREFIX = 0xFE800000;
@@ -372,6 +370,20 @@ int Ipv6Address::getMulticastScope() const
     if ((d[0] & MULTICAST_MASK) != MULTICAST_PREFIX)
         throw cRuntimeError("Ipv6Address::getMulticastScope(): %s is not a multicast address", str().c_str());
     return (d[0] >> 16) & 0x0F;
+}
+
+MacAddress Ipv6Address::mapToMulticastMacAddress() const
+{
+    ASSERT(isMulticast());
+
+    MacAddress macAddress;
+    macAddress.setAddressByte(0, 0x33);
+    macAddress.setAddressByte(1, 0x33);
+    macAddress.setAddressByte(2, (d[3] >> 24) & 0xFF);
+    macAddress.setAddressByte(3, (d[3] >> 16) & 0xFF);
+    macAddress.setAddressByte(4, (d[3] >> 8)  & 0xFF);
+    macAddress.setAddressByte(5, (d[3] >> 0)  & 0xFF);
+    return macAddress;
 }
 
 } // namespace inet

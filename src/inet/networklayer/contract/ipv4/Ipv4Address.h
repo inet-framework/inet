@@ -18,7 +18,7 @@
 #include <iostream>
 #include <string>
 
-#include "inet/common/INETDefs.h"
+#include "inet/linklayer/common/MacAddress.h"
 
 namespace inet {
 
@@ -306,6 +306,11 @@ class INET_API Ipv4Address
     bool operator<=(const Ipv4Address& addr1) const { return getInt() <= addr1.getInt(); }
     bool operator>(const Ipv4Address& addr1) const { return getInt() > addr1.getInt(); }
     bool operator>=(const Ipv4Address& addr1) const { return getInt() >= addr1.getInt(); }
+
+    /**
+     * Form a MAC address for a multicast IPv4 address, see  RFC 1112, section 6.4
+     */
+    MacAddress mapToMulticastMacAddress() const;
 
     /**
      * Returns true if the format of the string corresponds to an Ipv4 address

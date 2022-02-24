@@ -190,69 +190,6 @@ MacAddress GlobalArp::mapUnicastAddress(L3Address address)
     }
 }
 
-MacAddress GlobalArp::toMulticastMacAddress(Ipv4Address ipv4Address) {
-    MacAddress macAddress;
-    macAddress.setAddressByte(0, 0x01);
-    macAddress.setAddressByte(1, 0x00);
-    macAddress.setAddressByte(2, 0x5E);
-    macAddress.setAddressByte(3, ipv4Address.getDByte(1) & 0x7F);
-    macAddress.setAddressByte(4, ipv4Address.getDByte(2));
-    macAddress.setAddressByte(5, ipv4Address.getDByte(3));
-    return macAddress;
-}
-
-MacAddress GlobalArp::toMulticastMacAddress(Ipv6Address ipv6Address) {
-    uint32_t id = ipv6Address.words()[3];
-    MacAddress macAddress;
-    macAddress.setAddressByte(0, 0x33);
-    macAddress.setAddressByte(1, 0x33);
-    macAddress.setAddressByte(2, (id >> 24) & 0xFF);
-    macAddress.setAddressByte(3, (id >> 16) & 0xFF);
-    macAddress.setAddressByte(4, (id >> 8)  & 0xFF);
-    macAddress.setAddressByte(5, (id >> 0)  & 0xFF);
-    return macAddress;
-}
-
-MacAddress GlobalArp::mapMulticastAddress(L3Address l3Address)
-{
-    ASSERT(l3Address.isMulticast());
-    int id = 0;
-    switch (l3Address.getType()) {
-        case L3Address::IPv4:
-            return toMulticastMacAddress(l3Address.toIpv4());
-        case L3Address::IPv6:
-            return toMulticastMacAddress(l3Address.toIpv6());
-        case L3Address::MAC:
-            return l3Address.toMac();
-        case L3Address::MODULEID: {
-            ModuleIdAddress moduleIdAddress = l3Address.toModuleId();
-            id = moduleIdAddress.getId();
-            MacAddress macAddress;
-            macAddress.setAddressByte(0, 0x01);
-            macAddress.setAddressByte(1, 0x00);
-            macAddress.setAddressByte(2, (id >> 24) & 0xFF);
-            macAddress.setAddressByte(3, (id >> 16) & 0xFF);
-            macAddress.setAddressByte(4, (id >> 8)  & 0xFF);
-            macAddress.setAddressByte(5, (id >> 0)  & 0xFF);
-            return macAddress;
-        }
-        case L3Address::MODULEPATH: {
-            ModulePathAddress modulePathAddress = l3Address.toModulePath();
-            id = modulePathAddress.getId();
-            MacAddress macAddress;
-            macAddress.setAddressByte(0, 0x01);
-            macAddress.setAddressByte(1, 0x00);
-            macAddress.setAddressByte(2, (id >> 24) & 0xFF);
-            macAddress.setAddressByte(3, (id >> 16) & 0xFF);
-            macAddress.setAddressByte(4, (id >> 8)  & 0xFF);
-            macAddress.setAddressByte(5, (id >> 0)  & 0xFF);
-            return macAddress;
-        }
-        default:
-            throw cRuntimeError("Unknown address type");
-    }
-}
-
 L3Address GlobalArp::getL3AddressFor(const MacAddress& macAddress) const
 {
     Enter_Method("getL3AddressFor");

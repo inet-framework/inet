@@ -9,7 +9,6 @@
 #include <ctype.h>
 
 #include "inet/networklayer/common/InterfaceToken.h"
-#include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
 
@@ -148,20 +147,4 @@ MacAddress MacAddress::generateAutoAddress()
     return addr;
 }
 
-// see  RFC 1112, section 6.4
-MacAddress MacAddress::makeMulticastAddress(Ipv4Address addr)
-{
-    ASSERT(addr.isMulticast());
-
-    MacAddress macAddr;
-    macAddr.setAddressByte(0, 0x01);
-    macAddr.setAddressByte(1, 0x00);
-    macAddr.setAddressByte(2, 0x5e);
-    macAddr.setAddressByte(3, addr.getDByte(1) & 0x7f);
-    macAddr.setAddressByte(4, addr.getDByte(2));
-    macAddr.setAddressByte(5, addr.getDByte(3));
-    return macAddr;
-}
-
 } // namespace inet
-

@@ -100,6 +100,8 @@ class INET_API L3Address
 
     bool matches(const L3Address& other, int prefixLength) const;
 
+    MacAddress mapToMulticastMacAddress() const;
+
     static const char *getTypeName(AddressType t);
 
     inline void doParsimPacking(cCommBuffer *buf) const

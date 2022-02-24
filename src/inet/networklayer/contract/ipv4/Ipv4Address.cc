@@ -267,5 +267,20 @@ Ipv4Address Ipv4Address::makeBroadcastAddress(Ipv4Address netmask) const
     return br;
 }
 
+// see  RFC 1112, section 6.4
+MacAddress Ipv4Address::mapToMulticastMacAddress() const
+{
+    ASSERT(isMulticast());
+
+    MacAddress macAddr;
+    macAddr.setAddressByte(0, 0x01);
+    macAddr.setAddressByte(1, 0x00);
+    macAddr.setAddressByte(2, 0x5e);
+    macAddr.setAddressByte(3, (addr >> 16) & 0x7F);
+    macAddr.setAddressByte(4, (addr >> 8) & 0xFF);
+    macAddr.setAddressByte(5, (addr & 0xFF));
+    return macAddr;
+}
+
 } // namespace inet
 

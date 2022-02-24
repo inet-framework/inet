@@ -11,11 +11,10 @@
 #include <iostream>
 #include <string>
 
-#include "inet/common/INETDefs.h"
+#include "inet/linklayer/common/MacAddress.h"
+#include "inet/networklayer/common/InterfaceToken.h"
 
 namespace inet {
-
-class InterfaceToken;
 
 enum {
     IPv6_ADDRESS_SIZE = 16 // bytes
@@ -302,6 +301,8 @@ class INET_API Ipv6Address
      * Get the 4-bit scope field of an Ipv6 multicast address.
      */
     int getMulticastScope() const;
+
+    MacAddress mapToMulticastMacAddress() const;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Ipv6Address& ip)

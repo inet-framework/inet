@@ -16,7 +16,6 @@ namespace inet {
 #define MAC_ADDRESS_SIZE    6
 #define MAC_ADDRESS_MASK    0xffffffffffffULL
 
-class Ipv4Address;
 class InterfaceToken;
 
 /**
@@ -190,11 +189,6 @@ class INET_API MacAddress
      * suffix.
      */
     static MacAddress generateAutoAddress();
-
-    /**
-     * Form a MAC address for a multicast IPv4 address, see  RFC 1112, section 6.4
-     */
-    static MacAddress makeMulticastAddress(Ipv4Address addr);
 
     bool operator<(const MacAddress& other) const { return address < other.address; }
 
