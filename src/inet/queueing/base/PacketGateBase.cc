@@ -112,6 +112,7 @@ void PacketGateBase::updateDisplayString() const
 {
     PacketFlowBase::updateDisplayString();
     getDisplayString().setTagArg("i", 1, isOpen_ ? "green" : "red");
+    getDisplayString().setTagArg("i", 2, 50);
 }
 
 } // namespace queueing
