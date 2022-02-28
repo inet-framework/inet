@@ -8,7 +8,10 @@
 #include "inet/visualizer/canvas/linklayer/DataLinkCanvasVisualizer.h"
 
 #include "inet/linklayer/base/MacProtocolBase.h"
+
+#ifdef INET_WITH_PROTOCOLSUPPORT
 #include "inet/protocolelement/common/PacketEmitter.h"
+#endif // INET_WITH_PROTOCOLSUPPORT
 
 #ifdef INET_WITH_IEEE80211
 #include "inet/linklayer/ieee80211/mac/contract/ICoordinationFunction.h"
@@ -23,10 +26,13 @@ Define_Module(DataLinkCanvasVisualizer);
 bool DataLinkCanvasVisualizer::isLinkStart(cModule *module) const
 {
     // KLUDGE: for visualizing when using the layered Ethernet model
-    return dynamic_cast<PacketEmitter *>(module) != nullptr ||
-           dynamic_cast<MacProtocolBase *>(module) != nullptr
+    return false
+#ifdef INET_WITH_PROTOCOLSUPPORT
+            || dynamic_cast<PacketEmitter *>(module) != nullptr
+#endif // INET_WITH_PROTOCOLSUPPORT
+            || dynamic_cast<MacProtocolBase *>(module) != nullptr
 #ifdef INET_WITH_IEEE80211
-           || dynamic_cast<ieee80211::ICoordinationFunction *>(module) != nullptr
+            || dynamic_cast<ieee80211::ICoordinationFunction *>(module) != nullptr
 #endif // INET_WITH_IEEE80211
         ;
 }
@@ -34,10 +40,13 @@ bool DataLinkCanvasVisualizer::isLinkStart(cModule *module) const
 bool DataLinkCanvasVisualizer::isLinkEnd(cModule *module) const
 {
     // KLUDGE: for visualizing when using the layered Ethernet model
-    return dynamic_cast<PacketEmitter *>(module) != nullptr ||
-           dynamic_cast<MacProtocolBase *>(module) != nullptr
+    return false
+#ifdef INET_WITH_PROTOCOLSUPPORT
+            || dynamic_cast<PacketEmitter *>(module) != nullptr
+#endif // INET_WITH_PROTOCOLSUPPORT
+            || dynamic_cast<MacProtocolBase *>(module) != nullptr
 #ifdef INET_WITH_IEEE80211
-           || dynamic_cast<ieee80211::ICoordinationFunction *>(module) != nullptr
+            || dynamic_cast<ieee80211::ICoordinationFunction *>(module) != nullptr
 #endif // INET_WITH_IEEE80211
         ;
 }
