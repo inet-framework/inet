@@ -7,14 +7,14 @@
 
 package inet.physicallayer.wireless.common.energyconsumer;
 
-import inet.power.base.CcEnergyConsumerBase;
+import inet.power.contract.ICcEnergyConsumer;
 
 //
 // This module provides a radio energy consumer model. The current consumption is
 // determined by the radio mode, the transmitter state and the receiver state
 // using constant parameters.
 //
-simple StateBasedCcEnergyConsumer extends CcEnergyConsumerBase
+simple StateBasedCcEnergyConsumer like ICcEnergyConsumer
 {
     parameters:
         string energySourceModule;
@@ -36,5 +36,7 @@ simple StateBasedCcEnergyConsumer extends CcEnergyConsumerBase
         double transmitterTransmittingDataCurrentConsumption @unit(A) = default(transmitterTransmittingCurrentConsumption);
         @display("i=block/cogwheel");
         @class(StateBasedCcEnergyConsumer);
+        @signal[currentConsumptionChanged](type=double);
+        @statistic[currentConsumption](title="Current consumption"; source=currentConsumptionChanged; record=vector; interpolationmode=sample-hold);
 }
 

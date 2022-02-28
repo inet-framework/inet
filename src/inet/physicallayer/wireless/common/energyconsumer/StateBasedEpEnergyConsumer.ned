@@ -7,14 +7,14 @@
 
 package inet.physicallayer.wireless.common.energyconsumer;
 
-import inet.power.base.EpEnergyConsumerBase;
+import inet.power.contract.IEpEnergyConsumer;
 
 //
 // This module provides a radio power consumer model. The power consumption is
 // determined by the radio mode, the transmitter state and the receiver state
 // using constant parameters.
 //
-simple StateBasedEpEnergyConsumer extends EpEnergyConsumerBase
+simple StateBasedEpEnergyConsumer like IEpEnergyConsumer
 {
     parameters:
         string energySourceModule;
@@ -34,5 +34,7 @@ simple StateBasedEpEnergyConsumer extends EpEnergyConsumerBase
         double transmitterTransmittingDataPowerConsumption @unit(W) = default(transmitterTransmittingPowerConsumption);
         @display("i=block/cogwheel");
         @class(StateBasedEpEnergyConsumer);
+        @signal[powerConsumptionChanged](type=double);
+        @statistic[powerConsumption](title="Power consumption"; source=powerConsumptionChanged; record=vector; interpolationmode=sample-hold);
 }
 
