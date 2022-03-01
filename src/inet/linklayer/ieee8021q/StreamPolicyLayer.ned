@@ -7,10 +7,10 @@
 
 package inet.linklayer.ieee8021q;
 
-import inet.linklayer.ieee8021r.IIeee8021rLayer;
 import inet.protocolelement.contract.IProtocolLayer;
 
-module StreamPolicyLayer like IIeee8021rLayer
+
+module StreamPolicyLayer like IProtocolLayer
 {
     parameters:
         string interfaceTableModule;
