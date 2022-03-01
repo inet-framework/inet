@@ -1625,7 +1625,7 @@
         name = "Z3 Gate Scheduling Configurator"
         description = "Z3 SAT solver based TSN gate scheduling configurator (requires external libz3-dev or z3-devel installed.)"
         initiallyEnabled = "false"
-        requires = "Ethernet"
+        requires = "Ethernet GateScheduling"
         labels = ""
         nedPackages = "
                        inet.linklayer.configurator.gatescheduling.z3
