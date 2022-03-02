@@ -50813,7 +50813,7 @@
   "sim_time_limit": "1s",
   "test_result": "PASS",
   "ingredients": "tplx",
-  "fingerprint": "5f29-ef96",
+  "fingerprint": "4e70-e35d",
   "timestamp": 1641983904.6540816,
   "git_hash": "363312e006d4b21c768e39a72ec6b38db9a00e80",
   "git_clean": false
@@ -52207,6 +52207,19 @@
   "fingerprint": "a38b-0b39",
   "timestamp": 1642769017.0515404,
   "git_hash": "60741948d34e3ef7532a577f12727073390cfe4a",
+  "git_clean": false
+ },
+ {
+  "working_directory": "showcases/tsn/gatescheduling/sat",
+  "ini_file": "omnetpp.ini",
+  "config": "General",
+  "run": 0,
+  "sim_time_limit": "1s",
+  "test_result": "PASS",
+  "ingredients": "tplx",
+  "fingerprint": "71a8-b5fe",
+  "timestamp": 1646231292.4209187,
+  "git_hash": "a864902bcdd42e7082f309e19fdf2611839ec388",
   "git_clean": false
  }
 ]
