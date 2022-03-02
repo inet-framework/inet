@@ -7,25 +7,25 @@
 
 package inet.visualizer.common;
 
-import inet.visualizer.contract.IGateVisualizer;
+import inet.visualizer.contract.IGateScheduleVisualizer;
 
 //
 // This module integrates canvas and osg gate visualizers into a single module.
 //
-// @see ~GateCanvasVisualizer, ~GateOsgVisualizer, ~GateVisualizerBase, ~IGateVisualizer
+// @see ~GateScheduleCanvasVisualizer, ~GateScheduleOsgVisualizer, ~GateScheduleVisualizerBase, ~IGateScheduleVisualizer
 //
-module GateVisualizer like IGateVisualizer
+module GateScheduleVisualizer like IGateScheduleVisualizer
 {
     parameters:
         @display("i=block/app");
         *.visualizationTargetModule = default("^.^");
         *.visualizationSubjectModule = default("^.^");
     submodules:
-        canvasVisualizer: <default(firstAvailableOrEmpty("GateCanvasVisualizer"))> like IGateVisualizer if typename != "" {
+        canvasVisualizer: <default(firstAvailableOrEmpty("GateScheduleCanvasVisualizer"))> like IGateScheduleVisualizer if typename != "" {
             parameters:
                 @display("p=100,100");
         }
-        osgVisualizer: <default(firstAvailableOrEmpty("GateOsgVisualizer"))> like IGateVisualizer if typename != "" {
+        osgVisualizer: <default(firstAvailableOrEmpty("GateScheduleOsgVisualizer"))> like IGateScheduleVisualizer if typename != "" {
             parameters:
                 @display("p=100,200");
         }

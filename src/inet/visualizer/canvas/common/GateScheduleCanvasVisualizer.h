@@ -5,19 +5,20 @@
 //
 
 
-#ifndef __INET_GATECANVASVISUALIZER_H
-#define __INET_GATECANVASVISUALIZER_H
+#ifndef __INET_GATESCHEDULECANVASVISUALIZER_H
+#define __INET_GATESCHEDULECANVASVISUALIZER_H
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/figures/GateFigure.h"
-#include "inet/visualizer/base/GateVisualizerBase.h"
+#include "inet/visualizer/base/GateScheduleVisualizerBase.h"
 #include "inet/visualizer/canvas/scene/NetworkNodeCanvasVisualizer.h"
 
 namespace inet {
 
 namespace visualizer {
 
-class INET_API GateCanvasVisualizer : public GateVisualizerBase
+// TODO: GateScheduleCanvasVisualizer and friends
+class INET_API GateScheduleCanvasVisualizer : public GateScheduleVisualizerBase
 {
   protected:
     class INET_API GateCanvasVisualization : public GateVisualization {

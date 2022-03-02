@@ -5,8 +5,8 @@
 //
 
 
-#ifndef __INET_GATEVISUALIZERBASE_H
-#define __INET_GATEVISUALIZERBASE_H
+#ifndef __INET_GATESCHEDULEVISUALIZERBASE_H
+#define __INET_GATESCHEDULEVISUALIZERBASE_H
 
 #include "inet/clock/common/ClockTime.h" // TODO
 #include "inet/clock/contract/ClockTime.h"
@@ -19,7 +19,7 @@ namespace inet {
 
 namespace visualizer {
 
-class INET_API GateVisualizerBase : public VisualizerBase
+class INET_API GateScheduleVisualizerBase : public VisualizerBase
 {
   protected:
     class INET_API GateVisitor : public cVisitor {

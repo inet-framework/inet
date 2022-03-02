@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/visualizer/canvas/common/GateCanvasVisualizer.h"
+#include "inet/visualizer/canvas/common/GateScheduleCanvasVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/queueing/gate/PeriodicGate.h"
@@ -14,23 +14,23 @@ namespace inet {
 
 namespace visualizer {
 
-Define_Module(GateCanvasVisualizer);
+Define_Module(GateScheduleCanvasVisualizer);
 
-GateCanvasVisualizer::GateCanvasVisualization::GateCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, GateFigure *figure, queueing::IPacketGate *gate) :
+GateScheduleCanvasVisualizer::GateCanvasVisualization::GateCanvasVisualization(NetworkNodeCanvasVisualization *networkNodeVisualization, GateFigure *figure, queueing::IPacketGate *gate) :
     GateVisualization(gate),
     networkNodeVisualization(networkNodeVisualization),
     figure(figure)
 {
 }
 
-GateCanvasVisualizer::GateCanvasVisualization::~GateCanvasVisualization()
+GateScheduleCanvasVisualizer::GateCanvasVisualization::~GateCanvasVisualization()
 {
     delete figure;
 }
 
-void GateCanvasVisualizer::initialize(int stage)
+void GateScheduleCanvasVisualizer::initialize(int stage)
 {
-    GateVisualizerBase::initialize(stage);
+    GateScheduleVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
@@ -38,7 +38,7 @@ void GateCanvasVisualizer::initialize(int stage)
     }
 }
 
-GateVisualizerBase::GateVisualization *GateCanvasVisualizer::createGateVisualization(queueing::IPacketGate *gate) const
+GateScheduleVisualizerBase::GateVisualization *GateScheduleCanvasVisualizer::createGateVisualization(queueing::IPacketGate *gate) const
 {
     auto module = check_and_cast<cModule *>(gate);
     auto figure = new GateFigure("gate");
@@ -56,24 +56,24 @@ GateVisualizerBase::GateVisualization *GateCanvasVisualizer::createGateVisualiza
     return new GateCanvasVisualization(networkNodeVisualization, figure, gate);
 }
 
-void GateCanvasVisualizer::addGateVisualization(const GateVisualization *gateVisualization)
+void GateScheduleCanvasVisualizer::addGateVisualization(const GateVisualization *gateVisualization)
 {
-    GateVisualizerBase::addGateVisualization(gateVisualization);
+    GateScheduleVisualizerBase::addGateVisualization(gateVisualization);
     auto gateCanvasVisualization = static_cast<const GateCanvasVisualization *>(gateVisualization);
     auto figure = gateCanvasVisualization->figure;
     gateCanvasVisualization->networkNodeVisualization->addAnnotation(figure, figure->getBounds().getSize(), placementHint, placementPriority);
 }
 
-void GateCanvasVisualizer::removeGateVisualization(const GateVisualization *gateVisualization)
+void GateScheduleCanvasVisualizer::removeGateVisualization(const GateVisualization *gateVisualization)
 {
-    GateVisualizerBase::removeGateVisualization(gateVisualization);
+    GateScheduleVisualizerBase::removeGateVisualization(gateVisualization);
     auto gateCanvasVisualization = static_cast<const GateCanvasVisualization *>(gateVisualization);
     auto figure = gateCanvasVisualization->figure;
     if (networkNodeVisualizer != nullptr)
         gateCanvasVisualization->networkNodeVisualization->removeAnnotation(figure);
 }
 
-void GateCanvasVisualizer::refreshGateVisualization(const GateVisualization *gateVisualization) const
+void GateScheduleCanvasVisualizer::refreshGateVisualization(const GateVisualization *gateVisualization) const
 {
     auto gateCanvasVisualization = static_cast<const GateCanvasVisualization *>(gateVisualization);
     auto gate = check_and_cast<queueing::PeriodicGate *>(gateVisualization->gate);

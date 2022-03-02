@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/visualizer/base/GateVisualizerBase.h"
+#include "inet/visualizer/base/GateScheduleVisualizerBase.h"
 
 #include <algorithm>
 
@@ -13,7 +13,7 @@ namespace inet {
 
 namespace visualizer {
 
-bool GateVisualizerBase::GateVisitor::visit(cObject *object)
+bool GateScheduleVisualizerBase::GateVisitor::visit(cObject *object)
 {
     if (auto gate = dynamic_cast<queueing::IPacketGate *>(object))
         gates.push_back(gate);
@@ -22,18 +22,18 @@ bool GateVisualizerBase::GateVisitor::visit(cObject *object)
     return true;
 }
 
-GateVisualizerBase::GateVisualization::GateVisualization(queueing::IPacketGate *gate) :
+GateScheduleVisualizerBase::GateVisualization::GateVisualization(queueing::IPacketGate *gate) :
     gate(gate)
 {
 }
 
-void GateVisualizerBase::preDelete(cComponent *root)
+void GateScheduleVisualizerBase::preDelete(cComponent *root)
 {
     if (displayGates)
         removeAllGateVisualizations();
 }
 
-void GateVisualizerBase::initialize(int stage)
+void GateScheduleVisualizerBase::initialize(int stage)
 {
     VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
@@ -54,7 +54,7 @@ void GateVisualizerBase::initialize(int stage)
     }
 }
 
-void GateVisualizerBase::handleParameterChange(const char *name)
+void GateScheduleVisualizerBase::handleParameterChange(const char *name)
 {
     if (!hasGUI()) return;
     if (name != nullptr) {
@@ -65,7 +65,7 @@ void GateVisualizerBase::handleParameterChange(const char *name)
     }
 }
 
-void GateVisualizerBase::refreshDisplay() const
+void GateScheduleVisualizerBase::refreshDisplay() const
 {
     if (simTime() - lastRefreshTime > CLOCKTIME_AS_SIMTIME(displayDuration) / width) {
         for (auto gateVisualization : gateVisualizations)
@@ -74,17 +74,17 @@ void GateVisualizerBase::refreshDisplay() const
     }
 }
 
-void GateVisualizerBase::addGateVisualization(const GateVisualization *gateVisualization)
+void GateScheduleVisualizerBase::addGateVisualization(const GateVisualization *gateVisualization)
 {
     gateVisualizations.push_back(gateVisualization);
 }
 
-void GateVisualizerBase::removeGateVisualization(const GateVisualization *gateVisualization)
+void GateScheduleVisualizerBase::removeGateVisualization(const GateVisualization *gateVisualization)
 {
     gateVisualizations.erase(std::remove(gateVisualizations.begin(), gateVisualizations.end(), gateVisualization), gateVisualizations.end());
 }
 
-void GateVisualizerBase::addGateVisualizations()
+void GateScheduleVisualizerBase::addGateVisualizations()
 {
     GateVisitor gateVisitor;
     visualizationSubjectModule->forEachChild(&gateVisitor);
@@ -94,7 +94,7 @@ void GateVisualizerBase::addGateVisualizations()
     }
 }
 
-void GateVisualizerBase::removeAllGateVisualizations()
+void GateScheduleVisualizerBase::removeAllGateVisualizations()
 {
     for (auto gateVisualization : std::vector<const GateVisualization *>(gateVisualizations)) {
         removeGateVisualization(gateVisualization);

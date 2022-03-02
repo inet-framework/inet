@@ -10,9 +10,9 @@ package inet.visualizer.base;
 //
 // This is a base module for gate visualizer simple modules.
 //
-// @see ~GateCanvasVisualizer, ~GateOsgVisualizer, ~IGateVisualizer, ~VisualizerBase
+// @see ~GateScheduleCanvasVisualizer, ~GateScheduleOsgVisualizer, ~IGateScheduleVisualizer, ~VisualizerBase
 //
-simple GateVisualizerBase extends VisualizerBase
+simple GateScheduleVisualizerBase extends VisualizerBase
 {
     parameters:
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // module path to the network node visualizer module, refers to a sibling submodule by default
@@ -30,6 +30,6 @@ simple GateVisualizerBase extends VisualizerBase
         double displayDuration @mutable @unit(s) = default(0s); // gate operation time duration visualized in the amount of space available, use gate period by default
         double currentTimePosition = default(width / 2); // position of the current simulation time in the visualization, horizontal center by default
 
-        @class(GateVisualizerBase);
+        @class(GateScheduleVisualizerBase);
 }
 

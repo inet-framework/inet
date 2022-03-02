@@ -5,11 +5,11 @@
 //
 
 
-#ifndef __INET_GATEOSGVISUALIZER_H
-#define __INET_GATEOSGVISUALIZER_H
+#ifndef __INET_GATESCHEDULEOSGVISUALIZER_H
+#define __INET_GATESCHEDULEOSGVISUALIZER_H
 
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/visualizer/base/GateVisualizerBase.h"
+#include "inet/visualizer/base/GateScheduleVisualizerBase.h"
 #include "inet/visualizer/osg/scene/NetworkNodeOsgVisualizer.h"
 #include "inet/visualizer/osg/util/OsgUtils.h"
 
@@ -17,7 +17,7 @@ namespace inet {
 
 namespace visualizer {
 
-class INET_API GateOsgVisualizer : public GateVisualizerBase
+class INET_API GateScheduleOsgVisualizer : public GateScheduleVisualizerBase
 {
   protected:
     class INET_API GateOsgVisualization : public GateVisualization {

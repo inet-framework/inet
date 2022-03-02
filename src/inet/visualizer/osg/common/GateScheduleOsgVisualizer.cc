@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/visualizer/osg/common/GateOsgVisualizer.h"
+#include "inet/visualizer/osg/common/GateScheduleOsgVisualizer.h"
 
 #include "inet/common/ModuleAccess.h"
 
@@ -13,18 +13,18 @@ namespace inet {
 
 namespace visualizer {
 
-Define_Module(GateOsgVisualizer);
+Define_Module(GateScheduleOsgVisualizer);
 
-GateOsgVisualizer::GateOsgVisualization::GateOsgVisualization(NetworkNodeOsgVisualization *networkNodeVisualization, osg::Geode *node, queueing::IPacketGate *gate) :
+GateScheduleOsgVisualizer::GateOsgVisualization::GateOsgVisualization(NetworkNodeOsgVisualization *networkNodeVisualization, osg::Geode *node, queueing::IPacketGate *gate) :
     GateVisualization(gate),
     networkNodeVisualization(networkNodeVisualization),
     node(node)
 {
 }
 
-void GateOsgVisualizer::initialize(int stage)
+void GateScheduleOsgVisualizer::initialize(int stage)
 {
-    GateVisualizerBase::initialize(stage);
+    GateScheduleVisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
         networkNodeVisualizer.reference(this, "networkNodeVisualizerModule", true);
@@ -38,7 +38,7 @@ void GateOsgVisualizer::initialize(int stage)
     }
 }
 
-GateVisualizerBase::GateVisualization *GateOsgVisualizer::createGateVisualization(queueing::IPacketGate *gate) const
+GateScheduleVisualizerBase::GateVisualization *GateScheduleOsgVisualizer::createGateVisualization(queueing::IPacketGate *gate) const
 {
     auto ownedObject = check_and_cast<cOwnedObject *>(gate);
     auto module = check_and_cast<cModule *>(ownedObject->getOwner());
@@ -49,7 +49,7 @@ GateVisualizerBase::GateVisualization *GateOsgVisualizer::createGateVisualizatio
     return new GateOsgVisualization(networkNodeVisualization, geode, gate);
 }
 
-void GateOsgVisualizer::refreshGateVisualization(const GateVisualization *gateVisualization) const
+void GateScheduleOsgVisualizer::refreshGateVisualization(const GateVisualization *gateVisualization) const
 {
     // TODO
 //    auto infoOsgVisualization = static_cast<const GateOsgVisualization *>(gateVisualization);

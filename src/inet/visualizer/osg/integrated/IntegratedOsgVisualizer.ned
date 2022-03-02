@@ -9,7 +9,7 @@ package inet.visualizer.osg.integrated;
 
 import inet.visualizer.contract.IDataLinkVisualizer;
 import inet.visualizer.contract.IEnergyStorageVisualizer;
-import inet.visualizer.contract.IGateVisualizer;
+import inet.visualizer.contract.IGateScheduleVisualizer;
 import inet.visualizer.contract.IIeee80211Visualizer;
 import inet.visualizer.contract.IInfoVisualizer;
 import inet.visualizer.contract.IIntegratedVisualizer;
@@ -98,7 +98,7 @@ module IntegratedOsgVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=450,100");
         }
-        gateVisualizer: <default("GateOsgVisualizer")> like IGateVisualizer if typename != "" {
+        gateScheduleVisualizer: <default("GateScheduleOsgVisualizer")> like IGateScheduleVisualizer if typename != "" {
             parameters:
                 @display("p=450,200");
         }

@@ -9,7 +9,7 @@ package inet.visualizer.osg.integrated;
 
 import inet.visualizer.contract.IDataLinkVisualizer;
 import inet.visualizer.contract.IEnergyStorageVisualizer;
-import inet.visualizer.contract.IGateVisualizer;
+import inet.visualizer.contract.IGateScheduleVisualizer;
 import inet.visualizer.contract.IIeee80211Visualizer;
 import inet.visualizer.contract.IInfoVisualizer;
 import inet.visualizer.contract.IIntegratedVisualizer;
@@ -54,7 +54,7 @@ module IntegratedMultiOsgVisualizer like IIntegratedVisualizer
         int numObstacleLossVisualizers = default(1);
         int numPacketDropVisualizers = default(1);
         int numQueueVisualizers = default(1);
-        int numGateVisualizers = default(1);
+        int numGateScheduleVisualizers = default(1);
         int numRadioVisualizers = default(1);
         int numPhysicalLinkVisualizers = default(1);
         int numInterfaceTableVisualizers = default(1);
@@ -117,7 +117,7 @@ module IntegratedMultiOsgVisualizer like IIntegratedVisualizer
             parameters:
                 @display("p=450,100,row,100");
         }
-        gateVisualizer[numGateVisualizers]: <default("GateOsgVisualizer")> like IGateVisualizer {
+        gateScheduleVisualizer[numGateScheduleVisualizers]: <default("GateScheduleOsgVisualizer")> like IGateScheduleVisualizer {
             parameters:
                 @display("p=450,200,row,100");
         }
