@@ -130,29 +130,24 @@ simtime_t SimpleGateSchedulingConfigurator::computeStartOffsetForPathFragments(I
                     simtime_t interFrameGap = s(b(96) / interfaceDatarate).get();
                     auto channel = dynamic_cast<cDatarateChannel *>(networkInterface->getTxTransmissionChannel());
                     simtime_t propagationDelay = channel != nullptr ? channel->getDelay() : 0;
-                    auto gate = networkInterface->findModuleByPath(".macLayer.queue.gate[0]"); // KLUDGE: to check for gate scheduling
-                    if (gate != nullptr) {
-                        simtime_t gateOpenDuration = transmissionDuration;
-                        simtime_t gateOpenTime = nextGateOpenTime;
-                        simtime_t gateCloseTime = gateOpenTime + gateOpenDuration;
-                        for (int i = 0; i < interfaceSchedule.size(); i++) {
-                            if (interfaceSchedule[i].gateCloseTime + interFrameGap <= gateOpenTime || gateCloseTime + interFrameGap <= interfaceSchedule[i].gateOpenTime)
-                                continue;
-                            else {
-                                gateOpenTime = interfaceSchedule[i].gateCloseTime + interFrameGap;
-                                gateCloseTime = gateOpenTime + gateOpenDuration;
-                                i = 0;
-                            }
+                    simtime_t gateOpenDuration = transmissionDuration;
+                    simtime_t gateOpenTime = nextGateOpenTime;
+                    simtime_t gateCloseTime = gateOpenTime + gateOpenDuration;
+                    for (int i = 0; i < interfaceSchedule.size(); i++) {
+                        if (interfaceSchedule[i].gateCloseTime + interFrameGap <= gateOpenTime || gateCloseTime + interFrameGap <= interfaceSchedule[i].gateOpenTime)
+                            continue;
+                        else {
+                            gateOpenTime = interfaceSchedule[i].gateCloseTime + interFrameGap;
+                            gateCloseTime = gateOpenTime + gateOpenDuration;
+                            i = 0;
                         }
-                        simtime_t gateOpenDelay = gateOpenTime - nextGateOpenTime;
-                        if (gateOpenDelay != 0) {
-                            startOffsetShift += gateOpenDelay;
-                            break;
-                        }
-                        nextGateOpenTime = gateCloseTime + propagationDelay;
                     }
-                    else
-                        nextGateOpenTime += transmissionDuration + propagationDelay;
+                    simtime_t gateOpenDelay = gateOpenTime - nextGateOpenTime;
+                    if (gateOpenDelay != 0) {
+                        startOffsetShift += gateOpenDelay;
+                        break;
+                    }
+                    nextGateOpenTime = gateCloseTime + propagationDelay;
                 }
                 auto endNetworkNodeName = pathFragment->networkNodes.back()->module->getFullName();
                 if (endNetworkNodeName != destination->getFullName() && std::find(extendedPath.begin(), extendedPath.end(), endNetworkNodeName) == extendedPath.end())
@@ -206,33 +201,28 @@ void SimpleGateSchedulingConfigurator::addGateSchedulingForPathFragments(Input::
                     simtime_t interFrameGap = s(b(96) / interfaceDatarate).get();
                     auto channel = dynamic_cast<cDatarateChannel *>(networkInterface->getTxTransmissionChannel());
                     simtime_t propagationDelay = channel != nullptr ? channel->getDelay() : 0;
-                    auto gate = networkInterface->findModuleByPath(".macLayer.queue.gate[0]"); // KLUDGE: to check for gate scheduling
-                    if (gate != nullptr) {
-                        simtime_t gateOpenDuration = transmissionDuration;
-                        simtime_t gateOpenTime = nextGateOpenTime;
-                        simtime_t gateCloseTime = gateOpenTime + gateOpenDuration;
-                        for (int i = 0; i < interfaceSchedule.size(); i++) {
-                            if (interfaceSchedule[i].gateCloseTime + interFrameGap <= gateOpenTime || gateCloseTime + interFrameGap <= interfaceSchedule[i].gateOpenTime)
-                                continue;
-                            else {
-                                gateOpenTime = interfaceSchedule[i].gateCloseTime + interFrameGap;
-                                gateCloseTime = gateOpenTime + gateOpenDuration;
-                                i = 0;
-                            }
+                    simtime_t gateOpenDuration = transmissionDuration;
+                    simtime_t gateOpenTime = nextGateOpenTime;
+                    simtime_t gateCloseTime = gateOpenTime + gateOpenDuration;
+                    for (int i = 0; i < interfaceSchedule.size(); i++) {
+                        if (interfaceSchedule[i].gateCloseTime + interFrameGap <= gateOpenTime || gateCloseTime + interFrameGap <= interfaceSchedule[i].gateOpenTime)
+                            continue;
+                        else {
+                            gateOpenTime = interfaceSchedule[i].gateCloseTime + interFrameGap;
+                            gateCloseTime = gateOpenTime + gateOpenDuration;
+                            i = 0;
                         }
-                        simtime_t extraDelay = gateOpenTime - nextGateOpenTime;
-                        EV_DEBUG << "Extending gate scheduling for stream reservation" << EV_FIELD(networkNode) << EV_FIELD(networkInterface) << EV_FIELD(pcp) << EV_FIELD(interfaceDatarate) << EV_FIELD(packetLength) << EV_FIELD(index) << EV_FIELD(startTime, startTime.ustr()) << EV_FIELD(gateOpenTime, gateOpenTime.ustr()) << EV_FIELD(gateCloseTime, gateCloseTime.ustr()) << EV_FIELD(gateOpenDuration, gateOpenDuration.ustr()) << EV_FIELD(extraDelay, extraDelay.ustr()) << EV_ENDL;
-                        if (gateCloseTime > startTime + gateCycleDuration)
-                            throw cRuntimeError("Gate scheduling doesn't fit into cycle duration");
-                        Slot entry;
-                        entry.gateOpenIndex = flow.gateIndex;
-                        entry.gateOpenTime = gateOpenTime;
-                        entry.gateCloseTime = gateCloseTime;
-                        interfaceSchedule.push_back(entry);
-                        nextGateOpenTime = gateCloseTime + propagationDelay;
                     }
-                    else
-                        nextGateOpenTime += transmissionDuration + propagationDelay;
+                    simtime_t extraDelay = gateOpenTime - nextGateOpenTime;
+                    EV_DEBUG << "Extending gate scheduling for stream reservation" << EV_FIELD(networkNode) << EV_FIELD(networkInterface) << EV_FIELD(pcp) << EV_FIELD(interfaceDatarate) << EV_FIELD(packetLength) << EV_FIELD(index) << EV_FIELD(startTime, startTime.ustr()) << EV_FIELD(gateOpenTime, gateOpenTime.ustr()) << EV_FIELD(gateCloseTime, gateCloseTime.ustr()) << EV_FIELD(gateOpenDuration, gateOpenDuration.ustr()) << EV_FIELD(extraDelay, extraDelay.ustr()) << EV_ENDL;
+                    if (gateCloseTime > startTime + gateCycleDuration)
+                        throw cRuntimeError("Gate scheduling doesn't fit into cycle duration");
+                    Slot entry;
+                    entry.gateOpenIndex = flow.gateIndex;
+                    entry.gateOpenTime = gateOpenTime;
+                    entry.gateCloseTime = gateCloseTime;
+                    interfaceSchedule.push_back(entry);
+                    nextGateOpenTime = gateCloseTime + propagationDelay;
                 }
                 auto endNetworkNodeName = pathFragment->networkNodes.back()->module->getFullName();
                 if (endNetworkNodeName == destination->getFullName() && nextGateOpenTime - startTime > flow.startApplication->maxLatency)
