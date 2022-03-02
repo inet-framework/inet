@@ -151,9 +151,11 @@ void GateSchedulingConfiguratorBase::addFlows(Input& input) const
                     destinationMatcher.matches(destinationNode->module->getFullPath().c_str()))
                 {
                     int pcp = entry->get("pcp").intValue();
+                    int gateIndex = entry->get("gateIndex").intValue();
                     b packetLength = b(entry->get("packetLength").doubleValueInUnit("b"));
                     simtime_t packetInterval = entry->get("packetInterval").doubleValueInUnit("s");
                     simtime_t maxLatency = entry->containsKey("maxLatency") ? entry->get("maxLatency").doubleValueInUnit("s") : -1;
+                    simtime_t maxJitter = entry->containsKey("maxJitter") ? entry->get("maxJitter").doubleValueInUnit("s") : 0;
                     bps datarate = packetLength / s(packetInterval.dbl());
                     auto startDevice = input.getDevice(source);
                     auto endDevice = input.getDevice(destination);
@@ -167,10 +169,12 @@ void GateSchedulingConfiguratorBase::addFlows(Input& input) const
                     startApplication->packetLength = packetLength;
                     startApplication->packetInterval = packetInterval;
                     startApplication->maxLatency = maxLatency;
+                    startApplication->maxJitter = maxJitter;
                     input.applications.push_back(startApplication);
-                    EV_DEBUG << "Adding flow from configuration" << EV_FIELD(source) << EV_FIELD(destination) << EV_FIELD(pcp) << EV_FIELD(packetLength) << EV_FIELD(packetInterval, packetInterval.ustr()) << EV_FIELD(datarate) << EV_FIELD(maxLatency, maxLatency.ustr()) << EV_ENDL;
+                    EV_DEBUG << "Adding flow from configuration" << EV_FIELD(source) << EV_FIELD(destination) << EV_FIELD(pcp) << EV_FIELD(packetLength) << EV_FIELD(packetInterval, packetInterval.ustr()) << EV_FIELD(datarate) << EV_FIELD(maxLatency, maxLatency.ustr()) << EV_FIELD(maxJitter, maxJitter.ustr()) << EV_ENDL;
                     auto flow = new Input::Flow();
                     flow->name = entry->containsKey("name") ? entry->get("name").stringValue() : (std::string("flow") + std::to_string(flowIndex++)).c_str();
+                    flow->gateIndex = gateIndex;
                     flow->startApplication = startApplication;
                     flow->endDevice = endDevice;
                     if (entry->containsKey("pathFragments")) {

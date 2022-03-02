@@ -49,6 +49,7 @@ class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
             b packetLength = b(-1); // packet size in bits
             simtime_t packetInterval = -1; // packet inter-arrival time in seconds
             simtime_t maxLatency = -1; // maximum allowed latency in seconds
+            simtime_t maxJitter = -1; // maximum allowed jitter in seconds
             Device *device = nullptr; // the device where the application is running
         };
 
@@ -85,6 +86,7 @@ class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
         {
           public:
             std::string name; // for user identification
+            int gateIndex = -1; // index of the ~PeriodicGate
             Application *startApplication = nullptr; // the application that generates the packets
             Device *endDevice = nullptr; // the device where the flow ends
             std::vector<PathFragment *> pathFragments; // list of path fragments (may use redundancy)
