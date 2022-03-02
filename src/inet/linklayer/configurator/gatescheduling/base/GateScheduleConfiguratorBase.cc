@@ -119,16 +119,21 @@ void GateScheduleConfiguratorBase::addPorts(Input& input) const
             }
         }
     }
-    for (auto switch_ : input.switches) {
-        auto node = check_and_cast<Node *>(topology->getNodeFor(switch_->module));
-        for (auto port : switch_->ports) {
+    for (auto networkNode : input.networkNodes) {
+        auto node = check_and_cast<Node *>(topology->getNodeFor(networkNode->module));
+        for (auto port : networkNode->ports) {
             auto networkInterface = check_and_cast<NetworkInterface *>(port->module);
+            auto link = findLinkOut(findInterface(node, networkInterface));
             auto linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
             auto remoteNode = check_and_cast<Node *>(linkOut->getRemoteNode());
-            for (auto networkNode : input.networkNodes) {
-                if (networkNode->module == remoteNode->module)
-                    port->endNode = networkNode;
-            }
+            port->endNode = *std::find_if(input.networkNodes.begin(), input.networkNodes.end(), [&] (const auto& networkNode) {
+                return networkNode->module == remoteNode->module;
+            });
+            port->otherPort = *std::find_if(input.ports.begin(), input.ports.end(), [&] (const auto& otherPort) {
+                return otherPort->module == link->destinationInterface->networkInterface;
+            });
+            ASSERT(port->endNode);
+            ASSERT(port->otherPort);
         }
     }
 }
@@ -192,15 +197,21 @@ void GateScheduleConfiguratorBase::addFlows(Input& input) const
                         auto pathFragment = check_and_cast<cValueArray *>(pathFragments->get(l).objectValue());
                         for (int m = 0; m < pathFragment->size(); m++) {
                             for (auto networkNode : input.networkNodes) {
-                                if (!strcmp(networkNode->module->getFullName(), pathFragment->get(m).stringValue())) {
-                                    if (!path->networkNodes.empty()) {
-                                        auto node = static_cast<Node *>(topology->getNodeFor(path->networkNodes.back()->module));
-                                        auto neighborNode = static_cast<Node *>(topology->getNodeFor(networkNode->module));
-                                        auto link = findLinkOut(node, neighborNode);
-                                        auto outputPort = *std::find_if(input.ports.begin(), input.ports.end(), [&] (const auto& port) { return port->module == link->sourceInterface->networkInterface; });
-                                        auto inputPort = *std::find_if(input.ports.begin(), input.ports.end(), [&] (const auto& port) { return port->module == link->destinationInterface->networkInterface; });
-                                        path->inputPorts.push_back(inputPort);
+                                auto name = pathFragment->get(m).stdstringValue();
+                                int index = name.find('.');
+                                auto nodeName = index != std::string::npos ? name.substr(0, index) : name;
+                                auto interfaceName = index != std::string::npos ? name.substr(index + 1) : "";
+                                if (networkNode->module->getFullName() == nodeName) {
+                                    if (m != pathFragment->size() - 1) {
+                                        auto startNode = networkNode;
+                                        auto endNodeName = pathFragment->get(m + 1).stdstringValue();
+                                        int index = endNodeName.find('.');
+                                        endNodeName = index != std::string::npos ? endNodeName.substr(0, index) : endNodeName;
+                                        auto outputPort = *std::find_if(startNode->ports.begin(), startNode->ports.end(), [&] (const auto& port) {
+                                            return port->endNode->module->getFullName() == endNodeName && (interfaceName == "" || interfaceName == check_and_cast<NetworkInterface *>(port->module)->getInterfaceName());
+                                        });
                                         path->outputPorts.push_back(outputPort);
+                                        path->inputPorts.push_back(outputPort->otherPort);
                                     }
                                     path->networkNodes.push_back(networkNode);
                                     break;

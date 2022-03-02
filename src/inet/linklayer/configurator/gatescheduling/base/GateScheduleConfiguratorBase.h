@@ -67,6 +67,7 @@ class INET_API GateScheduleConfiguratorBase : public NetworkConfiguratorBase
             simtime_t maxSlotDuration = -1; // maximum slot duration in the cycle
             NetworkNode *startNode = nullptr; // the network node where this port is
             NetworkNode *endNode = nullptr; // the network node to which this port is connected
+            Port *otherPort = nullptr; // the other port to which this port is connected
         };
 
         // an Ethernet switch
