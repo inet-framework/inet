@@ -17,7 +17,7 @@ package inet.linklayer.configurator.gatescheduling.base;
 // This allows the derived modules to focus on the implementation of the actual
 // scheduling algorithm.
 //
-simple GateSchedulingConfiguratorBase
+simple GateScheduleConfiguratorBase
 {
     parameters:
         double gateCycleDuration @unit(s); // the globally used gate scheduling period in each PeriodicGate modules

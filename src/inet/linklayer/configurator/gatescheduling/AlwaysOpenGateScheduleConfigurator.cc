@@ -5,13 +5,13 @@
 //
 
 
-#include "inet/linklayer/configurator/gatescheduling/AlwaysOpenGateSchedulingConfigurator.h"
+#include "inet/linklayer/configurator/gatescheduling/AlwaysOpenGateScheduleConfigurator.h"
 
 namespace inet {
 
-Define_Module(AlwaysOpenGateSchedulingConfigurator);
+Define_Module(AlwaysOpenGateScheduleConfigurator);
 
-AlwaysOpenGateSchedulingConfigurator::Output *AlwaysOpenGateSchedulingConfigurator::computeGateScheduling(const Input& input) const
+AlwaysOpenGateScheduleConfigurator::Output *AlwaysOpenGateScheduleConfigurator::computeGateScheduling(const Input& input) const
 {
     auto output = new Output();
     for (auto port : input.ports) {

@@ -8,10 +8,10 @@
 //
 
 
-#ifndef __INET_Z3GATESCHEDULINGCONFIGURATOR_H
-#define __INET_Z3GATESCHEDULINGCONFIGURATOR_H
+#ifndef __INET_Z3GATESCHEDULECONFIGURATOR_H
+#define __INET_Z3GATESCHEDULECONFIGURATOR_H
 
-#include "inet/linklayer/configurator/gatescheduling/base/GateSchedulingConfiguratorBase.h"
+#include "inet/linklayer/configurator/gatescheduling/base/GateScheduleConfiguratorBase.h"
 
 #include "inet/linklayer/configurator/gatescheduling/z3/Operator.h"
 
@@ -19,7 +19,7 @@ namespace inet {
 
 using namespace z3;
 
-class INET_API Z3GateSchedulingConfigurator : public GateSchedulingConfiguratorBase
+class INET_API Z3GateScheduleConfigurator : public GateScheduleConfiguratorBase
 {
   protected:
     bool labelAsserts = false;

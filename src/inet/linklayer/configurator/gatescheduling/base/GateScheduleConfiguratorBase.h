@@ -5,8 +5,8 @@
 //
 
 
-#ifndef __INET_GATESCHEDULINGCONFIGURATORBASE_H
-#define __INET_GATESCHEDULINGCONFIGURATORBASE_H
+#ifndef __INET_GATESCHEDULECONFIGURATORBASE_H
+#define __INET_GATESCHEDULECONFIGURATORBASE_H
 
 #include "inet/common/Units.h"
 #include "inet/networklayer/configurator/base/NetworkConfiguratorBase.h"
@@ -15,7 +15,7 @@ namespace inet {
 
 using namespace units::values;
 
-class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
+class INET_API GateScheduleConfiguratorBase : public NetworkConfiguratorBase
 {
   protected:
     // input parameters for the gate scheduler
@@ -219,7 +219,7 @@ class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
     virtual Output *computeGateScheduling(const Input& input) const = 0;
 
   public:
-    virtual ~GateSchedulingConfiguratorBase() { clearConfiguration(); }
+    virtual ~GateScheduleConfiguratorBase() { clearConfiguration(); }
 };
 
 } // namespace inet

@@ -14,7 +14,7 @@ import inet.networklayer.configurator.contract.INetworkConfigurator;
 // A gate scheduling configurator is responsible for configuring all ~PeriodicGate
 // modules of all traffic categories in all network interfaces in the network.
 //
-moduleinterface IGateSchedulingConfigurator extends INetworkConfigurator
+moduleinterface IGateScheduleConfigurator extends INetworkConfigurator
 {
     parameters:
         @display("i=block/cogwheel");

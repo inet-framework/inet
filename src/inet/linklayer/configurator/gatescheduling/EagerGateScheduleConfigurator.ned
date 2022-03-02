@@ -7,8 +7,8 @@
 
 package inet.linklayer.configurator.gatescheduling;
 
-import inet.linklayer.configurator.gatescheduling.base.GateSchedulingConfiguratorBase;
-import inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfigurator;
+import inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorBase;
+import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigurator;
 
 //
 // This module provides a gate scheduling algorithm that eagerly reserves time
@@ -20,7 +20,7 @@ import inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfig
 // This configurator is primarily useful to produce statistical results that can
 // be used as a baseline in comparison with more advanced configurators.
 //
-simple EagerGateScheduleConfigurator extends GateSchedulingConfiguratorBase like IGateSchedulingConfigurator
+simple EagerGateScheduleConfigurator extends GateScheduleConfiguratorBase like IGateScheduleConfigurator
 {
     parameters:
         @class(EagerGateScheduleConfigurator);

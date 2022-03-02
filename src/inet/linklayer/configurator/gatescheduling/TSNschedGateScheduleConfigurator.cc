@@ -5,14 +5,14 @@
 //
 
 
-#include "inet/linklayer/configurator/gatescheduling/TSNschedGateSchedulingConfigurator.h"
+#include "inet/linklayer/configurator/gatescheduling/TSNschedGateScheduleConfigurator.h"
 
 #include <cstdio>
 #include <fstream>
 
 namespace inet {
 
-Define_Module(TSNschedGateSchedulingConfigurator);
+Define_Module(TSNschedGateScheduleConfigurator);
 
 static void printJson(std::ostream& stream, const cValue& value, int level = 0)
 {
@@ -55,7 +55,7 @@ static void printJson(std::ostream& stream, const cValue& value, int level = 0)
         stream << value.str();
 }
 
-cValueMap *TSNschedGateSchedulingConfigurator::convertInputToJson(const Input& input) const
+cValueMap *TSNschedGateScheduleConfigurator::convertInputToJson(const Input& input) const
 {
     cValueMap *json = new cValueMap();
     cValueArray *jsonDevices = new cValueArray();
@@ -139,7 +139,7 @@ cValueMap *TSNschedGateSchedulingConfigurator::convertInputToJson(const Input& i
     return json;
 }
 
-TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::convertJsonToOutput(const Input& input, const cValueMap *json) const
+TSNschedGateScheduleConfigurator::Output *TSNschedGateScheduleConfigurator::convertJsonToOutput(const Input& input, const cValueMap *json) const
 {
     auto output = new Output();
     auto jsonSwitches = check_and_cast<cValueArray *>(json->get("switches").objectValue());
@@ -212,7 +212,7 @@ TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::
     return output;
 }
 
-void TSNschedGateSchedulingConfigurator::writeInputToFile(const Input& input, std::string fileName) const
+void TSNschedGateScheduleConfigurator::writeInputToFile(const Input& input, std::string fileName) const
 {
     auto json = convertInputToJson(input);
     std::ofstream stream;
@@ -223,7 +223,7 @@ void TSNschedGateSchedulingConfigurator::writeInputToFile(const Input& input, st
     delete json;
 }
 
-TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::readOutputFromFile(const Input& input, std::string fileName) const
+TSNschedGateScheduleConfigurator::Output *TSNschedGateScheduleConfigurator::readOutputFromFile(const Input& input, std::string fileName) const
 {
     std::ifstream stream(fileName.c_str());
     if (!stream.good())
@@ -237,7 +237,7 @@ TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::
     return output;
 }
 
-void TSNschedGateSchedulingConfigurator::executeTSNsched(std::string inputFileName) const
+void TSNschedGateScheduleConfigurator::executeTSNsched(std::string inputFileName) const
 {
     std::string classpath = "${TSNSCHED_HOME}/libs/com.microsoft.z3.jar";
     std::string command = std::string("java -classpath ") + classpath + " -jar ${TSNSCHED_HOME}/libs/TSNsched.jar " + inputFileName + " -enableConsoleOutput";
@@ -245,7 +245,7 @@ void TSNschedGateSchedulingConfigurator::executeTSNsched(std::string inputFileNa
         throw cRuntimeError("Error during executing TSNsched command, make sure TSNSCHED_HOME is set and Microsoft Z3 is installed");
 }
 
-TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::computeGateScheduling(const Input& input) const
+TSNschedGateScheduleConfigurator::Output *TSNschedGateScheduleConfigurator::computeGateScheduling(const Input& input) const
 {
     std::string baseName = getEnvir()->getConfig()->substituteVariables("${resultdir}/${configname}-${iterationvarsf}#${repetition}");
     std::string inputFileName = baseName + "-TSNsched-input.json";

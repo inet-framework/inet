@@ -13,13 +13,13 @@
 
 #include "inet/common/PatternMatcher.h"
 #include "inet/common/Topology.h"
-#include "inet/linklayer/configurator/gatescheduling/base/GateSchedulingConfiguratorBase.h"
+#include "inet/linklayer/configurator/gatescheduling/base/GateScheduleConfiguratorBase.h"
 #include "inet/linklayer/configurator/Ieee8021dInterfaceData.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 namespace inet {
 
-class INET_API EagerGateScheduleConfigurator : public GateSchedulingConfiguratorBase
+class INET_API EagerGateScheduleConfigurator : public GateScheduleConfiguratorBase
 {
   protected:
     class Slot {

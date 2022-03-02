@@ -5,14 +5,14 @@
 //
 
 
-#ifndef __INET_TSNSCHEDGATESCHEDULINGCONFIGURATOR_H
-#define __INET_TSNSCHEDGATESCHEDULINGCONFIGURATOR_H
+#ifndef __INET_TSNSCHEDGATESCHEDULECONFIGURATOR_H
+#define __INET_TSNSCHEDGATESCHEDULECONFIGURATOR_H
 
-#include "inet/linklayer/configurator/gatescheduling/base/GateSchedulingConfiguratorBase.h"
+#include "inet/linklayer/configurator/gatescheduling/base/GateScheduleConfiguratorBase.h"
 
 namespace inet {
 
-class INET_API TSNschedGateSchedulingConfigurator : public GateSchedulingConfiguratorBase
+class INET_API TSNschedGateScheduleConfigurator : public GateScheduleConfiguratorBase
 {
   protected:
     virtual cValueMap *convertInputToJson(const Input& input) const;

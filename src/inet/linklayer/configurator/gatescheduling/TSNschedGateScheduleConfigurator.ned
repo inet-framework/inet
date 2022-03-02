@@ -7,8 +7,8 @@
 
 package inet.linklayer.configurator.gatescheduling;
 
-import inet.linklayer.configurator.gatescheduling.base.GateSchedulingConfiguratorBase;
-import inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfigurator;
+import inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorBase;
+import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigurator;
 
 //
 // This module provides a gate scheduling configurator that uses the TSNsched
@@ -21,9 +21,9 @@ import inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfig
 // TSNsched tool is found using the TSNSCHED_HOME environment variable, which
 // must be properly set to the installation folder.
 //
-simple TSNschedGateSchedulingConfigurator extends GateSchedulingConfiguratorBase like IGateSchedulingConfigurator
+simple TSNschedGateScheduleConfigurator extends GateScheduleConfiguratorBase like IGateScheduleConfigurator
 {
     parameters:
-        @class(TSNschedGateSchedulingConfigurator);
+        @class(TSNschedGateScheduleConfigurator);
 }
 

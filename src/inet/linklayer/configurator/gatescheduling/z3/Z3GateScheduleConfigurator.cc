@@ -8,22 +8,22 @@
 //
 
 
-#include "inet/linklayer/configurator/gatescheduling/z3/Z3GateSchedulingConfigurator.h"
+#include "inet/linklayer/configurator/gatescheduling/z3/Z3GateScheduleConfigurator.h"
 
 namespace inet {
 
-Define_Module(Z3GateSchedulingConfigurator);
+Define_Module(Z3GateScheduleConfigurator);
 
-void Z3GateSchedulingConfigurator::initialize(int stage)
+void Z3GateScheduleConfigurator::initialize(int stage)
 {
-    GateSchedulingConfiguratorBase::initialize(stage);
+    GateScheduleConfiguratorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         labelAsserts = par("labelAsserts");
         optimizeSchedule = par("optimizeSchedule");
     }
 }
 
-void Z3GateSchedulingConfigurator::addAssert(const expr& expr) const
+void Z3GateScheduleConfigurator::addAssert(const expr& expr) const
 {
     static int assertionCount = 0;
     if (optimizeSchedule) {
@@ -40,7 +40,7 @@ void Z3GateSchedulingConfigurator::addAssert(const expr& expr) const
     }
 }
 
-Z3GateSchedulingConfigurator::Output *Z3GateSchedulingConfigurator::computeGateScheduling(const Input& input) const
+Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateScheduling(const Input& input) const
 {
     config cfg;
     cfg.set("model", "true");
@@ -285,7 +285,7 @@ Z3GateSchedulingConfigurator::Output *Z3GateSchedulingConfigurator::computeGateS
     }
 }
 
-double Z3GateSchedulingConfigurator::getVariableValue(const model& model, const std::shared_ptr<expr> expr) const
+double Z3GateScheduleConfigurator::getVariableValue(const model& model, const std::shared_ptr<expr> expr) const
 {
     auto str = model.eval(*expr.get(), false).to_string();
     int index = str.find('/');

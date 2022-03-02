@@ -5,14 +5,14 @@
 //
 
 
-#include "inet/linklayer/configurator/gatescheduling/base/GateSchedulingConfiguratorBase.h"
+#include "inet/linklayer/configurator/gatescheduling/base/GateScheduleConfiguratorBase.h"
 
 #include "inet/common/PatternMatcher.h"
 #include "inet/queueing/gate/PeriodicGate.h"
 
 namespace inet {
 
-void GateSchedulingConfiguratorBase::initialize(int stage)
+void GateScheduleConfiguratorBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         gateCycleDuration = par("gateCycleDuration");
@@ -25,7 +25,7 @@ void GateSchedulingConfiguratorBase::initialize(int stage)
     }
 }
 
-void GateSchedulingConfiguratorBase::handleParameterChange(const char *name)
+void GateScheduleConfiguratorBase::handleParameterChange(const char *name)
 {
     if (name != nullptr) {
         if (!strcmp(name, "configuration")) {
@@ -38,7 +38,7 @@ void GateSchedulingConfiguratorBase::handleParameterChange(const char *name)
     }
 }
 
-void GateSchedulingConfiguratorBase::clearConfiguration()
+void GateScheduleConfiguratorBase::clearConfiguration()
 {
     if (topology != nullptr)
         topology->clear();
@@ -48,7 +48,7 @@ void GateSchedulingConfiguratorBase::clearConfiguration()
     gateSchedulingOutput = nullptr;
 }
 
-void GateSchedulingConfiguratorBase::computeConfiguration()
+void GateScheduleConfiguratorBase::computeConfiguration()
 {
     long startTime = clock();
     delete topology;
@@ -59,7 +59,7 @@ void GateSchedulingConfiguratorBase::computeConfiguration()
     printElapsedTime("computeConfiguration", startTime);
 }
 
-GateSchedulingConfiguratorBase::Input *GateSchedulingConfiguratorBase::createGateSchedulingInput() const
+GateScheduleConfiguratorBase::Input *GateScheduleConfiguratorBase::createGateSchedulingInput() const
 {
     auto input = new Input();
     addDevices(*input);
@@ -69,7 +69,7 @@ GateSchedulingConfiguratorBase::Input *GateSchedulingConfiguratorBase::createGat
     return input;
 }
 
-void GateSchedulingConfiguratorBase::addDevices(Input& input) const
+void GateScheduleConfiguratorBase::addDevices(Input& input) const
 {
     for (int i = 0; i < topology->getNumNodes(); i++) {
         auto node = (Node *)topology->getNode(i);
@@ -82,7 +82,7 @@ void GateSchedulingConfiguratorBase::addDevices(Input& input) const
     }
 }
 
-void GateSchedulingConfiguratorBase::addSwitches(Input& input) const
+void GateScheduleConfiguratorBase::addSwitches(Input& input) const
 {
     for (int i = 0; i < topology->getNumNodes(); i++) {
         auto node = (Node *)topology->getNode(i);
@@ -95,7 +95,7 @@ void GateSchedulingConfiguratorBase::addSwitches(Input& input) const
     }
 }
 
-void GateSchedulingConfiguratorBase::addPorts(Input& input) const
+void GateScheduleConfiguratorBase::addPorts(Input& input) const
 {
     for (int i = 0; i < topology->getNumNodes(); i++) {
         auto node = (Node *)topology->getNode(i);
@@ -133,7 +133,7 @@ void GateSchedulingConfiguratorBase::addPorts(Input& input) const
     }
 }
 
-void GateSchedulingConfiguratorBase::addFlows(Input& input) const
+void GateScheduleConfiguratorBase::addFlows(Input& input) const
 {
     int flowIndex = 0;
     EV_DEBUG << "Computing flows from configuration" << EV_FIELD(configuration) << EV_ENDL;
@@ -221,7 +221,7 @@ void GateSchedulingConfiguratorBase::addFlows(Input& input) const
     });
 }
 
-void GateSchedulingConfiguratorBase::configureGateScheduling()
+void GateScheduleConfiguratorBase::configureGateScheduling()
 {
     for (int i = 0; i < topology->getNumNodes(); i++) {
         auto node = (Node *)topology->getNode(i);
@@ -239,7 +239,7 @@ void GateSchedulingConfiguratorBase::configureGateScheduling()
     }
 }
 
-void GateSchedulingConfiguratorBase::configureGateScheduling(cModule *networkNode, cModule *gate, Interface *interface)
+void GateScheduleConfiguratorBase::configureGateScheduling(cModule *networkNode, cModule *gate, Interface *interface)
 {
     auto networkInterface = interface->networkInterface;
     bool initiallyOpen = false;
@@ -285,7 +285,7 @@ void GateSchedulingConfiguratorBase::configureGateScheduling(cModule *networkNod
     durationsPar.setObjectValue(durations);
 }
 
-void GateSchedulingConfiguratorBase::configureApplicationOffsets()
+void GateScheduleConfiguratorBase::configureApplicationOffsets()
 {
     for (auto& it : gateSchedulingOutput->applicationStartTimes) {
         auto startOffset = it.second;

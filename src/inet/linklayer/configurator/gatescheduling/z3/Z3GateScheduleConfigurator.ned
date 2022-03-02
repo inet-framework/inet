@@ -7,8 +7,8 @@
 
 package inet.linklayer.configurator.gatescheduling.z3;
 
-import inet.linklayer.configurator.gatescheduling.base.GateSchedulingConfiguratorBase;
-import inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfigurator;
+import inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorBase;
+import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigurator;
 
 //
 // This module provides a gate scheduling algorithm that uses the open source
@@ -16,10 +16,10 @@ import inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfig
 // corresponding INET feature must be enabled and the libz3-dev package must
 // be installed.
 //
-simple Z3GateSchedulingConfigurator extends GateSchedulingConfiguratorBase like IGateSchedulingConfigurator
+simple Z3GateScheduleConfigurator extends GateScheduleConfiguratorBase like IGateScheduleConfigurator
 {
     parameters:
         bool labelAsserts = default(false);
         bool optimizeSchedule = default(true);
-        @class(Z3GateSchedulingConfigurator);
+        @class(Z3GateScheduleConfigurator);
 }
