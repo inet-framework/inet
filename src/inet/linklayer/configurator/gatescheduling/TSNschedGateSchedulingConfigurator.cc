@@ -7,6 +7,7 @@
 
 #include "inet/linklayer/configurator/gatescheduling/TSNschedGateSchedulingConfigurator.h"
 
+#include <cstdio>
 #include <fstream>
 
 namespace inet {
@@ -250,6 +251,7 @@ TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::
     std::string inputFileName = baseName + "-TSNsched-input.json";
     // TODO: std::string outputFileName = baseName + "-TSNsched-output.json";
     std::string outputFileName = "output.json";
+    std::remove(outputFileName.c_str());
     writeInputToFile(input, inputFileName);
     executeTSNsched(inputFileName);
     return readOutputFromFile(input, outputFileName);
