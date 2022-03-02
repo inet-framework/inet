@@ -21,8 +21,8 @@ simple GateScheduleConfiguratorBase
 {
     parameters:
         double gateCycleDuration @unit(s); // the globally used gate scheduling period in each PeriodicGate modules
-        object configuration @mutable = default([]); // a vector of objects (e.g. [{...}, {...}]) where each object has the following fields: name, type, priority, application, source, destination, packetLength, packetInterval, maxLatency, pathFragments
-                                                     // here is an example: [{name: "s1", type: "unicast", application: "app[0]", priority: 0, source: "wheel*", destination: "hud", packetLength: 100B, packetInterval: 5ms, maxLatency: 100us}]
+        object configuration @mutable = default([]); // a vector of objects (e.g. [{...}, {...}]) where each object has the following fields: name, type, PCP, gate index, application, source, destination, packetLength, packetInterval, maxLatency, pathFragments
+                                                     // here is an example: [{name: "s1", type: "unicast", application: "app[0]", pcp: 0, gateIndex: 0, source: "wheel*", destination: "hud", packetLength: 100B, packetInterval: 5ms, maxLatency: 100us}]
         @display("i=block/cogwheel");
 }
 
