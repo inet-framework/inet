@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/linklayer/configurator/gatescheduling/SimpleGateSchedulingConfigurator.h"
+#include "inet/linklayer/configurator/gatescheduling/EagerGateScheduleConfigurator.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/stlutils.h"
@@ -14,14 +14,14 @@
 
 namespace inet {
 
-Define_Module(SimpleGateSchedulingConfigurator);
+Define_Module(EagerGateScheduleConfigurator);
 
 simtime_t simtimeModulo(simtime_t a, simtime_t b)
 {
     return SimTime::fromRaw(a.raw() % b.raw());
 }
 
-SimpleGateSchedulingConfigurator::Output *SimpleGateSchedulingConfigurator::computeGateScheduling(const Input& input) const
+EagerGateScheduleConfigurator::Output *EagerGateScheduleConfigurator::computeGateScheduling(const Input& input) const
 {
     std::map<NetworkInterface *, std::vector<Slot>> interfaceSchedules;
     auto output = new Output();
@@ -81,7 +81,7 @@ SimpleGateSchedulingConfigurator::Output *SimpleGateSchedulingConfigurator::comp
     return output;
 }
 
-simtime_t SimpleGateSchedulingConfigurator::computeStreamStartOffset(Input::Flow& flow, std::map<NetworkInterface *, std::vector<Slot>>& interfaceSchedules) const
+simtime_t EagerGateScheduleConfigurator::computeStreamStartOffset(Input::Flow& flow, std::map<NetworkInterface *, std::vector<Slot>>& interfaceSchedules) const
 {
     auto source = flow.startApplication->device->module;
     auto destination = flow.endDevice->module;
@@ -101,7 +101,7 @@ simtime_t SimpleGateSchedulingConfigurator::computeStreamStartOffset(Input::Flow
     return startOffset;
 }
 
-simtime_t SimpleGateSchedulingConfigurator::computeStartOffsetForPathFragments(Input::Flow& flow, std::string startNetworkNodeName, simtime_t startTime, std::map<NetworkInterface *, std::vector<Slot>>& interfaceSchedules) const
+simtime_t EagerGateScheduleConfigurator::computeStartOffsetForPathFragments(Input::Flow& flow, std::string startNetworkNodeName, simtime_t startTime, std::map<NetworkInterface *, std::vector<Slot>>& interfaceSchedules) const
 {
     auto destination = flow.endDevice->module;
     b packetLength = flow.startApplication->packetLength;
@@ -159,7 +159,7 @@ simtime_t SimpleGateSchedulingConfigurator::computeStartOffsetForPathFragments(I
     return result;
 };
 
-void SimpleGateSchedulingConfigurator::addGateScheduling(Input::Flow& flow, int startIndex, int endIndex, simtime_t startOffset, std::map<NetworkInterface *, std::vector<Slot>>& interfaceSchedules) const
+void EagerGateScheduleConfigurator::addGateScheduling(Input::Flow& flow, int startIndex, int endIndex, simtime_t startOffset, std::map<NetworkInterface *, std::vector<Slot>>& interfaceSchedules) const
 {
     auto source = flow.startApplication->device->module;
     auto destination = flow.endDevice->module;
@@ -173,7 +173,7 @@ void SimpleGateSchedulingConfigurator::addGateScheduling(Input::Flow& flow, int 
     }
 }
 
-void SimpleGateSchedulingConfigurator::addGateSchedulingForPathFragments(Input::Flow& flow, std::string startNetworkNodeName, simtime_t startTime, int index, std::map<NetworkInterface *, std::vector<Slot>>& interfaceSchedules) const
+void EagerGateScheduleConfigurator::addGateSchedulingForPathFragments(Input::Flow& flow, std::string startNetworkNodeName, simtime_t startTime, int index, std::map<NetworkInterface *, std::vector<Slot>>& interfaceSchedules) const
 {
     auto destination = flow.endDevice->module;
     auto pcp = flow.startApplication->pcp;

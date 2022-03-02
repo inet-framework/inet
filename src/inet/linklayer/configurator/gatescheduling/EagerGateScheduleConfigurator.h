@@ -5,8 +5,8 @@
 //
 
 
-#ifndef __INET_SIMPLEGATESCHEDULINGCONFIGURATOR_H
-#define __INET_SIMPLEGATESCHEDULINGCONFIGURATOR_H
+#ifndef __INET_EAGERGATESCHEDULEGCONFIGURATOR_H
+#define __INET_EAGERGATESCHEDULEGCONFIGURATOR_H
 
 #include <algorithm>
 #include <vector>
@@ -19,7 +19,7 @@
 
 namespace inet {
 
-class INET_API SimpleGateSchedulingConfigurator : public GateSchedulingConfiguratorBase
+class INET_API EagerGateScheduleConfigurator : public GateSchedulingConfiguratorBase
 {
   protected:
     class Slot {

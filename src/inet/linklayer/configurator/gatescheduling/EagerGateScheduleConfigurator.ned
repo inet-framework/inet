@@ -20,9 +20,9 @@ import inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfig
 // This configurator is primarily useful to produce statistical results that can
 // be used as a baseline in comparison with more advanced configurators.
 //
-simple SimpleGateSchedulingConfigurator extends GateSchedulingConfiguratorBase like IGateSchedulingConfigurator
+simple EagerGateScheduleConfigurator extends GateSchedulingConfiguratorBase like IGateSchedulingConfigurator
 {
     parameters:
-        @class(SimpleGateSchedulingConfigurator);
+        @class(EagerGateScheduleConfigurator);
 }
 
