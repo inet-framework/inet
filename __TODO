@@ -6,6 +6,9 @@ INET 4.4 release TODO items:
 
 2. Implementation
 
+ - hardware in the loop simulation using layered ethernet
+ - create TSN ext network interface
+
 3. Review
 
  - Review new examples.
