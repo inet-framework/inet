@@ -27,6 +27,30 @@ GateScheduleVisualizerBase::GateVisualization::GateVisualization(queueing::IPack
 {
 }
 
+const char *GateScheduleVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
+{
+    static std::string result;
+    switch (directive) {
+        case 'i': {
+            auto networkInterface = getContainingNicModule(module);
+            result = networkInterface->getInterfaceName();
+            break;
+        }
+        case 'm':
+            result = module->getFullName();
+            break;
+        case 'd':
+            result = module->getDisplayName() != nullptr ? module->getDisplayName() : "";
+            break;
+        case 'D':
+            result = module->getDisplayName() != nullptr ? module->getDisplayName() : module->getFullName();
+            break;
+        default:
+            throw cRuntimeError("Unknown directive: %c", directive);
+    }
+    return result.c_str();
+}
+
 void GateScheduleVisualizerBase::preDelete(cComponent *root)
 {
     if (displayGates)
@@ -100,6 +124,12 @@ void GateScheduleVisualizerBase::removeAllGateVisualizations()
         removeGateVisualization(gateVisualization);
         delete gateVisualization;
     }
+}
+
+const char *GateScheduleVisualizerBase::getGateScheduleVisualizationText(cModule *module) const
+{
+    DirectiveResolver directiveResolver(module);
+    return stringFormat.formatString(&directiveResolver);
 }
 
 } // namespace visualizer

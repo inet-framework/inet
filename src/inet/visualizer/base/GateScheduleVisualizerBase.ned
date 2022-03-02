@@ -9,6 +9,12 @@ package inet.visualizer.base;
 
 //
 // This is a base module for gate visualizer simple modules.
+// 
+// Format string directives:
+//	- %i: interface name
+// 	- %m: gate module name
+// 	- %d: gate module display name
+//  - %D: gate module display name if exists, otherwise gate module name
 //
 // @see ~GateScheduleCanvasVisualizer, ~GateScheduleOsgVisualizer, ~IGateScheduleVisualizer, ~VisualizerBase
 //
@@ -18,6 +24,7 @@ simple GateScheduleVisualizerBase extends VisualizerBase
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // module path to the network node visualizer module, refers to a sibling submodule by default
 
         bool displayGates = default(false);
+        string labelFormat = default("%i %D");
 
         string gateFilter = default("**"); // which gates are considered, matches all gates by default
 

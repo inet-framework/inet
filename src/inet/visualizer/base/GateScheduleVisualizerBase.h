@@ -14,6 +14,7 @@
 #include "inet/visualizer/base/VisualizerBase.h"
 #include "inet/visualizer/util/GateFilter.h"
 #include "inet/visualizer/util/Placement.h"
+#include "inet/common/StringFormat.h"
 
 namespace inet {
 
@@ -39,10 +40,21 @@ class INET_API GateScheduleVisualizerBase : public VisualizerBase
         virtual ~GateVisualization() {}
     };
 
+    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+      protected:
+        const cModule *module = nullptr;
+
+      public:
+        DirectiveResolver(const cModule *module) : module(module) {}
+
+        virtual const char *resolveDirective(char directive) const override;
+    };
+
   protected:
     /** @name Parameters */
     //@{
     bool displayGates = false;
+    StringFormat stringFormat;
     GateFilter gateFilter;
     double width;
     double height;
@@ -68,6 +80,8 @@ class INET_API GateScheduleVisualizerBase : public VisualizerBase
     virtual void removeGateVisualization(const GateVisualization *gateVisualization);
     virtual void refreshGateVisualization(const GateVisualization *gateVisualization) const = 0;
     virtual void removeAllGateVisualizations();
+
+    virtual const char *getGateScheduleVisualizationText(cModule *module) const;
 };
 
 } // namespace visualizer
