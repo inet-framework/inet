@@ -79,6 +79,8 @@ class INET_API GateSchedulingConfiguratorBase : public NetworkConfiguratorBase
         {
           public:
             std::vector<NetworkNode *> networkNodes; // list of network nodes the path goes through
+            std::vector<Port *> inputPorts; // list of ports the path goes through
+            std::vector<Port *> outputPorts; // list of ports the path goes through
         };
 
         // a flow of packets from the application of the start device to the end device

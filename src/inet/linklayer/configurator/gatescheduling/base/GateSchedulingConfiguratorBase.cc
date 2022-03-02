@@ -177,35 +177,40 @@ void GateSchedulingConfiguratorBase::addFlows(Input& input) const
                     flow->gateIndex = gateIndex;
                     flow->startApplication = startApplication;
                     flow->endDevice = endDevice;
-                    if (entry->containsKey("pathFragments")) {
-                        auto pathFragments = check_and_cast<cValueArray *>(entry->get("pathFragments").objectValue());
-                        for (int l = 0; l < pathFragments->size(); l++) {
-                            auto path = new Input::PathFragment();
-                            auto pathFragment = check_and_cast<cValueArray *>(pathFragments->get(l).objectValue());
-                            for (int m = 0; m < pathFragment->size(); m++) {
-                                for (auto networkNode : input.networkNodes) {
-                                    if (!strcmp(networkNode->module->getFullName(), pathFragment->get(m).stringValue())) {
-                                        path->networkNodes.push_back(networkNode);
-                                        break;
-                                    }
-                                }
-                            }
-                            flow->pathFragments.push_back(path);
-                        }
-                    }
+                    cValueArray *pathFragments;
+                    if (entry->containsKey("pathFragments"))
+                        pathFragments = check_and_cast<cValueArray *>(entry->get("pathFragments").objectValue());
                     else {
-                        auto pathFragment = new Input::PathFragment();
-                        auto path = computeShortestNodePath(sourceNode, destinationNode);
-                        for (auto node : path) {
+                        auto pathFragment = new cValueArray();
+                        for (auto node : computeShortestNodePath(sourceNode, destinationNode))
+                            pathFragment->add(node->module->getFullName());
+                        pathFragments = new cValueArray();
+                        pathFragments->add(pathFragment);
+                    }
+                    for (int l = 0; l < pathFragments->size(); l++) {
+                        auto path = new Input::PathFragment();
+                        auto pathFragment = check_and_cast<cValueArray *>(pathFragments->get(l).objectValue());
+                        for (int m = 0; m < pathFragment->size(); m++) {
                             for (auto networkNode : input.networkNodes) {
-                                if (networkNode->module == node->module) {
-                                    pathFragment->networkNodes.push_back(networkNode);
+                                if (!strcmp(networkNode->module->getFullName(), pathFragment->get(m).stringValue())) {
+                                    if (!path->networkNodes.empty()) {
+                                        auto node = static_cast<Node *>(topology->getNodeFor(path->networkNodes.back()->module));
+                                        auto neighborNode = static_cast<Node *>(topology->getNodeFor(networkNode->module));
+                                        auto link = findLinkOut(node, neighborNode);
+                                        auto outputPort = *std::find_if(input.ports.begin(), input.ports.end(), [&] (const auto& port) { return port->module == link->sourceInterface->networkInterface; });
+                                        auto inputPort = *std::find_if(input.ports.begin(), input.ports.end(), [&] (const auto& port) { return port->module == link->destinationInterface->networkInterface; });
+                                        path->inputPorts.push_back(inputPort);
+                                        path->outputPorts.push_back(outputPort);
+                                    }
+                                    path->networkNodes.push_back(networkNode);
                                     break;
                                 }
                             }
                         }
-                        flow->pathFragments.push_back(pathFragment);
+                        flow->pathFragments.push_back(path);
                     }
+                    if (!entry->containsKey("pathFragments"))
+                        delete pathFragments;
                     input.flows.push_back(flow);
                 }
             }
