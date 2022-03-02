@@ -391,11 +391,11 @@ or the :ned:`MacForwardingTableConfigurator` can also be used.
 There are several different automatic gate scheduling configurators having
 different capabilities:
 
--  :ned:`SimpleGateSchedulingConfigurator` eagerly allocates time slots in the
+-  :ned:`EagerGateScheduleConfigurator` eagerly allocates time slots in the
    order of increasing traffic priority
--  :ned:`Z3GateSchedulingConfigurator` uses a SAT solver to fulfill the traffic
+-  :ned:`Z3GateScheduleConfigurator` uses a SAT solver to fulfill the traffic
    constraints all at once
--  :ned:`TSNschedGateSchedulingConfigurator` uses a state-of-the-art external
+-  :ned:`TSNschedGateScheduleConfigurator` uses a state-of-the-art external
    tool called TSNsched that is available at https://github.com/ACassimiro/TSNsched
 
 There is only one stream redundancy configurator:

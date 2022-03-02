@@ -73,8 +73,8 @@
     <filename>inet.power.generator.AlternatingEpEnergyGenerator.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.configurator.gatescheduling.AlwaysOpenGateSchedulingConfigurator</name>
-    <filename>inet.linklayer.configurator.gatescheduling.AlwaysOpenGateSchedulingConfigurator.html</filename>
+    <name>inet.linklayer.configurator.gatescheduling.AlwaysOpenGateScheduleConfigurator</name>
+    <filename>inet.linklayer.configurator.gatescheduling.AlwaysOpenGateScheduleConfigurator.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.showcases.wireless.analogmodel.AnalogModelShowcaseDistanceNetwork</name>
@@ -1625,24 +1625,24 @@
     <filename>inet.tutorials.queueing.Gate2TutorialStep.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.visualizer.canvas.common.GateCanvasVisualizer</name>
-    <filename>inet.visualizer.canvas.common.GateCanvasVisualizer.html</filename>
+    <name>inet.visualizer.canvas.common.GateScheduleCanvasVisualizer</name>
+    <filename>inet.visualizer.canvas.common.GateScheduleCanvasVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.visualizer.osg.common.GateOsgVisualizer</name>
-    <filename>inet.visualizer.osg.common.GateOsgVisualizer.html</filename>
+    <name>inet.visualizer.osg.common.GateScheduleOsgVisualizer</name>
+    <filename>inet.visualizer.osg.common.GateScheduleOsgVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.configurator.gatescheduling.base.GateSchedulingConfiguratorBase</name>
-    <filename>inet.linklayer.configurator.gatescheduling.base.GateSchedulingConfiguratorBase.html</filename>
+    <name>inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorBase</name>
+    <filename>inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.visualizer.common.GateVisualizer</name>
-    <filename>inet.visualizer.common.GateVisualizer.html</filename>
+    <name>inet.visualizer.common.GateScheduleVisualizer</name>
+    <filename>inet.visualizer.common.GateScheduleVisualizer.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.visualizer.base.GateVisualizerBase</name>
-    <filename>inet.visualizer.base.GateVisualizerBase.html</filename>
+    <name>inet.visualizer.base.GateScheduleVisualizerBase</name>
+    <filename>inet.visualizer.base.GateScheduleVisualizerBase.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.queueing.queue.GatingPriorityQueue</name>
@@ -2493,12 +2493,12 @@
     <filename>inet.protocolelement.fragmentation.contract.IFragmenterPolicy.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfigurator</name>
-    <filename>inet.linklayer.configurator.gatescheduling.contract.IGateSchedulingConfigurator.html</filename>
+    <name>inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigurator</name>
+    <filename>inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigurator.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.visualizer.contract.IGateVisualizer</name>
-    <filename>inet.visualizer.contract.IGateVisualizer.html</filename>
+    <name>inet.visualizer.contract.IGateScheduleVisualizer</name>
+    <filename>inet.visualizer.contract.IGateScheduleVisualizer.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.common.geometry.common.IGeographicCoordinateSystem</name>
@@ -5545,8 +5545,8 @@
     <filename>inet.power.storage.SimpleEpEnergyStorage.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.configurator.gatescheduling.SimpleGateSchedulingConfigurator</name>
-    <filename>inet.linklayer.configurator.gatescheduling.SimpleGateSchedulingConfigurator.html</filename>
+    <name>inet.linklayer.configurator.gatescheduling.EagerGateScheduleConfigurator</name>
+    <filename>inet.linklayer.configurator.gatescheduling.EagerGateScheduleConfigurator.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.common.geometry.common.SimpleGeographicCoordinateSystem</name>
@@ -6221,8 +6221,8 @@
     <filename>inet.networks.base.TsnNetworkBase.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.configurator.gatescheduling.TSNschedGateSchedulingConfigurator</name>
-    <filename>inet.linklayer.configurator.gatescheduling.TSNschedGateSchedulingConfigurator.html</filename>
+    <name>inet.linklayer.configurator.gatescheduling.TSNschedGateScheduleConfigurator</name>
+    <filename>inet.linklayer.configurator.gatescheduling.TSNschedGateScheduleConfigurator.html</filename>
   </compound>
   <compound kind="class">
     <name>inet.node.tsn.TsnSwitch</name>
@@ -6597,7 +6597,7 @@
     <filename>inet.networklayer.xmipv6.xMIPv6Support.html</filename>
   </compound>
   <compound kind="class">
-    <name>inet.linklayer.configurator.gatescheduling.z3.Z3GateSchedulingConfigurator</name>
-    <filename>inet.linklayer.configurator.gatescheduling.z3.Z3GateSchedulingConfigurator.html</filename>
+    <name>inet.linklayer.configurator.gatescheduling.z3.Z3GateScheduleConfigurator</name>
+    <filename>inet.linklayer.configurator.gatescheduling.z3.Z3GateScheduleConfigurator.html</filename>
   </compound>
 </tagfile>
