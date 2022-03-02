@@ -59,7 +59,7 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
         addAssert(applicationStartTimeVariable < gateCycleDurationVariable);
     }
 
-    // 2. add transmission start/end time, reception start/end time constraints
+    // 2. add transmission start/end time, reception start/end time, transmission duration, propagation time constraints
     for (auto flow : input.flows) {
         for (int packetIndex = 0; packetIndex < getPacketCount(flow); packetIndex++) {
             for (auto pathFragment : flow->pathFragments) {
@@ -233,7 +233,7 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
             }
         }
 
-        // 2. fill gate schedules
+        // 3. fill gate schedules
         for (auto port : input.ports) {
             auto& schedules = output->gateSchedules[port];
             for (int gateIndex = 0; gateIndex < port->numGates; gateIndex++) {
