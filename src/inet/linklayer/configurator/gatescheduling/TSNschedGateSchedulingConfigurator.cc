@@ -205,8 +205,8 @@ TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::
         auto firstSendingTime = jsonFlow->get("firstSendingTime").doubleValue() / 1000000;
         bps datarate = application->device->ports[0]->datarate;
         auto startTime = firstSendingTime - s(application->packetLength / datarate).get();
-        if (startTime < 0)
-            startTime += gateCycleDuration.dbl();
+        while (startTime < 0)
+            startTime += application->packetInterval.dbl();
         output->applicationStartTimes[application] = startTime;
     }
     return output;
