@@ -34,21 +34,22 @@ SimpleGateSchedulingConfigurator::Output *SimpleGateSchedulingConfigurator::comp
     for (auto flow : input.flows) {
         simtime_t startOffset = output->applicationStartTimes[flow->startApplication];
         int count = gateCycleDuration / flow->startApplication->packetInterval;
-        ASSERT(gateCycleDuration == count * flow->startApplication->packetInterval);
+        if (gateCycleDuration != count * flow->startApplication->packetInterval)
+            throw cRuntimeError("Gate cycle duration must be a multiple of the application packet interval");
         addGateScheduling(*flow, 1, count, startOffset, interfaceSchedules);
     }
     for (auto networkNode : input.networkNodes) {
         for (auto port : networkNode->ports) {
             auto& schedules = output->gateSchedules[port];
             auto& slots = interfaceSchedules[check_and_cast<NetworkInterface *>(port->module)];
-            for (int priority = 0; priority < port->numPriorities; priority++) {
+            for (int gateIndex = 0; gateIndex < port->numGates; gateIndex++) {
                 auto schedule = new Output::Schedule();
                 schedule->port = port;
-                schedule->gateIndex = priority;
+                schedule->gateIndex = gateIndex;
                 schedule->cycleStart = 0;
                 schedule->cycleDuration = gateCycleDuration;
                 for (auto& slot : slots) {
-                    if (slot.gateOpenIndex == priority) {
+                    if (slot.gateOpenIndex == gateIndex) {
                         simtime_t slotStart = slot.gateOpenTime;
                         simtime_t slotEnd = slot.gateCloseTime;
                         simtime_t slotDuration = slot.gateCloseTime - slot.gateOpenTime;
@@ -84,10 +85,10 @@ simtime_t SimpleGateSchedulingConfigurator::computeStreamStartOffset(Input::Flow
 {
     auto source = flow.startApplication->device->module;
     auto destination = flow.endDevice->module;
-    auto priority = flow.startApplication->pcp;
+    auto pcp = flow.startApplication->pcp;
     bps datarate = flow.startApplication->packetLength / s(flow.startApplication->packetInterval.dbl());
     b packetLength = flow.startApplication->packetLength;
-    EV_DEBUG << "Computing start offset for stream reservation" << EV_FIELD(source) << EV_FIELD(destination) << EV_FIELD(priority) << EV_FIELD(packetLength) << EV_FIELD(datarate) << EV_FIELD(gateCycleDuration, gateCycleDuration.ustr()) << EV_ENDL;
+    EV_DEBUG << "Computing start offset for stream reservation" << EV_FIELD(source) << EV_FIELD(destination) << EV_FIELD(pcp) << EV_FIELD(packetLength) << EV_FIELD(datarate) << EV_FIELD(gateCycleDuration, gateCycleDuration.ustr()) << EV_ENDL;
     simtime_t startOffset = 0;
     while (true) {
         auto startOffsetShift = computeStartOffsetForPathFragments(flow, source->getFullName(), startOffset, interfaceSchedules);
@@ -96,7 +97,7 @@ simtime_t SimpleGateSchedulingConfigurator::computeStreamStartOffset(Input::Flow
         else
             startOffset += startOffsetShift;
     }
-    EV_DEBUG << "Setting start offset for stream reservation" << EV_FIELD(source) << EV_FIELD(destination) << EV_FIELD(priority) << EV_FIELD(packetLength) << EV_FIELD(datarate) << EV_FIELD(gateCycleDuration, gateCycleDuration.ustr()) << EV_FIELD(startOffset, startOffset.ustr()) << EV_ENDL;
+    EV_DEBUG << "Setting start offset for stream reservation" << EV_FIELD(source) << EV_FIELD(destination) << EV_FIELD(pcp) << EV_FIELD(packetLength) << EV_FIELD(datarate) << EV_FIELD(gateCycleDuration, gateCycleDuration.ustr()) << EV_FIELD(startOffset, startOffset.ustr()) << EV_ENDL;
     return startOffset;
 }
 
@@ -167,10 +168,10 @@ void SimpleGateSchedulingConfigurator::addGateScheduling(Input::Flow& flow, int 
 {
     auto source = flow.startApplication->device->module;
     auto destination = flow.endDevice->module;
-    auto priority = flow.startApplication->pcp;
+    auto pcp = flow.startApplication->pcp;
     bps datarate = flow.startApplication->packetLength / s(flow.startApplication->packetInterval.dbl());
     b packetLength = flow.startApplication->packetLength;
-    EV_DEBUG << "Allocating gate scheduling for stream reservation" << EV_FIELD(source) << EV_FIELD(destination) << EV_FIELD(priority) << EV_FIELD(packetLength) << EV_FIELD(datarate) << EV_FIELD(gateCycleDuration, gateCycleDuration.ustr()) << EV_FIELD(startOffset, startOffset.ustr()) << EV_FIELD(startIndex) << EV_FIELD(endIndex) << EV_ENDL;
+    EV_DEBUG << "Allocating gate scheduling for stream reservation" << EV_FIELD(source) << EV_FIELD(destination) << EV_FIELD(pcp) << EV_FIELD(packetLength) << EV_FIELD(datarate) << EV_FIELD(gateCycleDuration, gateCycleDuration.ustr()) << EV_FIELD(startOffset, startOffset.ustr()) << EV_FIELD(startIndex) << EV_FIELD(endIndex) << EV_ENDL;
     for (int index = startIndex; index < endIndex; index++) {
         simtime_t startTime = startOffset + index * flow.startApplication->packetInterval;
         addGateSchedulingForPathFragments(flow, source->getFullName(), startTime, index, interfaceSchedules);
@@ -180,7 +181,7 @@ void SimpleGateSchedulingConfigurator::addGateScheduling(Input::Flow& flow, int 
 void SimpleGateSchedulingConfigurator::addGateSchedulingForPathFragments(Input::Flow& flow, std::string startNetworkNodeName, simtime_t startTime, int index, std::map<NetworkInterface *, std::vector<Slot>>& interfaceSchedules) const
 {
     auto destination = flow.endDevice->module;
-    auto priority = flow.startApplication->pcp;
+    auto pcp = flow.startApplication->pcp;
     b packetLength = flow.startApplication->packetLength;
     std::deque<std::tuple<std::string, simtime_t, std::vector<std::string>>> todos;
     todos.push_back({startNetworkNodeName, startTime, {}});
@@ -220,11 +221,11 @@ void SimpleGateSchedulingConfigurator::addGateSchedulingForPathFragments(Input::
                             }
                         }
                         simtime_t extraDelay = gateOpenTime - nextGateOpenTime;
-                        EV_DEBUG << "Extending gate scheduling for stream reservation" << EV_FIELD(networkNode) << EV_FIELD(networkInterface) << EV_FIELD(priority) << EV_FIELD(interfaceDatarate) << EV_FIELD(packetLength) << EV_FIELD(index) << EV_FIELD(startTime, startTime.ustr()) << EV_FIELD(gateOpenTime, gateOpenTime.ustr()) << EV_FIELD(gateCloseTime, gateCloseTime.ustr()) << EV_FIELD(gateOpenDuration, gateOpenDuration.ustr()) << EV_FIELD(extraDelay, extraDelay.ustr()) << EV_ENDL;
+                        EV_DEBUG << "Extending gate scheduling for stream reservation" << EV_FIELD(networkNode) << EV_FIELD(networkInterface) << EV_FIELD(pcp) << EV_FIELD(interfaceDatarate) << EV_FIELD(packetLength) << EV_FIELD(index) << EV_FIELD(startTime, startTime.ustr()) << EV_FIELD(gateOpenTime, gateOpenTime.ustr()) << EV_FIELD(gateCloseTime, gateCloseTime.ustr()) << EV_FIELD(gateOpenDuration, gateOpenDuration.ustr()) << EV_FIELD(extraDelay, extraDelay.ustr()) << EV_ENDL;
                         if (gateCloseTime > startTime + gateCycleDuration)
                             throw cRuntimeError("Gate scheduling doesn't fit into cycle duration");
                         Slot entry;
-                        entry.gateOpenIndex = flow.startApplication->pcp;
+                        entry.gateOpenIndex = flow.gateIndex;
                         entry.gateOpenTime = gateOpenTime;
                         entry.gateCloseTime = gateCloseTime;
                         interfaceSchedule.push_back(entry);

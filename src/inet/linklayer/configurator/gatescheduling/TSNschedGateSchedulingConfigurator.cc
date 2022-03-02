@@ -111,7 +111,7 @@ cValueMap *TSNschedGateSchedulingConfigurator::convertInputToJson(const Input& i
         jsonFlow->set("type", "unicast");
         jsonFlow->set("sourceDevice", flow->startApplication->device->module->getFullName());
         jsonFlow->set("fixedPriority", "true");
-        jsonFlow->set("priorityValue", flow->startApplication->pcp);
+        jsonFlow->set("priorityValue", flow->gateIndex);
         jsonFlow->set("packetPeriodicity", flow->startApplication->packetInterval.dbl() * 1000000);
         jsonFlow->set("packetPeriodicityUnit", "us");
         jsonFlow->set("packetSize", b(flow->startApplication->packetLength).get());
@@ -160,14 +160,15 @@ TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::
                 throw cRuntimeError("Cannot find port: %s", portName.c_str());
             auto port = *jt;
             auto& schedules = output->gateSchedules[port];
-            for (int priority = 0; priority < port->numPriorities; priority++) {
+            for (int gateIndex = 0; gateIndex < port->numGates; gateIndex++) {
                 auto schedule = new Output::Schedule();
                 schedule->port = port;
-                schedule->gateIndex = priority;
+                schedule->gateIndex = gateIndex;
+                schedule->cycleDuration = jsonPort->get("cycleDuration").doubleValue() / 1000000;
                 auto jsonPrioritySlots = check_and_cast<cValueArray *>(jsonPort->get("prioritySlotsData").objectValue());
                 for (int k = 0; k < jsonPrioritySlots->size(); k++) {
                     auto jsonPrioritySlot = check_and_cast<cValueMap *>(jsonPrioritySlots->get(k).objectValue());
-                    if (priority == jsonPrioritySlot->get("priority").intValue()) {
+                    if (gateIndex == jsonPrioritySlot->get("priority").intValue()) {
                         auto jsonSlots = check_and_cast<cValueArray *>(jsonPrioritySlot->get("slotsData").objectValue());
                         for (int l = 0; l < jsonSlots->size(); l++) {
                             auto jsonSlot = check_and_cast<cValueMap *>(jsonSlots->get(l).objectValue());

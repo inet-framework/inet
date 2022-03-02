@@ -155,7 +155,7 @@ void StreamRedundancyConfigurator::computeStreamSendersAndReceivers(cValueMap *s
 
 void StreamRedundancyConfigurator::computeStreamEncodings(cValueMap *streamConfiguration)
 {
-    int pcp = streamConfiguration->containsKey("priority") ? streamConfiguration->get("priority").intValue() : -1;
+    int pcp = streamConfiguration->containsKey("pcp") ? streamConfiguration->get("pcp").intValue() : -1;
     for (int i = 0; i < topology->getNumNodes(); i++) {
         auto node = (Node *)topology->getNode(i);
         auto networkNode = node->module;

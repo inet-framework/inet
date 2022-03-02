@@ -48,8 +48,10 @@ void FailureProtectionConfigurator::computeStream(cValueMap *configuration)
     auto streamName = configuration->get("name").stringValue();
     StreamConfiguration streamConfiguration;
     streamConfiguration.name = streamName;
-    if (configuration->containsKey("priority"))
-        streamConfiguration.priority = configuration->get("priority").intValue();
+    if (configuration->containsKey("pcp"))
+        streamConfiguration.pcp = configuration->get("pcp").intValue();
+    if (configuration->containsKey("gateIndex"))
+        streamConfiguration.gateIndex = configuration->get("gateIndex").intValue();
     streamConfiguration.packetFilter = configuration->get("packetFilter");
     auto sourceNetworkNodeName = configuration->get("source").stringValue();
     streamConfiguration.source = sourceNetworkNodeName;
@@ -304,7 +306,7 @@ void FailureProtectionConfigurator::configureStreams() const
             cValueMap *streamParameterValue = new cValueMap();
             cValueArray *treesParameterValue = new cValueArray();
             streamParameterValue->set("name", streamConfiguration.name.c_str());
-            streamParameterValue->set("priority", streamConfiguration.priority);
+            streamParameterValue->set("pcp", streamConfiguration.pcp);
             streamParameterValue->set("packetFilter", streamConfiguration.packetFilter);
             streamParameterValue->set("source", streamConfiguration.source.c_str());
             // TODO KLUDGE
@@ -352,8 +354,10 @@ void FailureProtectionConfigurator::configureStreams() const
                 streamParameterValue->set("application", streamConfiguration->get("application"));
                 streamParameterValue->set("source", source);
                 streamParameterValue->set("destination", destination);
-                if (streamConfiguration->containsKey("priority"))
-                    streamParameterValue->set("priority", streamConfiguration->get("priority").intValue());
+                if (streamConfiguration->containsKey("pcp"))
+                    streamParameterValue->set("pcp", streamConfiguration->get("pcp").intValue());
+                if (streamConfiguration->containsKey("gateIndex"))
+                    streamParameterValue->set("gateIndex", streamConfiguration->get("gateIndex").intValue());
                 streamParameterValue->set("packetLength", cValue(streamConfiguration->get("packetLength").doubleValueInUnit("B"), "B"));
                 streamParameterValue->set("packetInterval", cValue(streamConfiguration->get("packetInterval").doubleValueInUnit("s"), "s"));
                 if (streamConfiguration->containsKey("maxLatency"))

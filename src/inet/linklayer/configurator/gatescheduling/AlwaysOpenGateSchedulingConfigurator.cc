@@ -15,10 +15,10 @@ AlwaysOpenGateSchedulingConfigurator::Output *AlwaysOpenGateSchedulingConfigurat
 {
     auto output = new Output();
     for (auto port : input.ports) {
-        for (int priority = 0; priority < port->numPriorities; priority++) {
+        for (int gateIndex = 0; gateIndex < port->numGates; gateIndex++) {
             Output::Schedule *schedule = new Output::Schedule();
             schedule->port = port;
-            schedule->gateIndex = priority;
+            schedule->gateIndex = gateIndex;
             schedule->cycleStart = 0;
             schedule->cycleDuration = gateCycleDuration;
             Output::Slot slot;
