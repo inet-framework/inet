@@ -258,8 +258,9 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    ('users-guide/index', 'users-guide.tex', "INET Framework User's Guide", '', 'manual', False),
-    ('developers-guide/index', 'developers-guide.tex', "INET Framework Developer's Guide", '', 'manual', False),
+    #('users-guide/index', 'users-guide.tex', "INET Framework User's Guide", '', 'manual', False),
+    ('showcases/tsn/combiningfeatures/gptpandtas/doc/index', 'gptpandtas.tex', "gptpandtas showcase", '', 'article', False),
+    #('developers-guide/index', 'developers-guide.tex', "INET Framework Developer's Guide", '', 'manual', False),
 ]
 
 
