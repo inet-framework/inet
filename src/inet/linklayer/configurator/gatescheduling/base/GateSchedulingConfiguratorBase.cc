@@ -265,7 +265,7 @@ void GateSchedulingConfiguratorBase::configureGateScheduling(cModule *networkNod
         durations->add(cValue(slotDuration.dbl(), "s"));
         slotEnd = slotStart + slotDuration;
     }
-    simtime_t remainingDuration = gateCycleDuration - slotEnd;
+    simtime_t remainingDuration = schedule->cycleDuration - slotEnd;
     if (slotEnd != 0) {
         if (remainingDuration != 0)
             durations->add(cValue(remainingDuration.dbl(), "s"));
