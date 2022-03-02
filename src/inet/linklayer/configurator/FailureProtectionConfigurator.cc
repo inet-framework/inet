@@ -332,9 +332,9 @@ void FailureProtectionConfigurator::configureStreams() const
         }
         EV_INFO << "Configuring stream configurator" << EV_FIELD(streamRedundancyConfigurator) << EV_FIELD(streamsParameterValue) << EV_ENDL;
         streamRedundancyConfigurator->par("configuration") = streamsParameterValue;
-        const char *gateSchedulingConfiguratorModulePath = par("gateSchedulingConfiguratorModule");
-        if (strlen(gateSchedulingConfiguratorModulePath) != 0) {
-            auto gateSchedulingConfigurator = getModuleByPath(gateSchedulingConfiguratorModulePath);
+        const char *gateScheduleConfiguratorModulePath = par("gateScheduleConfiguratorModule");
+        if (strlen(gateScheduleConfiguratorModulePath) != 0) {
+            auto gateScheduleConfigurator = getModuleByPath(gateScheduleConfiguratorModulePath);
             cValueArray *parameterValue = new cValueArray();
             for (int i = 0; i < configuration->size(); i++) {
                 cValueMap *streamConfiguration = check_and_cast<cValueMap *>(configuration->get(i).objectValue());
@@ -364,7 +364,7 @@ void FailureProtectionConfigurator::configureStreams() const
                     streamParameterValue->set("maxLatency", cValue(streamConfiguration->get("maxLatency").doubleValueInUnit("s"), "s"));
                 parameterValue->add(streamParameterValue);
             }
-            gateSchedulingConfigurator->par("configuration") = parameterValue;
+            gateScheduleConfigurator->par("configuration") = parameterValue;
         }
     }
 }

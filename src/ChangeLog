@@ -56,10 +56,10 @@
     linklayer.configurator.FailureProtectionConfigurator
     linklayer.configurator.MacForwardingTableConfigurator
     linklayer.configurator.StreamRedundancyConfigurator
-    linklayer.configurator.gatescheduling.AlwaysOpenGateSchedulingConfigurator
-    linklayer.configurator.gatescheduling.SimpleGateSchedulingConfigurator
-    linklayer.configurator.gatescheduling.TSNschedGateSchedulingConfigurator
-    linklayer.configurator.gatescheduling.z3.Z3GateSchedulingConfigurator
+    linklayer.configurator.gatescheduling.AlwaysOpenGateScheduleConfigurator
+    linklayer.configurator.gatescheduling.EagerGateScheduleConfigurator
+    linklayer.configurator.gatescheduling.TSNschedGateScheduleConfigurator
+    linklayer.configurator.gatescheduling.z3.Z3GateScheduleConfigurator
     linklayer.ethernet.common.BridgingLayer
     linklayer.ethernet.common.DirectionReverserLayer
     linklayer.ethernet.common.InterfaceRelayLayer
@@ -142,13 +142,13 @@
     queueing.shaper.PacketShaper
     queueing.shaper.PriorityShaper
     queueing.shaper.TimeAwareShaper
-    visualizer.base.GateVisualizerBase
+    visualizer.base.GateScheduleVisualizerBase
     visualizer.base.TreeVisualizerBase
-    visualizer.canvas.common.GateCanvasVisualizer
+    visualizer.canvas.common.GateScheduleCanvasVisualizer
     visualizer.canvas.configurator.FailureProtectionConfigurationCanvasVisualizer
     visualizer.canvas.configurator.StreamRedundancyConfigurationCanvasVisualizer
-    visualizer.common.GateVisualizer
-    visualizer.osg.common.GateOsgVisualizer
+    visualizer.common.GateScheduleVisualizer
+    visualizer.osg.common.GateScheduleOsgVisualizer
 
     Renamed modules
     ===============
@@ -197,7 +197,7 @@
     gateCycleDuration
     gateFilter
     gateIndexOffset
-    gateSchedulingConfiguratorModule
+    gateScheduleConfiguratorModule
     gptpNodeType
     hasCutthroughSwitching
     hasDefaultPath
@@ -238,7 +238,7 @@
     numClocks
     numDomains
     numFilters
-    numGateVisualizers
+    numGateScheduleVisualizers
     numGates
     numMeasurementModules
     numMeters
@@ -493,10 +493,10 @@
     linklayer/configurator/FailureProtectionConfigurator
     linklayer/configurator/MacForwardingTableConfigurator
     linklayer/configurator/StreamRedundancyConfigurator
-    linklayer/configurator/gatescheduling/AlwaysOpenGateSchedulingConfigurator
-    linklayer/configurator/gatescheduling/SimpleGateSchedulingConfigurator
-    linklayer/configurator/gatescheduling/TSNschedGateSchedulingConfigurator
-    linklayer/configurator/gatescheduling/base/GateSchedulingConfiguratorBase
+    linklayer/configurator/gatescheduling/AlwaysOpenGateScheduleConfigurator
+    linklayer/configurator/gatescheduling/EagerGateScheduleConfigurator
+    linklayer/configurator/gatescheduling/TSNschedGateScheduleConfigurator
+    linklayer/configurator/gatescheduling/base/GateScheduleConfiguratorBase
     linklayer/configurator/gatescheduling/z3/Cycle
     linklayer/configurator/gatescheduling/z3/Device
     linklayer/configurator/gatescheduling/z3/Flow
@@ -506,7 +506,7 @@
     linklayer/configurator/gatescheduling/z3/PathTree
     linklayer/configurator/gatescheduling/z3/Port
     linklayer/configurator/gatescheduling/z3/Switch
-    linklayer/configurator/gatescheduling/z3/Z3GateSchedulingConfigurator
+    linklayer/configurator/gatescheduling/z3/Z3GateScheduleConfigurator
     linklayer/ethernet/common/PacketDirectionReverser
     linklayer/ethernet/common/RelayInterfaceLearner
     linklayer/ethernet/common/RelayInterfaceSelector
@@ -565,13 +565,13 @@
     queueing/meter/SlidingWindowRateMeter
     queueing/meter/TokenBucketMeter
     queueing/scheduler/HtbScheduler
-    visualizer/base/GateVisualizerBase
+    visualizer/base/GateScheduleVisualizerBase
     visualizer/base/TreeVisualizerBase
     visualizer/canvas/base/TreeCanvasVisualizerBase
-    visualizer/canvas/common/GateCanvasVisualizer
+    visualizer/canvas/common/GateScheduleCanvasVisualizer
     visualizer/canvas/configurator/FailureProtectionConfigurationCanvasVisualizer
     visualizer/canvas/configurator/StreamRedundancyConfigurationCanvasVisualizer
-    visualizer/osg/common/GateOsgVisualizer
+    visualizer/osg/common/GateScheduleOsgVisualizer
 
     Renamed C++ classes
     ===================
