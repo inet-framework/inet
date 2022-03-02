@@ -224,6 +224,9 @@ void TSNschedGateSchedulingConfigurator::writeInputToFile(const Input& input, st
 
 TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::readOutputFromFile(const Input& input, std::string fileName) const
 {
+    std::ifstream stream(fileName.c_str());
+    if (!stream.good())
+        throw cRuntimeError("Cannot read from TSNsched output file");
     std::string expression = std::string("readJSON(\"") + fileName + "\")";
     cDynamicExpression dynamicExression;
     dynamicExression.parse(expression.c_str());
@@ -236,8 +239,9 @@ TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::
 void TSNschedGateSchedulingConfigurator::executeTSNsched(std::string inputFileName) const
 {
     std::string classpath = "${TSNSCHED_HOME}/libs/com.microsoft.z3.jar";
-    std::string command = std::string("java -classpath ") + classpath + " -jar ${TSNSCHED_HOME}/libs/TSNsched.jar " + inputFileName;
-    std::system(command.c_str());
+    std::string command = std::string("java -classpath ") + classpath + " -jar ${TSNSCHED_HOME}/libs/TSNsched.jar " + inputFileName + " -enableConsoleOutput";
+    if (std::system(command.c_str()) != 0)
+        throw cRuntimeError("Error during executing TSNsched command, make sure TSNSCHED_HOME is set and Microsoft Z3 is installed");
 }
 
 TSNschedGateSchedulingConfigurator::Output *TSNschedGateSchedulingConfigurator::computeGateScheduling(const Input& input) const
