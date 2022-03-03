@@ -228,7 +228,7 @@ void GateScheduleConfiguratorBase::addFlows(Input& input) const
         }
     }
     std::sort(input.flows.begin(), input.flows.end(), [] (const Input::Flow *r1, const Input::Flow *r2) {
-        return r1->startApplication->pcp < r2->startApplication->pcp;
+        return r1->startApplication->pcp > r2->startApplication->pcp;
     });
 }
 
