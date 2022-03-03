@@ -79,11 +79,18 @@ void PeriodicGate::scheduleChangeTimer()
 {
     ASSERT(0 <= index && index < (int)durations->size());
     clocktime_t duration = durations->get(index).doubleValueInUnit("s");
+    index = (index + 1) % durations->size();
+    // skip trailing zero for wrap around, length is divisible by 2 so the expected state is the same
+    if (durations->get(index).doubleValueInUnit("s") == 0) {
+        index = (index + 1) % durations->size();
+        duration += durations->get(index).doubleValueInUnit("s");
+        index = (index + 1) % durations->size();
+    }
+    //std::cout << getFullPath() << " " << duration << std::endl;
     if (scheduleForAbsoluteTime)
         scheduleClockEventAt(getClockTime() + duration - offset, changeTimer);
     else
         scheduleClockEventAfter(duration - offset, changeTimer);
-    index = (index + 1) % durations->size();
     offset = 0;
 }
 
