@@ -1,5 +1,5 @@
-Credit-Based Shaper
-===================
+Credit-Based Shaping
+====================
 
 Goals
 -----

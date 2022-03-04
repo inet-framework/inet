@@ -1,5 +1,5 @@
-Asynhronous Shaper
-==================
+Asynchronous Shaping
+====================
 
 Goals
 -----
