@@ -139,6 +139,19 @@ void ZCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject 
         fire(this, t, ((Coord *)wrapper->getObject())->z, details);
 }
 
+Register_ResultFilter("atomic", AtomicFilter);
+
+bool AtomicFilter::process(simtime_t& t, double& value, cObject *details)
+{
+    if (auto namedObject = dynamic_cast<cNamedObject *>(details)) {
+        if (!strcmp(namedObject->getName(), "atomicOperationStarted"))
+            inAtomicOperation = true;
+        else if (!strcmp(namedObject->getName(), "atomicOperationEnded"))
+            inAtomicOperation = false;
+    }
+    return !inAtomicOperation;
+}
+
 Register_ResultFilter("packetDuration", PacketDurationFilter);
 
 void PacketDurationFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)

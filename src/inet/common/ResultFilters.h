@@ -133,6 +133,18 @@ class INET_API ZCoordFilter : public cPointerResultFilter
 };
 
 /**
+ * Filter that expects a numeric value and lets it path through if an atomic operation is not in progress.
+ */
+class INET_API AtomicFilter : public cNumericResultFilter
+{
+  protected:
+    bool inAtomicOperation = false;
+
+  public:
+    virtual bool process(simtime_t& t, double& value, cObject *details) override;
+};
+
+/**
  * Filter that expects a packet and outputs its duration
  */
 class INET_API PacketDurationFilter : public cObjectResultFilter
