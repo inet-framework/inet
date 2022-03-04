@@ -29,9 +29,9 @@ module CompoundPacketQueueBase extends PacketQueueBase like IPacketQueue
         @signal[packetRemoved](type=inet::Packet);
         @signal[packetDropped](type=inet::Packet);
         // the statistical value is the number of packets in the queue
-        @statistic[queueLength](title="queue length"; source=warmup(totalCount(localSignal(packetPushEnded)) - count(localSignal(packetPulled)) - count(localSignal(packetRemoved)) - count(localSignal(packetDropped))); record=last,max,timeavg,vector; interpolationmode=sample-hold; unit=pk; autoWarmupFilter=false);
+        @statistic[queueLength](title="queue length"; source=warmup(atomic(constant0(localSignal(packetPushEnded)) + count(localSignal(packetPushStarted)) - count(localSignal(packetPulled)) - count(localSignal(packetRemoved)) - count(localSignal(packetDropped)))); record=last,max,timeavg,vector; interpolationmode=sample-hold; unit=pk; autoWarmupFilter=false);
         // the statistical value is the total bit length of all packets in the queue
-        @statistic[queueBitLength](title="queue bit length"; source=warmup(sum(packetLength(localSignal(packetPushEnded))) - sum(packetLength(localSignal(packetPulled))) - sum(packetLength(localSignal(packetRemoved))) - sum(packetLength(localSignal(packetDropped)))); record=last,max,timeavg,vector; unit=b; interpolationmode=sample-hold; autoWarmupFilter=false);
+        @statistic[queueBitLength](title="queue bit length"; source=warmup(atomic(constant0(localSignal(packetPushEnded)) + sum(packetLength(localSignal(packetPushStarted))) - sum(packetLength(localSignal(packetPulled))) - sum(packetLength(localSignal(packetRemoved))) - sum(packetLength(localSignal(packetDropped))))); record=last,max,timeavg,vector; unit=b; interpolationmode=sample-hold; autoWarmupFilter=false);
         // the statistical value is the queueing time of packets
         @statistic[queueingTime](title="queueing times"; source=queueingTime(localSignal(packetPulled)); record=histogram,vector; unit=s; interpolationmode=none);
         // the statistical value is the incoming packet

@@ -82,8 +82,8 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
     take(packet);
-    emit(packetPushStartedSignal, packet);
-    auto packetClone = packet->dup(); // TODO delete this code if the original packet can be emitted in packetPushEndedSignal
+    cNamedObject packetPushStartedDetails("atomicOperationStarted");
+    emit(packetPushStartedSignal, packet, &packetPushStartedDetails);
     EV_INFO << "Pushing packet" << EV_FIELD(packet) << EV_ENDL;
     queue.insert(packet);
     if (buffer != nullptr)
@@ -97,12 +97,11 @@ void PacketQueue::pushPacket(Packet *packet, cGate *gate)
         }
     }
     ASSERT(!isOverloaded());
-    // TODO pass packet instead of packetClone if not deleted when weak ptrs are available
-    emit(packetPushEndedSignal, packetClone);
-    delete packetClone;
-    updateDisplayString();
     if (collector != nullptr && getNumPackets() != 0)
         collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
+    cNamedObject packetPushEndedDetails("atomicOperationEnded");
+    emit(packetPushEndedSignal, nullptr, &packetPushEndedDetails);
+    updateDisplayString();
 }
 
 Packet *PacketQueue::pullPacket(cGate *gate)
