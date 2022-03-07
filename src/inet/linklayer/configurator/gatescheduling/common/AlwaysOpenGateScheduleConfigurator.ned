@@ -5,7 +5,7 @@
 //
 
 
-package inet.linklayer.configurator.gatescheduling;
+package inet.linklayer.configurator.gatescheduling.common;
 
 import inet.linklayer.configurator.gatescheduling.base.GateScheduleConfiguratorBase;
 import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigurator;

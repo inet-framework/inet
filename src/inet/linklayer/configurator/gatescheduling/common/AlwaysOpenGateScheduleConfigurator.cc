@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/linklayer/configurator/gatescheduling/AlwaysOpenGateScheduleConfigurator.h"
+#include "inet/linklayer/configurator/gatescheduling/common/AlwaysOpenGateScheduleConfigurator.h"
 
 namespace inet {
 

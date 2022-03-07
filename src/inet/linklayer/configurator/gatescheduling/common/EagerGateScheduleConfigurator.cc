@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/linklayer/configurator/gatescheduling/EagerGateScheduleConfigurator.h"
+#include "inet/linklayer/configurator/gatescheduling/common/EagerGateScheduleConfigurator.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/stlutils.h"

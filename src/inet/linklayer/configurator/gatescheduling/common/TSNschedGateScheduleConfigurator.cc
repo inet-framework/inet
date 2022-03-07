@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/linklayer/configurator/gatescheduling/TSNschedGateScheduleConfigurator.h"
+#include "inet/linklayer/configurator/gatescheduling/common/TSNschedGateScheduleConfigurator.h"
 
 #include <cstdio>
 #include <fstream>
