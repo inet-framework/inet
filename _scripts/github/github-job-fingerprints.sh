@@ -13,8 +13,6 @@
 
 set -e # make the script exit with error if any executed command exits with error
 
-export PATH="/root/omnetpp-6.0pre12-linux/bin:$PATH"
-
 # this is where the cloned INET repo is mounted into the container
 cd $GITHUB_WORKSPACE
 
