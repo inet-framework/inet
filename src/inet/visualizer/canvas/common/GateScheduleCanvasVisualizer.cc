@@ -49,7 +49,6 @@ GateScheduleVisualizerBase::GateVisualization *GateScheduleCanvasVisualizer::cre
     figure->setSpacing(spacing);
     figure->setBounds(cFigure::Rectangle(0, 0, width, height));
     figure->setPosition(currentTimePosition);
-    auto networkInterface = getContainingNicModule(module);
     figure->setLabel(getGateScheduleVisualizationText(module));
     auto networkNode = getContainingNode(module);
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
