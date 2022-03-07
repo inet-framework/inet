@@ -55,9 +55,14 @@ def process_arguments(task):
     kwargs["working_directory_filter"] = re.sub("(.*)/$", "\\1", kwargs["working_directory_filter"])
     return kwargs
 
-def run_main(main_function, task):
+def run_main(main_function, task_name):
     try:
-        print(main_function(**process_arguments(task)))
+        result = main_function(**process_arguments(task_name))
+        print(result)
+        sys.exit(0 if (result is None or
+                       (hasattr(result, "is_all_done") and result.is_all_done()) or
+                       (hasattr(result, "is_all_pass") and result.is_all_pass()))
+                   else 1)
     except KeyboardInterrupt:
         print("Program interrupted by user")
 
