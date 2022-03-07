@@ -61,6 +61,9 @@ cmdenv-event-banners = false
 *.queue*.bufferModule = "^.buffer"
 *.buffer.packetCapacity = 2
 
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
 %contains-regex: stdout
 Producing packet, .*?producer1-0.*?
 Pushing packet, .*?producer1-0.*?

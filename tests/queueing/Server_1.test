@@ -37,6 +37,9 @@ cmdenv-event-banners = false
 *.provider.packetLength = 1B
 *.server.processingTime = uniform(0s, 2s)
 
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
 %contains-regex: stdout
 Providing packet, .*?provider-0.*?
 Processing packet started, .*?provider-0.*?

@@ -45,6 +45,9 @@ cmdenv-event-banners = false
 *.dropper.wq = 0.5
 *.collector.collectionInterval = exponential(1s)
 
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
 %contains-regex: stdout
 Producing packet, .*?producer-1.*?
 Passing through packet, .*?producer-1.*?

@@ -45,6 +45,9 @@ cmdenv-event-banners = false
 *.classifier.transitionProbabilities = "0 1 1 0"
 *.classifier.waitIntervals = "40 4"
 
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
 %contains-regex: stdout
 Providing packet, .*?provider-0.*?
 Collecting packet, .*?provider-0.*?

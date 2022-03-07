@@ -44,6 +44,9 @@ cmdenv-event-banners = false
 *.producer.productionInterval = exponential(1s)
 *.classifier.buckets = [{tokenProductionRate: 4, label: "green"}, {tokenProductionRate: 2, label: "yellow"}]
 
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
 %contains-regex: stdout
 .*?producer: Producing packet, .*?producer-0.*?
 .*?classifier: Classifying packet, .*?producer-0.*?

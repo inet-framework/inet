@@ -84,6 +84,9 @@ cmdenv-event-banners = false
 *.*.mac.server.processingTime = uniform(0s, 2s)
 *.cable.*Delayer.delay = uniform(0s, 2s)
 
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
 %contains-regex: stdout
 Producing packet, .*?sourceApplication-0.*?
 Pushing packet, .*?sourceApplication-0.*?

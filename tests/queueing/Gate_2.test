@@ -39,6 +39,9 @@ cmdenv-event-banners = false
 *.gate.openTime = 3s
 *.gate.closeTime = 7s
 
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
 %contains-regex: stdout
 Opening gate.
 Providing packet, .*?provider-0.*?

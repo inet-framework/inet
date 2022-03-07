@@ -44,6 +44,9 @@ cmdenv-event-banners = false
 *.classifier.tokenProductionRate = 4
 *.classifier.label = "green"
 
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
 %contains-regex: stdout
 .*?producer: Producing packet, .*?producer-0.*?
 .*?classifier: Classifying packet, .*?producer-0.*?

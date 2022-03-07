@@ -59,6 +59,9 @@ cmdenv-event-banners = false
 *.collector.collectionInterval = 1s
 *.scheduler.schedulerClass = "TestScheduler"
 
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
 %contains-regex: stdout
 Providing packet, .*?provider1-0.*?
 Scheduling packet, .*?provider1-0.*?

@@ -53,6 +53,9 @@ cmdenv-event-banners = false
 *.producer*.productionInterval = uniform(0s, 2s)
 *.collector.collectionInterval = uniform(0s, 1s)
 
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
 %contains-regex: stdout
 Pulling packet, .*?producer2-0.*?
 Scheduling packet, .*?producer2-0.*?

@@ -77,6 +77,9 @@ cmdenv-event-banners = false
 *.responseProducer.provider[1].packetLength = intuniform(1B, 100B)
 *.responseProducer.provider[1].providingInterval = uniform(0s, 2s)
 
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
 %contains-regex: stdout
 Producing packet, .*?requestProducer-0.*?
 Pushing packet, .*?requestProducer-0.*?

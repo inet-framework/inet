@@ -51,6 +51,9 @@ cmdenv-event-banners = false
 *.collector.collectionInterval = 1s
 *.filter.filterClass = "TestFilter"
 
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
 %contains-regex: stdout
 Providing packet, .*?provider-0.*?
 Passing through packet, .*?provider-0.*?

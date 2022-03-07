@@ -43,6 +43,9 @@ cmdenv-event-banners = false
 *.numCollectors = 3
 *.collector[*].collectionInterval = uniform(0s, 2s)
 
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
 %contains-regex: stdout
 Providing packet, .*?provider-0.*?
 Forwarding packet, .*?provider-0.*?

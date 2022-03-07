@@ -35,6 +35,9 @@ cmdenv-event-banners = false
 *.filler.tokenGenerator.queueModule = "queue"
 *.consumer.collectionInterval = 1s
 
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
 %contains-regex: stdout
 Providing packet, .*?provider-0.*?
 Processing packet, .*?provider-0.*?

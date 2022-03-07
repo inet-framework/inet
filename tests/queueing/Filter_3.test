@@ -38,6 +38,9 @@ cmdenv-event-banners = false
 *.producer.productionInterval = 1s
 *.filter.packetFilter = expr(totalLength == 1B)
 
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
 %contains-regex: stdout
 Producing packet, .*?producer-1.*?
 Filtering out packet, .*?producer-1.*?
