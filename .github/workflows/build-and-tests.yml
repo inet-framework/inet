@@ -95,3 +95,29 @@ jobs:
             -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE \
             ghcr.io/inet-framework/ci-inet:6.0.1-230320 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-other-tests.sh
 
+  more-tests:
+    needs: build-native
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # TODO: add debug/release mode when the runtest scripts can switch between
+        # MODEs or executables based on command line arguments or envvars
+        scriptname: ["inet_run_validation_tests", "inet_run_regression_tests",
+                    # "inet_run_fingerprint_tests", "inet_run_smoke_tests",
+                    #"inet_run_statistical_tests", "inet_run_feature_tests", "inet_run_leak_tests",
+                    #"inet_run_simulations", "inet_run_speed_tests"
+                    ]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          name: libinet-so
+          path: ${{ github.workspace }}/src/
+      - name: Pull Docker image
+        run: docker pull omnetpp/travis-inet:6.0rc1-220209
+      - name: Run ${{ matrix.scriptname }}
+        run: |
+          docker run -i --env MODE=debug --env GITHUB_WORKSPACE --env SCRIPTNAME=${{ matrix.scriptname }} \
+            -v $GITHUB_WORKSPACE:$GITHUB_WORKSPACE \
+            omnetpp/travis-inet:6.0rc1-220209 /bin/bash $GITHUB_WORKSPACE/_scripts/github/github-job-inet_run-tests.sh
