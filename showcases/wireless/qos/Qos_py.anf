@@ -3656,7 +3656,7 @@ for t in df_nonqos.itertuples(index=False):
     plt.plot(t.vectime, t.vecvalue, label=ac.get_AC(t.module), marker='.', markersize=2, linestyle=' ')
 
 plt.legend(loc=1, ncol=4, handletextpad=0.1, columnspacing=0.1, markerscale=4)
-plt.tight_layout(1.5)
+plt.tight_layout(pad=1.5)
 
 xmin, xmax = plt.xlim()
 
@@ -3689,7 +3689,7 @@ for t in df_qos.itertuples(index=False):
     plt.plot(t.vectime, t.vecvalue, label=ac.get_AC(t.module), marker='.', markersize=2, linestyle=' ')
 
 plt.legend(loc=1, ncol=4, handletextpad=0.1, columnspacing=0.1, markerscale=4)
-plt.tight_layout(1.5)
+plt.tight_layout(pad=1.5)
 
 xmin, xmax = plt.xlim()
 
@@ -3715,16 +3715,15 @@ a = ax.get_ygridlines()
 ygridlines = ax1.get_ygridlines()
 default_grid_color = ygridlines[0].get_color()
 
-sxa.solid_x_axis(ax1,default_grid_color)
-sxa.solid_x_axis(ax2,default_grid_color)
-sxa.solid_x_axis(ax,default_grid_color)
-
 # zoom level change event handling
 def on_xlims_change(axes):
     print("plt.xlim" + str(ax.get_xlim()))
 
 def on_ylims_change(axes):
     print("plt.ylim" + str(ax.get_ylim()))
+    sxa.solid_x_axis(ax1,default_grid_color)
+    sxa.solid_x_axis(ax2,default_grid_color)
+    sxa.solid_x_axis(ax,default_grid_color)
     
 ax1.callbacks.connect('xlim_changed', on_xlims_change)
 ax1.callbacks.connect('ylim_changed', on_ylims_change)

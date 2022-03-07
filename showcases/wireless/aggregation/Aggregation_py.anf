@@ -9,7 +9,7 @@
         <input pattern="results/VoicePriorityAggregation-#0.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/barchart.png" id="1290015913" name="Number of packets reveiced" template="barchart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/barchart.png" id="1290015913" name="Number of packets received" template="barchart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
@@ -46,21 +46,19 @@ utils.assert_columns_exist(df, groups + series)
 for c in groups + series:
     df[c] = pd.to_numeric(df[c], errors="ignore")
     
-print(df['configname'])
+#print(df['configname'])
 
 #df = df.reindex(['NoAggregation','Aggregation','VoicePriorityAggregation'])
 
 df.sort_values(by=groups+series, axis='index', inplace=True)
 #df.sort_values(by='experiment', axis='index', inplace=True)
 
-print(df)
+#print(df)
 #df = df.reindex(['NoAggregation','Aggregation','VoicePriorityAggregation'])
 #df = df.set_index(['NoAggregation','Aggregation','VoicePriorityAggregation'])
 df = df.set_index('configname')
 df = df.reindex(['NoAggregation','Aggregation','VoicePriorityAggregation'])
-print(df)
-
-#names = utils.get_names_for_title(df, props)
+#print(df)
 
 #confidence_level_str = props["confidence_level"] if "confidence_level" in props else "none"
 #
@@ -572,7 +570,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc.figure.facecolor" value=""/>
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value=""/>
-            <property name="title" value=""/>
+            <property name="title" value="Number of packets received"/>
             <property name="cycle_seed" value="0"/>
             <property name="bar_placement" value="Aligned"/>
             <property name="yaxis_log" value="false"/>
@@ -629,31 +627,31 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 newcolors = ['#2ca02c', '#ff7f0e', '#1f77b4']
 
 array_of_colors = np.array([['NoAggregation','#1f77b4',0], ['Aggregation','#ff7f0e',1], ['VoicePriorityAggregation','#2ca02c',2]])
-print(array_of_colors)
+#print(array_of_colors)
 
 colordf = pd.DataFrame(array_of_colors, index=None, columns=['experiment','color','order'])
-print('colordf:',colordf)
+#print('colordf:',colordf)
 
 colordf = colordf[['experiment','color','order']].set_index('experiment')
-print("the new colordf:", colordf)
+#print("the new colordf:", colordf)
 
 df = df.join(colordf, on='experiment')
 
 
-print('df', df)
+#print('df', df)
 
 df.sort_values('order', inplace=True)
 
-print('df', df)
-print("props:", props)
+#print('df', df)
+#print("props:", props)
 
 # plot
 #utils.plot_vectors(df, props)
 for i in df.itertuples():
     plt.plot(i.vectime, i.vecvalue, label=i.experiment, color=i.color)
 
-utils.postconfigure_plot(props)
 plt.title("Average throughput")
+utils.postconfigure_plot(props)
 
 plt.grid(linestyle='--')
 plt.minorticks_on()
@@ -1305,10 +1303,10 @@ df.sort_values('order', inplace=True)
 for i in df.itertuples():
     plt.plot(i.vectime, i.vecvalue, label=i.experiment, color=i.color, linestyle='', marker='s', markersize=3)
 
-utils.postconfigure_plot(props)
 plt.title("End-to-end delay")
+utils.postconfigure_plot(props)
 
-plt.legend(fontsize=12, markerscale=2)
+plt.legend(fontsize=12, markerscale=2, loc='upper left')
 plt.grid(linestyle='--')
 
 zoomed = True
@@ -1892,7 +1890,7 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_log" value="false"/>
             <property name="image_export_height" value="8"/>
             <property name="xaxis_log" value="false"/>
-            <property name="legend_placement" value="upper right"/>
+            <property name="legend_placement" value="upper left"/>
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value="Simulation time [s]"/>
             <property name="grid_density" value="Major"/>
