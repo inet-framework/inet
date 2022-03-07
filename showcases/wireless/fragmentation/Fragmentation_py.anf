@@ -60,8 +60,6 @@ for c in groups + series:
 df = df.set_index('configname')
 df = df.reindex(['DCFnofrag','DCFfrag','HCFfrag','HCFfragblockack'])
 
-#names = utils.get_names_for_title(df, props)
-
 df.plot(kind='bar', ax=plt.gca(), zorder=2, align='center', width=0.8, figsize=(10,6))
 plt.grid(axis='y', linestyle='--')
 plt.grid(axis='x', linestyle='')
@@ -637,13 +635,13 @@ newcolors = ['#2ca02c', '#ff7f0e', '#1f77b4', '#d62728']
 # green orange blue red
 
 array_of_colors = np.array([['DCFfrag','#d62728',1], ['DCFnofrag','#2ca02c',0], ['HCFfrag','#1f77b4',2], ['HCFfragblockack','#ff7f0e',3]])
-print(array_of_colors)
+#print(array_of_colors)
 
 colordf = pd.DataFrame(array_of_colors, index=None, columns=['experiment','color','order'])
-print('colordf:',colordf)
+#print('colordf:',colordf)
 
 colordf = colordf[['experiment','color','order']].set_index('experiment')
-print("the new colordf:", colordf)
+#print("the new colordf:", colordf)
 
 df = df.join(colordf, on='experiment')
 
@@ -1303,7 +1301,7 @@ column_order_color = [
     ('OnlyPacketSizeHCFfragblockack', '#ff7f0e')
 ]
 
-print(df)
+#print(df)
 # iterate on the above list instead of the dataframe, so we dont
 # have to reorder the columns (and still get the desired order and colors)
 for c in column_order_color:
@@ -2005,7 +2003,7 @@ except:
 
 df /= 1000000
 
-print(df)
+#print(df)
 
 #plt.figure(figsize=(10,6))
 
@@ -2018,7 +2016,7 @@ column_order_color = [
     ('PacketSizeHCFfragblockack', '#ff7f0e')
 ]
 
-print(df)
+#print(df)
 # iterate on the above list instead of the dataframe, so we dont
 # have to reorder the columns (and still get the desired order and colors)
 for c in column_order_color:

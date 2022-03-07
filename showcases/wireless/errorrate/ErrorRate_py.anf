@@ -733,8 +733,8 @@ except ValueError as e:
     exit(1)
     
 #print("DF\n",df)
-print("DF PER\n",df_per)
-print("DF SNIR\n",df_snir)
+#print("DF PER\n",df_per)
+#print("DF SNIR\n",df_snir)
 
 df_per.to_csv('df_per', index=True)
 df_snir.to_csv('df_snir', index=True)
@@ -746,7 +746,7 @@ df_snir['snir'] = df_snir['value']          # add snir column, same as value col
 
 df_joined = df_snir.merge(df_per, on='iterationvarsd')
 
-print('before pivot', df_joined)
+#print('before pivot', df_joined)
 df_joined.to_csv('beforepivot', index=True)
 
 df_joined['snir'] = pd.to_numeric(df_joined['snir'])
@@ -757,7 +757,7 @@ df_joined.to_csv('afterpivot', index=True)
 
 df_joined = df_joined[['6','12','18','24','36','48','54']]
 
-print('joined', df_joined)
+#print('joined', df_joined)
 
 #df = df.pivot_table(index='bitrate', columns='name', values='vecvalue')
 
@@ -778,8 +778,8 @@ for c in df_joined:
 
 ylocs, ylabels = plt.yticks()
 
-print('ylocs',ylocs)
-print('ylabels',ylabels)
+#print('ylocs',ylocs)
+#print('ylabels',ylabels)
 
 # TODO these should be set from the dialog
 plt.title('PER vs SNIR')
@@ -2002,7 +2002,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_itervar" value="distance"/>
             <property name="yaxis_min" value=""/>
             <property name="image_export_filename" value="PER_distance_v3"/>
-            <property name="xaxis_min" value=""/>
+            <property name="xaxis_min" value="0"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="cap_size" value="4"/>
@@ -2041,10 +2041,10 @@ iso_itervar = props["iso_itervar"]
 # query data into a data frame
 df = results.get_scalars(filter_expression, include_fields = True, include_runattrs=True, include_attrs=True, include_itervars=True)
 
-print(df)
-print(df['value'][0])
-print(df['bitrate'][0])
-print("len:", len(df['value']))
+#print(df)
+#print(df['value'][0])
+#print(df['bitrate'][0])
+#print("len:", len(df['value']))
 
 #df['value'] = df['bitrate'] * (1 - df['value'])
 
@@ -2052,7 +2052,7 @@ for i in range(len(df['value'])):
 #    df['value'][i] = df['bitrate'][i] * (1 - df['value'][i])
     df['value'][i] = float(df['bitrate'][i]) * (1 - float(df['value'][i]))
 #    print("Y", float(df['bitrate'][i]) * (1 - float(df['value'][i])))
-    print("X", df['value'][i])
+#    print("X", df['value'][i])
 
 if df.empty:
     ideplot.set_warning("The result filter returned no data.")
