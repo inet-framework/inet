@@ -14,6 +14,9 @@ set -e # make the script exit with error if any executed command exits with erro
 # this is where the cloned INET repo is mounted into the container
 cd $GITHUB_WORKSPACE
 
+# TEST
+. /root/omnetpp-6.0rc1-linux/setenv -f
+
 . setenv -f
 
 cp -r /root/nsc-0.5.3 3rdparty
