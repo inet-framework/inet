@@ -28,6 +28,8 @@ class FingerprintStore:
     def write(self):
         logger.info("Writing fingerprints to " + self.file_name)
         file = open(self.file_name, "w")
+        if self.entries is None:
+            self.entries = []
         json.dump(self.entries, file, indent=True)
         file.close()
 

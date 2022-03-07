@@ -21,7 +21,7 @@ simulation_projects = dict()
 def get_simulation_project(name):
     if not name in simulation_projects:
         workspace_path = get_workspace_path(name)
-        simulation_projects[name] = SimulationProject(workspace_path) if workspace_path else None
+        simulation_projects[name] = SimulationProject(workspace_path)
     return simulation_projects[name]
 
 inet_project = get_simulation_project("inet")

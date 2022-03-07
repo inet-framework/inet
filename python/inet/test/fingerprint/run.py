@@ -57,7 +57,8 @@ class FingerprintTestRun(TestRun):
 
     def run(self, sim_time_limit=None, test_result_filter=None, exclude_test_result_filter="SKIP", output_stream=sys.stdout, **kwargs):
         if self.fingerprint:
-            return super().run(extra_args=self.get_extra_args(str(self.fingerprint)) + self.get_ingredients_extra_args(), sim_time_limit=sim_time_limit or self.sim_time_limit, output_stream=output_stream, **kwargs)
+            simulation_project = self.simulation_run.simulation_config.simulation_project
+            return super().run(extra_args=self.get_extra_args(simulation_project, str(self.fingerprint)) + self.get_ingredients_extra_args(), sim_time_limit=sim_time_limit or self.sim_time_limit, output_stream=output_stream, **kwargs)
         else:
             if matches_filter("SKIP", test_result_filter, exclude_test_result_filter, True):
                 print("Running " + self.simulation_run.get_simulation_parameters_string(**kwargs), end=" ", file=output_stream)
@@ -67,8 +68,8 @@ class FingerprintTestRun(TestRun):
         global all_fingerprint_ingredients_extra_args
         return list(all_fingerprint_ingredients_extra_args[self.ingredients]) if self.ingredients in all_fingerprint_ingredients_extra_args else []
 
-    def get_extra_args(self, fingerprint_arg):
-        return ["-n", os.environ["INET_ROOT"] + "/tests/networks", "--fingerprintcalculator-class", "inet::FingerprintCalculator", "--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"]
+    def get_extra_args(self, simulation_project, fingerprint_arg):
+        return ["-n", simulation_project.get_full_path(".") + "/tests/networks", "--fingerprintcalculator-class", "inet::FingerprintCalculator", "--fingerprint", fingerprint_arg, "--vector-recording", "false", "--scalar-recording", "false"]
 
 class FingerprintTestGroupRun:
     def __init__(self, sim_time_limit, fingerprint_test_runs, **kwargs):
@@ -95,8 +96,9 @@ class FingerprintTestGroupRun:
             checked_fingerprint_test_runs = list(filter(lambda fingerprint_test_run: fingerprint_test_run.fingerprint, self.fingerprint_test_runs))
             if checked_fingerprint_test_runs:
                 simulation_run = checked_fingerprint_test_runs[0].simulation_run
+                simulation_project = simulation_run.simulation_config.simulation_project
                 fingerprint_arg = ",".join(map(lambda e: str(e.fingerprint), checked_fingerprint_test_runs))
-                extra_args = checked_fingerprint_test_runs[0].get_extra_args(fingerprint_arg)
+                extra_args = checked_fingerprint_test_runs[0].get_extra_args(simulation_project, fingerprint_arg)
                 ingredients_extra_args = set()
                 for checked_fingerprint_test_run in checked_fingerprint_test_runs:
                     ingredients_extra_args = ingredients_extra_args.union(checked_fingerprint_test_run.get_ingredients_extra_args())
