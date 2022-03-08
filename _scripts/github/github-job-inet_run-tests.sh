@@ -17,6 +17,8 @@ cd $GITHUB_WORKSPACE
 # TEST
 . /root/omnetpp-6.0rc1-linux/setenv -f
 
+python3 -m pip install matplotlib pandas scipy
+
 . setenv -f
 
 cp -r /root/nsc-0.5.3 3rdparty
