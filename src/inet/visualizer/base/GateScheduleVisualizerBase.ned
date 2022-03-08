@@ -23,7 +23,7 @@ simple GateScheduleVisualizerBase extends VisualizerBase
     parameters:
         string networkNodeVisualizerModule = default("^.networkNodeVisualizer"); // module path to the network node visualizer module, refers to a sibling submodule by default
 
-        bool displayGates = default(false);
+        bool displayGateSchedules = default(false);
         string labelFormat = default("%i %D");
 
         string gateFilter = default("**"); // which gates are considered, matches all gates by default
