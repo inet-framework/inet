@@ -12,10 +12,10 @@ def parse_arguments(task_name):
     description = "Runs all " + task_name + " in the enclosing project recursively from the current working directory"
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("-l", "--log-level", choices=["ERROR", "WARN", "INFO", "DEBUG"], default="WARN", help="Verbose output mode")
-    parser.add_argument("--concurrent", default=True, action=argparse.BooleanOptionalAction, help="Concurrent execution")
-    parser.add_argument("--dry-run", default=False, action=argparse.BooleanOptionalAction, help="Display what would be done but doesn't actually do anything")
+    parser.add_argument("--concurrent", action="store_true", help="Concurrent execution")
+    parser.add_argument("--dry-run", action="store_true", help="Display what would be done but doesn't actually do anything")
     parser.add_argument("-m", "--mode", choices=["debug", "release"], help="Specifies the build mode of the executable")
-    parser.add_argument("--build", default=True, action=argparse.BooleanOptionalAction, help="Build executable")
+    parser.add_argument("--build", action="store_true", help="Build executable")
     parser.add_argument("-u", "--user-interface", choices=["Cmdenv", "Qtenv"], default="Cmdenv", help="User interface")
     parser.add_argument("-t", "--sim-time-limit", default=None, help="Simulation time limit")
     parser.add_argument("-T", "--cpu-time-limit", default=None, help="CPU time limit")
