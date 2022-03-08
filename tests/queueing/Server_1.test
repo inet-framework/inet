@@ -40,11 +40,11 @@ cmdenv-event-banners = false
 %# remove formatting
 %subst: /\x1B\[[0-9;]*m//
 
+%subst: /\nRunning simulation\.\.\.\n//
+
 %contains-regex: stdout
 Providing packet, .*?provider-0.*?
 Processing packet started, .*?provider-0.*?
-
-Running simulation...
 Processing packet ended, .*?provider-0.*?
 Consuming packet, .*?provider-0.*?
 Providing packet, .*?provider-1.*?

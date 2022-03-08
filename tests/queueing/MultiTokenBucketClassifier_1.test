@@ -47,6 +47,8 @@ cmdenv-event-banners = false
 %# remove formatting
 %subst: /\x1B\[[0-9;]*m//
 
+%subst: /\nRunning simulation\.\.\.\n//
+
 %contains-regex: stdout
 .*?producer: Producing packet, .*?producer-0.*?
 .*?classifier: Classifying packet, .*?producer-0.*?
@@ -54,8 +56,6 @@ cmdenv-event-banners = false
 .*?classifier: Checking tokens for packet, .*?8.*?0.*?producer-0.*?
 .*?classifier: Insufficient number of tokens for packet, .*?8.*?producer-0.*?
 .*?redConsumer: Consuming packet, .*?producer-0.*?
-
-Running simulation...
 .*?producer: Producing packet, .*?producer-1.*?
 .*?classifier: Classifying packet, .*?producer-1.*?
 .*?classifier: Checking tokens for packet, .*?8.*?3.1835.*?producer-1.*?

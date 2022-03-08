@@ -87,6 +87,8 @@ cmdenv-event-banners = false
 %# remove formatting
 %subst: /\x1B\[[0-9;]*m//
 
+%subst: /\nRunning simulation\.\.\.\n//
+
 %contains-regex: stdout
 Producing packet, .*?sourceApplication-0.*?
 Pushing packet, .*?sourceApplication-0.*?
@@ -96,8 +98,6 @@ Producing packet, .*?sourceApplication-0.*?
 Pushing packet, .*?sourceApplication-0.*?
 Pulling packet, .*?sourceApplication-0.*?
 Processing packet started, (.*?sourceApplication-0).*?
-
-Running simulation...
 Producing packet, .*?sourceApplication-1.*?
 Pushing packet, .*?sourceApplication-1.*?
 Processing packet ended, (.*?sourceApplication-0).*?

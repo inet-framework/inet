@@ -80,6 +80,8 @@ cmdenv-event-banners = false
 %# remove formatting
 %subst: /\x1B\[[0-9;]*m//
 
+%subst: /\nRunning simulation\.\.\.\n//
+
 %contains-regex: stdout
 Producing packet, packet = \(Packet\)requestProducer-0[^\n]*?
 Pushing packet, packet = \(Packet\)requestProducer-0[^\n]*?
@@ -90,8 +92,6 @@ Providing packet, packet = \(Packet\)provider\[0\]-0[^\n]*?
 Processing packet, packet = \(Packet\)provider\[0\]-0[^\n]*?
 Forwarding packet, packet = \(Packet\)provider\[0\]-0[^\n]*?
 Consuming packet, packet = \(Packet\)provider\[0\]-0[^\n]*?
-
-Running simulation...
 Providing packet, packet = \(Packet\)provider\[0\]-1[^\n]*?
 Processing packet, packet = \(Packet\)provider\[0\]-1[^\n]*?
 Forwarding packet, packet = \(Packet\)provider\[0\]-1[^\n]*?

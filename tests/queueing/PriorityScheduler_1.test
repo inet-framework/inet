@@ -56,6 +56,8 @@ cmdenv-event-banners = false
 %# remove formatting
 %subst: /\x1B\[[0-9;]*m//
 
+%subst: /\nRunning simulation\.\.\.\n//
+
 %contains-regex: stdout
 Pulling packet, .*?producer2-0.*?
 Scheduling packet, .*?producer2-0.*?
