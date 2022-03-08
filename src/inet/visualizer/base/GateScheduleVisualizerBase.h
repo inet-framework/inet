@@ -53,7 +53,7 @@ class INET_API GateScheduleVisualizerBase : public VisualizerBase
   protected:
     /** @name Parameters */
     //@{
-    bool displayGates = false;
+    bool displayGateSchedules = false;
     StringFormat stringFormat;
     GateFilter gateFilter;
     double width;

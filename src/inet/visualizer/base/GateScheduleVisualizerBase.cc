@@ -53,7 +53,7 @@ const char *GateScheduleVisualizerBase::DirectiveResolver::resolveDirective(char
 
 void GateScheduleVisualizerBase::preDelete(cComponent *root)
 {
-    if (displayGates)
+    if (displayGateSchedules)
         removeAllGateVisualizations();
 }
 
@@ -62,7 +62,7 @@ void GateScheduleVisualizerBase::initialize(int stage)
     VisualizerBase::initialize(stage);
     if (!hasGUI()) return;
     if (stage == INITSTAGE_LOCAL) {
-        displayGates = par("displayGates");
+        displayGateSchedules = par("displayGateSchedules");
         gateFilter.setPattern(par("gateFilter"));
         width = par("width");
         height = par("height");
@@ -73,7 +73,7 @@ void GateScheduleVisualizerBase::initialize(int stage)
         currentTimePosition = par("currentTimePosition");
     }
     else if (stage == INITSTAGE_LAST) {
-        if (displayGates)
+        if (displayGateSchedules)
             addGateVisualizations();
     }
 }
