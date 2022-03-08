@@ -25,6 +25,12 @@ echo "::group::Installing Python packages"
 python3 -m pip install matplotlib pandas scipy ipython
 echo "::endgroup::"
 
+mkdir /root/workspace
+export WORKSPACE_ROOT=/root/workspace
+
+ln -s /root/omnetpp-6.0rc1-linux /root/workspace/omnetpp
+ln -s $GITHUB_WORKSPACE /root/workspace/inet
+
 . setenv -f
 
 cp -r /root/nsc-0.5.3 3rdparty
