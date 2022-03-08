@@ -31,6 +31,8 @@ export WORKSPACE_ROOT=/root/workspace
 ln -s /root/omnetpp-6.0rc1-linux /root/workspace/omnetpp
 ln -s $GITHUB_WORKSPACE /root/workspace/inet
 
+cd /root/workspace/inet
+
 . setenv -f
 
 cp -r /root/nsc-0.5.3 3rdparty
