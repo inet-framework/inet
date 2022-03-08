@@ -1,5 +1,4 @@
 from inet.simulation.build import *
-from inet.simulation.cffi import *
 from inet.simulation.config import *
 from inet.simulation.optimize import *
 from inet.simulation.project import *

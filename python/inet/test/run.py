@@ -210,6 +210,12 @@ class MultipleTestResults:
     def get_passes(self, exclude_expected_passes=True):
         return self.filter(result_filter="PASS", exclude_expected_result_filter="PASS" if exclude_expected_passes else None)
 
+    def get_skips(self, exclude_expected_fails=True):
+        return self.filter(result_filter="SKIP", exclude_expected_result_filter="SKIP" if exclude_expected_fails else None)
+
+    def get_cancels(self, exclude_expected_fails=True):
+        return self.filter(result_filter="CANCEL", exclude_expected_result_filter="CANCEL" if exclude_expected_fails else None)
+
     def get_fails(self, exclude_expected_fails=True):
         return self.filter(result_filter="FAIL", exclude_expected_result_filter="FAIL" if exclude_expected_fails else None)
 

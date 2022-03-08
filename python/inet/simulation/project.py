@@ -26,3 +26,4 @@ def get_simulation_project(name):
 
 inet_project = get_simulation_project("inet")
 inet_baseline_project = get_simulation_project("inet-baseline")
+default_project=inet_project

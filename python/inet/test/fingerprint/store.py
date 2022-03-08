@@ -79,14 +79,13 @@ class FingerprintStore:
 
     def filter_entries(self, ingredients="tplx", test_result=None, working_directory=os.getcwd(), ini_file="omnetpp.ini", config="General", run=0, sim_time_limit=None):
         def f(fingerprint):
-            return fingerprint["working_directory"] == working_directory and \
-                   fingerprint["ini_file"] == ini_file and \
-                   fingerprint["config"] == config and \
-                   fingerprint["run"] == run and \
+            return (working_directory is None or fingerprint["working_directory"] == working_directory) and \
+                   (ini_file is None or fingerprint["ini_file"] == ini_file) and \
+                   (config is None or fingerprint["config"] == config) and \
+                   (run is None or fingerprint["run"] == run) and \
                    (sim_time_limit is None or fingerprint["sim_time_limit"] == sim_time_limit) and \
                    (test_result is None or fingerprint["test_result"] == test_result) and \
                    fingerprint["ingredients"] == ingredients
-        assert run is not None
         return list(filter(f, self.get_entries()))
     
     def get_fingerprint(self, **kwargs):

@@ -1,6 +1,7 @@
 import curses.ascii
 import functools
 import io
+import IPython
 import logging
 import multiprocessing
 import multiprocessing.pool
@@ -18,6 +19,11 @@ COLOR_YELLOW = "\033[1;33m"
 COLOR_CYAN = "\033[0;36m"
 COLOR_GREEN = "\033[0;32m"
 COLOR_RESET = "\033[0;0m"
+
+def enable_autoreload():
+    ipython = IPython.get_ipython()
+    ipython.magic("load_ext autoreload")
+    ipython.magic("autoreload 2")
 
 def get_workspace_path(resource):
     return os.path.abspath(os.path.join(os.environ["WORKSPACE_ROOT"], resource)) if "WORKSPACE_ROOT" in os.environ else \

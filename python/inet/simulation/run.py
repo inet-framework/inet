@@ -258,7 +258,7 @@ def clean_simulations_results(simulation_configs=None, **kwargs):
 
 def get_simulations(simulation_project=None, simulation_configs=None, run=None, sim_time_limit=None, cpu_time_limit=None, concurrent=True, run_simulation_function=_run_simulation, **kwargs):
     if simulation_project is None:
-        simulation_project = inet_project
+        simulation_project = default_project
     if simulation_configs is None:
         simulation_configs = get_simulation_configs(simulation_project, concurrent=concurrent, **kwargs)
     simulation_runs = []
