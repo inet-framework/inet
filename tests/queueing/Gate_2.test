@@ -21,7 +21,7 @@ network TestProviderCollector
             @display("p=200,100");
         }
         collector: ActivePacketSink {
-            @display("p=200,100");
+            @display("p=300,100");
         }
     connections:
         provider.out --> gate.in;
