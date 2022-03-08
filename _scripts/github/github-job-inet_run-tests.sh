@@ -17,6 +17,7 @@ cd $GITHUB_WORKSPACE
 # TEST
 . /root/omnetpp-6.0rc1-linux/setenv -f
 
+apt install -y python3-pip
 python3 -m pip install matplotlib pandas scipy
 
 . setenv -f
