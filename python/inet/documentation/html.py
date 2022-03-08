@@ -5,7 +5,7 @@ from inet.common import *
 from inet.simulation.project import *
 
 def generate_html_documentation(docker=False, clean_build=False):
-    print("Generating HTML documentation (docker=" + str(docker) + ", " + "clean_before_build=" + str(clean_before_build) + ")")
+    print("Generating HTML documentation (docker=" + str(docker) + ", " + "clean_build=" + str(clean_build) + ")")
     
     if clean_build:
         subprocess.run(["rm", "-r", "_build"], cwd = inet_project.get_full_path("/doc/src/"))
