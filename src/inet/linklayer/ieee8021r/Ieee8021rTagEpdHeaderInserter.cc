@@ -10,7 +10,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
-#include "inet/protocolelement/redundancy/SequenceNumberTag_m.h"
+#include "inet/common/SequenceNumberTag_m.h"
 #include "inet/linklayer/ieee8021r/Ieee8021rTagHeader_m.h"
 
 namespace inet {

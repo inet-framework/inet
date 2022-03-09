@@ -8,7 +8,7 @@
 #include "inet/protocolelement/redundancy/StreamIdentifier.h"
 
 #include "inet/common/packet/PacketFilter.h"
-#include "inet/protocolelement/redundancy/SequenceNumberTag_m.h"
+#include "inet/common/SequenceNumberTag_m.h"
 #include "inet/protocolelement/redundancy/StreamTag_m.h"
 
 namespace inet {

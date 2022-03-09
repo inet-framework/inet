@@ -7,9 +7,9 @@
 
 #include "inet/protocolelement/redundancy/StreamEncoder.h"
 
+#include "inet/common/SequenceNumberTag_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
-#include "inet/protocolelement/redundancy/SequenceNumberTag_m.h"
 #include "inet/protocolelement/redundancy/StreamTag_m.h"
 
 namespace inet {

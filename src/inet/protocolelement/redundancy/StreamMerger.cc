@@ -8,7 +8,7 @@
 #include "inet/protocolelement/redundancy/StreamMerger.h"
 
 #include "inet/common/stlutils.h"
-#include "inet/protocolelement/redundancy/SequenceNumberTag_m.h"
+#include "inet/common/SequenceNumberTag_m.h"
 #include "inet/protocolelement/redundancy/StreamTag_m.h"
 
 namespace inet {
