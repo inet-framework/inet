@@ -38,13 +38,6 @@ class ProtocolListTagBase extends TagBase
     const Protocol *protocol[]; // specifies a list of protocols (internal class with an artificial identifier)
 }
 
-cplusplus(ProtocolListTagBase) {{
-#if (OMNETPP_BUILDNUM < 1530)
-  public:
-    void appendProtocol(const Protocol *protocol) { insertProtocol(protocol); }
-#endif
-}}
-
 //
 // OSI layered service primitives
 //

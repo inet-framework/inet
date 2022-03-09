@@ -39,15 +39,6 @@ class TimeTagBase extends TagBase
     simtime_t packetTotalTimes[]; // total packet time summed up for the relevant modules
 }
 
-cplusplus(TimeTagBase) {{
-#if (OMNETPP_BUILDNUM < 1530)
-  public:
-    void appendFlowNames(const char *names) { insertFlowNames(names); }
-    void appendBitTotalTimes(omnetpp::simtime_t bitTotalTimes) { insertBitTotalTimes(bitTotalTimes); }
-    void appendPacketTotalTimes(omnetpp::simtime_t packetTotalTimes) { insertPacketTotalTimes(packetTotalTimes); }
-#endif
-}}
-
 //
 // This tag specifies the elapsed time. It can be attached to a specific
 // region of a packet in order to measure the elapsed time.

@@ -246,9 +246,5 @@ cplusplus(TcpHeader) {{
     virtual void setSourcePort(unsigned int port) override { setSrcPort(port); }
     virtual unsigned int getDestinationPort() const override { return getDestPort(); }
     virtual void setDestinationPort(unsigned int port) override { setDestPort(port); }
-#if (OMNETPP_BUILDNUM < 1530)
-    void appendHeaderOption(TcpOption * headerOption) { insertHeaderOption(headerOption); }
-#endif
-
     virtual std::string str() const override;
 }}

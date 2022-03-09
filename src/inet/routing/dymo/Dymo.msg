@@ -73,13 +73,6 @@ message PacketJitterTimer{
     cPacket *jitteredPacket @owned;
 }
 
-cplusplus(PacketJitterTimer) {{
-#if (OMNETPP_BUILDNUM < 1530)
-  public:
-    cPacket * removeJitteredPacket() { return dropJitteredPacket(); }
-#endif
-}}
-
 //
 // Dymo packets
 //
