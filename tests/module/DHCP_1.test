@@ -57,7 +57,8 @@ network = DhcpExample
 
 *.numHosts = 10
 
-**.numApps = 1
+**.cli[*].numApps = 1
+**.srv.numApps = 1
 
 **.cli[*].app[0].typename = "DhcpClient"
 **.cli[*].app[0].interface="eth0"   # interface toward dhcp server
