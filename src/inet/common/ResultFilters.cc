@@ -351,65 +351,68 @@ Register_ResultFilter("maxPerGroup", MaxPerGroupFilter);
 
 void MaxPerGroupFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    if (details != identifier) {
-        if (identifier != nullptr)
-            fire(this, time, max, details);
+    std::string newIdentifier = check_and_cast<cValueHolder *>(details)->get().stringValue();
+    if (newIdentifier != lastIdentifier) {
+        if (!lastIdentifier.empty())
+            fire(this, lastTime, max, details);
         max = 0;
-        identifier = details;
+        lastIdentifier = newIdentifier;
     }
     auto weightedValue = check_and_cast<WeightedValue *>(object);
     max = std::max(max, weightedValue->value.doubleValue());
-    time = t;
+    lastTime = t;
 }
 
 void MaxPerGroupFilter::finish(cComponent *component, simsignal_t signal)
 {
-    if (identifier != nullptr)
-        fire(this, time, max, nullptr);
+    if (!lastIdentifier.empty())
+        fire(this, lastTime, max, nullptr);
 }
 
 Register_ResultFilter("weightedMeanPerGroup", WeighedMeanPerGroupFilter);
 
 void WeighedMeanPerGroupFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    if (details != identifier) {
-        if (identifier != nullptr)
-            fire(this, time, sum / weight, details);
+    std::string newIdentifier = check_and_cast<cValueHolder *>(details)->get().stringValue();
+    if (newIdentifier != lastIdentifier) {
+        if (!lastIdentifier.empty())
+            fire(this, lastTime, sum / weight, details);
         weight = 0;
         sum = 0;
-        identifier = details;
+        lastIdentifier = newIdentifier;
     }
     auto weightedValue = check_and_cast<WeightedValue *>(object);
     sum += weightedValue->weight * weightedValue->value.doubleValue();
     weight += weightedValue->weight;
-    time = t;
+    lastTime = t;
 }
 
 void WeighedMeanPerGroupFilter::finish(cComponent *component, simsignal_t signal)
 {
-    if (identifier != nullptr)
-        fire(this, time, sum / weight, nullptr);
+    if (!lastIdentifier.empty())
+        fire(this, lastTime, sum / weight, nullptr);
 }
 
 Register_ResultFilter("weightedSumPerGroup", WeighedSumPerGroupFilter);
 
 void WeighedSumPerGroupFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
-    if (details != identifier) {
-        if (identifier != nullptr)
-            fire(this, time, sum, details);
+    std::string newIdentifier = check_and_cast<cValueHolder *>(details)->get().stringValue();
+    if (newIdentifier != lastIdentifier) {
+        if (!lastIdentifier.empty())
+            fire(this, lastTime, sum, details);
         sum = 0;
-        identifier = details;
+        lastIdentifier = newIdentifier;
     }
     auto weightedValue = check_and_cast<WeightedValue *>(object);
     sum += weightedValue->weight * weightedValue->value.doubleValue();
-    time = t;
+    lastTime = t;
 }
 
 void WeighedSumPerGroupFilter::finish(cComponent *component, simsignal_t signal)
 {
-    if (identifier != nullptr)
-        fire(this, time, sum, nullptr);
+    if (!lastIdentifier.empty())
+        fire(this, lastTime, sum, nullptr);
 }
 
 Register_ResultFilter("dropWeight", DropWeightFilter);
@@ -439,7 +442,10 @@ void GroupRegionsPerPacketFilter::receiveSignal(cResultFilter *prev, simtime_t_c
     WeightedValue weightedValue;
     weightedValue.weight = packetRegionValue->length.get();
     weightedValue.value = packetRegionValue->value;
-    fire(this, t, &weightedValue, packetRegionValue->packet);
+    std::string packetId = std::to_string(packetRegionValue->packet->getId());
+    cValueHolder valueHolder;
+    valueHolder.set(cValue(packetId));
+    fire(this, t, &weightedValue, &valueHolder);
 }
 
 Register_ResultFilter("lengthWeightedValuePerRegion", LengthWeightedValuePerRegionFilter);
