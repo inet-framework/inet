@@ -50,17 +50,20 @@ network Test
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-.*Event #\d+  t=6   Test\.scenarioManager \(ScenarioManager, id=2\)
+.*
+\*\* Event #\d+  t=6   Test\.scenarioManager \(ScenarioManager, id=2\)
 .*
 Test.host starting up
 .*
 Test.host started
-.*Event #\d+  t=6   Test\.host\.app\[0\] \(PingApp, id=\d+\)
+\*\* Event #\d+  t=6   Test\.host\.app\[0\] \(PingApp, id=\d+\)
 Starting up: dest=192\.168\.0\.42  src=<none>seqNo=0
-Sending ping request #0 to lower layer\.
+.*Sending ping request #0 to lower layer\.
 .*
-.*Event #\d+  t=9   Test\.host\.app\[0\] \(PingApp, id=\d+\)
-Sending ping request #3 to lower layer\.
+\*\* Event #\d+  t=7   Test\.host\.app\[0\] \(PingApp, id=\d+\)
+.*
+\*\* Event #\d+  t=9   Test\.host\.app\[0\] \(PingApp, id=\d+\)
+.*Sending ping request #3 to lower layer\.
 .*
 
 <!> No more events

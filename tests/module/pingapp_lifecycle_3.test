@@ -2,6 +2,7 @@
 
 Test ping stop followed by node startup.
 
+%#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 
 [General]
@@ -27,6 +28,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 **.initialStatus = "down"
 **.scenarioManager.script = xmldoc("scenario.xml")
 
+%#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
 import inet.test.moduletest.lib.*;
@@ -47,7 +49,7 @@ network Test
         <startup module="host"/>
     </at>
 </scenario>
-
+%#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 
 .*Event #\d+  t=6 .*
@@ -57,10 +59,9 @@ Test.host starting up
 Test.host started
 
 <!> No more events
-
+%#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 Sending ping #
-
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

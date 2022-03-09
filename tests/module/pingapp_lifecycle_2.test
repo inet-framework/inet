@@ -2,6 +2,7 @@
 
 Test ping start followed by node shutdown.
 
+%#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
 
 [General]
@@ -49,12 +50,16 @@ network Test
 %#--------------------------------------------------------------------------------------------------------------
 %subst: /DEBUG: //
 %contains-regex: stdout
-.*Event #\d+  t=3   Test\.host\.app\[0\] \(PingApp, id=\d+\)
+.*
+\*\* Event #\d+  t=3   Test\.host\.app\[0\] \(PingApp, id=\d+\)
 Starting up: dest=192\.168\.0\.42  src=<none>seqNo=0
-Sending ping request #0 to lower layer\.
+.*Sending ping request #0 to lower layer\.
+.*
+\*\* Event #\d+  t=4   Test\.host\.app\[0\] \(PingApp, id=\d+\)
+.*Sending ping request #1 to lower layer\.
 .*
 \*\* Event #\d+  t=5   Test\.host\.app\[0\] \(PingApp, id=\d+\)
-Sending ping request #2 to lower layer\.
+.*Sending ping request #2 to lower layer\.
 .*
 \*\* Event #\d+  t=6   Test\.scenarioManager \(ScenarioManager, id=2\)
 processing <at> command\.\.\.
