@@ -282,7 +282,7 @@
                        Includes a switch model with various relay unit implementations,
                        and also Ethernet-level traffic generators."
         initiallyEnabled = "true"
-        requires = "Ieee8021q Ieee8022 PhysicalLayerWiredCommon ProtocolSupport Queueing VirtualInterface"
+        requires = "Ieee8021q Ieee8022 PhysicalLayerWiredCommon ProtocolElement Queueing VirtualInterface"
         labels = "protocols"
         nedPackages = "
                        inet.applications.ethernet
@@ -477,7 +477,7 @@
         name = "IEEE 802.1q"
         description = "IEEE 802.1q support."
         initiallyEnabled = "true"
-        requires = "Ieee8022 PhysicalLayerWiredCommon ProtocolSupport Queueing"
+        requires = "Ieee8022 PhysicalLayerWiredCommon ProtocolElement Queueing"
         labels = "protocols"
         nedPackages = "
                        inet.linklayer.ieee8021q
@@ -990,7 +990,7 @@
         linkerFlags = ""
         />
     <feature
-        id = "ProtocolSupport"
+        id = "ProtocolElement"
         name = "Protocol support"
         description = "Aggregation, fragmentation, etc."
         initiallyEnabled = "true"
@@ -1017,7 +1017,7 @@
                        inet.protocolelement.transceiver
                       "
         extraSourceFolders = ""
-        compileFlags = "-DINET_WITH_PROTOCOLSUPPORT"
+        compileFlags = "-DINET_WITH_PROTOCOLELEMENT"
         linkerFlags = ""
         />
     <feature
@@ -1287,7 +1287,7 @@
         name = "Time-Sensitive Networking (TSN)"
         description = "Provides Time-Sensitive Networking features such as time synchronization, per-stream filtering, traffic shaping, gate scheduling, stream redundancy, failure protection, etc."
         initiallyEnabled = "true"
-        requires = "Clock Ethernet Ieee8021as Ieee8021q Ieee8021r ProtocolSupport Queueing"
+        requires = "Clock Ethernet Ieee8021as Ieee8021q Ieee8021r ProtocolElement Queueing"
         labels = ""
         nedPackages = "
                        inet.networks.tsn
@@ -1360,7 +1360,7 @@
         name = "Virtual interface"
         description = "Virtual network interface."
         initiallyEnabled = "true"
-        requires = "Ieee8022 PhysicalLayerWiredCommon ProtocolSupport Queueing"
+        requires = "Ieee8022 PhysicalLayerWiredCommon ProtocolElement Queueing"
         labels = "nic"
         nedPackages = "
                        inet.linklayer.virtual
