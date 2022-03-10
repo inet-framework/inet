@@ -146,6 +146,8 @@ def compute_asynchronousshaper_core4inet_endtoend_delay_alternatively(**kwargs):
                               "max": [540, 307.2, 375.84],
                               "mean": [247.1, 161.19, 298.52],
                               "stddev": [106.53, 73.621, 36.633]})
+    df["min"] -= 0.001 # 1 ns initial production offset, see INI file
+    df = df + 0.05 * 2 # 50 ns propagation delay per hop
     df.index.set_names(["trafficclass"], inplace=True)
     df.columns.set_names(["name"], inplace=True)
     return df
@@ -157,8 +159,8 @@ def compute_tsn_trafficshaping_asynchronousshaper_core4inet_validation_test_resu
     df2 = df2.sort_index(axis = 0).sort_index(axis = 1)
     maxQueueLength = compute_asynchronousshaper_core4inet_max_queuelength_from_simulation_results()
     test_result = maxQueueLength < 4 and \
-                  (df1["min"] > df2["min"]).all() and \
-                  (df1["max"] < df2["max"]).all() and \
+                  (df1["min"] >= df2["min"]).all() and \
+                  (df1["max"] <= df2["max"]).all() and \
                   numpy.allclose(df1["min"], df2["min"], rtol=test_accuracy, atol=0) and \
                   numpy.allclose(df1["max"], df2["max"], rtol=test_accuracy, atol=0) and \
                   numpy.allclose(df1["mean"], df2["mean"], rtol=test_accuracy * 7, atol=0) and \
@@ -203,6 +205,8 @@ def compute_creditbasedshaper_endtoend_delay_alternatively(**kwargs):
                               "max": [540, 307.2, 375.84],
                               "mean": [247.1, 161.19, 298.52],
                               "stddev": [106.53, 73.621, 36.633]})
+    df["min"] -= 0.001 # 1 ns initial production offset, see INI file
+    df = df + 0.05 * 2 # 50 ns propagation delay per hop
     df.index.set_names(["trafficclass"], inplace=True)
     df.columns.set_names(["name"], inplace=True)
     return df
@@ -214,8 +218,8 @@ def compute_tsn_trafficshaping_creditbasedshaper_validation_test_results(test_ac
     df2 = df2.sort_index(axis = 0).sort_index(axis = 1)
     maxQueueLength = compute_creditbasedshaper_max_queuelength_from_simulation_results()
     test_result = maxQueueLength < 4 and \
-                  (df1["min"] > df2["min"]).all() and \
-                  (df1["max"] < df2["max"]).all() and \
+                  (df1["min"] >= df2["min"]).all() and \
+                  (df1["max"] <= df2["max"]).all() and \
                   numpy.allclose(df1["min"], df2["min"], rtol=test_accuracy, atol=0) and \
                   numpy.allclose(df1["max"], df2["max"], rtol=test_accuracy, atol=0) and \
                   numpy.allclose(df1["mean"], df2["mean"], rtol=test_accuracy * 7, atol=0) and \
