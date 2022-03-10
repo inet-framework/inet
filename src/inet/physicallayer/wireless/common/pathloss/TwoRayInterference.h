@@ -1,3 +1,7 @@
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+//
+
 #ifndef __INET_TWORAYINTERFERENCE_H
 #define __INET_TWORAYINTERFERENCE_H
 

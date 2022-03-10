@@ -1,3 +1,7 @@
+//
+// SPDX-License-Identifier: LGPL-3.0-or-later
+//
+
 #ifndef __INET_BREAKPOINTPATHLOSS_H
 #define __INET_BREAKPOINTPATHLOSS_H
 
