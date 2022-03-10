@@ -8,7 +8,7 @@
 #ifndef __INET_NONQOSSEQUENCENUMBERASSIGNMENT_H
 #define __INET_NONQOSSEQUENCENUMBERASSIGNMENT_H
 
-#include "inet/linklayer/ieee80211/mac/sequencenumberassignment/LegacySequenceNumberAssigment.h"
+#include "inet/linklayer/ieee80211/mac/sequencenumberassignment/LegacySequenceNumberAssignment.h"
 
 namespace inet {
 namespace ieee80211 {

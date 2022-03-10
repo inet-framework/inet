@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/linklayer/ieee80211/mac/sequencenumberassignment/LegacySequenceNumberAssigment.h"
+#include "inet/linklayer/ieee80211/mac/sequencenumberassignment/LegacySequenceNumberAssignment.h"
 
 namespace inet {
 namespace ieee80211 {
