@@ -18,10 +18,21 @@ namespace physicallayer {
 class INET_API Ieee80211ErrorModelBase : public ErrorModelBase
 {
   protected:
-    virtual double getHeaderSuccessRate(const IIeee80211Mode *mode, unsigned int bitLength, double snr) const = 0;
-    virtual double getDataSuccessRate(const IIeee80211Mode *mode, unsigned int bitLength, double snr) const = 0;
+    double spectralEfficiency1bit = 2000000.0 / 1000000.0; // 1 bit per symbol with 1 MSPS
+    double spectralEfficiency2bit = 2000000.0 / 1000000.0 / 2.0; // 2 bits per symbol, 1 MSPS
+    double sirPerfect = 10.0;
+    double sirImpossible = 0.1;
+
+  protected:
+    virtual double getHeaderSuccessRate(const IIeee80211Mode *mode, unsigned int bitLength, double snir) const = 0;
+    virtual double getDataSuccessRate(const IIeee80211Mode *mode, unsigned int bitLength, double snir) const = 0;
 
     virtual Packet *computeCorruptedPacket(const Packet *packet, double ber) const override;
+
+    virtual double getDsssDbpskSuccessRate(unsigned int bitLength, double snir) const;
+    virtual double getDsssDqpskSuccessRate(unsigned int bitLength, double snir) const;
+    virtual double getDsssDqpskCck5_5SuccessRate(unsigned int bitLength, double snir) const;
+    virtual double getDsssDqpskCck11SuccessRate(unsigned int bitLength, double snir) const;
 
   public:
     Ieee80211ErrorModelBase();
