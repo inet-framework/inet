@@ -1,7 +1,7 @@
 //
 // Copyright (C) 2005 Emin Ilker Cetinbas, Andras Varga
 //
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: LGPL-3.0-or-later
 //
 //
 // Author: Emin Ilker Cetinbas (niw3_at_yahoo_d0t_com)

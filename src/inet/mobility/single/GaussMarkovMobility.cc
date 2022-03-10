@@ -1,7 +1,7 @@
 //
 // Copyright (C) 2009 Marcin Kosiba
 //
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: LGPL-3.0-or-later
 //
 //
 // Author: Marcin Kosiba marcin.kosiba@gmail.com

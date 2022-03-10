@@ -1,7 +1,7 @@
 //
 // Copyright (C) 2007 Peterpaul Klein Haneveld
 //
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: LGPL-3.0-or-later
 //
 //
 /* -*- mode:c++ -*- ********************************************************/
