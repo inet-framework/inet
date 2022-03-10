@@ -230,13 +230,13 @@ double Ieee80211NistErrorModel::getDSSSAndHrDSSSChunkSuccessRate(bps bitrate, un
 {
     switch ((int)bitrate.get()) {
         case 1000000:
-            return DsssErrorRateModel::GetDsssDbpskSuccessRate(snr, bitLength);
+            return getDsssDbpskSuccessRate(bitLength, snr);
         case 2000000:
-            return DsssErrorRateModel::GetDsssDqpskSuccessRate(snr, bitLength);
+            return getDsssDqpskSuccessRate(bitLength, snr);
         case 5500000:
-            return DsssErrorRateModel::GetDsssDqpskCck5_5SuccessRate(snr, bitLength);
+            return getDsssDqpskCck5_5SuccessRate(bitLength, snr);
         case 11000000:
-            return DsssErrorRateModel::GetDsssDqpskCck11SuccessRate(snr, bitLength);
+            return getDsssDqpskCck11SuccessRate(bitLength, snr);
     }
     throw cRuntimeError("Unsupported bitrate");
 }

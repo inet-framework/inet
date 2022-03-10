@@ -13,7 +13,6 @@
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/ConvolutionalCode.h"
-#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/DsssErrorRateModel.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211ErrorModelBase.h"
 
 namespace inet {
@@ -23,7 +22,7 @@ namespace physicallayer {
  * A model for the error rate for different modulations.  For OFDM modulation,
  * the model description and validation can be found in
  * http://www.nsnam.org/~pei/80211ofdm.pdf.  For DSSS modulations (802.11b),
- * the model uses the DsssErrorRateModel.
+ * the model uses a separate error model.
  */
 class INET_API Ieee80211NistErrorModel : public Ieee80211ErrorModelBase
 {
