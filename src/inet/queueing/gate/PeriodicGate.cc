@@ -45,8 +45,8 @@ void PeriodicGate::handleParameterChange(const char *name)
 void PeriodicGate::handleMessage(cMessage *message)
 {
     if (message == changeTimer) {
-        scheduleChangeTimer();
         processChangeTimer();
+        scheduleChangeTimer();
     }
     else
         throw cRuntimeError("Unknown message");
