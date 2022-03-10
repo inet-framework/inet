@@ -348,7 +348,7 @@ def collect_fingerprint_test_groups(simulation_run, ingredients_list=["tplx"], s
     fingerprint_test_runs = []
     for ingredients in ingredients_list:
         fingerprint_test_run = get_fingerprint_test_run(simulation_run, ingredients=ingredients, sim_time_limit=sim_time_limit, **kwargs)
-        if fingerprint_test_run:
+        if fingerprint_test_run and fingerprint_test_run.sim_time_limit:
             fingerprint_test_runs.append(fingerprint_test_run)
     def get_sim_time_limit(element):
         return element.sim_time_limit
