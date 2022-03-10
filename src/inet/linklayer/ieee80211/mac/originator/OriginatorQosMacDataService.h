@@ -26,7 +26,7 @@ class INET_API OriginatorQosMacDataService : public IOriginatorMacDataService, p
   protected:
     // Figure 5-1—MAC data plane architecture
 //    MsduRateLimiting *msduRateLimiting = nullptr;
-    ISequenceNumberAssignment *sequenceNumberAssigment = nullptr;
+    ISequenceNumberAssignment *sequenceNumberAssignment = nullptr;
 //    MsduIntegrityAndProtection *msduIntegrityAndProtection = nullptr;
 //    MpduEncryptionAndIntegrity *mpduEncryptionAndIntegrity = nullptr;
 //    MpduHeaderPlusCrc *mpduHeaderPlusCrc = nullptr;

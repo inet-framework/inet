@@ -17,14 +17,14 @@ Define_Module(OriginatorMacDataService);
 
 void OriginatorMacDataService::initialize()
 {
-    sequenceNumberAssigment = new NonQoSSequenceNumberAssignment();
+    sequenceNumberAssignment = new NonQoSSequenceNumberAssignment();
     fragmentationPolicy = check_and_cast<IFragmentationPolicy *>(getSubmodule("fragmentationPolicy"));
     fragmentation = new Fragmentation();
 }
 
 void OriginatorMacDataService::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
-    sequenceNumberAssigment->assignSequenceNumber(header);
+    sequenceNumberAssignment->assignSequenceNumber(header);
 }
 
 std::vector<Packet *> *OriginatorMacDataService::fragmentIfNeeded(Packet *frame)
@@ -48,7 +48,7 @@ std::vector<Packet *> *OriginatorMacDataService::extractFramesToTransmit(queuein
 //            txRateLimitingIfNeeded();
         Packet *packet = pendingQueue->dequeuePacket();
         take(packet);
-        if (sequenceNumberAssigment) {
+        if (sequenceNumberAssignment) {
             auto frame = packet->removeAtFront<Ieee80211DataOrMgmtHeader>();
             assignSequenceNumber(frame);
             packet->insertAtFront(frame);
@@ -70,7 +70,7 @@ std::vector<Packet *> *OriginatorMacDataService::extractFramesToTransmit(queuein
 
 OriginatorMacDataService::~OriginatorMacDataService()
 {
-    delete sequenceNumberAssigment;
+    delete sequenceNumberAssignment;
     delete fragmentation;
 }
 

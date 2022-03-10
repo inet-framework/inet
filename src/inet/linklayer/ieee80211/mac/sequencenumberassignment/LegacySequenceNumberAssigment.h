@@ -14,7 +14,7 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API LegacySequenceNumberAssigment : public ISequenceNumberAssignment
+class INET_API LegacySequenceNumberAssignment : public ISequenceNumberAssignment
 {
   protected:
     SequenceNumberCyclic lastSeqNum = SequenceNumberCyclic(0);

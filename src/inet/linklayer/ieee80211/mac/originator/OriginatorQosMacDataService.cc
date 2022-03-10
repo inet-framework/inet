@@ -27,7 +27,7 @@ void OriginatorQosMacDataService::initialize()
     aMpduAggregationPolicy = dynamic_cast<IMpduAggregationPolicy *>(getSubmodule("mpduAggregationPolicy"));
     if (aMpduAggregationPolicy)
         aMpduAggregation = new MpduAggregation();
-    sequenceNumberAssigment = new QoSSequenceNumberAssignment();
+    sequenceNumberAssignment = new QoSSequenceNumberAssignment();
     fragmentationPolicy = dynamic_cast<IFragmentationPolicy *>(getSubmodule("fragmentationPolicy"));
     fragmentation = new Fragmentation();
 }
@@ -64,7 +64,7 @@ Packet *OriginatorQosMacDataService::aMpduAggregateIfNeeded(std::vector<Packet *
 
 void OriginatorQosMacDataService::assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header)
 {
-    sequenceNumberAssigment->assignSequenceNumber(header);
+    sequenceNumberAssignment->assignSequenceNumber(header);
 }
 
 std::vector<Packet *> *OriginatorQosMacDataService::fragmentIfNeeded(Packet *frame)
@@ -94,7 +94,7 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queu
             take(packet);
         }
         // PS Defer Queueing
-        if (sequenceNumberAssigment) {
+        if (sequenceNumberAssignment) {
             auto header = packet->removeAtFront<Ieee80211DataOrMgmtHeader>();
             assignSequenceNumber(header);
             packet->insertAtFront(header);
@@ -123,7 +123,7 @@ OriginatorQosMacDataService::~OriginatorQosMacDataService()
 {
     delete aMsduAggregation;
     delete aMpduAggregation;
-    delete sequenceNumberAssigment;
+    delete sequenceNumberAssignment;
     delete fragmentation;
 }
 
