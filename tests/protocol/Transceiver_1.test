@@ -44,25 +44,55 @@ cmdenv-event-banners = false
 
 %contains-regex: stdout
 Producing packet, .*?source-0.*?
-
-Running simulation...
+Calculating signal duration, .*?source-0.*?
+Transmitting signal to channel, .*?source-0.*?
+Receiving signal from channel, .*?source-0.*?
 Consuming packet, .*?source-0.*?
 Producing packet, .*?source-1.*?
+Calculating signal duration, .*?source-1.*?
+Transmitting signal to channel, .*?source-1.*?
+Receiving signal from channel, .*?source-1.*?
 Consuming packet, .*?source-1.*?
 Producing packet, .*?source-2.*?
+Calculating signal duration, .*?source-2.*?
+Transmitting signal to channel, .*?source-2.*?
+Receiving signal from channel, .*?source-2.*?
 Consuming packet, .*?source-2.*?
 Producing packet, .*?source-3.*?
+Calculating signal duration, .*?source-3.*?
+Transmitting signal to channel, .*?source-3.*?
+Receiving signal from channel, .*?source-3.*?
 Consuming packet, .*?source-3.*?
 Producing packet, .*?source-4.*?
+Calculating signal duration, .*?source-4.*?
+Transmitting signal to channel, .*?source-4.*?
+Receiving signal from channel, .*?source-4.*?
 Consuming packet, .*?source-4.*?
 Producing packet, .*?source-5.*?
+Calculating signal duration, .*?source-5.*?
+Transmitting signal to channel, .*?source-5.*?
+Receiving signal from channel, .*?source-5.*?
 Consuming packet, .*?source-5.*?
 Producing packet, .*?source-6.*?
+Calculating signal duration, .*?source-6.*?
+Transmitting signal to channel, .*?source-6.*?
+Receiving signal from channel, .*?source-6.*?
 Consuming packet, .*?source-6.*?
 Producing packet, .*?source-7.*?
+Calculating signal duration, .*?source-7.*?
+Transmitting signal to channel, .*?source-7.*?
+Receiving signal from channel, .*?source-7.*?
 Consuming packet, .*?source-7.*?
 Producing packet, .*?source-8.*?
+Calculating signal duration, .*?source-8.*?
+Transmitting signal to channel, .*?source-8.*?
+Receiving signal from channel, .*?source-8.*?
 Consuming packet, .*?source-8.*?
 Producing packet, .*?source-9.*?
+Calculating signal duration, .*?source-9.*?
+Transmitting signal to channel, .*?source-9.*?
+Receiving signal from channel, .*?source-9.*?
 Consuming packet, .*?source-9.*?
 Producing packet, .*?source-10.*?
+Calculating signal duration, .*?source-10.*?
+Transmitting signal to channel, .*?source-10.*?
