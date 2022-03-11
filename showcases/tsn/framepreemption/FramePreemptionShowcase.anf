@@ -21,7 +21,7 @@
         <input pattern="results/FifoQueueing-#0.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="30" name="End-to-end delay, 1200-Byte packet length" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="743439075" name="End-to-end delay, 1200-Byte packet length" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 import matplotlib.pyplot as plt
@@ -697,7 +697,7 @@ plt.savefig('delay.png', dpi=150, transparent=True)
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1686" name="End-to-end delay, realistic packet length" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="987196550" name="End-to-end delay, realistic packet length" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 import matplotlib.pyplot as plt
@@ -1395,7 +1395,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="6"/>
             <property name="matplotlibrc" value="figure.figsize : 8,6"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1702" name="Time average of queue length" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1202937547" name="Time average of queue length" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 import matplotlib.pyplot as plt
@@ -1403,7 +1403,7 @@ import re
 from matplotlib.lines import Line2D
 
 def plot_vectors_(df, props):
-    print("XXXX")
+    #print("XXXX")
     p = plot if chart.is_native_chart() else plt
 
     def get_prop(k):
@@ -1416,32 +1416,32 @@ def plot_vectors_(df, props):
         style = utils._make_line_args(props, t, df)
         #print("style\n", style)
         #print("t\n",t)
-        print("t",str(t))
+        #print("t",str(t))
         if re.search("\'FramePreemption", str(t)):
-            print("PREEMPTION FOUND")
+            #print("PREEMPTION FOUND")
             style['linestyle'] = 'solid'
         if re.search("\'FifoQueueing", str(t)):
-            print("NOPREEMPTION FOUND")
+            #print("NOPREEMPTION FOUND")
             style['linestyle'] = 'dotted'
             style['color'] = 'red'
             #style['linewidth'] = '2'
         if re.search("\'PriorityQueueing", str(t)):
-            print("PRIORITY QUEUE FOUND")
+            #print("PRIORITY QUEUE FOUND")
             style['linestyle'] = 'dashed'
             
         if re.search("queue\[0\]", str(t)):
-            print("app[0] FOUND")
+            #print("app[0] FOUND")
             style['color'] = 'blue'
         if re.search("queue\[1\]", str(t)):
-            print("app[1] FOUND")
+            #print("app[1] FOUND")
             style['color'] = 'red'
         if re.search("express", str(t)):
-            print("app[1] FOUND")
+            #print("app[1] FOUND")
             style['color'] = 'blue'
         if re.search("preemptable", str(t)):
-            print("app[1] FOUND")
+            #print("app[1] FOUND")
             style['color'] = 'red'
-        print("style\n", style)
+        #print("style\n", style)
         p.plot(t.vectime, t.vecvalue, label=utils.make_legend_label(legend_cols, t), **style)
 
     title = get_prop("title") or utils.make_chart_title(df, title_col, legend_cols)
@@ -1467,14 +1467,14 @@ if df.empty:
     ideplot.set_warning("The result filter returned no data.")
     exit(1)
     
-print(df.configname)
+#print(df.configname)
 
 #df['comment'] = df['configname']
 
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-print(df)
+#print(df)
 
 # plot
 plot_vectors_(df, props)
@@ -1484,7 +1484,7 @@ utils.postconfigure_plot(props)
 ax = plt.gca()
 handles, labels = ax.get_legend_handles_labels()
 
-print("handles, labels\n", handles, labels)
+#print("handles, labels\n", handles, labels)
 
 newlabels = []
 for i in labels:
@@ -1494,16 +1494,24 @@ for i in labels:
     newlabel = re.sub(r'queue.queue\[1\]','Low Priority (PriorityQueueing)',newlabel)
     newlabel = re.sub(r'queue.queue\[0\]','High Priority (PriorityQueueing)',newlabel)
     newlabel = re.sub(r'queue','FIFO Queue (FifoQueueing)',newlabel)
-    print("newlabel:\n", newlabel)
+    #print("newlabel:\n", newlabel)
     newlabels.append(newlabel)
     
-plt.legend(handles, newlabels, markerscale=10)
+alternate_handles = [Line2D([0], [0], color='black', lw=1, linestyle=':', label='Line'),
+                     Line2D([0], [0], color='black', lw=1, linestyle='--', label='Line'),
+                     Line2D([0], [0], color='black', lw=1, linestyle='-', label='Line'),
+                     Line2D([0], [0], color='r', lw=4, linestyle='', marker='s', markersize=1, label='Line'),
+                     Line2D([0], [0], color='b', lw=4, linestyle='', marker='s', markersize=1, label='Line')]
+
+alternate_labels = ['FifoQueueing', 'PriorityQueueing', 'FramePreemption', 'Background', 'High-Priority']
+    
+plt.legend(alternate_handles, alternate_labels, markerscale=10, ncol=2)
 
 orderedhandles = [None] * 5
 orderedlabels = [None] * 5
 
 for i in range(0,5):
-    print(i, ": ", handles[i], newlabels[i])
+#    print(i, ": ", handles[i], newlabels[i])
     if newlabels[i] == "BG, Default":
         orderedlabels[0] = newlabels[i]
         orderedhandles[0] = handles[i]
@@ -1523,7 +1531,7 @@ for i in range(0,5):
         orderedlabels[5] = newlabels[i]
         orderedhandles[5] = handles[i]
 
-print(orderedlabels, orderedhandles)
+#print(orderedlabels, orderedhandles)
 
 handle = orderedhandles
 label = orderedlabels
