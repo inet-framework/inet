@@ -1047,7 +1047,7 @@ void L3App::socketDataArrived(L3Socket *socket, Packet *packet)
 void App::tunSocketExample()
 {
     TunSocket socket;
-    InterfaceEntry *interface = nullptr;
+    NetworkInterface *interface = nullptr;
 //!TunSocketOpenExample
 socket.open(interface->getId());
 //!End

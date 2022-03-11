@@ -28,7 +28,7 @@ class IInterfaceTable;
 class Icmp;
 class Icmpv6;
 class UdpHeader;
-class InterfaceEntry;
+class NetworkInterface;
 
 const bool DEFAULT_MULTICAST_LOOP = true;
 const uint16_t UDP_MAX_MESSAGE_SIZE = 65535; // bytes
@@ -146,13 +146,13 @@ class INET_API Udp : public TransportProtocolBase
     virtual void setReuseAddress(SockDesc *sd, bool reuseAddr);
     virtual void joinMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multicastAddresses, const std::vector<int> interfaceIds);
     virtual void leaveMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multicastAddresses);
-    virtual void blockMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList);
-    virtual void unblockMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList);
-    virtual void joinMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList);
-    virtual void leaveMulticastSources(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList);
-    virtual void setMulticastSourceFilter(SockDesc *sd, InterfaceEntry *ie, L3Address multicastAddress, UdpSourceFilterMode filterMode, const std::vector<L3Address>& sourceList);
+    virtual void blockMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList);
+    virtual void unblockMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList);
+    virtual void joinMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList);
+    virtual void leaveMulticastSources(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, const std::vector<L3Address>& sourceList);
+    virtual void setMulticastSourceFilter(SockDesc *sd, NetworkInterface *ie, L3Address multicastAddress, UdpSourceFilterMode filterMode, const std::vector<L3Address>& sourceList);
 
-    virtual void addMulticastAddressToInterface(InterfaceEntry *ie, const L3Address& multicastAddr);
+    virtual void addMulticastAddressToInterface(NetworkInterface *ie, const L3Address& multicastAddr);
 
     // ephemeral port
     virtual ushort getEphemeralPort();

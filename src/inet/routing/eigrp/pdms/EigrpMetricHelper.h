@@ -14,7 +14,7 @@
 #ifndef __INET_EIGRPMETRICHELPER_H
 #define __INET_EIGRPMETRICHELPER_H
 
-//#include "InterfaceEntry.h"
+//#include "NetworkInterface.h"
 
 #include "inet/routing/eigrp/messages/EigrpMessage_m.h"
 #include "inet/routing/eigrp/tables/EigrpInterfaceTable.h"

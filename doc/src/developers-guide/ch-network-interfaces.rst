@@ -56,7 +56,7 @@ Interface Entries
 ~~~~~~~~~~~~~~~~~
 
 Interfaces in the interface table are represented with the
-:cpp:`InterfaceEntry` class. :cpp:`IInterfaceTable` provides member
+:cpp:`NetworkInterface` class. :cpp:`IInterfaceTable` provides member
 functions for adding, removing, enumerating and looking up interfaces.
 
 Interfaces have unique names and interface IDs; either can be used to
@@ -94,27 +94,27 @@ Data stored by an interface entry include:
 
 Extensibility: You have probably noticed that the above list does not
 contain data such as the IPv4 or IPv6 address of the interface. Such
-information is not part of :cpp:`InterfaceEntry` because we do not want
+information is not part of :cpp:`NetworkInterface` because we do not want
 :ned:`InterfaceTable` to depend on either the IPv4 or the IPv6 protocol
 implementation; we want both to be optional, and we want
 :ned:`InterfaceTable` to be able to support possibly other network
 protocols as well.
 
-Thus, extra data items are added to :cpp:`InterfaceEntry` via extension.
+Thus, extra data items are added to :cpp:`NetworkInterface` via extension.
 Two kinds of extensions are envisioned: extension by the link layer
 (i.e. the NIC), and extension by the network layer protocol:
 
 -  NICs can extend interface entries via C++ class inheritance, that is,
-   by simply subclassing :cpp:`InterfaceEntry` and adding extra data and
+   by simply subclassing :cpp:`NetworkInterface` and adding extra data and
    functions. This is possible because NICs create and register entries
    in :ned:`InterfaceTable`, so in their code one can just write
-   ``new MyExtendedInterfaceEntry()`` instead of ``new InterfaceEntry()``.
+   ``new MyExtendedNetworkInterface()`` instead of ``new NetworkInterface()``.
 
 -  **Network layer protocols** cannot add data via subclassing, so
-   composition has to be used. :cpp:`InterfaceEntry` contains pointers
+   composition has to be used. :cpp:`NetworkInterface` contains pointers
    to network-layer specific data structures. For example, there are
    pointers to IPv4 specific data, and IPv6 specific data. These objects
-   can be accessed with the following :cpp:`InterfaceEntry` member
+   can be accessed with the following :cpp:`NetworkInterface` member
    functions: :fun:`ipv4Data()`, :fun:`ipv6Data()`, and
    :fun:`getGenericNetworkProtocolData()`. They return pointers of the
    types :cpp:`Ipv4InterfaceData`, :cpp:`Ipv6InterfaceData`, and
@@ -145,13 +145,13 @@ Example code that performs interface registration:
    {
        if (stage == INITSTAGE_LINK_LAYER) {
            ...
-           interfaceEntry = registerInterface(datarate);
+           networkInterface = registerInterface(datarate);
        ...
    }
 
-   InterfaceEntry *PPP::registerInterface(double datarate)
+   NetworkInterface *PPP::registerInterface(double datarate)
    {
-       InterfaceEntry *e = new InterfaceEntry(this);
+       NetworkInterface *e = new NetworkInterface(this);
 
        // interface name: NIC module's name without special characters ([])
        e->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());
@@ -204,6 +204,6 @@ categories in the host’s :ned:`NotificationBoard`:
    entry has changed (e.g. the up/down flag)
 
 In all those notifications, the data field is a pointer to the
-corresponding :cpp:`InterfaceEntry` object. This is even true for
+corresponding :cpp:`NetworkInterface` object. This is even true for
 ``NF_INTERFACE_DELETED`` (which is actually a pre-delete
 notification).
