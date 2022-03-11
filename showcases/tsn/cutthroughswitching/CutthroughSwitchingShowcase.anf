@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/showcases/ethernet/cutthrough/results/*Cutthrough-*.vec"/>
-        <input pattern="/inet/showcases/ethernet/cutthrough/results/*Cutthrough-*.sca"/>
         <input pattern="results/StoreAndForward-#0.sca"/>
         <input pattern="results/StoreAndForward-#0.vec"/>
+        <input pattern="results/CutthroughSwitching-#0.vec"/>
+        <input pattern="results/CutthroughSwitching-#0.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="8" name="Mean end-to-end delay" template="linechart_mpl" type="MATPLOTLIB">
-            <script>
-                <![CDATA[import math
+        <chart icon="icons/full/obj/linechart.png" id="1440885418" name="Mean end-to-end delay" template="linechart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 import matplotlib.pyplot as plt
 # get chart properties
@@ -47,10 +46,8 @@ ax.legend(reversed(handles), reversed(labels), markerscale=2)
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 
-plt.savefig('delay.png', dpi=150, transparent=True)]]>
-            </script>
-            <dialogPage id="Input" label="Input">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+plt.savefig('delay.png', dpi=150, transparent=True)]]></script>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -96,10 +93,8 @@ plt.savefig('delay.png', dpi=150, transparent=True)]]>
     </composite>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Lines" label="Lines">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -192,10 +187,8 @@ plt.savefig('delay.png', dpi=150, transparent=True)]]>
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Plot" label="Plot">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -359,10 +352,8 @@ plt.savefig('delay.png', dpi=150, transparent=True)]]>
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Styling" label="Styling">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -469,10 +460,8 @@ plt.savefig('delay.png', dpi=150, transparent=True)]]>
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Advanced" label="Advanced">
-                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -491,10 +480,8 @@ plt.savefig('delay.png', dpi=150, transparent=True)]]>
     </styledText>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="Export" label="Export">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -549,8 +536,7 @@ plt.savefig('delay.png', dpi=150, transparent=True)]]>
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
+]]></dialogPage>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="grid_show" value="true"/>
@@ -574,7 +560,7 @@ plt.savefig('delay.png', dpi=150, transparent=True)]]>
             <property name="xaxis_min" value="0"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
-            <property name="filter" value="module =~ &quot;*.app[*]&quot; AND name =~ endToEndDelay:vector"/>
+            <property name="filter" value="module =~ &quot;*.app[*].sink&quot; AND name =~ meanBitLifeTimePerPacket:vector"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
             <property name="markersize" value="2"/>
