@@ -192,11 +192,13 @@ void Ieee8022Llc::encapsulate(Packet *frame)
             llcHeader->setDsap(sapData & 0xFF);
             llcHeader->setControl(3);
         }
-        else {
+        else if (sapReq != nullptr) {
             llcHeader->setSsap(sapReq->getSsap());
             llcHeader->setDsap(sapReq->getDsap());
             llcHeader->setControl(3); // TODO get from sapTag
         }
+        else
+            throw cRuntimeError("Missing the required Ieee802SapReq for LLC header, or protocol number for SNAP header.");
         frame->insertAtFront(llcHeader);
     }
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022llc);
