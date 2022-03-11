@@ -1,3 +1,0 @@
-#!/bin/sh
-
-ipython --no-banner -m inet -i
