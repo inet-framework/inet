@@ -103,37 +103,6 @@
 
 /examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,            75d0-cba9/tplx;ce1d-d136/~tNl;51b3-9d40/~tND;900d-aaeb/tyf, PASS, wireless
 
-/examples/htb/,                      -f omnetpp.ini -c scenarioUDP1 -r 0,           11s,         934a-67cc/tplx;78bb-2faf/~tNl;04f5-a63e/~tND, PASS,
-/examples/htb/,                      -f omnetpp.ini -c scenarioUDP2 -r 0,           11s,         0934-5941/tplx;10d9-a10c/~tNl;69da-d80f/~tND, PASS,
-/examples/htb/,                      -f omnetpp.ini -c scenarioUDP3 -r 0,           11s,         0cda-0dfd/tplx;bd2f-b11a/~tNl;2a20-a8c2/~tND, PASS,
-/examples/htb/,                      -f omnetpp.ini -c scenarioUDP4 -r 0,           11s,         54fc-6be0/tplx;3b2b-8f9c/~tNl;444d-a0c3/~tND, PASS,
-/examples/htb/,                      -f omnetpp.ini -c scenarioTCP1 -r 0,           15s,         c36a-33dc/tplx;bdef-4aa6/~tNl;b182-3255/~tND, PASS,
-/examples/htb/,                      -f omnetpp.ini -c scenarioTCP2 -r 0,           15s,         b639-e489/tplx;44fa-a3b8/~tNl;94f4-c20a/~tND, PASS,
-/examples/htb/,                      -f omnetpp.ini -c scenarioTCP3 -r 0,           15s,         ab4e-c953/tplx;477c-a439/~tNl;3ddf-840f/~tND, PASS,
-/examples/htb/,                      -f omnetpp.ini -c scenarioTCP4 -r 0,           15s,         8087-4665/tplx;e1c8-8608/~tNl;052f-15d7/~tND, PASS,
-
-/examples/htb/,                      -f omnetpp.ini -c scenarioUDP1Eth -r 0,           11s,         8c07-1303/tplx;4dc4-27e2/~tNl;697b-ca28/~tND, PASS,
-/examples/htb/,                      -f omnetpp.ini -c scenarioUDP2Eth -r 0,           11s,         cd3a-672d/tplx;2d8f-7080/~tNl;ff0b-e2ee/~tND, PASS,
-/examples/htb/,                      -f omnetpp.ini -c scenarioUDP3Eth -r 0,           11s,         f931-6e55/tplx;81eb-8bee/~tNl;b27a-918d/~tND, PASS,
-/examples/htb/,                      -f omnetpp.ini -c scenarioUDP4Eth -r 0,           11s,         bc7e-bd2f/tplx;afec-fb6d/~tNl;ddbd-0bbf/~tND, PASS,
-/examples/htb/,                      -f omnetpp.ini -c scenarioTCP1Eth -r 0,           15s,         b3c9-60df/tplx;7316-e1ad/~tNl;4d5a-681e/~tND, PASS,
-/examples/htb/,                      -f omnetpp.ini -c scenarioTCP2Eth -r 0,           15s,         1f55-d0d8/tplx;0c42-8b40/~tNl;5d15-9ed8/~tND, PASS,
-/examples/htb/,                      -f omnetpp.ini -c scenarioTCP3Eth -r 0,           15s,         5b3d-7945/tplx;6a55-e502/~tNl;556f-e8ae/~tND, PASS,
-/examples/htb/,                      -f omnetpp.ini -c scenarioTCP4Eth -r 0,           15s,         26cc-6ad5/tplx;3f12-19d6/~tNl;a782-245e/~tND, PASS,
-
-/examples/httptools/direct/flashdirect/, -f omnetpp.ini -c General -r 0,               500000s,      f607-5921/tplx;428e-2e61/~tNl;8154-c757/tyf, PASS,
-/examples/httptools/direct/pairdirect/, -f omnetpp.ini -c random -r 0,                 500000s,      6fc8-681d/tplx;128c-5b0a/~tNl;f06b-220a/tyf, PASS,
-/examples/httptools/direct/pairdirect/, -f omnetpp.ini -c scripted -r 0,               500000s,      128c-6b2d/tplx;2949-7cdf/~tNl;d600-4c74/tyf, PASS,
-/examples/httptools/direct/pairdirect/, -f omnetpp.ini -c scripted-bad -r 0,           500000s,      8cb2-2401/tplx;14ae-2d9b/~tNl;9c54-5981/tyf, PASS,
-/examples/httptools/direct/pairdirect/, -f omnetpp.ini -c scripted-cross -r 0,         500000s,      3c73-a7f4/tplx;4ab0-893b/~tNl;282b-e21f/tyf, PASS,
-/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c random -r 0,                 500000s,      1fa2-b252/tplx;1c29-34ac/~tNl;9e09-4d72/tyf, PASS, EthernetMac
-/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c scripted -r 0,               500000s,      5a33-1e9a/tplx;155f-cc98/~tNl;8940-9455/tyf, PASS, EthernetMac
-/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c scripted-bad -r 0,           500000s,      e9ea-7bca/tplx;f5c4-4078/~tNl;5b0b-b037/tyf, PASS, EthernetMac
-/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c scripted-cross -r 0,         500000s,      f682-21f5/tplx;43ca-1cc1/~tNl;c830-dfc4/tyf, PASS, EthernetMac
-/examples/httptools/socket/simpleddos/, -f omnetpp.ini -c General -r 0,                500000s,      6abf-3815/tplx;261e-0ed9/~tNl;d66d-8038/tyf, PASS, EthernetMac
-/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0,          50000s,       ae30-1486/tplx;59f2-6541/~tNl;9aa6-3c97/tyf, PASS, EthernetMac
-/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,        50000s,       9a36-e378/tplx;37b0-2c44/~tNl;cd0a-5832/tyf, PASS, EthernetMac
-
 /examples/ieee8021as/,               -f omnetpp.ini -c Network -r 0,                     200s,       c25f-2574/tplx;8601-141a/~tNl;bd77-a206/~tND;2f64-3e50/tyf, PASS, gptp
 /examples/ieee8021as/,               -f omnetpp.ini -c Network_with_cross_traffic -r 0,  200s,       a9da-c265/tplx;cad5-887f/~tNl;9b0e-81e7/~tND;8d31-254b/tyf, PASS, gptp
 /examples/ieee8021as/,               -f omnetpp.ini -c Network_daisy_chain -r 0,         200s,       2c1a-a1b1/tplx;a5cf-cbf5/~tNl;5f34-6588/~tND;6ff7-a656/tyf, PASS, gptp

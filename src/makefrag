@@ -22,20 +22,6 @@ ifneq (,$(findstring win32,$(PLATFORM)))
 endif
 
 #
-# TCP implementaion using the Network Simulation Cradle (TCP_NSC feature)
-#
-WITH_TCP_NSC := $(shell (cd .. && $(FEATURETOOL) -q isenabled TcpNsc && echo enabled) )
-ifeq ($(WITH_TCP_NSC), enabled)
-  NSC_VERSION= $(shell ls -d ../3rdparty/nsc* 2>/dev/null | sed 's/^.*-//')
-  ifneq ($(NSC_VERSION),)
-    INCLUDE_PATH += -I../3rdparty/nsc-$(NSC_VERSION)/sim
-    LIBS += -Wl,-rpath,$(abspath ../3rdparty/nsc-$(NSC_VERSION))
-  else
-    $(error Please install NSC or disable 'TCP_NSC' feature)
-  endif
-endif
-
-#
 # TCP implementation using the lwIP stack
 #
 WITH_TCP_LWIP := $(shell (cd .. && $(FEATURETOOL) -q isenabled TcpLwip && echo enabled) )

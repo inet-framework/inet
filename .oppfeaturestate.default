@@ -22,10 +22,9 @@
     <feature id="Ethernet" enabled="true"/>
     <feature id="EthernetExamples" enabled="true"/>
     <feature id="Flooding" enabled="true"/>
+    <feature id="GateScheduling" enabled="true"/>
     <feature id="GeneralShowcases" enabled="true"/>
     <feature id="Gpsr" enabled="true"/>
-    <feature id="HttpTools" enabled="true"/>
-    <feature id="HttpToolsExamples" enabled="true"/>
     <feature id="Ieee80211" enabled="true"/>
     <feature id="Ieee802154" enabled="true"/>
     <feature id="Ieee8021ae" enabled="true"/>
@@ -56,7 +55,6 @@
     <feature id="Ospfv2Examples" enabled="true"/>
     <feature id="Ospfv3" enabled="true"/>
     <feature id="Ospfv3Examples" enabled="true"/>
-    <feature id="PacketDrill" enabled="true"/>
     <feature id="PhysicalEnvironment" enabled="true"/>
     <feature id="PhysicalEnvironmentExamples" enabled="true"/>
     <feature id="PhysicalLayerCommon" enabled="true"/>
@@ -66,7 +64,7 @@
     <feature id="PimExamples" enabled="true"/>
     <feature id="Power" enabled="true"/>
     <feature id="Ppp" enabled="true"/>
-    <feature id="ProtocolSupport" enabled="true"/>
+    <feature id="ProtocolElement" enabled="true"/>
     <feature id="ProtocolTutorial" enabled="true"/>
     <feature id="Queueing" enabled="true"/>
     <feature id="QueueingTutorial" enabled="true"/>
@@ -83,7 +81,8 @@
     <feature id="TcpCommon" enabled="true"/>
     <feature id="TcpInet" enabled="true"/>
     <feature id="TcpLwip" enabled="false"/>
-    <feature id="TcpNsc" enabled="false"/>
+    <feature id="TSN" enabled="true"/>
+    <feature id="TSNShowcases" enabled="true"/>
     <feature id="Tun" enabled="true"/>
     <feature id="Udp" enabled="true"/>
     <feature id="UnitDiskRadio" enabled="true"/>

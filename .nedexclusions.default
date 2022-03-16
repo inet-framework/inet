@@ -7,5 +7,4 @@ inet.linklayer.configurator.gatescheduling.z3
 inet.showcases.emulation
 inet.showcases.visualizer.osg
 inet.transportlayer.tcp_lwip
-inet.transportlayer.tcp_nsc
 inet.visualizer.osg
