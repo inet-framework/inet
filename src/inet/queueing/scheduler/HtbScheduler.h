@@ -1,6 +1,6 @@
 // Hierarchical Token Bucket Implementation for OMNeT++ & INET Framework
 // Copyright (C) 2021 Marija Gajić (NTNU), Marcin Bosk (TUM), Susanna Schwarzmann (TU Berlin), Stanislav Lange (NTNU), and Thomas Zinner (NTNU)
-// 
+//
 // SPDX-License-Identifier: GPL-2.0-or-later
 //
 //

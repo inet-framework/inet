@@ -9,7 +9,7 @@ package inet.visualizer.base;
 
 //
 // This is a base module for gate visualizer simple modules.
-// 
+//
 // Format string directives:
 //	- %i: interface name
 // 	- %m: gate module name

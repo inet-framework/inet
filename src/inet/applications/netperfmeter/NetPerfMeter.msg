@@ -9,7 +9,7 @@
 // * --------------------------------------------------------------------------
 //
 // Copyright (C) 2009-2015 by Thomas Dreibholz <dreibh@iem.uni-due.de>
-// 
+//
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
