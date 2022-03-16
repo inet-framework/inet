@@ -85,7 +85,7 @@ class FingerprintStore:
                    (run is None or fingerprint["run"] == run) and \
                    (sim_time_limit is None or fingerprint["sim_time_limit"] == sim_time_limit) and \
                    (test_result is None or fingerprint["test_result"] == test_result) and \
-                   fingerprint["ingredients"] == ingredients
+                   (ingredients is None or fingerprint["ingredients"] == ingredients)
         return list(filter(f, self.get_entries()))
     
     def get_fingerprint(self, **kwargs):

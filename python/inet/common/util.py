@@ -14,6 +14,7 @@ import time
 
 logger = logging.getLogger(__name__)
 
+COLOR_GRAY = "\033[38;20m"
 COLOR_RED = "\033[1;31m"
 COLOR_YELLOW = "\033[1;33m"
 COLOR_CYAN = "\033[0;36m"
@@ -169,3 +170,17 @@ def map_sequentially_or_concurrently(elements, function, concurrent=None, random
                 results.append(result)
                 element_index = element_index + 1
             return results
+
+class ColoredLoggingFormatter(logging.Formatter):
+    COLORS = {
+        logging.DEBUG: COLOR_GREEN,
+        logging.INFO: COLOR_GREEN,
+        logging.WARNING: COLOR_YELLOW,
+        logging.ERROR: COLOR_RED,
+        logging.CRITICAL: COLOR_RED
+    }
+
+    def format(self, record):
+        format = self.COLORS.get(record.levelno) + "%(levelname)s " + COLOR_CYAN + "%(name)s " +  COLOR_RESET + "%(message)s (%(filename)s:%(lineno)d)"
+        formatter = logging.Formatter(format)
+        return formatter.format(record)

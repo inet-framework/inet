@@ -9,6 +9,7 @@ import re
 import subprocess
 
 from inet.common import *
+from inet.simulation.project import *
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +103,7 @@ def get_all_simulation_configs(simulation_project, **kwargs):
         simulation_project.simulation_configs = collect_all_simulation_configs(simulation_project, ini_path_globs, **kwargs)
     return simulation_project.simulation_configs
 
-def get_simulation_configs(simulation_project, simulation_configs=None,
+def get_simulation_configs(simulation_project=default_project, simulation_configs=None,
                            filter=None, exclude_filter=None,
                            working_directory_filter=None, exclude_working_directory_filter=None,
                            ini_file_filter=None, exclude_ini_file_filter=None,

@@ -49,7 +49,13 @@ def parse_arguments(task):
 
 def process_arguments(task):
     args = parse_arguments(task)
-    logging.getLogger().setLevel(args.log_level)
+    logger = logging.getLogger()
+    logger.setLevel(args.log_level)
+    handler = logging.StreamHandler()
+    handler.setLevel(args.log_level)
+    handler.setFormatter(ColoredLoggingFormatter())
+    logger.handlers = []
+    logger.addHandler(handler)
     kwargs = {k: v for k, v in vars(args).items() if v is not None}
     kwargs["working_directory_filter"] = args.working_directory_filter or os.path.relpath(os.getcwd(), inet_project.get_full_path("."))
     kwargs["working_directory_filter"] = re.sub("(.*)/$", "\\1", kwargs["working_directory_filter"])

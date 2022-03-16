@@ -615,3 +615,16 @@ def remove_extra_correct_fingerprints(simulation_project=default_project, **kwar
         if not found:
             correct_fingerprint_store.remove_entry(entry)
     correct_fingerprint_store.write()
+
+def get_statistical_result_sim_time_limit(simulation_config, run=0):
+    simulation_project = simulation_config.simulation_project
+    correct_fingerprint_store = get_correct_fingerprint_store(simulation_project)
+    stored_fingerprint_entries = correct_fingerprint_store.filter_entries(ingredients=None, working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run=run)
+    if stored_fingerprint_entries:
+        selected_fingerprint_entry = select_fingerprint_entry_with_largest_sim_time_limit(stored_fingerprint_entries)
+        return selected_fingerprint_entry["sim_time_limit"]
+    else:
+        return "0s"
+
+def create_statistical_results(**kwargs):
+    run_simulations(**kwargs, sim_time_limit=get_statistical_result_sim_time_limit)

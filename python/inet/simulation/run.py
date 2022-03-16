@@ -68,19 +68,29 @@ class SimulationRun:
                (" -r " + str(self.run) if self.run != 0 else "") + \
                (" for " + sim_time_limit if sim_time_limit else "")
 
-    def run_simulation(self, mode=None, user_interface=None, sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, index=None, count=None, print_end=" ", keyboard_interrupt_handler=None, cancel=False, dry_run=False, output_stream=sys.stdout, extra_args=[], simulation_runner=subprocess_simulation_runner, **kwargs):
+    def get_sim_time_limit(self, sim_time_limit=None):
         if sim_time_limit is None:
-            sim_time_limit = self.sim_time_limit
+            return self.sim_time_limit(self.simulation_config, self.run) if callable(self.sim_time_limit) else self.sim_time_limit
+        else:
+            return sim_time_limit(self.simulation_config, self.run) if callable(sim_time_limit) else sim_time_limit
+
+    def get_cpu_time_limit(self, cpu_time_limit=None):
         if cpu_time_limit is None:
-            cpu_time_limit = self.cpu_time_limit
+            return self.cpu_time_limit(self.cpuulation_config, self.run) if callable(self.cpu_time_limit) else self.cpu_time_limit
+        else:
+            return cpu_time_limit(self.cpuulation_config, self.run) if callable(cpu_time_limit) else cpu_time_limit
+
+    def run_simulation(self, mode=None, user_interface=None, sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, index=None, count=None, print_end=" ", keyboard_interrupt_handler=None, cancel=False, dry_run=False, output_stream=sys.stdout, extra_args=[], simulation_runner=subprocess_simulation_runner, **kwargs):
+        simulation_run_sim_time_limit = self.get_sim_time_limit(sim_time_limit)
+        simulation_run_cpu_time_limit = self.get_cpu_time_limit(cpu_time_limit)
         simulation_project = self.simulation_config.simulation_project
         working_directory = self.simulation_config.working_directory
         ini_file = self.simulation_config.ini_file
         config = self.simulation_config.config
-        print(("[" + str(index + 1) + "/" + str(count) + "] " if index is not None and count is not None else "") + "Running " + self.get_simulation_parameters_string(sim_time_limit=sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs), end=print_end, file=output_stream)
+        print(("[" + str(index + 1) + "/" + str(count) + "] " if index is not None and count is not None else "") + "Running " + self.get_simulation_parameters_string(sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=simulation_run_cpu_time_limit, **kwargs), end=print_end, file=output_stream)
         output_stream.flush()
-        sim_time_limit_args = ["--sim-time-limit", sim_time_limit] if sim_time_limit else []
-        cpu_time_limit_args = ["--cpu-time-limit", cpu_time_limit] if cpu_time_limit else []
+        sim_time_limit_args = ["--sim-time-limit", simulation_run_sim_time_limit] if simulation_run_sim_time_limit else []
+        cpu_time_limit_args = ["--cpu-time-limit", simulation_run_cpu_time_limit] if simulation_run_cpu_time_limit else []
         record_eventlog_args = ["--record-eventlog", "true"] if (record_eventlog or self.record_eventlog) else []
         record_pcap_args = ["--**.numPcapRecorders=1", "--**.crcMode=\"computed\"", "--**.fcsMode=\"computed\""] if record_pcap else []
         env = os.environ.copy()
@@ -118,7 +128,7 @@ class MultipleSimulationRuns:
             concurrent = self.concurrent
         if build:
             build_project(simulation_project = self.simulation_project, **kwargs)
-        print("Running simulations " + str(kwargs))
+        logger.info("Running simulations " + str(kwargs))
         start_time = time.time()
         simulation_results = map_sequentially_or_concurrently(self.simulation_runs, self.run_simulation_function, concurrent=concurrent, **kwargs)
         end_time = time.time()
@@ -244,7 +254,7 @@ class MultipleSimulationResults:
 def clean_simulation_results(simulation_config):
     logger.info("Cleaning simulation results, folder = " + simulation_config.working_directory)
     simulation_project = simulation_config.simulation_project
-    path = simulation_project.get_full_path(simulation_config.working_directory) + "results"
+    path = os.path.join(simulation_project.get_full_path(simulation_config.working_directory), "results")
     if not re.search(".*/home/.*", path):
         raise Exception("Path is not in home")
     if os.path.exists(path):
@@ -264,10 +274,12 @@ def get_simulations(simulation_project=None, simulation_configs=None, run=None, 
     simulation_runs = []
     for simulation_config in simulation_configs:
         if run is not None:
-            simulation_runs.append(SimulationRun(simulation_config, run, sim_time_limit=sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs))
+            simulation_run_sim_time_limit = sim_time_limit(simulation_config, run) if callable(sim_time_limit) else sim_time_limit
+            simulation_runs.append(SimulationRun(simulation_config, run, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs))
         else:
             for generated_run in range(0, simulation_config.num_runs):
-                simulation_runs.append(SimulationRun(simulation_config, generated_run, sim_time_limit=sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs))
+                simulation_run_sim_time_limit = sim_time_limit(simulation_config, run) if callable(sim_time_limit) else sim_time_limit
+                simulation_runs.append(SimulationRun(simulation_config, generated_run, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs))
     return MultipleSimulationRuns(simulation_project, simulation_runs, concurrent=concurrent, run_simulation_function=run_simulation_function)
 
 def run_simulations(**kwargs):
