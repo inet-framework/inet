@@ -4,7 +4,7 @@ from omnetpp.scave.results import *
 
 from inet.simulation.config import *
 from inet.simulation.project import *
-from inet.simulation.run import *
+from inet.simulation.task import *
 
 def run_wifi_error_rate_simulation(bitrate, distance, **kwargs):
     working_directory = "/showcases/wireless/errorrate"

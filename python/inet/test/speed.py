@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 def check_running_time(simulation_result, **kwargs):
     # TODO
-    return TestResult(result="PASS")
+    return TestTaskResult(result="PASS")
 
 def run_speed_test(simulation_config, **kwargs):
     simulation_result = run_simulation_config(simulation_config, print_end=" ", **kwargs)

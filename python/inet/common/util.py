@@ -134,43 +134,6 @@ def test_keyboard_interrupt_handler(a, b):
             print("Interrupted")
         print("Disabled end")
 
-def call_with_capturing_output(element, function=None, elements=None, element_count=None, **kwargs):
-    output_stream = io.StringIO()
-    element_index = elements.index(element)
-    result = function(element, output_stream=output_stream, index=element_index, count=element_count, **kwargs)
-    print(output_stream.getvalue(), end="")
-    return result
-
-def map_sequentially_or_concurrently(elements, function, concurrent=None, randomize=False, chunksize=1, pool_class=multiprocessing.pool.ThreadPool, **kwargs):
-    element_count = len(elements)
-    for element in elements:
-        element.set_cancel(False)
-    if randomize:
-        elements = random.sample(elements, k=len(elements))
-    if concurrent:
-        try:
-            pool = pool_class(multiprocessing.cpu_count())
-            partially_applied_function = functools.partial(call_with_capturing_output, function=function, elements=elements, element_count=element_count, **kwargs)
-            results = pool.map_async(partially_applied_function, elements, chunksize=chunksize)
-            return results.get(0xFFFF)
-        except KeyboardInterrupt:
-            for element in elements:
-                element.set_cancel(True)
-            return results.get(0xFFFF)
-    else:
-        keyboard_interrupt_handler = KeyboardInterruptHandler()
-        with DisabledKeyboardInterrupts(keyboard_interrupt_handler):
-            results = []
-            cancel = False
-            element_index = 0
-            for element in elements:
-                result = function(element, keyboard_interrupt_handler=keyboard_interrupt_handler, cancel=cancel, index=element_index, count=element_count, **kwargs)
-                if result.result == "CANCEL":
-                    cancel = True
-                results.append(result)
-                element_index = element_index + 1
-            return results
-
 class ColoredLoggingFormatter(logging.Formatter):
     COLORS = {
         logging.DEBUG: COLOR_GREEN,

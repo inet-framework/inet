@@ -5,19 +5,17 @@ from inet.test.simulation import *
 
 logger = logging.getLogger(__name__)
 
-def check_smoke_test(test_run, simulation_result, **kwargs):
-    # TODO check simulation_result.elapsed_cpu_time
-    return check_test(test_run, simulation_result, **kwargs)
+class SmokeTestTask(SimulationTestTask):
+    def __init__(self, simulation_task, **kwargs):
+        super().__init__(simulation_task, **kwargs)
 
-def get_smoke_tests(cpu_time_limit="1s", **kwargs):
-    return get_tests(check_test_function=check_smoke_test, cpu_time_limit=cpu_time_limit, **kwargs)
+    def check_simulation_task_result(self, simulation_task_result, **kwargs):
+        # TODO check simulation_task_result.elapsed_cpu_time
+        return super().check_simulation_task_result(simulation_task_result, **kwargs)
+
+def get_smoke_test_tasks(cpu_time_limit="1s", **kwargs):
+    return get_simulation_test_tasks(simulation_test_task_class=SmokeTestTask, cpu_time_limit=cpu_time_limit, name="smoke test", **kwargs)
 
 def run_smoke_tests(**kwargs):
-    multiple_test_runs = None
-    try:
-        logger.info("Running smoke tests")
-        multiple_test_runs = get_smoke_tests(**kwargs)
-        return multiple_test_runs.run(**kwargs)
-    except KeyboardInterrupt:
-        test_results = list(map(lambda test_run: TestResult(test_run, None, result="CANCEL", reason="Cancel by user"), multiple_test_runs.test_runs)) if multiple_test_runs else []
-        return MultipleTestResults(multiple_test_runs, test_results)
+    multiple_test_tasks = get_smoke_test_tasks(**kwargs)
+    return multiple_test_tasks.run(**kwargs)

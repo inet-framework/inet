@@ -8,17 +8,17 @@ import omnetpp
 import omnetpp.scave.analysis
 
 from inet.simulation.project import *
-from inet.simulation.run import *
+from inet.simulation.task import *
 
 logger = logging.getLogger(__name__)
 
-def get_analysis_files(simulation_project=default_project, filter=".*", fullMatch=False, **kwargs):
+def get_analysis_files(simulation_project=default_project, filter=".*", exclude_filter=None, full_match=False, **kwargs):
     simulation_project_path = simulation_project.get_full_path(".")
     analysis_file_names = map(lambda path: os.path.relpath(path, simulation_project_path), glob.glob(simulation_project_path + "/**/*.anf", recursive = True))
-    return builtins.filter(lambda path: re.search(filter if fullMatch else ".*" + filter + ".*", path), analysis_file_names)
+    return builtins.filter(lambda analysis_file_name: matches_filter(analysis_file_name, filter, exclude_filter, full_match), analysis_file_names)
 
 def export_charts(simulation_project=default_project, **kwargs):
-    workspace = omnetpp.scave.analysis.Workspace(omnetpp.scave.analysis.Workspace.find_workspace(get_workspace_path(".")), [])
+    workspace = omnetpp.scave.analysis.Workspace(get_workspace_path("."), [])
     for analysis_file_name in get_analysis_files(**kwargs):
         try:
             logger.info("Exporting charts, analysis file = " + analysis_file_name)

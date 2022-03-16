@@ -27,6 +27,18 @@ class SimulationConfig:
     def __repr__(self):
         return repr(self)
 
+    def matches_filter(self, filter=None, exclude_filter=None,
+                       working_directory_filter=None, exclude_working_directory_filter=None,
+                       ini_file_filter=None, exclude_ini_file_filter=None,
+                       config_filter=None, exclude_config_filter=None,
+                       simulation_config_filter=lambda simulation_config: not simulation_config.abstract and not simulation_config.emulation,
+                       full_match=False, **kwargs):
+        return matches_filter(self.__repr__(), filter, exclude_filter, full_match) and \
+               matches_filter(self.working_directory, working_directory_filter, exclude_working_directory_filter, full_match) and \
+               matches_filter(self.ini_file, ini_file_filter, exclude_ini_file_filter, full_match) and \
+               matches_filter(self.config, config_filter, exclude_config_filter, full_match) and \
+               simulation_config_filter(self)
+
 num_runs_fast_regex = re.compile(r"(?m).*^\s*(include\s+.*\.ini|repeat\s*=\s*[0-9]+|.*\$\{.*\})")
 
 def get_num_runs_fast(ini_path):
@@ -78,7 +90,7 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
     return simulation_configs
 
 def collect_all_simulation_configs(simulation_project, ini_path_globs, concurrent=True, **kwargs):
-    logger.info("Collecting all simulation configs")
+    logger.info("Collecting all simulation configs started")
     ini_paths = list(itertools.chain.from_iterable(map(lambda g: glob.glob(g, recursive=True), ini_path_globs)))
     if concurrent:
         pool = multiprocessing.pool.ThreadPool(multiprocessing.cpu_count())
@@ -86,6 +98,7 @@ def collect_all_simulation_configs(simulation_project, ini_path_globs, concurren
     else:
         result = list(itertools.chain.from_iterable(map(functools.partial(collect_ini_file_simulation_configs, simulation_project), ini_paths)))
     result.sort(key=lambda element: (element.working_directory, element.ini_file, element.config))
+    logger.info("Collecting all simulation configs ended")
     return result
 
 def get_all_simulation_configs(simulation_project, **kwargs):
@@ -93,29 +106,17 @@ def get_all_simulation_configs(simulation_project, **kwargs):
     if simulation_project.simulation_configs is None:
         relative_path = os.path.relpath(os.getcwd(), simulation_project.get_full_path("."))
         if relative_path == "." or relative_path[0:2] == "..":
-            ini_path_globs = [simulation_project.get_full_path(".") + "/examples/**/*.ini",
-                              simulation_project.get_full_path(".") + "/showcases/**/*.ini",
-                              simulation_project.get_full_path(".") + "/tutorials/**/*.ini",
-                              simulation_project.get_full_path(".") + "/tests/fingerprint/*.ini",
-                              simulation_project.get_full_path(".") + "/tests/validation/**/*.ini"]
+            ini_path_globs = [simulation_project.get_full_path("/examples/**/*.ini"),
+                              simulation_project.get_full_path("/showcases/**/*.ini"),
+                              simulation_project.get_full_path("/tutorials/**/*.ini"),
+                              simulation_project.get_full_path("/tests/fingerprint/*.ini"),
+                              simulation_project.get_full_path("/tests/validation/**/*.ini")]
         else:
             ini_path_globs = [os.getcwd() + "/**/*.ini"]
         simulation_project.simulation_configs = collect_all_simulation_configs(simulation_project, ini_path_globs, **kwargs)
     return simulation_project.simulation_configs
 
-def get_simulation_configs(simulation_project=default_project, simulation_configs=None,
-                           filter=None, exclude_filter=None,
-                           working_directory_filter=None, exclude_working_directory_filter=None,
-                           ini_file_filter=None, exclude_ini_file_filter=None,
-                           config_filter=None, exclude_config_filter=None,
-                           simulation_config_filter=lambda simulation_config: not simulation_config.abstract and not simulation_config.emulation,
-                           full_match=False, **kwargs):
+def get_simulation_configs(simulation_project=default_project, simulation_configs=None, **kwargs):
     if simulation_configs is None:
         simulation_configs = get_all_simulation_configs(simulation_project, **kwargs)
-    return list(builtins.filter(lambda simulation_config:
-                                    matches_filter(simulation_config.__repr__(), filter, exclude_filter, full_match) and
-                                    matches_filter(simulation_config.working_directory, working_directory_filter, exclude_working_directory_filter, full_match) and
-                                    matches_filter(simulation_config.ini_file, ini_file_filter, exclude_ini_file_filter, full_match) and
-                                    matches_filter(simulation_config.config, config_filter, exclude_config_filter, full_match) and
-                                    simulation_config_filter(simulation_config),
-                                simulation_configs))
+    return list(builtins.filter(lambda simulation_config: simulation_config.matches_filter(**kwargs), simulation_configs))

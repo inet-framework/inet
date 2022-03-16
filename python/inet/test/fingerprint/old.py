@@ -6,7 +6,7 @@ import shlex
 
 from inet.common import *
 from inet.simulation.project import *
-from inet.test.fingerprint.run import *
+from inet.test.fingerprint.task import *
 
 def update_correct_fingerprints_from_csv(csv_file):
     def commentRemover(csv_data):

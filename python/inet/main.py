@@ -5,10 +5,8 @@ import sys
 logger = logging.getLogger(__name__)
 
 from inet.simulation.project import *
-from inet.simulation.run import *
+from inet.simulation.task import *
 from inet.test import *
-from inet.test.fingerprint.run import *
-from inet.test.smoke import *
 
 def parse_arguments(task):
     description = "Runs all " + task + " in the enclosing project recursively from the current working directory"
@@ -67,24 +65,33 @@ def run_main(main_function, task_name):
     try:
         result = main_function(**process_arguments(task_name))
         print(result)
-        sys.exit(0 if (result is None or
-                       (hasattr(result, "is_all_done") and result.is_all_done()) or
-                       (hasattr(result, "is_all_pass") and result.is_all_pass()))
-                   else 1)
+        sys.exit(0 if (result is None or result.is_all_results_expected()) else 1)
     except KeyboardInterrupt:
         logger.warn("Program interrupted by user")
 
 def run_simulations_main():
     run_main(run_simulations, "simulations")
 
-def run_leak_tests_main():
-    run_main(run_leak_tests, "leak tests")
+def run_chart_tests_main():
+    run_main(run_chart_tests, "chart tests")
 
 def run_fingerprint_tests_main():
     run_main(run_fingerprint_tests, "fingerprint tests")
 
-def run_regression_tests_main():
-    run_main(run_regression_tests, "regression tests")
+def run_leak_tests_main():
+    run_main(run_leak_tests, "leak tests")
+
+def run_module_tests_main():
+    run_main(run_module_tests, "module tests")
+
+def run_packet_tests_main():
+    run_main(run_packet_tests, "packet tests")
+
+def run_protocol_tests_main():
+    run_main(run_protocol_tests, "protocol tests")
+
+def run_queueing_tests_main():
+    run_main(run_queueing_tests, "queueing tests")
 
 def run_smoke_tests_main():
     run_main(run_smoke_tests, "smoke tests")
@@ -94,6 +101,9 @@ def run_speed_tests_main():
 
 def run_statistical_tests_main():
     run_main(run_statistical_tests, "statistical tests")
+
+def run_unit_tests_main():
+    run_main(run_unit_tests, "unit tests")
 
 def run_validation_tests_main():
     run_main(run_validation_tests, "validation tests")

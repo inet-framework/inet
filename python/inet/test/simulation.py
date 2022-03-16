@@ -3,112 +3,84 @@ import logging
 import time
 
 from inet.common import *
-from inet.simulation.run import *
+from inet.simulation.task import *
 from inet.simulation.config import *
-from inet.test.run import *
+from inet.test.task import *
 
 logger = logging.getLogger(__name__)
 
-def _run_simulation_test(test_run, output_stream=sys.stdout, **kwargs):
-    test_result = test_run.run(output_stream=output_stream, **kwargs)
-    test_result.print_result(complete_error_message=False, output_stream=output_stream)
-    return test_result
+class SimulationTestTaskResult(TestTaskResult):
+    def __init__(self, test_task, simulation_task_result=None, **kwargs):
+        super().__init__(test_task, **kwargs)
+        self.simulation_task_result = simulation_task_result
 
-class SimulationTestRun(TestRun):
-    def __init__(self, simulation_run, check_test_function, **kwargs):
-        super().__init__(**kwargs)
-        self.simulation_run = simulation_run
-        self.check_test_function = check_test_function
-
-    def set_cancel(self, cancel):
-        self.simulation_run.set_cancel(cancel)
-
-    def create_cancel_result(self, simulation_result):
-        return SimulationTestResult(self, simulation_result, result="CANCEL", reason="Cancel by user")
-
-    def run(self, sim_time_limit=None, cancel=False, output_stream=sys.stdout, **kwargs):
-        if cancel or self.cancel:
-            print("Running " + self.simulation_run.get_simulation_parameters_string(sim_time_limit=sim_time_limit, **kwargs), end=" ", file=output_stream)
-            return self.create_cancel_result(None)
-        else:
-            simulation_result = self.simulation_run.run_simulation(sim_time_limit=sim_time_limit, output_stream=output_stream, **kwargs)
-            if simulation_result.result != "CANCEL":
-                return self.check_test_function(self, simulation_result, **kwargs)
-            else:
-                return self.create_cancel_result(simulation_result)
-
-class MultipleSimulationTestRuns(MultipleTestRuns):
-    def __init__(self, multiple_simulation_runs, test_runs, **kwargs):
-        super().__init__(test_runs, **kwargs)
-        self.multiple_simulation_runs = multiple_simulation_runs
-
-    def run(self, simulation_project=None, concurrent=None, build=True, **kwargs):
-        if concurrent is None:
-            concurrent = self.multiple_simulation_runs.concurrent
-        if build:
-            build_project(simulation_project or self.multiple_simulation_runs.simulation_project, **kwargs)
-        logger.info("Running tests " + str(kwargs))
-        start_time = time.time()
-        test_results = map_sequentially_or_concurrently(self.test_runs, self.multiple_simulation_runs.run_simulation_function, concurrent=concurrent, **kwargs)
-        end_time = time.time()
-        flattened_test_results = flatten(map(lambda test_result: test_result.get_test_results(), test_results))
-        simulation_results = list(map(lambda test_result: test_result.simulation_result, flattened_test_results))
-        return MultipleSimulationTestResults(self, flattened_test_results, elapsed_wall_time=end_time - start_time)
-
-class SimulationTestResult(TestResult):
-    def __init__(self, test_run, simulation_result, **kwargs):
-        super().__init__(test_run, **kwargs)
-        self.simulation_result = simulation_result
+    def get_error_message(self, **kwargs):
+        return (self.simulation_task_result.get_error_message(**kwargs) if self.simulation_task_result else "") + \
+               super().get_error_message(**kwargs)
 
     def get_subprocess_result(self):
-        return self.simulation_result.subprocess_result if self.simulation_result else None
+        return self.simulation_task_result.subprocess_result if self.simulation_task_result else None
 
     def get_test_results(self):
         return [self]
 
-    def get_description(self, complete_error_message=True, include_simulation_parameters=False):
-        return (self.test_run.simulation_run.get_simulation_parameters_string() + " " if include_simulation_parameters else "") + \
-               self.color + self.result + COLOR_RESET + \
-               ((COLOR_YELLOW + " (unexpected)" + COLOR_RESET) if not self.expected and self.expected_result != "PASS" else "") + \
-               ((COLOR_GREEN + " (expected)" + COLOR_RESET) if self.expected and self.expected_result != "PASS" else "") + \
-               (" " + (self.simulation_result.error_message + " -- in module " + self.simulation_result.error_module if complete_error_message else self.simulation_result.error_message) if self.simulation_result and self.simulation_result.error_message and self.simulation_result.error_module else "") + \
-               (" (" + self.reason + ")" if self.reason else "")
-
-class MultipleSimulationTestResults(MultipleTestResults):
+class MultipleSimulationTestTaskResults(MultipleTestTaskResults):
     def get_test_results(self):
-        return self.test_results
+        return self.results
 
     def filter(self, result_filter=None, exclude_result_filter=None, expected_result_filter=None, exclude_expected_result_filter=None, exclude_expected_test_result=False, exclude_error_message_filter=None, error_message_filter=None, full_match=True):
         def matches_test_result(test_result):
             return (not exclude_expected_test_result or test_result.expected_result != test_result.result) and \
                    matches_filter(test_result.result, result_filter, exclude_result_filter, full_match) and \
                    matches_filter(test_result.expected_result, expected_result_filter, exclude_expected_result_filter, full_match) and \
-                   matches_filter(test_result.simulation_result.error_message if test_result.simulation_result else None, error_message_filter, exclude_error_message_filter, full_match)
-        test_results = list(filter(matches_test_result, self.test_results))
-        test_runs = list(map(lambda test_result: test_result.test_run, test_results))
-        simulation_runs = list(map(lambda test_run: test_run.simulation_run, test_runs))
-        orignial_multiple_simulation_runs = self.multiple_test_runs.multiple_simulation_runs
-        multiple_simulation_runs = MultipleSimulationRuns(orignial_multiple_simulation_runs.simulation_project, simulation_runs, concurrent=orignial_multiple_simulation_runs.concurrent, run_simulation_function=orignial_multiple_simulation_runs.run_simulation_function)
-        multiple_test_runs = self.multiple_test_runs.__class__(multiple_simulation_runs, test_runs)
-        return MultipleSimulationTestResults(multiple_test_runs, test_results)
+                   matches_filter(test_result.simulation_task_result.error_message if test_result.simulation_task_result else None, error_message_filter, exclude_error_message_filter, full_match)
+        test_results = list(filter(matches_test_result, self.results))
+        test_tasks = list(map(lambda test_result: test_result.test_task, test_results))
+        simulation_tasks = list(map(lambda test_task: test_task.simulation_run, test_tasks))
+        orignial_multiple_simulation_tasks = self.multiple_test_tasks.multiple_simulation_tasks
+        multiple_simulation_tasks = MultipleSimulationTasks(orignial_multiple_simulation_tasks.simulation_project, simulation_tasks, concurrent=orignial_multiple_simulation_tasks.concurrent)
+        multiple_test_tasks = self.multiple_test_tasks.__class__(multiple_simulation_tasks, test_tasks)
+        return MultipleSimulationTestTaskResults(multiple_test_tasks, test_results)
 
-def check_test(test_run, simulation_result, **kwargs):
-    if test_run.simulation_run.cancel or simulation_result.result == "CANCEL":
-        return SimulationTestResult(test_run, simulation_result, result="CANCEL", reason="Cancel by user")
-    else:
-        return SimulationTestResult(test_run, simulation_result, bool_result=simulation_result.subprocess_result.returncode == 0, expected_result="PASS")
+class SimulationTestTask(TestTask):
+    def __init__(self, simulation_task, task_result_class=SimulationTestTaskResult, **kwargs):
+        super().__init__(task_result_class=task_result_class, **kwargs)
+        self.simulation_task = simulation_task
 
-def get_tests(run_test_function=_run_simulation_test, check_test_function=check_test, **kwargs):
-    multiple_simulation_runs = get_simulations(run_simulation_function=run_test_function, **kwargs)
-    test_runs = list(map(lambda simulation_run: SimulationTestRun(simulation_run, check_test_function, **kwargs), multiple_simulation_runs.simulation_runs))
-    return MultipleSimulationTestRuns(multiple_simulation_runs, test_runs)
+    def set_cancel(self, cancel):
+        super().set_cancel(cancel)
+        self.simulation_task.set_cancel(cancel)
 
-def run_tests(**kwargs):
-    multiple_test_runs = None
-    try:
-        logger.info("Running tests")
-        multiple_test_runs = get_tests(**kwargs)
-        return multiple_test_runs.run(**kwargs)
-    except KeyboardInterrupt:
-        test_results = list(map(lambda test_run: SimulationTestResult(test_run, None, result="CANCEL", reason="Cancel by user"), multiple_test_runs.test_runs)) if multiple_test_runs else []
-        return MultipleSimulationTestResults(multiple_test_runs, test_results)
+    def get_parameters_string(self, **kwargs):
+        return self.simulation_task.get_parameters_string(**kwargs)
+
+    def run_protected(self, output_stream=sys.stdout, **kwargs):
+        simulation_task_result = self.simulation_task.run_protected(output_stream=output_stream, **kwargs)
+        if simulation_task_result.result == "DONE":
+            return self.check_simulation_task_result(simulation_task_result, **kwargs)
+        else:
+            return self.task_result_class(self, result=simulation_task_result.result, reason=simulation_task_result.reason)
+
+    def check_simulation_task_result(self, simulation_task_result, **kwargs):
+        return self.task_result_class(self, simulation_task_result, bool_result=simulation_task_result.subprocess_result.returncode == 0, expected_result="PASS")
+
+class MultipleSimulationTestTasks(MultipleTestTasks):
+    def __init__(self, test_tasks, **kwargs):
+        super().__init__(test_tasks, **kwargs)
+
+    # def run(self, build=True, **kwargs):
+    #     if build:
+    #         build_project(simulation_project=self.simulation_project, **kwargs)
+    #     test_results = super().run(**kwargs)
+    #     flattened_test_results = flatten(map(lambda test_result: test_result.get_test_results(), test_results))
+    #     simulation_task_results = list(map(lambda test_result: test_result.simulation_task_result, flattened_test_results))
+    #     return MultipleSimulationTestTaskResults(self, flattened_test_results, elapsed_wall_time=end_time - start_time)
+
+def get_simulation_test_tasks(simulation_test_task_class=SimulationTestTask, multiple_simulation_test_tasks_class=MultipleSimulationTestTasks, **kwargs):
+    multiple_simulation_tasks = get_simulation_tasks(**kwargs)
+    test_tasks = list(map(lambda simulation_task: simulation_test_task_class(simulation_task, **kwargs), multiple_simulation_tasks.tasks))
+    return multiple_simulation_test_tasks_class(test_tasks, **kwargs)
+
+def run_simulation_tests(**kwargs):
+    multiple_test_tasks = get_test_tasks(**kwargs)
+    return multiple_test_tasks.run()

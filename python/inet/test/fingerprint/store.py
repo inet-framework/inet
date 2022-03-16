@@ -16,7 +16,7 @@ class FingerprintStore:
         self.entries = None
 
     def read(self):
-        logger.info("Reading fingerprints from " + self.file_name)
+        logger.info(f"Reading fingerprints from {self.file_name}")
         if os.path.exists(self.file_name):
             file = open(self.file_name)
             self.entries = json.load(file)
@@ -26,7 +26,7 @@ class FingerprintStore:
             self.write()
 
     def write(self):
-        logger.info("Writing fingerprints to " + self.file_name)
+        logger.info(f"Writing fingerprints to {self.file_name}")
         file = open(self.file_name, "w")
         if self.entries is None:
             self.entries = []
