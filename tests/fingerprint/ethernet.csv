@@ -1,158 +1,158 @@
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
-.,  -f ethernet-bus-reconnect.ini -r 0,           ,                 2c88-9438/tplx;19fb-76d6/~tNl;59d9-99cb/~tND;a8d7-e36a/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-bus-reconnect.ini -r 1,           ,                 ac23-df18/tplx;6085-956d/~tNl;72f9-209e/~tND;0dbf-fab6/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-bus-reconnect.ini -r 2,           ,                 5594-14e7/tplx;df7c-2454/~tNl;c658-b744/~tND;c4ad-4062/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-bus-reconnect.ini -r 3,           ,                 ba02-bc2e/tplx;d9d9-8847/~tNl;025d-edc9/~tND;7bef-cd02/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-bus-reconnect.ini -r 4,           ,                 c5aa-fb14/tplx;1d00-4369/~tNl;6bb8-b6d1/~tND;483a-3ca3/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-bus-reconnect.ini -r 5,           ,                 c4b0-9473/tplx;89a9-47f5/~tNl;5397-cae4/~tND;a0cf-24ad/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-bus-reconnect.ini -r 6,           ,                 0b5c-97de/tplx;f453-2822/~tNl;66a9-8f7d/~tND;b493-5298/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-bus-reconnect.ini -r 7,           ,                 b155-4442/tplx;0488-00e5/~tNl;b35b-e88a/~tND;e4cc-eb3a/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-bus-reconnect.ini -r 8,           ,                 25ba-4c3d/tplx;d5e4-e709/~tNl;09d2-903e/~tND;9752-469b/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-bus-reconnect.ini -r 9,           ,                 0040-555e/tplx;a74f-f079/~tNl;253a-b229/~tND;1ee0-fd0d/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-bus-reconnect.ini -r 10,          ,                 cd66-7ada/tplx;e98d-f5f5/~tNl;4524-6a64/~tND;547c-df10/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-bus-reconnect.ini -r 11,          ,                 c6fe-5000/tplx;4ec2-03fd/~tNl;c90e-a3b0/~tND;2e1e-34a8/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-bus-reconnect.ini -r 0,           ,                 71fd-ad8b/tplx;2669-7653/~tNl;2bd5-bedd/~tND;a07c-bb05/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-bus-reconnect.ini -r 1,           ,                 d3a2-c9c7/tplx;8cb6-b318/~tNl;abc2-c0e5/~tND;8e37-7334/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-bus-reconnect.ini -r 2,           ,                 a86f-d29e/tplx;af94-c62d/~tNl;b2c9-ff04/~tND;da7e-74e8/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-bus-reconnect.ini -r 3,           ,                 46ce-04dc/tplx;bb92-51e3/~tNl;2c15-6f2b/~tND;f8dc-346d/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-bus-reconnect.ini -r 4,           ,                 5420-fe2e/tplx;2fe5-dbfb/~tNl;62d9-b36e/~tND;75b2-5393/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-bus-reconnect.ini -r 5,           ,                 7249-ec0f/tplx;2bf9-1d86/~tNl;8d86-be6b/~tND;6bf1-057b/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-bus-reconnect.ini -r 6,           ,                 aea4-c60b/tplx;5f9a-f117/~tNl;d684-fa20/~tND;aebd-f639/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-bus-reconnect.ini -r 7,           ,                 e1bd-39ec/tplx;e39e-a9be/~tNl;4418-d204/~tND;5ae6-28a9/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-bus-reconnect.ini -r 8,           ,                 c951-a35f/tplx;dd18-3a34/~tNl;1364-a808/~tND;d347-0f24/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-bus-reconnect.ini -r 9,           ,                 e389-c9cb/tplx;f3ca-4925/~tNl;6f3b-4bc4/~tND;e2c9-ee89/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-bus-reconnect.ini -r 10,          ,                 484f-757a/tplx;9385-299b/~tNl;6e2e-9e77/~tND;5627-fd13/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-bus-reconnect.ini -r 11,          ,                 dfce-7db7/tplx;1311-0a45/~tNl;addb-182b/~tND;ca7e-41b1/tyf, PASS, EthernetCsmaMac
 #
-.,  -f ethernet-hub.ini -r 0,                     ,                 f07b-fc67/tplx;34b2-1c66/~tNl;36d5-a273/~tND;7a0d-325a/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub.ini -r 1,                     ,                 e755-e51b/tplx;419e-cad7/~tNl;93f9-cbb6/~tND;912a-4be0/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub.ini -r 2,                     ,                 465a-928f/tplx;fce0-0ebb/~tNl;bb16-c74c/~tND;ec1c-90bc/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub.ini -r 3,                     ,                 3219-ccfb/tplx;d593-5560/~tNl;0857-95f3/~tND;a727-0432/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub.ini -r 4,                     ,                 252e-93c2/tplx;0720-ebe1/~tNl;4e19-820e/~tND;10ca-ef15/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub.ini -r 5,                     ,                 97e7-75bc/tplx;f6e2-8b82/~tNl;1dbe-2268/~tND;ba07-b11e/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub.ini -r 6,                     ,                 1e10-cc84/tplx;bb4b-d856/~tNl;eb0f-8ebe/~tND;48b2-0c7d/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub.ini -r 7,                     ,                 bfba-42ee/tplx;34da-e95b/~tNl;b986-4b8e/~tND;ce61-e8f4/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub.ini -r 8,                     ,                 9755-c205/tplx;b553-50e4/~tNl;b04c-ba70/~tND;7779-9d17/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub.ini -r 9,                     ,                 6005-5f88/tplx;c452-9031/~tNl;e5b7-b7d5/~tND;11cd-67c2/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub.ini -r 10,                    ,                 cfde-4513/tplx;88b8-a6ea/~tNl;4747-6f18/~tND;26c6-428b/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub.ini -r 11,                    ,                 9ef7-3c57/tplx;c37e-ecb5/~tNl;672e-3cc5/~tND;bed1-d4bd/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub.ini -r 0,                     ,                 0d25-8cba/tplx;3fdb-3169/~tNl;37c6-030a/~tND;25fc-c255/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub.ini -r 1,                     ,                 5087-1b2a/tplx;a8d9-d1e7/~tNl;9535-3a9f/~tND;a9d7-aa72/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub.ini -r 2,                     ,                 03d3-4413/tplx;e0f4-fa28/~tNl;98e0-3639/~tND;8c67-3579/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub.ini -r 3,                     ,                 33a3-ccdd/tplx;0aab-515e/~tNl;74d0-571a/~tND;d196-63c2/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub.ini -r 4,                     ,                 fc1b-69e3/tplx;ed94-4bd7/~tNl;e82f-a4cf/~tND;4f41-76a8/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub.ini -r 5,                     ,                 1c8a-14fa/tplx;b12c-6333/~tNl;257a-22b7/~tND;c9a4-6fc4/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub.ini -r 6,                     ,                 c10a-69be/tplx;e893-30e2/~tNl;a1a0-a628/~tND;b028-9e2c/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub.ini -r 7,                     ,                 a868-12b4/tplx;1732-d600/~tNl;2951-7f26/~tND;8635-0322/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub.ini -r 8,                     ,                 ce6f-eee3/tplx;a09f-882d/~tNl;69d4-5205/~tND;e12f-1392/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub.ini -r 9,                     ,                 5554-48be/tplx;663f-3d77/~tNl;7cb4-4742/~tND;bc50-d606/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub.ini -r 10,                    ,                 0bb9-41c8/tplx;8cc3-bc99/~tNl;6a13-2ec6/~tND;0973-2b02/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub.ini -r 11,                    ,                 fd17-be39/tplx;e619-03d8/~tNl;7486-0297/~tND;65fa-59bb/tyf, PASS, EthernetCsmaMac
 #
-.,  -f ethernet-hub-reconnect.ini -r 0,           ,                 68e4-0e70/tplx;5067-726d/~tNl;b396-677c/~tND;b205-2a9a/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub-reconnect.ini -r 1,           ,                 3b4e-40b2/tplx;7a25-cb89/~tNl;3040-95aa/~tND;5bac-7fb7/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub-reconnect.ini -r 2,           ,                 93af-a519/tplx;89c2-3f79/~tNl;75da-7abb/~tND;0ea2-96b2/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub-reconnect.ini -r 3,           ,                 6f5f-c339/tplx;7211-e9e9/~tNl;a6e2-decb/~tND;460f-e66a/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub-reconnect.ini -r 4,           ,                 1e60-0e10/tplx;f316-8393/~tNl;bf5c-6871/~tND;b11a-57b3/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub-reconnect.ini -r 5,           ,                 1ca5-0b09/tplx;294f-118e/~tNl;5e6b-9ed7/~tND;3ff0-3bb7/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub-reconnect.ini -r 6,           ,                 8b98-0cc9/tplx;43c8-e5ab/~tNl;65d2-d253/~tND;9740-6a23/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub-reconnect.ini -r 7,           ,                 4851-d552/tplx;16c6-425f/~tNl;9377-4d46/~tND;4bb5-1b59/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub-reconnect.ini -r 8,           ,                 3c32-be0d/tplx;503b-22f3/~tNl;59a7-05e3/~tND;bd53-1900/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub-reconnect.ini -r 9,           ,                 a2ec-321f/tplx;2173-7a16/~tNl;a385-c5fb/~tND;ae58-dfb2/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub-reconnect.ini -r 10,          ,                 4382-3d42/tplx;8420-df16/~tNl;f5a2-02d0/~tND;a3b6-7240/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-hub-reconnect.ini -r 11,          ,                 772c-1d1a/tplx;ad48-81bc/~tNl;cf1d-a347/~tND;0d5c-bdd4/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub-reconnect.ini -r 0,           ,                 aac7-5fc7/tplx;6e8c-7e28/~tNl;854c-9a1f/~tND;0c66-4273/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub-reconnect.ini -r 1,           ,                 ab16-c601/tplx;04dc-52a7/~tNl;c241-58f8/~tND;ecbc-5467/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub-reconnect.ini -r 2,           ,                 0a1f-b561/tplx;59ef-d177/~tNl;c725-f10e/~tND;6ef7-d0e2/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub-reconnect.ini -r 3,           ,                 24a6-aed4/tplx;fd36-fedf/~tNl;e066-2a56/~tND;ed6a-4a86/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub-reconnect.ini -r 4,           ,                 162c-55b4/tplx;7af1-0b85/~tNl;7957-9128/~tND;ea85-53b2/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub-reconnect.ini -r 5,           ,                 210e-04fa/tplx;6c11-d8c3/~tNl;160c-a369/~tND;01d5-7f1a/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub-reconnect.ini -r 6,           ,                 d994-0aca/tplx;d208-1af8/~tNl;1ec2-04dd/~tND;e7d3-e0d7/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub-reconnect.ini -r 7,           ,                 291b-7706/tplx;4e94-2966/~tNl;0526-3578/~tND;2b01-faf7/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub-reconnect.ini -r 8,           ,                 bf4f-b814/tplx;2382-ca87/~tNl;dece-9620/~tND;c23d-f795/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub-reconnect.ini -r 9,           ,                 6cfd-74f1/tplx;7a68-dc9e/~tNl;dd0d-9795/~tND;49b9-35d8/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub-reconnect.ini -r 10,          ,                 6e79-8078/tplx;a4b4-805a/~tNl;0002-24b0/~tND;9e8c-b3bc/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-hub-reconnect.ini -r 11,          ,                 2642-df12/tplx;2ff3-5d46/~tNl;121e-a9c7/~tND;c27f-c5d1/tyf, PASS, EthernetCsmaMac
 #
-.,  -f ethernet-switch.ini -r 0,                  ,                 20fa-e5d1/tplx;0ead-0e3f/~tNl;37bc-44e2/~tND;5879-0732/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-switch.ini -r 1,                  ,                 f1a4-2683/tplx;0ead-0e3f/~tNl;37bc-44e2/~tND;20ee-454d/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-switch.ini -r 2,                  ,                 246b-a838/tplx;e346-b782/~tNl;fa15-8a45/~tND;b396-a66c/tyf, PASS, EthernetMac
-.,  -f ethernet-switch.ini -r 3,                  ,                 37b3-cb9c/tplx;e346-b782/~tNl;fa15-8a45/~tND;0c4c-910b/tyf, PASS, EthernetMac
-.,  -f ethernet-switch.ini -r 4,                  ,                 181a-b5b2/tplx;076a-5280/~tNl;3bae-a79e/~tND;917c-6d52/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-switch.ini -r 5,                  ,                 6f45-2467/tplx;076a-5280/~tNl;3bae-a79e/~tND;a01a-79de/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-switch.ini -r 6,                  ,                 64cc-c66a/tplx;dc88-9e4a/~tNl;9a13-1617/~tND;08fa-f762/tyf, PASS, EthernetMac
-.,  -f ethernet-switch.ini -r 7,                  ,                 8d4b-9d17/tplx;dc88-9e4a/~tNl;9a13-1617/~tND;4d4f-df16/tyf, PASS, EthernetMac
-.,  -f ethernet-switch.ini -r 8,                  ,                 0d45-5d60/tplx;1556-67da/~tNl;4661-dc64/~tND;40cc-802a/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-switch.ini -r 9,                  ,                 52f1-38c3/tplx;1556-67da/~tNl;4661-dc64/~tND;5ebe-6a20/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-switch.ini -r 10,                 ,                 7ed9-546c/tplx;5b91-fdf7/~tNl;e004-42bc/~tND;6feb-0ac1/tyf, PASS, EthernetMac
-.,  -f ethernet-switch.ini -r 11,                 ,                 3594-1db6/tplx;5b91-fdf7/~tNl;e004-42bc/~tND;039e-fe58/tyf, PASS, EthernetMac
-.,  -f ethernet-switch.ini -r 12,                 ,                 da38-e21e/tplx;1372-f524/~tNl;75f1-4597/~tND;6c16-1c52/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-switch.ini -r 13,                 ,                 7baf-161a/tplx;1372-f524/~tNl;75f1-4597/~tND;eb25-4fd7/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-switch.ini -r 14,                 ,                 1cff-cf28/tplx;19f8-6ed9/~tNl;1f3f-8a7a/~tND;29da-60ed/tyf, PASS, EthernetMac
-.,  -f ethernet-switch.ini -r 15,                 ,                 c6d5-1439/tplx;19f8-6ed9/~tNl;1f3f-8a7a/~tND;a77e-814b/tyf, PASS, EthernetMac
-.,  -f ethernet-switch.ini -r 16,                 ,                 9df4-5c32/tplx;6baf-56b4/~tNl;18ff-35e2/~tND;6bad-5c6e/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-switch.ini -r 17,                 ,                 ab92-20fa/tplx;6baf-56b4/~tNl;18ff-35e2/~tND;f2d3-d979/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-switch.ini -r 18,                 ,                 5a1c-b58b/tplx;2b35-8e48/~tNl;c7ae-b7c8/~tND;2d31-dc37/tyf, PASS, EthernetMac
-.,  -f ethernet-switch.ini -r 19,                 ,                 278f-9310/tplx;2b35-8e48/~tNl;c7ae-b7c8/~tND;13f2-26e9/tyf, PASS, EthernetMac
-.,  -f ethernet-switch.ini -r 20,                 ,                 4bf3-b929/tplx;ac9c-a9da/~tNl;b07c-bbf6/~tND;ba01-872e/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-switch.ini -r 21,                 ,                 ffb9-0c54/tplx;ac9c-a9da/~tNl;b07c-bbf6/~tND;f01c-dfb6/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-switch.ini -r 22,                 ,                 a1f8-9203/tplx;6f6c-c6e6/~tNl;d701-73cc/~tND;2ecb-6cf7/tyf, PASS, EthernetMac
-.,  -f ethernet-switch.ini -r 23,                 ,                 1114-f070/tplx;6f6c-c6e6/~tNl;d701-73cc/~tND;459f-c232/tyf, PASS, EthernetMac
+.,  -f ethernet-switch.ini -r 0,                  ,                 1cee-bed6/tplx;01d5-ff3f/~tNl;8853-239a/~tND;1a5a-6760/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-switch.ini -r 1,                  ,                 282b-db22/tplx;01d5-ff3f/~tNl;8853-239a/~tND;7151-1636/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-switch.ini -r 2,                  ,                 bf76-bf15/tplx;9112-156a/~tNl;513f-2833/~tND;d7d2-dbef/tyf, PASS, EthernetMac
+.,  -f ethernet-switch.ini -r 3,                  ,                 764e-a5d5/tplx;9112-156a/~tNl;513f-2833/~tND;c6e7-f59c/tyf, PASS, EthernetMac
+.,  -f ethernet-switch.ini -r 4,                  ,                 3fb6-7a36/tplx;c1d7-1fe5/~tNl;4ea4-5181/~tND;65ff-787b/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-switch.ini -r 5,                  ,                 9edc-1cd5/tplx;c1d7-1fe5/~tNl;4ea4-5181/~tND;98c4-6c8e/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-switch.ini -r 6,                  ,                 2bb9-34ae/tplx;cf88-3c2e/~tNl;d95c-9d61/~tND;9f30-f2c8/tyf, PASS, EthernetMac
+.,  -f ethernet-switch.ini -r 7,                  ,                 e060-3bba/tplx;cf88-3c2e/~tNl;d95c-9d61/~tND;f1ea-a833/tyf, PASS, EthernetMac
+.,  -f ethernet-switch.ini -r 8,                  ,                 c976-97cc/tplx;fecc-c142/~tNl;d5e4-ab9b/~tND;66fb-e786/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-switch.ini -r 9,                  ,                 6704-c305/tplx;fecc-c142/~tNl;d5e4-ab9b/~tND;cb32-0b4f/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-switch.ini -r 10,                 ,                 084d-79e7/tplx;8e4e-b6fa/~tNl;9689-8699/~tND;6251-1351/tyf, PASS, EthernetMac
+.,  -f ethernet-switch.ini -r 11,                 ,                 0e2c-a548/tplx;8e4e-b6fa/~tNl;9689-8699/~tND;71b1-28fb/tyf, PASS, EthernetMac
+.,  -f ethernet-switch.ini -r 12,                 ,                 6a43-dc1d/tplx;4a7a-2a60/~tNl;93d6-3ab5/~tND;21d9-7481/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-switch.ini -r 13,                 ,                 b162-5a2f/tplx;4a7a-2a60/~tNl;93d6-3ab5/~tND;cacf-bcc2/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-switch.ini -r 14,                 ,                 ac23-f64d/tplx;3f53-838c/~tNl;b484-3847/~tND;74cc-33ef/tyf, PASS, EthernetMac
+.,  -f ethernet-switch.ini -r 15,                 ,                 1512-9ca3/tplx;3f53-838c/~tNl;b484-3847/~tND;4cb8-f6d6/tyf, PASS, EthernetMac
+.,  -f ethernet-switch.ini -r 16,                 ,                 cb78-ffbb/tplx;bd98-0142/~tNl;787a-bcc2/~tND;1f17-5618/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-switch.ini -r 17,                 ,                 3e5c-3715/tplx;bd98-0142/~tNl;787a-bcc2/~tND;ef4e-6cc8/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-switch.ini -r 18,                 ,                 4dbe-3fd0/tplx;7b7a-ed62/~tNl;43df-518b/~tND;5074-5253/tyf, PASS, EthernetMac
+.,  -f ethernet-switch.ini -r 19,                 ,                 541e-0f88/tplx;7b7a-ed62/~tNl;43df-518b/~tND;952d-47e2/tyf, PASS, EthernetMac
+.,  -f ethernet-switch.ini -r 20,                 ,                 9e00-492a/tplx;386b-777b/~tNl;c458-9214/~tND;a248-b89c/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-switch.ini -r 21,                 ,                 321c-4d91/tplx;386b-777b/~tNl;c458-9214/~tND;d110-280b/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-switch.ini -r 22,                 ,                 8c0a-6656/tplx;d0ad-ddae/~tNl;fe25-c189/~tND;18af-02e1/tyf, PASS, EthernetMac
+.,  -f ethernet-switch.ini -r 23,                 ,                 dc2e-dfe3/tplx;d0ad-ddae/~tNl;fe25-c189/~tND;4682-89f3/tyf, PASS, EthernetMac
 #
-.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 8ae3-c65c/tplx;3291-1840/~tNl;7592-7e94/~tND;d6f6-ec3b/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 36f4-7dc8/tplx;3291-1840/~tNl;7592-7e94/~tND;a6f0-1b3a/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 8ae3-c65c/tplx;3291-1840/~tNl;7592-7e94/~tND;d6f6-ec3b/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 36f4-7dc8/tplx;3291-1840/~tNl;7592-7e94/~tND;a6f0-1b3a/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==true  && $duplex==false && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , d0e5-4374/tplx;41d8-5350/~tNl;a23c-d7c0/~tND;d0e3-5e68/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==true  && $duplex==false && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 1ba8-2ed4/tplx;41d8-5350/~tNl;a23c-d7c0/~tND;6927-9591/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==true  && $duplex==false && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , d0e5-4374/tplx;41d8-5350/~tNl;a23c-d7c0/~tND;d0e3-5e68/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==true  && $duplex==false && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 1ba8-2ed4/tplx;41d8-5350/~tNl;a23c-d7c0/~tND;6927-9591/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 8c1d-1576/tplx;7fa9-961e/~tNl;a93e-48e8/~tND;ae74-4bab/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 4aa2-59c8/tplx;7fa9-961e/~tNl;a93e-48e8/~tND;1b38-1737/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 8c1d-1576/tplx;7fa9-961e/~tNl;a93e-48e8/~tND;ae74-4bab/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 4aa2-59c8/tplx;7fa9-961e/~tNl;a93e-48e8/~tND;1b38-1737/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , e88f-ba00/tplx;98b3-2ca1/~tNl;7f23-81e2/~tND;8992-ce42/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 4d2c-44ba/tplx;98b3-2ca1/~tNl;7f23-81e2/~tND;6a16-e404/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , e88f-ba00/tplx;98b3-2ca1/~tNl;7f23-81e2/~tND;8992-ce42/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 4d2c-44ba/tplx;98b3-2ca1/~tNl;7f23-81e2/~tND;6a16-e404/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==true  && $duplex==false && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 4a56-3e13/tplx;2b7d-0f50/~tNl;55af-3f0b/~tND;35a9-4790/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==true  && $duplex==false && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 7107-645b/tplx;2b7d-0f50/~tNl;55af-3f0b/~tND;a754-d034/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==true  && $duplex==false && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 4a56-3e13/tplx;2b7d-0f50/~tNl;55af-3f0b/~tND;35a9-4790/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==true  && $duplex==false && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 7107-645b/tplx;2b7d-0f50/~tNl;55af-3f0b/~tND;a754-d034/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , aefc-28da/tplx;79d3-d0bb/~tNl;4857-61c1/~tND;2bed-6b02/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 0e92-096c/tplx;79d3-d0bb/~tNl;4857-61c1/~tND;1142-2313/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , aefc-28da/tplx;79d3-d0bb/~tNl;4857-61c1/~tND;2bed-6b02/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Mbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 0e92-096c/tplx;79d3-d0bb/~tNl;4857-61c1/~tND;1142-2313/tyf, PASS, EthernetMac
 
-.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 85a0-4ee8/tplx;a05e-b34a/~tNl;9434-5295/~tND;4a87-dd5d/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , fa35-3869/tplx;a05e-b34a/~tNl;9434-5295/~tND;78c8-633f/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 85a0-4ee8/tplx;a05e-b34a/~tNl;9434-5295/~tND;4a87-dd5d/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , fa35-3869/tplx;a05e-b34a/~tNl;9434-5295/~tND;78c8-633f/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==true  && $duplex==false && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , c84d-60ab/tplx;05b4-8165/~tNl;c547-c87f/~tND;b122-2570/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==true  && $duplex==false && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 82ae-7f12/tplx;05b4-8165/~tNl;c547-c87f/~tND;0836-8f08/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==true  && $duplex==false && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , c84d-60ab/tplx;05b4-8165/~tNl;c547-c87f/~tND;b122-2570/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==true  && $duplex==false && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 82ae-7f12/tplx;05b4-8165/~tNl;c547-c87f/~tND;0836-8f08/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 23d3-e456/tplx;6443-ab74/~tNl;9666-77ae/~tND;efc4-b258/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 1555-3ef6/tplx;6443-ab74/~tNl;9666-77ae/~tND;e839-b751/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 23d3-e456/tplx;6443-ab74/~tNl;9666-77ae/~tND;efc4-b258/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 1555-3ef6/tplx;6443-ab74/~tNl;9666-77ae/~tND;e839-b751/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 13ad-3ce7/tplx;9e90-2046/~tNl;7d6f-c90b/~tND;01a5-bb93/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , ef16-c7ad/tplx;9e90-2046/~tNl;7d6f-c90b/~tND;4c14-6e99/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 13ad-3ce7/tplx;9e90-2046/~tNl;7d6f-c90b/~tND;01a5-bb93/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , ef16-c7ad/tplx;9e90-2046/~tNl;7d6f-c90b/~tND;4c14-6e99/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==true  && $duplex==false && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , be83-1fcd/tplx;f734-7aa0/~tNl;22d6-29e9/~tND;1a5c-4e47/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==true  && $duplex==false && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 9abd-30cb/tplx;f734-7aa0/~tNl;22d6-29e9/~tND;e14e-288f/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==true  && $duplex==false && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , be83-1fcd/tplx;f734-7aa0/~tNl;22d6-29e9/~tND;1a5c-4e47/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==true  && $duplex==false && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 9abd-30cb/tplx;f734-7aa0/~tNl;22d6-29e9/~tND;e14e-288f/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 3e0b-9188/tplx;6e34-724c/~tNl;e03a-c5cc/~tND;406e-dc59/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 6536-9031/tplx;6e34-724c/~tNl;e03a-c5cc/~tND;f4e7-0d83/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 3e0b-9188/tplx;6e34-724c/~tNl;e03a-c5cc/~tND;406e-dc59/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Mbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 6536-9031/tplx;6e34-724c/~tNl;e03a-c5cc/~tND;f4e7-0d83/tyf, PASS, EthernetMac
 
-.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , b469-6537/tplx;3ce6-542a/~tNl;e88d-aeed/~tND;921b-3430/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , ae8b-ba0d/tplx;3ce6-542a/~tNl;e88d-aeed/~tND;791a-1616/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , b469-6537/tplx;3ce6-542a/~tNl;e88d-aeed/~tND;921b-3430/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , ae8b-ba0d/tplx;3ce6-542a/~tNl;e88d-aeed/~tND;791a-1616/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==true  && $duplex==false && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , af50-5deb/tplx;7a84-8031/~tNl;3dfe-b990/~tND;9cea-8b68/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==true  && $duplex==false && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , c0a4-c5b8/tplx;7a84-8031/~tNl;3dfe-b990/~tND;576f-dde5/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==true  && $duplex==false && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 82bb-8658/tplx;fd3b-a03d/~tNl;ff2c-3ac7/~tND;5ff6-254e/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==true  && $duplex==false && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 9b46-679b/tplx;fd3b-a03d/~tNl;ff2c-3ac7/~tND;86cd-4052/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , cb1d-9ea5/tplx;408e-f3f4/~tNl;3308-2641/~tND;2389-4e5a/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , d626-31ce/tplx;408e-f3f4/~tNl;3308-2641/~tND;790a-6bd8/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , cb1d-9ea5/tplx;408e-f3f4/~tNl;3308-2641/~tND;2389-4e5a/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , d626-31ce/tplx;408e-f3f4/~tNl;3308-2641/~tND;790a-6bd8/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 32a6-c2b8/tplx;16cc-a076/~tNl;784f-9aea/~tND;88db-52a9/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 9a93-fd94/tplx;16cc-a076/~tNl;784f-9aea/~tND;ea18-db8d/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 32a6-c2b8/tplx;16cc-a076/~tNl;784f-9aea/~tND;88db-52a9/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 9a93-fd94/tplx;16cc-a076/~tNl;784f-9aea/~tND;ea18-db8d/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==true  && $duplex==false && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 705e-5c16/tplx;d7f7-1eab/~tNl;1b4b-365d/~tND;1e1c-39e6/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==true  && $duplex==false && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 3fb9-13fb/tplx;d7f7-1eab/~tNl;1b4b-365d/~tND;9bbe-4539/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==true  && $duplex==false && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 1b3e-86d7/tplx;0887-285b/~tNl;5c4e-07e4/~tND;8d91-8eb5/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==true  && $duplex==false && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 84ef-ebea/tplx;0887-285b/~tNl;5c4e-07e4/~tND;e49d-cae2/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 1f30-7246/tplx;590f-6f02/~tNl;bc77-9918/~tND;de46-c7d4/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 31a0-cb3a/tplx;590f-6f02/~tNl;bc77-9918/~tND;fc4c-d1bf/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 1f30-7246/tplx;590f-6f02/~tNl;bc77-9918/~tND;de46-c7d4/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==1Gbps   && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 31a0-cb3a/tplx;590f-6f02/~tNl;bc77-9918/~tND;fc4c-d1bf/tyf, PASS, EthernetMac
 
-.,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 8e10-6dfb/tplx;8c91-e6ee/~tNl;95d9-9e73/~tND;0806-6a61/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , a6e7-a47d/tplx;8c91-e6ee/~tNl;95d9-9e73/~tND;e34b-4f05/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 8e10-6dfb/tplx;8c91-e6ee/~tNl;95d9-9e73/~tND;0806-6a61/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , a6e7-a47d/tplx;8c91-e6ee/~tNl;95d9-9e73/~tND;e34b-4f05/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 74fb-1d31/tplx;0507-2cb4/~tNl;973f-f920/~tND;a12d-334f/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 1048-7f36/tplx;0507-2cb4/~tNl;973f-f920/~tND;f655-0a13/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 74fb-1d31/tplx;0507-2cb4/~tNl;973f-f920/~tND;a12d-334f/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 1048-7f36/tplx;0507-2cb4/~tNl;973f-f920/~tND;f655-0a13/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , ed03-b1b2/tplx;8f91-d24d/~tNl;ffc9-0d57/~tND;9406-35c5/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , a394-89bb/tplx;8f91-d24d/~tNl;ffc9-0d57/~tND;fa9f-1d3d/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , ed03-b1b2/tplx;8f91-d24d/~tNl;ffc9-0d57/~tND;9406-35c5/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , a394-89bb/tplx;8f91-d24d/~tNl;ffc9-0d57/~tND;fa9f-1d3d/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 1b3d-a8f0/tplx;e454-e016/~tNl;12f8-be0f/~tND;c960-4136/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 4e5e-c8c6/tplx;e454-e016/~tNl;12f8-be0f/~tND;ad32-94b7/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 1b3d-a8f0/tplx;e454-e016/~tNl;12f8-be0f/~tND;c960-4136/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==10Gbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 4e5e-c8c6/tplx;e454-e016/~tNl;12f8-be0f/~tND;ad32-94b7/tyf, PASS, EthernetMac
 
-.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 6c73-e994/tplx;c1ea-17a1/~tNl;26fe-3165/~tND;23f0-86d0/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 1fd9-de1f/tplx;c1ea-17a1/~tNl;26fe-3165/~tND;76b8-6545/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 6c73-e994/tplx;c1ea-17a1/~tNl;26fe-3165/~tND;23f0-86d0/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 1fd9-de1f/tplx;c1ea-17a1/~tNl;26fe-3165/~tND;76b8-6545/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , c32b-aa84/tplx;0821-f956/~tNl;7e29-3cfc/~tND;61fc-6dd7/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , a7c0-3eaf/tplx;0821-f956/~tNl;7e29-3cfc/~tND;1bd8-5b15/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , c32b-aa84/tplx;0821-f956/~tNl;7e29-3cfc/~tND;61fc-6dd7/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , a7c0-3eaf/tplx;0821-f956/~tNl;7e29-3cfc/~tND;1bd8-5b15/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 71b4-4828/tplx;6ab9-d311/~tNl;82ac-8856/~tND;77ee-c55b/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 356d-ed80/tplx;6ab9-d311/~tNl;82ac-8856/~tND;7804-ddea/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 71b4-4828/tplx;6ab9-d311/~tNl;82ac-8856/~tND;77ee-c55b/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 356d-ed80/tplx;6ab9-d311/~tNl;82ac-8856/~tND;7804-ddea/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , f730-8719/tplx;8f24-fe26/~tNl;2808-0071/~tND;6174-88bb/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 5d6c-e8f1/tplx;8f24-fe26/~tNl;2808-0071/~tND;10c5-58fb/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , f730-8719/tplx;8f24-fe26/~tNl;2808-0071/~tND;6174-88bb/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==25Gbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 5d6c-e8f1/tplx;8f24-fe26/~tNl;2808-0071/~tND;10c5-58fb/tyf, PASS, EthernetMac
 
-.,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , b3d8-411a/tplx;bec5-c94d/~tNl;7761-5181/~tND;cffd-207b/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 6a9c-fb2f/tplx;bec5-c94d/~tNl;7761-5181/~tND;1430-1bee/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , b3d8-411a/tplx;bec5-c94d/~tNl;7761-5181/~tND;cffd-207b/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 6a9c-fb2f/tplx;bec5-c94d/~tNl;7761-5181/~tND;1430-1bee/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 4a1a-a8cd/tplx;9181-8e72/~tNl;6d84-0b58/~tND;e034-577f/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 98b8-5304/tplx;9181-8e72/~tNl;6d84-0b58/~tND;71cb-3955/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 4a1a-a8cd/tplx;9181-8e72/~tNl;6d84-0b58/~tND;e034-577f/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 98b8-5304/tplx;9181-8e72/~tNl;6d84-0b58/~tND;71cb-3955/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , da40-7dd2/tplx;a925-74e4/~tNl;f895-20c2/~tND;b541-b8cc/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 75f8-ec6b/tplx;a925-74e4/~tNl;f895-20c2/~tND;f455-a7fd/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , da40-7dd2/tplx;a925-74e4/~tNl;f895-20c2/~tND;b541-b8cc/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 75f8-ec6b/tplx;a925-74e4/~tNl;f895-20c2/~tND;f455-a7fd/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 78aa-0495/tplx;d6c7-666b/~tNl;52b6-76b7/~tND;6f86-60d0/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 32db-e1bd/tplx;d6c7-666b/~tNl;52b6-76b7/~tND;91c5-bbfb/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 78aa-0495/tplx;d6c7-666b/~tNl;52b6-76b7/~tND;6f86-60d0/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==40Gbps  && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 32db-e1bd/tplx;d6c7-666b/~tNl;52b6-76b7/~tND;91c5-bbfb/tyf, PASS, EthernetMac
 
-.,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 56fd-329a/tplx;6952-47f7/~tNl;db6b-bf4e/~tND;bbdd-35ad/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 66ef-967c/tplx;6952-47f7/~tNl;db6b-bf4e/~tND;883f-ca47/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 56fd-329a/tplx;6952-47f7/~tNl;db6b-bf4e/~tND;bbdd-35ad/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 66ef-967c/tplx;6952-47f7/~tNl;db6b-bf4e/~tND;883f-ca47/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 5b18-3cec/tplx;2620-9dea/~tNl;6c27-3837/~tND;5907-bc5a/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , a77a-8fab/tplx;2620-9dea/~tNl;6c27-3837/~tND;98cf-e5ed/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 5b18-3cec/tplx;2620-9dea/~tNl;6c27-3837/~tND;5907-bc5a/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , a77a-8fab/tplx;2620-9dea/~tNl;6c27-3837/~tND;98cf-e5ed/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , b3a9-9251/tplx;7f3b-c2e4/~tNl;22f6-aa31/~tND;43fc-d528/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 4c95-1a08/tplx;7f3b-c2e4/~tNl;22f6-aa31/~tND;a0c2-6a6f/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , b3a9-9251/tplx;7f3b-c2e4/~tNl;22f6-aa31/~tND;43fc-d528/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 4c95-1a08/tplx;7f3b-c2e4/~tNl;22f6-aa31/~tND;a0c2-6a6f/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , ee59-7945/tplx;4abe-8f31/~tNl;73f6-9275/~tND;24cd-33c1/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , b713-0139/tplx;4abe-8f31/~tNl;73f6-9275/~tND;772a-357c/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , ee59-7945/tplx;4abe-8f31/~tNl;73f6-9275/~tND;24cd-33c1/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==100Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , b713-0139/tplx;4abe-8f31/~tNl;73f6-9275/~tND;772a-357c/tyf, PASS, EthernetMac
 
-.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 0f63-a532/tplx;d8e5-9a81/~tNl;5187-84e7/~tND;acd5-c7ad/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , a023-68bc/tplx;d8e5-9a81/~tNl;5187-84e7/~tND;c966-0a0a/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 0f63-a532/tplx;d8e5-9a81/~tNl;5187-84e7/~tND;acd5-c7ad/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , a023-68bc/tplx;d8e5-9a81/~tNl;5187-84e7/~tND;c966-0a0a/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 0023-54bb/tplx;805e-c11c/~tNl;6249-dc07/~tND;1c07-476f/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 723c-009f/tplx;805e-c11c/~tNl;6249-dc07/~tND;efc5-51b0/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 0023-54bb/tplx;805e-c11c/~tNl;6249-dc07/~tND;1c07-476f/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 723c-009f/tplx;805e-c11c/~tNl;6249-dc07/~tND;efc5-51b0/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 0bef-9841/tplx;5d5b-09b0/~tNl;a9a1-50af/~tND;0cb3-0ef6/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , c970-1133/tplx;5d5b-09b0/~tNl;a9a1-50af/~tND;a63a-01f4/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 0bef-9841/tplx;5d5b-09b0/~tNl;a9a1-50af/~tND;0cb3-0ef6/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , c970-1133/tplx;5d5b-09b0/~tNl;a9a1-50af/~tND;a63a-01f4/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , b65e-e4ff/tplx;94ff-cdbc/~tNl;43de-99c6/~tND;078a-2b99/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 7a0b-9f28/tplx;94ff-cdbc/~tNl;43de-99c6/~tND;c5a9-b867/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , b65e-e4ff/tplx;94ff-cdbc/~tNl;43de-99c6/~tND;078a-2b99/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==200Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 7a0b-9f28/tplx;94ff-cdbc/~tNl;43de-99c6/~tND;c5a9-b867/tyf, PASS, EthernetMac
 
-.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , a9d4-6cac/tplx;351e-eb2e/~tNl;c810-edf5/~tND;d557-e0ea/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , bef4-e3a6/tplx;351e-eb2e/~tNl;c810-edf5/~tND;1144-a741/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , a9d4-6cac/tplx;351e-eb2e/~tNl;c810-edf5/~tND;d557-e0ea/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , bef4-e3a6/tplx;351e-eb2e/~tNl;c810-edf5/~tND;1144-a741/tyf, PASS, EthernetCsmaMac
-.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , bd2d-5921/tplx;90fd-c3a4/~tNl;e68c-c3fc/~tND;7ec4-eed4/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , 59c3-c10b/tplx;90fd-c3a4/~tNl;e68c-c3fc/~tND;40c1-0bf0/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , bd2d-5921/tplx;90fd-c3a4/~tNl;e68c-c3fc/~tND;7ec4-eed4/tyf, PASS, EthernetMac
-.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , 59c3-c10b/tplx;90fd-c3a4/~tNl;e68c-c3fc/~tND;40c1-0bf0/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 2f4f-f0bd/tplx;98d5-684b/~tNl;f8ba-f2be/~tND;d537-f8e0/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==true  && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , f816-bf49/tplx;98d5-684b/~tNl;f8ba-f2be/~tND;65d8-cd8c/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 2f4f-f0bd/tplx;98d5-684b/~tNl;f8ba-f2be/~tND;d537-f8e0/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==true  && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , f816-bf49/tplx;98d5-684b/~tNl;f8ba-f2be/~tND;65d8-cd8c/tyf, PASS, EthernetCsmaMac
+.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="EthernetQosQueue" && $repetition==0', , 2b6b-4a73/tplx;46d9-4a08/~tNl;5dff-04db/~tND;8a5b-9b21/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==false && $duplex==true  && $burst==true  && $queue=="DropTailQueue" && $repetition==0',    , a3ec-62e6/tplx;46d9-4a08/~tNl;5dff-04db/~tND;754a-5ee7/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="EthernetQosQueue" && $repetition==0', , 2b6b-4a73/tplx;46d9-4a08/~tNl;5dff-04db/~tND;8a5b-9b21/tyf, PASS, EthernetMac
+.,  -f ethernet-twohosts.ini -r '$datarate==400Gbps && $csmacd==false && $duplex==true  && $burst==false && $queue=="DropTailQueue" && $repetition==0',    , a3ec-62e6/tplx;46d9-4a08/~tNl;5dff-04db/~tND;754a-5ee7/tyf, PASS, EthernetMac
 
