@@ -7,11 +7,14 @@
 #ifndef __INET_ETHERNETENCAPSULATION_H
 #define __INET_ETHERNETENCAPSULATION_H
 
+#include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/OperationalBase.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
-#include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
@@ -19,8 +22,11 @@ namespace inet {
 /**
  * Performs Ethernet II encapsulation/decapsulation. More info in the NED file.
  */
-class INET_API EthernetEncapsulation : public Ieee8022Llc
+class INET_API EthernetEncapsulation : public OperationalBase, public DefaultProtocolRegistrationListener
 {
+protected:
+  std::set<const Protocol *> upperProtocols; // where to send packets after decapsulation
+
   protected:
     FcsMode fcsMode = FCS_MODE_UNDEFINED;
     int seqNum;
@@ -32,7 +38,6 @@ class INET_API EthernetEncapsulation : public Ieee8022Llc
     static simsignal_t encapPkSignal;
     static simsignal_t decapPkSignal;
     static simsignal_t pauseSentSignal;
-    bool useSNAP; // true: generate EtherFrameWithSNAP, false: generate EthernetIIFrame
     NetworkInterface *networkInterface = nullptr;
 
     struct Socket {
@@ -53,21 +58,26 @@ class INET_API EthernetEncapsulation : public Ieee8022Llc
     virtual ~EthernetEncapsulation();
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
+    virtual void handleMessageWhenUp(cMessage *message) override;
 
-    virtual void registerMyProtocol() override;
+    virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
-    virtual void processCommandFromHigherLayer(Request *msg) override;
-    virtual void processPacketFromHigherLayer(Packet *msg) override;
-    virtual void processPacketFromMac(Packet *packet) override;
+    virtual void processCommandFromHigherLayer(Request *msg);
+    virtual void processPacketFromHigherLayer(Packet *msg);
+    virtual void processPacketFromMac(Packet *packet);
     virtual void handleSendPause(cMessage *msg);
 
     virtual void refreshDisplay() const override;
 
-  public:
-    /**
-     * Inserts the FCS chunk to end of packet. Fill the fcsMode and set fcs to 0.
-     */
-    static const Ptr<const EthernetMacHeader> decapsulateMacHeader(Packet *packet);
+    // for lifecycle:
+    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
+    virtual void clearSockets();
+    virtual void handleStartOperation(LifecycleOperation *operation) override;
+    virtual void handleStopOperation(LifecycleOperation *operation) override;
+    virtual void handleCrashOperation(LifecycleOperation *operation) override;
 };
 
 } // namespace inet

@@ -7,7 +7,6 @@
 #include "inet/linklayer/ethernet/basic/EthernetEncapsulation.h"
 
 #include "inet/common/INETUtils.h"
-#include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/checksum/EthernetCRC.h"
@@ -64,15 +63,15 @@ bool EthernetEncapsulation::Socket::matches(Packet *packet, const Ptr<const Ethe
 
 void EthernetEncapsulation::initialize(int stage)
 {
-    Ieee8022Llc::initialize(stage);
+    OperationalBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         fcsMode = parseFcsMode(par("fcsMode"));
         seqNum = 0;
         WATCH(seqNum);
         totalFromHigherLayer = totalFromMAC = totalPauseSent = 0;
-        useSNAP = par("useSNAP");
         networkInterface = findContainingNicModule(this); // TODO or getContainingNicModule() ? or use a MacForwardingTable?
 
+        WATCH_PTRSET(upperProtocols);
         WATCH_PTRMAP(socketIdToSocketMap);
         WATCH(totalFromHigherLayer);
         WATCH(totalFromMAC);
@@ -82,13 +81,27 @@ void EthernetEncapsulation::initialize(int stage)
         if (par("registerProtocol").boolValue()) { // FIXME //KUDGE should redesign place of EthernetEncapsulation and LLC modules
             // register service and protocol
             registerService(Protocol::ethernetMac, gate("upperLayerIn"), gate("upperLayerOut"));
+            registerProtocol(Protocol::ethernetMac, gate("lowerLayerOut"), gate("lowerLayerIn"));
         }
     }
 }
 
-void EthernetEncapsulation::registerMyProtocol()
+void EthernetEncapsulation::handleMessageWhenUp(cMessage *msg)
 {
-    registerProtocol(Protocol::ethernetMac, gate("lowerLayerOut"), gate("lowerLayerIn"));
+    if (msg->arrivedOn("upperLayerIn")) {
+        // from upper layer
+        EV_INFO << "Received " << msg << " from upper layer." << endl;
+        if (msg->isPacket())
+            processPacketFromHigherLayer(check_and_cast<Packet *>(msg));
+        else
+            processCommandFromHigherLayer(check_and_cast<Request *>(msg));
+    }
+    else if (msg->arrivedOn("lowerLayerIn")) {
+        EV_INFO << "Received " << msg << " from lower layer." << endl;
+        processPacketFromMac(check_and_cast<Packet *>(msg));
+    }
+    else
+        throw cRuntimeError("Unknown gate");
 }
 
 void EthernetEncapsulation::processCommandFromHigherLayer(Request *msg)
@@ -120,8 +133,6 @@ void EthernetEncapsulation::processCommandFromHigherLayer(Request *msg)
             send(indication, "transportOut");
             delete msg;
         }
-        else
-            Ieee8022Llc::processCommandFromHigherLayer(msg);
     }
     else if (dynamic_cast<SocketDestroyCommand *>(ctrl) != nullptr) {
         int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
@@ -131,16 +142,14 @@ void EthernetEncapsulation::processCommandFromHigherLayer(Request *msg)
             socketIdToSocketMap.erase(it);
             delete msg;
         }
-        else
-            Ieee8022Llc::processCommandFromHigherLayer(msg);
     }
     else
-        Ieee8022Llc::processCommandFromHigherLayer(msg);
+        throw cRuntimeError("Unknown command: '%s' with %s", msg->getName(), ctrl->getClassName());
 }
 
 void EthernetEncapsulation::refreshDisplay() const
 {
-    Ieee8022Llc::refreshDisplay();
+    OperationalBase::refreshDisplay();
     char buf[80];
     sprintf(buf, "passed up: %ld\nsent: %ld", totalFromMAC, totalFromHigherLayer);
     getDisplayString().setTagArg("t", 0, buf);
@@ -161,23 +170,15 @@ void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)
     EV_DETAIL << "Encapsulating higher layer packet `" << packet->getName() << "' for MAC\n";
 
     int typeOrLength = -1;
-    if (!useSNAP) {
-        const auto& protocolTag = packet->findTag<PacketProtocolTag>();
-        if (protocolTag) {
-            const Protocol *protocol = protocolTag->getProtocol();
-            if (protocol) {
-                int ethType = ProtocolGroup::ethertype.findProtocolNumber(protocol);
-                if (ethType != -1)
-                    typeOrLength = ethType;
-            }
-        }
-    }
-    if (typeOrLength == -1) {
-        Ieee8022Llc::encapsulate(packet);
+    const auto& protocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
+    const Protocol *protocol = protocolTag->getProtocol();
+    if (protocol && *protocol != Protocol::ieee8022llc)
+        typeOrLength = ProtocolGroup::ethertype.getProtocolNumber(protocol);
+    else
         typeOrLength = packet->getByteLength();
-    }
-    auto macAddressReq = packet->getTag<MacAddressReq>();
+
     const auto& ethHeader = makeShared<EthernetMacHeader>();
+    auto macAddressReq = packet->getTag<MacAddressReq>();
     auto srcAddr = macAddressReq->getSrcAddress();
     if (srcAddr.isUnspecified() && networkInterface != nullptr)
         srcAddr = networkInterface->getMacAddress();
@@ -188,14 +189,15 @@ void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)
     const auto& ethernetFcs = makeShared<EthernetFcs>();
     ethernetFcs->setFcsMode(fcsMode);
     packet->insertAtBack(ethernetFcs);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+    protocolTag->setProtocol(&Protocol::ethernetMac);
     packet->removeTagIfPresent<DispatchProtocolReq>();
     EV_INFO << "Sending " << packet << " to lower layer.\n";
     send(packet, "lowerLayerOut");
 }
 
-const Ptr<const EthernetMacHeader> EthernetEncapsulation::decapsulateMacHeader(Packet *packet)
+void EthernetEncapsulation::processPacketFromMac(Packet *packet)
 {
+    const Protocol *payloadProtocol = nullptr;
     auto ethHeader = packet->popAtFront<EthernetMacHeader>();
     packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
 
@@ -208,73 +210,56 @@ const Ptr<const EthernetMacHeader> EthernetEncapsulation::decapsulateMacHeader(P
     if (isIeee8023Header(*ethHeader)) {
         b payloadLength = B(ethHeader->getTypeOrLength());
         if (packet->getDataLength() < payloadLength)
-            throw cRuntimeError("incorrect payload length in ethernet frame");
+            throw cRuntimeError("incorrect payload length in ethernet frame");      // TODO alternative: drop packet
         packet->setBackOffset(packet->getFrontOffset() + payloadLength);
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022llc);
-    }
-    else if (isEth2Header(*ethHeader)) {
-        if (auto protocol = ProtocolGroup::ethertype.findProtocol(ethHeader->getTypeOrLength()))
-            packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
-        else
-            packet->removeTagIfPresent<PacketProtocolTag>();
-    }
-    return ethHeader;
-}
-
-void EthernetEncapsulation::processPacketFromMac(Packet *packet)
-{
-    const Protocol *payloadProtocol = nullptr;
-    auto ethHeader = decapsulateMacHeader(packet);
-
-    // remove llc header if possible
-    if (isIeee8023Header(*ethHeader)) {
-        Ieee8022Llc::processPacketFromMac(packet);
-        return;
+        payloadProtocol = &Protocol::ieee8022llc;
     }
     else if (isEth2Header(*ethHeader)) {
         payloadProtocol = ProtocolGroup::ethertype.findProtocol(ethHeader->getTypeOrLength());
-        if (payloadProtocol != nullptr) {
-            packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
-            packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
-        }
-        else {
-            packet->removeTagIfPresent<PacketProtocolTag>();
-            packet->removeTagIfPresent<DispatchProtocolReq>();
-        }
-        bool steal = false;
-        for (auto it : socketIdToSocketMap) {
-            auto socket = it.second;
-            if (socket->matches(packet, ethHeader)) {
-                auto packetCopy = packet->dup();
-                packetCopy->setKind(SOCKET_I_DATA);
-                packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it.first);
-                send(packetCopy, "upperLayerOut");
-                steal |= socket->steal;
-            }
-        }
-        if (steal)
-            delete packet;
-        else if (payloadProtocol != nullptr && contains(upperProtocols, payloadProtocol)) {
-            EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
-                      << packet->getName() << "' to higher layer\n";
-
-            totalFromMAC++;
-            emit(decapPkSignal, packet);
-
-            // pass up to higher layers.
-            EV_INFO << "Sending " << packet << " to upper layer.\n";
-            send(packet, "upperLayerOut");
-        }
-        else {
-            EV_WARN << "Unknown protocol, dropping packet\n";
-            PacketDropDetails details;
-            details.setReason(NO_PROTOCOL_FOUND);
-            emit(packetDroppedSignal, packet, &details);
-            delete packet;
-        }
     }
     else
         throw cRuntimeError("Unknown ethernet header");
+
+    if (payloadProtocol != nullptr) {
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(payloadProtocol);
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(payloadProtocol);
+    }
+    else {
+        packet->removeTagIfPresent<PacketProtocolTag>();
+        packet->removeTagIfPresent<DispatchProtocolReq>();
+    }
+    bool steal = false;
+    for (auto it : socketIdToSocketMap) {
+        auto socket = it.second;
+        if (socket->matches(packet, ethHeader)) {
+            auto packetCopy = packet->dup();
+            packetCopy->setKind(SOCKET_I_DATA);
+            packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it.first);
+            EV_INFO << "Sending " << packetCopy << " to socket " << it.first << ".\n";
+            send(packetCopy, "upperLayerOut");
+            steal |= socket->steal;
+        }
+    }
+    if (steal)
+        delete packet;
+    else if (payloadProtocol != nullptr && contains(upperProtocols, payloadProtocol)) {
+        EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
+                  << packet->getName() << "' to higher layer\n";
+
+        totalFromMAC++;
+        emit(decapPkSignal, packet);
+
+        // pass up to higher layers.
+        EV_INFO << "Sending " << packet << " to upper layer.\n";
+        send(packet, "upperLayerOut");
+    }
+    else {
+        EV_WARN << "Unknown protocol, dropping packet\n";
+        PacketDropDetails details;
+        details.setReason(NO_PROTOCOL_FOUND);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+    }
 }
 
 void EthernetEncapsulation::handleSendPause(cMessage *msg)
@@ -311,6 +296,43 @@ void EthernetEncapsulation::handleSendPause(cMessage *msg)
 
     emit(pauseSentSignal, pauseUnits);
     totalPauseSent++;
+}
+
+void EthernetEncapsulation::clearSockets()
+{
+    for (auto& elem : socketIdToSocketMap) {
+        delete elem.second;
+        elem.second = nullptr;
+    }
+    socketIdToSocketMap.clear();
+}
+
+void EthernetEncapsulation::handleStartOperation(LifecycleOperation *operation)
+{
+    clearSockets();
+}
+
+void EthernetEncapsulation::handleStopOperation(LifecycleOperation *operation)
+{
+    clearSockets();
+}
+
+void EthernetEncapsulation::handleCrashOperation(LifecycleOperation *operation)
+{
+    clearSockets();
+}
+
+void EthernetEncapsulation::handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterService");
+}
+
+void EthernetEncapsulation::handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterProtocol");
+    // KLUDGE this should be here: if (!strcmp("upperLayerOut", gate->getBaseName()))
+    // but then the register protocol calls are lost, because they can't go through the traffic conditioner
+    upperProtocols.insert(&protocol);
 }
 
 } // namespace inet

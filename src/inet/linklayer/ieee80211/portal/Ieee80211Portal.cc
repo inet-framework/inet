@@ -17,10 +17,10 @@
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/portal/Ieee80211Portal.h"
+#include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
 
 namespace inet {
-
 namespace ieee80211 {
 
 Define_Module(Ieee80211Portal);
@@ -57,22 +57,30 @@ void Ieee80211Portal::handleMessage(cMessage *message)
 void Ieee80211Portal::encapsulate(Packet *packet)
 {
 #ifdef INET_WITH_ETHERNET
-    auto ethernetHeader = EthernetEncapsulation::decapsulateMacHeader(packet); // do not use const auto& : trimChunks() delete it from packet
+    auto ethernetHeader = packet->popAtFront<EthernetMacHeader>(); // do not use const auto& : trimChunks() delete it from packet
+    packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
     packet->trim();
     packet->addTagIfAbsent<MacAddressReq>()->setDestAddress(ethernetHeader->getDest());
     packet->addTagIfAbsent<MacAddressReq>()->setSrcAddress(ethernetHeader->getSrc());
-    if (isIeee8023Header(*ethernetHeader))
+    if (isIeee8023Header(*ethernetHeader)) {
+        // remove Padding if possible
+        b payloadLength = B(ethernetHeader->getTypeOrLength());
+        if (packet->getDataLength() < payloadLength)
+            throw cRuntimeError("incorrect payload length in ethernet frame");      // TODO alternative: drop packet
+        packet->setBackOffset(packet->getFrontOffset() + payloadLength);
+
         // check that the packet already has an LLC header
         packet->peekAtFront<Ieee8022LlcHeader>();
+    }
     else if (isEth2Header(*ethernetHeader)) {
         const auto& ieee8022SnapHeader = makeShared<Ieee8022LlcSnapHeader>();
         ieee8022SnapHeader->setOui(0);
         ieee8022SnapHeader->setProtocolId(ethernetHeader->getTypeOrLength());
         packet->insertAtFront(ieee8022SnapHeader);
-        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022llc);
     }
     else
         throw cRuntimeError("Unknown packet: '%s'", packet->getFullName());
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022llc);
 #else // ifdef INET_WITH_ETHERNET
     throw cRuntimeError("INET compiled without ETHERNET feature!");
 #endif // ifdef INET_WITH_ETHERNET

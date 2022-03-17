@@ -8,7 +8,6 @@
 package inet.linklayer.ethernet.basic;
 
 import inet.linklayer.ethernet.contract.IEthernetEncapsulation;
-import inet.linklayer.ieee8022.Ieee8022Llc;
 
 //
 // Performs Ethernet II or Ethernet with LLC/SNAP encapsulation/decapsulation.
@@ -31,17 +30,17 @@ import inet.linklayer.ieee8022.Ieee8022Llc;
 //   higher layers. Accepts ~EthernetMacHeader, ~Ieee8022LlcHeader, and
 //   ~Ieee8022LlcSnapHeader too.
 //
-simple EthernetEncapsulation extends Ieee8022Llc like IEthernetEncapsulation
+simple EthernetEncapsulation like IEthernetEncapsulation
 {
     parameters:
+        bool registerProtocol = default(false);     //FIXME //KLUDGE should redesign place of EthernetEncapsulation and LLC modules
         string interfaceTableModule;   // The path to the InterfaceTable module
-        bool useSNAP = default(false);  // create EtherFrameWithSNAP frames instead of EthernetIIFrame
         string fcsMode @enum("declared","computed");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
         @class(EthernetEncapsulation);
-        @display("i=block/square");
+        @display("i=block/layer");
         @signal[encapPk](type=cPacket);
         @signal[decapPk](type=cPacket);
         @signal[pauseSent](type=long); // pause units
@@ -49,5 +48,9 @@ simple EthernetEncapsulation extends Ieee8022Llc like IEthernetEncapsulation
         @statistic[encapPk](title="packets encapsulated"; source=encapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[decapPk](title="packets decapsulated"; source=decapPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[pauseSent](title="pause sent"; record=count,sum,vector);
+    gates:
+        input upperLayerIn; // TODO accepts packets and socket commands with  @messageKinds(inet::SocketCommandCode), too
+        output upperLayerOut; // TODO sends packets and socket indications with @messageKinds(inet::SocketStatusInd), too
+        input lowerLayerIn;
+        output lowerLayerOut;
 }
-
