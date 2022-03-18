@@ -1,8 +1,7 @@
 import logging
-import omnetpp.repl
 
 from inet import *
-from inet.simulation.cffi import *
+#from inet.simulation.cffi import *
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

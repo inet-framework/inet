@@ -2,6 +2,8 @@ import argparse
 import logging
 import sys
 
+logger = logging.getLogger(__name__)
+
 from inet.simulation.project import *
 from inet.simulation.run import *
 from inet.test import *
@@ -70,7 +72,7 @@ def run_main(main_function, task_name):
                        (hasattr(result, "is_all_pass") and result.is_all_pass()))
                    else 1)
     except KeyboardInterrupt:
-        print("Program interrupted by user")
+        logger.warn("Program interrupted by user")
 
 def run_simulations_main():
     run_main(run_simulations, "simulations")

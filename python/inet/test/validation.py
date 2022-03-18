@@ -6,7 +6,7 @@ import random
 from omnetpp.scave.results import *
 
 from inet.simulation.project import *
-from inet.test.run import *
+from inet.test.simulation import *
 
 logger = logging.getLogger(__name__)
 

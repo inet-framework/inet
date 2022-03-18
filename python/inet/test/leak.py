@@ -1,6 +1,6 @@
 import logging
 
-from inet.test.run import *
+from inet.test.simulation import *
 
 logger = logging.getLogger(__name__)
 

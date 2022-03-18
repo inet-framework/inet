@@ -12,19 +12,20 @@ from inet.simulation.run import *
 
 logger = logging.getLogger(__name__)
 
-def get_analysis_files(simulation_project=default_project, working_directory_filter = ".*", fullMatch = False, **kwargs):
-    analysisFiles = glob.glob(simulation_project.get_full_path(".") + "/**/*.anf", recursive = True)
-    return filter(lambda path: re.search(working_directory_filter if fullMatch else ".*" + working_directory_filter + ".*", path), analysisFiles)
+def get_analysis_files(simulation_project=default_project, filter=".*", fullMatch=False, **kwargs):
+    simulation_project_path = simulation_project.get_full_path(".")
+    analysis_file_names = map(lambda path: os.path.relpath(path, simulation_project_path), glob.glob(simulation_project_path + "/**/*.anf", recursive = True))
+    return builtins.filter(lambda path: re.search(filter if fullMatch else ".*" + filter + ".*", path), analysis_file_names)
 
 def export_charts(simulation_project=default_project, **kwargs):
     workspace = omnetpp.scave.analysis.Workspace(omnetpp.scave.analysis.Workspace.find_workspace(get_workspace_path(".")), [])
-    for analysisFile in get_analysis_files(**kwargs):
+    for analysis_file_name in get_analysis_files(**kwargs):
         try:
-            logger.info("Exporting charts, analysisFile = " + analysisFile)
-            analysis = omnetpp.scave.analysis.load_anf_file(analysisFile)
+            logger.info("Exporting charts, analysis file = " + analysis_file_name)
+            analysis = omnetpp.scave.analysis.load_anf_file(simulation_project.get_full_path(analysis_file_name))
             for chart in analysis.collect_charts():
                 try:
-                    folder = os.path.dirname(analysisFile)
+                    folder = os.path.dirname(simulation_project.get_full_path(analysis_file_name))
                     analysis.export_image(chart, folder, workspace, format="png", dpi=150, target_folder="doc/media")
                 except Exception as e:
                     logger.error("Failed to export chart: " + str(e))

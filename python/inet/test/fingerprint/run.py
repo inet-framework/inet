@@ -5,7 +5,7 @@ from inet.common.ide import *
 from inet.simulation.project import *
 from inet.simulation.run import *
 from inet.test.fingerprint.store import *
-from inet.test.run import *
+from inet.test.simulation import *
 
 logger = logging.getLogger(__name__)
 all_fingerprint_ingredients = ["tplx", "~tNl", "~tND", "tyf"]
@@ -46,7 +46,7 @@ class Fingerprint:
     def __eq__(self, other):
         return other and self.fingerprint == other.fingerprint and self.ingredients == other.ingredients
 
-class FingerprintTestRun(TestRun):
+class FingerprintTestRun(SimulationTestRun):
     def __init__(self, simulation_run, check_test_function, sim_time_limit, ingredients, fingerprint, test_result, **kwargs):
         super().__init__(simulation_run, check_test_function, **kwargs)
         self.sim_time_limit = sim_time_limit
@@ -108,7 +108,7 @@ class FingerprintTestGroupRun:
                 fingerprint_test_results += fingerprint_test_group_results.test_results
             return MultipleTestResults(self.fingerprint_test_runs, fingerprint_test_results)
 
-class MultipleFingerprintTestRuns(MultipleTestRuns):
+class MultipleFingerprintTestRuns(MultipleSimulationTestRuns):
     def __init__(self, multiple_simulation_runs, test_runs, **kwargs):
         super().__init__(multiple_simulation_runs, test_runs, **kwargs)
 
@@ -137,7 +137,7 @@ class MultipleFingerprintTestRuns(MultipleTestRuns):
         self.store_fingerprint_results(multiple_fingerprint_test_results)
         return multiple_fingerprint_test_results
 
-class FingerprintTestResult(TestResult):
+class FingerprintTestResult(SimulationTestResult):
     def __init__(self, test_run, simulation_result, expected_fingerprint, calculated_fingerprint, **kwargs):
         super().__init__(test_run, simulation_result, **kwargs)
         self.expected_fingerprint = expected_fingerprint
@@ -469,7 +469,7 @@ class MultipleFingerprintUpdateRuns:
         simulation_project = simulation_project or self.multiple_simulation_runs.simulation_project
         if build:
             build_project(simulation_project, **kwargs)
-        print("Updating correct fingerprints " + str(kwargs))
+        logger.info("Updating correct fingerprints " + str(kwargs))
         start_time = time.time()
         fingerprint_update_results = map_sequentially_or_concurrently(self.fingerprint_update_runs, self.multiple_simulation_runs.run_simulation_function, concurrent=concurrent, **kwargs)
         end_time = time.time()
@@ -599,7 +599,7 @@ def remove_correct_fingerprint(simulation_run, run=0, ingredients="tplx", sim_ti
                                                  working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run=run)
 
 def remove_correct_fingerprints(**kwargs):
-    print("Removing correct fingerprints")
+    logger.info("Removing correct fingerprints")
     multiple_simulation_runs = get_simulations(run_simulation_function=remove_correct_fingerprint, **kwargs)
     multiple_simulation_runs.run(**kwargs)
 
@@ -627,4 +627,4 @@ def get_statistical_result_sim_time_limit(simulation_config, run=0):
         return "0s"
 
 def create_statistical_results(**kwargs):
-    run_simulations(**kwargs, sim_time_limit=get_statistical_result_sim_time_limit)
+    return run_simulations(**kwargs, sim_time_limit=get_statistical_result_sim_time_limit)

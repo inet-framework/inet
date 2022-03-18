@@ -7,5 +7,5 @@ logger = logging.getLogger(__name__)
 
 def run_regression_tests(**kwargs):
     logger.info("Running regression tests")
-    run_fingerprint_tests(**kwargs)
-    run_statistical_tests(**kwargs)
+    return run_fingerprint_tests(**kwargs)
+    #run_statistical_tests(**kwargs)
