@@ -60,7 +60,6 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
         }
         mac: <default(csmacdSupport ? "EthernetCsmaMac" : "EthernetMac")> like IEtherMac {
             parameters:
-                queue.packetCapacity = default(10000);
                 @display("p=500,300");
         }
     connections:
