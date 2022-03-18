@@ -9,7 +9,7 @@ package inet.linklayer.ethernet;
 
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.ethernet.contract.IEthernetEncapsulation;
+import inet.linklayer.ethernet.contract.IEthernetLayer;
 import inet.networklayer.common.NetworkInterface;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.ITrafficConditioner;
@@ -48,9 +48,10 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
             parameters:
                 @display("p=700,100");
         }
-        encap: <default("EthernetEncapsulation")> like IEthernetEncapsulation {
+        encap: <default("EthernetEncapsulation")> like IEthernetLayer {
             parameters:
                 @display("p=500,200");
+                @omittedTypename(OmittedEthernetEncapsulation);
         }
         queue: <default("EthernetQueue")> like IPacketQueue {
             parameters:

@@ -11,7 +11,6 @@ import inet.applications.ethernet.EtherAppServer;
 import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.ethernet.contract.IEthernetEncapsulation;
 import inet.linklayer.ethernet.contract.IEthernetLayer;
 import inet.linklayer.ieee8021q.IIeee8021qLayer;
 import inet.linklayer.ieee8021r.IIeee8021rLayer;
@@ -66,7 +65,7 @@ module EthernetHost
             parameters:
                 @display("p=450,200");
         }
-        encap: <default("EthernetEncapsulation")> like IEthernetEncapsulation if typename != "" {
+        encap: <default("EthernetEncapsulation")> like IEthernetLayer if typename != "" {
             parameters:
                 registerProtocol = true;
                 @display("p=350,300");

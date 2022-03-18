@@ -7,7 +7,7 @@
 
 package inet.linklayer.ethernet.basic;
 
-import inet.linklayer.ethernet.contract.IEthernetEncapsulation;
+import inet.linklayer.ethernet.contract.IEthernetLayer;
 
 //
 // Performs Ethernet II or Ethernet with LLC/SNAP encapsulation/decapsulation.
@@ -30,7 +30,7 @@ import inet.linklayer.ethernet.contract.IEthernetEncapsulation;
 //   higher layers. Accepts ~EthernetMacHeader, ~Ieee8022LlcHeader, and
 //   ~Ieee8022LlcSnapHeader too.
 //
-simple EthernetEncapsulation like IEthernetEncapsulation
+simple EthernetEncapsulation like IEthernetLayer
 {
     parameters:
         bool registerProtocol = default(false);     //FIXME //KLUDGE should redesign place of EthernetEncapsulation and LLC modules
