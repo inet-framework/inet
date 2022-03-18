@@ -11,7 +11,8 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 
 #ifdef INET_WITH_ETHERNET
-#include "inet/linklayer/ethernet/basic/EthernetEncapsulation.h"
+#include "inet/linklayer/ethernet/common/Ethernet.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
 #include "inet/physicallayer/wired/ethernet/EthernetPhyHeader_m.h"
 #endif // ifdef INET_WITH_ETHERNET
 
