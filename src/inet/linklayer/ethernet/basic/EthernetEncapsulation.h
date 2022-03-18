@@ -53,6 +53,7 @@ protected:
 
     friend std::ostream& operator<<(std::ostream& o, const Socket& t);
     std::map<int, Socket *> socketIdToSocketMap;
+    bool anyUpperProtocols = false;
 
   protected:
     virtual ~EthernetEncapsulation();
@@ -62,6 +63,7 @@ protected:
 
     virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
+    virtual void handleRegisterAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive) override;
 
     virtual void processCommandFromHigherLayer(Request *msg);
     virtual void processPacketFromHigherLayer(Packet *msg);

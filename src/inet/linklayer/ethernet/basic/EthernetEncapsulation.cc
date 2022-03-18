@@ -242,7 +242,7 @@ void EthernetEncapsulation::processPacketFromMac(Packet *packet)
     }
     if (steal)
         delete packet;
-    else if (payloadProtocol != nullptr && contains(upperProtocols, payloadProtocol)) {
+    else if (anyUpperProtocols || (payloadProtocol != nullptr && contains(upperProtocols, payloadProtocol))) {
         EV_DETAIL << "Decapsulating frame `" << packet->getName() << "', passing up contained packet `"
                   << packet->getName() << "' to higher layer\n";
 
@@ -333,6 +333,13 @@ void EthernetEncapsulation::handleRegisterProtocol(const Protocol& protocol, cGa
     // KLUDGE this should be here: if (!strcmp("upperLayerOut", gate->getBaseName()))
     // but then the register protocol calls are lost, because they can't go through the traffic conditioner
     upperProtocols.insert(&protocol);
+}
+
+void EthernetEncapsulation::handleRegisterAnyProtocol(cGate *gate, ServicePrimitive servicePrimitive)
+{
+    Enter_Method("handleRegisterAnyProtocol");
+    if (!strcmp("upperLayerOut", gate->getBaseName()))
+        anyUpperProtocols = true;
 }
 
 } // namespace inet
