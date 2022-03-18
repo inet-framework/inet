@@ -9,7 +9,7 @@ package inet.applications.ethernet;
 //
 // Server side of the ~EtherAppClient model -- generates packets containing
 // ~EtherAppResp chunks with the number of bytes requested by the client in
-// corresponding ~EtherAppReq. It should be connected directly to ~EthernetEncapsulation/~Ieee8022Llc
+// corresponding ~EtherAppReq. It should be connected directly to ~Ieee8022Llc
 // module.
 //
 simple EtherAppServer
