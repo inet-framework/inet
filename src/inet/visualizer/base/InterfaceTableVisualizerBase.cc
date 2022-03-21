@@ -274,7 +274,7 @@ void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t
         auto networkNode = getContainingNode(static_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode)) {
             auto networkInterface = static_cast<NetworkInterface *>(object);
-            if (interfaceFilter.matches(networkInterface)) {
+            if (networkInterface->getInterfaceId() != -1 && interfaceFilter.matches(networkInterface)) {
                 auto interfaceVisualization = createInterfaceVisualization(networkNode, networkInterface);
                 addInterfaceVisualization(interfaceVisualization);
             }
@@ -284,7 +284,7 @@ void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t
         auto networkNode = getContainingNode(static_cast<cModule *>(source));
         if (nodeFilter.matches(networkNode)) {
             auto networkInterface = static_cast<NetworkInterface *>(object);
-            if (interfaceFilter.matches(networkInterface)) {
+            if (networkInterface->getInterfaceId() != -1 && interfaceFilter.matches(networkInterface)) {
                 auto interfaceVisualization = getInterfaceVisualization(networkNode, networkInterface);
                 removeInterfaceVisualization(interfaceVisualization);
                 delete interfaceVisualization;
@@ -303,7 +303,7 @@ void InterfaceTableVisualizerBase::receiveSignal(cComponent *source, simsignal_t
 #endif // INET_WITH_IPv4
                     || (signal == interfaceStateChangedSignal && (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER)))
             {
-                if (interfaceFilter.matches(networkInterface)) {
+                if (networkInterface->getInterfaceId() != -1 && interfaceFilter.matches(networkInterface)) {
                     auto interfaceVisualization = getInterfaceVisualization(networkNode, networkInterface);
                     if (interfaceVisualization == nullptr) {
                         interfaceVisualization = createInterfaceVisualization(networkNode, networkInterface);
