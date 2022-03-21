@@ -414,7 +414,7 @@ double L3NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const ch
             transmittedFrame->insertAtBack(byteCountChunk);
 
             // KLUDGE
-            transmittedFrame->addTag<PacketProtocolTag>()->setProtocol(nullptr);
+            transmittedFrame->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ackingMac);
             check_and_cast<const Radio *>(transmitterRadio)->encapsulate(transmittedFrame);
 
             const ITransmission *transmission = transmitterRadio->getTransmitter()->createTransmission(transmitterRadio, transmittedFrame, simTime());
