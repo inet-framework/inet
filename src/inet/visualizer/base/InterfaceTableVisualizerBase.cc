@@ -100,6 +100,9 @@ const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(ch
         case 's':
             result = networkInterface->str();
             break;
+        case '/':
+            result = networkInterface->getNetworkAddress().isUnspecified() ? "" : "/";
+            break;
         case '\\':
             result = networkInterface->getNodeOutputGateId() == -1 ? "" : "\n";
             break;

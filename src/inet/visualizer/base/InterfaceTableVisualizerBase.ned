@@ -30,6 +30,7 @@ package inet.visualizer.base;
 //  - %i NetworkInterface::info()
 //  - %s NetworkInterface::str()
 //  - %\ conditional newline for wired interfaces
+//  - %/ conditional / for network address
 //
 // @see ~InterfaceTableCanvasVisualizer, ~InterfaceTableOsgVisualizer, ~IInterfaceTableVisualizer, ~VisualizerBase
 //
@@ -45,7 +46,7 @@ simple InterfaceTableVisualizerBase extends VisualizerBase
         string nodeFilter @mutable = default("*"); // which nodes are considered, matches all nodes by default
         string interfaceFilter @mutable = default("not(lo*)"); // which interfaces are considered, matches all non-local interfaces by default
 
-        string format @mutable = default("%N %\\%a/%l"); // determines what interface data is displayed
+        string format @mutable = default("%N %\\%a%/%l"); // determines what interface data is displayed
         string placementHint = default("top"); // annotation placement hint, space separated list of any, top, bottom, left, right, topLeft, topCenter, topRight, etc.
         double placementPriority = default(0); // determines the order of annotation positioning
 
