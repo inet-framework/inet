@@ -161,12 +161,14 @@ void SimpleEpEnergyStorage::scheduleTimer()
         targetCapacity = J(0);
     else if (targetCapacity > nominalCapacity)
         targetCapacity = nominalCapacity;
-    simtime_t remainingTime = unit((targetCapacity - residualCapacity) / totalPower / s(1)).get();
     if (timer->isScheduled())
         cancelEvent(timer);
     // don't schedule if there's no progress
-    if (remainingTime > 0)
-        scheduleAfter(remainingTime, timer);
+    if (totalPower != W(0)) {
+        simtime_t remainingTime = unit((targetCapacity - residualCapacity) / totalPower / s(1)).get();
+        if (remainingTime > 0)
+            scheduleAfter(remainingTime, timer);
+    }
 }
 
 } // namespace power
