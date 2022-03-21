@@ -107,15 +107,17 @@ void SimpleEpEnergyManagement::scheduleLifecycleOperationTimer()
         if (!std::isnan(nodeShutdownCapacity.get()) && nodeStatus->getState() == NodeStatus::UP && estimatedResidualCapacity > nodeShutdownCapacity)
             targetCapacity = nodeShutdownCapacity;
     }
-    // enforce target capacity to be in range
-    simtime_t remainingTime = unit((targetCapacity - estimatedResidualCapacity) / totalPower / s(1)).get();
-    // make sure the targetCapacity is reached despite floating point arithmetic
-    remainingTime.setRaw(remainingTime.raw() + 1);
     if (lifecycleOperationTimer->isScheduled())
         cancelEvent(lifecycleOperationTimer);
-    // don't schedule if there's no progress
-    if (remainingTime > 0)
-        scheduleAt(simTime() + remainingTime, lifecycleOperationTimer);
+    if (totalPower != W(0)) {
+        // enforce target capacity to be in range
+        simtime_t remainingTime = unit((targetCapacity - estimatedResidualCapacity) / totalPower / s(1)).get();
+        // make sure the targetCapacity is reached despite floating point arithmetic
+        remainingTime.setRaw(remainingTime.raw() + 1);
+        // don't schedule if there's no progress
+        if (remainingTime > 0)
+            scheduleAt(simTime() + remainingTime, lifecycleOperationTimer);
+    }
 }
 
 J SimpleEpEnergyManagement::getEstimatedEnergyCapacity() const
