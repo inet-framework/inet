@@ -5,7 +5,7 @@ Tests ScalarNoise max and min functions
 
 % includes:
 #include <stdio.h>
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarNoise.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarNoise.h"
 
 %global:
 
@@ -37,10 +37,10 @@ auto t3 = SimTime(18, SimTimeUnit::SIMTIME_MS);
 auto t4 = SimTime(20, SimTimeUnit::SIMTIME_MS);
 auto deltaT = SimTime(100, SimTimeUnit::SIMTIME_US);
 std::map<simtime_t, W> powerChangesBase;
-powerChangesBase.insert(std::pair<simtime_t, W>( t1, inet::W(5) ));
-powerChangesBase.insert(std::pair<simtime_t, W>( t2, inet::W(3) ));
-powerChangesBase.insert(std::pair<simtime_t, W>( t3, inet::W(-5) ));
-powerChangesBase.insert(std::pair<simtime_t, W>( t4, inet::W(-3) ));
+powerChangesBase.insert(std::pair<simtime_t, W>( t1, W(5) ));
+powerChangesBase.insert(std::pair<simtime_t, W>( t2, W(3) ));
+powerChangesBase.insert(std::pair<simtime_t, W>( t3, W(-5) ));
+powerChangesBase.insert(std::pair<simtime_t, W>( t4, W(-3) ));
 
 printBoundedMinMaxPower(powerChangesBase, 0, t1-deltaT); //max: 0, min: NaN
 printBoundedMinMaxPower(powerChangesBase, t1-deltaT, t1); //max: 0, min: NaN
