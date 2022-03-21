@@ -27,8 +27,16 @@ class ChunkPtr
 //
 class ProtocolTagBase extends TagBase
 {
-    const Protocol *protocol; // specifies a protocol (internal class with an artificial identifier)
+    const Protocol *protocol @getter(findProtocol); // specifies a protocol (internal class with an artificial identifier)
 }
+
+cplusplus(ProtocolTagBase) {{
+    const Protocol *getProtocol() const {
+        if (protocol == nullptr)
+            throw cRuntimeError("Protocol is not specified");
+        return protocol;
+    }
+}}
 
 //
 // This is an abstract base class that should not be directly added as a tag.
