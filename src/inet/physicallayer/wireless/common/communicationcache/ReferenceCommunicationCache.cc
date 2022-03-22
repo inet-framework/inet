@@ -78,6 +78,11 @@ void ReferenceCommunicationCache::mapRadios(std::function<void(const IRadio *)> 
         f(radioCacheEntry.radio);
 }
 
+int ReferenceCommunicationCache::getNumRadios() const
+{
+    return radioCache.size();
+}
+
 void ReferenceCommunicationCache::addTransmission(const ITransmission *transmission)
 {
     int transmissionId = transmission->getId();
@@ -105,6 +110,11 @@ void ReferenceCommunicationCache::mapTransmissions(std::function<void(const ITra
 {
     for (const auto& transmissionCacheEntry : transmissionCache)
         f(transmissionCacheEntry.transmission);
+}
+
+int ReferenceCommunicationCache::getNumTransmissions() const
+{
+    return transmissionCache.size();
 }
 
 void ReferenceCommunicationCache::removeNonInterferingTransmissions(std::function<void(const ITransmission *transmission)> f)

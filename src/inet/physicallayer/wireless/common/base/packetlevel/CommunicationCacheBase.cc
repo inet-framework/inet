@@ -263,6 +263,20 @@ void CommunicationCacheBase::TransmissionCacheEntry::deleteSignal()
     }
 }
 
+int CommunicationCacheBase::getNumRadios() const
+{
+    int numRadios = 0;
+    mapRadios([&](const IRadio *radio) { numRadios++; });
+    return numRadios;
+}
+
+int CommunicationCacheBase::getNumTransmissions() const
+{
+    int numTransmissions = 0;
+    mapTransmissions([&](const ITransmission *transmission) { numTransmissions++; });
+    return numTransmissions;
+}
+
 std::vector<const ITransmission *> *CommunicationCacheBase::computeInterferingTransmissions(const IRadio *radio, const simtime_t startTime, const simtime_t endTime)
 {
     RadioCacheEntry *radioCacheEntry = getRadioCacheEntry(radio);

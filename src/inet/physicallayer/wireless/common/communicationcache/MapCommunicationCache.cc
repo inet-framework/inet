@@ -71,6 +71,11 @@ void MapCommunicationCache::mapRadios(std::function<void(const IRadio *)> f) con
         f(it.second.radio);
 }
 
+int MapCommunicationCache::getNumRadios() const
+{
+    return radioCache.size();
+}
+
 void MapCommunicationCache::addTransmission(const ITransmission *transmission)
 {
     auto transmissionCacheEntry = getTransmissionCacheEntry(transmission);
@@ -111,6 +116,11 @@ void MapCommunicationCache::mapTransmissions(std::function<void(const ITransmiss
 {
     for (auto& it : transmissionCache)
         f(it.second.transmission);
+}
+
+int MapCommunicationCache::getNumTransmissions() const
+{
+    return transmissionCache.size();
 }
 
 void MapCommunicationCache::removeNonInterferingTransmissions(std::function<void(const ITransmission *transmission)> f)

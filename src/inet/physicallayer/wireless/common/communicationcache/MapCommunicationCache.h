@@ -56,6 +56,7 @@ class INET_API MapCommunicationCache : public CommunicationCacheBase
     virtual void removeRadio(const IRadio *radio) override;
     virtual const IRadio *getRadio(int id) const override;
     virtual void mapRadios(std::function<void(const IRadio *)> f) const override;
+    virtual int getNumRadios() const override;
     //@}
 
     /** @name Transmission cache */
@@ -64,6 +65,7 @@ class INET_API MapCommunicationCache : public CommunicationCacheBase
     virtual void removeTransmission(const ITransmission *transmission) override;
     virtual const ITransmission *getTransmission(int id) const override;
     virtual void mapTransmissions(std::function<void(const ITransmission *)> f) const override;
+    virtual int getNumTransmissions() const override;
     //@}
 
     /** @name Interference cache */

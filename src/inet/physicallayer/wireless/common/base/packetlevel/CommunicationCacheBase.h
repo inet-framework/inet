@@ -116,6 +116,16 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
     //@}
 
   public:
+    /** @name Radio cache */
+    //@{
+    virtual int getNumRadios() const override;
+    //@}
+
+    /** @name Transmission cache */
+    //@{
+    virtual int getNumTransmissions() const override;
+    //@}
+
     /** @name Interference cache */
     //@{
     virtual std::vector<const ITransmission *> *computeInterferingTransmissions(const IRadio *radio, const simtime_t startTime, const simtime_t endTime) override;

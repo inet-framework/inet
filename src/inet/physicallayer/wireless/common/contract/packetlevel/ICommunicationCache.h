@@ -36,6 +36,7 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual void removeRadio(const IRadio *radio) = 0;
     virtual const IRadio *getRadio(int id) const = 0;
     virtual void mapRadios(std::function<void(const IRadio *)> f) const = 0;
+    virtual int getNumRadios() const = 0;
     //@}
 
     /** @name Transmission cache */
@@ -44,6 +45,7 @@ class INET_API ICommunicationCache : public IPrintableObject
     virtual void removeTransmission(const ITransmission *transmission) = 0;
     virtual const ITransmission *getTransmission(int id) const = 0;
     virtual void mapTransmissions(std::function<void(const ITransmission *)> f) const = 0;
+    virtual int getNumTransmissions() const = 0;
     //@}
 
     /** @name Interference cache */
