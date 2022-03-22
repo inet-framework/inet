@@ -48,7 +48,7 @@ module EthernetHost2
         }
         eth: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
-                @display("p=200,300,row,150;q=txQueue");
+                @display("p=200,400,row,150;q=txQueue");
         }
     connections:
         app.out --> llc.upperLayerIn;

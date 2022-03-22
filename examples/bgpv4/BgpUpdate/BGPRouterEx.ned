@@ -42,24 +42,24 @@ module BGPRouterEx
         }
         ospf: Ospfv2 {
             parameters:
-                @display("p=400,400,row;i=block/network2");
+                @display("p=400,240,row;i=block/network2");
         }
         bgp: Bgp {
             parameters:
                 ospfRoutingModule = "^.ospf";
-                @display("p=325,80;i=block/network");
+                @display("p=250,80;i=block/network");
         }
         snifferIn: MessageChecker {
             parameters:
-                @display("i=block/uparrow_s;p=250,160");
+                @display("i=block/uparrow_s;p=175,160");
         }
         snifferOut: MessageChecker {
             parameters:
-                @display("i=block/downarrow_s;p=400,160");
+                @display("i=block/downarrow_s;p=325,160");
         }
         tcp: <default(firstAvailable("Tcp","TcpLwip","TcpNsc"))> like ITcp {
             parameters:
-                @display("p=325,240;i=block/transport");
+                @display("p=250,240;i=block/transport");
         }
         tn: MessageDispatcher {
             parameters:
@@ -76,11 +76,11 @@ module BGPRouterEx
         }
         ppp[sizeof(pppg)]: <default("PppInterface")> like IPppInterface {
             parameters:
-                @display("p=250,560,row,110;q=l2queue;i=block/ifcard");
+                @display("p=250,720,row,110;q=l2queue;i=block/ifcard");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
-                @display("p=400,560,row,110;q=l2queue;i=block/ifcard");
+                @display("p=400,720,row,110;q=l2queue;i=block/ifcard");
         }
     connections allowunconnected:
         bgp.socketOut --> { @display("m=s"); } --> snifferOut.in;
