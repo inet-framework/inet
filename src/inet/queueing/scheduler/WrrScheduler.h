@@ -20,8 +20,8 @@ namespace queueing {
 class INET_API WrrScheduler : public PacketSchedulerBase, public virtual IPacketCollection
 {
   protected:
-    int *weights = nullptr; // array of weights (has numInputs elements)
-    int *buckets = nullptr; // array of tokens in buckets (has numInputs elements)
+    unsigned int *weights = nullptr; // array of weights (has numInputs elements)
+    unsigned int *buckets = nullptr; // array of tokens in buckets (has numInputs elements)
 
     std::vector<IPacketCollection *> collections;
 

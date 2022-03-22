@@ -24,15 +24,15 @@ void WrrScheduler::initialize(int stage)
 {
     PacketSchedulerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        weights = new int[providers.size()];
-        buckets = new int[providers.size()];
+        weights = new unsigned int[providers.size()];
+        buckets = new unsigned int[providers.size()];
 
         cStringTokenizer tokenizer(par("weights"));
-        int i;
-        for (i = 0; i < (int)providers.size() && tokenizer.hasMoreTokens(); ++i)
-            buckets[i] = weights[i] = (int)utils::atoul(tokenizer.nextToken());
+        size_t i;
+        for (i = 0; i < providers.size() && tokenizer.hasMoreTokens(); ++i)
+            buckets[i] = weights[i] = utils::atoul(tokenizer.nextToken());
 
-        if (i < (int)providers.size())
+        if (i < providers.size())
             throw cRuntimeError("Too few values given in the weights parameter.");
         if (tokenizer.hasMoreTokens())
             throw cRuntimeError("Too many values given in the weights parameter.");
@@ -67,29 +67,32 @@ void WrrScheduler::removeAllPackets()
 
 int WrrScheduler::schedulePacket()
 {
-    bool isEmpty = true;
-    for (int i = 0; i < (int)providers.size(); ++i) {
+    int firstWeighted = -1;
+    int firstNonWeighted = -1;
+    for (size_t i = 0; i < providers.size(); ++i) {
         if (providers[i]->canPullSomePacket(inputGates[i]->getPathStartGate())) {
-            isEmpty = false;
             if (buckets[i] > 0) {
                 buckets[i]--;
-                return i;
+                return (int)i;
             }
+            else if (firstWeighted == -1 && weights[i] > 0)
+                firstWeighted = (int)i;
+            else if (firstNonWeighted == -1 && weights[i] == 0)
+                firstNonWeighted = (int)i;
         }
     }
 
-    if (isEmpty)
-        return -1;
-
-    int result = -1;
-    for (int i = 0; i < (int)providers.size(); ++i) {
-        buckets[i] = weights[i];
-        if (result == -1 && buckets[i] > 0 && providers[i]->canPullSomePacket(inputGates[i]->getPathStartGate())) {
-            buckets[i]--;
-            result = i;
-        }
+    if (firstWeighted != -1) {
+        for (size_t i = 0; i < providers.size(); ++i)
+            buckets[i] = weights[i];
+        buckets[firstWeighted]--;
+        return firstWeighted;
     }
-    return result;
+
+    if (firstNonWeighted != -1)
+        return firstNonWeighted;
+
+    return -1;
 }
 
 } // namespace queueing
