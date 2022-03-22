@@ -59,6 +59,8 @@ void Radio::initialize(int stage)
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         medium->addRadio(this);
+        if (medium->getCommunicationCache()->getNumTransmissions() == 0 && isListeningPossible())
+            throw cRuntimeError("Receiver is busy without any ongoing transmission, probably energy detection level is too low or background noise level is too high");
         initializeRadioMode();
         parseRadioModeSwitchingTimes();
     }
