@@ -58,6 +58,7 @@ module EthernetSwitch like IEthernetNetworkNode
         llc.registerProtocol = true;
         eth[*].mac.promiscuous = default(true);
         ethernet.*.promiscuous = default(true);
+        ethernet.registerProtocol = default(true);
 
     gates:
         inout ethg[numEthInterfaces] @labels(EtherFrame-conn);
@@ -109,7 +110,7 @@ module EthernetSwitch like IEthernetNetworkNode
         bl: MessageDispatcher {
             @display("p=800,450;b=1200,5");
         }
-        ethernet: <default("")> like IEthernetLayer if typename != "" {
+        ethernet: <default("EthernetEncapsulation")> like IEthernetLayer if typename != "" {
             @display("p=500,525");
         }
         ieee8021q: <default("Ieee8021qProtocol")> like IIeee8021qLayer if typename != "" {

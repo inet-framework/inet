@@ -9,7 +9,6 @@ package inet.linklayer.ethernet;
 
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.ethernet.contract.IEthernetLayer;
 import inet.networklayer.common.NetworkInterface;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.ITrafficConditioner;
@@ -22,7 +21,7 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
 {
     parameters:
         string interfaceTableModule;
-        string protocol = default("");
+        string protocol = default("ethernetmac");
         string address @mutable = default("auto");   // MAC address as hex string (12 hex digits), or
                                                      // "auto". "auto" values will be replaced by
                                                      // a generated MAC address in init stage 0.
@@ -46,12 +45,7 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
         }
         ingressTC: <default("")> like ITrafficConditioner {
             parameters:
-                @display("p=700,100");
-        }
-        encap: <default("EthernetEncapsulation")> like IEthernetLayer {
-            parameters:
-                @display("p=500,200");
-                @omittedTypename(OmittedEthernetEncapsulation);
+                @display("i=block/uparrow;p=700,100");
         }
         queue: <default("EthernetQueue")> like IPacketQueue {
             parameters:
@@ -63,16 +57,13 @@ module EthernetInterface extends NetworkInterface like IEthernetInterface
                 @display("p=500,300");
         }
     connections:
-        mac.upperLayerOut --> encap.lowerLayerIn;
-        queue.in <-- encap.lowerLayerOut;
-        mac.upperLayerIn <-- queue.out;
+        upperLayerIn --> { @display("m=n"); } --> egressTC.in;
+        egressTC.out --> queue.in;
+        queue.out --> mac.upperLayerIn;
 
         mac.phys <--> { @display("m=s"); } <--> phys;
 
-        encap.upperLayerOut --> ingressTC.in;
+        mac.upperLayerOut --> ingressTC.in;
         ingressTC.out --> { @display("m=n"); } --> upperLayerOut;
-
-        upperLayerIn --> { @display("m=n"); } --> egressTC.in;
-        egressTC.out --> encap.upperLayerIn;
 }
 

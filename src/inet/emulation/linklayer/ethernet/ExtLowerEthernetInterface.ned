@@ -9,7 +9,6 @@ package inet.emulation.linklayer.ethernet;
 
 import inet.emulation.common.ExtInterface;
 import inet.linklayer.contract.IEthernetInterface;
-import inet.linklayer.ethernet.contract.IEthernetLayer;
 
 //
 // This module provides an Ethernet network interface suitable for emulation.
@@ -19,23 +18,18 @@ import inet.linklayer.ethernet.contract.IEthernetLayer;
 module ExtLowerEthernetInterface extends ExtInterface like IEthernetInterface
 {
     parameters:
+        string protocol = default("ethernetmac");
         double bitrate @unit(bps) = default(nan bps);
     gates:
         input cutthroughIn @loose;
         output cutthroughOut @loose;
         inout phys @loose;
     submodules:
-        encap: <default("EthernetEncapsulation")> like IEthernetLayer {
-            parameters:
-                @display("p=300,100");
-        }
         socket: ExtEthernetSocket {
             parameters:
                 @display("p=300,200");
         }
     connections allowunconnected:
-        upperLayerIn --> { @display("m=n"); } --> encap.upperLayerIn;
-        upperLayerOut <-- { @display("m=n"); } <-- encap.upperLayerOut;
-        encap.lowerLayerOut --> socket.upperLayerIn;
-        encap.lowerLayerIn <-- socket.upperLayerOut;
+        upperLayerIn --> { @display("m=n"); } --> socket.upperLayerIn;
+        upperLayerOut <-- { @display("m=n"); } <-- socket.upperLayerOut;
 }

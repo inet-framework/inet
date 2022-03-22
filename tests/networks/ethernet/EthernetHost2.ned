@@ -8,6 +8,7 @@ package inet.tests.ethernet;
 
 import inet.applications.ethernet.EtherTrafGen;
 import inet.linklayer.contract.IEthernetInterface;
+import inet.linklayer.ethernet.contract.IEthernetLayer;
 import inet.linklayer.ieee8022.IIeee8022Llc;
 import inet.networklayer.common.InterfaceTable;
 
@@ -46,6 +47,9 @@ module EthernetHost2
             parameters:
                 @display("p=200,200");
         }
+        ethernet: <default("EthernetEncapsulation")> like IEthernetLayer if typename != "" {
+            @display("p=200,300");
+        }
         eth: <default("EthernetInterface")> like IEthernetInterface {
             parameters:
                 @display("p=200,400,row,150;q=txQueue");
@@ -53,8 +57,10 @@ module EthernetHost2
     connections:
         app.out --> llc.upperLayerIn;
         app.in <-- llc.upperLayerOut;
-        llc.lowerLayerOut --> eth.upperLayerIn;
-        llc.lowerLayerIn <-- eth.upperLayerOut;
+        llc.lowerLayerOut --> ethernet.upperLayerIn;
+        llc.lowerLayerIn <-- ethernet.upperLayerOut;
+        ethernet.lowerLayerOut --> eth.upperLayerIn;
+        ethernet.lowerLayerIn <-- eth.upperLayerOut;
         eth.phys <--> { @display("m=s"); } <--> ethg;
 }
 

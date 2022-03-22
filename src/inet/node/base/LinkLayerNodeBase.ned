@@ -34,10 +34,13 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
         int numPppInterfaces = default(0);  // minimum number of PPP interfaces
         int numTunInterfaces = default(0);
         int numVirtInterfaces = default(0);
+        string fcsMode @enum("declared","computed") = default("declared");
         pcapRecorder[*].pcapFile = default("results/" + expand("${configname}-") + fullPath() + ".pcap");
         mobility.typename = default(numWlanInterfaces > 0 ? "StationaryMobility" : "");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
+        *.fcsMode = this.fcsMode;
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
+        ethernet.registerProtocol = default(true);
         @figure[linkLayer](type=rectangle; pos=250,458; size=1000,284; fillColor=#0000ff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
         @figure[linkLayer.title](type=text; pos=1245,463; anchor=ne; text="link layer");
         @figure[interfaceLayer](type=rectangle; pos=250,758; size=1000,360; fillColor=#00ffff; lineColor=#808080; cornerRadius=5; fillOpacity=0.1);
@@ -65,7 +68,7 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
         bl: MessageDispatcher {
             @display("p=750,750;b=1000,5");
         }
-        ethernet: <default("")> like IEthernetLayer if typename != "" {
+        ethernet: <default(sizeof(ethg) > 0 ? "EthernetEncapsulation" : "")> like IEthernetLayer if typename != "" {
             @display("p=375,825");
         }
         ieee8021q: <default("")> like IIeee8021qLayer if typename != "" {
