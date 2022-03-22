@@ -38,54 +38,63 @@ void EcnMarker::markPacket(Packet *packet)
 
 void EcnMarker::setEcn(Packet *packet, IpEcnCode ecn)
 {
+    b offset(0);
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-    if (protocol == &Protocol::ethernetMac) {
-#if defined(INET_WITH_ETHERNET)
-        packet->trim();
-        auto ethHeader = packet->removeAtFront<EthernetMacHeader>();
-        auto ethFcs = packet->removeAtBack<EthernetFcs>(ETHER_FCS_BYTES);
-        if (isEth2Header(*ethHeader)) {
-            const Protocol *payloadProtocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
-#if defined(INET_WITH_IPv4)
-            if (payloadProtocol == &Protocol::ipv4) {
-                auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
-                ipv4Header->setEcn(ecn);
-                Ipv4::insertCrc(ipv4Header); // recalculate IP header checksum
-                insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
-                packet->insertAtFront(ethHeader);
-                ethFcs->setFcs(0);
-                packet->insertAtBack(ethFcs);
-                packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
+
+    if (protocol->getLayer() == Protocol::LinkLayer) {
+        if (protocol == &Protocol::ethernetMac) {
+#ifdef INET_WITH_ETHERNET
+            auto ethHeader = packet->peekDataAt<EthernetMacHeader>(offset);
+            if (isEth2Header(*ethHeader)) {
+                offset += ethHeader->getChunkLength();
+                protocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
             }
 #else
-            throw cRuntimeError("IPv4 feature is disabled");
-#endif
-        }
-        else {
-            packet->insertAtFront(ethHeader);
-            packet->insertAtBack(ethFcs);
-        }
-#else
         throw cRuntimeError("Ethernet feature is disabled");
-#endif // #if defined(INET_WITH_ETHERNET) && defined(INET_WITH_IPv4)
+#endif // #ifdef INET_WITH_ETHERNET
+        }
+    }
+
+    if (protocol == &Protocol::ipv4) {
+#ifdef INET_WITH_IPv4
+        packet->removeTagIfPresent<NetworkProtocolInd>();
+        auto ipv4Header = packet->removeDataAt<Ipv4Header>(offset);
+        ipv4Header->setEcn(ecn);
+        Ipv4::insertCrc(ipv4Header); // recalculate IP header checksum
+        auto networkProtocolInd = packet->addTagIfAbsent<NetworkProtocolInd>();
+        networkProtocolInd->setProtocol(protocol);
+        networkProtocolInd->setNetworkProtocolHeader(ipv4Header);
+        packet->insertDataAt(ipv4Header, offset);
+#else
+        throw cRuntimeError("IPv4 feature is disabled");
+#endif
     }
 }
 
 IpEcnCode EcnMarker::getEcn(const Packet *packet)
 {
-#if defined(INET_WITH_ETHERNET) && defined(INET_WITH_IPv4)
+    b offset(0);
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
-    if (protocol == &Protocol::ethernetMac) {
-        auto ethHeader = packet->peekAtFront<EthernetMacHeader>();
-        if (isEth2Header(*ethHeader)) {
-            const Protocol *payloadProtocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
-            if (payloadProtocol == &Protocol::ipv4) {
-                auto ipv4Header = packet->peekDataAt<Ipv4Header>(ethHeader->getChunkLength());
-                return static_cast<IpEcnCode>(ipv4Header->getEcn());
+
+    if (protocol->getLayer() == Protocol::LinkLayer) {
+        if (protocol == &Protocol::ethernetMac) {
+#ifdef INET_WITH_ETHERNET
+            auto ethHeader = packet->peekDataAt<EthernetMacHeader>(offset);
+            if (isEth2Header(*ethHeader)) {
+                offset += ethHeader->getChunkLength();
+                protocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
             }
+#else
+        throw cRuntimeError("Ethernet feature is disabled");
+#endif // #ifdef INET_WITH_ETHERNET
         }
     }
-#endif // #if defined(INET_WITH_ETHERNET) && defined(INET_WITH_IPv4)
+    if (protocol == &Protocol::ipv4) {
+#ifdef INET_WITH_IPv4
+        auto ipv4Header = packet->peekDataAt<Ipv4Header>(offset);
+        return static_cast<IpEcnCode>(ipv4Header->getEcn());
+#endif
+    }
     return IP_ECN_NOT_ECT;
 }
 
