@@ -8,6 +8,7 @@
 #ifndef __INET_DSCPMARKER_H
 #define __INET_DSCPMARKER_H
 
+#include "inet/common/Protocol.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"

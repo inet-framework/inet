@@ -12,6 +12,11 @@
 #include "inet/networklayer/diffserv/DiffservUtil.h"
 #include "inet/networklayer/diffserv/Dscp_m.h"
 
+#ifdef INET_WITH_ETHERNET
+#include "inet/linklayer/ethernet/common/Ethernet.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
+#endif // #ifdef INET_WITH_ETHERNET
+
 #ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
@@ -81,30 +86,52 @@ bool DscpMarker::markPacket(Packet *packet, int dscp)
 {
     EV_DETAIL << "Marking packet with dscp=" << dscpToString(dscp) << "\n";
 
+    b offset(0);
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
 
-    // TODO processing link-layer headers when exists
+    if (protocol->getLayer() == Protocol::LinkLayer) {
+        if (protocol == &Protocol::ethernetMac) {
+#ifdef INET_WITH_ETHERNET
+            auto ethHeader = packet->peekDataAt<EthernetMacHeader>(offset);
+            if (isEth2Header(*ethHeader)) {
+                offset += ethHeader->getChunkLength();
+                protocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
+            }
+#else
+        throw cRuntimeError("Ethernet feature is disabled");
+#endif // #ifdef INET_WITH_ETHERNET
+        }
+        else
+            return false;
+    }
 
+    if (protocol->getLayer() != Protocol::NetworkLayer)
+        return false;
 #ifdef INET_WITH_IPv4
-    if (protocol == &Protocol::ipv4) {
-        packet->trimFront();
-        const auto& ipv4Header = packet->removeAtFront<Ipv4Header>();
+    else if (protocol == &Protocol::ipv4) {
+        packet->removeTagIfPresent<NetworkProtocolInd>();
+        auto ipv4Header = packet->removeDataAt<Ipv4Header>(offset);
         ipv4Header->setDscp(dscp);
-        Ipv4::insertCrc(ipv4Header);
-        packet->insertAtFront(ipv4Header);
+        Ipv4::insertCrc(ipv4Header); // recalculate IP header checksum
+        auto networkProtocolInd = packet->addTagIfAbsent<NetworkProtocolInd>();
+        networkProtocolInd->setProtocol(protocol);
+        networkProtocolInd->setNetworkProtocolHeader(ipv4Header);
+        packet->insertDataAt(ipv4Header, offset);
         return true;
     }
 #endif // ifdef INET_WITH_IPv4
 #ifdef INET_WITH_IPv6
-    if (protocol == &Protocol::ipv6) {
-        packet->trimFront();
-        const auto& ipv6Header = packet->removeAtFront<Ipv6Header>();
+    else if (protocol == &Protocol::ipv6) {
+        packet->removeTagIfPresent<NetworkProtocolInd>();
+        auto ipv6Header = packet->removeDataAt<Ipv6Header>(offset);
         ipv6Header->setDscp(dscp);
-        packet->insertAtFront(ipv6Header);
+        auto networkProtocolInd = packet->addTagIfAbsent<NetworkProtocolInd>();
+        networkProtocolInd->setProtocol(protocol);
+        networkProtocolInd->setNetworkProtocolHeader(ipv6Header);
+        packet->insertDataAt(ipv6Header, offset);
         return true;
     }
 #endif // ifdef INET_WITH_IPv6
-
     return false;
 }
 
