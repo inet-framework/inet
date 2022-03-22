@@ -32,10 +32,6 @@
 #include "inet/physicallayer/wireless/common/signal/Interference.h"
 #endif
 
-#ifdef INET_WITH_UNITDISKRADIO
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeader_m.h"
-#endif
-
 namespace inet {
 
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
