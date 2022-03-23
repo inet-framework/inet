@@ -16,7 +16,7 @@ Define_Module(OmittedModule);
 void OmittedModule::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        for (cModule::GateIterator ig(this); !ig.end(); ig++) {
+        for (cModule::GateIterator ig(this); !ig.end(); ++ig) {
             auto gateIn = *ig;
             if (gateIn->getType() == cGate::INPUT && gateIn->findTransmissionChannel() == nullptr) {
                 auto gateOut = gateIn->getNextGate();
@@ -24,9 +24,17 @@ void OmittedModule::initialize(int stage)
                 auto nextGate = gateOut->getNextGate();
                 if (previousGate != nullptr && nextGate != nullptr) {
                     EV_INFO << "Reconnecting gates: " << previousGate->getFullPath() << " --> " << nextGate->getFullPath() << std::endl;
+                    std::string direction;
+                    if (previousGate->getChannel()) {
+                        direction = opp_nulltoempty(previousGate->getDisplayString().getTagArg("m", 0));
+                    }
+                    if (direction.empty() && gateOut->getChannel())
+                        direction = opp_nulltoempty(gateOut->getDisplayString().getTagArg("m", 0));
                     gateOut->disconnect();
                     previousGate->disconnect();
                     previousGate->connectTo(nextGate);
+                    if (!direction.empty())
+                        previousGate->getDisplayString().setTagArg("m", 0, direction.c_str());
                 }
             }
         }
