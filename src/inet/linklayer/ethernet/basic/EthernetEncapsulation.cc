@@ -36,6 +36,7 @@ simsignal_t EthernetEncapsulation::pauseSentSignal = registerSignal("pauseSent")
 std::ostream& operator<<(std::ostream& o, const EthernetEncapsulation::Socket& t)
 {
     o << "(id:" << t.socketId
+      << ",interfaceId:" << t.interfaceId
       << ",local:" << t.localAddress
       << ",remote:" << t.remoteAddress
       << ",protocol" << (t.protocol ? t.protocol->getName() : "<null>")
@@ -50,8 +51,10 @@ EthernetEncapsulation::~EthernetEncapsulation()
         delete it.second;
 }
 
-bool EthernetEncapsulation::Socket::matches(Packet *packet, const Ptr<const EthernetMacHeader>& ethernetMacHeader)
+bool EthernetEncapsulation::Socket::matches(Packet *packet, int ifaceId, const Ptr<const EthernetMacHeader>& ethernetMacHeader)
 {
+    if (interfaceId != -1 && interfaceId != ifaceId)
+        return false;
     if (!remoteAddress.isUnspecified() && !ethernetMacHeader->getSrc().isBroadcast() && ethernetMacHeader->getSrc() != remoteAddress)
         return false;
     if (!localAddress.isUnspecified() && !ethernetMacHeader->getDest().isBroadcast() && ethernetMacHeader->getDest() != localAddress)
@@ -113,6 +116,7 @@ void EthernetEncapsulation::processCommandFromHigherLayer(Request *msg)
     else if (auto bindCommand = dynamic_cast<EthernetBindCommand *>(ctrl)) {
         int socketId = check_and_cast<Request *>(msg)->getTag<SocketReq>()->getSocketId();
         Socket *socket = new Socket(socketId);
+        socket->interfaceId = msg->getTag<InterfaceReq>()->getInterfaceId();
         socket->localAddress = bindCommand->getLocalAddress();
         socket->remoteAddress = bindCommand->getRemoteAddress();
         socket->protocol = bindCommand->getProtocol();
@@ -198,10 +202,12 @@ void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)
 void EthernetEncapsulation::processPacketFromMac(Packet *packet)
 {
     const Protocol *payloadProtocol = nullptr;
+
+    int iface = packet->getTag<InterfaceInd>()->getInterfaceId();
     auto ethHeader = packet->popAtFront<EthernetMacHeader>();
     packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
 
-    // add Ieee802Ctrl to packet
+    // add MacAddressInd to packet
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     macAddressInd->setSrcAddress(ethHeader->getSrc());
     macAddressInd->setDestAddress(ethHeader->getDest());
@@ -231,7 +237,7 @@ void EthernetEncapsulation::processPacketFromMac(Packet *packet)
     bool steal = false;
     for (auto it : socketIdToSocketMap) {
         auto socket = it.second;
-        if (socket->matches(packet, ethHeader)) {
+        if (socket->matches(packet, iface, ethHeader)) {
             auto packetCopy = packet->dup();
             packetCopy->setKind(SOCKET_I_DATA);
             packetCopy->addTagIfAbsent<SocketInd>()->setSocketId(it.first);

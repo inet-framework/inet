@@ -42,13 +42,14 @@ protected:
 
     struct Socket {
         int socketId = -1;
+        int interfaceId = -1;
         MacAddress localAddress;
         MacAddress remoteAddress;
         const Protocol *protocol = nullptr;
         bool steal = false;
 
         Socket(int socketId) : socketId(socketId) {}
-        bool matches(Packet *packet, const Ptr<const EthernetMacHeader>& ethernetMacHeader);
+        bool matches(Packet *packet, int ifaceId, const Ptr<const EthernetMacHeader>& ethernetMacHeader);
     };
 
     friend std::ostream& operator<<(std::ostream& o, const Socket& t);
