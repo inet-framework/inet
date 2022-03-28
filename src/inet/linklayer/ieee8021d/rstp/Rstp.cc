@@ -13,7 +13,6 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/linklayer/ethernet/common/Ethernet.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
@@ -589,11 +588,6 @@ void Rstp::sendTCNtoRoot()
 
                 packet->insertAtBack(frame);
 
-                if (packet->getDataLength() < MIN_ETHERNET_FRAME_BYTES) { // KLUDGE, unnecessary padding
-                    const auto& padding = makeShared<ByteCountChunk>(MIN_ETHERNET_FRAME_BYTES - packet->getDataLength());
-                    packet->insertAtBack(padding);
-                }
-
                 auto macAddressReq = packet->addTag<MacAddressReq>();
                 macAddressReq->setSrcAddress(bridgeAddress);
                 macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
@@ -658,11 +652,6 @@ void Rstp::sendBPDU(int interfaceId)
         frame->setForwardDelay(forwardDelay);
 
         packet->insertAtBack(frame);
-
-        if (packet->getDataLength() < MIN_ETHERNET_FRAME_BYTES) { // KLUDGE, unnecessary padding
-            const auto& padding = makeShared<ByteCountChunk>(MIN_ETHERNET_FRAME_BYTES - packet->getDataLength());
-            packet->insertAtBack(padding);
-        }
 
         auto macAddressReq = packet->addTag<MacAddressReq>();
         macAddressReq->setSrcAddress(bridgeAddress);
