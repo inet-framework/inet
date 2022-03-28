@@ -114,15 +114,15 @@
 # /examples/ieee8021d/,                -f omnetpp.ini -c Switch7to4BySrcPriority -r 0, 100s,           0, ERROR,   # Switch7to4BySrcPriority extended
 # /examples/ieee8021d/,                -f omnetpp.ini -c TopologyChange -r 0,         100s,            0, ERROR,   # TopologyChange extended
 # /examples/ieee8021d/,                -f omnetpp.ini -c LinkReconnect -r 0,          100s,            0, ERROR,   # LinkReconnect extended
-/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch1RootByMAC -r 0,   180s,           64d9-f461/tplx;b66a-c246/~tNl;c7a5-8561/tyf, PASS,
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch1RootByMAC -r 0,   180s,           b9f8-85a8/tplx;b853-9cbf/~tNl;c7a5-8561/tyf, PASS,
 /examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch1RootByMAC -r 0,    180s,           9e11-ef30/tplx;57a0-e648/~tNl;7606-dfce/tyf, PASS,
-/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch3RootByPriority -r 0, 180s,        37e5-e456/tplx;3511-33eb/~tNl;9704-40e0/tyf, PASS,
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch3RootByPriority -r 0, 180s,        0544-c085/tplx;aad9-a812/~tNl;9704-40e0/tyf, PASS,
 /examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch3RootByPriority -r 0, 180s,         8c5e-74d9/tplx;389a-613a/~tNl;e3fa-dd73/tyf, PASS,
-/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch7to4BySrcPriority -r 0, 180s,      b0b2-803b/tplx;a8f9-0e8f/~tNl;57d2-88ef/tyf, PASS,
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch7to4BySrcPriority -r 0, 180s,      e4be-6f75/tplx;54ec-539b/~tNl;57d2-88ef/tyf, PASS,
 /examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch7to4BySrcPriority -r 0, 180s,       0862-2a16/tplx;816e-356b/~tNl;227e-5940/tyf, PASS,
-/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LargeNet -r 0,           180s,           0e46-8244/tplx;205b-ecd9/~tNl;f0ca-b87d/tyf, PASS,
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LargeNet -r 0,           180s,           6613-0ed8/tplx;ba63-c274/~tNl;f0ca-b87d/tyf, PASS,
 /examples/ieee8021d/,                -f omnetpp.ini -c STP-LargeNet -r 0,            180s,           9b0a-0f1a/tplx;fb5a-fa9b/~tNl;0386-66c7/tyf, PASS,
-/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LinkReconnect -r 0,      180s,           a6aa-9ff0/tplx;0a89-2c14/~tNl;d5db-19ae/tyf, PASS,
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LinkReconnect -r 0,      180s,           3d4c-c362/tplx;1000-c436/~tNl;d5db-19ae/tyf, PASS,
 /examples/ieee8021d/,                -f omnetpp.ini -c STP-LinkReconnect -r 0,       180s,           adfe-1ba6/tplx;d483-5b69/~tNl;5f52-2ed4/tyf, PASS,
 
 /examples/inet/ber/,                 -f omnetpp.ini -c ber-sack-experiment -r 0,    20s,             a3e1-37ce/tplx;2606-4da3/~tNl;e220-bff2/~tND;7f65-e503/tyf, PASS,
