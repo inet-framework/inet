@@ -243,6 +243,16 @@ Define_NED_Function2(nedf_findArrayObjectElement,
         "Returns the first object from the array that matches the given set of key-value pairs"
         );
 
+cValue nedf_getId(cComponent *contextComponent, cValue argv[], int argc)
+{
+    return contextComponent->getId();
+}
+
+Define_NED_Function2(nedf_getId,
+    "int getId()",
+    "ned",
+    "Returns the id of the module or channel in context.")
+
 } // namespace utils
 
 } // namespace inet
