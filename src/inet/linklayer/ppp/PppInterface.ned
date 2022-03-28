@@ -37,11 +37,11 @@ module PppInterface extends NetworkInterface like IPppInterface
         queue: <default("DropTailQueue")> like IPacketQueue {
             parameters:
                 packetCapacity = default(10000);
-                @display("p=350,200;q=l2queue");
+                @display("p=300,200;q=l2queue");
         }
         ppp: Ppp {
             parameters:
-                @display("p=400,300");
+                @display("p=500,300");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> egressTC.in;
