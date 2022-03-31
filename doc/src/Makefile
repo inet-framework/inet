@@ -29,8 +29,8 @@ html: Makefile copy-media
 copy-media: ../../media
 	@mkdir -p _build/html
 	@# copy the video files also to the output directory. This should be copied by the SPHINXBUILD itself, so this must be FIXED later.
-	@rsync -a --copy-links --prune-empty-dirs --exclude '_docs' --include '*/' --include '*.wav' --include '*.mp3' --include '*.mp4' --include '*.m4v' --exclude '*' tutorials _build/html
-	@rsync -a --copy-links --prune-empty-dirs --exclude '_docs' --include '*/' --include '*.wav' --include '*.mp3' --include '*.mp4' --include '*.m4v' --exclude '*' showcases _build/html
+	@rsync -a --copy-links --prune-empty-dirs --exclude '_docs' --include '*/' --include '*.wav' --include '*.mp3' --include '*.mp4' --include '*.m4v' --exclude '*' ../../tutorials _build/html
+	@rsync -a --copy-links --prune-empty-dirs --exclude '_docs' --include '*/' --include '*.wav' --include '*.mp3' --include '*.mp4' --include '*.m4v' --exclude '*' ../../showcases _build/html
 
 ../../media:
 	@echo "*** 'media' folder is not present. Check out using:"
