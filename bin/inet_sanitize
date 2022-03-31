@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# This script is intended to run INET simulations in sanitize mode. It can be used
+# only after the 'setenv' script has been run from both the OMNeT++ and the INET
+# top level directory using the '. setenv' command. To run a simulation, simply
+# go into its directory and run 'inet_sanitize' possibly passing additional command
+# line arguments. Please note that both OMNeT++ and INET must be compiled in sanitize
+# mode using 'make MODE=sanitize' before.
+#
+
+MODE=sanitize inet "$@"
+

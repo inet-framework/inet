@@ -2,4 +2,4 @@
 
 from inet.main import *
 
-run_leak_tests_main()
+run_sanitizer_tests_main()

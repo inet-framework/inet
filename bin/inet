@@ -40,14 +40,21 @@ if [ "$1" = "--debug" ]; then
    shift;
 fi
 
+if [ "$1" = "--sanitize" ]; then
+   # Equivalent to: MODE=sanitize inet
+   MODE="sanitize"
+   shift;
+fi
+
 if [ "$1" = "--printcmd" ] || [ "$1" = "-p" ]; then
    # Equivalent to: TOOL=echo inet
    TOOL="echo"
    shift;
 fi
 
-OPP_RUN_DBG=$(which opp_run_dbg 2> /dev/null || echo opp_run_dbg)
 OPP_RUN_RELEASE=$(which opp_run_release 2> /dev/null || echo opp_run_release)
+OPP_RUN_DBG=$(which opp_run_dbg 2> /dev/null || echo opp_run_dbg)
+OPP_RUN_SANITIZE=$(which opp_run_sanitize 2> /dev/null || echo opp_run_sanitize)
 
 INET_NEDFOLDERS=$(cat $INET_ROOT/.nedfolders | sed "s|^|$INET_ROOT/|" | tr '\n' ';')
 if [ ! "$INET_NEDFOLDERS" = "" ]; then
@@ -98,5 +105,19 @@ elif [ "$MODE" = "debug" ]; then
     echo "INET debug executable or shared library not found"
     exit 1
   fi
+elif [ "$MODE" = "sanitize" ]; then
+  if [ -f $OUT/INET_sanitize ]; then
+    $TOOL $OUT/INET_sanitize $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/INET_sanitize.exe ]; then
+    $TOOL $OUT/INET_sanitize.exe $INET_OMNETPP_OPTIONS
+  elif [ -f $OUT/libINET_sanitize.so ] || [ -f $OUT/INET_sanitize.dll ] || [ -f $OUT/libINET_sanitize.dll ] || [ -f $OUT/libINET_sanitize.dylib ]; then
+    $TOOL $OPP_RUN_SANITIZE -l $OUT/../src/INET $INET_OMNETPP_OPTIONS "$@"
+  else
+    echo "INET debug executable or shared library not found"
+    exit 1
+  fi
+else
+  echo "Unknown INET execution mode: $MODE"
+  exit 1
 fi
 
