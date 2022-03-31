@@ -30,6 +30,10 @@ RoutingTableRecorder::RoutingTableRecorder()
 
 RoutingTableRecorder::~RoutingTableRecorder()
 {
+    if (routingLogFile != nullptr) {
+        fclose(routingLogFile);
+        routingLogFile = nullptr;
+    }
 }
 
 void RoutingTableRecorder::initialize(int stage)
@@ -49,10 +53,6 @@ void RoutingTableRecorder::handleMessage(cMessage *)
 
 void RoutingTableRecorder::finish()
 {
-    if (routingLogFile != nullptr) {
-        fclose(routingLogFile);
-        routingLogFile = nullptr;
-    }
 }
 
 void RoutingTableRecorder::hookListeners()
@@ -97,6 +97,9 @@ void RoutingTableRecorder::receiveChangeNotification(cComponent *nsource, simsig
 
 void RoutingTableRecorder::recordInterfaceChange(cModule *host, const NetworkInterface *ie, simsignal_t signalID)
 {
+    if (getSimulation()->getSimulationStage() == CTX_CLEANUP)
+            return; // ignore notifications during cleanup
+
     // Note: ie->getInterfaceTable() may be nullptr (entry already removed from its table)
 
     const char *tag;
