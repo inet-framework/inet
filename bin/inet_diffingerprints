@@ -21,7 +21,7 @@ def readFingerprints1(eventlogFile):
     for line in eventlogFile:
         match = regExp.match(line)
         if match:
-            fingerprint = match.group(3)
+            fingerprint = match.group(3) if match.group(3) else match.group(4)
             fingerprints.append(fingerprint)
     return fingerprints
 
