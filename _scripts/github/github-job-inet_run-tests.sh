@@ -15,7 +15,7 @@ set -e # make the script exit with error if any executed command exits with erro
 cd $GITHUB_WORKSPACE
 
 # TEST
-. /root/omnetpp-6.0rc1-linux/setenv -f
+. /root/omnetpp-6.0-linux/setenv -f
 
 echo "::group::Installing pip"
 apt install -y python3-pip
@@ -28,7 +28,7 @@ echo "::endgroup::"
 mkdir /root/workspace
 export WORKSPACE_ROOT=/root/workspace
 
-ln -s /root/omnetpp-6.0rc1-linux /root/workspace/omnetpp
+ln -s /root/omnetpp-6.0-linux /root/workspace/omnetpp
 ln -s $GITHUB_WORKSPACE /root/workspace/inet
 
 cd /root/workspace/inet
