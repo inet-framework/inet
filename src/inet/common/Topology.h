@@ -39,7 +39,7 @@ namespace inet {
  * just as module gates are.
  *
  * @ingroup SimSupport
- * @see Topology::Node, Topology::Link, Topology::LinkIn, Topology::LinkOut
+ * @see Topology::Node, Topology::Link
  */
 
 // TODO doucument: graph may be modified by hand; graph nodes/links may or may not correspond to modules/gates
@@ -52,8 +52,6 @@ class INET_API Topology : public cOwnedObject
 {
   public:
     class Link;
-    class LinkIn;
-    class LinkOut;
 
     /**
      * Supporting class for Topology, represents a node in the graph.
@@ -166,7 +164,7 @@ class INET_API Topology : public cOwnedObject
         /**
          * Returns ith incoming link of graph node.
          */
-        LinkIn *getLinkIn(int i) const;
+        Link *getLinkIn(int i) const;
 
         /**
          * Returns the number of outgoing links from this graph node.
@@ -176,7 +174,7 @@ class INET_API Topology : public cOwnedObject
         /**
          * Returns ith outgoing link of graph node.
          */
-        LinkOut *getLinkOut(int i) const;
+        Link *getLinkOut(int i) const;
         //@}
 
         /** @name Result of shortest path extraction. */
@@ -198,7 +196,7 @@ class INET_API Topology : public cOwnedObject
          * target node. (There may be several paths with the same
          * length.)
          */
-        LinkOut *getPath(int i) const { return (LinkOut *)outPaths.at(i); }
+        Link *getPath(int i) const { return outPaths.at(i); }
         //@}
     };
 
@@ -252,88 +250,66 @@ class INET_API Topology : public cOwnedObject
          * finder methods of Topology.
          */
         void disable() { enabled = false; }
-    };
 
-    /**
-     * Supporting class for Topology.
-     *
-     * While navigating the graph stored in a Topology, Node's methods return
-     * LinkIn and LinkOut objects, which are 'aliases' to Link objects.
-     * LinkIn and LinkOut provide convenience functions that return the
-     * 'local' and 'remote' end of the connection when traversing the topology.
-     */
-    class INET_API LinkIn : public Link {
-      public:
         /**
          * Returns the node at the remote end of this connection.
          */
-        Node *getRemoteNode() const { return srcNode; }
+        Node *getLinkInRemoteNode() const { return srcNode; }
 
         /**
          * Returns the node at the local end of this connection.
          */
-        Node *getLocalNode() const { return destNode; }
+        Node *getLinkInLocalNode() const { return destNode; }
 
         /**
          * Returns the gate ID at the remote end of this connection.
          */
-        int getRemoteGateId() const { return srcGateId; }
+        int getLinkInRemoteGateId() const { return srcGateId; }
 
         /**
          * Returns the gate ID at the local end of this connection.
          */
-        int getLocalGateId() const { return destGateId; }
+        int getLinkInLocalGateId() const { return destGateId; }
 
         /**
          * Returns the gate at the remote end of this connection.
          */
-        cGate *getRemoteGate() const { return srcNode->getModule()->gate(srcGateId); }
+        cGate *getLinkInRemoteGate() const { return srcNode->getModule()->gate(srcGateId); }
 
         /**
          * Returns the gate at the local end of this connection.
          */
-        cGate *getLocalGate() const { return destNode->getModule()->gate(destGateId); }
-    };
+        cGate *getLinkInLocalGate() const { return destNode->getModule()->gate(destGateId); }
 
-    /**
-     * Supporting class for Topology.
-     *
-     * While navigating the graph stored in a Topology, Node's methods return
-     * LinkIn and LinkOut objects, which are 'aliases' to Link objects.
-     * LinkIn and LinkOut provide convenience functions that return the
-     * 'local' and 'remote' end of the connection when traversing the topology.
-     */
-    class INET_API LinkOut : public Link {
-      public:
         /**
          * Returns the node at the remote end of this connection.
          */
-        Node *getRemoteNode() const { return destNode; }
+        Node *getLinkOutRemoteNode() const { return destNode; }
 
         /**
          * Returns the node at the local end of this connection.
          */
-        Node *getLocalNode() const { return srcNode; }
+        Node *getLinkOutLocalNode() const { return srcNode; }
 
         /**
          * Returns the gate ID at the remote end of this connection.
          */
-        int getRemoteGateId() const { return destGateId; }
+        int getLinkOutRemoteGateId() const { return destGateId; }
 
         /**
          * Returns the gate ID at the local end of this connection.
          */
-        int getLocalGateId() const { return srcGateId; }
+        int getLinkOutLocalGateId() const { return srcGateId; }
 
         /**
          * Returns the gate at the remote end of this connection.
          */
-        cGate *getRemoteGate() const { return destNode->getModule()->gate(destGateId); }
+        cGate *getLinkOutRemoteGate() const { return destNode->getModule()->gate(destGateId); }
 
         /**
          * Returns the gate at the local end of this connection.
          */
-        cGate *getLocalGate() const { return srcNode->getModule()->gate(srcGateId); }
+        cGate *getLinkOutLocalGate() const { return srcNode->getModule()->gate(srcGateId); }
     };
 
     /**

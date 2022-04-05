@@ -23,18 +23,18 @@ namespace inet {
 
 Register_Class(Topology);
 
-Topology::LinkIn *Topology::Node::getLinkIn(int i) const
+Topology::Link *Topology::Node::getLinkIn(int i) const
 {
     if (i < 0 || i >= (int)inLinks.size())
         throw cRuntimeError("Topology::Node::getLinkIn: invalid link index %d", i);
-    return (Topology::LinkIn *)inLinks[i];
+    return inLinks[i];
 }
 
-Topology::LinkOut *Topology::Node::getLinkOut(int i) const
+Topology::Link *Topology::Node::getLinkOut(int i) const
 {
     if (i < 0 || i >= (int)outLinks.size())
         throw cRuntimeError("Topology::Node::getLinkOut: invalid index %d", i);
-    return (Topology::LinkOut *)outLinks[i];
+    return outLinks[i];
 }
 
 // ----
@@ -432,7 +432,7 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *_target) const
             if (!(dest->getLinkIn(i)->isEnabled()))
                 continue;
 
-            Node *src = dest->getLinkIn(i)->getRemoteNode();
+            Node *src = dest->getLinkIn(i)->getLinkInRemoteNode();
             if (!src->isEnabled())
                 continue;
 
