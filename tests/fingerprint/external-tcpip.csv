@@ -14,9 +14,9 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__stream -r 0,         100s,            dbac-e55c/tplx, PASS,
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__lwip -r 0,                 100s,            4999-d547/tplx, PASS,
 
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,                  50s,            d39c-571c/tplx, PASS, EthernetMac
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,                  50s,            4970-26d3/tplx, PASS, EthernetMac
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,                  50s,            380f-e995/tplx, PASS, EthernetMac
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,                  50s,            a788-9ebf/tplx, PASS, EthernetMac
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,                  50s,            edc0-0a0c/tplx, PASS, EthernetMac
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,                  50s,            7096-04e3/tplx, PASS, EthernetMac
 
 /examples/inet/nclients/,            -f omnetpp.ini -c inet__lwip -r 0,                 200s,            e194-036d/tplx, ERROR,
 /examples/inet/nclients/,            -f omnetpp.ini -c lwip__inet -r 0,                 200s,            0de9-dea9/tplx, ERROR,
