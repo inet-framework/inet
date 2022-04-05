@@ -242,7 +242,7 @@ void TSNschedGateScheduleConfigurator::executeTSNsched(std::string inputFileName
     std::string classpath = "${TSNSCHED_HOME}/libs/com.microsoft.z3.jar";
     std::string command = std::string("java -classpath ") + classpath + " -jar ${TSNSCHED_HOME}/libs/TSNsched.jar " + inputFileName + " -enableConsoleOutput";
     if (std::system(command.c_str()) != 0)
-        throw cRuntimeError("Error during executing TSNsched command, make sure TSNSCHED_HOME is set and Microsoft Z3 is installed");
+        throw cRuntimeError("TSNsched command execution failed, make sure TSNSCHED_HOME is set and Microsoft Z3 is installed");
 }
 
 TSNschedGateScheduleConfigurator::Output *TSNschedGateScheduleConfigurator::computeGateScheduling(const Input& input) const
