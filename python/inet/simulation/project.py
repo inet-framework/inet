@@ -6,24 +6,65 @@ from inet.common import *
 logger = logging.getLogger(__name__)
 
 class SimulationProject:
-    def __init__(self, project_directory):
+    def __init__(self, project_directory, executable=None, libraries=None, ned_folders=["src"], ini_file_folders=["."], image_folders=["image"]):
         self.project_directory = project_directory
+        self.executable = executable
+        self.libraries = libraries
+        self.ned_folders = ned_folders
+        self.ini_file_folders = ini_file_folders
+        self.image_folders = image_folders
         self.simulation_configs = None
 
     def get_name(self):
         return os.path.basename(self.get_full_path("."))
 
     def get_full_path(self, path):
-        return os.path.abspath(self.project_directory + "/" + path)
+        return os.path.abspath(os.path.join(self.project_directory, path))
+
+    def get_executable(self, mode="debug"):
+        if mode == "release":
+            return self.get_full_path(self.executable)
+        elif mode == "debug":
+            return self.get_full_path(self.executable + "_dbg")
+        elif mode == "sanitize":
+            return self.get_full_path(self.executable + "_sanitize")
+        else:
+            raise Exception(f"Unknown mode: {mode}")
+
+    def get_full_path_args(self, option, paths):
+        args = []
+        for path in paths:
+            args.append(option)
+            args.append(self.get_full_path(path))
+        return args
+
+    def get_default_args(self):
+        return [*self.get_full_path_args("-l", self.libraries), *self.get_full_path_args("-n", self.ned_folders), *self.get_full_path_args("--image-path", self.image_folders)]
 
 simulation_projects = dict()
 
-def get_simulation_project(name):
+def get_simulation_project(name, **kwargs):
     if not name in simulation_projects:
         workspace_path = get_workspace_path(name)
-        simulation_projects[name] = SimulationProject(workspace_path)
+        simulation_projects[name] = SimulationProject(workspace_path, **kwargs)
     return simulation_projects[name]
 
-inet_project = get_simulation_project("inet")
-inet_baseline_project = get_simulation_project("inet-baseline")
+aloha_project = get_simulation_project("omnetpp/samples/aloha", executable="aloha")
+
+tictoc_project = get_simulation_project("omnetpp/samples/tictoc", executable="tictoc")
+
+inet_project = get_simulation_project("inet",
+                                      executable=get_workspace_path("omnetpp/bin/opp_run"),
+                                      libraries=["src/INET"],
+                                      ned_folders=["src", "examples", "showcases", "tutorials", "tests/networks", "tests/validation"],
+                                      ini_file_folders=["examples", "showcases", "tutorials", "tests/fingerprint", "tests/validation"],
+                                      image_folders=["images"])
+
+inet_baseline_project = get_simulation_project("inet-baseline",
+                                               executable=inet_project.executable,
+                                               libraries=inet_project.libraries,
+                                               ned_folders=inet_project.ned_folders,
+                                               ini_file_folders=inet_project.ini_file_folders,
+                                               image_folders=inet_project.image_folders)
+
 default_project=inet_project

@@ -8,7 +8,10 @@ from inet.common.util import *
 logger = logging.getLogger(__name__)
 
 class TaskResult:
-    def __init__(self, task, result, expected_result="PASS", reason=None, error_message=None, elapsed_wall_time=None, possible_results=["DONE", "CANCEL", "ERROR"], possible_result_colors=[COLOR_GREEN, COLOR_CYAN, COLOR_RED], **kwargs):
+    def __init__(self, task=None, result="DONE", expected_result="DONE", reason=None, error_message=None, elapsed_wall_time=None, possible_results=["DONE", "CANCEL", "ERROR"], possible_result_colors=[COLOR_GREEN, COLOR_CYAN, COLOR_RED], **kwargs):
+        self.locals = locals()
+        self.locals.pop("self")
+        self.kwargs = kwargs
         self.task = task
         self.result = result
         self.expected_result = expected_result
@@ -19,7 +22,6 @@ class TaskResult:
         self.possible_results = possible_results
         self.possible_result_colors = possible_result_colors
         self.color = possible_result_colors[possible_results.index(result)]
-        self.kwargs = kwargs
 
     def __repr__(self):
         return "Result: " + self.get_description()
@@ -27,8 +29,8 @@ class TaskResult:
     def get_description(self, complete_error_message=True, include_parameters=False, **kwargs):
         return (self.task.get_parameters_string() + " " if include_parameters else "") + \
                 self.color + self.result + COLOR_RESET + \
-                ((COLOR_YELLOW + " (unexpected)" + COLOR_RESET) if not self.expected and self.expected_result != "PASS" else "") + \
-                ((COLOR_GREEN + " (expected)" + COLOR_RESET) if self.expected and self.expected_result != "PASS" else "") + \
+                ((COLOR_YELLOW + " (unexpected)" + COLOR_RESET) if not self.expected and self.color != COLOR_GREEN else "") + \
+                ((COLOR_GREEN + " (expected)" + COLOR_RESET) if self.expected and self.color != COLOR_GREEN else "") + \
                (" (" + self.reason + ")" if self.reason else "") + \
                (" " + self.get_error_message(complete_error_message=complete_error_message) if self.result == "ERROR" else "")
 
@@ -40,11 +42,13 @@ class TaskResult:
         print(self.get_description(complete_error_message=complete_error_message), file=output_stream)
 
     def rerun(self, **kwargs):
-        # TODO recreate tasks with kwargs merged with original parameters
-        return self.task.run(**kwargs)
+        return self.task.rerun(**kwargs)
 
 class MultipleTaskResults:
-    def __init__(self, multiple_tasks, results, expected_result="PASS", elapsed_wall_time=None, possible_results=["DONE", "CANCEL", "ERROR"], possible_result_colors=[COLOR_GREEN, COLOR_CYAN, COLOR_RED], **kwargs):
+    def __init__(self, multiple_tasks=None, results=[], expected_result="DONE", elapsed_wall_time=None, possible_results=["DONE", "CANCEL", "ERROR"], possible_result_colors=[COLOR_GREEN, COLOR_CYAN, COLOR_RED], **kwargs):
+        self.locals = locals()
+        self.locals.pop("self")
+        self.kwargs = kwargs
         self.multiple_tasks = multiple_tasks
         self.results = results
         self.expected_result = expected_result
@@ -67,7 +71,6 @@ class MultipleTaskResults:
                 self.result = possible_result
         self.color = possible_result_colors[possible_results.index(self.result)]
         self.expected = self.expected_result == self.result
-        self.kwargs = kwargs
 
     def __repr__(self):
         if len(self.results) == 0:
@@ -161,15 +164,16 @@ class MultipleTaskResults:
         return self.__class__(multiple_tasks, filtered_results)
 
     def rerun(self, **kwargs):
-        # TODO recreate tasks with kwargs merged with original parameters
-        return self.multiple_tasks.run(**kwargs)
+        return self.multiple_tasks.rerun(**kwargs)
 
 class Task:
     def __init__(self, name="task", task_result_class=TaskResult, **kwargs):
+        self.locals = locals()
+        self.locals.pop("self")
+        self.kwargs = kwargs
         self.name = name
         self.task_result_class = task_result_class
         self.cancel = False
-        self.kwargs = kwargs
 
     def __repr__(self):
         return repr(self)
@@ -188,7 +192,7 @@ class Task:
 
     def run(self, index=None, count=None, print_end=" ", dry_run=False, output_stream=sys.stdout, keyboard_interrupt_handler=None, **kwargs):
         if self.cancel:
-            return self.task_result_class(self, result="CANCEL", reason="Cancel by user")
+            return self.task_result_class(task=self, result="CANCEL", reason="Cancel by user")
         else:
             try:
                 print((self.get_progress_string(index, count) if index is not None and count is not None else "") + self.get_parameters_string(**kwargs), end=print_end, file=output_stream)
@@ -200,19 +204,25 @@ class Task:
                         end_time = time.time()
                         task_result.elapsed_wall_time = end_time - start_time
                     else:
-                        task_result = self.task_result_class(self, result="DONE", reason="Dry run")
+                        task_result = self.task_result_class(task=self, result="DONE", reason="Dry run")
             except KeyboardInterrupt:
-                task_result = self.task_result_class(self, result="CANCEL", reason="Cancel by user")
+                task_result = self.task_result_class(task=self, result="CANCEL", reason="Cancel by user")
             except Exception as e:
-                task_result = self.task_result_class(self, result="ERROR", reason="Exception during task execution", error_message=e.__repr__())
+                task_result = self.task_result_class(task=self, result="ERROR", reason="Exception during task execution", error_message=e.__repr__())
             task_result.print_result(complete_error_message=False, output_stream=output_stream)
             return task_result
 
     def run_protected(self, **kwargs):
-        return self.task_result_class(self, result="DONE", reason="Normal completion")
+        return self.task_result_class(task=self, result="DONE", reason="Task completed")
+
+    def rerun(self, **kwargs):
+        return self.__class__(**dict(dict(self.locals, **self.kwargs), **kwargs)).run()
 
 class MultipleTasks:
-    def __init__(self, tasks, name="task", concurrent=True, randomize=False, chunksize=1, pool_class=multiprocessing.pool.ThreadPool, multiple_task_results_class=MultipleTaskResults, **kwargs):
+    def __init__(self, tasks=[], name="task", concurrent=True, randomize=False, chunksize=1, pool_class=multiprocessing.pool.ThreadPool, multiple_task_results_class=MultipleTaskResults, **kwargs):
+        self.locals = locals()
+        self.locals.pop("self")
+        self.kwargs = kwargs
         self.tasks = tasks
         self.name = name
         self.concurrent = concurrent
@@ -221,7 +231,6 @@ class MultipleTasks:
         self.pool_class = pool_class
         self.multiple_task_results_class = multiple_task_results_class
         self.cancel = False
-        self.kwargs = kwargs
 
     def __repr__(self):
         return repr(self)
@@ -232,10 +241,11 @@ class MultipleTasks:
             task.set_cancel(cancel)
 
     def run(self, **kwargs):
-        logger.info(f"Running multiple {self.name}s started")
+        description = "concurrently" if self.concurrent else "sequentially"
+        logger.info(f"Running multiple {self.name}s {description} started")
         if self.cancel:
-            task_results = list(map(lambda task: task.task_result_class(task, result="CANCEL", reason="Cancel by user"), self.tasks))
-            multiple_task_results = self.multiple_task_results_class(self, task_results)
+            task_results = list(map(lambda task: task.task_result_class(task=task, result="CANCEL", reason="Cancel by user"), self.tasks))
+            multiple_task_results = self.multiple_task_results_class(multiple_tasks=self, results=task_results)
         else:
             try:
                 start_time = time.time()
@@ -243,9 +253,9 @@ class MultipleTasks:
                 end_time = time.time()
                 multiple_task_results.elapsed_wall_time = end_time - start_time
             except KeyboardInterrupt:
-                task_results = list(map(lambda task: task.task_result_class(task, result="CANCEL", reason="Cancel by user"), self.tasks))
-                multiple_task_results = self.multiple_task_results_class(self, task_results)
-        logger.info(f"Running multiple {self.name}s ended")
+                task_results = list(map(lambda task: task.task_result_class(task=task, result="CANCEL", reason="Cancel by user"), self.tasks))
+                multiple_task_results = self.multiple_task_results_class(multiple_tasks=self, results=task_results)
+        logger.info(f"Running multiple {self.name}s {description} ended")
         return multiple_task_results
 
     def run_protected(self, **kwargs):
@@ -278,7 +288,10 @@ class MultipleTasks:
                         cancel = True
                     task_results.append(result)
                     task_index = task_index + 1
-        return self.multiple_task_results_class(self, task_results)
+        return self.multiple_task_results_class(multiple_tasks=self, results=task_results)
+
+    def rerun(self, **kwargs):
+        return self.__class__(**dict(dict(self.locals, **self.kwargs), **kwargs)).run()
 
 def run_task_with_capturing_output(task, tasks=None, task_count=None, output_stream=sys.stdout, **kwargs):
     task_output_stream = io.StringIO()
@@ -288,5 +301,14 @@ def run_task_with_capturing_output(task, tasks=None, task_count=None, output_str
     return task_result
 
 def run_tasks(tasks, task_result_class=TaskResult, multiple_tasks_class=MultipleTasks, multiple_task_results_class=MultipleTaskResults, **kwargs):
-    multiple_tasks = multiple_tasks_class(tasks, **kwargs)
+    multiple_tasks = multiple_tasks_class(multiple_tasks=tasks, **kwargs)
     return multiple_tasks.run(**kwargs)
+
+def run_task_tests(multiple_tasks_class=MultipleTasks, task_class=Task, expected_result="DONE"):
+    multiple_tasks = multiple_tasks_class([task_class(), task_class()])
+    multiple_task_results1 = multiple_tasks.run()
+    assert(multiple_task_results1.result == expected_result)
+    multiple_task_results2 = multiple_task_results1.get_unexpected_results()
+    assert(len(multiple_task_results2.multiple_tasks.tasks) == 0)
+    multiple_task_results3 = multiple_task_results1.rerun(concurrent=False)
+    assert(multiple_task_results3.result == expected_result)

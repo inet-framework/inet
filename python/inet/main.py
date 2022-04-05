@@ -78,8 +78,8 @@ def run_chart_tests_main():
 def run_fingerprint_tests_main():
     run_main(run_fingerprint_tests, "fingerprint tests")
 
-def run_leak_tests_main():
-    run_main(run_leak_tests, "leak tests")
+def run_sanitizer_tests_main():
+    run_main(run_sanitizer_tests, "sanitizer tests")
 
 def run_module_tests_main():
     run_main(run_module_tests, "module tests")

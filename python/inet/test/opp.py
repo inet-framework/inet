@@ -10,6 +10,9 @@ logger = logging.getLogger(__name__)
 class OppTestTask(TestTask):
     def __init__(self, working_directory, test_file_name, **kwargs):
         super().__init__(**kwargs)
+        self.locals = locals()
+        self.locals.pop("self")
+        self.kwargs = kwargs
         self.working_directory = working_directory
         self.test_file_name = test_file_name
 
@@ -35,7 +38,7 @@ def get_opp_test_tasks(test_folder, simulation_project=default_project, filter="
     test_file_names = list(builtins.filter(lambda test_file_name: matches_filter(test_file_name, filter, None, full_match),
                                            glob.glob(os.path.join(simulation_project.get_full_path(test_folder), "*.test"))))
     test_tasks = list(map(create_test_task, test_file_names))
-    return MultipleTestTasks(test_tasks, multiple_task_results_class=MultipleTestTaskResults, **kwargs)
+    return MultipleTestTasks(tasks=test_tasks, multiple_task_results_class=MultipleTestTaskResults, **kwargs)
 
 def run_opp_tests(test_folder, **kwargs):
     multiple_test_tasks = get_opp_test_tasks(test_folder, **kwargs)

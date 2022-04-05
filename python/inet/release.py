@@ -26,7 +26,7 @@ import logging
 #     - run fingerprint tests
 #     - run statistical tests
 #     - run validation tests
-#     - run leak tests
+#     - run sanitizer tests
 #     - run speed tests
 #     - run feature tests
 

@@ -18,10 +18,47 @@ from inet.simulation.subprocess import *
 
 logger = logging.getLogger(__name__)
 
+class SimulationTaskResult(TaskResult):
+    def __init__(self, subprocess_result=None, cancel=False, **kwargs):
+        super().__init__(**kwargs)
+        self.locals = locals()
+        self.locals.pop("self")
+        self.kwargs = kwargs
+        self.subprocess_result = subprocess_result
+        if subprocess_result:
+            stdout = self.subprocess_result.stdout.decode("utf-8")
+            stderr = self.subprocess_result.stderr.decode("utf-8")
+            match = re.search(r"<!> Simulation time limit reached -- at t=(.*), event #(\d+)", stdout)
+            self.last_event_number = int(match.group(2)) if match else None
+            self.last_simulation_time = match.group(1) if match else None
+            self.elapsed_cpu_time = None # TODO
+            match = re.search("<!> Error: (.*) -- in module (.*)", stderr)
+            self.error_message = match.group(1).strip() if match else None
+            self.error_module = match.group(2).strip() if match else None
+            if self.error_message is None:
+                match = re.search("<!> Error: (.*)", stderr)
+                self.error_message = match.group(1).strip() if match else None
+        else:
+            self.last_event_number = None
+            self.last_simulation_time = None
+            self.error_message = None
+            self.error_module = None
+
+    def get_error_message(self, complete_error_message=True, **kwargs):
+        error_message = self.error_message or "Error message not found"
+        error_module = self.error_module or "Error module not found"
+        return (error_message + " -- in module " + error_module if complete_error_message else error_message) if self.result == "ERROR" else ""
+
+    def get_subprocess_result(self):
+        return self.subprocess_result
+
 class SimulationTask(Task):
-    def __init__(self, simulation_config, run=0, mode="debug", user_interface="Cmdenv", sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, name="simulation", **kwargs):
-        super().__init__(name=name, **kwargs)
+    def __init__(self, simulation_config=None, run=0, mode="debug", user_interface="Cmdenv", sim_time_limit=None, cpu_time_limit=None, record_eventlog=None, record_pcap=None, name="simulation", task_result_class=SimulationTaskResult, **kwargs):
+        super().__init__(name=name, task_result_class=task_result_class, **kwargs)
         assert run is not None
+        self.locals = locals()
+        self.locals.pop("self")
+        self.kwargs = kwargs
         self.simulation_config = simulation_config
         self.interactive = None # NOTE delayed to is_interactive()
         self._run = run
@@ -37,8 +74,9 @@ class SimulationTask(Task):
         if self.interactive is None:
             simulation_config = self.simulation_config
             simulation_project = simulation_config.simulation_project
-            executable = simulation_project.get_full_path("bin/inet")
-            args = [executable, "-s", "-u", "Cmdenv", "-f", simulation_config.ini_file, "-c", simulation_config.config, "-r", "0", "--sim-time-limit", "0s"]
+            executable = simulation_project.get_executable()
+            default_args = simulation_project.get_default_args()
+            args = [executable, *default_args, "-s", "-u", "Cmdenv", "-f", simulation_config.ini_file, "-c", simulation_config.config, "-r", "0", "--sim-time-limit", "0s"]
             env = os.environ.copy()
             env["INET_ROOT"] = simulation_project.get_full_path(".")
             subprocess_result = subprocess.run(args, cwd=simulation_project.get_full_path(simulation_config.working_directory), capture_output=True, env=env)
@@ -72,59 +110,32 @@ class SimulationTask(Task):
         cpu_time_limit_args = ["--cpu-time-limit", self.get_cpu_time_limit()] if self.cpu_time_limit else []
         record_eventlog_args = ["--record-eventlog", "true"] if self.record_eventlog else []
         record_pcap_args = ["--**.numPcapRecorders=1", "--**.crcMode=\"computed\"", "--**.fcsMode=\"computed\""] if self.record_pcap else []
-        executable = simulation_project.get_full_path("bin/inet")
-        args = [executable, "--" + self.mode, "-s", "-u", self.user_interface, "-f", ini_file, "-c", config, "-r", str(self._run), *sim_time_limit_args, *cpu_time_limit_args, *record_eventlog_args, *record_pcap_args, *extra_args]
+        executable = simulation_project.get_executable(mode=self.mode)
+        default_args = simulation_project.get_default_args()
+        args = [executable, *default_args, "-s", "-u", self.user_interface, "-f", ini_file, "-c", config, "-r", str(self._run), *sim_time_limit_args, *cpu_time_limit_args, *record_eventlog_args, *record_pcap_args, *extra_args]
         env = os.environ.copy()
         env["INET_ROOT"] = simulation_project.get_full_path(".")
         logger.debug(args)
         subprocess_result = simulation_runner.run(self, args)
         if subprocess_result.returncode == -signal.SIGINT.value:
-            return SimulationTaskResult(self, "CANCEL", subprocess_result, reason="Cancel by user")
+            return self.task_result_class(task=self, subprocess_result=subprocess_result, result="CANCEL", reason="Cancel by user")
         elif subprocess_result.returncode == 0:
-            return SimulationTaskResult(self, "DONE", subprocess_result)
+            return self.task_result_class(task=self, subprocess_result=subprocess_result, result="DONE")
         else:
-            return SimulationTaskResult(self, "ERROR", subprocess_result, reason="Non-zero exit code")
+            return self.task_result_class(task=self, subprocess_result=subprocess_result, result="ERROR", reason="Non-zero exit code")
 
 class MultipleSimulationTasks(MultipleTasks):
-    def __init__(self, simulation_tasks, simulation_project=default_project, name="simulation", **kwargs):
-        super().__init__(simulation_tasks, name=name, **kwargs)
+    def __init__(self, simulation_project=default_project, name="simulation", **kwargs):
+        super().__init__(name=name, **kwargs)
+        self.locals = locals()
+        self.locals.pop("self")
+        self.kwargs = kwargs
         self.simulation_project = simulation_project
 
     def run(self, build=True, **kwargs):
         if build:
             build_project(simulation_project=self.simulation_project, **kwargs)
         return super().run(**kwargs)
-
-class SimulationTaskResult(TaskResult):
-    def __init__(self, simulation_task, result, subprocess_result, cancel=False, **kwargs):
-        super().__init__(simulation_task, result, **kwargs)
-        self.subprocess_result = subprocess_result
-        if subprocess_result:
-            stdout = self.subprocess_result.stdout.decode("utf-8")
-            stderr = self.subprocess_result.stderr.decode("utf-8")
-            match = re.search(r"<!> Simulation time limit reached -- at t=(.*), event #(\d+)", stdout)
-            self.last_event_number = int(match.group(2)) if match else None
-            self.last_simulation_time = match.group(1) if match else None
-            self.elapsed_cpu_time = None # TODO
-            match = re.search("<!> Error: (.*) -- in module (.*)", stderr)
-            self.error_message = match.group(1).strip() if match else None
-            self.error_module = match.group(2).strip() if match else None
-            if self.error_message is None:
-                match = re.search("<!> Error: (.*)", stderr)
-                self.error_message = match.group(1).strip() if match else None
-        else:
-            self.last_event_number = None
-            self.last_simulation_time = None
-            self.error_message = None
-            self.error_module = None
-
-    def get_error_message(self, complete_error_message=True, **kwargs):
-        error_message = self.error_message or "Error message not found"
-        error_module = self.error_module or "Error module not found"
-        return (error_message + " -- in module " + error_module if complete_error_message else error_message) if self.result == "ERROR" else ""
-
-    def get_subprocess_result(self):
-        return self.subprocess_result
 
 def clean_simulation_results(simulation_config):
     logger.info("Cleaning simulation results, folder = " + simulation_config.working_directory)
@@ -150,16 +161,16 @@ def get_simulation_tasks(simulation_project=None, simulation_configs=None, run=N
     for simulation_config in simulation_configs:
         if run is not None:
             simulation_run_sim_time_limit = sim_time_limit(simulation_config, run) if callable(sim_time_limit) else sim_time_limit
-            simulation_tasks.append(simulation_task_class(simulation_config, run, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs))
+            simulation_tasks.append(simulation_task_class(simulation_config=simulation_config, run=run, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs))
         else:
             for generated_run in range(0, simulation_config.num_runs):
                 simulation_run_sim_time_limit = sim_time_limit(simulation_config, generated_run) if callable(sim_time_limit) else sim_time_limit
-                simulation_tasks.append(simulation_task_class(simulation_config, generated_run, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs))
-    return multiple_simulation_tasks_class(simulation_tasks, simulation_project=simulation_project, concurrent=concurrent, **kwargs)
+                simulation_tasks.append(simulation_task_class(simulation_config=simulation_config, run=generated_run, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs))
+    return multiple_simulation_tasks_class(tasks=simulation_tasks, simulation_project=simulation_project, concurrent=concurrent, **kwargs)
 
 def run_simulations(**kwargs):
     multiple_simulation_tasks = get_simulation_tasks(**kwargs)
-    return multiple_simulation_tasks.run()
+    return multiple_simulation_tasks.run(**kwargs)
 
 def run_simulation(simulation_project, working_directory, ini_file="omnetpp.ini", config="General", run=0, sim_time_limit=None, cpu_time_limit=None, **kwargs):
     simulation_config = SimulationConfig(simulation_project, working_directory, ini_file, config, 1, False, None)

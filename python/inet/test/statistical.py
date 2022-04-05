@@ -15,6 +15,9 @@ logger = logging.getLogger(__name__)
 class StatisticalTestTask(SimulationTestTask):
     def __init__(self, simulation_config, run, name="statistical test", task_result_class=SimulationTestTaskResult, **kwargs):
         super().__init__(SimulationTask(simulation_config, run, name=name, **kwargs), task_result_class=task_result_class, **kwargs)
+        self.locals = locals()
+        self.locals.pop("self")
+        self.kwargs = kwargs
 
     def check_simulation_task_result(self, simulation_task_result, **kwargs):
         simulation_task = simulation_task_result.task
@@ -88,6 +91,9 @@ def run_statistical_tests(**kwargs):
 class StatisticalResultsUpdateTask(SimulationTask):
     def __init__(self, simulation_config, run, name="statistical results update", **kwargs):
         super().__init__(simulation_config, run, name=name, **kwargs)
+        self.locals = locals()
+        self.locals.pop("self")
+        self.kwargs = kwargs
 
     def run_protected(self, **kwargs):
         update_result = super().run_protected(**kwargs)

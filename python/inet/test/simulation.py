@@ -10,8 +10,11 @@ from inet.test.task import *
 logger = logging.getLogger(__name__)
 
 class SimulationTestTaskResult(TestTaskResult):
-    def __init__(self, test_task, simulation_task_result=None, **kwargs):
-        super().__init__(test_task, **kwargs)
+    def __init__(self, simulation_task_result=None, **kwargs):
+        super().__init__(**kwargs)
+        self.locals = locals()
+        self.locals.pop("self")
+        self.kwargs = kwargs
         self.simulation_task_result = simulation_task_result
 
     def get_error_message(self, **kwargs):
@@ -43,8 +46,11 @@ class MultipleSimulationTestTaskResults(MultipleTestTaskResults):
         return MultipleSimulationTestTaskResults(multiple_test_tasks, test_results)
 
 class SimulationTestTask(TestTask):
-    def __init__(self, simulation_task, task_result_class=SimulationTestTaskResult, **kwargs):
+    def __init__(self, simulation_task=None, task_result_class=SimulationTestTaskResult, **kwargs):
         super().__init__(task_result_class=task_result_class, **kwargs)
+        self.locals = locals()
+        self.locals.pop("self")
+        self.kwargs = kwargs
         self.simulation_task = simulation_task
 
     def set_cancel(self, cancel):
@@ -57,16 +63,19 @@ class SimulationTestTask(TestTask):
     def run_protected(self, output_stream=sys.stdout, **kwargs):
         simulation_task_result = self.simulation_task.run_protected(output_stream=output_stream, **kwargs)
         if simulation_task_result.result == "DONE":
-            return self.check_simulation_task_result(simulation_task_result, **kwargs)
+            return self.check_simulation_task_result(simulation_task_result=simulation_task_result, **kwargs)
         else:
-            return self.task_result_class(self, result=simulation_task_result.result, reason=simulation_task_result.reason)
+            return self.task_result_class(task=self, result=simulation_task_result.result, reason=simulation_task_result.reason)
 
     def check_simulation_task_result(self, simulation_task_result, **kwargs):
-        return self.task_result_class(self, simulation_task_result, bool_result=simulation_task_result.subprocess_result.returncode == 0, expected_result="PASS")
+        return self.task_result_class(task=self, simulation_task_result=simulation_task_result, bool_result=simulation_task_result.subprocess_result.returncode == 0, expected_result="PASS")
 
 class MultipleSimulationTestTasks(MultipleTestTasks):
-    def __init__(self, test_tasks, **kwargs):
-        super().__init__(test_tasks, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.locals = locals()
+        self.locals.pop("self")
+        self.kwargs = kwargs
 
     # def run(self, build=True, **kwargs):
     #     if build:
@@ -78,8 +87,8 @@ class MultipleSimulationTestTasks(MultipleTestTasks):
 
 def get_simulation_test_tasks(simulation_test_task_class=SimulationTestTask, multiple_simulation_test_tasks_class=MultipleSimulationTestTasks, **kwargs):
     multiple_simulation_tasks = get_simulation_tasks(**kwargs)
-    test_tasks = list(map(lambda simulation_task: simulation_test_task_class(simulation_task, **kwargs), multiple_simulation_tasks.tasks))
-    return multiple_simulation_test_tasks_class(test_tasks, **kwargs)
+    test_tasks = list(map(lambda simulation_task: simulation_test_task_class(simulation_task=simulation_task, **kwargs), multiple_simulation_tasks.tasks))
+    return multiple_simulation_test_tasks_class(tasks=test_tasks, **kwargs)
 
 def run_simulation_tests(**kwargs):
     multiple_test_tasks = get_test_tasks(**kwargs)

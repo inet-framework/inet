@@ -56,9 +56,9 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
     config_dicts = []
     config_dict = {}
     for line in file:
-        match = re.match("\\[Config (.*)\\]|\\[(General)\\]", line)
+        match = re.match("\\[(Config +)?(.*?)\\]|\\[(General)\\]", line)
         if match:
-            config = match.group(1) or match.group(2)
+            config = match.group(2) or match.group(3)
             config_dict = {"config": config, "abstract_config": False, "description": None, "network": None}
             config_dicts.append(config_dict)
         match = re.match("#? *abstract-config *= *(\w+)", line)
@@ -72,8 +72,9 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
             config_dict["network"] = match.group(1)
     for config_dict in config_dicts:
         config = config_dict["config"]
-        executable = simulation_project.get_full_path("bin/inet")
-        args = [executable, "-s", "-f", ini_file, "-c", config, "-q", "numruns"]
+        executable = simulation_project.get_executable(mode="release")
+        default_args = simulation_project.get_default_args()
+        args = [executable, *default_args, "-s", "-f", ini_file, "-c", config, "-q", "numruns"]
         logger.debug(args)
         if num_runs_fast:
             num_runs = num_runs_fast
@@ -106,11 +107,7 @@ def get_all_simulation_configs(simulation_project, **kwargs):
     if simulation_project.simulation_configs is None:
         relative_path = os.path.relpath(os.getcwd(), simulation_project.get_full_path("."))
         if relative_path == "." or relative_path[0:2] == "..":
-            ini_path_globs = [simulation_project.get_full_path("/examples/**/*.ini"),
-                              simulation_project.get_full_path("/showcases/**/*.ini"),
-                              simulation_project.get_full_path("/tutorials/**/*.ini"),
-                              simulation_project.get_full_path("/tests/fingerprint/*.ini"),
-                              simulation_project.get_full_path("/tests/validation/**/*.ini")]
+            ini_path_globs = list(map(lambda ini_file_folder: simulation_project.get_full_path(os.path.join(ini_file_folder, "**/*.ini")), simulation_project.ini_file_folders))
         else:
             ini_path_globs = [os.getcwd() + "/**/*.ini"]
         simulation_project.simulation_configs = collect_all_simulation_configs(simulation_project, ini_path_globs, **kwargs)

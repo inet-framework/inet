@@ -14,7 +14,7 @@ class SmokeTestTask(SimulationTestTask):
         return super().check_simulation_task_result(simulation_task_result, **kwargs)
 
 def get_smoke_test_tasks(cpu_time_limit="1s", **kwargs):
-    return get_simulation_test_tasks(simulation_test_task_class=SmokeTestTask, cpu_time_limit=cpu_time_limit, name="smoke test", **kwargs)
+    return get_simulation_test_tasks(cpu_time_limit=cpu_time_limit, name="smoke test", simulation_test_task_class=SmokeTestTask, **kwargs)
 
 def run_smoke_tests(**kwargs):
     multiple_test_tasks = get_smoke_test_tasks(**kwargs)

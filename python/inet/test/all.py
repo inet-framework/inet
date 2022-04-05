@@ -3,8 +3,8 @@ import logging
 from inet.test.chart import *
 from inet.test.feature import *
 from inet.test.fingerprint import *
-from inet.test.leak import *
 from inet.test.opp import *
+from inet.test.sanitizer import *
 from inet.test.simulation import *
 from inet.test.smoke import *
 from inet.test.speed import *
@@ -54,10 +54,10 @@ def get_unit_test_tasks(**kwargs):
 
 def get_all_test_tasks(**kwargs):
     test_task_functions = [get_smoke_test_tasks,
+                           get_sanitizer_test_tasks,
                            get_fingerprint_test_tasks,
                            get_statistical_test_tasks,
                            get_validation_test_tasks,
-                           #get_leak_test_tasks,
                            #get_speed_test_tasks,
                            #get_feature_test_tasks,
                            get_packet_test_tasks,
