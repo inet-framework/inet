@@ -14,7 +14,11 @@ namespace physicallayer {
 const DsssOqpsk16Modulation DsssOqpsk16Modulation::singleton;
 
 DsssOqpsk16Modulation::DsssOqpsk16Modulation() :
-    ApskModulationBase(new std::vector<ApskSymbol>())
+    // TODO fill in the correct real and imaginary parts
+    ApskModulationBase(new std::vector<ApskSymbol>({ApskSymbol(NaN, NaN), ApskSymbol(NaN, NaN), ApskSymbol(NaN, NaN), ApskSymbol(NaN, NaN),
+                                                    ApskSymbol(NaN, NaN), ApskSymbol(NaN, NaN), ApskSymbol(NaN, NaN), ApskSymbol(NaN, NaN),
+                                                    ApskSymbol(NaN, NaN), ApskSymbol(NaN, NaN), ApskSymbol(NaN, NaN), ApskSymbol(NaN, NaN),
+                                                    ApskSymbol(NaN, NaN), ApskSymbol(NaN, NaN), ApskSymbol(NaN, NaN), ApskSymbol(NaN, NaN)}))
 {
 }
 
