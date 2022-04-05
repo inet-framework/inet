@@ -12,9 +12,6 @@
 
 namespace inet {
 
-unsigned int MacAddress::autoAddressCtr;
-bool MacAddress::simulationLifecycleListenerAdded;
-
 const MacAddress MacAddress::UNSPECIFIED_ADDRESS;
 const MacAddress MacAddress::BROADCAST_ADDRESS("ff:ff:ff:ff:ff:ff");
 const MacAddress MacAddress::MULTICAST_PAUSE_ADDRESS("01:80:C2:00:00:01");
@@ -135,16 +132,9 @@ InterfaceToken MacAddress::formInterfaceIdentifier() const
 
 MacAddress MacAddress::generateAutoAddress()
 {
-    if (!simulationLifecycleListenerAdded) {
-        // NOTE: EXECUTE_ON_STARTUP is too early and would add the listener to StaticEnv
-        getEnvir()->addLifecycleListener(new MacAddress::SimulationLifecycleListener());
-        simulationLifecycleListenerAdded = true;
-    }
-    ++autoAddressCtr;
-
-    uint64_t intAddr = 0x0AAA00000000ULL + (autoAddressCtr & 0xffffffffUL) + getEnvir()->getParsimProcId() * 0x000100000000ULL;
-    MacAddress addr(intAddr);
-    return addr;
+    static SimulationRunUniqueNumberGenerator<uint64_t> counter;
+    uint64_t raw = 0x0AAA00000000ULL + (counter.getNextValue() & 0xffffffffUL) + getEnvir()->getParsimProcId() * 0x000100000000ULL;
+    return MacAddress(raw);
 }
 
 } // namespace inet

@@ -25,21 +25,8 @@ class INET_API MacAddress
 {
   private:
     uint64_t address; // 6*8=48 bit address, lowest 6 bytes are used, highest 2 bytes are always zero
-    static unsigned int autoAddressCtr; // global counter for generateAutoAddress()
-    static bool simulationLifecycleListenerAdded;
 
   public:
-    class SimulationLifecycleListener : public cISimulationLifecycleListener {
-        virtual void lifecycleEvent(SimulationLifecycleEventType eventType, cObject *details) {
-            if (eventType == LF_PRE_NETWORK_INITIALIZE)
-                autoAddressCtr = 0;
-        }
-
-        virtual void listenerRemoved() {
-            delete this;
-        }
-    };
-
     /** The unspecified MAC address, 00:00:00:00:00:00 */
     static const MacAddress UNSPECIFIED_ADDRESS;
 
@@ -193,6 +180,29 @@ class INET_API MacAddress
     bool operator<(const MacAddress& other) const { return address < other.address; }
 
     bool operator>(const MacAddress& other) const { return address > other.address; }
+};
+
+template <typename T>
+class SimulationRunUniqueNumberGenerator : public cISimulationLifecycleListener
+{
+  private:
+    bool listenerAdded;
+    T value = 0;
+
+  public:
+    T getNextValue() {
+        if (!listenerAdded) {
+            // NOTE: EXECUTE_ON_STARTUP is too early and would add the listener to StaticEnv
+            getEnvir()->addLifecycleListener(this);
+            listenerAdded = true;
+        }
+        return ++value;
+    }
+
+    virtual void lifecycleEvent(SimulationLifecycleEventType eventType, cObject *details) {
+        if (eventType == LF_PRE_NETWORK_INITIALIZE)
+            value = 0;
+    }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const MacAddress& mac)
