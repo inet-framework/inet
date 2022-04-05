@@ -37,7 +37,7 @@ if [ "$TARGET_PLATFORM" != "linux" ]; then
         VoipStream VoipStreamExamples \
         NetworkEmulationSupport NetworkEmulationExamples NetworkEmulationShowcases \
         TcpLwip VisualizationOsg VisualizationOsgShowcases 2>&1
-    opp_featuretool disable TcpNsc 2>&1 || true
+
     echo "::endgroup::"
 fi
 

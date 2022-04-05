@@ -44,7 +44,7 @@ else
     #   (and leaving it enabled messes up the include paths)
     # - ExternalInterface is only supported on Linux
     # - lwIP and NSC does not seem to compile on at least Windows, oh well...
-    opp_featuretool disable VoipStream VoipStreamExamples NetworkEmulationSupport NetworkEmulationExamples NetworkEmulationShowcases TcpLwip TcpNsc
+    opp_featuretool disable VoipStream VoipStreamExamples NetworkEmulationSupport NetworkEmulationExamples NetworkEmulationShowcases TcpLwip
 
     # When compiling to windows, we have to force-enable precompiled headers, otherwise the
     # debug builds take too long, sometimes exceeding 50 minutes.
