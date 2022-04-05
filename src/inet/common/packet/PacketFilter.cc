@@ -48,12 +48,14 @@ void PacketFilter::setExpression(const char *expression)
 
 void PacketFilter::setExpression(cDynamicExpression *expression)
 {
+    delete filterExpression;
     filterExpression = expression;
     filterExpression->setResolver(new DynamicExpressionResolver(this));
 }
 
 void PacketFilter::setExpression(cOwnedDynamicExpression *expression)
 {
+    delete filterExpression;
     filterExpression = expression->dup();
     filterExpression->setResolver(new DynamicExpressionResolver(this));
 }
