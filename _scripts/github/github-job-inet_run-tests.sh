@@ -22,7 +22,7 @@ apt install -y python3-pip
 echo "::endgroup::"
 
 echo "::group::Installing Python packages"
-python3 -m pip install matplotlib pandas scipy ipython
+python3 -m pip install matplotlib pandas scipy ipython sewar
 echo "::endgroup::"
 
 mkdir /root/workspace
