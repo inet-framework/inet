@@ -63,7 +63,7 @@ Signal *PacketTransmitterBase::encodePacket(Packet *packet)
     txDurationClockTime = calculateClockTimeDuration(packet);
     // TODO: this is just a weak approximation which ignores the past and future drift and drift rate changes of the clock
     simtime_t packetTransmissionTime = CLOCKTIME_AS_SIMTIME(txDurationClockTime);
-    simtime_t bitTransmissionTime = CLOCKTIME_AS_SIMTIME(txDurationClockTime / packet->getBitLength());
+    simtime_t bitTransmissionTime = packet->getBitLength() != 0 ? CLOCKTIME_AS_SIMTIME(txDurationClockTime / packet->getBitLength()) : 0;
     auto packetEvent = new PacketTransmittedEvent();
     packetEvent->setDatarate(packet->getTotalLength() / s(txDurationClockTime.dbl()));
     insertPacketEvent(this, packet, PEK_TRANSMITTED, bitTransmissionTime, packetEvent);
