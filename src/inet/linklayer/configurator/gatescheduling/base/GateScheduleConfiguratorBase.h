@@ -93,6 +93,11 @@ class INET_API GateScheduleConfiguratorBase : public NetworkConfiguratorBase
             Application *startApplication = nullptr; // the application that generates the packets
             Device *endDevice = nullptr; // the device where the flow ends
             std::vector<PathFragment *> pathFragments; // list of path fragments (may use redundancy)
+
+            ~Flow() {
+                for (auto pathFragment : pathFragments)
+                    delete pathFragment;
+            }
         };
 
       public:

@@ -14,6 +14,14 @@ namespace inet {
 
 Define_Module(Z3GateScheduleConfigurator);
 
+Z3GateScheduleConfigurator::~Z3GateScheduleConfigurator()
+{
+    delete solver;
+    delete optimizer;
+    variables.clear();
+    delete ctx;
+}
+
 void Z3GateScheduleConfigurator::initialize(int stage)
 {
     GateScheduleConfiguratorBase::initialize(stage);
@@ -276,7 +284,6 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
             }
         }
 
-        delete solver;
         return output;
     }
     else {

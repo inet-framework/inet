@@ -165,6 +165,9 @@ class INET_API Z3GateScheduleConfigurator : public GateScheduleConfiguratorBase
     }
 
     virtual double getVariableValue(const model& model, const std::shared_ptr<expr> expr) const;
+
+  public:
+    virtual ~Z3GateScheduleConfigurator();
 };
 
 } // namespace inet
