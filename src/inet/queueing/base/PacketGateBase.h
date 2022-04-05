@@ -25,7 +25,7 @@ class INET_API PacketGateBase : public PacketFlowBase, public TransparentProtoco
 
   protected:
     bps bitrate = bps(NaN);
-    b extraLength = b(NaN);
+    b extraLength = b(-1);
     simtime_t extraDuration;
 
     bool isOpen_ = false;
