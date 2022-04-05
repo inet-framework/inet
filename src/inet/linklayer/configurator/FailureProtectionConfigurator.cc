@@ -420,7 +420,7 @@ void FailureProtectionConfigurator::collectAllPaths(const std::vector<const Node
     else {
         for (int i = 0; i < currentNode->getNumPaths(); i++) {
             auto link = (Link *)currentNode->getPath(i);
-            auto nextNode = (Node *)currentNode->getPath(i)->getRemoteNode();
+            auto nextNode = (Node *)currentNode->getPath(i)->getLinkOutRemoteNode();
             if (std::find_if(currentPath.begin(), currentPath.end(), [&] (const Interface *interface) { return interface->node == nextNode; }) == currentPath.end()) {
                 bool first = currentPath.empty();
                 if (first)
@@ -453,7 +453,7 @@ std::vector<const FailureProtectionConfigurator::Link *> FailureProtectionConfig
         std::string localName = localNode->module->getFullName();
         for (int j = 0; j < localNode->getNumOutLinks(); j++) {
             auto link = localNode->getLinkOut(j);
-            auto remoteNode = (Node *)link->getRemoteNode();
+            auto remoteNode = (Node *)link->getLinkOutRemoteNode();
             std::string remoteName = remoteNode->module->getFullName();
             std::string linkName = localName + "->" + remoteName;
             if (matchesFilter(linkName.c_str(), filter))

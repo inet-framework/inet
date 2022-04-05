@@ -75,12 +75,12 @@ void L2NetworkConfigurator::extractTopology(L2Topology& topology)
                     // visiting this interface
                     interfacesSeen.insert(networkInterface);
 
-                    Topology::LinkOut *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
+                    Topology::Link *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
 
                     Node *childNode = nullptr;
 
                     if (linkOut) {
-                        childNode = (Node *)linkOut->getRemoteNode();
+                        childNode = (Node *)linkOut->getLinkOutRemoteNode();
                         Q.push(childNode);
                     }
 
@@ -205,10 +205,10 @@ void L2NetworkConfigurator::ensureConfigurationComputed(L2Topology& topology)
         computeConfiguration();
 }
 
-Topology::LinkOut *L2NetworkConfigurator::findLinkOut(Node *node, int gateId)
+Topology::Link *L2NetworkConfigurator::findLinkOut(Node *node, int gateId)
 {
     for (int i = 0; i < node->getNumOutLinks(); i++)
-        if (node->getLinkOut(i)->getLocalGateId() == gateId)
+        if (node->getLinkOut(i)->getLinkOutLocalGateId() == gateId)
             return node->getLinkOut(i);
 
     return nullptr;

@@ -149,7 +149,7 @@ class INET_API L3NetworkConfiguratorBase : public cSimpleModule, public L3Addres
     virtual void extractTopology(Topology& topology);
 
     // helper functions
-    virtual void extractWiredNeighbors(Topology& topology, Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& nodesVisited);
+    virtual void extractWiredNeighbors(Topology& topology, Topology::Link *linkOut, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& nodesVisited);
     virtual void extractWirelessNeighbors(Topology& topology, const char *wirelessId, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& nodesVisited);
     virtual void extractDeviceNeighbors(Topology& topology, Node *node, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited);
     virtual InterfaceInfo *determineGatewayForLink(LinkInfo *linkInfo);
@@ -161,7 +161,7 @@ class INET_API L3NetworkConfiguratorBase : public cSimpleModule, public L3Addres
     virtual bool isWirelessInterface(NetworkInterface *networkInterface);
     virtual std::string getWirelessId(NetworkInterface *networkInterface);
     virtual InterfaceInfo *createInterfaceInfo(Topology& topology, Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface);
-    virtual Topology::LinkOut *findLinkOut(Node *node, int gateId);
+    virtual Topology::Link *findLinkOut(Node *node, int gateId);
     virtual InterfaceInfo *findInterfaceInfo(Node *node, NetworkInterface *networkInterface);
     virtual IInterfaceTable *findInterfaceTable(Node *node);
     virtual IRoutingTable *findRoutingTable(Node *node);

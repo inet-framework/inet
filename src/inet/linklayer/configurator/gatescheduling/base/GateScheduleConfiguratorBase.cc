@@ -125,7 +125,7 @@ void GateScheduleConfiguratorBase::addPorts(Input& input) const
             auto networkInterface = check_and_cast<NetworkInterface *>(port->module);
             auto link = findLinkOut(findInterface(node, networkInterface));
             auto linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
-            auto remoteNode = check_and_cast<Node *>(linkOut->getRemoteNode());
+            auto remoteNode = check_and_cast<Node *>(linkOut->getLinkOutRemoteNode());
             port->endNode = *std::find_if(input.networkNodes.begin(), input.networkNodes.end(), [&] (const auto& networkNode) {
                 return networkNode->module == remoteNode->module;
             });

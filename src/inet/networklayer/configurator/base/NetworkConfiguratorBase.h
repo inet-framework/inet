@@ -87,7 +87,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule
     virtual Link *findLinkOut(const Node *node, const char *neighbor) const;
     virtual Link *findLinkOut(const Node *node, const Node *neighbor) const;
     virtual Link *findLinkOut(const Interface *interface) const;
-    virtual Topology::LinkOut *findLinkOut(const Node *node, int gateId) const;
+    virtual Topology::Link *findLinkOut(const Node *node, int gateId) const;
     virtual Interface *findInterface(const Node *node, NetworkInterface *networkInterface) const;
 };
 

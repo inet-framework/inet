@@ -46,10 +46,10 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
                 if (interfacesSeen.count(networkInterface) == 0) {
                     // visiting this interface
                     interfacesSeen.insert(networkInterface);
-                    Topology::LinkOut *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
+                    Topology::Link *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
                     Node *childNode = nullptr;
                     if (linkOut) {
-                        childNode = (Node *)linkOut->getRemoteNode();
+                        childNode = (Node *)linkOut->getLinkOutRemoteNode();
                         unvisited.push(childNode);
                     }
                     Interface *interface = new Interface(node, networkInterface);
@@ -62,14 +62,14 @@ void NetworkConfiguratorBase::extractTopology(Topology& topology)
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         for (int j = 0; j < node->getNumOutLinks(); j++) {
-            Topology::LinkOut *linkOut = node->getLinkOut(j);
+            Topology::Link *linkOut = node->getLinkOut(j);
             Link *link = (Link *)linkOut;
-            Node *localNode = (Node *)linkOut->getLocalNode();
+            Node *localNode = (Node *)linkOut->getLinkOutLocalNode();
             if (localNode->interfaceTable)
-                link->sourceInterface = findInterface(localNode, localNode->interfaceTable->findInterfaceByNodeOutputGateId(linkOut->getLocalGateId()));
-            Node *remoteNode = (Node *)linkOut->getRemoteNode();
+                link->sourceInterface = findInterface(localNode, localNode->interfaceTable->findInterfaceByNodeOutputGateId(linkOut->getLinkOutLocalGateId()));
+            Node *remoteNode = (Node *)linkOut->getLinkOutRemoteNode();
             if (remoteNode->interfaceTable)
-                link->destinationInterface = findInterface(remoteNode, remoteNode->interfaceTable->findInterfaceByNodeInputGateId(linkOut->getRemoteGateId()));
+                link->destinationInterface = findInterface(remoteNode, remoteNode->interfaceTable->findInterfaceByNodeInputGateId(linkOut->getLinkOutRemoteGateId()));
         }
     }
 }
@@ -81,7 +81,7 @@ std::vector<NetworkConfiguratorBase::Node *> NetworkConfiguratorBase::computeSho
     auto node = source;
     while (node != destination) {
         path.push_back(node);
-        node = (Node *)node->getPath(0)->getRemoteNode();
+        node = (Node *)node->getPath(0)->getLinkOutRemoteNode();
     }
     path.push_back(destination);
     return path;
@@ -95,7 +95,7 @@ std::vector<NetworkConfiguratorBase::Link *> NetworkConfiguratorBase::computeSho
     while (node != destination) {
         auto link = (Link *)node->getPath(0);
         path.push_back(link);
-        node = (Node *)node->getPath(0)->getRemoteNode();
+        node = (Node *)node->getPath(0)->getLinkOutRemoteNode();
     }
     return path;
 }
@@ -108,7 +108,7 @@ bool NetworkConfiguratorBase::isBridgeNode(Node *node) const
 NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkIn(const Node *node, const char *neighbor) const
 {
     for (int i = 0; i < node->getNumInLinks(); i++)
-        if (!strcmp(node->getLinkIn(i)->getRemoteNode()->getModule()->getFullName(), neighbor))
+        if (!strcmp(node->getLinkIn(i)->getLinkInRemoteNode()->getModule()->getFullName(), neighbor))
             return check_and_cast<Link *>(static_cast<Topology::Link *>(node->getLinkIn(i)));
     return nullptr;
 }
@@ -116,7 +116,7 @@ NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkIn(const Node *n
 NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkOut(const Node *node, const char *neighbor) const
 {
     for (int i = 0; i < node->getNumOutLinks(); i++)
-        if (!strcmp(node->getLinkOut(i)->getRemoteNode()->getModule()->getFullName(), neighbor))
+        if (!strcmp(node->getLinkOut(i)->getLinkOutRemoteNode()->getModule()->getFullName(), neighbor))
             return check_and_cast<Link *>(static_cast<Topology::Link *>(node->getLinkOut(i)));
     return nullptr;
 }
@@ -124,7 +124,7 @@ NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkOut(const Node *
 NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkOut(const Node *node, const Node *neighbor) const
 {
     for (int i = 0; i < node->getNumOutLinks(); i++)
-        if (node->getLinkOut(i)->getRemoteNode() == neighbor)
+        if (node->getLinkOut(i)->getLinkOutRemoteNode() == neighbor)
             return check_and_cast<Link *>(static_cast<Topology::Link *>(node->getLinkOut(i)));
     return nullptr;
 }
@@ -139,10 +139,10 @@ NetworkConfiguratorBase::Link *NetworkConfiguratorBase::findLinkOut(const Interf
     return nullptr;
 }
 
-Topology::LinkOut *NetworkConfiguratorBase::findLinkOut(const Node *node, int gateId) const
+Topology::Link *NetworkConfiguratorBase::findLinkOut(const Node *node, int gateId) const
 {
     for (int i = 0; i < node->getNumOutLinks(); i++)
-        if (node->getLinkOut(i)->getLocalGateId() == gateId)
+        if (node->getLinkOut(i)->getLinkOutLocalGateId() == gateId)
             return node->getLinkOut(i);
     return nullptr;
 }

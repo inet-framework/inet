@@ -120,7 +120,7 @@ void L3NetworkConfiguratorBase::extractTopology(Topology& topology)
                             extractWirelessNeighbors(topology, wirelessId.c_str(), linkInfo, interfacesSeen, empty);
                         }
                         else {
-                            Topology::LinkOut *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
+                            Topology::Link *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
                             if (linkOut) {
                                 std::vector<Node *> empty;
                                 extractWiredNeighbors(topology, linkOut, linkInfo, interfacesSeen, empty);
@@ -136,14 +136,14 @@ void L3NetworkConfiguratorBase::extractTopology(Topology& topology)
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         for (int j = 0; j < node->getNumOutLinks(); j++) {
-            Topology::LinkOut *linkOut = node->getLinkOut(j);
+            Topology::Link *linkOut = node->getLinkOut(j);
             Link *link = (Link *)linkOut;
-            Node *localNode = (Node *)linkOut->getLocalNode();
+            Node *localNode = (Node *)linkOut->getLinkOutLocalNode();
             if (localNode->interfaceTable)
-                link->sourceInterfaceInfo = findInterfaceInfo(localNode, localNode->interfaceTable->findInterfaceByNodeOutputGateId(linkOut->getLocalGateId()));
-            Node *remoteNode = (Node *)linkOut->getRemoteNode();
+                link->sourceInterfaceInfo = findInterfaceInfo(localNode, localNode->interfaceTable->findInterfaceByNodeOutputGateId(linkOut->getLinkOutLocalGateId()));
+            Node *remoteNode = (Node *)linkOut->getLinkOutRemoteNode();
             if (remoteNode->interfaceTable)
-                link->destinationInterfaceInfo = findInterfaceInfo(remoteNode, remoteNode->interfaceTable->findInterfaceByNodeInputGateId(linkOut->getRemoteGateId()));
+                link->destinationInterfaceInfo = findInterfaceInfo(remoteNode, remoteNode->interfaceTable->findInterfaceByNodeInputGateId(linkOut->getLinkOutRemoteGateId()));
         }
     }
 
@@ -183,10 +183,10 @@ void L3NetworkConfiguratorBase::extractTopology(Topology& topology)
         linkInfo->gatewayInterfaceInfo = determineGatewayForLink(linkInfo);
 }
 
-void L3NetworkConfiguratorBase::extractWiredNeighbors(Topology& topology, Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
+void L3NetworkConfiguratorBase::extractWiredNeighbors(Topology& topology, Topology::Link *linkOut, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
 {
-    Node *node = (Node *)linkOut->getRemoteNode();
-    int inputGateId = linkOut->getRemoteGateId();
+    Node *node = (Node *)linkOut->getLinkOutRemoteNode();
+    int inputGateId = linkOut->getLinkOutRemoteGateId();
     IInterfaceTable *interfaceTable = node->interfaceTable;
     if (!isBridgeNode(node)) {
         NetworkInterface *networkInterface = interfaceTable->findInterfaceByNodeInputGateId(inputGateId);
@@ -243,7 +243,7 @@ void L3NetworkConfiguratorBase::extractDeviceNeighbors(Topology& topology, Node 
                 if (isWirelessInterface(networkInterface))
                     extractWirelessNeighbors(topology, getWirelessId(networkInterface).c_str(), linkInfo, interfacesSeen, deviceNodesVisited);
                 else {
-                    Topology::LinkOut *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
+                    Topology::Link *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
                     if (linkOut)
                         extractWiredNeighbors(topology, linkOut, linkInfo, interfacesSeen, deviceNodesVisited);
                 }
@@ -253,7 +253,7 @@ void L3NetworkConfiguratorBase::extractDeviceNeighbors(Topology& topology, Node 
     else {
         // hub and bus
         for (int i = 0; i < node->getNumOutLinks(); i++) {
-            Topology::LinkOut *linkOut = node->getLinkOut(i);
+            Topology::Link *linkOut = node->getLinkOut(i);
             extractWiredNeighbors(topology, linkOut, linkInfo, interfacesSeen, deviceNodesVisited);
         }
     }
@@ -271,10 +271,10 @@ bool L3NetworkConfiguratorBase::isWirelessInterface(NetworkInterface *networkInt
     return !strncmp(networkInterface->getInterfaceName(), "wlan", 4);
 }
 
-Topology::LinkOut *L3NetworkConfiguratorBase::findLinkOut(Node *node, int gateId)
+Topology::Link *L3NetworkConfiguratorBase::findLinkOut(Node *node, int gateId)
 {
     for (int i = 0; i < node->getNumOutLinks(); i++)
-        if (node->getLinkOut(i)->getLocalGateId() == gateId)
+        if (node->getLinkOut(i)->getLinkOutLocalGateId() == gateId)
             return node->getLinkOut(i);
 
     return nullptr;
@@ -331,18 +331,18 @@ double L3NetworkConfiguratorBase::computeWiredLinkWeight(Link *link, const char 
     if (costAttribute != nullptr)
         return parseCostAttribute(costAttribute);
     else {
-        Topology::LinkOut *linkOut = static_cast<Topology::LinkOut *>(static_cast<Topology::Link *>(link));
+        Topology::Link *linkOut = static_cast<Topology::Link *>(static_cast<Topology::Link *>(link));
         if (!strcmp(metric, "hopCount"))
             return 1;
         else if (!strcmp(metric, "delay")) {
-            cDatarateChannel *transmissionChannel = dynamic_cast<cDatarateChannel *>(linkOut->getLocalGate()->findTransmissionChannel());
+            cDatarateChannel *transmissionChannel = dynamic_cast<cDatarateChannel *>(linkOut->getLinkOutLocalGate()->findTransmissionChannel());
             if (transmissionChannel != nullptr)
                 return transmissionChannel->getDelay().dbl();
             else
                 return minLinkWeight;
         }
         else if (!strcmp(metric, "dataRate")) {
-            cChannel *transmissionChannel = linkOut->getLocalGate()->findTransmissionChannel();
+            cChannel *transmissionChannel = linkOut->getLinkOutLocalGate()->findTransmissionChannel();
             if (transmissionChannel != nullptr) {
                 double dataRate = transmissionChannel->getNominalDatarate();
                 return dataRate != 0 ? 1 / dataRate : minLinkWeight;
@@ -351,7 +351,7 @@ double L3NetworkConfiguratorBase::computeWiredLinkWeight(Link *link, const char 
                 return minLinkWeight;
         }
         else if (!strcmp(metric, "errorRate")) {
-            cDatarateChannel *transmissionChannel = dynamic_cast<cDatarateChannel *>(linkOut->getLocalGate()->findTransmissionChannel());
+            cDatarateChannel *transmissionChannel = dynamic_cast<cDatarateChannel *>(linkOut->getLinkOutLocalGate()->findTransmissionChannel());
             if (transmissionChannel != nullptr) {
                 InterfaceInfo *sourceInterfaceInfo = link->sourceInterfaceInfo;
                 double bitErrorRate = transmissionChannel->getBitErrorRate();
@@ -648,15 +648,15 @@ void L3NetworkConfiguratorBase::dumpTopology(Topology& topology)
         Node *node = (Node *)topology.getNode(i);
         EV_INFO << "Node " << node->module->getFullPath() << endl;
         for (int j = 0; j < node->getNumOutLinks(); j++) {
-            Topology::LinkOut *linkOut = node->getLinkOut(j);
-            ASSERT(linkOut->getLocalNode() == node);
-            Node *remoteNode = (Node *)linkOut->getRemoteNode();
+            Topology::Link *linkOut = node->getLinkOut(j);
+            ASSERT(linkOut->getLinkOutLocalNode() == node);
+            Node *remoteNode = (Node *)linkOut->getLinkOutRemoteNode();
             EV_INFO << "     -> " << remoteNode->module->getFullPath() << endl;
         }
         for (int j = 0; j < node->getNumInLinks(); j++) {
-            Topology::LinkIn *linkIn = node->getLinkIn(j);
-            ASSERT(linkIn->getLocalNode() == node);
-            Node *remoteNode = (Node *)linkIn->getRemoteNode();
+            Topology::Link *linkIn = node->getLinkIn(j);
+            ASSERT(linkIn->getLinkInLocalNode() == node);
+            Node *remoteNode = (Node *)linkIn->getLinkInRemoteNode();
             EV_INFO << "     <- " << remoteNode->module->getFullPath() << endl;
         }
     }

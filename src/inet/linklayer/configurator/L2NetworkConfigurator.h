@@ -112,7 +112,7 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
     // helper functions
     virtual bool linkContainsMatchingHostExcept(InterfaceInfo *currentInfo, Matcher& hostMatcher, cModule *exceptModule);
     void ensureConfigurationComputed(L2Topology& topology);
-    virtual Topology::LinkOut *findLinkOut(Node *node, int gateId);
+    virtual Topology::Link *findLinkOut(Node *node, int gateId);
     void configureInterface(InterfaceInfo *interfaceInfo);
 
   public:

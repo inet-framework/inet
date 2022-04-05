@@ -82,8 +82,8 @@ void StpTester::dfsVisit(Topology::Node *node)
     color[node] = GRAY;
 
     for (int i = 0; i < node->getNumOutLinks(); i++) {
-        Topology::LinkOut *linkOut = node->getLinkOut(i);
-        Topology::Node *neighbor = linkOut->getRemoteNode();
+        Topology::Link *linkOut = node->getLinkOut(i);
+        Topology::Node *neighbor = linkOut->getLinkOutRemoteNode();
 
         // If we found a port which is in state discarding,
         // then we do not expand this link
@@ -95,7 +95,7 @@ void StpTester::dfsVisit(Topology::Node *node)
         // If we found a port that points to a remote port which is in state
         // discarding, then we also do not expand this link
 
-        auto remoteGate = linkOut->getRemoteGate();
+        auto remoteGate = linkOut->getLinkOutRemoteGate();
         int remotePort = remoteGate->isVector() ? remoteGate->getIndex() : -1;
         if (!isForwarding(neighbor, remotePort))
             continue;

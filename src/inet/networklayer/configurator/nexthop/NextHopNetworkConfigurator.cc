@@ -81,7 +81,7 @@ void NextHopNetworkConfigurator::addStaticRoutes(Topology& topology)
                 link = (Link *)node->getPath(0);
                 if (node != sourceNode && !isBridgeNode(node) && link->sourceInterfaceInfo && link->sourceInterfaceInfo->networkInterface->findProtocolData<NextHopInterfaceData>())
                     nextHopInterfaceInfo = static_cast<InterfaceInfo *>(link->sourceInterfaceInfo);
-                node = (Node *)node->getPath(0)->getRemoteNode();
+                node = (Node *)node->getPath(0)->getLinkOutRemoteNode();
             }
 
             // determine source interface
