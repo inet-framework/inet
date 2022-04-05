@@ -51,6 +51,7 @@ class ProtocolListTagBase extends TagBase
 //
 enum ServicePrimitive
 {
+    SP_UNSPECIFIED = -1;
     SP_REQUEST    = 1;
     SP_INDICATION = 2;
     SP_RESPONSE   = 3;
