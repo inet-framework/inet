@@ -284,6 +284,7 @@ def get_validation_test_tasks(**kwargs):
         simulation_config = validation_test_task.simulation_task.simulation_config
         if simulation_config.matches_filter(**kwargs):
             validation_test_tasks.append(validation_test_task)
+    del kwargs["name"]
     return MultipleTestTasks(tasks=validation_test_tasks, name="validation test", **kwargs)
 
 def run_validation_tests(**kwargs):
