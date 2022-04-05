@@ -102,7 +102,7 @@ jobs:
       matrix:
         # TODO: add debug/release mode when the runtest scripts can switch between
         # MODEs or executables based on command line arguments or envvars
-        scriptname: ["inet_run_validation_tests", "inet_run_regression_tests",
+        scriptname: ["inet_run_validation_tests", # "inet_run_regression_tests",
                     # "inet_run_fingerprint_tests", "inet_run_smoke_tests",
                     #"inet_run_statistical_tests", "inet_run_feature_tests", "inet_run_leak_tests",
                     #"inet_run_simulations", "inet_run_speed_tests"
