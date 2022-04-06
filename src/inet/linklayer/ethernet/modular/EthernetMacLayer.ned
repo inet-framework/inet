@@ -41,27 +41,20 @@ module EthernetMacLayer like IEthernetMacLayer
         server: <default("InstantServer")> like IPacketServer {
             @display("p=200,200");
         }
-        streamer: <default("")> like IPacketFlow {
-            @display("p=200,300");
-        }
-        fcsInserter: <default("EthernetFcsInserter")> like IPacketFlow {
+        outboundEmitter: <default("PacketEmitter")> like IPacketFlow {
             @display("p=200,400");
         }
-        outboundEmitter: <default("PacketEmitter")> like IPacketFlow {
-            @display("p=200,500");
-        }
         fcsChecker: <default("EthernetFcsChecker")> like IPacketFilter {
-            @display("p=500,400");
+            popFcs = default(false);
+            @display("p=500,300");
         }
         inboundEmitter: <default("PacketEmitter")> like IPacketFlow {
-            @display("p=500,500");
+            @display("p=500,400");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> queue.in;
         queue.out --> server.in;
-        server.out --> streamer.in;
-        streamer.out --> fcsInserter.in;
-        fcsInserter.out --> outboundEmitter.in;
+        server.out --> outboundEmitter.in;
         outboundEmitter.out --> { @display("m=s"); } --> lowerLayerOut;
 
         lowerLayerIn --> { @display("m=s"); } --> inboundEmitter.in;
