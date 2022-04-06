@@ -15,6 +15,13 @@ namespace inet {
 
 Define_Module(EthernetFcsChecker);
 
+void EthernetFcsChecker::initialize(int stage)
+{
+    FcsCheckerBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+        popFcs = par("popFcs");
+}
+
 bool EthernetFcsChecker::checkFcs(const Packet *packet, FcsMode fcsMode, uint32_t fcs) const
 {
     switch (fcsMode) {
@@ -31,9 +38,11 @@ bool EthernetFcsChecker::checkFcs(const Packet *packet, FcsMode fcsMode, uint32_
 
 void EthernetFcsChecker::processPacket(Packet *packet)
 {
-    const auto& trailer = packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
-    auto& packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
-    packetProtocolTag->setBackOffset(packetProtocolTag->getBackOffset() + trailer->getChunkLength());
+    if (popFcs) {
+        const auto& trailer = packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
+        auto& packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
+        packetProtocolTag->setBackOffset(packetProtocolTag->getBackOffset() + trailer->getChunkLength());
+    }
 }
 
 bool EthernetFcsChecker::matchesPacket(const Packet *packet) const
