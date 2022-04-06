@@ -23,7 +23,7 @@ module Ieee8021qTimeAwareShaper extends CompoundPacketQueueBase
         int numTrafficClasses = default(8); // number of traffic categories
         double bitrate @unit(bps);
         *.bitrate = default(this.bitrate);
-        *.extraLength = default(96b);
+        *.extraLength = default(64b); // overhead for Ethernet PHY header
     submodules:
         buffer: <default("")> like IPacketBuffer if typename != "" {
             parameters:
