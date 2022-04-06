@@ -10,6 +10,7 @@ package inet.linklayer.ethernet.modular;
 import inet.linklayer.ethernet.contract.IEthernetLayer;
 import inet.protocolelement.contract.IProtocolHeaderChecker;
 import inet.protocolelement.contract.IProtocolHeaderInserter;
+import inet.queueing.contract.IPacketFilter;
 import inet.queueing.contract.IPacketFlow;
 
 module EthernetLayer like IEthernetLayer
@@ -39,19 +40,27 @@ module EthernetLayer like IEthernetLayer
         paddingInserter: <default("PaddingInserter")> like IPacketFlow {
             @display("p=300,300");
         }
+        fcsInserter: <default("EthernetFcsInserter")> like IPacketFlow {
+            @display("p=300,400");
+        }
         socketPacketProcessor: <default(hasSocketSupport ? "EthernetSocketPacketProcessor" : "")> like IPacketFlow {
             @display("p=600,100");
         }
         macHeaderChecker: <default("EthernetMacHeaderChecker")> like IProtocolHeaderChecker {
             @display("p=600,200");
         }
+        fcsChecker: <default("EthernetFcsChecker")> like IPacketFilter {
+            @display("p=600,400");
+        }
     connections:
         upperLayerIn --> { @display("m=n"); } --> socketCommandProcessor.in;
         socketCommandProcessor.out --> macHeaderInserter.in;
         macHeaderInserter.out --> paddingInserter.in;
-        paddingInserter.out --> { @display("m=s"); } --> lowerLayerOut;
+        paddingInserter.out --> fcsInserter.in;
+        fcsInserter.out --> { @display("m=s"); } --> lowerLayerOut;
 
-        lowerLayerIn --> { @display("m=s"); } --> macHeaderChecker.in;
+        lowerLayerIn --> { @display("m=s"); } --> fcsChecker.in;
+        fcsChecker.out --> macHeaderChecker.in;
         macHeaderChecker.out --> socketPacketProcessor.in;
         socketPacketProcessor.out --> { @display("m=n"); } --> upperLayerOut;
 }
