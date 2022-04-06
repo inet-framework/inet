@@ -44,6 +44,9 @@ class INET_API StreamDecoder : public PacketFlowBase, public TransparentProtocol
 
     virtual void configureMappings();
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+
+  public:
+    virtual ~StreamDecoder();
 };
 
 } // namespace inet

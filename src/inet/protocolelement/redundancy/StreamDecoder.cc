@@ -19,6 +19,12 @@ namespace inet {
 
 Define_Module(StreamDecoder);
 
+StreamDecoder::~StreamDecoder()
+{
+    for (auto& it : mappings)
+        delete it.interfaceNameMatcher;
+}
+
 void StreamDecoder::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
