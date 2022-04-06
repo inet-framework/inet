@@ -36,19 +36,19 @@ void Mpls::initialize(int stage)
         pct.reference(this, "classifierModule", true);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
-        registerService(Protocol::mpls, gate("netwIn"), gate("netwOut"));
-        registerProtocol(Protocol::mpls, gate("ifOut"), gate("ifIn"));
+        registerService(Protocol::mpls, gate("upperLayerIn"), gate("upperLayerOut"));
+        registerProtocol(Protocol::mpls, gate("lowerLayerOut"), gate("lowerLayerIn"));
     }
 }
 
 void Mpls::handleMessage(cMessage *msg)
 {
     Packet *pk = check_and_cast<Packet *>(msg);
-    if (msg->getArrivalGate()->isName("ifIn")) {
+    if (msg->getArrivalGate()->isName("lowerLayerIn")) {
         EV_INFO << "Processing message from L2: " << pk << endl;
         processPacketFromL2(pk);
     }
-    else if (msg->getArrivalGate()->isName("netwIn")) {
+    else if (msg->getArrivalGate()->isName("upperLayerIn")) {
         EV_INFO << "Processing message from L3: " << pk << endl;
         processPacketFromL3(pk);
     }
@@ -283,32 +283,32 @@ void Mpls::sendToL2(Packet *msg)
 {
     ASSERT(msg->findTag<InterfaceReq>());
     ASSERT(msg->findTag<PacketProtocolTag>());
-    send(msg, "ifOut");
+    send(msg, "lowerLayerOut");
 }
 
 void Mpls::sendToL3(Packet *msg)
 {
     ASSERT(msg->findTag<InterfaceInd>());
     ASSERT(msg->findTag<DispatchProtocolReq>());
-    send(msg, "netwOut");
+    send(msg, "upperLayerOut");
 }
 
 void Mpls::handleRegisterInterface(const NetworkInterface& interface, cGate *out, cGate *in)
 {
-    if (!strcmp("ifIn", in->getBaseName()))
-        registerInterface(interface, gate("netwIn"), gate("netwOut"));
+    if (!strcmp("lowerLayerIn", in->getBaseName()))
+        registerInterface(interface, gate("upperLayerIn"), gate("upperLayerOut"));
 }
 
 void Mpls::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");
-    if (!strcmp("ifOut", g->getName()))
-        registerService(protocol, gate("netwIn"), servicePrimitive);
-    else if (!strcmp("ifIn", g->getName()))
+    if (g->isName("lowerLayerOut"))
+        registerService(protocol, gate("upperLayerIn"), servicePrimitive);
+    else if (g->isName("lowerLayerIn"))
         ;
-    else if (!strcmp("netwOut", g->getName()))
-        registerService(protocol, gate("ifIn"), servicePrimitive);
-    else if (!strcmp("netwIn", g->getName()))
+    else if (g->isName("upperLayerOut"))
+        registerService(protocol, gate("lowerLayerIn"), servicePrimitive);
+    else if (g->isName("upperLayerIn"))
         ;
     else
         throw cRuntimeError("Unknown gate: %s", g->getName());
@@ -317,13 +317,13 @@ void Mpls::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrim
 void Mpls::handleRegisterProtocol(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterProtocol");
-    if (!strcmp("ifIn", g->getName()))
-        registerProtocol(protocol, gate("netwOut"), servicePrimitive);
-    else if (!strcmp("ifOut", g->getName()))
+    if (g->isName("lowerLayerIn"))
+        registerProtocol(protocol, gate("upperLayerOut"), servicePrimitive);
+    else if (g->isName("lowerLayerOut"))
         ;
-    else if (!strcmp("netwOut", g->getName()))
-        registerProtocol(protocol, gate("ifIn"), servicePrimitive);
-    else if (!strcmp("netwIn", g->getName()))
+    else if (g->isName("upperLayerOut"))
+        registerProtocol(protocol, gate("lowerLayerIn"), servicePrimitive);
+    else if (g->isName("upperLayerIn"))
         ; // void
     else
         throw cRuntimeError("Unknown gate: %s", g->getName());

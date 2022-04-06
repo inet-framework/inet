@@ -149,9 +149,9 @@ module LdpMplsRouter
         tn.out++ --> ipv4.transportIn;
         ipv4.ifOut --> nm.in++;
         nm.out++ --> ipv4.ifIn;
-        nm.out++ --> mpls.netwIn;
-        mpls.netwOut --> nm.in++;
-        mpls.ifOut --> ml.in++;
-        ml.out++ --> mpls.ifIn;
+        nm.out++ --> mpls.upperLayerIn;
+        mpls.upperLayerOut --> nm.in++;
+        mpls.lowerLayerOut --> ml.in++;
+        ml.out++ --> mpls.lowerLayerIn;
 }
 

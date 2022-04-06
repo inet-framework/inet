@@ -7,6 +7,9 @@
 
 package inet.networklayer.mpls;
 
+import inet.protocolelement.contract.IProtocolLayer;
+
+
 //
 // Implements the MPLS protocol.
 //
@@ -40,7 +43,7 @@ package inet.networklayer.mpls;
 // inherit the L2's QoS. This implementation follows a generic approach; it
 // assumes no information of QoS from the link layer.
 //
-simple Mpls
+simple Mpls like IProtocolLayer
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -48,9 +51,9 @@ simple Mpls
         string classifierModule; // The path to the module which implements the IIngressClassifier C++ interface
         @display("i=block/switch");
     gates:
-        input netwIn @labels(Ipv4Header);
-        output netwOut @labels(Ipv4Header);
-        input ifIn @labels(MplsPacket,Ipv4Header);
-        output ifOut @labels(MplsPacket,Ipv4Header);
+        input upperLayerIn;
+        output upperLayerOut;
+        input lowerLayerIn;
+        output lowerLayerOut;
 }
 
