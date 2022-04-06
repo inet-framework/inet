@@ -55,7 +55,7 @@ void PreemptableStreamer::handleMessage(cMessage *message)
 
 void PreemptableStreamer::endStreaming()
 {
-    auto packetLength = streamedPacket->getTotalLength();
+    auto packetLength = streamedPacket->getDataLength();
     EV_INFO << "Ending streaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
     pushOrSendPacketEnd(streamedPacket, outputGate, consumer, streamedPacket->getId());
     streamDatarate = bps(NaN);
@@ -87,7 +87,7 @@ void PreemptableStreamer::pushPacket(Packet *packet, cGate *gate)
     if (std::isnan(streamDatarate.get()))
         endStreaming();
     else
-        scheduleClockEventAfter(s(streamedPacket->getTotalLength() / streamDatarate).get(), endStreamingTimer);
+        scheduleClockEventAfter(s(streamedPacket->getDataLength() / streamDatarate).get(), endStreamingTimer);
 }
 
 void PreemptableStreamer::handleCanPushPacketChanged(cGate *gate)
@@ -151,7 +151,7 @@ Packet *PreemptableStreamer::pullPacketEnd(cGate *gate)
     b preemptedLength = roundingLength * ((pulledLength + roundingLength - b(1)) / roundingLength);
     if (preemptedLength < minPacketLength)
         preemptedLength = minPacketLength;
-    if (preemptedLength + minPacketLength <= packet->getTotalLength()) {
+    if (preemptedLength + minPacketLength <= packet->getDataLength()) {
         // already pulled part
         const auto& fragmentTag = packet->getTagForUpdate<FragmentTag>();
         fragmentTag->setLastFragment(false);
@@ -164,7 +164,7 @@ Packet *PreemptableStreamer::pullPacketEnd(cGate *gate)
         packet->removeTagIfPresent<PacketProtocolTag>();
         // remaining part
         std::string remainingPacketName = basePacketName + "-frag" + std::to_string(fragmentNumber + 1);
-        const auto& remainingData = packet->removeAtBack(packet->getTotalLength() - preemptedLength);
+        const auto& remainingData = packet->removeAtBack(packet->getDataLength() - preemptedLength);
         remainingPacket = new Packet(remainingPacketName.c_str(), remainingData);
         remainingPacket->copyTags(*packet);
         const auto& remainingPacketFragmentTag = remainingPacket->getTagForUpdate<FragmentTag>();
