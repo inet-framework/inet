@@ -23,7 +23,7 @@ class SimulationProject:
 
     def get_executable(self, mode="debug"):
         if mode == "release":
-            return self.get_full_path(self.executable)
+            return self.get_full_path(self.executable + "_release")
         elif mode == "debug":
             return self.get_full_path(self.executable + "_dbg")
         elif mode == "sanitize":

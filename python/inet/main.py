@@ -8,8 +8,8 @@ from inet.simulation.project import *
 from inet.simulation.task import *
 from inet.test import *
 
-def parse_arguments(task):
-    description = "Runs all " + task + " in the enclosing project recursively from the current working directory"
+def parse_arguments(task_name):
+    description = "Runs all " + task_name + " in the enclosing project recursively from the current working directory"
     parser = argparse.ArgumentParser(description=description)
     # TODO not all of these arguments are meaningful for each cases
     #      it must be carefully checked and updated accordingly
