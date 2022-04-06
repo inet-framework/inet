@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cd /home/levy/workspace/omnetpp
+source /home/levy/workspace/omnetpp/setenv
+
+cd /home/levy/workspace/inet
+source /home/levy/workspace/inet/setenv
+
+/bin/python3 "$@"
