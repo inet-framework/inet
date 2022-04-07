@@ -12,11 +12,6 @@
 namespace inet {
 namespace tcp {
 
-TcpTahoeRenoFamilyStateVariables::TcpTahoeRenoFamilyStateVariables()
-{
-
-}
-
 void TcpTahoeRenoFamilyStateVariables::setSendQueueLimit(uint32_t newLimit) {
     // The initial value of ssthresh SHOULD be set arbitrarily high (e.g.,
     // to the size of the largest possible advertised window) -> defined by sendQueueLimit
@@ -45,14 +40,12 @@ std::string TcpTahoeRenoFamilyStateVariables::detailedInfo() const
 TcpTahoeRenoFamily::TcpTahoeRenoFamily() : TcpBaseAlg(),
     state((TcpTahoeRenoFamilyStateVariables *&)TcpAlgorithm::state)
 {
-
 }
 
 void TcpTahoeRenoFamily::initialize()
 {
     TcpBaseAlg::initialize();
     state->ssthresh = conn->getTcpMain()->par("initialSsthresh");
-
 }
 
 } // namespace tcp

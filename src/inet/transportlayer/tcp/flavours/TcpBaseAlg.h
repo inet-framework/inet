@@ -9,60 +9,10 @@
 #define __INET_TCPBASEALG_H
 
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
+#include "inet/transportlayer/tcp/flavours/TcpBaseAlgState_m.h"
 
 namespace inet {
 namespace tcp {
-
-/**
- * State variables for TcpBaseAlg.
- */
-class INET_API TcpBaseAlgStateVariables : public TcpStateVariables
-{
-  public:
-    TcpBaseAlgStateVariables();
-    virtual std::string str() const override;
-    virtual std::string detailedInfo() const override;
-
-    /// retransmit count
-    //@{
-    int rexmit_count; ///< number of retransmissions (=1 after first rexmit)
-    simtime_t rexmit_timeout; ///< current retransmission timeout (aka RTO)
-    //@}
-
-    /// persist factor
-    //@{
-    uint persist_factor; ///< factor needed for simplified PERSIST timer calculation
-    simtime_t persist_timeout; ///< current persist timeout
-    //@}
-
-    /// congestion window
-    //@{
-    uint32_t snd_cwnd; ///< congestion window
-    //@}
-
-    /// round-trip time measurements
-    //@{
-    uint32_t rtseq; ///< starting sequence number of timed data
-    simtime_t rtseq_sendtime; ///< time when rtseq was sent (0 if RTT measurement is not running)
-    //@}
-
-    /// round-trip time estimation (Jacobson's algorithm)
-    //@{
-    simtime_t srtt; ///< smoothed round-trip time
-    simtime_t rttvar; ///< variance of round-trip time
-    //@}
-
-    /// number of RTOs
-    //@{
-    uint32_t numRtos; ///< total number of RTOs
-    //@}
-
-    /// RFC 3782 variables
-    //@{
-    uint32_t recover; ///< recover (RFC 3782)
-    bool firstPartialACK; ///< first partial acknowledgement (RFC 3782)
-    //@}
-};
 
 /**
  * Includes basic TCP algorithms: adaptive retransmission, PERSIST timer,

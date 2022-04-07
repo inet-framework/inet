@@ -37,33 +37,6 @@ namespace tcp {
 #define MIN_PERSIST_TIMEOUT    5   // 5s
 #define MAX_PERSIST_TIMEOUT    60   // 60s
 
-TcpBaseAlgStateVariables::TcpBaseAlgStateVariables()
-{
-    rexmit_count = 0;
-    rexmit_timeout = 3.0;
-
-    persist_factor = 0;
-    persist_timeout = 5.0;
-
-    snd_cwnd = 0; // will be set to SMSS when connection is established
-
-    rtseq = 0;
-    rtseq_sendtime = 0;
-
-    // Jacobson's alg: srtt must be initialized to 0, rttvar to a value which
-    // will yield rto = 3s initially.
-    srtt = 0;
-    rttvar = 3.0 / 4.0;
-
-    numRtos = 0;
-
-    // RFC 3782, page 4:
-    // "The algorithm specified in this document uses a variable "recover",
-    // whose initial value is the initial send sequence number."
-    recover = iss;
-    firstPartialACK = false;
-}
-
 std::string TcpBaseAlgStateVariables::str() const
 {
     std::stringstream out;
@@ -666,7 +639,6 @@ bool TcpBaseAlg::shouldMarkAck()
 
 void TcpBaseAlg::processEcnInEstablished()
 {
-
 }
 
 } // namespace tcp

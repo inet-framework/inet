@@ -8,35 +8,10 @@
 #define __INET_TCPWESTWOOD_H
 
 #include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
-#include "inet/transportlayer/tcp/flavours/TcpSegmentTransmitInfoList.h"
+#include "inet/transportlayer/tcp/flavours/TcpWestwoodState_m.h"
 
 namespace inet {
-
 namespace tcp {
-
-/**
- * State variables for TcpWestwood.
- */
-class INET_API TcpWestwoodStateVariables : public TcpBaseAlgStateVariables
-{
-  public:
-    TcpWestwoodStateVariables();
-    ~TcpWestwoodStateVariables();
-    virtual std::string str() const override;
-    virtual std::string detailedInfo() const override;
-
-    uint32_t ssthresh; ///< slow start threshold
-
-    simtime_t w_RTTmin; // min RTT
-    double w_a; // threshold reduction factor for ssthresh calculation
-
-    simtime_t w_lastAckTime; // last received ack time
-
-    double w_bwe;
-    double w_sample_bwe;
-
-    TcpSegmentTransmitInfoList regions;
-};
 
 class INET_API TcpWestwood : public TcpBaseAlg
 {
@@ -75,7 +50,6 @@ class INET_API TcpWestwood : public TcpBaseAlg
 };
 
 } // namespace tcp
-
 } // namespace inet
 
 #endif

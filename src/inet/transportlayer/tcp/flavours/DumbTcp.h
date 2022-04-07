@@ -9,18 +9,10 @@
 #define __INET_DUMBTCP_H
 
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
+#include "inet/transportlayer/tcp/flavours/DumbTcpState_m.h"
 
 namespace inet {
 namespace tcp {
-
-/**
- * State variables for DumbTcp.
- */
-class INET_API DumbTcpStateVariables : public TcpStateVariables
-{
-  public:
-    // ...
-};
 
 /**
  * A very-very basic TcpAlgorithm implementation, with hardcoded

@@ -9,23 +9,10 @@
 #define __INET_TCPTAHOERENOFAMILY_H
 
 #include "inet/transportlayer/tcp/flavours/TcpBaseAlg.h"
+#include "inet/transportlayer/tcp/flavours/TcpTahoeRenoFamilyState_m.h"
 
 namespace inet {
 namespace tcp {
-
-/**
- * State variables for TcpTahoeRenoFamily.
- */
-class INET_API TcpTahoeRenoFamilyStateVariables : public TcpBaseAlgStateVariables
-{
-  public:
-    TcpTahoeRenoFamilyStateVariables();
-    virtual std::string str() const override;
-    virtual std::string detailedInfo() const override;
-    virtual void setSendQueueLimit(uint32_t newLimit);
-
-    uint32_t ssthresh; ///< slow start threshold
-};
 
 /**
  * Provides utility functions to implement TcpTahoe, TcpReno and TcpNewReno.
@@ -40,7 +27,7 @@ class INET_API TcpTahoeRenoFamily : public TcpBaseAlg
     /** Ctor */
     TcpTahoeRenoFamily();
 
-    void initialize() override;
+    virtual void initialize() override;
 };
 
 } // namespace tcp
