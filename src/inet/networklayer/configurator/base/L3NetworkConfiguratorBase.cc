@@ -57,6 +57,12 @@ void L3NetworkConfiguratorBase::initialize(int stage)
         minLinkWeight = par("minLinkWeight");
         configureIsolatedNetworksSeparatly = par("configureIsolatedNetworksSeparatly").boolValue();
         configuration = par("config");
+
+        std::string wirelessIfStr = par("wirelessInterfaces").stdstringValue();
+        cStringTokenizer tokenizer(wirelessIfStr.c_str(), " ,;\t\n\r\f");
+        for(const auto& s : tokenizer.asVector()){
+            wirelessInterfaceNames.push_back(std::make_pair(s, s.size()));
+        }
     }
 }
 
@@ -268,7 +274,14 @@ bool L3NetworkConfiguratorBase::isBridgeNode(Node *node)
 
 bool L3NetworkConfiguratorBase::isWirelessInterface(NetworkInterface *networkInterface)
 {
-    return !strncmp(networkInterface->getInterfaceName(), "wlan", 4);
+    // If the name of networkInterface starts with any of known wireless interface names,
+    // it is considered a wireless interface.
+    for(const auto& e : wirelessInterfaceNames){
+        if (!strncmp(networkInterface->getInterfaceName(), e.first.c_str(), e.second)){
+            return true;
+        }
+    }
+    return false;
 }
 
 Topology::Link *L3NetworkConfiguratorBase::findLinkOut(Node *node, int gateId)

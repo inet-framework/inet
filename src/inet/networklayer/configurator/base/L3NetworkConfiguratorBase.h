@@ -135,6 +135,7 @@ class INET_API L3NetworkConfiguratorBase : public cSimpleModule, public L3Addres
     double minLinkWeight = NaN;
     bool configureIsolatedNetworksSeparatly = false;
     cXMLElement *configuration = nullptr;
+    std::vector<std::pair<std::string, int>> wirelessInterfaceNames;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

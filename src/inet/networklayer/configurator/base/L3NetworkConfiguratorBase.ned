@@ -17,5 +17,6 @@ simple L3NetworkConfiguratorBase like IL3NetworkConfigurator
     parameters:
         double minLinkWeight = default(1E-3);
         bool configureIsolatedNetworksSeparatly = default(false);
+        string wirelessInterfaces = default("wlan cellular");
 }
 
