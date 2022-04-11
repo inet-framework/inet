@@ -37,6 +37,8 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     virtual bool isOverloaded() const;
 
   public:
+    virtual ~CompoundPacketQueueBase() { delete packetDropperFunction; }
+
     virtual int getMaxNumPackets() const override { return packetCapacity; }
     virtual int getNumPackets() const override { return collection->getNumPackets(); }
 

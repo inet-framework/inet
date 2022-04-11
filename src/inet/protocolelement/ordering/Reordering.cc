@@ -15,6 +15,12 @@ namespace inet {
 
 Define_Module(Reordering);
 
+Reordering::~Reordering()
+{
+    for (auto it : packets)
+        delete it.second;
+}
+
 void Reordering::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);

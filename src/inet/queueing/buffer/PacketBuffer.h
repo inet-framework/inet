@@ -32,6 +32,8 @@ class INET_API PacketBuffer : public PacketBufferBase, public virtual IPacketBuf
     virtual bool isOverloaded() const;
 
   public:
+    virtual ~PacketBuffer() { delete packetDropperFunction; }
+
     virtual int getMaxNumPackets() const override { return packetCapacity; }
     virtual int getNumPackets() const override { return packets.size(); }
 

@@ -24,6 +24,8 @@ class INET_API Reordering : public PacketPusherBase
     virtual void initialize(int stage) override;
 
   public:
+    virtual ~Reordering();
+
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 };
 
