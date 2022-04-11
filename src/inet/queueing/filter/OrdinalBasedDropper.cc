@@ -58,6 +58,7 @@ void OrdinalBasedDropper::dropPacket(Packet *packet)
         EV_DEBUG << "End of dropsVector reached" << EV_ENDL;
         generateFurtherDrops = false;
     }
+    PacketFilterBase::dropPacket(packet);
 }
 
 void OrdinalBasedDropper::parseVector(const char *vector)
