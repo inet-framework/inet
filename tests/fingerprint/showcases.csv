@@ -138,7 +138,7 @@
 
 /showcases/wireless/analogmodel/,     -f omnetpp.ini -c Routing -r 0,                5s,         06cd-3543/tplx;d346-1e86/~tNl;c7b2-5c28/~tND;38b7-f1c9/tyf, PASS,    wireless
 /showcases/wireless/analogmodel/,     -f omnetpp.ini -c Distance -r 0,                2.5s,         1e75-270e/tplx;6d7a-d84c/~tNl;9ccb-a57b/~tND;5a09-9640/tyf, PASS,    wireless
-/showcases/wireless/analogmodel/,     -f omnetpp.ini -c Noise -r 0,                0.1s,         dd08-a63c/tplx;3caf-a8f4/~tNl;f5e3-baf9/~tND;f6e7-f392/tyf, PASS,    wireless
+/showcases/wireless/analogmodel/,     -f omnetpp.ini -c Noise -r 0,                0.1s,         dd08-a63c/tplx;e167-9c84/~tNl;9dad-dc30/~tND;f6e7-f392/tyf, PASS,    wireless
 
 /showcases/wireless/blockack/,     -f omnetpp.ini -c NoFragmentation -r 0,                                        1s,            4821-e745/tplx;9018-08c8/~tNl;0665-70ed/~tND, PASS,    wireless
 /showcases/wireless/blockack/,     -f omnetpp.ini -c Fragmentation -r 0,                                          1s,            2d29-28dd/tplx;27bf-b5e5/~tNl;f566-61a0/~tND, PASS,    wireless
@@ -149,30 +149,30 @@
 /showcases/wireless/crosstalk/,     -f omnetpp.ini -c IndependentFrequencyBandsTwoScalarRadioMediumModules -r 0,                                           1s,            8447-12fd/tplx;28b0-7515/~tNl;c6aa-306d/~tND;2778-d996/tyf, PASS,    wireless
 /showcases/wireless/crosstalk/,     -f omnetpp.ini -c PartiallyOverlappingFrequencyBands -r 0,                                           1s,            a9fc-8887/tplx;5fd5-7ddf/~tNl;b7ca-5176/~tND;d800-6246/tyf, PASS,    wireless
 
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 0,                                        5s,            6a9f-c21b/tplx;c236-5353/~tNl, PASS,    wireless ieee802154
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 1,                                        5s,            8cb8-6ac7/tplx;83e0-1191/~tNl, PASS,    wireless ieee802154
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 2,                                        5s,            4045-b97c/tplx;eddf-d40d/~tNl, PASS,    wireless ieee802154
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 3,                                        5s,            82e3-55f9/tplx;968b-0528/~tNl, PASS,    wireless ieee802154
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 4,                                        5s,            d534-6160/tplx;c9c8-bfde/~tNl, PASS,    wireless ieee802154
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 5,                                        5s,            251e-cd6d/tplx;7cf7-1570/~tNl, PASS,    wireless ieee802154
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 6,                                        5s,            708d-0f0f/tplx;4c19-7f6d/~tNl, PASS,    wireless ieee802154
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 7,                                        5s,            954e-f1f8/tplx;2d06-fa62/~tNl, PASS,    wireless ieee802154
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c WifiOnly -r 0,                                        5s,            9eba-b2d3/tplx;9f98-f4c5/~tNl;b3ed-3230/~tND, PASS,    wireless
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c WifiOnly -r 1,                                          5s,            b3d7-4193/tplx;5cc9-e9db/~tNl;04ed-ffc6/~tND, PASS,    wireless
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c WifiOnly -r 2,                                           5s,            76df-9a87/tplx;ed05-e427/~tNl;e7d2-52e6/~tND, PASS,    wireless
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c WifiOnly -r 3,                                        5s,            37cc-32e9/tplx;8155-24a0/~tNl;213e-e5c8/~tND, PASS,    wireless
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c WifiOnly -r 4,                                          5s,            1720-0b42/tplx;bd56-50a5/~tNl;3a7b-b4af/~tND, PASS,    wireless
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c WifiOnly -r 5,                                           5s,            a630-0edf/tplx;457f-5348/~tNl;c9c6-b307/~tND, PASS,    wireless
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c WifiOnly -r 6,                                        5s,            3976-f458/tplx;cf0f-081b/~tNl;74de-4f6f/~tND, PASS,    wireless
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c WifiOnly -r 7,                                          5s,            6961-e53c/tplx;c0e0-e9a6/~tNl;30c8-a766/~tND, PASS,    wireless
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 0,                                           5s,            3501-ab28/tplx;02c3-67d6/~tNl;f4c0-570c/tyf, PASS,    wireless ieee802154
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 1,                                           5s,            a42e-f983/tplx;cdec-1d07/~tNl;4400-8ec1/tyf, PASS,    wireless ieee802154
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 2,                                           5s,            cc92-406a/tplx;49fe-e356/~tNl;aab8-cfdd/tyf, PASS,    wireless ieee802154
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 3,                                           5s,            2aea-35d1/tplx;11d3-7e0f/~tNl;cdab-f42b/tyf, PASS,    wireless ieee802154
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 4,                                           5s,            60af-22c3/tplx;ba82-f633/~tNl;74b4-41f3/tyf, PASS,    wireless ieee802154
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 5,                                           5s,            bbd3-354f/tplx;6879-dea3/~tNl;ddd6-1a79/tyf, PASS,    wireless ieee802154
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 6,                                           5s,            c255-7e40/tplx;4f98-6ace/~tNl;6ec4-29f7/tyf, PASS,    wireless ieee802154
-/showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 7,                                           5s,            2f8b-1194/tplx;fd16-e751/~tNl;32c3-0484/tyf, PASS,    wireless ieee802154
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 0,                                        5s,            6a9f-c21b/tplx;1d7b-ac79/~tNl, PASS,    wireless ieee802154
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 1,                                        5s,            8cb8-6ac7/tplx;2d3f-addc/~tNl, PASS,    wireless ieee802154
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 2,                                        5s,            4045-b97c/tplx;9afb-cc7e/~tNl, PASS,    wireless ieee802154
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 3,                                        5s,            82e3-55f9/tplx;5973-5a07/~tNl, PASS,    wireless ieee802154
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 4,                                        5s,            d534-6160/tplx;506a-a46e/~tNl, PASS,    wireless ieee802154
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 5,                                        5s,            251e-cd6d/tplx;3b52-8020/~tNl, PASS,    wireless ieee802154
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 6,                                        5s,            708d-0f0f/tplx;e31b-2209/~tNl, PASS,    wireless ieee802154
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c Coexistence -r 7,                                        5s,            954e-f1f8/tplx;56a8-5df3/~tNl, PASS,    wireless ieee802154
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c WifiOnly -r 0,                                        5s,            9eba-b2d3/tplx;c147-5e89/~tNl;91d9-7444/~tND, PASS,    wireless
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c WifiOnly -r 1,                                          5s,            b3d7-4193/tplx;1ee8-3fca/~tNl;3027-c8ed/~tND, PASS,    wireless
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c WifiOnly -r 2,                                           5s,            76df-9a87/tplx;feda-d467/~tNl;d03a-b991/~tND, PASS,    wireless
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c WifiOnly -r 3,                                        5s,            37cc-32e9/tplx;8874-9fbe/~tNl;ed02-703d/~tND, PASS,    wireless
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c WifiOnly -r 4,                                          5s,            1720-0b42/tplx;c4c6-7525/~tNl;90da-ec2d/~tND, PASS,    wireless
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c WifiOnly -r 5,                                           5s,            a630-0edf/tplx;ad2f-3ff9/~tNl;2a71-86a3/~tND, PASS,    wireless
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c WifiOnly -r 6,                                        5s,            3976-f458/tplx;4288-aca5/~tNl;f89b-ee04/~tND, PASS,    wireless
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c WifiOnly -r 7,                                          5s,            6961-e53c/tplx;42d3-911e/~tNl;e6df-64a7/~tND, PASS,    wireless
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 0,                                           5s,            3501-ab28/tplx;614c-805e/~tNl;f4c0-570c/tyf, PASS,    wireless ieee802154
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 1,                                           5s,            a42e-f983/tplx;ab10-0018/~tNl;4400-8ec1/tyf, PASS,    wireless ieee802154
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 2,                                           5s,            cc92-406a/tplx;0524-50ac/~tNl;aab8-cfdd/tyf, PASS,    wireless ieee802154
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 3,                                           5s,            2aea-35d1/tplx;0c94-db74/~tNl;cdab-f42b/tyf, PASS,    wireless ieee802154
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 4,                                           5s,            60af-22c3/tplx;d2c1-d867/~tNl;74b4-41f3/tyf, PASS,    wireless ieee802154
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 5,                                           5s,            bbd3-354f/tplx;ebb3-ddef/~tNl;ddd6-1a79/tyf, PASS,    wireless ieee802154
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 6,                                           5s,            c255-7e40/tplx;7e70-ee1a/~tNl;6ec4-29f7/tyf, PASS,    wireless ieee802154
+/showcases/wireless/coexistence/,     -f omnetpp.ini -c WpanOnly -r 7,                                           5s,            2f8b-1194/tplx;81b2-01f2/~tNl;32c3-0484/tyf, PASS,    wireless ieee802154
 
 /showcases/wireless/directionalantennas/,     -f omnetpp.ini -c IsotropicAntenna -r 0,                360s,         cb2c-76b8/tplx;34d3-be84/~tNl;9ff1-60e9/~tND;c26d-a715/tyf, PASS,    wireless
 /showcases/wireless/directionalantennas/,     -f omnetpp.ini -c ParabolicAntenna -r 0,                360s,         814f-c3c5/tplx;ff14-8923/~tNl;5561-21a0/~tND;a4be-835f/tyf, PASS,    wireless
