@@ -25,8 +25,8 @@ void PacketDuplicator::pushPacket(Packet *packet, cGate *gate)
         pushOrSendPacket(duplicate, outputGate, consumer);
     }
     EV_INFO << "Forwarding original packet" << EV_FIELD(packet) << EV_ENDL;
-    pushOrSendPacket(packet, outputGate, consumer);
     handlePacketProcessed(packet);
+    pushOrSendPacket(packet, outputGate, consumer);
     updateDisplayString();
 }
 

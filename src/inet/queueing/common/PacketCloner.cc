@@ -40,11 +40,11 @@ void PacketCloner::pushPacket(Packet *packet, cGate *gate)
     Enter_Method("pushPacket");
     take(packet);
     int numGates = outputGates.size();
+    handlePacketProcessed(packet);
     for (int i = 0; i < numGates; i++) {
         EV_INFO << "Cloning packet" << EV_FIELD(packet) << EV_ENDL;
         pushOrSendPacket(i == numGates - 1 ? packet : packet->dup(), outputGates[i], consumers[i]);
     }
-    handlePacketProcessed(packet);
     updateDisplayString();
 }
 
