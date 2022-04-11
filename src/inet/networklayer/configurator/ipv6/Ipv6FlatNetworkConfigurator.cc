@@ -25,11 +25,11 @@ void Ipv6FlatNetworkConfigurator::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
-        cTopology topo("topo");
+        Topology topo("topo");
 
         // extract topology
         topo.extractByProperty("networkNode");
-        EV_DEBUG << "cTopology found " << topo.getNumNodes() << " nodes\n";
+        EV_DEBUG << "Topology found " << topo.getNumNodes() << " nodes\n";
 
         configureAdvPrefixes(topo);
 
@@ -51,13 +51,13 @@ void Ipv6FlatNetworkConfigurator::setDisplayString(int numIPNodes, int numNonIPN
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-bool Ipv6FlatNetworkConfigurator::isIPNode(cTopology::Node *node)
+bool Ipv6FlatNetworkConfigurator::isIPNode(Topology::Node *node)
 {
     return L3AddressResolver().findIpv6RoutingTableOf(node->getModule()) != nullptr
            && L3AddressResolver().findInterfaceTableOf(node->getModule()) != nullptr;
 }
 
-void Ipv6FlatNetworkConfigurator::configureAdvPrefixes(cTopology& topo)
+void Ipv6FlatNetworkConfigurator::configureAdvPrefixes(Topology& topo)
 {
     // assign advertised prefixes to all router interfaces
     for (int i = 0; i < topo.getNumNodes(); i++) {
@@ -119,11 +119,11 @@ void Ipv6FlatNetworkConfigurator::configureAdvPrefixes(cTopology& topo)
     }
 }
 
-void Ipv6FlatNetworkConfigurator::addOwnAdvPrefixRoutes(cTopology& topo)
+void Ipv6FlatNetworkConfigurator::addOwnAdvPrefixRoutes(Topology& topo)
 {
     // add globally routable prefixes to routing table
     for (int i = 0; i < topo.getNumNodes(); i++) {
-        cTopology::Node *node = topo.getNode(i);
+        Topology::Node *node = topo.getNode(i);
 
         // skip bus types
         if (!isIPNode(node))
@@ -160,13 +160,13 @@ void Ipv6FlatNetworkConfigurator::addOwnAdvPrefixRoutes(cTopology& topo)
 // TODO !isRouter nodes are not used as source/destination of routes
 //     but can be internal nodes of the generated shortest paths.
 //     the same problem with non-ipv6 nodes
-void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)
+void Ipv6FlatNetworkConfigurator::addStaticRoutes(Topology& topo)
 {
     int numIPNodes = 0;
 
     // fill in routing tables
     for (int i = 0; i < topo.getNumNodes(); i++) {
-        cTopology::Node *destNode = topo.getNode(i);
+        Topology::Node *destNode = topo.getNode(i);
 
         // skip bus types
         if (!isIPNode(destNode))
@@ -214,7 +214,7 @@ void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)
             if (!isIPNode(topo.getNode(j)))
                 continue;
 
-            cTopology::Node *atNode = topo.getNode(j);
+            Topology::Node *atNode = topo.getNode(j);
             if (atNode->getNumPaths() == 0)
                 continue; // not connected
 
@@ -230,20 +230,20 @@ void Ipv6FlatNetworkConfigurator::addStaticRoutes(cTopology& topo)
                 continue;
 
             // determine the local interface id
-            cGate *localGate = atNode->getPath(0)->getLocalGate();
+            cGate *localGate = atNode->getPath(0)->getLinkOutLocalGate();
             NetworkInterface *localIf = CHK(ift->findInterfaceByNodeOutputGateId(localGate->getId()));
 
             // determine next hop link address. That's a bit tricky because
             // the directly adjacent cTopo node might be a non-IP getNode(ethernet switch etc)
             // so we have to "seek through" them.
-            cTopology::Node *prevNode = atNode;
+            Topology::Node *prevNode = atNode;
             // if there's no ethernet switch between atNode and it's next hop
             // neighbour, we don't go into the following while() loop
-            while (!isIPNode(prevNode->getPath(0)->getRemoteNode()))
-                prevNode = prevNode->getPath(0)->getRemoteNode();
+            while (!isIPNode(prevNode->getPath(0)->getLinkOutRemoteNode()))
+                prevNode = prevNode->getPath(0)->getLinkOutRemoteNode();
 
             // ok, the next hop is now just one step away from prevNode
-            cGate *remoteGate = prevNode->getPath(0)->getRemoteGate();
+            cGate *remoteGate = prevNode->getPath(0)->getLinkOutRemoteGate();
             cModule *nextHop = remoteGate->getOwnerModule();
             IInterfaceTable *nextHopIft = L3AddressResolver().interfaceTableOf(nextHop);
             NetworkInterface *nextHopOnlinkIf = CHK(nextHopIft->findInterfaceByNodeInputGateId(remoteGate->getId()));

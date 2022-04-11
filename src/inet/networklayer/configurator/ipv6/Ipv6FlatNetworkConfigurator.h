@@ -9,6 +9,7 @@
 #define __INET_IPV6FLATNETWORKCONFIGURATOR_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/common/Topology.h"
 
 namespace inet {
 
@@ -26,12 +27,12 @@ class INET_API Ipv6FlatNetworkConfigurator : public cSimpleModule
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual void configureAdvPrefixes(cTopology& topo);
-    virtual void addOwnAdvPrefixRoutes(cTopology& topo);
-    virtual void addStaticRoutes(cTopology& topo);
+    virtual void configureAdvPrefixes(Topology& topo);
+    virtual void addOwnAdvPrefixRoutes(Topology& topo);
+    virtual void addStaticRoutes(Topology& topo);
 
     virtual void setDisplayString(int numIPNodes, int numNonIPNodes);
-    virtual bool isIPNode(cTopology::Node *node);
+    virtual bool isIPNode(Topology::Node *node);
 };
 
 } // namespace inet

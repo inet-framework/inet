@@ -8,6 +8,7 @@
 #ifndef __INET_IPV4FLATNETWORKCONFIGURATOR_H
 #define __INET_IPV4FLATNETWORKCONFIGURATOR_H
 
+#include "inet/common/Topology.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
 
 namespace inet {
@@ -41,12 +42,12 @@ class INET_API Ipv4FlatNetworkConfigurator : public cSimpleModule
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
 
-    virtual void extractTopology(cTopology& topo, NodeInfoVector& nodeInfo);
-    virtual void assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo);
-    virtual void addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo);
-    virtual void fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo);
+    virtual void extractTopology(Topology& topo, NodeInfoVector& nodeInfo);
+    virtual void assignAddresses(Topology& topo, NodeInfoVector& nodeInfo);
+    virtual void addDefaultRoutes(Topology& topo, NodeInfoVector& nodeInfo);
+    virtual void fillRoutingTables(Topology& topo, NodeInfoVector& nodeInfo);
 
-    virtual void setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo);
+    virtual void setDisplayString(Topology& topo, NodeInfoVector& nodeInfo);
 };
 
 } // namespace inet

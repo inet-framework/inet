@@ -17,8 +17,6 @@
 
 namespace inet {
 
-typedef cTopology WeightedTopology;
-
 Define_Module(Ipv4FlatNetworkConfigurator);
 
 void Ipv4FlatNetworkConfigurator::initialize(int stage)
@@ -26,10 +24,10 @@ void Ipv4FlatNetworkConfigurator::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_NETWORK_CONFIGURATION) {
-        cTopology topo("topo");
+        Topology topo("topo");
         NodeInfoVector nodeInfo; // will be of size topo.nodes[]
 
-        // extract topology into the cTopology object, then fill in
+        // extract topology into the Topology object, then fill in
         // isIPNode, rt and ift members of nodeInfo[]
         extractTopology(topo, nodeInfo);
 
@@ -48,11 +46,11 @@ void Ipv4FlatNetworkConfigurator::initialize(int stage)
     }
 }
 
-void Ipv4FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& nodeInfo)
+void Ipv4FlatNetworkConfigurator::extractTopology(Topology& topo, NodeInfoVector& nodeInfo)
 {
     // extract topology
     topo.extractByProperty("networkNode");
-    EV_DEBUG << "cTopology found " << topo.getNumNodes() << " nodes\n";
+    EV_DEBUG << "Topology found " << topo.getNumNodes() << " nodes\n";
 
     // fill in isIPNode, ift and rt members in nodeInfo[]
     nodeInfo.resize(topo.getNumNodes());
@@ -68,7 +66,7 @@ void Ipv4FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVecto
     }
 }
 
-void Ipv4FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo)
+void Ipv4FlatNetworkConfigurator::assignAddresses(Topology& topo, NodeInfoVector& nodeInfo)
 {
     // assign Ipv4 addresses
     uint32_t networkAddress = Ipv4Address(par("networkAddress").stringValue()).getInt();
@@ -99,11 +97,11 @@ void Ipv4FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVecto
     }
 }
 
-void Ipv4FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo)
+void Ipv4FlatNetworkConfigurator::addDefaultRoutes(Topology& topo, NodeInfoVector& nodeInfo)
 {
     // add default route to nodes with exactly one (non-loopback) interface
     for (int i = 0; i < topo.getNumNodes(); i++) {
-        cTopology::Node *node = topo.getNode(i);
+        Topology::Node *node = topo.getNode(i);
 
         // skip bus types
         if (!nodeInfo[i].isIPNode)
@@ -139,11 +137,11 @@ void Ipv4FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVect
     }
 }
 
-void Ipv4FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo)
+void Ipv4FlatNetworkConfigurator::fillRoutingTables(Topology& topo, NodeInfoVector& nodeInfo)
 {
     // fill in routing tables with static routes
     for (int i = 0; i < topo.getNumNodes(); i++) {
-        cTopology::Node *destNode = topo.getNode(i);
+        Topology::Node *destNode = topo.getNode(i);
 
         // skip bus types
         if (!nodeInfo[i].isIPNode)
@@ -163,7 +161,7 @@ void Ipv4FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVec
             if (!nodeInfo[j].isIPNode)
                 continue;
 
-            cTopology::Node *atNode = topo.getNode(j);
+            Topology::Node *atNode = topo.getNode(j);
             if (atNode->getNumPaths() == 0)
                 continue; // not connected
             if (nodeInfo[j].usesDefaultRoute)
@@ -173,7 +171,7 @@ void Ipv4FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVec
 
             IInterfaceTable *ift = nodeInfo[j].ift;
 
-            int outputGateId = atNode->getPath(0)->getLocalGate()->getId();
+            int outputGateId = atNode->getPath(0)->getLinkOutLocalGate()->getId();
             NetworkInterface *ie = ift->findInterfaceByNodeOutputGateId(outputGateId);
             if (!ie)
                 throw cRuntimeError("%s has no interface for output gate id %d", ift->getFullPath().c_str(), outputGateId);
@@ -199,7 +197,7 @@ void Ipv4FlatNetworkConfigurator::handleMessage(cMessage *msg)
     throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()");
 }
 
-void Ipv4FlatNetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo)
+void Ipv4FlatNetworkConfigurator::setDisplayString(Topology& topo, NodeInfoVector& nodeInfo)
 {
     int numIPNodes = 0;
     for (int i = 0; i < topo.getNumNodes(); i++)
