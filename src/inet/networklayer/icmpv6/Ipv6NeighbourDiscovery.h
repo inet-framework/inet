@@ -378,7 +378,6 @@ class INET_API Ipv6NeighbourDiscovery : public cSimpleModule, public LifecycleUn
 
   protected:
     void routersUnreachabilityDetection(const NetworkInterface *ie); // 3.9.07 - CB
-    bool isWirelessInterface(const NetworkInterface *ie);
     bool isWirelessAccessPoint(cModule *module);
 #endif /* INET_WITH_xMIPv6 */
 };

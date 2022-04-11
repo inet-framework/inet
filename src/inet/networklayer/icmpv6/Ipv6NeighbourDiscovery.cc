@@ -2605,7 +2605,7 @@ void Ipv6NeighbourDiscovery::invalidateNeigbourCache()
 
 bool Ipv6NeighbourDiscovery::canServeWirelessNodes(NetworkInterface *ie)
 {
-    if (isWirelessInterface(ie))
+    if (ie->isWireless())
         return true;
 
     // check if this interface is directly connected to an AccessPoint.
@@ -2624,12 +2624,6 @@ bool Ipv6NeighbourDiscovery::canServeWirelessNodes(NetworkInterface *ie)
     // FIXME The AccessPoint can be connected to this router via Ethernet switches and/or hubs.
 
     return false;
-}
-
-bool Ipv6NeighbourDiscovery::isWirelessInterface(const NetworkInterface *ie)
-{
-    // TODO should be a flag in the NetworkInterface
-    return strncmp("wlan", ie->getInterfaceName(), 4) == 0;
 }
 
 bool Ipv6NeighbourDiscovery::isWirelessAccessPoint(cModule *module)
