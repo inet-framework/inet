@@ -212,6 +212,8 @@ void Ipv4InterfaceData::changeMulticastGroupMembership(Ipv4Address multicastAddr
         McastSourceFilterMode oldFilterMode, const Ipv4AddressVector& oldSourceList,
         McastSourceFilterMode newFilterMode, const Ipv4AddressVector& newSourceList)
 {
+    if (!ownerp->isMulticast())
+        throw cRuntimeError("Ipv4InterfaceData::changeMulticastGroupMembership(): multicast interface expected, received %s.", ownerp->getInterfaceFullPath().c_str());
     if (!multicastAddress.isMulticast())
         throw cRuntimeError("Ipv4InterfaceData::changeMulticastGroupMembership(): multicast address expected, received %s.", multicastAddress.str().c_str());
 
