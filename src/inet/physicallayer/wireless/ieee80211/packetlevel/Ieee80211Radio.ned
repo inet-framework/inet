@@ -34,7 +34,7 @@ module Ieee80211Radio extends FlatRadioBase
         receiver.typename = default(signalAnalogRepresentation == "scalar" ? "Ieee80211ScalarReceiver" : signalAnalogRepresentation == "dimensional" ? "Ieee80211DimensionalReceiver" : "");
         centerFrequency @unit(Hz) = default(2.412GHz);                 // the center frequency of the band is automatically set by the radio
         bandwidth @unit(Hz) = default(nan MHz);
-        transmitter.preambleDuration = default(nan s);
+        transmitter.preambleDuration = default(-1 s);
         transmitter.bitrate = default(11Mbps);
         transmitter.headerLength = default(192b);
         transmitter.power = default(20mW);
