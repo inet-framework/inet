@@ -82,7 +82,7 @@ SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *ass
 
     cmtCCGroup = 0;
     lastTransmission = simTime();
-    sendAllRandomizer = RNGCONTEXT uniform(0, (1 << 31));
+    sendAllRandomizer = RNGCONTEXT uniform(0, (1u << 31));
     pseudoCumAck = 0;
     newPseudoCumAck = false;
     findPseudoCumAck = true;    // Set findPseudoCumAck to TRUE for new destination.
