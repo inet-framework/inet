@@ -98,7 +98,7 @@ class INET_API AddedFunction : public FunctionBase<R, D>
     }
 
     virtual bool isFinite(const typename D::I& i) const override {
-        return function1->isFinite(i) & function2->isFinite(i);
+        return function1->isFinite(i) && function2->isFinite(i);
     }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
@@ -168,7 +168,7 @@ class INET_API SubtractedFunction : public FunctionBase<R, D>
     }
 
     virtual bool isFinite(const typename D::I& i) const override {
-        return function1->isFinite(i) & function2->isFinite(i);
+        return function1->isFinite(i) && function2->isFinite(i);
     }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
@@ -245,7 +245,7 @@ class INET_API MultipliedFunction : public FunctionBase<R, D>
     }
 
     virtual bool isFinite(const typename D::I& i) const override {
-        return function1->isFinite(i) & function2->isFinite(i);
+        return function1->isFinite(i) && function2->isFinite(i);
     }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
