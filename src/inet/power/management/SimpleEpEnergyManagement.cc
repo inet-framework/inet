@@ -99,7 +99,7 @@ void SimpleEpEnergyManagement::scheduleLifecycleOperationTimer()
     }
     if (lifecycleOperationTimer->isScheduled())
         cancelEvent(lifecycleOperationTimer);
-    if (totalPower != W(0)) {
+    if (totalPower != W(0) && std::isfinite(targetCapacity.get())) {
         // enforce target capacity to be in range
         simtime_t remainingTime = unit((targetCapacity - estimatedResidualCapacity) / totalPower / s(1)).get();
         // make sure the targetCapacity is reached despite floating point arithmetic
