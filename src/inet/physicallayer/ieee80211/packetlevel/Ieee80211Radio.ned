@@ -42,7 +42,7 @@ module Ieee80211Radio extends FlatRadioBase
         carrierFrequency @unit(Hz) = default(2.412GHz);                 // the center frequency of the band is automatically set by the radio
         bandwidth @unit(Hz) = default(2MHz);
         antennaType = default("IsotropicAntenna");
-        transmitter.preambleDuration = default(0s/0);
+        transmitter.preambleDuration = default(-1 s);
         transmitter.bitrate = default(11Mbps);
         transmitter.headerBitLength = default(192b);
         transmitter.power = default(20mW);
