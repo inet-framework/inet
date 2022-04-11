@@ -55,7 +55,7 @@ Dymo::Dymo() :
     appendInformation(false),
     bufferSizePackets(-1),
     bufferSizeBytes(-1),
-    maxJitter(NaN),
+    maxJitter(-1),
     sendIntermediateRREP(false),
     minHopLimit(-1),
     maxHopLimit(-1),
