@@ -20,6 +20,7 @@ module Ieee802154UwbIrInterface extends NetworkInterface like IWirelessInterface
 {
     parameters:
         @class(NetworkInterface);
+        isWireless = true;
         string interfaceTableModule;
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
     gates:

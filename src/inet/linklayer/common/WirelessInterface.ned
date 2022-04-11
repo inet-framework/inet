@@ -20,6 +20,7 @@ import inet.queueing.contract.IPacketQueue;
 module WirelessInterface extends NetworkInterface like IWirelessInterface
 {
     parameters:
+        isWireless = true;
         string interfaceTableModule;
         string energySourceModule;
         string protocol = default("");

@@ -17,6 +17,7 @@ module LoopbackInterface extends NetworkInterface like ILoopbackInterface
 {
     parameters:
         @display("i=block/ifcard");
+        isWireless = false;
         string interfaceTableModule;
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
     gates:

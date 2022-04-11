@@ -16,6 +16,7 @@ import inet.networklayer.common.NetworkInterface;
 module TunInterface extends NetworkInterface like ITunnelInterface
 {
     parameters:
+        isWireless = default(false);
         string interfaceTableModule;
         int mtu @unit(B) = default(1500B);
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));

@@ -30,6 +30,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 module Ieee80211Interface extends NetworkInterface like IWirelessInterface
 {
     parameters:
+        isWireless = true;
         string interfaceTableModule;
         string energySourceModule = default("");
         string opMode @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","p","ac") = default("g(mixed)");

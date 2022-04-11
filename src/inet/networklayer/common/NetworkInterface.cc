@@ -104,6 +104,7 @@ void NetworkInterface::clearProtocolDataSet()
 void NetworkInterface::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+        wireless = par("isWireless");
         upperLayerIn = gate("upperLayerIn");
         upperLayerOut = gate("upperLayerOut");
         subscribe(POST_MODEL_CHANGE, this);

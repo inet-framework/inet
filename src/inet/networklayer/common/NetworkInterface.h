@@ -116,6 +116,7 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     bool loopback = false; ///< interface is loopback interface
     bool hasModuleIdAddress = false;
     bool hasModulePathAddress = false;
+    bool wireless = false;
     double datarate = 0; ///< data rate in bit/s
     MacAddress macAddr; ///< link-layer address (for now, only IEEE 802 MAC addresses are supported)
     InterfaceToken token; ///< for Ipv6 stateless autoconfig (RFC 1971), interface identifier (RFC 2462)
@@ -239,8 +240,8 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     bool isMulticast() const { return multicast; }
     bool isPointToPoint() const { return pointToPoint; }
     bool isLoopback() const { return loopback; }
-    bool isWired() const { return rxIn != nullptr && txOut != nullptr; }
-    bool isWireless() const { return !isWired(); }
+    bool isWired() const { return !wireless; }
+    bool isWireless() const { return wireless; }
     double getDatarate() const { return datarate; }
     const MacAddress& getMacAddress() const { return macAddr; }
     const InterfaceToken& getInterfaceToken() const { return token; }

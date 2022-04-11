@@ -19,6 +19,7 @@ import inet.queueing.contract.ITrafficConditioner;
 module PppInterface extends NetworkInterface like IPppInterface
 {
     parameters:
+        isWireless = false;
         string interfaceTableModule;
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
     gates:

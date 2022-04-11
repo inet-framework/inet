@@ -16,6 +16,7 @@ import inet.networklayer.common.NetworkInterface;
 module VirtualInterface extends NetworkInterface like IVirtualInterface
 {
     parameters:
+        isWireless = default(false);
         string interfaceTableModule;
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         @display("i=block/tunnel");

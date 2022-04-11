@@ -28,6 +28,7 @@ import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 module AckingWirelessInterface extends NetworkInterface like IWirelessInterface
 {
     parameters:
+        isWireless = true;
         string interfaceTableModule;
         string energySourceModule = default("");
         double bitrate @unit(bps);

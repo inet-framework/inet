@@ -20,6 +20,7 @@ import inet.queueing.contract.ITrafficConditioner;
 module EthernetInterface extends NetworkInterface like IEthernetInterface
 {
     parameters:
+        isWireless = false;
         string interfaceTableModule;
         string protocol = default("ethernetmac");
         string address @mutable = default("auto");   // MAC address as hex string (12 hex digits), or
