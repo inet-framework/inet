@@ -294,7 +294,7 @@ void SctpAssociation::sendOnAllPaths(SctpPathVariables *firstPath)
         {
             if (path != firstPath) {
                 sendOnPath(path);
-                path->sendAllRandomizer = RNGCONTEXT uniform(0, (1 << 31));
+                path->sendAllRandomizer = RNGCONTEXT uniform(0, (1u << 31));
             }
         }
         if ((state->strictCwndBooking) &&
