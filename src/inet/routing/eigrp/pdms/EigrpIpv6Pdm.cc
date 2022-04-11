@@ -439,7 +439,8 @@ bool EigrpIpv6Pdm::getDestIpAddress(int destNeigh, Ipv6Address *resultAddress)
     else { // destination neighbor set -> use unicast
         if ((neigh = eigrpNt->findNeighborById(destNeigh)) == nullptr)
             return false;
-        addr = neigh->getIPAddress().words();
+        auto ipAddress = neigh->getIPAddress();
+        addr = ipAddress.words();
         resultAddress->set(addr[0], addr[1], addr[2], addr[3]);
     }
 
