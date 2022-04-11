@@ -334,14 +334,14 @@ void SctpAssociation::chunkReschedulingControl(SctpPathVariables *path)
        << "\tpeerRwnd=" << state->peerRwnd
        << endl;
 
-    double totalBandwidth = 0.0;
+//    double totalBandwidth = 0.0;
     unsigned int totalOutstandingBytes = 0;
     unsigned int totalQueuedBytes = 0;
     for (auto& elem : sctpPathMap) {
         const SctpPathVariables *myPath = elem.second;
         totalQueuedBytes += myPath->queuedBytes;
         totalOutstandingBytes += myPath->outstandingBytes;
-        totalBandwidth += (double)myPath->cwnd / myPath->srtt.dbl();
+//        totalBandwidth += (double)myPath->cwnd / myPath->srtt.dbl();
     }
     assert(totalOutstandingBytes == state->outstandingBytes);
 
