@@ -39,7 +39,7 @@ void InterpacketGapInserter::initialize(int stage)
     else if (stage == INITSTAGE_LAST) {
         if (packetEndTime + durationPar->doubleValue() > getClockTime()) {
             double interpacketGapDuration = durationPar->doubleValue();
-            scheduleClockEventAt(packetEndTime + interpacketGapDuration, timer);
+            rescheduleClockEventAt(packetEndTime + interpacketGapDuration, timer);
             emit(interpacketGapStartedSignal, interpacketGapDuration);
         }
     }
