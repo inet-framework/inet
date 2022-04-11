@@ -88,5 +88,5 @@ network Network6
             @display("p=200,100");
         }
     connections allowunconnected:
-        client.out --> { delay = 1us; ber = 1E-5; } --> server.in;
+        client.out --> { datarate = 100Mbps; delay = 1us; ber = 1E-5; } --> server.in;
 }
