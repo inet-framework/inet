@@ -339,7 +339,7 @@ const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createCompletePacketM
         Packet *packet = new Packet(name);
         packet->insertAtBack(signalFieldPacketModel->getPacket()->peekAllAsBits());
         packet->insertAtBack(dataFieldPacketModel->getPacket()->peekAllAsBits());
-        packet->setBitError(signalFieldPacketModel->getPacket()->hasBitError() | dataFieldPacketModel->getPacket()->hasBitError());
+        packet->setBitError(signalFieldPacketModel->getPacket()->hasBitError() || dataFieldPacketModel->getPacket()->hasBitError());
         return new ReceptionPacketModel(packet, bps(NaN), NaN);
     }
 }
