@@ -8,7 +8,6 @@ import omnetpp
 import omnetpp.scave.analysis
 
 from inet.simulation.project import *
-from inet.simulation.task import *
 
 logger = logging.getLogger(__name__)
 

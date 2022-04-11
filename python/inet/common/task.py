@@ -160,7 +160,7 @@ class MultipleTaskResults:
                    matches_filter(test_result.error_message, error_message_filter, exclude_error_message_filter, full_match)
         filtered_results = list(filter(matches_test_result, self.results))
         filtered_tasks = list(map(lambda result: result.task, filtered_results))
-        multiple_tasks = self.multiple_tasks.__class__(filtered_tasks, concurrent=self.multiple_tasks.concurrent)
+        multiple_tasks = self.multiple_tasks.__class__(tasks=filtered_tasks, concurrent=self.multiple_tasks.concurrent)
         return self.__class__(multiple_tasks, filtered_results)
 
     def rerun(self, **kwargs):

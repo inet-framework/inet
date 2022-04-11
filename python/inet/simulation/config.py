@@ -14,7 +14,7 @@ from inet.simulation.project import *
 logger = logging.getLogger(__name__)
 
 class SimulationConfig:
-    def __init__(self, simulation_project, working_directory, ini_file, config, num_runs, abstract, description):
+    def __init__(self, simulation_project, working_directory, ini_file, config, num_runs, abstract, expected_result, description):
         self.simulation_project = simulation_project
         self.working_directory = working_directory
         self.ini_file = ini_file
@@ -22,6 +22,7 @@ class SimulationConfig:
         self.num_runs = num_runs
         self.abstract = abstract
         self.emulation = working_directory.find("emulation") != -1
+        self.expected_result = expected_result
         self.description = description
 
     def __repr__(self):
@@ -59,11 +60,14 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
         match = re.match("\\[(Config +)?(.*?)\\]|\\[(General)\\]", line)
         if match:
             config = match.group(2) or match.group(3)
-            config_dict = {"config": config, "abstract_config": False, "description": None, "network": None}
+            config_dict = {"config": config, "abstract_config": False, "expected_result": "DONE", "description": None, "network": None}
             config_dicts.append(config_dict)
         match = re.match("#? *abstract-config *= *(\w+)", line)
         if match:
             config_dict["abstract_config"] = bool(match.group(1))
+        match = re.match("#? *expected-result *= *\"(\w+)\"", line)
+        if match:
+            config_dict["expected_result"] = match.group(1)
         match = re.match("description *= *\"(.*)\"", line)
         if match:
             config_dict["description"] = match.group(1)
@@ -82,11 +86,15 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
             env = os.environ.copy()
             env["INET_ROOT"] = simulation_project.get_full_path(".")
             result = subprocess.run(args, cwd=working_directory, capture_output=True, env=env)
-            num_runs = int(result.stdout)
+            if result.returncode == 0:
+                num_runs = int(result.stdout)
+            else:
+                raise Exception("Cannot determine number of runs")
         description = config_dict["description"]
         description_abstract = (re.search("\((a|A)bstract\)", description) is not None) if description else False
-        abstract = (config_dict["network"] is None and config_dict["config"] == "General") or config_dict["abstract_config"] or description_abstract 
-        simulation_config = SimulationConfig(simulation_project, os.path.relpath(working_directory, simulation_project.get_full_path(".")), ini_file, config, num_runs, abstract, description)
+        abstract = (config_dict["network"] is None and config_dict["config"] == "General") or config_dict["abstract_config"] or description_abstract
+        expected_result = config_dict["expected_result"]
+        simulation_config = SimulationConfig(simulation_project, os.path.relpath(working_directory, simulation_project.get_full_path(".")), ini_file, config, num_runs, abstract, expected_result, description)
         simulation_configs.append(simulation_config)
     return simulation_configs
 

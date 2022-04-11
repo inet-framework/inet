@@ -18,7 +18,7 @@ class SimulationTestTaskResult(TestTaskResult):
         self.simulation_task_result = simulation_task_result
 
     def get_error_message(self, **kwargs):
-        return (self.simulation_task_result.get_error_message(**kwargs) if self.simulation_task_result else "") + \
+        return (self.simulation_task_result.get_error_message(**kwargs) + " " if self.simulation_task_result else "") + \
                super().get_error_message(**kwargs)
 
     def get_subprocess_result(self):
@@ -65,10 +65,12 @@ class SimulationTestTask(TestTask):
         if simulation_task_result.result == "DONE":
             return self.check_simulation_task_result(simulation_task_result=simulation_task_result, **kwargs)
         else:
-            return self.task_result_class(task=self, result=simulation_task_result.result, reason=simulation_task_result.reason)
+            return self.task_result_class(task=self, result=simulation_task_result.result, expected_result=simulation_task_result.expected_result, expected=simulation_task_result.expected, reason=simulation_task_result.reason)
 
     def check_simulation_task_result(self, simulation_task_result, **kwargs):
-        return self.task_result_class(task=self, simulation_task_result=simulation_task_result, bool_result=simulation_task_result.subprocess_result.returncode == 0, expected_result="PASS")
+        result = "PASS" if simulation_task_result.result == "DONE" else simulation_task_result.result
+        expected_result = "PASS" if simulation_task_result.expected_result == "DONE" else simulation_task_result.expected_result
+        return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result=result, expected_result=expected_result, reason=simulation_task_result.reason)
 
 class MultipleSimulationTestTasks(MultipleTestTasks):
     def __init__(self, **kwargs):

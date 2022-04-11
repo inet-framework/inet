@@ -38,6 +38,13 @@ class SimulationTaskResult(TaskResult):
             if self.error_message is None:
                 match = re.search("<!> Error: (.*)", stderr)
                 self.error_message = match.group(1).strip() if match else None
+            if self.error_message:
+                if re.search("The simulation attempted to prompt for user input", self.error_message):
+                    self.result = "SKIP"
+                    self.color = COLOR_CYAN
+                    self.expected_result = "SKIP"
+                    self.expected = True
+                    self.reason = "Interactive simulation"
         else:
             self.last_event_number = None
             self.last_simulation_time = None
@@ -85,6 +92,9 @@ class SimulationTask(Task):
             self.interactive = match is not None
         return self.interactive
 
+    def get_expected_result(self):
+        return self.simulation_config.expected_result
+
     def get_parameters_string(self, **kwargs):
         working_directory = self.simulation_config.working_directory
         ini_file = self.simulation_config.ini_file
@@ -116,13 +126,14 @@ class SimulationTask(Task):
         env = os.environ.copy()
         env["INET_ROOT"] = simulation_project.get_full_path(".")
         logger.debug(args)
+        expected_result = self.get_expected_result()
         subprocess_result = simulation_runner.run(self, args)
         if subprocess_result.returncode == -signal.SIGINT.value:
-            return self.task_result_class(task=self, subprocess_result=subprocess_result, result="CANCEL", reason="Cancel by user")
+            return self.task_result_class(task=self, subprocess_result=subprocess_result, result="CANCEL", expected_result=expected_result, reason="Cancel by user")
         elif subprocess_result.returncode == 0:
-            return self.task_result_class(task=self, subprocess_result=subprocess_result, result="DONE")
+            return self.task_result_class(task=self, subprocess_result=subprocess_result, result="DONE", expected_result=expected_result)
         else:
-            return self.task_result_class(task=self, subprocess_result=subprocess_result, result="ERROR", reason="Non-zero exit code")
+            return self.task_result_class(task=self, subprocess_result=subprocess_result, result="ERROR", expected_result=expected_result, reason="Non-zero exit code")
 
 class MultipleSimulationTasks(MultipleTasks):
     def __init__(self, simulation_project=default_project, name="simulation", **kwargs):
@@ -161,11 +172,13 @@ def get_simulation_tasks(simulation_project=None, simulation_configs=None, run=N
     for simulation_config in simulation_configs:
         if run is not None:
             simulation_run_sim_time_limit = sim_time_limit(simulation_config, run) if callable(sim_time_limit) else sim_time_limit
-            simulation_tasks.append(simulation_task_class(simulation_config=simulation_config, run=run, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs))
+            simulation_task = simulation_task_class(simulation_config=simulation_config, run=run, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs)
+            simulation_tasks.append(simulation_task)
         else:
             for generated_run in range(0, simulation_config.num_runs):
                 simulation_run_sim_time_limit = sim_time_limit(simulation_config, generated_run) if callable(sim_time_limit) else sim_time_limit
-                simulation_tasks.append(simulation_task_class(simulation_config=simulation_config, run=generated_run, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs))
+                simulation_task = simulation_task_class(simulation_config=simulation_config, run=generated_run, sim_time_limit=simulation_run_sim_time_limit, cpu_time_limit=cpu_time_limit, **kwargs)
+                simulation_tasks.append(simulation_task)
     return multiple_simulation_tasks_class(tasks=simulation_tasks, simulation_project=simulation_project, concurrent=concurrent, **kwargs)
 
 def run_simulations(**kwargs):

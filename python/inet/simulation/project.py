@@ -6,7 +6,7 @@ from inet.common import *
 logger = logging.getLogger(__name__)
 
 class SimulationProject:
-    def __init__(self, project_directory, executable=None, libraries=None, ned_folders=["src"], ini_file_folders=["."], image_folders=["image"]):
+    def __init__(self, project_directory, executable=None, libraries=[], ned_folders=["."], ini_file_folders=["."], image_folders=["."]):
         self.project_directory = project_directory
         self.executable = executable
         self.libraries = libraries
@@ -23,7 +23,7 @@ class SimulationProject:
 
     def get_executable(self, mode="debug"):
         if mode == "release":
-            return self.get_full_path(self.executable + "_release")
+            return self.get_full_path(self.executable + ("_release" if self.executable == "opp_run" else ""))
         elif mode == "debug":
             return self.get_full_path(self.executable + "_dbg")
         elif mode == "sanitize":
