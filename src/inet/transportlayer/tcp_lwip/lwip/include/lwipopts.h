@@ -37,6 +37,11 @@
 #define MEMP_MEM_MALLOC                 1
 
 /**
+ * MEM_ALIGNMENT: alignment of the CPU
+ */
+#define MEM_ALIGNMENT                   4
+
+/**
  * LWIP_ARP==1: Enable ARP functionality.
  */
 #define LWIP_ARP                        0
