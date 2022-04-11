@@ -114,7 +114,7 @@ void L3NetworkConfiguratorBase::extractTopology(Topology& topology)
                         InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, isBridgeNode(node) ? nullptr : linkInfo, networkInterface);
                         linkInfo->interfaceInfos.push_back(interfaceInfo);
                         // visit neighbors (and potentially the whole LAN, recursively)
-                        if (isWirelessInterface(networkInterface)) {
+                        if (networkInterface->isWireless()) {
                             std::vector<Node *> empty;
                             auto wirelessId = getWirelessId(networkInterface);
                             extractWirelessNeighbors(topology, wirelessId.c_str(), linkInfo, interfacesSeen, empty);
@@ -152,7 +152,7 @@ void L3NetworkConfiguratorBase::extractTopology(Topology& topology)
     for (auto& entry : topology.interfaceInfos) {
         InterfaceInfo *interfaceInfo = entry.second;
         NetworkInterface *networkInterface = interfaceInfo->networkInterface;
-        if (!networkInterface->isLoopback() && isWirelessInterface(networkInterface)) {
+        if (!networkInterface->isLoopback() && networkInterface->isWireless()) {
             auto wirelessId = getWirelessId(networkInterface);
             wirelessIdToInterfaceInfosMap[wirelessId].push_back(interfaceInfo);
         }
@@ -213,7 +213,7 @@ void L3NetworkConfiguratorBase::extractWirelessNeighbors(Topology& topology, con
         if (interfaceTable) {
             for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
                 NetworkInterface *networkInterface = interfaceTable->getInterface(j);
-                if (!networkInterface->isLoopback() && !containsKey(interfacesSeen, networkInterface->getId()) && isWirelessInterface(networkInterface)) {
+                if (!networkInterface->isLoopback() && !containsKey(interfacesSeen, networkInterface->getId()) && networkInterface->isWireless()) {
                     if (getWirelessId(networkInterface) == wirelessId) {
                         if (!isBridgeNode(node)) {
                             InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, linkInfo, networkInterface);
@@ -240,7 +240,7 @@ void L3NetworkConfiguratorBase::extractDeviceNeighbors(Topology& topology, Node 
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
             NetworkInterface *networkInterface = interfaceTable->getInterface(i);
             if (!networkInterface->isLoopback() && !containsKey(interfacesSeen, networkInterface->getId())) {
-                if (isWirelessInterface(networkInterface))
+                if (networkInterface->isWireless())
                     extractWirelessNeighbors(topology, getWirelessId(networkInterface).c_str(), linkInfo, interfacesSeen, deviceNodesVisited);
                 else {
                     Topology::Link *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
@@ -264,11 +264,6 @@ void L3NetworkConfiguratorBase::extractDeviceNeighbors(Topology& topology, Node 
 bool L3NetworkConfiguratorBase::isBridgeNode(Node *node)
 {
     return !node->routingTable || !node->interfaceTable;
-}
-
-bool L3NetworkConfiguratorBase::isWirelessInterface(NetworkInterface *networkInterface)
-{
-    return !strncmp(networkInterface->getInterfaceName(), "wlan", 4);
 }
 
 Topology::Link *L3NetworkConfiguratorBase::findLinkOut(Node *node, int gateId)
@@ -318,8 +313,8 @@ double L3NetworkConfiguratorBase::computeNodeWeight(Node *node, const char *metr
 
 double L3NetworkConfiguratorBase::computeLinkWeight(Link *link, const char *metric, cXMLElement *parameters)
 {
-    if ((link->sourceInterfaceInfo && isWirelessInterface(link->sourceInterfaceInfo->networkInterface)) ||
-        (link->destinationInterfaceInfo && isWirelessInterface(link->destinationInterfaceInfo->networkInterface)))
+    if ((link->sourceInterfaceInfo && link->sourceInterfaceInfo->networkInterface->isWireless()) ||
+        (link->destinationInterfaceInfo && link->destinationInterfaceInfo->networkInterface->isWireless()))
         return computeWirelessLinkWeight(link, metric, parameters);
     else
         return computeWiredLinkWeight(link, metric, parameters);
