@@ -164,7 +164,7 @@ void NextHopRoutingTable::configureRouterId()
 
 void NextHopRoutingTable::configureInterface(NetworkInterface *ie)
 {
-    int metric = (int)(ceil(2e9 / ie->getDatarate())); // use OSPF cost as default
+    int metric = ie->getDatarate() != 0 ? (int)(ceil(2e9 / ie->getDatarate())) : 1; // use OSPF cost as default
     int interfaceModuleId = ie->getId();
     // mac
     auto d = ie->addProtocolData<NextHopInterfaceData>();
