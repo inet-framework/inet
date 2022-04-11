@@ -852,7 +852,7 @@ void Ipv4NetworkConfigurator::dumpConfig(Topology& topology)
         bool hasWireless = false;
         for (auto& element : linkInfo->interfaceInfos) {
             InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(element);
-            if (isWirelessInterface(interfaceInfo->networkInterface))
+            if (interfaceInfo->networkInterface->isWireless())
                 hasWireless = true;
         }
         if (hasWireless) {
@@ -863,7 +863,7 @@ void Ipv4NetworkConfigurator::dumpConfig(Topology& topology)
                 if (!first)
                     stream << " ";
                 InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(element);
-                if (isWirelessInterface(interfaceInfo->networkInterface)) {
+                if (interfaceInfo->networkInterface->isWireless()) {
                     stream << interfaceInfo->node->module->getFullPath() << "%" << interfaceInfo->networkInterface->getInterfaceName();
                     first = false;
                 }
