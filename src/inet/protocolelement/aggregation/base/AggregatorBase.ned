@@ -19,7 +19,7 @@ module AggregatorBase extends PacketPusherBase
         @display("i=block/join");
         @class(AggregatorBase);
     submodules:
-        aggregatorPolicy: <> like IAggregatorPolicy if typename != "" {
+        aggregatorPolicy: <default("LengthBasedAggregatorPolicy")> like IAggregatorPolicy if typename != "" {
             parameters:
                 @display("p=100,100");
         }
