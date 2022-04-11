@@ -72,12 +72,10 @@ void Dsdv::start()
     int num_80211 = 0;
     NetworkInterface *ie;
     NetworkInterface *i_face;
-    const char *name;
     broadcastDelay = &par("broadcastDelay");
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         ie = ift->getInterface(i);
-        name = ie->getInterfaceName();
-        if (strstr(name, "wlan") != nullptr) {
+        if (ie->isWireless()) {
             i_face = ie;
             num_80211++;
             interfaceId = i;
@@ -94,8 +92,7 @@ void Dsdv::start()
         // clean the route table wlan interface entry
         for (int i = rt->getNumRoutes() - 1; i >= 0; i--) {
             entry = rt->getRoute(i);
-            const NetworkInterface *ie = entry->getInterface();
-            if (strstr(ie->getInterfaceName(), "wlan") != nullptr)
+            if (entry->getInterface()->isWireless())
                 rt->deleteRoute(entry);
         }
     }
