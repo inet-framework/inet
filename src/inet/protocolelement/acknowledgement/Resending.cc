@@ -37,6 +37,7 @@ void Resending::handleMessage(cMessage *message)
 
 void Resending::handlePushPacketProcessed(Packet *p, cGate *gate, bool successful)
 {
+    Enter_Method("handlePushPacketProcessed");
     if (successful || retry == numRetries) {
         if (producer != nullptr)
             producer->handlePushPacketProcessed(packet, inputGate->getPathStartGate(), successful);
