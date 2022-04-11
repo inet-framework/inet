@@ -35,7 +35,7 @@ simple EthernetEncapsulation like IEthernetLayer
     parameters:
         bool registerProtocol = default(false);     //FIXME //KLUDGE should redesign place of EthernetEncapsulation and LLC modules
         string interfaceTableModule;   // The path to the InterfaceTable module
-        string fcsMode @enum("declared","computed");
+        string fcsMode @enum("declared","computed") = default("declared");
         @lifecycleSupport;
         double stopOperationExtraTime @unit(s) = default(-1s);    // extra time after lifecycle stop operation finished
         double stopOperationTimeout @unit(s) = default(2s);    // timeout value for lifecycle stop operation
