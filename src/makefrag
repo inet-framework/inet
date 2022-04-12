@@ -51,10 +51,10 @@ ifeq ($(WITH_VOIPSTREAM), enabled)
       LIBS += $(shell $(PKGCFG) --libs libavcodec libavformat libavutil)
       CFLAGS += $(shell $(PKGCFG) --cflags libavcodec libavformat libavutil) -DHAVE_FFMPEG
     endif
-    HAVE_FFMPEG_AVRESAMPLE := $(shell $(PKGCFG) --exists libavresample && echo yes || echo no)
-    ifeq ($(HAVE_FFMPEG_AVRESAMPLE), yes)
-      LIBS += $(shell $(PKGCFG) --libs libavresample)
-      CFLAGS += $(shell $(PKGCFG) --cflags libavresample) -DHAVE_FFMPEG_AVRESAMPLE
+    HAVE_FFMPEG_SWRESAMPLE := $(shell $(PKGCFG) --exists libswresample && echo yes || echo no)
+    ifeq ($(HAVE_FFMPEG_SWRESAMPLE), yes)
+      LIBS += $(shell $(PKGCFG) --libs libswresample)
+      CFLAGS += $(shell $(PKGCFG) --cflags libswresample) -DHAVE_FFMPEG_SWRESAMPLE
     endif
   endif
 endif
