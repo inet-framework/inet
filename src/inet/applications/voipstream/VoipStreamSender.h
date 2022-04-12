@@ -54,6 +54,7 @@ class INET_API VoipStreamSender : public cSimpleModule, public LifecycleUnsuppor
     virtual Packet *generatePacket();
     virtual bool checkSilence(AVSampleFormat sampleFormat, void *_buf, int samples);
     virtual void readFrame();
+    virtual void resampleFrame(const uint8_t **in_data, int in_nb_samples);
 
   protected:
     class Buffer {

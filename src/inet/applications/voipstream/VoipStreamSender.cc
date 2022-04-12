@@ -418,7 +418,7 @@ void VoipStreamSender::Buffer::align()
 void VoipStreamSender::readFrame()
 {
     short int inBytesPerSample = av_get_bytes_per_sample(pCodecCtx->sample_fmt);
-    short int outBytesPerSample = av_get_bytes_per_sample(pEncoderCtx->sample_fmt);
+
     if (sampleBuffer.length() >= samplesPerPacket * inBytesPerSample)
         return;
 
@@ -466,34 +466,9 @@ void VoipStreamSender::readFrame()
                     sampleBuffer.notifyWrote(dataSize);
                 }
                 else {
-                    uint8_t *tmpSamples = new uint8_t[Buffer::BUFSIZE];
-
-                    uint8_t **in_data = frame->extended_data;
+                    const uint8_t **in_data = (const uint8_t **)(frame->extended_data);
                     int in_nb_samples = frame->nb_samples;
-
-                    uint8_t *out_data[1] = {
-                        nullptr
-                    };
-                    int maxOutSamples = sampleBuffer.availableSpace() / outBytesPerSample;
-                    int out_linesize;
-                    int ret;
-                    ret = av_samples_fill_arrays(out_data, &out_linesize, tmpSamples, 1, maxOutSamples, pEncoderCtx->sample_fmt, 0);
-                    if (ret < 0)
-                        throw cRuntimeError("failed out_data fill arrays");
-
-                    int resampled = swr_convert(pReSampleCtx, out_data, decoded, (const uint8_t **)in_data, in_nb_samples);
-                    if (resampled <= 0 && swr_get_delay(pReSampleCtx, 0) == 0) {
-                        throw cRuntimeError("swr_convert() returns error");
-                    }
-                    if (swr_get_delay(pReSampleCtx, 0) > 0)
-                         throw cRuntimeError("%ld delay samples not converted\n", swr_get_delay(pReSampleCtx, 0));
-//                    if (swr_available(pReSampleCtx) > 0)
-//                         throw cRuntimeError("%d samples available for output\n", swr_available(pReSampleCtx));
-                    if (resampled > 0) {
-                        memcpy(sampleBuffer.writePtr(), out_data[0], resampled * outBytesPerSample);
-                        sampleBuffer.notifyWrote(resampled * outBytesPerSample);
-                    }
-                    delete[] tmpSamples;
+                    resampleFrame(in_data, in_nb_samples);
                 }
             }
             av_frame_free(&frame);
@@ -501,6 +476,34 @@ void VoipStreamSender::readFrame()
         }
         av_free_packet(&packet);
     }
+}
+
+void VoipStreamSender::resampleFrame(const uint8_t **in_data, int in_nb_samples)
+{
+    short int outBytesPerSample = av_get_bytes_per_sample(pEncoderCtx->sample_fmt);
+    uint8_t *tmpSamples = new uint8_t[Buffer::BUFSIZE];
+    uint8_t *out_data[1] = { nullptr };
+    int maxOutSamples = sampleBuffer.availableSpace() / outBytesPerSample;
+    int out_linesize;
+    int ret;
+
+    ret = av_samples_fill_arrays(out_data, &out_linesize, tmpSamples, 1, maxOutSamples, pEncoderCtx->sample_fmt, 0);
+    if (ret < 0)
+        throw cRuntimeError("failed out_data fill arrays");
+
+    int resampled = swr_convert(pReSampleCtx, out_data, out_linesize, in_data, in_nb_samples);
+    if (resampled <= 0 && swr_get_delay(pReSampleCtx, 0) == 0) {
+        throw cRuntimeError("swr_convert() returns error");
+    }
+    if (swr_get_delay(pReSampleCtx, 0) > 0)
+        throw cRuntimeError("%ld delay samples not converted\n", swr_get_delay(pReSampleCtx, 0));
+//    if (swr_available(pReSampleCtx) > 0)
+//        throw cRuntimeError("%d samples available for output\n", swr_available(pReSampleCtx));
+    if (resampled > 0) {
+        memcpy(sampleBuffer.writePtr(), out_data[0], resampled * outBytesPerSample);
+        sampleBuffer.notifyWrote(resampled * outBytesPerSample);
+    }
+    delete[] tmpSamples;
 }
 
 } // namespace inet
