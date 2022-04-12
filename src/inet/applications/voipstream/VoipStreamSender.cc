@@ -91,7 +91,7 @@ void VoipStreamSender::initialize(int stage)
         EV_DEBUG << "libavcodec: " << LIBAVCODEC_VERSION_MAJOR << "." << LIBAVCODEC_VERSION_MINOR << "." << LIBAVCODEC_VERSION_MICRO << endl;
         EV_DEBUG << "libavformat: " << LIBAVFORMAT_VERSION_MAJOR << "." << LIBAVFORMAT_VERSION_MINOR << "." << LIBAVFORMAT_VERSION_MICRO << endl;
         EV_DEBUG << "libavutil: " << LIBAVUTIL_VERSION_MAJOR << "." << LIBAVUTIL_VERSION_MINOR << "." << LIBAVUTIL_VERSION_MICRO << endl;
-        EV_DEBUG << "libavresample: " << LIBAVRESAMPLE_VERSION_MAJOR << "." << LIBAVRESAMPLE_VERSION_MINOR << "." << LIBAVRESAMPLE_VERSION_MICRO << endl;
+        EV_DEBUG << "libswresample: " << LIBSWRESAMPLE_VERSION_MAJOR << "." << LIBSWRESAMPLE_VERSION_MINOR << "." << LIBSWRESAMPLE_VERSION_MICRO << endl;
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *node = findContainingNode(this);
@@ -186,8 +186,8 @@ void VoipStreamSender::finish()
         avcodec_close(pCodecCtx);
     }
     if (pReSampleCtx) {
-        avresample_close(pReSampleCtx);
-        avresample_free(&pReSampleCtx);
+        swr_close(pReSampleCtx);
+        swr_free(&pReSampleCtx);
         pReSampleCtx = nullptr;
     }
 
@@ -257,7 +257,7 @@ void VoipStreamSender::openSoundFile(const char *name)
         pReSampleCtx = nullptr;
     }
     else {
-        pReSampleCtx = avresample_alloc_context();
+        pReSampleCtx = swr_alloc();
         if (!pReSampleCtx)
             throw cRuntimeError("error in av_audio_resample_init()");
 
@@ -277,7 +277,7 @@ void VoipStreamSender::openSoundFile(const char *name)
         if (av_opt_set_int(pReSampleCtx, "internal_sample_fmt", AV_SAMPLE_FMT_FLTP, 0))
             throw cRuntimeError("error in option setting of 'internal_sample_fmt'");
 
-        ret = avresample_open(pReSampleCtx);
+        ret = swr_init(pReSampleCtx);
         if (ret < 0)
             throw cRuntimeError("Error opening context");
     }
@@ -469,10 +469,9 @@ void VoipStreamSender::readFrame()
                     uint8_t *tmpSamples = new uint8_t[Buffer::BUFSIZE];
 
                     uint8_t **in_data = frame->extended_data;
-                    int in_linesize = frame->linesize[0];
                     int in_nb_samples = frame->nb_samples;
 
-                    uint8_t *out_data[AVRESAMPLE_MAX_CHANNELS] = {
+                    uint8_t *out_data[1] = {
                         nullptr
                     };
                     int maxOutSamples = sampleBuffer.availableSpace() / outBytesPerSample;
@@ -482,17 +481,17 @@ void VoipStreamSender::readFrame()
                     if (ret < 0)
                         throw cRuntimeError("failed out_data fill arrays");
 
-                    decoded = avresample_convert(pReSampleCtx, out_data, out_linesize, decoded, in_data, in_linesize, in_nb_samples);
-                    if (decoded <= 0 && avresample_get_delay(pReSampleCtx) == 0) {
-                        throw cRuntimeError("audio_resample() returns error");
+                    int resampled = swr_convert(pReSampleCtx, out_data, decoded, (const uint8_t **)in_data, in_nb_samples);
+                    if (resampled <= 0 && swr_get_delay(pReSampleCtx, 0) == 0) {
+                        throw cRuntimeError("swr_convert() returns error");
                     }
-//                    if (avresample_get_delay(pReSampleCtx) > 0)
-//                         throw cRuntimeError("%d delay samples not converted\n", avresample_get_delay(pReSampleCtx));
-//                    if (avresample_available(pReSampleCtx) > 0)
-//                         throw cRuntimeError("%d samples available for output\n", avresample_available(pReSampleCtx));
-                    if (decoded > 0) {
-                        memcpy(sampleBuffer.writePtr(), out_data[0], decoded * outBytesPerSample);
-                        sampleBuffer.notifyWrote(decoded * outBytesPerSample);
+                    if (swr_get_delay(pReSampleCtx, 0) > 0)
+                         throw cRuntimeError("%ld delay samples not converted\n", swr_get_delay(pReSampleCtx, 0));
+//                    if (swr_available(pReSampleCtx) > 0)
+//                         throw cRuntimeError("%d samples available for output\n", swr_available(pReSampleCtx));
+                    if (resampled > 0) {
+                        memcpy(sampleBuffer.writePtr(), out_data[0], resampled * outBytesPerSample);
+                        sampleBuffer.notifyWrote(resampled * outBytesPerSample);
                     }
                     delete[] tmpSamples;
                 }
