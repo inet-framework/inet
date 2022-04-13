@@ -392,10 +392,10 @@ void NetPerfMeter::handleMessage(cMessage *msg)
                 auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
                 auto dataIndication = tags.getTag<SctpCommandReq>();
 //                SctpInfoReq* command = new SctpInfoReq("SendCommand");
-                SctpInfoReq *command = new SctpInfoReq();
-                command->setSocketId(dataIndication->getSocketId());
-                command->setSid(dataIndication->getSid());
-                command->setNumMsgs(dataIndication->getNumMsgs());
+//                SctpInfoReq *command = new SctpInfoReq();
+//                command->setSocketId(dataIndication->getSocketId());
+//                command->setSid(dataIndication->getSid());
+//                command->setNumMsgs(dataIndication->getNumMsgs());
                 Packet *cmsg = new Packet("ReceiveRequest", SCTP_C_RECEIVE);
                 auto cmd = cmsg->addTag<SctpSendReq>();
                 cmd->setSocketId(dataIndication->getSocketId());
