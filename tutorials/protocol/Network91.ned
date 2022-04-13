@@ -176,14 +176,13 @@ module DataService
 module Interface extends NetworkInterface
 {
     parameters:
-        isWireless = default(false);
         string interfaceTableModule;
         @class(NetworkInterface);
         @display("i=block/ifcard");
     gates:
         input upperLayerIn @loose;
         output upperLayerOut @loose;
-        inout g;
+        inout phys;
     submodules:
         sendToMacAddress: SendToMacAddress {
             @display("p=150,100");
@@ -229,8 +228,8 @@ module Interface extends NetworkInterface
         m1.out --> sendWithProtocol.in;
         sendWithProtocol.out --> fcsInserter.in;
         fcsInserter.out --> transmitter.in;
-        transmitter.out --> { @display("m=s"); } --> g$o;
-        g$i --> { @display("m=s"); } --> fcsChecker.in;
+        transmitter.out --> { @display("m=s"); } --> phys$o;
+        phys$i --> { @display("m=s"); } --> fcsChecker.in;
         fcsChecker.out --> receiveWithProtocol.in;
         receiveWithProtocol.out --> d1.in++;
         d1.out++ --> receiveWithAcknowledge.in;
@@ -264,7 +263,7 @@ module Node
         d1: MessageDispatcher {
             @display("p=450,400");
         }
-        interface[sizeof(g)]: Interface {
+        interface[sizeof(phys)]: Interface {
             @display("p=450,500,row,150");
         }
     connections:
@@ -277,7 +276,7 @@ module Node
         for i=0..sizeof(interface)-1 {
             interface[i].upperLayerOut --> d1.in++;
             d1.out++ --> interface[i].upperLayerIn;
-            g[i] <--> { @display("m=s"); } <--> interface[i].g;
+            g[i] <--> { @display("m=s"); } <--> interface[i].phys;
         }
 }
 

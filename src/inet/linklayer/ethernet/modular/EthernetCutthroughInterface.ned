@@ -18,7 +18,6 @@ import inet.physicallayer.wired.ethernet.IEthernetPhyLayer;
 module EthernetCutthroughInterface extends NetworkInterface like IEthernetInterface
 {
     parameters:
-        isWireless = false;
         string protocol = default("ethernetmac");
         bool broadcast = default(true);
         bool multicast = default(true);

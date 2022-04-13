@@ -21,7 +21,6 @@ import inet.protocolelement.trafficconditioner.ITrafficConditionerLayer;
 module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
 {
     parameters:
-        isWireless = false;
         string protocol = default("ethernetmac");
         bool broadcast = default(true);
         bool multicast = default(true);

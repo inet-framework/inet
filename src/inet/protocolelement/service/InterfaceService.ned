@@ -24,7 +24,6 @@ import inet.queueing.common.PacketMultiplexer;
 module InterfaceService extends NetworkInterface
 {
     parameters:
-        isWireless = default(false);
         string interfaceTableModule;
         string protocol;
         @class(inet::NetworkInterface);
@@ -32,7 +31,7 @@ module InterfaceService extends NetworkInterface
     gates:
         input upperLayerIn @loose;
         output upperLayerOut @loose;
-        inout g;
+        inout phys;
     submodules:
         sendToMacAddress: SendToMacAddress {
             @display("p=300,100");
@@ -78,8 +77,9 @@ module InterfaceService extends NetworkInterface
         m1.out --> sendWithProtocol.in;
         sendWithProtocol.out --> crcInserter.in;
         crcInserter.out --> transmitter.in;
-        transmitter.out --> { @display("m=s"); } --> g$o;
-        g$i --> { @display("m=s"); } --> crcChecker.in;
+        transmitter.out --> { @display("m=s"); } --> phys$o;
+
+        phys$i --> { @display("m=s"); } --> crcChecker.in;
         crcChecker.out --> receiveWithProtocol.in;
         receiveWithProtocol.out --> d1.in++;
         d1.out++ --> receiveWithAcknowledge.in;

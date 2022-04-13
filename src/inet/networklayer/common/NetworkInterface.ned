@@ -18,7 +18,6 @@ module NetworkInterface
     parameters:
         string displayStringTextFormat = default("%a (%i)\n%m");
         bool recordPcap = default(false);
-        bool isWireless;
         int numPcapRecorders = default(recordPcap ? 1 : 0);
         pcapRecorder[*].pcapFile = default("results/" + expand("${configname}-") + fullPath() + ".pcap");
         **.clockModule = default(exists(clock) ? absPath(".clock") : "");

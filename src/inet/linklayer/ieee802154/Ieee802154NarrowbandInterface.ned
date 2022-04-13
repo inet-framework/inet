@@ -20,7 +20,6 @@ module Ieee802154NarrowbandInterface extends NetworkInterface like IWirelessInte
 {
     parameters:
         @class(NetworkInterface);
-        isWireless = true;
         string interfaceTableModule;
         string energySourceModule = default("");
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));

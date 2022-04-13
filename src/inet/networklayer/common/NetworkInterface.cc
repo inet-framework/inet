@@ -104,22 +104,24 @@ void NetworkInterface::clearProtocolDataSet()
 void NetworkInterface::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        wireless = par("isWireless");
         upperLayerIn = gate("upperLayerIn");
         upperLayerOut = gate("upperLayerOut");
         subscribe(POST_MODEL_CHANGE, this);
-        if (hasGate("phys$i")) {
-            rxIn = gate("phys$i")->getPathEndGate();
-            rxTransmissionChannel = rxIn->findIncomingTransmissionChannel();
-            if (rxTransmissionChannel != nullptr)
-                rxTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
-        }
-        if (hasGate("phys$o")) {
-            txOut = gate("phys$o")->getPathStartGate();
-            txTransmissionChannel = txOut->findTransmissionChannel();
-            if (txTransmissionChannel != nullptr)
-                txTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
-        }
+        rxIn = hasGate("phys$i") ? gate("phys$i")->getPathEndGate() : nullptr;
+        rxTransmissionChannel = rxIn ? rxIn->findIncomingTransmissionChannel() : nullptr;
+        if (rxTransmissionChannel != nullptr)
+            rxTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
+
+        txOut = hasGate("phys$o") ? gate("phys$o")->getPathStartGate() : nullptr;
+        txTransmissionChannel = txOut ? txOut->findTransmissionChannel() : nullptr;
+        if (txTransmissionChannel != nullptr)
+            txTransmissionChannel->subscribe(POST_MODEL_CHANGE, this);
+
+        if (hasPar("isWireless"))
+            wireless = par("isWireless");
+        else
+            wireless = rxIn == nullptr && txOut == nullptr;
+
         upperLayerInConsumer = findConnectedModule<IPassivePacketSink>(upperLayerIn, 1);
         upperLayerOutConsumer = findConnectedModule<IPassivePacketSink>(upperLayerOut, 1);
         interfaceTable.reference(this, "interfaceTableModule", false);
@@ -135,6 +137,7 @@ void NetworkInterface::initialize(int stage)
         WATCH(loopback);
         WATCH(datarate);
         WATCH(macAddr);
+        WATCH(wireless);
         cModule *node = findContainingNode(this);
         NodeStatus *nodeStatus = node ? check_and_cast_nullable<NodeStatus *>(node->getSubmodule("status")) : nullptr;
         if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP) {

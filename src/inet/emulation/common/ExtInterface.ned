@@ -16,7 +16,7 @@ import inet.networklayer.common.NetworkInterface;
 module ExtInterface extends NetworkInterface like IExternalInterface
 {
     parameters:
-        isWireless = default(false);
+        bool isWireless = default(false);
         string interfaceTableModule;
         string device;
         string namespace = default("");

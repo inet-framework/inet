@@ -44,6 +44,7 @@ void VirtualTunnel::initialize(int stage)
         networkInterface->setBroadcast(realNetworkInterface->isBroadcast());
         networkInterface->setMulticast(realNetworkInterface->isMulticast());
         networkInterface->setPointToPoint(realNetworkInterface->isPointToPoint());
+        networkInterface->setWireless(realNetworkInterface->isWireless());
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         // KLUDGE depends on other interface

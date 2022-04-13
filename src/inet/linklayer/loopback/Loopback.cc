@@ -47,6 +47,7 @@ void Loopback::configureNetworkInterface()
     // capabilities
     networkInterface->setMtu(par("mtu"));
     networkInterface->setLoopback(true);
+    networkInterface->setWireless(false);
 }
 
 void Loopback::handleUpperPacket(Packet *packet)
