@@ -26,7 +26,7 @@ enum PacketDropReason
     NO_PROTOCOL_FOUND         = 13;
     NO_PORT_FOUND             = 14;
     DUPLICATE_DETECTED        = 15;
-    OTHER_PACKET_DROP         = 99;
+    OTHER_PACKET_DROP         = -1;
 }
 
 class PacketDropDetails extends cObject
