@@ -5,6 +5,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
+#include <cstdarg>
+
 #include "inet/applications/voipstream/VoipStreamSender.h"
 
 #include "inet/common/ModuleAccess.h"
@@ -130,7 +132,7 @@ void VoipStreamSender::initialize(int stage)
         // initialize avcodec library
         av_register_all();
         avcodec_register_all();
-
+        av_log_set_callback(&inet_av_log);
         av_init_packet(&packet);
 
         openSoundFile(soundFile);
@@ -315,12 +317,14 @@ Packet *VoipStreamSender::generatePacket()
     int ret = avcodec_fill_audio_frame(frame, /*channels*/ 1, pEncoderCtx->sample_fmt, (const uint8_t *)(sampleBuffer.readPtr()), inBytes, 1);
     if (ret < 0)
         throw cRuntimeError("Error in avcodec_fill_audio_frame(): err=%d", ret);
-
-    // The bitsPerOutSample is not 0 when codec is PCM.
-    int gotPacket;
-    ret = avcodec_encode_audio2(pEncoderCtx, &opacket, frame, &gotPacket);
-    if (ret < 0 || gotPacket != 1)
-        throw cRuntimeError("avcodec_encode_audio() error: %d gotPacket: %d", ret, gotPacket);
+    frame->channels = pEncoderCtx->channels;
+    frame->format = pEncoderCtx->sample_fmt;
+    ret = avcodec_send_frame(pEncoderCtx, frame);
+    if (ret < 0)
+        throw cRuntimeError("avcodec_send_frame() error: %d", ret);
+    ret = avcodec_receive_packet(pEncoderCtx, &opacket);
+    if (ret < 0)
+        throw cRuntimeError("avcodec_receive_packet() error: %d", ret);
 
     if (outFile.isOpen())
         outFile.write(sampleBuffer.readPtr(), inBytes);

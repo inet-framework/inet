@@ -20,6 +20,8 @@ extern "C" {
 
 namespace inet {
 
+void inet_av_log(void *avcontext, int level, const char *format, va_list va);
+
 /**
  * Records audio into a file.
  */

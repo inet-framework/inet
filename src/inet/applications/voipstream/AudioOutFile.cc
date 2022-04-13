@@ -7,9 +7,11 @@
 
 // for INT64_C(x), UINT64_C(x):
 #define __STDC_CONSTANT_MACROS
-#include "inet/applications/voipstream/AudioOutFile.h"
 
+#include <cstdarg>
 #include <stdint.h>
+
+#include "inet/applications/voipstream/AudioOutFile.h"
 
 #include "inet/common/INETEndians.h"
 
@@ -20,6 +22,15 @@ namespace inet {
 #elif defined(__GNUC__)
 #  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
+
+static void *getThisPtr() { return cSimulation::getActiveSimulation()->getContextModule(); }
+void inet_av_log(void *avcontext, int level, const char *format, va_list va)
+{
+    char buffer[1024];
+    int l = vsnprintf(buffer, 1023, format, va);
+    *(buffer + l) = 0;
+    EV_DEBUG << "av_log: " << buffer;
+}
 
 void AudioOutFile::addAudioStream(enum AVCodecID codec_id, int sampleRate, short int sampleBits)
 {
@@ -122,10 +133,14 @@ void AudioOutFile::write(void *decBuf, int pktBytes)
         throw cRuntimeError("Error in avcodec_fill_audio_frame(): err=%d", ret);
 
     // The bitsPerOutSample is not 0 when codec is PCM.
-    int gotPacket;
-    ret = avcodec_encode_audio2(c, &pkt, frame, &gotPacket);
-    if (ret < 0 || gotPacket != 1)
-        throw cRuntimeError("avcodec_encode_audio() error: %d gotPacket: %d", ret, gotPacket);
+    frame->channels = c->channels;
+    frame->format = c->sample_fmt;
+    ret = avcodec_send_frame(c, frame);
+    if (ret < 0)
+        throw cRuntimeError("avcodec_send_frame() error: %d", ret);
+    ret = avcodec_receive_packet(c, &pkt);
+    if (ret < 0)
+        throw cRuntimeError("avcodec_receive_packet() error: %d", ret);
 
     pkt.dts = 0; // HACK for libav 11
 
