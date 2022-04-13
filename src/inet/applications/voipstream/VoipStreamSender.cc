@@ -492,9 +492,8 @@ void VoipStreamSender::resampleFrame(const uint8_t **in_data, int in_nb_samples)
         throw cRuntimeError("failed out_data fill arrays");
 
     int resampled = swr_convert(pReSampleCtx, out_data, out_linesize, in_data, in_nb_samples);
-    if (resampled <= 0 && swr_get_delay(pReSampleCtx, 0) == 0) {
-        throw cRuntimeError("swr_convert() returns error");
-    }
+    if (resampled < 0)
+        throw cRuntimeError("swr_convert() returns error %d", resampled);
     if (swr_get_delay(pReSampleCtx, 0) > 0)
         throw cRuntimeError("%ld delay samples not converted\n", swr_get_delay(pReSampleCtx, 0));
 //    if (swr_available(pReSampleCtx) > 0)
