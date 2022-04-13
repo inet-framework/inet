@@ -39,7 +39,8 @@ TcpWestwood::TcpWestwood()
 
 void TcpWestwood::recalculateSlowStartThreshold()
 {
-    state->ssthresh = (uint32_t)((state->w_bwe * SIMTIME_DBL(state->w_RTTmin)) / (state->w_a));
+    double x = (state->w_bwe * SIMTIME_DBL(state->w_RTTmin)) / (state->w_a);
+    state->ssthresh = x <= UINT32_MAX ? (uint32_t)(x) : UINT32_MAX;
 
     conn->emit(ssthreshSignal, state->ssthresh);
 
