@@ -24,9 +24,9 @@ class INET_API Z3GateScheduleConfigurator : public GateScheduleConfiguratorBase
   protected:
     bool labelAsserts = false;
     bool optimizeSchedule = true;
-    mutable context *ctx = nullptr;
-    mutable solver *solver = nullptr;
-    mutable optimize *optimizer = nullptr;
+    mutable context *z3Context = nullptr;
+    mutable solver *z3Solver = nullptr;
+    mutable optimize *z3Optimize = nullptr;
     mutable std::map<std::string, std::shared_ptr<expr>> variables;
 
   protected:
@@ -41,7 +41,7 @@ class INET_API Z3GateScheduleConfigurator : public GateScheduleConfiguratorBase
         if (it != variables.end())
             return it->second;
         else {
-            auto variable = std::make_shared<expr>(ctx->real_const(variableName.c_str()));
+            auto variable = std::make_shared<expr>(z3Context->real_const(variableName.c_str()));
             variables[variableName] = variable;
             return variable;
         }

@@ -16,10 +16,10 @@ Define_Module(Z3GateScheduleConfigurator);
 
 Z3GateScheduleConfigurator::~Z3GateScheduleConfigurator()
 {
-    delete solver;
-    delete optimizer;
+    delete z3Solver;
+    delete z3Optimize;
     variables.clear();
-    delete ctx;
+    delete z3Context;
 }
 
 void Z3GateScheduleConfigurator::initialize(int stage)
@@ -36,15 +36,15 @@ void Z3GateScheduleConfigurator::addAssert(const expr& expr) const
     static int assertionCount = 0;
     if (optimizeSchedule) {
         if (labelAsserts)
-            optimizer->add(expr, (std::string("a") + std::to_string(assertionCount++)).c_str());
+            z3Optimize->add(expr, (std::string("a") + std::to_string(assertionCount++)).c_str());
         else
-            optimizer->add(expr);
+            z3Optimize->add(expr);
     }
     else {
         if (labelAsserts)
-            solver->add(expr, (std::string("a") + std::to_string(assertionCount++)).c_str());
+            z3Solver->add(expr, (std::string("a") + std::to_string(assertionCount++)).c_str());
         else
-            solver->add(expr);
+            z3Solver->add(expr);
     }
 }
 
@@ -52,18 +52,18 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
 {
     config cfg;
     cfg.set("model", "true");
-    ctx = new context(cfg);
-    solver = !optimizeSchedule ? new z3::solver(*ctx) : nullptr;
-    optimizer = optimizeSchedule ? new optimize(*ctx) : nullptr;
+    z3Context = new context(cfg);
+    z3Solver = !optimizeSchedule ? new z3::solver(*z3Context) : nullptr;
+    z3Optimize = optimizeSchedule ? new optimize(*z3Context) : nullptr;
     auto gateCycleDurationVariable = getGateCycleDurationVariable();
-    addAssert(gateCycleDurationVariable == ctx->real_val(gateCycleDuration.str().c_str()));
+    addAssert(gateCycleDurationVariable == z3Context->real_val(gateCycleDuration.str().c_str()));
     auto totalEndToEndDelayVariable = getTotalEndToEndDelayVariable();
-    auto totalEndToEndDelayValue = ctx->real_val(0);
+    auto totalEndToEndDelayValue = z3Context->real_val(0);
 
     // 1. add application start time constraints
     for (auto application : input.applications) {
         auto applicationStartTimeVariable = getApplicationStartTimeVariable(application);
-        addAssert(expr(ctx->real_val(0)) <= applicationStartTimeVariable);
+        addAssert(expr(z3Context->real_val(0)) <= applicationStartTimeVariable);
         addAssert(applicationStartTimeVariable < gateCycleDurationVariable);
     }
 
@@ -75,18 +75,18 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
                     auto transmissionPort = pathFragment->outputPorts[nodeIndex];
                     auto transmissionDurationVariable = getTransmissionDurationVariable(flow, transmissionPort);
                     simtime_t transmissionDuration = s(flow->startApplication->packetLength / transmissionPort->datarate).get();
-                    addAssert(transmissionDurationVariable == ctx->real_val(transmissionDuration.str().c_str()));
+                    addAssert(transmissionDurationVariable == z3Context->real_val(transmissionDuration.str().c_str()));
                     auto transmissionStartTimeVariable = getTransmissionStartTimeVariable(flow, packetIndex, transmissionPort, flow->gateIndex);
                     auto transmissionEndTimeVariable = getTransmissionEndTimeVariable(flow, packetIndex, transmissionPort, flow->gateIndex);
                     addAssert(transmissionStartTimeVariable + transmissionDurationVariable == transmissionEndTimeVariable);
-                    addAssert(expr(ctx->real_val(0)) <= transmissionStartTimeVariable);
+                    addAssert(expr(z3Context->real_val(0)) <= transmissionStartTimeVariable);
                     addAssert(transmissionStartTimeVariable < gateCycleDurationVariable);
                     auto receptionPort = pathFragment->inputPorts[nodeIndex];
                     auto receptionStartTimeVariable = getReceptionStartTimeVariable(flow, packetIndex, receptionPort, flow->gateIndex);
                     auto receptionEndTimeVariable = getReceptionEndTimeVariable(flow, packetIndex, receptionPort, flow->gateIndex);
                     addAssert(receptionStartTimeVariable + transmissionDurationVariable == receptionEndTimeVariable);
                     auto propagationTimeVariable = getPropagationTimeVariable(transmissionPort);
-                    addAssert(propagationTimeVariable == ctx->real_val(transmissionPort->propagationTime.str().c_str()));
+                    addAssert(propagationTimeVariable == z3Context->real_val(transmissionPort->propagationTime.str().c_str()));
                     addAssert(transmissionStartTimeVariable + propagationTimeVariable == receptionStartTimeVariable);
                 }
             }
@@ -99,7 +99,7 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
         auto applicationStartTimeVariable = getApplicationStartTimeVariable(flow->startApplication);
         auto packetIntervalVariable = getApplicationPacketIntervalVariable(flow->startApplication);
         auto packetInterval = flow->startApplication->packetInterval;
-        addAssert(packetIntervalVariable == ctx->real_val(packetInterval.str().c_str()));
+        addAssert(packetIntervalVariable == z3Context->real_val(packetInterval.str().c_str()));
         for (int packetIndex = 0; packetIndex < getPacketCount(flow); packetIndex++) {
             std::shared_ptr<expr> firstTransmissionStartTimeVariable;
             std::shared_ptr<expr> previousReceptionEndTimeVariable;
@@ -112,7 +112,7 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
                     auto receptionPort = pathFragment->inputPorts[nodeIndex];
                     auto receptionEndTimeVariable = getReceptionEndTimeVariable(flow, packetIndex, receptionPort, flow->gateIndex);
                     if (nodeIndex == 0)
-                        addAssert(applicationStartTimeVariable + packetIntervalVariable * ctx->real_val(packetIndex) == transmissionStartTimeVariable);
+                        addAssert(applicationStartTimeVariable + packetIntervalVariable * z3Context->real_val(packetIndex) == transmissionStartTimeVariable);
                     else if (previousReceptionEndTimeVariable)
                         addAssert(transmissionStartTimeVariable >= previousReceptionEndTimeVariable);
                     previousReceptionEndTimeVariable = receptionEndTimeVariable;
@@ -125,7 +125,7 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
                 addAssert(endToEndDelayVariable <= maxEndToEndDelayVariable);
         }
         if (maxEndToEndDelayVariable)
-            addAssert(maxEndToEndDelayVariable == ctx->real_val(flow->startApplication->maxLatency.str().c_str()));
+            addAssert(maxEndToEndDelayVariable == z3Context->real_val(flow->startApplication->maxLatency.str().c_str()));
     }
     addAssert(totalEndToEndDelayVariable == totalEndToEndDelayValue);
 
@@ -134,24 +134,24 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
         int count = getPacketCount(flow);
         auto maxJitterVariable = getMaxJitterVariable(flow);
         auto averageEndToEndDelayVariable = getAverageEndToEndDelayVariable(flow);
-        auto averageEndToEndDelayValue = ctx->real_val(0);
+        auto averageEndToEndDelayValue = z3Context->real_val(0);
         for (int packetIndex = 0; packetIndex < count; packetIndex++) {
             auto endToEndDelayVariable = getEndToEndDelayVariable(flow, packetIndex);
             averageEndToEndDelayValue = averageEndToEndDelayValue + endToEndDelayVariable;
         }
-        addAssert(averageEndToEndDelayVariable == averageEndToEndDelayValue / ctx->real_val(count));
+        addAssert(averageEndToEndDelayVariable == averageEndToEndDelayValue / z3Context->real_val(count));
         for (int packetIndex = 0; packetIndex < count; packetIndex++) {
             auto endToEndDelayVariable = getEndToEndDelayVariable(flow, packetIndex);
             addAssert(averageEndToEndDelayVariable - endToEndDelayVariable <= maxJitterVariable);
         }
-        addAssert(maxJitterVariable == ctx->real_val(0));
+        addAssert(maxJitterVariable == z3Context->real_val(0));
     }
 
     // 5. add one transmission per port at a time constraints
     for (auto port : input.ports) {
         simtime_t interframeGap = s(b(96) / port->datarate).get();
         auto interframeGapVariable = getInterframeGapVariable(port);
-        addAssert(interframeGapVariable == ctx->real_val(interframeGap.str().c_str()));
+        addAssert(interframeGapVariable == z3Context->real_val(interframeGap.str().c_str()));
         auto transmissionStartTimeVariables = getTransmissionStartTimeVariables(port);
         auto transmissionEndTimeVariables = getTransmissionEndTimeVariables(port);
         for (int i = 0; i < transmissionStartTimeVariables.size(); i++) {
@@ -207,18 +207,18 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
     // 8. add minimization goal if requested
     if (optimizeSchedule)
         // TODO add weights for the end-to-end delay and jitter of individual flows
-        optimizer->minimize(*totalEndToEndDelayVariable.get());
+        z3Optimize->minimize(*totalEndToEndDelayVariable.get());
 
     // print what we have
     EV_INFO << "Goal:" << std::endl;
     if (optimizeSchedule)
-        EV_INFO << *optimizer << std::endl;
+        EV_INFO << *z3Optimize << std::endl;
     else
-        EV_INFO << *solver << std::endl;
+        EV_INFO << *z3Solver << std::endl;
 
     // solve
-    if ((optimizeSchedule ? optimizer->check() : solver->check()) == sat) {
-        model model = optimizeSchedule ? optimizer->get_model() : solver->get_model();
+    if ((optimizeSchedule ? z3Optimize->check() : z3Solver->check()) == sat) {
+        model model = optimizeSchedule ? z3Optimize->get_model() : z3Solver->get_model();
         EV_INFO << "Solution:" << std::endl << model << std::endl;
         auto output = new Output();
 
@@ -287,7 +287,7 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
         return output;
     }
     else {
-        EV_WARN << "No solution found, unsatisfiable core:" << std::endl << (optimizeSchedule ? solver->unsat_core() : optimizer->unsat_core()) << std::endl;
+        EV_WARN << "No solution found, unsatisfiable core:" << std::endl << (optimizeSchedule ? z3Solver->unsat_core() : z3Optimize->unsat_core()) << std::endl;
         throw cRuntimeError("The specified constraints might not be satisfiable.");
     }
 }
