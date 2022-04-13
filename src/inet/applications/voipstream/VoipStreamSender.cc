@@ -427,8 +427,11 @@ void VoipStreamSender::readFrame()
     while (sampleBuffer.length() < samplesPerPacket * inBytesPerSample) {
         // read one frame
         int err = av_read_frame(pFormatCtx, &packet);
-        if (err < 0)
+        if (err < 0) { // end of file
+            if (pReSampleCtx)
+                resampleFrame(nullptr, 0);  // resample remainder data in internal buffer
             break;
+        }
 
         // if the frame doesn't belong to our audiostream, continue... is not supposed to happen,
         // since .wav contain only one media stream
