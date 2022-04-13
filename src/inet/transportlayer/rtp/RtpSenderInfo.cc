@@ -81,7 +81,7 @@ SenderReport *RtpSenderInfo::senderReport(simtime_t now)
         // ntp time stamp is 64 bit integer
 
         uint64_t ntpSeconds = (uint64_t)SIMTIME_DBL(now);
-        uint64_t ntpFraction = (uint64_t)((SIMTIME_DBL(now) - ntpSeconds * 65536.0) * 65536.0);
+        uint64_t ntpFraction = (uint64_t)((SIMTIME_DBL(now) - ntpSeconds) * 65536.0 * 65536.0);
 
         senderReport->setNTPTimeStamp((uint64_t)(ntpSeconds << 32) + ntpFraction);
         senderReport->setRTPTimeStamp(SIMTIME_DBL(now - _startTime) * _clockRate);
