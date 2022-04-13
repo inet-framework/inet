@@ -249,9 +249,12 @@ void VoipStreamReceiver::decodePacket(Packet *pk)
         emit(packetHasVoiceSignal, 1);
         uint16_t len = vp->getDataLength();
         auto bb = pk->peekDataAt<BytesChunk>(b(0), B(len));
-        auto buff = bb->getBytes();
-        curConn.writeAudioFrame(&buff.front(), buff.size());
-        FINGERPRINT_ADD_EXTRA_DATA2((const char *)(&buff.front()), buff.size());
+        //auto buff = bb->getBytes();
+        uint8_t *buff = new uint8_t[len + AV_INPUT_BUFFER_PADDING_SIZE]; // required extra AV_INPUT_BUFFER_PADDING_SIZE bytes at end of buff for avcodec_decode_audio4()
+        bb->copyToBuffer(buff, len);
+        curConn.writeAudioFrame(buff, len);
+        FINGERPRINT_ADD_EXTRA_DATA2((const char *)buff, len);
+        delete [] buff;
     }
     else if (vp->getType() == SILENCE) {
         emit(packetHasVoiceSignal, 0);
