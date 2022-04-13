@@ -171,7 +171,7 @@ class INET_API Sctp : public cSimpleModule
     UdpSocket udpSocket;
     int udpSockId;
 
-    SocketOptions *socketOptions;
+    SocketOptions *socketOptions = nullptr;
 
   protected:
     ModuleRefByPar<IRoutingTable> rt;
@@ -251,7 +251,7 @@ class INET_API Sctp : public cSimpleModule
     /** Getter and Setter for the socket options **/
     SocketOptions *collectSocketOptions();
 
-    void setSocketOptions(SocketOptions *options) { socketOptions = options; }
+    void setSocketOptions(SocketOptions *options) { delete socketOptions; socketOptions = options; }
     int getMaxInitRetrans() { return socketOptions->maxInitRetrans; };
     int getMaxInitRetransTimeout() { return socketOptions->maxInitRetransTimeout; };
     double getRtoInitial() { return socketOptions->rtoInitial; };

@@ -159,6 +159,7 @@ Sctp::~Sctp()
     if (!(sctpVTagMap.empty())) {
         sctpVTagMap.clear();
     }
+    delete socketOptions;
     EV_DEBUG << "after clearing maps\n";
 }
 
@@ -188,8 +189,6 @@ void Sctp::handleMessage(cMessage *msg)
         auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
         if (protocol == &Protocol::sctp) {
             // must be an SctpHeader
-            SctpHeader *sctpmsg = (packet->peekAtFront<SctpHeader>().get()->dup());
-            int chunkLength = B(sctpmsg->getChunkLength()).get();
             numPacketsReceived++;
 
             if (!pktdrop && (packet->hasBitError())) {
@@ -199,6 +198,9 @@ void Sctp::handleMessage(cMessage *msg)
                 delete msg;
                 return;
             }
+
+            SctpHeader *sctpmsg = (packet->peekAtFront<SctpHeader>().get()->dup());
+            int chunkLength = B(sctpmsg->getChunkLength()).get();
 
             if (pktdrop && packet->hasBitError()) {
                 EV_WARN << "Packet has bit-error. Call Pktdrop\n";
@@ -226,7 +228,7 @@ void Sctp::handleMessage(cMessage *msg)
                     EV_INFO << "no assoc found msg=" << sctpmsg->getName() << "\n";
 
                     if (!pktdrop && packet->hasBitError()) {
-//                        delete sctpmsg;
+                        delete sctpmsg;
                         return;
                     }
 
@@ -253,6 +255,7 @@ void Sctp::handleMessage(cMessage *msg)
                     }
                 }
             }
+            delete sctpmsg;
         }
         else {
             delete packet;
@@ -268,6 +271,7 @@ void Sctp::handleMessage(cMessage *msg)
             Indication *cmsg = new Indication("SendSocketOptions", SCTP_I_SENDSOCKETOPTIONS);
             auto indication = cmsg->addTag<SctpCommandReq>();
             indication->setSocketId(controlInfo->getSocketId());
+            delete socketOptions;
             socketOptions = collectSocketOptions();
             cmsg->setContextPointer((void *)socketOptions);
             cmsg->addTag<SocketInd>()->setSocketId(assocId);

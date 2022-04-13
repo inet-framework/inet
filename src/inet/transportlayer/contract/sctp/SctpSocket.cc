@@ -480,6 +480,7 @@ void SctpSocket::processMessage(cMessage *msg)
             if (cb) {
                 cb->sendRequestArrived(this);
             }
+            delete msg;
             break;
 
         case SCTP_I_AVAILABLE: {

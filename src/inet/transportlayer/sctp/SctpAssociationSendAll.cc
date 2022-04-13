@@ -1153,6 +1153,7 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                                 state->queueUpdate = true;
                             }
 
+                            delete datVar;
                             datVar = makeDataVarFromDataMsg(datMsg, path);
                             delete datMsg;
 
@@ -1363,9 +1364,9 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                     else {
                         packetFull = true;
                         EV_DETAIL << assocId << ": sendAll: packetFull: msg length = " << B(sctpMsg->getChunkLength()).get() + 20 << "\n";
-                        datVar = nullptr;
                     }
                     delete datVar;
+                    datVar = nullptr;
                 }
 
                 // ====== Send packet ===========================================

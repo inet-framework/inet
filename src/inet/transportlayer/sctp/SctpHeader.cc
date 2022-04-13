@@ -52,9 +52,10 @@ void SctpHeader::clean()
     if (this->getSctpChunksArraySize() > 0) {
         auto iterator = sctpChunkList.begin();
         while (iterator != sctpChunkList.end()) {
-//            SctpChunk *chunk = (*iterator);
+            SctpChunk *chunk = (*iterator);
             sctpChunkList.erase(iterator);
-//            delete chunk;
+            drop(chunk);
+            delete chunk;
         }
     }
 

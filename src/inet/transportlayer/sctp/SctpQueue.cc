@@ -30,6 +30,7 @@ SctpQueue::~SctpQueue()
     for (auto& elem : payloadQueue) {
         SctpDataVariables *chunk = elem.second;
         delete chunk->userData;
+        delete chunk;
     }
     if (!payloadQueue.empty()) {
         payloadQueue.clear();
