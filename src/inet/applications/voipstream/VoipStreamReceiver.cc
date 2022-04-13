@@ -141,7 +141,7 @@ void VoipStreamReceiver::Connection::writeAudioFrame(uint8_t *inbuf, int inbytes
     simtime_t decodedTime(1.0 * decodedFrame.nb_samples / sampleRate);
     lastPacketFinish += decodedTime;
     if (outFile.isOpen())
-        outFile.write(decodedFrame.data[0], decodedFrame.linesize[0]);
+        outFile.write(decodedFrame.data[0], decodedFrame.nb_samples * av_get_bytes_per_sample(decCtx->sample_fmt));
 }
 
 void VoipStreamReceiver::Connection::closeAudio()
