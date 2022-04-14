@@ -413,7 +413,7 @@ void VoipStreamSender::Buffer::align()
 {
     if (readOffset) {
         if (length())
-            memcpy(samples, samples + readOffset, length());
+            memmove(samples, samples + readOffset, length());
         writeOffset -= readOffset;
         readOffset = 0;
     }
