@@ -38,7 +38,6 @@ VoipStreamSender::~VoipStreamSender()
         avcodec_free_context(&pEncoderCtx);
     }
     cancelAndDelete(timer);
-    av_free_packet(&packet);
 }
 
 VoipStreamSender::Buffer::Buffer() :
@@ -130,10 +129,7 @@ void VoipStreamSender::initialize(int stage)
         sampleBuffer.clear(0);
 
         // initialize avcodec library
-        av_register_all();
-        avcodec_register_all();
         av_log_set_callback(&inet_av_log);
-        av_init_packet(&packet);
 
         openSoundFile(soundFile);
 
@@ -181,16 +177,15 @@ void VoipStreamSender::handleMessage(cMessage *msg)
 
 void VoipStreamSender::finish()
 {
-    av_free_packet(&packet);
     outFile.close();
 
     if (pCodecCtx) {
         avcodec_close(pCodecCtx);
     }
+
     if (pReSampleCtx) {
         swr_close(pReSampleCtx);
         swr_free(&pReSampleCtx);
-        pReSampleCtx = nullptr;
     }
 
     if (pFormatCtx) {
@@ -200,20 +195,20 @@ void VoipStreamSender::finish()
 
 void VoipStreamSender::openSoundFile(const char *name)
 {
-    int ret;
+    int err;
 
-    ret = avformat_open_input(&pFormatCtx, name, nullptr, nullptr);
-    if (ret < 0)
-        throw cRuntimeError("Audiofile '%s' open error: %d", name, ret);
+    err = avformat_open_input(&pFormatCtx, name, nullptr, nullptr);
+    if (err < 0)
+        throw cRuntimeError("Audiofile '%s' open error: %d", name, err);
 
-    ret = avformat_find_stream_info(pFormatCtx, nullptr);
-    if (ret < 0)
-        throw cRuntimeError("Audiofile '%s' avformat_find_stream_info() error: %d", name, ret);
+    err = avformat_find_stream_info(pFormatCtx, nullptr);
+    if (err < 0)
+        throw cRuntimeError("Audiofile '%s' avformat_find_stream_info() error: %d", name, err);
 
     // get stream number
     streamIndex = -1;
     for (unsigned int j = 0; j < pFormatCtx->nb_streams; j++) {
-        if (pFormatCtx->streams[j]->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
+        if (pFormatCtx->streams[j]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
             streamIndex = j;
             break;
         }
@@ -222,16 +217,21 @@ void VoipStreamSender::openSoundFile(const char *name)
     if (streamIndex == -1)
         throw cRuntimeError("The file '%s' not contains any audio stream.", name);
 
-    pCodecCtx = pFormatCtx->streams[streamIndex]->codec;
+    AVCodecParameters *codecPar = pFormatCtx->streams[streamIndex]->codecpar;
 
     // find decoder and open the correct codec
-    pCodec = avcodec_find_decoder(pCodecCtx->codec_id);
+    pCodec = avcodec_find_decoder(codecPar->codec_id);
     if (!pCodec)
         throw cRuntimeError("Audiofile '%s' avcodec_find_decoder() error: decoder not found", name);
-
-    ret = avcodec_open2(pCodecCtx, pCodec, nullptr);
-    if (ret < 0)
-        throw cRuntimeError("avcodec_open() error on file '%s': %d", name, ret);
+    pCodecCtx = avcodec_alloc_context3(pCodec);
+    if (!pCodecCtx)
+        throw cRuntimeError("avcodec_alloc_context3() failed");
+    err = avcodec_parameters_to_context(pCodecCtx, codecPar);
+    if (err < 0)
+        throw cRuntimeError("avcodec_parameters_to_context() error: %d", err);
+    err = avcodec_open2(pCodecCtx, pCodec, nullptr);
+    if (err < 0)
+        throw cRuntimeError("avcodec_open() error on file '%s': %d", name, err);
 
     // allocate encoder
     pEncoderCtx = avcodec_alloc_context3(nullptr);
@@ -239,7 +239,6 @@ void VoipStreamSender::openSoundFile(const char *name)
         throw cRuntimeError("error occured in avcodec_alloc_context3()");
     // set bitrate:
     pEncoderCtx->bit_rate = compressedBitRate;
-
     pEncoderCtx->sample_rate = sampleRate;
     pEncoderCtx->channels = 1;
 
@@ -279,8 +278,8 @@ void VoipStreamSender::openSoundFile(const char *name)
         if (av_opt_set_int(pReSampleCtx, "internal_sample_fmt", AV_SAMPLE_FMT_FLTP, 0))
             throw cRuntimeError("error in option setting of 'internal_sample_fmt'");
 
-        ret = swr_init(pReSampleCtx);
-        if (ret < 0)
+        err = swr_init(pReSampleCtx);
+        if (err < 0)
             throw cRuntimeError("Error opening context");
     }
 
@@ -288,6 +287,7 @@ void VoipStreamSender::openSoundFile(const char *name)
         outFile.open(traceFileName, sampleRate, 8 * av_get_bytes_per_sample(pEncoderCtx->sample_fmt));
 
     sampleBuffer.clear(samplesPerPacket * av_get_bytes_per_sample(pEncoderCtx->sample_fmt));
+    av_seek_frame(pFormatCtx, streamIndex, 0, 0);
 }
 
 Packet *VoipStreamSender::generatePacket()
@@ -303,28 +303,22 @@ Packet *VoipStreamSender::generatePacket()
     bool isSilent = checkSilence(pEncoderCtx->sample_fmt, sampleBuffer.readPtr(), samples);
     const auto& vp = makeShared<VoipStreamPacket>();
 
-    AVPacket opacket;
-    av_init_packet(&opacket);
-    opacket.data = nullptr;
-    opacket.size = 0;
+    AVPacket *opacket = av_packet_alloc();
     AVFrame *frame = av_frame_alloc();
-
     frame->nb_samples = samples;
-
     frame->channel_layout = AV_CH_LAYOUT_MONO;
     frame->sample_rate = pEncoderCtx->sample_rate;
-
-    int ret = avcodec_fill_audio_frame(frame, /*channels*/ 1, pEncoderCtx->sample_fmt, (const uint8_t *)(sampleBuffer.readPtr()), inBytes, 1);
-    if (ret < 0)
-        throw cRuntimeError("Error in avcodec_fill_audio_frame(): err=%d", ret);
     frame->channels = pEncoderCtx->channels;
     frame->format = pEncoderCtx->sample_fmt;
-    ret = avcodec_send_frame(pEncoderCtx, frame);
-    if (ret < 0)
-        throw cRuntimeError("avcodec_send_frame() error: %d", ret);
-    ret = avcodec_receive_packet(pEncoderCtx, &opacket);
-    if (ret < 0)
-        throw cRuntimeError("avcodec_receive_packet() error: %d", ret);
+    int err = avcodec_fill_audio_frame(frame, pEncoderCtx->channels, pEncoderCtx->sample_fmt, (const uint8_t *)(sampleBuffer.readPtr()), inBytes, 1);
+    if (err < 0)
+        throw cRuntimeError("Error in avcodec_fill_audio_frame(): err=%d", err);
+    err = avcodec_send_frame(pEncoderCtx, frame);
+    if (err < 0)
+        throw cRuntimeError("avcodec_send_frame() error: %d", err);
+    err = avcodec_receive_packet(pEncoderCtx, opacket);
+    if (err < 0)
+        throw cRuntimeError("avcodec_receive_packet() error: %d", err);
 
     if (outFile.isOpen())
         outFile.write(sampleBuffer.readPtr(), inBytes);
@@ -341,10 +335,10 @@ Packet *VoipStreamSender::generatePacket()
     else {
         pk->setName("VOICE");
         vp->setType(VOICE);
-        vp->setDataLength(opacket.size);
+        vp->setDataLength(opacket->size);
         vp->setChunkLength(B(voipHeaderSize));
         vp->setHeaderLength(voipHeaderSize);
-        const auto& voice = makeShared<BytesChunk>(opacket.data, opacket.size);
+        const auto& voice = makeShared<BytesChunk>(opacket->data, opacket->size);
         pk->insertAtFront(voice);
     }
 
@@ -359,7 +353,7 @@ Packet *VoipStreamSender::generatePacket()
 
     pktID++;
 
-    av_free_packet(&opacket);
+    av_packet_free(&opacket);
     av_frame_free(&frame);
     return pk;
 }
@@ -428,9 +422,11 @@ void VoipStreamSender::readFrame()
 
     sampleBuffer.align();
 
+    AVPacket *packet = av_packet_alloc();
+
     while (sampleBuffer.length() < samplesPerPacket * inBytesPerSample) {
         // read one frame
-        int err = av_read_frame(pFormatCtx, &packet);
+        int err = av_read_frame(pFormatCtx, packet);
         if (err < 0) { // end of file
             if (pReSampleCtx)
                 resampleFrame(nullptr, 0);  // resample remainder data in internal buffer
@@ -439,50 +435,57 @@ void VoipStreamSender::readFrame()
 
         // if the frame doesn't belong to our audiostream, continue... is not supposed to happen,
         // since .wav contain only one media stream
-        if (packet.stream_index != streamIndex)
+        if (packet->stream_index != streamIndex)
             continue;
+
+#if LIBAVUTIL_VERSION_MAJOR < 57
+        int skip_samples_size = 0;
+#else
+        size_t skip_samples_size = 0;
+#endif
+        const uint32_t* skip_samples_ptr = reinterpret_cast<const uint32_t*>(
+                av_packet_get_side_data(packet, AV_PKT_DATA_SKIP_SAMPLES, &skip_samples_size));
+
+        if (skip_samples_ptr && *skip_samples_ptr > 0) {
+            size_t skipped_samples = *skip_samples_ptr;
+            if (pReSampleCtx)
+                skipped_samples = skipped_samples * sampleRate / pCodecCtx->sample_rate;
+            int dataSize = skipped_samples * inBytesPerSample;
+            memset(sampleBuffer.writePtr(), 0, dataSize);
+            sampleBuffer.notifyWrote(dataSize);
+        }
 
         // packet length == 0 ? read next packet
-        if (packet.size == 0)
+        if (packet->size == 0)
             continue;
 
-        AVPacket avpkt;
-        avpkt.data = nullptr;
-        avpkt.size = 0;
-        av_init_packet(&avpkt);
-        ASSERT(avpkt.data == nullptr && avpkt.size == 0);
-        avpkt.data = packet.data;
-        avpkt.size = packet.size;
+        err = avcodec_send_packet(pCodecCtx, packet);
+        if (err < 0)
+            throw cRuntimeError("Error in avcodec_send_packet(), err=%d", err);
 
-        while (avpkt.size > 0) {
+        AVFrame *frame = av_frame_alloc();
+        while (true) {
             // decode audio and save the decoded samples in our buffer
-            AVFrame *frame = av_frame_alloc();
-            int gotFrame;
-            int decoded = avcodec_decode_audio4(pCodecCtx, frame, &gotFrame, &avpkt);
-            if (decoded < 0)
-                throw cRuntimeError("Error in avcodec_decode_audio4(), err=%d, gotFrame=%d", decoded, gotFrame);
+            err = avcodec_receive_frame(pCodecCtx, frame);
+            if (err == AVERROR(EAGAIN) || err == AVERROR_EOF)
+                break;
+            else if (err < 0)
+                throw cRuntimeError("Error in avcodec_receive_frame(), err=%d", err);
 
-            avpkt.data += decoded;
-            avpkt.size -= decoded;
-
-            if (gotFrame) {
-                if (!pReSampleCtx) {
-                    // copy frame to sampleBuffer
-                    int dataSize = av_samples_get_buffer_size(nullptr, pCodecCtx->channels, frame->nb_samples, pCodecCtx->sample_fmt, 1);
-                    memcpy(sampleBuffer.writePtr(), frame->data[0], dataSize);
-                    sampleBuffer.notifyWrote(dataSize);
-                }
-                else {
-                    const uint8_t **in_data = (const uint8_t **)(frame->extended_data);
-                    int in_nb_samples = frame->nb_samples;
-                    resampleFrame(in_data, in_nb_samples);
-                }
+            if (!pReSampleCtx) {
+                // copy frame to sampleBuffer
+                int dataSize = frame->nb_samples * inBytesPerSample;
+                memcpy(sampleBuffer.writePtr(), *frame->extended_data, dataSize);
+                sampleBuffer.notifyWrote(dataSize);
             }
-            av_frame_free(&frame);
-            av_free_packet(&avpkt);
+            else {
+                const uint8_t **in_data = (const uint8_t **)(frame->extended_data);
+                resampleFrame(in_data, frame->nb_samples);
+            }
         }
-        av_free_packet(&packet);
+        av_frame_free(&frame);
     }
+    av_packet_free(&packet);
 }
 
 void VoipStreamSender::resampleFrame(const uint8_t **in_data, int in_nb_samples)
@@ -492,10 +495,10 @@ void VoipStreamSender::resampleFrame(const uint8_t **in_data, int in_nb_samples)
     uint8_t *out_data[1] = { nullptr };
     int maxOutSamples = sampleBuffer.availableSpace() / outBytesPerSample;
     int out_linesize;
-    int ret;
+    int err;
 
-    ret = av_samples_fill_arrays(out_data, &out_linesize, tmpSamples, 1, maxOutSamples, pEncoderCtx->sample_fmt, 0);
-    if (ret < 0)
+    err = av_samples_fill_arrays(out_data, &out_linesize, tmpSamples, 1, maxOutSamples, pEncoderCtx->sample_fmt, 0);
+    if (err < 0)
         throw cRuntimeError("failed out_data fill arrays");
 
     int resampled = swr_convert(pReSampleCtx, out_data, out_linesize, in_data, in_nb_samples);
@@ -503,8 +506,6 @@ void VoipStreamSender::resampleFrame(const uint8_t **in_data, int in_nb_samples)
         throw cRuntimeError("swr_convert() returns error %d", resampled);
     if (swr_get_delay(pReSampleCtx, 0) > 0)
         throw cRuntimeError("%ld delay samples not converted\n", swr_get_delay(pReSampleCtx, 0));
-//    if (swr_available(pReSampleCtx) > 0)
-//        throw cRuntimeError("%d samples available for output\n", swr_available(pReSampleCtx));
     if (resampled > 0) {
         memcpy(sampleBuffer.writePtr(), out_data[0], resampled * outBytesPerSample);
         sampleBuffer.notifyWrote(resampled * outBytesPerSample);

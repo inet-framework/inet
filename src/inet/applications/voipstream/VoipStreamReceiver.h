@@ -61,7 +61,7 @@ class INET_API VoipStreamReceiver : public cSimpleModule, public LifecycleUnsupp
         Connection() {}
         void addAudioStream(enum AVCodecID codec_id);
         void openAudio(const char *fileName);
-        void writeAudioFrame(uint8_t *buf, int len);
+        void writeAudioFrame(AVPacket *avpkt);
         void writeLostSamples(int sampleCount);
         void closeAudio();
 

@@ -28,7 +28,7 @@ void inet_av_log(void *avcontext, int level, const char *format, va_list va);
 class INET_API AudioOutFile
 {
   public:
-    AudioOutFile() : opened(false), audio_st(nullptr), oc(nullptr) {};
+    AudioOutFile() {}
     ~AudioOutFile();
 
     void open(const char *resultFile, int sampleRate, short int sampleBits);
@@ -37,12 +37,10 @@ class INET_API AudioOutFile
     bool isOpen() const { return opened; }
 
   protected:
-    void addAudioStream(enum AVCodecID codec_id, int sampleRate, short int sampleBits);
-
-  protected:
-    bool opened;
-    AVStream *audio_st;
-    AVFormatContext *oc;
+    bool opened = false;
+    AVStream *audio_st = nullptr;
+    AVFormatContext *oc = nullptr;
+    AVCodecContext *codecCtx = nullptr;
 };
 
 } // namespace inet
