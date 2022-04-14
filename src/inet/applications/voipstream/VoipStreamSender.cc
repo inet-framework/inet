@@ -15,11 +15,11 @@
 
 namespace inet {
 
-#if defined(__clang__)
-#  pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#elif defined(__GNUC__)
-#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
+//#if defined(__clang__)
+//#  pragma clang diagnostic ignored "-Wdeprecated-declarations"
+//#elif defined(__GNUC__)
+//#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+//#endif
 
 extern "C" {
 #include <libavutil/opt.h>

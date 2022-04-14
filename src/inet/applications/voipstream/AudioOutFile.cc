@@ -17,11 +17,11 @@
 
 namespace inet {
 
-#if defined(__clang__)
-#  pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#elif defined(__GNUC__)
-#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
+//#if defined(__clang__)
+//#  pragma clang diagnostic ignored "-Wdeprecated-declarations"
+//#elif defined(__GNUC__)
+//#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+//#endif
 
 static void *getThisPtr() { return cSimulation::getActiveSimulation()->getContextModule(); }
 void inet_av_log(void *avcontext, int level, const char *format, va_list va)
