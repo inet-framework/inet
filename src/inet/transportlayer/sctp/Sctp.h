@@ -184,8 +184,8 @@ class INET_API Sctp : public cSimpleModule
     SctpAssociation *findAssocForMessage(L3Address srcAddr, L3Address destAddr, uint32_t srcPort, uint32_t destPort, bool findListen);
     SctpAssociation *findAssocForApp(int32_t appGateIndex, int32_t assocId);
     int32_t findAssocForFd(int32_t fd);
-    void sendAbortFromMain(Ptr<SctpHeader>& sctpMsg, L3Address fromAddr, L3Address toAddr);
-    void sendShutdownCompleteFromMain(Ptr<SctpHeader>& sctpMsg, L3Address fromAddr, L3Address toAddr);
+    void sendAbortFromMain(SctpHeader *sctpMsg, L3Address fromAddr, L3Address toAddr);
+    void sendShutdownCompleteFromMain(SctpHeader *sctpMsg, L3Address fromAddr, L3Address toAddr);
     virtual void refreshDisplay() const override;
 
   public:

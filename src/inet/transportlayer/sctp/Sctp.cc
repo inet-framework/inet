@@ -232,13 +232,12 @@ void Sctp::handleMessage(cMessage *msg)
                         return;
                     }
 
-                    Ptr<SctpHeader> sctpmsgptr(sctpmsg);
                     if (((sctpmsg->getSctpChunks(0)))->getSctpChunkType() == SHUTDOWN_ACK)
-                        sendShutdownCompleteFromMain(sctpmsgptr, destAddr, srcAddr);
+                        sendShutdownCompleteFromMain(sctpmsg, destAddr, srcAddr);
                     else if (((sctpmsg->getSctpChunks(0)))->getSctpChunkType() != ABORT &&
                              ((sctpmsg->getSctpChunks(0)))->getSctpChunkType() != SHUTDOWN_COMPLETE)
                     {
-                        sendAbortFromMain(sctpmsgptr, destAddr, srcAddr);
+                        sendAbortFromMain(sctpmsg, destAddr, srcAddr);
                     }
                     delete packet;
                 }
@@ -374,7 +373,7 @@ SocketOptions *Sctp::collectSocketOptions()
     return sockOptions;
 }
 
-void Sctp::sendAbortFromMain(Ptr<SctpHeader>& sctpmsg, L3Address fromAddr, L3Address toAddr)
+void Sctp::sendAbortFromMain(SctpHeader *sctpmsg, L3Address fromAddr, L3Address toAddr)
 {
     const auto& msg = makeShared<SctpHeader>();
 
@@ -411,7 +410,7 @@ void Sctp::sendAbortFromMain(Ptr<SctpHeader>& sctpmsg, L3Address fromAddr, L3Add
     send_to_ip(pkt);
 }
 
-void Sctp::sendShutdownCompleteFromMain(Ptr<SctpHeader>& sctpmsg, L3Address fromAddr, L3Address toAddr)
+void Sctp::sendShutdownCompleteFromMain(SctpHeader *sctpmsg, L3Address fromAddr, L3Address toAddr)
 {
     const auto& msg = makeShared<SctpHeader>();
 
