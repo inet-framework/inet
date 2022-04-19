@@ -456,10 +456,10 @@
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv6 -r 0,                   100s,            8a7b-b692/tplx;92ce-7549/~tNl;4c96-1800/tyf, PASS, EthernetMac
 /examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              100s,            732f-46d1/tplx;4854-3d14/~tNl;673d-9d99/~tND;a22a-ccdd/tyf, PASS, EthernetMac
 
-/examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,           3b10-2c5c/tplx;b015-6f81/~tNl;e938-0faf/~tND;fa69-30b4/tyf, PASS, igmp
-/examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           0055-d76b/tplx;7c48-14c9/~tNl;bc11-d963/~tND;de20-c6bc/tyf, PASS,
-/examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           4cd8-3f62/tplx;b668-e417/~tNl;8d77-3b47/~tND;353f-e7e3/tyf, PASS,
-/examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,           7938-2119/tplx;a91c-463a/~tNl;484a-e1c5/~tND;6ef2-6f53/tyf, PASS,
+/examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,           3b10-2c5c/tplx;b015-6f81/~tNl;5260-d4c2/~tND;fa69-30b4/tyf, PASS, igmp
+/examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           0055-d76b/tplx;7c48-14c9/~tNl;f185-90f2/~tND;de20-c6bc/tyf, PASS,
+/examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           4cd8-3f62/tplx;b668-e417/~tNl;2212-87f1/~tND;353f-e7e3/tyf, PASS,
+/examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,           7938-2119/tplx;a91c-463a/~tNl;0a8d-b375/~tND;6ef2-6f53/tyf, PASS,
 
 /examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            2aee-3c56/tplx;a8ee-8eaf/~tNl;068a-0196/~tND;6dbf-eebe/tyf, PASS,
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            4cff-b978/tplx;4183-df02/~tNl;5a0d-3ec7/~tND;d866-2d12/tyf, PASS,
