@@ -38,6 +38,9 @@ sim-time-limit = 10s
 cmdenv-event-banners = false
 *.source.packetLength = 100B
 *.source.productionInterval = 1s
+*.*.datarate = 100Mbps
+
+%subst: /\nRunning simulation\.\.\.\n//
 
 %contains-regex: stdout
 Producing packet, .*?source-0.*?
@@ -46,8 +49,6 @@ Starting destreaming packet, .*?source-0.*?
 Ending streaming packet, .*?source-0.*?
 Ending destreaming packet, .*?source-0.*?
 Consuming packet, .*?source-0.*?
-
-Running simulation...
 Producing packet, .*?source-1.*?
 Starting streaming packet, .*?source-1.*?
 Starting destreaming packet, .*?source-1.*?
@@ -105,6 +106,3 @@ Consuming packet, .*?source-9.*?
 Producing packet, .*?source-10.*?
 Starting streaming packet, .*?source-10.*?
 Starting destreaming packet, .*?source-10.*?
-Ending streaming packet, .*?source-10.*?
-Ending destreaming packet, .*?source-10.*?
-Consuming packet, .*?source-10.*?
