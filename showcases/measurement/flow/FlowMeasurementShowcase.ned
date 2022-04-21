@@ -20,9 +20,9 @@ module MyStandardHost extends StandardHost
         }
     connections:
         udp.ipOut --> { @reconnect; } --> measurementLayer.upperLayerIn if hasUdp;
-        measurementLayer.lowerLayerOut --> { @reconnect; } --> tn.in++ if hasUdp;
+        measurementLayer.lowerLayerOut --> { @reconnect; } --> tn.in[0] if hasUdp;
         udp.ipIn <-- { @reconnect; } <-- measurementLayer.upperLayerOut if hasUdp;
-        measurementLayer.lowerLayerIn <-- { @reconnect; } <-- tn.out++ if hasUdp;
+        measurementLayer.lowerLayerIn <-- { @reconnect; } <-- tn.out[0] if hasUdp;
 }
 
 network FlowMeasurementShowcase extends WiredNetworkBase
