@@ -18,7 +18,7 @@ class SimulationTestTaskResult(TestTaskResult):
         self.simulation_task_result = simulation_task_result
 
     def get_error_message(self, **kwargs):
-        return (self.simulation_task_result.get_error_message(**kwargs) + " " if self.simulation_task_result else "") + \
+        return (self.simulation_task_result.get_error_message(**kwargs) + ", " if self.simulation_task_result else "") + \
                super().get_error_message(**kwargs)
 
     def get_subprocess_result(self):
@@ -65,7 +65,7 @@ class SimulationTestTask(TestTask):
         if simulation_task_result.result == "DONE":
             return self.check_simulation_task_result(simulation_task_result=simulation_task_result, **kwargs)
         else:
-            return self.task_result_class(task=self, result=simulation_task_result.result, expected_result=simulation_task_result.expected_result, expected=simulation_task_result.expected, reason=simulation_task_result.reason)
+            return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result=simulation_task_result.result, expected_result=simulation_task_result.expected_result, expected=simulation_task_result.expected, reason=simulation_task_result.reason, error_message="simulation exited with error")
 
     def check_simulation_task_result(self, simulation_task_result, **kwargs):
         result = "PASS" if simulation_task_result.result == "DONE" else simulation_task_result.result
@@ -73,15 +73,18 @@ class SimulationTestTask(TestTask):
         return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result=result, expected_result=expected_result, reason=simulation_task_result.reason)
 
 class MultipleSimulationTestTasks(MultipleTestTasks):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, build=True, simulation_project=None, **kwargs):
+        super().__init__(build=build, simulation_project=simulation_project, **kwargs)
         self.locals = locals()
         self.locals.pop("self")
         self.kwargs = kwargs
+        self.build = build
+        self.simulation_project = simulation_project
 
-    # def run(self, build=True, **kwargs):
-    #     if build:
-    #         build_project(simulation_project=self.simulation_project, **kwargs)
+    def run(self, **kwargs):
+        if self.build:
+            build_project(simulation_project=self.simulation_project, **kwargs)
+        return super().run(**kwargs)
     #     test_results = super().run(**kwargs)
     #     flattened_test_results = flatten(map(lambda test_result: test_result.get_test_results(), test_results))
     #     simulation_task_results = list(map(lambda test_result: test_result.simulation_task_result, flattened_test_results))
@@ -90,7 +93,7 @@ class MultipleSimulationTestTasks(MultipleTestTasks):
 def get_simulation_test_tasks(simulation_test_task_class=SimulationTestTask, multiple_simulation_test_tasks_class=MultipleSimulationTestTasks, **kwargs):
     multiple_simulation_tasks = get_simulation_tasks(**kwargs)
     test_tasks = list(map(lambda simulation_task: simulation_test_task_class(simulation_task=simulation_task, **kwargs), multiple_simulation_tasks.tasks))
-    return multiple_simulation_test_tasks_class(tasks=test_tasks, **kwargs)
+    return multiple_simulation_test_tasks_class(tasks=test_tasks, simulation_project=multiple_simulation_tasks.simulation_project, **kwargs)
 
 def run_simulation_tests(**kwargs):
     multiple_test_tasks = get_test_tasks(**kwargs)

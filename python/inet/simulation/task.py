@@ -52,9 +52,9 @@ class SimulationTaskResult(TaskResult):
             self.error_module = None
 
     def get_error_message(self, complete_error_message=True, **kwargs):
-        error_message = self.error_message or "Error message not found"
-        error_module = self.error_module or "Error module not found"
-        return (error_message + " -- in module " + error_module if complete_error_message else error_message) if self.result == "ERROR" else ""
+        error_message = self.error_message or "<Error message not found>"
+        error_module = self.error_module or "<Error module not found>"
+        return error_message + " -- in module " + error_module if complete_error_message else error_message
 
     def get_subprocess_result(self):
         return self.subprocess_result
@@ -111,7 +111,7 @@ class SimulationTask(Task):
     def get_cpu_time_limit(self):
         return self.cpu_time_limit(self.simulation_config, self._run) if callable(self.cpu_time_limit) else self.cpu_time_limit
 
-    def run_protected(self, extra_args=[], simulation_runner=subprocess_simulation_runner, **kwargs):
+    def run_protected(self, extra_args=[], simulation_runner=subprocess_simulation_runner, capture_output=True, **kwargs):
         simulation_project = self.simulation_config.simulation_project
         working_directory = self.simulation_config.working_directory
         ini_file = self.simulation_config.ini_file
@@ -127,7 +127,7 @@ class SimulationTask(Task):
         env["INET_ROOT"] = simulation_project.get_full_path(".")
         logger.debug(args)
         expected_result = self.get_expected_result()
-        subprocess_result = simulation_runner.run(self, args)
+        subprocess_result = simulation_runner.run(self, args, capture_output=capture_output)
         if subprocess_result.returncode == -signal.SIGINT.value:
             return self.task_result_class(task=self, subprocess_result=subprocess_result, result="CANCEL", expected_result=expected_result, reason="Cancel by user")
         elif subprocess_result.returncode == 0:
@@ -136,15 +136,16 @@ class SimulationTask(Task):
             return self.task_result_class(task=self, subprocess_result=subprocess_result, result="ERROR", expected_result=expected_result, reason="Non-zero exit code")
 
 class MultipleSimulationTasks(MultipleTasks):
-    def __init__(self, simulation_project=default_project, name="simulation", **kwargs):
-        super().__init__(name=name, **kwargs)
+    def __init__(self, simulation_project=default_project, build=True, name="simulation", **kwargs):
+        super().__init__(build=build, name=name, **kwargs)
         self.locals = locals()
         self.locals.pop("self")
         self.kwargs = kwargs
+        self.build = build
         self.simulation_project = simulation_project
 
-    def run(self, build=True, **kwargs):
-        if build:
+    def run(self, **kwargs):
+        if self.build:
             build_project(simulation_project=self.simulation_project, **kwargs)
         return super().run(**kwargs)
 

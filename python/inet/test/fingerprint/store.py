@@ -26,10 +26,9 @@ class FingerprintStore:
             self.write()
 
     def write(self):
+        self.get_entries().sort(key=lambda element: (element["working_directory"], element["ini_file"], element["config"], element["run"], element["ingredients"], element["sim_time_limit"]))
         logger.info(f"Writing fingerprints to {self.file_name}")
         file = open(self.file_name, "w")
-        if self.entries is None:
-            self.entries = []
         json.dump(self.entries, file, indent=True)
         file.close()
 
@@ -70,20 +69,28 @@ class FingerprintStore:
         latest_entries.sort(key=lambda element: (element["working_directory"], element["ini_file"], element["config"], element["run"], element["ingredients"], element["sim_time_limit"]))
         return latest_entries
     
-    def get_entry(self, **kwargs):
+    def find_entry(self, **kwargs):
         result = self.filter_entries(**kwargs)
-        return result[0] if result and len(result) == 1 else None
+        return result[0] if len(result) == 1 else None
+
+    def get_entry(self, **kwargs):
+        result = self.find_entry(**kwargs)
+        if result is not None:
+            return result
+        else:
+            raise Exception("Entry not found")
 
     def remove_entry(self, entry):
         self.get_entries().remove(entry)
 
-    def filter_entries(self, ingredients="tplx", test_result=None, working_directory=os.getcwd(), ini_file="omnetpp.ini", config="General", run=0, sim_time_limit=None):
+    def filter_entries(self, ingredients="tplx", test_result=None, working_directory=os.getcwd(), ini_file="omnetpp.ini", config="General", run=0, sim_time_limit=None, itervars=None):
         def f(fingerprint):
             return (working_directory is None or fingerprint["working_directory"] == working_directory) and \
                    (ini_file is None or fingerprint["ini_file"] == ini_file) and \
                    (config is None or fingerprint["config"] == config) and \
                    (run is None or fingerprint["run"] == run) and \
                    (sim_time_limit is None or fingerprint["sim_time_limit"] == sim_time_limit) and \
+                   (itervars is None or fingerprint["itervars"] == itervars) and \
                    (test_result is None or fingerprint["test_result"] == test_result) and \
                    (ingredients is None or fingerprint["ingredients"] == ingredients)
         return list(filter(f, self.get_entries()))
@@ -94,7 +101,7 @@ class FingerprintStore:
     def set_fingerprint(self, fingerprint, **kwargs):
         self.get_entry(**kwargs)["fingerprint"] = fingerprint
 
-    def insert_fingerprint(self, fingerprint, ingredients="tplx", test_result=None, working_directory=os.getcwd(), ini_file="omnetpp.ini", config="General", run=0, sim_time_limit=None, git_hash=None, git_clean=None):
+    def insert_fingerprint(self, fingerprint, ingredients="tplx", test_result=None, working_directory=os.getcwd(), ini_file="omnetpp.ini", config="General", run=0, sim_time_limit=None, git_hash=None, git_clean=None, itervars="$repetition==0"):
         assert test_result == "ERROR" or sim_time_limit is not None
         if git_hash is None:
             git_hash = subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.simulation_project.get_full_path("."), capture_output=True).stdout.decode("utf-8").strip()
@@ -110,7 +117,8 @@ class FingerprintStore:
                                    "fingerprint": fingerprint,
                                    "timestamp": time.time(),
                                    "git_hash": git_hash,
-                                   "git_clean": git_clean})
+                                   "git_clean": git_clean,
+                                   "itervars": itervars})
 
     def update_fingerprint(self, fingerprint, **kwargs):
         entry = self.get_entry(**kwargs)
@@ -119,8 +127,8 @@ class FingerprintStore:
         else:
             self.insert_fingerprint(fingerprint, **kwargs)
 
-    def remove_fingerprint(self, ingredients="tplx", test_result=None, working_directory=os.getcwd(), ini_file="omnetpp.ini", config="General", run=0, sim_time_limit=None):
-        raise Exception("TODO")
+    def remove_fingerprint(self, **kwargs):
+        list(map(lambda element: self.entries.remove(element), self.filter_entries(**kwargs)))
 
 all_fingerprint_stores = dict()
 correct_fingerprint_stores = dict()

@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class StatisticalTestTask(SimulationTestTask):
     def __init__(self, simulation_config, run, name="statistical test", task_result_class=SimulationTestTaskResult, **kwargs):
-        super().__init__(SimulationTask(simulation_config, run, name=name, **kwargs), task_result_class=task_result_class, **kwargs)
+        super().__init__(SimulationTask(simulation_config=simulation_config, run=run, name=name, **kwargs), task_result_class=task_result_class, **kwargs)
         self.locals = locals()
         self.locals.pop("self")
         self.kwargs = kwargs
@@ -37,16 +37,16 @@ class StatisticalTestTask(SimulationTestTask):
                     stored_df = read_result_files(stored_scalar_result_file_name)
                     current_df = get_scalars(current_df)
                     if "runID" in current_df:
-                        current_df.drop("runID", 1,  inplace=True)
+                        current_df.drop("runID", axis=1,  inplace=True)
                     stored_df = get_scalars(stored_df)
                     if "runID" in stored_df:
-                        stored_df.drop("runID", 1,  inplace=True)
+                        stored_df.drop("runID", axis=1,  inplace=True)
                     scalars_match = current_df.equals(stored_df)
                     if not scalars_match:
                         if current_df.empty:
-                            return self.task_result_class(self, simulation_task_result, result="FAIL", reason="Current statistical results are empty")
+                            return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="FAIL", reason="Current statistical results are empty")
                         elif stored_df.empty:
-                            return self.task_result_class(self, simulation_task_result, result="FAIL", reason="Stored statistical results are empty")
+                            return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="FAIL", reason="Stored statistical results are empty")
                         else:
                             df = pandas.DataFrame()
                             df["module"] = stored_df["module"]
@@ -58,10 +58,10 @@ class StatisticalTestTask(SimulationTestTask):
                             reason = df.loc[df["relative_error"].idxmax()].to_string()
                             reason = re.sub(" +", " = ", reason)
                             reason = re.sub("\\n", ", ", reason)
-                            return self.task_result_class(self, simulation_task_result, result="FAIL", reason=reason)
+                            return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="FAIL", reason=reason)
                 else:
-                    return self.task_result_class(self, simulation_task_result, result="ERROR", reason="Stored statistical results are not found")
-        return self.task_result_class(self, simulation_task_result, result="PASS")
+                    return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="ERROR", reason="Stored statistical results are not found")
+        return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result="PASS")
     
 def get_statistical_result_sim_time_limit(simulation_config, run=0):
     ini_file_path = simulation_config.simulation_project.get_full_path(os.path.join(simulation_config.working_directory, simulation_config.ini_file))
@@ -90,7 +90,7 @@ def run_statistical_tests(**kwargs):
 
 class StatisticalResultsUpdateTask(SimulationTask):
     def __init__(self, simulation_config, run, name="statistical results update", **kwargs):
-        super().__init__(simulation_config, run, name=name, **kwargs)
+        super().__init__(simulation_config=simulation_config, run=run, name=name, **kwargs)
         self.locals = locals()
         self.locals.pop("self")
         self.kwargs = kwargs

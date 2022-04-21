@@ -35,11 +35,13 @@ class TaskResult:
                (" " + self.get_error_message(complete_error_message=complete_error_message) if self.result == "ERROR" else "")
 
     def get_error_message(self, **kwargs):
-        error_message = self.error_message or "No error message"
-        return error_message if self.result == "ERROR" else ""
+        return self.error_message or "<Error message not found>"
 
     def print_result(self, complete_error_message=False, output_stream=sys.stdout, **kwargs):
         print(self.get_description(complete_error_message=complete_error_message), file=output_stream)
+
+    def recreate(self, **kwargs):
+        return self.__class__(**dict(dict(self.locals, **self.kwargs), **kwargs))
 
     def rerun(self, **kwargs):
         return self.task.rerun(**kwargs)
@@ -160,8 +162,11 @@ class MultipleTaskResults:
                    matches_filter(test_result.error_message, error_message_filter, exclude_error_message_filter, full_match)
         filtered_results = list(filter(matches_test_result, self.results))
         filtered_tasks = list(map(lambda result: result.task, filtered_results))
-        multiple_tasks = self.multiple_tasks.__class__(tasks=filtered_tasks, concurrent=self.multiple_tasks.concurrent)
-        return self.__class__(multiple_tasks, filtered_results)
+        multiple_tasks = self.multiple_tasks.recreate(tasks=filtered_tasks, concurrent=self.multiple_tasks.concurrent)
+        return self.recreate(multiple_tasks=multiple_tasks, results=filtered_results)
+
+    def recreate(self, **kwargs):
+        return self.__class__(**dict(dict(self.locals, **self.kwargs), **kwargs))
 
     def rerun(self, **kwargs):
         return self.multiple_tasks.rerun(**kwargs)
@@ -190,7 +195,7 @@ class Task:
         index_str_padding = "0" * (len(count_str) - len(index_str))
         return "[" + index_str_padding + index_str + "/" + count_str + "] " if index is not None and count is not None else ""
 
-    def run(self, index=None, count=None, print_end=" ", dry_run=False, output_stream=sys.stdout, keyboard_interrupt_handler=None, **kwargs):
+    def run(self, index=None, count=None, print_end=" ", dry_run=False, output_stream=sys.stdout, keyboard_interrupt_handler=None, handle_exception=True, **kwargs):
         if self.cancel:
             return self.task_result_class(task=self, result="CANCEL", reason="Cancel by user")
         else:
@@ -208,15 +213,21 @@ class Task:
             except KeyboardInterrupt:
                 task_result = self.task_result_class(task=self, result="CANCEL", reason="Cancel by user")
             except Exception as e:
-                task_result = self.task_result_class(task=self, result="ERROR", reason="Exception during task execution", error_message=e.__repr__())
+                if handle_exception:
+                    task_result = self.task_result_class(task=self, result="ERROR", reason="Exception during task execution", error_message=e.__repr__())
+                else:
+                    raise e
             task_result.print_result(complete_error_message=False, output_stream=output_stream)
             return task_result
 
     def run_protected(self, **kwargs):
         return self.task_result_class(task=self, result="DONE", reason="Task completed")
 
+    def recreate(self, **kwargs):
+        return self.__class__(**dict(dict(self.locals, **self.kwargs), **kwargs))
+
     def rerun(self, **kwargs):
-        return self.__class__(**dict(dict(self.locals, **self.kwargs), **kwargs)).run()
+        return self.recreate(**kwargs).run()
 
 class MultipleTasks:
     def __init__(self, tasks=[], name="task", concurrent=True, randomize=False, chunksize=1, pool_class=multiprocessing.pool.ThreadPool, multiple_task_results_class=MultipleTaskResults, **kwargs):
@@ -290,8 +301,11 @@ class MultipleTasks:
                     task_index = task_index + 1
         return self.multiple_task_results_class(multiple_tasks=self, results=task_results)
 
+    def recreate(self, **kwargs):
+        return self.__class__(**dict(dict(self.locals, **self.kwargs), **kwargs))
+
     def rerun(self, **kwargs):
-        return self.__class__(**dict(dict(self.locals, **self.kwargs), **kwargs)).run()
+        return self.recreate(**kwargs).run()
 
 def run_task_with_capturing_output(task, tasks=None, task_count=None, output_stream=sys.stdout, **kwargs):
     task_output_stream = io.StringIO()
