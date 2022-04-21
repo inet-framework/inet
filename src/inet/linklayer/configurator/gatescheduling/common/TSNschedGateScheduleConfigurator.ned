@@ -18,7 +18,7 @@ import inet.linklayer.configurator.gatescheduling.contract.IGateScheduleConfigur
 // In order to be able to use this module, the above tool must be installed
 // along with a Java SDK and all other necessary tools. The module communicates
 // with TSNsched via reading and writing files and using system commands. The
-// TSNsched tool is found using the TSNSCHED_HOME environment variable, which
+// TSNsched tool is found using the TSNSCHED_ROOT environment variable, which
 // must be properly set to the installation folder.
 //
 simple TSNschedGateScheduleConfigurator extends GateScheduleConfiguratorBase like IGateScheduleConfigurator
