@@ -6,7 +6,7 @@
 package inet.showcases.measurement.relationships;
 
 import inet.networks.base.WiredNetworkBase;
-import inet.node.ethernet.EthernetLink;
+import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 
@@ -23,7 +23,7 @@ network MeasurementRelationshipsShowcase extends WiredNetworkBase
             @display("p=750,100");
         }
     connections:
-        source.ethg++ <--> EthernetLink <--> switch.ethg++;
-        switch.ethg++ <--> EthernetLink <--> destination.ethg++;
+        source.ethg++ <--> Eth100M <--> switch.ethg++;
+        switch.ethg++ <--> Eth100M <--> destination.ethg++;
 }
 
