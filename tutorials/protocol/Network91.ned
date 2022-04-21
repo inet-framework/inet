@@ -263,7 +263,7 @@ module Node
         d1: MessageDispatcher {
             @display("p=450,400");
         }
-        interface[sizeof(phys)]: Interface {
+        interface[sizeof(g)]: Interface {
             @display("p=450,500,row,150");
         }
     connections:
