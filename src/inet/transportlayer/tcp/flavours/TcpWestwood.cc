@@ -84,7 +84,8 @@ void TcpWestwood::processRexmitTimer(TcpEventCode& event)
         state->w_a = 1;
     }
 
-    recalculateSlowStartThreshold();
+    if (state->w_RTTmin != SIMTIME_MAX)
+        recalculateSlowStartThreshold();
     if (state->ssthresh < 2 * state->snd_mss)
         state->ssthresh = 2 * state->snd_mss;
 
@@ -232,7 +233,8 @@ void TcpWestwood::receivedDuplicateAck()
             state->w_a = 1;
         }
 
-        recalculateSlowStartThreshold();
+        if (state->w_RTTmin != SIMTIME_MAX)
+            recalculateSlowStartThreshold();
         // reset cwnd to ssthresh, if larger
         if (state->snd_cwnd > state->ssthresh)
             state->snd_cwnd = state->ssthresh;
