@@ -209,7 +209,7 @@ void ExtLowerUdp::bind(int socketId, const L3Address& localAddress, int localPor
 #endif
     int n = ::bind(socket->fd, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
     if (n < 0)
-        throw cRuntimeError("Cannot bind socket: %d", n);
+        throw cRuntimeError("Cannot bind socket: %d", sock_errno());
 }
 
 void ExtLowerUdp::connect(int socketId, const L3Address& remoteAddress, int remotePort)
