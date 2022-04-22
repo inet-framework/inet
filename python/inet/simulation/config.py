@@ -14,7 +14,7 @@ from inet.simulation.project import *
 logger = logging.getLogger(__name__)
 
 class SimulationConfig:
-    def __init__(self, simulation_project, working_directory, ini_file, config, num_runs, abstract, expected_result, description):
+    def __init__(self, simulation_project, working_directory, ini_file, config, num_runs, abstract, expected_result, user_interface, description):
         self.simulation_project = simulation_project
         self.working_directory = working_directory
         self.ini_file = ini_file
@@ -23,6 +23,7 @@ class SimulationConfig:
         self.abstract = abstract
         self.emulation = working_directory.find("emulation") != -1
         self.expected_result = expected_result
+        self.user_interface = user_interface
         self.description = description
 
     def __repr__(self):
@@ -49,19 +50,24 @@ def get_num_runs_fast(ini_path):
     return None if num_runs_fast_regex.search(text) else 1
 
 def collect_ini_file_simulation_configs(simulation_project, ini_path):
+    def create_config_dict(config):
+        return {"config": config, "abstract_config": False, "expected_result": "DONE", "user_interface": None, "description": None, "network": None}
     simulation_configs = []
     working_directory = os.path.dirname(ini_path)
     num_runs_fast = get_num_runs_fast(ini_path)
     ini_file = os.path.basename(ini_path)
     file = open(ini_path, encoding="utf-8")
-    config_dicts = []
+    config_dicts = {"General": create_config_dict("General")}
     config_dict = {}
     for line in file:
         match = re.match("\\[(Config +)?(.*?)\\]|\\[(General)\\]", line)
         if match:
             config = match.group(2) or match.group(3)
-            config_dict = {"config": config, "abstract_config": False, "expected_result": "DONE", "description": None, "network": None}
-            config_dicts.append(config_dict)
+            config_dict = create_config_dict(config)
+            config_dicts[config] = config_dict
+        match = re.match(" *user-interface *= \"*(\w+)\"", line)
+        if match:
+            config_dict["user_interface"] = match.group(1)
         match = re.match("#? *abstract-config *= *(\w+)", line)
         if match:
             config_dict["abstract_config"] = bool(match.group(1))
@@ -74,7 +80,8 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
         match = re.match("network *= *(.*)", line)
         if match:
             config_dict["network"] = match.group(1)
-    for config_dict in config_dicts:
+    general_config_dict = config_dicts["General"]
+    for config, config_dict in config_dicts.items():
         config = config_dict["config"]
         executable = simulation_project.get_executable(mode="release")
         default_args = simulation_project.get_default_args()
@@ -83,9 +90,7 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
         if num_runs_fast:
             num_runs = num_runs_fast
         else:
-            env = os.environ.copy()
-            env["INET_ROOT"] = simulation_project.get_full_path(".")
-            result = subprocess.run(args, cwd=working_directory, capture_output=True, env=env)
+            result = subprocess.run(args, cwd=working_directory, capture_output=True, env=simulation_project.get_env())
             if result.returncode == 0:
                 num_runs = int(result.stdout)
             else:
@@ -94,7 +99,8 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
         description_abstract = (re.search("\((a|A)bstract\)", description) is not None) if description else False
         abstract = (config_dict["network"] is None and config_dict["config"] == "General") or config_dict["abstract_config"] or description_abstract
         expected_result = config_dict["expected_result"]
-        simulation_config = SimulationConfig(simulation_project, os.path.relpath(working_directory, simulation_project.get_full_path(".")), ini_file, config, num_runs, abstract, expected_result, description)
+        user_interface = config_dict["user_interface"] or general_config_dict["user_interface"]
+        simulation_config = SimulationConfig(simulation_project, os.path.relpath(working_directory, simulation_project.get_full_path(".")), ini_file, config, num_runs, abstract, expected_result, user_interface, description)
         simulation_configs.append(simulation_config)
     return simulation_configs
 

@@ -61,11 +61,15 @@ class SimulationTestTask(TestTask):
         return self.simulation_task.get_parameters_string(**kwargs)
 
     def run_protected(self, output_stream=sys.stdout, **kwargs):
-        simulation_task_result = self.simulation_task.run_protected(output_stream=output_stream, **kwargs)
-        if simulation_task_result.result == "DONE":
-            return self.check_simulation_task_result(simulation_task_result=simulation_task_result, **kwargs)
+        simulation_config = self.simulation_task.simulation_config
+        if simulation_config.user_interface and simulation_config.user_interface != self.simulation_task.user_interface:
+            return self.task_result_class(task=self, result="SKIP", expected_result="SKIP", reason="Requires different user interface")
         else:
-            return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result=simulation_task_result.result, expected_result=simulation_task_result.expected_result, expected=simulation_task_result.expected, reason=simulation_task_result.reason, error_message="simulation exited with error")
+            simulation_task_result = self.simulation_task.run_protected(output_stream=output_stream, **kwargs)
+            if simulation_task_result.result == "DONE":
+                return self.check_simulation_task_result(simulation_task_result=simulation_task_result, **kwargs)
+            else:
+                return self.task_result_class(task=self, simulation_task_result=simulation_task_result, result=simulation_task_result.result, expected_result=simulation_task_result.expected_result, expected=simulation_task_result.expected, reason=simulation_task_result.reason, error_message="simulation exited with error")
 
     def check_simulation_task_result(self, simulation_task_result, **kwargs):
         result = "PASS" if simulation_task_result.result == "DONE" else simulation_task_result.result

@@ -26,8 +26,8 @@ class SimulationTaskResult(TaskResult):
         self.kwargs = kwargs
         self.subprocess_result = subprocess_result
         if subprocess_result:
-            stdout = self.subprocess_result.stdout.decode("utf-8")
-            stderr = self.subprocess_result.stderr.decode("utf-8")
+            stdout = self.subprocess_result.stdout.decode("utf-8") if self.subprocess_result.stdout else ""
+            stderr = self.subprocess_result.stderr.decode("utf-8") if self.subprocess_result.stderr else ""
             match = re.search(r"<!> Simulation time limit reached -- at t=(.*), event #(\d+)", stdout)
             self.last_event_number = int(match.group(2)) if match else None
             self.last_simulation_time = match.group(1) if match else None
@@ -84,9 +84,7 @@ class SimulationTask(Task):
             executable = simulation_project.get_executable()
             default_args = simulation_project.get_default_args()
             args = [executable, *default_args, "-s", "-u", "Cmdenv", "-f", simulation_config.ini_file, "-c", simulation_config.config, "-r", "0", "--sim-time-limit", "0s"]
-            env = os.environ.copy()
-            env["INET_ROOT"] = simulation_project.get_full_path(".")
-            subprocess_result = subprocess.run(args, cwd=simulation_project.get_full_path(simulation_config.working_directory), capture_output=True, env=env)
+            subprocess_result = subprocess.run(args, cwd=simulation_project.get_full_path(simulation_config.working_directory), capture_output=True, env=simulation_project.get_env())
             stderr = subprocess_result.stderr.decode("utf-8")
             match = re.search(r"The simulation wanted to ask a question|The simulation attempted to prompt for user input", stderr)
             self.interactive = match is not None
@@ -123,8 +121,6 @@ class SimulationTask(Task):
         executable = simulation_project.get_executable(mode=self.mode)
         default_args = simulation_project.get_default_args()
         args = [executable, *default_args, "-s", "-u", self.user_interface, "-f", ini_file, "-c", config, "-r", str(self._run), *sim_time_limit_args, *cpu_time_limit_args, *record_eventlog_args, *record_pcap_args, *extra_args]
-        env = os.environ.copy()
-        env["INET_ROOT"] = simulation_project.get_full_path(".")
         logger.debug(args)
         expected_result = self.get_expected_result()
         subprocess_result = simulation_runner.run(self, args, capture_output=capture_output)

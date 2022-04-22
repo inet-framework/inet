@@ -25,10 +25,8 @@ class PacketTestTask(TestTask):
         executable = "./runtest"
         working_directory = self.simulation_project.get_full_path("tests/packet")
         args = [executable, "-s"]
-        env = os.environ.copy()
-        env["INET_ROOT"] = self.simulation_project.get_full_path(".")
         logger.debug(args)
-        subprocess_result = subprocess.run(args, cwd=working_directory, capture_output=True, env=env)
+        subprocess_result = subprocess.run(args, cwd=working_directory, capture_output=True, env=self.simulation_project.get_env())
         stdout = subprocess_result.stdout.decode("utf-8")
         match = re.search(r"Packet unit test: (\w+)", stdout)
         return self.task_result_class(self, result=match.group(1) if match and subprocess_result.returncode == 0 else "FAIL")

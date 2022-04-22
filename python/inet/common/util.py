@@ -1,10 +1,7 @@
 import curses.ascii
-import functools
 import io
 import IPython
 import logging
-import multiprocessing
-import multiprocessing.pool
 import os
 import pickle
 import re

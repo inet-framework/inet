@@ -18,6 +18,12 @@ class SimulationProject:
     def get_name(self):
         return os.path.basename(self.get_full_path("."))
 
+    def get_env(self):
+        env = os.environ.copy()
+        env["INET_ROOT"] = self.get_full_path(".")
+        env["TSNSCHED_ROOT"] = self.get_full_path("../TSNsched")
+        return env
+
     def get_full_path(self, path):
         return os.path.abspath(os.path.join(self.project_directory, path))
 
