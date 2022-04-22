@@ -9,11 +9,13 @@
 
 #include "inet/applications/voipstream/VoipStreamReceiver.h"
 
-#include "inet/common/INETEndians.h"
+#include "inet/applications/voipstream/VoipStreamPacket_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
 namespace inet {
 

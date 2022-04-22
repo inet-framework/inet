@@ -13,8 +13,6 @@
 
 #include "inet/applications/voipstream/AudioOutFile.h"
 
-#include "inet/common/INETEndians.h"
-
 namespace inet {
 
 //#if defined(__clang__)

@@ -21,15 +21,11 @@ extern "C" {
 #include <libavformat/avformat.h>
 };
 
+#include <iostream>
 #include <sys/stat.h>
 
-#include <iostream>
-
 #include "inet/applications/voipstream/AudioOutFile.h"
-#include "inet/applications/voipstream/VoipStreamPacket_m.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {

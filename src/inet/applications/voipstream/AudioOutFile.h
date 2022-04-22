@@ -10,13 +10,13 @@
 
 #define __STDC_CONSTANT_MACROS
 
-#include "inet/common/INETDefs.h"
-
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/mathematics.h>
 };
+
+#include "inet/common/INETDefs.h"
 
 namespace inet {
 
