@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-04-11  Levente Mészáros
+
+	Changed IPv4 and IPv6 flat configurators to use the INET specific Topology class.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-07-22  Levente Mészáros

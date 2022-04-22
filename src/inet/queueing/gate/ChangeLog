@@ -1,5 +1,22 @@
 ====== inet-4.x ======
 
+2022-03-10  Levente Mészáros
+
+	PeriodicGate: Fixed scheduling change timer, it must come after it has been already processed.
+
+2022-03-03  Levente Mészáros
+
+	PeriodicGate: Fixed unnecessary state change when the last duration is 0 (due to even length requirement).
+
+2022-02-24  Zoltan Bojthe
+
+	Added missing INET_WITH_PHYSICALLAYERWIRELESSCOMMON
+	Moved interpacketGapStartedSignal/interpacketGapEndedSignal to Simsignals.h.
+
+2022-02-15  Levente Mészáros
+
+	PeriodicGate: Added getter for initial offset.
+
 2021-12-16  Levente Mészáros
 
 	PeriodicGate: Changed initiallyOpen to be true by default.

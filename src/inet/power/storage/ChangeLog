@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-03-21  Levente Mészáros
+
+	Fixed #747: Avoid division by zero causing scheduling a message to infinite simulation time.
+
 2021-05-28  Zoltan Bojthe
 
 	Changed SimpleCcBattery base class to LifecycleController.

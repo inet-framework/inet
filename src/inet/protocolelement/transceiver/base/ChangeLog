@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2022-04-05  Levente Mészáros
+
+	PacketTransmitterBase: Fixed division by zero error
+
+2022-02-03  Levente Mészáros
+
+	Changed utilization to percentage and added missing units to statistics.
+
 2021-11-29  Levente Mészáros
 
 	PacketReceiverBase: Added statistics similary to PacketTransmtitterBase.

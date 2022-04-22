@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-03-02  Levente Mészáros
+
+	Renamed *GateSchedulingConfigurator to *GateScheduleConfigurator.
+
 2021-04-21  Levente Mészáros
 
 	Added IGateSchedulingConfigurator module interface.

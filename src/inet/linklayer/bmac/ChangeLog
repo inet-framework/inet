@@ -2,6 +2,11 @@
 
 2022-01-26  Rudolf Hornig
 
+	All of the BMac code is licensed under LGPL v3 (allowed by the written permission
+	of the original author, Anna Foerster).
+
+2022-01-26  Rudolf Hornig
+
 	Clarified that all of the BMac code is licensed under LGPL v3 (with the written
 	permission of the original author, Anna Foerster).
 

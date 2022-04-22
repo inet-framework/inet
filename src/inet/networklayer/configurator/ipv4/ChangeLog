@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2022-04-11  Levente Mészáros
+
+	Changed IPv4 and IPv6 flat configurators to use the INET specific Topology class.
+
+2022-01-28  Rudolf Hornig
+
+	Code is re-licensed now under LGPL v3 with the written permission of the original authors.
+
 2022-01-24  Levente Mészáros
 
 	Ipv4NetworkConfigurator: Fixed bug #711 as suggested by Alfonso Ariza Quintana.

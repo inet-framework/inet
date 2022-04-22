@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2022-03-16  Rudolf Hornig
+
+	Moved/removed GPL licensed code to a separate repo to make INET clean LGPL licensed.
+
+2022-01-28  Rudolf Hornig
+
+	Code is re-licensed now under LGPL v3 with the written permission of the authors.
+
 2021-05-05  Zoltan Bojthe
 
 	Move enums to MSG files.

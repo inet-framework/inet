@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-01-19  Zoltan Bojthe
+
+	Fixed missing @toValue, @fromValue, or remove @byValue
+
 2022-01-19  Levente Mészáros
 
 	L3AddressResolver: Changed generic interface address lookup to take NextHopInterfaceData into account.
@@ -42,9 +46,17 @@
 
 	Added parent or this to parameter access for OMNeT++ 6 compatibility.
 
+2021-05-06  Edward Longman
+
+	Refactored out repeated code for matching Interface with Address
+
 2021-04-26  Zoltan Bojthe
 
 	Added/updated Enter_Method() info to the signalname in receiveSignal().
+
+2021-04-22  Edward Longman
+
+	Added ModuleIdAddress and ModulePathAddress to get L3AddressResolver::findHostWithAddress.
 
 2021-04-19  Zoltan Bojthe
 

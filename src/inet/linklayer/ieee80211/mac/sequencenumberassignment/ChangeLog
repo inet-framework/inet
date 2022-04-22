@@ -8,6 +8,11 @@
 	requirement. The latter is used where the protocol logic requires modulo
 	arithmetic.
 
+2022-03-10  Gyorgy Szaszko
+
+	Renamed files to correct typo.
+	Fixed typos in variables, function and class names.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-01-08  ------ inet-4.2.0 released ------

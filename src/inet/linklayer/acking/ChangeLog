@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2021-09-08  Edward Longman
+
+	Added lifecycle operation to AckingMac.
+
 2022-01-05  Zoltan Bojthe
 
 	Removed canProcessUpperPacket(), tryProcessUpperPacket().

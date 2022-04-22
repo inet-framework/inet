@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-04-11  Zoltan Bojthe
+
+	Changed to use isWireless() instead of searching for "wlan" interfaces.
+
 2021-04-19  Zoltan Bojthe
 
 	Switch to using ModuleRef, ModuleRefByPar, opp_component_ptr for pointers to

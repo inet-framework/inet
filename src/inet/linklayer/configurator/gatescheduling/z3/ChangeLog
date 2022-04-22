@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2022-03-02  Levente Mészáros
+
+	Renamed *GateSchedulingConfigurator to *GateScheduleConfigurator.
+
+2022-02-24  Levente Mészáros
+
+	Replaced the old Z3 SAT based implementation with a greatly simplified new one.
+
+2022-02-07  Levente Mészáros
+
+	Renamed priority fields to pcp and gateIndex as appropriate.
+
+2022-01-31  Levente Mészáros
+
+	Added NED documentation.
+
 2021-04-21  Levente Mészáros
 
 	Added Z3GateSchedulingConfigurator module.

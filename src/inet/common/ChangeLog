@@ -1,5 +1,63 @@
 ====== inet-4.x ======
 
+2022-04-13  Levente Mészáros
+
+	PacketDropReason: Changed default drop reason value to -1 because that's the
+	default inital value for fields.
+
+2022-04-05  Levente Mészáros
+
+	Topology: Removed LinkIn/LinkOut types because they cannot be properly implemented.
+	The cast from Link to LinkIn/LinkOut was inherently wrong due to the underlying
+	type being different. Problem found by sanitizer tests.
+	PacketFilter: Added missing destructor calls, problem found by sanitizer tests.
+	ProtocolTag: Added UNSPECIFIED value to ServicePrimitive, problem found by sanitizer tests.
+
+2022-03-28  Zoltan Bojthe
+
+	Added int getId() NED function.
+
+2022-03-23  Zoltan Bojthe
+
+	OmittedModule: copy gate displaystring when reconnecting.
+
+2022-03-21  Levente Mészáros
+
+	Changed ProtocolTag::getProtocol to require the protocol field to be actually set to a protocol.
+
+2022-03-09  Levente Mészáros
+
+	Fixed result filters grouping for packet regions.
+
+2022-03-04  Levente Mészáros
+
+	Added AtomicFilter to avoid statistics hazards during complex operations.
+
+2022-02-24  Zoltan Bojthe
+
+	Moved interpacketGapStartedSignal/interpacketGapEndedSignal to Simsignals.h.
+
+2022-02-21  Zoltan Bojthe
+
+	Added more missing @packetData annotations in MSG files.
+
+2022-02-15  Zoltan Bojthe
+
+	OperationalMixin: Changed isInitializeStage(), isModuleStartStage(), isModuleStopStage() to const.
+	LayeredProtocolBase: Changed isUpperMessage() and isLowerMessage() to const (#713)
+
+2022-02-07  Levente Mészáros
+
+	UtilizationFilter: Fixed incorrectly recording 1 - utilization.
+
+2022-01-28  Rudolf Hornig
+
+	Code is re-licensed now under LGPL v3 with the written permission of the authors.
+
+2022-01-18  Zoltan Bojthe
+
+	ResultFilters: Replaced deprecated init() functions to new version
+
 2022-01-17  Levente Mészáros
 
 	ProtocolListTagBase: Renamed plural protocols field to singular protocol.
@@ -38,7 +96,7 @@
 
 	ThroughputFilter: Extended with interval and numLengthLimit filter parameters
 	that are read from the INI file configuration.
-	
+
 	DemuxFlowFilter: Added flow name matching based on filter flowName parameter.
 
 	ResidenceTimePerRegionFilter: Adapted to new TimeTag fields.
@@ -66,7 +124,7 @@
 	VarianceFilter, StddevFilter, JitterFilter, DifferenceToMeanFilter, UtilizationFilter,
 	GroupRegionsPerPacketFilter, LengthWeightedValuePerRegionFilter, MaxPerGroupFilter,
 	WeighedMeanPerGroupFilter, WeighedSumPerGroupFilter, DropWeightFilter and WeightTimesFilter.
-	
+
 	TimeTag: Added setting packet level total times in time tags and added ResidenceTimeTag.
 	Added ResidenceTimeMeasurer and IMeasurer.
 

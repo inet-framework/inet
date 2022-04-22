@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-03-18  Zoltan Bojthe
+
+	Replaced IEthernetEncapsulation to IEthernetLayer.
+
 2022-01-13  Levente Mészáros
 
 	Refactored old IMacAddressTable to new IMacForwardingTable interface.

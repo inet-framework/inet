@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2022-03-22  Zoltan Bojthe
+
+	WrrScheduler: Fixed support for weight=0. Returns first non-weighted non-empty
+	provider when all weighted providers are empty.
+
+2022-03-16  Rudolf Hornig
+
+	Moved/removed GPL licensed code to a separate repo to make INET clean LGPL licensed.
+
 2022-01-14  Levente Mészáros
 
 	HtbScheduler: Added missing removeAllPackets method required by interface.

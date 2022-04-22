@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-03-17  Zoltan Bojthe
+
+	EthernetHost, EthernetHost2: Added LLC module to the upper of 'encap' module.
+
 2022-01-13  Levente Mészáros
 
 	Replaced remaining MacAddressTable with MacForwardingTable.

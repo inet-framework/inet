@@ -1,5 +1,16 @@
 ====== inet-4.x ======
 
+2022-04-06  Levente Mészáros
+
+	EthernetFragmentFcsInserter: Changed to make sure the packet is trimmed at
+	the back before inserting the FCS.
+	Ethernet*MacLayer: Refactored the TSN specific modules to be independent
+	of the standard EthernetMacLayer.
+	EthernetMacLayer: Removed Ethernet FCS insertions and optional streaming.
+	EthernetLayer: Added Ethernet FCS insertion and checking to the protocol layer.
+	EthernetFcsChecker: Implemented the IProtocolRegistrationListener interface.
+	EthernetFcsChecker: Added popFcs parameter.
+
 2022-01-14  Levente Mészáros
 
 	EthernetCutthroughSource: Added support for multicast destination addresses.

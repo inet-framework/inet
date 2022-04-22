@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2022-01-21  Zoltan Bojthe
+
+	Fixed documentation comments. Use includes instead of forward declarations.
+	Remove unnecessary includes. Remove commented out obsolete code. Initialize
+	member variables at declaration. Rename functions, move functions to
+	connection module. Remove some forward declarations Set some functions to
+	protected.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-16  Levente Mészáros

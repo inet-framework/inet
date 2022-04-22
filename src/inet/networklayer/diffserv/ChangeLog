@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-03-22  Zoltan Bojthe
+
+	DscpMarker: Added processing of ethernet MAC header when it exists.
+
 2022-01-07  Levente Mészáros
 
 	MultiFieldClassifier: Fixed registration forwarding for defaultOut gate.

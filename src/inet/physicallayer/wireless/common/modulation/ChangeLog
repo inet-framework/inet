@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-04-05  Levente Mészáros
+
+	DsssOqpsk16Modulation: Added missing constellation vector with unspecified symbols.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-11-24  Levente Mészáros

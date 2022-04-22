@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-04-06  Zoltan Bojthe
+
+	Rename gates to allow Mpls to implement the IProtocolLayer module interface.
+
 2022-01-12  Levente Mészáros
 
 	Mpls: Added missing cases for registration forwarding.

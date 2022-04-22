@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-02-24  Zoltan Bojthe
+
+	Added missing INET_WITH_PHYSICALLAYERWIRELESSCOMMON
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-08-26  Levente Mészáros

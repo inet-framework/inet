@@ -1,8 +1,20 @@
 ====== inet-4.x ======
 
+2022-04-13  Levente Mészáros
+
+	Fixed incorrectly calculating the fractional time value.
+
+2022-01-28  Rudolf Hornig
+
+	RTP code is re-licensed now under LGPL v3 with the written permission of the authors.
+
 2022-01-26  Rudolf Hornig
 
-	RTP code is re-licensed now under LGPL v3    
+	Changed license from GPL to LGPL v3 with the written permission of the original author (Matthias Oppitz).
+
+2022-01-26  Rudolf Hornig
+
+	RTP code is re-licensed now under LGPL v3
 	(allowed by the written permission of the original author, Matthias Oppitz).
 
 2021-05-31  Zoltan Bojthe

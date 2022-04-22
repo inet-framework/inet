@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2022-04-05  Levente Mészáros
+
+	Extracted a SimulationRunUniqueNumberGenerator type from MacAddress.
+
+2022-02-24  Zoltan Bojthe
+
+	MacAddress, GlobalArp: Moved multicast IPv4/IPv6/L3->MacAddress multicast
+	address conversions to Address classes.
+
 2022-01-07  Levente Mészáros
 
 	*QosClassifier: Added registration forwarding for out gate.

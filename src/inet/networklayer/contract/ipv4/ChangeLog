@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2022-02-24  Zoltan Bojthe
+
+	MacAddress, GlobalArp: Moved multicast IPv4/IPv6/L3->MacAddress multicast
+	address conversions to Address classes.
+
 2021-10-20  Levente Mészáros
 
 	MSG: Reverted toValue/fromValue from L3Address/Ipv4Address.

@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2022-01-28  Rudolf Hornig
+
+	Serializer code is re-licensed now under LGPL v3 with the written permission of the original authors.
+
+2021-07-14  Edward Longman
+
+	Added signals to Ipv6 layer and module type checking to enable route visualization.
+
+2021-05-07  Edward Longman
+
+	Replaced duplicate implementations of findInterfaceByAddress and isLocalAddress in RoutingTables.
+
 2021-05-07  Zoltan Bojthe
 
 	Added parent or this to parameter access for OMNeT++ 6 compatibility.

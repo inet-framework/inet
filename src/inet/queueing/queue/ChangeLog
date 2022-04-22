@@ -1,5 +1,23 @@
 ====== inet-4.x ======
 
+2022-04-11  Levente Mészáros
+
+	Added missing destructors to fix errors repored by sanitizer tests.
+
+2022-03-16  Rudolf Hornig
+
+	Moved/removed GPL licensed code to a separate repo to make INET clean LGPL licensed.
+
+2022-03-04  Levente Mészáros
+
+	Changed packetPush to make sure that there are no hazards in the queueLength statistics.
+
+	There are two problems here: packets can be dropped due to the queue
+	being overloaded, packets can also be pulled out immediately as they get
+	pushed into the queue. Depending on the order of push, remove, pull
+	operations the queue length can go above capacity and also below zero,
+	both of which should be avoided.
+
 2022-01-17  Marcin Bosk
 
 	Added initial HTB code.

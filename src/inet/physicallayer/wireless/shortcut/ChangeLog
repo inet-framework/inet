@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-02-21  Zoltan Bojthe
+
+	Pointers are initialized to nullptr automatically in MSG.
+
 2021-03-19  Zoltan Bojthe
 
 	Changed if-else-if ladders in initialize() to separate if statements because

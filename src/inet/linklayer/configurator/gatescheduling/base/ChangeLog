@@ -1,5 +1,25 @@
 ====== inet-4.x ======
 
+2022-04-05  Levente Mészáros
+
+	Fixed memory leaks found by sanitizer tests.
+
+2022-03-03  Levente Mészáros
+
+	Fixed ordering of flows by PCP. Higher PCP value means higher priority and that must come first.
+
+2022-03-02  Levente Mészáros
+
+	Renamed *GateSchedulingConfigurator to *GateScheduleConfigurator.
+	Added input/output ports to path fragments.
+	Changed to correctly fill in input/output ports even when the interface is specified.
+	Fixed remainingDuration to use the schedule's cycle duration instead of the global cycle duration.
+	Added gateIndex and maxJitter parameter to stream configuration.
+
+2022-02-07  Levente Mészáros
+
+	Renamed priority fields to pcp and gateIndex as appropriate.
+
 2021-04-29  Levente Mészáros
 
 	Added GateSchedulingConfiguratorBase module.

@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-01-26  Rudolf Hornig
+
+	Fixed license discrepancy in TcpLwip header (incorrect GPL license header).
+
 2021-03-19  Zoltan Bojthe
 
 	Changed if-else-if ladders in initialize() to separate if statements because

@@ -1,6 +1,0 @@
-====== inet-4.x ======
-
-2021-04-21  Levente Mészáros
-
-	Added AlwaysOpenGateSchedulingConfigurator, SimpleGateSchedulingConfigurator
-	and TSNschedGateSchedulingConfigurator.

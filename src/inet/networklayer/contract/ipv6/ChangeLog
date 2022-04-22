@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2022-02-24  Zoltan Bojthe
+
+	MacAddress, GlobalArp: Moved multicast IPv4/IPv6/L3->MacAddress multicast
+	address conversions to Address classes.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-16  Levente Mészáros

@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-04-05  Levente Mészáros
+
+	Added missing destructor calls to PacketFilter.
+
 2022-01-20  Levente Mészáros
 
 	PacketFilter: Extended with filtering for packet tags.

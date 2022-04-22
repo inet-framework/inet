@@ -4,6 +4,10 @@
 
 	RealTimeScheduler: Fixed the mixed nanosec and microsec values.
 
+2022-01-28  Rudolf Hornig
+
+	code is re-licensed now under LGPL v3 with the written permission of the authors
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-16  Levente Mészáros

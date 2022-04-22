@@ -1,5 +1,10 @@
 ====== inet-4.x ======
 
+2022-03-10  Levente Mészáros
+
+	Extended Ieee80211ErrorModelBase with new DSSS error rate model.
+	Dropped obsolete DsssErrorRateModel.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-08-31  Levente Mészáros

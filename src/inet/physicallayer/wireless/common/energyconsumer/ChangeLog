@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-02-28  Zoltan Bojthe
+
+	Removed dependency on power feature.
+
 2021-04-26  Zoltan Bojthe
 
 	Added/updated Enter_Method() info to the signalname in receiveSignal().

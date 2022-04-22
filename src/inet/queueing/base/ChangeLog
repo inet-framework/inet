@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2022-04-05  Levente Mészáros
+
+	Changed field default value in PacketGateBase.
+
+2022-02-25  Gyorgy Szaszko
+
+	Increased gate state color opacity in PacketGateBase
+
 2021-11-16  Levente Mészáros
 
 	PacketProcessorBase: Fixed begin send/end send calls without send hops.

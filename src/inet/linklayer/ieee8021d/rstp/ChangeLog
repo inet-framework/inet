@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-03-28  Zoltan Bojthe
+
+	Remove unnecessary ethernet padding
+
 2022-01-13  Levente Mészáros
 
 	Removed parameter assignments referencing other modules in the environment.

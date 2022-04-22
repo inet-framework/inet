@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2022-03-22  Zoltan Bojthe
+
+	Moved EthernetEncapsulation module from EthernetInterface to the linklayer 'ethernet' module.
+
+2022-03-18  Zoltan Bojthe
+
+	Removed obsolete parameter setting (queue submodule was removed from mac).
+	Replaced IEthernetEncapsulation to IEthernetLayer.
+
 2021-12-16  Levente Mészáros
 
 	Added missing interfaceTableModule parameter assignments for passing down.

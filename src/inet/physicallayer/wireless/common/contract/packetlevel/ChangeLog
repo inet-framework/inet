@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2022-03-22  Levente Mészáros
+
+	Extended communication cache with getNumRadios and getNumTransmissions.
+
+2022-02-21  Zoltan Bojthe
+
+	Pointers are initialized to nullptr automatically in MSG.
+
 2021-09-01  Levente Mészáros
 
 	IApskModulation: Fixed field types to be the same as in the existing C++ class.

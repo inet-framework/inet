@@ -8,6 +8,10 @@
 	requirement. The latter is used where the protocol logic requires modulo
 	arithmetic.
 
+2022-03-10  Gyorgy Szaszko
+
+	Fixed typos in variables, function and class names.
+
 2021-01-04  Levente Mészáros
 
 	Changed MAC data services to take care of packet ownership.

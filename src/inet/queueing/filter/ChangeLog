@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-04-11  Levente Mészáros
+
+	OrdinalBasedDropper: Added missing call to base class dropPacket.
+
 2021-11-24  Zoltan Bojthe
 
 	RedDropper: subscribe to queue for detecting queue emptying.

@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-03-02  Levente Mészáros
+
+	Renamed Gate*Visualier to GateSchedule*Visualizer.
+
 2021-03-19  Zoltan Bojthe
 
 	Changed if-else-if ladders in initialize() to separate if statements because

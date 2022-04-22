@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-04-11  Levente Mészáros
+
+	Fixed using the packet after it has been sent (can be deleted).
+
 2021-11-30  Levente Mészáros
 
 	Added QueueingPacketDelayer module that delays packets in order.

@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2022-04-13  Levente Mészáros
+
+	InterpacketGapInserter: Fixed memory leak found by sanitizer tests.
+
+2022-04-11  Levente Mészáros
+
+	InterpacketGapInserter: Fixed scheduling self timer when it was already scheduled by a callback.
+
+2022-04-06  Levente Mészáros
+
+	PreemptableStreamer: Replaced getTotalLength with getDataLength.
+
+2022-02-24  Zoltan Bojthe
+
+	Moved interpacketGapStartedSignal/interpacketGapEndedSignal to Simsignals.h
+
 2022-01-20  Levente Mészáros
 
 	PacketEmitter: Fixed duplicate emit calls for a single packet.

@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-03-22  Levente Mészáros
+
+	Added check to make sure that receiver IDLE state is actually possible.
+
 2021-05-07  Zoltan Bojthe
 
 	Added parent or this to parameter access for OMNeT++ 6 compatibility.

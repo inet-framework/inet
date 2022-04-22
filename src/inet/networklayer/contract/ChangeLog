@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2022-03-10  Rudolf Hornig
+
+	GPL -> LGPL relicensed xMIPv6 code with the author's permission.
+
+2022-02-08  Zoltan Bojthe
+
+	NetworkHeaderBase: Fixed type in @fromValue().
+
+2022-01-19  Zoltan Bojthe
+
+	Fixed missing @toValue, @fromValue, or remove @byValue.
+
 2021-10-20  Levente Mészáros
 
 	MSG: Reverted toValue/fromValue from L3Address/Ipv4Address.

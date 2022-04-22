@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2022-04-13  Levente Mészáros
+
+	TcpWestwood: Fixed unspecified behaviour when casting a double larger than UINT32_MAX.
+
+2022-04-07  Zoltan Bojthe
+
+	Moved state variable definitions to MSG files.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-16  Levente Mészáros

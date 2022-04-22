@@ -1,5 +1,21 @@
 ====== inet-4.x ======
 
+2022-04-14  Levente Mészáros
+
+	Fixed copying overlapping memory regions, found by sanitizer tests.
+
+2022-04-13  Zoltan Bojthe
+
+	Replaced avcodec_encode_audio2() to avcodec_send_frame(), avcodec_receive_packet()
+	required extra AV_INPUT_BUFFER_PADDING_SIZE bytes at end of buff for avcodec_decode_audio4()
+	Fixed length calculation for decoded data in writeAudioFrame.
+	Added resampling remainder data in internal buffer at end of file.
+
+2022-04-12  Zoltan Bojthe
+
+	Moved resampling code to new resampleFrame() function.
+	Changed to use libswresample instead of libavresample.
+
 2021-03-19  Zoltan Bojthe
 
 	Changed if-else-if ladders in initialize() to separate if statements because

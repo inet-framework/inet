@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2022-04-11  Levente Mészáros
+
+	NextHopRoutingTable: Added guard condition for division by zero found by sanitizer tests.
+
+2021-05-07  Edward Longman
+
+	Replaces duplicate implementations of findInterfaceByAddress and isLocalAddress in RoutingTables.
+
 2021-05-07  Zoltan Bojthe
 
 	Added parent or this to parameter access for OMNeT++ 6 compatibility.

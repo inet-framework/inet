@@ -1,5 +1,25 @@
 ====== inet-4.x ======
 
+2022-04-11  Levente Mészáros
+
+	Ipv4InterfaceData: Added guard condition for using a multicast interface.
+
+2022-03-31  Zoltan Bojthe
+
+	RoutingTableRecorder: Fixed recording was destroyed during cleanup.
+
+2022-03-10  Rudolf Hornig
+
+	Removed unused NetworkInfo class (was used only in Quagga tests).
+
+2022-01-28  Rudolf Hornig
+
+	Serializer code is re-licensed now under LGPL v3 with the written permission of the original authors.
+
+2022-01-19  Zoltan Bojthe
+
+	Fixed missing @toValue, @fromValue, or remove @byValue
+
 2021-11-15  Rudolf Hornig
 
 	Added @mutable property for OMNeT++ 6 compatibility.

@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-04-11  Levente Mészáros
+
+	Ieee80211LayeredOfdmReceiver: Fixed typo, bitwise vs boolean operator.
+
 2021-03-19  Zoltan Bojthe
 
 	Changed if-else-if ladders in initialize() to separate if statements because

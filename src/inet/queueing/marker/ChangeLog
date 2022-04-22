@@ -1,7 +1,12 @@
 ====== inet-4.x ======
 
+2022-03-22  Zoltan Bojthe
+
+	EcnMarker: process ethernet MAC header when exists.
+
 2022-01-07  Levente Mészáros
-	Adapted to new packet filter expression syntax.
+
+	Adapted to new packet filter expression syntax.
 
 2021-03-03  Zoltan Bojthe
 

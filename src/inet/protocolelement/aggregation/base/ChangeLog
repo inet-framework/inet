@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-04-11  Levente Mészáros
+
+	AggregatorBase: Changed aggregatorPolicy submodule default type to LengthBasedAggregatorPolicy.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-09-11  Levente Mészáros

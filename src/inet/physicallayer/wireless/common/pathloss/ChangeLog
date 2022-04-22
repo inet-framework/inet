@@ -1,5 +1,14 @@
 ====== inet-4.x ======
 
+2022-03-10  Rudolf Hornig
+
+	GPL -> LGPL relicensed pathloss models. The code in the remaining files are
+	straightforward implementation of well known publicly accessible numeric formulas.
+
+2022-02-02  Rudolf Hornig
+
+	GPL -> LGPL relicensed some code with the permission of the original authors
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-08-31  Levente Mészáros

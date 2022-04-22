@@ -1,5 +1,29 @@
 ====== inet-4.x ======
 
+2022-04-19  Levente Mészáros
+
+	Fixed double delete caused by using shared pointer for explicitly deleted object.
+
+2022-04-13  Levente Mészáros
+
+	Fixed various memory leaks found by sanitizer tests.
+
+2022-04-11  Levente Mészáros
+
+	SctpAssociation: Fixed bug found by sanitizer tests.
+	The value of 1 << 31 can be negative when converted to double, thanks C++.
+	SctpPathVariables: Fixed negative upper limit due to C++ stupidity.
+
+2022-02-21  Zoltan Bojthe
+
+	Pointers are initialized to nullptr automatically in MSG.
+	Added more missing @packetData annotations in MSG files.
+
+2022-01-28  Rudolf Hornig
+
+	SCTP code is re-licensed now under LGPL v3 with the written permission of the
+	original authors (Irene Ruengeler, Thomaz Dreibholz).
+
 2022-01-26  Rudolf Hornig
 
 	SCTP code is re-licensed now under LGPL v3

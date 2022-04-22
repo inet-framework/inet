@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-03-22  Levente Mészáros
+
+	Extended communication cache with getNumRadios and getNumTransmissions.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-12-08  Levente Mészáros

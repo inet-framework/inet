@@ -1,5 +1,23 @@
 ====== inet-4.x ======
 
+2022-04-11  Levente Mészáros
+
+	EthernetEncapsulation: Set fcsMode default value to be declared.
+
+2022-03-25  Zoltan Bojthe
+
+	EthernetEncapsulation: Added check interfaceId.
+
+2022-03-18  Zoltan Bojthe
+
+	Replaced IEthernetEncapsulation to IEthernetLayer.
+	EthernetEncapsulation: Added support for registering any-protocol.
+
+2022-03-17  Zoltan Bojthe
+
+	EthernetEncapsulation: encapsulate/decapsulate MAC header and FCS only.
+	Remove the inner Ieee8022Llc. Socket support not changed.
+
 2022-01-05  Zoltan Bojthe
 
 	Changed to use canDequeuePacket(), dequeuePacket().

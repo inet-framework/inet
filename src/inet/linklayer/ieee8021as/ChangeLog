@@ -1,5 +1,17 @@
 ====== inet-4.x ======
 
+2022-02-21  Zoltan Bojthe
+
+	Added more missing @packetData annotations in MSG files.
+
+2022-02-18  Zoltan Bojthe
+
+	Added 'clockIdentity' member instead of getId() calls.
+
+2022-02-09  Zoltan Bojthe
+
+	Changed to use contract.ClockTime instead of common.ClockTime.
+
 2022-01-10  Levente Mészáros
 
 	Changed default pdelay measurement initial offset to zero.

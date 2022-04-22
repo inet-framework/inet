@@ -1,5 +1,18 @@
 ====== inet-4.x ======
 
+2022-03-21  Levente Mészáros
+
+	InterfaceTableVisualizerBase: Changed default format to avoid useless / in network addresses.
+	InterfaceTableVisualizerBase: Fixed #710.
+
+2022-03-02  Gyorgy Szaszko
+
+	Added label format string to GateScheduleVisualizer.
+
+2022-03-02  Levente Mészáros
+
+	Renamed Gate*Visualier to GateSchedule*Visualizer.
+
 2021-11-08  Levente Mészáros
 
 	Added @mutable property to parameters which can be changed during the simulation.

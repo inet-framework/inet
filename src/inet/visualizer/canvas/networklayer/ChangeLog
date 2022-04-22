@@ -4,6 +4,10 @@
 
 	NetworkRouteCanvasVisualizer: Extended with support for layered Ethernet model.
 
+2021-07-14  Edward Longman
+
+	Add signals to Ipv6 layer and module type checking to enable route visualization.
+
 2021-01-11  ------ inet-4.3.0 released ------
 
 2020-11-26  Levente Mészáros

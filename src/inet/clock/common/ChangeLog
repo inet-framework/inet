@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2022-02-21  Zoltan Bojthe
+
+	MSG pointers are initialized to nullptr automatically.
+
+2022-02-09  Zoltan Bojthe
+
+	Changed to use contract.ClockTime instead of common.ClockTime.
+
 2021-07-07  Zoltan Bojthe
 
 	Added cast functions for ClockTime.
