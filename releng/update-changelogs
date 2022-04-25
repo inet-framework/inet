@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # This script automatically updates ChangeLog files from the git history.
 # The result may need some editing before committing back into the repo.
@@ -55,7 +55,7 @@ def updateChangeLogIn(dir):
     if since!="": gitLogCommand +=  ['--since='+since]
     if fromtag!="": gitLogCommand += [fromtag+"..HEAD"]
     gitLogCommand += [dir]
-    newLog = subprocess.check_output(gitLogCommand, shell=(isWindows and not isMSYS))
+    newLog = subprocess.check_output(gitLogCommand, shell=(isWindows and not isMSYS)).decode("utf-8")
     newLog = formatChangeLog(newLog)
 
     newLog = re.sub('(?m)^    (    )?', "\t", newLog) # spaces-to-tab
