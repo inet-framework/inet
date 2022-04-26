@@ -1,6 +1,6 @@
 ====== inet-4.x ======
 
-2022-01-25
+2022-04-25
 
     Added features
     ==============
@@ -16,6 +16,7 @@
     common/selfdoc
     linklayer/configurator/gatescheduling
     linklayer/configurator/gatescheduling/base
+    linklayer/configurator/gatescheduling/common
     linklayer/configurator/gatescheduling/contract
     linklayer/configurator/gatescheduling/z3
     linklayer/ieee8021as
@@ -56,9 +57,9 @@
     linklayer.configurator.FailureProtectionConfigurator
     linklayer.configurator.MacForwardingTableConfigurator
     linklayer.configurator.StreamRedundancyConfigurator
-    linklayer.configurator.gatescheduling.AlwaysOpenGateScheduleConfigurator
-    linklayer.configurator.gatescheduling.EagerGateScheduleConfigurator
-    linklayer.configurator.gatescheduling.TSNschedGateScheduleConfigurator
+    linklayer.configurator.gatescheduling.common.AlwaysOpenGateScheduleConfigurator
+    linklayer.configurator.gatescheduling.common.EagerGateScheduleConfigurator
+    linklayer.configurator.gatescheduling.common.TSNschedGateScheduleConfigurator
     linklayer.configurator.gatescheduling.z3.Z3GateScheduleConfigurator
     linklayer.ethernet.common.BridgingLayer
     linklayer.ethernet.common.DirectionReverserLayer
@@ -493,19 +494,10 @@
     linklayer/configurator/FailureProtectionConfigurator
     linklayer/configurator/MacForwardingTableConfigurator
     linklayer/configurator/StreamRedundancyConfigurator
-    linklayer/configurator/gatescheduling/AlwaysOpenGateScheduleConfigurator
-    linklayer/configurator/gatescheduling/EagerGateScheduleConfigurator
-    linklayer/configurator/gatescheduling/TSNschedGateScheduleConfigurator
     linklayer/configurator/gatescheduling/base/GateScheduleConfiguratorBase
-    linklayer/configurator/gatescheduling/z3/Cycle
-    linklayer/configurator/gatescheduling/z3/Device
-    linklayer/configurator/gatescheduling/z3/Flow
-    linklayer/configurator/gatescheduling/z3/FlowFragment
-    linklayer/configurator/gatescheduling/z3/Network
-    linklayer/configurator/gatescheduling/z3/PathNode
-    linklayer/configurator/gatescheduling/z3/PathTree
-    linklayer/configurator/gatescheduling/z3/Port
-    linklayer/configurator/gatescheduling/z3/Switch
+    linklayer/configurator/gatescheduling/common/AlwaysOpenGateScheduleConfigurator
+    linklayer/configurator/gatescheduling/common/EagerGateScheduleConfigurator
+    linklayer/configurator/gatescheduling/common/TSNschedGateScheduleConfigurator
     linklayer/configurator/gatescheduling/z3/Z3GateScheduleConfigurator
     linklayer/ethernet/common/PacketDirectionReverser
     linklayer/ethernet/common/RelayInterfaceLearner
