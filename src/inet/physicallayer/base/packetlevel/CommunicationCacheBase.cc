@@ -52,7 +52,7 @@ CommunicationCacheBase::RadioCacheEntry::~RadioCacheEntry()
 }
 
 CommunicationCacheBase::TransmissionCacheEntry::TransmissionCacheEntry() :
-    interferenceEndTime(NaN),
+    interferenceEndTime(-1),
     frame(nullptr),
     receptionCacheEntries(nullptr)
 {
