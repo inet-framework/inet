@@ -1,6 +1,28 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-4.3.8 (April 2022) - Stable
+--------------------------------
+
+Several minor bigfixes plus compatibility fixes for OMNeT++ 6.0.
+OMNeT++ 6.0 Preview and RC versions are NOT supported.
+For details see individual ChangeLog files 
+
+  - simplified findInterfaceByAddress() and findHostWithAddress(),
+    uses NetworkInterface::hasNetworkAddress()
+  - Replaced duplicate implementations of findInterfaceByAddress and
+    isLocalAddress in RoutingTables
+  - Changed initial values of simtime_t fields to -1 instead of NaN, because
+    double NaN cannot be converted to simtime_t.
+  - Replaced deprecated init() to new init(Context* ctx) in ResultFilters.
+  - Fixed #747: Avoid division by zero causing scheduling a message to 
+    infinite simulation time.
+  - Fixed SendOptions duration/remainingDuration for the animation of 
+    synchronous packet pushes/pulls in queueing/protocolelement
+  - Fixes for change in OMNeT++ 6 where uniform(a,b) now expecting a <=b
+  - Various smaller bigfixes and optimizations
+
+
 INET-4.3.7 (February 2022) - Stable
 -----------------------------------
 

@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2022-04-26  ------ inet-4.3.8 released ------
+
 2021-04-02  Levente Mészáros
 
 	PacketProcessorBase: Fixed SendOptions duration/remainingDuration for the
