@@ -1,5 +1,11 @@
 ====== inet-4.x ======
 
+2021-04-02  Levente Mészáros
+
+	PacketProcessorBase: Fixed SendOptions duration/remainingDuration for the
+	animation of synchronous packet pushes/pulls.
+
+
 2022-02-07  ------ inet-4.3.7 released ------
 
 2021-12-27  ------ inet-4.3.6 released ------

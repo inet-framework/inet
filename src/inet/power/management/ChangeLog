@@ -1,5 +1,15 @@
 ====== inet-4.x ======
 
+2022-04-11  Levente Mészáros
+
+	SimpleEpEnergyManagement: Added guard condition to avoid scheduling self
+	message.
+
+2022-03-21  Levente Mészáros
+
+	power: Fixed #747. Avoid division by zero causing scheduling a message to infinite
+	simulation time.
+
 2022-02-07  ------ inet-4.3.7 released ------
 
 2021-12-27  ------ inet-4.3.6 released ------
