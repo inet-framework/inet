@@ -407,18 +407,18 @@
 
     Removed statistics
     ==================
-    delayingTime is split into sevaral more specific variants
-    elapsedTime is split into sevaral more specific variants
+    delayingTime
+    elapsedTime
     gateStateChanged
     lifeTime
-    packetAdded is split into sevaral more specific variants
-    packetCreated is split into sevaral more specific variants
-    packetRemoved is split into sevaral more specific variants
-    packetServed is split into sevaral more specific variants
-    processingTime is split into sevaral more specific variants
-    tokensAdded is split into sevaral more specific variants
-    tokensDepleted is split into sevaral more specific variants
-    tokensRemoved is split into sevaral more specific variants
+    packetAdded
+    packetCreated
+    packetRemoved
+    packetServed
+    processingTime
+    tokensAdded
+    tokensDepleted
+    tokensRemoved
 
     Added chunks
     ============
