@@ -1,19 +1,8 @@
 //
 // Copyright (C) 2005 M. Bohge (bohge@tkn.tu-berlin.de), M. Renwanz
-// Copyright (C) 2010 Zoltan Bojthe
+// Copyright (C) 2010 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
 #ifndef __INET_VOIPSTREAMRECEIVER_H
@@ -36,10 +25,7 @@ extern "C" {
 #include <sys/stat.h>
 
 #include "inet/applications/voipstream/AudioOutFile.h"
-#include "inet/applications/voipstream/VoipStreamPacket_m.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
@@ -61,18 +47,17 @@ class INET_API VoipStreamReceiver : public cSimpleModule, public LifecycleUnsupp
     virtual void closeConnection();
     virtual void decodePacket(Packet *vp);
 
-    //UdpSocket::ICallback methods
+    // UdpSocket::ICallback methods
     virtual void socketDataArrived(UdpSocket *socket, Packet *packet) override;
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
     virtual void socketClosed(UdpSocket *socket) override {}
 
-    class Connection
-    {
+    class Connection {
       public:
         Connection() {}
         void addAudioStream(enum AVCodecID codec_id);
         void openAudio(const char *fileName);
-        void writeAudioFrame(uint8_t *buf, int len);
+        void writeAudioFrame(AVPacket *avpkt);
         void writeLostSamples(int sampleCount);
         void closeAudio();
 
@@ -117,5 +102,5 @@ class INET_API VoipStreamReceiver : public cSimpleModule, public LifecycleUnsupp
 
 } // namespace inet
 
-#endif // ifndef __INET_VOIPSTREAMRECEIVER_H
+#endif
 

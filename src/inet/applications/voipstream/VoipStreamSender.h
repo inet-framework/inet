@@ -1,19 +1,8 @@
 //
 // Copyright (C) 2005 M. Bohge (bohge@tkn.tu-berlin.de), M. Renwanz
-// Copyright (C) 2010 Zoltan Bojthe
+// Copyright (C) 2010 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
 #ifndef __INET_VOIPSTREAMSENDER_H
@@ -34,18 +23,15 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
-#ifndef HAVE_FFMPEG_AVRESAMPLE
-#error Please install libavresample or disable 'VoIPStream' feature
-#endif // ifndef HAVE_FFMPEG_AVRESAMPLE
-#include <libavresample/avresample.h>
-#endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
+#ifndef HAVE_FFMPEG_SWRESAMPLE
+#error Please install libswresample or disable 'VoIPStream' feature
+#endif // ifndef HAVE_FFMPEG_SWRESAMPLE
+
+#include <libswresample/swresample.h>
 };
 
 #include "inet/applications/voipstream/AudioOutFile.h"
-#include "inet/applications/voipstream/VoipStreamPacket_m.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
@@ -66,12 +52,12 @@ class INET_API VoipStreamSender : public cSimpleModule, public LifecycleUnsuppor
     virtual Packet *generatePacket();
     virtual bool checkSilence(AVSampleFormat sampleFormat, void *_buf, int samples);
     virtual void readFrame();
+    virtual void resampleFrame(const uint8_t **in_data, int in_nb_samples);
 
   protected:
-    class Buffer
-    {
+    class Buffer {
       public:
-        enum { BUFSIZE = 48000*2*2 };   // 1 second of two channel 48kHz 16bit audio
+        enum { BUFSIZE = 48000 * 2 * 2 }; // 1 second of two channel 48kHz 16bit audio
 
       protected:
         char *samples;
@@ -100,38 +86,31 @@ class INET_API VoipStreamSender : public cSimpleModule, public LifecycleUnsuppor
     L3Address destAddress;
 
     int voipHeaderSize = 0;
-    int voipSilenceThreshold = 0;    // the maximum amplitude of a silence packet
-    int voipSilencePacketSize = 0;    // size of a silence packet
-    int sampleRate = 0;    // samples/sec [Hz]
+    int voipSilenceThreshold = 0; // the maximum amplitude of a silence packet
+    int voipSilencePacketSize = 0; // size of a silence packet
+    int sampleRate = 0; // samples/sec [Hz]
     const char *codec = nullptr;
     int compressedBitRate = 0;
     simtime_t packetTimeLength;
-    const char *soundFile = nullptr;    // input audio file name
+    const char *soundFile = nullptr; // input audio file name
     int repeatCount = 0;
 
-    const char *traceFileName = nullptr;    // name of the output trace file, nullptr or empty to turn off recording
+    const char *traceFileName = nullptr; // name of the output trace file, nullptr or empty to turn off recording
     AudioOutFile outFile;
 
     // AVCodec parameters
     AVFormatContext *pFormatCtx = nullptr;
     AVCodecContext *pCodecCtx = nullptr;
-    AVCodec *pCodec = nullptr;    // input decoder codec
-
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
-    AVAudioResampleContext *pReSampleCtx = nullptr;
-#else // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
-    ReSampleContext *pReSampleCtx = nullptr;
-#endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
-
+    AVCodec *pCodec = nullptr; // input decoder codec
+    SwrContext *pReSampleCtx = nullptr;
     AVCodecContext *pEncoderCtx = nullptr;
-    AVCodec *pCodecEncoder = nullptr;    // output encoder codec
+    AVCodec *pCodecEncoder = nullptr; // output encoder codec
 
     // state variables
     UdpSocket socket;
     int streamIndex = -1;
-    uint32_t pktID = 0;    // increasing packet sequence number
+    uint32_t pktID = 0; // increasing packet sequence number
     int samplesPerPacket = 0;
-    AVPacket packet {};  // {}: zero-initialize so that av_free_packet() doesn't crash if initialization doesn't go through
     Buffer sampleBuffer;
 
     cMessage *timer = nullptr;
@@ -139,5 +118,5 @@ class INET_API VoipStreamSender : public cSimpleModule, public LifecycleUnsuppor
 
 } // namespace inet
 
-#endif // ifndef __INET_VOIPSTREAMSENDER_H
+#endif
 

@@ -1,57 +1,38 @@
 //
 // Copyright (C) 2005 M. Bohge (bohge@tkn.tu-berlin.de), M. Renwanz
-// Copyright (C) 2010 Zoltan Bojthe
+// Copyright (C) 2010 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
 // for INT64_C(x), UINT64_C(x):
 #define __STDC_CONSTANT_MACROS
+
+#include <cstdarg>
 #include <stdint.h>
 
 #include "inet/applications/voipstream/AudioOutFile.h"
-#include "inet/common/INETEndians.h"
 
 namespace inet {
 
-#if defined(__clang__)
-#  pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#elif defined(__GNUC__)
-#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
+//#if defined(__clang__)
+//#  pragma clang diagnostic ignored "-Wdeprecated-declarations"
+//#elif defined(__GNUC__)
+//#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+//#endif
 
-void AudioOutFile::addAudioStream(enum AVCodecID codec_id, int sampleRate, short int sampleBits)
+static void *getThisPtr() { return cSimulation::getActiveSimulation()->getContextModule(); }
+void inet_av_log(void *avcontext, int level, const char *format, va_list va)
 {
-    AVStream *st = avformat_new_stream(oc, nullptr);
-
-    if (!st)
-        throw cRuntimeError("Could not alloc stream\n");
-
-    AVCodecContext *c = st->codec;
-    c->codec_id = codec_id;
-    c->codec_type = AVMEDIA_TYPE_AUDIO;
-
-    /* put sample parameters */
-    c->bit_rate = sampleRate * sampleBits;
-    c->sample_rate = sampleRate;
-    c->sample_fmt = AV_SAMPLE_FMT_S16;    //FIXME hack!
-    c->channels = 1;
-    audio_st = st;
+    char buffer[1024];
+    int l = vsnprintf(buffer, 1023, format, va);
+    *(buffer + l) = 0;
+    EV_DEBUG << "av_log: " << buffer;
 }
 
 void AudioOutFile::open(const char *resultFile, int sampleRate, short int sampleBits)
 {
+    int err;
     ASSERT(!opened);
 
     opened = true;
@@ -72,80 +53,101 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
         throw cRuntimeError("Memory error at avformat_alloc_context()");
 
     oc->oformat = fmt;
-    snprintf(oc->filename, sizeof(oc->filename), "%s", resultFile);
+    oc->url = av_strdup(resultFile);
 
     // add the audio stream using the default format codecs and initialize the codecs
     audio_st = nullptr;
-    if (fmt->audio_codec != AV_CODEC_ID_NONE)
-        addAudioStream(fmt->audio_codec, sampleRate, sampleBits);
+    if (fmt->audio_codec != AV_CODEC_ID_NONE) {
+        audio_st = avformat_new_stream(oc, nullptr);
+
+        if (!audio_st)
+            throw cRuntimeError("Could not alloc stream\n");
+
+        AVCodecParameters *p = audio_st->codecpar;
+        p->codec_id = fmt->audio_codec;
+        p->codec_type = AVMEDIA_TYPE_AUDIO;
+        p->bit_rate = sampleRate * sampleBits;
+        p->sample_rate = sampleRate;
+        p->channels = 1;
+    }
 
     av_dump_format(oc, 0, resultFile, 1);
 
-    /* now that all the parameters are set, we can open the audio and
-       video codecs and allocate the necessary encode buffers */
+    // now that all the parameters are set, we can open the audio and
+    // video codecs and allocate the necessary encode buffers
     if (audio_st) {
-        AVCodecContext *c = audio_st->codec;
+        AVCodecParameters *codecPar = audio_st->codecpar;
 
-        /* find the audio encoder */
-        AVCodec *avcodec = avcodec_find_encoder(c->codec_id);
+        // find the audio encoder
+        AVCodec *avcodec = avcodec_find_encoder(codecPar->codec_id);
         if (!avcodec)
-            throw cRuntimeError("Codec %d not found", c->codec_id);
+            throw cRuntimeError("Codec %d not found", codecPar->codec_id);
+        codecCtx = avcodec_alloc_context3(avcodec);
+        if (!codecCtx)
+            throw cRuntimeError("avcodec_alloc_context3() failed");
+        err = avcodec_parameters_to_context(codecCtx, codecPar);
+        if (err < 0)
+            throw cRuntimeError("avcodec_parameters_to_context() error: %d", err);
 
-        /* open it */
-        if (avcodec_open2(c, avcodec, nullptr) < 0)
-            throw cRuntimeError("Could not open codec %d", c->codec_id);
+        codecCtx->sample_fmt = AV_SAMPLE_FMT_S16; // FIXME hack!
+
+        // open it
+        err = avcodec_open2(codecCtx, avcodec, nullptr);
+        if (err < 0)
+            throw cRuntimeError("Could not open codec %d: error %d", codecPar->codec_id, err);
     }
 
-    /* open the output file, if needed */
+    // open the output file, if needed
     if (!(fmt->flags & AVFMT_NOFILE)) {
         if (avio_open(&oc->pb, resultFile, AVIO_FLAG_WRITE) < 0)
             throw cRuntimeError("Could not open '%s'", resultFile);
     }
 
     // write the stream header
-    auto err = avformat_write_header(oc, nullptr);
+    err = avformat_write_header(oc, nullptr);
     if (err < 0)
-        throw cRuntimeError("Could not write header to '%s'", resultFile);
+        throw cRuntimeError("Could not write header to '%s', error=%d", resultFile, err);
 }
 
 void AudioOutFile::write(void *decBuf, int pktBytes)
 {
     ASSERT(opened);
 
-    AVCodecContext *c = audio_st->codec;
-    short int bytesPerInSample = av_get_bytes_per_sample(c->sample_fmt);
+    short int bytesPerInSample = av_get_bytes_per_sample(codecCtx->sample_fmt);
     int samples = pktBytes / bytesPerInSample;
 
-    AVPacket pkt;
-    av_init_packet(&pkt);
-    pkt.data = nullptr;
-    pkt.size = 0;
     AVFrame *frame = av_frame_alloc();
-
     frame->nb_samples = samples;
-
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
     frame->channel_layout = AV_CH_LAYOUT_MONO;
-    frame->sample_rate = c->sample_rate;
-#endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
-
-    int ret = avcodec_fill_audio_frame(frame,    /*channels*/ 1, c->sample_fmt,
-                (const uint8_t *)(decBuf), pktBytes, 1);
-    if (ret < 0)
-        throw cRuntimeError("Error in avcodec_fill_audio_frame(): err=%d", ret);
+    frame->sample_rate = codecCtx->sample_rate;
+    frame->channels = codecCtx->channels;
+    frame->format = codecCtx->sample_fmt;
+    int err = avcodec_fill_audio_frame(frame, /*channels*/ 1, codecCtx->sample_fmt, (const uint8_t *)(decBuf), pktBytes, 1);
+    if (err < 0)
+        throw cRuntimeError("Error in avcodec_fill_audio_frame(): err=%d", err);
 
     // The bitsPerOutSample is not 0 when codec is PCM.
-    int gotPacket;
-    ret = avcodec_encode_audio2(c, &pkt, frame, &gotPacket);
-    if (ret < 0 || gotPacket != 1)
-        throw cRuntimeError("avcodec_encode_audio() error: %d gotPacket: %d", ret, gotPacket);
+    frame->channels = codecCtx->channels;
+    frame->format = codecCtx->sample_fmt;
+    err = avcodec_send_frame(codecCtx, frame);
+    if (err < 0)
+        throw cRuntimeError("avcodec_send_frame() error: %d", err);
+    AVPacket *pkt = av_packet_alloc();
+    while(true) {
+        err = avcodec_receive_packet(codecCtx, pkt);
+        if (err == AVERROR(EAGAIN) || err == AVERROR_EOF)
+            break;
+        else if (err < 0)
+            throw cRuntimeError("avcodec_receive_packet() error: %d", err);
 
-    pkt.dts = 0;    //HACK for libav 11
+        pkt->dts = 0; // HACK for libav 11
 
-    // write the compressed frame into the media file
-    ret = av_interleaved_write_frame(oc, &pkt);
-    if (ret != 0)
-        throw cRuntimeError("Error while writing audio frame: %d", ret);
+        // write the compressed frame into the media file
+        err = av_interleaved_write_frame(oc, pkt);
+        if (err != 0)
+            throw cRuntimeError("Error while writing audio frame: %d", err);
+    }
+    av_packet_free(&pkt);
     av_frame_free(&frame);
 }
 
@@ -154,25 +156,44 @@ bool AudioOutFile::close()
     if (!opened)
         return false;
 
+    int err = avcodec_send_frame(codecCtx, nullptr);
+    if (err < 0)
+        throw cRuntimeError("avcodec_send_frame() error: %d", err);
+    AVPacket *pkt = av_packet_alloc();
+    while(true) {
+        err = avcodec_receive_packet(codecCtx, pkt);
+        if (err == AVERROR(EAGAIN) || err == AVERROR_EOF)
+            break;
+        else if (err < 0)
+            throw cRuntimeError("avcodec_receive_packet() error: %d", err);
+
+        pkt->dts = 0; // HACK for libav 11
+
+        // write the compressed frame into the media file
+        err = av_interleaved_write_frame(oc, pkt);
+        if (err != 0)
+            throw cRuntimeError("Error while writing audio frame: %d", err);
+    }
+    av_packet_free(&pkt);
+
     opened = false;
 
-    /* write the trailer, if any.  the trailer must be written
-     * before you close the CodecContexts open when you wrote the
-     * header; otherwise write_trailer may try to use memory that
-     * was freed on av_codec_close() */
+    // write the trailer, if any.  the trailer must be written
+    // before you close the CodecContexts open when you wrote the
+    // header; otherwise write_trailer may try to use memory that
+    // was freed on av_codec_close()
     av_write_trailer(oc);
 
-    /* close each codec */
+    // close each codec
     if (audio_st)
-        avcodec_close(audio_st->codec);
-
+        avcodec_close(codecCtx);
 
     if (!(oc->oformat->flags & AVFMT_NOFILE)) {
-        /* close the output file */
+        // close the output file
         avio_close(oc->pb);
     }
 
-    /* free the stream */
+    // free the stream
     avformat_free_context(oc);
     oc = nullptr;
     return true;
