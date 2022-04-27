@@ -67,9 +67,9 @@
 # /examples/diffserv/simple_/,         -f omnetpp.ini -c WithoutQoS -r 0   # WithoutQoS extended
 # /examples/diffserv/simple_/,         -f omnetpp.ini -c WithPolicing -r 0   # WithPolicing extended
 # /examples/diffserv/simple_/,         -f omnetpp.ini -c WithQueueing -r 0   # WithQueueing extended
-/examples/diffserv/simple_/,         -f omnetpp.ini -c VoIP_WithoutQoS -r 0,               10s,             dfd6-5610/tplx;d9b9-91a7/~tNl;25e4-c7bb/~tND;b29f-eb2a/tyf, PASS,
-/examples/diffserv/simple_/,         -f omnetpp.ini -c VoIP_WithPolicing -r 0,             10s,             157a-b525/tplx;9fdd-df8f/~tNl;ab5b-ea32/~tND;38c5-2d50/tyf, PASS,
-/examples/diffserv/simple_/,         -f omnetpp.ini -c VoIP_WithPolicingAndQueueing -r 0,  10s,             20c8-4a99/tplx;bd81-b731/~tNl;7b5e-e53e/~tND;4acf-dd35/tyf, PASS,
+/examples/diffserv/simple_/,         -f omnetpp.ini -c VoIP_WithoutQoS -r 0,               10s,             2eb4-a987/tplx;d9b9-91a7/~tNl;7f42-64e4/~tND;b29f-eb2a/tyf, PASS,
+/examples/diffserv/simple_/,         -f omnetpp.ini -c VoIP_WithPolicing -r 0,             10s,             4a5b-9515/tplx;9fdd-df8f/~tNl;9d47-b0e6/~tND;38c5-2d50/tyf, PASS,
+/examples/diffserv/simple_/,         -f omnetpp.ini -c VoIP_WithPolicingAndQueueing -r 0,  10s,             bc5b-69e8/tplx;bd81-b731/~tNl;a789-a6d5/~tND;4acf-dd35/tyf, PASS,
 
 # /examples/emulation/extclient/,      -f omnetpp.ini -c General -r 0,                100s,         0, ERROR,    # pcap devices not supported
 # /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_Traffic -r 0,         100s,         0, ERROR,    # pcap devices not supported
