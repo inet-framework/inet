@@ -2,19 +2,7 @@
 // Copyright (C) 2005 M. Bohge (bohge@tkn.tu-berlin.de), M. Renwanz
 // Copyright (C) 2010 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
 #ifndef __INET_VOIPSTREAMRECEIVER_H
@@ -33,15 +21,11 @@ extern "C" {
 #include <libavformat/avformat.h>
 };
 
+#include <iostream>
 #include <sys/stat.h>
 
-#include <iostream>
-
 #include "inet/applications/voipstream/AudioOutFile.h"
-#include "inet/applications/voipstream/VoipStreamPacket_m.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
-#include "inet/networklayer/common/L3AddressResolver.h"
-#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {
@@ -73,7 +57,7 @@ class INET_API VoipStreamReceiver : public cSimpleModule, public LifecycleUnsupp
         Connection() {}
         void addAudioStream(enum AVCodecID codec_id);
         void openAudio(const char *fileName);
-        void writeAudioFrame(uint8_t *buf, int len);
+        void writeAudioFrame(AVPacket *avpkt);
         void writeLostSamples(int sampleCount);
         void closeAudio();
 

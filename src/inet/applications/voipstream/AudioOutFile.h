@@ -2,19 +2,7 @@
 // Copyright (C) 2005 M. Bohge (bohge@tkn.tu-berlin.de), M. Renwanz
 // Copyright (C) 2010 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
 #ifndef __INET_AUDIOOUTFILE_H
@@ -22,15 +10,17 @@
 
 #define __STDC_CONSTANT_MACROS
 
-#include "inet/common/INETDefs.h"
-
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/mathematics.h>
 };
 
+#include "inet/common/INETDefs.h"
+
 namespace inet {
+
+void inet_av_log(void *avcontext, int level, const char *format, va_list va);
 
 /**
  * Records audio into a file.
@@ -38,7 +28,7 @@ namespace inet {
 class INET_API AudioOutFile
 {
   public:
-    AudioOutFile() : opened(false), audio_st(nullptr), oc(nullptr) {};
+    AudioOutFile() {}
     ~AudioOutFile();
 
     void open(const char *resultFile, int sampleRate, short int sampleBits);
@@ -47,12 +37,10 @@ class INET_API AudioOutFile
     bool isOpen() const { return opened; }
 
   protected:
-    void addAudioStream(enum AVCodecID codec_id, int sampleRate, short int sampleBits);
-
-  protected:
-    bool opened;
-    AVStream *audio_st;
-    AVFormatContext *oc;
+    bool opened = false;
+    AVStream *audio_st = nullptr;
+    AVFormatContext *oc = nullptr;
+    AVCodecContext *codecCtx = nullptr;
 };
 
 } // namespace inet

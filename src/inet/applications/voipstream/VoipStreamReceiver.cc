@@ -2,36 +2,28 @@
 // Copyright (C) 2005 M. Bohge (bohge@tkn.tu-berlin.de), M. Renwanz
 // Copyright (C) 2010 OpenSim Ltd.
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
+// SPDX-License-Identifier: LGPL-3.0-or-later
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-//
+
+#include <cstdarg>
 
 #include "inet/applications/voipstream/VoipStreamReceiver.h"
 
-#include "inet/common/INETEndians.h"
+#include "inet/applications/voipstream/VoipStreamPacket_m.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
+#include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 
 namespace inet {
 
-#if defined(__clang__)
-#  pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#elif defined(__GNUC__)
-#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
+//#if defined(__clang__)
+//#  pragma clang diagnostic ignored "-Wdeprecated-declarations"
+//#elif defined(__GNUC__)
+//#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+//#endif
 
 Define_Module(VoipStreamReceiver);
 
@@ -63,7 +55,7 @@ void VoipStreamReceiver::initialize(int stage)
         playoutDelay = par("playoutDelay");
 
         // initialize avcodec library
-        av_register_all();
+        av_log_set_callback(&inet_av_log);
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         cModule *node = findContainingNode(this);
@@ -134,26 +126,26 @@ void VoipStreamReceiver::Connection::writeLostSamples(int sampleCount)
     }
 }
 
-void VoipStreamReceiver::Connection::writeAudioFrame(uint8_t *inbuf, int inbytes)
+void VoipStreamReceiver::Connection::writeAudioFrame(AVPacket *avpkt)
 {
-    AVPacket avpkt;
-    av_init_packet(&avpkt);
-    avpkt.data = inbuf;
-    avpkt.size = inbytes;
+    int err = avcodec_send_packet(decCtx, avpkt);
+    if (err < 0)
+        throw cRuntimeError("Error in avcodec_send_packet(), err=%d", err);
 
-    int gotFrame;
-    AVFrame decodedFrame = {
-        { nullptr }
-    };
-    int consumedBytes = avcodec_decode_audio4(decCtx, &decodedFrame, &gotFrame, &avpkt);
-    if (consumedBytes < 0 || !gotFrame)
-        throw cRuntimeError("Error in avcodec_decode_audio4(): returns: %d, gotFrame: %d", consumedBytes, gotFrame);
-    if (consumedBytes != inbytes)
-        throw cRuntimeError("Model error: remained bytes after avcodec_decode_audio4(): %d = ( %d - %d )", inbytes - consumedBytes, inbytes, consumedBytes);
-    simtime_t decodedTime(1.0 * decodedFrame.nb_samples / sampleRate);
-    lastPacketFinish += decodedTime;
-    if (outFile.isOpen())
-        outFile.write(decodedFrame.data[0], decodedFrame.linesize[0]);
+    AVFrame *decodedFrame = av_frame_alloc();
+    while (true) {
+        // decode audio and save the decoded samples in our buffer
+        err = avcodec_receive_frame(decCtx, decodedFrame);
+        if (err == AVERROR(EAGAIN) || err == AVERROR_EOF)
+            break;
+        else if (err < 0)
+            throw cRuntimeError("Error in avcodec_receive_frame(), err=%d", err);
+        simtime_t decodedTime(1.0 * decodedFrame->nb_samples / sampleRate);
+        lastPacketFinish += decodedTime;
+        if (outFile.isOpen())
+            outFile.write(decodedFrame->data[0], decodedFrame->nb_samples * av_get_bytes_per_sample(decCtx->sample_fmt));
+    }
+    av_frame_free(&decodedFrame);
 }
 
 void VoipStreamReceiver::Connection::closeAudio()
@@ -193,9 +185,9 @@ void VoipStreamReceiver::createConnection(Packet *pk)
     curConn.decCtx->channels = 1;
     curConn.decCtx->bits_per_coded_sample = curConn.sampleBits;
 
-    int ret = avcodec_open2(curConn.decCtx, curConn.pCodecDec, nullptr);
-    if (ret < 0)
-        throw cRuntimeError("could not open decoding codec %d (%s): err=%d", curConn.codec, curConn.pCodecDec->name, ret);
+    int err = avcodec_open2(curConn.decCtx, curConn.pCodecDec, nullptr);
+    if (err < 0)
+        throw cRuntimeError("could not open decoding codec %d (%s): err=%d", curConn.codec, curConn.pCodecDec->name, err);
 
     curConn.openAudio(resultFile);
     curConn.offline = false;
@@ -261,9 +253,14 @@ void VoipStreamReceiver::decodePacket(Packet *pk)
         emit(packetHasVoiceSignal, 1);
         uint16_t len = vp->getDataLength();
         auto bb = pk->peekDataAt<BytesChunk>(b(0), B(len));
-        auto buff = bb->getBytes();
-        curConn.writeAudioFrame(&buff.front(), buff.size());
-        FINGERPRINT_ADD_EXTRA_DATA2((const char *)(&buff.front()), buff.size());
+        //auto buff = bb->getBytes();
+        AVPacket *avpkt = av_packet_alloc();
+        av_new_packet(avpkt, len + AV_INPUT_BUFFER_PADDING_SIZE); // required extra AV_INPUT_BUFFER_PADDING_SIZE bytes at end of buff for avcodec_decode_audio4()
+        bb->copyToBuffer(avpkt->data, len);
+        avpkt->size = len;
+        FINGERPRINT_ADD_EXTRA_DATA2((const char *)avpkt->data, len);
+        curConn.writeAudioFrame(avpkt);
+        av_packet_free(&avpkt);
     }
     else if (vp->getType() == SILENCE) {
         emit(packetHasVoiceSignal, 0);
