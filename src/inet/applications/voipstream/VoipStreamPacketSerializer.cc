@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-
 #include "inet/applications/voipstream/VoipStreamPacketSerializer.h"
 
 #include "inet/applications/voipstream/VoipStreamPacket_m.h"

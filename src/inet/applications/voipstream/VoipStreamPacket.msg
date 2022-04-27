@@ -44,3 +44,4 @@ class VoipStreamPacket extends FieldsChunk
 
     uint16_t dataLength;
 }
+
