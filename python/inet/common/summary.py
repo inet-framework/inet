@@ -50,10 +50,14 @@ def collect_parameters(simulation_project, path="src"):
         args = ["opp_nedtool", "c", file_name]
         result = subprocess.run(args, capture_output=True)
         file = open(file_name + ".xml", encoding="utf-8")
+        module = None
         for line in file:
+            match = re.match(r"\s*<(simple-module|compound-module|module-interface|channel) name=\"(.*?)\"", line)
+            if match:
+                module = match.group(2)
             match = re.match(r"\s*<param type=\"(.*?)\" name=\"(.*?)\"", line)
             if match:
-                parameters.append(match.group(2))
+                parameters.append(module + ":" + match.group(2))
         file.close()
         os.remove(file_name + ".xml")
     return list(set(parameters))
