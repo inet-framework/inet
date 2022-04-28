@@ -44,8 +44,8 @@ if [ "$TARGET_PLATFORM" != "linux" ]; then
     opp_featuretool disable \
         VoipStream VoipStreamExamples \
         NetworkEmulationSupport NetworkEmulationExamples NetworkEmulationShowcases \
-        TcpLwip TcpNsc \
-        VisualizationOsg VisualizationOsgShowcases 2>&1
+        TcpLwip VisualizationOsg VisualizationOsgShowcases 2>&1
+    opp_featuretool disable TcpNsc 2>&1 || true
     echo "::endgroup::"
 fi
 
