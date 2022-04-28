@@ -1,9 +1,6 @@
-
 INET 4.4 release TODO items:
 
 1. Documentation
-
- - Add new Time-Sensitive Networking chapter to the User's Guide
 
 2. Implementation
 
@@ -22,6 +19,7 @@ INET 4.4 release TODO items:
 
  - Fix important bugs from github.
  - Merge important pull requests from github.
+ - Merge other outstanding branches: from gyuri, etc.
  - Complete WHATSNEW and ChangeLog.
 
 5. Testing
