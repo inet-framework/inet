@@ -11,6 +11,8 @@
 # /examples/adhoc/qos/,                -f omnetpp.ini -c Edca -r 0,         # abstract-config
 /examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             8d50-a4b1/tplx;d392-4369/~tNl;9028-7098/~tND;0a6f-a84c/tyf, PASS, wireless adhoc
 /examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 1,                 10s,             f4a1-f5d8/tplx;cd86-d5e3/~tNl;4cb2-a7e5/~tND;ff06-03de/tyf, PASS, wireless adhoc
+/examples/adhoc/qos/,                -f omnetpp.ini -c Fragmentation,               10s,             9c66-e6f0/tplx;cc9e-d1a6/~tNl;5d97-d47f/~tND;0000-0000/tyf, PASS, wireless adhoc
+/examples/adhoc/qos/,                -f omnetpp.ini -c MsduAggregation,             10s,             6139-16b9/tplx;cfcf-1e52/~tNl;28e0-5fb4/~tND;0000-0000/tyf, PASS, wireless adhoc
 
 /examples/aodv/,                     -f omnetpp.ini -c IPv4SlowMobility -r 0,          50s,          5e65-dd5c/tplx;dc4b-ec59/~tNl;edb3-aecf/~tND;b942-7a6e/tyf, PASS, wireless adhoc AckingWirelessInterface
 /examples/aodv/,                     -f omnetpp.ini -c IPv4ModerateFastMobility -r 0,  50s,          6cb0-ffab/tplx;aba4-d49f/~tNl;1f10-e203/~tND, PASS, wireless adhoc AckingWirelessInterface
@@ -291,6 +293,9 @@
 # /examples/inet/udpclientserver/,     -f omnetpp.ini -c _ipv6 -r 0,                  10s,             0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # abstract-config
 # /examples/inet/udpclientserver/,     -f omnetpp.ini -c _gn -r 0,                  10s,             0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # abstract-config
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4 -r 0,            10s,             8d79-bf2c/tplx;803b-4bed/~tNl;b367-c522/~tND;fc1b-6064/tyf, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4_clock,           10s,             8d79-bf2c/tplx;803b-4bed/~tNl;b367-c522/~tND;fc1b-6064/tyf, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4_clock_adjust,    10s,             5976-ef29/tplx;803b-4bed/~tNl;b367-c522/~tND;0000-0000/tyf, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4_clock_drift,     10s,             8d79-bf2c/tplx;803b-4bed/~tNl;b367-c522/~tND;0000-0000/tyf, PASS,
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Fragment_ipv4 -r 0,      10s,             f8fb-0997/tplx;3f90-c480/~tNl;0b85-3891/~tND;82ca-61a2/tyf, PASS,
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv4 -r 0,     10s,             8ed9-2714/tplx;e23b-dc11/~tNl;d637-dffb/~tND;38a4-9e86/tyf, PASS,
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv4 -r 0,     10s,             5f78-4a56/tplx;0000-0000/~tNl;0000-0000/~tND;2dc3-29f4/tyf, PASS,
@@ -384,6 +389,7 @@
 /examples/mobility/,                 -f omnetpp.ini -c RectangleMobility -r 0,      10000s,          4860-beb1/tplx;0000-0000/~tNl;0000-0000/~tND;2df2-794e/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c StaticGridMobility -r 0,     0s,              0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,         # (zero time simulated)
 /examples/mobility/,                 -f omnetpp.ini -c StationaryMobility -r 0,     0s,              0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,         # (zero time simulated)
+/examples/mobility,                  -f omnetpp.ini -c SuperpositioningMobility,    10s,             4700-bd90/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c TractorMobility -r 0,        10000s,          4b3c-6272/tplx;0000-0000/~tNl;0000-0000/~tND;d72c-bdc0/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility1 -r 0,        10000s,          0e28-b6e3/tplx;0000-0000/~tNl;0000-0000/~tND;95ce-e71e/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility2 -r 0,        10000s,          67c8-fee0/tplx;0000-0000/~tNl;0000-0000/~tND;9cfc-e867/tyf, PASS,
@@ -391,6 +397,7 @@
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility4 -r 0,        10000s,          9511-7d84/tplx;0000-0000/~tNl;0000-0000/~tND;06f8-aff3/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility5 -r 0,        10000s,          9511-7d84/tplx;0000-0000/~tNl;0000-0000/~tND;a637-60c8/tyf, PASS,
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility6 -r 0,        10000s,          0e4c-de72/tplx;0000-0000/~tNl;0000-0000/~tND;22cd-9a0f/tyf, PASS,
+/examples/mobility,                  -f omnetpp.ini -c VehicleMobility,             10s,             74e9-d3f9/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
 
 /examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50s,             6a1b-caed/tplx;36d7-02a9/~tNl;6a67-8c1b/tyf, PASS,
 /examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                100s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, ERROR,    # <!> Error in module (TED) R37.LSR0.ted (id=45) during network initialization: Model error: ASSERT: condition !remote.isUnspecified() false in function initialize, networklayer/ted/TED.cc line 86.
@@ -477,6 +484,9 @@
 /examples/wireless/antenna/,         -f omnetpp.ini -c OrbitX -r 0,                 3610s,           74b3-5fc1/tplx;6755-9aa4/~tNl;9929-6392/~tND;a096-7e79/tyf, PASS, wireless
 /examples/wireless/antenna/,         -f omnetpp.ini -c OrbitY -r 0,                 3610s,           c95e-2d0b/tplx;b108-c520/~tNl;8b68-60e8/~tND;a89b-5af0/tyf, PASS, wireless
 /examples/wireless/antenna/,         -f omnetpp.ini -c OrbitZ -r 0,                 3610s,           843f-badf/tplx;bc8b-7dc3/~tNl;587c-0b63/~tND;618b-17a6/tyf, PASS, wireless
+/examples/wireless/antenna,          -f omnetpp.ini -c RotationX,                   1s,              8abc-79c7/tplx;d274-6adc/~tNl;e6db-0d2f/~tND;0000-0000/tyf, PASS, wireless
+/examples/wireless/antenna,          -f omnetpp.ini -c RotationY,                   1s,              8abc-79c7/tplx;d274-6adc/~tNl;e6db-0d2f/~tND;0000-0000/tyf, PASS, wireless
+/examples/wireless/antenna,          -f omnetpp.ini -c RotationZ,                   1s,              8abc-79c7/tplx;d274-6adc/~tNl;e6db-0d2f/~tND;0000-0000/tyf, PASS, wireless
 
 /examples/wireless/configurator/,    -f omnetpp.ini -c General -r 0,                100s,            372a-a6e4/tplx;68c7-d228/~tNl;048f-ca98/~tND;50c4-046b/tyf, PASS, wireless EthernetMac
 
@@ -501,6 +511,9 @@
 /examples/wireless/hiddennode/,      -f omnetpp.ini -c General -r 0,                5s,         8383-735e/tplx;8e4d-20ee/~tNl;318e-4afd/~tND;d261-55c9/tyf, PASS, wireless
 
 /examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,           1b06-0b2c/tplx;2ad9-0144/~tNl;d8f5-d323/~tND;1bd1-e9ac/tyf, PASS, wireless
+
+/examples/wireless/ieee80211levelofdetail, -f omnetpp.ini -c Default,               1s,           9caf-0174/tplx;8a78-c0c1/~tNl;3340-666f/~tND;0000-0000/tyf, PASS, wireless
+/examples/wireless/ieee80211levelofdetail, -f omnetpp.ini -c Layered,               1s,           140d-f0e8/tplx;8a78-c0c1/~tNl;3340-6677/~tND;0000-0000/tyf, PASS, wireless
 
 # /examples/wireless/lan80211/,        -f .qtenv.ini -c General -r 0
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,         7ba1-5f14/tplx;82ad-f313/~tNl;144d-6116/~tND, PASS, wireless
@@ -557,6 +570,7 @@
 /examples/wireless/nic/,             -f omnetpp.ini -c XMacWithUnitDiskRadio -r 0,                100s,     37a8-c2c5/tplx;0686-0808/~tNl;533f-aed0/~tND;966d-0205/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c XMacWithApskScalarRadio -r 0,              100s,     37a8-c2c5/tplx;0686-0808/~tNl;d43b-1c55/~tND;f2cc-9ba4/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c XMacWithApskDimensionalRadio -r 0,         100s,     37a8-c2c5/tplx;0686-0808/~tNl;d43b-1c55/~tND;f2cc-9ba4/tyf, PASS, wireless
+/examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacV2X,                           1s,       31cd-9228/tplx;525a-e618/~tNl;b8b6-91be/~tND;0000-0000/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithUnitDiskRadio -r 0,        100s,     4f6c-58ca/tplx;5cf5-c40d/~tNl;5c0a-1fc2/~tND;ee35-015b/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211DimensionalRadio -r 0, 100s,     ac49-fb67/tplx;2432-7a75/~tNl;8500-9973/~tND;b3da-b44e/tyf, PASS, wireless
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211ScalarRadio -r 0, 100s,     4828-9707/tplx;088c-fb4f/~tNl;3557-c4a0/~tND;d641-a9a7/tyf, PASS, wireless

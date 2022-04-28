@@ -6,7 +6,7 @@
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__inet -r 0,                  50s,            8402-9aa9/tplx, PASS,
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__lwip -r 0,                  50s,            f1ba-019b/tplx, PASS,
 
-# /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_lwIP -r 0,                    100s,           0000-0000/tplx, ERROR,    # shutdown/restart not supported by TCP_lwIP
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c TcpLwip -r 0,                     100s,           0000-0000/tplx, ERROR,    # shutdown/restart not supported by TCP_lwIP
 
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip -r 0,                 100s,            dbac-e55c/tplx, PASS,
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__inet -r 0,                 100s,            841f-007f/tplx, PASS,
