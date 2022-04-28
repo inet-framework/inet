@@ -10,7 +10,7 @@ Also, INET is now fully licensed under LGPL (see later for details).
 
 Experimental Python support has been added for running simulations concurrently
 and optionally on an SSH cluster. This is mostly useful for running parameter
-studies and automated testing.
+studies, automated testing and optimizing parameters.
 
 There are also a number of small improvements, and several bug fixes. Some changes
 are backward incompatible, so existing models may need to be updated. This version
@@ -276,7 +276,8 @@ Notable backward compatible changes are the following:
    statistical, and several other tests. The inet_python_repl shell script starts
    the Python interpreter and loads the required OMNeT++/INET Python packages.
    The main entry points are run_simulations, run_smoke_tests, run_fingerprint_tests,
-   and so on. There are also shell scripts (called inet_run_*) that can be used in
+   and several other run_* functions, there's also an optimize_simulation_parameters
+   function. There are also shell scripts (called inet_run_*) that can be used in
    the simulation folders directly.
 
    This package will be officially supported in the next OMNeT++/INET release.
