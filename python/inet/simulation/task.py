@@ -178,6 +178,15 @@ def get_simulation_tasks(simulation_project=None, simulation_configs=None, run=N
                 simulation_tasks.append(simulation_task)
     return multiple_simulation_tasks_class(tasks=simulation_tasks, simulation_project=simulation_project, concurrent=concurrent, **kwargs)
 
+def get_simulation_task(**kwargs):
+    simulation_tasks = get_simulation_tasks(**kwargs)
+    if len(simulation_tasks.tasks) == 0:
+        raise Exception("Simulation task not found")
+    elif len(simulation_tasks.tasks) == 1:
+        return simulation_tasks.tasks[0]
+    else:
+        raise Exception("Found more than 1 simulation tasks")
+
 def run_simulations(**kwargs):
     multiple_simulation_tasks = get_simulation_tasks(**kwargs)
     return multiple_simulation_tasks.run(**kwargs)

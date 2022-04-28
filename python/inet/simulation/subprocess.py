@@ -11,8 +11,8 @@ class SubprocessSimulationRunner:
     def teardown(self):
         pass
 
-    def run(self, simulation_run, args, capture_output=True):
-        simulation_config = simulation_run.simulation_config
+    def run(self, simulation_task, args, capture_output=True):
+        simulation_config = simulation_task.simulation_config
         simulation_project = simulation_config.simulation_project
         working_directory = simulation_config.working_directory
         full_working_directory = simulation_project.get_full_path(working_directory)

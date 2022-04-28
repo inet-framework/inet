@@ -14,7 +14,7 @@ from inet.simulation.project import *
 logger = logging.getLogger(__name__)
 
 class SimulationConfig:
-    def __init__(self, simulation_project, working_directory, ini_file, config, num_runs, abstract, expected_result, user_interface, description):
+    def __init__(self, simulation_project, working_directory, ini_file="omnetpp.ini", config="General", num_runs=1, abstract=False, expected_result="DONE", user_interface="Cmdenv", description=None):
         self.simulation_project = simulation_project
         self.working_directory = working_directory
         self.ini_file = ini_file
@@ -100,7 +100,7 @@ def collect_ini_file_simulation_configs(simulation_project, ini_path):
         abstract = (config_dict["network"] is None and config_dict["config"] == "General") or config_dict["abstract_config"] or description_abstract
         expected_result = config_dict["expected_result"]
         user_interface = config_dict["user_interface"] or general_config_dict["user_interface"]
-        simulation_config = SimulationConfig(simulation_project, os.path.relpath(working_directory, simulation_project.get_full_path(".")), ini_file, config, num_runs, abstract, expected_result, user_interface, description)
+        simulation_config = SimulationConfig(simulation_project, os.path.relpath(working_directory, simulation_project.get_full_path(".")), ini_file=ini_file, config=config, num_runs=num_runs, abstract=abstract, expected_result=expected_result, user_interface=user_interface, description=description)
         simulation_configs.append(simulation_config)
     return simulation_configs
 

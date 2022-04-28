@@ -19,7 +19,7 @@ class StatisticalTestTask(SimulationTestTask):
         self.locals.pop("self")
         self.kwargs = kwargs
 
-    def check_simulation_task_result(self, simulation_task_result, **kwargs):
+    def check_simulation_task_result(self, simulation_task_result, result_name_filter=None, exclude_result_name_filter=None, result_module_filter=None, exclude_result_module_filter=None, full_match=False, **kwargs):
         simulation_task = simulation_task_result.task
         simulation_config = simulation_task.simulation_config
         simulation_project = simulation_config.simulation_project
@@ -55,6 +55,8 @@ class StatisticalTestTask(SimulationTestTask):
                             df["current_value"] = current_df["value"]
                             df["absolute_error"] = df.apply(lambda row: abs(row["current_value"] - row["stored_value"]), axis=1)
                             df["relative_error"] = df.apply(lambda row: row["absolute_error"] / abs(row["stored_value"]) if row["stored_value"] != 0 else (float("inf") if row["current_value"] != 0 else 0), axis=1)
+                            df = df[df.apply(lambda row: matches_filter(row["name"], result_name_filter, exclude_result_name_filter, full_match) and \
+                                                         matches_filter(row["module"], result_module_filter, exclude_result_module_filter, full_match), axis=1)]
                             reason = df.loc[df["relative_error"].idxmax()].to_string()
                             reason = re.sub(" +", " = ", reason)
                             reason = re.sub("\\n", ", ", reason)

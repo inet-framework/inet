@@ -2,7 +2,8 @@ import cppyy
 import re
 
 from inet.common import *
-from inet.simulation.cffi import * 
+from inet.simulation.cffi.inet import *
+from inet.simulation.cffi.omnetpp import *
 
 class PythonCmdenv(Cmdenv):
     def loadNEDFiles(self):
@@ -36,9 +37,9 @@ class InprocessSimulationRunner:
     def teardown(self):
         CodeFragments.executeAll(CodeFragments.SHUTDOWN)
 
-    def run(self, simulation_run, args):
+    def run(self, simulation_task, args, capture_output=True):
         old_working_directory = os.getcwd()
-        simulation_config = simulation_run.simulation_config
+        simulation_config = simulation_task.simulation_config
         simulation_project = simulation_config.simulation_project
         working_directory = simulation_config.working_directory
         full_working_directory = simulation_project.get_full_path(working_directory)
