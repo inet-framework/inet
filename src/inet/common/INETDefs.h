@@ -31,8 +31,8 @@ namespace inet {
 using namespace omnetpp;
 } // namespace inet
 
-#if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1530
-#  error At least OMNeT++/OMNEST version 6.0 Release Candidate 1 required
+#if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1531
+#  error At least OMNeT++/OMNEST version 6.0 required
 #endif
 
 #define INET_VERSION        0x0403
