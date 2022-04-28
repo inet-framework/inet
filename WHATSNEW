@@ -6,18 +6,26 @@ INET-4.4 (May 2022) - Stable
 
 This is a new minor stable release of the INET 4.x branch. The highlight of this
 release is the implementation of several Time-Sensitive Networking (TSN) features.
+Also, INET is now fully licensed under LGPL (see later for details).
+
+Experimental Python support has been added for running simulations concurrently
+and optionally on an SSH cluster. This is mostly useful for running parameter
+studies and automated testing.
 
 There are also a number of small improvements, and several bug fixes. Some changes
 are backward incompatible, so existing models may need to be updated. This version
 requires OMNeT++ 6.0 or later.
 
 For a complete list of all added, removed, and changed folders, NED modules, packet
-chunks, packet tags, statistics, C++ classes, and signals please refer to ChangeLog
+chunks, packet tags, statistics, C++ classes, and signals please refer to the ChangeLog
 file in the src folder.
 
 Notable backward incompatible changes are the following:
 
 1. Network interfaces
+
+   The queue modules are placed back inside the network interface compound module
+   as direct submodules, reverting back a previous change in INET 4.2 version.
 
    In the INET 3.x versions, the network interface queue submodules were part
    of the network interface compound modules, and they were directly connected
@@ -33,7 +41,7 @@ Notable backward incompatible changes are the following:
    Unfortunately, this change turned out to be bad for various reasons. The most
    important is that the queue needs to communicate with the module it is connected
    to. For example, a complex compound queue which can delay packets needs to notify
-   the connected module, in this case the MAC module, when a packet becomes ready
+   the connected module, in this case of the MAC module, when a packet becomes ready
    to be pulled. So once again, we decided to move the queues back where they were
    before, outside of the MAC modules. Of course, the original queue length hazard
    problem still had to be solved, but as it turned out that problem had to be solved
@@ -42,22 +50,20 @@ Notable backward incompatible changes are the following:
    This change may require the modification of simulation models, because the queue
    module parameter assignments (referring to the old module positions) may have no
    effect any more. This change can break existing simulations silently producing
-   different statistical results.
+   different results.
 
 2. Network nodes
 
    The addition of Time-Sensitive Networking features required to further extend
    the network node architecture by adding a separate bridging layer compound
-   module between the L2 and L3 layers. This new module is optional and it is
-   present in both Ethernet switches and standard hosts.
+   module between the L2 and L3 layers. This new module is optional and it can
+   be present in both Ethernet switches and standard hosts.
 
-   The VLAN policy module have been moved into the new bridging layer in order
+   The VLAN policy module has been moved into the new bridging layer in order
    to correctly combine with the TSN stream features.
 
-   This change may require the modification of simulation models, because the VLAN
-   policy module parameter assignments (referring to the old module positions) may
-   have no effect any more. This change can break existing simulations silently
-   producing different statistical results.
+   This change requires updating the VLAN policy module parameter assignments,
+   otherwise simulations may silently produce different results.
 
 3. Packet filter expressions
 
@@ -76,14 +82,18 @@ Notable backward incompatible changes are the following:
 
    This change may require the modification of simulation models, because packet
    filter expressions are not backward compatible. This change can break existing
-   simulations silently producing different statistical results.
+   simulations silently producing different results.
+
+   The User's Guide contains a separate chapter describing the packet filter
+   expressions with several examples.
 
 4. Signals and statistics
 
    Several signals and statistics have been renamed and several others are split
    into multiple different ones. This change was necessary in order to have a
-   more coherent naming and also to have more fine-grained results. See the
-   ChangeLog file under the src folder for more details.
+   more coherent naming and also to have more fine-grained results. The most
+   important affected modules are the flow measurement recorder and the queueing
+   model elements. See the ChangeLog file under the src folder for more details.
 
    This change may require the modification of analysis files, because the results
    may be different. This change can break existing analysis files silently producing
@@ -108,7 +118,7 @@ Notable backward compatible changes are the following:
    of them. These modules are usually part of the network interfaces in the
    complex queueing mechanism of Time-Sensitive Networking.
 
-   The per-stream filtering feature provides modules for token bucket based
+   The per-stream filtering feature provides modules for token-bucket-based
    traffic metering, transmission eligibility time calculation, and a form
    of statistical traffic metering. These modules are usually part of the
    ingress traffic filter of the bridging layer.
@@ -123,15 +133,17 @@ Notable backward compatible changes are the following:
 
 2. Ethernet model
 
-   The old Ethernet network interface infrastructure has been changed. The FCS
-   protocol header insertion has been moved from the Ethernet MAC layer module
-   to the Ethernet protocol layer module. The Ethernet protocol layer was already
-   separated from the network interface and moved to separate module in network
-   nodes in the previous INET version.
+   The old Ethernet (non-TSN) network interface infrastructure has been changed.
 
-3. Network level automatic configuration
+   The FCS protocol header insertion has been moved from the Ethernet MAC layer
+   module to the Ethernet protocol layer module. The Ethernet protocol layer was
+   already separated from the network interface and moved to separate module in
+   network nodes in the previous INET version. This change makes it possible to
+   use the old and the new TSN capable Ethernet models interchangeably.
 
-   Several new network level automatic configurator modules have been added.
+3. Link-layer network-wide automatic configuration
+
+   Several new network-wide automatic configurator modules have been added.
 
    One such network configurator module configures all MAC address tables (aka.
    MAC forwarding information databases) automatically in all Ethernet switches
@@ -146,18 +158,18 @@ Notable backward compatible changes are the following:
    the required end-to-end latency and jitter limits are met for all configured
    streams. The following gate scheduling configurators are available:
      - simple eager configurator
-     - Z3 SAT solver based configurator (requires installation of external library)
-     - TSNsched based configurator (requires installation of external tool)
+     - Z3 SAT-solver-based configurator (requires installation of external library)
+     - TSNsched-based configurator (requires installation of external tool)
 
    Another network level configurator that is used in Time-Sensitive Networking
    is the stream redundancy configurator. This module configures the stream merger
    and stream splitter modules in all network nodes such that all redundant traffic
-   paths are used. The redundant streams makes the network resilient to various
+   paths are used. The redundant streams make the network resilient to various
    node and/or link failures.
 
    Finally, there is the so called failure protection configurator that is used
    in Time-Sensitive Networking. This module configures the network using the
-   stream redundancy and optionally the gate scheduling configurators to meet
+   stream redundancy, and optionally the gate scheduling configurators, to meet
    the complex node and/or link failure protection requirements of all traffic
    streams by figuring out the necessary redundant paths.
 
@@ -173,12 +185,9 @@ Notable backward compatible changes are the following:
    The queueing model have been extended with various token bucket meters and
    classifiers. The model also allows one to create chained token buckets where
    the overflowing tokens go to another bucket. Meters simply attach meta data
-   to packets while classifiers push packets to different gates, both work based
+   to packets while classifiers push packets to different gates, both based
    on the state of the token buckets. These modules are currently used in TSN
    per-stream traffic filtering.
-
-   A new interactive packet gate has been added that allows the user to directly
-   control the gate's open/closed state from Qtenv and experiment interactively.
 
    Several new generic protocol support elements have been added. There are several
    new modules, currently used in TSN frame replication, for stream identification,
@@ -186,18 +195,26 @@ Notable backward compatible changes are the following:
    modules, currently used in TSN asynchronous shaping, for transmission eligibility
    time metering, filtering, and queueing. 
 
+   A new interactive packet gate has been added that allows the user to directly
+   control the gate's open/closed state from Qtenv and experiment interactively.
+
+   Please note that in OMNeT++ 6.0 version of Qtenv the simulation may stop more
+   than once in the same event. This is called pause points, and it happens every
+   time a packet is passed from one module to another using to queueing model
+   elements, the protocol support modules, or the INET packet processing API.
+
 6. Applications
 
-   A new simple clock synchronizer application has been added. This module can
-   be used to synchronize clocks in the whole network without actually sending
-   any time synchronization packets.
+   A new simple out-of-band clock synchronizer application has been added. This
+   module can be used to synchronize clocks in the whole network without actually
+   sending any time synchronization packets.
 
-   New IEEE 802.2 LLC protocol specific applications have been added. These allow
+   New IEEE 802.2 LLC protocol-specific applications have been added. These allow
    to send IEEE 802.2 LLC packets directly from the application layer.
 
 7. Packet chunks, tags and serializers
 
-   New packet chunks has been added for the IEEE 802.1r protocol.
+   New packet chunks have been added for the IEEE 802.1r protocol.
 
    Several new packet tags have been added: PcpReq/PcpInd, StreamReq/StreamInd,
    SequenceNumberReq/SequenceNumberInd, ResidenceTimeTag, EligibilityTimeTag,
@@ -209,16 +226,17 @@ Notable backward compatible changes are the following:
 
 8. Signals and statistics
 
-   Several new signals and statistics have been added. The most notable example
-   is the measurement of packet residence time, the duration the packet spends
-   in individual network nodes. For a complete list of signal and statistics
-   changes see the ChangeLog in the src folder.
+   Several new signals and statistics have been added. The most notable newly
+   added statistics are the measurement of the transmission duration, the signal
+   propagation time, and the packet residence time. The latter being the duration
+   the packet spends in individual network nodes. For a complete list of signal
+   and statistic changes see the ChangeLog in the src folder.
 
 9. Project features
 
    Several new project features have been added. The IEEE 802.1as and the IEEE
    802.1r features are used in Time-Sensitive Networking. Another feature is
-   added for the Microsoft Z3 SAT solver based gate schedule configurator, it
+   added for the Microsoft Z3 SAT-solver-based gate schedule configurator, it
    requires the installation of an external library.
 
    Finally, there is a new feature for an automatic simulation model self documenter.
@@ -247,10 +265,10 @@ Notable backward compatible changes are the following:
    have been added to demonstrate how to do some widely used communication
    network measurements. There are examples for datarate, throughput,
    utilization, end-to-end delay, jitter, queueing time, residence time,
-   transmission time, propagation time and various packet flow specific
+   transmission time, propagation time and various packet-flow-specific
    measurements.
 
-12. Python support
+12. Experimental Python support
 
    A new experimental Python package has been added that allows the automation
    of running and testing multiple simulations concurrently and also optionally
@@ -271,12 +289,12 @@ Notable backward compatible changes are the following:
    new packet filter expression syntax. It gives a brief description of the
    syntax and provides several examples.
 
-14. Licensing
+14. Licensing and code formatting
 
-   The whole INET Framework has been re-licensed under the LGPL. All components
-   that were not licensed under LGPL, and where we could not reach the original
-   authors, or they did not agree with the new license, have been moved into a
-   separate INET-GPL project.
+   The whole INET Framework has been re-licensed under the LGPL. The vast majority
+   of INET components were already licensed under LGPL. All other components that
+   were not, and where we could not reach the original authors, or they did not
+   agree with the new license, have been moved into a separate INET-GPL project.
 
    As of today, the new INET-GPL project (https://github.com/inet-framework/inet-gpl)
    contains the following old INET components:
@@ -285,13 +303,11 @@ Notable backward compatible changes are the following:
     - HTB queue and scheduler
     - HTTP tools
 
-15. Code formatting
-
    All source files have been changed with respect to license headers. The longer
-   license header variants have been replaced with a standard one liner SPX license
+   license header variants have been replaced with a standard one-liner SPX license
    reference.
 
-16. Notable bug fixes
+15. Notable bug fixes and other changes
 
    Fixed the hazards in queue length statistics that allowed the length to go
    below 0 or above the queue capacity for zero simulation time.
@@ -301,6 +317,8 @@ Notable backward compatible changes are the following:
    Fixed several memory leaks and other problems found by the sanitizer.
 
    There were several other minor bug fixes some of which are documented on Github.
+
+   The VoIP stream modules have been updated to the latest development library.
 
 INET-4.3 (January 2021) - Stable
 --------------------------------
