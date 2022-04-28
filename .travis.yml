@@ -14,7 +14,7 @@ services:
   - docker
 
 before_install:
-  - docker pull omnetpp/travis-inet:6.0rc1-220209
+  - docker pull omnetpp/travis-inet:6.0-220428
 
 cache:
   directories:
