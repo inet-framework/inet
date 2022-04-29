@@ -50,7 +50,7 @@ using namespace omnetpp;
 #endif
 
 #define INET_VERSION  0x0402
-#define INET_PATCH_LEVEL 0x09
+#define INET_PATCH_LEVEL 0x0A
 
 #if OMNETPP_VERSION < 0x0600 || OMNETPP_BUILDNUM < 1525
 namespace omnetpp {
