@@ -84,7 +84,7 @@ network EigrpTestNetwork
     connections:
         R1.ethg[0] <--> Eth100M <--> R2.ethg[0];
         R1.ethg[1] <--> Eth100M <--> R3.ethg[0];
-        R2.ethg[1] <--> Eth100M <--> R4.ethg[0];        
+        R2.ethg[1] <--> Eth100M <--> R4.ethg[0];
         R3.ethg[1] <--> Eth100M <--> R4.ethg[1];
 
         R1.ethg[2] <--> Eth100M <--> LAN1.ethg++;

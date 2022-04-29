@@ -10,7 +10,7 @@ package inet.test.moduletest.lib;
 //
 // An ISriptable module for dumping routing tables into a file.
 //
-// Use the following command in the script of the ScenarioManager: 
+// Use the following command in the script of the ScenarioManager:
 //
 //   <dump-routes module="..." nodes="..." dest="..."/>
 //

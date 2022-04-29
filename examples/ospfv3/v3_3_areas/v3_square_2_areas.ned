@@ -20,7 +20,7 @@ network v3_3_areas
     submodules:
         configurator: Ipv4NetworkConfigurator {
             parameters:
-                config = xml("<config>"+                             
+                config = xml("<config>"+
                             "</config>"
                             );
                 addStaticRoutes = false;
