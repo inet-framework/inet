@@ -40,6 +40,7 @@
 package inet.examples.mobility;
 
 import inet.mobility.group.MoBanCoordinator;
+import inet.visualizer.canvas.integrated.IntegratedCanvasVisualizer;
 
 
 //
@@ -50,10 +51,15 @@ import inet.mobility.group.MoBanCoordinator;
 network MoBANNetwork
 {
     parameters:
+        bool hasVisualizer = default(false);
         int numNodes; // total number of nodes in the network, either ordinary nodes or WBAN nodes
         int numMoBAN; // total number of MoBAN coordinators (WBAN instances)
         @display("bgb=1000,1000");
     submodules:
+        visualizer: IntegratedCanvasVisualizer if hasVisualizer {
+            parameters:
+                @display("p=100,100");
+        }
         node[numNodes]: MobileHost {
             parameters:
                 @display("b=8,8,oval,red,,");
