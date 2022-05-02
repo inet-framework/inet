@@ -7,7 +7,7 @@ from dask.distributed import Client, SSHCluster
 
 def start_cluster():
     global client
-    cluster = dask.distributed.SSHCluster(["192.168.0.200", "192.168.0.200", "192.168.0.52"], remote_python="/home/levy/workspace/inet/bin/inet_ssh_cluster_python", scheduler_options={"dashboard_address": ":8797"})
+    cluster = dask.distributed.SSHCluster(["192.168.0.200", "192.168.0.200", "192.168.0.52"], remote_python="~/workspace/inet/bin/inet_ssh_cluster_python", scheduler_options={"dashboard_address": ":8797"})
     client = Client(cluster)
 
 def run_gethostname_on_cluster():
