@@ -358,7 +358,7 @@ void InterfaceTable::deleteInterface(NetworkInterface *entry)
     emit(interfaceDeletedSignal, entry); // actually, only going to be deleted
 
     idToInterface[id - INTERFACEIDS_START] = nullptr;
-    delete entry;
+    entry->deleteModule();
     invalidateTmpInterfaceList();
 }
 
