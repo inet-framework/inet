@@ -5,8 +5,7 @@ INET 4.4 release TODO items:
 2. Implementation
 
  - rename *Layered* modules to *Compound* or *Modular*? discuss!
- - hardware in the loop simulation using layered ethernet
- - create TSN ext network interface
+ - support hardware in the loop simulation using layered ethernet
  - search for get_names_for_title and fix chart errors
 
 3. Review
