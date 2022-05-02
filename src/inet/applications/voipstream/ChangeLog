@@ -1,5 +1,12 @@
 ====== inet-4.x ======
 
+2022-04-14  Zoltan Bojthe
+
+	Bugfixes, deprecated-free code.
+
+	Replaced deprecated function usages. Renamed local 'ret' variables to 'err'.
+	Removed VoipStreamSender::packet member, send skipped samples.
+
 2022-04-14  Levente Mészáros
 
 	Fixed copying overlapping memory regions, found by sanitizer tests.

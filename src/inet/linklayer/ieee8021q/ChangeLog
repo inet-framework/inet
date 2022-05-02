@@ -202,5 +202,3 @@
 	Added Ieee8021QTag and Ieee8021QVlan module.
 	Added packet tags to Ieee8021QReq and Ieee8021QInd.
 	Added application VLAN tagging support.
-
-====== inet-4.x ======

@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-04-22  Zoltan Bojthe
+
+	Show the correct errno in throw.
+
 2021-05-04  Zoltan Bojthe
 
 	Added missing Enter_Method calls.
@@ -56,5 +60,3 @@
 
 	Created a separate folder structure under src for emulation related modules and components.
 	Added ExtLowerUdp module that provides emulation support at the UDP protocol level.
-
-====== inet-4.x ======

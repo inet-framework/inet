@@ -94,5 +94,3 @@
 	Created a separate folder structure under src for emulation related modules and components.
 	Added ExtInterface module class to register network interface.
 	Renamed module to PcapCapturer.
-
-====== inet-4.x ======

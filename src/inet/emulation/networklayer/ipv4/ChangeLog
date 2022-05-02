@@ -57,5 +57,3 @@
 
 	Created a separate folder structure under src for emulation related modules and components.
 	Added ExtLowerIpv4 and ExtUpperIpv4 modules that provide emulation support at the IPv4 protocol level.
-
-====== inet-4.x ======

@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-05-02  Zoltan Bojthe
+
+	Fixed #703.
+
 2022-01-19  Zoltan Bojthe
 
 	Fixed missing @toValue, @fromValue, or remove @byValue

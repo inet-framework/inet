@@ -1,5 +1,13 @@
 ====== inet-4.x ======
 
+2021-12-11  Gyorgy Szaszko
+
+	Added display directive for time difference to a reference clock.
+
+2021-12-10  Gyorgy Szaszko
+
+	Added display string directive to display time in natural unit.
+
 2021-06-25  Levente Mészáros
 
 	Added minimal NED documentation to base modules.
