@@ -67,8 +67,8 @@ std::vector<SharingRegionTagSet::RegionTag<TagBase>> SharingRegionTagSet::addTag
     b o = offset;
     if (regionTags != nullptr) {
         for (auto& regionTag : *regionTags) {
-            auto tag = regionTag.getTag();
-            auto tagObject = tag.get();
+            const auto& existingTag = regionTag.getTag();
+            auto tagObject = existingTag.get();
             if (typeInfo == typeid(*tagObject)) {
                 b l = regionTag.getStartOffset() - o;
                 if (l > b(0)) {
