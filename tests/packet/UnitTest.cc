@@ -1830,6 +1830,17 @@ static void testRegionTagSet()
     regionTagSet2.copyTags(regionTagSet1, b(0), b(0), b(1000));
     ASSERT(regionTagSet2.getNumTags() == 1);
     }
+
+    { // 13. addTagsWhereAbsent
+    SharingRegionTagSet regtionTagSet1;
+    auto creationTimeTag1 = regtionTagSet1.addTag<CreationTimeTag>(B(10), B(20));
+    creationTimeTag1->setCreationTime(42);
+    regtionTagSet1.addTagsWhereAbsent<CreationTimeTag>(B(0), B(40));
+    for (int i = 0; i < regtionTagSet1.getNumTags(); i++)
+        std::cout << "TAG: " << regtionTagSet1.getRegionTag(i) << std::endl;
+    auto creationTimeTag2 = regtionTagSet1.getTag<CreationTimeTag>(B(0), B(10));
+    ASSERT(creationTimeTag2->getCreationTime() != 42);
+    }
 }
 
 static void testChunkRegionTags()
