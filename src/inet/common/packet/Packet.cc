@@ -183,6 +183,7 @@ void Packet::insertAt(const Ptr<const Chunk>& chunk, b offset)
         newContent->insertAtFront(chunk);
         newContent->markImmutable();
         content = newContent->simplify();
+        regionTags.moveTags(chunk->getChunkLength());
     }
     else if (offset == totalLength && content->canInsertAtBack(chunk)) {
         const auto& newContent = makeExclusivelyOwnedMutableChunk(content);
@@ -191,12 +192,14 @@ void Packet::insertAt(const Ptr<const Chunk>& chunk, b offset)
         content = newContent->simplify();
     }
     else if (content->canInsertAt(chunk, offset)) {
+        regionTags.moveTags(offset, content->getChunkLength() - offset, chunk->getChunkLength());
         const auto& newContent = makeExclusivelyOwnedMutableChunk(content);
         newContent->insertAt(chunk, offset);
         newContent->markImmutable();
         content = newContent->simplify();
     }
     else {
+        regionTags.moveTags(offset, content->getChunkLength() - offset, chunk->getChunkLength());
         auto sequenceChunk = makeShared<SequenceChunk>();
         if (offset != b(0))
             sequenceChunk->insertAtBack(content->peek(Chunk::ForwardIterator(b(0), 0), offset, Chunk::PF_ALLOW_ALL));
@@ -223,27 +226,36 @@ void Packet::eraseAt(b offset, b length)
     auto totalLength = getTotalLength();
     CHUNK_CHECK_USAGE(b(0) <= offset && offset <= totalLength, "offset is out of range");
     CHUNK_CHECK_USAGE(b(-1) <= length && offset + length <= totalLength, "length is invalid");
-    if (content->getChunkLength() == length)
+    if (content->getChunkLength() == length) {
         content = EmptyChunk::singleton;
+        regionTags.clearTags(b(0), length);
+    }
     else if (offset == b(0) && content->canRemoveAtFront(length)) {
         const auto& newContent = makeExclusivelyOwnedMutableChunk(content);
         newContent->removeAtFront(length);
         newContent->markImmutable();
         content = newContent->simplify();
+        regionTags.clearTags(b(0), length);
+        regionTags.moveTags(-length);
     }
     else if (offset + length == totalLength && content->canRemoveAtBack(length)) {
         const auto& newContent = makeExclusivelyOwnedMutableChunk(content);
         newContent->removeAtBack(length);
         newContent->markImmutable();
         content = newContent->simplify();
+        regionTags.clearTags(offset, length);
     }
     else if (content->canRemoveAt(offset, length)) {
+        regionTags.clearTags(offset, length);
+        regionTags.moveTags(offset + length, content->getChunkLength() - offset - length, -length);
         const auto& newContent = makeExclusivelyOwnedMutableChunk(content);
         newContent->removeAt(offset, offset);
         newContent->markImmutable();
         content = newContent->simplify();
     }
     else {
+        regionTags.clearTags(offset, length);
+        regionTags.moveTags(offset + length, content->getChunkLength() - offset - length, -length);
         auto sequenceChunk = makeShared<SequenceChunk>();
         if (offset != b(0))
             sequenceChunk->insertAtBack(content->peek(Chunk::ForwardIterator(b(0), 0), offset));
