@@ -8,7 +8,7 @@ from omnetpp.scave.results import *
 from inet.simulation.config import *
 from inet.simulation.project import *
 from inet.simulation.task import *
-from inet.simulation.cffi.inprocess import inprocess_simulation_runner
+from inet.simulation.cffi import *
 
 def cost_function(parameter_values, simulation_task, expected_result_names, expected_result_values, fixed_parameter_names, fixed_parameter_values, fixed_parameter_assignments, fixed_parameter_units, parameter_names, parameter_assignments, parameter_units, kwargs):
     all_parameter_assignments = [*fixed_parameter_assignments, *parameter_assignments]
@@ -33,7 +33,7 @@ def optimize_simulation_parameters(simulation_task, expected_result_names, expec
                                    fixed_parameter_names, fixed_parameter_values, fixed_parameter_assignments, fixed_parameter_units,
                                    parameter_names, parameter_assignments, parameter_units,
                                    initial_values, min_values, max_values, tol=1E-3,
-                                   concurrent=False, simulation_runner=inprocess_simulation_runner, **kwargs):
+                                   concurrent=False, simulation_runner=inprocess_simulation_runner if "inprocess_simulation_runner" in locals() else subprocess_simulation_runner, **kwargs):
     # TODO unfortunately we cannot run simulations concurrently in the same process right now
     if concurrent:
         simulation_runner = subprocess_simulation_runner

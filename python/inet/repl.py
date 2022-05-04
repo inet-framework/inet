@@ -7,7 +7,6 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 handler = logging.StreamHandler()
-handler.setLevel(logging.INFO)
 handler.setFormatter(ColoredLoggingFormatter())
 
 logger.handlers = []
