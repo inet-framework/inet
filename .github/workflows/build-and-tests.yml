@@ -79,8 +79,7 @@ jobs:
       matrix:
         # TODO: add debug/release mode when the runtest scripts can switch between
         # MODEs or executables based on command line arguments or envvars
-        testdir: ["module", "unit", "packet", "queueing", "protocol",
-                  "packetdrill/udp", "packetdrill/tcp", "packetdrill/sctp"]
+        testdir: ["module", "unit", "packet", "queueing", "protocol"]
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
