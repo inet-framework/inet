@@ -121,13 +121,13 @@ class FingerprintStore:
                                    "itervars": itervars})
 
     def update_fingerprint(self, fingerprint, **kwargs):
-        entry = self.get_entry(**kwargs)
+        entry = self.find_entry(**kwargs)
         if entry:
             entry["fingerprint"] = fingerprint
         else:
             self.insert_fingerprint(fingerprint, **kwargs)
 
-    def remove_fingerprint(self, **kwargs):
+    def remove_fingerprints(self, **kwargs):
         list(map(lambda element: self.entries.remove(element), self.filter_entries(**kwargs)))
 
 all_fingerprint_stores = dict()

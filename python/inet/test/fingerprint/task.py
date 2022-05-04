@@ -589,8 +589,8 @@ def update_correct_fingerprints(**kwargs):
 def remove_correct_fingerprint(simulation_task, ingredients=None, **kwargs):
     simulation_config = simulation_task.simulation_config
     correct_fingerprint_store = get_correct_fingerprint_store(simulation_config.simulation_project)
-    correct_fingerprint_store.remove_fingerprint(ingredients=ingredients, sim_time_limit=simulation_task.sim_time_limit,
-                                                 working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run=simulation_task._run)
+    correct_fingerprint_store.remove_fingerprints(ingredients=ingredients, sim_time_limit=simulation_task.sim_time_limit,
+                                                  working_directory=simulation_config.working_directory, ini_file=simulation_config.ini_file, config=simulation_config.config, run=simulation_task._run)
 
 def remove_correct_fingerprints(**kwargs):
     logger.info("Removing correct fingerprints")
