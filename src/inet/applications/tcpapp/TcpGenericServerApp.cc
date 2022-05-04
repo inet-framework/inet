@@ -104,7 +104,8 @@ void TcpGenericServerApp::handleMessage(cMessage *msg)
         emit(packetReceivedSignal, packet);
 
         bool doClose = false;
-        while (const auto& appmsg = queue.pop<GenericAppMsg>(b(-1), Chunk::PF_ALLOW_NULLPTR)) {
+        while (queue.has<GenericAppMsg>(b(-1))) {
+            const auto& appmsg = queue.pop<GenericAppMsg>(b(-1));
             msgsRcvd++;
             bytesRcvd += B(appmsg->getChunkLength()).get();
             B requestedBytes = appmsg->getExpectedReplyLength();
