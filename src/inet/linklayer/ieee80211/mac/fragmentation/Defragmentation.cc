@@ -23,6 +23,7 @@ Packet *Defragmentation::defragmentFrames(std::vector<Packet *> *fragmentFrames)
         fragmentFrame->popAtFront<Ieee80211DataOrMgmtHeader>();
         fragmentFrame->popAtBack<Ieee80211MacTrailer>(B(4));
         defragmentedFrame->insertAtBack(fragmentFrame->peekData());
+        defragmentedFrame->getRegionTags().copyTags(fragmentFrame->getRegionTags(), fragmentFrame->getFrontOffset(), defragmentedFrame->getDataLength() - fragmentFrame->getDataLength(), fragmentFrame->getDataLength());
         std::string defragmentedName(fragmentFrame->getName());
         auto index = defragmentedName.find("-frag");
         if (index != std::string::npos)

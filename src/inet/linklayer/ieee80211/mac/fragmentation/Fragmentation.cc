@@ -27,6 +27,7 @@ std::vector<Packet *> *Fragmentation::fragmentFrame(Packet *frame, const std::ve
         auto fragment = new Packet(name.c_str());
         B length = B(fragmentSizes.at(i));
         fragment->insertAtBack(frame->peekDataAt(offset, length));
+        fragment->getRegionTags().copyTags(frame->getRegionTags(), offset, frame->getFrontOffset(), frame->getDataLength());
         offset += length;
         const auto& fragmentHeader = staticPtrCast<Ieee80211DataOrMgmtHeader>(frameHeader->dupShared());
         fragmentHeader->setSequenceNumber(frameHeader->getSequenceNumber());

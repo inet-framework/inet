@@ -27,6 +27,7 @@ std::vector<Packet *> *MpduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         auto frame = new Packet();
         frame->setName(tokenizer.nextToken());
         frame->insertAtBack(mpdu);
+        frame->getRegionTags().copyTags(aggregatedFrame->getRegionTags(), aggregatedFrame->getFrontOffset() - frame->getDataLength(), frame->getFrontOffset(), frame->getDataLength());
         EV_TRACE << "Created " << *frame << " from A-MPDU.\n";
         // TODO check CRC?
         frames->push_back(frame);

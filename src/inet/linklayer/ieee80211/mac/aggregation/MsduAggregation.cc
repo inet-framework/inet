@@ -64,6 +64,7 @@ Packet *MsduAggregation::aggregateFrames(std::vector<Packet *> *frames)
         setSubframeAddress(msduSubframeHeader, header);
         aggregatedFrame->insertAtBack(msduSubframeHeader);
         aggregatedFrame->insertAtBack(msdu);
+        aggregatedFrame->getRegionTags().copyTags(frame->getRegionTags(), frame->getFrontOffset(), aggregatedFrame->getBackOffset() - frame->getDataLength(), frame->getDataLength());
         int paddingLength = 4 - B(msduSubframeHeader->getChunkLength() + msdu->getChunkLength()).get() % 4;
         if (i != (int)frames->size() - 1 && paddingLength != 4) {
             auto padding = makeShared<ByteCountChunk>(B(paddingLength));

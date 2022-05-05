@@ -20,6 +20,7 @@ void SubpacketLengthHeaderBasedAggregator::continueAggregation(Packet *packet)
     subpacketHeader->setLengthField(packet->getDataLength());
     aggregatedPacket->insertAtBack(subpacketHeader);
     aggregatedPacket->insertAtBack(packet->peekData());
+    aggregatedPacket->getRegionTags().copyTags(packet->getRegionTags(), packet->getFrontOffset(), aggregatedPacket->getBackOffset() - packet->getDataLength(), packet->getDataLength());
 }
 
 } // namespace inet

@@ -33,6 +33,7 @@ std::vector<Packet *> SubpacketLengthHeaderBasedDeaggregator::deaggregatePacket(
         auto subpacketData = packet->popAtFront(subpacketHeader->getLengthField());
         auto subpacketName = tokenizer.nextToken();
         auto subpacket = new Packet(subpacketName, subpacketData);
+        subpacket->getRegionTags().copyTags(packet->getRegionTags(), packet->getFrontOffset() - subpacket->getDataLength(), B(0), subpacket->getDataLength());
         subpackets.push_back(subpacket);
     }
     return subpackets;

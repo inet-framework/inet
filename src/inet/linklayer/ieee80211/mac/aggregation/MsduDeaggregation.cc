@@ -58,6 +58,7 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         auto frame = new Packet();
         frame->setName(tokenizer.nextToken());
         frame->insertAtBack(msdu);
+        frame->getRegionTags().copyTags(aggregatedFrame->getRegionTags(), aggregatedFrame->getFrontOffset() - frame->getDataLength(), frame->getFrontOffset(), frame->getDataLength());
         auto header = makeShared<Ieee80211DataHeader>();
         header->setType(ST_DATA_WITH_QOS);
         header->addChunkLength(QOSCONTROL_PART_LENGTH);
