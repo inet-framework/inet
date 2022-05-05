@@ -41,7 +41,7 @@ class MultipleSimulationTestTaskResults(MultipleTestTaskResults):
         test_tasks = list(map(lambda test_result: test_result.test_task, test_results))
         simulation_tasks = list(map(lambda test_task: test_task.simulation_run, test_tasks))
         orignial_multiple_simulation_tasks = self.multiple_test_tasks.multiple_simulation_tasks
-        multiple_simulation_tasks = MultipleSimulationTasks(orignial_multiple_simulation_tasks.simulation_project, simulation_tasks, concurrent=orignial_multiple_simulation_tasks.concurrent)
+        multiple_simulation_tasks = MultipleSimulationTasks(simulation_project=orignial_multiple_simulation_tasks.simulation_project, tasks=simulation_tasks, concurrent=orignial_multiple_simulation_tasks.concurrent)
         multiple_test_tasks = self.multiple_test_tasks.__class__(multiple_simulation_tasks, test_tasks)
         return MultipleSimulationTestTaskResults(multiple_test_tasks, test_results)
 

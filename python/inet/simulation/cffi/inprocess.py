@@ -2,8 +2,8 @@ import cppyy
 import re
 
 from inet.common import *
-from inet.simulation.cffi.inet import *
-from inet.simulation.cffi.omnetpp import *
+from inet.simulation.cffi.inetlib import *
+from inet.simulation.cffi.omnetpplib import *
 
 class PythonCmdenv(Cmdenv):
     def loadNEDFiles(self):

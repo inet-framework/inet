@@ -1,3 +1,4 @@
+import inet
 import logging
 
 from inet import *

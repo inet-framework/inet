@@ -28,12 +28,12 @@ cppyy.include("envir/inifilereader.h")
 cppyy.include("envir/sectionbasedconfig.h")
 
 # setup omnetpp namespace
-from cppyy.gbl import omnetpp
-cStaticFlag = omnetpp.cStaticFlag
-SimTime = omnetpp.SimTime
-CodeFragments = omnetpp.CodeFragments
-cSimulation = omnetpp.cSimulation
-cEvent = omnetpp.cEvent
-Cmdenv = omnetpp.cmdenv.Cmdenv
-InifileReader = omnetpp.envir.InifileReader
-SectionBasedConfiguration = omnetpp.envir.SectionBasedConfiguration
+lib = cppyy.gbl.omnetpp
+cStaticFlag = lib.cStaticFlag
+SimTime = lib.SimTime
+CodeFragments = lib.CodeFragments
+cSimulation = lib.cSimulation
+cEvent = lib.cEvent
+Cmdenv = lib.cmdenv.Cmdenv
+InifileReader = lib.envir.InifileReader
+SectionBasedConfiguration = lib.envir.SectionBasedConfiguration

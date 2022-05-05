@@ -3,6 +3,10 @@ import logging
 import matplotlib
 import sewar
 
+import omnetpp
+import omnetpp.scave
+import omnetpp.scave.analysis
+
 from inet.common import *
 from inet.documentation.chart import *
 from inet.test.task import *
@@ -29,13 +33,13 @@ class ChartTestTask(TestTask):
         for chart in analysis.collect_charts():
             if chart.name == self.chart_name:
                 image_export_filename = chart.properties["image_export_filename"]
+                if image_export_filename is None or image_export_filename == "":
+                    return self.task_result_class(self, result="SKIP", expected_result="SKIP", reason="Chart file name is not specified")
                 folder = os.path.dirname(self.simulation_project.get_full_path(self.analysis_file_name))
                 file_name = analysis.export_image(chart, folder, workspace, format="png", dpi=150, target_folder="doc/media", filename=image_export_filename + "_new")
                 new_file_name = os.path.join(folder, file_name)
                 old_file_name = os.path.join(folder, re.sub("_new", "", file_name))
-                if image_export_filename is None or image_export_filename == "":
-                    return self.task_result_class(self, result="SKIP", expected_result="SKIP", reason="Chart file name is not specified")
-                elif os.path.isfile(old_file_name):
+                if os.path.isfile(old_file_name):
                     new_image = matplotlib.image.imread(new_file_name)
                     old_image = matplotlib.image.imread(old_file_name)
                     metric = sewar.rmse(old_image, new_image)
@@ -59,7 +63,7 @@ class MultipleChartTestTasks(MultipleTestTasks):
     def run_protected(self, **kwargs):
         multiple_simulation_task_results = self.multiple_simulation_tasks.run_protected(output_stream=io.StringIO(), **kwargs)
         if multiple_simulation_task_results.result != "DONE":
-            return self.task_result_class(self, result=simulation_task_result.result, reason=simulation_task_result.reason)
+            return self.multiple_task_results_class(self, result=simulation_task_result.result, reason=simulation_task_result.reason)
         else:
             return super().run_protected(**kwargs)
 
@@ -77,7 +81,7 @@ def get_chart_test_tasks(simulation_project=default_project, run_simulations=Tru
                     if not list(builtins.filter(lambda element: element.simulation_config == simulation_task.simulation_config and element._run == simulation_task._run, simulation_tasks)):
                         simulation_tasks.append(simulation_task)
             test_tasks.append(ChartTestTask(simulation_project=simulation_project, analysis_file_name=analysis_file_name, chart_name=chart.name, task_result_class=TestTaskResult))
-    return MultipleChartTestTasks(tasks=test_tasks, multiple_simulation_tasks=MultipleSimulationTasks(simulation_tasks=simulation_tasks, simulation_project=simulation_project, **kwargs), pool_class=pool_class, **kwargs)
+    return MultipleChartTestTasks(tasks=test_tasks, multiple_simulation_tasks=MultipleSimulationTasks(tasks=simulation_tasks, simulation_project=simulation_project, **kwargs), pool_class=pool_class, **kwargs)
 
 def run_chart_tests(**kwargs):
     multiple_chart_test_tasks = get_chart_test_tasks(**kwargs)
@@ -96,23 +100,24 @@ class ChartUpdateTask(UpdateTask):
     def get_parameters_string(self, **kwargs):
         return self.analysis_file_name + ": " + self.chart_name
 
-    def run_protected(self, **kwargs):
+    def run_protected(self, keep_charts=False, **kwargs):
         workspace = omnetpp.scave.analysis.Workspace(get_workspace_path("."), [])
         analysis = omnetpp.scave.analysis.load_anf_file(self.simulation_project.get_full_path(self.analysis_file_name))
         for chart in analysis.collect_charts():
             if chart.name == self.chart_name:
                 image_export_filename = chart.properties["image_export_filename"]
+                if image_export_filename is None or image_export_filename == "":
+                    return self.task_result_class(self, result="SKIP", expected_result="SKIP", reason="Chart file name is not specified")
                 folder = os.path.dirname(self.simulation_project.get_full_path(self.analysis_file_name))
                 file_name = analysis.export_image(chart, folder, workspace, format="png", dpi=150, target_folder="doc/media", filename=image_export_filename + "_new")
                 new_file_name = os.path.join(folder, file_name)
                 old_file_name = os.path.join(folder, re.sub("_new", "", file_name))
-                if image_export_filename is None or image_export_filename == "":
-                    return self.task_result_class(self, result="SKIP", expected_result="SKIP", reason="Chart file name is not specified")
-                elif os.path.isfile(old_file_name):
+                if os.path.isfile(old_file_name):
                     same = filecmp.cmp(old_file_name, new_file_name, shallow=False)
                     if same:
                         os.remove(new_file_name)
                     else:
+                        os.rename(old_file_name, re.sub("_new", "_old", file_name))
                         os.rename(new_file_name, old_file_name)
                     return self.task_result_class(self, result="KEEP" if same else "UPDATE")
                 else:
@@ -120,13 +125,36 @@ class ChartUpdateTask(UpdateTask):
                     return self.task_result_class(self, result="INSERT")
         return self.task_result_class(self, result="ERROR", reason="Chart not found")
 
-def get_update_chart_tasks(simulation_project=default_project, filter=None, working_directory_filter=None, pool_class=multiprocessing.Pool, **kwargs):
+class MultipleChartUpdateTasks(MultipleUpdateTasks):
+    def __init__(self, multiple_simulation_tasks=None, name="chart update", multiple_task_results_class=MultipleUpdateTaskResults, **kwargs):
+        super().__init__(name=name, multiple_task_results_class=multiple_task_results_class, **kwargs)
+        self.locals = locals()
+        self.locals.pop("self")
+        self.kwargs = kwargs
+        self.multiple_simulation_tasks = multiple_simulation_tasks
+
+    def run_protected(self, **kwargs):
+        multiple_simulation_task_results = self.multiple_simulation_tasks.run_protected(output_stream=io.StringIO(), **kwargs)
+        if multiple_simulation_task_results.result != "DONE":
+            return self.multiple_task_results_class(self, result=simulation_task_result.result, reason=simulation_task_result.reason)
+        else:
+            return super().run_protected(**kwargs)
+
+def get_update_chart_tasks(simulation_project=default_project, run_simulations=True, filter=None, working_directory_filter=None, pool_class=multiprocessing.Pool, **kwargs):
     update_tasks = []
+    simulation_tasks = []
     for analysis_file_name in get_analysis_files(simulation_project=simulation_project, filter=filter or working_directory_filter, **kwargs):
         analysis = omnetpp.scave.analysis.load_anf_file(simulation_project.get_full_path(analysis_file_name))
         for chart in analysis.collect_charts():
-            update_tasks.append(ChartUpdateTask(simulation_project, analysis_file_name, chart.name, task_result_class=UpdateTaskResult))
-    return MultipleUpdateTasks(tasks=update_tasks, multiple_task_results_class=MultipleUpdateTaskResults, pool_class=pool_class, **kwargs)
+            folder = os.path.dirname(simulation_project.get_full_path(analysis_file_name))
+            working_directory = os.path.relpath(folder, simulation_project.get_full_path("."))
+            if run_simulations:
+                multiple_simulation_tasks = get_simulation_tasks(simulation_project=simulation_project, working_directory_filter=working_directory, sim_time_limit=get_statistical_result_sim_time_limit, **kwargs)
+                for simulation_task in multiple_simulation_tasks.tasks:
+                    if not list(builtins.filter(lambda element: element.simulation_config == simulation_task.simulation_config and element._run == simulation_task._run, simulation_tasks)):
+                        simulation_tasks.append(simulation_task)
+            update_tasks.append(ChartUpdateTask(simulation_project=simulation_project, analysis_file_name=analysis_file_name, chart_name=chart.name, task_result_class=UpdateTaskResult))
+    return MultipleChartUpdateTasks(tasks=update_tasks, multiple_simulation_tasks=MultipleSimulationTasks(tasks=simulation_tasks, simulation_project=simulation_project, **kwargs), pool_class=pool_class, **kwargs)
 
 def update_charts(simulation_project=default_project, pool_class=multiprocessing.Pool, **kwargs):
     multiple_update_chart_tasks = get_update_chart_tasks(**kwargs)

@@ -1,10 +1,10 @@
+import builtins
 import functools
 import glob
 import logging
 import os
 import re
 
-import omnetpp
 import omnetpp.scave.analysis
 
 from inet.simulation.project import *
