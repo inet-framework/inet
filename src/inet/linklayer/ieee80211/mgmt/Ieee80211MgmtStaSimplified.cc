@@ -7,11 +7,6 @@
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtStaSimplified.h"
 
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/linklayer/common/MacAddressTag_m.h"
-#include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 
 namespace inet {
