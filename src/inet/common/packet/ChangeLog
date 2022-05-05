@@ -1,5 +1,9 @@
 ====== inet-4.x ======
 
+2022-05-03  Levente Mészáros
+
+	Packet: Added missing region tag set update when the packet contents are changed.
+
 2022-04-05  Levente Mészáros
 
 	Added missing destructor calls to PacketFilter.

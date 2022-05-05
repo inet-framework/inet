@@ -2,7 +2,7 @@
 
 2022-05-02  Zoltan Bojthe
 
-	Fixed #703.
+	Fixed bug #703, "void InterfaceTable::deleteInterface(NetworkInterface *entry) doesn't work"
 
 2022-01-19  Zoltan Bojthe
 
