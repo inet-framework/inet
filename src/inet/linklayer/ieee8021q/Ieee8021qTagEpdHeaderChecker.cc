@@ -10,6 +10,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/DropEligibleTag_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
@@ -51,6 +52,7 @@ void Ieee8021qTagEpdHeaderChecker::processPacket(Packet *packet)
     packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(header->getPcp());
     packet->addTagIfAbsent<PcpInd>()->setPcp(header->getPcp());
     packet->addTagIfAbsent<VlanInd>()->setVlanId(header->getVid());
+    packet->addTagIfAbsent<DropEligibleInd>()->setDropEligible(header->getDei());
     auto typeOrLength = header->getTypeOrLength();
     const Protocol *protocol;
     if (isIeee8023Length(typeOrLength))

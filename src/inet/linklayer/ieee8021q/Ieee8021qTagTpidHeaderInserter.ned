@@ -17,6 +17,7 @@ simple Ieee8021qTagTpidHeaderInserter extends PacketFlowBase like IIeee8021qTagT
         int defaultVlanId = default(-1);
         int defaultPcp = default(-1);
         int defaultUserPriority = default(-1);
+        int defaultDropEligible = default(-1); // <0: unspecified, 0: false, >0: true
         @class(Ieee8021qTagTpidHeaderInserter);
         @display("i=block/inserter");
 }

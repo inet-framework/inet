@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee8021q/Ieee8021qTagTpidHeaderInserter.h"
 
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/DropEligibleTag_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
@@ -34,13 +35,16 @@ void Ieee8021qTagTpidHeaderInserter::initialize(int stage)
         defaultVlanId = par("defaultVlanId");
         defaultPcp = par("defaultPcp");
         defaultUserPriority = par("defaultUserPriority");
+        defaultDropEligible = par("defaultDropEligible");
     }
 }
 
 void Ieee8021qTagTpidHeaderInserter::processPacket(Packet *packet)
 {
     auto header = makeShared<Ieee8021qTagTpidHeader>();
+
     header->setTpid(tpid);
+
     auto userPriorityReq = packet->removeTagIfPresent<UserPriorityReq>();
     auto userPriority = userPriorityReq != nullptr ? userPriorityReq->getUserPriority() : defaultUserPriority;
     if (userPriority != -1) {
@@ -48,6 +52,7 @@ void Ieee8021qTagTpidHeaderInserter::processPacket(Packet *packet)
         header->setPcp(userPriority);
         packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(userPriority);
     }
+
     auto pcpReq = packet->removeTagIfPresent<PcpReq>();
     auto pcp = pcpReq != nullptr ? pcpReq->getPcp() : defaultPcp;
     if (pcp != -1) {
@@ -55,6 +60,7 @@ void Ieee8021qTagTpidHeaderInserter::processPacket(Packet *packet)
         header->setPcp(pcp);
         packet->addTagIfAbsent<PcpInd>()->setPcp(pcp);
     }
+
     auto vlanReq = packet->removeTagIfPresent<VlanReq>();
     auto vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : defaultVlanId;
     if (vlanId != -1) {
@@ -62,6 +68,15 @@ void Ieee8021qTagTpidHeaderInserter::processPacket(Packet *packet)
         header->setVid(vlanId);
         packet->addTagIfAbsent<VlanInd>()->setVlanId(vlanId);
     }
+
+    auto dropEligibleReq = packet->removeTagIfPresent<DropEligibleReq>();
+    auto dropEligible = dropEligibleReq != nullptr ? (dropEligibleReq->getDropEligible() ? 1 : 0) : defaultDropEligible;
+    if (dropEligible >= 0) {
+        EV_INFO << "Setting dropEligible" << EV_FIELD(dei, dropEligible) << EV_ENDL;
+        header->setDei(dropEligible > 0);
+        packet->addTagIfAbsent<DropEligibleInd>()->setDropEligible(dropEligible);
+    }
+
     packet->insertAtFront(header);
     auto& packetProtocolTag = packet->getTagForUpdate<PacketProtocolTag>();
     packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() + header->getChunkLength());

@@ -11,6 +11,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/SequenceNumberTag_m.h"
+#include "inet/linklayer/common/DropEligibleTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
@@ -36,6 +37,7 @@ void PacketDirectionReverser::processPacket(Packet *packet)
     auto directionTag = packet->findTag<DirectionTag>();
     auto eligibilityTimeTag = packet->findTag<EligibilityTimeTag>();
     auto macAddressInd = packet->findTag<MacAddressInd>();
+    auto dropEligibleInd = packet->findTag<DropEligibleInd>();
     auto vlanInd = packet->findTag<VlanInd>();
     auto pcpInd = packet->findTag<PcpInd>();
     auto userPriorityInd = packet->findTag<UserPriorityInd>();
@@ -60,6 +62,8 @@ void PacketDirectionReverser::processPacket(Packet *packet)
         macAddressReq->setSrcAddress(macAddressInd->getSrcAddress());
         macAddressReq->setDestAddress(macAddressInd->getDestAddress());
     }
+    if (dropEligibleInd != nullptr)
+        packet->addTag<DropEligibleReq>()->setDropEligible(dropEligibleInd->getDropEligible());
     if (vlanInd != nullptr)
         packet->addTag<VlanReq>()->setVlanId(vlanInd->getVlanId());
     if (pcpInd != nullptr)

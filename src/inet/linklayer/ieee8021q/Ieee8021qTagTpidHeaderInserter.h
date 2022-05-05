@@ -23,6 +23,7 @@ class INET_API Ieee8021qTagTpidHeaderInserter : public PacketFlowBase
     int defaultVlanId = -1;
     int defaultPcp = -1;
     int defaultUserPriority = -1;
+    int defaultDropEligible = -1;
 
   protected:
     virtual void initialize(int stage) override;

@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee8021q/Ieee8021qTagTpidHeaderChecker.h"
 
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/DropEligibleTag_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
@@ -38,6 +39,7 @@ void Ieee8021qTagTpidHeaderChecker::processPacket(Packet *packet)
     packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(header->getPcp());
     packet->addTagIfAbsent<PcpInd>()->setPcp(header->getPcp());
     packet->addTagIfAbsent<VlanInd>()->setVlanId(header->getVid());
+    packet->addTagIfAbsent<DropEligibleInd>()->setDropEligible(header->getDei());
     auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
     packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() - header->getChunkLength());
 }
