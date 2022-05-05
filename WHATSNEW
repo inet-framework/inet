@@ -310,6 +310,10 @@ Notable backward compatible changes are the following:
 
 15. Notable bug fixes and other changes
 
+   Fixed packet level region tag updating when packet contents are changed.
+
+   Fixed copying region tags in fragmentation, defragmentation, aggregation, and deaggregation.
+
    Fixed the hazards in queue length statistics that allowed the length to go
    below 0 or above the queue capacity for zero simulation time.
 
