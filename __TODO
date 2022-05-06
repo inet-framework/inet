@@ -4,9 +4,7 @@ INET 4.4 release TODO items:
 
 2. Implementation
 
- - rename *Layered* modules to *Compound* or *Modular*? discuss!
  - support hardware in the loop simulation using layered ethernet
- - search for get_names_for_title and fix chart errors
 
 3. Review
 
@@ -18,7 +16,7 @@ INET 4.4 release TODO items:
 
  - Fix important bugs from github.
  - Merge important pull requests from github.
- - Merge other outstanding branches: from gyuri, etc.
+ - Merge other outstanding branches from git.
  - Complete WHATSNEW and ChangeLog.
 
 5. Testing
@@ -26,6 +24,8 @@ INET 4.4 release TODO items:
  - Make all fingerprint, module, unit, packet, drill, queueing, protocol, and leak tests PASS.
 
 ===============================================================================
+
+- rename *Layered* modules to *Compound* or *Modular*? discuss!
 
 Clean up PCAP recording:
  - can happen at and is provided by network interfaces
