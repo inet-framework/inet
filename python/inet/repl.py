@@ -15,4 +15,4 @@ logger.addHandler(handler)
 
 enable_autoreload()
 
-print("INET python support is loaded.")
+print("INET Python support is loaded. Run help(inet) for more details.")

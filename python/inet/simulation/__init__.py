@@ -1,3 +1,13 @@
+"""
+This package supports running INET Framework simulations.
+
+The main function is run_simulations() that allows running multiple simulations,
+even completely unrelated ones that have different working directories, INI files,
+and configurations. The simulations can be run sequentially or concurrently on a
+single computer or on an SSH cluster. Besides, the simulations can be run as
+separate processes and also in the same Python process loading INET as a library.
+"""
+
 from inet.simulation.build import *
 from inet.simulation.config import *
 from inet.simulation.optimize import *

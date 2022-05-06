@@ -1,3 +1,12 @@
+"""
+This is the main package for the INET Framework.
+
+It provides sub-packages for running simulations, automated testing, and generating
+documentation.
+
+Run help(inet.simulation) or using one of the other sub-packages for more details.
+"""
+
 from inet.documentation import *
 from inet.simulation import *
 from inet.test import *
