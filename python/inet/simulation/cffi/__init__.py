@@ -12,3 +12,5 @@ if omnetpp_project_path is not None and inet_project_path is not None and \
     from inet.simulation.cffi.inetlib import *
     from inet.simulation.cffi.inprocess import *
     from inet.simulation.cffi.omnetpplib import *
+
+__all__ = [k for k,v in locals().items() if k[0] != "_" and v.__class__.__name__ != "module"]
