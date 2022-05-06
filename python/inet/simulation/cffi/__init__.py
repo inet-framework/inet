@@ -9,8 +9,8 @@ if omnetpp_project_path is not None and inet_project_path is not None and \
    os.path.exists(omnetpp_project_path) and os.path.exists(inet_project_path) and \
    os.path.exists(os.path.join(omnetpp_project_path, "include")) and os.path.exists(os.path.join(inet_project_path, "src")):
     from inet.simulation.cffi.event import *
-    from inet.simulation.cffi.inetlib import *
+    from inet.simulation.cffi.inet import *
     from inet.simulation.cffi.inprocess import *
-    from inet.simulation.cffi.omnetpplib import *
+    from inet.simulation.cffi.omnetpp import *
 
 __all__ = [k for k,v in locals().items() if k[0] != "_" and v.__class__.__name__ != "module"]
