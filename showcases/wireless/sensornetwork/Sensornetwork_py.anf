@@ -26,12 +26,10 @@ iso_itervars = utils.split(props["iso_itervar"])
 try:
     df = results.get_scalars(filter_expression, include_runattrs=True, include_attrs=True, include_itervars=True)
 except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 if not xaxis_itervar and not iso_itervars:
     print("The 'Itervar for X Axis' and 'Itervar for iso line' options were not set in the dialog, inferring them from the data..")
@@ -43,8 +41,7 @@ if xaxis_itervar:
     utils.assert_columns_exist(df, [xaxis_itervar], "The iteration variable for the X axis could not be found")
     df[xaxis_itervar] = pd.to_numeric(df[xaxis_itervar], errors="ignore")
 else:
-    ideplot.set_warning("Please select the iteration variable for the X axis!")
-    exit(1)
+    raise chart.ChartScriptError("Please select the iteration variable for the X axis!")
 
 if iso_itervars:
     utils.assert_columns_exist(df, iso_itervars, "An iteration variable for the iso lines could not be found")
@@ -53,8 +50,7 @@ if iso_itervars:
             df[iv] = pd.to_numeric(df[iv], errors="ignore")
 
 if df.empty:
-    ideplot.set_warning("Select scalars for the Y axis in the Properties dialog")
-    exit(1)
+    raise chart.ChartScriptError("Select scalars for the Y axis in the Properties dialog")
 
 uninteresting = ["runID", "value", "datetime", "iterationvars",
                 "iterationvarsf", "measurement", "processid",
@@ -778,12 +774,10 @@ iso_itervars = utils.split(props["iso_itervar"])
 try:
     df = results.get_scalars(filter_expression, include_runattrs=True, include_attrs=True, include_itervars=True)
 except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 if not xaxis_itervar and not iso_itervars:
     print("The 'Itervar for X Axis' and 'Itervar for iso line' options were not set in the dialog, inferring them from the data..")
@@ -795,8 +789,7 @@ if xaxis_itervar:
     utils.assert_columns_exist(df, [xaxis_itervar], "The iteration variable for the X axis could not be found")
     df[xaxis_itervar] = pd.to_numeric(df[xaxis_itervar], errors="ignore")
 else:
-    ideplot.set_warning("Please select the iteration variable for the X axis!")
-    exit(1)
+    raise chart.ChartScriptError("Please select the iteration variable for the X axis!")
 
 if iso_itervars:
     utils.assert_columns_exist(df, iso_itervars, "An iteration variable for the iso lines could not be found")
@@ -805,8 +798,7 @@ if iso_itervars:
             df[iv] = pd.to_numeric(df[iv], errors="ignore")
 
 if df.empty:
-    ideplot.set_warning("Select scalars for the Y axis in the Properties dialog")
-    exit(1)
+    raise chart.ChartScriptError("Select scalars for the Y axis in the Properties dialog")
 
 uninteresting = ["runID", "value", "datetime", "iterationvars",
                 "iterationvarsf", "measurement", "processid",
@@ -1530,12 +1522,10 @@ iso_itervars = utils.split(props["iso_itervar"])
 try:
     df = results.get_scalars(filter_expression, include_runattrs=True, include_attrs=True, include_itervars=True)
 except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 if not xaxis_itervar and not iso_itervars:
     print("The 'Itervar for X Axis' and 'Itervar for iso line' options were not set in the dialog, inferring them from the data..")
@@ -1547,8 +1537,7 @@ if xaxis_itervar:
     utils.assert_columns_exist(df, [xaxis_itervar], "The iteration variable for the X axis could not be found")
     df[xaxis_itervar] = pd.to_numeric(df[xaxis_itervar], errors="ignore")
 else:
-    ideplot.set_warning("Please select the iteration variable for the X axis!")
-    exit(1)
+    raise chart.ChartScriptError("Please select the iteration variable for the X axis!")
 
 if iso_itervars:
     utils.assert_columns_exist(df, iso_itervars, "An iteration variable for the iso lines could not be found")
@@ -1557,8 +1546,7 @@ if iso_itervars:
             df[iv] = pd.to_numeric(df[iv], errors="ignore")
 
 if df.empty:
-    ideplot.set_warning("Select scalars for the Y axis in the Properties dialog")
-    exit(1)
+    raise chart.ChartScriptError("Select scalars for the Y axis in the Properties dialog")
 
 uninteresting = ["runID", "value", "datetime", "iterationvars",
                 "iterationvarsf", "measurement", "processid",

@@ -20,8 +20,7 @@ filter_expression = props["filter"]
 df = results.get_histograms(filter_expression, include_attrs=True, include_itervars=True)
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 # plot
 utils.plot_histograms(df, props)
@@ -520,8 +519,7 @@ filter_expression = props["filter"]
 df = results.get_histograms(filter_expression, include_attrs=True, include_itervars=True)
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 # plot
 utils.plot_histograms(df, props)
@@ -1020,8 +1018,7 @@ filter_expression = props["filter"]
 df = results.get_histograms(filter_expression, include_attrs=True, include_itervars=True)
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 # plot
 utils.plot_histograms(df, props)

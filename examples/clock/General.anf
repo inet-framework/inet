@@ -23,8 +23,7 @@ end_time = float(props["vector_end_time"] or math.inf)
 df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
 df = ops.perform_vector_ops(df, props["vector_operations"])
@@ -605,8 +604,7 @@ end_time = float(props["vector_end_time"] or math.inf)
 df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
 df = ops.perform_vector_ops(df, props["vector_operations"])

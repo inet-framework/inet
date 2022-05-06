@@ -26,12 +26,10 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
 df = ops.perform_vector_ops(df, props["vector_operations"])
@@ -607,12 +605,10 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
 df = ops.perform_vector_ops(df, props["vector_operations"])
@@ -1190,12 +1186,10 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
 df = ops.perform_vector_ops(df, props["vector_operations"])
@@ -1809,12 +1803,10 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
 df = ops.perform_vector_ops(df, props["vector_operations"])
@@ -2427,12 +2419,10 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
 df = ops.perform_vector_ops(df, props["vector_operations"])
@@ -3006,12 +2996,10 @@ end_time = float(props["vector_end_time"] or math.inf)
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
 except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
 df = ops.perform_vector_ops(df, props["vector_operations"])
@@ -3610,16 +3598,13 @@ try:
     df_nonqos = results.get_vectors(filter_string_nonqos, include_attrs=True, include_itervars=True)
     df_qos = results.get_vectors(filter_string_qos, include_attrs=True, include_itervars=True)
 except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df_nonqos.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
     
 if df_qos.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 df_nonqos['vecvalue'] *= 1000
 df_qos['vecvalue'] *= 1000

@@ -27,8 +27,7 @@ filter_expression = props["filter"]
 df = results.get_scalars(filter_expression, include_attrs=True, include_itervars=True, include_runattrs=True)
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 groups = props["groups"].split(",")
 series = props["series"].split(",")
@@ -37,8 +36,7 @@ if not groups[0] and not series[0]:
     print("The Groups and Series options were not set in the dialog, inferring them from the data.")
     g, s = ("module", "name") if len(df) == 1 else utils.select_best_partitioning_column_pair(df, props)
     if not g or not s:
-        ideplot.set_warning("Please set the Groups and Series options in the dialog!")
-        exit(1)
+        raise chart.ChartScriptError("Please set the Groups and Series options in the dialog!")
     groups, series = [g], [s]
 
 utils.assert_columns_exist(df, groups + series)

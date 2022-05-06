@@ -27,8 +27,7 @@ df = results.get_vectors(filter_expression, include_runattrs=True, include_attrs
 plt.gcf().set_size_inches(8,6)
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
 df = ops.perform_vector_ops(df, props["vector_operations"])

@@ -25,15 +25,13 @@ iso_itervar = props["iso_itervar"]
 df = results.get_scalars(filter_expression, include_fields = True, include_runattrs=True, include_attrs=True, include_itervars=True)
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 if not xaxis_itervar and not iso_itervar:
     print("The X Axis and Iso Line options were not set in the dialog, inferring them from the data..")
     xaxis_itervar, iso_itervar = utils.select_best_partitioning_column_pair(df, props)
     if not xaxis_itervar:
-        ideplot.set_warning("Please set the X Axis (and Iso Lines) options in the dialog!")
-        exit(1)
+        raise chart.ChartScriptError("Please set the X Axis (and Iso Lines) options in the dialog!")
 
 utils.assert_columns_exist(df, [xaxis_itervar])
 df[xaxis_itervar] = pd.to_numeric(df[xaxis_itervar], errors="ignore")
@@ -46,14 +44,12 @@ if not iso_itervar: # might be an empty string
     iso_itervar = None
 
 if df.empty:
-    ideplot.set_warning("Select scalars for the Y axis in the Properties dialog")
-    exit(1)
+    raise chart.ChartScriptError("Select scalars for the Y axis in the Properties dialog")
 
 unique_names = df["name"].unique()
 
 if len(unique_names) != 1:
-    ideplot.set_warning("Selected scalars must share the same name.")
-    exit(1)
+    raise chart.ChartScriptError("Selected scalars must share the same name.")
 
 scalar_name = unique_names[0]
 
@@ -80,8 +76,7 @@ p.ylabel(scalar_name)
 try:
     xs = pd.to_numeric(df.index.values)
 except:
-    ideplot.set_warning("The X axis itervar is not purely numeric, this is not supported yet.")
-    exit(1)
+    raise chart.ChartScriptError("The X axis itervar is not purely numeric, this is not supported yet.")
 
 for c in df.columns:
     style = utils._make_line_args(props, c, df)
@@ -729,8 +724,7 @@ try:
     df_per = results.get_scalars(filter_expression_per, include_fields = True, include_attrs=True, include_itervars=True, include_runattrs=True)
     df_snir = results.get_scalars(filter_expression_snir, include_fields = True, include_attrs=True, include_itervars=True, include_runattrs=True)
 except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
     
 #print("DF\n",df)
 #print("DF PER\n",df_per)
@@ -762,8 +756,7 @@ df_joined = df_joined[['6','12','18','24','36','48','54']]
 #df = df.pivot_table(index='bitrate', columns='name', values='vecvalue')
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
 #df = ops.perform_vector_ops(df, props["vector_operations"])
@@ -1342,15 +1335,13 @@ iso_itervar = props["iso_itervar"]
 df = results.get_scalars(filter_expression, include_fields = True, include_runattrs=True, include_attrs=True, include_itervars=True)
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 if not xaxis_itervar and not iso_itervar:
     print("The X Axis and Iso Line options were not set in the dialog, inferring them from the data..")
     xaxis_itervar, iso_itervar = utils.select_best_partitioning_column_pair(df, props)
     if not xaxis_itervar:
-        ideplot.set_warning("Please set the X Axis (and Iso Lines) options in the dialog!")
-        exit(1)
+        raise chart.ChartScriptError("Please set the X Axis (and Iso Lines) options in the dialog!")
 
 utils.assert_columns_exist(df, [xaxis_itervar])
 df[xaxis_itervar] = pd.to_numeric(df[xaxis_itervar], errors="ignore")
@@ -1363,14 +1354,12 @@ if not iso_itervar: # might be an empty string
     iso_itervar = None
 
 if df.empty:
-    ideplot.set_warning("Select scalars for the Y axis in the Properties dialog")
-    exit(1)
+    raise chart.ChartScriptError("Select scalars for the Y axis in the Properties dialog")
 
 unique_names = df["name"].unique()
 
 if len(unique_names) != 1:
-    ideplot.set_warning("Selected scalars must share the same name.")
-    exit(1)
+    raise chart.ChartScriptError("Selected scalars must share the same name.")
 
 scalar_name = unique_names[0]
 
@@ -1397,8 +1386,7 @@ p.ylabel(scalar_name)
 try:
     xs = pd.to_numeric(df.index.values)
 except:
-    ideplot.set_warning("The X axis itervar is not purely numeric, this is not supported yet.")
-    exit(1)
+    raise chart.ChartScriptError("The X axis itervar is not purely numeric, this is not supported yet.")
 
 for c in df.columns:
     style = utils._make_line_args(props, c, df)
@@ -2055,15 +2043,13 @@ for i in range(len(df['value'])):
 #    print("X", df['value'][i])
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 if not xaxis_itervar and not iso_itervar:
     print("The X Axis and Iso Line options were not set in the dialog, inferring them from the data..")
     xaxis_itervar, iso_itervar = utils.select_best_partitioning_column_pair(df, props)
     if not xaxis_itervar:
-        ideplot.set_warning("Please set the X Axis (and Iso Lines) options in the dialog!")
-        exit(1)
+        raise chart.ChartScriptError("Please set the X Axis (and Iso Lines) options in the dialog!")
 
 utils.assert_columns_exist(df, [xaxis_itervar])
 df[xaxis_itervar] = pd.to_numeric(df[xaxis_itervar], errors="ignore")
@@ -2076,14 +2062,12 @@ if not iso_itervar: # might be an empty string
     iso_itervar = None
 
 if df.empty:
-    ideplot.set_warning("Select scalars for the Y axis in the Properties dialog")
-    exit(1)
+    raise chart.ChartScriptError("Select scalars for the Y axis in the Properties dialog")
 
 unique_names = df["name"].unique()
 
 if len(unique_names) != 1:
-    ideplot.set_warning("Selected scalars must share the same name.")
-    exit(1)
+    raise chart.ChartScriptError("Selected scalars must share the same name.")
 
 scalar_name = unique_names[0]
 
@@ -2110,8 +2094,7 @@ p.ylabel(scalar_name)
 try:
     xs = pd.to_numeric(df.index.values)
 except:
-    ideplot.set_warning("The X axis itervar is not purely numeric, this is not supported yet.")
-    exit(1)
+    raise chart.ChartScriptError("The X axis itervar is not purely numeric, this is not supported yet.")
 
 for c in df.columns:
     style = utils._make_line_args(props, c, df)

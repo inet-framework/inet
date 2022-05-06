@@ -24,12 +24,10 @@ filter_expression = props["filter"]
 try:
     df = results.get_scalars(filter_expression, include_attrs=True, include_itervars=True, include_runattrs=True)
 except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 groups = props["groups"].split(",")
 series = props["series"].split(",")
@@ -40,8 +38,7 @@ if not groups[0] and not series[0]:
     groups, series = [g], [s]
 
 if not groups[0] or not series[0]:
-    ideplot.set_warning("Please set both the Groups and Series properties in the dialog - or neither, for automatic setup.")
-    exit(1)
+    raise chart.ChartScriptError("Please set both the Groups and Series properties in the dialog - or neither, for automatic setup.")
 
 utils.assert_columns_exist(df, groups + series, "No such iteration variable or run attribute")
 
@@ -608,12 +605,10 @@ filter_expression = props["filter"]
 try:
     df = results.get_scalars(filter_expression, include_attrs=True, include_itervars=True, include_runattrs=True)
 except ValueError as e:
-    ideplot.set_warning("Error while querying results: " + str(e))
-    exit(1)
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
-    ideplot.set_warning("The result filter returned no data.")
-    exit(1)
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 groups = props["groups"].split(",")
 series = props["series"].split(",")
@@ -624,8 +619,7 @@ if not groups[0] and not series[0]:
     groups, series = [g], [s]
 
 if not groups[0] or not series[0]:
-    ideplot.set_warning("Please set both the Groups and Series properties in the dialog - or neither, for automatic setup.")
-    exit(1)
+    raise chart.ChartScriptError("Please set both the Groups and Series properties in the dialog - or neither, for automatic setup.")
 
 utils.assert_columns_exist(df, groups + series, "No such iteration variable or run attribute")
 
