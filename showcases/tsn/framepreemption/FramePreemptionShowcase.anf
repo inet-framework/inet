@@ -1,28 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <analysis version="2">
     <inputs>
-        <input pattern="/inet/showcases/ethernet/preemption/results/Preemption-*.vec"/>
-        <input pattern="/inet/showcases/ethernet/preemption/results/Preemption-*.sca"/>
-        <input pattern="results/Default-#0.sca"/>
-        <input pattern="results/Default-#0.vec"/>
-        <input pattern="results/DisabledPreemption-#0.sca"/>
-        <input pattern="results/DisabledPreemption-#0.vec"/>
-        <input pattern="results/RealisticFramePreemption-#0.sca"/>
-        <input pattern="results/RealisticFramePreemption-#0.vec"/>
-        <input pattern="results/RealisticPriorityQueueing-#0.vec"/>
-        <input pattern="results/RealisticPriorityQueueing-#0.sca"/>
-        <input pattern="results/RealisticFifoQueueing-#0.vec"/>
-        <input pattern="results/RealisticFifoQueueing-#0.sca"/>
-        <input pattern="results/PriorityQueueing-#0.vec"/>
-        <input pattern="results/PriorityQueueing-#0.sca"/>
-        <input pattern="results/FramePreemption-#0.vec"/>
-        <input pattern="results/FramePreemption-#0.sca"/>
-        <input pattern="results/FifoQueueing-#0.vec"/>
-        <input pattern="results/FifoQueueing-#0.sca"/>
+        <input pattern="results/*.vec"/>
+        <input pattern="results/*.sca"/>
     </inputs>
     <charts>
         <chart icon="icons/full/obj/linechart.png" id="1351587780" name="End-to-end delay, 1200-Byte packet length" template="linechart_mpl" type="MATPLOTLIB">
-            <script><![CDATA[import math
+            <script>
+                <![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import modifiedplot
 import matplotlib.pyplot as plt
@@ -77,8 +62,10 @@ plt.legend(alternate_handles, alternate_labels, markerscale=4, ncol=2, loc='lowe
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]></script>
-            <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </script>
+            <dialogPage id="INPUT" label="Input">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -127,8 +114,10 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </dialogPage>
+            <dialogPage id="LINES" label="Lines">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -221,8 +210,10 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </dialogPage>
+            <dialogPage id="PLOT" label="Plot">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -379,8 +370,10 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </dialogPage>
+            <dialogPage id="LEGEND" label="Legend">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -446,8 +439,10 @@ utils.export_data_if_needed(df, props)
 
 
   </x:children>
-</xswt>]]></dialogPage>
-            <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+</xswt>]]>
+            </dialogPage>
+            <dialogPage id="STYLING" label="Styling">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -554,8 +549,10 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]>
+            </dialogPage>
+            <dialogPage id="ADVANCED" label="Advanced">
+                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -574,8 +571,10 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </dialogPage>
+            <dialogPage id="EXPORT" label="Export">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -630,7 +629,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
+]]>
+            </dialogPage>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="grid_show" value="true"/>
@@ -675,7 +675,8 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="1915024745" name="End-to-end delay, realistic packet length" template="linechart_mpl" type="MATPLOTLIB">
-            <script><![CDATA[import math
+            <script>
+                <![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import modifiedplot
 import matplotlib.pyplot as plt
@@ -752,8 +753,10 @@ plt.legend(alternate_handles, alternate_labels, markerscale=4, ncol=2, loc=legen
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]></script>
-            <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </script>
+            <dialogPage id="INPUT" label="Input">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -802,8 +805,10 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </dialogPage>
+            <dialogPage id="LINES" label="Lines">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -896,8 +901,10 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </dialogPage>
+            <dialogPage id="PLOT" label="Plot">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1054,8 +1061,10 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </dialogPage>
+            <dialogPage id="LEGEND" label="Legend">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -1121,8 +1130,10 @@ utils.export_data_if_needed(df, props)
 
 
   </x:children>
-</xswt>]]></dialogPage>
-            <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+</xswt>]]>
+            </dialogPage>
+            <dialogPage id="STYLING" label="Styling">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1229,8 +1240,10 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]>
+            </dialogPage>
+            <dialogPage id="ADVANCED" label="Advanced">
+                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -1249,8 +1262,10 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </dialogPage>
+            <dialogPage id="EXPORT" label="Export">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1305,7 +1320,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
+]]>
+            </dialogPage>
             <property name="matplotlibrc.legend.frameon" value="true"/>
             <property name="matplotlibrc.legend.fancybox" value="false"/>
             <property name="grid_show" value="true"/>
@@ -1350,7 +1366,8 @@ utils.export_data_if_needed(df, props)
             <property name="legend_format" value=""/>
         </chart>
         <chart icon="icons/full/obj/linechart.png" id="1727700626" name="Time average of queue length" template="linechart_native" type="LINE">
-            <script><![CDATA[import math
+            <script>
+                <![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
 # get chart properties
@@ -1381,8 +1398,10 @@ utils.postconfigure_plot(props)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]></script>
-            <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </script>
+            <dialogPage id="INPUT" label="Input">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -1431,8 +1450,10 @@ utils.export_data_if_needed(df, props)
     </composite>
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </dialogPage>
+            <dialogPage id="LINES" label="Lines">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1525,8 +1546,10 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </dialogPage>
+            <dialogPage id="PLOT" label="Plot">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1683,8 +1706,10 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </dialogPage>
+            <dialogPage id="LEGEND" label="Legend">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -1750,8 +1775,10 @@ utils.export_data_if_needed(df, props)
 
 
   </x:children>
-</xswt>]]></dialogPage>
-            <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+</xswt>]]>
+            </dialogPage>
+            <dialogPage id="STYLING" label="Styling">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1861,8 +1888,10 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]>
+            </dialogPage>
+            <dialogPage id="ADVANCED" label="Advanced">
+                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -1881,8 +1910,10 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]></dialogPage>
-            <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]>
+            </dialogPage>
+            <dialogPage id="EXPORT" label="Export">
+                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1937,7 +1968,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]></dialogPage>
+]]>
+            </dialogPage>
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="grid_show" value="true"/>
             <property name="vector_end_time" value=""/>
