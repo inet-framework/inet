@@ -3,6 +3,9 @@ from omnetpp.scave import results, chart, utils, ideplot
 import matplotlib.pyplot as plt
 import pandas as pd
 import ast
+import re
+
+debug = False
 
 def plot_vectors(df, props, legend_func=utils.make_legend_label):
     """
@@ -105,32 +108,40 @@ def add_to_dataframe(df, style_tuple_list, default_dict={}):
     example:
     style_tuple_list = [('legend', 'eth[0]', {'linestyle': '--', 'linewidth': 2}), ('legend', 'eth[1]', {'linestyle': '-', 'linewidth': 2, 'marker': 's', 'markersize': 4})]
     default_dict = {'linestyle': '-', 'linewidth': 1}
+    
+    Note that the value parameter can contain regex (e.g. .*foo). Make sure to escape regex characters such as [ and ] with \
     """
     
     df['additional_style'] = None
     
+    def add_separator():
+        print("")
+    
     for i in style_tuple_list:
         column = i[0]
-        print("column: ", column)
         value = i[1]
-        print("value: ", value)
         style_tuple = i[2]
-        print("style_tuple: ", style_tuple)
         
         for i in range(0,len(df)):
-            # if (df[column][i] == value and df['additional_style'][i] == None):
-            #     df['additional_style'][i] = str(style_tuple)
-            #     print("XXXX", str(style_tuple))
-            if (df[column][i] == value):
+            pattern = re.compile(value)
+            match = re.fullmatch(pattern, df[column][i])
+            if match != None:
+                if debug:
+                    print("MATCH FOUND:")
+                    print("    column:", column)
+                    print("    value:", value)
+                    print("    match:", match.group())
                 if (df['additional_style'][i] == None):
                     df['additional_style'][i] = str(style_tuple)
-                    print("XXXX", str(style_tuple))
+                    if debug: print("Adding style tuple:", str(style_tuple))
+                    if debug: add_separator()
                 else:
-                    orig_style_dict = ast.literal_eval(df['additional_style'][i])
-                    print("orig style dict", orig_style_dict, type(orig_style_dict))
-                    orig_style_dict.update(style_tuple)
-                    print("orig style dict", orig_style_dict, type(orig_style_dict))
-                    df['additional_style'][i] = str(orig_style_dict)
+                    orig_style_dict = ast.literal_eval(df['additional_style'][i])       # convert already added style to dict
+                    if debug: print("Adding style tuple to existing style dict", orig_style_dict, type(orig_style_dict))
+                    orig_style_dict.update(style_tuple)                                 # add new style to dict
+                    if debug: print("New style dict", orig_style_dict, type(orig_style_dict))
+                    if debug: add_separator()
+                    df['additional_style'][i] = str(orig_style_dict)                    # add to dataframe as string
                 
     for i in range(0,len(df)):
         if (df['additional_style'][i] == None):
