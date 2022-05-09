@@ -6,8 +6,7 @@
     </inputs>
     <charts>
         <chart icon="icons/full/obj/barchart.png" id="151" name="Packet propagation time on the channel" template="barchart_native" type="BAR">
-            <script>
-                <![CDATA[from omnetpp.scave import results, chart, utils
+            <script><![CDATA[from omnetpp.scave import results, chart, utils
 
 # get chart properties
 props = chart.get_properties()
@@ -30,16 +29,16 @@ groups, series = utils.select_groups_series(df, props)
 confidence_level = utils.get_confidence_level(props)
 valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, groups, series, confidence_level)
 
+valuedf *= 1000000000
+
 utils.plot_bars(valuedf, errorsdf, metadf, props)
 
 utils.postconfigure_plot(props)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
-]]>
-            </script>
-            <dialogPage id="INPUT" label="Input">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></script>
+            <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -86,10 +85,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="BARS" label="Bars">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="BARS" label="Bars"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -141,10 +138,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="PLOT" label="Plot">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -287,10 +282,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="LEGEND" label="Legend">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -356,10 +349,8 @@ utils.export_data_if_needed(df, props)
 
 
   </x:children>
-</xswt>]]>
-            </dialogPage>
-            <dialogPage id="STYLING" label="Styling">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+</xswt>]]></dialogPage>
+            <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -469,10 +460,8 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="ADVANCED" label="Advanced">
-                <![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+]]></dialogPage>
+            <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -491,10 +480,8 @@ utils.export_data_if_needed(df, props)
     </styledText>
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
-            <dialogPage id="EXPORT" label="Export">
-                <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+]]></dialogPage>
+            <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -549,11 +536,10 @@ utils.export_data_if_needed(df, props)
 
   </x:children>
 </xswt>
-]]>
-            </dialogPage>
+]]></dialogPage>
             <property name="grid_show" value="true"/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="propagation time [s]"/>
+            <property name="yaxis_title" value="propagation time [ns]"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Packet propagation time on the channel"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
@@ -585,11 +571,11 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="9"/>
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
-            <property name="legend_manual" value=""/>
+            <property name="legend_manual" value="false"/>
             <property name="legend_replacements" value=""/>
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
-            <property name="include_fields" value=""/>
+            <property name="include_fields" value="false"/>
         </chart>
     </charts>
 </analysis>
