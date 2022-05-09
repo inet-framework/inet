@@ -124,12 +124,12 @@ class SimulationTask(Task):
         logger.debug(args)
         expected_result = self.get_expected_result()
         subprocess_result = simulation_runner.run(self, args, capture_output=capture_output)
-        if subprocess_result.returncode == -signal.SIGINT.value:
+        if subprocess_result.returncode == signal.SIGINT.value or subprocess_result.returncode == -signal.SIGINT.value:
             return self.task_result_class(task=self, subprocess_result=subprocess_result, result="CANCEL", expected_result=expected_result, reason="Cancel by user")
         elif subprocess_result.returncode == 0:
             return self.task_result_class(task=self, subprocess_result=subprocess_result, result="DONE", expected_result=expected_result)
         else:
-            return self.task_result_class(task=self, subprocess_result=subprocess_result, result="ERROR", expected_result=expected_result, reason="Non-zero exit code")
+            return self.task_result_class(task=self, subprocess_result=subprocess_result, result="ERROR", expected_result=expected_result, reason=f"Non-zero exit code: {subprocess_result.returncode}")
 
 class MultipleSimulationTasks(MultipleTasks):
     def __init__(self, simulation_project=default_project, build=True, name="simulation", **kwargs):
