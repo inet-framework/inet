@@ -10,6 +10,7 @@
 #include "inet/applications/voipstream/VoipStreamReceiver.h"
 
 #include "inet/applications/voipstream/VoipStreamPacket_m.h"
+#include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -43,9 +44,6 @@ void VoipStreamReceiver::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        // KLUDGE hack to create results folder (doesn't work when record-scalars = false)
-        recordScalar("hackForCreateResultsFolder", 0);
-
         // Say Hello to the world
         EV_TRACE << "VoIPSinkApp initialize()" << endl;
 
@@ -113,6 +111,7 @@ void VoipStreamReceiver::socketErrorArrived(UdpSocket *socket, Indication *indic
 
 void VoipStreamReceiver::Connection::openAudio(const char *fileName)
 {
+    inet::utils::makePathForFile(fileName);
     outFile.open(fileName, sampleRate, 8 * av_get_bytes_per_sample(decCtx->sample_fmt));
 }
 

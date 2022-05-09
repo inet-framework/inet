@@ -10,6 +10,7 @@
 #include "inet/applications/voipstream/VoipStreamSender.h"
 
 #include "inet/applications/voipstream/VoipStreamPacket_m.h"
+#include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -105,9 +106,6 @@ void VoipStreamSender::initialize(int stage)
 
         // say HELLO to the world
         EV_TRACE << "VoIPSourceApp -> initialize(" << stage << ")" << endl;
-
-        // KLUDGE hack to create results folder (doesn't work when record-scalars = false)
-        recordScalar("hackForCreateResultsFolder", 0);
 
         destAddress = L3AddressResolver().resolve(par("destAddress"));
         socket.setOutputGate(gate("socketOut"));
@@ -285,8 +283,10 @@ void VoipStreamSender::openSoundFile(const char *name)
             throw cRuntimeError("Error opening context");
     }
 
-    if (traceFileName && *traceFileName)
+    if (traceFileName && *traceFileName) {
+        inet::utils::makePathForFile(traceFileName);
         outFile.open(traceFileName, sampleRate, 8 * av_get_bytes_per_sample(pEncoderCtx->sample_fmt));
+    }
 
     sampleBuffer.clear(samplesPerPacket * av_get_bytes_per_sample(pEncoderCtx->sample_fmt));
     av_seek_frame(pFormatCtx, streamIndex, 0, 0);
