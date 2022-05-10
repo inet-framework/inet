@@ -1,14 +1,66 @@
 #!/usr/bin/env -S sh -c "echo >&2 \"Error: You are running this script instead of sourcing it. Make sure to use it as 'source setenv' or '. setenv', otherwise its settings won't take effect.\"; exit 1"
 
-if [ ! -f bin/inet ]; then
-    echo "Error: current working directory does not look like an INET root directory"
-    # no exit -- it would close the shell
-else
-    export INET_ROOT=$(pwd)
-    echo $INET_ROOT
-    export PATH=$INET_ROOT/bin:$PATH
-    export PYTHONPATH=$INET_ROOT/python:$PYTHONPATH
-    export INET_OMNETPP_OPTIONS="--image-path=$INET_ROOT/images"
-    export INET_GDB_OPTIONS="-quiet -ex run --args"
-    export INET_VALGRIND_OPTIONS="-v --tool=memcheck --leak-check=yes --show-reachable=no --leak-resolution=high --num-callers=40 --freelist-vol=4000000"
+# first argument can be (e.g. 'source setenv -q'):
+# -q : do not show banner text on configuration success
+# -r : remove an already configured environment
+
+# Get the directory where this script reside using a trick (works differently on bash and zsh)
+# On bash, the current script's name is in 'BASH_SOURCE[0]'
+if [ "$BASH_VERSION" != "" ]; then # for BASH
+  dir=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
+elif [ "$ZSH_VERSION" != "" ]; then # on zsh the script name is in '$0'
+  dir=$(cd $(dirname $0) && pwd)
+else # on any other SH compatible shell we assume that the current working directory is the OMNeT++ root directory
+  dir=$(pwd)
+fi
+
+# check if dir is really pointing to an omnet++ installation dir
+if [ ! -f $dir/bin/inet  ]; then
+    echo "Error: '$dir' does not look like an INET root directory"
+    return 1
+fi
+
+# remove previous environment to prevent the accumulation of path elements
+if [ -n "$INET_ROOT" ]; then
+  if [ "$1" = "-r" ]; then
+    echo "Removed previous environment for '$INET_ROOT'."
+    dir=
+  else
+    echo "Warning: overwriting previous environment for '$INET_ROOT'."
+  fi
+  export PATH=${PATH#$INET_ROOT/bin:}
+  export PYTHONPATH=${PYTHONPATH#$INET_ROOT/python}
+  export INET_ROOT=
+  export INET_OMNETPP_OPTIONS=
+  export INET_GDB_OPTIONS=
+  export INET_VALGRIND_OPTIONS=
+fi
+
+# do not continue if removal was requested
+if [ "$1" = "-r" ]; then
+    return 0
+fi
+
+export PATH=$dir/bin:$PATH
+export PYTHONPATH=$dir/python:$PYTHONPATH && PYTHONPATH=${PYTHONPATH%:}  # required because colon at the end causes issues on Windows
+export INET_ROOT=$dir
+export INET_OMNETPP_OPTIONS="--image-path=$INET_ROOT/images"
+export INET_GDB_OPTIONS="-quiet -ex run --args"
+export INET_VALGRIND_OPTIONS="-v --tool=memcheck --leak-check=yes --show-reachable=no --leak-resolution=high --num-callers=40 --freelist-vol=4000000"
+dir=
+
+if [ "$1" != "-q" ]; then
+  echo "Environment for INET $(inet_version) in directory '$INET_ROOT' is ready."
+
+  if [ ! -f $INET_ROOT/src/Makefile ]; then
+  cat <<__END__
+
+Type "make makefiles" and then "make" to build INET.
+__END__
+  fi
+fi
+
+# source user specific script if present
+if [ -f "$INET_ROOT/setenv_local" ] ; then
+  source $INET_ROOT/setenv_local
 fi
