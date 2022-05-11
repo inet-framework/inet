@@ -4,8 +4,6 @@ INET 4.4 release TODO items:
 
 2. Implementation
 
- - support hardware in the loop simulation using layered ethernet
-
 3. Review
 
  - Review new examples.
@@ -25,6 +23,7 @@ INET 4.4 release TODO items:
 
 ===============================================================================
 
+- hardware in the loop simulation using layered ethernet model and TSN
 - rename *Layered* modules to *Compound* or *Modular*? discuss!
 
 Clean up PCAP recording:
@@ -41,7 +40,6 @@ Clean up PCAP recording:
 - eliminate all typename != "" from NED files using default interface ommitted typenames
 - reduce redundancy among applications, e.g. add base application with parameterizable IO submodule, perhaps even create an IO base module which uses the ISocket interface
 - replace findPathStartGate/findPathEndGate with findConnectedModule/findConnectedGate and wrap the type specific reference to the module/gate into a template class?
-- make lz3 makefrag linker options conditional on oppfeature
 
 - add examples/documentation for matching PCP value and destination MAC address for outgoing packets (identification)
 - example with Pcp and PriorityToTrafficClassClassifier classifier example
@@ -65,9 +63,8 @@ determining the next protocol for a packet in a protocol module (DispatchProtoco
  - use native protocol of network interface (specified as NetworkInterface protocol parameter)
  - use default next protocol of protocol module (hard-coded or specified as protocol parameter)
 
- - packet region tags don't follow packet data insertion/removal, should be fixed
  - chunk queue and various chunk buffers don't have region tags, there's no place to store data specific tags from packets when reassembling data
- - fragmentation and defragmentation doesn't copy packet region tags, for example Ipv4
+ - fragmentation and defragmentation doesn't copy packet region tags in Ipv4
 
  - visualizer/canvas/spectrum -> GHz overlapping with node label
  - visualizer/instrumentfigures -> plot figure size parameter not working
@@ -99,14 +96,11 @@ handlePullPacketChanged can come from the queue when
  - a low priority frame cannot be interrupted because it's already too close to its end (remaining minPacketLength)
 in both cases a progress report is sent which is unnecessary and confusing
 
-- review all streamig operation with respect to origPacketId handling
-
 - ethernet preemption example: 2nd out of 3 sends per packet must be avoided
   - add a check for whether the two packets are definitely equal or may be different?!
   - change the preamble insertion module to immediately start with a progress of 8 bytes and
   - change the transmitter to check if the at the progress update the expected progress position is at the end of the packet to skip the progress report
 
-- reformat source code
 - create release script (remove trailing spaces, replace leading tabs, fix header guards, format source code)
 
 - check Ethernet FCS progress report at the correct moment of time
@@ -130,10 +124,8 @@ Parallel simulation support
    - integrating
 
  - use @reconnect to simplify network nodes which copy big parts of StandardHost
- - timing API, generic TimeTag or multiple tags containing queueing time, processing time, propagation time, transmission time for the packet data per bit
  - similarly to timing API other meta-data could also be stored for the packet data per bit (e.g. hop count)
  - when deleting a network interface or deleting a network node, the interface deleted signal is missing
- - extend packet API with updateAtFront<> and updateAtBack taking a modifier lambda function as argument (to replace the remove/insert idiom)
  - add generic IpApp, EthernetApp similarly to UdpApp and TcpApp
  - unify C++ namespaces, NED namespaces, folders and file names (e.g. ospfv vs. Ospf3*)
  - implement additional INET specific fingerprint ingredients: network interface configuration, routing table, mobility state, etc.
@@ -146,12 +138,8 @@ Parallel simulation support
  - implement MemoizedFunction and multi dimensional domain subdivision tree
  - add parameter for orthogonal combinator function: multiplicative and minimum based
  - add parameter for bit error estimation: based on min(packet), mean(packet), min(mean(symbol))
- - test cmdenv-fake-gui & figure fingerprinting from OMNeT++ 6.0
- - clang compiler bug, see test.cc
 
-
-most important topics
- - chapter in developers guild about signals and statistics, naming convention, what constitues a signal and what does not, etc.
+ - chapter in developers guide about signals and statistics, naming convention, what constitutes a signal and what does not, etc.
  - existing protocols
    - 802.11 statistics, logging, display strings, code cleanup, memory management
    - complete IPv6
@@ -171,7 +159,6 @@ most important topics
  - port existing 3rd party models
    - help ANSA porting to INET 4.0
 
- - implicit serialization of chunks for conversion must be controllable from the API with flags
  - the packet dissector may need to do implicit chunk conversion because it has to choose a representation which may or may not be the same as the one in the packet (e.g. two interoperable frameworks)
  - add parameter to mobility base which determines what should happen if the energy storage is depleted. For example, a drone should just stop, but a satellite should continue its motion.
 
@@ -223,9 +210,6 @@ most important topics
  - nicely position submodules in compound modules, prepare for 2 info lines
  - extend main protocol modules (and all submodules) with 2 info lines above the submodule icon
  - avoid specifying module icon sizes by default, override icon size in submodules
- - sort includes alphabetically
- - pretty print white spaces
-
 
 TODO: cleanup MSG files
  remove if possible:
