@@ -598,7 +598,7 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value="Utilization [ratio]"/>
+            <property name="yaxis_title" value="Utilization [%]"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Channel utilization, vector"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
@@ -1171,7 +1171,7 @@ Show over_underflow cell?
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
-            <property name="xaxis_title" value="Simulation time [s]"/>
+            <property name="xaxis_title" value="Utilization [%]"/>
             <property name="Plot.BackgroundColor" value="white"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
@@ -1192,7 +1192,7 @@ Show over_underflow cell?
             <property name="image_export_width" value="9"/>
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
-            <property name="legend_manual" value=""/>
+            <property name="legend_manual" value="false"/>
             <property name="legend_replacements" value=""/>
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
