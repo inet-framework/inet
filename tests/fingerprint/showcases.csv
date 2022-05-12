@@ -18,7 +18,7 @@
 # /showcases/measurement/relationships/,    -f omnetpp.ini -c General -r 0,           1s,           1211-c17f/tplx;0000-0000/~tNl;0000-0000/~tND;497e-9125/tyf, PASS,
 /showcases/measurement/residencetime/,    -f omnetpp.ini -c General -r 0,           1s,           cadd-e1a2/tplx;9cb5-923b/~tNl;f4a9-3bd0/~tND;f520-af62/tyf, PASS,
 /showcases/measurement/throughput/,       -f omnetpp.ini -c General -r 0,           1s,           ac1e-785a/tplx;6e50-0f3d/~tNl;e2f2-d4d9/~tND;3de5-f77f/tyf, PASS,
-/showcases/measurement/transmissiontime/, -f omnetpp.ini -c General -r 0,           1s,           2185-5237/tplx;b0ce-ce9d/~tNl;985f-f759/~tND;c577-f9d5/tyf, PASS,
+/showcases/measurement/transmissiontime/, -f omnetpp.ini -c General -r 0,           1s,           8a37-e540/tplx;f52d-ee20/~tNl;97bd-1f25/~tND;e6ad-7a84/tyf, PASS,
 /showcases/measurement/utilization/,      -f omnetpp.ini -c General -r 0,           1s,           f70d-940d/tplx;faef-c51c/~tNl;f3a7-5fa2/~tND;3de5-f77f/tyf, PASS,
 
 /showcases/mobility/basic/,          -f omnetpp.ini -c LinearMobility -r 0,         100s,         1211-c17f/tplx;0000-0000/~tNl;0000-0000/~tND;497e-9125/tyf, PASS,
