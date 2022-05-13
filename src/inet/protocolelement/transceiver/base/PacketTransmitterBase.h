@@ -22,6 +22,8 @@ namespace inet {
 using namespace inet::queueing;
 using namespace inet::physicallayer;
 
+extern template class ClockUserModuleMixin<OperationalMixin<PacketProcessorBase>>;
+
 class INET_API PacketTransmitterBase : public ClockUserModuleMixin<OperationalMixin<PacketProcessorBase>>, public virtual IPassivePacketSink
 {
   protected:

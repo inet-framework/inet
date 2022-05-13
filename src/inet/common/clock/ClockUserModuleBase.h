@@ -12,6 +12,8 @@
 
 namespace inet {
 
+extern template class ClockUserModuleMixin<cSimpleModule>;
+
 class INET_API ClockUserModuleBase : public ClockUserModuleMixin<cSimpleModule>
 {
 };

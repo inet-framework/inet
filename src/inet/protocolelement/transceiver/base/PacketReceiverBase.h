@@ -20,6 +20,8 @@ namespace inet {
 using namespace inet::queueing;
 using namespace inet::physicallayer;
 
+extern template class OperationalMixin<PacketProcessorBase>;
+
 class INET_API PacketReceiverBase : public OperationalMixin<PacketProcessorBase>, public virtual IActivePacketSource
 {
   protected:

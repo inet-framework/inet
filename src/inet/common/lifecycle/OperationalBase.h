@@ -12,6 +12,8 @@
 
 namespace inet {
 
+extern template class OperationalMixin<cSimpleModule>;
+
 class INET_API OperationalBase : public OperationalMixin<cSimpleModule>
 {
 };
