@@ -44,7 +44,7 @@ ShortBitVector::ShortBitVector(unsigned int num)
 ShortBitVector::ShortBitVector(unsigned int bits, unsigned int size)
 {
     if (size > sizeof(unsigned int) * 8)
-        throw cRuntimeError("size = %u must be less than %lu", size, sizeof(unsigned int) * 8);
+        throw cRuntimeError("size = %u must be less than %zu", size, (size_t)(sizeof(unsigned int) * 8));
     this->size = size;
     this->bits = bits;
 }

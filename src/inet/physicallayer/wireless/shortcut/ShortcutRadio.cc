@@ -88,7 +88,7 @@ void ShortcutRadio::sendToPeer(Packet *packet, ShortcutRadio *peer)
     else {
         auto length = b(lengthOverhead->intValue());
         if (length < b(0))
-            throw cRuntimeError("invalid lengthOverhead value: %li bit", length.get());
+            throw cRuntimeError("invalid lengthOverhead value: %" PRId64 " bit", length.get());
         if (length > b(0)) {
             auto& protocolTag = packet->getTagForUpdate<PacketProtocolTag>();
             auto header = makeShared<ShortcutPhyHeader>();
