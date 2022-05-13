@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2022-05-13  ------ inet-4.4.0 released ------
+
 2022-03-16  Rudolf Hornig
 
 	Moved/removed GPL licensed code to a separate repo to make INET clean LGPL licensed.

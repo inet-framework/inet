@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2022-05-13  ------ inet-4.4.0 released ------
+
 2021-11-29  Levente Mészáros
 
 	InstantServer: Fixed reentrant calls to handleCan*PacketChanged.

@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2022-05-13  ------ inet-4.4.0 released ------
+
 2022-05-02  Rudolf Hornig
 
 	Switched ipv6tunneling license from gpl to lgpl with the written permission of DLR.

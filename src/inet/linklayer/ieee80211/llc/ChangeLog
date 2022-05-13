@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2022-05-13  ------ inet-4.4.0 released ------
+
 2018-07-10  Raphael Riebl
 
 	Added Ieee80211LlcEpd, Ieee80211LlcLpd modules and IIeee80211Llc module interface.

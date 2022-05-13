@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2022-05-13  ------ inet-4.4.0 released ------
+
 2021-10-22  Levente Mészáros
 
 	Added Ieee8022LlcApp, Ieee8022LlcSourceApp, Ieee8022LlcSinkApp, and

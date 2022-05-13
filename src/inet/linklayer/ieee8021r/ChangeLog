@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2022-05-13  ------ inet-4.4.0 released ------
+
 2021-02-23  Levente Mészáros
 
 	Added Ieee8021rLayer, Ieee8021rProtocol, Ieee8021rTagEpdHeaderChecker,

@@ -1,5 +1,7 @@
 ====== inet-4.x ======
 
+2022-05-13  ------ inet-4.4.0 released ------
+
 2022-03-02  Levente Mészáros
 
 	Renamed Gate*Visualier to GateSchedule*Visualizer.
