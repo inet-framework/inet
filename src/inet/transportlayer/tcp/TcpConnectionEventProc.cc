@@ -103,6 +103,7 @@ void TcpConnection::process_ACCEPT(TcpEventCode& event, TcpCommand *tcpCommand, 
 {
     TcpAcceptCommand *acceptCommand = check_and_cast<TcpAcceptCommand *>(tcpCommand);
     listeningSocketId = -1;
+    tcpAlgorithm->established(false);
     sendEstabIndicationToApp();
     sendAvailableDataToApp();
     delete acceptCommand;

@@ -308,13 +308,14 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
             return TCP_E_IGNORE;
         }
 
-        // notify tcpAlgorithm and app layer
-        tcpAlgorithm->established(false);
 
         if (isToBeAccepted())
             sendAvailableIndicationToApp();
-        else
+        else {
+            // notify tcpAlgorithm and app layer
+            tcpAlgorithm->established(false);
             sendEstabIndicationToApp();
+        }
 
         // This will trigger transition to ESTABLISHED. Timers and notifying
         // app will be taken care of in stateEntered().
