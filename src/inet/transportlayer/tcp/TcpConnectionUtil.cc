@@ -340,6 +340,10 @@ void TcpConnection::signalConnectionTimeout()
 
 void TcpConnection::sendIndicationToApp(int code, const int id)
 {
+    if (listeningSocketId != -1) {
+        EV_WARN << "Connection not accepted, sending indication skipped for socket " << socketId << EV_ENDL;
+        return;
+    }
     EV_INFO << "Notifying app: " << indicationName(code) << "\n";
     auto indication = new Indication(indicationName(code), code);
     TcpCommand *ind = new TcpCommand();
