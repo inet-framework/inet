@@ -61,7 +61,7 @@ class EigrpNetwork
  * Table with networks for routing.
  */
 template<typename IPAddress>
-class EigrpNetworkTable : cObject
+class INET_API EigrpNetworkTable : cObject
 {
   protected:
     std::vector<EigrpNetwork<IPAddress> *> networkVec;

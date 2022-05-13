@@ -26,7 +26,7 @@ namespace eigrp {
  * Class represents EIGRP Neighbor Table.
  */
 template<typename IPAddress>
-class EigrpNeighborTable : public cSimpleModule
+class INET_API EigrpNeighborTable : public cSimpleModule
 {
   protected:
     typedef typename std::vector<EigrpNeighbor<IPAddress> *> NeighborVector;
@@ -70,7 +70,7 @@ class EigrpNeighborTable : public cSimpleModule
 // TODO - mozna predelat kontejnery do samostatnych souboru
 //typedef EigrpNeighborTable<IPv4Address> EigrpIpv4NeighborTable;       //IPv6 - ADDED for backward compatibility with old IPv4-only version
 
-class EigrpIpv4NeighborTable : public EigrpNeighborTable<Ipv4Address>
+class INET_API EigrpIpv4NeighborTable : public EigrpNeighborTable<Ipv4Address>
 {
 // container class for IPv4NT, must exist because of Define_Module()
 
@@ -87,7 +87,7 @@ class INET_API Eigrpv4NeighTableAccess : public ModuleAccess<EigrpIpv4NeighborTa
 */
 
 #ifndef DISABLE_EIGRP_IPV6
-class EigrpIpv6NeighborTable : public EigrpNeighborTable<Ipv6Address>
+class INET_API EigrpIpv6NeighborTable : public EigrpNeighborTable<Ipv6Address>
 {
 // container class for IPv6NT, must exist because of Define_Module()
 

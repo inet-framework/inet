@@ -15,7 +15,7 @@
 
 #include "inet/routing/eigrp/messages/EigrpMessage_m.h"
 namespace inet {
-class EigrpMsgReq : public EigrpMsgReq_Base
+class INET_API EigrpMsgReq : public EigrpMsgReq_Base
 {
   public:
     EigrpMsgReq(const char *name = nullptr) : EigrpMsgReq_Base(name) {}

@@ -29,7 +29,7 @@ namespace eigrp {
  * Class represents one entry in EIGRP Neighbor Table.
  */
 template<typename IPAddress>
-class EigrpNeighbor : public cObject
+class INET_API EigrpNeighbor : public cObject
 {
   protected:
     int ifaceId;                /**< ID of interface that is connected to the neighbor. */

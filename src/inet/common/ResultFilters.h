@@ -16,7 +16,7 @@ namespace utils {
 
 namespace filters {
 
-class VoidPtrWrapper : public cObject
+class INET_API VoidPtrWrapper : public cObject
 {
   private:
     void *object;

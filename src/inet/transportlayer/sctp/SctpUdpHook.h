@@ -15,7 +15,7 @@ namespace inet {
 
 namespace sctp {
 
-class SctpUdpHook : public cSimpleModule, public NetfilterBase::HookBase
+class INET_API SctpUdpHook : public cSimpleModule, public NetfilterBase::HookBase
 {
   public:
     SctpUdpHook() {}

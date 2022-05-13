@@ -29,7 +29,7 @@ class EigrpRtp;
 /**
  * Queue for storing requests for message sending.
  */
-class EigrpRequestQueue : public cObject
+class INET_API EigrpRequestQueue : public cObject
 {
   private:
     typedef std::list<EigrpMsgReq *> MessageQueue;
@@ -59,7 +59,7 @@ class EigrpRequestQueue : public cObject
  * Class represents Reliable Transport Protocol for reliable transmission of EIGRP messages.
  */
 template<typename IPAddress>
-class EigrpRtpT : public cSimpleModule
+class INET_API EigrpRtpT : public cSimpleModule
 {
     struct NeighborInfo {
         int neighborId;
@@ -131,7 +131,7 @@ class EigrpRtpT : public cSimpleModule
     virtual ~EigrpRtpT();
 };
 
-class EigrpRtp : public EigrpRtpT<Ipv4Address>
+class INET_API EigrpRtp : public EigrpRtpT<Ipv4Address>
 {
 // container class for IPv4RTP, must exist because of Define_Module()
 
@@ -140,7 +140,7 @@ class EigrpRtp : public EigrpRtpT<Ipv4Address>
 };
 
 #ifndef DISABLE_EIGRP_IPV6
-class EigrpRtp6 : public EigrpRtpT<Ipv6Address>
+class INET_API EigrpRtp6 : public EigrpRtpT<Ipv6Address>
 {
 // container class for IPv6RTP, must exist because of Define_Module()
 

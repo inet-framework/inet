@@ -28,7 +28,7 @@ namespace eigrp {
  * Class represents EIGRP Topology Table.
  */
 template<typename IPAddress>
-class EigrpTopologyTable : public cSimpleModule
+class INET_API EigrpTopologyTable : public cSimpleModule
 {
   private:
     typedef typename std::vector<EigrpRouteSource<IPAddress> *> RouteVector;
@@ -96,7 +96,7 @@ class EigrpTopologyTable : public cSimpleModule
     void setRouterId(Ipv4Address& routerID) { this->routerID = routerID; }
 };
 
-class EigrpIpv4TopologyTable : public EigrpTopologyTable<Ipv4Address>
+class INET_API EigrpIpv4TopologyTable : public EigrpTopologyTable<Ipv4Address>
 {
 // container class for IPv4TT, must exist because of Define_Module()
 
@@ -104,7 +104,7 @@ class EigrpIpv4TopologyTable : public EigrpTopologyTable<Ipv4Address>
     virtual ~EigrpIpv4TopologyTable() {}
 };
 
-class EigrpIpv6TopologyTable : public EigrpTopologyTable<Ipv6Address>
+class INET_API EigrpIpv6TopologyTable : public EigrpTopologyTable<Ipv6Address>
 {
 // container class for IPv6TT, must exist because of Define_Module()
 

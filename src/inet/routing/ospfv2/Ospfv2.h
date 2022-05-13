@@ -23,7 +23,7 @@ namespace ospfv2 {
 /**
  * Implements the OSPFv2 routing protocol. See the NED file for more information.
  */
-class Ospfv2 : public RoutingProtocolBase, protected cListener
+class INET_API Ospfv2 : public RoutingProtocolBase, protected cListener
 {
   private:
     cModule *host = nullptr; // the host module that owns this module

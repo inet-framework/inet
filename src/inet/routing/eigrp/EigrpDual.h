@@ -27,7 +27,7 @@ namespace eigrp {
  * Class represents DUAL automaton.
  */
 template<typename IPAddress>
-class EigrpDual : public cObject /* cSimpleModule */
+class INET_API EigrpDual : public cObject /* cSimpleModule */
 {
   public:
     enum DualEvent {

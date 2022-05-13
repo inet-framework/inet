@@ -183,7 +183,7 @@ class INET_API MacAddress
 };
 
 template <typename T>
-class SimulationRunUniqueNumberGenerator : public cISimulationLifecycleListener
+class INET_API SimulationRunUniqueNumberGenerator : public cISimulationLifecycleListener
 {
   private:
     bool listenerAdded;

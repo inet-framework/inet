@@ -19,41 +19,41 @@ namespace newphysicallayer {
 
 using namespace inet::units::values;
 
-class ITransmissionMedium
+class INET_API ITransmissionMedium
 {
 };
 
-class ISignalSource
+class INET_API ISignalSource
 {
 };
 
-class ISignalSink
+class INET_API ISignalSink
 {
 };
 
-class INoiseSource : public ISignalSource
+class INET_API INoiseSource : public ISignalSource
 {
 };
 
-class ISignalProbe : public ISignalSink
+class INET_API ISignalProbe : public ISignalSink
 {
 };
 
-class ITransmitter
+class INET_API ITransmitter
 {
 };
 
-class IReceiver
+class INET_API IReceiver
 {
 };
 
-class ITransceiver : public ISignalSource, public ISignalSink
+class INET_API ITransceiver : public ISignalSource, public ISignalSink
 {
     virtual ITransmitter *getTransmitter() = 0;
     virtual IReceiver *getReceiver() = 0;
 };
 
-class IPowerSpectralDensity
+class INET_API IPowerSpectralDensity
 {
     virtual simtime_t getStartTime() = 0;
     virtual simtime_t getEndTime() = 0;
@@ -64,12 +64,12 @@ class IPowerSpectralDensity
     virtual W getPower(simtime_t time, Hz frequency) = 0;
 };
 
-class IPowerDirectionalSelectivity
+class INET_API IPowerDirectionalSelectivity
 {
     virtual double getGain(Quaternion direction) = 0;
 };
 
-class ISignalDeparture
+class INET_API ISignalDeparture
 {
     virtual ISignalSource *getSource() = 0;
 
@@ -80,7 +80,7 @@ class ISignalDeparture
     virtual Quaternion getDepartureOrientation() = 0;
 };
 
-class ISignalArrival
+class INET_API ISignalArrival
 {
     virtual ISignalDeparture *getDeparture() = 0;
     virtual ISignalSink *getSink() = 0;
@@ -92,13 +92,13 @@ class ISignalArrival
     virtual Quaternion getArrivalOrientation() = 0;
 };
 
-class ISignalTransmission : public ISignalDeparture
+class INET_API ISignalTransmission : public ISignalDeparture
 {
     virtual Packet *getPacket() = 0;
     virtual ITransceiver *getTransmitter() = 0;
 };
 
-class ISignalReception : public ISignalArrival
+class INET_API ISignalReception : public ISignalArrival
 {
     virtual ISignalTransmission *getTransmission() = 0;
     virtual ITransceiver *getReceiver() = 0;

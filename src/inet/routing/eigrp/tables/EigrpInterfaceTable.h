@@ -21,7 +21,7 @@
 namespace inet {
 namespace eigrp {
 
-class EigrpInterface : public cObject
+class INET_API EigrpInterface : public cObject
 {
   protected:
     int interfaceId;        /**< ID of interface */
@@ -143,7 +143,7 @@ class EigrpInterface : public cObject
  * Toida reprezentujici tabulku EIGRP-ENABLED interfacu
  */
 
-class EigrpInterfaceTable : public cSimpleModule
+class INET_API EigrpInterfaceTable : public cSimpleModule
 {
   protected:
     typedef typename std::vector<EigrpInterface *> InterfaceVector;

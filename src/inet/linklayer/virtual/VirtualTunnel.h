@@ -25,7 +25,7 @@
 
 namespace inet {
 
-class VirtualTunnel : public queueing::PassivePacketSinkBase
+class INET_API VirtualTunnel : public queueing::PassivePacketSinkBase
 #ifdef INET_WITH_ETHERNET
         , public EthernetSocket::ICallback
 #endif

@@ -20,7 +20,7 @@
 
 namespace inet {
 
-class Gptp : public ClockUserModuleBase, public cListener
+class INET_API Gptp : public ClockUserModuleBase, public cListener
 {
     //parameters:
     ModuleRefByPar<IInterfaceTable> interfaceTable;

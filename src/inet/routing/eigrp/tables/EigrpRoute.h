@@ -30,7 +30,7 @@ template<typename IPAddress> class EigrpRouteSource;
  * Network destination, it contains state for DUAL.
  */
 template<typename IPAddress>
-class EigrpRoute : public cObject
+class INET_API EigrpRoute : public cObject
 {
   protected:
     int routeId;                        /** Unique ID of route */
@@ -110,7 +110,7 @@ class EigrpRoute : public cObject
  * Class represents EIGRP route to a destination network.
  */
 template<typename IPAddress>
-class EigrpRouteSource : public cObject
+class INET_API EigrpRouteSource : public cObject
 {
   protected:
     int sourceId;                       /** Unique ID of source */

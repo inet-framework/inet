@@ -203,7 +203,7 @@ class INET_API SctpAsconfChunk : public SctpAsconfChunk_Base
     virtual SctpParameter *removeAsconfParam();
 };
 
-class SctpIncomingSsnResetRequestParameter : public SctpIncomingSsnResetRequestParameter_Base
+class INET_API SctpIncomingSsnResetRequestParameter : public SctpIncomingSsnResetRequestParameter_Base
 {
   private:
     void copy(const SctpIncomingSsnResetRequestParameter& other);

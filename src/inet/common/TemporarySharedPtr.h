@@ -19,7 +19,7 @@ class TemporarySharedPtr;
  * This class provides support for Qtenv inspectors for objects referenced by shared pointers.
  */
 template<typename T>
-class TemporarySharedPtrClassDescriptor : public cClassDescriptor
+class INET_API TemporarySharedPtrClassDescriptor : public cClassDescriptor
 {
   protected:
     cClassDescriptor *classDescriptor;
@@ -60,7 +60,7 @@ class TemporarySharedPtrClassDescriptor : public cClassDescriptor
  */
 // TODO subclass from cTemporary when available to fix leaking memory from the inspector
 template<typename T>
-class TemporarySharedPtr : public cObject
+class INET_API TemporarySharedPtr : public cObject
 {
   private:
     const Ptr<const T> object;

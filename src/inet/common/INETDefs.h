@@ -97,7 +97,7 @@ inline void printElapsedTime(const char *name, long startTime)
 
 #define GET_3TH_ARG(arg1, arg2, arg3, ...)    arg3
 
-extern int evFlags;
+extern INET_API int evFlags;
 #define EV_FORMAT_STYLE(format)               (evFlags & IPrintableObject::PRINT_FLAG_FORMATTED ? format : "")
 #define EV_NORMAL                             EV_FORMAT_STYLE("\x1b[0m")
 #define EV_BOLD                               EV_FORMAT_STYLE("\x1b[1m")

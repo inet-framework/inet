@@ -12,7 +12,7 @@
 
 namespace inet {
 
-class SimTimeTextFigure : public cTextFigure
+class INET_API SimTimeTextFigure : public cTextFigure
 {
   protected:
     std::string prefix;

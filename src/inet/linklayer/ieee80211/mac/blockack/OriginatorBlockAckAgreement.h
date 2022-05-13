@@ -15,7 +15,7 @@ namespace ieee80211 {
 
 class OriginatorBlockAckAgreementHandler;
 
-class OriginatorBlockAckAgreement : public cObject
+class INET_API OriginatorBlockAckAgreement : public cObject
 {
   protected:
     MacAddress receiverAddr = MacAddress::UNSPECIFIED_ADDRESS;
