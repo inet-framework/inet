@@ -122,6 +122,9 @@ class INET_API TcpReceiveQueue : public cObject
 
     /** Returns the minimum of first byte seq.no. in queue and rcv_nxt */
     virtual uint32_t getFirstSeqNo();
+
+    /** Returns the rcv_nxt */
+    virtual uint32_t getRcvNxt() { return rcv_nxt; }
 };
 
 } // namespace tcp

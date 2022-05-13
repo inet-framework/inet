@@ -399,7 +399,7 @@ void TcpConnection::sendAvailableDataToApp()
             sendToApp(indication);
         }
         else {
-            while (auto msg = receiveQueue->extractBytesUpTo(state->rcv_nxt)) {
+            while (auto msg = receiveQueue->extractBytesUpTo(receiveQueue->getRcvNxt())) {
                 msg->setKind(TCP_I_DATA); // TODO currently we never send TCP_I_URGENT_DATA
                 msg->addTag<SocketInd>()->setSocketId(socketId);
                 sendToApp(msg);
