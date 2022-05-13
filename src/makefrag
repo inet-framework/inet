@@ -12,7 +12,7 @@ FEATURETOOL := opp_featuretool
 #
 #CFLAGS += -Wold-style-cast
 
-ifneq (,$(findstring win32,$(PLATFORM)))
+ifeq ($(PLATFORM),win32)
   #
   # on windows we have to link with the ws2_32 (winsock2) library as it is no longer added
   # to the omnetpp system libraries by default (as of OMNeT++ 5.1)
