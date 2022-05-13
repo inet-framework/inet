@@ -10,7 +10,7 @@ FEATURETOOL=opp_featuretool
 # Set the SKIPPED_FEATURES environment variable to empty string to allow enabling
 # the features that require NSC or libav*.
 if [ -z ${SKIPPED_FEATURES+x} ]; then
-  skipped_features="TcpNsc VoipStream"
+  skipped_features="VoipStream"
 else
   skipped_features=${SKIPPED_FEATURES}
 fi
@@ -38,14 +38,14 @@ runtest() {
   GREEN='\033[0;32m'
   NC='\033[0m' # No Color
   (make makefiles >/dev/null && make cleanall >/dev/null && make makefiles >/dev/null) || { echo "*** $testindex. $1 prepare build: ${RED}FAIL${NC}" ; return 1; }
-  make -j8 >/$LOG_DIR/$1-build.out 2>/$LOG_DIR/$1-build.err || { echo "*** $testindex. $1 building: ${RED}FAIL${NC}" ; return 1; }
-  (cd $DIR; opp_run -l ../../src/INET -u Cmdenv -n ../../src:. >/$LOG_DIR/$1-run.out 2>/$LOG_DIR/$1-run.err) || { echo "*** $testindex. $1 running: ${RED}FAIL${NC}" ; return 1; }
+  make -j8 >$LOG_DIR/$1-build.out 2>$LOG_DIR/$1-build.err || { echo "*** $testindex. $1 building: ${RED}FAIL${NC}" ; return 1; }
+  (cd $DIR; opp_run -l ../../src/INET -u Cmdenv -n ../../src:. >$LOG_DIR/$1-run.out 2>$LOG_DIR/$1-run.err) || { echo "*** $testindex. $1 running: ${RED}FAIL${NC}" ; return 1; }
   echo "*** $testindex. $1: ${GREEN}PASS${NC}"; return 0;
 }
 
-cd `dirname $0`
-DIR=`pwd`
-LOG_DIR=`pwd`/_log
+cd $(dirname $0)
+DIR=$(pwd)
+LOG_DIR=$(pwd)/_log
 rm -rf $LOG_DIR; mkdir -p $LOG_DIR
 cd ../..
 
