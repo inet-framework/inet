@@ -144,8 +144,10 @@ TcpConnection::~TcpConnection()
 void TcpConnection::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
-        if (!processTimer(msg))
+        if (!processTimer(msg)) {
+            getSimulation()->setContext(tcpMain);  // Set context to parent Tcp module before delete this module
             tcpMain->removeConnection(this);
+        }
     }
     else
         throw cRuntimeError("model error: TcpConnection allows only self messages");

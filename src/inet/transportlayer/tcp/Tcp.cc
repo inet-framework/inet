@@ -197,7 +197,9 @@ TcpConnection *Tcp::createConnection(int socketId)
 
 void Tcp::removeConnection(TcpConnection *conn)
 {
-    EV_INFO << "Deleting Tcp connection\n";
+    ASSERT(getSimulation()->getContext() == this);
+
+    EV_INFO << "Deleting Tcp connection " << conn->socketId << "\n";
 
     tcpAppConnMap.erase(conn->socketId);
 
