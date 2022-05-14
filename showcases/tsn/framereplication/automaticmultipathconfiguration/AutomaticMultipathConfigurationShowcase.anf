@@ -5,7 +5,7 @@
         <input pattern="/inet/showcases/tsn/framereplication/automaticmultipathconfiguration/results/*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/barchart.png" id="725036719" name="Number of packets sent and received" template="barchart_native" type="BAR">
+        <chart icon="icons/full/obj/barchart.png" id="543070783" name="Number of packets sent and received" template="barchart_native" type="BAR">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
 
 # get chart properties
@@ -537,7 +537,7 @@ utils.export_data_if_needed(df, props)
 ]]></dialogPage>
             <property name="grid_show" value="true"/>
             <property name="Plot.Caching" value="true"/>
-            <property name="yaxis_title" value=""/>
+            <property name="yaxis_title" value="count"/>
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Number of packets sent and received"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
@@ -545,7 +545,7 @@ utils.export_data_if_needed(df, props)
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="bar_placement" value="Aligned"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="6"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="upper right"/>
             <property name="plot.properties" value=""/>
@@ -558,7 +558,7 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
             <property name="baseline" value="0"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="packetsreceivedsent"/>
             <property name="filter" value="type =~ scalar AND (&#10;    (module =~ &quot;*.destination.udp&quot; AND name =~ packetReceived:count) OR&#10;    (module =~ &quot;*.source.udp&quot; AND name =~ packetSent:count)&#10;)"/>
             <property name="X.Label.Wrap" value="true"/>
             <property name="series" value="name"/>
@@ -566,7 +566,7 @@ utils.export_data_if_needed(df, props)
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="Plot.Antialias" value="true"/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="9"/>
             <property name="legend_prefer_module_display_paths" value="true"/>
             <property name="legend_prefer_result_titles" value="true"/>
             <property name="legend_manual" value="true"/>
@@ -575,7 +575,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_format" value="$title"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="851115173" name="Number of packets received / number of packets sent" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1689838000" name="Number of packets received / number of packets sent" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import numpy as np
