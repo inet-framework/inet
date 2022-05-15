@@ -145,7 +145,7 @@ def add_to_dataframe(df, style_tuple_list, default_dict={}):
                 
     for i in range(0,len(df)):
         if (df['additional_style'][i] == None):
-            print('adding default stuff')
+            if debug: print('adding default stuff')
             df['additional_style'][i] = str(default_dict)
 
     return df

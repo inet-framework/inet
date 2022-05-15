@@ -80,11 +80,11 @@ def add_to_dataframe(df, style_tuple_list, default_dict={}):
     
     for i in style_tuple_list:
         column = i[0]
-        print("column: ", column)
+        #print("column: ", column)
         value = i[1]
-        print("value: ", value)
+        #print("value: ", value)
         style_tuple = i[2]
-        print("style_tuple: ", style_tuple)
+        #print("style_tuple: ", style_tuple)
         
         for i in range(0,len(df)):
             if (df[column][i] == value and df['additional_style'][i] == None):
@@ -92,7 +92,7 @@ def add_to_dataframe(df, style_tuple_list, default_dict={}):
                 
     for i in range(0,len(df)):
         if (df['additional_style'][i] == None):
-            print('adding default stuff')
+            #print('adding default stuff')
             df['additional_style'][i] = str(default_dict)
 
     return df
