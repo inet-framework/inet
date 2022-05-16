@@ -52,7 +52,7 @@ module TsnDevice extends StandardHost
         gptp: <default("Gptp")> like IApp if hasTimeSynchronization {
             gptpNodeType = default("SLAVE_NODE");
             slavePort = default("eth0");
-            masterPorts = [];
+            masterPorts = default([]);
             @display("p=700,75");
         }
     connections:
