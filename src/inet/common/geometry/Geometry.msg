@@ -18,6 +18,7 @@ namespace inet;
 class Coord
 {
     @existingClass;
+    @toString(.str());
     double x;
     double y;
     double z;
