@@ -26,7 +26,6 @@
 
 namespace inet {
 
-#ifdef INET_WITH_CLOCK
 template class ClockUserModuleMixin<cSimpleModule>;
 template class ClockUserModuleMixin<ApplicationBase>;
 
@@ -44,8 +43,6 @@ template class ClockUserModuleMixin<queueing::PacketServerBase>;
 template class ClockUserModuleMixin<queueing::PassivePacketSinkBase>;
 template class ClockUserModuleMixin<queueing::PassivePacketSourceBase>;
 template class ClockUserModuleMixin<queueing::TokenGeneratorBase>;
-
-#endif // #ifdef INET_WITH_CLOCK
 
 } // namespace inet
 

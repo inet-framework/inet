@@ -9,6 +9,7 @@
 #define __INET_CLOCKUSERMODULEMIXIN_H
 
 #include "inet/clock/contract/IClock.h"
+#include "inet/clock/contract/ClockEvent.h"
 
 #ifdef INET_WITH_CLOCK
 #include "inet/clock/common/ClockEvent.h"
@@ -22,7 +23,6 @@ template<typename T>
 class INET_API ClockUserModuleMixin : public T
 {
 #ifdef INET_WITH_CLOCK
-
   protected:
     ModuleRefByPar<IClock> clock;
 
