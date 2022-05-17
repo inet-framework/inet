@@ -17,6 +17,7 @@ namespace bgp {
 class INET_API BgpRoutingTableEntry : public Ipv4Route
 {
   private:
+    enum { DEFAULT_COST = 1} ;
     typedef unsigned char RoutingPathType;
     // destinationID is RoutingEntry::host
     // addressMask is RoutingEntry::netmask

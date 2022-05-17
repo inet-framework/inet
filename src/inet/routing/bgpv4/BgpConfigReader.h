@@ -21,6 +21,7 @@ namespace bgp {
 class INET_API BgpConfigReader
 {
   private:
+    enum { NB_TIMERS = 4 };
     cModule *bgpModule = nullptr;
     IInterfaceTable *ift = nullptr;
     BgpRouter *bgpRouter = nullptr;

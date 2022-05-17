@@ -33,6 +33,7 @@ simple Bgp like IBgp
         bool connectedCheck = default(true);
         int ebgpMultihop = default(1);
         @display("i=block/network2");
+        @selfMessageKinds(inet::bgp::BgpSelfMsgKind);
     gates:
         input socketIn @messageKinds(inet::TcpStatusInd);
         output socketOut @messageKinds(inet::TcpCommandCode);

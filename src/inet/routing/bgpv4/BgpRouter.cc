@@ -63,7 +63,7 @@ void BgpRouter::addWatches()
 
 void BgpRouter::recordStatistics()
 {
-    unsigned int statTab[NB_STATS] = {
+    unsigned int statTab[BgpSession::NB_STATS] = {
         0, 0, 0, 0, 0, 0
     };
 
@@ -502,7 +502,7 @@ void BgpRouter::processMessage(const BgpUpdateMessage& msg)
         }
     }
 
-    unsigned char decisionProcessResult = asLoopDetection(entry, myAsId);
+    BgpProcessResult decisionProcessResult = asLoopDetection(entry, myAsId);
 
     if (decisionProcessResult == ASLOOP_NO_DETECTED) {
         // RFC 4271, 9.1.  Decision Process
@@ -515,7 +515,7 @@ void BgpRouter::processMessage(const BgpUpdateMessage& msg)
         delete entry;
 }
 
-unsigned char BgpRouter::asLoopDetection(BgpRoutingTableEntry *entry, AsId myAS)
+BgpProcessResult BgpRouter::asLoopDetection(BgpRoutingTableEntry *entry, AsId myAS)
 {
     for (unsigned int i = 1; i < entry->getASCount(); i++) {
         if (myAS == entry->getAS(i))
@@ -525,12 +525,12 @@ unsigned char BgpRouter::asLoopDetection(BgpRoutingTableEntry *entry, AsId myAS)
 }
 
 /* add entry to routing table, or delete entry */
-unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRoutingTableEntry *entry, SessionId sessionIndex)
+BgpProcessResult BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRoutingTableEntry *entry, SessionId sessionIndex)
 {
     // Don't add the route if it exists in PrefixListINTable or in ASListINTable
     if (isInTable(_prefixListIN, entry) != (unsigned long)-1 || isInASList(_ASListIN, entry)) {
         delete entry;
-        return 0;
+        return RESULT0;
     }
 
     /*If the AS_PATH attribute of a BGP route contains an AS loop, the BGP
@@ -580,7 +580,7 @@ unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouting
     if (BGPindex != (unsigned long)-1) {
         if (tieBreakingProcess(bgpRoutingTable[BGPindex], entry)) {
             delete entry;
-            return 0;
+            return RESULT0;
         }
         else {
             entry->setInterface(_BGPSessions[sessionIndex]->getLinkIntf());
@@ -610,7 +610,7 @@ unsigned char BgpRouter::decisionProcess(const BgpUpdateMessage& msg, BgpRouting
             }
             else {
                 delete entry;
-                return 0;
+                return RESULT0;
             }
         }
     }
@@ -675,7 +675,7 @@ bool BgpRouter::tieBreakingProcess(BgpRoutingTableEntry *oldEntry, BgpRoutingTab
     return true;
 }
 
-void BgpRouter::updateSendProcess(const unsigned char type, SessionId sessionIndex, BgpRoutingTableEntry *entry)
+void BgpRouter::updateSendProcess(BgpProcessResult type, SessionId sessionIndex, BgpRoutingTableEntry *entry)
 {
     // Don't send the update Message if the route exists in listOUTTable
     // SESSION = EGP : send an update message to all BGP Peer (EGP && IGP)

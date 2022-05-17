@@ -19,6 +19,12 @@ namespace bgp {
 
 class INET_API BgpSession : public cObject
 {
+public:
+    enum {
+        BGP_RETRY_TIME = 120,
+        BGP_HOLD_TIME = 180,
+        BGP_KEEP_ALIVE = 60 // 1/3 of BGP_HOLD_TIME
+    };
   private:
     SessionInfo _info;
     BgpRouter& bgpRouter;
@@ -56,6 +62,7 @@ class INET_API BgpSession : public cObject
     friend struct fsm::Established;
 
   public:
+    enum { NB_STATS = 6 };
     BgpSession(BgpRouter& bgpRouter);
     virtual ~BgpSession();
 
