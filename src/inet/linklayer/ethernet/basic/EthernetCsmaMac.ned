@@ -94,7 +94,7 @@ import inet.linklayer.contract.IEtherMac;
 // Please see <a href="physical.html">Messaging on the physical layer</a>.
 //
 // @see ~EthernetMac, ~EthernetInterface, ~IPacketQueue, ~EthernetEncapsulation, ~Ieee8022Llc
-// @see ~EtherFrame, ~EthernetIIFrame, ~EtherFrameWithLlc, ~Ieee802Ctrl
+// @see ~EthernetMacHeader, ~Ieee8022LlcHeader, ~EthernetFcs
 //
 module EthernetCsmaMac like IEtherMac
 {
