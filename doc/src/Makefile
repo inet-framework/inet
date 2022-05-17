@@ -18,12 +18,15 @@ help:
 include tools/sphinx_deployment.mk
 
 server: Makefile copy-media
+	ln -sf ../../showcases showcases; ln -sf ../../tutorials
 	@sphinx-autobuild --host 0.0.0.0 --port 8000 "$(SOURCEDIR)" "$(BUILDDIR)/html" $(SPHINXOPTS) $(O) -r .git
 
 pdf: Makefile copy-media
+	ln -sf ../../showcases showcases; ln -sf ../../tutorials
 	@$(SPHINXBUILD) -M latexpdf "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 html: Makefile copy-media
+	ln -sf ../../showcases showcases; ln -sf ../../tutorials
 	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 copy-media: ../../media

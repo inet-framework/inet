@@ -1,6 +1,7 @@
 # local and generated files not to be committed
+doc/src/showcases
+doc/src/tutorials
 src/Makefile
-src/Makefile.vc
 *_m.h
 *_m.cc
 *_sm.h
