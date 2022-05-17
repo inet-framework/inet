@@ -71,8 +71,9 @@ def groupCol(rows, colName):
 
 db = json.load(sys.stdin)
 
+print('<docfragments>')
 for nedtype, actions in db.items():
-    print('<nedfragment location="{}" anchor="after-statistics"><![CDATA[\n{}]]></nedfragment>\n\n'.format(
+    print('<docfragment nedtype="{}" anchor="after-statistics"><![CDATA[\n{}]]></docfragment>\n\n'.format(
         nedtype,
         table(actions.get('SCHEDULE'), 'Scheduled messages') +
         table(actions.get('CALL'), 'Direct method calls') +
@@ -88,3 +89,4 @@ for nedtype, actions in db.items():
         table(actions.get('TAG'), 'Tagging operations') +
         '')
     )
+print('</docfragments>')
