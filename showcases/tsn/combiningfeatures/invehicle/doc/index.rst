@@ -46,11 +46,11 @@ evaluate their performance.
 Results
 -------
 
-The following video shows the behavior in Qtenv:
+.. The following video shows the behavior in Qtenv:
 
-.. video:: media/behavior.mp4
-   :align: center
-   :width: 90%
+   .. video:: media/behavior.mp4
+      :align: center
+      :width: 90%
 
 Here are the simulation results:
 
