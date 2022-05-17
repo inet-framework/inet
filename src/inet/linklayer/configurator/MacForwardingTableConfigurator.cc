@@ -117,6 +117,8 @@ void MacForwardingTableConfigurator::configureMacForwardingTables() const
 
 void MacForwardingTableConfigurator::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == ipv4MulticastChangeSignal) {
         auto sourceInfo = check_and_cast<Ipv4MulticastGroupSourceInfo *>(object);
         auto node = static_cast<Node *>(topology->getNodeFor(getContainingNode(sourceInfo->ie)));

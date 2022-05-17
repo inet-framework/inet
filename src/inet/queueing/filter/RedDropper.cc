@@ -148,6 +148,8 @@ void RedDropper::processPacket(Packet *packet)
 
 void RedDropper::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+
     if (signalID == packetPushedSignal || signalID == packetPulledSignal || signalID == packetRemovedSignal || signalID == packetDroppedSignal)
         q_time = simTime();
 }

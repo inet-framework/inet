@@ -28,6 +28,8 @@ void EthernetMacLayer::initialize(int stage)
 
 void EthernetMacLayer::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == interfaceStateChangedSignal) {
         auto networkInterface = getContainingNicModule(this);
         auto networkInterfaceChangeDetails = check_and_cast<const NetworkInterfaceChangeDetails *>(object);

@@ -33,6 +33,8 @@ void ResidenceTimeMeasurer::initialize(int stage)
 
 void ResidenceTimeMeasurer::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
+    Enter_Method("%s", cComponent::getSignalName(signal));
+
     if (signal == packetCreatedSignal) {
         auto packet = check_and_cast<Packet *>(object);
         b offset = b(0);
