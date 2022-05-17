@@ -142,9 +142,10 @@ void Arp::initiateArpResolution(Ipv4Address nextHopAddr, ArpCacheEntry *entry)
     sendArpRequest(entry->ie, nextHopAddr);
 
     // start timer
-    cMessage *msg = entry->timer = new cMessage("ARP timeout");
-    msg->setContextPointer(entry);
-    scheduleAfter(retryTimeout, msg);
+    ASSERT(entry->timer == nullptr);
+    entry->timer = new cMessage("ARP timeout");
+    entry->timer->setContextPointer(entry);
+    scheduleAfter(retryTimeout, entry->timer);
 
     numResolutions++;
     Notification signal(nextHopAddr, MacAddress::UNSPECIFIED_ADDRESS, entry->ie);
