@@ -329,6 +329,10 @@
     <filename>src-inet-linklayer-csmaca-CsmaCaMacTrailer.html</filename>
   </compound>
   <compound kind="class">
+    <name>DcTcpFamilyStateVariables</name>
+    <filename>src-inet-transportlayer-tcp-flavours-DcTcpFamilyStateVariables.html</filename>
+  </compound>
+  <compound kind="class">
     <name>DelayingTimeTag</name>
     <filename>src-inet-common-DelayingTimeTag.html</filename>
   </compound>
@@ -389,6 +393,18 @@
     <filename>src-inet-common-DispatchProtocolReq.html</filename>
   </compound>
   <compound kind="class">
+    <name>DropEligibleInd</name>
+    <filename>src-inet-linklayer-common-DropEligibleInd.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>DropEligibleReq</name>
+    <filename>src-inet-linklayer-common-DropEligibleReq.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>DropEligibleTagBase</name>
+    <filename>src-inet-linklayer-common-DropEligibleTagBase.html</filename>
+  </compound>
+  <compound kind="class">
     <name>DrPriorityOption</name>
     <filename>src-inet-routing-pim-DrPriorityOption.html</filename>
   </compound>
@@ -411,6 +427,10 @@
   <compound kind="class">
     <name>DsdvHello</name>
     <filename>src-inet-routing-dsdv-DsdvHello.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>DumbTcpStateVariables</name>
+    <filename>src-inet-transportlayer-tcp-flavours-DumbTcpStateVariables.html</filename>
   </compound>
   <compound kind="class">
     <name>DymoMetricType</name>
@@ -891,26 +911,6 @@
   <compound kind="class">
     <name>HopLimitTagBase</name>
     <filename>src-inet-networklayer-common-HopLimitTagBase.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>HttpBaseMessage</name>
-    <filename>src-inet-applications-httptools-common-HttpBaseMessage.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>HttpContentType</name>
-    <filename>src-inet-applications-httptools-common-HttpContentType.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>HttpReplyMessage</name>
-    <filename>src-inet-applications-httptools-common-HttpReplyMessage.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>HttpRequestMessage</name>
-    <filename>src-inet-applications-httptools-common-HttpRequestMessage.html</filename>
-  </compound>
-  <compound kind="class">
-    <name>HttpServerStatusUpdateMsg</name>
-    <filename>src-inet-applications-httptools-common-HttpServerStatusUpdateMsg.html</filename>
   </compound>
   <compound kind="class">
     <name>Hz</name>
@@ -2269,10 +2269,6 @@
     <filename>src-inet-common-packet-Packet.html</filename>
   </compound>
   <compound kind="class">
-    <name>PacketDrillInfo</name>
-    <filename>src-inet-applications-packetdrill-PacketDrillInfo.html</filename>
-  </compound>
-  <compound kind="class">
     <name>PacketDrop</name>
     <filename>src-inet-visualizer-base-PacketDrop.html</filename>
   </compound>
@@ -2733,6 +2729,10 @@
     <filename>src-inet-transportlayer-tcp_common-SackItem.html</filename>
   </compound>
   <compound kind="class">
+    <name>SackList</name>
+    <filename>src-inet-transportlayer-tcp-SackList.html</filename>
+  </compound>
+  <compound kind="class">
     <name>SapCode</name>
     <filename>src-inet-linklayer-common-SapCode.html</filename>
   </compound>
@@ -2998,15 +2998,15 @@
   </compound>
   <compound kind="class">
     <name>SequenceNumberInd</name>
-    <filename>src-inet-protocolelement-redundancy-SequenceNumberInd.html</filename>
+    <filename>src-inet-common-SequenceNumberInd.html</filename>
   </compound>
   <compound kind="class">
     <name>SequenceNumberReq</name>
-    <filename>src-inet-protocolelement-redundancy-SequenceNumberReq.html</filename>
+    <filename>src-inet-common-SequenceNumberReq.html</filename>
   </compound>
   <compound kind="class">
     <name>SequenceNumberTagBase</name>
-    <filename>src-inet-protocolelement-redundancy-SequenceNumberTagBase.html</filename>
+    <filename>src-inet-common-SequenceNumberTagBase.html</filename>
   </compound>
   <compound kind="class">
     <name>ServicePrimitive</name>
@@ -3169,6 +3169,10 @@
     <filename>src-inet-transportlayer-contract-tcp-TcpAvailableInfo.html</filename>
   </compound>
   <compound kind="class">
+    <name>TcpBaseAlgStateVariables</name>
+    <filename>src-inet-transportlayer-tcp-flavours-TcpBaseAlgStateVariables.html</filename>
+  </compound>
+  <compound kind="class">
     <name>TcpCommand</name>
     <filename>src-inet-transportlayer-contract-tcp-TcpCommand.html</filename>
   </compound>
@@ -3195,6 +3199,10 @@
   <compound kind="class">
     <name>TcpErrorInfo</name>
     <filename>src-inet-transportlayer-contract-tcp-TcpErrorInfo.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>TcpEventCode</name>
+    <filename>src-inet-transportlayer-tcp-TcpEventCode.html</filename>
   </compound>
   <compound kind="class">
     <name>TcpHeader</name>
@@ -3253,6 +3261,10 @@
     <filename>src-inet-transportlayer-tcp-TcpSackRexmitQueue.html</filename>
   </compound>
   <compound kind="class">
+    <name>TcpSegmentTransmitInfoList</name>
+    <filename>src-inet-transportlayer-tcp-flavours-TcpSegmentTransmitInfoList.html</filename>
+  </compound>
+  <compound kind="class">
     <name>TcpSendQueue</name>
     <filename>src-inet-transportlayer-tcp-TcpSendQueue.html</filename>
   </compound>
@@ -3273,6 +3285,10 @@
     <filename>src-inet-transportlayer-contract-tcp-TcpSetTosCommand.html</filename>
   </compound>
   <compound kind="class">
+    <name>TcpState</name>
+    <filename>src-inet-transportlayer-tcp-TcpState.html</filename>
+  </compound>
+  <compound kind="class">
     <name>TcpStateVariables</name>
     <filename>src-inet-transportlayer-tcp-TcpStateVariables.html</filename>
   </compound>
@@ -3283,6 +3299,18 @@
   <compound kind="class">
     <name>TcpStatusInfo</name>
     <filename>src-inet-transportlayer-contract-tcp-TcpStatusInfo.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>TcpTahoeRenoFamilyStateVariables</name>
+    <filename>src-inet-transportlayer-tcp-flavours-TcpTahoeRenoFamilyStateVariables.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>TcpVegasStateVariables</name>
+    <filename>src-inet-transportlayer-tcp-flavours-TcpVegasStateVariables.html</filename>
+  </compound>
+  <compound kind="class">
+    <name>TcpWestwoodStateVariables</name>
+    <filename>src-inet-transportlayer-tcp-flavours-TcpWestwoodStateVariables.html</filename>
   </compound>
   <compound kind="class">
     <name>TedChangeInfo</name>
