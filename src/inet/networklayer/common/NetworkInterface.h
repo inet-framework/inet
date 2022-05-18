@@ -42,6 +42,8 @@ class INET_API MacEstimateCostProcess
     virtual int getNeighbors(MacAddress[]) = 0;
 };
 
+//TODO declare InterfaceProtocolData and descendants in MSG file
+
 /**
  * Base class for protocol-specific data on an interface.
  * Notable subclasses are Ipv4InterfaceData and Ipv6InterfaceData.
