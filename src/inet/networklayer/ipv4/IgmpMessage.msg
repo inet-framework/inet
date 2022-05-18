@@ -12,6 +12,14 @@ import inet.transportlayer.common.CrcMode;
 
 namespace inet;
 
+enum IgmpTimerKind
+{
+    IGMP_QUERY_TIMER = 1001;
+    IGMP_HOSTGROUP_TIMER = 1002;
+    IGMP_LEAVE_TIMER = 1003;
+    IGMP_REXMT_TIMER = 1004;
+};
+
 enum IgmpType
 {
     IGMP_MEMBERSHIP_QUERY = 0x11;

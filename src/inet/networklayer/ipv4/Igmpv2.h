@@ -44,13 +44,6 @@ class INET_API Igmpv2 : public cSimpleModule, public DefaultProtocolRegistration
         IGMP_HGS_IDLE_MEMBER,
     };
 
-    enum IgmpTimerKind {
-        IGMP_QUERY_TIMER,
-        IGMP_HOSTGROUP_TIMER,
-        IGMP_LEAVE_TIMER,
-        IGMP_REXMT_TIMER
-    };
-
     struct HostGroupData {
         Igmpv2 *owner;
         Ipv4Address groupAddr;

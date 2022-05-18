@@ -108,6 +108,7 @@ simple Igmpv2 like IIgmp
         double unsolicitedReportInterval @unit(s) = default(10s);
 //      double version1RouterPresentInterval @unit(s) = default(400s);
         @display("i=block/cogwheel");
+        @selfMessageKinds(inet::IgmpTimerKind);
 
     gates:
         input ipIn @labels(Ipv4ControlInfo/up);  // delivered IGMP packets
