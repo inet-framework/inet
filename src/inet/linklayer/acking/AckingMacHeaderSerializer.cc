@@ -78,7 +78,7 @@ Packet *AckingMacToEthernetPcapRecorderHelper::tryConvertToLinkType(const Packet
         ethHeader->setSrc(ackingHdr->getSrc());
         ethHeader->setTypeOrLength(ackingHdr->getNetworkProtocol());
         newPacket->insertAtFront(ethHeader);
-        newPacket->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+        newPacket->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
         return newPacket;
     }
 #endif // defined(INET_WITH_ETHERNET)

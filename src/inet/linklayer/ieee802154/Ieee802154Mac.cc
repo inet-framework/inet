@@ -202,7 +202,7 @@ void Ieee802154Mac::encapsulate(Packet *packet)
     }
 
     packet->insertAtFront(macPkt);
-    packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee802154);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee802154);
     EV_DETAIL << "pkt encapsulated, length: " << macPkt->getChunkLength() << "\n";
 }
 

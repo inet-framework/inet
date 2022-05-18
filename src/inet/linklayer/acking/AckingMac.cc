@@ -206,7 +206,7 @@ void AckingMac::encapsulate(Packet *packet)
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     macAddressInd->setSrcAddress(macHeader->getSrc());
     macAddressInd->setDestAddress(macHeader->getDest());
-    packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ackingMac);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ackingMac);
 }
 
 bool AckingMac::dropFrameNotForUs(Packet *packet)

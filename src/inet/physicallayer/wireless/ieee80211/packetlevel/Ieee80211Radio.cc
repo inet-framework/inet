@@ -264,7 +264,7 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
         protocol = &Protocol::ieee80211VhtPhy;
     else
         throw cRuntimeError("Invalid IEEE 802.11 PHY header type.");
-    packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(protocol);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
 }
 
 void Ieee80211Radio::decapsulate(Packet *packet) const
@@ -277,7 +277,7 @@ void Ieee80211Radio::decapsulate(Packet *packet) const
     auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
     if (tailLength + paddingLength != b(0))
         packet->popAtBack(tailLength + paddingLength, Chunk::PF_ALLOW_INCORRECT);
-    packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
 }
 
 const Ptr<const Ieee80211PhyHeader> Ieee80211Radio::popIeee80211PhyHeaderAtFront(Packet *packet, b length, int flags)

@@ -36,7 +36,7 @@ void Ieee80211OfdmRadio::encapsulate(Packet *packet) const
     auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
     const auto& phyTrailer = makeShared<BitCountChunk>(paddingLength + b(6));
     packet->insertAtBack(phyTrailer);
-    packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211OfdmPhy);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211OfdmPhy);
 }
 
 void Ieee80211OfdmRadio::decapsulate(Packet *packet) const

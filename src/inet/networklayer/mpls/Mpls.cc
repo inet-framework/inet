@@ -136,7 +136,7 @@ void Mpls::pushLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader)
     packet->trimFront();
     newMplsHeader->setS(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() != Protocol::mpls.getId());
     packet->insertAtFront(newMplsHeader);
-    packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::mpls);
 }
 
 void Mpls::swapLabel(Packet *packet, Ptr<MplsHeader>& newMplsHeader)
@@ -153,7 +153,7 @@ void Mpls::popLabel(Packet *packet)
     ASSERT(packet->getTag<PacketProtocolTag>()->getProtocol()->getId() == Protocol::mpls.getId());
     auto oldMplsHeader = packet->popAtFront<MplsHeader>();
     if (oldMplsHeader->getS()) {
-        packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     }
 }
 
