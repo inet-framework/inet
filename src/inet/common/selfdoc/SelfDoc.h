@@ -49,22 +49,30 @@ class INET_API SelfDocTempOffClass
 // for declare a local SelfDocTempOffClass variable:
 #define SelfDocTempOff  SelfDocTempOffClass selfDocTempOff_ ## __LINE__;
 
-
 #undef Enter_Method
 #undef Enter_Method_Silent
 
 #define __Enter_Method_SelfDoc(...) \
         if (SelfDoc::notInInitialize(__VA_ARGS__) && (getSimulation()->getSimulationStage() != CTX_CLEANUP)) { \
-            std::ostringstream os; \
             auto __from = __ctx.getCallerContext(); \
-            os << "=SelfDoc={ " << SelfDoc::keyVal("module", __from ? __from->getComponentType()->getFullName() : "-=unknown=-") \
-               << ", " << SelfDoc::keyVal("action","CALL") \
-               << ", " << SelfDoc::val("details") << " : { " \
-               << SelfDoc::keyVal("call to", getSimulation()->getContext()->getComponentType()->getFullName()) \
-               << ", " << SelfDoc::keyVal("function", std::string(opp_typename(typeid(*this))) + "::" + __func__) \
-               << ", " << SelfDoc::keyVal("info", SelfDoc::enterMethodInfo(__VA_ARGS__)) \
-               << " } }"; \
-            globalSelfDoc.insert(os.str()); \
+            std::string fromModuleName = __from ? __from->getParentModule() ? __from->getComponentType()->getFullName() : "-=Network=-" : "-=unknown=-"; \
+            std::string toModuleName = getSimulation()->getContext()->getComponentType()->getFullName(); \
+            std::string keyValFunction = SelfDoc::keyVal("function", std::string(opp_typename(typeid(*this))) + "::" + __func__); \
+            std::string keyValInfo = SelfDoc::keyVal("info", SelfDoc::enterMethodInfo(__VA_ARGS__)); \
+            { \
+                std::ostringstream os; \
+                os << "=SelfDoc={ " << SelfDoc::keyVal("module", fromModuleName) \
+                   << ", " << SelfDoc::keyVal("action","CALL") \
+                   << ", " << SelfDoc::val("details") << " : { " << SelfDoc::keyVal("call to", toModuleName) << ", " << keyValFunction << ", " << keyValInfo << " } }"; \
+                globalSelfDoc.insert(os.str()); \
+            } \
+            { \
+                std::ostringstream os; \
+                os << "=SelfDoc={ " << SelfDoc::keyVal("module", toModuleName) \
+                   << ", " << SelfDoc::keyVal("action","CALLED") \
+                   << ", " << SelfDoc::val("details") << " : { " << SelfDoc::keyVal("call from", fromModuleName) << ", " << keyValFunction << ", " << keyValInfo << " } }"; \
+                globalSelfDoc.insert(os.str()); \
+            } \
         }
 
 // TODO add module relative path when caller and call to are in same networkNode
