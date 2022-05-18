@@ -182,6 +182,7 @@ void Flooding::handleLowerPacket(Packet *packet)
         }
         // not for me -> rebroadcast
         else {
+            // FIXME Maybe send original packet instead of create a copy and drop original?
             // check ttl and rebroadcast
             if (floodHeader->getTtl() > 1) {
                 EV << " data msg not for me! ttl = " << floodHeader->getTtl()
