@@ -25,7 +25,7 @@ def table(rows, title):
     for k in rows[0].keys():
         s += '<th>{}</th>'.format(k)
     s += '</tr>\n'
-    for entry in rows:
+    for entry in sorted(rows, key = lambda x:list(x.values())):
         s +='<tr>'
         for k, v in entry.items():
             if type(v) is list:
@@ -69,6 +69,28 @@ def groupCol(rows, colName):
         rr.append(x)
     return rr
 
+# aggregate to a list the colName column
+def aggregateCol(rows, colName):
+    if rows == None:
+        return None
+    r = {}
+    for entry in rows:
+        e = entry.copy()
+        e.pop(colName, None)
+        g = { entry[colName] }
+        ekey = json.dumps(e)
+        if ekey in r:
+            r[ekey][1] = r[ekey][1] | g
+        else:
+            r[ekey] = [e,g]
+
+    rr = list()
+    for k,e in r.items():
+        x = e[0]
+        x[colName] = sorted(list(e[1]))
+        rr.append(x)
+    return rr
+
 db = json.load(sys.stdin)
 
 print('<docfragments>')
@@ -77,16 +99,17 @@ for nedtype, actions in db.items():
         nedtype,
         table(actions.get('SCHEDULE'), 'Scheduled messages') +
         table(actions.get('CALL'), 'Direct method calls') +
+        table(aggregateCol(actions.get('CALLED'), 'call from'), 'Called methods') +
         table(groupCol(actions.get('INPUT'), 'tags'), 'Incoming messages') +
         table(groupCol(actions.get('OUTPUT'), 'tags'), 'Outgoing messages') +
         table(groupCol(actions.get('PULL_IN'), 'tags'), 'Pull in messages') +
         table(groupCol(actions.get('PULLED_OUT'), 'tags'), 'Pulled out messages') +
         table(groupCol(actions.get('PUSHED_IN'), 'tags'), 'Pushed in messages') +
         table(groupCol(actions.get('PUSH_OUT'), 'tags'), 'Push out messages') +
-        table(actions.get('PACKET'), 'Packet operations') +
-        table(actions.get('STAG'), 'Shared Tagging operations') +
-        table(actions.get('RTAG'), 'Region Tagging operations') +
-        table(actions.get('TAG'), 'Tagging operations') +
+        table(aggregateCol(actions.get('PACKET'), 'packetAction'), 'Packet operations') +
+        table(aggregateCol(actions.get('STAG'), 'tagAction'), 'Shared Tagging operations') +
+        table(aggregateCol(actions.get('RTAG'), 'tagAction'), 'Region Tagging operations') +
+        table(aggregateCol(actions.get('TAG'), 'tagAction'), 'Tagging operations') +
         '')
     )
 print('</docfragments>')
