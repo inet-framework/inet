@@ -407,7 +407,7 @@ NetworkInterface *Ipv6RoutingTable::getInterfaceByAddress(const L3Address& addre
 
 bool Ipv6RoutingTable::isLocalAddress(const Ipv6Address& dest) const
 {
-    Enter_Method("isLocalAddress(%s) y/n", dest.str().c_str());
+    Enter_Method("isLocalAddress(%s)", dest.str().c_str());
 
     // first, check if we have an interface with this address
     if (ift->isLocalAddress(dest))
