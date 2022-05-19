@@ -660,7 +660,7 @@ for t in df.itertuples(index=False):
             style['drawstyle'] = 'steps-post'
         elif interp == "backward-sample-hold":
             style['drawstyle'] = 'steps-pre'
-    print(style)
+    #print(style)
     style["marker"] = "s"
     style["markersize"] = "3"
     plt.plot(t.vectime, t.vecvalue, label=t.experiment, **style, color=t.color)
@@ -2708,7 +2708,6 @@ column_order_color = [
     ('ThresholdHCFfragblockack', '#ff7f0e')
 ]
 
-print(df)
 # iterate on the above list instead of the dataframe, so we dont
 # have to reorder the columns (and still get the desired order and colors)
 for c in column_order_color:
@@ -3351,8 +3350,8 @@ filter_expression_snir = """(module =~ "FragmentationShowcase.wifiHost2.wlan[0].
 df_snir = results.get_scalars(filter_expression_snir, include_fields=True, include_attrs=True, include_itervars=True, include_runattrs=True)
 # The mean column of this data frame will be the x coordinate
 df_snir = df_snir.pivot_table(index='txPower', columns='experiment', values='value')
-print("SNIR:")
-print(df_snir)
+#print("SNIR:")
+#print(df_snir)
 
 # Get the throughput vectors
 df_tp = results.get_scalars(filter_expression, include_fields=True, include_attrs=True, include_runattrs=True, include_itervars=True)
@@ -3361,8 +3360,8 @@ df_tp = results.get_scalars(filter_expression, include_fields=True, include_attr
 #df_tp['mean'] = df_tp['vecvalue'].apply(np.mean)
 # The mean column of this data frame will be the y coordinate
 df_tp = df_tp.pivot_table(index='txPower', columns='experiment', values='value')
-print("Throughput:")
-print(df_tp)
+#print("Throughput:")
+#print(df_tp)
 
 plt.figure(figsize=(11,6))
 
@@ -3375,7 +3374,6 @@ column_order_color = [
     ('TxPowerHCFfragblockack', '#ff7f0e')
 ]
 
-print(df_tp)
 # iterate on the above list instead of the dataframe, so we dont
 # have to reorder the columns (and still get the desired order and colors)
 # For each column (experiment) we plot a line, taking the x coordinates

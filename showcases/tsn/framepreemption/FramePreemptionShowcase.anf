@@ -5,7 +5,7 @@
         <input pattern="results/*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="95071055" name="End-to-end delay, 1200-Byte packet length" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="2051192745" name="End-to-end delay, 1200-Byte packet length" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import modifiedplot
@@ -35,8 +35,6 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # add modified line style to dataframe
 df = ls.add_custom_style(df)
-
-print(df)
 
 # plot
 modifiedplot.plot_vectors(df, props)
@@ -647,7 +645,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_format" value=""/>
             <property name="simplify" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1495265128" name="End-to-end delay, realistic packet length" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="849528329" name="End-to-end delay, realistic packet length" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import modifiedplot
@@ -1297,7 +1295,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1870507482" name="End-to-end delay, realistic packet length zoomed" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1324011999" name="End-to-end delay, realistic packet length zoomed" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import modifiedplot
@@ -1941,7 +1939,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1795913588" name="Time average of queue length" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1865293396" name="Time average of queue length" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 

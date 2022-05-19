@@ -5,7 +5,7 @@
         <input pattern="results/General-rateControl=AarfRateControl-#0.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="1063899509" name="No rate control" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1204237398" name="No rate control" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -637,7 +637,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="$name"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1164277090" name="AarfRateControl" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="372891731" name="AarfRateControl" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -1266,7 +1266,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="$name"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1093390583" name="Throughput" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1944383348" name="Throughput" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
@@ -1898,7 +1898,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="$rateControl"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1278457977" name="Selected datarate" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1136604321" name="Selected datarate" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 import modifiedplot
@@ -1929,8 +1929,6 @@ style_tuple_list = [('rateControl', '""', {'linestyle': 'solid', 'linewidth': 3}
 #default_dict = {'linewidth': 1}
 
 df = modifiedplot.add_to_dataframe(df, style_tuple_list)
-
-print(df)
 
 #df['propertyname'] = df['propertyvalue'] = df['module']
 

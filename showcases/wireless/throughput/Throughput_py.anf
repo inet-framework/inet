@@ -146,8 +146,8 @@ ax2.set_ylim(ymin, ymax)
 
 rightyticks = []
 
-print("df",df)
-print("df",df.values)
+#print("df",df)
+#print("df",df.values)
 
 # add values to right y axis
 rightyticks.append(df.values[0][0])
@@ -161,7 +161,7 @@ rightyticks.append(df.values[5][2])
 rightyticks.append(df.values[6][2])
 rightyticks.append(df.values[7][2])
 
-print('rightyticks:',rightyticks)
+#print('rightyticks:',rightyticks)
 
 ax2.set_yticks(rightyticks)
 

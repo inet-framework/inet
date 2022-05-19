@@ -25,8 +25,6 @@ except ValueError as e:
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
-print(df)
-
 df['module'] = df['module'].replace(regex="Ieee802154Showcase.(.*?).energyStorage",value="\\1")
 
 groups, series = utils.select_groups_series(df, props)
@@ -34,8 +32,6 @@ confidence_level = utils.get_confidence_level(props)
 valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, groups, series, confidence_level)
 
 valuedf *= -1
-
-print("valuedf\n", valuedf)
 
 utils.plot_bars(valuedf, errorsdf, metadf, props)
 

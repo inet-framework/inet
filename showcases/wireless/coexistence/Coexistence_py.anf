@@ -54,7 +54,6 @@ plt.title("Wifi performance")
 df = pd.pivot_table(df, index='experiment', values='value')
 
 df.sort_values(by="experiment", axis='index', inplace=True, ascending=False)
-print(df)
 
 df.columns=['Number of packets received']
 df.index=['Wifi only','Wifi+WPAN coexistence']
@@ -635,7 +634,6 @@ plt.title("WPAN performance")
 df = pd.pivot_table(df, index='experiment', values='value')
 
 df.sort_values(by="experiment", axis='index', inplace=True, ascending=False)
-print(df)
 
 df.columns=['Number of packets received']
 df.index=['WPAN only','Wifi+WPAN coexistence']

@@ -27,8 +27,6 @@ except ValueError as e:
 
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
-    
-print(df)
 
 df['legend'] = df['module']
 

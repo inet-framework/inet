@@ -614,7 +614,6 @@ utils.plot_vectors(df, props)
 utils.postconfigure_plot(props)
 
 gridstyle = props['grid_linestyle']
-print("gridstyle",gridstyle)
 #mpl.rcParams['grid.linestyle'] = gridstyle
 plt.grid(linestyle=gridstyle)
 

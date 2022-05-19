@@ -4058,14 +4058,12 @@ df = ops.perform_vector_ops(df, props["vector_operations"])
 
 colors = ['xkcd:lightblue','orange','green','red','darkblue']
 
-print(df)
 df = df.set_index('experiment')
 df = df.reindex(['AxiallySymmetricAntenna','CosineAntenna','IsotropicAntenna','ParabolicAntenna','DipoleAntenna'])
-print(df)
 
 i = 0
 for t in df.itertuples(index=False):
-    print(t)
+    #print(t)
     style = dict()
     interp = t.interpolationmode if 'interpolationmode' in df else 'sample-hold' if 'enum' in df else None
     if interp:
