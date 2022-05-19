@@ -35,6 +35,12 @@ utils.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
+#workaround start
+#transparency workaround for omnetpp-6.0
+import matplotlib as mpl
+mpl.rcParams['savefig.transparent'] = True
+#workaround end
+
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]></script>
@@ -598,6 +604,12 @@ if df.empty:
 utils.plot_histograms(df, props)
 utils.postconfigure_plot(props)
 
+#workaround start
+#transparency workaround for omnetpp-6.0
+import matplotlib as mpl
+mpl.rcParams['savefig.transparent'] = True
+#workaround end
+
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]></script>
@@ -1096,6 +1108,12 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 utils.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
+
+#workaround start
+#transparency workaround for omnetpp-6.0
+import matplotlib as mpl
+mpl.rcParams['savefig.transparent'] = True
+#workaround end
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -1663,6 +1681,12 @@ df['binedges'] = df['binedges'] * 1000
 utils.plot_histograms(df, props)
 utils.postconfigure_plot(props)
 
+#workaround start
+#transparency workaround for omnetpp-6.0
+import matplotlib as mpl
+mpl.rcParams['savefig.transparent'] = True
+#workaround end
+
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]></script>
@@ -2161,6 +2185,12 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 utils.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
+
+#workaround start
+#transparency workaround for omnetpp-6.0
+import matplotlib as mpl
+mpl.rcParams['savefig.transparent'] = True
+#workaround end
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -2727,6 +2757,12 @@ df['binedges'] = df['binedges'] * 1000
 # plot
 utils.plot_histograms(df, props)
 utils.postconfigure_plot(props)
+
+#workaround start
+#transparency workaround for omnetpp-6.0
+import matplotlib as mpl
+mpl.rcParams['savefig.transparent'] = True
+#workaround end
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)

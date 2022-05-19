@@ -5,7 +5,7 @@
         <input pattern="/inet/showcases/measurement/queueingtime/results/General-*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/histogramchart.png" id="1554449167" name="Source queueing time, histogram" template="histogramchart_native" type="HISTOGRAM">
+        <chart icon="icons/full/obj/histogramchart.png" id="2100818613" name="Source queueing time, histogram" template="histogramchart_native" type="HISTOGRAM">
             <script><![CDATA[from omnetpp.scave import results, chart, utils
 
 # get chart properties
@@ -29,6 +29,12 @@ df['binedges'] = df['binedges'] * 1000
 # plot
 utils.plot_histograms(df, props)
 utils.postconfigure_plot(props)
+
+#workaround start
+#transparency workaround for omnetpp-6.0
+import matplotlib as mpl
+mpl.rcParams['savefig.transparent'] = True
+#workaround end
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -565,7 +571,7 @@ Show over_underflow cell?
             <property name="image_export_width" value="9"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="749948384" name="Source queueing time, vector" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1527959793" name="Source queueing time, vector" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -594,6 +600,12 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 utils.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
+
+#workaround start
+#transparency workaround for omnetpp-6.0
+import matplotlib as mpl
+mpl.rcParams['savefig.transparent'] = True
+#workaround end
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)

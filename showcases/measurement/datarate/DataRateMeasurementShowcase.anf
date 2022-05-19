@@ -35,6 +35,12 @@ utils.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
+#workaround start
+#transparency workaround for omnetpp-6.0
+import matplotlib as mpl
+mpl.rcParams['savefig.transparent'] = True
+#workaround end
+
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]></script>
@@ -604,6 +610,12 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 utils.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
+
+#workaround start
+#transparency workaround for omnetpp-6.0
+import matplotlib as mpl
+mpl.rcParams['savefig.transparent'] = True
+#workaround end
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
@@ -1175,6 +1187,12 @@ utils.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
 
+#workaround start
+#transparency workaround for omnetpp-6.0
+import matplotlib as mpl
+mpl.rcParams['savefig.transparent'] = True
+#workaround end
+
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]></script>
@@ -1744,6 +1762,12 @@ df = utils.perform_vector_ops(df, props["vector_operations"])
 utils.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)
+
+#workaround start
+#transparency workaround for omnetpp-6.0
+import matplotlib as mpl
+mpl.rcParams['savefig.transparent'] = True
+#workaround end
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
