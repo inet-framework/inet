@@ -48,8 +48,11 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label):
         return props[k] if k in props else None
 
     title_cols, legend_cols = utils.extract_label_columns(df, props)
-
-    df.sort_values(by=legend_cols, inplace=True)
+    
+    if 'order' in df.columns:
+        df.sort_values(by='order', inplace=True)
+    else:
+        df.sort_values(by=legend_cols, inplace=True)
     for t in df.itertuples(index=False):
         style = utils._make_line_args(props, t, df)
 #        if t.propertyname != '':
@@ -97,7 +100,7 @@ def plot_vectors_separate(df, props, legend_func=utils.make_legend_label):
     utils.set_plot_title(title)
 
 
-def add_to_dataframe(df, style_tuple_list, default_dict={}):
+def add_to_dataframe(df, style_tuple_list, default_dict={}, order={}):
     """
     Adds 'additional_style' column to dataframe. The concent of this column is added to 'style' object when plotting.
     style_tuple_list: [(column, value, {style dictionary}), (...), ...]:
@@ -147,5 +150,16 @@ def add_to_dataframe(df, style_tuple_list, default_dict={}):
         if (df['additional_style'][i] == None):
             if debug: print('adding default stuff')
             df['additional_style'][i] = str(default_dict)
+            
+    if order:
+        # order the dataframe
+        df['order'] = None
+        for i in order.items():
+            print(i[0], i[1])
+            for j in range(0,len(df)):
+                if df['configname'][j] == i[0]:
+                    df['order'][j] = i[1]
+                    
+        print("order added.", df['order'], df)
 
     return df
