@@ -1727,7 +1727,7 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="740259908" name="Clock drift - time domain 1" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
-import modifiedplot
+import modifiedplot_gptp as modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -2954,7 +2954,7 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="355886137" name="Clock drift - domain 0" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
-import modifiedplot
+import modifiedplot_gptp as modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -3542,7 +3542,7 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="1791421460" name="Clock drift - domain 1" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
-import modifiedplot
+import modifiedplot_gptp as modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -4130,7 +4130,7 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="2104974291" name="Clock drift - domain 2" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
-import modifiedplot
+import modifiedplot_gptp as modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -4719,7 +4719,7 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="2087401471" name="Clock drift - domain 3" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
-import modifiedplot
+import modifiedplot_gptp as modifiedplot
 
 # get chart properties
 props = chart.get_properties()

@@ -8,7 +8,7 @@
         <chart icon="icons/full/obj/linechart.png" id="2051192745" name="End-to-end delay, 1200-Byte packet length" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot
+import modifiedplot_fp as modifiedplot
 import matplotlib.pyplot as plt
 import create_labels_and_style as ls
 
@@ -648,7 +648,7 @@ utils.export_data_if_needed(df, props)
         <chart icon="icons/full/obj/linechart.png" id="849528329" name="End-to-end delay, realistic packet length" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot
+import modifiedplot_fp as modifiedplot
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import matplotlib.patches as patches
@@ -1298,7 +1298,7 @@ utils.export_data_if_needed(df, props)
         <chart icon="icons/full/obj/linechart.png" id="1324011999" name="End-to-end delay, realistic packet length zoomed" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot
+import modifiedplot_fp as modifiedplot
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import matplotlib.patches as patches

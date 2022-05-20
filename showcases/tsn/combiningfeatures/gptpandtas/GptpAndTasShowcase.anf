@@ -5,11 +5,11 @@
         <input pattern="/inet/showcases/tsn/combiningfeatures/gptpandtas/results/*.sca"/>
     </inputs>
     <charts>
-        <folder id="1021251643" name="Clock Drift, Normal Operation">
-            <chart icon="icons/full/obj/linechart.png" id="998371403" name="Normal Operation, Clock Drift, Time Domain of Primary Master (Domain 0)" template="linechart_native" type="LINE">
+        <folder id="686738086" name="Clock Drift, Normal Operation">
+            <chart icon="icons/full/obj/linechart.png" id="58392000" name="Normal Operation, Clock Drift, Time Domain of Primary Master (Domain 0)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot
+import modifiedplot_gptpandtas as modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -646,10 +646,10 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="56598685" name="Normal Operation, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1452968581" name="Normal Operation, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot
+import modifiedplot_gptpandtas as modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -1287,10 +1287,10 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1231131031" name="Normal Operation, Clock Drift, Active Clocks in Bridges and End Stations" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="680541503" name="Normal Operation, Clock Drift, Active Clocks in Bridges and End Stations" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot
+import modifiedplot_gptpandtas as modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -1928,11 +1928,11 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_format" value=""/>
             </chart>
         </folder>
-        <folder id="609483925" name="Clock Drift, Link Failure">
-            <chart icon="icons/full/obj/linechart.png" id="1849554046" name="Link Failure, Clock Drift, Time Domain of Primary Master (Domain 0)" template="linechart_native" type="LINE">
+        <folder id="1954444571" name="Clock Drift, Link Failure">
+            <chart icon="icons/full/obj/linechart.png" id="2127769190" name="Link Failure, Clock Drift, Time Domain of Primary Master (Domain 0)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot
+import modifiedplot_gptpandtas as modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -2569,10 +2569,10 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1786897217" name="Link Failure, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1164565886" name="Link Failure, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot
+import modifiedplot_gptpandtas as modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -3210,10 +3210,10 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1375243453" name="Link Failure, Clock Drift, Active Clocks in Bridges and End Stations" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="2117312165" name="Link Failure, Clock Drift, Active Clocks in Bridges and End Stations" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot
+import modifiedplot_gptpandtas as modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -3851,11 +3851,11 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_format" value=""/>
             </chart>
         </folder>
-        <folder id="2070325317" name="Clock Drift, Failover">
-            <chart icon="icons/full/obj/linechart.png" id="1137669131" name="Failover, Clock Drift, Time Domain of Primary Master (Domain 0)" template="linechart_native" type="LINE">
+        <folder id="1457639970" name="Clock Drift, Failover">
+            <chart icon="icons/full/obj/linechart.png" id="2037641704" name="Failover, Clock Drift, Time Domain of Primary Master (Domain 0)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot
+import modifiedplot_gptpandtas as modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -4492,10 +4492,10 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="1747152443" name="Failover, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="961922815" name="Failover, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot
+import modifiedplot_gptpandtas as modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -5133,10 +5133,10 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_automatic" value="true"/>
                 <property name="legend_format" value=""/>
             </chart>
-            <chart icon="icons/full/obj/linechart.png" id="2081459590" name="Failover, Clock Drift, Active Clocks in Bridges and End Stations" template="linechart_native" type="LINE">
+            <chart icon="icons/full/obj/linechart.png" id="1700728201" name="Failover, Clock Drift, Active Clocks in Bridges and End Stations" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot
+import modifiedplot_gptpandtas as modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -5775,7 +5775,7 @@ utils.export_data_if_needed(df, props)
                 <property name="legend_format" value=""/>
             </chart>
         </folder>
-        <chart icon="icons/full/obj/linechart.png" id="393938736" name="Application end-to-end delay, normal operation" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1037877039" name="Application end-to-end delay, normal operation" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -6410,7 +6410,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="meanBitLifeTimePerPacket"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1704981972" name="Application end-to-end delay, link failure" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="532204673" name="Application end-to-end delay, link failure" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -7045,7 +7045,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="meanBitLifeTimePerPacket"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="625103776" name="Application end-to-end delay, failover" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="1427731443" name="Application end-to-end delay, failover" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 
@@ -7680,11 +7680,11 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="meanBitLifeTimePerPacket"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1893315355" name="Application End-To-End Delay, All Cases" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="310236629" name="Application End-To-End Delay, All Cases" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
-import modifiedplot
+import modifiedplot_gptpandtas as modifiedplot
 
 
 # get chart properties

@@ -1,4 +1,4 @@
-import modifiedplot
+import modifiedplot_fp as modifiedplot
 from matplotlib.lines import Line2D
 
 alternate_handles = [Line2D([0], [0], color='black', lw=1, linestyle=':', label='Line'),
