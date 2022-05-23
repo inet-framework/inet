@@ -127,6 +127,7 @@ class INET_API Flooding : public NetworkProtocolBase, public INetworkProtocol
 
     void decapsulate(Packet *packet);
     void encapsulate(Packet *packet);
+    void forwardPacket(Packet *packet);
 
     /**
      * @brief Attaches a "control info" (NetwToMac) structure (object) to the message pMsg.

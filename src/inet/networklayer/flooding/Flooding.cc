@@ -164,12 +164,7 @@ void Flooding::handleLowerPacket(Packet *packet)
                 EV << " data msg BROADCAST! ttl = " << floodHeader->getTtl()
                    << " > 1 -> rebroadcast msg & send to upper\n";
                 auto dMsg = packet->dup();
-                auto newFloodHeader = dMsg->removeAtFront<FloodingHeader>();
-                newFloodHeader->setTtl(newFloodHeader->getTtl() - 1);
-                dMsg->insertAtFront(newFloodHeader);
-                setDownControlInfo(dMsg, MacAddress::BROADCAST_ADDRESS);
-                sendDown(dMsg);
-                nbDataPacketsForwarded++;
+                forwardPacket(dMsg);
             }
             else
                 EV << " max hops reached (ttl = " << floodHeader->getTtl() << ") -> only send to upper\n";
@@ -182,25 +177,11 @@ void Flooding::handleLowerPacket(Packet *packet)
         }
         // not for me -> rebroadcast
         else {
-            // FIXME Maybe send original packet instead of create a copy and drop original?
             // check ttl and rebroadcast
             if (floodHeader->getTtl() > 1) {
                 EV << " data msg not for me! ttl = " << floodHeader->getTtl()
                    << " > 1 -> forward\n";
-                decapsulate(packet);
-                auto packetCopy = new Packet();
-                packetCopy->insertAtBack(packet->peekDataAt(b(0), packet->getDataLength()));
-                auto floodHeaderCopy = staticPtrCast<FloodingHeader>(floodHeader->dupShared());
-                floodHeaderCopy->setTtl(floodHeader->getTtl() - 1);
-                packetCopy->insertAtFront(floodHeaderCopy);
-                // needs to set the next hop address again to broadcast
-                cObject *const pCtrlInfo = packetCopy->removeControlInfo();
-                if (pCtrlInfo != nullptr)
-                    delete pCtrlInfo;
-                setDownControlInfo(packetCopy, MacAddress::BROADCAST_ADDRESS);
-                sendDown(packetCopy);
-                nbDataPacketsForwarded++;
-                delete packet;
+                forwardPacket(packet);
             }
             else {
                 // max hops reached -> delete
@@ -213,6 +194,16 @@ void Flooding::handleLowerPacket(Packet *packet)
         EV << " data msg already BROADCASTed! delete msg\n";
         delete packet;
     }
+}
+
+void Flooding::forwardPacket(Packet *packet)
+{
+    auto floodingHeader = packet->removeAtFront<FloodingHeader>();
+    floodingHeader->setTtl(floodingHeader->getTtl() - 1);
+    packet->insertAtFront(floodingHeader);
+    setDownControlInfo(packet, MacAddress::BROADCAST_ADDRESS);
+    sendDown(packet);
+    nbDataPacketsForwarded++;
 }
 
 /**
