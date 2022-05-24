@@ -10,11 +10,17 @@ content = "[" + sys.stdin.read() + '{} ]'  # make an array from the individual d
 database = json.loads(content)
 
 nedtypes = dict()
+msgtypes = dict()
 
 for entry in database:
     if entry : # skip empty entries (so you can add an empty entry at the end of the file)
-        nedtypes[entry["module"]] = actions = nedtypes.get(entry["module"], dict())
-        actions[entry["action"]] = details = actions.get(entry["action"], list())
-        details.append(entry["details"])
+        if "module" in entry:
+            nedtypes[entry["module"]] = actions = nedtypes.get(entry["module"], dict())
+            actions[entry["action"]] = details = actions.get(entry["action"], list())
+            details.append(entry["details"])
+        elif "class" in entry:
+            msgtypes[entry["class"]] = actions = msgtypes.get(entry["class"], dict())
+            actions[entry["action"]] = details = actions.get(entry["action"], list())
+            details.append(entry["details"])
 
-print(json.dumps(nedtypes, indent=True))
+print(json.dumps( {"ned" : nedtypes, "msg" : msgtypes}, indent=True))
