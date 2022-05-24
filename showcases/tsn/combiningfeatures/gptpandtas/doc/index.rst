@@ -109,8 +109,8 @@ Clocks and Clock Drift
    TODO clocks are configured similarly to the other one (using multiclock and settable clocks with constant drift oscillators)
    the oscillators are configured a bit differently
 
-Clocks are configured similarly to the TODO showcase, using :ned:`MultiClock` and :ned:`SettableClock` modules with constant drift oscillators.
-However, we configure the TODO oscillator a bit differently to make the failover effect in the third example simulation more visible:
+Clocks are configured similarly to the :doc:`/showcases/tsn/timesynchronization/gptp/doc/index` showcase, using :ned:`MultiClock` and :ned:`SettableClock` modules with constant drift oscillators.
+However, we configure the drift rate of the oscillator in ``tsnClock2`` a bit differently to make the failover effect in the third example simulation more visible:
 
 .. minden nodeban minden time domain timeja megvan
 
@@ -125,7 +125,7 @@ However, we configure the TODO oscillator a bit differently to make the failover
 
 We specify a random drift rate for all oscillators in the second line, but override this setting for the oscillators of ``TsnClock2`` in the first line with a specific constant drift rate, in order to make the failover effect more visible.
 
-**TODO** minden time domainnek a timeja minden nodeban nyilvan van tartva -> ez a multiclock lenyege
+.. **TODO** minden time domainnek a timeja minden nodeban nyilvan van tartva -> ez a multiclock lenyege
 
 .. **TODO** time aware shaping config
 
@@ -324,12 +324,12 @@ The clocks begin to diverge after time synchronization in this gPTP time domain 
 
 .. TODO time sync in this time domain stops
 
-TODO domain -> time domain! too generic
+.. TODO domain -> time domain! too generic
 
 The next chart shows clock drift in domain 2. This is the domain of the hot-standby master clock, which stays online.
 Thus the clocks in this domain keep being synchronized. (the hot-standby master is denoted with the thick orange line, the primary master with the dotted blue line.)
 
-**TODO** keep being synchronized
+.. **TODO** keep being synchronized
 
 .. .. figure:: media/linkfailure_hotstandby.svg
       :align: center
@@ -339,8 +339,8 @@ Thus the clocks in this domain keep being synchronized. (the hot-standby master 
    :align: center
 
 Note that when the primary master node goes offline, the hot-standby master node cannot synchronize to it any more.
-Thus its clock drifts from the primary master's, denoted by the orange and blue lines diverging. The bridge and slave nodes continue to synchronize to the hot-standby master node.
-(denoted by the other lines following it)
+Thus its clock drifts from the primary master's, denoted by the orange and blue lines diverging. The bridge and slave nodes continue to synchronize to the hot-standby master node
+(denoted by the other lines following the hot-standby master node).
 
 .. **TODO** a tobbi node gorbeje ragaszkodik a sarga gorbehez
 
@@ -357,14 +357,16 @@ Thus its clock drifts from the primary master's, denoted by the orange and blue 
       :align: center
       :width: 100%
 
-The next chart shows the active clocks in bridge and slave nodes:
+.. The next chart shows the active clocks in bridge and slave nodes:
 
-.. figure:: media/LinkFailure_endstations.png
-   :align: center
+.. .. figure:: media/LinkFailure_endstations.png
+      :align: center
 
-The active clocks are still the ones using domain 0 as the source of time, thus their times diverge after the link break TODO due to not being synced. Again, this chart is the same as the one displaying domain 0.
+.. The active clocks are still the ones using domain 0 as the source of time, thus their times diverge after the link break TODO due to not being synced. Again, this chart is the same as the one displaying domain 0.
 
-TODO nem kell a chart csak annyi hogy ugynaaz
+The active clocks in bridge and slave nodes are the ones that use Domain 0 as the source of time, thus the clock drift chart for the active clocks is the same as the one displaying clock drift for Domain 0.
+
+.. TODO nem kell a chart csak annyi hogy ugynaaz
 
 The next chart shows the delay:
 
