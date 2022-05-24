@@ -124,8 +124,8 @@ Here are the drifts (time differences) over time:
    :align: center
 
 The three clocks have different drift rates. The magnitude and direction of drift of ``source1`` and ``source2`` 
-   compared to ``switch1`` are different as well, i.e. ``source1``'s clock is early and ``source2``'s clock is late 
-   compared to ``switch1``'s.
+compared to ``switch1`` are different as well, i.e. ``source1``'s clock is early and ``source2``'s clock is late 
+compared to ``switch1``'s.
 
 Example: Out-of-Band Synchronization of Clocks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
