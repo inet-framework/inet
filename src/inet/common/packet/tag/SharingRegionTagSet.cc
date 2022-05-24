@@ -12,15 +12,28 @@ namespace inet {
 #ifdef INET_WITH_SELFDOC
 void SharingRegionTagSet::selfDoc(const char * tagAction, const char *typeName)
 {
+    auto contextModuleTypeName = getSimulation()->getContextModule()->getComponentType()->getFullName();
     if (SelfDoc::generateSelfdoc) {
-        std::ostringstream os;
-        os << "=SelfDoc={ " << SelfDoc::keyVal("module", getSimulation()->getContextModule()->getComponentType()->getFullName())
-           << ", " << SelfDoc::keyVal("action", "RTAG")
-           << ", \"details\" : { "
-           << SelfDoc::keyVal("tagAction", tagAction)
-           << ", " << SelfDoc::keyVal("tagType", typeName)
-           << " } }";
-        globalSelfDoc.insert(os.str());
+        {
+            std::ostringstream os;
+            os << "=SelfDoc={ " << SelfDoc::keyVal("module", contextModuleTypeName)
+               << ", " << SelfDoc::keyVal("action", "RTAG")
+               << ", \"details\" : { "
+               << SelfDoc::keyVal("tagAction", tagAction)
+               << ", " << SelfDoc::keyVal("tagType", typeName)
+               << " } }";
+            globalSelfDoc.insert(os.str());
+        }
+        {
+            std::ostringstream os;
+            os << "=SelfDoc={ " << SelfDoc::keyVal("class", typeName)
+               << ", " << SelfDoc::keyVal("action", "RTAG_USAGE")
+               << ", \"details\" : { "
+               << SelfDoc::keyVal("tagAction", tagAction)
+               << ", " << SelfDoc::keyVal("module", contextModuleTypeName)
+               << " } }";
+            globalSelfDoc.insert(os.str());
+        }
     }
 }
 #endif // INET_WITH_SELFDOC

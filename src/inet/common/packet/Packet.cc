@@ -29,14 +29,27 @@ Register_Class(Packet);
 void Packet::selfDoc(const char * packetAction, const char *typeName)
 {
     if (SelfDoc::generateSelfdoc) {
-        std::ostringstream os;
-        os << "=SelfDoc={ " << SelfDoc::keyVal("module", getSimulation()->getContextModule()->getComponentType()->getFullName())
-           << ", " << SelfDoc::keyVal("action", "PACKET")
-           << ", \"details\" : { "
-           << SelfDoc::keyVal("packetAction", packetAction)
-           << ", " << SelfDoc::keyVal("chunkType", typeName)
-           << " } }";
-        globalSelfDoc.insert(os.str());
+        auto contextModuleTypeName = getSimulation()->getContextModule()->getComponentType()->getFullName();
+        {
+            std::ostringstream os;
+            os << "=SelfDoc={ " << SelfDoc::keyVal("module", contextModuleTypeName)
+               << ", " << SelfDoc::keyVal("action", "PACKET")
+               << ", \"details\" : { "
+               << SelfDoc::keyVal("packetAction", packetAction)
+               << ", " << SelfDoc::keyVal("chunkType", typeName)
+               << " } }";
+            globalSelfDoc.insert(os.str());
+        }
+        {
+            std::ostringstream os;
+            os << "=SelfDoc={ " << SelfDoc::keyVal("class", typeName)
+               << ", " << SelfDoc::keyVal("action", "CHUNK_USAGE")
+               << ", \"details\" : { "
+               << SelfDoc::keyVal("action", packetAction)
+               << ", " << SelfDoc::keyVal("module", contextModuleTypeName)
+               << " } }";
+            globalSelfDoc.insert(os.str());
+        }
     }
 }
 #else
