@@ -159,7 +159,7 @@ class TcpOptionUnknown extends TcpOption
 }
 
 //
-// Represents a TCP segment, to be used with the ~TCP module.
+// Represents a TCP segment, to be used with the ~Tcp module.
 //
 // TCP header fields not explicitly modelled: work on going
 // - Data Offset (number of 32 bit words in the header): represented
