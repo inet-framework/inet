@@ -212,11 +212,13 @@ void PacketProcessorBase::animate(Packet *packet, cGate *gate, const SendOptions
 #ifdef INET_WITH_SELFDOC
     if (SelfDoc::generateSelfdoc) {
         auto from = gate->getOwnerModule();
+        auto fromName = from->getComponentType()->getFullName();
         auto to = endGate->getOwnerModule();
+        auto toName = to->getComponentType()->getFullName();
         auto ctrl = packet->getControlInfo();
         {
             std::ostringstream os;
-            os << "=SelfDoc={ " << SelfDoc::keyVal("module", from->getComponentType()->getFullName())
+            os << "=SelfDoc={ " << SelfDoc::keyVal("module", fromName)
                     << ", " << SelfDoc::keyVal("action", action == PUSH ? "PUSH_OUT" : "PULLED_OUT")
                     << ", " << SelfDoc::val("details") << " : {"
                     << SelfDoc::keyVal("gate", SelfDoc::gateInfo(gate))
@@ -230,7 +232,7 @@ void PacketProcessorBase::animate(Packet *packet, cGate *gate, const SendOptions
         }
         {
             std::ostringstream os;
-            os << "=SelfDoc={ " << SelfDoc::keyVal("module", to->getComponentType()->getFullName())
+            os << "=SelfDoc={ " << SelfDoc::keyVal("module", toName)
                     << ", " << SelfDoc::keyVal("action", action == PUSH ? "PUSHED_IN" : "PULL_IN")
                     << ", " << SelfDoc::val("details") << " : {"
                     << SelfDoc::keyVal("gate", SelfDoc::gateInfo(endGate))
