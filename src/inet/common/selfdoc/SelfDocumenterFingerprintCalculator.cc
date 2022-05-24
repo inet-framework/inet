@@ -57,6 +57,7 @@ void SelfDocumenterFingerprintCalculator::addEvent(cEvent *event)
                         << ", " << SelfDoc::keyVal("kind", SelfDoc::kindToStr(msg->getKind(), fromModule->getProperties(), "directSendKinds", arrivalGate->getProperties(), "messageKinds"))
                         << ", " << SelfDoc::keyVal("ctrl", ctrl ? opp_typename(typeid(*ctrl)) : "")
                         << ", " << SelfDoc::tagsToJson("tags", msg)
+                        << ", " << SelfDoc::keyVal("destModule", toModuleName)
                         << " } }"
                        ;
                 globalSelfDoc.insert(os.str());
@@ -71,6 +72,7 @@ void SelfDocumenterFingerprintCalculator::addEvent(cEvent *event)
                         << ", " << SelfDoc::keyVal("kind", SelfDoc::kindToStr(msg->getKind(), senderGate->getProperties(), "messageKinds", arrivalGate->getProperties(), "messageKinds"))
                         << ", " << SelfDoc::keyVal("ctrl", ctrl ? opp_typename(typeid(*ctrl)) : "")
                         << ", " << SelfDoc::tagsToJson("tags", msg)
+                        << ", " << SelfDoc::keyVal("destModule", toModuleName)
                         << " } }"
                        ;
                 globalSelfDoc.insert(os.str());
@@ -86,6 +88,7 @@ void SelfDocumenterFingerprintCalculator::addEvent(cEvent *event)
                         << ", " << SelfDoc::keyVal("kind", SelfDoc::kindToStr(msg->getKind(), arrivalGate->getProperties(), "messageKinds", senderGate ? senderGate->getProperties() : nullptr, "messageKinds"))
                         << ", " << SelfDoc::keyVal("ctrl", ctrl ? opp_typename(typeid(*ctrl)) : "")
                         << ", " << SelfDoc::tagsToJson("tags", msg)
+                        << ", " << SelfDoc::keyVal("srcModule", fromModuleName)
                         << " } }"
                        ;
                 globalSelfDoc.insert(os.str());

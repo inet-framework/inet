@@ -226,6 +226,7 @@ void PacketProcessorBase::animate(Packet *packet, cGate *gate, const SendOptions
                     << ", " << SelfDoc::keyVal("kind", SelfDoc::kindToStr(packet->getKind(), gate->getProperties(), "messageKinds", endGate->getProperties(), "messageKinds"))
                     << ", " << SelfDoc::keyVal("ctrl", ctrl ? opp_typename(typeid(*ctrl)) : "")
                     << ", " << SelfDoc::tagsToJson("tags", packet)
+                    << ", " << SelfDoc::keyVal("destModule", toName)
                     << " } }"
                     ;
             globalSelfDoc.insert(os.str());
@@ -240,6 +241,7 @@ void PacketProcessorBase::animate(Packet *packet, cGate *gate, const SendOptions
                     << ", " << SelfDoc::keyVal("kind", SelfDoc::kindToStr(packet->getKind(), endGate->getProperties(), "messageKinds", gate->getProperties(), "messageKinds"))
                     << ", " << SelfDoc::keyVal("ctrl", ctrl ? opp_typename(typeid(*ctrl)) : "")
                     << ", " << SelfDoc::tagsToJson("tags", packet)
+                    << ", " << SelfDoc::keyVal("srcModule", fromName)
                     << " } }"
                     ;
             globalSelfDoc.insert(os.str());
