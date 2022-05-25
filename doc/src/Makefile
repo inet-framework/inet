@@ -20,14 +20,17 @@ include tools/sphinx_deployment.mk
 server: Makefile copy-media
 	ln -sf ../../showcases showcases; ln -sf ../../tutorials
 	@sphinx-autobuild --host 0.0.0.0 --port 8000 "$(SOURCEDIR)" "$(BUILDDIR)/html" $(SPHINXOPTS) $(O) -r .git
+	unlink showcases; unlink tutorials
 
 pdf: Makefile copy-media
 	ln -sf ../../showcases showcases; ln -sf ../../tutorials
 	@$(SPHINXBUILD) -M latexpdf "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	unlink showcases; unlink tutorials
 
 html: Makefile copy-media
 	ln -sf ../../showcases showcases; ln -sf ../../tutorials
 	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	unlink showcases; unlink tutorials
 
 copy-media: ../../media
 	@mkdir -p _build/html
