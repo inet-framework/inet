@@ -74,6 +74,7 @@ Packet::Packet(const char *name, const Ptr<const Chunk>& content) :
     backIterator(Chunk::BackwardIterator(b(0), 0)),
     totalLength(content->getChunkLength())
 {
+    SELFDOC_FUNCTION_CHUNK(content);
     constPtrCast<Chunk>(content)->markImmutable();
     CHUNK_CHECK_IMPLEMENTATION(isConsistent());
 }
