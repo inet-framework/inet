@@ -731,8 +731,7 @@ void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& aodvPacket, const L3Addr
     ASSERT(timeToLive != 0);
 
     const char *className = aodvPacket->getClassName();
-    Packet *packet = new Packet(!strncmp("inet::", className, 6) ? className + 6 : className);
-    packet->insertAtBack(aodvPacket);
+    Packet *packet = new Packet(!strncmp("inet::", className, 6) ? className + 6 : className, aodvPacket);
 
     int interfaceId = CHK(interfaceTable->findInterfaceByName(par("interface")))->getInterfaceId(); // TODO Implement: support for multiple interfaces
     packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
