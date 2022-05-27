@@ -52,7 +52,8 @@ class INET_API ScenarioManager : public cSimpleModule, public LifecycleControlle
     cModule *getRequiredModule(const cXMLElement *node, const char *attr);
     cGate *findMandatorySingleGateTowards(cModule *srcModule, cModule *destModule);
     GatePair getConnection(const cXMLElement *node);
-    void setChannelParam(cGate *srcGate, const char *name, const char *value);
+    void setParamFromXml(cPar& param, const cXMLElement *node);
+    cPar& getChannelParam(cGate *srcGate, const char *name);
     void disconnect(cGate *srcGate);
     void createConnection(const cXMLElementList& paramList, cChannelType *channelType, cGate *srcGate, cGate *destGate);
 

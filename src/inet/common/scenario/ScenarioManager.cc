@@ -26,6 +26,7 @@ static const char *ATTR_DEST_GATE = "dest-gate";
 static const char *ATTR_PAR = "par";
 static const char *ATTR_NAME = "name";
 static const char *ATTR_VALUE = "value";
+static const char *ATTR_EXPR = "expr";
 static const char *ATTR_TYPE = "type";
 static const char *ATTR_VECTOR = "vector";
 static const char *ATTR_CHANNEL_TYPE = "channel-type";
@@ -240,22 +241,37 @@ void ScenarioManager::processModuleSpecificCommand(const cXMLElement *node)
     scriptable->processCommand(*node);
 }
 
+void ScenarioManager::setParamFromXml(cPar& param, const cXMLElement *node)
+{
+    const char *valueAttr = node->getAttribute(ATTR_VALUE);
+    const char *exprAttr = node->getAttribute(ATTR_EXPR);
+    if (!valueAttr && !exprAttr)
+        throw cRuntimeError("<%s>: required any '%s' or '%s' attribute", node->getTagName(), ATTR_VALUE, ATTR_EXPR);
+    if (valueAttr && exprAttr)
+        throw cRuntimeError("<%s>: required only one from '%s' and '%s' attributes", node->getTagName(), ATTR_VALUE, ATTR_EXPR);
+    if (exprAttr)
+        param.parse(exprAttr);
+    else {
+        switch (param.getType()) {
+            case cPar::STRING: param.setStringValue(valueAttr); break;
+            case cPar::XML:    param.setXMLValue(getEnvir()->getParsedXMLString(valueAttr)); break;
+            default:           param.parse(valueAttr); break;
+        }
+    }
+}
+
 void ScenarioManager::processSetParamCommand(const cXMLElement *node)
 {
     // process <set-param> command
     cModule *mod = getRequiredModule(node, ATTR_MODULE);
     const char *parAttr = xmlutils::getMandatoryFilledAttribute(*node, ATTR_PAR);
-    const char *valueAttr = xmlutils::getMandatoryAttribute(*node, ATTR_VALUE);
-
-    EV << "Setting " << mod->getFullPath() << "." << parAttr << " = " << valueAttr << "\n";
-    bubble((std::string("setting: ") + mod->getFullPath() + "." + parAttr + " = " + valueAttr).c_str());
-
-    // set the parameter to the given value
     cPar& param = mod->par(parAttr);
-    param.parse(valueAttr);
+    setParamFromXml(param, node);
+    EV << "Setting " << param.getFullPath() << " = " << param.str() << "\n";
+    bubble(("setting: " + param.getFullPath() + " = " + param.str()).c_str());
 }
 
-void ScenarioManager::setChannelParam(cGate *srcGate, const char *name, const char *value)
+cPar& ScenarioManager::getChannelParam(cGate *srcGate, const char *name)
 {
     // make sure gate is connected at all
     if (!srcGate->getNextGate())
@@ -268,7 +284,7 @@ void ScenarioManager::setChannelParam(cGate *srcGate, const char *name, const ch
 
     // set the parameter to the given value
     cPar& param = chan->par(name);
-    param.parse(value);
+    return param;
 }
 
 void ScenarioManager::processSetChannelParamCommand(const cXMLElement *node)
@@ -278,14 +294,15 @@ void ScenarioManager::processSetChannelParamCommand(const cXMLElement *node)
     const char *parAttr = xmlutils::getMandatoryFilledAttribute(*node, ATTR_PAR);
     const char *valueAttr = xmlutils::getMandatoryAttribute(*node, ATTR_VALUE);
 
+    cPar& param = getChannelParam(pair.first, parAttr);
+    setParamFromXml(param, node);
+    if (pair.second)
+        setParamFromXml(getChannelParam(pair.second, parAttr), node);
+
     EV << "Setting channel parameter: " << parAttr << " = " << valueAttr
        << " on connection " << pair.first->getFullPath() << " --> " << pair.first->getNextGate()->getFullPath()
        << (pair.second ? " and its reverse connection" : "") << "\n";
-    bubble((std::string("setting channel parameter: ") + parAttr + " = " + valueAttr).c_str());
-
-    setChannelParam(pair.first, parAttr, valueAttr);
-    if (pair.second)
-        setChannelParam(pair.second, parAttr, valueAttr);
+    bubble((std::string("setting channel parameter: ") + parAttr + " = " + param.str()).c_str());
 }
 
 void ScenarioManager::processCreateModuleCommand(const cXMLElement *node)
