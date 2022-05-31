@@ -534,6 +534,7 @@ void Ieee802154Mac::manageMissingAck(t_mac_event /*event*/, cMessage * /*msg*/)
     }
     else {
         // drop packet
+        emit(linkBrokenSignal, currentTxFrame);
         EV_DETAIL << "Packet was transmitted " << txAttempts
                   << " times and I never got an Ack. I drop the packet." << endl;
         txAttempts = 0;
