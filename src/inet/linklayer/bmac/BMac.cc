@@ -360,7 +360,7 @@ void BMac::handleSelfMessage(cMessage *msg)
                     // drop the packet
                     emit(linkBrokenSignal, currentTxFrame);
                     PacketDropDetails details;
-                    details.setReason(OTHER_PACKET_DROP);
+                    details.setReason(RETRY_LIMIT_REACHED);
                     dropCurrentTxFrame(details);
                     scheduleWakeUp();
                     macState = SLEEP;
