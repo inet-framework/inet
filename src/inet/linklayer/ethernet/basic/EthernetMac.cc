@@ -130,7 +130,6 @@ void EthernetMac::handleUpperPacket(Packet *packet)
     EV_INFO << "Received " << packet << " from upper layer." << endl;
 
     numFramesFromHL++;
-    emit(packetReceivedFromUpperSignal, packet);
 
     auto frame = packet->peekAtFront<EthernetMacHeader>();
     if (frame->getDest().equals(getMacAddress())) {

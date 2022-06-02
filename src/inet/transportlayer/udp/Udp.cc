@@ -706,7 +706,6 @@ void Udp::handleUpperPacket(Packet *packet)
     if (packet->getKind() != UDP_C_DATA)
         throw cRuntimeError("Unknown packet command code (message kind) %d received from app", packet->getKind());
 
-    emit(packetReceivedFromUpperSignal, packet);
     L3Address srcAddr, destAddr;
     int srcPort = -1, destPort = -1;
 

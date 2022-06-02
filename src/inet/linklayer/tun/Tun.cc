@@ -61,7 +61,6 @@ void Tun::handleUpperPacket(Packet *packet)
         send(packet, "upperLayerOut");
     }
     else {
-        emit(packetReceivedFromUpperSignal, packet);
         for (int socketId : socketIds) {
             Packet *copy = packet->dup();
             copy->setKind(TUN_I_DATA);

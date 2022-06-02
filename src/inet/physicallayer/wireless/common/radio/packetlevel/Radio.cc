@@ -265,7 +265,6 @@ void Radio::handleLowerCommand(cMessage *message)
 
 void Radio::handleUpperPacket(Packet *packet)
 {
-    emit(packetReceivedFromUpperSignal, packet);
     if (isTransmitterMode(radioMode)) {
         if (transmissionTimer->isScheduled())
             throw cRuntimeError("Received frame from upper layer while already transmitting.");
