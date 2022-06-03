@@ -5,10 +5,21 @@
         <input pattern="results/*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="2051192745" name="End-to-end delay, 1200-Byte packet length" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="255609871" name="End-to-end delay, 1200-Byte packet length" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot_fp as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_fp
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 import matplotlib.pyplot as plt
 import create_labels_and_style as ls
 
@@ -645,10 +656,21 @@ utils.export_data_if_needed(df, props)
             <property name="legend_format" value=""/>
             <property name="simplify" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="849528329" name="End-to-end delay, realistic packet length" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="376220435" name="End-to-end delay, realistic packet length" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot_fp as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_fp
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import matplotlib.patches as patches
@@ -1295,10 +1317,21 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1324011999" name="End-to-end delay, realistic packet length zoomed" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="2032539938" name="End-to-end delay, realistic packet length zoomed" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot_fp as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_fp
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import matplotlib.patches as patches
@@ -1939,7 +1972,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1865293396" name="Time average of queue length" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="176728346" name="Time average of queue length" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
 

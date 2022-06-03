@@ -1901,7 +1901,18 @@ utils.export_data_if_needed(df, props)
         <chart icon="icons/full/obj/linechart.png" id="125318307" name="Selected datarate" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot_rc as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_rc
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 import matplotlib.pyplot as plt
 
 # get chart properties
@@ -1930,19 +1941,7 @@ style_tuple_list = [('rateControl', '""', {'linestyle': 'solid', 'linewidth': 3}
 
 df = modifiedplot.add_to_dataframe(df, style_tuple_list)
 
-#df['propertyname'] = df['propertyvalue'] = df['module']
-
-#for i in range(0,len(df)):
-#    if df['rateControl'][i] == '""':
-#        df['linewidth'][i] = 4
-#        df['linestyle'][i] = '--'
-#    else:
-#        df['linewidth'][i] = 1
-#        df['linestyle'][i] = '-'
-        
-
 # plot
-#utils.plot_vectors(df, props)
 modifiedplot.plot_vectors(df, props)
 
 utils.postconfigure_plot(props)

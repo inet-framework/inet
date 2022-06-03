@@ -8,7 +8,18 @@
         <chart icon="icons/full/obj/linechart.png" id="1071993108" name="Recovery, Clock Drift, Time Domain of Primary Master (Domain 0)" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot_gptpandtas as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_gptpandtas
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 
 # get chart properties
 props = chart.get_properties()
@@ -622,7 +633,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="Failover_domain0"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value="0"/>
             <property name="linewidth" value="1.0"/>
             <property name="filter" value="type =~ vector AND runattr:experiment =~ Recovery AND (module =~ &quot;*.clock[0]&quot; OR module =~ &quot;*.tsnClock1.clock&quot;) AND name =~ timeChanged:vector"/>
@@ -648,7 +659,18 @@ utils.export_data_if_needed(df, props)
         <chart icon="icons/full/obj/linechart.png" id="721776832" name="Recovery, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot_gptpandtas as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_gptpandtas
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 
 # get chart properties
 props = chart.get_properties()
@@ -1263,7 +1285,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="Failover_domain2"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value="0"/>
             <property name="linewidth" value="1.0"/>
             <property name="filter" value="type =~ vector AND runattr:experiment =~ Recovery AND (module =~ &quot;*.clock[2]&quot; OR module =~ &quot;*.tsnClock*.clock&quot;) AND name =~ timeChanged:vector"/>
@@ -1289,7 +1311,18 @@ utils.export_data_if_needed(df, props)
         <chart icon="icons/full/obj/linechart.png" id="1621954179" name="Recovery, Clock Drift, Active Clocks in Bridges and End Stations" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot_gptpandtas as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_gptpandtas
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 
 # get chart properties
 props = chart.get_properties()
@@ -1904,7 +1937,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="Failover_endstations"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value="0"/>
             <property name="linewidth" value="1.0"/>
             <property name="filter" value="type =~ vector AND runattr:experiment =~ Recovery AND name =~ timeChanged:vector AND (module =~ &quot;*.clock&quot;)"/>
@@ -2539,7 +2572,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value=""/>
             <property name="Legend.Font" value="Arial-regular-8"/>
-            <property name="image_export_filename" value="delay_failover"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="filter" value="type =~ vector AND name =~ meanBitLifeTimePerPacket:vector AND runattr:configname =~ &quot;Recovery&quot;"/>
@@ -2566,7 +2599,18 @@ utils.export_data_if_needed(df, props)
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
-import modifiedplot_gptpandtas as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_gptpandtas
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 
 
 # get chart properties
@@ -2591,17 +2635,8 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-df['order'] = None
-
-for i in range(0,len(df)):
-    if df['configname'][i] == 'NormalOperation':
-        df['order'][i] = 0
-    if df['configname'][i] == 'LinkFailure':
-        df['order'][i] = 1
-    if df['configname'][i] == 'Failover':
-        df['order'][i] = 2
-    if df['configname'][i] == 'Recovery':
-        df['order'][i] = 3
+order = {'NormalOperation': 0, 'LinkFailure': 1, 'Failover': 2, 'Recovery': 3}
+modifiedplot.add_to_dataframe(df, (), order=order)
 
 # plot
 modifiedplot.plot_vectors_separate(df, props)
@@ -3188,7 +3223,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="xaxis_title" value="Simulation Time [s]"/>
             <property name="grid_density" value="Major"/>
             <property name="yaxis_min" value="0"/>
-            <property name="image_export_filename" value="Delay_all"/>
+            <property name="image_export_filename" value=""/>
             <property name="xaxis_min" value="0"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>

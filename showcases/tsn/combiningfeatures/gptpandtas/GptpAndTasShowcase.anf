@@ -9,7 +9,18 @@
             <chart icon="icons/full/obj/linechart.png" id="58392000" name="Normal Operation, Clock Drift, Time Domain of Primary Master (Domain 0)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot_gptpandtas as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_gptpandtas
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 
 # get chart properties
 props = chart.get_properties()
@@ -649,7 +660,18 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="1452968581" name="Normal Operation, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot_gptpandtas as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_gptpandtas
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 
 # get chart properties
 props = chart.get_properties()
@@ -1290,7 +1312,18 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="680541503" name="Normal Operation, Clock Drift, Active Clocks in Bridges and End Stations" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot_gptpandtas as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_gptpandtas
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 
 # get chart properties
 props = chart.get_properties()
@@ -1932,7 +1965,18 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="2127769190" name="Link Failure, Clock Drift, Time Domain of Primary Master (Domain 0)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot_gptpandtas as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_gptpandtas
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 
 # get chart properties
 props = chart.get_properties()
@@ -2572,7 +2616,18 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="1164565886" name="Link Failure, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot_gptpandtas as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_gptpandtas
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 
 # get chart properties
 props = chart.get_properties()
@@ -3213,7 +3268,18 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="2117312165" name="Link Failure, Clock Drift, Active Clocks in Bridges and End Stations" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot_gptpandtas as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_gptpandtas
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 
 # get chart properties
 props = chart.get_properties()
@@ -3855,7 +3921,18 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="2037641704" name="Failover, Clock Drift, Time Domain of Primary Master (Domain 0)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot_gptpandtas as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_gptpandtas
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 
 # get chart properties
 props = chart.get_properties()
@@ -4495,7 +4572,18 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="961922815" name="Failover, Clock Drift, Time Domain of Hot-Standby Master (Domain 2)" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot_gptpandtas as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_gptpandtas
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 
 # get chart properties
 props = chart.get_properties()
@@ -5136,7 +5224,18 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="1700728201" name="Failover, Clock Drift, Active Clocks in Bridges and End Stations" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot_gptpandtas as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_gptpandtas
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 
 # get chart properties
 props = chart.get_properties()
@@ -7684,7 +7783,18 @@ utils.export_data_if_needed(df, props)
             <script><![CDATA[import math
 import matplotlib.pyplot as plt
 from omnetpp.scave import results, chart, utils
-import modifiedplot_gptpandtas as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_gptpandtas
+    import modifiedplot
+import matplotlib.pyplot as plt
+# ----workaround end----
 
 
 # get chart properties
@@ -7709,15 +7819,8 @@ if df.empty:
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-df['order'] = None
-
-for i in range(0,len(df)):
-    if df['configname'][i] == 'NormalOperation':
-        df['order'][i] = 0
-    if df['configname'][i] == 'LinkFailure':
-        df['order'][i] = 1
-    if df['configname'][i] == 'Failover':
-        df['order'][i] = 2
+order = {'NormalOperation': 0, 'LinkFailure': 1, 'Failover': 2}
+modifiedplot.add_to_dataframe(df, (), order=order)
 
 # plot
 modifiedplot.plot_vectors_separate(df, props)
@@ -8309,7 +8412,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
             <property name="legend_format" value="$configname"/>
-            <property name="filter" value="* AND module =~ &quot;GptpAndTasShowcase.tsnDevice4.app[0].sink&quot; AND name =~ meanBitLifeTimePerPacket:vector"/>
+            <property name="filter" value="(runattr:configname =~ &quot;NormalOperation&quot; OR runattr:configname =~ &quot;LinkFailure&quot; OR runattr:configname =~ &quot;Failover&quot; )  AND module =~ &quot;GptpAndTasShowcase.tsnDevice4.app[0].sink&quot; AND name =~ meanBitLifeTimePerPacket:vector"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
             <property name="markersize" value="2"/>

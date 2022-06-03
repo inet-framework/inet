@@ -19,7 +19,7 @@
         <input pattern="results/TxPower*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/barchart.png" id="1915900755" name="Number of packets received" template="barchart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/barchart.png" id="1099332328" name="Number of packets received" template="barchart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import numpy as np
 import pandas as pd
 from omnetpp.scave import results, chart, ideplot, utils
@@ -603,11 +603,21 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="10"/>
             <property name="matplotlibrc" value="savefig.transparent : True&#10;savefig.bbox : tight"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="53299095" name="Throughput" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1052450824" name="Throughput" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import modifiedplot_frag as modifiedplot
+# ----workaround start----
+# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+# remove when it's part of a release
+# replace it with:
+#     import modifiedplot
+try:
+    import modifiedplot
+except:
+    import modifiedplot_frag
+    import modifiedplot
 import matplotlib.pyplot as plt
+# ----workaround end----
 
 # get chart properties
 props = chart.get_properties()
@@ -1249,7 +1259,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="false"/>
             <property name="legend_format" value="$configname"/>
         </chart>
-        <chart icon="icons/full/obj/scatterchart.png" id="680127518" name="Throughput vs. packet size with a 250-byte fragmentation threshold" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/scatterchart.png" id="1793085116" name="Throughput vs. packet size with a 250-byte fragmentation threshold" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
@@ -1957,7 +1967,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="10"/>
             <property name="matplotlibrc" value="savefig.transparent: True&#10;savefig.bbox: tight"/>
         </chart>
-        <chart icon="icons/full/obj/scatterchart.png" id="1924985263" name="Throughput vs. packet size, with all frames fragmented to 16 fragments" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/scatterchart.png" id="1675238676" name="Throughput vs. packet size, with all frames fragmented to 16 fragments" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
@@ -2667,7 +2677,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="10"/>
             <property name="matplotlibrc" value="savefig.transparent : True&#10;savefig.bbox : tight"/>
         </chart>
-        <chart icon="icons/full/obj/scatterchart.png" id="647762373" name="Throughput vs. fragmentation threshold, 1000-byte packets" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/scatterchart.png" id="753137194" name="Throughput vs. fragmentation threshold, 1000-byte packets" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
@@ -3369,7 +3379,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="10"/>
             <property name="matplotlibrc" value="savefig.transparent : True&#10;savefig.bbox : tight"/>
         </chart>
-        <chart icon="icons/full/obj/scatterchart.png" id="1295157908" name="Throughput vs. SNIR in the case of 2000-byte packet size and 250-byte fragmentation threshold" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/scatterchart.png" id="816228526" name="Throughput vs. SNIR in the case of 2000-byte packet size and 250-byte fragmentation threshold" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
 import matplotlib.pyplot as plt
 import numpy as np
