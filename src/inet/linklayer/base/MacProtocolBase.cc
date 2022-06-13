@@ -9,6 +9,7 @@
 
 #include "inet/common/IInterfaceRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
 
 namespace inet {
 
@@ -177,6 +178,7 @@ Packet *MacProtocolBase::dequeuePacket()
     Packet *packet = txQueue->dequeuePacket();
     take(packet);
     packet->setArrival(getId(), upperLayerInGateId, simTime());
+    emit(packetReceivedFromUpperSignal, packet);
     return packet;
 }
 
