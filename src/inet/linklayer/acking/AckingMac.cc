@@ -90,6 +90,8 @@ void AckingMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t
         if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
             radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
             transmissionState = newRadioTransmissionState;
+            if (currentTxFrame != nullptr && (!useAck || !ackTimeoutMsg->isScheduled())) // current TX not wait for ACK
+                deleteCurrentTxFrame();
             if (currentTxFrame == nullptr && canDequeuePacket())
                 processUpperPacket();
         }
@@ -102,13 +104,9 @@ void AckingMac::startTransmitting()
 {
     // if there's any control info, remove it; then encapsulate the packet
     MacAddress dest = currentTxFrame->getTag<MacAddressReq>()->getDestAddress();
-    Packet *msg = currentTxFrame;
-    if (useAck && !dest.isBroadcast() && !dest.isMulticast() && !dest.isUnspecified()) { // unicast
-        msg = currentTxFrame->dup();
+    Packet *msg = currentTxFrame->dup();
+    if (useAck && !dest.isBroadcast() && !dest.isMulticast() && !dest.isUnspecified()) // unicast
         scheduleAfter(ackTimeout, ackTimeoutMsg);
-    }
-    else
-        currentTxFrame = nullptr;
 
     encapsulate(msg);
 
