@@ -126,7 +126,7 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     std::vector<MacEstimateCostProcess *> estimateCostProcessArray;
 
   protected:
-    class LocalGate : public cGate {
+    class INET_API LocalGate : public cGate {
       protected:
         NetworkInterface *networkInterface;
 
