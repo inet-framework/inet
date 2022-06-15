@@ -82,8 +82,9 @@ void UdpSocketIo::setSocketOptions()
     }
 
     auto multicastAddresses = check_and_cast<cValueArray *>(par("multicastAddresses").objectValue());
+    int multicastInterfaceId = multicastInterface != nullptr ? multicastInterface->getInterfaceId() : -1;
     for (int i = 0; i < multicastAddresses->size(); i++)
-        socket.joinMulticastGroup(Ipv4Address(multicastAddresses->get(0).stringValue()), multicastInterface != nullptr ? multicastInterface->getInterfaceId() : -1);
+        socket.joinMulticastGroup(Ipv4Address(multicastAddresses->get(i).stringValue()), multicastInterfaceId);
 
     bool receiveBroadcast = par("receiveBroadcast");
     if (receiveBroadcast)
