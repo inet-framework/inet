@@ -457,7 +457,7 @@ void Udp::joinMulticastGroups(SockDesc *sd, const std::vector<L3Address>& multic
         MulticastMembership *membership = sd->findMulticastMembership(multicastAddr, interfaceId);
         if (membership)
             throw cRuntimeError("UPD::joinMulticastGroups(): %s group on interface %s is already joined.",
-                    multicastAddr.str().c_str(), ift->getInterfaceById(interfaceId)->getFullName());
+                    multicastAddr.str().c_str(), interfaceId == -1 ? "*" : ift->getInterfaceById(interfaceId)->getFullName());
 
         membership = new MulticastMembership();
         membership->interfaceId = interfaceId;
