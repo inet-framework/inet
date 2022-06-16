@@ -283,14 +283,6 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol, publ
 
     // sequence numbers for receiving
     std::map<MacAddress, unsigned long> SeqNrChild; // child -> sequence number
-
-  private:
-    /** @brief Copy constructor is not allowed.
-     */
-    Ieee802154Mac(const Ieee802154Mac&);
-    /** @brief Assignment operator is not allowed.
-     */
-    Ieee802154Mac& operator=(const Ieee802154Mac&);
 };
 
 } // namespace inet
