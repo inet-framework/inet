@@ -47,45 +47,7 @@ namespace inet {
 class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol, public queueing::IActivePacketSink
 {
   public:
-    Ieee802154Mac()
-        : MacProtocolBase()
-        , nbTxFrames(0)
-        , nbRxFrames(0)
-        , nbMissedAcks(0)
-        , nbRecvdAcks(0)
-        , nbDroppedFrames(0)
-        , nbTxAcks(0)
-        , nbDuplicates(0)
-        , nbBackoffs(0)
-        , backoffValues(0)
-        , backoffTimer(nullptr), ccaTimer(nullptr), sifsTimer(nullptr), rxAckTimer(nullptr)
-        , macState(IDLE_1)
-        , status(STATUS_OK)
-        , transmissionState(physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED)
-        , sifs()
-        , macAckWaitDuration()
-        , headerLength(0)
-        , transmissionAttemptInterruptedByRx(false)
-        , ccaDetectionTime()
-        , rxSetupTime()
-        , aTurnaroundTime()
-        , macMaxCSMABackoffs(0)
-        , macMaxFrameRetries(0)
-        , aUnitBackoffPeriod()
-        , useMACAcks(false)
-        , backoffMethod(CONSTANT)
-        , macMinBE(0)
-        , macMaxBE(0)
-        , initialCW(0)
-        , txPower(0)
-        , NB(0)
-        , txAttempts(0)
-        , bitrate(0)
-        , ackLength(0)
-        , ackMessage(nullptr)
-        , SeqNrParent()
-        , SeqNrChild()
-    {}
+    Ieee802154Mac() : MacProtocolBase() {}
 
     virtual ~Ieee802154Mac();
 
@@ -115,15 +77,15 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol, publ
   protected:
     /** @name Different tracked statistics.*/
     /*@{*/
-    long nbTxFrames;
-    long nbRxFrames;
-    long nbMissedAcks;
-    long nbRecvdAcks;
-    long nbDroppedFrames;
-    long nbTxAcks;
-    long nbDuplicates;
-    long nbBackoffs;
-    double backoffValues;
+    long nbTxFrames = 0;
+    long nbRxFrames = 0;
+    long nbMissedAcks = 0;
+    long nbRecvdAcks = 0;
+    long nbDroppedFrames = 0;
+    long nbTxAcks = 0;
+    long nbDuplicates = 0;
+    long nbBackoffs = 0;
+    double backoffValues = 0.0;
     /*@}*/
 
     /** @brief MAC states
@@ -154,7 +116,10 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol, publ
 
     /** @name Pointer for timer messages.*/
     /*@{*/
-    cMessage *backoffTimer, *ccaTimer, *sifsTimer, *rxAckTimer;
+    cMessage *backoffTimer = nullptr;
+    cMessage *ccaTimer = nullptr;
+    cMessage *sifsTimer = nullptr;
+    cMessage *rxAckTimer = nullptr;
     /*@}*/
 
     /** @brief MAC state machine events.
@@ -204,12 +169,12 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol, publ
     };
 
     /** @brief keep track of MAC state */
-    t_mac_states macState;
-    t_mac_status status;
+    t_mac_states macState = IDLE_1;
+    t_mac_status status = STATUS_OK;
 
     /** @brief The radio. */
     ModuleRefByPar<physicallayer::IRadio> radio;
-    physicallayer::IRadio::TransmissionState transmissionState;
+    physicallayer::IRadio::TransmissionState transmissionState = physicallayer::IRadio::TRANSMISSION_STATE_UNDEFINED;
 
     /** @brief Maximum time between a packet and its ACK
      *
@@ -222,9 +187,9 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol, publ
     simtime_t macAckWaitDuration;
 
     /** @brief Length of the header*/
-    int headerLength;
+    int headerLength = 0;
 
-    bool transmissionAttemptInterruptedByRx;
+    bool transmissionAttemptInterruptedByRx = false;
     /** @brief CCA detection time */
     simtime_t ccaDetectionTime;
     /** @brief Time to setup radio from sleep to Rx state */
@@ -232,49 +197,49 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol, publ
     /** @brief Time to switch radio from Rx to Tx state */
     simtime_t aTurnaroundTime;
     /** @brief maximum number of extra backoffs (excluding the first unconditional one) before frame drop */
-    int macMaxCSMABackoffs;
+    int macMaxCSMABackoffs = 0;
     /** @brief maximum number of frame retransmissions without ack */
-    unsigned int macMaxFrameRetries;
+    unsigned int macMaxFrameRetries = 0;
     /** @brief base time unit for calculating backoff durations */
     simtime_t aUnitBackoffPeriod;
     /** @brief Stores if the MAC expects Acks for Unicast packets.*/
-    bool useMACAcks;
+    bool useMACAcks = false;
 
     /** @brief Defines the backoff method to be used.*/
-    backoff_methods backoffMethod;
+    backoff_methods backoffMethod = CONSTANT;
 
     /**
      * @brief Minimum backoff exponent.
      * Only used for exponential backoff method.
      */
-    int macMinBE;
+    int macMinBE = 0;
     /**
      * @brief Maximum backoff exponent.
      * Only used for exponential backoff method.
      */
-    int macMaxBE;
+    int macMaxBE = 0;
 
     /** @brief initial contention window size
      * Only used for linear and constant backoff method.*/
-    int initialCW;
+    int initialCW = 0;
 
     /** @brief The power (in mW) to transmit with.*/
-    double txPower;
+    double txPower = 0.0;
 
     /** @brief number of backoff performed until now for current frame */
-    int NB;
+    int NB = 0;
 
     /** @brief count the number of tx attempts
      *
      * This holds the number of transmission attempts for the current frame.
      */
-    unsigned int txAttempts;
+    unsigned int txAttempts = 0;
 
     /** @brief the bit rate at which we transmit */
-    double bitrate;
+    double bitrate = 0.0;
 
     /** @brief The bit length of the ACK packet.*/
-    int ackLength;
+    int ackLength = 0;
 
   protected:
     /** @brief Generate new interface address*/
@@ -310,7 +275,7 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol, publ
     virtual void handleCrashOperation(LifecycleOperation *operation) override;
     virtual void refreshDisplay() const override;
 
-    Packet *ackMessage;
+    Packet *ackMessage = nullptr;
 
     // sequence number for sending, map for the general case with more senders
     // also in initialisation phase multiple potential parents
