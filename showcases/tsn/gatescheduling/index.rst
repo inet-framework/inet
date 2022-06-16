@@ -1,5 +1,5 @@
-Gate Scheduling
-===============
+Automatic Gate Schedule Configuration
+=====================================
 
 In time-aware shaping, gate schedules (i.e. when the gates corresponding to different traffic categories are open or closed) can be specified manually. This might be sufficient in some simple cases.
 However, in complex cases, manually calculating gate schedules may be impossible, thus automation may be required. Gate schedule configurators can be used for this purpose.
