@@ -119,6 +119,8 @@ cNEDValue nedf_absPath(cComponent *context, cNEDValue argv[], int argc)
 {
     if (argc != 1)
         throw cRuntimeError("absPath(): must be one argument instead of %d argument(s)", argc);
+    if (context == nullptr)
+        throw cRuntimeError("absPath(): context component required");
     const char *path = argv[0].stringValue();
     switch (*path) {
         case '.':
@@ -177,7 +179,7 @@ Define_NED_Function2(nedf_nanToZero,
         "Returns the argument if it is not NaN, otherwise returns 0."
         );
 
-static cNedValue nedf_intWithUnit(cComponent *contextComponent, cNedValue argv[], int argc)
+static cNedValue nedf_intWithUnit(cComponent *context, cNedValue argv[], int argc)
 {
     switch (argv[0].getType()) {
         case cNedValue::BOOL:
@@ -200,7 +202,7 @@ Define_NED_Function2(nedf_intWithUnit,
     "conversion",
     "Converts x to an integer (C++ long), and returns the result. A boolean argument becomes 0 or 1; a double is converted using floor(); a string or an XML argument causes an error.");
 
-cNedValue nedf_xmlattr(cComponent *contextComponent, cNedValue argv[], int argc)
+cNedValue nedf_xmlattr(cComponent *context, cNedValue argv[], int argc)
 {
     if (argv[0].getType() != cNedValue::OBJECT)
         throw cRuntimeError("xmlattr(): xmlNode argument must be an xml node");
@@ -243,9 +245,11 @@ Define_NED_Function2(nedf_findArrayObjectElement,
         "Returns the first object from the array that matches the given set of key-value pairs"
         );
 
-cValue nedf_getId(cComponent *contextComponent, cValue argv[], int argc)
+cValue nedf_getId(cComponent *context, cValue argv[], int argc)
 {
-    return contextComponent->getId();
+    if (context == nullptr)
+        throw cRuntimeError("absPath(): context component required");
+    return context->getId();
 }
 
 Define_NED_Function2(nedf_getId,
