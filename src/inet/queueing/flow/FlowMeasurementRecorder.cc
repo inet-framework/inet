@@ -63,24 +63,6 @@ void FlowMeasurementRecorder::processPacket(Packet *packet)
     }
 }
 
-void FlowMeasurementRecorder::makeMeasurement(Packet *packet, b offset, b length, const char *flowName, simsignal_t bitSignal, simsignal_t bitPerRegionSignal, simsignal_t packetPerBitSignal, simsignal_t packetPerRegionSignal, simtime_t bitValue, simtime_t packetValue)
-{
-    EV_INFO << "Making measurement on packet" << EV_FIELD(offset) << EV_FIELD(length);
-    if (flowName != nullptr && *flowName != '\0')
-        EV_INFO << EV_FIELD(flowName);
-    EV_INFO << EV_FIELD(bitSignal, cComponent::getSignalName(bitSignal)) << EV_FIELD(bitValue) << EV_FIELD(packet) << EV_ENDL;
-    cNamedObject details(flowName);
-    // TODO: use weighted value when available in omnetpp
-    for (int i = 0; i < length.get(); i++) {
-        emit(bitSignal, bitValue, &details);
-        if (packetPerBitSignal != -1)
-            emit(packetPerBitSignal, packetValue, &details);
-    }
-    emit(bitPerRegionSignal, bitValue, &details);
-    if (packetPerRegionSignal != -1)
-        emit(packetPerRegionSignal, packetValue, &details);
-}
-
 void FlowMeasurementRecorder::makeMeasurements(Packet *packet)
 {
     emit(packetFlowMeasuredSignal, packet);

@@ -38,23 +38,10 @@ class INET_API FlowMeasurementRecorder : public PacketFlowBase, public Transpare
 
   protected:
     virtual void initialize(int stage) override;
-    virtual void makeMeasurement(Packet *packet, b offset, b length, const char *flowName, simsignal_t bitSignal, simsignal_t bitPerRegionSignal, simsignal_t packetPerBitSignal, simsignal_t packetPerRegionSignal, simtime_t bitValue, simtime_t packetValue);
     virtual void makeMeasurements(Packet *packet);
     virtual void endMeasurements(Packet *packet);
 
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
-
-    template<typename T>
-    void makeMeasurement(Packet *packet, b offset, b length, simsignal_t bitSignal, simsignal_t bitPerRegionSignal, simsignal_t packetPerBitSignal, simsignal_t packetPerRegionSignal) {
-        packet->mapAllRegionTags<T>(offset, length, [&] (b o, b l, const Ptr<const T>& timeTag) {
-            for (int i = 0; i < (int)timeTag->getBitTotalTimesArraySize(); i++) {
-                auto flowName = timeTag->getFlowNames(i);
-                cMatchableString matchableFlowName(flowName);
-                if (flowNameMatcher.matches(&matchableFlowName))
-                    makeMeasurement(packet, o, l, flowName, bitSignal, bitPerRegionSignal, packetPerBitSignal, packetPerRegionSignal, timeTag->getBitTotalTimes(i), timeTag->getPacketTotalTimes(i));
-            }
-        });
-    }
 
     template<typename T>
     void endMeasurement(Packet *packet, b offset, b length) {
