@@ -532,15 +532,19 @@ Register_ResultFilter("elapsedTimePerRegion", ElapsedTimePerRegionFilter);
 void ElapsedTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     auto packet = check_and_cast<Packet *>(object);
+    auto flow = dynamic_cast<Flow *>(details);
     packet->mapAllRegionTags<ElapsedTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const ElapsedTimeTag>& tag) {
         for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
-            PacketRegionValue packetRegionValue;
-            packetRegionValue.packet = packet;
-            packetRegionValue.offset = o;
-            packetRegionValue.length = l;
-            // TODO: no type conversion please
-            packetRegionValue.value = cValue((simTime() - tag->getBitTotalTimes(i)).dbl());
-            fire(this, t, &packetRegionValue, details);
+            auto flowName = tag->getFlowNames(i);
+            if (flow == nullptr || !strcmp(flowName, flow->getName())) {
+                PacketRegionValue packetRegionValue;
+                packetRegionValue.packet = packet;
+                packetRegionValue.offset = o;
+                packetRegionValue.length = l;
+                // TODO: no type conversion please
+                packetRegionValue.value = cValue((simTime() - tag->getBitTotalTimes(i)).dbl());
+                fire(this, t, &packetRegionValue, details);
+            }
         }
     });
 }
@@ -550,15 +554,19 @@ Register_ResultFilter("delayingTimePerRegion", DelayingTimePerRegionFilter);
 void DelayingTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     auto packet = check_and_cast<Packet *>(object);
+    auto flow = dynamic_cast<Flow *>(details);
     packet->mapAllRegionTags<DelayingTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const DelayingTimeTag>& tag) {
         for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
-            PacketRegionValue packetRegionValue;
-            packetRegionValue.packet = packet;
-            packetRegionValue.offset = o;
-            packetRegionValue.length = l;
-            // TODO: no type conversion please
-            packetRegionValue.value = cValue(tag->getBitTotalTimes(i).dbl());
-            fire(this, t, &packetRegionValue, details);
+            auto flowName = tag->getFlowNames(i);
+            if (flow == nullptr || !strcmp(flowName, flow->getName())) {
+                PacketRegionValue packetRegionValue;
+                packetRegionValue.packet = packet;
+                packetRegionValue.offset = o;
+                packetRegionValue.length = l;
+                // TODO: no type conversion please
+                packetRegionValue.value = cValue(tag->getBitTotalTimes(i).dbl());
+                fire(this, t, &packetRegionValue, details);
+            }
         }
     });
 }
@@ -568,15 +576,19 @@ Register_ResultFilter("processingTimePerRegion", ProcessingTimePerRegionFilter);
 void ProcessingTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     auto packet = check_and_cast<Packet *>(object);
+    auto flow = dynamic_cast<Flow *>(details);
     packet->mapAllRegionTags<ProcessingTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const ProcessingTimeTag>& tag) {
         for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
-            PacketRegionValue packetRegionValue;
-            packetRegionValue.packet = packet;
-            packetRegionValue.offset = o;
-            packetRegionValue.length = l;
-            // TODO: no type conversion please
-            packetRegionValue.value = cValue(tag->getBitTotalTimes(i).dbl());
-            fire(this, t, &packetRegionValue, details);
+            auto flowName = tag->getFlowNames(i);
+            if (flow == nullptr || !strcmp(flowName, flow->getName())) {
+                PacketRegionValue packetRegionValue;
+                packetRegionValue.packet = packet;
+                packetRegionValue.offset = o;
+                packetRegionValue.length = l;
+                // TODO: no type conversion please
+                packetRegionValue.value = cValue(tag->getBitTotalTimes(i).dbl());
+                fire(this, t, &packetRegionValue, details);
+            }
         }
     });
 }
@@ -586,15 +598,19 @@ Register_ResultFilter("queueingTimePerRegion", QueueingTimePerRegionFilter);
 void QueueingTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     auto packet = check_and_cast<Packet *>(object);
+    auto flow = dynamic_cast<Flow *>(details);
     packet->mapAllRegionTags<QueueingTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const QueueingTimeTag>& tag) {
         for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
-            PacketRegionValue packetRegionValue;
-            packetRegionValue.packet = packet;
-            packetRegionValue.offset = o;
-            packetRegionValue.length = l;
-            // TODO: no type conversion please
-            packetRegionValue.value = cValue(tag->getBitTotalTimes(i).dbl());
-            fire(this, t, &packetRegionValue, details);
+            auto flowName = tag->getFlowNames(i);
+            if (flow == nullptr || !strcmp(flowName, flow->getName())) {
+                PacketRegionValue packetRegionValue;
+                packetRegionValue.packet = packet;
+                packetRegionValue.offset = o;
+                packetRegionValue.length = l;
+                // TODO: no type conversion please
+                packetRegionValue.value = cValue(tag->getBitTotalTimes(i).dbl());
+                fire(this, t, &packetRegionValue, details);
+            }
         }
     });
 }
@@ -604,15 +620,19 @@ Register_ResultFilter("propagationTimePerRegion", PropagationTimePerRegionFilter
 void PropagationTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     auto packet = check_and_cast<Packet *>(object);
+    auto flow = dynamic_cast<Flow *>(details);
     packet->mapAllRegionTags<PropagationTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const PropagationTimeTag>& tag) {
         for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
-            PacketRegionValue packetRegionValue;
-            packetRegionValue.packet = packet;
-            packetRegionValue.offset = o;
-            packetRegionValue.length = l;
-            // TODO: no type conversion please
-            packetRegionValue.value = cValue(tag->getBitTotalTimes(i).dbl());
-            fire(this, t, &packetRegionValue, details);
+            auto flowName = tag->getFlowNames(i);
+            if (flow == nullptr || !strcmp(flowName, flow->getName())) {
+                PacketRegionValue packetRegionValue;
+                packetRegionValue.packet = packet;
+                packetRegionValue.offset = o;
+                packetRegionValue.length = l;
+                // TODO: no type conversion please
+                packetRegionValue.value = cValue(tag->getBitTotalTimes(i).dbl());
+                fire(this, t, &packetRegionValue, details);
+            }
         }
     });
 }
@@ -622,15 +642,19 @@ Register_ResultFilter("transmissionTimePerRegion", TransmissionTimePerRegionFilt
 void TransmissionTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     auto packet = check_and_cast<Packet *>(object);
+    auto flow = dynamic_cast<Flow *>(details);
     packet->mapAllRegionTags<TransmissionTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const TransmissionTimeTag>& tag) {
         for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
-            PacketRegionValue packetRegionValue;
-            packetRegionValue.packet = packet;
-            packetRegionValue.offset = o;
-            packetRegionValue.length = l;
-            // TODO: no type conversion please
-            packetRegionValue.value = cValue(tag->getBitTotalTimes(i).dbl());
-            fire(this, t, &packetRegionValue, details);
+            auto flowName = tag->getFlowNames(i);
+            if (flow == nullptr || !strcmp(flowName, flow->getName())) {
+                PacketRegionValue packetRegionValue;
+                packetRegionValue.packet = packet;
+                packetRegionValue.offset = o;
+                packetRegionValue.length = l;
+                // TODO: no type conversion please
+                packetRegionValue.value = cValue(tag->getBitTotalTimes(i).dbl());
+                fire(this, t, &packetRegionValue, details);
+            }
         }
     });
 }
@@ -640,15 +664,19 @@ Register_ResultFilter("packetTransmissionTimePerRegion", PacketTransmissionTimeP
 void PacketTransmissionTimePerRegionFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object, cObject *details)
 {
     auto packet = check_and_cast<Packet *>(object);
+    auto flow = dynamic_cast<Flow *>(details);
     packet->mapAllRegionTags<TransmissionTimeTag>(b(0), packet->getDataLength(), [&] (b o, b l, const Ptr<const TransmissionTimeTag>& tag) {
         for (int i = 0; i < (int)tag->getBitTotalTimesArraySize(); i++) {
-            PacketRegionValue packetRegionValue;
-            packetRegionValue.packet = packet;
-            packetRegionValue.offset = o;
-            packetRegionValue.length = l;
-            // TODO: no type conversion please
-            packetRegionValue.value = cValue(tag->getPacketTotalTimes(i).dbl());
-            fire(this, t, &packetRegionValue, details);
+            auto flowName = tag->getFlowNames(i);
+            if (flow == nullptr || !strcmp(flowName, flow->getName())) {
+                PacketRegionValue packetRegionValue;
+                packetRegionValue.packet = packet;
+                packetRegionValue.offset = o;
+                packetRegionValue.length = l;
+                // TODO: no type conversion please
+                packetRegionValue.value = cValue(tag->getPacketTotalTimes(i).dbl());
+                fire(this, t, &packetRegionValue, details);
+            }
         }
     });
 }
