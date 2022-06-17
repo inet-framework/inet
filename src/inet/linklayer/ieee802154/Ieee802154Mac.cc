@@ -1058,5 +1058,23 @@ void Ieee802154Mac::handlePullPacketProcessed(Packet *packet, cGate *gate, bool 
     throw cRuntimeError("Not supported callback");
 }
 
+b Ieee802154Mac::calculateHeaderLength(const Ptr<const Ieee802154MacHeader_>& header) const
+{
+    b length = b(24);
+    switch (header->getDestAddressingMode()) {
+        case IEEE802154_FCF_ADDR_NONE: break;
+        case IEEE802154_FCF_ADDR_SHORT: length += b(16+16); break;
+        case IEEE802154_FCF_ADDR_EXT: length += b(16+64); break;
+        default: throw cRuntimeError("invalid destAddressingMode");
+    }
+    switch (header->getSourceAddressingMode()) {
+        case IEEE802154_FCF_ADDR_NONE: break;
+        case IEEE802154_FCF_ADDR_SHORT: length += b(header->getPanIdCompression() ? 16 : 16+16); break;
+        case IEEE802154_FCF_ADDR_EXT: length += b(header->getPanIdCompression() ? 64 : 16+64); break;
+        default: throw cRuntimeError("invalid sourceAddressingMode");
+    }
+    return length;
+}
+
 } // namespace inet
 

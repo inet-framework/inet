@@ -28,9 +28,11 @@
 #include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
+#include "inet/linklayer/ieee802154/Ieee802154MacHeader_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IPacketQueue.h"
+
 
 namespace inet {
 
@@ -270,6 +272,8 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol, publ
 
     virtual void encapsulate(Packet *packet);
     virtual void decapsulate(Packet *packet);
+
+    virtual b calculateHeaderLength(const Ptr<const Ieee802154MacHeader_>& header) const;
 
     // OperationalBase:
     virtual void handleStartOperation(LifecycleOperation *operation) override;
