@@ -8,8 +8,8 @@ import json
 import re
 
 def tildeize(t):
-    p = re.compile(r'\binet::(([a-z0-9]+::)*)')
-    t = p.sub(r'\1~', t)
+    p = re.compile(r'\b(inet::([a-z0-9]+::)*)')
+    t = p.sub(r'~\1', t)
     p = re.compile(r'\b(inet\.([a-z0-9]+\.)*)')
     t = p.sub(r'~\1', t)
     return t
