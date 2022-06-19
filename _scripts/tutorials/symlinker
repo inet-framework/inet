@@ -1,13 +1,36 @@
-#!/bin/bash
+#!/usr/bin/env python3
 
-if [[ $1 == -h ]]; then
-  echo "Creates symlink in this directory to the corresponding showcase directory in /_docs"
-else
+import os
 
-parentdir="$(dirname $(pwd))"
-currentdir="$(basename $(pwd))"
-last_of_parentdir="$(basename $parentdir)"
+cwd = os.getcwd()
+cwdpath = cwd.split('/')
+cwdpath = cwdpath[1:]
 
-ln -vs ../../_docs/$last_of_parentdir/$currentdir/ doc
+assert 'inet' in cwdpath, "Current directory not under INET's directory"
 
-fi
+if cwdpath[-1] != 'doc':
+    print("Run this from the /doc folder!")
+    exit()
+
+inet_index = -1
+inet_path = []
+for i in range(0,len(cwdpath)):
+    inet_path.append(cwdpath[i])
+    if cwdpath[i]  == 'inet':
+        inet_index = i
+        break
+
+inet = '/'.join(inet_path)
+
+target_path = cwdpath[inet_index+1:]
+target = '/'.join(target_path)
+
+# create shadow directory structure
+target_folder = inet + '/media/' + target
+os.system("mkdir -v -p /" + target_folder)
+
+# create symlink
+inet_dist = len(target_path)
+rel = inet_dist * '../'
+symlink_target = rel + 'media/' + target
+os.system("ln -v -n -s " + symlink_target + "/ media")
