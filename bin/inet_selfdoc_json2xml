@@ -42,7 +42,7 @@ def table(rows, title):
     return s
 
 def markOpt(t):
-    return '<i>{}?</i>'.format(t)
+    return '{}?'.format(t)
 
 # group the colName column of list of tuple
 def groupCol(rows, colName):
