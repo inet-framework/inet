@@ -551,6 +551,29 @@ class INET_API Topology : public cOwnedObject
      * Uses weights in nodes and links.
      */
     void calculateWeightedSingleShortestPathsTo(Node *target) const;
+
+    /**
+     * Apply the Dijkstra algorithm to find all shortest paths from the given
+     * graph node. The paths found can be extracted via Node's methods.
+     * Uses weights in nodes and links.
+     *
+     * Example for how to extract path from node src to dst, with path cost
+     *
+     *          if (dst->getNumPaths() == 0)
+     *              return;
+     *          std::stack<Topology::Node*> Path;
+     *          Topology::Node* n = dst;
+     *          double cost = 0;
+     *          while (n != src) {
+     *              path.push(n);
+     *              Topology::Link *prevLink = dest->getPath(0);
+     *              n = prevLink->getLinkOutLocalNode();
+     *              cost += prevLink->getWeight();
+     *          }
+     *          path.push(src);
+     *
+     */
+     void calculateWeightedSingleShortestPathsFrom(Node *target) const;
     //@}
 
   protected:

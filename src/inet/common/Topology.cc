@@ -466,6 +466,71 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *_target) const
     }
 }
 
+void Topology::calculateWeightedSingleShortestPathsFrom(Node *_target) const
+{
+    if (!_target)
+        throw cRuntimeError(this, "..ShortestPathTo(): target node is nullptr");
+    auto target = _target;
+
+    // clean path infos
+    for (auto& elem : nodes) {
+        elem->dist = INFINITY;
+        elem->outPaths.clear();
+    }
+
+    target->dist = 0;
+
+    std::list<Node *> q;
+
+    q.push_back(target);
+
+    while (!q.empty()) {
+        //Node *dest = q.front();
+        Node *src = q.front();
+        q.pop_front();
+
+        ASSERT(src->getWeight() >= 0.0);
+
+        // for each w adjacent to v...
+        for (int i = 0; i < src->getNumOutLinks(); i++) {
+            if (!(src->getLinkOut(i)->isEnabled()))
+                continue;
+
+            Node *dest = src->getLinkOut(i)->getLinkOutRemoteNode();
+            if (!dest->isEnabled())
+                continue;
+
+            double linkWeight = src->getLinkOut(i)->getWeight();
+
+            // links with linkWeight == 0 might induce circles
+            ASSERT(linkWeight > 0.0);
+
+            double newdist = src->dist + linkWeight;
+            if (src != target)
+                newdist += src->getWeight(); // src is not the target, uses weight of src node as price of routing (infinity means src node doesn't route between interfaces)
+            if (newdist != INFINITY && dest->dist > newdist) { // it's a valid shorter path from target node to dest
+                if (dest->dist != INFINITY)
+                    q.remove(dest); // dest is in the queue
+                dest->dist = newdist;
+                // the first one will be the shortest
+                dest->outPaths.erase(std::remove(dest->outPaths.begin(), dest->outPaths.end(), src->outLinks[i]), dest->outPaths.end());
+                dest->outPaths.insert(dest->outPaths.begin(), src->outLinks[i]);
+
+                // insert src node to ordered list
+                auto it = q.begin();
+                for (; it != q.end(); ++it)
+                    if ((*it)->dist > newdist)
+                        break;
+
+                q.insert(it, dest);
+            }
+            else if (!contains(dest->outPaths, src->outLinks[i]))
+                src->outPaths.push_back(src->outLinks[i]);
+        }
+    }
+}
+
+
 void Topology::findNetworks(Node *node)
 {
     if (node->isVisited())
