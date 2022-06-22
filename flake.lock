@@ -1,0 +1,65 @@
+{
+  "nodes": {
+    "flake-utils": {
+      "locked": {
+        "lastModified": 1653893745,
+        "narHash": "sha256-0jntwV3Z8//YwuOjzhV2sgJJPt+HY6KhU7VZUL0fKZQ=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "1ed9fb1935d260de5fe1c2f7ee0ebaae17ed2fa1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1655567057,
+        "narHash": "sha256-Cc5hQSMsTzOHmZnYm8OSJ5RNUp22bd5NADWLHorULWQ=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e0a42267f73ea52adc061a64650fddc59906fc99",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "ref": "nixpkgs-unstable",
+        "type": "indirect"
+      }
+    },
+    "omnetpp": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1657039954,
+        "narHash": "sha256-kd5z2ofXAmJ3j+a6wdeAHaFpAjp2Hw7be5ntVvS8UDM=",
+        "owner": "omnetpp",
+        "repo": "omnetpp",
+        "rev": "9ddf815c6acababfb7b8273a00c7bf6faa493cf7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "omnetpp",
+        "ref": "flake/omnetpp-6.0.x",
+        "repo": "omnetpp",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flake-utils": [
+          "omnetpp",
+          "flake-utils"
+        ],
+        "omnetpp": "omnetpp"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
