@@ -26,6 +26,7 @@ module LayeredEthernetInterface extends NetworkInterface like IEthernetInterface
         bool multicast = default(true);
         string address @mutable = default("auto");
         double bitrate @unit(bps);
+        int mtu @unit(B) = default(1500B);
         string interfaceTableModule;
         *.bitrate = default(this.bitrate);
     gates:
