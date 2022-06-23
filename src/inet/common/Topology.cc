@@ -413,28 +413,22 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *target) const
     calculateWeightedSingleShortestPaths(target, true);
 }
 
-void Topology::calculateWeightedSingleShortestPaths(Node *_target, bool to) const
+void Topology::calculateWeightedSingleShortestPaths(Node *target, bool to) const
 {
-    if (!_target)
-        throw cRuntimeError(this, "..ShortestPathTo(): target node is nullptr");
-    auto target = _target;
+    if (!target)
+        throw cRuntimeError(this, "calculateWeightedSingleShortestPaths(): target node is nullptr");
 
-    // clean path infos
     for (auto& elem : nodes) {
         elem->dist = INFINITY;
         elem->outPaths.clear();
     }
-
     target->dist = 0;
 
     std::list<Node *> q;
-
     q.push_back(target);
-
     while (!q.empty()) {
         Node *current = q.front();
         q.pop_front();
-
         ASSERT(current->getWeight() >= 0.0);
 
         // for each w adjacent to v...
