@@ -413,19 +413,19 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *target) const
     calculateWeightedSingleShortestPaths(target, true);
 }
 
-void Topology::calculateWeightedSingleShortestPaths(Node *target, bool to) const
+void Topology::calculateWeightedSingleShortestPaths(Node *initial, bool to) const
 {
-    if (!target)
-        throw cRuntimeError(this, "calculateWeightedSingleShortestPaths(): target node is nullptr");
+    if (!initial)
+        throw cRuntimeError(this, "calculateWeightedSingleShortestPaths(): initial node is nullptr");
 
     for (auto& elem : nodes) {
         elem->dist = INFINITY;
         elem->outPaths.clear();
     }
-    target->dist = 0;
+    initial->dist = 0;
 
     std::list<Node *> q;
-    q.push_back(target);
+    q.push_back(initial);
     while (!q.empty()) {
         Node *current = q.front();
         q.pop_front();
@@ -446,7 +446,7 @@ void Topology::calculateWeightedSingleShortestPaths(Node *target, bool to) const
             ASSERT(linkWeight > 0.0);
 
             double newdist = current->dist + linkWeight;
-            if (current != target)
+            if (current != initial)
                 newdist += current->getWeight(); // current is not the target, uses weight of current node as price of routing (infinity means current node doesn't route between interfaces)
             if (newdist != INFINITY && remote->dist > newdist) { // it's a valid shorter path from remote to target node
                 if (remote->dist != INFINITY)

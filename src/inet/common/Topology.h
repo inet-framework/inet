@@ -559,7 +559,7 @@ class INET_API Topology : public cOwnedObject
      */
     void calculateWeightedSingleShortestPathsTo(Node *target) const;
 
-    void calculateWeightedSingleShortestPaths(Node *target, bool to) const;
+    void calculateWeightedSingleShortestPaths(Node *initial, bool to) const;
     //@}
 
   protected:
