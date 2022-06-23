@@ -432,46 +432,46 @@ void Topology::calculateWeightedSingleShortestPaths(Node *_target, bool to) cons
     q.push_back(target);
 
     while (!q.empty()) {
-        Node *dest = q.front();
+        Node *current = q.front();
         q.pop_front();
 
-        ASSERT(dest->getWeight() >= 0.0);
+        ASSERT(current->getWeight() >= 0.0);
 
         // for each w adjacent to v...
-        for (int i = 0; i < dest->getNumInLinks(); i++) {
-            if (!(dest->getLinkIn(i)->isEnabled()))
+        for (int i = 0; i < current->getNumInLinks(); i++) {
+            if (!(current->getLinkIn(i)->isEnabled()))
                 continue;
 
-            Node *src = dest->getLinkIn(i)->getLinkInRemoteNode();
-            if (!src->isEnabled())
+            Node *remote = current->getLinkIn(i)->getLinkInRemoteNode();
+            if (!remote->isEnabled())
                 continue;
 
-            double linkWeight = dest->getLinkIn(i)->getWeight();
+            double linkWeight = current->getLinkIn(i)->getWeight();
 
             // links with linkWeight == 0 might induce circles
             ASSERT(linkWeight > 0.0);
 
-            double newdist = dest->dist + linkWeight;
-            if (dest != target)
-                newdist += dest->getWeight(); // dest is not the target, uses weight of dest node as price of routing (infinity means dest node doesn't route between interfaces)
-            if (newdist != INFINITY && src->dist > newdist) { // it's a valid shorter path from src to target node
-                if (src->dist != INFINITY)
-                    q.remove(src); // src is in the queue
-                src->dist = newdist;
+            double newdist = current->dist + linkWeight;
+            if (current != target)
+                newdist += current->getWeight(); // current is not the target, uses weight of current node as price of routing (infinity means current node doesn't route between interfaces)
+            if (newdist != INFINITY && remote->dist > newdist) { // it's a valid shorter path from remote to target node
+                if (remote->dist != INFINITY)
+                    q.remove(remote); // remote is in the queue
+                remote->dist = newdist;
                 // the first one will be the shortest
-                src->outPaths.erase(std::remove(src->outPaths.begin(), src->outPaths.end(), dest->inLinks[i]), src->outPaths.end());
-                src->outPaths.insert(src->outPaths.begin(), dest->inLinks[i]);
+                remote->outPaths.erase(std::remove(remote->outPaths.begin(), remote->outPaths.end(), current->inLinks[i]), remote->outPaths.end());
+                remote->outPaths.insert(remote->outPaths.begin(), current->inLinks[i]);
 
-                // insert src node to ordered list
+                // insert remote node to ordered list
                 auto it = q.begin();
                 for (; it != q.end(); ++it)
                     if ((*it)->dist > newdist)
                         break;
 
-                q.insert(it, src);
+                q.insert(it, remote);
             }
-            else if (!contains(src->outPaths, dest->inLinks[i]))
-                src->outPaths.push_back(dest->inLinks[i]);
+            else if (!contains(remote->outPaths, current->inLinks[i]))
+                remote->outPaths.push_back(current->inLinks[i]);
         }
     }
 }
