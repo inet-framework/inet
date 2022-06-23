@@ -546,11 +546,20 @@ class INET_API Topology : public cOwnedObject
     void calculateUnweightedSingleShortestPathsTo(Node *target) const;
 
     /**
+     * Apply the Dijkstra algorithm to find all shortest paths from the given
+     * graph node. The paths found can be extracted via Node's methods.
+     * Uses weights in nodes and links.
+     */
+     void calculateWeightedSingleShortestPathsFrom(Node *source) const;
+
+    /**
      * Apply the Dijkstra algorithm to find all shortest paths to the given
      * graph node. The paths found can be extracted via Node's methods.
      * Uses weights in nodes and links.
      */
     void calculateWeightedSingleShortestPathsTo(Node *target) const;
+
+    void calculateWeightedSingleShortestPaths(Node *target, bool to) const;
     //@}
 
   protected:

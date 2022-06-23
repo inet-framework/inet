@@ -403,6 +403,10 @@ void Topology::calculateUnweightedSingleShortestPathsTo(Node *_target) const
     }
 }
 
+void Topology::calculateWeightedSingleShortestPathsFrom(Node *source) const
+{
+}
+
 void Topology::calculateWeightedSingleShortestPathsTo(Node *_target) const
 {
     if (!_target)
@@ -464,6 +468,10 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *_target) const
                 src->outPaths.push_back(dest->inLinks[i]);
         }
     }
+}
+
+void Topology::calculateWeightedSingleShortestPaths(Node *target, bool to) const
+{
 }
 
 void Topology::findNetworks(Node *node)
