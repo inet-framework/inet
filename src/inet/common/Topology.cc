@@ -432,15 +432,15 @@ void Topology::calculateWeightedSingleShortestPaths(Node *target, bool to) const
         ASSERT(current->getWeight() >= 0.0);
 
         // for each w adjacent to v...
-        for (int i = 0; i < current->getNumInLinks(); i++) {
-            if (!(current->getLinkIn(i)->isEnabled()))
+        for (int i = 0; i < (to ? current->getNumInLinks() : current->getNumOutLinks()); i++) {
+            if (!(to ? current->getLinkIn(i)->isEnabled() : current->getLinkOut(i)->isEnabled()))
                 continue;
 
-            Node *remote = current->getLinkIn(i)->getLinkInRemoteNode();
+            Node *remote = to ? current->getLinkIn(i)->getLinkInRemoteNode() : current->getLinkOut(i)->getLinkOutRemoteNode();
             if (!remote->isEnabled())
                 continue;
 
-            double linkWeight = current->getLinkIn(i)->getWeight();
+            double linkWeight = to ? current->getLinkIn(i)->getWeight() : current->getLinkOut(i)->getWeight();
 
             // links with linkWeight == 0 might induce circles
             ASSERT(linkWeight > 0.0);
@@ -453,8 +453,8 @@ void Topology::calculateWeightedSingleShortestPaths(Node *target, bool to) const
                     q.remove(remote); // remote is in the queue
                 remote->dist = newdist;
                 // the first one will be the shortest
-                remote->outPaths.erase(std::remove(remote->outPaths.begin(), remote->outPaths.end(), current->inLinks[i]), remote->outPaths.end());
-                remote->outPaths.insert(remote->outPaths.begin(), current->inLinks[i]);
+                remote->outPaths.erase(std::remove(remote->outPaths.begin(), remote->outPaths.end(), to ? current->inLinks[i] : current->outLinks[i]), remote->outPaths.end());
+                remote->outPaths.insert(remote->outPaths.begin(), to ? current->inLinks[i] : current->outLinks[i]);
 
                 // insert remote node to ordered list
                 auto it = q.begin();
@@ -464,8 +464,8 @@ void Topology::calculateWeightedSingleShortestPaths(Node *target, bool to) const
 
                 q.insert(it, remote);
             }
-            else if (!contains(remote->outPaths, current->inLinks[i]))
-                remote->outPaths.push_back(current->inLinks[i]);
+            else if (!contains(remote->outPaths, to ? current->inLinks[i] : current->outLinks[i]))
+                (to ? remote : current)->outPaths.push_back(to ? current->inLinks[i] : current->outLinks[i]);
         }
     }
 }
