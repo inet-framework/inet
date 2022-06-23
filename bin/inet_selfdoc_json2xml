@@ -32,11 +32,17 @@ def table(rows, title):
                 s +='<td>'
                 sep = ''
                 for vv in v:
-                    s += sep + '{}'.format(tildeize(vv))
+                    if k == 'function':
+                        s += sep + '{}'.format(vv)
+                    else:
+                        s += sep + '{}'.format(tildeize(vv))
                     sep = ', '
                 s +='</td>'
             else:
-                s +='<td>{}</td>'.format(tildeize(v))
+                if k == 'function':
+                    s +='<td>{}</td>'.format(v)
+                else:
+                    s +='<td>{}</td>'.format(tildeize(v))
         s += '</tr>\n'
     s += '</table>\n'
     return s
