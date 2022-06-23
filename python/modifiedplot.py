@@ -109,12 +109,12 @@ def add_to_dataframe(df, style_tuple_list, default_dict={}, order={}):
     default_dict: {style dictionary}:
         add style to rows not matched by the above
     order: {'configname': order, ...}
-        assigns order number to particular confignames
+        2-member list: first one is the column in the dataframe to order by, second is a dict with the order numbers
         
     example:
     style_tuple_list = [('legend', 'eth[0]', {'linestyle': '--', 'linewidth': 2}), ('legend', 'eth[1]', {'linestyle': '-', 'linewidth': 2, 'marker': 's', 'markersize': 4})]
     default_dict = {'linestyle': '-', 'linewidth': 1}
-    order = {'Default_config': 1, 'Advanced_config': 0, 'Manual_config': 2}
+    order = ['configname', {'Default_config': 1, 'Advanced_config': 0, 'Manual_config': 2}]
     
     Note that the value parameter in style_tuple_list can contain regex (e.g. .*foo). Make sure to escape regex characters such as [ and ] with \
     """
@@ -158,9 +158,12 @@ def add_to_dataframe(df, style_tuple_list, default_dict={}, order={}):
     if order:
         # order the dataframe
         df['order'] = None
-        for i in order.items():
+        
+        order_column = order[0]
+        order_dict = order[1]
+        for i in order_dict.items():
             for j in range(0,len(df)):
-                if df['configname'][j] == i[0]:
+                if df[order_column][j] == i[0]:
                     df['order'][j] = i[1]
                     
         if debug: print("order added.", df['order'], df)
