@@ -405,13 +405,15 @@ void Topology::calculateUnweightedSingleShortestPathsTo(Node *_target) const
 
 void Topology::calculateWeightedSingleShortestPathsFrom(Node *source) const
 {
+    calculateWeightedSingleShortestPaths(source, false);
 }
 
-void Topology::calculateWeightedSingleShortestPathsTo(Node *_target) const
+void Topology::calculateWeightedSingleShortestPathsTo(Node *target) const
 {
+    calculateWeightedSingleShortestPaths(target, true);
 }
 
-void Topology::calculateWeightedSingleShortestPaths(Node *target, bool to) const
+void Topology::calculateWeightedSingleShortestPaths(Node *_target, bool to) const
 {
     if (!_target)
         throw cRuntimeError(this, "..ShortestPathTo(): target node is nullptr");
