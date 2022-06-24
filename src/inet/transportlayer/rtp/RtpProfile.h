@@ -35,7 +35,7 @@ class INET_API RtpProfile : public cSimpleModule
     // and the gate which leads to the RtpPayloadReceiver module.
     // Note: in the original, this used to be a hundred lines, as RTPSSRCGate.cc/h,
     // but even this class is an overkill --Andras
-    class SsrcGate : public cNamedObject { // FIXME why is it a namedObject?
+    class INET_API SsrcGate : public cNamedObject { // FIXME why is it a namedObject?
       protected:
         uint32_t ssrc;
         int gateId;

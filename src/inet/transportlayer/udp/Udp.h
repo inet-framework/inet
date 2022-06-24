@@ -37,7 +37,7 @@ namespace inet {
 
 const uint16_t UDP_MAX_MESSAGE_SIZE = 65535; // bytes
 
-class UdpCrcInsertionHook : public cSimpleModule, public NetfilterBase::HookBase
+class INET_API UdpCrcInsertionHook : public cSimpleModule, public NetfilterBase::HookBase
 {
   public:
     virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }

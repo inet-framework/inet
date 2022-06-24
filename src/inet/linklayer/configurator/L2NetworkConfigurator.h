@@ -33,7 +33,7 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
     /**
      * Represents a node in the network.
      */
-    class Node : public Topology::Node {
+    class INET_API Node : public Topology::Node {
       public:
         cModule *module;
         IInterfaceTable *interfaceTable;
@@ -47,7 +47,7 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
     /**
      * Represents an interface in the network.
      */
-    class InterfaceInfo : public cObject {
+    class INET_API InterfaceInfo : public cObject {
       public:
         Node *node;
         Node *childNode;
@@ -59,7 +59,7 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
         virtual std::string getFullPath() const override { return networkInterface->getInterfaceFullPath(); }
     };
 
-    class Matcher {
+    class INET_API Matcher {
       protected:
         bool matchesany;
         std::vector<inet::PatternMatcher *> matchers; // TODO replace with a MatchExpression once it becomes available in OMNeT++
@@ -72,7 +72,7 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
         bool matchesAny() { return matchesany; }
     };
 
-    class Link : public Topology::Link {
+    class INET_API Link : public Topology::Link {
       public:
         InterfaceInfo *sourceInterfaceInfo;
         InterfaceInfo *destinationInterfaceInfo;
@@ -81,7 +81,7 @@ class INET_API L2NetworkConfigurator : public cSimpleModule
         Link() { sourceInterfaceInfo = nullptr; destinationInterfaceInfo = nullptr; }
     };
 
-    class L2Topology : public Topology {
+    class INET_API L2Topology : public Topology {
       protected:
         virtual Node *createNode(cModule *module) override { return new L2NetworkConfigurator::Node(module); }
         virtual Link *createLink() override { return new L2NetworkConfigurator::Link(); }

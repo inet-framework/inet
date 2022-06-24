@@ -19,7 +19,7 @@ class INET_API IChannelAccess
     static simsignal_t channelOwnershipChangedSignal;
 
   public:
-    class ICallback {
+    class INET_API ICallback {
       public:
         virtual ~ICallback() {}
 

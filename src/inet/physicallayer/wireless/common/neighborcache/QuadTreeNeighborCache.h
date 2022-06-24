@@ -21,7 +21,7 @@ class INET_API QuadTreeNeighborCache : public cSimpleModule, public INeighborCac
     typedef std::vector<const IRadio *> Radios;
 
   protected:
-    class QuadTreeNeighborCacheVisitor : public IVisitor {
+    class INET_API QuadTreeNeighborCacheVisitor : public IVisitor {
       protected:
         RadioMedium *radioMedium;
         IRadio *transmitter;

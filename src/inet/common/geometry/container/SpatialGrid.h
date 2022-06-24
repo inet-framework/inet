@@ -25,7 +25,7 @@ class INET_API SpatialGrid
 {
   public:
     template<typename T>
-    class Triplet {
+    class INET_API Triplet {
       public:
         T x;
         T y;
@@ -59,7 +59,7 @@ class INET_API SpatialGrid
   protected:
     // This class implements a LineSegmentIterator based on the G3D library's RayGridIterator class
     // http://graphics.cs.williams.edu/courses/cs371/f10/G3D/manual/class_g3_d_1_1_ray_grid_iterator.html
-    class LineSegmentIterator {
+    class INET_API LineSegmentIterator {
       protected:
         Triplet<int> index;
         Triplet<int> endPoint;

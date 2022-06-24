@@ -32,7 +32,7 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, protected cListener
 //        double expiry; // TODO association should expire after a while if STA is silent?
     };
 
-    class NotificationInfoSta : public cObject {
+    class INET_API NotificationInfoSta : public cObject {
         MacAddress apAddress;
         MacAddress staAddress;
 
@@ -43,7 +43,8 @@ class INET_API Ieee80211MgmtAp : public Ieee80211MgmtApBase, protected cListener
         const MacAddress& getStaAddress() const { return staAddress; }
     };
 
-    struct MacCompare {
+    class INET_API MacCompare {
+      public:
         bool operator()(const MacAddress& u1, const MacAddress& u2) const { return u1.compareTo(u2) < 0; }
     };
     typedef std::map<MacAddress, StaInfo, MacCompare> StaList;

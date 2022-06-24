@@ -17,7 +17,7 @@ namespace physicallayer {
 class INET_API AxiallySymmetricAntenna : public AntennaBase
 {
   protected:
-    class AntennaGain : public IAntennaGain {
+    class INET_API AntennaGain : public IAntennaGain {
       protected:
         double minGain = NaN;
         double maxGain = NaN;

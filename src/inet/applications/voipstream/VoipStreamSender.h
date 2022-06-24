@@ -56,7 +56,7 @@ class INET_API VoipStreamSender : public cSimpleModule, public LifecycleUnsuppor
     virtual void resampleFrame(const uint8_t **in_data, int in_nb_samples);
 
   protected:
-    class Buffer {
+    class INET_API Buffer {
       public:
         enum { BUFSIZE = 48000 * 2 * 2 }; // 1 second of two channel 48kHz 16bit audio
 

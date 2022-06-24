@@ -17,7 +17,7 @@ namespace physicallayer {
 class INET_API IsotropicAntenna : public AntennaBase
 {
   protected:
-    class AntennaGain : public IAntennaGain {
+    class INET_API AntennaGain : public IAntennaGain {
       public:
         virtual double getMinGain() const override { return 1; }
         virtual double getMaxGain() const override { return 1; }

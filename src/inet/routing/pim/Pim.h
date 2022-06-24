@@ -16,7 +16,7 @@
 
 namespace inet {
 
-class PimCrcInsertionHook : public cSimpleModule, public NetfilterBase::HookBase
+class INET_API PimCrcInsertionHook : public cSimpleModule, public NetfilterBase::HookBase
 {
   public:
     virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }

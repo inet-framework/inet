@@ -136,7 +136,7 @@ struct LsaKeyType
     RouterId advertisingRouter;
 };
 
-class LsaKeyType_Less : public std::binary_function<LsaKeyType, LsaKeyType, bool>
+class INET_API LsaKeyType_Less : public std::binary_function<LsaKeyType, LsaKeyType, bool>
 {
   public:
     bool operator()(LsaKeyType leftKey, LsaKeyType rightKey) const;

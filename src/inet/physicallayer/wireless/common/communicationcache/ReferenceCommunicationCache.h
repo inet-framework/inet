@@ -16,7 +16,7 @@ namespace physicallayer {
 class INET_API ReferenceCommunicationCache : public CommunicationCacheBase
 {
   protected:
-    class ReferenceTransmissionCacheEntry : public TransmissionCacheEntry {
+    class INET_API ReferenceTransmissionCacheEntry : public TransmissionCacheEntry {
       public:
         /**
          * The list of intermediate reception computation results.

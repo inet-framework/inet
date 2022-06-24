@@ -17,7 +17,7 @@
 namespace inet {
 namespace tcp {
 
-class TcpCrcInsertionHook : public cSimpleModule, public NetfilterBase::HookBase
+class INET_API TcpCrcInsertionHook : public cSimpleModule, public NetfilterBase::HookBase
 {
   public:
     static void insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<TcpHeader>& tcpHeader, Packet *tcpPayload);

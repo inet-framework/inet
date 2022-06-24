@@ -21,7 +21,7 @@ class INET_API GridNeighborCache : public cSimpleModule, public INeighborCache
     typedef std::vector<const IRadio *> Radios;
 
   protected:
-    class GridNeighborCacheVisitor : public IVisitor {
+    class INET_API GridNeighborCacheVisitor : public IVisitor {
       protected:
         RadioMedium *radioMedium;
         IRadio *transmitter;

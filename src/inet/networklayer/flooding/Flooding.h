@@ -67,7 +67,7 @@ class INET_API Flooding : public NetworkProtocolBase, public INetworkProtocol
     /** @brief Defines whether to use plain flooding or not*/
     bool plainFlooding = false;
 
-    class Bcast {
+    class INET_API Bcast {
       public:
         unsigned long seqNum;
         L3Address srcAddr;

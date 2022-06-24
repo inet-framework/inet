@@ -734,7 +734,7 @@ void ThroughputFilter::finish(cComponent *component, simsignal_t signalID)
 
 Register_ResultFilter("liveThroughput", LiveThroughputFilter);
 
-class TimerEvent : public cEvent
+class INET_API TimerEvent : public cEvent
 {
   protected:
     LiveThroughputFilter *target;

@@ -22,7 +22,7 @@ namespace visualizer {
 class INET_API StatisticOsgVisualizer : public StatisticVisualizerBase
 {
   protected:
-    class StatisticOsgVisualization : public StatisticVisualization {
+    class INET_API StatisticOsgVisualization : public StatisticVisualization {
       public:
         NetworkNodeOsgVisualization *networkNodeVisualization = nullptr;
         osg::Node *node = nullptr;

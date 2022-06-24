@@ -18,7 +18,7 @@ namespace ospfv2 {
 
 using namespace ospf;
 
-class LsaProcessingMarker
+class INET_API LsaProcessingMarker
 {
   private:
     unsigned int index;

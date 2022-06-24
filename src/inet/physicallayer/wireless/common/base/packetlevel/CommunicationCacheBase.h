@@ -20,7 +20,7 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
     /**
      * Caches the intermediate computation results related to a radio.
      */
-    class RadioCacheEntry {
+    class INET_API RadioCacheEntry {
       public:
         /**
          * The corresponding radio.
@@ -43,7 +43,7 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
     /**
      * Caches the intermediate computation results related to a reception.
      */
-    class ReceptionCacheEntry {
+    class INET_API ReceptionCacheEntry {
       public:
         /**
          * The corresponding transmission.
@@ -79,7 +79,7 @@ class INET_API CommunicationCacheBase : public cModule, public ICommunicationCac
     /**
      * Caches the intermediate computation results related to a transmission.
      */
-    class TransmissionCacheEntry {
+    class INET_API TransmissionCacheEntry {
       public:
         /**
          * The corresponding transmission.

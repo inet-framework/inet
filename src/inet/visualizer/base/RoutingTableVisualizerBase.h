@@ -34,7 +34,7 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
         virtual ~RouteVisualization() {}
     };
 
-    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {
       protected:
         const Ipv4Route *route = nullptr;
 

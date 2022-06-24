@@ -24,7 +24,7 @@ namespace inet {
 class INET_API BvhTree
 {
   public:
-    class Axis {
+    class INET_API Axis {
       protected:
         std::string axisOrder;
         unsigned int curr;
@@ -41,7 +41,7 @@ class INET_API BvhTree
     };
 
   public:
-    class BvhTreeVisitor : public IVisitor {
+    class INET_API BvhTreeVisitor : public IVisitor {
       public:
         virtual void visit(const cObject *) const = 0;
         virtual LineSegment getLineSegment() const = 0;
@@ -49,7 +49,8 @@ class INET_API BvhTree
     };
 
   protected:
-    struct AxisComparator {
+    class INET_API AxisComparator {
+      public:
         char axis;
         AxisComparator(char axis) : axis(axis) {}
         bool operator()(const physicalenvironment::IPhysicalObject *left, const physicalenvironment::IPhysicalObject *right) const

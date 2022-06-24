@@ -22,7 +22,7 @@ class INET_API DimensionalTransmitterBase : public virtual IPrintableObject
 {
   protected:
     template<typename T>
-    class GainEntry {
+    class INET_API GainEntry {
       public:
         const IInterpolator<T, double> *interpolator;
         const char where;

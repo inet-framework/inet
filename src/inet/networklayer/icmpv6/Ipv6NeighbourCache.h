@@ -108,9 +108,9 @@ class INET_API Ipv6NeighbourCache
     typedef std::map<Key, Neighbour> NeighbourMap;
 
     // cyclic double-linked list of default routers
-    class DefaultRouterList {
+    class INET_API DefaultRouterList {
       public:
-        class iterator {
+        class INET_API iterator {
             friend class DefaultRouterList;
 
           private:

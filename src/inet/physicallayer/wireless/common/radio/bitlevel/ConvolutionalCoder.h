@@ -39,7 +39,7 @@ class INET_API ConvolutionalCoder : public IFecCoder
   public:
     typedef std::vector<std::vector<ShortBitVector>> ShortBitVectorMatrix;
 
-    class TrellisGraphNode {
+    class INET_API TrellisGraphNode {
       public:
         int symbol;
         int state;

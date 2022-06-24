@@ -51,7 +51,8 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     };
 
   protected:
-    struct SocketDescriptor {
+    class SocketDescriptor {
+      public:
         int socketId = -1;
         int protocolId = -1;
         Ipv6Address localAddress;
@@ -85,7 +86,7 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     // 28.9.07 - CB
     // datagrams that are supposed to be sent with a tentative Ipv6 address
     // are rescheduled for later resubmission.
-    class ScheduledDatagram : public cPacket {
+    class INET_API ScheduledDatagram : public cPacket {
       protected:
         Packet *packet = nullptr;
         const Ipv6Header *ipv6Header = nullptr;

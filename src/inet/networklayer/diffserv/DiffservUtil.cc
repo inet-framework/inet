@@ -176,7 +176,7 @@ double getInterfaceDatarate(IInterfaceTable *ift, cSimpleModule *interfaceModule
     return ie ? ie->getDatarate() : -1;
 }
 
-class ColorAttribute : public cObject
+class INET_API ColorAttribute : public cObject
 {
   public:
     int color;

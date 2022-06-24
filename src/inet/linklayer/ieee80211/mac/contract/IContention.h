@@ -35,7 +35,7 @@ class INET_API IContention
     static simsignal_t channelAccessGrantedSignal;
 
   public:
-    class ICallback {
+    class INET_API ICallback {
       public:
         ~ICallback() {}
 

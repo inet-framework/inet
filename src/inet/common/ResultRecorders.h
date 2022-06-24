@@ -58,7 +58,7 @@ class INET_API ElapsedTimeRecorder : public cResultRecorder
 class INET_API WeightedHistogramRecorder : public cNumericResultRecorder
 {
   public:
-    class cWeight : public cObject {
+    class INET_API cWeight : public cObject {
       protected:
         const double weight;
 

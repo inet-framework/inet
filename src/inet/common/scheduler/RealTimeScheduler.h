@@ -30,7 +30,7 @@ class INET_API RealTimeScheduler : public cScheduler
         virtual bool notify(int fd) = 0;
     };
 
-    class Entry {
+    class INET_API Entry {
       public:
         int fd = -1;
         ICallback *callback = nullptr;
@@ -42,7 +42,7 @@ class INET_API RealTimeScheduler : public cScheduler
     int64_t baseTime = 0; // in nanoseconds, as returned by opp_get_monotonic_clock_nsecs()
 
   protected:
-    class BeginSimulationEvent : public cEvent {
+    class INET_API BeginSimulationEvent : public cEvent {
       public:
         BeginSimulationEvent(const char *name) : cEvent(name) {}
         virtual cEvent *dup() const override { return new BeginSimulationEvent(getName()); }

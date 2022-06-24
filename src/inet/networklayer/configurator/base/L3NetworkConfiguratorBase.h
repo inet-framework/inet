@@ -28,7 +28,7 @@ class INET_API L3NetworkConfiguratorBase : public cSimpleModule, public L3Addres
     /**
      * Represents a node in the network.
      */
-    class Node : public inet::Topology::Node {
+    class INET_API Node : public inet::Topology::Node {
       public:
         cModule *module = nullptr;
         IInterfaceTable *interfaceTable = nullptr;
@@ -43,7 +43,7 @@ class INET_API L3NetworkConfiguratorBase : public cSimpleModule, public L3Addres
     /**
      * Represents a connection (wired or wireless) in the network.
      */
-    class Link : public inet::Topology::Link {
+    class INET_API Link : public inet::Topology::Link {
       public:
         InterfaceInfo *sourceInterfaceInfo = nullptr;
         InterfaceInfo *destinationInterfaceInfo = nullptr;
@@ -55,7 +55,7 @@ class INET_API L3NetworkConfiguratorBase : public cSimpleModule, public L3Addres
     /**
      * Represents an interface in the network.
      */
-    class InterfaceInfo : public cObject {
+    class INET_API InterfaceInfo : public cObject {
       public:
         Node *node = nullptr;
         LinkInfo *linkInfo = nullptr;
@@ -77,7 +77,7 @@ class INET_API L3NetworkConfiguratorBase : public cSimpleModule, public L3Addres
      * Represents a "link" in the network. A link is a communication medium between interfaces;
      * it can be e.g. a point-to-point link, an Ethernet LAN or a wireless LAN.
      */
-    class LinkInfo : public cObject {
+    class INET_API LinkInfo : public cObject {
       public:
         std::vector<InterfaceInfo *> interfaceInfos; // interfaces on that LAN or point-to-point link
         InterfaceInfo *gatewayInterfaceInfo = nullptr; // non-nullptr if all hosts have 1 non-loopback interface except one host that has two of them (this will be the gateway)
@@ -90,7 +90,7 @@ class INET_API L3NetworkConfiguratorBase : public cSimpleModule, public L3Addres
     /**
      * Represents the network topology.
      */
-    class Topology : public inet::Topology {
+    class INET_API Topology : public inet::Topology {
       public:
         std::vector<LinkInfo *> linkInfos; // all links in the network
         std::map<int, InterfaceInfo *> interfaceInfos; // all interfaces in the network
@@ -103,7 +103,7 @@ class INET_API L3NetworkConfiguratorBase : public cSimpleModule, public L3Addres
         virtual Link *createLink() override { return new L3NetworkConfiguratorBase::Link(); }
     };
 
-    class Matcher {
+    class INET_API Matcher {
       protected:
         bool matchesany = false;
         std::vector<inet::PatternMatcher *> matchers; // TODO replace with a MatchExpression once it becomes available in OMNeT++
@@ -116,7 +116,7 @@ class INET_API L3NetworkConfiguratorBase : public cSimpleModule, public L3Addres
         bool matchesAny() { return matchesany; }
     };
 
-    class InterfaceMatcher {
+    class INET_API InterfaceMatcher {
       protected:
         bool matchesany = false;
         std::vector<inet::PatternMatcher *> nameMatchers;
