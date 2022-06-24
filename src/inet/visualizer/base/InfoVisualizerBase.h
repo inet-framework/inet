@@ -29,7 +29,7 @@ class INET_API InfoVisualizerBase : public VisualizerBase
         virtual ~InfoVisualization() {}
     };
 
-    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {
       protected:
         const cModule *module = nullptr;
 

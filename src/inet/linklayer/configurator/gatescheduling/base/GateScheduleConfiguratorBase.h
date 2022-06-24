@@ -25,7 +25,7 @@ class INET_API GateScheduleConfiguratorBase : public NetworkConfiguratorBase
         class Port;
 
         // all network nodes
-        class NetworkNode
+        class INET_API NetworkNode
         {
           public:
             std::vector<Port *> ports; // list of network interfaces
@@ -36,12 +36,12 @@ class INET_API GateScheduleConfiguratorBase : public NetworkConfiguratorBase
         };
 
         // an end device (network node) that runs applications
-        class Device : public NetworkNode
+        class INET_API Device : public NetworkNode
         {
         };
 
         // an application that generates traffic
-        class Application
+        class INET_API Application
         {
           public:
             cModule *module = nullptr; // corresponding OMNeT++ module
@@ -54,7 +54,7 @@ class INET_API GateScheduleConfiguratorBase : public NetworkConfiguratorBase
         };
 
         // network interface
-        class Port
+        class INET_API Port
         {
           public:
             cModule *module = nullptr; // corresponding OMNeT++ module
@@ -71,12 +71,12 @@ class INET_API GateScheduleConfiguratorBase : public NetworkConfiguratorBase
         };
 
         // an Ethernet switch
-        class Switch : public NetworkNode
+        class INET_API Switch : public NetworkNode
         {
         };
 
         // part of a flow's paths
-        class PathFragment
+        class INET_API PathFragment
         {
           public:
             std::vector<NetworkNode *> networkNodes; // list of network nodes the path goes through
@@ -85,7 +85,7 @@ class INET_API GateScheduleConfiguratorBase : public NetworkConfiguratorBase
         };
 
         // a flow of packets from the application of the start device to the end device
-        class Flow
+        class INET_API Flow
         {
           public:
             std::string name; // for user identification
@@ -165,7 +165,7 @@ class INET_API GateScheduleConfiguratorBase : public NetworkConfiguratorBase
     {
       public:
         // a single slot in a schedule
-        class Slot
+        class INET_API Slot
         {
           public:
             simtime_t start; // start time in seconds
@@ -173,7 +173,7 @@ class INET_API GateScheduleConfiguratorBase : public NetworkConfiguratorBase
         };
 
         // a gate scheduling for a specific (traffic class) of a specific port
-        class Schedule
+        class INET_API Schedule
         {
           public:
             Input::Port *port = nullptr; // reference to the port

@@ -8,7 +8,9 @@
 #ifndef __INET_INSTRUMENTUTIL_H
 #define __INET_INSTRUMENTUTIL_H
 
-class InstrumentUtil
+#include "inet/common/INETDefs.h"
+
+class INET_API InstrumentUtil
 {
     typedef int OutCode;
 

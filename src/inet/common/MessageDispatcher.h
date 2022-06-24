@@ -32,7 +32,7 @@ class INET_API MessageDispatcher :
     public DefaultProtocolRegistrationListener, public IInterfaceRegistrationListener
 {
   public:
-    class Key {
+    class INET_API Key {
       protected:
         int protocolId;
         int servicePrimitive;

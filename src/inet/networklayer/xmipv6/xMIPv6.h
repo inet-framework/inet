@@ -80,7 +80,7 @@ class INET_API xMIPv6 : public cSimpleModule
     /**
      * The base class for all other timers that are used for retransmissions.
      */
-    class TimerIfEntry {
+    class INET_API TimerIfEntry {
       public:
         cMessage *timer; // pointer to the scheduled timer message
         virtual ~TimerIfEntry() {} // to make it a polymorphic base class
@@ -91,7 +91,8 @@ class INET_API xMIPv6 : public cSimpleModule
         NetworkInterface *ifEntry; // interface from which the message will be transmitted
     };
 
-    struct Key {
+    class INET_API Key {
+      public:
         int type; // type of the message (BU, HoTI, CoTI) stored in the map, indexed by this key
         int interfaceID; // ID of the interface over which the message is sent
         Ipv6Address dest; // the address of either the HA or the CN
@@ -125,7 +126,7 @@ class INET_API xMIPv6 : public cSimpleModule
     CnList::iterator itCNList; // declaring an iterator over the cnList vector
 
     /** Subclasses for the different timers */
-    class BuTransmitIfEntry : public TimerIfEntry {
+    class INET_API BuTransmitIfEntry : public TimerIfEntry {
       public:
         uint buSequenceNumber; // sequence number of the BU sent
         uint lifeTime; // lifetime of the BU sent
@@ -134,27 +135,27 @@ class INET_API xMIPv6 : public cSimpleModule
         bool homeRegistration; // indicates whether this goes to HA or CN;
     };
 
-    class TestInitTransmitIfEntry : public TimerIfEntry {
+    class INET_API TestInitTransmitIfEntry : public TimerIfEntry {
       public:
         Ptr<MobilityHeader> testInitMsg; // either the HoTI or CoTI
     };
 
-    class BrTransmitIfEntry : public TimerIfEntry {
+    class INET_API BrTransmitIfEntry : public TimerIfEntry {
       public:
         uint retries; // number of BRRs already sent
     };
 
-    class BulExpiryIfEntry : public TimerIfEntry {
+    class INET_API BulExpiryIfEntry : public TimerIfEntry {
       public:
         Ipv6Address CoA, HoA; // the CoA and HoA of the MN that were used for this BUL entry
     };
 
-    class BcExpiryIfEntry : public TimerIfEntry {
+    class INET_API BcExpiryIfEntry : public TimerIfEntry {
       public:
         Ipv6Address HoA; // HoA of the MN
     };
 
-    class TokenExpiryIfEntry : public TimerIfEntry {
+    class INET_API TokenExpiryIfEntry : public TimerIfEntry {
       public:
         Ipv6Address cnAddr; // CN whose token is expiring
         int tokenType; // KEY_XX indicates whether it is a care-of token, etc.

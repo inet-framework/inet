@@ -40,7 +40,7 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     /**
      * Represents an Ipv4Header, queued by a Hook
      */
-    class QueuedDatagramForHook {
+    class INET_API QueuedDatagramForHook {
       public:
         QueuedDatagramForHook(Packet *packet, IHook::Type hookType) :
             packet(packet), hookType(hookType) {}

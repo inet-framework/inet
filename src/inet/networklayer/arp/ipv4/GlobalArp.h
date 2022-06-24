@@ -32,7 +32,7 @@ class INET_API GlobalArp : public OperationalBase, public IArp, public cListener
     typedef std::map<L3Address, ArpCacheEntry *> ArpCache;
 
     // L3Address -> MacAddress
-    class ArpCacheEntry {
+    class INET_API ArpCacheEntry {
       public:
         GlobalArp *owner = nullptr; // owner module of this cache entry
         const NetworkInterface *networkInterface = nullptr; // NIC to send the packet to

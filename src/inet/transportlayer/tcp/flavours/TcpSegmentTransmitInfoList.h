@@ -17,7 +17,7 @@ namespace tcp {
 class INET_API TcpSegmentTransmitInfoList
 {
   public:
-    class Item {
+    class INET_API Item {
       protected:
         uint32_t beg; // segment [begin, end)
         uint32_t end;

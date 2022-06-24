@@ -16,7 +16,7 @@ namespace physicallayer {
 class INET_API VectorCommunicationCache : public CommunicationCacheBase
 {
   protected:
-    class VectorTransmissionCacheEntry : public TransmissionCacheEntry {
+    class INET_API VectorTransmissionCacheEntry : public TransmissionCacheEntry {
       public:
         /**
          * The list of intermediate reception computation results.

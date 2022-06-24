@@ -19,7 +19,7 @@ class INET_API CosineAntenna : public AntennaBase
   protected:
     virtual void initialize(int stage) override;
 
-    class AntennaGain : public IAntennaGain {
+    class INET_API AntennaGain : public IAntennaGain {
       public:
         AntennaGain(double maxGain, deg beamWidth);
         virtual double getMinGain() const override { return 0; }

@@ -18,7 +18,7 @@ namespace visualizer {
 class INET_API PhysicalEnvironmentCanvasVisualizer : public PhysicalEnvironmentVisualizerBase
 {
   protected:
-    class ObjectPositionComparator {
+    class INET_API ObjectPositionComparator {
       protected:
         const RotationMatrix& viewRotation;
 

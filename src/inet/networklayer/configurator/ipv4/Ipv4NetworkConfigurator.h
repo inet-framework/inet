@@ -31,7 +31,7 @@ class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase
     /**
      * Represents a node in the network.
      */
-    class Node : public L3NetworkConfiguratorBase::Node {
+    class INET_API Node : public L3NetworkConfiguratorBase::Node {
       public:
         std::vector<Ipv4Route *> staticRoutes;
         std::vector<Ipv4MulticastRoute *> staticMulticastRoutes;
@@ -44,7 +44,7 @@ class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase
         }
     };
 
-    class Topology : public L3NetworkConfiguratorBase::Topology {
+    class INET_API Topology : public L3NetworkConfiguratorBase::Topology {
       protected:
         virtual Node *createNode(cModule *module) override { return new Ipv4NetworkConfigurator::Node(module); }
     };
@@ -52,7 +52,7 @@ class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase
     /**
      * Represents an interface in the network.
      */
-    class InterfaceInfo : public L3NetworkConfiguratorBase::InterfaceInfo {
+    class INET_API InterfaceInfo : public L3NetworkConfiguratorBase::InterfaceInfo {
       public:
         uint32_t address; // the bits
         uint32_t addressSpecifiedBits; // 1 means the bit is specified, 0 means the bit is unspecified
@@ -71,7 +71,7 @@ class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase
      * Simplified route representation used by the optimizer.
      * This class makes the optimization faster by introducing route coloring.
      */
-    class RouteInfo {
+    class INET_API RouteInfo {
       public:
         int color; // an index into an array representing the different route actions (gateway, interface, metric, etc.)
         bool enabled; // allows turning of routes without removing them from the list
@@ -93,7 +93,7 @@ class INET_API Ipv4NetworkConfigurator : public L3NetworkConfiguratorBase
     /**
      * Simplified routing table representation used by the optimizer.
      */
-    class RoutingTableInfo {
+    class INET_API RoutingTableInfo {
       public:
         std::vector<RouteInfo *> routeInfos; // list of routes in the routing table
 

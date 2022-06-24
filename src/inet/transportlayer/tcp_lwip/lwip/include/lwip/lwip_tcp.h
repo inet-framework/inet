@@ -66,7 +66,7 @@ namespace tcp {
 
 class LwipTcpStackIf;
 
-class LwipTcpLayer
+class INET_API LwipTcpLayer
 {
   public:
     struct tcp_hdr;

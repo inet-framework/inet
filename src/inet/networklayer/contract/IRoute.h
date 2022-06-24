@@ -169,7 +169,7 @@ class INET_API IMulticastRoute
         PIM_SM, ///< managed by PIM-SM router
     };
 
-    class InInterface {
+    class INET_API InInterface {
       protected:
         NetworkInterface *ie;
 
@@ -180,7 +180,7 @@ class INET_API IMulticastRoute
         NetworkInterface *getInterface() const { return ie; }
     };
 
-    class OutInterface {
+    class INET_API OutInterface {
       protected:
         const NetworkInterface *ie;
         bool _isLeaf; // for TRPB support

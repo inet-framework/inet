@@ -34,7 +34,7 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
         virtual ~InterfaceVisualization() {}
     };
 
-    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {
       protected:
         const NetworkInterface *networkInterface = nullptr;
 

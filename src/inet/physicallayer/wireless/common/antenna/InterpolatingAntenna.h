@@ -21,7 +21,7 @@ namespace physicallayer {
 class INET_API InterpolatingAntenna : public AntennaBase
 {
   protected:
-    class AntennaGain : public IAntennaGain {
+    class INET_API AntennaGain : public IAntennaGain {
       protected:
         double minGain;
         double maxGain;
