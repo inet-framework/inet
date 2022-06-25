@@ -69,36 +69,44 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label):
 
     p.ylabel(utils.make_chart_title(df, ["title"]))
     
-def plot_vectors_separate(df, props, legend_func=utils.make_legend_label):
-    """
-    This is very similar to `plot_vectors`, with identical usage.
-    The only difference is in the end result, where each vector will
-    be plotted in its own separate set of axes (coordinate system),
-    arranged vertically, with a shared X axis during navigation.
-    """
-    def get_prop(k):
-        return props[k] if k in props else None
+def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_label):
+    p = ideplot if chart.is_native_chart() else plt
+    
+    title = ""
+    ax_list = []
+    for j in range(0, len(df_list)):
+        df = df_list[j]
 
-    title_cols, legend_cols = utils.extract_label_columns(df, props)
+        def get_prop(k):
+            return props[k] if k in props else None
+    
+        title_cols, legend_cols = utils.extract_label_columns(df, props)
+        
+        ax = None
+        ax = plt.subplot(len(df_list), 1, j+1, sharex=ax)
+    
+        if 'order' in df.columns:
+            df.sort_values(by='order', inplace=True)
+        else:
+            df.sort_values(by=legend_cols, inplace=True)
+            
+        for t in df.itertuples(index=False):
+            style = utils._make_line_args(props, t, df)
+            style_dict = eval(t.additional_style)
+            for i in style_dict.items():
+                style[i[0]] = i[1]
+            p.plot(t.vectime, t.vecvalue, label=legend_func(legend_cols, t, props), **style)
+        
+        if j == 0:
+            title = get_prop("title") or utils.make_chart_title(df, title_cols)
 
-    df.sort_values(by=['order'], inplace=True)
+            #utils.set_plot_title(title)
+            plt.suptitle(title)
+        ax_list.append(ax)
 
-    ax = None
-    for i, t in enumerate(df.itertuples(index=False)):
-        style = utils._make_line_args(props, t, df)
-        ax = plt.subplot(df.shape[0], 1, i+1, sharex=ax)
-
-        if i != df.shape[0]-1:
-            plt.setp(ax.get_xticklabels(), visible=False)
-            ax.xaxis.get_label().set_visible(False)
-
-        plt.plot(t.vectime, t.vecvalue, label=legend_func(legend_cols, t, props), **style)
-
-    plt.subplot(df.shape[0], 1, 1)
-
-    title = get_prop("title") or make_chart_title(df, title_cols)
-    utils.set_plot_title(title)
-
+    p.ylabel(utils.make_chart_title(df, ["title"]))
+    
+    return ax_list
 
 def add_to_dataframe(df, style_tuple_list, default_dict={}, order={}):
     """
