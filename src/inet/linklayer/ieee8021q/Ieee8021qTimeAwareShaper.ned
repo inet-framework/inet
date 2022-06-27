@@ -13,6 +13,7 @@ import inet.queueing.contract.IPacketGate;
 import inet.queueing.contract.IPacketQueue;
 import inet.queueing.contract.IPacketScheduler;
 import inet.queueing.queue.CompoundPacketQueueBase;
+import inet.queueing.gate.GateControlList;
 
 //
 // This module implements the IEEE 802.1Q time aware shaper.
@@ -45,6 +46,11 @@ module Ieee8021qTimeAwareShaper extends CompoundPacketQueueBase
         transmissionGate[numTrafficClasses]: <default("PeriodicGate")> like IPacketGate {
             parameters:
                 @display("p=700,100,column,125");
+        }
+        gateControlList: GateControlList {
+            parameters:
+                numGates = parent.numTrafficClasses;
+                @display("p=700,225");
         }
         transmissionSelection: <default("PriorityScheduler")> like IPacketScheduler {
             parameters:

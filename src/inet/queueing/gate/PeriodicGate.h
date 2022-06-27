@@ -25,6 +25,8 @@ class INET_API PeriodicGate : public ClockUserModuleMixin<PacketGateBase>
 
     ClockEvent *changeTimer = nullptr;
 
+    friend class GateControlList;
+
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
