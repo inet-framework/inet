@@ -1144,7 +1144,10 @@ void Ipv4::sendPacketToNIC(Packet *packet)
     if (auto encapsulationProtocolReq = packet->findTagForUpdate<EncapsulationProtocolReq>()) {
         dispatchProtocol = encapsulationProtocolReq->getProtocol(0);
         encapsulationProtocolReq->eraseProtocol(0);
-        encapsulationProtocolReq->insertProtocol(encapsulationProtocolReq->getProtocolArraySize(), networkInterfaceProtocol);
+        if (networkInterfaceProtocol != nullptr)
+            encapsulationProtocolReq->appendProtocol(networkInterfaceProtocol);
+        else if (encapsulationProtocolReq->getProtocolArraySize() == 0)
+            packet->removeTag<EncapsulationProtocolReq>();
     }
     if (dispatchProtocol == nullptr)
         packet->removeTagIfPresent<DispatchProtocolReq>();
