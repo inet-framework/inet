@@ -142,9 +142,9 @@ class INET_API Stp : public StpBase
     friend inline std::ostream& operator<<(std::ostream& os, Ieee8021dInterfaceData *p);
     friend inline std::ostream& operator<<(std::ostream& os, Stp i);
 
-    // for lifecycle:
 
   protected:
+    // for lifecycle:
     virtual void start() override;
     virtual void stop() override;
 };

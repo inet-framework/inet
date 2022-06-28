@@ -585,17 +585,8 @@ void Rstp::sendTCNtoRoot()
                 frame->setMaxAge(maxAge);
                 frame->setHelloTime(helloTime);
                 frame->setForwardDelay(forwardDelay);
-
                 packet->insertAtBack(frame);
-
-                auto macAddressReq = packet->addTag<MacAddressReq>();
-                macAddressReq->setSrcAddress(bridgeAddress);
-                macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
-                packet->addTag<InterfaceReq>()->setInterfaceId(r);
-
-                packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
-                packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
-                send(packet, "relayOut");
+                sendOut(packet, r, MacAddress::STP_MULTICAST_ADDRESS);
             }
         }
     }
@@ -652,14 +643,7 @@ void Rstp::sendBPDU(int interfaceId)
         frame->setForwardDelay(forwardDelay);
 
         packet->insertAtBack(frame);
-
-        auto macAddressReq = packet->addTag<MacAddressReq>();
-        macAddressReq->setSrcAddress(bridgeAddress);
-        macAddressReq->setDestAddress(MacAddress::STP_MULTICAST_ADDRESS);
-        packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
-        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
-        packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
-        send(packet, "relayOut");
+        sendOut(packet, interfaceId, MacAddress::STP_MULTICAST_ADDRESS);
     }
 }
 

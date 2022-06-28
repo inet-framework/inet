@@ -56,6 +56,8 @@ class INET_API StpBase : public OperationalBase, public cListener
     virtual void start();
     virtual void stop();
 
+    void sendOut(Packet *packet, int interfaceId, const MacAddress& destAddress);
+
     /**
      * @brief Adds effects to be represented by Tkenv. Colors the link black if forwarding parameter is true
      * and the port to which the link is connected to is also forwarding, otherwise colors the link gray.

@@ -8,8 +8,11 @@
 #include "inet/linklayer/ieee8021d/common/StpBase.h"
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
@@ -58,6 +61,17 @@ void StpBase::start()
 void StpBase::stop()
 {
     ie = nullptr;
+}
+
+void StpBase::sendOut(Packet *packet, int interfaceId, const MacAddress& destAddress)
+{
+    packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
+    packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
+    auto macAddressReq = packet->addTag<MacAddressReq>();
+    macAddressReq->setSrcAddress(bridgeAddress);
+    macAddressReq->setDestAddress(destAddress);
+    send(packet, "relayOut");
 }
 
 void StpBase::colorLink(NetworkInterface *ie, bool forwarding) const
