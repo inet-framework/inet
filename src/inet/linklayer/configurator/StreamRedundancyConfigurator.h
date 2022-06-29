@@ -15,14 +15,14 @@ namespace inet {
 class INET_API StreamRedundancyConfigurator : public NetworkConfiguratorBase
 {
   protected:
-    class StreamIdentification
+    class INET_API StreamIdentification
     {
       public:
         std::string stream;
         cValue packetFilter;
     };
 
-    class StreamDecoding
+    class INET_API StreamDecoding
     {
       public:
         NetworkInterface *networkInterface = nullptr;
@@ -30,21 +30,21 @@ class INET_API StreamRedundancyConfigurator : public NetworkConfiguratorBase
         std::string name;
     };
 
-    class StreamMerging
+    class INET_API StreamMerging
     {
       public:
         std::vector<std::string> inputStreams;
         std::string outputStream;
     };
 
-    class StreamSplitting
+    class INET_API StreamSplitting
     {
       public:
         std::string inputStream;
         std::vector<std::string> outputStreams;
     };
 
-    class StreamEncoding
+    class INET_API StreamEncoding
     {
       public:
         std::string name;
@@ -57,7 +57,7 @@ class INET_API StreamRedundancyConfigurator : public NetworkConfiguratorBase
     /**
      * Represents a node in the network.
      */
-    class Node : public NetworkConfiguratorBase::Node {
+    class INET_API Node : public NetworkConfiguratorBase::Node {
       public:
         std::vector<StreamIdentification> streamIdentifications;
         std::vector<StreamEncoding> streamEncodings;
@@ -69,13 +69,13 @@ class INET_API StreamRedundancyConfigurator : public NetworkConfiguratorBase
         Node(cModule *module) : NetworkConfiguratorBase::Node(module) { }
     };
 
-    class Topology : public NetworkConfiguratorBase::Topology {
+    class INET_API Topology : public NetworkConfiguratorBase::Topology {
       protected:
         virtual Node *createNode(cModule *module) override { return new StreamRedundancyConfigurator::Node(module); }
     };
 
     // TODO use this, see below
-    class StreamNodeTreeData
+    class INET_API StreamNodeTreeData
     {
       public:
         std::string sender;
@@ -83,7 +83,7 @@ class INET_API StreamRedundancyConfigurator : public NetworkConfiguratorBase
         std::vector<std::string> distinctReceivers;
     };
 
-    class StreamNode
+    class INET_API StreamNode
     {
       public:
         // TODO use this, see above
@@ -95,7 +95,7 @@ class INET_API StreamRedundancyConfigurator : public NetworkConfiguratorBase
         std::vector<std::vector<std::string>> distinctReceivers; // distinct non-empty receiver sets
     };
 
-    class Stream
+    class INET_API Stream
     {
       public:
         std::map<std::string, StreamNode> streamNodes;

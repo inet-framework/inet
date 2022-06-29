@@ -36,7 +36,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
      * It implements a unique identifier for an arbitrary RREQ message
      * in the network. See: rreqsArrivalTime.
      */
-    class RreqIdentifier {
+    class INET_API RreqIdentifier {
       public:
         L3Address originatorAddr;
         unsigned int rreqID;
@@ -47,7 +47,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
         }
     };
 
-    class RreqIdentifierCompare {
+    class INET_API RreqIdentifierCompare {
       public:
         bool operator()(const RreqIdentifier& lhs, const RreqIdentifier& rhs) const
         {

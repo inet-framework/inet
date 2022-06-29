@@ -16,7 +16,7 @@ namespace physicallayer {
 class INET_API MapCommunicationCache : public CommunicationCacheBase
 {
   protected:
-    class MapTransmissionCacheEntry : public TransmissionCacheEntry {
+    class INET_API MapTransmissionCacheEntry : public TransmissionCacheEntry {
       public:
         /**
          * The map of intermediate reception computation results.

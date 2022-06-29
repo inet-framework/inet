@@ -42,7 +42,7 @@ class INET_API Arp : public OperationalBase, public IArp
 
     // Ipv4Address -> MacAddress table
     // TODO should we key it on (Ipv4Address, NetworkInterface*)?
-    class ArpCacheEntry {
+    class INET_API ArpCacheEntry {
       public:
         Arp *owner = nullptr; // owner ARP module of this cache entry
         const NetworkInterface *ie = nullptr; // NIC to send the packet to

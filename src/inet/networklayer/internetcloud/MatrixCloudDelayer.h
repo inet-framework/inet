@@ -23,7 +23,7 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
 {
   protected:
     // FIXME modified copy of 'Matcher' class from Ipv4NetworkConfigurator
-    class Matcher {
+    class INET_API Matcher {
       private:
         bool matchesany;
         std::vector<inet::PatternMatcher *> matchers; // TODO replace with a MatchExpression once it becomes available in OMNeT++
@@ -35,7 +35,7 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
         bool matchesAny() { return matchesany; }
     };
 
-    class MatrixEntry {
+    class INET_API MatrixEntry {
       public:
         Matcher srcMatcher;
         Matcher destMatcher;
@@ -51,7 +51,7 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
         bool matches(const char *src, const char *dest);
     };
 
-    class Descriptor {
+    class INET_API Descriptor {
       public:
         cDynamicExpression *delayPar = nullptr;
         cDynamicExpression *dataratePar = nullptr;

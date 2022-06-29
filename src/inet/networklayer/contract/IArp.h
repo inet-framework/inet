@@ -26,7 +26,7 @@ class INET_API IArp
     /**
      * Sent in ARP cache change notification signals
      */
-    class Notification : public cObject {
+    class INET_API Notification : public cObject {
       public:
         L3Address l3Address;
         MacAddress macAddress;

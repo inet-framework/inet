@@ -34,7 +34,7 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
         double getLastValue() const { return lastValue; }
     };
 
-    class StatisticVisualization {
+    class INET_API StatisticVisualization {
       public:
         LastValueRecorder *recorder = nullptr;
         const int moduleId = -1;
@@ -47,7 +47,7 @@ class INET_API StatisticVisualizerBase : public VisualizerBase, public cListener
         StatisticVisualization(int moduleId, simsignal_t signal, const char *unit);
     };
 
-    class DirectiveResolver : public StringFormat::IDirectiveResolver {
+    class INET_API DirectiveResolver : public StringFormat::IDirectiveResolver {
       protected:
         const StatisticVisualizerBase *visualizer = nullptr;
         const StatisticVisualization *visualization = nullptr;

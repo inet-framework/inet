@@ -16,7 +16,7 @@ class Ospfv3NeighborState;
 class Ospfv3Interface;
 // struct Ospfv3DdPacketId;
 
-class Ospfv3Neighbor
+class INET_API Ospfv3Neighbor
 {
   public:
     enum Ospfv3NeighborEventType {

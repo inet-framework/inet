@@ -17,7 +17,7 @@ namespace physicallayer {
 class INET_API ParabolicAntenna : public AntennaBase
 {
   protected:
-    class AntennaGain : public IAntennaGain {
+    class INET_API AntennaGain : public IAntennaGain {
       public:
         AntennaGain(double maxGain, double minGain, deg beamWidth);
         virtual double getMaxGain() const override { return maxGain; }

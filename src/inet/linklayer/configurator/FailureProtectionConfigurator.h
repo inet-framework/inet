@@ -15,7 +15,7 @@ namespace inet {
 class INET_API FailureProtectionConfigurator : public NetworkConfiguratorBase
 {
   public:
-    class Path
+    class INET_API Path
     {
       public:
         std::vector<const Interface *> interfaces;
@@ -39,7 +39,7 @@ class INET_API FailureProtectionConfigurator : public NetworkConfiguratorBase
         }
     };
 
-    class Tree
+    class INET_API Tree
     {
       public:
         std::vector<Path> paths;
@@ -61,7 +61,7 @@ class INET_API FailureProtectionConfigurator : public NetworkConfiguratorBase
         }
     };
 
-    class StreamConfiguration
+    class INET_API StreamConfiguration
     {
       public:
         std::string name;

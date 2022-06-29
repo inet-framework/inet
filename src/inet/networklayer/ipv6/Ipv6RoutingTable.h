@@ -79,7 +79,7 @@ class INET_API Ipv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
 
   protected:
     // helper for addRoute()
-    class RouteLessThan {
+    class INET_API RouteLessThan {
         const Ipv6RoutingTable& c;
 
       public:

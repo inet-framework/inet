@@ -23,7 +23,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule
     /**
      * Represents a node in the network.
      */
-    class Node : public Topology::Node {
+    class INET_API Node : public Topology::Node {
       public:
         cModule *module;
         IInterfaceTable *interfaceTable;
@@ -38,7 +38,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule
     /**
      * Represents an interface in the network.
      */
-    class Interface : public cObject {
+    class INET_API Interface : public cObject {
       public:
         Node *node;
         NetworkInterface *networkInterface;
@@ -48,7 +48,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule
         virtual std::string getFullPath() const override { return networkInterface->getInterfaceFullPath(); }
     };
 
-    class Link : public Topology::Link {
+    class INET_API Link : public Topology::Link {
       public:
         Interface *sourceInterface;
         Interface *destinationInterface;
@@ -57,7 +57,7 @@ class INET_API NetworkConfiguratorBase : public cSimpleModule
         Link() { sourceInterface = nullptr; destinationInterface = nullptr; }
     };
 
-    class Topology : public inet::Topology {
+    class INET_API Topology : public inet::Topology {
       protected:
         virtual Node *createNode(cModule *module) override { return new NetworkConfiguratorBase::Node(module); }
         virtual Link *createLink() override { return new NetworkConfiguratorBase::Link(); }

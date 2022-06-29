@@ -52,7 +52,7 @@ class INET_API VoipStreamReceiver : public cSimpleModule, public LifecycleUnsupp
     virtual void socketErrorArrived(UdpSocket *socket, Indication *indication) override;
     virtual void socketClosed(UdpSocket *socket) override {}
 
-    class Connection {
+    class INET_API Connection {
       public:
         Connection() {}
         void addAudioStream(enum AVCodecID codec_id);

@@ -29,7 +29,7 @@ namespace physicallayer {
 class INET_API DielectricObstacleLoss : public TracingObstacleLossBase
 {
   protected:
-    class TotalObstacleLossComputation : public IVisitor {
+    class INET_API TotalObstacleLossComputation : public IVisitor {
       protected:
         mutable double totalLoss;
         const DielectricObstacleLoss *obstacleLoss;

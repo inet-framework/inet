@@ -116,7 +116,7 @@ class INET_API Ipv4RoutingTable : public cSimpleModule, public IIpv4RoutingTable
     virtual void invalidateCache();
 
     // helper for sorting routing table, used by addRoute()
-    class RouteLessThan {
+    class INET_API RouteLessThan {
         const Ipv4RoutingTable& c;
 
       public:

@@ -20,7 +20,7 @@ class INET_API IRecoveryProcedure
     static simsignal_t retryLimitReachedSignal;
 
   public:
-    class ICwCalculator {
+    class INET_API ICwCalculator {
       public:
         virtual ~ICwCalculator() {}
 

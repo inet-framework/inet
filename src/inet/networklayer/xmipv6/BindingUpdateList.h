@@ -45,7 +45,7 @@ class INET_API BindingUpdateList : public cSimpleModule
         DEREGISTER
     };
 
-    class BindingUpdateListEntry {
+    class INET_API BindingUpdateListEntry {
       public:
         Ipv6Address destAddress; // is the address of the HA or the CN to which the MN has sent a BU message; reference to the key in the map
         Ipv6Address homeAddress; // Home address of the MN for which that BU was sent.

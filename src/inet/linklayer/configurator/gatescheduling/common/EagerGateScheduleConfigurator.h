@@ -21,7 +21,7 @@ namespace inet {
 class INET_API EagerGateScheduleConfigurator : public GateScheduleConfiguratorBase
 {
   protected:
-    class Slot {
+    class INET_API Slot {
       public:
         int gateOpenIndex = -1;
         simtime_t gateOpenTime = -1;

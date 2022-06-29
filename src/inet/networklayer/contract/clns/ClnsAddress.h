@@ -23,7 +23,7 @@
 
 namespace inet {
 
-class ClnsAddress
+class INET_API ClnsAddress
 {
   private:
     uint64_t systemID;
