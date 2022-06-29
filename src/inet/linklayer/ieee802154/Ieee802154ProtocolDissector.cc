@@ -11,6 +11,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/linklayer/ieee802154/Ieee802154MacHeader_m.h"
+#include "inet/linklayer/ieee802154/Ieee802154PayloadProtocolTag_m.h"
 
 namespace inet {
 
@@ -21,10 +22,11 @@ void Ieee802154ProtocolDissector::dissect(Packet *packet, const Protocol *protoc
     const auto& header = packet->popAtFront<Ieee802154MacHeader>();
     callback.startProtocolDataUnit(&Protocol::ieee802154);
     callback.visitChunk(header, &Protocol::ieee802154);
-    if (header->getNetworkProtocol() != -1) {
-        auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(header->getNetworkProtocol());
-        callback.dissectPacket(packet, payloadProtocol);
-    }
+    const Protocol *payloadProtocol = nullptr;
+    if (auto tag = packet->findTag<Ieee802154PayloadProtocolTag>())
+        payloadProtocol = tag->getProtocol();
+    callback.dissectPacket(packet, payloadProtocol);
+
 //    auto paddingLength = packet->getDataLength();
 //    if (paddingLength > b(0)) {
 //        const auto& padding = packet->popHeader(paddingLength);

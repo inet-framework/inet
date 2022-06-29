@@ -30,6 +30,5 @@ class Ieee802154MacHeader extends FieldsChunk
 {
     MacAddress srcAddr;
     MacAddress destAddr;
-    int networkProtocol = -1;
     long       sequenceId; // Sequence Number to detect duplicate messages
 }
