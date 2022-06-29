@@ -23,6 +23,7 @@ void PeriodicGate::initialize(int stage)
         durations = check_and_cast<cValueArray *>(par("durations").objectValue());
         scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
         changeTimer = new ClockEvent("ChangeTimer");
+        enableImplicitGuardBand = par("enableImplicitGuardBand");
     }
     else if (stage == INITSTAGE_QUEUEING)
         initializeGating();
@@ -109,8 +110,12 @@ bool PeriodicGate::canPacketFlowThrough(Packet *packet) const
     else if (packet == nullptr)
         return false;
     else {
-        clocktime_t flowEndTime = getClockTime() + s((packet->getDataLength() + extraLength) / bitrate).get() + SIMTIME_AS_CLOCKTIME(extraDuration);
-        return !changeTimer->isScheduled() || flowEndTime <= getArrivalClockTime(changeTimer);
+        if (enableImplicitGuardBand) {
+            clocktime_t flowEndTime = getClockTime() + s((packet->getDataLength() + extraLength) / bitrate).get() + SIMTIME_AS_CLOCKTIME(extraDuration);
+            return !changeTimer->isScheduled() || flowEndTime <= getArrivalClockTime(changeTimer);
+        } else {
+            return isOpen_;
+        }
     }
 }
 
