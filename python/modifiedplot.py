@@ -4,8 +4,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import ast
 import re
+from matplotlib.lines import Line2D
 
 debug = False
+
+default_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
 
 def plot_vectors(df, props, legend_func=utils.make_legend_label):
     """
@@ -177,3 +180,29 @@ def add_to_dataframe(df, style_tuple_list, default_dict={}, order={}):
         if debug: print("order added.", df['order'], df)
 
     return df
+
+def multidimensional_legend(style_tuple_list):
+    """
+    Can create multi-dimensional legend, where one aspect of a line (e.g. color) represents a dimension, another aspect (e.g. linestyle of solid, dashed or dotted) represents another dimension,
+    as opposed to the default behavior, in which lines in the legend represent the lines on the chart directly. **TODO** not sure this explanation is needed
+    
+    style_tuple_list: [('legend label 1', {dict contaning the style arguments for the legend}), ('legend label 2, {...}), ...]
+    
+    for example:
+    style_tuple_list = [('Label1', {'color': 'orange', 'linestyle': '--', 'markersize': 3}),
+                        ('Label2', {'color': 'red', 'markersize': 3})]
+                        
+    returns legend handles and labels that can be supplied to plt.legend()
+    """
+    labels = []
+    handles = []
+    if debug: print("style_tuple_list", style_tuple_list)
+    for i in style_tuple_list:
+        print("i", i)
+        labels.append(i[0])
+        print("i[1]", i[1])
+        handles.append(Line2D([0], [0], **i[1]))
+    if debug:
+        print("labels", labels)
+        print("handles", handles)
+    return handles, labels
