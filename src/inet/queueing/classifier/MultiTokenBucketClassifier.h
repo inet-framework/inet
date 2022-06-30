@@ -15,6 +15,9 @@
 namespace inet {
 namespace queueing {
 
+extern template class TokenBucketClassifierMixin<MultiTokenBucketMixin<PacketClassifierBase>>;
+
+
 class INET_API MultiTokenBucketClassifier : public TokenBucketClassifierMixin<MultiTokenBucketMixin<PacketClassifierBase>>
 {
   protected:

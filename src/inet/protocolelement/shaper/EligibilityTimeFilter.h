@@ -16,6 +16,8 @@ namespace inet {
 
 using namespace inet::queueing;
 
+extern template class ClockUserModuleMixin<PacketFilterBase>;
+
 class INET_API EligibilityTimeFilter : public ClockUserModuleMixin<PacketFilterBase>, public TransparentProtocolRegistrationListener
 {
   protected:

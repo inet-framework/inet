@@ -12,6 +12,9 @@
 #include "inet/queueing/base/PacketServerBase.h"
 
 namespace inet {
+
+extern template class ClockUserModuleMixin<queueing::PacketServerBase>;
+
 namespace queueing {
 
 class INET_API PacketServer : public ClockUserModuleMixin<PacketServerBase>

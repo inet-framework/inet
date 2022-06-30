@@ -13,6 +13,9 @@
 #include "inet/queueing/contract/IActivePacketSource.h"
 
 namespace inet {
+
+extern template class ClockUserModuleMixin<queueing::PacketSchedulerBase>;
+
 namespace queueing {
 
 class INET_API MarkovScheduler : public ClockUserModuleMixin<PacketSchedulerBase>, public virtual IPassivePacketSink, public virtual IActivePacketSource

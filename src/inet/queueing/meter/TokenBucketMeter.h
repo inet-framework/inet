@@ -15,6 +15,8 @@
 namespace inet {
 namespace queueing {
 
+extern template class TokenBucketMeterMixin<TokenBucketMixin<PacketMeterBase>>;
+
 class INET_API TokenBucketMeter : public TokenBucketMeterMixin<TokenBucketMixin<PacketMeterBase>>
 {
   protected:

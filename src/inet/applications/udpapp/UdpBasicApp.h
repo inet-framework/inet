@@ -17,6 +17,8 @@
 
 namespace inet {
 
+extern template class ClockUserModuleMixin<ApplicationBase>;
+
 /**
  * UDP application. See NED for more info.
  */

@@ -15,6 +15,8 @@ namespace inet {
 
 using namespace inet::queueing;
 
+extern template class ClockUserModuleMixin<PacketPusherBase>;
+
 class INET_API InterpacketGapInserter : public ClockUserModuleMixin<PacketPusherBase>
 {
   protected:

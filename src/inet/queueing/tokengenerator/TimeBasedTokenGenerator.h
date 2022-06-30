@@ -12,6 +12,9 @@
 #include "inet/queueing/base/TokenGeneratorBase.h"
 
 namespace inet {
+
+extern template class ClockUserModuleMixin<queueing::TokenGeneratorBase>;
+
 namespace queueing {
 
 class INET_API TimeBasedTokenGenerator : public ClockUserModuleMixin<TokenGeneratorBase>

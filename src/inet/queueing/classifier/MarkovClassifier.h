@@ -14,6 +14,9 @@
 #include "inet/queueing/contract/IPassivePacketSource.h"
 
 namespace inet {
+
+extern template class ClockUserModuleMixin<queueing::PacketClassifierBase>;
+
 namespace queueing {
 
 class INET_API MarkovClassifier : public ClockUserModuleMixin<PacketClassifierBase>, public virtual IActivePacketSink, public virtual IPassivePacketSource

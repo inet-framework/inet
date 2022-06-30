@@ -15,6 +15,8 @@ namespace inet {
 
 using namespace inet::queueing;
 
+extern template class ClockUserModuleMixin<PacketGateBase>;
+
 class INET_API EligibilityTimeGate : public ClockUserModuleMixin<PacketGateBase>
 {
   public:

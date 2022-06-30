@@ -13,6 +13,9 @@
 #include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {
+
+extern template class ClockUserModuleMixin<queueing::PacketPusherBase>;
+
 namespace queueing {
 
 class INET_API PacketDelayer : public ClockUserModuleMixin<PacketPusherBase>, public TransparentProtocolRegistrationListener
