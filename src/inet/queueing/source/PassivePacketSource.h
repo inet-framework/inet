@@ -12,6 +12,9 @@
 #include "inet/queueing/base/PassivePacketSourceBase.h"
 
 namespace inet {
+
+extern template class ClockUserModuleMixin<queueing::PassivePacketSourceBase>;
+
 namespace queueing {
 
 class INET_API PassivePacketSource : public ClockUserModuleMixin<PassivePacketSourceBase>

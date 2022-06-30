@@ -16,6 +16,8 @@ namespace inet {
 
 using namespace inet::queueing;
 
+extern template class ClockUserModuleMixin<PacketProcessorBase>;
+
 class INET_API PacketStreamer : public ClockUserModuleMixin<PacketProcessorBase>, public virtual IPacketFlow
 {
   protected:
