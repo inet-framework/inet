@@ -40,7 +40,7 @@ class INET_API SharingTagSet : public cObject
     Ptr<SharedVector<Ptr<const TagBase>>> tags;
 
   protected:
-    void setTag(int index, const Ptr<const TagBase>& tag);
+    inline void setTag(int index, const Ptr<const TagBase>& tag);
     void addTag(const Ptr<const TagBase>& tag);
     const Ptr<TagBase> removeTag(int index);
 
@@ -57,8 +57,8 @@ class INET_API SharingTagSet : public cObject
     SharingTagSet(const SharingTagSet& other) : tags(other.tags) {}
     SharingTagSet(SharingTagSet&& other) : tags(other.tags) { other.tags = nullptr; }
 
-    SharingTagSet& operator=(const SharingTagSet& other);
-    SharingTagSet& operator=(SharingTagSet&& other);
+    inline SharingTagSet& operator=(const SharingTagSet& other);
+    inline SharingTagSet& operator=(SharingTagSet&& other);
 
     virtual void parsimPack(cCommBuffer *buffer) const override;
     virtual void parsimUnpack(cCommBuffer *buffer) override;
