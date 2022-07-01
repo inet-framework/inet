@@ -123,7 +123,7 @@ class INET_API SharingRegionTagSet : public cObject
     Ptr<SharedVector<RegionTag<TagBase>>> regionTags;
 
   protected:
-    void setTag(int index, const Ptr<const TagBase>& tag);
+    inline void setTag(int index, const Ptr<const TagBase>& tag);
     void addTag(b offset, b length, const Ptr<const TagBase>& tag);
     std::vector<SharingRegionTagSet::RegionTag<TagBase>> addTagsWhereAbsent(const std::type_info& typeInfo, b offset, b length, const Ptr<const TagBase>& tag);
     const Ptr<TagBase> removeTag(int index);
@@ -139,7 +139,7 @@ class INET_API SharingRegionTagSet : public cObject
 
     void ensureTagsVectorAllocated();
     void prepareTagsVectorForUpdate();
-    void sortTagsVector();
+    inline void sortTagsVector();
 
   public:
     /** @name Constructors and operators */
@@ -148,8 +148,8 @@ class INET_API SharingRegionTagSet : public cObject
     SharingRegionTagSet(const SharingRegionTagSet& other) : regionTags(other.regionTags) {}
     SharingRegionTagSet(SharingRegionTagSet&& other) : regionTags(other.regionTags) { other.regionTags = nullptr; }
 
-    SharingRegionTagSet& operator=(const SharingRegionTagSet& other);
-    SharingRegionTagSet& operator=(SharingRegionTagSet&& other);
+    inline SharingRegionTagSet& operator=(const SharingRegionTagSet& other);
+    inline SharingRegionTagSet& operator=(SharingRegionTagSet&& other);
 
     virtual void parsimPack(cCommBuffer *buffer) const override;
     virtual void parsimUnpack(cCommBuffer *buffer) override;
@@ -160,27 +160,27 @@ class INET_API SharingRegionTagSet : public cObject
     /**
      * Returns the number of tags.
      */
-    int getNumTags() const;
+    inline int getNumTags() const;
 
     /**
      * Returns the shared tag at the given index.
      */
-    const Ptr<const TagBase>& getTag(int index) const;
+    inline const Ptr<const TagBase>& getTag(int index) const;
 
     /**
      * Returns the exclusively owned tag at the given index for update.
      */
-    const Ptr<TagBase> getTagForUpdate(int index);
+    inline const Ptr<TagBase> getTagForUpdate(int index);
 
     /**
      * Returns the shared region tag at the given index.
      */
-    const RegionTag<TagBase>& getRegionTag(int index) const;
+    inline const RegionTag<TagBase>& getRegionTag(int index) const;
 
     /**
      * Returns the exclusively owned region tag at the given index.
      */
-    const RegionTag<TagBase> getRegionTagForUpdate(int index);
+    inline const RegionTag<TagBase> getRegionTagForUpdate(int index);
 
     /**
      * Clears the set of tags in the given region.
