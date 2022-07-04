@@ -71,6 +71,7 @@ void Ieee802154Mac::initialize(int stage)
         bitrate = par("bitrate");
         ackLength = par("ackLength");
         ackMessage = nullptr;
+        fcsMode = parseFcsMode(par("fcsMode"));
 
         // init parameters for backoff method
         std::string backoffMethodStr = par("backoffMethod").stdstringValue();
@@ -208,6 +209,12 @@ void Ieee802154Mac::encapsulate(Packet *packet)
     }
 
     packet->insertAtFront(macPkt);
+
+    const auto& fcs = makeShared<Ieee802154Fcs>();
+    fcs->setFcsMode(fcsMode);
+    // TODO calculate Fcs
+    packet->insertAtBack(fcs);
+
     packet->addTag<Ieee802154PayloadProtocolTag>()->setProtocol(protocol);
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee802154);
     EV_DETAIL << "pkt encapsulated, length: " << macPkt->getChunkLength() << "\n";
@@ -907,8 +914,47 @@ void Ieee802154Mac::receiveSignal(cComponent *source, simsignal_t signalID, intv
     }
 }
 
+uint16_t Ieee802154Mac::calculateFcs(const unsigned char *buf, unsigned int bufsize)
+{
+    // TODO add implementation
+    return 0;
+}
+
+bool Ieee802154Mac::checkFcs(Packet *packet)
+{
+    EV_STATICCONTEXT;
+
+    const auto& fcsChunk = packet->peekAtBack<Ieee802154Fcs>(IEEE802154_FCS_SIZE); // FIXME can I use any flags?
+
+    switch (fcsChunk->getFcsMode()) {
+        case FCS_DECLARED_CORRECT:
+            break;
+        case FCS_DECLARED_INCORRECT:
+            EV_ERROR << "incorrect FCS in ethernet frame\n";
+            return false;
+        case FCS_COMPUTED: {
+            // check the FCS
+            auto bytes = packet->peekDataAt<BytesChunk>(B(0), packet->getDataLength() - fcsChunk->getChunkLength());
+            auto bufferLength = B(bytes->getChunkLength()).get();
+            auto buffer = new uint8_t[bufferLength];
+            // 1. fill in the data
+            bytes->copyToBuffer(buffer, bufferLength);
+            // 2. compute the FCS
+            auto computedFcs = calculateFcs(buffer, bufferLength);
+            delete[] buffer;
+            if(computedFcs != fcsChunk->getFcs())
+                return false;
+            break;
+        }
+        default:
+            throw cRuntimeError("invalid FCS mode in IEEE 802.15.4 packet");
+    }
+    return true;
+}
+
 void Ieee802154Mac::decapsulate(Packet *packet)
 {
+    packet->popAtBack<Ieee802154Fcs>(IEEE802154_FCS_SIZE);
     const auto& csmaHeader = packet->popAtFront<Ieee802154MacHeader>();
     packet->addTagIfAbsent<MacAddressInd>()->setSrcAddress(csmaHeader->getSrcAddr());
     packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());

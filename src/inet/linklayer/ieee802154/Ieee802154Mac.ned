@@ -85,6 +85,8 @@ module Ieee802154Mac extends MacProtocolBase like IMacProtocol
         // maximum backoff exponent (for exponential backoff method only)
         int macMaxBE = default(8);
 
+        string fcsMode @enum("declared","computed") = default("declared");
+
         string radioModule = default("^.radio");   // The path to the Radio module  //FIXME remove default value
 
         @class(Ieee802154Mac);

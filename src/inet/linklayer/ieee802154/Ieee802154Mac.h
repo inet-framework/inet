@@ -25,6 +25,7 @@
 #define __INET_IEEE802154MAC_H
 
 #include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/linklayer/common/FcsMode_m.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/contract/IMacProtocol.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
@@ -86,6 +87,7 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol, publ
     long nbDuplicates = 0;
     long nbBackoffs = 0;
     double backoffValues = 0.0;
+    FcsMode fcsMode = FCS_MODE_UNDEFINED;
     /*@}*/
 
     /** @brief MAC states
@@ -283,6 +285,9 @@ class INET_API Ieee802154Mac : public MacProtocolBase, public IMacProtocol, publ
 
     // sequence numbers for receiving
     std::map<MacAddress, unsigned long> SeqNrChild; // child -> sequence number
+
+    static uint16_t calculateFcs(const unsigned char *buf, unsigned int bufsize);
+    static bool checkFcs(Packet *packet);
 };
 
 } // namespace inet
