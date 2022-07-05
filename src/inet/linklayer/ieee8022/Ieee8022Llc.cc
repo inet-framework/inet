@@ -37,17 +37,12 @@ void Ieee8022Llc::initialize(int stage)
         if (par("registerProtocol").boolValue()) { // FIXME //KUDGE should redesign place of EthernetEncapsulation and LLC modules
             // register service and protocol
             registerService(Protocol::ieee8022llc, gate("upperLayerIn"), gate("upperLayerOut"));
-            registerMyProtocol();
+            registerProtocol(Protocol::ieee8022llc, gate("lowerLayerOut"), gate("lowerLayerIn"));
         }
 
         WATCH_PTRMAP(socketIdToSocketDescriptor);
         WATCH_PTRSET(upperProtocols);
     }
-}
-
-void Ieee8022Llc::registerMyProtocol()
-{
-    registerProtocol(Protocol::ieee8022llc, gate("lowerLayerOut"), gate("lowerLayerIn"));
 }
 
 void Ieee8022Llc::handleMessageWhenUp(cMessage *msg)
