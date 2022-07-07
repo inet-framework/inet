@@ -10,7 +10,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
-#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/common/Simsignals.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/socket/SocketTag_m.h"
@@ -65,7 +65,9 @@ void Ieee8022Llc::handleMessageWhenUp(cMessage *msg)
 
 void Ieee8022Llc::processPacketFromHigherLayer(Packet *packet)
 {
+    packet->removeTagIfPresent<DispatchProtocolReq>();
     encapsulate(packet);
+    dispatchToNextEncapsulationProtocol(packet);
     send(packet, "lowerLayerOut");
 }
 
@@ -197,7 +199,6 @@ void Ieee8022Llc::encapsulate(Packet *frame)
         frame->insertAtFront(llcHeader);
     }
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022llc);
-    frame->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
 }
 
 void Ieee8022Llc::decapsulate(Packet *frame)

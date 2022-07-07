@@ -10,7 +10,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketTag_m.h"
@@ -960,11 +960,9 @@ void Ipv6::sendDatagramToOutput(Packet *packet, const NetworkInterface *destIE, 
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destIE->getInterfaceId());
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv6);
     packet->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv6);
-    auto protocol = destIE->getProtocol();
-    if (protocol != nullptr)
-        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
-    else
-        packet->removeTagIfPresent<DispatchProtocolReq>();
+    packet->removeTagIfPresent<DispatchProtocolReq>();
+    dispatchToNextEncapsulationProtocol(packet);
+    appendDispatchToNetworkInterface(packet, destIE);
     send(packet, "queueOut");
 }
 

@@ -10,6 +10,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/common/SequenceNumberTag_m.h"
 #include "inet/linklayer/ieee8021r/Ieee8021rTagHeader_m.h"
 
@@ -20,11 +21,8 @@ Define_Module(Ieee8021rTagEpdHeaderInserter);
 void Ieee8021rTagEpdHeaderInserter::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        const char *nextProtocolAsString = par("nextProtocol");
-        if (*nextProtocolAsString != '\0')
-            nextProtocol = Protocol::getProtocol(nextProtocolAsString);
-    }
+    if (stage == INITSTAGE_LOCAL)
+        nextProtocol = Protocol::getProtocol(par("nextProtocol").stringValue());
     else if (stage == INITSTAGE_LINK_LAYER)
         registerService(Protocol::ieee8021rTag, inputGate, nullptr);
 }
@@ -48,16 +46,10 @@ void Ieee8021rTagEpdHeaderInserter::processPacket(Packet *packet)
     packet->insertAtFront(header);
     packetProtocolTag->setProtocol(&Protocol::ieee8021rTag);
     packetProtocolTag->setFrontOffset(b(0));
-    const Protocol *dispatchProtocol = nullptr;
-    if (auto encapsulationProtocolReq = packet->findTagForUpdate<EncapsulationProtocolReq>()) {
-        dispatchProtocol = encapsulationProtocolReq->getProtocol(0);
-        encapsulationProtocolReq->eraseProtocol(0);
-    }
-    else if (nextProtocol != nullptr)
-        dispatchProtocol = nextProtocol;
-    else
-        dispatchProtocol = &Protocol::ethernetMac;
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(dispatchProtocol);
+    packet->removeTagIfPresent<DispatchProtocolReq>();
+    dispatchToNextEncapsulationProtocol(packet);
+    if (!packet->findTag<DispatchProtocolReq>())
+        packet->addTag<DispatchProtocolReq>()->setProtocol(nextProtocol);
 }
 
 } // namespace inet

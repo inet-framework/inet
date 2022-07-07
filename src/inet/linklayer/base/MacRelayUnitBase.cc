@@ -10,6 +10,7 @@
 #include "inet/common/DirectionTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/common/StringFormat.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -73,11 +74,9 @@ void MacRelayUnitBase::sendPacket(Packet *packet, const MacAddress& destinationA
     EV_INFO << "Sending packet to peer" << EV_FIELD(destinationAddress) << EV_FIELD(outgoingInterface) << EV_FIELD(packet) << EV_ENDL;
     packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
-    auto protocol = outgoingInterface->getProtocol();
-    if (protocol != nullptr)
-        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
-    else
-        packet->removeTagIfPresent<DispatchProtocolReq>();
+    packet->removeTagIfPresent<DispatchProtocolReq>();
+    dispatchToNextEncapsulationProtocol(packet);
+    appendDispatchToNetworkInterface(packet, outgoingInterface);
     emit(packetSentToLowerSignal, packet);
     send(packet, "lowerLayerOut");
 }

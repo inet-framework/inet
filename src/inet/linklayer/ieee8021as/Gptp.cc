@@ -11,6 +11,7 @@
 
 #include "inet/clock/model/SettableClock.h"
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/common/clock/ClockUserModuleBase.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddress.h"
@@ -219,11 +220,9 @@ void Gptp::sendPacketToNIC(Packet *packet, int portId)
     packet->addTag<InterfaceReq>()->setInterfaceId(portId);
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::gptp);
     packet->addTag<DispatchProtocolInd>()->setProtocol(&Protocol::gptp);
-    auto protocol = networkInterface->getProtocol();
-    if (protocol != nullptr)
-        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
-    else
-        packet->removeTagIfPresent<DispatchProtocolReq>();
+    packet->removeTagIfPresent<DispatchProtocolReq>();
+    dispatchToNextEncapsulationProtocol(packet);
+    appendDispatchToNetworkInterface(packet, networkInterface);
     send(packet, "socketOut");
 }
 

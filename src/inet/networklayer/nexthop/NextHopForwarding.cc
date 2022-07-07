@@ -8,7 +8,7 @@
 #include "inet/networklayer/nexthop/NextHopForwarding.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/stlutils.h"
@@ -601,11 +601,9 @@ void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const NetworkInte
         datagram->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
         datagram->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::nextHopForwarding);
         datagram->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::nextHopForwarding);
-        auto protocol = ie->getProtocol();
-        if (protocol != nullptr)
-            datagram->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
-        else
-            datagram->removeTagIfPresent<DispatchProtocolReq>();
+        datagram->removeTagIfPresent<DispatchProtocolReq>();
+        dispatchToNextEncapsulationProtocol(datagram);
+        appendDispatchToNetworkInterface(datagram, ie);
         send(datagram, "queueOut");
         return;
     }

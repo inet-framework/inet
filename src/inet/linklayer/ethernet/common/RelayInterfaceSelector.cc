@@ -8,6 +8,7 @@
 #include "inet/linklayer/ethernet/common/RelayInterfaceSelector.h"
 
 #include "inet/common/DirectionTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
@@ -116,15 +117,7 @@ void RelayInterfaceSelector::sendPacket(Packet *packet, const MacAddress& destin
     EV_INFO << "Sending packet to peer" << EV_FIELD(destinationAddress) << EV_FIELD(outgoingInterface) << EV_FIELD(packet) << EV_ENDL;
     packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
-    auto protocol = outgoingInterface->getProtocol();
-    if (protocol != nullptr) {
-        if (auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>()) {
-            auto encapsulationProtocolReq = packet->addTagIfAbsent<EncapsulationProtocolReq>();
-            encapsulationProtocolReq->appendProtocol(protocol);
-        }
-        else
-            packet->addTag<DispatchProtocolReq>()->setProtocol(protocol);
-    }
+    appendDispatchToNetworkInterface(packet, outgoingInterface);
     pushOrSendPacket(packet, outputGate, consumer);
 }
 

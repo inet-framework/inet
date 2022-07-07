@@ -9,6 +9,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
@@ -78,9 +79,10 @@ void PacketTaggerBase::markPacket(Packet *packet)
     if (pcp != -1) {
         EV_DEBUG << "Attaching PcpReq" << EV_FIELD(packet) << EV_FIELD(pcp) << EV_ENDL;
         packet->addTagIfAbsent<PcpReq>()->setPcp(pcp);
-        auto encapsulationReq = packet->addTagIfAbsent<EncapsulationProtocolReq>();
-        encapsulationReq->insertProtocol(0, &Protocol::ieee8021qCTag);
     }
+    // TODO try to remove this altogether
+    if (vlanId != -1 || pcp != -1)
+        prependDispatchToEncapsulationProtocol(packet, &Protocol::ieee8021qCTag);
     if (userPriority != -1) {
         EV_DEBUG << "Attaching UserPriorityReq" << EV_FIELD(packet) << EV_FIELD(userPriority) << EV_ENDL;
         packet->addTagIfAbsent<UserPriorityReq>()->setUserPriority(userPriority);

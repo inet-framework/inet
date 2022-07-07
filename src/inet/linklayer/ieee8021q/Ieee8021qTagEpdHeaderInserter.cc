@@ -10,6 +10,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/linklayer/common/DropEligibleTag_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
@@ -31,9 +32,7 @@ void Ieee8021qTagEpdHeaderInserter::initialize(int stage)
             qtagProtocol = &Protocol::ieee8021qCTag;
         else
             throw cRuntimeError("Unknown tag type");
-        const char *nextProtocolAsString = par("nextProtocol");
-        if (*nextProtocolAsString != '\0')
-            nextProtocol = Protocol::getProtocol(nextProtocolAsString);
+        nextProtocol = Protocol::getProtocol(par("nextProtocol").stringValue());
         defaultVlanId = par("defaultVlanId");
         defaultPcp = par("defaultPcp");
         defaultUserPriority = par("defaultUserPriority");
@@ -88,16 +87,10 @@ void Ieee8021qTagEpdHeaderInserter::processPacket(Packet *packet)
     packet->insertAtFront(header);
     packetProtocolTag->setProtocol(qtagProtocol);
     packetProtocolTag->setFrontOffset(b(0));
-    const Protocol *dispatchProtocol = nullptr;
-    if (auto encapsulationProtocolReq = packet->findTagForUpdate<EncapsulationProtocolReq>()) {
-        dispatchProtocol = encapsulationProtocolReq->getProtocol(0);
-        encapsulationProtocolReq->eraseProtocol(0);
-    }
-    else if (nextProtocol != nullptr)
-        dispatchProtocol = nextProtocol;
-    else
-        dispatchProtocol = &Protocol::ethernetMac;
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(dispatchProtocol);
+    packet->removeTagIfPresent<DispatchProtocolReq>();
+    dispatchToNextEncapsulationProtocol(packet);
+    if (!packet->findTag<DispatchProtocolReq>())
+        packet->addTag<DispatchProtocolReq>()->setProtocol(nextProtocol);
 }
 
 } // namespace inet

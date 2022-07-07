@@ -9,7 +9,7 @@
 #include "inet/networklayer/arp/ipv4/Arp.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/dissector/ProtocolDissector.h"
@@ -173,11 +173,8 @@ void Arp::sendArpRequest(const NetworkInterface *ie, Ipv4Address ipAddress)
 
     packet->addTag<MacAddressReq>()->setDestAddress(MacAddress::BROADCAST_ADDRESS);
     packet->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-    if (ie->getProtocol() != nullptr)
-        packet->addTag<DispatchProtocolReq>()->setProtocol(ie->getProtocol());
-    else
-        packet->removeTagIfPresent<DispatchProtocolReq>();
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
+    appendDispatchToNetworkInterface(packet, ie);
 
     // send out
     EV_INFO << "Sending " << packet << " to network protocol.\n";
@@ -337,11 +334,8 @@ void Arp::processArpPacket(Packet *packet)
                 outPk->insertAtFront(arpReply);
                 outPk->addTag<MacAddressReq>()->setDestAddress(srcMacAddress);
                 outPk->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-                if (ie->getProtocol() != nullptr)
-                    outPk->addTag<DispatchProtocolReq>()->setProtocol(ie->getProtocol());
-                else
-                    outPk->removeTagIfPresent<DispatchProtocolReq>();
                 outPk->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
+                appendDispatchToNetworkInterface(outPk, ie);
 
                 // send out
                 EV_INFO << "Sending " << outPk << " to network protocol.\n";
@@ -468,11 +462,8 @@ void Arp::sendArpGratuitous(const NetworkInterface *ie, MacAddress srcAddr, Ipv4
     macAddrReq->setSrcAddress(srcAddr);
     macAddrReq->setDestAddress(MacAddress::BROADCAST_ADDRESS);
     packet->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-    if (ie->getProtocol() != nullptr)
-        packet->addTag<DispatchProtocolReq>()->setProtocol(ie->getProtocol());
-    else
-        packet->removeTagIfPresent<DispatchProtocolReq>();
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
+    appendDispatchToNetworkInterface(packet, ie);
 
     ArpCacheEntry *entry = new ArpCacheEntry();
     arpCache.insert(arpCache.begin(), std::make_pair(ipAddr, entry));
@@ -513,11 +504,8 @@ void Arp::sendArpProbe(const NetworkInterface *ie, MacAddress srcAddr, Ipv4Addre
     macAddrReq->setSrcAddress(srcAddr);
     macAddrReq->setDestAddress(MacAddress::BROADCAST_ADDRESS);
     packet->addTag<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
-    if (ie->getProtocol() != nullptr)
-        packet->addTag<DispatchProtocolReq>()->setProtocol(ie->getProtocol());
-    else
-        packet->removeTagIfPresent<DispatchProtocolReq>();
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::arp);
+    appendDispatchToNetworkInterface(packet, ie);
 
     // send out
     send(packet, "ifOut");
