@@ -50,5 +50,8 @@ module NetworkLayerNodeBase extends LinkLayerNodeBase
 
         llc.upperLayerOut --> nl.in++ if exists(llc);
         llc.upperLayerIn <-- nl.out++ if exists(llc);
+
+        epd.upperLayerOut --> nl.in++ if exists(epd);
+        epd.upperLayerIn <-- nl.out++ if exists(epd);
 }
 

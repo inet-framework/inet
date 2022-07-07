@@ -16,12 +16,14 @@ import inet.linklayer.contract.ITunnelInterface;
 import inet.linklayer.contract.IVirtualInterface;
 import inet.linklayer.contract.IWirelessInterface;
 import inet.linklayer.ethernet.contract.IEthernetLayer;
+import inet.linklayer.ieee802.IIeee802Epd;
 import inet.linklayer.ieee8021q.IIeee8021qLayer;
 import inet.linklayer.ieee8021r.IIeee8021rLayer;
 import inet.linklayer.ieee8022.IIeee8022Llc;
 import inet.networklayer.common.InterfaceTable;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.protocolelement.contract.IProtocolLayer;
+
 
 module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
 {
@@ -56,8 +58,11 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
         interfaceTable: InterfaceTable {
             @display("p=125,240;is=s");
         }
-        llc: <default("")> like IIeee8022Llc if typename != "" {
+        llc: <default("Ieee8022Llc")> like IIeee8022Llc if typename != "" {
             @display("p=375,525");
+        }
+        epd: <default("Ieee802Epd")> like IIeee802Epd if typename != "" {
+            @display("p=275,525");
         }
         cb: MessageDispatcher {
             @display("p=750,600;b=1000,5");
@@ -102,6 +107,9 @@ module LinkLayerNodeBase extends NodeBase like IEthernetNetworkNode
     connections allowunconnected:
         llc.lowerLayerOut --> cb.in++ if exists(llc);
         llc.lowerLayerIn <-- cb.out++ if exists(llc);
+
+        epd.lowerLayerOut --> cb.in++ if exists(llc);
+        epd.lowerLayerIn <-- cb.out++ if exists(llc);
 
         cb.out++ --> bridging.upperLayerIn if exists(bridging);
         bridging.upperLayerOut --> cb.in++ if exists(bridging);
