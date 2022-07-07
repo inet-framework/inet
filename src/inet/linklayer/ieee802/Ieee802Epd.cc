@@ -59,7 +59,7 @@ void Ieee802Epd::encapsulate(Packet *frame)
     llcHeader->setEtherType(ethType);
     frame->insertAtFront(llcHeader);
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee802epd);
-    frame->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+    frame->removeTagIfPresent<DispatchProtocolReq>();
 }
 
 void Ieee802Epd::decapsulate(Packet *frame)
