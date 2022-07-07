@@ -1,3 +1,91 @@
+Use case:
+ - sequence of protocol headers/trailers
+   e.g. Application Data, UDP, IPv4, IEEE 802.2 LLC, IEEE 802.15.4
+ - sequence of protocol modules
+   App, Udp, Ipv4, Ieee8022Llc, Ieee802154
+ - dispatch decision (can be hardcoded, locally parametrizable, can depend on packet data or meta data, looked up from database, overridden by being already specified)
+   App -> Udp (App)
+   Udp -> Ipv4 (Udp by destination address)
+   Ipv4 -> Ieee8022Llc (App, Network interface?)
+   Ieee8022Llc -> Ieee802154 (Network interface)
+   Ieee802154 -> NetworkInterface (Ipv4, App)
+
+determining the next protocol for a packet in a protocol module (DispatchProtocolReq) (outgoing/incoming)
+ - can be unspecified
+ - can be hard-coded into C++ source of the module that is currently processing the packet
+ - can be specified by a protocol parameter on the module
+ - can be determined by a socket
+ - can be determined by the address type (e.g. Ipv4, Ipv6) of a destination address
+ - can be determined by one or more header fields from an incoming packet using a protocol group mapping
+ - can be determined by a header field directly referencing the protocol
+ - can be the requested transport protocol, network protocol, MAC protocol (TransportProtocolReq, NetworkProtocolReq, MacProtocolReq)
+ - can be the expected protocol of a network interface
+ - can be determined by the current packet protocol
+ - can be determined by from which protocol module the packet came (e.g. DispatchProtocolInd)
+ - can be determined by a module that created or previously processed the packet (e.g. application by EncapsulationProtocolReq)
+ - can be the first protocol in encapsulation protocol request (EncapsulationProtocolReq)
+ - can be determined by some other packet meta-data (e.g. EncapsulationProtocolReq?)
+
+what should we do when the payload protocol is not specified in the packet (e.g. 802.15.4 or 802.11)?
+this information should be attached as a meta-data to the packet by the module which knows this, so a packet dissector (or printer) can process the packet without context
+
+documentation goes into Developer's Guide
+
+who adds DispatchProtocolReq?
+ - the module who determines the next protocol
+who queries DispatchProtocolReq?
+ - the message dispatcher module
+who removes DispatchProtocolReq?
+ - the DispatchProtocolReq destination module who processes the packet
+
+how is the EncapsulationProtocolReq used now?
+ + RelayInterfaceSelector appends network interface protocol into EncapsulationProtocolReq if DispatchProtocolReq is already present
+ + Ieee8021qTagEpdHeaderInserter removes first protocol from EncapsulationProtocolReq if present to use in DispatchProtocolReq
+ + Ieee8021rTagEpdHeaderInserter removes first protocol from EncapsulationProtocolReq if present to use in DispatchProtocolReq
+ + Ipv4 appends network interface protocol to the end of EncapsulationProtocolReq and copies first entry to DispatchProtocolReq
+ + StreamEncoder delays existing DispatchProtocolReq and inserts 802.1q and 802.1r protocols into EncapsulationProtocolReq depending on what tags are attached
+ +? PacketTaggerBase adds EncapsulationProtocolReq with 802.1q if PcpReq is added
+
+what are typical delayed protocol dispatch actions?
+ - pop protocol at the beginning of EncapsulationProtocolReq, get first protocol to where the packet must be sent to
+ - push protocol at the beginning of EncapsulationProtocolReq to send packet to a specific protocol first
+ - push protocol at the end of EncapsulationProtocolReq to send packet to a specific protocol last
+
+fallback mechanism for next protocol:
+ - if InterfaceReq is added, push network interface protocol at the end of EncapsulationProtocolReq
+ - if L3 destination address is specified, set NetworkProtocolReq to corresponding network protocol
+ - pop protocol at the beginning of EncapsulationProtocolReq
+ - if no protocol is found, use module specific next protocol parameter
+ - if no protocol is specified, use module specific hard-coded next protocol
+   - in applications use the protocol from TransportProtocolReq
+   - in transport protocols use the protocol from NetworkProtocolReq
+   - in network protocols use the protocol from MacProtocolReq
+ - if no protocol is hard-coded, leave DispatchProtocolReq unspecified (direct connections decide who processes the packet next)
+
+TSN use case:
+App [app] -> udp (udp app) ()
+Udp [udp app] -> ipv4 (ipv4 udp app) ()
+Ipv4 [ipv4 udp app] -> ethernetmac (ethernetmac ipv4 udp app) ()
+StreamIdentifier [ipv4 udp app] -> ethernetmac (ethernetmac ipv4 udp app) ()
+StreamEncoder [ipv4 udp app] -> ieee8021r (ethernetmac ieee8021q ieee8021r ipv4 udp app) (ethernetmac ieee8021q)
+Ieee8021r [ieee8021r ipv4 udp app] -> ieee8021q (ethernetmac ieee8021q ieee8021r ipv4 udp app) (ethernetmac)
+Ieee8021q [ieee8021q ieee8021r ipv4 udp app] -> ethernetmac (ethernetmac ieee8021q ieee8021r ipv4 udp app) ()
+EthernetMac [ethernetmac ieee8021q ieee8021r ipv4 udp app] -> network interface (ethernetmac ieee8021q ieee8021r ipv4 udp app) ()
+
+802.15.4 use case:
+App [app] -> udp (udp app) ()
+Udp [udp app] -> ipv4 (ipv4 udp app) ()
+Ipv4 [ipv4 udp app] -> ieee802154 (ieee802154 ipv4 udp app) ()
+Llc [ipv4 udp app] -> ieee8022llc (ieee802154 ieee8022llc ipv4 udp app) (ieee802154)
+Ieee8022llc [ieee8022llc ipv4 udp app] -> ieee802154 (ieee802154 ieee8022llc ipv4 udp app) ()
+Ieee802154 [ieee802154 ieee8022llc ipv4 udp app] -> network interface (ieee802154 ieee8022llc ipv4 udp app) ()
+
+Restructure StandardHost to include a separate LLC layer which contains:
+ - a separate packet classifier (LlcClassifier) that decides which LLC is used (if any) based on the MAC protocol for example
+ - IEEE 802.2 SNAP LLC
+ - IEEE 802 EPD LLC
+ - ZIGBEE LLC (https://lucidar.me/en/zigbee/autopsy-of-a-zigbee-frame/)
+
 INET 4.4 release TODO items:
 
 1. Documentation
@@ -54,14 +142,6 @@ Clean up PCAP recording:
 - have modules named as TransmissionSelectionAlgorithm
 
 implement multicast support in one gate scheduling configurator
-
-determining the next protocol for a packet in a protocol module (DispatchProtocolReq)
- - use protocol for specific address type (Ipv4, Ipv6)
- - use protocol based on socket type
- - use first protocol in encapsulation protocol list request (EncapsulationProtocolReq)
- - use the requested transport protocol, network protocol, MAC protocol (TransportProtocolReq, NetworkProtocolReq, MacProtocolReq)
- - use native protocol of network interface (specified as NetworkInterface protocol parameter)
- - use default next protocol of protocol module (hard-coded or specified as protocol parameter)
 
  - chunk queue and various chunk buffers don't have region tags, there's no place to store data specific tags from packets when reassembling data
  - fragmentation and defragmentation doesn't copy packet region tags in Ipv4
