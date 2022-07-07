@@ -10,7 +10,6 @@ package inet.linklayer.ieee8022;
 simple Ieee8022Llc like IIeee8022Llc
 {
     parameters:
-        bool registerProtocol = default(false);     //FIXME //KLUDGE should redesign place of EthernetEncapsulation and LLC modules
         @display("i=block/layer");
         @signal[packetDropped](type=inet::Packet);
     gates:
