@@ -41,7 +41,6 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     FcsMode fcsMode;
 
     ModuleRefByPar<Ieee80211Mib> mib;
-    opp_component_ptr<IIeee80211Llc> llc;
     opp_component_ptr<IDs> ds;
 
     opp_component_ptr<IRx> rx;

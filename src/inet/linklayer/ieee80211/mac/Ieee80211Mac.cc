@@ -55,8 +55,6 @@ void Ieee80211Mac::initialize(int stage)
         mib->qos = par("qosStation");
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
-        cModule *llcModule = gate("upperLayerOut")->getNextGate()->getOwnerModule();
-        llc = check_and_cast<IIeee80211Llc *>(llcModule);
         cModule *radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule();
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
@@ -271,7 +269,7 @@ void Ieee80211Mac::decapsulate(Packet *packet)
     const auto& header = packet->popAtFront<Ieee80211DataOrMgmtHeader>();
     auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
     if (dynamicPtrCast<const Ieee80211DataHeader>(header))
-        packetProtocolTag->setProtocol(llc->getProtocol());
+        packetProtocolTag->setProtocol(networkInterface->getProtocol());
     else if (dynamicPtrCast<const Ieee80211MgmtHeader>(header))
         packetProtocolTag->setProtocol(&Protocol::ieee80211Mgmt);
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();

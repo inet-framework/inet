@@ -67,7 +67,7 @@ module Ieee80211Interface extends NetworkInterface like IWirelessInterface
         string address @mutable = default("auto"); // MAC address as hex string (12 hex digits), or
                                                    // "auto". "auto" values will be replaced by
                                                    // a generated MAC address in init stage 0.
-        string protocol = default("");
+        string protocol = default(opMode == "p" ? "ieee802epd" : "ieee8022llc");
         double bitrate @unit(bps) = default(-1bps);
         **.opMode = this.opMode;
         **.bitrate = this.bitrate;
@@ -85,10 +85,6 @@ module Ieee80211Interface extends NetworkInterface like IWirelessInterface
         mib: Ieee80211Mib {
             parameters:
                 @display("p=100,300;is=s");
-        }
-        llc: <default(opMode == "p" ? "Ieee80211LlcEpd" : "Ieee80211LlcLpd")> like IIeee80211Llc {
-            parameters:
-                @display("p=300,200");
         }
         classifier: <default("OmittedIeee8021dQosClassifier")> like IIeee8021dQosClassifier {
             parameters:
@@ -121,11 +117,8 @@ module Ieee80211Interface extends NetworkInterface like IWirelessInterface
         mgmt.agentOut --> agent.mgmtIn if exists(agent);
         mgmt.agentIn <-- agent.mgmtOut if exists(agent);
 
-        llc.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
-        llc.upperLayerIn <-- { @display("m=n"); } <-- classifier.out;
-
-        llc.lowerLayerOut --> mac.upperLayerIn;
-        llc.lowerLayerIn <-- mac.upperLayerOut;
+        mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
+        mac.upperLayerIn <-- { @display("m=n"); } <-- classifier.out;
 
         classifier.in <-- { @display("m=n"); } <-- upperLayerIn;
 }
