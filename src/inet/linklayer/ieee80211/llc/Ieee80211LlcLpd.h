@@ -16,9 +16,6 @@ namespace ieee80211 {
 
 class INET_API Ieee80211LlcLpd : public Ieee8022Llc, public IIeee80211Llc
 {
-  protected:
-    virtual void encapsulate(Packet *frame) override;
-
   public:
     const Protocol *getProtocol() const override;
 };

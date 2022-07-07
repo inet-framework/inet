@@ -7,18 +7,11 @@
 #include "inet/linklayer/ieee80211/llc/Ieee80211LlcLpd.h"
 
 #include "inet/common/ProtocolGroup.h"
-#include "inet/linklayer/ieee80211/llc/LlcProtocolTag_m.h"
 
 namespace inet {
 namespace ieee80211 {
 
 Define_Module(Ieee80211LlcLpd);
-
-void Ieee80211LlcLpd::encapsulate(Packet *frame)
-{
-    Ieee8022Llc::encapsulate(frame);
-    frame->addTagIfAbsent<LlcProtocolTag>()->setProtocol(getProtocol());
-}
 
 const Protocol *Ieee80211LlcLpd::getProtocol() const
 {

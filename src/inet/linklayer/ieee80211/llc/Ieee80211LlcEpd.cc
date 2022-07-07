@@ -11,7 +11,6 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/Simsignals_m.h"
 #include "inet/linklayer/ieee802/Ieee802EpdHeader_m.h"
-#include "inet/linklayer/ieee80211/llc/LlcProtocolTag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -56,7 +55,6 @@ void Ieee80211LlcEpd::encapsulate(Packet *frame)
     llcHeader->setEtherType(ethType);
     frame->insertAtFront(llcHeader);
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee802epd);
-    frame->addTagIfAbsent<LlcProtocolTag>()->setProtocol(&Protocol::ieee802epd);
 }
 
 void Ieee80211LlcEpd::decapsulate(Packet *frame)

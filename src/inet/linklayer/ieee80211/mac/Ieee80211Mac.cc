@@ -16,6 +16,7 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
+#include "inet/linklayer/ieee80211/llc/LlcProtocolTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211SubtypeTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Rx.h"
@@ -230,6 +231,7 @@ void Ieee80211Mac::handleUpperCommand(cMessage *msg)
 
 void Ieee80211Mac::encapsulate(Packet *packet)
 {
+    packet->addTagIfAbsent<LlcProtocolTag>()->setProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
     auto macAddressReq = packet->getTag<MacAddressReq>();
     auto destAddress = macAddressReq->getDestAddress();
     const auto& header = makeShared<Ieee80211DataHeader>();
