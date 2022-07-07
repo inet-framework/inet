@@ -195,7 +195,7 @@ void Ieee8022Llc::encapsulate(Packet *frame)
         frame->insertAtFront(llcHeader);
     }
     frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee8022llc);
-    frame->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+    frame->removeTagIfPresent<DispatchProtocolReq>();
 }
 
 void Ieee8022Llc::decapsulate(Packet *frame)
