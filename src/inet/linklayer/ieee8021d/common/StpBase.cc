@@ -9,6 +9,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -68,6 +69,7 @@ void StpBase::sendOut(Packet *packet, int interfaceId, const MacAddress& destAdd
     packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::stp);
     packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8022llc);
+    appendDispatchToNetworkInterface(packet, ifTable->getInterfaceById(interfaceId));
     auto macAddressReq = packet->addTag<MacAddressReq>();
     macAddressReq->setSrcAddress(bridgeAddress);
     macAddressReq->setDestAddress(destAddress);
