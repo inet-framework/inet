@@ -22,16 +22,19 @@ void Ieee802154ProtocolDissector::dissect(Packet *packet, const Protocol *protoc
     const auto& header = packet->popAtFront<Ieee802154MacHeader>();
     callback.startProtocolDataUnit(&Protocol::ieee802154);
     callback.visitChunk(header, &Protocol::ieee802154);
+    const auto& fcs = packet->popAtBack<Ieee802154Fcs>(IEEE802154_FCS_SIZE);
     const Protocol *payloadProtocol = nullptr;
     if (auto tag = packet->findTag<Ieee802154PayloadProtocolTag>())
         payloadProtocol = tag->getProtocol();
     callback.dissectPacket(packet, payloadProtocol);
 
-//    auto paddingLength = packet->getDataLength();
-//    if (paddingLength > b(0)) {
-//        const auto& padding = packet->popHeader(paddingLength);
-//        callback.visitChunk(padding, &Protocol::ieee802154);
-//    }
+    auto paddingLength = packet->getDataLength();
+    if (paddingLength > b(0)) {
+        const auto& padding = packet->popAtFront(paddingLength);
+        callback.visitChunk(padding, &Protocol::ieee802154);
+    }
+
+    callback.visitChunk(fcs, &Protocol::ieee802154);
     callback.endProtocolDataUnit(&Protocol::ieee802154);
 }
 
