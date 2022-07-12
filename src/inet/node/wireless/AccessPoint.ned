@@ -47,7 +47,6 @@ module AccessPoint
         wlan[*].llc.typename = default("Ieee80211Portal");
         wlan[*].agent.typename = default("");
         wlan[*].radio.antenna.mobilityModule = default("^.^.^.mobility");
-        eth[*].encap.typename = "";
         *.macTableModule = default(absPath(".macTable"));
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         bridging.hasStp = false;
