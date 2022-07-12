@@ -10,7 +10,7 @@
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
-#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/common/stlutils.h"
@@ -96,6 +96,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
         auto& tags = check_and_cast<ITaggedObject *>(message)->getTags();
         tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(interfaceId);
         auto networkInterface = interfaceTable->getInterfaceById(interfaceId);
+        // TODO     appendDispatchToNetworkInterface(message, networkInterface);
         auto protocol = networkInterface->getProtocol();
         if (protocol != nullptr)
             tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
@@ -110,6 +111,7 @@ void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
                 cMessage *duplicate = utils::dupPacketAndControlInfo(message);
                 auto& tags = check_and_cast<ITaggedObject *>(duplicate)->getTags();
                 tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
+                // TODO     appendDispatchToNetworkInterface(duplicate, networkInterface);
                 auto protocol = networkInterface->getProtocol();
                 if (protocol != nullptr)
                     tags.addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
