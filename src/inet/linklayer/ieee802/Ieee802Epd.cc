@@ -19,11 +19,9 @@ Define_Module(Ieee802Epd);
 void Ieee802Epd::initialize(int stage)
 {
     if (stage == INITSTAGE_LINK_LAYER) {
-        if (par("registerProtocol").boolValue()) { // FIXME //KUDGE should redesign place of EthernetEncapsulation and LLC modules
-            // register service and protocol
-            registerService(Protocol::ieee802epd, gate("upperLayerIn"), gate("upperLayerOut"));
-            registerProtocol(Protocol::ieee802epd, gate("lowerLayerOut"), gate("lowerLayerIn"));
-        }
+        // register service and protocol
+        registerService(Protocol::ieee802epd, gate("upperLayerIn"), gate("upperLayerOut"));
+        registerProtocol(Protocol::ieee802epd, gate("lowerLayerOut"), gate("lowerLayerIn"));
     }
 }
 

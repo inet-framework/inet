@@ -20,7 +20,6 @@ moduleinterface IIeee802Epd
 simple Ieee802Epd like IIeee802Epd
 {
     parameters:
-        bool registerProtocol = default(false);     //FIXME //KLUDGE should redesign place of EthernetEncapsulation and LLC modules
         @display("i=block/layer");
         @signal[packetDropped](type=Packet);
     gates:
