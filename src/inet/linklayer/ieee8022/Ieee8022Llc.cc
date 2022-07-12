@@ -60,7 +60,7 @@ void Ieee8022Llc::handleMessageWhenUp(cMessage *msg)
         processPacketFromMac(check_and_cast<Packet *>(msg));
     }
     else
-        throw cRuntimeError("Unknown gate");
+        throw cRuntimeError("Message arrived on unknown gate '%s'", msg->getArrivalGate()->getName());
 }
 
 void Ieee8022Llc::processPacketFromHigherLayer(Packet *packet)
