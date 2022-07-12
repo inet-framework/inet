@@ -7,7 +7,6 @@
 #ifndef __INET_IEEE80211LLCLPD_H
 #define __INET_IEEE80211LLCLPD_H
 
-#include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
 #include "inet/linklayer/ieee8022/Ieee8022Llc.h"
 
