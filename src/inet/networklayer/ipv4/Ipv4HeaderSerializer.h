@@ -19,14 +19,16 @@ namespace inet {
 class INET_API Ipv4HeaderSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serializeOption(MemoryOutputStream& stream, const TlvOptionBase *option) const;
+    static void serializeOption(MemoryOutputStream& stream, const TlvOptionBase *option);
     virtual TlvOptionBase *deserializeOption(MemoryInputStream& stream) const;
 
     virtual void serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
     virtual const Ptr<Chunk> deserialize(MemoryInputStream& stream) const override;
 
+
   public:
     Ipv4HeaderSerializer() : FieldsChunkSerializer() {}
+    static void serialize(MemoryOutputStream& stream, const Ipv4Header& ipv4Header);
 };
 
 } // namespace inet

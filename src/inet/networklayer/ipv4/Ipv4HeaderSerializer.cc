@@ -15,48 +15,47 @@ namespace inet {
 
 Register_Serializer(Ipv4Header, Ipv4HeaderSerializer);
 
-void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ipv4Header &ipv4Header)
 {
     auto startPosition = stream.getLength();
     struct ip iphdr;
-    const auto& ipv4Header = staticPtrCast<const Ipv4Header>(chunk);
-    B headerLength = ipv4Header->getHeaderLength();
+    B headerLength = ipv4Header.getHeaderLength();
     ASSERT((headerLength.get() & 3) == 0 && headerLength >= IPv4_MIN_HEADER_LENGTH && headerLength <= IPv4_MAX_HEADER_LENGTH);
-    ASSERT(headerLength <= ipv4Header->getTotalLengthField());
+    ASSERT(headerLength <= ipv4Header.getTotalLengthField());
     iphdr.ip_hl = B(headerLength).get() >> 2;
-    iphdr.ip_v = ipv4Header->getVersion();
-    iphdr.ip_tos = ipv4Header->getTypeOfService();
-    iphdr.ip_id = htons(ipv4Header->getIdentification());
-    ASSERT((ipv4Header->getFragmentOffset() & 7) == 0);
-    uint16_t ip_off = (ipv4Header->getFragmentOffset() / 8) & IP_OFFMASK;
-    if (ipv4Header->getReservedBit())
+    iphdr.ip_v = ipv4Header.getVersion();
+    iphdr.ip_tos = ipv4Header.getTypeOfService();
+    iphdr.ip_id = htons(ipv4Header.getIdentification());
+    ASSERT((ipv4Header.getFragmentOffset() & 7) == 0);
+    uint16_t ip_off = (ipv4Header.getFragmentOffset() / 8) & IP_OFFMASK;
+    if (ipv4Header.getReservedBit())
         ip_off |= IP_RF;
-    if (ipv4Header->getMoreFragments())
+    if (ipv4Header.getMoreFragments())
         ip_off |= IP_MF;
-    if (ipv4Header->getDontFragment())
+    if (ipv4Header.getDontFragment())
         ip_off |= IP_DF;
     iphdr.ip_off = htons(ip_off);
-    iphdr.ip_ttl = ipv4Header->getTimeToLive();
-    iphdr.ip_p = ipv4Header->getProtocolId();
-    iphdr.ip_src.s_addr = htonl(ipv4Header->getSrcAddress().getInt());
-    iphdr.ip_dst.s_addr = htonl(ipv4Header->getDestAddress().getInt());
-    iphdr.ip_len = htons(B(ipv4Header->getTotalLengthField()).get());
-    if (ipv4Header->getCrcMode() != CRC_COMPUTED)
+    iphdr.ip_ttl = ipv4Header.getTimeToLive();
+    iphdr.ip_p = ipv4Header.getProtocolId();
+    iphdr.ip_src.s_addr = htonl(ipv4Header.getSrcAddress().getInt());
+    iphdr.ip_dst.s_addr = htonl(ipv4Header.getDestAddress().getInt());
+    iphdr.ip_len = htons(B(ipv4Header.getTotalLengthField()).get());
+    if (ipv4Header.getCrcMode() != CRC_COMPUTED)
         throw cRuntimeError("Cannot serialize Ipv4 header without a properly computed CRC");
-    iphdr.ip_sum = htons(ipv4Header->getCrc());
+    iphdr.ip_sum = htons(ipv4Header.getCrc());
     stream.writeBytes((uint8_t *)&iphdr, IPv4_MIN_HEADER_LENGTH);
 
     if (headerLength > IPv4_MIN_HEADER_LENGTH) {
-        unsigned short numOptions = ipv4Header->getOptionArraySize();
+        unsigned short numOptions = ipv4Header.getOptionArraySize();
         B optionsLength = B(0);
         if (numOptions > 0) { // options present?
             for (unsigned short i = 0; i < numOptions; i++) {
-                const TlvOptionBase *option = &ipv4Header->getOption(i);
+                const TlvOptionBase *option = &ipv4Header.getOption(i);
                 serializeOption(stream, option);
                 optionsLength += B(option->getLength());
             }
         } // if options present
-        if (ipv4Header->getHeaderLength() < IPv4_MIN_HEADER_LENGTH + optionsLength)
+        if (ipv4Header.getHeaderLength() < IPv4_MIN_HEADER_LENGTH + optionsLength)
             throw cRuntimeError("Serializing an Ipv4 packet with wrong headerLength value: not enough for store options.\n");
         auto writtenLength = B(stream.getLength() - startPosition);
         if (writtenLength < headerLength)
@@ -64,7 +63,13 @@ void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     }
 }
 
-void Ipv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const TlvOptionBase *option) const
+void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
+{
+    const auto& ipv4Header = staticPtrCast<const Ipv4Header>(chunk);
+    serialize(stream, *ipv4Header.get());
+}
+
+void Ipv4HeaderSerializer::serializeOption(MemoryOutputStream& stream, const TlvOptionBase *option)
 {
     unsigned short type = option->getType();
     unsigned short length = option->getLength(); // length >= 1
