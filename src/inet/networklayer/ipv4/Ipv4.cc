@@ -779,8 +779,9 @@ void Ipv4::reassembleAndDeliverFinish(Packet *packet)
     else {
         EV_ERROR << "Transport protocol '" << protocol->getName() << "' not connected, discarding packet\n";
         packet->setFrontOffset(ipv4HeaderPosition);
-        const NetworkInterface *fromIE = getSourceInterface(packet);
-        sendIcmpError(packet, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+        // get source interface:
+        const auto& tag = packet->findTag<InterfaceInd>();
+        sendIcmpError(packet, tag ? tag->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
     }
 }
 
