@@ -83,7 +83,7 @@ void Ipv4::initialize(int stage)
         directBroadcastInterfaceMatcher.setPattern(directBroadcastInterfaces.c_str(), false, true, false);
 
         curFragmentId = 0;
-        lastCheckTime = 0;
+        lastCheckTime = SIMTIME_ZERO;
 
         numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
@@ -817,10 +817,9 @@ void Ipv4::fragmentPostRouting(Packet *packet)
         fragmentAndSend(packet);
 }
 
-void Ipv4::setComputedCrc(Ptr<Ipv4Header>& ipv4Header)
+void Ipv4::setComputedCrc(const Ptr<Ipv4Header>& ipv4Header)
 {
-    ASSERT(crcMode == CRC_COMPUTED);
-    ipv4Header->setCrc(0);
+    ipv4Header->setCrc(0); // make sure that the CRC is 0 in the Udp header before computing the CRC
     MemoryOutputStream ipv4HeaderStream;
     Chunk::serialize(ipv4HeaderStream, ipv4Header);
     // compute the CRC
@@ -843,12 +842,7 @@ void Ipv4::insertCrc(const Ptr<Ipv4Header>& ipv4Header)
         case CRC_COMPUTED: {
             // if the CRC mode is computed, then compute the CRC and set it
             // this computation is delayed after the routing decision, see INetfilter hook
-            ipv4Header->setCrc(0x0000); // make sure that the CRC is 0 in the Udp header before computing the CRC
-            MemoryOutputStream ipv4HeaderStream;
-            Chunk::serialize(ipv4HeaderStream, ipv4Header);
-            // compute the CRC
-            uint16_t crc = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
-            ipv4Header->setCrc(crc);
+            setComputedCrc(ipv4Header);
             break;
         }
         default:
