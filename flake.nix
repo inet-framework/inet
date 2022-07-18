@@ -2,6 +2,7 @@
   description = "INET Framework for OMNeT++ Discrete Event Simulator";
 
   inputs = {
+    # omnetpp.url = "/home/rhornig/omnetpp-dev";
     omnetpp.url = "github:omnetpp/omnetpp/flake/omnetpp-6.0.x";
     flake-utils.follows = "omnetpp/flake-utils";
   };
@@ -11,7 +12,7 @@
     let
       oppPkgs = omnetpp.oppPkgs.${system};
       pname = "inet";
-      version = "4.4.0.${oppPkgs.lib.substring 0 8 self.lastModifiedDate}.${self.shortRev or "dirty"}";
+      version = "4.4.1.${oppPkgs.lib.substring 0 8 self.lastModifiedDate}.${self.shortRev or "dirty"}";
     in rec {
       packages = rec {
         ${pname} = oppPkgs.callPackage ./releng/inet_mkDerivation.nix {
