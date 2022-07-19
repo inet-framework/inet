@@ -131,10 +131,7 @@
 
  - review and refactor all applications which have lifecycle, startTime, endTime parameters, move code from initialize to separate reusable functions (e.g. for lifecycle restart)
 
- - DHCP Client should work multiple interfaces, but works with only one.
-
- - UDP: add a parameter: used protocol number, default value is UDP.
-   It's useful for UDP-like protocols, e.g. MANET
+ - DHCP Client/Server should work with multiple interfaces
 
  - revise ethernet/eth-index.ned! e.g it writes about autoconfiguration, and probably half of it is obsolete
 
@@ -151,14 +148,6 @@
  - TCPSegment, UDPPacket: use uint16_t for ports, uint32_t for sequence numbers, etc; also in the code!!!
    hint: first replace it somewhere with a type that CANNOT be cast to integer types, then let compile errors propagate the type change everywhere
 
- - implement missing models:
-   Queueing (we have: FIFO, RED): CBQ, WFQ, RIO, Round Robin, Fair queueing Round Robin
-   Suggested by VR:
-     Wired: Circuit Switch, ATM(AAL2/AAL5,CBR/VBR/ABR), IP over ATM, PNNI, MPLS, DiffServ
-     Wireless:  Adhoc routing:FSR/DSDV/ZRP/TORA/LENMMAR;Adhoc MAC:802.11, WTRP,
-     TDMA; QoS supports for cross-layer design
-     and also, Group Mobility,  etc.
-
  - provide default for RoutingTable.routingTableFile once xmlinline() is implemented in omnet.
 
  - PPP, Ethernet: should use signals (ModelChangeNotification) to detect if channel path breaks
@@ -170,40 +159,25 @@
 
  - finish making gate names consistent in RTP modules
 
- - labeling:
-   - add labels l2pkt/l3pkt/l4pkt to upper layer input/output of L1/L2/L3 protocols or modules? 
-     i.e. NIC's upperLayerIn could be tagged as l3pkt, and IP's ifOut also as l3pkt
-   - add @labels(node,configurator,!configurator) to FlatNetworkConfigurator and similar "singleton" modeules,
-     to make them unique?
-   - change the @labels(PPPFrame) label on pppg[] gates of hosts/routers to something slightly different
-     (e.g. @labels(PPPFrame/pk)) so that PPPInterface does not appear in the palette on network level?
+ - gate labeling for the NED editor
+ - change the @labels(PPPFrame) label on pppg[] gates of hosts/routers to something slightly different
+   (e.g. @labels(PPPFrame/pk)) so that PPPInterface does not appear in the palette on network level?
 
  - eliminate ARP overhead for PPP interfaces
 
  - examples\wireless\hosttohost: Readme mentions some "attached Excel sheet" which is missing!!!
 
  - failure/recovery (replacing with failed router is problematic!)
- - gate labeling for the NED editor
 
- - IRoutingTable6, ITED, etc!
-
- - routingTable optimizations from Gamer!
-
- - Document: decide interfaceId vs interfacePointer! issue: IPRoutingDecision contains interfaceID.
-      if we change it to pointer, messages that are underway in the host during a deleteInterface()
-      may crash!!! solution: use a vector inside InterfaceTable, and let each deleteInterface()
-      leave a hole in it?
-
- - move "q=queue" too into the default display string
- - add gate @labels
- - rename TCPBasicClientApp to TCPRequestReplyClientApp ?
+ - review if existing (also add missing) "q=queue" display string tags still refer to the right module?
+ - rename TCPBasicClientApp to TCPRequestReplyClientApp?
  - Ethernet: ditch autoconfig and zero-datarate channels, use deliverOnReceptionStart and 10/100/1000Mbps channels!
 
  - rename the following TED.h methods to begin with a verb:
-   unsigned int linkIndex(IPAddress advrouter, IPAddress linkid)
-   unsigned int linkIndex(IPAddress localInf)
-   IPAddress peerRemoteInterface(IPAddress peerIP)
-   IPAddress primaryAddress(IPAddress localInf)
+   - unsigned int linkIndex(IPAddress advrouter, IPAddress linkid)
+   - unsigned int linkIndex(IPAddress localInf)
+   - IPAddress peerRemoteInterface(IPAddress peerIP)
+   - IPAddress primaryAddress(IPAddress localInf)
 
  - cache gate IDs to speed up sending
 
@@ -235,27 +209,6 @@
  - apps: add startTime param; IPAddressResolver should only be invoked at startTime not in initialize()!
 
  - Ethernet: restore original connection color when transmission ends
-
- - refactor ICMP/ICMPv6 error message sending and error indication
-   - separate sending an ICMP error message on the network from sending an ICMP error indication up to a transport protocol or an application
-   - ICMP error indication must not contain an ICMP header but ICMP specific Ind tags instead
-   - IPv4 can call both sendIcmpErrorMessage to send an ICMP error message on the network to a peer
-     or it can call sendIcmpErrorIndication directly to send an ICMP Indication message (not a packet) to a transport protocol or an application
-   - when ICMP is processing an incoming ICMP message (processIcmpMessage) it may be an error message (processsIcmpErrorMessage) which in turn
-     should call the same sendIcmpErrorIndication that can also be called by Ipv4 or Udp, etc.
-     the ICMP error indication should contain the quoted packet part in the form of a chunk or a packet for higher layer protocols to process
-   - UDP must not understand ICMP headers, it should simply handle ICMP error indication messages (not packets) and the attached meta information
-     when UDP sends up an error indication it should also attach all the received ICMP indication tags
- - implement ICMP rate limiting, see e.g bsd.mod/netinet/ip_icmp.c, badport_bandlim()
- - ICMP options: stopOnError (bool param), UDPBadPortSendICMP (bool param)
- - ICMP: shouldn't we unify ICMP and ICMPv6...? at least types and codes?
-   ICMPv6 uses different type&code numeric values but this is only of interest
-   if we want to do emulation
- - instead of sending up ICMP packet to UDP & TCP: create an ICMPErrorInfo, and
-   IP (IPv6) would attach that to the bogus datagram, with message kind IP_I_ICMP_ERROR.
-   (win: IP/ICMP dependencies can then be removed from TCP and UDP in makemakefiles!!!)
- - ErrorHandling is not used anymore! do we need to send a copy of ICMP errors to the
-   ICMP module itself as well?
 
  - TCP: how to handle ICMP error reports?
 

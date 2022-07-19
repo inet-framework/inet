@@ -1,0 +1,20 @@
+ - refactor ICMP/ICMPv6 error message sending and error indication
+   - separate sending an ICMP error message on the network from sending an ICMP error indication up to a transport protocol or an application
+   - ICMP error indication must not contain an ICMP header but ICMP specific Ind tags instead
+   - IPv4 can call both sendIcmpErrorMessage to send an ICMP error message on the network to a peer
+     or it can call sendIcmpErrorIndication directly to send an ICMP Indication message (not a packet) to a transport protocol or an application
+   - when ICMP is processing an incoming ICMP message (processIcmpMessage) it may be an error message (processsIcmpErrorMessage) which in turn
+     should call the same sendIcmpErrorIndication that can also be called by Ipv4 or Udp, etc.
+     the ICMP error indication should contain the quoted packet part in the form of a chunk or a packet for higher layer protocols to process
+   - UDP must not understand ICMP headers, it should simply handle ICMP error indication messages (not packets) and the attached meta information
+     when UDP sends up an error indication it should also attach all the received ICMP indication tags
+ - implement ICMP rate limiting, see e.g bsd.mod/netinet/ip_icmp.c, badport_bandlim()
+ - ICMP options: stopOnError (bool param), UDPBadPortSendICMP (bool param)
+ - ICMP: shouldn't we unify ICMP and ICMPv6...? at least types and codes?
+   ICMPv6 uses different type&code numeric values but this is only of interest
+   if we want to do emulation
+ - instead of sending up ICMP packet to UDP & TCP: create an ICMPErrorInfo, and
+   IP (IPv6) would attach that to the bogus datagram, with message kind IP_I_ICMP_ERROR.
+   (win: IP/ICMP dependencies can then be removed from TCP and UDP in makemakefiles!!!)
+ - ErrorHandling is not used anymore! do we need to send a copy of ICMP errors to the
+   ICMP module itself as well?
