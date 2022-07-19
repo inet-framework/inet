@@ -34,7 +34,7 @@
 
 namespace inet {
 
-// CLASS
+// TODO optimize *= and other operators/functions
 class INET_API Int128
 {
   private:
