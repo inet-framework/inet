@@ -1,0 +1,12 @@
+ - route source type should be a protocol, CISCO admin dist should be calculated from the source type
+ - all protocols must set their protocol as source to routes added
+ - long term: extract OspfRouteData from OspfRoutingTableEntry and add as protocolData into Ipv4Route
+ - long term: extract OspfInterfaceData from OspfInterface and add to InterfaceEntry as tag?
+ - OspfConfigReader: search = "strict|relaxed" should be changed :)
+ - OspfConfigReader: collects all OSPF interfaces based on XML config entries, result may contain the same interface twice, should work the other way around by starting with all the interfaces and finding the first OSPF config entry in the XML for that interface
+ - OspfArea::originateRouterLSA calculates a different LSA length field than Lsa.cc:B calculateLSASize(const OspfRouterLsa *routerLSA)
+ - should use the proper IPAddress class, not its own one...
+ - OSPFTimer class only contains a timerKind() -- is this class necessary at all...?
+ - rename ifIndex (SetIfIndex, GetIfIndex, etc) to interfaceId AND change default value to -1!
+ - OSPFRouting::LoadInterfaceParameters: interfaceType is contained in InterfaceEntry, it's redundant to read it from XML!
+ - try to reduce size of configuration. If Zebra can do it...

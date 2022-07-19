@@ -1,0 +1,56 @@
+INET 4.5 release TODO items:
+
+1. Implementation
+
+ - refactor all quantity formatting to use the OMNeT++ 6.1 quantity formatter (e.g. 160000000 Hz -> 160 MHz)
+   - replace long2string and double2string in Units.msg
+
+ - python support for running simulations/tests/etc. using OMNeT++ 6.1 which should contain the necessary python support
+
+ - Determining the next protocol for a packet in a protocol module using DispatchProtocolReq and EncapsulationProtocolReq. #782
+
+ - Restructure StandardHost to make it flexible enough to replace all current network node types which are basically copied from StandardHost and slightly modified
+   - use @reconnect to simplify network nodes which copy big parts of StandardHost
+   - revise all network node module base class hierarchy (e.g. mpls nodes)
+
+ - Restructure StandardHost to include a separate LLC layer which contains:
+   - a separate packet classifier (LlcClassifier) that decides which LLC is used (if any) based on the MAC protocol for example
+   - IEEE 802.2 SNAP LLC
+   - IEEE 802 EPD LLC
+   - ZIGBEE LLC (https://lucidar.me/en/zigbee/autopsy-of-a-zigbee-frame/)
+
+ - replace findPathStartGate/findPathEndGate with findConnectedModule/findConnectedGate and wrap the type specific reference to the module/gate into a template class?
+
+ - ??? synchronous packet processing vs message based configuration (e.g. sockets/interfaces)?
+
+ - ??? refactor protocol modules to avoid cross module zero simulation time messaging using the FES
+   - for example (App, Udp, Ipv4, Ethernet stack) two hosts one sending to the other, one packet send is 4 distinct events (transmission start/end and reception start/end),
+     first event starts in App and ends with transmission start, next event is reception start, etc.
+
+ - chunk queue and various chunk buffers don't have region tags, there's no place to store data specific tags from packets when reassembling data
+
+ - fragmentation/defragmentation, aggregation/deaggregation must take care of packet/chunk tags and region tags properly
+
+ - when deleting a network interface or deleting a network node, the interface deleted signal is missing
+
+ - Qtenv packet log support via packet tags using INET modules similar to visualizers that hook into protocols
+   - following wireless communication is almost impossible in the packet log
+   - add filtering for technical/physical/link/network/transport/application levels (link should be the default)
+   - support following TCP streams
+
+2. Documentation
+
+3. Review
+
+4. Release
+
+ - Refactor to use latest OMNeT++ features.
+ - Fix important bugs from github.
+ - Merge important pull requests from github.
+ - Merge other outstanding branches from git.
+ - Complete WHATSNEW and ChangeLog.
+ - Cleanup code formatting.
+
+5. Testing
+
+ - Make all fingerprint, module, unit, packet, drill, queueing, protocol, and leak tests PASS.

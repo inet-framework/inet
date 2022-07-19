@@ -1,0 +1,3 @@
+ - examples: there's heaps of ICMP errors coming from UDP ("port unreachable")
+ - "gateway" field of routing entries gets lost after TED::rebuildRoutingTable
+ - use interface NAME - why?

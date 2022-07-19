@@ -1,3 +1,5 @@
+ - better error reporting when the radio doesn't provide the Ieee80211Mode to the MAC, e.g. when using the default UnitDiskRadio instead of the Ieee80211UnitDiskRadio, check for base classes
+
  - add statistic collection, consider removing IStatistics and BasicStatistics and adding signals based statistics instead
    reasoning: there are many components in 802.11 and it seems to be a bad idea to centralize all possible events into a single class
    even if we do that, how can we be sure of whether we added all useful events to the API?

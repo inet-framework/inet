@@ -1,0 +1,16 @@
+ - add ChunkStack (lifo) similarly to how ChunkQueue (fifo) is implemented
+ - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer
+
+ - Chunk.msg:
+   - _getChunk -> getChunk
+   - _packet -> packet
+
+ - cleanup PCAP recording
+   - can happen at and is provided by network interfaces
+   - doesn't have to be supported by specific MAC/PHY/etc. layer modules
+   - can be done at lower layer and/or upper layer gates of network interfaces
+   - can record inbound and/or outbound packets
+   - can record each packet start and/or packet end and/or packet progress
+   - can be used to aggregate packets for network interface/network node/network level
+   - is configured by default to record the packet end for both inbound and outbound packets (PHY) at the lower layer gates of network interfaces
+   - document everything about this in the User's Guide

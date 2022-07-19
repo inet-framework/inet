@@ -1,7 +1,7 @@
-C++ quirks (to be worked on when SCTP-2.2 is integrated from "master" branch):
+ - check if StandardHost6 (IPv6) is working properly
 
-- data members of TimeStats start with uppercase
+ - if SCTPServer.echoFactor not 0, then will a runtime error:
+      "Error in module (SCTP) P5.server.sctp (id=22): User error: stream with id 2 not found."
+      Network: IPv4; 1 server, 1 router, 10 client
 
-- message files: use "packet" keyword instead of "message Foo extends cPacket"
-
-- cPolymorphic -> cObject
+ - finish making gate names consistent

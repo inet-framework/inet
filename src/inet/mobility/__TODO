@@ -1,0 +1,7 @@
+ - cleanup implementation with respect to base classes, overriding base methods, etc.
+ - fix mobility non-determinism caused by interpolation from last position during animation
+ - validate Rotation, Quaternion, EulerAngles against each other and documentation
+ - validate positioning and orientation IMobility, PhysicalEnvironment, ObstacleLoss
+ - add geographic mobility modules (separate Euclidean and geographic mobilities)
+ - add parameter to mobility base which determines what should happen if the energy storage is depleted.
+   For example, a drone should just stop, but a satellite should continue its motion.

@@ -1,200 +1,64 @@
-Use case:
- - sequence of protocol headers/trailers
-   e.g. Application Data, UDP, IPv4, IEEE 802.2 LLC, IEEE 802.15.4
- - sequence of protocol modules
-   App, Udp, Ipv4, Ieee8022Llc, Ieee802154
- - dispatch decision (can be hardcoded, locally parametrizable, can depend on packet data or meta data, looked up from database, overridden by being already specified)
-   App -> Udp (App)
-   Udp -> Ipv4 (Udp by destination address)
-   Ipv4 -> Ieee8022Llc (App, Network interface?)
-   Ieee8022Llc -> Ieee802154 (Network interface)
-   Ieee802154 -> NetworkInterface (Ipv4, App)
+ - hardware in the loop simulation using layered ethernet model and TSN
+ - rename *Layered* modules to *Compound* or *Modular*? discuss!
 
-determining the next protocol for a packet in a protocol module (DispatchProtocolReq) (outgoing/incoming)
- - can be unspecified
- - can be hard-coded into C++ source of the module that is currently processing the packet
- - can be specified by a protocol parameter on the module
- - can be determined by a socket
- - can be determined by the address type (e.g. Ipv4, Ipv6) of a destination address
- - can be determined by one or more header fields from an incoming packet using a protocol group mapping
- - can be determined by a header field directly referencing the protocol
- - can be the requested transport protocol, network protocol, MAC protocol (TransportProtocolReq, NetworkProtocolReq, MacProtocolReq)
- - can be the expected protocol of a network interface
- - can be determined by the current packet protocol
- - can be determined by from which protocol module the packet came (e.g. DispatchProtocolInd)
- - can be determined by a module that created or previously processed the packet (e.g. application by EncapsulationProtocolReq)
- - can be the first protocol in encapsulation protocol request (EncapsulationProtocolReq)
- - can be determined by some other packet meta-data (e.g. EncapsulationProtocolReq?)
+ - PacketTransmitter without transmission channel should stop in initialize? otherwise duration parameters will not work
 
-what should we do when the payload protocol is not specified in the packet (e.g. 802.15.4 or 802.11)?
-this information should be attached as a meta-data to the packet by the module which knows this, so a packet dissector (or printer) can process the packet without context
+ - eliminate some typename != "" from NED files using default interface ommitted typenames if conditional connections are used
+ - reduce redundancy among applications, e.g. add base application with parameterizable IO submodule, perhaps even create an IO base module which uses the ISocket interface
 
-documentation goes into Developer's Guide
+ - add examples/documentation for matching PCP value and destination MAC address for outgoing packets (identification)
+ - example with Pcp and PriorityToTrafficClassClassifier classifier example
+ - example with combined Ethernet virtual LANs and TSN features
 
-who adds DispatchProtocolReq?
- - the module who determines the next protocol
-who queries DispatchProtocolReq?
- - the message dispatcher module
-who removes DispatchProtocolReq?
- - the DispatchProtocolReq destination module who processes the packet
+ - duplicate animation from EthernetFcsChecker through NetworkInterface due to animate always going through the gate chain even though the packet stops at NetworkInterface to attach an InterfaceInd 
+ - come up with realistic frame replication showcases such as multiple link breaks which still produce the traffic at the destination
+ - replace GatingPriorityQueue with ShaperPriorityQueue/PriorityShaper?
+ - add examples to flow measurements for store-and-forward, A-MPDU aggregation, preemption, cut-through and their effects on the bit and packet total times
 
-how is the EncapsulationProtocolReq used now?
- + RelayInterfaceSelector appends network interface protocol into EncapsulationProtocolReq if DispatchProtocolReq is already present
- + Ieee8021qTagEpdHeaderInserter removes first protocol from EncapsulationProtocolReq if present to use in DispatchProtocolReq
- + Ieee8021rTagEpdHeaderInserter removes first protocol from EncapsulationProtocolReq if present to use in DispatchProtocolReq
- + Ipv4 appends network interface protocol to the end of EncapsulationProtocolReq and copies first entry to DispatchProtocolReq
- + StreamEncoder delays existing DispatchProtocolReq and inserts 802.1q and 802.1r protocols into EncapsulationProtocolReq depending on what tags are attached
- +? PacketTaggerBase adds EncapsulationProtocolReq with 802.1q if PcpReq is added
+ - naming things according to standards, have parameter names according to the standard
+ - have modules named as TransmissionSelectionAlgorithm
 
-what are typical delayed protocol dispatch actions?
- - pop protocol at the beginning of EncapsulationProtocolReq, get first protocol to where the packet must be sent to
- - push protocol at the beginning of EncapsulationProtocolReq to send packet to a specific protocol first
- - push protocol at the end of EncapsulationProtocolReq to send packet to a specific protocol last
-
-fallback mechanism for next protocol:
- - if InterfaceReq is added, push network interface protocol at the end of EncapsulationProtocolReq
- - if L3 destination address is specified, set NetworkProtocolReq to corresponding network protocol
- - pop protocol at the beginning of EncapsulationProtocolReq
- - if no protocol is found, use module specific next protocol parameter
- - if no protocol is specified, use module specific hard-coded next protocol
-   - in applications use the protocol from TransportProtocolReq
-   - in transport protocols use the protocol from NetworkProtocolReq
-   - in network protocols use the protocol from MacProtocolReq
- - if no protocol is hard-coded, leave DispatchProtocolReq unspecified (direct connections decide who processes the packet next)
-
-TSN use case:
-App [app] -> udp (udp app) ()
-Udp [udp app] -> ipv4 (ipv4 udp app) ()
-Ipv4 [ipv4 udp app] -> ethernetmac (ethernetmac ipv4 udp app) ()
-StreamIdentifier [ipv4 udp app] -> ethernetmac (ethernetmac ipv4 udp app) ()
-StreamEncoder [ipv4 udp app] -> ieee8021r (ethernetmac ieee8021q ieee8021r ipv4 udp app) (ethernetmac ieee8021q)
-Ieee8021r [ieee8021r ipv4 udp app] -> ieee8021q (ethernetmac ieee8021q ieee8021r ipv4 udp app) (ethernetmac)
-Ieee8021q [ieee8021q ieee8021r ipv4 udp app] -> ethernetmac (ethernetmac ieee8021q ieee8021r ipv4 udp app) ()
-EthernetMac [ethernetmac ieee8021q ieee8021r ipv4 udp app] -> network interface (ethernetmac ieee8021q ieee8021r ipv4 udp app) ()
-
-802.15.4 use case:
-App [app] -> udp (udp app) ()
-Udp [udp app] -> ipv4 (ipv4 udp app) ()
-Ipv4 [ipv4 udp app] -> ieee802154 (ieee802154 ipv4 udp app) ()
-Llc [ipv4 udp app] -> ieee8022llc (ieee802154 ieee8022llc ipv4 udp app) (ieee802154)
-Ieee8022llc [ieee8022llc ipv4 udp app] -> ieee802154 (ieee802154 ieee8022llc ipv4 udp app) ()
-Ieee802154 [ieee802154 ieee8022llc ipv4 udp app] -> network interface (ieee802154 ieee8022llc ipv4 udp app) ()
-
-Restructure StandardHost to include a separate LLC layer which contains:
- - a separate packet classifier (LlcClassifier) that decides which LLC is used (if any) based on the MAC protocol for example
- - IEEE 802.2 SNAP LLC
- - IEEE 802 EPD LLC
- - ZIGBEE LLC (https://lucidar.me/en/zigbee/autopsy-of-a-zigbee-frame/)
-
-INET 4.4 release TODO items:
-
-1. Documentation
-
-2. Implementation
-
-3. Review
-
- - Review new examples.
- - Review all added components.
- - Review folder names and module names.
-
-4. Release
-
- - Fix important bugs from github.
- - Merge important pull requests from github.
- - Merge other outstanding branches from git.
- - Complete WHATSNEW and ChangeLog.
-
-5. Testing
-
- - Make all fingerprint, module, unit, packet, drill, queueing, protocol, and leak tests PASS.
-
-===============================================================================
-
-- hardware in the loop simulation using layered ethernet model and TSN
-- rename *Layered* modules to *Compound* or *Modular*? discuss!
-
-Clean up PCAP recording:
- - can happen at and is provided by network interfaces
- - doesn't have to be supported by specific MAC/PHY/etc. layer modules
- - can be done at lower layer and/or upper layer gates of network interfaces
- - can record inbound and/or outbound packets
- - can record each packet start and/or packet end and/or packet progress
- - can be used to aggregate packets for network interface/network node/network level
- - is configured by default to record the packet end for both inbound and outbound packets at the lower layer gates of network interfaces
-
-- PacketTransmitter without transmission channel should stop in initialize? otherwise duration parameters will not work
-
-- eliminate all typename != "" from NED files using default interface ommitted typenames
-- reduce redundancy among applications, e.g. add base application with parameterizable IO submodule, perhaps even create an IO base module which uses the ISocket interface
-- replace findPathStartGate/findPathEndGate with findConnectedModule/findConnectedGate and wrap the type specific reference to the module/gate into a template class?
-
-- add examples/documentation for matching PCP value and destination MAC address for outgoing packets (identification)
-- example with Pcp and PriorityToTrafficClassClassifier classifier example
-- example with combined Ethernet virtual LANs and TSN features
-
-- duplicate animation from EthernetFcsChecker through NetworkInterface due to animate always going through the gate chain even though the packet stops at NetworkInterface to attach an InterfaceInd 
-- come up with realistic frame replication showcases such as multiple link breaks which still produce the traffic at the destination
-- replace GatingPriorityQueue with ShaperPriorityQueue/PriorityShaper?
-- add examples to flow measurements for store-and-forward, A-MPDU aggregation, preemption, cut-through and their effects on the bit and packet total times
-
-- naming things according to standards, have parameter names according to the standard
-- have modules named as TransmissionSelectionAlgorithm
-
-implement multicast support in one gate scheduling configurator
-
- - chunk queue and various chunk buffers don't have region tags, there's no place to store data specific tags from packets when reassembling data
- - fragmentation and defragmentation doesn't copy packet region tags in Ipv4
-
- - visualizer/canvas/spectrum -> GHz overlapping with node label
- - visualizer/instrumentfigures -> plot figure size parameter not working
- - visualizer/styling -> switching config lead to crash
- - visualizer/canvas/transportconnection -> switching config lead to crash
- - wireless/ratecontrol -> missing visualization when run in fast mode
+ - implement multicast support in one gate scheduling configurator
 
  - compound figures should be updated to have a bounds property that contains all elements and they must not be over-determined (e.g. size vs plotSize) see topic/figures
+
  - refactor ICMP/ICMPv6 error message sending and error indication
-   - separate sending an ICMP error message on the network from sending an ICMP error indiciation up to a transport protocol or an application
+   - separate sending an ICMP error message on the network from sending an ICMP error indication up to a transport protocol or an application
    - ICMP error indication must not contain an ICMP header but ICMP specific Ind tags instead
    - IPv4 can call both sendIcmpErrorMessage to send an ICMP error message on the network to a peer
      or it can call sendIcmpErrorIndication directly to send an ICMP Indication message (not a packet) to a transport protocol or an application
    - when ICMP is processing an incoming ICMP message (processIcmpMessage) it may be an error message (processsIcmpErrorMessage) which in turn
      should call the same sendIcmpErrorIndication that can also be called by Ipv4 or Udp, etc.
      the ICMP error indication should contain the quoted packet part in the form of a chunk or a packet for higher layer protocols to process
-   - UDP must not understand ICMP headers, it should simply handle ICMP error indiciation messages (not packets) and the attached meta information
+   - UDP must not understand ICMP headers, it should simply handle ICMP error indication messages (not packets) and the attached meta information
      when UDP sends up an error indication it should also attach all the received ICMP indication tags
+
  - ThruputMeteringChannel -> result filter + visualizer for measuring the channel throughput using channel signals and result for analysis
- - Add Ethernet socket support to layered model.
- - Implement fingerprints for figures and values for all example simulations.
- - update all EV statements to use EV_FIELD
- - replace cross module pointers with ModuleRef<T>
- - cleanup bitrate vs datarate
- - cleanup operator<<, printOn, str, etc. in all classes
+ - add Ethernet socket support to layered model.
+ - implement fingerprints for figures and values for all example simulations.
 
-handlePullPacketChanged can come from the queue when
- - a high priority frame is already being streamed and it gets interrupted
- - a low priority frame cannot be interrupted because it's already too close to its end (remaining minPacketLength)
-in both cases a progress report is sent which is unnecessary and confusing
+ - code cleanup
+   - update all EV statements to use EV_FIELD
+   - replace cross module pointers with ModuleRef<T>
+   - bitrate vs datarate
+   - operator<<, printOn, str, etc. in all classes
 
-- ethernet preemption example: 2nd out of 3 sends per packet must be avoided
-  - add a check for whether the two packets are definitely equal or may be different?!
-  - change the preamble insertion module to immediately start with a progress of 8 bytes and
-  - change the transmitter to check if the at the progress update the expected progress position is at the end of the packet to skip the progress report
+ - handlePullPacketChanged can come from the queue when
+   - a high priority frame is already being streamed and it gets interrupted
+   - a low priority frame cannot be interrupted because it's already too close to its end (remaining minPacketLength)
+   - in both cases a progress report is sent which is unnecessary and confusing
 
-- create release script (remove trailing spaces, replace leading tabs, fix header guards, format source code)
+ - ethernet preemption example: 2nd out of 3 sends per packet must be avoided
+   - add a check for whether the two packets are definitely equal or may be different?!
+   - change the preamble insertion module to immediately start with a progress of 8 bytes and
+   - change the transmitter to check if the at the progress update the expected progress position is at the end of the packet to skip the progress report
 
-- check Ethernet FCS progress report at the correct moment of time
+ - create release script (remove trailing spaces, replace leading tabs, fix header guards, format source code)
 
-Parallel simulation support
- - compute earliest input/output time (function?!) for each gate in the network
-   - earliest output time (EOT) per gate starts from the earliest event in the module (using virtual method in modules with default implementation)
-   - also take into account C++ methods calls when propagating EIT/EOT
-   - earliest input time (EIT) per gate is computed from neighbors' earliest output time per gate + channel delay
-   - refine times by propagating EOT to EIT until there's no change
-   - neighbor partitions' EIT can be easily found
+ - check Ethernet FCS progress report at the correct moment of time
 
-- Add parameters to ScenarioManager disconnect operation to allow cutting connection at either end (source or destination)
-  and also support disconnecting bidirectional connections in all four combinations.
+ - add parameters to ScenarioManager disconnect operation to allow cutting connection at either end (source or destination)
+   and also support disconnecting bidirectional connections in all four combinations.
 
  - generic TCP/UDP socket tagging, with automatic copying of tags to outgoing packets
 
@@ -203,13 +67,9 @@ Parallel simulation support
    - filling
    - integrating
 
- - use @reconnect to simplify network nodes which copy big parts of StandardHost
  - similarly to timing API other meta-data could also be stored for the packet data per bit (e.g. hop count)
- - when deleting a network interface or deleting a network node, the interface deleted signal is missing
- - add generic IpApp, EthernetApp similarly to UdpApp and TcpApp
  - unify C++ namespaces, NED namespaces, folders and file names (e.g. ospfv vs. Ospf3*)
  - implement additional INET specific fingerprint ingredients: network interface configuration, routing table, mobility state, etc.
- - better error reporting when the radio doesn't provide the Ieee80211Mode to the MAC, e.g. when using the default UnitDiskRadio instead of the Ieee80211UnitDiskRadio, check for base classes
  - fix Ieee80211UnitDiskReceiver base class and initialize, solve diamond inheritance
  - extend timeGains/frequencyGains parsing with OMNeT++ 6.0 expression parser support (#ifdef)
  - extend PlotFigure with margin parameters
@@ -233,39 +93,20 @@ Parallel simulation support
    - finish renaming signals, labels, statistics to have a consistent naming scheme
    - review all examples to check if they still work as expected
  - new features
-   - add geographic mobility modules (separate Euclidean and geographic mobilities)
-   - add new queue module API and use it in all protocols which have queues
    - LTE PHY full support and porting to INET 4.0, source/sink separation, signal classes, etc. (e.g. probe/microwave oven)
  - port existing 3rd party models
    - help ANSA porting to INET 4.0
 
  - the packet dissector may need to do implicit chunk conversion because it has to choose a representation which may or may not be the same as the one in the packet (e.g. two interoperable frameworks)
- - add parameter to mobility base which determines what should happen if the energy storage is depleted. For example, a drone should just stop, but a satellite should continue its motion.
-
- - route source type should be a protocol, CISCO admin dist should be calculated from the source type
- - all protocols must set their protocol as source to routes added
- - long term: extract OspfRouteData from OspfRoutingTableEntry and add as protocolData into Ipv4Route
- - long term: extract OspfInterfaceData from OspfInterface and add to InterfaceEntry as tag?
- - OspfConfigReader: search = "strict|relaxed" should be changed :)
- - OspfConfigReader: collects all OSPF interfaces based on XML config entries, result may contain the same interface twice, should work the other way around by starting with all the interfaces and finding the first OSPF config entry in the XML for that interface
- - OspfArea::originateRouterLSA calculates a different LSA length field than Lsa.cc:B calculateLSASize(const OspfRouterLsa *routerLSA)
 
  - change all protocols (where applicable) to accept any kind of cPacket (not only Packet) for interoperability with 3rd party projects 
- - add test and check for std::dynamic_pointer_cast<Subclass1>(chunk->peek<Subclass1>()) != nullptr always holds when peek uses a variant type deserializer
  - remove obsolete HostAutoConfigurator, Ipv4FlatNetworkConfigurator modules?
- - fix mobility non-determinism caused by interpolation from last position during animation
- - validate Rotation, Quaternion, EulerAngles against each other and documentation
- - validate positioning and orientation IMobility, PhysicalEnvironment, ObstacleLoss
- - replace all internal queues with external queue modules and make them configurable
  - 802.11 preamble, header, data separation in HT and VHT mode doesn't really make sense the way it's right now implemented
    there's no separate header in these modes, the preamble is much more complicated than in the other modes
    there's also a bug related to this in the Ieee80211ScalarTransmitter when it computes the data duration
- - replace long2string and double2string in Units.msg with something more clever (e.g. 160000000 Hz -> 160 MHz)
- - add L2 sockets: EthernetSocket bound to EtherType, LlcSocket bound to SSAP, DSAP, add Ieee80211Socket bound unconditionally
+ - add separate Ieee80211Socket
  - solve dynamic node creation and address resolution in applications
  - don't subclass APSK medium and such with other specific radios, think of APSK radio as yet another specific conceptual radio
- + generalize shutdown, startup, crash operations to applications, protocols, interfaces, etc. (NodeShutdownOperation -> ShutdownOperation, NodeStatus -> OperationalStatus?)
- + add antenna directional selectivity visualizer
  - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
  - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
  - revise protocol header class hierarchy (e.g. avoid unnecessary interfaces)
@@ -274,12 +115,9 @@ Parallel simulation support
  - replace functionality of GenericAppMsg with chunk tags, or better yet get rid of it altogether!
  - use shared pointers for transmissions/receptions, etc. because the gui copies packets in the packet log and inspects them later
  - factor out physical layer analog domain representation into a separate parameter of transmissions
- - ethernet socket vs. ssap/dsap both in StandardHost and EtherHost
  - review all examples and check if they still do what is intended
- - add ChunkStack (lifo) similarly to how ChunkQueue (fifo) is implemented
  - add separate reusable application packet generators
  - rewrite serializers that use structure bit fields, this is undefined C++ behavior
- - revise all network node module base class hierarchy (e.g. mpls nodes)
  - replace cCompoundModule class in hosts/nodes with a specific classes such as StandardHost
    providing getInterfaceTable, getMobility, getIPv4NetworkLayer, etc. to avoid random code fragments with getSubmodule(".ipv4.routingTable")???
    but we should avoid having these classes for a random collections of utility functions!
@@ -291,151 +129,176 @@ Parallel simulation support
  - extend main protocol modules (and all submodules) with 2 info lines above the submodule icon
  - avoid specifying module icon sizes by default, override icon size in submodules
 
-TODO: cleanup MSG files
- remove if possible:
-  - import inet.common.INETDefs-ek
-  - INETDefs.msg
-  - cplusplus-ok
-  - #include-ok
-  - const-ansok
-  - typedef-ek
-  - @opaque
-  - @primitive-ek -> primitive foo;
+ - @descriptor(false) vs @descriptor(readonly); why do we have descriptor anything at all? why don't we have descriptors for all types all the time?
+ - @editable(false) vs @descriptor(readonly)??? and in general editable is a GUI concept
 
- @descriptor(false) vs @descriptor(readonly); why do we have descriptor anything at all? why don't we have descriptors for all types all the time?
- @editable(false) vs @descriptor(readonly)??? and in general editable is a GUI concept
+ - DYMOSequenceNumber: class DYMOSequenceNumber??? why class? primitive class???
+ - PacketDrop: packet_ -> packet
+ - IntServ.msg: *_t is reserved for C++ standard
+ - InterfaceEntry: eliminate @getter if possible
+ - EtherType.msg: replace with Protocol.h?
+ - IPProtocolId.msg: replace with Protocol.h?
 
- Chunk.msg:
- _getChunk -> getChunk
- _packet -> packet
+ - review and refactor all applications which have lifecycle, startTime, endTime parameters, move code from initialize to separate reusable functions (e.g. for lifecycle restart)
 
- DYMOSequenceNumber: class DYMOSequenceNumber??? why class? primitive class???
- PacketDrop: packet_ -> packet
- IntServ.msg: *_t is reserved for C++ standard
- InterfaceEntry: eliminate @getter if possible
- EtherType.msg: replace with Protocol.h?
- IPProtocolId.msg: replace with Protocol.h?
+ - DHCP Client should work multiple interfaces, but works with only one.
 
-TODO: review and refactor all applications which have lifecycle, startTime, endTime parameters, move code from initialize to separate reusable functions (e.g. for lifecycle restart)
+ - UDP: add a parameter: used protocol number, default value is UDP.
+   It's useful for UDP-like protocols, e.g. MANET
 
-TODO: DHCP Client should work multiple interfaces, but works with only one.
+ - revise ethernet/eth-index.ned! e.g it writes about autoconfiguration, and probably half of it is obsolete
 
-TODO: UDP: add a parameter: used protocol number, default value is UDP.
-      It's useful for UDP-like protocols, e.g. MANET
+ - examples/ospfv2/areas does not work: the UDP apps in H3 keep sending, but never receive answer; seems like
+   sent packets cannot even leave H3 (they are queued up in ARP, due to "address resolution pending")
 
-TODO: revise ethernet/eth-index.ned! e.g it writes about autoconfiguration, and probably half of it is obsolete
+ - TCP,UDP,SCTP: Need revision for PORT_ANY usage:
+   unspec port should be 0 not -1
+   What will the PORT_ANY value: -1 or 0.
+   Where do replace from PORT_ANY to a valid port: in TCPSocket or in
+      TCPConnection::process_OPEN_ACTIVE/process_OPEN_PASSIVE
+   Check it in other protocols.
 
-TODO: examples/ospfv2/areas does not work: the UDP apps in H3 keep sending, but never receive answer; seems like
-      sent packets cannot even leave H3 (they are queued up in ARP, due to "address resolution pending")
+ - TCPSegment, UDPPacket: use uint16_t for ports, uint32_t for sequence numbers, etc; also in the code!!!
+   hint: first replace it somewhere with a type that CANNOT be cast to integer types, then let compile errors propagate the type change everywhere
 
-TODO: TCP,UDP,SCTP: Need revision for PORT_ANY usage:
-      What will the PORT_ANY value: -1 or 0.
-      Where do replace from PORT_ANY to a valid port: in TCPSocket or in
-          TCPConnection::process_OPEN_ACTIVE/process_OPEN_PASSIVE
-      Check it in other protocols.
-
-TODO: Int128/Uint128 code revision / optimisation
-      Optimise *= and other operators/functions.
-
-TODO: IPv4 misfeature: in IPv4::handleMessageFromHL(cPacket *msg), if the packet is already
-      an IP datagram, then it does not encapsulate the packet but just routes it!
-      Problem: HL cannot control whether it wants IP to route the packet or tunnel (encapsulate) it!!
-
-TODO: fix typos: recived, broadCast
-
-TODO: TCPSegment, UDPPacket: use uint16_t for ports, uint32_t for sequence numbers, etc; also in the code!!!
-      hint: first replace it somewhere with a type that CANNOT be cast to integer types, then let compile errors propagate the type change everywhere
-
-TODO: StandardHost: do we need tcpType, udpType, sctpType? why not just <default("UDP")>, <default("SCTP")>, etc? they are conditional anyway!
-
-TODO: make copyright headers uniform....
-
-
-TODO: set up nightly builds: 
-   - should report build errors/warnings;
-   - should run etc/runallexamples and report the results (runtime errors, fingerprint mismatches, etc)
-
-TODO: execute etc/runallexamples, and fix errors (last run: May 2008)
-
-TODO: implement missing models:
-   Qeueing (we have: FIFO, RED): CBQ, WFQ, RIO, Round Robin, Fair queueing Round Robin
+ - implement missing models:
+   Queueing (we have: FIFO, RED): CBQ, WFQ, RIO, Round Robin, Fair queueing Round Robin
    Suggested by VR:
      Wired: Circuit Switch, ATM(AAL2/AAL5,CBR/VBR/ABR), IP over ATM, PNNI, MPLS, DiffServ
      Wireless:  Adhoc routing:FSR/DSDV/ZRP/TORA/LENMMAR;Adhoc MAC:802.11, WTRP,
      TDMA; QoS supports for cross-layer design
      and also, Group Mobility,  etc.
 
-TODO: derive BGPRouter from OSPFRouter that should be derived from Router
+ - provide default for RoutingTable.routingTableFile once xmlinline() is implemented in omnet.
 
-TODO: is the namId needed at StandardHost level? Possibly implement namtrace as a plugin?
+ - PPP, Ethernet: should use signals (ModelChangeNotification) to detect if channel path breaks
 
-TODO: port NAM trace writer to use signals mechanism
+ - implement node failure/recovery by using signals mechanism
 
-TODO: Add ThruputMetering channel (NED definition)
+ - VideoStrmReq problem on IPv6: 
+   "Error in module (UDP) P62.server.udp (id=21): User error: (UDPPacket)VideoStrmReq arrived from lower layer without control info"
 
-TODO: provide default for RoutingTable.routingTableFile once xmlinline() is implemented in omnet.
+ - finish making gate names consistent in RTP modules
 
-TODO: integrate models:
-   HIPSim++, MobileWiMAX, ...
+ - labelling:
+   - add labels l2pkt/l3pkt/l4pkt to upper layer input/output of L1/L2/L3 protocols or modules? 
+     i.e. NIC's upperLayerIn could be tagged as l3pkt, and IP's ifOut also as l3pkt
+   - add @labels(node,configurator,!configurator) to FlatNetworkConfigurator and similar "singleton" modeules,
+     to make them unique?
+   - change the @labels(PPPFrame) label on pppg[] gates of hosts/routers to something slightly different
+     (e.g. @labels(PPPFrame/pk)) so that PPPInterface does not appear in the palette on network level?
 
-TODO: PPP, Ethernet: should use signals (ModelChangeNotification) to detect if channel path breaks
+ - eliminate ARP overhead for PPP interfaces
 
-TODO: implement node failure/recovery by using signals mechanism
+ - examples\wireless\hosttohost: Readme mentions some "attached Excel sheet" which is missing!!!
 
-TODO: pcap file recording using signals mechanism
+ - failure/recovery (replacing with failed router is problematic!)
+ - gate labelling for the NED editor
 
-TODO: VideoStrmReq problem on IPv6: 
-      "Error in module (UDP) P62.server.udp (id=21): User error: (UDPPacket)VideoStrmReq arrived from lower layer without control info"
+ - eliminate cast after dup(), like (AirFrame*)airframe->dup()
 
-TODO: check if SCTP in StandardHost6 (IPv6) is working properly
+ - IRoutingTable6, ITED, etc!
 
-BUG:  if SCTPServer.echoFactor not 0, then will a runtime error:
-      "Error in module (SCTP) P5.server.sctp (id=22): User error: stream with id 2 not found."
-      Network: IPv4; 1 server, 1 router, 10 client
+ - routingTable optimizations from Gamer!
 
-TODO: labelling:
-  - add labels l2pkt/l3pkt/l4pkt to upper layer input/output of L1/L2/L3 protocols or modules? 
-    i.e. NIC's upperLayerIn could be tagged as l3pkt, and IP's ifOut also as l3pkt
-  - add @labels(node,configurator,!configurator) to FlatNetworkConfigurator and similar "singleton" modeules,
-    to make them unique?
-  - change the @labels(PPPFrame) label on pppg[] gates of hosts/routers to something slightly different
-    (e.g. @labels(PPPFrame/pk)) so that PPPInterface does not appear in the palette on network level?
+ - Document: decide interfaceId vs interfacePointer! issue: IPRoutingDecision contains interfaceID.
+      if we change it to pointer, messages that are underway in the host during a deleteInterface()
+      may crash!!! solution: use a vector inside InterfaceTable, and let each deleteInterface()
+      leave a hole in it?
 
+ - move "q=queue" too into the default display string
+ - add gate @labels
+ - rename TCPBasicClientApp to TCPRequestReplyClientApp ?
+ - ethernet: ditch autoconfig and zero-datarate channels, use deliverOnReceptionStart and 10/100/1000Mbps channels!
 
-TODO:  finish making gate names consistent! around the SCTP and RTP modules
-TODO:  PingApp is strange; it should send payload+controlInfo instead of ICMP packet, 
-       the word ping should not occur in ICMP code, move identifier, sequence number from PingPayload into ICMPControlInfo
+ - rename the following TED.h methods to begin with a verb:
+   unsigned int linkIndex(IPAddress advrouter, IPAddress linkid)
+   unsigned int linkIndex(IPAddress localInf)
+   IPAddress peerRemoteInterface(IPAddress peerIP)
+   IPAddress primaryAddress(IPAddress localInf)
 
-TODO: eliminate ARP overhead for PPP interfaces; 
+ - cache gate IDs to speed up sending
 
-TODO: UDPSocket::Callback::socketDatagramArrived() - change arg cMessage* to cPacket*
+ - model link failures, via isDown() method of InterfaceEntry. L2 modules
+   should understand isDown(), and FailureManager should be enhanced with
+   linkdown/linkup commands. See email on list archive on 9/17/2006 10:34 AM
 
-TODO: examples\wireless\hosttohost: Readme mentions some "attached Excel sheet" which is missing!!!
+ - create NetworkInterfaces/Base subdirectory: AirFrame, WirelessMacBase, ChannelAccess, etc.
 
-TODO: toplevel package legyen "org.omnetpp.inet"
+ - Ieee80211Mac to fire TxNotifDetails when Ack arrives for a frame. Mgmt layer
+   to use this notification to learn when ProbeRequest or AssociationResponse
+   has been transmitted.
 
-TODO:  MTU patch from Irene Rungeler
+ - ChannelControl: grid; instead of having pMax parameter, it should ask all
+   radios and collect pMax from them! (or, directly the range!)
 
-TODO: add SCTP to the whatsnew file
+ - radio models: when calculating the probability of bit errors, snirMIN is
+   assumed for the whole duration of the frame! This means that if snir
+   changes along the packet duration, we overestimate the probability of
+   bit error. (there should be proper integration there)
 
-- MAKE IT POSSIBLE TO USE DIFFERENT TYPES FOR EACH ELEMENT OF "LIKE" SUBMODULE VECTORS!
-  In StandardHost etc, change
-      udpApp[numUdpApps]: <udpAppType> like IUDPApp;
-  to
-     udpApp[numUdpApps]: <> like IUDPApp;
+ - IReceptionModel:
+   - improve it to be able to accomodate antenna gain: calculation function
+     should take node positions, antenna directions (maybe this should be in
+     some IDirectionalReceptionmodel, plugging into some AbstractDirectionalRadio?)
+   - allow for implementing "good/bad channel"-type radio models (Gilbert-Elliot)
+     e.g. containsBadChannelState(starttime, endtime)
+   - allow the radio model to add extra noise over time, or modify received power
+     over time, e.g. using functions like
+       PowerList calculateReceivedPower(...)
+       PowerList ambientNoise(...)
+     (maybe this should be some IDetailedReceptionModel, plugging into
+     a specialized version of AbstractRadio?)
 
+ - implement ICMP rate limiting, see e.g bsd.mod/netinet/ip_icmp.c, badport_bandlim()
+ - ICMP options: stopOnError (bool param), UDPBadPortSendICMP (bool param)
 
-TODO:
-- failure/recovery (replacing with failed router is problematic!)
-- gate labelling for the NED editor
+ - problem with NetworkConfigurator + RSVP's FailureManager: after deleting/recreating
+   LSR, configured IP addresses and host routes to PPP peers get lost.
+   Solution: implement failure/recovery with NF_FAILURE and NF_RECOVERY notifications!
 
------------------------
+ - "ack" in LinkStateMsg redundant? (never read)
+   what is the TELinkInfo.state flag?
+   what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printed?
+
+ - BUG: UDP ephemeral port setting: if chosen & stored in UDP, sending further dgrams need to look it up from the SockDesc...
+
+ - reading routing files: it doesn't make sense to be able to manually set MULTICAST on an interface
+
+ - implement IPv6 tunneling
+
+ - added userId to TCPCommand -- rewrite TCPSocketMap to make use of userId
+        - socket must be inserted into map before bind(), so that a userId can be assigned
+        - what about incoming connections? how to assign userId to them?
+           IF IT CANNOT BE DONE: remove userId from TCP!!!!
+
+ - apps: add startTime param; IPAddressResolver should only be invoked at startTime not in initialize()!
+
+ - Ethernet: restore original connection color when transmission ends
+
+ - ICMP: shouldn't we unify ICMP and ICMPv6...? at least types and codes?
+   ICMPv6 uses different type&code numeric values but this is only of interest
+   if we want to do emulation
+
+ - instead of sending up ICMP packet to UDP & TCP: create an ICMPErrorInfo, and
+   IP (IPv6) would attach that to the bogus datagram, with message kind IP_I_ICMP_ERROR.
+   (win: IP/ICMP dependencies can then be removed from TCP and UDP in makemakefiles!!!)
+
+ - ErrorHandling is not used anymore! do we need to send a copy of ICMP errors to the
+   ICMP module itself as well?
+
+ - TCP: how to handle ICMP error reports?
+
+ - MPLS/LDP/RSVP:
+    - document! ScenarioManager commands, XML file formats, unimplemented features
+
+Really old stuff
+================
 add support for integrating the TIREM module?
    http://www.alionscience.com/index.cfm?fuseaction=products.view&productid=19
    "TIREM predicts radio frequency propagation loss over irregular terrain and seawater for
    ground-based and air-borne transmitters and receivers. TIREM is commercially
    available as a DLL and as a module in leading commercial M&S tools."
-
 -----------------------
 mailing list post on 2008-11-17 "INET Framework accuracy":
 A really interesting paper is the technical report "Towards Comparable
@@ -471,187 +334,6 @@ The paper is excellent work, and literally cries for follow-ups:
    is publicly available, or is there any plan to release it? there certainly
    would be value in doing that.
 -----------------------
-
-TODO: eliminate cast after dup(), like (AirFrame*)airframe->dup()
-
-TODO: IRoutingTable6, ITED, etc!
-
-TODO routingTable optimizations from Gamer!
-
-TODO: Document: decide interfaceId vs interfacePointer! issue: IPRoutingDecision contains interfaceID.
-      if we change it to pointer, messages that are underway in the host during a deleteInterface()
-      may crash!!! solution: use a vector inside InterfaceTable, and let each deleteInterface()
-      leave a hole in it?
------------------------
-- move "q=queue" too into the default display string
-- add gate @labels
-- rename TCPBasicClientApp to TCPRequestReplyClientApp ?
-- ethernet: ditch autoconfig and zero-datarate channels, use deliverOnReceptionStart and 10/100/1000Mbps channels!
-
------------------------
-TODO rename the following TED.h methods to begin with a verb:
-  unsigned int linkIndex(IPAddress advrouter, IPAddress linkid)
-  unsigned int linkIndex(IPAddress localInf)
-  IPAddress peerRemoteInterface(IPAddress peerIP)
-  IPAddress primaryAddress(IPAddress localInf)
------------------------
-cache gate IDs to speed up sending
------------------------
-put all c++ code into "inet" namespace
-- networklayer\extras\FailureManager.cc: contains obsolete, hardcoded module type names!
-- factor out common part of hosts/routers etc, and use subclassing
-- remove channelInstaller
-- examples: add fingerprints!
-- create a new executable demo for Windows
-
---------
-- get quagga to work
---------
-- add IdealRadio, DistanceBasedRadio, GilbertElliotRadio.
-   in DistanceBasedRadio: decouple transmission range from interference range
-   (ie use 2 different module parameters)
---------
-- model link failures, via isDown() method of InterfaceEntry. L2 modules
-  should understand isDown(), and FailureManager should be enhanced with
-  linkdown/linkup commands. See email on list archive on 9/17/2006 10:34 AM
---------
-- create NetworkInterfaces/Base subdirectory: AirFrame, WirelessMacBase,
-  ChannelAccess, etc.
---------
-- Ieee80211Mac to fire TxNotifDetails when Ack arrives for a frame. Mgmt layer
-  to use this notification to learn when ProbeRequest or AssociationResponse
-  has been transmitted.
---------
-- ChannelControl: grid; instead of having pMax parameter, it should ask all
-  radios and collect pMax from them! (or, directly the range!)
---------
-- radio models: when calculating the probability of bit errors, snirMIN is
-  assumed for the whole duration of the frame! This means that if snir
-  changes along the packet duration, we overestimate the probability of
-  bit error. (there should be proper integration there)
---------
-- IReceptionModel:
-  - improve it to be able to accomodate antenna gain: calculation function
-    should take node positions, antenna directions (maybe this should be in
-    some IDirectionalReceptionmodel, plugging into some AbstractDirectionalRadio?)
-  - allow for implementing "good/bad channel"-type radio models (Gilbert-Elliot)
-    e.g. containsBadChannelState(starttime, endtime)
-  - allow the radio model to add extra noise over time, or modify received power
-    over time, e.g. using functions like
-      PowerList calculateReceivedPower(...)
-      PowerList ambientNoise(...)
-    (maybe this should be some IDetailedReceptionModel, plugging into
-    a specialized version of AbstractRadio?)
---------
-- AbstractRadio: consider: don't sent up the packet if there're bit errors,
-  just fire some specific radio state change notification! would simplify the
-  Ieee80211Mac state machine a lot!
---------
-- tummiepiggy's TCP bug ("TCP_S_FIN_WAIT_1 timeout" on mailing list)
---------
-- quagga/socketmsg: use base/bytearraymessage instead
---------
-- implement ICMP rate limiting, see e.g bsd.mod/netinet/ip_icmp.c, badport_bandlim()
-- ICMP options: stopOnError (bool param), UDPBadPortSendICMP (bool param)
---------
-- problem with NetworkConfigurator + RSVP's FailureManager: after deleting/recreating
-  LSR, configured IP addresses and host routes to PPP peers get lost.
-  Solution: implement failure/recovery with NF_FAILURE and NF_RECOVERY notifications!
---------
-- check in Quagga documentation
-- rename Daemon to QuaggaDaemon
---------
-- "ack" in LinkStateMsg redundant? (never read)
-Q: what is the TELinkInfo.state flag?
-Q: what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printed?
-
---------
-- MPLS examples: there's heaps of ICMP errors coming from UDP ("port unreachable")
---------
-- BUG: UDP ephemeral port setting: if chosen & stored in UDP, sending further dgrams need to look it up from the SockDesc...
---------
-- reading routing files: it doesn't make sense to be able to manually set MULTICAST on an interface
-
-- create example network with both Ethernet and PPP
-
-- IP/IPv6: implement tunnelling
-
-- revise fragmentation in IP
-
-- added userId to TCPCommand -- rewrite TCPSocketMap to make use of userId
-        - socket must be inserted into map before bind(), so that a userId can be assigned
-        - what about incoming connections? how to assign userId to them?
-           IF IT CANNOT BE DONE: remove userId from TCP!!!!
-
-- TCP/UDP: unspec port should be 0 not -1!!!
-
-- NAM trace: doesn't record drops, because DropTailQueue doesn't send notifications
-
-- there's no IPAddress::getPrefix() and getSuffix() (like IPv6Address has)
-
-- apps: add startTime param; IPAddressResolver should only be invoked at startTime not in initialize()!
-
-- TCP tests fail now (TCPDump has changed)
-
-- if a node pings itself, that'll be "destination unreachable" -- fix it
-
-- Eth: restore original conn color when transmission ends
-
-- "headerLength" param in snrEval???
-
-- IPv4 configurator: should fill in next hop addresses too, not only interface (esp with Ethernet)
-
-- IPv4: make it usable with ad-hoc models
-
-- notifboard: switch to the context of the client before calling its receiveNotification()
-
-- todo for omnetpp-3.2:
-     - add handleParameterChange() to apps (needed for Scenario Manager!)
-     - use new opp_msgc features? (kind=..., length=...etc)
-
-----------------------
- - ExtInterface performance optimization: I am not sure how long the pointer from
-   pcap_next() is valid [until the next such call perhaps?], but it might be possible
-   to spare the allocation of the ExtFrame and the cost of copying the bytes into it
-   inside cSocketRTScheduler::receiveWithTimeout(). I mean, the notification message
-   could just directly contain the ptr from pcap_next(), plus caplen; so the ExtInterface
-   module could directly deserialize from the pcap buffer (and also spare copying the
-   bytes out of ExtFrame). There is no concurrency problem, because events are processed
-   in strict timestamp order, the notification message has the same timestamp as the
-   external event, and receiveWithTimeout() is only invoked again when time has passed
-   that timestamp (``if (timeval_greater(targetTime, curTime))'' line in getNextEvent()).
-   This could improve the packet rate the simulation can handle in real time.
-
-----------------------
-- MPLS models: "gateway" field of routing entries gets lost after TED::rebuildRoutingTable
-----------------------
-- ICMP: shouldn't we unify ICMP and ICMPv6...? at least types and codes?
-  ICMPv6 uses different type&code numeric values but this is only of interest
-  if we want to do emulation
-
-- instead of sending up ICMP packet to UDP & TCP: create an ICMPErrorInfo, and
-  IP (IPv6) would attach that to the bogus datagram, with message kind IP_I_ICMP_ERROR.
-  (win: IP/ICMP dependencies can then be removed from TCP and UDP in makemakefiles!!!)
-
-- ErrorHandling is not used anymore! do we need to send a copy of ICMP errors to the
-  ICMP module itself as well?
-
-- TCP: how to handle ICMP error reports?
-
------------------------
-- MPLS/LDP/RSVP:
-    - document! ScenarioManager commands, XML file formats, unimplemented features
-    - Quagga ospfd: could it serve as OSPF_TE??
-- mpls models use interface NAME - why?
-
------------------------
-- OSPFv2 TODO:
-     - should use the proper IPAddress class, not its own one...
-     - OSPFTimer class only contains a timerKind() -- is this class necessary at all...?
-     - rename ifIndex (SetIfIndex, GetIfIndex, etc) to interfaceId AND change default value to -1!
-     - OSPFRouting::LoadInterfaceParameters: interfaceType is contained in InterfaceEntry, it's redundant to read it from XML!
-     - try to reduce size of configuration. If Zebra can do it...
------------------------
 into the ipv6 doc:
 "
 Currently, IPv6 support consists of several modules. The IPv6 module
@@ -685,8 +367,6 @@ to send), and there's no unacknowledged data (i.e. previously sent segments
 have all been acknowledged). But what is "sufficiently long"? I guess that
 should be measured in RTT rather than absolute time (secs). So maybe we
 should say 5*RTT is "sufficiently long"?
------------------------
-802.11 bugs: see mailing list...
 -----------------------
 FlatNetworkConfigurator: assigns the same address to all interfaces of a router.
 This is not the usual way things are done on the internet. But if we assign
