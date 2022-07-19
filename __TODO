@@ -1,4 +1,4 @@
- - hardware in the loop simulation using layered ethernet model and TSN
+ - hardware in the loop simulation using layered Ethernet model and TSN
  - rename *Layered* modules to *Compound* or *Modular*? discuss!
 
  - PacketTransmitter without transmission channel should stop in initialize? otherwise duration parameters will not work
@@ -22,22 +22,12 @@
 
  - compound figures should be updated to have a bounds property that contains all elements and they must not be over-determined (e.g. size vs plotSize) see topic/figures
 
- - refactor ICMP/ICMPv6 error message sending and error indication
-   - separate sending an ICMP error message on the network from sending an ICMP error indication up to a transport protocol or an application
-   - ICMP error indication must not contain an ICMP header but ICMP specific Ind tags instead
-   - IPv4 can call both sendIcmpErrorMessage to send an ICMP error message on the network to a peer
-     or it can call sendIcmpErrorIndication directly to send an ICMP Indication message (not a packet) to a transport protocol or an application
-   - when ICMP is processing an incoming ICMP message (processIcmpMessage) it may be an error message (processsIcmpErrorMessage) which in turn
-     should call the same sendIcmpErrorIndication that can also be called by Ipv4 or Udp, etc.
-     the ICMP error indication should contain the quoted packet part in the form of a chunk or a packet for higher layer protocols to process
-   - UDP must not understand ICMP headers, it should simply handle ICMP error indication messages (not packets) and the attached meta information
-     when UDP sends up an error indication it should also attach all the received ICMP indication tags
-
  - ThruputMeteringChannel -> result filter + visualizer for measuring the channel throughput using channel signals and result for analysis
  - add Ethernet socket support to layered model.
  - implement fingerprints for figures and values for all example simulations.
 
  - code cleanup
+   - eliminate C style casts, especially after (Foo*)foo->dup()
    - update all EV statements to use EV_FIELD
    - replace cross module pointers with ModuleRef<T>
    - bitrate vs datarate
@@ -48,7 +38,7 @@
    - a low priority frame cannot be interrupted because it's already too close to its end (remaining minPacketLength)
    - in both cases a progress report is sent which is unnecessary and confusing
 
- - ethernet preemption example: 2nd out of 3 sends per packet must be avoided
+ - Ethernet preemption example: 2nd out of 3 sends per packet must be avoided
    - add a check for whether the two packets are definitely equal or may be different?!
    - change the preamble insertion module to immediately start with a progress of 8 bytes and
    - change the transmitter to check if the at the progress update the expected progress position is at the end of the packet to skip the progress report
@@ -180,7 +170,7 @@
 
  - finish making gate names consistent in RTP modules
 
- - labelling:
+ - labeling:
    - add labels l2pkt/l3pkt/l4pkt to upper layer input/output of L1/L2/L3 protocols or modules? 
      i.e. NIC's upperLayerIn could be tagged as l3pkt, and IP's ifOut also as l3pkt
    - add @labels(node,configurator,!configurator) to FlatNetworkConfigurator and similar "singleton" modeules,
@@ -193,9 +183,7 @@
  - examples\wireless\hosttohost: Readme mentions some "attached Excel sheet" which is missing!!!
 
  - failure/recovery (replacing with failed router is problematic!)
- - gate labelling for the NED editor
-
- - eliminate cast after dup(), like (AirFrame*)airframe->dup()
+ - gate labeling for the NED editor
 
  - IRoutingTable6, ITED, etc!
 
@@ -209,7 +197,7 @@
  - move "q=queue" too into the default display string
  - add gate @labels
  - rename TCPBasicClientApp to TCPRequestReplyClientApp ?
- - ethernet: ditch autoconfig and zero-datarate channels, use deliverOnReceptionStart and 10/100/1000Mbps channels!
+ - Ethernet: ditch autoconfig and zero-datarate channels, use deliverOnReceptionStart and 10/100/1000Mbps channels!
 
  - rename the following TED.h methods to begin with a verb:
    unsigned int linkIndex(IPAddress advrouter, IPAddress linkid)
@@ -227,10 +215,6 @@
    to use this notification to learn when ProbeRequest or AssociationResponse
    has been transmitted.
 
-
- - implement ICMP rate limiting, see e.g bsd.mod/netinet/ip_icmp.c, badport_bandlim()
- - ICMP options: stopOnError (bool param), UDPBadPortSendICMP (bool param)
-
  - problem with NetworkConfigurator + RSVP's FailureManager: after deleting/recreating
    LSR, configured IP addresses and host routes to PPP peers get lost.
    Solution: implement failure/recovery with NF_FAILURE and NF_RECOVERY notifications!
@@ -243,8 +227,6 @@
 
  - reading routing files: it doesn't make sense to be able to manually set MULTICAST on an interface
 
- - implement IPv6 tunneling
-
  - added userId to TCPCommand -- rewrite TCPSocketMap to make use of userId
         - socket must be inserted into map before bind(), so that a userId can be assigned
         - what about incoming connections? how to assign userId to them?
@@ -254,14 +236,24 @@
 
  - Ethernet: restore original connection color when transmission ends
 
+ - refactor ICMP/ICMPv6 error message sending and error indication
+   - separate sending an ICMP error message on the network from sending an ICMP error indication up to a transport protocol or an application
+   - ICMP error indication must not contain an ICMP header but ICMP specific Ind tags instead
+   - IPv4 can call both sendIcmpErrorMessage to send an ICMP error message on the network to a peer
+     or it can call sendIcmpErrorIndication directly to send an ICMP Indication message (not a packet) to a transport protocol or an application
+   - when ICMP is processing an incoming ICMP message (processIcmpMessage) it may be an error message (processsIcmpErrorMessage) which in turn
+     should call the same sendIcmpErrorIndication that can also be called by Ipv4 or Udp, etc.
+     the ICMP error indication should contain the quoted packet part in the form of a chunk or a packet for higher layer protocols to process
+   - UDP must not understand ICMP headers, it should simply handle ICMP error indication messages (not packets) and the attached meta information
+     when UDP sends up an error indication it should also attach all the received ICMP indication tags
+ - implement ICMP rate limiting, see e.g bsd.mod/netinet/ip_icmp.c, badport_bandlim()
+ - ICMP options: stopOnError (bool param), UDPBadPortSendICMP (bool param)
  - ICMP: shouldn't we unify ICMP and ICMPv6...? at least types and codes?
    ICMPv6 uses different type&code numeric values but this is only of interest
    if we want to do emulation
-
  - instead of sending up ICMP packet to UDP & TCP: create an ICMPErrorInfo, and
    IP (IPv6) would attach that to the bogus datagram, with message kind IP_I_ICMP_ERROR.
    (win: IP/ICMP dependencies can then be removed from TCP and UDP in makemakefiles!!!)
-
  - ErrorHandling is not used anymore! do we need to send a copy of ICMP errors to the
    ICMP module itself as well?
 
@@ -270,12 +262,9 @@
  - MPLS/LDP/RSVP:
     - document! ScenarioManager commands, XML file formats, unimplemented features
 
-TCP:
-Slow Start should be applied every time TCP starts to send "after a
-sufficiently long idle period".
-
-"Idle" could be interpreted as when the send queue is empty (there's nothing
-to send), and there's no unacknowledged data (i.e. previously sent segments
-have all been acknowledged). But what is "sufficiently long"? I guess that
-should be measured in RTT rather than absolute time (secs). So maybe we
-should say 5*RTT is "sufficiently long"?
+ - TCP: Slow Start should be applied every time TCP starts to send "after a sufficiently long idle period".
+   "Idle" could be interpreted as when the send queue is empty (there's nothing
+   to send), and there's no unacknowledged data (i.e. previously sent segments
+   have all been acknowledged). But what is "sufficiently long"? I guess that
+   should be measured in RTT rather than absolute time (secs). So maybe we
+   should say 5*RTT is "sufficiently long"?
