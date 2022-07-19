@@ -71,8 +71,6 @@ void Ipv4::initialize(int stage)
         arp.reference(this, "arpModule", true);
         icmp.reference(this, "icmpModule", true);
 
-        transportInGateBaseId = gateBaseId("transportIn");
-
         const char *crcModeString = par("crcMode");
         crcMode = parseCrcMode(crcModeString, false);
 
