@@ -223,32 +223,10 @@
    should understand isDown(), and FailureManager should be enhanced with
    linkdown/linkup commands. See email on list archive on 9/17/2006 10:34 AM
 
- - create NetworkInterfaces/Base subdirectory: AirFrame, WirelessMacBase, ChannelAccess, etc.
-
  - Ieee80211Mac to fire TxNotifDetails when Ack arrives for a frame. Mgmt layer
    to use this notification to learn when ProbeRequest or AssociationResponse
    has been transmitted.
 
- - ChannelControl: grid; instead of having pMax parameter, it should ask all
-   radios and collect pMax from them! (or, directly the range!)
-
- - radio models: when calculating the probability of bit errors, snirMIN is
-   assumed for the whole duration of the frame! This means that if snir
-   changes along the packet duration, we overestimate the probability of
-   bit error. (there should be proper integration there)
-
- - IReceptionModel:
-   - improve it to be able to accomodate antenna gain: calculation function
-     should take node positions, antenna directions (maybe this should be in
-     some IDirectionalReceptionmodel, plugging into some AbstractDirectionalRadio?)
-   - allow for implementing "good/bad channel"-type radio models (Gilbert-Elliot)
-     e.g. containsBadChannelState(starttime, endtime)
-   - allow the radio model to add extra noise over time, or modify received power
-     over time, e.g. using functions like
-       PowerList calculateReceivedPower(...)
-       PowerList ambientNoise(...)
-     (maybe this should be some IDetailedReceptionModel, plugging into
-     a specialized version of AbstractRadio?)
 
  - implement ICMP rate limiting, see e.g bsd.mod/netinet/ip_icmp.c, badport_bandlim()
  - ICMP options: stopOnError (bool param), UDPBadPortSendICMP (bool param)
@@ -292,72 +270,6 @@
  - MPLS/LDP/RSVP:
     - document! ScenarioManager commands, XML file formats, unimplemented features
 
-Really old stuff
-================
-add support for integrating the TIREM module?
-   http://www.alionscience.com/index.cfm?fuseaction=products.view&productid=19
-   "TIREM predicts radio frequency propagation loss over irregular terrain and seawater for
-   ground-based and air-borne transmitters and receivers. TIREM is commercially
-   available as a DLL and as a module in leading commercial M&S tools."
------------------------
-mailing list post on 2008-11-17 "INET Framework accuracy":
-A really interesting paper is the technical report "Towards Comparable
-Network Simulators", from Pengfei Di, Yaser Houri, Kendy Kutzner and  Thomas
-Fuhrmann [see url below]. They measure 802.11 throughput with ns2 and
-OMNeT++ INET Fw, and come to the conclusion that they are hard to compare,
-due to differences in the radio model and MAC parameterization. Then they go
-on to wrap ns2's 802.11 model into an OMNeT++ simple module, and with that,
-the OMNeT++ simulation (not too surprisingly) shows excellent correspondence
-with the ns2 simulation :)
-
-http://i30www.ira.uka.de/research/documents/p2p/2008/towards_comparable_netw
-ork_simulations.pdf
-
-The paper is excellent work, and literally cries for follow-ups:
-
-1. INET's radio model is pluggable, and as the report authors describe it,
-   the ns-2 radio model seems to be quite simple (i.e. propdelay is a constant
-   and does not depend on distance). Thus, it should be possible to reimplement
-   ns-2's radio model in OMNeT++ with not too much effort (and contribute it to
-   INET) and re-run the experiments with it.
-
-2. OTOH I'm wondering, why not test the radio model and the 802.11MAC
-   operation *separately*? I.e. write an ideal radio (ber==0 always) and test
-   different 802.11 MAC models over that in all scenarios; then have more
-   realistic radio models and test them with simple (contention-free) 802.11
-   setups
-
-3. INET 802.11MAC model parameterization could be adjusted so that it's
-   possible to set it up with *exactly* the same parameters as ns-2.
-
-4. the authors ported ns-2's 802.11 model into OMNeT++; wonder if this code
-   is publicly available, or is there any plan to release it? there certainly
-   would be value in doing that.
------------------------
-into the ipv6 doc:
-"
-Currently, IPv6 support consists of several modules. The IPv6 module
-implements IPv6 datagram handling (sending, forwarding etc). It relies on
-RoutingTable6 to get access to the routes. RoutingTable6 also contains the
-neighbour discovery data structures (dest cache, neighbour cache, prefix
-list -- the latter effectively merged into the route table). Interface
-configuration (address, state, timeouts etc) is held in the InterfaceTable,
-in IPv6InterfaceData objects attached to InterfaceEntry as its ipv6()
-member.
-
-The module IPv6NeighbourDiscovery implements all tasks associated with
-neighbour discovery and stateless address autoconfiguration. Its data
-structures are in RoutingTable6 (dest cache, neighbour cache, prefix list).
-Neighbour discovery packets are only sent and processed by this module --
-when IPv6 receives one, it forwards the packet to IPv6NeighbourDiscovery.
-
-The rest of ICMPv6 (ICMP errors, echo request/reply etc) is implemented in
-the module ICMPv6, just like with IPv4. ICMP errors are sent into
-IPv6ErrorHandling, which the user can extend or replace to get errors
-handled in any way they like.
-"
-
------------------------
 TCP:
 Slow Start should be applied every time TCP starts to send "after a
 sufficiently long idle period".
@@ -367,51 +279,3 @@ to send), and there's no unacknowledged data (i.e. previously sent segments
 have all been acknowledged). But what is "sufficiently long"? I guess that
 should be measured in RTT rather than absolute time (secs). So maybe we
 should say 5*RTT is "sufficiently long"?
------------------------
-FlatNetworkConfigurator: assigns the same address to all interfaces of a router.
-This is not the usual way things are done on the internet. But if we assign
-different addresses, which addr to use in the routing tables etc?
------------------------
-VOJTA:
- -make connect work without bind (autoassign local address based on
-destination, currently unspecified address is sent and SYN+ACK will not
-be sent back (at least for 127.0.0.1, I didn't check for others))
------------------------
-from http://www.freesoft.org/CIE/Course/Section3/10.htm:
-
-# Per-interface assignment. IP addresses are assigned on a per-interface basis,
-so a host might possess several IP addresses if it has several interfaces.
-For example, a host with both Ethernet and serial interfaces would have an
-IP address for each. This is an important consequence of prefix-based
-addressing. An IP address doesn't really refer to a host, it refers to an
-interface.
-
-If a host is known by multiple addresses, then every service on this host
-can be referred to by multiple names! Addressing this host requires picking
-one of these. Since the packet is addressed to the interface and not the host,
-path information is introduced into the address. The exact ramifications of
-this effect depend heavily on the network design. In particular, careless
-design can result in a host becoming reachable by one address but not by
-another. The simplest solution to this problem is to select the host's most
-reliable interface and advertise its IP address as the host's primary IP
-address.
-
-==> current FlatNetworkConfigurator is shit? how to do address assignment?
-
-see also:
- "The Network Administrators' Guide" http://www.tldp.org/LDP/nag/node1.html
- "IP 101: All About IP Addresses" http://www.networkcomputing.com/netdesign/ip101c.html
-  - according to this: network numbers and interface addresses don't necessarily
-    have to do anything with each other! may look COMPLETELY different
-
-from http://www.networkcomputing.com/netdesign/ip101.html:
-
-The important thing to realize is that while a routing table keeps track of
-network numbers, no one assigns a network number to any piece of equipment.
-Every interface of a router or host connected on the network must have an IP
-address and a subnet mask defined (many pieces of equipment will assign a
-default subnet mask if none is applied). From this IP address and subnet mask,
-the network number is derived by the IP stack and tracked in the routing table.
-
-Q: if routing tables contain network numbers, are IP addresses of router
-interfaces also addressable?
