@@ -1,3 +1,7 @@
+ - follow changes in INET version since the wizards were created
+
+ - review the remaining TODO items in this file whether if they are still relevant
+
 Ethernet Networks
 ----------------
 hub switch bus
