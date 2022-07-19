@@ -66,7 +66,6 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<IArp> arp;
     ModuleRefByPar<Icmp> icmp;
-    int transportInGateBaseId = -1;
 
     // config
     CrcMode crcMode = CRC_MODE_UNDEFINED;
