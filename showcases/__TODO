@@ -25,3 +25,26 @@ Eventually all sensor nodes get into this state and the number of successfully s
 - SuperpositioningMobility should have faceForward (maybe all mobilities should?)
 - SuperpositioningMobility: support for enabling orientation and position separatelly
 - EntangledMobility vs AttachedMobility: support for enabling orientation and position separatelly
+
+Planned Showcases:
+------------------
+
+-Hardware-in-the-loop: simulated AODV, real network
+-Modeling radio interference:
+	modeling radio interference -> distinct showcase -> noise sources (bg noise with
+	spectrum; noise source with spectrum (and changing in time);
+	->the features of the dimensional model
+	wide noise, narrow noise,
+-Corruption mode: corruption level and its effects on protocols (independent from wifi -> APSK radio)
+-Throughput: add ht/vht mode
+-Hud (distinct logical and physical views)
+-UWBIR-Wifi coexistence: 802.15.4 MAC + APSK UWBIR radio + arbitrary packet level error model
+-packetlog window showcase
+ - understanding data
+ - filtering
+ - configure message display
+ - TODO: regular expr.
+ - TODO: OSI level
+-Neuralnetworkerrormodel -> training data generation, training, error model generation -> include these
+-Optimizing performance: recording, logging, event log, debug vs release - how they affect performance;
+ sysprof; tests/speed folder;
