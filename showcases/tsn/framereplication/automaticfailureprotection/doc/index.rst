@@ -64,5 +64,5 @@ Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`AutomaticFailurePr
 Discussion
 ----------
 
-Use `this <https://github.com/inet-framework/inet/discussions/TODO>`__ page in the GitHub issue tracker for commenting on this showcase.
+Use `this <https://github.com/inet-framework/inet/discussions/787>`__ page in the GitHub issue tracker for commenting on this showcase.
 

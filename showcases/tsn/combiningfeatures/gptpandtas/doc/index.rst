@@ -273,5 +273,5 @@ For comparison, the next chart displays the delay for the three configurations o
 Discussion
 ----------
 
-Use `this <https://github.com/inet-framework/inet/discussions/TODO>`__ page in the GitHub issue tracker for commenting on this showcase.
+Use `this <https://github.com/inet-framework/inet/discussions/784>`__ page in the GitHub issue tracker for commenting on this showcase.
 
