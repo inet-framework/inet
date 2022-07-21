@@ -60,7 +60,7 @@ void EcnMarker::setEcn(Packet *packet, IpEcnCode ecn)
         packet->removeTagIfPresent<NetworkProtocolInd>();
         auto ipv4Header = packet->removeDataAt<Ipv4Header>(offset);
         ipv4Header->setEcn(ecn);
-        Ipv4::insertCrc(ipv4Header); // recalculate IP header checksum
+        Ipv4Header::insertCrc(ipv4Header); // recalculate IP header checksum
         auto networkProtocolInd = packet->addTagIfAbsent<NetworkProtocolInd>();
         networkProtocolInd->setProtocol(protocol);
         networkProtocolInd->setNetworkProtocolHeader(ipv4Header);
