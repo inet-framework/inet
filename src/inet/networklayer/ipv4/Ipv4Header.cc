@@ -6,6 +6,7 @@
 
 
 #include "inet/common/INETUtils.h"
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 
 namespace inet {
@@ -64,6 +65,67 @@ void Ipv4Header::setEcn(short ecn)
 {
     setTypeOfService((typeOfService & 0xfc) | (ecn & 0x03));
 }
+
+void Ipv4Header::setComputedCrc(const Ptr<Ipv4Header>& ipv4Header)
+{
+    ipv4Header->setCrc(0);
+    MemoryOutputStream ipv4HeaderStream;
+    Chunk::serialize(ipv4HeaderStream, ipv4Header);
+    // compute the CRC
+    uint16_t crc = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
+    ipv4Header->setCrc(crc);
+}
+
+void Ipv4Header::insertCrc(const Ptr<Ipv4Header>& ipv4Header)
+{
+    CrcMode crcMode = ipv4Header->getCrcMode();
+    switch (crcMode) {
+        case CRC_DECLARED_CORRECT:
+            // if the CRC mode is declared to be correct, then set the CRC to an easily recognizable value
+            ipv4Header->setCrc(0xC00D);
+            break;
+        case CRC_DECLARED_INCORRECT:
+            // if the CRC mode is declared to be incorrect, then set the CRC to an easily recognizable value
+            ipv4Header->setCrc(0xBAAD);
+            break;
+        case CRC_COMPUTED: {
+            // if the CRC mode is computed, then compute the CRC and set it
+            // this computation is delayed after the routing decision, see INetfilter hook
+            setComputedCrc(ipv4Header);
+            break;
+        }
+        default:
+            throw cRuntimeError("Unknown CRC mode: %d", (int)crcMode);
+    }
+}
+
+bool Ipv4Header::verifyCrc(const Ptr<const Ipv4Header>& ipv4Header)
+{
+    switch (ipv4Header->getCrcMode()) {
+        case CRC_DECLARED_CORRECT: {
+            // if the CRC mode is declared to be correct, then the check passes if and only if the chunk is correct
+            return ipv4Header->isCorrect();
+        }
+        case CRC_DECLARED_INCORRECT:
+            // if the CRC mode is declared to be incorrect, then the check fails
+            return false;
+        case CRC_COMPUTED: {
+            if (ipv4Header->isCorrect()) {
+                // compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC) and the chunks are correct
+                MemoryOutputStream ipv4HeaderStream;
+                Chunk::serialize(ipv4HeaderStream, ipv4Header);
+                uint16_t computedCrc = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
+                return computedCrc == 0;
+            }
+            else {
+                return false;
+            }
+        }
+        default:
+            throw cRuntimeError("Unknown CRC mode");
+    }
+}
+
 
 } // namespace inet
 

@@ -202,33 +202,6 @@ void Ipv4::handleMessageWhenUp(cMessage *msg)
         throw cRuntimeError("message arrived on unknown gate '%s'", msg->getArrivalGate()->getName());
 }
 
-bool Ipv4::verifyCrc(const Ptr<const Ipv4Header>& ipv4Header)
-{
-    switch (ipv4Header->getCrcMode()) {
-        case CRC_DECLARED_CORRECT: {
-            // if the CRC mode is declared to be correct, then the check passes if and only if the chunk is correct
-            return ipv4Header->isCorrect();
-        }
-        case CRC_DECLARED_INCORRECT:
-            // if the CRC mode is declared to be incorrect, then the check fails
-            return false;
-        case CRC_COMPUTED: {
-            if (ipv4Header->isCorrect()) {
-                // compute the CRC, the check passes if the result is 0xFFFF (includes the received CRC) and the chunks are correct
-                MemoryOutputStream ipv4HeaderStream;
-                Chunk::serialize(ipv4HeaderStream, ipv4Header);
-                uint16_t computedCrc = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
-                return computedCrc == 0;
-            }
-            else {
-                return false;
-            }
-        }
-        default:
-            throw cRuntimeError("Unknown CRC mode");
-    }
-}
-
 const NetworkInterface *Ipv4::getSourceInterface(Packet *packet)
 {
     const auto& tag = packet->findTag<InterfaceInd>();
@@ -261,7 +234,7 @@ void Ipv4::handleIncomingDatagram(Packet *packet)
     packet->addTagIfAbsent<NetworkProtocolInd>()->setProtocol(&Protocol::ipv4);
     packet->addTagIfAbsent<NetworkProtocolInd>()->setNetworkProtocolHeader(ipv4Header);
 
-    if (!verifyCrc(ipv4Header)) {
+    if (!Ipv4Header::verifyCrc(ipv4Header)) {
         EV_WARN << "CRC error found, drop packet\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
@@ -732,7 +705,7 @@ void Ipv4::reassembleAndDeliver(Packet *packet)
         }
         if (packet->peekAtFront<Ipv4Header>()->getCrcMode() == CRC_COMPUTED) {
             auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
-            setComputedCrc(ipv4Header);
+            Ipv4Header::setComputedCrc(ipv4Header);
             insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
         }
         EV_DETAIL << "This fragment completes the datagram.\n";
@@ -817,39 +790,6 @@ void Ipv4::fragmentPostRouting(Packet *packet)
         fragmentAndSend(packet);
 }
 
-void Ipv4::setComputedCrc(const Ptr<Ipv4Header>& ipv4Header)
-{
-    ipv4Header->setCrc(0); // make sure that the CRC is 0 in the Udp header before computing the CRC
-    MemoryOutputStream ipv4HeaderStream;
-    Chunk::serialize(ipv4HeaderStream, ipv4Header);
-    // compute the CRC
-    uint16_t crc = TcpIpChecksum::checksum(ipv4HeaderStream.getData());
-    ipv4Header->setCrc(crc);
-}
-
-void Ipv4::insertCrc(const Ptr<Ipv4Header>& ipv4Header)
-{
-    CrcMode crcMode = ipv4Header->getCrcMode();
-    switch (crcMode) {
-        case CRC_DECLARED_CORRECT:
-            // if the CRC mode is declared to be correct, then set the CRC to an easily recognizable value
-            ipv4Header->setCrc(0xC00D);
-            break;
-        case CRC_DECLARED_INCORRECT:
-            // if the CRC mode is declared to be incorrect, then set the CRC to an easily recognizable value
-            ipv4Header->setCrc(0xBAAD);
-            break;
-        case CRC_COMPUTED: {
-            // if the CRC mode is computed, then compute the CRC and set it
-            // this computation is delayed after the routing decision, see INetfilter hook
-            setComputedCrc(ipv4Header);
-            break;
-        }
-        default:
-            throw cRuntimeError("Unknown CRC mode: %d", (int)crcMode);
-    }
-}
-
 void Ipv4::fragmentAndSend(Packet *packet)
 {
     const NetworkInterface *destIE = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
@@ -879,7 +819,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
     if (mtu == 0 || packet->getByteLength() <= mtu) {
         if (crcMode == CRC_COMPUTED) {
             auto ipv4Header = removeNetworkProtocolHeader<Ipv4Header>(packet);
-            setComputedCrc(ipv4Header);
+            Ipv4Header::setComputedCrc(ipv4Header);
             insertNetworkProtocolHeader(packet, Protocol::ipv4, ipv4Header);
         }
         sendDatagramToOutput(packet);
@@ -939,7 +879,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
         fraghdr->setFragmentOffset(offsetBase + offset);
         fraghdr->setTotalLengthField(B(headerLength + thisFragmentLength));
         if (crcMode == CRC_COMPUTED)
-            setComputedCrc(fraghdr);
+            Ipv4Header::setComputedCrc(fraghdr);
 
         fragment->insertAtFront(fraghdr);
         ASSERT(fragment->getByteLength() == headerLength + thisFragmentLength);
