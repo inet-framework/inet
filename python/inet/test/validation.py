@@ -40,9 +40,9 @@ def compute_frame_replication_success_rate_analytically1():
     for combination in combinations:
         probability = (combination * probabilities + (1 - combination) * (1 - probabilities)).prod()
         for solution in solutions:
-            if (solution * combination == solution).all() :
+            if (solution * combination == solution).all():
                 p += probability
-                break   
+                break
     return p
 
 def compute_frame_replication_success_rate_analytically2():
