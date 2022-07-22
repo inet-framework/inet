@@ -1,3 +1,14 @@
+ - support capturing a stronger signal while receiving a weaker one
+ - support aborting an ongoing transmission
+ - add the simulation of synchronization process (pilot/preamble)
+ - add missing Weibull and Jakes fading
+ - add multipath support
+ - add real CUDA and multi-core parallel execution
+ - add deep learning (neural-network) based wireless physical layer error model
+ - add parameter for bit error estimation: based on min(packet), mean(packet), min(mean(symbol))
+ - use shared pointers for transmissions/receptions, etc. because the gui copies packets in the packet log and inspects them later
+ - factor out physical layer analog domain representation into a separate parameter of transmissions
+
  - "receive" multiple signals simultaneously without prefering one or the other when they start at the same time but in different events, same for simply overlapping signals, that is the radio should evaluate all and pick the one after the signals end and make sure it only recives one at a time! 
  - where should the radio check for incorrect (corrupted) PHY headers? this is completely missing right now, should this be done from the receiver or the radio class (probably before decapsulation)?
    in general, setting the bit error flag in the packet is not an option, because it might lose the fine detail of a corrupted packet (e.g. chunk level or bit level corruption)

@@ -1,0 +1,10 @@
+ - provide support for hardware in the loop simulation using layered Ethernet model and TSN
+ - add example with combined Ethernet virtual LANs and TSN features
+ - fix duplicate animation from EthernetFcsChecker through NetworkInterface due to animate always going through the gate chain even though the packet stops at NetworkInterface to attach an InterfaceInd 
+ - fix Ethernet preemption example: 2nd out of 3 sends per packet must be avoided
+   - add a check for whether the two packets are definitely equal or may be different?!
+   - change the preamble insertion module to immediately start with a progress of 8 bytes and
+   - change the transmitter to check if the at the progress update the expected progress position is at the end of the packet to skip the progress report
+ - check Ethernet FCS progress report at the correct moment of time
+ - revise ethernet/eth-index.ned! e.g it writes about autoconfiguration, and probably half of it is obsolete
+ - restore original connection color when Ethernet transmission ends

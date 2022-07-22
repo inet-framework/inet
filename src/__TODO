@@ -1,130 +1,71 @@
- - hardware in the loop simulation using layered Ethernet model and TSN
- - rename *Layered* modules to *Compound* or *Modular*? discuss!
+ - IPv6 has not yet been through the same refactoring and improvements as the IPv4 model
+   after that, xMIPv6 needs to be tested and revised as well
 
- - PacketTransmitter without transmission channel should stop in initialize? otherwise duration parameters will not work
+ - 802.11 statistics, logging, display strings
+ - 802.11 preamble, header, data separation in HT and VHT mode doesn't really make sense the way it's right now implemented
+   there's no separate header in these modes, the preamble is much more complicated than in the other modes
+   there's also a bug related to this in the Ieee80211ScalarTransmitter when it computes the data duration
+ - add separate Ieee80211Socket
+ - Ieee80211Mac to fire TxNotifDetails when Ack arrives for a frame. Mgmt layer
+   to use this notification to learn when ProbeRequest or AssociationResponse
+   has been transmitted.
 
- - eliminate some typename != "" from NED files using default interface ommitted typenames if conditional connections are used
  - reduce redundancy among applications, e.g. add base application with parameterizable IO submodule, perhaps even create an IO base module which uses the ISocket interface
 
  - add examples/documentation for matching PCP value and destination MAC address for outgoing packets (identification)
  - example with Pcp and PriorityToTrafficClassClassifier classifier example
- - example with combined Ethernet virtual LANs and TSN features
 
- - duplicate animation from EthernetFcsChecker through NetworkInterface due to animate always going through the gate chain even though the packet stops at NetworkInterface to attach an InterfaceInd 
  - come up with realistic frame replication showcases such as multiple link breaks which still produce the traffic at the destination
- - replace GatingPriorityQueue with ShaperPriorityQueue/PriorityShaper?
  - add examples to flow measurements for store-and-forward, A-MPDU aggregation, preemption, cut-through and their effects on the bit and packet total times
-
- - naming things according to standards, have parameter names according to the standard
- - have modules named as TransmissionSelectionAlgorithm
 
  - implement multicast support in one gate scheduling configurator
 
  - compound figures should be updated to have a bounds property that contains all elements and they must not be over-determined (e.g. size vs plotSize) see topic/figures
 
  - ThruputMeteringChannel -> result filter + visualizer for measuring the channel throughput using channel signals and result for analysis
- - add Ethernet socket support to layered model.
- - implement fingerprints for figures and values for all example simulations.
-
- - code cleanup
-   - eliminate C style casts, especially after (Foo*)foo->dup()
-   - update all EV statements to use EV_FIELD
-   - replace cross module pointers with ModuleRef<T>
-   - bitrate vs datarate
-   - operator<<, printOn, str, etc. in all classes
 
  - handlePullPacketChanged can come from the queue when
    - a high priority frame is already being streamed and it gets interrupted
    - a low priority frame cannot be interrupted because it's already too close to its end (remaining minPacketLength)
    - in both cases a progress report is sent which is unnecessary and confusing
 
- - Ethernet preemption example: 2nd out of 3 sends per packet must be avoided
-   - add a check for whether the two packets are definitely equal or may be different?!
-   - change the preamble insertion module to immediately start with a progress of 8 bytes and
-   - change the transmitter to check if the at the progress update the expected progress position is at the end of the packet to skip the progress report
-
  - create release script (remove trailing spaces, replace leading tabs, fix header guards, format source code)
-
- - check Ethernet FCS progress report at the correct moment of time
 
  - add parameters to ScenarioManager disconnect operation to allow cutting connection at either end (source or destination)
    and also support disconnecting bidirectional connections in all four combinations.
 
- - generic TCP/UDP socket tagging, with automatic copying of tags to outgoing packets
-
- - temporal and spectral and spatial energy density
-   - sampling
-   - filling
-   - integrating
-
- - similarly to timing API other meta-data could also be stored for the packet data per bit (e.g. hop count)
- - unify C++ namespaces, NED namespaces, folders and file names (e.g. ospfv vs. Ospf3*)
  - implement additional INET specific fingerprint ingredients: network interface configuration, routing table, mobility state, etc.
- - fix Ieee80211UnitDiskReceiver base class and initialize, solve diamond inheritance
  - extend timeGains/frequencyGains parsing with OMNeT++ 6.0 expression parser support (#ifdef)
- - extend PlotFigure with margin parameters
  - extend Units with double and simtime_t handling and use C++ units in division and multiplication functions
- - signal shared ptr cache
+
  - implement MemoizedFunction and multi dimensional domain subdivision tree
  - add parameter for orthogonal combinator function: multiplicative and minimum based
- - add parameter for bit error estimation: based on min(packet), mean(packet), min(mean(symbol))
-
- - chapter in developers guide about signals and statistics, naming convention, what constitutes a signal and what does not, etc.
- - existing protocols
-   - 802.11 statistics, logging, display strings, code cleanup, memory management
-   - complete IPv6
- - cross-cutting smaller changes
-   - review end-to-end delay calculation
-     - for applications it means the delay of complete application packets
-     - for UDP it means the delay of datagrams
-     - for TCP it means the delay of bytes
-   - review NED documentation, update obsolete parts
-   - add meaningful display strings to at least the top level submodules of network nodes (with optional formatting parameters)
-   - finish renaming signals, labels, statistics to have a consistent naming scheme
-   - review all examples to check if they still work as expected
- - new features
-   - LTE PHY full support and porting to INET 4.0, source/sink separation, signal classes, etc. (e.g. probe/microwave oven)
- - port existing 3rd party models
-   - help ANSA porting to INET 4.0
 
  - the packet dissector may need to do implicit chunk conversion because it has to choose a representation which may or may not be the same as the one in the packet (e.g. two interoperable frameworks)
 
  - change all protocols (where applicable) to accept any kind of cPacket (not only Packet) for interoperability with 3rd party projects 
  - remove obsolete HostAutoConfigurator, Ipv4FlatNetworkConfigurator modules?
- - 802.11 preamble, header, data separation in HT and VHT mode doesn't really make sense the way it's right now implemented
-   there's no separate header in these modes, the preamble is much more complicated than in the other modes
-   there's also a bug related to this in the Ieee80211ScalarTransmitter when it computes the data duration
- - add separate Ieee80211Socket
  - solve dynamic node creation and address resolution in applications
  - don't subclass APSK medium and such with other specific radios, think of APSK radio as yet another specific conceptual radio
  - move extra functions that doesn't really belong to L3AddressResolver (e.g. findInterfaceTableOf, findIPv4RoutingTableOf)
- - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
- - revise protocol header class hierarchy (e.g. avoid unnecessary interfaces)
- - revise NED network node module hierarchy (e.g. MPLS nodes)
  - use m instead of double in Coord?
  - replace functionality of GenericAppMsg with chunk tags, or better yet get rid of it altogether!
- - use shared pointers for transmissions/receptions, etc. because the gui copies packets in the packet log and inspects them later
- - factor out physical layer analog domain representation into a separate parameter of transmissions
  - review all examples and check if they still do what is intended
  - add separate reusable application packet generators
  - rewrite serializers that use structure bit fields, this is undefined C++ behavior
+
  - replace cCompoundModule class in hosts/nodes with a specific classes such as StandardHost
    providing getInterfaceTable, getMobility, getIPv4NetworkLayer, etc. to avoid random code fragments with getSubmodule(".ipv4.routingTable")???
    but we should avoid having these classes for a random collections of utility functions!
  - add separate classes/functions for iterating over the network nodes in a network or
    finding a network node based on its mac address/ip address or finding the position of a network node, etc.
  - add missing node NED files for existing protocols (e.g. sensor nodes, IoT devices) 
- - update all NED and C++ documentation, remove obsolete documentation
- - nicely position submodules in compound modules, prepare for 2 info lines
- - extend main protocol modules (and all submodules) with 2 info lines above the submodule icon
- - avoid specifying module icon sizes by default, override icon size in submodules
 
  - @descriptor(false) vs @descriptor(readonly); why do we have descriptor anything at all? why don't we have descriptors for all types all the time?
  - @editable(false) vs @descriptor(readonly)??? and in general editable is a GUI concept
 
  - DYMOSequenceNumber: class DYMOSequenceNumber??? why class? primitive class???
  - PacketDrop: packet_ -> packet
- - IntServ.msg: *_t is reserved for C++ standard
  - InterfaceEntry: eliminate @getter if possible
  - EtherType.msg: replace with Protocol.h?
  - IPProtocolId.msg: replace with Protocol.h?
@@ -133,45 +74,17 @@
 
  - DHCP Client/Server should work with multiple interfaces
 
- - revise ethernet/eth-index.ned! e.g it writes about autoconfiguration, and probably half of it is obsolete
-
  - examples/ospfv2/areas does not work: the UDP apps in H3 keep sending, but never receive answer; seems like
    sent packets cannot even leave H3 (they are queued up in ARP, due to "address resolution pending")
 
- - TCP,UDP,SCTP: Need revision for PORT_ANY usage:
-   unspec port should be 0 not -1
-   What will the PORT_ANY value: -1 or 0.
-   Where do replace from PORT_ANY to a valid port: in TCPSocket or in
-      TCPConnection::process_OPEN_ACTIVE/process_OPEN_PASSIVE
-   Check it in other protocols.
-
- - TCPSegment, UDPPacket: use uint16_t for ports, uint32_t for sequence numbers, etc; also in the code!!!
-   hint: first replace it somewhere with a type that CANNOT be cast to integer types, then let compile errors propagate the type change everywhere
-
  - provide default for RoutingTable.routingTableFile once xmlinline() is implemented in omnet.
-
- - PPP, Ethernet: should use signals (ModelChangeNotification) to detect if channel path breaks
-
- - implement node failure/recovery by using signals mechanism
-
- - VideoStrmReq problem on IPv6: 
-   "Error in module (UDP) P62.server.udp (id=21): User error: (UDPPacket)VideoStrmReq arrived from lower layer without control info"
-
- - finish making gate names consistent in RTP modules
 
  - gate labeling for the NED editor
  - change the @labels(PPPFrame) label on pppg[] gates of hosts/routers to something slightly different
    (e.g. @labels(PPPFrame/pk)) so that PPPInterface does not appear in the palette on network level?
 
- - eliminate ARP overhead for PPP interfaces
-
- - examples\wireless\hosttohost: Readme mentions some "attached Excel sheet" which is missing!!!
-
- - failure/recovery (replacing with failed router is problematic!)
-
  - review if existing (also add missing) "q=queue" display string tags still refer to the right module?
  - rename TCPBasicClientApp to TCPRequestReplyClientApp?
- - Ethernet: ditch autoconfig and zero-datarate channels, use deliverOnReceptionStart and 10/100/1000Mbps channels!
 
  - rename the following TED.h methods to begin with a verb:
    - unsigned int linkIndex(IPAddress advrouter, IPAddress linkid)
@@ -179,15 +92,9 @@
    - IPAddress peerRemoteInterface(IPAddress peerIP)
    - IPAddress primaryAddress(IPAddress localInf)
 
- - cache gate IDs to speed up sending
-
  - model link failures, via isDown() method of InterfaceEntry. L2 modules
    should understand isDown(), and FailureManager should be enhanced with
    linkdown/linkup commands. See email on list archive on 9/17/2006 10:34 AM
-
- - Ieee80211Mac to fire TxNotifDetails when Ack arrives for a frame. Mgmt layer
-   to use this notification to learn when ProbeRequest or AssociationResponse
-   has been transmitted.
 
  - problem with NetworkConfigurator + RSVP's FailureManager: after deleting/recreating
    LSR, configured IP addresses and host routes to PPP peers get lost.
@@ -197,27 +104,34 @@
    what is the TELinkInfo.state flag?
    what is UnResvBandwidth[8] indexed with? what is [4] and [7] that gets printed?
 
- - BUG: UDP ephemeral port setting: if chosen & stored in UDP, sending further dgrams need to look it up from the SockDesc...
-
  - reading routing files: it doesn't make sense to be able to manually set MULTICAST on an interface
 
- - added userId to TCPCommand -- rewrite TCPSocketMap to make use of userId
-        - socket must be inserted into map before bind(), so that a userId can be assigned
-        - what about incoming connections? how to assign userId to them?
-           IF IT CANNOT BE DONE: remove userId from TCP!!!!
-
  - apps: add startTime param; IPAddressResolver should only be invoked at startTime not in initialize()!
-
- - Ethernet: restore original connection color when transmission ends
-
- - TCP: how to handle ICMP error reports?
 
  - MPLS/LDP/RSVP:
     - document! ScenarioManager commands, XML file formats, unimplemented features
 
- - TCP: Slow Start should be applied every time TCP starts to send "after a sufficiently long idle period".
-   "Idle" could be interpreted as when the send queue is empty (there's nothing
-   to send), and there's no unacknowledged data (i.e. previously sent segments
-   have all been acknowledged). But what is "sufficiently long"? I guess that
-   should be measured in RTT rather than absolute time (secs). So maybe we
-   should say 5*RTT is "sufficiently long"?
+ - generic
+   - add meaningful display strings to at least the top level submodules of network nodes (with optional formatting parameters)
+   - cache gate IDs to speed up sending
+   - revise protocol base class hierarchy (e.g. LayeredProtocolBase vs IPv4 base class, etc.)
+   - revise protocol header class hierarchy (e.g. avoid unnecessary interfaces)
+   - revise NED network node module hierarchy (e.g. MPLS nodes)
+   - nicely position submodules in compound modules, prepare for 2 info lines
+   - avoid specifying module icon sizes by default, override icon size in submodules
+
+ - cleanup
+   - review all examples to check if they still work as expected
+   - rename all modules, parameters, classes, signals, statistics, labels to have a consistent naming scheme
+   - discuss renaming *Layered* modules to *Compound* or *Modular*?
+   - if conditional connections are used, eliminate typename != "" from NED files using default interface ommitted typenames
+   - unify C++ namespaces, NED namespaces, folders and file names
+   - eliminate C style casts, especially after (Foo*)foo->dup()
+   - update all EV statements to use EV_FIELD
+   - replace cross module pointers with ModuleRef<T>
+   - bitrate vs datarate
+   - operator<<, printOn, str, etc. in all classes
+
+ - porting
+   - simuLTE PHY full support and porting to INET 4.x
+   - help ANSA porting to INET 4.x

@@ -1,3 +1,6 @@
+ - separate initial positioning from positioning over time
+ - make them composable sequentially and additively
+ - extend interface with future movement predictions
  - cleanup implementation with respect to base classes, overriding base methods, etc.
  - fix mobility non-determinism caused by interpolation from last position during animation
  - validate Rotation, Quaternion, EulerAngles against each other and documentation

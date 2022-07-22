@@ -1,0 +1,29 @@
+ - fix UDP ephemeral port setting: if chosen & stored in UDP, sending further dgrams need to look it up from the SockDesc...
+
+ - finish making gate names consistent in RTP modules
+
+ - generic TCP/UDP socket tagging, with automatic copying of tags to outgoing packets
+
+ - TCP,UDP,SCTP: Need revision for PORT_ANY usage:
+   unspec port should be 0 not -1
+   What will the PORT_ANY value: -1 or 0.
+   Where do replace from PORT_ANY to a valid port: in TCPSocket or in
+      TCPConnection::process_OPEN_ACTIVE/process_OPEN_PASSIVE
+   Check it in other protocols.
+
+ - TCPSegment, UDPPacket: use uint16_t for ports, uint32_t for sequence numbers, etc; also in the code!!!
+   hint: first replace it somewhere with a type that CANNOT be cast to integer types, then let compile errors propagate the type change everywhere
+
+ - added userId to TCPCommand -- rewrite TCPSocketMap to make use of userId
+   - socket must be inserted into map before bind(), so that a userId can be assigned
+   - what about incoming connections? how to assign userId to them?
+           IF IT CANNOT BE DONE: remove userId from TCP!!!!
+
+ - TCP: how to handle ICMP error reports?
+
+ - TCP: Slow Start should be applied every time TCP starts to send "after a sufficiently long idle period".
+   "Idle" could be interpreted as when the send queue is empty (there's nothing
+   to send), and there's no unacknowledged data (i.e. previously sent segments
+   have all been acknowledged). But what is "sufficiently long"? I guess that
+   should be measured in RTT rather than absolute time (secs). So maybe we
+   should say 5*RTT is "sufficiently long"?
