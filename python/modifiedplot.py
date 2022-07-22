@@ -72,6 +72,36 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label):
 
     p.ylabel(utils.make_chart_title(df, ["title"]))
     
+def plot_vectors_separate(df, props, legend_func=utils.make_legend_label):
+    """
+    This is very similar to `plot_vectors`, with identical usage.
+    The only difference is in the end result, where each vector will
+    be plotted in its own separate set of axes (coordinate system),
+    arranged vertically, with a shared X axis during navigation.
+    """
+    def get_prop(k):
+        return props[k] if k in props else None
+
+    title_cols, legend_cols = utils.extract_label_columns(df, props)
+
+    df.sort_values(by=['order'], inplace=True)
+
+    ax = None
+    for i, t in enumerate(df.itertuples(index=False)):
+        style = utils._make_line_args(props, t, df)
+        ax = plt.subplot(df.shape[0], 1, i+1, sharex=ax)
+
+        if i != df.shape[0]-1:
+            plt.setp(ax.get_xticklabels(), visible=False)
+            ax.xaxis.get_label().set_visible(False)
+
+        plt.plot(t.vectime, t.vecvalue, label=legend_func(legend_cols, t, props), **style)
+
+    plt.subplot(df.shape[0], 1, 1)
+
+    title = get_prop("title") or make_chart_title(df, title_cols)
+    utils.set_plot_title(title)
+    
 def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_label):
     p = ideplot if chart.is_native_chart() else plt
     
