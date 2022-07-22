@@ -13,6 +13,7 @@
 
 namespace inet {
 
+// TODO extend with margin parameters
 class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
 {
     struct Tick {

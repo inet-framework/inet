@@ -25,6 +25,8 @@ namespace inet {
 
 namespace visualizer {
 
+
+// TODO: visualization of temporal and spectral and spatial energy density using sampling/filling/integrating method
 class INET_API MediumVisualizerBase : public VisualizerBase, public cListener
 {
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON

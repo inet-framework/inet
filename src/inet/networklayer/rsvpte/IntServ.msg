@@ -8,6 +8,8 @@
 //
 // This file defines data structures used in IntServ services
 //
+// TODO *_t is reserved for C++ standard
+//
 
 import inet.common.INETDefs;
 import inet.networklayer.contract.ipv4.Ipv4Address;
