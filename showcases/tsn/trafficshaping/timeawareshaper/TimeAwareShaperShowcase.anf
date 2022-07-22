@@ -5,21 +5,15 @@
         <input pattern="/inet/showcases/tsn/trafficshaping/timeawareshaper/results/*.sca"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/linechart.png" id="1549210077" name="Client application traffic and traffic shaper incoming traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="250023493" name="Client application traffic and traffic shaper incoming traffic" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-# ----workaround start----
-# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
-# remove when it's part of a release
-# replace it with:
-#     import modifiedplot
-try:
-    import modifiedplot
-except:
-    import modifiedplot_tas
-    import modifiedplot
+import os
+import sys
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-# ----workaround end----
+import modifiedplot
 import matplotlib.pyplot as plt
 default_colors = modifiedplot.default_colors
 
@@ -663,22 +657,15 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="9"/>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="912231840" name="Shaper Incoming and Outgoing Traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="286260457" name="Shaper Incoming and Outgoing Traffic" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-# ----workaround start----
-# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
-# remove when it's part of a release
-# replace it with:
-#     import modifiedplot
-try:
-    import modifiedplot
-except:
-    import modifiedplot_tas
-    import modifiedplot
+import os
+import sys
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-# ----workaround end----
-import matplotlib.pyplot as plt
+import modifiedplot
 default_colors = modifiedplot.default_colors
 
 # get chart properties
@@ -1322,22 +1309,15 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="9"/>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1254249159" name="Traffic Shaper Outgoing Traffic and Server Application Traffic" template="linechart_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1898348329" name="Traffic Shaper Outgoing Traffic and Server Application Traffic" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-# ----workaround start----
-# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
-# remove when it's part of a release
-# replace it with:
-#     import modifiedplot
-try:
-    import modifiedplot
-except:
-    import modifiedplot_tas
-    import modifiedplot
+import os
+import sys
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-# ----workaround end----
-import matplotlib.pyplot as plt
+import modifiedplot
 default_colors = modifiedplot.default_colors
 
 # get chart properties
@@ -1980,7 +1960,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="9"/>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="481571147" name="Traffic shaper queue lengths" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="963051623" name="Traffic shaper queue lengths" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot
 
@@ -2591,7 +2571,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_log" value="false"/>
             <property name="Axis.Label.Font" value="Arial-regular-8"/>
             <property name="legend_placement" value="upper right"/>
-            <property name="plot.properties" value="savefig.transparent : True"/>
+            <property name="plot.properties" value=""/>
             <property name="data_export_filename" value=""/>
             <property name="xaxis_title" value="Simulation Time [s]"/>
             <property name="Plot.BackgroundColor" value="white"/>
@@ -2621,7 +2601,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="681948716" name="Transmitting state and gate states" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="651585001" name="Transmitting state and gate states" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import re
 import math
 import matplotlib.pyplot as plt
@@ -3260,7 +3240,7 @@ utils.export_data_if_needed(df, props)]]></script>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
             <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1473014649" name="Traffic shaping" template="linechart_separate_mpl" type="MATPLOTLIB">
+        <chart icon="icons/full/obj/linechart.png" id="1635101941" name="Traffic shaping" template="linechart_separate_mpl" type="MATPLOTLIB">
             <script><![CDATA[import re
 import numpy
 import math

@@ -8,18 +8,12 @@
         <chart icon="icons/full/obj/linechart.png" id="290703123" name="Application End-to-End Delay" template="linechart_native" type="LINE">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-# ----workaround start----
-# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
-# remove when it's part of a release
-# replace it with:
-#     import modifiedplot
-try:
-    import modifiedplot
-except:
-    import modifiedplot_sat
-    import modifiedplot
+import os
+import sys
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-# ----workaround end----
+import modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -674,18 +668,12 @@ utils.export_data_if_needed(df, props)
         <chart icon="icons/full/obj/linechart.png" id="1701145797" name="Application End-to-End Delay, Comparison of Eager and SAT" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-# ----workaround start----
-# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
-# remove when it's part of a release
-# replace it with:
-#     import modifiedplot
-try:
-    import modifiedplot
-except:
-    import modifiedplot_sat
-    import modifiedplot
+import os
+import sys
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-# ----workaround end----
+import modifiedplot
 
 # get chart properties
 props = chart.get_properties()

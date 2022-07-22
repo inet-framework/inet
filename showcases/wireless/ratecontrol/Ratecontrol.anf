@@ -1901,18 +1901,12 @@ utils.export_data_if_needed(df, props)
         <chart icon="icons/full/obj/linechart.png" id="125318307" name="Selected datarate" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-# ----workaround start----
-# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
-# remove when it's part of a release
-# replace it with:
-#     import modifiedplot
-try:
-    import modifiedplot
-except:
-    import modifiedplot_rc
-    import modifiedplot
+import os
+import sys
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-# ----workaround end----
+import modifiedplot
 import matplotlib.pyplot as plt
 
 # get chart properties

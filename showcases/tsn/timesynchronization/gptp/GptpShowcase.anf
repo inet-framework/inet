@@ -1727,18 +1727,12 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="1728805221" name="Clock drift - time domain 1" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-# ----workaround start----
-# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
-# remove when it's part of a release
-# replace it with:
-#     import modifiedplot
-try:
-    import modifiedplot
-except:
-    import modifiedplot_gptp
-    import modifiedplot
+import os
+import sys
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-# ----workaround end----
+import modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -3014,18 +3008,12 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="1717988050" name="Clock drift - domain 0" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-# ----workaround start----
-# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
-# remove when it's part of a release
-# replace it with:
-#     import modifiedplot
-try:
-    import modifiedplot
-except:
-    import modifiedplot_gptp
-    import modifiedplot
+import os
+import sys
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-# ----workaround end----
+import modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -3663,18 +3651,12 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="1102847241" name="Clock drift - domain 1" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-# ----workaround start----
-# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
-# remove when it's part of a release
-# replace it with:
-#     import modifiedplot
-try:
-    import modifiedplot
-except:
-    import modifiedplot_gptp
-    import modifiedplot
+import os
+import sys
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-# ----workaround end----
+import modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -4312,18 +4294,12 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="1630386290" name="Clock drift - domain 2" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-# ----workaround start----
-# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
-# remove when it's part of a release
-# replace it with:
-#     import modifiedplot
-try:
-    import modifiedplot
-except:
-    import modifiedplot_gptp
-    import modifiedplot
+import os
+import sys
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-# ----workaround end----
+import modifiedplot
 
 # get chart properties
 props = chart.get_properties()
@@ -4962,18 +4938,12 @@ utils.export_data_if_needed(df, props)
             <chart icon="icons/full/obj/linechart.png" id="1654088279" name="Clock drift - domain 3" template="linechart_native" type="LINE">
                 <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-# ----workaround start----
-# workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
-# remove when it's part of a release
-# replace it with:
-#     import modifiedplot
-try:
-    import modifiedplot
-except:
-    import modifiedplot_gptp
-    import modifiedplot
+import os
+import sys
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
 import matplotlib.pyplot as plt
-# ----workaround end----
+import modifiedplot
 
 # get chart properties
 props = chart.get_properties()
