@@ -36,7 +36,7 @@ using namespace omnetpp;
 #endif
 
 #define INET_VERSION        0x0404
-#define INET_PATCH_LEVEL    0x00
+#define INET_PATCH_LEVEL    0x01
 
 #if defined(INET_EXPORT)
 #define INET_API          OPP_DLLEXPORT

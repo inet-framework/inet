@@ -1,6 +1,19 @@
 Recent changes in the INET Framework
 ====================================
 
+INET 4.4.1 (July 2022) - Stable
+-------------------------------
+
+This is a minor bugfix release, mostly fixing linker errors on Windows for projects
+depending on INET.
+
+- Fixed #758
+- Added several INET_API markers to fix linker errors on Windows
+- Fixed duplicate symbol linker errors on Windows when using template classes 
+  as a base class. 
+- Fixed some inline method declarations.
+
+
 INET-4.4 (May 2022) - Stable
 ----------------------------
 
