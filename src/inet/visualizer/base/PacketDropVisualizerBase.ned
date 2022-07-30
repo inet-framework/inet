@@ -20,7 +20,8 @@ package inet.visualizer.base;
 // The format string can contain the following directives:
 //  - %n packet name
 //  - %c packet class
-//  - %r drop reason
+//  - %r drop reason number
+//  - %s drop reason string
 //
 // @see ~PacketDropCanvasVisualizer, ~PacketDropOsgVisualizer, ~IPacketDropVisualizer, ~VisualizerBase
 //

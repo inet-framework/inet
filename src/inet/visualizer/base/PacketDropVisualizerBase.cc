@@ -71,6 +71,8 @@ std::string PacketDropVisualizerBase::DirectiveResolver::resolveDirective(char d
             return packetDrop->getPacket_()->getClassName();
         case 'r':
             return std::to_string(packetDrop->getReason());
+        case 's':
+            return cEnum::find("inet::PacketDropReason")->getStringFor(packetDrop->getReason());
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
