@@ -103,6 +103,13 @@ def plot_vectors_separate(df, props, legend_func=utils.make_legend_label):
     utils.set_plot_title(title)
     
 def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_label):
+    """
+    This is a modified version of the built-in plot_vectors_separate() function. It takes a list of dataframes,
+    and plots each dataframe on its own subplot. Useful for plotting multiple lines on a subplot, as the built-in
+    function can't do that currently.
+    
+    The dataframes can also contain 'additional_style' columns.
+    """
     p = ideplot if chart.is_native_chart() else plt
     
     title = ""
@@ -125,9 +132,10 @@ def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_
             
         for t in df.itertuples(index=False):
             style = utils._make_line_args(props, t, df)
-            style_dict = eval(t.additional_style)
-            for i in style_dict.items():
-                style[i[0]] = i[1]
+            if 'additional_style' in df.columns:
+                style_dict = eval(t.additional_style)
+                for i in style_dict.items():
+                    style[i[0]] = i[1]
             p.plot(t.vectime, t.vecvalue, label=legend_func(legend_cols, t, props), **style)
         
         if j == 0:
