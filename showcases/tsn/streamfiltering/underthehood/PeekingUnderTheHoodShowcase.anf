@@ -5,7 +5,7 @@
         <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="446864451" name="Traffic class 1" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="21" name="Traffic class 1" template="linechart_native" type="LINE">
             <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
@@ -604,7 +604,7 @@ utils.export_data_if_needed(df, props)
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Traffic class 1"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
-            <property name="vector_operations" value="apply: timewinthruput(window_size=0.02)&#10;apply: divide_by(1000000)"/>
+            <property name="vector_operations" value="apply: divide_by(1000000)"/>
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
@@ -642,7 +642,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="920160435" name="Traffic class 2" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="269" name="Traffic class 2" template="linechart_native" type="LINE">
             <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
@@ -1241,7 +1241,7 @@ utils.export_data_if_needed(df, props)
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Traffic class 2"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
-            <property name="vector_operations" value="apply: timewinthruput(window_size=0.02)&#10;apply: divide_by(1000000)"/>
+            <property name="vector_operations" value="apply: divide_by(1000000)"/>
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
@@ -1279,7 +1279,7 @@ utils.export_data_if_needed(df, props)
             <property name="legend_automatic" value="true"/>
             <property name="legend_format" value=""/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="29579289" name="Traffic class 3" resultTypes="" template="linechart_native" type="LINE">
+        <chart icon="icons/full/obj/linechart.png" id="268" name="Traffic class 3" template="linechart_native" type="LINE">
             <script><![CDATA[import re
 import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
@@ -1878,7 +1878,7 @@ utils.export_data_if_needed(df, props)
             <property name="Legend.Border" value="false"/>
             <property name="title" value="Traffic class 3"/>
             <property name="Plot.Title.Font" value="Arial-regular-10"/>
-            <property name="vector_operations" value="apply: timewinthruput(window_size=0.02)&#10;apply: divide_by(1000000)"/>
+            <property name="vector_operations" value="apply: divide_by(1000000)"/>
             <property name="cycle_seed" value="0"/>
             <property name="Axis.Title.Font" value="Arial-regular-8"/>
             <property name="yaxis_log" value="false"/>
