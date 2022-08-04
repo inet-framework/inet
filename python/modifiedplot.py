@@ -74,17 +74,27 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label):
     
 def plot_vectors_separate(df, props, legend_func=utils.make_legend_label):
     """
-    This is very similar to `plot_vectors`, with identical usage.
-    The only difference is in the end result, where each vector will
-    be plotted in its own separate set of axes (coordinate system),
-    arranged vertically, with a shared X axis during navigation.
+    Modified version of the built-in plot_vectors_separate() function, with the additional functionality
+    of ordering the dataframe before plotting, based on the 'order' column. The order of the line colors and
+    the legend order can be controlled this way.
+    
+        Original description:
+        
+        This is very similar to `plot_vectors`, with identical usage.
+        The only difference is in the end result, where each vector will
+        be plotted in its own separate set of axes (coordinate system),
+        arranged vertically, with a shared X axis during navigation.
     """
     def get_prop(k):
         return props[k] if k in props else None
+    
+    ax_list = []
 
     title_cols, legend_cols = utils.extract_label_columns(df, props)
 
-    df.sort_values(by=['order'], inplace=True)
+    if 'order' in df.columns:
+        print("\nsorting by order\n")
+        df.sort_values(by=['order'], inplace=True)
 
     ax = None
     for i, t in enumerate(df.itertuples(index=False)):
@@ -96,11 +106,14 @@ def plot_vectors_separate(df, props, legend_func=utils.make_legend_label):
             ax.xaxis.get_label().set_visible(False)
 
         plt.plot(t.vectime, t.vecvalue, label=legend_func(legend_cols, t, props), **style)
+        ax_list.append(ax)
 
     plt.subplot(df.shape[0], 1, 1)
 
     title = get_prop("title") or make_chart_title(df, title_cols)
     utils.set_plot_title(title)
+    
+    return ax_list
     
 def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_label):
     """
@@ -165,7 +178,7 @@ def add_to_dataframe(df, style_tuple_list, default_dict={}, order={}):
     default_dict = {'linestyle': '-', 'linewidth': 1}
     order = ['configname', {'Default_config': 1, 'Advanced_config': 0, 'Manual_config': 2}]
     
-    Note that the value parameter in style_tuple_list can contain regex (e.g. .*foo). Make sure to escape regex characters such as [ and ] with \
+    Note that the value parameter in style_tuple_list and the order can contain regex (e.g. .*foo). Make sure to escape regex characters such as [ and ] with \
     """
     
     df['additional_style'] = None
@@ -210,9 +223,13 @@ def add_to_dataframe(df, style_tuple_list, default_dict={}, order={}):
         
         order_column = order[0]
         order_dict = order[1]
+        if debug: print('order_column:', order_column, 'order_dict', order_dict)
         for i in order_dict.items():
             for j in range(0,len(df)):
-                if df[order_column][j] == i[0]:
+                # if df[order_column][j] == i[0]:
+                pattern = re.compile(i[0])
+                match = re.fullmatch(pattern, df[order_column][j])
+                if match != None:
                     df['order'][j] = i[1]
                     
         if debug: print("order added.", df['order'], df)
