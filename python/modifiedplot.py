@@ -254,9 +254,9 @@ def multidimensional_legend(style_tuple_list, labels = [], handles = []):
 
     if debug: print("style_tuple_list", style_tuple_list)
     for i in style_tuple_list:
-        print("i", i)
+        if debug: print("i", i)
         labels.append(i[0])
-        print("i[1]", i[1])
+        if debug: print("i[1]", i[1])
         handles.append(Line2D([0], [0], **i[1]))
     if debug:
         print("labels", labels)
