@@ -236,10 +236,12 @@ def add_to_dataframe(df, style_tuple_list, default_dict={}, order={}):
 
     return df
 
-def multidimensional_legend(style_tuple_list):
+def multidimensional_legend(style_tuple_list, labels = [], handles = []):
     """
     Can create multi-dimensional legend, where one aspect of a line (e.g. color) represents a dimension, another aspect (e.g. linestyle of solid, dashed or dotted) represents another dimension,
     as opposed to the default behavior, in which lines in the legend represent the lines on the chart directly. **TODO** not sure this explanation is needed
+    
+    If existing legend handles and labels are supplied arguments, the new legend entries are appended.
     
     style_tuple_list: [('legend label 1', {dict contaning the style arguments for the legend}), ('legend label 2, {...}), ...]
     
@@ -249,8 +251,7 @@ def multidimensional_legend(style_tuple_list):
                         
     returns legend handles and labels that can be supplied to plt.legend()
     """
-    labels = []
-    handles = []
+
     if debug: print("style_tuple_list", style_tuple_list)
     for i in style_tuple_list:
         print("i", i)
@@ -261,3 +262,4 @@ def multidimensional_legend(style_tuple_list):
         print("labels", labels)
         print("handles", handles)
     return handles, labels
+    
