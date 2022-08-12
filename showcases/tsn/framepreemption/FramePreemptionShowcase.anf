@@ -656,7 +656,7 @@ from omnetpp.scave import results, chart, utils
 import os
 import sys
 # TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
-sys.path.append(os.path.join(os.getcwd(), "../../../../python"))
+sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
 import modifiedplot
 import matplotlib.pyplot as plt
