@@ -6,7 +6,7 @@ import ast
 import re
 from matplotlib.lines import Line2D
 
-debug = False
+# debug = False
 
 default_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
 
@@ -72,11 +72,13 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label):
 
     p.ylabel(utils.make_chart_title(df, ["title"]))
     
-def plot_vectors_separate(df, props, legend_func=utils.make_legend_label):
+def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, debug=False):
     """
     Modified version of the built-in plot_vectors_separate() function, with the additional functionality
     of ordering the dataframe before plotting, based on the 'order' column. The order of the line colors and
-    the legend order can be controlled this way.
+    the legend order can be controlled this way. It also returns the list of axes used in the plot for further processing.
+    
+    Also adds the content of the 'additional_style' column to the style object before plotting.
     
         Original description:
         
@@ -93,12 +95,16 @@ def plot_vectors_separate(df, props, legend_func=utils.make_legend_label):
     title_cols, legend_cols = utils.extract_label_columns(df, props)
 
     if 'order' in df.columns:
-        print("\nsorting by order\n")
+        if debug: print("\nsorting by order\n")
         df.sort_values(by=['order'], inplace=True)
 
     ax = None
     for i, t in enumerate(df.itertuples(index=False)):
         style = utils._make_line_args(props, t, df)
+        if 'additional_style' in df.columns:
+            style_dict = eval(t.additional_style)
+            for j in style_dict.items():
+                style[j[0]] = j[1]
         ax = plt.subplot(df.shape[0], 1, i+1, sharex=ax)
 
         if i != df.shape[0]-1:
@@ -162,7 +168,7 @@ def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_
     
     return ax_list
 
-def add_to_dataframe(df, style_tuple_list, default_dict={}, order={}):
+def add_to_dataframe(df, style_tuple_list=[], default_dict={}, order={}, debug=False):
     """
     Adds 'additional_style' column to dataframe. The concent of this column is added to 'style' object when plotting.
     Can also specify row order in dataframe (e.g. for ordering items in legend).
@@ -185,37 +191,37 @@ def add_to_dataframe(df, style_tuple_list, default_dict={}, order={}):
     
     def add_separator():
         print("")
-    
-    for i in style_tuple_list:
-        column = i[0]
-        value = i[1]
-        style_tuple = i[2]
-        
+    if style_tuple_list:
+        for i in style_tuple_list:
+            column = i[0]
+            value = i[1]
+            style_tuple = i[2]
+            
+            for i in range(0,len(df)):
+                pattern = re.compile(value)
+                match = re.fullmatch(pattern, df[column][i])
+                if match != None:
+                    if debug:
+                        print("MATCH FOUND:")
+                        print("    column:", column)
+                        print("    value:", value)
+                        print("    match:", match.group())
+                    if (df['additional_style'][i] == None):
+                        df['additional_style'][i] = str(style_tuple)
+                        if debug: print("Adding style tuple:", str(style_tuple))
+                        if debug: add_separator()
+                    else:
+                        orig_style_dict = ast.literal_eval(df['additional_style'][i])       # convert already added style to dict
+                        if debug: print("Adding style tuple to existing style dict", orig_style_dict, type(orig_style_dict))
+                        orig_style_dict.update(style_tuple)                                 # add new style to dict
+                        if debug: print("New style dict", orig_style_dict, type(orig_style_dict))
+                        if debug: add_separator()
+                        df['additional_style'][i] = str(orig_style_dict)                    # add to dataframe as string
+                    
         for i in range(0,len(df)):
-            pattern = re.compile(value)
-            match = re.fullmatch(pattern, df[column][i])
-            if match != None:
-                if debug:
-                    print("MATCH FOUND:")
-                    print("    column:", column)
-                    print("    value:", value)
-                    print("    match:", match.group())
-                if (df['additional_style'][i] == None):
-                    df['additional_style'][i] = str(style_tuple)
-                    if debug: print("Adding style tuple:", str(style_tuple))
-                    if debug: add_separator()
-                else:
-                    orig_style_dict = ast.literal_eval(df['additional_style'][i])       # convert already added style to dict
-                    if debug: print("Adding style tuple to existing style dict", orig_style_dict, type(orig_style_dict))
-                    orig_style_dict.update(style_tuple)                                 # add new style to dict
-                    if debug: print("New style dict", orig_style_dict, type(orig_style_dict))
-                    if debug: add_separator()
-                    df['additional_style'][i] = str(orig_style_dict)                    # add to dataframe as string
-                
-    for i in range(0,len(df)):
-        if (df['additional_style'][i] == None):
-            if debug: print('adding default stuff')
-            df['additional_style'][i] = str(default_dict)
+            if (df['additional_style'][i] == None):
+                if debug: print('adding default stuff')
+                df['additional_style'][i] = str(default_dict)
             
     if order:
         # order the dataframe
@@ -223,7 +229,7 @@ def add_to_dataframe(df, style_tuple_list, default_dict={}, order={}):
         
         order_column = order[0]
         order_dict = order[1]
-        if debug: print('order_column:', order_column, 'order_dict', order_dict)
+        if debug: print('order_column:', order_column, '\norder_dict', order_dict)
         for i in order_dict.items():
             for j in range(0,len(df)):
                 # if df[order_column][j] == i[0]:
@@ -232,11 +238,13 @@ def add_to_dataframe(df, style_tuple_list, default_dict={}, order={}):
                 if match != None:
                     df['order'][j] = i[1]
                     
-        if debug: print("order added.", df['order'], df)
+        if debug: 
+            print("order added:")
+            print(df['order'], df)
 
     return df
 
-def multidimensional_legend(style_tuple_list, labels = [], handles = []):
+def multidimensional_legend(style_tuple_list, labels = [], handles = [], debug=False):
     """
     Can create multi-dimensional legend, where one aspect of a line (e.g. color) represents a dimension, another aspect (e.g. linestyle of solid, dashed or dotted) represents another dimension,
     as opposed to the default behavior, in which lines in the legend represent the lines on the chart directly. **TODO** not sure this explanation is needed
