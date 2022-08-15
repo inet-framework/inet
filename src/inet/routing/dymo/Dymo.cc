@@ -230,14 +230,14 @@ void Dymo::reinjectDelayedDatagram(Packet *datagram)
 {
     const auto& networkHeader = getNetworkProtocolHeader(datagram);
     EV_INFO << "Sending queued datagram: source = " << networkHeader->getSourceAddress() << ", destination = " << networkHeader->getDestinationAddress() << endl;
-    networkProtocol->reinjectQueuedDatagram(const_cast<const Packet *>(datagram));
+    networkProtocol->reinjectQueuedDatagram(datagram);
 }
 
 void Dymo::dropDelayedDatagram(Packet *datagram)
 {
     const auto& networkHeader = getNetworkProtocolHeader(datagram);
     EV_WARN << "Dropping queued datagram: source = " << networkHeader->getSourceAddress() << ", destination = " << networkHeader->getDestinationAddress() << endl;
-    networkProtocol->dropQueuedDatagram(const_cast<const Packet *>(datagram));
+    networkProtocol->dropQueuedDatagram(datagram);
 }
 
 void Dymo::eraseDelayedDatagrams(const L3Address& target)
