@@ -8,7 +8,12 @@ from matplotlib.lines import Line2D
 
 # debug = False
 
-default_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
+default_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']
+
+def get_default_colors():
+    default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    print(default_colors)
+    return default_colors
 
 def plot_vectors(df, props, legend_func=utils.make_legend_label):
     """
