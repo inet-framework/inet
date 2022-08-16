@@ -109,12 +109,12 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
      * to handleMulticastPacket() for multicast packets, or drops the packet if
      * it's unroutable or forwarding is off.
      */
-    virtual void routePacket(Packet *datagram, const NetworkInterface *destIE, const L3Address& nextHop, bool fromHL);
+    virtual void routePacket(Packet *datagram, bool fromHL);
 
     /**
      * Forwards packets to all multicast destinations, using sendDatagramToOutput().
      */
-    virtual void routeMulticastPacket(Packet *datagram, const NetworkInterface *destIE, const NetworkInterface *fromIE);
+    virtual void routeMulticastPacket(Packet *datagram);
 
     /**
      * Encapsulate packet coming from higher layers into NextHopDatagram, using
@@ -137,9 +137,9 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
      */
     virtual void sendDatagramToOutput(Packet *datagram, const NetworkInterface *ie, L3Address nextHop);
 
-    virtual void datagramPreRouting(Packet *datagram, const NetworkInterface *inIE, const NetworkInterface *destIE, const L3Address& nextHop);
-    virtual void datagramLocalIn(Packet *datagram, const NetworkInterface *inIE);
-    virtual void datagramLocalOut(Packet *datagram, const NetworkInterface *destIE, const L3Address& nextHop);
+    virtual void datagramPreRouting(Packet *datagram);
+    virtual void datagramLocalIn(Packet *datagram);
+    virtual void datagramLocalOut(Packet *datagram);
 
     virtual IHook::Result datagramPreRoutingHook(Packet *datagram);
     virtual IHook::Result datagramForwardHook(Packet *datagram);

@@ -165,7 +165,6 @@ const NetworkInterface *NextHopForwarding::getSourceInterfaceFrom(Packet *packet
 void NextHopForwarding::handlePacketFromNetwork(Packet *packet)
 {
     if (packet->hasBitError()) {
-        // TODO emit packetDropped signal
         EV_WARN << "CRC error found, drop packet\n";
         PacketDropDetails details;
         details.setReason(INCORRECTLY_RECEIVED);
@@ -193,19 +192,13 @@ void NextHopForwarding::handlePacketFromNetwork(Packet *packet)
     }
 
     const NetworkInterface *inIE = interfaceTable->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
-    const NetworkInterface *destIE = nullptr;
 
     EV_DETAIL << "Received datagram `" << packet->getName() << "' with dest=" << header->getDestAddr() << " from " << header->getSrcAddr() << " in interface" << inIE->getInterfaceName() << "\n";
 
     if (datagramPreRoutingHook(packet) != IHook::ACCEPT)
         return;
 
-    inIE = interfaceTable->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
-    const auto& destIeTag = packet->findTag<InterfaceReq>();
-    destIE = destIeTag ? interfaceTable->getInterfaceById(destIeTag->getInterfaceId()) : nullptr;
-    const auto& nextHopTag = packet->findTag<NextHopAddressReq>();
-    L3Address nextHop = (nextHopTag) ? nextHopTag->getNextHopAddress() : L3Address();
-    datagramPreRouting(packet, inIE, destIE, nextHop);
+    datagramPreRouting(packet);
 }
 
 void NextHopForwarding::handlePacketFromHL(Packet *packet)
@@ -233,11 +226,16 @@ void NextHopForwarding::handlePacketFromHL(Packet *packet)
     const auto& nextHopTag = packet->findTag<NextHopAddressReq>();
     nextHop = (nextHopTag) ? nextHopTag->getNextHopAddress() : L3Address();
 
-    datagramLocalOut(packet, destIE, nextHop);
+    datagramLocalOut(packet);
 }
 
-void NextHopForwarding::routePacket(Packet *datagram, const NetworkInterface *destIE, const L3Address& requestedNextHop, bool fromHL)
+void NextHopForwarding::routePacket(Packet *datagram, bool fromHL)
 {
+    const auto& destIeTag = datagram->findTag<InterfaceReq>();
+    auto destIE = destIeTag ? interfaceTable->getInterfaceById(destIeTag->getInterfaceId()) : nullptr;
+    const auto& nextHopTag = datagram->findTag<NextHopAddressReq>();
+    L3Address requestedNextHop = (nextHopTag) ? nextHopTag->getNextHopAddress() : L3Address();
+
     // TODO add option handling code here
 
     auto header = datagram->peekAtFront<NextHopForwardingHeader>();
@@ -328,8 +326,11 @@ void NextHopForwarding::routePacket(Packet *datagram, const NetworkInterface *de
     sendDatagramToOutput(datagram, destIE, nextHop);
 }
 
-void NextHopForwarding::routeMulticastPacket(Packet *datagram, const NetworkInterface *destIE, const NetworkInterface *fromIE)
+void NextHopForwarding::routeMulticastPacket(Packet *datagram)
 {
+    const auto& fromIeTag = datagram->findTag<InterfaceInd>();
+    auto fromIE = fromIeTag ? interfaceTable->getInterfaceById(fromIeTag->getInterfaceId()) : nullptr;
+
     const auto& header = datagram->peekAtFront<NextHopForwardingHeader>();
     L3Address destAddr = header->getDestinationAddress();
     // if received from the network...
@@ -638,29 +639,29 @@ void NextHopForwarding::sendDatagramToOutput(Packet *datagram, const NetworkInte
     }
 }
 
-void NextHopForwarding::datagramPreRouting(Packet *datagram, const NetworkInterface *inIE, const NetworkInterface *destIE, const L3Address& nextHop)
+void NextHopForwarding::datagramPreRouting(Packet *datagram)
 {
     const auto& header = datagram->peekAtFront<NextHopForwardingHeader>();
     // route packet
     if (!header->getDestinationAddress().isMulticast())
-        routePacket(datagram, destIE, nextHop, false);
+        routePacket(datagram, false);
     else
-        routeMulticastPacket(datagram, destIE, inIE);
+        routeMulticastPacket(datagram);
 }
 
-void NextHopForwarding::datagramLocalIn(Packet *packet, const NetworkInterface *inIE)
+void NextHopForwarding::datagramLocalIn(Packet *packet)
 {
     sendDatagramToHL(packet);
 }
 
-void NextHopForwarding::datagramLocalOut(Packet *datagram, const NetworkInterface *destIE, const L3Address& nextHop)
+void NextHopForwarding::datagramLocalOut(Packet *datagram)
 {
     const auto& header = datagram->peekAtFront<NextHopForwardingHeader>();
     // route packet
     if (!header->getDestinationAddress().isMulticast())
-        routePacket(datagram, destIE, nextHop, true);
+        routePacket(datagram, true);
     else
-        routeMulticastPacket(datagram, destIE, nullptr);
+        routeMulticastPacket(datagram);
 }
 
 void NextHopForwarding::registerHook(int priority, IHook *hook)
@@ -693,21 +694,18 @@ void NextHopForwarding::reinjectQueuedDatagram(const Packet *datagram)
     for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
         if (iter->datagram == datagram) {
             Packet *datagram = iter->datagram;
-            const NetworkInterface *inIE = iter->inIE;
-            const NetworkInterface *outIE = iter->outIE;
-            const L3Address& nextHop = iter->nextHop;
             INetfilter::IHook::Type hookType = iter->hookType;
             switch (hookType) {
                 case INetfilter::IHook::PREROUTING:
-                    datagramPreRouting(datagram, inIE, outIE, nextHop);
+                    datagramPreRouting(datagram);
                     break;
 
                 case INetfilter::IHook::LOCALIN:
-                    datagramLocalIn(datagram, inIE);
+                    datagramLocalIn(datagram);
                     break;
 
                 case INetfilter::IHook::LOCALOUT:
-                    datagramLocalOut(datagram, outIE, nextHop);
+                    datagramLocalOut(datagram);
                     break;
 
                 default:
@@ -887,8 +885,6 @@ void NextHopForwarding::flush()
         delete elem.datagram;
     }
     queuedDatagramsForHooks.clear();
-
-// fragbuf.flush();
 }
 
 } // namespace inet
