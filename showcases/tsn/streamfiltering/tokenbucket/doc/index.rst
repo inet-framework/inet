@@ -13,6 +13,33 @@ which allows specifying committed/excess information rates and burst sizes.
 The Model
 ---------
 
+so
+
+- tsnswitch has ingresstrafficfiltering
+- tsndevice has egress and ingress traffic filtering
+- this adds a streamfilteringlayer to the network node
+- the streamfilteringlayer has optional ingress and egress filtering submodules
+- the proper ones are enabled according to the parameters
+- by default the ingress/egress filtering submodule is a SimpleIeee8021qFilter,
+  that can do per-stream filtering. it has a configurable number of traffic streams,
+  and a meter, a filter and a gate for each. additionally, there is the default route
+  which unfiltered packets take by default.
+- the meter can do metering
+- the filter drops the packets (might be based on the metering)
+- the gate is an interactive gate by default, so its always open
+- example
+
+- the classifier is a streamclassifier by default -> classify according to named streams
+- token bucket filtering can be done with the SingleRateTwoColorMeter module
+- this is a queueing element that has chained token buckets (?)
+- can specify a committed information rate and a committed burst rate
+- the rate of token regeneration defines the information rate
+- the max number of tokens the burst size (if lots of tokens accumulate, the node can transmit faster/until they are depleted)
+- the meter actually labels packets green or red, according to the number of tokens available (if there are no tokens, then red)
+- the filter is a labelfilter and it drops red packets
+- note check out other meter modules (DualRateThreeColorMeter)
+- the submodules in the simpleieee8021qfilter doesn't have to be the same type for the different traffic categories (e.g. check out the mixing shapers)
+
 There are three network nodes in the network. The client and the server are
 :ned:`TsnDevice` modules, and the switch is a :ned:`TsnSwitch` module. The
 links between them use 100 Mbps :ned:`EthernetLink` channels.
@@ -59,6 +86,12 @@ packets are dropped by the filter.
 Results
 -------
 
+.. figure:: media/datarate_tokens_be.png
+   :align: center
+
+.. figure:: media/datarate_tokens_vi.png
+   :align: center
+
 The first diagram shows the data rate of the application level outgoing traffic
 in the client. The data rate varies over time for both traffic classes using a
 sinusoid packet interval.
@@ -73,11 +106,17 @@ and the dropped data rate.
 .. figure:: media/BestEffortTrafficClass.png
    :align: center
 
+.. figure:: media/datarate_be.png
+   :align: center
+
 The next diagram shows the operation of the per-stream filter for the video traffic
 class. The outgoing data rate equals with the sum of the incoming data rate and
 the dropped data rate.
 
 .. figure:: media/VideoTrafficClass.png
+   :align: center
+
+.. figure:: media/datarate_vi.png
    :align: center
 
 The next diagram shows the number of tokens in the token bucket for both streams.
