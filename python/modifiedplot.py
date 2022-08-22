@@ -17,38 +17,46 @@ def get_default_colors():
 
 def plot_vectors(df, props, legend_func=utils.make_legend_label):
     """
-    Creates a line plot from the dataframe, with styling and additional input
-    coming from the properties. Each row in the dataframe defines a series.
-
-    Colors and markers are assigned automatically. The `cycle_seed` property
-    allows you to select other combinations if the default one is not suitable.
-
-    A function to produce the legend labels can be passed in. By default,
-    `make_legend_label()` is used, which offers many ways to influence the
-    legend via datataframe columns and chart properties. In the absence of
-    more specified settings, the legend is normally computed from columns which best
-    differentiate among the vectors.
-
-    Parameters:
-
-    - `df`: the dataframe
-    - `props` (dict): the properties
-    - `legend_func`: the function to produce custom legend labels
-
-    Columns of the dataframe:
-
-    - `vectime`, `vecvalue` (Numpy `ndarray`'s of matching sizes): the x and y coordinates for the plot
-    - `interpolationmode` (str, optional): this column normally comes from a result attribute, and determines how the points will be connected
-    - `legend` (optional): legend label for the series; if missing, legend labels are derived from other columns
-    - `name`, `title`, `module`, etc. (optional): provide input for the legend
-
-    Notable properties that affect the plot:
-
-    - `title`: plot title (autocomputed if missing)
-    - `legend_labels`: selects whether to prefer the `name` or the `title` column for the legend
-    - `drawstyle`: Matplotlib draw style; if present, it overrides the draw style derived from `interpolationmode`.
-    - `linestyle`, `linecolor`, `linewidth`, `marker`, `markersize`: styling
-    - `cycle_seed`: Alters the sequence in which colors and markers are assigned to series.
+    Modified version of the built-in plot_vectors() function, with the additional functionality
+    of ordering the dataframe before plotting, based on the 'order' column. The order of the line colors and
+    the legend order can be controlled this way.
+    
+    Also adds the content of the 'additional_style' column to the style object before plotting.
+    
+    Original description:
+    
+        Creates a line plot from the dataframe, with styling and additional input
+        coming from the properties. Each row in the dataframe defines a series.
+    
+        Colors and markers are assigned automatically. The `cycle_seed` property
+        allows you to select other combinations if the default one is not suitable.
+    
+        A function to produce the legend labels can be passed in. By default,
+        `make_legend_label()` is used, which offers many ways to influence the
+        legend via dataframe columns and chart properties. In the absence of
+        more specified settings, the legend is normally computed from columns which best
+        differentiate among the vectors.
+    
+        Parameters:
+    
+        - `df`: the dataframe
+        - `props` (dict): the properties
+        - `legend_func`: the function to produce custom legend labels
+    
+        Columns of the dataframe:
+    
+        - `vectime`, `vecvalue` (Numpy `ndarray`'s of matching sizes): the x and y coordinates for the plot
+        - `interpolationmode` (str, optional): this column normally comes from a result attribute, and determines how the points will be connected
+        - `legend` (optional): legend label for the series; if missing, legend labels are derived from other columns
+        - `name`, `title`, `module`, etc. (optional): provide input for the legend
+    
+        Notable properties that affect the plot:
+    
+        - `title`: plot title (autocomputed if missing)
+        - `legend_labels`: selects whether to prefer the `name` or the `title` column for the legend
+        - `drawstyle`: Matplotlib draw style; if present, it overrides the draw style derived from `interpolationmode`.
+        - `linestyle`, `linecolor`, `linewidth`, `marker`, `markersize`: styling
+        - `cycle_seed`: Alters the sequence in which colors and markers are assigned to series.
     """
     p = ideplot if chart.is_native_chart() else plt
 
@@ -266,7 +274,7 @@ def add_to_dataframe(df, style_tuple_list=[], default_dict={}, order={}, debug=F
 
     return df
 
-def multidimensional_legend(style_tuple_list, labels = [], handles = [], debug=False):
+def create_multidimensional_legend(style_tuple_list, labels = [], handles = [], debug=False):
     """
     Can create multi-dimensional legend, where one aspect of a line (e.g. color) represents a dimension, another aspect (e.g. linestyle of solid, dashed or dotted) represents another dimension,
     as opposed to the default behavior, in which lines in the legend represent the lines on the chart directly. **TODO** not sure this explanation is needed
