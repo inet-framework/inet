@@ -13,32 +13,72 @@ which allows specifying committed/excess information rates and burst sizes.
 The Model
 ---------
 
-so
+Filtering Overview
+~~~~~~~~~~~~~~~~~~
 
-- tsnswitch has ingresstrafficfiltering
-- tsndevice has egress and ingress traffic filtering
-- this adds a streamfilteringlayer to the network node
-- the streamfilteringlayer has optional ingress and egress filtering submodules
-- the proper ones are enabled according to the parameters
-- by default the ingress/egress filtering submodule is a SimpleIeee8021qFilter,
-  that can do per-stream filtering. it has a configurable number of traffic streams,
-  and a meter, a filter and a gate for each. additionally, there is the default route
-  which unfiltered packets take by default.
-- the meter can do metering
-- the filter drops the packets (might be based on the metering)
-- the gate is an interactive gate by default, so its always open
-- example
+As described in the TODO showcase in more detail, filtering done in the bridging layer TODO
 
-- the classifier is a streamclassifier by default -> classify according to named streams
-- token bucket filtering can be done with the SingleRateTwoColorMeter module
-- this is a queueing element that has chained token buckets (?)
-- can specify a committed information rate and a committed burst rate
-- the rate of token regeneration defines the information rate
-- the max number of tokens the burst size (if lots of tokens accumulate, the node can transmit faster/until they are depleted)
-- the meter actually labels packets green or red, according to the number of tokens available (if there are no tokens, then red)
-- the filter is a labelfilter and it drops red packets
-- note check out other meter modules (DualRateThreeColorMeter)
-- the submodules in the simpleieee8021qfilter doesn't have to be the same type for the different traffic categories (e.g. check out the mixing shapers)
+In this showcase, we'll use the TODO module for token bucket filtering.
+
+   so
+
+   - tsnswitch has ingresstrafficfiltering
+   - tsndevice has egress and ingress traffic filtering
+   - this adds a streamfilteringlayer to the network node
+   - the streamfilteringlayer has optional ingress and egress filtering submodules
+   - the proper ones are enabled according to the parameters
+   - by default the ingress/egress filtering submodule is a SimpleIeee8021qFilter,
+   that can do per-stream filtering. it has a configurable number of traffic streams,
+   and a meter, a filter and a gate for each. additionally, there is the default route
+   which unfiltered packets take by default.
+   - the meter can do metering
+   - the filter drops the packets (might be based on the metering)
+   - the gate is an interactive gate by default, so its always open
+   - example
+
+   - the classifier is a streamclassifier by default -> classify according to named streams
+   - token bucket filtering can be done with the SingleRateTwoColorMeter module
+   - this is a queueing element that has one token bucket
+   - can specify a committed information rate and a committed burst rate
+   - the rate of token regeneration defines the information rate
+   - the max number of tokens the burst size (if lots of tokens accumulate, the node can transmit faster/until they are depleted)
+   - the meter actually labels packets green or red, according to the number of tokens available (if there are no tokens, then red)
+   - the filter is a labelfilter and it drops red packets
+   - note check out other meter modules (DualRateThreeColorMeter)
+   - the submodules in the simpleieee8021qfilter doesn't have to be the same type for the different traffic categories (e.g. check out the mixing shapers)
+
+Token Bucket Policing Overview
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   - how we do token bucket policing/filtering
+   - SingleRateTwoColorMeter + the default LabelFilter (passes green by default)
+   - SingleRateTwoColorMeter has parameters for committedinformationrate and committedburstsize
+   - under the hood it uses tokens, and these two parameters actually configure token generation rate and max number of tokens
+   - so the meter puts a green or red tag based on if there is enough tokens and the filter drops excess packets
+
+   - token bucket filtering can be done with the SingleRateTwoColorMeter module
+   - this is a queueing element that has one token bucket
+   - can specify a committed information rate and a committed burst rate
+   - the rate of token regeneration defines the information rate
+   - the max number of tokens the burst size (if lots of tokens accumulate, the node can transmit faster/until they are depleted)
+   - the meter actually labels packets green or red, according to the number of tokens available (if there are no tokens, then red)
+   - the filter is a labelfilter and it drops red packets
+   - note check out other meter modules (DualRateThreeColorMeter)
+
+We can do token bucket filtering by using a :ned:`SingleRateTwoColorMeter` as the meter module, and :ned:`LabelFilter` that is the default filter in :ned:`SimpleIeee8021qFilter`.
+The :ned:`SingleRateTwoColorMeter` is a packet meter queueing element that has one token bucket. It has :par:`committedInformationRate` and :par:`committedBurstSize`
+parameters. Under the hood, the information rate parameter sets the token generation rate, the burst size the maximum number of tokens.
+Packets in the traffic category can be trasmitted if there are tokens available; if there are lots of tokens, packets can be transmitted faster until
+the tokens are depleted.
+
+The meter measures the data rate of the traffic stream, and labels packets either `green` or `red`, depending on the
+number of available tokens. By default, the filter module is a :ned:`LabelFilter`, and drops packets that aren't green.
+
+.. note:: Other, more complex meter modules are available (using multiple token buckets, for example), such as :ned:`SingleRateThreeColorMeter` or :ned:`DualRateThreeColorMeter`.
+          For more information and the list of other meter modules, check the NED documentation.
+
+The Network
+~~~~~~~~~~~
 
 There are three network nodes in the network. The client and the server are
 :ned:`TsnDevice` modules, and the switch is a :ned:`TsnSwitch` module. The
@@ -46,6 +86,9 @@ links between them use 100 Mbps :ned:`EthernetLink` channels.
 
 .. figure:: media/Network.png
    :align: center
+
+The Configuration
+~~~~~~~~~~~~~~~~~
 
 There are four applications in the network creating two independent data streams
 between the client and the server. The average data rates are 40 Mbps and 20 Mbps
