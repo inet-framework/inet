@@ -56,7 +56,7 @@ OPP_RUN_RELEASE=$(which opp_run_release 2> /dev/null || echo opp_run_release)
 OPP_RUN_DBG=$(which opp_run_dbg 2> /dev/null || echo opp_run_dbg)
 OPP_RUN_SANITIZE=$(which opp_run_sanitize 2> /dev/null || echo opp_run_sanitize)
 
-INET_NEDFOLDERS=$(cat $INET_ROOT/.nedfolders | sed "s|^|$INET_ROOT/|" | tr '\n' ';')
+INET_NEDFOLDERS=$(cat $INET_ROOT/.nedfolders | sed "s|^|$INET_ROOT/|" | tr '\n' ':')
 if [ ! "$INET_NEDFOLDERS" = "" ]; then
   INET_OMNETPP_OPTIONS="-n $INET_NEDFOLDERS $INET_OMNETPP_OPTIONS"
 fi
