@@ -10,11 +10,19 @@
 #include "inet/protocolelement/transceiver/base/PacketReceiverBase.h"
 #include "inet/protocolelement/transceiver/base/PacketTransmitterBase.h"
 
+#ifdef INET_WITH_QUEUEING
+#include "inet/queueing/base/PacketFlowBase.h"
+#endif
+
 namespace inet {
 
 template class OperationalMixin<cSimpleModule>;
 
 template class OperationalMixin<PacketProcessorBase>;
+
+#ifdef INET_WITH_QUEUEING
+template class OperationalMixin<queueing::PacketFlowBase>;
+#endif
 
 } // namespace inet
 
