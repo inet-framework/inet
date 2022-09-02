@@ -8,7 +8,7 @@ import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMed
 import inet.visualizer.common.IntegratedMultiVisualizer;
 
 
-network MobilityShowcase
+network CombiningMobilityShowcase
 {
     parameters:
         int numHosts;

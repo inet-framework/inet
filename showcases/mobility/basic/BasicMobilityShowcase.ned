@@ -3,7 +3,7 @@ package inet.showcases.mobility.basic;
 import inet.node.inet.StandardHost;
 import inet.visualizer.common.IntegratedVisualizer;
 
-network MobilityShowcase
+network BasicMobilityShowcase
 {
     parameters:
         int numHosts;
