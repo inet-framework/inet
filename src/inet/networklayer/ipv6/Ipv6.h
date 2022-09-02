@@ -39,14 +39,10 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     class QueuedDatagramForHook {
       public:
         QueuedDatagramForHook(Packet *packet, IHook::Type hookType) :
-            packet(packet), inIE(nullptr), outIE(nullptr),
-            hookType(hookType) {}
+                packet(packet), hookType(hookType) {}
         virtual ~QueuedDatagramForHook() {}
 
         Packet *packet = nullptr;
-        const NetworkInterface *inIE = nullptr;
-        const NetworkInterface *outIE = nullptr;
-        Ipv6Address nextHopAddr;
         const IHook::Type hookType = static_cast<IHook::Type>(-1);
     };
 
@@ -111,7 +107,9 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
 
   protected:
     // utility: look up interface from getArrivalGate()
-    virtual NetworkInterface *getSourceInterfaceFrom(Packet *msg);
+    NetworkInterface *getSourceInterfaceFrom(Packet *msg);
+    const NetworkInterface *getDestInterface(Packet *packet);
+    Ipv6Address getNextHop(Packet *packet);
 
     // utility: show current statistics above the icon
     virtual void refreshDisplay() const override;
@@ -121,7 +119,7 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
      */
     virtual void encapsulate(Packet *transportPacket);
 
-    virtual void preroutingFinish(Packet *packet, const NetworkInterface *fromIE, const NetworkInterface *destIE, Ipv6Address nextHopAddr);
+    virtual void preroutingFinish(Packet *packet);
 
     virtual void handleMessage(cMessage *msg) override;
 
@@ -132,7 +130,8 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
      * Invokes encapsulate(), then routePacket().
      */
     virtual void handleMessageFromHL(Packet *msg);
-    virtual void datagramLocalOut(Packet *packet, const NetworkInterface *destIE, Ipv6Address requestedNextHopAddress);
+
+    virtual void datagramLocalOut(Packet *packet);
 
     /**
      * Handle incoming ICMP messages.
@@ -145,13 +144,13 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
      * to routeMulticastPacket() for multicast packets, or drops the packet if
      * it's unroutable or forwarding is off.
      */
-    virtual void routePacket(Packet *packet, const NetworkInterface *destIE, const NetworkInterface *fromIE, Ipv6Address requestedNextHopAddress, bool fromHL);
+    virtual void routePacket(Packet *packet, bool fromHL);
     virtual void resolveMACAddressAndSendPacket(Packet *packet, int interfaceID, Ipv6Address nextHop, bool fromHL);
 
     /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
      */
-    virtual void routeMulticastPacket(Packet *packet, const NetworkInterface *destIE, const NetworkInterface *fromIE, bool fromHL);
+    virtual void routeMulticastPacket(Packet *packet, bool fromHL);
 
     virtual void fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const MacAddress& nextHopAddr, bool fromHL);
 
@@ -195,12 +194,12 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     /**
      * called before a packet is delivered via the network
      */
-    IHook::Result datagramPostRoutingHook(Packet *packet, const NetworkInterface *inIE, const NetworkInterface *& outIE, L3Address& nextHopAddr);
+    IHook::Result datagramPostRoutingHook(Packet *packet);
 
     /**
      * called before a packet arriving from the network is delivered locally
      */
-    IHook::Result datagramLocalInHook(Packet *packet, const NetworkInterface *inIE);
+    IHook::Result datagramLocalInHook(Packet *packet);
 
     /**
      * called before a packet arriving locally is delivered
