@@ -55,6 +55,7 @@ extensions = [
     #'sphinxcontrib.images',
     'tools.doxylink',
     'sphinx.ext.imgconverter',
+    'rinoh.frontend.sphinx'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

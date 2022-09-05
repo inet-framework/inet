@@ -27,6 +27,11 @@ pdf: Makefile copy-media
 	@$(SPHINXBUILD) -M latexpdf "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 	unlink showcases; unlink tutorials
 
+rinoh: Makefile copy-media
+	ln -sf ../../showcases showcases; ln -sf ../../tutorials
+	@$(SPHINXBUILD) -b rinoh "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	unlink showcases; unlink tutorials
+
 html: Makefile copy-media
 	ln -sf ../../showcases showcases; ln -sf ../../tutorials
 	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
