@@ -192,9 +192,10 @@ void AckingMac::encapsulate(Packet *packet)
     auto macHeader = makeShared<AckingMacHeader>();
     macHeader->setChunkLength(B(headerLength));
     auto macAddressReq = packet->getTag<MacAddressReq>();
-    macHeader->setSrc(macAddressReq->getSrcAddress());
-    macHeader->setDest(macAddressReq->getDestAddress());
+    MacAddress src = macAddressReq->getSrcAddress();
     MacAddress dest = macAddressReq->getDestAddress();
+    macHeader->setSrc(src.isUnspecified() ? networkInterface->getMacAddress() : src);
+    macHeader->setDest(dest);
     if (dest.isBroadcast() || dest.isMulticast() || dest.isUnspecified())
         macHeader->setSrcModuleId(-1);
     else
