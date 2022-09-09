@@ -12,6 +12,7 @@ simple Ipv4Defragmenter
         string icmpModule;
         double fragmentTimeout @unit(s);
         string displayStringTextFormat = default("");   // TODO required for PacketProcessorBase
+        @display("i=block/defrag");
     gates:
         input in;
         output out;
