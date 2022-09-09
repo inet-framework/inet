@@ -12,11 +12,12 @@ simple Ipv4Fragmenter
         string arpModule;
         string icmpModule;
         string interfaceTableModule;
-        string crcMode @enum("declared", "computed");
+        string crcMode @enum("declared","computed");
         int timeToLive;
         int multicastTimeToLive;
         string displayStringTextFormat = default("");   // TODO required for PacketProcessorBase
         @signal[packetDropped](type=cPacket);
+        @display("i=block/frag");
     gates:
         input in;
         output out;

@@ -18,6 +18,7 @@ simple Ipv4PrepareForward
         @signal[ipv4DataOnNonrpf](type=inet::Ipv4Header);
         @signal[ipv4DataOnRpf](type=inet::Ipv4Header);
         @signal[ipv4MdataRegister](type=inet::Packet);
+        @display("i=block/network2");
     gates:
         input in;
         output out;

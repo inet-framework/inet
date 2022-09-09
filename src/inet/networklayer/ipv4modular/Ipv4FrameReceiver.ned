@@ -12,6 +12,7 @@ simple Ipv4FrameReceiver
         string icmpModule;
         string displayStringTextFormat = default("");   // TODO required for PacketProcessorBase
         @signal[packetReceivedFromLower](type=cPacket);
+        @display("i=block/uparrow");
     gates:
         input in;
         output out;

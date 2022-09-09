@@ -11,6 +11,7 @@ simple Ipv4Decapsulate
     parameters:
         string displayStringTextFormat = default("");   // TODO required for PacketProcessorBase
         string icmpModule; // ModuleReference
+        @display("i=block/checker");
     gates:
         input in;
         output out;

@@ -14,6 +14,7 @@ module Ipv4RoutingDecision
         string routingTableModule;
         string directBroadcastInterfaces;
         string displayStringTextFormat = default("");   // TODO required for PacketProcessorBase
+        @display("i=block/classifier");
     gates:
         input in;
         output localOut;
