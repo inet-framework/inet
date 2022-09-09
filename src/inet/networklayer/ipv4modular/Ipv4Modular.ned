@@ -17,23 +17,11 @@ module Ipv4Modular like IIpv4
         string routingTableModule;
         string arpModule;
         string icmpModule;
-        string crcMode @enum("declared","computed") = default("declared");
-        int timeToLive = default(32);
-        int multicastTimeToLive = default(32);
-        double fragmentTimeout @unit(s) = default(60s);
-        bool limitedBroadcast = default(false); // send out limited broadcast packets comming from higher layer
-        string directBroadcastInterfaces = default("");   // list of interfaces that direct broadcast is enabled (by default direct broadcast is disabled on all interfaces)
         @class(Ipv4Modular);
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         *.routingTableModule = default(absPath(this.routingTableModule));
         *.arpModule = default(absPath(this.arpModule));
         *.icmpModule = default(absPath(this.icmpModule));
-        *.crcMode = this.crcMode;
-        *.timeToLive = this.timeToLive;
-        *.multicastTimeToLive = this.multicastTimeToLive;
-        *.fragmentTimeout = this.fragmentTimeout;
-        *.limitedBroadcast = this.limitedBroadcast;
-        *.directBroadcastInterfaces = this.directBroadcastInterfaces;
     gates:
         input transportIn @labels(Ipv4ControlInfo/down,TcpHeader,UdpHeader,SctpHeader);
         output transportOut @labels(Ipv4ControlInfo/up,TcpHeader,UdpHeader,SctpHeader);
@@ -119,4 +107,21 @@ module Ipv4Modular like IIpv4
         forwardHook.out --> m1.in++;
 
         socketIn.socketOut --> socketOut.socketIn;
+}
+
+module Ipv4ModularCompatible extends Ipv4Modular
+{
+    parameters:
+        string crcMode @enum("declared","computed") = default("declared");
+        int timeToLive = default(32);
+        int multicastTimeToLive = default(32);
+        double fragmentTimeout @unit(s) = default(60s);
+        bool limitedBroadcast = default(false); // send out limited broadcast packets comming from higher layer
+        string directBroadcastInterfaces = default("");   // list of interfaces that direct broadcast is enabled (by default direct broadcast is disabled on all interfaces)
+        *.crcMode = this.crcMode;
+        *.timeToLive = this.timeToLive;
+        *.multicastTimeToLive = this.multicastTimeToLive;
+        *.fragmentTimeout = this.fragmentTimeout;
+        *.limitedBroadcast = this.limitedBroadcast;
+        *.directBroadcastInterfaces = this.directBroadcastInterfaces;
 }
