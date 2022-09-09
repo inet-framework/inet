@@ -264,6 +264,19 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict={}, order={}, debug
     
     def add_separator():
         print("")
+    def remove_zero_index_if_present(df, debug):
+        remove = True
+        if debug: print("remove zero index if present df:", df)
+        for i, row in df.iterrows():
+            if (i != 0):
+                remove = False
+                break
+        if remove:
+            df.reset_index(drop=True, inplace=True)
+            if debug: print("removing zero index\n")
+            
+    remove_zero_index_if_present(df, debug)
+            
     if style_tuple_list is not None:
         df['additional_style'] = None
         for i in style_tuple_list:
@@ -273,7 +286,9 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict={}, order={}, debug
             
             for i in range(0,len(df)):
                 pattern = re.compile(value)
+                if debug: print("value:", value, "pattern:", pattern, "df[column][i]", df[column][i])
                 match = re.fullmatch(pattern, df[column][i])
+                if debug: print("match:", match)
                 if match != None:
                     if debug:
                         print("MATCH FOUND:")
@@ -577,3 +592,76 @@ def plot_bars(df, errors_df=None, meta_df=None, props={}, order=None, zorder=Non
 
     if title is not None:
         utils.set_plot_title(title)
+        
+def plot_lines(df, props, legend_func=utils.make_legend_label, use_default_sort_values=False):
+    """
+    Copy of built-in plot_lines() without sorting (by default).
+    
+    Orig description:
+    
+    Creates a line plot from the dataframe, with styling and additional input
+    coming from the properties. Each row in the dataframe defines a line.
+
+    Colors are assigned automatically.  The `cycle_seed` property allows you to
+    select other combinations if the default one is not suitable.
+
+    A function to produce the legend labels can be passed in. By default,
+    `make_legend_label()` is used, which offers many ways to influence the
+    legend via dataframe columns and chart properties. In the absence of
+    more specified settings, the legend is normally computed from columns which best
+    differentiate among the lines.
+
+    Parameters:
+
+    - `df`: The dataframe.
+    - `props` (dict): The properties.
+    - `legend_func` (function): The function to produce custom legend labels.
+       See `utils.make_legend_label()` for prototype and semantics.
+
+    Columns of the dataframe:
+
+    - `x`, `y` (array-like, `len(x)==len(y)`): The X and Y coordinates of the points.
+    - `error` (array-like, `len(x)==len(y)`, optional):
+       The half lengths of the error bars for each point.
+    - `legend` (string, optional): Legend label for the series. If missing,
+       legend labels are derived from other columns.
+    - `name`, `title`, `module`, etc. (optional): Provide input for the legend.
+
+    Notable properties that affect the plot:
+
+    - `title`: Plot title (autocomputed if missing).
+    - `linewidth`: Line width.
+    - `marker`: Marker style.
+    - `linestyle`, `linecolor`, `linewidth`: Styling.
+    - `error_style`: If `error` is present, controls how the error is shown.
+       Accepted values: "Error bars", "Error band"
+    - `cycle_seed`: Alters the sequence in which colors and markers are assigned to series.
+    """
+    p = ideplot if chart.is_native_chart() else plt
+
+    def get_prop(k):
+        return props[k] if k in props else None
+
+    title_cols, legend_cols = utils.extract_label_columns(df, props)
+
+    if use_default_sort_values:
+        df.sort_values(by=legend_cols, inplace=True)
+    for t in df.itertuples(index=False):
+        style = utils._make_line_args(props, t, df)
+
+        if len(t.x) < 2 and style["marker"] == ' ':
+            style["marker"] = '.'
+
+        p.plot(t.x, t.y, label=legend_func(legend_cols, t, props), **style)
+
+        if hasattr(t, "error") and not ideplot.is_native_plot():
+            style["linewidth"] = float(style["linewidth"])
+            style["linestyle"] = "none"
+
+            if props["error_style"] == "Error bars":
+                plt.errorbar(t.x, t.y, yerr=t.error, capsize=float(props["cap_size"]), **style)
+            elif props["error_style"] == "Error band":
+                plt.fill_between(t.x, t.y-t.error, t.y+t.error, alpha=float(props["band_alpha"]))
+
+    title = get_prop("title") or make_chart_title(df, title_cols)
+    utils.set_plot_title(title)
