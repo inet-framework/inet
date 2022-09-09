@@ -81,7 +81,13 @@ void Aodv::initialize(int stage)
             helloMsgTimer = new cMessage("HelloMsgTimer");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
-        networkProtocol->registerHook(0, this);
+        networkProtocol->registerNetfilterHandler(PREROUTING, 0, [] (Packet *datagram) { return ACCEPT; }); // new interface
+
+        networkProtocol->registerHook(0, this); // for backward compatibilty
+        // can be implemented as
+        networkProtocol->registerNetfilterHandler(PREROUTING, 0, [] (Packet *datagram) { return hook->datagramPreRouting(datagram); });
+        // 5 more
+
         host->subscribe(linkBrokenSignal, this);
         usingIpv6 = (routingTable->getRouterIdAsGeneric().getType() == L3Address::IPv6);
     }

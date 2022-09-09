@@ -65,14 +65,14 @@ void Ipv4RoutingDecision::pushPacket(Packet *packet, cGate *gate)
     // route packet
 
     if (fromIE->isLoopback()) {
-        reassembleAndDeliver(packet);
+        deliverLocally(packet);
     }
     else if (destAddr.isMulticast()) {
         // check for local delivery
         // Note: multicast routers will receive IGMP datagrams even if their interface is not joined to the group
         if (fromIE->getProtocolData<Ipv4InterfaceData>()->isMemberOfMulticastGroup(destAddr) ||
             (rt->isMulticastForwardingEnabled() && ipv4Header->getProtocolId() == IP_PROT_IGMP))
-            reassembleAndDeliver(packet->dup());
+            deliverLocally(packet->dup());
         else
             EV_WARN << "Skip local delivery of multicast datagram (input interface not in multicast group)\n";
 
@@ -98,7 +98,7 @@ void Ipv4RoutingDecision::pushPacket(Packet *packet, cGate *gate)
         // check for local delivery; we must accept also packets coming from the interfaces that
         // do not yet have an IP address assigned. This happens during DHCP requests.
         if (rt->isLocalAddress(destAddr) || fromIE->getProtocolData<Ipv4InterfaceData>()->getIPAddress().isUnspecified()) {
-            reassembleAndDeliver(packet);
+            deliverLocally(packet);
         }
         else if (destAddr.isLimitedBroadcastAddress() || (broadcastIE = rt->findInterfaceByLocalBroadcastAddress(destAddr))) {
             // broadcast datagram on the target subnet if we are a router
@@ -116,7 +116,7 @@ void Ipv4RoutingDecision::pushPacket(Packet *packet, cGate *gate)
             }
 
             EV_INFO << "Broadcast received\n";
-            reassembleAndDeliver(packet);
+            deliverLocally(packet);
         }
         else if (!rt->isForwardingEnabled()) {
             EV_WARN << "forwarding off, dropping packet\n";

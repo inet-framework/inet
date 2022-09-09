@@ -9,19 +9,21 @@ package inet.networklayer.ipv4modular;
 //
 // TODO documentation
 //
-moduleinterface IIpv4Hook
+moduleinterface INetfilterHook // is there a difference between IIpv4Hook and IIpv6Hook?
 {
     parameters:
         @display("i=old/hook");
+        @ommittedTypename("OmittedNetfilterHook");
     gates:
         input in;
         output out;
 }
 
-module Ipv4HookBypass like IIpv4Hook
+module OmittedNetfilterHook like INetfilterHook
 {
     parameters:
-        @display("i=old/hook");
+        @class(::inet::OmittedModule);
+        @display("i=old/hook,black,50");
     gates:
         input in;
         output out;

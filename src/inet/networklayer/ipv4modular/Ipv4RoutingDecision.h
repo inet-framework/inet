@@ -38,7 +38,7 @@ class INET_API Ipv4RoutingDecision : public queueing::PacketProcessorBase, publi
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    void reassembleAndDeliver(Packet *packet) { pushOrSendPacket(packet, localOutputGate, localConsumer); }
+    void deliverLocally(Packet *packet) { pushOrSendPacket(packet, localOutputGate, localConsumer); }
     void fragmentPostRouting(Packet *packet) { pushOrSendPacket(packet, forwardOutputGate, forwardConsumer); }
     void routeUnicastPacket(Packet *packet) { pushOrSendPacket(packet, forwardOutputGate, forwardConsumer); }
     void forwardMulticastPacket(Packet *packet) { pushOrSendPacket(packet, forwardOutputGate, forwardConsumer); }
