@@ -13,7 +13,6 @@
 #include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/queueing/base/PacketPusherBase.h"
-//#include "inet/transportlayer/common/CrcMode_m.h"
 
 namespace inet {
 

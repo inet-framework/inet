@@ -13,15 +13,6 @@
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 
-//#include "inet/networklayer/common/DscpTag_m.h"
-//#include "inet/networklayer/common/EcnTag_m.h"
-//#include "inet/networklayer/common/FragmentationTag_m.h"
-//#include "inet/networklayer/common/HopLimitTag_m.h"
-//#include "inet/networklayer/common/L3AddressTag_m.h"
-//#include "inet/networklayer/common/L3Tools.h"
-//#include "inet/networklayer/common/TosTag_m.h"
-//#include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
-
 namespace inet {
 
 Define_Module(Ipv4LocalOut);
