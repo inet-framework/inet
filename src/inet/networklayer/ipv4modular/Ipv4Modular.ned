@@ -38,11 +38,17 @@ module Ipv4Modular like IIpv4
         encap: Ipv4Encapsulate {
             @display("p=200,200");
         }
+        outputHook: <default("Ipv4HookBypass")> like IIpv4Hook {
+            @display("p=200,300");
+        }
         localOut: Ipv4LocalOut {
             @display("p=200,400");
         }
         m1: PacketMultiplexer {
             @display("p=200,500");
+        }
+        postroutingHook: <default("Ipv4HookBypass")> like IIpv4Hook {
+            @display("p=200,600");
         }
         frag: Ipv4Fragmenter {
             @display("p=200,700");
@@ -51,15 +57,24 @@ module Ipv4Modular like IIpv4
         prepareFwd: Ipv4PrepareForward {
             @display("p=400,500");
         }
+        forwardHook: <default("Ipv4HookBypass")> like IIpv4Hook {
+            @display("p=300,500");
+        }
 
         frameReceiver: Ipv4FrameReceiver {
             @display("p=500,700");
+        }
+        preroutingHook: <default("Ipv4HookBypass")> like IIpv4Hook {
+            @display("p=500,600");
         }
         routingDecision: Ipv4RoutingDecision {
             @display("p=500,500");
         }
         defrag: Ipv4Defragmenter {
             @display("p=500,400");
+        }
+        inputHook: <default("Ipv4HookBypass")> like IIpv4Hook {
+            @display("p=500,300");
         }
         decap: Ipv4Decapsulate {
             @display("p=500,200");
@@ -71,20 +86,25 @@ module Ipv4Modular like IIpv4
     connections:
         transportIn --> { @display("m=n"); } --> socketIn.in;
         socketIn.out --> encap.in;
-        encap.out --> localOut.in;
+        encap.out --> outputHook.in;
+        outputHook.out --> localOut.in;
         localOut.out --> m1.in++;
-        m1.out --> frag.in;
+        m1.out --> postroutingHook.in;
+        postroutingHook.out --> frag.in;
         frag.out --> { @display("m=s"); } --> queueOut;
 
         queueIn --> { @display("m=s"); } --> frameReceiver.in;
-        frameReceiver.out --> routingDecision.in;
+        frameReceiver.out --> preroutingHook.in;
+        preroutingHook.out --> routingDecision.in;
         routingDecision.localOut --> defrag.in;
-        defrag.out --> decap.in;
+        defrag.out --> inputHook.in;
+        inputHook.out --> decap.in;
         decap.out --> socketOut.in;
         socketOut.out --> { @display("m=n"); } --> transportOut;
 
         routingDecision.forwardOut --> prepareFwd.in;
-        prepareFwd.out --> m1.in++;
+        prepareFwd.out --> forwardHook.in;
+        forwardHook.out --> m1.in++;
 
         socketIn.socketOut --> socketOut.socketIn;
 }
