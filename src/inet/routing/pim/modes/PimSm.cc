@@ -1432,7 +1432,7 @@ void PimSm::sendPIMRegisterNull(Ipv4Address multOrigin, Ipv4Address multGroup)
         ipv4Header->setHeaderLength(IPv4_MIN_HEADER_LENGTH);
         ipv4Header->setTotalLengthField(IPv4_MIN_HEADER_LENGTH);
         ipv4Header->setCrcMode(pimModule->getCrcMode());
-        Ipv4::insertCrc(ipv4Header);
+        ipv4Header->updateCrc();
         pk->insertAtBack(ipv4Header);
 
         emit(sentRegisterPkSignal, pk);
