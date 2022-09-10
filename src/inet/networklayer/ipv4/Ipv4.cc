@@ -83,7 +83,7 @@ void Ipv4::initialize(int stage)
         directBroadcastInterfaceMatcher.setPattern(directBroadcastInterfaces.c_str(), false, true, false);
 
         curFragmentId = 0;
-        lastCheckTime = 0;
+        lastCheckTime = SIMTIME_ZERO;
 
         numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
