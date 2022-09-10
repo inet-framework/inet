@@ -243,4 +243,10 @@ cplusplus(Ipv4Header) {{
     virtual const Protocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
     virtual void setProtocol(const Protocol *protocol) override { setProtocolId(static_cast<IpProtocolId>(ProtocolGroup::ipprotocol.getProtocolNumber(protocol))); }
     virtual bool isFragment() const override { return getMoreFragments() || (getFragmentOffset() != 0); }
+
+    // utility: calculate and set CRC based on crcMode
+    virtual void updateCrc();
+
+    // utility: verify CRC
+    virtual bool verifyCrc() const;
 }}

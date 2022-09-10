@@ -116,15 +116,6 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     // utility: processing requested ARP resolution timed out
     void arpResolutionTimedOut(IArp::Notification *entry);
 
-    // utility: verifying CRC
-    bool verifyCrc(const Ptr<const Ipv4Header>& ipv4Header);
-
-    // utility: calculate and set CRC
-    void setComputedCrc(Ptr<Ipv4Header>& ipv4Header);
-
-  public:
-    static void insertCrc(const Ptr<Ipv4Header>& ipv4Header);
-
   protected:
     /**
      * Encapsulate packet coming from higher layers into Ipv4Header, using
