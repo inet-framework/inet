@@ -97,17 +97,18 @@ def get_power_for_each_module_dataframes():
     df_l = df_l.groupby(['name','configname','module', 'iterationvars','inifile'], as_index=False).mean()
     # print("\ndf_l after averaging:\n-------------------",df_l)
     
-    print("get_power_dataframes\nreturning:")
-    print("df_b:\n", df_b)
-    print("df_x:\n", df_x)
-    print("df_l:\n", df_l)
+    if debug:
+        print("get_power_dataframes\nreturning:")
+        print("df_b:\n", df_b)
+        print("df_x:\n", df_x)
+        print("df_l:\n", df_l)
     
     return df_b, df_x, df_l
 
 def index_into_dataframe_with_itervar(df, itervar):
     
     return_df = df[df['iterationvars']==itervar]
-    print("index_into_dataframe_with_itervar\nreturning ", return_df)
+    if debug: print("index_into_dataframe_with_itervar\nreturning ", return_df)
     return return_df
 
 def get_best_power_dataframes_for_most_packets_received():
@@ -118,22 +119,22 @@ def get_best_power_dataframes_for_most_packets_received():
     best_itervar_b, best_itervar_x, best_itervar_l = get_itervars_from_multiple_dataframes(*get_best_performing_dataframe_separately_packetreceived())
     
     bmac_best_power = index_into_dataframe_with_itervar(bmac_power, best_itervar_b)
-    print("BMAC BEST POWER: ", bmac_best_power)
+    if debug: print("BMAC BEST POWER: ", bmac_best_power)
     
     xmac_best_power = index_into_dataframe_with_itervar(xmac_power, best_itervar_x)
-    print("XMAC BEST POWER: ", xmac_best_power)
+    if debug: print("XMAC BEST POWER: ", xmac_best_power)
     
     lmac_best_power = index_into_dataframe_with_itervar(lmac_power, best_itervar_l)
-    print("LMAC BEST POWER: ", lmac_best_power)
+    if debug: print("LMAC BEST POWER: ", lmac_best_power)
     
     bmac_best_power_sum = sum_dataframe(bmac_best_power)
-    print("BMAC BEST POWER SUM: ", bmac_best_power_sum)
+    if debug: print("BMAC BEST POWER SUM: ", bmac_best_power_sum)
     
     xmac_best_power_sum = sum_dataframe(xmac_best_power)
-    print("XMAC BEST POWER SUM: ", xmac_best_power_sum)
+    if debug: print("XMAC BEST POWER SUM: ", xmac_best_power_sum)
     
     lmac_best_power_sum = sum_dataframe(lmac_best_power)
-    print("LMAC BEST POWER SUM: ", lmac_best_power_sum)
+    if debug: print("LMAC BEST POWER SUM: ", lmac_best_power_sum)
     
     return bmac_best_power_sum, xmac_best_power_sum, lmac_best_power_sum
     

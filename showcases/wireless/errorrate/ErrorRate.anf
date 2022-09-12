@@ -5,12 +5,16 @@
         <input pattern="results/General-*.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/scatterchart.png" id="403131582" name="SNIR vs distance" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
-            <script><![CDATA[import math
-import numpy as np
-import pandas as pd
+        <chart createdWith="" icon="icons/full/obj/scatterchart.png" id="121653067" name="SNIR vs distance" resultTypes="" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
+            <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
+import os
+import sys
+from omnetpp.scave.utils import make_legend_label
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
+import modifiedplot
+default_colors = modifiedplot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -18,98 +22,41 @@ utils.preconfigure_plot(props)
 
 # collect parameters for query
 filter_expression = props["filter"]
-xaxis_itervar = props["xaxis_itervar"]
-iso_itervar = props["iso_itervar"]
+include_fields = props["include_fields"] == "true"
 
 # query data into a data frame
-df = results.get_scalars(filter_expression, include_fields = True, include_runattrs=True, include_attrs=True, include_itervars=True)
+try:
+    df = results.get_scalars(filter_expression, include_fields=include_fields, include_attrs=True, include_runattrs=True, include_itervars=True)
+except results.ResultQueryError as e:
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
-if not xaxis_itervar and not iso_itervar:
-    print("The X Axis and Iso Line options were not set in the dialog, inferring them from the data..")
-    xaxis_itervar, iso_itervar = utils.select_best_partitioning_column_pair(df, props)
-    if not xaxis_itervar:
-        raise chart.ChartScriptError("Please set the X Axis (and Iso Lines) options in the dialog!")
+xaxis_itervar, group_by = utils.select_xaxis_and_groupby(df, props)
+confidence_level = utils.get_confidence_level(props)
+newdf = utils.pivot_for_scatterchart(df, xaxis_itervar, group_by, confidence_level)
 
-utils.assert_columns_exist(df, [xaxis_itervar])
-df[xaxis_itervar] = pd.to_numeric(df[xaxis_itervar], errors="ignore")
+props['legend_replacements'] = "/bitrate//\n/=//"
+props['legend_format'] = "${name} Mbps"
 
-if iso_itervar:
-    utils.assert_columns_exist(df, [xaxis_itervar])
-    df[iso_itervar] = pd.to_numeric(df[iso_itervar], errors="ignore")
+modifiedplot.plot_lines(newdf, props)
 
-if not iso_itervar: # might be an empty string
-    iso_itervar = None
+names = df["name"].unique()
+scalar_names = names[0] + ", etc." if len(names) > 1 else names[0]
+ideplot.ylabel(scalar_names) # TODO: shouldn't call into ideplot directly
 
-if df.empty:
-    raise chart.ChartScriptError("Select scalars for the Y axis in the Properties dialog")
-
-unique_names = df["name"].unique()
-
-if len(unique_names) != 1:
-    raise chart.ChartScriptError("Selected scalars must share the same name.")
-
-scalar_name = unique_names[0]
-
-confidence_level_str = props["confidence_level"] if "confidence_level" in props else "none"
-
-if confidence_level_str == "none":
-    df = pd.pivot_table(df, values="value", columns=iso_itervar, index=xaxis_itervar)
-    errors_df = None
-else:
-    confidence_level = float(confidence_level_str[:-1])/100
-    conf_int = lambda values: utils.confidence_interval(confidence_level, values) if len(values) > 1 else math.nan
-    pivoted = pd.pivot_table(df, values="value", columns=iso_itervar, index=xaxis_itervar, aggfunc=[np.mean, conf_int], dropna=False)
-    df = pivoted["mean"]
-    errors_df = pivoted["<lambda>"]
-
-legend_cols, _ = utils.extract_label_columns(df, props)
-
-p = plot if chart.is_native_chart() else plt
-
-
-p.xlabel(xaxis_itervar)
-p.ylabel(scalar_name)
-
-try:
-    xs = pd.to_numeric(df.index.values)
-except:
-    raise chart.ChartScriptError("The X axis itervar is not purely numeric, this is not supported yet.")
-
-for c in df.columns:
-    style = utils._make_line_args(props, c, df)
-    ys = df[c].values
-    p.plot(xs, ys, label=(iso_itervar + "=" + str(df[c].name) if iso_itervar else scalar_name), **style)
-
-    if errors_df is not None and not chart.is_native_chart():
-        style["linewidth"] = float(style["linewidth"])
-        style["linestyle"] = "none"
-        yerr = errors_df[c].values
-        if props["error_style"] == "Error bars":
-            p.errorbar(xs, ys, yerr=yerr, capsize=float(props["cap_size"]), **style)
-        elif props["error_style"] == "Error band":
-            plt.fill_between(xs, ys-yerr, ys+yerr, alpha=float(props["band_alpha"]))
-
-utils.set_plot_title(scalar_name + " vs. " + xaxis_itervar)
+title = (scalar_names + " vs. " + xaxis_itervar) if xaxis_itervar else scalar_names
+if "title" in props and props["title"]:
+    title = props["title"]
+utils.set_plot_title(title)
 
 utils.postconfigure_plot(props)
-
-plt.title("SNIR vs distance")
-
-# Remove 'PacketSize' from legend labels
-ax = plt.gca()
-handles, labels = ax.get_legend_handles_labels()
-newlabels = []
-for i in labels:
-    newlabels.append(i.replace('bitrate=','') + ' Mbps')
-ax.legend(handles, newlabels, loc=1, markerscale=2)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]></script>
-            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -118,36 +65,48 @@ utils.export_data_if_needed(df, props)
     <package name="org.eclipse.swt.layout" />
     <package name="org.eclipse.swt.custom" />
   </import>
-  <layout x:class="GridLayout" numColumns="1" />
+  <layout x:class="GridLayout" numColumns="2" />
   <x:children>
-    <label text="Filter expression for scalars as Y value:" />
+    <label text="Filter expression for scalars as Y value:">
+        <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </label>
+
     <styledText x:id="filter" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="filter" x:id.resultType="scalar">
-      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
     </styledText>
+
+    <button x:id="include_fields" x:style="CHECK" text="Include fields">
+      <layoutData x:class="GridData" horizontalAlignment="END" />
+    </button>
+
     <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
       <layoutData x:class="GridData" horizontalAlignment="END" />
     </button>
+
     <composite>
-      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
       <layout x:class="GridLayout" numColumns="2" />
       <x:children>
 
-        <label text="Itervar for X axis:"/>
+        <label text="X Axis:"/>
         <combo x:id="xaxis_itervar" x:id.content="$itervarnames" x:style="BORDER">
             <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
         </combo>
 
-        <label text="Itervar for iso lines:"/>
-        <combo x:id="iso_itervar" x:id.content="$itervarnames" x:style="BORDER">
+        <label text="Group By:*"/>
+        <combo x:id="group_by" x:id.content="$itervarnames,replication,module,name" x:style="BORDER">
             <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
         </combo>
+        <label text="* This is a comma-separated list of iteration variable, run attribute, or result attribute names.">
+            <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" horizontalSpan="2" />
+        </label>
 
       </x:children>
     </composite>
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -241,7 +200,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -364,13 +323,6 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalSpan="2"/>
     </button>
 
-    <!-- Display titles or names? -->
-    <label text="Label source:"/>
-    <combo x:id="legend_labels" x:id.default="result titles" x:style="BORDER|READ_ONLY">
-      <add x:p0="result names"/>
-      <add x:p0="result titles"/>
-    </combo>
-
     <!-- Placement -->
     <label text="Placement:"/>
     <combo x:id="legend_placement" x:id.default="upper right" x:style="BORDER|READ_ONLY">
@@ -406,7 +358,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Confidence Interval" label="Confidence Interval"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="CONFINT" label="Confidence Interval"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -475,7 +427,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -583,7 +535,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+            <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -603,7 +555,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -666,7 +618,6 @@ utils.export_data_if_needed(df, props)
             <property name="linecolor" value=""/>
             <property name="confidence_level" value="none"/>
             <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Signal-to-noise-plus-interference ratio"/>
             <property name="title" value="SNIR vs distance"/>
             <property name="cycle_seed" value="0"/>
@@ -692,17 +643,18 @@ utils.export_data_if_needed(df, props)
             <property name="marker" value="none"/>
             <property name="plt.style" value="default"/>
             <property name="legend_show" value="true"/>
-            <property name="iso_itervar" value="bitrate"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="10"/>
             <property name="matplotlibrc" value="grid.linestyle : --&#10;savefig.transparent : True"/>
+            <property name="group_by" value="bitrate"/>
+            <property name="include_fields" value="true"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1716878815" name="PER vs SNIR" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="962028107" name="PER vs SNIR" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
-from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
+from omnetpp.scave import results, chart, utils
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -720,18 +672,13 @@ filter_expression_snir = """module =~ "ErrorRateShowcase.destinationHost.wlan[*]
 
 # query vector data into a data frame
 try:
-    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
     df_per = results.get_scalars(filter_expression_per, include_fields = True, include_attrs=True, include_itervars=True, include_runattrs=True)
     df_snir = results.get_scalars(filter_expression_snir, include_fields = True, include_attrs=True, include_itervars=True, include_runattrs=True)
-except ValueError as e:
+except results.ResultQueryError as e:
     raise chart.ChartScriptError("Error while querying results: " + str(e))
-    
-#print("DF\n",df)
-#print("DF PER\n",df_per)
-#print("DF SNIR\n",df_snir)
 
-df_per.to_csv('df_per', index=True)
-df_snir.to_csv('df_snir', index=True)
+if df_per.empty or df_snir.empty:
+    raise chart.ChartScriptError("The result filter returned no data.")
 
 df_per['per'] = df_per['value']             # add per column, same as value column
 df_per = df_per[['iterationvarsd','per']]   # we only need these two columns
@@ -740,30 +687,17 @@ df_snir['snir'] = df_snir['value']          # add snir column, same as value col
 
 df_joined = df_snir.merge(df_per, on='iterationvarsd')
 
-#print('before pivot', df_joined)
-df_joined.to_csv('beforepivot', index=True)
-
 df_joined['snir'] = pd.to_numeric(df_joined['snir'])
 df_joined['per'] = pd.to_numeric(df_joined['per'])
 
 df_joined = df_joined.pivot_table(columns='bitrate', index='snir', values='per')
-df_joined.to_csv('afterpivot', index=True)
 
 df_joined = df_joined[['6','9','12','18','24','36','48','54']]
 
-#print('joined', df_joined)
-
-#df = df.pivot_table(index='bitrate', columns='name', values='vecvalue')
-
-if df.empty:
-    raise chart.ChartScriptError("The result filter returned no data.")
-
 # apply vector operations
-#df = ops.perform_vector_ops(df, props["vector_operations"])
+#df = utils.perform_vector_ops(df, props["vector_operations"])
 
 # plot
-#utils.plot_vectors(df, props)
-
 for c in df_joined:
     ys = df_joined[c]
     mask = ys.notna()
@@ -771,10 +705,8 @@ for c in df_joined:
 
 ylocs, ylabels = plt.yticks()
 
-#print('ylocs',ylocs)
-#print('ylabels',ylabels)
-
-# TODO these should be set from the dialog
+# TODO these should be set from the dialog 
+# -> cannot do that because we're not using the built-in function to plot
 plt.title('PER vs SNIR')
 plt.xlabel('Signal-to-noise-plus-interference ratio')
 plt.ylabel('Packet error rate')
@@ -782,9 +714,9 @@ plt.ylabel('Packet error rate')
 utils.postconfigure_plot(props)
 
 utils.export_image_if_needed(props)
-utils.export_data_if_needed(df, props)
+#utils.export_data_if_needed(df, props)
 ]]></script>
-            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -804,28 +736,28 @@ utils.export_data_if_needed(df, props)
     </button>
     <composite>
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
-      <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true" />
+      <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="false" />
       <x:children>
         <group text="Vector operations (one per line)">
           <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
           <layout x:class="GridLayout" numColumns="1" />
           <x:children>
-            <text x:id="vector_operations" x:style="BORDER|MULTI|V_SCROLL|H_SCROLL">
+            <text x:id="vector_operations" x:style="BORDER|MULTI|V_SCROLL|H_SCROLL" x:id.contentAssist="vectorops">
               <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
             </text>
           </x:children>
         </group>
         <group text="Crop interval">
-          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="false" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
           <layout x:class="GridLayout" numColumns="2" />
           <x:children>
             <label text="Start time (sec):" />
             <text x:id="vector_start_time" x:style="BORDER">
-              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+              <layoutData x:class="GridData" widthHint="120" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
             </text>
             <label text="End time (sec):" />
             <text x:id="vector_end_time" x:style="BORDER">
-              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+              <layoutData x:class="GridData" widthHint="120" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
             </text>
           </x:children>
         </group>
@@ -834,7 +766,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -928,7 +860,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1051,13 +983,6 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalSpan="2"/>
     </button>
 
-    <!-- Display titles or names? -->
-    <label text="Label source:"/>
-    <combo x:id="legend_labels" x:id.default="result titles" x:style="BORDER|READ_ONLY">
-      <add x:p0="result names"/>
-      <add x:p0="result titles"/>
-    </combo>
-
     <!-- Placement -->
     <label text="Placement:"/>
     <combo x:id="legend_placement" x:id.default="upper right" x:style="BORDER|READ_ONLY">
@@ -1093,7 +1018,74 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang" />
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+  </import>
+  <layout x:class="GridLayout" numColumns="1" />
+  <x:children>
+
+        <group text="Legend labels">
+
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="false" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+          <layout x:class="GridLayout" />
+          <x:children>
+            <button x:id='legend_automatic' text='Automatic' x:style='RADIO' x:id.default="true"/>
+            <composite>
+              <layoutData x:class="GridData" horizontalIndent="30"/>
+              <layout x:class="GridLayout" marginHeight="0" marginBottom="5"/>
+              <x:children>
+                <button x:id='legend_prefer_result_titles' text='Use result title instead of name where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/>
+                <button x:id='legend_prefer_module_display_paths' text='Use module display path instead of full path where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/>
+              </x:children>
+            </composite>
+
+            <button x:id='legend_manual' text='Manual' x:style='RADIO'/>
+            <composite>
+              <layoutData x:class="GridData" horizontalIndent="30"/>
+              <layout x:class="GridLayout" numColumns="2" marginHeight="0" marginBottom="5"/>
+              <x:children>
+                <label text="Format string:"/>
+                <text x:id="legend_format" x:style="BORDER" x:id.enablerButton="legend_manual" x:id.contentAssist="columns">
+                  <layoutData x:class="GridData" widthHint="200" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="CENTER" grabExcessVerticalSpace="false" />
+                </text>
+                <label text="Hint: Add $name or ${name} to insert content of data frame column; use $$ to insert dollar sign">
+                  <layoutData x:class="GridData" horizontalSpan="2" />
+                </label>
+              </x:children>
+            </composite>
+          </x:children>
+
+        </group>
+
+        <group text="Label tweaking">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+          <layout x:class="GridLayout" numColumns="1" />
+          <x:children>
+            <label text="Sed-style regex replacements inside the labels (/foo/bar/, one per line):" />
+            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL">
+              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+            </styledText>
+            <label text="Hint: Use \1, \2, etc. to refer back to parenthesized groups; data frame colums ($name, ${name}) also recognized"/>
+            <!--
+            <label text="Examples:"/>
+            <label text='- &quot;/tcp/TCP/&quot; ==&gt; change &quot;tcp&quot; to &quot;TCP&quot;'/>
+            <label text='- &quot;/ +/ /&quot; ==&gt; replace multiple spaces with one space'/>
+            <label text="- &quot;/host\[(\d+)\]/in host \1/&quot; ==&gt; change &quot;host[21]&quot; to &quot;in host 21&quot; (note \1,\2 as group reference)"/>
+            <label text='- &quot;/\//:/&quot; or &quot;|\|:|&quot; ==&gt; replace slashes with colons'/>
+            -->
+          </x:children>
+        </group>
+
+
+  </x:children>
+</xswt>]]></dialogPage>
+            <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1201,7 +1193,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+            <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -1221,7 +1213,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1283,9 +1275,8 @@ utils.export_data_if_needed(df, props)
             <property name="vector_end_time" value=""/>
             <property name="linecolor" value=""/>
             <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value=""/>
-            <property name="title" value=""/>
+            <property name="title" value="PER vs SNIR"/>
             <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="true"/>
@@ -1314,13 +1305,23 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="10"/>
             <property name="matplotlibrc" value="grid.linestyle : --&#10;savefig.transparent : True"/>
+            <property name="legend_prefer_module_display_paths" value="true"/>
+            <property name="legend_prefer_result_titles" value="true"/>
+            <property name="legend_manual" value=""/>
+            <property name="legend_replacements" value=""/>
+            <property name="legend_automatic" value="true"/>
+            <property name="legend_format" value=""/>
         </chart>
-        <chart icon="icons/full/obj/scatterchart.png" id="2054690010" name="PER vs distance" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
-            <script><![CDATA[import math
-import numpy as np
-import pandas as pd
+        <chart createdWith="" icon="icons/full/obj/scatterchart.png" id="1887594818" name="PER vs distance" resultTypes="" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
+            <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
+import os
+import sys
+from omnetpp.scave.utils import make_legend_label
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
+import modifiedplot
+default_colors = modifiedplot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -1328,98 +1329,41 @@ utils.preconfigure_plot(props)
 
 # collect parameters for query
 filter_expression = props["filter"]
-xaxis_itervar = props["xaxis_itervar"]
-iso_itervar = props["iso_itervar"]
+include_fields = props["include_fields"] == "true"
 
 # query data into a data frame
-df = results.get_scalars(filter_expression, include_fields = True, include_runattrs=True, include_attrs=True, include_itervars=True)
+try:
+    df = results.get_scalars(filter_expression, include_fields=include_fields, include_attrs=True, include_runattrs=True, include_itervars=True)
+except results.ResultQueryError as e:
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
-if not xaxis_itervar and not iso_itervar:
-    print("The X Axis and Iso Line options were not set in the dialog, inferring them from the data..")
-    xaxis_itervar, iso_itervar = utils.select_best_partitioning_column_pair(df, props)
-    if not xaxis_itervar:
-        raise chart.ChartScriptError("Please set the X Axis (and Iso Lines) options in the dialog!")
+xaxis_itervar, group_by = utils.select_xaxis_and_groupby(df, props)
+confidence_level = utils.get_confidence_level(props)
+newdf = utils.pivot_for_scatterchart(df, xaxis_itervar, group_by, confidence_level)
 
-utils.assert_columns_exist(df, [xaxis_itervar])
-df[xaxis_itervar] = pd.to_numeric(df[xaxis_itervar], errors="ignore")
+props['legend_replacements'] = "/bitrate//\n/=//"
+props['legend_format'] = "${name} Mbps"
 
-if iso_itervar:
-    utils.assert_columns_exist(df, [xaxis_itervar])
-    df[iso_itervar] = pd.to_numeric(df[iso_itervar], errors="ignore")
+modifiedplot.plot_lines(newdf, props)
 
-if not iso_itervar: # might be an empty string
-    iso_itervar = None
+names = df["name"].unique()
+scalar_names = names[0] + ", etc." if len(names) > 1 else names[0]
+ideplot.ylabel(scalar_names) # TODO: shouldn't call into ideplot directly
 
-if df.empty:
-    raise chart.ChartScriptError("Select scalars for the Y axis in the Properties dialog")
-
-unique_names = df["name"].unique()
-
-if len(unique_names) != 1:
-    raise chart.ChartScriptError("Selected scalars must share the same name.")
-
-scalar_name = unique_names[0]
-
-confidence_level_str = props["confidence_level"] if "confidence_level" in props else "none"
-
-if confidence_level_str == "none":
-    df = pd.pivot_table(df, values="value", columns=iso_itervar, index=xaxis_itervar)
-    errors_df = None
-else:
-    confidence_level = float(confidence_level_str[:-1])/100
-    conf_int = lambda values: utils.confidence_interval(confidence_level, values) if len(values) > 1 else math.nan
-    pivoted = pd.pivot_table(df, values="value", columns=iso_itervar, index=xaxis_itervar, aggfunc=[np.mean, conf_int], dropna=False)
-    df = pivoted["mean"]
-    errors_df = pivoted["<lambda>"]
-
-legend_cols, _ = utils.extract_label_columns(df, props)
-
-p = plot if chart.is_native_chart() else plt
-
-
-p.xlabel(xaxis_itervar)
-p.ylabel(scalar_name)
-
-try:
-    xs = pd.to_numeric(df.index.values)
-except:
-    raise chart.ChartScriptError("The X axis itervar is not purely numeric, this is not supported yet.")
-
-for c in df.columns:
-    style = utils._make_line_args(props, c, df)
-    ys = df[c].values
-    p.plot(xs, ys, label=(iso_itervar + "=" + str(df[c].name) if iso_itervar else scalar_name), **style)
-
-    if errors_df is not None and not chart.is_native_chart():
-        style["linewidth"] = float(style["linewidth"])
-        style["linestyle"] = "none"
-        yerr = errors_df[c].values
-        if props["error_style"] == "Error bars":
-            p.errorbar(xs, ys, yerr=yerr, capsize=float(props["cap_size"]), **style)
-        elif props["error_style"] == "Error band":
-            plt.fill_between(xs, ys-yerr, ys+yerr, alpha=float(props["band_alpha"]))
-
-utils.set_plot_title(scalar_name + " vs. " + xaxis_itervar)
+title = (scalar_names + " vs. " + xaxis_itervar) if xaxis_itervar else scalar_names
+if "title" in props and props["title"]:
+    title = props["title"]
+utils.set_plot_title(title)
 
 utils.postconfigure_plot(props)
-
-plt.title("PER vs distance")
-
-# Remove 'bitrate=' from legend labels
-ax = plt.gca()
-handles, labels = ax.get_legend_handles_labels()
-newlabels = []
-for i in labels:
-    newlabels.append(i.replace('bitrate=','') + ' Mbps')
-ax.legend(handles, newlabels, loc=1, markerscale=2)
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]></script>
-            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -1428,36 +1372,48 @@ utils.export_data_if_needed(df, props)
     <package name="org.eclipse.swt.layout" />
     <package name="org.eclipse.swt.custom" />
   </import>
-  <layout x:class="GridLayout" numColumns="1" />
+  <layout x:class="GridLayout" numColumns="2" />
   <x:children>
-    <label text="Filter expression for scalars as Y value:" />
+    <label text="Filter expression for scalars as Y value:">
+        <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </label>
+
     <styledText x:id="filter" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="filter" x:id.resultType="scalar">
-      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
     </styledText>
+
+    <button x:id="include_fields" x:style="CHECK" text="Include fields">
+      <layoutData x:class="GridData" horizontalAlignment="END" />
+    </button>
+
     <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
       <layoutData x:class="GridData" horizontalAlignment="END" />
     </button>
+
     <composite>
-      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
       <layout x:class="GridLayout" numColumns="2" />
       <x:children>
 
-        <label text="Itervar for X axis:"/>
+        <label text="X Axis:"/>
         <combo x:id="xaxis_itervar" x:id.content="$itervarnames" x:style="BORDER">
             <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
         </combo>
 
-        <label text="Itervar for iso lines:"/>
-        <combo x:id="iso_itervar" x:id.content="$itervarnames" x:style="BORDER">
+        <label text="Group By:*"/>
+        <combo x:id="group_by" x:id.content="$itervarnames,replication,module,name" x:style="BORDER">
             <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
         </combo>
+        <label text="* This is a comma-separated list of iteration variable, run attribute, or result attribute names.">
+            <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" horizontalSpan="2" />
+        </label>
 
       </x:children>
     </composite>
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1551,7 +1507,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1674,13 +1630,6 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalSpan="2"/>
     </button>
 
-    <!-- Display titles or names? -->
-    <label text="Label source:"/>
-    <combo x:id="legend_labels" x:id.default="result titles" x:style="BORDER|READ_ONLY">
-      <add x:p0="result names"/>
-      <add x:p0="result titles"/>
-    </combo>
-
     <!-- Placement -->
     <label text="Placement:"/>
     <combo x:id="legend_placement" x:id.default="upper right" x:style="BORDER|READ_ONLY">
@@ -1716,7 +1665,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Confidence Interval" label="Confidence Interval"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="CONFINT" label="Confidence Interval"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1785,7 +1734,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1893,7 +1842,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+            <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -1913,7 +1862,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -1976,7 +1925,6 @@ utils.export_data_if_needed(df, props)
             <property name="linecolor" value=""/>
             <property name="confidence_level" value="none"/>
             <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Packet error rate"/>
             <property name="title" value="PER vs distance"/>
             <property name="cycle_seed" value="0"/>
@@ -2002,20 +1950,25 @@ utils.export_data_if_needed(df, props)
             <property name="marker" value="none"/>
             <property name="plt.style" value="default"/>
             <property name="legend_show" value="true"/>
-            <property name="iso_itervar" value="bitrate"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="10"/>
             <property name="matplotlibrc" value="grid.linestyle : --&#10;savefig.transparent : True"/>
+            <property name="group_by" value="bitrate"/>
+            <property name="include_fields" value="true"/>
         </chart>
-        <chart icon="icons/full/obj/scatterchart.png" id="849396457" name="Effective bitrate vs distance" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
-            <script><![CDATA[import math
-import numpy as np
-import pandas as pd
+        <chart createdWith="" icon="icons/full/obj/scatterchart.png" id="411005840" name="Effective bitrate vs distance" resultTypes="" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
+            <script><![CDATA[from omnetpp.scave import results, chart, utils, ideplot
+import os
+import sys
+from omnetpp.scave.utils import make_legend_label
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
-from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
+import modifiedplot
+default_colors = modifiedplot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -2023,113 +1976,44 @@ utils.preconfigure_plot(props)
 
 # collect parameters for query
 filter_expression = props["filter"]
-xaxis_itervar = props["xaxis_itervar"]
-iso_itervar = props["iso_itervar"]
+include_fields = props["include_fields"] == "true"
 
 # query data into a data frame
-df = results.get_scalars(filter_expression, include_fields = True, include_runattrs=True, include_attrs=True, include_itervars=True)
-
-#print(df)
-#print(df['value'][0])
-#print(df['bitrate'][0])
-#print("len:", len(df['value']))
-
-#df['value'] = df['bitrate'] * (1 - df['value'])
-
-for i in range(len(df['value'])):
-#    df['value'][i] = df['bitrate'][i] * (1 - df['value'][i])
-    df['value'][i] = float(df['bitrate'][i]) * (1 - float(df['value'][i]))
-#    print("Y", float(df['bitrate'][i]) * (1 - float(df['value'][i])))
-#    print("X", df['value'][i])
+try:
+    df = results.get_scalars(filter_expression, include_fields=include_fields, include_attrs=True, include_runattrs=True, include_itervars=True)
+except results.ResultQueryError as e:
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
-if not xaxis_itervar and not iso_itervar:
-    print("The X Axis and Iso Line options were not set in the dialog, inferring them from the data..")
-    xaxis_itervar, iso_itervar = utils.select_best_partitioning_column_pair(df, props)
-    if not xaxis_itervar:
-        raise chart.ChartScriptError("Please set the X Axis (and Iso Lines) options in the dialog!")
+for i in range(len(df['value'])):
+    df['value'][i] = float(df['bitrate'][i]) * (1 - float(df['value'][i]))
 
-utils.assert_columns_exist(df, [xaxis_itervar])
-df[xaxis_itervar] = pd.to_numeric(df[xaxis_itervar], errors="ignore")
+xaxis_itervar, group_by = utils.select_xaxis_and_groupby(df, props)
+confidence_level = utils.get_confidence_level(props)
+newdf = utils.pivot_for_scatterchart(df, xaxis_itervar, group_by, confidence_level)
 
-if iso_itervar:
-    utils.assert_columns_exist(df, [xaxis_itervar])
-    df[iso_itervar] = pd.to_numeric(df[iso_itervar], errors="ignore")
+props['legend_replacements'] = "/bitrate//\n/=//"
+props['legend_format'] = "${name} Mbps"
 
-if not iso_itervar: # might be an empty string
-    iso_itervar = None
+modifiedplot.plot_lines(newdf, props)
 
-if df.empty:
-    raise chart.ChartScriptError("Select scalars for the Y axis in the Properties dialog")
+names = df["name"].unique()
+scalar_names = names[0] + ", etc." if len(names) > 1 else names[0]
+ideplot.ylabel(scalar_names) # TODO: shouldn't call into ideplot directly
 
-unique_names = df["name"].unique()
-
-if len(unique_names) != 1:
-    raise chart.ChartScriptError("Selected scalars must share the same name.")
-
-scalar_name = unique_names[0]
-
-confidence_level_str = props["confidence_level"] if "confidence_level" in props else "none"
-
-if confidence_level_str == "none":
-    df = pd.pivot_table(df, values="value", columns=iso_itervar, index=xaxis_itervar)
-    errors_df = None
-else:
-    confidence_level = float(confidence_level_str[:-1])/100
-    conf_int = lambda values: utils.confidence_interval(confidence_level, values) if len(values) > 1 else math.nan
-    pivoted = pd.pivot_table(df, values="value", columns=iso_itervar, index=xaxis_itervar, aggfunc=[np.mean, conf_int], dropna=False)
-    df = pivoted["mean"]
-    errors_df = pivoted["<lambda>"]
-
-legend_cols, _ = utils.extract_label_columns(df, props)
-
-p = plot if chart.is_native_chart() else plt
-
-
-p.xlabel(xaxis_itervar)
-p.ylabel(scalar_name)
-
-try:
-    xs = pd.to_numeric(df.index.values)
-except:
-    raise chart.ChartScriptError("The X axis itervar is not purely numeric, this is not supported yet.")
-
-for c in df.columns:
-    style = utils._make_line_args(props, c, df)
-    ys = df[c].values
-    p.plot(xs, ys, label=(iso_itervar + "=" + str(df[c].name) if iso_itervar else scalar_name), **style)
-
-    if errors_df is not None and not chart.is_native_chart():
-        style["linewidth"] = float(style["linewidth"])
-        style["linestyle"] = "none"
-        yerr = errors_df[c].values
-        if props["error_style"] == "Error bars":
-            p.errorbar(xs, ys, yerr=yerr, capsize=float(props["cap_size"]), **style)
-        elif props["error_style"] == "Error band":
-            plt.fill_between(xs, ys-yerr, ys+yerr, alpha=float(props["band_alpha"]))
-
-utils.set_plot_title(scalar_name + " vs. " + xaxis_itervar)
+title = (scalar_names + " vs. " + xaxis_itervar) if xaxis_itervar else scalar_names
+if "title" in props and props["title"]:
+    title = props["title"]
+utils.set_plot_title(title)
 
 utils.postconfigure_plot(props)
-
-# Remove 'TxPower' from legend labels
-ax = plt.gca()
-handles, labels = ax.get_legend_handles_labels()
-newlabels = []
-for i in labels:
-    i += ' Mbps'
-    newlabels.append(i.replace('bitrate=',''))
-#ax.legend(handles, newlabels, loc=1, ncol=4, markerscale=2)
-ax.legend(handles, newlabels, loc=1, markerscale=2)
-
-plt.title("Effective bitrate vs distance")
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]></script>
-            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -2138,36 +2022,48 @@ utils.export_data_if_needed(df, props)
     <package name="org.eclipse.swt.layout" />
     <package name="org.eclipse.swt.custom" />
   </import>
-  <layout x:class="GridLayout" numColumns="1" />
+  <layout x:class="GridLayout" numColumns="2" />
   <x:children>
-    <label text="Filter expression for scalars as Y value:" />
+    <label text="Filter expression for scalars as Y value:">
+        <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </label>
+
     <styledText x:id="filter" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="filter" x:id.resultType="scalar">
-      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
     </styledText>
+
+    <button x:id="include_fields" x:style="CHECK" text="Include fields">
+      <layoutData x:class="GridData" horizontalAlignment="END" />
+    </button>
+
     <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
       <layoutData x:class="GridData" horizontalAlignment="END" />
     </button>
+
     <composite>
-      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
       <layout x:class="GridLayout" numColumns="2" />
       <x:children>
 
-        <label text="Itervar for X axis:"/>
+        <label text="X Axis:"/>
         <combo x:id="xaxis_itervar" x:id.content="$itervarnames" x:style="BORDER">
             <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
         </combo>
 
-        <label text="Itervar for iso lines:"/>
-        <combo x:id="iso_itervar" x:id.content="$itervarnames" x:style="BORDER">
+        <label text="Group By:*"/>
+        <combo x:id="group_by" x:id.content="$itervarnames,replication,module,name" x:style="BORDER">
             <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
         </combo>
+        <label text="* This is a comma-separated list of iteration variable, run attribute, or result attribute names.">
+            <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" horizontalSpan="2" />
+        </label>
 
       </x:children>
     </composite>
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="LINES" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2261,7 +2157,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2384,13 +2280,6 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalSpan="2"/>
     </button>
 
-    <!-- Display titles or names? -->
-    <label text="Label source:"/>
-    <combo x:id="legend_labels" x:id.default="result titles" x:style="BORDER|READ_ONLY">
-      <add x:p0="result names"/>
-      <add x:p0="result titles"/>
-    </combo>
-
     <!-- Placement -->
     <label text="Placement:"/>
     <combo x:id="legend_placement" x:id.default="upper right" x:style="BORDER|READ_ONLY">
@@ -2426,7 +2315,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Confidence Interval" label="Confidence Interval"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="CONFINT" label="Confidence Interval"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2495,7 +2384,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2603,7 +2492,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+            <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -2623,7 +2512,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -2686,12 +2575,11 @@ utils.export_data_if_needed(df, props)
             <property name="linecolor" value=""/>
             <property name="confidence_level" value="none"/>
             <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Effective bitrate [Mbps]"/>
             <property name="title" value="Effective bitrate vs distance"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
-            <property name="image_export_height" value="4"/>
+            <property name="image_export_height" value="6"/>
             <property name="xaxis_log" value="false"/>
             <property name="legend_placement" value="upper right"/>
             <property name="data_export_filename" value=""/>
@@ -2699,7 +2587,7 @@ utils.export_data_if_needed(df, props)
             <property name="grid_density" value="Major"/>
             <property name="xaxis_itervar" value="distance"/>
             <property name="yaxis_min" value="0"/>
-            <property name="image_export_filename" value=""/>
+            <property name="image_export_filename" value="throughput_distance3"/>
             <property name="xaxis_min" value="0"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
@@ -2712,13 +2600,14 @@ utils.export_data_if_needed(df, props)
             <property name="marker" value="none"/>
             <property name="plt.style" value="default"/>
             <property name="legend_show" value="true"/>
-            <property name="iso_itervar" value="bitrate"/>
             <property name="matplotlibrc.legend.shadow" value="false"/>
             <property name="simplify" value="false"/>
             <property name="yaxis_max" value=""/>
             <property name="xaxis_max" value="550"/>
-            <property name="image_export_width" value="6"/>
+            <property name="image_export_width" value="10"/>
             <property name="matplotlibrc" value="grid.linestyle : --&#10;savefig.transparent : True"/>
+            <property name="group_by" value="bitrate"/>
+            <property name="include_fields" value="true"/>
         </chart>
     </charts>
 </analysis>

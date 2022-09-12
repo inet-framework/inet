@@ -9,12 +9,15 @@
         <input pattern="results/VoicePriorityAggregation-#0.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/barchart.png" id="1290015913" name="Number of packets received" template="barchart_mpl" type="MATPLOTLIB">
-            <script><![CDATA[import math
-import numpy as np
-import pandas as pd
-from omnetpp.scave import results, chart, ideplot, utils
+        <chart createdWith="" icon="icons/full/obj/barchart.png" id="1590756013" name="Number of packets received" resultTypes="" template="barchart_mpl" type="MATPLOTLIB">
+            <script><![CDATA[from omnetpp.scave import results, chart, utils
+import os
+import sys
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
+import modifiedplot
+default_colors = modifiedplot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -22,72 +25,38 @@ utils.preconfigure_plot(props)
 
 # collect parameters for query
 filter_expression = props["filter"]
+include_fields = props["include_fields"] == "true"
 
 # query scalar data into dataframe
-df = results.get_scalars(filter_expression, include_attrs=True, include_itervars=True, include_runattrs=True)
+try:
+    df = results.get_scalars(filter_expression, include_fields=include_fields, include_attrs=True, include_runattrs=True, include_itervars=True)
+except results.ResultQueryError as e:
+    raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
-groups = props["groups"].split(",")
-series = props["series"].split(",")
+groups, series = utils.select_groups_series(df, props)
+confidence_level = utils.get_confidence_level(props)
+valuedf, errorsdf, metadf = utils.pivot_for_barchart(df, groups, series, confidence_level)
 
-if not groups[0] and not series[0]:
-    print("The Groups and Series options were not set in the dialog, inferring them from the data.")
-    g, s = ("module", "name") if len(df) == 1 else utils.select_best_partitioning_column_pair(df, props)
-    if not g or not s:
-        raise chart.ChartScriptError("Please set the Groups and Series options in the dialog!")
-    groups, series = [g], [s]
-
-utils.assert_columns_exist(df, groups + series)
-
-for c in groups + series:
-    df[c] = pd.to_numeric(df[c], errors="ignore")
-    
-#print(df['configname'])
-
-#df = df.reindex(['NoAggregation','Aggregation','VoicePriorityAggregation'])
-
-df.sort_values(by=groups+series, axis='index', inplace=True)
-#df.sort_values(by='experiment', axis='index', inplace=True)
-
-#print(df)
-#df = df.reindex(['NoAggregation','Aggregation','VoicePriorityAggregation'])
-#df = df.set_index(['NoAggregation','Aggregation','VoicePriorityAggregation'])
-df = df.set_index('configname')
-df = df.reindex(['NoAggregation','Aggregation','VoicePriorityAggregation'])
-#print(df)
-
-#confidence_level_str = props["confidence_level"] if "confidence_level" in props else "none"
-#
-#if confidence_level_str == "none":
-#    df = pd.pivot_table(df, index=groups, columns=series, values='value')
-#    utils.plot_bars(df, props, names)
-#else:
-#    confidence_level = float(confidence_level_str[:-1])/100
-#    conf_int = lambda values: utils.confidence_interval(confidence_level, values) if len(values) > 1 else math.nan
-#    df = pd.pivot_table(df, index=groups, columns=series, values='value', aggfunc=[np.mean, conf_int], dropna=False)
-#    utils.plot_bars(df["mean"], props, names, df["<lambda>"])
-
-#utils.postconfigure_plot(props)
-
-df.plot(kind='bar', ax=plt.gca(), zorder=2, align='center', width=0.8, figsize=(8,6))
+modifiedplot.plot_bars(valuedf, errorsdf, metadf, props, order=['NoAggregation','Aggregation','VoicePriorityAggregation'], zorder=2)
 
 ax = plt.gca()
-for p in ax.patches:
-    ax.annotate(str(int(p.get_height())), (p.get_x() + p.get_width() / 2, p.get_height() - 10000),
-                horizontalalignment='center', verticalalignment='top', color='white', size=12)
 
-plt.title('Number of packets received')
-plt.legend().remove()
+modifiedplot.annotate_barchart(ax, offset=10000, result_type='int')
+
+utils.postconfigure_plot(props)
+
 plt.grid(axis='y', linestyle='--')
-plt.xticks(rotation=0)
+plt.grid(axis='x', linestyle='')
 plt.xlabel('')
+plt.ylabel('')
 
 utils.export_image_if_needed(props)
 utils.export_data_if_needed(df, props)
 ]]></script>
-            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="INPUT" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
   <import xmlns="http://sweet_swt.sf.net/xswt">
     <package name="java.lang" />
@@ -105,9 +74,13 @@ utils.export_data_if_needed(df, props)
     <styledText x:id="filter" x:style="BORDER|V_SCROLL|H_SCROLL" x:id.contentAssist="filter" x:id.resultType="scalar">
       <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
     </styledText>
-
+    
+    <button x:id="include_fields" x:style="CHECK" text="Include fields">
+      <layoutData x:class="GridData" horizontalAlignment="END" />
+    </button>
+    
     <button x:id="simplify" x:style="PUSH" text="Simplify" x:id.role="simplify" x:id.targetControl="filter">
-      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="END" />
+      <layoutData x:class="GridData" horizontalAlignment="END" />
     </button>
 
     <label text="Multiple attributes can be selected in both fields below, separated by commas.">
@@ -131,7 +104,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Bars" label="Bars"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="BARS" label="Bars"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -184,7 +157,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Confidence Interval" label="Confidence Interval"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="CONFINT" label="Confidence Interval"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -226,7 +199,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="PLOT" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -335,13 +308,6 @@ utils.export_data_if_needed(df, props)
       <layoutData x:class="GridData" horizontalSpan="2"/>
     </button>
 
-    <!-- Display titles or names? -->
-    <label text="Label source:"/>
-    <combo x:id="legend_labels" x:id.default="result titles" x:style="BORDER|READ_ONLY">
-      <add x:p0="result names"/>
-      <add x:p0="result titles"/>
-    </combo>
-
     <!-- Placement -->
     <label text="Placement:"/>
     <combo x:id="legend_placement" x:id.default="upper right" x:style="BORDER|READ_ONLY">
@@ -377,7 +343,74 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="LEGEND" label="Legend"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang" />
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+  </import>
+  <layout x:class="GridLayout" numColumns="1" />
+  <x:children>
+
+        <group text="Legend labels">
+
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="false" verticalAlignment="FILL" grabExcessVerticalSpace="false" />
+          <layout x:class="GridLayout" />
+          <x:children>
+            <button x:id='legend_automatic' text='Automatic' x:style='RADIO' x:id.default="true"/>
+            <composite>
+              <layoutData x:class="GridData" horizontalIndent="30"/>
+              <layout x:class="GridLayout" marginHeight="0" marginBottom="5"/>
+              <x:children>
+                <button x:id='legend_prefer_result_titles' text='Use result title instead of name where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/>
+                <button x:id='legend_prefer_module_display_paths' text='Use module display path instead of full path where available' x:style='CHECK' x:id.default="true" x:id.enablerButton="legend_automatic"/>
+              </x:children>
+            </composite>
+
+            <button x:id='legend_manual' text='Manual' x:style='RADIO'/>
+            <composite>
+              <layoutData x:class="GridData" horizontalIndent="30"/>
+              <layout x:class="GridLayout" numColumns="2" marginHeight="0" marginBottom="5"/>
+              <x:children>
+                <label text="Format string:"/>
+                <text x:id="legend_format" x:style="BORDER" x:id.enablerButton="legend_manual" x:id.contentAssist="columns">
+                  <layoutData x:class="GridData" widthHint="200" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="CENTER" grabExcessVerticalSpace="false" />
+                </text>
+                <label text="Hint: Add $name or ${name} to insert content of data frame column; use $$ to insert dollar sign">
+                  <layoutData x:class="GridData" horizontalSpan="2" />
+                </label>
+              </x:children>
+            </composite>
+          </x:children>
+
+        </group>
+
+        <group text="Label tweaking">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+          <layout x:class="GridLayout" numColumns="1" />
+          <x:children>
+            <label text="Sed-style regex replacements inside the labels (/foo/bar/, one per line):" />
+            <styledText x:id="legend_replacements" x:style="BORDER|V_SCROLL|H_SCROLL">
+              <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+            </styledText>
+            <label text="Hint: Use \1, \2, etc. to refer back to parenthesized groups; data frame colums ($name, ${name}) also recognized"/>
+            <!--
+            <label text="Examples:"/>
+            <label text='- &quot;/tcp/TCP/&quot; ==&gt; change &quot;tcp&quot; to &quot;TCP&quot;'/>
+            <label text='- &quot;/ +/ /&quot; ==&gt; replace multiple spaces with one space'/>
+            <label text="- &quot;/host\[(\d+)\]/in host \1/&quot; ==&gt; change &quot;host[21]&quot; to &quot;in host 21&quot; (note \1,\2 as group reference)"/>
+            <label text='- &quot;/\//:/&quot; or &quot;|\|:|&quot; ==&gt; replace slashes with colons'/>
+            -->
+          </x:children>
+        </group>
+
+
+  </x:children>
+</xswt>]]></dialogPage>
+            <dialogPage id="STYLING" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -485,7 +518,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+            <dialogPage id="ADVANCED" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
 <xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
   <import xmlns='http://sweet_swt.sf.net/xswt'>
     <package name='java.lang'/>
@@ -505,7 +538,7 @@ utils.export_data_if_needed(df, props)
   </x:children>
 </xswt>
 ]]></dialogPage>
-            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+            <dialogPage id="EXPORT" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
 
   <import xmlns="http://sweet_swt.sf.net/xswt">
@@ -566,7 +599,6 @@ utils.export_data_if_needed(df, props)
             <property name="grid_show" value="true"/>
             <property name="confidence_level" value="none"/>
             <property name="matplotlibrc.figure.facecolor" value=""/>
-            <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value=""/>
             <property name="title" value="Number of packets received"/>
             <property name="cycle_seed" value="0"/>
@@ -593,13 +625,24 @@ utils.export_data_if_needed(df, props)
             <property name="yaxis_max" value=""/>
             <property name="image_export_width" value="8"/>
             <property name="matplotlibrc" value="savefig.bbox: tight&#10;savefig.transparent : True"/>
+            <property name="legend_prefer_module_display_paths" value="true"/>
+            <property name="legend_prefer_result_titles" value="true"/>
+            <property name="legend_manual" value=""/>
+            <property name="legend_replacements" value=""/>
+            <property name="legend_automatic" value="true"/>
+            <property name="legend_format" value=""/>
+            <property name="include_fields" value=""/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1872081085" name="Average throughput" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1448917004" name="Average throughput" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import numpy as np
-import pandas as pd
+import os
+import sys
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
+import modifiedplot
+default_colors = modifiedplot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -613,42 +656,23 @@ end_time = float(props["vector_end_time"] or math.inf)
 # query vector data into a data frame
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
-except ValueError as e:
+except results.ResultQueryError as e:
     raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
+modifiedplot.add_to_dataframe(df, style_tuple_list=[('configname', 'NoAggregation', {'color': default_colors[0]}),
+                                                    ('configname', 'Aggregation', {'color': default_colors[1]}),
+                                                    ('configname', 'VoicePriorityAggregation', {'color': default_colors[2]})],
+                                                    order=['configname', 'NoAggregation', 'Aggregation', 'VoicePriorityAggregation'])
+
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-newcolors = ['#2ca02c', '#ff7f0e', '#1f77b4']
-
-array_of_colors = np.array([['NoAggregation','#1f77b4',0], ['Aggregation','#ff7f0e',1], ['VoicePriorityAggregation','#2ca02c',2]])
-#print(array_of_colors)
-
-colordf = pd.DataFrame(array_of_colors, index=None, columns=['experiment','color','order'])
-#print('colordf:',colordf)
-
-colordf = colordf[['experiment','color','order']].set_index('experiment')
-#print("the new colordf:", colordf)
-
-df = df.join(colordf, on='experiment')
-
-
-#print('df', df)
-
-df.sort_values('order', inplace=True)
-
-#print('df', df)
-#print("props:", props)
-
 # plot
-#utils.plot_vectors(df, props)
-for i in df.itertuples():
-    plt.plot(i.vectime, i.vecvalue, label=i.experiment, color=i.color)
+modifiedplot.plot_vectors(df, props)
 
-plt.title("Average throughput")
 utils.postconfigure_plot(props)
 
 plt.grid(linestyle='--')
@@ -1252,14 +1276,17 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value="10"/>
             <property name="image_export_width" value="8"/>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
-            <property name="include_fields" value="false"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1267488110" name="End-to-end delay" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="643839341" name="End-to-end delay" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils
-import numpy as np
-import pandas as pd
+import os
+import sys
+# TODO workaround when using omnetpp 6.0 that doesn't yet contain the python path feature
+sys.path.append(os.path.join(os.getcwd(), "../../../python"))
 import matplotlib.pyplot as plt
+import modifiedplot
+default_colors = modifiedplot.default_colors
 
 # get chart properties
 props = chart.get_properties()
@@ -1273,35 +1300,23 @@ end_time = float(props["vector_end_time"] or math.inf)
 # query vector data into a data frame
 try:
     df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
-except ValueError as e:
+except results.ResultQueryError as e:
     raise chart.ChartScriptError("Error while querying results: " + str(e))
 
 if df.empty:
     raise chart.ChartScriptError("The result filter returned no data.")
 
+modifiedplot.add_to_dataframe(df, style_tuple_list=[('configname', 'NoAggregation', {'color': default_colors[0]}),
+                                                    ('configname', 'Aggregation', {'color': default_colors[1]}),
+                                                    ('configname', 'VoicePriorityAggregation', {'color': default_colors[2]})],
+                                                    order=['configname', 'NoAggregation', 'Aggregation', 'VoicePriorityAggregation'])
+
 # apply vector operations
 df = utils.perform_vector_ops(df, props["vector_operations"])
 
-order_colors = np.array([['NoAggregation','#1f77b4',0],['Aggregation','#ff7f0e',1],['VoicePriorityAggregation','#2ca02c',2]])
-#print('order_colors:',order_colors)
-
-order_colors_df = pd.DataFrame(order_colors, index=None, columns=['experiment','color','order'])
-#print('order_colors_df:', order_colors_df)
-
-order_colors_df = order_colors_df[['experiment','color','order']].set_index('experiment')
-#print('order_colors_df:', order_colors_df)
-
-df = df.join(order_colors_df, on='experiment')
-#print('df:', df)
-
-df.sort_values('order', inplace=True)
-
 # plot
-#utils.plot_vectors(df, props)
-for i in df.itertuples():
-    plt.plot(i.vectime, i.vecvalue, label=i.experiment, color=i.color, linestyle='', marker='s', markersize=3)
+modifiedplot.plot_vectors(df, props)
 
-plt.title("End-to-end delay")
 utils.postconfigure_plot(props)
 
 plt.legend(fontsize=12, markerscale=2, loc='upper left')
@@ -1878,11 +1893,11 @@ utils.export_data_if_needed(df, props)
             <property name="linecolor" value=""/>
             <property name="matplotlibrc.figure.facecolor" value=""/>
             <property name="legend_prefer_result_titles" value="true"/>
-            <property name="legend_manual" value="false"/>
+            <property name="legend_manual" value="true"/>
             <property name="yaxis_title" value="End-to-end delay [ms]"/>
             <property name="legend_replacements" value=""/>
             <property name="title" value="End-to-end delay"/>
-            <property name="legend_automatic" value="true"/>
+            <property name="legend_automatic" value="false"/>
             <property name="vector_operations" value="apply: multiply_by(1000)"/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
@@ -1897,11 +1912,11 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_min" value=""/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
-            <property name="legend_format" value=""/>
+            <property name="legend_format" value="$configname"/>
             <property name="filter" value="* AND module =~ &quot;AggregationShowcase.host2.*&quot; AND name =~ endToEndDelay:vector"/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="none"/>
-            <property name="markersize" value="1"/>
+            <property name="markersize" value="3"/>
             <property name="drawstyle" value="auto"/>
             <property name="marker" value="s (square)"/>
             <property name="plt.style" value="default"/>
@@ -1912,7 +1927,6 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_max" value=""/>
             <property name="image_export_width" value="16"/>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
-            <property name="include_fields" value="false"/>
         </chart>
     </charts>
 </analysis>

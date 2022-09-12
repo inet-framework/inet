@@ -135,12 +135,12 @@ The power of the received signal vs. distance, using
 :ned:`TwoRayInterference` path loss module types, is displayed on the
 following plot:
 
-.. image:: media/tworay.svg
+.. figure:: media/tworay.png
    :width: 100%
 
 Here is the same plot zoomed in:
 
-.. image:: media/tworay2.svg
+.. figure:: media/tworay_zoomed.png
    :width: 100%
 
 It is apparent that the two-ray ground reflection model yields the same
@@ -155,14 +155,14 @@ The next plot displays the power of the received signal vs. distance
 using the :ned:`RicianFading` and :ned:`LogNormalShadowing` models, and the
 :ned:`FreeSpacePathLoss` model for reference:
 
-.. image:: media/ricianlognormal.svg
+.. figure:: media/ricianlognormal.png
    :width: 100%
 
 The sharp visual change in the "raggedness" of the curves near 100m is
 due to the data points becoming less dense. Here is the same plot zoomed
 in on the near-field:
 
-.. image:: media/ricianlognormal2.svg
+.. figure:: media/ricianlognormal_zoomed.png
    :width: 100%
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PathLossShowcase.ned <../PathLossShowcase.ned>`

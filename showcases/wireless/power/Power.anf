@@ -4,7 +4,7 @@
         <input pattern="results/General-#0.vec"/>
     </inputs>
     <charts>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="9" name="All hosts" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="44030571" name="All hosts" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 import matplotlib.pyplot as plt
@@ -576,7 +576,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="10"/>
             <property name="matplotlibrc" value="savefig.transparent : True"/>
         </chart>
-        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1605" name="Host[x]" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1016970137" name="Host[x]" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 import matplotlib.pyplot as plt
@@ -590,7 +590,7 @@ utils.preconfigure_plot(props)
 host = 10
 
 # collect parameters for query
-filter_expression = 'type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ "#0" AND (module =~ "PowerConsumptionShowcase.host[' + str(host) + '].energyGenerator" AND name =~ powerGeneration:vector OR module =~ "PowerConsumptionShowcase.host[' + str(host) + '].energyStorage" AND name =~ residualEnergyCapacity:vector)'
+filter_expression = 'type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ "#0" AND module =~ "PowerConsumptionShowcase.host[' + str(host) + '].energyStorage" AND name =~ residualEnergyCapacity:vector'
 start_time = float(props["vector_start_time"] or -math.inf)
 end_time = float(props["vector_end_time"] or math.inf)
 
@@ -1130,7 +1130,7 @@ utils.export_data_if_needed(df, props)
             <property name="matplotlibrc.figure.facecolor" value=""/>
             <property name="legend_labels" value="result titles"/>
             <property name="yaxis_title" value="Residual energy capacity [J]"/>
-            <property name="title" value="Host[12]"/>
+            <property name="title" value=""/>
             <property name="vector_operations" value=""/>
             <property name="cycle_seed" value="0"/>
             <property name="yaxis_log" value="false"/>
@@ -1145,7 +1145,7 @@ utils.export_data_if_needed(df, props)
             <property name="xaxis_min" value="0"/>
             <property name="matplotlibrc.axes.facecolor" value=""/>
             <property name="linewidth" value="1.5"/>
-            <property name="filter" value="type =~ vector AND runattr:experiment =~ General AND runattr:replication =~ &quot;#0&quot; AND (module =~ &quot;PowerConsumptionShowcase.host[10].energyGenerator&quot; AND name =~ powerGeneration:vector OR module =~ &quot;PowerConsumptionShowcase.host[12].energyStorage&quot; AND name =~ residualEnergyCapacity:vector)"/>
+            <property name="filter" value=""/>
             <property name="vector_start_time" value=""/>
             <property name="linestyle" value="solid"/>
             <property name="markersize" value="5"/>
