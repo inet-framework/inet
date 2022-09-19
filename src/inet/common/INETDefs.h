@@ -114,6 +114,59 @@ extern INET_API int evFlags;
 #define EV_ENDL                               "." << endl
 #define EV_LOC                                EV_FAINT << __FILE__ << ":" << __LINE__ << ":" << __FUNCTION__ << "()" << EV_NORMAL
 
+/**
+ * Convenience macro for using cSimulation::getSharedVariable() for initializing
+ * class members that are references for simulation-global variables.
+ * getSharedVariable() is used in place of "normal" C++ global variables to
+ * allow several simulation instances coexist without their global variables
+ * getting mixed up.
+ *
+ * getSharedVariable() identifies shared objects by a string key. A "shared"
+ * object is allocated on the first call with that key, and they are deallocated
+ * by cSimulation automatically at the end of the simulation. When using this
+ * macro, the type of the shared object (the template type parameter) is derived
+ * from the field's type, and the key is derived from the field's name and
+ * the name of the containing class. If additional arguments are specified
+ * to the macro, they are passed to the constructor or initializer of the object.
+ *
+ * An example:
+ *
+ * <pre>
+ * class Foobar {
+ *     ...
+ *     Foo& foo = SIMULATION_SHARED_VARIABLE(foo);
+ *     ...
+ * };
+ * </pre>
+ *
+ * Where the middle line roughly translates to:
+ *
+ * Foo& foo = cSimulation::getActiveSimulation()->getSharedVariable<Foo>("Foobar::foo");
+ *
+ * and it initializes the foo reference in all instances to the Foobar class
+ * to point to the same shared Foo instance, identified as "Foobar::foo".
+ */
+#define SIMULATION_SHARED_VARIABLE(FIELD,...) \
+        getSimulationOrSharedDataManager()->getSharedVariable<std::remove_reference<decltype(FIELD)>::type>((std::string(opp_typename(typeid(*this)))+"::"+#FIELD).c_str(), ## __VA_ARGS__)
+
+/**
+ * This macro is similar to SIMULATION_SHARED_VARIABLE(), but instead of wrapping
+ * cSimulation::getSharedVariable() it wraps cSimulation::getSharedCounter().
+ * Counters are of type uint64_t.
+ *
+ * An example:
+ *
+ * <pre>
+ * class Foobar {
+ *     ...
+ *     uint64_t& nextId = SIMULATION_SHARED_COUNTER(nextId);
+ *     ...
+ * };
+ * </pre>
+ */
+#define SIMULATION_SHARED_COUNTER(FIELD,...) \
+        getSimulationOrSharedDataManager()->getSharedCounter((std::string(opp_typename(typeid(*this)))+"::"+#FIELD).c_str(), ## __VA_ARGS__)
+
 } // namespace inet
 
 #ifdef INET_WITH_SELFDOC

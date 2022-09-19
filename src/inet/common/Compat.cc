@@ -9,6 +9,131 @@
 
 namespace inet {
 
+
+#if OMNETPP_BUILDNUM < 2000
+
+using namespace omnetpp;
+
+SharedDataManager::SharedDataHandles *SharedDataManager::sharedVariableHandles;
+SharedDataManager::SharedDataHandles *SharedDataManager::sharedCounterHandles;
+
+int SharedDataManager::SharedDataHandles::registerName(const char *name)
+{
+    auto it = nameToHandle.find(name);
+    if (it != nameToHandle.end())
+        return it->second;
+    else {
+        nameToHandle[name] = ++lastHandle;
+        return lastHandle;
+    }
+}
+
+const char *SharedDataManager::SharedDataHandles::getNameFor(int handle)
+{
+    // linear search should suffice here (small number of items, non-performance-critical)
+    for (auto& pair : nameToHandle)
+        if (pair.second == handle)
+            return pair.first.c_str();
+    return nullptr;
+}
+
+SharedDataManager::SharedDataManager()
+{
+    const size_t MAX_NUM_COUNTERS = 1000;  // fixed size to prevent array reallocation -- increase if necessary
+    sharedCounters.resize(MAX_NUM_COUNTERS, INVALID);
+}
+
+sharedvarhandle_t SharedDataManager::registerSharedVariableName(const char *name)
+{
+    if (sharedVariableHandles == nullptr)
+        sharedVariableHandles = new SharedDataHandles();
+    return sharedVariableHandles->registerName(name);
+}
+
+const char *SharedDataManager::getSharedVariableName(sharedvarhandle_t handle)
+{
+    return sharedVariableHandles ? sharedVariableHandles->getNameFor(handle) : nullptr;
+}
+
+sharedcounterhandle_t SharedDataManager::registerSharedCounterName(const char *name)
+{
+    if (sharedCounterHandles == nullptr)
+        sharedCounterHandles = new SharedDataHandles();
+    return sharedCounterHandles->registerName(name);
+}
+
+const char *SharedDataManager::getSharedCounterName(sharedcounterhandle_t handle)
+{
+    return sharedCounterHandles ? sharedCounterHandles->getNameFor(handle) : nullptr;
+}
+
+uint64_t& SharedDataManager::getSharedCounter(sharedcounterhandle_t handle, uint64_t initialValue)
+{
+    if (sharedCounters.size() <= handle)
+        throw cRuntimeError("getSharedCounter(): number of shared counters exhausted -- please increase table size in " __FILE__); // fixed size to prevent array reallocation which would invalidate returned references -- increase if necessary
+    uint64_t& counter = sharedCounters[handle];
+    if (counter == INVALID)
+        counter = initialValue;
+    return counter;
+}
+
+uint64_t& SharedDataManager::getSharedCounter(const char *name, uint64_t initialValue)
+{
+    return getSharedCounter(registerSharedCounterName(name), initialValue);
+}
+
+void SharedDataManager::clear()
+{
+    for (auto& item : sharedVariables)
+        item.second(); // call stored destructor
+    sharedVariables.clear();
+    sharedCounters.clear();
+}
+
+void SharedDataManager::lifecycleEvent(SimulationLifecycleEventType eventType, cObject *details)
+{
+    if (eventType == LF_POST_NETWORK_DELETE)
+        clear();
+
+    CodeFragment::executeAll(eventType);
+}
+
+SharedDataManager *SharedDataManager::getInstance()
+{
+    static SharedDataManager *instance = nullptr;
+    if (instance == nullptr) {
+        instance = new SharedDataManager;
+        getEnvir()->addLifecycleListener(instance);
+    }
+    return instance;
+}
+
+EXECUTE_ON_STARTUP(SharedDataManager::getInstance());
+
+//---
+
+CodeFragment *CodeFragment::head = nullptr;
+
+CodeFragment::CodeFragment(void (*code)(), SimulationLifecycleEventType lifecycleEvent) : lifecycleEvent(lifecycleEvent), code(code)
+{
+    next = head;
+    head = this;
+}
+
+void CodeFragment::executeAll(SimulationLifecycleEventType lifecycleEvent)
+{
+    CodeFragment *p = CodeFragment::head;
+    while (p) {
+        if (p->lifecycleEvent == lifecycleEvent)
+            p->code();
+        p = p->next;
+    }
+}
+
+#endif
+
+
+
 #ifdef _MSC_VER
 
 //
