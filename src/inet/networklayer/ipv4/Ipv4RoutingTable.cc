@@ -148,7 +148,7 @@ void Ipv4RoutingTable::handleMessage(cMessage *msg)
 
 void Ipv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    if (getSimulation()->getContextType() == CTX_INITIALIZE)
+    if (getSimulation()->getSimulationStage() == STAGE(INITIALIZE))
         return; // ignore notifications during initialize
 
     Enter_Method("%s", cComponent::getSignalName(signalID));

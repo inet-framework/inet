@@ -97,7 +97,7 @@ void RoutingTableRecorder::receiveChangeNotification(cComponent *nsource, simsig
 
 void RoutingTableRecorder::recordInterfaceChange(cModule *host, const NetworkInterface *ie, simsignal_t signalID)
 {
-    if (getSimulation()->getSimulationStage() == CTX_CLEANUP)
+    if (getSimulation()->getSimulationStage() == STAGE(CLEANUP))
             return; // ignore notifications during cleanup
 
     // Note: ie->getInterfaceTable() may be nullptr (entry already removed from its table)

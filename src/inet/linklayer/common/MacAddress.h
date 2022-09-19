@@ -193,7 +193,7 @@ class INET_API SimulationRunUniqueNumberGenerator : public cISimulationLifecycle
     T getNextValue() {
         if (!listenerAdded) {
             // NOTE: EXECUTE_ON_STARTUP is too early and would add the listener to StaticEnv
-            getEnvir()->addLifecycleListener(this);
+            cSimulation::getActiveSimulation()->addLifecycleListener(this);
             listenerAdded = true;
         }
         return ++value;

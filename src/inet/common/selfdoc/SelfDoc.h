@@ -53,7 +53,7 @@ class INET_API SelfDocTempOffClass
 #undef Enter_Method_Silent
 
 #define __Enter_Method_SelfDoc(...) \
-        if (SelfDoc::notInInitialize(__VA_ARGS__) && (getSimulation()->getSimulationStage() != CTX_CLEANUP)) { \
+        if (SelfDoc::notInInitialize(__VA_ARGS__) && (getSimulation()->getSimulationStage() != STAGE(CLEANUP))) { \
             auto __from = __ctx.getCallerContext(); \
             std::string fromModuleName = __from ? __from->getParentModule() ? __from->getComponentType()->getFullName() : "-=Network=-" : "-=unknown=-"; \
             std::string toModuleName = getSimulation()->getContext()->getComponentType()->getFullName(); \

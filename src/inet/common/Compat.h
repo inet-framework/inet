@@ -14,6 +14,15 @@
 
 namespace inet {
 
+// Some methods like addLifecycleListener() were moved from cEnvir to cSimulation in OMNeT++ 7.0
+#if OMNETPP_BUILDNUM < 2000
+#define STAGE(x) CTX_ ## x
+inline omnetpp::cEnvir *getActiveSimulationOrEnvir() { return omnetpp::cSimulation::getActiveEnvir(); }
+#else
+#define STAGE(x) cSimulation::STAGE_ ## x
+inline omnetpp::cSimulation *getActiveSimulationOrEnvir() { return omnetpp::cSimulation::getActiveSimulation(); }
+#endif
+
 #define EVSTREAM    EV
 
 #ifdef _MSC_VER

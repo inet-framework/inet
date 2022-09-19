@@ -14,18 +14,29 @@ namespace utils {
 
 cNEDValue nedf_hasModule(cComponent *context, cNEDValue argv[], int argc)
 {
-    cRegistrationList *types = omnetpp::internal::componentTypes.getInstance();
     if (argv[0].getType() != cNEDValue::STRING)
         throw cRuntimeError("hasModule(): string arguments expected");
     const char *name = argv[0].stringValue();
+#if OMNETPP_BUILDNUM < 2000
+    cRegistrationList *types = omnetpp::internal::componentTypes.getInstance();
     cComponentType *c;
     c = dynamic_cast<cComponentType *>(types->lookup(name)); // by qualified name
     if (c && c->isAvailable())
-        return true;
+         return true;
     c = dynamic_cast<cComponentType *>(types->find(name)); // by simple name
     if (c && c->isAvailable())
+         return true;
+    return false;
+#else
+    cModuleType *type = cModuleType::find(name); // by qualified name
+    if (type && type->isAvailable())
+        return true;
+    auto types = cModuleType::findAll(name); // by simple name
+    for (cModuleType *type : types)
+        if (type && type->isAvailable())
         return true;
     return false;
+#endif
 }
 
 Define_NED_Function2(nedf_hasModule,
@@ -36,7 +47,7 @@ Define_NED_Function2(nedf_hasModule,
 
 cNEDValue nedf_haveClass(cComponent *context, cNEDValue argv[], int argc)
 {
-    return omnetpp::internal::classes.getInstance()->lookup(argv[0].stringValue()) != nullptr;
+    return cObjectFactory::find(argv[0].stringValue()) != nullptr;
 }
 
 Define_NED_Function2(nedf_haveClass,
@@ -142,6 +153,7 @@ Define_NED_Function2(nedf_absPath,
 
 cNEDValue nedf_firstAvailableOrEmpty(cComponent *context, cNEDValue argv[], int argc)
 {
+#if OMNETPP_BUILDNUM < 2000
     cRegistrationList *types = omnetpp::internal::componentTypes.getInstance();
     for (int i = 0; i < argc; i++) {
         if (argv[i].getType() != cNEDValue::STRING)
@@ -156,6 +168,22 @@ cNEDValue nedf_firstAvailableOrEmpty(cComponent *context, cNEDValue argv[], int 
             return argv[i];
     }
     return "";
+#else
+    // note: diff is due to cComponentType::findAll() being absent in OMNeT++ 6.0 and earlier
+    for (int i = 0; i < argc; i++) {
+        if (argv[i].getType() != cNEDValue::STRING)
+            throw cRuntimeError("firstAvailable(): string arguments expected");
+        const char *name = argv[i].stringValue();
+        cComponentType *type = cComponentType::find(name); // by qualified name
+        if (type && type->isAvailable())
+            return argv[i];
+        auto types = cComponentType::findAll(name); // by simple name
+        for (cComponentType *type : types)
+            if (type && type->isAvailable())
+                return argv[i];
+    }
+    return "";
+#endif
 }
 
 Define_NED_Function2(nedf_firstAvailableOrEmpty,

@@ -262,10 +262,11 @@ void UtilizationFilter::init(Context *ctx)
 {
     cNumericResultFilter::init(ctx);
     std::string fullPath = ctx->component->getFullPath() + "." + ctx->attrsProperty->getIndex() + ".throughput";
-    auto intervalValue = getEnvir()->getConfig()->getPerObjectConfigValue(fullPath.c_str(), "interval");
-    interval = cConfiguration::parseDouble(intervalValue, "s", nullptr, 0.1);
-    auto numValueLimitValue = getEnvir()->getConfig()->getPerObjectConfigValue(fullPath.c_str(), "numValueLimit");
-    numValueLimit = cConfiguration::parseLong(numValueLimitValue, nullptr, 100);
+    cConfiguration *cfg = getEnvir()->getConfig();
+    auto intervalValue = cfg->getPerObjectConfigValue(fullPath.c_str(), "interval");
+    interval = cfg->parseDouble(intervalValue, "s", nullptr, 0.1);
+    auto numValueLimitValue = cfg->getPerObjectConfigValue(fullPath.c_str(), "numValueLimit");
+    numValueLimit = cfg->parseLong(numValueLimitValue, nullptr, 100);
     lastSignalTime = totalValueTime = simTime();
     numValueLimit = numValueLimit * 2;
 }
@@ -687,10 +688,11 @@ void ThroughputFilter::init(Context *ctx)
 {
     cObjectResultFilter::init(ctx);
     std::string fullPath = ctx->component->getFullPath() + "." + ctx->attrsProperty->getIndex() + ".throughput";
-    auto intervalValue = getEnvir()->getConfig()->getPerObjectConfigValue(fullPath.c_str(), "interval");
-    interval = cConfiguration::parseDouble(intervalValue, "s", nullptr, 0.1);
-    auto numLengthLimitValue = getEnvir()->getConfig()->getPerObjectConfigValue(fullPath.c_str(), "numLengthLimit");
-    numLengthLimit = cConfiguration::parseLong(numLengthLimitValue, nullptr, 100);
+    cConfiguration *cfg = getEnvir()->getConfig();
+    auto intervalValue = cfg->getPerObjectConfigValue(fullPath.c_str(), "interval");
+    interval = cfg->parseDouble(intervalValue, "s", nullptr, 0.1);
+    auto numLengthLimitValue = cfg->getPerObjectConfigValue(fullPath.c_str(), "numLengthLimit");
+    numLengthLimit = cfg->parseLong(numLengthLimitValue, nullptr, 100);
     lastSignalTime = simTime();
 }
 

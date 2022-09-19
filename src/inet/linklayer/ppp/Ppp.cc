@@ -93,7 +93,7 @@ void Ppp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
 
     MacProtocolBase::receiveSignal(source, signalID, obj, details);
 
-    if (getSimulation()->getSimulationStage() == CTX_CLEANUP)
+    if (getSimulation()->getSimulationStage() == STAGE(CLEANUP))
         return;
 
     if (signalID == POST_MODEL_CHANGE) {

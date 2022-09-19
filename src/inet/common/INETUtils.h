@@ -72,12 +72,12 @@ inline int roundUp(int numToRound, int multiple) { return ((numToRound + multipl
 /**
  * Like cObjectFactory::createOneIfClassIsKnown(), except it starts searching for the class in the given namespace
  */
-INET_API cObject *createOneIfClassIsKnown(const char *className, const char *defaultNamespace = getSimulation()->getContext()->getClassName());
+INET_API cObject *createOneIfClassIsKnown(const char *className, const char *defaultNamespace = nullptr);
 
 /**
  * Like cObjectFactory::createOne(), except it starts searching for the class in the given namespace
  */
-INET_API cObject *createOne(const char *className, const char *defaultNamespace = getSimulation()->getContext()->getClassName());
+INET_API cObject *createOne(const char *className, const char *defaultNamespace = nullptr);
 
 /**
  * Duplicate a packet together with its control info. (cPacket's dup() ignores the control info,
