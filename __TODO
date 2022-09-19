@@ -9,7 +9,22 @@ Implementation
 
  - nice feature: python support for running simulations/tests/etc. using OMNeT++ 6.1 which should contain the necessary python support
 
+ - nice feature: Qtenv packet log support via packet tags using INET modules similar to visualizers that hook into protocols
+   - following wireless communication is almost impossible in the packet log
+   - add filtering for technical/physical/link/network/transport/application levels (link should be the default)
+   - support following TCP streams
+
  - cleanup: determining the next protocol for a packet in a protocol module using DispatchProtocolReq and EncapsulationProtocolReq. #782
+
+ - fix: replace findPathStartGate/findPathEndGate with findConnectedModule/findConnectedGate and wrap the type specific reference to the module/gate into a template class?
+
+ - fix: PacketTransmitter connected without transmission channel should stop in initialize? otherwise duration parameters will not work
+
+ - fix: fragmentation/defragmentation, aggregation/deaggregation must take care of packet/chunk tags and region tags properly
+
+ - fix: when deleting a network interface or deleting a network node, the interface deleted signal is missing
+
+ - missing feature: chunk queue and various chunk buffers don't have region tags, there's no place to store data specific tags from packets when reassembling data
 
  - ??? difficult feature: restructure StandardHost to make it flexible enough to replace all current network node types which are basically copied from StandardHost and slightly modified
    - use @reconnect to simplify network nodes which copy big parts of StandardHost
@@ -21,26 +36,11 @@ Implementation
    - IEEE 802 EPD LLC
    - ZIGBEE LLC (https://lucidar.me/en/zigbee/autopsy-of-a-zigbee-frame/)
 
- - fix: replace findPathStartGate/findPathEndGate with findConnectedModule/findConnectedGate and wrap the type specific reference to the module/gate into a template class?
-
- - fix: PacketTransmitter connected without transmission channel should stop in initialize? otherwise duration parameters will not work
-
  - ??? difficult feature: synchronous packet processing vs message based configuration (e.g. sockets/interfaces)?
 
  - ??? difficult feature: refactor protocol modules to avoid cross module zero simulation time messaging using the FES
    - for example (App, Udp, Ipv4, Ethernet stack) two hosts one sending to the other, one packet send is 4 distinct events (transmission start/end and reception start/end),
      first event starts in App and ends with transmission start, next event is reception start, etc.
-
- - missing feature: chunk queue and various chunk buffers don't have region tags, there's no place to store data specific tags from packets when reassembling data
-
- - fix: fragmentation/defragmentation, aggregation/deaggregation must take care of packet/chunk tags and region tags properly
-
- - fix: when deleting a network interface or deleting a network node, the interface deleted signal is missing
-
- - nice feature: Qtenv packet log support via packet tags using INET modules similar to visualizers that hook into protocols
-   - following wireless communication is almost impossible in the packet log
-   - add filtering for technical/physical/link/network/transport/application levels (link should be the default)
-   - support following TCP streams
 
 Documentation
 -------------
