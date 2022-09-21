@@ -22,7 +22,7 @@
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalSnir.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarSnir.h"
 #include "inet/physicallayer/base/packetlevel/ErrorModelBase.h"
-#include "keras2cpp/model.h"
+//#include "keras2cpp/model.h"
 
 namespace inet {
 
@@ -32,19 +32,19 @@ class INET_API NeuralNetworkErrorModel : public ErrorModelBase
 {
   protected:
     const char *modelNameFormat = nullptr;
-    std::map<std::string, keras2cpp::Model *> models;
+    //std::map<std::string, keras2cpp::Model *> models;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
-    virtual void fillSnirTensor(const ScalarSnir *snir, int timeDivision, int frequencyDivision, keras2cpp::Tensor& in) const;
-    virtual void fillSnirTensor(const DimensionalSnir *snir, int timeDivision, int frequencyDivision, keras2cpp::Tensor& in) const;
+    //virtual void fillSnirTensor(const ScalarSnir *snir, int timeDivision, int frequencyDivision, keras2cpp::Tensor& in) const;
+   // virtual void fillSnirTensor(const DimensionalSnir *snir, int timeDivision, int frequencyDivision, keras2cpp::Tensor& in) const;
 
     virtual std::string computeModelName(const ISnir *snir) const;
 
   public:
-    virtual ~NeuralNetworkErrorModel() { for (auto it : models) delete it.second; }
+   // virtual ~NeuralNetworkErrorModel() { for (auto it : models) delete it.second; }
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

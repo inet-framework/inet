@@ -39,6 +39,7 @@ static std::string getModulationName(const IModulation *modulation)
 void NeuralNetworkErrorModel::initialize(int stage)
 {
     ErrorModelBase::initialize(stage);
+    /*
     if (stage == INITSTAGE_LOCAL) {
         modelNameFormat = par("modelNameFormat");
         // TODO: make this database global to allow sharing among module instances
@@ -56,6 +57,7 @@ void NeuralNetworkErrorModel::initialize(int stage)
             models[modelName] = model;
         }
     }
+    */
 }
 
 std::ostream& NeuralNetworkErrorModel::printToStream(std::ostream& stream, int level) const
@@ -66,6 +68,7 @@ std::ostream& NeuralNetworkErrorModel::printToStream(std::ostream& stream, int l
 double NeuralNetworkErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
+    /*
     auto name = computeModelName(snir);
     auto it = models.find(name);
     if (it == models.end())
@@ -83,7 +86,8 @@ double NeuralNetworkErrorModel::computePacketErrorRate(const ISnir *snir, IRadio
     int symbolCount = timeDivision * frequencyDivision;
     // TODO: KLUDGE:
     if (symbolCount != 416)
-        return 0;
+        return 0;*/
+        /*
     keras2cpp::Tensor in(symbolCount);
     if (auto scalarSnir = dynamic_cast<const ScalarSnir *>(snir))
         fillSnirTensor(scalarSnir, timeDivision, frequencyDivision, in);
@@ -109,9 +113,11 @@ double NeuralNetworkErrorModel::computePacketErrorRate(const ISnir *snir, IRadio
     double packetErrorRate = std::min(1.0f, std::max(0.0f, out.data_[0]));
     EV_DEBUG << "Computed packet error rate is " << packetErrorRate << std::endl;
     return packetErrorRate;
+    */
+    return 0;
 }
 
-void NeuralNetworkErrorModel::fillSnirTensor(const ScalarSnir *snir, int timeDivision, int frequencyDivision, keras2cpp::Tensor& in) const
+/*void NeuralNetworkErrorModel::fillSnirTensor(const ScalarSnir *snir, int timeDivision, int frequencyDivision, keras2cpp::Tensor& in) const
 {
     auto scalarSnir = check_and_cast<const ScalarSnir *>(snir);
     auto reception = snir->getReception();
@@ -191,7 +197,7 @@ void NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir *snir, int ti
         in.data_[i] = std::log(snirMean);
     }
     EV_TRACE << std::endl;
-}
+}*/
 
 double NeuralNetworkErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
