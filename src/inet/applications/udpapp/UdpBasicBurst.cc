@@ -19,14 +19,12 @@
 
 namespace inet {
 
-EXECUTE_ON_STARTUP(
-        cEnum * e = cEnum::find("inet::ChooseDestAddrMode");
-        if (!e)
-            omnetpp::internal::enums.getInstance()->add(e = new cEnum("inet::ChooseDestAddrMode"));
-        e->insert(UdpBasicBurst::ONCE, "once");
-        e->insert(UdpBasicBurst::PER_BURST, "perBurst");
-        e->insert(UdpBasicBurst::PER_SEND, "perSend");
-        );
+Register_Enum2(destAddrMode, "inet::ChooseDestAddrMode", (
+        "once", UdpBasicBurst::ONCE,
+        "perBurst", UdpBasicBurst::PER_BURST,
+        "perSend", UdpBasicBurst::PER_SEND,
+        nullptr
+        ));
 
 Define_Module(UdpBasicBurst);
 
