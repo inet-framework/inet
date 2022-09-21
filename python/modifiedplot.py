@@ -238,7 +238,7 @@ def fix_labels_for_subplots(ax_list, props, layout, debug=False):
             assert False, "somethings wrong"            
 
 
-def add_to_dataframe(df, style_tuple_list=None, default_dict={}, order={}, debug=False):
+def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order={}, debug=False):
     """
     Adds 'additional_style' column to dataframe. The concent of this column is added to 'style' object when plotting.
     Can also specify row order in dataframe (e.g. for ordering items in legend).
@@ -276,9 +276,16 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict={}, order={}, debug
             if debug: print("removing zero index\n")
             
     remove_zero_index_if_present(df, debug)
+    
+    df['additional_style'] = None
+    
+    if default_dict is not None:    
+        for i in range(0,len(df)):
+#            if (df['additional_style'][i] == None):
+            if debug: print('adding default stuff')
+            df['additional_style'][i] = str(default_dict)
             
     if style_tuple_list is not None:
-        df['additional_style'] = None
         for i in style_tuple_list:
             column = i[0]
             value = i[1]
@@ -306,11 +313,6 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict={}, order={}, debug
                         if debug: print("New style dict", orig_style_dict, type(orig_style_dict))
                         if debug: add_separator()
                         df['additional_style'][i] = str(orig_style_dict)                    # add to dataframe as string
-                    
-        for i in range(0,len(df)):
-            if (df['additional_style'][i] == None):
-                if debug: print('adding default stuff')
-                df['additional_style'][i] = str(default_dict)
             
     if order:
         # order the dataframe
