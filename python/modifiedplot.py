@@ -383,7 +383,7 @@ def quick_reorder_legend(handles, labels, order):
 
 
             
-def annotate_barchart(ax, offset=0, color='white', size=12, zorder=10, prefix='', postfix='', accuracy=2, outliers=None, debug=False):
+def annotate_barchart(ax, offset=0, color='white', size=12, zorder=10, prefix='', postfix='', accuracy=2, outliers=None, result_type='float', debug=False):
     """
     Add text annotations to barcharts, displaying the bar height.
     
@@ -396,6 +396,7 @@ def annotate_barchart(ax, offset=0, color='white', size=12, zorder=10, prefix=''
                     {'index': 2, 'color': 'black', ...}
                         ^ index of bar
                                          ^ style (has the same parameters)
+            - result_type: set to 'int' to display results in the annotation without decimals (e.g. display 1024 instead of 1024.0)
     """
     if outliers == None:
         outliers = [{}]
@@ -419,12 +420,16 @@ def annotate_barchart(ax, offset=0, color='white', size=12, zorder=10, prefix=''
                     i.setdefault('color', 'white')
                     i.setdefault('size', 12)
                     if debug: print("adding outlier stuff")
-                    ax.annotate(prefix + str(round(ax.patches[p].get_height(), accuracy)) + postfix, (ax.patches[p].get_x() + ax.patches[p].get_width() / 2, ax.patches[p].get_height() - i['offset']),
+                    type_conv = eval(result_type)
+                    if debug: print("type_conv: ", type_conv)
+                    ax.annotate(prefix + str(round(type_conv(ax.patches[p].get_height()), accuracy)) + postfix, (ax.patches[p].get_x() + ax.patches[p].get_width() / 2, ax.patches[p].get_height() - i['offset']),
                                 horizontalalignment='center', verticalalignment='top', color=i['color'], size=i['size'],
                                 zorder=zorder)
         else:
             if debug: print('adding default stuff')
-            ax.annotate(prefix + str(round(ax.patches[p].get_height(), accuracy)) + postfix, (ax.patches[p].get_x() + ax.patches[p].get_width() / 2, ax.patches[p].get_height() - offset),
+            type_conv = eval(result_type)
+            if debug: print("type_conv: ", type_conv)
+            ax.annotate(prefix + str(round(type_conv(ax.patches[p].get_height()), accuracy)) + postfix, (ax.patches[p].get_x() + ax.patches[p].get_width() / 2, ax.patches[p].get_height() - offset),
             horizontalalignment='center', verticalalignment='top', color=color, size=size,
             zorder=zorder)
                     
