@@ -136,6 +136,11 @@ void NeuralNetworkErrorModelTrainingDatasetGenerator::generateTrainingDataset()
         auto data = makeShared<BytesChunk>(bytes);
         auto transmittedPacket = new Packet(nullptr, data);
         transmittedPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+        // adds the following:
+        //  - tail bits
+        //  - service bits
+        //  - plus padding to whole ofdm symbol
+        //  - one extra ofdm symbol for phy header
         radio->encapsulate(transmittedPacket);
         // create transmission
         simtime_t startTime = 0;
@@ -156,6 +161,8 @@ void NeuralNetworkErrorModelTrainingDatasetGenerator::generateTrainingDataset()
         // TODO: time division doesn't take into account that the preamble doesn't contain symbols
         auto timeDivision = transmittedSymbols->size();
         auto frequencyDivision = ofdmModulation != nullptr ? ofdmModulation->getNumSubcarriers() : 1;
+        if (frequencyDivision != 52)
+            throw cRuntimeError("wrong number of OFDM subcarriers!");
         int numSymbols = timeDivision * frequencyDivision;
         // create reception
         auto arrival = propagation->computeArrival(transmission, radio->getAntenna()->getMobility());
@@ -232,9 +239,11 @@ void NeuralNetworkErrorModelTrainingDatasetGenerator::generateTrainingDataset()
             traningDataset << (int)byte << ", ";
         // print symbol SNIR means
         double snirMean = 0;
+        startTime += preambleDuration;
         for (int i = 0; i < timeDivision; i++) {
             for (int j = 0; j < frequencyDivision; j++) {
                 simtime_t symbolStartTime = (startTime * (timeDivision - i) + endTime * i) / timeDivision;
+                //std::cout << symbolStartTime << std::endl;
                 simtime_t symbolEndTime = (startTime * (timeDivision - i - 1) + endTime * (i + 1)) / timeDivision;
                 Hz symbolStartFrequency = (startFrequency * (frequencyDivision - j) + endFrequency * j) / frequencyDivision;
                 Hz symbolEndFrequency = (startFrequency * (frequencyDivision - j - 1) + endFrequency * (j + 1)) / frequencyDivision;
