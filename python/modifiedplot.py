@@ -436,7 +436,7 @@ def annotate_barchart(ax, offset=0, color='white', size=12, zorder=10, prefix=''
             horizontalalignment='center', verticalalignment='top', color=color, size=size,
             zorder=zorder)
                     
-def plot_bars(df, errors_df=None, meta_df=None, props={}, order=None, zorder=None, rename=None):
+def plot_bars(df, errors_df=None, meta_df=None, props={}, order=None, zorder=None, rename=None, override_width=None, debug=False):
     """
     Modified version of the built-in plot_bars() function.
     The bars can be reordered with the optional 'order' argument. Also, can specify a z-order value, and rename bars with 'rename'.
@@ -556,6 +556,9 @@ def plot_bars(df, errors_df=None, meta_df=None, props={}, order=None, zorder=Non
                 extra_args['zorder'] = 1 - (i / len(df.index) / 10)
             else:
                 extra_args['zorder'] = zorder
+            if override_width is not None:
+                width = override_width
+                if debug: print("override_width:", width)
             extra_args['bottom'] = bottoms + stacks
 
         label = utils.make_legend_label(legend_cols, meta_row, props)
@@ -671,5 +674,5 @@ def plot_lines(df, props, legend_func=utils.make_legend_label, use_default_sort_
             elif props["error_style"] == "Error band":
                 plt.fill_between(t.x, t.y-t.error, t.y+t.error, alpha=float(props["band_alpha"]))
 
-    title = get_prop("title") or make_chart_title(df, title_cols)
+    title = get_prop("title") or utils.make_chart_title(df, title_cols)
     utils.set_plot_title(title)
