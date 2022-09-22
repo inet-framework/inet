@@ -662,6 +662,12 @@ def plot_lines(df, props, legend_func=utils.make_legend_label, use_default_sort_
 
         if len(t.x) < 2 and style["marker"] == ' ':
             style["marker"] = '.'
+            
+        if 'additional_style' in df.columns:
+            style_dict = eval(t.additional_style)
+            # print("style_dict:", style_dict)
+            for i in style_dict.items():
+                style[i[0]] = i[1]
 
         p.plot(t.x, t.y, label=legend_func(legend_cols, t, props), **style)
 
