@@ -10,6 +10,8 @@ package inet.emulation.linklayer.ethernet;
 import inet.emulation.common.ExtInterface;
 import inet.linklayer.contract.IEtherMac;
 import inet.linklayer.contract.IEthernetInterface;
+import inet.queueing.contract.IPacketQueue;
+
 
 //
 // This module provides an Ethernet network interface suitable for emulation.
@@ -21,6 +23,7 @@ module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
     parameters:
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         double bitrate @unit(bps) = default(nan bps);
+        @display("bgb=450,400");
     gates:
         input cutthroughIn @loose;
         output cutthroughOut @loose;
@@ -28,16 +31,21 @@ module ExtUpperEthernetInterface extends ExtInterface like IEthernetInterface
     submodules:
         tap: ExtEthernetTapDevice {
             parameters:
-                @display("p=300,100");
+                @display("p=350,100");
+        }
+        queue: <default("EthernetQueue")> like IPacketQueue {
+            parameters:
+                packetCapacity = default(10000);
+                @display("p=250,200");
         }
         mac: <default(csmacdSupport ? "EthernetCsmaMac" : "EthernetMac")> like IEtherMac {
             parameters:
-                queue.packetCapacity = 10000;
-                @display("p=300,200");
+                @display("p=350,300");
         }
     connections allowunconnected:
-        tap.lowerLayerOut --> { @display("m=s"); } --> mac.upperLayerIn;
-        tap.lowerLayerIn <-- { @display("m=s"); } <-- mac.upperLayerOut;
+        tap.lowerLayerOut --> queue.in;
+        queue.out --> mac.upperLayerIn;
+        tap.lowerLayerIn <-- mac.upperLayerOut;
         mac.phys <--> { @display("m=s"); } <--> phys;
 }
 
