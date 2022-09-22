@@ -85,6 +85,9 @@ void NeuralNetworkErrorModelTrainingDatasetGenerator::openTrainingDataset()
             case 'M':
                 result = getModulationName(subcarrierModulation);
                 break;
+            case 'l':
+                result = par("packetLength").str();
+                break;
             case 'f':
                 result = centerFrequency.str();
                 break;
@@ -203,6 +206,11 @@ void NeuralNetworkErrorModelTrainingDatasetGenerator::generateTrainingDataset()
             else {
                 auto transmittedData = transmittedPacket->peekAllAsBytes();
                 auto receivedData = receivedPacket->peekAllAsBytes();
+                // TODO: this is not a good way to compare the data:
+                // - the physical header has a parity bit (covering only the header, not the data)
+                //    - that should be checked first
+                // - should not compare the padding bytes, the MAC doesn't care about that
+                //    - we assume that the MAC-level FCS is accurate (detects corruption iff corruption happened)
                 for (int j = 0; j < receivedPacket->getByteLength(); j++) {
                     if (receivedData->getBytes()[j] != transmittedData->getBytes()[j]) {
                         isReceptionSuccessful = false;
