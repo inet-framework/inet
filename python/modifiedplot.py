@@ -375,12 +375,13 @@ def create_multidimensional_legend(style_tuple_list, labels = [], handles = [], 
         print("handles", handles)
     return handles, labels
 
-def quick_reorder_legend(handles, labels, order):
+def quick_reorder_legend(handles, labels, order, **kwargs):
     """
     Quickly reorder the legend. Order: list of integers with the new order, e.g. [2, 0, 1].
     Reorders the legend in-place (so it's not needed to call plt.legend() with the returned handles and labels).
+    Also, add any parameters for plt.legend() as kwargs.
     """
-    plt.legend([handles[i] for i in order], [labels[i] for i in order])
+    plt.legend([handles[i] for i in order], [labels[i] for i in order], **kwargs)
     return handles, labels
 
 
