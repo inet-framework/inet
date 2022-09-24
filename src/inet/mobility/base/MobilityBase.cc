@@ -273,7 +273,7 @@ void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& velocity, rad&
         sign = reflect(constraintAreaMin.x, constraintAreaMax.x, lastPosition.x, velocity.x);
         reflect(constraintAreaMin.x, constraintAreaMax.x, targetPosition.x, dummy);
         heading = deg(90) + (heading - deg(90)) * sign;
-        if (sign == -1 && &quaternion != &Quaternion::NIL) {
+        if (sign == -1 && quaternion != Quaternion::NIL) {
             std::swap(quaternion.s, quaternion.v.z);
             std::swap(quaternion.v.x, quaternion.v.y);
             quaternion.v.x *= -1;
@@ -284,7 +284,7 @@ void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& velocity, rad&
         sign = reflect(constraintAreaMin.y, constraintAreaMax.y, lastPosition.y, velocity.y);
         reflect(constraintAreaMin.y, constraintAreaMax.y, targetPosition.y, dummy);
         heading = heading * sign;
-        if (sign == -1 && &quaternion != &Quaternion::NIL) {
+        if (sign == -1 && quaternion != Quaternion::NIL) {
             quaternion.v.x *= -1;
             quaternion.v.z *= -1;
         }
@@ -293,7 +293,7 @@ void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& velocity, rad&
         sign = reflect(constraintAreaMin.z, constraintAreaMax.z, lastPosition.z, velocity.z);
         reflect(constraintAreaMin.z, constraintAreaMax.z, targetPosition.z, dummy);
         elevation = elevation * sign;
-        if (sign == -1 && &quaternion != &Quaternion::NIL) {
+        if (sign == -1 && quaternion != Quaternion::NIL) {
             quaternion.v.x *= -1;
             quaternion.v.y *= -1;
         }
@@ -343,18 +343,21 @@ void MobilityBase::raiseErrorIfOutside()
 void MobilityBase::handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity)
 {
     rad a;
-    handleIfOutside(policy, targetPosition, velocity, a, a, Quaternion::NIL);
+    Quaternion nil = Quaternion::NIL;
+    handleIfOutside(policy, targetPosition, velocity, a, a, nil);
 }
 
 void MobilityBase::handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading)
 {
     rad dummy;
-    handleIfOutside(policy, targetPosition, velocity, heading, dummy, Quaternion::NIL);
+    Quaternion nil = Quaternion::NIL;
+    handleIfOutside(policy, targetPosition, velocity, heading, dummy, nil);
 }
 
 void MobilityBase::handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading, rad& elevation)
 {
-    handleIfOutside(policy, targetPosition, velocity, heading, elevation, Quaternion::NIL);
+    Quaternion nil = Quaternion::NIL;
+    handleIfOutside(policy, targetPosition, velocity, heading, elevation, nil);
 }
 
 void MobilityBase::handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& velocity, rad& heading, rad& elevation, Quaternion& quaternion)
