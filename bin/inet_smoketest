@@ -309,7 +309,9 @@ class SmokeTestCase(SimulationTestCase):
             " --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=false" + \
             " --result-dir=" + resultdir + \
-            " " + extraOppRunArgs
+            " --cmdenv-num-threads=4" + extraOppRunArgs
+
+        command = re.sub(" -r ([0-9]+)", r" -r \1,\1,\1,\1", command)
 
         # print("COMMAND: " + command + '\n')
         result = self.runSimulation(self.title, command, workingdir)
