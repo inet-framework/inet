@@ -112,7 +112,8 @@ int QosClassifier::getUserPriority(cMessage *msg)
 #ifdef INET_WITH_IPv4
     if (ethernetMacProtocol == ETHERTYPE_IPv4 || packetProtocol == &Protocol::ipv4) {
         const auto& ipv4Header = packet->peekDataAt<Ipv4Header>(ethernetMacHeaderLength);
-        ipProtocol = ipv4Header->getProtocolId();
+        if (ipv4Header->getFragmentOffset() == 0 && !ipv4Header->getMoreFragments())
+            ipProtocol = ipv4Header->getProtocolId();
         ipHeaderLength = ipv4Header->getChunkLength();
     }
 #endif
