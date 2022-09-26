@@ -14,25 +14,24 @@ void StringFormat::parseFormat(const char *format)
     this->format = format;
 }
 
-const char *StringFormat::formatString(IDirectiveResolver *resolver) const
+std::string StringFormat::formatString(IDirectiveResolver *resolver) const
 {
     return formatString(format.c_str(), resolver);
 }
 
-const char *StringFormat::formatString(std::function<const char *(char)>& resolver) const
+std::string StringFormat::formatString(std::function<std::string(char)>& resolver) const
 {
     return formatString(format.c_str(), resolver);
 }
 
-const char *StringFormat::formatString(const char *format, const IDirectiveResolver *resolver)
+std::string StringFormat::formatString(const char *format, const IDirectiveResolver *resolver)
 {
     return formatString(format, [&] (char directive) { return resolver->resolveDirective(directive); });
 }
 
-const char *StringFormat::formatString(const char *format, const std::function<const char *(char)> resolver)
+std::string StringFormat::formatString(const char *format, const std::function<std::string(char)> resolver)
 {
-    static std::string result;
-    result.clear();
+    std::string result;
     int current = 0;
     int previous = current;
     while (true) {
@@ -56,7 +55,7 @@ const char *StringFormat::formatString(const char *format, const std::function<c
         }
         current++;
     }
-    return result.c_str();
+    return result;
 }
 
 } // namespace inet

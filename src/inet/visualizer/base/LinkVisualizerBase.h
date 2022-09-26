@@ -46,7 +46,7 @@ class INET_API LinkVisualizerBase : public VisualizerBase, public cListener
       public:
         DirectiveResolver(const cPacket *packet) : packet(packet) {}
 
-        virtual const char *resolveDirective(char directive) const override;
+        virtual std::string resolveDirective(char directive) const override;
     };
 
   protected:

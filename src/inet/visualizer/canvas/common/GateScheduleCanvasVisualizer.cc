@@ -49,7 +49,7 @@ GateScheduleVisualizerBase::GateVisualization *GateScheduleCanvasVisualizer::cre
     figure->setSpacing(spacing);
     figure->setBounds(cFigure::Rectangle(0, 0, width, height));
     figure->setPosition(currentTimePosition);
-    figure->setLabel(getGateScheduleVisualizationText(module));
+    figure->setLabel(getGateScheduleVisualizationText(module).c_str());
     auto networkNode = getContainingNode(module);
     auto networkNodeVisualization = networkNodeVisualizer->getNetworkNodeVisualization(networkNode);
     return new GateCanvasVisualization(networkNodeVisualization, figure, gate);

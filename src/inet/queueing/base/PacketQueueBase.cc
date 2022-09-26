@@ -63,39 +63,28 @@ void PacketQueueBase::emit(simsignal_t signal, cObject *object, cObject *details
     cSimpleModule::emit(signal, object, details);
 }
 
-const char *PacketQueueBase::resolveDirective(char directive) const
+std::string PacketQueueBase::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 'p':
-            result = std::to_string(getNumPackets());
-            break;
+            return std::to_string(getNumPackets());
         case 'l':
-            result = getTotalLength().str();
-            break;
+            return getTotalLength().str();
         case 'u':
-            result = std::to_string(numPushedPackets);
-            break;
+            return std::to_string(numPushedPackets);
         case 'o':
-            result = std::to_string(numPulledPackets);
-            break;
+            return std::to_string(numPulledPackets);
         case 'r':
-            result = std::to_string(numRemovedPackets);
-            break;
+            return std::to_string(numRemovedPackets);
         case 'd':
-            result = std::to_string(numDroppedPackets);
-            break;
+            return std::to_string(numDroppedPackets);
         case 'c':
-            result = std::to_string(numCreatedPackets);
-            break;
+            return std::to_string(numCreatedPackets);
         case 'n':
-            result = !isEmpty() ? getPacket(0)->getFullName() : "";
-            break;
+            return !isEmpty() ? getPacket(0)->getFullName() : "";
         default:
-            result = PacketProcessorBase::resolveDirective(directive);
-            break;
+            return PacketProcessorBase::resolveDirective(directive);
     }
-    return result.c_str();
 }
 
 } // namespace queueing

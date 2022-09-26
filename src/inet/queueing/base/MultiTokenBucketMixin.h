@@ -77,9 +77,8 @@ class INET_API MultiTokenBucketMixin : public T, public ITokenStorage
         }
     }
 
-    const virtual char* resolveDirective(char directive) const override
+    std::string resolveDirective(char directive) const override
     {
-        static std::string result;
         switch (directive) {
             case 'n': {
                 std::stringstream stream;
@@ -89,13 +88,11 @@ class INET_API MultiTokenBucketMixin : public T, public ITokenStorage
                         stream << ", ";
                     stream << tokenBucket.getNumTokens();
                 }
-                result = stream.str();
-                break;
+                return stream.str();
             }
             default:
                 return T::resolveDirective(directive);
         }
-        return result.c_str();
     }
 
   public:

@@ -109,17 +109,14 @@ void MarkovScheduler::pushPacket(Packet *packet, cGate *gate)
     updateDisplayString();
 }
 
-const char *MarkovScheduler::resolveDirective(char directive) const
+std::string MarkovScheduler::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 's':
-            result = std::to_string(state);
-            break;
+            return std::to_string(state);
         default:
             return PacketProcessorBase::resolveDirective(directive);
     }
-    return result.c_str();
 }
 
 void MarkovScheduler::handleCanPushPacketChanged(cGate *gate)

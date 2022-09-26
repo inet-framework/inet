@@ -45,7 +45,7 @@ InfoVisualizerBase::InfoVisualization *InfoCanvasVisualizer::createInfoVisualiza
     figure->setAssociatedObject(module);
     figure->setZIndex(zIndex);
     figure->setFont(font);
-    figure->setText(getInfoVisualizationText(module));
+    figure->setText(getInfoVisualizationText(module).c_str());
     figure->setLabelColor(textColor);
     figure->setBackgroundColor(backgroundColor);
     figure->setOpacity(opacity);

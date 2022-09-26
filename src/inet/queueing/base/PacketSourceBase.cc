@@ -35,65 +35,50 @@ void PacketSourceBase::initialize(int stage)
     }
 }
 
-const char *PacketSourceBase::createPacketName(const Ptr<const Chunk>& data) const
+std::string PacketSourceBase::createPacketName(const Ptr<const Chunk>& data) const
 {
-    return StringFormat::formatString(packetNameFormat, [&] (char directive) {
-        static std::string result;
-        switch (directive) {
+    return StringFormat::formatString(packetNameFormat, [&] (char directive) -> std::string {
+            switch (directive) {
             case 'a': {
                 auto application = findContainingApplication();
                 if (application != nullptr)
-                    result = application->getDisplayName() != nullptr ? application->getDisplayName() : application->getFullName();
+                    return application->getDisplayName() != nullptr ? application->getDisplayName() : application->getFullName();
                 else
-                    result = getDisplayName() != nullptr ? getDisplayName() :  getFullName();
-                break;
+                    return getDisplayName() != nullptr ? getDisplayName() :  getFullName();
             }
             case 'n':
-                result = getDisplayName() != nullptr ? getDisplayName() : getFullName();
-                break;
+                return getDisplayName() != nullptr ? getDisplayName() : getFullName();
             case 'm': {
                 auto application = getContainingApplication();
-                result = application->getDisplayName() != nullptr ? application->getDisplayName() : application->getFullName();
-                break;
+                return application->getDisplayName() != nullptr ? application->getDisplayName() : application->getFullName();
             }
             case 'M': {
                 auto networkNode = getContainingNode(this);
-                result = networkNode->getDisplayName() != nullptr ? networkNode->getDisplayName() : networkNode->getFullName();
-                break;
+                return networkNode->getDisplayName() != nullptr ? networkNode->getDisplayName() : networkNode->getFullName();
             }
             case 'p':
-
-                result = getFullPath();
-                break;
+                return getFullPath();
             case 'h':
-                result = getContainingApplication()->getFullPath();
-                break;
+                return getContainingApplication()->getFullPath();
             case 'H':
-                result = getContainingNode(this)->getFullPath();
-                break;
+                return getContainingNode(this)->getFullPath();
             case 'c':
-                result = std::to_string(numProcessedPackets);
-                break;
+                return std::to_string(numProcessedPackets);
             case 'l':
-                result = data->getChunkLength().str();
-                break;
+                return data->getChunkLength().str();
             case 'd':
                 if (auto byteCountChunk = dynamicPtrCast<const ByteCountChunk>(data))
-                    result = std::to_string(byteCountChunk->getData());
+                    return std::to_string(byteCountChunk->getData());
                 else if (auto bitCountChunk = dynamicPtrCast<const BitCountChunk>(data))
-                    result = std::to_string(bitCountChunk->getData());
-                break;
+                    return std::to_string(bitCountChunk->getData());
             case 't':
-                result = simTime().str();
-                break;
+                return simTime().str();
             case 'e':
-                result = std::to_string(getSimulation()->getEventNumber());
-                break;
+                return std::to_string(getSimulation()->getEventNumber());
             default:
                 throw cRuntimeError("Unknown directive: %c", directive);
         }
-        return result.c_str();
-    });
+        });
 }
 
 Ptr<Chunk> PacketSourceBase::createPacketContent() const
@@ -153,7 +138,7 @@ Packet *PacketSourceBase::createPacket()
         packetContent->addTag<IdentityTag>()->setIdentityStart(identityStart);
     }
     auto packetName = createPacketName(packetContent);
-    auto packet = new Packet(packetName, packetContent);
+    auto packet = new Packet(packetName.c_str(), packetContent);
     if (attachDirectionTag)
         packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
     numProcessedPackets++;

@@ -31,32 +31,27 @@ void StatisticVisualizerBase::preDelete(cComponent *root)
     }
 }
 
-const char *StatisticVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
+std::string StatisticVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 's':
-            result = visualizer->signalName;
-            break;
+            return visualizer->signalName;
         case 'n':
-            result = visualizer->statisticName;
-            break;
+            return visualizer->statisticName;
         case 'v':
             if (std::isnan(visualization->printValue))
-                result = "-";
+                return "-";
             else {
                 char temp[32];
                 sprintf(temp, "%.4g", visualization->printValue);
-                result = temp;
+                return temp;
             }
             break;
         case 'u':
-            result = visualization->printUnit;
-            break;
+            return visualization->printUnit;
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
-    return result.c_str();
 }
 
 void StatisticVisualizerBase::initialize(int stage)

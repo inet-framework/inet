@@ -38,29 +38,22 @@ void PacketBufferBase::emit(simsignal_t signal, cObject *object, cObject *detail
     cSimpleModule::emit(signal, object, details);
 }
 
-const char *PacketBufferBase::resolveDirective(char directive) const
+std::string PacketBufferBase::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 'p':
-            result = std::to_string(getNumPackets());
-            break;
+            return std::to_string(getNumPackets());
         case 'l':
-            result = getTotalLength().str();
-            break;
+            return getTotalLength().str();
         case 'a':
-            result = std::to_string(numAddedPackets);
-            break;
+            return std::to_string(numAddedPackets);
         case 'r':
-            result = std::to_string(numRemovedPackets);
-            break;
+            return std::to_string(numRemovedPackets);
         case 'd':
-            result = std::to_string(numDroppedPackets);
-            break;
+            return std::to_string(numDroppedPackets);
         default:
             return PacketProcessorBase::resolveDirective(directive);
     }
-    return result.c_str();
 }
 
 } // namespace queueing

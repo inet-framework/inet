@@ -23,29 +23,22 @@ PathVisualizerBase::PathVisualization::PathVisualization(const char *label, cons
 {
 }
 
-const char *PathVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
+std::string PathVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 'p':
-            result = std::to_string(pathVisualization->numPackets);
-            break;
+            return std::to_string(pathVisualization->numPackets);
         case 'l':
-            result = pathVisualization->totalLength.str();
-            break;
+            return pathVisualization->totalLength.str();
         case 'L':
-            result = pathVisualization->label;
-            break;
+            return pathVisualization->label;
         case 'n':
-            result = packet->getName();
-            break;
+            return packet->getName();
         case 'c':
-            result = packet->getClassName();
-            break;
+            return packet->getClassName();
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
-    return result.c_str();
 }
 
 void PathVisualizerBase::preDelete(cComponent *root)

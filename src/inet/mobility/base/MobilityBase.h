@@ -44,7 +44,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
       public:
         DirectiveResolver(IMobility *mobility) : mobility(mobility) {}
 
-        virtual const char *resolveDirective(char directive) const override;
+        virtual std::string resolveDirective(char directive) const override;
     };
 
   public:

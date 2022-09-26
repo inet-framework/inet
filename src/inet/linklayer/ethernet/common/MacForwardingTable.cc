@@ -114,23 +114,20 @@ void MacForwardingTable::updateDisplayString() const
 {
     if (getEnvir()->isGUI()) {
         auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-        getDisplayString().setTagArg("t", 0, text);
+        getDisplayString().setTagArg("t", 0, text.c_str());
     }
 }
 
-const char *MacForwardingTable::resolveDirective(char directive) const
+std::string MacForwardingTable::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 'a':
-            result = std::to_string(forwardingTable.size());
-            break;
+            return std::to_string(forwardingTable.size());
         case 'v':
-            break;
+            return "";
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
-    return result.c_str();
 }
 
 int MacForwardingTable::getUnicastAddressForwardingInterface(const MacAddress& address, unsigned int vid) const

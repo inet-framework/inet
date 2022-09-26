@@ -47,7 +47,7 @@ class INET_API GateScheduleVisualizerBase : public VisualizerBase
       public:
         DirectiveResolver(const cModule *module) : module(module) {}
 
-        virtual const char *resolveDirective(char directive) const override;
+        virtual std::string resolveDirective(char directive) const override;
     };
 
   protected:
@@ -81,7 +81,7 @@ class INET_API GateScheduleVisualizerBase : public VisualizerBase
     virtual void refreshGateVisualization(const GateVisualization *gateVisualization) const = 0;
     virtual void removeAllGateVisualizations();
 
-    virtual const char *getGateScheduleVisualizationText(cModule *module) const;
+    virtual std::string getGateScheduleVisualizationText(cModule *module) const;
 };
 
 } // namespace visualizer

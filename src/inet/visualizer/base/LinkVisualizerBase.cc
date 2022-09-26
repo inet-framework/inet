@@ -21,20 +21,16 @@ LinkVisualizerBase::LinkVisualization::LinkVisualization(int sourceModuleId, int
 {
 }
 
-const char *LinkVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
+std::string LinkVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 'n':
-            result = packet->getName();
-            break;
+            return packet->getName();
         case 'c':
-            result = packet->getClassName();
-            break;
+            return packet->getClassName();
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
-    return result.c_str();
 }
 
 void LinkVisualizerBase::preDelete(cComponent *root)

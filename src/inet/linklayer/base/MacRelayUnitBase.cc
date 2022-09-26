@@ -34,27 +34,23 @@ void MacRelayUnitBase::initialize(int stage)
     }
 }
 
-const char *MacRelayUnitBase::resolveDirective(char directive) const
+std::string MacRelayUnitBase::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
-    case 'p':
-        result = std::to_string(numProcessedFrames);
-        break;
-    case 'd':
-        result = std::to_string(numDroppedFrames);
-        break;
+        case 'p':
+            return std::to_string(numProcessedFrames);
+        case 'd':
+            return std::to_string(numDroppedFrames);
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
-    return result.c_str();
 }
 
 void MacRelayUnitBase::updateDisplayString() const
 {
     if (getEnvir()->isGUI()) {
         auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-        getDisplayString().setTagArg("t", 0, text);
+        getDisplayString().setTagArg("t", 0, text.c_str());
     }
 }
 

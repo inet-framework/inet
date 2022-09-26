@@ -91,17 +91,14 @@ void PacketServer::handleCanPullPacketChanged(cGate *gate)
     }
 }
 
-const char *PacketServer::resolveDirective(char directive) const
+std::string PacketServer::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 's':
-            result = processingTimer->isScheduled() ? "processing" : "";
-            break;
+            return processingTimer->isScheduled() ? "processing" : "";
         default:
             return PacketServerBase::resolveDirective(directive);
     }
-    return result.c_str();
 }
 
 } // namespace queueing

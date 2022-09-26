@@ -37,7 +37,7 @@ void ClockBase::updateDisplayString() const
 {
     if (getEnvir()->isGUI()) {
         auto text = StringFormat::formatString(displayStringTextFormat, this);
-        getDisplayString().setTagArg("t", 0, text);
+        getDisplayString().setTagArg("t", 0, text.c_str());
     }
 }
 
@@ -86,23 +86,18 @@ void ClockBase::handleClockEvent(ClockEvent *msg)
     clockEventTime = -1;
 }
 
-const char *ClockBase::resolveDirective(char directive) const
+std::string ClockBase::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 't':
-            result = getClockTime().str() + " s";
-            break;
+            return getClockTime().str() + " s";
         case 'T':
-            result = getClockTime().ustr();
-            break;
+            return getClockTime().ustr();
         case 'd':
-            result = (getClockTime() - referenceClockModule->getClockTime()).ustr();
-            break;
+            return (getClockTime() - referenceClockModule->getClockTime()).ustr();
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
-    return result.c_str();
 }
 
 } // namespace inet

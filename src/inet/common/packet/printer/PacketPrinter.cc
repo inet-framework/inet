@@ -15,35 +15,26 @@ namespace inet {
 
 Register_MessagePrinter(PacketPrinter);
 
-const char *PacketPrinter::DirectiveResolver::resolveDirective(char directive) const
+std::string PacketPrinter::DirectiveResolver::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 's':
-            result = context.sourceColumn.str();
-            break;
+            return context.sourceColumn.str();
         case 'd':
-            result = context.destinationColumn.str();
-            break;
+            return context.destinationColumn.str();
         case 'p':
-            result = context.protocolColumn.str();
-            break;
+            return context.protocolColumn.str();
         case 'l':
-            result = context.lengthColumn.str();
-            break;
+            return context.lengthColumn.str();
         case 't':
-            result = context.typeColumn.str();
-            break;
+            return context.typeColumn.str();
         case 'i':
-            result = context.infoColumn.str();
-            break;
+            return context.infoColumn.str();
         case 'n':
-            result = std::to_string(numPacket);
-            break;
+            return std::to_string(numPacket);
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
-    return result.c_str();
 }
 
 int PacketPrinter::getScoreFor(cMessage *msg) const

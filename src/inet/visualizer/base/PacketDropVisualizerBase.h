@@ -60,7 +60,7 @@ class INET_API PacketDropVisualizerBase : public VisualizerBase, public cListene
       public:
         DirectiveResolver(const PacketDrop *packetDrop);
 
-        virtual const char *resolveDirective(char directive) const override;
+        virtual std::string resolveDirective(char directive) const override;
     };
 
     class INET_API DetailsFilter {

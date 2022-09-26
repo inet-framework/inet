@@ -49,7 +49,7 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
     virtual int64_t computeTicksForInterval(simtime_t timeInterval) const override;
     virtual simtime_t computeIntervalForTicks(int64_t numTicks) const override;
 
-    virtual const char *resolveDirective(char directive) const override;
+    virtual std::string resolveDirective(char directive) const override;
 };
 
 } // namespace inet

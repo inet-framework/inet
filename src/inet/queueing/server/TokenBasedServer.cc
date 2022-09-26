@@ -88,20 +88,17 @@ void TokenBasedServer::addTokens(double tokens)
     updateDisplayString();
 }
 
-const char *TokenBasedServer::resolveDirective(char directive) const
+std::string TokenBasedServer::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 'n': {
             std::stringstream stream;
             stream << numTokens;
-            result = stream.str();
-            break;
+            return stream.str();
         }
         default:
             return PacketServerBase::resolveDirective(directive);
     }
-    return result.c_str();
 }
 
 } // namespace queueing

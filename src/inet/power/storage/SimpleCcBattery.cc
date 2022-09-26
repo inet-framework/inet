@@ -43,24 +43,20 @@ void SimpleCcBattery::updateDisplayString() const
 {
     if (getEnvir()->isGUI()) {
         auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-        getDisplayString().setTagArg("t", 0, text);
+        getDisplayString().setTagArg("t", 0, text.c_str());
     }
 }
 
-const char *SimpleCcBattery::resolveDirective(char directive) const
+std::string SimpleCcBattery::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 'c':
-            result = getResidualChargeCapacity().str();
-            break;
+            return getResidualChargeCapacity().str();
         case 'p':
-            result = std::to_string((int)std::round(100 * unit(getResidualChargeCapacity() / getNominalChargeCapacity()).get())) + "%";
-            break;
+            return std::to_string((int)std::round(100 * unit(getResidualChargeCapacity() / getNominalChargeCapacity()).get())) + "%";
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
-    return result.c_str();
 }
 
 void SimpleCcBattery::updateTotalCurrentConsumption()

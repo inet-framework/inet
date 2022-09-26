@@ -278,24 +278,19 @@ void Ppp::refreshDisplay() const
     MacProtocolBase::refreshDisplay();
 
     if (displayStringTextFormat != nullptr) {
-        auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) {
-            static std::string result;
+        auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) -> std::string {
             switch (directive) {
                 case 's':
-                    result = std::to_string(numSent);
-                    break;
+                    return std::to_string(numSent);
                 case 'r':
-                    result = std::to_string(numRcvdOK);
-                    break;
+                    return std::to_string(numRcvdOK);
                 case 'd':
-                    result = std::to_string(numDroppedIfaceDown + numDroppedBitErr);
-                    break;
+                    return std::to_string(numDroppedIfaceDown + numDroppedBitErr);
                 case 'q':
-                    result = std::to_string(txQueue->getNumPackets());
-                    break;
+                    return std::to_string(txQueue->getNumPackets());
                 case 'b':
                     if (datarateChannel == nullptr)
-                        result = "not connected";
+                        return "not connected";
                     else {
                         char datarateText[40];
                         double datarate = datarateChannel->getNominalDatarate();
@@ -307,15 +302,13 @@ void Ppp::refreshDisplay() const
                             sprintf(datarateText, "%gkbps", datarate / 1e3);
                         else
                             sprintf(datarateText, "%gbps", datarate);
-                        result = datarateText;
+                        return datarateText;
                     }
-                    break;
                 default:
                     throw cRuntimeError("Unknown directive: %c", directive);
             }
-            return result.c_str();
         });
-        getDisplayString().setTagArg("t", 0, text);
+        getDisplayString().setTagArg("t", 0, text.c_str());
     }
 
     const char *color = "";

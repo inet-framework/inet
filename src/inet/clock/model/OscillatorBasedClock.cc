@@ -110,20 +110,16 @@ void OscillatorBasedClock::handleClockEvent(ClockEvent *event)
     ClockBase::handleClockEvent(event);
 }
 
-const char *OscillatorBasedClock::resolveDirective(char directive) const
+std::string OscillatorBasedClock::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 'o':
-            result = std::to_string(originClockTick);
-            break;
+            return std::to_string(originClockTick);
         case 'c':
-            result = std::to_string(originClockTick + oscillator->computeTicksForInterval(simTime() - oscillator->getComputationOrigin()));
-            break;
+            return std::to_string(originClockTick + oscillator->computeTicksForInterval(simTime() - oscillator->getComputationOrigin()));
         default:
             return ClockBase::resolveDirective(directive);
     }
-    return result.c_str();
 }
 
 void OscillatorBasedClock::receiveSignal(cComponent *source, int signal, cObject *obj, cObject *details)

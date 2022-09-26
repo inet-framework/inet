@@ -62,23 +62,18 @@ PacketDropVisualizerBase::DirectiveResolver::DirectiveResolver(const PacketDrop 
 {
 }
 
-const char *PacketDropVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
+std::string PacketDropVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 'n':
-            result = packetDrop->getPacket_()->getName();
-            break;
+            return packetDrop->getPacket_()->getName();
         case 'c':
-            result = packetDrop->getPacket_()->getClassName();
-            break;
+            return packetDrop->getPacket_()->getClassName();
         case 'r':
-            result = std::to_string(packetDrop->getReason());
-            break;
+            return std::to_string(packetDrop->getReason());
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
-    return result.c_str();
 }
 
 void PacketDropVisualizerBase::DetailsFilter::setPattern(const char *pattern)

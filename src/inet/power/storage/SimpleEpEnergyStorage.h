@@ -78,7 +78,7 @@ class INET_API SimpleEpEnergyStorage : public EpEnergyStorageBase, public String
     virtual void handleMessage(cMessage *message) override;
     virtual void refreshDisplay() const override;
     virtual void updateDisplayString() const;
-    virtual const char *resolveDirective(char directive) const override;
+    virtual std::string resolveDirective(char directive) const override;
 
     virtual void updateTotalPowerConsumption() override;
     virtual void updateTotalPowerGeneration() override;

@@ -404,24 +404,20 @@ void PacketProcessorBase::updateDisplayString() const
 {
     if (getEnvir()->isGUI() && displayStringTextFormat != nullptr) {
         auto text = StringFormat::formatString(displayStringTextFormat, this);
-        getDisplayString().setTagArg("t", 0, text);
+        getDisplayString().setTagArg("t", 0, text.c_str());
     }
 }
 
-const char *PacketProcessorBase::resolveDirective(char directive) const
+std::string PacketProcessorBase::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 'p':
-            result = std::to_string(numProcessedPackets);
-            break;
+            return std::to_string(numProcessedPackets);
         case 'l':
-            result = processedTotalLength.str();
-            break;
+            return processedTotalLength.str();
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
-    return result.c_str();
 }
 
 } // namespace queueing

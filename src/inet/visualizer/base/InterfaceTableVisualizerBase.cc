@@ -32,84 +32,74 @@ InterfaceTableVisualizerBase::InterfaceVisualization::InterfaceVisualization(int
 {
 }
 
-const char *InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
+std::string InterfaceTableVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
-    static std::string result;
-    result = "";
     switch (directive) {
         case 'N':
-            result = networkInterface->getInterfaceName();
-            break;
+            return networkInterface->getInterfaceName();
         case 'm':
-            result = networkInterface->getMacAddress().str();
-            break;
+            return networkInterface->getMacAddress().str();
         case 'l': // TODO Ipv4 or Ipv6
 #ifdef INET_WITH_IPv4
             if (auto ipv4Data = networkInterface->findProtocolData<Ipv4InterfaceData>())
-                result = std::to_string(ipv4Data->getNetmask().getNetmaskLength());
+                return std::to_string(ipv4Data->getNetmask().getNetmaskLength());
 #endif // INET_WITH_IPv4
-            break;
+            return "";
         case '4':
 #ifdef INET_WITH_IPv4
             if (auto ipv4Data = networkInterface->findProtocolData<Ipv4InterfaceData>())
-                result = ipv4Data->getIPAddress().str();
+                return ipv4Data->getIPAddress().str();
 #endif // INET_WITH_IPv4
-            break;
+            return "";
         case '6':
 #ifdef INET_WITH_IPv6
             if (auto ipv6Data = networkInterface->findProtocolData<Ipv6InterfaceData>())
-                result = ipv6Data->getLinkLocalAddress().str();
+                return ipv6Data->getLinkLocalAddress().str();
 #endif // INET_WITH_IPv6
-            break;
+            return "";
         case 'a':
             if (false) ;
 #ifdef INET_WITH_IPv4
             else if (auto ipv4Data = networkInterface->findProtocolData<Ipv4InterfaceData>())
-                result = ipv4Data->getIPAddress().str();
+                return ipv4Data->getIPAddress().str();
 #endif // INET_WITH_IPv4
 #ifdef INET_WITH_IPv6
             else if (auto ipv6Data = networkInterface->findProtocolData<Ipv6InterfaceData>())
-                result = ipv6Data->getLinkLocalAddress().str();
+                return ipv6Data->getLinkLocalAddress().str();
 #endif // INET_WITH_IPv6
 #ifdef INET_WITH_NEXTHOP
             else if (auto nextHopData = networkInterface->findProtocolData<NextHopInterfaceData>())
-                result = nextHopData->getAddress().str();
+                return nextHopData->getAddress().str();
 #endif // INET_WITH_NEXTHOP
-            break;
+            return "";
         case 'g':
 #ifdef INET_WITH_NEXTHOP
             if (auto nextHopData = networkInterface->findProtocolData<NextHopInterfaceData>())
-                result = nextHopData->getAddress().str();
+                return nextHopData->getAddress().str();
 #endif // INET_WITH_NEXTHOP
-            break;
+            return "";
         case 'n':
-            result = networkInterface->getNetworkAddress().str();
-            break;
+            return networkInterface->getNetworkAddress().str();
         case 't':
             switch (networkInterface->getState()) {
-                case NetworkInterface::UP: result = "up"; break;
-                case NetworkInterface::DOWN: result = "down"; break;
-                case NetworkInterface::GOING_UP: result = "going up"; break;
-                case NetworkInterface::GOING_DOWN: result = "going down"; break;
+                case NetworkInterface::UP: return "up"; break;
+                case NetworkInterface::DOWN: return "down"; break;
+                case NetworkInterface::GOING_UP: return "going up"; break;
+                case NetworkInterface::GOING_DOWN: return "going down"; break;
                 default: throw cRuntimeError("Unknown interface state");
             }
             break;
         case 'i':
-            result = networkInterface->str();
-            break;
+            return networkInterface->str();
         case 's':
-            result = networkInterface->str();
-            break;
+            return networkInterface->str();
         case '/':
-            result = networkInterface->getNetworkAddress().isUnspecified() ? "" : "/";
-            break;
+            return networkInterface->getNetworkAddress().isUnspecified() ? "" : "/";
         case '\\':
-            result = networkInterface->getNodeOutputGateId() == -1 ? "" : "\n";
-            break;
+            return networkInterface->getNodeOutputGateId() == -1 ? "" : "\n";
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
-    return result.c_str();
 }
 
 void InterfaceTableVisualizerBase::preDelete(cComponent *root)

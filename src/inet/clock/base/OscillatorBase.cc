@@ -23,24 +23,20 @@ void OscillatorBase::updateDisplayString() const
 {
     if (getEnvir()->isGUI()) {
         auto text = StringFormat::formatString(displayStringTextFormat, this);
-        getDisplayString().setTagArg("t", 0, text);
+        getDisplayString().setTagArg("t", 0, text.c_str());
     }
 }
 
-const char *OscillatorBase::resolveDirective(char directive) const
+std::string OscillatorBase::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 'n':
-            result = getNominalTickLength().str() + " s";
-            break;
+            return getNominalTickLength().str() + " s";
         case 'o':
-            result = getComputationOrigin().str() + " s";
-            break;
+            return getComputationOrigin().str() + " s";
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
-    return result.c_str();
 }
 
 } // namespace inet

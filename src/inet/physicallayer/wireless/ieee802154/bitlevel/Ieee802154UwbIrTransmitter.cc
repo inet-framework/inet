@@ -71,7 +71,6 @@ simtime_t Ieee802154UwbIrTransmitter::getThdr() const
                 case Ieee802154UwbIrMode::NOMINAL_4_M:
 //                    throw cRuntimeError("This optional mode is not implemented.");
                     return 0;
-                    break;
                 case Ieee802154UwbIrMode::NOMINAL_16_M:
                     return 16.4E-6;
                 case Ieee802154UwbIrMode::NOMINAL_64_M:

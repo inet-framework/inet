@@ -41,7 +41,7 @@ class INET_API PacketPrinter : public cMessagePrinter
       public:
         DirectiveResolver(const Context& context, const int numPacket) : context(context), numPacket(numPacket) {}
 
-        virtual const char *resolveDirective(char directive) const override;
+        virtual std::string resolveDirective(char directive) const override;
     };
 
   protected:

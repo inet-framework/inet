@@ -36,7 +36,7 @@ class INET_API InfoVisualizerBase : public VisualizerBase
       public:
         DirectiveResolver(const cModule *module) : module(module) {}
 
-        virtual const char *resolveDirective(char directive) const override;
+        virtual std::string resolveDirective(char directive) const override;
     };
 
   protected:
@@ -67,7 +67,7 @@ class INET_API InfoVisualizerBase : public VisualizerBase
     virtual void refreshInfoVisualization(const InfoVisualization *infoVisualization, const char *info) const = 0;
     virtual void removeAllInfoVisualizations();
 
-    virtual const char *getInfoVisualizationText(cModule *module) const;
+    virtual std::string getInfoVisualizationText(cModule *module) const;
 
   public:
     virtual void preDelete(cComponent *root) override;

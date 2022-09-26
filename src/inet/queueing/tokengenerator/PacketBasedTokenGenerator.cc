@@ -48,24 +48,20 @@ void PacketBasedTokenGenerator::pushPacket(Packet *packet, cGate *gate)
     delete packet;
 }
 
-const char *PacketBasedTokenGenerator::resolveDirective(char directive) const
+std::string PacketBasedTokenGenerator::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 's': {
-            result = par("storageModule").stringValue();
-            break;
+            return par("storageModule").stringValue();
         }
         case 't': {
             std::stringstream stream;
             stream << numTokensGenerated;
-            result = stream.str();
-            break;
+            return stream.str();
         }
         default:
             return PassivePacketSinkBase::resolveDirective(directive);
     }
-    return result.c_str();
 }
 
 void PacketBasedTokenGenerator::receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details)

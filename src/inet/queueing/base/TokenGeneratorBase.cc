@@ -25,24 +25,20 @@ void TokenGeneratorBase::initialize(int stage)
     }
 }
 
-const char *TokenGeneratorBase::resolveDirective(char directive) const
+std::string TokenGeneratorBase::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 's': {
-            result = par("storageModule").stringValue();
-            break;
+            return par("storageModule").stringValue();
         }
         case 't': {
             std::stringstream stream;
             stream << numTokensGenerated;
-            result = stream.str();
-            break;
+            return stream.str();
         }
         default:
-            result = PacketProcessorBase::resolveDirective(directive);
+            return PacketProcessorBase::resolveDirective(directive);
     }
-    return result.c_str();
 }
 
 } // namespace queueing

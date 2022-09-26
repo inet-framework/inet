@@ -55,7 +55,7 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener, public 
   public:
     PcapRecorder();
     virtual ~PcapRecorder();
-    virtual const char *resolveDirective(char directive) const override;
+    virtual std::string resolveDirective(char directive) const override;
 
   protected:
     virtual void initialize() override;

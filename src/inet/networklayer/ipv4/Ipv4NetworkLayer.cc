@@ -22,21 +22,18 @@ void Ipv4NetworkLayer::updateDisplayString() const
 {
     if (getEnvir()->isGUI()) {
         auto text = StringFormat::formatString(par("displayStringTextFormat"), this);
-        getDisplayString().setTagArg("t", 0, text);
+        getDisplayString().setTagArg("t", 0, text.c_str());
     }
 }
 
-const char *Ipv4NetworkLayer::resolveDirective(char directive) const
+std::string Ipv4NetworkLayer::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 'i':
-            result = getSubmodule("ip")->getDisplayString().getTagArg("t", 0);
-            break;
+            return getSubmodule("ip")->getDisplayString().getTagArg("t", 0);
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
-    return result.c_str();
 }
 
 } // namespace inet

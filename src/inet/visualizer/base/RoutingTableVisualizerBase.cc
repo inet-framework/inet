@@ -24,35 +24,26 @@ RoutingTableVisualizerBase::RouteVisualization::RouteVisualization(const Ipv4Rou
 {
 }
 
-const char *RoutingTableVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
+std::string RoutingTableVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 'm':
-            result = route->getNetmask().isUnspecified() ? "*" : std::to_string(route->getNetmask().getNetmaskLength());
-            break;
+            return route->getNetmask().isUnspecified() ? "*" : std::to_string(route->getNetmask().getNetmaskLength());
         case 'g':
-            result = route->getGateway().isUnspecified() ? "*" : route->getGateway().str();
-            break;
+            return route->getGateway().isUnspecified() ? "*" : route->getGateway().str();
         case 'd':
-            result = route->getDestination().isUnspecified() ? "*" : route->getDestination().str();
-            break;
+            return route->getDestination().isUnspecified() ? "*" : route->getDestination().str();
         case 'e':
-            result = std::to_string(route->getMetric());
-            break;
+            return std::to_string(route->getMetric());
         case 'n':
-            result = route->getInterface()->getInterfaceName();
-            break;
+            return route->getInterface()->getInterfaceName();
         case 'i':
-            result = route->str();
-            break;
+            return route->str();
         case 's':
-            result = route->str();
-            break;
+            return route->str();
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
-    return result.c_str();
 }
 
 void RoutingTableVisualizerBase::preDelete(cComponent *root)

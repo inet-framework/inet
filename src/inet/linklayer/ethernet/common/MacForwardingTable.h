@@ -66,7 +66,7 @@ class INET_API MacForwardingTable : public OperationalBase, public IMacForwardin
     virtual void handleMessageWhenUp(cMessage *msg) override;
     virtual void refreshDisplay() const override;
     virtual void updateDisplayString() const;
-    virtual const char *resolveDirective(char directive) const override;
+    virtual std::string resolveDirective(char directive) const override;
 
     virtual void parseForwardingTableParameter();
 

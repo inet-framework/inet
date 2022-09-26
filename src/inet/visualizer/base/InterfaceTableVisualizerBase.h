@@ -41,7 +41,7 @@ class INET_API InterfaceTableVisualizerBase : public VisualizerBase, public cLis
       public:
         DirectiveResolver(const NetworkInterface *networkInterface) : networkInterface(networkInterface) {}
 
-        virtual const char *resolveDirective(char directive) const override;
+        virtual std::string resolveDirective(char directive) const override;
     };
 
   protected:

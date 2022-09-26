@@ -27,7 +27,7 @@ class INET_API OscillatorBase : public cSimpleModule, public IOscillator, public
     virtual void updateDisplayString() const;
 
   public:
-    virtual const char *resolveDirective(char directive) const override;
+    virtual std::string resolveDirective(char directive) const override;
 };
 
 } // namespace inet

@@ -41,7 +41,7 @@ class INET_API RoutingTableVisualizerBase : public VisualizerBase, public cListe
       public:
         DirectiveResolver(const Ipv4Route *route) : route(route) {}
 
-        virtual const char *resolveDirective(char directive) const override;
+        virtual std::string resolveDirective(char directive) const override;
     };
 
   protected:

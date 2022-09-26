@@ -164,7 +164,7 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     virtual void handleParameterChange(const char *name) override;
     virtual void refreshDisplay() const override;
     virtual void updateDisplayString() const override;
-    virtual const char *resolveDirective(char directive) const override;
+    virtual std::string resolveDirective(char directive) const override;
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, cObject *details) override;
     virtual cGate *createGateObject(cGate::Type type) override {
         return type == cGate::INPUT ? new LocalGate(this) : cModule::createGateObject(type);

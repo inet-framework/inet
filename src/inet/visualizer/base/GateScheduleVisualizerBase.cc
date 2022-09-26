@@ -27,28 +27,22 @@ GateScheduleVisualizerBase::GateVisualization::GateVisualization(queueing::IPack
 {
 }
 
-const char *GateScheduleVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
+std::string GateScheduleVisualizerBase::DirectiveResolver::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 'i': {
             auto networkInterface = getContainingNicModule(module);
-            result = networkInterface->getInterfaceName();
-            break;
+            return networkInterface->getInterfaceName();
         }
         case 'm':
-            result = module->getFullName();
-            break;
+            return module->getFullName();
         case 'd':
-            result = module->getDisplayName() != nullptr ? module->getDisplayName() : "";
-            break;
+            return module->getDisplayName() != nullptr ? module->getDisplayName() : "";
         case 'D':
-            result = module->getDisplayName() != nullptr ? module->getDisplayName() : module->getFullName();
-            break;
+            return module->getDisplayName() != nullptr ? module->getDisplayName() : module->getFullName();
         default:
             throw cRuntimeError("Unknown directive: %c", directive);
     }
-    return result.c_str();
 }
 
 void GateScheduleVisualizerBase::preDelete(cComponent *root)
@@ -126,7 +120,7 @@ void GateScheduleVisualizerBase::removeAllGateVisualizations()
     }
 }
 
-const char *GateScheduleVisualizerBase::getGateScheduleVisualizationText(cModule *module) const
+std::string GateScheduleVisualizerBase::getGateScheduleVisualizationText(cModule *module) const
 {
     DirectiveResolver directiveResolver(module);
     return stringFormat.formatString(&directiveResolver);

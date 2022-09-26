@@ -34,7 +34,6 @@ const Ptr<Chunk> OspfPacketSerializer::deserialize(MemoryInputStream& stream) co
         case 2:
             stream.seek(startPos);
             return ospfv2::Ospfv2PacketSerializer().deserialize(stream);
-            break;
 #endif // #ifdef INET_WITH_OSPFv2
 #ifdef INET_WITH_OSPFv3
         case 3:

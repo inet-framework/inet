@@ -36,7 +36,7 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     virtual ClockEvent *cancelClockEvent(ClockEvent *event) override;
     virtual void handleClockEvent(ClockEvent *event) override;
 
-    virtual const char *resolveDirective(char directive) const override;
+    virtual std::string resolveDirective(char directive) const override;
 
     virtual void receiveSignal(cComponent *source, int signal, cObject *obj, cObject *details) override;
 };

@@ -57,20 +57,14 @@ class INET_API TokenBucketMixin : public T, public ITokenStorage
         T::emit(tokensChangedSignal, getNumTokens());
     }
 
-    const virtual char* resolveDirective(char directive) const override
+    std::string resolveDirective(char directive) const override
     {
-        static std::string result;
         switch (directive) {
-            case 'n': {
-                std::stringstream stream;
-                stream << tokenBucket.getNumTokens();
-                result = stream.str();
-                break;
-            }
+            case 'n':
+                return std::to_string(tokenBucket.getNumTokens());
             default:
                 return T::resolveDirective(directive);
         }
-        return result.c_str();
     }
 
     virtual void rescheduleOverflowTimer() {

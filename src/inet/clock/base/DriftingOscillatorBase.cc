@@ -112,20 +112,16 @@ void DriftingOscillatorBase::processCommand(const cXMLElement& node)
         throw cRuntimeError("Invalid command: %s", node.getTagName());
 }
 
-const char *DriftingOscillatorBase::resolveDirective(char directive) const
+std::string DriftingOscillatorBase::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 'c':
-            result = getCurrentTickLength().str() + " s";
-            break;
+            return getCurrentTickLength().str() + " s";
         case 'd':
-            result = std::to_string((int64_t)(driftRate * 1E+6)) + " ppm";
-            break;
+            return std::to_string((int64_t)(driftRate * 1E+6)) + " ppm";
         default:
             return OscillatorBase::resolveDirective(directive);
     }
-    return result.c_str();
 }
 
 } // namespace inet

@@ -268,20 +268,16 @@ void PacketFilterBase::dropPacket(Packet *packet, PacketDropReason reason, int l
     PacketProcessorBase::dropPacket(packet, reason, limit);
 }
 
-const char *PacketFilterBase::resolveDirective(char directive) const
+std::string PacketFilterBase::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 'd':
-            result = std::to_string(numDroppedPackets);
-            break;
+            return std::to_string(numDroppedPackets);
         case 'k':
-            result = droppedTotalLength.str();
-            break;
+            return droppedTotalLength.str();
         default:
             return PacketProcessorBase::resolveDirective(directive);
     }
-    return result.c_str();
 }
 
 } // namespace queueing

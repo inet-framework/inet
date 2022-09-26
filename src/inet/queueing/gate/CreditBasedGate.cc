@@ -212,20 +212,17 @@ void CreditBasedGate::handleCanPullPacketChanged(cGate *gate)
     PacketGateBase::handleCanPullPacketChanged(gate);
 }
 
-const char *CreditBasedGate::resolveDirective(char directive) const
+std::string CreditBasedGate::resolveDirective(char directive) const
 {
-    static std::string result;
     switch (directive) {
         case 'n': {
             std::stringstream stream;
             stream << currentCredit;
-            result = stream.str();
-            break;
+            return stream.str();
         }
         default:
             return PacketGateBase::resolveDirective(directive);
     }
-    return result.c_str();
 }
 
 } // namespace queueing

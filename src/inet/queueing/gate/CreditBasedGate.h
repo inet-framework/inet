@@ -55,7 +55,7 @@ class INET_API CreditBasedGate : public PacketGateBase, public cListener
 
     virtual void handleCanPullPacketChanged(cGate *gate) override;
 
-    virtual const char *resolveDirective(char directive) const override;
+    virtual std::string resolveDirective(char directive) const override;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;

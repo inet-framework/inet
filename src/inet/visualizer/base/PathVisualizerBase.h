@@ -45,7 +45,7 @@ class INET_API PathVisualizerBase : public VisualizerBase, public cListener
         DirectiveResolver(const PathVisualization *pathVisualization, const cPacket *packet) :
             pathVisualization(pathVisualization), packet(packet) {}
 
-        virtual const char *resolveDirective(char directive) const override;
+        virtual std::string resolveDirective(char directive) const override;
     };
 
   protected:

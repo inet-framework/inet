@@ -41,7 +41,7 @@ const char *Int128::toString(uint32_t radix) const
     if (radix < 2 || radix > 37)
         return "(invalid radix)";
 
-    static char sz[256];
+    static OPP_THREAD_LOCAL char sz[256];
     memset(sz, 0, 256);
 
     Int128 r;

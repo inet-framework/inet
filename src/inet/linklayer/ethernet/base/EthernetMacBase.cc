@@ -606,24 +606,19 @@ void EthernetMacBase::refreshDisplay() const
     if (!strcmp(getParentModule()->getNedTypeName(), "inet.linklayer.ethernet.EthernetInterface"))
         getParentModule()->getDisplayString().setTagArg("i", 1, color);
 
-    auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) {
-        static std::string result;
-        switch (directive) {
+    auto text = StringFormat::formatString(displayStringTextFormat, [&] (char directive) -> std::string {
+         switch (directive) {
             case 's':
-                result = std::to_string(numFramesSent);
-                break;
+                return std::to_string(numFramesSent);
             case 'r':
-                result = std::to_string(numFramesReceivedOK);
-                break;
+                return std::to_string(numFramesReceivedOK);
             case 'd':
-                result = std::to_string(numDroppedPkFromHLIfaceDown + numDroppedIfaceDown + numDroppedBitError + numDroppedNotForUs);
-                break;
+                return std::to_string(numDroppedPkFromHLIfaceDown + numDroppedIfaceDown + numDroppedBitError + numDroppedNotForUs);
             case 'q':
-                result = txQueue != nullptr ? std::to_string(txQueue->getNumPackets()) : "";
-                break;
+                return txQueue != nullptr ? std::to_string(txQueue->getNumPackets()) : "";
             case 'b':
                 if (transmissionChannel == nullptr)
-                    result = "not connected";
+                    return "not connected";
                 else {
                     char datarateText[40];
                     double datarate = transmissionChannel->getNominalDatarate();
@@ -635,15 +630,13 @@ void EthernetMacBase::refreshDisplay() const
                         sprintf(datarateText, "%gkbps", datarate / 1e3);
                     else
                         sprintf(datarateText, "%gbps", datarate);
-                    result = datarateText;
+                    return datarateText;
                 }
-                break;
             default:
                 throw cRuntimeError("Unknown directive: %c", directive);
         }
-        return result.c_str();
-    });
-    getDisplayString().setTagArg("t", 0, text);
+        });
+    getDisplayString().setTagArg("t", 0, text.c_str());
 }
 
 void EthernetMacBase::changeTransmissionState(MacTransmitState newState)
