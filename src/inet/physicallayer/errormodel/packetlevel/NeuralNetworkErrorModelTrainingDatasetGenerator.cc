@@ -159,8 +159,8 @@ void NeuralNetworkErrorModelTrainingDatasetGenerator::generateTrainingDataset()
         auto subcarrierModulation = ofdmModulation != nullptr ? ofdmModulation->getSubcarrierModulation() : nullptr;
         auto transmittedSymbols = transmission->getSymbolModel()->getAllSymbols();
         // TODO: time division doesn't take into account that the preamble doesn't contain symbols
-        auto timeDivision = transmittedSymbols->size();
-        auto frequencyDivision = ofdmModulation != nullptr ? ofdmModulation->getNumSubcarriers() : 1;
+        int timeDivision = transmittedSymbols->size();
+        int frequencyDivision = ofdmModulation != nullptr ? ofdmModulation->getNumSubcarriers() : 1;
         if (frequencyDivision != 52)
             throw cRuntimeError("wrong number of OFDM subcarriers!");
         int numSymbols = timeDivision * frequencyDivision;
