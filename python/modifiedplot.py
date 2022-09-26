@@ -381,6 +381,9 @@ def quick_reorder_legend(handles, labels, order, **kwargs):
     Reorders the legend in-place (so it's not needed to call plt.legend() with the returned handles and labels).
     Also, add any parameters for plt.legend() as kwargs.
     """
+    legendsize = len(handles)
+    if order == []:
+        order = [*range(0, legendsize)]
     plt.legend([handles[i] for i in order], [labels[i] for i in order], **kwargs)
     return handles, labels
 
