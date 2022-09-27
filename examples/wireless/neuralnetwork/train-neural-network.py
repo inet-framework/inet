@@ -9,13 +9,12 @@ import code
 import numpy
 import random
 import argparse
-import tensorflow
+import tensorflow as tf
 import keras.utils
 
 from keras.models import Model, Sequential
 from keras.layers import Activation, Dense, InputLayer, Concatenate, BatchNormalization, Conv1D, LSTM, GlobalAveragePooling1D, MaxPool1D, AveragePooling1D
 from keras.optimizers import SGD, Adam, Adagrad
-from keras2cpp import keras2cpp
 from PySide2.QtWidgets import QWidget, QSlider, QHBoxLayout, QSplitter, QScrollArea, QLabel, QApplication, QDialog, QLineEdit, QPushButton
 
 numpy.set_printoptions(threshold=sys.maxsize)
@@ -72,21 +71,23 @@ def loadTrainingDataset(trainingDataset):
     for filename in trainingDataset:
         print(f"Loading training dataset from {filename}")
         loadTrainingDatasetFile(filename, inputs, outputs)
-    return keras.preprocessing.sequence.pad_sequences(inputs, dtype="float"), numpy.array(outputs)
-            
+    return keras.utils.pad_sequences(inputs, dtype="float"), numpy.array(outputs)
+
 inputs, outputs = loadTrainingDataset(args.trainingDataset)
 
 def buildModel(inputs=inputs, outputs=outputs):
     print(f"Building model for {len(inputs[0])} inputs")
     model = Sequential()
 
-    model.add(Conv1D(filters=32, kernel_size=7, padding="same", input_shape=(None, 1)))
+    #model.add(Conv1D(filters=32, kernel_size=7, padding="same", input_shape=(None, 1)))
     #model.add(MaxPool1D(4))
     #model.add(Conv1D(filters=16, kernel_size=5, padding="same"))
-    model.add(AveragePooling1D(4))
-    model.add(Conv1D(filters=8, kernel_size=3, padding="same"))
-    model.add(LSTM(4, return_sequences=True))
-    model.add(GlobalAveragePooling1D())
+    #model.add(AveragePooling1D(4))
+    #model.add(Conv1D(filters=8, kernel_size=3, padding="same"))
+    #model.add(LSTM(4, return_sequences=True))
+    #model.add(GlobalAveragePooling1D())
+
+    model.add(InputLayer(input_shape=(len(inputs[0]),), name="snirs", dtype=tf.dtypes.float32))
     model.add(Dense(32, activation="tanh"))
     model.add(Dense(16, activation="tanh"))
     model.add(Dense(1, activation="sigmoid"))
@@ -112,7 +113,10 @@ def saveModel(model=model):
     print(f"Saving neural network model as {args.output}.h5")
     os.makedirs(os.path.dirname(args.output), exist_ok=True)
     model.save(args.output + ".h5")
-    keras2cpp.export_model(model, args.output + ".model")
+
+    tflite_model = tf.lite.TFLiteConverter.from_keras_model(model).convert()
+    with open(args.output + ".tflite", 'wb') as f:
+        f.write(tflite_model)
 
 def printSamples(model=model, inputs=inputs, outputs=outputs, numSamples=args.numSamples):
     for i in range(numSamples):

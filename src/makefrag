@@ -21,6 +21,11 @@ ifeq ($(PLATFORM),win32)
   #
   LDFLAGS += -lws2_32
   DEFINES += -DINET_EXPORT
+
+INCLUDE_PATH += -I../3rdparty/frugally-deep/include -I../3rdparty/json/include -I../3rdparty/FunctionalPlus/include
+CFLAGS += $(shell (pkg-config --cflags eigen3))
+
+
 endif
 
 #
