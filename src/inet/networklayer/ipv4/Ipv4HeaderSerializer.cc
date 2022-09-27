@@ -9,23 +9,28 @@
 
 #include "inet/common/Endian.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/networklayer/ipv4/headers/ip.h"
 
 namespace inet {
 
 Register_Serializer(Ipv4Header, Ipv4HeaderSerializer);
 
+#define IP_RF         0x8000               /* reserved fragment flag */
+#define IP_DF         0x4000               /* dont fragment flag */
+#define IP_MF         0x2000               /* more fragments flag */
+#define IP_OFFMASK    0x1fff               /* mask for fragmenting bits */
+
 void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ipv4Header &ipv4Header)
 {
     auto startPosition = stream.getLength();
-    struct ip iphdr;
     B headerLength = ipv4Header.getHeaderLength();
     ASSERT((headerLength.get() & 3) == 0 && headerLength >= IPv4_MIN_HEADER_LENGTH && headerLength <= IPv4_MAX_HEADER_LENGTH);
     ASSERT(headerLength <= ipv4Header.getTotalLengthField());
-    iphdr.ip_hl = B(headerLength).get() >> 2;
-    iphdr.ip_v = ipv4Header.getVersion();
-    iphdr.ip_tos = ipv4Header.getTypeOfService();
-    iphdr.ip_id = htons(ipv4Header.getIdentification());
+
+    stream.writeUint4(ipv4Header.getVersion());
+    stream.writeUint4(B(headerLength).get() >> 2);
+    stream.writeUint8(ipv4Header.getTypeOfService());
+    stream.writeUint16Be(B(ipv4Header.getTotalLengthField()).get());
+    stream.writeUint16Be(ipv4Header.getIdentification());
     ASSERT((ipv4Header.getFragmentOffset() & 7) == 0);
     uint16_t ip_off = (ipv4Header.getFragmentOffset() / 8) & IP_OFFMASK;
     if (ipv4Header.getReservedBit())
@@ -34,16 +39,14 @@ void Ipv4HeaderSerializer::serialize(MemoryOutputStream& stream, const Ipv4Heade
         ip_off |= IP_MF;
     if (ipv4Header.getDontFragment())
         ip_off |= IP_DF;
-    iphdr.ip_off = htons(ip_off);
-    iphdr.ip_ttl = ipv4Header.getTimeToLive();
-    iphdr.ip_p = ipv4Header.getProtocolId();
-    iphdr.ip_src.s_addr = htonl(ipv4Header.getSrcAddress().getInt());
-    iphdr.ip_dst.s_addr = htonl(ipv4Header.getDestAddress().getInt());
-    iphdr.ip_len = htons(B(ipv4Header.getTotalLengthField()).get());
+    stream.writeUint16Be(ip_off);
+    stream.writeUint8(ipv4Header.getTimeToLive());
+    stream.writeUint8(ipv4Header.getProtocolId());
     if (ipv4Header.getCrcMode() != CRC_COMPUTED)
         throw cRuntimeError("Cannot serialize Ipv4 header without a properly computed CRC");
-    iphdr.ip_sum = htons(ipv4Header.getCrc());
-    stream.writeBytes((uint8_t *)&iphdr, IPv4_MIN_HEADER_LENGTH);
+    stream.writeUint16Be(ipv4Header.getCrc());
+    stream.writeIpv4Address(ipv4Header.getSrcAddress());
+    stream.writeIpv4Address(ipv4Header.getDestAddress());
 
     if (headerLength > IPv4_MIN_HEADER_LENGTH) {
         unsigned short numOptions = ipv4Header.getOptionArraySize();
@@ -152,30 +155,28 @@ const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
 {
     auto position = stream.getPosition();
     B bufsize = stream.getRemainingLength();
-    uint8_t buffer[B(IPv4_MIN_HEADER_LENGTH).get()];
-    stream.readBytes(buffer, IPv4_MIN_HEADER_LENGTH);
     auto ipv4Header = makeShared<Ipv4Header>();
-    const struct ip& iphdr = *static_cast<const struct ip *>((void *)&buffer);
-    B totalLength, headerLength;
 
-    ipv4Header->setVersion(iphdr.ip_v);
-    ipv4Header->setHeaderLength(IPv4_MIN_HEADER_LENGTH);
-    ipv4Header->setSrcAddress(Ipv4Address(ntohl(iphdr.ip_src.s_addr)));
-    ipv4Header->setDestAddress(Ipv4Address(ntohl(iphdr.ip_dst.s_addr)));
-    ipv4Header->setProtocolId((IpProtocolId)iphdr.ip_p);
-    ipv4Header->setTimeToLive(iphdr.ip_ttl);
-    ipv4Header->setIdentification(ntohs(iphdr.ip_id));
-    uint16_t ip_off = ntohs(iphdr.ip_off);
+    ipv4Header->setVersion(stream.readUint4());
+    B headerLength = B(stream.readUint4() << 2);
+    ipv4Header->setHeaderLength(headerLength);
+    ipv4Header->setTypeOfService(stream.readUint8());
+    B totalLength = B(stream.readUint16Be());
+    ipv4Header->setTotalLengthField(totalLength);
+    ipv4Header->setIdentification(stream.readUint16Be());
+    uint16_t ip_off = stream.readUint16Be();
+    ipv4Header->setFragmentOffset((ip_off & IP_OFFMASK) * 8);
     ipv4Header->setReservedBit((ip_off & IP_RF) != 0);
     ipv4Header->setMoreFragments((ip_off & IP_MF) != 0);
     ipv4Header->setDontFragment((ip_off & IP_DF) != 0);
-    ipv4Header->setFragmentOffset((ntohs(iphdr.ip_off) & IP_OFFMASK) * 8);
-    ipv4Header->setTypeOfService(iphdr.ip_tos);
-    totalLength = B(ntohs(iphdr.ip_len));
-    ipv4Header->setTotalLengthField(totalLength);
-    headerLength = B(iphdr.ip_hl << 2);
+    ipv4Header->setTimeToLive(stream.readUint8());
+    ipv4Header->setProtocolId(static_cast<IpProtocolId>(stream.readUint8()));
+    ipv4Header->setCrc(stream.readUint16Be());
+    ipv4Header->setCrcMode(CRC_COMPUTED);
+    ipv4Header->setSrcAddress(stream.readIpv4Address());
+    ipv4Header->setDestAddress(stream.readIpv4Address());
 
-    if (iphdr.ip_v != 4)
+    if (ipv4Header->getVersion() != 4)
         ipv4Header->markIncorrect();
     if (headerLength < IPv4_MIN_HEADER_LENGTH) {
         ipv4Header->markIncorrect();
@@ -183,9 +184,6 @@ const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
     }
     if (totalLength < headerLength)
         ipv4Header->markIncorrect();
-
-    ipv4Header->setHeaderLength(headerLength);
-
     if (headerLength > IPv4_MIN_HEADER_LENGTH) { // options present?
         while (stream.getRemainingLength() > B(0) && stream.getPosition() - position < headerLength) {
             TlvOptionBase *option = deserializeOption(stream);
@@ -195,9 +193,6 @@ const Ptr<Chunk> Ipv4HeaderSerializer::deserialize(MemoryInputStream& stream) co
     if (headerLength > bufsize) {
         ipv4Header->markIncomplete();
     }
-
-    ipv4Header->setCrc(ntohs(iphdr.ip_sum));
-    ipv4Header->setCrcMode(CRC_COMPUTED);
 
     return ipv4Header;
 }
