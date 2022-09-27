@@ -18,33 +18,84 @@
 #ifndef __INET_NEURALNETWORKERRORMODEL_H
 #define __INET_NEURALNETWORKERRORMODEL_H
 
+#include <fstream>
+
 #include "inet/common/Units.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalSnir.h"
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarSnir.h"
 #include "inet/physicallayer/base/packetlevel/ErrorModelBase.h"
-//#include "keras2cpp/model.h"
+
+#include "tensorflow/lite/micro/all_ops_resolver.h"
+#include "tensorflow/lite/micro/micro_error_reporter.h"
+#include "tensorflow/lite/micro/micro_interpreter.h"
+#include "tensorflow/lite/schema/schema_generated.h"
+
 
 namespace inet {
 
 namespace physicallayer {
 
+class INET_API NeuralNet {
+  public:
+  std::vector<uint8_t> modeldata;
+  const tflite::Model *model;
+
+
+
+  static tflite::AllOpsResolver resolver;
+
+  static tflite::MicroErrorReporter micro_error_reporter;
+
+  tflite::MicroInterpreter *interpreter;
+
+  const size_t arena_size = 64 * 1024;
+  uint8_t *arena = nullptr;
+
+
+  NeuralNet(const char *filename) {
+
+      std::ifstream stream(filename, std::ios::in | std::ios::binary);
+
+      modeldata = std::vector<uint8_t>((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+
+      model = tflite::GetModel(modeldata.data());
+
+      arena = new uint8_t[arena_size];
+
+    // Build an interpreter to run the model with.
+    interpreter = new tflite::MicroInterpreter(model, resolver, arena, arena_size, &micro_error_reporter);
+
+    // Allocate memory from the tensor_arena for the model's tensors.
+    TfLiteStatus allocate_status = interpreter->AllocateTensors();
+
+  }
+
+  //float run(const float *input, float *output) { }
+
+  ~NeuralNet() {
+    delete interpreter;
+    delete[] arena;
+  };
+
+};
+
 class INET_API NeuralNetworkErrorModel : public ErrorModelBase
 {
   protected:
     const char *modelNameFormat = nullptr;
-    //std::map<std::string, keras2cpp::Model *> models;
+    std::map<std::string, NeuralNet *> models;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
-    //virtual void fillSnirTensor(const ScalarSnir *snir, int timeDivision, int frequencyDivision, keras2cpp::Tensor& in) const;
-   // virtual void fillSnirTensor(const DimensionalSnir *snir, int timeDivision, int frequencyDivision, keras2cpp::Tensor& in) const;
+    virtual void fillSnirTensor(const ScalarSnir *snir, int timeDivision, int frequencyDivision, TfLiteTensor* in) const;
+    virtual void fillSnirTensor(const DimensionalSnir *snir, int timeDivision, int frequencyDivision, TfLiteTensor* i) const;
 
     virtual std::string computeModelName(const ISnir *snir) const;
 
   public:
-   // virtual ~NeuralNetworkErrorModel() { for (auto it : models) delete it.second; }
+    virtual ~NeuralNetworkErrorModel() { for (auto it : models) delete it.second; }
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

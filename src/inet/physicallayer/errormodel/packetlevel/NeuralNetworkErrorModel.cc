@@ -23,9 +23,18 @@
 #include "inet/physicallayer/errormodel/packetlevel/NeuralNetworkErrorModel.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
 
+#include <fstream>
+
 namespace inet {
 
 namespace physicallayer {
+
+
+
+tflite::AllOpsResolver NeuralNet::resolver;
+
+tflite::MicroErrorReporter NeuralNet::micro_error_reporter;
+
 
 Define_Module(NeuralNetworkErrorModel);
 
@@ -39,14 +48,14 @@ static std::string getModulationName(const IModulation *modulation)
 void NeuralNetworkErrorModel::initialize(int stage)
 {
     ErrorModelBase::initialize(stage);
-    /*
+
     if (stage == INITSTAGE_LOCAL) {
         modelNameFormat = par("modelNameFormat");
         // TODO: make this database global to allow sharing among module instances
         cStringTokenizer tokenizer(par("neuralNetworkModelFilenames"), ",");
         while (tokenizer.hasMoreTokens()) {
             std::string filename = tokenizer.nextToken();
-            auto model = keras2cpp::Model::load(filename);
+
             auto index = filename.rfind('/');
             if (index == std::string::npos)
                 index = 0;
@@ -54,10 +63,11 @@ void NeuralNetworkErrorModel::initialize(int stage)
                 index++;
             auto modelName = filename.substr(index, filename.rfind('.') - index);
             EV_INFO << "Loading neural network model " << modelName << std::endl;
-            models[modelName] = model;
+
+            models[modelName] = new NeuralNet(modelName.c_str());
         }
     }
-    */
+
 }
 
 std::ostream& NeuralNetworkErrorModel::printToStream(std::ostream& stream, int level) const
@@ -68,7 +78,7 @@ std::ostream& NeuralNetworkErrorModel::printToStream(std::ostream& stream, int l
 double NeuralNetworkErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method_Silent();
-    /*
+
     auto name = computeModelName(snir);
     auto it = models.find(name);
     if (it == models.end())
@@ -86,9 +96,11 @@ double NeuralNetworkErrorModel::computePacketErrorRate(const ISnir *snir, IRadio
     int symbolCount = timeDivision * frequencyDivision;
     // TODO: KLUDGE:
     if (symbolCount != 416)
-        return 0;*/
-        /*
-    keras2cpp::Tensor in(symbolCount);
+        return 0;
+
+    TfLiteTensor* in = model->interpreter->input(0);
+
+
     if (auto scalarSnir = dynamic_cast<const ScalarSnir *>(snir))
         fillSnirTensor(scalarSnir, timeDivision, frequencyDivision, in);
     else if (auto dimensionalSnir = dynamic_cast<const DimensionalSnir *>(snir))
@@ -96,28 +108,32 @@ double NeuralNetworkErrorModel::computePacketErrorRate(const ISnir *snir, IRadio
     else
         throw cRuntimeError("Unknown SNIR representation");
     EV_TRACE << "Input tensor:";
-    for (int i = 0; i < (int)in.data_.size(); i++) {
+    float *indata = tflite::GetTensorData<float>(in);
+    for (int i = 0; i < (int)in->dims->data[0]; i++) {
         if (i != 0)
             EV_TRACE << ", ";
-        EV_TRACE << in.data_[i];
+        EV_TRACE << indata[i];
     }
     EV_TRACE << std::endl;
-    keras2cpp::Tensor out = model->operator()(in);
+
+    model->interpreter->Invoke();
+
+    TfLiteTensor* out = model->interpreter->output(0);
+    float *outdata = tflite::GetTensorData<float>(out);
     EV_TRACE << "Output tensor:";
-    for (int i = 0; i < (int)out.data_.size(); i++) {
+    for (int i = 0; i < (int)out->dims->data[0]; i++) {
         if (i != 0)
             EV_TRACE << ", ";
-        EV_TRACE << out.data_[i];
+        EV_TRACE << outdata[i];
     }
     EV_TRACE << std::endl;
-    double packetErrorRate = std::min(1.0f, std::max(0.0f, out.data_[0]));
+    double packetErrorRate = std::min(1.0f, std::max(0.0f, outdata[0]));
     EV_DEBUG << "Computed packet error rate is " << packetErrorRate << std::endl;
     return packetErrorRate;
-    */
-    return 0;
+
 }
 
-/*void NeuralNetworkErrorModel::fillSnirTensor(const ScalarSnir *snir, int timeDivision, int frequencyDivision, keras2cpp::Tensor& in) const
+void NeuralNetworkErrorModel::fillSnirTensor(const ScalarSnir *snir, int timeDivision, int frequencyDivision, TfLiteTensor *in) const
 {
     auto scalarSnir = check_and_cast<const ScalarSnir *>(snir);
     auto reception = snir->getReception();
@@ -125,20 +141,21 @@ double NeuralNetworkErrorModel::computePacketErrorRate(const ISnir *snir, IRadio
     auto endTime = reception->getDataEndTime();
     int symbolCount = timeDivision * frequencyDivision;
     EV_DEBUG << "Computing SNIR mean tensor for " << symbolCount << " symbols" << std::endl;
+    float* indata = tflite::GetTensorData<float>(in);
     for (int i = 0; i < timeDivision; i++) {
         simtime_t symbolStartTime = (startTime * (double)(timeDivision - i) + endTime * (double)i) / timeDivision;
         simtime_t symbolEndTime = (startTime * (double)(timeDivision - i - 1) + endTime * (double)(i + 1)) / timeDivision;
         double snirMean = scalarSnir->computeMean(symbolStartTime, symbolEndTime);
         for (int j = 0; j < frequencyDivision; j++) {
             int symbolIndex = frequencyDivision * i + j;
-            in.data_[symbolIndex] = std::log(snirMean);
+            indata[symbolIndex] = std::log(snirMean);
             EV_TRACE << snirMean << ", " << std::endl;
         }
     }
     EV_TRACE << std::endl;
 }
 
-void NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir *snir, int timeDivision, int frequencyDivision, keras2cpp::Tensor& in) const
+void NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir *snir, int timeDivision, int frequencyDivision, TfLiteTensor *in) const
 {
     auto dimensionalSnir = check_and_cast<const DimensionalSnir *>(snir);
     auto snirFunction = dimensionalSnir->getSnir();
@@ -167,6 +184,11 @@ void NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir *snir, int ti
     math::Point<simsec, Hz> startPoint(simsec(startTime), centerFrequency - bandwidth / 2);
     math::Point<simsec, Hz> endPoint(simsec(endTime), centerFrequency + bandwidth / 2);
     math::Interval<simsec, Hz> interval(startPoint, endPoint, 0b11, 0b00, 0b00);
+
+    float* indata = tflite::GetTensorData<float>(in);
+    for (int i = 0; i < in->dims->data[0]; i++)
+        indata[i] = 0;
+
     snirFunction->partition(interval, [&] (const math::Interval<simsec, Hz>& i1, const math::IFunction<double, math::Domain<simsec, Hz>> *f1) {
         auto intervalStartTime = std::get<0>(i1.getLower()).get();
         auto intervalEndTime = std::get<0>(i1.getUpper()).get();
@@ -183,7 +205,7 @@ void NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir *snir, int ti
                 auto i2 = symbolIntervals[symbolIndex].getIntersected(i1);
                 double v = i2.getVolume() * f1->getMean(i2);
                 ASSERT(!std::isnan(v));
-                in.data_[symbolIndex] += v;
+                indata[symbolIndex] += v;
             }
         }
     });
@@ -192,12 +214,12 @@ void NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir *snir, int ti
     snirFunction->printStructure(EV_TRACE);
     EV_DEBUG << "Computing SNIR mean tensor for " << symbolCount << " symbols" << std::endl;
     for (int i = 0; i < symbolCount; i++) {
-        double snirMean = in.data_[i] / area;
+        double snirMean = indata[i] / area;
         EV_TRACE << snirMean << ", ";
-        in.data_[i] = std::log(snirMean);
+        indata[i] = std::log(snirMean);
     }
     EV_TRACE << std::endl;
-}*/
+}
 
 double NeuralNetworkErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
