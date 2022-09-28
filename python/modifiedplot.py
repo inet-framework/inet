@@ -607,7 +607,7 @@ def plot_bars(df, errors_df=None, meta_df=None, props={}, order=None, zorder=Non
     if title is not None:
         utils.set_plot_title(title)
         
-def plot_lines(df, props, legend_func=utils.make_legend_label, use_default_sort_values=False):
+def plot_lines(df, props, legend_func=utils.make_legend_label, use_default_sort_values=False, debug=False):
     """
     Copy of built-in plot_lines() without sorting (by default).
     
@@ -660,6 +660,9 @@ def plot_lines(df, props, legend_func=utils.make_legend_label, use_default_sort_
 
     if use_default_sort_values:
         df.sort_values(by=legend_cols, inplace=True)
+    if 'order' in df.columns:
+        df.sort_values(by='order', inplace=True)
+        if debug: print("values sorted by 'order' column")
     for t in df.itertuples(index=False):
         style = utils._make_line_args(props, t, df)
 
@@ -667,6 +670,7 @@ def plot_lines(df, props, legend_func=utils.make_legend_label, use_default_sort_
             style["marker"] = '.'
             
         if 'additional_style' in df.columns:
+            if debug: print("t.additional_style", t.additional_style)
             style_dict = eval(t.additional_style)
             # print("style_dict:", style_dict)
             for i in style_dict.items():
