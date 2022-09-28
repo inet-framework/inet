@@ -87,7 +87,7 @@ def buildModel(inputs=inputs, outputs=outputs):
     #model.add(LSTM(4, return_sequences=True))
     #model.add(GlobalAveragePooling1D())
 
-    model.add(InputLayer(input_shape=(len(inputs[0]),), name="snirs"))
+    model.add(InputLayer(input_shape=(len(inputs[0]),), name="snirs", dtype=tf.dtypes.float32))
     model.add(Dense(32, activation="tanh"))
     model.add(Dense(16, activation="tanh"))
     model.add(Dense(1, activation="sigmoid"))

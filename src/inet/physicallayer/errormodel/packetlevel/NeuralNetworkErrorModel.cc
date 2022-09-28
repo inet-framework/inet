@@ -64,7 +64,9 @@ void NeuralNetworkErrorModel::initialize(int stage)
             auto modelName = filename.substr(index, filename.rfind('.') - index);
             EV_INFO << "Loading neural network model " << modelName << std::endl;
 
-            models[modelName] = new NeuralNet(modelName.c_str());
+            std::string modelFile = "results/" + modelName + ".tflite";
+            std::cout << "modelfile: " << modelFile << std::endl;
+            models[modelName] = new NeuralNet(modelFile.c_str());
         }
     }
 
@@ -185,9 +187,9 @@ void NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir *snir, int ti
     math::Point<simsec, Hz> endPoint(simsec(endTime), centerFrequency + bandwidth / 2);
     math::Interval<simsec, Hz> interval(startPoint, endPoint, 0b11, 0b00, 0b00);
 
-    float* indata = tflite::GetTensorData<float>(in);
-    for (int i = 0; i < in->dims->data[0]; i++)
-        indata[i] = 0;
+
+    for (int i = 0; i < 416; i++)
+        in->data.f[i] = 0;
 
     snirFunction->partition(interval, [&] (const math::Interval<simsec, Hz>& i1, const math::IFunction<double, math::Domain<simsec, Hz>> *f1) {
         auto intervalStartTime = std::get<0>(i1.getLower()).get();
@@ -205,7 +207,7 @@ void NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir *snir, int ti
                 auto i2 = symbolIntervals[symbolIndex].getIntersected(i1);
                 double v = i2.getVolume() * f1->getMean(i2);
                 ASSERT(!std::isnan(v));
-                indata[symbolIndex] += v;
+                in->data.f[symbolIndex] += v;
             }
         }
     });
@@ -214,9 +216,9 @@ void NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir *snir, int ti
     snirFunction->printStructure(EV_TRACE);
     EV_DEBUG << "Computing SNIR mean tensor for " << symbolCount << " symbols" << std::endl;
     for (int i = 0; i < symbolCount; i++) {
-        double snirMean = indata[i] / area;
+        double snirMean = in->data.f[i] / area;
         EV_TRACE << snirMean << ", ";
-        indata[i] = std::log(snirMean);
+        in->data.f[i] = std::log(snirMean);
     }
     EV_TRACE << std::endl;
 }

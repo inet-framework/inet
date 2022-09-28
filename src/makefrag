@@ -41,7 +41,7 @@ endif
 
 INCLUDE_PATH += -I../3rdparty/tflite-micro
 INCLUDE_PATH += -I../3rdparty/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include
-OBJS += ../3rdparty/tflite-micro/gen/linux_x86_64_release_with_logs/lib/libtensorflow-microlite.a
+OBJS += ../3rdparty/tflite-micro/gen/linux_x86_64_debug/lib/libtensorflow-microlite.a
 
 
 #

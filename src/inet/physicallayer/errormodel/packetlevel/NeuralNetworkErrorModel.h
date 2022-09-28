@@ -48,7 +48,7 @@ class INET_API NeuralNet {
 
   tflite::MicroInterpreter *interpreter;
 
-  const size_t arena_size = 64 * 1024;
+  const size_t arena_size = 64 * 1024 * 1024;
   uint8_t *arena = nullptr;
 
 
@@ -57,16 +57,25 @@ class INET_API NeuralNet {
       std::ifstream stream(filename, std::ios::in | std::ios::binary);
 
       modeldata = std::vector<uint8_t>((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
-
+      std::cout << "modeldata length: " << modeldata.size() << std::endl;
       model = tflite::GetModel(modeldata.data());
+
+      if (model->version() != TFLITE_SCHEMA_VERSION) {
+        std::cout << "VERSION MISMATCH" << std::endl;
+      TF_LITE_REPORT_ERROR(&micro_error_reporter,
+          "Model provided is schema version %d not equal "
+          "to supported version %d.\n",
+          model->version(), TFLITE_SCHEMA_VERSION);
+    }
+
 
       arena = new uint8_t[arena_size];
 
-    // Build an interpreter to run the model with.
-    interpreter = new tflite::MicroInterpreter(model, resolver, arena, arena_size, &micro_error_reporter);
+      // Build an interpreter to run the model with.
+      interpreter = new tflite::MicroInterpreter(model, resolver, arena, arena_size, &micro_error_reporter);
 
-    // Allocate memory from the tensor_arena for the model's tensors.
-    TfLiteStatus allocate_status = interpreter->AllocateTensors();
+      // Allocate memory from the tensor_arena for the model's tensors.
+      TfLiteStatus allocate_status = interpreter->AllocateTensors();
 
   }
 
