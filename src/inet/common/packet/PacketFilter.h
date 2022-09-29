@@ -47,7 +47,7 @@ class INET_API PacketFilter
 
         virtual cValue readVariable(cExpression::Context *context, const char *name) override;
         virtual cValue readVariable(cExpression::Context *context, const char *name, intval_t index) override;
-        virtual cValue readMember(cExpression::Context *context, const cValue &object, const char *name) override;
+        virtual cValue readMember(cExpression::Context *context, const cValue& object, const char *name) override;
         virtual cValue readMember(cExpression::Context *context, const cValue& object, const char *name, intval_t index) override;
         virtual cValue callMethod(cExpression::Context *context, const cValue& object, const char *name, cValue argv[], int argc) override;
         virtual cValue callFunction(cExpression::Context *context, const char *name, cValue argv[], int argc) override;

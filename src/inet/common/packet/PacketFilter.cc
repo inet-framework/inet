@@ -25,7 +25,6 @@ PacketFilter::~PacketFilter()
     delete packetDissectorCallback;
 }
 
-
 void PacketFilter::setPattern(const char *pattern)
 {
     delete matchExpression;
