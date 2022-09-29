@@ -186,7 +186,7 @@ cValue PacketFilter::DynamicExpressionResolver::readVariable(cExpression::Contex
 
 cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context *context, const cValue &object, const char *name)
 {
-    if (object.getType() == cValue::OBJECT) {
+    if (object.getType() == cValue::POINTER) {
         if (dynamic_cast<Packet *>(object.objectValue())) {
             bool isClassName = isupper(name[0]);
             if (isClassName) {
@@ -222,7 +222,7 @@ cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context 
 
 cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context *context, const cValue &object, const char *name, intval_t index)
 {
-    if (object.getType() == cValue::OBJECT) {
+    if (object.getType() == cValue::POINTER) {
         if (dynamic_cast<Packet *>(object.objectValue())) {
             bool isClassName = isupper(name[0]);
             if (isClassName) {
