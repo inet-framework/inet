@@ -115,12 +115,12 @@ bool PacketFilter::matches(const cPacket *cpacket) const
 
 void PacketFilter::PacketDissectorCallback::visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol)
 {
-    packetFilter->protocolToChunkMap.insert({protocol, const_cast<Chunk *>(chunk.get())});
+    packetFilter->protocolToChunkMap.insert({protocol, chunk});
     auto className = chunk->getClassName();
     const char *colon = strrchr(className, ':');
     if (colon != nullptr)
         className = colon + 1;
-    packetFilter->classNameToChunkMap.insert({className, const_cast<Chunk *>(chunk.get())});
+    packetFilter->classNameToChunkMap.insert({className, chunk});
 }
 
 cValue PacketFilter::DynamicExpressionResolver::readVariable(cExpression::Context *context, const char *name)
@@ -132,7 +132,7 @@ cValue PacketFilter::DynamicExpressionResolver::readVariable(cExpression::Contex
         if (isClassName) {
             auto it = packetFilter->classNameToChunkMap.find(name);
             if (it != packetFilter->classNameToChunkMap.end())
-                return it->second;
+                return const_cast<Chunk *>(it->second.get());
             else
                 return cValue(any_ptr(packetFilter->findPacketTag(name)));
         }
@@ -141,7 +141,7 @@ cValue PacketFilter::DynamicExpressionResolver::readVariable(cExpression::Contex
             if (protocol != nullptr) {
                 auto it = packetFilter->protocolToChunkMap.find(protocol);
                 if (it != packetFilter->protocolToChunkMap.end())
-                    return it->second;
+                    return const_cast<Chunk *>(it->second.get());
                 else
                     return cValue(any_ptr(nullptr));
             }
@@ -163,7 +163,7 @@ cValue PacketFilter::DynamicExpressionResolver::readVariable(cExpression::Contex
             auto it = packetFilter->classNameToChunkMap.lower_bound(name);
             while (index-- > 0)
                 it++;
-            return it->second;
+            return const_cast<Chunk *>(it->second.get());
         }
         else
             return cValue(any_ptr(nullptr));
@@ -175,7 +175,7 @@ cValue PacketFilter::DynamicExpressionResolver::readVariable(cExpression::Contex
                 auto it = packetFilter->protocolToChunkMap.lower_bound(protocol);
                 while (index-- > 0)
                     it++;
-                return it->second;
+                return const_cast<Chunk *>(it->second.get());
             }
             else
                 return cValue(any_ptr(nullptr));
@@ -192,7 +192,7 @@ cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context 
             if (isClassName) {
                 auto it = packetFilter->classNameToChunkMap.find(name);
                 if (it != packetFilter->classNameToChunkMap.end())
-                    return it->second;
+                    return const_cast<Chunk *>(it->second.get());
                 else
                     return cValue(any_ptr(packetFilter->findPacketTag(name)));
             }
@@ -201,7 +201,7 @@ cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context 
                 if (protocol != nullptr) {
                     auto it = packetFilter->protocolToChunkMap.find(protocol);
                     if (it != packetFilter->protocolToChunkMap.end())
-                        return it->second;
+                        return const_cast<Chunk *>(it->second.get());
                     else
                         return cValue(any_ptr(nullptr));
                 }
@@ -230,7 +230,7 @@ cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context 
                     auto it = packetFilter->classNameToChunkMap.lower_bound(name);
                     while (index-- > 0)
                         it++;
-                    return it->second;
+                    return const_cast<Chunk *>(it->second.get());
                 }
                 else
                     return cValue(any_ptr(nullptr));
@@ -242,7 +242,7 @@ cValue PacketFilter::DynamicExpressionResolver::readMember(cExpression::Context 
                         auto it = packetFilter->protocolToChunkMap.lower_bound(protocol);
                         while (index-- > 0)
                             it++;
-                        return it->second;
+                        return const_cast<Chunk *>(it->second.get());
                     }
                     else
                         return cValue(any_ptr(nullptr));

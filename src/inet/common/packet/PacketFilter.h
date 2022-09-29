@@ -58,8 +58,8 @@ class INET_API PacketFilter
     cMatchExpression *matchExpression = nullptr;
     PacketDissectorCallback *packetDissectorCallback = nullptr;
     mutable const cPacket *cpacket = nullptr;
-    mutable std::multimap<const Protocol *, Chunk *> protocolToChunkMap;
-    mutable std::multimap<std::string, Chunk *> classNameToChunkMap;
+    mutable std::multimap<const Protocol *, Ptr<const Chunk>> protocolToChunkMap;
+    mutable std::multimap<std::string, Ptr<const Chunk>> classNameToChunkMap;
 
   public:
     PacketFilter();
