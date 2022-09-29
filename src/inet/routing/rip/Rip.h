@@ -86,7 +86,7 @@ class INET_API Rip : public RoutingProtocolBase, protected cListener
     cModule *host = nullptr; // the host module that owns this module
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<IRoutingTable> rt;
-    IL3AddressType *addressType = nullptr; // address type of the routing table
+    const IL3AddressType *addressType = nullptr; // address type of the routing table
     // state
     InterfaceVector ripInterfaces; // interfaces on which RIP is used
     RouteVector ripRoutingTable; // all advertised routes (imported or learned)

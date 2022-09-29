@@ -13,7 +13,7 @@
 
 namespace inet {
 
-Ipv6AddressType Ipv6AddressType::INSTANCE;
+const Ipv6AddressType Ipv6AddressType::INSTANCE;
 
 const Ipv6Address Ipv6AddressType::ALL_RIP_ROUTERS_MCAST("FF02::9");
 

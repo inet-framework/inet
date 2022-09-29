@@ -400,7 +400,7 @@ void SctpAssociation::sendToIP(Packet *pkt, const Ptr<SctpHeader>& sctpmsg,
         pkt->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::sctp);
     }
 
-    IL3AddressType *addressType = dest.getAddressType();
+    const IL3AddressType *addressType = dest.getAddressType();
     pkt->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
 
     if (sctpMain->getInterfaceId() != -1) {

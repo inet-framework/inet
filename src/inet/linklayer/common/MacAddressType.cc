@@ -9,7 +9,7 @@
 
 namespace inet {
 
-MacAddressType MacAddressType::INSTANCE;
+const MacAddressType MacAddressType::INSTANCE;
 
 } // namespace inet
 

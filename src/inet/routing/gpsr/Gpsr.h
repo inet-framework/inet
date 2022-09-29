@@ -47,7 +47,7 @@ class INET_API Gpsr : public RoutingProtocolBase, public cListener, public Netfi
     // context
     cModule *host = nullptr;
     opp_component_ptr<IMobility> mobility;
-    IL3AddressType *addressType = nullptr;
+    const IL3AddressType *addressType = nullptr;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     const char *outputInterface = nullptr;
     ModuleRefByPar<IRoutingTable> routingTable; // TODO delete when necessary functions are moved to interface table

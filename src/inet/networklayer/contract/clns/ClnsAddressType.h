@@ -23,7 +23,7 @@ namespace inet {
 class INET_API CLNSAddressType : public IL3AddressType
 {
   public:
-    static CLNSAddressType INSTANCE;
+    static const CLNSAddressType INSTANCE;
 
   public:
     CLNSAddressType() {}

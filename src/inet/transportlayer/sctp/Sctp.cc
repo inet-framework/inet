@@ -404,7 +404,7 @@ void Sctp::sendAbortFromMain(SctpHeader *sctpmsg, L3Address fromAddr, L3Address 
     auto addresses = pkt->addTag<L3AddressReq>();
     addresses->setSrcAddress(fromAddr);
     addresses->setDestAddress(toAddr);
-    IL3AddressType *addressType = toAddr.getAddressType();
+    const IL3AddressType *addressType = toAddr.getAddressType();
     pkt->addTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     insertTransportProtocolHeader(pkt, Protocol::sctp, msg);
     send_to_ip(pkt);
@@ -435,7 +435,7 @@ void Sctp::sendShutdownCompleteFromMain(SctpHeader *sctpmsg, L3Address fromAddr,
     auto addresses = pkt->addTag<L3AddressReq>();
     addresses->setSrcAddress(fromAddr);
     addresses->setDestAddress(toAddr);
-    IL3AddressType *addressType = toAddr.getAddressType();
+    const IL3AddressType *addressType = toAddr.getAddressType();
     pkt->addTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     insertTransportProtocolHeader(pkt, Protocol::sctp, msg);
     send_to_ip(pkt);

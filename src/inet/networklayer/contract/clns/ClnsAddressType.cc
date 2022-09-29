@@ -16,7 +16,7 @@
 
 namespace inet {
 
-CLNSAddressType CLNSAddressType::INSTANCE;
+const CLNSAddressType CLNSAddressType::INSTANCE;
 
 } /* namespace inet */
 

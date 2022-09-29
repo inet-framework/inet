@@ -48,7 +48,7 @@ template<typename X, typename Y>
 class INET_API EitherInterpolator : public ConstantInterpolatorBase<X, Y>
 {
   public:
-    static EitherInterpolator<X, Y> singleton;
+    static const EitherInterpolator<X, Y> singleton;
 
   public:
     virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
@@ -59,13 +59,13 @@ class INET_API EitherInterpolator : public ConstantInterpolatorBase<X, Y>
 };
 
 template<typename X, typename Y>
-EitherInterpolator<X, Y> EitherInterpolator<X, Y>::singleton;
+const EitherInterpolator<X, Y> EitherInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
 class INET_API LeftInterpolator : public ConstantInterpolatorBase<X, Y>
 {
   public:
-    static LeftInterpolator<X, Y> singleton;
+    static const LeftInterpolator<X, Y> singleton;
 
   public:
     virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
@@ -75,13 +75,13 @@ class INET_API LeftInterpolator : public ConstantInterpolatorBase<X, Y>
 };
 
 template<typename X, typename Y>
-LeftInterpolator<X, Y> LeftInterpolator<X, Y>::singleton;
+const LeftInterpolator<X, Y> LeftInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
 class INET_API RightInterpolator : public ConstantInterpolatorBase<X, Y>
 {
   public:
-    static RightInterpolator<X, Y> singleton;
+    static const RightInterpolator<X, Y> singleton;
 
   public:
     virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
@@ -91,13 +91,13 @@ class INET_API RightInterpolator : public ConstantInterpolatorBase<X, Y>
 };
 
 template<typename X, typename Y>
-RightInterpolator<X, Y> RightInterpolator<X, Y>::singleton;
+const RightInterpolator<X, Y> RightInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
 class INET_API AverageInterpolator : public ConstantInterpolatorBase<X, Y>
 {
   public:
-    static AverageInterpolator<X, Y> singleton;
+    static const AverageInterpolator<X, Y> singleton;
 
   public:
     virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
@@ -107,13 +107,13 @@ class INET_API AverageInterpolator : public ConstantInterpolatorBase<X, Y>
 };
 
 template<typename X, typename Y>
-AverageInterpolator<X, Y> AverageInterpolator<X, Y>::singleton;
+const AverageInterpolator<X, Y> AverageInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
 class INET_API MinimumInterpolator : public ConstantInterpolatorBase<X, Y>
 {
   public:
-    static MinimumInterpolator<X, Y> singleton;
+    static const MinimumInterpolator<X, Y> singleton;
 
   public:
     virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
@@ -123,13 +123,13 @@ class INET_API MinimumInterpolator : public ConstantInterpolatorBase<X, Y>
 };
 
 template<typename X, typename Y>
-MinimumInterpolator<X, Y> MinimumInterpolator<X, Y>::singleton;
+const MinimumInterpolator<X, Y> MinimumInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
 class INET_API MaximumInterpolator : public ConstantInterpolatorBase<X, Y>
 {
   public:
-    static MaximumInterpolator<X, Y> singleton;
+    static const MaximumInterpolator<X, Y> singleton;
 
   public:
     virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
@@ -139,13 +139,13 @@ class INET_API MaximumInterpolator : public ConstantInterpolatorBase<X, Y>
 };
 
 template<typename X, typename Y>
-MaximumInterpolator<X, Y> MaximumInterpolator<X, Y>::singleton;
+const MaximumInterpolator<X, Y> MaximumInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
 class INET_API CloserInterpolator : public InterpolatorBase<X, Y>
 {
   public:
-    static CloserInterpolator<X, Y> singleton;
+    static const CloserInterpolator<X, Y> singleton;
 
   public:
     virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
@@ -160,13 +160,13 @@ class INET_API CloserInterpolator : public InterpolatorBase<X, Y>
 };
 
 template<typename X, typename Y>
-CloserInterpolator<X, Y> CloserInterpolator<X, Y>::singleton;
+const CloserInterpolator<X, Y> CloserInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
 class INET_API LinearInterpolator : public InterpolatorBase<X, Y>
 {
   public:
-    static LinearInterpolator<X, Y> singleton;
+    static const LinearInterpolator<X, Y> singleton;
 
   public:
     virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
@@ -188,13 +188,13 @@ class INET_API LinearInterpolator : public InterpolatorBase<X, Y>
 };
 
 template<typename X, typename Y>
-LinearInterpolator<X, Y> LinearInterpolator<X, Y>::singleton;
+const LinearInterpolator<X, Y> LinearInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
 class INET_API LineardbInterpolator : public InterpolatorBase<X, Y>
 {
   public:
-    static LineardbInterpolator<X, Y> singleton;
+    static const LineardbInterpolator<X, Y> singleton;
 
   public:
     virtual Y getValue(const X x1, const Y y1, const X x2, const Y y2, const X x) const override {
@@ -220,7 +220,7 @@ class INET_API LineardbInterpolator : public InterpolatorBase<X, Y>
 };
 
 template<typename X, typename Y>
-LineardbInterpolator<X, Y> LineardbInterpolator<X, Y>::singleton;
+const LineardbInterpolator<X, Y> LineardbInterpolator<X, Y>::singleton;
 
 template<typename X, typename Y>
 const IInterpolator<X, Y> *createInterpolator(const char *text) {

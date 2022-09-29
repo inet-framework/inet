@@ -155,7 +155,7 @@ void IpvxTrafGen::sendPacket()
 
     L3Address destAddr = chooseDestAddr();
 
-    IL3AddressType *addressType = destAddr.getAddressType();
+    const IL3AddressType *addressType = destAddr.getAddressType();
     packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
     packet->addTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     packet->addTag<L3AddressReq>()->setDestAddress(destAddr);

@@ -611,7 +611,7 @@ void TcpLwip::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP, L3Add
     EV_TRACE << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP
              << " from " << srcP << " to " << destP << "\n";
 
-    IL3AddressType *addressType = destP.getAddressType();
+    const IL3AddressType *addressType = destP.getAddressType();
 
     packet->addTag<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = packet->addTag<L3AddressReq>();

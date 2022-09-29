@@ -56,7 +56,7 @@ L3Address::AddressType L3Address::getType() const
         return L3Address::IPv6;
 }
 
-IL3AddressType *L3Address::getAddressType() const
+const IL3AddressType *L3Address::getAddressType() const
 {
     switch (getType()) {
         case L3Address::NONE:

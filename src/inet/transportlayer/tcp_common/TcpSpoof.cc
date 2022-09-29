@@ -64,7 +64,7 @@ void TcpSpoof::sendToIP(Packet *pk, L3Address src, L3Address dest)
 //    printSegmentBrief(tcpseg);
 
     ASSERT(pk != nullptr);
-    IL3AddressType *addressType = dest.getAddressType();
+    const IL3AddressType *addressType = dest.getAddressType();
     pk->addTagIfAbsent<TransportProtocolInd>()->setProtocol(&Protocol::tcp);
     pk->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(addressType->getNetworkProtocol());
     auto addresses = pk->addTagIfAbsent<L3AddressReq>();

@@ -9,7 +9,7 @@
 
 namespace inet {
 
-ModuleIdAddressType ModuleIdAddressType::INSTANCE;
+const ModuleIdAddressType ModuleIdAddressType::INSTANCE;
 
 } // namespace inet
 

@@ -17,7 +17,7 @@ namespace inet {
 class INET_API Ipv6AddressType : public IL3AddressType
 {
   public:
-    static Ipv6AddressType INSTANCE;
+    static const Ipv6AddressType INSTANCE;
     static const Ipv6Address ALL_RIP_ROUTERS_MCAST;
 
   public:

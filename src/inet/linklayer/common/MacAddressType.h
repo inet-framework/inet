@@ -16,7 +16,7 @@ namespace inet {
 class INET_API MacAddressType : public IL3AddressType
 {
   public:
-    static MacAddressType INSTANCE;
+    static const MacAddressType INSTANCE;
 
   public:
     MacAddressType() {}

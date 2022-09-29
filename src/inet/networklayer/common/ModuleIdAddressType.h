@@ -16,7 +16,7 @@ namespace inet {
 class INET_API ModuleIdAddressType : public IL3AddressType
 {
   public:
-    static ModuleIdAddressType INSTANCE;
+    static const ModuleIdAddressType INSTANCE;
 
   public:
     ModuleIdAddressType() {}
