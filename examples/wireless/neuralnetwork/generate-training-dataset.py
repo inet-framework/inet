@@ -8,4 +8,4 @@ parser = argparse.ArgumentParser()
 parser.add_argument("configname")
 args = parser.parse_args()
 
-os.system(f"opp_runall inet -f generate-training-dataset.ini -u Cmdenv -c {args.configname}")
+os.system(f"opp_runall -b 1 inet -f generate-training-dataset.ini -u Cmdenv -c {args.configname}")
