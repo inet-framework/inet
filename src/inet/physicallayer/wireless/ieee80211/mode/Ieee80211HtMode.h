@@ -452,9 +452,9 @@ class INET_API Ieee80211HtmcsTable
 class INET_API Ieee80211HtCompliantModes
 {
   protected:
-    static Ieee80211HtCompliantModes singleton;
+    static const Ieee80211HtCompliantModes singleton;
 
-    std::map<std::tuple<Hz, unsigned int, Ieee80211HtModeBase::GuardIntervalType>, const Ieee80211HtMode *> modeCache;
+    mutable std::map<std::tuple<Hz, unsigned int, Ieee80211HtModeBase::GuardIntervalType>, const Ieee80211HtMode *> modeCache;
 
   public:
     Ieee80211HtCompliantModes();
