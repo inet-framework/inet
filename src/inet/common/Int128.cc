@@ -34,19 +34,19 @@ inline long double fmodl(long double a1, long double a2)
 
 #endif // ifdef __ANDROID__
 
-const char *Int128::toString(uint32_t radix) const
+std::string Int128::str(int radix) const
 {
     if (!*this)
         return "0";
     if (radix < 2 || radix > 37)
         return "(invalid radix)";
 
-    static OPP_THREAD_LOCAL char sz[256];
-    memset(sz, 0, 256);
+    char sz[256];
+    memset(sz, 0, sizeof(sz));
 
     Int128 r;
     Int128 ii = (*this < 0) ? -*this : *this;
-    int i = 255;
+    int i = sizeof(sz)-1;
     Int128 aux = radix;
 
     while (!!ii && i) {

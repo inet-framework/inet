@@ -146,11 +146,11 @@ class INET_API Int128
     // Common methods
     int toInt() const { return (int)lo; }
     int64_t toInt64() const { return (int64_t)lo; }
-
-    const char *toString(uint32_t radix = 10) const;
     float toFloat() const;
     double toDouble() const;
     long double toLongDouble() const;
+
+    std::string str(int radix = 10) const;
 
     // Arithmetic methods
     Int128 div(const Int128&, Int128&) const;
