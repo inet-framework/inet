@@ -55,7 +55,7 @@ double DielectricObstacleLoss::computeDielectricLoss(const IMaterial *material, 
     // NOTE: based on http://en.wikipedia.org/wiki/Dielectric_loss
     double lossTangent = material->getDielectricLossTangent(frequency);
     mps propagationSpeed = material->getPropagationSpeed();
-    double factor = std::exp(-atan(lossTangent) * unit(2 * M_PI * frequency * distance / propagationSpeed).get());
+    double factor = std::exp(2 * -atan(lossTangent) * unit(2 * M_PI * frequency * distance / propagationSpeed).get());
     ASSERT(0 <= factor && factor <= 1);
     return factor;
 }
