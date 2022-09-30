@@ -412,9 +412,9 @@
 /examples/neighborcache/,            -f omnetpp.ini -c NeighborListNeighborCache -r 0, 100s,         9940-e9be/tplx;f1e5-9031/~tNl;5244-9ec7/~tND;91e4-3f14/tyf, PASS, wireless AckingWirelessInterface Ipv4
 /examples/neighborcache/,            -f omnetpp.ini -c GridNeighborCache -r 0,         100s,         082a-d5ae/tplx;3790-656a/~tNl;5f58-7469/~tND, PASS, wireless AckingWirelessInterface Ipv4
 
-/examples/objectcache/,              -f omnetpp.ini -c WithoutCache -r 0,           20s,             eec2-572c/tplx;3dbf-d975/~tNl;a119-0cbb/~tND;b4f4-1f56/tyf, PASS, wireless Ipv4
-/examples/objectcache/,              -f omnetpp.ini -c GridObjectCache -r 0,        20s,             eec2-572c/tplx;3dbf-d975/~tNl;a119-0cbb/~tND;be70-0bf1/tyf, PASS, wireless Ipv4
-/examples/objectcache/,              -f omnetpp.ini -c BvhObjectCache -r 0,         20s,             eec2-572c/tplx;3dbf-d975/~tNl;a119-0cbb/~tND;be70-0bf1/tyf, PASS, wireless Ipv4
+/examples/objectcache/,              -f omnetpp.ini -c WithoutCache -r 0,           20s,             9c36-7f4c/tplx;3dbf-d975/~tNl;a119-0cbb/~tND;b4f4-1f56/tyf, PASS, wireless Ipv4
+/examples/objectcache/,              -f omnetpp.ini -c GridObjectCache -r 0,        20s,             9c36-7f4c/tplx;3dbf-d975/~tNl;a119-0cbb/~tND;be70-0bf1/tyf, PASS, wireless Ipv4
+/examples/objectcache/,              -f omnetpp.ini -c BvhObjectCache -r 0,         20s,             9c36-7f4c/tplx;3dbf-d975/~tNl;a119-0cbb/~tND;be70-0bf1/tyf, PASS, wireless Ipv4
 
 /examples/openstreetmap/,            -f omnetpp.ini -c General -r 0,                100s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
 
@@ -575,8 +575,8 @@
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211DimensionalRadio -r 0, 100s,     ac49-fb67/tplx;2432-7a75/~tNl;8500-9973/~tND;b3da-b44e/tyf, PASS, wireless Ipv4
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIeee80211ScalarRadio -r 0, 100s,     4828-9707/tplx;088c-fb4f/~tNl;3557-c4a0/~tND;d641-a9a7/tyf, PASS, wireless Ipv4
 
-/examples/wireless/obstacle/,        -f omnetpp.ini -c Outdoor -r 0,                100s,            55ce-2495/tplx;8017-51ec/~tNl;31b0-648d/~tND, PASS, wireless Ipv4
-/examples/wireless/obstacle/,        -f omnetpp.ini -c Indoor -r 0,                 100s,            4561-66d4/tplx;1d19-7be2/~tNl;2c98-fe3a/~tND;d15d-c30d/tyf, PASS, wireless Ipv4
+/examples/wireless/obstacle/,        -f omnetpp.ini -c Outdoor -r 0,                100s,            d208-e7af/tplx;2176-a413/~tNl;5962-3c23/~tND, PASS, wireless Ipv4
+/examples/wireless/obstacle/,        -f omnetpp.ini -c Indoor -r 0,                 100s,            2266-617f/tplx;10ba-3618/~tNl;e338-1510/~tND;d15d-c30d/tyf, PASS, wireless Ipv4
 /examples/wireless/obstacle/,        -f omnetpp.ini -c Orbit -r 0,                  100s,            9d0b-2d8e/tplx;19c6-aa59/~tNl;24eb-6d2f/~tND;4ac4-1df4/tyf, PASS, wireless Ipv4
 
 /examples/wireless/power/,           -f omnetpp.ini -c General -r 0,                100s,            6fae-d558/tplx;b8ea-b2fc/~tNl;aa2c-8354/~tND, PASS, wireless Ipv4
