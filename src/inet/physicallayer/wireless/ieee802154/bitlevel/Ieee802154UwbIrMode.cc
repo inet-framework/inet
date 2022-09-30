@@ -48,9 +48,6 @@ const short Ieee802154UwbIrMode::C31[8][31] = {
 
 const short Ieee802154UwbIrMode::shortSFD[8] = { 0, 1, 0, -1, 1, 0, 0, -1 };
 
-short Ieee802154UwbIrMode::s_array[maxS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 };
-int Ieee802154UwbIrMode::last_s = 15;
-
 const Ieee802154UwbIrMode Ieee802154UwbIrMode::cfg_mandatory_4M = {
     3,           // channel
     NOMINAL_4_M, // PRF
