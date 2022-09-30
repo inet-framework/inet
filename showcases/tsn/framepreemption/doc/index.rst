@@ -153,7 +153,7 @@ In the ``FramePreemption`` configuration, we replace the :ned:`EthernetMacLayer`
 which support preemption.
 
 .. literalinclude:: ../omnetpp.ini
-   :start-at: Config Preemption
+   :start-at: Config FramePreemption
    :end-at: DropTailQueue
    :language: ini
 
