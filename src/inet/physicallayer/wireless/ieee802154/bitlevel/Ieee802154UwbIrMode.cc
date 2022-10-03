@@ -88,16 +88,24 @@ const Ieee802154UwbIrMode Ieee802154UwbIrMode::cfg_mandatory_16M = {
     MHz(499.2)    // bandwidth
 };
 
-// TODO do this in a static initializer once (even better: simply create a function from symbol index to hopping position)
+std::vector<short> Ieee802154UwbIrMode::make_s() const
+{
+    const int maxS = 20000;
+    std::vector<short> result = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 };
+    result.resize(maxS);
+
+    // compute missing values
+    for (int i = 15; i < maxS; i++)
+        result[i] = (result[i - 14] + result[i - 15]) % 2;
+
+    return result;
+}
+
 int Ieee802154UwbIrMode::s(int n) const
 {
-    ASSERT(n < maxS);
-    for (; last_s <= n; last_s = last_s + 1) {
-        // compute missing values as necessary
-        s_array[last_s] = (s_array[last_s - 14] + s_array[last_s - 15]) % 2;
-    }
-    ASSERT(s_array[n] == 0 || s_array[n] == 1);
-    return s_array[n];
+    if (n >= s_values.size())
+        throw cRuntimeError("Precomputed s[] values exhausted"); //TODO do "n = n % CYCLE_LENGTH" instead
+    return s_values[n];
 }
 
 int Ieee802154UwbIrMode::getHoppingPos(int sym) const

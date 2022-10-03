@@ -83,9 +83,10 @@ class INET_API Ieee802154UwbIrMode
     Hz centerFrequency;
     Hz bandwidth;
 
-    static const int maxS = 20000;
-    mutable short s_array[maxS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0 };
-    mutable int last_s = 15;
+    const std::vector<short> s_values = make_s();
+
+  private:
+    std::vector<short> make_s() const;
 
   public:
     int s(int n) const;

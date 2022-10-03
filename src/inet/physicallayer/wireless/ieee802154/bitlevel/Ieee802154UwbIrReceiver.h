@@ -21,17 +21,13 @@ namespace physicallayer {
 class INET_API Ieee802154UwbIrReceiver : public ReceiverBase
 {
   protected:
-    Ieee802154UwbIrMode cfg;
+    const Ieee802154UwbIrMode& cfg = Ieee802154UwbIrMode::cfg_mandatory_16M;
 
   protected:
-    virtual void initialize(int stage) override;
-
     virtual std::vector<bool> *decode(const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
     virtual std::pair<double, double> integrateWindow(simtime_t_cref pNow, simtime_t_cref burst, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
 
   public:
-    Ieee802154UwbIrReceiver();
-
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
     virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const override;
     virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
