@@ -95,7 +95,7 @@ const Ieee802154UwbIrMode Ieee802154UwbIrMode::cfg_mandatory_16M = {
 int Ieee802154UwbIrMode::s(int n) const
 {
     ASSERT(n < maxS);
-    for (; last_s < n; last_s = last_s + 1) {
+    for (; last_s <= n; last_s = last_s + 1) {
         // compute missing values as necessary
         s_array[last_s] = (s_array[last_s - 14] + s_array[last_s - 15]) % 2;
     }
