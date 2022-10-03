@@ -27,17 +27,6 @@ namespace physicallayer {
 
 Define_Module(Ieee802154UwbIrTransmitter);
 
-Ieee802154UwbIrTransmitter::Ieee802154UwbIrTransmitter()
-{
-}
-
-void Ieee802154UwbIrTransmitter::initialize(int stage)
-{
-    if (stage == INITSTAGE_LOCAL) {
-        cfg = Ieee802154UwbIrMode::cfg_mandatory_16M;
-    }
-}
-
 std::ostream& Ieee802154UwbIrTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "Ieee802154UwbIrTransmitter";

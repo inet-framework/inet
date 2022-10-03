@@ -19,18 +19,6 @@ namespace physicallayer {
 
 Define_Module(Ieee802154UwbIrReceiver);
 
-Ieee802154UwbIrReceiver::Ieee802154UwbIrReceiver() :
-    ReceiverBase()
-{
-}
-
-void Ieee802154UwbIrReceiver::initialize(int stage)
-{
-    if (stage == INITSTAGE_LOCAL) {
-        cfg = Ieee802154UwbIrMode::cfg_mandatory_16M;
-    }
-}
-
 std::ostream& Ieee802154UwbIrReceiver::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     return stream << "Ieee802154UwbIrReceiver";

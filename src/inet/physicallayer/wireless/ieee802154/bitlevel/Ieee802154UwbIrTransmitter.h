@@ -40,11 +40,9 @@ using namespace inet::math;
 class INET_API Ieee802154UwbIrTransmitter : public TransmitterBase
 {
   protected:
-    Ieee802154UwbIrMode cfg;
+    const Ieee802154UwbIrMode& cfg = Ieee802154UwbIrMode::cfg_mandatory_16M;
 
   protected:
-    virtual void initialize(int stage) override;
-
     simtime_t getFrameDuration(int psduLength) const;
     simtime_t getMaxFrameDuration() const;
     simtime_t getPhyMaxFrameDuration() const;
@@ -59,10 +57,7 @@ class INET_API Ieee802154UwbIrTransmitter : public TransmitterBase
     virtual Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> generateIEEE802154AUWBSignal(const simtime_t startTime, std::vector<bool> *bits) const;
 
   public:
-    Ieee802154UwbIrTransmitter();
-
     virtual const ITransmission *createTransmission(const IRadio *transmitter, const Packet *packet, const simtime_t startTime) const override;
-
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
 
