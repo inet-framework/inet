@@ -12,19 +12,14 @@
 
 package inet.routing.eigrp;
 
+import inet.routing.contract.IEigrp;
 import inet.routing.eigrp.pdms.EigrpIpv4Pdm;
 import inet.routing.eigrp.pdms.EigrpIpv6Pdm;
-import inet.routing.eigrp.EigrpSplitter;
-import inet.routing.contract.IEigrp;
-
-
 import inet.routing.eigrp.tables.EigrpInterfaceTable;
 import inet.routing.eigrp.tables.EigrpIpv4NeighborTable;
 import inet.routing.eigrp.tables.EigrpIpv4TopologyTable;
-
 import inet.routing.eigrp.tables.EigrpIpv6NeighborTable;
 import inet.routing.eigrp.tables.EigrpIpv6TopologyTable;
-
 
 
 module EigrpProcessDS like IEigrp

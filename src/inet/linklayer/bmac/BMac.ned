@@ -8,9 +8,9 @@
 
 package inet.linklayer.bmac;
 
-import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
+
 
 //
 // Implementation of B-MAC (called also Berkeley MAC, Low Power Listening or

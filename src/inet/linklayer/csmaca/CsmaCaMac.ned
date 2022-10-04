@@ -7,9 +7,9 @@
 
 package inet.linklayer.csmaca;
 
-import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
+
 
 //
 // Implements an imaginary CSMA/CA-based MAC protocol with optional

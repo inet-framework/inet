@@ -6,8 +6,6 @@
 
 package inet.mobility.static;
 
-import inet.mobility.static.StationaryMobility;
-
 //
 // Mobility model which places all hosts at constant distances
 // in a line with an orientation

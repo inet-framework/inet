@@ -12,8 +12,6 @@ import inet.common.MessageDispatcher;
 import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.ethernet.contract.IEthernetLayer;
-import inet.linklayer.ieee8021q.IIeee8021qLayer;
-import inet.linklayer.ieee8021r.IIeee8021rLayer;
 import inet.linklayer.ieee8022.IIeee8022Llc;
 import inet.networklayer.common.InterfaceTable;
 

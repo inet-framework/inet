@@ -11,19 +11,17 @@ import inet.linklayer.ieee80211.mac.blockack.OriginatorBlockAckAgreementPolicy;
 import inet.linklayer.ieee80211.mac.blockack.RecipientBlockAckAgreementPolicy;
 import inet.linklayer.ieee80211.mac.channelaccess.Edca;
 import inet.linklayer.ieee80211.mac.channelaccess.Hcca;
-import inet.linklayer.ieee80211.mac.contract.IRateControl;
 import inet.linklayer.ieee80211.mac.contract.IHcf;
-import inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure;
+import inet.linklayer.ieee80211.mac.contract.IRateControl;
 import inet.linklayer.ieee80211.mac.originator.OriginatorQosAckPolicy;
 import inet.linklayer.ieee80211.mac.originator.OriginatorQosMacDataService;
-import inet.linklayer.ieee80211.mac.originator.QosRecoveryProcedure;
 import inet.linklayer.ieee80211.mac.originator.QosRtsPolicy;
-import inet.linklayer.ieee80211.mac.originator.TxopProcedure;
 import inet.linklayer.ieee80211.mac.protectionmechanism.SingleProtectionMechanism;
 import inet.linklayer.ieee80211.mac.rateselection.QosRateSelection;
 import inet.linklayer.ieee80211.mac.recipient.QosCtsPolicy;
 import inet.linklayer.ieee80211.mac.recipient.RecipientQosAckPolicy;
 import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
+
 
 //
 // HCF -- Hybrid Coordination Function

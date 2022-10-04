@@ -14,12 +14,12 @@
 
 package inet.examples.eigrp.testing_scenario6;
 
-import inet.node.eigrp.EigrpRouter;
-import inet.node.inet.StandardHost;
-import inet.node.ethernet.Eth100M;
-import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.eigrp.EigrpRouter;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+
 
 network EigrpTestNetwork
 {

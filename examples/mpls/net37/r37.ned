@@ -24,117 +24,43 @@ network R37
             parameters:
                 @display("p=100,100;is=s");
         }
-        LSR0: RsvpMplsRouter {
-            parameters:
-        }
-        LSR1: RsvpMplsRouter {
-            parameters:
-        }
-        LSR2: RsvpMplsRouter {
-            parameters:
-        }
-        LSR3: RsvpMplsRouter {
-            parameters:
-        }
-        LSR4: RsvpMplsRouter {
-            parameters:
-        }
-        LSR5: RsvpMplsRouter {
-            parameters:
-        }
-        LSR6: RsvpMplsRouter {
-            parameters:
-        }
-        LSR7: RsvpMplsRouter {
-            parameters:
-        }
-        LSR8: RsvpMplsRouter {
-            parameters:
-        }
-        LSR9: RsvpMplsRouter {
-            parameters:
-        }
-        LSR10: RsvpMplsRouter {
-            parameters:
-        }
-        LSR11: RsvpMplsRouter {
-            parameters:
-        }
-        LSR12: RsvpMplsRouter {
-            parameters:
-        }
-        LSR13: RsvpMplsRouter {
-            parameters:
-        }
-        LSR14: RsvpMplsRouter {
-            parameters:
-        }
-        LSR15: RsvpMplsRouter {
-            parameters:
-        }
-        LSR16: RsvpMplsRouter {
-            parameters:
-        }
-        LSR17: RsvpMplsRouter {
-            parameters:
-        }
-        LSR18: RsvpMplsRouter {
-            parameters:
-        }
-        LSR19: RsvpMplsRouter {
-            parameters:
-        }
-        LSR20: RsvpMplsRouter {
-            parameters:
-        }
-        LSR21: RsvpMplsRouter {
-            parameters:
-        }
-        LSR22: RsvpMplsRouter {
-            parameters:
-        }
-        LSR23: RsvpMplsRouter {
-            parameters:
-        }
-        LSR24: RsvpMplsRouter {
-            parameters:
-        }
-        LSR25: RsvpMplsRouter {
-            parameters:
-        }
-        LSR26: RsvpMplsRouter {
-            parameters:
-        }
-        LSR27: RsvpMplsRouter {
-            parameters:
-        }
-        LSR28: RsvpMplsRouter {
-            parameters:
-        }
-        LSR29: RsvpMplsRouter {
-            parameters:
-        }
-        LSR30: RsvpMplsRouter {
-            parameters:
-        }
-        LSR31: RsvpMplsRouter {
-            parameters:
-        }
-        LSR32: RsvpMplsRouter {
-            parameters:
-        }
-        LSR33: RsvpMplsRouter {
-            parameters:
-        }
-        LSR34: RsvpMplsRouter {
-            parameters:
-        }
-        LSR35: RsvpMplsRouter {
-            parameters:
-        }
-        LSR36: RsvpMplsRouter {
-            parameters:
-        }
+        LSR0: RsvpMplsRouter;
+        LSR1: RsvpMplsRouter;
+        LSR2: RsvpMplsRouter;
+        LSR3: RsvpMplsRouter;
+        LSR4: RsvpMplsRouter;
+        LSR5: RsvpMplsRouter;
+        LSR6: RsvpMplsRouter;
+        LSR7: RsvpMplsRouter;
+        LSR8: RsvpMplsRouter;
+        LSR9: RsvpMplsRouter;
+        LSR10: RsvpMplsRouter;
+        LSR11: RsvpMplsRouter;
+        LSR12: RsvpMplsRouter;
+        LSR13: RsvpMplsRouter;
+        LSR14: RsvpMplsRouter;
+        LSR15: RsvpMplsRouter;
+        LSR16: RsvpMplsRouter;
+        LSR17: RsvpMplsRouter;
+        LSR18: RsvpMplsRouter;
+        LSR19: RsvpMplsRouter;
+        LSR20: RsvpMplsRouter;
+        LSR21: RsvpMplsRouter;
+        LSR22: RsvpMplsRouter;
+        LSR23: RsvpMplsRouter;
+        LSR24: RsvpMplsRouter;
+        LSR25: RsvpMplsRouter;
+        LSR26: RsvpMplsRouter;
+        LSR27: RsvpMplsRouter;
+        LSR28: RsvpMplsRouter;
+        LSR29: RsvpMplsRouter;
+        LSR30: RsvpMplsRouter;
+        LSR31: RsvpMplsRouter;
+        LSR32: RsvpMplsRouter;
+        LSR33: RsvpMplsRouter;
+        LSR34: RsvpMplsRouter;
+        LSR35: RsvpMplsRouter;
+        LSR36: RsvpMplsRouter;
         host1: StandardHost {
             parameters:
                 @display("i=device/laptop");

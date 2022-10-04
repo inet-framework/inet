@@ -8,8 +8,8 @@
 
 package inet.linklayer.ethernet.basic;
 
-import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.contract.IEtherMac;
+
 
 //
 // Ethernet MAC layer. MAC performs transmission and reception of frames.

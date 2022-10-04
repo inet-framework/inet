@@ -7,8 +7,6 @@
 
 package inet.applications.tcpapp;
 
-import inet.applications.contract.IApp;
-
 //
 // Accepts any number of incoming TCP connections, and sends back the
 // messages that arrive on them, The lengths of the messages are

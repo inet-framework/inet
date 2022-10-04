@@ -1,13 +1,12 @@
 package inet.examples.ospfv3.multiple_areas_FINAL;
 
-import inet.node.ospfv3.Ospfv3Router;
-import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.common.misc.ThruputMeteringChannel;
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
+import inet.node.ospfv3.Ospfv3Router;
 
-import inet.common.scenario.ScenarioManager;
 
 network multiple_areas2
 {
@@ -21,7 +20,7 @@ network multiple_areas2
         }
     submodules:
         configurator: Ipv4NetworkConfigurator {
-                config = xml("<config>"+
+            config = xml("<config>"+
 //                            "<interface among='Router4 Router5' address='192.168.1.x' netmask='255.255.255.0' />"+
 //                            "<interface among='Router1 Router6' address='192.168.10.x' netmask='255.255.255.0' />"+
 //                            "<interface among='Router2 Router7' address='192.168.20.x' netmask='255.255.255.0' />"+
@@ -37,7 +36,7 @@ network multiple_areas2
             addStaticRoutes = false;
             addDefaultRoutes = false;
             addSubnetRoutes = false;
-                @display("p=23,24");
+            @display("p=23,24");
         }
         Router1: Ospfv3Router {
             parameters:

@@ -7,8 +7,6 @@
 
 package inet.linklayer.base;
 
-import inet.linklayer.contract.IMacRelayUnit;
-
 simple MacRelayUnitBase
 {
     parameters:

@@ -6,7 +6,6 @@ import ned.DatarateChannel;
 network HostsWithSwitch
 {
     @display("bgl=2");
-    types:
     submodules:
         hostA: EthernetHost2 {
             parameters:

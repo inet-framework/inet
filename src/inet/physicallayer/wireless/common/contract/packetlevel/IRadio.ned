@@ -7,8 +7,6 @@
 
 package inet.physicallayer.wireless.common.contract.packetlevel;
 
-import inet.physicallayer.wireless.common.contract.packetlevel.IPhysicalLayer;
-
 //
 // Module interface for radio modules. Radio modules deal with the transmission of
 // frames over a wireless medium (the radio medium).

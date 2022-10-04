@@ -7,7 +7,6 @@ import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
-import inet.node.inet.WirelessHost;
 import inet.visualizer.common.IntegratedVisualizer;
 
 

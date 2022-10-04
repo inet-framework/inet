@@ -14,8 +14,7 @@ import inet.linklayer.ieee80211.mac.contract.IDs;
 import inet.linklayer.ieee80211.mac.contract.IHcf;
 import inet.linklayer.ieee80211.mac.contract.IRx;
 import inet.linklayer.ieee80211.mac.contract.ITx;
-import inet.linklayer.ieee80211.mac.coordinationfunction.Dcf;
-import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+
 
 //
 // Implementation of the 802.11b MAC protocol. This module is intended
@@ -48,9 +47,9 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
 {
     parameters:
         string mibModule;
-        string modeSet @enum("a", "b", "g(erp)", "g(mixed)", "n(mixed-2.4Ghz)", "p", "ac") = default("g(mixed)");
-        string fcsMode @enum("declared", "computed") = default("declared");
-        string initialRadioMode @enum("off", "sleep", "receiver", "transmitter", "transceiver") = default("receiver");
+        string modeSet @enum("a","b","g(erp)","g(mixed)","n(mixed-2.4Ghz)","p","ac") = default("g(mixed)");
+        string fcsMode @enum("declared","computed") = default("declared");
+        string initialRadioMode @enum("off","sleep","receiver","transmitter","transceiver") = default("receiver");
 
         int mtu @unit(B) = default(2304B);
         bool qosStation = default(false);
@@ -67,7 +66,7 @@ module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
         @statistic[packetSentToLower](title="packets sent to lower layer"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetReceivedFromUpper](title="packets received from upper layer"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetReceivedFromLower](title="packets received from lower layer"; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
-        @statistic[linkBroken](title="link breaks"; record=count, vector?; interpolationmode=none);
+        @statistic[linkBroken](title="link breaks"; record=count,vector?; interpolationmode=none);
         @statistic[packetDrop](title="packet drops"; source=packetDropped; record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropIncorrectlyReceived](title="packet drops: incorrectly received"; source=packetDropReasonIsIncorrectlyReceived(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNotAddressedToUs](title="packet drops: not addressed to us"; source=packetDropReasonIsNotAddressedToUs(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);

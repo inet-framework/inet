@@ -16,12 +16,11 @@ import inet.linklayer.ieee80211.mac.originator.OriginatorAckPolicy;
 import inet.linklayer.ieee80211.mac.originator.OriginatorMacDataService;
 import inet.linklayer.ieee80211.mac.originator.RtsPolicy;
 import inet.linklayer.ieee80211.mac.protectionmechanism.OriginatorProtectionMechanism;
-import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
-import inet.linklayer.ieee80211.mac.queue.PendingQueue;
 import inet.linklayer.ieee80211.mac.rateselection.RateSelection;
 import inet.linklayer.ieee80211.mac.recipient.CtsPolicy;
 import inet.linklayer.ieee80211.mac.recipient.RecipientAckPolicy;
 import inet.linklayer.ieee80211.mac.recipient.RecipientMacDataService;
+
 
 //
 // IEEE 802.11 Distributed Coordination Function

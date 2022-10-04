@@ -7,9 +7,9 @@
 
 package inet.linklayer.xmac;
 
-import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
+
 
 //
 // Implementation of X-MAC.

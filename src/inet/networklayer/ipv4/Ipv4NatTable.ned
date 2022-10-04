@@ -7,8 +7,6 @@
 
 package inet.networklayer.ipv4;
 
-import inet.networklayer.contract.IRoutingTable;
-
 //
 // Stores the network address translation table.
 //

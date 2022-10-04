@@ -1,12 +1,9 @@
 package inet.examples.ospfv3.v3_2_routers;
 
-import inet.node.ospfv3.Ospfv3Router;
-import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
 import inet.common.misc.ThruputMeteringChannel;
-import inet.node.ethernet.EthernetSwitch;
-
 import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ospfv3.Ospfv3Router;
 
 
 network v3_2_routers

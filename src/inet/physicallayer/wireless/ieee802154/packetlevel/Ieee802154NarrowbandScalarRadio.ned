@@ -7,8 +7,6 @@
 
 package inet.physicallayer.wireless.ieee802154.packetlevel;
 
-import inet.physicallayer.wireless.common.base.packetlevel.FlatRadioBase;
-
 module Ieee802154NarrowbandScalarRadio extends Ieee802154NarrowbandRadio
 {
     parameters:

@@ -20,7 +20,6 @@
 
 package inet.linklayer.ieee802154;
 
-import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.base.MacProtocolBase;
 import inet.linklayer.contract.IMacProtocol;
 

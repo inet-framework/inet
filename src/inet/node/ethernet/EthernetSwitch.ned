@@ -25,6 +25,7 @@ import inet.networklayer.common.InterfaceTable;
 import inet.node.contract.IEthernetNetworkNode;
 import inet.protocolelement.contract.IProtocolLayer;
 
+
 //
 // Model of an Ethernet switch.
 //

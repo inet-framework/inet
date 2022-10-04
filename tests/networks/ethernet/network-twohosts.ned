@@ -4,7 +4,6 @@ import ned.DatarateChannel;
 
 network TwoHosts
 {
-    types:
     submodules:
         hostA: EthernetHost2 {
             parameters:

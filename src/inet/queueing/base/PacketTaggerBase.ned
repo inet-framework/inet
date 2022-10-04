@@ -7,9 +7,6 @@
 
 package inet.queueing.base;
 
-import inet.queueing.contract.IPacketSink;
-import inet.queueing.contract.IPacketSource;
-
 //
 // This is a base module for various packet tagger modules.
 //
