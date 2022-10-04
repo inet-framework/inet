@@ -13,7 +13,7 @@
 
 namespace inet {
 
-class INET_API Ipv4Modular : public cModule, public INetfilter, public INetworkProtocol
+class INET_API Ipv4Modular : public cModule, public INetfilter, public IIpv4HookManager, public INetworkProtocol
 {
   protected:
     class IHookHandlers {
@@ -30,13 +30,15 @@ class INET_API Ipv4Modular : public cModule, public INetfilter, public INetworkP
     IHookInfo hookInfo;
 
   protected:
+    void chkHookManager();
+    // cModule:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
-    // INetfilter
-
-    virtual void registerNetfilterHandler(Ipv4Hook::NetfilterType type, int priority, Ipv4Hook::NetfilterHandler *handler);
-    virtual void unregisterNetfilterHandler(Ipv4Hook::NetfilterType type, int priority, Ipv4Hook::NetfilterHandler *handler);
+    // IIpv4HookManager:
+    virtual void registerNetfilterHandler(Ipv4Hook::NetfilterType type, int priority, Ipv4Hook::NetfilterHandler *handler) override;
+    virtual void unregisterNetfilterHandler(Ipv4Hook::NetfilterType type, int priority, Ipv4Hook::NetfilterHandler *handler) override;
+    virtual void reinjectQueuedDatagram(Packet *datagram, Ipv4Hook::NetfilterResult action) override;
 
     // INetfilter compatibility:
     virtual void registerHook(int priority, IHook *hook) override;

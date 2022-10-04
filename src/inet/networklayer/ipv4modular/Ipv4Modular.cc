@@ -81,44 +81,49 @@ void Ipv4Modular::unregisterHook(IHook *hook)
     hookInfo.erase(it);
 }
 
+void Ipv4Modular::chkHookManager()
+{
+    if (!hookManager)
+        throw cRuntimeError("No hook manager, hooks not supported");
+}
+
 void Ipv4Modular::dropQueuedDatagram(const Packet *datagram)
 {
     Enter_Method(__FUNCTION__);
 
-    if (hookManager)
-        hookManager->reinjectQueuedDatagram(const_cast<Packet *>(datagram), Ipv4Hook::NetfilterResult::DROP);
-    else
-        throw cRuntimeError("No hook manager, hooks not supported");
+    chkHookManager();
+    hookManager->reinjectQueuedDatagram(const_cast<Packet *>(datagram), Ipv4Hook::NetfilterResult::DROP);
 }
 
 void Ipv4Modular::reinjectQueuedDatagram(const Packet *datagram)
 {
     Enter_Method(__FUNCTION__);
 
-    if (hookManager)
-        hookManager->reinjectQueuedDatagram(const_cast<Packet *>(datagram), Ipv4Hook::NetfilterResult::ACCEPT);
-    else
-        throw cRuntimeError("No hook manager, hooks not supported");
+    reinjectQueuedDatagram(const_cast<Packet *>(datagram), Ipv4Hook::NetfilterResult::ACCEPT);
+}
+
+void Ipv4Modular::reinjectQueuedDatagram(Packet *datagram, Ipv4Hook::NetfilterResult action)
+{
+    Enter_Method(__FUNCTION__);
+
+    chkHookManager();
+    hookManager->reinjectQueuedDatagram(datagram, action);
 }
 
 void Ipv4Modular::registerNetfilterHandler(Ipv4Hook::NetfilterType type, int priority, Ipv4Hook::NetfilterHandler *handler)
 {
     Enter_Method(__FUNCTION__);
 
-    if (hookManager)
-        hookManager->registerNetfilterHandler(type, priority, handler);
-    else
-        throw cRuntimeError("No hook manager, hooks not supported");
+    chkHookManager();
+    hookManager->registerNetfilterHandler(type, priority, handler);
 }
 
 void Ipv4Modular::unregisterNetfilterHandler(Ipv4Hook::NetfilterType type, int priority, Ipv4Hook::NetfilterHandler *handler)
 {
     Enter_Method(__FUNCTION__);
 
-    if (hookManager)
-        hookManager->unregisterNetfilterHandler(type, priority, handler);
-    else
-        throw cRuntimeError("No hook manager, hooks not supported");
+    chkHookManager();
+    hookManager->unregisterNetfilterHandler(type, priority, handler);
 }
 
 } // namespace inet
