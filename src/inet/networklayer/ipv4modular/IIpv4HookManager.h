@@ -17,7 +17,7 @@ class INET_API IIpv4HookManager
   public:
     virtual void registerNetfilterHandler(Ipv4Hook::NetfilterType type, int priority, Ipv4Hook::NetfilterHandler *handler) = 0;
     virtual void unregisterNetfilterHandler(Ipv4Hook::NetfilterType type, int priority, Ipv4Hook::NetfilterHandler *handler) = 0;
-    virtual void reinjectQueuedDatagram(Packet *datagram, Ipv4Hook::NetfilterResult action) = 0;
+    virtual void reinjectDatagram(Packet *datagram, Ipv4Hook::NetfilterResult action) = 0;
 };
 
 } // namespace inet

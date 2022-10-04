@@ -102,12 +102,12 @@ void Ipv4Modular::reinjectQueuedDatagram(const Packet *datagram)
     reinjectQueuedDatagram(const_cast<Packet *>(datagram), Ipv4Hook::NetfilterResult::ACCEPT);
 }
 
-void Ipv4Modular::reinjectQueuedDatagram(Packet *datagram, Ipv4Hook::NetfilterResult action)
+void Ipv4Modular::reinjectDatagram(Packet *datagram, Ipv4Hook::NetfilterResult action)
 {
     Enter_Method(__FUNCTION__);
 
     chkHookManager();
-    hookManager->reinjectQueuedDatagram(datagram, action);
+    hookManager->reinjectDatagram(datagram, action);
 }
 
 void Ipv4Modular::registerNetfilterHandler(Ipv4Hook::NetfilterType type, int priority, Ipv4Hook::NetfilterHandler *handler)

@@ -23,7 +23,7 @@ class INET_API Ipv4HookManager : public cSimpleModule, public IIpv4HookManager
 
     virtual void registerNetfilterHandler(Ipv4Hook::NetfilterType type, int priority, Ipv4Hook::NetfilterHandler *handler) override;
     virtual void unregisterNetfilterHandler(Ipv4Hook::NetfilterType type, int priority, Ipv4Hook::NetfilterHandler *handler) override;
-    virtual void reinjectQueuedDatagram(Packet *datagram, Ipv4Hook::NetfilterResult action) override;
+    virtual void reinjectDatagram(Packet *datagram, Ipv4Hook::NetfilterResult action) override;
 };
 
 } // namespace inet

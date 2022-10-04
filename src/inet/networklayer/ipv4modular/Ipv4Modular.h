@@ -31,6 +31,8 @@ class INET_API Ipv4Modular : public cModule, public INetfilter, public IIpv4Hook
 
   protected:
     void chkHookManager();
+
+  public:
     // cModule:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
@@ -38,7 +40,7 @@ class INET_API Ipv4Modular : public cModule, public INetfilter, public IIpv4Hook
     // IIpv4HookManager:
     virtual void registerNetfilterHandler(Ipv4Hook::NetfilterType type, int priority, Ipv4Hook::NetfilterHandler *handler) override;
     virtual void unregisterNetfilterHandler(Ipv4Hook::NetfilterType type, int priority, Ipv4Hook::NetfilterHandler *handler) override;
-    virtual void reinjectQueuedDatagram(Packet *datagram, Ipv4Hook::NetfilterResult action) override;
+    virtual void reinjectDatagram(Packet *datagram, Ipv4Hook::NetfilterResult action) override;
 
     // INetfilter compatibility:
     virtual void registerHook(int priority, IHook *hook) override;

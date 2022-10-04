@@ -39,7 +39,7 @@ void Ipv4HookManager::unregisterNetfilterHandler(Ipv4Hook::NetfilterType type, i
     hook[type]->unregisterNetfilterHandler(priority, handler);
 }
 
-void Ipv4HookManager::reinjectQueuedDatagram(Packet *datagram, Ipv4Hook::NetfilterResult action)
+void Ipv4HookManager::reinjectDatagram(Packet *datagram, Ipv4Hook::NetfilterResult action)
 {
     Enter_Method(__FUNCTION__);
 
