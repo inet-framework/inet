@@ -17,7 +17,7 @@ void Ipv4NetfilterHook::registerNetfilterHandler(int priority, Ipv4Hook::Netfilt
     auto it = handlers.begin();
 
     for ( ; it != handlers.end(); ++it) {
-        if (priority > it->priority) {
+        if (priority < it->priority) {
             break;
         }
         else if (it->priority == priority && it->handler == handler)
@@ -30,7 +30,7 @@ void Ipv4NetfilterHook::registerNetfilterHandler(int priority, Ipv4Hook::Netfilt
 void Ipv4NetfilterHook::unregisterNetfilterHandler(int priority, Ipv4Hook::NetfilterHandler *handler)
 {
     for (auto it = handlers.begin(); it != handlers.end(); ++it) {
-        if (priority > it->priority)
+        if (priority < it->priority)
             break;
         else if (it->priority == priority && it->handler == handler) {
             handlers.erase(it);
@@ -56,7 +56,7 @@ Ipv4NetfilterHook::Items::iterator Ipv4NetfilterHook::findHandler(int priority, 
     for ( ; it != handlers.end(); ++it) {
         if (it->priority == priority && it->handler == handler)
             return it;
-        if (priority > it->priority)
+        if (priority < it->priority)
             break;
     }
     return handlers.end();
