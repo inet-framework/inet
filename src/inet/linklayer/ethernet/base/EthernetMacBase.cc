@@ -347,9 +347,24 @@ void EthernetMacBase::receiveSignal(cComponent *source, simsignal_t signalID, cO
 void EthernetMacBase::processConnectDisconnect()
 {
     if (!connected) {
-        cancelEvent(endTxTimer);
         cancelEvent(endIfgTimer);
         cancelEvent(endPauseTimer);
+
+        if (curTxSignal) {
+            if (getSimulation()->getSimulationStage() == CTX_EVENT && physOutGate->getPathEndGate()->isConnected()) {
+                ASSERT(endTxTimer->isScheduled());
+                curTxSignal->setDuration(endTxTimer->getArrivalTime() - curTxSignal->getCreationTime());
+                simtime_t duration = simTime() - curTxSignal->getCreationTime(); // TODO save and use start tx time
+                cutEthernetSignalEnd(curTxSignal, duration);
+                emit(transmissionEndedSignal, curTxSignal);
+                send(curTxSignal, SendOptions().finishTx(curTxSignal->getId()), physOutGate);
+            }
+            else
+                delete curTxSignal;
+            curTxSignal = nullptr;
+            cancelEvent(endTxTimer);
+        }
+        ASSERT(!endTxTimer->isScheduled());
 
         if (currentTxFrame) {
             EV_DETAIL << "Interface is not connected, dropping packet " << currentTxFrame << endl;
