@@ -136,7 +136,7 @@ void Ppp::refreshOutGateConnection(bool connected)
             b newLength = b(floor(curTxPacket->getBitLength() * sentPart));
             curTxPacket->removeAtBack(curTxPacket->getDataLength() - newLength);
             curTxPacket->setBitError(true);
-            send(curTxPacket, SendOptions().finishTx(curTxPacket->getId()).duration(sentDuration), physOutGate);
+            send(curTxPacket, SendOptions().finishTx(curTxPacket->getId()), physOutGate);
             curTxPacket = nullptr;
             cancelEvent(endTransmissionEvent);
         }

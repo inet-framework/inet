@@ -589,7 +589,7 @@ void EthernetCsmaMac::sendJamSignal()
     simtime_t duration = simTime() - curTxSignal->getCreationTime(); // TODO save and use start tx time
     cutEthernetSignalEnd(curTxSignal, duration); // TODO save and use start tx time
     emit(transmissionEndedSignal, curTxSignal);
-    send(curTxSignal, SendOptions().finishTx(curTxSignal->getId()).duration(duration), physOutGate);
+    send(curTxSignal, SendOptions().finishTx(curTxSignal->getId()), physOutGate);
     curTxSignal = nullptr;
 
     // send JAM
