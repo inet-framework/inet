@@ -51,7 +51,7 @@
 /examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,      2s,     2035-6024/tplx;8510-8b61/tpl;a2c4-fe86/~tNl;b492-b86a/~tND;7d7a-b707/tyf, PASS, udp EthernetMac Ipv4
 
 # /examples/voipstream/osudp, -f receiver.ini -c General,                          10s,     0000-0000/tplx;0000-0000/tpl;0000-0000/~tNl;0000-0000/tyf, ERROR, emulation # emulation
-/examples/voipstream/osudp, -f sender.ini -c g711_aLaw,                          10s,     ed9d-09ab/tplx;ed9d-09ab/tpl;0000-0000/~tNl;0000-0000/tyf, PASS, emulation
-/examples/voipstream/osudp, -f sender.ini -c g711_muLaw,                         10s,     ed9d-09ab/tplx;ed9d-09ab/tpl;0000-0000/~tNl;0000-0000/tyf, PASS, emulation
-/examples/voipstream/osudp, -f sender.ini -c g726,                               10s,     7d5e-f8db/tplx;7d5e-f8db/tpl;0000-0000/~tNl;0000-0000/tyf, PASS, emulation
-/examples/voipstream/osudp, -f sender.ini -c pcm_s16le,                          10s,     6b82-9a29/tplx;6b82-9a29/tpl;0000-0000/~tNl;0000-0000/tyf, PASS, emulation
+# /examples/voipstream/osudp, -f sender.ini -c g711_aLaw,                          10s,     ed9d-09ab/tplx;ed9d-09ab/tpl;0000-0000/~tNl;0000-0000/tyf, PASS, emulation
+# /examples/voipstream/osudp, -f sender.ini -c g711_muLaw,                         10s,     ed9d-09ab/tplx;ed9d-09ab/tpl;0000-0000/~tNl;0000-0000/tyf, PASS, emulation
+# /examples/voipstream/osudp, -f sender.ini -c g726,                               10s,     7d5e-f8db/tplx;7d5e-f8db/tpl;0000-0000/~tNl;0000-0000/tyf, PASS, emulation
+# /examples/voipstream/osudp, -f sender.ini -c pcm_s16le,                          10s,     6b82-9a29/tplx;6b82-9a29/tpl;0000-0000/~tNl;0000-0000/tyf, PASS, emulation
