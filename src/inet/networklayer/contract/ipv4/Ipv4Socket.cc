@@ -17,7 +17,7 @@
 namespace inet {
 
 Ipv4Socket::Ipv4Socket(cGate *outputGate) :
-    socketId(getEnvir()->getUniqueNumber()),
+    socketId(getActiveSimulationOrEnvir()->getUniqueNumber()),
     outputGate(outputGate)
 {
 }

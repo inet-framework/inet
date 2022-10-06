@@ -141,7 +141,7 @@ class INET_API SctpSocket : public ISocket
      * Generates a new integer, to be used as assocId. (assocId is part of the key
      * which associates connections with their apps).
      */
-    static int32_t getNewAssocId() { return getEnvir()->getUniqueNumber(); }
+    static int32_t getNewAssocId() { return getActiveSimulationOrEnvir()->getUniqueNumber(); }
 
     /**
      * Returns the socket state, one of NOT_BOUND, CLOSED, LISTENING, CONNECTING,

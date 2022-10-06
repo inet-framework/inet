@@ -133,7 +133,7 @@ InterfaceToken MacAddress::formInterfaceIdentifier() const
 MacAddress MacAddress::generateAutoAddress()
 {
     static SimulationRunUniqueNumberGenerator<uint64_t> counter;
-    uint64_t raw = 0x0AAA00000000ULL + (counter.getNextValue() & 0xffffffffUL) + getEnvir()->getParsimProcId() * 0x000100000000ULL;
+    uint64_t raw = 0x0AAA00000000ULL + (counter.getNextValue() & 0xffffffffUL) + getActiveSimulationOrEnvir()->getParsimProcId() * 0x000100000000ULL;
     return MacAddress(raw);
 }
 

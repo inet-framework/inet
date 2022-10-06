@@ -295,7 +295,7 @@ void PingApp::handleStartOperation(LifecycleOperation *operation)
 void PingApp::startSendingPingRequests()
 {
     ASSERT(!timer->isScheduled());
-    pid = getSimulation()->getUniqueNumber();
+    pid = getActiveSimulationOrEnvir()->getUniqueNumber();
     lastStart = simTime();
     timer->setKind(PING_FIRST_ADDR);
     sentCount = 0;

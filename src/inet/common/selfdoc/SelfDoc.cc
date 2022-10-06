@@ -31,7 +31,7 @@ class LocalLifecycleListener : public cISimulationLifecycleListener {
 } listener;
 }
 
-EXECUTE_ON_STARTUP(cSimulation::getActiveEnvir()->addLifecycleListener(&listener));
+EXECUTE_ON_STARTUP(getActiveSimulationOrEnvir()->addLifecycleListener(&listener));
 
 
 SelfDoc::~SelfDoc() noexcept(false)

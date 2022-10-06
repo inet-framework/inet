@@ -41,7 +41,7 @@ void Loopback::initialize(int stage)
 void Loopback::configureNetworkInterface()
 {
     // generate a link-layer address to be used as interface token for IPv6
-//    InterfaceToken token(0, getSimulation()->getUniqueNumber(), 64);
+//    InterfaceToken token(0, getActiveSimulationOrEnvir()->getUniqueNumber(), 64);
 //    ie->setInterfaceToken(token);
 
     // capabilities

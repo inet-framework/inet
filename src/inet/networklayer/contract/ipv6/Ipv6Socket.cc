@@ -17,7 +17,7 @@
 namespace inet {
 
 Ipv6Socket::Ipv6Socket(cGate *outputGate) :
-    socketId(getEnvir()->getUniqueNumber()),
+    socketId(getActiveSimulationOrEnvir()->getUniqueNumber()),
     outputGate(outputGate)
 {
 }

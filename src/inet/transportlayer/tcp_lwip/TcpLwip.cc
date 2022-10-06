@@ -287,7 +287,7 @@ err_t TcpLwip::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
 
 err_t TcpLwip::tcp_event_accept(TcpLwipConnection& conn, LwipTcpLayer::tcp_pcb *pcb, err_t err)
 {
-    int newConnId = getEnvir()->getUniqueNumber();
+    int newConnId = getActiveSimulationOrEnvir()->getUniqueNumber();
 
     auto moduleType = cModuleType::get("inet.transportlayer.tcp_lwip.TcpLwipConnection");
     char submoduleName[24];

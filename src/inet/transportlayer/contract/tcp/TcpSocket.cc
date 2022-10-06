@@ -17,7 +17,7 @@ TcpSocket::TcpSocket()
 {
     // don't allow user-specified connIds because they may conflict with
     // automatically assigned ones.
-    connId = getEnvir()->getUniqueNumber();
+    connId = getActiveSimulationOrEnvir()->getUniqueNumber();
 }
 
 TcpSocket::TcpSocket(cMessage *msg)
@@ -248,7 +248,7 @@ void TcpSocket::sendToTcp(cMessage *msg, int connId)
 
 void TcpSocket::renewSocket()
 {
-    connId = getEnvir()->getUniqueNumber();
+    connId = getActiveSimulationOrEnvir()->getUniqueNumber();
     remoteAddr = localAddr = L3Address();
     remotePrt = localPrt = -1;
     sockstate = NOT_BOUND;

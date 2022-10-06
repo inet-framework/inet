@@ -18,7 +18,7 @@ namespace inet {
 
 L3Socket::L3Socket(const Protocol *l3Protocol, cGate *outputGate) :
     l3Protocol(l3Protocol),
-    socketId(getEnvir()->getUniqueNumber()),
+    socketId(getActiveSimulationOrEnvir()->getUniqueNumber()),
     outputGate(outputGate)
 {
 }
