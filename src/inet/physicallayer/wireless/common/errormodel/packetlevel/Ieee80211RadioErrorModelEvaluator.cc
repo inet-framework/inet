@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <string>
 #include "inet/common/INETUtils.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/StringFormat.h"
@@ -46,90 +47,89 @@ void Ieee80211RadioErrorModelEvaluator::initialize(int stage)
         repeatCount = par("repeatCount");
         radio = check_and_cast<const Radio *>(getModuleByPath(par("radioModule")));
         radioMedium = check_and_cast<const IRadioMedium *>(getModuleByPath("radioMedium"));
-        openSnirsFile();
+        openFiles();
     }
     else if (stage == INITSTAGE_LAST) {
         evaluateErrorModel();
-        closeSnirsFile();
+        closeFiles();
     }
 }
 
-void Ieee80211RadioErrorModelEvaluator::openSnirsFile()
+void Ieee80211RadioErrorModelEvaluator::openFiles()
 {
-    /*
-    auto transmittedPacket = new Packet(nullptr, makeShared<ByteCountChunk>(B(1)));
-    transmittedPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
-    radio->encapsulate(transmittedPacket);
-    auto transmission = check_and_cast<const LayeredTransmission *>(radio->getTransmitter()->createTransmission(radio, transmittedPacket, 0));
-    auto bitrate = transmission->getBitModel()->getDataGrossBitrate();
-    if (auto forwardErrorCorrection = transmission->getBitModel()->getForwardErrorCorrection())
-        bitrate *= forwardErrorCorrection->getCodeRate();
-    auto modulation = transmission->getSymbolModel()->getDataModulation();
-    auto ofdmModulation = dynamic_cast<const Ieee80211OfdmModulation *>(modulation);
-    auto subcarrierModulation = ofdmModulation != nullptr ? ofdmModulation->getSubcarrierModulation() : nullptr;
-    auto narrowbandSignal = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
-    auto centerFrequency = narrowbandSignal->getCenterFrequency();
-    auto bandwidth = narrowbandSignal->getBandwidth();
-    std::string filename = StringFormat::formatString(packetNameFormat, [&] (char directive) {
-        static std::string result;
-        switch (directive) {
-            case 'c':
-                result = std::string(strrchr(radio->getClassName(), ':') + 1);
-                break;
-            case 'r':
-                result = bitrate.str();
-                break;
-            case 'm':
-                result = getModulationName(modulation);
-                break;
-            case 'M':
-                result = getModulationName(subcarrierModulation);
-                break;
-            case 'l':
-                result = par("packetLength").str();
-                break;
-            case 'f':
-                result = centerFrequency.str();
-                break;
-            case 'b':
-                result = bandwidth.str();
-                break;
-            default:
-                throw cRuntimeError("Unknown directive: %c", directive);
-        }
-        return result.c_str();
-    });
-    delete transmittedPacket;
-    filename.erase(std::remove_if(filename.begin(), filename.end(), isspace), filename.end());
-    std::cout << "Opening training dataset file '" << filename << "'" << std::endl;
-    inet::utils::makePathForFile(filename.c_str());
-    traningDataset.open(filename.c_str(), std::ios::out | std::ios::binary);
-    if (!traningDataset.is_open())
-        throw cRuntimeError("Cannot open file %s", filename.c_str());
-        */
+
+    //auto transmittedPacket = new Packet(nullptr, makeShared<ByteCountChunk>(B(1)));
+    //transmittedPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+    //radio->encapsulate(transmittedPacket);
+    //auto transmission = check_and_cast<const LayeredTransmission *>(radio->getTransmitter()->createTransmission(radio, transmittedPacket, 0));
+    //auto bitrate = transmission->getBitModel()->getDataGrossBitrate();
+    //if (auto forwardErrorCorrection = transmission->getBitModel()->getForwardErrorCorrection())
+    //    bitrate *= forwardErrorCorrection->getCodeRate();
+    //auto modulation = transmission->getSymbolModel()->getDataModulation();
+    //auto ofdmModulation = dynamic_cast<const Ieee80211OfdmModulation *>(modulation);
+    //auto subcarrierModulation = ofdmModulation != nullptr ? ofdmModulation->getSubcarrierModulation() : nullptr;
+    //auto narrowbandSignal = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
+    //auto centerFrequency = narrowbandSignal->getCenterFrequency();
+    //auto bandwidth = narrowbandSignal->getBandwidth();
+
+    std::string snirsFilename = par("snirsFilename");
+    snirsFilename.erase(std::remove_if(snirsFilename.begin(), snirsFilename.end(), isspace), snirsFilename.end());
+    std::cout << "Opening snirs file '" << snirsFilename << "'" << std::endl;
+    inet::utils::makePathForFile(snirsFilename.c_str());
+    snirsFile.open(snirsFilename.c_str(), std::ios::in);
+    if (!snirsFile.is_open())
+        throw cRuntimeError("Cannot open file %s", snirsFilename.c_str());
+
+    std::string persFilename = par("persFilename");
+    persFilename.erase(std::remove_if(persFilename.begin(), persFilename.end(), isspace), persFilename.end());
+    std::cout << "Opening pers file '" << persFilename << "'" << std::endl;
+    inet::utils::makePathForFile(persFilename.c_str());
+    persFile.open(persFilename.c_str(), std::ios::out | std::ios::trunc);
+    if (!persFile.is_open())
+        throw cRuntimeError("Cannot open file %s", persFilename.c_str());
+
+    //delete transmittedPacket;
 }
 
-void Ieee80211RadioErrorModelEvaluator::closeSnirsFile()
+void Ieee80211RadioErrorModelEvaluator::closeFiles()
 {
     if (snirsFile.is_open())
         snirsFile.close();
+    if (persFile.is_open())
+        persFile.close();
 }
 
 void Ieee80211RadioErrorModelEvaluator::evaluateErrorModel()
 {
     // TODO: separate preamble, header and data parts for generating the noise and the training data
     std::cout << "Generating training dataset" << std::endl;
-    snirsFile << "# index, packetErrorRate, backgroundNoisePowerMean, backgroundNoisePowerStddev, numInterferingSignals, meanInterferingSignalNoisePowerMean, meanInterferingSignalNoisePowerStddev, bitrate, packetLength, modulation, subcarrierModulation, centerFrequency, bandwidth, timeDivision, frequencyDivision, numSymbols, preambleDuration, headerDuration, dataDuration, duration, packetByte+, symbolSnirMean+" << std::endl;
+    // snirsFile << "# index, packetErrorRate, backgroundNoisePowerMean, backgroundNoisePowerStddev, numInterferingSignals, meanInterferingSignalNoisePowerMean, meanInterferingSignalNoisePowerStddev, bitrate, packetLength, modulation, subcarrierModulation, centerFrequency, bandwidth, timeDivision, frequencyDivision, numSymbols, preambleDuration, headerDuration, dataDuration, duration, packetByte+, symbolSnirMean+" << std::endl;
     if (auto analogModel = dynamic_cast<const LayeredDimensionalAnalogModel *>(radioMedium->getAnalogModel())) {
         auto propagation = radioMedium->getPropagation();
         auto transmitter = radio->getTransmitter();
         auto receiver = radio->getReceiver();
-        int packetCount = 0;
-        for (int packetIndex = 0; packetIndex < packetCount; packetIndex++) {
-            B packetLength = B(par("packetLength"));
-            W backgroundNoisePowerMean = W(par("backgroundNoisePowerMean"));
-            W backgroundNoisePowerStddev = W(par("backgroundNoisePowerStddev"));
-            int numInterferingSignals = par("numInterferingSignals");
+
+        std::string line;
+        while (true) {
+            std::getline(snirsFile, line);
+            if (line.empty())
+                break;
+
+            std::vector<double> snirs;
+
+            for (std::string s : cStringTokenizer(line.c_str(), ", ").asVector()) {
+                if (!s.empty()) {
+                    std::cout << s << std::endl;
+                    snirs.push_back(1000000*atof(s.c_str()));
+                }
+            }
+
+            ASSERT(snirs.size() % 52 == 0);
+
+
+            B packetLength = B(100); // BIG TODO
+
+
             // create packet
             std::vector<uint8_t> bytes;
             for (B i = B(0); i < packetLength; i++)
@@ -164,6 +164,16 @@ void Ieee80211RadioErrorModelEvaluator::evaluateErrorModel()
             int frequencyDivision = ofdmModulation != nullptr ? ofdmModulation->getNumSubcarriers() : 1;
             if (frequencyDivision != 52)
                 throw cRuntimeError("wrong number of OFDM subcarriers!");
+
+
+
+
+            // TODO:
+            timeDivision = snirs.size() / frequencyDivision;
+
+
+
+
             int numSymbols = timeDivision * frequencyDivision;
             // create reception
             auto arrival = propagation->computeArrival(transmission, radio->getAntenna()->getMobility());
@@ -174,13 +184,13 @@ void Ieee80211RadioErrorModelEvaluator::evaluateErrorModel()
             auto bandwidth = narrowbandSignal->getBandwidth();
             auto startFrequency = centerFrequency - bandwidth / 2;
             auto endFrequency = centerFrequency + bandwidth / 2;
-            auto backgroundNoisePowerFunction = assembleNoisePowerFunction({}, frequencyDivision, timeDivision, startTime, endTime, startFrequency, endFrequency);
+            auto backgroundNoisePowerFunction = assembleNoisePowerFunction(snirs, frequencyDivision, timeDivision, startTime, endTime, startFrequency, endFrequency);
             std::vector<Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>> noisePowerFunctions;
             noisePowerFunctions.push_back(backgroundNoisePowerFunction);
-            W meanInterferingSignalNoisePowerMean = W(0);
-            W meanInterferingSignalNoisePowerStddev = W(0);
-            meanInterferingSignalNoisePowerMean /= numInterferingSignals;
-            meanInterferingSignalNoisePowerStddev /= numInterferingSignals;
+            //W meanInterferingSignalNoisePowerMean = W(0);
+            //W meanInterferingSignalNoisePowerStddev = W(0);
+            //meanInterferingSignalNoisePowerMean /= numInterferingSignals;
+            //meanInterferingSignalNoisePowerStddev /= numInterferingSignals;
             auto noisePowerFunction = makeShared<SummedFunction<WpHz, Domain<simsec, Hz>>>(noisePowerFunctions);
             auto noise = new DimensionalNoise(startTime, endTime, centerFrequency, bandwidth, noisePowerFunction);
             // create snir
@@ -191,11 +201,15 @@ void Ieee80211RadioErrorModelEvaluator::evaluateErrorModel()
             auto interference = new Interference(noise, new std::vector<const IReception *>());
             const ISnir *snir = new LayeredSnir(reception, noise);
             int receptionSuccessfulCount = 0;
+            std::cout << "receiving..." << std::endl;
             for (int i = 0; i < repeatCount; i++) {
                 auto decisions = new std::vector<const IReceptionDecision *>();
+                std::cout << "comp rec res" << std::endl;
                 auto receptionResult = receiver->computeReceptionResult(listening, reception, interference, snir, decisions);
+                std::cout << "done comp rec res" << std::endl;
                 auto receivedPacket = receptionResult->getPacket();
                 bool isReceptionSuccessful = true;
+                std::cout << "checking reception result..." << std::endl;
                 if (receivedPacket->getTotalLength() != transmittedPacket->getTotalLength())
                     isReceptionSuccessful = false;
                 else {
@@ -213,15 +227,19 @@ void Ieee80211RadioErrorModelEvaluator::evaluateErrorModel()
                         }
                     }
                 }
+                std::cout << "succ? " << std::boolalpha << isReceptionSuccessful << std::endl;
                 if (isReceptionSuccessful)
                     receptionSuccessfulCount++;
                 delete receptionResult;
             }
             // print parameters
             double packetErrorRate = (1 - (double)receptionSuccessfulCount / repeatCount);
-            snirsFile << (int)packetIndex << ", " << packetErrorRate << ", " << backgroundNoisePowerMean << ", " << backgroundNoisePowerStddev << ", " << numInterferingSignals << ", " << meanInterferingSignalNoisePowerMean << ", " << meanInterferingSignalNoisePowerStddev << ", " << bitrate << ", " << transmittedPacket->getTotalLength() << ", " << getModulationName(modulation) << ", " << (subcarrierModulation != nullptr ? getModulationName(subcarrierModulation) : "NA") << ", " << centerFrequency << ", " << bandwidth << ", " << timeDivision << ", " << frequencyDivision << ", " << numSymbols << ", "  << preambleDuration << ", " << headerDuration << ", " << dataDuration << ", " << duration << ", ";
+            persFile << packetErrorRate << std::endl;
+            std::cout << "PER: " << packetErrorRate << std::endl;
+            //snirsFile << (int)packetIndex << ", " << packetErrorRate << ", " << backgroundNoisePowerMean << ", " << backgroundNoisePowerStddev << ", " << numInterferingSignals << ", " << meanInterferingSignalNoisePowerMean << ", " << meanInterferingSignalNoisePowerStddev << ", " << bitrate << ", " << transmittedPacket->getTotalLength() << ", " << getModulationName(modulation) << ", " << (subcarrierModulation != nullptr ? getModulationName(subcarrierModulation) : "NA") << ", " << centerFrequency << ", " << bandwidth << ", " << timeDivision << ", " << frequencyDivision << ", " << numSymbols << ", "  << preambleDuration << ", " << headerDuration << ", " << dataDuration << ", " << duration << ", ";
 
             // print symbol SNIR means
+            /*
             double snirMean = 0;
             startTime += preambleDuration;
             for (int i = 0; i < timeDivision; i++) {
@@ -240,8 +258,9 @@ void Ieee80211RadioErrorModelEvaluator::evaluateErrorModel()
                 }
             }
             snirMean /= numSymbols;
-            std::cout << "Generating line: index = " << packetIndex << ", packetErrorRate = " << packetErrorRate << ", packetLength = " << packetLength << ", meanSnir = " << snirMean << ", backgroundNoisePowerMean = " << backgroundNoisePowerMean << ", backgroundNoisePowerStddev = " << backgroundNoisePowerStddev << ", numInterferingSignals = " << numInterferingSignals << ", meanInterferingSignalNoisePowerMean = " << meanInterferingSignalNoisePowerMean << ", meanInterferingSignalNoisePowerStddev = " << meanInterferingSignalNoisePowerStddev << std::endl;
-            snirsFile << std::endl;
+            */
+            //std::cout << "Generating line: index = " << packetIndex << ", packetErrorRate = " << packetErrorRate << ", packetLength = " << packetLength << ", meanSnir = " << snirMean << ", backgroundNoisePowerMean = " << backgroundNoisePowerMean << ", backgroundNoisePowerStddev = " << backgroundNoisePowerStddev << ", numInterferingSignals = " << numInterferingSignals << ", meanInterferingSignalNoisePowerMean = " << meanInterferingSignalNoisePowerMean << ", meanInterferingSignalNoisePowerStddev = " << meanInterferingSignalNoisePowerStddev << std::endl;
+            //snirsFile << std::endl;
             delete snir;
             delete listening;
             delete interference;
@@ -260,27 +279,23 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> Ieee80211RadioErrorModelEvaluator
     auto bandwidth = endFrequency - startFrequency;
 
     Ptr<SummedFunction<WpHz, Domain<simsec, Hz>>> noisePowerFunction = makeShared<SummedFunction<WpHz, Domain<simsec, Hz>>>();
-    if (frequencyDivision == 1) {
-        std::vector<WpHz> rs;
-        for (int i = 0; i < timeDivision; i++) {
+    std::cout << "making noise" << std::endl;
+    for (int fi = 0; fi < frequencyDivision; fi++) {
+        for (int ti = 0; ti < timeDivision; ti++) {
+            // TODO
+            //WpHz power = WpHz(snirs[j + i * timeDivision] / bandwidth * frequencyDivision);
+            //rs.push_back(power);
+
             auto segment = makeShared<Boxcar2DFunction<WpHz, simsec, Hz>>(
-                simsec(startTime + (endTime - startTime) * i / timeDivision),
-                simsec(startTime + (endTime - startTime) * (i + 1) / timeDivision),
-                startFrequency,
-                endFrequency,
-                WpHz(snirs[i]));
+                simsec(startTime + (endTime - startTime) * ti / timeDivision),
+                simsec(startTime + (endTime - startTime) * (ti + 1) / timeDivision),
+                startFrequency + bandwidth * fi / frequencyDivision,
+                startFrequency + bandwidth * (fi + 1) / frequencyDivision,
+                WpHz(snirs[ti*frequencyDivision + fi]));
             noisePowerFunction->addElement(segment);
         }
     }
-    else {
-        for (int i = 0; i < timeDivision + 1; i++) {
-            for (int j = 0; j < frequencyDivision + 1; j++) {
-                // TODO
-                //WpHz power = WpHz(snirs[j + i * timeDivision] / bandwidth * frequencyDivision);
-                //rs.push_back(power);
-            }
-        }
-    }
+    std::cout << "maketh noise" << std::endl;
     return noisePowerFunction;
 }
 

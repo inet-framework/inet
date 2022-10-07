@@ -91,6 +91,7 @@ const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const Layered
 
 const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
+    std::cout << "bleh" << std::endl;
     auto reception = snir->getReception();
     // bit model
     auto bitModel = transmission->getBitModel();
@@ -129,6 +130,7 @@ const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const L
     // calculate symbol intervals
     std::vector<math::Interval<simsec, Hz>> symbolIntervals;
     symbolIntervals.reserve(symbolCount);
+    std::cout << "blih" << std::endl;
     for (int i = 0; i < timeDivision; i++) {
         simtime_t symbolStartTime = i < headerSymbolLength ?
                 math::LinearInterpolator<double, simtime_t>::singleton.getValue(0, headerStartTime, headerSymbolLength, headerEndTime, i) :
@@ -145,13 +147,16 @@ const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const L
             symbolIntervals.push_back(symbolInterval);
         }
     }
+    std::cout << "bloh" << std::endl;
     // partition SNIR function and sum SNIR values per symbol
     math::Point<simsec, Hz> startPoint(simsec(startTime), startFrequency);
     math::Point<simsec, Hz> endPoint(simsec(endTime), endFrequency);
     math::Interval<simsec, Hz> interval(startPoint, endPoint, 0b11, 0b00, 0b00);
     std::vector<double> data(symbolCount);
     auto snirFunction = check_and_cast<const LayeredSnir *>(snir)->getSnir();
+    std::cout << "bloh 2" << std::endl;
     snirFunction->partition(interval, [&] (const math::Interval<simsec, Hz>& i1, const math::IFunction<double, math::Domain<simsec, Hz>> *f1) {
+        std::cout << "parti" << std::endl;
         auto intervalStartTime = std::get<0>(i1.getLower()).get();
         auto intervalEndTime = std::get<0>(i1.getUpper()).get();
         auto intervalStartFrequency = std::get<1>(i1.getLower());
@@ -176,6 +181,7 @@ const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const L
             }
         }
     });
+    std::cout << "bluh" << std::endl;
     // average symbol SNIR values
     auto symbolFrequencyBandwidth = bandwidth / frequencyDivision;
     for (int i = 0; i < timeDivision; i++) {

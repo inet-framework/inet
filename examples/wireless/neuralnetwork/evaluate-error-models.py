@@ -5,11 +5,11 @@ import sys
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-s", "--scalarPacketlevel", default=True)
-parser.add_argument("-sn", "--scalarPacketlevelNeuralNetwork", default=False)
-parser.add_argument("-d", "--dimensionalPacketlevel", default=True)
-parser.add_argument("-dn", "--dimensionalPacketlevelNeuralNetwork", default=False)
-parser.add_argument("-b", "--dimensionalSymbollevel", default=True)
+parser.add_argument("-sp", "--scalarPacketlevel", default=False, action='store_true')
+parser.add_argument("-spn", "--scalarPacketlevelNeuralNetwork", default=False, action='store_true')
+parser.add_argument("-dp", "--dimensionalPacketlevel", default=False, action='store_true')
+parser.add_argument("-dpn", "--dimensionalPacketlevelNeuralNetwork", default=False, action='store_true')
+parser.add_argument("-ds", "--dimensionalSymbollevel", default=False, action='store_true')
 parser.add_argument("inifile")
 args = parser.parse_args()
 

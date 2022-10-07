@@ -132,8 +132,10 @@ const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createPacketModel(con
 
 const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
-    if (levelOfDetail == SYMBOL_DOMAIN)
+    if (levelOfDetail == SYMBOL_DOMAIN) {
+        std::cout << "blah" << std::endl;
         return errorModel->computeSymbolModel(transmission, snir);
+    }
     return nullptr;
 }
 
@@ -355,14 +357,18 @@ const Ieee80211OfdmMode *Ieee80211LayeredOfdmReceiver::computeMode(Hz bandwidth)
 
 const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
+    std::cout << "A1" << std::endl;
     const Ieee80211LayeredTransmission *transmission = check_and_cast<const Ieee80211LayeredTransmission *>(reception->getTransmission());
     // corruted model
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
+    std::cout << "A3" << std::endl;
     const IReceptionSampleModel *sampleModel = createSampleModel(transmission, snir);
+    std::cout << "A4" << std::endl;
     const IReceptionSymbolModel *symbolModel = createSymbolModel(transmission, snir);
+    std::cout << "A5" << std::endl;
     const IReceptionBitModel *bitModel = createBitModel(transmission, snir);
+    std::cout << "A6" << std::endl;
     const IReceptionPacketModel *packetModel = createPacketModel(transmission, snir);
-    // signal field model
     const IReceptionSymbolModel *signalFieldSymbolModel = createSignalFieldSymbolModel(symbolModel);
     const IReceptionSymbolModel *dataFieldSymbolModel = createDataFieldSymbolModel(symbolModel);
     const IReceptionBitModel *signalFieldBitModel = createSignalFieldBitModel(bitModel, signalFieldSymbolModel);
@@ -421,6 +427,9 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
     modeInd->setMode(transmission->getMode());
     auto channelInd = packet->addTagIfAbsent<Ieee80211ChannelInd>();
     channelInd->setChannel(transmission->getChannel());
+
+    std::cout << "E" << std::endl;
+
     return new LayeredReceptionResult(reception, decisions, packetModel, bitModel, symbolModel, sampleModel, analogModel);
 }
 
