@@ -32,21 +32,22 @@ class INET_API Ieee80211RadioErrorModelEvaluator : public cSimpleModule
     const Radio *radio = nullptr;
     const IRadioMedium *radioMedium = nullptr;
 
-    std::ofstream snirsFile;
+    std::ifstream snirsFile;
+    std::ofstream persFile;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
-    virtual void openSnirsFile();
-    virtual void closeSnirsFile();
+    virtual void openFiles();
+    virtual void closeFiles();
 
     virtual void evaluateErrorModel();
 
     virtual Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> assembleNoisePowerFunction(std::vector<double> snirs, int frequencyDivision, int timeDivision, simtime_t startTime, simtime_t endTime, Hz startFrequency, Hz endFrequency);
 
   public:
-    virtual ~Ieee80211RadioErrorModelEvaluator() { closeSnirsFile(); }
+    virtual ~Ieee80211RadioErrorModelEvaluator() { closeFiles(); }
 };
 
 } // namespace physicallayer
