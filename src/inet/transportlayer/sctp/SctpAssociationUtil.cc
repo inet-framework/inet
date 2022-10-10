@@ -411,7 +411,7 @@ void SctpAssociation::sendToIP(Packet *pkt, const Ptr<SctpHeader>& sctpmsg,
     addresses->setDestAddress(dest);
     pkt->addTagIfAbsent<SocketReq>()->setSocketId(assocId);
     EV_INFO << "send packet " << pkt << " to ipOut\n";
-    check_and_cast<Sctp *>(getSimulation()->getContextModule())->send(pkt, "ipOut");
+    sctpMain->send(pkt, "ipOut");
 
     if (chunkType == HEARTBEAT) {
         SctpPathVariables *path = getPath(dest);
