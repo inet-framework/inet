@@ -512,8 +512,14 @@
 
 /examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,           1b06-0b2c/tplx;2ad9-0144/~tNl;d8f5-d323/~tND;1bd1-e9ac/tyf, PASS, wireless
 
-/examples/wireless/ieee80211levelofdetail, -f omnetpp.ini -c Default,               1s,           9caf-0174/tplx;8a78-c0c1/~tNl;3340-666f/~tND;0000-0000/tyf, PASS, wireless Ipv4
-/examples/wireless/ieee80211levelofdetail, -f omnetpp.ini -c Layered,               1s,           140d-f0e8/tplx;8a78-c0c1/~tNl;3340-6677/~tND;0000-0000/tyf, PASS, wireless Ipv4
+/examples/wireless/ieee80211levelofdetail, -f omnetpp.ini -c Default -r '$distance=100  && $bitrate=6  && $repetition=0',               1s,           7d44-b2bb/tplx;d318-d210/~tNl;392b-1b38/~tND;a21e-0940/tyf, PASS, wireless Ipv4
+/examples/wireless/ieee80211levelofdetail, -f omnetpp.ini -c Default -r '$distance=1000 && $bitrate=6  && $repetition=0',               1s,           2de9-fd45/tplx;8aa4-8d31/~tNl;03ac-ef28/~tND;7842-68f1/tyf, PASS, wireless Ipv4
+/examples/wireless/ieee80211levelofdetail, -f omnetpp.ini -c Default -r '$distance=100  && $bitrate=54 && $repetition=0',               1s,           a102-3972/tplx;601f-dc79/~tNl;ed49-2f9f/~tND;c6d6-1939/tyf, PASS, wireless Ipv4
+/examples/wireless/ieee80211levelofdetail, -f omnetpp.ini -c Default -r '$distance=1000 && $bitrate=54 && $repetition=0',               1s,           9caf-0174/tplx;8a78-c0c1/~tNl;3340-666f/~tND;ec21-3671/tyf, PASS, wireless Ipv4
+/examples/wireless/ieee80211levelofdetail, -f omnetpp.ini -c Layered -r '$distance=100  && $bitrate=6  && $repetition=0',               1s,           3578-4846/tplx;231b-2761/~tNl;5bb3-3e17/~tND;ce43-28be/tyf, PASS, wireless Ipv4
+/examples/wireless/ieee80211levelofdetail, -f omnetpp.ini -c Layered -r '$distance=1000 && $bitrate=6  && $repetition=0',               1s,           cc58-8e28/tplx;8aa4-8d31/~tNl;03af-af28/~tND;9550-fcf9/tyf, PASS, wireless Ipv4
+/examples/wireless/ieee80211levelofdetail, -f omnetpp.ini -c Layered -r '$distance=100  && $bitrate=54 && $repetition=0',               1s,           144f-08ca/tplx;901f-e38b/~tNl;84e6-dce2/~tND;d86b-2f48/tyf, PASS, wireless Ipv4
+/examples/wireless/ieee80211levelofdetail, -f omnetpp.ini -c Layered -r '$distance=1000 && $bitrate=54 && $repetition=0',               1s,           140d-f0e8/tplx;8a78-c0c1/~tNl;3340-6677/~tND;8f08-fc37/tyf, PASS, wireless Ipv4
 
 # /examples/wireless/lan80211/,        -f .qtenv.ini -c General -r 0
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,         7ba1-5f14/tplx;82ad-f313/~tNl;144d-6116/~tND, PASS, wireless Ipv4
