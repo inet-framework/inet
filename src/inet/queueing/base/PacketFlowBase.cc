@@ -140,12 +140,12 @@ void PacketFlowBase::handlePushPacketProcessed(Packet *packet, cGate *gate, bool
 
 bool PacketFlowBase::canPullSomePacket(cGate *gate) const
 {
-    return provider->canPullSomePacket(inputGate->getPathStartGate());
+    return provider != nullptr && provider->canPullSomePacket(inputGate->getPathStartGate());
 }
 
 Packet *PacketFlowBase::canPullPacket(cGate *gate) const
 {
-    return provider->canPullPacket(inputGate->getPathStartGate());
+    return provider != nullptr ? provider->canPullPacket(inputGate->getPathStartGate()) : nullptr;
 }
 
 Packet *PacketFlowBase::pullPacket(cGate *gate)
