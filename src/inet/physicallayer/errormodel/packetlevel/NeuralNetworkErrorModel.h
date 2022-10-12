@@ -25,86 +25,30 @@
 #include "inet/physicallayer/analogmodel/packetlevel/ScalarSnir.h"
 #include "inet/physicallayer/base/packetlevel/ErrorModelBase.h"
 
-#include "tensorflow/lite/micro/all_ops_resolver.h"
-#include "tensorflow/lite/micro/micro_error_reporter.h"
-#include "tensorflow/lite/micro/micro_interpreter.h"
-#include "tensorflow/lite/schema/schema_generated.h"
-
+#include <fdeep/fdeep.hpp>
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API NeuralNet {
-  public:
-  std::vector<uint8_t> modeldata;
-  const tflite::Model *model;
-
-
-
-  static tflite::AllOpsResolver resolver;
-
-  static tflite::MicroErrorReporter micro_error_reporter;
-
-  tflite::MicroInterpreter *interpreter;
-
-  const size_t arena_size = 64 * 1024 * 1024;
-  uint8_t *arena = nullptr;
-
-
-  NeuralNet(const char *filename) {
-
-      std::ifstream stream(filename, std::ios::in | std::ios::binary);
-
-      modeldata = std::vector<uint8_t>((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
-      std::cout << "modeldata length: " << modeldata.size() << std::endl;
-      model = tflite::GetModel(modeldata.data());
-
-      if (model->version() != TFLITE_SCHEMA_VERSION) {
-        std::cout << "VERSION MISMATCH" << std::endl;
-      TF_LITE_REPORT_ERROR(&micro_error_reporter,
-          "Model provided is schema version %d not equal "
-          "to supported version %d.\n",
-          model->version(), TFLITE_SCHEMA_VERSION);
-    }
-
-
-      arena = new uint8_t[arena_size];
-
-      // Build an interpreter to run the model with.
-      interpreter = new tflite::MicroInterpreter(model, resolver, arena, arena_size, &micro_error_reporter);
-
-      // Allocate memory from the tensor_arena for the model's tensors.
-      TfLiteStatus allocate_status = interpreter->AllocateTensors();
-
-  }
-
-  //float run(const float *input, float *output) { }
-
-  ~NeuralNet() {
-    delete interpreter;
-    delete[] arena;
-  };
-
-};
 
 class INET_API NeuralNetworkErrorModel : public ErrorModelBase
 {
   protected:
     const char *modelNameFormat = nullptr;
-    std::map<std::string, NeuralNet *> models;
+    std::map<std::string, fdeep::model> models;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
-    virtual void fillSnirTensor(const ScalarSnir *snir, int timeDivision, int frequencyDivision, TfLiteTensor* in) const;
-    virtual void fillSnirTensor(const DimensionalSnir *snir, int timeDivision, int frequencyDivision, TfLiteTensor* i) const;
+    virtual std::vector<float> fillSnirTensor(const ScalarSnir *snir, int timeDivision, int frequencyDivision) const;
+    virtual std::vector<float> fillSnirTensor(const DimensionalSnir *snir, int timeDivision, int frequencyDivision) const;
 
     virtual std::string computeModelName(const ISnir *snir) const;
 
   public:
-    virtual ~NeuralNetworkErrorModel() { for (auto it : models) delete it.second; }
+    virtual ~NeuralNetworkErrorModel() {  }
 
     virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
 

@@ -30,10 +30,12 @@ namespace inet {
 namespace physicallayer {
 
 
+// Write an std::string to EV.
+inline static void EV_logger(const std::string& str)
+{
+    EV << str << std::flush;
+}
 
-tflite::AllOpsResolver NeuralNet::resolver;
-
-tflite::MicroErrorReporter NeuralNet::micro_error_reporter;
 
 
 Define_Module(NeuralNetworkErrorModel);
@@ -64,9 +66,9 @@ void NeuralNetworkErrorModel::initialize(int stage)
             auto modelName = filename.substr(index, filename.rfind('.') - index);
             EV_INFO << "Loading neural network model " << modelName << std::endl;
 
-            std::string modelFile = "results/" + modelName + ".tflite";
+            std::string modelFile = "results/" + modelName + ".json";
             std::cout << "modelfile: " << modelFile << std::endl;
-            models[modelName] = new NeuralNet(modelFile.c_str());
+            models.insert({modelName, fdeep::load_model(modelFile, true, EV_logger)});
         }
     }
 
@@ -100,42 +102,35 @@ double NeuralNetworkErrorModel::computePacketErrorRate(const ISnir *snir, IRadio
     if (symbolCount != 416)
         return 0;
 
-    TfLiteTensor* in = model->interpreter->input(0);
-
-
+    std::vector<float> input;
     if (auto scalarSnir = dynamic_cast<const ScalarSnir *>(snir))
-        fillSnirTensor(scalarSnir, timeDivision, frequencyDivision, in);
+        input = fillSnirTensor(scalarSnir, timeDivision, frequencyDivision);
     else if (auto dimensionalSnir = dynamic_cast<const DimensionalSnir *>(snir))
-        fillSnirTensor(dimensionalSnir, timeDivision, frequencyDivision, in);
+        input = fillSnirTensor(dimensionalSnir, timeDivision, frequencyDivision);
     else
         throw cRuntimeError("Unknown SNIR representation");
     EV_TRACE << "Input tensor:";
-    float *indata = tflite::GetTensorData<float>(in);
-    for (int i = 0; i < (int)in->dims->data[0]; i++) {
+
+    for (int i = 0; i < input.size(); i++) {
         if (i != 0)
             EV_TRACE << ", ";
-        EV_TRACE << indata[i];
+        EV_TRACE << input[i];
     }
     EV_TRACE << std::endl;
 
-    model->interpreter->Invoke();
+    const auto result = model.predict({
+        fdeep::tensor(fdeep::tensor_shape(timeDivision, frequencyDivision), input)
+    });
 
-    TfLiteTensor* out = model->interpreter->output(0);
-    float *outdata = tflite::GetTensorData<float>(out);
-    EV_TRACE << "Output tensor:";
-    for (int i = 0; i < (int)out->dims->data[0]; i++) {
-        if (i != 0)
-            EV_TRACE << ", ";
-        EV_TRACE << outdata[i];
-    }
-    EV_TRACE << std::endl;
-    double packetErrorRate = std::min(1.0f, std::max(0.0f, outdata[0]));
+    auto predicted = result[0].get_ignore_rank(fdeep::tensor_pos(0));
+
+    double packetErrorRate = std::min(1.0f, std::max(0.0f, predicted));
     EV_DEBUG << "Computed packet error rate is " << packetErrorRate << std::endl;
     return packetErrorRate;
 
 }
 
-void NeuralNetworkErrorModel::fillSnirTensor(const ScalarSnir *snir, int timeDivision, int frequencyDivision, TfLiteTensor *in) const
+std::vector<float> NeuralNetworkErrorModel::fillSnirTensor(const ScalarSnir *snir, int timeDivision, int frequencyDivision) const
 {
     auto scalarSnir = check_and_cast<const ScalarSnir *>(snir);
     auto reception = snir->getReception();
@@ -143,21 +138,25 @@ void NeuralNetworkErrorModel::fillSnirTensor(const ScalarSnir *snir, int timeDiv
     auto endTime = reception->getDataEndTime();
     int symbolCount = timeDivision * frequencyDivision;
     EV_DEBUG << "Computing SNIR mean tensor for " << symbolCount << " symbols" << std::endl;
-    float* indata = tflite::GetTensorData<float>(in);
+
+    std::vector<float> result;
+    result.reserve(symbolCount);
+
     for (int i = 0; i < timeDivision; i++) {
         simtime_t symbolStartTime = (startTime * (double)(timeDivision - i) + endTime * (double)i) / timeDivision;
         simtime_t symbolEndTime = (startTime * (double)(timeDivision - i - 1) + endTime * (double)(i + 1)) / timeDivision;
         double snirMean = scalarSnir->computeMean(symbolStartTime, symbolEndTime);
         for (int j = 0; j < frequencyDivision; j++) {
-            int symbolIndex = frequencyDivision * i + j;
-            indata[symbolIndex] = std::log(snirMean);
+            result.push_back(snirMean);
             EV_TRACE << snirMean << ", " << std::endl;
         }
     }
     EV_TRACE << std::endl;
+
+    return result;
 }
 
-void NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir *snir, int timeDivision, int frequencyDivision, TfLiteTensor *in) const
+std::vector<float> NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir *snir, int timeDivision, int frequencyDivision) const
 {
     auto dimensionalSnir = check_and_cast<const DimensionalSnir *>(snir);
     auto snirFunction = dimensionalSnir->getSnir();
@@ -188,8 +187,13 @@ void NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir *snir, int ti
     math::Interval<simsec, Hz> interval(startPoint, endPoint, 0b11, 0b00, 0b00);
 
 
-    for (int i = 0; i < 416; i++)
-        in->data.f[i] = 0;
+    EV_TRACE << std::endl << "SNIR function: " << std::endl;
+    snirFunction->printStructure(EV_TRACE);
+    EV_DEBUG << "Computing SNIR mean tensor for " << symbolCount << " symbols" << std::endl;
+
+
+    std::vector<float> result;
+    result.resize(symbolCount);
 
     snirFunction->partition(interval, [&] (const math::Interval<simsec, Hz>& i1, const math::IFunction<double, math::Domain<simsec, Hz>> *f1) {
         auto intervalStartTime = std::get<0>(i1.getLower()).get();
@@ -207,20 +211,22 @@ void NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir *snir, int ti
                 auto i2 = symbolIntervals[symbolIndex].getIntersected(i1);
                 double v = i2.getVolume() * f1->getMean(i2);
                 ASSERT(!std::isnan(v));
-                in->data.f[symbolIndex] += v;
+                result[symbolIndex] += v;
             }
         }
     });
+
+
     double area = (endTime - startTime).dbl() / timeDivision * bandwidth.get() / frequencyDivision;
-    EV_TRACE << std::endl << "SNIR function: " << std::endl;
-    snirFunction->printStructure(EV_TRACE);
-    EV_DEBUG << "Computing SNIR mean tensor for " << symbolCount << " symbols" << std::endl;
+
+
     for (int i = 0; i < symbolCount; i++) {
-        double snirMean = in->data.f[i] / area;
-        EV_TRACE << snirMean << ", ";
-        in->data.f[i] = std::log(snirMean);
+        result[i] /= area;
+        EV_TRACE << result[i] << ", ";
     }
     EV_TRACE << std::endl;
+
+    return result;
 }
 
 double NeuralNetworkErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const

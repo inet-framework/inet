@@ -39,9 +39,9 @@ $O/$(TARGET): $(DEFFILE)
   endif
 endif
 
-INCLUDE_PATH += -I../3rdparty/tflite-micro
-INCLUDE_PATH += -I../3rdparty/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include
-OBJS += ../3rdparty/tflite-micro/gen/linux_x86_64_debug/lib/libtensorflow-microlite.a
+
+INCLUDE_PATH += -I../3rdparty/frugally-deep/include -I../3rdparty/json/include -I../3rdparty/FunctionalPlus/include
+CFLAGS += $(shell (pkg-config --cflags eigen3))
 
 
 #

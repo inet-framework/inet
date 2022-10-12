@@ -50,3 +50,22 @@ Supported software:
 
   To test if your build was correct, try the examples/inet/tcpclientserver
   example, and choose a configuration which uses NSC as the TCP implementation.
+
+- frugally-deep ("Use Keras models in C++ with ease")
+
+  Source: https://github.com/Dobiasd/frugally-deep
+
+- json (by Niels Lohmann)
+
+  Source: https://github.com/nlohmann/json
+  Dependency of frugally-deep.
+
+- FunctionalPlus ("helps you write concise and readable C++ code")
+
+  Source: https://github.com/Dobiasd/FunctionalPlus
+  Dependency of frugally-deep.
+
+- Eigen ("Eigen is a C++ template library for linear algebra: matrices, vectors, numerical solvers, and related algorithms.")
+
+  Not included, external dependency.
+  Dependency of frugally-deep.
