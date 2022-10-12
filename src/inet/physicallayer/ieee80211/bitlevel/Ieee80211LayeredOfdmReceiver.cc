@@ -133,7 +133,7 @@ const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createPacketModel(con
 const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
     if (levelOfDetail == SYMBOL_DOMAIN) {
-        std::cout << "blah" << std::endl;
+        //std::cout << "blah" << std::endl;
         return errorModel->computeSymbolModel(transmission, snir);
     }
     return nullptr;
@@ -355,20 +355,20 @@ const Ieee80211OfdmMode *Ieee80211LayeredOfdmReceiver::computeMode(Hz bandwidth)
 
 const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    std::cout << "A1" << std::endl;
+    //std::cout << "A1" << std::endl;
     const Ieee80211LayeredTransmission *transmission = check_and_cast<const Ieee80211LayeredTransmission *>(reception->getTransmission());
-    std::cout << "A2" << std::endl;
+    //std::cout << "A2" << std::endl;
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
-    std::cout << "A3" << std::endl;
+    //std::cout << "A3" << std::endl;
     const IReceptionSampleModel *sampleModel = createSampleModel(transmission, snir);
-    std::cout << "A4" << std::endl;
+    //std::cout << "A4" << std::endl;
     const IReceptionSymbolModel *symbolModel = createSymbolModel(transmission, snir);
-    std::cout << "A5" << std::endl;
+    //std::cout << "A5" << std::endl;
     const IReceptionBitModel *bitModel = createBitModel(transmission, snir);
-    std::cout << "A6" << std::endl;
+    //std::cout << "A6" << std::endl;
     const IReceptionPacketModel *packetModel = createPacketModel(transmission, snir);
 
-    std::cout << "B" << std::endl;
+    //std::cout << "B" << std::endl;
 
     const IReceptionSymbolModel *signalFieldSymbolModel = createSignalFieldSymbolModel(symbolModel);
     const IReceptionSymbolModel *dataFieldSymbolModel = createDataFieldSymbolModel(symbolModel);
@@ -384,7 +384,7 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
     const IReceptionBitModel *dataFieldBitModel = createDataFieldBitModel(bitModel, dataFieldSymbolModel, signalFieldPacketModel, signalFieldBitModel);
     const IReceptionPacketModel *dataFieldPacketModel = createDataFieldPacketModel(signalFieldBitModel, dataFieldBitModel, signalFieldPacketModel);
 
-    std::cout << "C" << std::endl;
+    //std::cout << "C" << std::endl;
 
 //    if (!sampleModel)
 //        sampleModel = createCompleteSampleModel(signalFieldSampleModel, dataFieldSampleModel);
@@ -406,7 +406,7 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
         delete dataFieldPacketModel;
     }
 
-    std::cout << "D" << std::endl;
+    //std::cout << "D" << std::endl;
 
     auto packet = const_cast<Packet *>(packetModel->getPacket());
     auto snirInd = packet->addTagIfAbsent<SnirInd>();
@@ -419,7 +419,7 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
     auto channelInd = packet->addTagIfAbsent<Ieee80211ChannelInd>();
     channelInd->setChannel(transmission->getChannel());
 
-    std::cout << "E" << std::endl;
+    //std::cout << "E" << std::endl;
 
     return new LayeredReceptionResult(reception, decisions, packetModel, bitModel, symbolModel, sampleModel, analogModel);
 }
