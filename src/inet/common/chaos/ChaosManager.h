@@ -22,7 +22,6 @@
 #include <vector>
 #include <algorithm>
 #include <string>
-#include "inet/routing/leach/Leach.h"
 #include "inet/common/lifecycle/LifecycleController.h"
 
 using namespace omnetpp;

@@ -21,7 +21,6 @@
 #include <string>
 #include <cstring>
 #include <map>
-//#include "inet/routing/leach/Leach.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/chaos/ChaosEvent_m.h"

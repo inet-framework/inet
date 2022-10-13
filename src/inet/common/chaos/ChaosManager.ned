@@ -15,8 +15,6 @@
 
 package inet.common.chaos;
 
-import inet.routing.leach.Leach;
-
 //
 // TODO auto-generated module
 //

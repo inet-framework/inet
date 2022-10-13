@@ -1,5 +1,3 @@
-import inet.common.INETDefs;   
-
 namespace inet;
 
 message ChaosEvent 
