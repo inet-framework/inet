@@ -74,7 +74,8 @@ for i, c in enumerate(dff.columns):
     style = {'marker': 'o'}
     [line] = p.plot(pd.to_numeric(dff.index.values), dff[c].values * 100 + y, label=iso_itervar + "=" + str(dff[c].name), **style)
     lines.append(line)
-    y = y + .1
+    #y = y + .1
+
 
 def plot():
     #print(f"Duration: {duration}, power: {power}")
@@ -87,14 +88,44 @@ def plot():
         lines[i].set_data(pd.to_numeric(dff.index.values), dff[c].values * 100 + y)
         y = y + .1
 
-plot()
+
+fig = plt.gcf()
+
+
+def plot_export_all():
+    global duration, power
+    old_d = duration
+    old_p = power
+    for d in durations:
+        for p in powers:
+            duration = d
+            power = p
+            plot()
+            fig.canvas.draw()
+            plt.suptitle(f"Noise duration: {duration} us, noise power: {power} mW")
+            plt.savefig(f"results/Ieee80211Radio_{d}us_{p}mW_psr.png")
+            #plt.clf()
+    duration = old_d
+    power = old_p
+    plt.suptitle(None)
+
+
+#plot()
+
 big = plt.gca()
-plt.ylim(0, 100)
+plt.ylim(0, 125)
+
 
 utils.set_plot_title("Received Packets vs Number of Noise Sources")
 utils.postconfigure_plot(props)
 
-fig = plt.gcf()
+
+#plot_export_all()
+
+
+plot()
+
+
 duration_slider_ax  = fig.add_axes([0.25, 0.15, 0.65, 0.03])
 duration_slider = Slider(duration_slider_ax, 'Duration', 1, len(durations), valstep=1)
 def duration_sliders_on_changed(val):
