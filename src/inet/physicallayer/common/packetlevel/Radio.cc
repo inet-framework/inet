@@ -240,6 +240,7 @@ void Radio::handleTransmissionTimer(cMessage *message)
 
 void Radio::handleReceptionTimer(cMessage *message)
 {
+    Enter_Method_Silent();
     if (message->getKind() == IRadioSignal::SIGNAL_PART_WHOLE)
         endReception(message);
     else if (message->getKind() == IRadioSignal::SIGNAL_PART_PREAMBLE)
@@ -466,6 +467,7 @@ void Radio::continueReception(cMessage *timer)
 
 void Radio::endReception(cMessage *timer)
 {
+    Enter_Method_Silent();
     auto part = (IRadioSignal::SignalPart)timer->getKind();
     auto signal = static_cast<Signal *>(timer->getControlInfo());
     auto arrival = signal->getArrival();
