@@ -286,6 +286,7 @@ const IInterference *RadioMedium::computeInterference(const IRadio *receiver, co
 
 const IReceptionDecision *RadioMedium::computeReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission, IRadioSignal::SignalPart part) const
 {
+    Enter_Method_Silent();
     receptionDecisionComputationCount++;
     const IReception *reception = getReception(radio, transmission);
     const IInterference *interference = getInterference(radio, listening, transmission);
