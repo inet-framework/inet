@@ -97,10 +97,6 @@ double NeuralNetworkErrorModel::computePacketErrorRate(const ISnir *snir, IRadio
         frequencyDivision = ofdmModulation->getNumSubcarriers();
     else
         frequencyDivision = 1;
-    int symbolCount = timeDivision * frequencyDivision;
-    // TODO: KLUDGE:
-    if (symbolCount != 416)
-        return 0;
 
     std::vector<float> input;
     if (auto scalarSnir = dynamic_cast<const ScalarSnir *>(snir))
