@@ -473,10 +473,10 @@ void Radio::endReception(cMessage *timer)
     auto arrival = signal->getArrival();
     auto reception = signal->getReception();
     if (timer == receptionTimer && isReceiverMode(radioMode) && arrival->getEndTime() == simTime()) {
-        auto transmission = signal->getTransmission();
+        //auto transmission = signal->getTransmission();
 // TODO: this would draw twice from the random number generator in isReceptionSuccessful: auto isReceptionSuccessful = medium->isReceptionSuccessful(this, transmission, part);
-        auto isReceptionSuccessful = medium->getReceptionDecision(this, signal->getListening(), transmission, part)->isReceptionSuccessful();
-        EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "\x1b[1msuccessfully\x1b[0m" : "\x1b[1munsuccessfully\x1b[0m") << " for " << (ISignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
+        //auto isReceptionSuccessful = medium->getReceptionDecision(this, signal->getListening(), transmission, part)->isReceptionSuccessful();
+        //EV_INFO << "Reception ended: " << (isReceptionSuccessful ? "\x1b[1msuccessfully\x1b[0m" : "\x1b[1munsuccessfully\x1b[0m") << " for " << (ISignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
         auto macFrame = medium->receivePacket(this, signal);
         take(macFrame);
         // TODO: FIXME: see handling packets with incorrect PHY headers in the TODO file
