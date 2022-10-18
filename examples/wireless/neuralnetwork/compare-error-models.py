@@ -7,11 +7,11 @@ import pprint
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-s", "--scalarPacketlevel", default=False, action="store_true")
-parser.add_argument("-sn", "--scalarPacketlevelNeuralNetwork", default=False, action="store_true")
-parser.add_argument("-d", "--dimensionalPacketlevel", default=True, action="store_true")
-parser.add_argument("-dn", "--dimensionalPacketlevelNeuralNetwork", default=True, action="store_true")
-parser.add_argument("-b", "--dimensionalSymbollevel", default=True, action="store_true")
+parser.add_argument("-sp",  "--scalarPacketlevel", default=False, action="store_true")
+parser.add_argument("-spn", "--scalarPacketlevelNeuralNetwork", default=False, action="store_true")
+parser.add_argument("-dp",  "--dimensionalPacketlevel", default=True, action="store_true")
+parser.add_argument("-dpn", "--dimensionalPacketlevelNeuralNetwork", default=True, action="store_true")
+parser.add_argument("-ds",  "--dimensionalSymbollevel", default=True, action="store_true")
 parser.add_argument("inifile")
 args = parser.parse_args()
 
