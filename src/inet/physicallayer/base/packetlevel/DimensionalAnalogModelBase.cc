@@ -107,6 +107,7 @@ const INoise *DimensionalAnalogModelBase::computeNoise(const IReception *recepti
 
 const ISnir *DimensionalAnalogModelBase::computeSNIR(const IReception *reception, const INoise *noise) const
 {
+    Enter_Method_Silent();
     const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
     return new DimensionalSnir(dimensionalReception, dimensionalNoise);

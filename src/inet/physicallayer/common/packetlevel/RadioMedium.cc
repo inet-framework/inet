@@ -289,6 +289,7 @@ const IInterference *RadioMedium::computeInterference(const IRadio *receiver, co
 
 const IInterference *RadioMedium::computeInterference(const IRadio *receiver, const IListening *listening, const ITransmission *transmission) const
 {
+    Enter_Method_Silent();
     interferenceComputationCount++;
     const IReception *reception = getReception(receiver, transmission);
     const INoise *noise = backgroundNoise ? backgroundNoise->computeNoise(listening) : nullptr;
@@ -307,6 +308,7 @@ const IReceptionDecision *RadioMedium::computeReceptionDecision(const IRadio *ra
 
 const IReceptionResult *RadioMedium::computeReceptionResult(const IRadio *radio, const IListening *listening, const ITransmission *transmission) const
 {
+    Enter_Method_Silent();
     receptionResultComputationCount++;
     const IReception *reception = getReception(radio, transmission);
     const IInterference *interference = getInterference(radio, listening, transmission);
@@ -337,6 +339,7 @@ const IListening *RadioMedium::getListening(const IRadio *receiver, const ITrans
 
 const IReception *RadioMedium::getReception(const IRadio *receiver, const ITransmission *transmission) const
 {
+    Enter_Method_Silent();
     cacheReceptionGetCount++;
     const IReception *reception = communicationCache->getCachedReception(receiver, transmission);
     if (reception)
@@ -384,6 +387,7 @@ const INoise *RadioMedium::getNoise(const IRadio *receiver, const ITransmission 
 
 const ISnir *RadioMedium::getSNIR(const IRadio *receiver, const ITransmission *transmission) const
 {
+    Enter_Method_Silent();
     cacheSNIRGetCount++;
     const ISnir *snir = communicationCache->getCachedSNIR(receiver, transmission);
     if (snir)
@@ -571,7 +575,7 @@ void RadioMedium::sendToRadio(IRadio *transmitter, const IRadio *receiver, const
     const ITransmission *transmission = transmittedSignal->getTransmission();
     if (receiver != transmitter && receiver->getReceiver() != nullptr && isPotentialReceiver(receiver, transmission)) {
         auto transmitterRadio = const_cast<cSimpleModule *>(check_and_cast<const cSimpleModule *>(transmitter));
-        cMethodCallContextSwitcher contextSwitcher(transmitterRadio);
+        cMethodCallContextSwitcher contextSwitcher(transmitterRadio, __PRETTY_FUNCTION__);
         contextSwitcher.methodCall("sendToRadio");
         const IArrival *arrival = getArrival(receiver, transmission);
         simtime_t propagationTime = arrival->getStartPropagationTime();
@@ -673,6 +677,7 @@ bool RadioMedium::isReceptionAttempted(const IRadio *receiver, const ITransmissi
 
 bool RadioMedium::isReceptionSuccessful(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) const
 {
+    Enter_Method_Silent();
     const IReception *reception = getReception(receiver, transmission);
     const IListening *listening = getListening(receiver, transmission);
     // TODO: why compute?
@@ -701,7 +706,7 @@ void RadioMedium::pickUpSignals(IRadio *receiverRadio)
         {
             const IArrival *arrival = getArrival(receiverRadio, transmission);
             if (arrival->getEndTime() >= simTime()) {
-                cMethodCallContextSwitcher contextSwitcher(transmitterRadio);
+                cMethodCallContextSwitcher contextSwitcher(transmitterRadio, __PRETTY_FUNCTION__);
                 contextSwitcher.methodCall("sendToRadio");
                 const Packet *packet = transmission->getPacket();
                 EV_DEBUG << "Picking up " << packet << " originally sent "

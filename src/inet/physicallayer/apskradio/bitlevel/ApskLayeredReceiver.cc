@@ -154,6 +154,7 @@ const IReceptionPacketModel *ApskLayeredReceiver::createPacketModel(const Layere
 
 const IReceptionResult *ApskLayeredReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
+    Enter_Method_Silent();
     const LayeredTransmission *transmission = check_and_cast<const LayeredTransmission *>(reception->getTransmission());
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
     const IReceptionSampleModel *sampleModel = createSampleModel(transmission, snir, analogModel);
