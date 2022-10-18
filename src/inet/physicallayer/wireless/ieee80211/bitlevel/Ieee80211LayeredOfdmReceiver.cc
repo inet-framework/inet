@@ -111,6 +111,7 @@ std::ostream& Ieee80211LayeredOfdmReceiver::printToStream(std::ostream& stream, 
 
 const IReceptionSampleModel *Ieee80211LayeredOfdmReceiver::createSampleModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
+    Enter_Method_Silent();
     if (levelOfDetail == SAMPLE_DOMAIN)
         return errorModel->computeSampleModel(transmission, snir);
     return nullptr;
@@ -118,6 +119,7 @@ const IReceptionSampleModel *Ieee80211LayeredOfdmReceiver::createSampleModel(con
 
 const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createBitModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
+    Enter_Method_Silent();
     if (levelOfDetail == BIT_DOMAIN)
         return errorModel->computeBitModel(transmission, snir);
     return nullptr;
@@ -125,6 +127,7 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createBitModel(const Lay
 
 const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createPacketModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
+    Enter_Method_Silent();
     if (levelOfDetail == PACKET_DOMAIN)
         return errorModel->computePacketModel(transmission, snir);
     return nullptr;
@@ -132,10 +135,9 @@ const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createPacketModel(con
 
 const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
-    if (levelOfDetail == SYMBOL_DOMAIN) {
-        //std::cout << "blah" << std::endl;
+    Enter_Method_Silent();
+    if (levelOfDetail == SYMBOL_DOMAIN)
         return errorModel->computeSymbolModel(transmission, snir);
-    }
     return nullptr;
 }
 
@@ -149,6 +151,7 @@ double Ieee80211LayeredOfdmReceiver::getCodeRateFromDecoderModule(const IDecoder
 
 const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createCompleteBitModel(const IReceptionBitModel *signalFieldBitModel, const IReceptionBitModel *dataFieldBitModel) const
 {
+    Enter_Method_Silent();
     if (levelOfDetail >= BIT_DOMAIN) {
         BitVector *bits = new BitVector(*signalFieldBitModel->getAllBits());
         if (dataFieldBitModel != nullptr) {
@@ -346,6 +349,7 @@ const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createCompletePacketM
 
 const Ieee80211OfdmMode *Ieee80211LayeredOfdmReceiver::computeMode(Hz bandwidth) const
 {
+    Enter_Method_Silent();
     const Ieee80211OfdmDecoderModule *ofdmSignalDecoderModule = check_and_cast<const Ieee80211OfdmDecoderModule *>(signalDecoder);
     const Ieee80211OfdmDecoderModule *ofdmDataDecoderModule = check_and_cast<const Ieee80211OfdmDecoderModule *>(dataDecoder);
     const Ieee80211OfdmDemodulatorModule *ofdmSignalDemodulatorModule = check_and_cast<const Ieee80211OfdmDemodulatorModule *>(signalDemodulator);
@@ -357,20 +361,15 @@ const Ieee80211OfdmMode *Ieee80211LayeredOfdmReceiver::computeMode(Hz bandwidth)
 
 const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    //std::cout << "A1" << std::endl;
+    Enter_Method_Silent();
     const Ieee80211LayeredTransmission *transmission = check_and_cast<const Ieee80211LayeredTransmission *>(reception->getTransmission());
     //std::cout << "A2" << std::endl;
     // corruted model
     const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
-    //std::cout << "A3" << std::endl;
     const IReceptionSampleModel *sampleModel = createSampleModel(transmission, snir);
-    //std::cout << "A4" << std::endl;
     const IReceptionSymbolModel *symbolModel = createSymbolModel(transmission, snir);
-    //std::cout << "A5" << std::endl;
     const IReceptionBitModel *bitModel = createBitModel(transmission, snir);
-    //std::cout << "A6" << std::endl;
     const IReceptionPacketModel *packetModel = createPacketModel(transmission, snir);
-    //std::cout << "B" << std::endl;
     const IReceptionSymbolModel *signalFieldSymbolModel = createSignalFieldSymbolModel(symbolModel);
     const IReceptionSymbolModel *dataFieldSymbolModel = createDataFieldSymbolModel(symbolModel);
     const IReceptionBitModel *signalFieldBitModel = createSignalFieldBitModel(bitModel, signalFieldSymbolModel);
@@ -430,8 +429,6 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
     auto channelInd = packet->addTagIfAbsent<Ieee80211ChannelInd>();
     channelInd->setChannel(transmission->getChannel());
 
-    //std::cout << "E" << std::endl;
-
     return new LayeredReceptionResult(reception, decisions, packetModel, bitModel, symbolModel, sampleModel, analogModel);
 }
 
@@ -444,6 +441,7 @@ const IListening *Ieee80211LayeredOfdmReceiver::createListening(const IRadio *ra
 // TODO copy
 const IListeningDecision *Ieee80211LayeredOfdmReceiver::computeListeningDecision(const IListening *listening, const IInterference *interference) const
 {
+    Enter_Method_Silent();
     const IRadio *receiver = listening->getReceiver();
     const IRadioMedium *radioMedium = receiver->getMedium();
     const IAnalogModel *analogModel = radioMedium->getAnalogModel();
@@ -458,6 +456,7 @@ const IListeningDecision *Ieee80211LayeredOfdmReceiver::computeListeningDecision
 
 bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const
 {
+    Enter_Method_Silent();
     auto ieee80211Transmission = dynamic_cast<const Ieee80211LayeredTransmission *>(transmission);
     return ieee80211Transmission && SnirReceiverBase::computeIsReceptionPossible(listening, transmission);
 }
@@ -466,6 +465,7 @@ bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *
 // TODO: copy
 bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const
 {
+    Enter_Method_Silent();
     auto ieee80211Transmission = dynamic_cast<const Ieee80211LayeredTransmission *>(reception->getTransmission());
     if (ieee80211Transmission == nullptr)
         return false;

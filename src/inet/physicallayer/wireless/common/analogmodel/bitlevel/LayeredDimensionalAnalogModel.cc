@@ -46,6 +46,7 @@ const IReception *LayeredDimensionalAnalogModel::computeReception(const IRadio *
 
 const ISnir *LayeredDimensionalAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const
 {
+    Enter_Method_Silent();
     const LayeredReception *layeredReception = check_and_cast<const LayeredReception *>(reception);
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
     return new LayeredSnir(layeredReception, dimensionalNoise);

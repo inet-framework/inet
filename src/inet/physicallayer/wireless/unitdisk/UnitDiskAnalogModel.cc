@@ -68,6 +68,7 @@ const INoise *UnitDiskAnalogModel::computeNoise(const IReception *reception, con
 
 const ISnir *UnitDiskAnalogModel::computeSNIR(const IReception *reception, const INoise *noise) const
 {
+    Enter_Method_Silent();
     return new UnitDiskSnir(reception, noise);
 }
 

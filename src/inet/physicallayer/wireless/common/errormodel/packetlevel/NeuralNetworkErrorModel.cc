@@ -132,6 +132,7 @@ double NeuralNetworkErrorModel::computePacketErrorRate(const ISnir *snir, IRadio
 
 std::vector<float> NeuralNetworkErrorModel::fillSnirTensor(const ScalarSnir *snir, int timeDivision, int frequencyDivision) const
 {
+    Enter_Method_Silent();
     auto scalarSnir = check_and_cast<const ScalarSnir *>(snir);
     auto reception = snir->getReception();
     auto startTime = reception->getHeaderStartTime();
@@ -158,6 +159,7 @@ std::vector<float> NeuralNetworkErrorModel::fillSnirTensor(const ScalarSnir *sni
 
 std::vector<float> NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir *snir, int timeDivision, int frequencyDivision) const
 {
+    Enter_Method_Silent();
     auto dimensionalSnir = check_and_cast<const DimensionalSnir *>(snir);
     auto snirFunction = dimensionalSnir->getSnir();
     auto reception = snir->getReception();

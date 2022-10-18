@@ -71,6 +71,7 @@ const IReceptionDecision *ReceiverBase::computeReceptionDecision(const IListenin
 
 const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
+    Enter_Method_Silent();
     bool isReceptionSuccessful = true;
     for (auto decision : *decisions)
         isReceptionSuccessful &= decision->isReceptionSuccessful();
@@ -92,6 +93,7 @@ const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *l
 
 W ReceiverBase::computeSignalPower(const IListening *listening, const ISnir *snir, const IInterference *interference) const
 {
+    Enter_Method_Silent();
     if (!dynamic_cast<const NarrowbandNoiseBase *>(snir->getNoise()))
         return W(0);
     else {
@@ -105,6 +107,7 @@ W ReceiverBase::computeSignalPower(const IListening *listening, const ISnir *sni
 
 Packet *ReceiverBase::computeReceivedPacket(const ISnir *snir, bool isReceptionSuccessful) const
 {
+    Enter_Method_Silent();
     auto transmittedPacket = snir->getReception()->getTransmission()->getPacket();
     auto receivedPacket = transmittedPacket->dup();
     receivedPacket->clearTags();

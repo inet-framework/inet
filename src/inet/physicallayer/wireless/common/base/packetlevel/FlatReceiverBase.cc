@@ -78,6 +78,7 @@ bool FlatReceiverBase::computeIsReceptionPossible(const IListening *listening, c
 
 bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
 {
+    Enter_Method_Silent();
     if (!SnirReceiverBase::computeIsReceptionSuccessful(listening, reception, part, interference, snir))
         return false;
     else if (!errorModel)
@@ -97,6 +98,7 @@ bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening,
 
 const IReceptionResult *FlatReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
+    Enter_Method_Silent();
     auto receptionResult = NarrowbandReceiverBase::computeReceptionResult(listening, reception, interference, snir, decisions);
     auto errorRateInd = const_cast<Packet *>(receptionResult->getPacket())->addTagIfAbsent<ErrorRateInd>();
     errorRateInd->setPacketErrorRate(errorModel ? errorModel->computePacketErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE) : 0.0);
