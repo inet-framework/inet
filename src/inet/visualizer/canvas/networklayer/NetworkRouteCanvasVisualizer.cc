@@ -33,6 +33,8 @@ namespace visualizer {
 
 Define_Module(NetworkRouteCanvasVisualizer);
 
+// TODO replace dynamic_cast<> checks to an other method
+
 bool NetworkRouteCanvasVisualizer::isPathStart(cModule *module) const
 {
 #ifdef INET_WITH_IPv4
