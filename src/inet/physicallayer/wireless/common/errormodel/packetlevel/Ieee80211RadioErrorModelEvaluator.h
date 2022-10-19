@@ -44,7 +44,7 @@ class INET_API Ieee80211RadioErrorModelEvaluator : public cSimpleModule
 
     virtual void evaluateErrorModel();
 
-    virtual Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> assembleNoisePowerFunction(std::vector<double> snirs, int frequencyDivision, int timeDivision, simtime_t startTime, simtime_t endTime, Hz startFrequency, Hz endFrequency);
+    // static virtual Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> assembleNoisePowerFunction(std::vector<double> snirs, int frequencyDivision, int timeDivision, simtime_t startTime, simtime_t endTime, Hz startFrequency, Hz endFrequency);
 
   public:
     virtual ~Ieee80211RadioErrorModelEvaluator() { closeFiles(); }
