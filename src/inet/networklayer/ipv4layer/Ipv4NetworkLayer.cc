@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/networklayer/ipv4/Ipv4NetworkLayer.h"
+#include "inet/networklayer/ipv4layer/Ipv4NetworkLayer.h"
 
 #include "inet/common/StringFormat.h"
 

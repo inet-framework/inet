@@ -10,7 +10,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4layer/routingtable/IIpv4RoutingTable.h"
 #include "inet/queueing/base/PacketProcessorBase.h"
 #include "inet/queueing/contract/IActivePacketSource.h"
 #include "inet/queueing/contract/IPacketPusher.h"

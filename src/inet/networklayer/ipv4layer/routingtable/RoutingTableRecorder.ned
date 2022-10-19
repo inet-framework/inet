@@ -5,7 +5,7 @@
 //
 
 
-package inet.networklayer.ipv4;
+package inet.networklayer.ipv4layer.routingtable;
 
 //
 // Records changes in the routing tables (~Ipv4RoutingTable) and interface tables

@@ -18,7 +18,7 @@
 
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/routing/eigrp/pdms/IEigrpModule.h"
 #include "inet/routing/eigrp/tables/EigrpNetworkTable.h"

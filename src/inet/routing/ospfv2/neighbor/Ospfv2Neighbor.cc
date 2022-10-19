@@ -8,7 +8,7 @@
 
 #include <memory.h>
 
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4Header_m.h"
 #include "inet/routing/ospfv2/Ospfv2Crc.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/neighbor/Ospfv2NeighborState.h"

@@ -8,8 +8,8 @@
 #define __INET_IPV4DEFRAGMENTER_H
 
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/networklayer/ipv4/Icmp.h"
-#include "inet/networklayer/ipv4/Ipv4FragBuf.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4FragBuf.h"
+#include "inet/networklayer/ipv4layer/icmp/Icmp.h"
 #include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {

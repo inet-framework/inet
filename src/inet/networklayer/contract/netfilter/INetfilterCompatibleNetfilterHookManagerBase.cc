@@ -4,27 +4,28 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/networklayer/ipv4modular/INetfilterCompatibleIpv4HookManagerBase.h"
+#include "inet/networklayer/contract/netfilter/INetfilterCompatibleNetfilterHookManagerBase.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/networklayer/ipv4modular/IIpv4HookManager_m.h"
+#include "inet/networklayer/contract/netfilter/NetfilterHookDefs_m.h"
 
 namespace inet {
+namespace NetfilterHook {
 
-Ipv4Hook::NetfilterResult INetfilterCompatibleIpv4HookManagerBase::mapResult(INetfilter::IHook::Result r)
+NetfilterResult INetfilterCompatibleNetfilterHookManagerBase::mapResult(INetfilter::IHook::Result r)
 {
     switch (r) {
-        case INetfilter::IHook::Result::ACCEPT: return Ipv4Hook::NetfilterResult::ACCEPT;
-        case INetfilter::IHook::Result::DROP: return Ipv4Hook::NetfilterResult::DROP;
-        case INetfilter::IHook::Result::QUEUE: return Ipv4Hook::NetfilterResult::QUEUE;
-        //case INetfilter::IHook::Result::REPEAT: return Ipv4Hook::NetfilterResult::REPEAT;
-        case INetfilter::IHook::Result::STOLEN: return Ipv4Hook::NetfilterResult::STOLEN;
-        //case INetfilter::IHook::Result::STOP: return Ipv4Hook::NetfilterResult::STOP;
+        case INetfilter::IHook::Result::ACCEPT: return NetfilterResult::ACCEPT;
+        case INetfilter::IHook::Result::DROP: return NetfilterResult::DROP;
+        case INetfilter::IHook::Result::QUEUE: return NetfilterResult::QUEUE;
+        //case INetfilter::IHook::Result::REPEAT: return NetfilterResult::REPEAT;
+        case INetfilter::IHook::Result::STOLEN: return NetfilterResult::STOLEN;
+        //case INetfilter::IHook::Result::STOP: return NetfilterResult::STOP;
         default: throw cRuntimeError("Unknown result value");
     }
 }
 
-void INetfilterCompatibleIpv4HookManagerBase::registerHook(int priority, IHook *hook)
+void INetfilterCompatibleNetfilterHookManagerBase::registerHook(int priority, IHook *hook)
 {
 //    Enter_Method(__FUNCTION__);
     omnetpp::cMethodCallContextSwitcher __ctx(check_and_cast<cComponent *>(this)); __ctx.methodCall(__FUNCTION__);
@@ -38,22 +39,22 @@ void INetfilterCompatibleIpv4HookManagerBase::registerHook(int priority, IHook *
     IHookHandlers h;
 
     h.priority = priority;
-    h.prerouting = new Ipv4Hook::NetfilterHandler([=](Packet* packet) { return mapResult(hook->datagramPreRoutingHook(packet)); });
-    h.localIn = new Ipv4Hook::NetfilterHandler([=](Packet* packet) { return mapResult(hook->datagramLocalInHook(packet)); });
-    h.forward = new Ipv4Hook::NetfilterHandler([=](Packet* packet) { return mapResult(hook->datagramForwardHook(packet)); });
-    h.postrouting = new Ipv4Hook::NetfilterHandler([=](Packet* packet) { return mapResult(hook->datagramPostRoutingHook(packet)); });
-    h.localOut = new Ipv4Hook::NetfilterHandler([=](Packet* packet) { return mapResult(hook->datagramLocalOutHook(packet)); });
+    h.prerouting = new NetfilterHandler([=](Packet* packet) { return mapResult(hook->datagramPreRoutingHook(packet)); });
+    h.localIn = new NetfilterHandler([=](Packet* packet) { return mapResult(hook->datagramLocalInHook(packet)); });
+    h.forward = new NetfilterHandler([=](Packet* packet) { return mapResult(hook->datagramForwardHook(packet)); });
+    h.postrouting = new NetfilterHandler([=](Packet* packet) { return mapResult(hook->datagramPostRoutingHook(packet)); });
+    h.localOut = new NetfilterHandler([=](Packet* packet) { return mapResult(hook->datagramLocalOutHook(packet)); });
 
-    registerNetfilterHandler(Ipv4Hook::NetfilterType::PREROUTING, h.priority, h.prerouting);
-    registerNetfilterHandler(Ipv4Hook::NetfilterType::LOCALIN, h.priority, h.localIn);
-    registerNetfilterHandler(Ipv4Hook::NetfilterType::FORWARD, h.priority, h.forward);
-    registerNetfilterHandler(Ipv4Hook::NetfilterType::POSTROUTING, h.priority, h.postrouting);
-    registerNetfilterHandler(Ipv4Hook::NetfilterType::LOCALOUT, h.priority, h.localOut);
+    registerNetfilterHandler(NetfilterType::PREROUTING, h.priority, h.prerouting);
+    registerNetfilterHandler(NetfilterType::LOCALIN, h.priority, h.localIn);
+    registerNetfilterHandler(NetfilterType::FORWARD, h.priority, h.forward);
+    registerNetfilterHandler(NetfilterType::POSTROUTING, h.priority, h.postrouting);
+    registerNetfilterHandler(NetfilterType::LOCALOUT, h.priority, h.localOut);
 
     hookInfo.insert(std::pair<IHook*, IHookHandlers>(hook, h));
 }
 
-void INetfilterCompatibleIpv4HookManagerBase::unregisterHook(IHook *hook)
+void INetfilterCompatibleNetfilterHookManagerBase::unregisterHook(IHook *hook)
 {
 //    Enter_Method(__FUNCTION__);
     omnetpp::cMethodCallContextSwitcher __ctx(check_and_cast<cComponent *>(this)); __ctx.methodCall(__FUNCTION__);
@@ -66,22 +67,23 @@ void INetfilterCompatibleIpv4HookManagerBase::unregisterHook(IHook *hook)
         throw cRuntimeError("Usage error: the hook not found in list of registered hooks.");
 
     const auto& h = it->second;
-    unregisterNetfilterHandler(Ipv4Hook::NetfilterType::PREROUTING, h.priority, h.prerouting);
-    unregisterNetfilterHandler(Ipv4Hook::NetfilterType::LOCALIN, h.priority, h.localIn);
-    unregisterNetfilterHandler(Ipv4Hook::NetfilterType::FORWARD, h.priority, h.forward);
-    unregisterNetfilterHandler(Ipv4Hook::NetfilterType::POSTROUTING, h.priority, h.postrouting);
-    unregisterNetfilterHandler(Ipv4Hook::NetfilterType::LOCALOUT, h.priority, h.localOut);
+    unregisterNetfilterHandler(NetfilterType::PREROUTING, h.priority, h.prerouting);
+    unregisterNetfilterHandler(NetfilterType::LOCALIN, h.priority, h.localIn);
+    unregisterNetfilterHandler(NetfilterType::FORWARD, h.priority, h.forward);
+    unregisterNetfilterHandler(NetfilterType::POSTROUTING, h.priority, h.postrouting);
+    unregisterNetfilterHandler(NetfilterType::LOCALOUT, h.priority, h.localOut);
     hookInfo.erase(it);
 }
 
-void INetfilterCompatibleIpv4HookManagerBase::dropQueuedDatagram(const Packet *datagram)
+void INetfilterCompatibleNetfilterHookManagerBase::dropQueuedDatagram(const Packet *datagram)
 {
-    reinjectDatagram(const_cast<Packet *>(datagram), Ipv4Hook::NetfilterResult::DROP);
+    reinjectDatagram(const_cast<Packet *>(datagram), NetfilterResult::DROP);
 }
 
-void INetfilterCompatibleIpv4HookManagerBase::reinjectQueuedDatagram(const Packet *datagram)
+void INetfilterCompatibleNetfilterHookManagerBase::reinjectQueuedDatagram(const Packet *datagram)
 {
-    reinjectDatagram(const_cast<Packet *>(datagram), Ipv4Hook::NetfilterResult::ACCEPT);
+    reinjectDatagram(const_cast<Packet *>(datagram), NetfilterResult::ACCEPT);
 }
 
+} // namespace NetfilterHook
 } // namespace inet

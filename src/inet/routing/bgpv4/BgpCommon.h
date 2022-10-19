@@ -8,7 +8,7 @@
 #define __INET_BGPCOMMON_H
 
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4Header_m.h"
 #include "inet/routing/bgpv4/BgpCommon_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 

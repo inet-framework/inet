@@ -4,12 +4,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-package inet.networklayer.ipv4modular;
+package inet.networklayer.contract.netfilter;
 
 //
 // TODO documentation
 //
-moduleinterface IIpv4HookManager
+moduleinterface INetfilterHookManager
 {
     @ommittedTypename("");
 }

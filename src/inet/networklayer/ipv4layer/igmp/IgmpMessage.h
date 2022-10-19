@@ -8,7 +8,7 @@
 #ifndef __INET_IGMPMESSAGE_H
 #define __INET_IGMPMESSAGE_H
 
-#include "inet/networklayer/ipv4/IgmpMessage_m.h"
+#include "inet/networklayer/ipv4layer/igmp/IgmpMessage_m.h"
 
 #endif
 

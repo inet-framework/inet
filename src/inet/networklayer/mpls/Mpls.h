@@ -15,7 +15,7 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4Header_m.h"
 #include "inet/networklayer/mpls/ConstType.h"
 #include "inet/networklayer/mpls/IIngressClassifier.h"
 #include "inet/networklayer/mpls/LibTable.h"

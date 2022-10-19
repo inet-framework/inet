@@ -9,7 +9,7 @@
 
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
 #include "inet/routing/bgpv4/BgpCommon.h"
 #include "inet/routing/bgpv4/BgpRouter.h"
 #include "inet/routing/bgpv4/bgpmessage/BgpHeader_m.h"

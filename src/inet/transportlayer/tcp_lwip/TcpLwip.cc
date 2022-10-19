@@ -24,7 +24,7 @@
 #endif // ifdef INET_WITH_IPv6
 
 #ifdef INET_WITH_IPv4
-#include "inet/networklayer/ipv4/IcmpHeader_m.h"
+#include "inet/networklayer/ipv4layer/icmp/IcmpHeader_m.h"
 #endif // ifdef INET_WITH_IPv4
 
 #include "inet/transportlayer/common/L4Tools.h"

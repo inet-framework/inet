@@ -6,7 +6,7 @@
 //
 
 
-#include "inet/networklayer/ipv4/Ipv4.h"
+#include "inet/networklayer/ipv4layer/ipv4/Ipv4.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -37,11 +37,11 @@
 #include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4SocketCommand_m.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-#include "inet/networklayer/ipv4/IcmpHeader_m.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
+#include "inet/networklayer/ipv4layer/icmp/IcmpHeader_m.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4OptionsTag_m.h"
+#include "inet/networklayer/ipv4layer/routingtable/IIpv4RoutingTable.h"
 
 namespace inet {
 

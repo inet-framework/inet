@@ -9,27 +9,28 @@
 
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
-#include "inet/networklayer/ipv4modular/IIpv4HookManager.h"
+#include "inet/networklayer/contract/netfilter/INetfilterHookManager.h"
 
 namespace inet {
+namespace NetfilterHook {
 
-class INET_API INetfilterCompatibleIpv4HookManagerBase : public INetfilter, public IIpv4HookManager
+class INET_API INetfilterCompatibleNetfilterHookManagerBase : public INetfilter, public INetfilterHookManager
 {
   protected:
     class IHookHandlers {
       public:
         int priority = -1;
-        Ipv4Hook::NetfilterHandler *prerouting = nullptr;
-        Ipv4Hook::NetfilterHandler *localIn = nullptr;
-        Ipv4Hook::NetfilterHandler *forward = nullptr;
-        Ipv4Hook::NetfilterHandler *postrouting = nullptr;
-        Ipv4Hook::NetfilterHandler *localOut = nullptr;
+        NetfilterHandler *prerouting = nullptr;
+        NetfilterHandler *localIn = nullptr;
+        NetfilterHandler *forward = nullptr;
+        NetfilterHandler *postrouting = nullptr;
+        NetfilterHandler *localOut = nullptr;
     };
     typedef std::map<IHook*, IHookHandlers> IHookInfo;
     IHookInfo hookInfo;
 
   public:
-    static Ipv4Hook::NetfilterResult mapResult(INetfilter::IHook::Result r);
+    static NetfilterResult mapResult(INetfilter::IHook::Result r);
 
     // INetfilter compatibility:
     virtual void registerHook(int priority, IHook *hook) override;
@@ -38,6 +39,7 @@ class INET_API INetfilterCompatibleIpv4HookManagerBase : public INetfilter, publ
     virtual void reinjectQueuedDatagram(const Packet *datagram) override;
 };
 
+} // namespace NetfilterHook
 } // namespace inet
 
 #endif

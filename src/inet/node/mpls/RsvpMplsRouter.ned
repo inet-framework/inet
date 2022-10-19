@@ -11,7 +11,7 @@ import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.contract.ILoopbackInterface;
 import inet.linklayer.contract.IPppInterface;
 import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.Ipv4NetworkLayer;
+import inet.networklayer.ipv4layer.Ipv4NetworkLayer;
 import inet.networklayer.mpls.IIngressClassifier;
 import inet.networklayer.mpls.LibTable;
 import inet.networklayer.mpls.Mpls;

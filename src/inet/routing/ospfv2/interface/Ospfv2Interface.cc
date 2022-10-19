@@ -12,8 +12,8 @@
 #include <vector>
 
 #include "inet/common/checksum/TcpIpChecksum.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
 #include "inet/routing/ospfv2/Ospfv2Crc.h"
 #include "inet/routing/ospfv2/Ospfv2PacketSerializer.h"
 #include "inet/routing/ospfv2/interface/Ospfv2InterfaceStateDown.h"

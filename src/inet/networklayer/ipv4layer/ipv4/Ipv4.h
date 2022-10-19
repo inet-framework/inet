@@ -20,9 +20,9 @@
 #include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
-#include "inet/networklayer/ipv4/Icmp.h"
-#include "inet/networklayer/ipv4/Ipv4FragBuf.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4FragBuf.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4layer/icmp/Icmp.h"
 
 namespace inet {
 

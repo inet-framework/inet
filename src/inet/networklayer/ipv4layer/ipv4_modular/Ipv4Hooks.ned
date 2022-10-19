@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-package inet.networklayer.ipv4modular;
+package inet.networklayer.ipv4layer.ipv4_modular;
 
 //
 // TODO documentation

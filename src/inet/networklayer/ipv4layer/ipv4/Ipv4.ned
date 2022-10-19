@@ -5,7 +5,10 @@
 //
 
 
-package inet.networklayer.ipv4;
+package inet.networklayer.ipv4layer.ipv4;
+
+import inet.networklayer.contract.ipv4.IIpv4;
+
 
 //
 // Implements the IPv4 protocol. The protocol header is represented

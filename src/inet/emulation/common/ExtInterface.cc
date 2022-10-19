@@ -23,7 +23,7 @@
 #include "inet/common/NetworkNamespaceContext.h"
 #include "inet/emulation/common/ExtInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
 
 namespace inet {
 

@@ -11,8 +11,8 @@ import inet.common.MessageDispatcher;
 import inet.networklayer.configurator.ipv4.Ipv4NodeConfigurator;
 import inet.networklayer.contract.IArp;
 import inet.networklayer.contract.INetworkLayer;
-import inet.networklayer.ipv4.IIpv4;
-import inet.networklayer.ipv4.Ipv4RoutingTable;
+import inet.networklayer.contract.ipv4.IIpv4;
+import inet.networklayer.ipv4layer.routingtable.Ipv4RoutingTable;
 
 
 module ExtUpperIpv4NetworkLayer like INetworkLayer

@@ -5,7 +5,7 @@
 //
 
 
-package inet.networklayer.ipv4;
+package inet.networklayer.ipv4layer.nat;
 
 //
 // Stores the network address translation table.

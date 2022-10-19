@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/networklayer/ipv4modular/Ipv4Modular.h"
+#include "inet/networklayer/ipv4layer/ipv4_modular/Ipv4Modular.h"
 
 #include "inet/common/IProtocolRegistrationListener.h"
-#include "inet/networklayer/ipv4modular/IIpv4HookManager_m.h"
+#include "inet/networklayer/contract/netfilter/NetfilterHookDefs_m.h"
 
 namespace inet {
 
@@ -18,7 +18,7 @@ void Ipv4Modular::initialize(int stage)
     cModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        hookManager = check_and_cast_nullable<IIpv4HookManager *>(findModuleByPath(".hookManager"));
+        hookManager = check_and_cast_nullable<INetfilterHookManager *>(findModuleByPath(".hookManager"));
     }
     else if (stage == INITSTAGE_NETWORK_LAYER) {
         registerService(Protocol::ipv4, gate("transportIn"), gate("transportOut"));
@@ -32,7 +32,7 @@ void Ipv4Modular::chkHookManager()
         throw cRuntimeError("No hook manager, hooks not supported");
 }
 
-void Ipv4Modular::reinjectDatagram(Packet *datagram, Ipv4Hook::NetfilterResult action)
+void Ipv4Modular::reinjectDatagram(Packet *datagram, NetfilterHook::NetfilterResult action)
 {
     Enter_Method(__FUNCTION__);
 
@@ -40,7 +40,7 @@ void Ipv4Modular::reinjectDatagram(Packet *datagram, Ipv4Hook::NetfilterResult a
     hookManager->reinjectDatagram(datagram, action);
 }
 
-void Ipv4Modular::registerNetfilterHandler(Ipv4Hook::NetfilterType type, int priority, Ipv4Hook::NetfilterHandler *handler)
+void Ipv4Modular::registerNetfilterHandler(NetfilterHook::NetfilterType type, int priority, NetfilterHook::NetfilterHandler *handler)
 {
     Enter_Method(__FUNCTION__);
 
@@ -48,7 +48,7 @@ void Ipv4Modular::registerNetfilterHandler(Ipv4Hook::NetfilterType type, int pri
     hookManager->registerNetfilterHandler(type, priority, handler);
 }
 
-void Ipv4Modular::unregisterNetfilterHandler(Ipv4Hook::NetfilterType type, int priority, Ipv4Hook::NetfilterHandler *handler)
+void Ipv4Modular::unregisterNetfilterHandler(NetfilterHook::NetfilterType type, int priority, NetfilterHook::NetfilterHandler *handler)
 {
     Enter_Method(__FUNCTION__);
 

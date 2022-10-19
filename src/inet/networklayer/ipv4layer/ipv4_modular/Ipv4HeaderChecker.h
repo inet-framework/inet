@@ -8,7 +8,7 @@
 #define __INET_IPV4FRAMERECEIVER_H
 
 #include "inet/common/ModuleRefByPar.h"
-#include "inet/networklayer/ipv4/Icmp.h"
+#include "inet/networklayer/ipv4layer/icmp/Icmp.h"
 #include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {

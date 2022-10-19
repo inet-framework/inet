@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-package inet.networklayer.ipv4modular;
+package inet.networklayer.ipv4layer.ipv4_modular;
 
-import inet.networklayer.ipv4.IIpv4;
+import inet.networklayer.contract.ipv4.IIpv4;
+import inet.networklayer.contract.netfilter.INetfilterHookManager;
 import inet.queueing.common.PacketMultiplexer;
 
 
@@ -28,7 +29,7 @@ module Ipv4Modular like IIpv4
         input queueIn @labels(Ipv4Header,ArpPacket,Ieee802Ctrl);
         output queueOut @labels(Ipv4Header,ArpPacket,Ieee802Ctrl);
     submodules:
-        hookManager: <default("")> like IIpv4HookManager {
+        hookManager: <default("")> like INetfilterHookManager {
             @display("p=100,100");
         }
         ipv4SocketTable: Ipv4SocketTable {

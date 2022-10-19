@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/networklayer/ipv4/RoutingTableRecorder.h"
+#include "inet/networklayer/ipv4layer/routingtable/RoutingTableRecorder.h"
 
 #include <cinttypes>
 
@@ -13,9 +13,9 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/networklayer/ipv4/Ipv4Route.h"
+#include "inet/networklayer/ipv4layer/routingtable/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/routingtable/Ipv4Route.h"
 
 namespace inet {
 

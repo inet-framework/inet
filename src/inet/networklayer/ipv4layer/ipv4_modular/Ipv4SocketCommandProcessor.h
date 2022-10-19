@@ -13,8 +13,8 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/OperationalMixin.h"
 #include "inet/common/packet/Message.h"
-#include "inet/networklayer/ipv4modular/Ipv4SocketPacketProcessor.h"
-#include "inet/networklayer/ipv4modular/Ipv4SocketTable.h"
+#include "inet/networklayer/ipv4layer/ipv4_modular/Ipv4SocketPacketProcessor.h"
+#include "inet/networklayer/ipv4layer/ipv4_modular/Ipv4SocketTable.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
 namespace inet {

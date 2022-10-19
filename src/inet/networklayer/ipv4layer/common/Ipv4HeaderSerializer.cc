@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/networklayer/ipv4/Ipv4HeaderSerializer.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4HeaderSerializer.h"
 
 #include "inet/common/Endian.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"

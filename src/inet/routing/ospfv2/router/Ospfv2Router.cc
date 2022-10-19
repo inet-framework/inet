@@ -7,7 +7,7 @@
 #include "inet/routing/ospfv2/router/Ospfv2Router.h"
 
 #include "inet/common/stlutils.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
 #include "inet/routing/ospfv2/router/Lsa.h"
 
 namespace inet {

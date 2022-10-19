@@ -21,8 +21,8 @@
 #include "inet/common/stlutils.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/networklayer/ipv4/IgmpMessage.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/igmp/IgmpMessage.h"
 
 namespace inet {
 

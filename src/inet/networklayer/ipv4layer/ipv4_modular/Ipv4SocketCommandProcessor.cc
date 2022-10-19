@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/networklayer/ipv4modular/Ipv4SocketCommandProcessor.h"
+#include "inet/networklayer/ipv4layer/ipv4_modular/Ipv4SocketCommandProcessor.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/socket/SocketTag_m.h"

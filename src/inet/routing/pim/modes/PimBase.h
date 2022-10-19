@@ -12,7 +12,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4layer/routingtable/IIpv4RoutingTable.h"
 #include "inet/routing/base/RoutingProtocolBase.h"
 #include "inet/routing/pim/Pim.h"
 #include "inet/routing/pim/PimPacket_m.h"

@@ -4,16 +4,18 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/networklayer/ipv4modular/Ipv4NetfilterHook.h"
+#include "inet/networklayer/ipv4layer/ipv4_modular/Ipv4NetfilterHook.h"
 
-#include "inet/networklayer/ipv4modular/Ipv4QueuedDatagramTag_m.h"
+#include "inet/networklayer/contract/netfilter/NetfilterQueuedDatagramTag_m.h"
 
 namespace inet {
 
 Define_Module(Ipv4NetfilterHook);
 
-void Ipv4NetfilterHook::registerNetfilterHandler(int priority, Ipv4Hook::NetfilterHandler *handler)
+void Ipv4NetfilterHook::registerNetfilterHandler(int priority, NetfilterHook::NetfilterHandler *handler)
 {
+    Enter_Method(__FUNCTION__);
+
     auto it = handlers.begin();
 
     for ( ; it != handlers.end(); ++it) {
@@ -27,8 +29,10 @@ void Ipv4NetfilterHook::registerNetfilterHandler(int priority, Ipv4Hook::Netfilt
     handlers.insert(it, item);
 }
 
-void Ipv4NetfilterHook::unregisterNetfilterHandler(int priority, Ipv4Hook::NetfilterHandler *handler)
+void Ipv4NetfilterHook::unregisterNetfilterHandler(int priority, NetfilterHook::NetfilterHandler *handler)
 {
+    Enter_Method(__FUNCTION__);
+
     for (auto it = handlers.begin(); it != handlers.end(); ++it) {
         if (priority < it->priority)
             break;
@@ -43,14 +47,15 @@ void Ipv4NetfilterHook::unregisterNetfilterHandler(int priority, Ipv4Hook::Netfi
 void Ipv4NetfilterHook::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
+
     take(packet);
     handlePacketProcessed(packet);
 
-    if (iterateHandlers(packet) == Ipv4Hook::NetfilterResult::ACCEPT)
+    if (iterateHandlers(packet) == NetfilterHook::NetfilterResult::ACCEPT)
         pushOrSendPacket(packet, outputGate, consumer);
 }
 
-Ipv4NetfilterHook::Items::iterator Ipv4NetfilterHook::findHandler(int priority, const Ipv4Hook::NetfilterHandler *handler)
+Ipv4NetfilterHook::Items::iterator Ipv4NetfilterHook::findHandler(int priority, const NetfilterHook::NetfilterHandler *handler)
 {
     auto it = handlers.begin();
     for ( ; it != handlers.end(); ++it) {
@@ -62,44 +67,44 @@ Ipv4NetfilterHook::Items::iterator Ipv4NetfilterHook::findHandler(int priority, 
     return handlers.end();
 }
 
-Ipv4Hook::NetfilterResult Ipv4NetfilterHook::iterateHandlers(Packet *packet, Items::iterator it)
+NetfilterHook::NetfilterResult Ipv4NetfilterHook::iterateHandlers(Packet *packet, Items::iterator it)
 {
     for ( ; it != handlers.end(); ++it) {
-        Ipv4Hook::NetfilterResult r = (*(it->handler))(packet);
+        NetfilterHook::NetfilterResult r = (*(it->handler))(packet);
         switch (r) {
-            case Ipv4Hook::NetfilterResult::ACCEPT:
+            case NetfilterHook::NetfilterResult::ACCEPT:
                 break; // continue iteration
 
-            case Ipv4Hook::NetfilterResult::DROP:
+            case NetfilterHook::NetfilterResult::DROP:
                 //TODO emit signal
                 delete packet;
                 return r;
 
-            case Ipv4Hook::NetfilterResult::QUEUE: {
+            case NetfilterHook::NetfilterResult::QUEUE: {
                 if (packet->getOwner() != this)
                     throw cRuntimeError("Model error: netfilter handler changed the owner of queued datagram '%s'", packet->getFullName());
-                auto tag = packet->addTag<Ipv4QueuedDatagramTag>();
+                auto tag = packet->addTag<NetfilterHook::NetfilterQueuedDatagramTag>();
                 tag->setHookId(getId());
                 tag->setPriority(it->priority);
                 tag->setHandler(it->handler);
                 return r;
             }
 
-            case Ipv4Hook::NetfilterResult::STOLEN:
+            case NetfilterHook::NetfilterResult::STOLEN:
                 return r;
 
             default:
                 throw cRuntimeError("Unknown IHook::Result value: %d", (int)r);
         }
     }
-    return Ipv4Hook::NetfilterResult::ACCEPT;
+    return NetfilterHook::NetfilterResult::ACCEPT;
 }
 
-void Ipv4NetfilterHook::reinjectQueuedDatagram(Packet *packet, Ipv4Hook::NetfilterResult action)
+void Ipv4NetfilterHook::reinjectQueuedDatagram(Packet *packet, NetfilterHook::NetfilterResult action)
 {
     Enter_Method("reinjectDatagram()");
     take(packet);
-    auto tag = packet->getTag<Ipv4QueuedDatagramTag>();
+    auto tag = packet->getTag<NetfilterHook::NetfilterQueuedDatagramTag>();
     if (tag->getHookId() != getId())
         throw cRuntimeError("model error: Packet queued by another netfilter hook.");
     auto priority = tag->getPriority();
@@ -108,24 +113,25 @@ void Ipv4NetfilterHook::reinjectQueuedDatagram(Packet *packet, Ipv4Hook::Netfilt
     if (it == handlers.end())
         throw cRuntimeError("hook not found for reinjected packet");
     switch (action) {
-        case Ipv4Hook::NetfilterResult::DROP:
+        case NetfilterHook::NetfilterResult::DROP:
+            // TODO emit signal
             delete packet;
             break;
 
-        case Ipv4Hook::NetfilterResult::ACCEPT:
+        case NetfilterHook::NetfilterResult::ACCEPT:
             ++it;
             // continue
-        case Ipv4Hook::NetfilterResult::REPEAT:
-            if (iterateHandlers(packet, it) == Ipv4Hook::NetfilterResult::ACCEPT)
+        case NetfilterHook::NetfilterResult::REPEAT:
+            if (iterateHandlers(packet, it) == NetfilterHook::NetfilterResult::ACCEPT)
                 pushOrSendPacket(packet, outputGate, consumer);
             break;
 
-        case Ipv4Hook::NetfilterResult::STOP:
+        case NetfilterHook::NetfilterResult::STOP:
             pushOrSendPacket(packet, outputGate, consumer);
             break;
 
         default:
-            throw cRuntimeError("Unaccepted Ipv4Hook::NetfilterResult %i", (int)action);
+            throw cRuntimeError("Unaccepted NetfilterHook::NetfilterResult %i", (int)action);
     }
 }
 

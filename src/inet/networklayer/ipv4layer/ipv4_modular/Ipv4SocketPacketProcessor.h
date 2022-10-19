@@ -11,8 +11,8 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Message.h"
-#include "inet/networklayer/ipv4/Icmp.h"
-#include "inet/networklayer/ipv4modular/Ipv4SocketTable.h"
+#include "inet/networklayer/ipv4layer/icmp/Icmp.h"
+#include "inet/networklayer/ipv4layer/ipv4_modular/Ipv4SocketTable.h"
 #include "inet/queueing/base/PacketPusherBase.h"
 
 namespace inet {

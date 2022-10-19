@@ -12,7 +12,7 @@
 
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/networklayer/ipv4/Ipv4Route.h" // not strictly required, but most clients will need it anyway
+#include "inet/networklayer/ipv4layer/routingtable/Ipv4Route.h" // not strictly required, but most clients will need it anyway
 
 namespace inet {
 

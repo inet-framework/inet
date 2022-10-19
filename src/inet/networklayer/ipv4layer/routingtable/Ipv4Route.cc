@@ -5,16 +5,16 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/networklayer/ipv4/Ipv4Route.h"
+#include "inet/networklayer/ipv4layer/routingtable/Ipv4Route.h"
 
 #include <stdio.h>
 
 #include <sstream>
 
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/routingtable/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4layer/routingtable/Ipv4RoutingTable.h"
 
 namespace inet {
 

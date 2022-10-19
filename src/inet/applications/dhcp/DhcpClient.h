@@ -14,7 +14,7 @@
 #include "inet/applications/dhcp/DhcpMessage_m.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/networklayer/common/InterfaceTable.h"
-#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
+#include "inet/networklayer/ipv4layer/routingtable/Ipv4RoutingTable.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 
 namespace inet {

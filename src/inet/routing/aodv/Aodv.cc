@@ -17,9 +17,9 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
-#include "inet/networklayer/ipv4/IcmpHeader.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#include "inet/networklayer/ipv4/Ipv4Route.h"
+#include "inet/networklayer/ipv4layer/icmp/IcmpHeader_m.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4layer/routingtable/Ipv4Route.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo.h"
 

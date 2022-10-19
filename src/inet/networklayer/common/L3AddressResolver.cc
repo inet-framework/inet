@@ -14,7 +14,7 @@
 
 #ifdef INET_WITH_IPv4
 #include "inet/networklayer/configurator/ipv4/Ipv4NetworkConfigurator.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4layer/routingtable/IIpv4RoutingTable.h"
 #endif // ifdef INET_WITH_IPv4
 
 #ifdef INET_WITH_IPv6

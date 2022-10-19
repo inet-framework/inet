@@ -19,7 +19,7 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 
 #ifdef INET_WITH_IPv4
-#include "inet/networklayer/ipv4/IcmpHeader_m.h"
+#include "inet/networklayer/ipv4layer/icmp/IcmpHeader_m.h"
 #endif // ifdef INET_WITH_IPv4
 
 #ifdef INET_WITH_IPv6

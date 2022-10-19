@@ -7,8 +7,8 @@
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/checksum/TcpIpChecksum.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#include "inet/networklayer/ipv4/Ipv4HeaderSerializer.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4HeaderSerializer.h"
 
 namespace inet {
 

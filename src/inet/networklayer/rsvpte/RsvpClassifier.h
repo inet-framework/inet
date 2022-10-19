@@ -13,7 +13,7 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/scenario/IScriptable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4Header_m.h"
 #include "inet/networklayer/mpls/ConstType.h"
 #include "inet/networklayer/mpls/LibTable.h"
 #include "inet/networklayer/rsvpte/IRsvpClassifier.h"

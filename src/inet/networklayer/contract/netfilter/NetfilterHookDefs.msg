@@ -11,7 +11,7 @@ cplusplus {{
 #include <functional>
 }}
 
-namespace inet::Ipv4Hook;
+namespace inet::NetfilterHook;
 
 enum NetfilterType {
     PREROUTING = 0;
@@ -33,7 +33,7 @@ enum NetfilterResult {
 };
 
 cplusplus {{
-    typedef std::function<Ipv4Hook::NetfilterResult(Packet*)> NetfilterHandler;
+    typedef std::function<NetfilterHook::NetfilterResult(Packet*)> NetfilterHandler;
 }}
 
 class NetfilterHandler {

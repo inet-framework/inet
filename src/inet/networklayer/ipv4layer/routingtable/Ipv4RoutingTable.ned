@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-package inet.networklayer.ipv4;
+package inet.networklayer.ipv4layer.routingtable;
 
 import inet.networklayer.contract.IRoutingTable;
 

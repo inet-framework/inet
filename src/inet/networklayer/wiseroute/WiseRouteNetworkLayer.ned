@@ -8,9 +8,10 @@
 package inet.networklayer.wiseroute;
 
 import inet.common.MessageDispatcher;
-import inet.networklayer.arp.ipv4.GlobalArp;
+import inet.networklayer.arp.GlobalArp;
 import inet.networklayer.common.EchoProtocol;
 import inet.networklayer.contract.INetworkLayer;
+
 
 //
 // This module provides a simple network layer.

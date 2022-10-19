@@ -23,7 +23,7 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 
 #ifdef INET_WITH_IPv4
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4Header_m.h"
 #endif
 
 #ifdef INET_WITH_IPv6

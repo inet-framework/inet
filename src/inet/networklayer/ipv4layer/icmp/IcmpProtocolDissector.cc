@@ -5,10 +5,10 @@
 //
 
 
-#include "inet/networklayer/ipv4/IcmpProtocolDissector.h"
+#include "inet/networklayer/ipv4layer/icmp/IcmpProtocolDissector.h"
 
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/networklayer/ipv4/IcmpHeader_m.h"
+#include "inet/networklayer/ipv4layer/icmp/IcmpHeader_m.h"
 
 namespace inet {
 

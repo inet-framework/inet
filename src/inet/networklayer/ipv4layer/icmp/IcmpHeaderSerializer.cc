@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/networklayer/ipv4/IcmpHeaderSerializer.h"
+#include "inet/networklayer/ipv4layer/icmp/IcmpHeaderSerializer.h"
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/networklayer/ipv4/IcmpHeader_m.h"
+#include "inet/networklayer/ipv4layer/icmp/IcmpHeader_m.h"
 
 namespace inet {
 

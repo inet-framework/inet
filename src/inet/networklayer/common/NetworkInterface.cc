@@ -19,7 +19,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 
 #ifdef INET_WITH_IPv4
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
 #endif // ifdef INET_WITH_IPv4
 
 #ifdef INET_WITH_IPv6

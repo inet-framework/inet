@@ -10,7 +10,7 @@
 
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4Header_m.h"
 
 namespace inet {
 

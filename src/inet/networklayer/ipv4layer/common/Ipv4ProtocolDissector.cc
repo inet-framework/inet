@@ -5,11 +5,11 @@
 //
 
 
-#include "inet/networklayer/ipv4/Ipv4ProtocolDissector.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4ProtocolDissector.h"
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
-#include "inet/networklayer/ipv4/Ipv4.h"
+#include "inet/networklayer/ipv4layer/ipv4/Ipv4.h"
 
 namespace inet {
 

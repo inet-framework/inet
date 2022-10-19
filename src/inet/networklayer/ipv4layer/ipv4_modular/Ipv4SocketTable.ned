@@ -5,7 +5,7 @@
 //
 
 
-package inet.networklayer.ipv4modular;
+package inet.networklayer.ipv4layer.ipv4_modular;
 
 simple Ipv4SocketTable
 {

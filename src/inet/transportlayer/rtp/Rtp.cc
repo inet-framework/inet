@@ -11,7 +11,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4layer/routingtable/IIpv4RoutingTable.h"
 #include "inet/transportlayer/contract/udp/UdpControlInfo_m.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
 #include "inet/transportlayer/rtp/RtpInnerPacket_m.h"

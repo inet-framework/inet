@@ -10,8 +10,8 @@
 #include "inet/common/MatchableObject.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/configurator/StreamRedundancyConfigurator.h"
-#include "inet/networklayer/arp/ipv4/GlobalArp.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/arp/GlobalArp.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
 
 namespace inet {
 

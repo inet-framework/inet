@@ -6,7 +6,7 @@
 //
 
 
-package inet.networklayer.arp.ipv4;
+package inet.networklayer.arp;
 
 import inet.networklayer.contract.IArp;
 

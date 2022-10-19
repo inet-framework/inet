@@ -15,7 +15,7 @@
 #include "inet/networklayer/common/TosTag_m.h"
 
 #ifdef INET_WITH_IPv4
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
 #endif // ifdef INET_WITH_IPv4
 
 #include "inet/transportlayer/common/L4PortTag_m.h"

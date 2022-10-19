@@ -5,7 +5,7 @@
 //
 
 
-package inet.networklayer.ipv4modular;
+package inet.networklayer.ipv4layer.ipv4_modular;
 
 import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;

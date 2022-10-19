@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/networklayer/ipv4/IgmpHeaderSerializer.h"
+#include "inet/networklayer/ipv4layer/igmp/IgmpHeaderSerializer.h"
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/networklayer/ipv4/IgmpMessage_m.h"
+#include "inet/networklayer/ipv4layer/igmp/IgmpMessage_m.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h> // htonl, ntohl, ...

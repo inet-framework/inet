@@ -11,7 +11,7 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/PacketFilter.h"
 #include "inet/networklayer/contract/INetfilter.h"
-#include "inet/networklayer/ipv4/Ipv4NatEntry_m.h"
+#include "inet/networklayer/ipv4layer/nat/Ipv4NatEntry_m.h"
 
 namespace inet {
 

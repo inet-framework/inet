@@ -18,8 +18,7 @@
 #endif // #ifdef INET_WITH_ETHERNET
 
 #ifdef INET_WITH_IPv4
-#include "inet/networklayer/ipv4/Ipv4.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4Header_m.h"
 #endif // ifdef INET_WITH_IPv4
 
 #ifdef INET_WITH_IPv6

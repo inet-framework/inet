@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/networklayer/ipv4/Igmpv2.h"
+#include "inet/networklayer/ipv4layer/igmp/Igmpv2.h"
 
 #include <algorithm>
 
@@ -19,9 +19,9 @@
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
-#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4OptionsTag_m.h"
+#include "inet/networklayer/ipv4layer/routingtable/Ipv4RoutingTable.h"
 
 namespace inet {
 

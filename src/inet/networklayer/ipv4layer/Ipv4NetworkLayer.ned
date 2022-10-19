@@ -5,12 +5,18 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-package inet.networklayer.ipv4;
+package inet.networklayer.ipv4layer;
 
 import inet.common.MessageDispatcher;
 import inet.networklayer.configurator.contract.IIpv4NodeConfigurator;
 import inet.networklayer.contract.IArp;
 import inet.networklayer.contract.INetworkLayer;
+import inet.networklayer.contract.ipv4.IIpv4;
+import inet.networklayer.ipv4layer.icmp.Icmp;
+import inet.networklayer.ipv4layer.igmp.IIgmp;
+import inet.networklayer.ipv4layer.nat.Ipv4NatTable;
+import inet.networklayer.ipv4layer.routingtable.Ipv4RoutingTable;
+
 
 //
 // Network layer of an IPv4 node.

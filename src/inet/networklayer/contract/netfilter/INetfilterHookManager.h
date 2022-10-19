@@ -4,22 +4,24 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#ifndef __INET_IIPV4HOOKMANAGER_H
-#define __INET_IIPV4HOOKMANAGER_H
+#ifndef __INET_INETFILTERHOOKMANAGER_H
+#define __INET_INETFILTERHOOKMANAGER_H
 
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/ipv4modular/IIpv4HookManager_m.h"
+#include "inet/networklayer/contract/netfilter/NetfilterHookDefs_m.h"
 
 namespace inet {
+namespace NetfilterHook {
 
-class INET_API IIpv4HookManager
+class INET_API INetfilterHookManager
 {
   public:
-    virtual void registerNetfilterHandler(Ipv4Hook::NetfilterType type, int priority, Ipv4Hook::NetfilterHandler *handler) = 0;
-    virtual void unregisterNetfilterHandler(Ipv4Hook::NetfilterType type, int priority, Ipv4Hook::NetfilterHandler *handler) = 0;
-    virtual void reinjectDatagram(Packet *datagram, Ipv4Hook::NetfilterResult action) = 0;
+    virtual void registerNetfilterHandler(NetfilterType type, int priority, NetfilterHandler *handler) = 0;
+    virtual void unregisterNetfilterHandler(NetfilterType type, int priority, NetfilterHandler *handler) = 0;
+    virtual void reinjectDatagram(Packet *datagram, NetfilterResult action) = 0;
 };
 
+} // namespace NetfilterHook
 } // namespace inet
 
 #endif

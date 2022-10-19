@@ -13,7 +13,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/networklayer/configurator/ipv4/Ipv4NetworkConfigurator.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4layer/routingtable/IIpv4RoutingTable.h"
 
 namespace inet {
 

@@ -25,7 +25,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/emulation/networklayer/ipv4/ExtIpv4TunDevice.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4Header_m.h"
 
 namespace inet {
 

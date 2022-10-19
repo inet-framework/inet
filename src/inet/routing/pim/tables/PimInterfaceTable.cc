@@ -11,7 +11,7 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/common/InterfaceMatcher.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
 
 namespace inet {
 

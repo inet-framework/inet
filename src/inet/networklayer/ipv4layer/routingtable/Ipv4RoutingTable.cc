@@ -7,7 +7,7 @@
 
 // Cleanup and rewrite: Andras Varga, 2004
 
-#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
+#include "inet/networklayer/ipv4layer/routingtable/Ipv4RoutingTable.h"
 
 #include <algorithm>
 #include <sstream>
@@ -20,9 +20,9 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/stlutils.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/networklayer/ipv4/Ipv4Route.h"
-#include "inet/networklayer/ipv4/RoutingTableParser.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/routingtable/Ipv4Route.h"
+#include "inet/networklayer/ipv4layer/routingtable/RoutingTableParser.h"
 
 namespace inet {
 

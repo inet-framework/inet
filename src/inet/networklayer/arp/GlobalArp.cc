@@ -6,10 +6,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/networklayer/arp/ipv4/GlobalArp.h"
+#include "inet/networklayer/arp/GlobalArp.h"
 
 #include "inet/common/lifecycle/NodeStatus.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
 #ifdef INET_WITH_IPv6
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif

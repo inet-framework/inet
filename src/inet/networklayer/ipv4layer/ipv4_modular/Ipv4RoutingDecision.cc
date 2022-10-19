@@ -4,13 +4,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/networklayer/ipv4modular/Ipv4RoutingDecision.h"
+#include "inet/networklayer/ipv4layer/ipv4_modular/Ipv4RoutingDecision.h"
 
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/common/NextHopAddressTag_m.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
 
 namespace inet {
 

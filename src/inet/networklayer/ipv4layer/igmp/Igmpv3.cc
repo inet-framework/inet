@@ -11,7 +11,7 @@
  * @date 12.5.2013
  */
 
-#include "inet/networklayer/ipv4/Igmpv3.h"
+#include "inet/networklayer/ipv4layer/igmp/Igmpv3.h"
 
 #include <algorithm>
 #include <bitset>
@@ -26,9 +26,9 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/networklayer/ipv4/Ipv4OptionsTag_m.h"
-#include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4InterfaceData.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4OptionsTag_m.h"
+#include "inet/networklayer/ipv4layer/routingtable/Ipv4RoutingTable.h"
 
 namespace inet {
 

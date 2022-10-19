@@ -6,7 +6,7 @@
 
 import inet.common.INETDefs;
 import inet.common.TagBase;
-import inet.networklayer.ipv4.Ipv4Header;
+import inet.networklayer.ipv4layer.common.Ipv4Header;
 
 namespace inet;
 

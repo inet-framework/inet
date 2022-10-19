@@ -26,7 +26,7 @@
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 
 #ifdef INET_WITH_IPv4
-#include "inet/networklayer/ipv4/Icmp.h"
+#include "inet/networklayer/ipv4layer/icmp/Icmp.h"
 #endif
 
 #ifdef INET_WITH_IPv6

@@ -5,13 +5,13 @@
 //
 
 
-#include "inet/networklayer/ipv4/Ipv4FragBuf.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4FragBuf.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-#include "inet/networklayer/ipv4/Icmp.h"
-#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4layer/common/Ipv4Header_m.h"
+#include "inet/networklayer/ipv4layer/icmp/Icmp.h"
 
 namespace inet {
 

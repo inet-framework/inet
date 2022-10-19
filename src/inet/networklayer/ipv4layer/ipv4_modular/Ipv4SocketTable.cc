@@ -5,7 +5,7 @@
 //
 
 
-#include "inet/networklayer/ipv4modular/Ipv4SocketTable.h"
+#include "inet/networklayer/ipv4layer/ipv4_modular/Ipv4SocketTable.h"
 
 #include "inet/common/stlutils.h"
 

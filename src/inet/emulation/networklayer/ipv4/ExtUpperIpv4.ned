@@ -7,7 +7,8 @@
 
 package inet.emulation.networklayer.ipv4;
 
-import inet.networklayer.ipv4.IIpv4;
+import inet.networklayer.contract.ipv4.IIpv4;
+
 
 module ExtUpperIpv4 like IIpv4
 {

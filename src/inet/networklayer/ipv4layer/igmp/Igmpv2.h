@@ -15,7 +15,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
-#include "inet/networklayer/ipv4/IgmpMessage_m.h"
+#include "inet/networklayer/ipv4layer/igmp/IgmpMessage_m.h"
 
 namespace inet {
 

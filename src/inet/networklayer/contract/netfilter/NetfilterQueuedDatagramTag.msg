@@ -6,13 +6,13 @@
 
 import inet.common.INETDefs;
 import inet.common.TagBase;
-import inet.networklayer.ipv4modular.IIpv4HookManager;
+import inet.networklayer.contract.netfilter.NetfilterHookDefs;
 
-namespace inet;
+namespace inet::NetfilterHook;
 
-class Ipv4QueuedDatagramTag extends TagBase
+class NetfilterQueuedDatagramTag extends TagBase
 {
     int hookId;
     int priority;
-    Ipv4Hook::NetfilterHandler *handler;
+    NetfilterHook::NetfilterHandler *handler;
 };

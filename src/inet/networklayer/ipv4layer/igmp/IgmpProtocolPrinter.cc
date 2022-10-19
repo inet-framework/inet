@@ -5,12 +5,12 @@
 //
 
 
-#include "inet/networklayer/ipv4/IgmpProtocolPrinter.h"
+#include "inet/networklayer/ipv4layer/igmp/IgmpProtocolPrinter.h"
 
 #include "inet/common/packet/printer/PacketPrinter.h"
 #include "inet/common/packet/printer/ProtocolPrinterRegistry.h"
-#include "inet/networklayer/ipv4/IgmpMessage_m.h"
-#include "inet/networklayer/ipv4/Igmpv3.h"
+#include "inet/networklayer/ipv4layer/igmp/IgmpMessage_m.h"
+#include "inet/networklayer/ipv4layer/igmp/Igmpv3.h"
 
 namespace inet {
 

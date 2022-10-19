@@ -18,7 +18,7 @@
 #endif
 
 #ifdef INET_WITH_IPv4
-#include "inet/networklayer/ipv4/Ipv4.h"
+#include "inet/networklayer/ipv4layer/ipv4/Ipv4.h"
 #endif
 
 namespace inet {

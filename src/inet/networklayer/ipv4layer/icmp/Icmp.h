@@ -13,8 +13,8 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/ipv4/IIpv4RoutingTable.h"
-#include "inet/networklayer/ipv4/IcmpHeader.h"
+#include "inet/networklayer/ipv4layer/routingtable/IIpv4RoutingTable.h"
+#include "inet/networklayer/ipv4layer/icmp/IcmpHeader_m.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 
 namespace inet {
