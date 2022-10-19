@@ -553,7 +553,7 @@
         nedPackages = "
                        inet.networklayer.arp.ipv4
                        inet.networklayer.configurator.ipv4
-                       inet.networklayer.ipv4
+                       inet.networklayer.ipv4layer
                       "
         extraSourceFolders = ""
         compileFlags = "-DINET_WITH_IPv4"
