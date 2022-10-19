@@ -24,7 +24,9 @@ package inet.networklayer.ipv4layer.igmp;
 //
 moduleinterface IIgmp
 {
-    @display("i=block/cogwheel");
+    parameters:
+        @display("i=block/cogwheel");
+        @formerly(inet.networklayer.ipv4.IIgmp);
 
     gates:
         input ipIn @labels(Ipv4ControlInfo/up);

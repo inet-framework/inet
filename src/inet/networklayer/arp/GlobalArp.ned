@@ -19,6 +19,7 @@ simple GlobalArp like IArp
         string interfaceTableModule;   // path to the InterfaceTable module
         string addressType @enum("ipv4", "ipv6", "mac", "moduleid", "modulepath") = default("ipv4");
         @display("i=block/layer");
+        @formerly(inet.networklayer.arp.ipv4.GlobalArp);
     gates:
         input ifIn @labels(ArpPacket,Ieee802Ctrl);
         output ifOut @labels(ArpPacket,Ieee802Ctrl);

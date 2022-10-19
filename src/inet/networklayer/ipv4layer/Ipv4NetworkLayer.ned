@@ -37,6 +37,7 @@ module Ipv4NetworkLayer like INetworkLayer
         *.icmpModule = default(absPath(".icmp"));
         @class(::inet::Ipv4NetworkLayer);
         @display("i=block/fork");
+        @formerly(inet.networklayer.ipv4.Ipv4NetworkLayer);
 
     gates:
         input ifIn @labels(INetworkHeader);

@@ -17,5 +17,6 @@ simple RoutingTableRecorder
     parameters:
         bool enabled = default(true);
         @display("i=block/control");
+        @formerly(inet.networklayer.ipv4.RoutingTableRecorder);
 }
 

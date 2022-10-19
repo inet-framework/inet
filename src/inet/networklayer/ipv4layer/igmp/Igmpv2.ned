@@ -109,6 +109,7 @@ simple Igmpv2 like IIgmp
         //      double version1RouterPresentInterval @unit(s) = default(400s);
         @display("i=block/cogwheel");
         @selfMessageKinds(inet::IgmpTimerKind);
+        @formerly(inet.networklayer.ipv4.Igmpv2);
 
     gates:
         input ipIn @labels(Ipv4ControlInfo/up);  // delivered IGMP packets

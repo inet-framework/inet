@@ -55,5 +55,6 @@ simple Ipv4RoutingTable like IRoutingTable
         @signal[mrouteAdded](type=inet::Ipv4MulticastRoute);
         @signal[mrouteDeleted](type=inet::Ipv4MulticastRoute);
         @signal[mrouteChanged](type=inet::Ipv4MulticastRoute);
+        @formerly(inet.ipv4.RoutingTable);
 }
 

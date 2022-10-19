@@ -19,6 +19,7 @@ simple Icmp
         string crcMode @mutable @enum("declared", "computed") = default("declared");
         int quoteLength @mutable @unit(B) = default(8B); // Number of bytes from original packet to quote in ICMP reply
         @display("i=block/control");
+        @formerly(inet.networklayer.ipv4.Icmp);
     gates:
         input transportIn;
         output transportOut;
