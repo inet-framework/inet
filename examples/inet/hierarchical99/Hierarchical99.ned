@@ -8,7 +8,7 @@
 package inet.examples.inet.hierarchical99;
 
 import inet.networklayer.configurator.contract.IL3NetworkConfigurator;
-import inet.networklayer.ipv4.RoutingTableRecorder;
+import inet.networklayer.ipv4layer.routingtable.RoutingTableRecorder;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth10G;
 import inet.node.ethernet.Eth1G;

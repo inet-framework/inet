@@ -4,7 +4,7 @@ package inet.examples.rip.simpletest;
 import inet.common.misc.ThruputMeteringChannel;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
-import inet.networklayer.ipv4.RoutingTableRecorder;
+import inet.networklayer.ipv4layer.routingtable.RoutingTableRecorder;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 import inet.node.rip.RipRouter;

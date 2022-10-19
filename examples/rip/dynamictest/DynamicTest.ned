@@ -4,7 +4,7 @@ package inet.examples.rip.dynamictest;
 import inet.common.misc.ThruputMeteringChannel;
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.networklayer.ipv4.RoutingTableRecorder;
+import inet.networklayer.ipv4layer.routingtable.RoutingTableRecorder;
 import inet.node.inet.StandardHost;
 import inet.node.rip.RipRouter;
 

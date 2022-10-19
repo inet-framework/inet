@@ -12,7 +12,7 @@ import inet.linklayer.contract.IEthernetInterface;
 import inet.linklayer.contract.IPppInterface;
 import inet.linklayer.ethernet.contract.IEthernetLayer;
 import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.Ipv4NetworkLayer;
+import inet.networklayer.ipv4layer.Ipv4NetworkLayer;
 import inet.routing.bgpv4.Bgp;
 import inet.routing.ospfv2.Ospfv2;
 import inet.transportlayer.contract.ITcp;

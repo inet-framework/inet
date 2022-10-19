@@ -7,7 +7,7 @@ package inet.examples.manetrouting.dymo;
 
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.networklayer.ipv4.RoutingTableRecorder;
+import inet.networklayer.ipv4layer.routingtable.RoutingTableRecorder;
 import inet.node.dymo.DymoRouter;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 

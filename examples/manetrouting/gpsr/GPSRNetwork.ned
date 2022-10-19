@@ -7,7 +7,7 @@ package inet.examples.manetrouting.gpsr;
 
 import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.networklayer.ipv4.RoutingTableRecorder;
+import inet.networklayer.ipv4layer.routingtable.RoutingTableRecorder;
 import inet.node.gpsr.GpsrRouter;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 
