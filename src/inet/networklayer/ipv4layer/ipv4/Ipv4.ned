@@ -7,17 +7,6 @@
 
 package inet.networklayer.ipv4;
 
-moduleinterface IIpv4
-{
-    parameters:
-        @display("i=block/routing");
-    gates:
-        input transportIn @labels(Ipv4ControlInfo/down,TcpHeader,UdpHeader,SctpHeader);
-        output transportOut @labels(Ipv4ControlInfo/up,TcpHeader,UdpHeader,SctpHeader);
-        input queueIn @labels(Ipv4Header,ArpPacket,Ieee802Ctrl);
-        output queueOut @labels(Ipv4Header,ArpPacket,Ieee802Ctrl);
-}
-
 //
 // Implements the IPv4 protocol. The protocol header is represented
 // by the ~Ipv4Header message class.
