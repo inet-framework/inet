@@ -250,7 +250,9 @@ b Ieee80211LayeredOfdmTransmitter::getPaddingLength(const Ieee80211OfdmMode *mod
         dataBitsPerOFDMSymbol = convolutionalCode->getDecodedLength(codedBitsPerOFDMSymbol);
     }
     unsigned int dataBitsLength = 6 + b(length).get() + 16;
+    std::cerr << "dataBitsLength: " << dataBitsLength << std::endl;
     unsigned int numberOfOFDMSymbols = lrint(ceil(1.0*dataBitsLength / dataBitsPerOFDMSymbol));
+    std::cerr << "numberOfOFDMSymbols: " << numberOfOFDMSymbols << std::endl;
     unsigned int numberOfBitsInTheDataField = dataBitsPerOFDMSymbol * numberOfOFDMSymbols; // N_DATA
     unsigned int numberOfPadBits = numberOfBitsInTheDataField - dataBitsLength; // N_PAD
     return b(numberOfPadBits);

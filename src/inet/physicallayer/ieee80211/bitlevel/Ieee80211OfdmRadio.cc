@@ -41,10 +41,12 @@ void Ieee80211OfdmRadio::encapsulate(Packet *packet) const
     phyHeader->setLengthField(B(packet->getTotalLength()));
     packet->insertAtFront(phyHeader);
     auto paddingLength = ofdmTransmitter->getPaddingLength(ofdmTransmitter->getMode(packet), B(phyHeader->getLengthField()));
+    std::cerr << "paddingLength = " << paddingLength << std::endl;
     // insert padding and 6 tail bits
     const auto &phyTrailer = makeShared<BitCountChunk>(paddingLength + b(6));
     packet->insertAtBack(phyTrailer);
     packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211OfdmPhy);
+    std::cerr << "final length: " << packet->getTotalLength() << std::endl;
 }
 
 void Ieee80211OfdmRadio::decapsulate(Packet *packet) const
