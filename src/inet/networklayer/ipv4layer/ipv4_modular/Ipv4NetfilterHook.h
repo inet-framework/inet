@@ -36,7 +36,7 @@ class INET_API Ipv4NetfilterHook : public queueing::PacketPusherBase, public Net
     virtual void registerNetfilterHandler(int priority, NetfilterHook::NetfilterHandler *handler) override;
     virtual void unregisterNetfilterHandler(int priority, NetfilterHook::NetfilterHandler *handler) override;
 
-    virtual void reinjectQueuedDatagram(Packet *datagram, NetfilterHook::NetfilterResult action) override;
+    virtual void reinjectDatagram(Packet *datagram, NetfilterHook::NetfilterResult action) override;
 };
 
 } // namespace inet

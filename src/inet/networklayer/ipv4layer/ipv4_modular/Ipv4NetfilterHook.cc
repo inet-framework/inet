@@ -100,7 +100,7 @@ NetfilterHook::NetfilterResult Ipv4NetfilterHook::iterateHandlers(Packet *packet
     return NetfilterHook::NetfilterResult::ACCEPT;
 }
 
-void Ipv4NetfilterHook::reinjectQueuedDatagram(Packet *packet, NetfilterHook::NetfilterResult action)
+void Ipv4NetfilterHook::reinjectDatagram(Packet *packet, NetfilterHook::NetfilterResult action)
 {
     Enter_Method("reinjectDatagram()");
     take(packet);

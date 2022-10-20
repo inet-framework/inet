@@ -17,7 +17,7 @@ class INET_API INetfilterHook
 {
     virtual void registerNetfilterHandler(int priority, NetfilterHandler *handler) = 0;
     virtual void unregisterNetfilterHandler(int priority, NetfilterHandler *handler) = 0;
-    virtual void reinjectQueuedDatagram(Packet *datagram, NetfilterResult action) = 0;
+    virtual void reinjectDatagram(Packet *datagram, NetfilterResult action) = 0;
 };
 
 } // namespace NetfilterHook

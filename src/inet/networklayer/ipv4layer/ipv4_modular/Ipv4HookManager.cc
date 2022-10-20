@@ -46,7 +46,7 @@ void Ipv4HookManager::reinjectDatagram(Packet *datagram, NetfilterHook::Netfilte
     auto tag = datagram->getTag<NetfilterHook::NetfilterQueuedDatagramTag>();
     for (int hookPos = NetfilterHook::NetfilterType::__FIRST_HOOK; hookPos < NetfilterHook::NetfilterType::__NUM_HOOK_TYPES; ++hookPos) {
         if (hook[hookPos]->getId() == tag->getHookId()) {
-            hook[hookPos]->reinjectQueuedDatagram(datagram, action);
+            hook[hookPos]->reinjectDatagram(datagram, action);
             return;
         }
     }
