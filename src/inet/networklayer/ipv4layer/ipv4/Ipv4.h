@@ -18,8 +18,8 @@
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/packet/Message.h"
 #include "inet/networklayer/contract/IArp.h"
-#include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
+#include "inet/networklayer/contract/netfilter/INetfilterCompatibleNetfilterHookManagerBase.h"
 #include "inet/networklayer/ipv4layer/common/Ipv4FragBuf.h"
 #include "inet/networklayer/ipv4layer/common/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4layer/icmp/Icmp.h"
@@ -34,21 +34,19 @@ class IIpv4RoutingTable;
 /**
  * Implements the Ipv4 protocol.
  */
-class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetworkProtocol, public DefaultProtocolRegistrationListener, public cListener
+class INET_API Ipv4 : public OperationalBase, public NetfilterHook::INetfilterCompatibleNetfilterHookManagerBase, public INetworkProtocol, public DefaultProtocolRegistrationListener, public cListener
 {
-  public:
-    /**
-     * Represents an Ipv4Header, queued by a Hook
-     */
-    class INET_API QueuedDatagramForHook {
+  protected:
+    class Item {
       public:
-        QueuedDatagramForHook(Packet *packet, IHook::Type hookType) :
-            packet(packet), hookType(hookType) {}
-        virtual ~QueuedDatagramForHook() {}
-
-        Packet *packet = nullptr;
-        const IHook::Type hookType = static_cast<IHook::Type>(-1);
+        int priority;
+        NetfilterHook::NetfilterHandler *handler;
+        Item(int priority, NetfilterHook::NetfilterHandler *handler) : priority(priority), handler(handler) {}
     };
+    typedef std::vector<Item> Items;
+    Items hooks[NetfilterHook::NetfilterType::__NUM_HOOK_TYPES];
+
+    // ARP related
     typedef std::map<Ipv4Address, cPacketQueue> PendingPackets;
 
     struct SocketDescriptor {
@@ -61,7 +59,6 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
             : socketId(socketId), protocolId(protocolId), localAddress(localAddress) {}
     };
 
-  protected:
     ModuleRefByPar<IIpv4RoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
     ModuleRefByPar<IArp> arp;
@@ -93,10 +90,6 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     int numDropped = 0; // forwarding off, no outgoing interface, too large but "don't fragment" is set, TTL exceeded, etc
     int numUnroutable = 0;
     int numForwarded = 0;
-
-    // hooks
-    typedef std::list<QueuedDatagramForHook> DatagramQueueForHooks;
-    DatagramQueueForHooks queuedDatagramsForHooks;
 
   protected:
     // utility: look up interface from getArrivalGate()
@@ -223,53 +216,21 @@ class INET_API Ipv4 : public OperationalBase, public NetfilterBase, public INetw
     void handleRequest(Request *request);
 
     // NetFilter functions:
+    Ipv4::Items::iterator findHookPosition(NetfilterHook::NetfilterType type, int priority, const NetfilterHook::NetfilterHandler *handler);
 
-  protected:
     /**
      * called before a packet arriving from the network is routed
      */
-    IHook::Result datagramPreRoutingHook(Packet *datagram);
-
-    /**
-     * called before a packet arriving from the network is delivered via the network
-     */
-    IHook::Result datagramForwardHook(Packet *datagram);
-
-    /**
-     * called before a packet is delivered via the network
-     */
-    IHook::Result datagramPostRoutingHook(Packet *datagram);
-
-    /**
-     * called before a packet arriving from the network is delivered locally
-     */
-    IHook::Result datagramLocalInHook(Packet *datagram);
-
-    /**
-     * called before a packet arriving locally is delivered
-     */
-    IHook::Result datagramLocalOutHook(Packet *datagram);
+    NetfilterHook::NetfilterResult processHook(NetfilterHook::NetfilterType type, Packet *datagram, Ipv4::Items::iterator it);
+    NetfilterHook::NetfilterResult processHook(NetfilterHook::NetfilterType type, Packet *datagram);
 
   public:
     /**
-     * registers a Hook to be executed during datagram processing
+     * INetfilterHookManager:
      */
-    virtual void registerHook(int priority, IHook *hook) override;
-
-    /**
-     * unregisters a Hook to be executed during datagram processing
-     */
-    virtual void unregisterHook(IHook *hook) override;
-
-    /**
-     * drop a previously queued datagram
-     */
-    virtual void dropQueuedDatagram(const Packet *datagram) override;
-
-    /**
-     * re-injects a previously queued datagram
-     */
-    virtual void reinjectQueuedDatagram(const Packet *datagram) override;
+    virtual void registerNetfilterHandler(NetfilterHook::NetfilterType type, int priority, NetfilterHook::NetfilterHandler *handler) override;
+    virtual void unregisterNetfilterHandler(NetfilterHook::NetfilterType type, int priority, NetfilterHook::NetfilterHandler *handler) override;
+    virtual void reinjectDatagram(Packet *datagram, NetfilterHook::NetfilterResult action) override;
 
     /**
      * ILifecycle methods
