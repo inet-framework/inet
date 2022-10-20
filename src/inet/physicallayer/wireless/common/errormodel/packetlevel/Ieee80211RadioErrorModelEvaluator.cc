@@ -109,6 +109,7 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> assembleNoisePowerFunction(std::v
     ASSERT(snirs.size() == frequencyDivision * timeDivision);
 
     auto bandwidth = endFrequency - startFrequency;
+    auto duration = endTime - startTime;
 
     Ptr<SummedFunction<WpHz, Domain<simsec, Hz>>> noisePowerFunction = makeShared<SummedFunction<WpHz, Domain<simsec, Hz>>>();
     std::cout << "making noise" << std::endl;
@@ -119,8 +120,8 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> assembleNoisePowerFunction(std::v
             //rs.push_back(power);
 
             auto segment = makeShared<Boxcar2DFunction<WpHz, simsec, Hz>>(
-                simsec(startTime + (endTime - startTime) * ti / timeDivision),
-                simsec(startTime + (endTime - startTime) * (ti + 1) / timeDivision),
+                simsec(startTime + duration * ti / timeDivision),
+                simsec(startTime + duration * (ti + 1) / timeDivision),
                 startFrequency + bandwidth * fi / frequencyDivision,
                 startFrequency + bandwidth * (fi + 1) / frequencyDivision,
                 WpHz(snirs[ti*frequencyDivision + fi]));
@@ -128,10 +129,18 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> assembleNoisePowerFunction(std::v
         }
     }
     std::cout << "maketh noise" << std::endl;
+
+    for (Hz f = startFrequency - bandwidth*0.2; f < endFrequency + bandwidth * 0.2; f += kHz(100)) {
+        for (simtime_t t = startTime - duration * 0.2; t < endTime + duration * 0.2; t += SimTime(1, SIMTIME_US)) {
+            std::cout << t << " " << f << " " << noisePowerFunction->getValue({simsec(t), f}) << std::endl;
+        }
+    }
+
+
     return noisePowerFunction;
 }
 
-DimensionalNoise *createNoise(std::vector<double> snirs, IReception *reception, int frequencyDivision, int timeDivision, SimTime startTime, SimTime endTime) {
+DimensionalNoise *createNoise(std::vector<double> snirs, const IReception *reception, int frequencyDivision, int timeDivision, SimTime startTime, SimTime endTime) {
         // create noise
     auto narrowbandSignal = check_and_cast<const INarrowbandSignal *>(reception->getAnalogModel());
     auto centerFrequency = narrowbandSignal->getCenterFrequency();
@@ -145,11 +154,11 @@ DimensionalNoise *createNoise(std::vector<double> snirs, IReception *reception, 
 
 
 
-LayeredTransmission *createLayeredTransmission(const IRadio *radio, const ITransmitter *transmitter, Packet *transmittedPacket) {
+const LayeredTransmission *createLayeredTransmission(const IRadio *radio, const ITransmitter *transmitter, Packet *transmittedPacket) {
 
     // create transmission
     simtime_t startTime = 0;
-    auto transmission = check_and_cast<LayeredTransmission *>(transmitter->createTransmission(radio, transmittedPacket, startTime));
+    auto transmission = check_and_cast<const LayeredTransmission *>(transmitter->createTransmission(radio, transmittedPacket, startTime));
     auto transmissionAnalogModel = transmission->getAnalogModel();
     auto preambleDuration = transmissionAnalogModel->getPreambleDuration();
     auto headerDuration = transmissionAnalogModel->getHeaderDuration();
@@ -182,15 +191,6 @@ LayeredTransmission *createLayeredTransmission(const IRadio *radio, const ITrans
     */
 
     return transmission;
-}
-
-const LayeredReception *createLayeredReception(const IRadio *radio, const ITransmission *transmission, const IPropagation *propagation, const IAnalogModel *analogModel) {
-
-    // create reception
-    auto arrival = propagation->computeArrival(transmission, radio->getAntenna()->getMobility());
-    auto reception = check_and_cast<const LayeredReception *>(analogModel->computeReception(radio, transmission, arrival));
-
-    return reception;
 }
 
 const ISnir *createLayeredSnir(const LayeredReception *reception, const DimensionalNoise *noise) {
@@ -239,14 +239,6 @@ const ITransmission *createNonLayeredTransmission(const IRadio *radio, const ITr
     */
 }
 
-const DimensionalReception *createNonLayeredReception(const IRadio *radio, const ITransmission *transmission, const IPropagation *propagation, const IAnalogModel *analogModel) {
-
-    // create reception
-    auto arrival = propagation->computeArrival(transmission, radio->getAntenna()->getMobility());
-    auto reception = check_and_cast<const DimensionalReception *>(analogModel->computeReception(radio, transmission, arrival));
-    return reception;
-}
-
 const ISnir *createNonLayeredSnir(const DimensionalReception *reception, const DimensionalNoise *noise) {
     // create snir
     auto signalAnalogModel = check_and_cast<const DimensionalReception *>(reception->getAnalogModel());
@@ -283,31 +275,38 @@ void Ieee80211RadioErrorModelEvaluator::evaluateErrorModel()
 
         for (std::string s : cStringTokenizer(line.c_str(), ", ").asVector()) {
             if (!s.empty()) {
-                std::cout << s << std::endl;
-                snirs.push_back(1000000*atof(s.c_str()));
+                //std::cout << s << std::endl;
+                snirs.push_back(atof(s.c_str()));
             }
         }
 
         ASSERT(snirs.size() % 52 == 0);
 
+        int frequencyDivision = 52;
+        int timeDivision = snirs.size() / frequencyDivision;
 
-        B packetLength = B(100); // BIG TODO
+        // 48 usable subcarriers, 4 bits per symbol, 1/2 coding rate, 6 tail bits, 16 service bits, 24 signal bits
+        b dataLength = b(timeDivision * 48 * 4 / 2 - 6 - 16 - 24); // BIG TODO
 
+        std::cout << "to get " << snirs.size() << " SNIRS, I think we need " << dataLength.get() << " bits of data" << std::endl;
 
-        // create packet
+        // create packet, including 30 bytes MAC header, and 4 bytes of FCS
         std::vector<uint8_t> bytes;
-        for (B i = B(0); i < packetLength; i++)
+        for (b i = b(0); (i + b(8)) <= dataLength; i += b(8))
             bytes.push_back(intuniform(0, 255));
         auto data = makeShared<BytesChunk>(bytes);
         auto transmittedPacket = new Packet(nullptr, data);
         transmittedPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+        std::cout << transmittedPacket->getByteLength() << " bytes long packet is ";
+
         // adds the following:
-        //  - tail bits
-        //  - service bits
-        //  - plus padding to whole ofdm symbol
-        //  - one extra ofdm symbol for phy header
+        //  - tail bits (6b)
+        //  - service bits (16b)
+        //  - plus padding to whole ofdm symbol (variable bits)
+        //  - one extra ofdm symbol for phy header (always 3 bytes)
         radio->encapsulate(transmittedPacket);
 
+        std::cout << transmittedPacket->getByteLength() << " bytes long packet after encapsulation" << std::endl;
 
         const ITransmission *transmission = nullptr;
         if (auto analogModel = dynamic_cast<const LayeredDimensionalAnalogModel *>(radioMedium->getAnalogModel()))
@@ -315,18 +314,21 @@ void Ieee80211RadioErrorModelEvaluator::evaluateErrorModel()
         if (auto analogModel = dynamic_cast<const DimensionalAnalogModel *>(radioMedium->getAnalogModel()))
             transmission = createNonLayeredTransmission(radio, transmitter, transmittedPacket);
 
+        std::cerr << "transm dur is " << transmission->getDuration() << std::endl;
+        std::cerr << "expected: " << SimTime(4, SIMTIME_US) * timeDivision << std::endl;
+        ASSERT(transmission->getDuration() == SimTime(4, SIMTIME_US) * timeDivision);
+
         SimTime startTime = transmission->getStartTime();
         SimTime endTime = transmission->getEndTime();
         auto listening = receiver->createListening(nullptr, startTime, endTime, Coord::ZERO, Coord::ZERO);
 
-        const IReception *reception = nullptr;
-        const LayeredReception *layeredReception = nullptr;
-        const DimensionalReception *dimensionalReception = nullptr;
-        if (auto analogModel = dynamic_cast<const LayeredDimensionalAnalogModel *>(radioMedium->getAnalogModel()))
-            reception = layeredReception = createLayeredReception(radio, transmission, propagation, analogModel);
-        if (auto analogModel = dynamic_cast<const DimensionalAnalogModel *>(radioMedium->getAnalogModel()))
-            reception = dimensionalReception = createNonLayeredReception(radio, transmission, propagation, analogModel);
 
+        // create reception
+        auto arrival = propagation->computeArrival(transmission, radio->getAntenna()->getMobility());
+        const IReception *reception = radioMedium->getAnalogModel()->computeReception(radio, transmission, arrival);
+
+        const LayeredReception *layeredReception = dynamic_cast<const LayeredReception *>(reception);
+        const DimensionalReception *dimensionalReception = dynamic_cast<const DimensionalReception *>(reception);
 
 
         auto noise = createNoise(snirs, reception, frequencyDivision, timeDivision, startTime, endTime);
