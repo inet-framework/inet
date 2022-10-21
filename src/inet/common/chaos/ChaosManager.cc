@@ -23,6 +23,7 @@
 #include <map>
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/common/chaos/ChaosEvent_m.h"
 using namespace std;
 
@@ -106,21 +107,26 @@ void ChaosManager::processCommand(int command, int nodeNum) {
     string targetString = "host[" + std::to_string(nodeNum) + "]";
     const char *target = &targetString[0];
     cModule *module = getModuleByPath(target);
+    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(module->getSubmodule("status"));
     if (!module)
             throw cRuntimeError("Module '%s' not found", target);
+    if (!nodeStatus)
+            throw cRuntimeError("Cannot find node status");
 
     // resolve command
     LifecycleOperation *operation;
-    if (nodeNum == 1) {
-        operation = new ModuleStopOperation;
-    } else {
-        operation = new ModuleCrashOperation;
-    }
-    map<string, string> params; // empty string to fill parameters
-    operation->initialize(module, params);
+    if (nodeStatus->getState() == NodeStatus::UP) {
+        if (command == 1) {
+            operation = new ModuleStopOperation;
+        } else {
+            operation = new ModuleCrashOperation;
+        }
+        map<string, string> params; // empty string to fill parameters
+            operation->initialize(module, params);
 
-    // perform operation
-    lifecycleController.initiateOperation(operation);
+        // perform operation
+        lifecycleController.initiateOperation(operation);
+    }
 
 }
 
