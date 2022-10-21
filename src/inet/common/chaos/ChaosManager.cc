@@ -72,7 +72,7 @@ void ChaosManager::generateChaos(int faultPerc, int numNodes) {
     for (int counter = 0; counter < faultyNodes; counter++) {
         eventObject event;
         event.nodeNum = getUniqueNodeId(numNodes);
-        event.time = rand()%101; // random value 50 assigned
+        event.time = rand()%getResolvedSimTimeLimit();; // random value 50 assigned
         event.command = 1 + (rand()%2);
         eventList.push_back(event);
     }
@@ -122,6 +122,16 @@ void ChaosManager::processCommand(int command, int nodeNum) {
     // perform operation
     lifecycleController.initiateOperation(operation);
 
+}
+
+int ChaosManager::getResolvedSimTimeLimit() {
+    int timeLimit = 0;
+    cConfiguration *config = getEnvir()->getConfig();
+    string simTimeLimit = config->getConfigValue("sim-time-limit");
+    string simTimeLimitResolved = std::regex_replace(simTimeLimit,std::regex("[^0-9]*([0-9]+).*"),
+            std::string("$1"));
+    timeLimit = std::stoi(simTimeLimitResolved);
+    return timeLimit;
 }
 
 } //namespace

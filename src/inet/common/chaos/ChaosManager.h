@@ -41,6 +41,7 @@ class INET_API ChaosManager : public cSimpleModule
     void processCommand(int command, int nodeNum);
     bool eventExist(int nodeId);
     int getUniqueNodeId(int numNodes);
+    int getResolvedSimTimeLimit();
 
     int numNodes = 0;
     int faultPerc = 0;
