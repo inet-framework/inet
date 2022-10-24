@@ -11,7 +11,6 @@
 
 namespace inet {
 
-bool Chunk::enableImplicitChunkSerialization = false;
 int Chunk::nextId = 0;
 const b Chunk::unspecifiedLength = b(-std::numeric_limits<int64_t>::max());
 
@@ -117,9 +116,14 @@ const char *Chunk::getHexDumpLine(int index)
 const Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<Chunk>& chunk, b offset, b length, int flags)
 {
     auto chunkType = chunk->getChunkType();
-    if (!enableImplicitChunkSerialization && !(flags & PF_ALLOW_SERIALIZATION) && chunkType != CT_BITS && chunkType != CT_BYTES) {
+    if (!(flags & PF_ALLOW_REINTERPRETATION) && chunkType != CT_BITS && chunkType != CT_BYTES) {
         auto chunkObject = chunk.get();
-        throw cRuntimeError("Implicit data reinterpretation via chunk serialization/deserialization (%s -> %s) is disabled to prevent unexpected behavior due to reinterpretation and unpredictable performance degradation due to overhead (you may consider changing the Chunk::enableImplicitChunkSerialization flag or passing the PF_ALLOW_SERIALIZATION flag)", opp_typename(typeid(*chunkObject)), opp_typename(typeInfo));
+        throw cRuntimeError("Cannot convert chunk from type %s to type %s. "
+                "The most likely cause of this error is that a packet header is being misinterpreted while processing a received packet. "
+                "The most likely fix is to find the code where the misinterpretation happens and change it."
+                "If the intention is to reinterpret the chunk via serialization/deserialization, then it needs to be enabled by passing the PF_ALLOW_SERIALIZATION flag into the peek() or similar function."
+                "The automatic conversion is disabled by default to prevent unexpected behavior due to unintended data reinterpretation.",
+                opp_typename(typeid(*chunkObject)), opp_typename(typeInfo));
     }
     MemoryOutputStream outputStream;
     serialize(outputStream, chunk, offset, length < b(0) ? std::min(-length, chunk->getChunkLength() - offset) : length);

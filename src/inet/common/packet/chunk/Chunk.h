@@ -280,7 +280,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
         PF_ALLOW_INCOMPLETE             = (1 << 2),
         PF_ALLOW_INCORRECT              = (1 << 3),
         PF_ALLOW_IMPROPERLY_REPRESENTED = (1 << 4),
-        PF_ALLOW_SERIALIZATION          = (1 << 5),
+        PF_ALLOW_REINTERPRETATION       = (1 << 5),
         PF_ALLOW_ALL                    = -1
     };
 
@@ -333,12 +333,6 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     };
 
   public:
-    /**
-     * Peeking some part into a chunk that requires automatic serialization
-     * will throw an exception when implicit chunk serialization is disabled.
-     */
-    static bool enableImplicitChunkSerialization;
-
     static int nextId;
 
   protected:
