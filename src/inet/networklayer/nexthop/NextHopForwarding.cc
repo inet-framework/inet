@@ -19,6 +19,7 @@
 #include "inet/networklayer/common/L3Tools.h"
 #include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/contract/L3SocketCommand_m.h"
+#include "inet/networklayer/contract/netfilter/NetfilterQueuedDatagramTag_m.h"
 #include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"
 #include "inet/networklayer/nexthop/NextHopInterfaceData.h"
 #include "inet/networklayer/nexthop/NextHopRoute.h"
@@ -41,10 +42,6 @@ NextHopForwarding::~NextHopForwarding()
 {
     for (auto it : socketIdToSocketDescriptor)
         delete it.second;
-    for (auto& elem : queuedDatagramsForHooks) {
-        delete elem.datagram;
-    }
-    queuedDatagramsForHooks.clear();
 }
 
 void NextHopForwarding::initialize(int stage)
@@ -195,7 +192,7 @@ void NextHopForwarding::handlePacketFromNetwork(Packet *packet)
 
     EV_DETAIL << "Received datagram `" << packet->getName() << "' with dest=" << header->getDestAddr() << " from " << header->getSrcAddr() << " in interface" << inIE->getInterfaceName() << "\n";
 
-    if (datagramPreRoutingHook(packet) != IHook::ACCEPT)
+    if (processHook(NetfilterHook::NetfilterType::PREROUTING, packet) != NetfilterHook::NetfilterResult::ACCEPT)
         return;
 
     datagramPreRouting(packet);
@@ -218,7 +215,7 @@ void NextHopForwarding::handlePacketFromHL(Packet *packet)
     encapsulate(packet, destIE);
 
     L3Address nextHop;
-    if (datagramLocalOutHook(packet) != IHook::ACCEPT)
+    if (processHook(NetfilterHook::NetfilterType::LOCALOUT, packet) != NetfilterHook::NetfilterResult::ACCEPT)
         return;
 
     const auto& destIeTag = packet->findTag<InterfaceReq>();
@@ -255,7 +252,7 @@ void NextHopForwarding::routePacket(Packet *datagram, bool fromHL)
         }
         numLocalDeliver++;
 
-        if (datagramLocalInHook(datagram) != INetfilter::IHook::ACCEPT)
+        if (processHook(NetfilterHook::NetfilterType::LOCALIN, datagram) != NetfilterHook::NetfilterResult::ACCEPT)
             return;
 
         sendDatagramToHL(datagram);
@@ -664,191 +661,146 @@ void NextHopForwarding::datagramLocalOut(Packet *datagram)
         routeMulticastPacket(datagram);
 }
 
-void NextHopForwarding::registerHook(int priority, IHook *hook)
+void NextHopForwarding::registerNetfilterHandler(NetfilterHook::NetfilterType type, int priority, NetfilterHook::NetfilterHandler *handler)
 {
-    Enter_Method("registerHook()");
-    NetfilterBase::registerHook(priority, hook);
+    Enter_Method(__FUNCTION__);
+
+    ASSERT(type >= 0 && type < NetfilterHook::NetfilterType::__NUM_HOOK_TYPES);
+    auto it = hooks[type].begin();
+
+    for ( ; it != hooks[type].end(); ++it) {
+        if (priority < it->priority) {
+            break;
+        }
+        else if (it->priority == priority && it->handler == handler)
+            throw cRuntimeError("handler already registered");
+    }
+    Item item(priority, handler);
+    hooks[type].insert(it, item);
 }
 
-void NextHopForwarding::unregisterHook(IHook *hook)
+void NextHopForwarding::unregisterNetfilterHandler(NetfilterHook::NetfilterType type, int priority, NetfilterHook::NetfilterHandler *handler)
 {
-    Enter_Method("unregisterHook()");
-    NetfilterBase::unregisterHook(hook);
-}
+    Enter_Method(__FUNCTION__);
 
-void NextHopForwarding::dropQueuedDatagram(const Packet *datagram)
-{
-    Enter_Method("dropDatagram()");
-    for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
-        if (iter->datagram == datagram) {
-            delete datagram;
-            queuedDatagramsForHooks.erase(iter);
+    ASSERT(type >= 0 && type < NetfilterHook::NetfilterType::__NUM_HOOK_TYPES);
+    for (auto it = hooks[type].begin(); it != hooks[type].end(); ++it) {
+        if (priority < it->priority)
+            break;
+        else if (it->priority == priority && it->handler == handler) {
+            hooks[type].erase(it);
             return;
         }
     }
+    throw cRuntimeError("handler not found");
 }
 
-void NextHopForwarding::reinjectQueuedDatagram(const Packet *datagram)
+void NextHopForwarding::reinjectDatagram(Packet *datagram, NetfilterHook::NetfilterResult action)
 {
-    Enter_Method("reinjectDatagram()");
-    for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
-        if (iter->datagram == datagram) {
-            Packet *datagram = iter->datagram;
-            INetfilter::IHook::Type hookType = iter->hookType;
-            switch (hookType) {
-                case INetfilter::IHook::PREROUTING:
-                    datagramPreRouting(datagram);
-                    break;
+    Enter_Method(__FUNCTION__);
 
-                case INetfilter::IHook::LOCALIN:
-                    datagramLocalIn(datagram);
-                    break;
+    take(datagram);
+    auto tag = datagram->getTag<NetfilterHook::NetfilterQueuedDatagramTag>();
+    int type = tag->getHookId();
+    auto priority = tag->getPriority();
+    auto handler = tag->getHandler();
+    auto it = findHookPosition((NetfilterHook::NetfilterType)type, priority, handler);
+    if (it == hooks[type].end())
+        throw cRuntimeError("hook not found for reinjected packet");
+    switch (action) {
+        case NetfilterHook::NetfilterResult::DROP:
+            // TODO emit signal
+            delete datagram;
+            break;
 
-                case INetfilter::IHook::LOCALOUT:
+        case NetfilterHook::NetfilterResult::ACCEPT:
+            ++it;
+            // continue
+        case NetfilterHook::NetfilterResult::REPEAT:
+            if (processHook((NetfilterHook::NetfilterType)type, datagram, it) != NetfilterHook::NetfilterResult::ACCEPT)
+                break;
+
+        case NetfilterHook::NetfilterResult::STOP:
+            switch ((NetfilterHook::NetfilterType)type) {
+                case NetfilterHook::NetfilterType::LOCALOUT:
                     datagramLocalOut(datagram);
                     break;
 
+                case NetfilterHook::NetfilterType::PREROUTING:
+                    datagramPreRouting(datagram);
+                    break;
+
+//                case NetfilterHook::NetfilterType::POSTROUTING:
+//                    fragmentAndSend(datagram);
+//                    break;
+
+                case NetfilterHook::NetfilterType::LOCALIN:
+                    datagramLocalIn(datagram);
+                    break;
+
+//                case NetfilterHook::NetfilterType::FORWARD:
+//                    routeUnicastPacketFinish(datagram);
+//                    break;
+
                 default:
-                    throw cRuntimeError("Re-injection of datagram queued for this hook not implemented");
+                    throw cRuntimeError("Unknown hook ID: %d", type);
                     break;
             }
-            queuedDatagramsForHooks.erase(iter);
-            return;
-        }
+            break;
+
+        default:
+            throw cRuntimeError("Unaccepted NetfilterHook::NetfilterResult %i", (int)action);
     }
 }
 
-INetfilter::IHook::Result NextHopForwarding::datagramPreRoutingHook(Packet *datagram)
+NextHopForwarding::Items::iterator NextHopForwarding::findHookPosition(NetfilterHook::NetfilterType type, int priority, const NetfilterHook::NetfilterHandler *handler)
 {
-    for (auto& elem : hooks) {
-        IHook::Result r = elem.second->datagramPreRoutingHook(datagram);
+    ASSERT(type >= 0 && type < NetfilterHook::NetfilterType::__NUM_HOOK_TYPES);
+    auto it = hooks[type].begin();
+    for ( ; it != hooks[type].end(); ++it) {
+        if (it->priority == priority && it->handler == handler)
+            return it;
+        if (priority < it->priority)
+            break;
+    }
+    return hooks[type].end();
+}
+
+NetfilterHook::NetfilterResult NextHopForwarding::processHook(NetfilterHook::NetfilterType type, Packet *packet, NextHopForwarding::Items::iterator it)
+{
+    ASSERT(type >= 0 && type < NetfilterHook::NetfilterType::__NUM_HOOK_TYPES);
+    for ( ; it != hooks[type].end(); ++it) {
+        NetfilterHook::NetfilterResult r = (*(it->handler))(packet);
         switch (r) {
-            case IHook::ACCEPT:
+            case NetfilterHook::NetfilterResult::ACCEPT:
                 break; // continue iteration
 
-            case IHook::DROP:
-                delete datagram;
+            case NetfilterHook::NetfilterResult::DROP:
+                delete packet;
                 return r;
 
-            case IHook::QUEUE:
-                if (datagram->getOwner() != this)
-                    throw cRuntimeError("Model error: netfilter hook changed the owner of queued datagram '%s'", datagram->getFullName());
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, INetfilter::IHook::PREROUTING));
+            case NetfilterHook::NetfilterResult::QUEUE: {
+                auto tag = packet->addTag<NetfilterHook::NetfilterQueuedDatagramTag>();
+                tag->setHookId(type);
+                tag->setPriority(it->priority);
+                tag->setHandler(it->handler);
                 return r;
+            }
 
-            case IHook::STOLEN:
+            case NetfilterHook::NetfilterResult::STOLEN:
                 return r;
 
             default:
                 throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
         }
     }
-    return IHook::ACCEPT;
+    return NetfilterHook::NetfilterResult::ACCEPT;
 }
 
-INetfilter::IHook::Result NextHopForwarding::datagramForwardHook(Packet *datagram)
+NetfilterHook::NetfilterResult NextHopForwarding::processHook(NetfilterHook::NetfilterType type, Packet *datagram)
 {
-    for (auto& elem : hooks) {
-        IHook::Result r = elem.second->datagramForwardHook(datagram);
-        switch (r) {
-            case IHook::ACCEPT:
-                break; // continue iteration
-
-            case IHook::DROP:
-                delete datagram;
-                return r;
-
-            case IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, INetfilter::IHook::FORWARD));
-                return r;
-
-            case IHook::STOLEN:
-                return r;
-
-            default:
-                throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
-        }
-    }
-    return IHook::ACCEPT;
-}
-
-INetfilter::IHook::Result NextHopForwarding::datagramPostRoutingHook(Packet *datagram)
-{
-    for (auto& elem : hooks) {
-        IHook::Result r = elem.second->datagramPostRoutingHook(datagram);
-        switch (r) {
-            case IHook::ACCEPT:
-                break; // continue iteration
-
-            case IHook::DROP:
-                delete datagram;
-                return r;
-
-            case IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, INetfilter::IHook::POSTROUTING));
-                return r;
-
-            case IHook::STOLEN:
-                return r;
-
-            default:
-                throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
-        }
-    }
-    return IHook::ACCEPT;
-}
-
-INetfilter::IHook::Result NextHopForwarding::datagramLocalInHook(Packet *datagram)
-{
-    L3Address address;
-    for (auto& elem : hooks) {
-        IHook::Result r = elem.second->datagramLocalInHook(datagram);
-        switch (r) {
-            case IHook::ACCEPT:
-                break; // continue iteration
-
-            case IHook::DROP:
-                delete datagram;
-                return r;
-
-            case IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, INetfilter::IHook::LOCALIN));
-                return r;
-
-            case IHook::STOLEN:
-                return r;
-
-            default:
-                throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
-        }
-    }
-    return IHook::ACCEPT;
-}
-
-INetfilter::IHook::Result NextHopForwarding::datagramLocalOutHook(Packet *datagram)
-{
-    for (auto& elem : hooks) {
-        IHook::Result r = elem.second->datagramLocalOutHook(datagram);
-        switch (r) {
-            case IHook::ACCEPT:
-                break; // continue iteration
-
-            case IHook::DROP:
-                delete datagram;
-                return r;
-
-            case IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, INetfilter::IHook::LOCALOUT));
-                return r;
-
-            case IHook::STOLEN:
-                return r;
-
-            default:
-                throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
-        }
-    }
-    return IHook::ACCEPT;
+    ASSERT(type >= 0 && type < NetfilterHook::NetfilterType::__NUM_HOOK_TYPES);
+    return processHook(type, datagram, hooks[type].begin());
 }
 
 void NextHopForwarding::handleStartOperation(LifecycleOperation *operation)
@@ -880,11 +832,6 @@ void NextHopForwarding::stop()
 
 void NextHopForwarding::flush()
 {
-    EV_DEBUG << "NextHopForwarding::flush(): packets in hooks: " << queuedDatagramsForHooks.size() << endl;
-    for (auto& elem : queuedDatagramsForHooks) {
-        delete elem.datagram;
-    }
-    queuedDatagramsForHooks.clear();
 }
 
 } // namespace inet

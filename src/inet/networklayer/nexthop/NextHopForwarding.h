@@ -20,8 +20,8 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/contract/IArp.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
+#include "inet/networklayer/contract/netfilter/INetfilterCompatibleNetfilterHookManagerBase.h"
 #include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"
 #include "inet/networklayer/nexthop/NextHopRoutingTable.h"
 
@@ -33,26 +33,9 @@ namespace inet {
  * interface to allow routing protocols to kick in. It doesn't provide datagram fragmentation
  * and reassembling.
  */
-class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase, public INetworkProtocol, public DefaultProtocolRegistrationListener
+class INET_API NextHopForwarding : public OperationalBase, public NetfilterHook::INetfilterCompatibleNetfilterHookManagerBase, public INetworkProtocol, public DefaultProtocolRegistrationListener
 {
   protected:
-    /**
-     * Represents an NextHopDatagram, queued by a Hook
-     */
-    struct QueuedDatagramForHook {
-      public:
-        QueuedDatagramForHook(Packet *datagram, INetfilter::IHook::Type hookType)
-            : datagram(datagram), hookType(hookType) {}
-
-        virtual ~QueuedDatagramForHook() {}
-
-        Packet *datagram;
-        const NetworkInterface *inIE;
-        const NetworkInterface *outIE;
-        const L3Address nextHop;
-        const INetfilter::IHook::Type hookType;
-    };
-
     struct SocketDescriptor {
         int socketId = -1;
         int protocolId = -1;
@@ -74,9 +57,15 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
     std::set<const Protocol *> upperProtocols; // where to send packets after decapsulation
     std::map<int, SocketDescriptor *> socketIdToSocketDescriptor;
 
-    // hooks
-    typedef std::list<QueuedDatagramForHook> DatagramQueueForHooks;
-    DatagramQueueForHooks queuedDatagramsForHooks;
+    // Netfilter:
+    class Item {
+      public:
+        int priority;
+        NetfilterHook::NetfilterHandler *handler;
+        Item(int priority, NetfilterHook::NetfilterHandler *handler) : priority(priority), handler(handler) {}
+    };
+    typedef std::vector<Item> Items;
+    Items hooks[NetfilterHook::NetfilterType::__NUM_HOOK_TYPES];
 
     // statistics
     int numLocalDeliver;
@@ -141,11 +130,14 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
     virtual void datagramLocalIn(Packet *datagram);
     virtual void datagramLocalOut(Packet *datagram);
 
-    virtual IHook::Result datagramPreRoutingHook(Packet *datagram);
-    virtual IHook::Result datagramForwardHook(Packet *datagram);
-    virtual IHook::Result datagramPostRoutingHook(Packet *datagram);
-    virtual IHook::Result datagramLocalInHook(Packet *datagram);
-    virtual IHook::Result datagramLocalOutHook(Packet *datagram);
+    // NetFilter functions:
+    NextHopForwarding::Items::iterator findHookPosition(NetfilterHook::NetfilterType type, int priority, const NetfilterHook::NetfilterHandler *handler);
+
+    /**
+     * called before a packet arriving from the network is routed
+     */
+    NetfilterHook::NetfilterResult processHook(NetfilterHook::NetfilterType type, Packet *datagram, NextHopForwarding::Items::iterator it);
+    NetfilterHook::NetfilterResult processHook(NetfilterHook::NetfilterType type, Packet *datagram);
 
   public:
     NextHopForwarding();
@@ -154,10 +146,12 @@ class INET_API NextHopForwarding : public OperationalBase, public NetfilterBase,
     virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
-    virtual void registerHook(int priority, IHook *hook) override;
-    virtual void unregisterHook(IHook *hook) override;
-    virtual void dropQueuedDatagram(const Packet *datagram) override;
-    virtual void reinjectQueuedDatagram(const Packet *datagram) override;
+    /**
+     * INetfilterHookManager:
+     */
+    virtual void registerNetfilterHandler(NetfilterHook::NetfilterType type, int priority, NetfilterHook::NetfilterHandler *handler) override;
+    virtual void unregisterNetfilterHandler(NetfilterHook::NetfilterType type, int priority, NetfilterHook::NetfilterHandler *handler) override;
+    virtual void reinjectDatagram(Packet *datagram, NetfilterHook::NetfilterResult action) override;
 
   protected:
     /**
