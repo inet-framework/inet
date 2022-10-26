@@ -25,6 +25,7 @@
 #include "inet/networklayer/common/TosTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv6/Ipv6SocketCommand_m.h"
+#include "inet/networklayer/contract/netfilter/NetfilterQueuedDatagramTag_m.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
 #include "inet/networklayer/ipv6/Ipv6ExtHeaderTag_m.h"
@@ -50,10 +51,6 @@ Ipv6::~Ipv6()
 {
     for (auto it : socketIdToSocketDescriptor)
         delete it.second;
-
-    for (auto& elem : queuedDatagramsForHooks) {
-        delete elem.packet;
-    }
 }
 
 #ifdef INET_WITH_xMIPv6
@@ -85,10 +82,6 @@ void Ipv6::initialize(int stage)
         curFragmentId = 0;
         lastCheckTime = SIMTIME_ZERO;
         fragbuf.init(icmp);
-
-        // NetFilter:
-        hooks.clear();
-        queuedDatagramsForHooks.clear();
 
         numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
@@ -261,11 +254,11 @@ void Ipv6::handleMessage(cMessage *msg)
         if (fromHL) {
             // remove control info
             delete packet->removeControlInfo();
-            if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT)
+            if (processHook(NetfilterHook::NetfilterType::LOCALOUT, packet) == NetfilterHook::NetfilterResult::ACCEPT)
                 datagramLocalOut(packet);
         }
         else {
-            if (datagramPreRoutingHook(packet) == INetfilter::IHook::ACCEPT)
+            if (processHook(NetfilterHook::NetfilterType::PREROUTING, packet) == NetfilterHook::NetfilterResult::ACCEPT)
                 preroutingFinish(packet);
         }
     }
@@ -355,7 +348,7 @@ void Ipv6::handleMessageFromHL(Packet *packet)
             destIE = ift->findFirstLoopbackInterface();
         ASSERT(destIE);
     }
-    if (datagramLocalOutHook(packet) == INetfilter::IHook::ACCEPT)
+    if (processHook(NetfilterHook::NetfilterType::LOCALOUT, packet) == NetfilterHook::NetfilterResult::ACCEPT)
         datagramLocalOut(packet);
 }
 
@@ -866,7 +859,7 @@ void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const
         ipv6Header = newIpv6Header;
     }
     L3Address nextHopAddr_(nextHopAddr);
-    if (datagramPostRoutingHook(packet) == INetfilter::IHook::ACCEPT) {
+    if (processHook(NetfilterHook::NetfilterType::POSTROUTING, packet) == NetfilterHook::NetfilterResult::ACCEPT) {
         fragmentAndSend(packet, ie, nextHopAddr_.toMac(), fromHL);
     }
 }
@@ -1076,197 +1069,148 @@ bool Ipv6::processExtensionHeaders(Packet *packet, const Ipv6Header *ipv6Header)
 #endif /* INET_WITH_xMIPv6 */
 
 // NetFilter:
-void Ipv6::registerHook(int priority, INetfilter::IHook *hook)
+void Ipv6::registerNetfilterHandler(NetfilterHook::NetfilterType type, int priority, NetfilterHook::NetfilterHandler *handler)
 {
-    Enter_Method("registerHook()");
-    NetfilterBase::registerHook(priority, hook);
+    Enter_Method(__FUNCTION__);
+
+    ASSERT(type >= 0 && type < NetfilterHook::NetfilterType::__NUM_HOOK_TYPES);
+    auto it = hooks[type].begin();
+
+    for ( ; it != hooks[type].end(); ++it) {
+        if (priority < it->priority) {
+            break;
+        }
+        else if (it->priority == priority && it->handler == handler)
+            throw cRuntimeError("handler already registered");
+    }
+    Item item(priority, handler);
+    hooks[type].insert(it, item);
 }
 
-void Ipv6::unregisterHook(INetfilter::IHook *hook)
+void Ipv6::unregisterNetfilterHandler(NetfilterHook::NetfilterType type, int priority, NetfilterHook::NetfilterHandler *handler)
 {
-    Enter_Method("unregisterHook()");
-    NetfilterBase::unregisterHook(hook);
-}
+    Enter_Method(__FUNCTION__);
 
-void Ipv6::dropQueuedDatagram(const Packet *packet)
-{
-    Enter_Method("dropQueuedDatagram()");
-    for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
-        if (iter->packet == packet) {
-            delete packet;
-            queuedDatagramsForHooks.erase(iter);
+    ASSERT(type >= 0 && type < NetfilterHook::NetfilterType::__NUM_HOOK_TYPES);
+    for (auto it = hooks[type].begin(); it != hooks[type].end(); ++it) {
+        if (priority < it->priority)
+            break;
+        else if (it->priority == priority && it->handler == handler) {
+            hooks[type].erase(it);
             return;
         }
     }
+    throw cRuntimeError("handler not found");
 }
 
-void Ipv6::reinjectQueuedDatagram(const Packet *packet)
+void Ipv6::reinjectDatagram(Packet *datagram, NetfilterHook::NetfilterResult action)
 {
-    Enter_Method("reinjectDatagram()");
-    for (auto iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
-        if (iter->packet == packet) {
-            Packet *datagram = iter->packet;
-            switch (iter->hookType) {
-                case INetfilter::IHook::LOCALOUT:
+    Enter_Method(__FUNCTION__);
+
+    take(datagram);
+    auto tag = datagram->getTag<NetfilterHook::NetfilterQueuedDatagramTag>();
+    int type = tag->getHookId();
+    auto priority = tag->getPriority();
+    auto handler = tag->getHandler();
+    auto it = findHookPosition((NetfilterHook::NetfilterType)type, priority, handler);
+    if (it == hooks[type].end())
+        throw cRuntimeError("hook not found for reinjected packet");
+    switch (action) {
+        case NetfilterHook::NetfilterResult::DROP:
+            // TODO emit signal
+            delete datagram;
+            break;
+
+        case NetfilterHook::NetfilterResult::ACCEPT:
+            ++it;
+            // continue
+        case NetfilterHook::NetfilterResult::REPEAT:
+            if (processHook((NetfilterHook::NetfilterType)type, datagram, it) != NetfilterHook::NetfilterResult::ACCEPT)
+                break;
+
+        case NetfilterHook::NetfilterResult::STOP:
+            switch ((NetfilterHook::NetfilterType)type) {
+                case NetfilterHook::NetfilterType::LOCALOUT:
                     datagramLocalOut(datagram);
                     break;
 
-                case INetfilter::IHook::PREROUTING:
+                case NetfilterHook::NetfilterType::PREROUTING:
                     preroutingFinish(datagram);
                     break;
 
-                case INetfilter::IHook::POSTROUTING:
-//                    fragmentAndSend(datagram, iter->outIE, iter->nextHopAddr);
+                case NetfilterHook::NetfilterType::POSTROUTING:
+                    // fragmentAndSend(datagram);
                     throw cRuntimeError("Re-injection of datagram queued for POSTROUTING hook not implemented");
                     break;
 
-                case INetfilter::IHook::LOCALIN:
-//                    reassembleAndDeliverFinish(datagram);
+                case NetfilterHook::NetfilterType::LOCALIN:
+                    // reassembleAndDeliverFinish(datagram);
                     throw cRuntimeError("Re-injection of datagram queued for LOCALIN hook not implemented");
                     break;
 
-                case INetfilter::IHook::FORWARD:
+                case NetfilterHook::NetfilterType::FORWARD:
                     throw cRuntimeError("Re-injection of datagram queued for FORWARD hook not implemented");
                     break;
 
                 default:
-                    throw cRuntimeError("Unknown hook ID: %d", (int)(iter->hookType));
+                    throw cRuntimeError("Unknown hook ID: %d", type);
                     break;
             }
-            queuedDatagramsForHooks.erase(iter);
-            return;
-        }
+            break;
+
+        default:
+            throw cRuntimeError("Unaccepted NetfilterHook::NetfilterResult %i", (int)action);
     }
 }
 
-INetfilter::IHook::Result Ipv6::datagramPreRoutingHook(Packet *packet)
+NetfilterHook::NetfilterResult Ipv6::processHook(NetfilterHook::NetfilterType type, Packet *packet, Ipv6::Items::iterator it)
 {
-    for (auto& elem : hooks) {
-        IHook::Result r = elem.second->datagramPreRoutingHook(packet);
+    ASSERT(type >= 0 && type < NetfilterHook::NetfilterType::__NUM_HOOK_TYPES);
+    for ( ; it != hooks[type].end(); ++it) {
+        NetfilterHook::NetfilterResult r = (*(it->handler))(packet);
         switch (r) {
-            case INetfilter::IHook::ACCEPT:
+            case NetfilterHook::NetfilterResult::ACCEPT:
                 break; // continue iteration
 
-            case INetfilter::IHook::DROP:
+            case NetfilterHook::NetfilterResult::DROP:
                 delete packet;
                 return r;
 
-            case INetfilter::IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(packet, INetfilter::IHook::PREROUTING));
+            case NetfilterHook::NetfilterResult::QUEUE: {
+                auto tag = packet->addTag<NetfilterHook::NetfilterQueuedDatagramTag>();
+                tag->setHookId(type);
+                tag->setPriority(it->priority);
+                tag->setHandler(it->handler);
                 return r;
+            }
 
-            case INetfilter::IHook::STOLEN:
+            case NetfilterHook::NetfilterResult::STOLEN:
                 return r;
 
             default:
                 throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
         }
     }
-    return INetfilter::IHook::ACCEPT;
+    return NetfilterHook::NetfilterResult::ACCEPT;
 }
 
-INetfilter::IHook::Result Ipv6::datagramForwardHook(Packet *packet)
+NetfilterHook::NetfilterResult Ipv6::processHook(NetfilterHook::NetfilterType type, Packet *datagram)
 {
-    for (auto& elem : hooks) {
-        IHook::Result r = elem.second->datagramForwardHook(packet);
-        switch (r) {
-            case INetfilter::IHook::ACCEPT:
-                break; // continue iteration
-
-            case INetfilter::IHook::DROP:
-                delete packet;
-                return r;
-
-            case INetfilter::IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(packet, INetfilter::IHook::FORWARD));
-                return r;
-
-            case INetfilter::IHook::STOLEN:
-                return r;
-
-            default:
-                throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
-        }
-    }
-    return INetfilter::IHook::ACCEPT;
+    ASSERT(type >= 0 && type < NetfilterHook::NetfilterType::__NUM_HOOK_TYPES);
+    return processHook(type, datagram, hooks[type].begin());
 }
 
-INetfilter::IHook::Result Ipv6::datagramPostRoutingHook(Packet *packet)
+Ipv6::Items::iterator Ipv6::findHookPosition(NetfilterHook::NetfilterType type, int priority, const NetfilterHook::NetfilterHandler *handler)
 {
-    for (auto& elem : hooks) {
-        IHook::Result r = elem.second->datagramPostRoutingHook(packet);
-        switch (r) {
-            case INetfilter::IHook::ACCEPT:
-                break; // continue iteration
-
-            case INetfilter::IHook::DROP:
-                delete packet;
-                return r;
-
-            case INetfilter::IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(packet, INetfilter::IHook::POSTROUTING));
-                return r;
-
-            case INetfilter::IHook::STOLEN:
-                return r;
-
-            default:
-                throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
-        }
+    ASSERT(type >= 0 && type < NetfilterHook::NetfilterType::__NUM_HOOK_TYPES);
+    auto it = hooks[type].begin();
+    for ( ; it != hooks[type].end(); ++it) {
+        if (it->priority == priority && it->handler == handler)
+            return it;
+        if (priority < it->priority)
+            break;
     }
-    return INetfilter::IHook::ACCEPT;
-}
-
-INetfilter::IHook::Result Ipv6::datagramLocalInHook(Packet *packet)
-{
-    for (auto& elem : hooks) {
-        IHook::Result r = elem.second->datagramLocalInHook(packet);
-        switch (r) {
-            case INetfilter::IHook::ACCEPT:
-                break; // continue iteration
-
-            case INetfilter::IHook::DROP:
-                delete packet;
-                return r;
-
-            case INetfilter::IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(packet, INetfilter::IHook::LOCALIN));
-                return r;
-
-            case INetfilter::IHook::STOLEN:
-                return r;
-
-            default:
-                throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
-        }
-    }
-    return INetfilter::IHook::ACCEPT;
-}
-
-INetfilter::IHook::Result Ipv6::datagramLocalOutHook(Packet *packet)
-{
-    for (auto& elem : hooks) {
-        IHook::Result r = elem.second->datagramLocalOutHook(packet);
-        switch (r) {
-            case INetfilter::IHook::ACCEPT:
-                break; // continue iteration
-
-            case INetfilter::IHook::DROP:
-                delete packet;
-                return r;
-
-            case INetfilter::IHook::QUEUE:
-                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(packet, INetfilter::IHook::LOCALOUT));
-                return r;
-
-            case INetfilter::IHook::STOLEN:
-                return r;
-
-            default:
-                throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
-        }
-    }
-    return INetfilter::IHook::ACCEPT;
+    return hooks[type].end();
 }
 
 void Ipv6::sendIcmpError(Packet *packet, Icmpv6Type type, int code)

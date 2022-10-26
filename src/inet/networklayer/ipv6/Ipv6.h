@@ -14,8 +14,8 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Message.h"
-#include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
+#include "inet/networklayer/contract/netfilter/INetfilterCompatibleNetfilterHookManagerBase.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
 #include "inet/networklayer/ipv6/Ipv6FragBuf.h"
@@ -30,23 +30,18 @@ class Icmpv6Header;
 /**
  * Ipv6 implementation.
  */
-class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public LifecycleUnsupported, public INetworkProtocol, public DefaultProtocolRegistrationListener
+class INET_API Ipv6 : public cSimpleModule, public NetfilterHook::INetfilterCompatibleNetfilterHookManagerBase, public LifecycleUnsupported, public INetworkProtocol, public DefaultProtocolRegistrationListener
 {
-  public:
-    /**
-     * Represents an Ipv4Header, queued by a Hook
-     */
-    class QueuedDatagramForHook {
-      public:
-        QueuedDatagramForHook(Packet *packet, IHook::Type hookType) :
-                packet(packet), hookType(hookType) {}
-        virtual ~QueuedDatagramForHook() {}
-
-        Packet *packet = nullptr;
-        const IHook::Type hookType = static_cast<IHook::Type>(-1);
-    };
-
   protected:
+    class Item {
+      public:
+        int priority;
+        NetfilterHook::NetfilterHandler *handler;
+        Item(int priority, NetfilterHook::NetfilterHandler *handler) : priority(priority), handler(handler) {}
+    };
+    typedef std::vector<Item> Items;
+    Items hooks[NetfilterHook::NetfilterType::__NUM_HOOK_TYPES];
+
     class SocketDescriptor {
       public:
         int socketId = -1;
@@ -100,10 +95,6 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
         Packet *removeDatagram() { Packet *ret = packet; packet = nullptr; return ret; }
     };
 #endif /* INET_WITH_xMIPv6 */
-
-    // netfilter hook variables
-    typedef std::list<QueuedDatagramForHook> DatagramQueueForHooks;
-    DatagramQueueForHooks queuedDatagramsForHooks;
 
   protected:
     // utility: look up interface from getArrivalGate()
@@ -181,30 +172,14 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     // NetFilter functions:
 
   protected:
+    // NetFilter functions:
+    Ipv6::Items::iterator findHookPosition(NetfilterHook::NetfilterType type, int priority, const NetfilterHook::NetfilterHandler *handler);
+
     /**
      * called before a packet arriving from the network is routed
      */
-    IHook::Result datagramPreRoutingHook(Packet *packet);
-
-    /**
-     * called before a packet arriving from the network is delivered via the network
-     */
-    IHook::Result datagramForwardHook(Packet *packet);
-
-    /**
-     * called before a packet is delivered via the network
-     */
-    IHook::Result datagramPostRoutingHook(Packet *packet);
-
-    /**
-     * called before a packet arriving from the network is delivered locally
-     */
-    IHook::Result datagramLocalInHook(Packet *packet);
-
-    /**
-     * called before a packet arriving locally is delivered
-     */
-    IHook::Result datagramLocalOutHook(Packet *packet);
+    NetfilterHook::NetfilterResult processHook(NetfilterHook::NetfilterType type, Packet *datagram, Ipv6::Items::iterator it);
+    NetfilterHook::NetfilterResult processHook(NetfilterHook::NetfilterType type, Packet *datagram);
 
   public:
     Ipv6();
@@ -214,10 +189,9 @@ class INET_API Ipv6 : public cSimpleModule, public NetfilterBase, public Lifecyc
     virtual void handleRegisterProtocol(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
 
     // Netfilter:
-    virtual void registerHook(int priority, IHook *hook) override;
-    virtual void unregisterHook(IHook *hook) override;
-    virtual void dropQueuedDatagram(const Packet *packet) override;
-    virtual void reinjectQueuedDatagram(const Packet *packet) override;
+    virtual void registerNetfilterHandler(NetfilterHook::NetfilterType type, int priority, NetfilterHook::NetfilterHandler *handler) override;
+    virtual void unregisterNetfilterHandler(NetfilterHook::NetfilterType type, int priority, NetfilterHook::NetfilterHandler *handler) override;
+    virtual void reinjectDatagram(Packet *datagram, NetfilterHook::NetfilterResult action) override;
 
   protected:
     /**
