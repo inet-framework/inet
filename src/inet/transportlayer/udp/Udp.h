@@ -18,7 +18,7 @@
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/contract/INetfilter.h"
+#include "inet/networklayer/contract/netfilter/NetfilterHookDefs_m.h"
 #include "inet/transportlayer/base/TransportProtocolBase.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
@@ -36,16 +36,6 @@
 namespace inet {
 
 const uint16_t UDP_MAX_MESSAGE_SIZE = 65535; // bytes
-
-class INET_API UdpCrcInsertionHook : public cSimpleModule, public NetfilterBase::HookBase
-{
-  public:
-    virtual Result datagramPreRoutingHook(Packet *packet) override { return ACCEPT; }
-    virtual Result datagramForwardHook(Packet *packet) override { return ACCEPT; }
-    virtual Result datagramPostRoutingHook(Packet *packet) override;
-    virtual Result datagramLocalInHook(Packet *packet) override { return ACCEPT; }
-    virtual Result datagramLocalOutHook(Packet *packet) override { return ACCEPT; }
-};
 
 /**
  * Implements the Udp protocol: encapsulates/decapsulates user data into/from Udp.
@@ -198,6 +188,7 @@ class INET_API Udp : public TransportProtocolBase
     static void insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<UdpHeader>& udpHeader, Packet *udpPayload);
     static bool verifyCrc(const Protocol *networkProtocol, const Ptr<const UdpHeader>& udpHeader, Packet *packet);
     static uint16_t computeCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const UdpHeader>& udpHeader, const Ptr<const Chunk>& udpData);
+    static NetfilterHook::NetfilterResult crcCalculatorNetfilterHook(Packet *packet);
 
   public:
     Udp();

@@ -84,8 +84,3 @@ simple Udp like IUdp
         output appOut @labels(UdpControlInfo/up) @messageKinds(inet::UdpStatusInd);
         output ipOut @labels(UdpHeader,Ipv4ControlInfo/down,Ipv6ControlInfo/down);
 }
-
-simple UdpCrcInsertionHook
-{
-}
-

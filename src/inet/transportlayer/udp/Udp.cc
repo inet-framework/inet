@@ -27,6 +27,7 @@
 #include "inet/networklayer/common/MulticastTag_m.h"
 #include "inet/networklayer/common/TosTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/contract/netfilter/INetfilterHookManager.h"
 
 #ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4layer/common/Ipv4Header_m.h"
@@ -47,7 +48,8 @@
 namespace inet {
 
 Define_Module(Udp);
-Define_Module(UdpCrcInsertionHook);
+
+static NetfilterHook::NetfilterHandler udpCrcCalculatorNetfilterHook = Udp::crcCalculatorNetfilterHook;
 
 Udp::Udp()
 {
@@ -90,11 +92,6 @@ void Udp::initialize(int stage)
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         if (crcMode == CRC_COMPUTED) {
-            cModuleType *moduleType = cModuleType::get("inet.transportlayer.udp.UdpCrcInsertionHook");
-            auto crcInsertion = check_and_cast<UdpCrcInsertionHook *>(moduleType->create("crcInsertion", this));
-            crcInsertion->finalizeParameters();
-            crcInsertion->callInitialize();
-
             // TODO
             // Unlike IPv4, when UDP packets are originated by an IPv6 node,
             // the UDP checksum is not optional.  That is, whenever
@@ -105,14 +102,14 @@ void Udp::initialize(int stage)
             // discard UDP packets containing a zero checksum, and should log
             // the error.
 #ifdef INET_WITH_IPv4
-            auto ipv4 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv4.ip"));
+            auto ipv4 = dynamic_cast<NetfilterHook::INetfilterHookManager *>(findModuleByPath("^.ipv4.ip"));
             if (ipv4 != nullptr)
-                ipv4->registerHook(0, crcInsertion);
+                ipv4->registerNetfilterHandler(NetfilterHook::NetfilterType::POSTROUTING, 0, &udpCrcCalculatorNetfilterHook);
 #endif
 #ifdef INET_WITH_IPv6
-            auto ipv6 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv6.ipv6"));
+            auto ipv6 = dynamic_cast<NetfilterHook::INetfilterHookManager *>(findModuleByPath("^.ipv6.ipv6"));
             if (ipv6 != nullptr)
-                ipv6->registerHook(0, crcInsertion);
+                ipv6->registerNetfilterHandler(NetfilterHook::NetfilterType::POSTROUTING, 0, &udpCrcCalculatorNetfilterHook);
 #endif
         }
         registerService(Protocol::udp, gate("appIn"), gate("appOut"));
@@ -1458,12 +1455,10 @@ std::ostream& operator<<(std::ostream& os, const Udp::SockDescList& list)
 // other methods
 // ######################
 
-INetfilter::IHook::Result UdpCrcInsertionHook::datagramPostRoutingHook(Packet *packet)
+NetfilterHook::NetfilterResult Udp::crcCalculatorNetfilterHook(Packet *packet)
 {
-    Enter_Method("datagramPostRoutingHook");
-
     if (packet->findTag<InterfaceInd>())
-        return ACCEPT; // FORWARD
+        return NetfilterHook::ACCEPT; // FORWARD
 
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
@@ -1471,15 +1466,16 @@ INetfilter::IHook::Result UdpCrcInsertionHook::datagramPostRoutingHook(Packet *p
         ASSERT(!networkHeader->isFragment());
         packet->eraseAtFront(networkHeader->getChunkLength());
         auto udpHeader = packet->removeAtFront<UdpHeader>();
-        ASSERT(udpHeader->getCrcMode() == CRC_COMPUTED);
-        const L3Address& srcAddress = networkHeader->getSourceAddress();
-        const L3Address& destAddress = networkHeader->getDestinationAddress();
-        Udp::insertCrc(networkProtocol, srcAddress, destAddress, udpHeader, packet);
+        if (udpHeader->getCrcMode() == CRC_COMPUTED) {
+            const L3Address& srcAddress = networkHeader->getSourceAddress();
+            const L3Address& destAddress = networkHeader->getDestinationAddress();
+            Udp::insertCrc(networkProtocol, srcAddress, destAddress, udpHeader, packet);
+        }
         packet->insertAtFront(udpHeader);
         packet->insertAtFront(networkHeader);
     }
 
-    return ACCEPT;
+    return NetfilterHook::ACCEPT;
 }
 
 bool Udp::MulticastMembership::isSourceAllowed(L3Address sourceAddr)
