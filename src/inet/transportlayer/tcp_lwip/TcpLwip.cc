@@ -18,6 +18,7 @@
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
+#include "inet/networklayer/contract/netfilter/INetfilterHookManager.h"
 
 #ifdef INET_WITH_IPv6
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
@@ -89,20 +90,16 @@ void TcpLwip::initialize(int stage)
         registerProtocol(Protocol::tcp, gate("ipOut"), gate("ipIn"));
 
         if (crcMode == CRC_COMPUTED) {
-            cModuleType *moduleType = cModuleType::get("inet.transportlayer.tcp_common.TcpCrcInsertionHook");
-            auto *crcInsertion = check_and_cast<TcpCrcInsertionHook *>(moduleType->create("crcInsertion", this));
-            crcInsertion->finalizeParameters();
-            crcInsertion->callInitialize();
 
 #ifdef INET_WITH_IPv4
-            auto ipv4 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv4.ip"));
+            auto ipv4 = dynamic_cast<NetfilterHook::INetfilterHookManager *>(findModuleByPath("^.ipv4.ip"));
             if (ipv4 != nullptr)
-                ipv4->registerHook(0, crcInsertion);
+                ipv4->registerNetfilterHandler(NetfilterHook::NetfilterType::POSTROUTING, 0, &TcpCrcInsertionHook::netfilterHandler);
 #endif
 #ifdef INET_WITH_IPv6
-            auto ipv6 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv6.ipv6"));
+            auto ipv6 = dynamic_cast<NetfilterHook::INetfilterHookManager *>(findModuleByPath("^.ipv6.ipv6"));
             if (ipv6 != nullptr)
-                ipv6->registerHook(0, crcInsertion);
+                ipv6->registerNetfilterHandler(NetfilterHook::NetfilterType::POSTROUTING, 0, &TcpCrcInsertionHook::netfilterHandler);
 #endif
         }
     }

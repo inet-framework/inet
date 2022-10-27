@@ -14,34 +14,33 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3Tools.h"
-#include "inet/networklayer/contract/INetfilter.h"
+#include "inet/networklayer/contract/netfilter/INetfilterHookManager.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
 
 namespace inet {
 namespace tcp {
 
-Define_Module(TcpCrcInsertionHook);
+NetfilterHook::NetfilterHandler TcpCrcInsertionHook::netfilterHandler = TcpCrcInsertionHook::datagramCrcCalculator;
 
-INetfilter::IHook::Result TcpCrcInsertionHook::datagramPostRoutingHook(Packet *packet)
+NetfilterHook::NetfilterResult TcpCrcInsertionHook::datagramCrcCalculator(Packet *packet)
 {
-    Enter_Method("datagramPostRoutingHook");
-
     if (packet->findTag<InterfaceInd>())
-        return ACCEPT; // FORWARD
+        return NetfilterHook::NetfilterResult::ACCEPT; // FORWARD
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     const auto& networkHeader = getNetworkProtocolHeader(packet);
     if (networkHeader->getProtocol() == &Protocol::tcp) {
         ASSERT(!networkHeader->isFragment());
         packet->eraseAtFront(networkHeader->getChunkLength());
         auto tcpHeader = packet->removeAtFront<TcpHeader>();
-        ASSERT(tcpHeader->getCrcMode() == CRC_COMPUTED);
-        const L3Address& srcAddress = networkHeader->getSourceAddress();
-        const L3Address& destAddress = networkHeader->getDestinationAddress();
-        insertCrc(networkProtocol, srcAddress, destAddress, tcpHeader, packet);
+        if (tcpHeader->getCrcMode() == CRC_COMPUTED) {
+            const L3Address& srcAddress = networkHeader->getSourceAddress();
+            const L3Address& destAddress = networkHeader->getDestinationAddress();
+            insertCrc(networkProtocol, srcAddress, destAddress, tcpHeader, packet);
+        }
         packet->insertAtFront(tcpHeader);
         packet->insertAtFront(networkHeader);
     }
-    return ACCEPT;
+    return NetfilterHook::NetfilterResult::ACCEPT;
 }
 
 void TcpCrcInsertionHook::insertCrc(const Protocol *networkProtocol, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<TcpHeader>& tcpHeader, Packet *packet)
