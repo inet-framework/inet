@@ -14,11 +14,13 @@
 #include "inet/networklayer/common/IpProtocolId_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/common/L3Tools.h"
+#include "inet/networklayer/contract/netfilter/INetfilterHookManager.h"
 
 namespace inet {
 
 Define_Module(Pim);
-Define_Module(PimCrcInsertionHook);
+
+static NetfilterHook::NetfilterHandler pimCrcCalculatorNetfilterHook = Pim::crcCalculatorNetfilterHook;
 
 Pim::~Pim()
 {
@@ -34,11 +36,6 @@ void Pim::initialize(int stage)
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         if (crcMode == CRC_COMPUTED) {
-            cModuleType *moduleType = cModuleType::get("inet.routing.pim.PimCrcInsertionHook");
-            auto crcInsertion = check_and_cast<PimCrcInsertionHook *>(moduleType->create("crcInsertion", this));
-            crcInsertion->finalizeParameters();
-            crcInsertion->callInitialize();
-
             // For IPv6, the checksum also includes the IPv6 "pseudo-header",
             // as specified in RFC 2460, Section 8.1 [5].  This
             // "pseudo-header" is prepended to the PIM header for the purposes
@@ -48,9 +45,9 @@ void Pim::initialize(int stage)
             // the PIM register header (8).  The Next Header value used in the
             // pseudo-header is 103.
 #ifdef INET_WITH_IPv6
-            auto ipv6 = dynamic_cast<INetfilter *>(findModuleByPath("^.ipv6.ipv6"));
+            auto ipv6 = dynamic_cast<NetfilterHook::INetfilterHookManager *>(findModuleByPath("^.ipv6.ipv6"));
             if (ipv6 != nullptr)
-                ipv6->registerHook(0, crcInsertion);
+                ipv6->registerNetfilterHandler(NetfilterHook::NetfilterType::POSTROUTING, 0, &pimCrcCalculatorNetfilterHook);
 #endif
         }
     }
@@ -76,28 +73,28 @@ void Pim::handleCrashOperation(LifecycleOperation *operation)
 {
 }
 
-INetfilter::IHook::Result PimCrcInsertionHook::datagramPostRoutingHook(Packet *packet)
+NetfilterHook::NetfilterResult Pim::crcCalculatorNetfilterHook(Packet *packet)
 {
-    Enter_Method("datagramPostRoutingHook");
-
     if (packet->findTag<InterfaceInd>())
-        return ACCEPT; // FORWARD
+        return NetfilterHook::ACCEPT; // FORWARD
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     if (*networkProtocol == Protocol::ipv6) {
         const auto& networkHeader = getNetworkProtocolHeader(packet);
         if (*networkHeader->getProtocol() == Protocol::pim) {
-            ASSERT(!networkHeader->isFragment());
-            packet->eraseAtFront(networkHeader->getChunkLength());
-            auto pimPacket = packet->removeAtFront<PimPacket>();
-            ASSERT(pimPacket->getCrcMode() == CRC_COMPUTED);
-            const L3Address& srcAddress = networkHeader->getSourceAddress();
-            const L3Address& destAddress = networkHeader->getDestinationAddress();
-            Pim::insertCrc(networkProtocol, srcAddress, destAddress, pimPacket);
-            packet->insertAtFront(pimPacket);
-            packet->insertAtFront(networkHeader);
+            if (!networkHeader->isFragment()) {
+                packet->eraseAtFront(networkHeader->getChunkLength());
+                auto pimPacket = packet->removeAtFront<PimPacket>();
+                if (pimPacket->getCrcMode() == CRC_COMPUTED) {
+                    const L3Address& srcAddress = networkHeader->getSourceAddress();
+                    const L3Address& destAddress = networkHeader->getDestinationAddress();
+                    Pim::insertCrc(networkProtocol, srcAddress, destAddress, pimPacket);
+                }
+                packet->insertAtFront(pimPacket);
+                packet->insertAtFront(networkHeader);
+            }
         }
     }
-    return ACCEPT;
+    return NetfilterHook::ACCEPT;
 }
 
 void Pim::insertCrc(const Ptr<PimPacket>& pimPacket)

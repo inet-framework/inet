@@ -72,8 +72,3 @@ module Pim like IPim
         pimSplitter.ipOut --> { @display("m=s"); } --> networkLayerOut;
         pimSplitter.ipIn <-- { @display("m=s"); } <-- networkLayerIn;
 }
-
-simple PimCrcInsertionHook
-{
-}
-
