@@ -119,8 +119,7 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
         floodSeqNumber++;
         pkt->setIsFlood(1);
         pkt->setHeaderKind(ROUTE_FLOOD);
-        auto packet = new Packet("route-flood");
-        packet->insertAtBack(pkt);
+        auto packet = new Packet("route-flood", pkt);
         setDownControlInfo(packet, MacAddress::BROADCAST_ADDRESS);
         sendDown(packet);
         nbFloodsSent++;
@@ -159,38 +158,32 @@ void WiseRoute::handleLowerPacket(Packet *packet)
             updateRouteTable(initialSrcAddr, srcAddr, rssi, ber);
 
         if (finalDestAddr == myNetwAddr || finalDestAddr.isBroadcast()) {
-            Packet *packetCopy;
             if (floodType == FORWARD) {
                 // it's a flood. copy for delivery, forward original.
                 // if we are here (see updateFloodTable()), finalDestAddr == IP Broadcast. Hence finalDestAddr,
                 // initialSrcAddr, and destAddr have already been correctly set
                 // at origin, as well as the MAC control info. Hence only update
                 // local hop source address.
-                packetCopy = packet->dup();
                 wiseRouteHeader->setSourceAddress(myNetwAddr);
                 pCtrlInfo = packet->removeControlInfo();
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
-                auto p = new Packet(packet->getName());
-                packet->popAtFront<WiseRouteHeader>();
-                p->insertAtBack(packet->peekDataAt(b(0), packet->getDataLength()));
+                auto p = packet->dup();
+                p->clearTags();
+                p->removeAtFront<WiseRouteHeader>();
                 wiseRouteHeader->setPayloadLengthField(p->getDataLength());
                 p->insertAtFront(wiseRouteHeader);
                 setDownControlInfo(p, MacAddress::BROADCAST_ADDRESS);
                 sendDown(p);
                 nbDataPacketsForwarded++;
-                delete packet;
-            }
-            else {
-                packetCopy = packet;
             }
             if (wiseRouteHeader->getHeaderKind() == DATA) {
-                decapsulate(packetCopy);
-                sendUp(packetCopy);
+                decapsulate(packet);
+                sendUp(packet);
                 nbDataPacketsReceived++;
             }
             else {
                 nbRouteFloodsReceived++;
-                delete packetCopy;
+                delete packet;
             }
         }
         else {
@@ -199,13 +192,12 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 wiseRouteHeader->setSourceAddress(myNetwAddr);
                 pCtrlInfo = packet->removeControlInfo();
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
-                auto p = new Packet(packet->getName());
-                packet->popAtFront<WiseRouteHeader>();
-                p->insertAtBack(packet->peekDataAt(b(0), packet->getDataLength()));
-                wiseRouteHeader->setPayloadLengthField(p->getDataLength());
-                p->insertAtFront(wiseRouteHeader);
-                setDownControlInfo(p, MacAddress::BROADCAST_ADDRESS);
-                sendDown(p);
+                packet->removeAtFront<WiseRouteHeader>();
+                packet->clearTags();
+                wiseRouteHeader->setPayloadLengthField(packet->getDataLength());
+                packet->insertAtFront(wiseRouteHeader);
+                setDownControlInfo(packet, MacAddress::BROADCAST_ADDRESS);
+                sendDown(packet);
                 nbDataPacketsForwarded++;
                 nbUnicastFloodForwarded++;
             }
@@ -223,17 +215,15 @@ void WiseRoute::handleLowerPacket(Packet *packet)
                 if (nextHopMacAddr.isUnspecified())
                     throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GlobalArp module.");
                 wiseRouteHeader->setNbHops(wiseRouteHeader->getNbHops() + 1);
-                auto p = new Packet(packet->getName());
-                packet->popAtFront<WiseRouteHeader>();
-                p->insertAtBack(packet->peekDataAt(b(0), packet->getDataLength()));
-                wiseRouteHeader->setPayloadLengthField(p->getDataLength());
-                p->insertAtFront(wiseRouteHeader);
-                setDownControlInfo(p, nextHopMacAddr);
-                sendDown(p);
+                packet->removeAtFront<WiseRouteHeader>();
+                packet->clearTags();
+                wiseRouteHeader->setPayloadLengthField(packet->getDataLength());
+                packet->insertAtFront(wiseRouteHeader);
+                setDownControlInfo(packet, nextHopMacAddr);
+                sendDown(packet);
                 nbDataPacketsForwarded++;
                 nbPureUnicastForwarded++;
             }
-            delete packet;
         }
         if (pCtrlInfo != nullptr)
             delete pCtrlInfo;
