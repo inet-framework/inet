@@ -127,6 +127,8 @@ The three clocks have different drift rates. The magnitude and direction of drif
 compared to ``switch1`` are different as well, i.e. ``source1``'s clock is early and ``source2``'s clock is late 
 compared to ``switch1``'s.
 
+.. note:: A `clock time difference to simulation time` chart can be easily produced by plotting the ``timeChanged:vector`` statistic, and applying a linear trend operation with -1 as argument.
+
 Example: Out-of-Band Synchronization of Clocks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
