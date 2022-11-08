@@ -22,5 +22,5 @@ The following group of examples demonstrate the most commonly used statistics:
    residencetime/doc/index
    datarate/doc/index
    flow/doc/index
-   relationships/doc/index
+   .. relationships/doc/index
 
