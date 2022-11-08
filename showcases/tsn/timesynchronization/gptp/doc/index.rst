@@ -10,7 +10,7 @@ In this showcase we demonstrate how to configure gPTP master clocks, bridges, an
 reliable time synchronization throughout the whole network.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/tsn/timesynchronization/gptp <https://github.com/inet-framework/tree/master/showcases/tsn/timesynchronization/gptp>`__
+| Source files location: `inet/showcases/tsn/timesynchronization/gptp <https://github.com/inet-framework/inet/tree/master/showcases/tsn/timesynchronization/gptp>`__
 
 About gPTP
 ----------

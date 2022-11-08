@@ -8,7 +8,7 @@ In this example we demonstrate the automatic stream redundancy configuration bas
 on the link and node failure protection requirements.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/tsn/framereplication/automaticfailureprotection <https://github.com/inet-framework/tree/master/showcases/tsn/framereplication/automaticfailureprotection>`__
+| Source files location: `inet/showcases/tsn/framereplication/automaticfailureprotection <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framereplication/automaticfailureprotection>`__
 
 The Model
 ---------

@@ -9,7 +9,7 @@ stream splitting, stream merging, stream encoding and stream decoding to achieve
 the desired stream redundancy.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/tsn/framereplication/manualconfiguration <https://github.com/inet-framework/tree/master/showcases/tsn/framereplication/manualconfiguration>`__
+| Source files location: `inet/showcases/tsn/framereplication/manualconfiguration <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framereplication/manualconfiguration>`__
 
 The Model
 ---------

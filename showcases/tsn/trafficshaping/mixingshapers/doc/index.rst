@@ -8,7 +8,7 @@ In this example we demonstrate how to use different traffic shapers in the same
 network interface.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/tsn/trafficshaping/mixingshapers <https://github.com/inet-framework/tree/master/showcases/tsn/trafficshaping/mixingshapers>`__
+| Source files location: `inet/showcases/tsn/trafficshaping/mixingshapers <https://github.com/inet-framework/inet/tree/master/showcases/tsn/trafficshaping/mixingshapers>`__
 
 The Model
 ---------

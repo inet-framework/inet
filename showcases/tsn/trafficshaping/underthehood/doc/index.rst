@@ -10,7 +10,7 @@ and validating specific complex scheduling and traffic shaping behaviors which
 can be difficult to replicate in a complete network.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/tsn/trafficshaping/underthehood <https://github.com/inet-framework/tree/master/showcases/tsn/trafficshaping/underthehood>`__
+| Source files location: `inet/showcases/tsn/trafficshaping/underthehood <https://github.com/inet-framework/inet/tree/master/showcases/tsn/trafficshaping/underthehood>`__
 
 The Model
 ---------

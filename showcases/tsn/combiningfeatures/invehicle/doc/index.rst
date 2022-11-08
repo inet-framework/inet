@@ -11,7 +11,7 @@ filtering and policying, stream redundancy, unicast and multicast streams, link
 failure protection, frame preemption, and cut-through switching.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/tsn/combiningfeatures/invehicle <https://github.com/inet-framework/tree/master/showcases/tsn/combiningfeatures/invehicle>`__
+| Source files location: `inet/showcases/tsn/combiningfeatures/invehicle <https://github.com/inet-framework/inet/tree/master/showcases/tsn/combiningfeatures/invehicle>`__
 
 The Model
 ---------

@@ -10,7 +10,7 @@ frames in time-triggered windows, and as such guarantees bounded latency for tim
 In this showcase, we demonstrate how to use time-aware traffic shaping.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/tsn/trafficshaping/timeawareshaper <https://github.com/inet-framework/tree/master/showcases/tsn/trafficshaping/timeawareshaper>`__
+| Source files location: `inet/showcases/tsn/trafficshaping/timeawareshaper <https://github.com/inet-framework/inet/tree/master/showcases/tsn/trafficshaping/timeawareshaper>`__
 
 The Model
 ---------

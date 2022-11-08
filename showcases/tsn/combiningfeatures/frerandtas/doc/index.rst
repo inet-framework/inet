@@ -8,7 +8,7 @@ In this example we demonstrate how to automatically configure time-aware shaping
 in the presence of frame replication.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/tsn/combiningfeatures/frerandtas <https://github.com/inet-framework/tree/master/showcases/tsn/combiningfeatures/frerandtas>`__
+| Source files location: `inet/showcases/tsn/combiningfeatures/frerandtas <https://github.com/inet-framework/inet/tree/master/showcases/tsn/combiningfeatures/frerandtas>`__
 
 The Model
 ---------

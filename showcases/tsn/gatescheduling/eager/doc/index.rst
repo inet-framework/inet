@@ -7,7 +7,7 @@ Goals
 This showcase demonstrates how the eager gate schedule configurator can set up schedules in a simple network.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/tsn/gatescheduling/eager <https://github.com/inet-framework/tree/master/showcases/tsn/gatescheduling/eager>`__
+| Source files location: `inet/showcases/tsn/gatescheduling/eager <https://github.com/inet-framework/inet/tree/master/showcases/tsn/gatescheduling/eager>`__
 
 The Model
 ---------

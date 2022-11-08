@@ -10,7 +10,7 @@ to configure clock drift for them, and how to use time synchronization mechanism
 to reduce time differences.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/tsn/timesynchronization/clockdrift <https://github.com/inet-framework/tree/master/showcases/tsn/timesynchronization/clockdrift>`__
+| Source files location: `inet/showcases/tsn/timesynchronization/clockdrift <https://github.com/inet-framework/inet/tree/master/showcases/tsn/timesynchronization/clockdrift>`__
 
 Introduction
 ~~~~~~~~~~~~

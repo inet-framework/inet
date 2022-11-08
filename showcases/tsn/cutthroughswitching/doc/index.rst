@@ -16,7 +16,7 @@ switching,
 in which the whole frame is received and then forwarded.
 
 | INET version: ``4.3``
-| Source files location: `inet/showcases/tsn/cutthroughswitching <https://github.com/inet-framework/tree/master/showcases/tsn/cutthroughswitching>`__
+| Source files location: `inet/showcases/tsn/cutthroughswitching <https://github.com/inet-framework/inet/tree/master/showcases/tsn/cutthroughswitching>`__
 
 The Model
 ---------

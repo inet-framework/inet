@@ -11,7 +11,7 @@ time-critical high-priority frames.
 This showcase demonstrates Ethernet frame preemption and examines the latency reduction.
 
 | INET version: ``4.3``
-| Source files location: `inet/showcases/tsn/framepreemption <https://github.com/inet-framework/tree/master/showcases/tsn/framepreemption>`__
+| Source files location: `inet/showcases/tsn/framepreemption <https://github.com/inet-framework/inet/tree/master/showcases/tsn/framepreemption>`__
 
 The Model
 ---------

@@ -11,7 +11,7 @@ in a network that is using time-aware traffic shaping.
    :doc:`/showcases/tsn/timesynchronization/gptp/doc/index` and :doc:`/showcases/tsn/trafficshaping/timeawareshaper/doc/index` showcases.
 
 | INET version: ``4.4``
-| Source files location: `inet/showcases/tsn/combiningfeatures/gptpandtas <https://github.com/inet-framework/tree/master/showcases/tsn/combiningfeatures/gptpandtas>`__
+| Source files location: `inet/showcases/tsn/combiningfeatures/gptpandtas <https://github.com/inet-framework/inet/tree/master/showcases/tsn/combiningfeatures/gptpandtas>`__
 
 The Model
 ---------
