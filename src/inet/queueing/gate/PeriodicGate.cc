@@ -23,6 +23,7 @@ void PeriodicGate::initialize(int stage)
         durations = check_and_cast<cValueArray *>(par("durations").objectValue());
         scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
         changeTimer = new ClockEvent("ChangeTimer");
+        changeTimer->setSchedulingPriority(par("changeTimerSchedulingPriority"));
     }
     else if (stage == INITSTAGE_QUEUEING)
         initializeGating();
