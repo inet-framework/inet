@@ -53,6 +53,27 @@ static int schedulePacketByUserPriority(const std::vector<IPassivePacketSource *
 
 Register_Packet_Scheduler_Function(PacketUserPriorityScheduler, schedulePacketByUserPriority);
 
+static int schedulePacketByPacketLength(const std::vector<IPassivePacketSource *>& sources)
+{
+    int selectedIndex = -1;
+    b selectedPacketLength = b(-1);
+    for (int i = 0; i < (int)sources.size(); i++) {
+        auto source = sources[i];
+        auto module = check_and_cast<cModule *>(source);
+        auto packet = source->canPullPacket(module->gate("out"));
+        if (packet != nullptr) {
+            auto packetLength = packet->getDataLength();
+            if (packetLength > selectedPacketLength) {
+                selectedPacketLength = packetLength;
+                selectedIndex = i;
+            }
+        }
+    }
+    return selectedIndex;
+}
+
+Register_Packet_Scheduler_Function(PacketLengthScheduler, schedulePacketByPacketLength);
+
 } // namespace queueing
 } // namespace inet
 
