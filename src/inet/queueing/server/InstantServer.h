@@ -17,13 +17,19 @@ class INET_API InstantServer : public PacketServerBase
 {
   protected:
     bool isProcessing = false;
+    cMessage *serveTimer = nullptr;
 
   protected:
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *message) override;
+
     virtual bool canProcessPacket();
     virtual void processPacket();
     virtual void processPackets();
 
   public:
+    virtual ~InstantServer();
+
     virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handleCanPullPacketChanged(cGate *gate) override;
 };
