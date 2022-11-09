@@ -43,8 +43,10 @@ static int schedulePacketByUserPriority(const std::vector<IPassivePacketSource *
         auto module = check_and_cast<cModule *>(source);
         auto packet = source->canPullPacket(module->gate("out"));
         auto userPriorityReq = packet->getTag<UserPriorityReq>();
-        if (userPriorityReq->getUserPriority() > selectedUserPriority)
+        if (userPriorityReq->getUserPriority() > selectedUserPriority) {
+            selectedUserPriority = userPriorityReq->getUserPriority();
             selectedIndex = i;
+        }
     }
     return selectedIndex;
 }
