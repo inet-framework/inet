@@ -20,6 +20,7 @@ namespace queueing {
 class INET_API PacketServer : public ClockUserModuleMixin<PacketServerBase>
 {
   protected:
+    cMessage *serveTimer = nullptr;
     ClockEvent *processingTimer = nullptr;
     Packet *packet = nullptr;
 
@@ -32,7 +33,7 @@ class INET_API PacketServer : public ClockUserModuleMixin<PacketServerBase>
     virtual void endProcessingPacket();
 
   public:
-    virtual ~PacketServer() { cancelAndDeleteClockEvent(processingTimer); delete packet; }
+    virtual ~PacketServer();
 
     virtual void handleCanPushPacketChanged(cGate *gate) override;
     virtual void handleCanPullPacketChanged(cGate *gate) override;

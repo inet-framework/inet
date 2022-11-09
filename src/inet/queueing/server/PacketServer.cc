@@ -16,16 +16,33 @@ namespace queueing {
 
 Define_Module(PacketServer);
 
+PacketServer::~PacketServer()
+{
+    cancelAndDelete(serveTimer);
+    cancelAndDeleteClockEvent(processingTimer);
+    delete packet;
+}
+
 void PacketServer::initialize(int stage)
 {
     ClockUserModuleMixin::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
+        int serveSchedulingPriority = par("serveSchedulingPriority");
+        if (serveSchedulingPriority != -1) {
+            serveTimer = new cMessage("ServeTimer");
+            serveTimer->setSchedulingPriority(serveSchedulingPriority);
+        }
         processingTimer = new ClockEvent("ProcessingTimer");
+    }
 }
 
 void PacketServer::handleMessage(cMessage *message)
 {
-    if (message == processingTimer) {
+    if (message == serveTimer) {
+        startProcessingPacket();
+        scheduleProcessingTimer();
+    }
+    else if (message == processingTimer) {
         endProcessingPacket();
         if (canStartProcessingPacket()) {
             startProcessingPacket();
@@ -77,8 +94,12 @@ void PacketServer::handleCanPushPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
     if (!processingTimer->isScheduled() && canStartProcessingPacket()) {
-        startProcessingPacket();
-        scheduleProcessingTimer();
+        if (serveTimer)
+            rescheduleAt(simTime(), serveTimer);
+        else {
+            startProcessingPacket();
+            scheduleProcessingTimer();
+        }
     }
 }
 
@@ -86,8 +107,12 @@ void PacketServer::handleCanPullPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
     if (!processingTimer->isScheduled() && canStartProcessingPacket()) {
-        startProcessingPacket();
-        scheduleProcessingTimer();
+        if (serveTimer)
+            rescheduleAt(simTime(), serveTimer);
+        else {
+            startProcessingPacket();
+            scheduleProcessingTimer();
+        }
     }
 }
 
