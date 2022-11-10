@@ -17,6 +17,6 @@ import inet.queueing.contract.IPacketFilter;
 simple LabelFilter extends PacketFilterBase like IPacketFilter
 {
     parameters:
-        string labelFilter; // the label filter as a match expression (e.g. green or red)
+        string labelFilter @mutable; // the label filter as a match expression (e.g. green or red)
         @class(LabelFilter);
 }

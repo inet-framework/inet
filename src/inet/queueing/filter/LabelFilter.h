@@ -22,6 +22,7 @@ class INET_API LabelFilter : public PacketFilterBase, public TransparentProtocol
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void handleParameterChange(const char *name) override;
 
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
