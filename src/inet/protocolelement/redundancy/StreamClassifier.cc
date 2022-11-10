@@ -52,10 +52,12 @@ int StreamClassifier::classifyPacket(Packet *packet)
             break;
         }
     }
-    if (streamName != nullptr && mapping->containsKey(streamName))
-        return mapping->get(streamName).intValue() + gateIndexOffset;
-    else
-        return defaultGateIndex;
+    if (streamName != nullptr && mapping->containsKey(streamName)) {
+        int outputGateIndex = mapping->get(streamName).intValue() + gateIndexOffset;
+        if (consumers[outputGateIndex]->canPushPacket(packet, outputGates[outputGateIndex]->getPathEndGate()))
+            return outputGateIndex;
+    }
+    return defaultGateIndex;
 }
 
 } // namespace inet
