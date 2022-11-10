@@ -59,7 +59,7 @@ int PacketClassifierBase::callClassifyPacket(Packet *packet) const
     // KLUDGE
     int index = const_cast<PacketClassifierBase *>(this)->classifyPacket(packet);
     if (index < 0 || static_cast<unsigned int>(index) >= outputGates.size())
-        throw cRuntimeError("Classified packet to invalid output gate: %d", index);
+        throw cRuntimeError("Packet is classified to invalid output gate: %d", index);
     return index;
 }
 
@@ -184,7 +184,7 @@ Packet *PacketClassifierBase::pullPacket(cGate *gate)
     auto packet = provider->pullPacket(inputGate->getPathStartGate());
     int index = callClassifyPacket(packet);
     if (index != gate->getIndex())
-        throw cRuntimeError("Classified packet to wrong output gate");
+        throw cRuntimeError("Packet is classified to the wrong output gate (%d) when pulled from gate (%d)", index, gate->getIndex());
     return packet;
 }
 
