@@ -683,9 +683,12 @@
         labels = ""
         nedPackages = "
                        inet.networklayer.configurator.ipv6
-                       inet.networklayer.icmpv6
-                       inet.networklayer.ipv6
-                       inet.networklayer.ipv6tunneling
+                       inet.networklayer.ipv6layer.common
+                       inet.networklayer.ipv6layer.icmpv6
+                       inet.networklayer.ipv6layer.ipv6
+                       inet.networklayer.ipv6layer.neighbourdiscovery
+                       inet.networklayer.ipv6layer.routingtable
+                       inet.networklayer.ipv6layer.tunneling
                        inet.node.ipv6
                       "
         extraSourceFolders = ""
@@ -1844,7 +1847,7 @@
         recommended = ""
         labels = "protocols"
         nedPackages = "
-                       inet.networklayer.xmipv6
+                       inet.networklayer.ipv6layer.xmipv6
                        inet.node.xmipv6
                       "
         extraSourceFolders = ""
