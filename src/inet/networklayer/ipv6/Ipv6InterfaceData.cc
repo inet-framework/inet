@@ -71,9 +71,6 @@ std::string Ipv6InterfaceData::RouterMulticastData::detailedInfo()
 Ipv6InterfaceData::Ipv6InterfaceData()
     : InterfaceProtocolData(NetworkInterface::F_IPV6_DATA)
 {
-#ifdef INET_WITH_xMIPv6
-//    rt6 = IPv6RoutingTableAccess().get();
-#endif /* INET_WITH_xMIPv6 */
     /*******************Setting host/node/router Protocol Constants************/
     routerConstants.maxInitialRtrAdvertInterval = IPv6_MAX_INITIAL_RTR_ADVERT_INTERVAL;
     routerConstants.maxInitialRtrAdvertisements = IPv6_MAX_INITIAL_RTR_ADVERTISEMENTS;
@@ -84,15 +81,6 @@ Ipv6InterfaceData::Ipv6InterfaceData()
     hostConstants.maxRtrSolicitationDelay = IPv6_MAX_RTR_SOLICITATION_DELAY;
     hostConstants.rtrSolicitationInterval = IPv6_RTR_SOLICITATION_INTERVAL;
     hostConstants.maxRtrSolicitations = IPv6_MAX_RTR_SOLICITATIONS;
-
-#ifdef INET_WITH_xMIPv6
-    hostConstants.initialBindAckTimeout = MIPv6_INITIAL_BINDACK_TIMEOUT; // MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
-    hostConstants.maxBindAckTimeout = MIPv6_MAX_BINDACK_TIMEOUT; // MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
-    hostConstants.initialBindAckTimeoutFirst = MIPv6_INITIAL_BINDACK_TIMEOUT_FIRST; // MIPv6: 12.9.07 - CB
-    hostConstants.maxRRBindingLifeTime = MIPv6_MAX_RR_BINDING_LIFETIME; // 14.9.07 - CB
-    hostConstants.maxHABindingLifeTime = MIPv6_MAX_HA_BINDING_LIFETIME; // 14.9.07 - CB
-    hostConstants.maxTokenLifeTime = MIPv6_MAX_TOKEN_LIFETIME; // 14.9.07 - CB
-#endif /* INET_WITH_xMIPv6 */
 
     nodeConstants.maxMulticastSolicit = IPv6_MAX_MULTICAST_SOLICIT;
     nodeConstants.maxUnicastSolicit = IPv6_MAX_UNICAST_SOLICIT;
@@ -120,15 +108,21 @@ Ipv6InterfaceData::Ipv6InterfaceData()
     rtrVars.advManagedFlag = false;
     rtrVars.advOtherConfigFlag = false;
 
-#ifdef INET_WITH_xMIPv6
-    rtrVars.advHomeAgentFlag = false; // Zarrar Yousaf Feb-March 2007
-#endif /* INET_WITH_xMIPv6 */
-
     rtrVars.advLinkMTU = IPv6_MIN_MTU;
     rtrVars.advReachableTime = IPv6_DEFAULT_ADV_REACHABLE_TIME;
     rtrVars.advRetransTimer = IPv6_DEFAULT_ADV_RETRANS_TIMER;
     rtrVars.advCurHopLimit = IPv6_DEFAULT_ADVCURHOPLIMIT;
     rtrVars.advDefaultLifetime = 3 * rtrVars.maxRtrAdvInterval;
+
+#ifdef INET_WITH_xMIPv6
+    rtrVars.advHomeAgentFlag = false; // Zarrar Yousaf Feb-March 2007
+    hostConstants.initialBindAckTimeout = MIPv6_INITIAL_BINDACK_TIMEOUT; // MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
+    hostConstants.maxBindAckTimeout = MIPv6_MAX_BINDACK_TIMEOUT; // MIPv6: added by Zarrar Yousaf @ CNI UniDo 17.06.07
+    hostConstants.initialBindAckTimeoutFirst = MIPv6_INITIAL_BINDACK_TIMEOUT_FIRST; // MIPv6: 12.9.07 - CB
+    hostConstants.maxRRBindingLifeTime = MIPv6_MAX_RR_BINDING_LIFETIME; // 14.9.07 - CB
+    hostConstants.maxHABindingLifeTime = MIPv6_MAX_HA_BINDING_LIFETIME; // 14.9.07 - CB
+    hostConstants.maxTokenLifeTime = MIPv6_MAX_TOKEN_LIFETIME; // 14.9.07 - CB
+#endif /* INET_WITH_xMIPv6 */
 
 #if USE_MOBILITY
     if (rtrVars.advDefaultLifetime < 1)
