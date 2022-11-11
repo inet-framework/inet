@@ -17,7 +17,7 @@
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #endif // INET_WITH_IPv4
 #ifdef INET_WITH_IPv6
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6InterfaceData.h"
 #endif // INET_WITH_IPv6
 #include "inet/visualizer/base/InterfaceTableVisualizerBase.h"
 

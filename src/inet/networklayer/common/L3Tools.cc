@@ -11,7 +11,7 @@
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #endif
 #ifdef INET_WITH_IPv6
-#include "inet/networklayer/ipv6/Ipv6Header.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6Header.h"
 #endif
 #ifdef INET_WITH_NEXTHOP
 #include "inet/networklayer/nexthop/NextHopForwardingHeader_m.h"

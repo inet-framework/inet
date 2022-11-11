@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/networklayer/ipv6/Ipv6.h"
+#include "inet/networklayer/ipv6layer/ipv6/Ipv6.h"
 
 #include "inet/common/INETUtils.h"
 #include "inet/common/IProtocolRegistrationListener.h"
@@ -24,14 +24,14 @@
 #include "inet/networklayer/common/TosTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/ipv6/Ipv6SocketCommand_m.h"
-#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
-#include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
-#include "inet/networklayer/ipv6/Ipv6ExtHeaderTag_m.h"
-#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6layer/icmpv6/Icmpv6Header_m.h"
+#include "inet/networklayer/ipv6layer/neighbourdiscovery/Ipv6NdMessage_m.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6ExtHeaderTag_m.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6ExtensionHeaders_m.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6InterfaceData.h"
 
 #ifdef INET_WITH_xMIPv6
-#include "inet/networklayer/xmipv6/MobilityHeader_m.h"
+#include "inet/networklayer/ipv6layer/xmipv6/MobilityHeader_m.h"
 #endif /* INET_WITH_xMIPv6 */
 
 namespace inet {

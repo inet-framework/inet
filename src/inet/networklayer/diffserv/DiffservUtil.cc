@@ -16,7 +16,7 @@
 #endif // ifdef INET_WITH_IPv4
 
 #ifdef INET_WITH_IPv6
-#include "inet/networklayer/ipv6/Ipv6Header.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6Header.h"
 #endif // ifdef INET_WITH_IPv6
 
 namespace inet {

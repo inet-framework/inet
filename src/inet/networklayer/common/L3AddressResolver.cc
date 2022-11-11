@@ -18,8 +18,8 @@
 #endif // ifdef INET_WITH_IPv4
 
 #ifdef INET_WITH_IPv6
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6layer/routingtable/Ipv6RoutingTable.h"
 #endif // ifdef INET_WITH_IPv6
 
 #ifdef INET_WITH_NEXTHOP

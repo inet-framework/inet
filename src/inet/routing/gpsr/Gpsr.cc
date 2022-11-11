@@ -27,8 +27,8 @@
 #endif
 
 #ifdef INET_WITH_IPv6
-#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6ExtensionHeaders_m.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6InterfaceData.h"
 #endif
 
 #ifdef INET_WITH_NEXTHOP

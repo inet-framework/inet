@@ -11,7 +11,7 @@
 #include <list>
 
 #include "inet/common/ProtocolGroup.h"
-#include "inet/networklayer/ipv6/Ipv6Header_m.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6Header_m.h"
 
 namespace inet {
 

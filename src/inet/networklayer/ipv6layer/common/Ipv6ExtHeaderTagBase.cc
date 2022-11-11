@@ -5,8 +5,8 @@
 //
 
 
-#include "inet/networklayer/ipv6/Ipv6ExtHeaderTag_m.h"
-#include "inet/networklayer/ipv6/Ipv6Header.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6ExtHeaderTag_m.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6Header.h"
 
 namespace inet {
 

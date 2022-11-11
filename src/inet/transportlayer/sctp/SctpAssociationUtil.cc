@@ -21,14 +21,14 @@
 #include "inet/networklayer/common/L3AddressTag_m.h"
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/networklayer/ipv4/Ipv4RoutingTable.h"
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
+#include "inet/networklayer/ipv6layer/routingtable/Ipv6RoutingTable.h"
 
 #ifdef INET_WITH_IPv4
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
 #endif // ifdef INET_WITH_IPv4
 
 #ifdef INET_WITH_IPv6
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6InterfaceData.h"
 #endif // ifdef INET_WITH_IPv6
 
 #include "inet/transportlayer/common/L4Tools.h"

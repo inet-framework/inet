@@ -5,9 +5,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/networklayer/ipv6/Ipv6Route.h"
+#include "inet/networklayer/ipv6layer/routingtable/Ipv6Route.h"
 
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
+#include "inet/networklayer/ipv6layer/routingtable/Ipv6RoutingTable.h"
 
 namespace inet {
 

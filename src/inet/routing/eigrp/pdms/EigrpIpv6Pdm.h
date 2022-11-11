@@ -25,7 +25,7 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/networklayer/common/NetworkInterface.h"
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
+#include "inet/networklayer/ipv6layer/routingtable/Ipv6RoutingTable.h"
 #include "inet/routing/eigrp/EigrpDual.h"
 #include "inet/routing/eigrp/messages/EigrpMessage_m.h"
 #include "inet/routing/eigrp/messages/EigrpMsgReq.h"

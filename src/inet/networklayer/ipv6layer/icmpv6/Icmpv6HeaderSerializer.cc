@@ -4,11 +4,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/networklayer/icmpv6/Icmpv6HeaderSerializer.h"
+#include "inet/networklayer/ipv6layer/icmpv6/Icmpv6HeaderSerializer.h"
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
-#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
-#include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
+#include "inet/networklayer/ipv6layer/icmpv6/Icmpv6Header_m.h"
+#include "inet/networklayer/ipv6layer/neighbourdiscovery/Ipv6NdMessage_m.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h> // htonl, ntohl, ...

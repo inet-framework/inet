@@ -9,10 +9,10 @@
 //
 //
 
-#include "inet/networklayer/xmipv6/BindingUpdateList.h"
+#include "inet/networklayer/ipv6layer/xmipv6/BindingUpdateList.h"
 
 #include "inet/common/stlutils.h"
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6InterfaceData.h"
 
 namespace inet {
 

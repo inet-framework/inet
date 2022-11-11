@@ -30,7 +30,7 @@
 #endif
 
 #ifdef INET_WITH_IPv6
-#include "inet/networklayer/icmpv6/Icmpv6.h"
+#include "inet/networklayer/ipv6layer/icmpv6/Icmpv6.h"
 #endif
 
 namespace inet {

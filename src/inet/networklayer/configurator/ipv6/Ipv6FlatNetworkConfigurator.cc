@@ -11,8 +11,8 @@
 
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6InterfaceData.h"
+#include "inet/networklayer/ipv6layer/routingtable/Ipv6RoutingTable.h"
 
 namespace inet {
 

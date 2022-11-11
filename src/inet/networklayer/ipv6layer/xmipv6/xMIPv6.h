@@ -16,9 +16,9 @@
 #include <vector>
 
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
-#include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
-#include "inet/networklayer/xmipv6/BindingUpdateList.h"
-#include "inet/networklayer/xmipv6/MobilityHeader_m.h" // for HAOpt & RH2
+#include "inet/networklayer/ipv6layer/tunneling/Ipv6Tunneling.h"
+#include "inet/networklayer/ipv6layer/xmipv6/BindingUpdateList.h"
+#include "inet/networklayer/ipv6layer/xmipv6/MobilityHeader_m.h" // for HAOpt & RH2
 
 namespace inet {
 

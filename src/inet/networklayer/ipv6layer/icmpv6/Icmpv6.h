@@ -11,7 +11,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/lifecycle/LifecycleUnsupported.h"
 #include "inet/common/packet/Packet.h"
-#include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
+#include "inet/networklayer/ipv6layer/icmpv6/Icmpv6Header_m.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 
 namespace inet {

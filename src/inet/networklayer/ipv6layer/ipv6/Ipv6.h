@@ -16,12 +16,12 @@
 #include "inet/common/packet/Message.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/contract/INetworkProtocol.h"
-#include "inet/networklayer/icmpv6/Icmpv6.h"
-#include "inet/networklayer/icmpv6/Ipv6NeighbourDiscovery.h"
-#include "inet/networklayer/ipv6/Ipv6FragBuf.h"
-#include "inet/networklayer/ipv6/Ipv6Header.h"
-#include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
-#include "inet/networklayer/ipv6tunneling/Ipv6Tunneling.h"
+#include "inet/networklayer/ipv6layer/icmpv6/Icmpv6.h"
+#include "inet/networklayer/ipv6layer/neighbourdiscovery/Ipv6NeighbourDiscovery.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6FragBuf.h"
+#include "inet/networklayer/ipv6layer/common/Ipv6Header.h"
+#include "inet/networklayer/ipv6layer/routingtable/Ipv6RoutingTable.h"
+#include "inet/networklayer/ipv6layer/tunneling/Ipv6Tunneling.h"
 
 namespace inet {
 

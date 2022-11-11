@@ -14,7 +14,7 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/ipv6/Ipv6Address.h"
-#include "inet/networklayer/ipv6/Ipv6Route.h"
+#include "inet/networklayer/ipv6layer/routingtable/Ipv6Route.h"
 
 namespace inet {
 
