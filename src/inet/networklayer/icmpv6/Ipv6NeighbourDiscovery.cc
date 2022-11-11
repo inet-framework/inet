@@ -2100,9 +2100,7 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie)
     // Section 7.2.6: Sending Unsolicited Neighbor Advertisements
 #ifdef INET_WITH_xMIPv6
     Enter_Method("sendUnsolicitedNa");
-#endif /* INET_WITH_xMIPv6 */
 
-#ifndef INET_WITH_xMIPv6
     // In some cases a node may be able to determine that its link-layer
     // address has changed (e.g., hot-swap of an interface card) and may
     // wish to inform its neighbors of the new link-layer address quickly.
@@ -2110,33 +2108,25 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie)
     // unsolicited Neighbor Advertisement messages to the all-nodes
     // multicast address.  These advertisements MUST be separated by at
     // least RetransTimer seconds.
-#else /* INET_WITH_xMIPv6 */
     auto na = makeShared<Ipv6NeighbourAdvertisement>();
     Ipv6Address myIPv6Addr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
-#endif /* INET_WITH_xMIPv6 */
 
     // The Target Address field in the unsolicited advertisement is set to
     // an IP address of the interface, and the Target Link-Layer Address
     // option is filled with the new link-layer address.
-#ifdef INET_WITH_xMIPv6
     na->setTargetAddress(myIPv6Addr);
     auto sla = new Ipv6NdTargetLinkLayerAddress();
     sla->setLinkLayerAddress(ie->getMacAddress());
     na->getOptionsForUpdate().appendOption(sla);
     na->addChunkLength(IPv6ND_LINK_LAYER_ADDRESS_OPTION_LENGTH);
-#endif /* INET_WITH_xMIPv6 */
 
     // The Solicited flag MUST be set to zero, in order to avoid confusing
     // the Neighbor Unreachability Detection algorithm.
-#ifdef INET_WITH_xMIPv6
     na->setSolicitedFlag(false);
-#endif /* INET_WITH_xMIPv6 */
 
     // If the node is a router, it MUST set the Router flag to one;
     // otherwise it MUST set it to zero.
-#ifdef INET_WITH_xMIPv6
     na->setRouterFlag(rt6->isRouter());
-#endif /* INET_WITH_xMIPv6 */
 
     // The Override flag MAY be set to either zero or one.  In either case,
     // neighboring nodes will immediately change the state of their Neighbor
@@ -2145,9 +2135,7 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie)
     // one, neighboring nodes will install the new link-layer address in
     // their caches.  Otherwise, they will ignore the new link-layer
     // address, choosing instead to probe the cached address.
-#ifdef INET_WITH_xMIPv6
     na->setOverrideFlag(true);
-#endif /* INET_WITH_xMIPv6 */
 
     // A node that has multiple IP addresses assigned to an interface MAY
     // multicast a separate Neighbor Advertisement for each address.  In
@@ -2174,7 +2162,6 @@ void Ipv6NeighbourDiscovery::sendUnsolicitedNa(NetworkInterface *ie)
     // Neighbor Unreachability Detection algorithm ensures that all nodes
     // obtain a reachable link-layer address, though the delay may be
     // slightly longer.
-#ifdef INET_WITH_xMIPv6
     auto packet = new Packet("NApacket");
     Icmpv6::insertCrc(crcMode, na, packet);
     packet->insertAtFront(na);
