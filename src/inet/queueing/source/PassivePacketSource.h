@@ -20,6 +20,7 @@ namespace queueing {
 class INET_API PassivePacketSource : public ClockUserModuleMixin<PassivePacketSourceBase>
 {
   protected:
+    clocktime_t initialProvidingOffset;
     cPar *providingIntervalParameter = nullptr;
     ClockEvent *providingTimer = nullptr;
     bool scheduleForAbsoluteTime = false;
@@ -30,7 +31,7 @@ class INET_API PassivePacketSource : public ClockUserModuleMixin<PassivePacketSo
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual void scheduleProvidingTimer();
+    virtual void scheduleProvidingTimer(clocktime_t delay);
     virtual Packet *providePacket(cGate *gate);
 
   public:
@@ -39,7 +40,7 @@ class INET_API PassivePacketSource : public ClockUserModuleMixin<PassivePacketSo
     virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return outputGate == gate; }
 
-    virtual bool canPullSomePacket(cGate *gate) const override { return !providingTimer->isScheduled(); }
+    virtual bool canPullSomePacket(cGate *gate) const override;
     virtual Packet *canPullPacket(cGate *gate) const override;
 
     virtual Packet *pullPacket(cGate *gate) override;

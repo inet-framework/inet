@@ -7,8 +7,6 @@
 
 #include "inet/queueing/source/PassivePacketSource.h"
 
-#include "inet/common/Simsignals.h"
-
 namespace inet {
 namespace queueing {
 
@@ -18,14 +16,18 @@ void PassivePacketSource::initialize(int stage)
 {
     ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        initialProvidingOffset = par("initialProvidingOffset");
         providingIntervalParameter = &par("providingInterval");
         providingTimer = new ClockEvent("ProvidingTimer");
         scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
         WATCH_PTR(nextPacket);
     }
     else if (stage == INITSTAGE_QUEUEING) {
+        checkPacketOperationSupport(outputGate);
         if (collector != nullptr)
             collector->handleCanPullPacketChanged(outputGate->getPathEndGate());
+        if (!providingTimer->isScheduled() && initialProvidingOffset != 0)
+            scheduleProvidingTimer(initialProvidingOffset);
     }
 }
 
@@ -39,27 +41,31 @@ void PassivePacketSource::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-void PassivePacketSource::scheduleProvidingTimer()
+bool PassivePacketSource::canPullSomePacket(cGate *gate) const
 {
-    clocktime_t interval = providingIntervalParameter->doubleValue();
-    if (interval != 0 || providingTimer->getArrivalModule() == nullptr) {
-        if (scheduleForAbsoluteTime)
-            scheduleClockEventAt(getClockTime() + interval, providingTimer);
-        else
-            scheduleClockEventAfter(interval, providingTimer);
-    }
+    return getClockTime() >= initialProvidingOffset && !providingTimer->isScheduled();
 }
 
 Packet *PassivePacketSource::canPullPacket(cGate *gate) const
 {
     Enter_Method("canPullPacket");
-    if (providingTimer->isScheduled())
+    if (getClockTime() < initialProvidingOffset || providingTimer->isScheduled())
         return nullptr;
     else {
         if (nextPacket == nullptr)
             // KLUDGE
             nextPacket = const_cast<PassivePacketSource *>(this)->createPacket();
         return nextPacket;
+    }
+}
+
+void PassivePacketSource::scheduleProvidingTimer(clocktime_t delay)
+{
+    if (delay != 0 || providingTimer->getArrivalModule() == nullptr) {
+        if (scheduleForAbsoluteTime)
+            scheduleClockEventAt(getClockTime() + delay, providingTimer);
+        else
+            scheduleClockEventAfter(delay, providingTimer);
     }
 }
 
@@ -72,7 +78,7 @@ Packet *PassivePacketSource::pullPacket(cGate *gate)
         auto packet = providePacket(gate);
         animatePullPacket(packet, outputGate);
         emit(packetPulledSignal, packet);
-        scheduleProvidingTimer();
+        scheduleProvidingTimer(providingIntervalParameter->doubleValue());
         updateDisplayString();
         return packet;
     }

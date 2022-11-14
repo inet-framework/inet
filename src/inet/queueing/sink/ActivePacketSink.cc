@@ -16,27 +16,22 @@ void ActivePacketSink::initialize(int stage)
 {
     ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        initialCollectionOffset = par("initialCollectionOffset");
         collectionIntervalParameter = &par("collectionInterval");
         collectionTimer = new ClockEvent("CollectionTimer");
         scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        if (!collectionTimer->isScheduled() && provider->canPullSomePacket(inputGate->getPathStartGate())) {
-            double offset = par("initialCollectionOffset");
-            if (offset != 0)
-                scheduleCollectionTimer(offset);
-            else {
-                scheduleCollectionTimer(collectionIntervalParameter->doubleValue());
-                collectPacket();
-            }
-        }
+        checkPacketOperationSupport(inputGate);
+        if (!collectionTimer->isScheduled())
+            scheduleCollectionTimerAndCollectPacket();
     }
 }
 
 void ActivePacketSink::handleMessage(cMessage *message)
 {
     if (message == collectionTimer) {
-        if (provider->canPullSomePacket(inputGate->getPathStartGate())) {
+        if (provider == nullptr || provider->canPullSomePacket(inputGate->getPathStartGate())) {
             scheduleCollectionTimer(collectionIntervalParameter->doubleValue());
             collectPacket();
         }
@@ -45,12 +40,32 @@ void ActivePacketSink::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-void ActivePacketSink::scheduleCollectionTimer(double delay)
+void ActivePacketSink::handleParameterChange(const char *name)
+{
+    if (name != nullptr) {
+        if (!strcmp(name, "initialCollectionOffset"))
+            initialCollectionOffset = par("initialCollectionOffset");
+    }
+}
+
+void ActivePacketSink::scheduleCollectionTimer(clocktime_t delay)
 {
     if (scheduleForAbsoluteTime)
         scheduleClockEventAt(getClockTime() + delay, collectionTimer);
     else
         scheduleClockEventAfter(delay, collectionTimer);
+}
+
+void ActivePacketSink::scheduleCollectionTimerAndCollectPacket()
+{
+    if (!initialCollectionOffsetScheduled && initialCollectionOffset != 0) {
+        scheduleCollectionTimer(initialCollectionOffset);
+        initialCollectionOffsetScheduled = true;
+    }
+    else if (provider == nullptr || provider->canPullSomePacket(inputGate->getPathStartGate())) {
+        scheduleCollectionTimer(collectionIntervalParameter->doubleValue());
+        collectPacket();
+    }
 }
 
 void ActivePacketSink::collectPacket()
@@ -68,15 +83,8 @@ void ActivePacketSink::collectPacket()
 void ActivePacketSink::handleCanPullPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
-    if (!collectionTimer->isScheduled() && provider->canPullSomePacket(inputGate->getPathStartGate())) {
-        double offset = par("initialCollectionOffset");
-        if (offset != 0)
-            scheduleCollectionTimer(offset);
-        else {
-            scheduleCollectionTimer(collectionIntervalParameter->doubleValue());
-            collectPacket();
-        }
-    }
+    if (!collectionTimer->isScheduled())
+        scheduleCollectionTimerAndCollectPacket();
 }
 
 void ActivePacketSink::handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful)

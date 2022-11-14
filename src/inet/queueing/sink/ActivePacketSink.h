@@ -20,6 +20,8 @@ namespace queueing {
 class INET_API ActivePacketSink : public ClockUserModuleMixin<ActivePacketSinkBase>
 {
   protected:
+    bool initialCollectionOffsetScheduled = false;
+    clocktime_t initialCollectionOffset;
     cPar *collectionIntervalParameter = nullptr;
     ClockEvent *collectionTimer = nullptr;
     bool scheduleForAbsoluteTime = false;
@@ -27,8 +29,10 @@ class INET_API ActivePacketSink : public ClockUserModuleMixin<ActivePacketSinkBa
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
+    virtual void handleParameterChange(const char *name) override;
 
-    virtual void scheduleCollectionTimer(double delay);
+    virtual void scheduleCollectionTimer(clocktime_t delay);
+    virtual void scheduleCollectionTimerAndCollectPacket();
     virtual void collectPacket();
 
   public:

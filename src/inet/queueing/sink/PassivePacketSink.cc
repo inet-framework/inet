@@ -7,9 +7,6 @@
 
 #include "inet/queueing/sink/PassivePacketSink.h"
 
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/Simsignals.h"
-
 namespace inet {
 namespace queueing {
 
@@ -19,6 +16,7 @@ void PassivePacketSink::initialize(int stage)
 {
     ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        initialConsumptionOffset = par("initialConsumptionOffset");
         consumptionIntervalParameter = &par("consumptionInterval");
         consumptionTimer = new ClockEvent("ConsumptionTimer");
         scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
@@ -27,6 +25,8 @@ void PassivePacketSink::initialize(int stage)
         checkPacketOperationSupport(inputGate);
         if (producer != nullptr)
             producer->handleCanPushPacketChanged(inputGate->getPathStartGate());
+        if (!consumptionTimer->isScheduled() && initialConsumptionOffset != 0)
+            scheduleConsumptionTimer(initialConsumptionOffset);
     }
 }
 
@@ -40,14 +40,23 @@ void PassivePacketSink::handleMessage(cMessage *message)
         PassivePacketSinkBase::handleMessage(message);
 }
 
-void PassivePacketSink::scheduleConsumptionTimer()
+bool PassivePacketSink::canPushSomePacket(cGate *gate) const
 {
-    clocktime_t interval = consumptionIntervalParameter->doubleValue();
-    if (interval != 0 || consumptionTimer->getArrivalModule() == nullptr) {
+    return getClockTime() >= initialConsumptionOffset && !consumptionTimer->isScheduled() && PassivePacketSinkBase::canPushSomePacket(gate);
+}
+
+bool PassivePacketSink::canPushPacket(Packet *packet, cGate *gate) const
+{
+    return canPushSomePacket(gate);
+}
+
+void PassivePacketSink::scheduleConsumptionTimer(clocktime_t delay)
+{
+    if (delay != 0 || consumptionTimer->getArrivalModule() == nullptr) {
         if (scheduleForAbsoluteTime)
-            scheduleClockEventAt(getClockTime() + interval, consumptionTimer);
+            scheduleClockEventAt(getClockTime() + delay, consumptionTimer);
         else
-            scheduleClockEventAfter(interval, consumptionTimer);
+            scheduleClockEventAfter(delay, consumptionTimer);
     }
 }
 
@@ -60,7 +69,7 @@ void PassivePacketSink::pushPacket(Packet *packet, cGate *gate)
     else {
         emit(packetPushedSignal, packet);
         consumePacket(packet);
-        scheduleConsumptionTimer();
+        scheduleConsumptionTimer(consumptionIntervalParameter->doubleValue());
     }
 }
 

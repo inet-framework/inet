@@ -7,9 +7,6 @@
 
 #include "inet/queueing/source/ActivePacketSource.h"
 
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/Simsignals.h"
-
 namespace inet {
 namespace queueing {
 
@@ -19,20 +16,15 @@ void ActivePacketSource::initialize(int stage)
 {
     ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        initialProductionOffset = par("initialProductionOffset");
         productionIntervalParameter = &par("productionInterval");
         productionTimer = new ClockEvent("ProductionTimer");
         scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
     }
     else if (stage == INITSTAGE_QUEUEING) {
-        if (!productionTimer->isScheduled() && (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()))) {
-            double offset = par("initialProductionOffset");
-            if (offset != 0)
-                scheduleProductionTimer(offset);
-            else {
-                scheduleProductionTimer(productionIntervalParameter->doubleValue());
-                producePacket();
-            }
-        }
+        checkPacketOperationSupport(outputGate);
+        if (!productionTimer->isScheduled())
+            scheduleProductionTimerAndProducePacket();
     }
 }
 
@@ -48,12 +40,32 @@ void ActivePacketSource::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-void ActivePacketSource::scheduleProductionTimer(double delay)
+void ActivePacketSource::handleParameterChange(const char *name)
+{
+    if (name != nullptr) {
+        if (!strcmp(name, "initialProductionOffset"))
+            initialProductionOffset = par("initialProductionOffset");
+    }
+}
+
+void ActivePacketSource::scheduleProductionTimer(clocktime_t delay)
 {
     if (scheduleForAbsoluteTime)
         scheduleClockEventAt(getClockTime() + delay, productionTimer);
     else
         scheduleClockEventAfter(delay, productionTimer);
+}
+
+void ActivePacketSource::scheduleProductionTimerAndProducePacket()
+{
+    if (!initialProductionOffsetScheduled && initialProductionOffset != 0) {
+        scheduleProductionTimer(initialProductionOffset);
+        initialProductionOffsetScheduled = true;
+    }
+    else if (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate())) {
+        scheduleProductionTimer(productionIntervalParameter->doubleValue());
+        producePacket();
+    }
 }
 
 void ActivePacketSource::producePacket()
@@ -68,15 +80,8 @@ void ActivePacketSource::producePacket()
 void ActivePacketSource::handleCanPushPacketChanged(cGate *gate)
 {
     Enter_Method("handleCanPushPacketChanged");
-    if (!productionTimer->isScheduled() && (consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()))) {
-        double offset = par("initialProductionOffset");
-        if (offset != 0)
-            scheduleProductionTimer(offset);
-        else {
-            scheduleProductionTimer(productionIntervalParameter->doubleValue());
-            producePacket();
-        }
-    }
+    if (!productionTimer->isScheduled())
+        scheduleProductionTimerAndProducePacket();
 }
 
 void ActivePacketSource::handlePushPacketProcessed(Packet *packet, cGate *gate, bool successful)

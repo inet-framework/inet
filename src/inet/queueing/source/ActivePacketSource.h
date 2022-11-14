@@ -20,6 +20,8 @@ namespace queueing {
 class INET_API ActivePacketSource : public ClockUserModuleMixin<ActivePacketSourceBase>
 {
   protected:
+    bool initialProductionOffsetScheduled = false;
+    clocktime_t initialProductionOffset;
     cPar *productionIntervalParameter = nullptr;
     ClockEvent *productionTimer = nullptr;
     bool scheduleForAbsoluteTime = false;
@@ -27,8 +29,10 @@ class INET_API ActivePacketSource : public ClockUserModuleMixin<ActivePacketSour
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
+    virtual void handleParameterChange(const char *name) override;
 
-    virtual void scheduleProductionTimer(double delay);
+    virtual void scheduleProductionTimer(clocktime_t delay);
+    virtual void scheduleProductionTimerAndProducePacket();
     virtual void producePacket();
 
   public:
