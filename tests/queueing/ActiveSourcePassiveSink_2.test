@@ -1,0 +1,44 @@
+%description:
+
+In this test, packets are produced periodically by an active packet source
+(ActivePacketSource). The packets are not consumed by a passive packet sink
+(PassivePacketSink) due to backpressure during initial consumption offset.
+
+%file: test.ned
+
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+
+network TestProducerConsumer
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=200,100");
+        }
+    connections:
+        producer.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestProducerConsumer
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+*.consumer.initialConsumptionOffset = 11s
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%subst: /\nRunning simulation\.\.\.\n//
+
+%not-contains-regex: stdout
+Producing packet, .*?producer-0.*?
+
+%not-contains-regex: stdout
+Consuming packet, .*?producer-0.*?

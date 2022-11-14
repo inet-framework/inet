@@ -1,0 +1,44 @@
+%description:
+
+In this test, packets are collected periodically by an active packet sink
+(ActivePacketSink). The packets are not provided by a passive packet source
+(PassivePacketSource) due to backpressure during initial providing offset.
+
+%file: test.ned
+
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.source.PassivePacketSource;
+
+network TestProviderCollector
+{
+    submodules:
+        provider: PassivePacketSource {
+            @display("p=100,100");
+        }
+        collector: ActivePacketSink {
+            @display("p=200,100");
+        }
+    connections:
+        provider.out --> collector.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestProviderCollector
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.provider.packetLength = 1B
+*.provider.initialProvidingOffset = 11s
+*.collector.collectionInterval = 1s
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%subst: /\nRunning simulation\.\.\.\n//
+
+%not-contains-regex: stdout
+Providing packet, .*?provider-0.*?
+
+%not-contains-regex: stdout
+Collecting packet, .*?provider-0.*?

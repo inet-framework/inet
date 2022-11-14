@@ -1,7 +1,7 @@
 %description:
 
-In this test, an passive packet source is connected to an passive packet sink,
-which causes the simulation to fail.
+In this test, an passive packet source is connected to an passive packet sink
+in reverse submodule order, which causes the simulation to fail.
 
 %file: test.ned
 
