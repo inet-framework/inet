@@ -12,7 +12,18 @@ import inet.queueing.contract.IActivePacketSink;
 
 //
 // This module is an active packet sink which pulls packets from the connected
-// packet provider. All pulled packets are counted and deleted.
+// module. It pulls whole packets through the in gate at every collection interval.
+// It pulls the first packet after the initial collection offset.
+//
+// If backpressure is present at the end of a collection interval, then it waits
+// until the backpressure disappears, and then pulls in a packet. The collection
+// interval timer always starts after the module pulls a packet in.
+//
+// All pulled packets are counted and deleted.
+//
+// Invariants:
+//  - two subsequent packets are always pulled in at least collectionInterval time apart
+//  - backpressure prevents packets from being pulled in
 //
 simple ActivePacketSink extends ActivePacketSinkBase like IActivePacketSink
 {

@@ -12,7 +12,16 @@ import inet.queueing.contract.IActivePacketSource;
 
 //
 // This module is an active packet source which pushes packets into the connected
-// packet consumer.
+// module. It pushes whole packets through the out gate at every production
+// interval. It pushes the first packet after the initial production offset.
+//
+// If backpressure is present at the end of a production interval, then it waits
+// until the backpressure disappears, and then pushes out a packet. The production
+// interval timer always starts after the module pushes a packet out.
+//
+// Invariants:
+//  - two subsequent packets are always pushed out at least productionInterval time apart
+//  - backpressure prevents packets from being pushed out
 //
 simple ActivePacketSource extends ActivePacketSourceBase like IActivePacketSource
 {
