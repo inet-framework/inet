@@ -195,8 +195,8 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
     virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
     virtual bool supportsPacketPassing(cGate *gate) const override { return true; }
     virtual bool supportsPacketStreaming(cGate *gate) const override { return false; }
-    virtual bool canPushSomePacket(cGate *gate) const override { return true; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
+    virtual bool canPushSomePacket(cGate *gate) const override;
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
     virtual void pushPacket(Packet *packet, cGate *gate) override;
     virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override;
     virtual void pushPacketEnd(Packet *packet, cGate *gate) override;

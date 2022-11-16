@@ -186,6 +186,24 @@ void NetworkInterface::arrived(cMessage *message, cGate *gate, const SendOptions
     cModule::arrived(message, gate, options, time);
 }
 
+bool NetworkInterface::canPushSomePacket(cGate *gate) const
+{
+    auto pathEndGate = gate->getPathEndGate();
+    if (auto packetSink = dynamic_cast<IPassivePacketSink *>(pathEndGate->getOwnerModule()))
+        return packetSink->canPushSomePacket(gate);
+    else
+        return true;
+}
+
+bool NetworkInterface::canPushPacket(Packet *packet, cGate *gate) const
+{
+    auto pathEndGate = gate->getPathEndGate();
+    if (auto packetSink = dynamic_cast<IPassivePacketSink *>(pathEndGate->getOwnerModule()))
+        return packetSink->canPushPacket(packet, pathEndGate);
+    else
+        return true;
+}
+
 void NetworkInterface::pushPacket(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacket");
