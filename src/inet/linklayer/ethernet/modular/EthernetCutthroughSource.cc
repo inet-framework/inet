@@ -39,19 +39,21 @@ void EthernetCutthroughSource::handleMessage(cMessage *message)
         if (!sourceAddress.isMulticast())
             macForwardingTable->learnUnicastAddressForwardingInterface(networkInterface->getInterfaceId(), sourceAddress);
         int interfaceId = destinationAddress.isMulticast() ? -1 : macForwardingTable->getUnicastAddressForwardingInterface(destinationAddress);
+        streamedPacket->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
+        const auto& dispatchProtocolReq = streamedPacket->removeTagIfPresent<DispatchProtocolReq>();
         if (interfaceId != -1 && cutthroughConsumer->canPushPacket(streamedPacket, cutthroughOutputGate)) {
             streamedPacket->trim();
-            streamedPacket->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
             streamedPacket->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
-            streamedPacket->removeTagIfPresent<DispatchProtocolReq>();
             EV_INFO << "Starting streaming packet " << streamedPacket->getName() << "." << std::endl;
             pushOrSendPacketStart(streamedPacket, cutthroughOutputGate, cutthroughConsumer, streamDatarate, streamedPacket->getTransmissionId());
             streamedPacket = nullptr;
             cutthroughInProgress = true;
             updateDisplayString();
         }
-        else
+        else {
+            streamedPacket->addTag<DispatchProtocolReq>()->setProtocol(dispatchProtocolReq->getProtocol());
             PacketDestreamer::pushPacketStart(streamedPacket, outputGate, streamDatarate);
+        }
     }
     else
         PacketDestreamer::handleMessage(message);
