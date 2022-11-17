@@ -145,7 +145,7 @@ plt.gcf().subplots_adjust(bottom=0.25)
         <combo x:id="iso_itervar" x:id.content="$itervarnames" x:style="BORDER">
             <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
         </combo>
-         
+
       </x:children>
     </composite>
   </x:children>
@@ -196,18 +196,18 @@ plt.gcf().subplots_adjust(bottom=0.25)
       <add x:p0="dashed"/>
       <add x:p0="dashdot"/>
     </combo>
-    
+
     <label text="Line width:"/>
     <spinner x:id="linewidth" minimum="0" digits="1" selection="15" maximum="1000" x:style="BORDER"/>
 
       </x:children>
     </group>
-    
+
     <group text="Markers">
       <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
       <layout x:class="GridLayout" numColumns="2"/>
       <x:children>
-    
+
     <label text="Marker:"/>
     <combo x:id="marker" x:style="BORDER">
       <add x:p0="auto"/>
@@ -241,7 +241,7 @@ plt.gcf().subplots_adjust(bottom=0.25)
 
       </x:children>
     </group>
-    
+
   </x:children>
 </xswt>
 ]]></dialogPage>
@@ -462,7 +462,7 @@ plt.gcf().subplots_adjust(bottom=0.25)
       <add x:p0="seaborn-white"/>
       <add x:p0="seaborn-whitegrid"/>
     </combo>
-    
+
     <label text="Cycle seed:"/>
     <spinner x:id="cycle_seed" selection="0" minimum="0" maximum="1000000" x:style="BORDER"/>
 
@@ -481,7 +481,7 @@ plt.gcf().subplots_adjust(bottom=0.25)
     <ColorChooser x:id="matplotlibrc.figure.facecolor" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
     </ColorChooser>
-    
+
     <label text="Axes background color:"/>
     <ColorChooser x:id="matplotlibrc.axes.facecolor" x:style="BORDER">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
@@ -532,7 +532,7 @@ plt.gcf().subplots_adjust(bottom=0.25)
     <label text="Here you can further customize the plot using matplotlibrc properties."/>
     <label text="The syntax is one entry per line in the 'key : value' format; comments (#) are also accepted."/>
     <label text="Content Assist available (hit Ctrl+Space)."/>
-    <text x:id="matplotlibrc" x:style="BORDER|MULTI" x:id.isFilter="true"> 
+    <text x:id="matplotlibrc" x:style="BORDER|MULTI" x:id.isFilter="true">
       <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true"/>
     </text>
   </x:children>

@@ -63,33 +63,45 @@ bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, cons
 
 const IReceptionDecision *ReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
 {
-    Enter_Method_Silent();
-    auto isReceptionPossible = computeIsReceptionPossible(listening, reception, part);
-    auto isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(listening, reception, part, interference);
-    auto isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(listening, reception, part, interference, snir);
-    return new ReceptionDecision(reception, part, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
+    const IReceptionDecision *result;
+    cMethodCallContextSwitcher::stacklogEnabled = true;
+    {
+        Enter_Method_Silent();
+        auto isReceptionPossible = computeIsReceptionPossible(listening, reception, part);
+        auto isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(listening, reception, part, interference);
+        auto isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(listening, reception, part, interference, snir);
+        result = new ReceptionDecision(reception, part, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
+    }
+    cMethodCallContextSwitcher::stacklogEnabled = false;
+    return result;
 }
 
 const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    Enter_Method_Silent();
-    bool isReceptionSuccessful = true;
-    for (auto decision : *decisions)
-        isReceptionSuccessful &= decision->isReceptionSuccessful();
-    auto packet = computeReceivedPacket(snir, isReceptionSuccessful);
-    auto signalPower = computeSignalPower(listening, snir, interference);
-    if (!std::isnan(signalPower.get())) {
-        auto signalPowerInd = packet->addTagIfAbsent<SignalPowerInd>();
-        signalPowerInd->setPower(signalPower);
+    const IReceptionResult *result;
+    cMethodCallContextSwitcher::stacklogEnabled = true;
+    {
+        Enter_Method_Silent();
+        bool isReceptionSuccessful = true;
+        for (auto decision : *decisions)
+            isReceptionSuccessful &= decision->isReceptionSuccessful();
+        auto packet = computeReceivedPacket(snir, isReceptionSuccessful);
+        auto signalPower = computeSignalPower(listening, snir, interference);
+        if (!std::isnan(signalPower.get())) {
+            auto signalPowerInd = packet->addTagIfAbsent<SignalPowerInd>();
+            signalPowerInd->setPower(signalPower);
+        }
+        auto snirInd = packet->addTagIfAbsent<SnirInd>();
+        snirInd->setMinimumSnir(snir->getMin());
+        snirInd->setMaximumSnir(snir->getMax());
+        snirInd->setAverageSnir(snir->getMean());
+        auto signalTimeInd = packet->addTagIfAbsent<SignalTimeInd>();
+        signalTimeInd->setStartTime(reception->getStartTime());
+        signalTimeInd->setEndTime(reception->getEndTime());
+        result = new ReceptionResult(reception, decisions, packet);
     }
-    auto snirInd = packet->addTagIfAbsent<SnirInd>();
-    snirInd->setMinimumSnir(snir->getMin());
-    snirInd->setMaximumSnir(snir->getMax());
-    snirInd->setAverageSnir(snir->getMean());
-    auto signalTimeInd = packet->addTagIfAbsent<SignalTimeInd>();
-    signalTimeInd->setStartTime(reception->getStartTime());
-    signalTimeInd->setEndTime(reception->getEndTime());
-    return new ReceptionResult(reception, decisions, packet);
+        cMethodCallContextSwitcher::stacklogEnabled = false;
+        return result;
 }
 
 W ReceiverBase::computeSignalPower(const IListening *listening, const ISnir *snir, const IInterference *interference) const

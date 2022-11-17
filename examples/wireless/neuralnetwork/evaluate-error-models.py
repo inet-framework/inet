@@ -18,20 +18,20 @@ INET = "inet_dbg" if args.debug else "inet"
 
 if args.scalarPacketlevel:
     print("Scalar Packetlevel")
-    os.system(f"opp_runall -b 1 {INET} -f {args.inifile} -u Cmdenv -c ScalarPacketlevel")
+    os.system(f"opp_runall -v -b 1 -j 8 {INET} -f {args.inifile} -u Cmdenv -c ScalarPacketlevel")
 
 if args.scalarPacketlevelNeuralNetwork:
     print("Scalar Packetlevel Neural Network")
-    os.system(f"opp_runall -b 1 {INET} -f {args.inifile} -u Cmdenv -c ScalarPacketlevelNeuralNetwork")
+    os.system(f"opp_runall -b 1 -j 8 {INET} -f {args.inifile} -u Cmdenv -c ScalarPacketlevelNeuralNetwork")
 
 if args.dimensionalPacketlevel:
     print("Dimensional Packetlevel")
-    os.system(f"opp_runall -b 1 {INET} -f {args.inifile} -u Cmdenv -c DimensionalPacketlevel")
+    os.system(f"opp_runall -b 1 -j 8 {INET} -f {args.inifile} -u Cmdenv -c DimensionalPacketlevel")
 
 if args.dimensionalPacketlevelNeuralNetwork:
     print("Dimensional Packetlevel Neural Network")
-    os.system(f"opp_runall -b 1 {INET} -f {args.inifile} -u Cmdenv -c DimensionalPacketlevelNeuralNetwork")
+    os.system(f"opp_runall -b 1 -j 8 {INET} -f {args.inifile} -u Cmdenv -c DimensionalPacketlevelNeuralNetwork")
 
 if args.dimensionalSymbollevel:
     print("Dimensional Symbollevel")
-    os.system(f"opp_runall -b 1 {INET} -f {args.inifile} -u Cmdenv -c DimensionalSymbollevel")
+    os.system(f"opp_runall -b 1 -j 8 {INET} -f {args.inifile} -u Cmdenv -c DimensionalSymbollevel")

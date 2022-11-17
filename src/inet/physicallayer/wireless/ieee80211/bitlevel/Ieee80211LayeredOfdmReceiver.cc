@@ -361,6 +361,9 @@ const Ieee80211OfdmMode *Ieee80211LayeredOfdmReceiver::computeMode(Hz bandwidth)
 
 const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
+    LayeredReceptionResult *result;
+    cMethodCallContextSwitcher::stacklogEnabled = true;
+    {
     Enter_Method_Silent();
     const Ieee80211LayeredTransmission *transmission = check_and_cast<const Ieee80211LayeredTransmission *>(reception->getTransmission());
     //std::cout << "A2" << std::endl;
@@ -429,7 +432,11 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
     auto channelInd = packet->addTagIfAbsent<Ieee80211ChannelInd>();
     channelInd->setChannel(transmission->getChannel());
 
-    return new LayeredReceptionResult(reception, decisions, packetModel, bitModel, symbolModel, sampleModel, analogModel);
+    result = new LayeredReceptionResult(reception, decisions, packetModel, bitModel, symbolModel, sampleModel, analogModel);
+    }
+        cMethodCallContextSwitcher::stacklogEnabled = false;
+        return result;
+
 }
 
 const IListening *Ieee80211LayeredOfdmReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord& startPosition, const Coord& endPosition) const
