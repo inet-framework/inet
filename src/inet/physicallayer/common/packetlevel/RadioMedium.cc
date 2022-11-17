@@ -299,16 +299,25 @@ const IInterference *RadioMedium::computeInterference(const IRadio *receiver, co
 
 const IReceptionDecision *RadioMedium::computeReceptionDecision(const IRadio *radio, const IListening *listening, const ITransmission *transmission, IRadioSignal::SignalPart part) const
 {
-    Enter_Method_Silent();
-    receptionDecisionComputationCount++;
-    const IReception *reception = getReception(radio, transmission);
-    const IInterference *interference = getInterference(radio, listening, transmission);
-    const ISnir *snir = getSNIR(radio, transmission);
-    return radio->getReceiver()->computeReceptionDecision(listening, reception, part, interference, snir);
+    const IReceptionDecision *result;
+    cMethodCallContextSwitcher::stacklogEnabled = true;
+    {
+        Enter_Method_Silent();
+        receptionDecisionComputationCount++;
+        const IReception *reception = getReception(radio, transmission);
+        const IInterference *interference = getInterference(radio, listening, transmission);
+        const ISnir *snir = getSNIR(radio, transmission);
+        result = radio->getReceiver()->computeReceptionDecision(listening, reception, part, interference, snir);
+    }
+    cMethodCallContextSwitcher::stacklogEnabled = false;
+    return result;
 }
 
 const IReceptionResult *RadioMedium::computeReceptionResult(const IRadio *radio, const IListening *listening, const ITransmission *transmission) const
 {
+    cMethodCallContextSwitcher::stacklogEnabled = true;
+    const IReceptionResult *result;
+    {
     Enter_Method_Silent();
     receptionResultComputationCount++;
     const IReception *reception = getReception(radio, transmission);
@@ -316,7 +325,10 @@ const IReceptionResult *RadioMedium::computeReceptionResult(const IRadio *radio,
     const ISnir *snir = getSNIR(radio, transmission);
     const IReceptionDecision *receptionDecision = getReceptionDecision(radio, listening, transmission, IRadioSignal::SIGNAL_PART_WHOLE);
     const std::vector<const IReceptionDecision *> *receptionDecisions = new std::vector<const IReceptionDecision *> {receptionDecision};
-    return radio->getReceiver()->computeReceptionResult(listening, reception, interference, snir, receptionDecisions);
+     result =radio->getReceiver()->computeReceptionResult(listening, reception, interference, snir, receptionDecisions);
+    }
+    cMethodCallContextSwitcher::stacklogEnabled = false;
+    return result;
 }
 
 const IListeningDecision *RadioMedium::computeListeningDecision(const IRadio *radio, const IListening *listening) const

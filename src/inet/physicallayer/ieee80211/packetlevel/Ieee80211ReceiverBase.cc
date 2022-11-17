@@ -92,13 +92,19 @@ void Ieee80211ReceiverBase::setChannelNumber(int channelNumber)
 
 const IReceptionResult *Ieee80211ReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
+    cMethodCallContextSwitcher::stacklogEnabled = true;
+    const IReceptionResult *receptionResult;
     Enter_Method_Silent();
+    {
     auto transmission = check_and_cast<const Ieee80211TransmissionBase *>(reception->getTransmission());
-    auto receptionResult = FlatReceiverBase::computeReceptionResult(listening, reception, interference, snir, decisions);
+    receptionResult = FlatReceiverBase::computeReceptionResult(listening, reception, interference, snir, decisions);
     auto packet = const_cast<Packet *>(receptionResult->getPacket());
     packet->getTag<PacketProtocolTag>()->setProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
     packet->addTagIfAbsent<Ieee80211ModeInd>()->setMode(transmission->getMode());
     packet->addTagIfAbsent<Ieee80211ChannelInd>()->setChannel(transmission->getChannel());
+    }
+        cMethodCallContextSwitcher::stacklogEnabled = false;
+
     return receptionResult;
 }
 

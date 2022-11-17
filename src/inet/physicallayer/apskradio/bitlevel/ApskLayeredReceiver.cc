@@ -154,30 +154,35 @@ const IReceptionPacketModel *ApskLayeredReceiver::createPacketModel(const Layere
 
 const IReceptionResult *ApskLayeredReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    Enter_Method_Silent();
-    const LayeredTransmission *transmission = check_and_cast<const LayeredTransmission *>(reception->getTransmission());
-    const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
-    const IReceptionSampleModel *sampleModel = createSampleModel(transmission, snir, analogModel);
-    const IReceptionSymbolModel *symbolModel = createSymbolModel(transmission, snir, sampleModel);
-    EV_TRACE << "RECEIVED SYMBOLS: ";
-    for (auto symbol : *symbolModel->getAllSymbols()) {
-        const ApskSymbol *apskSymbol = check_and_cast<const ApskSymbol *>(symbol);
-        EV_TRACE << "(" << apskSymbol->real() << ", " << apskSymbol->imag() << "), ";
+    cMethodCallContextSwitcher::stacklogEnabled = true;
+    LayeredReceptionResult * result = nullptr;
+    {
+        Enter_Method_Silent();
+        const LayeredTransmission *transmission = check_and_cast<const LayeredTransmission *>(reception->getTransmission());
+        const IReceptionAnalogModel *analogModel = createAnalogModel(transmission, snir);
+        const IReceptionSampleModel *sampleModel = createSampleModel(transmission, snir, analogModel);
+        const IReceptionSymbolModel *symbolModel = createSymbolModel(transmission, snir, sampleModel);
+        EV_TRACE << "RECEIVED SYMBOLS: ";
+        for (auto symbol : *symbolModel->getAllSymbols()) {
+            const ApskSymbol *apskSymbol = check_and_cast<const ApskSymbol *>(symbol);
+            EV_TRACE << "(" << apskSymbol->real() << ", " << apskSymbol->imag() << "), ";
+        }
+        EV_TRACE << std::endl;
+        const IReceptionBitModel *bitModel = createBitModel(transmission, snir, symbolModel);
+        EV_TRACE << "RECEIVED BYTES: ";
+        for (auto byte : bitModel->getAllBits()->getBytes())
+            EV_TRACE << (int)byte << ", ";
+        const IReceptionPacketModel *packetModel = createPacketModel(transmission, snir, bitModel);
+        auto packet = const_cast<Packet *>(packetModel->getPacket());
+        packet->addTagIfAbsent<ErrorRateInd>(); // TODO: setPacketErrorRate(per);
+        auto snirInd = packet->addTagIfAbsent<SnirInd>();
+        snirInd->setMinimumSnir(snir->getMin());
+        snirInd->setMaximumSnir(snir->getMax());
+        snirInd->setAverageSnir(snir->getMean());
+        result = new LayeredReceptionResult(reception, decisions, packetModel, bitModel, symbolModel, sampleModel, analogModel);
     }
-    EV_TRACE << std::endl;
-    const IReceptionBitModel *bitModel = createBitModel(transmission, snir, symbolModel);
-    EV_TRACE << "RECEIVED BYTES: ";
-    for (auto byte : bitModel->getAllBits()->getBytes())
-        EV_TRACE << (int)byte << ", ";
-    const IReceptionPacketModel *packetModel = createPacketModel(transmission, snir, bitModel);
-    auto packet = const_cast<Packet *>(packetModel->getPacket());
-    packet->addTagIfAbsent<ErrorRateInd>(); // TODO: setPacketErrorRate(per);
-    auto snirInd = packet->addTagIfAbsent<SnirInd>();
-    snirInd->setMinimumSnir(snir->getMin());
-    snirInd->setMaximumSnir(snir->getMax());
-    snirInd->setAverageSnir(snir->getMean());
-
-    return new LayeredReceptionResult(reception, decisions, packetModel, bitModel, symbolModel, sampleModel, analogModel);
+    cMethodCallContextSwitcher::stacklogEnabled = false;
+    return result;
 }
 
 const IListening *ApskLayeredReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
