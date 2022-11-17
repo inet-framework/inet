@@ -45,6 +45,7 @@ class INET_API Ieee80211VhtModeBase
 
     virtual int getNumberOfDataSubcarriers() const;
     virtual int getNumberOfPilotSubcarriers() const;
+    // TODO: plus null subcarrier! plus 6-6 guard subcarriers at the sides!
     virtual int getNumberOfTotalSubcarriers() const { return getNumberOfDataSubcarriers() + getNumberOfPilotSubcarriers(); }
     virtual GuardIntervalType getGuardIntervalType() const { return guardIntervalType; }
     virtual int getNumberOfSpatialStreams() const { return numberOfSpatialStreams; }
