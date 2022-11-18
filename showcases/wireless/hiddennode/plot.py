@@ -7,6 +7,11 @@ import matplotlib.pyplot as plt
 
 prevnums = None
 
+num_const = 0
+num_frequniform = 0
+num_timeuniform = 0
+num_other = 0
+
 
 for l in f.readlines():
     if l.startswith("[INFO]"):
@@ -38,15 +43,37 @@ for l in f.readlines():
                 freqHomogeneous = False
                 break
 
-        if freqHomogeneous:
-            print("freqHomogeneous")
-            continue
-
-
 
         if np.all(nums == nums[0]):
             print("all equal:", nums[0])
+            num_const += 1
             continue
+
+
+
+        if freqHomogeneous:
+            print("freqHomogeneous")
+            num_frequniform += 1
+            continue
+
+        timeHomogeneous = True
+
+        for sc in range(52):
+            slots = int(len(nums) / 52)
+            sc_snir = nums[sc::52]
+            if not np.all(sc_snir == sc_snir[0]):
+                timeHomogeneous = False
+                break
+
+
+        if timeHomogeneous:
+            print("timeHomogeneous")
+            num_timeuniform += 1
+            continue
+
+
+        num_other += 1
+
 
         if prevnums is not None:
             if np.all(nums == prevnums):
@@ -64,6 +91,8 @@ for l in f.readlines():
 
         fig = plt.figure(figsize=(8, 3))
         ax1 = fig.add_subplot(111, projection='3d')
-        ax1.scatter(x, y,nums)
+        #ax1.scatter(x, y,nums)
 
-        plt.show()
+        #plt.show()
+
+print("constant:", num_const, "freq unif:", num_frequniform, "time unif:", num_timeuniform, "num other:", num_other)
