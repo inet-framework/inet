@@ -27,12 +27,184 @@ following submodules (incomplete list):
    channel scanning, beaconing
 
 #. *agent*: initiates actions such as channel scanning and connecting to
-   and disconnecting from access points
+   and disconnecting from access points (basically simulating user behavior)
 
 #. *MAC*: transmits and receives frames according to the IEEE 802.11
    medium access procedure
 
 #. *PHY*: represents the radio
+
+The following sections examine the above components.
+
+.. _ug:sec:80211:mac:
+
+MAC
+---
+
+The :ned:`Ieee80211Mac` module represents the IEEE 802.11 MAC, and its structure
+and operation closely follows the architecture described in the standard IEEE
+802.11-2012 Part 11: Wireless LAN Medium Access Control (MAC) and Physical Layer
+(PHY) Specifications. This module performs the transmission and reception of
+frames using the CSMA/CA protocol. :ned:`Ieee80211Mac` was designed to be
+modular to allow for experimentation with new policies, features, and algorithms
+within the MAC layer. Users can easily replace individual components with their
+own implementations, and policies that are likely to be experimented with are
+extracted into their own modules.
+
+The model separates the coordination functions, channel access method,
+channel access function, MAC data services and other elements from the 802.11
+standard into their own modules. These modules include:
+
+-  :ned:`Dcf`, :ned:`Hcf`: Implementation of the Distributed Coordination Function
+   and the Hybrid Coordination Function that control medium access. They are
+   themselves modular, and especially, :ned:`Hcf` consists of a number of submodules.
+
+-  :ned:`Edca`: Channel access method as specified by the standard
+
+-  :ned:`Edcaf`, :ned:Dcaf: Channel access function that controls channel ownership, etc.
+
+-  :ned:`OriginatorMacDataService`, :ned:`RecipientMacDataService`,
+   :ned:`OriginatorQosDataService`, :ned:`RecipientQosMacDataService`: MAC
+   data services implemented as compound modules that combine functions
+   related to transforming data frames (sequence numbering, duplicate removal,
+   frame reordering, fragmentation, aggregation)
+
+-  :ned:`TxopProcedure`: Implements transmission opportunity (TxOP) behavior of the standard
+
+-  :ned:`QosRateSelection`: Rate selection controls data rate for all kind of frames, including management and control frames
+
+-  :ned:`AarfRateControl`, :ned:`OnoeRateControl`: Implementations of the AARF and ONOE rate control algorithms. Rate control determines the optimal data rate for data frames
+
+-  :ned:`OriginatorProtectionMechanism`: Protection mechanism provides channel allocation for frame exchange sequences
+
+-  :ned:`NonQosRecoveryProcedure`, :ned:`QosRecoveryProcedure`: Recovery procedures for non-QoS and QoS frames; they determine what to do in case of frame exchange failure
+
+-  :ned:`Contention`: Implements contention-based channel access using defer, backoff, etc.
+
+-  :ned:`PendingQueue`: Queue that contains unchanged frames as received from higher layers, waiting for transmission
+
+-  :ned:`InProgressFrames`: Queue that contains frames waiting for transmission already processed by the MAC data service
+
+-  :ned:`Tx`, :ned:`Rx` interface with the radio, and are directly responsible for frame transmission and reception
+
+Other elements of the standard appear as C++ classes inside other modules:
+
+-  Duplicate removal (which discards duplicate received frames based on sequence numbers) is part of :ned:`RecipientMacDataService`
+
+-  Aggregation and deaggregation are parts of the MAC data services modules. Aggregation is controlled by a separate policy module, see below.
+
+-  Fragmentation and defragmentation are part of MAC data services modules. Fragmentation is controlled by a separate policy module, see below.
+
+-  Block ACK agreements and frame reordering. Block agreements are controlled by policy modules, see below.
+
+-  Declarations of frame exchange sequences allowed by the standard also explicitly appear in the model as
+-  C++ classes in coordination functions like :ned:`Hcf`.
+
+The MAC model has the following built-in policy submodules by default, most of
+which are replaceable. Policy modules do not implement behavior, they just encapsulate
+rules.
+
+.. , with the default modules in parentheses:
+
+-  ACK policy (e.g. :ned:`OriginatorAckPolicy`, :ned:`RecipientAckPolicy`): controls what kind of acknowledgement is used per-frame (none, normal, block-ack)
+
+-  RTS/CTS policy (e.g. :ned:`RtsPolicy`, :ned:`CtsPolicy`): determines which frames are protected by the RTS/CTS mechanism
+
+-  Originator and recipient block ACK agreement policies (e.g. :ned:`OriginatorBlockAckAgreementPolicy`, :ned:`RecipientBlockAckAgreementPolicy`): determine when and what kind of agreements are made
+
+-  MSDU aggregation policy (e.g. :ned:`BasicMsduAggregationPolicy`): controls when and which frames are aggregated into an A-MSDU
+
+-  Fragmentation policy (e.g. :ned:`BasicFragmentationPolicy`): controls when and how fragmentation happens
+
+.. _ug:sec:80211:physical-layer:
+
+Physical Layer
+--------------
+
+*The physical layer* modules (:ned:`Ieee80211Radio`) deal with modelling
+the process of transmitting and receiving frames. They determine if a frame was received correctly (that
+is, it did not suffer bit errors due to low signal power or interference
+in the radio channel). All frames are passed up to the
+MAC, and incorrectly received frames are dropped there.
+
+On the physical layer, one can choose from several radios with different
+levels of detail. Radios can operate on packet level, bit level, or symbol level.
+The following is a list of the various radio types, with the matching radio medium in parentheses:
+
+-  Packet-level radio using scalar analog model: :ned:`Ieee80211ScalarRadio` (:ned:`Ieee80211ScalarRadioMedium`)
+
+      Signal power is represented as a scalar value in both time and frequency
+
+-  Packet-level radio using dimensional analog model: :ned:`Ieee80211DimensionalRadio` (:ned:`Ieee80211DimensionalRadioMedium`)
+
+      Signal power density is represented by a 2-dimensional function in time and frequency, and arbitrary signal shapes can be defined
+
+-  Packet-level radio using unit disk analog model: :ned:`Ieee80211UnitDiskRadio` (:ned:`UnitDiskRadioMedium`)
+
+      Simple model featuring communication, interference and detection ranges as parameters, with successful reception only possible within communication range
+
+-  Layered radio with configurable level of detail, using scalar or dimensional analog model: :ned:`Ieee80211OfdmRadio` (:ned:`Ieee80211LayeredScalarRadioMedium` or :ned:`Ieee80211LayeredDimensionalRadioMedium`)
+
+      When set to symbol level of detail, layered radios simulate the complete transmission and reception process (i.e. transmission of symbols, applying forward error correction, scrambling and interleaving, and the inverse process for reception).
+      In contrast, non-layered packet level radios use error models to calculate successful reception probability from SNIR.
+      Layered radios are more accurate than non-layered radio models, but also require greater computing power.
+
+.. seealso::
+
+   | :ref:`ug:sec:medium:analog-models`
+   | :ref:`ug:sec:phy:layered-radio-models`
+
+.. | Some of these radios use different analog models, e.g. scalar, dimensional or unit disk. More information:
+
+.. .. seealso::
+
+      | :doc:`/users-guide/ch-physicallayer`
+      | :doc:`/users-guide/ch-transmission-medium`
+
+Error Models
+~~~~~~~~~~~~
+
+When using packet-level radios, the reception process inside the radio is responsible for turning analog signals on the transmission medium directly into frames passed to the MAC layer.
+The error model decides if the packet was successfully received or not, based on properties such as signal-to-noise-and-interference ratio (SNIR) during
+reception. The error model is a replaceable submodule in the radio. The following error models are available for 802.11. These models produce a packet error rate using a scalar SNIR value
+(minimum, mean, or maximum of the time/frequency dependent SNIR function). It then generates a random number to decide whether the particular packet is successfully received or not.
+
+- :ned:`Ieee80211BerTableErrorModel`: bit error rate is determined by a piecewise linear function, defined in a bit error rate vs SNIR table
+- :ned:`Ieee80211NistErrorModel`: implementation of the NIST analytical error model
+- :ned:`Ieee80211YansErrorModel`: implementation of the YANS analytical error model
+
+The layered radio (:ned:`Ieee80211OfdmRadio`) uses different error models depending on the specified level of detail:
+
+- `packet` level: can use any of the above packet-level error models (table, NIST, or YANS)
+- `bit` level: bits are corrupted based on a scalar SNIR computed for the relevant part of the frame
+- `symbol` level: corrupts symbols based on a scalar SNIR symbol error rate, computed for the duration of each symbol, by the modulation's C++ class
+
+.. note:: There is no error model in :ned:`Ieee80211UnitDiskRadio`, because successful reception only depends on range.
+
+.. seealso::
+
+   :ref:`ug:sec:phy:error-models`
+
+.. _ug:sec:80211:management:
+
+Management
+----------
+
+*The management layer* exchanges management frames via the MAC with its
+peer management entities in other STAs and APs. Beacon, Probe
+Request/Response, Authentication, Association Request/Response etc
+frames are generated and interpreted by management entities, and
+transmitted/received via the MAC layer. During scanning, it is the
+management entity that periodically switches channels, and collects
+information from received beacons and probe responses.
+
+.. **V1** The management layer has several implementations which differ in their
+   role (STA/AP/ad-hoc) and level of detail: :ned:`Ieee80211MgmtAdhoc`,
+   :ned:`Ieee80211MgmtAp`, :ned:`Ieee80211MgmtApSimplified`,
+   :ned:`Ieee80211MgmtSta`, :ned:`Ieee80211MgmtStaSimplified`. The
+   ..Simplified ones differ from the others in that they do not model the
+   scan-authenticate-associate process, so they cannot be used in
+   experiments involving handover.
 
 The management component has several implementations which differ in
 their role and level of detail:
@@ -54,145 +226,12 @@ used e.g. in experiments involving handover.
 requires an agent (:ned:`Ieee80211AgentSta` or a custom one) to initiate
 actions.
 
-The following sections examine the above components.
-
-.. _ug:sec:80211:mac:
-
-MAC
----
-
-The :ned:`Ieee80211Mac` module type represents the IEEE 802.11 MAC. The structure of the
-implementation closely follows the architecture described in the standard, IEEE 802.11-2012 Part
-11: Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY)
-Specifications.
-
-:ned:`Ieee80211Mac` performs transmission of frames according to the
-CSMA/CA protocol. It receives data and management frames from the upper
-layers, and transmits them.
-
-The :ned:`Ieee80211Mac` was designed to be modular to facilitate
-experimenting with new policies, features and algorithms within the MAC
-layer. Users can easily replace individual components with their own
-implementations. Policies, which most likely to be experimented with,
-are extracted into their own modules.
-
-The new model also separates the following components in the 802.11 standard into modules:
-
--  Coordination function: :ned:`Dcf`, :ned:`Hcf`. The coordination functions control the medium access as specified by the standard.  
-
--  Channel access method as specified by the standard: :ned:`Edca` 
-
--  Channel access function: :ned:`Edcaf`, :ned:`Dcaf`. The channel access function controls channel ownership, etc.
-
--  MAC data services: :ned:`OriginatorMacDataService`, :ned:`RecipientMacDataService`, :ned:`OriginatorQosDataService`, :ned:`RecipientQosMacDataService`.
-   The MAC data services are implemented as compound modules, which combine functions related to transforming data frames (sequence numbering, duplicate removal, frame reordering, fragmentation, aggregation).
-
--  Aggregation and deaggregation (C++ class in MAC data services): These classes implement aggregation and deaggregation according to the policy modules (see below).
-
--  Fragmentation and defragmentation (C++ classes in MAC data services): These classes carry out the task of fragmentation and defragmentation according to the policy modules (see below).
-
--  Block ACK agreements and frame reordering (C++ classes): These classes carry out the task according to the policy modules (see below).
-
--  Frame exchange sequences (implemented as C++ classes in coordination functions, like :ned:`Hcf`): These classes strictly follow the standard specifying the valid frame sequences.
-
--  TXOP procedure (:ned:`TxopProcedure`): This module implements the transmission opportunity behavior of the standard.
-
--  Duplicate removal (C++ class in RecipientMacDataService): This class removes duplicate received frames based on sequence numbers.
-
--  Rate selection: :ned:`QosRateSelection`. This module controls data rate for all kind of frames, including management and control frames.
-
--  Rate control: :ned:`AarfRateControl`, :ned:`OnoeRateControl`. These modules determine the optimal data rate for data frames.
-
--  Protection mechanism: :ned:`OriginatorProtectionMechanism`. This module provides channel allocation for frame exchange sequences.
-
--  Recovery procedure: :ned:`NonQosRecoveryProcedure`, :ned:`QosRecoveryProcedure`. These modules determine what to do in case of frame exchange failure.
-
--  Contention: :ned:`Contention`. The contention module implements contention-based channel access, using defer, backoff, etc.
-
--  :ned:`PendingQueue`: This module is a queue containing frames received from higher layers, waiting for transmission unchanged.
-
--  :ned:`InProgressFrames`: This modules is a queue containing frames waiting for transmission already processed by the MAC data service.
-
--  TX/RX (:ned:`Tx`, :ned:`Rx`). Responsible for simple frame transmission/reception.
-
-The MAC model has the following replaceable built-in policy submodules by default:
-
-.. -  :ned:`OriginatorAckPolicy` and :ned:`RecipientAckPolicy`
-
-.. -  :ned:`RtsPolicy` and :ned:`CtsPolicy`
-
-.. -  :ned:`OriginatorBlockAckAgreementPolicy` and :ned:`RecipientBlockAckAgreementPolicy`
-
-.. -  :ned:`BasicMsduAggregationPolicy`
-
-.. -  :ned:`BasicFragmentationPolicy`
-
-.. , with the default modules in parentheses:
-
--  ACK policy (e.g. :ned:`OriginatorAckPolicy`, :ned:`RecipientAckPolicy`): controls what kind of acknowledgement is used per-frame (none, normal, block-ack)
-
--  RTS/CTS policy (e.g. :ned:`RtsPolicy`, :ned:`CtsPolicy`): determines which frames are protected by the RTS/CTS mechanism
-
--  Originator and recipient block ACK agreement policies (e.g. :ned:`OriginatorBlockAckAgreementPolicy`, :ned:`RecipientBlockAckAgreementPolicy`): determine when and what kind of agreements are made
-
--  MSDU aggregation policy (e.g. :ned:`BasicMsduAggregationPolicy`): controls when and which frames are aggregated into an A-MSDU 
-
--  Fragmentation policy (e.g. :ned:`BasicFragmentationPolicy`): controls when and how fragmentation happens
-
-.. For example, a lot of these modules are located in the *hcf* submodule of the MAC:
-
-   .. figure:: figures/hcf.png
-      :align: center
-
-.. _ug:sec:80211:physical-layer:
-
-Physical Layer
---------------
-
-*The physical layer* modules (:ned:`Ieee80211Radio`) deal with modelling
-transmission and reception of frames. They model the characteristics of
-the radio channel, and determine if a frame was received correctly (that
-is, it did not suffer bit errors due to low signal power or interference
-in the radio channel). Frames received correctly are passed up to the
-MAC.
-
-On the physical layer, one can choose from several radios with different
-levels of detail. The various radio types (with the matching
-transmission medium types in parentheses) are:
-
--  :ned:`Ieee80211ScalarRadio` (:ned:`Ieee80211ScalarRadioMedium`)
-
--  :ned:`Ieee80211DimensionalRadio`
-   (:ned:`Ieee80211DimensionalRadioMedium`)
-
--  :ned:`Ieee80211UnitDiskRadio` (:ned:`UnitDiskRadioMedium`)
-
-.. _ug:sec:80211:management:
-
-Management
-----------
-
-*The management layer* exchanges management frames via the MAC with its
-peer management entities in other STAs and APs. Beacon, Probe
-Request/Response, Authentication, Association Request/Response etc
-frames are generated and interpreted by management entities, and
-transmitted/received via the MAC layer. During scanning, it is the
-management entity that periodically switches channels, and collects
-information from received beacons and probe responses.
-
-The management layer has several implementations which differ in their
-role (STA/AP/ad-hoc) and level of detail: :ned:`Ieee80211MgmtAdhoc`,
-:ned:`Ieee80211MgmtAp`, :ned:`Ieee80211MgmtApSimplified`,
-:ned:`Ieee80211MgmtSta`, :ned:`Ieee80211MgmtStaSimplified`. The
-..Simplified ones differ from the others in that they do not model the
-scan-authenticate-associate process, so they cannot be used in
-experiments involving handover.
-
 .. _ug:sec:80211:agent:
 
 Agent
 -----
 
+The agent simulates user behavior, such as selecting access points to connect to.
 The agent is what instructs the management layer to perform scanning,
 authentication and association. The management layer itself just carries
 out these commands by performing the scanning, authentication and
@@ -207,3 +246,240 @@ them.
 agent. By modifying or replacing the agent, one can alter the dynamic
 behaviour of STAs in the network, for example implement different
 handover strategies.
+
+**TODO**
+
+.. - ini file snippets
+.. - screenshots where needed
+.. - error model section
+- briefly about analog models, and layered
+.. - link to physical layer, analog model, tx medium
+
+Common Configuration Options
+----------------------------
+
+The following is a list of options to configure some common use cases.
+
+Radio and Radio Medium Types
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. Using a specific radio and matching radio medium module
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following are examples of using a specific radio and matching radio medium module.
+If the radio medium module type in the NED file is parametric, the type can be specified in the INI file:
+
+.. code-block:: ned
+
+   radioMedium: <> like IRadioMedium {
+      parameters:
+         @display("p=100,50");
+   }
+
+Set the radio and radio medium type in the INI file:
+
+- :ned:`Ieee80211ScalarRadio` and :ned:`Ieee80211ScalarRadioMedium`:
+
+  .. code-block:: ini
+
+     *.*.wlan[*].radio.typename = "Ieee80211ScalarRadio"
+     *.radioMedium.typename = "Ieee80211ScalarRadioMedium"
+
+- :ned:`Ieee80211DimensionalRadio` and :ned:`Ieee80211DimensionalRadioMedium`:
+
+  .. code-block:: ini
+
+     *.*.wlan[*].radio.typename = "Ieee80211DimensionalRadio"
+     *.radioMedium.typename = "Ieee80211DimensionalRadioMedium"
+
+- :ned:`Ieee80211UnitDiskRadio` and :ned:`UnitDiskRadioMedium`:
+
+  .. code-block:: ini
+
+     *.*.wlan[*].radio.typename = "Ieee80211UnitDiskRadio"
+     *.radioMedium.typename = "Ieee80211UnitDiskRadioMedium"
+     *.*.wlan[*].radio.transmitter.communicationRange = 200m
+
+     **.displayCommunicationRange = true     # optionally display communication range with blue circles; requires visualizer module in network
+
+- :ned:`Ieee80211OfdmRadio` with :ned:`Ieee80211LayeredScalarRadioMedium`:
+
+  .. note:: In infrastructure mode, this only works with simplified management
+
+  .. code-block:: ini
+
+     *.host*.wlan[*].radio.typename = "Ieee80211OfdmRadio"
+     *.host*.wlan[*].radio.receiver.levelofdetail = "symbol"
+     *.host*.wlan[*].radio.transmitter.levelofdetail = "symbol"
+     *.radioMedium.typename = "Ieee80211LayeredScalarRadioMedium"
+
+     *.*.wlan[*].radio.centerFrequency = 2.4GHz
+     *.*.wlan[*].radio.bandwidth = 2MHz
+
+     *.*.wlan[*].radio.transmitter.power = 100mW
+     *.*.wlan[*].radio.receiver.energyDetection = -100dBm
+     *.*.wlan[*].radio.receiver.sensitivity = -100dBm
+     *.*.wlan[*].radio.receiver.snirThreshold = 4dB
+     *.*.wlan[*].radio.receiver.channelSpacing = 5MHz
+
+     **.fcsMode = "computed"
+     **.crcMode = "computed"
+
+.. - :ned:`Ieee80211OfdmRadio` with :ned:`Ieee80211LayeredDimensionalRadioMedium`:
+
+  .. code-block:: ini
+
+     *.host*.wlan[*].radio.typename = "Ieee80211OfdmRadio"
+     *.host*.wlan[*].radio.receiver.levelofdetail = "symbol"
+     *.host*.wlan[*].radio.transmitter.levelofdetail = "symbol"
+     *.radioMedium.typename = "Ieee80211LayeredDimensionalRadioMedium"
+
+Wifi Standard, Bitrate and Rate Control
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Switching Wifi operating mode (e.g. 802.11g, 802.11n, etc):
+
+  .. code-block:: ini
+
+     *.host*.wlan[*].opMode = "g(mixed)"
+
+  The list of available modes are the following (defined in :cpp:`Ieee80211ModeSet.h`):
+
+  - `a`
+  - `b`
+  - `g(mixed)`
+  - `g(erp)`
+  - `n(mixed-2.4Ghz)`
+  - `ac`
+
+- Setting a specific Wifi bitrate:
+
+  .. code-block:: ini
+
+     *.host*.wlan[*].bitrate = 48Mbps
+
+  .. note:: The list of possible bitrates in each Wifi mode is defined in defined in :cpp:`Ieee80211ModeSet.h`.
+
+- Specify rate control algorithm
+
+  .. code-block:: ini
+
+     *.*host.wlan[*].mac.dcf.rateControl.typename = "AarfRateControl"
+
+Adhoc, Station and Access Point Mode
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. Setting network nodes to adhoc, station and access point mode
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+- Switching a network node to `adhoc` mode:
+
+  .. code-block:: ini
+
+     *.host*.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+     *.host*.wlan[*].agent.typename = "" # disable agent module, as it isn't needed with adhoc management
+
+  .. note:: :ned:`AdhocHost` has this configured by default.
+
+- Switching a network node to `STA` (station) mode:
+
+  .. code-block:: ini
+
+     *.host*.wlan[*].mgmt.typename = "Ieee80211MgmtSta"
+
+  .. note:: This is default in :ned:`WirelessHost`
+
+- Switching a network node to `AP` (access point) mode:
+
+  .. code-block:: ini
+
+     *.host*.wlan[*].mgmt.typename = "Ieee80211MgmtAp"
+
+  .. note:: This is default in :ned:`AccessPoint`
+
+- Switching all stations and all access points to `simplified` management
+
+  Simplified management means that some aspects of connecting to Wifi networks is not simulated, such as channel scanning, authentication, etc.
+  Station nodes with simplified management are assumed to be connected to the Wifi network specified with the access point's MAC address.
+
+  .. code-block:: ini
+
+     *.ap*.wlan[0].mgmt.typename = "Ieee80211MgmtApSimplified"
+     *.ap*.wlan[0].address = "A0:00:00:00:00:00:01"
+
+     *.host*.wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified"
+     *.host*.wlan[*].agent.typename = "" # disable agent module, as it isn't needed with simplified management
+     *.host*.wlan[*].mgmt.accessPointAddress = "A0:00:00:00:00:00:01"   # specify which AP the nodes are connected to
+
+- Setting Wifi channel number to use with simplified management (need to set channels in both hosts and access point)
+
+  With simplified management, channel scanning is not simulated. Station nodes are assumed to be connected to the Wifi network, and use the channel specified by the :par:`channelNumber` parameter of the access point's wireless interface. **TODO** is this needed?
+
+  .. code-block:: ini
+
+     **.ap.wlan[*].radio.channelNumber = 2
+     **.host*.wlan[*].radio.channelNumber = 2
+
+- Setting Wifi channel number to use in access point (hosts will scan channels, no need to set channel number there; n/a with simplified management):
+
+  .. code-block:: ini
+
+     **.ap.wlan[*].radio.channelNumber = 2
+
+- Specify Wifi access point SSID (n/a with simplified management)
+
+  - station nodes connect to the wifi network specified by SSID or access point address?
+
+  .. code-block:: ini
+
+     *.ap*.wlan[0].mgmt.ssid = "wlan5"
+     *.host*.wlan[*].agent.defaultSsid = "wlan5"
+
+- Specify Wifi access point address
+
+  .. code-block:: ini
+
+     *.host*.wlan[*].accessPointAddress = "A0:00:00:00:00:00:01"
+
+Physical Characteristics of Transmissions, Receptions, and Background Noise
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Setting radio transmitter power:
+
+  .. code-block:: ini
+
+     *.host*.wlan[*].radio.transmitter.power = 0.1mW
+
+- Setting Receiver sensitivity
+
+  Sensitivity of a radio's receiver submodule is specified with three parameters:
+
+  - energy detection: the minimum signal power required to detect a signal
+  - sensitivity: the minimum signal power required to attempt receiving a transmission
+  - SNIR threshold: a minimum SNIR value required to attempt receiving a transmission
+
+  .. code-block:: ini
+
+     *.host*.wlan[*].radio.receiver.energyDetection = -105dBm
+     *.host*.wlan[*].radio.receiver.sensitivity = -105dBm
+     *.host*.wlan[*].radio.receiver.snirThreshold = 0dB
+
+- Specifying Wifi transmission spectral distribution to the spectral mask given in the 802.11 standard (requires dimensional radio and radio medium modules):
+
+  .. code-block:: ini
+
+     *.host*.wlan[*].radio.transmitter.frequencyGains = "left c-b*1.5 -40dB linear c-b -28dB linear c-b*0.5-1MHz -20dB linear c-b*0.5+1MHz 0dB linear c+b*0.5-1MHz 0dB linear c+b*0.5+1MHz -20dB linear c+b -28dB linear c+b*1.5 -40dB right"
+
+- Specify background noise power when using scalar analog model (e.g. :ned:`Ieee80211ScalarRadioMedium`):
+
+  .. code-block:: ini
+
+     *.radioMedium.backgroundNoise.power = -100dBm
+
+- Specify background noise power spectral density when using dimensional analog model (e.g. :ned:`Ieee80211DimensionalRadioMedium`):
+
+  .. code-block:: ini
+
+     *.radioMedium.backgroundNoise.power = nan
+     *.radioMedium.backgroundNoise.powerSpectralDensity = -95dBmWpMHz

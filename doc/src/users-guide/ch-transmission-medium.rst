@@ -9,7 +9,7 @@ Overview
 --------
 
 For wireless communication, an additional module is required to model
-the shared physical medium where the communication takes place. This
+the shared physical medium where the communication takes place: the `radio medium` module. This
 module keeps track of transceivers, noise sources, ongoing
 transmissions, background noise, and other ongoing noises.
 
@@ -25,7 +25,7 @@ It relies on several models:
 
 #. signal analog model
 
-With the help of the above models, the medium module computes when,
+With the help of the above models, the radio medium module computes when,
 where, and how signals arrive at receivers, including the set of
 interfering signals and noises. In addition, the medium module also
 contains various mechanisms and ways to improve the scalability of
@@ -64,7 +64,23 @@ types:
    neighborCache: <default("")> like INeighborCache
        if typename != "";
 
-There are many preconfigured versions of :ned:`RadioMedium`:
+:ned:`RadioMedium` can be configured to be used with any radio module type. However,
+there are radio medium modules pre-configured for the various radio types for convenience. These modules just extend :ned:`RadioMedium`
+with the parameters set according to the corresponding radio. For example, :ned:`Ieee80211ScalarRadioMedium` sets the analog model and background noise submodule types to scalar versions:
+
+.. code-block:: ned
+
+   module Ieee80211ScalarRadioMedium extends Ieee80211RadioMedium
+   {
+      parameters:
+        analogModel.typename = default("ScalarAnalogModel");
+        backgroundNoise.typename = default("IsotropicScalarBackgroundNoise");
+   }
+
+For simulating the coexistence of radios with different wireless technologies,
+the default :ned:`RadioMedium` can be used and configured appropriately.
+
+Here are the pre-configured versions of :ned:`RadioMedium`:
 
 -  For use with :ned:`UnitDiskRadio`: :ned:`UnitDiskRadioMedium`
 
