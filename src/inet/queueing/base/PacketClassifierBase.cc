@@ -87,14 +87,15 @@ void PacketClassifierBase::endPacketStreaming(Packet *packet)
 bool PacketClassifierBase::canPushSomePacket(cGate *gate) const
 {
     for (int i = 0; i < (int)outputGates.size(); i++)
-        if (!consumers[i]->canPushSomePacket(outputGates[i]->getPathEndGate()))
-            return false;
-    return true;
+        if (consumers[i]->canPushSomePacket(outputGates[i]->getPathEndGate()))
+            return true;
+    return false;
 }
 
 bool PacketClassifierBase::canPushPacket(Packet *packet, cGate *gate) const
 {
-    return canPushSomePacket(gate);
+    int index = callClassifyPacket(packet);
+    return consumers[index]->canPushPacket(packet, outputGates[index]->getPathEndGate());
 }
 
 void PacketClassifierBase::pushPacket(Packet *packet, cGate *gate)
