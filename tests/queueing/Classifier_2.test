@@ -1,0 +1,52 @@
+%description:
+
+In this test, packets cannot be produced by the active packet source because
+both sinks after the classifier are full.
+
+%file: test.ned
+
+import inet.queueing.sink.FullPacketSink;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.classifier.PriorityClassifier;
+import inet.queueing.source.ActivePacketSource;
+
+network TestClassifier
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        classifier: PriorityClassifier {
+            @display("p=200,100");
+        }
+        consumer1: FullPacketSink {
+            @display("p=300,100");
+        }
+        consumer2: FullPacketSink {
+            @display("p=300,200");
+        }
+    connections allowunconnected:
+        producer.out --> classifier.in;
+        classifier.out++ --> consumer1.in;
+        classifier.out++ --> consumer2.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestClassifier
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%subst: /\nRunning simulation\.\.\.\n//
+
+%not-contains-regex: stdout
+Producing packet, .*?producer-0.*?
+
+%not-contains-regex: stdout
+Consuming packet, .*?producer-0.*?
