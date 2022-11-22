@@ -102,9 +102,17 @@ class INET_API VoipStreamSender : public cSimpleModule, public LifecycleUnsuppor
     // AVCodec parameters
     AVFormatContext *pFormatCtx = nullptr;
     AVCodecContext *pCodecCtx = nullptr;
+
+#if LIBAVCODEC_VERSION_MAJOR >= 59
+    const
+#endif
     AVCodec *pCodec = nullptr; // input decoder codec
     SwrContext *pReSampleCtx = nullptr;
     AVCodecContext *pEncoderCtx = nullptr;
+
+#if LIBAVCODEC_VERSION_MAJOR >= 59
+    const
+#endif
     AVCodec *pCodecEncoder = nullptr; // output encoder codec
 
     // state variables

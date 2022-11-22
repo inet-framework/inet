@@ -76,6 +76,9 @@ class INET_API VoipStreamReceiver : public cSimpleModule, public LifecycleUnsupp
         AVOutputFormat *fmt = nullptr;
         AVStream *audio_st = nullptr;
         AVCodecContext *decCtx = nullptr;
+#if LIBAVCODEC_VERSION_MAJOR >= 59
+        const
+#endif
         AVCodec *pCodecDec = nullptr;
         AudioOutFile outFile;
         L3Address srcAddr;
