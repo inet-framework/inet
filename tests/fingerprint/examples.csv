@@ -96,12 +96,12 @@
 /examples/ethernet/lans/,            -f switch.ini -c SwitchedLanPreconf -r 0,      1000s,           65ca-9091/tplx;2c9a-5fb7/~tNl;bb65-f60d/tyf, PASS, EthernetMac
 /examples/ethernet/lans/,            -f twoHosts.ini -c TwoHosts1 -r 0,             200s,            05a6-a95c/tplx;1ffa-9820/~tNl;f813-f626/tyf, PASS, EthernetCsmaMac
 
-/examples/ethernet/vlan/,            -f omnetpp.ini -c NoVlan -r 0,                 10ms,            1869-0f8b/tplx;8cc3-6df5/~tNl;788d-f5d0/~tND;0c03-6f69/tyf, PASS, Ipv4
-/examples/ethernet/vlan/,            -f omnetpp.ini -c BetweenSwitches -r 0,        10ms,            2ee2-63f0/tplx;a820-12c6/~tNl;f35c-2800/~tND;3ff4-9ef5/tyf, PASS, Ipv4
-/examples/ethernet/vlan/,            -f omnetpp.ini -c BetweenHosts -r 0,           10ms,            b364-b238/tplx;b725-0790/~tNl;e6ee-f7d4/~tND;b0e4-c4bb/tyf, PASS, Ipv4
-/examples/ethernet/vlan/,            -f omnetpp.ini -c Asymmetric -r 0,             10ms,            7526-1622/tplx;02e8-6ff6/~tNl;f5b8-aaef/~tND;7a40-15cb/tyf, PASS, Ipv4
-/examples/ethernet/vlan/,            -f omnetpp.ini -c DoubleTagged -r 0,           10ms,            9878-e0f6/tplx;e0a0-0a56/~tNl;052a-57d9/~tND;942f-97ec/tyf, PASS, Ipv4
-/examples/ethernet/vlan/,            -f omnetpp.ini -c VirtualInterface -r 0,       10ms,            a0b3-f2da/tplx;b725-0790/~tNl;849c-43ea/~tND;babc-34e0/tyf, PASS, Ipv4
+/examples/ethernet/vlan/,            -f omnetpp.ini -c NoVlan -r 0,                 10ms,            01d5-50c3/tplx;8cc3-6df5/~tNl;788d-f5d0/~tND;0c03-6f69/tyf, PASS, Ipv4
+/examples/ethernet/vlan/,            -f omnetpp.ini -c BetweenSwitches -r 0,        10ms,            28d6-d4e9/tplx;a820-12c6/~tNl;f35c-2800/~tND;3ff4-9ef5/tyf, PASS, Ipv4
+/examples/ethernet/vlan/,            -f omnetpp.ini -c BetweenHosts -r 0,           10ms,            739e-a2d4/tplx;b725-0790/~tNl;e6ee-f7d4/~tND;b0e4-c4bb/tyf, PASS, Ipv4
+/examples/ethernet/vlan/,            -f omnetpp.ini -c Asymmetric -r 0,             10ms,            709c-7acf/tplx;02e8-6ff6/~tNl;f5b8-aaef/~tND;7a40-15cb/tyf, PASS, Ipv4
+/examples/ethernet/vlan/,            -f omnetpp.ini -c DoubleTagged -r 0,           10ms,            be9b-4f3e/tplx;e0a0-0a56/~tNl;052a-57d9/~tND;942f-97ec/tyf, PASS, Ipv4
+/examples/ethernet/vlan/,            -f omnetpp.ini -c VirtualInterface -r 0,       10ms,            741e-5e8b/tplx;b725-0790/~tNl;849c-43ea/~tND;babc-34e0/tyf, PASS, Ipv4
 
 /examples/geometry/,                 -f omnetpp.ini -c General -r 0,                100s,            75d0-cba9/tplx;ce1d-d136/~tNl;51b3-9d40/~tND;900d-aaeb/tyf, PASS, wireless Ipv4
 
