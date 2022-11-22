@@ -38,6 +38,9 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
     opened = true;
 
     // auto detect the output format from the name. default is WAV
+#if LIBAVFORMAT_VERSION_MAJOR >= 59
+    const
+#endif
     AVOutputFormat *fmt = av_guess_format(nullptr, resultFile, nullptr);
     if (!fmt) {
         EV_WARN << "Could not deduce output format from file extension: using WAV.\n";
@@ -79,6 +82,9 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
         AVCodecParameters *codecPar = audio_st->codecpar;
 
         // find the audio encoder
+#if LIBAVCODEC_VERSION_MAJOR >= 59
+        const
+#endif
         AVCodec *avcodec = avcodec_find_encoder(codecPar->codec_id);
         if (!avcodec)
             throw cRuntimeError("Codec %d not found", codecPar->codec_id);
