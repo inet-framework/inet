@@ -23,8 +23,8 @@ class INET_API IPassivePacketSource
     virtual ~IPassivePacketSource() {}
 
     /**
-     * Returns false if the packet source is empty at the given gate and no more
-     * packets can be pulled from it without raising an error.
+     * Returns true if packets can be pulled at the given gate from the packet
+     * source.
      *
      * The gate must be a valid gate of this module and it must support pulling
      * packets.
@@ -42,7 +42,7 @@ class INET_API IPassivePacketSource
 
     /**
      * Pulls the packet from the packet source at the given gate. This operation
-     * pulls the packet as a whole. The onwership of the packet is transferred
+     * pulls the packet as a whole. The ownership of the packet is transferred
      * to the sink.
      *
      * The source must not be empty at the given gate. The returned packet must
@@ -53,7 +53,7 @@ class INET_API IPassivePacketSource
 
     /**
      * Starts pulling the packet from the packet source at the given gate. This
-     * is a packet streaming operation. The onwership of the packet is transferred
+     * is a packet streaming operation. The ownership of the packet is transferred
      * to the sink.
      *
      * Packet streaming can be started with any of the streaming operations, and
@@ -72,7 +72,7 @@ class INET_API IPassivePacketSource
 
     /**
      * Ends pulling the packet from the packet source at the given gate. This is
-     * a packet streaming operation. The onwership of the packet is transferred
+     * a packet streaming operation. The ownership of the packet is transferred
      * to the sink.
      *
      * Packet streaming can be started with any of the streaming operations, and
@@ -93,7 +93,7 @@ class INET_API IPassivePacketSource
      * Progresses pulling the packet from the packet source at the given gate.
      * This is a packet streaming operation. The position specifies where the
      * packet streaming is at the moment. The extra length parameter partially
-     * fixes the future of the packet streaming operation. The onwership of the
+     * fixes the future of the packet streaming operation. The ownership of the
      * packet is transferred to the sink.
      *
      * Packet streaming can be started with any of the streaming operations, and

@@ -23,8 +23,8 @@ class INET_API IPassivePacketSink
     virtual ~IPassivePacketSink() {}
 
     /**
-     * Returns false if the packet sink is full at the given gate and no more
-     * packets can be pushed into it without raising an error.
+     * Returns true if packets can be pushed at the given gate into the packet
+     * sink.
      *
      * The gate must be a valid gate of this module and it must support pushing
      * packets.
@@ -33,7 +33,7 @@ class INET_API IPassivePacketSink
 
     /**
      * Returns true if the given packet can be pushed at the given gate into
-     * the packet sink without raising an error.
+     * the packet sink.
      *
      * The packet must not be nullptr. The gate must be a valid gate of this
      * module and it must support pushing packets.
@@ -42,7 +42,7 @@ class INET_API IPassivePacketSink
 
     /**
      * Pushes the packet into the packet sink at the given gate. This operation
-     * pushes the packet as a whole. The onwership of the packet is transferred
+     * pushes the packet as a whole. The ownership of the packet is transferred
      * to the sink.
      *
      * This method is called, for example, when a packet source module pushes a
@@ -56,7 +56,7 @@ class INET_API IPassivePacketSink
 
     /**
      * Starts pushing the packet into the packet sink at the given gate. This is
-     * a packet streaming operation. The onwership of the packet is transferred
+     * a packet streaming operation. The ownership of the packet is transferred
      * to the sink.
      *
      * Packet streaming can be started with any of the streaming operations, and
@@ -74,7 +74,7 @@ class INET_API IPassivePacketSink
 
     /**
      * Ends pushing the packet into the packet sink at the given gate. This is
-     * a packet streaming operation. The onwership of the packet is transferred
+     * a packet streaming operation. The ownership of the packet is transferred
      * to the sink.
      *
      * Packet streaming can be started with any of the streaming operations, and
@@ -94,7 +94,7 @@ class INET_API IPassivePacketSink
      * Progresses pushing the packet into the packet sink at the given gate. This
      * is a packet streaming operation. The position specifies where the packet
      * streaming is at the moment. The extra length parameter partially fixes
-     * the future of the packet streaming operation. The onwership of the packet
+     * the future of the packet streaming operation. The ownership of the packet
      * is transferred to the sink.
      *
      * Packet streaming can be started with any of the streaming operations, and
