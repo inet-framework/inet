@@ -29,6 +29,15 @@ void PassivePacketSinkBase::handleMessage(cMessage *message)
     pushPacket(packet, packet->getArrivalGate());
 }
 
+void PassivePacketSinkBase::pushPacket(Packet *packet, cGate *gate)
+{
+    Enter_Method("pushPacket");
+    ASSERT(packet != nullptr);
+    ASSERT(gate->getOwnerModule() == this);
+    take(packet);
+    handlePushPacket(packet, gate);
+}
+
 } // namespace queueing
 } // namespace inet
 
