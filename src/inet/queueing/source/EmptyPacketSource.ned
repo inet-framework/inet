@@ -8,18 +8,20 @@
 package inet.queueing.source;
 
 import inet.queueing.base.PacketProcessorBase;
-import inet.queueing.contract.IActivePacketSource;
+import inet.queueing.contract.IPacketSource;
 
 //
-// This module is an empty packet source which never pushes packets into the
-// connected packet consumer.
+// This module is an active/passive empty packet source. It doesn't push packets
+// into the connected module, and it doesn't allow packets to be pulled from it
+// by the connected module. The output gate generates backpressure for pull packet
+// operations.
 //
-simple EmptyPacketSource extends PacketProcessorBase like IActivePacketSource
+simple EmptyPacketSource extends PacketProcessorBase like IPacketSource
 {
     parameters:
         displayStringTextFormat = default("created 0 pk (0 B)");
         @class(EmptyPacketSource);
         @display("i=block/source");
     gates:
-        output out @labels(push);
+        output out @labels(push,pull);
 }
