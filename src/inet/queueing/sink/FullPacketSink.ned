@@ -7,18 +7,20 @@
 
 package inet.queueing.sink;
 
-import inet.queueing.base.PassivePacketSinkBase;
-import inet.queueing.contract.IPassivePacketSink;
+import inet.queueing.base.PacketProcessorBase;
+import inet.queueing.contract.IPacketSink;
 
 //
-// This module is a full packet sink which cannot be pushed with packets from
-// the connected packet source.
+// This module is an active/passive full packet sink. It doesn't pull packets
+// from the connected module, and the it doesn't allow packets to be pusehd by
+// the connected module. The input gate generates backpressure for push packet
+// operations.
 //
-simple FullPacketSink extends PassivePacketSinkBase like IPassivePacketSink
+simple FullPacketSink extends PacketProcessorBase like IPacketSink
 {
     parameters:
         @class(FullPacketSink);
         @display("i=block/sink");
     gates:
-        input in @labels(push);
+        input in @labels(push,pull);
 }
