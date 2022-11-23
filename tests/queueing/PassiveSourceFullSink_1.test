@@ -1,0 +1,33 @@
+%description:
+
+In this test, an passive packet source is connected to a full packet sink.
+
+%file: test.ned
+
+import inet.queueing.sink.FullPacketSink;
+import inet.queueing.source.PassivePacketSource;
+
+network TestSourceSink
+{
+    submodules:
+        source: PassivePacketSource {
+            @display("p=100,100");
+        }
+        sink: FullPacketSink {
+            @display("p=200,100");
+        }
+    connections:
+        source.out --> sink.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestSourceSink
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.source.packetLength = 1B
+*.source.providingInterval = 1s
+
+%not-contains: stdout
+Producing packet, .*?source.*?

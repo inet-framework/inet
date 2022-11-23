@@ -1,0 +1,32 @@
+%description:
+
+In this test, an empty packet source is connected to an active packet sink.
+
+%file: test.ned
+
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.source.EmptyPacketSource;
+
+network TestSourceSink
+{
+    submodules:
+        source: EmptyPacketSource {
+            @display("p=200,100");
+        }
+        sink: ActivePacketSink {
+            @display("p=100,100");
+        }
+    connections:
+        source.out --> sink.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestSourceSink
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.sink.collectionInterval = 1s
+
+%not-contains: stdout
+Collecting packet, .*?source.*?
