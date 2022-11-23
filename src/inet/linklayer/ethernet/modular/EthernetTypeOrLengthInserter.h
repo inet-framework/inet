@@ -8,13 +8,11 @@
 #ifndef __INET_ETHERNETTYPEORLENGTHINSERTER_H
 #define __INET_ETHERNETTYPEORLENGTHINSERTER_H
 
-#include "inet/queueing/base/PacketFlowBase.h"
+#include "inet/protocolelement/base/ProtocolHeaderInserterBase.h"
 
 namespace inet {
 
-using namespace inet::queueing;
-
-class INET_API EthernetTypeOrLengthInserter : public PacketFlowBase
+class INET_API EthernetTypeOrLengthInserter : public ProtocolHeaderInserterBase
 {
   protected:
     virtual void initialize(int stage) override;

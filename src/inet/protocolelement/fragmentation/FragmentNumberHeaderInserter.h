@@ -8,14 +8,12 @@
 #ifndef __INET_FRAGMENTNUMBERHEADERINSERTER_H
 #define __INET_FRAGMENTNUMBERHEADERINSERTER_H
 
+#include "inet/protocolelement/base/ProtocolHeaderInserterBase.h"
 #include "inet/protocolelement/common/HeaderPosition.h"
-#include "inet/queueing/base/PacketFlowBase.h"
 
 namespace inet {
 
-using namespace inet::queueing;
-
-class INET_API FragmentNumberHeaderInserter : public PacketFlowBase
+class INET_API FragmentNumberHeaderInserter : public ProtocolHeaderInserterBase
 {
   protected:
     HeaderPosition headerPosition = HP_UNDEFINED;

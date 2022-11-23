@@ -10,13 +10,11 @@
 
 #include "inet/common/Protocol.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
-#include "inet/queueing/base/PacketFlowBase.h"
+#include "inet/protocolelement/base/ProtocolHeaderInserterBase.h"
 
 namespace inet {
 
-using namespace inet::queueing;
-
-class INET_API Ieee8022LlcInserter : public PacketFlowBase
+class INET_API Ieee8022LlcInserter : public ProtocolHeaderInserterBase
 {
   protected:
     virtual void initialize(int stage) override;

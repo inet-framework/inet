@@ -10,13 +10,13 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
-#include "inet/queueing/base/PacketFlowBase.h"
+#include "inet/protocolelement/base/ProtocolHeaderInserterBase.h"
 
 namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API EthernetMacHeaderInserter : public PacketFlowBase
+class INET_API EthernetMacHeaderInserter : public ProtocolHeaderInserterBase
 {
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;

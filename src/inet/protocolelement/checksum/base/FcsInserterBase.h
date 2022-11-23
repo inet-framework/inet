@@ -9,13 +9,11 @@
 #define __INET_FCSINSERTERBASE_H
 
 #include "inet/linklayer/common/FcsMode_m.h"
-#include "inet/queueing/base/PacketFlowBase.h"
+#include "inet/protocolelement/base/ProtocolHeaderInserterBase.h"
 
 namespace inet {
 
-using namespace inet::queueing;
-
-class INET_API FcsInserterBase : public PacketFlowBase
+class INET_API FcsInserterBase : public ProtocolHeaderInserterBase
 {
   protected:
     FcsMode fcsMode = FCS_MODE_UNDEFINED;

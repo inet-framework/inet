@@ -8,14 +8,12 @@
 #ifndef __INET_PADDINGINSERTER_H
 #define __INET_PADDINGINSERTER_H
 
+#include "inet/protocolelement/base/ProtocolHeaderInserterBase.h"
 #include "inet/protocolelement/common/HeaderPosition.h"
-#include "inet/queueing/base/PacketFlowBase.h"
 
 namespace inet {
 
-using namespace inet::queueing;
-
-class INET_API PaddingInserter : public PacketFlowBase
+class INET_API PaddingInserter : public ProtocolHeaderInserterBase
 {
   protected:
     b minLength = b(-1);

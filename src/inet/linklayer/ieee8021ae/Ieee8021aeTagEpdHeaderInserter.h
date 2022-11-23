@@ -8,13 +8,11 @@
 #ifndef __INET_IEEE8021AETAGEPDHEADERINSERTER_H
 #define __INET_IEEE8021AETAGEPDHEADERINSERTER_H
 
-#include "inet/queueing/base/PacketFlowBase.h"
+#include "inet/protocolelement/base/ProtocolHeaderInserterBase.h"
 
 namespace inet {
 
-using namespace inet::queueing;
-
-class INET_API Ieee8021aeTagEpdHeaderInserter : public PacketFlowBase
+class INET_API Ieee8021aeTagEpdHeaderInserter : public ProtocolHeaderInserterBase
 {
   protected:
     virtual void initialize(int stage) override;

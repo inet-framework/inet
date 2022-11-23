@@ -8,15 +8,13 @@
 #ifndef __INET_ETHERNETPHYHEADERINSERTER_H
 #define __INET_ETHERNETPHYHEADERINSERTER_H
 
-#include "inet/queueing/base/PacketFlowBase.h"
+#include "inet/protocolelement/base/ProtocolHeaderInserterBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-using namespace inet::queueing;
-
-class INET_API EthernetPhyHeaderInserter : public PacketFlowBase
+class INET_API EthernetPhyHeaderInserter : public ProtocolHeaderInserterBase
 {
   protected:
     virtual void processPacket(Packet *packet) override;

@@ -12,8 +12,6 @@
 
 namespace inet {
 
-using namespace inet::queueing;
-
 class INET_API EthernetFcsInserter : public FcsInserterBase
 {
   protected:

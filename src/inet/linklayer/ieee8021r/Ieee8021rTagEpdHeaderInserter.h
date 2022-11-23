@@ -9,13 +9,11 @@
 #define __INET_IEEE8021RTAGEPDHEADERINSERTER_H
 
 #include "inet/common/Protocol.h"
-#include "inet/queueing/base/PacketFlowBase.h"
+#include "inet/protocolelement/base/ProtocolHeaderInserterBase.h"
 
 namespace inet {
 
-using namespace inet::queueing;
-
-class INET_API Ieee8021rTagEpdHeaderInserter : public PacketFlowBase
+class INET_API Ieee8021rTagEpdHeaderInserter : public ProtocolHeaderInserterBase
 {
   protected:
     const Protocol *nextProtocol = nullptr;

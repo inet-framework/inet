@@ -8,15 +8,13 @@
 #ifndef __INET_ETHERNETFRAGMENTPHYHEADERINSERTER_H
 #define __INET_ETHERNETFRAGMENTPHYHEADERINSERTER_H
 
-#include "inet/queueing/base/PacketFlowBase.h"
+#include "inet/protocolelement/base/ProtocolHeaderInserterBase.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-using namespace inet::queueing;
-
-class INET_API EthernetFragmentPhyHeaderInserter : public PacketFlowBase
+class INET_API EthernetFragmentPhyHeaderInserter : public ProtocolHeaderInserterBase
 {
   protected:
     uint8_t smdNumber = 0;

@@ -8,14 +8,14 @@
 #ifndef __INET_CRCINSERTERBASE_H
 #define __INET_CRCINSERTERBASE_H
 
-#include "inet/queueing/base/PacketFlowBase.h"
+#include "inet/protocolelement/base/ProtocolHeaderInserterBase.h"
 #include "inet/transportlayer/common/CrcMode_m.h"
 
 namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API CrcInserterBase : public PacketFlowBase
+class INET_API CrcInserterBase : public ProtocolHeaderInserterBase
 {
   protected:
     CrcMode crcMode = CRC_MODE_UNDEFINED;
