@@ -23,16 +23,6 @@ void PassivePacketSourceBase::initialize(int stage)
         checkPacketOperationSupport(outputGate);
 }
 
-Packet *PassivePacketSourceBase::pullPacket(cGate *gate)
-{
-    Enter_Method("pullPacket");
-    ASSERT(gate->getOwnerModule() == this);
-    ASSERT(canPullPacket(gate));
-    auto packet = handlePullPacket(gate);
-    ASSERT(packet != nullptr);
-    return packet;
-}
-
 } // namespace queueing
 } // namespace inet
 
