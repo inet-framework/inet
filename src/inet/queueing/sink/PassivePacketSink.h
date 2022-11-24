@@ -29,6 +29,7 @@ class INET_API PassivePacketSink : public ClockUserModuleMixin<PassivePacketSink
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
+    virtual void handlePushPacket(Packet *packet, cGate *gate) override;
 
     virtual void scheduleConsumptionTimer(clocktime_t delay);
     virtual void consumePacket(Packet *packet);
@@ -41,8 +42,6 @@ class INET_API PassivePacketSink : public ClockUserModuleMixin<PassivePacketSink
 
     virtual bool canPushSomePacket(cGate *gate) const override;
     virtual bool canPushPacket(Packet *packet, cGate *gate) const override;
-
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
 };
 
 } // namespace queueing

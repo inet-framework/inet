@@ -15,8 +15,8 @@ namespace queueing {
 
 class INET_API PacketPushToSend : public PassivePacketSinkBase
 {
-  public:
-    virtual void pushPacket(Packet *packet, cGate *gate) override;
+  protected:
+    virtual void handlePushPacket(Packet *packet, cGate *gate) override;
 };
 
 } // namespace queueing

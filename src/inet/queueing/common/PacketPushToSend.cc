@@ -12,10 +12,8 @@ namespace queueing {
 
 Define_Module(PacketPushToSend);
 
-void PacketPushToSend::pushPacket(Packet *packet, cGate *gate)
+void PacketPushToSend::handlePushPacket(Packet *packet, cGate *gate)
 {
-    Enter_Method("pushPacket");
-    take(packet);
     handlePacketProcessed(packet);
     send(packet, "out");
     updateDisplayString();

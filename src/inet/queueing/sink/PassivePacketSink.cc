@@ -60,10 +60,8 @@ void PassivePacketSink::scheduleConsumptionTimer(clocktime_t delay)
     }
 }
 
-void PassivePacketSink::pushPacket(Packet *packet, cGate *gate)
+void PassivePacketSink::handlePushPacket(Packet *packet, cGate *gate)
 {
-    Enter_Method("pushPacket");
-    take(packet);
     if (consumptionTimer->isScheduled() && consumptionTimer->getArrivalTime() > simTime())
         throw cRuntimeError("Another packet is already being consumed");
     else {

@@ -43,10 +43,8 @@ void PcapFilePacketConsumer::finish()
     pcapWriter.close();
 }
 
-void PcapFilePacketConsumer::pushPacket(Packet *packet, cGate *gate)
+void PcapFilePacketConsumer::handlePushPacket(Packet *packet, cGate *gate)
 {
-    Enter_Method("pushPacket");
-    take(packet);
     emit(packetPushedSignal, packet);
     pcapWriter.writePacket(simTime(), packet, direction, getContainingNicModule(this), networkType);
     numProcessedPackets++;
