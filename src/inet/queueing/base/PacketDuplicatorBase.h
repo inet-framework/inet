@@ -32,8 +32,8 @@ class INET_API PacketDuplicatorBase : public PacketProcessorBase, public virtual
     virtual bool supportsPacketPushing(cGate *gate) const override { return true; }
     virtual bool supportsPacketPulling(cGate *gate) const override { return true; }
 
-    virtual bool canPushSomePacket(cGate *gate) const override { return true; }
-    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return true; }
+    virtual bool canPushSomePacket(cGate *gate) const override { return consumer == nullptr || consumer->canPushSomePacket(outputGate->getPathEndGate()); }
+    virtual bool canPushPacket(Packet *packet, cGate *gate) const override { return consumer == nullptr || consumer->canPushPacket(packet, outputGate->getPathEndGate()); }
     virtual void pushPacket(Packet *packet, cGate *gate) override;
 
     virtual void pushPacketStart(Packet *packet, cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
