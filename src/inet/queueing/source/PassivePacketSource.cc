@@ -69,9 +69,8 @@ void PassivePacketSource::scheduleProvidingTimer(clocktime_t delay)
     }
 }
 
-Packet *PassivePacketSource::pullPacket(cGate *gate)
+Packet *PassivePacketSource::handlePullPacket(cGate *gate)
 {
-    Enter_Method("pullPacket");
     if (providingTimer->isScheduled() && providingTimer->getArrivalTime() > simTime())
         throw cRuntimeError("Another packet is already being provided");
     else {
