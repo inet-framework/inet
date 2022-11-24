@@ -97,9 +97,8 @@ Packet *MarkovClassifier::canPullPacket(cGate *gate) const
     return canPullSomePacket(gate) ? provider->canPullPacket(inputGate->getPathStartGate()) : nullptr;
 }
 
-Packet *MarkovClassifier::pullPacket(cGate *gate)
+Packet *MarkovClassifier::handlePullPacket(cGate *gate)
 {
-    Enter_Method("pullPacket");
     if (gate->getIndex() != state)
         throw cRuntimeError("Cannot pull from gate");
     auto packet = provider->pullPacket(inputGate->getPathStartGate());

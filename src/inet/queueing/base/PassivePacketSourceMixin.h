@@ -17,10 +17,10 @@ template <typename T>
 class INET_API PassivePacketSourceMixin : public T, public virtual IPassivePacketSource
 {
   protected:
-    virtual Packet *handlePullPacket(cGate *gate) = 0;
-    virtual Packet *handlePullPacketStart(cGate *gate, bps datarate) = 0;
-    virtual Packet *handlePullPacketEnd(cGate *gate) = 0;
-    virtual Packet *handlePullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) = 0;
+    virtual Packet *handlePullPacket(cGate *gate) { throw cRuntimeError("Illegal operation: pullPacket is not supported"); }
+    virtual Packet *handlePullPacketStart(cGate *gate, bps datarate) { throw cRuntimeError("Illegal operation: pullPacketStart is not supported"); }
+    virtual Packet *handlePullPacketEnd(cGate *gate) { throw cRuntimeError("Illegal operation: pullPacketEnd is not supported"); }
+    virtual Packet *handlePullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) { throw cRuntimeError("Illegal operation: pullPacketProgress is not supported"); }
 
   public:
     virtual Packet *pullPacket(cGate *gate) override {

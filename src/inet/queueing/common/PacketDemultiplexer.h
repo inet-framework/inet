@@ -9,13 +9,13 @@
 #define __INET_PACKETDEMULTIPLEXER_H
 
 #include "inet/queueing/base/PacketProcessorBase.h"
+#include "inet/queueing/base/PassivePacketSourceMixin.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
-#include "inet/queueing/contract/IPassivePacketSource.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketDemultiplexer : public PacketProcessorBase, public virtual IActivePacketSink, public virtual IPassivePacketSource
+class INET_API PacketDemultiplexer : public PassivePacketSourceMixin<PacketProcessorBase>, public virtual IActivePacketSink
 {
   protected:
     cGate *inputGate = nullptr;
@@ -26,6 +26,7 @@ class INET_API PacketDemultiplexer : public PacketProcessorBase, public virtual 
 
   protected:
     virtual void initialize(int stage) override;
+    virtual Packet *handlePullPacket(cGate *gate) override;
 
   public:
     virtual IPassivePacketSource *getProvider(cGate *gate) override { return provider; }
@@ -35,8 +36,6 @@ class INET_API PacketDemultiplexer : public PacketProcessorBase, public virtual 
 
     virtual bool canPullSomePacket(cGate *gate) const override { return provider->canPullSomePacket(inputGate->getPathStartGate()); }
     virtual Packet *canPullPacket(cGate *gate) const override { return provider->canPullPacket(inputGate->getPathStartGate()); }
-
-    virtual Packet *pullPacket(cGate *gate) override;
 
     virtual Packet *pullPacketStart(cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
     virtual Packet *pullPacketEnd(cGate *gate) override { throw cRuntimeError("Invalid operation"); }

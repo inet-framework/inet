@@ -10,16 +10,17 @@
 
 #include "inet/common/clock/ClockUserModuleMixin.h"
 #include "inet/queueing/base/PacketClassifierBase.h"
+#include "inet/queueing/base/PassivePacketSourceMixin.h"
 #include "inet/queueing/contract/IActivePacketSink.h"
 #include "inet/queueing/contract/IPassivePacketSource.h"
 
 namespace inet {
 
-extern template class ClockUserModuleMixin<queueing::PacketClassifierBase>;
+extern template class ClockUserModuleMixin<queueing::PassivePacketSourceMixin<queueing::PacketClassifierBase>>;
 
 namespace queueing {
 
-class INET_API MarkovClassifier : public ClockUserModuleMixin<PacketClassifierBase>, public virtual IActivePacketSink, public virtual IPassivePacketSource
+class INET_API MarkovClassifier : public ClockUserModuleMixin<PassivePacketSourceMixin<PacketClassifierBase>>, public virtual IActivePacketSink
 {
   protected:
     IPassivePacketSource *provider = nullptr;
@@ -38,6 +39,7 @@ class INET_API MarkovClassifier : public ClockUserModuleMixin<PacketClassifierBa
 
     virtual int classifyPacket(Packet *packet) override;
     virtual void scheduleWaitTimer();
+    virtual Packet *handlePullPacket(cGate *gate) override;
 
   public:
     virtual ~MarkovClassifier();
@@ -49,12 +51,6 @@ class INET_API MarkovClassifier : public ClockUserModuleMixin<PacketClassifierBa
 
     virtual bool canPullSomePacket(cGate *gate) const override;
     virtual Packet *canPullPacket(cGate *gate) const override;
-
-    virtual Packet *pullPacket(cGate *gate) override;
-
-    virtual Packet *pullPacketStart(cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
-    virtual Packet *pullPacketEnd(cGate *gate) override { throw cRuntimeError("Invalid operation"); }
-    virtual Packet *pullPacketProgress(cGate *gate, bps datarate, b position, b extraProcessableLength) override { throw cRuntimeError("Invalid operation"); }
 
     virtual void handleCanPullPacketChanged(cGate *gate) override;
     virtual void handlePullPacketProcessed(Packet *packet, cGate *gate, bool successful) override;

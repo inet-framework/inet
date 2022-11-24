@@ -35,9 +35,8 @@ void PacketDemultiplexer::initialize(int stage)
     }
 }
 
-Packet *PacketDemultiplexer::pullPacket(cGate *gate)
+Packet *PacketDemultiplexer::handlePullPacket(cGate *gate)
 {
-    Enter_Method("pullPacket");
     auto packet = provider->pullPacket(inputGate->getPathStartGate());
     take(packet);
     EV_INFO << "Forwarding packet" << EV_FIELD(packet) << EV_ENDL;
