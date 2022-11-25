@@ -35,6 +35,7 @@ class INET_API PacketFlowBase : public PacketProcessorBase, public virtual IPack
     virtual void handleMessage(cMessage *message) override;
 
     virtual void processPacket(Packet *packet) = 0;
+    virtual void processPacket(Packet *packet) const { const_cast<PacketFlowBase *>(this)->processPacket(packet); }
 
     virtual bool isStreamingPacket() const { return inProgressStreamId != -1; }
     virtual void startPacketStreaming(Packet *packet);
