@@ -226,7 +226,7 @@ void EthernetMac::processMsgFromNetwork(EthernetSignalBase *signal)
         return;
 
     if (frame->getTypeOrLength() == ETHERTYPE_FLOW_CONTROL) {
-        const auto& controlFrame = currentTxFrame->peekDataAt<EthernetControlFrameBase>(frame->getChunkLength(), b(-1));
+        const auto& controlFrame = packet->peekDataAt<EthernetControlFrameBase>(frame->getChunkLength(), b(-1));
         if (controlFrame->getOpCode() == ETHERNET_CONTROL_PAUSE) {
             auto pauseFrame = check_and_cast<const EthernetPauseFrame *>(controlFrame.get());
             int pauseUnits = pauseFrame->getPauseTime();
