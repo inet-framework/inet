@@ -288,8 +288,14 @@ void GateScheduleConfiguratorBase::configureGateScheduling(cModule *networkNode,
     if (slotEnd != 0) {
         if (remainingDuration != 0)
             durations->add(cValue(remainingDuration.dbl(), "s"));
-        if (durations->size() % 2 != 0)
-            durations->add(cValue(0, "s"));
+        if (durations->size() % 2 != 0) {
+            if (durations->size() > 1) {
+                double delta = durations->get(durations->size() - 1).doubleValueInUnit("s");
+                durations->set(0, cValue(durations->get(0).doubleValueInUnit("s") + delta, "s"));
+                offset += delta;
+            }
+            durations->erase(durations->size() - 1);
+        }
     }
     EV_DEBUG << "Configuring gate scheduling parameters" << EV_FIELD(networkNode) << EV_FIELD(networkInterface) << EV_FIELD(gate) << EV_FIELD(initiallyOpen) << EV_FIELD(offset) << EV_FIELD(durations) << EV_ENDL;
     gate->par("initiallyOpen") = initiallyOpen;
