@@ -17,13 +17,20 @@
 
 package inet.physicallayer.errormodel.packetlevel;
 
-simple Ieee80211RadioErrorModelEvaluator
+module Ieee80211RadioErrorModelEvaluator
 {
     parameters:
+        @class(Ieee80211RadioErrorModelEvaluator);
         string snirsFilename; // TODO replace with an object read by the built-in CSV functions once available
         string persFilename;
         string radioModule = default("^.radio");
         int repeatCount = default(100);
         @display("i=block/cogwheel");
+    submodules:
+        nn: NeuralNetworkErrorModel {
+            modelNameFormat = "%c_%r_%m_%M_%f_%b";
+            neuralNetworkModelFilenames = "models/Ieee80211Radio_24Mbps_Ieee80211Ofdm_Qam16_2.412GHz_20MHz.model";
+
+        }
 }
 

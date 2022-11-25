@@ -24,12 +24,15 @@
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalAnalogModel.h"
 #include "inet/physicallayer/analogmodel/bitlevel/LayeredSnir.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalSnir.h"
+#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/common/bitlevel/LayeredReception.h"
 #include "inet/physicallayer/analogmodel/packetlevel/DimensionalReception.h"
 #include "inet/physicallayer/common/bitlevel/LayeredReceptionResult.h"
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
 #include "inet/physicallayer/common/packetlevel/Interference.h"
+#include "inet/physicallayer/common/packetlevel/ReceptionDecision.h"
 #include "inet/physicallayer/errormodel/packetlevel/Ieee80211RadioErrorModelEvaluator.h"
+#include "inet/physicallayer/errormodel/packetlevel/NeuralNetworkErrorModel.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211DimensionalTransmission.h"
 
@@ -104,12 +107,34 @@ void Ieee80211RadioErrorModelEvaluator::closeFiles()
 }
 
 
+LeftInterpolator<simsec, WpHz> intX;
+LeftInterpolator<Hz, WpHz> intY;
+
 Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> assembleNoisePowerFunction(std::vector<double> snirs, int frequencyDivision, int timeDivision, simtime_t startTime, simtime_t endTime, Hz startFrequency, Hz endFrequency)
 {
     ASSERT(snirs.size() == frequencyDivision * timeDivision);
 
     auto bandwidth = endFrequency - startFrequency;
     auto duration = endTime - startTime;
+
+    //return makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(WpHz(0.1 / 20000000.0 / 200.0));
+
+
+    std::vector<WpHz> noisePowers;
+    for (int i = 0; i < snirs.size(); ++i) {
+        double s = snirs[i];
+
+        noisePowers.push_back(WpHz(1 / s)); // signal should be 1 WpHz (lol 20MW WiFi)
+        if ((i % 52) == 51)
+            noisePowers.push_back(WpHz(0.1));
+    }
+
+    for (int i = 0; i < 53; ++i) {
+        noisePowers.push_back(WpHz(0.1));
+    }
+
+    return makeShared<PeriodicallyInterpolated2DFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), timeDivision+1, startFrequency, endFrequency, frequencyDivision+1, intX, intY, noisePowers);
+/*
 
     Ptr<SummedFunction<WpHz, Domain<simsec, Hz>>> noisePowerFunction = makeShared<SummedFunction<WpHz, Domain<simsec, Hz>>>();
     std::cout << "making noise" << std::endl;
@@ -137,7 +162,7 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> assembleNoisePowerFunction(std::v
     }
 
 
-    return noisePowerFunction;
+    return noisePowerFunction;*/
 }
 
 DimensionalNoise *createNoise(std::vector<double> snirs, const IReception *reception, int frequencyDivision, int timeDivision, SimTime startTime, SimTime endTime) {
@@ -195,8 +220,6 @@ const LayeredTransmission *createLayeredTransmission(const IRadio *radio, const 
 
 const ISnir *createLayeredSnir(const LayeredReception *reception, const DimensionalNoise *noise) {
     // create snir
-    auto signalAnalogModel = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(reception->getAnalogModel());
-    auto receptionPowerFunction = signalAnalogModel->getPower();
     const ISnir *snir = new LayeredSnir(reception, noise);
     return snir;
 }
@@ -241,8 +264,8 @@ const ITransmission *createNonLayeredTransmission(const IRadio *radio, const ITr
 
 const ISnir *createNonLayeredSnir(const DimensionalReception *reception, const DimensionalNoise *noise) {
     // create snir
-    auto signalAnalogModel = check_and_cast<const DimensionalReception *>(reception->getAnalogModel());
-    auto receptionPowerFunction = signalAnalogModel->getPower();
+    //auto signalAnalogModel = check_and_cast<const DimensionalReception *>(reception->getAnalogModel());
+    //auto receptionPowerFunction = signalAnalogModel->getPower();
     const ISnir *snir = new DimensionalSnir(reception, noise);
     return snir;
 }
@@ -260,10 +283,6 @@ void Ieee80211RadioErrorModelEvaluator::evaluateErrorModel()
     auto propagation = radioMedium->getPropagation();
     auto transmitter = radio->getTransmitter();
     auto receiver = radio->getReceiver();
-
-
-// snirsFile << "# index, packetErrorRate, backgroundNoisePowerMean, backgroundNoisePowerStddev, numInterferingSignals, meanInterferingSignalNoisePowerMean, meanInterferingSignalNoisePowerStddev, bitrate, packetLength, modulation, subcarrierModulation, centerFrequency, bandwidth, timeDivision, frequencyDivision, numSymbols, preambleDuration, headerDuration, dataDuration, duration, packetByte+, symbolSnirMean+" << std::endl;
-
 
     std::string line;
     while (true) {
@@ -286,7 +305,7 @@ void Ieee80211RadioErrorModelEvaluator::evaluateErrorModel()
         int timeDivision = snirs.size() / frequencyDivision;
 
         // 48 usable subcarriers, 4 bits per symbol, 1/2 coding rate, 6 tail bits, 16 service bits, 24 signal bits
-        b dataLength = b(timeDivision * 48 * 4 / 2 - 6 - 16 - 24); // BIG TODO
+        b dataLength = b((timeDivision-1) * 48 * 4 / 2 - 6 - 16 - 24); // BIG TODO
 
         std::cout << "to get " << snirs.size() << " SNIRS, I think we need " << dataLength.get() << " bits of data" << std::endl;
 
@@ -314,12 +333,21 @@ void Ieee80211RadioErrorModelEvaluator::evaluateErrorModel()
         if (auto analogModel = dynamic_cast<const DimensionalAnalogModel *>(radioMedium->getAnalogModel()))
             transmission = createNonLayeredTransmission(radio, transmitter, transmittedPacket);
 
+        std::cerr << "durations: " << transmission->getPreambleDuration() <<
+                " " << transmission->getHeaderDuration() <<
+                " " << transmission->getDataDuration() << std::endl;
+
+        std::cerr << "preamble: " << transmission->getPreambleStartTime() << " - " << transmission->getPreambleEndTime() << std::endl;
+        std::cerr << "header: " << transmission->getHeaderStartTime() << " - " << transmission->getHeaderEndTime() << std::endl;
+        std::cerr << "data: " << transmission->getDataStartTime() << " - " << transmission->getDataEndTime() << std::endl;
+        std::cerr << "ALL: " <<  transmission->getStartTime() << " - " << transmission->getEndTime() << std::endl;
+
         std::cerr << "transm dur is " << transmission->getDuration() << std::endl;
         std::cerr << "expected: " << SimTime(4, SIMTIME_US) * timeDivision << std::endl;
-        ASSERT(transmission->getDuration() == SimTime(4, SIMTIME_US) * timeDivision);
+        //ASSERT(transmission->getDuration() == SimTime(4, SIMTIME_US) * timeDivision);
 
-        SimTime startTime = transmission->getStartTime();
-        SimTime endTime = transmission->getEndTime();
+        SimTime startTime = transmission->getHeaderStartTime();
+        SimTime endTime = transmission->getDataEndTime();
         auto listening = receiver->createListening(nullptr, startTime, endTime, Coord::ZERO, Coord::ZERO);
 
 
@@ -343,16 +371,29 @@ void Ieee80211RadioErrorModelEvaluator::evaluateErrorModel()
         if (auto analogModel = dynamic_cast<const DimensionalAnalogModel *>(radioMedium->getAnalogModel()))
             snir = createNonLayeredSnir(dimensionalReception, noise);
 
+        double packetErrorRate = NAN;
 
         int receptionSuccessfulCount = 0;
         std::cout << "receiving..." << std::endl;
         for (int i = 0; i < repeatCount; i++) {
             auto decisions = new std::vector<const IReceptionDecision *>();
             std::cout << "comp rec res" << std::endl;
+            const IReceptionDecision *receptionDecision = //new ReceptionDecision(reception, IRadioSignal::SIGNAL_PART_WHOLE, true, true, true);
+            receiver->computeReceptionDecision(listening, reception, IRadioSignal::SIGNAL_PART_WHOLE, interference, snir);
+            decisions->push_back(receptionDecision);
+
             auto receptionResult = receiver->computeReceptionResult(listening, reception, interference, snir, decisions);
             std::cout << "done comp rec res" << std::endl;
             auto receivedPacket = receptionResult->getPacket();
-            bool isReceptionSuccessful = true;
+            if (ErrorRateInd *errorRateInd = receivedPacket->findTag<ErrorRateInd>()) {
+                std::cerr << "EROR RATE IND " << errorRateInd->getPacketErrorRate() << std::endl;
+                if (!std::isnan(errorRateInd->getPacketErrorRate())) {
+                    packetErrorRate = errorRateInd->getPacketErrorRate();
+                    break;
+                }
+            }
+
+            bool isReceptionSuccessful = !receivedPacket->hasBitError();
             std::cout << "checking reception result..." << std::endl;
             if (receivedPacket->getTotalLength() != transmittedPacket->getTotalLength())
                 isReceptionSuccessful = false;
@@ -376,8 +417,11 @@ void Ieee80211RadioErrorModelEvaluator::evaluateErrorModel()
                 receptionSuccessfulCount++;
             delete receptionResult;
         }
+
+        if (std::isnan(packetErrorRate))
+            packetErrorRate = (1 - (double)receptionSuccessfulCount / repeatCount);
+
         // print parameters
-        double packetErrorRate = (1 - (double)receptionSuccessfulCount / repeatCount);
         persFile << packetErrorRate << std::endl;
         std::cout << "PER: " << packetErrorRate << std::endl;
         //snirsFile << (int)packetIndex << ", " << packetErrorRate << ", " << backgroundNoisePowerMean << ", " << backgroundNoisePowerStddev << ", " << numInterferingSignals << ", " << meanInterferingSignalNoisePowerMean << ", " << meanInterferingSignalNoisePowerStddev << ", " << bitrate << ", " << transmittedPacket->getTotalLength() << ", " << getModulationName(modulation) << ", " << (subcarrierModulation != nullptr ? getModulationName(subcarrierModulation) : "NA") << ", " << centerFrequency << ", " << bandwidth << ", " << timeDivision << ", " << frequencyDivision << ", " << numSymbols << ", "  << preambleDuration << ", " << headerDuration << ", " << dataDuration << ", " << duration << ", ";
@@ -405,24 +449,8 @@ void Ieee80211RadioErrorModelEvaluator::evaluateErrorModel()
         */
         //std::cout << "Generating line: index = " << packetIndex << ", packetErrorRate = " << packetErrorRate << ", packetLength = " << packetLength << ", meanSnir = " << snirMean << ", backgroundNoisePowerMean = " << backgroundNoisePowerMean << ", backgroundNoisePowerStddev = " << backgroundNoisePowerStddev << ", numInterferingSignals = " << numInterferingSignals << ", meanInterferingSignalNoisePowerMean = " << meanInterferingSignalNoisePowerMean << ", meanInterferingSignalNoisePowerStddev = " << meanInterferingSignalNoisePowerStddev << std::endl;
         //snirsFile << std::endl;
-        delete snir;
-        delete listening;
-        delete interference;
-        delete arrival;
-        delete reception;
-        delete transmission;
-        delete transmittedPacket;
+
     }
-
-
-
-
-
-
-
-
-
-
 
 }
 
