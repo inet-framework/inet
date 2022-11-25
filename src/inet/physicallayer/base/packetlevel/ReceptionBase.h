@@ -57,9 +57,9 @@ class INET_API ReceptionBase : public virtual IReception, public virtual IRecept
     virtual const simtime_t getPreambleStartTime() const override { return startTime; }
     virtual const simtime_t getPreambleEndTime() const override { return startTime + preambleDuration; }
     virtual const simtime_t getHeaderStartTime() const override { return startTime + preambleDuration; }
-    virtual const simtime_t getHeaderEndTime() const override { return endTime - dataDuration; }
-    virtual const simtime_t getDataStartTime() const override { return endTime - dataDuration; }
-    virtual const simtime_t getDataEndTime() const override { return endTime; }
+    virtual const simtime_t getHeaderEndTime() const override { return startTime + preambleDuration + headerDuration; }
+    virtual const simtime_t getDataStartTime() const override { return startTime + preambleDuration + headerDuration; }
+    virtual const simtime_t getDataEndTime() const override { return startTime + preambleDuration + headerDuration + dataDuration; }
 
     virtual const simtime_t getDuration() const override { return endTime - startTime; }
     virtual const simtime_t getDuration(IRadioSignal::SignalPart part) const override;

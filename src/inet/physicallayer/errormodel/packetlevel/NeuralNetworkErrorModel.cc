@@ -241,6 +241,9 @@ double NeuralNetworkErrorModel::computeSymbolErrorRate(const ISnir *snir, IRadio
 
 std::string NeuralNetworkErrorModel::computeModelName(const ISnir *snir) const
 {
+    // KLUDGE
+    return "Ieee80211Radio_24Mbps_Ieee80211Ofdm_Qam16_2.412GHz_20MHz";
+
     auto reception = snir->getReception();
     auto transmission = check_and_cast<const FlatTransmissionBase *>(reception->getTransmission());
     auto radio = check_and_cast<const Radio *>(transmission->getTransmitter());
