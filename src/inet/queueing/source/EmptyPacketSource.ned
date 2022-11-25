@@ -8,7 +8,9 @@
 package inet.queueing.source;
 
 import inet.queueing.base.PacketProcessorBase;
+import inet.queueing.contract.IActivePacketSource;
 import inet.queueing.contract.IPacketSource;
+import inet.queueing.contract.IPassivePacketSource;
 
 //
 // This module is an active/passive empty packet source. It doesn't push packets
@@ -16,7 +18,7 @@ import inet.queueing.contract.IPacketSource;
 // by the connected module. The output gate generates backpressure for pull packet
 // operations.
 //
-simple EmptyPacketSource extends PacketProcessorBase like IPacketSource
+simple EmptyPacketSource extends PacketProcessorBase like IPacketSource, IActivePacketSource, IPassivePacketSource
 {
     parameters:
         displayStringTextFormat = default("created 0 pk (0 B)");
