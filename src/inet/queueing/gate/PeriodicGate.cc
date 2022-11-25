@@ -36,9 +36,10 @@ void PeriodicGate::handleParameterChange(const char *name)
         else if (!strcmp(name, "initiallyOpen"))
             isOpen_ = par("initiallyOpen");
         else if (!strcmp(name, "durations")) {
-            initializeGating();
+//            initializeGating();
         }
     }
+    initializeGating();
 }
 
 void PeriodicGate::handleMessage(cMessage *message)
