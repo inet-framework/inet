@@ -1,6 +1,6 @@
 %description:
 
-Tests signal transmitter and signal receiver.
+Tests whole signal transmitter and whole signal receiver.
 
 %file: test.ned
 

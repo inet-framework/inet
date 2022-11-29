@@ -1,0 +1,192 @@
+%description:
+
+Tests stream through signal transmitter and stream through signal receiver.
+
+%file: test.ned
+
+import ned.DatarateChannel;
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.sink.PassivePacketSink;
+import inet.protocolelement.common.PacketStreamer;
+import inet.protocolelement.common.PacketDestreamer;
+import inet.protocolelement.transceiver.StreamThroughTransmitter;
+import inet.protocolelement.transceiver.StreamThroughReceiver;
+
+network TestTransceiver
+{
+    submodules:
+        source: ActivePacketSource {
+            @display("p=100,100");
+        }
+        streamer: PacketStreamer {
+            @display("p=100,200");
+        }
+        transmitter: StreamThroughTransmitter {
+            @display("p=100,300");
+        }
+        receiver: StreamThroughReceiver {
+            @display("p=100,400");
+        }
+        destreamer: PacketDestreamer {
+            @display("p=100,500");
+        }
+        sink: PassivePacketSink {
+            @display("p=100,600");
+        }
+    connections:
+        source.out --> streamer.in;
+        streamer.out --> transmitter.in;
+        transmitter.out --> DatarateChannel { delay = 1us; } --> receiver.in;
+        receiver.out --> destreamer.in;
+        destreamer.out --> sink.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestTransceiver
+sim-time-limit = 10s
+cmdenv-event-banners = false
+*.source.packetLength = 100B
+*.source.productionInterval = 1s
+*.streamer.datarate = 1Mbps
+*.transmitter.datarate = 1Mbps
+*.receiver.datarate = 1Mbps
+*.destreamer.datarate = 1Mbps
+
+%contains-regex: stdout
+Producing packet, .*?source-0.*?
+Starting streaming packet, .*?source-0.*?
+Calculating signal duration, .*?source-0.*?
+Starting transmission, .*?source-0.*?
+Transmitting signal start to channel, .*?source-0.*?
+Receiving signal start from channel, .*?source-0.*?
+Starting destreaming packet, .*?source-0.*?
+Ending streaming packet, .*?source-0.*?
+Ending transmission, .*?source-0.*?
+Transmitting signal end to channel, .*?source-0.*?
+Receiving signal start from channel, .*?source-0.*?
+Ending destreaming packet, .*?source-0.*?
+Consuming packet, .*?source-0.*?
+Producing packet, .*?source-1.*?
+Starting streaming packet, .*?source-1.*?
+Calculating signal duration, .*?source-1.*?
+Starting transmission, .*?source-1.*?
+Transmitting signal start to channel, .*?source-1.*?
+Receiving signal start from channel, .*?source-1.*?
+Starting destreaming packet, .*?source-1.*?
+Ending streaming packet, .*?source-1.*?
+Ending transmission, .*?source-1.*?
+Transmitting signal end to channel, .*?source-1.*?
+Receiving signal start from channel, .*?source-1.*?
+Ending destreaming packet, .*?source-1.*?
+Consuming packet, .*?source-1.*?
+Producing packet, .*?source-2.*?
+Starting streaming packet, .*?source-2.*?
+Calculating signal duration, .*?source-2.*?
+Starting transmission, .*?source-2.*?
+Transmitting signal start to channel, .*?source-2.*?
+Receiving signal start from channel, .*?source-2.*?
+Starting destreaming packet, .*?source-2.*?
+Ending streaming packet, .*?source-2.*?
+Ending transmission, .*?source-2.*?
+Transmitting signal end to channel, .*?source-2.*?
+Receiving signal start from channel, .*?source-2.*?
+Ending destreaming packet, .*?source-2.*?
+Consuming packet, .*?source-2.*?
+Producing packet, .*?source-3.*?
+Starting streaming packet, .*?source-3.*?
+Calculating signal duration, .*?source-3.*?
+Starting transmission, .*?source-3.*?
+Transmitting signal start to channel, .*?source-3.*?
+Receiving signal start from channel, .*?source-3.*?
+Starting destreaming packet, .*?source-3.*?
+Ending streaming packet, .*?source-3.*?
+Ending transmission, .*?source-3.*?
+Transmitting signal end to channel, .*?source-3.*?
+Receiving signal start from channel, .*?source-3.*?
+Ending destreaming packet, .*?source-3.*?
+Consuming packet, .*?source-3.*?
+Producing packet, .*?source-4.*?
+Starting streaming packet, .*?source-4.*?
+Calculating signal duration, .*?source-4.*?
+Starting transmission, .*?source-4.*?
+Transmitting signal start to channel, .*?source-4.*?
+Receiving signal start from channel, .*?source-4.*?
+Starting destreaming packet, .*?source-4.*?
+Ending streaming packet, .*?source-4.*?
+Ending transmission, .*?source-4.*?
+Transmitting signal end to channel, .*?source-4.*?
+Receiving signal start from channel, .*?source-4.*?
+Ending destreaming packet, .*?source-4.*?
+Consuming packet, .*?source-4.*?
+Producing packet, .*?source-5.*?
+Starting streaming packet, .*?source-5.*?
+Calculating signal duration, .*?source-5.*?
+Starting transmission, .*?source-5.*?
+Transmitting signal start to channel, .*?source-5.*?
+Receiving signal start from channel, .*?source-5.*?
+Starting destreaming packet, .*?source-5.*?
+Ending streaming packet, .*?source-5.*?
+Ending transmission, .*?source-5.*?
+Transmitting signal end to channel, .*?source-5.*?
+Receiving signal start from channel, .*?source-5.*?
+Ending destreaming packet, .*?source-5.*?
+Consuming packet, .*?source-5.*?
+Producing packet, .*?source-6.*?
+Starting streaming packet, .*?source-6.*?
+Calculating signal duration, .*?source-6.*?
+Starting transmission, .*?source-6.*?
+Transmitting signal start to channel, .*?source-6.*?
+Receiving signal start from channel, .*?source-6.*?
+Starting destreaming packet, .*?source-6.*?
+Ending streaming packet, .*?source-6.*?
+Ending transmission, .*?source-6.*?
+Transmitting signal end to channel, .*?source-6.*?
+Receiving signal start from channel, .*?source-6.*?
+Ending destreaming packet, .*?source-6.*?
+Consuming packet, .*?source-6.*?
+Producing packet, .*?source-7.*?
+Starting streaming packet, .*?source-7.*?
+Calculating signal duration, .*?source-7.*?
+Starting transmission, .*?source-7.*?
+Transmitting signal start to channel, .*?source-7.*?
+Receiving signal start from channel, .*?source-7.*?
+Starting destreaming packet, .*?source-7.*?
+Ending streaming packet, .*?source-7.*?
+Ending transmission, .*?source-7.*?
+Transmitting signal end to channel, .*?source-7.*?
+Receiving signal start from channel, .*?source-7.*?
+Ending destreaming packet, .*?source-7.*?
+Consuming packet, .*?source-7.*?
+Producing packet, .*?source-8.*?
+Starting streaming packet, .*?source-8.*?
+Calculating signal duration, .*?source-8.*?
+Starting transmission, .*?source-8.*?
+Transmitting signal start to channel, .*?source-8.*?
+Receiving signal start from channel, .*?source-8.*?
+Starting destreaming packet, .*?source-8.*?
+Ending streaming packet, .*?source-8.*?
+Ending transmission, .*?source-8.*?
+Transmitting signal end to channel, .*?source-8.*?
+Receiving signal start from channel, .*?source-8.*?
+Ending destreaming packet, .*?source-8.*?
+Consuming packet, .*?source-8.*?
+Producing packet, .*?source-9.*?
+Starting streaming packet, .*?source-9.*?
+Calculating signal duration, .*?source-9.*?
+Starting transmission, .*?source-9.*?
+Transmitting signal start to channel, .*?source-9.*?
+Receiving signal start from channel, .*?source-9.*?
+Starting destreaming packet, .*?source-9.*?
+Ending streaming packet, .*?source-9.*?
+Ending transmission, .*?source-9.*?
+Transmitting signal end to channel, .*?source-9.*?
+Receiving signal start from channel, .*?source-9.*?
+Ending destreaming packet, .*?source-9.*?
+Consuming packet, .*?source-9.*?
+Producing packet, .*?source-10.*?
+Starting streaming packet, .*?source-10.*?
+Calculating signal duration, .*?source-10.*?
+Starting transmission, .*?source-10.*?
+Transmitting signal start to channel, .*?source-10.*?
