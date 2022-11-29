@@ -6,23 +6,13 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--debug", default=False, action='store_true')
-parser.add_argument("-sp", "--scalarPacketlevel", default=False, action='store_true')
-parser.add_argument("-spn", "--scalarPacketlevelNeuralNetwork", default=False, action='store_true')
-parser.add_argument("-dp", "--dimensionalPacketlevel", default=False, action='store_true')
-parser.add_argument("-dpn", "--dimensionalPacketlevelNeuralNetwork", default=False, action='store_true')
-parser.add_argument("-ds", "--dimensionalSymbollevel", default=False, action='store_true')
+parser.add_argument("-p", "--dimensionalPacketlevel", default=False, action='store_true')
+parser.add_argument("-n", "--dimensionalPacketlevelNeuralNetwork", default=False, action='store_true')
+parser.add_argument("-s", "--dimensionalSymbollevel", default=False, action='store_true')
 parser.add_argument("inifile")
 args = parser.parse_args()
 
 INET = "inet_dbg" if args.debug else "inet"
-
-if args.scalarPacketlevel:
-    print("Scalar Packetlevel")
-    os.system(f"opp_runall -v -b 1 -j 8 {INET} -f {args.inifile} -u Cmdenv -c ScalarPacketlevel")
-
-if args.scalarPacketlevelNeuralNetwork:
-    print("Scalar Packetlevel Neural Network")
-    os.system(f"opp_runall -b 1 -j 8 {INET} -f {args.inifile} -u Cmdenv -c ScalarPacketlevelNeuralNetwork")
 
 if args.dimensionalPacketlevel:
     print("Dimensional Packetlevel")
