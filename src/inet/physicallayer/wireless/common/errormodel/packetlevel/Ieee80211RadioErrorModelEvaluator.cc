@@ -133,7 +133,10 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> assembleNoisePowerFunction(std::v
         noisePowers.push_back(WpHz(0.1));
     }
 
-    return makeShared<PeriodicallyInterpolated2DFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), timeDivision+1, startFrequency, endFrequency, frequencyDivision+1, intX, intY, noisePowers);
+    auto preambleNoise = makeShared<Boxcar2DFunction<WpHz, simsec, Hz>>(simsec(0), simsec(startTime), startFrequency, endFrequency, WpHz(0.01));
+    auto dataNoise = makeShared<PeriodicallyInterpolated2DFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), timeDivision+1, startFrequency, endFrequency, frequencyDivision+1, intX, intY, noisePowers);
+
+    return preambleNoise->add(dataNoise);
 /*
 
     Ptr<SummedFunction<WpHz, Domain<simsec, Hz>>> noisePowerFunction = makeShared<SummedFunction<WpHz, Domain<simsec, Hz>>>();
@@ -262,12 +265,48 @@ const ITransmission *createNonLayeredTransmission(const IRadio *radio, const ITr
     */
 }
 
-const ISnir *createNonLayeredSnir(const DimensionalReception *reception, const DimensionalNoise *noise) {
+const DimensionalSnir *createNonLayeredSnir(const DimensionalReception *reception, const DimensionalNoise *noise) {
     // create snir
     //auto signalAnalogModel = check_and_cast<const DimensionalReception *>(reception->getAnalogModel());
     //auto receptionPowerFunction = signalAnalogModel->getPower();
-    const ISnir *snir = new DimensionalSnir(reception, noise);
-    return snir;
+    return new DimensionalSnir(reception, noise);
+}
+
+template<typename T>
+double getval(T v) {
+    return v.get();
+}
+
+template<>
+double getval(double v) {
+    return v;
+}
+
+template<typename R>
+void dump(const char *name, inet::Ptr<const IFunction<R, Domain<simsec,Hz>>> fn, Interval<simsec, Hz> range) {
+
+    std::ofstream ofs(name + std::string(".csv"), std::ios::trunc);
+
+    bool header = true;
+    for (double t = range.getLower().get(0); t < range.getUpper().get(0); t += 0.000'001) {
+        if (header) {
+            ofs << name;
+            for (double f = range.getLower().get(1); f < range.getUpper().get(1); f += 100'000) {
+                ofs << " " << std::setprecision(9) << f;
+            }
+            ofs << std::endl;
+        }
+
+        header = false;
+
+        ofs << std::setprecision(9) << t;
+        for (double f = range.getLower().get(1); f < range.getUpper().get(1); f += 100'000) {
+            ofs << " " << std::setprecision(9) << getval(fn->getValue({simsec(t), Hz(f)}));
+        }
+
+        ofs << std::endl;
+    }
+
 }
 
 void Ieee80211RadioErrorModelEvaluator::evaluateErrorModel()
@@ -362,14 +401,26 @@ void Ieee80211RadioErrorModelEvaluator::evaluateErrorModel()
         auto noise = createNoise(snirs, reception, frequencyDivision, timeDivision, startTime, endTime);
         auto interference = new Interference(noise, new std::vector<const IReception *>());
 
+        if (dimensionalReception) {
+            auto powerFn = dimensionalReception->getPower();
+            dump("power", powerFn, {{simsec(0.000'000'5), Hz(2'400'000'000.0)}, {simsec(0.0002), Hz(2'425'000'000.0)}, true, true, 0});
+        }
+        auto noiseFn = noise->getPower();
+
+
+        dump("noise", noiseFn, {{simsec(0.000'000'5), Hz(2'400'000'000.0)}, {simsec(0.0002), Hz(2'425'000'000.0)}, true, true, 0});
 
         //auto snirFunction = receptionPowerFunction->divide(noisePowerFunction);
 
         const ISnir *snir = nullptr;
         if (auto analogModel = dynamic_cast<const LayeredDimensionalAnalogModel *>(radioMedium->getAnalogModel()))
             snir = createLayeredSnir(layeredReception, noise);
-        if (auto analogModel = dynamic_cast<const DimensionalAnalogModel *>(radioMedium->getAnalogModel()))
-            snir = createNonLayeredSnir(dimensionalReception, noise);
+        if (auto analogModel = dynamic_cast<const DimensionalAnalogModel *>(radioMedium->getAnalogModel())) {
+            auto dsnir = createNonLayeredSnir(dimensionalReception, noise);
+            auto dsnirf = dsnir->getSnir();
+            dump("snir", dsnirf, {{simsec(0.000'000'5), Hz(2'400'000'000.0)}, {simsec(0.0002), Hz(2'425'000'000.0)}, true, true, 0});
+            snir = dsnir;
+        }
 
         double packetErrorRate = NAN;
 
