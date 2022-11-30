@@ -165,11 +165,13 @@ std::vector<Ipv4Address> RoutingTableVisualizerBase::getDestinations()
         auto networkNode = *it;
         if (isNetworkNode(networkNode) && destinationFilter.matches(networkNode)) {
             auto interfaceTable = addressResolver.findInterfaceTableOf(networkNode);
-            for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-                auto interface = interfaceTable->getInterface(i);
-                auto address = interface->getIpv4Address();
-                if (!address.isUnspecified())
-                    destinations.push_back(address);
+            if (interfaceTable != nullptr) {
+                for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
+                    auto interface = interfaceTable->getInterface(i);
+                    auto address = interface->getIpv4Address();
+                    if (!address.isUnspecified())
+                        destinations.push_back(address);
+                }
             }
         }
     }
