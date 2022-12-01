@@ -31,15 +31,18 @@ void PeriodicGate::initialize(int stage)
 void PeriodicGate::handleParameterChange(const char *name)
 {
     if (name != nullptr) {
-        if (!strcmp(name, "offset"))
+        if (!strcmp(name, "offset")) {
             initialOffset = par("offset");
-        else if (!strcmp(name, "initiallyOpen"))
+            initializeGating();
+        }
+        else if (!strcmp(name, "initiallyOpen")) {
             isOpen_ = par("initiallyOpen");
+            initializeGating();
+        }
         else if (!strcmp(name, "durations")) {
-//            initializeGating();
+            initializeGating();
         }
     }
-    initializeGating();
 }
 
 void PeriodicGate::handleMessage(cMessage *message)
