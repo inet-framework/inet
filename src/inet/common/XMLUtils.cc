@@ -180,6 +180,20 @@ bool getAttributeBoolValue(const cXMLElement *node, const char *attrName)
     return parseBool(attrStr);
 }
 
+double getAttributeDoubleValue(const cXMLElement *node, const char *attrName, double defVal)
+{
+    const char *attrStr = node->getAttribute(attrName);
+    if (attrStr && *attrStr)
+        return opp_atof(attrStr);
+    return defVal;
+}
+
+double getAttributeDoubleValue(const cXMLElement *node, const char *attrName)
+{
+    const char *attrStr = getMandatoryFilledAttribute(*node, attrName);
+    return opp_atof(attrStr);
+}
+
 } // namespace xmlutils
 
 } // namespace inet

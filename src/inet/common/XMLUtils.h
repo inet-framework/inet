@@ -27,6 +27,8 @@ INET_API const char *getMandatoryAttribute(const cXMLElement& node, const char *
 INET_API const char *getMandatoryFilledAttribute(const cXMLElement& node, const char *attr);
 INET_API bool getAttributeBoolValue(const cXMLElement *node, const char *attrName, bool defVal);
 INET_API bool getAttributeBoolValue(const cXMLElement *node, const char *attrName);
+INET_API double getAttributeDoubleValue(const cXMLElement *node, const char *attrName, double defVal);
+INET_API double getAttributeDoubleValue(const cXMLElement *node, const char *attrName);
 
 INET_API bool parseBool(const char *text);
 

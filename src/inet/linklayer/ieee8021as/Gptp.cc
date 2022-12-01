@@ -380,11 +380,13 @@ void Gptp::synchronize()
     clocktime_t newTime = peerSentTimeSync + peerDelay + correctionField + residenceTime;
 
     ASSERT(gptpNodeType != MASTER_NODE);
-    check_and_cast<SettableClock *>(clock.get())->setClockTime(newTime);
 
     // TODO computeGmRateRatio:
     gmRateRatio = (origNow - newLocalTimeAtTimeSync) / (syncIngressTimestamp - receivedTimeSync);
     gmRateRatio = 1.0 / gmRateRatio;
+
+    auto settableClock = check_and_cast<SettableClock *>(clock.get());
+    settableClock->setClockTime(newTime, gmRateRatio * settableClock->getOscillatorCompensationFactor(), true);
 
     oldLocalTimeAtTimeSync = origNow;
     newLocalTimeAtTimeSync = clock->getClockTime();

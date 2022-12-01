@@ -42,7 +42,7 @@ void SimpleClockSynchronizer::handleStartOperation(LifecycleOperation *operation
 
 void SimpleClockSynchronizer::synchronizeSlaveClock()
 {
-    slaveClock->setClockTime(masterClock->getClockTime() + synchronizationAccuracyParameter->doubleValue(), true);
+    slaveClock->setClockTime(masterClock->getClockTime() + synchronizationAccuracyParameter->doubleValue(), 1.0, true);
 }
 
 void SimpleClockSynchronizer::scheduleSynchronizationTimer()
