@@ -16,7 +16,7 @@ class INET_API RandomDriftOscillator : public DriftingOscillatorBase
 {
   protected:
     cMessage *changeTimer = nullptr;
-    cPar *driftRateParameter = nullptr;
+    double initialDriftRate = NaN;
     cPar *driftRateChangeParameter = nullptr;
     cPar *changeIntervalParameter = nullptr;
     double driftRateChangeTotal = 0;

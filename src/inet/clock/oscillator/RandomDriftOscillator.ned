@@ -17,8 +17,8 @@ import inet.clock.contract.IOscillator;
 simple RandomDriftOscillator extends DriftingOscillatorBase like IOscillator
 {
     parameters:
+        double initialDriftRate @unit(ppm) = default(0ppm); // expressed as a ratio in parts per million
         volatile double changeInterval @unit(s); // drift change happens at the end of every interval
-        volatile double driftRate @unit(ppm) = default(0ppm); // expressed as a ratio in parts per million
         volatile double driftRateChange @unit(ppm) = default(0ppm); // integrated over time (random walk), no change by default
         double driftRateChangeLowerLimit @unit(ppm) = default(-inf ppm); // lower limit for random walk, no limit by default
         double driftRateChangeUpperLimit @unit(ppm) = default(inf ppm); // upper limit for random walk, no limit by default
