@@ -393,6 +393,7 @@ void Gptp::synchronize()
     receivedTimeSync = syncIngressTimestamp;
 
     // adjust local timestamps, too
+    pdelayRespEventIngressTimestamp += newLocalTimeAtTimeSync - oldLocalTimeAtTimeSync;
     pdelayReqEventEgressTimestamp += newLocalTimeAtTimeSync - oldLocalTimeAtTimeSync;
 
     /************** Rate ratio calculation *************************************
