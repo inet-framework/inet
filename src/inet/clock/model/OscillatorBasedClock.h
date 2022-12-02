@@ -19,7 +19,9 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
     IOscillator *oscillator = nullptr;
     int64_t (*roundingFunction)(int64_t, int64_t) = nullptr;
 
-    int64_t originClockTick = -1; // the value of the clock internal register representing the time as known by the clock measured in oscillator nominal tick intervals
+    simtime_t originSimulationTime;
+    clocktime_t originClockTime;
+
     std::vector<ClockEvent *> events;
 
   protected:
@@ -27,6 +29,8 @@ class INET_API OscillatorBasedClock : public ClockBase, public cListener
 
   public:
     virtual ~OscillatorBasedClock();
+
+    virtual double getOscillatorCompensationFactor() const { return 1.0; }
 
     virtual clocktime_t computeClockTimeFromSimTime(simtime_t t) const override;
     virtual simtime_t computeSimTimeFromClockTime(clocktime_t t) const override;
