@@ -41,7 +41,7 @@ class INET_API DriftingOscillatorBase : public OscillatorBase, public IScriptabl
   public:
     virtual simtime_t getComputationOrigin() const override { return origin; }
     virtual simtime_t getNominalTickLength() const override { return nominalTickLength; }
-    virtual simtime_t getCurrentTickLength() const { return SimTime::fromRaw(decreaseWithDriftRate(nominalTickLength.raw())); }
+    virtual double getCurrentTickLength() const { return nominalTickLength.dbl() + nominalTickLength.dbl() * inverseDriftRate; }
 
     virtual double getDriftRate() const { return driftRate; }
     virtual void setDriftRate(double driftRate);
