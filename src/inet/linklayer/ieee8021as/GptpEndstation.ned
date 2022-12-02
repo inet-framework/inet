@@ -19,11 +19,11 @@ module GptpEndstation extends StandardHost
     parameters:
         clock.typename = default("SettableClock");
     submodules:
-        gptp: <default("Gptp")> like IApp {
+        gptp: <default("Gptp")> like IApp if typename != "" {
             @display("p=700.11755,75.166");
         }
     connections:
-        gptp.socketOut --> at.in++;
-        at.out++ --> gptp.socketIn;
+        gptp.socketOut --> at.in++ if exists(gptp);
+        at.out++ --> gptp.socketIn if exists(gptp);
 }
 
