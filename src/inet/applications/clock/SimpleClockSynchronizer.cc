@@ -7,6 +7,7 @@
 
 #include "inet/applications/clock/SimpleClockSynchronizer.h"
 
+#include "inet/clock/base/DriftingOscillatorBase.h"
 #include "inet/common/ModuleAccess.h"
 
 namespace inet {
@@ -21,7 +22,8 @@ void SimpleClockSynchronizer::initialize(int stage)
         masterClock.reference(this, "masterClockModule", true);
         slaveClock.reference(this, "slaveClockModule", true);
         synchronizationIntervalParameter = &par("synchronizationInterval");
-        synchronizationAccuracyParameter = &par("synchronizationAccuracy");
+        synchronizationClockTimeErrorParameter = &par("synchronizationClockTimeError");
+        synchronizationOscillatorCompensationFactorErrorParameter = &par("synchronizationOscillatorCompensationFactorError");
     }
 }
 
@@ -40,9 +42,20 @@ void SimpleClockSynchronizer::handleStartOperation(LifecycleOperation *operation
     scheduleSynchronizationTimer();
 }
 
+static double getCurrentTickLength(IClock *clock)
+{
+    auto oscillatorBasedClock = check_and_cast<OscillatorBasedClock*>(clock);
+    auto clockOscillator = oscillatorBasedClock->getOscillator();
+    auto driftingOscillator = check_and_cast<const DriftingOscillatorBase *>(clockOscillator);
+    return driftingOscillator->getCurrentTickLength();
+}
+
 void SimpleClockSynchronizer::synchronizeSlaveClock()
 {
-    slaveClock->setClockTime(masterClock->getClockTime() + synchronizationAccuracyParameter->doubleValue(), 1.0, true);
+    auto masterOscillatorBasedClock = check_and_cast<OscillatorBasedClock*>(masterClock.get());
+    auto clockTime = masterClock->getClockTime() + synchronizationClockTimeErrorParameter->doubleValue();
+    double oscillatorCompensationFactor = getCurrentTickLength(slaveClock.get()) / getCurrentTickLength(masterClock.get()) * masterOscillatorBasedClock->getOscillatorCompensationFactor() * synchronizationOscillatorCompensationFactorErrorParameter->doubleValue();
+    slaveClock->setClockTime(clockTime, oscillatorCompensationFactor, true);
 }
 
 void SimpleClockSynchronizer::scheduleSynchronizationTimer()

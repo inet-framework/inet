@@ -23,7 +23,8 @@ class INET_API SimpleClockSynchronizer : public ApplicationBase
     ModuleRefByPar<IClock> masterClock;
     ModuleRefByPar<SettableClock> slaveClock;
     cPar *synchronizationIntervalParameter = nullptr;
-    cPar *synchronizationAccuracyParameter = nullptr;
+    cPar *synchronizationClockTimeErrorParameter = nullptr;
+    cPar *synchronizationOscillatorCompensationFactorErrorParameter = nullptr;
 
   protected:
     virtual void initialize(int stage) override;
