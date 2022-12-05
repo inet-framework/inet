@@ -60,6 +60,7 @@ class INET_API Gptp : public ClockUserModuleBase, public cListener
     clocktime_t newLocalTimeAtTimeSync;
     clocktime_t oldLocalTimeAtTimeSync;
     clocktime_t peerSentTimeSync;  // sending time of last received GptpSync
+    clocktime_t oldPeerSentTimeSync = -1;  // sending time of previous received GptpSync
     clocktime_t syncIngressTimestamp;  // receiving time of last incoming GptpSync
 
     bool rcvdGptpSync = false;
