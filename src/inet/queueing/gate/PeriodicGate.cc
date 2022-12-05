@@ -23,9 +23,8 @@ void PeriodicGate::initialize(int stage)
         scheduleForAbsoluteTime = par("scheduleForAbsoluteTime");
         changeTimer = new ClockEvent("ChangeTimer");
         changeTimer->setSchedulingPriority(par("changeTimerSchedulingPriority"));
-    }
-    else if (stage == INITSTAGE_QUEUEING)
         initializeGating();
+    }
 }
 
 void PeriodicGate::handleParameterChange(const char *name)
