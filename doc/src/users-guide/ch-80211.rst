@@ -61,8 +61,8 @@ The following sections examine the above components.
 MAC
 ---
 
-The :ned:`Ieee80211Mac` module type represents the IEEE 802.11 MAC. The
-implementation is entirely based on the standard IEEE 802.11-2012 Part
+The :ned:`Ieee80211Mac` module type represents the IEEE 802.11 MAC. The structure of the
+implementation closely follows the architecture described in the standard, IEEE 802.11-2012 Part
 11: Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY)
 Specifications.
 
@@ -76,49 +76,73 @@ layer. Users can easily replace individual components with their own
 implementations. Policies, which most likely to be experimented with,
 are extracted into their own modules.
 
-The model has the following replaceable built-in policies:
+The new model also separates the following components in the 802.11 standard into modules:
 
--  ACK policy
+-  Coordination function: :ned:`Dcf`, :ned:`Hcf`. The coordination functions control the medium access as specified by the standard.  
 
--  RTS/CTS policy
+-  Channel access method as specified by the standard: :ned:`Edca` 
 
--  Originator and recipient block ACK agreement policies
+-  Channel access function: :ned:`Edcaf`, :ned:`Dcaf`. The channel access function controls channel ownership, etc.
 
--  MSDU aggregation policy
+-  MAC data services: :ned:`OriginatorMacDataService`, :ned:`RecipientMacDataService`, :ned:`OriginatorQosDataService`, :ned:`RecipientQosMacDataService`.
+   The MAC data services are implemented as compound modules, which combine functions related to transforming data frames (sequence numbering, duplicate removal, frame reordering, fragmentation, aggregation).
 
--  Fragmentation policy
+-  Aggregation and deaggregation (C++ class in MAC data services): These classes implement aggregation and deaggregation according to the policy modules (see below).
 
-The new model also separates the following components:
+-  Fragmentation and defragmentation (C++ classes in MAC data services): These classes carry out the task of fragmentation and defragmentation according to the policy modules (see below).
 
--  Coordination functions
+-  Block ACK agreements and frame reordering (C++ classes): These classes carry out the task according to the policy modules (see below).
 
--  Channel access methods
+-  Frame exchange sequences (implemented as C++ classes in coordination functions, like :ned:`Hcf`): These classes strictly follow the standard specifying the valid frame sequences.
 
--  MAC data services
+-  TXOP procedure (:ned:`TxopProcedure`): This module implements the transmission opportunity behavior of the standard.
 
--  Aggregation and deaggregation
+-  Duplicate removal (C++ class in RecipientMacDataService): This class removes duplicate received frames based on sequence numbers.
 
--  Fragmentation and defragmentation
+-  Rate selection: :ned:`QosRateSelection`. This module controls data rate for all kind of frames, including management and control frames.
 
--  Block ACK agreements and reordering
+-  Rate control: :ned:`AarfRateControl`, :ned:`OnoeRateControl`. These modules determine the optimal data rate for data frames.
 
--  Frame exchange sequences
+-  Protection mechanism: :ned:`OriginatorProtectionMechanism`. This module provides channel allocation for frame exchange sequences.
 
--  Duplicate removal
+-  Recovery procedure: :ned:`NonQosRecoveryProcedure`, :ned:`QosRecoveryProcedure`. These modules determine what to do in case of frame exchange failure.
 
--  Rate selection
+-  Contention: :ned:`Contention`. The contention module implements contention-based channel access, using defer, backoff, etc.
 
--  Rate control
+-  :ned:`PendingQueue`: This module is a queue containing frames received from higher layers, waiting for transmission unchanged.
 
--  Protection mechanisms
+-  :ned:`InProgressFrames`: This modules is a queue containing frames waiting for transmission already processed by the MAC data service.
 
--  Recovery procedure
+-  TX/RX (:ned:`Tx`, :ned:`Rx`). Responsible for simple frame transmission/reception.
 
--  Contention
+The MAC model has the following replaceable built-in policy submodules by default:
 
--  Frame queues
+.. -  :ned:`OriginatorAckPolicy` and :ned:`RecipientAckPolicy`
 
--  TX/RX
+.. -  :ned:`RtsPolicy` and :ned:`CtsPolicy`
+
+.. -  :ned:`OriginatorBlockAckAgreementPolicy` and :ned:`RecipientBlockAckAgreementPolicy`
+
+.. -  :ned:`BasicMsduAggregationPolicy`
+
+.. -  :ned:`BasicFragmentationPolicy`
+
+.. , with the default modules in parentheses:
+
+-  ACK policy (e.g. :ned:`OriginatorAckPolicy`, :ned:`RecipientAckPolicy`): controls what kind of acknowledgement is used per-frame (none, normal, block-ack)
+
+-  RTS/CTS policy (e.g. :ned:`RtsPolicy`, :ned:`CtsPolicy`): determines which frames are protected by the RTS/CTS mechanism
+
+-  Originator and recipient block ACK agreement policies (e.g. :ned:`OriginatorBlockAckAgreementPolicy`, :ned:`RecipientBlockAckAgreementPolicy`): determine when and what kind of agreements are made
+
+-  MSDU aggregation policy (e.g. :ned:`BasicMsduAggregationPolicy`): controls when and which frames are aggregated into an A-MSDU 
+
+-  Fragmentation policy (e.g. :ned:`BasicFragmentationPolicy`): controls when and how fragmentation happens
+
+.. For example, a lot of these modules are located in the *hcf* submodule of the MAC:
+
+   .. figure:: figures/hcf.png
+      :align: center
 
 .. _ug:sec:80211:physical-layer:
 
