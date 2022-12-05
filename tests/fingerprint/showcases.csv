@@ -72,7 +72,7 @@
 /showcases/tsn/framereplication/multicastfailureprotection/, -f omnetpp.ini -c General -r 0, 0.1s, c1d1-d561/tplx;53a4-dd47/~tNl;7c41-1acd/~tND;7a73-befb/tyf, PASS,
 
 /showcases/tsn/gatescheduling/eager/, -f omnetpp.ini -c Eager -r 0,               0.2s,         8671-b3dd/tplx;6cd8-54ff/~tNl;1fa9-dfc1/~tND;2133-a8d8/tyf, PASS,
-/showcases/tsn/gatescheduling/sat/,  -f omnetpp.ini -c SAT -r 0,                0.2s,         8013-de80/tplx;17b6-3b14/~tNl;a2a9-9d59/~tND;f96f-15d0/tyf, PASS,
+/showcases/tsn/gatescheduling/sat/,  -f omnetpp.ini -c SAT -r 0,                0.2s,         03ff-24e5/tplx;f956-a907/~tNl;b4eb-5d5c/~tND;f96f-15d0/tyf, PASS,
 #/showcases/tsn/gatescheduling/tsnsched/, -f omnetpp.ini -c General -r 0,            0.2s,         0000-0000/tplx;c268-fae7/~tNl;0d5b-c7a9/~tND;e74e-6ba9/tyf, PASS, # TSNsched externel tool required
 
 /showcases/tsn/streamfiltering/statistical/, -f omnetpp.ini -c General -r 0,        1s,         bc9a-33db/tplx;4794-0e45/~tNl;8a22-dfe5/~tND;a095-8c98/tyf, PASS,

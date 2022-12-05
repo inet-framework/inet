@@ -157,11 +157,11 @@ class INET_API Z3GateScheduleConfigurator : public GateScheduleConfiguratorBase
     }
 
     virtual std::vector<std::shared_ptr<expr>> getReceptionStartTimeVariables(const Input::Port *port, int gateIndex = -1) const {
-        return getTimeVariables(port, gateIndex, "transmissionStartTime");
+        return getTimeVariables(port, gateIndex, "receptionStartTime");
     }
 
     virtual std::vector<std::shared_ptr<expr>> getReceptionEndTimeVariables(const Input::Port *port, int gateIndex = -1) const {
-        return getTimeVariables(port, gateIndex, "transmissionEndTime");
+        return getTimeVariables(port, gateIndex, "receptionEndTime");
     }
 
     virtual double getVariableValue(const model& model, const std::shared_ptr<expr> expr) const;
