@@ -17,7 +17,7 @@ import inet.linklayer.ieee80211.mac.contract.ITx;
 
 
 //
-// Implementation of the 802.11b MAC protocol. This module is intended
+// Implementation of the 802.11 MAC protocol. This module is intended
 // to be used in combination with the ~Ieee80211Radio module as the physical
 // layer.
 //

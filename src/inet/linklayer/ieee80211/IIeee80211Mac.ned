@@ -10,7 +10,7 @@ package inet.linklayer.ieee80211;
 import inet.linklayer.contract.IMacProtocol;
 
 //
-// Module interface for all ieee802.11 mac modul
+// Module interface for all IEEE 802.11 MAC modules
 //
 moduleinterface IIeee80211Mac extends IMacProtocol
 {
