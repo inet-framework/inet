@@ -29,9 +29,6 @@ class INET_API QueueBasedTokenGenerator : public TokenGeneratorBase, public cLis
     virtual void generateTokens();
 
   public:
-    virtual bool supportsPacketPushing(cGate *gate) const override { return false; }
-    virtual bool supportsPacketPulling(cGate *gate) const override { return false; }
-
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 
