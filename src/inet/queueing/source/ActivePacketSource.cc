@@ -58,7 +58,7 @@ void ActivePacketSource::scheduleProductionTimer(clocktime_t delay)
 
 void ActivePacketSource::scheduleProductionTimerAndProducePacket()
 {
-    if (!initialProductionOffsetScheduled && initialProductionOffset != 0) {
+    if (!initialProductionOffsetScheduled && initialProductionOffset >= CLOCKTIME_ZERO) {
         scheduleProductionTimer(initialProductionOffset);
         initialProductionOffsetScheduled = true;
     }
