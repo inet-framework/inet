@@ -58,7 +58,7 @@ void ActivePacketSink::scheduleCollectionTimer(clocktime_t delay)
 
 void ActivePacketSink::scheduleCollectionTimerAndCollectPacket()
 {
-    if (!initialCollectionOffsetScheduled && initialCollectionOffset != 0) {
+    if (!initialCollectionOffsetScheduled && initialCollectionOffset >= CLOCKTIME_ZERO) {
         scheduleCollectionTimer(initialCollectionOffset);
         initialCollectionOffsetScheduled = true;
     }
