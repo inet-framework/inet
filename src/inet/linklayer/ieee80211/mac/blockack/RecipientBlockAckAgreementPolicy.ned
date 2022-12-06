@@ -7,7 +7,10 @@
 
 package inet.linklayer.ieee80211.mac.blockack;
 
-simple RecipientBlockAckAgreementPolicy
+import inet.linklayer.ieee80211.mac.contract.IRecipientBlockAckAgreementPolicy;
+
+
+simple RecipientBlockAckAgreementPolicy like IRecipientBlockAckAgreementPolicy
 {
     parameters:
         bool delayedAckPolicySupported = default(false);

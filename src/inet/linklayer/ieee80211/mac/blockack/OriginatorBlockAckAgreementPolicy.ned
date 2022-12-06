@@ -7,7 +7,10 @@
 
 package inet.linklayer.ieee80211.mac.blockack;
 
-simple OriginatorBlockAckAgreementPolicy
+import inet.linklayer.ieee80211.mac.contract.IOriginatorBlockAckAgreementPolicy;
+
+
+simple OriginatorBlockAckAgreementPolicy like IOriginatorBlockAckAgreementPolicy
 {
     parameters:
         string originatorAckPolicyModule;

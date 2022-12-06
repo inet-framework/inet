@@ -7,7 +7,10 @@
 
 package inet.linklayer.ieee80211.mac.originator;
 
-simple QosRtsPolicy
+import inet.linklayer.ieee80211.mac.contract.IRtsPolicy;
+
+
+simple QosRtsPolicy like IRtsPolicy
 {
     parameters:
         string rateSelectionModule;

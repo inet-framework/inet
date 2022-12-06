@@ -7,7 +7,10 @@
 
 package inet.linklayer.ieee80211.mac.recipient;
 
-simple QosCtsPolicy
+import inet.linklayer.ieee80211.mac.contract.ICtsPolicy;
+
+
+simple QosCtsPolicy like ICtsPolicy
 {
     parameters:
         string rxModule;

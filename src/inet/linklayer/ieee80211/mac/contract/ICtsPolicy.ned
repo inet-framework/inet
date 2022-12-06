@@ -5,12 +5,9 @@
 //
 
 
-package inet.linklayer.ieee80211.mac.recipient;
+package inet.linklayer.ieee80211.mac.contract;
 
-import inet.linklayer.ieee80211.mac.contract.ICtsPolicy;
-
-
-simple CtsPolicy like ICtsPolicy
+moduleinterface ICtsPolicy
 {
     parameters:
         string rxModule;

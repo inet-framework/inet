@@ -7,7 +7,10 @@
 
 package inet.linklayer.ieee80211.mac.recipient;
 
-simple RecipientAckPolicy
+import inet.linklayer.ieee80211.mac.contract.IRecipientAckPolicy;
+
+
+simple RecipientAckPolicy like IRecipientAckPolicy
 {
     parameters:
         string rateSelectionModule;

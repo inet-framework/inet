@@ -1,4 +1,3 @@
-//
 // Copyright (C) 2016 OpenSim Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
@@ -7,19 +6,19 @@
 
 package inet.linklayer.ieee80211.mac.coordinationfunction;
 
-import inet.linklayer.ieee80211.mac.blockack.OriginatorBlockAckAgreementPolicy;
-import inet.linklayer.ieee80211.mac.blockack.RecipientBlockAckAgreementPolicy;
 import inet.linklayer.ieee80211.mac.channelaccess.Edca;
 import inet.linklayer.ieee80211.mac.channelaccess.Hcca;
+import inet.linklayer.ieee80211.mac.contract.ICtsPolicy;
 import inet.linklayer.ieee80211.mac.contract.IHcf;
+import inet.linklayer.ieee80211.mac.contract.IOriginatorBlockAckAgreementPolicy;
+import inet.linklayer.ieee80211.mac.contract.IOriginatorQosAckPolicy;
 import inet.linklayer.ieee80211.mac.contract.IRateControl;
-import inet.linklayer.ieee80211.mac.originator.OriginatorQosAckPolicy;
+import inet.linklayer.ieee80211.mac.contract.IRecipientBlockAckAgreementPolicy;
+import inet.linklayer.ieee80211.mac.contract.IRecipientQosAckPolicy;
+import inet.linklayer.ieee80211.mac.contract.IRtsPolicy;
 import inet.linklayer.ieee80211.mac.originator.OriginatorQosMacDataService;
-import inet.linklayer.ieee80211.mac.originator.QosRtsPolicy;
 import inet.linklayer.ieee80211.mac.protectionmechanism.SingleProtectionMechanism;
 import inet.linklayer.ieee80211.mac.rateselection.QosRateSelection;
-import inet.linklayer.ieee80211.mac.recipient.QosCtsPolicy;
-import inet.linklayer.ieee80211.mac.recipient.RecipientQosAckPolicy;
 import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
 
 
@@ -108,28 +107,28 @@ module Hcf like IHcf
             parameters:
                 @display("p=350,200");
         }
-        originatorAckPolicy: OriginatorQosAckPolicy {
+        originatorAckPolicy: <default("OriginatorQosAckPolicy")> like IOriginatorQosAckPolicy {
             parameters:
                 @display("p=550,100");
         }
-        recipientAckPolicy: RecipientQosAckPolicy {
+        recipientAckPolicy: <default("RecipientQosAckPolicy")> like IRecipientQosAckPolicy {
             parameters:
                 @display("p=550,200");
         }
-        rtsPolicy: QosRtsPolicy {
+        rtsPolicy: <default("QosRtsPolicy")> like IRtsPolicy {
             parameters:
                 @display("p=550,300");
         }
-        ctsPolicy: QosCtsPolicy {
+        ctsPolicy: <default("QosCtsPolicy")> like ICtsPolicy {
             parameters:
                 @display("p=550,400");
         }
-        originatorBlockAckAgreementPolicy: OriginatorBlockAckAgreementPolicy if isBlockAckSupported {
+        originatorBlockAckAgreementPolicy: <default("OriginatorBlockAckAgreementPolicy")> like IOriginatorBlockAckAgreementPolicy if isBlockAckSupported {
             parameters:
                 originatorAckPolicyModule = "^.originatorAckPolicy";
                 @display("p=550,500");
         }
-        recipientBlockAckAgreementPolicy: RecipientBlockAckAgreementPolicy if isBlockAckSupported {
+        recipientBlockAckAgreementPolicy: <default("RecipientBlockAckAgreementPolicy")> like IRecipientBlockAckAgreementPolicy if isBlockAckSupported {
             parameters:
                 @display("p=550,600");
         }

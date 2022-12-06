@@ -8,17 +8,17 @@
 package inet.linklayer.ieee80211.mac.coordinationfunction;
 
 import inet.linklayer.ieee80211.mac.channelaccess.Dcaf;
+import inet.linklayer.ieee80211.mac.contract.ICtsPolicy;
 import inet.linklayer.ieee80211.mac.contract.IDcf;
+import inet.linklayer.ieee80211.mac.contract.IOriginatorAckPolicy;
 import inet.linklayer.ieee80211.mac.contract.IRateControl;
+import inet.linklayer.ieee80211.mac.contract.IRecipientAckPolicy;
+import inet.linklayer.ieee80211.mac.contract.IRtsPolicy;
 import inet.linklayer.ieee80211.mac.originator.AckHandler;
 import inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure;
-import inet.linklayer.ieee80211.mac.originator.OriginatorAckPolicy;
 import inet.linklayer.ieee80211.mac.originator.OriginatorMacDataService;
-import inet.linklayer.ieee80211.mac.originator.RtsPolicy;
 import inet.linklayer.ieee80211.mac.protectionmechanism.OriginatorProtectionMechanism;
 import inet.linklayer.ieee80211.mac.rateselection.RateSelection;
-import inet.linklayer.ieee80211.mac.recipient.CtsPolicy;
-import inet.linklayer.ieee80211.mac.recipient.RecipientAckPolicy;
 import inet.linklayer.ieee80211.mac.recipient.RecipientMacDataService;
 
 
@@ -104,19 +104,19 @@ module Dcf like IDcf
             parameters:
                 @display("p=350,400");
         }
-        originatorAckPolicy: OriginatorAckPolicy {
+        originatorAckPolicy: <default("OriginatorAckPolicy")> like IOriginatorAckPolicy {
             parameters:
                 @display("p=550,100");
         }
-        recipientAckPolicy: RecipientAckPolicy {
+        recipientAckPolicy: <default("RecipientAckPolicy")> like IRecipientAckPolicy {
             parameters:
                 @display("p=550,200");
         }
-        rtsPolicy: RtsPolicy {
+        rtsPolicy: <default("RtsPolicy")> like IRtsPolicy {
             parameters:
                 @display("p=550,300");
         }
-        ctsPolicy: CtsPolicy {
+        ctsPolicy: <default("CtsPolicy")> like ICtsPolicy {
             parameters:
                 @display("p=550,400");
         }

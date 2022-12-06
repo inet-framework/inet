@@ -7,7 +7,10 @@
 
 package inet.linklayer.ieee80211.mac.originator;
 
-simple OriginatorAckPolicy
+import inet.linklayer.ieee80211.mac.contract.IOriginatorAckPolicy;
+
+
+simple OriginatorAckPolicy like IOriginatorAckPolicy
 {
     parameters:
         string rateSelectionModule;
