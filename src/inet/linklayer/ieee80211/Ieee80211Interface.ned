@@ -17,15 +17,46 @@ import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.wireless.common.contract.packetlevel.IRadio;
 
 //
-// This module implements an IEEE 802.11 network interface.
+// This module implements an IEEE 802.11 network interface. It implements
+// a large subset of the IEEE 802.11 standard, and may use radio models
+// and wireless signal representations of varying levels of detail.
+// It is also extremely configurable, and its component structure makes
+// it easy to experiment with various details of the protocol.
 //
-// It can be configured via the mgmt.typename parameter to act
-// as an AP or a STA, or for ad-hoc mode.
+// The main components of the interface are the MAC and the radio submodules.
+// Most configuration parameters are in the MAC (~Ieee80211Mac) and its
+// numerous subcomponents. Most subcomponents are replaceable to facilitate
+// experimentation by using typename assignments in the configuration.
 //
-// Potential mgmType values: ~Ieee80211MgmtStaSimplified, ~Ieee80211MgmtSta,
-// ~Ieee80211MgmtAp, ~Ieee80211MgmtApSimplified, ~Ieee80211MgmtAdhoc.
+// The default radio is ~Ieee80211ScalarRadio, but it can be replaced 
+// with any of several compatible radio types using typename assignments
+// in the configuration. Several radio models of varying levels of detail
+// are available, from simple unit disk radio models to layered radio models
+// that explicitly model forward error correction, scrambling, symbol
+// encoding/decoding, etc, and may represent radio signals with a
+// multi-dimensional power density function over time and frequency.
+// The INET User Guide elaborates on the possibilities.
 //
-// A classifier is needed if you want to use QoS.
+// The type of the management submodule is also configurable. The type of this
+// submodule decides whether the interfaces acts an AP, a STA, or is in ad hoc mode.
+// Use ~Ieee80211MgmtSta or ~Ieee80211MgmtStaSimplified for STA,
+// ~Ieee80211MgmtAp or ~Ieee80211MgmtApSimplified for AP, and 
+// ~Ieee80211MgmtAdhoc for ad hoc mode.
+//
+// The agent submodule is responsible for initiating the process of connecting
+// to an AP and similar tasks normally done from "user space".
+//
+// The LLC submodule is responsible for adding/removing the LLC header on packets.
+//
+// A classifier is responsible for assigning a 802.1d User Priority (UP) to
+// packets, and is only needed if QoS is involved.
+//
+// The clock submodule would allow clock skew modeling -- this is currently not used.
+//
+// Note about the implementation:
+//
+// Despite its appearance, Ieee80211Interface is not a plain compound module.
+// It has an underlying custom C++ class that inherits from cModule.
 //
 module Ieee80211Interface extends NetworkInterface like IWirelessInterface
 {

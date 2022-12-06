@@ -21,27 +21,58 @@ import inet.linklayer.ieee80211.mac.contract.ITx;
 // to be used in combination with the ~Ieee80211Radio module as the physical
 // layer.
 //
-// Encapsulation/decapsulation must be done in the upper layers. (It is
-// typically in the 802.11 management module, see in ~Ieee80211Interface).
-// The base class for 802.11 frame messages is ~Ieee80211MacHeader, but this
-// module expects ~Ieee80211DataOrMgmtHeader (a subclass) from upper layers
-// (the management module). This module will assign the transmitter address
-// (address 2) and the frame sequence number/fragment number fields in the
-// frames; all other fields must already be filled when this module gets
-// the frame for transmission.
+// This module has been heavily modularized to enable customization
+// and extension of almost any aspect of its operation, with the aim of
+// better supporting experimentation and research. Because of that, its
+// features and details of operation are determined by its several
+// subcomponents, and can be altered by extending or replacing the
+// appropriate subcomponents.
 //
-// <b>Limitations</b>
+// Some noteworthy features are:
 //
-// Power management and polling (PCF) are not supported.
+// - Support for 802.11a/b/g/e/p, as well as partial/incomplete support for
+//   later WiFi standards such as n and ac.
 //
-// Physical layer algorithms such as frequency hopping and
-// direct sequence spread spectrum are not modelled directly.
+// - Implements DCF and HCF channel access, including support for QoS (EDCA). 
 //
-// Fields related to the above unsupported features are omitted from
-// management frame formats as well (for example, FH/DS/CF parameter sets,
-// beacon/probe timestamp which is related to physical layer synchronization,
-// listen interval which is related to power management, capability information
-// which is related to PCF and other non-modelled features).
+// - Support for both infrastructure mode and ad hoc mode operation.
+//
+// - In infrastructure mode, authentication and association can be
+//   implicit, or explicitly modeled using frame exchanges.
+//
+// - Support for advanced MAC features such as frame aggregation,
+//   fragmentation, block acknowledgement and block agreements,
+//   rate selection and adaptive rate control algorithms like AARF and
+//   ONOE.
+//
+// - Ability to work with radio models of varying levels of detail,
+//   from simple unit disk radio models to layered radio models that
+//   explicitly model forward error correction, scrambling, symbol
+//   encoding/decoding, etc, and may represent radio signals with a
+//   multi-dimensional power density function over time and frequency.
+//
+// - Support for energy consumption modeling.
+//
+// The IEEE 802.11 header is represented by ~Ieee80211MacHeader and its 
+// subclasses.
+//
+// Note about the implementation:
+//
+// Despite its appearance, Ieee80211Mac is not a plain compound module.
+// Although the bulk of its functionality is outsourced to submodules,
+// it is an active module with an underlying C++ class that subclasses
+// from cSimpleModule, and receives/sends messages on its own behalf.
+//
+// Notable omissions:
+//
+// - PCF is missing
+// - HCCA is currently not implemented. (The module exists, but it is
+//   currently a placeholder.)
+// - Fields related to unsupported features are omitted from frame formats 
+//   as well (for example, FH/DS/CF parameter sets, beacon/probe timestamp
+//   which is related to physical layer synchronization, listen interval 
+//   which is related to power management, capability information
+//   which is related to PCF and other non-modeled features).
 //
 module Ieee80211Mac extends MacProtocolBase like IIeee80211Mac
 {
