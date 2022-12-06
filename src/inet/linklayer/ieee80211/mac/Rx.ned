@@ -10,7 +10,11 @@ package inet.linklayer.ieee80211.mac;
 import inet.linklayer.ieee80211.mac.contract.IRx;
 
 //
-// The default implementation of ~IRx.
+// Responsible for checking frames received over the radio for errors, 
+// for managing the NAV, and for notifying other processes about the channel 
+// state (free or busy). 
+//
+// This is the default implementation of ~IRx. 
 //
 simple Rx like IRx
 {

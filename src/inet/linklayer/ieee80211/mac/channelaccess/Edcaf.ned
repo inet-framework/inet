@@ -15,7 +15,8 @@ import inet.linklayer.ieee80211.mac.originator.TxopProcedure;
 import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
 
 //
-// IEEE 802.11 Enhanced Distributed Channel Access Function
+// Implements EDCAF (Enhanced Distributed Channel Access Function) for IEEE 802.11.
+// EDCAF represents one access category within EDCA. 
 //
 module Edcaf
 {

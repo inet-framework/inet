@@ -10,6 +10,11 @@ package inet.linklayer.ieee80211.mac.channelaccess;
 import inet.linklayer.ieee80211.mac.contract.ICollisionController;
 import inet.linklayer.ieee80211.mac.originator.NonQosRecoveryProcedure;
 
+//
+// Implements EDCA (Enhanced Distributed Channel Access) for IEEE 802.11.
+// The implementation allows for a configurable number of access categories,
+// not just four as defined by the standard.
+//
 module Edca
 {
     parameters:

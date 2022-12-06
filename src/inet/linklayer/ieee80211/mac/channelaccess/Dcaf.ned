@@ -11,6 +11,9 @@ import inet.queueing.contract.IPacketQueue;
 import inet.linklayer.ieee80211.mac.contract.IContention;
 import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
 
+//
+// Implements the DCAF (Distributed Channel Access Function) for IEEE 802.11.
+//
 module Dcaf
 {
     parameters:

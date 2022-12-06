@@ -9,6 +9,10 @@ package inet.linklayer.ieee80211.mac.contention;
 
 import inet.linklayer.ieee80211.mac.contract.ICollisionController;
 
+//
+// A collision controller used with EDCA. It detects and reports internal
+// collisions among ~Edcaf instances.
+//
 simple EdcaCollisionController like ICollisionController
 {
     parameters:

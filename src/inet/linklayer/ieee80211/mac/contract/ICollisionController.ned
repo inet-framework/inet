@@ -9,8 +9,8 @@ package inet.linklayer.ieee80211.mac.contract;
 
 //
 // Interface for collision controllers. A collision controller is used
-// with EDCA, and it detects and reports internal collisions between
-// Contention instances.
+// with EDCA, and it detects and reports internal collisions among 
+// ~Edcaf instances.
 //
 moduleinterface ICollisionController
 {

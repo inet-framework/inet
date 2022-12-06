@@ -23,7 +23,7 @@ import inet.linklayer.ieee80211.mac.recipient.RecipientMacDataService;
 
 
 //
-// IEEE 802.11 Distributed Coordination Function
+// Implements the DCF (Distributed Coordination Function) for IEEE 802.11.
 //
 module Dcf like IDcf
 {
