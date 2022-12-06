@@ -18,6 +18,7 @@
 #include "inet/physicallayer/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
 #include "inet/physicallayer/analogmodel/bitlevel/LayeredSnir.h"
 #include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredTransmission.h"
 #include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
 #include "inet/physicallayer/common/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
@@ -27,6 +28,7 @@
 #include "inet/physicallayer/ieee80211/bitlevel/errormodel/Ieee80211OfdmErrorModel.h"
 #include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmSymbolModel.h"
 #include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
+#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
 
 namespace inet {
 namespace physicallayer {
@@ -99,7 +101,6 @@ const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const Layered
 
 const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
-    //std::cout << "bleh" << std::endl;
     auto reception = snir->getReception();
     // bit model
     auto bitModel = transmission->getBitModel();
@@ -114,104 +115,106 @@ const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const L
     auto dataModulation = check_and_cast<const Ieee80211OfdmModulation *>(symbolModel->getDataModulation());
     auto dataSubcarrierModulation = dataModulation->getSubcarrierModulation();
     // analog model
-    auto analogModel = transmission->getAnalogModel();
-    auto preambleDuration = analogModel->getPreambleDuration();
-    auto headerDuration = analogModel->getHeaderDuration();
-    auto dataDuration = analogModel->getDataDuration();
-    auto centerFrequency = check_and_cast<const INarrowbandSignal *>(analogModel)->getCenterFrequency();
-    auto bandwidth = check_and_cast<const INarrowbandSignal *>(analogModel)->getBandwidth();
+    auto analogModel = check_and_cast<const NarrowbandSignalAnalogModel*>(transmission->getAnalogModel());
     // derived quantities
-    auto startFrequency = centerFrequency - bandwidth / 2;
-    auto endFrequency = centerFrequency + bandwidth / 2;
-    auto startTime = reception->getStartTime();
-    auto endTime = reception->getEndTime();
-    auto headerStartTime = startTime + preambleDuration;
-    auto headerEndTime = headerStartTime + headerDuration;
-    auto dataStartTime = headerEndTime;
-    auto dataEndTime = endTime;
+
+    auto mode = check_and_cast<const Ieee80211OfdmMode*>(check_and_cast<const Ieee80211TransmissionBase*>(transmission)->getMode())->getDataMode();
+
     // division
     auto transmittedSymbols = symbolModel->getAllSymbols();
-    int timeDivision = transmittedSymbols->size();
-    ASSERT(headerSymbolLength + dataSymbolLength == timeDivision);
-    auto frequencyDivision = dataModulation != nullptr ? dataModulation->getNumSubcarriers() : 1;
-    int symbolCount = timeDivision * frequencyDivision;
+    int numOfdmSymbols = transmittedSymbols->size();
+    ASSERT(headerSymbolLength + dataSymbolLength == numOfdmSymbols);
+    auto numSubcarriers = dataModulation != nullptr ? dataModulation->getNumSubcarriers() : 1;
+    int symbolCount = numOfdmSymbols * numSubcarriers;
     // calculate symbol intervals
     std::vector<math::Interval<simsec, Hz>> symbolIntervals;
     symbolIntervals.reserve(symbolCount);
-    //std::cout << "blih" << std::endl;
-    for (int i = 0; i < timeDivision; i++) {
-        simtime_t symbolStartTime = i < headerSymbolLength ?
-                LinearInterpolator<double, simtime_t>::singleton.getValue(0, headerStartTime, headerSymbolLength, headerEndTime, i) :
-                LinearInterpolator<double, simtime_t>::singleton.getValue(1, dataStartTime, dataSymbolLength + 1, dataEndTime, i);
-        simtime_t symbolEndTime = i < headerSymbolLength ?
-                LinearInterpolator<double, simtime_t>::singleton.getValue(0, headerStartTime, headerSymbolLength, headerEndTime, i + 1) :
-                LinearInterpolator<double, simtime_t>::singleton.getValue(1, dataStartTime, dataSymbolLength + 1, dataEndTime, i + 1);
-        for (int j = 0; j < frequencyDivision; j++) {
-            Hz symbolStartFrequency = (startFrequency * (frequencyDivision - j) + endFrequency * j) / frequencyDivision;
-            Hz symbolEndFrequency = (startFrequency * (frequencyDivision - j - 1) + endFrequency * (j + 1)) / frequencyDivision;
-            math::Point<simsec, Hz> symbolStartPoint(simsec(symbolStartTime), symbolStartFrequency);
-            math::Point<simsec, Hz> symbolEndPoint(simsec(symbolEndTime), symbolEndFrequency);
+
+
+    for (int i = 0; i < numOfdmSymbols; i++) {
+        simtime_t symbolStartTime = reception->getHeaderStartTime() + i * 4e-6;
+        simtime_t symbolEndTime = reception->getHeaderStartTime() + (i+1) * 4e-6;
+        for (int subcarrier = 0; subcarrier < numSubcarriers; subcarrier++) {
+            auto startFreq = mode->getSubcarrierStartFrequencyOffset(subcarrier) + analogModel->getCenterFrequency();
+            auto endFreq = mode->getSubcarrierEndFrequencyOffset(subcarrier) + analogModel->getCenterFrequency();
+            math::Point<simsec, Hz> symbolStartPoint(simsec(symbolStartTime), startFreq);
+            math::Point<simsec, Hz> symbolEndPoint(simsec(symbolEndTime), endFreq);
             math::Interval<simsec, Hz> symbolInterval(symbolStartPoint, symbolEndPoint, 0b11, 0b00, 0b00);
             symbolIntervals.push_back(symbolInterval);
         }
     }
-    //std::cout << "bloh" << std::endl;
+
+    auto startFreq = mode->getSubcarrierStartFrequencyOffset(0) + analogModel->getCenterFrequency();
+    auto endFreq = mode->getSubcarrierEndFrequencyOffset(numSubcarriers-1) + analogModel->getCenterFrequency();
+
+    math::Point<simsec, Hz> startPoint(simsec(reception->getHeaderStartTime()), startFreq);
+    math::Point<simsec, Hz> endPoint(simsec(reception->getDataEndTime()), endFreq);
+
     // partition SNIR function and sum SNIR values per symbol
-    math::Point<simsec, Hz> startPoint(simsec(startTime), startFrequency);
-    math::Point<simsec, Hz> endPoint(simsec(endTime), endFrequency);
     math::Interval<simsec, Hz> interval(startPoint, endPoint, 0b11, 0b00, 0b00);
     std::vector<double> data(symbolCount);
     auto snirFunction = check_and_cast<const LayeredSnir *>(snir)->getSnir();
-    //std::cout << "bloh 2" << std::endl;
+
     snirFunction->partition(interval, [&] (const math::Interval<simsec, Hz>& i1, const math::IFunction<double, math::Domain<simsec, Hz>> *f1) {
-        //std::cout << "parti" << std::endl;
+
         auto intervalStartTime = std::get<0>(i1.getLower()).get();
         auto intervalEndTime = std::get<0>(i1.getUpper()).get();
-        auto intervalStartFrequency = std::get<1>(i1.getLower());
-        auto intervalEndFrequency = std::get<1>(i1.getUpper());
-        auto startTimeIndex = std::max(0, intervalStartTime < headerEndTime ?
-                (int)std::floor((intervalStartTime - headerStartTime).dbl() / headerDuration.dbl() * headerSymbolLength) :
-                headerSymbolLength + (int)std::floor((intervalStartTime - headerDuration - dataStartTime).dbl() / dataDuration.dbl() * dataSymbolLength));
-        auto endTimeIndex = std::min(timeDivision - 1, intervalStartTime < headerEndTime ?
-                (int)std::ceil((intervalEndTime - headerStartTime).dbl() / headerDuration.dbl() * headerSymbolLength) :
-                headerSymbolLength + (int)std::ceil((intervalEndTime - headerDuration - dataStartTime).dbl() / dataDuration.dbl() * dataSymbolLength));
-        auto startFrequencyIndex = std::max(0, (int)std::floor(Hz(intervalStartFrequency - startFrequency).get() / Hz(endFrequency - startFrequency).get() * frequencyDivision));
-        auto endFrequencyIndex = std::min(frequencyDivision - 1, (int)std::ceil(Hz(intervalEndFrequency - startFrequency).get() / Hz(endFrequency - startFrequency).get() * frequencyDivision));
         // sum SNIR
-        for (int i = startTimeIndex; i <= endTimeIndex; i++) {
-            for (int j = startFrequencyIndex; j <= endFrequencyIndex; j++) {
-                int index = i * frequencyDivision + j;
+
+        int startTimeSlot = (int)std::floor((intervalStartTime - reception->getHeaderStartTime()) / SimTime(4, SIMTIME_US));
+        int endTimeSlot = (int)std::ceil((intervalEndTime - reception->getHeaderStartTime()) / SimTime(4, SIMTIME_US)) + 1;
+
+        startTimeSlot = std::max(0, startTimeSlot);
+        endTimeSlot = std::min(numOfdmSymbols, endTimeSlot);
+
+        for (int timeslot = startTimeSlot; timeslot < endTimeSlot; timeslot++) {
+            // TODO: optimize, only iterate on subcarriers that have
+            // a chance of intersecting the interval
+            for (int subcarrier = 0; subcarrier < numSubcarriers; subcarrier++) {
+                int index = timeslot * numSubcarriers + subcarrier;
                 ASSERT(0 <= index && index < symbolCount);
+
                 auto i2 = i1.getIntersected(symbolIntervals[index]);
+                if (i2.isEmpty())
+                    continue;
+                /*
+                std::cout << "timeslot: " << timeslot << " subcarrier: " << subcarrier << " index: " << index << std::endl;
+                std::cout << "i1: " << i1 << std::endl;
+                std::cout << "i2: " << i2 << std::endl;
+                std::cout << "symbolIntervals[index]: " << symbolIntervals[index] << std::endl;
+                */
+
                 double v = i2.getVolume() * f1->getMean(i2);
                 ASSERT(!std::isnan(v));
                 data[index] += v;
             }
         }
     });
-    //std::cout << "bluh" << std::endl;
+
+    auto symbolFrequencyBandwidth = mode->getSubcarrierFrequencySpacing();
+    auto symbolDuration = mode->getSymbolInterval();
+    auto symbolArea = symbolDuration.dbl() * symbolFrequencyBandwidth.get();
+
     // average symbol SNIR values
-    auto symbolFrequencyBandwidth = bandwidth / frequencyDivision;
-    for (int i = 0; i < timeDivision; i++) {
-        std::vector<const ApskSymbol *> receivedSymbols;
-        auto symbolDuration = i < headerSymbolLength ? headerDuration / headerSymbolLength : dataDuration / dataSymbolLength;
-        for (int j = 0; j < frequencyDivision; j++) {
-            int index = i * frequencyDivision + j;
-            auto symbolArea = symbolDuration.dbl() * symbolFrequencyBandwidth.get();
+    for (int i = 0; i < numOfdmSymbols; i++) {
+        for (int j = 0; j < numSubcarriers; j++) {
+            int index = i * numSubcarriers + j;
             data[index] /= symbolArea;
         }
     }
+
+
     // calulate symbol error rate and corrupt symbols
     auto receivedOfdmSymbols = new std::vector<const ISymbol *>();
-    for (int i = 0; i < timeDivision; i++) {
+    for (int i = 0; i < numOfdmSymbols; i++) {
         auto modulation = i == 0 ? headerSubcarrierModulation : dataSubcarrierModulation;
         auto grossBitrate = i == 0 ? headerGrossBitrate : dataGrossBitrate;
         auto transmittedOfdmSymbol = check_and_cast<const Ieee80211OfdmSymbol *>(transmittedSymbols->at(i));
         std::vector<const ApskSymbol *> receivedSymbols;
-        for (int j = 0; j < frequencyDivision; j++) {
-            int index = i * frequencyDivision + j;
+        for (int j = 0; j < numSubcarriers; j++) {
+            int index = i * numSubcarriers + j;
             double snirMean = data[index];
-            double symbolErrorRate = modulation->calculateSER(snirMean, bandwidth / frequencyDivision, grossBitrate / frequencyDivision);
+            double symbolErrorRate = modulation->calculateSER(snirMean, symbolFrequencyBandwidth, grossBitrate / numSubcarriers);
             bool isCorruptSymbol = symbolErrorRate == 1 || (symbolErrorRate != 0 && uniform(0, 1) < symbolErrorRate);
             auto transmittedSymbol = transmittedOfdmSymbol->getSubCarrierSymbols().at(j >= 26 ? j + 1 : j);
             auto receivedSymbol = isCorruptSymbol ? computeCorruptSymbol(modulation, transmittedSymbol) : transmittedSymbol;
@@ -222,7 +225,6 @@ const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const L
         auto receivedOfdmSymbol = new Ieee80211OfdmSymbol(receivedSymbols);
         receivedOfdmSymbols->push_back(receivedOfdmSymbol);
     }
-    //std::cout << "blyh" << std::endl;
     return new ReceptionSymbolModel(symbolModel->getHeaderSymbolLength(), symbolModel->getHeaderSymbolRate(), symbolModel->getDataSymbolLength(), symbolModel->getDataSymbolRate(), receivedOfdmSymbols);
 }
 

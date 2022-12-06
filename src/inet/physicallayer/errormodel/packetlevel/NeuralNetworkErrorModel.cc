@@ -163,7 +163,7 @@ std::vector<float> NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir
     auto endTime = reception->getDataEndTime();
     auto transmission = check_and_cast<const DimensionalTransmission *>(reception->getTransmission());
     auto centerFrequency = transmission->getCenterFrequency();
-    auto bandwidth = transmission->getBandwidth();
+    auto bandwidth = kHz(312.5) * 53; // transmission->getBandwidth();
     auto startFrequency = centerFrequency - bandwidth / 2;
     auto endFrequency = centerFrequency + bandwidth / 2;
     int symbolCount = timeDivision * frequencyDivision;
