@@ -172,9 +172,25 @@ void NeuralNetworkErrorModelTrainingDatasetGenerator::generateTrainingDataset()
         auto bandwidth = narrowbandSignal->getBandwidth();
         auto startFrequency = centerFrequency - bandwidth / 2;
         auto endFrequency = centerFrequency + bandwidth / 2;
-        auto backgroundNoisePowerFunction = createNoisePowerFunction(backgroundNoisePowerMean, backgroundNoisePowerStddev, frequencyDivision, timeDivision, startTime, endTime, startFrequency, endFrequency);
+        auto backgroundNoisePowerFunction = createNoisePowerFunction(backgroundNoisePowerMean, backgroundNoisePowerStddev,
+            26 + 1 + 26, timeDivision, startTime, endTime,
+            centerFrequency - kHz(312.5) * 26.5,
+            centerFrequency + kHz(312.5) * 26.5);
         std::vector<Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>> noisePowerFunctions;
         noisePowerFunctions.push_back(backgroundNoisePowerFunction);
+
+
+        // sneakily blocking out the DC subcarrier, just in case
+        noisePowerFunctions.push_back(makeShared<Boxcar2DFunction<WpHz, simsec, Hz>>(
+            simsec(-10), simsec(10), centerFrequency - kHz(150), centerFrequency + kHz(150), WpHz(1))); // lol 300 kW WiFi
+        // also the guard subcarriers
+        noisePowerFunctions.push_back(makeShared<Boxcar2DFunction<WpHz, simsec, Hz>>(
+            simsec(-10), simsec(10), centerFrequency - MHz(100), centerFrequency - kHz(312.5) * 27, WpHz(1))); // lol 100 MW WiFi
+        noisePowerFunctions.push_back(makeShared<Boxcar2DFunction<WpHz, simsec, Hz>>(
+            simsec(-10), simsec(10), centerFrequency + kHz(312.5) * 27, centerFrequency + MHz(100), WpHz(1))); // lol 100 MW WiFi
+
+
+
         W meanInterferingSignalNoisePowerMean = W(0);
         W meanInterferingSignalNoisePowerStddev = W(0);
         for (int i = 0; i < numInterferingSignals; i++) {
@@ -225,10 +241,19 @@ void NeuralNetworkErrorModelTrainingDatasetGenerator::generateTrainingDataset()
                     }
                 }
             }
-            if (isReceptionSuccessful)
+            if (isReceptionSuccessful) {
                 receptionSuccessfulCount++;
+                std::cout << "+";
+            }
+            else
+                std::cout << "-";
+
+            std::cout << std::flush;
+
             delete receptionResult;
         }
+
+        std::cout << std::endl;
         // print parameters
         double packetErrorRate = (1 - (double)receptionSuccessfulCount / repeatCount);
         traningDataset << (int)packetIndex << ", " << packetErrorRate << ", " << backgroundNoisePowerMean << ", " << backgroundNoisePowerStddev << ", " << numInterferingSignals << ", " << meanInterferingSignalNoisePowerMean << ", " << meanInterferingSignalNoisePowerStddev << ", " << bitrate << ", " << transmittedPacket->getTotalLength() << ", " << getModulationName(modulation) << ", " << (subcarrierModulation != nullptr ? getModulationName(subcarrierModulation) : "NA") << ", " << centerFrequency << ", " << bandwidth << ", " << timeDivision << ", " << frequencyDivision << ", " << numSymbols << ", "  << preambleDuration << ", " << headerDuration << ", " << dataDuration << ", " << duration << ", ";

@@ -53,6 +53,26 @@ class INET_API Ieee80211OfdmModeBase : public Ieee80211OfdmTimingRelatedParamete
     // The null subcarrier and the guard subcarriers at the sides are not included.
     int getNumberOfTotalSubcarriers() const { return getNumberOfDataSubcarriers() + getNumberOfPilotSubcarriers(); }
 
+    Hz getSubcarrierStartFrequencyOffset(int subcarrierIndex) const {
+        if (subcarrierIndex < 0 || subcarrierIndex >= getNumberOfTotalSubcarriers())
+            throw cRuntimeError("Invalid subcarrier index: %d", subcarrierIndex);
+
+        if (subcarrierIndex < getNumberOfTotalSubcarriers() / 2)
+            return getSubcarrierFrequencySpacing() * (subcarrierIndex - (getNumberOfTotalSubcarriers() / 2) - 0.5);
+        else
+            return getSubcarrierFrequencySpacing() * (subcarrierIndex - (getNumberOfTotalSubcarriers() / 2) + 0.5);
+    }
+
+    Hz getSubcarrierEndFrequencyOffset(int subcarrierIndex) const {
+        if (subcarrierIndex < 0 || subcarrierIndex >= getNumberOfTotalSubcarriers())
+            throw cRuntimeError("Invalid subcarrier index: %d", subcarrierIndex);
+
+        if (subcarrierIndex < getNumberOfTotalSubcarriers() / 2)
+            return getSubcarrierFrequencySpacing() * (subcarrierIndex - (getNumberOfTotalSubcarriers() / 2) + 0.5);
+        else
+            return getSubcarrierFrequencySpacing() * (subcarrierIndex - (getNumberOfTotalSubcarriers() / 2) + 1.5);
+    }
+
     virtual bps getGrossBitrate() const;
     virtual bps getNetBitrate() const;
     virtual Hz getBandwidth() const { return bandwidth; }

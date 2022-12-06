@@ -172,7 +172,7 @@ DimensionalNoise *createNoise(std::vector<double> snirs, const IReception *recep
         // create noise
     auto narrowbandSignal = check_and_cast<const INarrowbandSignal *>(reception->getAnalogModel());
     auto centerFrequency = narrowbandSignal->getCenterFrequency();
-    auto bandwidth = narrowbandSignal->getBandwidth();
+    auto bandwidth = kHz(312.5) * 53;
     auto startFrequency = centerFrequency - bandwidth / 2;
     auto endFrequency = centerFrequency + bandwidth / 2;
     auto noisePowerFunction = assembleNoisePowerFunction(snirs, frequencyDivision, timeDivision, startTime, endTime, startFrequency, endFrequency);
