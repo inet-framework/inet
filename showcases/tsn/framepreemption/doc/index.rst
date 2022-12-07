@@ -37,8 +37,8 @@ To enable preemption, the default submodules :ned:`EthernetMacLayer` and :ned:`E
 need to be replaced with :ned:`EthernetPreemptingMacLayer` and :ned:`EthernetPreemptingPhyLayer`.
 
 The :ned:`EthernetPreemptingMacLayer` contains two submodules which themselves represent Ethernet 
-MAC layers, a preemptable (:ned:`EthernetStreamingMacLayer`) and an express MAC layer 
-(:ned:`EthernetFragmentingMacLayer`), each with its own queue for frames:
+MAC layers, a preemptable (:ned:`EthernetFragmentingMacLayer`) and an express MAC layer 
+(:ned:`EthernetStreamingMacLayer`), each with its own queue for frames:
 
 .. figure:: media/mac.png
    :align: center
