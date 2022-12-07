@@ -7,6 +7,10 @@
 
 package inet.linklayer.ieee80211.mac.ratecontrol;
 
+//
+// Implements the Auto Rate Fallback (ARF) adaptive rate 
+// control mechanism.
+//
 simple ArfRateControl extends AarfRateControl
 {
     parameters:
