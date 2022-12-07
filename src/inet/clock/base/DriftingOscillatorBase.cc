@@ -13,9 +13,12 @@ void DriftingOscillatorBase::initialize(int stage)
 {
     OscillatorBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        nominalTickLength = par("nominalTickLength");
+        double nominalTickLengthAsDouble = par("nominalTickLength");
+        nominalTickLength = nominalTickLengthAsDouble;
         if (nominalTickLength == 0)
             nominalTickLength.setRaw(1);
+        else if (nominalTickLength.dbl() != nominalTickLengthAsDouble)
+            throw cRuntimeError("The nominalTickLength parameter value %lg cannot be accurately represented with the current simulation time precision, conversion result: %s", nominalTickLengthAsDouble, nominalTickLength.ustr().c_str());
         inverseDriftRate = invertDriftRate(driftRate);
         origin = simTime();
         simtime_t currentTickLength = getCurrentTickLength();
