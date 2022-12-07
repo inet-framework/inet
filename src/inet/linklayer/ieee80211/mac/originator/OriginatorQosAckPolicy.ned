@@ -10,6 +10,9 @@ package inet.linklayer.ieee80211.mac.originator;
 import inet.linklayer.ieee80211.mac.contract.IOriginatorQosAckPolicy;
 
 
+//
+// Implements the default originator ACK policy for QoS stations.
+//
 simple OriginatorQosAckPolicy like IOriginatorQosAckPolicy
 {
     parameters:

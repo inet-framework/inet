@@ -10,6 +10,9 @@ package inet.linklayer.ieee80211.mac.blockack;
 import inet.linklayer.ieee80211.mac.contract.IRecipientBlockAckAgreementPolicy;
 
 
+//
+// Implements the default recipient block ACK agreement policy.
+//
 simple RecipientBlockAckAgreementPolicy like IRecipientBlockAckAgreementPolicy
 {
     parameters:

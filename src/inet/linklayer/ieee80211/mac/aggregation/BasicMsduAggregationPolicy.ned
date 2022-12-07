@@ -9,6 +9,12 @@ package inet.linklayer.ieee80211.mac.aggregation;
 
 import inet.linklayer.ieee80211.mac.contract.IMsduAggregationPolicy;
 
+//
+// Implements a basic MSDU aggregation policy, controlled by parameters
+// such as the minimum number of subframes needed to compose an A-MSDU,
+// the minimum length for the aggregated payload, the maximum A-MSDU size,
+// etc.
+//
 simple BasicMsduAggregationPolicy like IMsduAggregationPolicy
 {
     int subframeNumThreshold = default(-1); // Minimum number of subframes needed to compose an A-MSDU. (-1 means it won't be checked)

@@ -10,6 +10,9 @@ package inet.linklayer.ieee80211.mac.blockack;
 import inet.linklayer.ieee80211.mac.contract.IOriginatorBlockAckAgreementPolicy;
 
 
+//
+// Implements the default originator block ACK agreement policy
+//
 simple OriginatorBlockAckAgreementPolicy like IOriginatorBlockAckAgreementPolicy
 {
     parameters:

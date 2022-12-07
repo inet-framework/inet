@@ -10,6 +10,9 @@ package inet.linklayer.ieee80211.mac.originator;
 import inet.linklayer.ieee80211.mac.contract.IRtsPolicy;
 
 
+//
+// Implements the default RTS policy for QoS stations.
+//
 simple QosRtsPolicy like IRtsPolicy
 {
     parameters:

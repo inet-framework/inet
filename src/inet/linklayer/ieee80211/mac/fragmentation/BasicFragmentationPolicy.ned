@@ -9,6 +9,10 @@ package inet.linklayer.ieee80211.mac.fragmentation;
 
 import inet.linklayer.ieee80211.mac.contract.IFragmentationPolicy;
 
+//
+// Implements a basic fragmentation policy, which employs a fragmentation
+// frame size threshold.
+//
 simple BasicFragmentationPolicy like IFragmentationPolicy
 {
     parameters:
