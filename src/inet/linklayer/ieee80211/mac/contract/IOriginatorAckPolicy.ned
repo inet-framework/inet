@@ -7,6 +7,11 @@
 
 package inet.linklayer.ieee80211.mac.contract;
 
+//
+// Interface for originator ACK policies. This policy tells whether
+// an ACK is expected for a transmitted frame, and also determines
+// the ACK timeout.
+//
 moduleinterface IOriginatorAckPolicy
 {
     parameters:

@@ -7,6 +7,9 @@
 
 package inet.linklayer.ieee80211.mac.contract;
 
+//
+// Interface for RTS policies.
+//
 moduleinterface IRtsPolicy
 {
     parameters:
