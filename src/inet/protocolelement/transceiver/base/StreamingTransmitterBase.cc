@@ -52,6 +52,8 @@ void StreamingTransmitterBase::scheduleTxEndTimer(Signal *signal)
 void StreamingTransmitterBase::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signal));
+    if (getSimulation()->getSimulationStage() == STAGE(CLEANUP))
+        return;
     if (signal == PRE_MODEL_CHANGE) {
         if (auto notification = dynamic_cast<cPrePathCutNotification *>(object)) {
             if (outputGate == notification->pathStartGate && isTransmitting())
