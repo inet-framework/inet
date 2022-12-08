@@ -50,6 +50,9 @@ Eventually all sensor nodes get into this state and the number of successfully s
 - RateControl:		rate adaptation instead of rate control?
 - DataLinkVisualizer: move activity parameter to DataLinkVisualizer from LinkVisualizerBase ?
 - RadioVisualizer: rename displayRadios parameter to better reflect that its a master switch
+- Ieee80211Visualizer doesn't work with simplified mgmt
+- Ieee80211Visualizer should indicate channel number
+- InfoVisualizer (and probably other visualizers): when DisplayHint = "bottom", the figure is on top of the module's name
 
 IPv4NetworkConfigurator:
 ?- a netmaskRoutes miatt olyan szabály is hozzáadódik a routing táblához, ami hibás. Pont a korrekt szabály felett van, és a csomagok nem találnak oda
