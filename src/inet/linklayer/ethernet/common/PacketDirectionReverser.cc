@@ -17,6 +17,7 @@
 #include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
+#include "inet/protocolelement/cutthrough/CutthroughTag_m.h"
 #include "inet/protocolelement/redundancy/StreamTag_m.h"
 #include "inet/protocolelement/shaper/EligibilityTimeTag_m.h"
 
@@ -35,6 +36,7 @@ void PacketDirectionReverser::processPacket(Packet *packet)
 {
     auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto directionTag = packet->findTag<DirectionTag>();
+    auto cutthroughTag = packet->findTag<CutthroughTag>();
     auto eligibilityTimeTag = packet->findTag<EligibilityTimeTag>();
     auto macAddressInd = packet->findTag<MacAddressInd>();
     auto dropEligibleInd = packet->findTag<DropEligibleInd>();
@@ -52,6 +54,9 @@ void PacketDirectionReverser::processPacket(Packet *packet)
         if (directionTag->getDirection() != DIRECTION_INBOUND)
             throw cRuntimeError("Packet must be inbound");
         packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
+    }
+    if (cutthroughTag != nullptr) {
+        packet->addTagIfAbsent<CutthroughTag>()->setCutthroughPosition(cutthroughTag->getCutthroughPosition());
     }
     if (eligibilityTimeTag != nullptr)
         packet->addTag<EligibilityTimeTag>()->setEligibilityTime(eligibilityTimeTag->getEligibilityTime());
