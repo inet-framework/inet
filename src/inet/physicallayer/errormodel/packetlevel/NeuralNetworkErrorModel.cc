@@ -168,6 +168,7 @@ std::vector<float> NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir
     auto endFrequency = centerFrequency + bandwidth / 2;
     int symbolCount = timeDivision * frequencyDivision;
     std::vector<math::Interval<simsec, Hz>> symbolIntervals;
+    // TODO: skip DC subcarrier!
     for (int i = 0; i < timeDivision; i++) {
         simtime_t symbolStartTime = (startTime * (double)(timeDivision - i) + endTime * (double)i) / timeDivision;
         simtime_t symbolEndTime = (startTime * (double)(timeDivision - i - 1) + endTime * (double)(i + 1)) / timeDivision;
@@ -215,7 +216,7 @@ std::vector<float> NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir
     });
 
 
-    double area = (endTime - startTime).dbl() / timeDivision * bandwidth.get() / frequencyDivision;
+    double area = (endTime - startTime).dbl() / timeDivision * Hz(bandwidth).get() / frequencyDivision;
 
 
     for (int i = 0; i < symbolCount; i++) {

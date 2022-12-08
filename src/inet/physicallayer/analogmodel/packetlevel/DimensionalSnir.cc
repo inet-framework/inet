@@ -101,7 +101,8 @@ double DimensionalSnir::computeMean() const
     auto startTime = simsec(reception->getStartTime());
     auto endTime = simsec(reception->getEndTime());
     Hz centerFrequency = dimensionalReception->getCenterFrequency();
-    Hz bandwidth = dimensionalReception->getBandwidth();
+    // TODO HACK
+    Hz bandwidth = kHz(312.5) * 53.0; // dimensionalReception->getBandwidth();
     Point<simsec, Hz> startPoint(startTime, centerFrequency - bandwidth / 2);
     Point<simsec, Hz> endPoint(endTime, centerFrequency + bandwidth / 2);
     EV_TRACE << "SNIR begin " << endl;
