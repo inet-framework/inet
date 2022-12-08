@@ -56,7 +56,7 @@ void StreamThroughReceiver::receivePacketProgress(cPacket *cpacket, cGate *gate,
 {
     take(cpacket);
     auto signal = check_and_cast<Signal *>(cpacket);
-    EV_INFO << "Receiving signal start from channel" << EV_FIELD(signal) << EV_ENDL;
+    EV_INFO << "Receiving signal progress from channel" << EV_FIELD(signal) << EV_ENDL;
     if (rxSignal) {
         delete rxSignal;
         rxSignal = signal;
@@ -71,7 +71,7 @@ void StreamThroughReceiver::receivePacketEnd(cPacket *cpacket, cGate *gate, bps 
 {
     take(cpacket);
     auto signal = check_and_cast<Signal *>(cpacket);
-    EV_INFO << "Receiving signal start from channel" << EV_FIELD(signal) << EV_ENDL;
+    EV_INFO << "Receiving signal end from channel" << EV_FIELD(signal) << EV_ENDL;
     emit(receptionEndedSignal, signal);
     if (rxSignal) {
         delete rxSignal;
