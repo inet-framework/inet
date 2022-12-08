@@ -13,6 +13,7 @@ simple EthernetCutthroughSource extends PacketDestreamer
 {
     parameters:
         string macTableModule;
+        int cutthroughSwitchingHeaderSize @unit(b) = default(0b);
         @class(EthernetCutthroughSource);
         @display("i=block/routing");
 }
