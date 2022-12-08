@@ -150,14 +150,21 @@ void PacketDissector::dissectPacket(Packet *packet, const Protocol *protocol, b 
 {
     auto frontOffset = packet->getFrontOffset();
     auto backOffset = packet->getBackOffset();
-    packet->setFrontOffset(frontOffset + extraFrontOffset);
-    packet->setBackOffset(backOffset + extraBackOffset);
-    // dissect packet data part according to protocol
-    doDissectPacket(packet, protocol);
-    // dissect remaining junk in packet without protocol (e.g. ethernet padding at IP level)
-    if (packet->getDataLength() != b(0))
-        doDissectPacket(packet, nullptr);
-    ASSERT(packet->getDataLength() == b(0));
+    try {
+        packet->setFrontOffset(frontOffset + extraFrontOffset);
+        packet->setBackOffset(backOffset + extraBackOffset);
+        // dissect packet data part according to protocol
+        doDissectPacket(packet, protocol);
+        // dissect remaining junk in packet without protocol (e.g. ethernet padding at IP level)
+        if (packet->getDataLength() != b(0))
+            doDissectPacket(packet, nullptr);
+        ASSERT(packet->getDataLength() == b(0));
+    }
+    catch (...) {
+        packet->setFrontOffset(frontOffset);
+        packet->setBackOffset(backOffset);
+        throw;
+    }
     packet->setFrontOffset(frontOffset);
     packet->setBackOffset(backOffset);
 }
