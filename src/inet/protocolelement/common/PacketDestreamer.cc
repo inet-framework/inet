@@ -57,6 +57,7 @@ void PacketDestreamer::pushPacketStart(Packet *packet, cGate *gate, bps datarate
 {
     Enter_Method("pushPacketStart");
     take(packet);
+    delete streamedPacket;
     streamedPacket = packet;
     streamDatarate = datarate;
     EV_INFO << "Starting destreaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
