@@ -22,6 +22,7 @@ module EthernetPhyLayer like IEthernetPhyLayer
         inboundEmitter.signalName = "packetReceivedFromLower";
         inboundEmitter.direction = "inbound";
         *.bitrate = default(this.bitrate);
+        *.datarate = default(this.bitrate);
         @display("i=block/layer");
     gates:
         input upperLayerIn;
