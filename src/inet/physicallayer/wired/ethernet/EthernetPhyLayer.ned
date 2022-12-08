@@ -39,9 +39,12 @@ module EthernetPhyLayer like IEthernetPhyLayer
         outboundEmitter: <default("PacketEmitter")> like IPacketFlow {
             @display("p=200,300");
         }
+        cutthroughSink: <default("")> like IPacketFlow {
+            @display("p=200,400");
+        }
         transmitter: <default("PacketTransmitter")> like IPacketTransmitter {
             datarate = default(parent.bitrate);
-            @display("p=200,400");
+            @display("p=200,500");
         }
         phyHeaderChecker: <default("EthernetPhyHeaderChecker")> like IPacketFilter {
             @display("p=500,100");
@@ -49,19 +52,24 @@ module EthernetPhyLayer like IEthernetPhyLayer
         inboundEmitter: <default("PacketEmitter")> like IPacketFlow {
             @display("p=500,300");
         }
+        cutthroughSource: <default("")> like IPacketFlow {
+            @display("p=500,400");
+        }
         receiver: <default("PacketReceiver")> like IPacketReceiver {
             datarate = default(parent.bitrate);
-            @display("p=500,400");
+            @display("p=500,500");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> phyHeaderInserter.in;
         phyHeaderInserter.out --> interFrameGapInserter.in;
         interFrameGapInserter.out --> outboundEmitter.in;
-        outboundEmitter.out --> transmitter.in;
+        outboundEmitter.out --> cutthroughSink.in;
+        cutthroughSink.out --> transmitter.in;
         transmitter.out --> { @display("m=s"); } --> lowerLayerOut;
 
         lowerLayerIn --> { @display("m=s"); } --> receiver.in;
-        receiver.out --> inboundEmitter.in;
+        receiver.out --> cutthroughSource.in;
+        cutthroughSource.out --> inboundEmitter.in;
         inboundEmitter.out --> phyHeaderChecker.in;
         phyHeaderChecker.out --> { @display("m=n"); } --> upperLayerOut;
 }

@@ -27,38 +27,28 @@ module EthernetCutthroughInterface extends NetworkInterface like IEthernetInterf
         string macTableModule;
         *.bitrate = default(this.bitrate);
         *.macTableModule = default(this.macTableModule);
-        @class(EthernetCutthroughInterface);
     gates:
         input upperLayerIn;
         output upperLayerOut;
-        input cutthroughIn;
-        output cutthroughOut;
         inout phys @labels(EthernetSignal);
     submodules:
         macLayer: <default("EthernetMacLayer")> like IEthernetMacLayer {
             parameters:
                 @display("p=400,100");
         }
-        cutthroughLayer: EthernetCutthroughLayer {
-            parameters:
-                @display("p=400,200");
-        }
         phyLayer: <default("EthernetStreamThroughPhyLayer")> like IEthernetPhyLayer {
             parameters:
+                cutthroughSource.typename = default("EthernetCutthroughSource");
+                cutthroughSink.typename = default("EthernetCutthroughSink");
                 @display("p=400,300");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> macLayer.upperLayerIn;
-        macLayer.lowerLayerOut --> cutthroughLayer.upperLayerIn;
-        cutthroughLayer.lowerLayerOut --> phyLayer.upperLayerIn;
+        macLayer.lowerLayerOut --> phyLayer.upperLayerIn;
         phyLayer.lowerLayerOut --> { @display("m=s"); } --> phys$o;
 
         phys$i --> { @display("m=s"); } --> phyLayer.lowerLayerIn;
-        phyLayer.upperLayerOut --> cutthroughLayer.lowerLayerIn;
-        cutthroughLayer.upperLayerOut --> macLayer.lowerLayerIn;
+        phyLayer.upperLayerOut --> macLayer.lowerLayerIn;
         macLayer.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
-
-        cutthroughLayer.cutthroughOut --> { @display("m=e"); } --> cutthroughOut;
-        cutthroughIn --> { @display("m=w"); } --> cutthroughLayer.cutthroughIn;
 }
 

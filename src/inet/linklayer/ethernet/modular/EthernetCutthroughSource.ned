@@ -15,6 +15,4 @@ simple EthernetCutthroughSource extends PacketDestreamer
         string macTableModule;
         @class(EthernetCutthroughSource);
         @display("i=block/routing");
-    gates:
-        output cutthroughOut;
 }

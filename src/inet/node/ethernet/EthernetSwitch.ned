@@ -123,9 +123,6 @@ module EthernetSwitch like IEthernetNetworkNode
         li: MessageDispatcher {
             @display("p=800,600;b=1200,5");
         }
-        cutthrough: MessageDispatcher if hasCutthroughSwitching {
-            @display("p=800,675;b=1200,5");
-        }
         eth[sizeof(ethg)]: <default(hasCutthroughSwitching ? "EthernetCutthroughInterface" : "EthernetInterface")> like IEthernetInterface {
             @display("p=250,750,row,150;q=txQueue");
         }
@@ -138,11 +135,6 @@ module EthernetSwitch like IEthernetNetworkNode
 
         ieee8021r.lowerLayerOut --> li.in++ if exists(ieee8021r);
         li.out++ --> ieee8021r.lowerLayerIn if exists(ieee8021r);
-
-        for i=0..sizeof(ethg)-1 {
-            eth[i].cutthroughOut --> cutthrough.in++ if hasCutthroughSwitching;
-            eth[i].cutthroughIn <-- cutthrough.out++ if hasCutthroughSwitching;
-        }
 
         bl.out++ --> li.in++;
         li.out++ --> bl.in++;

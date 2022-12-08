@@ -14,6 +14,4 @@ simple EthernetCutthroughSink extends PacketStreamer
     parameters:
         @class(EthernetCutthroughSink);
         @display("i=block/routing");
-    gates:
-        input cutthroughIn;
 }
