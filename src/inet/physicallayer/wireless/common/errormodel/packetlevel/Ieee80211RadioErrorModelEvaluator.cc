@@ -119,22 +119,52 @@ Ptr<const IFunction<WpHz, Domain<simsec, Hz>>> assembleNoisePowerFunction(std::v
 
     //return makeShared<ConstantFunction<WpHz, Domain<simsec, Hz>>>(WpHz(0.1 / 20000000.0 / 200.0));
 
+    /*
+    std::cout << "SNIRS:" << std::endl;
+    for (auto s :snirs) {
+        std::cout << s << " ";
+    }
+    std::cout << std::endl;
+    */
 
     std::vector<WpHz> noisePowers;
     for (int i = 0; i < snirs.size(); ++i) {
         double s = snirs[i];
 
+        if ((i % 52) == 26) // the DC subcarrier
+            noisePowers.push_back(WpHz(0.001));
+
         noisePowers.push_back(WpHz(1 / s)); // signal should be 1 WpHz (lol 20MW WiFi)
+
         if ((i % 52) == 51)
-            noisePowers.push_back(WpHz(0.1));
+            noisePowers.push_back(WpHz(0.001));
     }
 
-    for (int i = 0; i < 53; ++i) {
-        noisePowers.push_back(WpHz(0.1));
+    for (int i = 0; i < 54; ++i) {
+        noisePowers.push_back(WpHz(0.001));
     }
 
-    auto preambleNoise = makeShared<Boxcar2DFunction<WpHz, simsec, Hz>>(simsec(0), simsec(startTime), startFrequency, endFrequency, WpHz(0.01));
-    auto dataNoise = makeShared<PeriodicallyInterpolated2DFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), timeDivision+1, startFrequency, endFrequency, frequencyDivision+1, intX, intY, noisePowers);
+
+    /*
+    std::cout << "noisePowers:" << std::endl;
+    for (auto p : noisePowers) {
+        std::cout << p << " ";
+    }
+    std::cout << std::endl;
+    */
+
+    std::vector<WpHz> noisePowersT;
+
+    for (int f = 0; f < (frequencyDivision+2); ++f) {
+        for (int t = 0; t < (timeDivision+1); ++t) {
+            noisePowersT.push_back(noisePowers[t * (frequencyDivision + 2) + f]);
+        }
+    }
+
+    auto preambleNoise = makeShared<Boxcar2DFunction<WpHz, simsec, Hz>>(simsec(0), simsec(startTime), startFrequency, endFrequency, WpHz(0.001));
+
+    auto dataNoise = makeShared<PeriodicallyInterpolated2DFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), timeDivision+1, startFrequency, endFrequency, frequencyDivision+1+1, intX, intY, noisePowersT);
+    //auto dataNoise = makeShared<Boxcar2DFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), startFrequency, endFrequency, WpHz(1.0/20));
 
     return preambleNoise->add(dataNoise);
 /*
@@ -221,10 +251,9 @@ const LayeredTransmission *createLayeredTransmission(const IRadio *radio, const 
     return transmission;
 }
 
-const ISnir *createLayeredSnir(const LayeredReception *reception, const DimensionalNoise *noise) {
+const LayeredSnir *createLayeredSnir(const LayeredReception *reception, const DimensionalNoise *noise) {
     // create snir
-    const ISnir *snir = new LayeredSnir(reception, noise);
-    return snir;
+    return new LayeredSnir(reception, noise);
 }
 
 const ITransmission *createNonLayeredTransmission(const IRadio *radio, const ITransmitter *transmitter, Packet *transmittedPacket) {
@@ -403,22 +432,31 @@ void Ieee80211RadioErrorModelEvaluator::evaluateErrorModel()
 
         if (dimensionalReception) {
             auto powerFn = dimensionalReception->getPower();
-            dump("power", powerFn, {{simsec(0.000'000'5), Hz(2'400'000'000.0)}, {simsec(0.0002), Hz(2'425'000'000.0)}, true, true, 0});
+            dump("power", powerFn, {{simsec(0.000'000'5), Hz(2'420'000'000.0)}, {simsec(0.0002), Hz(2'460'000'000.0)}, true, true, 0});
         }
+
+        if (layeredReception) {
+            auto analogModel = check_and_cast<const DimensionalReceptionSignalAnalogModel*>(layeredReception->getAnalogModel());
+            auto powerFn = analogModel->getPower();
+            dump("power", powerFn, {{simsec(0.000'000'5), Hz(2'420'000'000.0)}, {simsec(0.0002), Hz(2'460'000'000.0)}, true, true, 0});
+        }
+
         auto noiseFn = noise->getPower();
-
-
-        dump("noise", noiseFn, {{simsec(0.000'000'5), Hz(2'400'000'000.0)}, {simsec(0.0002), Hz(2'425'000'000.0)}, true, true, 0});
+        dump("noise", noiseFn, {{simsec(0.000'000'5), Hz(2'420'000'000.0)}, {simsec(0.0002), Hz(2'460'000'000.0)}, true, true, 0});
 
         //auto snirFunction = receptionPowerFunction->divide(noisePowerFunction);
 
         const ISnir *snir = nullptr;
-        if (auto analogModel = dynamic_cast<const LayeredDimensionalAnalogModel *>(radioMedium->getAnalogModel()))
-            snir = createLayeredSnir(layeredReception, noise);
+        if (auto analogModel = dynamic_cast<const LayeredDimensionalAnalogModel *>(radioMedium->getAnalogModel())) {
+            auto lsnir = createLayeredSnir(layeredReception, noise);
+            auto lsnirf = lsnir->getSnir();
+            dump("snir", lsnirf, {{simsec(0.000'000'5), Hz(2'420'000'000.0)}, {simsec(0.0002), Hz(2'460'000'000.0)}, true, true, 0});
+            snir = lsnir;
+        }
         if (auto analogModel = dynamic_cast<const DimensionalAnalogModel *>(radioMedium->getAnalogModel())) {
             auto dsnir = createNonLayeredSnir(dimensionalReception, noise);
             auto dsnirf = dsnir->getSnir();
-            dump("snir", dsnirf, {{simsec(0.000'000'5), Hz(2'400'000'000.0)}, {simsec(0.0002), Hz(2'425'000'000.0)}, true, true, 0});
+            dump("snir", dsnirf, {{simsec(0.000'000'5), Hz(2'420'000'000.0)}, {simsec(0.0002), Hz(2'460'000'000.0)}, true, true, 0});
             snir = dsnir;
         }
 
