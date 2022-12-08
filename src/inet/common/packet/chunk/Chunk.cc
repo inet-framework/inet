@@ -121,7 +121,7 @@ const Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<C
         throw cRuntimeError("Cannot convert chunk from type %s to type %s. "
                 "The most likely cause of this error is that a packet header is being misinterpreted while processing a received packet. "
                 "The most likely fix is to find the code where the misinterpretation happens and change it."
-                "If the intention is to reinterpret the chunk via serialization/deserialization, then it needs to be enabled by passing the PF_ALLOW_SERIALIZATION flag into the peek() or similar function."
+                "If the intention is to reinterpret the chunk via serialization/deserialization, then it needs to be enabled by passing the PF_ALLOW_REINTERPRETATION flag into the peek() or similar function."
                 "The automatic conversion is disabled by default to prevent unexpected behavior due to unintended data reinterpretation.",
                 opp_typename(typeid(*chunkObject)), opp_typename(typeInfo));
     }
