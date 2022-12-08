@@ -65,6 +65,7 @@ class INET_API GateScheduleConfiguratorBase : public NetworkConfiguratorBase
             simtime_t guardBand = -1; // guard band in seconds
             simtime_t maxCycleTime = -1; // maximum length of the cycle
             simtime_t maxSlotDuration = -1; // maximum slot duration in the cycle
+            bool cutthroughSwitchingEnabled = true; // cut-through switching is enabled
             NetworkNode *startNode = nullptr; // the network node where this port is
             NetworkNode *endNode = nullptr; // the network node to which this port is connected
             Port *otherPort = nullptr; // the other port to which this port is connected
@@ -90,6 +91,7 @@ class INET_API GateScheduleConfiguratorBase : public NetworkConfiguratorBase
           public:
             std::string name; // for user identification
             int gateIndex = -1; // index of the ~PeriodicGate
+            b cutthroughSwitchingHeaderSize = b(0);
             Application *startApplication = nullptr; // the application that generates the packets
             Device *endDevice = nullptr; // the device where the flow ends
             std::vector<PathFragment *> pathFragments; // list of path fragments (may use redundancy)

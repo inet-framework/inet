@@ -103,6 +103,7 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
         for (int packetIndex = 0; packetIndex < getPacketCount(flow); packetIndex++) {
             std::shared_ptr<expr> firstTransmissionStartTimeVariable;
             std::shared_ptr<expr> previousReceptionEndTimeVariable;
+            std::shared_ptr<expr> previousReceptionStartTimeVariable;
             for (auto pathFragment : flow->pathFragments) {
                 for (int nodeIndex = 0; nodeIndex < pathFragment->networkNodes.size() - 1; nodeIndex++) {
                     auto transmissionPort = pathFragment->outputPorts[nodeIndex];
@@ -110,11 +111,19 @@ Z3GateScheduleConfigurator::Output *Z3GateScheduleConfigurator::computeGateSched
                     if (firstTransmissionStartTimeVariable == nullptr)
                         firstTransmissionStartTimeVariable = transmissionStartTimeVariable;
                     auto receptionPort = pathFragment->inputPorts[nodeIndex];
+                    auto receptionStartTimeVariable = getReceptionStartTimeVariable(flow, packetIndex, receptionPort, flow->gateIndex);
                     auto receptionEndTimeVariable = getReceptionEndTimeVariable(flow, packetIndex, receptionPort, flow->gateIndex);
                     if (nodeIndex == 0)
                         addAssert(applicationStartTimeVariable + packetIntervalVariable * z3Context->real_val(packetIndex) == transmissionStartTimeVariable);
-                    else if (previousReceptionEndTimeVariable)
-                        addAssert(transmissionStartTimeVariable >= previousReceptionEndTimeVariable);
+                    else if (previousReceptionEndTimeVariable) {
+                        if (transmissionPort->cutthroughSwitchingEnabled && receptionPort->cutthroughSwitchingEnabled && flow->cutthroughSwitchingHeaderSize != b(0)) {
+                            simtime_t cutthroughDelay = s(flow->cutthroughSwitchingHeaderSize / receptionPort->datarate).get();
+                            addAssert(transmissionStartTimeVariable >= previousReceptionStartTimeVariable + z3Context->real_val(cutthroughDelay.str().c_str()));
+                        }
+                        else
+                            addAssert(transmissionStartTimeVariable >= previousReceptionEndTimeVariable);
+                    }
+                    previousReceptionStartTimeVariable = receptionStartTimeVariable;
                     previousReceptionEndTimeVariable = receptionEndTimeVariable;
                 }
             }

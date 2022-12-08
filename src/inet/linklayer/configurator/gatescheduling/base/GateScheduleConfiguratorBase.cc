@@ -113,6 +113,7 @@ void GateScheduleConfiguratorBase::addPorts(Input& input) const
                 port->guardBand = s(port->maxPacketLength / port->datarate).get();
                 port->maxCycleTime = gateCycleDuration;
                 port->maxSlotDuration = gateCycleDuration;
+                port->cutthroughSwitchingEnabled = true; // TODO: extract from network interface!
                 port->startNode = networkNode;
                 networkNode->ports.push_back(port);
                 input.ports.push_back(port);
@@ -158,6 +159,7 @@ void GateScheduleConfiguratorBase::addFlows(Input& input) const
                     int pcp = entry->get("pcp").intValue();
                     int gateIndex = entry->get("gateIndex").intValue();
                     b packetLength = b(entry->get("packetLength").doubleValueInUnit("b"));
+                    b cutthroughSwitchingHeaderSize = entry->containsKey("cutthroughSwitchingHeaderSize") ? b(entry->get("cutthroughSwitchingHeaderSize").doubleValueInUnit("b")) : b(0);
                     simtime_t packetInterval = entry->get("packetInterval").doubleValueInUnit("s");
                     simtime_t maxLatency = entry->containsKey("maxLatency") ? entry->get("maxLatency").doubleValueInUnit("s") : -1;
                     simtime_t maxJitter = entry->containsKey("maxJitter") ? entry->get("maxJitter").doubleValueInUnit("s") : 0;
@@ -180,6 +182,7 @@ void GateScheduleConfiguratorBase::addFlows(Input& input) const
                     auto flow = new Input::Flow();
                     flow->name = entry->containsKey("name") ? entry->get("name").stringValue() : (std::string("flow") + std::to_string(flowIndex++)).c_str();
                     flow->gateIndex = gateIndex;
+                    flow->cutthroughSwitchingHeaderSize = cutthroughSwitchingHeaderSize;
                     flow->startApplication = startApplication;
                     flow->endDevice = endDevice;
                     cValueArray *pathFragments;
