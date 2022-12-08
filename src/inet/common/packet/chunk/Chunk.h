@@ -241,6 +241,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     friend class SliceChunk;
     friend class EncryptedChunk;
     friend class SequenceChunk;
+    friend class StreamBufferChunk;
     friend class ChunkDescriptor;
 
   protected:
@@ -268,6 +269,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
         CT_ENCRYPTED,
         CT_CPACKET,
         CT_SEQUENCE,
+        CT_STREAM,
         CT_FIELDS
     };
 

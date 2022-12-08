@@ -15,6 +15,7 @@ cplusplus {{
 #include "inet/common/packet/chunk/Chunk.h"
 #include "inet/common/packet/chunk/cPacketChunk.h"
 #include "inet/common/packet/chunk/EmptyChunk.h"
+#include "inet/common/packet/chunk/StreamBufferChunk.h"
 #include "inet/common/packet/chunk/EncryptedChunk.h"
 #include "inet/common/packet/chunk/FieldsChunk.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
@@ -98,6 +99,15 @@ class EmptyChunk extends Chunk
 {
     @existingClass;
     @descriptor(readonly);
+}
+
+class StreamBufferChunk extends Chunk
+{
+    @existingClass;
+    @descriptor(readonly);
+    simtime_t startTime;
+    bps datarate;
+    Chunk* streamData @getter(_getStreamData);
 }
 
 class EncryptedChunk extends Chunk
