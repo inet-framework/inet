@@ -315,7 +315,7 @@ bool UtilizationFilter::process(simtime_t& t, double& value, cObject *details)
 void UtilizationFilter::emitUtilization(simtime_t time, cObject *details)
 {
     double utilization = time == lastSignalTime ? 0 : totalValue / (time - lastSignalTime).dbl();
-    ASSERT(0 <= utilization && utilization <= 1);
+    utilization = std::min(std::max(utilization, 0.0), 1.0);
     fire(this, time, utilization, details);
     lastSignalTime = time;
     totalValue = 0;
