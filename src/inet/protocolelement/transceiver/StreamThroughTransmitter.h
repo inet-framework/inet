@@ -34,7 +34,7 @@ class INET_API StreamThroughTransmitter : public StreamingTransmitterBase
 
     virtual void startTx(Packet *packet, bps datarate, b position);
     virtual void progressTx(Packet *packet, bps datarate, b position);
-    virtual void endTx();
+    virtual void endTx(Packet *packet);
     virtual void abortTx() override;
 
     virtual void scheduleBufferUnderrunTimer();

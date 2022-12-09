@@ -21,7 +21,7 @@ void StreamThroughTransmitter::initialize(int stage)
 void StreamThroughTransmitter::handleMessageWhenUp(cMessage *message)
 {
     if (message == txEndTimer)
-        endTx();
+        endTx(check_and_cast<Packet *>(txSignal->getEncapsulatedPacket()));
     else if (message == bufferUnderrunTimer)
         throw cRuntimeError("Buffer underrun during transmission");
     else
@@ -99,14 +99,16 @@ void StreamThroughTransmitter::progressTx(Packet *packet, bps datarate, b positi
     scheduleBufferUnderrunTimer();
 }
 
-void StreamThroughTransmitter::endTx()
+void StreamThroughTransmitter::endTx(Packet *packet)
 {
     // 1. check current state
     ASSERT(isTransmitting());
     // 2. send signal end to receiver and notify subscribers
-    auto packet = check_and_cast<Packet *>(txSignal->getEncapsulatedPacket());
     EV_INFO << "Ending transmission" << EV_FIELD(packet) << EV_FIELD(datarate, txDatarate) << EV_ENDL;
     handlePacketProcessed(packet);
+    auto signal = encodePacket(packet);
+    delete txSignal;
+    txSignal = signal->dup();
     emit(transmissionEndedSignal, txSignal);
     sendSignalEnd(txSignal, packet->getTransmissionId());
     // 3. clear internal state
@@ -125,6 +127,7 @@ void StreamThroughTransmitter::endTx()
         producer->handlePushPacketProcessed(packet, gate, true);
         producer->handleCanPushPacketChanged(gate);
     }
+    delete signal;
 }
 
 void StreamThroughTransmitter::abortTx()
@@ -189,9 +192,13 @@ void StreamThroughTransmitter::pushPacketStart(Packet *packet, cGate *gate, bps 
 void StreamThroughTransmitter::pushPacketEnd(Packet *packet, cGate *gate)
 {
     Enter_Method("pushPacketEnd");
-    ASSERT(txSignal != nullptr);
     take(packet);
-    progressTx(packet, bps(NaN), packet->getTotalLength());
+    if (txEndTimer->getArrivalTime() == simTime()) {
+        cancelClockEvent(txEndTimer);
+        endTx(packet);
+    }
+    else
+        progressTx(packet, txDatarate, packet->getDataLength());
     updateDisplayString();
 }
 
