@@ -50,11 +50,12 @@ void PacketStreamer::handleMessage(cMessage *message)
 
 void PacketStreamer::endStreaming()
 {
-    auto packetLength = streamedPacket->getTotalLength();
-    EV_INFO << "Ending streaming packet" << EV_FIELD(packet, *streamedPacket) << EV_ENDL;
-    pushOrSendPacketEnd(streamedPacket, outputGate, consumer, streamedPacket->getId());
+    auto packet = streamedPacket;
+    auto packetLength = packet->getTotalLength();
+    EV_INFO << "Ending streaming packet" << EV_FIELD(packet) << EV_ENDL;
     streamDatarate = bps(NaN);
     streamedPacket = nullptr;
+    pushOrSendPacketEnd(packet, outputGate, consumer, packet->getId());
     numProcessedPackets++;
     processedTotalLength += packetLength;
     updateDisplayString();
@@ -78,11 +79,11 @@ void PacketStreamer::pushPacket(Packet *packet, cGate *gate)
     streamDatarate = datarate;
     streamedPacket = packet;
     EV_INFO << "Starting streaming packet" << EV_FIELD(packet) << EV_ENDL;
+    if (!std::isnan(streamDatarate.get()))
+        scheduleClockEventAfter(s(streamedPacket->getTotalLength() / streamDatarate).get(), endStreamingTimer);
     pushOrSendPacketStart(streamedPacket->dup(), outputGate, consumer, streamDatarate, streamedPacket->getId());
     if (std::isnan(streamDatarate.get()))
         endStreaming();
-    else
-        scheduleClockEventAfter(s(streamedPacket->getTotalLength() / streamDatarate).get(), endStreamingTimer);
 }
 
 void PacketStreamer::handleCanPushPacketChanged(cGate *gate)
