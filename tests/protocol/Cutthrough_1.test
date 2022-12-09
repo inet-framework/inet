@@ -1,0 +1,144 @@
+%description:
+
+Tests protocol agnostic cut-through switching.
+
+%file: test.ned
+
+import inet.protocolelement.cutthrough.CutthroughSink;
+import inet.protocolelement.cutthrough.CutthroughSource;
+import inet.protocolelement.transceiver.DestreamingReceiver;
+import inet.protocolelement.transceiver.StreamThroughReceiver;
+import inet.protocolelement.transceiver.StreamThroughTransmitter;
+import inet.protocolelement.transceiver.StreamingTransmitter;
+import inet.queueing.common.PacketMultiplexer;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.server.InstantServer;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+
+network TestCutthrough
+{
+    submodules:
+        sourceApp: ActivePacketSource {
+            @display("p=100,400");
+        }
+        sourceTransmitter: StreamingTransmitter {
+            @display("p=100,500");
+        }
+        switchReceiver: StreamThroughReceiver {
+            @display("p=250,500");
+        }
+        cutthroughSource: CutthroughSource {
+            @display("p=250,400");
+        }
+        switchApp: ActivePacketSource {
+            @display("p=250,100");
+        }
+        m: PacketMultiplexer {
+            @display("p=250,200");
+        }
+        queue: PacketQueue {
+            @display("p=400,200");
+        }
+        server: InstantServer {
+            @display("p=400,300");
+        }
+        cutthroughSink: CutthroughSink {
+            @display("p=400,400");
+        }
+        switchTransmitter: StreamThroughTransmitter {
+            @display("p=400,500");
+        }
+        sinkReceiver: DestreamingReceiver {
+            @display("p=550,500");
+        }
+        sinkApp: PassivePacketSink {
+            @display("p=550,400");
+        }
+    connections:
+        sourceApp.out --> sourceTransmitter.in;
+        sourceTransmitter.out --> { @display("ls=blue,3,"); datarate = 10Mbps; delay = 1ns; } --> switchReceiver.in;
+        switchReceiver.out --> { @display("ls=blue"); } --> cutthroughSource.in;
+        cutthroughSource.out --> m.in++;
+        switchApp.out --> m.in++;
+        m.out --> queue.in;
+        queue.out --> server.in;
+        server.out --> cutthroughSink.in;
+        cutthroughSink.out --> { @display("ls=blue"); } --> switchTransmitter.in;
+        switchTransmitter.out --> { @display("ls=blue,3,"); datarate = 10Mbps; delay = 1ns; } --> sinkReceiver.in;
+        sinkReceiver.out --> sinkApp.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestCutthrough
+sim-time-limit = 0.01s
+cmdenv-event-banners = false
+
+**.datarate = 10Mbps
+
+**.cutthroughPosition = 8B
+
+**.sourceApp.packetLength = 800B
+**.sourceApp.productionInterval = exponential(1ms)
+
+**.switchApp.packetLength = 400B
+**.switchApp.productionInterval = exponential(1ms)
+
+%contains-regex: stdout
+Sending cut-through packet, .*?sourceApp-0.*?
+.*
+Consuming packet, .*?switchApp-0.*?
+.*
+Sending cut-through packet, .*?sourceApp-1.*?
+.*
+Consuming packet, .*?sourceApp-0.*?
+.*
+Consuming packet, .*?sourceApp-1.*?
+.*
+Consuming packet, .*?switchApp-1.*?
+.*
+Sending cut-through packet, .*?sourceApp-2.*?
+.*
+Consuming packet, .*?sourceApp-2.*?
+.*
+Sending cut-through packet, .*?sourceApp-3.*?
+.*
+Consuming packet, .*?switchApp-2.*?
+.*
+Consuming packet, .*?sourceApp-3.*?
+.*
+Sending cut-through packet, .*?sourceApp-4.*?
+.*
+Consuming packet, .*?sourceApp-4.*?
+.*
+Consuming packet, .*?switchApp-3.*?
+.*
+Consuming packet, .*?switchApp-4.*?
+.*
+Sending cut-through packet, .*?sourceApp-5.*?
+.*
+Consuming packet, .*?sourceApp-5.*?
+.*
+Consuming packet, .*?switchApp-5.*?
+.*
+Sending cut-through packet, .*?sourceApp-6.*?
+.*
+Sending cut-through packet, .*?sourceApp-7.*?
+.*
+Consuming packet, .*?sourceApp-6.*?
+.*
+Consuming packet, .*?switchApp-6.*?
+.*
+Sending cut-through packet, .*?sourceApp-8.*?
+.*
+Consuming packet, .*?switchApp-7.*?
+.*
+Consuming packet, .*?sourceApp-7.*?
+.*
+Consuming packet, .*?sourceApp-8.*?
+.*
+Consuming packet, .*?switchApp-8.*?
+.*
+Consuming packet, .*?switchApp-9.*?
