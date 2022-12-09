@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := all-pch
 
-LDFLAGS += -lz3 -fopenmp
+LDFLAGS += -lz3
 
 #
 # Use the new message compiler introduced in OMNeT++ 5.3
