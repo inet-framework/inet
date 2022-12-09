@@ -2,11 +2,7 @@
 
 - Earth & Network node visualization showcases (and possibly others):
 *.visualizer.osgVisualizer.typename = "IntegratedOsgVisualizer" # TODO: remove when enabled by default
-- Transportconnection showcase: A runtime error occurred:
-Tag 'inet::Ipv4InterfaceData' is absent -- in module (inet::visualizer::TransportConnectionCanvasVisualizer) TransportConnectionVisualizationMultipleConnectionsShowcase.visualizer.canvasVisualizer.transportConnectionVisualizer (id=222), at t=0.00006972s, event #232 
 - Earth showcase: 3rd config: the initial viewport is not centered on the nodes
-- HiddenNode: crash with all 4 configs (some error in Ieee80211MacProtocolDissector?)
-- Ratecontrol: 2nd config running very slowly when run with the gui in express mode
 
 BUGS:
 
@@ -62,20 +58,6 @@ IPv4
 
 TCP
 ?- EndToEndDelay statistic always 0 (e.g. advanced showcase), it uses messageAge filter, which relies on creation timestamp, and that is 0 due to the packet being allocated in TCP, there's no easy solution
-
-DONE:
-
-Throughput
-+ in g mode the application-level throughput is less than in a-mode.
-
-+ LevelOfDetail:		crash. something wrong with the mac.
-+ HiddenNode:		exactly the same amount of packets in configs 1 and 3
-			check_and_cast(): Cannot cast 'inet::physicallayer::INoise*' to type 'const 						inet::physicallayer::NarrowbandNoiseBase *' -- in module (inet::physicallayer::Ieee80211Radio) 						HiddenNodeExample.hostA.wlan[0].radio (id=36), during network initialization
-+ RateControl:		the charts are not the same as before.
-+ Power:			error
-+ RoutingTableVisualizer: Tag 'inet::Ipv4InterfaceData' is absent -- in module (inet::visualizer::RoutingTableCanvasVisualizer)
-+ Coexistence: inet: 42dd5dc (updated submodule refs for swarm, 2018-10-24) showcases: 0b13136 (coexistence, 2018-10-29): IndependentPerformance config, run 0:
-vector::reserve while processing statistic signal packetSentToUpper (id=58) with data type inet::Packet, emitted from (inet::physicallayer::FlatRadioBase)CoexistenceShowcase6.wpanHost1.wlan[0].radio -- in module (inet::physicallayer::FlatRadioBase) CoexistenceShowcase6.wpanHost1.wlan[0].radio (id=233), at t=5.20633785078s, event #471274 
 
 Planned Showcases:
 ------------------
