@@ -22,7 +22,7 @@ module SourceApp like IApp
         input socketIn;
         output socketOut;
     submodules:
-        source: <default("ActivePacketSink")> like IActivePacketSource {
+        source: <default("ActivePacketSource")> like IActivePacketSource {
             @display("p=150,150");
         }
     connections allowunconnected:
