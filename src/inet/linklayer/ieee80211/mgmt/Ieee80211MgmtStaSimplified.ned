@@ -8,15 +8,11 @@
 package inet.linklayer.ieee80211.mgmt;
 
 //
-// Used in 802.11 infrastructure mode: handles management frames for a station (STA).
-// Relies on the MAC layer (~Ieee80211Mac) for reception and transmission of frames.
+// Used in 802.11 infrastructure mode for a station (STA).
 //
-// This variant is a very simplistic: the AP address and channel is preconfigured,
-// there is no scanning, authentication or association. Only data frames are
-// understood or sent at any time.
-//
-// This module never switches channels, that is, it will operate on the channel
-// the physical layer is configured for (see channelNumber in ~Ieee80211Radio).
+// This management module variant does not implement scanning, nor does 
+// it send or expect to receive any management frames. It simply treats the 
+// station as associated to the configured AP all the time.
 //
 simple Ieee80211MgmtStaSimplified like IIeee80211Mgmt
 {
