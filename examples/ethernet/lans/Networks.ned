@@ -10,7 +10,7 @@ package inet.examples.ethernet.lans;
 import inet.node.ethernet.EthernetHub;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth10M;
-import inet.node.ethernet.EthernetHost;
+import inet.node.ethernet.SimpleEthernetLlcHost;
 import inet.node.ethernet.EthernetSwitch;
 import inet.physicallayer.wired.common.WireJunction;
 import ned.DatarateChannel;
@@ -51,45 +51,45 @@ network MixedLAN
             parameters:
                 @display("p=753,307");
         }
-        busHostA: EthernetHost {
+        busHostA: SimpleEthernetLlcHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=126,200");
         }
-        busHostB: EthernetHost {
+        busHostB: SimpleEthernetLlcHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=258,200");
         }
-        busHostC: EthernetHost {
+        busHostC: SimpleEthernetLlcHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=514,400");
         }
-        busHostD: EthernetHost {
+        busHostD: SimpleEthernetLlcHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=753,400");
         }
-        switchHostA: EthernetHost {
+        switchHostA: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=100,500");
         }
-        switchHostB: EthernetHost {
+        switchHostB: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=250,500");
         }
-        switchHostC: EthernetHost {
+        switchHostC: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=400,500");
         }
-        switchHostD: EthernetHost {
+        switchHostD: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
@@ -102,17 +102,17 @@ network MixedLAN
             gates:
                 ethg[5];
         }
-        hubHostA: EthernetHost {
+        hubHostA: SimpleEthernetLlcHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=500,100");
         }
-        hubHostB: EthernetHost {
+        hubHostB: SimpleEthernetLlcHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=650,100");
         }
-        hubHostC: EthernetHost {
+        hubHostC: SimpleEthernetLlcHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=800,100");
@@ -156,11 +156,11 @@ network MixedLAN
 network TwoHosts
 {
     submodules:
-        hostA: EthernetHost {
+        hostA: SimpleEthernetLlcHost {
             parameters:
                 @display("p=100,100");
         }
-        hostB: EthernetHost {
+        hostB: SimpleEthernetLlcHost {
             parameters:
                 @display("p=300,100");
         }
@@ -181,25 +181,25 @@ network SwitchedLAN
             datarate = 100Mbps;
         }
     submodules:
-        hostA: EthernetHost {
+        hostA: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=250,100");
         }
-        hostB: EthernetHost {
+        hostB: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=400,200");
         }
-        hostC: EthernetHost {
+        hostC: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=250,300");
         }
-        hostD: EthernetHost {
+        hostD: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
@@ -225,22 +225,22 @@ network SwitchedLAN
 network HubLAN
 {
     submodules:
-        hostA: EthernetHost {
+        hostA: SimpleEthernetLlcHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=250,100");
         }
-        hostB: EthernetHost {
+        hostB: SimpleEthernetLlcHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=400,200");
         }
-        hostC: EthernetHost {
+        hostC: SimpleEthernetLlcHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=250,300");
         }
-        hostD: EthernetHost {
+        hostD: SimpleEthernetLlcHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=100,200");
@@ -270,22 +270,22 @@ network BusLAN
             length = 1cm;
         }
     submodules:
-        hostA: EthernetHost {
+        hostA: SimpleEthernetLlcHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=100,111");
         }
-        hostB: EthernetHost {
+        hostB: SimpleEthernetLlcHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=250,111");
         }
-        hostC: EthernetHost {
+        hostC: SimpleEthernetLlcHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=400,111");
         }
-        hostD: EthernetHost {
+        hostD: SimpleEthernetLlcHost {
             parameters:
                 eth.duplexMode = false;
                 @display("p=550,111");
@@ -327,25 +327,25 @@ network SwitchedDuplexLAN
         }
 
     submodules:
-        hostA: EthernetHost {
+        hostA: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=250,100");
         }
-        hostB: EthernetHost {
+        hostB: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=400,200");
         }
-        hostC: EthernetHost {
+        hostC: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=250,300");
         }
-        hostD: EthernetHost {
+        hostD: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;

@@ -38,7 +38,7 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %file: test.ned
 
 import inet.test.moduletest.lib.*;
-import inet.node.ethernet.EthernetHost;
+import inet.node.ethernet.SimpleEthernetLlcHost;
 import inet.node.ethernet.EthernetSwitch;
 import inet.common.scenario.ScenarioManager;
 
@@ -49,10 +49,10 @@ network Test
         scenarioManager: ScenarioManager {
             @display("p=450,50");
         }
-        sender[2]: EthernetHost {
+        sender[2]: SimpleEthernetLlcHost {
             @display("p=100,350,r,150");
         }
-        recip: EthernetHost {
+        recip: SimpleEthernetLlcHost {
             @display("p=500,350");
         }
         switch: EthernetSwitch {

@@ -9,7 +9,7 @@ import inet.common.scenario.ScenarioManager;
 import inet.linklayer.configurator.L2NetworkConfigurator;
 import inet.linklayer.ieee8021d.tester.StpTester;
 import inet.node.ethernet.Eth1G;
-import inet.node.ethernet.EthernetHost;
+import inet.node.ethernet.SimpleEthernetLlcHost;
 import inet.node.ethernet.EthernetSwitch;
 
 
@@ -82,38 +82,38 @@ network SwitchNetwork
 network LargeNet extends SwitchNetwork
 {
     submodules:
-        host1: EthernetHost {
+        host1: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=250,200");
         }
-        host2: EthernetHost {
+        host2: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=775,300");
         }
 
-        host3: EthernetHost {
+        host3: SimpleEthernetLlcHost {
             parameters:
             csmacdSupport = false;
             eth.duplexMode = true;
             @display("p=700,100");
         }
-        host4: EthernetHost {
+        host4: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=775,470");
         }
-        host5: EthernetHost {
+        host5: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
                 @display("p=325,470");
         }
-        host6: EthernetHost {
+        host6: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;

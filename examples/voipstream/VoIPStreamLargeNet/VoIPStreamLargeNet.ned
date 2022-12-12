@@ -10,7 +10,7 @@ package inet.examples.voipstream.VoIPStreamLargeNet;
 
 import inet.node.ethernet.EthernetHub;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.EthernetHost;
+import inet.node.ethernet.SimpleEthernetLlcHost;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 import inet.physicallayer.wired.common.WireJunction;
@@ -45,7 +45,7 @@ module VoIPStreamSmallLAN
         hub: EthernetHub {
             @display("is=s");
         }
-        host[h]: EthernetHost {
+        host[h]: SimpleEthernetLlcHost {
             parameters:
                 eth.duplexMode = false;
                 @display("is=s");
@@ -77,7 +77,7 @@ module VoIPStreamMediumLAN
                 eth[0].duplexMode = false;
                 @display("is=s");
         }
-        host[n]: EthernetHost {
+        host[n]: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
@@ -86,7 +86,7 @@ module VoIPStreamMediumLAN
         hub: EthernetHub {
             @display("is=s");
         }
-        hhost[h]: EthernetHost {
+        hhost[h]: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = true;
                 eth.duplexMode = false;
@@ -127,7 +127,7 @@ module VoIPStreamLargeLAN
                 eth[0].duplexMode = false;
                 @display("is=s");
         }
-        host[n]: EthernetHost {
+        host[n]: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
@@ -137,7 +137,7 @@ module VoIPStreamLargeLAN
             parameters:
                 @display("is=s");
         }
-        hhost[h]: EthernetHost {
+        hhost[h]: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = true;
                 eth.duplexMode = false;
@@ -147,7 +147,7 @@ module VoIPStreamLargeLAN
             parameters:
                 @display("p=,,r,50");
         }
-        bhost[b]: EthernetHost {
+        bhost[b]: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = true;
                 eth.duplexMode = false;
@@ -208,7 +208,7 @@ network VoIPStreamLargeNet
         mlanBB[n*bbm]: VoIPStreamMediumLAN;
         llanBB[n*bbl]: VoIPStreamLargeLAN;
         switchA: EthernetSwitch;
-        serverA: EthernetHost {
+        serverA: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
@@ -217,7 +217,7 @@ network VoIPStreamLargeNet
         mlanA[am]: VoIPStreamMediumLAN;
         llanA[al]: VoIPStreamLargeLAN;
         switchB: EthernetSwitch;
-        serverB: EthernetHost {
+        serverB: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
@@ -226,7 +226,7 @@ network VoIPStreamLargeNet
         mlanB[bm]: VoIPStreamMediumLAN;
         llanB[bl]: VoIPStreamLargeLAN;
         switchC: EthernetSwitch;
-        serverC: EthernetHost {
+        serverC: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
@@ -235,7 +235,7 @@ network VoIPStreamLargeNet
         mlanC[cm]: VoIPStreamMediumLAN;
         llanC[cl]: VoIPStreamLargeLAN;
         switchD: EthernetSwitch;
-        serverD: EthernetHost {
+        serverD: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;

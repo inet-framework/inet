@@ -6,7 +6,7 @@ Test Rstp treebuilding
 
 import inet.test.moduletest.lib.*;
 import inet.node.ethernet.Eth1G;
-import inet.node.ethernet.EthernetHost;
+import inet.node.ethernet.SimpleEthernetLlcHost;
 import inet.node.ethernet.EthernetSwitch;
 import inet.common.scenario.ScenarioManager;
 import inet.linklayer.configurator.L2NetworkConfigurator;
@@ -31,12 +31,12 @@ network LargeNet
         switch10: EthernetSwitch;
         switch11: EthernetSwitch;
 
-        host1: EthernetHost;
-        host2: EthernetHost;
-        host3: EthernetHost;
-        host4: EthernetHost;
-        host5: EthernetHost;
-        host6: EthernetHost;
+        host1: SimpleEthernetLlcHost;
+        host2: SimpleEthernetLlcHost;
+        host3: SimpleEthernetLlcHost;
+        host4: SimpleEthernetLlcHost;
+        host5: SimpleEthernetLlcHost;
+        host6: SimpleEthernetLlcHost;
 
     connections:
         switch1.ethg++ <--> Eth1G <--> switch4.ethg++;

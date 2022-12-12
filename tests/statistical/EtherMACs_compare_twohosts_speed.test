@@ -18,7 +18,7 @@ compare results of variations and checks:
 %file: test.ned
 
 import ned.DatarateChannel;
-import inet.node.ethernet.EthernetHost;
+import inet.node.ethernet.SimpleEthernetLlcHost;
 
 network CompareMACs
 {
@@ -30,41 +30,41 @@ network CompareMACs
         }
 
     submodules:
-        host_iq_1_F_A: EthernetHost {
+        host_iq_1_F_A: SimpleEthernetLlcHost {
             parameters:
                 @display("p=70,70");
         }
-        host_iq_1_F_B: EthernetHost {
+        host_iq_1_F_B: SimpleEthernetLlcHost {
             parameters:
                 @display("p=210,70");
         }
-        host_eq_1_F_A: EthernetHost {
+        host_eq_1_F_A: SimpleEthernetLlcHost {
             parameters:
                 queueType = "DropTailQueue";
                 @display("p=70,140");
         }
-        host_eq_1_F_B: EthernetHost {
+        host_eq_1_F_B: SimpleEthernetLlcHost {
             parameters:
                 queueType = "DropTailQueue";
                 @display("p=210,140");
         }
-        host_iq_2_F_A: EthernetHost {
+        host_iq_2_F_A: SimpleEthernetLlcHost {
             parameters:
                 macType = "EthernetMac";
                 @display("p=70,210");
         }
-        host_iq_2_F_B: EthernetHost {
+        host_iq_2_F_B: SimpleEthernetLlcHost {
             parameters:
                 macType = "EthernetMac";
                 @display("p=210,210");
         }
-        host_eq_2_F_A: EthernetHost {
+        host_eq_2_F_A: SimpleEthernetLlcHost {
             parameters:
                 queueType = "DropTailQueue";
                 macType = "EthernetMac";
                 @display("p=70,280");
         }
-        host_eq_2_F_B: EthernetHost {
+        host_eq_2_F_B: SimpleEthernetLlcHost {
             parameters:
                 queueType = "DropTailQueue";
                 macType = "EthernetMac";

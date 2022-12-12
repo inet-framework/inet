@@ -8,7 +8,7 @@
 package inet.examples.ethernet.lans;
 
 import inet.node.ethernet.EthernetHub;
-import inet.node.ethernet.EthernetHost;
+import inet.node.ethernet.SimpleEthernetLlcHost;
 import inet.node.ethernet.EthernetSwitch;
 import inet.physicallayer.wired.common.WireJunction;
 import ned.DatarateChannel;
@@ -45,7 +45,7 @@ module SmallLAN
         hub: EthernetHub {
             @display("p=400,100");
         }
-        host[h]: EthernetHost {
+        host[h]: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = true;
                 eth.duplexMode = false;
@@ -77,7 +77,7 @@ module MediumLAN
                 eth[0].duplexMode = false;
                 @display("p=625,100");
         }
-        host[n]: EthernetHost {
+        host[n]: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
@@ -87,7 +87,7 @@ module MediumLAN
             parameters:
                 @display("p=625,300");
         }
-        hhost[h]: EthernetHost {
+        hhost[h]: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = true;
                 eth.duplexMode = false;
@@ -135,7 +135,7 @@ module LargeLAN
                 eth[0].duplexMode = false;
                 @display("p=450,100");
         }
-        host[n]: EthernetHost {
+        host[n]: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
@@ -145,7 +145,7 @@ module LargeLAN
             parameters:
                 @display("p=900,100");
         }
-        hhost[h]: EthernetHost {
+        hhost[h]: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = true;
                 eth.duplexMode = false;
@@ -155,7 +155,7 @@ module LargeLAN
             parameters:
                 @display("p=,,r,50");
         }
-        bhost[b]: EthernetHost {
+        bhost[b]: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = true;
                 eth.duplexMode = false;
@@ -230,7 +230,7 @@ network LargeNet
         switchA: EthernetSwitch {
             @display("p=400,580");
         }
-        serverA: EthernetHost {
+        serverA: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
@@ -248,7 +248,7 @@ network LargeNet
         switchB: EthernetSwitch {
             @display("p=700,380");
         }
-        serverB: EthernetHost {
+        serverB: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
@@ -266,7 +266,7 @@ network LargeNet
         switchC: EthernetSwitch {
             @display("p=1000,580");
         }
-        serverC: EthernetHost {
+        serverC: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;
@@ -284,7 +284,7 @@ network LargeNet
         switchD: EthernetSwitch {
             @display("p=1300,380");
         }
-        serverD: EthernetHost {
+        serverD: SimpleEthernetLlcHost {
             parameters:
                 csmacdSupport = false;
                 eth.duplexMode = true;

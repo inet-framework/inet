@@ -15,10 +15,10 @@ checks:
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 import ned.DatarateChannel;
-import inet.node.ethernet.EthernetHost;
+import inet.node.ethernet.SimpleEthernetLlcHost;
 import inet.node.ethernet.EthernetHub;
 
-module EtherHostQ extends EthernetHost
+module EtherHostQ extends SimpleEthernetLlcHost
 {
     parameters:
         queueType = "DropTailQueue";
