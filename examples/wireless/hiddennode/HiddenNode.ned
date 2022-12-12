@@ -47,7 +47,7 @@ module Node
         }
     connections allowunconnected:
         wlan.radioIn <-- radioIn;
-        cli.out --> wlan.upperLayerIn;
+        cli.socketOut --> wlan.upperLayerIn;
 }
 
 module SinkNode
@@ -81,8 +81,8 @@ module SinkNode
         }
     connections allowunconnected:
         wlan.radioIn <-- radioIn;
-        sink.in <-- wlan.upperLayerOut;
-        sink.out --> wlan.upperLayerIn;
+        sink.socketIn <-- wlan.upperLayerOut;
+        sink.socketOut --> wlan.upperLayerIn;
 }
 
 

@@ -48,7 +48,7 @@ module ThroughputClient
         }
     connections allowunconnected:
         wlan.radioIn <-- radioIn;
-        cli.out --> wlan.upperLayerIn;
+        cli.socketOut --> wlan.upperLayerIn;
 }
 
 module ThroughputServer

@@ -55,8 +55,8 @@ module EthernetHost2
                 @display("p=200,400,row,150;q=txQueue");
         }
     connections:
-        app.out --> llc.upperLayerIn;
-        app.in <-- llc.upperLayerOut;
+        app.socketOut --> llc.upperLayerIn;
+        app.socketIn <-- llc.upperLayerOut;
         llc.lowerLayerOut --> ethernet.upperLayerIn;
         llc.lowerLayerIn <-- ethernet.upperLayerOut;
         ethernet.lowerLayerOut --> eth.upperLayerIn;

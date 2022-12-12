@@ -46,8 +46,8 @@ module SinkClient
         }
     connections allowunconnected:
         radioIn --> { @display("m=s"); } --> wlan.radioIn;
-        wlan.upperLayerOut --> sink.in;
-        sink.out --> wlan.upperLayerIn;
+        wlan.upperLayerOut --> sink.socketIn;
+        sink.socketOut --> wlan.upperLayerIn;
 }
 
 module Client
@@ -81,7 +81,7 @@ module Client
         }
     connections allowunconnected:
         wlan.radioIn <-- radioIn;
-        cli.out --> wlan.upperLayerIn;
+        cli.socketOut --> wlan.upperLayerIn;
 }
 
 network RateControlTest
