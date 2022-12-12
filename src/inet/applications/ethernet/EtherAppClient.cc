@@ -57,7 +57,7 @@ void EtherAppClient::initialize(int stage)
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
-        llcSocket.setOutputGate(gate("out"));
+        llcSocket.setOutputGate(gate("socketOut"));
         llcSocket.setCallback(this);
     }
 }

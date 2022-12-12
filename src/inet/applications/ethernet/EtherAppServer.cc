@@ -32,7 +32,7 @@ void EtherAppServer::initialize(int stage)
         packetsSent = packetsReceived = 0;
 
         // socket
-        llcSocket.setOutputGate(gate("out"));
+        llcSocket.setOutputGate(gate("socketOut"));
         llcSocket.setCallback(this);
 
         WATCH(packetsSent);

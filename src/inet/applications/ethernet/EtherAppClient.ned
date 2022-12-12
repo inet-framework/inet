@@ -6,13 +6,16 @@
 
 package inet.applications.ethernet;
 
+import inet.applications.contract.IApp;
+
+
 //
 // A simple traffic generator for the Ethernet model and the 802.11 model,
 // and generally for any L2 model that accepts ~Ieee802SapReq tags on the
 // packets. It generates packets containing ~EtherAppReq chunks. It should
 // be connected directly to ~Ieee8022Llc.
 //
-simple EtherAppClient
+simple EtherAppClient like IApp
 {
     parameters:
         string interfaceTableModule;
@@ -35,7 +38,7 @@ simple EtherAppClient
         @statistic[packetSent](title="packets sent"; source=packetSent; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="dataAge(packetReceived)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:
-        input in @labels(Ieee802Ctrl/up) @messageKinds(inet::SocketStatusInd);
-        output out @labels(Ieee802Ctrl/down) @messageKinds(inet::SocketCommandCode);
+        input socketIn @labels(Ieee802Ctrl/up) @messageKinds(inet::SocketStatusInd);
+        output socketOut @labels(Ieee802Ctrl/down) @messageKinds(inet::SocketCommandCode);
 }
 

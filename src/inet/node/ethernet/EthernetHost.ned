@@ -80,10 +80,10 @@ module EthernetHost
                 @display("p=350,400,row,150;q=txQueue");
         }
     connections:
-        cli.out --> dp.in++;
-        dp.out++ --> cli.in;
-        srv.out --> dp.in++;
-        dp.out++ --> srv.in;
+        cli.socketOut --> dp.in++;
+        dp.out++ --> cli.socketIn;
+        srv.socketOut --> dp.in++;
+        dp.out++ --> srv.socketIn;
 
         dp.out++ --> llc.upperLayerIn;
         llc.upperLayerOut --> dp.in++;

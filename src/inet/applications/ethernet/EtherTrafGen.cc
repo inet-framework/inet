@@ -68,7 +68,7 @@ void EtherTrafGen::initialize(int stage)
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
-        llcSocket.setOutputGate(gate("out"));
+        llcSocket.setOutputGate(gate("socketOut"));
     }
 }
 
@@ -166,7 +166,7 @@ void EtherTrafGen::sendBurstPackets()
 
         EV_INFO << "Send packet `" << msgname << "' dest=" << destMacAddress << " length=" << len << "B ssap/dsap=" << ssap << "/" << dsap << "\n";
         emit(packetSentSignal, datapacket);
-        send(datapacket, "out");
+        send(datapacket, "socketOut");
         packetsSent++;
     }
 }
