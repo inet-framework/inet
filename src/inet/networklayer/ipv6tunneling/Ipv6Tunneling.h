@@ -55,9 +55,8 @@ class INET_API Ipv6Tunneling : public cSimpleModule, public LifecycleUnsupported
         Tunnel(const Ipv6Address& entry = Ipv6Address::UNSPECIFIED_ADDRESS,
                 const Ipv6Address& exit = Ipv6Address::UNSPECIFIED_ADDRESS,
                 const Ipv6Address& destTrigger = Ipv6Address::UNSPECIFIED_ADDRESS);
-//        ~Tunnel();
 
-        bool operator==(const Tunnel& rhs)
+        bool operator==(const Tunnel& rhs) const
         {
             return entry == rhs.entry && exit == rhs.exit && destTrigger == rhs.destTrigger;
         }
@@ -99,16 +98,6 @@ class INET_API Ipv6Tunneling : public cSimpleModule, public LifecycleUnsupported
     };
 
     typedef std::map<int, struct Tunnel> Tunnels;
-    typedef Tunnels::const_iterator TI;
-
-    struct equalTunnel : public std::binary_function<Tunnels::value_type, Tunnels::value_type, bool> {
-        bool operator()(const Tunnels::value_type& lhs, const Tunnels::value_type& rhs) const
-        {
-            return (lhs.second.entry == rhs.second.entry) &&
-                   (lhs.second.exit == rhs.second.exit) &&
-                   (lhs.second.destTrigger == rhs.second.destTrigger);
-        }
-    };
 
     // Tunnels are stored here indexed by vIfIndex
     Tunnels tunnels;

@@ -136,10 +136,10 @@ struct LsaKeyType
     RouterId advertisingRouter;
 };
 
-class INET_API LsaKeyType_Less : public std::binary_function<LsaKeyType, LsaKeyType, bool>
+class INET_API LsaKeyType_Less
 {
   public:
-    bool operator()(LsaKeyType leftKey, LsaKeyType rightKey) const;
+    bool operator()(const LsaKeyType& leftKey, const LsaKeyType& rightKey) const;
 };
 
 struct DesignatedRouterId
@@ -187,7 +187,7 @@ inline bool operator!=(DesignatedRouterId leftID, DesignatedRouterId rightID)
     return !(leftID == rightID);
 }
 
-inline bool LsaKeyType_Less::operator()(LsaKeyType leftKey, LsaKeyType rightKey) const
+inline bool LsaKeyType_Less::operator()(const LsaKeyType& leftKey, const LsaKeyType& rightKey) const
 {
     return (leftKey.linkStateID < rightKey.linkStateID) ||
            ((leftKey.linkStateID == rightKey.linkStateID) &&

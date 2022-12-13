@@ -179,14 +179,11 @@ int Ipv6Tunneling::createTunnel(TunnelType tunnelType,
 int Ipv6Tunneling::findTunnel(const Ipv6Address& src, const Ipv6Address& dest,
         const Ipv6Address& destTrigger) const
 {
-    TI it = std::find_if(tunnels.begin(), tunnels.end(),
-                std::bind(equalTunnel(),
-                    std::make_pair((int)0, Tunnel(src, dest, destTrigger)),
-                    std::placeholders::_1));
-
-    if (it != tunnels.end())
-        return it->first;
-
+    Tunnel t0(src, dest, destTrigger);
+    for (const auto& tun: tunnels) {
+        if (tun.second == t0)
+            return tun.first;
+    }
     return 0;
 }
 
