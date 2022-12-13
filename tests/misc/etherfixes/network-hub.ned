@@ -1,6 +1,6 @@
 
 import inet.node.ethernet.EthernetHub;
-import inet.node.ethernet.EthernetHost2;
+import inet.node.ethernet.SimpleEthTrafGenHost;
 import ned.DatarateChannel;
 
 
@@ -8,15 +8,15 @@ network HostsWithHub
 {
     types:
     submodules:
-        hostA: EthernetHost2 {
+        hostA: SimpleEthTrafGenHost {
             parameters:
                 @display("p=72,80");
         }
-        hostB: EthernetHost2 {
+        hostB: SimpleEthTrafGenHost {
             parameters:
                 @display("p=334,80");
         }
-        hostC: EthernetHost2 {
+        hostC: SimpleEthTrafGenHost {
             parameters:
                 @display("p=334,80");
         }

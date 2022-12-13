@@ -7,15 +7,15 @@ import ned.DatarateChannel;
 network HostsWithHub
 {
     submodules:
-        hostA: EthernetHost2 {
+        hostA: SimpleEthTrafGenHost {
             parameters:
                 @display("p=80,200");
         }
-        hostB: EthernetHost2 {
+        hostB: SimpleEthTrafGenHost {
             parameters:
                 @display("p=200,200");
         }
-        hostC: EthernetHost2 {
+        hostC: SimpleEthTrafGenHost {
             parameters:
                 @display("p=320,200");
         }

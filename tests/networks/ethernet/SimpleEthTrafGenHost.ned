@@ -19,7 +19,7 @@ import inet.networklayer.common.InterfaceTable;
 // higher layer protocols (IP, TCP). By default is configured to use
 // half-duplex MAC (CSMA/CD).
 //
-module EthernetHost2
+module SimpleEthTrafGenHost
 {
     parameters:
         bool csmacdSupport = default(true);  // by default use CSMA/CD
