@@ -821,11 +821,11 @@ class _StateInstance
 
   protected:
     _MachineBase& myMachine;
-    _StateSpecification *mySpecification; // Instance of state class
-    mutable _StateInstance *myHistory;
-    _StateInstance *myParent;
-    void *myBox;
-    void *myBoxPlace; // Reused box heap memory
+    _StateSpecification *mySpecification = nullptr; // Instance of state class
+    mutable _StateInstance *myHistory = nullptr;
+    _StateInstance *myParent = nullptr;
+    void *myBox = nullptr;
+    void *myBoxPlace = nullptr; // Reused box heap memory
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1539,12 +1539,14 @@ class _MachineBase
     // Get StateInstance object for ID.
     _StateInstance *& getInstance(ID id)
     {
+        ASSERT(id < myInstanceCnt);
         return myInstances[id];
     }
 
     // Get StateInstance object for ID.
     const _StateInstance *getInstance(ID id) const
     {
+        ASSERT(id < myInstanceCnt);
         return myInstances[id];
     }
 
@@ -1611,6 +1613,7 @@ class _MachineBase
     _IEventBase *myPendingEvent = nullptr;
 
     // Array of StateInstance objects.
+    unsigned int myInstanceCnt = 0;
     _StateInstance **myInstances = nullptr;
 };
 

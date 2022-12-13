@@ -51,8 +51,8 @@ public:
     unsigned int _keepAliveMsgRcv = 0;
 
     // FINAL STATE MACHINE
-    fsm::TopState::Box *_box;
-    Macho::Machine<fsm::TopState> *_fsm;
+    fsm::TopState::Box *_box = nullptr;
+    Macho::Machine<fsm::TopState> *_fsm = nullptr;
 
     friend struct fsm::Idle;
     friend struct fsm::Connect;

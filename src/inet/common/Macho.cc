@@ -279,6 +279,7 @@ void _MachineBase::shutdown()
 
 void _MachineBase::allocate(unsigned int count)
 {
+    myInstanceCnt = count;
     myInstances = new _StateInstance *[count];
     for (unsigned int i = 0; i < count; ++i)
         myInstances[i] = nullptr;
@@ -286,6 +287,7 @@ void _MachineBase::allocate(unsigned int count)
 
 void _MachineBase::free(unsigned int count)
 {
+    ASSERT(count <= myInstanceCnt);
     // Free from end of list, so that child states are freed first
     unsigned int i = count;
     while (i > 0) {
@@ -298,6 +300,7 @@ void _MachineBase::free(unsigned int count)
 // Clear history of state and children.
 void _MachineBase::clearHistoryDeep(unsigned int count, const _StateInstance& instance)
 {
+    ASSERT(count <= myInstanceCnt);
     for (unsigned int i = 0; i < count; ++i) {
         _StateInstance *s = myInstances[i];
         if (s && s->isChild(instance))
