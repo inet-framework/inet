@@ -11,19 +11,23 @@
 
 namespace inet {
 
-InitStageRegistry globalInitStageRegistry;
-
-inet::InitStage* InitStageRegistry::getInitStage(const char *name)
+InitStageRegistry::~InitStageRegistry()
 {
     for (auto stage : stages)
-        if (!strcmp(stage->name, name))
+        delete stage;
+}
+
+InitStageRegistry::Stage *InitStageRegistry::getInitStage(const char *name)
+{
+    for (auto stage : stages)
+        if (!strcmp(stage->stageDecl->getName(), name))
             return stage;
     throw cRuntimeError("Cannot find initialization stage: %s", name);
 }
 
-void InitStageRegistry::addInitStage(InitStage &initStage)
+void InitStageRegistry::addInitStage(const InitStage *initStage)
 {
-    stages.push_back(&initStage);
+    stages.push_back(new Stage{initStage});
     numInitStages = -1;
 }
 
@@ -37,6 +41,21 @@ int InitStageRegistry::getNumInitStages()
 {
     ensureInitStageNumbersAssigned();
     return numInitStages;
+}
+
+int InitStageRegistry::getNumber(const InitStage *initStage)
+{
+    ensureInitStageNumbersAssigned();
+    for (auto stage : stages)
+        if (stage->stageDecl == initStage)
+            return stage->number;
+    throw cRuntimeError("Cannot find initialization stage: %s", initStage->getName());
+}
+
+void InitStageRegistry::ensureInitStageNumbersAssigned()
+{
+    if (numInitStages == -1)
+        assignInitStageNumbers();
 }
 
 void InitStageRegistry::assignInitStageNumbers()
@@ -69,13 +88,19 @@ void InitStageRegistry::assignInitStageNumbers()
         if (!assigned)
             throw cRuntimeError("Circle detected in initialization stage dependency graph");
     }
-    std::sort(stages.begin(), stages.end(), [] (const InitStage *s1, const InitStage *s2) -> bool {
+    std::sort(stages.begin(), stages.end(), [] (const Stage *s1, const Stage *s2) -> bool {
         return s1->number < s2->number;
     });
     EV_STATICCONTEXT;
     for (auto stage : stages)
-        EV_DEBUG << "Initialization stage: " << stage->name << " = " << stage->number << std::endl;
+        EV_DEBUG << "Initialization stage: " << stage->stageDecl->getName() << " = " << stage->number << std::endl;
     EV_DEBUG << "Total number of initialization stages: " << numInitStages << std::endl;
+}
+
+InitStageRegistry& InitStageRegistry::getInstance()
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::InitStageRegistry::instance");
+    return getSimulationOrSharedDataManager()->getSharedVariable<InitStageRegistry>(handle);
 }
 
 } // namespace inet

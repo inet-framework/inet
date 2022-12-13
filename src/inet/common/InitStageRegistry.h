@@ -20,29 +20,34 @@ class InitStage;
 class INET_API InitStageRegistry
 {
   protected:
+    struct Stage {
+        const InitStage *stageDecl;
+        int number = -1;
+        std::vector<Stage *> precedingStages;
+        std::vector<Stage *> followingStages;
+    };
+
     int numInitStages = -1;
-    std::vector<InitStage *> stages;
+    std::vector<Stage *> stages;
     std::vector<std::pair<const char *, const char *>> dependencies;
 
   protected:
-    InitStage* getInitStage(const char *name);
-
+    Stage *getInitStage(const char *name);
     void assignInitStageNumbers();
+    void ensureInitStageNumbersAssigned();
 
   public:
-    void addInitStage(InitStage &initStage);
+    InitStageRegistry() {}
+    ~InitStageRegistry();
 
+    void addInitStage(const InitStage *initStage);
     void addInitStageDependency(const char *source, const char *target);
 
     int getNumInitStages();
+    int getNumber(const InitStage *initStage);
 
-    void ensureInitStageNumbersAssigned() {
-        if (numInitStages == -1)
-            assignInitStageNumbers();
-    }
+    static InitStageRegistry& getInstance();
 };
-
-extern INET_API InitStageRegistry globalInitStageRegistry;
 
 /**
  * This class provides constants for initialization stages for modules overriding
@@ -52,25 +57,18 @@ extern INET_API InitStageRegistry globalInitStageRegistry;
 class INET_API InitStage
 {
   public:
-    int number = -1;
     const char *name = nullptr;
-    std::vector<InitStage *> precedingStages;
-    std::vector<InitStage *> followingStages;
-
   public:
     InitStage(const char *name) : name(name) {}
-
-    operator int() const {
-        globalInitStageRegistry.ensureInitStageNumbersAssigned();
-        return number;
-    }
+    const char *getName() const { return name; }
+    operator int() const { return InitStageRegistry::getInstance().getNumber(this); }
 };
 
-#define Define_InitStage(name) InitStage INITSTAGE_##name(#name); EXECUTE_ON_STARTUP(globalInitStageRegistry.addInitStage(INITSTAGE_##name))
+#define Define_InitStage(name) const InitStage INITSTAGE_##name(#name); EXECUTE_PRE_NETWORK_SETUP(InitStageRegistry::getInstance().addInitStage(&INITSTAGE_##name))
 
-#define Define_InitStage_Dependency(source, target) EXECUTE_ON_STARTUP(globalInitStageRegistry.addInitStageDependency(#source, #target))
+#define Define_InitStage_Dependency(source, target) EXECUTE_PRE_NETWORK_SETUP(InitStageRegistry::getInstance().addInitStageDependency(#source, #target))
 
-#define NUM_INIT_STAGES globalInitStageRegistry.getNumInitStages()
+#define NUM_INIT_STAGES InitStageRegistry::getInstance().getNumInitStages()
 
 } // namespace inet
 
