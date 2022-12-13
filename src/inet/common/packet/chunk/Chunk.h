@@ -353,8 +353,8 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     //@{
     int getBinDumpNumLines() const;
     int getHexDumpNumLines() const;
-    const char *getBinDumpLine(int index);
-    const char *getHexDumpLine(int index);
+    std::string getBinDumpLine(int index);
+    std::string getHexDumpLine(int index);
     const SharingRegionTagSet::RegionTag<TagBase>& _getTag(int index) const { return regionTags.getRegionTag(index); }
     //@}
 
