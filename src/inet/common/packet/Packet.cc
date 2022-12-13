@@ -29,7 +29,7 @@ Register_Class(Packet);
 void Packet::selfDoc(const char * packetAction, const char *typeName)
 {
     if (SelfDoc::generateSelfdoc) {
-        auto contextModuleTypeName = getSimulation()->getContextModule()->getComponentType()->getFullName();
+        auto contextModuleTypeName = cSimulation::getActiveSimulation()->getContextModule()->getComponentType()->getFullName();
         {
             std::ostringstream os;
             os << "=SelfDoc={ " << SelfDoc::keyVal("module", contextModuleTypeName)

@@ -529,7 +529,7 @@ cXMLElement *Ospfv2ConfigReader::findMatchingConfig(const cXMLElementList& route
             }
 
             const char *toward = getMandatoryFilledAttribute(*ifConfig, "toward");
-            cModule *destnode = getSimulation()->getSystemModule()->getModuleByPath(toward);
+            cModule *destnode = cSimulation::getActiveSimulation()->getSystemModule()->getModuleByPath(toward);
             if (!destnode)
                 throw cRuntimeError("toward module `%s' not found at %s", toward, (*ifConfig).getSourceLocation());
 
@@ -561,7 +561,7 @@ std::vector<NetworkInterface *> Ospfv2ConfigReader::getInterfaceByXMLAttributesO
     }
 
     const char *toward = getMandatoryFilledAttribute(ifConfig, "toward");
-    cModule *destnode = getSimulation()->getSystemModule()->getModuleByPath(toward);
+    cModule *destnode = cSimulation::getActiveSimulation()->getSystemModule()->getModuleByPath(toward);
     if (!destnode)
         throw cRuntimeError("'ifName' or 'toward' module `%s' not found at %s", toward, ifConfig.getSourceLocation());
 

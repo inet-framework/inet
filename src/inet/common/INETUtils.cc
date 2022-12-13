@@ -131,7 +131,7 @@ std::string vstringf(const char *fmt, va_list& args)
 cObject *createOneIfClassIsKnown(const char *className, const char *defaultNamespace)
 {
     if (!defaultNamespace)
-        defaultNamespace = getSimulation()->getContext()->getClassName();
+        defaultNamespace = cSimulation::getActiveSimulation()->getContext()->getClassName();
     std::string ns = defaultNamespace;
     do {
         std::string::size_type found = ns.rfind("::");
@@ -149,7 +149,7 @@ cObject *createOneIfClassIsKnown(const char *className, const char *defaultNames
 cObject *createOne(const char *className, const char *defaultNamespace)
 {
     if (!defaultNamespace)
-        defaultNamespace = getSimulation()->getContext()->getClassName();
+        defaultNamespace = cSimulation::getActiveSimulation()->getContext()->getClassName();
     cObject *ret = createOneIfClassIsKnown(className, defaultNamespace);
     if (!ret)
         throw cRuntimeError("Class \"%s\" not found -- perhaps its code was not linked in, "

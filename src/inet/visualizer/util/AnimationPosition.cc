@@ -12,8 +12,8 @@ namespace inet {
 namespace visualizer {
 
 AnimationPosition::AnimationPosition() :
-    simulationTime(getSimulation()->getSimTime()),
-    animationTime(getSimulation()->getEnvir()->getAnimationTime()),
+    simulationTime(cSimulation::getActiveSimulation()->getSimTime()),
+    animationTime(cSimulation::getActiveEnvir()->getAnimationTime()),
     realTime(computeRealTime())
 {
 }

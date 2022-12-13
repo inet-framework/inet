@@ -14,7 +14,7 @@ namespace physicallayer {
 
 void CommunicationLog::open()
 {
-    output.open(getEnvir()->getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}.tlog"));
+    output.open(getActiveSimulationOrEnvir()->getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}.tlog"));
 }
 
 void CommunicationLog::close()

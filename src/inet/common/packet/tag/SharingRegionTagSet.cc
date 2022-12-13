@@ -12,7 +12,7 @@ namespace inet {
 #ifdef INET_WITH_SELFDOC
 void SharingRegionTagSet::selfDoc(const char * tagAction, const char *typeName)
 {
-    auto contextModuleTypeName = getSimulation()->getContextModule()->getComponentType()->getFullName();
+    auto contextModuleTypeName = cSimulation::getActiveSimulation()->getContextModule()->getComponentType()->getFullName();
     if (SelfDoc::generateSelfdoc) {
         {
             std::ostringstream os;

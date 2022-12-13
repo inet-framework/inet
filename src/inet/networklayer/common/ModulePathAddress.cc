@@ -41,7 +41,7 @@ cModule *getModuleByRelativePath(cModule *modp, const char *path)
 
 bool ModulePathAddress::tryParse(const char *addr)
 {
-    cModule *module = getModuleByRelativePath(getSimulation()->getSystemModule(), addr);
+    cModule *module = getModuleByRelativePath(cSimulation::getActiveSimulation()->getSystemModule(), addr);
     if (module) {
         // accepts network interface modules only:
         if (isNetworkNode(module))
@@ -71,7 +71,7 @@ std::string ModulePathAddress::str() const
         return s.str();
     }
     else /* if (id > 0) */ {
-        cModule *module = getSimulation()->getModule(id);
+        cModule *module = cSimulation::getActiveSimulation()->getModule(id);
         if (module) {
             std::string fullPath = module->getFullPath();
             return strchr(fullPath.c_str(), '.') + 1;

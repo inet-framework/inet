@@ -45,7 +45,7 @@ void vector_delete_element(std::vector<T *>& v, T *p)
 
 bool LifecycleController::initiateOperation(LifecycleOperation *operation, IDoneCallback *completionCallback)
 {
-    ASSERT(getSimulation()->getContextModule() == check_and_cast<cComponent *>(this));
+    ASSERT(cSimulation::getActiveSimulation()->getContextModule() == check_and_cast<cComponent *>(this));
     operation->currentStage = 0;
     operation->operationCompletionCallback = completionCallback;
     operation->insideInitiateOperation = true;

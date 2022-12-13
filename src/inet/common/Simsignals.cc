@@ -126,7 +126,7 @@ simsignal_t tokensDepletedSignal = cComponent::registerSignal("tokensDepleted");
 void printSignalBanner(simsignal_t signalID, const cObject *obj, const cObject *details)
 {
     EV << "** Signal at T=" << simTime()
-       << " to " << getSimulation()->getContextModule()->getFullPath() << ": "
+       << " to " << cSimulation::getActiveSimulation()->getContextModule()->getFullPath() << ": "
        << cComponent::getSignalName(signalID) << " "
        << (obj ? obj->str() : "") << " "
        << (details ? details->str() : "")
@@ -136,7 +136,7 @@ void printSignalBanner(simsignal_t signalID, const cObject *obj, const cObject *
 void printSignalBanner(simsignal_t signalID, intval_t value, const cObject *details)
 {
     EV << "** Signal at T=" << simTime()
-       << " to " << getSimulation()->getContextModule()->getFullPath() << ": "
+       << " to " << cSimulation::getActiveSimulation()->getContextModule()->getFullPath() << ": "
        << cComponent::getSignalName(signalID) << " "
        << value << " "
        << (details ? details->str() : "")

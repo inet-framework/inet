@@ -147,7 +147,7 @@ bool L3AddressResolver::tryResolve(const char *s, L3Address& result, int addrTyp
         throw cRuntimeError("L3AddressResolver: syntax error parsing address spec `%s'", s);
 
     // find module
-    cModule *mod = getSimulation()->findModuleByPath(modname.c_str());
+    cModule *mod = cSimulation::getActiveSimulation()->findModuleByPath(modname.c_str());
     if (!mod)
         throw cRuntimeError("L3AddressResolver: module `%s' not found", modname.c_str());
 
@@ -172,7 +172,7 @@ bool L3AddressResolver::tryResolve(const char *s, L3Address& result, int addrTyp
     // find interface for dest node
     // get address from the given module/interface
     if (!destnodename.empty()) {
-        cModule *destnode = getSimulation()->findModuleByPath(destnodename.c_str());
+        cModule *destnode = cSimulation::getActiveSimulation()->findModuleByPath(destnodename.c_str());
         if (!destnode)
             throw cRuntimeError("L3AddressResolver: destination module `%s' not found", destnodename.c_str());
         result = addressOf(mod, destnode, addrType);
@@ -392,7 +392,7 @@ bool L3AddressResolver::getInterfaceIpv4Address(L3Address& ret, NetworkInterface
     else {
         // find address in the configurator's notebook
         // TODO how do we know where is the configurator? get the path from a NED parameter?
-        Ipv4NetworkConfigurator *configurator = dynamic_cast<Ipv4NetworkConfigurator *>(getSimulation()->findModuleByPath("configurator"));
+        Ipv4NetworkConfigurator *configurator = dynamic_cast<Ipv4NetworkConfigurator *>(cSimulation::getActiveSimulation()->findModuleByPath("configurator"));
         if (configurator)
             return static_cast<L3AddressResolver *>(configurator)->getInterfaceIpv4Address(ret, ie, netmask);
     }
@@ -422,7 +422,7 @@ bool L3AddressResolver::getInterfaceModulePathAddress(L3Address& ret, NetworkInt
     else {
         // find address in the configurator's notebook
         // TODO how do we know where is the configurator? getNextHopNetworkConfigurator the path from a NED parameter?
-        NextHopNetworkConfigurator *configurator = dynamic_cast<NextHopNetworkConfigurator *>(getSimulation()->findModuleByPath("configurator"));
+        NextHopNetworkConfigurator *configurator = dynamic_cast<NextHopNetworkConfigurator *>(cSimulation::getActiveSimulation()->findModuleByPath("configurator"));
         if (configurator)
             return static_cast<L3AddressResolver *>(configurator)->getInterfaceIpv4Address(ret, ie, netmask);
     }
@@ -444,7 +444,7 @@ bool L3AddressResolver::getInterfaceModuleIdAddress(L3Address& ret, NetworkInter
     else {
         // find address in the configurator's notebook
         // TODO how do we know where is the configurator? getNextHopNetworkConfigurator the path from a NED parameter?
-        NextHopNetworkConfigurator *configurator = dynamic_cast<NextHopNetworkConfigurator *>(getSimulation()->findModuleByPath("configurator"));
+        NextHopNetworkConfigurator *configurator = dynamic_cast<NextHopNetworkConfigurator *>(cSimulation::getActiveSimulation()->findModuleByPath("configurator"));
         if (configurator)
             return static_cast<L3AddressResolver *>(configurator)->getInterfaceIpv4Address(ret, ie, netmask);
     }
@@ -518,7 +518,7 @@ NextHopRoutingTable *L3AddressResolver::findNextHopRoutingTableOf(cModule *host)
 std::vector<cModule *> L3AddressResolver::collectNetworkNodes()
 {
     std::vector<cModule *> result;
-    doCollectNetworkNodes(getSimulation()->getSystemModule(), result);
+    doCollectNetworkNodes(cSimulation::getActiveSimulation()->getSystemModule(), result);
     return result;
 }
 

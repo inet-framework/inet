@@ -13,7 +13,7 @@ namespace inet {
 void SharingTagSet::selfDoc(const char * tagAction, const char *typeName)
 {
     if (SelfDoc::generateSelfdoc) {
-        auto contextModuleTypeName = getSimulation()->getContextModule()->getComponentType()->getFullName();
+        auto contextModuleTypeName = cSimulation::getActiveSimulation()->getContextModule()->getComponentType()->getFullName();
         {
             std::ostringstream os;
             os << "=SelfDoc={ " << SelfDoc::keyVal("module", contextModuleTypeName)
