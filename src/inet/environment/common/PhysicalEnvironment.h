@@ -82,7 +82,7 @@ class INET_API PhysicalEnvironment : public cModule, public IPhysicalEnvironment
     virtual const Coord& getSpaceMin() const override { return spaceMin; }
     virtual const Coord& getSpaceMax() const override { return spaceMax; }
 
-    virtual const IMaterialRegistry *getMaterialRegistry() const override { return &MaterialRegistry::singleton; }
+    virtual const IMaterialRegistry *getMaterialRegistry() const override { return &MaterialRegistry::getInstance(); }
 
     virtual int getNumObjects() const override { return objects.size(); }
     virtual const PhysicalObject *getObject(int index) const override { return objects[index]; }

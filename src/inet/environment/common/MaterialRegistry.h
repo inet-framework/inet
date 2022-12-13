@@ -21,9 +21,6 @@ class INET_API MaterialRegistry : public IMaterialRegistry
   protected:
     mutable std::map<const std::string, const Material *> materials;
 
-  public:
-    static MaterialRegistry singleton;
-
   protected:
     void addMaterial(const Material *material) const;
 
@@ -32,6 +29,8 @@ class INET_API MaterialRegistry : public IMaterialRegistry
     virtual ~MaterialRegistry();
 
     virtual const Material *getMaterial(const char *name) const override;
+
+    static MaterialRegistry& getInstance();
 };
 
 } // namespace physicalenvironment

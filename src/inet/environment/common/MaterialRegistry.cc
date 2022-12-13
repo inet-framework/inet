@@ -13,8 +13,6 @@ namespace inet {
 
 namespace physicalenvironment {
 
-MaterialRegistry MaterialRegistry::singleton;
-
 MaterialRegistry::MaterialRegistry()
 {
 }
@@ -46,6 +44,12 @@ const Material *MaterialRegistry::getMaterial(const char *name) const
     }
     auto it = materials.find(name);
     return it != materials.end() ? it->second : nullptr;
+}
+
+MaterialRegistry& MaterialRegistry::getInstance()
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::MaterialRegistry::instance");
+    return getSimulationOrSharedDataManager()->getSharedVariable<MaterialRegistry>(handle);
 }
 
 } // namespace physicalenvironment

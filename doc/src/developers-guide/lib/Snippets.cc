@@ -605,7 +605,7 @@ void packetDissectionExample()
   auto packet = new Packet();
   PacketDissectorCallback callback;
 //!PacketDissectionExample
-auto& registry = ProtocolDissectorRegistry::globalRegistry;
+auto& registry = ProtocolDissectorRegistry::getInstance();
 PacketDissector dissector(registry, callback);
 auto packetProtocolTag = packet->findTag<PacketProtocolTag>();
 auto protocol = packetProtocolTag->getProtocol();

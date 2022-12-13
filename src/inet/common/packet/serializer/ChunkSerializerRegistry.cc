@@ -9,8 +9,6 @@
 
 namespace inet {
 
-ChunkSerializerRegistry ChunkSerializerRegistry::globalRegistry;
-
 ChunkSerializerRegistry::~ChunkSerializerRegistry()
 {
     for (auto it : serializers)
@@ -30,6 +28,12 @@ const ChunkSerializer *ChunkSerializerRegistry::getSerializer(const std::type_in
         return it->second;
     else
         throw cRuntimeError("Cannot find serializer for %s", opp_typename(typeInfo));
+}
+
+ChunkSerializerRegistry& ChunkSerializerRegistry::getInstance()
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ChunkSerializerRegistry::instance");
+    return getSimulationOrSharedDataManager()->getSharedVariable<ChunkSerializerRegistry>(handle);
 }
 
 } // namespace

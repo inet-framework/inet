@@ -13,13 +13,10 @@
 
 namespace inet {
 
-#define Register_Protocol_Printer(PROTOCOL, CLASSNAME)    EXECUTE_ON_STARTUP(ProtocolPrinterRegistry::globalRegistry.registerProtocolPrinter(PROTOCOL, new CLASSNAME()));
+#define Register_Protocol_Printer(PROTOCOL, CLASSNAME)    EXECUTE_PRE_NETWORK_SETUP(ProtocolPrinterRegistry::getInstance().registerProtocolPrinter(PROTOCOL, new CLASSNAME()));
 
 class INET_API ProtocolPrinterRegistry
 {
-  public:
-    static ProtocolPrinterRegistry globalRegistry;
-
   protected:
     std::map<const Protocol *, const ProtocolPrinter *> protocolPrinters;
 
@@ -30,6 +27,8 @@ class INET_API ProtocolPrinterRegistry
 
     const ProtocolPrinter *findProtocolPrinter(const Protocol *protocol) const;
     const ProtocolPrinter *getProtocolPrinter(const Protocol *protocol) const;
+
+    static ProtocolPrinterRegistry& getInstance();
 };
 
 } // namespace

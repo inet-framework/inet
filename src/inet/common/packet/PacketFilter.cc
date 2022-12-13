@@ -103,7 +103,7 @@ bool PacketFilter::matches(const cPacket *cpacket) const
         }
         if (filterExpression != nullptr) {
             if (auto packet = dynamic_cast<const Packet *>(cpacket)) {
-                PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, *packetDissectorCallback);
+                PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), *packetDissectorCallback);
                 packetDissector.dissectPacket(const_cast<Packet *>(packet));
             }
             result &= filterExpression->evaluate().boolValue();

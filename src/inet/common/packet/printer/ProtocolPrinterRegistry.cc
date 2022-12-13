@@ -9,8 +9,6 @@
 
 namespace inet {
 
-ProtocolPrinterRegistry ProtocolPrinterRegistry::globalRegistry;
-
 ProtocolPrinterRegistry::~ProtocolPrinterRegistry()
 {
     for (auto it : protocolPrinters)
@@ -38,6 +36,12 @@ const ProtocolPrinter *ProtocolPrinterRegistry::getProtocolPrinter(const Protoco
         return it->second;
     else
         throw cRuntimeError("Cannot find protocol printer for %s", protocol->getName());
+}
+
+ProtocolPrinterRegistry& ProtocolPrinterRegistry::getInstance()
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolPrinterRegistry::instance");
+    return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolPrinterRegistry>(handle);
 }
 
 } // namespace

@@ -41,7 +41,7 @@ bool BehaviorAggregateClassifier::PacketDissectorCallback::matches(Packet *packe
 {
     dissect = true;
     matches_ = false;
-    PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, *this);
+    PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), *this);
     packetDissector.dissectPacket(packet);
     return matches_;
 }

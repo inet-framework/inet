@@ -42,7 +42,7 @@ bool MultiFieldClassifier::PacketDissectorCallback::matches(Packet *packet)
 {
     matchesL3 = matchesL4 = false;
     dissect = true;
-    PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, *this);
+    PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), *this);
     packetDissector.dissectPacket(packet);
     return matchesL3 && matchesL4;
 }

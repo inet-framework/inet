@@ -96,7 +96,7 @@ Packet::Packet(const Packet& other) :
 const ChunkTemporarySharedPtr *Packet::getDissection() const
 {
     PacketDissector::ChunkBuilder builder;
-    PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, builder);
+    PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), builder);
     packetDissector.dissectPacket(const_cast<Packet *>(this));
     return new ChunkTemporarySharedPtr(builder.getContent());
 }

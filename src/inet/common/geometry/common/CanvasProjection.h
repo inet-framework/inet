@@ -19,8 +19,6 @@ class INET_API CanvasProjection
     cFigure::Point scale;
     cFigure::Point translation;
 
-    static std::map<const cCanvas *, CanvasProjection *> canvasProjections;
-
   public:
     CanvasProjection() : scale(cFigure::Point(1, 1)) {}
     CanvasProjection(RotationMatrix rotation, cFigure::Point translation);
@@ -40,7 +38,6 @@ class INET_API CanvasProjection
     Coord computeCanvasPointInverse(const cFigure::Point& point, double depth) const;
 
     static CanvasProjection *getCanvasProjection(const cCanvas *canvas);
-    static void dropCanvasProjections();
 };
 
 } // namespace inet

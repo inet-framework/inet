@@ -181,7 +181,7 @@ void Chunk::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk,
     CHUNK_CHECK_USAGE(length >= b(-1), "length is invalid");
     CHUNK_CHECK_USAGE(b(0) <= offset && offset <= chunk->getChunkLength(), "offset is out of range");
     const Chunk *chunkPointer = chunk.get();
-    auto serializer = ChunkSerializerRegistry::globalRegistry.getSerializer(typeid(*chunkPointer));
+    auto serializer = ChunkSerializerRegistry::getInstance().getSerializer(typeid(*chunkPointer));
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED
     auto startPosition = stream.getLength();
 #endif
@@ -195,7 +195,7 @@ void Chunk::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk,
 
 const Ptr<Chunk> Chunk::deserialize(MemoryInputStream& stream, const std::type_info& typeInfo)
 {
-    auto serializer = ChunkSerializerRegistry::globalRegistry.getSerializer(typeInfo);
+    auto serializer = ChunkSerializerRegistry::getInstance().getSerializer(typeInfo);
 #if CHUNK_CHECK_IMPLEMENTATION_ENABLED
     auto startPosition = B(stream.getPosition());
 #endif

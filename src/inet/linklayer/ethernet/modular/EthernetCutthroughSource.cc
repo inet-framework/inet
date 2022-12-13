@@ -49,7 +49,7 @@ b EthernetCutthroughSource::getCutthroughSwitchingHeaderSize(Packet *packet) con
         return cutthroughSwitchingHeaderSize;
     else {
         EthernetCutthroughHeaderSizeCallback callback;
-        PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, callback);
+        PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), callback);
         packetDissector.dissectPacket(packet);
         return callback.cutthroughSwitchingHeaderSize - ETHER_FCS_BYTES;
     }

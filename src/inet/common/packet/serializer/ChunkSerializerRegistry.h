@@ -12,13 +12,10 @@
 
 namespace inet {
 
-#define Register_Serializer(TYPE, CLASSNAME)    EXECUTE_ON_STARTUP(ChunkSerializerRegistry::globalRegistry.registerSerializer(typeid(TYPE), new CLASSNAME()));
+#define Register_Serializer(TYPE, CLASSNAME)    EXECUTE_PRE_NETWORK_SETUP(ChunkSerializerRegistry::getInstance().registerSerializer(typeid(TYPE), new CLASSNAME()));
 
 class INET_API ChunkSerializerRegistry
 {
-  public:
-    static ChunkSerializerRegistry globalRegistry;
-
   protected:
     std::map<const std::type_info *, const ChunkSerializer *> serializers;
 
@@ -28,6 +25,8 @@ class INET_API ChunkSerializerRegistry
     void registerSerializer(const std::type_info& typeInfo, const ChunkSerializer *serializer);
 
     const ChunkSerializer *getSerializer(const std::type_info& typeInfo) const;
+
+    static ChunkSerializerRegistry& getInstance();
 };
 
 } // namespace

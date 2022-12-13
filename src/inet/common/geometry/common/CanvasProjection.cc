@@ -9,17 +9,6 @@
 
 namespace inet {
 
-std::map<const cCanvas *, CanvasProjection *> CanvasProjection::canvasProjections;
-
-EXECUTE_ON_SHUTDOWN(CanvasProjection::dropCanvasProjections());
-
-void CanvasProjection::dropCanvasProjections()
-{
-    for (auto it : canvasProjections)
-        delete it.second;
-    canvasProjections.clear();
-}
-
 CanvasProjection::CanvasProjection(RotationMatrix rotation, cFigure::Point translation) :
     rotation(rotation),
     scale(cFigure::Point(1, 1)),
@@ -52,12 +41,12 @@ Coord CanvasProjection::computeCanvasPointInverse(const cFigure::Point& point, d
 
 CanvasProjection *CanvasProjection::getCanvasProjection(const cCanvas *canvas)
 {
-    auto it = canvasProjections.find(canvas);
-    if (it == canvasProjections.end())
-        return canvasProjections[canvas] = new CanvasProjection();
-    else
-        return it->second;
+    static int canvasProjectionsHandle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::canvasProjections");
+    auto& canvasProjections = getSimulationOrSharedDataManager()->getSharedVariable<std::map<const cCanvas *, CanvasProjection>>(canvasProjectionsHandle);
+    return &canvasProjections[canvas];  // inserts element if not yet exists
 }
+
+
 
 } // namespace inet
 

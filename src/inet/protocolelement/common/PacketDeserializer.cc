@@ -20,7 +20,7 @@ void PacketDeserializer::processPacket(Packet *packet)
     const auto& packetProtocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = packetProtocolTag != nullptr ? packetProtocolTag->getProtocol() : nullptr;
     PacketDissector::ChunkBuilder chunkBuilder;
-    PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, chunkBuilder);
+    PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), chunkBuilder);
     packetDissector.dissectPacket(packet, protocol);
     packet->eraseAll();
     packet->insertAtFront(chunkBuilder.getContent());

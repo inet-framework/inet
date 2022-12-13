@@ -46,9 +46,6 @@ class INET_API LineManager
   protected:
     std::map<std::pair<int, int>, CacheEntry> cacheEntries;
 
-    static std::map<const cCanvas *, LineManager> canvasLineManagers;
-    static std::map<const cCanvas *, LineManager> osgLineManagers;
-
   protected:
     std::pair<int, int> getKey(int fromModuleId, int toModuleId) {
         return fromModuleId < toModuleId ? std::pair<int, int>(fromModuleId, toModuleId) : std::pair<int, int>(toModuleId, fromModuleId);

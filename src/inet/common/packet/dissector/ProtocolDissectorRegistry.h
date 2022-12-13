@@ -13,13 +13,10 @@
 
 namespace inet {
 
-#define Register_Protocol_Dissector(PROTOCOL, CLASSNAME)    EXECUTE_ON_STARTUP(ProtocolDissectorRegistry::globalRegistry.registerProtocolDissector(PROTOCOL, new CLASSNAME()));
+#define Register_Protocol_Dissector(PROTOCOL, CLASSNAME)    EXECUTE_PRE_NETWORK_SETUP(ProtocolDissectorRegistry::getInstance().registerProtocolDissector(PROTOCOL, new CLASSNAME()));
 
 class INET_API ProtocolDissectorRegistry
 {
-  public:
-    static ProtocolDissectorRegistry globalRegistry;
-
   protected:
     std::map<const Protocol *, const ProtocolDissector *> protocolDissectors;
 
@@ -30,6 +27,8 @@ class INET_API ProtocolDissectorRegistry
 
     const ProtocolDissector *findProtocolDissector(const Protocol *protocol) const;
     const ProtocolDissector *getProtocolDissector(const Protocol *protocol) const;
+
+    static ProtocolDissectorRegistry& getInstance();
 };
 
 } // namespace

@@ -9,8 +9,6 @@
 
 namespace inet {
 
-ProtocolDissectorRegistry ProtocolDissectorRegistry::globalRegistry;
-
 ProtocolDissectorRegistry::~ProtocolDissectorRegistry()
 {
     for (auto it : protocolDissectors)
@@ -35,6 +33,12 @@ const ProtocolDissector *ProtocolDissectorRegistry::getProtocolDissector(const P
         return it->second;
     else
         throw cRuntimeError("Cannot find protocol dissector for %s", protocol->getName());
+}
+
+ProtocolDissectorRegistry& ProtocolDissectorRegistry::getInstance()
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolDissectorRegistry::instance");
+    return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolDissectorRegistry>(handle);
 }
 
 } // namespace

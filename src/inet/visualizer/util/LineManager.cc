@@ -13,17 +13,19 @@ namespace inet {
 
 namespace visualizer {
 
-std::map<const cCanvas *, LineManager> LineManager::canvasLineManagers;
-std::map<const cCanvas *, LineManager> LineManager::osgLineManagers;
 
 LineManager *LineManager::getCanvasLineManager(const cCanvas *canvas)
 {
-    return &canvasLineManagers[canvas];
+    static int canvasLineManagersHandle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::canvasLineManagers");
+    auto& canvasLineManagers = getSimulationOrSharedDataManager()->getSharedVariable<std::map<const cCanvas *, LineManager>>(canvasLineManagersHandle);
+    return &canvasLineManagers[canvas];  // inserts element if not yet exists
 }
 
 LineManager *LineManager::getOsgLineManager(const cCanvas *canvas)
 {
-    return &osgLineManagers[canvas];
+    static int osgLineManagersHandle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::osgLineManagers");
+    auto& osgLineManagers = getSimulationOrSharedDataManager()->getSharedVariable<std::map<const cCanvas *, LineManager>>(osgLineManagersHandle);
+    return &osgLineManagers[canvas];  // inserts element if not yet exists
 }
 
 bool LineManager::compareModuleLines(const ModuleLine *moduleLine1, const ModuleLine *moduleLine2)

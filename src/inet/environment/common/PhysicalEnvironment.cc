@@ -358,8 +358,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             throw cRuntimeError("Missing material attribute of object");
         else if (containsKey(nameToMaterialMap, materialAttribute))
             material = nameToMaterialMap[materialAttribute];
-        else if (MaterialRegistry::singleton.getMaterial(materialAttribute))
-            material = MaterialRegistry::singleton.getMaterial(materialAttribute);
+        else if (MaterialRegistry::getInstance().getMaterial(materialAttribute))
+            material = MaterialRegistry::getInstance().getMaterial(materialAttribute);
         else
             material = idToMaterialMap[atoi(materialAttribute)];
         if (!material)

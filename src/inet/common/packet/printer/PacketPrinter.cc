@@ -65,9 +65,9 @@ bool PacketPrinter::isEnabledInfo(const Options *options, const Protocol *protoc
 
 const ProtocolPrinter& PacketPrinter::getProtocolPrinter(const Protocol *protocol) const
 {
-    auto protocolPrinter = ProtocolPrinterRegistry::globalRegistry.findProtocolPrinter(protocol);
+    auto protocolPrinter = ProtocolPrinterRegistry::getInstance().findProtocolPrinter(protocol);
     if (protocolPrinter == nullptr)
-        protocolPrinter = ProtocolPrinterRegistry::globalRegistry.findProtocolPrinter(nullptr);
+        protocolPrinter = ProtocolPrinterRegistry::getInstance().findProtocolPrinter(nullptr);
     return *protocolPrinter;
 }
 
@@ -195,7 +195,7 @@ void PacketPrinter::printPacket(Packet *packet, const Options *options, Context&
 {
     PacketDissector::PduTreeBuilder pduTreeBuilder;
     try {
-        PacketDissector packetDissector(ProtocolDissectorRegistry::globalRegistry, pduTreeBuilder);
+        PacketDissector packetDissector(ProtocolDissectorRegistry::getInstance(), pduTreeBuilder);
         packetDissector.dissectPacket(packet);
     }
     catch (cRuntimeError& e) {
