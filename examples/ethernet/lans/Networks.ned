@@ -7,10 +7,10 @@
 
 package inet.examples.ethernet.lans;
 
-import inet.node.ethernet.EthernetHub;
+import inet.examples.node.SimpleEthernetLlcHost;
 import inet.node.ethernet.Eth100M;
 import inet.node.ethernet.Eth10M;
-import inet.node.ethernet.SimpleEthernetLlcHost;
+import inet.node.ethernet.EthernetHub;
 import inet.node.ethernet.EthernetSwitch;
 import inet.physicallayer.wired.common.WireJunction;
 import ned.DatarateChannel;

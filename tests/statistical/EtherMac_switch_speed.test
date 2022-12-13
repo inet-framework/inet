@@ -17,9 +17,10 @@ checks:
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
-import ned.DatarateChannel;
-import inet.node.ethernet.SimpleEthernetLlcHost;
+import inet.examples.node.SimpleEthernetLlcHost;
 import inet.node.ethernet.EthernetSwitch;
+import ned.DatarateChannel;
+
 
 module EtherHostQ extends SimpleEthernetLlcHost
 {

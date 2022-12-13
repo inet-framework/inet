@@ -7,8 +7,8 @@
 
 package inet.examples.ethernet.lans;
 
+import inet.examples.node.SimpleEthernetLlcHost;
 import inet.node.ethernet.EthernetHub;
-import inet.node.ethernet.SimpleEthernetLlcHost;
 import inet.node.ethernet.EthernetSwitch;
 import inet.physicallayer.wired.common.WireJunction;
 import ned.DatarateChannel;

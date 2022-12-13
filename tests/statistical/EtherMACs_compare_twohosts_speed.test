@@ -17,8 +17,8 @@ compare results of variations and checks:
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
+import inet.examples.node.SimpleEthernetLlcHost;
 import ned.DatarateChannel;
-import inet.node.ethernet.SimpleEthernetLlcHost;
 
 network CompareMACs
 {

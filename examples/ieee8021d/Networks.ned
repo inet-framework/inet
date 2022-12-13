@@ -6,10 +6,10 @@
 package inet.examples.ieee8021d;
 
 import inet.common.scenario.ScenarioManager;
+import inet.examples.node.SimpleEthernetLlcHost;
 import inet.linklayer.configurator.L2NetworkConfigurator;
 import inet.linklayer.ieee8021d.tester.StpTester;
 import inet.node.ethernet.Eth1G;
-import inet.node.ethernet.SimpleEthernetLlcHost;
 import inet.node.ethernet.EthernetSwitch;
 
 
@@ -97,9 +97,9 @@ network LargeNet extends SwitchNetwork
 
         host3: SimpleEthernetLlcHost {
             parameters:
-            csmacdSupport = false;
-            eth.duplexMode = true;
-            @display("p=700,100");
+                csmacdSupport = false;
+                eth.duplexMode = true;
+                @display("p=700,100");
         }
         host4: SimpleEthernetLlcHost {
             parameters:

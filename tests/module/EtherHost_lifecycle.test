@@ -10,7 +10,7 @@ sender[0] and recip start at down
 
 [General]
 network = Test
-ned-path = .;../../../../src;../../lib
+ned-path = .;../../../../src;../../../../examples;../../lib
 cmdenv-express-mode = false
 
 #omnetpp 5.0 - 5.1 compatibility:
@@ -37,10 +37,10 @@ snapshot-file = "${resultdir}/${configname}-${runnumber}.sna"
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.test.moduletest.lib.*;
-import inet.node.ethernet.SimpleEthernetLlcHost;
-import inet.node.ethernet.EthernetSwitch;
 import inet.common.scenario.ScenarioManager;
+import inet.examples.node.SimpleEthernetLlcHost;
+import inet.node.ethernet.EthernetSwitch;
+import inet.test.moduletest.lib.*;
 
 
 network Test

@@ -8,9 +8,9 @@
 
 package inet.examples.voipstream.VoIPStreamLargeNet;
 
-import inet.node.ethernet.EthernetHub;
+import inet.examples.node.SimpleEthernetLlcHost;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
-import inet.node.ethernet.SimpleEthernetLlcHost;
+import inet.node.ethernet.EthernetHub;
 import inet.node.ethernet.EthernetSwitch;
 import inet.node.inet.StandardHost;
 import inet.physicallayer.wired.common.WireJunction;

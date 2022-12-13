@@ -4,13 +4,13 @@ Test Rstp treebuilding
 
 %file: test.ned
 
-import inet.test.moduletest.lib.*;
-import inet.node.ethernet.Eth1G;
-import inet.node.ethernet.SimpleEthernetLlcHost;
-import inet.node.ethernet.EthernetSwitch;
 import inet.common.scenario.ScenarioManager;
+import inet.examples.node.SimpleEthernetLlcHost;
 import inet.linklayer.configurator.L2NetworkConfigurator;
 import inet.linklayer.ieee8021d.tester.StpTester;
+import inet.node.ethernet.Eth1G;
+import inet.node.ethernet.EthernetSwitch;
+import inet.test.moduletest.lib.*;
 
 network LargeNet
 {
@@ -69,7 +69,7 @@ network LargeNet
 [General]
 sim-time-limit = 50s
 cmdenv-express-mode = false
-ned-path = .;../../../../src;../../lib
+ned-path = .;../../../../src;../../../../examples;../../lib
 
 #omnetpp 5.0 - 5.1 compatibility:
 eventlog-file = "${resultdir}/${configname}-${runnumber}.elog"

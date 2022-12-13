@@ -14,9 +14,9 @@ checks:
 
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
-import inet.node.ethernet.EthernetHub;
-import inet.node.ethernet.SimpleEthernetLlcHost;
 import inet.common.scenario.ScenarioManager;
+import inet.examples.node.SimpleEthernetLlcHost;
+import inet.node.ethernet.EthernetHub;
 import ned.DatarateChannel;
 
 
