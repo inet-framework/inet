@@ -38,13 +38,11 @@ void SctpSendStream::deleteQueue()
 {
     SctpDataMsg *datMsg;
     SctpSimpleMessage *smsg;
-    int32_t count = streamQ->getLength();
     while (!streamQ->isEmpty()) {
         datMsg = check_and_cast<SctpDataMsg *>(streamQ->pop());
         smsg = check_and_cast<SctpSimpleMessage *>(datMsg->decapsulate());
         delete smsg;
         delete datMsg;
-        count--;
     }
     while (!uStreamQ->isEmpty()) {
         datMsg = check_and_cast<SctpDataMsg *>(uStreamQ->pop());

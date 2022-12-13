@@ -356,7 +356,7 @@ void Rtcp::processIncomingRTCPPacket(Packet *packet, Ipv4Address address, int po
     calculateAveragePacketSize(packet->getByteLength());
     simtime_t arrivalTime = packet->getArrivalTime();
 
-    for (int i = 0; packet->getByteLength() > 0; i++) {
+    while (packet->getByteLength() > 0) {
         // remove the rtcp packet from the rtcp compound packet
         const auto& rtcpPacket = packet->popAtFront<RtcpPacket>();
         if (rtcpPacket) {

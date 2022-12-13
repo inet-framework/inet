@@ -667,8 +667,6 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
 
     uint16_t chunksAdded = 0;
     uint16_t dataChunksAdded = 0;
-    uint32_t totalChunksSent = 0;
-    uint32_t totalPacketsSent = 0;
     uint32_t outstandingBytes = 0;
 
     uint32_t tcount = 0; // Bytes in transmission queue on the selected path
@@ -806,7 +804,6 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
             dacPacketsRcvd = 0;
 
             chunksAdded++;
-            totalChunksSent++;
             // ------ Create AUTH chunk, if necessary --------------------------
             authAdded = addAuthChunkIfNecessary(sctpMsg, SACK, authAdded);
 
@@ -835,7 +832,6 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
             if (peekAbandonedChunk(path) != nullptr) {
                 forwardChunk = createForwardTsnChunk(path->remoteAddress);
                 chunksAdded++;
-                totalChunksSent++;
                 state->ackPointAdvanced = false;
                 if (!headerCreated) {
                     sctpMsg = makeShared<SctpHeader>();
@@ -1001,7 +997,6 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                         if (peekAbandonedChunk(path) != nullptr) {
                             forwardChunk = createForwardTsnChunk(path->remoteAddress);
                             chunksAdded++;
-                            totalChunksSent++;
                             state->ackPointAdvanced = false;
                             // ------ Create AUTH chunk, if necessary -----------------------
                             authAdded = addAuthChunkIfNecessary(sctpMsg, FORWARD_TSN, authAdded);
@@ -1289,7 +1284,6 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                     datVar->hasBeenFastRetransmitted = false;
                     EV_DETAIL << "sendAll(): adding new outbound data datVar to packet (tsn=" << datVar->tsn << ")...!!!\n";
                     /* update counters */
-                    totalChunksSent++;
                     chunksAdded++;
                     dataChunksAdded++;
 
@@ -1424,7 +1418,6 @@ void SctpAssociation::sendOnPath(SctpPathVariables *pathId, bool firstPass)
                         sendToIP(pkt, sctpMsg, path->remoteAddress);
                         sctpMsg = nullptr;
                         pmDataIsSentOn(path);
-                        totalPacketsSent++;
                         path->lastTransmission = simTime();
                         path->packetsInBurst++;
                         state->lastTransmission = simTime();
