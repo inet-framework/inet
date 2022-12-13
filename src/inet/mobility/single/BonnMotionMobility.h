@@ -21,11 +21,13 @@ namespace inet {
 class INET_API BonnMotionMobility : public LineSegmentsMobilityBase
 {
   protected:
+    BonnMotionFileCache& cache = SIMULATION_SHARED_VARIABLE(cache);
+
     // state
-    bool is3D;
-    const BonnMotionFile::Line *lines;
-    int currentLine;
-    double maxSpeed; // the possible maximum speed at any future time
+    bool is3D = false;
+    const BonnMotionFile::Line *lines = nullptr;
+    int currentLine = -1;
+    double maxSpeed = 0; // the possible maximum speed at any future time
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -45,10 +47,6 @@ class INET_API BonnMotionMobility : public LineSegmentsMobilityBase
     virtual void computeMaxSpeed();
 
   public:
-    BonnMotionMobility();
-
-    virtual ~BonnMotionMobility();
-
     virtual double getMaxSpeed() const override { return maxSpeed; }
 };
 

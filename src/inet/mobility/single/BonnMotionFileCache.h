@@ -45,28 +45,11 @@ class INET_API BonnMotionFile
 class INET_API BonnMotionFileCache
 {
   protected:
-    typedef std::map<std::string, BonnMotionFile> BmFileMap;
-    BmFileMap cache;
-    static BonnMotionFileCache *inst;
+    std::map<std::string, BonnMotionFile> cache;
     void parseFile(const char *filename, BonnMotionFile& bmFile);
-    BonnMotionFileCache() {}
-    virtual ~BonnMotionFileCache() {}
 
   public:
-    /**
-     * Returns the singleton instance.
-     */
-    static BonnMotionFileCache *getInstance();
-
-    /**
-     * Deletes the singleton instance.
-     */
-    static void deleteInstance();
-
-    /**
-     * Returns the given document.
-     */
-    virtual const BonnMotionFile *getFile(const char *filename);
+    const BonnMotionFile *getFile(const char *filename);
 };
 
 } // namespace inet

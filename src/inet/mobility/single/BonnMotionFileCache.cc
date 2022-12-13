@@ -20,23 +20,6 @@ const BonnMotionFile::Line *BonnMotionFile::getLine(int nodeId) const
     return (it == lines.end()) ? nullptr : &(*it);
 }
 
-BonnMotionFileCache *BonnMotionFileCache::inst;
-
-BonnMotionFileCache *BonnMotionFileCache::getInstance()
-{
-    if (!inst)
-        inst = new BonnMotionFileCache;
-    return inst;
-}
-
-void BonnMotionFileCache::deleteInstance()
-{
-    if (inst) {
-        delete inst;
-        inst = nullptr;
-    }
-}
-
 const BonnMotionFile *BonnMotionFileCache::getFile(const char *filename)
 {
     // if found, return it from cache

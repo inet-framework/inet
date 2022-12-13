@@ -14,14 +14,6 @@ namespace inet {
 
 Define_Module(BonnMotionMobility);
 
-BonnMotionMobility::BonnMotionMobility()
-{
-    is3D = false;
-    lines = nullptr;
-    currentLine = -1;
-    maxSpeed = 0;
-}
-
 void BonnMotionMobility::computeMaxSpeed()
 {
     const BonnMotionFile::Line& vec = *lines;
@@ -42,11 +34,6 @@ void BonnMotionMobility::computeMaxSpeed()
     }
 }
 
-BonnMotionMobility::~BonnMotionMobility()
-{
-    BonnMotionFileCache::deleteInstance();
-}
-
 void BonnMotionMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
@@ -58,7 +45,7 @@ void BonnMotionMobility::initialize(int stage)
         if (nodeId == -1)
             nodeId = getContainingNode(this)->getIndex();
         const char *fname = par("traceFile");
-        const BonnMotionFile *bmFile = BonnMotionFileCache::getInstance()->getFile(fname);
+        const BonnMotionFile *bmFile = cache.getFile(fname);
         lines = bmFile->getLine(nodeId);
         if (!lines)
             throw cRuntimeError("Invalid nodeId %d -- no such line in file '%s'", nodeId, fname);
