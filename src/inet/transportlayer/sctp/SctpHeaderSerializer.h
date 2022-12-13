@@ -45,13 +45,18 @@ class INET_API SctpHeaderSerializer : public FieldsChunkSerializer
     static void hmacSha1(const uint8_t *buf, uint32_t buflen, const uint8_t *key, uint32_t keylen, uint8_t *digest);
     void calculateSharedKey();
     bool compareRandom();
+    static int getKeysHandle();
 
+  public:
+    struct Keys {
+        unsigned char keyVector[512];
+        unsigned int sizeKeyVector;
+        unsigned char peerKeyVector[512];
+        unsigned int sizePeerKeyVector;
+        unsigned char sharedKey[512];
+    };
   private:
-    static unsigned char keyVector[512];
-    static unsigned int sizeKeyVector;
-    static unsigned char peerKeyVector[512];
-    static unsigned int sizePeerKeyVector;
-    static unsigned char sharedKey[512];
+    Keys& keys = getSimulationOrSharedDataManager()->getSharedVariable<Keys>(getKeysHandle());
 };
 
 } // namespace sctp

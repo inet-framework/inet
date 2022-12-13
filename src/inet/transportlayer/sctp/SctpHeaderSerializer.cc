@@ -33,11 +33,11 @@ namespace sctp {
 
 Register_Serializer(SctpHeader, SctpHeaderSerializer);
 
-unsigned char SctpHeaderSerializer::keyVector[512];
-unsigned int SctpHeaderSerializer::sizeKeyVector = 0;
-unsigned char SctpHeaderSerializer::peerKeyVector[512];
-unsigned int SctpHeaderSerializer::sizePeerKeyVector = 0;
-unsigned char SctpHeaderSerializer::sharedKey[512];
+int SctpHeaderSerializer::getKeysHandle()
+{
+    static int keysHandle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::sctp::SctpHeaderSerializer::keys");
+    return keysHandle;
+}
 
 void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
@@ -192,9 +192,9 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                     parPtr += ADD_PADDING(sizeof(struct random_parameter) + randomsize);
                     random->length = htons(sizeof(struct random_parameter) + randomsize);
                     rp->length = htons(sizeof(struct random_parameter) + randomsize);
-                    sizeKeyVector = sizeof(struct random_parameter) + randomsize;
+                    keys.sizeKeyVector = sizeof(struct random_parameter) + randomsize;
                     struct tlv *chunks = (struct tlv *)(((unsigned char *)ic) + sizeof(struct init_chunk) + parPtr);
-                    struct tlv *cp = (struct tlv *)(((unsigned char *)vector) + sizeKeyVector);
+                    struct tlv *cp = (struct tlv *)(((unsigned char *)vector) + keys.sizeKeyVector);
 
                     chunks->type = htons(CHUNKS);
                     cp->type = htons(CHUNKS);
@@ -207,15 +207,15 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                     }
                     chunks->length = htons(sizeof(struct tlv) + chunksize);
                     cp->length = htons(sizeof(struct tlv) + chunksize);
-                    sizeKeyVector += sizeof(struct tlv) + chunksize;
+                    keys.sizeKeyVector += sizeof(struct tlv) + chunksize;
                     parPtr += ADD_PADDING(sizeof(struct tlv) + chunksize);
                     struct hmac_algo *hmac = (struct hmac_algo *)(((unsigned char *)ic) + sizeof(struct init_chunk) + parPtr);
-                    struct hmac_algo *hp = (struct hmac_algo *)(((unsigned char *)vector) + sizeKeyVector);
+                    struct hmac_algo *hp = (struct hmac_algo *)(((unsigned char *)vector) + keys.sizeKeyVector);
                     hmac->type = htons(HMAC_ALGO);
                     hp->type = htons(HMAC_ALGO);
                     hmac->length = htons(4 + 2 * initChunk->getHmacTypesArraySize());
                     hp->length = htons(4 + 2 * initChunk->getHmacTypesArraySize());
-                    sizeKeyVector += (4 + 2 * initChunk->getHmacTypesArraySize());
+                    keys.sizeKeyVector += (4 + 2 * initChunk->getHmacTypesArraySize());
                     for (unsigned int i = 0; i < initChunk->getHmacTypesArraySize(); i++) {
                         hmac->ident[i] = htons(initChunk->getHmacTypes(i));
                         hp->ident[i] = htons(initChunk->getHmacTypes(i));
@@ -224,8 +224,8 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                     padding_last = ADD_PADDING(4 + 2 * initChunk->getHmacTypesArraySize()) - (4 + 2 * initChunk->getHmacTypesArraySize());
                     parPtr -= padding_last;
 
-                    for (unsigned int k = 0; k < sizeKeyVector; k++) {
-                        keyVector[k] = vector[k];
+                    for (unsigned int k = 0; k < keys.sizeKeyVector; k++) {
+                        keys.keyVector[k] = vector[k];
                     }
                     free(vector);
                 }
@@ -365,16 +365,16 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
                     }
                     parPtr += ADD_PADDING(4 + 2 * initAckChunk->getHmacTypesArraySize());
                     for (unsigned int k = 0; k < min(sizeVector, 64); k++) {
-                        if (sizeKeyVector != 0)
-                            peerKeyVector[k] = vector[k];
+                        if (keys.sizeKeyVector != 0)
+                            keys.peerKeyVector[k] = vector[k];
                         else
-                            keyVector[k] = vector[k];
+                            keys.keyVector[k] = vector[k];
                     }
 
-                    if (sizeKeyVector != 0)
-                        sizePeerKeyVector = sizeVector;
+                    if (keys.sizeKeyVector != 0)
+                        keys.sizePeerKeyVector = sizeVector;
                     else
-                        sizeKeyVector = sizeVector;
+                        keys.sizeKeyVector = sizeVector;
                     /* ToDo */
 //                    calculateSharedKey();
                     free(vector);
@@ -1093,8 +1093,8 @@ void SctpHeaderSerializer::serialize(MemoryOutputStream& stream, const Ptr<const
     uint8_t result[SHA_LENGTH];
     if (authstart != 0) {
         struct data_vector *ac = (struct data_vector *)(buffer + authstart);
-        EV_DETAIL << "sizeKeyVector=" << sizeKeyVector << ", sizePeerKeyVector=" << sizePeerKeyVector << "\n";
-        hmacSha1((uint8_t *)ac->data, writtenbytes - authstart, sharedKey, sizeKeyVector + sizePeerKeyVector, result);
+        EV_DETAIL << "sizeKeyVector=" << keys.sizeKeyVector << ", sizePeerKeyVector=" << keys.sizePeerKeyVector << "\n";
+        hmacSha1((uint8_t *)ac->data, writtenbytes - authstart, keys.sharedKey, keys.sizeKeyVector + keys.sizePeerKeyVector, result);
         struct auth_chunk *auth = (struct auth_chunk *)(buffer + authstart);
         for (int32_t k = 0; k < SHA_LENGTH; k++)
             auth->hmac[k] = result[k];
@@ -1383,21 +1383,21 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                 }
                 if (chunk->getHmacTypesArraySize() != 0) {
                     unsigned char *vector = (unsigned char *)malloc(64);
-                    sizePeerKeyVector = rplen;
+                    keys.sizePeerKeyVector = rplen;
                     memcpy(vector, rp, rplen);
-                    for (unsigned int k = 0; k < sizePeerKeyVector; k++) {
-                        peerKeyVector[k] = vector[k];
+                    for (unsigned int k = 0; k < keys.sizePeerKeyVector; k++) {
+                        keys.peerKeyVector[k] = vector[k];
                     }
                     memcpy(vector, cp, cplen);
                     for (unsigned int k = 0; k < cplen; k++) {
-                        peerKeyVector[sizePeerKeyVector + k] = vector[k];
+                        keys.peerKeyVector[keys.sizePeerKeyVector + k] = vector[k];
                     }
-                    sizePeerKeyVector += cplen;
+                    keys.sizePeerKeyVector += cplen;
                     memcpy(vector, hp, hplen);
                     for (unsigned int k = 0; k < hplen; k++) {
-                        peerKeyVector[sizePeerKeyVector + k] = vector[k];
+                        keys.peerKeyVector[keys.sizePeerKeyVector + k] = vector[k];
                     }
-                    sizePeerKeyVector += hplen;
+                    keys.sizePeerKeyVector += hplen;
                     free(vector);
                 }
                 chunk->setBitLength(chunklen * 8);
@@ -1602,10 +1602,10 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                         EV_ERROR << "Random parameter too long. It will be truncated.\n";
                         rplen = 64;
                     }
-                    sizePeerKeyVector = rplen;
+                    keys.sizePeerKeyVector = rplen;
                     memcpy(vector, rp, rplen);
-                    for (unsigned int k = 0; k < sizePeerKeyVector; k++) {
-                        peerKeyVector[k] = vector[k];
+                    for (unsigned int k = 0; k < keys.sizePeerKeyVector; k++) {
+                        keys.peerKeyVector[k] = vector[k];
                     }
                     free(rp);
                     if (cplen > 64) {
@@ -1614,20 +1614,20 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                     }
                     memcpy(vector, cp, cplen);
                     for (unsigned int k = 0; k < cplen; k++) {
-                        peerKeyVector[sizePeerKeyVector + k] = vector[k];
+                        keys.peerKeyVector[keys.sizePeerKeyVector + k] = vector[k];
                     }
                     free(cp);
-                    sizePeerKeyVector += cplen;
+                    keys.sizePeerKeyVector += cplen;
                     if (hplen > 64) {
                         EV_ERROR << "HMac parameter too long. It will be truncated.\n";
                         hplen = 64;
                     }
                     memcpy(vector, hp, hplen);
                     for (unsigned int k = 0; k < hplen; k++) {
-                        peerKeyVector[sizePeerKeyVector + k] = vector[k];
+                        keys.peerKeyVector[keys.sizePeerKeyVector + k] = vector[k];
                     }
                     free(hp);
-                    sizePeerKeyVector += hplen;
+                    keys.sizePeerKeyVector += hplen;
 //                    calculateSharedKey();
                 }
                 chunk->setByteLength(chunklen);
@@ -1873,7 +1873,7 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
                 flen = bufsize - (sizeof(struct common_header) + chunkPtr);
 
                 const struct data_vector *sc = (struct data_vector *)(chunks + chunkPtr);
-                hmacSha1((uint8_t *)sc->data, flen, sharedKey, sizeKeyVector + sizePeerKeyVector, result);
+                hmacSha1((uint8_t *)sc->data, flen, keys.sharedKey, keys.sizeKeyVector + keys.sizePeerKeyVector, result);
 
                 chunk->setHMacOk(true);
                 for (unsigned int j = 0; j < SHA_LENGTH; j++) {
@@ -2153,8 +2153,8 @@ const Ptr<Chunk> SctpHeaderSerializer::deserialize(MemoryInputStream& stream) co
 bool SctpHeaderSerializer::compareRandom()
 {
     unsigned int i, size;
-    if (sizeKeyVector != sizePeerKeyVector) {
-        if (sizePeerKeyVector > sizeKeyVector) {
+    if (keys.sizeKeyVector != keys.sizePeerKeyVector) {
+        if (keys.sizePeerKeyVector > keys.sizeKeyVector) {
             return false;
         }
         else {
@@ -2162,11 +2162,11 @@ bool SctpHeaderSerializer::compareRandom()
         }
     }
     else
-        size = sizeKeyVector;
+        size = keys.sizeKeyVector;
     for (i = 0; i < size; i++) {
-        if (keyVector[i] < peerKeyVector[i])
+        if (keys.keyVector[i] < keys.peerKeyVector[i])
             return false;
-        if (keyVector[i] > peerKeyVector[i])
+        if (keys.keyVector[i] > keys.peerKeyVector[i])
             return true;
     }
     return true;
@@ -2180,16 +2180,16 @@ void SctpHeaderSerializer::calculateSharedKey()
     peerFirst = compareRandom();
 
     if (peerFirst == false) {
-        for (i = 0; i < sizeKeyVector; i++)
-            sharedKey[i] = keyVector[i];
-        for (i = 0; i < sizePeerKeyVector; i++)
-            sharedKey[i + sizeKeyVector] = peerKeyVector[i];
+        for (i = 0; i < keys.sizeKeyVector; i++)
+            keys.sharedKey[i] = keys.keyVector[i];
+        for (i = 0; i < keys.sizePeerKeyVector; i++)
+            keys.sharedKey[i + keys.sizeKeyVector] = keys.peerKeyVector[i];
     }
     else {
-        for (i = 0; i < sizePeerKeyVector; i++)
-            sharedKey[i] = peerKeyVector[i];
-        for (i = 0; i < sizeKeyVector; i++)
-            sharedKey[i + sizePeerKeyVector] = keyVector[i];
+        for (i = 0; i < keys.sizePeerKeyVector; i++)
+            keys.sharedKey[i] = keys.peerKeyVector[i];
+        for (i = 0; i < keys.sizeKeyVector; i++)
+            keys.sharedKey[i + keys.sizePeerKeyVector] = keys.keyVector[i];
     }
 }
 
