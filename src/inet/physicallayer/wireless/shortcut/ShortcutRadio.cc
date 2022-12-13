@@ -19,8 +19,6 @@
 namespace inet {
 namespace physicallayer {
 
-std::map<MacAddress, ShortcutRadio *> ShortcutRadio::shortcutRadios;
-
 Define_Module(ShortcutRadio);
 
 void ShortcutRadio::initialize(int stage)

@@ -289,8 +289,6 @@ void Gpsr::configureInterfaces()
 //
 
 // KLUDGE implement position registry protocol
-PositionTable Gpsr::globalPositionTable;
-
 Coord Gpsr::lookupPositionInGlobalRegistry(const L3Address& address) const
 {
     // KLUDGE implement position registry protocol

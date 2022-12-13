@@ -21,9 +21,6 @@ namespace inet {
 
 Define_Module(GlobalArp);
 
-GlobalArp::ArpCache GlobalArp::globalArpCache;
-int GlobalArp::globalArpCacheRefCnt = 0;
-
 static std::ostream& operator<<(std::ostream& out, const GlobalArp::ArpCacheEntry& entry)
 {
     return out << "MAC:" << entry.networkInterface->getMacAddress();
@@ -31,15 +28,10 @@ static std::ostream& operator<<(std::ostream& out, const GlobalArp::ArpCacheEntr
 
 GlobalArp::GlobalArp()
 {
-    if (++globalArpCacheRefCnt == 1) {
-        if (!globalArpCache.empty())
-            throw cRuntimeError("Global ARP cache not empty, model error in previous run?");
-    }
 }
 
 GlobalArp::~GlobalArp()
 {
-    --globalArpCacheRefCnt;
     // delete my entries from the globalArpCache
     for (auto it = globalArpCache.begin(); it != globalArpCache.end();) {
         if (it->second->owner == this) {

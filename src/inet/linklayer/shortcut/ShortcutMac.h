@@ -16,7 +16,7 @@ namespace inet {
 class INET_API ShortcutMac : public MacProtocolBase
 {
   protected:
-    static std::map<MacAddress, ShortcutMac *> shortcutMacs;
+    std::map<MacAddress, ShortcutMac *>& shortcutMacs = SIMULATION_SHARED_VARIABLE(shortcutMacs);
 
   protected:
     double bitrate = NaN;

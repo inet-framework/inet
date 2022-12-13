@@ -16,8 +16,6 @@
 
 namespace inet {
 
-std::map<MacAddress, ShortcutMac *> ShortcutMac::shortcutMacs;
-
 Define_Module(ShortcutMac);
 
 ShortcutMac::~ShortcutMac()

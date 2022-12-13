@@ -20,7 +20,7 @@ namespace physicallayer {
 class INET_API ShortcutRadio : public PhysicalLayerBase, public virtual IRadio
 {
   protected:
-    static std::map<MacAddress, ShortcutRadio *> shortcutRadios;
+    std::map<MacAddress, ShortcutRadio *>& shortcutRadios = SIMULATION_SHARED_VARIABLE(shortcutRadios);
 
   protected:
     RadioMode radioMode = RADIO_MODE_OFF;

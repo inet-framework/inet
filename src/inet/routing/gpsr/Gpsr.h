@@ -52,7 +52,7 @@ class INET_API Gpsr : public RoutingProtocolBase, public cListener, public Netfi
     const char *outputInterface = nullptr;
     ModuleRefByPar<IRoutingTable> routingTable; // TODO delete when necessary functions are moved to interface table
     ModuleRefByPar<INetfilter> networkProtocol;
-    static PositionTable globalPositionTable; // KLUDGE implement position registry protocol
+    PositionTable& globalPositionTable = SIMULATION_SHARED_VARIABLE(globalPositionTable); // KLUDGE implement position registry protocol
 
     // packet size
     int positionByteLength = -1;

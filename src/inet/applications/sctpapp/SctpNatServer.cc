@@ -27,8 +27,6 @@ using namespace sctp;
 
 Define_Module(SctpNatServer);
 
-NatVector SctpNatServer::natVector;
-
 void SctpNatServer::initialize(int stage)
 {
     numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;

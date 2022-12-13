@@ -54,7 +54,7 @@ class INET_API SctpNatServer : public cSimpleModule, public LifecycleUnsupported
     int32_t inboundStreams;
     int32_t lastStream;
 
-    static NatVector natVector;
+    NatVector& natVector = SIMULATION_SHARED_VARIABLE(natVector);
 
     int32_t ssn;
 

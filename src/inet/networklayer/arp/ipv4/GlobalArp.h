@@ -42,8 +42,7 @@ class INET_API GlobalArp : public OperationalBase, public IArp, public cListener
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     L3Address::AddressType addressType = static_cast<L3Address::AddressType>(-1);
 
-    static ArpCache globalArpCache;
-    static int globalArpCacheRefCnt;
+    ArpCache& globalArpCache = SIMULATION_SHARED_VARIABLE(globalArpCache);
 
   protected:
     void ensureCacheEntry(const L3Address& address, const NetworkInterface *networkInterface);
