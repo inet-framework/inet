@@ -7,11 +7,6 @@
 
 #include "inet/common/Compat.h"
 
-#ifdef EV_GLOBAL_STREAM
-// TODO compiles but it doesn't do what it supposed to do
-cLogStream cLogStream::globalStream;
-#endif // ifdef EV_GLOBAL_STREAM
-
 namespace inet {
 
 #ifdef _MSC_VER
