@@ -17,7 +17,7 @@ namespace sctp {
 
 #define CRC32C(c, d)    (c = (c >> 8) ^ crc_c[(c ^ (d)) & 0xFF])
 
-static uint32_t crc_c[256] = {
+static const uint32_t crc_c[256] = {
     0x00000000L, 0xF26B8303L, 0xE13B70F7L, 0x1350F3F4L,
     0xC79A971FL, 0x35F1141CL, 0x26A1E7E8L, 0xD4CA64EBL,
     0x8AD958CFL, 0x78B2DBCCL, 0x6BE22838L, 0x9989AB3BL,

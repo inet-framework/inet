@@ -18,11 +18,11 @@ static const double AXIS_WIDTH_PERCENT = 0.03;
 static const double FRAME_PERCENT = 0.1;
 static const double TICK_BIG_LENGTH_PERCENT = 0.17;
 static const double TICK_SMALL_LENGTH_PERCENT = 0.27;
-static double NUMBER_Y_PERCENT = 0.01;
-static double NUMBER_FONTSIZE_PERCENT = 0.3;
-static double NEEDLE_WIDTH_PERCENT = 0.05;
-static double NEEDLE_HEIGHT_PERCENT = 0.6;
-static double NEEDLE_OFFSET_PERCENT = 0.03;
+static const double NUMBER_Y_PERCENT = 0.01;
+static const double NUMBER_FONTSIZE_PERCENT = 0.3;
+static const double NEEDLE_WIDTH_PERCENT = 0.05;
+static const double NEEDLE_HEIGHT_PERCENT = 0.6;
+static const double NEEDLE_OFFSET_PERCENT = 0.03;
 
 // Properties
 static const char *PKEY_BACKGROUND_COLOR = "backgroundColor";
