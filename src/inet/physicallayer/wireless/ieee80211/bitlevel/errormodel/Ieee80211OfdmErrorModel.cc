@@ -6,8 +6,8 @@
 
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/errormodel/Ieee80211OfdmErrorModel.h"
 
-// TODO AFTER REBASE: fix includes here
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredSnir.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IApskModulation.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
@@ -17,6 +17,7 @@
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSampleModel.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmModulation.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmSymbolModel.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
 
@@ -85,7 +86,7 @@ const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const Layered
     }
     else
         throw cRuntimeError("Unknown data modulation");
-    return new ReceptionBitModel(b(signalBitLength), signalBitrate, b(dataBitLength), dataBitrate, corruptedBits);
+    return new ReceptionBitModel(b(signalBitLength), signalBitrate, b(dataBitLength), dataBitrate, corruptedBits, NaN);
 }
 
 const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const
@@ -130,11 +131,11 @@ const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const L
     symbolIntervals.reserve(symbolCount);
     for (int i = 0; i < timeDivision; i++) {
         simtime_t symbolStartTime = i < headerSymbolLength ?
-                LinearInterpolator<double, simtime_t>::singleton.getValue(0, headerStartTime, headerSymbolLength, headerEndTime, i) :
-                LinearInterpolator<double, simtime_t>::singleton.getValue(1, dataStartTime, dataSymbolLength + 1, dataEndTime, i);
+                math::LinearInterpolator<double, simtime_t>::singleton.getValue(0, headerStartTime, headerSymbolLength, headerEndTime, i) :
+                math::LinearInterpolator<double, simtime_t>::singleton.getValue(1, dataStartTime, dataSymbolLength + 1, dataEndTime, i);
         simtime_t symbolEndTime = i < headerSymbolLength ?
-                LinearInterpolator<double, simtime_t>::singleton.getValue(0, headerStartTime, headerSymbolLength, headerEndTime, i + 1) :
-                LinearInterpolator<double, simtime_t>::singleton.getValue(1, dataStartTime, dataSymbolLength + 1, dataEndTime, i + 1);
+                math::LinearInterpolator<double, simtime_t>::singleton.getValue(0, headerStartTime, headerSymbolLength, headerEndTime, i + 1) :
+                math::LinearInterpolator<double, simtime_t>::singleton.getValue(1, dataStartTime, dataSymbolLength + 1, dataEndTime, i + 1);
         for (int j = 0; j < frequencyDivision; j++) {
             Hz symbolStartFrequency = (startFrequency * (frequencyDivision - j) + endFrequency * j) / frequencyDivision;
             Hz symbolEndFrequency = (startFrequency * (frequencyDivision - j - 1) + endFrequency * (j + 1)) / frequencyDivision;
@@ -207,7 +208,7 @@ const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const L
         auto receivedOfdmSymbol = new Ieee80211OfdmSymbol(receivedSymbols);
         receivedOfdmSymbols->push_back(receivedOfdmSymbol);
     }
-    return new ReceptionSymbolModel(symbolModel->getHeaderSymbolLength(), symbolModel->getHeaderSymbolRate(), symbolModel->getDataSymbolLength(), symbolModel->getDataSymbolRate(), receivedOfdmSymbols);
+    return new ReceptionSymbolModel(symbolModel->getHeaderSymbolLength(), symbolModel->getHeaderSymbolRate(), symbolModel->getDataSymbolLength(), symbolModel->getDataSymbolRate(), receivedOfdmSymbols, NaN);
 }
 
 void Ieee80211OfdmErrorModel::corruptBits(BitVector *bits, double ber, int begin, int end) const
