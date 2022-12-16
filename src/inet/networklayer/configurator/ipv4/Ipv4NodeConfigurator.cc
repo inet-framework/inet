@@ -137,7 +137,11 @@ void Ipv4NodeConfigurator::configureRoutingTable()
 
 void Ipv4NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
+#if OMNETPP_BUILDNUM < 2001
     if (getSimulation()->getSimulationStage() == STAGE(INITIALIZE))
+#else
+    if (getSimulation()->getStage() == STAGE(INITIALIZE))
+#endif
         return; // ignore notifications during initialize
 
     Enter_Method("%s", cComponent::getSignalName(signalID));

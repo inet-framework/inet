@@ -93,7 +93,11 @@ void Ppp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
 
     MacProtocolBase::receiveSignal(source, signalID, obj, details);
 
+#if OMNETPP_BUILDNUM < 2001
     if (getSimulation()->getSimulationStage() == STAGE(CLEANUP))
+#else
+    if (getSimulation()->getStage() == STAGE(CLEANUP))
+#endif
         return;
 
     if (signalID == POST_MODEL_CHANGE) {

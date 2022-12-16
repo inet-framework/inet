@@ -351,7 +351,11 @@ void EthernetMacBase::processConnectDisconnect()
         cancelEvent(endPauseTimer);
 
         if (curTxSignal) {
+#if OMNETPP_BUILDNUM < 2001
             if (getSimulation()->getSimulationStage() == STAGE(EVENT) && physOutGate->getPathEndGate()->isConnected()) {
+#else
+            if (getSimulation()->getStage() == STAGE(EVENT) && physOutGate->getPathEndGate()->isConnected()) {
+#endif
                 ASSERT(endTxTimer->isScheduled());
                 curTxSignal->setDuration(endTxTimer->getArrivalTime() - curTxSignal->getCreationTime());
                 simtime_t duration = simTime() - curTxSignal->getCreationTime(); // TODO save and use start tx time

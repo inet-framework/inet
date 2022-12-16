@@ -229,7 +229,7 @@ PositionAttitudeTransform *createPositionAttitudeTransform(const Coord& position
 std::string resolveImageResource(const char *imageName, cComponent *context)
 {
     if (context == nullptr)
-        context = getSimulation()->getContextModule();
+        context = cSimulation::getActiveSimulation()->getContextModule();
     std::string path;
     for (auto ext : { "", ".png", ".gif", ".jpg" }) {
         path = context->resolveResourcePath((std::string(imageName) + ext).c_str());
