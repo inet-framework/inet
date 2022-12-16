@@ -364,6 +364,8 @@ class SimulationTestCase(unittest.TestCase):
             FILE.close()
 
         result = SimulationResult(command, workingdir, exitcode, elapsedTime=elapsedTime)
+        if exitcode > 10: # TODO
+            return result
 
         # process error messages
         errorLines = re.findall("<!>.*", out, re.M)
@@ -371,30 +373,52 @@ class SimulationTestCase(unittest.TestCase):
         fp = '[a-fA-F0-9]{4}-[a-fA-F0-9]{4}/[a-zA-Z0~]+'
         fps = fp + '(?: '+fp+')*'
         fpsl = fps + '(?:, '+fps+')*'
-        pattern = 'calculated: (' + fpsl + '), expected: (' + fpsl + ')$'
+        pattern = 'calculated: (' + fpsl + '), expected: (' + fpsl + ')( -- during finalization)?$'
+        isFingerprintPass = False
+        isFingerprintFail = False
+        wasError = False
+        result.exitcode = 0
 
         for err in errorLines:
             err = err.strip()
             if re.search("Fingerprint", err):
                 if re.search("Fingerprint successfully", err):
+                    isFingerprintPass = True
                     result.isFingerprintOK = True
                 else:
                     m = re.search(pattern, err)
                     if m:
-                        result.isFingerprintOK = False
+                        isFingerprintFail = True
                         result.computedFingerprint = str2FpGroup(m.group(1), ', ')
                         result.expectedFingerprint = str2FpGroup(m.group(2), ', ')
+                        # TODO only the last failed run's fingerprints stored
                     else:
                         raise Exception("Cannot parse fingerprint-related error message: " + err + "\nPattern: >>>"+pattern+'<<<')
+            elif re.search("Simulation time limit reached", err):
+                pass
             else:
                 errorMsg += "\n" + err
+                wasError = True
                 if re.search("CPU time limit reached", err):
                     result.cpuTimeLimitReached = True
-                    result.exitcode = 1
                 m = re.search(r"at t=([0-9]*(\.[0-9]+)?)s, event #([0-9]+)", err)
                 if m:
                     result.simulatedTime = float(m.group(1))
                     result.numEvents = int(m.group(3))
+
+        if wasError:   # TODO
+            result.exitcode = exitcode
+        elif result.cpuTimeLimitReached:
+            result.exitcode = 1
+        elif isFingerprintFail and isFingerprintPass:
+            result.isFingerprintOK = False
+            errorMsg += "\nFound PASSED and FAILED fingerprint results, too."
+        elif isFingerprintFail:
+            result.isFingerprintOK = False
+        elif isFingerprintPass:
+            result.isFingerprintOK = True
+        else:
+            pass
 
         result.errormsg = errorMsg.strip()
         return result
@@ -457,7 +481,8 @@ class FingerprintTestCase(SimulationTestCase):
             result = self.runSimulation(self.title, command, workingdir, resultdir)
 
             # process the result
-            # note: fingerprint mismatch is technically NOT an error in 4.2 or before! (exitcode==0)
+            # note: fingerprint mismatch is technically NOT an error in omnetpp 6.0 or before! (exitcode==0)
+            # note: fingerprint mismatch is an error in omnetpp 6.1 or after! (exitcode==1)
             self.storeExitcodeCallback(result.exitcode)
             if result.exitcode != 0:
                 raise Exception("runtime error with exitcode="+str(result.exitcode)+": " + result.errormsg)
