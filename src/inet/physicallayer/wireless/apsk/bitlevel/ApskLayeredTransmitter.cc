@@ -7,16 +7,15 @@
 
 #include "inet/physicallayer/wireless/apsk/bitlevel/ApskLayeredTransmitter.h"
 
-// TODO AFTER REBASE: fix includes here
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
-#include "inet/physicallayer/apskradio/bitlevel/ApskEncoder.h"
-#include "inet/physicallayer/apskradio/bitlevel/ApskLayeredTransmitter.h"
-#include "inet/physicallayer/apskradio/bitlevel/ApskModulator.h"
-#include "inet/physicallayer/apskradio/packetlevel/ApskPhyHeader_m.h"
-#include "inet/physicallayer/common/bitlevel/LayeredTransmission.h"
-#include "inet/physicallayer/contract/bitlevel/ISignalAnalogModel.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskEncoder.h"
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskLayeredTransmitter.h"
+#include "inet/physicallayer/wireless/apsk/bitlevel/ApskModulator.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/ApskPhyHeader_m.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 
 namespace inet {
 
