@@ -18,8 +18,8 @@
 #ifndef __INET_NOISESCALARTRANSMITTER_H
 #define __INET_NOISESCALARTRANSMITTER_H
 
-#include "inet/physicallayer/base/packetlevel/TransmitterBase.h"
-#include "inet/physicallayer/contract/packetlevel/ITransmitter.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/TransmitterBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmitter.h"
 
 namespace inet {
 
@@ -37,7 +37,7 @@ class INET_API NoiseScalarTransmitter : public TransmitterBase
     virtual void initialize(int stage) override;
 
   public:
-    virtual std::ostream& printToStream(std::ostream& stream, int level) const override;
+    virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 
     virtual const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, simtime_t startTime) const override;
 };

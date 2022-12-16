@@ -51,6 +51,7 @@ const ITransmission *Ieee802154NarrowbandDimensionalTransmitter::createTransmiss
     const Quaternion& startOrientation = mobility->getCurrentAngularPosition();
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     auto symbolTime = 0;
+    auto codeRate = 0; // TODO
     return new DimensionalTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, packet->getTotalLength(), modulation, symbolTime, centerFrequency, bandwidth, transmissionBitrate, codeRate, powerFunction);
 }
 

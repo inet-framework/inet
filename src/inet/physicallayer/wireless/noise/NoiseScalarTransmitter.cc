@@ -15,10 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "inet/physicallayer/wireless/noise/NoiseScalarTransmitter.h"
+
 #include "inet/mobility/contract/IMobility.h"
-#include "inet/physicallayer/analogmodel/packetlevel/ScalarTransmission.h"
-#include "inet/physicallayer/common/packetlevel/NoiseScalarTransmitter.h"
-#include "inet/physicallayer/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
 
 namespace inet {
 
@@ -37,7 +38,7 @@ void NoiseScalarTransmitter::initialize(int stage)
     }
 }
 
-std::ostream& NoiseScalarTransmitter::printToStream(std::ostream& stream, int level) const
+std::ostream& NoiseScalarTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "NoiseScalarTransmitter";
     return TransmitterBase::printToStream(stream, level);
