@@ -59,7 +59,7 @@ bool Ieee80211OfdmDemodulator::isPilotOrDcSubcarrier(int i) const
 
 const IReceptionBitModel *Ieee80211OfdmDemodulator::demodulate(const IReceptionSymbolModel *symbolModel) const
 {
-    const std::vector<const ISymbol *> *symbols = symbolModel->getSymbols();
+    const std::vector<const ISymbol *> *symbols = symbolModel->getAllSymbols();
     BitVector *bitRepresentation = new BitVector();
     for (auto& symbols_i : *symbols) {
         const Ieee80211OfdmSymbol *symbol = dynamic_cast<const Ieee80211OfdmSymbol *>(symbols_i);

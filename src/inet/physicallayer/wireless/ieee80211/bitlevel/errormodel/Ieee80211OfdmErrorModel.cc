@@ -90,7 +90,7 @@ const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const Layered
 const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
     auto transmissionSymbolModel = check_and_cast<const Ieee80211OfdmTransmissionSymbolModel *>(transmission->getSymbolModel());
-    auto symbols = transmissionSymbolModel->getSymbols();
+    auto symbols = transmissionSymbolModel->getAllSymbols();
     auto receivedSymbols = new std::vector<const ISymbol *>();
     // Only the first symbol is signal field symbol
     double scalarSnir = getScalarSnir(snir);

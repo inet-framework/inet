@@ -191,14 +191,14 @@ void Ieee80211LayeredOfdmTransmitter::encodeAndModulate(const ITransmissionPacke
 const ITransmissionSymbolModel *Ieee80211LayeredOfdmTransmitter::createSymbolModel(const ITransmissionSymbolModel *signalFieldSymbolModel, const ITransmissionSymbolModel *dataFieldSymbolModel) const
 {
     if (levelOfDetail >= SYMBOL_DOMAIN) {
-        const std::vector<const ISymbol *> *signalSymbols = signalFieldSymbolModel->getSymbols();
+        const std::vector<const ISymbol *> *signalSymbols = signalFieldSymbolModel->getAllSymbols();
         std::vector<const ISymbol *> *mergedSymbols = new std::vector<const ISymbol *>();
         const Ieee80211OfdmSymbol *ofdmSymbol = nullptr;
         for (auto& signalSymbol : *signalSymbols) {
             ofdmSymbol = check_and_cast<const Ieee80211OfdmSymbol *>(signalSymbol);
             mergedSymbols->push_back(new Ieee80211OfdmSymbol(*ofdmSymbol));
         }
-        const std::vector<const ISymbol *> *dataSymbols = dataFieldSymbolModel->getSymbols();
+        const std::vector<const ISymbol *> *dataSymbols = dataFieldSymbolModel->getAllSymbols();
         for (auto& dataSymbol : *dataSymbols) {
             ofdmSymbol = dynamic_cast<const Ieee80211OfdmSymbol *>(dataSymbol);
             mergedSymbols->push_back(new Ieee80211OfdmSymbol(*ofdmSymbol));

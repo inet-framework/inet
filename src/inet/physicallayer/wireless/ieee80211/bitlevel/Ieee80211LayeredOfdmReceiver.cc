@@ -212,7 +212,7 @@ const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createSignalFieldSymb
     if (levelOfDetail > SYMBOL_DOMAIN)
         throw cRuntimeError("This level of detail is unimplemented!");
     else if (levelOfDetail == SYMBOL_DOMAIN) { // Create from symbol model (made by the error model)
-        const std::vector<const ISymbol *> *symbols = receptionSymbolModel->getSymbols();
+        const std::vector<const ISymbol *> *symbols = receptionSymbolModel->getAllSymbols();
         std::vector<const ISymbol *> *signalSymbols = new std::vector<const ISymbol *>();
         const Ieee80211OfdmSymbol *signalSymbol = check_and_cast<const Ieee80211OfdmSymbol *>(symbols->at(0));
         signalSymbols->push_back(new Ieee80211OfdmSymbol(*signalSymbol)); // The first symbol is the signal field symbol
@@ -227,7 +227,7 @@ const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createDataFieldSymbol
     if (levelOfDetail > SYMBOL_DOMAIN)
         throw cRuntimeError("This level of detail is unimplemented!");
     else if (levelOfDetail == SYMBOL_DOMAIN) { // Create from symbol model (made by the error model)
-        const std::vector<const ISymbol *> *symbols = receptionSymbolModel->getSymbols();
+        const std::vector<const ISymbol *> *symbols = receptionSymbolModel->getAllSymbols();
         std::vector<const ISymbol *> *dataSymbols = new std::vector<const ISymbol *>();
         const Ieee80211OfdmSymbol *ofdmSymbol = nullptr;
         for (unsigned int i = 1; i < symbols->size(); i++) {
@@ -321,9 +321,9 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createDataFieldBitModel(
 const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createCompleteSymbolModel(const IReceptionSymbolModel *signalFieldSymbolModel, const IReceptionSymbolModel *dataFieldSymbolModel) const
 {
     if (levelOfDetail >= SYMBOL_DOMAIN) {
-        const std::vector<const ISymbol *> *symbols = signalFieldSymbolModel->getSymbols();
+        const std::vector<const ISymbol *> *symbols = signalFieldSymbolModel->getAllSymbols();
         std::vector<const ISymbol *> *completeSymbols = new std::vector<const ISymbol *>(*symbols);
-        symbols = dataFieldSymbolModel->getSymbols();
+        symbols = dataFieldSymbolModel->getAllSymbols();
         for (auto& symbol : *symbols)
             completeSymbols->push_back(new Ieee80211OfdmSymbol(*static_cast<const Ieee80211OfdmSymbol *>(symbol)));
         return new Ieee80211OfdmReceptionSymbolModel(signalFieldSymbolModel->getHeaderSymbolLength(), signalFieldSymbolModel->getHeaderSymbolRate(), dataFieldSymbolModel->getPayloadSymbolLength(), dataFieldSymbolModel->getPayloadSymbolRate(), completeSymbols);
