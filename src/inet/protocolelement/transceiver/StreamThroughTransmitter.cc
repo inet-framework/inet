@@ -21,7 +21,7 @@ void StreamThroughTransmitter::initialize(int stage)
 void StreamThroughTransmitter::handleMessageWhenUp(cMessage *message)
 {
     if (message == txEndTimer)
-        endTx(check_and_cast<Packet *>(txSignal->getEncapsulatedPacket()));
+        endTx(check_and_cast<Packet *>(txSignal->decapsulate()));
     else if (message == bufferUnderrunTimer)
         throw cRuntimeError("Buffer underrun during transmission");
     else
