@@ -149,7 +149,7 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IReception *reception, c
     std::map<simtime_t, W> powerChanges;
     powerChanges[math::getLowerBound<simtime_t>()] = W(0);
     powerChanges[math::getUpperBound<simtime_t>()] = W(0);
-    addReception(scalarReception, noiseStartTime, noiseEndTime, powerChanges);
+    addReception(reception, noiseStartTime, noiseEndTime, powerChanges);
     addNoise(scalarNoise, noiseStartTime, noiseEndTime, powerChanges);
     W power = W(0);
     for (auto & it : powerChanges) {

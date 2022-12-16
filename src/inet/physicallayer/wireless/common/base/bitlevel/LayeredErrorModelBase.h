@@ -9,7 +9,7 @@
 #define __INET_LAYEREDERRORMODELBASE_H
 
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ILayeredErrorModel.h"
-#include "inet/physicallayer/base/packetlevel/ApskModulationBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 
 namespace inet {
 

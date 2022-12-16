@@ -32,7 +32,7 @@ const IReceptionPacketModel *LayeredErrorModelBase::computePacketModel(const Lay
     if (packetErrorRate != 0 && uniform(0, 1) < packetErrorRate)
         receivedPacket->setBitError(true);
     receivedPacket->addTagIfAbsent<ErrorRateInd>()->setPacketErrorRate(packetErrorRate);
-    return new ReceptionPacketModel(receivedPacket, transmissionPacketModel->getHeaderNetBitrate(), transmissionPacketModel->getDataNetBitrate(), packetErrorRate);
+    return new ReceptionPacketModel(receivedPacket, transmissionPacketModel->getHeaderNetBitrate(), transmissionPacketModel->getDataNetBitrate());
 }
 
 const IReceptionBitModel *LayeredErrorModelBase::computeBitModel(const LayeredTransmission *transmission, double bitErrorRate) const
@@ -53,7 +53,7 @@ const IReceptionSymbolModel *LayeredErrorModelBase::computeSymbolModel(const Lay
 {
     auto transmissionSymbolModel = check_and_cast<const TransmissionSymbolModel *>(transmission->getSymbolModel());
     if (symbolErrorRate == 0)
-        return new ReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getDataSymbolLength(), transmissionSymbolModel->getDataSymbolRate(), new std::vector<const ISymbol*>(*transmissionSymbolModel->getAllSymbols()));
+        return new ReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getDataSymbolLength(), transmissionSymbolModel->getDataSymbolRate(), new std::vector<const ISymbol*>(*transmissionSymbolModel->getAllSymbols()), symbolErrorRate);
     else {
         auto modulation = check_and_cast<const ApskModulationBase *>(transmissionSymbolModel->getDataModulation());
         auto transmittedSymbols = transmissionSymbolModel->getAllSymbols();
@@ -65,7 +65,7 @@ const IReceptionSymbolModel *LayeredErrorModelBase::computeSymbolModel(const Lay
             auto receivedSymbol = isCorruptSymbol ? computeCorruptSymbol(modulation, transmittedSymbol) : transmittedSymbol;
             receivedSymbols->at(i) = receivedSymbol;
         }
-        return new ReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getDataSymbolLength(), transmissionSymbolModel->getDataSymbolRate(), receivedSymbols);
+        return new ReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getDataSymbolLength(), transmissionSymbolModel->getDataSymbolRate(), receivedSymbols, symbolErrorRate);
     }
 }
 
