@@ -57,6 +57,7 @@ const ITransmission *ApskDimensionalTransmitter::createTransmission(const IRadio
     const Quaternion& endOrientation = mobility->getCurrentAngularPosition();
     const auto& powerFunction = createPowerFunction(startTime, endTime, centerFrequency, bandwidth, transmissionPower);
     auto symbolTime = 0;
+    double codeRate = 0; // TODO
     return new ApskDimensionalTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, dataLength, modulation, symbolTime, transmissionCenterFrequency, transmissionBandwidth, transmissionBitrate, codeRate, powerFunction);
 }
 
