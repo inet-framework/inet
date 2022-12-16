@@ -16,8 +16,6 @@
 
 namespace inet {
 
-int32_t SctpSocket::nextAssocId = 0;
-
 SctpSocket::SctpSocket(bool type)
 {
     sockstate = NOT_BOUND;

@@ -33,7 +33,7 @@ class IRadioMedium;
 class INET_API ITransmission : public IPrintableObject
 {
   protected:
-    static int nextId;
+    uint64_t& nextId = SIMULATION_SHARED_COUNTER(nextId);
 
   public:
     /**

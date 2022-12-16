@@ -64,7 +64,7 @@ class INET_API SctpNatTable : public cSimpleModule
 
     ~SctpNatTable();
 
-    static uint32_t nextEntryNumber;
+    uint64_t& nextEntryNumber = SIMULATION_SHARED_COUNTER(nextEntryNumber);
 
 //    void addNatEntry(SctpNatEntry* entry);
 
@@ -82,7 +82,7 @@ class INET_API SctpNatTable : public cSimpleModule
 
     void printNatTable();
 
-    static uint32_t getNextEntryNumber() { return nextEntryNumber++; };
+    uint64_t getNextEntryNumber() { return nextEntryNumber++; };
 };
 
 } // namespace sctp

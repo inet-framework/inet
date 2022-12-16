@@ -81,7 +81,7 @@ class INET_API SctpSocket : public ISocket
 
   protected:
     int assocId;
-    static int32_t nextAssocId;
+    uint64_t& nextAssocId = SIMULATION_SHARED_COUNTER(nextAssocId);
     int sockstate;
     bool oneToOne;
     bool appLimited;

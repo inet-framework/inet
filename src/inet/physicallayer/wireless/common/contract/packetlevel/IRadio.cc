@@ -11,8 +11,6 @@ namespace inet {
 
 namespace physicallayer {
 
-int IRadio::nextId = 0;
-
 simsignal_t IRadio::radioModeChangedSignal = cComponent::registerSignal("radioModeChanged");
 simsignal_t IRadio::listeningChangedSignal = cComponent::registerSignal("listeningChanged");
 simsignal_t IRadio::receptionStateChangedSignal = cComponent::registerSignal("receptionStateChanged");

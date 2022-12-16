@@ -59,7 +59,7 @@ class INET_API UdpBasicBurst : public ApplicationBase, public UdpSocket::ICallba
     bool dontFragment = false;
 
     // statistics:
-    static int counter; // counter for generating a global number for each packet
+    uint64_t& counter = SIMULATION_SHARED_COUNTER(counter); // counter for generating a global number for each packet
 
     int numSent = 0;
     int numReceived = 0;

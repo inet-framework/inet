@@ -24,8 +24,6 @@ using std::endl;
 
 Define_Module(ProbabilisticBroadcast);
 
-long ProbabilisticBroadcast::id_counter = 0;
-
 void ProbabilisticBroadcast::initialize(int stage)
 {
     NetworkProtocolBase::initialize(stage);

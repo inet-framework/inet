@@ -11,11 +11,10 @@
 
 namespace inet {
 
-int Chunk::nextId = 0;
 const b Chunk::unspecifiedLength = b(-std::numeric_limits<int64_t>::max());
 
 Chunk::Chunk() :
-    id(nextId++),
+    id(getNextId()),
     flags(0)
 {
 }
@@ -23,7 +22,7 @@ Chunk::Chunk() :
 Chunk::Chunk(const Chunk& other) :
     cObject(other),
     SharedBase<Chunk>(other),
-    id(nextId++),
+    id(getNextId()),
     flags(other.flags & ~CF_IMMUTABLE),
     regionTags(other.regionTags)
 {
@@ -47,6 +46,13 @@ void Chunk::parsimUnpack(cCommBuffer *buffer)
     buffer->unpack(id);
     buffer->unpack(flags);
     regionTags.parsimUnpack(buffer);
+}
+
+uint64_t Chunk::getNextId()
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedCounterName("inet::Chunk::nextId");
+    uint64_t& nextId = getSimulationOrSharedDataManager()->getSharedCounter(handle);
+    return nextId++;
 }
 
 void Chunk::handleChange()

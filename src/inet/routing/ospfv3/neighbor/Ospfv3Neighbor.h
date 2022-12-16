@@ -174,7 +174,7 @@ class INET_API Ospfv3Neighbor
     Packet *lastTransmittedDDPacket = nullptr;
 
     Ospfv3Interface *containingInterface = nullptr;
-    static unsigned long ddSequenceNumberInitSeed;
+    uint64_t& ddSequenceNumberInitSeed = SIMULATION_SHARED_COUNTER(ddSequenceNumberInitSeed);
 
     int last_hello_received = 0;
 };

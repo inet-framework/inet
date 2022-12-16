@@ -105,7 +105,7 @@ class INET_API Neighbor
     Ospfv2Interface *parentInterface = nullptr;
 
     // TODO Should come from a global unique number generator module.
-    static unsigned long ddSequenceNumberInitSeed;
+    uint64_t& ddSequenceNumberInitSeed = SIMULATION_SHARED_COUNTER(ddSequenceNumberInitSeed);
 
   private:
     void changeState(NeighborState *newState, NeighborState *currentState);

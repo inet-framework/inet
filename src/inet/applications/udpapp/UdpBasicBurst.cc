@@ -28,8 +28,6 @@ Register_Enum2(destAddrMode, "inet::ChooseDestAddrMode", (
 
 Define_Module(UdpBasicBurst);
 
-int UdpBasicBurst::counter;
-
 simsignal_t UdpBasicBurst::outOfOrderPkSignal = registerSignal("outOfOrderPk");
 
 UdpBasicBurst::~UdpBasicBurst()
@@ -94,7 +92,7 @@ L3Address UdpBasicBurst::chooseDestAddr()
 Packet *UdpBasicBurst::createPacket()
 {
     char msgName[32];
-    sprintf(msgName, "UDPBasicAppData-%d", counter++);
+    sprintf(msgName, "UDPBasicAppData-%lu", (unsigned long)counter++);
     long msgByteLength = *messageLengthPar;
     Packet *pk = new Packet(msgName);
     const auto& payload = makeShared<ApplicationPacket>();

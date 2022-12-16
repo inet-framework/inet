@@ -28,8 +28,7 @@ class IdentityTag extends TagBase
 
 cplusplus(IdentityTag) {{
   public:
-    static int64_t nextIdentityStart;
-    static int64_t getNextIdentityStart(b length) { auto result = nextIdentityStart; nextIdentityStart += b(length).get(); return result; }
+    static uint64_t getNextIdentityStart(b length);
 
     virtual const Ptr<TagBase> changeRegion(b offsetDelta, b lengthDelta) const override {
         if (offsetDelta == b(0))
@@ -43,5 +42,12 @@ cplusplus(IdentityTag) {{
 }}
 
 cplusplus(cc) {{
-int64_t IdentityTag::nextIdentityStart = 0;
+uint64_t IdentityTag::getNextIdentityStart(b length)
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedCounterName("inet::IdentityTag::nextIdentityStart");
+    uint64_t& nextIdentityStart = getSimulationOrSharedDataManager()->getSharedCounter(handle);
+    auto result = nextIdentityStart;
+    nextIdentityStart += b(length).get();
+    return result;
+}
 }}

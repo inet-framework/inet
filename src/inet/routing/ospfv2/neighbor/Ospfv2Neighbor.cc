@@ -21,9 +21,6 @@ namespace ospfv2 {
 
 using namespace ospf;
 
-// FIXME!!! Should come from a global unique number generator module.
-unsigned long Neighbor::ddSequenceNumberInitSeed = 0;
-
 Neighbor::Neighbor(RouterId neighbor) :
     neighborID(neighbor),
     neighborIPAddress(NULL_IPV4ADDRESS),

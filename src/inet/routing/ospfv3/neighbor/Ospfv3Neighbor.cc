@@ -5,9 +5,6 @@
 namespace inet {
 namespace ospfv3 {
 
-// FIXME!!! Should come from a global unique number generator module.
-unsigned long Ospfv3Neighbor::ddSequenceNumberInitSeed = 0;
-
 Ospfv3Neighbor::Ospfv3Neighbor(Ipv4Address newId, Ospfv3Interface *parent)
 {
     EV_DEBUG << "$$$$$$ New Ospfv3Neighbor has been created\n";
@@ -58,7 +55,7 @@ Ospfv3Neighbor::~Ospfv3Neighbor()
         delete previousState;
     }
     delete state;
-} // destructor
+}
 
 Ospfv3Neighbor::Ospfv3NeighborStateType Ospfv3Neighbor::getState() const
 {

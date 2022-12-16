@@ -32,7 +32,7 @@ class INET_API Icmp : public cSimpleModule, public DefaultProtocolRegistrationLi
     B quoteLength;
     ModuleRefByPar<IIpv4RoutingTable> rt;
     ModuleRefByPar<IInterfaceTable> ift;
-    static long ctr;
+    uint64_t& ctr = SIMULATION_SHARED_COUNTER(ctr);
 
   protected:
     virtual void processIcmpMessage(Packet *);

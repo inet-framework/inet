@@ -29,8 +29,6 @@ namespace inet {
 
 Define_Module(Icmp);
 
-long Icmp::ctr = 0;
-
 void Icmp::handleParameterChange(const char *name)
 {
     if (name == nullptr)

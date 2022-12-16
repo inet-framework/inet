@@ -20,8 +20,6 @@
 namespace inet {
 namespace sctp {
 
-uint32_t SctpNatTable::nextEntryNumber = 0;
-
 Define_Module(SctpNatTable);
 
 SctpNatTable::SctpNatTable()

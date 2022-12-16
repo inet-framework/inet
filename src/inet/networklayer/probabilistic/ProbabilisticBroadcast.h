@@ -161,14 +161,9 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
      */
     simtime_t timeToLive;
 
-    static long id_counter;
+    uint64_t& id_counter = SIMULATION_SHARED_COUNTER(id_counter);
 
-    static long getNextID()
-    {
-        long nextID = id_counter;
-        id_counter++;
-        return nextID;
-    }
+    uint64_t getNextID() {return id_counter++;}
 
     /**
      * @brief Maximal number of broadcast attempts for each packet.

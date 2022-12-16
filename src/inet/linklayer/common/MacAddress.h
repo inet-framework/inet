@@ -182,29 +182,6 @@ class INET_API MacAddress
     bool operator>(const MacAddress& other) const { return address > other.address; }
 };
 
-template <typename T>
-class INET_API SimulationRunUniqueNumberGenerator : public cISimulationLifecycleListener
-{
-  private:
-    bool listenerAdded;
-    T value = 0;
-
-  public:
-    T getNextValue() {
-        if (!listenerAdded) {
-            // NOTE: EXECUTE_ON_STARTUP is too early and would add the listener to StaticEnv
-            getActiveSimulationOrEnvir()->addLifecycleListener(this);
-            listenerAdded = true;
-        }
-        return ++value;
-    }
-
-    virtual void lifecycleEvent(SimulationLifecycleEventType eventType, cObject *details) {
-        if (eventType == LF_PRE_NETWORK_INITIALIZE)
-            value = 0;
-    }
-};
-
 inline std::ostream& operator<<(std::ostream& os, const MacAddress& mac)
 {
     return os << mac.str();
