@@ -190,9 +190,9 @@ L3Address GlobalArp::getL3AddressFor(const MacAddress& macAddress) const
         case L3Address::IPv4: {
             if (macAddress.isUnspecified())
                 return Ipv4Address::UNSPECIFIED_ADDRESS;
-            for (ArpCache::const_iterator it = globalArpCache.begin(); it != globalArpCache.end(); it++)
-                if (it->second->networkInterface->getMacAddress() == macAddress && it->first.getType() == L3Address::IPv4)
-                    return it->first;
+            for (auto pair : globalArpCache)
+                if (pair.second->networkInterface->getMacAddress() == macAddress && pair.first.getType() == L3Address::IPv4)
+                    return pair.first;
             return Ipv4Address::UNSPECIFIED_ADDRESS;
         }
 #endif
@@ -200,9 +200,9 @@ L3Address GlobalArp::getL3AddressFor(const MacAddress& macAddress) const
         case L3Address::IPv6: {
             if (macAddress.isUnspecified())
                 return Ipv6Address::UNSPECIFIED_ADDRESS;
-            for (ArpCache::const_iterator it = globalArpCache.begin(); it != globalArpCache.end(); it++)
-                if (it->second->networkInterface->getMacAddress() == macAddress && it->first.getType() == L3Address::IPv6)
-                    return it->first;
+            for (auto pair : globalArpCache)
+                if (pair.second->networkInterface->getMacAddress() == macAddress && pair.first.getType() == L3Address::IPv6)
+                    return pair.first;
             return Ipv4Address::UNSPECIFIED_ADDRESS;
         }
 #endif
@@ -211,17 +211,17 @@ L3Address GlobalArp::getL3AddressFor(const MacAddress& macAddress) const
         case L3Address::MODULEID: {
             if (macAddress.isUnspecified())
                 return ModuleIdAddress();
-            for (ArpCache::const_iterator it = globalArpCache.begin(); it != globalArpCache.end(); it++)
-                if (it->second->networkInterface->getMacAddress() == macAddress && it->first.getType() == L3Address::MODULEID)
-                    return it->first;
+            for (auto pair : globalArpCache)
+                if (pair.second->networkInterface->getMacAddress() == macAddress && pair.first.getType() == L3Address::MODULEID)
+                    return pair.first;
             return ModuleIdAddress();
         }
         case L3Address::MODULEPATH: {
             if (macAddress.isUnspecified())
                 return ModulePathAddress();
-            for (ArpCache::const_iterator it = globalArpCache.begin(); it != globalArpCache.end(); it++)
-                if (it->second->networkInterface->getMacAddress() == macAddress && it->first.getType() == L3Address::MODULEPATH)
-                    return it->first;
+            for (auto pair : globalArpCache)
+                if (pair.second->networkInterface->getMacAddress() == macAddress && pair.first.getType() == L3Address::MODULEPATH)
+                    return pair.first;
             return ModulePathAddress();
         }
         default:
