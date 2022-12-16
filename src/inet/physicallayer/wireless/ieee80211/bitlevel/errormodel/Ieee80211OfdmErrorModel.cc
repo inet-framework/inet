@@ -56,20 +56,21 @@ const IReceptionPacketModel *Ieee80211OfdmErrorModel::computePacketModel(const L
     if (packetErrorRate != 0 && uniform(0, 1) < packetErrorRate)
         receivedPacket->setBitError(true);
     receivedPacket->addTagIfAbsent<ErrorRateInd>()->setPacketErrorRate(packetErrorRate);
-    return new ReceptionPacketModel(receivedPacket, transmissionPacketModel->getBitrate(), NaN);
+    auto bitrate = transmissionPacketModel->getDataNetBitrate();
+    return new ReceptionPacketModel(receivedPacket, bitrate, bitrate);
 }
 
 const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
     const ITransmissionBitModel *transmissionBitModel = transmission->getBitModel();
     int signalBitLength = b(transmissionBitModel->getHeaderLength()).get();
-    bps signalBitRate = transmissionBitModel->getHeaderBitRate();
+    bps signalBitRate = transmissionBitModel->getHeaderGrossBitrate();
     int dataBitLength = b(transmissionBitModel->getDataLength()).get();
-    bps dataBitRate = transmissionBitModel->getDataBitRate();
+    bps dataBitRate = transmissionBitModel->getDataGrossBitrate();
     ASSERT(transmission->getSymbolModel() != nullptr);
     const IModulation *signalModulation = transmission->getSymbolModel()->getHeaderModulation();
-    const IModulation *dataModulation = transmission->getSymbolModel()->getPayloadModulation();
-    const BitVector *bits = transmissionBitModel->getBits();
+    const IModulation *dataModulation = transmission->getSymbolModel()->getDataModulation();
+    const BitVector *bits = transmissionBitModel->getAllBits();
     BitVector *corruptedBits = new BitVector(*bits);
     const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
     if (auto apskSignalModulation = dynamic_cast<const IApskModulation *>(signalModulation)) {
@@ -90,18 +91,18 @@ const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const Layered
 const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const
 {
     auto transmissionSymbolModel = check_and_cast<const Ieee80211OfdmTransmissionSymbolModel *>(transmission->getSymbolModel());
-    auto symbols = transmissionSymbolModel->getSymbols();
+    auto symbols = transmissionSymbolModel->getAllSymbols();
     auto receivedSymbols = new std::vector<const ISymbol *>();
     // Only the first symbol is signal field symbol
     double scalarSnir = getScalarSnir(snir);
     receivedSymbols->push_back(corruptOfdmSymbol(check_and_cast<const Ieee80211OfdmSymbol *>(symbols->at(0)), &BpskModulation::singleton, scalarSnir));
     // The remaining are all data field symbols
-    auto dataModulation = check_and_cast<const MqamModulationBase *>(transmissionSymbolModel->getPayloadModulation());
+    auto dataModulation = check_and_cast<const MqamModulationBase *>(transmissionSymbolModel->getDataModulation());
     for (unsigned int i = 1; i < symbols->size(); i++) {
         Ieee80211OfdmSymbol *corruptedOFDMSymbol = corruptOfdmSymbol(check_and_cast<const Ieee80211OfdmSymbol *>(symbols->at(i)), dataModulation, scalarSnir);
         receivedSymbols->push_back(corruptedOFDMSymbol);
     }
-    return new Ieee80211OfdmReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getPayloadSymbolLength(), transmissionSymbolModel->getPayloadSymbolRate(), receivedSymbols);
+    return new Ieee80211OfdmReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getDataSymbolLength(), transmissionSymbolModel->getDataSymbolRate(), receivedSymbols);
 }
 
 void Ieee80211OfdmErrorModel::corruptBits(BitVector *bits, double ber, int begin, int end) const
@@ -145,11 +146,13 @@ const IReceptionSampleModel *Ieee80211OfdmErrorModel::computeSampleModel(const L
     throw cRuntimeError("Unimplemented!");
     // TODO implement sample error model
     const ITransmissionSampleModel *transmissionSampleModel = transmission->getSampleModel();
-    int sampleLength = transmissionSampleModel->getSampleLength();
-    double sampleRate = transmissionSampleModel->getSampleRate();
+    int headerSampleLength = transmissionSampleModel->getHeaderSampleLength();
+    double headerSampleRate = transmissionSampleModel->getHeaderSampleRate();
+    int dataSampleLength = transmissionSampleModel->getDataSampleLength();
+    double dataSampleRate = transmissionSampleModel->getDataSampleRate();
     const std::vector<W> *samples = transmissionSampleModel->getSamples();
-    W rssi = W(0); // TODO error model
-    return new ReceptionSampleModel(sampleLength, sampleRate, samples, rssi);
+    // TODO error model?
+    return new ReceptionSampleModel(headerSampleLength, headerSampleRate, dataSampleLength, dataSampleRate, samples);
 }
 
 } // namespace physicallayer

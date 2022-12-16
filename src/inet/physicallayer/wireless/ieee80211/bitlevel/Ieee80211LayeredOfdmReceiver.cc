@@ -148,13 +148,13 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createCompleteBitModel(c
 {
     if (levelOfDetail >= BIT_DOMAIN) {
         if (dataFieldBitModel == nullptr)
-            return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderBitRate(), b(-1), bps(NaN), new BitVector(*signalFieldBitModel->getBits()), NaN);
+            return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderGrossBitrate(), b(-1), bps(NaN), new BitVector(*signalFieldBitModel->getAllBits()), NaN);
         else {
-            BitVector *bits = new BitVector(*signalFieldBitModel->getBits());
-            const BitVector *dataBits = dataFieldBitModel->getBits();
+            BitVector *bits = new BitVector(*signalFieldBitModel->getAllBits());
+            const BitVector *dataBits = dataFieldBitModel->getAllBits();
             for (unsigned int i = 0; i < dataBits->getSize(); i++)
                 bits->appendBit(dataBits->getBit(i));
-            return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderBitRate(), dataFieldBitModel->getDataLength(), dataFieldBitModel->getDataBitRate(), bits, NaN);
+            return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderGrossBitrate(), dataFieldBitModel->getDataLength(), dataFieldBitModel->getDataGrossBitrate(), bits, NaN);
         }
     }
     return nullptr;
@@ -212,7 +212,7 @@ const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createSignalFieldSymb
     if (levelOfDetail > SYMBOL_DOMAIN)
         throw cRuntimeError("This level of detail is unimplemented!");
     else if (levelOfDetail == SYMBOL_DOMAIN) { // Create from symbol model (made by the error model)
-        const std::vector<const ISymbol *> *symbols = receptionSymbolModel->getSymbols();
+        const std::vector<const ISymbol *> *symbols = receptionSymbolModel->getAllSymbols();
         std::vector<const ISymbol *> *signalSymbols = new std::vector<const ISymbol *>();
         const Ieee80211OfdmSymbol *signalSymbol = check_and_cast<const Ieee80211OfdmSymbol *>(symbols->at(0));
         signalSymbols->push_back(new Ieee80211OfdmSymbol(*signalSymbol)); // The first symbol is the signal field symbol
@@ -227,14 +227,14 @@ const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createDataFieldSymbol
     if (levelOfDetail > SYMBOL_DOMAIN)
         throw cRuntimeError("This level of detail is unimplemented!");
     else if (levelOfDetail == SYMBOL_DOMAIN) { // Create from symbol model (made by the error model)
-        const std::vector<const ISymbol *> *symbols = receptionSymbolModel->getSymbols();
+        const std::vector<const ISymbol *> *symbols = receptionSymbolModel->getAllSymbols();
         std::vector<const ISymbol *> *dataSymbols = new std::vector<const ISymbol *>();
         const Ieee80211OfdmSymbol *ofdmSymbol = nullptr;
         for (unsigned int i = 1; i < symbols->size(); i++) {
             ofdmSymbol = check_and_cast<const Ieee80211OfdmSymbol *>(symbols->at(i));
             dataSymbols->push_back(new Ieee80211OfdmSymbol(*ofdmSymbol));
         }
-        dataFieldSymbolModel = new Ieee80211OfdmReceptionSymbolModel(-1, NaN, symbols->size() - 1, receptionSymbolModel->getPayloadSymbolRate(), dataSymbols);
+        dataFieldSymbolModel = new Ieee80211OfdmReceptionSymbolModel(-1, NaN, symbols->size() - 1, receptionSymbolModel->getDataSymbolRate(), dataSymbols);
     }
     return dataFieldSymbolModel;
 }
@@ -262,10 +262,10 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createSignalFieldBitMode
             signalFieldLength = DECODED_SIGNAL_FIELD_LENGTH * codeRate;
         }
         BitVector *signalFieldBits = new BitVector();
-        const BitVector *bits = bitModel->getBits();
+        const BitVector *bits = bitModel->getAllBits();
         for (unsigned int i = 0; i < signalFieldLength; i++)
             signalFieldBits->appendBit(bits->getBit(i));
-        signalFieldBitModel = new ReceptionBitModel(b(signalFieldLength), bitModel->getHeaderBitRate(), b(-1), bps(NaN), signalFieldBits, NaN);
+        signalFieldBitModel = new ReceptionBitModel(b(signalFieldLength), bitModel->getHeaderGrossBitrate(), b(-1), bps(NaN), signalFieldBits, NaN);
     }
     return signalFieldBitModel;
 }
@@ -306,14 +306,14 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createDataFieldBitModel(
         dataFieldLengthInBits += calculatePadding(dataFieldLengthInBits, modulation, 1.0 / codeRate);
 //        ASSERT(dataFieldLengthInBits % convolutionalCode->getCodeRatePuncturingK() == 0);
         unsigned int encodedDataFieldLengthInBits = dataFieldLengthInBits * codeRate;
-        const BitVector *bits = bitModel->getBits();
+        const BitVector *bits = bitModel->getAllBits();
         unsigned int encodedSignalFieldLength = b(signalFieldBitModel->getHeaderLength()).get();
         if (dataFieldLengthInBits + encodedSignalFieldLength > bits->getSize())
             throw cRuntimeError("The calculated data field length = %d is greater then the actual bitvector length = %d", dataFieldLengthInBits, bits->getSize());
         BitVector *dataBits = new BitVector();
         for (unsigned int i = 0; i < encodedDataFieldLengthInBits; i++)
             dataBits->appendBit(bits->getBit(encodedSignalFieldLength + i));
-        dataFieldBitModel = new ReceptionBitModel(b(-1), bps(NaN), b(encodedDataFieldLengthInBits), bitModel->getDataBitRate(), dataBits, NaN);
+        dataFieldBitModel = new ReceptionBitModel(b(-1), bps(NaN), b(encodedDataFieldLengthInBits), bitModel->getDataGrossBitrate(), dataBits, NaN);
     }
     return dataFieldBitModel;
 }
@@ -321,12 +321,12 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createDataFieldBitModel(
 const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createCompleteSymbolModel(const IReceptionSymbolModel *signalFieldSymbolModel, const IReceptionSymbolModel *dataFieldSymbolModel) const
 {
     if (levelOfDetail >= SYMBOL_DOMAIN) {
-        const std::vector<const ISymbol *> *symbols = signalFieldSymbolModel->getSymbols();
+        const std::vector<const ISymbol *> *symbols = signalFieldSymbolModel->getAllSymbols();
         std::vector<const ISymbol *> *completeSymbols = new std::vector<const ISymbol *>(*symbols);
-        symbols = dataFieldSymbolModel->getSymbols();
+        symbols = dataFieldSymbolModel->getAllSymbols();
         for (auto& symbol : *symbols)
             completeSymbols->push_back(new Ieee80211OfdmSymbol(*static_cast<const Ieee80211OfdmSymbol *>(symbol)));
-        return new Ieee80211OfdmReceptionSymbolModel(signalFieldSymbolModel->getHeaderSymbolLength(), signalFieldSymbolModel->getHeaderSymbolRate(), dataFieldSymbolModel->getPayloadSymbolLength(), dataFieldSymbolModel->getPayloadSymbolRate(), completeSymbols);
+        return new Ieee80211OfdmReceptionSymbolModel(signalFieldSymbolModel->getHeaderSymbolLength(), signalFieldSymbolModel->getHeaderSymbolRate(), dataFieldSymbolModel->getDataSymbolLength(), dataFieldSymbolModel->getDataSymbolRate(), completeSymbols);
     }
     return nullptr;
 }
@@ -334,13 +334,13 @@ const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createCompleteSymbolM
 const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createCompletePacketModel(const char *name, const IReceptionPacketModel *signalFieldPacketModel, const IReceptionPacketModel *dataFieldPacketModel) const
 {
     if (dataFieldPacketModel == nullptr)
-        return new ReceptionPacketModel(signalFieldPacketModel->getPacket()->dup(), bps(NaN), NaN);
+        return new ReceptionPacketModel(signalFieldPacketModel->getPacket()->dup(), bps(NaN), bps(NaN));
     else {
         Packet *packet = new Packet(name);
         packet->insertAtBack(signalFieldPacketModel->getPacket()->peekAllAsBits());
         packet->insertAtBack(dataFieldPacketModel->getPacket()->peekAllAsBits());
         packet->setBitError(signalFieldPacketModel->getPacket()->hasBitError() || dataFieldPacketModel->getPacket()->hasBitError());
-        return new ReceptionPacketModel(packet, bps(NaN), NaN);
+        return new ReceptionPacketModel(packet, bps(NaN), bps(NaN));
     }
 }
 

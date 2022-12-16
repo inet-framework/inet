@@ -47,7 +47,7 @@ std::ostream& Ieee80211OfdmDecoder::printToStream(std::ostream& stream, int leve
 const IReceptionPacketModel *Ieee80211OfdmDecoder::decode(const IReceptionBitModel *bitModel) const
 {
     bool hasBitError = false;
-    BitVector *decodedBits = new BitVector(*bitModel->getBits());
+    BitVector *decodedBits = new BitVector(*bitModel->getAllBits());
     const IInterleaving *interleaving = nullptr;
     if (deinterleaver) {
         *decodedBits = deinterleaver->deinterleave(*decodedBits);
@@ -84,7 +84,7 @@ const IReceptionPacketModel *Ieee80211OfdmDecoder::createPacketModel(const BitVe
     }
     delete decodedBits;
     packet->setBitError(hasBitError);
-    return new ReceptionPacketModel(packet, bps(NaN), NaN);
+    return new ReceptionPacketModel(packet, bps(NaN), bps(NaN));
 }
 
 ShortBitVector Ieee80211OfdmDecoder::getSignalFieldRate(const BitVector& signalField) const

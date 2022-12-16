@@ -77,7 +77,7 @@ const ITransmissionSymbolModel *Ieee80211OfdmModulator::modulate(const ITransmis
 {
     std::vector<const ISymbol *> *ofdmSymbols = new std::vector<const ISymbol *>();
     const ApskModulationBase *modulationScheme = subcarrierModulation->getSubcarrierModulation();
-    const BitVector *bits = bitModel->getBits();
+    const BitVector *bits = bitModel->getAllBits();
     // Divide the resulting coded and interleaved data string into groups of N_BPSC bits.
     unsigned int nBPSC = modulationScheme->getCodeWordSize();
     ShortBitVector bitGroup;

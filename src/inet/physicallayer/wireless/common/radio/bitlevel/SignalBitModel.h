@@ -59,7 +59,7 @@ class INET_API ReceptionBitModel : public SignalBitModel, public virtual IRecept
     double bitErrorRate;
 
   public:
-    ReceptionBitModel(b headerLength, bps headerBitrate, b dataLength, bps dataBitrate, const BitVector *bits);
+    ReceptionBitModel(b headerLength, bps headerBitrate, b dataLength, bps dataBitrate, const BitVector *bits, double bitErrorrate);
 
     virtual double getBitErrorRate() const override { return bitErrorRate; }
 };
