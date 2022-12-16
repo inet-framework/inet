@@ -7,31 +7,30 @@
 
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211LayeredOfdmReceiver.h"
 
-// TODO AFTER REBASE: fix includes here
 #include "inet/common/packet/chunk/BytesChunk.h"
-#include "inet/physicallayer/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
-#include "inet/physicallayer/analogmodel/packetlevel/DimensionalAnalogModel.h"
-#include "inet/physicallayer/base/packetlevel/NarrowbandNoiseBase.h"
-#include "inet/physicallayer/common/bitlevel/LayeredReception.h"
-#include "inet/physicallayer/common/bitlevel/LayeredReceptionResult.h"
-#include "inet/physicallayer/common/bitlevel/SignalBitModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSampleModel.h"
-#include "inet/physicallayer/common/bitlevel/SignalSymbolModel.h"
-#include "inet/physicallayer/common/packetlevel/BandListening.h"
-#include "inet/physicallayer/common/packetlevel/ListeningDecision.h"
-#include "inet/physicallayer/contract/bitlevel/ISymbol.h"
-#include "inet/physicallayer/contract/packetlevel/SignalTag_m.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredOfdmReceiver.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211LayeredTransmission.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDecoderModule.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmDemodulatorModule.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmSymbol.h"
-#include "inet/physicallayer/ieee80211/bitlevel/Ieee80211OfdmSymbolModel.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmMode.h"
-#include "inet/physicallayer/ieee80211/mode/Ieee80211OfdmModulation.h"
-#include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
-#include "inet/physicallayer/modulation/BpskModulation.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredReception.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/LayeredReceptionResult.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalBitModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSampleModel.h"
+#include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/ListeningDecision.h"
+#include "inet/physicallayer/wireless/common/contract/bitlevel/ISymbol.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211LayeredOfdmReceiver.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211LayeredTransmission.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDecoderModule.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDefs.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmDemodulatorModule.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmSymbol.h"
+#include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmSymbolModel.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmModulation.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/common/modulation/BpskModulation.h"
 
 namespace inet {
 namespace physicallayer {
@@ -155,7 +154,7 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createCompleteBitModel(c
             for (unsigned int i = 0; i < dataBits->getSize(); i++)
                 bits->appendBit(dataBits->getBit(i));
         }
-        return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderGrossBitrate(), dataFieldBitModel != nullptr ? dataFieldBitModel->getDataLength() : b(0), dataFieldBitModel != nullptr ? dataFieldBitModel->getDataGrossBitrate() : bps(NaN), bits);
+        return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderGrossBitrate(), dataFieldBitModel != nullptr ? dataFieldBitModel->getDataLength() : b(0), dataFieldBitModel != nullptr ? dataFieldBitModel->getDataGrossBitrate() : bps(NaN), bits, NaN);
     }
     return nullptr;
 }
