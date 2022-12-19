@@ -162,6 +162,7 @@ const INoise *ScalarAnalogModelBase::computeNoise(const IReception *reception, c
 
 const ISnir *ScalarAnalogModelBase::computeSNIR(const IReception *reception, const INoise *noise) const
 {
+    Enter_Method_Silent();
     return new ScalarSnir(reception, noise);
 }
 

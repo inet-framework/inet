@@ -86,6 +86,7 @@ const IListeningDecision *UnitDiskReceiver::computeListeningDecision(const IList
 
 const IReceptionResult *UnitDiskReceiver::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
+    Enter_Method_Silent();
     auto noise = check_and_cast_nullable<const UnitDiskNoise *>(snir->getNoise());
     double errorRate = check_and_cast<const UnitDiskReception *>(reception)->getPower() == UnitDiskReception::POWER_RECEIVABLE && (noise == nullptr || !noise->isInterfering()) ? 0 : 1;
     auto receptionResult = ReceiverBase::computeReceptionResult(listening, reception, interference, snir, decisions);
