@@ -31,12 +31,12 @@ void IpvxTrafSink::initialize(int stage)
         int protocolId = par("protocol");
         if (protocolId < 143 || protocolId > 254)
             throw cRuntimeError("invalid protocol id %d, accepts only between 143 and 254", protocolId);
-        auto protocol = ProtocolGroup::ipprotocol.findProtocol(protocolId);
+        auto protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(protocolId);
         if (!protocol) {
             char *buff = new char[40];
             sprintf(buff, "prot_%d", protocolId);
             protocol = new Protocol(buff, buff);
-            ProtocolGroup::ipprotocol.addProtocol(protocolId, protocol);
+            ProtocolGroup::getIpProtocolGroup()->addProtocol(protocolId, protocol);
         }
         registerProtocol(*protocol, gate("ipOut"), gate("ipIn"));
     }
@@ -62,7 +62,7 @@ void IpvxTrafSink::printPacket(Packet *msg)
     int protocol = -1;
     auto ctrl = msg->getControlInfo();
     if (ctrl != nullptr) {
-        protocol = ProtocolGroup::ipprotocol.getProtocolNumber(msg->getTag<PacketProtocolTag>()->getProtocol());
+        protocol = ProtocolGroup::getIpProtocolGroup()->getProtocolNumber(msg->getTag<PacketProtocolTag>()->getProtocol());
     }
     Ptr<const L3AddressTagBase> addresses = msg->findTag<L3AddressReq>();
     if (addresses == nullptr)

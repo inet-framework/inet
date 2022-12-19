@@ -170,7 +170,7 @@ void EthernetEncapsulation::processPacketFromHigherLayer(Packet *packet)
     const auto& protocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
     const Protocol *protocol = protocolTag->getProtocol();
     if (protocol && *protocol != Protocol::ieee8022llc)
-        typeOrLength = ProtocolGroup::ethertype.getProtocolNumber(protocol);
+        typeOrLength = ProtocolGroup::getEthertypeProtocolGroup()->getProtocolNumber(protocol);
     else
         typeOrLength = packet->getByteLength();
 
@@ -214,7 +214,7 @@ void EthernetEncapsulation::processPacketFromMac(Packet *packet)
         payloadProtocol = &Protocol::ieee8022llc;
     }
     else if (isEth2Header(*ethHeader)) {
-        payloadProtocol = ProtocolGroup::ethertype.findProtocol(ethHeader->getTypeOrLength());
+        payloadProtocol = ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(ethHeader->getTypeOrLength());
     }
     else
         throw cRuntimeError("Unknown ethernet header");

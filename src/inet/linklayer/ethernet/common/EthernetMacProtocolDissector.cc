@@ -26,7 +26,7 @@ void EthernetMacProtocolDissector::dissect(Packet *packet, const Protocol *proto
     const auto& fcs = packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
     int typeOrLength = macHeader->getTypeOrLength();
     if (isEth2Type(typeOrLength)) {
-        auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(typeOrLength);
+        auto payloadProtocol = ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(typeOrLength);
         callback.dissectPacket(packet, payloadProtocol);
     }
     else {

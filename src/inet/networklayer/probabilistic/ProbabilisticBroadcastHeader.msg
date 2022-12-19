@@ -34,7 +34,7 @@ cplusplus(ProbabilisticBroadcastHeader) {{
     virtual void setSourceAddress(const L3Address& address) override { setSrcAddr(address); }
     virtual L3Address getDestinationAddress() const override { return getDestAddr(); }
     virtual void setDestinationAddress(const L3Address& address) override { setDestAddr(address); }
-    virtual const Protocol *getProtocol() const override { return ProtocolGroup::ipprotocol.findProtocol(getProtocolId()); }
-    virtual void setProtocol(const Protocol *protocol) override { setProtocolId(static_cast<IpProtocolId>(ProtocolGroup::ipprotocol.getProtocolNumber(protocol))); }
+    virtual const Protocol *getProtocol() const override { return ProtocolGroup::getIpProtocolGroup()->findProtocol(getProtocolId()); }
+    virtual void setProtocol(const Protocol *protocol) override { setProtocolId(static_cast<IpProtocolId>(ProtocolGroup::getIpProtocolGroup()->getProtocolNumber(protocol))); }
     virtual bool isFragment() const override { return false; }
 }}

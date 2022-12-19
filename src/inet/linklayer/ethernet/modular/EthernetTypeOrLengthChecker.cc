@@ -26,7 +26,7 @@ void EthernetTypeOrLengthChecker::processPacket(Packet *packet)
     if (isIeee8023Length(typeOrLength))
         protocol = &Protocol::ieee8022llc;
     else
-        protocol = ProtocolGroup::ethertype.getProtocol(typeOrLength);
+        protocol = ProtocolGroup::getEthertypeProtocolGroup()->getProtocol(typeOrLength);
     auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
     packetProtocolTag->setFrontOffset(b(0));
     packetProtocolTag->setBackOffset(b(0));
@@ -40,7 +40,7 @@ bool EthernetTypeOrLengthChecker::matchesPacket(const Packet *packet) const
     auto typeOrLength = header->getTypeOrLength();
     if (isIeee8023Length(typeOrLength))
         return true;
-    auto protocol = ProtocolGroup::ethertype.findProtocol(typeOrLength);
+    auto protocol = ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(typeOrLength);
     return protocol != nullptr;
 }
 

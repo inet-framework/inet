@@ -163,9 +163,9 @@ void Ieee8022Llc::encapsulate(Packet *frame)
     int ethType = -1;
     int snapOui = -1;
     if (sapReq == nullptr && protocol != nullptr) {
-        ethType = ProtocolGroup::ethertype.findProtocolNumber(protocol);
+        ethType = ProtocolGroup::getEthertypeProtocolGroup()->findProtocolNumber(protocol);
         if (ethType == -1)
-            snapOui = ProtocolGroup::snapOui.findProtocolNumber(protocol);
+            snapOui = ProtocolGroup::getSnapOuiProtocolGroup()->findProtocolNumber(protocol);
     }
     if (ethType != -1 || snapOui != -1) {
         const auto& snapHeader = makeShared<Ieee8022LlcSnapHeader>();
@@ -181,7 +181,7 @@ void Ieee8022Llc::encapsulate(Packet *frame)
     }
     else {
         const auto& llcHeader = makeShared<Ieee8022LlcHeader>();
-        int sapData = ProtocolGroup::ieee8022protocol.findProtocolNumber(protocol);
+        int sapData = ProtocolGroup::getIeee8022ProtocolGroup()->findProtocolNumber(protocol);
         if (sapReq == nullptr && sapData != -1) {
             llcHeader->setSsap((sapData >> 8) & 0xFF);
             llcHeader->setDsap(sapData & 0xFF);
@@ -233,13 +233,13 @@ const Protocol *Ieee8022Llc::getProtocol(const Ptr<const Ieee8022LlcHeader>& llc
         if (snapHeader == nullptr)
             throw cRuntimeError("LLC header indicates SNAP header, but SNAP header is missing");
         if (snapHeader->getOui() == 0)
-            payloadProtocol = ProtocolGroup::ethertype.findProtocol(snapHeader->getProtocolId());
+            payloadProtocol = ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(snapHeader->getProtocolId());
         else
-            payloadProtocol = ProtocolGroup::snapOui.findProtocol(snapHeader->getOui());
+            payloadProtocol = ProtocolGroup::getSnapOuiProtocolGroup()->findProtocol(snapHeader->getOui());
     }
     else {
         int32_t sapData = ((llcHeader->getSsap() & 0xFF) << 8) | (llcHeader->getDsap() & 0xFF);
-        payloadProtocol = ProtocolGroup::ieee8022protocol.findProtocol(sapData); // do not use getProtocol
+        payloadProtocol = ProtocolGroup::getIeee8022ProtocolGroup()->findProtocol(sapData); // do not use getProtocol
     }
     return payloadProtocol;
 }

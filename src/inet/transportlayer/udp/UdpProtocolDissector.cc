@@ -28,9 +28,9 @@ void UdpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICa
     callback.visitChunk(header, &Protocol::udp);
     auto udpPayloadEndOffset = udpHeaderOffset + B(header->getTotalLengthField());
     packet->setBackOffset(udpPayloadEndOffset);
-    auto dataProtocol = ProtocolGroup::udpprotocol.findProtocol(header->getDestPort());
+    auto dataProtocol = ProtocolGroup::getUdpProtocolGroup()->findProtocol(header->getDestPort());
     if (dataProtocol == nullptr)
-        dataProtocol = ProtocolGroup::udpprotocol.findProtocol(header->getSrcPort());
+        dataProtocol = ProtocolGroup::getUdpProtocolGroup()->findProtocol(header->getSrcPort());
     callback.dissectPacket(packet, dataProtocol);
     ASSERT(packet->getDataLength() == B(0));
     packet->setFrontOffset(udpPayloadEndOffset);

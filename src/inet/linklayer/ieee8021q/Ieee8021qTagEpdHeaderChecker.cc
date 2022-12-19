@@ -58,7 +58,7 @@ void Ieee8021qTagEpdHeaderChecker::processPacket(Packet *packet)
     if (isIeee8023Length(typeOrLength))
         protocol = &Protocol::ieee8022llc;
     else
-        protocol = ProtocolGroup::ethertype.getProtocol(typeOrLength);
+        protocol = ProtocolGroup::getEthertypeProtocolGroup()->getProtocol(typeOrLength);
     auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
     packetProtocolTag->setFrontOffset(b(0));
     packetProtocolTag->setBackOffset(b(0));
@@ -77,7 +77,7 @@ bool Ieee8021qTagEpdHeaderChecker::matchesPacket(const Packet *packet) const
 {
     const auto& header = packet->peekAtFront<Ieee8021qTagEpdHeader>();
     auto typeOrLength = header->getTypeOrLength();
-    if (!isIeee8023Length(typeOrLength) && ProtocolGroup::ethertype.findProtocol(typeOrLength) == nullptr)
+    if (!isIeee8023Length(typeOrLength) && ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(typeOrLength) == nullptr)
         return false;
     else {
         auto vlanId = header->getVid();

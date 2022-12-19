@@ -47,7 +47,7 @@ void EcnMarker::setEcn(Packet *packet, IpEcnCode ecn)
             auto ethHeader = packet->peekDataAt<EthernetMacHeader>(offset);
             if (isEth2Header(*ethHeader)) {
                 offset += ethHeader->getChunkLength();
-                protocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
+                protocol = ProtocolGroup::getEthertypeProtocolGroup()->getProtocol(ethHeader->getTypeOrLength());
             }
 #else
         throw cRuntimeError("Ethernet feature is disabled");
@@ -82,7 +82,7 @@ IpEcnCode EcnMarker::getEcn(const Packet *packet)
             auto ethHeader = packet->peekDataAt<EthernetMacHeader>(offset);
             if (isEth2Header(*ethHeader)) {
                 offset += ethHeader->getChunkLength();
-                protocol = ProtocolGroup::ethertype.getProtocol(ethHeader->getTypeOrLength());
+                protocol = ProtocolGroup::getEthertypeProtocolGroup()->getProtocol(ethHeader->getTypeOrLength());
             }
 #else
         throw cRuntimeError("Ethernet feature is disabled");

@@ -20,7 +20,7 @@ void AckingMacProtocolDissector::dissect(Packet *packet, const Protocol *protoco
     auto header = packet->popAtFront<AckingMacHeader>();
     callback.startProtocolDataUnit(&Protocol::ackingMac);
     callback.visitChunk(header, &Protocol::ackingMac);
-    auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(header->getNetworkProtocol());
+    auto payloadProtocol = ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(header->getNetworkProtocol());
     callback.dissectPacket(packet, payloadProtocol);
     ASSERT(packet->getDataLength() == B(0));
     callback.endProtocolDataUnit(&Protocol::ackingMac);

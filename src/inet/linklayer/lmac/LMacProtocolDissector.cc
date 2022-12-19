@@ -22,7 +22,7 @@ void LMacProtocolDissector::dissect(Packet *packet, const Protocol *protocol, IC
     callback.visitChunk(header, &Protocol::lmac);
     if (header->getType() == LMAC_DATA) {
         const auto& dataHeader = dynamicPtrCast<const LMacDataFrameHeader>(header);
-        auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(dataHeader->getNetworkProtocol());
+        auto payloadProtocol = ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(dataHeader->getNetworkProtocol());
         callback.dissectPacket(packet, payloadProtocol);
     }
     ASSERT(packet->getDataLength() == B(0));

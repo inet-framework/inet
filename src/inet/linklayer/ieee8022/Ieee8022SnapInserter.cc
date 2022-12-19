@@ -32,9 +32,9 @@ void Ieee8022SnapInserter::processPacket(Packet *packet)
     int ethType = -1;
     int snapOui = -1;
     if (protocol) {
-        ethType = ProtocolGroup::ethertype.findProtocolNumber(protocol);
+        ethType = ProtocolGroup::getEthertypeProtocolGroup()->findProtocolNumber(protocol);
         if (ethType == -1)
-            snapOui = ProtocolGroup::snapOui.findProtocolNumber(protocol);
+            snapOui = ProtocolGroup::getSnapOuiProtocolGroup()->findProtocolNumber(protocol);
     }
     const auto& snapHeader = makeShared<Ieee8022SnapHeader>();
     if (ethType != -1) {
@@ -52,9 +52,9 @@ void Ieee8022SnapInserter::processPacket(Packet *packet)
 const Protocol *Ieee8022SnapInserter::getProtocol(const Ptr<const Ieee8022SnapHeader>& snapHeader)
 {
     if (snapHeader->getOui() == 0)
-        return ProtocolGroup::ethertype.findProtocol(snapHeader->getProtocolId());
+        return ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(snapHeader->getProtocolId());
     else
-        return ProtocolGroup::snapOui.findProtocol(snapHeader->getOui());
+        return ProtocolGroup::getSnapOuiProtocolGroup()->findProtocol(snapHeader->getOui());
 }
 
 } // namespace inet

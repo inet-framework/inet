@@ -130,7 +130,7 @@ void Ipv4Encap::encapsulate(Packet *transportPacket)
     Ipv4Address src = l3AddressReq->getSrcAddress().toIpv4();
     Ipv4Address dest = l3AddressReq->getDestAddress().toIpv4();
 
-    ipv4Header->setProtocolId((IpProtocolId)ProtocolGroup::ipprotocol.getProtocolNumber(transportPacket->getTag<PacketProtocolTag>()->getProtocol()));
+    ipv4Header->setProtocolId((IpProtocolId)ProtocolGroup::getIpProtocolGroup()->getProtocolNumber(transportPacket->getTag<PacketProtocolTag>()->getProtocol()));
 
     auto hopLimitReq = transportPacket->removeTagIfPresent<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
@@ -213,7 +213,7 @@ void Ipv4Encap::decapsulate(Packet *packet)
 
     // original Ipv4 datagram might be needed in upper layers to send back ICMP error message
 
-    auto transportProtocol = ProtocolGroup::ipprotocol.getProtocol(ipv4Header->getProtocolId());
+    auto transportProtocol = ProtocolGroup::getIpProtocolGroup()->getProtocol(ipv4Header->getProtocolId());
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(transportProtocol);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(transportProtocol);
     auto l3AddressInd = packet->addTagIfAbsent<L3AddressInd>();

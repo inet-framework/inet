@@ -159,43 +159,43 @@ static const ProtocolGroup::Protocols tcpProtocols {
 ProtocolGroup *ProtocolGroup::getEthertypeProtocolGroup()
 {
     static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::ethertype");
-    return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, ethertypeProtocols);
+    return &getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, "ethertype", ethertypeProtocols);
 }
 
 ProtocolGroup *ProtocolGroup::getPppProtocolGroup()
 {
     static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::ppp");
-    return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, pppProtocols);
+    return &getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, "ppp", pppProtocols);
 }
 
 ProtocolGroup *ProtocolGroup::getIpProtocolGroup()
 {
     static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::ip");
-    return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, ipProtocols);
+    return &getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, "ip", ipProtocols);
 }
 
 ProtocolGroup *ProtocolGroup::getSnapOuiProtocolGroup()
 {
     static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::snapOui");
-    return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, snapOuiProtocols);
+    return &getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, "snapOui", snapOuiProtocols);
 }
 
 ProtocolGroup *ProtocolGroup::getIeee8022ProtocolGroup()
 {
     static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::ieee8022");
-    return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, ieee8022Protocols);
+    return &getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, "ieee8022", ieee8022Protocols);
 }
 
 ProtocolGroup *ProtocolGroup::getTcpProtocolGroup()
 {
     static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::tcp");
-    return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, tcpProtocols);
+    return &getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, "tcp", tcpProtocols);
 }
 
 ProtocolGroup *ProtocolGroup::getUdpProtocolGroup()
 {
     static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::udp");
-    return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, udpProtocols);
+    return &getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, "udp", udpProtocols);
 }
 
 } // namespace inet

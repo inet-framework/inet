@@ -49,9 +49,9 @@ void Ieee8022SnapChecker::processPacket(Packet *packet)
 const Protocol *Ieee8022SnapChecker::getProtocol(const Ptr<const Ieee8022SnapHeader>& snapHeader)
 {
     if (snapHeader->getOui() == 0)
-        return ProtocolGroup::ethertype.findProtocol(snapHeader->getProtocolId());
+        return ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(snapHeader->getProtocolId());
     else
-        return ProtocolGroup::snapOui.findProtocol(snapHeader->getOui());
+        return ProtocolGroup::getSnapOuiProtocolGroup()->findProtocol(snapHeader->getOui());
 }
 
 } // namespace inet

@@ -19,7 +19,7 @@ void Ieee802EpdProtocolDissector::dissect(Packet *packet, const Protocol *protoc
     const auto& header = packet->popAtFront<Ieee802EpdHeader>();
     callback.startProtocolDataUnit(&Protocol::ieee802epd);
     callback.visitChunk(header, &Protocol::ieee802epd);
-    auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(header->getEtherType());
+    auto payloadProtocol = ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(header->getEtherType());
     callback.dissectPacket(packet, payloadProtocol);
     callback.endProtocolDataUnit(&Protocol::ieee802epd);
 }

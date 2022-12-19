@@ -30,7 +30,7 @@ void Ieee8022LlcInserter::processPacket(Packet *packet)
     const auto& protocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = protocolTag ? protocolTag->getProtocol() : nullptr;
     const auto& llcHeader = makeShared<Ieee8022LlcHeader>();
-    int sapData = ProtocolGroup::ieee8022protocol.findProtocolNumber(protocol);
+    int sapData = ProtocolGroup::getIeee8022ProtocolGroup()->findProtocolNumber(protocol);
     if (sapData != -1) {
         llcHeader->setSsap((sapData >> 8) & 0xFF);
         llcHeader->setDsap(sapData & 0xFF);
@@ -49,7 +49,7 @@ void Ieee8022LlcInserter::processPacket(Packet *packet)
 const Protocol *Ieee8022LlcInserter::getProtocol(const Ptr<const Ieee8022LlcHeader>& llcHeader)
 {
     int32_t sapData = ((llcHeader->getSsap() & 0xFF) << 8) | (llcHeader->getDsap() & 0xFF);
-    return ProtocolGroup::ieee8022protocol.findProtocol(sapData); // do not use getProtocol
+    return ProtocolGroup::getIeee8022ProtocolGroup()->findProtocol(sapData); // do not use getProtocol
 }
 
 } // namespace inet

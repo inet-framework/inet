@@ -54,7 +54,7 @@ void Ieee8022LlcChecker::processPacket(Packet *packet)
 const Protocol *Ieee8022LlcChecker::getProtocol(const Ptr<const Ieee8022LlcHeader>& llcHeader)
 {
     int32_t sapData = ((llcHeader->getSsap() & 0xFF) << 8) | (llcHeader->getDsap() & 0xFF);
-    return ProtocolGroup::ieee8022protocol.findProtocol(sapData);
+    return ProtocolGroup::getIeee8022ProtocolGroup()->findProtocol(sapData);
 }
 
 } // namespace inet

@@ -27,7 +27,7 @@ void Ieee8021qTagEpdProtocolDissector::dissect(Packet *packet, const Protocol *p
     callback.visitChunk(header, protocol);
     int typeOrLength = header->getTypeOrLength();
     if (isEth2Type(typeOrLength)) {
-        auto payloadProtocol = ProtocolGroup::ethertype.findProtocol(typeOrLength);
+        auto payloadProtocol = ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(typeOrLength);
         callback.dissectPacket(packet, payloadProtocol);
     }
     else {

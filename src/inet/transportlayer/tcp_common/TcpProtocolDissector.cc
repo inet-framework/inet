@@ -21,9 +21,9 @@ void TcpProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICa
     callback.startProtocolDataUnit(&Protocol::tcp);
     callback.visitChunk(header, &Protocol::tcp);
     if (packet->getDataLength() != b(0)) {
-        auto dataProtocol = ProtocolGroup::tcpprotocol.findProtocol(header->getDestPort());
+        auto dataProtocol = ProtocolGroup::getTcpProtocolGroup()->findProtocol(header->getDestPort());
         if (dataProtocol == nullptr)
-            dataProtocol = ProtocolGroup::tcpprotocol.findProtocol(header->getSrcPort());
+            dataProtocol = ProtocolGroup::getTcpProtocolGroup()->findProtocol(header->getSrcPort());
         callback.dissectPacket(packet, dataProtocol);
     }
     callback.endProtocolDataUnit(&Protocol::tcp);

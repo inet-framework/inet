@@ -23,8 +23,6 @@ namespace inet {
 
 Define_Module(IpvxTrafGen);
 
-std::vector<const Protocol *> IpvxTrafGen::allocatedProtocols;
-
 IpvxTrafGen::IpvxTrafGen()
 {
 }
@@ -42,12 +40,11 @@ void IpvxTrafGen::initialize(int stage)
         int protocolId = par("protocol");
         if (protocolId < 143 || protocolId > 254)
             throw cRuntimeError("invalid protocol id %d, accepts only between 143 and 254", protocolId);
-        protocol = ProtocolGroup::ipprotocol.findProtocol(protocolId);
+        protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(protocolId);
         if (!protocol) {
             std::string name = "prot_" + std::to_string(protocolId);
             protocol = new Protocol(name.c_str(), name.c_str());
-            allocatedProtocols.push_back(protocol);
-            ProtocolGroup::ipprotocol.addProtocol(protocolId, protocol);
+            ProtocolGroup::getIpProtocolGroup()->addProtocol(protocolId, protocol);
         }
         numPackets = par("numPackets");
         startTime = par("startTime");
@@ -173,7 +170,7 @@ void IpvxTrafGen::printPacket(Packet *msg)
     int protocol = -1;
     auto *ctrl = msg->getControlInfo();
     if (ctrl != nullptr) {
-        protocol = ProtocolGroup::ipprotocol.getProtocolNumber(msg->getTag<PacketProtocolTag>()->getProtocol());
+        protocol = ProtocolGroup::getIpProtocolGroup()->getProtocolNumber(msg->getTag<PacketProtocolTag>()->getProtocol());
     }
     Ptr<const L3AddressTagBase> addresses = msg->findTag<L3AddressReq>();
     if (addresses == nullptr)
@@ -213,15 +210,6 @@ void IpvxTrafGen::handleCrashOperation(LifecycleOperation *operation)
 {
     cancelNextPacket();
 }
-
-void ipvxTrafGenClearProtocols()
-{
-    for (auto *p : IpvxTrafGen::allocatedProtocols)
-        delete p;
-    IpvxTrafGen::allocatedProtocols.clear();
-}
-
-EXECUTE_ON_SHUTDOWN(ipvxTrafGenClearProtocols());
 
 } // namespace inet
 

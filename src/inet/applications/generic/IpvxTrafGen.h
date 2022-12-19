@@ -41,9 +41,6 @@ class INET_API IpvxTrafGen : public ApplicationBase
     // statistic
     int numSent = 0;
     int numReceived = 0;
-    static std::vector<const Protocol *> allocatedProtocols;
-
-    friend void ipvxTrafGenClearProtocols();
 
   protected:
     virtual void scheduleNextPacket(simtime_t previous);

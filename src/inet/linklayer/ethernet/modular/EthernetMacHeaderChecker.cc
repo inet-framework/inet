@@ -44,7 +44,7 @@ void EthernetMacHeaderChecker::processPacket(Packet *packet)
     if (isIeee8023Length(typeOrLength))
         protocol = &Protocol::ieee8022llc;
     else
-        protocol = ProtocolGroup::ethertype.getProtocol(typeOrLength);
+        protocol = ProtocolGroup::getEthertypeProtocolGroup()->getProtocol(typeOrLength);
     packetProtocolTag->setFrontOffset(b(0));
     packetProtocolTag->setBackOffset(b(0));
     packetProtocolTag->setProtocol(protocol);
@@ -63,7 +63,7 @@ bool EthernetMacHeaderChecker::matchesPacket(const Packet *packet) const
         if (isIeee8023Length(typeOrLength))
             return true;
         else
-            return ProtocolGroup::ethertype.findProtocol(typeOrLength) != nullptr;
+            return ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(typeOrLength) != nullptr;
     }
 }
 

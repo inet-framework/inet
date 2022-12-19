@@ -34,7 +34,7 @@ void Ieee8021rTagEpdHeaderChecker::processPacket(Packet *packet)
     if (isIeee8023Length(typeOrLength))
         protocol = &Protocol::ieee8022llc;
     else
-        protocol = ProtocolGroup::ethertype.getProtocol(typeOrLength);
+        protocol = ProtocolGroup::getEthertypeProtocolGroup()->getProtocol(typeOrLength);
     auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
     packetProtocolTag->setFrontOffset(b(0));
     packetProtocolTag->setBackOffset(b(0));
@@ -53,7 +53,7 @@ bool Ieee8021rTagEpdHeaderChecker::matchesPacket(const Packet *packet) const
 {
     const auto& header = packet->peekAtFront<Ieee8021rTagEpdHeader>();
     auto typeOrLength = header->getTypeOrLength();
-    return isIeee8023Length(typeOrLength) || ProtocolGroup::ethertype.findProtocol(typeOrLength) != nullptr;
+    return isIeee8023Length(typeOrLength) || ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(typeOrLength) != nullptr;
 }
 
 } // namespace inet

@@ -44,7 +44,7 @@ void Ieee8021rTagEpdHeaderInserter::processPacket(Packet *packet)
     if (protocol == &Protocol::ieee8022llc)
         header->setTypeOrLength(packet->getByteLength());
     else
-        header->setTypeOrLength(ProtocolGroup::ethertype.findProtocolNumber(protocol));
+        header->setTypeOrLength(ProtocolGroup::getEthertypeProtocolGroup()->findProtocolNumber(protocol));
     packet->insertAtFront(header);
     packetProtocolTag->setProtocol(&Protocol::ieee8021rTag);
     packetProtocolTag->setFrontOffset(b(0));

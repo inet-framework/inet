@@ -84,7 +84,7 @@ void Icmpv6::processICMPv6Message(Packet *packet)
         else {
             auto dispatchProtocolReq = packet->addTagIfAbsent<DispatchProtocolReq>();
             dispatchProtocolReq->setServicePrimitive(SP_INDICATION);
-            dispatchProtocolReq->setProtocol(ProtocolGroup::ipprotocol.getProtocol(transportProtocol));
+            dispatchProtocolReq->setProtocol(ProtocolGroup::getIpProtocolGroup()->getProtocol(transportProtocol));
             send(packet, "transportOut");
         }
     }
@@ -324,7 +324,7 @@ void Icmpv6::handleRegisterProtocol(const Protocol& protocol, cGate *gate, Servi
 {
     Enter_Method("handleRegisterProtocol");
     if (!strcmp("transportOut", gate->getBaseName())) {
-        int protocolNumber = ProtocolGroup::ipprotocol.findProtocolNumber(&protocol);
+        int protocolNumber = ProtocolGroup::getIpProtocolGroup()->findProtocolNumber(&protocol);
         if (protocolNumber != -1)
             transportProtocols.insert(protocolNumber);
     }
