@@ -258,7 +258,7 @@ void XMac::handleSelfMessage(cMessage *msg)
             }
             // during CCA, we received a preamble. Go to state WAIT_DATA and
             // schedule the timeout.
-            if (msg->getKind() == XMAC_PREAMBLE) {
+            else if (msg->getKind() == XMAC_PREAMBLE) {
                 auto incoming_preamble = check_and_cast<Packet *>(msg)->peekAtFront<XMacControlFrame>();
 
                 // preamble is for me
@@ -287,7 +287,7 @@ void XMac::handleSelfMessage(cMessage *msg)
             }
             // in case we get an ACK, we simply discard it, because it means the end
             // of another communication
-            if (msg->getKind() == XMAC_ACK) {
+            else if (msg->getKind() == XMAC_ACK) {
                 EV_DEBUG << "State CCA, message XMAC_ACK, new state CCA" << endl;
                 delete msg;
                 return;
@@ -295,7 +295,7 @@ void XMac::handleSelfMessage(cMessage *msg)
             // this case is very, very, very improbable, but let's do it.
             // if in CCA the node receives directly the data packet, accept it
             // even if we increased nbMissedAcks in state SLEEP
-            if (msg->getKind() == XMAC_DATA) {
+            else if (msg->getKind() == XMAC_DATA) {
                 auto incoming_data = check_and_cast<Packet *>(msg)->peekAtFront<XMacDataFrameHeader>();
 
                 // packet is for me
@@ -331,7 +331,7 @@ void XMac::handleSelfMessage(cMessage *msg)
                 return;
             }
             // radio switch from above
-            if (msg->getKind() == XMAC_SWITCHING_FINISHED) {
+            else if (msg->getKind() == XMAC_SWITCHING_FINISHED) {
                 if (radio->getRadioMode() == IRadio::RADIO_MODE_TRANSMITTER) {
                     if (currentTxFrame == nullptr) {
                         currentTxFrame = dequeuePacket();
@@ -343,7 +343,7 @@ void XMac::handleSelfMessage(cMessage *msg)
                 return;
             }
             // ack_rx within sending_preamble or preamble_timeout without an ACK
-            if ((msg->getKind() == XMAC_ACK) || (msg->getKind() == XMAC_STOP_PREAMBLES)) {
+            else if ((msg->getKind() == XMAC_ACK) || (msg->getKind() == XMAC_STOP_PREAMBLES)) {
                 // ~ ADDED THE SECOND CONDITION! :) if not, below
                 if (msg->getKind() == XMAC_ACK) {
                     delete msg;
@@ -360,9 +360,8 @@ void XMac::handleSelfMessage(cMessage *msg)
                 txAttempts = 1;
                 return;
             }
-
             // next is the case of a node receiving 1 preamble or data while in his preamble gaps, ignore, we are sending!
-            if ((msg->getKind() == XMAC_PREAMBLE) || (msg->getKind() == XMAC_DATA)) {
+            else if ((msg->getKind() == XMAC_PREAMBLE) || (msg->getKind() == XMAC_DATA)) {
                 if (msg->getKind() == XMAC_DATA) {
                     nbDroppedDataPackets++;
                 }
@@ -421,12 +420,12 @@ void XMac::handleSelfMessage(cMessage *msg)
                 delete msg;
                 return;
             }
-            if (msg->getKind() == XMAC_ACK) {
+            else if (msg->getKind() == XMAC_ACK) {
                 // nothing happens
                 delete msg;
                 return;
             }
-            if (msg->getKind() == XMAC_DATA) {
+            else if (msg->getKind() == XMAC_DATA) {
                 auto packet = check_and_cast<Packet *>(msg);
                 auto mac = packet->peekAtFront<XMacDataFrameHeader>();
                 const MacAddress& dest = mac->getDestAddr();
@@ -457,7 +456,7 @@ void XMac::handleSelfMessage(cMessage *msg)
                 return;
             }
             // data does not arrives in time
-            if (msg->getKind() == XMAC_DATA_TIMEOUT) {
+            else if (msg->getKind() == XMAC_DATA_TIMEOUT) {
                 EV << "node " << address << " : State WAIT_DATA, message XMAC_DATA_TIMEOUT, new state SLEEP" << endl;
                 // if something in the queue, wakeup soon.
                 if (!txQueue->isEmpty())
@@ -543,7 +542,7 @@ void XMac::receiveSignal(cComponent *source, simsignal_t signalID, intval_t valu
             if (macState == WAIT_TX_DATA_OVER) {
                 scheduleAfter(SIMTIME_ZERO, data_tx_over);
             }
-            if (macState == WAIT_ACK_TX) {
+            else if (macState == WAIT_ACK_TX) {
                 scheduleAfter(SIMTIME_ZERO, ack_tx_over);
             }
         }
