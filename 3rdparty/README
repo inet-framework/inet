@@ -1,0 +1,22 @@
+3rd party libraries and software belong here.
+
+Bundled software:
+
+- frugally-deep ("Use Keras models in C++ with ease")
+
+  Source: https://github.com/Dobiasd/frugally-deep
+
+- json (by Niels Lohmann)
+
+  Source: https://github.com/nlohmann/json
+  Dependency of frugally-deep.
+
+- FunctionalPlus ("helps you write concise and readable C++ code")
+
+  Source: https://github.com/Dobiasd/FunctionalPlus
+  Dependency of frugally-deep.
+
+- Eigen ("Eigen is a C++ template library for linear algebra: matrices, vectors, numerical solvers, and related algorithms.")
+
+  Not included, external dependency.
+  Dependency of frugally-deep.

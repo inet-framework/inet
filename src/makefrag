@@ -40,6 +40,11 @@ else
   PKGCFG := $(shell which pkg-config)
 endif
 
+
+INCLUDE_PATH += -I../3rdparty/frugally-deep/include -I../3rdparty/json/include -I../3rdparty/FunctionalPlus/include
+CFLAGS += $(shell ($(PKGCFG) --cflags eigen3))
+
+
 #
 # VoipStream feature:
 #
