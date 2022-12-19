@@ -124,7 +124,7 @@ class INET_API XMac : public MacProtocolBase, public IMacProtocol, public queuei
      *         whether medium is busy
      *  SEND_PREAMBLE -- node sends preambles to wake up all nodes
      *  WAIT_DATA -- node has received at least one preamble from another node
-     *               and wiats for the actual data packet
+     *               and waits for the actual data packet
      *  SEND_DATA -- node has sent enough preambles and sends the actual data
      *               packet
      *  WAIT_TX_DATA_OVER -- node waits until the data packet sending is ready

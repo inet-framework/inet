@@ -285,7 +285,7 @@ void XMac::handleSelfMessage(cMessage *msg)
                 delete msg;
                 return;
             }
-            // in case we get an ACK, we simply dicard it, because it means the end
+            // in case we get an ACK, we simply discard it, because it means the end
             // of another communication
             if (msg->getKind() == XMAC_ACK) {
                 EV_DEBUG << "State CCA, message XMAC_ACK, new state CCA" << endl;
