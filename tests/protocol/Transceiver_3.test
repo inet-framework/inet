@@ -65,7 +65,7 @@ Starting destreaming packet, .*?source-0.*?
 Ending streaming packet, .*?source-0.*?
 Ending transmission, .*?source-0.*?
 Transmitting signal end to channel, .*?source-0.*?
-Receiving signal start from channel, .*?source-0.*?
+Receiving signal end from channel, .*?source-0.*?
 Ending destreaming packet, .*?source-0.*?
 Consuming packet, .*?source-0.*?
 Producing packet, .*?source-1.*?
@@ -78,7 +78,7 @@ Starting destreaming packet, .*?source-1.*?
 Ending streaming packet, .*?source-1.*?
 Ending transmission, .*?source-1.*?
 Transmitting signal end to channel, .*?source-1.*?
-Receiving signal start from channel, .*?source-1.*?
+Receiving signal end from channel, .*?source-1.*?
 Ending destreaming packet, .*?source-1.*?
 Consuming packet, .*?source-1.*?
 Producing packet, .*?source-2.*?
@@ -91,7 +91,7 @@ Starting destreaming packet, .*?source-2.*?
 Ending streaming packet, .*?source-2.*?
 Ending transmission, .*?source-2.*?
 Transmitting signal end to channel, .*?source-2.*?
-Receiving signal start from channel, .*?source-2.*?
+Receiving signal end from channel, .*?source-2.*?
 Ending destreaming packet, .*?source-2.*?
 Consuming packet, .*?source-2.*?
 Producing packet, .*?source-3.*?
@@ -104,7 +104,7 @@ Starting destreaming packet, .*?source-3.*?
 Ending streaming packet, .*?source-3.*?
 Ending transmission, .*?source-3.*?
 Transmitting signal end to channel, .*?source-3.*?
-Receiving signal start from channel, .*?source-3.*?
+Receiving signal end from channel, .*?source-3.*?
 Ending destreaming packet, .*?source-3.*?
 Consuming packet, .*?source-3.*?
 Producing packet, .*?source-4.*?
@@ -117,7 +117,7 @@ Starting destreaming packet, .*?source-4.*?
 Ending streaming packet, .*?source-4.*?
 Ending transmission, .*?source-4.*?
 Transmitting signal end to channel, .*?source-4.*?
-Receiving signal start from channel, .*?source-4.*?
+Receiving signal end from channel, .*?source-4.*?
 Ending destreaming packet, .*?source-4.*?
 Consuming packet, .*?source-4.*?
 Producing packet, .*?source-5.*?
@@ -130,7 +130,7 @@ Starting destreaming packet, .*?source-5.*?
 Ending streaming packet, .*?source-5.*?
 Ending transmission, .*?source-5.*?
 Transmitting signal end to channel, .*?source-5.*?
-Receiving signal start from channel, .*?source-5.*?
+Receiving signal end from channel, .*?source-5.*?
 Ending destreaming packet, .*?source-5.*?
 Consuming packet, .*?source-5.*?
 Producing packet, .*?source-6.*?
@@ -143,7 +143,7 @@ Starting destreaming packet, .*?source-6.*?
 Ending streaming packet, .*?source-6.*?
 Ending transmission, .*?source-6.*?
 Transmitting signal end to channel, .*?source-6.*?
-Receiving signal start from channel, .*?source-6.*?
+Receiving signal end from channel, .*?source-6.*?
 Ending destreaming packet, .*?source-6.*?
 Consuming packet, .*?source-6.*?
 Producing packet, .*?source-7.*?
@@ -156,7 +156,7 @@ Starting destreaming packet, .*?source-7.*?
 Ending streaming packet, .*?source-7.*?
 Ending transmission, .*?source-7.*?
 Transmitting signal end to channel, .*?source-7.*?
-Receiving signal start from channel, .*?source-7.*?
+Receiving signal end from channel, .*?source-7.*?
 Ending destreaming packet, .*?source-7.*?
 Consuming packet, .*?source-7.*?
 Producing packet, .*?source-8.*?
@@ -169,7 +169,7 @@ Starting destreaming packet, .*?source-8.*?
 Ending streaming packet, .*?source-8.*?
 Ending transmission, .*?source-8.*?
 Transmitting signal end to channel, .*?source-8.*?
-Receiving signal start from channel, .*?source-8.*?
+Receiving signal end from channel, .*?source-8.*?
 Ending destreaming packet, .*?source-8.*?
 Consuming packet, .*?source-8.*?
 Producing packet, .*?source-9.*?
@@ -182,7 +182,7 @@ Starting destreaming packet, .*?source-9.*?
 Ending streaming packet, .*?source-9.*?
 Ending transmission, .*?source-9.*?
 Transmitting signal end to channel, .*?source-9.*?
-Receiving signal start from channel, .*?source-9.*?
+Receiving signal end from channel, .*?source-9.*?
 Ending destreaming packet, .*?source-9.*?
 Consuming packet, .*?source-9.*?
 Producing packet, .*?source-10.*?
