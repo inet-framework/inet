@@ -497,9 +497,9 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, c
             auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
             if (*protocol == Protocol::ethernetPhy) {
                 const auto& ethPhyHeader = packet->peekAtFront<physicallayer::EthernetPhyHeader>();
-                const auto& ethMacHeader = packet->peekAt<EthernetMacHeader>(ethPhyHeader->getChunkLength());
+                const auto& ethMacHeader = packet->peekDataAt<EthernetMacHeader>(ethPhyHeader->getChunkLength());
                 if (ethMacHeader->getTypeOrLength() == ETHERTYPE_GPTP) {
-                    const auto& gptp = packet->peekAt<GptpBase>(ethPhyHeader->getChunkLength() + ethMacHeader->getChunkLength());
+                    const auto& gptp = packet->peekDataAt<GptpBase>(ethPhyHeader->getChunkLength() + ethMacHeader->getChunkLength());
                     if (gptp->getDomainNumber() == domainNumber)
                         packet->addTagIfAbsent<GptpIngressTimeInd>()->setArrivalClockTime(clock->getClockTime());
                 }
@@ -513,9 +513,9 @@ void Gptp::receiveSignal(cComponent *source, simsignal_t signal, cObject *obj, c
             auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
             if (*protocol == Protocol::ethernetPhy) {
                 const auto& ethPhyHeader = packet->peekAtFront<physicallayer::EthernetPhyHeader>();
-                const auto& ethMacHeader = packet->peekAt<EthernetMacHeader>(ethPhyHeader->getChunkLength());
+                const auto& ethMacHeader = packet->peekDataAt<EthernetMacHeader>(ethPhyHeader->getChunkLength());
                 if (ethMacHeader->getTypeOrLength() == ETHERTYPE_GPTP) {
-                    const auto& gptp = packet->peekAt<GptpBase>(ethPhyHeader->getChunkLength() + ethMacHeader->getChunkLength());
+                    const auto& gptp = packet->peekDataAt<GptpBase>(ethPhyHeader->getChunkLength() + ethMacHeader->getChunkLength());
                     if (gptp->getDomainNumber() == domainNumber) {
                         int portId = getContainingNicModule(check_and_cast<cModule*>(source))->getInterfaceId();
                         switch (gptp->getMessageType()) {
