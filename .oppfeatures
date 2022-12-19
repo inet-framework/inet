@@ -970,6 +970,7 @@
                        inet.protocolelement.aggregation
                        inet.protocolelement.checksum
                        inet.protocolelement.common
+                       inet.protocolelement.cutthrough
                        inet.protocolelement.dispatching
                        inet.protocolelement.forwarding
                        inet.protocolelement.fragmentation
