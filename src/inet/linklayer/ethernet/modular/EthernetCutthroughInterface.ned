@@ -7,48 +7,21 @@
 
 package inet.linklayer.ethernet.modular;
 
-import inet.linklayer.contract.IEthernetInterface;
+import inet.linklayer.ethernet.LayeredEthernetInterface;
 import inet.linklayer.ethernet.contract.IEthernetMacLayer;
-import inet.networklayer.common.NetworkInterface;
 import inet.physicallayer.wired.ethernet.IEthernetPhyLayer;
 
 //
 // This module represents an Ethernet network interface with cut-through support.
 //
-module EthernetCutthroughInterface extends NetworkInterface like IEthernetInterface
+module EthernetCutthroughInterface extends LayeredEthernetInterface
 {
     parameters:
-        string protocol = default("ethernetmac");
-        bool broadcast = default(true);
-        bool multicast = default(true);
-        string address @mutable = default("auto");
-        double bitrate @unit(bps);
-        string interfaceTableModule;
         string macTableModule;
         *.bitrate = default(this.bitrate);
         *.macTableModule = default(this.macTableModule);
-    gates:
-        input upperLayerIn;
-        output upperLayerOut;
-        inout phys @labels(EthernetSignal);
-    submodules:
-        macLayer: <default("EthernetMacLayer")> like IEthernetMacLayer {
-            parameters:
-                @display("p=400,100");
-        }
-        phyLayer: <default("EthernetStreamThroughPhyLayer")> like IEthernetPhyLayer {
-            parameters:
-                cutthroughSource.typename = default("EthernetCutthroughSource");
-                cutthroughSink.typename = default("EthernetCutthroughSink");
-                @display("p=400,300");
-        }
-    connections:
-        upperLayerIn --> { @display("m=n"); } --> macLayer.upperLayerIn;
-        macLayer.lowerLayerOut --> phyLayer.upperLayerIn;
-        phyLayer.lowerLayerOut --> { @display("m=s"); } --> phys$o;
-
-        phys$i --> { @display("m=s"); } --> phyLayer.lowerLayerIn;
-        phyLayer.upperLayerOut --> macLayer.lowerLayerIn;
-        macLayer.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
+        phyLayer.typename = default("EthernetStreamThroughPhyLayer");
+        phyLayer.cutthroughSource.typename = default("EthernetCutthroughSource");
+        phyLayer.cutthroughSink.typename = default("EthernetCutthroughSink");
 }
 
