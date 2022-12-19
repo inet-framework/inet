@@ -48,6 +48,8 @@ void PacketDelayer::pushPacket(Packet *packet, cGate *gate)
 #ifdef INET_WITH_CLOCK
     if (clock != nullptr) {
         clocktime_t delay = par("delay");
+        auto bitrate = bps(par("bitrate"));
+        delay += s(packet->getDataLength() / bitrate).get();
         EV_INFO << "Delaying packet" << EV_FIELD(delay) << EV_FIELD(packet) << EV_ENDL;
         auto clockEvent = new ClockEvent("DelayTimer");
         clockEvent->setContextPointer(packet);
@@ -58,6 +60,8 @@ void PacketDelayer::pushPacket(Packet *packet, cGate *gate)
     {
 #endif
         simtime_t delay = par("delay");
+        auto bitrate = bps(par("bitrate"));
+        delay += s(packet->getDataLength() / bitrate).get();
         EV_INFO << "Delaying packet" << EV_FIELD(delay) << EV_FIELD(packet) << EV_ENDL;
         scheduleAfter(delay, packet);
     }
