@@ -221,12 +221,14 @@ void XMac::handleSelfMessage(cMessage *msg)
             }
             // we receive an ACK back but it is too late
             else if (msg->getKind() == XMAC_ACK) {
+                EV_DEBUG << "node " << address << " : State SLEEP, receive an XMAC_ACK, ignored" << endl;
                 nbMissedAcks++;
                 delete msg;
                 return;
             }
             // received messages prior real-switching to SLEEP? I'm sorry, out
             else {
+                EV_DEBUG << "node " << address << " : State SLEEP, receive message with kind=" << msg->getKind() << ", ignored" << endl;
                 return;
             }
             break;
@@ -234,6 +236,7 @@ void XMac::handleSelfMessage(cMessage *msg)
             if (msg->getKind() == XMAC_CCA_TIMEOUT) {
                 // channel is clear and we wanna SEND
                 if (!txQueue->isEmpty()) {
+                    EV_DEBUG << "node " << address << " : State CCA, message XMAC_CCA_TIMEOUT, new state SEND_PREAMBLE" << endl;
                     radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
                     changeDisplayColor(YELLOW);
                     macState = SEND_PREAMBLE;
@@ -245,6 +248,7 @@ void XMac::handleSelfMessage(cMessage *msg)
                 }
                 // if anything to send, go back to sleep and wake up after a full period
                 else {
+                    EV_DEBUG << "node " << address << " : State CCA, message XMAC_CCA_TIMEOUT, new state SLEEP" << endl;
                     scheduleAfter(slotDuration, wakeup);
                     macState = SLEEP;
                     radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
@@ -269,7 +273,7 @@ void XMac::handleSelfMessage(cMessage *msg)
                 }
                 // the preamble is not for us
                 else {
-                    EV << "node " << address << " : State CCA, message XMAC_PREAMBLE not for me." << endl;
+                    EV << "node " << address << " : State CCA, message XMAC_PREAMBLE not for me, new state SLEEP." << endl;
                     // ~ better overhearing management? :)
                     cancelEvent(cca_timeout);
                     scheduleAfter(slotDuration, wakeup);
@@ -296,7 +300,7 @@ void XMac::handleSelfMessage(cMessage *msg)
 
                 // packet is for me
                 if (incoming_data->getDestAddr() == address) {
-                    EV << "node " << address << " : State CCA, received XMAC_DATA, accepting it." << endl;
+                    EV << "node " << address << " : State CCA, received XMAC_DATA, accepting it, new state WAIT_DATA." << endl;
                     cancelEvent(cca_timeout);
                     cancelEvent(switch_preamble_phase);
                     cancelEvent(stop_preambles);
@@ -587,16 +591,31 @@ void XMac::changeDisplayColor(XMAC_COLORS color)
             break;
 
         case SEND_ACK:
+            dispStr.setTagArg("t", 0, "SEND_ACK");
+            break;
+
         case SEND_PREAMBLE:
+            dispStr.setTagArg("t", 0, "SEND_PREAMBLE");
+            break;
+
         case SEND_DATA:
-            dispStr.setTagArg("t", 0, "SEND");
+            dispStr.setTagArg("t", 0, "SEND_DATA");
             break;
 
         case WAIT_ACK:
+            dispStr.setTagArg("t", 0, "WAIT_ACK");
+            break;
+
         case WAIT_DATA:
+            dispStr.setTagArg("t", 0, "WAIT_DATA");
+            break;
+
         case WAIT_TX_DATA_OVER:
+            dispStr.setTagArg("t", 0, "WAIT_TX_DATA_OVER");
+            break;
+
         case WAIT_ACK_TX:
-            dispStr.setTagArg("t", 0, "WAIT");
+            dispStr.setTagArg("t", 0, "WAIT_ACK_TX");
             break;
 
         default:
