@@ -2139,7 +2139,7 @@ template<class C, class P>
 template<class C, class P>
 /* static */ inline Key MachoLink<C, P>::key()
 {
-    static _KeyData k = {
+    static OPP_THREAD_LOCAL _KeyData k = {
         _getInstance, isChild, C::_state_name, StateId<C>::value
     };
     return &k;

@@ -9,8 +9,8 @@
 
 namespace inet {
 
-b ChunkSerializer::totalSerializedLength = b(0);
-b ChunkSerializer::totalDeserializedLength = b(0);
+OPP_THREAD_LOCAL b ChunkSerializer::totalSerializedLength = b(0);
+OPP_THREAD_LOCAL b ChunkSerializer::totalDeserializedLength = b(0);
 
 } // namespace
 

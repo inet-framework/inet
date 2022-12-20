@@ -15,7 +15,7 @@
 namespace inet {
 namespace physicallayer {
 
-const Ieee80211VhtCompliantModes Ieee80211VhtCompliantModes::singleton;
+OPP_THREAD_LOCAL const Ieee80211VhtCompliantModes Ieee80211VhtCompliantModes::singleton;
 
 Ieee80211VhtMode::Ieee80211VhtMode(const char *name, const Ieee80211VhtPreambleMode *preambleMode, const Ieee80211VhtDataMode *dataMode, const BandMode centerFrequencyMode) :
     Ieee80211ModeBase(name),

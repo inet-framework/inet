@@ -17,7 +17,7 @@ class INET_API SelfDoc
     std::set<std::string> textSet;
 
   public:
-    static bool generateSelfdoc;
+    static OPP_THREAD_LOCAL bool generateSelfdoc;
 
   public:
     SelfDoc() {}
@@ -36,7 +36,7 @@ class INET_API SelfDoc
     static std::string gateInfo(cGate *gate);
 };
 
-extern SelfDoc globalSelfDoc;
+extern OPP_THREAD_LOCAL SelfDoc globalSelfDoc;
 
 class INET_API SelfDocTempOffClass
 {

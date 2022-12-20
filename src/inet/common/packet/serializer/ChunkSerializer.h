@@ -17,8 +17,8 @@ namespace inet {
 class INET_API ChunkSerializer : public cObject
 {
   public:
-    static b totalSerializedLength;
-    static b totalDeserializedLength;
+    static OPP_THREAD_LOCAL b totalSerializedLength;
+    static OPP_THREAD_LOCAL b totalDeserializedLength;
 
   public:
     /**

@@ -325,7 +325,7 @@ const char *Packet::getFullName() const
             suffix = ":start";
         else
             suffix = ":progress";
-        static std::set<std::string> pool;
+        static OPP_THREAD_LOCAL std::set<std::string> pool;
         std::string fullname = std::string(getName()) + suffix;
         auto it = pool.insert(fullname).first;
         return it->c_str();

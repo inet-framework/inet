@@ -113,7 +113,7 @@ struct memp {
 
 /** This array holds the first free element of each pool.
  *  Elements form a linked list. */
-static struct memp *memp_tab[MEMP_MAX];
+OPP_THREAD_LOCAL static OPP_THREAD_LOCAL struct memp *memp_tab[MEMP_MAX];
 
 #else /* MEMP_MEM_MALLOC */
 
@@ -147,7 +147,7 @@ static const char *memp_desc[MEMP_MAX] = {
 #endif /* LWIP_DEBUG */
 
 /** This is the actual memory used by the pools. */
-static u8_t memp_memory[MEM_ALIGNMENT - 1
+static OPP_THREAD_LOCAL u8_t memp_memory[MEM_ALIGNMENT - 1
 #define LWIP_MEMPOOL(name,num,size,desc) + ( (num) * (MEMP_SIZE + MEMP_ALIGN_SIZE(size) ) )
 #include "lwip/memp_std.h"
 ];

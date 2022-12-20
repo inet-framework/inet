@@ -9,7 +9,7 @@
 
 namespace inet {
 
-int evFlags = 1;
+OPP_THREAD_LOCAL int evFlags = 1;
 
 } // namespace inet
 
