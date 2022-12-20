@@ -20,9 +20,12 @@ class INET_API ProtocolGroup
     std::map<int, const Protocol *> protocolNumberToProtocol;
     std::map<const Protocol *, int> protocolToProtocolNumber;
 
+    std::vector<const Protocol *> dynamicallyAddedProtocols; // the items in protocols[] that need to be deallocated in destructor
+
   public:
     typedef std::map<int, const Protocol *> Protocols;
     ProtocolGroup(const char *name, const Protocols& protocolNumberToProtocol);
+    ~ProtocolGroup();
 
     const char *getName() const { return name; }
     int getNumElements() const { return protocols.size(); }
