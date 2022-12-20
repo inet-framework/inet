@@ -12,7 +12,7 @@
 
 namespace inet {
 
-ProtocolGroup::ProtocolGroup(const char *name, std::map<int, const Protocol *> protocolNumberToProtocol) :
+ProtocolGroup::ProtocolGroup(const char *name, const Protocols& protocolNumberToProtocol) :
     name(name),
     protocolNumberToProtocol(protocolNumberToProtocol)
 {
@@ -62,7 +62,7 @@ void ProtocolGroup::addProtocol(int protocolId, const Protocol *protocol)
 // FIXME use constants instead of numbers
 
 // excerpt from http://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml
-ProtocolGroup ProtocolGroup::ethertype("ethertype", {
+static const ProtocolGroup::Protocols ethertypeProtocols {
     { ETHERTYPE_IPv4, &Protocol::ipv4 },
     { ETHERTYPE_ARP, &Protocol::arp },
     { ETHERTYPE_INET_CDP, &Protocol::cdp },               // TODO remove it, it's a CISCO code for LLC, ANSAINET project use it currently
@@ -85,10 +85,10 @@ ProtocolGroup ProtocolGroup::ethertype("ethertype", {
     { ETHERTYPE_IEEE8021AE, &Protocol::ieee8021ae },
     { ETHERTYPE_TTETH, &Protocol::tteth },
     { ETHERTYPE_IEEE8021_R_TAG, &Protocol::ieee8021rTag },
-});
+};
 
 // excerpt from http://www.iana.org/assignments/ppp-numbers/ppp-numbers.xhtml
-ProtocolGroup ProtocolGroup::pppprotocol("pppprotocol", {
+static const ProtocolGroup::Protocols pppProtocols {
     { 0x0021, &Protocol::ipv4 },
     { 0x0057, &Protocol::ipv6 },
     { 0x0281, &Protocol::mpls },
@@ -97,10 +97,10 @@ ProtocolGroup ProtocolGroup::pppprotocol("pppprotocol", {
     { 0x39FD, &Protocol::probabilistic },     // INET specific non-standard protocol
     { 0x39FE, &Protocol::wiseRoute },         // INET specific non-standard protocol
     { 0x39FF, &Protocol::nextHopForwarding }, // INET specific non-standard protocol
-});
+};
 
 // excerpt from http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
-ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
+static const ProtocolGroup::Protocols ipProtocols {
     { IP_PROT_ICMP, &Protocol::icmpv4 },
     { IP_PROT_IGMP, &Protocol::igmp },
     { IP_PROT_IP, &Protocol::ipv4 },
@@ -127,34 +127,76 @@ ProtocolGroup ProtocolGroup::ipprotocol("ipprotocol", {
     { IP_PROT_NEXT_HOP_FORWARDING, &Protocol::nextHopForwarding }, // INET specific non-standard protocol
     { IP_PROT_ECHO, &Protocol::echo },              // INET specific non-standard protocol
     { IP_PROT_UNKNOWN, &Protocol::unknown }, // INET specific non-standard protocol
-});
+};
 
-ProtocolGroup ProtocolGroup::snapOui("snapOui", {
+static const ProtocolGroup::Protocols snapOuiProtocols {
     //TODO do not add {0, .... }, it is a  special value: the protocolId contains the ethertype value
     // { 0x00000C, &Protocol::ciscoSnap } //TODO
-});
+};
 
-ProtocolGroup ProtocolGroup::ieee8022protocol("ieee8022protocol", {
+static const ProtocolGroup::Protocols ieee8022Protocols {
     { 0x4242, &Protocol::stp },
     { 0xAAAA, &Protocol::ieee8022snap },
     { 0xFE00, &Protocol::isis },
     { 0xFFFF, &Protocol::unknown }, // INET specific non-standard protocol
-});
+};
 
-ProtocolGroup ProtocolGroup::udpprotocol("udpprotocol", {
+static const ProtocolGroup::Protocols udpProtocols {
     { 554, &Protocol::rtsp },
     { 6696, &Protocol::babel },
     { 11111, &Protocol::unknown }, // INET specific non-standard protocol
-});
+};
 
-ProtocolGroup ProtocolGroup::tcpprotocol("tcpprotocol", {
+static const ProtocolGroup::Protocols tcpProtocols {
     { 21, &Protocol::ftp },
     { 22, &Protocol::ssh },
     { 23, &Protocol::telnet },
     { 80, &Protocol::http },
     { 554, &Protocol::rtsp },
     { 11111, &Protocol::unknown }, // INET specific non-standard protocol
-});
+};
+
+ProtocolGroup *ProtocolGroup::getEthertypeProtocolGroup()
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::ethertype");
+    return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, ethertypeProtocols);
+}
+
+ProtocolGroup *ProtocolGroup::getPppProtocolGroup()
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::ppp");
+    return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, pppProtocols);
+}
+
+ProtocolGroup *ProtocolGroup::getIpProtocolGroup()
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::ip");
+    return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, ipProtocols);
+}
+
+ProtocolGroup *ProtocolGroup::getSnapOuiProtocolGroup()
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::snapOui");
+    return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, snapOuiProtocols);
+}
+
+ProtocolGroup *ProtocolGroup::getIeee8022ProtocolGroup()
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::ieee8022");
+    return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, ieee8022Protocols);
+}
+
+ProtocolGroup *ProtocolGroup::getTcpProtocolGroup()
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::tcp");
+    return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, tcpProtocols);
+}
+
+ProtocolGroup *ProtocolGroup::getUdpProtocolGroup()
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedVariableName("inet::ProtocolGroup::udp");
+    return getSimulationOrSharedDataManager()->getSharedVariable<ProtocolGroup>(handle, udpProtocols);
+}
 
 } // namespace inet
 

@@ -21,7 +21,8 @@ class INET_API ProtocolGroup
     std::map<const Protocol *, int> protocolToProtocolNumber;
 
   public:
-    ProtocolGroup(const char *name, std::map<int, const Protocol *> protocolNumberToProtocol);
+    typedef std::map<int, const Protocol *> Protocols;
+    ProtocolGroup(const char *name, const Protocols& protocolNumberToProtocol);
 
     const char *getName() const { return name; }
     int getNumElements() const { return protocols.size(); }
@@ -36,14 +37,14 @@ class INET_API ProtocolGroup
     std::string str() const { return name; }
 
   public:
-    // in alphanumeric order
-    static ProtocolGroup ethertype;
-    static ProtocolGroup ieee8022protocol;
-    static ProtocolGroup ipprotocol;
-    static ProtocolGroup pppprotocol;
-    static ProtocolGroup snapOui;
-    static ProtocolGroup tcpprotocol;
-    static ProtocolGroup udpprotocol;
+    // in alphabetic order
+    static ProtocolGroup *getEthertypeProtocolGroup();
+    static ProtocolGroup *getIeee8022ProtocolGroup();
+    static ProtocolGroup *getIpProtocolGroup();
+    static ProtocolGroup *getPppProtocolGroup();
+    static ProtocolGroup *getSnapOuiProtocolGroup();
+    static ProtocolGroup *getTcpProtocolGroup();
+    static ProtocolGroup *getUdpProtocolGroup();
 };
 
 inline std::ostream& operator<<(std::ostream& o, const ProtocolGroup& t) { o << t.str(); return o; }
