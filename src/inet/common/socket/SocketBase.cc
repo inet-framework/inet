@@ -33,6 +33,16 @@ void SocketBase::sendOut(cMessage *msg)
     check_and_cast<cSimpleModule *>(outputGate->getOwnerModule())->send(msg, outputGate);
 }
 
+void SocketBase::sendOut(Request *request)
+{
+    sendOut(static_cast<cMessage *>(request));
+}
+
+void SocketBase::sendOut(Packet *packet)
+{
+    sendOut(static_cast<cMessage *>(packet));
+}
+
 void SocketBase::send(Packet *packet)
 {
     packet->setKind(SOCKET_C_DATA);

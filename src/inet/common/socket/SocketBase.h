@@ -9,6 +9,7 @@
 #define __INET_SOCKETBASE_H
 
 #include "inet/common/socket/ISocket.h"
+#include "inet/common/packet/Message.h"
 
 namespace inet {
 
@@ -22,6 +23,8 @@ class INET_API SocketBase : public ISocket
 
   protected:
     virtual void sendOut(cMessage *msg);
+    virtual void sendOut(Request *request);
+    virtual void sendOut(Packet *packet);
 
   public:
     SocketBase();
