@@ -38,6 +38,7 @@ void PacketDirectionReverser::processPacket(Packet *packet)
     auto directionTag = packet->findTag<DirectionTag>();
     auto cutthroughTag = packet->findTag<CutthroughTag>();
     auto eligibilityTimeTag = packet->findTag<EligibilityTimeTag>();
+    auto encapsulationProtocolInd = packet->findTag<EncapsulationProtocolInd>();
     auto macAddressInd = packet->findTag<MacAddressInd>();
     auto dropEligibleInd = packet->findTag<DropEligibleInd>();
     auto vlanInd = packet->findTag<VlanInd>();
@@ -60,6 +61,13 @@ void PacketDirectionReverser::processPacket(Packet *packet)
     }
     if (eligibilityTimeTag != nullptr)
         packet->addTag<EligibilityTimeTag>()->setEligibilityTime(eligibilityTimeTag->getEligibilityTime());
+    if (encapsulationProtocolInd != nullptr) {
+        int n = encapsulationProtocolInd->getProtocolArraySize();
+        auto encapsulationProtocolReq = packet->addTag<EncapsulationProtocolReq>();
+        encapsulationProtocolReq->setProtocolArraySize(n);
+        for (int i = 0; i < n; i++)
+            encapsulationProtocolReq->setProtocol(n - i - 1, encapsulationProtocolInd->getProtocol(i));
+    }
     if (interfaceInd != nullptr)
         packet->addTag<InterfaceInd>()->setInterfaceId(interfaceInd->getInterfaceId());
     if (macAddressInd != nullptr) {
