@@ -125,8 +125,8 @@ void EthernetSocketIo::handleStartOperation(LifecycleOperation *operation)
 {
     setSocketOptions();
     socket.setOutputGate(gate("socketOut"));
-// TODO breaks if there are queueing components between the application and the socket handling modules
-//    socket.bind(localAddress, remoteAddress, nullptr, true);
+    if (!localAddress.isUnspecified())
+        socket.bind(localAddress, remoteAddress, nullptr, true);
 }
 
 void EthernetSocketIo::handleStopOperation(LifecycleOperation *operation)
