@@ -241,7 +241,8 @@ void PacketPrinter::printPacketInsideOut(const Ptr<const PacketDissector::Protoc
                 context.infoLevel = protocolDataUnit->getLevel();
                 printSourceColumn(protocolContext.sourceColumn.str(), protocol, options, context);
                 printDestinationColumn(protocolContext.destinationColumn.str(), protocol, options, context);
-                printProtocolColumn(protocol, options, context);
+                if (protocol != &Protocol::unknown)
+                    printProtocolColumn(protocol, options, context);
                 // prepend info column
                 bool showAutoInfo = isEnabledOption(options, "Show auto info");
                 bool showInnermostInfo = isEnabledOption(options, "Show innermost info");
@@ -282,7 +283,8 @@ void PacketPrinter::printPacketLeftToRight(const Ptr<const PacketDissector::Prot
                 context.infoLevel = protocolDataUnit->getLevel();
                 printSourceColumn(protocolContext.sourceColumn.str(), protocol, options, context);
                 printDestinationColumn(protocolContext.destinationColumn.str(), protocol, options, context);
-                printProtocolColumn(protocol, options, context);
+                if (protocol != &Protocol::unknown)
+                    printProtocolColumn(protocol, options, context);
             }
             // append info column
             if (isEnabledInfo(options, protocol)) {
