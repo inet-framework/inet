@@ -11,6 +11,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
@@ -35,6 +36,7 @@ void EthernetMacHeaderChecker::initialize(int stage)
 void EthernetMacHeaderChecker::processPacket(Packet *packet)
 {
     const auto& header = packet->popAtFront<EthernetMacHeader>();
+    pushEncapsulationProtocolInd(packet, &Protocol::ethernetMac);
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     macAddressInd->setSrcAddress(header->getSrc());
     macAddressInd->setDestAddress(header->getDest());
