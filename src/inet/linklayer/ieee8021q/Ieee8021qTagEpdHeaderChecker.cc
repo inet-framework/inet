@@ -10,6 +10,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/linklayer/common/DropEligibleTag_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
@@ -49,6 +50,7 @@ void Ieee8021qTagEpdHeaderChecker::handleParameterChange(const char *name)
 void Ieee8021qTagEpdHeaderChecker::processPacket(Packet *packet)
 {
     const auto& header = packet->popAtFront<Ieee8021qTagEpdHeader>();
+    pushEncapsulationProtocolInd(packet, &Protocol::ieee8021qCTag);
     packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(header->getPcp());
     packet->addTagIfAbsent<PcpInd>()->setPcp(header->getPcp());
     packet->addTagIfAbsent<VlanInd>()->setVlanId(header->getVid());
