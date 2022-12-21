@@ -11,15 +11,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/common/INETUtils.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/LayeredProtocolBase.h"
-#include "inet/common/ModuleAccess.h"
-#include "inet/common/ProtocolTag_m.h"
-#include "inet/common/checksum/TcpIpChecksum.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/lifecycle/NodeStatus.h"
+#include "inet/common/ModuleAccess.h"
 #include "inet/common/packet/Message.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
@@ -1073,15 +1074,8 @@ void Ipv4::sendPacketToNIC(Packet *packet)
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     packet->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv4);
     auto networkInterfaceProtocol = networkInterface->getProtocol();
-    auto dispatchProtocol = networkInterfaceProtocol;
-    if (auto encapsulationProtocolReq = packet->findTagForUpdate<EncapsulationProtocolReq>()) {
-        dispatchProtocol = encapsulationProtocolReq->getProtocol(0);
-        encapsulationProtocolReq->eraseProtocol(0);
-        if (networkInterfaceProtocol != nullptr)
-            encapsulationProtocolReq->appendProtocol(networkInterfaceProtocol);
-        else if (encapsulationProtocolReq->getProtocolArraySize() == 0)
-            packet->removeTag<EncapsulationProtocolReq>();
-    }
+    pushEncapsulationProtocolReq(packet, networkInterfaceProtocol);
+    auto dispatchProtocol = popEncapsulationProtocolReq(packet);
     if (dispatchProtocol == nullptr)
         packet->removeTagIfPresent<DispatchProtocolReq>();
     else
