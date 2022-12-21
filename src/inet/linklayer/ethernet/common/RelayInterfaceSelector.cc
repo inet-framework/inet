@@ -8,6 +8,7 @@
 #include "inet/linklayer/ethernet/common/RelayInterfaceSelector.h"
 
 #include "inet/common/DirectionTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
@@ -117,14 +118,10 @@ void RelayInterfaceSelector::sendPacket(Packet *packet, const MacAddress& destin
     packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
     auto protocol = outgoingInterface->getProtocol();
-    if (protocol != nullptr) {
-        if (auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>()) {
-            auto encapsulationProtocolReq = packet->addTagIfAbsent<EncapsulationProtocolReq>();
-            encapsulationProtocolReq->appendProtocol(protocol);
-        }
-        else
-            packet->addTag<DispatchProtocolReq>()->setProtocol(protocol);
-    }
+    if (protocol != nullptr)
+        pushEncapsulationProtocolReq(packet, protocol);
+    if (!packet->findTag<DispatchProtocolReq>())
+        packet->addTag<DispatchProtocolReq>()->setProtocol(popEncapsulationProtocolReq(packet));
     pushOrSendPacket(packet, outputGate, consumer);
 }
 
