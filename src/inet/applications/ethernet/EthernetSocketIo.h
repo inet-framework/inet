@@ -16,6 +16,7 @@ namespace inet {
 class INET_API EthernetSocketIo : public ApplicationBase, public EthernetSocket::ICallback
 {
   protected:
+    NetworkInterface *networkInterface = nullptr;
     MacAddress remoteAddress;
     MacAddress localAddress;
     EthernetSocket socket;
