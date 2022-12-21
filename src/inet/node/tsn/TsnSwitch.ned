@@ -44,4 +44,6 @@ module TsnSwitch extends EthernetSwitch
         bridging.streamFilter.ingress.typename = default(hasIngressTrafficFiltering ? "SimpleIeee8021qFilter" : ""); // use 802.1 Qci ingress filtering when ingress per-stream filtering is enabled
         bridging.streamCoder.typename = default(hasIncomingStreams || hasOutgoingStreams || hasIngressTrafficFiltering || hasStreamRedundancy ? "StreamCoderLayer" : ""); // enable stream endocing/decoding when stream redundancy is enabled
         llc.typename = default("");
+        ieee8021r.typename = default(hasStreamRedundancy ? "Ieee8021rProtocol" : "");
+        ieee8021q.typename = default(hasIncomingStreams || hasOutgoingStreams || hasStreamRedundancy ? "Ieee8021qProtocol" : "");
 }
