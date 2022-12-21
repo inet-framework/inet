@@ -7,8 +7,9 @@
 
 #include "inet/linklayer/ethernet/common/EthernetSocket.h"
 
-#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ethernet/common/EthernetCommand_m.h"
@@ -20,8 +21,20 @@ void EthernetSocket::sendOut(cMessage *msg)
     auto& tags = check_and_cast<ITaggedObject *>(msg)->getTags();
     if (networkInterface != nullptr)
         tags.addTagIfAbsent<InterfaceReq>()->setInterfaceId(networkInterface->getInterfaceId());
-    tags.addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
     SocketBase::sendOut(msg);
+}
+
+void EthernetSocket::sendOut(Request *request)
+{
+    request->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ethernetMac);
+    SocketBase::sendOut(request);
+}
+
+void EthernetSocket::sendOut(Packet *packet)
+{
+    appendEncapsulationProtocolReq(packet, &Protocol::ethernetMac);
+    setDispatchProtocol(packet);
+    SocketBase::sendOut(packet);
 }
 
 void EthernetSocket::bind(const MacAddress& localAddress, const MacAddress& remoteAddress, const Protocol *protocol, bool steal)

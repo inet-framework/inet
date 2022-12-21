@@ -44,6 +44,8 @@ class INET_API EthernetSocket : public SocketBase
 
   protected:
     virtual void sendOut(cMessage *msg) override;
+    virtual void sendOut(Request *request) override;
+    virtual void sendOut(Packet *packet) override;
 
   public:
     /** @name Opening and closing connections, sending data */
