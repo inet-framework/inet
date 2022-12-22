@@ -19,9 +19,6 @@ class INET_API EmptyChunk : public Chunk
 {
     friend class Chunk;
 
-  public:
-    static const Ptr<EmptyChunk> singleton;
-
   protected:
     virtual const Ptr<Chunk> peekUnchecked(PeekPredicate predicate, PeekConverter converter, const Iterator& iterator, b length, int flags) const override;
 
@@ -49,7 +46,7 @@ class INET_API EmptyChunk : public Chunk
         if (flags & PF_ALLOW_NULLPTR)
             return nullptr;
         else if (flags & PF_ALLOW_EMPTY)
-            return EmptyChunk::singleton;
+            return makeShared<EmptyChunk>();
         else
             throw cRuntimeError("Returning an empty chunk is not allowed according to the flags: %x", flags);
     }

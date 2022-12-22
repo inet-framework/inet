@@ -60,7 +60,7 @@ class INET_API ChunkQueue : public cNamedObject
   public:
     /** @name Constructors, destructors and duplication related functions */
     //@{
-    ChunkQueue(const char *name = nullptr, const Ptr<const Chunk>& content = EmptyChunk::singleton);
+    ChunkQueue(const char *name = nullptr, const Ptr<const Chunk>& content = makeShared<EmptyChunk>());
     ChunkQueue(const ChunkQueue& other);
 
     virtual ChunkQueue *dup() const override { return new ChunkQueue(*this); }

@@ -31,7 +31,7 @@ void ChunkQueue::remove(b length)
 {
     CHUNK_CHECK_IMPLEMENTATION(b(0) <= length && length <= iterator.getPosition());
     if (content->getChunkLength() == length)
-        content = EmptyChunk::singleton;
+        content = makeShared<EmptyChunk>();
     else if (content->canRemoveAtFront(length)) {
         const auto& newContent = makeExclusivelyOwnedMutableChunk(content);
         newContent->removeAtFront(length);
@@ -79,7 +79,7 @@ void ChunkQueue::clear()
 {
     poppedLength += getLength();
     content->seekIterator(iterator, b(0));
-    content = EmptyChunk::singleton;
+    content = makeShared<EmptyChunk>();
 }
 
 void ChunkQueue::push(const Ptr<const Chunk>& chunk)
@@ -88,7 +88,7 @@ void ChunkQueue::push(const Ptr<const Chunk>& chunk)
     CHUNK_CHECK_USAGE(chunk->getChunkLength() > b(0), "chunk is empty");
     constPtrCast<Chunk>(chunk)->markImmutable();
     pushedLength += chunk->getChunkLength();
-    if (content == EmptyChunk::singleton)
+    if (content->getChunkType() == Chunk::CT_EMPTY)
         content = chunk;
     else {
         if (content->canInsertAtBack(chunk)) {

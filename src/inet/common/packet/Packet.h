@@ -952,7 +952,7 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
         const auto& frontPart = frontLength > b(0) ? peekAt(b(0), frontLength) : nullptr;
         b backLength = totalLength - offset - chunkLength;
         const auto& backPart = backLength > b(0) ? peekAt(totalLength - backLength, backLength) : nullptr;
-        content = EmptyChunk::singleton;
+        content = makeShared<EmptyChunk>();
         const auto& result = makeExclusivelyOwnedMutableChunk(oldChunk);
         CHUNK_CHECK_USAGE(chunkLength == chunk->getChunkLength(), "length is different");
         if (frontLength == b(0) && backLength == b(0))
