@@ -9,7 +9,6 @@
 
 namespace inet {
 
-int Protocol::nextId = 0;
 std::map<int, const Protocol *>& Protocol::getIdToProtocol()
 {
     static std::map<int, const Protocol *> idToProtocol;
@@ -23,7 +22,7 @@ std::map<std::string, const Protocol *>& Protocol::getNameToProtocol()
 }
 
 Protocol::Protocol(const char *name, const char *descriptiveName, Layer layer) :
-    id(nextId++),
+    id(getNextId()),
     name(name),
     descriptiveName(descriptiveName),
     layer(layer)
@@ -69,6 +68,21 @@ const Protocol *Protocol::getProtocol(const char *name)
         return protocol;
     else
         throw cRuntimeError("Unknown protocol: name = %s", name);
+}
+
+uint64_t Protocol::getNextId()
+{
+    static int handle = cSimulationOrSharedDataManager::registerSharedCounterName("inet::Protocol::nextId");
+    static uint64_t staticCounter;
+    if (cSimulation::getActiveSimulation() == nullptr) {
+        // for initializing static const Protocol instances (Protocol::aodv, etc.)
+        return staticCounter++;
+    }
+    else {
+        // for Protocol instances created during simulation
+        uint64_t& nextId = getSimulationOrSharedDataManager()->getSharedCounter(handle, staticCounter);
+        return nextId++;
+    }
 }
 
 // Standard protocol identifiers

@@ -15,7 +15,7 @@ namespace inet {
 class INET_API Protocol
 {
   protected:
-    static int nextId;
+    static uint64_t getNextId();
     static std::map<int, const Protocol *>& getIdToProtocol();
     static std::map<std::string, const Protocol *>& getNameToProtocol();
 
