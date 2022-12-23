@@ -1,3 +1,4 @@
 #!/bin/bash
+echo "Hint: You may want to use the '-F tyf' option to exclude graphical (tyf) fingerprints, as they are not regularly kept up to date"
 INET_OMNETPP_OPTIONS="-n $INET_NED_PATH:$INET_ROOT/tests/networks --image-path=$INET_ROOT/images"
 $INET_ROOT/bin/inet_fingerprinttest --directory $INET_ROOT "$@"
