@@ -251,7 +251,7 @@ static Packet *deserialize(const Protocol *protocol, Packet *pk)
             }
         }
         if (etherType != -1) {
-            protocol = ProtocolGroup::ethertype.findProtocol(etherType);
+            protocol = ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(etherType);
         }
         outPk = deserialize(protocol, pk);
         if (llcHeader)
@@ -265,7 +265,7 @@ static Packet *deserialize(const Protocol *protocol, Packet *pk)
         Ptr<const Chunk> trailer = nullptr;
         if (trailerLength > b(0))
             trailer = pk->popAtBack(trailerLength);
-        protocol = ProtocolGroup::ipprotocol.findProtocol(header->getProtocolId());
+        protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(header->getProtocolId());
         outPk = deserialize(protocol, pk);
         outPk->insertAtFront(header);
         if (trailer != nullptr)
@@ -273,7 +273,7 @@ static Packet *deserialize(const Protocol *protocol, Packet *pk)
     }
     else if (*protocol == Protocol::ipv6) {
         const auto& header = pk->popAtFront<Ipv6Header>();
-        protocol = ProtocolGroup::ipprotocol.findProtocol(header->getProtocolId());
+        protocol = ProtocolGroup::getIpProtocolGroup()->findProtocol(header->getProtocolId());
         outPk = deserialize(protocol, pk);
         outPk->insertAtFront(header);
     }
