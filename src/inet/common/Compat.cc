@@ -14,6 +14,8 @@ namespace inet {
 
 using namespace omnetpp;
 
+const size_t MAX_NUM_COUNTERS = 1000;  // fixed size to prevent array reallocation -- increase if necessary
+
 SharedDataManager::SharedDataHandles *SharedDataManager::sharedVariableHandles;
 SharedDataManager::SharedDataHandles *SharedDataManager::sharedCounterHandles;
 
@@ -39,7 +41,6 @@ const char *SharedDataManager::SharedDataHandles::getNameFor(int handle)
 
 SharedDataManager::SharedDataManager()
 {
-    const size_t MAX_NUM_COUNTERS = 1000;  // fixed size to prevent array reallocation -- increase if necessary
     sharedCounters.resize(MAX_NUM_COUNTERS, INVALID);
 }
 
@@ -70,7 +71,7 @@ const char *SharedDataManager::getSharedCounterName(sharedcounterhandle_t handle
 uint64_t& SharedDataManager::getSharedCounter(sharedcounterhandle_t handle, uint64_t initialValue)
 {
     if (sharedCounters.size() <= handle)
-        throw cRuntimeError("getSharedCounter(): number of shared counters exhausted -- please increase table size in " __FILE__); // fixed size to prevent array reallocation which would invalidate returned references -- increase if necessary
+        throw cRuntimeError("getSharedCounter(): invalid handle %lu, or number of shared counters exhausted (you can increase table size in " __FILE__ ")", (unsigned long)handle); // fixed size to prevent array reallocation which would invalidate returned references -- increase if necessary
     uint64_t& counter = sharedCounters[handle];
     if (counter == INVALID)
         counter = initialValue;
@@ -88,6 +89,7 @@ void SharedDataManager::clear()
         item.second(); // call stored destructor
     sharedVariables.clear();
     sharedCounters.clear();
+    sharedCounters.resize(MAX_NUM_COUNTERS, INVALID);
 }
 
 void SharedDataManager::lifecycleEvent(SimulationLifecycleEventType eventType, cObject *details)
