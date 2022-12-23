@@ -15,7 +15,7 @@ cp -pPR lib work/       # OSX does not support cp -a
 opp_test gen $OPT -v $TESTFILES || exit 1
 
 echo
-(cd work; opp_makemake -f --deep -lINET -L../../../../src -P . --no-deep-includes -I../../../../src; $MAKE) || exit 1
+(cd work; opp_makemake -f --deep -lINET -L../../../../src -P . -I../../../../src; $MAKE) || exit 1
 
 echo
 opp_test run $OPT -v $TESTFILES || exit 1

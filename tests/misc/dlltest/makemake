@@ -1,1 +1,1 @@
-opp_makemake -f -s --no-deep-includes -I../../../src
+opp_makemake -f -s -I../../../src

@@ -18,7 +18,7 @@ echo
 # include precompiled.h first to all c++ file:
 echo CFLAGS += -include inet/common/precompiled.h >work/makefrag
 
-(cd work; opp_makemake -f --deep -lINET$DBG_SUFFIX -L../../../src -P . --no-deep-includes -I./lib -I../../../src; $MAKE) || exit 1
+(cd work; opp_makemake -f --deep -lINET$DBG_SUFFIX -L../../../src -P . -I./lib -I../../../src; $MAKE) || exit 1
 echo
 opp_test run -p work$DBG_SUFFIX $OPT -v $TESTFILES || exit 1
 echo
