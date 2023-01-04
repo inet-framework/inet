@@ -19,11 +19,11 @@ module ProcessingDelayLayer like IProcessingDelayLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
-        ingress: <default("")> like IPacketDelayer {
+        ingress: <default("PacketDelayer")> like IPacketDelayer {
             parameters:
                 @display("p=150,100");
         }
-        egress: <default("")> like IPacketDelayer {
+        egress: <default("PacketDelayer")> like IPacketDelayer {
             parameters:
                 @display("p=350,100");
         }
