@@ -23,6 +23,8 @@ simple PacketDelayer extends PacketProcessorBase like IPacketDelayer
         string clockModule = default(""); // relative path of a module that implements IClock; optional
         volatile double delay @unit(s); // specifies delay per packet
         volatile double bitrate @unit(bps) = default(inf bps); // determines additional delay per bit
+        int schedulingPriority = default(0);
+        bool scheduleZeroDelay = default(true);
         @class(PacketDelayer);
         @display("i=block/delay");
     gates:

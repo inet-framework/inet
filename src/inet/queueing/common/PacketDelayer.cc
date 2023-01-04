@@ -16,19 +16,33 @@ namespace queueing {
 
 Define_Module(PacketDelayer);
 
+void PacketDelayer::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL) {
+        schedulingPriority = par("schedulingPriority");
+        scheduleZeroDelay = par("scheduleZeroDelay");
+    }
+}
+
 void PacketDelayer::handleMessage(cMessage *message)
 {
     if (message->isSelfMessage()) {
-        auto packet = message->isPacket() ? check_and_cast<Packet *>(message) : static_cast<Packet *>(message->getContextPointer());
-        if (!message->isPacket())
+        bool isPacket = message->isPacket();
+        auto packet = isPacket ? check_and_cast<Packet *>(message) : static_cast<Packet *>(message->getContextPointer());
+        if (!isPacket)
             delete message;
-        simtime_t delay = simTime() - message->getSendingTime();
-        insertPacketEvent(this, packet, PEK_DELAYED, delay / packet->getBitLength());
-        increaseTimeTag<DelayingTimeTag>(packet, delay / packet->getBitLength(), delay);
-        pushOrSendPacket(packet, outputGate, consumer);
+        processPacket(packet, message->getSendingTime());
     }
     else
         PacketPusherBase::handleMessage(message);
+}
+
+void PacketDelayer::processPacket(Packet *packet, simtime_t sendingTime)
+{
+    simtime_t delay = simTime() - sendingTime;
+    insertPacketEvent(this, packet, PEK_DELAYED, delay / packet->getBitLength());
+    increaseTimeTag<DelayingTimeTag>(packet, delay / packet->getBitLength(), delay);
+    pushOrSendPacket(packet, outputGate, consumer);
 }
 
 cGate *PacketDelayer::getRegistrationForwardingGate(cGate *gate)
@@ -53,7 +67,11 @@ void PacketDelayer::pushPacket(Packet *packet, cGate *gate)
         EV_INFO << "Delaying packet" << EV_FIELD(delay) << EV_FIELD(packet) << EV_ENDL;
         auto clockEvent = new ClockEvent("DelayTimer");
         clockEvent->setContextPointer(packet);
-        scheduleClockEventAfter(delay, clockEvent);
+        clockEvent->setSchedulingPriority(schedulingPriority);
+        if (delay != 0 || scheduleZeroDelay)
+            scheduleClockEventAfter(delay, clockEvent);
+        else
+            processPacket(packet, simTime());
     }
     else {
 #else
@@ -63,7 +81,10 @@ void PacketDelayer::pushPacket(Packet *packet, cGate *gate)
         auto bitrate = bps(par("bitrate"));
         delay += s(packet->getDataLength() / bitrate).get();
         EV_INFO << "Delaying packet" << EV_FIELD(delay) << EV_FIELD(packet) << EV_ENDL;
-        scheduleAfter(delay, packet);
+        if (delay != 0 || scheduleZeroDelay)
+            scheduleAfter(delay, packet);
+        else
+            processPacket(packet, simTime());
     }
     handlePacketProcessed(packet);
     updateDisplayString();

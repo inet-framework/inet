@@ -21,7 +21,14 @@ namespace queueing {
 class INET_API PacketDelayer : public ClockUserModuleMixin<PacketPusherBase>, public TransparentProtocolRegistrationListener
 {
   protected:
+    int schedulingPriority = -1;
+    bool scheduleZeroDelay = false;
+
+  protected:
+    virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
+
+    virtual void processPacket(Packet *packet, simtime_t sendingTime);
 
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
