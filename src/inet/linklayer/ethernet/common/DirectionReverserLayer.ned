@@ -11,6 +11,7 @@ import inet.common.MessageDispatcher;
 import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IPacketDelayer;
+import inet.queueing.contract.IPacketFlow;
 
 //
 // This module provides a layer that combines the decision for local delivery
@@ -37,7 +38,7 @@ module DirectionReverserLayer like IProtocolLayer
         delayer: <default("")> like IPacketDelayer {
             @display("p=300,300");
         }
-        reverser: PacketDirectionReverser {
+        reverser: <default("PacketDirectionReverser")> like IPacketFlow {
             @display("p=500,300");
         }
         join: PacketMultiplexer {
