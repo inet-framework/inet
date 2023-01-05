@@ -403,7 +403,7 @@ class ThreadedTestResult(unittest.TestResult):
         ret.parent = self
         return ret
 
-    def stop():
+    def stop(self):
         super(ThreadedTestResult, self).stop()
         if self.parent:
             self.parent.stop()
