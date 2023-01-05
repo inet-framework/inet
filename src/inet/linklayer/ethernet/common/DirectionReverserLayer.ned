@@ -12,7 +12,6 @@ import inet.protocolelement.contract.IProtocolLayer;
 import inet.queueing.common.PacketMultiplexer;
 import inet.queueing.contract.IPacketDelayer;
 
-
 //
 // This module provides a layer that combines the decision for local delivery
 // with the service of reversing the direction of an incoming packet to outgoing
@@ -28,26 +27,30 @@ module DirectionReverserLayer like IProtocolLayer
         input lowerLayerIn;
         output lowerLayerOut;
     submodules:
+        cutthroughBarrier: <default("")> like IPacketDelayer {
+            @display("p=100,150");
+        }
         fork: MessageDispatcher {
             forwardServiceRegistration = false;
-            @display("p=100,100;i=-;b=10,10,oval,grey,,1");
+            @display("p=100,300;i=-;b=10,10,oval,grey,,1");
         }
         delayer: <default("")> like IPacketDelayer {
-            @display("p=300,100");
+            @display("p=300,300");
         }
         reverser: PacketDirectionReverser {
-            @display("p=500,100");
+            @display("p=500,300");
         }
         join: PacketMultiplexer {
             forwardProtocolRegistration = false;
-            @display("p=700,100");
+            @display("p=700,300");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> join.in++;
         join.out --> { @display("m=s"); } --> lowerLayerOut;
 
         lowerLayerIn --> { @display("m=s"); } --> fork.in++;
-        fork.out++ --> { @display("m=n"); } --> upperLayerOut;
+        fork.out++ --> cutthroughBarrier.in;
+        cutthroughBarrier.out --> { @display("m=n"); } --> upperLayerOut;
 
         fork.out++ --> delayer.in;
         delayer.out --> reverser.in;
