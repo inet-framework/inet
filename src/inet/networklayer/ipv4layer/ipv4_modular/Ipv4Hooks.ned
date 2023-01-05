@@ -7,7 +7,8 @@
 package inet.networklayer.ipv4layer.ipv4_modular;
 
 //
-// TODO documentation
+// Interface for modules representing netfilter hooks, used e.g. in
+// the modular IPv4 implementation ~Ipv4Modular.
 //
 moduleinterface INetfilterHook
 {
@@ -19,6 +20,12 @@ moduleinterface INetfilterHook
         output out;
 }
 
+//
+// This module is a placeholder that does not perform any function and is removed
+// from the module hierarchy (i.e. replaced by a connection) during initialization.
+// It can be used instead of making a submodule of the given module interface type
+// conditional.
+//
 module OmittedNetfilterHook like INetfilterHook
 {
     parameters:
