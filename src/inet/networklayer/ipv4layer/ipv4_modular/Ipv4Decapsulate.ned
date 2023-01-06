@@ -8,7 +8,10 @@ package inet.networklayer.ipv4layer.ipv4_modular;
 
 import inet.queueing.base.PacketPusherBase;
 
-
+//
+// Removes the IPv4 header from the packet, and converts the header's
+// content into various indication tags attached to the packet.
+//
 simple Ipv4Decapsulate extends PacketPusherBase
 {
     parameters:

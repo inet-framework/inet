@@ -37,8 +37,6 @@ void Ipv4Decapsulate::decapsulate(Packet *packet)
     packet->addTagIfAbsent<EcnInd>()->setExplicitCongestionNotification(ipv4Header->getEcn());
     packet->addTagIfAbsent<TosInd>()->setTos(ipv4Header->getTypeOfService());
 
-    // original Ipv4 datagram might be needed in upper layers to send back ICMP error message
-
     auto transportProtocol = ProtocolGroup::ipprotocol.getProtocol(ipv4Header->getProtocolId());
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(transportProtocol);
     packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(transportProtocol);

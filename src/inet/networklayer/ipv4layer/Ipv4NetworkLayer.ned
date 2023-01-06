@@ -21,7 +21,6 @@ import inet.networklayer.ipv4layer.routingtable.Ipv4RoutingTable;
 //
 // Network layer of an IPv4 node.
 //
-//
 module Ipv4NetworkLayer like INetworkLayer
 {
     parameters:

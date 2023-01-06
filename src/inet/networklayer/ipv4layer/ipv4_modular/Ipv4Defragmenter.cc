@@ -50,7 +50,7 @@ Packet *Ipv4Defragmenter::reassembleAndDeliver(Packet *packet)
         EV_DETAIL << "Datagram fragment: offset=" << ipv4Header->getFragmentOffset()
                   << ", MORE=" << (ipv4Header->getMoreFragments() ? "true" : "false") << ".\n";
 
-        // erase timed out fragments in fragmentation buffer; check every 10 seconds max
+        // erase timed out fragments from fragmentation buffer; check every 10 seconds max
         if (simTime() >= lastCheckTime + 10) {
             lastCheckTime = simTime();
             fragbuf.purgeStaleFragments(icmp, simTime() - fragmentTimeoutTime);
