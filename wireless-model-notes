@@ -1,0 +1,213 @@
+
+
+technology-dependent MAC
+
+valami1 - technology-dependent but medium-indepentent
+ ? ^v ?
+valami2 - technology-independent but medium-depentent
+
+technology-independent medium
+
+
+---
+# unitdisk
+
+**.radio.transmitter.technology.channel = 7 # technology-dependent
+**.radio.transmitter.analogdomain.range = 300m # analog domain (medium)-dependent
+**.radio.receiver.technology.channel = 7 # technology-dependent
+**.radio.antenna.gain = -3dB # whatever
+
+
+
+**.radio.transmitter.technology.channel = 7 # technology-dependent
+**.radio.transmitter.analogdomain.power = 80mW # analog domain (medium)-dependent
+**.radio.receiver.technology.channel = 7 # technology-dependent
+**.radio.receiver.analogdomain.sensitivity = -40dBmw
+**.radio.antenna.gain = -3dB # whatever
+
+
+-------
+# scalar
+
+
+**.radio.analogdomain.range = 300m # analog domain (medium)-dependent
+**.radio.transmitter.channel = 7 # technology-dependent
+**.radio.receiver.channel = 7 # technology-dependent
+**.radio.antenna.gain = -3dB # whatever
+
+
+
+**.radio.analogdomain.power = 80mW # analog domain (medium)-dependent
+**.radio.analogdomain.sensitivity = -40dBmw
+**.radio.transmitter.channel = 7 # technology-dependent
+**.radio.receiver.channel = 7 # technology-dependent
+**.radio.antenna.gain = -3dB # whatever
+
+
+-------
+# dimensional
+
+
+**.radio.analogdomain.range = 300m # analog domain (medium)-dependent
+**.radio.transmitter.channel = 7 # technology-dependent
+**.radio.receiver.channel = 7 # technology-dependent
+**.radio.antenna.gain = -3dB # whatever
+
+
+
+**.radio.analogdomain.power = 80mW # analog domain (medium)-dependent
+**.radio.analogdomain.sensitivity = -40dBmw
+**.radio.transmitter.channel = 7 # technology-dependent
+**.radio.receiver.channel = 7 # technology-dependent
+**.radio.antenna.gain = -3dB # whatever
+
+=======
+
+XXX transmitter.technology
+XXX transmitter.analogdomain
+XXX transmission.technology
+XXX transmission.analogdomain
+XXX receiver.technology
+XXX receiver.analogdomain
+XXX reception.technology
+XXX reception.analogdomain
+
+
+
+
+
+
+
+
+
+
+
+
+combinations (concept):
+[EgyikIeee80211, MasikIeee80211, Ieee802154, Apsk] x [UnitDisk, Scalar, Dimensional]
+
+
+Transmitter module -> transmission, Receiver module <- reception
+
+classes (plan):
+[EgyikIeee80211, MasikIeee80211, Ieee802154, Apsk] x [Transmitter, Transmission, Radio, Reception, Receiver]
++
+[UnitDisk, Scalar, Dimensional] x [TransmitterAnalogModel, TransmissionAnalogModel, ReceptionAnalogModel, ReceiverAnalogModel]
+
+classes (current):
+[EgyikIeee80211, MasikIeee80211, Ieee802154, Apsk] x [UnitDisk, Scalar, Dimensional] x [Transmitter, Transmission, Radio, Reception, Receiver]
+
+(((
+error models
+  - depends on snir model?!?! - which may or may not be technology and/or analog model specific
+  - part of all receivers
+    - even if a trivial one, like "always successful"
+    - each can choose which reception analog models they support (single, some, all, etc...)
+)))
+
+
+transmission
+transmission.analogmodel
+reception
+reception.analogmodel
+transmitter
+transmitter.analogmodel
+receiver
+receiver.analogmodel
+
+
+
+NED: (Ieee80211Radio)radio.(Ieee80211Transmitter)transmitter.(DimensionalTransmitterAnalogModel)analogmodel
+
+C++: (Ieee80211Transmission)transmission->(DimensionalTransmissionAnalogModel)analogmodel
+
+
+
+
+
+
+
+
+
+
+
+XXX transmitter
+XXX transmitter.technology
+XXX receiver
+XXX receiver.technology
+
+
+XXX transmitter
+XXX receiver
+XXX analogdomain
+
+
+
+class ITransmitter {
+  ITransmission createTransmission(Packet *)
+};
+class ITransmitterAnalogModel {
+
+};
+
+class ScalarTransmitterAnalogModel : ITransmitterAnalogModel;
+class DimensionalTransmitterAnalogModel : ITransmitterAnalogModel;
+
+class TransmitterBase : ITransmitter {
+  ITransmitterAnalogModel *analogModel;
+};
+
+class Ieee80211Transmitter : TransmitterBase {
+  ITransmission *createTransmission(Packet *packet) {
+    Ieee80211Transmission *transmission = new Ieee80211Transmission();
+    // convert packet req tags to transmission metadata
+    ITransmitterAnalogModel *analogModelModule = getSubmodule("analogModel");
+    // convert channel req tag to centerfreq/bandwidth/power
+    ITransmissionAnalogModel *analogModel = analogModelModule->createAnalogModel(packet);
+    return transmission;
+  }
+};
+
+class Ieee802154Transmitter : TransmitterBase {
+
+};
+
+
+
+
+
+class ITransmission {
+};
+class ITransmissionAnalogModel {
+
+};
+
+class UnitDiskTransmissionAnalogModel : ITransmissionAnalogModel {
+  m communicationRange;
+  m interferenceRange;
+  m detectionRange;
+};
+
+class ScalarTransmissionAnalogModel : ITransmissionAnalogModel {
+  Hz centerFrequency;
+  Hz bandwidth;
+  W power;
+};
+class DimensionalTransmissionAnalogModel : ITransmissionAnalogModel {
+  Ptr<Function<WpHz, Hz, simsec>> powerDensity;
+};
+
+class TransmissionBase : ITransmission {
+  ITransmissionAnalogModel *analogModel;
+};
+
+class Ieee80211Transmission : TransmissionBase {
+  Ieee80211Mode *mode;
+  Ieee80211Channel *channel;
+};
+
+class Ieee802154Transmission : TransmissionBase {
+
+};
+
+
