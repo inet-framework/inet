@@ -59,6 +59,8 @@ const ITransmission *UnitDiskTransmitter::createTransmission(const IRadio *trans
     auto dataLength = packet->getTotalLength() - phyHeader->getChunkLength();
     const auto& signalBitrateReq = const_cast<Packet *>(packet)->findTag<SignalBitrateReq>();
     auto transmissionBitrate = signalBitrateReq != nullptr ? signalBitrateReq->getDataBitrate() : bitrate;
+    if (!(transmissionBitrate > bps(0)))
+        throw cRuntimeError("Missing transmission bitrate (got %g): No bitrate request on packet, and bitrate parameter not set", transmissionBitrate.get());
     auto headerDuration = b(headerLength).get() / bps(transmissionBitrate).get();
     auto dataDuration = b(dataLength).get() / bps(transmissionBitrate).get();
     auto duration = preambleDuration + headerDuration + dataDuration;
