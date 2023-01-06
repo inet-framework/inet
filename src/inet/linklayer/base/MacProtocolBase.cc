@@ -165,7 +165,7 @@ queueing::IPacketQueue *MacProtocolBase::getQueue(cGate *gate) const
                 return m;
         }
     }
-    throw cRuntimeError("Gate %s is not connected to a module of type queueing::IPacketQueue", gate->getFullPath().c_str());
+    throw cRuntimeError("Gate %s is not connected to a module of type queueing::IPacketQueue (did you use OmittedPacketQueue as queue type?)", gate->getFullPath().c_str());
 }
 
 bool MacProtocolBase::canDequeuePacket() const
