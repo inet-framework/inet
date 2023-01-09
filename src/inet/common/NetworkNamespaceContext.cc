@@ -22,9 +22,9 @@ NetworkNamespaceContext::NetworkNamespaceContext(const char *networkNamespace)
         namespaceAsString += networkNamespace;
         newNs = open(namespaceAsString.c_str(), O_RDONLY);
         if (newNs == -1)
-            throw cRuntimeError("Cannot open network namespace");
+            throw cRuntimeError("Cannot open network namespace: errno=%d (%s)", errno, strerror(errno));
         if (setns(newNs, 0) == -1)
-            throw cRuntimeError("Cannot change network namespace");
+            throw cRuntimeError("Cannot change network namespace: errno=%d (%s)", errno, strerror(errno));
 #else
         throw cRuntimeError("Network namespaces are only supported on Linux");
 #endif
