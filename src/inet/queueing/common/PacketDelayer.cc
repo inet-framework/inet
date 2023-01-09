@@ -18,6 +18,7 @@ Define_Module(PacketDelayer);
 
 void PacketDelayer::initialize(int stage)
 {
+    ClockUserModuleMixin::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         schedulingPriority = par("schedulingPriority");
         scheduleZeroDelay = par("scheduleZeroDelay");
