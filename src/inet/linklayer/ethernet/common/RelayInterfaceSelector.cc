@@ -119,7 +119,7 @@ void RelayInterfaceSelector::sendPacket(Packet *packet, const MacAddress& destin
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
     auto protocol = outgoingInterface->getProtocol();
     if (protocol != nullptr)
-        pushEncapsulationProtocolReq(packet, protocol);
+        appendEncapsulationProtocolReq(packet, protocol);
     if (!packet->findTag<DispatchProtocolReq>())
         packet->addTag<DispatchProtocolReq>()->setProtocol(popEncapsulationProtocolReq(packet));
     pushOrSendPacket(packet, outputGate, consumer);

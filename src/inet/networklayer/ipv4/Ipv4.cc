@@ -1074,7 +1074,7 @@ void Ipv4::sendPacketToNIC(Packet *packet)
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     packet->addTagIfAbsent<DispatchProtocolInd>()->setProtocol(&Protocol::ipv4);
     auto networkInterfaceProtocol = networkInterface->getProtocol();
-    pushEncapsulationProtocolReq(packet, networkInterfaceProtocol);
+    appendEncapsulationProtocolReq(packet, networkInterfaceProtocol);
     auto dispatchProtocol = popEncapsulationProtocolReq(packet);
     if (dispatchProtocol == nullptr)
         packet->removeTagIfPresent<DispatchProtocolReq>();

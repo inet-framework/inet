@@ -36,7 +36,7 @@ void EthernetMacHeaderChecker::initialize(int stage)
 void EthernetMacHeaderChecker::processPacket(Packet *packet)
 {
     const auto& header = packet->popAtFront<EthernetMacHeader>();
-    pushEncapsulationProtocolInd(packet, &Protocol::ethernetMac);
+    appendEncapsulationProtocolInd(packet, &Protocol::ethernetMac);
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     macAddressInd->setSrcAddress(header->getSrc());
     macAddressInd->setDestAddress(header->getDest());
