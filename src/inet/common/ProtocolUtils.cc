@@ -21,6 +21,14 @@ void appendEncapsulationProtocolReq(Packet *packet, const Protocol *protocol)
     encapsulationProtocolReq->appendProtocol(protocol);
 }
 
+const Protocol *peekEncapsulationProtocolReq(Packet *packet)
+{
+    if (auto encapsulationProtocolReq = packet->findTagForUpdate<EncapsulationProtocolReq>())
+        return encapsulationProtocolReq->getProtocol(0);
+    else
+        return nullptr;
+}
+
 const Protocol *popEncapsulationProtocolReq(Packet *packet)
 {
     if (auto encapsulationProtocolReq = packet->findTagForUpdate<EncapsulationProtocolReq>()) {
@@ -44,12 +52,6 @@ INET_API bool hasEncapsulationProtocolReq(Packet *packet, const Protocol *protoc
     return false;
 }
 
-void ensureEncapsulationProtocolReq(Packet *packet, const Protocol *protocol)
-{
-    if (!hasEncapsulationProtocolReq(packet, protocol))
-        appendEncapsulationProtocolReq(packet, protocol);
-}
-
 void removeEncapsulationProtocolReq(Packet *packet, const Protocol *protocol)
 {
     if (auto encapsulationProtocolReq = packet->addTagIfAbsent<EncapsulationProtocolReq>()) {
@@ -59,6 +61,22 @@ void removeEncapsulationProtocolReq(Packet *packet, const Protocol *protocol)
                 break;
             }
         }
+    }
+}
+
+void ensureEncapsulationProtocolReq(Packet *packet, const Protocol *protocol, bool present, bool prepend)
+{
+    if (present) {
+        if (!hasEncapsulationProtocolReq(packet, protocol)) {
+            if (prepend)
+                prependEncapsulationProtocolReq(packet, protocol);
+            else
+                appendEncapsulationProtocolReq(packet, protocol);
+        }
+    }
+    else {
+        if (hasEncapsulationProtocolReq(packet, protocol))
+            removeEncapsulationProtocolReq(packet, protocol);
     }
 }
 
@@ -85,6 +103,28 @@ const Protocol *popEncapsulationProtocolInd(Packet *packet)
     }
     else
         return nullptr;
+}
+
+void setDispatchProtocol(Packet *packet, const Protocol *defaultProtocol)
+{
+    if (auto protocol = peekEncapsulationProtocolReq(packet))
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
+    else if (defaultProtocol != nullptr)
+        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(defaultProtocol);
+    else
+        packet->removeTagIfPresent<DispatchProtocolReq>();
+}
+
+void removeDispatchProtocol(Packet *packet, const Protocol *expectedProtocol)
+{
+    if (auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>()) {
+        ASSERT(dispatchProtocolReq->getProtocol() == expectedProtocol);
+        packet->removeTag<DispatchProtocolReq>();
+    }
+    if (auto encapsulationProtocolReq = packet->findTag<EncapsulationProtocolReq>()) {
+        ASSERT(encapsulationProtocolReq->getProtocolArraySize() > 0 && encapsulationProtocolReq->getProtocol(0) == expectedProtocol);
+        popEncapsulationProtocolReq(packet);
+    }
 }
 
 } // namespace inet
