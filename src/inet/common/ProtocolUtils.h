@@ -13,13 +13,13 @@
 
 namespace inet {
 
-INET_API void pushEncapsulationProtocolReq(Packet *packet, const Protocol *protocol);
+INET_API void appendEncapsulationProtocolReq(Packet *packet, const Protocol *protocol);
 INET_API const Protocol *popEncapsulationProtocolReq(Packet *packet);
 
 INET_API bool hasEncapsulationProtocolReq(Packet *packet, const Protocol *protocol);
 INET_API void ensureEncapsulationProtocolReq(Packet *packet, const Protocol *protocol);
 
-INET_API void pushEncapsulationProtocolInd(Packet *packet, const Protocol *protocol);
+INET_API void appendEncapsulationProtocolInd(Packet *packet, const Protocol *protocol);
 
 } // namespace inet
 

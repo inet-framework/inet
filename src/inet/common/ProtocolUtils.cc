@@ -9,7 +9,7 @@
 
 namespace inet {
 
-void pushEncapsulationProtocolReq(Packet *packet, const Protocol *protocol)
+void appendEncapsulationProtocolReq(Packet *packet, const Protocol *protocol)
 {
     auto encapsulationProtocolReq = packet->addTagIfAbsent<EncapsulationProtocolReq>();
     encapsulationProtocolReq->appendProtocol(protocol);
@@ -41,10 +41,10 @@ INET_API bool hasEncapsulationProtocolReq(Packet *packet, const Protocol *protoc
 void ensureEncapsulationProtocolReq(Packet *packet, const Protocol *protocol)
 {
     if (!hasEncapsulationProtocolReq(packet, protocol))
-        pushEncapsulationProtocolReq(packet, protocol);
+        appendEncapsulationProtocolReq(packet, protocol);
 }
 
-void pushEncapsulationProtocolInd(Packet *packet, const Protocol *protocol)
+void appendEncapsulationProtocolInd(Packet *packet, const Protocol *protocol)
 {
     auto encapsulationProtocolInd = packet->addTagIfAbsent<EncapsulationProtocolInd>();
     encapsulationProtocolInd->appendProtocol(protocol);
