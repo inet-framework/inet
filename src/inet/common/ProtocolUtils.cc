@@ -50,6 +50,18 @@ void ensureEncapsulationProtocolReq(Packet *packet, const Protocol *protocol)
         appendEncapsulationProtocolReq(packet, protocol);
 }
 
+void removeEncapsulationProtocolReq(Packet *packet, const Protocol *protocol)
+{
+    if (auto encapsulationProtocolReq = packet->addTagIfAbsent<EncapsulationProtocolReq>()) {
+        for (int i = 0; i < encapsulationProtocolReq->getProtocolArraySize(); i++) {
+            if (encapsulationProtocolReq->getProtocol(i) == protocol) {
+                encapsulationProtocolReq->eraseProtocol(i);
+                break;
+            }
+        }
+    }
+}
+
 void prependEncapsulationProtocolInd(Packet *packet, const Protocol *protocol)
 {
     auto encapsulationProtocolInd = packet->addTagIfAbsent<EncapsulationProtocolInd>();
