@@ -12,6 +12,6 @@ import inet.protocolelement.checksum.base.CrcInserterBase;
 simple CrcHeaderInserter extends CrcInserterBase
 {
     parameters:
-        string headerPosition @unit("front","back") = default("front");
+        string headerPosition @enum("front","back") = default("front");
         @class(CrcHeaderInserter);
 }

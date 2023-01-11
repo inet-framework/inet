@@ -15,7 +15,7 @@ simple PaddingInserter extends PacketFlowBase like IPacketFlow
     parameters:
         int minLength @unit(b);
         int roundingLength @unit(b) = default(1B);
-        string insertionPosition @unit("front","back") = default("back");
+        string insertionPosition @enum("front","back") = default("back");
         @class(PaddingInserter);
         @display("i=block/inserter");
 }

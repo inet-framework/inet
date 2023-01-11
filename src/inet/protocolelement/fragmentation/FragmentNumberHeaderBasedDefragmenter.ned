@@ -13,6 +13,6 @@ import inet.protocolelement.fragmentation.contract.IPacketDefragmenter;
 simple FragmentNumberHeaderBasedDefragmenter extends DefragmenterBase like IPacketDefragmenter
 {
     parameters:
-        string headerPosition @unit("front","back") = default("front");
+        string headerPosition @enum("front","back") = default("front");
         @class(FragmentNumberHeaderBasedDefragmenter);
 }

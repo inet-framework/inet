@@ -12,6 +12,6 @@ import inet.protocolelement.checksum.base.FcsCheckerBase;
 simple FcsHeaderChecker extends FcsCheckerBase
 {
     parameters:
-        string headerPosition @unit("front","back") = default("back");
+        string headerPosition @enum("front","back") = default("back");
         @class(FcsHeaderChecker);
 }

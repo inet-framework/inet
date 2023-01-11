@@ -13,6 +13,6 @@ import inet.protocolelement.fragmentation.contract.IPacketFragmenter;
 module FragmentNumberHeaderBasedFragmenter extends FragmenterBase like IPacketFragmenter
 {
     parameters:
-        string headerPosition @unit("front","back") = default("front");
+        string headerPosition @enum("front","back") = default("front");
         @class(FragmentNumberHeaderBasedFragmenter);
 }

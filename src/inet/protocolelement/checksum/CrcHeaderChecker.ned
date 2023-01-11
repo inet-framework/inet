@@ -12,6 +12,6 @@ import inet.protocolelement.checksum.base.CrcCheckerBase;
 simple CrcHeaderChecker extends CrcCheckerBase
 {
     parameters:
-        string headerPosition @unit("front","back") = default("front");
+        string headerPosition @enum("front","back") = default("front");
         @class(CrcHeaderChecker);
 }

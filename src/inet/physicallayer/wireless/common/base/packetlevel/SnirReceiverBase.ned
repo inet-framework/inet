@@ -16,7 +16,7 @@ module SnirReceiverBase like IReceiver
 {
     parameters:
         double snirThreshold @unit(dB);    // reception is not successful if the SNIR is below this threshold (unsuccessful reception)
-        string snirThresholdMode @unit("min","mean") = default("min");
+        string snirThresholdMode @enum("min","mean") = default("min");
         @display("i=block/wrx");
 }
 

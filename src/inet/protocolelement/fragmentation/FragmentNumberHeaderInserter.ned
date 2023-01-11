@@ -12,7 +12,7 @@ import inet.queueing.base.PacketFlowBase;
 simple FragmentNumberHeaderInserter extends PacketFlowBase
 {
     parameters:
-        string headerPosition @unit("front","back") = default("front");
+        string headerPosition @enum("front","back") = default("front");
         @class(FragmentNumberHeaderInserter);
         @display("i=block/inserter");
 }

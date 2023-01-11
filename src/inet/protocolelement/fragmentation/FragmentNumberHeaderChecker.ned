@@ -12,7 +12,7 @@ import inet.queueing.base.PacketFilterBase;
 simple FragmentNumberHeaderChecker extends PacketFilterBase
 {
     parameters:
-        string headerPosition @unit("front","back") = default("front");
+        string headerPosition @enum("front","back") = default("front");
         @class(FragmentNumberHeaderChecker);
         @display("i=block/checker");
 }
