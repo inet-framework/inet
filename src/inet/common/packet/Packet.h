@@ -1277,6 +1277,13 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
     }
 
     /**
+     * Returns true if the packet tag for the provided type is found.
+     */
+    template<typename T> bool hasTag() const {
+        return tags.findTag<T>() != nullptr;
+    }
+
+    /**
      * Returns the packet tag for the provided type or returns nullptr if no such packet tag is found.
      */
     template<typename T> const Ptr<const T> findTag() const {
