@@ -128,6 +128,11 @@ class INET_API MacForwardingTableConfigurator : public NetworkConfiguratorBase, 
         return nullptr;
     }
 
+  public:
+    virtual ~MacForwardingTableConfigurator();
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+
     static int countParalellLinks(const Interface *interface) {
         int count = 0;
         auto node = interface->node;
@@ -136,11 +141,6 @@ class INET_API MacForwardingTableConfigurator : public NetworkConfiguratorBase, 
                 count++;
         return count;
     }
-
-  public:
-    virtual ~MacForwardingTableConfigurator();
-
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
 
 } // namespace inet
