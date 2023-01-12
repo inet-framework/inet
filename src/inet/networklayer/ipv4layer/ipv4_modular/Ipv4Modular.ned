@@ -11,10 +11,20 @@ import inet.networklayer.contract.netfilter.INetfilterHookManager;
 import inet.queueing.common.PacketMultiplexer;
 
 
+//TODO:
+//
+//  Ipv4SocketCommandProcessor -> Ipv4SocketIn
+//  Ipv4SocketPacketProcessor -> Ipv4SocketOut
+//  Ipv4RoutingDecision -> 
+//
+//  ipv4SocketTable (submodule) -> socketTable
+//  hook icon -> block/process_s
+//  
+
 module Ipv4Modular like IIpv4
 {
     parameters:
-        string interfaceTableModule;   // The path to the InterfaceTable module
+        string interfaceTableModule;
         string routingTableModule;
         string arpModule;
         string icmpModule;
@@ -57,14 +67,12 @@ module Ipv4Modular like IIpv4
         fragmentation: Ipv4Fragmenter {
             @display("p=250,700");
         }
-
         routingDecision: Ipv4RoutingDecision {
             @display("p=550,500");
         }
         forwardHook: <default("OmittedNetfilterHook")> like INetfilterHook {
             @display("p=400,500");
         }
-
         headerChecker: Ipv4HeaderChecker {
             @display("p=700,700");
         }

@@ -15,6 +15,13 @@
 
 namespace inet {
 
+
+// decrements TTL
+// send ICMP if unroutable
+// TODO does a ton of other stuff
+//
+//
+
 class INET_API Ipv4RoutingDecision : public queueing::PacketPusherBase
 {
   protected:
