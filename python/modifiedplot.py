@@ -74,7 +74,7 @@ def plot_vectors(df, props, legend_func=utils.make_legend_label):
         style = utils._make_line_args(props, t, df)
 #        if t.propertyname != '':
 #            style[t.propertyname] = t.propertyvalue
-        if 'additional_style' in df.columns:
+        if 'additional_style' in df.columns and t.additional_style != None:
             style_dict = eval(t.additional_style)
             # print("style_dict:", style_dict)
             for i in style_dict.items():
@@ -116,7 +116,7 @@ def plot_vectors_separate(df, props, legend_func=utils.make_legend_label, debug=
     ax = None
     for i, t in enumerate(df.itertuples(index=False)):
         style = utils._make_line_args(props, t, df)
-        if 'additional_style' in df.columns:
+        if 'additional_style' in df.columns and t.additional_style != None:
             style_dict = eval(t.additional_style)
             for j in style_dict.items():
                 style[j[0]] = j[1]
@@ -206,7 +206,7 @@ def plot_vectors_separate_grouped(df_list, props, legend_func=utils.make_legend_
             
         for t in df.itertuples(index=False):
             style = utils._make_line_args(props, t, df)
-            if 'additional_style' in df.columns:
+            if 'additional_style' in df.columns and t.additional_style != None:
                 style_dict = eval(t.additional_style)
                 for i in style_dict.items():
                     style[i[0]] = i[1]
