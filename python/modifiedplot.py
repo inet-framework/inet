@@ -350,6 +350,7 @@ def add_to_dataframe(df, style_tuple_list=None, default_dict=None, order={}, deb
 
 def create_multidimensional_legend(style_tuple_list, labels = [], handles = [], debug=False):
     """
+    DEPRECATED
     Can create multi-dimensional legend, where one aspect of a line (e.g. color) represents a dimension, another aspect (e.g. linestyle of solid, dashed or dotted) represents another dimension,
     as opposed to the default behavior, in which lines in the legend represent the lines on the chart directly. **TODO** not sure this explanation is needed
     
@@ -377,6 +378,7 @@ def create_multidimensional_legend(style_tuple_list, labels = [], handles = [], 
 
 def quick_reorder_legend(handles, labels, order, **kwargs):
     """
+    DEPRECATED
     Quickly reorder the legend. Order: list of integers with the new order, e.g. [2, 0, 1].
     Reorders the legend in-place (so it's not needed to call plt.legend() with the returned handles and labels).
     Also, add any parameters for plt.legend() as kwargs.
@@ -387,7 +389,42 @@ def quick_reorder_legend(handles, labels, order, **kwargs):
     plt.legend([handles[i] for i in order], [labels[i] for i in order], **kwargs)
     return handles, labels
 
+def create_custom_legend(style_tuple_list, order = [], labels = [], handles = [], inplace=True, debug=False, **kwargs):
+    """
+    Can create multi-dimensional legend, where one aspect of a line (e.g. color) represents a dimension, another aspect (e.g. linestyle of solid, dashed or dotted) represents another dimension,
+    as opposed to the default behavior, in which lines in the legend represent the lines on the chart directly. **TODO** not sure this explanation is needed
+    
+    If existing legend handles and labels are supplied arguments, the new legend entries are appended.
+    
+    style_tuple_list: [('legend label 1', {dict contaning the style arguments for the legend}), ('legend label 2, {...}), ...]
+    
+    for example:
+    style_tuple_list = [('Label1', {'color': 'orange', 'linestyle': '--', 'markersize': 3}),
+                        ('Label2', {'color': 'red', 'markersize': 3})]
+                        
+    Reorder the legend by specifying 'order'. Order: list of integers with the new order, e.g. [2, 0, 1].
+    Also, add any parameters for plt.legend() as kwargs.
+                        
+    By default, does everything in-place (so it's not needed to call plt.legend() with the returned handles and labels).
+    Returns legend handles and labels that can be supplied to plt.legend()
+    """
 
+    if debug: print("style_tuple_list", style_tuple_list)
+    for i in style_tuple_list:
+        if debug: print("i", i)
+        labels.append(i[0])
+        if debug: print("i[1]", i[1])
+        handles.append(Line2D([0], [0], **i[1]))
+    if debug:
+        print("labels", labels)
+        print("handles", handles)
+        
+    if order == []:
+        legendsize = len(handles)
+        order = [*range(0, legendsize)]
+    if inplace:
+        plt.legend([handles[i] for i in order], [labels[i] for i in order], **kwargs)
+    return handles, labels
             
 def annotate_barchart(ax, offset=0, color='white', size=12, zorder=10, prefix='', postfix='', accuracy=2, outliers=None, result_type='float', debug=False):
     """
