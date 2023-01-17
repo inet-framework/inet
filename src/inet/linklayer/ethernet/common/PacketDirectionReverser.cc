@@ -28,7 +28,16 @@ Define_Module(PacketDirectionReverser);
 void PacketDirectionReverser::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
-    if (stage == INITSTAGE_QUEUEING)
+    if (stage == INITSTAGE_LOCAL) {
+        forwardVlan = par("forwardVlan");
+        forwardPcp = par("forwardPcp");
+        auto excludeEncapsulationProtocolsAsArray = check_and_cast<cValueArray *>(par("excludeEncapsulationProtocols").objectValue());
+        for (int i = 0; i < excludeEncapsulationProtocolsAsArray->size(); i++) {
+            auto protocol = Protocol::getProtocol(excludeEncapsulationProtocolsAsArray->get(i).stringValue());
+            excludeEncapsulationProtocols.push_back(protocol);
+        }
+    }
+    else if (stage == INITSTAGE_QUEUEING)
         registerAnyProtocol(outputGate, inputGate);
 }
 
@@ -38,7 +47,6 @@ void PacketDirectionReverser::processPacket(Packet *packet)
     auto directionTag = packet->findTag<DirectionTag>();
     auto cutthroughTag = packet->findTag<CutthroughTag>();
     auto eligibilityTimeTag = packet->findTag<EligibilityTimeTag>();
-    auto encapsulationProtocolInd = packet->findTag<EncapsulationProtocolInd>();
     auto macAddressInd = packet->findTag<MacAddressInd>();
     auto dropEligibleInd = packet->findTag<DropEligibleInd>();
     auto vlanInd = packet->findTag<VlanInd>();
@@ -47,6 +55,7 @@ void PacketDirectionReverser::processPacket(Packet *packet)
     auto streamInd = packet->findTag<StreamInd>();
     auto sequenceNumberInd = packet->findTag<SequenceNumberInd>();
     auto interfaceInd = packet->findTag<InterfaceInd>();
+    auto encapsulationProtocolInd = packet->findTag<EncapsulationProtocolInd>();
     packet->trim();
     packet->clearTags();
     if (packetProtocolTag != nullptr)
@@ -61,13 +70,6 @@ void PacketDirectionReverser::processPacket(Packet *packet)
     }
     if (eligibilityTimeTag != nullptr)
         packet->addTag<EligibilityTimeTag>()->setEligibilityTime(eligibilityTimeTag->getEligibilityTime());
-    if (encapsulationProtocolInd != nullptr) {
-        int n = encapsulationProtocolInd->getProtocolArraySize();
-        auto encapsulationProtocolReq = packet->addTag<EncapsulationProtocolReq>();
-        encapsulationProtocolReq->setProtocolArraySize(n);
-        for (int i = 0; i < n; i++)
-            encapsulationProtocolReq->setProtocol(n - i - 1, encapsulationProtocolInd->getProtocol(i));
-    }
     if (interfaceInd != nullptr)
         packet->addTag<InterfaceInd>()->setInterfaceId(interfaceInd->getInterfaceId());
     if (macAddressInd != nullptr) {
@@ -77,9 +79,9 @@ void PacketDirectionReverser::processPacket(Packet *packet)
     }
     if (dropEligibleInd != nullptr)
         packet->addTag<DropEligibleReq>()->setDropEligible(dropEligibleInd->getDropEligible());
-    if (vlanInd != nullptr)
+    if (vlanInd != nullptr && forwardVlan)
         packet->addTag<VlanReq>()->setVlanId(vlanInd->getVlanId());
-    if (pcpInd != nullptr)
+    if (pcpInd != nullptr && forwardPcp)
         packet->addTag<PcpReq>()->setPcp(pcpInd->getPcp());
     if (userPriorityInd != nullptr)
         packet->addTag<UserPriorityReq>()->setUserPriority(userPriorityInd->getUserPriority());
@@ -87,6 +89,20 @@ void PacketDirectionReverser::processPacket(Packet *packet)
         packet->addTag<StreamReq>()->setStreamName(streamInd->getStreamName());
     if (sequenceNumberInd != nullptr)
         packet->addTag<SequenceNumberReq>()->setSequenceNumber(sequenceNumberInd->getSequenceNumber());
+    if (encapsulationProtocolInd != nullptr) {
+        int n = encapsulationProtocolInd->getProtocolArraySize();
+        // PROTOCOLUTILS
+        auto encapsulationProtocolReq = packet->addTag<EncapsulationProtocolReq>();
+        std::vector<const Protocol *> protocols;
+        for (int i = 0; i < n; i++) {
+            auto protocol = encapsulationProtocolInd->getProtocol(i);
+            if (std::find(excludeEncapsulationProtocols.begin(), excludeEncapsulationProtocols.end(), protocol) == excludeEncapsulationProtocols.end())
+                protocols.push_back(protocol);
+        }
+        encapsulationProtocolReq->setProtocolArraySize(protocols.size());
+        for (int i = 0; i < protocols.size(); i++)
+            encapsulationProtocolReq->setProtocol(protocols.size() - i - 1, protocols[i]);
+    }
 }
 
 } // namespace inet

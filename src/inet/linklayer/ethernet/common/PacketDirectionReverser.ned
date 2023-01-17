@@ -18,6 +18,9 @@ import inet.queueing.contract.IPacketFlow;
 simple PacketDirectionReverser extends PacketFlowBase like IPacketFlow
 {
     parameters:
+        bool forwardVlan = default(true);
+        bool forwardPcp = default(true);
+        object excludeEncapsulationProtocols = default([]);
         @class(PacketDirectionReverser);
 }
 
