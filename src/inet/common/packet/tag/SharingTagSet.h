@@ -95,6 +95,11 @@ class INET_API SharingTagSet : public cObject
     /** @name Type dependent functions */
     //@{
     /**
+     * Returns true if the tag with provided type is present.
+     */
+    template<typename T> bool hasTag() const;
+
+    /**
      * Returns the shared tag of the provided type, or returns nullptr if no such tag is present.
      */
     template<typename T> const Ptr<const T> findTag() const;
@@ -197,6 +202,14 @@ template<typename T>
 inline int SharingTagSet::getTagIndex() const
 {
     return getTagIndex(typeid(T));
+}
+
+template<typename T>
+inline bool SharingTagSet::hasTag() const
+{
+    SELFDOC_FUNCTION_T;
+    int index = getTagIndex<T>();
+    return index != -1;
 }
 
 template<typename T>
