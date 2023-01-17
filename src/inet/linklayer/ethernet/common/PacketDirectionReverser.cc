@@ -91,7 +91,6 @@ void PacketDirectionReverser::processPacket(Packet *packet)
         packet->addTag<SequenceNumberReq>()->setSequenceNumber(sequenceNumberInd->getSequenceNumber());
     if (encapsulationProtocolInd != nullptr) {
         int n = encapsulationProtocolInd->getProtocolArraySize();
-        // PROTOCOLUTILS
         auto encapsulationProtocolReq = packet->addTag<EncapsulationProtocolReq>();
         std::vector<const Protocol *> protocols;
         for (int i = 0; i < n; i++) {

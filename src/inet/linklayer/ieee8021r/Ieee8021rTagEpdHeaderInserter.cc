@@ -10,6 +10,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/common/SequenceNumberTag_m.h"
 #include "inet/linklayer/ieee8021r/Ieee8021rTagHeader_m.h"
 
@@ -48,16 +49,8 @@ void Ieee8021rTagEpdHeaderInserter::processPacket(Packet *packet)
     packet->insertAtFront(header);
     packetProtocolTag->setProtocol(&Protocol::ieee8021rTag);
     packetProtocolTag->setFrontOffset(b(0));
-    const Protocol *dispatchProtocol = nullptr;
-    if (auto encapsulationProtocolReq = packet->findTagForUpdate<EncapsulationProtocolReq>()) {
-        dispatchProtocol = encapsulationProtocolReq->getProtocol(0);
-        encapsulationProtocolReq->eraseProtocol(0);
-    }
-    else if (nextProtocol != nullptr)
-        dispatchProtocol = nextProtocol;
-    else
-        dispatchProtocol = &Protocol::ethernetMac;
-    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(dispatchProtocol);
+    removeDispatchProtocol(packet, &Protocol::ieee8021rTag);
+    setDispatchProtocol(packet, nextProtocol != nullptr ? nextProtocol : &Protocol::ethernetMac);
 }
 
 } // namespace inet

@@ -7,6 +7,7 @@
 
 #include "inet/protocolelement/redundancy/StreamEncoder.h"
 
+#include "inet/common/ProtocolUtils.h"
 #include "inet/common/SequenceNumberTag_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
@@ -65,18 +66,11 @@ void StreamEncoder::processPacket(Packet *packet)
                     packet->addTagIfAbsent<PcpReq>()->setPcp(mapping.pcp);
                 if (mapping.vlanId != -1)
                     packet->addTagIfAbsent<VlanReq>()->setVlanId(mapping.vlanId);
-                if (packet->findTag<SequenceNumberReq>() != nullptr) {
-                    if (auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>()) {
-                        auto encapsulationReq = packet->addTagIfAbsent<EncapsulationProtocolReq>();
-                        encapsulationReq->insertProtocol(0, dispatchProtocolReq->getProtocol());
-                    }
-                    packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8021rTag);
-                }
-                if (auto dispatchProtocolReq = packet->findTag<DispatchProtocolReq>()) {
-                    auto encapsulationReq = packet->addTagIfAbsent<EncapsulationProtocolReq>();
-                    encapsulationReq->insertProtocol(0, dispatchProtocolReq->getProtocol());
-                }
-                packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(&Protocol::ieee8021qCTag);
+                if (packet->hasTag<SequenceNumberReq>())
+                    ensureEncapsulationProtocolReq(packet, &Protocol::ieee8021rTag);
+                if (mapping.pcp != -1 || mapping.vlanId != -1)
+                    ensureEncapsulationProtocolReq(packet, &Protocol::ieee8021qCTag);
+                setDispatchProtocol(packet);
                 break;
             }
         }

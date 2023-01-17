@@ -7,7 +7,9 @@
 
 #include "inet/linklayer/vlan/VlanReqMapper.h"
 
+#include "inet/common/ProtocolUtils.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
@@ -56,9 +58,8 @@ void VlanReqMapper::processPacket(Packet *packet)
                 packet->addTagIfAbsent<VlanReq>()->setVlanId(newVlanId);
         }
     }
-    auto dispatchProtocolInd = packet->findTag<DispatchProtocolInd>();
-    if (dispatchProtocolInd != nullptr)
-        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(dispatchProtocolInd->getProtocol());
+    ensureEncapsulationProtocolReq(packet, protocol, packet->hasTag<VlanReq>() || packet->hasTag<PcpReq>());
+    setDispatchProtocol(packet);
 }
 
 } // namespace inet
