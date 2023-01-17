@@ -32,7 +32,7 @@ void CutthroughSource::handleMessage(cMessage *message)
 {
     if (message == cutthroughTimer) {
         auto cutthroughPacket = streamedPacket->dup();
-        auto cutthroughData = cutthroughPacket->removeDataAt(cutthroughPosition);
+        auto cutthroughData = cutthroughPacket->removeAt(cutthroughPosition);
         cutthroughData->markImmutable();
         auto cutthroughBuffer = makeShared<StreamBufferChunk>(cutthroughData, simTime(), datarate);
         cutthroughPacket->insertAtBack(cutthroughBuffer);
