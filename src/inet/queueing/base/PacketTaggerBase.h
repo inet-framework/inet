@@ -8,6 +8,7 @@
 #ifndef __INET_PACKETTAGGERBASE_H
 #define __INET_PACKETTAGGERBASE_H
 
+#include "inet/common/Protocol.h"
 #include "inet/queueing/base/PacketMarkerBase.h"
 
 namespace inet {
@@ -25,6 +26,7 @@ class INET_API PacketTaggerBase : public PacketMarkerBase
     int vlanId = -1;
     int pcp = -1;
     W transmissionPower = W(NaN);
+    std::vector<const Protocol *> encapsulationProtocols;
 
   protected:
     virtual void initialize(int stage) override;
