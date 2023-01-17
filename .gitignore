@@ -2,6 +2,7 @@
 doc/src/showcases
 doc/src/tutorials
 src/Makefile
+debug/makefile
 *_m.h
 *_m.cc
 *_sm.h
