@@ -20,6 +20,7 @@ using namespace inet::queueing;
 class INET_API VlanReqMapper : public PacketFlowBase, public TransparentProtocolRegistrationListener
 {
   protected:
+    const Protocol *protocol = nullptr;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     cValueMap *mappedVlanIds = nullptr;
 

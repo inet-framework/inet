@@ -19,6 +19,7 @@ void VlanReqMapper::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        protocol = Protocol::getProtocol(par("protocol").stringValue());
         interfaceTable.reference(this, "interfaceTableModule", true);
         cObject *object = par("mappedVlanIds");
         mappedVlanIds = check_and_cast<cValueMap *>(object);
