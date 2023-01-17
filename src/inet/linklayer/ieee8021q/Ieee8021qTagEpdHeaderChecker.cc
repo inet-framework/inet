@@ -50,7 +50,7 @@ void Ieee8021qTagEpdHeaderChecker::handleParameterChange(const char *name)
 void Ieee8021qTagEpdHeaderChecker::processPacket(Packet *packet)
 {
     const auto& header = packet->popAtFront<Ieee8021qTagEpdHeader>();
-    appendEncapsulationProtocolInd(packet, &Protocol::ieee8021qCTag);
+    appendEncapsulationProtocolInd(packet, qtagProtocol);
     packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(header->getPcp());
     packet->addTagIfAbsent<PcpInd>()->setPcp(header->getPcp());
     packet->addTagIfAbsent<VlanInd>()->setVlanId(header->getVid());

@@ -10,6 +10,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/common/SequenceNumberTag_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/ieee8021r/Ieee8021rTagHeader_m.h"
@@ -28,6 +29,7 @@ void Ieee8021rTagEpdHeaderChecker::initialize(int stage)
 void Ieee8021rTagEpdHeaderChecker::processPacket(Packet *packet)
 {
     const auto& header = packet->popAtFront<Ieee8021rTagEpdHeader>();
+    appendEncapsulationProtocolInd(packet, &Protocol::ieee8021rTag);
     packet->addTagIfAbsent<SequenceNumberInd>()->setSequenceNumber(header->getSequenceNumber());
     auto typeOrLength = header->getTypeOrLength();
     const Protocol *protocol;
