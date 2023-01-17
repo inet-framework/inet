@@ -30,10 +30,10 @@ void EthernetCutthroughSource::handleMessage(cMessage *message)
     if (message == cutthroughTimer) {
         auto cutthroughPacket = streamedPacket->dup();
         b cutthroughPosition = getCutthroughSwitchingHeaderSize(cutthroughPacket);
-        auto cutthroughData = cutthroughPacket->removeDataAt(cutthroughPosition, cutthroughPacket->getDataLength() - cutthroughPosition - ETHER_FCS_BYTES);
+        auto cutthroughData = cutthroughPacket->removeAt(cutthroughPosition, cutthroughPacket->getDataLength() - cutthroughPosition - ETHER_FCS_BYTES);
         cutthroughData->markImmutable();
         cutthroughBuffer = makeShared<StreamBufferChunk>(cutthroughData, simTime(), datarate);
-        cutthroughPacket->insertDataAt(cutthroughBuffer, cutthroughPosition);
+        cutthroughPacket->insertAt(cutthroughBuffer, cutthroughPosition);
         cutthroughPacket->addTag<CutthroughTag>()->setCutthroughPosition(cutthroughPosition);
         EV_INFO << "Sending cut-through packet" << EV_FIELD(packet, *cutthroughPacket) << EV_ENDL;
         pushOrSendPacket(cutthroughPacket, outputGate, consumer);
@@ -86,14 +86,14 @@ void EthernetCutthroughSource::pushPacketEnd(Packet *packet, cGate *gate)
         take(packet);
         delete streamedPacket;
         streamedPacket = nullptr;
-        numProcessedPackets++;
-        processedTotalLength += packet->getTotalLength();
         cutthroughInProgress = false;
         b cutthroughPosition = getCutthroughSwitchingHeaderSize(packet);
-        auto cutthroughData = packet->removeDataAt(cutthroughPosition, packet->getDataLength() - cutthroughPosition - ETHER_FCS_BYTES);
+        auto cutthroughData = packet->removeAt(cutthroughPosition, packet->getDataLength() - cutthroughPosition - ETHER_FCS_BYTES);
         cutthroughData->markImmutable();
         cutthroughBuffer->setStreamData(cutthroughData);
         cutthroughBuffer = nullptr;
+        numProcessedPackets++;
+        processedTotalLength += packet->getTotalLength();
         delete packet;
         updateDisplayString();
     }

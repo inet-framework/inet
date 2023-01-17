@@ -20,7 +20,7 @@ void EthernetCutthroughSink::endStreaming()
     if (auto cutthroughTag = streamedPacket->findTag<CutthroughTag>()) {
         EV_DEBUG << "Detected cut-through packet" << EV_FIELD(streamedPacket) << EV_ENDL;
         b cutthroughPosition = cutthroughTag->getCutthroughPosition();
-        auto cutthroughBuffer = streamedPacket->removeDataAt<StreamBufferChunk>(cutthroughTag->getCutthroughPosition(), streamedPacket->getDataLength() - cutthroughPosition - B(4));
+        auto cutthroughBuffer = streamedPacket->removeAt<StreamBufferChunk>(cutthroughTag->getCutthroughPosition(), streamedPacket->getDataLength() - cutthroughPosition - B(4));
         auto cutthroughData = cutthroughBuffer->getStreamData();
         EV_DEBUG << "Replacing cut-through stream buffer with cut-through data" << EV_FIELD(cutthroughBuffer) << EV_FIELD(cutthroughData) << EV_ENDL;
         streamedPacket->insertAt(cutthroughData, cutthroughPosition);
