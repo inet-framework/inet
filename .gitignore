@@ -52,6 +52,7 @@ python/inet/test/fingerprint/all_fingerprints.json
 *.pdf
 *.ilg
 *.ind
+*.mk
 *.synctex.gz
 .buildlog*
 compile_commands.json
