@@ -23,10 +23,11 @@ using namespace inet::queueing;
 class INET_API EthernetCutthroughSource : public PacketDestreamer
 {
   protected:
-    class EthernetCutthroughHeaderSizeCallback : public PacketDissector::ICallback
+    class EthernetCutthroughDissectorCallback : public PacketDissector::ICallback
     {
       public:
         b cutthroughSwitchingHeaderSize = b(0);
+        const Protocol *payloadProtocol = nullptr;
 
       public:
         virtual bool shouldDissectProtocolDataUnit(const Protocol *protocol) override;
@@ -50,6 +51,15 @@ class INET_API EthernetCutthroughSource : public PacketDestreamer
     virtual void handleMessage(cMessage *message) override;
 
     virtual b getCutthroughSwitchingHeaderSize(Packet *packet) const;
+
+    /**
+     * Packets are eligible for cut-through switching if the contents of the
+     * packet and the meta data on the packet are the same for the reception
+     * start and the reception end operation. The current cut-through implementation
+     * cannot handle preempted packets and other cases such as attaching an
+     * igress timestamp at reception end.
+     */
+    virtual bool isEligibleForCutthrough(Packet *packet) const;
 
   public:
     virtual ~EthernetCutthroughSource() { cancelAndDelete(cutthroughTimer); }
