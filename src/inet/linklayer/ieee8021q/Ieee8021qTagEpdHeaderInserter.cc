@@ -58,7 +58,7 @@ void Ieee8021qTagEpdHeaderInserter::processPacket(Packet *packet)
     auto pcpReq = packet->removeTagIfPresent<PcpReq>();
     auto pcp = pcpReq != nullptr ? pcpReq->getPcp() : defaultPcp;
     if (pcp != -1) {
-        EV_INFO << "Setting PCP" << EV_FIELD(vid, pcp) << EV_ENDL;
+        EV_INFO << "Setting PCP" << EV_FIELD(pcp, pcp) << EV_ENDL;
         header->setPcp(pcp);
         packet->addTagIfAbsent<PcpInd>()->setPcp(pcp);
     }
