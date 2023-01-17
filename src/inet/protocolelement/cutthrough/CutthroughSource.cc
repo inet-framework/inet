@@ -7,7 +7,6 @@
 
 #include "inet/protocolelement/cutthrough/CutthroughSource.h"
 
-#include "inet/common/packet/chunk/StreamBufferChunk.h"
 #include "inet/protocolelement/cutthrough/CutthroughTag_m.h"
 
 namespace inet {
@@ -34,9 +33,10 @@ void CutthroughSource::handleMessage(cMessage *message)
         auto cutthroughPacket = streamedPacket->dup();
         auto cutthroughData = cutthroughPacket->removeAt(cutthroughPosition);
         cutthroughData->markImmutable();
-        auto cutthroughBuffer = makeShared<StreamBufferChunk>(cutthroughData, simTime(), datarate);
+        cutthroughBuffer = makeShared<StreamBufferChunk>(cutthroughData, simTime(), datarate);
         cutthroughPacket->insertAtBack(cutthroughBuffer);
-        cutthroughPacket->addTag<CutthroughTag>()->setCutthroughPosition(cutthroughPosition);
+        auto cutthroughTag = cutthroughPacket->addTag<CutthroughTag>();
+        cutthroughTag->setCutthroughPosition(cutthroughPosition);
         EV_INFO << "Sending cut-through packet" << EV_FIELD(packet, *cutthroughPacket) << EV_ENDL;
         pushOrSendPacket(cutthroughPacket, outputGate, consumer);
     }
@@ -56,6 +56,10 @@ void CutthroughSource::pushPacketEnd(Packet *packet, cGate *gate)
     take(packet);
     delete streamedPacket;
     streamedPacket = nullptr;
+    auto cutthroughData = packet->removeAt(cutthroughPosition);
+    cutthroughData->markImmutable();
+    cutthroughBuffer->setStreamData(cutthroughData);
+    cutthroughBuffer = nullptr;
     numProcessedPackets++;
     processedTotalLength += packet->getTotalLength();
     delete packet;

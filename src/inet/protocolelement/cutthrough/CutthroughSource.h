@@ -8,6 +8,7 @@
 #ifndef __INET_CUTTHROUGHSOURCE_H
 #define __INET_CUTTHROUGHSOURCE_H
 
+#include "inet/common/packet/chunk/StreamBufferChunk.h"
 #include "inet/protocolelement/common/PacketDestreamer.h"
 
 namespace inet {
@@ -20,6 +21,7 @@ class INET_API CutthroughSource : public PacketDestreamer
     b cutthroughPosition;
     cMessage *cutthroughTimer = nullptr;
 
+    Ptr<StreamBufferChunk> cutthroughBuffer = nullptr;
   protected:
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
