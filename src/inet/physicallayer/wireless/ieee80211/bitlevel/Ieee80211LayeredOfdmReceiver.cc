@@ -368,6 +368,7 @@ const IReceptionResult *Ieee80211LayeredOfdmReceiver::computeReceptionResult(con
     const IReceptionBitModel *bitModel = createBitModel(transmission, snir);
     const IReceptionPacketModel *packetModel = createPacketModel(transmission, snir);
     // signal field model
+    // TODO: itt szétszedi, aztán a createComplete*... -ban összerakja...?
     const IReceptionSymbolModel *signalFieldSymbolModel = createSignalFieldSymbolModel(symbolModel);
     const IReceptionSymbolModel *dataFieldSymbolModel = createDataFieldSymbolModel(symbolModel);
     const IReceptionBitModel *signalFieldBitModel = createSignalFieldBitModel(bitModel, signalFieldSymbolModel);

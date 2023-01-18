@@ -145,10 +145,10 @@ void NeuralNetworkErrorModelTrainingDatasetGenerator::generateTrainingDataset()
         auto transmittedPacket = new Packet(nullptr, data);
         transmittedPacket->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
         // adds the following:
-        //  - tail bits
-        //  - service bits
-        //  - plus padding to whole ofdm symbol
         //  - one extra ofdm symbol for phy header
+        //  - service bits
+        //  - tail bits
+        //  - plus padding to whole ofdm symbol
         radio->encapsulate(transmittedPacket);
         // create transmission
         simtime_t startTime = 0;
@@ -266,10 +266,11 @@ void NeuralNetworkErrorModelTrainingDatasetGenerator::generateTrainingDataset()
         // print parameters
         double packetErrorRate = (1 - (double)receptionSuccessfulCount / repeatCount);
         traningDataset << (int)packetIndex << ", " << packetErrorRate << ", " << backgroundNoisePowerMean << ", " << backgroundNoisePowerStddev << ", " << numInterferingSignals << ", " << meanInterferingSignalNoisePowerMean << ", " << meanInterferingSignalNoisePowerStddev << ", " << bitrate << ", " << transmittedPacket->getTotalLength() << ", " << getModulationName(modulation) << ", " << (subcarrierModulation != nullptr ? getModulationName(subcarrierModulation) : "NA") << ", " << centerFrequency << ", " << bandwidth << ", " << timeDivision << ", " << frequencyDivision << ", " << numSymbols << ", "  << preambleDuration << ", " << headerDuration << ", " << dataDuration << ", " << duration << ", ";
-        // print packet bytes
-        auto transmittedData = transmittedPacket->peekAllAsBytes();
-        for (auto byte : transmittedData->getBytes())
-            traningDataset << (int)byte << ", ";
+
+        // // print packet bytes
+        // auto transmittedData = transmittedPacket->peekAllAsBytes();
+        // for (auto byte : transmittedData->getBytes())
+        //     traningDataset << (int)byte << ", ";
 
         auto mode = check_and_cast<const Ieee80211OfdmMode*>(check_and_cast<const Ieee80211TransmissionBase*>(transmission)->getMode())->getDataMode();
 
