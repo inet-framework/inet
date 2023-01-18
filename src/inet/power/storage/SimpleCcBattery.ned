@@ -21,7 +21,7 @@ simple SimpleCcBattery extends CcEnergyStorageBase
 {
     parameters:
         double nominalCapacity @unit(C); // maximum amount of charge stored
-        double initialCapacity @unit(C); // the initially stored amount of charge
+        double initialCapacity @unit(C) = default(nominalCapacity); // the initially stored amount of charge
         double nominalVoltage @unit(V); // open circuit voltage at maximum charge
         double internalResistance @unit(Ohm); // internal resistance
         string displayStringTextFormat = default("%c (%p)");
