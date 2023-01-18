@@ -70,6 +70,9 @@ const IReceptionSymbolModel *LayeredErrorModelBase::computeSymbolModel(const ITr
 
 const ISymbol *LayeredErrorModelBase::computeCorruptSymbol(const ApskModulationBase *modulation, const ApskSymbol *transmittedSymbol) const
 {
+    // TODO: this would be better if we simply shifted the QI symbol by an offset of normal distribution,
+    // with a variance based on the snir, instead of deciding that it has to be corrupt at the callsite,
+    // but a SNIR is needed here for that. See: Ieee80211OfdmErrorModel::computeReceivedSymbol
     auto constellation = modulation->getConstellation();
     if (!strcmp("uniform", symbolCorruptionMode)) {
         auto index = intuniform(0, constellation->size() - 2);
