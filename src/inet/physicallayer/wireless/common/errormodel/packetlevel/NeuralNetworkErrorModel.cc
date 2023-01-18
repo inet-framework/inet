@@ -18,10 +18,13 @@
 #include "inet/common/StringFormat.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalTransmission.h"
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredSnir.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/wireless/common/radio/packetlevel/Radio.h"
 #include "inet/physicallayer/wireless/common/errormodel/packetlevel/NeuralNetworkErrorModel.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmModulation.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/SignalAnalogModel.h"
 
 #include <fstream>
 
@@ -80,10 +83,90 @@ std::ostream& NeuralNetworkErrorModel::printToStream(std::ostream& stream, int l
     return stream << "NeuralNetworkErrorModel";
 }
 
-double NeuralNetworkErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
-{
-    Enter_Method_Silent();
 
+double NeuralNetworkErrorModel::computeSignalPartErrorRate(const ISnir *snir) const
+{
+    auto mode = &Ieee80211OfdmCompliantModes::ofdmHeaderMode6MbpsRate13;
+    auto modulation = mode->getModulation();
+
+    auto reception = snir->getReception();
+    auto grossBitrate = mode->getGrossBitrate();
+
+    ASSERT(grossBitrate == Mbps(6));
+
+    auto subcarrierModulation = modulation->getSubcarrierModulation();
+    auto analogModel = check_and_cast<const NarrowbandSignalAnalogModel*>(reception->getAnalogModel());
+    auto numSubcarriers = modulation->getNumSubcarriers();
+    auto centerFrequency = analogModel->getCenterFrequency();
+
+    ASSERT(numSubcarriers == 52);
+
+    auto symbolFrequencyBandwidth = mode->getSubcarrierFrequencySpacing();
+    auto symbolDuration = mode->getSymbolInterval();
+    auto symbolArea = symbolDuration.dbl() * symbolFrequencyBandwidth.get();
+
+    // calculate symbol intervals
+    std::vector<math::Interval<simsec, Hz>> symbolIntervals;
+    symbolIntervals.reserve(numSubcarriers);
+
+    simtime_t headerStartTime = reception->getHeaderStartTime();
+    simtime_t headerEndTime = reception->getHeaderEndTime();
+
+    for (int subcarrier = 0; subcarrier < numSubcarriers; subcarrier++) {
+        auto startFreq = mode->getSubcarrierStartFrequencyOffset(subcarrier) + centerFrequency;
+        auto endFreq = mode->getSubcarrierEndFrequencyOffset(subcarrier) + centerFrequency;
+        math::Point<simsec, Hz> symbolStartPoint(simsec(headerStartTime), startFreq);
+        math::Point<simsec, Hz> symbolEndPoint(simsec(headerEndTime), endFreq);
+        math::Interval<simsec, Hz> symbolInterval(symbolStartPoint, symbolEndPoint, 0b11, 0b00, 0b00);
+        symbolIntervals.push_back(symbolInterval);
+    }
+
+    auto startFreq = mode->getSubcarrierStartFrequencyOffset(0) + centerFrequency;
+    auto endFreq = mode->getSubcarrierEndFrequencyOffset(numSubcarriers-1) + centerFrequency;
+
+    math::Point<simsec, Hz> startPoint(simsec(headerStartTime), startFreq);
+    math::Point<simsec, Hz> endPoint(simsec(headerEndTime), endFreq);
+
+    // partition SNIR function and sum SNIR values per symbol
+    math::Interval<simsec, Hz> interval(startPoint, endPoint, 0b11, 0b00, 0b00);
+    std::vector<double> data(numSubcarriers);
+    auto snirFunction = check_and_cast<const LayeredSnir *>(snir)->getSnir();
+
+    snirFunction->partition(interval, [&] (const math::Interval<simsec, Hz>& i1, const math::IFunction<double, math::Domain<simsec, Hz>> *f1) {
+        // TODO: optimize, only iterate on subcarriers that have
+        // a chance of intersecting the interval
+        for (int subcarrier = 0; subcarrier < numSubcarriers; subcarrier++) {
+            auto i2 = i1.getIntersected(symbolIntervals[subcarrier]);
+            if (i2.isEmpty())
+                continue;
+
+            double v = i2.getVolume() * f1->getMean(i2);
+            ASSERT(!std::isnan(v));
+            data[subcarrier] += v;
+        }
+    });
+
+    double successRate = 1.0;
+
+    // average symbol SNIR values
+    EV_TRACE << "SNIR means and error rates of OFDM subcarrier symbols: " << std::endl;
+    for (int j = 0; j < numSubcarriers; j++) {
+        double snirMean = data[j] / symbolArea;
+        double symbolErrorRate = subcarrierModulation->calculateSER(snirMean, symbolFrequencyBandwidth, grossBitrate / numSubcarriers);
+        //bool isCorruptSymbol = symbolErrorRate == 1 || (symbolErrorRate != 0 && uniform(0, 1) < symbolErrorRate);
+
+        successRate *= (1 - symbolErrorRate);
+        EV_TRACE << snirMean << " " << symbolErrorRate << ", ";
+    }
+    EV_TRACE << std::endl;
+
+    EV_DEBUG << "OFDM header error rate: " << (1 - successRate) << std::endl;
+
+    return 1 - successRate;
+}
+
+double NeuralNetworkErrorModel::computeDataPartErrorRate(const ISnir *snir) const
+{
     auto name = computeModelName(snir);
     auto it = models.find(name);
     if (it == models.end())
@@ -91,7 +174,7 @@ double NeuralNetworkErrorModel::computePacketErrorRate(const ISnir *snir, IRadio
     auto model = it->second;
     auto reception = snir->getReception();
     auto transmission = check_and_cast<const FlatTransmissionBase *>(reception->getTransmission());
-    int timeDivision = (transmission->getHeaderDuration() + transmission->getDataDuration()) / transmission->getSymbolTime();
+    int timeDivision = transmission->getDataDuration() / transmission->getSymbolTime();
     int frequencyDivision;
     auto modulation = transmission->getModulation();
     if (auto ofdmModulation = dynamic_cast<const Ieee80211OfdmModulation *>(modulation))
@@ -124,6 +207,26 @@ double NeuralNetworkErrorModel::computePacketErrorRate(const ISnir *snir, IRadio
     double packetErrorRate = std::min(1.0f, std::max(0.0f, predicted));
     EV_DEBUG << "Computed packet error rate is " << packetErrorRate << std::endl;
     return packetErrorRate;
+}
+
+
+double NeuralNetworkErrorModel::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
+{
+    Enter_Method_Silent();
+
+    switch (part) {
+        case IRadioSignal::SIGNAL_PART_WHOLE:
+            return 1.0 - ((1.0 - computeSignalPartErrorRate(snir)) * (1.0 - computeSignalPartErrorRate(snir)));
+        case IRadioSignal::SIGNAL_PART_PREAMBLE:
+            return NaN; // TODO
+        case IRadioSignal::SIGNAL_PART_HEADER:
+            return computeSignalPartErrorRate(snir);
+        case IRadioSignal::SIGNAL_PART_DATA:
+            return computeDataPartErrorRate(snir);
+        default:
+            throw cRuntimeError("Unknown signal part");
+
+    }
 
 }
 
@@ -160,7 +263,7 @@ std::vector<float> NeuralNetworkErrorModel::fillSnirTensor(const DimensionalSnir
     auto dimensionalSnir = check_and_cast<const DimensionalSnir *>(snir);
     auto snirFunction = dimensionalSnir->getSnir();
     auto reception = snir->getReception();
-    auto startTime = reception->getHeaderStartTime();
+    auto startTime = reception->getDataStartTime();
     auto endTime = reception->getDataEndTime();
     auto transmission = check_and_cast<const DimensionalTransmission *>(reception->getTransmission());
     auto centerFrequency = transmission->getCenterFrequency();

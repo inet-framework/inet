@@ -47,6 +47,9 @@ class INET_API NeuralNetworkErrorModel : public ErrorModelBase
 
     virtual std::string computeModelName(const ISnir *snir) const;
 
+    double computeSignalPartErrorRate(const ISnir *snir) const;
+    double computeDataPartErrorRate(const ISnir *snir) const;
+
   public:
     virtual ~NeuralNetworkErrorModel() {  }
 
