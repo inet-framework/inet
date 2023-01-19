@@ -208,7 +208,7 @@ double NeuralNetworkErrorModel::computePacketErrorRate(const ISnir *snir, IRadio
 
     switch (part) {
         case IRadioSignal::SIGNAL_PART_WHOLE:
-            return 1.0 - ((1.0 - computeSignalPartErrorRate(snir)) * (1.0 - computeSignalPartErrorRate(snir)));
+            return computeDataPartErrorRate(snir); // FIXME HACK 1.0 - ((1.0 - computeSignalPartErrorRate(snir)) * (1.0 - computeSignalPartErrorRate(snir)));
         case IRadioSignal::SIGNAL_PART_PREAMBLE:
             return NaN; // TODO
         case IRadioSignal::SIGNAL_PART_HEADER:
