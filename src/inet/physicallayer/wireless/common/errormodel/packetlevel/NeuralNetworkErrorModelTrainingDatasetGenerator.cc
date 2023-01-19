@@ -151,9 +151,7 @@ void NeuralNetworkErrorModelTrainingDatasetGenerator::generateTrainingDataset()
         //  - plus padding to whole ofdm symbol
         radio->encapsulate(transmittedPacket);
         // create transmission
-        simtime_t startTime = 0;
-        auto transmission = check_and_cast<const LayeredTransmission *>(transmitter->createTransmission(radio, transmittedPacket, startTime));
-        auto endTime = transmission->getEndTime();
+        auto transmission = check_and_cast<const LayeredTransmission *>(transmitter->createTransmission(radio, transmittedPacket, 0));
         auto transmissionAnalogModel = transmission->getAnalogModel();
         auto preambleDuration = transmissionAnalogModel->getPreambleDuration();
         auto headerDuration = transmissionAnalogModel->getHeaderDuration();
@@ -166,8 +164,7 @@ void NeuralNetworkErrorModelTrainingDatasetGenerator::generateTrainingDataset()
         auto ofdmModulation = dynamic_cast<const Ieee80211OfdmModulation *>(modulation);
         auto subcarrierModulation = ofdmModulation != nullptr ? ofdmModulation->getSubcarrierModulation() : nullptr;
         auto transmittedSymbols = transmission->getSymbolModel()->getAllSymbols();
-        // TODO: time division doesn't take into account that the preamble doesn't contain symbols
-        int timeDivision = transmittedSymbols->size();
+        int timeDivision = transmittedSymbols->size() - 1;
         int frequencyDivision = ofdmModulation != nullptr ? ofdmModulation->getNumSubcarriers() : 1;
         if (frequencyDivision != 52)
             throw cRuntimeError("wrong number of OFDM subcarriers!");
@@ -179,15 +176,21 @@ void NeuralNetworkErrorModelTrainingDatasetGenerator::generateTrainingDataset()
         auto narrowbandSignal = check_and_cast<const INarrowbandSignal *>(reception->getAnalogModel());
         auto centerFrequency = narrowbandSignal->getCenterFrequency();
         auto bandwidth = narrowbandSignal->getBandwidth();
+
+        auto dataStartTime = preambleDuration + headerDuration;
+        auto dataEndTime = preambleDuration + headerDuration + dataDuration;
+
+        if (dataDuration != timeDivision * SimTime(4, SIMTIME_US))
+            throw cRuntimeError("wrong data duration! %s expected %s", dataDuration.str().c_str(), (timeDivision * SimTime(4, SIMTIME_US)).str().c_str());
+
         auto startFrequency = centerFrequency - bandwidth / 2;
         auto endFrequency = centerFrequency + bandwidth / 2;
         auto backgroundNoisePowerFunction = createNoisePowerFunction(backgroundNoisePowerMean, backgroundNoisePowerStddev,
-            26 + 1 + 26, timeDivision, startTime, endTime,
+            26 + 1 + 26, timeDivision, dataStartTime, dataEndTime,
             centerFrequency - kHz(312.5) * 26.5,
             centerFrequency + kHz(312.5) * 26.5);
         std::vector<Ptr<const IFunction<WpHz, Domain<simsec, Hz>>>> noisePowerFunctions;
         noisePowerFunctions.push_back(backgroundNoisePowerFunction);
-
 
         // sneakily blocking out the DC subcarrier, just in case
         noisePowerFunctions.push_back(makeShared<Boxcar2DFunction<WpHz, simsec, Hz>>(
@@ -209,7 +212,7 @@ void NeuralNetworkErrorModelTrainingDatasetGenerator::generateTrainingDataset()
             meanInterferingSignalNoisePowerStddev += interferingSignalNoisePowerStddev;
             int interferingSignalTimeDivision = intuniform(1, timeDivision);
             int interferingSignalFrequencyDivision = intuniform(1, frequencyDivision);
-            simtime_t interferingSignalStartTime = startTime + duration * intuniform(1 - interferingSignalTimeDivision, timeDivision - 1) / timeDivision;
+            simtime_t interferingSignalStartTime = dataStartTime + dataDuration * intuniform(1 - interferingSignalTimeDivision, timeDivision - 1) / timeDivision;
             simtime_t interferingSignalEndTime = interferingSignalStartTime + duration / timeDivision * interferingSignalTimeDivision;
             Hz interferingSignalStartFrequency = startFrequency + bandwidth * intuniform(1 - interferingSignalFrequencyDivision, frequencyDivision - 1) / frequencyDivision;
             Hz interferingSignalEndFrequency = interferingSignalStartFrequency + bandwidth / frequencyDivision * interferingSignalFrequencyDivision;
@@ -219,12 +222,12 @@ void NeuralNetworkErrorModelTrainingDatasetGenerator::generateTrainingDataset()
         meanInterferingSignalNoisePowerMean /= numInterferingSignals;
         meanInterferingSignalNoisePowerStddev /= numInterferingSignals;
         auto noisePowerFunction = makeShared<SummedFunction<WpHz, Domain<simsec, Hz>>>(noisePowerFunctions);
-        auto noise = new DimensionalNoise(startTime, endTime, centerFrequency, bandwidth, noisePowerFunction);
+        auto noise = new DimensionalNoise(dataStartTime, dataEndTime, centerFrequency, bandwidth, noisePowerFunction);
         // create snir
         auto signalAnalogModel = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(reception->getAnalogModel());
         auto receptionPowerFunction = signalAnalogModel->getPower();
         auto snirFunction = receptionPowerFunction->divide(noisePowerFunction);
-        auto listening = receiver->createListening(nullptr, startTime, endTime, Coord::ZERO, Coord::ZERO);
+        auto listening = receiver->createListening(nullptr, 0, duration, Coord::ZERO, Coord::ZERO);
         auto interference = new Interference(noise, new std::vector<const IReception *>());
         const ISnir *snir = new LayeredSnir(reception, noise);
         int receptionSuccessfulCount = 0;
@@ -277,11 +280,10 @@ void NeuralNetworkErrorModelTrainingDatasetGenerator::generateTrainingDataset()
 
         // print symbol SNIR means
         double snirMean = 0;
-        startTime += preambleDuration;
         for (int i = 0; i < timeDivision; i++) {
             for (int j = 0; j < frequencyDivision; j++) {
-                simtime_t symbolStartTime = (startTime * (timeDivision - i) + endTime * i) / timeDivision;
-                simtime_t symbolEndTime = (startTime * (timeDivision - i - 1) + endTime * (i + 1)) / timeDivision;
+                simtime_t symbolStartTime = (dataStartTime * (timeDivision - i) + dataEndTime * i) / timeDivision;
+                simtime_t symbolEndTime = (dataStartTime * (timeDivision - i - 1) + dataEndTime * (i + 1)) / timeDivision;
 
                 Hz symbolStartFrequency = centerFrequency + mode->getSubcarrierStartFrequencyOffset(j);
                 Hz symbolEndFrequency = centerFrequency + mode->getSubcarrierEndFrequencyOffset(j);

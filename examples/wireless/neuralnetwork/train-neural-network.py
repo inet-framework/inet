@@ -27,7 +27,7 @@ TIME_NR_INDEX = 13
 FREQ_NR_INDEX = 14
 FREQUENCY_SIZE = 52
 BATCH_SIZE = 8
-NUM_EPOCHS = 1000
+NUM_EPOCHS = 250
 
 np.set_printoptions(threshold=sys.maxsize)
 
@@ -81,7 +81,7 @@ def loadTrainingDataset(trainingDataset):
                 error = float(row[1])
 
                 # there are 20 columns of metadata
-                snir_start = 20 + int(row[BYTE_NR_INDEX].strip().split()[0])
+                snir_start = 20 # + int(row[BYTE_NR_INDEX].strip().split()[0])
                 snirs = np.array([float(p) for p in row[snir_start:-1]])
 
                 freq_division = int(row[FREQ_NR_INDEX].strip().split()[0])
@@ -174,7 +174,7 @@ def trainModel():
 
 def saveModel(model=model):
     if args.output is None :
-        args.output = re.sub("results/(.*?)(_[0-9]+)?\.log", "models/\\1", args.trainingDataset[0])
+        args.output = re.sub("results/(.*?)(_[0-9]+)?\.csv", "models/\\1", args.trainingDataset[0])
     print(f"Saving neural network model as {args.output}.h5")
     os.makedirs(os.path.dirname(args.output), exist_ok=True)
     model.save(args.output + ".h5")
