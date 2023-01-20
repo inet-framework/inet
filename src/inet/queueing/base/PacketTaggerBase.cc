@@ -39,6 +39,11 @@ void PacketTaggerBase::initialize(int stage)
         pcp = par("pcp");
         userPriority = par("userPriority");
         transmissionPower = W(par("transmissionPower"));
+        auto encapsulationProtocolsAsArray = check_and_cast<cValueArray *>(par("encapsulationProtocols").objectValue());
+        for (int i = 0; i < encapsulationProtocolsAsArray->size(); i++) {
+            auto protocol = Protocol::getProtocol(encapsulationProtocolsAsArray->get(i).stringValue());
+            encapsulationProtocols.push_back(protocol);
+        }
     }
     else if (stage == INITSTAGE_LINK_LAYER) {
         const char *interfaceName = par("interfaceName");
