@@ -5,7 +5,7 @@
         <input pattern="results/General-*.vec"/>
     </inputs>
     <charts>
-        <chart icon="icons/full/obj/scatterchart.png" id="403131582" name="SNIR vs distance" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/scatterchart.png" id="1354650080" name="SNIR vs distance" resultTypes="" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
@@ -700,7 +700,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="10"/>
             <property name="matplotlibrc" value="grid.linestyle : --&#10;savefig.transparent : True"/>
         </chart>
-        <chart icon="icons/full/obj/linechart.png" id="1716878815" name="PER vs SNIR" template="linechart_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/linechart.png" id="1795325937" name="PER vs SNIR" resultTypes="" template="linechart_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 from omnetpp.scave import results, chart, utils, ideplot, vectorops as ops
 import matplotlib.pyplot as plt
@@ -708,27 +708,20 @@ import pandas as pd
 
 # get chart properties
 props = chart.get_properties()
-utils.preconfigure_plot(props)
-
-# collect parameters for query
-filter_expression = props["filter"]
-start_time = float(props["vector_start_time"] or -math.inf)
-end_time = float(props["vector_end_time"] or math.inf)
 
 filter_expression_per = """module =~ "ErrorRateShowcase.destinationHost.wlan[*].radio" AND (name =~ "packetErrorRate:vector:mean")"""
 filter_expression_snir = """module =~ "ErrorRateShowcase.destinationHost.wlan[*].radio" AND (name =~ "minSnir:vector:mean")"""
 
 # query vector data into a data frame
 try:
-    df = results.get_vectors(filter_expression, include_attrs=True, include_runattrs=True, include_itervars=True, start_time=start_time, end_time=end_time)
     df_per = results.get_scalars(filter_expression_per, include_fields = True, include_attrs=True, include_itervars=True, include_runattrs=True)
     df_snir = results.get_scalars(filter_expression_snir, include_fields = True, include_attrs=True, include_itervars=True, include_runattrs=True)
 except ValueError as e:
     raise chart.ChartScriptError("Error while querying results: " + str(e))
     
-#print("DF\n",df)
-#print("DF PER\n",df_per)
-#print("DF SNIR\n",df_snir)
+
+print("DF PER\n",df_per)
+print("DF SNIR\n",df_snir)
 
 df_per.to_csv('df_per', index=True)
 df_snir.to_csv('df_snir', index=True)
@@ -740,49 +733,132 @@ df_snir['snir'] = df_snir['value']          # add snir column, same as value col
 
 df_joined = df_snir.merge(df_per, on='iterationvarsd')
 
+df_joined = df_joined[['snir', 'per', 'distance', 'bitrate', 'size']]
+
+
 #print('before pivot', df_joined)
 df_joined.to_csv('beforepivot', index=True)
 
 df_joined['snir'] = pd.to_numeric(df_joined['snir'])
 df_joined['per'] = pd.to_numeric(df_joined['per'])
+df_joined['size'] = pd.to_numeric(df_joined['size'])
+df_joined['bitrate'] = pd.to_numeric(df_joined['bitrate'])
+df_joined['distance'] = pd.to_numeric(df_joined['distance'])
 
-df_joined = df_joined.pivot_table(columns='bitrate', index='snir', values='per')
-df_joined.to_csv('afterpivot', index=True)
 
-df_joined = df_joined[['6','9','12','18','24','36','48','54']]
+df_pivoted = df_joined.pivot_table(columns=['bitrate', 'distance'], index='size', values='per')
+df_pivoted.to_csv('afterpivot', index=True)
+
 
 #print('joined', df_joined)
 
 #df = df.pivot_table(index='bitrate', columns='name', values='vecvalue')
-
-if df.empty:
-    raise chart.ChartScriptError("The result filter returned no data.")
 
 # apply vector operations
 #df = ops.perform_vector_ops(df, props["vector_operations"])
 
 # plot
 #utils.plot_vectors(df, props)
+import seaborn as sns
+import numpy as np
+fig, axs = plt.subplots(2, 4, squeeze=True, sharex=True, sharey=True)
+plt.subplots_adjust(left=0.1,
+                    bottom=0.1,
+                    right=0.9,
+                    top=0.9,
+                    wspace=0.4,
+                    hspace=0.2)
 
-for c in df_joined:
-    ys = df_joined[c]
-    mask = ys.notna()
-    plt.plot(df_joined.index.values[mask], df_joined[c].values[mask], label=c + ' Mbps')
+dist_snir = df_joined.groupby("distance").mean()[["snir"]]
+dist_snir["db"] = np.log10(dist_snir["snir"]) * 10
+print(dist_snir)
+axs = axs.flatten()
+cbar_ax = fig.add_axes([.92, .3, .03, .4])
 
-ylocs, ylabels = plt.yticks()
+dists = dist_snir.index.values
+snirs = dist_snir["snir"].values
+dbs = dist_snir["db"].values
 
-#print('ylocs',ylocs)
-#print('ylabels',ylabels)
+import scipy
 
-# TODO these should be set from the dialog
-plt.title('PER vs SNIR')
-plt.xlabel('Signal-to-noise-plus-interference ratio')
-plt.ylabel('Packet error rate')
 
-utils.postconfigure_plot(props)
+dist2db_1 = scipy.interpolate.interp1d(dists, dbs, fill_value="extrapolate")
+db2dist_1 = scipy.interpolate.interp1d(dbs, dists, fill_value="extrapolate")
+
+def dist2db(dists):
+    res = np.array([dist2db_1(d) for d in dists])
+    print(dists, " dist2db -> ", res)
+    return res
+
+def db2dist(dbs):
+    res = np.array([db2dist_1(d) for d in dbs])
+    print(dbs, " db2dist -> ", res)
+    return res
+
+for ax, bitrate in zip(axs, df_pivoted.columns.get_level_values(0).unique()):
+    sns.heatmap(df_pivoted[bitrate].transpose(), ax=ax, 
+                vmin=0, vmax=1, cmap="viridis_r", cbar=True, cbar_ax=cbar_ax)
+    ax.set_title(str(bitrate) + " Mbps")
+    ax.invert_yaxis()
+    sax = ax.secondary_yaxis("right",  functions=(dist2db, db2dist))
+    sax.set_label("dB")
+    sax.set_ylim(ax.get_ylim())
+
+
+plt.suptitle("Packet Error Rate")
+
+if False:
+    sec_ax = fig.add_axes([.75, .1, .2, .8])
+    
+    
+    # Now remove axes[1,5] from the grouper for xaxis
+    sec_ax.get_shared_x_axes().remove(sec_ax)
+    sec_ax.get_shared_y_axes().remove(sec_ax)
+    import matplotlib as mpl
+    # Create and assign new ticker
+    xticker = mpl.axis.Ticker()
+    yticker = mpl.axis.Ticker()
+    #sec_ax.xaxis.major = xticker
+    sec_ax.yaxis.major = yticker
+    
+    # The new ticker needs new locator and formatters
+    #xloc = mpl.ticker.AutoLocator()
+    #xfmt = mpl.ticker.ScalarFormatter()
+    yloc = mpl.ticker.AutoLocator()
+    yfmt = mpl.ticker.ScalarFormatter()
+    
+    #sec_ax.xaxis.set_major_locator(xloc)
+    #sec_ax.xaxis.set_major_formatter(xfmt)
+    
+    sec_ax.yaxis.set_major_locator(yloc)
+    sec_ax.yaxis.set_major_formatter(yfmt)
+    
+    
+    df_joined_orig[["distance", "snir", "per"]].plot.scatter("distance", "snir", ax=sec_ax)
+    sec_ax.set_yscale('log')
+    
+    for label in sec_ax.get_xticklabels():
+      label.set_rotation(45)
+      label.set_ha('right')
+      
+if False:
+    for c in df_joined:
+        ys = df_joined[c]
+        mask = ys.notna()
+        plt.plot(df_joined.index.values[mask], df_joined[c].values[mask], label=c + ' Mbps')
+    
+    ylocs, ylabels = plt.yticks()
+    
+    #print('ylocs',ylocs)
+    #print('ylabels',ylabels)
+    
+    # TODO these should be set from the dialog
+    plt.title('PER vs SNIR')
+    plt.xlabel('Signal-to-noise-plus-interference ratio')
+    plt.ylabel('Packet error rate')
 
 utils.export_image_if_needed(props)
-utils.export_data_if_needed(df, props)
+
 ]]></script>
             <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <xswt xmlns:x="http://sweet_swt.sf.net/xswt">
@@ -1315,7 +1391,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="10"/>
             <property name="matplotlibrc" value="grid.linestyle : --&#10;savefig.transparent : True"/>
         </chart>
-        <chart icon="icons/full/obj/scatterchart.png" id="2054690010" name="PER vs distance" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/scatterchart.png" id="725882619" name="PER vs distance" resultTypes="" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
@@ -2010,7 +2086,7 @@ utils.export_data_if_needed(df, props)
             <property name="image_export_width" value="10"/>
             <property name="matplotlibrc" value="grid.linestyle : --&#10;savefig.transparent : True"/>
         </chart>
-        <chart icon="icons/full/obj/scatterchart.png" id="849396457" name="Effective bitrate vs distance" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
+        <chart createdWith="" icon="icons/full/obj/scatterchart.png" id="2023680527" name="Effective bitrate vs distance" resultTypes="" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
             <script><![CDATA[import math
 import numpy as np
 import pandas as pd
