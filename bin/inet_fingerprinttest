@@ -32,6 +32,7 @@ import traceback
 import unittest
 from io import StringIO
 
+oppErrorCodeMax = 10
 rootDir = os.path.abspath(".")  # the working directory in the CSV file is relative to this dir
 cpuTimeLimit = "600s"
 logFile = "test.out"
@@ -379,8 +380,6 @@ class SimulationTestCase(unittest.TestCase):
             FILE.close()
 
         result = SimulationResult(command, workingdir, exitcode, elapsedTime=elapsedTime)
-        if exitcode > 10: # TODO
-            return result
 
         # process error messages
         errorLines = re.findall("<!>.*", out, re.M)
@@ -421,7 +420,15 @@ class SimulationTestCase(unittest.TestCase):
                     result.simulatedTime = float(m.group(1))
                     result.numEvents = int(m.group(3))
 
-        if wasError:   # TODO
+        if exitcode > oppErrorCodeMax: # smallest system error code
+            wasError = True
+            errorMsg += "\nExit code: " + str(exitcode)
+#            try:
+#                errorMsg += " " + os.strerror(exitcode-128)
+#            except ValueError:
+#                pass    # do nothing
+
+        if wasError:
             result.exitcode = exitcode
         elif result.cpuTimeLimitReached:
             result.exitcode = 1
@@ -435,7 +442,7 @@ class SimulationTestCase(unittest.TestCase):
         else:
             pass
 
-        result.errormsg = errorMsg.strip()
+        result.errorMsg = errorMsg.strip()
         return result
 
     def runProgram(self, command, workingdir, resultdir):
@@ -500,7 +507,7 @@ class FingerprintTestCase(SimulationTestCase):
             # note: fingerprint mismatch is an error in omnetpp 6.1 or after! (exitcode==1)
             self.storeExitcodeCallback(result.exitcode)
             if result.exitcode != 0:
-                raise Exception("runtime error with exitcode="+str(result.exitcode)+": " + result.errormsg)
+                raise Exception("runtime error with exitcode="+str(result.exitcode)+": " + result.errorMsg)
             elif result.cpuTimeLimitReached:
                 raise Exception("cpu time limit exceeded")
             elif result.simulatedTime == 0 and self.simtimelimit != '0s':
