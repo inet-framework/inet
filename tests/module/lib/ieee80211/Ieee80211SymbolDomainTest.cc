@@ -61,8 +61,8 @@ void Ieee80211SymbolDomainTest::test() const
         dataField->setByte(i - 3, input.getBytes()[i]);
     auto signalPacket = new Packet("signal", signalField);
     auto dataPacket = new Packet("data", dataField);
-    TransmissionPacketModel signalPacketModel(signalPacket, bps(NaN));
-    TransmissionPacketModel dataPacketModel(dataPacket, bps(NaN));
+    TransmissionPacketModel signalPacketModel(signalPacket, bps(NaN), bps(NaN));
+    TransmissionPacketModel dataPacketModel(dataPacket, bps(NaN), bps(NaN));
     const ITransmissionBitModel *signalBitModel = ieee80211OFDMSignalEncoder->encode(&signalPacketModel);
     const ITransmissionBitModel *dataBitModel = ieee80211OFDMDataEncoder->encode(&dataPacketModel);
     const ITransmissionSymbolModel *transmissionSignalSymbolModel = ieee80211OFDMSignalModulator->modulate(signalBitModel);
