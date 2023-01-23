@@ -93,7 +93,8 @@ std::ostream& Ieee80211LayeredOfdmTransmitter::printToStream(std::ostream& strea
 
 const ITransmissionPacketModel *Ieee80211LayeredOfdmTransmitter::createPacketModel(const Packet *packet) const
 {
-    return new TransmissionPacketModel(packet, mode->getDataMode()->getNetBitrate());
+    auto bitrate = mode->getDataMode()->getNetBitrate();
+    return new TransmissionPacketModel(packet, bitrate, bitrate);
 }
 
 const ITransmissionAnalogModel *Ieee80211LayeredOfdmTransmitter::createScalarAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel) const
@@ -130,9 +131,8 @@ const ITransmissionAnalogModel *Ieee80211LayeredOfdmTransmitter::createScalarAna
     unsigned int numberOfDataApskSymbols = dataBitLength / dataCodeWordSize;
     unsigned int numberOfDataOFDMSymbols = numberOfDataApskSymbols / NUMBER_OF_OFDM_DATA_SUBCARRIERS;
     simtime_t dataDuration = numberOfDataOFDMSymbols * mode->getSymbolInterval();
-    simtime_t duration = preambleDuration + headerDuration + dataDuration;
     // TODO: centerFrequency doesn't take the channel into account
-    return new ScalarTransmissionSignalAnalogModel(duration, centerFrequency, mode->getDataMode()->getBandwidth(), power);
+    return new ScalarTransmissionSignalAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, mode->getDataMode()->getBandwidth(), power);
 }
 
 const ITransmissionPacketModel *Ieee80211LayeredOfdmTransmitter::createSignalFieldPacketModel(const ITransmissionPacketModel *completePacketModel) const
@@ -141,14 +141,14 @@ const ITransmissionPacketModel *Ieee80211LayeredOfdmTransmitter::createSignalFie
     // fields, so the SIGNAL field is 24 bits (OFDM_SYMBOL_SIZE / 2) long.
     auto packet = completePacketModel->getPacket();
     const auto& signalChunk = packet->peekAt(b(0), b(NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2));
-    return new TransmissionPacketModel(new Packet(nullptr, signalChunk), bps(NaN));
+    return new TransmissionPacketModel(new Packet(nullptr, signalChunk), bps(NaN), bps(NaN));
 }
 
 const ITransmissionPacketModel *Ieee80211LayeredOfdmTransmitter::createDataFieldPacketModel(const ITransmissionPacketModel *completePacketModel) const
 {
     auto packet = completePacketModel->getPacket();
     const auto& dataChunk = packet->peekAt(b(NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2), packet->getTotalLength() - b(NUMBER_OF_OFDM_DATA_SUBCARRIERS / 2));
-    return new TransmissionPacketModel(new Packet(nullptr, dataChunk), bps(NaN));
+    return new TransmissionPacketModel(new Packet(nullptr, dataChunk), bps(NaN), bps(NaN));
 }
 
 void Ieee80211LayeredOfdmTransmitter::encodeAndModulate(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *& fieldBitModel, const ITransmissionSymbolModel *& fieldSymbolModel, const IEncoder *encoder, const IModulator *modulator, bool isSignalField) const

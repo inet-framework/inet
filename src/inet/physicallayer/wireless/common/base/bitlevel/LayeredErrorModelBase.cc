@@ -26,7 +26,8 @@ const IReceptionPacketModel *LayeredErrorModelBase::computePacketModel(const Lay
     if (packetErrorRate != 0 && uniform(0, 1) < packetErrorRate)
         receivedPacket->setBitError(true);
     receivedPacket->addTagIfAbsent<ErrorRateInd>()->setPacketErrorRate(packetErrorRate);
-    return new ReceptionPacketModel(receivedPacket, transmissionPacketModel->getBitrate(), packetErrorRate);
+    auto bitrate = transmissionPacketModel->getDataNetBitrate();
+    return new ReceptionPacketModel(receivedPacket, bitrate, bitrate);
 }
 
 const IReceptionBitModel *LayeredErrorModelBase::computeBitModel(const LayeredTransmission *transmission, double bitErrorRate) const

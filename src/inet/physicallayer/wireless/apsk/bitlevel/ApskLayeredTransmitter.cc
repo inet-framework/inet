@@ -87,7 +87,7 @@ std::ostream& ApskLayeredTransmitter::printToStream(std::ostream& stream, int le
 
 const ITransmissionPacketModel *ApskLayeredTransmitter::createPacketModel(const Packet *packet) const
 {
-    return new TransmissionPacketModel(check_and_cast<const Packet *>(packet), bitrate);
+    return new TransmissionPacketModel(check_and_cast<const Packet *>(packet), bitrate, bitrate);
 }
 
 const ITransmissionBitModel *ApskLayeredTransmitter::createBitModel(const ITransmissionPacketModel *packetModel) const
@@ -141,7 +141,7 @@ const ITransmissionAnalogModel *ApskLayeredTransmitter::createAnalogModel(const 
     }
     else {
         simtime_t duration = packetModel->getPacket()->getBitLength() / bitrate.get();
-        return new ScalarTransmissionSignalAnalogModel(duration, centerFrequency, bandwidth, power);
+        return new ScalarTransmissionSignalAnalogModel(0, 0, duration, centerFrequency, bandwidth, power);
     }
 }
 
