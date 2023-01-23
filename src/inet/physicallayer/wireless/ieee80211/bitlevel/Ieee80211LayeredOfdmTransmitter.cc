@@ -214,9 +214,9 @@ const ITransmissionSymbolModel *Ieee80211LayeredOfdmTransmitter::createSymbolMod
 const ITransmissionBitModel *Ieee80211LayeredOfdmTransmitter::createBitModel(const ITransmissionBitModel *signalFieldBitModel, const ITransmissionBitModel *dataFieldBitModel, const ITransmissionPacketModel *packetModel) const
 {
     if (levelOfDetail >= BIT_DOMAIN) {
-        BitVector *encodedBits = new BitVector(*signalFieldBitModel->getBits());
-        unsigned int signalBitLength = signalFieldBitModel->getBits()->getSize();
-        const BitVector *dataFieldBits = dataFieldBitModel->getBits();
+        BitVector *encodedBits = new BitVector(*signalFieldBitModel->getAllBits());
+        unsigned int signalBitLength = signalFieldBitModel->getAllBits()->getSize();
+        const BitVector *dataFieldBits = dataFieldBitModel->getAllBits();
         unsigned int dataBitLength = dataFieldBits->getSize();
         for (unsigned int i = 0; i < dataFieldBits->getSize(); i++)
             encodedBits->appendBit(dataFieldBits->getBit(i));

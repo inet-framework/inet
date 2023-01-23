@@ -150,8 +150,8 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createCompleteBitModel(c
         if (dataFieldBitModel == nullptr)
             return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderBitRate(), b(-1), bps(NaN), new BitVector(*signalFieldBitModel->getBits()), NaN);
         else {
-            BitVector *bits = new BitVector(*signalFieldBitModel->getBits());
-            const BitVector *dataBits = dataFieldBitModel->getBits();
+            BitVector *bits = new BitVector(*signalFieldBitModel->getAllBits());
+            const BitVector *dataBits = dataFieldBitModel->getAllBits();
             for (unsigned int i = 0; i < dataBits->getSize(); i++)
                 bits->appendBit(dataBits->getBit(i));
             return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderBitRate(), dataFieldBitModel->getDataLength(), dataFieldBitModel->getDataBitRate(), bits, NaN);
@@ -262,7 +262,7 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createSignalFieldBitMode
             signalFieldLength = DECODED_SIGNAL_FIELD_LENGTH * codeRate;
         }
         BitVector *signalFieldBits = new BitVector();
-        const BitVector *bits = bitModel->getBits();
+        const BitVector *bits = bitModel->getAllBits();
         for (unsigned int i = 0; i < signalFieldLength; i++)
             signalFieldBits->appendBit(bits->getBit(i));
         signalFieldBitModel = new ReceptionBitModel(b(signalFieldLength), bitModel->getHeaderBitRate(), b(-1), bps(NaN), signalFieldBits, NaN);
@@ -306,7 +306,7 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createDataFieldBitModel(
         dataFieldLengthInBits += calculatePadding(dataFieldLengthInBits, modulation, 1.0 / codeRate);
 //        ASSERT(dataFieldLengthInBits % convolutionalCode->getCodeRatePuncturingK() == 0);
         unsigned int encodedDataFieldLengthInBits = dataFieldLengthInBits * codeRate;
-        const BitVector *bits = bitModel->getBits();
+        const BitVector *bits = bitModel->getAllBits();
         unsigned int encodedSignalFieldLength = b(signalFieldBitModel->getHeaderLength()).get();
         if (dataFieldLengthInBits + encodedSignalFieldLength > bits->getSize())
             throw cRuntimeError("The calculated data field length = %d is greater then the actual bitvector length = %d", dataFieldLengthInBits, bits->getSize());

@@ -35,7 +35,7 @@ const IReceptionBitModel *LayeredErrorModelBase::computeBitModel(const LayeredTr
     if (bitErrorRate == 0)
         return new ReceptionBitModel(transmissionBitModel->getHeaderLength(), transmissionBitModel->getHeaderBitRate(), transmissionBitModel->getDataLength(), transmissionBitModel->getDataBitRate(), new BitVector(*transmissionBitModel->getBits()), bitErrorRate);
     else {
-        BitVector *receivedBits = new BitVector(*transmissionBitModel->getBits());
+        BitVector *receivedBits = new BitVector(*transmissionBitModel->getAllBits());
         for (unsigned int i = 0; i < receivedBits->getSize(); i++) {
             if (uniform(0, 1) < bitErrorRate)
                 receivedBits->toggleBit(i);
