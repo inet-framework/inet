@@ -203,7 +203,7 @@ const ITransmissionSymbolModel *Ieee80211LayeredOfdmTransmitter::createSymbolMod
             ofdmSymbol = dynamic_cast<const Ieee80211OfdmSymbol *>(dataSymbol);
             mergedSymbols->push_back(new Ieee80211OfdmSymbol(*ofdmSymbol));
         }
-        const Ieee80211OfdmTransmissionSymbolModel *transmissionSymbolModel = new Ieee80211OfdmTransmissionSymbolModel(1, 1.0 / mode->getSignalMode()->getDuration(), mergedSymbols->size() - 1, 1.0 / mode->getSymbolInterval(), mergedSymbols, signalFieldSymbolModel->getHeaderModulation(), dataFieldSymbolModel->getPayloadModulation());
+        const Ieee80211OfdmTransmissionSymbolModel *transmissionSymbolModel = new Ieee80211OfdmTransmissionSymbolModel(1, 1.0 / mode->getSignalMode()->getDuration(), mergedSymbols->size() - 1, 1.0 / mode->getSymbolInterval(), mergedSymbols, signalFieldSymbolModel->getHeaderModulation(), dataFieldSymbolModel->getDataModulation());
         delete signalFieldSymbolModel;
         delete dataFieldSymbolModel;
         return transmissionSymbolModel;

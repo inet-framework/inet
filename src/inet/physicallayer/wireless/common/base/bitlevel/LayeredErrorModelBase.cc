@@ -33,14 +33,14 @@ const IReceptionBitModel *LayeredErrorModelBase::computeBitModel(const LayeredTr
 {
     const TransmissionBitModel *transmissionBitModel = check_and_cast<const TransmissionBitModel *>(transmission->getBitModel());
     if (bitErrorRate == 0)
-        return new ReceptionBitModel(transmissionBitModel->getHeaderLength(), transmissionBitModel->getHeaderBitRate(), transmissionBitModel->getDataLength(), transmissionBitModel->getDataBitRate(), new BitVector(*transmissionBitModel->getBits()), bitErrorRate);
+        return new ReceptionBitModel(transmissionBitModel->getHeaderLength(), transmissionBitModel->getHeaderGrossBitrate(), transmissionBitModel->getDataLength(), transmissionBitModel->getDataGrossBitrate(), new BitVector(*transmissionBitModel->getAllBits()), bitErrorRate);
     else {
         BitVector *receivedBits = new BitVector(*transmissionBitModel->getAllBits());
         for (unsigned int i = 0; i < receivedBits->getSize(); i++) {
             if (uniform(0, 1) < bitErrorRate)
                 receivedBits->toggleBit(i);
         }
-        return new ReceptionBitModel(transmissionBitModel->getHeaderLength(), transmissionBitModel->getHeaderBitRate(), transmissionBitModel->getDataLength(), transmissionBitModel->getDataBitRate(), receivedBits, bitErrorRate);
+        return new ReceptionBitModel(transmissionBitModel->getHeaderLength(), transmissionBitModel->getHeaderGrossBitrate(), transmissionBitModel->getDataLength(), transmissionBitModel->getDataGrossBitrate(), receivedBits, bitErrorRate);
     }
 }
 
@@ -48,12 +48,12 @@ const IReceptionSymbolModel *LayeredErrorModelBase::computeSymbolModel(const Lay
 {
     if (symbolErrorRate == 0) {
         const TransmissionSymbolModel *transmissionSymbolModel = check_and_cast<const TransmissionSymbolModel *>(transmission->getSymbolModel());
-        return new ReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getPayloadSymbolLength(), transmissionSymbolModel->getPayloadSymbolRate(), new std::vector<const ISymbol *>(*transmissionSymbolModel->getSymbols()), symbolErrorRate);
+        return new ReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getDataSymbolLength(), transmissionSymbolModel->getDataSymbolRate(), new std::vector<const ISymbol *>(*transmissionSymbolModel->getAllSymbols()), symbolErrorRate);
     }
     else {
         const TransmissionSymbolModel *transmissionSymbolModel = check_and_cast<const TransmissionSymbolModel *>(transmission->getSymbolModel());
-        const ApskModulationBase *modulation = check_and_cast<const ApskModulationBase *>(transmissionSymbolModel->getPayloadModulation());
-        const std::vector<const ISymbol *> *transmittedSymbols = transmissionSymbolModel->getSymbols();
+        const ApskModulationBase *modulation = check_and_cast<const ApskModulationBase *>(transmissionSymbolModel->getDataModulation());
+        const std::vector<const ISymbol *> *transmittedSymbols = transmissionSymbolModel->getAllSymbols();
         std::vector<const ISymbol *> *receivedSymbols = new std::vector<const ISymbol *>();
         for (auto& transmittedSymbols_i : *transmittedSymbols) {
             if (uniform(0, 1) < symbolErrorRate) {
@@ -67,7 +67,7 @@ const IReceptionSymbolModel *LayeredErrorModelBase::computeSymbolModel(const Lay
             else
                 receivedSymbols->push_back(transmittedSymbols_i);
         }
-        return new ReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getPayloadSymbolLength(), transmissionSymbolModel->getPayloadSymbolRate(), receivedSymbols, symbolErrorRate);
+        return new ReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getDataSymbolLength(), transmissionSymbolModel->getDataSymbolRate(), receivedSymbols, symbolErrorRate);
     }
 }
 
