@@ -37,7 +37,7 @@ class INET_API NoiseSource : public cSimpleModule, public virtual IRadio
     virtual void startTransmission();
     virtual void endTransmission();
 
-    virtual void scheduleSleepTimer();
+    virtual void scheduleSleepTimer(simtime_t transmissionDuration);
     virtual void scheduleTransmissionTimer(const ITransmission *transmission);
 
   public:

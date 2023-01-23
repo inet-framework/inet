@@ -62,13 +62,14 @@ void NoiseSource::startTransmission()
 
 void NoiseSource::endTransmission()
 {
+    Signal *signal = static_cast<Signal *>(transmissionTimer->getContextPointer());
     transmissionTimer->setContextPointer(nullptr);
-    scheduleSleepTimer();
+    scheduleSleepTimer(signal->getDuration());
 }
 
-void NoiseSource::scheduleSleepTimer()
+void NoiseSource::scheduleSleepTimer(simtime_t transmissionDuration)
 {
-    scheduleAfter(par("sleepInterval"), sleepTimer);
+    scheduleAfter(par("sleepInterval") - transmissionDuration, sleepTimer);
 }
 
 void NoiseSource::scheduleTransmissionTimer(const ITransmission *transmission)
