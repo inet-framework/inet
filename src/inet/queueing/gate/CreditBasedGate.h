@@ -8,7 +8,9 @@
 #ifndef __INET_CREDITBASEDGATE_H
 #define __INET_CREDITBASEDGATE_H
 
+#include "inet/common/ModuleRef.h"
 #include "inet/queueing/base/PacketGateBase.h"
+#include "inet/queueing/gate/PeriodicGate.h"
 
 namespace inet {
 namespace queueing {
@@ -19,6 +21,8 @@ class INET_API CreditBasedGate : public PacketGateBase, public cListener
     static simsignal_t creditsChangedSignal;
 
   protected:
+    ModuleRef<PeriodicGate> periodicGate;
+
     // parameters
     double idleCreditGainRate = NaN;
     double transmitCreditSpendRate = NaN;
@@ -44,6 +48,7 @@ class INET_API CreditBasedGate : public PacketGateBase, public cListener
 
     virtual void processPacket(Packet *packet) override;
     virtual bool hasAvailablePacket() const { return provider->canPullSomePacket(inputGate->getPathStartGate()); }
+    virtual bool isPeriodicGateOpen() const { return periodicGate->isOpen(); }
     virtual void updateCurrentCredit();
     virtual void updateCurrentCreditGainRate();
     virtual void emitCurrentCredit();
@@ -59,6 +64,7 @@ class INET_API CreditBasedGate : public PacketGateBase, public cListener
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, double value, cObject *details) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, bool value, cObject *details) override;
 };
 
 } // namespace queueing

@@ -37,6 +37,9 @@ void CreditBasedGate::initialize(int stage)
         lastCurrentCreditEmitted = currentCredit;
         lastCurrentCreditEmittedTime = simTime();
         isOpen_ = currentCredit >= transmitCreditLimit;
+        periodicGate.reference(outputGate, false);
+        if (periodicGate != nullptr)
+            check_and_cast<cModule *>(periodicGate.get())->subscribe(gateStateChangedSignal, this);
         cModule *module = getContainingNicModule(this);
         module->subscribe(transmissionStartedSignal, this);
         module->subscribe(transmissionEndedSignal, this);
@@ -137,10 +140,27 @@ void CreditBasedGate::updateCurrentCreditGainRate()
 {
     if (isTransmitting || isInterpacketGap)
         currentCreditGainRate = -transmitCreditSpendRate;
+    else if (periodicGate != nullptr && !isPeriodicGateOpen())
+        currentCreditGainRate = 0;
     else if (currentCredit < 0 || hasAvailablePacket())
         currentCreditGainRate = idleCreditGainRate;
     else
         currentCreditGainRate = 0;
+}
+
+void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, bool value, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(simsignal));
+    if (simsignal == gateStateChangedSignal) {
+        // 1. update currentCreditGainRate and notify listeners about currentCredit change
+        updateCurrentCredit();
+        updateCurrentCreditGainRate();
+        emitCurrentCredit();
+        // 2. reschedule change timer when currentCredit reaches transmitCreditLimit
+        scheduleChangeTimer();
+    }
+    else
+        throw cRuntimeError("Unknown signal");
 }
 
 void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, double value, cObject *details)
