@@ -6,6 +6,7 @@ Tests ScalarNoise max and min functions
 % includes:
 #include <stdio.h>
 #include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarNoise.h"
+#include "inet/common/math/Functions.h"
 
 %global:
 
@@ -17,14 +18,12 @@ using inet::units::values::Hz;
 using inet::units::values::MHz;
 using inet::units::values::kHz;
 
-void printBoundedMinMaxPower(const std::map<simtime_t, W>& powerChangesBase,
+void printBoundedMinMaxPower(const Ptr<const math::IFunction<W, math::Domain<simtime_t>>>& powerFunction,
         const omnetpp::SimTime& startTime, const omnetpp::SimTime& endTime)
 {
     Hz centerFrequency = MHz(1000);
     Hz bandwidth = kHz(1);
-    auto testPowerChanges = new std::map<simtime_t, W>(powerChangesBase);
-    ScalarNoise test_unit(startTime, endTime, centerFrequency, bandwidth,
-            testPowerChanges);
+    ScalarNoise test_unit(startTime, endTime, centerFrequency, bandwidth, powerFunction);
     char time_bounds[30];
     sprintf(time_bounds, "simtime (ms) %4.1f-%4.1f: ", startTime.dbl()*1000.0, endTime.dbl()*1000.0);
     EV << time_bounds << "max:" << test_unit.computeMaxPower(startTime, endTime) << endl;
@@ -36,25 +35,24 @@ auto t2 = SimTime(8, SimTimeUnit::SIMTIME_MS);
 auto t3 = SimTime(18, SimTimeUnit::SIMTIME_MS);
 auto t4 = SimTime(20, SimTimeUnit::SIMTIME_MS);
 auto deltaT = SimTime(100, SimTimeUnit::SIMTIME_US);
-std::map<simtime_t, W> powerChangesBase;
-powerChangesBase.insert(std::pair<simtime_t, W>( t1, W(5) ));
-powerChangesBase.insert(std::pair<simtime_t, W>( t2, W(3) ));
-powerChangesBase.insert(std::pair<simtime_t, W>( t3, W(-5) ));
-powerChangesBase.insert(std::pair<simtime_t, W>( t4, W(-3) ));
 
-printBoundedMinMaxPower(powerChangesBase, 0, t1-deltaT); //max: 0, min: NaN
-printBoundedMinMaxPower(powerChangesBase, t1-deltaT, t1); //max: 0, min: NaN
-printBoundedMinMaxPower(powerChangesBase, t1-deltaT, t1+deltaT); //max: 5, min: 5
-printBoundedMinMaxPower(powerChangesBase, t1, t2-deltaT); //max: 5. min: 5
-printBoundedMinMaxPower(powerChangesBase, t1, t2+deltaT); //max: 8, min: 5
+const auto boxcar1 = makeShared<math::Boxcar1DFunction<W, simtime_t>>(t1, t3, W(5));
+const auto boxcar2 = makeShared<math::Boxcar1DFunction<W, simtime_t>>(t2, t4, W(3));
+const auto powerFunction = makeShared<math::AddedFunction<W, math::Domain<simtime_t>>>(boxcar1, boxcar2);
+
+printBoundedMinMaxPower(powerFunction, 0, t1-deltaT); //max: 0, min: NaN
+printBoundedMinMaxPower(powerFunction, t1-deltaT, t1); //max: 0, min: NaN
+printBoundedMinMaxPower(powerFunction, t1-deltaT, t1+deltaT); //max: 5, min: 5
+printBoundedMinMaxPower(powerFunction, t1, t2-deltaT); //max: 5. min: 5
+printBoundedMinMaxPower(powerFunction, t1, t2+deltaT); //max: 8, min: 5
 auto startTime = SimTime(10, SimTimeUnit::SIMTIME_MS);
 auto endTime = SimTime(11, SimTimeUnit::SIMTIME_MS);
-printBoundedMinMaxPower(powerChangesBase, startTime, endTime); // max:8, min: 8
-printBoundedMinMaxPower(powerChangesBase, t1, t3); // max: 8, min: 5
-printBoundedMinMaxPower(powerChangesBase, t2-deltaT, t4); // max: 8, min: 3
-printBoundedMinMaxPower(powerChangesBase, t3, t4+deltaT); // max: 3, min: 0
-printBoundedMinMaxPower(powerChangesBase, t4, t4+deltaT); // max: 0, min: 0
-printBoundedMinMaxPower(powerChangesBase, t4+deltaT, t4+2*deltaT); // max: 0, min: NaN
+printBoundedMinMaxPower(powerFunction, startTime, endTime); // max:8, min: 8
+printBoundedMinMaxPower(powerFunction, t1, t3); // max: 8, min: 5
+printBoundedMinMaxPower(powerFunction, t2-deltaT, t4); // max: 8, min: 3
+printBoundedMinMaxPower(powerFunction, t3, t4+deltaT); // max: 3, min: 0
+printBoundedMinMaxPower(powerFunction, t4, t4+deltaT); // max: 0, min: 0
+printBoundedMinMaxPower(powerFunction, t4+deltaT, t4+2*deltaT); // max: 0, min: NaN
 
 %contains: stdout
 simtime (ms)  0.0- 4.9: max:0 W
@@ -62,7 +60,7 @@ simtime (ms)  0.0- 4.9: min:0 W
 simtime (ms)  4.9- 5.0: max:0 W
 simtime (ms)  4.9- 5.0: min:0 W
 simtime (ms)  4.9- 5.1: max:5 W
-simtime (ms)  4.9- 5.1: min:5 W
+simtime (ms)  4.9- 5.1: min:0 W
 simtime (ms)  5.0- 7.9: max:5 W
 simtime (ms)  5.0- 7.9: min:5 W
 simtime (ms)  5.0- 8.1: max:8 W
