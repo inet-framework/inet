@@ -208,7 +208,7 @@ const ITransmissionSymbolModel *Ieee80211LayeredOfdmTransmitter::createSymbolMod
         delete dataFieldSymbolModel;
         return transmissionSymbolModel;
     }
-    return new Ieee80211OfdmTransmissionSymbolModel(-1, NaN, -1, NaN, nullptr, mode->getSignalMode()->getModulation()->getSubcarrierModulation(), mode->getDataMode()->getModulation()->getSubcarrierModulation());
+    return new Ieee80211OfdmTransmissionSymbolModel(-1, NaN, -1, NaN, nullptr, mode->getSignalMode()->getModulation(), mode->getDataMode()->getModulation());
 }
 
 const ITransmissionBitModel *Ieee80211LayeredOfdmTransmitter::createBitModel(const ITransmissionBitModel *signalFieldBitModel, const ITransmissionBitModel *dataFieldBitModel, const ITransmissionPacketModel *packetModel) const

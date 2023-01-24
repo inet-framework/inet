@@ -19,6 +19,7 @@
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalSymbolModel.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211OfdmSymbolModel.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmModulation.h"
 
 namespace inet {
 namespace physicallayer {
@@ -98,9 +99,10 @@ const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const L
     double scalarSnir = getScalarSnir(snir);
     receivedSymbols->push_back(corruptOfdmSymbol(check_and_cast<const Ieee80211OfdmSymbol *>(symbols->at(0)), &BpskModulation::singleton, scalarSnir));
     // The remaining are all data field symbols
-    auto dataModulation = check_and_cast<const MqamModulationBase *>(transmissionSymbolModel->getDataModulation());
+    auto dataModulation = check_and_cast<const Ieee80211OfdmModulation *>(transmissionSymbolModel->getDataModulation());
+    auto dataSubcarrierModulation = check_and_cast<const MqamModulationBase *>(dataModulation->getSubcarrierModulation());
     for (unsigned int i = 1; i < symbols->size(); i++) {
-        Ieee80211OfdmSymbol *corruptedOFDMSymbol = corruptOfdmSymbol(check_and_cast<const Ieee80211OfdmSymbol *>(symbols->at(i)), dataModulation, scalarSnir);
+        Ieee80211OfdmSymbol *corruptedOFDMSymbol = corruptOfdmSymbol(check_and_cast<const Ieee80211OfdmSymbol *>(symbols->at(i)), dataSubcarrierModulation, scalarSnir);
         receivedSymbols->push_back(corruptedOFDMSymbol);
     }
     return new Ieee80211OfdmReceptionSymbolModel(transmissionSymbolModel->getHeaderSymbolLength(), transmissionSymbolModel->getHeaderSymbolRate(), transmissionSymbolModel->getDataSymbolLength(), transmissionSymbolModel->getDataSymbolRate(), receivedSymbols);
