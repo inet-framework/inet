@@ -16,7 +16,7 @@
 # Authors: Andras Varga, Zoltan Bojthe
 #
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from typing import List
 import argparse
 import copy
 import csv
@@ -75,30 +75,43 @@ fpExtraArgs = {
             }
 }
 
-def fpGroup2Str(fpGroup, separ1=';', separ2=' '):
-    return separ1.join(separ2.join(sorted(x)) for x in fpGroup)
+
+def formatFingerprintGroupForCsv(fingerprintGroup : List[List[str]]):
+    """
+    Formatting the fingerprint group for csv file.
+    Example fingerprintGroup: [ ['1234-5678/tplx', ['2345-6789/tplx']], ['0123-abcd/tl', '2345-6789/tl']]
+    """
+    return ';'.join(' '.join(sorted(x)) for x in fingerprintGroup)
 
 
-def str2FpGroup(str, separ1=';', separ2=' '):
-    return list(list(x.split(separ2)) for x in str.split(separ1))
+def formatFingerprintGroupForOmnetpp(fingerprintGroup : List[List[str]]) -> str :
+    """ formatting the fingerprint group for omnetpp command line argument """
+    return ', '.join(' '.join(sorted(x)) for x in fingerprintGroup)
 
 
-def filteringFpGroup(fpGroup, fpFilterList, excludeFpFilterList):
-    if len(fpFilterList):
-        # filtering with fpFilterList
+def parseFingerprintGroupFromCsv(str : str) -> List[List[str]] :
+    return list(list(x.split(' ')) for x in str.split(';'))
+
+
+def parseFingerprintGroupFromOmnetpp(str : str) -> List[List[str]] :
+    return list(list(x.split(' ')) for x in str.split(', '))
+
+
+def filterFingerprintGroup(fingerprintGroup : List[List[str]], includedFingerprintTypes : List[str], excludedFingerprintTypes : List[str]) -> List[List[str]]:
+    """ returns filtered out fingerprint group"""
+    if includedFingerprintTypes:
         l1 = list()
-        for i in range(len(fpGroup)):
-            s = list(filter(lambda x : x.split('/', 1)[1] in fpFilterList, fpGroup[i]))
+        for i in range(len(fingerprintGroup)):
+            s = list(filter(lambda x : x.split('/', 1)[1] in includedFingerprintTypes, fingerprintGroup[i]))
             if s:
                 l1.append(s)
     else:
-        l1 = fpGroup
+        l1 = fingerprintGroup
 
-    if len(excludeFpFilterList):
-        # filtering with excludeFpFilterList
+    if excludedFingerprintTypes:
         l2 = list()
         for i in range(len(l1)):
-            s = list(filter(lambda x : x.split('/', 1)[1] not in excludeFpFilterList, l1[i]))
+            s = list(filter(lambda x : x.split('/', 1)[1] not in excludedFingerprintTypes, l1[i]))
             if s:
                 l2.append(s)
     else:
@@ -107,17 +120,17 @@ def filteringFpGroup(fpGroup, fpFilterList, excludeFpFilterList):
     return l2
 
 
-def fpGroupMerge(mFp, otherFp):
-    for i in range(len(otherFp)):
-        if i >= len(mFp):
-            mFp.append(list())
-        s = list(filter(lambda x : x not in mFp[i], otherFp[i]))
+def mergeFingerprintListIntoGroup(fingerprintGroup : List[List[str]], fingerprintList : List[str]):
+    for i in range(len(fingerprintList)):
+        if i >= len(fingerprintGroup):
+            fingerprintGroup.append(list())
+        s = list(filter(lambda x : x not in fingerprintGroup[i], fingerprintList[i]))
         if s:
-            mFp[i].extend(s)
+            fingerprintGroup[i].extend(s)
         #mFp[i].append(otherFp[i])  # TODO filter to unique
 
 
-def diffFpGroups(actualFpGroup, expectedFpGroup):
+def diffFpGroups(actualFpGroup: List[List[str]], expectedFpGroup: List[List[str]]):
     actFp = actualFpGroup.copy()
     expFp = expectedFpGroup.copy()
     for act in actualFpGroup:
@@ -125,6 +138,8 @@ def diffFpGroups(actualFpGroup, expectedFpGroup):
             if len(set(exp) & set(act)) > 0:
                 actFp.remove(act)
                 expFp.remove(exp)
+#    actFp = [fp for fp in actualFpGroup if all(fp_elem not in expectedFpGroup for fp_elem in fp)]
+#    expFp = [fp for fp in expectedFpGroup if all(fp_elem not in actualFpGroup for fp_elem in fp)]
     return (actFp, expFp)
 
 
@@ -158,9 +173,9 @@ class FingerprintTestCaseGenerator():
             title = simulation['wd'] + " " + simulation['args'] + " " + simulation['tags']
             if not filterRegexList or ['x' for regex in filterRegexList if re.search(regex, title)]: # if any regex matches title
                 if not excludeFilterRegexList or not ['x' for regex in excludeFilterRegexList if re.search(regex, title)]: # if NO exclude-regex matches title
-                    fingerprints = str2FpGroup(simulation['fingerprint'])
+                    fingerprints = parseFingerprintGroupFromCsv(simulation['fingerprint'])
                     if len(fpFilterList) > 0 or len(excludeFpFilterList) > 0:
-                        fingerprints = filteringFpGroup(fingerprints, fpFilterList, excludeFpFilterList)
+                        fingerprints = filterFingerprintGroup(fingerprints, fpFilterList, excludeFpFilterList)
                     if len(fingerprints):
                         fpArg = set()
                         fpSet = set()
@@ -275,7 +290,7 @@ class FingerprintTestCaseGenerator():
                                 print("ERROR: Cannot replace fingerprint '%s' to '%s' at '%s' line %d (cnt: %d):\n     %s" % (oldFpStr, newFpStr, csvFile, line, cnt, lines[line]))
                     lines[line] = newLine
                 else:
-                    print("ERROR: Cannot replace fingerprint '%s' to '%s' at '%s' line %d:\n     %s" % (fpGroup2Str(oldFingerprint), fpGroup2Str(newFingerprint), csvFile, line, lines[line]))
+                    print("ERROR: Cannot replace fingerprint '%s' to '%s' at '%s' line %d:\n     %s" % (formatFingerprintGroupForCsv(oldFingerprint), formatFingerprintGroupForCsv(newFingerprint), csvFile, line, lines[line]))
 
         return ''.join(lines) if containsComputedFingerprint else None
 
@@ -389,8 +404,8 @@ class SimulationTestCase(unittest.TestCase):
                     m = re.search(pattern, err)
                     if m:
                         isFingerprintFail = True
-                        result.computedFingerprint = str2FpGroup(m.group(1), ', ')
-                        result.expectedFingerprint = str2FpGroup(m.group(2), ', ')
+                        result.computedFingerprint = parseFingerprintGroupFromOmnetpp(m.group(1))
+                        result.expectedFingerprint = parseFingerprintGroupFromOmnetpp(m.group(2))
                         # TODO only the last failed run's fingerprints stored
                     else:
                         raise Exception("Cannot parse fingerprint-related error message: " + err + "\nPattern: >>>"+pattern+'<<<')
@@ -468,7 +483,7 @@ class FingerprintTestCase(SimulationTestCase):
 
         command = (exeName + "_dbg" if debug else exeName + "_release" if release else exeName) + " -u Cmdenv " + progArgs + ' ' + self.extraFpArg + \
             _iif(self.simtimelimit != "", " --sim-time-limit=" + self.simtimelimit, "") + \
-            " \"--fingerprint=" + fpGroup2Str(self.fingerprint, ', ') + "\" --cpu-time-limit=" + cpuTimeLimit + \
+            " \"--fingerprint=" + formatFingerprintGroupForOmnetpp(self.fingerprint) + "\" --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=true" + \
             " --result-dir=" + resultdir + \
             " " + extraOppRunArgs
@@ -500,12 +515,12 @@ class FingerprintTestCase(SimulationTestCase):
                 curFp = self.fingerprint
 
             if len(curFp):
-                fpGroupMerge(computedFingerprints, curFp)
+                mergeFingerprintListIntoGroup(computedFingerprints, curFp)
 
         if anyFingerprintBad:
             self.storeFingerprintCallback(computedFingerprints)
             (afp, efp) = diffFpGroups(computedFingerprints, self.fingerprint)
-            assert False, "some fingerprint mismatch: actual '" + fpGroup2Str(afp) + "', expected: '" + fpGroup2Str(efp) + "'"
+            assert False, "some fingerprint mismatch: actual '" + formatFingerprintGroupForCsv(afp) + "', expected: '" + formatFingerprintGroupForCsv(efp) + "'"
 
     def __str__(self):
         return self.title
@@ -785,11 +800,14 @@ if __name__ == "__main__":
     parser.add_argument('-a', '--oppargs', action='append', metavar='oppargs', nargs=argparse.REMAINDER, help='extra opp_run arguments until the end of the line')
     parser.add_argument('-n', type=int, default=1, help='Split the selected test cases into n sets, and only run one of these sets')
     parser.add_argument('-i', type=int, default=0, help='Which set of test cases to run [0..n-1]')
+    parser.add_argument('-l', '--logfile', default = "fingerprinttest.out", metavar='filename', help='name of the logfile')
     args = parser.parse_args()
 
-    if os.path.isfile(logFile):
-        FILE = open(logFile, "w")
-        FILE.close()
+    logFile = args.logfile
+
+    # create / reset logFile
+    FILE = open(logFile, "w")
+    FILE.close()
 
     if not args.testspecfiles:
         args.testspecfiles = glob.glob('*.csv')
