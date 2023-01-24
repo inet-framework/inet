@@ -33,14 +33,17 @@ void CreditBasedGate::initialize(int stage)
         maxCredit = par("maxCredit");
         displayStringTextFormat = par("displayStringTextFormat");
         currentCredit = par("initialCredit");
+        isAccumulatingBeforeGateClose = par("isAccumulatingBeforeGateClose");
         currentCreditGainRate = idleCreditGainRate;
         lastCurrentCreditEmitted = currentCredit;
         lastCurrentCreditEmittedTime = simTime();
         isOpen_ = currentCredit >= transmitCreditLimit;
+        periodicGate.reference(outputGate, false);
         cModule *module = getContainingNicModule(this);
         module->subscribe(transmissionStartedSignal, this);
         module->subscribe(transmissionEndedSignal, this);
         module->subscribe(interpacketGapEndedSignal, this);
+        module->subscribe(gateStateChangedSignal, this);
         changeTimer = new cMessage("ChangeTimer");
         WATCH(currentCredit);
         WATCH(currentCreditGainRate);
@@ -50,6 +53,7 @@ void CreditBasedGate::initialize(int stage)
         updateCurrentCreditGainRate();
         emitCurrentCredit();
         scheduleChangeTimer();
+        isInPreClosingTime();
     }
     else if (stage == INITSTAGE_LAST)
         updateDisplayString();
@@ -68,6 +72,8 @@ void CreditBasedGate::handleMessage(cMessage *message)
         updateCurrentCreditGainRate();
         // 5. reschedule change timer based on currentCredit and currentCreditGainRate
         scheduleChangeTimer();
+        // 6. check if pre-closing time has begun
+        isInPreClosingTime();
     }
     else
         throw cRuntimeError("Unknown message");
@@ -137,10 +143,46 @@ void CreditBasedGate::updateCurrentCreditGainRate()
 {
     if (isTransmitting || isInterpacketGap)
         currentCreditGainRate = -transmitCreditSpendRate;
+    else if (!isTransmissionGateOpen())
+        currentCreditGainRate = 0;
     else if (currentCredit < 0 || hasAvailablePacket())
         currentCreditGainRate = idleCreditGainRate;
     else
         currentCreditGainRate = 0;
+}
+
+void CreditBasedGate::isInPreClosingTime()
+{
+    if(isOpen_ && isTransmissionGateOpen() && !canPacketBeTransmitted() && hasAvailablePacket()){
+        if(preClosingStartTime == -1)
+            preClosingStartTime = simTime();
+    }
+    else
+        preClosingStartTime = -1;
+    
+}
+
+void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, bool value, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(simsignal));
+    if(periodicGate->getId() == source->getId()){
+        if (simsignal == gateStateChangedSignal) {
+            if (!value && isAccumulatingBeforeGateClose && preClosingStartTime != -1) {
+                // 1. update credit
+                currentCredit = lastCurrentCreditEmitted + currentCreditGainRate * (simTime() - preClosingStartTime).dbl();
+                currentCredit = std::max(minCredit, std::min(maxCredit, currentCredit));
+            }
+            // 2. update currentCreditGainRate and notify listeners about currentCredit change
+            updateCurrentCreditGainRate();
+            emitCurrentCredit();
+            // 3. reschedule change timer when currentCredit reaches transmitCreditLimit
+            scheduleChangeTimer();
+            // 4. reset preClosingStartTime
+            isInPreClosingTime();
+        }
+        else
+            throw cRuntimeError("Unknown signal");
+    }
 }
 
 void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, double value, cObject *details)
@@ -158,6 +200,8 @@ void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, d
             emitCurrentCredit();
             // 3. reschedule change timer when currentCredit reaches transmitCreditLimit
             scheduleChangeTimer();
+            // 4. check if pre-closing time has begun
+            isInPreClosingTime();
         }
     }
     else
@@ -192,6 +236,8 @@ void CreditBasedGate::receiveSignal(cComponent *source, simsignal_t simsignal, c
             emitCurrentCredit();
             // 4. reschedule change timer when currentCredit reaches transmitCreditLimit
             scheduleChangeTimer();
+            // 5. check if pre-closing time has begun
+            isInPreClosingTime();
         }
 #endif
     }
@@ -209,6 +255,8 @@ void CreditBasedGate::handleCanPullPacketChanged(cGate *gate)
     emitCurrentCredit();
     // 3. reschedule change timer when currentCredit reaches transmitCreditLimit
     scheduleChangeTimer();
+    // 4. check if pre-closing time has begun
+    isInPreClosingTime();
     PacketGateBase::handleCanPullPacketChanged(gate);
 }
 

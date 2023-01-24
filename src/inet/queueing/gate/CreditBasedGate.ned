@@ -38,6 +38,7 @@ simple CreditBasedGate extends PacketGateBase like IPacketGate
         double transmitCreditLimit = default(0); // credit limit above which the gate is open
         double minCredit = default(-inf); // minimum number of credits
         double maxCredit = default(inf); // maximum number of credits
+        bool isAccumulatingBeforeGateClose = default(false); // whether credit increases before gate close event when no packets can be sent anymore
         displayStringTextFormat = default("contains %n cr\nserved %p pk (%l)"); // determines display string text above the submodule
         @class(CreditBasedGate);
         @signal[creditsChanged](type=double);
