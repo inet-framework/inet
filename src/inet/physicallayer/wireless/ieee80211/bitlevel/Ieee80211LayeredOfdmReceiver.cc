@@ -166,7 +166,7 @@ const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createDataFieldPacket
     if (levelOfDetail > PACKET_DOMAIN) { // Create from the bit model
         if (dataDecoder)
             dataFieldPacketModel = dataDecoder->decode(dataFieldBitModel);
-        else {
+        else if (mode != nullptr) {
             const Ieee80211OfdmCode *code = mode->getDataMode()->getCode();
             const Ieee80211OfdmDecoder decoder(code);
             dataFieldPacketModel = decoder.decode(dataFieldBitModel);
@@ -276,7 +276,7 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createDataFieldBitModel(
     if (levelOfDetail > BIT_DOMAIN) { // Create from symbol model
         if (dataDemodulator) // non-compliant
             dataFieldBitModel = dataDemodulator->demodulate(dataFieldSymbolModel);
-        else { // compliant
+        else if (mode != nullptr) { // compliant
             const Ieee80211OfdmDataMode *dataMode = mode->getDataMode();
             const Ieee80211OfdmDemodulator ofdmDemodulator(dataMode->getModulation());
             dataFieldBitModel = ofdmDemodulator.demodulate(dataFieldSymbolModel);
@@ -323,10 +323,14 @@ const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createCompleteSymbolM
     if (levelOfDetail >= SYMBOL_DOMAIN) {
         const std::vector<const ISymbol *> *symbols = signalFieldSymbolModel->getAllSymbols();
         std::vector<const ISymbol *> *completeSymbols = new std::vector<const ISymbol *>(*symbols);
-        symbols = dataFieldSymbolModel->getAllSymbols();
-        for (auto& symbol : *symbols)
-            completeSymbols->push_back(new Ieee80211OfdmSymbol(*static_cast<const Ieee80211OfdmSymbol *>(symbol)));
-        return new Ieee80211OfdmReceptionSymbolModel(signalFieldSymbolModel->getHeaderSymbolLength(), signalFieldSymbolModel->getHeaderSymbolRate(), dataFieldSymbolModel->getDataSymbolLength(), dataFieldSymbolModel->getDataSymbolRate(), completeSymbols);
+        if (dataFieldSymbolModel != nullptr) {
+            symbols = dataFieldSymbolModel->getAllSymbols();
+            for (auto & symbol : *symbols)
+                completeSymbols->push_back(new Ieee80211OfdmSymbol(*static_cast<const Ieee80211OfdmSymbol *>(symbol)));
+            return new Ieee80211OfdmReceptionSymbolModel(signalFieldSymbolModel->getHeaderSymbolLength(), signalFieldSymbolModel->getHeaderSymbolRate(), dataFieldSymbolModel->getDataSymbolLength(), dataFieldSymbolModel->getDataSymbolRate(), completeSymbols);
+        }
+        else
+            return new Ieee80211OfdmReceptionSymbolModel(signalFieldSymbolModel->getHeaderSymbolLength(), signalFieldSymbolModel->getHeaderSymbolRate(), 0, NaN, completeSymbols);
     }
     return nullptr;
 }
