@@ -84,7 +84,7 @@ const IReceptionPacketModel *Ieee80211OfdmDecoder::createPacketModel(const BitVe
     }
     delete decodedBits;
     packet->setBitError(hasBitError);
-    return new ReceptionPacketModel(packet, bps(NaN), bps(NaN));
+    return new ReceptionPacketModel(packet, Mbps(54), Mbps(54));
 }
 
 ShortBitVector Ieee80211OfdmDecoder::getSignalFieldRate(const BitVector& signalField) const
