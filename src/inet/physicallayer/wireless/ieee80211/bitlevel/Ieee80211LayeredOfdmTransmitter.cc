@@ -93,8 +93,7 @@ std::ostream& Ieee80211LayeredOfdmTransmitter::printToStream(std::ostream& strea
 
 const ITransmissionPacketModel *Ieee80211LayeredOfdmTransmitter::createPacketModel(const Packet *packet) const
 {
-    auto bitrate = mode->getDataMode()->getNetBitrate();
-    return new TransmissionPacketModel(packet, bitrate, bitrate);
+    return new TransmissionPacketModel(packet, mode->getHeaderMode()->getNetBitrate(), mode->getDataMode()->getNetBitrate());
 }
 
 const ITransmissionAnalogModel *Ieee80211LayeredOfdmTransmitter::createScalarAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel) const

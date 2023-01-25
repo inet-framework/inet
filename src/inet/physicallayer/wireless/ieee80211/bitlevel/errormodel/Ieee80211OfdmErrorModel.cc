@@ -58,8 +58,7 @@ const IReceptionPacketModel *Ieee80211OfdmErrorModel::computePacketModel(const L
     if (packetErrorRate != 0 && uniform(0, 1) < packetErrorRate)
         receivedPacket->setBitError(true);
     receivedPacket->addTagIfAbsent<ErrorRateInd>()->setPacketErrorRate(packetErrorRate);
-    auto bitrate = transmissionPacketModel->getDataNetBitrate();
-    return new ReceptionPacketModel(receivedPacket, bitrate, bitrate);
+    return new ReceptionPacketModel(receivedPacket, transmissionPacketModel->getHeaderNetBitrate(), transmissionPacketModel->getDataNetBitrate());
 }
 
 const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const LayeredTransmission *transmission, const ISnir *snir) const
