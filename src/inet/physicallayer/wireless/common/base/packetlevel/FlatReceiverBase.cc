@@ -89,7 +89,7 @@ bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening,
         else if (packetErrorRate == 1.0)
             return false;
         else {
-            ASSERT(0.0 < packetErrorRate && packetErrorRate <= 1.0);
+            ASSERT(0.0 < packetErrorRate && packetErrorRate < 1.0);
             return dblrand() > packetErrorRate;
         }
     }
