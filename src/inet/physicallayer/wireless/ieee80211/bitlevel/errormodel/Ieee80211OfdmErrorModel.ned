@@ -31,6 +31,7 @@ import inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211Nis
 module Ieee80211OfdmErrorModel extends Ieee80211NistErrorModel like ILayeredErrorModel
 {
     parameters:
+        string symbolCorruptionMode @enum("1bit", "uniform") = default("1bit");
         double dataSymbolErrorRate = default(nan);
         double dataBitErrorRate = default(nan);
         double signalSymbolErrorRate = default(nan);

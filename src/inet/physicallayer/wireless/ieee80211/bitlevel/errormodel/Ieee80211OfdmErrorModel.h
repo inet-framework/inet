@@ -20,6 +20,7 @@ namespace physicallayer {
 class INET_API Ieee80211OfdmErrorModel : public Ieee80211NistErrorModel, public ILayeredErrorModel
 {
   protected:
+    const char *symbolCorruptionMode = nullptr;
     double signalSymbolErrorRate;
     double dataSymbolErrorRate;
     double signalBitErrorRate;

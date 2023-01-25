@@ -29,6 +29,7 @@ void Ieee80211OfdmErrorModel::initialize(int stage)
 {
     Ieee80211NistErrorModel::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        symbolCorruptionMode = par("symbolCorruptionMode");
         dataSymbolErrorRate = par("dataSymbolErrorRate");
         dataBitErrorRate = par("dataBitErrorRate");
         signalSymbolErrorRate = par("signalSymbolErrorRate");
