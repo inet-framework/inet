@@ -247,10 +247,9 @@ const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createSignalFieldBitMode
             signalFieldBitModel = signalDemodulator->demodulate(signalFieldSymbolModel);
         else { // compliant
                // In compliant mode, the signal field modulation is always BPSK
-            const Ieee80211OfdmModulation *signalModulation = new Ieee80211OfdmModulation(52, &BpskModulation::singleton);
-            const Ieee80211OfdmDemodulator demodulator(signalModulation);
+            Ieee80211OfdmModulation modulation(52, &BpskModulation::singleton);
+            const Ieee80211OfdmDemodulator demodulator(&modulation);
             signalFieldBitModel = demodulator.demodulate(signalFieldSymbolModel);
-            delete signalModulation;
         }
     }
     else if (levelOfDetail == BIT_DOMAIN) { // Create from bit model (made by the error model)
