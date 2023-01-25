@@ -9,8 +9,8 @@
 
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredReception.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
-#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/ScalarAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
+#include "inet/physicallayer/wireless/common/analogmodel/packetlevel/DimensionalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISymbol.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
@@ -464,9 +464,8 @@ bool Ieee80211LayeredOfdmReceiver::computeIsReceptionPossible(const IListening *
         return false;
     else {
         const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
-        const LayeredReception *scalarReception = check_and_cast<const LayeredReception *>(reception);
-        // TODO scalar
-        const ScalarReceptionSignalAnalogModel *analogModel = check_and_cast<const ScalarReceptionSignalAnalogModel *>(scalarReception->getAnalogModel());
+        const LayeredReception *dimensionalReception = check_and_cast<const LayeredReception *>(reception);
+        const DimensionalReceptionSignalAnalogModel *analogModel = check_and_cast<const DimensionalReceptionSignalAnalogModel *>(dimensionalReception->getAnalogModel());
         if (bandListening->getCenterFrequency() != analogModel->getCenterFrequency() || bandListening->getBandwidth() != analogModel->getBandwidth()) {
             EV_DEBUG << "Computing reception possible: listening and reception bands are different -> reception is impossible" << endl;
             return false;

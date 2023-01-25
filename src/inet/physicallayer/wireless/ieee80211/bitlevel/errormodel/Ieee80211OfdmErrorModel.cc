@@ -8,6 +8,7 @@
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/errormodel/Ieee80211OfdmErrorModel.h"
 
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredSnir.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IApskModulation.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
@@ -69,11 +70,11 @@ const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const Layered
     int dataBitLength = b(transmissionBitModel->getDataLength()).get();
     bps dataBitrate = transmissionBitModel->getDataGrossBitrate();
     ASSERT(transmission->getSymbolModel() != nullptr);
-    const IModulation *signalModulation = transmission->getSymbolModel()->getHeaderModulation();
-    const IModulation *dataModulation = transmission->getSymbolModel()->getDataModulation();
+    const IModulation *signalModulation = check_and_cast<const Ieee80211OfdmModulation *>(transmission->getSymbolModel()->getHeaderModulation())->getSubcarrierModulation();
+    const IModulation *dataModulation = check_and_cast<const Ieee80211OfdmModulation *>(transmission->getSymbolModel()->getDataModulation())->getSubcarrierModulation();
     const BitVector *bits = transmissionBitModel->getAllBits();
     BitVector *corruptedBits = new BitVector(*bits);
-    const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
+    auto analogModel = check_and_cast<const INarrowbandSignal *>(transmission->getAnalogModel());
     if (auto apskSignalModulation = dynamic_cast<const IApskModulation *>(signalModulation)) {
         double signalFieldBer = std::isnan(signalBitErrorRate) ? apskSignalModulation->calculateBER(getScalarSnir(snir), analogModel->getBandwidth(), signalBitrate) : signalBitErrorRate;
         corruptBits(corruptedBits, signalFieldBer, 0, signalBitLength);

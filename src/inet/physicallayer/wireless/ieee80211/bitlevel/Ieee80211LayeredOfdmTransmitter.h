@@ -66,8 +66,8 @@ class INET_API Ieee80211LayeredOfdmTransmitter : public TransmitterBase
     const ITransmissionSampleModel *createSampleModel(const ITransmissionSymbolModel *symbolModel) const;
 
     /* Analog domain */
-    const ITransmissionAnalogModel *createAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSymbolModel *symbolModel, const ITransmissionSampleModel *sampleModel) const;
-    const ITransmissionAnalogModel *createScalarAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel) const;
+    const ITransmissionAnalogModel *createAnalogModel(simtime_t startTime, const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSymbolModel *symbolModel, const ITransmissionSampleModel *sampleModel) const;
+    const ITransmissionAnalogModel *createDimensionalAnalogModel(simtime_t startTime, const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel) const;
 
     const Ieee80211OfdmMode *computeMode(Hz bandwidth) const;
 

@@ -9,8 +9,8 @@
 
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/mobility/contract/IMobility.h"
+#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/DimensionalSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/analogmodel/bitlevel/LayeredTransmission.h"
-#include "inet/physicallayer/wireless/common/analogmodel/bitlevel/ScalarSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/bitlevel/ISignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/radio/bitlevel/SignalPacketModel.h"
 #include "inet/physicallayer/wireless/ieee80211/bitlevel/Ieee80211ConvolutionalCode.h"
@@ -96,7 +96,7 @@ const ITransmissionPacketModel *Ieee80211LayeredOfdmTransmitter::createPacketMod
     return new TransmissionPacketModel(packet, mode->getHeaderMode()->getNetBitrate(), mode->getDataMode()->getNetBitrate());
 }
 
-const ITransmissionAnalogModel *Ieee80211LayeredOfdmTransmitter::createScalarAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel) const
+const ITransmissionAnalogModel *Ieee80211LayeredOfdmTransmitter::createDimensionalAnalogModel(simtime_t startTime, const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel) const
 {
     int headerBitLength = -1;
     int dataBitLength = -1;
@@ -130,8 +130,10 @@ const ITransmissionAnalogModel *Ieee80211LayeredOfdmTransmitter::createScalarAna
     unsigned int numberOfDataApskSymbols = dataBitLength / dataCodeWordSize;
     unsigned int numberOfDataOFDMSymbols = numberOfDataApskSymbols / NUMBER_OF_OFDM_DATA_SUBCARRIERS;
     simtime_t dataDuration = numberOfDataOFDMSymbols * mode->getSymbolInterval();
+    auto endTime = startTime + preambleDuration + headerDuration + dataDuration;
     // TODO: centerFrequency doesn't take the channel into account
-    return new ScalarTransmissionSignalAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, mode->getDataMode()->getBandwidth(), power);
+    auto powerFunction = makeShared<math::Boxcar2DFunction<WpHz, simsec, Hz>>(simsec(startTime), simsec(endTime), centerFrequency - bandwidth / 2, centerFrequency + bandwidth / 2, power / bandwidth);
+    return new DimensionalTransmissionSignalAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, mode->getDataMode()->getBandwidth(), powerFunction);
 }
 
 const ITransmissionPacketModel *Ieee80211LayeredOfdmTransmitter::createSignalFieldPacketModel(const ITransmissionPacketModel *completePacketModel) const
@@ -247,7 +249,7 @@ const ITransmissionSampleModel *Ieee80211LayeredOfdmTransmitter::createSampleMod
         return nullptr;
 }
 
-const ITransmissionAnalogModel *Ieee80211LayeredOfdmTransmitter::createAnalogModel(const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSymbolModel *symbolModel, const ITransmissionSampleModel *sampleModel) const
+const ITransmissionAnalogModel *Ieee80211LayeredOfdmTransmitter::createAnalogModel(simtime_t startTime, const ITransmissionPacketModel *packetModel, const ITransmissionBitModel *bitModel, const ITransmissionSymbolModel *symbolModel, const ITransmissionSampleModel *sampleModel) const
 {
     const ITransmissionAnalogModel *analogModel = nullptr;
     if (digitalAnalogConverter) {
@@ -256,8 +258,8 @@ const ITransmissionAnalogModel *Ieee80211LayeredOfdmTransmitter::createAnalogMod
         else
             throw cRuntimeError("Digital/analog converter needs sample representation");
     }
-    else // TODO Analog model is obligatory, currently we use scalar analog model as default analog model
-        analogModel = createScalarAnalogModel(packetModel, bitModel);
+    else // TODO: Analog model is obligatory, currently we use dimensional analog model as default analog model
+        analogModel = createDimensionalAnalogModel(startTime, packetModel, bitModel);
     return analogModel;
 }
 
@@ -298,7 +300,7 @@ const ITransmission *Ieee80211LayeredOfdmTransmitter::createTransmission(const I
     bitModel = createBitModel(signalFieldBitModel, dataFieldBitModel, packetModel);
     symbolModel = createSymbolModel(signalFieldSymbolModel, dataFieldSymbolModel);
     sampleModel = createSampleModel(symbolModel);
-    analogModel = createAnalogModel(packetModel, bitModel, symbolModel, sampleModel);
+    analogModel = createAnalogModel(startTime, packetModel, bitModel, symbolModel, sampleModel);
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     // assuming movement and rotation during transmission is negligible
     const simtime_t endTime = startTime + analogModel->getDuration();
