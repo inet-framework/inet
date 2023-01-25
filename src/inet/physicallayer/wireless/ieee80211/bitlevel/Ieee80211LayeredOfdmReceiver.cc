@@ -147,15 +147,15 @@ double Ieee80211LayeredOfdmReceiver::getCodeRateFromDecoderModule(const IDecoder
 const IReceptionBitModel *Ieee80211LayeredOfdmReceiver::createCompleteBitModel(const IReceptionBitModel *signalFieldBitModel, const IReceptionBitModel *dataFieldBitModel) const
 {
     if (levelOfDetail >= BIT_DOMAIN) {
-        if (dataFieldBitModel == nullptr)
-            return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderGrossBitrate(), b(-1), bps(NaN), new BitVector(*signalFieldBitModel->getAllBits()), NaN);
-        else {
-            BitVector *bits = new BitVector(*signalFieldBitModel->getAllBits());
+        BitVector *bits = new BitVector(*signalFieldBitModel->getAllBits());
+        if (dataFieldBitModel != nullptr) {
             const BitVector *dataBits = dataFieldBitModel->getAllBits();
             for (unsigned int i = 0; i < dataBits->getSize(); i++)
                 bits->appendBit(dataBits->getBit(i));
             return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderGrossBitrate(), dataFieldBitModel->getDataLength(), dataFieldBitModel->getDataGrossBitrate(), bits, NaN);
         }
+        else
+            return new ReceptionBitModel(signalFieldBitModel->getHeaderLength(), signalFieldBitModel->getHeaderGrossBitrate(), b(0), bps(NaN), bits, NaN);
     }
     return nullptr;
 }
@@ -337,15 +337,15 @@ const IReceptionSymbolModel *Ieee80211LayeredOfdmReceiver::createCompleteSymbolM
 
 const IReceptionPacketModel *Ieee80211LayeredOfdmReceiver::createCompletePacketModel(const char *name, const IReceptionPacketModel *signalFieldPacketModel, const IReceptionPacketModel *dataFieldPacketModel) const
 {
-    if (dataFieldPacketModel == nullptr)
-        return new ReceptionPacketModel(signalFieldPacketModel->getPacket()->dup(), bps(NaN), bps(NaN));
-    else {
-        Packet *packet = new Packet(name);
-        packet->insertAtBack(signalFieldPacketModel->getPacket()->peekAllAsBits());
-        packet->insertAtBack(dataFieldPacketModel->getPacket()->peekAllAsBits());
+    Packet *packet = new Packet(name);
+    packet->insertAtBack(signalFieldPacketModel->getPacket()->peekAll());
+    if (dataFieldPacketModel != nullptr) {
+        packet->insertAtBack(dataFieldPacketModel->getPacket()->peekAll());
         packet->setBitError(signalFieldPacketModel->getPacket()->hasBitError() || dataFieldPacketModel->getPacket()->hasBitError());
-        return new ReceptionPacketModel(packet, bps(NaN), bps(NaN));
+        return new ReceptionPacketModel(packet, signalFieldPacketModel->getHeaderNetBitrate(), dataFieldPacketModel->getDataNetBitrate());
     }
+    else
+        return new ReceptionPacketModel(packet, signalFieldPacketModel->getHeaderNetBitrate(), bps(NaN));
 }
 
 const Ieee80211OfdmMode *Ieee80211LayeredOfdmReceiver::computeMode(Hz bandwidth) const
