@@ -22,7 +22,7 @@ Define_Module(Ieee80211OfdmDemodulatorModule);
 void Ieee80211OfdmDemodulatorModule::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
-        ofdmDemodulator = new Ieee80211OfdmDemodulator(new Ieee80211OfdmModulation(52, ApskModulationBase::findModulation(par("subcarrierModulation"))));
+        ofdmDemodulator = new Ieee80211OfdmDemodulator(new Ieee80211OfdmModulation(par("numSubcarriers"), ApskModulationBase::findModulation(par("subcarrierModulation"))));
 }
 
 const IReceptionBitModel *Ieee80211OfdmDemodulatorModule::demodulate(const IReceptionSymbolModel *symbolModel) const

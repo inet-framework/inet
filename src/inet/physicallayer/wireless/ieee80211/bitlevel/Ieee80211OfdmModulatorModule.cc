@@ -20,7 +20,7 @@ Define_Module(Ieee80211OfdmModulatorModule);
 void Ieee80211OfdmModulatorModule::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
-        ofdmModulator = new Ieee80211OfdmModulator(new Ieee80211OfdmModulation(52, ApskModulationBase::findModulation(par("subcarrierModulation"))), par("pilotSubcarrierPolarityVectorOffset"));
+        ofdmModulator = new Ieee80211OfdmModulator(new Ieee80211OfdmModulation(par("numSubcarriers"), ApskModulationBase::findModulation(par("subcarrierModulation"))), par("pilotSubcarrierPolarityVectorOffset"));
 }
 
 const ITransmissionSymbolModel *Ieee80211OfdmModulatorModule::modulate(const ITransmissionBitModel *bitModel) const
