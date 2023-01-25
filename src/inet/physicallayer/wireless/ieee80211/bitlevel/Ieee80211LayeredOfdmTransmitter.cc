@@ -230,6 +230,28 @@ const ITransmissionBitModel *Ieee80211LayeredOfdmTransmitter::createBitModel(con
     // TODO
     return new TransmissionBitModel(b(-1), mode->getSignalMode()->getGrossBitrate(), b(-1), mode->getDataMode()->getGrossBitrate(), nullptr, nullptr, nullptr, nullptr);
 }
+/*
+// TODO AFTER REBASE: this entire function should probably not be here
+b Ieee80211LayeredOfdmTransmitter::getPaddingLength(const Ieee80211OfdmMode *mode, b length) const
+{
+    // 18.3.5.4 Pad bits (PAD), 1597p.
+    // TODO: in non-compliant mode: header padding.
+    unsigned int codedBitsPerOFDMSymbol = mode->getDataMode()->getModulation()->getSubcarrierModulation()->getCodeWordSize() * NUMBER_OF_OFDM_DATA_SUBCARRIERS;
+    const Ieee80211OfdmCode *code = mode->getDataMode()->getCode();
+    unsigned int dataBitsPerOFDMSymbol = codedBitsPerOFDMSymbol; // N_DBPS
+    if (code->getConvolutionalCode()) {
+        const ConvolutionalCode *convolutionalCode = code->getConvolutionalCode();
+        dataBitsPerOFDMSymbol = convolutionalCode->getDecodedLength(codedBitsPerOFDMSymbol);
+    }
+    unsigned int dataBitsLength = 6 + b(length).get() + 16;
+    std::cerr << "dataBitsLength: " << dataBitsLength << std::endl;
+    unsigned int numberOfOFDMSymbols = lrint(ceil(1.0*dataBitsLength / dataBitsPerOFDMSymbol));
+    std::cerr << "numberOfOFDMSymbols: " << numberOfOFDMSymbols << std::endl;
+    unsigned int numberOfBitsInTheDataField = dataBitsPerOFDMSymbol * numberOfOFDMSymbols; // N_DATA
+    unsigned int numberOfPadBits = numberOfBitsInTheDataField - dataBitsLength; // N_PAD
+    return b(numberOfPadBits);
+}
+*/
 
 const ITransmissionSampleModel *Ieee80211LayeredOfdmTransmitter::createSampleModel(const ITransmissionSymbolModel *symbolModel) const
 {
