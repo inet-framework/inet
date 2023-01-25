@@ -31,8 +31,7 @@ TransmissionPacketModel::TransmissionPacketModel(const Packet *packet, bps heade
 }
 
 ReceptionPacketModel::ReceptionPacketModel(const Packet *packet, bps headerBitrate, bps dataBitrate) :
-    SignalPacketModel(packet, headerBitrate, dataBitrate),
-    packetErrorRate(packetErrorRate)
+    SignalPacketModel(packet, headerBitrate, dataBitrate)
 {
 }
 

@@ -38,12 +38,11 @@ class INET_API TransmissionPacketModel : public SignalPacketModel, public virtua
 class INET_API ReceptionPacketModel : public SignalPacketModel, public IReceptionPacketModel
 {
   protected:
-    double packetErrorRate;
 
   public:
     ReceptionPacketModel(const Packet *packet, bps headerBitrate, bps dataBitrate);
 
-    virtual double getPacketErrorRate() const override { return packetErrorRate; }
+    virtual double getPacketErrorRate() const override { return NaN; }
 };
 
 } // namespace physicallayer
