@@ -34,7 +34,7 @@ module NoiseSource like IRadio
             parameters:
                 @display("p=100,200");
         }
-        transmitter: <default("NoiseDimensionalTransmitter")> like ITransmitter {
+        transmitter: <default("NoiseScalarTransmitter")> like ITransmitter {
             parameters:
                 @display("p=100,300");
         }
