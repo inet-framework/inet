@@ -47,9 +47,9 @@ BitVector Ieee80211OfdmDemodulator::demodulateSymbol(const Ieee80211OfdmSymbol *
     return field;
 }
 
-const IReceptionBitModel *Ieee80211OfdmDemodulator::createBitModel(const BitVector *bitRepresentation, int signalFieldLength, bps signalFieldBitRate, int dataFieldLength, bps dataFieldBitRate) const
+const IReceptionBitModel *Ieee80211OfdmDemodulator::createBitModel(const BitVector *bitRepresentation, int signalFieldLength, bps signalFieldBitrate, int dataFieldLength, bps dataFieldBitrate) const
 {
-    return new ReceptionBitModel(b(signalFieldLength), signalFieldBitRate, b(dataFieldLength), dataFieldBitRate, bitRepresentation, NaN);
+    return new ReceptionBitModel(b(signalFieldLength), signalFieldBitrate, b(dataFieldLength), dataFieldBitrate, bitRepresentation, NaN);
 }
 
 bool Ieee80211OfdmDemodulator::isPilotOrDcSubcarrier(int i) const

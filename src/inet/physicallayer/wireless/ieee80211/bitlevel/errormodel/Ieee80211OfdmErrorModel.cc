@@ -65,9 +65,9 @@ const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const Layered
 {
     const ITransmissionBitModel *transmissionBitModel = transmission->getBitModel();
     int signalBitLength = b(transmissionBitModel->getHeaderLength()).get();
-    bps signalBitRate = transmissionBitModel->getHeaderGrossBitrate();
+    bps signalBitrate = transmissionBitModel->getHeaderGrossBitrate();
     int dataBitLength = b(transmissionBitModel->getDataLength()).get();
-    bps dataBitRate = transmissionBitModel->getDataGrossBitrate();
+    bps dataBitrate = transmissionBitModel->getDataGrossBitrate();
     ASSERT(transmission->getSymbolModel() != nullptr);
     const IModulation *signalModulation = transmission->getSymbolModel()->getHeaderModulation();
     const IModulation *dataModulation = transmission->getSymbolModel()->getDataModulation();
@@ -75,18 +75,18 @@ const IReceptionBitModel *Ieee80211OfdmErrorModel::computeBitModel(const Layered
     BitVector *corruptedBits = new BitVector(*bits);
     const ScalarTransmissionSignalAnalogModel *analogModel = check_and_cast<const ScalarTransmissionSignalAnalogModel *>(transmission->getAnalogModel());
     if (auto apskSignalModulation = dynamic_cast<const IApskModulation *>(signalModulation)) {
-        double signalFieldBer = std::isnan(signalBitErrorRate) ? apskSignalModulation->calculateBER(getScalarSnir(snir), analogModel->getBandwidth(), signalBitRate) : signalBitErrorRate;
+        double signalFieldBer = std::isnan(signalBitErrorRate) ? apskSignalModulation->calculateBER(getScalarSnir(snir), analogModel->getBandwidth(), signalBitrate) : signalBitErrorRate;
         corruptBits(corruptedBits, signalFieldBer, 0, signalBitLength);
     }
     else
         throw cRuntimeError("Unknown signal modulation");
     if (auto apskDataModulation = dynamic_cast<const IApskModulation *>(dataModulation)) {
-        double dataFieldBer = std::isnan(dataBitErrorRate) ? apskDataModulation->calculateBER(getScalarSnir(snir), analogModel->getBandwidth(), dataBitRate) : dataBitErrorRate;
+        double dataFieldBer = std::isnan(dataBitErrorRate) ? apskDataModulation->calculateBER(getScalarSnir(snir), analogModel->getBandwidth(), dataBitrate) : dataBitErrorRate;
         corruptBits(corruptedBits, dataFieldBer, signalBitLength, corruptedBits->getSize());
     }
     else
         throw cRuntimeError("Unknown data modulation");
-    return new ReceptionBitModel(b(signalBitLength), signalBitRate, b(dataBitLength), dataBitRate, corruptedBits, NaN);
+    return new ReceptionBitModel(b(signalBitLength), signalBitrate, b(dataBitLength), dataBitrate, corruptedBits, NaN);
 }
 
 const IReceptionSymbolModel *Ieee80211OfdmErrorModel::computeSymbolModel(const LayeredTransmission *transmission, const ISnir *snir) const
