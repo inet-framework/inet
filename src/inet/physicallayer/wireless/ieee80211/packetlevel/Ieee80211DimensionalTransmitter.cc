@@ -64,7 +64,7 @@ const ITransmission *Ieee80211DimensionalTransmitter::createTransmission(const I
     const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = transmissionMode->getDataMode()->getDuration(B(phyHeader->getLengthField()));
     auto dataModulation = transmissionMode->getDataMode()->getModulation();
-    auto dataSymbolTime = SimTime(4, SIMTIME_US); // TODO: transmissionMode->getDataMode()->getSymbolInterval();
+    auto dataSymbolTime = transmissionMode->getDataMode()->getSymbolInterval();
     return new Ieee80211DimensionalTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, headerLength, dataLength, dataModulation, dataSymbolTime, centerFrequency, transmissionBandwidth, transmissionBitrate, codeRate, powerFunction, transmissionMode, transmissionChannel);
 }
 
