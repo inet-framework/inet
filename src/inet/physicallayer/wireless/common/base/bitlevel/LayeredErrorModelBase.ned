@@ -12,7 +12,7 @@ import inet.physicallayer.wireless.common.contract.bitlevel.ILayeredErrorModel;
 module LayeredErrorModelBase like ILayeredErrorModel
 {
     parameters:
-        string symbolCorruptionMode @enum("1bit", "uniform") = default("uniform");
+        string symbolCorruptionMode @enum("1bit", "uniform") = default("1bit");
         @display("i=block/broadcast");
 }
 
