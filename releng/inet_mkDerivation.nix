@@ -1,7 +1,8 @@
 { 
-  pname, version, src ? ./.,        # direct parameters
-  stdenv, lib, lld,                 # build environment
-  perl, omnetpp,                    # dependencies
+  pname, version, src ? ./.,             # direct parameters
+  stdenv, lib, pkg-config,               # build environment
+  perl, omnetpp,                  # dependencies
+  z3, ffmpeg,
 }:
 let
 in
@@ -12,13 +13,10 @@ stdenv.mkDerivation rec {
   strictDeps = true;
   dontStrip = true;
 
-  buildInputs = [ omnetpp ];
+  buildInputs = [ omnetpp z3 ffmpeg ];
 
   # tools required for build only (not needed in derivations)
-  nativeBuildInputs = [ omnetpp ];
-
-  # tools required for build only (needed in derivations)
-  propagatedNativeBuildInputs = [  ];
+  nativeBuildInputs = [ omnetpp pkg-config ];
 
   # we have to patch all shebangs to use NIX versions of the interpreters
   prePatch = ''

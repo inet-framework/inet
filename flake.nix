@@ -12,31 +12,34 @@
     let
       oppPkgs = omnetpp.oppPkgs.${system};
       pname = "inet";
-      version = "4.4.1.${oppPkgs.lib.substring 0 8 self.lastModifiedDate}.${self.shortRev or "dirty"}";
+      githash = self.shortRev or "dirty";
+      timestamp = oppPkgs.lib.substring 0 8 self.lastModifiedDate;
+      gversion = "${githash}.${timestamp}";
+      sversion = "6.0.1"; # schemantic version number
+
     in rec {
       packages = rec {
+        default = packages.${pname};
+
         ${pname} = oppPkgs.callPackage ./releng/inet_mkDerivation.nix {
-          inherit pname version;
-          omnetpp = omnetpp.packages.${system}.omnetpp;
+          inherit pname; 
+          version = gversion;
+          omnetpp = omnetpp.packages.${system}.omnetpp-runtime;
           src = self;
         };
-
-        default = packages.${pname};
       };
 
       devShells = rec {
-        "${pname}" = oppPkgs.stdenv.mkDerivation {
-          name = "inet";
-          buildInputs = [
-            omnetpp.packages.${system}.default
-            self.packages.${system}.default
-          ];
+        default = oppPkgs.stdenv.mkDerivation {
+          name = "${pname}-${gversion} dependencies";
+          buildInputs = self.packages.${system}."${pname}".buildInputs;
+          nativeBuildInputs = self.packages.${system}."${pname}".nativeBuildInputs;
+
           shellHook = ''
-            source ${self.packages.${system}.default}/setenv
+            source setenv
           '';
         };
-
-        default = devShells."${pname}";
       };
+
     });
 }
