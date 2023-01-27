@@ -23,24 +23,9 @@ Ieee80211UnitDiskTransmitter::Ieee80211UnitDiskTransmitter() :
 {
 }
 
-void Ieee80211UnitDiskTransmitter::initialize(int stage)
-{
-    Ieee80211TransmitterBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL) {
-        communicationRange = m(par("communicationRange"));
-        interferenceRange = m(par("interferenceRange"));
-        detectionRange = m(par("detectionRange"));
-    }
-}
-
 std::ostream& Ieee80211UnitDiskTransmitter::printToStream(std::ostream& stream, int level, int evFlags) const
 {
     stream << "Ieee80211UnitDiskTransmitter";
-    if (level <= PRINT_LEVEL_INFO)
-        stream << EV_FIELD(communicationRange);
-    if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(interferenceRange)
-               << EV_FIELD(detectionRange);
     return Ieee80211TransmitterBase::printToStream(stream, level);
 }
 
@@ -59,7 +44,9 @@ const ITransmission *Ieee80211UnitDiskTransmitter::createTransmission(const IRad
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
     const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = duration - headerDuration - preambleDuration;
-    return new Ieee80211UnitDiskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, communicationRange, interferenceRange, detectionRange, transmissionMode, channel);
+    auto transmission = new Ieee80211UnitDiskTransmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, transmissionMode, channel);
+    transmission->analogModel = getAnalogModel()->createAnalogModel(packet);
+    return transmission;
 }
 
 } // namespace physicallayer

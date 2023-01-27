@@ -25,7 +25,11 @@ class INET_API UnitDiskTransmitterAnalogModel : public TransmitterAnalogModelBas
 
   protected:
     virtual void initialize(int stage) override {
-      // TODO: get parameters
+        if (stage == INITSTAGE_LOCAL) {
+            communicationRange = m(par("communicationRange"));
+            interferenceRange = m(par("interferenceRange"));
+            detectionRange = m(par("detectionRange"));
+        }
     }
 
   public:

@@ -13,9 +13,6 @@ package inet.physicallayer.wireless.ieee80211.packetlevel;
 module Ieee80211UnitDiskTransmitter extends Ieee80211TransmitterBase
 {
     parameters:
-        double communicationRange @unit(m);                              // the range where the reception of transmissions produced by this transmitter is possible
-        double interferenceRange @unit(m) = default(communicationRange); // the range where transmissions produced by this transmitter interferes with other transmissions
-        double detectionRange @unit(m) = default(interferenceRange);     // the range where transmissions produced by this transmitter can be detected at all
         @class(Ieee80211UnitDiskTransmitter);
 }
 

@@ -9,6 +9,7 @@
 #define __INET_UNITDISKTRANSMITTER_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmitterBase.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmitterAnalogModel.h"
 
 namespace inet {
 
@@ -23,9 +24,6 @@ class INET_API UnitDiskTransmitter : public TransmitterBase
     simtime_t preambleDuration;
     b headerLength;
     bps bitrate;
-    m communicationRange;
-    m interferenceRange;
-    m detectionRange;
 
   protected:
     virtual void initialize(int stage) override;
@@ -38,8 +36,8 @@ class INET_API UnitDiskTransmitter : public TransmitterBase
     virtual simtime_t getPreambleDuration() const { return preambleDuration; }
     virtual b getHeaderLength() const { return headerLength; }
     virtual bps getBitrate() const { return bitrate; }
-    virtual m getMaxCommunicationRange() const override { return communicationRange; }
-    virtual m getMaxInterferenceRange() const override { return interferenceRange; }
+    virtual m getMaxCommunicationRange() const override { return check_and_cast<UnitDiskTransmitterAnalogModel *>(getAnalogModel())->getCommunicationRange(); }
+    virtual m getMaxInterferenceRange() const override { return check_and_cast<UnitDiskTransmitterAnalogModel *>(getAnalogModel())->getInterferenceRange(); }
 };
 
 } // namespace physicallayer

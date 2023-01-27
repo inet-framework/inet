@@ -13,6 +13,7 @@
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskReception.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskSnir.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmission.h"
+#include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmissionAnalogModel.h"
 
 namespace inet {
 namespace physicallayer {
@@ -28,6 +29,7 @@ const IReception *UnitDiskAnalogModel::computeReception(const IRadio *receiverRa
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
     const UnitDiskTransmission *idealTransmission = check_and_cast<const UnitDiskTransmission *>(transmission);
+    const UnitDiskTransmissionAnalogModel *analogModel = check_and_cast<const UnitDiskTransmissionAnalogModel *>(transmission->getNewAnalogModel());
     const simtime_t receptionStartTime = arrival->getStartTime();
     const simtime_t receptionEndTime = arrival->getEndTime();
     const Coord& receptionStartPosition = arrival->getStartPosition();
@@ -40,11 +42,11 @@ const IReception *UnitDiskAnalogModel::computeReception(const IRadio *receiverRa
     UnitDiskReception::Power power;
     if (obstacleLoss == 0)
         power = UnitDiskReception::POWER_UNDETECTABLE;
-    else if (distance <= idealTransmission->getCommunicationRange())
+    else if (distance <= analogModel->getCommunicationRange())
         power = UnitDiskReception::POWER_RECEIVABLE;
-    else if (distance <= idealTransmission->getInterferenceRange())
+    else if (distance <= analogModel->getInterferenceRange())
         power = UnitDiskReception::POWER_INTERFERING;
-    else if (distance <= idealTransmission->getDetectionRange())
+    else if (distance <= analogModel->getDetectionRange())
         power = UnitDiskReception::POWER_DETECTABLE;
     else
         power = UnitDiskReception::POWER_UNDETECTABLE;

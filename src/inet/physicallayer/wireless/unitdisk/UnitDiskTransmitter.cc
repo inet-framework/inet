@@ -19,10 +19,7 @@ Define_Module(UnitDiskTransmitter);
 
 UnitDiskTransmitter::UnitDiskTransmitter() :
     headerLength(b(-1)),
-    bitrate(NaN),
-    communicationRange(NaN),
-    interferenceRange(NaN),
-    detectionRange(NaN)
+    bitrate(NaN)
 {
 }
 
@@ -32,9 +29,6 @@ void UnitDiskTransmitter::initialize(int stage)
         preambleDuration = par("preambleDuration");
         headerLength = b(par("headerLength"));
         bitrate = bps(par("bitrate"));
-        communicationRange = m(par("communicationRange"));
-        interferenceRange = m(par("interferenceRange"));
-        detectionRange = m(par("detectionRange"));
     }
 }
 
@@ -45,11 +39,6 @@ std::ostream& UnitDiskTransmitter::printToStream(std::ostream& stream, int level
         stream << EV_FIELD(preambleDuration)
                << EV_FIELD(headerLength)
                << EV_FIELD(bitrate);
-    if (level <= PRINT_LEVEL_INFO)
-        stream << EV_FIELD(communicationRange);
-    if (level <= PRINT_LEVEL_TRACE)
-        stream << EV_FIELD(interferenceRange)
-               << EV_FIELD(detectionRange);
     return stream;
 }
 
@@ -70,10 +59,11 @@ const ITransmission *UnitDiskTransmitter::createTransmission(const IRadio *trans
     auto endPosition = mobility->getCurrentPosition();
     auto startOrientation = mobility->getCurrentAngularPosition();
     auto endOrientation = mobility->getCurrentAngularPosition();
-    return new UnitDiskTransmission(transmitter, packet, startTime, endTime,
+    auto transmission = new UnitDiskTransmission(transmitter, packet, startTime, endTime,
             preambleDuration, headerDuration, dataDuration,
-            startPosition, endPosition, startOrientation, endOrientation,
-            communicationRange, interferenceRange, detectionRange);
+            startPosition, endPosition, startOrientation, endOrientation);
+    transmission->analogModel = getAnalogModel()->createAnalogModel(packet);
+    return transmission;
 }
 
 } // namespace physicallayer
