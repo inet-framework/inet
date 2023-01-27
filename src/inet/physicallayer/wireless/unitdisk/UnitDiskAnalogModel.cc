@@ -12,7 +12,6 @@
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskNoise.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskReception.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskSnir.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmission.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmissionAnalogModel.h"
 
 namespace inet {
@@ -28,7 +27,6 @@ std::ostream& UnitDiskAnalogModel::printToStream(std::ostream& stream, int level
 const IReception *UnitDiskAnalogModel::computeReception(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     const IRadioMedium *radioMedium = receiverRadio->getMedium();
-    const UnitDiskTransmission *idealTransmission = check_and_cast<const UnitDiskTransmission *>(transmission);
     const UnitDiskTransmissionAnalogModel *analogModel = check_and_cast<const UnitDiskTransmissionAnalogModel *>(transmission->getNewAnalogModel());
     const simtime_t receptionStartTime = arrival->getStartTime();
     const simtime_t receptionEndTime = arrival->getEndTime();

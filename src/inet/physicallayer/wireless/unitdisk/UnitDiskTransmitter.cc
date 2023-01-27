@@ -8,9 +8,9 @@
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmitter.h"
 
 #include "inet/mobility/contract/IMobility.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/TransmissionBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/unitdisk/UnitDiskPhyHeader_m.h"
-#include "inet/physicallayer/wireless/unitdisk/UnitDiskTransmission.h"
 
 namespace inet {
 namespace physicallayer {
@@ -59,7 +59,7 @@ const ITransmission *UnitDiskTransmitter::createTransmission(const IRadio *trans
     auto endPosition = mobility->getCurrentPosition();
     auto startOrientation = mobility->getCurrentAngularPosition();
     auto endOrientation = mobility->getCurrentAngularPosition();
-    auto transmission = new UnitDiskTransmission(transmitter, packet, startTime, endTime,
+    auto transmission = new TransmissionBase(transmitter, packet, startTime, endTime,
             preambleDuration, headerDuration, dataDuration,
             startPosition, endPosition, startOrientation, endOrientation);
     transmission->analogModel = getAnalogModel()->createAnalogModel(packet);
