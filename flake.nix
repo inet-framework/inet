@@ -3,7 +3,7 @@
 
   inputs = {
     # omnetpp.url = "/home/rhornig/omnetpp-dev";
-    omnetpp.url = "github:omnetpp/omnetpp/flake/omnetpp-6.0.x";
+    omnetpp.url = "github:omnetpp/omnetpp/v/6.0.x";
     flake-utils.follows = "omnetpp/flake-utils";
   };
 
