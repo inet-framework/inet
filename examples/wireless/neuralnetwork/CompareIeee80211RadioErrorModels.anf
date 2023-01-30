@@ -1,0 +1,779 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<analysis version="2">
+    <inputs>
+        <input pattern="results/Ieee80211Radio/*/*/*/*/*/*.sca"/>
+    </inputs>
+    <charts>
+        <chart icon="icons/full/obj/scatterchart.png" id="156" name="Packet reception probability (PSR)" template="scatterchart_itervars_mpl" type="MATPLOTLIB">
+            <script><![CDATA[import math
+import pandas as pd
+import matplotlib.pyplot as plt
+from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+from matplotlib.widgets import Slider
+
+# get chart properties
+props = chart.get_properties()
+utils.preconfigure_plot(props)
+
+# collect parameters for query
+filter_expression = props["filter"]
+xaxis_itervar = props["xaxis_itervar"]
+iso_itervar = props["iso_itervar"]
+
+if not xaxis_itervar or not iso_itervar:
+    plot.set_warning("Select itervars in the Properties dialog!")
+    exit(1)
+
+# query vector data into a data frame
+df = results.get_scalars(filter_expression, include_attrs=False, include_itervars=True, include_runattrs=True, include_config_entries=True)
+
+df[["configname", "messageLength", "numNoiseSources", "power", "duration", "value"]].to_csv("blah.csv", index=False)
+
+
+df[xaxis_itervar] = pd.to_numeric(df[xaxis_itervar], errors="ignore")
+df[iso_itervar] = pd.to_numeric(df[iso_itervar], errors="ignore")
+df['sim-time-limit'] = df['sim-time-limit'].apply(lambda s : float(s.replace("s", "")))
+df['duration'] = pd.to_numeric(df['duration'], errors="ignore")
+df['power'] = pd.to_numeric(df['power'], errors="ignore")
+df['value'] /= df['sim-time-limit']
+
+if df.empty:
+    plot.set_warning("Select scalars for the Y axis in the Properties dialog")
+    exit(1)
+
+unique_names = df["name"].unique()
+
+if len(unique_names) != 1:
+    plot.set_warning("Scalar names should be unique")
+    exit(1)
+
+scalar_name = unique_names[0]
+
+p = plot if chart.is_native_chart() else plt
+
+p.xlabel(xaxis_itervar)
+p.ylabel(scalar_name)
+
+durations = list(set(list(df['duration'])))
+durations = [d for d in durations if not math.isnan(d)]
+durations.sort()
+duration = durations[0]
+
+powers = list(set(list(df['power'])))
+powers = [p for p in powers if not math.isnan(p)]
+powers.sort()
+power = powers[0]
+
+lines = []
+df1 = df[df['duration'] == duration]
+df2 = df1[df1['power'] == power]
+dff = pd.pivot_table(df2, values="value", columns=iso_itervar, index=xaxis_itervar)
+#print(dff)
+legend_cols, _ = utils.extract_label_columns(dff)
+y = 0
+for i, c in enumerate(dff.columns):
+    style = utils._make_line_args(props, c, dff)
+    del style['drawstyle']
+    style = {'marker': 'o'}
+    [line] = p.plot(pd.to_numeric(dff.index.values), dff[c].values * 100 + y, label=iso_itervar + "=" + str(dff[c].name), **style)
+    lines.append(line)
+    #y = y + .1
+
+
+def plot():
+    #print(f"Duration: {duration}, power: {power}")
+    df1 = df[df['duration'] == duration]
+    df2 = df1[df1['power'] == power]
+    dff = pd.pivot_table(df2, values="value", columns=iso_itervar, index=xaxis_itervar)
+    legend_cols, _ = utils.extract_label_columns(dff)
+    y = 0
+    for i, c in enumerate(dff.columns):
+        lines[i].set_data(pd.to_numeric(dff.index.values), dff[c].values * 100 + y)
+        y = y + .1
+
+
+fig = plt.gcf()
+
+
+def plot_export_all():
+    global duration, power
+    old_d = duration
+    old_p = power
+    for d in durations:
+        for p in powers:
+            duration = d
+            power = p
+            plot()
+            fig.canvas.draw()
+            plt.suptitle(f"Noise duration: {duration} us, noise power: {power} mW")
+            plt.savefig(f"results/Ieee80211Radio_{d}us_{p}mW_psr.png")
+            #plt.clf()
+    duration = old_d
+    power = old_p
+    plt.suptitle(None)
+
+
+#plot()
+
+big = plt.gca()
+plt.ylim(0, 125)
+
+
+utils.set_plot_title("Received Packets vs Number of Noise Sources")
+utils.postconfigure_plot(props)
+
+
+#plot_export_all()
+
+
+plot()
+
+
+duration_slider_ax  = fig.add_axes([0.25, 0.15, 0.65, 0.03])
+duration_slider = Slider(duration_slider_ax, 'Duration', 1, len(durations), valstep=1)
+def duration_sliders_on_changed(val):
+    global duration
+    duration = durations[int(val) - 1]
+    duration_slider.valtext.set_text(str(duration))
+    plot()
+    fig.canvas.draw_idle()
+duration_slider.on_changed(duration_sliders_on_changed)
+
+power_slider_ax  = fig.add_axes([0.25, 0.1, 0.65, 0.03])
+power_slider = Slider(power_slider_ax, 'Power', 1, len(powers), valstep=1)
+def power_sliders_on_changed(val):
+    global power
+    power = powers[int(val) - 1]
+    power_slider.valtext.set_text(str(power))
+    plot()
+    fig.canvas.draw_idle()
+power_slider.on_changed(power_sliders_on_changed)
+plt.gcf().subplots_adjust(bottom=0.25)
+]]></script>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang" />
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+  </import>
+  <layout x:class="GridLayout" numColumns="1" />
+  <x:children>
+    <label text="Filter expression for scalars as Y value:" />
+    <text x:id="filter" x:style="BORDER|MULTI|V_SCROLL|H_SCROLL" x:id.isFilter="true">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+    </text>
+    <composite>
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" />
+      <layout x:class="GridLayout" numColumns="2" />
+      <x:children>
+
+        <label text="Itervar for X axis:"/>
+        <combo x:id="xaxis_itervar" x:id.content="$itervarnames" x:style="BORDER">
+            <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </combo>
+
+        <label text="Itervar for iso lines:"/>
+        <combo x:id="iso_itervar" x:id.content="$itervarnames" x:style="BORDER">
+            <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </combo>
+
+      </x:children>
+    </composite>
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Lines" label="Lines"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <group text="Lines">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <label text="Draw style:"/>
+    <combo x:id="drawstyle" x:style="BORDER|READ_ONLY">
+      <add x:p0="auto"/>
+      <add x:p0="none"/>
+      <add x:p0="linear"/>
+      <add x:p0="steps-pre"/>
+      <add x:p0="steps-mid"/>
+      <add x:p0="steps-post"/>
+    </combo>
+
+    <label text="Line color:"/>
+    <ColorChooser x:id="linecolor" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="BEGINNING" grabExcessHorizontalSpace="false"/>
+    </ColorChooser>
+
+    <label text="Line style:"/>
+    <combo x:id="linestyle" x:style="BORDER|READ_ONLY">
+      <add x:p0="none"/>
+      <add x:p0="solid"/>
+      <add x:p0="dotted"/>
+      <add x:p0="dashed"/>
+      <add x:p0="dashdot"/>
+    </combo>
+
+    <label text="Line width:"/>
+    <spinner x:id="linewidth" minimum="0" digits="1" selection="15" maximum="1000" x:style="BORDER"/>
+
+      </x:children>
+    </group>
+
+    <group text="Markers">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <label text="Marker:"/>
+    <combo x:id="marker" x:style="BORDER">
+      <add x:p0="auto"/>
+      <add x:p0="none"/>
+      <add x:p0=". (dot)"/>
+      <add x:p0=", (point)"/>
+      <add x:p0="v (triangle down)"/>
+      <add x:p0="^ (triangle up)"/>
+      <add x:p0="&lt; (triangle left)"/>
+      <add x:p0="&gt; (triangle right)"/>
+      <add x:p0="1 (tri down)"/>
+      <add x:p0="2 (tri up)"/>
+      <add x:p0="3 (tri left)"/>
+      <add x:p0="4 (tri right)"/>
+      <add x:p0="| (vline)"/>
+      <add x:p0="_ (hline)"/>
+      <add x:p0="8 (octagon)"/>
+      <add x:p0="o (circle)"/>
+      <add x:p0="s (square)"/>
+      <add x:p0="p (pentagon)"/>
+      <add x:p0="* (star)"/>
+      <add x:p0="+ (plus)"/>
+      <add x:p0="x (cross)"/>
+      <add x:p0="D (diamond)"/>
+      <add x:p0="d (thin diamond)"/>
+      <!-- TODO the rest...  -->
+    </combo>
+
+    <label text="Marker size:"/>
+    <spinner x:id="markersize" selection="6" minimum="0" maximum="100" x:style="BORDER"/>
+
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Plot" label="Plot"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2" makeColumnsEqualWidth="true"/>
+
+  <x:children>
+
+    <group text="Title">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- Plot title -->
+    <label text="Plot title:"/>
+    <text x:id="title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- X Axis { -->
+    <group text="X axis">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <label text="Label:"/>
+    <text x:id="xaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Min:"/>
+    <text x:id="xaxis_min" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Max:"/>
+    <text x:id="xaxis_max" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <button x:id="xaxis_log" text="Logarithmic" x:style="CHECK">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Y Axis { -->
+    <group text="Y axis">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <label text="Label:"/>
+    <text x:id="yaxis_title" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Min:"/>
+    <text x:id="yaxis_min" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <label text="Max:"/>
+    <text x:id="yaxis_max" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </text>
+
+    <button x:id="yaxis_log" text="Logarithmic" x:style="CHECK">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Grid { -->
+    <group text="Grid">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- Display Legend? -->
+    <button x:id="grid_show" text="Show grid" x:style="CHECK" x:id.isEnabler="true">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
+
+    <!-- Show grid:None/Major/All -->
+    <label text="Density:"/>
+    <combo x:id="grid_density" x:style="BORDER|READ_ONLY">
+      <add x:p0="Major"/>
+      <add x:p0="All"/>
+    </combo>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Legend { -->
+    <group text="Legend">
+      <layoutData x:class="GridData" horizontalSpan="1" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="false"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- Display Legend? -->
+    <button x:id="legend_show" text="Show legend" x:style="CHECK" x:id.isEnabler="true" >
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
+
+    <!-- Display titles or names? -->
+    <label text="Label source:"/>
+    <combo x:id="legend_labels" x:style="BORDER|READ_ONLY">
+      <add x:p0="result names"/>
+      <add x:p0="result titles"/>
+    </combo>
+
+    <!-- Placement -->
+    <label text="Placement:"/>
+    <combo x:id="legend_placement" x:style="BORDER|READ_ONLY">
+      <add x:p0="best"/>
+      <add x:p0="upper right"/>
+      <add x:p0="upper left"/>
+      <add x:p0="lower left"/>
+      <add x:p0="lower right"/>
+      <add x:p0="right"/>
+      <add x:p0="center left"/>
+      <add x:p0="center right"/>
+      <add x:p0="lower center"/>
+      <add x:p0="upper center"/>
+      <add x:p0="center"/>
+      <add x:p0="outside top left"/>
+      <add x:p0="outside top center"/>
+      <add x:p0="outside top right"/>
+      <add x:p0="outside bottom left"/>
+      <add x:p0="outside bottom center"/>
+      <add x:p0="outside bottom right"/>
+      <add x:p0="outside left top"/>
+      <add x:p0="outside left center"/>
+      <add x:p0="outside left bottom"/>
+      <add x:p0="outside right top"/>
+      <add x:p0="outside right center"/>
+      <add x:p0="outside right bottom"/>
+    </combo>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Styling" label="Styling"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <!-- Style { -->
+    <group text="Style">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <label text="Style:"/>
+    <combo x:id="plt.style" x:style="BORDER">
+      <add x:p0="default"/>
+      <add x:p0="classic"/>
+      <add x:p0="ggplot"/>
+      <add x:p0="grayscale"/>
+      <add x:p0="dark_background"/>
+      <add x:p0="bmh"/>
+      <add x:p0="fast"/>
+      <add x:p0="fivethirtyeight"/>
+      <add x:p0="tableau-colorblind10"/>
+      <add x:p0="Solarize_Light2"/>
+      <add x:p0="seaborn"/>
+      <add x:p0="seaborn-bright"/>
+      <add x:p0="seaborn-colorblind"/>
+      <add x:p0="seaborn-dark"/>
+      <add x:p0="seaborn-darkgrid"/>
+      <add x:p0="seaborn-dark-palette"/>
+      <add x:p0="seaborn-deep"/>
+      <add x:p0="seaborn-muted"/>
+      <add x:p0="seaborn-notebook"/>
+      <add x:p0="seaborn-paper"/>
+      <add x:p0="seaborn-pastel"/>
+      <add x:p0="seaborn-poster"/>
+      <add x:p0="seaborn-talk"/>
+      <add x:p0="seaborn-ticks"/>
+      <add x:p0="seaborn-white"/>
+      <add x:p0="seaborn-whitegrid"/>
+    </combo>
+
+    <label text="Cycle seed:"/>
+    <spinner x:id="cycle_seed" selection="0" minimum="0" maximum="1000000" x:style="BORDER"/>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+    <!-- Colors { -->
+    <group text="Colors">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <!-- backgroundColor -->
+    <label text="Figure background color:"/>
+    <ColorChooser x:id="matplotlibrc.figure.facecolor" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <label text="Axes background color:"/>
+    <ColorChooser x:id="matplotlibrc.axes.facecolor" x:style="BORDER">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+    </ColorChooser>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+
+    <!-- Legend { -->
+    <group text="Legend">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+    <button x:id="matplotlibrc.legend.frameon" text="Frame" x:style="CHECK"  x:id.isEnabler="true">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
+
+    <button x:id="matplotlibrc.legend.fancybox" text="Fancybox" x:style="CHECK">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
+
+    <button x:id="matplotlibrc.legend.shadow" text="Shadow" x:style="CHECK">
+      <layoutData x:class="GridData" horizontalSpan="2"/>
+    </button>
+
+    <!-- } -->
+      </x:children>
+    </group>
+
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Advanced" label="Advanced"><![CDATA[<?xml version='1.0' encoding='UTF-8'?>
+<xswt xmlns:x='http://sweet_swt.sf.net/xswt'>
+  <import xmlns='http://sweet_swt.sf.net/xswt'>
+    <package name='java.lang'/>
+    <package name='org.eclipse.swt.widgets' />
+    <package name='org.eclipse.swt.graphics' />
+    <package name='org.eclipse.swt.layout' />
+    <package name='org.eclipse.swt.custom' />
+  </import>
+  <layout x:class='GridLayout' numColumns='1'/>
+  <x:children>
+    <label text="Here you can further customize the plot using matplotlibrc properties."/>
+    <label text="The syntax is one entry per line in the 'key : value' format; comments (#) are also accepted."/>
+    <label text="Content Assist available (hit Ctrl+Space)."/>
+    <text x:id="matplotlibrc" x:style="BORDER|MULTI" x:id.isFilter="true">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true"/>
+    </text>
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <property name="matplotlibrc.legend.frameon" value="true"/>
+            <property name="matplotlibrc.legend.fancybox" value="true"/>
+            <property name="grid_show" value="true"/>
+            <property name="linecolor" value="auto"/>
+            <property name="matplotlibrc.figure.facecolor" value=""/>
+            <property name="legend_labels" value="result titles"/>
+            <property name="yaxis_title" value="%"/>
+            <property name="title" value="Packet reception probability vs number of noise sources"/>
+            <property name="cycle_seed" value="0"/>
+            <property name="yaxis_log" value="false"/>
+            <property name="xaxis_log" value="false"/>
+            <property name="legend_placement" value="upper right"/>
+            <property name="xaxis_title" value=""/>
+            <property name="grid_density" value="Major"/>
+            <property name="xaxis_itervar" value="numNoiseSources"/>
+            <property name="yaxis_min" value=""/>
+            <property name="xaxis_min" value=""/>
+            <property name="matplotlibrc.axes.facecolor" value=""/>
+            <property name="linewidth" value="1.5"/>
+            <property name="filter" value="name =~ packetReceived:*"/>
+            <property name="linestyle" value="solid"/>
+            <property name="markersize" value="5"/>
+            <property name="drawstyle" value="auto"/>
+            <property name="marker" value="o (circle)"/>
+            <property name="plt.style" value="default"/>
+            <property name="legend_show" value="true"/>
+            <property name="iso_itervar" value="configname"/>
+            <property name="matplotlibrc.legend.shadow" value="false"/>
+            <property name="yaxis_max" value=""/>
+            <property name="xaxis_max" value=""/>
+            <property name="matplotlibrc" value=""/>
+        </chart>
+        <chart icon="icons/full/obj/linechart.png" id="236" name="Relative packet reception probability (PSR) difference" template="generic_mpl" type="MATPLOTLIB">
+            <script><![CDATA[import math
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from omnetpp.scave import results, chart, utils, plot, vectorops as ops
+
+fig = plt.figure()
+ax1 = fig.add_subplot(221, projection='3d', title='Analytical relative to symbol level')
+ax2 = fig.add_subplot(222, projection='3d', title='Neural network based relative to symbol level')
+ax3 = fig.add_subplot(223, projection='3d', title='Neural network based relative to analytical')
+ax4 = fig.add_subplot(224, projection='3d', title='Neural network based compared to analytical relative to symbol level')
+
+# get chart properties
+props = chart.get_properties()
+utils.preconfigure_plot(props)
+
+# query vector data into a data frame
+df = results.get_scalars(props['input'], include_attrs=False, include_itervars=True, include_runattrs=True, include_config_entries=True)
+df['sim-time-limit'] = df['sim-time-limit'].apply(lambda s : float(s.replace('s', '')))
+df['numNoiseSources'] = pd.to_numeric(df['numNoiseSources'], errors='ignore')
+df['duration'] = pd.to_numeric(df['duration'], errors='ignore')
+df['power'] = pd.to_numeric(df['power'], errors='ignore')
+df['value'] /= df['sim-time-limit']
+df = pd.pivot_table(df, values='value', columns='configname', index=['numNoiseSources', 'duration', 'power'])
+df = df.reset_index()
+#df = df[df['numNoiseSources'].isin([0,20])]
+#df = df[df['duration'].isin([2,4])]
+#df = df[df['power'].isin([2,4])]
+df = df[df['numNoiseSources'].isin([0,2,4,6,8,10,12,14,16,18,20])]
+#print(df)
+
+def d(a, x, base, min, max):
+    if x == 0:
+        if a == 0:
+            return 0
+        else:
+            return min
+    elif a == 0:
+        return max
+    else:
+        return np.clip(math.log(x / a, base), min, max)
+
+def fi(a, x):
+    dx = d(a, x, 2, -2, 2)
+    return 1 - math.fabs(dx) / 2
+
+def fiRow1(row):
+    return fi(row.DimensionalSymbollevel, row.DimensionalPacketlevel)
+
+def fiRow2(row):
+    return fi(row.DimensionalSymbollevel, row.DimensionalPacketlevelNeuralNetwork)
+
+def fiRow3(row):
+    return fi(row.DimensionalPacketlevelNeuralNetwork, row.DimensionalPacketlevel)
+
+def f(a, x, y):
+    dx = d(a, x, 2, -2, 2)
+    dy = d(a, y, 2, -2, 2)
+    return d(math.fabs(dx), math.fabs(dy), 2, -2, 2)
+
+def fRow(row):
+    return f(row.DimensionalSymbollevel, row.DimensionalPacketlevelNeuralNetwork, row.DimensionalPacketlevel)
+
+x = df['numNoiseSources']
+y = df['duration']
+z = df['power']
+
+def compare(ax, c, label='PSR difference [green=matches, red=doesn\'t match]'):
+    ax.set_xlabel('Number of noise sources')
+    ax.set_ylabel('Noise duration [us]')
+    ax.set_zlabel('Noise power [mW]')
+    img = ax.scatter(x, y, z, c=c, cmap='RdYlGn', depthshade=False)
+    cb = fig.colorbar(img, ax=ax)
+    cb.set_label(label)
+
+df['value1'] = df.apply(fiRow1, axis=1)
+df['value2'] = df.apply(fiRow2, axis=1)
+df['value3'] = df.apply(fiRow3, axis=1)
+df['value4'] = df.apply(fRow, axis=1)
+#print(df)
+
+compare(ax1, df['value1'])
+compare(ax2, df['value2'])
+compare(ax3, df['value3'])
+compare(ax4, df['value4'], label = 'Relative PSR difference [green=better, red=worse]')
+
+plt.show()
+]]></script>
+            <dialogPage id="Input" label="Input"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang" />
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+  </import>
+  <layout x:class="GridLayout" numColumns="1" />
+  <x:children>
+    <label text="Enter data you want to feed into the Python script." />
+    <label text="It will be available to the script via chart.get_property('input')." />
+    <styledText x:id="input" x:style="BORDER|WRAP|V_SCROLL|H_SCROLL" x:id.contentAssist="filter">
+      <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true" verticalAlignment="FILL" grabExcessVerticalSpace="true" />
+    </styledText>
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <dialogPage id="Export" label="Export"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<xswt xmlns:x="http://sweet_swt.sf.net/xswt">
+
+  <import xmlns="http://sweet_swt.sf.net/xswt">
+    <package name="java.lang"/>
+    <package name="org.eclipse.swt.widgets" />
+    <package name="org.eclipse.swt.graphics" />
+    <package name="org.eclipse.swt.layout" />
+    <package name="org.eclipse.swt.custom" />
+    <package name="org.omnetpp.common.wizard.support" />
+    <package name="org.omnetpp.ned.editor.wizards.support" />
+    <package name="org.omnetpp.cdt.wizard.support" />
+  </import>
+  <layout x:class="GridLayout" numColumns="2"/>
+
+  <x:children>
+
+    <group text="Image export">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+        <label text="Image file name (w/o extension):"/>
+        <text x:id="image_export_filename" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+
+        <label text="Image width (inches):"/>
+        <text x:id="image_export_width" x:id.default="6" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+
+        <label text="Image height (inches):"/>
+        <text x:id="image_export_height" x:id.default="4" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+
+      </x:children>
+    </group>
+
+    <group text="Data export">
+      <layoutData x:class="GridData" horizontalSpan="2" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+      <layout x:class="GridLayout" numColumns="2"/>
+      <x:children>
+
+        <label text="File name (w/o extension):"/>
+        <text x:id="data_export_filename" x:style="BORDER">
+          <layoutData x:class="GridData" horizontalAlignment="FILL" grabExcessHorizontalSpace="true"/>
+        </text>
+
+      </x:children>
+    </group>
+
+  </x:children>
+</xswt>
+]]></dialogPage>
+            <property name="input" value="name =~ packetReceived:*"/>
+            <property name="data_export_filename" value=""/>
+            <property name="image_export_filename" value=""/>
+            <property name="image_export_height" value="4"/>
+            <property name="image_export_width" value="6"/>
+        </chart>
+    </charts>
+</analysis>
