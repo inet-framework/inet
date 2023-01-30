@@ -289,19 +289,19 @@
 # /examples/inet/udpclientserver/,     -f omnetpp.ini -c _ipv4 -r 0,                  10s,             0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # abstract-config
 # /examples/inet/udpclientserver/,     -f omnetpp.ini -c _ipv6 -r 0,                  10s,             0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # abstract-config
 # /examples/inet/udpclientserver/,     -f omnetpp.ini -c _gn -r 0,                  10s,             0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,   # abstract-config
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4 -r 0,            10s,             8d79-bf2c/tplx;803b-4bed/~tNl;b367-c522/~tND;fc1b-6064/tyf, PASS, Ipv4
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4_clock,           10s,             8d79-bf2c/tplx;803b-4bed/~tNl;b367-c522/~tND;fc1b-6064/tyf, PASS, Ipv4
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4 -r 0,            10s,             8d79-bf2c/tplx;803b-4bed/~tNl;b367-c522/~tND;0478-6494/tyf, PASS, Ipv4
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4_clock,           10s,             8d79-bf2c/tplx;803b-4bed/~tNl;b367-c522/~tND;2705-30aa/tyf, PASS, Ipv4
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4_clock_adjust,    10s,             494a-d934/tplx;031f-9e02/~tNl;2d0e-5c03/~tND;7a62-9593/tyf, PASS, Ipv4
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv4_clock_drift,     10s,             074a-b1ff/tplx;031f-9e02/~tNl;2d0e-5c03/~tND;461f-1722/tyf, PASS, Ipv4
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Fragment_ipv4 -r 0,      10s,             f8fb-0997/tplx;3f90-c480/~tNl;0b85-3891/~tND;82ca-61a2/tyf, PASS, Ipv4
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv4 -r 0,     10s,             8ed9-2714/tplx;e23b-dc11/~tNl;d637-dffb/~tND;38a4-9e86/tyf, PASS, Ipv4
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv4 -r 0,     10s,             5f78-4a56/tplx;0000-0000/~tNl;0000-0000/~tND;2dc3-29f4/tyf, PASS, Ipv4
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv6 -r 0,            10s,             8fe6-9756/tplx;a01e-d6d4/~tNl;76d6-32a1/~tND;4d9b-72c4/tyf, PASS,
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv6 -r 0,     10s,             7ab4-d252/tplx;5686-d296/~tNl;b17c-3e1f/~tND;5959-269b/tyf, PASS,
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv6 -r 0,     10s,             e4ab-2322/tplx;9aaf-0585/~tNl;1eea-5de9/~tND;2e7e-f5a0/tyf, PASS,
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_gn -r 0,              10s,             4460-ccf4/tplx;0000-0000/~tNl;0000-0000/~tND;4945-96d4/tyf, PASS,
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_gn -r 0,       10s,             4460-ccf4/tplx;0000-0000/~tNl;0000-0000/~tND;4945-96d4/tyf, PASS,
-/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_gn -r 0,       10s,             4460-ccf4/tplx;0000-0000/~tNl;0000-0000/~tND;4945-96d4/tyf, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Fragment_ipv4 -r 0,      10s,             f8fb-0997/tplx;3f90-c480/~tNl;0b85-3891/~tND;3365-fa74/tyf, PASS, Ipv4
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv4 -r 0,     10s,             8ed9-2714/tplx;e23b-dc11/~tNl;d637-dffb/~tND;497e-09a5/tyf, PASS, Ipv4
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv4 -r 0,     10s,             5f78-4a56/tplx;0000-0000/~tNl;0000-0000/~tND;dc2f-7b28/tyf, PASS, Ipv4
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_ipv6 -r 0,            10s,             8fe6-9756/tplx;a01e-d6d4/~tNl;76d6-32a1/~tND;8e58-1a4b/tyf, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_ipv6 -r 0,     10s,             7ab4-d252/tplx;5686-d296/~tNl;b17c-3e1f/~tND;5787-6195/tyf, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv6 -r 0,     10s,             e4ab-2322/tplx;9aaf-0585/~tNl;1eea-5de9/~tND;8a3e-26d1/tyf, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_OK_gn -r 0,              10s,             4460-ccf4/tplx;0000-0000/~tNl;0000-0000/~tND;57a5-1480/tyf, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Port_Unav_gn -r 0,       10s,             4460-ccf4/tplx;0000-0000/~tNl;0000-0000/~tND;57a5-1480/tyf, PASS,
+/examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_gn -r 0,       10s,             4460-ccf4/tplx;0000-0000/~tNl;0000-0000/~tND;57a5-1480/tyf, PASS,
 
 /examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c simple -r 0,                 100s,            c134-1229/tplx;3195-f4c7/~tNl;01f1-c8f5/~tND;8a29-7dbb/tyf, PASS, Ipv4
 /examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c two_senders -r 0,            100s,            971d-8644/tplx;b789-87a3/~tNl;76b9-a729/~tND;973b-9427/tyf, PASS, Ipv4
@@ -315,12 +315,14 @@
 /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             ea75-5750/tplx;63fd-0642/~tNl;12ed-3bd7/~tND;0d4a-2dc4/tyf, PASS, EthernetMac
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             2b21-0aa7/tplx;e179-c3bf/~tNl;268e-bb92/tyf, PASS, EthernetMac
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c Mixed -r 0,                  50s,             6aae-6db8/tplx;f8e9-857b/~tNl;a87b-23eb/tyf, PASS, EthernetMac
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             4479-851b/tplx;8e07-2aec/~tNl;a63a-cd35/tyf, PASS,
+
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             4479-851b/tplx;8e07-2aec/~tNl;73a1-404b/tyf, PASS,
 # /examples/ipv6/nclients/,            -f omnetpp.ini -c TCP_APP -r 0    # abstract-config
 # /examples/ipv6/nclients/,            -f omnetpp.ini -c SCTP_APP -r 0   # abstract-config
 /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           c5d4-8871/tplx;770a-9c44/~tNl;3475-fc31/tyf, PASS, EthernetMac
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           a39a-669a/tplx;ad75-e817/~tNl;1e5c-bedb/tyf, PASS,
-/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            1607-36dd/tplx;9c89-c7c1/~tNl;0e90-dcad/~tND;829a-6e83/tyf, PASS,
+
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           a39a-669a/tplx;ad75-e817/~tNl;ca30-d6dc/tyf, PASS,
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            1607-36dd/tplx;9c89-c7c1/~tNl;0e90-dcad/~tND;f4ae-8bb4/tyf, PASS,
 
 /examples/manetrouting/dsdv/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             cd11-7c78/tplx;1ba1-8398/~tNl;04ca-d934/~tND;6388-bbad/tyf, PASS,  wireless adhoc Ipv4
 /examples/manetrouting/dsdv/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             94c8-51dd/tplx;e9e8-7d0b/~tNl;e9f0-b256/~tND;e86f-d3fa/tyf, PASS,  wireless adhoc Ipv4

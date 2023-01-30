@@ -55,8 +55,8 @@
 #/showcases/tsn/combiningfeatures/invehicle/, -f omnetpp.ini -c ManualTsn -r 0,      10ms,         b187-219b/tplx;c268-fae7/~tNl;0d5b-c7a9/~tND;e74e-6ba9/tyf, PASS,
 #/showcases/tsn/combiningfeatures/invehicle/, -f omnetpp.ini -c AutomaticTsn -r 0,   10ms,         66d0-84af/tplx;c268-fae7/~tNl;0d5b-c7a9/~tND;e74e-6ba9/tyf, PASS,
 
-/showcases/tsn/cutthroughswitching/, -f omnetpp.ini -c StoreAndForward -r 0,        1s,         e93f-4829/tplx;2186-4b4a/~tNl;5033-eee8/~tND;7535-87af/tyf, PASS,
-/showcases/tsn/cutthroughswitching/, -f omnetpp.ini -c CutthroughSwitching -r 0,    1s,         0ab4-ef40/tplx;5eb9-4c6e/~tNl;ef8a-23e5/~tND;3cd3-5f0c/tyf, PASS,
+/showcases/tsn/cutthroughswitching/, -f omnetpp.ini -c StoreAndForward -r 0,        1s,         e93f-4829/tplx;2186-4b4a/~tNl;5033-eee8/~tND;e7ea-c40a/tyf, PASS,
+/showcases/tsn/cutthroughswitching/, -f omnetpp.ini -c CutthroughSwitching -r 0,    1s,         0ab4-ef40/tplx;5eb9-4c6e/~tNl;ef8a-23e5/~tND;2bfc-0f59/tyf, PASS,
 
 /showcases/tsn/framepreemption/,     -f omnetpp.ini -c FifoQueueing -r 0,           1s,         5ef8-0e2f/tplx;5254-8176/~tNl;734d-28bc/~tND;f14d-148e/tyf, PASS,
 /showcases/tsn/framepreemption/,     -f omnetpp.ini -c PriorityQueueing -r 0,       1s,         3171-cda0/tplx;48c5-41c7/~tNl;f7ae-7530/~tND;19c3-ba2a/tyf, PASS,
@@ -142,10 +142,10 @@
 # /showcases/visualizer/osg/osgdemo/,      -f omnetpp.ini -c General -r 0,                100s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, ERROR,
 
 /showcases/visualizer/canvas/packetdrop/,   -f omnetpp.ini -c QueueOverflow -r 0,                                      2002ms,            c23c-c6c8/tplx;b7e8-1b57/~tNl;b4fc-c0f1/~tND;ea28-df1a/tyf, PASS,    wireless EthernetMac Ipv4
-/showcases/visualizer/canvas/packetdrop/,   -f omnetpp.ini -c ArpResolutionFailed -r 0,                                500s,            9069-cca6/tplx;0000-0000/~tNl;0000-0000/~tND;5d58-540c/tyf, PASS,    wireless Ipv4
-/showcases/visualizer/canvas/packetdrop/,   -f omnetpp.ini -c MACRetryLimitReached -r 0,                               500s,            1f7a-e5f3/tplx;14cf-73d2/~tNl;c5f5-7ea6/~tND;a56e-92bc/tyf, PASS,    wireless Ipv4
-/showcases/visualizer/canvas/packetdrop/,   -f omnetpp.ini -c InterfaceNotConnected -r 0,                              500s,            d05f-642a/tplx;0000-0000/~tNl;0000-0000/~tND;4a47-0e85/tyf, PASS, EthernetMac Ipv4
-/showcases/visualizer/canvas/packetdrop/,   -f omnetpp.ini -c NoRouteToDestination -r 0,                               500s,            4c38-3589/tplx;0000-0000/~tNl;0000-0000/~tND;72d3-5569/tyf, PASS, Ipv4
+/showcases/visualizer/canvas/packetdrop/,   -f omnetpp.ini -c ArpResolutionFailed -r 0,                                500s,            9069-cca6/tplx;0000-0000/~tNl;0000-0000/~tND;2811-6bc6/tyf, PASS,    wireless Ipv4
+/showcases/visualizer/canvas/packetdrop/,   -f omnetpp.ini -c MACRetryLimitReached -r 0,                               500s,            1f7a-e5f3/tplx;14cf-73d2/~tNl;c5f5-7ea6/~tND;2a6f-66de/tyf, PASS,    wireless Ipv4
+/showcases/visualizer/canvas/packetdrop/,   -f omnetpp.ini -c InterfaceNotConnected -r 0,                              500s,            d05f-642a/tplx;0000-0000/~tNl;0000-0000/~tND;4c62-3d46/tyf, PASS, EthernetMac Ipv4
+/showcases/visualizer/canvas/packetdrop/,   -f omnetpp.ini -c NoRouteToDestination -r 0,                               500s,            4c38-3589/tplx;0000-0000/~tNl;0000-0000/~tND;a35d-f318/tyf, PASS, Ipv4
 
 /showcases/visualizer/canvas/physicallinkactivity/, -f omnetpp.ini -c EnablingVisualization -r 0,                      500s,            a1da-0032/tplx;bde3-9c6e/~tNl;7f8e-b45a/~tND;b709-d035/tyf, PASS,    wireless Ipv4
 /showcases/visualizer/canvas/physicallinkactivity/, -f omnetpp.ini -c Filtering -r 0,                                  250s,            1642-3498/tplx;02c5-9eab/~tNl;bc54-d5aa/~tND;494d-a1bc/tyf, PASS,    wireless Ipv4
